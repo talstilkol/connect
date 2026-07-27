@@ -373,6 +373,57 @@ label.file-button:focus-within {
   text-overflow: ellipsis;
 }
 
+.team-directory-card {
+  margin-bottom: 18px;
+}
+
+.team-directory-note {
+  margin: 0 0 18px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.team-member-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.team-member-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.team-member-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--canvas);
+  color: var(--nav);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.team-member-row strong,
+.team-member-row small {
+  display: block;
+}
+
+.team-member-row small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .sidebar-footer strong,
 .sidebar-footer small {
   display: block;

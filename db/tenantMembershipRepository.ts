@@ -21,6 +21,29 @@ const FIND_ACTIVE_MEMBERSHIPS_SQL = `
   ORDER BY tenant_memberships.tenant_id ASC
 `;
 
+const FIND_ACTIVE_TENANT_MEMBERS_SQL = `
+  SELECT
+    tenant_memberships.tenant_id AS tenantId,
+    tenants.display_name AS tenantDisplayName,
+    tenants.status AS tenantStatus,
+    tenant_memberships.external_user_id AS externalUserId,
+    tenant_memberships.role AS role
+  FROM tenant_memberships
+  INNER JOIN tenants
+    ON tenants.id = tenant_memberships.tenant_id
+  WHERE tenant_memberships.tenant_id = ?1
+    AND tenant_memberships.status = 'active'
+  ORDER BY
+    CASE tenant_memberships.role
+      WHEN 'owner' THEN 1
+      WHEN 'manager' THEN 2
+      WHEN 'agent' THEN 3
+      ELSE 4
+    END ASC,
+    tenant_memberships.id ASC
+  LIMIT 101
+`;
+
 const tenantRoles: readonly TenantRole[] = [
   "owner",
   "manager",
@@ -57,6 +80,9 @@ export interface ActiveTenantMembership {
 export interface TenantMembershipRepository {
   findActiveByExternalUserId(
     externalUserId: UserId,
+  ): Promise<readonly ActiveTenantMembership[]>;
+  findActiveByTenantId(
+    tenantId: TenantId,
   ): Promise<readonly ActiveTenantMembership[]>;
 }
 
@@ -100,6 +126,21 @@ function parseMembershipRow(
   };
 }
 
+function requireTenantId(
+  value: TenantId,
+): TenantId {
+  if (
+    !Number.isSafeInteger(value) ||
+    value <= 0
+  ) {
+    throw new Error(
+      "tenantId must be a positive integer",
+    );
+  }
+
+  return value;
+}
+
 export function createTenantMembershipRepository(
   database: D1DatabaseBinding,
 ): TenantMembershipRepository {
@@ -121,6 +162,37 @@ export function createTenantMembershipRepository(
       }
 
       return (result.results ?? []).map(parseMembershipRow);
+    },
+
+    async findActiveByTenantId(tenantId) {
+      const normalizedTenantId =
+        requireTenantId(tenantId);
+      const result = await database
+        .prepare(
+          FIND_ACTIVE_TENANT_MEMBERS_SQL,
+        )
+        .bind(normalizedTenantId)
+        .all<D1TenantMembershipRow>();
+
+      if (!result.success) {
+        throw new Error(
+          result.error ??
+            "D1 tenant member read failed",
+        );
+      }
+
+      const rows =
+        result.results ?? [];
+
+      if (rows.length > 100) {
+        throw new Error(
+          "D1 tenant member directory exceeds the safe limit",
+        );
+      }
+
+      return rows.map(
+        parseMembershipRow,
+      );
     },
   };
 }

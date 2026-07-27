@@ -11,6 +11,7 @@ import { readCurrentMetaEmbeddedSignup } from "../../../server/meta/currentMetaE
 import { readCurrentMetaConnection } from "../../../server/meta/currentMetaConnection";
 import { readCurrentMessageTemplates } from "../../../server/templates/currentMessageTemplates";
 import { readCurrentOperationalReport } from "../../../server/reports/currentOperationalReport";
+import { readCurrentTeamDirectory } from "../../../server/team/currentTeamDirectory";
 import { readCurrentProductionReadiness } from "../../../server/operations/currentProductionReadiness";
 import { configurationRequiredMetaEmbeddedSignup } from "../../../shared/domain/metaEmbeddedSignupView";
 import { configurationRequiredMetaConnection } from "../../../shared/domain/metaConnectionView";
@@ -40,6 +41,7 @@ export default async function WorkspaceSectionPage({
     botFlowsResult,
     aiAgentsResult,
     operationalReportResult,
+    teamDirectoryResult,
     initialProductionReadiness,
   ] = await Promise.all([
     section === "contacts" && authEnabled
@@ -136,6 +138,15 @@ export default async function WorkspaceSectionPage({
             "configuration-required" as const,
           report: null,
         }),
+    section === "team" && authEnabled
+      ? readCurrentTeamDirectory()
+      : Promise.resolve({
+          status:
+            "configuration-required" as const,
+          directory: {
+            members: [],
+          },
+        }),
     Promise.resolve(
       readCurrentProductionReadiness(),
     ),
@@ -195,6 +206,12 @@ export default async function WorkspaceSectionPage({
       }
       initialOperationalReportStatus={
         operationalReportResult.status
+      }
+      initialTeamDirectory={
+        teamDirectoryResult.directory
+      }
+      initialTeamDirectoryStatus={
+        teamDirectoryResult.status
       }
       initialProductionReadiness={
         initialProductionReadiness

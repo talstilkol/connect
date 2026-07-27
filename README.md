@@ -16,9 +16,12 @@
    `aria-live`, מצב Pending ו־RTL.
 6. ה־Sidebar כולל מחליף Tenant נגיש שמבצע שמירה בשרת ומרענן את
    כל נתוני ה־Workspace לאחר הצלחה.
-7. Local Release Gate עובר עם 900/900 בדיקות, 22 Migrations,
-   ‏328 קובצי Source ו־18 Client dependency graphs.
-8. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+7. מסך הצוות טוען Memberships פעילים אמיתיים מ־D1, דורש
+   `team.manage` ומציג רק Reference Code אטום, Role וסימון המשתמש
+   הנוכחי. שמות ואימיילים יגיעו רק מחיבור Identity מאומת.
+8. Local Release Gate עובר עם 908/908 בדיקות, 22 Migrations,
+   ‏332 קובצי Source ו־18 Client dependency graphs.
+9. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

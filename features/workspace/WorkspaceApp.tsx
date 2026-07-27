@@ -75,10 +75,9 @@ import {
   type ContactOrganizationSnapshot,
 } from "../../shared/domain/contactOrganization";
 import {
-  roleLabels,
-  rolePermissions,
-  type TenantRole,
-} from "../../shared/domain/model";
+  type TeamDirectoryStatus,
+  type TeamDirectoryView,
+} from "../../shared/domain/teamDirectoryView";
 import { inspectBusinessProfileCompleteness } from "../../shared/validation/businessProfile";
 import { inspectDashboardSetup } from "../../shared/validation/dashboardSetup";
 import {
@@ -113,6 +112,9 @@ import { useAccessibleDialog } from "./useAccessibleDialog";
 import {
   TenantWorkspaceSwitcher,
 } from "./TenantWorkspaceSwitcher";
+import {
+  TeamDirectory,
+} from "../team/TeamDirectory";
 
 type MetaSignupAttemptStatus =
   | "idle"
@@ -201,6 +203,11 @@ export default function WorkspaceApp({
   initialOperationalReport = null,
   initialOperationalReportStatus =
     "configuration-required",
+  initialTeamDirectory = {
+    members: [],
+  },
+  initialTeamDirectoryStatus =
+    "configuration-required",
   initialProductionReadiness,
 }: {
   activeSection?: SectionId;
@@ -238,6 +245,10 @@ export default function WorkspaceApp({
     OperationalReportView | null;
   initialOperationalReportStatus?:
     OperationalReportStatus;
+  initialTeamDirectory?:
+    TeamDirectoryView;
+  initialTeamDirectoryStatus?:
+    TeamDirectoryStatus;
   initialProductionReadiness:
     ProductionReadinessReport;
 }) {
@@ -482,7 +493,16 @@ export default function WorkspaceApp({
             />
           ) : null}
           {activeSection === "billing" ? <Billing /> : null}
-          {activeSection === "team" ? <Team /> : null}
+          {activeSection === "team" ? (
+            <TeamDirectory
+              directory={
+                initialTeamDirectory
+              }
+              status={
+                initialTeamDirectoryStatus
+              }
+            />
+          ) : null}
           {activeSection === "decisions" ? (
             <DecisionCenter
               report={initialProductionReadiness}
@@ -1255,47 +1275,6 @@ function Billing() {
           <b>←</b>
           <span>אשף הקמה</span>
         </div>
-      </section>
-    </FeaturePage>
-  );
-}
-
-function Team() {
-  const roles = Object.keys(roleLabels) as TenantRole[];
-
-  return (
-    <FeaturePage
-      eyebrow="RBAC"
-      title="צוות והרשאות"
-      description="Clerk מזהה את המשתמש, Membership בצד השרת קובע את ה-Tenant, ומטריצת RBAC קובעת את הפעולות המותרות. הזמנת משתמשים תחובר בשלב ה-Onboarding המתמשך."
-      action={
-        <button type="button" className="primary-button" disabled>
-          הזמנת משתמש
-        </button>
-      }
-    >
-      <section className="role-grid">
-        {roles.map((role) => (
-          <article className="card role-card" key={role}>
-            <div className="role-card-heading">
-              <span className="role-symbol" aria-hidden="true">
-                {role === "owner" ? "O" : role === "manager" ? "M" : role === "agent" ? "A" : "V"}
-              </span>
-              <div>
-                <span className="card-kicker">{role}</span>
-                <h2>{roleLabels[role]}</h2>
-              </div>
-            </div>
-            <strong className="permission-count">
-              {rolePermissions[role].length} הרשאות מוגדרות
-            </strong>
-            <ul>
-              {rolePermissions[role].map((permission) => (
-                <li key={permission}>{permission}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
       </section>
     </FeaturePage>
   );

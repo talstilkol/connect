@@ -131,3 +131,96 @@ test("surfaces a failed D1 membership read", async () => {
     /membership-read-failed/,
   );
 });
+
+test("loads a bounded active team directory inside one tenant", async () => {
+  const database = new MembershipDatabase({
+    success: true,
+    results: [
+      {
+        tenantId: 7,
+        tenantDisplayName:
+          "tenant-name",
+        tenantStatus: "active",
+        externalUserId:
+          "external-user-id",
+        role: "owner",
+      },
+      {
+        tenantId: 7,
+        tenantDisplayName:
+          "tenant-name",
+        tenantStatus: "active",
+        externalUserId:
+          "second-user-id",
+        role: "agent",
+      },
+    ],
+  });
+  const repository =
+    createTenantMembershipRepository(
+      database,
+    );
+  const members =
+    await repository
+      .findActiveByTenantId(7);
+
+  assert.equal(members.length, 2);
+  assert.match(
+    database.recording.sql,
+    /tenant_memberships\.tenant_id = \?1/,
+  );
+  assert.match(
+    database.recording.sql,
+    /tenant_memberships\.status = 'active'/,
+  );
+  assert.match(
+    database.recording.sql,
+    /LIMIT 101/,
+  );
+  assert.deepEqual(
+    database.recording.values,
+    [7],
+  );
+});
+
+test("rejects invalid and oversized team directory reads", async () => {
+  const database = new MembershipDatabase({
+    success: true,
+    results: Array.from(
+      {
+        length: 101,
+      },
+      (_, index) => ({
+        tenantId: 7,
+        tenantDisplayName:
+          "tenant-name",
+        tenantStatus: "active",
+        externalUserId:
+          `external-user-${index}`,
+        role: "viewer",
+      }),
+    ),
+  });
+  const repository =
+    createTenantMembershipRepository(
+      database,
+    );
+
+  await assert.rejects(
+    repository.findActiveByTenantId(
+      7,
+    ),
+    /exceeds the safe limit/,
+  );
+  database.recording = null;
+  await assert.rejects(
+    repository.findActiveByTenantId(
+      0,
+    ),
+    /tenantId must be a positive integer/,
+  );
+  assert.equal(
+    database.recording,
+    null,
+  );
+});
