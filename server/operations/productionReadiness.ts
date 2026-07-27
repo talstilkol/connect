@@ -34,6 +34,9 @@ import {
 import {
   inspectSourceControlGovernanceEvidence,
 } from "./sourceControlGovernanceEvidence.ts";
+import {
+  inspectDeploymentProvenanceEvidence,
+} from "./deploymentProvenanceEvidence.ts";
 import type {
   ProductionReadinessCategory,
   ProductionReadinessCheck,
@@ -69,6 +72,7 @@ export interface ProductionReadinessInput {
   environmentIsolation: ConfigurationState;
   secretInventory: ConfigurationState;
   sourceControlGovernance: ConfigurationState;
+  deploymentProvenance: ConfigurationState;
   hosting: ProductionHostingBindings;
   implementation: ProductionImplementationState;
 }
@@ -97,7 +101,10 @@ export interface ProductionReadinessEnvironment {
   ENVIRONMENT_ISOLATION_EVIDENCE_JSON?: string;
   SECRET_INVENTORY_EVIDENCE_JSON?: string;
   APP_DEPLOYED_COMMIT_SHA?: string;
+  APP_RELEASE_ID?: string;
+  APP_DEPLOYMENT_ARTIFACT_DIGEST?: string;
   SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON?: string;
+  DEPLOYMENT_PROVENANCE_EVIDENCE_JSON?: string;
 }
 
 interface CheckDefinition {
@@ -214,6 +221,17 @@ export function inspectProductionReadiness(
         "ENVIRONMENT_ISOLATION_EVIDENCE_VERIFIED",
       blockedCode:
         "ENVIRONMENT_ISOLATION_EVIDENCE_REQUIRED",
+    }),
+    toCheck({
+      id: "hosting.deployment-provenance",
+      category: "storage",
+      ready: isConfigured(
+        input.deploymentProvenance,
+      ),
+      readyCode:
+        "DEPLOYMENT_PROVENANCE_EVIDENCE_VERIFIED",
+      blockedCode:
+        "DEPLOYMENT_PROVENANCE_EVIDENCE_REQUIRED",
     }),
     toCheck({
       id: "meta.embedded-signup",
@@ -480,6 +498,12 @@ export function inspectCurrentProductionReadiness(
         : "incomplete",
     sourceControlGovernance:
       inspectSourceControlGovernanceEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    deploymentProvenance:
+      inspectDeploymentProvenanceEvidence(
         environment,
       ).status === "configured"
         ? "configured"

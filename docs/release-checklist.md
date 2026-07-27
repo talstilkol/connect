@@ -65,6 +65,9 @@ Log זהים ל־Commit.
 
 5.6 Artifact הפריסה מקושר ל־Release ID.
 
+5.7 Deployment Provenance Evidence תקף ומוכיח התאמה בין Release ID,
+‏Commit, ‏Git Tree, ‏Lockfile, ‏Migration Set ו־Artifact הפריסה.
+
 ## 6. Operations
 
 6.1 Monitoring, ‏Alerting ו־SLO פעילים.

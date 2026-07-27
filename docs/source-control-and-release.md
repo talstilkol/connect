@@ -172,3 +172,24 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 
 7.7 החוזה אינו מפעיל הגנות בעצמו. שער Production נשאר חסום עד
 להגדרת Repository Authority והפקת Evidence מהספק שנבחר.
+
+## 8. Deployment Provenance Evidence
+
+8.1 `DEPLOYMENT_PROVENANCE_EVIDENCE_JSON` מקבל Evidence v1
+קצר־חיים עבור פריסת Production אמיתית.
+
+8.2 ה־Release ID מחושב מחדש מתוך Commit SHA, ‏Git Tree SHA,
+‏`package-lock.json` digest ו־Migration Set digest. חוסר התאמה
+ביניהם חוסם Production.
+
+8.3 `APP_DEPLOYED_COMMIT_SHA`, ‏`APP_RELEASE_ID`
+ו־`APP_DEPLOYMENT_ARTIFACT_DIGEST` חייבים להתאים בדיוק לראיה.
+
+8.4 הראיה כוללת Artifact Digest ו־Deployment Fingerprint נפרדים.
+היא אינה כוללת כתובת פריסה, מזהה ספק או Credentials.
+
+8.5 Evidence חסר, פג תוקף, ארוך מ־24 שעות, שאינו עבור Production,
+בעל Digest שונה או שאינו תואם לערכי Runtime חוסם Production.
+
+8.6 קיום החוזה אינו הוכחת פריסה. הראיה תופק רק לאחר בניית Artifact
+חד־ערכי ופריסתו בפועל דרך הספק המאושר.
