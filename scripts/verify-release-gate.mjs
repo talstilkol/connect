@@ -26,6 +26,14 @@ const steps = [
     ],
   },
   {
+    id: "secret-hygiene",
+    command: process.execPath,
+    arguments: [
+      "scripts/verify-secret-hygiene.mjs",
+      "--history",
+    ],
+  },
+  {
     id: "interface-guardrails",
     command: process.execPath,
     arguments: [
@@ -37,6 +45,13 @@ const steps = [
     command: process.execPath,
     arguments: [
       "scripts/verify-dependency-lock.mjs",
+    ],
+  },
+  {
+    id: "migrations",
+    command: process.execPath,
+    arguments: [
+      "scripts/verify-migrations.mjs",
     ],
   },
   {

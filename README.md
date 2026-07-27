@@ -34,18 +34,19 @@
     Restore מפורשות ללא Defaults.
 17. ראיית Backup מתקבלת רק עבור D1 ו־R2 מאומתים ותרגיל Restore
     לסביבה מבודדת שאינו ישן מהמדיניות.
-18. Retention Policy דורש כיסוי מלא של 12 מחלקות המידע הקיימות.
+18. Retention Policy דורש כיסוי מלא של 22 מחלקות המידע הקיימות.
 19. Purge דורש Plan דטרמיניסטי ו־Confirmation תואם; אין Adapter
     מחיקה פעיל ולכן שום מידע אינו נמחק.
-20. ביקורת מקור סטטית עוברת על 267 קבצים ומונעת Randomness אסור,
+20. ביקורת מקור סטטית עוברת על קוד האפליקציה ומונעת Randomness אסור,
     Dynamic Code Execution, HTML Injection, ‏Browser Storage סמכותי
     ו־Secrets שרתיים במודולי Client.
-21. 12 בדיקות ממשק מקבעות RTL, נקודות שבירה, Focus, ‏Reduced Motion,
+21. 15 בדיקות ממשק מקבעות RTL, נקודות שבירה, Focus, ‏Reduced Motion,
     ניווט, Mobile Menu, ‏Dialog ו־Skip Link.
 22. Dependency Lock מאמת 22 תלויות ישירות מול `package-lock.json`.
 23. Local Release Gate עובר. Production Release Gate נכשל בכוונה
     על 5 Ready, ‏10 Blocked ו־10 Decision Required.
-24. כל 818 הבדיקות, Build, ‏TypeScript ו־ESLint עוברים.
+24. כל הבדיקות, Build, ‏TypeScript ו־ESLint עוברים דרך Local
+    Release Gate.
 25. כל 14 השלבים הושלמו בקוד המקומי. פרסום נשאר חסום עד השלמת
     ההחלטות, הספקים, משאבי הענן והתרגילים החיצוניים.
 
@@ -152,7 +153,8 @@
    1. ניווט בין המסכים.
    2. קריאת CSV מקומית, מיפוי עמודות וייבוא מאומת לאחר אישור מפורש.
    3. הוספת בלוקים דטרמיניסטית לתהליך בוט.
-   4. תיעוד החלטות בזיכרון המסך בלבד.
+   4. מרכז ההחלטות ב־Workspace הוא Read-only; שמירה קבועה זמינה
+      רק ל־System Admin דרך `/admin/decisions`.
    5. Dashboard שמציג 1 מתוך 10 לאחר שמירת פרטי העסק המקומיים.
 6. תשתית נתונים מקומית:
    1. Schema ראשוני ל־D1 עבור Tenants, Memberships, Business Profiles ו־Audit Logs.
