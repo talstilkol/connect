@@ -23,7 +23,10 @@
 2.5 Secret Inventory Evidence תקף, וכל מועדי ה־Rotation עתידיים.
 
 2.6 Source Control Governance Evidence תקף, מקושר ל־Commit הנפרס
-ומוכיח שכל עשרת ה־Status Checks ושמונת בקרי ה־Repository פעילים.
+ומוכיח שכל תשעת ה־PR Status Checks ושמונת בקרי ה־Repository פעילים.
+
+2.7 CI Execution Evidence תקף ומוכיח שכל תשעת ה־PR Checks הסתיימו
+בהצלחה עבור אותו Commit ואותו Release ID.
 
 ## 3. Data
 

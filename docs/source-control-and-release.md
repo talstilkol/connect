@@ -151,11 +151,11 @@ Authority, אישור הסביבות והרשאה מפורשת לפריסה.
 
 ## 7. Source Control Governance Evidence
 
-7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v1
+7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v2
 קצר־חיים שמופק מ־Repository אמיתי לאחר הגדרת Remote.
 
-7.2 ה־Evidence דורש עשרה Status Checks: שמונת שערי האיכות המקומיים,
-Dependency Audit ו־Production Readiness.
+7.2 ה־Evidence דורש תשעה Pull Request Status Checks: שמונת שערי
+האיכות המקומיים ו־Dependency Audit.
 
 7.3 ה־Evidence מאשר Branch Protection, ‏CODEOWNERS Review, ביטול
 אישורים ישנים, פתרון שיחות Review, חסימת Force Push ומחיקת Branch,
@@ -172,6 +172,10 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 
 7.7 החוזה אינו מפעיל הגנות בעצמו. שער Production נשאר חסום עד
 להגדרת Repository Authority והפקת Evidence מהספק שנבחר.
+
+7.8 Production Readiness אינו Required Check של Pull Request.
+הוא שער Release נפרד, משום שהוא דורש ראיות Runtime שנוצרות רק
+לאחר פריסה. הפרדה זו מונעת מעגל תלות שאינו ניתן להשלמה.
 
 ## 8. Deployment Provenance Evidence
 
@@ -193,3 +197,20 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 
 8.6 קיום החוזה אינו הוכחת פריסה. הראיה תופק רק לאחר בניית Artifact
 חד־ערכי ופריסתו בפועל דרך הספק המאושר.
+
+## 9. CI Execution Evidence
+
+9.1 `CI_EXECUTION_EVIDENCE_JSON` מקבל Evidence v1 קצר־חיים עבור
+תוצאות CI אמיתיות.
+
+9.2 נדרשת תוצאת `success` עבור כל תשעת ה־Pull Request Checks,
+המקושרת לאותו Commit ולאותו Release ID.
+
+9.3 לכל Check נדרשים Completed At קנוני, Run Fingerprint ייחודי
+ו־Output Digest. תוצאה חסרה, כפולה, ישנה או שאינה `success` נפסלת.
+
+9.4 כל Check חייב להסתיים לכל היותר 24 שעות לפני הפקת הראיה,
+והראיה עצמה תקפה לכל היותר 24 שעות.
+
+9.5 CI Execution Evidence אינו כולל לוגים, שמות Repository,
+כתובות Build או Credentials.

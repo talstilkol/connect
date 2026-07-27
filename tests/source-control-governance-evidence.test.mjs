@@ -7,25 +7,13 @@ import test from "node:test";
 import {
   deriveSourceControlGovernanceEvidenceDigest,
   inspectSourceControlGovernanceEvidence,
+  requiredPullRequestStatusChecks,
 } from "../server/operations/sourceControlGovernanceEvidence.ts";
 
 const deployedCommitSha =
   "1".repeat(40);
 const now =
   new Date("2026-07-27T12:00:00.000Z");
-const requiredStatusChecks = [
-  "source-guardrails",
-  "secret-hygiene",
-  "interface-guardrails",
-  "dependency-lock",
-  "migrations",
-  "typecheck",
-  "lint",
-  "tests-and-build",
-  "dependency-audit",
-  "production-readiness",
-];
-
 function fingerprint(value) {
   return `sha256:${createHash("sha256")
     .update(value)
@@ -34,7 +22,7 @@ function fingerprint(value) {
 
 function createEvidence() {
   const evidence = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     verifiedAt:
       "2026-07-27T11:00:00.000Z",
     expiresAt:
@@ -46,7 +34,8 @@ function createEvidence() {
     releaseCommitSha:
       deployedCommitSha,
     requiredReviewCount: 1,
-    requiredStatusChecks,
+    requiredStatusChecks:
+      requiredPullRequestStatusChecks,
     controls: {
       branchProtection: true,
       codeOwnerReview: true,
@@ -85,7 +74,7 @@ test("accepts protected source control linked to the deployed commit", () => {
       status: "configured",
       code:
         "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
-      requiredStatusCheckCount: 10,
+      requiredStatusCheckCount: 9,
       controlCount: 8,
     },
   );
@@ -207,8 +196,12 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     {
       ...evidence,
       evidenceDigest:
-        "source_control_governance_evidence_v1_" +
+        "source_control_governance_evidence_v2_" +
         "0".repeat(64),
+    },
+    {
+      ...evidence,
+      schemaVersion: 1,
     },
   ]) {
     assert.equal(

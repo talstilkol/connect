@@ -37,6 +37,9 @@ import {
 import {
   inspectDeploymentProvenanceEvidence,
 } from "./deploymentProvenanceEvidence.ts";
+import {
+  inspectCiExecutionEvidence,
+} from "./ciExecutionEvidence.ts";
 import type {
   ProductionReadinessCategory,
   ProductionReadinessCheck,
@@ -73,6 +76,7 @@ export interface ProductionReadinessInput {
   secretInventory: ConfigurationState;
   sourceControlGovernance: ConfigurationState;
   deploymentProvenance: ConfigurationState;
+  ciExecution: ConfigurationState;
   hosting: ProductionHostingBindings;
   implementation: ProductionImplementationState;
 }
@@ -105,6 +109,7 @@ export interface ProductionReadinessEnvironment {
   APP_DEPLOYMENT_ARTIFACT_DIGEST?: string;
   SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON?: string;
   DEPLOYMENT_PROVENANCE_EVIDENCE_JSON?: string;
+  CI_EXECUTION_EVIDENCE_JSON?: string;
 }
 
 interface CheckDefinition {
@@ -330,6 +335,17 @@ export function inspectProductionReadiness(
         "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_REQUIRED",
     }),
     toCheck({
+      id: "security.ci-execution",
+      category: "security",
+      ready: isConfigured(
+        input.ciExecution,
+      ),
+      readyCode:
+        "CI_EXECUTION_EVIDENCE_VERIFIED",
+      blockedCode:
+        "CI_EXECUTION_EVIDENCE_REQUIRED",
+    }),
+    toCheck({
       id: "security.dependency-audit",
       category: "security",
       ready: implementation.dependencyAudit,
@@ -504,6 +520,12 @@ export function inspectCurrentProductionReadiness(
         : "incomplete",
     deploymentProvenance:
       inspectDeploymentProvenanceEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    ciExecution:
+      inspectCiExecutionEvidence(
         environment,
       ).status === "configured"
         ? "configured"

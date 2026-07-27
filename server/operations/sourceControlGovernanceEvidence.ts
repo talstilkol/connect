@@ -2,7 +2,8 @@ import {
   createHash,
 } from "node:crypto";
 
-const requiredStatusChecks = Object.freeze([
+export const requiredPullRequestStatusChecks =
+  Object.freeze([
   "source-guardrails",
   "secret-hygiene",
   "interface-guardrails",
@@ -12,7 +13,6 @@ const requiredStatusChecks = Object.freeze([
   "lint",
   "tests-and-build",
   "dependency-audit",
-  "production-readiness",
 ] as const);
 const controlNames = Object.freeze([
   "branchProtection",
@@ -29,13 +29,13 @@ const fingerprintPattern =
   /^sha256:[a-f0-9]{64}$/;
 const commitPattern = /^[a-f0-9]{40}$/;
 const evidenceDigestPattern =
-  /^source_control_governance_evidence_v1_[a-f0-9]{64}$/;
+  /^source_control_governance_evidence_v2_[a-f0-9]{64}$/;
 
 type GovernanceControl =
   (typeof controlNames)[number];
 
 interface SourceControlGovernanceEvidence {
-  schemaVersion: 1;
+  schemaVersion: 2;
   verifiedAt: string;
   expiresAt: string;
   repositoryFingerprint: string;
@@ -62,7 +62,7 @@ export type SourceControlGovernanceReport =
         status: "configured";
         code:
           "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED";
-        requiredStatusCheckCount: 10;
+        requiredStatusCheckCount: 9;
         controlCount: 8;
       }
     | {
@@ -152,7 +152,7 @@ function canonicalEvidenceIdentity(
     requiredReviewCount:
       evidence.requiredReviewCount,
     requiredStatusChecks:
-      requiredStatusChecks.map(
+      requiredPullRequestStatusChecks.map(
         (check) => check,
       ),
     controls: Object.fromEntries(
@@ -170,7 +170,7 @@ export function deriveSourceControlGovernanceEvidenceDigest(
     "evidenceDigest"
   >,
 ): string {
-  return `source_control_governance_evidence_v1_${sha256(
+  return `source_control_governance_evidence_v2_${sha256(
     canonicalEvidenceIdentity(evidence),
   )}`;
 }
@@ -200,7 +200,7 @@ function parseEvidence(
       "controls",
       "evidenceDigest",
     ]) ||
-    value.schemaVersion !== 1 ||
+    value.schemaVersion !== 2 ||
     !isCanonicalTimestamp(
       value.verifiedAt,
     ) ||
@@ -243,10 +243,11 @@ function parseEvidence(
   if (
     !Array.isArray(rawStatusChecks) ||
     rawStatusChecks.length !==
-      requiredStatusChecks.length ||
+      requiredPullRequestStatusChecks.length ||
     new Set(rawStatusChecks)
-      .size !== requiredStatusChecks.length ||
-    requiredStatusChecks.some(
+      .size !==
+        requiredPullRequestStatusChecks.length ||
+    requiredPullRequestStatusChecks.some(
       (check) =>
         !rawStatusChecks.includes(
           check,
@@ -272,7 +273,7 @@ function parseEvidence(
   }
 
   const evidence = {
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     verifiedAt: value.verifiedAt,
     expiresAt: value.expiresAt,
     repositoryFingerprint:
@@ -284,7 +285,7 @@ function parseEvidence(
     requiredReviewCount:
       value.requiredReviewCount as number,
     requiredStatusChecks:
-      requiredStatusChecks.map(
+      requiredPullRequestStatusChecks.map(
         (check) => check,
       ),
     controls: Object.fromEntries(
@@ -405,7 +406,7 @@ export function inspectSourceControlGovernanceEvidence(
     status: "configured",
     code:
       "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
-    requiredStatusCheckCount: 10,
+    requiredStatusCheckCount: 9,
     controlCount: 8,
   };
 }
