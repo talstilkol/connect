@@ -267,6 +267,50 @@ export const tenantMemberships = sqliteTable(
   ],
 );
 
+export const tenantSelections = sqliteTable(
+  "tenant_selections",
+  {
+    externalUserId: text(
+      "external_user_id",
+    ).primaryKey(),
+    tenantId: integer("tenant_id").notNull(),
+    version: integer("version")
+      .notNull()
+      .default(1),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    check(
+      "tenant_selections_external_user_id_not_blank",
+      sql`length(trim(${table.externalUserId})) > 0`,
+    ),
+    check(
+      "tenant_selections_version_positive",
+      sql`${table.version} >= 1`,
+    ),
+    foreignKey({
+      columns: [
+        table.tenantId,
+        table.externalUserId,
+      ],
+      foreignColumns: [
+        tenantMemberships.tenantId,
+        tenantMemberships.externalUserId,
+      ],
+      name:
+        "tenant_selections_membership_fk",
+    }).onDelete("cascade"),
+    index(
+      "tenant_selections_tenant_idx",
+    ).on(table.tenantId),
+  ],
+);
+
 export const businessProfiles = sqliteTable(
   "business_profiles",
   {

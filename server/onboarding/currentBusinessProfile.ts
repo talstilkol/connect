@@ -1,33 +1,45 @@
 import { createBusinessProfileRepository } from "../../db/businessProfileRepository";
 import { requireRuntimeDatabase } from "../../db/runtimeDatabase";
-import { createTenantMembershipRepository } from "../../db/tenantMembershipRepository";
 import type { BusinessProfileDraft } from "../../shared/domain/businessProfileDraft";
+import {
+  requireCurrentTenantSession,
+} from "../auth/currentTenantSession";
+import {
+  TenantSessionError,
+} from "../auth/tenantSession";
 import { hasClerkServerConfiguration } from "../auth/clerkConfiguration";
-import { readClerkIdentity } from "../auth/clerkIdentity";
 
 export async function readCurrentBusinessProfile(): Promise<BusinessProfileDraft | null> {
   if (!hasClerkServerConfiguration()) {
     return null;
   }
 
-  const identity = await readClerkIdentity();
-
-  if (!identity) {
-    return null;
-  }
-
   const database = await requireRuntimeDatabase();
-  const memberships = createTenantMembershipRepository(database);
-  const activeMemberships =
-    await memberships.findActiveByExternalUserId(identity.externalUserId);
+  let session;
 
-  if (activeMemberships.length !== 1) {
-    return null;
+  try {
+    session =
+      await requireCurrentTenantSession(
+        database,
+      );
+  } catch (error) {
+    if (
+      error instanceof
+        TenantSessionError &&
+      (error.code ===
+        "AUTHENTICATION_REQUIRED" ||
+        error.code ===
+          "TENANT_MEMBERSHIP_REQUIRED")
+    ) {
+      return null;
+    }
+
+    throw error;
   }
 
   const profiles = createBusinessProfileRepository(database);
   const profile = await profiles.findByTenantId(
-    activeMemberships[0].tenantId,
+    session.tenantId,
   );
 
   if (!profile) {

@@ -148,6 +148,13 @@
       "when": 1785149465323,
       "tag": "0020_production_decision_records",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1785153475877,
+      "tag": "0021_tenant_selection",
+      "breakpoints": true
     }
   ]
 }

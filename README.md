@@ -3,6 +3,22 @@
 ממשק Web ראשוני למערכת ה־SaaS החדשה שמחליפה את חיבור WhatsApp Web הלא־רשמי
 ב־Connect הישן.
 
+## מצב Master Plan — תשתית Stage 3
+
+1. בחירת סביבת עבודה למשתמש רב־Tenant נשמרת ב־D1 ולא ב־Cookie
+   או ב־Browser Storage.
+2. הדפדפן מקבל מפתח בחירה SHA-256 אטום, שם תצוגה ו־Role בלבד;
+   `tenantId` ו־External User ID נשארים בשרת.
+3. השמירה משתמשת ב־Expected Version, בודקת מחדש Membership פעיל
+   וסטטוס Tenant, וחוסמת שינוי מקביל או בחירה זרה.
+4. בחירה ישנה שאיבדה כשירות מחייבת בחירה מחדש ואינה יוצרת Deadlock.
+5. שער React מוצג לפני טעינת מידע עסקי, כולל Focus תקין,
+   `aria-live`, מצב Pending ו־RTL.
+6. Local Release Gate עובר עם 897/897 בדיקות, 22 Migrations,
+   ‏327 קובצי Source ו־17 Client dependency graphs.
+7. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+   Decision Required.
+
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
 1. שער Production מרכז 30 בדיקות ונכשל סגור עבור כל חסימה או

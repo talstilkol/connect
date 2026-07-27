@@ -44,7 +44,7 @@ const tenantSessionStatuses =
     "payment_failed",
   ] as const);
 
-function canCreateTenantSession(
+export function isEligibleTenantMembership(
   membership: ActiveTenantMembership,
   identity: AuthenticatedIdentity,
 ): boolean {
@@ -81,7 +81,7 @@ export function resolveTenantSessionFromMemberships(
 
   const eligibleMemberships =
     memberships.filter((membership) =>
-      canCreateTenantSession(
+      isEligibleTenantMembership(
         membership,
         identity,
       ),

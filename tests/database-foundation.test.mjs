@@ -60,6 +60,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0018_material_guardian.sql",
     "0019_purple_silvermane.sql",
     "0020_production_decision_records.sql",
+    "0021_tenant_selection.sql",
   ]);
 
   const migration = await readFile(
@@ -723,6 +724,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "production_decision_events",
     "production_decision_records",
     "tenant_memberships",
+    "tenant_selections",
     "tenant_subscription_events",
     "tenant_subscriptions",
     "tenants",
