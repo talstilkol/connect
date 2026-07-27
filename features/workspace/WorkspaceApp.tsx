@@ -110,6 +110,9 @@ import {
 import { useWorkspaceDrafts } from "./WorkspaceDraftProvider";
 import { DecisionCenter } from "./DecisionCenter";
 import { useAccessibleDialog } from "./useAccessibleDialog";
+import {
+  TenantWorkspaceSwitcher,
+} from "./TenantWorkspaceSwitcher";
 
 type MetaSignupAttemptStatus =
   | "idle"
@@ -303,25 +306,11 @@ export default function WorkspaceApp({
           })}
         </nav>
 
-        <div className="sidebar-footer">
-          <div className="workspace-avatar" aria-hidden="true">
-            C
-          </div>
-          <div>
-            <strong>סביבת עבודה חדשה</strong>
-            <small>{workspaceMetaPresentation.statusLabel}</small>
-          </div>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="הגדרות חשבון"
-            aria-describedby="unavailable-navigation-actions"
-            title="הגדרות החשבון עדיין אינן זמינות"
-            disabled
-          >
-            •••
-          </button>
-        </div>
+        <TenantWorkspaceSwitcher
+          connectionStatus={
+            workspaceMetaPresentation.statusLabel
+          }
+        />
       </aside>
 
       {mobileMenuOpen ? (

@@ -62,3 +62,69 @@ test("preserves button semantics and announces selection state", async () => {
     /role="listitem"/,
   );
 });
+
+test("keeps the workspace switcher on opaque server-backed selection", async () => {
+  const source = await readSource(
+    "features/workspace/TenantWorkspaceSwitcher.tsx",
+  );
+
+  assert.match(
+    source,
+    /selectTenantAction\(\{/,
+  );
+  assert.match(
+    source,
+    /expectedVersion:\s*directory\.version/,
+  );
+  assert.match(
+    source,
+    /router\.refresh\(\)/,
+  );
+  assert.doesNotMatch(
+    source,
+    /\btenantId\b|\bexternalUserId\b/,
+  );
+  assert.doesNotMatch(
+    source,
+    /localStorage|sessionStorage|document\.cookie/,
+  );
+});
+
+test("wires an accessible tenant switcher through the workspace layout", async () => {
+  const [
+    switcherSource,
+    layoutSource,
+    workspaceSource,
+  ] = await Promise.all([
+    readSource(
+      "features/workspace/TenantWorkspaceSwitcher.tsx",
+    ),
+    readSource(
+      "app/workspace/layout.tsx",
+    ),
+    readSource(
+      "features/workspace/WorkspaceApp.tsx",
+    ),
+  ]);
+
+  assert.match(
+    switcherSource,
+    /<select/,
+  );
+  assert.match(
+    switcherSource,
+    /aria-live="polite"/,
+  );
+  assert.match(
+    switcherSource,
+    /disabled=\{isPending\}/,
+  );
+  assert.match(
+    layoutSource,
+    /<TenantWorkspaceProvider/,
+  );
+  assert.match(
+    workspaceSource,
+    /<TenantWorkspaceSwitcher/,
+  );
+});

@@ -14,9 +14,11 @@
 4. בחירה ישנה שאיבדה כשירות מחייבת בחירה מחדש ואינה יוצרת Deadlock.
 5. שער React מוצג לפני טעינת מידע עסקי, כולל Focus תקין,
    `aria-live`, מצב Pending ו־RTL.
-6. Local Release Gate עובר עם 897/897 בדיקות, 22 Migrations,
-   ‏327 קובצי Source ו־17 Client dependency graphs.
-7. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+6. ה־Sidebar כולל מחליף Tenant נגיש שמבצע שמירה בשרת ומרענן את
+   כל נתוני ה־Workspace לאחר הצלחה.
+7. Local Release Gate עובר עם 900/900 בדיקות, 22 Migrations,
+   ‏328 קובצי Source ו־18 Client dependency graphs.
+8. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

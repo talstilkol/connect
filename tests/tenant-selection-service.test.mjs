@@ -32,35 +32,37 @@ function membership({
 function createFixture({
   initialSelection = null,
   saveOutcome = "saved",
+  membershipRecords,
 } = {}) {
   let selection =
     initialSelection;
   let saveInput = null;
-  const memberships = [
-    membership({
-      tenantId: 7,
-      displayName:
-        "First workspace",
-    }),
-    membership({
-      tenantId: 11,
-      displayName:
-        "Second workspace",
-      role: "manager",
-    }),
-    membership({
-      tenantId: 13,
-      displayName:
-        "Blocked workspace",
-      tenantStatus: "blocked",
-    }),
-    membership({
-      tenantId: 17,
-      displayName:
-        "Foreign workspace",
-      externalUserId: "user-b",
-    }),
-  ];
+  const memberships =
+    membershipRecords ?? [
+      membership({
+        tenantId: 7,
+        displayName:
+          "First workspace",
+      }),
+      membership({
+        tenantId: 11,
+        displayName:
+          "Second workspace",
+        role: "manager",
+      }),
+      membership({
+        tenantId: 13,
+        displayName:
+          "Blocked workspace",
+        tenantStatus: "blocked",
+      }),
+      membership({
+        tenantId: 17,
+        displayName:
+          "Foreign workspace",
+        externalUserId: "user-b",
+      }),
+    ];
   const service =
     createTenantSelectionService({
       memberships: {
@@ -306,5 +308,39 @@ test("requires reselection when the stored tenant is no longer eligible", async 
         option.selected === false,
     ),
     true,
+  );
+});
+
+test("presents the only eligible tenant as selected without creating storage", async () => {
+  const {
+    service,
+    getSaveInput,
+  } = createFixture({
+    membershipRecords: [
+      membership({
+        tenantId: 7,
+        displayName:
+          "Only workspace",
+      }),
+    ],
+  });
+  const directory =
+    await service.list(identity);
+
+  assert.equal(
+    directory.version,
+    0,
+  );
+  assert.equal(
+    directory.selectionRequired,
+    false,
+  );
+  assert.equal(
+    directory.options[0].selected,
+    true,
+  );
+  assert.equal(
+    getSaveInput(),
+    null,
   );
 });

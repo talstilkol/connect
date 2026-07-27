@@ -235,6 +235,12 @@ export function createTenantSelectionService(
             membership.tenantId ===
             selection.tenantId,
         );
+      const effectiveSelectedTenantId =
+        selectionIsEligible
+          ? selection.tenantId
+          : memberships.length === 1
+            ? memberships[0].tenantId
+            : null;
 
       return {
         version:
@@ -254,8 +260,7 @@ export function createTenantSelectionService(
                 .tenantDisplayName,
             role: membership.role,
             selected:
-              selectionIsEligible &&
-              selection.tenantId ===
+              effectiveSelectedTenantId ===
                 membership.tenantId,
           }),
         ),
