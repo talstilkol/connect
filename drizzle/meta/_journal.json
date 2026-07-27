@@ -1,0 +1,146 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1784995349810,
+      "tag": "0000_connect_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784996746021,
+      "tag": "0001_tenant_provisioning",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784997628569,
+      "tag": "0002_contacts_and_consent",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784998903035,
+      "tag": "0003_contact_import_jobs",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784999716270,
+      "tag": "0004_contact_cursor_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1785000048346,
+      "tag": "0005_contact_tags_and_lists",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1785000862614,
+      "tag": "0006_meta_connection_webhooks",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1785006214781,
+      "tag": "0007_meta_credential_vault",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1785008730493,
+      "tag": "0008_message_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1785009406060,
+      "tag": "0009_template_submission_lifecycle",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1785011377364,
+      "tag": "0010_template_status_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1785013149045,
+      "tag": "0011_campaign_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1785017282509,
+      "tag": "0012_conversations_and_messages",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1785074374145,
+      "tag": "0013_bot_flow_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1785078081584,
+      "tag": "0014_neat_kingpin",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1785079644437,
+      "tag": "0015_chilly_dreaming_celestial",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1785082631265,
+      "tag": "0016_uneven_firestar",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1785087818977,
+      "tag": "0017_unusual_veda",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1785088339812,
+      "tag": "0018_material_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1785091777431,
+      "tag": "0019_purple_silvermane",
+      "breakpoints": true
+    }
+  ]
+}

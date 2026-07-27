@@ -31,6 +31,38 @@ const localBindingConfig = {
         },
       ]
     : [],
+  queues: {
+    producers: [
+      {
+        binding: "META_WEBHOOK_QUEUE",
+        queue: "connect-meta-webhooks",
+      },
+      {
+        binding: "CAMPAIGN_DELIVERY_QUEUE",
+        queue: "connect-campaign-deliveries",
+      },
+    ],
+    consumers: [
+      {
+        queue: "connect-meta-webhooks",
+        max_batch_size: 10,
+        max_batch_timeout: 5,
+        max_retries: 10,
+        dead_letter_queue: "connect-meta-webhooks-dlq",
+      },
+      {
+        queue: "connect-campaign-deliveries",
+        max_batch_size: 10,
+        max_batch_timeout: 5,
+        max_retries: 10,
+        dead_letter_queue:
+          "connect-campaign-deliveries-dlq",
+      },
+    ],
+  },
+  triggers: {
+    crons: ["* * * * *"],
+  },
 };
 
 export default defineConfig(async () => {

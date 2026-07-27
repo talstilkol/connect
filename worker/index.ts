@@ -1,10 +1,105 @@
 /** Cloudflare Worker entry point for the Connect web application. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import type { D1DatabaseBinding } from "../db/d1";
+import {
+  createConversationRepository,
+} from "../db/conversationRepository.ts";
+import {
+  createBotFlowRepository,
+} from "../db/botFlowRepository.ts";
+import {
+  createBotRuntimeRepository,
+} from "../db/botRuntimeRepository.ts";
+import {
+  createAiAgentRepository,
+} from "../db/aiAgentRepository.ts";
+import {
+  createAiReplyOutboxRepository,
+} from "../db/aiReplyOutboxRepository.ts";
+import {
+  createAiRuntimePersistence,
+} from "../db/aiRuntimeRepository.ts";
+import {
+  createBotReplyDeliveryRepository,
+} from "../db/botReplyDeliveryRepository.ts";
+import {
+  createMessageTemplateRepository,
+} from "../db/messageTemplateRepository.ts";
+import {
+  createCampaignDeliveryBatchHandler,
+  createCampaignScheduledHandler,
+} from "../server/campaigns/campaignDispatchRuntime.ts";
+import {
+  type CampaignDeliveryQueueBinding,
+} from "../server/campaigns/campaignScheduler.ts";
+import {
+  createUnavailableCampaignDeliveryProcessor,
+} from "../server/campaigns/unavailableCampaignDeliveryProcessor.ts";
+import {
+  createMetaWebhookEventDispatcher,
+} from "../server/meta/metaWebhookEventDispatcher.ts";
+import {
+  createMetaWebhookBusinessBatchProcessor,
+} from "../server/meta/metaWebhookBusinessProcessor.ts";
+import {
+  createMetaWebhookQueueBatchHandler,
+  handleMetaWebhookQueueRoute,
+} from "../server/meta/metaWebhookQueueRuntime.ts";
+import type {
+  MetaWebhookQueueBatch,
+} from "../server/meta/metaWebhookQueueConsumer.ts";
+import type {
+  MetaWebhookQueueBinding,
+} from "../server/meta/metaWebhookQueuePublisher.ts";
+import type {
+  R2BucketBinding,
+} from "../server/ai/knowledgeObjectStorage.ts";
+import {
+  createBotRuntimeService,
+} from "../server/bot/botRuntimeService.ts";
+import {
+  createBotInboundRuntimeProcessor,
+} from "../server/bot/botInboundRuntimeProcessor.ts";
+import {
+  createUnavailableBotReplyProcessor,
+} from "../server/bot/unavailableBotReplyProcessor.ts";
+import {
+  createActiveAiRuntimeAgentLoader,
+} from "../server/ai/activeAiRuntimeAgent.ts";
+import {
+  createAiInboundRuntimeProcessor,
+} from "../server/ai/aiInboundRuntimeProcessor.ts";
+import {
+  createAiRuntimeService,
+} from "../server/ai/aiRuntimeService.ts";
+import {
+  unavailableAiKnowledgeRetriever,
+  unavailableAiResponseProvider,
+} from "../server/ai/unavailableAiRuntimeDependencies.ts";
+import {
+  createInboundAutomationProcessor,
+} from "../server/automation/inboundAutomationProcessor.ts";
+import type {
+  RateLimitBinding,
+} from "../server/security/rateLimit.ts";
+
+interface AssetFetcher {
+  fetch(request: Request): Promise<Response>;
+}
 
 interface Env {
-  ASSETS: Fetcher;
-  DB: D1Database;
+  ASSETS: AssetFetcher;
+  DB: D1DatabaseBinding;
+  FILES: R2BucketBinding;
+  META_APP_SECRET?: string;
+  META_WEBHOOK_VERIFY_TOKEN?: string;
+  META_WEBHOOK_QUEUE?: MetaWebhookQueueBinding;
+  META_WEBHOOK_RATE_LIMITER?: RateLimitBinding;
+  TENANT_MUTATION_RATE_LIMITER?: RateLimitBinding;
+  SYSTEM_ADMIN_MUTATION_RATE_LIMITER?: RateLimitBinding;
+  CAMPAIGN_DELIVERY_QUEUE?:
+    CampaignDeliveryQueueBinding;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -17,6 +112,16 @@ interface Env {
 interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
   passThroughOnException(): void;
+}
+
+const META_WEBHOOK_QUEUE_NAME = "connect-meta-webhooks";
+const CAMPAIGN_DELIVERY_QUEUE_NAME =
+  "connect-campaign-deliveries";
+const CAMPAIGN_SCHEDULER_CRON = "* * * * *";
+
+interface ScheduledController {
+  cron: string;
+  scheduledTime: number;
 }
 
 // Image security config. SVG sources with .svg extension auto-skip the
@@ -40,7 +145,102 @@ const worker = {
       }, allowedWidths);
     }
 
+    if (url.pathname === "/webhooks/meta") {
+      return handleMetaWebhookQueueRoute(request, env);
+    }
+
     return handler.fetch(request, env, ctx);
+  },
+
+  async queue(
+    batch: MetaWebhookQueueBatch,
+    env: Env,
+  ): Promise<void> {
+    if (batch.queue === META_WEBHOOK_QUEUE_NAME) {
+      const botRuntimeRepository =
+        createBotRuntimeRepository(env.DB);
+      const aiRuntimePersistence =
+        createAiRuntimePersistence(env.DB);
+      const inboundRuntime =
+        createInboundAutomationProcessor(
+          createBotInboundRuntimeProcessor(
+            createBotRuntimeService(
+              createBotFlowRepository(env.DB),
+              botRuntimeRepository,
+            ),
+            createBotReplyDeliveryRepository(
+              env.DB,
+            ),
+            createUnavailableBotReplyProcessor(),
+            {
+              now() {
+                return new Date();
+              },
+            },
+          ),
+          createAiInboundRuntimeProcessor(
+            botRuntimeRepository,
+            createActiveAiRuntimeAgentLoader(
+              createAiAgentRepository(env.DB),
+            ),
+            createAiRuntimeService({
+              retriever:
+                unavailableAiKnowledgeRetriever,
+              costGate:
+                aiRuntimePersistence.costGate,
+              provider:
+                unavailableAiResponseProvider,
+              audit:
+                aiRuntimePersistence.auditSink,
+            }),
+            createAiReplyOutboxRepository(
+              env.DB,
+            ),
+          ),
+        );
+      const processor = createMetaWebhookEventDispatcher(
+        createMetaWebhookBusinessBatchProcessor({
+          conversations:
+            createConversationRepository(env.DB),
+          templates:
+            createMessageTemplateRepository(env.DB),
+          inboundRuntime,
+        }),
+      );
+      const consumer = createMetaWebhookQueueBatchHandler(
+        env,
+        processor,
+      );
+
+      await consumer.handle(batch);
+      return;
+    }
+
+    if (
+      batch.queue === CAMPAIGN_DELIVERY_QUEUE_NAME
+    ) {
+      const consumer =
+        createCampaignDeliveryBatchHandler(
+          env,
+          createUnavailableCampaignDeliveryProcessor(),
+        );
+
+      await consumer.handle(batch);
+      return;
+    }
+
+    throw new Error("Unsupported queue");
+  },
+
+  async scheduled(
+    controller: ScheduledController,
+    env: Env,
+  ): Promise<void> {
+    if (controller.cron !== CAMPAIGN_SCHEDULER_CRON) {
+      throw new Error("Unsupported cron trigger");
+    }
+
+    await createCampaignScheduledHandler(env).run();
   },
 };
 

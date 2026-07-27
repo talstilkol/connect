@@ -1,0 +1,1085 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "2caec1df-a608-4e02-94c0-9d02e4ce0635",
+  "prevId": "92fb6417-1e22-4be3-b0e8-300ef9e33482",
+  "tables": {
+    "audit_logs": {
+      "name": "audit_logs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "actor_external_user_id": {
+          "name": "actor_external_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_type": {
+          "name": "target_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_id": {
+          "name": "target_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata_json": {
+          "name": "metadata_json",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "audit_logs_tenant_created_idx": {
+          "name": "audit_logs_tenant_created_idx",
+          "columns": [
+            "tenant_id",
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "audit_logs_idempotency_key_uq": {
+          "name": "audit_logs_idempotency_key_uq",
+          "columns": [
+            "idempotency_key"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "audit_logs_tenant_id_tenants_id_fk": {
+          "name": "audit_logs_tenant_id_tenants_id_fk",
+          "tableFrom": "audit_logs",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "audit_logs_action_not_blank": {
+          "name": "audit_logs_action_not_blank",
+          "value": "length(trim(\"audit_logs\".\"action\")) > 0"
+        },
+        "audit_logs_target_type_not_blank": {
+          "name": "audit_logs_target_type_not_blank",
+          "value": "length(trim(\"audit_logs\".\"target_type\")) > 0"
+        }
+      }
+    },
+    "business_profiles": {
+      "name": "business_profiles",
+      "columns": {
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "business_name": {
+          "name": "business_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "interface_language": {
+          "name": "interface_language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "business_profiles_tenant_id_tenants_id_fk": {
+          "name": "business_profiles_tenant_id_tenants_id_fk",
+          "tableFrom": "business_profiles",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "business_profiles_business_name_not_blank": {
+          "name": "business_profiles_business_name_not_blank",
+          "value": "length(trim(\"business_profiles\".\"business_name\")) > 0"
+        },
+        "business_profiles_timezone_not_blank": {
+          "name": "business_profiles_timezone_not_blank",
+          "value": "length(trim(\"business_profiles\".\"timezone\")) > 0"
+        },
+        "business_profiles_language_valid": {
+          "name": "business_profiles_language_valid",
+          "value": "\"business_profiles\".\"interface_language\" in ('he', 'en', 'ar')"
+        },
+        "business_profiles_version_positive": {
+          "name": "business_profiles_version_positive",
+          "value": "\"business_profiles\".\"version\" >= 1"
+        }
+      }
+    },
+    "contact_consent_events": {
+      "name": "contact_consent_events",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "evidence_reference": {
+          "name": "evidence_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "actor_external_user_id": {
+          "name": "actor_external_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "contact_consent_events_tenant_key_uq": {
+          "name": "contact_consent_events_tenant_key_uq",
+          "columns": [
+            "tenant_id",
+            "idempotency_key"
+          ],
+          "isUnique": true
+        },
+        "contact_consent_events_contact_time_idx": {
+          "name": "contact_consent_events_contact_time_idx",
+          "columns": [
+            "tenant_id",
+            "contact_id",
+            "occurred_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "contact_consent_events_tenant_id_tenants_id_fk": {
+          "name": "contact_consent_events_tenant_id_tenants_id_fk",
+          "tableFrom": "contact_consent_events",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "contact_consent_events_contact_id_contacts_id_fk": {
+          "name": "contact_consent_events_contact_id_contacts_id_fk",
+          "tableFrom": "contact_consent_events",
+          "tableTo": "contacts",
+          "columnsFrom": [
+            "contact_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "contact_consent_events_type_valid": {
+          "name": "contact_consent_events_type_valid",
+          "value": "\"contact_consent_events\".\"event_type\" in ('granted', 'unsubscribed')"
+        },
+        "contact_consent_events_source_not_blank": {
+          "name": "contact_consent_events_source_not_blank",
+          "value": "length(trim(\"contact_consent_events\".\"source\")) > 0"
+        },
+        "contact_consent_events_occurred_at_not_blank": {
+          "name": "contact_consent_events_occurred_at_not_blank",
+          "value": "length(trim(\"contact_consent_events\".\"occurred_at\")) > 0"
+        },
+        "contact_consent_events_idempotency_key_not_blank": {
+          "name": "contact_consent_events_idempotency_key_not_blank",
+          "value": "length(trim(\"contact_consent_events\".\"idempotency_key\")) > 0"
+        }
+      }
+    },
+    "contact_import_jobs": {
+      "name": "contact_import_jobs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "total_rows": {
+          "name": "total_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "processed_rows": {
+          "name": "processed_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_rows": {
+          "name": "created_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "updated_rows": {
+          "name": "updated_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "unchanged_rows": {
+          "name": "unchanged_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "rejected_rows": {
+          "name": "rejected_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "duplicate_rows": {
+          "name": "duplicate_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'processing'"
+        },
+        "created_by_external_user_id": {
+          "name": "created_by_external_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "contact_import_jobs_tenant_key_uq": {
+          "name": "contact_import_jobs_tenant_key_uq",
+          "columns": [
+            "tenant_id",
+            "idempotency_key"
+          ],
+          "isUnique": true
+        },
+        "contact_import_jobs_tenant_created_idx": {
+          "name": "contact_import_jobs_tenant_created_idx",
+          "columns": [
+            "tenant_id",
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "contact_import_jobs_tenant_id_tenants_id_fk": {
+          "name": "contact_import_jobs_tenant_id_tenants_id_fk",
+          "tableFrom": "contact_import_jobs",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "contact_import_jobs_idempotency_key_not_blank": {
+          "name": "contact_import_jobs_idempotency_key_not_blank",
+          "value": "length(trim(\"contact_import_jobs\".\"idempotency_key\")) > 0"
+        },
+        "contact_import_jobs_file_name_not_blank": {
+          "name": "contact_import_jobs_file_name_not_blank",
+          "value": "length(trim(\"contact_import_jobs\".\"file_name\")) > 0"
+        },
+        "contact_import_jobs_total_rows_positive": {
+          "name": "contact_import_jobs_total_rows_positive",
+          "value": "\"contact_import_jobs\".\"total_rows\" > 0"
+        },
+        "contact_import_jobs_counts_valid": {
+          "name": "contact_import_jobs_counts_valid",
+          "value": "\"contact_import_jobs\".\"processed_rows\" >= 0\n        and \"contact_import_jobs\".\"created_rows\" >= 0\n        and \"contact_import_jobs\".\"updated_rows\" >= 0\n        and \"contact_import_jobs\".\"unchanged_rows\" >= 0\n        and \"contact_import_jobs\".\"rejected_rows\" >= 0\n        and \"contact_import_jobs\".\"duplicate_rows\" >= 0\n        and \"contact_import_jobs\".\"processed_rows\" <= \"contact_import_jobs\".\"total_rows\"\n        and \"contact_import_jobs\".\"processed_rows\" = \"contact_import_jobs\".\"created_rows\"\n          + \"contact_import_jobs\".\"updated_rows\"\n          + \"contact_import_jobs\".\"unchanged_rows\"\n          + \"contact_import_jobs\".\"rejected_rows\"\n          + \"contact_import_jobs\".\"duplicate_rows\""
+        },
+        "contact_import_jobs_status_valid": {
+          "name": "contact_import_jobs_status_valid",
+          "value": "\"contact_import_jobs\".\"status\" in ('processing', 'completed')"
+        },
+        "contact_import_jobs_completion_consistent": {
+          "name": "contact_import_jobs_completion_consistent",
+          "value": "(\n        \"contact_import_jobs\".\"status\" = 'processing'\n        and \"contact_import_jobs\".\"completed_at\" is null\n      ) or (\n        \"contact_import_jobs\".\"status\" = 'completed'\n        and \"contact_import_jobs\".\"processed_rows\" = \"contact_import_jobs\".\"total_rows\"\n        and \"contact_import_jobs\".\"completed_at\" is not null\n      )"
+        },
+        "contact_import_jobs_actor_not_blank": {
+          "name": "contact_import_jobs_actor_not_blank",
+          "value": "length(trim(\"contact_import_jobs\".\"created_by_external_user_id\")) > 0"
+        }
+      }
+    },
+    "contact_import_rows": {
+      "name": "contact_import_rows",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_row_number": {
+          "name": "source_row_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "phone_fingerprint": {
+          "name": "phone_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "contact_import_rows_job_source_uq": {
+          "name": "contact_import_rows_job_source_uq",
+          "columns": [
+            "job_id",
+            "source_row_number"
+          ],
+          "isUnique": true
+        },
+        "contact_import_rows_job_phone_idx": {
+          "name": "contact_import_rows_job_phone_idx",
+          "columns": [
+            "job_id",
+            "phone_fingerprint"
+          ],
+          "isUnique": false
+        },
+        "contact_import_rows_tenant_job_idx": {
+          "name": "contact_import_rows_tenant_job_idx",
+          "columns": [
+            "tenant_id",
+            "job_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "contact_import_rows_tenant_id_tenants_id_fk": {
+          "name": "contact_import_rows_tenant_id_tenants_id_fk",
+          "tableFrom": "contact_import_rows",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "contact_import_rows_job_id_contact_import_jobs_id_fk": {
+          "name": "contact_import_rows_job_id_contact_import_jobs_id_fk",
+          "tableFrom": "contact_import_rows",
+          "tableTo": "contact_import_jobs",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "contact_import_rows_contact_id_contacts_id_fk": {
+          "name": "contact_import_rows_contact_id_contacts_id_fk",
+          "tableFrom": "contact_import_rows",
+          "tableTo": "contacts",
+          "columnsFrom": [
+            "contact_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "contact_import_rows_source_row_positive": {
+          "name": "contact_import_rows_source_row_positive",
+          "value": "\"contact_import_rows\".\"source_row_number\" >= 2"
+        },
+        "contact_import_rows_status_valid": {
+          "name": "contact_import_rows_status_valid",
+          "value": "\"contact_import_rows\".\"status\" in ('created', 'updated', 'unchanged', 'rejected', 'duplicate')"
+        },
+        "contact_import_rows_reason_valid": {
+          "name": "contact_import_rows_reason_valid",
+          "value": "\"contact_import_rows\".\"reason\" is null\n        or \"contact_import_rows\".\"reason\" in ('missing_phone', 'invalid_phone', 'duplicate_in_file')"
+        },
+        "contact_import_rows_outcome_consistent": {
+          "name": "contact_import_rows_outcome_consistent",
+          "value": "(\n        \"contact_import_rows\".\"status\" in ('created', 'updated', 'unchanged')\n        and \"contact_import_rows\".\"contact_id\" is not null\n        and \"contact_import_rows\".\"phone_fingerprint\" is not null\n        and \"contact_import_rows\".\"reason\" is null\n      ) or (\n        \"contact_import_rows\".\"status\" = 'duplicate'\n        and \"contact_import_rows\".\"phone_fingerprint\" is not null\n        and \"contact_import_rows\".\"reason\" = 'duplicate_in_file'\n      ) or (\n        \"contact_import_rows\".\"status\" = 'rejected'\n        and \"contact_import_rows\".\"contact_id\" is null\n        and \"contact_import_rows\".\"phone_fingerprint\" is null\n        and \"contact_import_rows\".\"reason\" in ('missing_phone', 'invalid_phone')\n      )"
+        }
+      }
+    },
+    "contacts": {
+      "name": "contacts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "phone_e164": {
+          "name": "phone_e164",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "company": {
+          "name": "company",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mailing_status": {
+          "name": "mailing_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'unsubscribed'"
+        },
+        "consent_status": {
+          "name": "consent_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'unknown'"
+        },
+        "consent_source": {
+          "name": "consent_source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "consent_recorded_at": {
+          "name": "consent_recorded_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "consent_withdrawn_at": {
+          "name": "consent_withdrawn_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "consent_evidence_reference": {
+          "name": "consent_evidence_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "contacts_tenant_phone_uq": {
+          "name": "contacts_tenant_phone_uq",
+          "columns": [
+            "tenant_id",
+            "phone_e164"
+          ],
+          "isUnique": true
+        },
+        "contacts_tenant_updated_idx": {
+          "name": "contacts_tenant_updated_idx",
+          "columns": [
+            "tenant_id",
+            "updated_at"
+          ],
+          "isUnique": false
+        },
+        "contacts_tenant_mailing_idx": {
+          "name": "contacts_tenant_mailing_idx",
+          "columns": [
+            "tenant_id",
+            "mailing_status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "contacts_tenant_id_tenants_id_fk": {
+          "name": "contacts_tenant_id_tenants_id_fk",
+          "tableFrom": "contacts",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "contacts_phone_e164_valid": {
+          "name": "contacts_phone_e164_valid",
+          "value": "length(\"contacts\".\"phone_e164\") between 2 and 16\n        and substr(\"contacts\".\"phone_e164\", 1, 1) = '+'\n        and substr(\"contacts\".\"phone_e164\", 2, 1) between '1' and '9'\n        and substr(\"contacts\".\"phone_e164\", 2) not glob '*[^0-9]*'"
+        },
+        "contacts_mailing_status_valid": {
+          "name": "contacts_mailing_status_valid",
+          "value": "\"contacts\".\"mailing_status\" in ('subscribed', 'unsubscribed')"
+        },
+        "contacts_consent_status_valid": {
+          "name": "contacts_consent_status_valid",
+          "value": "\"contacts\".\"consent_status\" in ('unknown', 'granted', 'withdrawn')"
+        },
+        "contacts_consent_state_consistent": {
+          "name": "contacts_consent_state_consistent",
+          "value": "(\n        \"contacts\".\"consent_status\" = 'unknown'\n        and \"contacts\".\"mailing_status\" = 'unsubscribed'\n        and \"contacts\".\"consent_source\" is null\n        and \"contacts\".\"consent_recorded_at\" is null\n        and \"contacts\".\"consent_withdrawn_at\" is null\n      ) or (\n        \"contacts\".\"consent_status\" = 'granted'\n        and \"contacts\".\"mailing_status\" = 'subscribed'\n        and \"contacts\".\"consent_source\" is not null\n        and \"contacts\".\"consent_recorded_at\" is not null\n        and \"contacts\".\"consent_withdrawn_at\" is null\n      ) or (\n        \"contacts\".\"consent_status\" = 'withdrawn'\n        and \"contacts\".\"mailing_status\" = 'unsubscribed'\n        and \"contacts\".\"consent_source\" is not null\n        and \"contacts\".\"consent_recorded_at\" is not null\n        and \"contacts\".\"consent_withdrawn_at\" is not null\n      )"
+        },
+        "contacts_version_positive": {
+          "name": "contacts_version_positive",
+          "value": "\"contacts\".\"version\" >= 1"
+        }
+      }
+    },
+    "tenant_memberships": {
+      "name": "tenant_memberships",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "external_user_id": {
+          "name": "external_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'active'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "tenant_memberships_tenant_user_uq": {
+          "name": "tenant_memberships_tenant_user_uq",
+          "columns": [
+            "tenant_id",
+            "external_user_id"
+          ],
+          "isUnique": true
+        },
+        "tenant_memberships_user_idx": {
+          "name": "tenant_memberships_user_idx",
+          "columns": [
+            "external_user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tenant_memberships_tenant_id_tenants_id_fk": {
+          "name": "tenant_memberships_tenant_id_tenants_id_fk",
+          "tableFrom": "tenant_memberships",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tenant_memberships_external_user_id_not_blank": {
+          "name": "tenant_memberships_external_user_id_not_blank",
+          "value": "length(trim(\"tenant_memberships\".\"external_user_id\")) > 0"
+        },
+        "tenant_memberships_role_valid": {
+          "name": "tenant_memberships_role_valid",
+          "value": "\"tenant_memberships\".\"role\" in ('owner', 'manager', 'agent', 'viewer')"
+        },
+        "tenant_memberships_status_valid": {
+          "name": "tenant_memberships_status_valid",
+          "value": "\"tenant_memberships\".\"status\" in ('active', 'suspended')"
+        }
+      }
+    },
+    "tenants": {
+      "name": "tenants",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "provisioning_key": {
+          "name": "provisioning_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'trial'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "tenants_provisioning_key_uq": {
+          "name": "tenants_provisioning_key_uq",
+          "columns": [
+            "provisioning_key"
+          ],
+          "isUnique": true
+        },
+        "tenants_status_idx": {
+          "name": "tenants_status_idx",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tenants_display_name_not_blank": {
+          "name": "tenants_display_name_not_blank",
+          "value": "length(trim(\"tenants\".\"display_name\")) > 0"
+        },
+        "tenants_status_valid": {
+          "name": "tenants_status_valid",
+          "value": "\"tenants\".\"status\" in ('trial', 'active', 'payment_failed', 'suspended', 'cancelled', 'expired', 'blocked')"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}
