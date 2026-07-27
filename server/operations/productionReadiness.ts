@@ -31,6 +31,9 @@ import {
 import {
   inspectSecretInventoryEvidence,
 } from "./secretInventoryEvidence.ts";
+import {
+  inspectSourceControlGovernanceEvidence,
+} from "./sourceControlGovernanceEvidence.ts";
 import type {
   ProductionReadinessCategory,
   ProductionReadinessCheck,
@@ -65,6 +68,7 @@ export interface ProductionReadinessInput {
   retentionPolicy: ConfigurationState;
   environmentIsolation: ConfigurationState;
   secretInventory: ConfigurationState;
+  sourceControlGovernance: ConfigurationState;
   hosting: ProductionHostingBindings;
   implementation: ProductionImplementationState;
 }
@@ -92,6 +96,8 @@ export interface ProductionReadinessEnvironment {
   RETENTION_POLICY_JSON?: string;
   ENVIRONMENT_ISOLATION_EVIDENCE_JSON?: string;
   SECRET_INVENTORY_EVIDENCE_JSON?: string;
+  APP_DEPLOYED_COMMIT_SHA?: string;
+  SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON?: string;
 }
 
 interface CheckDefinition {
@@ -295,6 +301,17 @@ export function inspectProductionReadiness(
         "SECRET_INVENTORY_EVIDENCE_REQUIRED",
     }),
     toCheck({
+      id: "security.source-control-governance",
+      category: "security",
+      ready: isConfigured(
+        input.sourceControlGovernance,
+      ),
+      readyCode:
+        "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
+      blockedCode:
+        "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_REQUIRED",
+    }),
+    toCheck({
       id: "security.dependency-audit",
       category: "security",
       ready: implementation.dependencyAudit,
@@ -457,6 +474,12 @@ export function inspectCurrentProductionReadiness(
         : "incomplete",
     secretInventory:
       inspectSecretInventoryEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    sourceControlGovernance:
+      inspectSourceControlGovernanceEvidence(
         environment,
       ).status === "configured"
         ? "configured"

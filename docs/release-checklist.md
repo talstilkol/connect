@@ -22,6 +22,9 @@
 
 2.5 Secret Inventory Evidence תקף, וכל מועדי ה־Rotation עתידיים.
 
+2.6 Source Control Governance Evidence תקף, מקושר ל־Commit הנפרס
+ומוכיח שכל עשרת ה־Status Checks ושמונת בקרי ה־Repository פעילים.
+
 ## 3. Data
 
 3.1 כל המיגרציות עברו Validation לפי הסדר.

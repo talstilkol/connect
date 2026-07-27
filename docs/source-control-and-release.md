@@ -148,3 +148,27 @@ Authority, אישור הסביבות והרשאה מפורשת לפריסה.
 
 6.8 עצם קיום החוזה אינו הוכחת בידוד. שער Production נשאר חסום עד
 להזרקת Evidence שמופק ממשאבים אמיתיים.
+
+## 7. Source Control Governance Evidence
+
+7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v1
+קצר־חיים שמופק מ־Repository אמיתי לאחר הגדרת Remote.
+
+7.2 ה־Evidence דורש עשרה Status Checks: שמונת שערי האיכות המקומיים,
+Dependency Audit ו־Production Readiness.
+
+7.3 ה־Evidence מאשר Branch Protection, ‏CODEOWNERS Review, ביטול
+אישורים ישנים, פתרון שיחות Review, חסימת Force Push ומחיקת Branch,
+‏Secret Scanning ו־Push Protection.
+
+7.4 נדרש Reviewer אחד לפחות. `releaseCommitSha` חייב להתאים בדיוק
+ל־`APP_DEPLOYED_COMMIT_SHA`.
+
+7.5 שמות Repository, ‏Branch, ‏Owner או ספק אינם נשמרים בראיה.
+במקומם נשמרים Fingerprints נפרדים מסוג SHA-256.
+
+7.6 Evidence חסר, פג תוקף, עם Control כבוי, Status Check חסר,
+Digest שונה או Commit שאינו תואם חוסם Production.
+
+7.7 החוזה אינו מפעיל הגנות בעצמו. שער Production נשאר חסום עד
+להגדרת Repository Authority והפקת Evidence מהספק שנבחר.
