@@ -126,3 +126,15 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 
 6.4 הגדרת המשאבים תושלם דרך ספק Hosting רק לאחר בחירת Repository
 Authority, אישור הסביבות והרשאה מפורשת לפריסה.
+
+6.5 `ENVIRONMENT_ISOLATION_EVIDENCE_JSON` מקבל Evidence v1 קצר־חיים
+שמופק מ־Inventory אמיתי של ספק התשתית.
+
+6.6 ה־Evidence מכיל רק 44 Fingerprints מסוג SHA-256: אחת לכל מחלקת
+משאב בכל אחת מארבע הסביבות. הוא אינו מכיל Resource ID או Secret.
+
+6.7 Fingerprint משותף, סביבה חסרה, Data Boundary שגוי, Digest שונה,
+זמן עתידי או Evidence שפג תוקפו חוסמים Production.
+
+6.8 עצם קיום החוזה אינו הוכחת בידוד. שער Production נשאר חסום עד
+להזרקת Evidence שמופק ממשאבים אמיתיים.

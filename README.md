@@ -5,7 +5,7 @@
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
-1. שער Production מרכז 25 בדיקות ונכשל סגור עבור כל חסימה או
+1. שער Production מרכז 26 בדיקות ונכשל סגור עבור כל חסימה או
    החלטה חסרה.
 2. Meta Webhook, פעולות Tenant ופעולות System Admin משתמשים בשלוש
    Policies נפרדות של Rate Limiting.
@@ -44,7 +44,7 @@
     ניווט, Mobile Menu, ‏Dialog ו־Skip Link.
 22. Dependency Lock מאמת 22 תלויות ישירות מול `package-lock.json`.
 23. Local Release Gate עובר. Production Release Gate נכשל בכוונה
-    על 5 Ready, ‏10 Blocked ו־10 Decision Required.
+    על 5 Ready, ‏11 Blocked ו־10 Decision Required.
 24. כל הבדיקות, Build, ‏TypeScript ו־ESLint עוברים דרך Local
     Release Gate.
 25. כל 14 השלבים הושלמו בקוד המקומי. פרסום נשאר חסום עד השלמת

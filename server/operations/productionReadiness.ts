@@ -25,6 +25,9 @@ import {
 import {
   inspectRetentionPolicy,
 } from "./retentionPolicy.ts";
+import {
+  inspectEnvironmentIsolationEvidence,
+} from "./environmentIsolationEvidence.ts";
 import type {
   ProductionReadinessCategory,
   ProductionReadinessCheck,
@@ -57,6 +60,7 @@ export interface ProductionReadinessInput {
   sloAlertPolicy: ConfigurationState;
   backupRestorePolicy: ConfigurationState;
   retentionPolicy: ConfigurationState;
+  environmentIsolation: ConfigurationState;
   hosting: ProductionHostingBindings;
   implementation: ProductionImplementationState;
 }
@@ -82,6 +86,7 @@ export interface ProductionReadinessEnvironment {
   BACKUP_RETENTION_DAYS?: string;
   RESTORE_REHEARSAL_INTERVAL_DAYS?: string;
   RETENTION_POLICY_JSON?: string;
+  ENVIRONMENT_ISOLATION_EVIDENCE_JSON?: string;
 }
 
 interface CheckDefinition {
@@ -187,6 +192,17 @@ export function inspectProductionReadiness(
       ready: input.hosting.r2 === "FILES",
       readyCode: "R2_BINDING_DECLARED",
       blockedCode: "R2_BINDING_INVALID",
+    }),
+    toCheck({
+      id: "hosting.environment-isolation",
+      category: "storage",
+      ready: isConfigured(
+        input.environmentIsolation,
+      ),
+      readyCode:
+        "ENVIRONMENT_ISOLATION_EVIDENCE_VERIFIED",
+      blockedCode:
+        "ENVIRONMENT_ISOLATION_EVIDENCE_REQUIRED",
     }),
     toCheck({
       id: "meta.embedded-signup",
@@ -415,6 +431,12 @@ export function inspectCurrentProductionReadiness(
     retentionPolicy:
       inspectRetentionPolicy(environment).status ===
       "configured"
+        ? "configured"
+        : "incomplete",
+    environmentIsolation:
+      inspectEnvironmentIsolationEvidence(
+        environment,
+      ).status === "configured"
         ? "configured"
         : "incomplete",
     hosting,
