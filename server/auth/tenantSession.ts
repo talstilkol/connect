@@ -2,6 +2,7 @@ import {
   hasPermission,
   type Permission,
   type TenantContext,
+  type TenantId,
   type UserId,
 } from "../../shared/domain/model.ts";
 import type {
@@ -36,9 +37,40 @@ export interface TenantSession extends TenantContext {
   externalUserId: UserId;
 }
 
+const tenantSessionStatuses =
+  Object.freeze([
+    "trial",
+    "active",
+    "payment_failed",
+  ] as const);
+
+function canCreateTenantSession(
+  membership: ActiveTenantMembership,
+  identity: AuthenticatedIdentity,
+): boolean {
+  return (
+    membership.externalUserId ===
+      identity.externalUserId &&
+    tenantSessionStatuses.includes(
+      membership.tenantStatus as
+        (typeof tenantSessionStatuses)[number],
+    )
+  );
+}
+
+function isValidSelectedTenantId(
+  value: TenantId,
+): boolean {
+  return (
+    Number.isSafeInteger(value) &&
+    value > 0
+  );
+}
+
 export function resolveTenantSessionFromMemberships(
   identity: AuthenticatedIdentity | null,
   memberships: readonly ActiveTenantMembership[],
+  selectedTenantId?: TenantId,
 ): TenantSession {
   if (!identity) {
     throw new TenantSessionError(
@@ -47,21 +79,62 @@ export function resolveTenantSessionFromMemberships(
     );
   }
 
-  if (memberships.length === 0) {
+  const eligibleMemberships =
+    memberships.filter((membership) =>
+      canCreateTenantSession(
+        membership,
+        identity,
+      ),
+    );
+
+  if (eligibleMemberships.length === 0) {
     throw new TenantSessionError(
       "TENANT_MEMBERSHIP_REQUIRED",
-      "The authenticated user has no active tenant membership",
+      "The authenticated user has no eligible tenant membership",
     );
   }
 
-  if (memberships.length > 1) {
+  if (selectedTenantId !== undefined) {
+    if (
+      !isValidSelectedTenantId(
+        selectedTenantId,
+      )
+    ) {
+      throw new TenantSessionError(
+        "TENANT_SELECTION_REQUIRED",
+        "The selected tenant is invalid",
+      );
+    }
+
+    const selectedMembership =
+      eligibleMemberships.find(
+        (membership) =>
+          membership.tenantId ===
+          selectedTenantId,
+      );
+
+    if (!selectedMembership) {
+      throw new TenantSessionError(
+        "TENANT_SELECTION_REQUIRED",
+        "The selected tenant is not available to the authenticated user",
+      );
+    }
+
+    return toTenantSession(
+      selectedMembership,
+    );
+  }
+
+  if (eligibleMemberships.length > 1) {
     throw new TenantSessionError(
       "TENANT_SELECTION_REQUIRED",
       "The authenticated user must select one tenant",
     );
   }
 
-  return toTenantSession(memberships[0]);
+  return toTenantSession(
+    eligibleMemberships[0],
+  );
 }
 
 function toTenantSession(
@@ -79,16 +152,25 @@ function toTenantSession(
 export async function resolveTenantSession(
   identity: AuthenticatedIdentity | null,
   repository: TenantMembershipRepository,
+  selectedTenantId?: TenantId,
 ): Promise<TenantSession> {
   if (!identity) {
-    return resolveTenantSessionFromMemberships(identity, []);
+    return resolveTenantSessionFromMemberships(
+      identity,
+      [],
+      selectedTenantId,
+    );
   }
 
   const memberships = await repository.findActiveByExternalUserId(
     identity.externalUserId,
   );
 
-  return resolveTenantSessionFromMemberships(identity, memberships);
+  return resolveTenantSessionFromMemberships(
+    identity,
+    memberships,
+    selectedTenantId,
+  );
 }
 
 export function requireTenantPermission(

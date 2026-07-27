@@ -1,4 +1,7 @@
 import type {
+  TenantId,
+} from "../../shared/domain/model.ts";
+import type {
   D1DatabaseBinding,
 } from "../../db/d1.ts";
 import {
@@ -13,9 +16,13 @@ import type {
 
 export async function requireCurrentTenantMutationSession(
   database?: D1DatabaseBinding,
+  selectedTenantId?: TenantId,
 ): Promise<TenantSession> {
   const session =
-    await requireCurrentTenantSession(database);
+    await requireCurrentTenantSession(
+      database,
+      selectedTenantId,
+    );
 
   await enforceCurrentTenantMutationRateLimit(
     session.externalUserId,

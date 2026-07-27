@@ -10,12 +10,18 @@ const identity = {
   externalUserId: "external-user-id",
 };
 
-function membership(tenantId, role = "owner") {
+function membership(
+  tenantId,
+  role = "owner",
+  tenantStatus = "active",
+  externalUserId =
+    identity.externalUserId,
+) {
   return {
     tenantId,
     tenantDisplayName: `tenant-${tenantId}`,
-    tenantStatus: "active",
-    externalUserId: identity.externalUserId,
+    tenantStatus,
+    externalUserId,
     role,
   };
 }
@@ -50,6 +56,116 @@ test("requires explicit selection when a user belongs to multiple tenants", asyn
       repositoryWith([membership(7), membership(11)]),
     ),
     (error) => error.code === "TENANT_SELECTION_REQUIRED",
+  );
+});
+
+test("resolves an explicit tenant only from the authenticated memberships", async () => {
+  const session = await resolveTenantSession(
+    identity,
+    repositoryWith([
+      membership(7, "owner"),
+      membership(11, "manager"),
+    ]),
+    11,
+  );
+
+  assert.equal(session.tenantId, 11);
+  assert.equal(session.role, "manager");
+
+  await assert.rejects(
+    resolveTenantSession(
+      identity,
+      repositoryWith([
+        membership(7),
+        membership(11),
+      ]),
+      13,
+    ),
+    (error) =>
+      error.code ===
+      "TENANT_SELECTION_REQUIRED",
+  );
+});
+
+test("rejects malformed selected tenant identities", async () => {
+  for (const selectedTenantId of [
+    0,
+    -1,
+    1.5,
+    Number.NaN,
+  ]) {
+    await assert.rejects(
+      resolveTenantSession(
+        identity,
+        repositoryWith([
+          membership(7),
+        ]),
+        selectedTenantId,
+      ),
+      (error) =>
+        error.code ===
+        "TENANT_SELECTION_REQUIRED",
+    );
+  }
+});
+
+test("blocks restricted tenants and memberships from another identity", async () => {
+  for (const tenantStatus of [
+    "suspended",
+    "cancelled",
+    "expired",
+    "blocked",
+  ]) {
+    await assert.rejects(
+      resolveTenantSession(
+        identity,
+        repositoryWith([
+          membership(
+            7,
+            "owner",
+            tenantStatus,
+          ),
+        ]),
+      ),
+      (error) =>
+        error.code ===
+        "TENANT_MEMBERSHIP_REQUIRED",
+    );
+  }
+
+  await assert.rejects(
+    resolveTenantSession(
+      identity,
+      repositoryWith([
+        membership(
+          7,
+          "owner",
+          "active",
+          "different-user",
+        ),
+      ]),
+    ),
+    (error) =>
+      error.code ===
+      "TENANT_MEMBERSHIP_REQUIRED",
+  );
+});
+
+test("keeps payment-failed distinct from terminal access states", async () => {
+  const session = await resolveTenantSession(
+    identity,
+    repositoryWith([
+      membership(
+        7,
+        "owner",
+        "payment_failed",
+      ),
+    ]),
+  );
+
+  assert.equal(
+    session.status,
+    "payment_failed",
   );
 });
 

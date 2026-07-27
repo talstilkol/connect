@@ -168,9 +168,13 @@
 7. תשתית זהות והרשאות:
    1. Clerk מחובר למסכי Login ו־Registration עם ממשק עברי.
    2. `proxy.ts` מגן על Routes של ה־Workspace כאשר Clerk מוגדר.
-   3. Tenant Session נגזר מ־Clerk User ומ־Membership פעיל ב־D1.
+   3. Tenant Session נגזר מ־Clerk User ומ־Membership פעיל ב־D1,
+      ורק כאשר זהות המשתמש תואמת והרשומה שייכת ל־Tenant נגיש.
    4. מטריצת RBAC נאכפת בצד השרת לפני גישה ל־Repository.
-   5. משתמש ששייך ליותר מ־Tenant אחד נדרש לבחירה מפורשת.
+   5. משתמש ששייך ליותר מ־Tenant אחד נדרש לבחירה מפורשת; הבחירה
+      מתקבלת רק אם Tenant ID נמצא ב־Memberships האמיתיים שלו.
+   6. Tenant במצב `suspended`, ‏`cancelled`, ‏`expired` או `blocked`
+      אינו יכול לייצר Session גם כאשר ה־Membership עצמו פעיל.
 8. Onboarding קבוע:
    1. שמירת פרטי העסק עוברת דרך Server Action כאשר Clerk פעיל.
    2. משתמש מאומת ללא Membership מקבל Tenant ו־Owner Membership ראשוניים.
