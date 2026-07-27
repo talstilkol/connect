@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useEffect,
   useRef,
   useState,
   useTransition,
@@ -15,7 +14,6 @@ import type {
 } from "../../server/ai/aiReplyApprovalActionResult.ts";
 import {
   decideAiReplyApprovalAction,
-  loadAiReplyApprovalsAction,
 } from "../../server/ai/aiReplyApprovalActions.ts";
 import {
   changeConversationAssignmentAction,
@@ -45,16 +43,16 @@ import {
   messageStatusLabels,
   replaceInboxConversation,
 } from "./conversationPresentation.ts";
+import {
+  canEnableInboxPolling,
+  useInboxPolling,
+  type InboxRefreshState,
+} from "./useInboxPolling.ts";
 
 type Feedback = {
   tone: "success" | "warning";
   message: string;
 } | null;
-
-type RefreshState =
-  | "idle"
-  | "refreshing"
-  | "stale";
 
 const actionFailureMessages: Record<
   ConversationActionFailure["status"],
@@ -139,26 +137,6 @@ function hasActiveFilters(
   );
 }
 
-function toAiApprovalDirectoryStatus(
-  failure:
-    AiReplyApprovalActionFailure["status"],
-): Exclude<
-  AiReplyApprovalDirectoryStatus,
-  "ready"
-> {
-  if (
-    failure === "configuration-required" ||
-    failure === "unauthenticated" ||
-    failure === "onboarding-required" ||
-    failure === "tenant-selection-required" ||
-    failure === "permission-denied"
-  ) {
-    return failure;
-  }
-
-  return "server-error";
-}
-
 export function ConversationInbox({
   authEnabled,
   initialInbox,
@@ -206,7 +184,7 @@ export function ConversationInbox({
   const [feedback, setFeedback] =
     useState<Feedback>(null);
   const [refreshState, setRefreshState] =
-    useState<RefreshState>("idle");
+    useState<InboxRefreshState>("idle");
   const [pendingConversationKey, setPendingConversationKey] =
     useState<string | null>(null);
   const [pendingApprovalKey, setPendingApprovalKey] =
@@ -218,112 +196,23 @@ export function ConversationInbox({
     selectedThread?.conversation.conversationKey ??
     null;
 
-  useEffect(() => {
-    if (
-      !authEnabled ||
-      initialStatus !== "ready"
-    ) {
-      return;
-    }
-
-    let disposed = false;
-
-    const refreshVisibleInbox = async () => {
-      if (
-        document.visibilityState !== "visible" ||
-        refreshInFlight.current
-      ) {
-        return;
-      }
-
-      refreshInFlight.current = true;
-      setRefreshState("refreshing");
-
-      try {
-        const [result, approvalResult] =
-          await Promise.all([
-            refreshInboxAction({
-              filters,
-              selectedConversationKey,
-            }),
-            loadAiReplyApprovalsAction(),
-          ]);
-
-        if (disposed) {
-          return;
-        }
-
-        if (result.status !== "refreshed") {
-          setRefreshState("stale");
-          return;
-        }
-
-        setConversations(
-          result.inbox.conversations,
-        );
-        setSelectedThread(
-          result.inbox.selectedThread,
-        );
-        setCanReply(result.inbox.canReply);
-        setFilters(result.inbox.filters);
-
-        if (
-          approvalResult.status === "loaded"
-        ) {
-          setAiApprovals(
-            approvalResult.directory.approvals,
-          );
-          setCanDecideAi(
-            approvalResult.directory.canDecide,
-          );
-          setAiApprovalStatus("ready");
-          setRefreshState("idle");
-        } else {
-          setAiApprovalStatus(
-            toAiApprovalDirectoryStatus(
-              approvalResult.status,
-            ),
-          );
-          setRefreshState("stale");
-        }
-      } catch {
-        if (!disposed) {
-          setRefreshState("stale");
-        }
-      } finally {
-        refreshInFlight.current = false;
-      }
-    };
-
-    const intervalId = window.setInterval(
-      () => void refreshVisibleInbox(),
-      15_000,
-    );
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        void refreshVisibleInbox();
-      }
-    };
-
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibilityChange,
-    );
-
-    return () => {
-      disposed = true;
-      window.clearInterval(intervalId);
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibilityChange,
-      );
-    };
-  }, [
-    authEnabled,
+  useInboxPolling({
+    enabled: canEnableInboxPolling(
+      authEnabled,
+      initialStatus,
+    ),
     filters,
-    initialStatus,
     selectedConversationKey,
-  ]);
+    refreshInFlight,
+    setConversations,
+    setSelectedThread,
+    setCanReply,
+    setFilters,
+    setAiApprovals,
+    setCanDecideAi,
+    setAiApprovalStatus,
+    setRefreshState,
+  });
 
   if (
     !authEnabled ||

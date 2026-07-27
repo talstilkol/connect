@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
 import ClerkAppProvider from "../features/auth/ClerkAppProvider";
+import { resolvePublicOrigin } from "../server/operations/publicOrigin";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,15 +18,13 @@ const title = "Connect | WhatsApp Business Platform";
 const description =
   "מערכת SaaS לניהול WhatsApp Business רשמי, קמפיינים, שיחות, בוטים וסוכני AI.";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
-  const protocol =
-    forwardedProtocol ?? (host?.startsWith("localhost") ? "http" : "https");
-  const requestOrigin = host ? `${protocol}://${host}` : null;
-  const socialImage = requestOrigin ? `${requestOrigin}/og.png` : null;
+export function generateMetadata(): Metadata {
+  const publicOrigin = resolvePublicOrigin(
+    process.env,
+  );
+  const socialImage = publicOrigin
+    ? `${publicOrigin}/og.png`
+    : null;
 
   return {
     title,
@@ -36,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
           title,
           description,
           type: "website",
-          url: requestOrigin ?? undefined,
+          url: publicOrigin ?? undefined,
           images: [{ url: socialImage, width: 1748, height: 912 }],
         }
       : undefined,

@@ -74,6 +74,24 @@ const checks = [
     pattern:
       /role="dialog"[^>]*aria-modal="true"[^>]*aria-labelledby=/,
   },
+  {
+    code: "DIALOG_ESCAPE_REQUIRED",
+    file: "features/workspace/useAccessibleDialog.ts",
+    pattern:
+      /event\.key\s*===\s*["']Escape["']/,
+  },
+  {
+    code: "DIALOG_FOCUS_TRAP_REQUIRED",
+    file: "features/workspace/useAccessibleDialog.ts",
+    pattern:
+      /resolveFocusTrapTarget\(/,
+  },
+  {
+    code: "UNAVAILABLE_ACTIONS_DISABLED",
+    file: "features/workspace/WorkspaceApp.tsx",
+    pattern:
+      /aria-label="עזרה"[\s\S]{0,220}\bdisabled\b[\s\S]{0,300}aria-label="התראות"[\s\S]{0,220}\bdisabled\b/,
+  },
 ];
 
 export async function inspectInterfaceGuardrails(

@@ -15,12 +15,12 @@ const policy = {
 };
 
 const evidence = {
-  version: 1,
-  backupId: "backup-2026-07-26",
+  version: 2,
+  backupId: "backup-2026-07-27",
   backupCreatedAt:
-    "2026-07-26T08:00:00.000Z",
+    "2026-07-27T08:00:00.000Z",
   backupVerifiedAt:
-    "2026-07-26T08:30:00.000Z",
+    "2026-07-27T08:30:00.000Z",
   d1: {
     status: "verified",
     sha256: "a".repeat(64),
@@ -32,10 +32,32 @@ const evidence = {
     objectCount: 2,
     totalBytes: 4096,
   },
+  retention: {
+    windowStartedAt:
+      "2026-06-01T00:00:00.000Z",
+    oldestRetainedBackupAt:
+      "2026-06-26T08:00:00.000Z",
+    newestRetainedBackupAt:
+      "2026-07-27T08:00:00.000Z",
+    retainedBackupIds: [
+      "backup-2026-06-30",
+      "backup-2026-07-27",
+    ],
+  },
   restoreRehearsal: {
     target: "isolated",
+    restoredBackupId:
+      "backup-2026-06-30",
+    restoredBackupCreatedAt:
+      "2026-06-30T08:00:00.000Z",
     completedAt:
       "2026-07-26T09:00:00.000Z",
+    sourceD1Sha256: "c".repeat(64),
+    restoredD1Sha256: "c".repeat(64),
+    sourceR2InventorySha256:
+      "d".repeat(64),
+    restoredR2InventorySha256:
+      "d".repeat(64),
     d1Status: "verified",
     r2Status: "verified",
   },
@@ -44,7 +66,7 @@ const evidence = {
 const clock = {
   now() {
     return new Date(
-      "2026-07-26T10:00:00.000Z",
+      "2026-07-27T10:00:00.000Z",
     );
   },
 };
@@ -77,7 +99,7 @@ test("requires explicit backup and restore policy without defaults", () => {
   );
 });
 
-test("accepts only verified D1, R2, and isolated restore evidence", () => {
+test("verifies linked D1, R2, retention, and isolated restore evidence", () => {
   assert.deepEqual(
     assessBackupRestoreEvidence(
       policy,
@@ -89,6 +111,9 @@ test("accepts only verified D1, R2, and isolated restore evidence", () => {
       backupId: evidence.backupId,
       backupCreatedAt:
         evidence.backupCreatedAt,
+      restoredBackupId:
+        evidence.restoreRehearsal
+          .restoredBackupId,
       restoreRehearsalCompletedAt:
         evidence.restoreRehearsal
           .completedAt,
@@ -111,7 +136,6 @@ test("rejects stale backup and restore evidence separately", () => {
       code: "BACKUP_STALE",
     },
   );
-
   assert.deepEqual(
     assessBackupRestoreEvidence(
       {
@@ -135,6 +159,72 @@ test("rejects stale backup and restore evidence separately", () => {
   );
 });
 
+test("rejects inconsistent R2 and unproven retention history", () => {
+  assert.equal(
+    assessBackupRestoreEvidence(
+      policy,
+      {
+        ...evidence,
+        r2: {
+          ...evidence.r2,
+          objectCount: 0,
+        },
+      },
+      clock,
+    ).code,
+    "INVALID_EVIDENCE",
+  );
+  assert.equal(
+    assessBackupRestoreEvidence(
+      policy,
+      {
+        ...evidence,
+        retention: {
+          ...evidence.retention,
+          oldestRetainedBackupAt:
+            "2026-07-10T08:00:00.000Z",
+        },
+      },
+      clock,
+    ).code,
+    "BACKUP_RETENTION_UNVERIFIED",
+  );
+});
+
+test("rejects an unlinked or digest-mismatched restore rehearsal", () => {
+  assert.equal(
+    assessBackupRestoreEvidence(
+      policy,
+      {
+        ...evidence,
+        retention: {
+          ...evidence.retention,
+          retainedBackupIds: [
+            evidence.backupId,
+          ],
+        },
+      },
+      clock,
+    ).code,
+    "BACKUP_RETENTION_UNVERIFIED",
+  );
+  assert.equal(
+    assessBackupRestoreEvidence(
+      policy,
+      {
+        ...evidence,
+        restoreRehearsal: {
+          ...evidence.restoreRehearsal,
+          restoredD1Sha256:
+            "e".repeat(64),
+        },
+      },
+      clock,
+    ).code,
+    "RESTORE_EVIDENCE_MISMATCH",
+  );
+});
+
 test("rejects extended, future, and non-isolated evidence", () => {
   assert.equal(
     assessBackupRestoreEvidence(
@@ -147,7 +237,6 @@ test("rejects extended, future, and non-isolated evidence", () => {
     ).code,
     "INVALID_EVIDENCE",
   );
-
   assert.equal(
     assessBackupRestoreEvidence(
       policy,
@@ -162,14 +251,13 @@ test("rejects extended, future, and non-isolated evidence", () => {
     ).code,
     "INVALID_EVIDENCE",
   );
-
   assert.equal(
     assessBackupRestoreEvidence(
       policy,
       {
         ...evidence,
         backupVerifiedAt:
-          "2026-07-26T11:00:00.000Z",
+          "2026-07-27T11:00:00.000Z",
       },
       clock,
     ).code,

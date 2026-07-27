@@ -1,26 +1,42 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import {
   inspectRetentionPolicy,
+  RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS,
   RETENTION_DATA_CLASSES,
 } from "../server/operations/retentionPolicy.ts";
 import {
   createRetentionPurgeService,
+  RETENTION_PURGE_PLAN_TTL_MS,
   RetentionPurgeError,
 } from "../server/operations/retentionPurgeService.ts";
+
+function digest(value) {
+  return createHash("sha256")
+    .update(value)
+    .digest("hex");
+}
+
+function policyRules() {
+  return RETENTION_DATA_CLASSES.map(
+    (dataClass) => ({
+      dataClass,
+      trigger:
+        RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS[
+          dataClass
+        ],
+      retainForDays: 30,
+    }),
+  );
+}
 
 function configuredPolicy() {
   const inspection = inspectRetentionPolicy({
     RETENTION_POLICY_JSON: JSON.stringify({
-      version: 1,
-      rules: RETENTION_DATA_CLASSES.map(
-        (dataClass) => ({
-          dataClass,
-          trigger: "record-terminal",
-          retainForDays: 30,
-        }),
-      ),
+      version: 2,
+      rules: policyRules(),
     }),
   });
 
@@ -32,7 +48,21 @@ function configuredPolicy() {
   return inspection.configuration;
 }
 
-test("requires complete retention coverage without defaults", () => {
+function inventoryFor(input) {
+  return {
+    eligibleRecords: 1,
+    eligibleObjects:
+      input.dataClass ===
+      "knowledge-source-objects"
+        ? 1
+        : 0,
+    candidateSetSha256: digest(
+      `${input.dataClass}:${input.cutoffAt}`,
+    ),
+  };
+}
+
+test("requires v2 coverage and the approved trigger for every data class", () => {
   assert.deepEqual(inspectRetentionPolicy({}), {
     status: "configuration-required",
     issues: ["POLICY_REQUIRED"],
@@ -40,14 +70,8 @@ test("requires complete retention coverage without defaults", () => {
 
   const inspection = inspectRetentionPolicy({
     RETENTION_POLICY_JSON: JSON.stringify({
-      version: 1,
-      rules: RETENTION_DATA_CLASSES.map(
-        (dataClass) => ({
-          dataClass,
-          trigger: "record-terminal",
-          retainForDays: 30,
-        }),
-      ),
+      version: 2,
+      rules: policyRules(),
     }),
   });
 
@@ -57,50 +81,62 @@ test("requires complete retention coverage without defaults", () => {
   );
   assert.deepEqual(
     inspection.configuration.rules.map(
-      (rule) => rule.dataClass,
+      (rule) => [
+        rule.dataClass,
+        rule.trigger,
+      ],
     ),
-    RETENTION_DATA_CLASSES,
+    RETENTION_DATA_CLASSES.map(
+      (dataClass) => [
+        dataClass,
+        RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS[
+          dataClass
+        ],
+      ],
+    ),
   );
 });
 
-test("rejects missing, duplicate, and extended retention rules", () => {
-  const rules = RETENTION_DATA_CLASSES.map(
-    (dataClass) => ({
-      dataClass,
-      trigger: "record-terminal",
-      retainForDays: 30,
-    }),
-  );
+test("rejects legacy, incomplete, duplicate, extended, and unsafe trigger policies", () => {
+  const rules = policyRules();
 
   assert.deepEqual(
     inspectRetentionPolicy({
       RETENTION_POLICY_JSON: JSON.stringify({
         version: 1,
-        rules: rules.slice(1),
+        rules,
       }),
     }),
     {
       status: "configuration-required",
-      issues: [
-        "DATA_CLASS_COVERAGE_INVALID",
-      ],
+      issues: ["POLICY_SHAPE_INVALID"],
     },
   );
-
+  assert.deepEqual(
+    inspectRetentionPolicy({
+      RETENTION_POLICY_JSON: JSON.stringify({
+        version: 2,
+        rules: rules.slice(1),
+      }),
+    }).issues,
+    ["DATA_CLASS_COVERAGE_INVALID"],
+  );
   assert.equal(
     inspectRetentionPolicy({
       RETENTION_POLICY_JSON: JSON.stringify({
-        version: 1,
-        rules: [rules[0], ...rules.slice(0, -1)],
+        version: 2,
+        rules: [
+          rules[0],
+          ...rules.slice(0, -1),
+        ],
       }),
     }).status,
     "configuration-required",
   );
-
   assert.deepEqual(
     inspectRetentionPolicy({
       RETENTION_POLICY_JSON: JSON.stringify({
-        version: 1,
+        version: 2,
         rules: [
           {
             ...rules[0],
@@ -109,66 +145,80 @@ test("rejects missing, duplicate, and extended retention rules", () => {
           ...rules.slice(1),
         ],
       }),
-    }),
-    {
-      status: "configuration-required",
-      issues: ["RULE_INVALID"],
-    },
+    }).issues,
+    ["RULE_INVALID"],
+  );
+  assert.deepEqual(
+    inspectRetentionPolicy({
+      RETENTION_POLICY_JSON: JSON.stringify({
+        version: 2,
+        rules: [
+          {
+            ...rules[0],
+            trigger: "record-created",
+          },
+          ...rules.slice(1),
+        ],
+      }),
+    }).issues,
+    ["TRIGGER_NOT_ALLOWED"],
   );
 });
 
-test("prepares a deterministic bounded purge plan", async () => {
+test("prepares a deterministic expiring plan with immutable candidates and protections", async () => {
   const inspected = [];
+  const clock = {
+    now() {
+      return new Date(
+        "2026-07-31T00:00:00.000Z",
+      );
+    },
+  };
   const service = createRetentionPurgeService({
     policy: configuredPolicy(),
     inventory: {
       async inspect(input) {
         inspected.push(input);
-        return {
-          eligibleRecords: 2,
-          eligibleObjects:
-            input.dataClass ===
-            "knowledge-source-data-and-objects"
-              ? 1
-              : 0,
-        };
+        return inventoryFor(input);
       },
     },
     purge: {
-      async purge() {
+      async purgeAtomically() {
         throw new Error("not called");
       },
     },
-    clock: {
-      now() {
-        return new Date(
-          "2026-07-31T00:00:00.000Z",
-        );
-      },
-    },
+    clock,
   });
 
   const first = await service.prepare();
   const second = await service.prepare();
 
   assert.deepEqual(first, second);
+  assert.equal(first.plan.version, 2);
+  assert.equal(first.plan.policyVersion, 2);
+  assert.match(
+    first.plan.planId,
+    /^retention_plan_v2_[0-9a-f]{64}$/,
+  );
   assert.equal(
-    first.plan.entries.length,
-    RETENTION_DATA_CLASSES.length,
+    Date.parse(first.plan.expiresAt) -
+      Date.parse(first.plan.generatedAt),
+    RETENTION_PURGE_PLAN_TTL_MS,
   );
   assert.equal(
     first.plan.entries[0].cutoffAt,
     "2026-07-01T00:00:00.000Z",
   );
+  assert.deepEqual(
+    first.plan.entries[0].protections,
+    {
+      excludeActiveRecords: true,
+      excludeLegalHolds: true,
+    },
+  );
   assert.match(
     first.confirmationKey,
-    /^retention_purge_v1_[0-9a-f]{64}$/,
-  );
-  assert.equal(
-    JSON.stringify(first).includes(
-      "tenantId",
-    ),
-    false,
+    /^retention_purge_v2_[0-9a-f]{64}$/,
   );
   assert.equal(
     inspected.length,
@@ -176,35 +226,45 @@ test("prepares a deterministic bounded purge plan", async () => {
   );
 });
 
-test("requires the exact plan confirmation before purge", async () => {
+test("requires confirmation, rechecks inventory, and calls the atomic port", async () => {
   let purgeCalls = 0;
+  const clock = {
+    now() {
+      return new Date(
+        "2026-07-31T00:00:00.000Z",
+      );
+    },
+  };
   const service = createRetentionPurgeService({
     policy: configuredPolicy(),
     inventory: {
-      async inspect() {
-        return {
-          eligibleRecords: 1,
-          eligibleObjects: 0,
-        };
+      async inspect(input) {
+        return inventoryFor(input);
       },
     },
     purge: {
-      async purge() {
+      async purgeAtomically(input) {
         purgeCalls += 1;
+        assert.equal(
+          input.expectedPlanId,
+          input.plan.planId,
+        );
+        assert.equal(
+          input.expectedPolicyVersion,
+          2,
+        );
+
         return {
+          planId: input.plan.planId,
           purgedRecords:
             RETENTION_DATA_CLASSES.length,
-          purgedObjects: 0,
+          purgedObjects: 1,
+          committedAt:
+            "2026-07-31T00:00:00.000Z",
         };
       },
     },
-    clock: {
-      now() {
-        return new Date(
-          "2026-07-31T00:00:00.000Z",
-        );
-      },
-    },
+    clock,
   });
   const prepared = await service.prepare();
 
@@ -212,7 +272,7 @@ test("requires the exact plan confirmation before purge", async () => {
     service.execute({
       plan: prepared.plan,
       confirmationKey:
-        "retention_purge_v1_" +
+        "retention_purge_v2_" +
         "0".repeat(64),
     }),
     (error) =>
@@ -226,15 +286,92 @@ test("requires the exact plan confirmation before purge", async () => {
     await service.execute(prepared),
     {
       outcome: "purged",
+      auditStatus: "consistent",
       purgedRecords:
         RETENTION_DATA_CLASSES.length,
-      purgedObjects: 0,
+      purgedObjects: 1,
+      committedAt:
+        "2026-07-31T00:00:00.000Z",
     },
   );
   assert.equal(purgeCalls, 1);
 });
 
-test("rejects malformed inventory and over-reported purge results", async () => {
+test("rejects expired plans and changed candidate inventories before deletion", async () => {
+  let now =
+    "2026-07-31T00:00:00.000Z";
+  let inspectionCount = 0;
+  const service = createRetentionPurgeService({
+    policy: configuredPolicy(),
+    inventory: {
+      async inspect(input) {
+        inspectionCount += 1;
+        const value = inventoryFor(input);
+
+        return inspectionCount >
+          RETENTION_DATA_CLASSES.length
+          ? {
+              ...value,
+              candidateSetSha256: digest(
+                `changed:${input.dataClass}`,
+              ),
+            }
+          : value;
+      },
+    },
+    purge: {
+      async purgeAtomically() {
+        throw new Error("must not delete");
+      },
+    },
+    clock: {
+      now() {
+        return new Date(now);
+      },
+    },
+  });
+  const prepared = await service.prepare();
+
+  await assert.rejects(
+    service.execute(prepared),
+    (error) =>
+      error instanceof RetentionPurgeError &&
+      error.code === "INVENTORY_CHANGED",
+  );
+
+  const expiringService =
+    createRetentionPurgeService({
+      policy: configuredPolicy(),
+      inventory: {
+        async inspect(input) {
+          return inventoryFor(input);
+        },
+      },
+      purge: {
+        async purgeAtomically() {
+          throw new Error("must not delete");
+        },
+      },
+      clock: {
+        now() {
+          return new Date(now);
+        },
+      },
+    });
+  now = "2026-07-31T00:00:00.000Z";
+  const expiringPlan =
+    await expiringService.prepare();
+  now = "2026-07-31T00:05:00.001Z";
+
+  await assert.rejects(
+    expiringService.execute(expiringPlan),
+    (error) =>
+      error instanceof RetentionPurgeError &&
+      error.code === "PLAN_EXPIRED",
+  );
+});
+
+test("rejects malformed inventory and reports provider count anomalies as audit evidence", async () => {
   const invalidInventory =
     createRetentionPurgeService({
       policy: configuredPolicy(),
@@ -243,16 +380,12 @@ test("rejects malformed inventory and over-reported purge results", async () => 
           return {
             eligibleRecords: 1,
             eligibleObjects: 0,
-            contactPhone: "+972500000000",
           };
         },
       },
       purge: {
-        async purge() {
-          return {
-            purgedRecords: 0,
-            purgedObjects: 0,
-          };
+        async purgeAtomically() {
+          throw new Error("not called");
         },
       },
       clock: {
@@ -275,18 +408,22 @@ test("rejects malformed inventory and over-reported purge results", async () => 
     createRetentionPurgeService({
       policy: configuredPolicy(),
       inventory: {
-        async inspect() {
+        async inspect(input) {
           return {
+            ...inventoryFor(input),
             eligibleRecords: 0,
             eligibleObjects: 0,
           };
         },
       },
       purge: {
-        async purge() {
+        async purgeAtomically(input) {
           return {
+            planId: input.plan.planId,
             purgedRecords: 1,
             purgedObjects: 0,
+            committedAt:
+              "2026-07-31T00:00:00.000Z",
           };
         },
       },
@@ -298,13 +435,14 @@ test("rejects malformed inventory and over-reported purge results", async () => 
         },
       },
     });
-  const plan = await overReported.prepare();
+  const prepared =
+    await overReported.prepare();
+  const result =
+    await overReported.execute(prepared);
 
-  await assert.rejects(
-    overReported.execute(plan),
-    (error) =>
-      error instanceof RetentionPurgeError &&
-      error.code ===
-        "INVALID_PURGE_RESULT",
+  assert.equal(
+    result.auditStatus,
+    "provider-count-mismatch",
   );
+  assert.equal(result.purgedRecords, 1);
 });

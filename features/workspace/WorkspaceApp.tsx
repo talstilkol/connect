@@ -56,6 +56,9 @@ import type {
   OperationalReportStatus,
   OperationalReportView,
 } from "../../shared/domain/operationalReportView";
+import type {
+  ProductionReadinessReport,
+} from "../../shared/domain/productionReadiness";
 import {
   defaultInboxFilters,
 } from "../../shared/domain/conversationView";
@@ -105,6 +108,8 @@ import {
   subscribeToMetaEmbeddedSignupMessages,
 } from "./metaEmbeddedSignupClient";
 import { useWorkspaceDrafts } from "./WorkspaceDraftProvider";
+import { DecisionCenter } from "./DecisionCenter";
+import { useAccessibleDialog } from "./useAccessibleDialog";
 
 type MetaSignupAttemptStatus =
   | "idle"
@@ -134,59 +139,6 @@ const setupSteps = [
   { title: "בוט או AI", description: "בחירת מסלול המענה הראשוני" },
   { title: "שליחת ניסיון", description: "בדיקת תהליך מקצה לקצה" },
   { title: "הפעלת סביבת העבודה", description: "מעבר ממצב הקמה למצב פעיל" },
-];
-
-const criticalDecisions = [
-  {
-    title: "ספק WhatsApp והמבנה מול Meta",
-    detail: "יש להכריע בין חיבור ישיר כ־Tech Provider לבין ספק חיצוני.",
-    owner: "מוצר + הנהלה",
-  },
-  {
-    title: "ספק סליקה והפקת חשבוניות",
-    detail: "הספק יקבע את תהליך ההרשמה, Webhooks, החזרים וחשבוניות.",
-    owner: "כספים + פיתוח",
-  },
-  {
-    title: "חבילות, מחירים ומגבלות",
-    detail: "נדרשים מחירים אמיתיים ומגבלות משתמשים, מספרים, הודעות ו־AI.",
-    owner: "הנהלה",
-  },
-  {
-    title: "ספקי AI ומודל חיוב",
-    detail: "נדרשת החלטה על ספק, מודלים, מפתח משותף או מפתח לכל לקוח.",
-    owner: "מוצר + פיתוח",
-  },
-  {
-    title: "רשימת יכולות מדויקת ל־MVP",
-    detail: "יש לקבע אילו מסכים ופעולות נדרשים לגרסה הראשונה.",
-    owner: "מוצר",
-  },
-  {
-    title: "מדיניות הסכמה והסרה",
-    detail: "הכללים יקבעו מי רשאי לקבל קמפיין ואיך מטפלים בבקשת הסרה.",
-    owner: "משפטי + מוצר",
-  },
-  {
-    title: "מיקום אחסון הנתונים",
-    detail: "נדרשת החלטה על אזור אחסון, גיבויים ומדיניות שמירת מידע.",
-    owner: "אבטחה + פיתוח",
-  },
-  {
-    title: "משתמשים ומספרי WhatsApp",
-    detail: "הכמויות המותרות לכל לקוח חייבות להיות חלק ממודל החבילות.",
-    owner: "מוצר",
-  },
-  {
-    title: "שיטת מעבר מבוט לנציג",
-    detail: "יש להגדיר טריגרים, הקצאה, נעילת שיחה וחזרה לבוט.",
-    owner: "שירות + מוצר",
-  },
-  {
-    title: "מדיניות שמירת הודעות וקבצים",
-    detail: "יש לקבוע תקופת שמירה, מחיקה, ייצוא והרשאות צפייה.",
-    owner: "משפטי + אבטחה",
-  },
 ];
 
 export default function WorkspaceApp({
@@ -246,6 +198,7 @@ export default function WorkspaceApp({
   initialOperationalReport = null,
   initialOperationalReportStatus =
     "configuration-required",
+  initialProductionReadiness,
 }: {
   activeSection?: SectionId;
   authEnabled?: boolean;
@@ -282,11 +235,12 @@ export default function WorkspaceApp({
     OperationalReportView | null;
   initialOperationalReportStatus?:
     OperationalReportStatus;
+  initialProductionReadiness:
+    ProductionReadinessReport;
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [metaPanelOpen, setMetaPanelOpen] = useState(false);
-  const [decisionNotes, setDecisionNotes] = useState<Record<number, string>>({});
   const workspaceMetaPresentation = presentMetaConnection(
     initialMetaConnection,
   );
@@ -336,7 +290,12 @@ export default function WorkspaceApp({
                   </span>
                   <span>{item.label}</span>
                   {item.id === "decisions" ? (
-                    <span className="nav-count">10</span>
+                    <span className="nav-count">
+                      {
+                        initialProductionReadiness.counts
+                          .decisionRequired
+                      }
+                    </span>
                   ) : null}
                 </button>
               </div>
@@ -352,7 +311,14 @@ export default function WorkspaceApp({
             <strong>סביבת עבודה חדשה</strong>
             <small>{workspaceMetaPresentation.statusLabel}</small>
           </div>
-          <button type="button" className="icon-button" aria-label="הגדרות חשבון">
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="הגדרות חשבון"
+            aria-describedby="unavailable-navigation-actions"
+            title="הגדרות החשבון עדיין אינן זמינות"
+            disabled
+          >
             •••
           </button>
         </div>
@@ -396,13 +362,32 @@ export default function WorkspaceApp({
               <i />
               סביבת הקמה
             </span>
-            <button type="button" className="topbar-icon" aria-label="עזרה">
+            <button
+              type="button"
+              className="topbar-icon"
+              aria-label="עזרה"
+              aria-describedby="unavailable-navigation-actions"
+              title="מרכז העזרה עדיין אינו זמין"
+              disabled
+            >
               ?
             </button>
-            <button type="button" className="topbar-icon" aria-label="התראות">
+            <button
+              type="button"
+              className="topbar-icon"
+              aria-label="התראות"
+              aria-describedby="unavailable-navigation-actions"
+              title="מרכז ההתראות עדיין אינו זמין"
+              disabled
+            >
               ♢
-              <span className="notification-dot" />
             </button>
+            <span
+              className="sr-only"
+              id="unavailable-navigation-actions"
+            >
+              פעולה זו עדיין אינה זמינה בגרסה הנוכחית.
+            </span>
             {authEnabled ? (
               <UserButton
                 appearance={{
@@ -419,6 +404,10 @@ export default function WorkspaceApp({
           {activeSection === "dashboard" ? (
             <Dashboard
               metaConnection={initialMetaConnection}
+              decisionRequiredCount={
+                initialProductionReadiness.counts
+                  .decisionRequired
+              }
               onNavigate={navigate}
               onConnectMeta={() => setMetaPanelOpen(true)}
             />
@@ -507,10 +496,7 @@ export default function WorkspaceApp({
           {activeSection === "team" ? <Team /> : null}
           {activeSection === "decisions" ? (
             <DecisionCenter
-              notes={decisionNotes}
-              onNoteChange={(index, value) =>
-                setDecisionNotes((current) => ({ ...current, [index]: value }))
-              }
+              report={initialProductionReadiness}
             />
           ) : null}
         </div>
@@ -529,10 +515,12 @@ export default function WorkspaceApp({
 
 function Dashboard({
   metaConnection,
+  decisionRequiredCount,
   onNavigate,
   onConnectMeta,
 }: {
   metaConnection: MetaConnectionView;
+  decisionRequiredCount: number;
   onNavigate: (section: SectionId) => void;
   onConnectMeta: () => void;
 }) {
@@ -691,7 +679,10 @@ function Dashboard({
               <span className="decision-icon">!</span>
               <span className="status-pill critical">דורש החלטה</span>
             </div>
-            <h2>10 החלטות חוסמות פיתוח</h2>
+            <h2>
+              {decisionRequiredCount}{" "}
+              החלטות חוסמות Production
+            </h2>
             <p>
               ספק Meta, סליקה, חבילות, AI ומדיניות מידע עדיין לא הוגדרו באפיון.
             </p>
@@ -1321,69 +1312,6 @@ function Team() {
   );
 }
 
-function DecisionCenter({
-  notes,
-  onNoteChange,
-}: {
-  notes: Record<number, string>;
-  onNoteChange: (index: number, value: string) => void;
-}) {
-  const answeredCount = Object.values(notes).filter((note) => note.trim().length > 0).length;
-
-  return (
-    <FeaturePage
-      eyebrow="שער לפני פיתוח"
-      title="מרכז החלטות"
-      description="10 הנושאים שחייבים לקבל תשובה אמיתית לפני חיבור שירותים וכתיבת לוגיקה עסקית."
-      action={<span className="decision-progress">{answeredCount} מתוך 10 תועדו</span>}
-    >
-      <section className="decision-summary card">
-        <div>
-          <span className="summary-number">{10 - answeredCount}</span>
-          <div>
-            <strong>החלטות עדיין פתוחות</strong>
-            <small>תשובה מקומית נשמרת רק בזמן שהמסך פתוח.</small>
-          </div>
-        </div>
-        <div className="summary-progress">
-          <span style={{ width: `${answeredCount * 10}%` }} />
-        </div>
-      </section>
-      <div className="decisions-list">
-        {criticalDecisions.map((decision, index) => {
-          const hasNote = Boolean(notes[index]?.trim());
-          return (
-            <article className={`card decision-row ${hasNote ? "answered" : ""}`} key={decision.title}>
-              <span className="decision-index">{String(index + 1).padStart(2, "0")}</span>
-              <div className="decision-content">
-                <div className="decision-title-row">
-                  <div>
-                    <h2>{decision.title}</h2>
-                    <p>{decision.detail}</p>
-                  </div>
-                  <span className={`status-pill ${hasNote ? "success" : "critical"}`}>
-                    {hasNote ? "תועדה תשובה" : "פתוח"}
-                  </span>
-                </div>
-                <label>
-                  <span>החלטה / הערה</span>
-                  <textarea
-                    rows={2}
-                    value={notes[index] ?? ""}
-                    placeholder="יש להזין החלטה אמיתית — לא ייווצר ערך ברירת מחדל."
-                    onChange={(event) => onNoteChange(index, event.target.value)}
-                  />
-                </label>
-                <small className="decision-owner">בעלי החלטה: {decision.owner}</small>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </FeaturePage>
-  );
-}
-
 function FeaturePage({
   eyebrow,
   title,
@@ -1452,6 +1380,8 @@ function MetaConnectionPanel({
   const activeAttemptRef =
     useRef<ActiveMetaSignupAttempt | null>(null);
   const panelActiveRef = useRef(true);
+  const dialogRef =
+    useAccessibleDialog(onClose);
 
   useEffect(() => {
     if (
@@ -1713,19 +1643,37 @@ function MetaConnectionPanel({
         type="button"
         className="modal-backdrop"
         aria-label="סגירת חלון חיבור"
+        tabIndex={-1}
         onClick={onClose}
       />
-      <section className="connection-panel" role="dialog" aria-modal="true" aria-labelledby="meta-title">
+      <section
+        className="connection-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="meta-title"
+        aria-describedby="meta-panel-notice"
+        ref={dialogRef}
+        tabIndex={-1}
+      >
         <div className="panel-header">
           <div>
             <span className="card-kicker">חיבור רשמי</span>
             <h2 id="meta-title">חיבור Meta ו־WhatsApp</h2>
           </div>
-          <button type="button" className="close-button" aria-label="סגירה" onClick={onClose}>
+          <button
+            type="button"
+            className="close-button"
+            aria-label="סגירה"
+            data-dialog-initial-focus
+            onClick={onClose}
+          >
             ×
           </button>
         </div>
-        <div className={`panel-notice ${presentation.tone}`}>
+        <div
+          className={`panel-notice ${presentation.tone}`}
+          id="meta-panel-notice"
+        >
           <span>{presentation.setupComplete ? "✓" : "!"}</span>
           <p>{presentation.panelNotice}</p>
         </div>

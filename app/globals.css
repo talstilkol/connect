@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../features/workspace/decision-center.css";
 
 :root {
   --ink: #152c2a;
@@ -274,6 +275,22 @@ label.file-button:focus-within {
   background: none;
   color: rgba(255, 255, 255, 0.52);
   cursor: pointer;
+}
+
+.sr-only {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.icon-button:disabled,
+.topbar-icon:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .content-area {
@@ -4462,147 +4479,6 @@ label.file-button:focus-within {
   color: #94a39f;
 }
 
-.decision-progress {
-  min-height: 35px;
-  padding: 0 13px;
-  border: 1px solid #bcdccc;
-  background: #edf9f2;
-  color: #327d5c;
-  font-size: 10px;
-}
-
-.decision-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 30px;
-  margin-bottom: 14px;
-  padding: 18px 22px;
-}
-
-.decision-summary > div:first-child {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.summary-number {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: var(--coral-soft);
-  color: var(--coral);
-  font-size: 19px;
-  font-weight: 900;
-}
-
-.decision-summary strong,
-.decision-summary small {
-  display: block;
-}
-
-.decision-summary strong {
-  font-size: 11px;
-}
-
-.decision-summary small {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 8px;
-}
-
-.summary-progress {
-  width: min(360px, 40%);
-  margin: 0;
-}
-
-.decisions-list {
-  display: grid;
-  gap: 12px;
-}
-
-.decision-row {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 20px;
-  padding: 21px;
-  transition: border-color 160ms ease;
-}
-
-.decision-row.answered {
-  border-color: #b7dec7;
-}
-
-.decision-index {
-  width: 45px;
-  height: 45px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: #f2f5f4;
-  color: #82908c;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.decision-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.decision-title-row h2 {
-  margin: 0;
-  font-size: 15px;
-}
-
-.decision-title-row p {
-  margin: 5px 0 0;
-  color: var(--muted);
-  font-size: 9px;
-  line-height: 1.6;
-}
-
-.decision-content label {
-  display: block;
-  margin-top: 15px;
-}
-
-.decision-content label > span {
-  display: block;
-  margin-bottom: 6px;
-  color: #5f716c;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.decision-content textarea {
-  width: 100%;
-  resize: vertical;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: #fbfcfb;
-  color: var(--ink);
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.decision-content textarea::placeholder {
-  color: #9ca8a4;
-}
-
-.decision-owner {
-  display: block;
-  margin-top: 8px;
-  color: #8c9995;
-  font-size: 8px;
-}
-
 .modal-layer {
   position: fixed;
   inset: 0;
@@ -7295,25 +7171,6 @@ label.file-button:focus-within {
 
   .billing-card {
     padding: 28px 18px;
-  }
-
-  .decision-summary {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .summary-progress {
-    width: 100%;
-  }
-
-  .decision-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 17px;
-  }
-
-  .decision-title-row {
-    flex-direction: column;
   }
 
   .public-header {

@@ -8,6 +8,7 @@ const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const MAXIMUM_DATE_DAYS = 100_000_000;
 const MAXIMUM_DATE_HOURS =
   MAXIMUM_DATE_DAYS * 24;
+const MAXIMUM_RETAINED_BACKUP_IDS = 10_000;
 
 export interface BackupRestoreClock {
   now(): Date;
@@ -18,6 +19,7 @@ export type BackupRestoreEvidenceAssessment =
       status: "verified";
       backupId: string;
       backupCreatedAt: string;
+      restoredBackupId: string;
       restoreRehearsalCompletedAt: string;
     }
   | {
@@ -28,11 +30,13 @@ export type BackupRestoreEvidenceAssessment =
         | "CLOCK_UNAVAILABLE"
         | "FUTURE_EVIDENCE"
         | "BACKUP_STALE"
+        | "BACKUP_RETENTION_UNVERIFIED"
+        | "RESTORE_EVIDENCE_MISMATCH"
         | "RESTORE_REHEARSAL_STALE";
     };
 
 interface BackupRestoreEvidence {
-  version: 1;
+  version: 2;
   backupId: string;
   backupCreatedAt: string;
   backupVerifiedAt: string;
@@ -47,9 +51,21 @@ interface BackupRestoreEvidence {
     objectCount: number;
     totalBytes: number;
   };
+  retention: {
+    windowStartedAt: string;
+    oldestRetainedBackupAt: string;
+    newestRetainedBackupAt: string;
+    retainedBackupIds: readonly string[];
+  };
   restoreRehearsal: {
     target: "isolated";
+    restoredBackupId: string;
+    restoredBackupCreatedAt: string;
     completedAt: string;
+    sourceD1Sha256: string;
+    restoredD1Sha256: string;
+    sourceR2InventorySha256: string;
+    restoredR2InventorySha256: string;
     d1Status: "verified";
     r2Status: "verified";
   };
@@ -100,6 +116,24 @@ function isNonNegativeSafeInteger(
   );
 }
 
+function isSha256(
+  value: unknown,
+): value is string {
+  return (
+    typeof value === "string" &&
+    SHA256_PATTERN.test(value)
+  );
+}
+
+function isSafeId(
+  value: unknown,
+): value is string {
+  return (
+    typeof value === "string" &&
+    SAFE_ID_PATTERN.test(value)
+  );
+}
+
 function parseEvidence(
   value: unknown,
 ): BackupRestoreEvidence | null {
@@ -112,11 +146,11 @@ function parseEvidence(
       "backupVerifiedAt",
       "d1",
       "r2",
+      "retention",
       "restoreRehearsal",
     ]) ||
-    value.version !== 1 ||
-    typeof value.backupId !== "string" ||
-    !SAFE_ID_PATTERN.test(value.backupId) ||
+    value.version !== 2 ||
+    !isSafeId(value.backupId) ||
     !isUtcTimestamp(value.backupCreatedAt) ||
     !isUtcTimestamp(value.backupVerifiedAt) ||
     !isRecord(value.d1) ||
@@ -126,8 +160,7 @@ function parseEvidence(
       "sizeBytes",
     ]) ||
     value.d1.status !== "verified" ||
-    typeof value.d1.sha256 !== "string" ||
-    !SHA256_PATTERN.test(value.d1.sha256) ||
+    !isSha256(value.d1.sha256) ||
     !Number.isSafeInteger(value.d1.sizeBytes) ||
     Number(value.d1.sizeBytes) <= 0 ||
     !isRecord(value.r2) ||
@@ -138,28 +171,86 @@ function parseEvidence(
       "totalBytes",
     ]) ||
     value.r2.status !== "verified" ||
-    typeof value.r2.inventorySha256 !==
-      "string" ||
-    !SHA256_PATTERN.test(
-      value.r2.inventorySha256,
-    ) ||
+    !isSha256(value.r2.inventorySha256) ||
     !isNonNegativeSafeInteger(
       value.r2.objectCount,
     ) ||
     !isNonNegativeSafeInteger(
       value.r2.totalBytes,
     ) ||
+    (Number(value.r2.objectCount) === 0) !==
+      (Number(value.r2.totalBytes) === 0) ||
+    !isRecord(value.retention) ||
+    !hasExactKeys(value.retention, [
+      "windowStartedAt",
+      "oldestRetainedBackupAt",
+      "newestRetainedBackupAt",
+      "retainedBackupIds",
+    ]) ||
+    !isUtcTimestamp(
+      value.retention.windowStartedAt,
+    ) ||
+    !isUtcTimestamp(
+      value.retention.oldestRetainedBackupAt,
+    ) ||
+    !isUtcTimestamp(
+      value.retention.newestRetainedBackupAt,
+    ) ||
+    !Array.isArray(
+      value.retention.retainedBackupIds,
+    ) ||
+    value.retention.retainedBackupIds.length ===
+      0 ||
+    value.retention.retainedBackupIds.length >
+      MAXIMUM_RETAINED_BACKUP_IDS ||
+    value.retention.retainedBackupIds.some(
+      (backupId) => !isSafeId(backupId),
+    ) ||
+    new Set(
+      value.retention.retainedBackupIds,
+    ).size !==
+      value.retention.retainedBackupIds.length ||
     !isRecord(value.restoreRehearsal) ||
     !hasExactKeys(value.restoreRehearsal, [
       "target",
+      "restoredBackupId",
+      "restoredBackupCreatedAt",
       "completedAt",
+      "sourceD1Sha256",
+      "restoredD1Sha256",
+      "sourceR2InventorySha256",
+      "restoredR2InventorySha256",
       "d1Status",
       "r2Status",
     ]) ||
     value.restoreRehearsal.target !==
       "isolated" ||
+    !isSafeId(
+      value.restoreRehearsal
+        .restoredBackupId,
+    ) ||
+    !isUtcTimestamp(
+      value.restoreRehearsal
+        .restoredBackupCreatedAt,
+    ) ||
     !isUtcTimestamp(
       value.restoreRehearsal.completedAt,
+    ) ||
+    !isSha256(
+      value.restoreRehearsal
+        .sourceD1Sha256,
+    ) ||
+    !isSha256(
+      value.restoreRehearsal
+        .restoredD1Sha256,
+    ) ||
+    !isSha256(
+      value.restoreRehearsal
+        .sourceR2InventorySha256,
+    ) ||
+    !isSha256(
+      value.restoreRehearsal
+        .restoredR2InventorySha256,
     ) ||
     value.restoreRehearsal.d1Status !==
       "verified" ||
@@ -242,6 +333,21 @@ export function assessBackupRestoreEvidence(
     Date.parse(evidence.backupCreatedAt);
   const backupVerified =
     Date.parse(evidence.backupVerifiedAt);
+  const windowStarted = Date.parse(
+    evidence.retention.windowStartedAt,
+  );
+  const oldestRetained = Date.parse(
+    evidence.retention
+      .oldestRetainedBackupAt,
+  );
+  const newestRetained = Date.parse(
+    evidence.retention
+      .newestRetainedBackupAt,
+  );
+  const restoredBackupCreated = Date.parse(
+    evidence.restoreRehearsal
+      .restoredBackupCreatedAt,
+  );
   const restoreCompleted = Date.parse(
     evidence.restoreRehearsal.completedAt,
   );
@@ -249,6 +355,11 @@ export function assessBackupRestoreEvidence(
   if (
     backupCreated > backupVerified ||
     backupVerified > nowMilliseconds ||
+    windowStarted > nowMilliseconds ||
+    oldestRetained > nowMilliseconds ||
+    newestRetained > nowMilliseconds ||
+    restoredBackupCreated >
+      nowMilliseconds ||
     restoreCompleted > nowMilliseconds
   ) {
     return {
@@ -268,6 +379,51 @@ export function assessBackupRestoreEvidence(
     };
   }
 
+  const retentionCutoff =
+    nowMilliseconds -
+    policy.backupRetentionDays *
+      24 * 60 * 60 * 1000;
+
+  if (
+    windowStarted > oldestRetained ||
+    oldestRetained > retentionCutoff ||
+    newestRetained !== backupCreated ||
+    !evidence.retention.retainedBackupIds.includes(
+      evidence.backupId,
+    ) ||
+    !evidence.retention.retainedBackupIds.includes(
+      evidence.restoreRehearsal
+        .restoredBackupId,
+    ) ||
+    restoredBackupCreated <
+      oldestRetained ||
+    restoredBackupCreated >
+      newestRetained
+  ) {
+    return {
+      status: "not-verified",
+      code: "BACKUP_RETENTION_UNVERIFIED",
+    };
+  }
+
+  if (
+    evidence.restoreRehearsal
+      .sourceD1Sha256 !==
+      evidence.restoreRehearsal
+        .restoredD1Sha256 ||
+    evidence.restoreRehearsal
+      .sourceR2InventorySha256 !==
+      evidence.restoreRehearsal
+        .restoredR2InventorySha256 ||
+    restoreCompleted <
+      restoredBackupCreated
+  ) {
+    return {
+      status: "not-verified",
+      code: "RESTORE_EVIDENCE_MISMATCH",
+    };
+  }
+
   if (
     nowMilliseconds - restoreCompleted >
     policy.restoreRehearsalIntervalDays *
@@ -284,6 +440,9 @@ export function assessBackupRestoreEvidence(
     backupId: evidence.backupId,
     backupCreatedAt:
       evidence.backupCreatedAt,
+    restoredBackupId:
+      evidence.restoreRehearsal
+        .restoredBackupId,
     restoreRehearsalCompletedAt:
       evidence.restoreRehearsal.completedAt,
   };

@@ -2,7 +2,14 @@ import {
   readdir,
   readFile,
 } from "node:fs/promises";
-import { extname, join } from "node:path";
+import {
+  dirname,
+  extname,
+  join,
+  normalize,
+  relative,
+  resolve,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = fileURLToPath(
@@ -13,13 +20,32 @@ const sourceRoots = [
   "features",
   "server",
   "shared",
+  "db",
+  "worker",
+];
+const rootRuntimeFiles = [
+  "proxy.ts",
+  "vite.config.ts",
+  "next.config.ts",
+  "drizzle.config.ts",
+  "cloudflare-env.d.ts",
 ];
 const sourceExtensions = new Set([
   ".js",
   ".jsx",
   ".ts",
   ".tsx",
+  ".mjs",
+  ".mts",
 ]);
+const resolvableExtensions = [
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".mts",
+];
 const bannedPatterns = [
   {
     code: "RANDOMNESS_FORBIDDEN",
@@ -57,11 +83,33 @@ const serverOnlyIdentifiers = [
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
 ];
+const serverOnlyImportPattern =
+  /["'](?:cloudflare:workers|server-only|next\/headers|next\/server|@clerk\/nextjs\/server)["']/;
+const clientDirectivePattern =
+  /^\s*["']use client["']\s*;?/m;
+const serverActionDirectivePattern =
+  /^\s*["']use server["']\s*;?/m;
 
 async function listSourceFiles(directory) {
-  const entries = await readdir(directory, {
-    withFileTypes: true,
-  });
+  let entries;
+
+  try {
+    entries = await readdir(directory, {
+      withFileTypes: true,
+    });
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      return [];
+    }
+
+    throw error;
+  }
+
   const nested = await Promise.all(
     entries.map(async (entry) => {
       const absolutePath = join(
@@ -84,57 +132,203 @@ async function listSourceFiles(directory) {
   return nested.flat();
 }
 
+function runtimeImportSpecifiers(source) {
+  const specifiers = [];
+  const patterns = [
+    /\bimport\s+(?!type\b)(?:[^"'();]*?\s+from\s+)?["']([^"']+)["']/g,
+    /\bexport\s+(?!type\b)[^"';]*?\s+from\s+["']([^"']+)["']/g,
+    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
+  ];
+
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      specifiers.push(match[1]);
+    }
+  }
+
+  return specifiers;
+}
+
+function resolveLocalImport(
+  importer,
+  specifier,
+  availableFiles,
+) {
+  if (!specifier.startsWith(".")) {
+    return null;
+  }
+
+  const basePath = normalize(
+    resolve(dirname(importer), specifier),
+  );
+  const candidates = [
+    basePath,
+    ...resolvableExtensions.map(
+      (extension) => `${basePath}${extension}`,
+    ),
+    ...resolvableExtensions.map(
+      (extension) =>
+        join(basePath, `index${extension}`),
+    ),
+  ];
+
+  return (
+    candidates.find((candidate) =>
+      availableFiles.has(candidate),
+    ) ?? null
+  );
+}
+
+function relativePath(root, file) {
+  return relative(root, file).replaceAll(
+    "\\",
+    "/",
+  );
+}
+
+function isServerOnlyModule(
+  root,
+  file,
+  source,
+) {
+  const path = relativePath(root, file);
+
+  return (
+    path.startsWith("db/") ||
+    path.startsWith("worker/") ||
+    serverOnlyImportPattern.test(source)
+  );
+}
+
 export async function inspectSourceGuardrails(
   root = projectRoot,
 ) {
-  const files = (
+  const nestedFiles = (
     await Promise.all(
       sourceRoots.map((sourceRoot) =>
         listSourceFiles(join(root, sourceRoot)),
       ),
     )
-  )
-    .flat()
-    .sort();
+  ).flat();
+  const rootFiles = rootRuntimeFiles
+    .map((file) => join(root, file))
+    .filter((file) =>
+      sourceExtensions.has(extname(file)),
+    );
+  const candidateFiles = [
+    ...nestedFiles,
+    ...rootFiles,
+  ];
+  const sources = new Map();
+
+  for (const file of candidateFiles) {
+    try {
+      sources.set(file, await readFile(file, "utf8"));
+    } catch (error) {
+      if (
+        typeof error !== "object" ||
+        error === null ||
+        !("code" in error) ||
+        error.code !== "ENOENT"
+      ) {
+        throw error;
+      }
+    }
+  }
+
+  const files = [...sources.keys()].sort();
+  const availableFiles = new Set(files);
   const findings = [];
+  const findingKeys = new Set();
+  const addFinding = (finding) => {
+    const key = `${finding.code}:${finding.file}`;
+
+    if (!findingKeys.has(key)) {
+      findingKeys.add(key);
+      findings.push(finding);
+    }
+  };
+  const graph = new Map(
+    files.map((file) => [
+      file,
+      runtimeImportSpecifiers(
+        sources.get(file),
+      )
+        .map((specifier) =>
+          resolveLocalImport(
+            file,
+            specifier,
+            availableFiles,
+          ),
+        )
+        .filter(Boolean),
+    ]),
+  );
 
   for (const file of files) {
-    const source = await readFile(file, "utf8");
-    const isClientModule =
-      /^\s*["']use client["'];/m.test(source);
+    const source = sources.get(file);
+    const path = relativePath(root, file);
 
     for (const rule of bannedPatterns) {
       if (rule.pattern.test(source)) {
-        findings.push({
+        addFinding({
           code: rule.code,
-          file: file.slice(root.length + 1),
+          file: path,
         });
       }
     }
+  }
 
-    if (
-      isClientModule &&
-      /(?:from|import)\s*\(?["']cloudflare:workers["']/.test(
-        source,
-      )
-    ) {
-      findings.push({
-        code: "CLIENT_CLOUDFLARE_ENV_FORBIDDEN",
-        file: file.slice(root.length + 1),
-      });
-    }
+  const clientEntries = files.filter((file) =>
+    clientDirectivePattern.test(
+      sources.get(file),
+    ),
+  );
 
-    if (isClientModule) {
-      for (const identifier of serverOnlyIdentifiers) {
-        if (source.includes(identifier)) {
-          findings.push({
-            code: "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
-            file: file.slice(
-              root.length + 1,
-            ),
-          });
-          break;
-        }
+  for (const clientEntry of clientEntries) {
+    const pending = [clientEntry];
+    const visited = new Set();
+
+    while (pending.length > 0) {
+      const file = pending.shift();
+
+      if (!file || visited.has(file)) {
+        continue;
+      }
+
+      visited.add(file);
+      const source = sources.get(file);
+
+      if (
+        file !== clientEntry &&
+        serverActionDirectivePattern.test(source)
+      ) {
+        continue;
+      }
+
+      if (
+        isServerOnlyModule(root, file, source)
+      ) {
+        addFinding({
+          code: "CLIENT_SERVER_BOUNDARY_FORBIDDEN",
+          file: relativePath(root, clientEntry),
+        });
+        continue;
+      }
+
+      if (
+        serverOnlyIdentifiers.some((identifier) =>
+          source.includes(identifier),
+        )
+      ) {
+        addFinding({
+          code: "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+          file: relativePath(root, clientEntry),
+        });
+      }
+
+      for (const dependency of graph.get(file) ?? []) {
+        pending.push(dependency);
       }
     }
   }
@@ -145,6 +339,8 @@ export async function inspectSourceGuardrails(
         ? "passed"
         : "failed",
     filesInspected: files.length,
+    clientEntriesInspected:
+      clientEntries.length,
     findings: Object.freeze(findings),
   });
 }
@@ -155,7 +351,7 @@ async function runCli() {
 
   if (report.status === "passed") {
     console.log(
-      `Source guardrails: PASS (${report.filesInspected} files)`,
+      `Source guardrails: PASS (${report.filesInspected} files, ${report.clientEntriesInspected} client graphs)`,
     );
     return;
   }

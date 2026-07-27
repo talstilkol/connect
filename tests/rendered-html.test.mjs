@@ -59,7 +59,10 @@ test("server-renders the workspace dashboard", async () => {
   assert.match(html, /0 מתוך 10/);
   assert.match(html, /השלמת פרטי העסק/);
   assert.doesNotMatch(html, /השלב הראשון: חיבור רשמי ל־Meta/);
-  assert.match(html, /10 החלטות חוסמות פיתוח/);
+  assert.match(
+    html,
+    /החלטות חוסמות Production/,
+  );
 });
 
 test("server-renders the system admin route in a fail-closed state", async () => {
@@ -101,6 +104,7 @@ test("server-renders auth and workspace feature routes", async () => {
     campaignsResponse,
     inboxResponse,
     aiResponse,
+    decisionsResponse,
   ] = await Promise.all([
     render("/login"),
     render("/workspace/templates"),
@@ -108,6 +112,7 @@ test("server-renders auth and workspace feature routes", async () => {
     render("/workspace/campaigns"),
     render("/workspace/inbox"),
     render("/workspace/ai"),
+    render("/workspace/decisions"),
   ]);
 
   assert.equal(loginResponse.status, 200);
@@ -116,6 +121,10 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.equal(campaignsResponse.status, 200);
   assert.equal(inboxResponse.status, 200);
   assert.equal(aiResponse.status, 200);
+  assert.equal(
+    decisionsResponse.status,
+    200,
+  );
 
   const [
     loginHtml,
@@ -124,6 +133,7 @@ test("server-renders auth and workspace feature routes", async () => {
     campaignsHtml,
     inboxHtml,
     aiHtml,
+    decisionsHtml,
   ] =
     await Promise.all([
       loginResponse.text(),
@@ -132,6 +142,7 @@ test("server-renders auth and workspace feature routes", async () => {
       campaignsResponse.text(),
       inboxResponse.text(),
       aiResponse.text(),
+      decisionsResponse.text(),
     ]);
 
   assert.match(loginHtml, /Clerk מוכן לחיבור אך טרם הופעל/);
@@ -196,5 +207,17 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.doesNotMatch(
     aiHtml,
     /מדיניות-שירות\.pdf|מענה מבוסס ידע/,
+  );
+  assert.match(
+    decisionsHtml,
+    /מקור הנתונים זהה לשער המוכנות/,
+  );
+  assert.match(
+    decisionsHtml,
+    /AI_PROVIDER_DECISION_REQUIRED/,
+  );
+  assert.doesNotMatch(
+    decisionsHtml,
+    /textarea|החלטה \/ הערה/,
   );
 });

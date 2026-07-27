@@ -11,6 +11,7 @@ import { readCurrentMetaEmbeddedSignup } from "../../../server/meta/currentMetaE
 import { readCurrentMetaConnection } from "../../../server/meta/currentMetaConnection";
 import { readCurrentMessageTemplates } from "../../../server/templates/currentMessageTemplates";
 import { readCurrentOperationalReport } from "../../../server/reports/currentOperationalReport";
+import { readCurrentProductionReadiness } from "../../../server/operations/currentProductionReadiness";
 import { configurationRequiredMetaEmbeddedSignup } from "../../../shared/domain/metaEmbeddedSignupView";
 import { configurationRequiredMetaConnection } from "../../../shared/domain/metaConnectionView";
 import { defaultInboxFilters } from "../../../shared/domain/conversationView";
@@ -39,6 +40,7 @@ export default async function WorkspaceSectionPage({
     botFlowsResult,
     aiAgentsResult,
     operationalReportResult,
+    initialProductionReadiness,
   ] = await Promise.all([
     section === "contacts" && authEnabled
       ? readCurrentContacts()
@@ -134,6 +136,9 @@ export default async function WorkspaceSectionPage({
             "configuration-required" as const,
           report: null,
         }),
+    Promise.resolve(
+      readCurrentProductionReadiness(),
+    ),
   ]);
 
   return (
@@ -190,6 +195,9 @@ export default async function WorkspaceSectionPage({
       }
       initialOperationalReportStatus={
         operationalReportResult.status
+      }
+      initialProductionReadiness={
+        initialProductionReadiness
       }
     />
   );

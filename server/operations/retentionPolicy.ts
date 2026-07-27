@@ -2,16 +2,24 @@ const MAXIMUM_DATE_DAYS = 100_000_000;
 
 export const RETENTION_DATA_CLASSES = [
   "tenant-account-data",
-  "contact-and-consent-data",
-  "meta-connection-and-credential-data",
+  "contact-data",
+  "consent-events",
+  "meta-connection-data",
+  "meta-credential-data",
   "webhook-receipts",
   "template-records",
-  "campaign-and-delivery-records",
-  "conversation-and-message-data",
-  "bot-flow-and-delivery-data",
-  "ai-agent-and-runtime-data",
-  "knowledge-source-data-and-objects",
-  "billing-and-subscription-events",
+  "campaign-records",
+  "delivery-records",
+  "conversation-data",
+  "message-data",
+  "bot-flow-data",
+  "bot-delivery-data",
+  "ai-agent-data",
+  "ai-runtime-data",
+  "knowledge-source-data",
+  "knowledge-source-objects",
+  "billing-events",
+  "subscription-data",
   "audit-logs",
 ] as const;
 
@@ -27,6 +35,33 @@ export const RETENTION_TRIGGERS = [
 export type RetentionTrigger =
   (typeof RETENTION_TRIGGERS)[number];
 
+export const RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS =
+  Object.freeze({
+    "tenant-account-data": "tenant-closed",
+    "contact-data": "tenant-closed",
+    "consent-events": "record-created",
+    "meta-connection-data": "tenant-closed",
+    "meta-credential-data": "tenant-closed",
+    "webhook-receipts": "record-terminal",
+    "template-records": "tenant-closed",
+    "campaign-records": "record-terminal",
+    "delivery-records": "record-terminal",
+    "conversation-data": "record-terminal",
+    "message-data": "record-terminal",
+    "bot-flow-data": "tenant-closed",
+    "bot-delivery-data": "record-terminal",
+    "ai-agent-data": "tenant-closed",
+    "ai-runtime-data": "record-terminal",
+    "knowledge-source-data": "tenant-closed",
+    "knowledge-source-objects": "tenant-closed",
+    "billing-events": "record-created",
+    "subscription-data": "record-terminal",
+    "audit-logs": "record-created",
+  } satisfies Record<
+    RetentionDataClass,
+    RetentionTrigger
+  >);
+
 export interface RetentionPolicyRule {
   dataClass: RetentionDataClass;
   trigger: RetentionTrigger;
@@ -34,7 +69,7 @@ export interface RetentionPolicyRule {
 }
 
 export interface RetentionPolicy {
-  version: 1;
+  version: 2;
   rules: readonly RetentionPolicyRule[];
 }
 
@@ -47,7 +82,8 @@ export type RetentionPolicyIssue =
   | "POLICY_JSON_INVALID"
   | "POLICY_SHAPE_INVALID"
   | "DATA_CLASS_COVERAGE_INVALID"
-  | "RULE_INVALID";
+  | "RULE_INVALID"
+  | "TRIGGER_NOT_ALLOWED";
 
 export type RetentionPolicyInspection =
   | {
@@ -107,7 +143,17 @@ function isTrigger(
 
 function parseRule(
   value: unknown,
-): RetentionPolicyRule | null {
+):
+  | {
+      status: "valid";
+      rule: RetentionPolicyRule;
+    }
+  | {
+      status: "invalid";
+      issue:
+        | "RULE_INVALID"
+        | "TRIGGER_NOT_ALLOWED";
+    } {
   if (
     !isRecord(value) ||
     !hasExactKeys(value, [
@@ -124,15 +170,32 @@ function parseRule(
     Number(value.retainForDays) >
       MAXIMUM_DATE_DAYS
   ) {
-    return null;
+    return {
+      status: "invalid",
+      issue: "RULE_INVALID",
+    };
+  }
+
+  if (
+    RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS[
+      value.dataClass
+    ] !== value.trigger
+  ) {
+    return {
+      status: "invalid",
+      issue: "TRIGGER_NOT_ALLOWED",
+    };
   }
 
   return {
-    dataClass: value.dataClass,
-    trigger: value.trigger,
-    retainForDays: Number(
-      value.retainForDays,
-    ),
+    status: "valid",
+    rule: {
+      dataClass: value.dataClass,
+      trigger: value.trigger,
+      retainForDays: Number(
+        value.retainForDays,
+      ),
+    },
   };
 }
 
@@ -168,7 +231,7 @@ export function inspectRetentionPolicy(
       "version",
       "rules",
     ]) ||
-    parsed.version !== 1 ||
+    parsed.version !== 2 ||
     !Array.isArray(parsed.rules)
   ) {
     return {
@@ -177,17 +240,29 @@ export function inspectRetentionPolicy(
     };
   }
 
-  const rules = parsed.rules.map(parseRule);
+  const parsedRules = parsed.rules.map(parseRule);
+  const invalidRule = parsedRules.find(
+    (result) => result.status === "invalid",
+  );
 
-  if (rules.some((rule) => rule === null)) {
+  if (invalidRule?.status === "invalid") {
     return {
       status: "configuration-required",
-      issues: ["RULE_INVALID"],
+      issues: [invalidRule.issue],
     };
   }
 
-  const validRules =
-    rules as RetentionPolicyRule[];
+  const validRules = parsedRules.map(
+    (result) => {
+      if (result.status !== "valid") {
+        throw new Error(
+          "Retention rule parsing invariant failed",
+        );
+      }
+
+      return result.rule;
+    },
+  );
   const receivedClasses = new Set(
     validRules.map((rule) => rule.dataClass),
   );
@@ -220,7 +295,7 @@ export function inspectRetentionPolicy(
   return {
     status: "configured",
     configuration: {
-      version: 1,
+      version: 2,
       rules: RETENTION_DATA_CLASSES.map(
         (dataClass) => ({
           ...ruleByDataClass.get(dataClass)!,
