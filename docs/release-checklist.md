@@ -20,6 +20,8 @@
 
 2.4 Secret Scanning ו־Push Protection של ספק ה־Repository עברו.
 
+2.5 Secret Inventory Evidence תקף, וכל מועדי ה־Rotation עתידיים.
+
 ## 3. Data
 
 3.1 כל המיגרציות עברו Validation לפי הסדר.

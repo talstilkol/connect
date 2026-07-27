@@ -115,6 +115,16 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 5.3 ערכים ממשיים אינם נשמרים ב־`.env.example`, בקוד, במסמך זה או
 ב־Release Manifest.
 
+5.4 `SECRET_INVENTORY_EVIDENCE_JSON` מגדיר Inventory v1 עבור חמשת
+ערכי השרת הרגישים הקיימים ובכל ארבע הסביבות.
+
+5.5 כל אחת מ־20 הרשומות כוללת Secret Fingerprint, ‏Owner
+Fingerprint, מועד Rotation אחרון ומועד Rotation הבא. Fingerprint
+של Secret אינו יכול להופיע ביותר מסביבה אחת.
+
+5.6 ה־Evidence אינו מכיל Secret או זהות בעלים גלויה. Evidence חסר,
+פג תוקף, עם Rotation שעבר או עם Digest שונה חוסם Production.
+
 ## 6. סביבות
 
 6.1 Development, ‏Preview, ‏Staging ו־Production חייבות להשתמש

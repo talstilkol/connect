@@ -28,6 +28,9 @@ import {
 import {
   inspectEnvironmentIsolationEvidence,
 } from "./environmentIsolationEvidence.ts";
+import {
+  inspectSecretInventoryEvidence,
+} from "./secretInventoryEvidence.ts";
 import type {
   ProductionReadinessCategory,
   ProductionReadinessCheck,
@@ -61,6 +64,7 @@ export interface ProductionReadinessInput {
   backupRestorePolicy: ConfigurationState;
   retentionPolicy: ConfigurationState;
   environmentIsolation: ConfigurationState;
+  secretInventory: ConfigurationState;
   hosting: ProductionHostingBindings;
   implementation: ProductionImplementationState;
 }
@@ -87,6 +91,7 @@ export interface ProductionReadinessEnvironment {
   RESTORE_REHEARSAL_INTERVAL_DAYS?: string;
   RETENTION_POLICY_JSON?: string;
   ENVIRONMENT_ISOLATION_EVIDENCE_JSON?: string;
+  SECRET_INVENTORY_EVIDENCE_JSON?: string;
 }
 
 interface CheckDefinition {
@@ -279,6 +284,17 @@ export function inspectProductionReadiness(
       blockedStatus: "decision-required",
     }),
     toCheck({
+      id: "security.secret-inventory",
+      category: "security",
+      ready: isConfigured(
+        input.secretInventory,
+      ),
+      readyCode:
+        "SECRET_INVENTORY_EVIDENCE_VERIFIED",
+      blockedCode:
+        "SECRET_INVENTORY_EVIDENCE_REQUIRED",
+    }),
+    toCheck({
       id: "security.dependency-audit",
       category: "security",
       ready: implementation.dependencyAudit,
@@ -435,6 +451,12 @@ export function inspectCurrentProductionReadiness(
         : "incomplete",
     environmentIsolation:
       inspectEnvironmentIsolationEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    secretInventory:
+      inspectSecretInventoryEvidence(
         environment,
       ).status === "configured"
         ? "configured"

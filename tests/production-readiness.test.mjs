@@ -36,6 +36,7 @@ test("reports ready only when every production dependency is ready", () => {
     retentionPolicy: "configured",
     environmentIsolation:
       "configured",
+    secretInventory: "configured",
     hosting: {
       d1: "DB",
       r2: "FILES",
@@ -45,7 +46,7 @@ test("reports ready only when every production dependency is ready", () => {
 
   assert.equal(report.readyForProduction, true);
   assert.deepEqual(report.counts, {
-    ready: 26,
+    ready: 27,
     blocked: 0,
     decisionRequired: 0,
   });
@@ -69,7 +70,7 @@ test("fails closed for absent environment and unresolved implementation", () => 
   assert.equal(report.readyForProduction, false);
   assert.deepEqual(report.counts, {
     ready: 5,
-    blocked: 11,
+    blocked: 12,
     decisionRequired: 10,
   });
   assert.equal(
@@ -99,6 +100,7 @@ test("rejects renamed or absent hosting bindings", () => {
     retentionPolicy: "configured",
     environmentIsolation:
       "configured",
+    secretInventory: "configured",
     hosting: {
       d1: "DATABASE",
     },
