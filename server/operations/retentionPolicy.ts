@@ -21,6 +21,8 @@ export const RETENTION_DATA_CLASSES = [
   "billing-events",
   "subscription-data",
   "audit-logs",
+  "production-decision-data",
+  "production-decision-events",
 ] as const;
 
 export type RetentionDataClass =
@@ -57,6 +59,10 @@ export const RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS =
     "billing-events": "record-created",
     "subscription-data": "record-terminal",
     "audit-logs": "record-created",
+    "production-decision-data":
+      "record-terminal",
+    "production-decision-events":
+      "record-created",
   } satisfies Record<
     RetentionDataClass,
     RetentionTrigger

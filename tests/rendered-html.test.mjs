@@ -85,6 +85,28 @@ test("server-renders the system admin route in a fail-closed state", async () =>
   );
 });
 
+test("server-renders the production decision admin route in a fail-closed state", async () => {
+  const response = await render(
+    "/admin/decisions",
+  );
+
+  assert.equal(response.status, 200);
+  const html = await response.text();
+
+  assert.match(
+    html,
+    /סביבת Admin אינה מוגדרת/,
+  );
+  assert.match(
+    html,
+    /לפני ניהול החלטות/,
+  );
+  assert.doesNotMatch(
+    html,
+    /name="rationale"/,
+  );
+});
+
 test("server-renders local business profile completeness boundaries", async () => {
   const response = await render("/workspace/onboarding");
   assert.equal(response.status, 200);

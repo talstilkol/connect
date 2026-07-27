@@ -6553,6 +6553,170 @@ label.file-button:focus-within {
   line-height: 1.8;
 }
 
+.admin-decision-notice {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  border: 1px solid #e5ca8d;
+  border-radius: 15px;
+  background: var(--amber-soft);
+}
+
+.admin-decision-notice strong {
+  color: #7e571d;
+  font-size: 11px;
+}
+
+.admin-decision-notice p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.admin-decision-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-decision-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 10px 35px
+    rgba(32, 56, 52, 0.05);
+}
+
+.admin-decision-card > header {
+  display: grid;
+  grid-template-columns:
+    auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-decision-card > header h2 {
+  margin: 4px 0 6px;
+  font-size: 16px;
+}
+
+.admin-decision-card > header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.admin-decision-card > header small {
+  color: var(--muted);
+  direction: ltr;
+  font-size: 8px;
+  unicode-bidi: isolate;
+}
+
+.admin-decision-runtime {
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 8px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.admin-decision-runtime.ready {
+  color: #287351;
+  background: #edf9f2;
+}
+
+.admin-decision-runtime.blocked {
+  color: #a53d3d;
+  background: #fff0f0;
+}
+
+.admin-decision-runtime.decision-required {
+  color: #8b6122;
+  background: var(--amber-soft);
+}
+
+.admin-decision-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.admin-decision-meta span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: #f1f5f3;
+  font-size: 8px;
+}
+
+.admin-decision-form {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 0.55fr)
+    minmax(320px, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.admin-decision-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-decision-form label > span {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.admin-decision-form input,
+.admin-decision-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-size: 10px;
+}
+
+.admin-decision-form input {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.admin-decision-form textarea {
+  min-height: 96px;
+  padding: 9px 10px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.admin-decision-form input:focus,
+.admin-decision-form textarea:focus {
+  border-color: #73aa91;
+  outline: 3px solid #e5f4ec;
+}
+
+.admin-decision-form > div {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-decision-form > div small {
+  color: var(--muted);
+  font-size: 8px;
+}
+
 @media (max-width: 980px) {
   .admin-hero {
     grid-template-columns: 1fr;
@@ -6622,6 +6786,22 @@ label.file-button:focus-within {
   .admin-danger-zone,
   .admin-create-subscription > div {
     grid-column: auto;
+  }
+
+  .admin-decision-card > header,
+  .admin-decision-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-decision-card > header
+    .admin-decision-runtime {
+    justify-self: start;
+  }
+
+  .admin-decision-form > div {
+    grid-column: auto;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .admin-tenant-heading,

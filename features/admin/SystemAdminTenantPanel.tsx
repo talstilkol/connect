@@ -570,6 +570,12 @@ export function SystemAdminTenantPanel({
             הרשאת שרת פעילה
           </span>
           <Link
+            href="/admin/decisions"
+            className="secondary-button"
+          >
+            החלטות Production
+          </Link>
+          <Link
             href="/workspace"
             className="secondary-button"
           >

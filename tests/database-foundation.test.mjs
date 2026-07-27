@@ -59,6 +59,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0017_unusual_veda.sql",
     "0018_material_guardian.sql",
     "0019_purple_silvermane.sql",
+    "0020_production_decision_records.sql",
   ]);
 
   const migration = await readFile(
@@ -407,6 +408,45 @@ test("tenant subscription migration adds manual lifecycle state and immutable hi
   );
 });
 
+test("production decision migration stores versioned global decisions with atomic audit triggers", async () => {
+  const migration = await readFile(
+    new URL(
+      "0020_production_decision_records.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `production_decision_records`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `production_decision_events`/,
+  );
+  assert.match(
+    migration,
+    /production_decision_events_check_version_uq/,
+  );
+  assert.match(
+    migration,
+    /CREATE TRIGGER `production_decision_records_insert_audit`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TRIGGER `production_decision_records_update_guard`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TRIGGER `production_decision_records_update_audit`/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /access_token|api_key|client_secret|provider_payload/i,
+  );
+});
+
 test("message template migration stores tenant-owned definitions without provider payloads", async () => {
   const migration = await readFile(
     new URL("0008_message_templates.sql", migrationsUrl),
@@ -680,6 +720,8 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "meta_connections",
     "meta_credential_envelopes",
     "meta_webhook_receipts",
+    "production_decision_events",
+    "production_decision_records",
     "tenant_memberships",
     "tenant_subscription_events",
     "tenant_subscriptions",

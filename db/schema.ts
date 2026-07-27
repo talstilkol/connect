@@ -25,6 +25,9 @@ export const tenantSubscriptionEventTypes = [
   "status-changed",
   "cancelled",
 ] as const;
+export const productionDecisionEventTypes = [
+  "recorded",
+] as const;
 
 export const tenantRoles = [
   "owner",
@@ -3186,6 +3189,170 @@ export const tenantSubscriptionEvents =
     ],
   );
 
+export const productionDecisionRecords =
+  sqliteTable(
+    "production_decision_records",
+    {
+      checkId: text("check_id")
+        .primaryKey(),
+      selection: text("selection")
+        .notNull(),
+      rationale: text("rationale")
+        .notNull(),
+      version: integer("version")
+        .notNull()
+        .default(1),
+      lastEventKey: text(
+        "last_event_key",
+      ).notNull(),
+      decidedByExternalUserId: text(
+        "decided_by_external_user_id",
+      ).notNull(),
+      decidedAt: text("decided_at")
+        .notNull(),
+      updatedAt: text("updated_at")
+        .notNull(),
+    },
+    (table) => [
+      check(
+        "production_decision_records_check_id_bounded",
+        sql`length(trim(${table.checkId})) between 3 and 100
+          and trim(${table.checkId}) = ${table.checkId}`,
+      ),
+      check(
+        "production_decision_records_selection_bounded",
+        sql`length(trim(${table.selection})) between 1 and 120
+          and trim(${table.selection}) = ${table.selection}`,
+      ),
+      check(
+        "production_decision_records_rationale_bounded",
+        sql`length(trim(${table.rationale})) between 1 and 2000
+          and trim(${table.rationale}) = ${table.rationale}`,
+      ),
+      check(
+        "production_decision_records_version_positive",
+        sql`${table.version} >= 1`,
+      ),
+      check(
+        "production_decision_records_event_key_sha256",
+        sql`length(${table.lastEventKey}) = 93
+          and substr(${table.lastEventKey}, 1, 29)
+            = 'production_decision_event_v1_'
+          and substr(${table.lastEventKey}, 30)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "production_decision_records_actor_bounded",
+        sql`length(trim(${table.decidedByExternalUserId})) between 1 and 255
+          and trim(${table.decidedByExternalUserId})
+            = ${table.decidedByExternalUserId}`,
+      ),
+      check(
+        "production_decision_records_decided_at_canonical",
+        sql`length(${table.decidedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.decidedAt})
+            = ${table.decidedAt}`,
+      ),
+      check(
+        "production_decision_records_updated_at_canonical",
+        sql`length(${table.updatedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.updatedAt})
+            = ${table.updatedAt}`,
+      ),
+      index(
+        "production_decision_records_updated_idx",
+      ).on(table.updatedAt),
+    ],
+  );
+
+export const productionDecisionEvents =
+  sqliteTable(
+    "production_decision_events",
+    {
+      eventKey: text("event_key")
+        .primaryKey(),
+      checkId: text("check_id")
+        .notNull()
+        .references(
+          () =>
+            productionDecisionRecords.checkId,
+          { onDelete: "restrict" },
+        ),
+      eventType: text("event_type", {
+        enum: productionDecisionEventTypes,
+      })
+        .notNull()
+        .default("recorded"),
+      selection: text("selection")
+        .notNull(),
+      rationale: text("rationale")
+        .notNull(),
+      actorExternalUserId: text(
+        "actor_external_user_id",
+      ).notNull(),
+      decisionVersion: integer(
+        "decision_version",
+      ).notNull(),
+      occurredAt: text("occurred_at")
+        .notNull(),
+      createdAt: text("created_at")
+        .notNull()
+        .default(sql`CURRENT_TIMESTAMP`),
+    },
+    (table) => [
+      check(
+        "production_decision_events_key_sha256",
+        sql`length(${table.eventKey}) = 93
+          and substr(${table.eventKey}, 1, 29)
+            = 'production_decision_event_v1_'
+          and substr(${table.eventKey}, 30)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "production_decision_events_type_valid",
+        sql`${table.eventType} = 'recorded'`,
+      ),
+      check(
+        "production_decision_events_selection_bounded",
+        sql`length(trim(${table.selection})) between 1 and 120
+          and trim(${table.selection}) = ${table.selection}`,
+      ),
+      check(
+        "production_decision_events_rationale_bounded",
+        sql`length(trim(${table.rationale})) between 1 and 2000
+          and trim(${table.rationale}) = ${table.rationale}`,
+      ),
+      check(
+        "production_decision_events_actor_bounded",
+        sql`length(trim(${table.actorExternalUserId})) between 1 and 255
+          and trim(${table.actorExternalUserId})
+            = ${table.actorExternalUserId}`,
+      ),
+      check(
+        "production_decision_events_version_positive",
+        sql`${table.decisionVersion} >= 1`,
+      ),
+      check(
+        "production_decision_events_occurred_at_canonical",
+        sql`length(${table.occurredAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.occurredAt})
+            = ${table.occurredAt}`,
+      ),
+      uniqueIndex(
+        "production_decision_events_check_version_uq",
+      ).on(
+        table.checkId,
+        table.decisionVersion,
+      ),
+      index(
+        "production_decision_events_check_occurred_idx",
+      ).on(
+        table.checkId,
+        table.occurredAt,
+      ),
+    ],
+  );
+
 export type TenantRow = typeof tenants.$inferSelect;
 export type NewTenantRow = typeof tenants.$inferInsert;
 export type TenantMembershipRow = typeof tenantMemberships.$inferSelect;
@@ -3272,3 +3439,11 @@ export type TenantSubscriptionEventRow =
   typeof tenantSubscriptionEvents.$inferSelect;
 export type NewTenantSubscriptionEventRow =
   typeof tenantSubscriptionEvents.$inferInsert;
+export type ProductionDecisionRecordRow =
+  typeof productionDecisionRecords.$inferSelect;
+export type NewProductionDecisionRecordRow =
+  typeof productionDecisionRecords.$inferInsert;
+export type ProductionDecisionEventRow =
+  typeof productionDecisionEvents.$inferSelect;
+export type NewProductionDecisionEventRow =
+  typeof productionDecisionEvents.$inferInsert;
