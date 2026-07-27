@@ -204,6 +204,8 @@ export default function WorkspaceApp({
   initialOperationalReportStatus =
     "configuration-required",
   initialTeamDirectory = {
+    identityStatus:
+      "unavailable",
     members: [],
   },
   initialTeamDirectoryStatus =

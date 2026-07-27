@@ -321,6 +321,22 @@ test("removes a selection when its membership is removed", async () => {
   });
   database
     .prepare(`
+      INSERT INTO tenant_memberships (
+        tenant_id,
+        external_user_id,
+        role,
+        status
+      )
+      VALUES (
+        1,
+        'user-b',
+        'owner',
+        'active'
+      )
+    `)
+    .run();
+  database
+    .prepare(`
       DELETE FROM tenant_memberships
       WHERE tenant_id = 1
         AND external_user_id = 'user-a'

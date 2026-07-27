@@ -12,7 +12,8 @@ const FIND_ACTIVE_MEMBERSHIPS_SQL = `
     tenants.display_name AS tenantDisplayName,
     tenants.status AS tenantStatus,
     tenant_memberships.external_user_id AS externalUserId,
-    tenant_memberships.role AS role
+    tenant_memberships.role AS role,
+    tenant_memberships.version AS version
   FROM tenant_memberships
   INNER JOIN tenants
     ON tenants.id = tenant_memberships.tenant_id
@@ -27,7 +28,8 @@ const FIND_ACTIVE_TENANT_MEMBERS_SQL = `
     tenants.display_name AS tenantDisplayName,
     tenants.status AS tenantStatus,
     tenant_memberships.external_user_id AS externalUserId,
-    tenant_memberships.role AS role
+    tenant_memberships.role AS role,
+    tenant_memberships.version AS version
   FROM tenant_memberships
   INNER JOIN tenants
     ON tenants.id = tenant_memberships.tenant_id
@@ -67,6 +69,7 @@ interface D1TenantMembershipRow {
   tenantStatus: string;
   externalUserId: string;
   role: string;
+  version: number;
 }
 
 export interface ActiveTenantMembership {
@@ -75,6 +78,7 @@ export interface ActiveTenantMembership {
   tenantStatus: TenantStatus;
   externalUserId: UserId;
   role: TenantRole;
+  version: number;
 }
 
 export interface TenantMembershipRepository {
@@ -117,12 +121,22 @@ function parseMembershipRow(
     throw new Error("D1 returned an unsupported tenant status");
   }
 
+  if (
+    !Number.isSafeInteger(row.version) ||
+    row.version <= 0
+  ) {
+    throw new Error(
+      "D1 returned an invalid tenant membership version",
+    );
+  }
+
   return {
     tenantId: row.tenantId as TenantId,
     tenantDisplayName: row.tenantDisplayName,
     tenantStatus: row.tenantStatus,
     externalUserId: row.externalUserId as UserId,
     role: row.role,
+    version: row.version,
   };
 }
 

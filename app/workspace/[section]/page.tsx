@@ -144,6 +144,8 @@ export default async function WorkspaceSectionPage({
           status:
             "configuration-required" as const,
           directory: {
+            identityStatus:
+              "unavailable" as const,
             members: [],
           },
         }),

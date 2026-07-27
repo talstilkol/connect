@@ -57,6 +57,7 @@ test("loads active memberships with deterministic tenant ordering", async () => 
         tenantStatus: "active",
         externalUserId: "external-user-id",
         role: "manager",
+        version: 1,
       },
     ],
   });
@@ -69,6 +70,7 @@ test("loads active memberships with deterministic tenant ordering", async () => 
   assert.equal(memberships.length, 1);
   assert.equal(memberships[0].tenantId, 7);
   assert.equal(memberships[0].role, "manager");
+  assert.equal(memberships[0].version, 1);
   assert.match(
     database.recording.sql,
     /tenant_memberships\.external_user_id = \?/,
@@ -108,6 +110,7 @@ test("rejects invalid role data returned by D1", async () => {
         tenantStatus: "active",
         externalUserId: "external-user-id",
         role: "unsupported-role",
+        version: 1,
       },
     ],
   });
@@ -132,6 +135,35 @@ test("surfaces a failed D1 membership read", async () => {
   );
 });
 
+test("rejects an invalid membership version returned by D1", async () => {
+  const database = new MembershipDatabase({
+    success: true,
+    results: [
+      {
+        tenantId: 7,
+        tenantDisplayName:
+          "tenant-name",
+        tenantStatus: "active",
+        externalUserId:
+          "external-user-id",
+        role: "manager",
+        version: 0,
+      },
+    ],
+  });
+  const repository =
+    createTenantMembershipRepository(
+      database,
+    );
+
+  await assert.rejects(
+    repository.findActiveByExternalUserId(
+      "external-user-id",
+    ),
+    /invalid tenant membership version/,
+  );
+});
+
 test("loads a bounded active team directory inside one tenant", async () => {
   const database = new MembershipDatabase({
     success: true,
@@ -144,6 +176,7 @@ test("loads a bounded active team directory inside one tenant", async () => {
         externalUserId:
           "external-user-id",
         role: "owner",
+        version: 1,
       },
       {
         tenantId: 7,
@@ -153,6 +186,7 @@ test("loads a bounded active team directory inside one tenant", async () => {
         externalUserId:
           "second-user-id",
         role: "agent",
+        version: 1,
       },
     ],
   });
@@ -198,6 +232,7 @@ test("rejects invalid and oversized team directory reads", async () => {
         externalUserId:
           `external-user-${index}`,
         role: "viewer",
+        version: 1,
       }),
     ),
   });

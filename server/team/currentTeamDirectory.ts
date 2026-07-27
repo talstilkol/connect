@@ -20,6 +20,9 @@ import {
 import {
   createTeamDirectoryService,
 } from "./teamDirectoryService.ts";
+import {
+  createUnavailableTeamIdentityDirectory,
+} from "./teamIdentityDirectory.ts";
 
 export type CurrentTeamDirectoryResult =
   | {
@@ -33,11 +36,15 @@ export type CurrentTeamDirectoryResult =
         "ready"
       >;
       directory: {
+        identityStatus:
+          "unavailable";
         members: readonly [];
       };
     };
 
 const emptyDirectory = {
+  identityStatus:
+    "unavailable" as const,
   members: [] as const,
 };
 
@@ -99,11 +106,14 @@ Promise<CurrentTeamDirectoryResult> {
         database,
       );
     const service =
-      createTeamDirectoryService(
-        createTenantMembershipRepository(
-          database,
-        ),
-      );
+      createTeamDirectoryService({
+        identities:
+          createUnavailableTeamIdentityDirectory(),
+        memberships:
+          createTenantMembershipRepository(
+            database,
+          ),
+      });
 
     return {
       status: "ready",

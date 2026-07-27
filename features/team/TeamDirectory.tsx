@@ -102,13 +102,17 @@ export function TeamDirectory({
                 פעילים
               </span>
             </div>
-            <p className="team-directory-note">
-              שמות ואימיילים אינם מוצגים
-              עד חיבור Clerk User
-              Directory. חברים אחרים
-              מזוהים באמצעות Reference
-              Code מוגן הנגזר בשרת.
-            </p>
+            {directory.identityStatus ===
+            "unavailable" ? (
+              <p className="team-directory-note">
+                שמות ואימיילים אינם
+                מוצגים עד חיבור Clerk
+                User Directory. חברים
+                אחרים מזוהים באמצעות
+                Reference Code מוגן
+                הנגזר בשרת.
+              </p>
+            ) : null}
             <ul className="team-member-list">
               {directory.members.map(
                 (member) => (
@@ -128,15 +132,14 @@ export function TeamDirectory({
                     </div>
                     <div>
                       <strong>
-                        {member.currentUser
-                          ? "המשתמש הנוכחי"
-                          : "חבר צוות מוגן"}
+                        {member.displayName ??
+                          (member.currentUser
+                            ? "המשתמש הנוכחי"
+                            : "חבר צוות מוגן")}
                       </strong>
                       <small>
-                        Reference:{" "}
-                        {
-                          member.referenceCode
-                        }
+                        {member.primaryEmail ??
+                          `Reference: ${member.referenceCode}`}
                       </small>
                     </div>
                     <span className="status-pill neutral">

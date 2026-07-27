@@ -33,26 +33,47 @@ function member(
     tenantStatus: "active",
     externalUserId,
     role,
+    version: 1,
     ...overrides,
   };
 }
 
 function createFixture(
   members,
+  identityResult = {
+    status: "unavailable",
+    identities: [],
+  },
 ) {
   let readTenantId = null;
   const service =
     createTeamDirectoryService({
-      async findActiveByExternalUserId() {
-        throw new Error(
-          "unexpected identity read",
-        );
+      identities: {
+        async resolve(
+          externalUserIds,
+        ) {
+          assert.deepEqual(
+            externalUserIds,
+            members.map(
+              (item) =>
+                item.externalUserId,
+            ),
+          );
+          return identityResult;
+        },
       },
-      async findActiveByTenantId(
-        tenantId,
-      ) {
-        readTenantId = tenantId;
-        return members;
+      memberships: {
+        async findActiveByExternalUserId() {
+          throw new Error(
+            "unexpected identity read",
+          );
+        },
+        async findActiveByTenantId(
+          tenantId,
+        ) {
+          readTenantId = tenantId;
+          return members;
+        },
       },
     });
 
@@ -84,10 +105,15 @@ test("maps real tenant members to bounded opaque references", async () => {
     getReadTenantId(),
     7,
   );
+  assert.equal(
+    directory.identityStatus,
+    "unavailable",
+  );
   assert.deepEqual(
     directory.members.map(
       (item) => ({
         role: item.role,
+        version: item.version,
         currentUser:
           item.currentUser,
       }),
@@ -95,10 +121,12 @@ test("maps real tenant members to bounded opaque references", async () => {
     [
       {
         role: "owner",
+        version: 1,
         currentUser: true,
       },
       {
         role: "agent",
+        version: 1,
         currentUser: false,
       },
     ],
@@ -119,6 +147,214 @@ test("maps real tenant members to bounded opaque references", async () => {
     JSON.stringify(directory),
     /current-user|other-user|tenantId|externalUserId/,
   );
+});
+
+test("maps only complete validated identity display data", async () => {
+  const members = [
+    member(
+      "current-user",
+      "owner",
+    ),
+    member(
+      "other-user",
+      "viewer",
+    ),
+  ];
+  const fixture =
+    createFixture(
+      members,
+      {
+        status: "ready",
+        identities: [
+          {
+            externalUserId:
+              "current-user",
+            displayName:
+              "Current User",
+            primaryEmail:
+              "current@example.com",
+          },
+          {
+            externalUserId:
+              "other-user",
+            displayName:
+              "Other User",
+            primaryEmail:
+              "other@example.com",
+          },
+        ],
+      },
+    );
+  const directory =
+    await fixture.service.list(
+      session(),
+    );
+
+  assert.equal(
+    directory.identityStatus,
+    "ready",
+  );
+  assert.deepEqual(
+    directory.members.map(
+      (item) => ({
+        displayName:
+          item.displayName,
+        primaryEmail:
+          item.primaryEmail,
+      }),
+    ),
+    [
+      {
+        displayName:
+          "Current User",
+        primaryEmail:
+          "current@example.com",
+      },
+      {
+        displayName:
+          "Other User",
+        primaryEmail:
+          "other@example.com",
+      },
+    ],
+  );
+});
+
+test("rejects incomplete, foreign, duplicate, and malformed identity results", async () => {
+  const members = [
+    member(
+      "current-user",
+      "owner",
+    ),
+    member(
+      "other-user",
+      "agent",
+    ),
+  ];
+  const invalidIdentityLists = [
+    [
+      {
+        externalUserId:
+          "current-user",
+        displayName:
+          "Current User",
+        primaryEmail:
+          "current@example.com",
+      },
+    ],
+    [
+      {
+        externalUserId:
+          "current-user",
+        displayName:
+          "Current User",
+        primaryEmail:
+          "current@example.com",
+      },
+      {
+        externalUserId:
+          "foreign-user",
+        displayName:
+          "Foreign User",
+        primaryEmail:
+          "foreign@example.com",
+      },
+    ],
+    [
+      {
+        externalUserId:
+          "current-user",
+        displayName:
+          "Current User",
+        primaryEmail:
+          "current@example.com",
+      },
+      {
+        externalUserId:
+          "current-user",
+        displayName:
+          "Duplicate User",
+        primaryEmail:
+          "duplicate@example.com",
+      },
+    ],
+    [
+      {
+        externalUserId:
+          "current-user",
+        displayName: " ",
+        primaryEmail:
+          "current@example.com",
+      },
+      {
+        externalUserId:
+          "other-user",
+        displayName:
+          "Other User",
+        primaryEmail:
+          "invalid email",
+      },
+    ],
+  ];
+
+  for (const identities of invalidIdentityLists) {
+    const fixture =
+      createFixture(
+        members,
+        {
+          status: "ready",
+          identities,
+        },
+      );
+
+    await assert.rejects(
+      fixture.service.list(
+        session(),
+      ),
+    );
+  }
+});
+
+test("rejects contradictory or unsupported identity directory states", async () => {
+  const members = [
+    member(
+      "current-user",
+      "owner",
+    ),
+  ];
+
+  for (const identityResult of [
+    {
+      status: "unavailable",
+      identities: [
+        {
+          externalUserId:
+            "current-user",
+          displayName:
+            "Current User",
+          primaryEmail:
+            "current@example.com",
+        },
+      ],
+    },
+    {
+      status: "unsupported",
+      identities: [],
+    },
+  ]) {
+    const fixture =
+      createFixture(
+        members,
+        identityResult,
+      );
+
+    await assert.rejects(
+      fixture.service.list(
+        session(),
+      ),
+      /identity directory/,
+    );
+  }
 });
 
 test("denies team reads before repository access when permission is absent", async () => {

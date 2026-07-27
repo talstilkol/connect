@@ -37,6 +37,13 @@ export const tenantRoles = [
 ] as const;
 
 export const membershipStatuses = ["active", "suspended"] as const;
+export const tenantMembershipEventTypes = [
+  "role-changed",
+  "suspended",
+  "reactivated",
+  "owner-transfer-out",
+  "owner-transfer-in",
+] as const;
 export const interfaceLanguages = ["he", "en", "ar"] as const;
 export const mailingStatuses = ["subscribed", "unsubscribed"] as const;
 export const consentStatuses = ["unknown", "granted", "withdrawn"] as const;
@@ -239,6 +246,9 @@ export const tenantMemberships = sqliteTable(
     status: text("status", { enum: membershipStatuses })
       .notNull()
       .default("active"),
+    version: integer("version")
+      .notNull()
+      .default(1),
     createdAt: text("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -258,6 +268,10 @@ export const tenantMemberships = sqliteTable(
     check(
       "tenant_memberships_status_valid",
       sql`${table.status} in ('active', 'suspended')`,
+    ),
+    check(
+      "tenant_memberships_version_positive",
+      sql`${table.version} >= 1`,
     ),
     uniqueIndex("tenant_memberships_tenant_user_uq").on(
       table.tenantId,
@@ -310,6 +324,155 @@ export const tenantSelections = sqliteTable(
     ).on(table.tenantId),
   ],
 );
+
+export const tenantMembershipEvents =
+  sqliteTable(
+    "tenant_membership_events",
+    {
+      eventKey: text(
+        "event_key",
+      ).primaryKey(),
+      operationKey: text(
+        "operation_key",
+      ).notNull(),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      targetExternalUserId: text(
+        "target_external_user_id",
+      ).notNull(),
+      actorExternalUserId: text(
+        "actor_external_user_id",
+      ).notNull(),
+      eventType: text("event_type", {
+        enum:
+          tenantMembershipEventTypes,
+      }).notNull(),
+      fromRole: text("from_role", {
+        enum: tenantRoles,
+      }).notNull(),
+      toRole: text("to_role", {
+        enum: tenantRoles,
+      }).notNull(),
+      fromStatus: text("from_status", {
+        enum: membershipStatuses,
+      }).notNull(),
+      toStatus: text("to_status", {
+        enum: membershipStatuses,
+      }).notNull(),
+      fromVersion: integer(
+        "from_version",
+      ).notNull(),
+      toVersion: integer(
+        "to_version",
+      ).notNull(),
+      occurredAt: text(
+        "occurred_at",
+      ).notNull(),
+    },
+    (table) => [
+      check(
+        "tenant_membership_events_event_key_valid",
+        sql`length(${table.eventKey}) = 91
+          and ${table.eventKey} glob 'tenant_membership_event_v1_[0-9a-f]*'
+          and substr(${table.eventKey}, 28) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "tenant_membership_events_operation_key_valid",
+        sql`length(${table.operationKey}) = 95
+          and ${table.operationKey} glob 'tenant_membership_operation_v1_[0-9a-f]*'
+          and substr(${table.operationKey}, 32) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "tenant_membership_events_target_not_blank",
+        sql`length(trim(${table.targetExternalUserId})) > 0`,
+      ),
+      check(
+        "tenant_membership_events_actor_not_blank",
+        sql`length(trim(${table.actorExternalUserId})) > 0`,
+      ),
+      check(
+        "tenant_membership_events_type_valid",
+        sql`${table.eventType} in ('role-changed', 'suspended', 'reactivated', 'owner-transfer-out', 'owner-transfer-in')`,
+      ),
+      check(
+        "tenant_membership_events_from_role_valid",
+        sql`${table.fromRole} in ('owner', 'manager', 'agent', 'viewer')`,
+      ),
+      check(
+        "tenant_membership_events_to_role_valid",
+        sql`${table.toRole} in ('owner', 'manager', 'agent', 'viewer')`,
+      ),
+      check(
+        "tenant_membership_events_from_status_valid",
+        sql`${table.fromStatus} in ('active', 'suspended')`,
+      ),
+      check(
+        "tenant_membership_events_to_status_valid",
+        sql`${table.toStatus} in ('active', 'suspended')`,
+      ),
+      check(
+        "tenant_membership_events_version_transition",
+        sql`${table.fromVersion} >= 1
+          and ${table.toVersion} = ${table.fromVersion} + 1`,
+      ),
+      check(
+        "tenant_membership_events_state_changed",
+        sql`${table.fromRole} <> ${table.toRole}
+          or ${table.fromStatus} <> ${table.toStatus}`,
+      ),
+      check(
+        "tenant_membership_events_shape_valid",
+        sql`(
+            ${table.eventType} = 'role-changed'
+            and ${table.fromRole} <> ${table.toRole}
+            and ${table.fromStatus} = ${table.toStatus}
+          ) or (
+            ${table.eventType} = 'suspended'
+            and ${table.fromRole} = ${table.toRole}
+            and ${table.fromStatus} = 'active'
+            and ${table.toStatus} = 'suspended'
+          ) or (
+            ${table.eventType} = 'reactivated'
+            and ${table.fromRole} = ${table.toRole}
+            and ${table.fromStatus} = 'suspended'
+            and ${table.toStatus} = 'active'
+          ) or (
+            ${table.eventType} = 'owner-transfer-out'
+            and ${table.fromRole} = 'owner'
+            and ${table.toRole} <> 'owner'
+            and ${table.fromStatus} = 'active'
+            and ${table.toStatus} = 'active'
+          ) or (
+            ${table.eventType} = 'owner-transfer-in'
+            and ${table.fromRole} <> 'owner'
+            and ${table.toRole} = 'owner'
+            and ${table.fromStatus} = 'active'
+            and ${table.toStatus} = 'active'
+          )`,
+      ),
+      check(
+        "tenant_membership_events_occurred_at_canonical",
+        sql`length(${table.occurredAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.occurredAt})
+            = ${table.occurredAt}`,
+      ),
+      uniqueIndex(
+        "tenant_membership_events_operation_target_uq",
+      ).on(
+        table.operationKey,
+        table.targetExternalUserId,
+      ),
+      index(
+        "tenant_membership_events_tenant_occurred_idx",
+      ).on(
+        table.tenantId,
+        table.occurredAt,
+      ),
+    ],
+  );
 
 export const businessProfiles = sqliteTable(
   "business_profiles",
@@ -3401,6 +3564,10 @@ export type TenantRow = typeof tenants.$inferSelect;
 export type NewTenantRow = typeof tenants.$inferInsert;
 export type TenantMembershipRow = typeof tenantMemberships.$inferSelect;
 export type NewTenantMembershipRow = typeof tenantMemberships.$inferInsert;
+export type TenantMembershipEventRow =
+  typeof tenantMembershipEvents.$inferSelect;
+export type NewTenantMembershipEventRow =
+  typeof tenantMembershipEvents.$inferInsert;
 export type BusinessProfileRow = typeof businessProfiles.$inferSelect;
 export type NewBusinessProfileRow = typeof businessProfiles.$inferInsert;
 export type MetaConnectionRow = typeof metaConnections.$inferSelect;
