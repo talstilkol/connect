@@ -85,6 +85,15 @@ Backup תקפות.
 
 4.4 אין Timestamp או מזהה אקראי. אותו מצב מקור מייצר אותו Manifest.
 
+4.5 `npm run release:changelog` יוצר Change Log דטרמיניסטי
+מה־Commit subjects האמיתיים. Subject שאינו עומד בחוזה Conventional
+Commit חוסם את היצירה במקום לייצר תיאור מומצא.
+
+4.6 Checklist השחרור המלא נמצא ב־`docs/release-checklist.md`.
+
+4.7 `npm run release:verify-artifacts` מחשב מחדש את שתי הראיות
+מה־Commit, דורש Worktree נקי ונכשל אם Artifact חסר, פגום או ישן.
+
 ## 5. Secrets
 
 5.1 שמות התצורה הציבורית:

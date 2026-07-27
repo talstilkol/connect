@@ -167,13 +167,7 @@ function git(argumentsList) {
   ).trim();
 }
 
-export async function createCurrentReleaseManifest() {
-  if (git(["status", "--porcelain"])) {
-    throw new Error(
-      "RELEASE_MANIFEST_DIRTY_WORKTREE",
-    );
-  }
-
+export async function readCommittedReleaseManifest() {
   const [
     packageText,
     packageLockText,
@@ -231,6 +225,16 @@ export async function createCurrentReleaseManifest() {
     packageLockText,
     migrations,
   });
+}
+
+export async function createCurrentReleaseManifest() {
+  if (git(["status", "--porcelain"])) {
+    throw new Error(
+      "RELEASE_MANIFEST_DIRTY_WORKTREE",
+    );
+  }
+
+  return readCommittedReleaseManifest();
 }
 
 async function runCli() {
