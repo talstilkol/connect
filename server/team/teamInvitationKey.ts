@@ -12,13 +12,15 @@ import {
   requireTeamInvitationStatus,
 } from "./teamInvitationValidation.ts";
 import {
-  requireTeamExternalUserId,
   requireTeamMembershipVersion,
   requireTeamTimestamp,
 } from "./teamMembershipValidation.ts";
 import type {
   TeamInvitationEventType,
 } from "../../shared/domain/teamInvitation.ts";
+import {
+  requireTeamInvitationActor,
+} from "./teamInvitationActor.ts";
 
 async function digestIdentity(
   value: object,
@@ -95,7 +97,8 @@ export async function deriveTeamInvitationOperationKey(
     expectedVersion: unknown;
     role: unknown;
     fromStatus: unknown;
-    actorExternalUserId: unknown;
+    actorExternalUserId?: unknown;
+    systemActorId?: unknown;
     occurredAt: unknown;
     expiresAt: unknown;
   },
@@ -112,6 +115,24 @@ export async function deriveTeamInvitationOperationKey(
       : requireTeamInvitationStatus(
           input.fromStatus,
         );
+  const actor =
+    requireTeamInvitationActor({
+      actorExternalUserId:
+        input.actorExternalUserId,
+      systemActorId:
+        input.systemActorId,
+    });
+  const actorIdentity =
+    actor.kind === "user"
+      ? {
+          actorExternalUserId:
+            actor.id,
+        }
+      : {
+          actorKind: "system",
+          systemActorId:
+            actor.id,
+        };
 
   return `team_invitation_operation_v1_${await digestIdentity(
     {
@@ -132,10 +153,7 @@ export async function deriveTeamInvitationOperationKey(
           input.role,
         ),
       fromStatus,
-      actorExternalUserId:
-        requireTeamExternalUserId(
-          input.actorExternalUserId,
-        ),
+      ...actorIdentity,
       occurredAt:
         requireTeamTimestamp(
           input.occurredAt,

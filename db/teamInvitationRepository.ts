@@ -1,13 +1,15 @@
 import type {
-  UserId,
-} from "../shared/domain/model.ts";
-import type {
   TeamInvitation,
+  TeamInvitationActor,
   TeamInvitationEventType,
   TeamInvitationMutationResult,
   TeamInvitationRole,
   TeamInvitationStatus,
 } from "../shared/domain/teamInvitation.ts";
+import {
+  requireStoredTeamInvitationActor,
+  requireTeamInvitationActor,
+} from "../server/team/teamInvitationActor.ts";
 import {
   deriveTeamInvitationEventKey,
   deriveTeamInvitationDeliveryKey,
@@ -43,7 +45,8 @@ const findInvitationSql = `
     status,
     version,
     invited_by_external_user_id AS invitedByExternalUserId,
-    last_actor_external_user_id AS lastActorExternalUserId,
+    last_actor_kind AS lastActorKind,
+    last_actor_external_user_id AS lastActorId,
     requested_at AS requestedAt,
     expires_at AS expiresAt,
     updated_at AS updatedAt
@@ -59,7 +62,8 @@ const findEventSql = `
     operation_key AS operationKey,
     invitation_key AS invitationKey,
     tenant_id AS tenantId,
-    actor_external_user_id AS actorExternalUserId,
+    actor_kind AS actorKind,
+    actor_external_user_id AS actorId,
     event_type AS eventType,
     from_role AS fromRole,
     to_role AS toRole,
@@ -83,6 +87,7 @@ const insertInvitationSql = `
     status,
     version,
     invited_by_external_user_id,
+    last_actor_kind,
     last_actor_external_user_id,
     requested_at,
     expires_at,
@@ -90,7 +95,7 @@ const insertInvitationSql = `
   )
   VALUES (
     ?1, ?2, ?3, ?4, 'pending', 1,
-    ?5, ?5, ?6, ?7, ?6
+    ?5, 'user', ?5, ?6, ?7, ?6
   )
 `;
 
@@ -100,6 +105,7 @@ const reopenInvitationSql = `
     role = ?5,
     status = 'pending',
     version = version + 1,
+    last_actor_kind = 'user',
     last_actor_external_user_id = ?6,
     requested_at = ?7,
     expires_at = ?8,
@@ -115,8 +121,9 @@ const transitionInvitationSql = `
   SET
     status = ?5,
     version = version + 1,
-    last_actor_external_user_id = ?6,
-    updated_at = ?7
+    last_actor_kind = ?6,
+    last_actor_external_user_id = ?7,
+    updated_at = ?8
   WHERE tenant_id = ?1
     AND invitation_key = ?2
     AND version = ?3
@@ -129,6 +136,7 @@ const insertEventSql = `
     operation_key,
     invitation_key,
     tenant_id,
+    actor_kind,
     actor_external_user_id,
     event_type,
     from_role,
@@ -141,18 +149,19 @@ const insertEventSql = `
     expires_at
   )
   SELECT
-    ?1, ?2, ?3, ?4, ?5, ?6,
-    ?7, ?8, ?9, ?10, ?11, ?12,
-    ?13, ?14
+    ?1, ?2, ?3, ?4, ?5, ?6, ?7,
+    ?8, ?9, ?10, ?11, ?12, ?13,
+    ?14, ?15
   FROM team_invitations
   WHERE tenant_id = ?4
     AND invitation_key = ?3
-    AND role = ?8
-    AND status = ?10
-    AND version = ?12
-    AND last_actor_external_user_id = ?5
-    AND updated_at = ?13
-    AND expires_at = ?14
+    AND role = ?9
+    AND status = ?11
+    AND version = ?13
+    AND last_actor_kind = ?5
+    AND last_actor_external_user_id = ?6
+    AND updated_at = ?14
+    AND expires_at = ?15
 `;
 
 const insertDeliverySql = `
@@ -214,7 +223,8 @@ interface InvitationRow {
   status: unknown;
   version: unknown;
   invitedByExternalUserId: unknown;
-  lastActorExternalUserId: unknown;
+  lastActorKind: unknown;
+  lastActorId: unknown;
   requestedAt: unknown;
   expiresAt: unknown;
   updatedAt: unknown;
@@ -225,7 +235,8 @@ interface InvitationEventRow {
   operationKey: unknown;
   invitationKey: unknown;
   tenantId: unknown;
-  actorExternalUserId: unknown;
+  actorKind: unknown;
+  actorId: unknown;
   eventType: unknown;
   fromRole: unknown;
   toRole: unknown;
@@ -255,7 +266,7 @@ interface InvitationEvent {
   operationKey: string;
   invitationKey: string;
   tenantId: number;
-  actorExternalUserId: UserId;
+  actor: TeamInvitationActor;
   eventType:
     TeamInvitationEventType;
   fromRole:
@@ -286,7 +297,8 @@ export interface TransitionTeamInvitationCommand {
   invitationKey: unknown;
   expectedVersion: unknown;
   toStatus: unknown;
-  actorExternalUserId: unknown;
+  actorExternalUserId?: unknown;
+  systemActorId?: unknown;
   occurredAt: unknown;
 }
 
@@ -391,9 +403,10 @@ function parseInvitation(
       requireTeamExternalUserId(
         row.invitedByExternalUserId,
       ),
-    lastActorExternalUserId:
-      requireTeamExternalUserId(
-        row.lastActorExternalUserId,
+    lastActor:
+      requireStoredTeamInvitationActor(
+        row.lastActorKind,
+        row.lastActorId,
       ),
     requestedAt,
     expiresAt,
@@ -455,9 +468,10 @@ function parseEvent(
       requireTeamTenantId(
         row.tenantId,
       ),
-    actorExternalUserId:
-      requireTeamExternalUserId(
-        row.actorExternalUserId,
+    actor:
+      requireStoredTeamInvitationActor(
+        row.actorKind,
+        row.actorId,
       ),
     eventType:
       parseEventType(
@@ -505,8 +519,13 @@ function eventsMatch(
 ): boolean {
   return (
     actual !== null &&
+    actual.actor.kind ===
+      expected.actor.kind &&
+    actual.actor.id ===
+      expected.actor.id &&
     Object.keys(expected).every(
       (key) =>
+        key === "actor" ||
         actual[
           key as keyof InvitationEvent
         ] ===
@@ -653,8 +672,8 @@ export function createTeamInvitationRepository(
       status:
         TeamInvitationStatus;
       version: number;
-      actorExternalUserId:
-        UserId;
+      actor:
+        TeamInvitationActor;
       occurredAt: string;
       expiresAt: string;
     },
@@ -732,9 +751,12 @@ export function createTeamInvitationRepository(
         expectedInvitation.status &&
       invitation.version ===
         expectedInvitation.version &&
-      invitation.lastActorExternalUserId ===
+      invitation.lastActor.kind ===
         expectedInvitation
-          .actorExternalUserId &&
+          .actor.kind &&
+      invitation.lastActor.id ===
+        expectedInvitation
+          .actor.id &&
       invitation.updatedAt ===
         expectedInvitation
           .occurredAt &&
@@ -941,7 +963,11 @@ export function createTeamInvitationRepository(
         operationKey,
         invitationKey,
         tenantId,
-        actorExternalUserId,
+        actor: {
+          kind: "user",
+          id:
+            actorExternalUserId,
+        },
         eventType,
         fromRole:
           current?.role ?? null,
@@ -997,6 +1023,7 @@ export function createTeamInvitationRepository(
               operationKey,
               invitationKey,
               tenantId,
+              "user",
               actorExternalUserId,
               eventType,
               current?.role ??
@@ -1029,7 +1056,11 @@ export function createTeamInvitationRepository(
           role,
           status: "pending",
           version: toVersion,
-          actorExternalUserId,
+          actor: {
+            kind: "user",
+            id:
+              actorExternalUserId,
+          },
           occurredAt: requestedAt,
           expiresAt,
         },
@@ -1074,10 +1105,23 @@ export function createTeamInvitationRepository(
         );
       }
 
-      const actorExternalUserId =
-        requireTeamExternalUserId(
-          command.actorExternalUserId,
+      const actor =
+        requireTeamInvitationActor({
+          actorExternalUserId:
+            command
+              .actorExternalUserId,
+          systemActorId:
+            command.systemActorId,
+        });
+
+      if (
+        actor.kind === "system" &&
+        toStatus !== "expired"
+      ) {
+        throw new Error(
+          "team invitation system actor operation is invalid",
         );
+      }
       const occurredAt =
         requireTeamTimestamp(
           command.occurredAt,
@@ -1112,7 +1156,16 @@ export function createTeamInvitationRepository(
             role: current.role,
             fromStatus:
               "pending",
-            actorExternalUserId,
+            ...(actor.kind ===
+            "user"
+              ? {
+                  actorExternalUserId:
+                    actor.id,
+                }
+              : {
+                  systemActorId:
+                    actor.id,
+                }),
             occurredAt,
             expiresAt:
               current.expiresAt,
@@ -1247,7 +1300,7 @@ export function createTeamInvitationRepository(
         operationKey,
         invitationKey,
         tenantId,
-        actorExternalUserId,
+        actor,
         eventType,
         fromRole:
           current.role,
@@ -1291,7 +1344,8 @@ export function createTeamInvitationRepository(
               expectedVersion,
               "pending",
               toStatus,
-              actorExternalUserId,
+              actor.kind,
+              actor.id,
               occurredAt,
             ),
         database
@@ -1301,7 +1355,8 @@ export function createTeamInvitationRepository(
               operationKey,
               invitationKey,
               tenantId,
-              actorExternalUserId,
+              actor.kind,
+              actor.id,
               eventType,
               current.role,
               current.role,
@@ -1325,7 +1380,7 @@ export function createTeamInvitationRepository(
             role: current.role,
             status: toStatus,
             version: toVersion,
-            actorExternalUserId,
+            actor,
             occurredAt,
             expiresAt:
               current.expiresAt,

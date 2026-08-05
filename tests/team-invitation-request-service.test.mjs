@@ -46,8 +46,10 @@ async function invitation(
     version: 1,
     invitedByExternalUserId:
       "owner-user",
-    lastActorExternalUserId:
-      "owner-user",
+    lastActor: {
+      kind: "user",
+      id: "owner-user",
+    },
     requestedAt,
     expiresAt:
       "2026-08-12T10:00:00.000Z",

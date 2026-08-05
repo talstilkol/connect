@@ -415,6 +415,132 @@ test("expires a pending invitation without changing its original expiry", async 
   );
 });
 
+test("records scheduled expiration under the approved system actor", async () => {
+  const fixture =
+    await createFixture();
+  const created =
+    await fixture.repository.request(
+      requestCommand,
+    );
+  const systemActorId =
+    "team-invitation-expiration-scheduler-v1";
+  const expired =
+    await fixture.repository.transition({
+      tenantId: 7,
+      invitationKey:
+        created.invitation
+          .invitationKey,
+      expectedVersion: 1,
+      toStatus: "expired",
+      systemActorId,
+      occurredAt: expiresAt,
+    });
+  const repeated =
+    await fixture.repository.transition({
+      tenantId: 7,
+      invitationKey:
+        created.invitation
+          .invitationKey,
+      expectedVersion: 1,
+      toStatus: "expired",
+      systemActorId,
+      occurredAt: expiresAt,
+    });
+
+  assert.equal(
+    expired.outcome,
+    "updated",
+  );
+  assert.equal(
+    repeated.outcome,
+    "unchanged",
+  );
+  assert.deepEqual(
+    expired.invitation.lastActor,
+    {
+      kind: "system",
+      id: systemActorId,
+    },
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            actor_kind AS actorKind,
+            actor_external_user_id AS actorId
+          FROM team_invitation_events
+          WHERE event_type = 'expired'
+        `)
+        .get(),
+    },
+    {
+      actorKind: "system",
+      actorId: systemActorId,
+    },
+  );
+});
+
+test("rejects ambiguous and unapproved transition actors before persistence", async () => {
+  const commands = [
+    {
+      actorExternalUserId:
+        "manager-user",
+      systemActorId:
+        "team-invitation-expiration-scheduler-v1",
+    },
+    {
+      systemActorId:
+        "unknown-scheduler",
+    },
+    {
+      systemActorId:
+        "team-invitation-expiration-scheduler-v1",
+      toStatus: "revoked",
+    },
+    {},
+  ];
+
+  for (const actor of commands) {
+    const fixture =
+      await createFixture();
+    const created =
+      await fixture.repository.request(
+        requestCommand,
+      );
+
+    await assert.rejects(
+      fixture.repository.transition({
+        tenantId: 7,
+        invitationKey:
+          created.invitation
+            .invitationKey,
+        expectedVersion: 1,
+        toStatus:
+          actor.toStatus ??
+          "expired",
+        occurredAt: expiresAt,
+        ...actor,
+      }),
+      /actor|system actor/,
+    );
+    assert.deepEqual(
+      {
+        ...fixture.database
+          .prepare(`
+            SELECT status, version
+            FROM team_invitations
+          `)
+          .get(),
+      },
+      {
+        status: "pending",
+        version: 1,
+      },
+    );
+  }
+});
+
 test("rejects stale, active re-request, cross-tenant, and pending transition input", async () => {
   const fixture =
     await createFixture();
@@ -639,5 +765,49 @@ test("database guards pending deletion, state versions, and event immutability",
         DELETE FROM team_invitation_events
       `),
     /events are immutable/,
+  );
+
+  fixture.database.exec(`
+    UPDATE team_invitation_deliveries
+    SET
+      status = 'cancelled',
+      last_error_code =
+        'INVITATION_EXPIRED'
+    WHERE invitation_key =
+      '${invitationKey}'
+  `);
+  assert.throws(
+    () =>
+      fixture.database.exec(`
+        UPDATE team_invitations
+        SET
+          status = 'expired',
+          version = 2,
+          last_actor_kind = 'system',
+          last_actor_external_user_id =
+            'unknown-scheduler',
+          updated_at =
+            '${expiresAt}'
+        WHERE invitation_key =
+          '${invitationKey}'
+      `),
+    /last_actor_kind_valid/,
+  );
+  assert.throws(
+    () =>
+      fixture.database.exec(`
+        UPDATE team_invitations
+        SET
+          status = 'revoked',
+          version = 2,
+          last_actor_kind = 'system',
+          last_actor_external_user_id =
+            'team-invitation-expiration-scheduler-v1',
+          updated_at =
+            '${expiresAt}'
+        WHERE invitation_key =
+          '${invitationKey}'
+      `),
+    /last_actor_kind_valid/,
   );
 });

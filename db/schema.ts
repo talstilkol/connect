@@ -55,6 +55,10 @@ export const teamInvitationEventTypes = [
   "revoked",
   "expired",
 ] as const;
+export const teamInvitationActorKinds = [
+  "user",
+  "system",
+] as const;
 export const teamInvitationDeliveryStatuses = [
   "pending",
   "sending",
@@ -526,6 +530,15 @@ export const teamInvitations =
       lastActorExternalUserId: text(
         "last_actor_external_user_id",
       ).notNull(),
+      lastActorKind: text(
+        "last_actor_kind",
+        {
+          enum:
+            teamInvitationActorKinds,
+        },
+      )
+        .notNull()
+        .default("user"),
       requestedAt: text(
         "requested_at",
       ).notNull(),
@@ -579,6 +592,16 @@ export const teamInvitations =
         sql`length(trim(${table.lastActorExternalUserId})) between 1 and 512
           and trim(${table.lastActorExternalUserId})
             = ${table.lastActorExternalUserId}`,
+      ),
+      check(
+        "team_invitations_last_actor_kind_valid",
+        sql`${table.lastActorKind} = 'user'
+          or (
+            ${table.lastActorKind} = 'system'
+            and ${table.status} = 'expired'
+            and ${table.lastActorExternalUserId}
+              = 'team-invitation-expiration-scheduler-v1'
+          )`,
       ),
       check(
         "team_invitations_requested_at_canonical",
@@ -641,6 +664,12 @@ export const teamInvitationEvents =
       actorExternalUserId: text(
         "actor_external_user_id",
       ).notNull(),
+      actorKind: text("actor_kind", {
+        enum:
+          teamInvitationActorKinds,
+      })
+        .notNull()
+        .default("user"),
       eventType: text("event_type", {
         enum:
           teamInvitationEventTypes,
@@ -696,6 +725,16 @@ export const teamInvitationEvents =
         sql`length(trim(${table.actorExternalUserId})) between 1 and 512
           and trim(${table.actorExternalUserId})
             = ${table.actorExternalUserId}`,
+      ),
+      check(
+        "team_invitation_events_actor_kind_valid",
+        sql`${table.actorKind} = 'user'
+          or (
+            ${table.actorKind} = 'system'
+            and ${table.eventType} = 'expired'
+            and ${table.actorExternalUserId}
+              = 'team-invitation-expiration-scheduler-v1'
+          )`,
       ),
       check(
         "team_invitation_events_type_valid",

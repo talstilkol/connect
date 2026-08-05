@@ -190,6 +190,13 @@
       "when": 1785946025000,
       "tag": "0026_team_invitation_transition_outbox_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "6",
+      "when": 1785950825000,
+      "tag": "0027_team_invitation_system_actor",
+      "breakpoints": true
     }
   ]
 }

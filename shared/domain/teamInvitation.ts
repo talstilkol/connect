@@ -21,6 +21,31 @@ export type TeamInvitationEventType =
   | "revoked"
   | "expired";
 
+export const teamInvitationActorKinds = [
+  "user",
+  "system",
+] as const;
+
+export type TeamInvitationActorKind =
+  (typeof teamInvitationActorKinds)[number];
+
+export const teamInvitationSystemActorIds = [
+  "team-invitation-expiration-scheduler-v1",
+] as const;
+
+export type TeamInvitationSystemActorId =
+  (typeof teamInvitationSystemActorIds)[number];
+
+export type TeamInvitationActor =
+  | {
+      kind: "user";
+      id: UserId;
+    }
+  | {
+      kind: "system";
+      id: TeamInvitationSystemActorId;
+    };
+
 export interface TeamInvitation {
   invitationKey: string;
   tenantId: number;
@@ -29,7 +54,7 @@ export interface TeamInvitation {
   status: TeamInvitationStatus;
   version: number;
   invitedByExternalUserId: UserId;
-  lastActorExternalUserId: UserId;
+  lastActor: TeamInvitationActor;
   requestedAt: string;
   expiresAt: string;
   updatedAt: string;
