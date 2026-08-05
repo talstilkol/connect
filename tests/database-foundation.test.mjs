@@ -64,6 +64,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0022_tenant_membership_lifecycle.sql",
     "0023_team_invitation_lifecycle.sql",
     "0024_team_invitation_outbox.sql",
+    "0025_team_invitation_reconciliation.sql",
   ]);
 
   const migration = await readFile(

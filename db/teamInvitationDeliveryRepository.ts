@@ -129,6 +129,20 @@ const settleDeliverySql = `
     ${deliveryColumnsSql}
 `;
 
+const reconcileDeliverySql = `
+  UPDATE team_invitation_deliveries
+  SET
+    status = ?3,
+    last_error_code = ?4,
+    submitted_at = ?5,
+    updated_at = ?6
+  WHERE tenant_id = ?1
+    AND delivery_key = ?2
+    AND status = 'ambiguous'
+  RETURNING
+    ${deliveryColumnsSql}
+`;
+
 interface DeliveryRow {
   deliveryKey: unknown;
   tenantId: unknown;
@@ -200,6 +214,17 @@ export interface TeamInvitationDeliveryRepository {
     occurredAt: unknown,
   ): Promise<TeamInvitationDelivery>;
   markAmbiguous(
+    tenantId: unknown,
+    deliveryKey: unknown,
+    errorCode: unknown,
+    occurredAt: unknown,
+  ): Promise<TeamInvitationDelivery>;
+  reconcileSubmitted(
+    tenantId: unknown,
+    deliveryKey: unknown,
+    occurredAt: unknown,
+  ): Promise<TeamInvitationDelivery>;
+  reconcileBlocked(
     tenantId: unknown,
     deliveryKey: unknown,
     errorCode: unknown,
@@ -515,6 +540,60 @@ export function createTeamInvitationDeliveryRepository(
     );
   }
 
+  async function reconcile(
+    tenantIdInput: unknown,
+    deliveryKeyInput: unknown,
+    status:
+      | "submitted"
+      | "blocked",
+    errorCodeInput: unknown,
+    occurredAtInput: unknown,
+  ): Promise<TeamInvitationDelivery> {
+    const tenantId =
+      requireTeamTenantId(
+        tenantIdInput,
+      );
+    const deliveryKey =
+      requireTeamInvitationDeliveryKey(
+        deliveryKeyInput,
+      );
+    const occurredAt =
+      requireTeamTimestamp(
+        occurredAtInput,
+      );
+    const errorCode =
+      status === "submitted"
+        ? null
+        : requireTeamInvitationDeliveryErrorCode(
+            errorCodeInput,
+          );
+    const submittedAt =
+      status === "submitted"
+        ? occurredAt
+        : null;
+    const row = await database
+      .prepare(reconcileDeliverySql)
+      .bind(
+        tenantId,
+        deliveryKey,
+        status,
+        errorCode,
+        submittedAt,
+        occurredAt,
+      )
+      .first<DeliveryRow>();
+
+    if (row !== null) {
+      return parseDelivery(row);
+    }
+
+    return requireSettled(
+      tenantId,
+      deliveryKey,
+      status,
+    );
+  }
+
   return {
     find,
 
@@ -718,6 +797,35 @@ export function createTeamInvitationDeliveryRepository(
         tenantId,
         deliveryKey,
         "ambiguous",
+        errorCode,
+        occurredAt,
+      );
+    },
+
+    reconcileSubmitted(
+      tenantId,
+      deliveryKey,
+      occurredAt,
+    ) {
+      return reconcile(
+        tenantId,
+        deliveryKey,
+        "submitted",
+        null,
+        occurredAt,
+      );
+    },
+
+    reconcileBlocked(
+      tenantId,
+      deliveryKey,
+      errorCode,
+      occurredAt,
+    ) {
+      return reconcile(
+        tenantId,
+        deliveryKey,
+        "blocked",
         errorCode,
         occurredAt,
       );

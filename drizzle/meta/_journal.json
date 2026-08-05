@@ -176,6 +176,13 @@
       "when": 1785940970223,
       "tag": "0024_team_invitation_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1785943285000,
+      "tag": "0025_team_invitation_reconciliation",
+      "breakpoints": true
     }
   ]
 }

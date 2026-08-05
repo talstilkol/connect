@@ -29,10 +29,30 @@ export type TeamInvitationProviderResult =
       status: "unavailable";
     };
 
+export interface TeamInvitationProviderLookupCommand {
+  requestKey: string;
+  tenantId: number;
+}
+
+export type TeamInvitationProviderLookupResult =
+  | {
+      status: "submitted";
+    }
+  | {
+      status: "not-found";
+    }
+  | {
+      status: "unavailable";
+    };
+
 export interface TeamInvitationProvider {
   invite(
     command:
       TeamInvitationProviderCommand,
+  ): Promise<unknown>;
+  lookup(
+    command:
+      TeamInvitationProviderLookupCommand,
   ): Promise<unknown>;
 }
 
@@ -40,6 +60,11 @@ export function createUnavailableTeamInvitationProvider():
 TeamInvitationProvider {
   return {
     async invite() {
+      return {
+        status: "unavailable",
+      };
+    },
+    async lookup() {
       return {
         status: "unavailable",
       };

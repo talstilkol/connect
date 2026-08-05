@@ -18,6 +18,10 @@ import {
   createTeamInvitationDispatchProcessor,
 } from "../server/team/teamInvitationDispatchProcessor.ts";
 import {
+  createTeamInvitationReconciliationProcessor,
+  TeamInvitationReconciliationError,
+} from "../server/team/teamInvitationReconciliationProcessor.ts";
+import {
   createUnavailableTeamInvitationProvider,
 } from "../server/team/teamInvitationProvider.ts";
 
@@ -208,6 +212,28 @@ async function stage(
     deliveryKey:
       row.deliveryKey,
   };
+}
+
+async function stageAmbiguous(
+  fixture,
+) {
+  const staged =
+    await stage(fixture);
+
+  await fixture.deliveries.claim(
+    7,
+    staged.deliveryKey,
+    "2026-08-05T10:01:00.000Z",
+  );
+  await fixture.deliveries
+    .markAmbiguous(
+      7,
+      staged.deliveryKey,
+      "PROVIDER_OUTCOME_UNKNOWN",
+      "2026-08-05T10:02:00.000Z",
+    );
+
+  return staged;
 }
 
 function clock(...timestamps) {
@@ -639,5 +665,226 @@ test("database rejects invalid delivery transitions and active deletion", async 
           '${staged.deliveryKey}'
       `),
     /active team invitation deliveries cannot be deleted/,
+  );
+});
+
+test("reconciles an ambiguous delivery as submitted without resending", async () => {
+  const fixture =
+    await createFixture();
+  const staged =
+    await stageAmbiguous(fixture);
+  const lookupCalls = [];
+  const processor =
+    createTeamInvitationReconciliationProcessor(
+      fixture.deliveries,
+      {
+        async lookup(command) {
+          lookupCalls.push(command);
+          return {
+            status: "submitted",
+          };
+        },
+      },
+      clock(
+        "2026-08-05T10:03:00.000Z",
+      ),
+    );
+
+  assert.deepEqual(
+    await processor.process(
+      7,
+      staged.deliveryKey,
+    ),
+    {
+      outcome:
+        "resolved-submitted",
+    },
+  );
+  assert.deepEqual(
+    await processor.process(
+      7,
+      staged.deliveryKey,
+    ),
+    { outcome: "duplicate" },
+  );
+  assert.deepEqual(
+    lookupCalls,
+    [
+      {
+        requestKey:
+          staged.deliveryKey,
+        tenantId: 7,
+      },
+    ],
+  );
+  const delivery =
+    await fixture.deliveries.find(
+      7,
+      staged.deliveryKey,
+    );
+
+  assert.equal(
+    delivery.status,
+    "submitted",
+  );
+  assert.equal(
+    delivery.lastErrorCode,
+    null,
+  );
+  assert.equal(
+    delivery.submittedAt,
+    "2026-08-05T10:03:00.000Z",
+  );
+});
+
+test("reconciles an authoritative provider miss as blocked", async () => {
+  const fixture =
+    await createFixture();
+  const staged =
+    await stageAmbiguous(fixture);
+  const processor =
+    createTeamInvitationReconciliationProcessor(
+      fixture.deliveries,
+      {
+        async lookup() {
+          return {
+            status: "not-found",
+          };
+        },
+      },
+      clock(
+        "2026-08-05T10:03:00.000Z",
+      ),
+    );
+
+  assert.deepEqual(
+    await processor.process(
+      7,
+      staged.deliveryKey,
+    ),
+    {
+      outcome:
+        "resolved-blocked",
+    },
+  );
+  const delivery =
+    await fixture.deliveries.find(
+      7,
+      staged.deliveryKey,
+    );
+
+  assert.equal(
+    delivery.status,
+    "blocked",
+  );
+  assert.equal(
+    delivery.lastErrorCode,
+    "PROVIDER_CONFIRMED_NOT_SUBMITTED",
+  );
+});
+
+test("keeps unavailable, failed, and malformed reconciliation deferred", async () => {
+  const providers = [
+    {
+      async lookup() {
+        return {
+          status: "unavailable",
+        };
+      },
+    },
+    {
+      async lookup() {
+        throw new Error(
+          "private lookup failure",
+        );
+      },
+    },
+    {
+      async lookup() {
+        return {
+          status: "submitted",
+          providerId: "private",
+        };
+      },
+    },
+  ];
+
+  for (const provider of providers) {
+    const fixture =
+      await createFixture();
+    const staged =
+      await stageAmbiguous(
+        fixture,
+      );
+    const processor =
+      createTeamInvitationReconciliationProcessor(
+        fixture.deliveries,
+        provider,
+      );
+
+    assert.deepEqual(
+      await processor.process(
+        7,
+        staged.deliveryKey,
+      ),
+      { outcome: "deferred" },
+    );
+    const delivery =
+      await fixture.deliveries
+        .find(
+          7,
+          staged.deliveryKey,
+        );
+
+    assert.equal(
+      delivery.status,
+      "ambiguous",
+    );
+    assert.equal(
+      delivery.lastErrorCode,
+      "PROVIDER_OUTCOME_UNKNOWN",
+    );
+  }
+});
+
+test("reconciliation fails closed for invalid input and illegal database transitions", async () => {
+  const fixture =
+    await createFixture();
+  const staged =
+    await stageAmbiguous(fixture);
+  let lookupCalls = 0;
+  const processor =
+    createTeamInvitationReconciliationProcessor(
+      fixture.deliveries,
+      {
+        async lookup() {
+          lookupCalls += 1;
+          return {
+            status: "submitted",
+          };
+        },
+      },
+    );
+
+  await assert.rejects(
+    processor.process(
+      "7",
+      staged.deliveryKey,
+    ),
+    TeamInvitationReconciliationError,
+  );
+  assert.equal(lookupCalls, 0);
+  assert.throws(
+    () =>
+      fixture.database.exec(`
+        UPDATE team_invitation_deliveries
+        SET
+          status = 'pending',
+          attempt_count = 0,
+          last_error_code = NULL
+        WHERE delivery_key =
+          '${staged.deliveryKey}'
+      `),
+    /transition is invalid/,
   );
 });
