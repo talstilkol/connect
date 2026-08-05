@@ -61,7 +61,7 @@ export function TeamDirectory({
             aria-describedby="team-invitation-unavailable"
             className="primary-button"
             disabled
-            title="הזמנות יופעלו לאחר חיבור Clerk User Directory וחוזה Audit"
+            title="הזמנות יופעלו לאחר חיבור Clerk User Directory ו־Server Action מאובטח"
             type="button"
           >
             הזמנת משתמש
@@ -76,7 +76,8 @@ export function TeamDirectory({
       >
         הזמנה ושינוי משתמשים נשארים
         חסומים עד חיבור פרטי זהות
-        מאומתים, Version ו־Audit אטומי.
+        מאומתים, Server Action מאובטח
+        ובדיקת E2E מול D1 חי.
       </p>
 
       {status === "ready" ? (

@@ -1,7 +1,3 @@
-import {
-  createHash,
-} from "node:crypto";
-
 import type {
   TenantMembershipRepository,
 } from "../../db/tenantMembershipRepository.ts";
@@ -17,27 +13,9 @@ import type {
   TeamIdentityDirectory,
   TeamIdentityDisplay,
 } from "./teamIdentityDirectory.ts";
-
-const memberKeyPattern =
-  /^team_member_v1_[a-f0-9]{64}$/;
-
-function deriveMemberKey(
-  session: TenantSession,
-  externalUserId: string,
-): string {
-  return `team_member_v1_${createHash(
-    "sha256",
-  )
-    .update(
-      JSON.stringify({
-        purpose:
-          "team-member-reference",
-        tenantId: session.tenantId,
-        externalUserId,
-      }),
-    )
-    .digest("hex")}`;
-}
+import {
+  deriveTeamMemberKey,
+} from "./teamMemberKey.ts";
 
 function toMemberView(
   session: TenantSession,
@@ -48,18 +26,10 @@ function toMemberView(
     TeamIdentityDisplay | null,
 ): TeamMemberView {
   const memberKey =
-    deriveMemberKey(
-      session,
+    deriveTeamMemberKey(
+      session.tenantId,
       externalUserId,
     );
-
-  if (
-    !memberKeyPattern.test(memberKey)
-  ) {
-    throw new Error(
-      "The derived team member key is invalid",
-    );
-  }
 
   return {
     memberKey,

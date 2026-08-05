@@ -20,9 +20,12 @@
    `team.manage`. לכל Membership יש Version חיובי; Identity Display
    עובר דרך Port שנכשל סגור ומציג Reference Code אטום עד חיבור ספק
    מאומת. Audit Events הם immutable ומקושרים למצב שנשמר.
-8. Local Release Gate עובר עם 916/916 בדיקות, 23 Migrations,
-   ‏333 קובצי Source ו־18 Client dependency graphs.
-9. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+8. שכבת Team Mutation השרתית מבצעת שינוי Role/Status ו־Owner
+   Transfer עם Expected Version ו־Audit אטומי. ה־React נשאר
+   Read-only עד Identity ו־E2E חיים.
+9. Local Release Gate עובר עם 925/925 בדיקות, 23 Migrations,
+   ‏339 קובצי Source ו־18 Client dependency graphs.
+10. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
