@@ -303,6 +303,34 @@ test("revokes and re-requests one stable invitation with exact versions", async 
     fixture.database
       .prepare(`
         SELECT
+          invitation_version AS invitationVersion,
+          status,
+          last_error_code AS lastErrorCode
+        FROM team_invitation_deliveries
+        ORDER BY invitation_version ASC
+      `)
+      .all()
+      .map((row) => ({
+        ...row,
+      })),
+    [
+      {
+        invitationVersion: 1,
+        status: "cancelled",
+        lastErrorCode:
+          "INVITATION_REVOKED",
+      },
+      {
+        invitationVersion: 3,
+        status: "pending",
+        lastErrorCode: null,
+      },
+    ],
+  );
+  assert.deepEqual(
+    fixture.database
+      .prepare(`
+        SELECT
           event_type AS eventType,
           from_version AS fromVersion,
           to_version AS toVersion
@@ -351,7 +379,7 @@ test("expires a pending invitation without changing its original expiry", async 
         expectedVersion: 1,
         toStatus: "expired",
         actorExternalUserId:
-          "system-expiry-worker",
+          "manager-user",
         occurredAt: expiresAt,
       },
     );
@@ -367,6 +395,23 @@ test("expires a pending invitation without changing its original expiry", async 
   assert.equal(
     expired.invitation.expiresAt,
     expiresAt,
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            status,
+            last_error_code AS lastErrorCode
+          FROM team_invitation_deliveries
+        `)
+        .get(),
+    },
+    {
+      status: "cancelled",
+      lastErrorCode:
+        "INVITATION_EXPIRED",
+    },
   );
 });
 
@@ -479,6 +524,74 @@ test("rolls back invitation state when audit persistence fails", async () => {
   );
 });
 
+test("rolls back transition and delivery cancellation when audit persistence fails", async () => {
+  const fixture =
+    await createFixture();
+  const created =
+    await fixture.repository.request(
+      requestCommand,
+    );
+
+  fixture.database.exec(`
+    CREATE TRIGGER reject_transition_event
+    BEFORE INSERT
+    ON team_invitation_events
+    WHEN NEW.event_type = 'revoked'
+    BEGIN
+      SELECT RAISE(
+        ABORT,
+        'transition event rejected'
+      );
+    END
+  `);
+
+  await assert.rejects(
+    fixture.repository.transition({
+      tenantId: 7,
+      invitationKey:
+        created.invitation
+          .invitationKey,
+      expectedVersion: 1,
+      toStatus: "revoked",
+      actorExternalUserId:
+        "manager-user",
+      occurredAt:
+        "2026-08-05T11:00:00.000Z",
+    }),
+    /persistence failed/,
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT status, version
+          FROM team_invitations
+        `)
+        .get(),
+    },
+    {
+      status: "pending",
+      version: 1,
+    },
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            status,
+            last_error_code AS lastErrorCode
+          FROM team_invitation_deliveries
+        `)
+        .get(),
+    },
+    {
+      status: "pending",
+      lastErrorCode: null,
+    },
+  );
+});
+
 test("database guards pending deletion, state versions, and event immutability", async () => {
   const fixture =
     await createFixture();
@@ -510,7 +623,7 @@ test("database guards pending deletion, state versions, and event immutability",
         WHERE invitation_key =
           '${invitationKey}'
       `),
-    /exact version transition/,
+    /exact version transition|pending invitation delivery/,
   );
   assert.throws(
     () =>

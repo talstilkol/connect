@@ -194,6 +194,18 @@ const findDeliverySql = `
   LIMIT 1
 `;
 
+const cancelDeliveryForTransitionSql = `
+  UPDATE team_invitation_deliveries
+  SET
+    status = 'cancelled',
+    last_error_code = ?4,
+    updated_at = ?5
+  WHERE tenant_id = ?1
+    AND invitation_key = ?2
+    AND invitation_version = ?3
+    AND status = 'pending'
+`;
+
 interface InvitationRow {
   invitationKey: unknown;
   tenantId: unknown;
@@ -583,6 +595,40 @@ export function createTeamInvitationRepository(
       : parseEvent(row);
   }
 
+  async function findDelivery(
+    deliveryKey: string,
+  ): Promise<InvitationDeliveryRow | null> {
+    return database
+      .prepare(
+        findDeliverySql,
+      )
+      .bind(deliveryKey)
+      .first<InvitationDeliveryRow>();
+  }
+
+  function deliveryIdentityMatches(
+    delivery:
+      InvitationDeliveryRow | null,
+    expected: {
+      deliveryKey: string;
+      tenantId: number;
+      invitationKey: string;
+      invitationVersion: number;
+    },
+  ): delivery is InvitationDeliveryRow {
+    return (
+      delivery !== null &&
+      delivery.deliveryKey ===
+        expected.deliveryKey &&
+      delivery.tenantId ===
+        expected.tenantId &&
+      delivery.invitationKey ===
+        expected.invitationKey &&
+      delivery.invitationVersion ===
+        expected.invitationVersion
+    );
+  }
+
   async function executeBatch(
     statements:
       readonly D1PreparedStatement[],
@@ -809,7 +855,6 @@ export function createTeamInvitationRepository(
               expectedVersion + 1,
           },
         );
-
       if (
         current !== null &&
         current.version ===
@@ -1081,6 +1126,15 @@ export function createTeamInvitationRepository(
             eventType,
           },
         );
+      const deliveryKey =
+        await deriveTeamInvitationDeliveryKey(
+          {
+            tenantId,
+            invitationKey,
+            invitationVersion:
+              expectedVersion,
+          },
+        );
 
       if (
         current.version ===
@@ -1098,6 +1152,32 @@ export function createTeamInvitationRepository(
           existingEvent.eventKey ===
             eventKey
         ) {
+          const delivery =
+            await findDelivery(
+              deliveryKey,
+            );
+
+          if (
+            !deliveryIdentityMatches(
+              delivery,
+              {
+                deliveryKey,
+                tenantId,
+                invitationKey,
+                invitationVersion:
+                  expectedVersion,
+              },
+            ) ||
+            delivery.status ===
+              "pending" ||
+            delivery.status ===
+              "sending"
+          ) {
+            throw new Error(
+              "team invitation transition delivery is not settled",
+            );
+          }
+
           return {
             outcome: "unchanged",
             invitation: current,
@@ -1118,6 +1198,39 @@ export function createTeamInvitationRepository(
       if (
         current.status !==
           "pending"
+      ) {
+        return {
+          outcome:
+            "invalid-transition",
+          invitation: current,
+        };
+      }
+
+      const delivery =
+        await findDelivery(
+          deliveryKey,
+        );
+
+      if (
+        !deliveryIdentityMatches(
+          delivery,
+          {
+            deliveryKey,
+            tenantId,
+            invitationKey,
+            invitationVersion:
+              expectedVersion,
+          },
+        )
+      ) {
+        throw new Error(
+          "team invitation transition delivery is missing",
+        );
+      }
+
+      if (
+        delivery.status ===
+        "sending"
       ) {
         return {
           outcome:
@@ -1148,9 +1261,27 @@ export function createTeamInvitationRepository(
         expiresAt:
           current.expiresAt,
       };
-      const batchWasSuccessful =
-        await executeBatch([
-          database
+      const transitionStatements = [
+        ...(delivery.status ===
+        "pending"
+          ? [
+              database
+                .prepare(
+                  cancelDeliveryForTransitionSql,
+                )
+                .bind(
+                  tenantId,
+                  invitationKey,
+                  expectedVersion,
+                  toStatus ===
+                    "expired"
+                    ? "INVITATION_EXPIRED"
+                    : "INVITATION_REVOKED",
+                  occurredAt,
+                ),
+            ]
+          : []),
+        database
             .prepare(
               transitionInvitationSql,
             )
@@ -1163,7 +1294,7 @@ export function createTeamInvitationRepository(
               actorExternalUserId,
               occurredAt,
             ),
-          database
+        database
             .prepare(insertEventSql)
             .bind(
               eventKey,
@@ -1181,25 +1312,56 @@ export function createTeamInvitationRepository(
               occurredAt,
               current.expiresAt,
             ),
-        ]);
+      ];
+      const batchWasSuccessful =
+        await executeBatch(
+          transitionStatements,
+        );
+      const result =
+        await verify(
+          tenantId,
+          invitationKey,
+          {
+            role: current.role,
+            status: toStatus,
+            version: toVersion,
+            actorExternalUserId,
+            occurredAt,
+            expiresAt:
+              current.expiresAt,
+          },
+          expectedEvent,
+          null,
+          batchWasSuccessful,
+          "updated",
+        );
+      const settledDelivery =
+        await findDelivery(
+          deliveryKey,
+        );
 
-      return verify(
-        tenantId,
-        invitationKey,
-        {
-          role: current.role,
-          status: toStatus,
-          version: toVersion,
-          actorExternalUserId,
-          occurredAt,
-          expiresAt:
-            current.expiresAt,
-        },
-        expectedEvent,
-        null,
-        batchWasSuccessful,
-        "updated",
-      );
+      if (
+        !deliveryIdentityMatches(
+          settledDelivery,
+          {
+            deliveryKey,
+            tenantId,
+            invitationKey,
+            invitationVersion:
+              expectedVersion,
+          },
+        ) ||
+        settledDelivery.status ===
+          "pending" ||
+        settledDelivery.status ===
+          "sending"
+      ) {
+        throw new Error(
+          "team invitation transition delivery is not settled",
+        );
+      }
+
+      return result;
     },
   };
 }

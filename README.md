@@ -38,11 +38,11 @@
 13. Queue ייעודי ו־Worker מחוברים ל־Outbox דרך Message contract
    מצומצם. כל עוד ה־Provider אינו מוגדר, ההודעה עוברת Retry לפני
    Claim והרשומה נשארת Pending.
-14. TTL ו־Re-request אינם מקבלים Defaults. עד הגדרה מפורשת,
-   ה־Server Action נכשל סגור ושער Production דורש החלטה.
-15. ה־React נשאר Read-only עד Identity Provider, ‏Expiration,
-   ‏Acceptance ו־E2E.
-16. Local Release Gate עובר עם 987/987 בדיקות, 26 Migrations,
+14. TTL ו־Re-request אינם מקבלים Defaults. הזמנה Pending שפג
+   עוברת ל־Expired עם Audit וביטול Outbox אטומי לפני Re-request.
+15. ה־React נשאר Read-only עד Identity Provider, ‏Expiration
+   מתוזמן, ‏Acceptance ו־E2E.
+16. Local Release Gate עובר עם 991/991 בדיקות, 27 Migrations,
    ‏361 קובצי Source ו־18 Client dependency graphs.
 17. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
    Decision Required.

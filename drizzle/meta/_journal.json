@@ -183,6 +183,13 @@
       "when": 1785943285000,
       "tag": "0025_team_invitation_reconciliation",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1785946025000,
+      "tag": "0026_team_invitation_transition_outbox_guard",
+      "breakpoints": true
     }
   ]
 }

@@ -200,45 +200,93 @@ export function createTeamInvitationRequestService(
       ) {
         if (
           current.role !==
-            parsed.role ||
-          Date.parse(
-            current.expiresAt,
-          ) <=
-            Date.parse(
-              requestedAt,
-            )
+          parsed.role
         ) {
           throw new TeamInvitationRequestError(
             "CONFLICT",
           );
         }
 
-        const deliveryKey =
-          await deriveTeamInvitationDeliveryKey(
-            {
-              tenantId:
-                session.tenantId,
-              invitationKey,
-              invitationVersion:
-                current.version,
-            },
-          );
+        if (
+          Date.parse(
+            current.expiresAt,
+          ) >
+          Date.parse(
+            requestedAt,
+          )
+        ) {
+          const deliveryKey =
+            await deriveTeamInvitationDeliveryKey(
+              {
+                tenantId:
+                  session.tenantId,
+                invitationKey,
+                invitationVersion:
+                  current.version,
+              },
+            );
+
+          try {
+            await publisher.publish(
+              session.tenantId,
+              deliveryKey,
+            );
+          } catch {
+            throw new TeamInvitationRequestError(
+              "QUEUE_UNAVAILABLE",
+            );
+          }
+
+          return {
+            status:
+              "already-pending",
+          };
+        }
+
+        let expiration;
 
         try {
-          await publisher.publish(
-            session.tenantId,
-            deliveryKey,
-          );
+          expiration =
+            await repository.transition(
+              {
+                tenantId:
+                  session.tenantId,
+                invitationKey,
+                expectedVersion:
+                  current.version,
+                toStatus: "expired",
+                actorExternalUserId:
+                  session
+                    .externalUserId,
+                occurredAt:
+                  requestedAt,
+              },
+            );
         } catch {
           throw new TeamInvitationRequestError(
-            "QUEUE_UNAVAILABLE",
+            "PERSISTENCE_UNAVAILABLE",
           );
         }
 
-        return {
-          status:
-            "already-pending",
-        };
+        if (
+          (
+            expiration.outcome !==
+              "updated" &&
+            expiration.outcome !==
+              "unchanged"
+          ) ||
+          expiration.invitation ===
+            null ||
+          expiration.invitation
+            .status !== "expired"
+        ) {
+          throw new TeamInvitationRequestError(
+            "CONFLICT",
+          );
+        }
+
+        current =
+          expiration.invitation;
       }
 
       if (

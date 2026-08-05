@@ -59,6 +59,7 @@ async function invitation(
 function createFixture({
   current = null,
   requestResult,
+  transitionResult,
   queueError,
   policy = {
     ttlHours: 168,
@@ -85,6 +86,14 @@ function createFixture({
         command,
       });
       return requestResult;
+    },
+    async transition(command) {
+      calls.push({
+        operation:
+          "transition",
+        command,
+      });
+      return transitionResult;
     },
   };
   const publisher = {
@@ -252,6 +261,74 @@ test("re-requests only a terminal invitation when policy explicitly allows it", 
   );
 });
 
+test("expires a due invitation before an allowed re-request", async () => {
+  const current =
+    await invitation({
+      expiresAt:
+        requestedAt,
+    });
+  const expired =
+    await invitation({
+      status: "expired",
+      version: 2,
+      expiresAt:
+        requestedAt,
+    });
+  const renewed =
+    await invitation({
+      version: 3,
+    });
+  const fixture =
+    createFixture({
+      current,
+      transitionResult: {
+        outcome: "updated",
+        invitation: expired,
+      },
+      requestResult: {
+        outcome: "updated",
+        invitation: renewed,
+      },
+    });
+
+  assert.deepEqual(
+    await fixture.service.invite(
+      session,
+      input,
+    ),
+    { status: "queued" },
+  );
+  assert.deepEqual(
+    fixture.calls
+      .filter((call) =>
+        [
+          "transition",
+          "request",
+          "publish",
+        ].includes(
+          call.operation,
+        ),
+      )
+      .map(
+        (call) =>
+          call.operation,
+      ),
+    [
+      "transition",
+      "request",
+      "publish",
+    ],
+  );
+  assert.equal(
+    fixture.calls.find(
+      (call) =>
+        call.operation ===
+        "request",
+    ).command.expectedVersion,
+    2,
+  );
+});
+
 test("blocks terminal re-request and pending role changes according to policy", async () => {
   const scenarios = [
     {
@@ -280,20 +357,6 @@ test("blocks terminal re-request and pending role changes according to policy", 
         ...input,
         role: "manager",
       },
-      code: "CONFLICT",
-    },
-    {
-      current:
-        await invitation({
-          expiresAt:
-            requestedAt,
-        }),
-      policy: {
-        ttlHours: 168,
-        reRequest:
-          "after-terminal",
-      },
-      requestInput: input,
       code: "CONFLICT",
     },
   ];

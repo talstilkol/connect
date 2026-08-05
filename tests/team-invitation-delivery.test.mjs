@@ -538,7 +538,12 @@ test("cancels an obsolete or expired delivery before provider access", async () 
         7,
         staged.deliveryKey,
       ),
-      { outcome: "cancelled" },
+      {
+        outcome:
+          mode === "revoked"
+            ? "duplicate"
+            : "cancelled",
+      },
     );
     assert.equal(
       providerCalls,
@@ -564,8 +569,8 @@ test("marks a second claim ambiguous and blocks invitation transition while send
     ).outcome,
     "claimed",
   );
-  await assert.rejects(
-    fixture.invitations
+  assert.deepEqual(
+    await fixture.invitations
       .transition({
         tenantId: 7,
         invitationKey:
@@ -578,7 +583,12 @@ test("marks a second claim ambiguous and blocks invitation transition while send
         occurredAt:
           "2026-08-05T10:02:00.000Z",
       }),
-    /persistence failed/,
+    {
+      outcome:
+        "invalid-transition",
+      invitation:
+        staged.invitation,
+    },
   );
   const processor =
     createTeamInvitationDispatchProcessor(
@@ -1067,4 +1077,187 @@ test("republishes one persisted outbox after queue failure without duplicate sta
       1,
     );
   }
+});
+
+test("expires and cancels a due outbox before creating a re-request", async () => {
+  const fixture =
+    await createFixture();
+
+  await fixture.invitations
+    .request(requestCommand);
+  const queueCalls = [];
+  const service =
+    createTeamInvitationRequestService(
+      fixture.invitations,
+      {
+        async publish(
+          tenantId,
+          deliveryKey,
+        ) {
+          queueCalls.push({
+            tenantId,
+            deliveryKey,
+          });
+          return {
+            outcome: "queued",
+          };
+        },
+      },
+      {
+        ttlHours: 168,
+        reRequest:
+          "after-terminal",
+      },
+      () => expiresAt,
+    );
+
+  assert.deepEqual(
+    await service.invite(
+      {
+        tenantId: 7,
+        displayName:
+          "workspace",
+        status: "active",
+        role: "owner",
+        externalUserId:
+          "manager-user",
+      },
+      {
+        email:
+          requestCommand.email,
+        role:
+          requestCommand.role,
+      },
+    ),
+    { status: "queued" },
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            status,
+            version,
+            expires_at AS expiresAt
+          FROM team_invitations
+        `)
+        .get(),
+    },
+    {
+      status: "pending",
+      version: 3,
+      expiresAt:
+        "2026-08-19T10:00:00.000Z",
+    },
+  );
+  assert.deepEqual(
+    fixture.database
+      .prepare(`
+        SELECT
+          invitation_version AS invitationVersion,
+          status,
+          last_error_code AS lastErrorCode
+        FROM team_invitation_deliveries
+        ORDER BY invitation_version ASC
+      `)
+      .all()
+      .map((row) => ({
+        ...row,
+      })),
+    [
+      {
+        invitationVersion: 1,
+        status: "cancelled",
+        lastErrorCode:
+          "INVITATION_EXPIRED",
+      },
+      {
+        invitationVersion: 3,
+        status: "pending",
+        lastErrorCode: null,
+      },
+    ],
+  );
+  assert.equal(
+    fixture.database
+      .prepare(`
+        SELECT count(*) AS count
+        FROM team_invitation_events
+      `)
+      .get().count,
+    3,
+  );
+  assert.equal(
+    queueCalls.length,
+    1,
+  );
+});
+
+test("records expiration but does not re-request when policy disables it", async () => {
+  const fixture =
+    await createFixture();
+
+  await fixture.invitations
+    .request(requestCommand);
+  let queueCalls = 0;
+  const service =
+    createTeamInvitationRequestService(
+      fixture.invitations,
+      {
+        async publish() {
+          queueCalls += 1;
+          return {
+            outcome: "queued",
+          };
+        },
+      },
+      {
+        ttlHours: 168,
+        reRequest:
+          "disabled",
+      },
+      () => expiresAt,
+    );
+
+  await assert.rejects(
+    service.invite(
+      {
+        tenantId: 7,
+        displayName:
+          "workspace",
+        status: "active",
+        role: "owner",
+        externalUserId:
+          "manager-user",
+      },
+      {
+        email:
+          requestCommand.email,
+        role:
+          requestCommand.role,
+      },
+    ),
+    (error) =>
+      error instanceof
+        TeamInvitationRequestError &&
+      error.code ===
+        "REREQUEST_DISABLED",
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            status,
+            version
+          FROM team_invitations
+        `)
+        .get(),
+    },
+    {
+      status: "expired",
+      version: 2,
+    },
+  );
+  assert.equal(queueCalls, 0);
 });
