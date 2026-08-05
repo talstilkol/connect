@@ -17,6 +17,7 @@ test("routes tenant-only mutation modules through the mutation session", async (
     "contacts/contactImportActions.ts",
     "contacts/contactOrganizationActions.ts",
     "meta/metaEmbeddedSignupActions.ts",
+    "team/teamMembershipActions.ts",
     "templates/messageTemplateActions.ts",
   ];
 
