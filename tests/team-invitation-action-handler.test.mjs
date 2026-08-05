@@ -11,9 +11,12 @@ import {
   createTeamInvitationActionHandler,
 } from "../server/team/teamInvitationActionHandler.ts";
 import {
-  TeamInvitationError,
-  TeamInvitationInputError,
-} from "../server/team/teamInvitationService.ts";
+  TeamInvitationRequestError,
+  TeamInvitationRequestInputError,
+} from "../server/team/teamInvitationRequestService.ts";
+import {
+  TeamInvitationPolicyConfigurationError,
+} from "../server/team/teamInvitationPolicy.ts";
 
 const session = {
   tenantId: 7,
@@ -65,7 +68,7 @@ function fixture(options = {}) {
                 return {
                   status:
                     options.status ??
-                    "submitted",
+                    "queued",
                 };
               },
             },
@@ -101,10 +104,10 @@ test("stops before identity when Clerk configuration is missing", async () => {
   );
 });
 
-test("returns bounded submitted and idempotent outcomes", async () => {
+test("returns bounded queued and idempotent outcomes", async () => {
   for (
     const status of [
-      "submitted",
+      "queued",
       "already-pending",
     ]
   ) {
@@ -177,20 +180,32 @@ test("maps authentication, rate limit, input, and provider failures", async () =
       "contextError",
     ],
     [
-      new TeamInvitationInputError(),
+      new TeamInvitationRequestInputError(),
       "invalid-input",
       "serviceError",
     ],
     [
-      new TeamInvitationError(
-        "PROVIDER_UNAVAILABLE",
+      new TeamInvitationPolicyConfigurationError(),
+      "configuration-required",
+      "contextError",
+    ],
+    [
+      new TeamInvitationRequestError(
+        "CONFLICT",
       ),
-      "provider-unavailable",
+      "conflict",
       "serviceError",
     ],
     [
-      new TeamInvitationError(
-        "PROVIDER_FAILED",
+      new TeamInvitationRequestError(
+        "REREQUEST_DISABLED",
+      ),
+      "conflict",
+      "serviceError",
+    ],
+    [
+      new TeamInvitationRequestError(
+        "QUEUE_UNAVAILABLE",
       ),
       "temporarily-unavailable",
       "serviceError",

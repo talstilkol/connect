@@ -30,11 +30,23 @@ test("composes invitations through a protected fail-closed server action", async
   );
   assert.match(
     source,
-    /createUnavailableTeamInvitationProvider/,
+    /createTeamInvitationRepository/,
   );
   assert.match(
     source,
-    /createTeamInvitationService/,
+    /createTeamInvitationRequestService/,
+  );
+  assert.match(
+    source,
+    /requireRuntimeTeamInvitationPublisher/,
+  );
+  assert.match(
+    source,
+    /requireTeamInvitationPolicy/,
+  );
+  assert.doesNotMatch(
+    source,
+    /createUnavailableTeamInvitationProvider|createTeamInvitationService/,
   );
   assert.doesNotMatch(
     source,

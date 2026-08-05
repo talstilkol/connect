@@ -55,6 +55,17 @@ export function createTeamInvitationPublisherFromEnvironment(
   );
 }
 
+export async function requireRuntimeTeamInvitationPublisher() {
+  const { env } =
+    await import(
+      "cloudflare:workers"
+    );
+
+  return createTeamInvitationPublisherFromEnvironment(
+    env,
+  );
+}
+
 export function createTeamInvitationQueueBatchHandler(
   environment:
     TeamInvitationQueueEnvironment,

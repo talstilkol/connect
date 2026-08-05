@@ -27,6 +27,8 @@ test("reports ready only when every production dependency is ready", () => {
   const report = inspectProductionReadiness({
     clerk: "configured",
     systemAdmin: "configured",
+    teamInvitationPolicy:
+      "configured",
     metaEmbeddedSignup: "configured",
     metaWebhook: "configured",
     knowledgeUploadPolicy: "configured",
@@ -51,7 +53,7 @@ test("reports ready only when every production dependency is ready", () => {
 
   assert.equal(report.readyForProduction, true);
   assert.deepEqual(report.counts, {
-    ready: 30,
+    ready: 31,
     blocked: 0,
     decisionRequired: 0,
   });
@@ -76,7 +78,7 @@ test("fails closed for absent environment and unresolved implementation", () => 
   assert.deepEqual(report.counts, {
     ready: 5,
     blocked: 15,
-    decisionRequired: 10,
+    decisionRequired: 11,
   });
   assert.equal(
     report.checks.find(
@@ -96,6 +98,8 @@ test("rejects renamed or absent hosting bindings", () => {
   const report = inspectProductionReadiness({
     clerk: "configured",
     systemAdmin: "configured",
+    teamInvitationPolicy:
+      "configured",
     metaEmbeddedSignup: "configured",
     metaWebhook: "configured",
     knowledgeUploadPolicy: "configured",

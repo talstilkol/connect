@@ -22,6 +22,10 @@ import {
   TeamInvitationReconciliationError,
 } from "../server/team/teamInvitationReconciliationProcessor.ts";
 import {
+  createTeamInvitationRequestService,
+  TeamInvitationRequestError,
+} from "../server/team/teamInvitationRequestService.ts";
+import {
   createUnavailableTeamInvitationProvider,
 } from "../server/team/teamInvitationProvider.ts";
 
@@ -887,4 +891,180 @@ test("reconciliation fails closed for invalid input and illegal database transit
       `),
     /transition is invalid/,
   );
+});
+
+test("persists invitation, audit, and outbox before queue publication", async () => {
+  const fixture =
+    await createFixture();
+  const queueCalls = [];
+  const service =
+    createTeamInvitationRequestService(
+      fixture.invitations,
+      {
+        async publish(
+          tenantId,
+          deliveryKey,
+        ) {
+          queueCalls.push({
+            tenantId,
+            deliveryKey,
+          });
+          return {
+            outcome: "queued",
+          };
+        },
+      },
+      {
+        ttlHours: 168,
+        reRequest:
+          "after-terminal",
+      },
+      () => requestedAt,
+    );
+
+  assert.deepEqual(
+    await service.invite(
+      {
+        tenantId: 7,
+        displayName:
+          "workspace",
+        status: "active",
+        role: "owner",
+        externalUserId:
+          "manager-user",
+      },
+      {
+        email:
+          requestCommand.email,
+        role:
+          requestCommand.role,
+      },
+    ),
+    { status: "queued" },
+  );
+  assert.equal(
+    queueCalls.length,
+    1,
+  );
+
+  for (
+    const table of [
+      "team_invitations",
+      "team_invitation_events",
+      "team_invitation_deliveries",
+    ]
+  ) {
+    assert.equal(
+      fixture.database
+        .prepare(
+          `SELECT count(*) AS count FROM ${table}`,
+        )
+        .get().count,
+      1,
+    );
+  }
+});
+
+test("republishes one persisted outbox after queue failure without duplicate state", async () => {
+  const fixture =
+    await createFixture();
+  const publisher = {
+    shouldFail: true,
+    calls: [],
+    async publish(
+      tenantId,
+      deliveryKey,
+    ) {
+      this.calls.push({
+        tenantId,
+        deliveryKey,
+      });
+
+      if (this.shouldFail) {
+        throw new Error(
+          "private queue failure",
+        );
+      }
+
+      return {
+        outcome: "queued",
+      };
+    },
+  };
+  const service =
+    createTeamInvitationRequestService(
+      fixture.invitations,
+      publisher,
+      {
+        ttlHours: 168,
+        reRequest:
+          "after-terminal",
+      },
+      () => requestedAt,
+    );
+  const requestInput = {
+    email:
+      requestCommand.email,
+    role:
+      requestCommand.role,
+  };
+  const invitationSession = {
+    tenantId: 7,
+    displayName: "workspace",
+    status: "active",
+    role: "owner",
+    externalUserId:
+      "manager-user",
+  };
+
+  await assert.rejects(
+    service.invite(
+      invitationSession,
+      requestInput,
+    ),
+    (error) =>
+      error instanceof
+        TeamInvitationRequestError &&
+      error.code ===
+        "QUEUE_UNAVAILABLE",
+  );
+  publisher.shouldFail = false;
+
+  assert.deepEqual(
+    await service.invite(
+      invitationSession,
+      requestInput,
+    ),
+    {
+      status:
+        "already-pending",
+    },
+  );
+  assert.equal(
+    publisher.calls.length,
+    2,
+  );
+  assert.equal(
+    publisher.calls[0]
+      .deliveryKey,
+    publisher.calls[1]
+      .deliveryKey,
+  );
+
+  for (
+    const table of [
+      "team_invitations",
+      "team_invitation_events",
+      "team_invitation_deliveries",
+    ]
+  ) {
+    assert.equal(
+      fixture.database
+        .prepare(
+          `SELECT count(*) AS count FROM ${table}`,
+        )
+        .get().count,
+      1,
+    );
+  }
 });

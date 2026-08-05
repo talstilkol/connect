@@ -18,6 +18,15 @@ export interface ProductionDecisionView
 
 export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
   {
+    checkId:
+      "identity.team-invitation-policy",
+    title:
+      "מדיניות תפוגה והזמנה מחדש",
+    detail:
+      "יש לקבוע את משך תוקף ההזמנה והאם ניתן להזמין מחדש לאחר מצב סופי.",
+    owner: "מוצר + אבטחה",
+  },
+  {
     checkId: "ai.provider",
     title: "ספק AI ומודל חיוב",
     detail:

@@ -3,6 +3,9 @@
 import {
   requireRuntimeDatabase,
 } from "../../db/runtimeDatabase.ts";
+import {
+  createTeamInvitationRepository,
+} from "../../db/teamInvitationRepository.ts";
 import type {
   TeamInvitationActionResult,
 } from "../../shared/domain/teamInvitationView.ts";
@@ -16,11 +19,14 @@ import {
   createTeamInvitationActionHandler,
 } from "./teamInvitationActionHandler.ts";
 import {
-  createUnavailableTeamInvitationProvider,
-} from "./teamInvitationProvider.ts";
+  requireTeamInvitationPolicy,
+} from "./teamInvitationPolicy.ts";
 import {
-  createTeamInvitationService,
-} from "./teamInvitationService.ts";
+  requireRuntimeTeamInvitationPublisher,
+} from "./teamInvitationQueueRuntime.ts";
+import {
+  createTeamInvitationRequestService,
+} from "./teamInvitationRequestService.ts";
 
 function createActionHandler() {
   return createTeamInvitationActionHandler(
@@ -35,12 +41,18 @@ function createActionHandler() {
           await requireCurrentTenantMutationSession(
             database,
           );
+        const publisher =
+          await requireRuntimeTeamInvitationPublisher();
 
         return {
           session,
           service:
-            createTeamInvitationService(
-              createUnavailableTeamInvitationProvider(),
+            createTeamInvitationRequestService(
+              createTeamInvitationRepository(
+                database,
+              ),
+              publisher,
+              requireTeamInvitationPolicy(),
             ),
         };
       },

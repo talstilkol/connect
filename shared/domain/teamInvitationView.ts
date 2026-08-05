@@ -6,13 +6,13 @@ export type TeamInvitationActionFailureStatus =
   | "permission-denied"
   | "rate-limited"
   | "temporarily-unavailable"
-  | "provider-unavailable"
+  | "conflict"
   | "invalid-input"
   | "server-error";
 
 export type TeamInvitationActionResult =
   | {
-      status: "submitted";
+      status: "queued";
     }
   | {
       status: "already-pending";

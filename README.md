@@ -23,9 +23,9 @@
 8. שכבת Team Mutation השרתית מבצעת שינוי Role/Status ו־Owner
    Transfer עם Expected Version ו־Audit אטומי. Server Actions
    מוגנים ב־Mutation Session וב־Rate Limit ומחזירים DTO אטום.
-9. תשתית Invitation Request מאמתת אימייל ותפקיד, מייצרת מפתח
-   Idempotency דטרמיניסטי ומבודד Tenant ועוברת דרך Server Action
-   מוגן. ה־Provider הפעיל נכשל סגור ואינו שולח הזמנה.
+9. Invitation Request מאמת אימייל ותפקיד, דורש Policy מפורשת
+   ומבודד Tenant דרך Server Action מוגן. State, ‏Audit ו־Outbox
+   נשמרים לפני פרסום Delivery Key ל־Queue.
 10. מחזור חיי Invitation נשמר ב־D1 עם Version, ‏Audit אטומי
    ומצבי Pending, ‏Revoked ו־Expired. ‏Acceptance נשאר חסום עד
    קישור אטומי ל־Identity ול־Membership.
@@ -38,16 +38,18 @@
 13. Queue ייעודי ו־Worker מחוברים ל־Outbox דרך Message contract
    מצומצם. כל עוד ה־Provider אינו מוגדר, ההודעה עוברת Retry לפני
    Claim והרשומה נשארת Pending.
-14. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
-   חיבור ה־Publisher ל־Request, ‏Acceptance ו־E2E.
-15. Local Release Gate עובר עם 974/974 בדיקות, 26 Migrations,
-   ‏359 קובצי Source ו־18 Client dependency graphs.
-16. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+14. TTL ו־Re-request אינם מקבלים Defaults. עד הגדרה מפורשת,
+   ה־Server Action נכשל סגור ושער Production דורש החלטה.
+15. ה־React נשאר Read-only עד Identity Provider, ‏Expiration,
+   ‏Acceptance ו־E2E.
+16. Local Release Gate עובר עם 987/987 בדיקות, 26 Migrations,
+   ‏361 קובצי Source ו־18 Client dependency graphs.
+17. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
-1. שער Production מרכז 30 בדיקות ונכשל סגור עבור כל חסימה או
+1. שער Production מרכז 31 בדיקות ונכשל סגור עבור כל חסימה או
    החלטה חסרה.
 2. Meta Webhook, פעולות Tenant ופעולות System Admin משתמשים בשלוש
    Policies נפרדות של Rate Limiting.

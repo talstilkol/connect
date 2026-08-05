@@ -10,14 +10,17 @@ import {
   TenantMutationRateLimitError,
 } from "../security/tenantMutationRateLimit.ts";
 import {
-  TeamInvitationError,
-  TeamInvitationInputError,
-  type createTeamInvitationService,
-} from "./teamInvitationService.ts";
+  TeamInvitationRequestError,
+  TeamInvitationRequestInputError,
+  type createTeamInvitationRequestService,
+} from "./teamInvitationRequestService.ts";
+import {
+  TeamInvitationPolicyConfigurationError,
+} from "./teamInvitationPolicy.ts";
 
 type TeamInvitationService =
   ReturnType<
-    typeof createTeamInvitationService
+    typeof createTeamInvitationRequestService
   >;
 
 interface ActionContext {
@@ -73,7 +76,7 @@ function mapFailure(
 
   if (
     error instanceof
-    TeamInvitationInputError
+    TeamInvitationRequestInputError
   ) {
     return {
       status: "invalid-input",
@@ -82,13 +85,25 @@ function mapFailure(
 
   if (
     error instanceof
-    TeamInvitationError
+    TeamInvitationPolicyConfigurationError
+  ) {
+    return {
+      status:
+        "configuration-required",
+    };
+  }
+
+  if (
+    error instanceof
+    TeamInvitationRequestError
   ) {
     return {
       status:
         error.code ===
-        "PROVIDER_UNAVAILABLE"
-          ? "provider-unavailable"
+          "CONFLICT" ||
+        error.code ===
+          "REREQUEST_DISABLED"
+          ? "conflict"
           : "temporarily-unavailable",
     };
   }

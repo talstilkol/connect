@@ -34,7 +34,7 @@ const LIST_RECORDS_SQL = `
   SELECT ${RECORD_COLUMNS_SQL}
   FROM production_decision_records
   ORDER BY check_id ASC
-  LIMIT 10
+  LIMIT 11
 `;
 
 const FIND_RECORD_SQL = `
@@ -185,7 +185,7 @@ export function createProductionDecisionRepository(
       );
       const rows = result.results ?? [];
 
-      if (rows.length > 10) {
+      if (rows.length > 11) {
         throw new Error(
           "production decision list is unbounded",
         );

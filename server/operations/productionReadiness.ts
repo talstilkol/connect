@@ -40,6 +40,9 @@ import {
 import {
   inspectCiExecutionEvidence,
 } from "./ciExecutionEvidence.ts";
+import {
+  inspectTeamInvitationPolicy,
+} from "../team/teamInvitationPolicy.ts";
 import type {
   ProductionReadinessCategory,
   ProductionReadinessCheck,
@@ -65,6 +68,8 @@ export interface ProductionHostingBindings {
 export interface ProductionReadinessInput {
   clerk: ConfigurationState;
   systemAdmin: ConfigurationState;
+  teamInvitationPolicy:
+    ConfigurationState;
   metaEmbeddedSignup: ConfigurationState;
   metaWebhook: ConfigurationState;
   knowledgeUploadPolicy: ConfigurationState;
@@ -85,6 +90,8 @@ export interface ProductionReadinessEnvironment {
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?: string;
   CLERK_SECRET_KEY?: string;
   CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS?: string;
+  TEAM_INVITATION_TTL_HOURS?: string;
+  TEAM_INVITATION_REREQUEST_POLICY?: string;
   META_APP_ID?: string;
   META_APP_SECRET?: string;
   META_EMBEDDED_SIGNUP_CONFIGURATION_ID?: string;
@@ -201,6 +208,20 @@ export function inspectProductionReadiness(
       ready: isConfigured(input.systemAdmin),
       readyCode: "SYSTEM_ADMIN_CONFIGURED",
       blockedCode: "SYSTEM_ADMIN_CONFIGURATION_REQUIRED",
+    }),
+    toCheck({
+      id:
+        "identity.team-invitation-policy",
+      category: "identity",
+      ready: isConfigured(
+        input.teamInvitationPolicy,
+      ),
+      readyCode:
+        "TEAM_INVITATION_POLICY_CONFIGURED",
+      blockedCode:
+        "TEAM_INVITATION_POLICY_REQUIRED",
+      blockedStatus:
+        "decision-required",
     }),
     toCheck({
       id: "storage.d1-binding",
@@ -467,6 +488,12 @@ export function inspectCurrentProductionReadiness(
     clerk: inspectClerkConfiguration(environment).status,
     systemAdmin:
       inspectSystemAdminConfiguration(environment).status,
+    teamInvitationPolicy:
+      inspectTeamInvitationPolicy(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
     metaEmbeddedSignup:
       inspectMetaEmbeddedSignupServerReadiness(
         environment,
