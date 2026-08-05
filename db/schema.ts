@@ -642,6 +642,13 @@ export const teamInvitations =
         table.status,
         table.expiresAt,
       ),
+      index(
+        "team_invitations_expiration_scan_idx",
+      ).on(
+        table.status,
+        table.expiresAt,
+        table.invitationKey,
+      ),
     ],
   );
 

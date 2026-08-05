@@ -52,7 +52,19 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   );
   assert.match(
     workerSource,
-    /createCampaignScheduledHandler\(env\)\.run\(\)/,
+    /createCampaignScheduledHandler/,
+  );
+  assert.match(
+    workerSource,
+    /createTeamInvitationExpirationScheduledHandler/,
+  );
+  assert.match(
+    workerSource,
+    /controller\.scheduledTime/,
+  );
+  assert.match(
+    workerSource,
+    /await Promise\.all/,
   );
   assert.doesNotMatch(
     workerSource,

@@ -9,8 +9,14 @@ import {
 import test from "node:test";
 
 import {
+  createTeamInvitationExpirationRepository,
+} from "../db/teamInvitationExpirationRepository.ts";
+import {
   createTeamInvitationRepository,
 } from "../db/teamInvitationRepository.ts";
+import {
+  createTeamInvitationExpirationScheduler,
+} from "../server/team/teamInvitationExpirationScheduler.ts";
 import {
   deriveTeamInvitationKey,
 } from "../server/team/teamInvitationKey.ts";
@@ -150,13 +156,20 @@ async function createFixture() {
       (8, 'other-workspace', 'active')
   `);
 
+  const binding =
+    new SqliteD1Database(
+      database,
+    );
+
   return {
     database,
     repository:
       createTeamInvitationRepository(
-        new SqliteD1Database(
-          database,
-        ),
+        binding,
+      ),
+    expirationRepository:
+      createTeamInvitationExpirationRepository(
+        binding,
       ),
   };
 }
@@ -478,6 +491,188 @@ test("records scheduled expiration under the approved system actor", async () =>
       actorKind: "system",
       actorId: systemActorId,
     },
+  );
+});
+
+test("scans due invitations by exclusive keyset and expires one bounded run", async () => {
+  const fixture =
+    await createFixture();
+  const invitations = [
+    {
+      email:
+        "first@example.com",
+      expiresAt:
+        "2026-08-10T10:00:00.000Z",
+    },
+    {
+      email:
+        "second@example.com",
+      expiresAt:
+        "2026-08-11T10:00:00.000Z",
+    },
+    {
+      email:
+        "future@example.com",
+      expiresAt:
+        "2026-08-13T10:00:00.000Z",
+    },
+  ];
+
+  for (
+    const invitation of
+      invitations
+  ) {
+    await fixture.repository.request({
+      ...requestCommand,
+      email: invitation.email,
+      expiresAt:
+        invitation.expiresAt,
+    });
+  }
+
+  const firstPage =
+    await fixture
+      .expirationRepository
+      .listDuePage(
+        expiresAt,
+        null,
+        1,
+      );
+  const secondPage =
+    await fixture
+      .expirationRepository
+      .listDuePage(
+        expiresAt,
+        firstPage.nextCursor,
+        1,
+      );
+  const finalPage =
+    await fixture
+      .expirationRepository
+      .listDuePage(
+        expiresAt,
+        secondPage.nextCursor,
+        1,
+      );
+
+  assert.equal(
+    firstPage.invitations[0]
+      .expiresAt,
+    "2026-08-10T10:00:00.000Z",
+  );
+  assert.equal(
+    secondPage.invitations[0]
+      .expiresAt,
+    "2026-08-11T10:00:00.000Z",
+  );
+  assert.deepEqual(
+    finalPage,
+    {
+      invitations: [],
+      nextCursor: null,
+    },
+  );
+  for (
+    const input of [
+      {
+        cutoff: "invalid",
+        cursor: null,
+        limit: 1,
+      },
+      {
+        cutoff: expiresAt,
+        cursor: {
+          ...firstPage
+            .nextCursor,
+          extra: true,
+        },
+        limit: 1,
+      },
+      {
+        cutoff: expiresAt,
+        cursor: null,
+        limit: 51,
+      },
+    ]
+  ) {
+    await assert.rejects(
+      fixture
+        .expirationRepository
+        .listDuePage(
+          input.cutoff,
+          input.cursor,
+          input.limit,
+        ),
+      /expiration|timestamp/,
+    );
+  }
+
+  const scheduler =
+    createTeamInvitationExpirationScheduler(
+      fixture
+        .expirationRepository,
+      fixture.repository,
+      {
+        now() {
+          return new Date(
+            expiresAt,
+          );
+        },
+      },
+    );
+
+  assert.deepEqual(
+    await scheduler.run(),
+    {
+      scanned: 2,
+      expired: 2,
+      idempotent: 0,
+      skipped: 0,
+      limitReached: false,
+    },
+  );
+  assert.deepEqual(
+    await scheduler.run(),
+    {
+      scanned: 0,
+      expired: 0,
+      idempotent: 0,
+      skipped: 0,
+      limitReached: false,
+    },
+  );
+  assert.deepEqual(
+    fixture.database
+      .prepare(`
+        SELECT status, count(*) AS count
+        FROM team_invitations
+        GROUP BY status
+        ORDER BY status ASC
+      `)
+      .all()
+      .map((row) => ({
+        ...row,
+      })),
+    [
+      {
+        status: "expired",
+        count: 2,
+      },
+      {
+        status: "pending",
+        count: 1,
+      },
+    ],
+  );
+  assert.equal(
+    fixture.database
+      .prepare(`
+        SELECT count(*) AS count
+        FROM team_invitation_events
+        WHERE actor_kind = 'system'
+      `)
+      .get().count,
+    2,
   );
 });
 

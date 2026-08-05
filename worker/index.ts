@@ -92,6 +92,9 @@ import {
 import type {
   TeamInvitationQueueBinding,
 } from "../server/team/teamInvitationQueuePublisher.ts";
+import {
+  createTeamInvitationExpirationScheduledHandler,
+} from "../server/team/teamInvitationExpirationRuntime.ts";
 
 interface AssetFetcher {
   fetch(request: Request): Promise<Response>;
@@ -267,7 +270,19 @@ const worker = {
       throw new Error("Unsupported cron trigger");
     }
 
-    await createCampaignScheduledHandler(env).run();
+    await Promise.all([
+      Promise.resolve().then(() =>
+        createCampaignScheduledHandler(
+          env,
+        ).run(),
+      ),
+      Promise.resolve().then(() =>
+        createTeamInvitationExpirationScheduledHandler(
+          env,
+          controller.scheduledTime,
+        ).run(),
+      ),
+    ]);
   },
 };
 

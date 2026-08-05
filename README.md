@@ -40,11 +40,11 @@
    Claim והרשומה נשארת Pending.
 14. TTL ו־Re-request אינם מקבלים Defaults. הזמנה Pending שפג
    עוברת ל־Expired עם Audit וביטול Outbox אטומי לפני Re-request.
-15. Audit של Invitation מבחין בין User Actor לבין System Actor
-   מאושר. ה־React נשאר Read-only עד Identity Provider, ‏Expiration
-   מתוזמן, ‏Acceptance ו־E2E.
-16. Local Release Gate עובר עם 996/996 בדיקות, 28 Migrations,
-   ‏362 קובצי Source ו־18 Client dependency graphs.
+15. Expiration Scheduler סורק הזמנות שפגו ב־Keyset Pages של עשרה,
+   עד 50 בריצה, ומבצע Transition עם Expected Version ו־System Actor.
+   ה־React נשאר Read-only עד Identity Provider, ‏Acceptance ו־E2E.
+16. Local Release Gate עובר עם 1005/1005 בדיקות, 29 Migrations,
+   ‏365 קובצי Source ו־18 Client dependency graphs.
 17. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
    Decision Required.
 

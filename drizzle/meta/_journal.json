@@ -197,6 +197,13 @@
       "when": 1785950825000,
       "tag": "0027_team_invitation_system_actor",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "6",
+      "when": 1785954425000,
+      "tag": "0028_team_invitation_expiration_scan",
+      "breakpoints": true
     }
   ]
 }

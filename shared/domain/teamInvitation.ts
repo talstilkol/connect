@@ -29,8 +29,11 @@ export const teamInvitationActorKinds = [
 export type TeamInvitationActorKind =
   (typeof teamInvitationActorKinds)[number];
 
+export const teamInvitationExpirationSystemActorId =
+  "team-invitation-expiration-scheduler-v1";
+
 export const teamInvitationSystemActorIds = [
-  "team-invitation-expiration-scheduler-v1",
+  teamInvitationExpirationSystemActorId,
 ] as const;
 
 export type TeamInvitationSystemActorId =
