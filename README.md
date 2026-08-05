@@ -23,10 +23,14 @@
 8. שכבת Team Mutation השרתית מבצעת שינוי Role/Status ו־Owner
    Transfer עם Expected Version ו־Audit אטומי. Server Actions
    מוגנים ב־Mutation Session וב־Rate Limit ומחזירים DTO אטום.
-9. ה־React נשאר Read-only עד Identity ו־E2E חיים.
-10. Local Release Gate עובר עם 932/932 בדיקות, 23 Migrations,
-   ‏343 קובצי Source ו־18 Client dependency graphs.
-11. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+9. תשתית Invitation Request מאמתת אימייל ותפקיד, מייצרת מפתח
+   Idempotency דטרמיניסטי ומבודד Tenant ועוברת דרך Server Action
+   מוגן. ה־Provider הפעיל נכשל סגור ואינו שולח הזמנה.
+10. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
+   מחזור חיים מתמשך ו־E2E חיים.
+11. Local Release Gate עובר עם 945/945 בדיקות, 23 Migrations,
+   ‏350 קובצי Source ו־18 Client dependency graphs.
+12. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
