@@ -7,6 +7,7 @@ export const teamInvitationStatuses = [
   "pending",
   "revoked",
   "expired",
+  "accepted",
 ] as const;
 
 export type TeamInvitationStatus =

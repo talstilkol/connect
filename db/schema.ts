@@ -837,6 +837,123 @@ export const teamInvitationEvents =
     ],
   );
 
+export const teamInvitationAcceptances =
+  sqliteTable(
+    "team_invitation_acceptances",
+    {
+      acceptanceKey: text(
+        "acceptance_key",
+      ).primaryKey(),
+      tenantId: integer(
+        "tenant_id",
+      ).notNull(),
+      invitationKey: text(
+        "invitation_key",
+      ).notNull(),
+      externalUserId: text(
+        "external_user_id",
+      ).notNull(),
+      normalizedEmail: text(
+        "normalized_email",
+      ).notNull(),
+      role: text("role", {
+        enum: tenantRoles,
+      }).notNull(),
+      fromVersion: integer(
+        "from_version",
+      ).notNull(),
+      toVersion: integer(
+        "to_version",
+      ).notNull(),
+      acceptedAt: text(
+        "accepted_at",
+      ).notNull(),
+      expiresAt: text(
+        "expires_at",
+      ).notNull(),
+      createdAt: text("created_at")
+        .notNull()
+        .default(sql`CURRENT_TIMESTAMP`),
+    },
+    (table) => [
+      check(
+        "team_invitation_acceptances_key_valid",
+        sql`length(${table.acceptanceKey}) = 94
+          and ${table.acceptanceKey} glob 'team_invitation_acceptance_v1_[0-9a-f]*'
+          and substr(${table.acceptanceKey}, 31) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "team_invitation_acceptances_user_bounded",
+        sql`length(trim(${table.externalUserId})) between 1 and 512
+          and trim(${table.externalUserId}) = ${table.externalUserId}`,
+      ),
+      check(
+        "team_invitation_acceptances_email_normalized",
+        sql`length(${table.normalizedEmail}) between 3 and 254
+          and ${table.normalizedEmail} = lower(trim(${table.normalizedEmail}))
+          and instr(${table.normalizedEmail}, '@') > 1`,
+      ),
+      check(
+        "team_invitation_acceptances_role_valid",
+        sql`${table.role} in ('manager', 'agent', 'viewer')`,
+      ),
+      check(
+        "team_invitation_acceptances_version_transition",
+        sql`${table.fromVersion} >= 1
+          and ${table.toVersion} = ${table.fromVersion} + 1`,
+      ),
+      check(
+        "team_invitation_acceptances_time_valid",
+        sql`length(${table.acceptedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.acceptedAt})
+            = ${table.acceptedAt}
+          and length(${table.expiresAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.expiresAt})
+            = ${table.expiresAt}
+          and ${table.acceptedAt} < ${table.expiresAt}`,
+      ),
+      foreignKey({
+        columns: [
+          table.tenantId,
+          table.invitationKey,
+        ],
+        foreignColumns: [
+          teamInvitations.tenantId,
+          teamInvitations.invitationKey,
+        ],
+        name:
+          "team_invitation_acceptances_invitation_fk",
+      }).onDelete("restrict"),
+      foreignKey({
+        columns: [
+          table.tenantId,
+          table.externalUserId,
+        ],
+        foreignColumns: [
+          tenantMemberships.tenantId,
+          tenantMemberships.externalUserId,
+        ],
+        name:
+          "team_invitation_acceptances_membership_fk",
+      }).onDelete("restrict"),
+      uniqueIndex(
+        "team_invitation_acceptances_invitation_uq",
+      ).on(table.invitationKey),
+      uniqueIndex(
+        "team_invitation_acceptances_tenant_user_uq",
+      ).on(
+        table.tenantId,
+        table.externalUserId,
+      ),
+      index(
+        "team_invitation_acceptances_tenant_accepted_idx",
+      ).on(
+        table.tenantId,
+        table.acceptedAt,
+      ),
+    ],
+  );
+
 export const teamInvitationDeliveries =
   sqliteTable(
     "team_invitation_deliveries",

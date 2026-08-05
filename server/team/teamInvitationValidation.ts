@@ -152,6 +152,23 @@ export function requireTeamInvitationEventKey(
   return value;
 }
 
+export function requireTeamInvitationAcceptanceKey(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string" ||
+    !/^team_invitation_acceptance_v1_[0-9a-f]{64}$/.test(
+      value,
+    )
+  ) {
+    throw new Error(
+      "team invitation acceptance key is invalid",
+    );
+  }
+
+  return value;
+}
+
 export function requireTeamInvitationStatus(
   value: unknown,
 ): TeamInvitationStatus {

@@ -38,21 +38,31 @@ import type {
 
 const findInvitationSql = `
   SELECT
-    invitation_key AS invitationKey,
-    tenant_id AS tenantId,
-    normalized_email AS normalizedEmail,
-    role,
-    status,
-    version,
-    invited_by_external_user_id AS invitedByExternalUserId,
-    last_actor_kind AS lastActorKind,
-    last_actor_external_user_id AS lastActorId,
-    requested_at AS requestedAt,
-    expires_at AS expiresAt,
-    updated_at AS updatedAt
+    team_invitations.invitation_key AS invitationKey,
+    team_invitations.tenant_id AS tenantId,
+    team_invitations.normalized_email AS normalizedEmail,
+    team_invitations.role,
+    CASE
+      WHEN team_invitation_acceptances.acceptance_key
+        IS NOT NULL
+        THEN 'accepted'
+      ELSE team_invitations.status
+    END AS status,
+    team_invitations.version,
+    team_invitations.invited_by_external_user_id AS invitedByExternalUserId,
+    team_invitations.last_actor_kind AS lastActorKind,
+    team_invitations.last_actor_external_user_id AS lastActorId,
+    team_invitations.requested_at AS requestedAt,
+    team_invitations.expires_at AS expiresAt,
+    team_invitations.updated_at AS updatedAt
   FROM team_invitations
-  WHERE tenant_id = ?1
-    AND invitation_key = ?2
+  LEFT JOIN team_invitation_acceptances
+    ON team_invitation_acceptances.tenant_id =
+      team_invitations.tenant_id
+    AND team_invitation_acceptances.invitation_key =
+      team_invitations.invitation_key
+  WHERE team_invitations.tenant_id = ?1
+    AND team_invitations.invitation_key = ?2
   LIMIT 1
 `;
 
@@ -955,6 +965,18 @@ export function createTeamInvitationRepository(
         };
       }
 
+      if (
+        current !== null &&
+        current.status ===
+          "accepted"
+      ) {
+        return {
+          outcome:
+            "invalid-transition",
+          invitation: current,
+        };
+      }
+
       const toVersion =
         expectedVersion + 1;
       const expectedEvent:
@@ -1098,10 +1120,11 @@ export function createTeamInvitationRepository(
         );
 
       if (
-        toStatus === "pending"
+        toStatus !== "revoked" &&
+        toStatus !== "expired"
       ) {
         throw new Error(
-          "pending requires a new invitation request",
+          "team invitation transition status is invalid",
         );
       }
 

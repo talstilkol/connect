@@ -21,6 +21,14 @@ const listDueInvitationsSql = `
   FROM team_invitations
   WHERE status = 'pending'
     AND expires_at <= ?1
+    AND NOT EXISTS (
+      SELECT 1
+      FROM team_invitation_acceptances
+      WHERE team_invitation_acceptances.tenant_id =
+        team_invitations.tenant_id
+        AND team_invitation_acceptances.invitation_key =
+          team_invitations.invitation_key
+    )
     AND (
       ?2 IS NULL
       OR expires_at > ?2

@@ -9,6 +9,9 @@ import {
 import test from "node:test";
 
 import {
+  createTeamInvitationAcceptanceRepository,
+} from "../db/teamInvitationAcceptanceRepository.ts";
+import {
   createTeamInvitationExpirationRepository,
 } from "../db/teamInvitationExpirationRepository.ts";
 import {
@@ -169,6 +172,10 @@ async function createFixture() {
       ),
     expirationRepository:
       createTeamInvitationExpirationRepository(
+        binding,
+      ),
+    acceptanceRepository:
+      createTeamInvitationAcceptanceRepository(
         binding,
       ),
   };
@@ -676,6 +683,376 @@ test("scans due invitations by exclusive keyset and expires one bounded run", as
   );
 });
 
+test("accepts one verified invitation atomically and keeps retries idempotent", async () => {
+  const fixture =
+    await createFixture();
+  const created =
+    await fixture.repository.request(
+      requestCommand,
+    );
+  const command = {
+    invitationKey:
+      created.invitation
+        .invitationKey,
+    externalUserId:
+      "accepted-user",
+    verifiedEmail:
+      "team.member@example.com",
+    acceptedAt:
+      "2026-08-06T10:00:00.000Z",
+  };
+  const accepted =
+    await fixture
+      .acceptanceRepository
+      .accept(command);
+  const repeated =
+    await fixture
+      .acceptanceRepository
+      .accept(command);
+
+  assert.equal(
+    accepted.outcome,
+    "created",
+  );
+  assert.equal(
+    repeated.outcome,
+    "unchanged",
+  );
+  assert.equal(
+    accepted.invitation.status,
+    "accepted",
+  );
+  assert.equal(
+    accepted.invitation.version,
+    2,
+  );
+  assert.deepEqual(
+    accepted.membership,
+    {
+      tenantId: 7,
+      externalUserId:
+        "accepted-user",
+      role: "agent",
+      status: "active",
+      version: 1,
+    },
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            status,
+            last_error_code AS lastErrorCode
+          FROM team_invitation_deliveries
+        `)
+        .get(),
+    },
+    {
+      status: "cancelled",
+      lastErrorCode:
+        "INVITATION_ACCEPTED",
+    },
+  );
+  assert.equal(
+    fixture.database
+      .prepare(`
+        SELECT count(*) AS count
+        FROM team_invitation_acceptances
+      `)
+      .get().count,
+    1,
+  );
+  assert.deepEqual(
+    await fixture
+      .expirationRepository
+      .listDuePage(
+        expiresAt,
+        null,
+        10,
+      ),
+    {
+      invitations: [],
+      nextCursor: null,
+    },
+  );
+  assert.throws(
+    () =>
+      fixture.database.exec(`
+        UPDATE team_invitations
+        SET updated_at =
+          '2026-08-07T10:00:00.000Z'
+        WHERE invitation_key =
+          '${created.invitation.invitationKey}'
+      `),
+    /accepted team invitations are immutable/,
+  );
+});
+
+test("rejects mismatched, expired, revoked, sending, and existing-member acceptance", async () => {
+  const cases = [
+    {
+      setup: "email",
+      expected:
+        "email-mismatch",
+    },
+    {
+      setup: "expired",
+      expected:
+        "invalid-transition",
+    },
+    {
+      setup: "revoked",
+      expected:
+        "invalid-transition",
+    },
+    {
+      setup: "sending",
+      expected:
+        "invalid-transition",
+    },
+    {
+      setup: "member",
+      expected: "conflict",
+    },
+  ];
+
+  for (
+    const testCase of cases
+  ) {
+    const fixture =
+      await createFixture();
+    const created =
+      await fixture.repository
+        .request(requestCommand);
+    const invitationKey =
+      created.invitation
+        .invitationKey;
+
+    if (
+      testCase.setup ===
+      "revoked"
+    ) {
+      await fixture.repository
+        .transition({
+          tenantId: 7,
+          invitationKey,
+          expectedVersion: 1,
+          toStatus: "revoked",
+          actorExternalUserId:
+            "manager-user",
+          occurredAt:
+            "2026-08-05T11:00:00.000Z",
+        });
+    }
+
+    if (
+      testCase.setup ===
+      "sending"
+    ) {
+      fixture.database.exec(`
+        UPDATE team_invitation_deliveries
+        SET
+          status = 'sending',
+          attempt_count = 1,
+          updated_at =
+            '2026-08-05T11:00:00.000Z'
+      `);
+    }
+
+    if (
+      testCase.setup ===
+      "member"
+    ) {
+      fixture.database.exec(`
+        INSERT INTO tenant_memberships (
+          tenant_id,
+          external_user_id,
+          role,
+          status,
+          version,
+          created_at,
+          updated_at
+        )
+        VALUES (
+          7,
+          'accepted-user',
+          'viewer',
+          'active',
+          1,
+          '2026-08-05T11:00:00.000Z',
+          '2026-08-05T11:00:00.000Z'
+        )
+      `);
+    }
+
+    const result =
+      await fixture
+        .acceptanceRepository
+        .accept({
+          invitationKey,
+          externalUserId:
+            "accepted-user",
+          verifiedEmail:
+            testCase.setup ===
+            "email"
+              ? "other@example.com"
+              : "team.member@example.com",
+          acceptedAt:
+            testCase.setup ===
+            "expired"
+              ? expiresAt
+              : "2026-08-06T10:00:00.000Z",
+        });
+
+    assert.equal(
+      result.outcome,
+      testCase.expected,
+    );
+    assert.equal(
+      fixture.database
+        .prepare(`
+          SELECT count(*) AS count
+          FROM team_invitation_acceptances
+        `)
+        .get().count,
+      0,
+    );
+  }
+});
+
+test("rolls back invitation, membership, outbox, and acceptance audit together", async () => {
+  const fixture =
+    await createFixture();
+  const created =
+    await fixture.repository.request(
+      requestCommand,
+    );
+
+  fixture.database.exec(`
+    CREATE TRIGGER reject_acceptance_audit
+    BEFORE INSERT
+    ON team_invitation_acceptances
+    BEGIN
+      SELECT RAISE(
+        ABORT,
+        'acceptance rejected'
+      );
+    END
+  `);
+
+  await assert.rejects(
+    fixture
+      .acceptanceRepository
+      .accept({
+        invitationKey:
+          created.invitation
+            .invitationKey,
+        externalUserId:
+          "accepted-user",
+        verifiedEmail:
+          "team.member@example.com",
+        acceptedAt:
+          "2026-08-06T10:00:00.000Z",
+      }),
+    /persistence failed/,
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT status, version
+          FROM team_invitations
+        `)
+        .get(),
+    },
+    {
+      status: "pending",
+      version: 1,
+    },
+  );
+  assert.deepEqual(
+    {
+      ...fixture.database
+        .prepare(`
+          SELECT
+            status,
+            last_error_code AS lastErrorCode
+          FROM team_invitation_deliveries
+        `)
+        .get(),
+    },
+    {
+      status: "pending",
+      lastErrorCode: null,
+    },
+  );
+
+  for (
+    const table of [
+      "team_invitation_acceptances",
+      "tenant_memberships",
+    ]
+  ) {
+    assert.equal(
+      fixture.database
+        .prepare(
+          `SELECT count(*) AS count FROM ${table}`,
+        )
+        .get().count,
+      0,
+    );
+  }
+});
+
+test("keeps concurrent acceptance exact and single-use", async () => {
+  const fixture =
+    await createFixture();
+  const created =
+    await fixture.repository.request(
+      requestCommand,
+    );
+  const command = {
+    invitationKey:
+      created.invitation
+        .invitationKey,
+    externalUserId:
+      "accepted-user",
+    verifiedEmail:
+      "team.member@example.com",
+    acceptedAt:
+      "2026-08-06T10:00:00.000Z",
+  };
+  const outcomes = (
+    await Promise.all([
+      fixture
+        .acceptanceRepository
+        .accept(command),
+      fixture
+        .acceptanceRepository
+        .accept(command),
+    ])
+  )
+    .map(({ outcome }) =>
+      outcome,
+    )
+    .sort();
+
+  assert.deepEqual(
+    outcomes,
+    ["created", "unchanged"],
+  );
+  assert.equal(
+    fixture.database
+      .prepare(`
+        SELECT count(*) AS count
+        FROM tenant_memberships
+      `)
+      .get().count,
+    1,
+  );
+});
+
 test("rejects ambiguous and unapproved transition actors before persistence", async () => {
   const commands = [
     {
@@ -736,7 +1113,7 @@ test("rejects ambiguous and unapproved transition actors before persistence", as
   }
 });
 
-test("rejects stale, active re-request, cross-tenant, and pending transition input", async () => {
+test("rejects stale, active re-request, cross-tenant, and non-terminal transition input", async () => {
   const fixture =
     await createFixture();
   const created =
@@ -808,7 +1185,24 @@ test("rejects stale, active re-request, cross-tenant, and pending transition inp
           "2026-08-05T11:00:00.000Z",
       },
     ),
-    /pending requires/,
+    /transition status is invalid/,
+  );
+  await assert.rejects(
+    fixture.repository.transition(
+      {
+        tenantId: 7,
+        invitationKey:
+          created.invitation
+            .invitationKey,
+        expectedVersion: 1,
+        toStatus: "accepted",
+        actorExternalUserId:
+          "manager-user",
+        occurredAt:
+          "2026-08-05T11:00:00.000Z",
+      },
+    ),
+    /transition status is invalid/,
   );
 });
 
@@ -944,7 +1338,7 @@ test("database guards pending deletion, state versions, and event immutability",
         WHERE invitation_key =
           '${invitationKey}'
       `),
-    /exact version transition|pending invitation delivery/,
+    /exact version transition|active invitation delivery/,
   );
   assert.throws(
     () =>

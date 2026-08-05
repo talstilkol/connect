@@ -27,8 +27,7 @@
    ומבודד Tenant דרך Server Action מוגן. State, ‏Audit ו־Outbox
    נשמרים לפני פרסום Delivery Key ל־Queue.
 10. מחזור חיי Invitation נשמר ב־D1 עם Version, ‏Audit אטומי
-   ומצבי Pending, ‏Revoked ו־Expired. ‏Acceptance נשאר חסום עד
-   קישור אטומי ל־Identity ול־Membership.
+   ומצבי Pending, ‏Revoked, ‏Expired ו־Accepted לוגי.
 11. Durable Outbox נכתב באותה טרנזקציה עם Invitation ו־Audit.
    ה־Processor מבצע Claim יחיד, מסווג Provider unavailable כ־
    Blocked ותוצאה לא ידועה כ־Ambiguous ללא Retry אוטומטי.
@@ -42,10 +41,14 @@
    עוברת ל־Expired עם Audit וביטול Outbox אטומי לפני Re-request.
 15. Expiration Scheduler סורק הזמנות שפגו ב־Keyset Pages של עשרה,
    עד 50 בריצה, ומבצע Transition עם Expected Version ו־System Actor.
-   ה־React נשאר Read-only עד Identity Provider, ‏Acceptance ו־E2E.
-16. Local Release Gate עובר עם 1005/1005 בדיקות, 29 Migrations,
-   ‏365 קובצי Source ו־18 Client dependency graphs.
-17. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
+16. Acceptance מאומת מבטל Outbox Pending, מעדכן Version, יוצר
+   Membership פעיל וכותב Acceptance Audit immutable באותו D1 Batch.
+   הוכחת הזהות אינה נשמרת, ו־Retry זהה אינו מכפיל Membership.
+17. ה־React נשאר Read-only עד חיבור Identity Provider אמיתי
+   והשלמת Browser E2E.
+18. Local Release Gate עובר עם 1013/1013 בדיקות, 30 Migrations,
+   ‏368 קובצי Source ו־18 Client dependency graphs.
+19. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
