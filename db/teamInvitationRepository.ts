@@ -10,6 +10,7 @@ import type {
 } from "../shared/domain/teamInvitation.ts";
 import {
   deriveTeamInvitationEventKey,
+  deriveTeamInvitationDeliveryKey,
   deriveTeamInvitationKey,
   deriveTeamInvitationOperationKey,
 } from "../server/team/teamInvitationKey.ts";
@@ -154,6 +155,45 @@ const insertEventSql = `
     AND expires_at = ?14
 `;
 
+const insertDeliverySql = `
+  INSERT INTO team_invitation_deliveries (
+    delivery_key,
+    tenant_id,
+    invitation_key,
+    invitation_version,
+    status,
+    attempt_count,
+    created_at,
+    updated_at
+  )
+  SELECT
+    ?1, ?2, ?3, ?4,
+    'pending', 0, ?5, ?5
+  FROM team_invitations
+  WHERE tenant_id = ?2
+    AND invitation_key = ?3
+    AND version = ?4
+    AND status = 'pending'
+    AND requested_at = ?5
+`;
+
+const findDeliverySql = `
+  SELECT
+    delivery_key AS deliveryKey,
+    tenant_id AS tenantId,
+    invitation_key AS invitationKey,
+    invitation_version AS invitationVersion,
+    status,
+    attempt_count AS attemptCount,
+    last_error_code AS lastErrorCode,
+    submitted_at AS submittedAt,
+    created_at AS createdAt,
+    updated_at AS updatedAt
+  FROM team_invitation_deliveries
+  WHERE delivery_key = ?1
+  LIMIT 1
+`;
+
 interface InvitationRow {
   invitationKey: unknown;
   tenantId: unknown;
@@ -183,6 +223,19 @@ interface InvitationEventRow {
   toVersion: unknown;
   occurredAt: unknown;
   expiresAt: unknown;
+}
+
+interface InvitationDeliveryRow {
+  deliveryKey: unknown;
+  tenantId: unknown;
+  invitationKey: unknown;
+  invitationVersion: unknown;
+  status: unknown;
+  attemptCount: unknown;
+  lastErrorCode: unknown;
+  submittedAt: unknown;
+  createdAt: unknown;
+  updatedAt: unknown;
 }
 
 interface InvitationEvent {
@@ -455,9 +508,11 @@ function eventsMatch(
 function batchesSucceeded(
   results:
     readonly D1Result[],
+  expectedLength: number,
 ): boolean {
   return (
-    results.length === 2 &&
+    results.length ===
+      expectedLength &&
     results.every(
       (result) =>
         result.success &&
@@ -537,6 +592,7 @@ export function createTeamInvitationRepository(
         await database.batch(
           statements,
         ),
+        statements.length,
       );
     } catch {
       return false;
@@ -558,6 +614,13 @@ export function createTeamInvitationRepository(
     },
     expectedEvent:
       InvitationEvent,
+    expectedDelivery:
+      | {
+          deliveryKey: string;
+          invitationVersion: number;
+          createdAt: string;
+        }
+      | null,
     batchWasSuccessful: boolean,
     successOutcome:
       "created" | "updated",
@@ -565,6 +628,7 @@ export function createTeamInvitationRepository(
     const [
       invitation,
       event,
+      delivery,
     ] = await Promise.all([
       find(
         tenantId,
@@ -573,7 +637,46 @@ export function createTeamInvitationRepository(
       findEvent(
         expectedEvent.operationKey,
       ),
+      expectedDelivery === null
+        ? Promise.resolve(null)
+        : database
+            .prepare(
+              findDeliverySql,
+            )
+            .bind(
+              expectedDelivery
+                .deliveryKey,
+            )
+            .first<InvitationDeliveryRow>(),
     ]);
+    const deliveryMatches =
+      expectedDelivery === null ||
+      (
+        delivery !== null &&
+        delivery.deliveryKey ===
+          expectedDelivery
+            .deliveryKey &&
+        delivery.tenantId ===
+          tenantId &&
+        delivery.invitationKey ===
+          invitationKey &&
+        delivery.invitationVersion ===
+          expectedDelivery
+            .invitationVersion &&
+        delivery.status ===
+          "pending" &&
+        delivery.attemptCount === 0 &&
+        delivery.lastErrorCode ===
+          null &&
+        delivery.submittedAt ===
+          null &&
+        delivery.createdAt ===
+          expectedDelivery
+            .createdAt &&
+        delivery.updatedAt ===
+          expectedDelivery
+            .createdAt
+      );
 
     if (
       invitation !== null &&
@@ -595,7 +698,8 @@ export function createTeamInvitationRepository(
       eventsMatch(
         event,
         expectedEvent,
-      )
+      ) &&
+      deliveryMatches
     ) {
       return {
         outcome:
@@ -696,6 +800,15 @@ export function createTeamInvitationRepository(
             eventType,
           },
         );
+      const deliveryKey =
+        await deriveTeamInvitationDeliveryKey(
+          {
+            tenantId,
+            invitationKey,
+            invitationVersion:
+              expectedVersion + 1,
+          },
+        );
 
       if (
         current !== null &&
@@ -712,10 +825,34 @@ export function createTeamInvitationRepository(
           existingEvent.eventKey ===
             eventKey
         ) {
-          return {
-            outcome: "unchanged",
-            invitation: current,
-          };
+          const delivery =
+            await database
+              .prepare(
+                findDeliverySql,
+              )
+              .bind(deliveryKey)
+              .first<InvitationDeliveryRow>();
+
+          if (
+            delivery !== null &&
+            delivery.deliveryKey ===
+              deliveryKey &&
+            delivery.tenantId ===
+              tenantId &&
+            delivery.invitationKey ===
+              invitationKey &&
+            delivery.invitationVersion ===
+              current.version
+          ) {
+            return {
+              outcome: "unchanged",
+              invitation: current,
+            };
+          }
+
+          throw new Error(
+            "team invitation outbox is missing",
+          );
         }
       }
 
@@ -827,6 +964,17 @@ export function createTeamInvitationRepository(
               requestedAt,
               expiresAt,
             ),
+          database
+            .prepare(
+              insertDeliverySql,
+            )
+            .bind(
+              deliveryKey,
+              tenantId,
+              invitationKey,
+              toVersion,
+              requestedAt,
+            ),
         ]);
 
       return verify(
@@ -841,6 +989,13 @@ export function createTeamInvitationRepository(
           expiresAt,
         },
         expectedEvent,
+        {
+          deliveryKey,
+          invitationVersion:
+            toVersion,
+          createdAt:
+            requestedAt,
+        },
         batchWasSuccessful,
         current === null
           ? "created"
@@ -1041,6 +1196,7 @@ export function createTeamInvitationRepository(
             current.expiresAt,
         },
         expectedEvent,
+        null,
         batchWasSuccessful,
         "updated",
       );

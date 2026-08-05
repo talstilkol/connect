@@ -29,11 +29,14 @@
 10. מחזור חיי Invitation נשמר ב־D1 עם Version, ‏Audit אטומי
    ומצבי Pending, ‏Revoked ו־Expired. ‏Acceptance נשאר חסום עד
    קישור אטומי ל־Identity ול־Membership.
-11. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
-   חיבור ה־Repository לפעולה ו־E2E חיים.
-12. Local Release Gate עובר עם 951/951 בדיקות, 24 Migrations,
-   ‏352 קובצי Source ו־18 Client dependency graphs.
-13. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+11. Durable Outbox נכתב באותה טרנזקציה עם Invitation ו־Audit.
+   ה־Processor מבצע Claim יחיד, מסווג Provider unavailable כ־
+   Blocked ותוצאה לא ידועה כ־Ambiguous ללא Retry אוטומטי.
+12. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
+   Worker חי, ‏Acceptance ו־E2E.
+13. Local Release Gate עובר עם 959/959 בדיקות, 25 Migrations,
+   ‏354 קובצי Source ו־18 Client dependency graphs.
+14. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

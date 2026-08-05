@@ -169,6 +169,13 @@
       "when": 1785940316871,
       "tag": "0023_team_invitation_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1785940970223,
+      "tag": "0024_team_invitation_outbox",
+      "breakpoints": true
     }
   ]
 }

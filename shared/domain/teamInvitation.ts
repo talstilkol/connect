@@ -49,3 +49,29 @@ export interface TeamInvitationMutationResult {
   invitation:
     TeamInvitation | null;
 }
+
+export const teamInvitationDeliveryStatuses = [
+  "pending",
+  "sending",
+  "submitted",
+  "blocked",
+  "ambiguous",
+  "cancelled",
+] as const;
+
+export type TeamInvitationDeliveryStatus =
+  (typeof teamInvitationDeliveryStatuses)[number];
+
+export interface TeamInvitationDelivery {
+  deliveryKey: string;
+  tenantId: number;
+  invitationKey: string;
+  invitationVersion: number;
+  status:
+    TeamInvitationDeliveryStatus;
+  attemptCount: number;
+  lastErrorCode: string | null;
+  submittedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

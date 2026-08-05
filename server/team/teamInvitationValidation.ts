@@ -1,8 +1,10 @@
 import type {
+  TeamInvitationDeliveryStatus,
   TeamInvitationRole,
   TeamInvitationStatus,
 } from "../../shared/domain/teamInvitation.ts";
 import {
+  teamInvitationDeliveryStatuses,
   teamInvitationStatuses,
 } from "../../shared/domain/teamInvitation.ts";
 
@@ -166,4 +168,56 @@ export function requireTeamInvitationStatus(
 
   return value as
     TeamInvitationStatus;
+}
+
+export function requireTeamInvitationDeliveryKey(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string" ||
+    !/^team_invitation_delivery_v1_[0-9a-f]{64}$/.test(
+      value,
+    )
+  ) {
+    throw new Error(
+      "team invitation delivery key is invalid",
+    );
+  }
+
+  return value;
+}
+
+export function requireTeamInvitationDeliveryStatus(
+  value: unknown,
+): TeamInvitationDeliveryStatus {
+  if (
+    typeof value !== "string" ||
+    !teamInvitationDeliveryStatuses.some(
+      (status) => status === value,
+    )
+  ) {
+    throw new Error(
+      "team invitation delivery status is invalid",
+    );
+  }
+
+  return value as
+    TeamInvitationDeliveryStatus;
+}
+
+export function requireTeamInvitationDeliveryErrorCode(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string" ||
+    !/^[A-Z0-9_]{1,100}$/.test(
+      value,
+    )
+  ) {
+    throw new Error(
+      "team invitation delivery error code is invalid",
+    );
+  }
+
+  return value;
 }

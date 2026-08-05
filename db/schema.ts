@@ -55,6 +55,14 @@ export const teamInvitationEventTypes = [
   "revoked",
   "expired",
 ] as const;
+export const teamInvitationDeliveryStatuses = [
+  "pending",
+  "sending",
+  "submitted",
+  "blocked",
+  "ambiguous",
+  "cancelled",
+] as const;
 export const interfaceLanguages = ["he", "en", "ar"] as const;
 export const mailingStatuses = ["subscribed", "unsubscribed"] as const;
 export const consentStatuses = ["unknown", "granted", "withdrawn"] as const;
@@ -779,6 +787,147 @@ export const teamInvitationEvents =
       ).on(
         table.tenantId,
         table.occurredAt,
+      ),
+    ],
+  );
+
+export const teamInvitationDeliveries =
+  sqliteTable(
+    "team_invitation_deliveries",
+    {
+      deliveryKey: text(
+        "delivery_key",
+      ).primaryKey(),
+      tenantId: integer(
+        "tenant_id",
+      ).notNull(),
+      invitationKey: text(
+        "invitation_key",
+      ).notNull(),
+      invitationVersion: integer(
+        "invitation_version",
+      ).notNull(),
+      status: text("status", {
+        enum:
+          teamInvitationDeliveryStatuses,
+      })
+        .notNull()
+        .default("pending"),
+      attemptCount: integer(
+        "attempt_count",
+      )
+        .notNull()
+        .default(0),
+      lastErrorCode: text(
+        "last_error_code",
+      ),
+      submittedAt: text(
+        "submitted_at",
+      ),
+      createdAt: text(
+        "created_at",
+      ).notNull(),
+      updatedAt: text(
+        "updated_at",
+      ).notNull(),
+    },
+    (table) => [
+      check(
+        "team_invitation_deliveries_key_valid",
+        sql`length(${table.deliveryKey}) = 92
+          and ${table.deliveryKey} glob 'team_invitation_delivery_v1_[0-9a-f]*'
+          and substr(${table.deliveryKey}, 29) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "team_invitation_deliveries_version_positive",
+        sql`${table.invitationVersion} >= 1`,
+      ),
+      check(
+        "team_invitation_deliveries_status_valid",
+        sql`${table.status} in ('pending', 'sending', 'submitted', 'blocked', 'ambiguous', 'cancelled')`,
+      ),
+      check(
+        "team_invitation_deliveries_attempt_count_valid",
+        sql`${table.attemptCount} >= 0`,
+      ),
+      check(
+        "team_invitation_deliveries_error_code_valid",
+        sql`${table.lastErrorCode} is null
+          or (
+            length(${table.lastErrorCode}) between 1 and 100
+            and ${table.lastErrorCode} not glob '*[^A-Z0-9_]*'
+          )`,
+      ),
+      check(
+        "team_invitation_deliveries_created_at_canonical",
+        sql`length(${table.createdAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.createdAt})
+            = ${table.createdAt}`,
+      ),
+      check(
+        "team_invitation_deliveries_updated_at_canonical",
+        sql`length(${table.updatedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.updatedAt})
+            = ${table.updatedAt}
+          and ${table.updatedAt} >= ${table.createdAt}`,
+      ),
+      check(
+        "team_invitation_deliveries_submitted_at_canonical",
+        sql`${table.submittedAt} is null
+          or (
+            length(${table.submittedAt}) = 24
+            and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.submittedAt})
+              = ${table.submittedAt}
+            and ${table.submittedAt} >= ${table.createdAt}
+          )`,
+      ),
+      check(
+        "team_invitation_deliveries_state_shape_valid",
+        sql`(
+            ${table.status} = 'pending'
+            and ${table.attemptCount} = 0
+            and ${table.lastErrorCode} is null
+            and ${table.submittedAt} is null
+          ) or (
+            ${table.status} = 'sending'
+            and ${table.attemptCount} = 1
+            and ${table.lastErrorCode} is null
+            and ${table.submittedAt} is null
+          ) or (
+            ${table.status} = 'submitted'
+            and ${table.attemptCount} = 1
+            and ${table.lastErrorCode} is null
+            and ${table.submittedAt} is not null
+          ) or (
+            ${table.status} in ('blocked', 'ambiguous', 'cancelled')
+            and ${table.attemptCount} in (0, 1)
+            and ${table.lastErrorCode} is not null
+            and ${table.submittedAt} is null
+          )`,
+      ),
+      foreignKey({
+        columns: [
+          table.tenantId,
+          table.invitationKey,
+        ],
+        foreignColumns: [
+          teamInvitations.tenantId,
+          teamInvitations.invitationKey,
+        ],
+        name:
+          "team_invitation_deliveries_invitation_fk",
+      }).onDelete("restrict"),
+      uniqueIndex(
+        "team_invitation_deliveries_invitation_version_uq",
+      ).on(
+        table.invitationKey,
+        table.invitationVersion,
+      ),
+      index(
+        "team_invitation_deliveries_status_created_idx",
+      ).on(
+        table.status,
+        table.createdAt,
       ),
     ],
   );
@@ -3885,6 +4034,10 @@ export type TeamInvitationEventRow =
   typeof teamInvitationEvents.$inferSelect;
 export type NewTeamInvitationEventRow =
   typeof teamInvitationEvents.$inferInsert;
+export type TeamInvitationDeliveryRow =
+  typeof teamInvitationDeliveries.$inferSelect;
+export type NewTeamInvitationDeliveryRow =
+  typeof teamInvitationDeliveries.$inferInsert;
 export type BusinessProfileRow = typeof businessProfiles.$inferSelect;
 export type NewBusinessProfileRow = typeof businessProfiles.$inferInsert;
 export type MetaConnectionRow = typeof metaConnections.$inferSelect;

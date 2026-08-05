@@ -24,6 +24,7 @@ export const RETENTION_DATA_CLASSES = [
   "production-decision-data",
   "production-decision-events",
   "team-invitation-data",
+  "team-invitation-delivery-data",
   "team-invitation-events",
 ] as const;
 
@@ -66,6 +67,8 @@ export const RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS =
     "production-decision-events":
       "record-created",
     "team-invitation-data":
+      "record-terminal",
+    "team-invitation-delivery-data":
       "record-terminal",
     "team-invitation-events":
       "record-created",

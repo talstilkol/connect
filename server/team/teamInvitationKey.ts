@@ -193,3 +193,30 @@ export async function deriveTeamInvitationEventKey(
     },
   )}`;
 }
+
+export async function deriveTeamInvitationDeliveryKey(
+  input: {
+    tenantId: unknown;
+    invitationKey: unknown;
+    invitationVersion: unknown;
+  },
+): Promise<string> {
+  return `team_invitation_delivery_v1_${await digestIdentity(
+    {
+      namespace:
+        "team_invitation_delivery_v1",
+      tenantId:
+        requireTeamTenantId(
+          input.tenantId,
+        ),
+      invitationKey:
+        requireTeamInvitationKey(
+          input.invitationKey,
+        ),
+      invitationVersion:
+        requireTeamMembershipVersion(
+          input.invitationVersion,
+        ),
+    },
+  )}`;
+}
