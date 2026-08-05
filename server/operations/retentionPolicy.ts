@@ -23,6 +23,8 @@ export const RETENTION_DATA_CLASSES = [
   "audit-logs",
   "production-decision-data",
   "production-decision-events",
+  "team-invitation-data",
+  "team-invitation-events",
 ] as const;
 
 export type RetentionDataClass =
@@ -62,6 +64,10 @@ export const RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS =
     "production-decision-data":
       "record-terminal",
     "production-decision-events":
+      "record-created",
+    "team-invitation-data":
+      "record-terminal",
+    "team-invitation-events":
       "record-created",
   } satisfies Record<
     RetentionDataClass,

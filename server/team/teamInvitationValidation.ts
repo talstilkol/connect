@@ -1,9 +1,10 @@
 import type {
-  TenantRole,
-} from "../../shared/domain/model.ts";
-import type {
   TeamInvitationRole,
-} from "./teamInvitationProvider.ts";
+  TeamInvitationStatus,
+} from "../../shared/domain/teamInvitation.ts";
+import {
+  teamInvitationStatuses,
+} from "../../shared/domain/teamInvitation.ts";
 
 const emailPattern =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -78,10 +79,7 @@ export function requireTeamInvitationRole(
     );
   }
 
-  return value as Exclude<
-    TenantRole,
-    "owner"
-  >;
+  return value as TeamInvitationRole;
 }
 
 export function requireTeamInvitationRequestKey(
@@ -99,4 +97,73 @@ export function requireTeamInvitationRequestKey(
   }
 
   return value;
+}
+
+export function requireTeamInvitationKey(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string" ||
+    !/^team_invitation_v1_[0-9a-f]{64}$/.test(
+      value,
+    )
+  ) {
+    throw new Error(
+      "team invitation key is invalid",
+    );
+  }
+
+  return value;
+}
+
+export function requireTeamInvitationOperationKey(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string" ||
+    !/^team_invitation_operation_v1_[0-9a-f]{64}$/.test(
+      value,
+    )
+  ) {
+    throw new Error(
+      "team invitation operation key is invalid",
+    );
+  }
+
+  return value;
+}
+
+export function requireTeamInvitationEventKey(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string" ||
+    !/^team_invitation_event_v1_[0-9a-f]{64}$/.test(
+      value,
+    )
+  ) {
+    throw new Error(
+      "team invitation event key is invalid",
+    );
+  }
+
+  return value;
+}
+
+export function requireTeamInvitationStatus(
+  value: unknown,
+): TeamInvitationStatus {
+  if (
+    typeof value !== "string" ||
+    !teamInvitationStatuses.some(
+      (status) => status === value,
+    )
+  ) {
+    throw new Error(
+      "team invitation status is invalid",
+    );
+  }
+
+  return value as
+    TeamInvitationStatus;
 }

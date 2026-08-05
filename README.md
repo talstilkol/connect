@@ -26,11 +26,14 @@
 9. תשתית Invitation Request מאמתת אימייל ותפקיד, מייצרת מפתח
    Idempotency דטרמיניסטי ומבודד Tenant ועוברת דרך Server Action
    מוגן. ה־Provider הפעיל נכשל סגור ואינו שולח הזמנה.
-10. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
-   מחזור חיים מתמשך ו־E2E חיים.
-11. Local Release Gate עובר עם 945/945 בדיקות, 23 Migrations,
-   ‏350 קובצי Source ו־18 Client dependency graphs.
-12. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+10. מחזור חיי Invitation נשמר ב־D1 עם Version, ‏Audit אטומי
+   ומצבי Pending, ‏Revoked ו־Expired. ‏Acceptance נשאר חסום עד
+   קישור אטומי ל־Identity ול־Membership.
+11. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
+   חיבור ה־Repository לפעולה ו־E2E חיים.
+12. Local Release Gate עובר עם 951/951 בדיקות, 24 Migrations,
+   ‏352 קובצי Source ו־18 Client dependency graphs.
+13. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

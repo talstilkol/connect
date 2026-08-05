@@ -44,6 +44,17 @@ export const tenantMembershipEventTypes = [
   "owner-transfer-out",
   "owner-transfer-in",
 ] as const;
+export const teamInvitationStatuses = [
+  "pending",
+  "revoked",
+  "expired",
+] as const;
+export const teamInvitationEventTypes = [
+  "requested",
+  "re-requested",
+  "revoked",
+  "expired",
+] as const;
 export const interfaceLanguages = ["he", "en", "ar"] as const;
 export const mailingStatuses = ["subscribed", "unsubscribed"] as const;
 export const consentStatuses = ["unknown", "granted", "withdrawn"] as const;
@@ -467,6 +478,304 @@ export const tenantMembershipEvents =
       ),
       index(
         "tenant_membership_events_tenant_occurred_idx",
+      ).on(
+        table.tenantId,
+        table.occurredAt,
+      ),
+    ],
+  );
+
+export const teamInvitations =
+  sqliteTable(
+    "team_invitations",
+    {
+      invitationKey: text(
+        "invitation_key",
+      ).primaryKey(),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      normalizedEmail: text(
+        "normalized_email",
+      ).notNull(),
+      role: text("role", {
+        enum: tenantRoles,
+      }).notNull(),
+      status: text("status", {
+        enum:
+          teamInvitationStatuses,
+      })
+        .notNull()
+        .default("pending"),
+      version: integer("version")
+        .notNull()
+        .default(1),
+      invitedByExternalUserId: text(
+        "invited_by_external_user_id",
+      ).notNull(),
+      lastActorExternalUserId: text(
+        "last_actor_external_user_id",
+      ).notNull(),
+      requestedAt: text(
+        "requested_at",
+      ).notNull(),
+      expiresAt: text(
+        "expires_at",
+      ).notNull(),
+      createdAt: text("created_at")
+        .notNull()
+        .default(sql`CURRENT_TIMESTAMP`),
+      updatedAt: text(
+        "updated_at",
+      ).notNull(),
+    },
+    (table) => [
+      check(
+        "team_invitations_key_valid",
+        sql`length(${table.invitationKey}) = 83
+          and ${table.invitationKey} glob 'team_invitation_v1_[0-9a-f]*'
+          and substr(${table.invitationKey}, 20) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "team_invitations_email_normalized",
+        sql`length(${table.normalizedEmail}) between 3 and 254
+          and ${table.normalizedEmail} = lower(trim(${table.normalizedEmail}))
+          and instr(${table.normalizedEmail}, '@') > 1
+          and instr(substr(
+            ${table.normalizedEmail},
+            instr(${table.normalizedEmail}, '@') + 1
+          ), '.') > 1`,
+      ),
+      check(
+        "team_invitations_role_valid",
+        sql`${table.role} in ('manager', 'agent', 'viewer')`,
+      ),
+      check(
+        "team_invitations_status_valid",
+        sql`${table.status} in ('pending', 'revoked', 'expired')`,
+      ),
+      check(
+        "team_invitations_version_positive",
+        sql`${table.version} >= 1`,
+      ),
+      check(
+        "team_invitations_inviter_bounded",
+        sql`length(trim(${table.invitedByExternalUserId})) between 1 and 512
+          and trim(${table.invitedByExternalUserId})
+            = ${table.invitedByExternalUserId}`,
+      ),
+      check(
+        "team_invitations_last_actor_bounded",
+        sql`length(trim(${table.lastActorExternalUserId})) between 1 and 512
+          and trim(${table.lastActorExternalUserId})
+            = ${table.lastActorExternalUserId}`,
+      ),
+      check(
+        "team_invitations_requested_at_canonical",
+        sql`length(${table.requestedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.requestedAt})
+            = ${table.requestedAt}`,
+      ),
+      check(
+        "team_invitations_expires_at_canonical",
+        sql`length(${table.expiresAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.expiresAt})
+            = ${table.expiresAt}
+          and ${table.expiresAt} > ${table.requestedAt}`,
+      ),
+      check(
+        "team_invitations_updated_at_canonical",
+        sql`length(${table.updatedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.updatedAt})
+            = ${table.updatedAt}
+          and ${table.updatedAt} >= ${table.requestedAt}`,
+      ),
+      uniqueIndex(
+        "team_invitations_tenant_email_uq",
+      ).on(
+        table.tenantId,
+        table.normalizedEmail,
+      ),
+      uniqueIndex(
+        "team_invitations_tenant_key_uq",
+      ).on(
+        table.tenantId,
+        table.invitationKey,
+      ),
+      index(
+        "team_invitations_tenant_status_expiry_idx",
+      ).on(
+        table.tenantId,
+        table.status,
+        table.expiresAt,
+      ),
+    ],
+  );
+
+export const teamInvitationEvents =
+  sqliteTable(
+    "team_invitation_events",
+    {
+      eventKey: text(
+        "event_key",
+      ).primaryKey(),
+      operationKey: text(
+        "operation_key",
+      ).notNull(),
+      invitationKey: text(
+        "invitation_key",
+      ).notNull(),
+      tenantId: integer(
+        "tenant_id",
+      ).notNull(),
+      actorExternalUserId: text(
+        "actor_external_user_id",
+      ).notNull(),
+      eventType: text("event_type", {
+        enum:
+          teamInvitationEventTypes,
+      }).notNull(),
+      fromRole: text("from_role", {
+        enum: tenantRoles,
+      }),
+      toRole: text("to_role", {
+        enum: tenantRoles,
+      }).notNull(),
+      fromStatus: text(
+        "from_status",
+        {
+          enum:
+            teamInvitationStatuses,
+        },
+      ),
+      toStatus: text("to_status", {
+        enum:
+          teamInvitationStatuses,
+      }).notNull(),
+      fromVersion: integer(
+        "from_version",
+      ).notNull(),
+      toVersion: integer(
+        "to_version",
+      ).notNull(),
+      occurredAt: text(
+        "occurred_at",
+      ).notNull(),
+      expiresAt: text(
+        "expires_at",
+      ).notNull(),
+      createdAt: text("created_at")
+        .notNull()
+        .default(sql`CURRENT_TIMESTAMP`),
+    },
+    (table) => [
+      check(
+        "team_invitation_events_key_valid",
+        sql`length(${table.eventKey}) = 89
+          and ${table.eventKey} glob 'team_invitation_event_v1_[0-9a-f]*'
+          and substr(${table.eventKey}, 26) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "team_invitation_events_operation_key_valid",
+        sql`length(${table.operationKey}) = 93
+          and ${table.operationKey} glob 'team_invitation_operation_v1_[0-9a-f]*'
+          and substr(${table.operationKey}, 30) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "team_invitation_events_actor_bounded",
+        sql`length(trim(${table.actorExternalUserId})) between 1 and 512
+          and trim(${table.actorExternalUserId})
+            = ${table.actorExternalUserId}`,
+      ),
+      check(
+        "team_invitation_events_type_valid",
+        sql`${table.eventType} in ('requested', 're-requested', 'revoked', 'expired')`,
+      ),
+      check(
+        "team_invitation_events_to_role_valid",
+        sql`${table.toRole} in ('manager', 'agent', 'viewer')`,
+      ),
+      check(
+        "team_invitation_events_to_status_valid",
+        sql`${table.toStatus} in ('pending', 'revoked', 'expired')`,
+      ),
+      check(
+        "team_invitation_events_version_transition",
+        sql`(
+            ${table.eventType} = 'requested'
+            and ${table.fromVersion} = 0
+            and ${table.toVersion} = 1
+          ) or (
+            ${table.eventType} <> 'requested'
+            and ${table.fromVersion} >= 1
+            and ${table.toVersion} = ${table.fromVersion} + 1
+          )`,
+      ),
+      check(
+        "team_invitation_events_shape_valid",
+        sql`(
+            ${table.eventType} = 'requested'
+            and ${table.fromRole} is null
+            and ${table.fromStatus} is null
+            and ${table.toStatus} = 'pending'
+          ) or (
+            ${table.eventType} = 're-requested'
+            and ${table.fromRole} in ('manager', 'agent', 'viewer')
+            and ${table.fromStatus} in ('revoked', 'expired')
+            and ${table.toStatus} = 'pending'
+          ) or (
+            ${table.eventType} = 'revoked'
+            and ${table.fromRole} = ${table.toRole}
+            and ${table.fromStatus} = 'pending'
+            and ${table.toStatus} = 'revoked'
+          ) or (
+            ${table.eventType} = 'expired'
+            and ${table.fromRole} = ${table.toRole}
+            and ${table.fromStatus} = 'pending'
+            and ${table.toStatus} = 'expired'
+          )`,
+      ),
+      check(
+        "team_invitation_events_occurred_at_canonical",
+        sql`length(${table.occurredAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.occurredAt})
+            = ${table.occurredAt}`,
+      ),
+      check(
+        "team_invitation_events_expires_at_canonical",
+        sql`length(${table.expiresAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.expiresAt})
+            = ${table.expiresAt}
+          and (
+            ${table.toStatus} <> 'pending'
+            or ${table.expiresAt} > ${table.occurredAt}
+          )`,
+      ),
+      foreignKey({
+        columns: [
+          table.tenantId,
+          table.invitationKey,
+        ],
+        foreignColumns: [
+          teamInvitations.tenantId,
+          teamInvitations.invitationKey,
+        ],
+        name:
+          "team_invitation_events_invitation_fk",
+      }).onDelete("restrict"),
+      uniqueIndex(
+        "team_invitation_events_operation_uq",
+      ).on(table.operationKey),
+      uniqueIndex(
+        "team_invitation_events_invitation_version_uq",
+      ).on(
+        table.invitationKey,
+        table.toVersion,
+      ),
+      index(
+        "team_invitation_events_tenant_occurred_idx",
       ).on(
         table.tenantId,
         table.occurredAt,
@@ -3568,6 +3877,14 @@ export type TenantMembershipEventRow =
   typeof tenantMembershipEvents.$inferSelect;
 export type NewTenantMembershipEventRow =
   typeof tenantMembershipEvents.$inferInsert;
+export type TeamInvitationRow =
+  typeof teamInvitations.$inferSelect;
+export type NewTeamInvitationRow =
+  typeof teamInvitations.$inferInsert;
+export type TeamInvitationEventRow =
+  typeof teamInvitationEvents.$inferSelect;
+export type NewTeamInvitationEventRow =
+  typeof teamInvitationEvents.$inferInsert;
 export type BusinessProfileRow = typeof businessProfiles.$inferSelect;
 export type NewBusinessProfileRow = typeof businessProfiles.$inferInsert;
 export type MetaConnectionRow = typeof metaConnections.$inferSelect;

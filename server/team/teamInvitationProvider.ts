@@ -1,10 +1,13 @@
 import type {
-  TenantRole,
   UserId,
 } from "../../shared/domain/model.ts";
+import type {
+  TeamInvitationRole,
+} from "../../shared/domain/teamInvitation.ts";
 
-export type TeamInvitationRole =
-  Exclude<TenantRole, "owner">;
+export type {
+  TeamInvitationRole,
+} from "../../shared/domain/teamInvitation.ts";
 
 export interface TeamInvitationProviderCommand {
   requestKey: string;

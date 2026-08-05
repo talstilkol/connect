@@ -61,7 +61,7 @@ export function TeamDirectory({
             aria-describedby="team-invitation-unavailable"
             className="primary-button"
             disabled
-            title="הזמנות יופעלו לאחר חיבור ספק, מחזור חיים מתמשך ובדיקת E2E חיה"
+            title="הזמנות יופעלו לאחר חיבור ספק, Acceptance מאומת ובדיקת E2E חיה"
             type="button"
           >
             הזמנת משתמש
@@ -76,9 +76,9 @@ export function TeamDirectory({
       >
         הזמנה ושינוי משתמשים נשארים
         חסומים עד חיבור ספק הזמנות,
-        שמירת מחזור החיים, פרטי זהות
-        מאומתים ובדיקת E2E מול Clerk
-        ו־D1 חיים.
+        Acceptance ופרטי זהות מאומתים
+        ובדיקת E2E מול Clerk ו־D1
+        חיים.
       </p>
 
       {status === "ready" ? (
