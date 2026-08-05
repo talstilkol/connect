@@ -46,6 +46,7 @@ export type TeamInvitationProviderLookupResult =
     };
 
 export interface TeamInvitationProvider {
+  isConfigured(): boolean;
   invite(
     command:
       TeamInvitationProviderCommand,
@@ -59,6 +60,9 @@ export interface TeamInvitationProvider {
 export function createUnavailableTeamInvitationProvider():
 TeamInvitationProvider {
   return {
+    isConfigured() {
+      return false;
+    },
     async invite() {
       return {
         status: "unavailable",

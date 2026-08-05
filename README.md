@@ -35,11 +35,14 @@
 12. Reconciliation בודק Delivery מסוג Ambiguous לפי המפתח
    הדטרמיניסטי, ללא שליחה חוזרת. רק תשובת ספק ודאית מעבירה אותו
    ל־Submitted או ל־Blocked; ספק לא זמין משאיר אותו Ambiguous.
-13. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
-   Worker חי, ‏Acceptance ו־E2E.
-14. Local Release Gate עובר עם 963/963 בדיקות, 26 Migrations,
-   ‏355 קובצי Source ו־18 Client dependency graphs.
-15. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
+13. Queue ייעודי ו־Worker מחוברים ל־Outbox דרך Message contract
+   מצומצם. כל עוד ה־Provider אינו מוגדר, ההודעה עוברת Retry לפני
+   Claim והרשומה נשארת Pending.
+14. ה־React נשאר Read-only עד Identity, ‏Invitation Provider,
+   חיבור ה־Publisher ל־Request, ‏Acceptance ו־E2E.
+15. Local Release Gate עובר עם 974/974 בדיקות, 26 Migrations,
+   ‏359 קובצי Source ו־18 Client dependency graphs.
+16. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־10
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

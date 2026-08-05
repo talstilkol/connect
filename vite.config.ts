@@ -41,6 +41,10 @@ const localBindingConfig = {
         binding: "CAMPAIGN_DELIVERY_QUEUE",
         queue: "connect-campaign-deliveries",
       },
+      {
+        binding: "TEAM_INVITATION_QUEUE",
+        queue: "connect-team-invitations",
+      },
     ],
     consumers: [
       {
@@ -57,6 +61,14 @@ const localBindingConfig = {
         max_retries: 10,
         dead_letter_queue:
           "connect-campaign-deliveries-dlq",
+      },
+      {
+        queue: "connect-team-invitations",
+        max_batch_size: 10,
+        max_batch_timeout: 5,
+        max_retries: 10,
+        dead_letter_queue:
+          "connect-team-invitations-dlq",
       },
     ],
   },

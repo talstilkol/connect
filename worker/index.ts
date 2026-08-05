@@ -83,6 +83,15 @@ import {
 import type {
   RateLimitBinding,
 } from "../server/security/rateLimit.ts";
+import {
+  createTeamInvitationQueueBatchHandler,
+} from "../server/team/teamInvitationQueueRuntime.ts";
+import {
+  createUnavailableTeamInvitationProvider,
+} from "../server/team/teamInvitationProvider.ts";
+import type {
+  TeamInvitationQueueBinding,
+} from "../server/team/teamInvitationQueuePublisher.ts";
 
 interface AssetFetcher {
   fetch(request: Request): Promise<Response>;
@@ -100,6 +109,8 @@ interface Env {
   SYSTEM_ADMIN_MUTATION_RATE_LIMITER?: RateLimitBinding;
   CAMPAIGN_DELIVERY_QUEUE?:
     CampaignDeliveryQueueBinding;
+  TEAM_INVITATION_QUEUE?:
+    TeamInvitationQueueBinding;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -117,6 +128,8 @@ interface ExecutionContext {
 const META_WEBHOOK_QUEUE_NAME = "connect-meta-webhooks";
 const CAMPAIGN_DELIVERY_QUEUE_NAME =
   "connect-campaign-deliveries";
+const TEAM_INVITATION_QUEUE_NAME =
+  "connect-team-invitations";
 const CAMPAIGN_SCHEDULER_CRON = "* * * * *";
 
 interface ScheduledController {
@@ -223,6 +236,20 @@ const worker = {
         createCampaignDeliveryBatchHandler(
           env,
           createUnavailableCampaignDeliveryProcessor(),
+        );
+
+      await consumer.handle(batch);
+      return;
+    }
+
+    if (
+      batch.queue ===
+      TEAM_INVITATION_QUEUE_NAME
+    ) {
+      const consumer =
+        createTeamInvitationQueueBatchHandler(
+          env,
+          createUnavailableTeamInvitationProvider(),
         );
 
       await consumer.handle(batch);
