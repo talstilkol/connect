@@ -82,7 +82,14 @@
 31. Local Release Gate עובר עם 1095/1095 בדיקות, 30 Migrations,
    ‏384 קובצי Source, ‏19 Client dependency graphs, ‏685 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
-32. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
+   לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
+   פגיעויות ידועות בגרף ה־Production.
+33. בגרף הפיתוח נשארו שש התראות ב־`drizzle-kit` וב־`vinext`.
+   הצעת התיקון האוטומטית היא Downgrade שובר ולכן אינה מיושמת.
+34. Vite config משתמש כעת ב־JSON import attributes ובסיומת קובץ
+   מפורשת, ללא אזהרת ה־Native config loader החדשה.
+35. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
