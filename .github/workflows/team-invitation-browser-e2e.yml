@@ -1,0 +1,68 @@
+name: Team invitation browser E2E
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: team-invitation-browser-e2e-staging
+  cancel-in-progress: false
+
+jobs:
+  staging-browser-proof:
+    name: Staging browser proof
+    runs-on: ubuntu-latest
+    environment: staging-e2e
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the release commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install the governed browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify the local release gate
+        run: npm run verify:release-gate:local
+
+      - name: Run the seven release-bound browser scenarios
+        run: npm run e2e:team-invitation-browser
+        env:
+          APP_DEPLOYMENT_ARTIFACT_DIGEST: ${{ vars.APP_DEPLOYMENT_ARTIFACT_DIGEST }}
+          TEAM_INVITATION_BROWSER_AUTH_STATES_JSON: ${{ secrets.TEAM_INVITATION_BROWSER_AUTH_STATES_JSON }}
+          TEAM_INVITATION_BROWSER_CLOUDFLARE_ACCOUNT_ID: ${{ vars.TEAM_INVITATION_BROWSER_CLOUDFLARE_ACCOUNT_ID }}
+          TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN: ${{ secrets.TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN }}
+          TEAM_INVITATION_BROWSER_CLOUDFLARE_DATABASE_ID: ${{ vars.TEAM_INVITATION_BROWSER_CLOUDFLARE_DATABASE_ID }}
+          TEAM_INVITATION_BROWSER_E2E_CASES_JSON: ${{ secrets.TEAM_INVITATION_BROWSER_E2E_CASES_JSON }}
+          TEAM_INVITATION_BROWSER_E2E_ORIGIN: ${{ vars.TEAM_INVITATION_BROWSER_E2E_ORIGIN }}
+          TEAM_INVITATION_REREQUEST_POLICY: ${{ vars.TEAM_INVITATION_REREQUEST_POLICY }}
+          TEAM_INVITATION_TTL_HOURS: ${{ vars.TEAM_INVITATION_TTL_HOURS }}
+
+      - name: Build the short-lived evidence document
+        run: >-
+          npm run evidence:team-invitation-browser --
+          --receipt .artifacts/team-invitation-browser-receipt.json
+
+      - name: Upload the bounded evidence artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: team-invitation-browser-evidence-${{ github.sha }}
+          path: |
+            .artifacts/team-invitation-browser-receipt.json
+            .artifacts/team-invitation-browser-evidence.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 1

@@ -78,10 +78,10 @@
    הפקת Transcript. הוא חוסם Referrer וניווט Cross-origin ואינו
    מחזיר Cookies, ‏URL או Invitation Key.
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
-   חיבור CI ו־Credentials אמיתיים עדיין חסרים ולכן אין Browser
-   Evidence אמיתי.
-31. Local Release Gate עובר עם 1102/1102 בדיקות, 30 Migrations,
-   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏687 קבצים
+   ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
+   Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
+31. Local Release Gate עובר עם 1109/1109 בדיקות, 30 Migrations,
+   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏691 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -99,6 +99,14 @@
    אין Route ציבורי, Mutation, ‏Retry אוטומטי או יצירת משאב ענן.
 38. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
+39. Launcher סגור דורש Release נקי, ‏Artifact Digest, ‏Policy,
+   Inventory קצר־חיים ושישה Auth states מדויקים לפני פתיחת Chromium.
+40. שבעת התרחישים רצים דרך אותם Core contracts. ה־Browser נסגר לפני
+   כתיבת Receipt אטומי; כשל בכל Port מונע Evidence חלקי.
+41. GitHub Actions ידני מוגן ב־`staging-e2e`, משתמש ב־Actions
+   המקובעים ל־Commit ומעלה Receipt ו־Evidence ליום אחד בלבד.
+42. הפעלת ה־Workflow נשארת פעולה חיצונית: יש ליצור את Environment,
+   להזין Secrets ו־Variables אמיתיים ולהכין Inventory תואם לפריסה.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
