@@ -80,8 +80,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1125/1125 בדיקות, 30 Migrations,
-   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏697 קבצים
+31. Local Release Gate עובר עם 1130/1130 בדיקות, 30 Migrations,
+   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏699 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -120,6 +120,9 @@
    ומאפשר למפעיל להתחבר ידנית לכל Profile. הוא שומר רק State השייך
    ל־Staging בקובץ `0600`; הוא אינו מקבל או מדפיס סיסמה, Token או
    Cookie. הרצה אמיתית עדיין דורשת שש זהויות Staging מורשות.
+47. File Safety Gate פותח את Auth Bundle ללא מעקב אחר Symlink,
+   דורש קובץ רגיל בבעלות המשתמש, Link יחיד והרשאת `0600`, ומאמת שוב
+   את התוכן והתפוגה לפני העברה ל־Secret Store. הפלט אינו כולל State.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 

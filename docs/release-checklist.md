@@ -81,6 +81,9 @@ Trace או Screenshot, והוא הופק על ידי מערכת ה־CI המאו�
 עברו את ה־Validator והוזרקו מ־Secret Store. קובץ הלכידה המקומי אינו
 נשמר ב־Git או כ־Artifact רגיל.
 
+5.9.1.1 לפני ההעברה ל־Secret Store קובץ הלכידה עבר את File Safety
+Gate עם בעלות מקומית, Link יחיד, הרשאת `0600` ותפוגה מספקת.
+
 5.9.2 כל 22 ה־Assertions מה־Scenario Registry עברו, לרבות הוכחות
 Database עבור Mutation, Rejection ו־Idempotency.
 

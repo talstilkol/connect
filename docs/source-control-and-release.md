@@ -249,3 +249,7 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 10.9 רק Cookies ו־Local Storage של Origin ה־Staging נשמרים. State
 של ספק זהות חיצוני מסונן; State מורחב בתוך Scope של Staging נכשל
 סגור. לאחר ההעברה ל־Secret Store יש למחוק את העותק המקומי.
+
+10.10 `npm run verify:team-invitation-browser-auth-file` מאמת לפני
+ההעברה שה־Bundle אינו Symlink או Hard link, נמצא בבעלות המשתמש,
+פרטי בהרשאת `0600`, לא השתנה בזמן הקריאה ועדיין תקף לריצה.
