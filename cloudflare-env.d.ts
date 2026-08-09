@@ -34,5 +34,7 @@ declare module "cloudflare:workers" {
     BACKUP_RETENTION_DAYS?: string;
     RESTORE_REHEARSAL_INTERVAL_DAYS?: string;
     RETENTION_POLICY_JSON?: string;
+    TEAM_INVITATION_BROWSER_E2E_ORIGIN?: string;
+    TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON?: string;
   };
 }

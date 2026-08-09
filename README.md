@@ -51,14 +51,16 @@
    Read-only. הוא מוגדר `noindex` ו־`no-referrer`, אינו מציג נתוני
    Tenant או Identity, וכפתור הקבלה מוסבר ומושבת.
 19. ה־React נשאר Read-only עד הגדרת Clerk והשלמת Browser E2E.
-20. Local Release Gate עובר עם 1025/1025 בדיקות, 30 Migrations,
-   ‏372 קובצי Source ו־18 Client dependency graphs.
-21. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
+20. שער Browser E2E דורש Evidence קצר־חיים עבור שבעה תרחישים,
+   המקושר ל־Release, ‏Commit, ‏Artifact, ‏Staging Origin ו־Policy.
+21. Local Release Gate עובר עם 1031/1031 בדיקות, 30 Migrations,
+   ‏373 קובצי Source ו־18 Client dependency graphs.
+22. Production נשאר No-Go: ‏5 Ready, ‏16 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
-1. שער Production מרכז 31 בדיקות ונכשל סגור עבור כל חסימה או
+1. שער Production מרכז 32 בדיקות ונכשל סגור עבור כל חסימה או
    החלטה חסרה.
 2. Meta Webhook, פעולות Tenant ופעולות System Admin משתמשים בשלוש
    Policies נפרדות של Rate Limiting.

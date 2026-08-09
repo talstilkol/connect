@@ -29,6 +29,8 @@ test("reports ready only when every production dependency is ready", () => {
     systemAdmin: "configured",
     teamInvitationPolicy:
       "configured",
+    teamInvitationBrowserEvidence:
+      "configured",
     metaEmbeddedSignup: "configured",
     metaWebhook: "configured",
     knowledgeUploadPolicy: "configured",
@@ -53,7 +55,7 @@ test("reports ready only when every production dependency is ready", () => {
 
   assert.equal(report.readyForProduction, true);
   assert.deepEqual(report.counts, {
-    ready: 31,
+    ready: 32,
     blocked: 0,
     decisionRequired: 0,
   });
@@ -77,7 +79,7 @@ test("fails closed for absent environment and unresolved implementation", () => 
   assert.equal(report.readyForProduction, false);
   assert.deepEqual(report.counts, {
     ready: 5,
-    blocked: 15,
+    blocked: 16,
     decisionRequired: 11,
   });
   assert.equal(
@@ -99,6 +101,8 @@ test("rejects renamed or absent hosting bindings", () => {
     clerk: "configured",
     systemAdmin: "configured",
     teamInvitationPolicy:
+      "configured",
+    teamInvitationBrowserEvidence:
       "configured",
     metaEmbeddedSignup: "configured",
     metaWebhook: "configured",

@@ -41,6 +41,9 @@ import {
   inspectCiExecutionEvidence,
 } from "./ciExecutionEvidence.ts";
 import {
+  inspectTeamInvitationBrowserEvidence,
+} from "./teamInvitationBrowserEvidence.ts";
+import {
   inspectTeamInvitationPolicy,
 } from "../team/teamInvitationPolicy.ts";
 import type {
@@ -70,6 +73,8 @@ export interface ProductionReadinessInput {
   systemAdmin: ConfigurationState;
   teamInvitationPolicy:
     ConfigurationState;
+  teamInvitationBrowserEvidence:
+    ConfigurationState;
   metaEmbeddedSignup: ConfigurationState;
   metaWebhook: ConfigurationState;
   knowledgeUploadPolicy: ConfigurationState;
@@ -92,6 +97,8 @@ export interface ProductionReadinessEnvironment {
   CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS?: string;
   TEAM_INVITATION_TTL_HOURS?: string;
   TEAM_INVITATION_REREQUEST_POLICY?: string;
+  TEAM_INVITATION_BROWSER_E2E_ORIGIN?: string;
+  TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON?: string;
   META_APP_ID?: string;
   META_APP_SECRET?: string;
   META_EMBEDDED_SIGNUP_CONFIGURATION_ID?: string;
@@ -222,6 +229,18 @@ export function inspectProductionReadiness(
         "TEAM_INVITATION_POLICY_REQUIRED",
       blockedStatus:
         "decision-required",
+    }),
+    toCheck({
+      id:
+        "identity.team-invitation-browser-e2e",
+      category: "identity",
+      ready: isConfigured(
+        input.teamInvitationBrowserEvidence,
+      ),
+      readyCode:
+        "TEAM_INVITATION_BROWSER_E2E_EVIDENCE_VERIFIED",
+      blockedCode:
+        "TEAM_INVITATION_BROWSER_E2E_EVIDENCE_REQUIRED",
     }),
     toCheck({
       id: "storage.d1-binding",
@@ -490,6 +509,12 @@ export function inspectCurrentProductionReadiness(
       inspectSystemAdminConfiguration(environment).status,
     teamInvitationPolicy:
       inspectTeamInvitationPolicy(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    teamInvitationBrowserEvidence:
+      inspectTeamInvitationBrowserEvidence(
         environment,
       ).status === "configured"
         ? "configured"
