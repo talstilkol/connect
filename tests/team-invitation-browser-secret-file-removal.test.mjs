@@ -60,6 +60,10 @@ async function createFiles() {
     directory,
     "team-invitation-browser-case-inventory.json",
   );
+  const browserEvidencePath = join(
+    directory,
+    "team-invitation-browser-evidence.json",
+  );
 
   await mkdir(directory, {
     recursive: true,
@@ -74,17 +78,30 @@ async function createFiles() {
     "case-secret",
     { mode: 0o600 },
   );
+  await writeFile(
+    browserEvidencePath,
+    "browser-evidence",
+    { mode: 0o600 },
+  );
 
   return {
     directory,
     authenticationStatePath,
     caseInventoryPath,
+    browserEvidencePath,
   };
 }
 
-function dependencies(verifySecretFiles) {
+function dependencies(
+  verifySecretFiles,
+  verifyBrowserEvidenceFile = async () => ({
+    releaseId: releaseManifest.releaseId,
+    verifiedScenarioCount: 7,
+  }),
+) {
   return {
     verifySecretFiles,
+    verifyBrowserEvidenceFile,
     mkdir,
     lstat,
     rename,
@@ -111,6 +128,8 @@ function configuration(
       files.authenticationStatePath,
     caseInventoryPath:
       files.caseInventoryPath,
+    browserEvidencePath:
+      files.browserEvidencePath,
     dependencies: dependencyOverrides,
     ...overrides,
   };
@@ -183,6 +202,10 @@ test("quarantines, re-verifies, and unlinks both local secret files", async () =
     releaseId: releaseManifest.releaseId,
   });
   assert.ok(Object.isFrozen(result));
+  assert.equal(
+    await exists(files.browserEvidencePath),
+    true,
+  );
 });
 
 test("requires explicit transfer confirmation before verification or mutation", async () => {
@@ -206,6 +229,51 @@ test("requires explicit transfer confirmation before verification or mutation", 
   );
 
   assert.equal(verificationCalls, 0);
+  assert.equal(
+    await readFile(
+      files.authenticationStatePath,
+      "utf8",
+    ),
+    "auth-secret",
+  );
+  assert.equal(
+    await readFile(
+      files.caseInventoryPath,
+      "utf8",
+    ),
+    "case-secret",
+  );
+});
+
+test("requires matching browser evidence before reading or moving secret files", async () => {
+  const files = await createFiles();
+  let secretVerificationCalls = 0;
+
+  await assert.rejects(
+    () =>
+      removeTeamInvitationBrowserSecretFiles(
+        configuration(
+          files,
+          dependencies(
+            async () => {
+              secretVerificationCalls += 1;
+            },
+            async () => {
+              return {
+                releaseId:
+                  `connect_release_v1_${"c".repeat(64)}`,
+                verifiedScenarioCount: 7,
+              };
+            },
+          ),
+        ),
+      ),
+    expectsError(
+      "SECRET_FILE_REMOVAL_BROWSER_EVIDENCE_INVALID",
+    ),
+  );
+
+  assert.equal(secretVerificationCalls, 0);
   assert.equal(
     await readFile(
       files.authenticationStatePath,

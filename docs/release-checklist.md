@@ -90,8 +90,12 @@ Gate עם בעלות מקומית, Link יחיד, הרשאת `0600` ותפוגה
 5.9.1.3 השער המשולב עבר עבור שני הקבצים באותו Clock ואישר שישה
 Profiles, שבעה Scenarios, ‏Origin יחיד ו־Release נוכחי יחיד.
 
-5.9.1.4 לאחר אימות הערכים ב־Secret Store, שני הקבצים המקומיים הוסרו
-באמצעות Quarantine ואימות חוזר. אין לסמן סעיף זה כהוכחת Secure Erase.
+5.9.1.4 לאחר אימות הערכים ב־Secret Store והרצה מוצלחת ממנו, קובץ
+Browser Evidence קצר־חיים ותואם Release עבר את שער הקובץ הייעודי.
+
+5.9.1.5 רק לאחר מכן שני הקבצים המקומיים הוסרו באמצעות Quarantine
+ואימות חוזר. אין לסמן סעיף זה כהוכחת Secure Erase או כהוכחת ספק
+קריפטוגרפית להעברה.
 
 5.9.2 כל 22 ה־Assertions מה־Scenario Registry עברו, לרבות הוכחות
 Database עבור Mutation, Rejection ו־Idempotency.

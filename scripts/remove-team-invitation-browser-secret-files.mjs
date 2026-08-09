@@ -22,6 +22,10 @@ import {
   verifyTeamInvitationBrowserSecretFiles,
   teamInvitationBrowserSecretFileVerificationDependencies,
 } from "./verify-team-invitation-browser-secret-files.mjs";
+import {
+  verifyTeamInvitationBrowserEvidenceFile,
+  teamInvitationBrowserEvidenceFileVerificationDependencies,
+} from "./verify-team-invitation-browser-evidence-file.mjs";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -39,6 +43,13 @@ const caseInventoryPath = join(
   projectRoot,
   ".artifacts",
   caseInventoryFileName,
+);
+const browserEvidenceFileName =
+  "team-invitation-browser-evidence.json";
+const browserEvidencePath = join(
+  projectRoot,
+  ".artifacts",
+  browserEvidenceFileName,
 );
 const confirmationValue =
   "secret-store-transfer-confirmed";
@@ -89,6 +100,7 @@ function requireConfiguration(value) {
       "clock",
       "authenticationStatePath",
       "caseInventoryPath",
+      "browserEvidencePath",
       "dependencies",
     ])
   ) {
@@ -106,18 +118,25 @@ function requireConfiguration(value) {
     typeof value.authenticationStatePath !==
       "string" ||
     typeof value.caseInventoryPath !== "string" ||
+    typeof value.browserEvidencePath !== "string" ||
     !isAbsolute(value.authenticationStatePath) ||
     !isAbsolute(value.caseInventoryPath) ||
+    !isAbsolute(value.browserEvidencePath) ||
     basename(value.authenticationStatePath) !==
       authenticationFileName ||
     basename(value.caseInventoryPath) !==
       caseInventoryFileName ||
+    basename(value.browserEvidencePath) !==
+      browserEvidenceFileName ||
     dirname(value.authenticationStatePath) !==
       dirname(value.caseInventoryPath) ||
+    dirname(value.authenticationStatePath) !==
+      dirname(value.browserEvidencePath) ||
     dirname(value.authenticationStatePath) === "/" ||
     !isObject(value.dependencies) ||
     !hasExactKeys(value.dependencies, [
       "verifySecretFiles",
+      "verifyBrowserEvidenceFile",
       "mkdir",
       "lstat",
       "rename",
@@ -151,6 +170,22 @@ function requireVerificationResult(value) {
     value.scenarioCount !== 7
   ) {
     fail("SECRET_FILE_REMOVAL_VERIFICATION_FAILED");
+  }
+
+  return value;
+}
+
+function requireEvidenceVerificationResult(value) {
+  if (
+    !isObject(value) ||
+    !hasExactKeys(value, [
+      "releaseId",
+      "verifiedScenarioCount",
+    ]) ||
+    typeof value.releaseId !== "string" ||
+    value.verifiedScenarioCount !== 7
+  ) {
+    fail("SECRET_FILE_REMOVAL_BROWSER_EVIDENCE_INVALID");
   }
 
   return value;
@@ -239,6 +274,12 @@ async function restoreMovedFiles(
 }
 
 const productionDependencies = Object.freeze({
+  verifyBrowserEvidenceFile: (value) =>
+    verifyTeamInvitationBrowserEvidenceFile({
+      ...value,
+      dependencies:
+        teamInvitationBrowserEvidenceFileVerificationDependencies,
+    }),
   verifySecretFiles: (value) =>
     verifyTeamInvitationBrowserSecretFiles({
       ...value,
@@ -257,6 +298,17 @@ export async function removeTeamInvitationBrowserSecretFiles(
 ) {
   const configuration =
     requireConfiguration(rawConfiguration);
+  const now = configuration.clock();
+
+  if (
+    !(now instanceof Date) ||
+    !Number.isFinite(now.getTime())
+  ) {
+    fail("SECRET_FILE_REMOVAL_CONFIGURATION_INVALID");
+  }
+
+  const stableClock = () =>
+    new Date(now.getTime());
   const parentDirectory = dirname(
     configuration.authenticationStatePath,
   );
@@ -280,12 +332,48 @@ export async function removeTeamInvitationBrowserSecretFiles(
       environment: configuration.environment,
       releaseManifest:
         configuration.releaseManifest,
-      clock: configuration.clock,
+      clock: stableClock,
       authenticationStatePath:
         authenticationPath,
       caseInventoryPath: inventoryPath,
     });
   let before;
+
+  try {
+    const evidence =
+      requireEvidenceVerificationResult(
+        await configuration.dependencies
+          .verifyBrowserEvidenceFile({
+            filePath:
+              configuration.browserEvidencePath,
+            environment:
+              configuration.environment,
+            releaseManifest:
+              configuration.releaseManifest,
+            clock: stableClock,
+          }),
+      );
+
+    if (
+      evidence.releaseId !==
+        configuration.releaseManifest.releaseId
+    ) {
+      fail(
+        "SECRET_FILE_REMOVAL_BROWSER_EVIDENCE_INVALID",
+      );
+    }
+  } catch (error) {
+    if (
+      error instanceof
+        TeamInvitationBrowserSecretFileRemovalError
+    ) {
+      throw error;
+    }
+
+    fail(
+      "SECRET_FILE_REMOVAL_BROWSER_EVIDENCE_INVALID",
+    );
+  }
 
   try {
     before = requireVerificationResult(
@@ -421,6 +509,7 @@ async function runCli() {
       clock: () => new Date(),
       authenticationStatePath,
       caseInventoryPath,
+      browserEvidencePath,
       dependencies: productionDependencies,
     });
 

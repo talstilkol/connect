@@ -263,10 +263,15 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 את שני השערים תחת Clock אחד ומוכיח התאמת Origin ו־Release לפני
 העברה ל־Secret Store. הוא אינו מדפיס או מחזיר את תוכן הקבצים.
 
-10.13 `npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer`
-מורשה רק
-אחרי אימות ההעברה. הוא מעביר את שני הקבצים ל־Quarantine פרטי, מאמת
-אותם מחדש ומבצע `unlink`; כשל מוקדם מפעיל Restore ללא הדפסת תוכן.
+10.13 `npm run verify:team-invitation-browser-evidence-file` מאמת
+שמסמך ה־Evidence שהורד מריצת CI הוא קובץ רגיל בבעלות המפעיל, ללא
+Symlink, ‏Hard link או הרשאת כתיבה זרה, ושהוא קצר־חיים ותואם בדיוק
+ל־Release, ‏Commit, ‏Artifact, ‏Origin ו־Policy הנוכחיים.
 
-10.14 הפעולה אינה Secure Erase ואינה מוחקת עותקי Snapshot, ‏Backup
+10.14 `npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer`
+מורשה רק אחרי אישור ההעברה ואימות ה־Browser Evidence. הוא מעביר את
+שני הקבצים ל־Quarantine פרטי, מאמת אותם מחדש ומבצע `unlink`; כשל מוקדם
+מפעיל Restore ללא הדפסת תוכן.
+
+10.15 הפעולה אינה Secure Erase ואינה מוחקת עותקי Snapshot, ‏Backup
 או Secret Store. מחזור החיים של עותקים אלה נשלט במדיניות הספק.

@@ -356,16 +356,28 @@ npm run verify:team-invitation-browser-secret-files
 ומאמת ששני הקבצים שייכים לאותו Origin וש־Case Inventory שייך ל־Release
 הנוכחי. כשל אינו מדפיס תוכן מאחד הקבצים.
 
-12.12 רק לאחר שאומת כי שני הערכים נשמרו ב־Secret Store המאושר
-מריצים:
+12.12 רק לאחר שאומת כי שני הערכים נשמרו ב־Secret Store המאושר,
+הריצה ממנו הסתיימה בהצלחה ו־Browser Evidence הורד אל
+`.artifacts/team-invitation-browser-evidence.json`, מריצים תחילה:
+
+```sh
+npm run verify:team-invitation-browser-evidence-file
+```
+
+12.13 לאחר שהשער עבר מריצים:
 
 ```sh
 npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer
 ```
 
-12.13 הפקודה כוללת אישור מפורש בשם שלה, מאמתת את שני הקבצים, מעבירה
-אותם ל־Quarantine פרטי ומאמתת שוב לפני `unlink`. כשל לפני תחילת
-המחיקה מחזיר את הקבצים לנתיביהם המקוריים.
+12.14 הפקודה כוללת אישור מפעיל מפורש, דורשת Browser Evidence תקף
+וקצר־חיים לאותו Release, ואז מאמתת את שני הקבצים, מעבירה אותם
+ל־Quarantine פרטי ומאמתת שוב לפני `unlink`. כשל לפני תחילת המחיקה
+מחזיר את הקבצים לנתיביהם המקוריים.
 
-12.14 `unlink` מסיר את קישורי הקבצים המקומיים בלבד. הוא אינו מוכיח
+12.15 קובץ ה־Evidence נפתח ללא מעקב אחר Symlink, חייב להיות בבעלות
+המפעיל, בעל Link יחיד וללא הרשאת כתיבה ל־Group או ל־Others. הוא נשאר
+במקום לצורכי Audit ואינו כולל את שני ה־Secrets.
+
+12.16 `unlink` מסיר את קישורי הקבצים המקומיים בלבד. הוא אינו מוכיח
 מחיקה פיזית מ־SSD, ‏Filesystem Snapshot, גיבוי או Secret Store.
