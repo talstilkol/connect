@@ -90,12 +90,16 @@ Gate עם בעלות מקומית, Link יחיד, הרשאת `0600` ותפוגה
 5.9.1.3 השער המשולב עבר עבור שני הקבצים באותו Clock ואישר שישה
 Profiles, שבעה Scenarios, ‏Origin יחיד ו־Release נוכחי יחיד.
 
-5.9.1.4 לאחר אימות הערכים ב־Secret Store והרצה מוצלחת ממנו, קובץ
-Browser Evidence קצר־חיים ותואם Release עבר את שער הקובץ הייעודי.
+5.9.1.4 ה־Browser Evidence וה־Attestation Bundle הורדו מאותו Artifact
+קצר־חיים. `gh attestation verify` אישר Digest, ‏Repository, ‏Signer
+Workflow, ‏Release Commit ו־GitHub-hosted runner.
 
-5.9.1.5 רק לאחר מכן שני הקבצים המקומיים הוסרו באמצעות Quarantine
-ואימות חוזר. אין לסמן סעיף זה כהוכחת Secure Erase או כהוכחת ספק
-קריפטוגרפית להעברה.
+5.9.1.5 לאחר אימות הערכים ב־Secret Store והרצה מוצלחת ממנו, קובץ
+Browser Evidence קצר־חיים ותואם Release עבר גם את השער הסמנטי.
+
+5.9.1.6 רק לאחר מכן שני הקבצים המקומיים הוסרו באמצעות Quarantine
+ואימות חוזר. אין לסמן סעיף זה כהוכחת Secure Erase או כהוכחה שה־Secret
+Store עצמו שמר את הערכים; החתימה מוכיחה את מקור ה־Evidence.
 
 5.9.2 כל 22 ה־Assertions מה־Scenario Registry עברו, לרבות הוכחות
 Database עבור Mutation, Rejection ו־Idempotency.

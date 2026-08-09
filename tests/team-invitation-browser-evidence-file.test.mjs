@@ -134,7 +134,11 @@ async function createEvidenceFile(
     { mode: 0o644 },
   );
 
-  return { directory, filePath };
+  return {
+    directory,
+    filePath,
+    text: `${JSON.stringify(evidence)}\n`,
+  };
 }
 
 function configuration(
@@ -177,6 +181,8 @@ test("accepts an owner-controlled short-lived evidence file for the current rele
 
   assert.deepEqual(result, {
     releaseId: releaseManifest.releaseId,
+    evidenceFileDigest:
+      `sha256:${sha256(file.text)}`,
     verifiedScenarioCount: 7,
   });
   assert.ok(Object.isFrozen(result));

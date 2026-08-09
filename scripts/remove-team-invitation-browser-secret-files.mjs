@@ -26,6 +26,10 @@ import {
   verifyTeamInvitationBrowserEvidenceFile,
   teamInvitationBrowserEvidenceFileVerificationDependencies,
 } from "./verify-team-invitation-browser-evidence-file.mjs";
+import {
+  verifyTeamInvitationBrowserEvidenceAttestation,
+  teamInvitationBrowserEvidenceAttestationDependencies,
+} from "./verify-team-invitation-browser-evidence-attestation.mjs";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -50,6 +54,13 @@ const browserEvidencePath = join(
   projectRoot,
   ".artifacts",
   browserEvidenceFileName,
+);
+const browserEvidenceAttestationFileName =
+  "team-invitation-browser-evidence-attestation.json";
+const browserEvidenceAttestationPath = join(
+  projectRoot,
+  ".artifacts",
+  browserEvidenceAttestationFileName,
 );
 const confirmationValue =
   "secret-store-transfer-confirmed";
@@ -101,6 +112,8 @@ function requireConfiguration(value) {
       "authenticationStatePath",
       "caseInventoryPath",
       "browserEvidencePath",
+      "browserEvidenceAttestationPath",
+      "repository",
       "dependencies",
     ])
   ) {
@@ -119,24 +132,38 @@ function requireConfiguration(value) {
       "string" ||
     typeof value.caseInventoryPath !== "string" ||
     typeof value.browserEvidencePath !== "string" ||
+    typeof value.browserEvidenceAttestationPath !==
+      "string" ||
+    typeof value.repository !== "string" ||
     !isAbsolute(value.authenticationStatePath) ||
     !isAbsolute(value.caseInventoryPath) ||
     !isAbsolute(value.browserEvidencePath) ||
+    !isAbsolute(
+      value.browserEvidenceAttestationPath,
+    ) ||
     basename(value.authenticationStatePath) !==
       authenticationFileName ||
     basename(value.caseInventoryPath) !==
       caseInventoryFileName ||
     basename(value.browserEvidencePath) !==
       browserEvidenceFileName ||
+    basename(
+      value.browserEvidenceAttestationPath,
+    ) !== browserEvidenceAttestationFileName ||
     dirname(value.authenticationStatePath) !==
       dirname(value.caseInventoryPath) ||
     dirname(value.authenticationStatePath) !==
       dirname(value.browserEvidencePath) ||
+    dirname(value.authenticationStatePath) !==
+      dirname(
+        value.browserEvidenceAttestationPath,
+      ) ||
     dirname(value.authenticationStatePath) === "/" ||
     !isObject(value.dependencies) ||
     !hasExactKeys(value.dependencies, [
       "verifySecretFiles",
       "verifyBrowserEvidenceFile",
+      "verifyBrowserEvidenceAttestation",
       "mkdir",
       "lstat",
       "rename",
@@ -180,12 +207,47 @@ function requireEvidenceVerificationResult(value) {
     !isObject(value) ||
     !hasExactKeys(value, [
       "releaseId",
+      "evidenceFileDigest",
       "verifiedScenarioCount",
     ]) ||
     typeof value.releaseId !== "string" ||
+    typeof value.evidenceFileDigest !== "string" ||
+    !/^sha256:[a-f0-9]{64}$/.test(
+      value.evidenceFileDigest,
+    ) ||
     value.verifiedScenarioCount !== 7
   ) {
     fail("SECRET_FILE_REMOVAL_BROWSER_EVIDENCE_INVALID");
+  }
+
+  return value;
+}
+
+function requireAttestationVerificationResult(value) {
+  if (
+    !isObject(value) ||
+    !hasExactKeys(value, [
+      "repository",
+      "releaseId",
+      "evidenceFileDigest",
+      "verifiedAttestationCount",
+    ]) ||
+    typeof value.repository !== "string" ||
+    value.repository.length === 0 ||
+    typeof value.releaseId !== "string" ||
+    typeof value.evidenceFileDigest !== "string" ||
+    !/^sha256:[a-f0-9]{64}$/.test(
+      value.evidenceFileDigest,
+    ) ||
+    !Number.isSafeInteger(
+      value.verifiedAttestationCount,
+    ) ||
+    value.verifiedAttestationCount < 1 ||
+    value.verifiedAttestationCount > 30
+  ) {
+    fail(
+      "SECRET_FILE_REMOVAL_BROWSER_ATTESTATION_INVALID",
+    );
   }
 
   return value;
@@ -274,6 +336,12 @@ async function restoreMovedFiles(
 }
 
 const productionDependencies = Object.freeze({
+  verifyBrowserEvidenceAttestation: (value) =>
+    verifyTeamInvitationBrowserEvidenceAttestation({
+      ...value,
+      dependencies:
+        teamInvitationBrowserEvidenceAttestationDependencies,
+    }),
   verifyBrowserEvidenceFile: (value) =>
     verifyTeamInvitationBrowserEvidenceFile({
       ...value,
@@ -338,6 +406,49 @@ export async function removeTeamInvitationBrowserSecretFiles(
       caseInventoryPath: inventoryPath,
     });
   let before;
+  let attestedEvidenceFileDigest;
+
+  try {
+    const attestation =
+      requireAttestationVerificationResult(
+        await configuration.dependencies
+          .verifyBrowserEvidenceAttestation({
+            evidencePath:
+              configuration.browserEvidencePath,
+            attestationBundlePath:
+              configuration
+                .browserEvidenceAttestationPath,
+            repository: configuration.repository,
+            releaseManifest:
+              configuration.releaseManifest,
+          }),
+      );
+
+    if (
+      attestation.repository !==
+        configuration.repository ||
+      attestation.releaseId !==
+        configuration.releaseManifest.releaseId
+    ) {
+      fail(
+        "SECRET_FILE_REMOVAL_BROWSER_ATTESTATION_INVALID",
+      );
+    }
+
+    attestedEvidenceFileDigest =
+      attestation.evidenceFileDigest;
+  } catch (error) {
+    if (
+      error instanceof
+        TeamInvitationBrowserSecretFileRemovalError
+    ) {
+      throw error;
+    }
+
+    fail(
+      "SECRET_FILE_REMOVAL_BROWSER_ATTESTATION_INVALID",
+    );
+  }
 
   try {
     const evidence =
@@ -356,7 +467,9 @@ export async function removeTeamInvitationBrowserSecretFiles(
 
     if (
       evidence.releaseId !==
-        configuration.releaseManifest.releaseId
+        configuration.releaseManifest.releaseId ||
+      evidence.evidenceFileDigest !==
+        attestedEvidenceFileDigest
     ) {
       fail(
         "SECRET_FILE_REMOVAL_BROWSER_EVIDENCE_INVALID",
@@ -492,9 +605,11 @@ async function runCli() {
   const argumentsList = process.argv.slice(2);
 
   if (
-    argumentsList.length !== 1 ||
+    argumentsList.length !== 3 ||
     argumentsList[0] !==
-      "--confirm-secret-store-transfer"
+      "--confirm-secret-store-transfer" ||
+    argumentsList[1] !== "--repo" ||
+    typeof argumentsList[2] !== "string"
   ) {
     fail("SECRET_FILE_REMOVAL_NOT_CONFIRMED");
   }
@@ -510,6 +625,8 @@ async function runCli() {
       authenticationStatePath,
       caseInventoryPath,
       browserEvidencePath,
+      browserEvidenceAttestationPath,
+      repository: argumentsList[2],
       dependencies: productionDependencies,
     });
 

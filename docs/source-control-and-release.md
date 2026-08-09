@@ -263,15 +263,26 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 את שני השערים תחת Clock אחד ומוכיח התאמת Origin ו־Release לפני
 העברה ל־Secret Store. הוא אינו מדפיס או מחזיר את תוכן הקבצים.
 
-10.13 `npm run verify:team-invitation-browser-evidence-file` מאמת
+10.13 Workflow ה־Staging חותם את קובץ ה־Browser Evidence באמצעות
+`actions/attest` מקובע ו־GitHub OIDC. ההרשאות מוגבלות ל־Contents Read,
+‏OIDC, ‏Attestations ו־Artifact Metadata; ה־Bundle מועלה ליום אחד.
+
+10.14 `npm run verify:team-invitation-browser-evidence-attestation -- --repo "$GITHUB_REPOSITORY"`
+מפעיל `gh attestation verify` על ה־Evidence וה־Bundle ודורש Repository,
+‏Signer Workflow ו־Commit מדויקים וכן GitHub-hosted runner.
+
+10.15 `npm run verify:team-invitation-browser-evidence-file` מאמת
 שמסמך ה־Evidence שהורד מריצת CI הוא קובץ רגיל בבעלות המפעיל, ללא
 Symlink, ‏Hard link או הרשאת כתיבה זרה, ושהוא קצר־חיים ותואם בדיוק
 ל־Release, ‏Commit, ‏Artifact, ‏Origin ו־Policy הנוכחיים.
 
-10.14 `npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer`
-מורשה רק אחרי אישור ההעברה ואימות ה־Browser Evidence. הוא מעביר את
-שני הקבצים ל־Quarantine פרטי, מאמת אותם מחדש ומבצע `unlink`; כשל מוקדם
-מפעיל Restore ללא הדפסת תוכן.
+10.16 `npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer --repo "$GITHUB_REPOSITORY"`
+מורשה רק אחרי אישור ההעברה ואימות ה־Attestation וה־Browser Evidence.
+הוא מעביר את שני הקבצים ל־Quarantine פרטי, מאמת אותם מחדש ומבצע
+`unlink`; כשל מוקדם מפעיל Restore ללא הדפסת תוכן.
 
-10.15 הפעולה אינה Secure Erase ואינה מוחקת עותקי Snapshot, ‏Backup
+10.17 ה־Attestation מוכיח את מקור ה־Evidence, אך אינו מוכיח שה־Secret
+Store שמר את הערכים ואינו מבטיח שהקוד שנבדק בטוח לוגית.
+
+10.18 פעולת המחיקה אינה Secure Erase ואינה מוחקת עותקי Snapshot, ‏Backup
 או Secret Store. מחזור החיים של עותקים אלה נשלט במדיניות הספק.

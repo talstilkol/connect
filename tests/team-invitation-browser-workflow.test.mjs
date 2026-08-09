@@ -22,7 +22,7 @@ test("keeps the staging proof workflow manual, read-only, and environment protec
   );
   assert.match(
     workflow,
-    /permissions:\n  contents: read/,
+    /permissions:\n  contents: read\n  id-token: write\n  attestations: write\n  artifact-metadata: write/,
   );
   assert.match(
     workflow,
@@ -45,7 +45,7 @@ test("pins every external action and supplies secrets only to preflight and brow
     ),
   ].map((match) => match[1]);
 
-  assert.equal(actionReferences.length, 3);
+  assert.equal(actionReferences.length, 4);
   assert.equal(
     actionReferences.every((reference) =>
       /^[a-f0-9]{40}$/.test(reference),
@@ -71,6 +71,18 @@ test("pins every external action and supplies secrets only to preflight and brow
   assert.match(
     workflow,
     /retention-days: 1/,
+  );
+  assert.match(
+    workflow,
+    /uses: actions\/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4\.2\.1/,
+  );
+  assert.match(
+    workflow,
+    /subject-path: \.artifacts\/team-invitation-browser-evidence\.json/,
+  );
+  assert.match(
+    workflow,
+    /team-invitation-browser-evidence-attestation\.json/,
   );
   assert.ok(
     workflow.indexOf(

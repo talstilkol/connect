@@ -356,28 +356,48 @@ npm run verify:team-invitation-browser-secret-files
 ומאמת ששני הקבצים שייכים לאותו Origin וש־Case Inventory שייך ל־Release
 הנוכחי. כשל אינו מדפיס תוכן מאחד הקבצים.
 
-12.12 רק לאחר שאומת כי שני הערכים נשמרו ב־Secret Store המאושר,
-הריצה ממנו הסתיימה בהצלחה ו־Browser Evidence הורד אל
-`.artifacts/team-invitation-browser-evidence.json`, מריצים תחילה:
+12.12 לאחר יצירת ה־Evidence, ה־Workflow מפעיל `actions/attest` בגרסה
+מקובעת וחותם את Digest הקובץ באמצעות GitHub OIDC ו־Sigstore. ה־Bundle
+נשמר בשם
+`.artifacts/team-invitation-browser-evidence-attestation.json` ומועלה
+יחד עם ה־Evidence ליום אחד בלבד.
+
+12.13 Artifact Attestations דורש Repository ו־Plan נתמכים ב־GitHub.
+אם יכולת זו אינה זמינה, ה־Workflow נכשל סגור ואין למחוק את העותקים
+המקומיים או להפעיל Invitation Acceptance.
+
+12.14 לאחר הורדת ה־Artifact, מגדירים `GITHUB_REPOSITORY` לערך
+`owner/repository` האמיתי ומריצים:
+
+```sh
+npm run verify:team-invitation-browser-evidence-attestation -- --repo "$GITHUB_REPOSITORY"
+```
+
+12.15 ה־Verifier דורש חתימת SLSA תקפה, Repository ו־Signer Workflow
+מדויקים, Commit SHA של ה־Release ו־GitHub-hosted runner. הוא משתמש
+ב־Bundle שהורד ואינו מסתמך על Metadata לא חתום מתוך ה־Evidence.
+
+12.16 רק לאחר שאומת כי שני הערכים נשמרו ב־Secret Store המאושר,
+הריצה ממנו הסתיימה בהצלחה ושער ה־Attestation עבר, מריצים גם:
 
 ```sh
 npm run verify:team-invitation-browser-evidence-file
 ```
 
-12.13 לאחר שהשער עבר מריצים:
+12.17 לאחר ששני השערים עברו מריצים:
 
 ```sh
-npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer
+npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer --repo "$GITHUB_REPOSITORY"
 ```
 
-12.14 הפקודה כוללת אישור מפעיל מפורש, דורשת Browser Evidence תקף
-וקצר־חיים לאותו Release, ואז מאמתת את שני הקבצים, מעבירה אותם
-ל־Quarantine פרטי ומאמתת שוב לפני `unlink`. כשל לפני תחילת המחיקה
-מחזיר את הקבצים לנתיביהם המקוריים.
+12.18 הפקודה מאמתת בעצמה מחדש גם את ה־Attestation וגם את ה־Evidence,
+ורק אז מאמתת את שני הקבצים, מעבירה אותם ל־Quarantine פרטי ומאמתת
+שוב לפני `unlink`. כשל לפני תחילת המחיקה מחזיר את הקבצים לנתיביהם.
 
-12.15 קובץ ה־Evidence נפתח ללא מעקב אחר Symlink, חייב להיות בבעלות
-המפעיל, בעל Link יחיד וללא הרשאת כתיבה ל־Group או ל־Others. הוא נשאר
-במקום לצורכי Audit ואינו כולל את שני ה־Secrets.
+12.19 קובצי ה־Evidence וה־Bundle נפתחים ללא מעקב אחר Symlink. כל אחד
+מהם חייב להיות בבעלות המפעיל, בעל Link יחיד וללא הרשאת כתיבה ל־Group
+או ל־Others. הם נשארים במקום לצורכי Audit ואינם כוללים את שני
+ה־Secrets.
 
-12.16 `unlink` מסיר את קישורי הקבצים המקומיים בלבד. הוא אינו מוכיח
+12.20 `unlink` מסיר את קישורי הקבצים המקומיים בלבד. הוא אינו מוכיח
 מחיקה פיזית מ־SSD, ‏Filesystem Snapshot, גיבוי או Secret Store.

@@ -2,6 +2,9 @@ import {
   join,
 } from "node:path";
 import {
+  createHash,
+} from "node:crypto";
+import {
   fileURLToPath,
 } from "node:url";
 
@@ -171,6 +174,10 @@ export async function verifyTeamInvitationBrowserEvidenceFile(
   return Object.freeze({
     releaseId:
       configuration.releaseManifest.releaseId,
+    evidenceFileDigest:
+      `sha256:${createHash("sha256")
+        .update(rawEvidence)
+        .digest("hex")}`,
     verifiedScenarioCount:
       report.verifiedScenarioCount,
   });

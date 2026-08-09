@@ -34,6 +34,8 @@ const testRoot = join(
   "connect-team-invitation-secret-removal-tests",
   String(process.pid),
 );
+const evidenceFileDigest =
+  `sha256:${"d".repeat(64)}`;
 let testOrdinal = 0;
 
 function verificationResult() {
@@ -64,6 +66,10 @@ async function createFiles() {
     directory,
     "team-invitation-browser-evidence.json",
   );
+  const browserEvidenceAttestationPath = join(
+    directory,
+    "team-invitation-browser-evidence-attestation.json",
+  );
 
   await mkdir(directory, {
     recursive: true,
@@ -83,12 +89,18 @@ async function createFiles() {
     "browser-evidence",
     { mode: 0o600 },
   );
+  await writeFile(
+    browserEvidenceAttestationPath,
+    "browser-evidence-attestation",
+    { mode: 0o600 },
+  );
 
   return {
     directory,
     authenticationStatePath,
     caseInventoryPath,
     browserEvidencePath,
+    browserEvidenceAttestationPath,
   };
 }
 
@@ -96,12 +108,20 @@ function dependencies(
   verifySecretFiles,
   verifyBrowserEvidenceFile = async () => ({
     releaseId: releaseManifest.releaseId,
+    evidenceFileDigest,
     verifiedScenarioCount: 7,
+  }),
+  verifyBrowserEvidenceAttestation = async () => ({
+    repository: "connect-owner/connect",
+    releaseId: releaseManifest.releaseId,
+    evidenceFileDigest,
+    verifiedAttestationCount: 1,
   }),
 ) {
   return {
     verifySecretFiles,
     verifyBrowserEvidenceFile,
+    verifyBrowserEvidenceAttestation,
     mkdir,
     lstat,
     rename,
@@ -130,6 +150,9 @@ function configuration(
       files.caseInventoryPath,
     browserEvidencePath:
       files.browserEvidencePath,
+    browserEvidenceAttestationPath:
+      files.browserEvidenceAttestationPath,
+    repository: "connect-owner/connect",
     dependencies: dependencyOverrides,
     ...overrides,
   };
@@ -206,6 +229,12 @@ test("quarantines, re-verifies, and unlinks both local secret files", async () =
     await exists(files.browserEvidencePath),
     true,
   );
+  assert.equal(
+    await exists(
+      files.browserEvidenceAttestationPath,
+    ),
+    true,
+  );
 });
 
 test("requires explicit transfer confirmation before verification or mutation", async () => {
@@ -261,7 +290,9 @@ test("requires matching browser evidence before reading or moving secret files",
             async () => {
               return {
                 releaseId:
-                  `connect_release_v1_${"c".repeat(64)}`,
+                  releaseManifest.releaseId,
+                evidenceFileDigest:
+                  `sha256:${"e".repeat(64)}`,
                 verifiedScenarioCount: 7,
               };
             },
@@ -274,6 +305,55 @@ test("requires matching browser evidence before reading or moving secret files",
   );
 
   assert.equal(secretVerificationCalls, 0);
+  assert.equal(
+    await readFile(
+      files.authenticationStatePath,
+      "utf8",
+    ),
+    "auth-secret",
+  );
+  assert.equal(
+    await readFile(
+      files.caseInventoryPath,
+      "utf8",
+    ),
+    "case-secret",
+  );
+});
+
+test("requires a matching cryptographic attestation before evidence or secret access", async () => {
+  const files = await createFiles();
+  let laterVerificationCalls = 0;
+
+  await assert.rejects(
+    () =>
+      removeTeamInvitationBrowserSecretFiles(
+        configuration(
+          files,
+          dependencies(
+            async () => {
+              laterVerificationCalls += 1;
+            },
+            async () => {
+              laterVerificationCalls += 1;
+            },
+            async () => ({
+              repository:
+                "other-owner/connect",
+              releaseId:
+                releaseManifest.releaseId,
+              evidenceFileDigest,
+              verifiedAttestationCount: 1,
+            }),
+          ),
+        ),
+      ),
+    expectsError(
+      "SECRET_FILE_REMOVAL_BROWSER_ATTESTATION_INVALID",
+    ),
+  );
+
+  assert.equal(laterVerificationCalls, 0);
   assert.equal(
     await readFile(
       files.authenticationStatePath,

@@ -5,6 +5,9 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 concurrency:
   group: team-invitation-browser-e2e-staging
@@ -69,6 +72,19 @@ jobs:
           npm run evidence:team-invitation-browser --
           --receipt .artifacts/team-invitation-browser-receipt.json
 
+      - name: Attest the browser evidence provenance
+        id: attest-browser-evidence
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: .artifacts/team-invitation-browser-evidence.json
+
+      - name: Stage the signed attestation bundle
+        run: >-
+          install -m 0644 "$ATTESTATION_BUNDLE_PATH"
+          .artifacts/team-invitation-browser-evidence-attestation.json
+        env:
+          ATTESTATION_BUNDLE_PATH: ${{ steps.attest-browser-evidence.outputs.bundle-path }}
+
       - name: Upload the bounded evidence artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -76,6 +92,7 @@ jobs:
           path: |
             .artifacts/team-invitation-browser-receipt.json
             .artifacts/team-invitation-browser-evidence.json
+            .artifacts/team-invitation-browser-evidence-attestation.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 1
