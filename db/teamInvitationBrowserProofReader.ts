@@ -89,11 +89,16 @@ const externalUserProofSql = `
     ) AS acceptanceAuditCount
 `;
 
-interface ProofRow {
+export interface TeamInvitationBrowserProofRow {
   invitationCount: unknown;
   membershipCount: unknown;
   activeMembershipCount: unknown;
   acceptanceAuditCount: unknown;
+}
+
+export interface TeamInvitationBrowserProofQuery {
+  sql: string;
+  params: readonly string[];
 }
 
 export interface TeamInvitationBrowserDatabaseProof {
@@ -249,7 +254,7 @@ function requireCount(
   return value;
 }
 
-function parseProof(
+export function parseTeamInvitationBrowserProofRow(
   value: unknown,
 ): TeamInvitationBrowserDatabaseProof {
   if (
@@ -301,6 +306,29 @@ function parseProof(
   return Object.freeze(proof);
 }
 
+export function buildTeamInvitationBrowserProofQuery(
+  input: unknown,
+): TeamInvitationBrowserProofQuery {
+  const parsed = parseInput(input);
+
+  return Object.freeze(
+    parsed.scope.kind === "tenant-total"
+      ? {
+          sql: tenantTotalProofSql,
+          params: Object.freeze([
+            parsed.invitationKey,
+          ]),
+        }
+      : {
+          sql: externalUserProofSql,
+          params: Object.freeze([
+            parsed.invitationKey,
+            parsed.scope.externalUserId,
+          ]),
+        },
+  );
+}
+
 export function createTeamInvitationBrowserProofReader(
   database: D1DatabaseBinding,
 ) {
@@ -308,32 +336,21 @@ export function createTeamInvitationBrowserProofReader(
     async read(
       input: unknown,
     ): Promise<TeamInvitationBrowserDatabaseProof> {
-      const parsed = parseInput(input);
+      const query =
+        buildTeamInvitationBrowserProofQuery(
+          input,
+        );
 
       try {
-        const statement =
-          parsed.scope.kind ===
-          "tenant-total"
-            ? database
-                .prepare(
-                  tenantTotalProofSql,
-                )
-                .bind(
-                  parsed.invitationKey,
-                )
-            : database
-                .prepare(
-                  externalUserProofSql,
-                )
-                .bind(
-                  parsed.invitationKey,
-                  parsed.scope
-                    .externalUserId,
-                );
+        const statement = database
+          .prepare(query.sql)
+          .bind(...query.params);
         const row =
-          await statement.first<ProofRow>();
+          await statement.first<TeamInvitationBrowserProofRow>();
 
-        return parseProof(row);
+        return parseTeamInvitationBrowserProofRow(
+          row,
+        );
       } catch (error) {
         if (
           error instanceof

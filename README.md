@@ -78,9 +78,10 @@
    הפקת Transcript. הוא חוסם Referrer וניווט Cross-origin ואינו
    מחזיר Cookies, ‏URL או Invitation Key.
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
-   חיבור CI ו־D1 מרוחק עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1095/1095 בדיקות, 30 Migrations,
-   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏685 קבצים
+   חיבור CI ו־Credentials אמיתיים עדיין חסרים ולכן אין Browser
+   Evidence אמיתי.
+31. Local Release Gate עובר עם 1102/1102 בדיקות, 30 Migrations,
+   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏687 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -89,7 +90,14 @@
    הצעת התיקון האוטומטית היא Downgrade שובר ולכן אינה מיושמת.
 34. Vite config משתמש כעת ב־JSON import attributes ובסיומת קובץ
    מפורשת, ללא אזהרת ה־Native config loader החדשה.
-35. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+35. D1 Remote Proof Adapter שולח רק את שתי שאילתות ה־SELECT
+   הקנוניות ל־Cloudflare API endpoint קבוע ומחייב D1 Read token.
+36. תגובת D1 מתקבלת רק כאשר ה־API מדווח `changed_db = false`,
+   ‏`changes = 0` ו־`rows_written = 0`; שגיאות ספק ו־Rows גולמיים
+   אינם נכנסים ל־Receipt.
+37. Account, ‏Database ו־Token נשארים ב־Secrets של סביבת Staging.
+   אין Route ציבורי, Mutation, ‏Retry אוטומטי או יצירת משאב ענן.
+38. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
