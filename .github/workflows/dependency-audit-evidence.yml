@@ -1,0 +1,63 @@
+name: Dependency audit evidence
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+concurrency:
+  group: dependency-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-audit:
+    name: dependency-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Audit production dependencies and build release-bound evidence
+        run: npm run evidence:dependency-audit
+
+      - name: Attest the dependency audit evidence provenance
+        id: attest-dependency-audit
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: .artifacts/dependency-audit-evidence.json
+
+      - name: Stage the signed attestation bundle
+        run: >-
+          install -m 0644 "$ATTESTATION_BUNDLE_PATH"
+          .artifacts/dependency-audit-evidence-attestation.json
+        env:
+          ATTESTATION_BUNDLE_PATH: ${{ steps.attest-dependency-audit.outputs.bundle-path }}
+
+      - name: Upload the bounded evidence artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dependency-audit-evidence-${{ github.sha }}
+          path: |
+            .artifacts/dependency-audit-evidence.json
+            .artifacts/dependency-audit-evidence-attestation.json
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 1

@@ -75,6 +75,14 @@ const steps = [
       : [
           {
             id:
+              "dependency-audit-attestation",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-dependency-audit-evidence-attestation.mjs",
+            ],
+          },
+          {
+            id:
               "team-invitation-browser-attestation",
             command: process.execPath,
             arguments: [

@@ -21,6 +21,13 @@
 2.2.1 כל מוני `info`, ‏`low`, ‏`moderate`, ‏`high` ו־`critical` הם
 אפס. Evidence שמדווח על פגיעות נשמר לצורכי אבחון אך חוסם Production.
 
+2.2.2 ה־Artifact כולל את קובץ ה־Evidence ואת Attestation Bundle
+מאותו Workflow ומאותו Commit, ו־`gh attestation verify` עבר מול
+ה־Repository המאושר ו־GitHub-hosted runner.
+
+2.2.3 `DEPENDENCY_AUDIT_EVIDENCE_JSON` זהה מבחינה מבנית לקובץ
+החתום. אין לקבל JSON מקומי אחר גם אם ה־Digest הפנימי שלו תקין.
+
 2.3 Production Readiness מחזיר Ready עבור כל הבדיקות.
 
 2.4 Secret Scanning ו־Push Protection של ספק ה־Repository עברו.

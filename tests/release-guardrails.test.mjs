@@ -43,7 +43,7 @@ test("passes the current source, interface, and dependency lock guardrails", asy
   );
 });
 
-test("requires invitation evidence attestation only in the production release gate", async () => {
+test("requires dependency and invitation evidence attestations only in the production release gate", async () => {
   const source = await readFile(
     new URL(
       "../scripts/verify-release-gate.mjs",
@@ -54,7 +54,10 @@ test("requires invitation evidence attestation only in the production release ga
   const conditionalStart = source.indexOf(
     "localOnly\n      ? []",
   );
-  const attestationStep = source.indexOf(
+  const dependencyAttestationStep = source.indexOf(
+    '"dependency-audit-attestation"',
+  );
+  const browserAttestationStep = source.indexOf(
     '"team-invitation-browser-attestation"',
   );
   const readinessStep = source.indexOf(
@@ -62,8 +65,18 @@ test("requires invitation evidence attestation only in the production release ga
   );
 
   assert.notEqual(conditionalStart, -1);
-  assert.ok(attestationStep > conditionalStart);
-  assert.ok(readinessStep > attestationStep);
+  assert.ok(
+    dependencyAttestationStep > conditionalStart,
+  );
+  assert.ok(
+    browserAttestationStep >
+      dependencyAttestationStep,
+  );
+  assert.ok(readinessStep > browserAttestationStep);
+  assert.match(
+    source,
+    /scripts\/verify-dependency-audit-evidence-attestation\.mjs/,
+  );
   assert.match(
     source,
     /scripts\/verify-team-invitation-browser-evidence-attestation\.mjs/,

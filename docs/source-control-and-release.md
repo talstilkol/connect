@@ -317,3 +317,20 @@ Digest ותפוגה ומשווה ל־`APP_RELEASE_ID` ול־`APP_DEPLOYED_COMMIT
 
 11.5 פגיעות אחת לפחות מחזירה `DEPENDENCY_VULNERABILITIES_FOUND`.
 אין המרה אוטומטית ל־Ready ואין הפעלת `npm audit fix` או Downgrade.
+
+11.6 `.github/workflows/dependency-audit-evidence.yml` רץ עבור Pull
+Request או הפעלה ידנית. ה־Job נקרא `dependency-audit`, מפיק Evidence
+מול ה־Registry הרשמי וחותם עליו באמצעות GitHub Attestations.
+
+11.7 ה־Workflow משתמש רק ב־Actions המקובעים ל־Commit, אינו שומר
+Credentials של Checkout ומעלה את ה־Evidence ואת ה־Attestation Bundle
+ליום אחד בלבד.
+
+11.8 `npm run verify:dependency-audit-evidence-attestation` מפעיל
+`gh attestation verify` ודורש Repository, ‏Signer Workflow, ‏Release
+Commit ו־GitHub-hosted runner מדויקים. הוא קורא מחדש את שני הקבצים
+אחרי האימות וחוסם החלפה במהלך הבדיקה.
+
+11.9 המאמת דורש גם זהות מבנית מלאה בין הקובץ החתום לבין
+`DEPENDENCY_AUDIT_EVIDENCE_JSON`. שער Production מפעיל אותו לפני
+Browser Attestation ולפני Production Readiness.
