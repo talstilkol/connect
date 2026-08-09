@@ -237,3 +237,7 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 10.6 Scenario Registry מרכז שבעה תרחישים ו־22 Assertions. כל
 Scenario Output Digest נגזר מהסדר, מהשם, מהמקור ומה־Output Digest
 של Assertions שלו; תוצאה כללית שאינה קשורה לבדיקות נפסלת.
+
+10.7 `TEAM_INVITATION_BROWSER_E2E_CASES_JSON` הוא Secret זמני של
+Staging המכיל Invitation Keys ו־External User Scopes. הוא מוזרק
+מ־CI Secret Store, תקף עד שעתיים ואסור לשמור אותו כ־Artifact.

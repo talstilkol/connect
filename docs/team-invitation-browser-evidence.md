@@ -23,9 +23,12 @@
 2.4 Clerk, ‏Invitation Policy, ‏D1 והזהויות הנדרשות לתרחישים חייבים
 להיות משאבי Staging נפרדים. אין להשתמש בנתוני Production.
 
-2.5 Executor Core מקומי קיים, אך הוא אינו מספק Browser, ‏CI,
-Credentials או Test Cases. שלושת ה־Ports חייבים להתחבר למשאבי
-Staging אמיתיים לפני שניתן להפיק Receipt.
+2.5 Executor Core, ‏Case Inventory Resolver ו־D1 Proof Port קיימים
+מקומית. הם אינם מספקים Browser, ‏CI, Credentials או Test Cases.
+כל ה־Ports חייבים להתחבר למשאבי Staging אמיתיים לפני הפקת Receipt.
+
+2.6 Case Inventory הוא Secret קצר־חיים הנפרד מה־Receipt. הוא חייב
+להישאר תקף לכל תקציב הריצה ולהתאים לאותה זהות Deployment ו־Policy.
 
 ## 3. חוזה ה־Receipt
 

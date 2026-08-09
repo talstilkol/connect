@@ -67,9 +67,12 @@
 26. Executor Core מריץ את שבעת התרחישים ברצף, קורא D1 לפני ואחרי
    פעולת Browser ונכשל מיד על Timeout, Observation שגוי או מעבר
    Database לא בטוח. ספקי CI ו־Browser עדיין אינם מוגדרים.
-27. Local Release Gate עובר עם 1072/1072 בדיקות, 30 Migrations,
-   ‏381 קובצי Source ו־19 Client dependency graphs.
-28. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+27. Staging Case Inventory קצר־חיים מקושר לזהות הפריסה ומבודד שבעה
+   Invitation Keys וזהויות. D1 Proof Port דוחה תוצאה שהושלמה לאחר
+   Abort ואינו מוסיף Mutation או Route.
+28. Local Release Gate עובר עם 1082/1082 בדיקות, 30 Migrations,
+   ‏383 קובצי Source ו־19 Client dependency graphs.
+29. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

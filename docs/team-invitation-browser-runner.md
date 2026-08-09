@@ -199,8 +199,8 @@ Deployment, ‏Policy ושבעה Scenario executions בלבד.
 8.5 ה־Adapter דוחה Fingerprint כפול, Timestamp לא קנוני, טווח
 תרחישים מעל 24 שעות ו־Receipt שאינו עומד בחוזה ה־Evidence.
 
-8.6 אין Adapter ל־CI, ‏Browser או D1 Credentials. לכן קיום הקוד
-אינו מפעיל Staging ואינו משנה את מצב Production.
+8.6 D1 Proof Port קיים, אך אין Adapter ל־CI, ‏Browser או Credentials.
+לכן קיום הקוד אינו מפעיל Staging ואינו משנה את מצב Production.
 
 ## 9. Executor Port
 
@@ -229,4 +229,29 @@ AbortSignal, עוצר את הריצה ואינו גורם ל־Retry אוטומט
 נכשלים מיד. התרחיש הבא אינו נפתח.
 
 9.7 ה־Executor אינו מכיל Credentials, אינו בוחר ספק ואינו Route.
-מימושי ה־Ports ייבנו רק לאחר בחירת CI ו־Browser Executor אמיתיים.
+Case Resolver ו־D1 Port קיימים; Browser Port ייבנה רק לאחר בחירת
+CI ו־Browser Executor אמיתיים.
+
+## 10. Staging Case Inventory
+
+10.1 `TEAM_INVITATION_BROWSER_E2E_CASES_JSON` הוא Secret זמני של
+Staging. הוא אינו נשמר ב־Git, ב־Artifact, ב־Evidence או בלוג.
+
+10.2 ה־Inventory כולל בדיוק שבעה Cases בסדר ה־Registry. כל Case
+כולל Scenario Name ו־Invitation Key ייחודי.
+
+10.3 ששת התרחישים בעלי Database Assertions כוללים Proof Scope.
+התרחיש הלא מחובר משתמש רק ב־`tenant-total`; יתר חמשת התרחישים
+משתמשים ב־External User IDs ייחודיים.
+
+10.4 ה־Inventory מקושר ל־Staging Origin, ‏Release, ‏Commit,
+Artifact ו־Policy Digest המדויקים.
+
+10.5 זמן החיים המרבי הוא שעתיים. לפני התחלת הריצה נדרש להישאר
+חלון תקפות המספיק לכל שבעת ה־Scenario timeouts.
+
+10.6 Resolver חושף פעולה אחת בלבד: פתרון Case לפי Scenario קנוני.
+אין API לרשימה, חיפוש, Dump או קריאת Inventory מלא.
+
+10.7 D1 Proof Port מעביר את ה־Case ל־Reader הקיים ובודק Abort לפני
+הקריאה ואחריה. Proof שהסתיים לאחר Abort אינו נכנס ל־Assertion.
