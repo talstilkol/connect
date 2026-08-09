@@ -377,6 +377,11 @@ npm run verify:team-invitation-browser-evidence-attestation -- --repo "$GITHUB_R
 מדויקים, Commit SHA של ה־Release ו־GitHub-hosted runner. הוא משתמש
 ב־Bundle שהורד ואינו מסתמך על Metadata לא חתום מתוך ה־Evidence.
 
+12.15.1 לפני `npm run verify:release-gate` מגדירים גם
+`TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY` לאותה זהות
+`owner/repository`. שער Production מפעיל את ה־Verifier ללא Arguments
+ועוצר לפני Production Readiness אם המשתנה או החתימה חסרים.
+
 12.16 רק לאחר שאומת כי שני הערכים נשמרו ב־Secret Store המאושר,
 הריצה ממנו הסתיימה בהצלחה ושער ה־Attestation עבר, מריצים גם:
 

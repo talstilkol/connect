@@ -80,7 +80,7 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1155/1155 בדיקות, 30 Migrations,
+31. Local Release Gate עובר עם 1157/1157 בדיקות, 30 Migrations,
    ‏384 קובצי Source, ‏19 Client dependency graphs, ‏711 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
@@ -176,8 +176,10 @@
 21. 15 בדיקות ממשק מקבעות RTL, נקודות שבירה, Focus, ‏Reduced Motion,
     ניווט, Mobile Menu, ‏Dialog ו־Skip Link.
 22. Dependency Lock מאמת 23 תלויות ישירות מול `package-lock.json`.
-23. Local Release Gate עובר. Production Release Gate נכשל בכוונה
-    על 5 Ready, ‏17 Blocked ו־11 Decision Required.
+23. Local Release Gate עובר. Production Release Gate דורש תחילה
+    Attestation קריפטוגרפי ל־Browser Evidence ורק לאחר מכן מריץ את
+    33 בדיקות ה־Readiness. כרגע הוא נכשל בכוונה על Evidence חסר ועל
+    5 Ready, ‏17 Blocked ו־11 Decision Required.
 24. כל הבדיקות, Build, ‏TypeScript ו־ESLint עוברים דרך Local
     Release Gate. Deployment Provenance דורש התאמה מלאה בין
     ה־Release Manifest, ‏Commit, ‏Artifact ופריסת Production.

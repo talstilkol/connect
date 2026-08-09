@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  readFile,
   mkdtemp,
   mkdir,
   writeFile,
@@ -39,6 +40,33 @@ test("passes the current source, interface, and dependency lock guardrails", asy
   assert.equal(
     dependencies.findings.length,
     0,
+  );
+});
+
+test("requires invitation evidence attestation only in the production release gate", async () => {
+  const source = await readFile(
+    new URL(
+      "../scripts/verify-release-gate.mjs",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  const conditionalStart = source.indexOf(
+    "localOnly\n      ? []",
+  );
+  const attestationStep = source.indexOf(
+    '"team-invitation-browser-attestation"',
+  );
+  const readinessStep = source.indexOf(
+    'id: "production-readiness"',
+  );
+
+  assert.notEqual(conditionalStart, -1);
+  assert.ok(attestationStep > conditionalStart);
+  assert.ok(readinessStep > attestationStep);
+  assert.match(
+    source,
+    /scripts\/verify-team-invitation-browser-evidence-attestation\.mjs/,
   );
 });
 

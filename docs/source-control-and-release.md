@@ -35,8 +35,19 @@ Release ו־Secrets הם unknown/unavailable עד למינוי מפורש.
 
 2.1.8 Build וכל הבדיקות.
 
-2.2 `npm run verify:release-gate` מוסיף Production Readiness ונכשל
-סגור כל עוד קיימת החלטה או תלות חיצונית חסרה.
+2.2 `npm run verify:release-gate` דורש בנוסף, ובסדר הבא:
+
+2.2.1 `TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY` בפורמט
+`owner/repository` האמיתי.
+
+2.2.2 אימות קריפטוגרפי של Browser Evidence מול ה־Attestation Bundle,
+‏Repository, ‏Signer Workflow ו־Release Commit.
+
+2.2.3 רק לאחר שהחתימה עברה — Production Readiness. השער נכשל סגור
+כל עוד ה־Attestation, החלטה או תלות חיצונית חסרים.
+
+2.2.4 `verify:release-gate:local` אינו דורש GitHub, ‏Bundle או Secrets
+חיצוניים ולכן נשאר שער פיתוח מקומי דטרמיניסטי.
 
 2.3 `npm run verify:secret-hygiene` אינו מדפיס Secret, נתיב התאמה,
 Commit פגוע או תוכן קובץ. הוא מחזיר קוד ממצא מוגבל בלבד.

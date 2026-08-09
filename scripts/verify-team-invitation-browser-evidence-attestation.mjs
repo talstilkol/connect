@@ -285,11 +285,36 @@ export async function verifyTeamInvitationBrowserEvidenceAttestation(
   });
 }
 
-function parseArguments(argumentsList) {
+export function resolveTeamInvitationBrowserAttestationRepository(
+  argumentsList,
+  environment,
+) {
+  const configuredRepository =
+    environment
+      .TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY;
+
+  if (argumentsList.length === 0) {
+    if (
+      typeof configuredRepository !== "string" ||
+      configuredRepository.length === 0
+    ) {
+      fail(
+        "BROWSER_EVIDENCE_ATTESTATION_ARGUMENTS_INVALID",
+      );
+    }
+
+    return configuredRepository;
+  }
+
   if (
     argumentsList.length !== 2 ||
     argumentsList[0] !== "--repo" ||
-    typeof argumentsList[1] !== "string"
+    typeof argumentsList[1] !== "string" ||
+    (
+      typeof configuredRepository === "string" &&
+      configuredRepository.length > 0 &&
+      configuredRepository !== argumentsList[1]
+    )
   ) {
     fail("BROWSER_EVIDENCE_ATTESTATION_ARGUMENTS_INVALID");
   }
@@ -298,9 +323,11 @@ function parseArguments(argumentsList) {
 }
 
 async function runCli() {
-  const repository = parseArguments(
-    process.argv.slice(2),
-  );
+  const repository =
+    resolveTeamInvitationBrowserAttestationRepository(
+      process.argv.slice(2),
+      process.env,
+    );
   const releaseManifest =
     await createCurrentReleaseManifest();
   const result =

@@ -74,6 +74,14 @@ const steps = [
       ? []
       : [
           {
+            id:
+              "team-invitation-browser-attestation",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-team-invitation-browser-evidence-attestation.mjs",
+            ],
+          },
+          {
             id: "production-readiness",
             command: "npm",
             arguments: [

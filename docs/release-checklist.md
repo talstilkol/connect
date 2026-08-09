@@ -110,6 +110,11 @@ Read-only, ושום Row או Identifier לא נכתב ל־Receipt.
 5.10 Browser Evidence הופק מה־Receipt באמצעות המחולל המקומי, טרם
 פג תוקף ומתאים בדיוק לערכי Runtime של ה־Release.
 
+5.11 `TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY` מכיל את זהות
+ה־Repository האמיתית, ו־Production Release Gate הפעיל את אימות
+ה־Attestation לפני Production Readiness. Evidence סמנטי ללא חתימה
+אינו מספיק למעבר השער.
+
 ## 6. Operations
 
 6.1 Monitoring, ‏Alerting ו־SLO פעילים.

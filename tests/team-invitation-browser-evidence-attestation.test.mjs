@@ -10,6 +10,7 @@ import test from "node:test";
 import {
   verifyTeamInvitationBrowserEvidenceAttestation,
   TeamInvitationBrowserEvidenceAttestationError,
+  resolveTeamInvitationBrowserAttestationRepository,
 } from "../scripts/verify-team-invitation-browser-evidence-attestation.mjs";
 
 const artifactDirectory = join(
@@ -242,4 +243,38 @@ test("rejects evidence or bundle replacement during cryptographic verification",
   );
 
   assert.equal(reads, 4);
+});
+
+test("resolves one production-gate repository without accepting conflicting input", () => {
+  assert.equal(
+    resolveTeamInvitationBrowserAttestationRepository(
+      [],
+      {
+        TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY:
+          repository,
+      },
+    ),
+    repository,
+  );
+  assert.equal(
+    resolveTeamInvitationBrowserAttestationRepository(
+      ["--repo", repository],
+      {},
+    ),
+    repository,
+  );
+
+  assert.throws(
+    () =>
+      resolveTeamInvitationBrowserAttestationRepository(
+        ["--repo", repository],
+        {
+          TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY:
+            "other-owner/connect",
+        },
+      ),
+    expectsError(
+      "BROWSER_EVIDENCE_ATTESTATION_ARGUMENTS_INVALID",
+    ),
+  );
 });
