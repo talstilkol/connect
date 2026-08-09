@@ -22,13 +22,31 @@ const authenticatedProfiles = [
   "verified-accepted-invitation",
   "verified-accessibility",
 ];
+const launcherNow = new Date(
+  "2026-08-09T10:00:00.000Z",
+);
 
 function authenticationStates() {
   return Object.fromEntries(
     authenticatedProfiles.map((profile) => [
       profile,
       {
-        cookies: [],
+        cookies: [
+          {
+            name: "__session",
+            value: `session-${profile}`,
+            domain:
+              "staging.connect.example",
+            path: "/",
+            expires:
+              Date.parse(
+                "2026-08-10T10:00:00.000Z",
+              ) / 1_000,
+            httpOnly: true,
+            secure: true,
+            sameSite: "Lax",
+          },
+        ],
         origins: [],
       },
     ]),
@@ -71,6 +89,7 @@ test("parses only a release-bound staging launcher configuration", () => {
     parseTeamInvitationBrowserLauncherConfiguration({
       environment: environment(),
       releaseManifest,
+      now: launcherNow,
     });
 
   assert.equal(
@@ -105,6 +124,7 @@ test("rejects an incomplete authentication-state inventory before browser startu
             JSON.stringify(incomplete),
         }),
         releaseManifest,
+        now: launcherNow,
       }),
     expectsLauncherCode(
       "CONFIGURATION_INVALID",
@@ -125,6 +145,7 @@ test("rejects a local or non-canonical browser origin before browser startup", (
               origin,
           }),
           releaseManifest,
+          now: launcherNow,
         }),
       expectsLauncherCode(
         "CONFIGURATION_INVALID",
@@ -173,9 +194,7 @@ test("preflights release, inventory, auth, and D1 configuration without browser 
     await preflightTeamInvitationBrowserLauncher({
       environment: environment(),
       clock: () =>
-        new Date(
-          "2026-08-09T10:00:00.000Z",
-        ),
+        launcherNow,
       dependencies,
     });
 
@@ -305,9 +324,7 @@ test("composes case, browser, and D1 ports and writes only after browser closure
     await runTeamInvitationBrowserLauncher({
       environment: environment(),
       clock: () =>
-        new Date(
-          "2026-08-09T10:00:00.000Z",
-        ),
+        launcherNow,
       dependencies,
     });
 
@@ -326,7 +343,9 @@ test("composes case, browser, and D1 ports and writes only after browser closure
       "verified-matching-email",
       new AbortController().signal,
     ),
-    { cookies: [], origins: [] },
+    authenticationStates()[
+      "verified-matching-email"
+    ],
   );
 });
 
@@ -363,9 +382,7 @@ test("closes the browser and never writes a receipt after execution failure", as
     runTeamInvitationBrowserLauncher({
       environment: environment(),
       clock: () =>
-        new Date(
-          "2026-08-09T10:00:00.000Z",
-        ),
+        launcherNow,
       dependencies,
     }),
     /ASSERTION_FAILED/,

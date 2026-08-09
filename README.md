@@ -80,8 +80,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1115/1115 בדיקות, 30 Migrations,
-   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏693 קבצים
+31. Local Release Gate עובר עם 1119/1119 בדיקות, 30 Migrations,
+   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏695 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -113,6 +113,9 @@
 44. מחולל Case Inventory מקבל שבעה Cases דרך Secret זמני, גוזר
    חלון של שעה וכותב JSON קנוני בהרשאות `0600` תחת `.artifacts`.
    Invitation Keys וזהויות אינם מודפסים ואינם נשמרים ב־Git.
+45. Auth State Validator מאמת לעומק שישה Profiles: לפחות Cookie
+   מאובטח אחד, Domain השייך ל־Staging, תפוגה המספיקה לריצה ו־Origin
+   זהה. שדות נוספים, כפילויות, Domain זר ו־IndexedDB נדחים.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 

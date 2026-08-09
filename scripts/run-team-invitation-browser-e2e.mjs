@@ -39,6 +39,10 @@ import {
 import {
   openPlaywrightTeamInvitationBrowserSession,
 } from "./team-invitation-playwright-session-driver.mjs";
+import {
+  parseTeamInvitationBrowserAuthenticationStates,
+  teamInvitationBrowserAuthenticatedProfiles,
+} from "./team-invitation-browser-auth-state-bundle.mjs";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -51,21 +55,11 @@ const receiptPath = join(
 const scenarioTimeoutMilliseconds = 60_000;
 const inventorySafetyMarginMilliseconds = 60_000;
 const maximumAuthenticationStateLength = 65_536;
-const maximumCookiesPerProfile = 100;
-const maximumOriginsPerProfile = 20;
 const releaseIdPattern =
   /^connect_release_v1_[a-f0-9]{64}$/;
 const commitShaPattern = /^[a-f0-9]{40}$/;
 const artifactDigestPattern =
   /^sha256:[a-f0-9]{64}$/;
-const authenticatedProfiles = Object.freeze([
-  "unverified-primary-email",
-  "verified-matching-email",
-  "verified-mismatched-email",
-  "verified-expired-invitation",
-  "verified-accepted-invitation",
-  "verified-accessibility",
-]);
 
 export class TeamInvitationBrowserLauncherError
   extends Error {
@@ -123,55 +117,6 @@ function requireEnvironmentValue(
   return value;
 }
 
-function parseAuthenticationStates(rawValue) {
-  if (
-    rawValue.length >
-      maximumAuthenticationStateLength
-  ) {
-    failConfiguration();
-  }
-
-  let parsed;
-
-  try {
-    parsed = JSON.parse(rawValue);
-  } catch {
-    failConfiguration();
-  }
-
-  if (
-    !isPlainObject(parsed) ||
-    !hasExactKeys(
-      parsed,
-      authenticatedProfiles,
-    )
-  ) {
-    failConfiguration();
-  }
-
-  for (const profile of authenticatedProfiles) {
-    const state = parsed[profile];
-
-    if (
-      !isPlainObject(state) ||
-      !hasExactKeys(state, [
-        "cookies",
-        "origins",
-      ]) ||
-      !Array.isArray(state.cookies) ||
-      state.cookies.length >
-        maximumCookiesPerProfile ||
-      !Array.isArray(state.origins) ||
-      state.origins.length >
-        maximumOriginsPerProfile
-    ) {
-      failConfiguration();
-    }
-  }
-
-  return Object.freeze(parsed);
-}
-
 function requireReleaseManifest(value) {
   if (
     !isPlainObject(value) ||
@@ -221,8 +166,13 @@ function requireStagingOrigin(value) {
 export function parseTeamInvitationBrowserLauncherConfiguration({
   environment,
   releaseManifest,
+  now = new Date(),
 }) {
-  if (!isPlainObject(environment)) {
+  if (
+    !isPlainObject(environment) ||
+    !(now instanceof Date) ||
+    !Number.isFinite(now.getTime())
+  ) {
     failConfiguration();
   }
 
@@ -277,14 +227,27 @@ export function parseTeamInvitationBrowserLauncherConfiguration({
         "TEAM_INVITATION_BROWSER_E2E_CASES_JSON",
         24_000,
       ),
-    authenticationStates:
-      parseAuthenticationStates(
-        requireEnvironmentValue(
-          environment,
-          "TEAM_INVITATION_BROWSER_AUTH_STATES_JSON",
-          maximumAuthenticationStateLength,
-        ),
-      ),
+    authenticationStates: (() => {
+      try {
+        return parseTeamInvitationBrowserAuthenticationStates(
+          requireEnvironmentValue(
+            environment,
+            "TEAM_INVITATION_BROWSER_AUTH_STATES_JSON",
+            maximumAuthenticationStateLength,
+          ),
+          {
+            origin,
+            now,
+            minimumRemainingLifetimeMilliseconds:
+              teamInvitationBrowserScenarioRegistry.length *
+                scenarioTimeoutMilliseconds +
+              inventorySafetyMarginMilliseconds,
+          },
+        );
+      } catch {
+        failConfiguration();
+      }
+    })(),
     cloudflare: Object.freeze({
       accountId: requireEnvironmentValue(
         environment,
@@ -311,7 +274,9 @@ function createStorageStateResolver(
   return async (profile, signal) => {
     if (
       signal?.aborted ||
-      !authenticatedProfiles.includes(profile)
+      !teamInvitationBrowserAuthenticatedProfiles.includes(
+        profile,
+      )
     ) {
       throw new TeamInvitationBrowserLauncherError(
         "AUTHENTICATION_STATE_UNAVAILABLE",
@@ -416,6 +381,7 @@ async function prepareTeamInvitationBrowserLauncher(
     parseTeamInvitationBrowserLauncherConfiguration({
       environment,
       releaseManifest,
+      now,
     });
   const caseResolver =
     dependencies.createCaseResolver(
