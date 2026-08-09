@@ -2,7 +2,8 @@
 
 ## 1. מצב ובעלות
 
-1.1 Browser Runner ו־CI Provider עדיין `unknown/unavailable`.
+1.1 Browser Executor ו־CI Provider עדיין `unknown/unavailable`.
+ה־Runner Adapter הספק־נייטרלי קיים בקוד המקומי.
 
 1.2 החוזה נייטרלי לספק. הוא מגדיר מה חייב להיבדק, אך אינו בוחר
 GitHub Actions, ספק CI אחר או שירות Browser חיצוני.
@@ -93,16 +94,19 @@ Screenshot, ‏Trace, ‏Cookie, ‏Token או נתוני Identity אינם נכ
 
 ## 4. מבנה תוצאת Assertion
 
-4.1 כל Assertion כולל בדיוק `name`, ‏`source`, ‏`status`
-ו־`outputDigest`.
+4.1 קלט Browser Assertion כולל בדיוק `name`, ‏`source`
+ו־`observation`. ה־Observation הוא Shape מצומצם וייעודי ל־Assertion;
+הוא אינו מכיל DOM, טקסט חופשי או נתוני זהות.
 
-4.2 `source` חייב להתאים ל־Registry: ‏`browser` או `database`.
+4.2 קלט Database Assertion כולל בדיוק `name`, ‏`source`, ‏`before`
+ו־`after`. שני ה־Snapshots עוברים את אותו Parser מוגבל של Counts.
 
-4.3 `status` חייב להיות `passed`. תוצאה אחרת אינה נכנסת ל־Receipt;
-הריצה כולה נכשלת.
+4.3 ה־Adapter אינו מקבל `status` מה־Executor. הוא מחשב הצלחה מתוך
+ה־Observation או מתוך מעבר ה־Database. כשל יחיד מונע Receipt.
 
-4.4 `outputDigest` הוא SHA-256 של פלט Assertion קנוני ומסונן. כל
-22 ה־Digests חייבים להיות ייחודיים באותה ריצה.
+4.4 פלט מאומת כולל בדיוק `name`, ‏`source`, ‏`status: passed`
+ו־`outputDigest`. ה־Digest הוא SHA-256 של פלט קנוני ומסונן. כל 22
+ה־Digests חייבים להיות ייחודיים באותה ריצה.
 
 4.5 Scenario `outputDigest` מחושב באמצעות
 `deriveTeamInvitationBrowserScenarioOutputDigest`. הוא קשור לסדר,
@@ -123,8 +127,12 @@ Read-only. אחרי הפעולה נקרא אותו Scope בדיוק.
 
 5.5 Runner סוגר Session ומוחק State מקומי לאחר כל תרחיש.
 
-5.6 לאחר שבע הצלחות נבנה Receipt. כשל יחיד, Timeout או תוצאה לא
-חד־משמעית מונעים יצירת Receipt.
+5.6 לאחר שבע הצלחות ה־Adapter מרכיב Receipt בסדר ה־Registry. זמן
+`verifiedAt` נגזר מזמן ההשלמה המאוחר ביותר ואינו מתקבל מה־Caller.
+
+5.7 ה־Receipt עובר מיד דרך `buildTeamInvitationBrowserEvidence`
+באותו זמן קנוני. כשל יחיד, Timeout או תוצאה לא חד־משמעית מונעים
+יצירת Receipt.
 
 ## 6. גבולות אבטחה
 
@@ -170,5 +178,26 @@ Unchanged, יצירת Membership יחיד, יצירת Audit יחיד או Retry 
 7.6 תוצאת Assertion אינה מחזירה Counts. היא מחזירה Name, ‏Source,
 ‏Passed ו־Digest הקשור ל־Scenario, ל־Assertion ולשני ה־Snapshots.
 
-7.7 Reader או Assertion אינם Route או Server Action. חשיפתם ל־CI
-תתבצע רק דרך Adapter מאומת שייבנה לאחר בחירת סביבת ההרצה.
+7.7 Reader או Assertion אינם Route או Server Action. ה־Adapter
+המאומת מחבר את התוצאות ל־Receipt בלבד; חיבור D1 בפועל נשאר באחריות
+Executor מבודד לאחר בחירת סביבת ההרצה.
+
+## 8. Runner Adapter
+
+8.1 `buildTeamInvitationBrowserRunnerReceipt` מקבל Metadata של
+Deployment, ‏Policy ושבעה Scenario executions בלבד.
+
+8.2 שמות התרחישים וה־Assertions, הסדר והמקור חייבים להתאים בדיוק
+ל־Registry. שדה נוסף או `passed` שסופק מבחוץ נדחים.
+
+8.3 Browser Observations הם Enums, ‏Booleans או Zero counts
+ייעודיים. Text, ‏HTML, ‏Screenshot, ‏Token ו־Identity אינם מתקבלים.
+
+8.4 Database Assertions נבנים מחדש דרך ה־Builder הקיים. ה־Adapter
+אינו סומך על Digest או Status שנוצרו ב־Runner חיצוני.
+
+8.5 ה־Adapter דוחה Fingerprint כפול, Timestamp לא קנוני, טווח
+תרחישים מעל 24 שעות ו־Receipt שאינו עומד בחוזה ה־Evidence.
+
+8.6 אין Adapter ל־CI, ‏Browser או D1 Credentials. לכן קיום הקוד
+אינו מפעיל Staging ואינו משנה את מצב Production.

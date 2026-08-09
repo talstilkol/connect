@@ -61,9 +61,12 @@
    ו־Database. כל Scenario Digest קשור לתוצאות המסודרות שלו.
 24. Database Proof Reader מבצע SELECT יחיד ומחזיר Counts מוגבלים.
    שכבת Assertion ממירה Before/After ל־Digest ללא Rows או מזהים.
-25. Local Release Gate עובר עם 1056/1056 בדיקות, 30 Migrations,
-   ‏378 קובצי Source ו־19 Client dependency graphs.
-26. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+25. Runner Adapter מאמת בעצמו 14 Browser Observations ושמונה
+   Database Assertions ומרכיב Receipt אחד בעל 22 Digests; הוא אינו
+   מקבל `passed`, ‏Digest או `verifiedAt` מה־Executor.
+26. Local Release Gate עובר עם 1065/1065 בדיקות, 30 Migrations,
+   ‏380 קובצי Source ו־19 Client dependency graphs.
+27. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
