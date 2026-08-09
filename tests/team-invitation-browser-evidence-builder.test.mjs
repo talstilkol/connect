@@ -1,10 +1,17 @@
 import assert from "node:assert/strict";
+import {
+  createHash,
+} from "node:crypto";
 import test from "node:test";
 
 import {
   inspectTeamInvitationBrowserEvidence,
   requiredTeamInvitationBrowserScenarios,
 } from "../server/operations/teamInvitationBrowserEvidence.ts";
+import {
+  deriveTeamInvitationBrowserScenarioOutputDigest,
+  teamInvitationBrowserScenarioRegistry,
+} from "../server/operations/teamInvitationBrowserScenarioRegistry.ts";
 import {
   createTeamInvitationBrowserEvidenceFromReceipt,
 } from "../scripts/create-team-invitation-browser-evidence.mjs";
@@ -16,6 +23,12 @@ const releaseId =
 const commitSha = "b".repeat(40);
 const artifactDigest =
   `sha256:${"c".repeat(64)}`;
+
+function digest(value) {
+  return `sha256:${createHash("sha256")
+    .update(value)
+    .digest("hex")}`;
+}
 
 function receipt(overrides = {}) {
   return {
@@ -33,16 +46,38 @@ function receipt(overrides = {}) {
     },
     scenarios:
       requiredTeamInvitationBrowserScenarios.map(
-        (name, index) => ({
-          name,
-          status: "passed",
-          completedAt:
-            "2026-08-09T09:59:00.000Z",
-          runFingerprint:
-            `sha256:${String(index).repeat(64)}`,
-          outputDigest:
-            `sha256:${"89abcde"[index].repeat(64)}`,
-        }),
+        (name, index) => {
+          const definition =
+            teamInvitationBrowserScenarioRegistry[
+              index
+            ];
+          const assertions =
+            definition.assertions.map(
+              (assertion, assertionIndex) => ({
+                name: assertion.name,
+                source: assertion.source,
+                status: "passed",
+                outputDigest: digest(
+                  `${name}:${assertionIndex}`,
+                ),
+              }),
+            );
+
+          return {
+            name,
+            status: "passed",
+            completedAt:
+              "2026-08-09T09:59:00.000Z",
+            runFingerprint:
+              `sha256:${String(index).repeat(64)}`,
+            outputDigest:
+              deriveTeamInvitationBrowserScenarioOutputDigest(
+                definition.name,
+                assertions,
+              ),
+            assertions,
+          };
+        },
       ),
     ...overrides,
   };
@@ -107,6 +142,16 @@ test("builds one short-lived evidence document from a complete browser receipt",
   assert.equal(
     evidence.scenarios.length,
     7,
+  );
+  assert.deepEqual(
+    Object.keys(evidence.scenarios[0]),
+    [
+      "name",
+      "status",
+      "completedAt",
+      "runFingerprint",
+      "outputDigest",
+    ],
   );
   assert.deepEqual(
     collectKeys(evidence).filter(
@@ -224,6 +269,104 @@ test("rejects stale, future, duplicate, and incomplete browser runs", () => {
           now:
             candidate.now ??
             new Date(verifiedAt),
+        }),
+      /TEAM_INVITATION_BROWSER_E2E_RECEIPT_INVALID/,
+    );
+  }
+});
+
+test("requires every canonical browser and database assertion with bound output", () => {
+  const scenarios = receipt().scenarios;
+  const missingAssertion =
+    scenarios.map(
+      (scenario, index) =>
+        index === 0
+          ? {
+              ...scenario,
+              assertions:
+                scenario.assertions.slice(1),
+            }
+          : scenario,
+    );
+  const wrongSource =
+    scenarios.map(
+      (scenario, index) =>
+        index === 1
+          ? {
+              ...scenario,
+              assertions:
+                scenario.assertions.map(
+                  (assertion, assertionIndex) =>
+                    assertionIndex === 0
+                      ? {
+                          ...assertion,
+                          source: "database",
+                        }
+                      : assertion,
+                ),
+            }
+          : scenario,
+    );
+  const unboundOutput =
+    scenarios.map(
+      (scenario, index) =>
+        index === 2
+          ? {
+              ...scenario,
+              outputDigest:
+                digest("unbound-output"),
+            }
+          : scenario,
+    );
+  const duplicatedAssertionDigest =
+    scenarios.map(
+      (scenario, index) => {
+        if (index !== 3) {
+          return scenario;
+        }
+
+        const assertions =
+          scenario.assertions.map(
+            (assertion, assertionIndex) =>
+              assertionIndex === 0
+                ? {
+                    ...assertion,
+                    outputDigest:
+                      scenarios[0]
+                        .assertions[0]
+                        .outputDigest,
+                  }
+                : assertion,
+          );
+
+        return {
+          ...scenario,
+          assertions,
+          outputDigest:
+            deriveTeamInvitationBrowserScenarioOutputDigest(
+              scenario.name,
+              assertions,
+            ),
+        };
+      },
+    );
+
+  for (
+    const candidate of [
+      missingAssertion,
+      wrongSource,
+      unboundOutput,
+      duplicatedAssertionDigest,
+    ]
+  ) {
+    assert.throws(
+      () =>
+        createTeamInvitationBrowserEvidenceFromReceipt({
+          receipt: receipt({
+            scenarios: candidate,
+          }),
+          releaseManifest: manifest(),
+          now: new Date(verifiedAt),
         }),
       /TEAM_INVITATION_BROWSER_E2E_RECEIPT_INVALID/,
     );

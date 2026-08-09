@@ -53,7 +53,22 @@
 
 3.2.5 `outputDigest` מסוג SHA-256 השונה מה־Run Fingerprint.
 
-3.3 אימייל, User ID, ‏Tenant ID, ‏Invitation Key, Cookie, Token,
+3.2.6 `assertions` לפי הסדר והמקור המוגדרים ב־Scenario Registry.
+
+3.3 כל Assertion כולל בדיוק:
+
+3.3.1 `name`.
+
+3.3.2 `source` מסוג `browser` או `database` בהתאם ל־Registry.
+
+3.3.3 `status` שערכו `passed`.
+
+3.3.4 `outputDigest` ייחודי מסוג SHA-256.
+
+3.4 Scenario `outputDigest` חייב להיות ה־Digest הקנוני של תוצאות
+ה־Assertions המסודרות. שינוי סדר, מקור, סטטוס או פלט פוסל אותו.
+
+3.5 אימייל, User ID, ‏Tenant ID, ‏Invitation Key, Cookie, Token,
 Screenshot, Trace או לוג דפדפן אינם מותרים בתוך ה־Receipt.
 
 ## 4. הפקה

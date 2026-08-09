@@ -57,9 +57,11 @@
    Provenance תואמים. Server Action משתמש באותו Activation Gate.
 22. מחולל Evidence מקבל Receipt אמיתי בלבד, משווה אותו ל־Release
    ול־Commit הנקיים ושומר Artifact ללא PII שאינו נכנס ל־Git.
-23. Local Release Gate עובר עם 1041/1041 בדיקות, 30 Migrations,
-   ‏375 קובצי Source ו־19 Client dependency graphs.
-24. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+23. Scenario Registry מגדיר 22 Assertions קנוניים ממקורות Browser
+   ו־Database. כל Scenario Digest קשור לתוצאות המסודרות שלו.
+24. Local Release Gate עובר עם 1045/1045 בדיקות, 30 Migrations,
+   ‏376 קובצי Source ו־19 Client dependency graphs.
+25. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

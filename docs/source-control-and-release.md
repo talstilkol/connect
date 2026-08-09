@@ -233,3 +233,7 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 10.5 המחולל מאמת Integrity וקישור ל־Release אך אינו מוכיח בעצמו
 מי הפעיל את הדפדפן. מערכת CI מאושרת והרשאות Runtime הן גבול
 ה־Authority עד בחירת ספק Attestation חיצוני.
+
+10.6 Scenario Registry מרכז שבעה תרחישים ו־22 Assertions. כל
+Scenario Output Digest נגזר מהסדר, מהשם, מהמקור ומה־Output Digest
+של Assertions שלו; תוצאה כללית שאינה קשורה לבדיקות נפסלת.

@@ -9,6 +9,17 @@ import {
 import {
   resolvePublicOrigin,
 } from "./publicOrigin.ts";
+import {
+  deriveTeamInvitationBrowserScenarioOutputDigest,
+  findTeamInvitationBrowserScenario,
+  requiredTeamInvitationBrowserScenarios,
+  type TeamInvitationBrowserAssertionResult,
+  type TeamInvitationBrowserScenarioName,
+} from "./teamInvitationBrowserScenarioRegistry.ts";
+
+export {
+  requiredTeamInvitationBrowserScenarios,
+} from "./teamInvitationBrowserScenarioRegistry.ts";
 
 const maximumEvidenceLength =
   24_000;
@@ -26,20 +37,6 @@ const policyDigestPattern =
   /^team_invitation_policy_v1_[a-f0-9]{64}$/;
 const evidenceDigestPattern =
   /^team_invitation_browser_evidence_v1_[a-f0-9]{64}$/;
-
-export const requiredTeamInvitationBrowserScenarios =
-  Object.freeze([
-    "unauthenticated-user-rejected",
-    "unverified-primary-email-rejected",
-    "verified-matching-email-accepts",
-    "mismatched-email-remains-private",
-    "expired-invitation-rejected",
-    "identical-retry-idempotent",
-    "keyboard-and-focus-accessible",
-  ] as const);
-
-type TeamInvitationBrowserScenarioName =
-  (typeof requiredTeamInvitationBrowserScenarios)[number];
 
 export interface TeamInvitationBrowserScenarioEvidence {
   name:
@@ -364,6 +361,176 @@ function parseScenarios(
   return parsedScenarios;
 }
 
+interface ParsedReceiptScenario {
+  evidence:
+    TeamInvitationBrowserScenarioEvidence;
+  assertionOutputDigests:
+    readonly string[];
+}
+
+function parseReceiptScenario(
+  value: unknown,
+): ParsedReceiptScenario | null {
+  if (
+    !isPlainObject(value) ||
+    !hasExactKeys(value, [
+      "name",
+      "status",
+      "completedAt",
+      "runFingerprint",
+      "outputDigest",
+      "assertions",
+    ])
+  ) {
+    return null;
+  }
+
+  const definition =
+    findTeamInvitationBrowserScenario(
+      value.name,
+    );
+
+  if (
+    definition === null ||
+    value.status !== "passed" ||
+    !isCanonicalTimestamp(
+      value.completedAt,
+    ) ||
+    typeof value.runFingerprint !==
+      "string" ||
+    !fingerprintPattern.test(
+      value.runFingerprint,
+    ) ||
+    typeof value.outputDigest !==
+      "string" ||
+    !fingerprintPattern.test(
+      value.outputDigest,
+    ) ||
+    value.runFingerprint ===
+      value.outputDigest ||
+    !Array.isArray(value.assertions) ||
+    value.assertions.length !==
+      definition.assertions.length
+  ) {
+    return null;
+  }
+
+  const assertions:
+    TeamInvitationBrowserAssertionResult[] = [];
+
+  for (
+    let index = 0;
+    index < definition.assertions.length;
+    index += 1
+  ) {
+    const expected =
+      definition.assertions[index];
+    const assertion =
+      value.assertions[index];
+
+    if (
+      !isPlainObject(assertion) ||
+      !hasExactKeys(assertion, [
+        "name",
+        "source",
+        "status",
+        "outputDigest",
+      ]) ||
+      assertion.name !== expected.name ||
+      assertion.source !== expected.source ||
+      assertion.status !== "passed" ||
+      typeof assertion.outputDigest !==
+        "string" ||
+      !fingerprintPattern.test(
+        assertion.outputDigest,
+      )
+    ) {
+      return null;
+    }
+
+    assertions.push({
+      name: expected.name,
+      source: expected.source,
+      status: "passed",
+      outputDigest:
+        assertion.outputDigest,
+    });
+  }
+
+  if (
+    deriveTeamInvitationBrowserScenarioOutputDigest(
+      definition.name,
+      assertions,
+    ) !== value.outputDigest
+  ) {
+    return null;
+  }
+
+  return {
+    evidence: {
+      name: definition.name,
+      status: "passed",
+      completedAt:
+        value.completedAt,
+      runFingerprint:
+        value.runFingerprint,
+      outputDigest:
+        value.outputDigest,
+    },
+    assertionOutputDigests:
+      assertions.map(
+        (assertion) =>
+          assertion.outputDigest,
+      ),
+  };
+}
+
+function parseReceiptScenarios(
+  value: unknown,
+): TeamInvitationBrowserScenarioEvidence[] | null {
+  if (
+    !Array.isArray(value) ||
+    value.length !==
+      requiredTeamInvitationBrowserScenarios.length
+  ) {
+    return null;
+  }
+
+  const parsed = value.map(
+    parseReceiptScenario,
+  );
+
+  if (
+    parsed.some(
+      (scenario) => scenario === null,
+    )
+  ) {
+    return null;
+  }
+
+  const receiptScenarios =
+    parsed as ParsedReceiptScenario[];
+  const evidenceScenarios =
+    receiptScenarios.map(
+      (scenario) => scenario.evidence,
+    );
+  const assertionOutputDigests =
+    receiptScenarios.flatMap(
+      (scenario) =>
+        scenario.assertionOutputDigests,
+    );
+
+  if (
+    parseScenarios(evidenceScenarios) === null ||
+    new Set(assertionOutputDigests).size !==
+      assertionOutputDigests.length
+  ) {
+    return null;
+  }
+
+  return evidenceScenarios;
+}
+
 function parseEvidence(
   rawValue: string,
 ): TeamInvitationBrowserEvidence | null {
@@ -675,7 +842,7 @@ export function buildTeamInvitationBrowserEvidence(
   }
 
   const scenarios =
-    parseScenarios(
+    parseReceiptScenarios(
       receipt.scenarios,
     );
 
