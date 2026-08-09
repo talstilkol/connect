@@ -69,10 +69,53 @@ test("keeps invitation actions and sensitive identities outside React", async ()
 
   assert.doesNotMatch(
     component,
-    /teamInvitationActions|inviteTeamMemberAction/,
+    /teamInvitationActions|inviteTeamMemberAction|teamInvitationAcceptanceActions|acceptTeamInvitationAction/,
   );
   assert.doesNotMatch(
     view,
     /email|tenantId|externalUserId|requestKey/,
+  );
+});
+
+test("accepts invitations only through the verified Clerk server boundary", async () => {
+  const [
+    action,
+    identity,
+  ] = await Promise.all([
+    readSource(
+      "server/team/teamInvitationAcceptanceActions.ts",
+    ),
+    readSource(
+      "server/team/clerkTeamInvitationIdentityVerifier.ts",
+    ),
+  ]);
+
+  assert.match(
+    action,
+    /^"use server";/,
+  );
+  assert.match(
+    action,
+    /createTeamInvitationAcceptanceRepository/,
+  );
+  assert.match(
+    action,
+    /createTeamInvitationAcceptanceService/,
+  );
+  assert.match(
+    action,
+    /createClerkTeamInvitationIdentityContext/,
+  );
+  assert.doesNotMatch(
+    action,
+    /requireCurrentTenantSession|requireCurrentTenantMutationSession/,
+  );
+  assert.match(
+    identity,
+    /verification[\s\S]*status !== "verified"/,
+  );
+  assert.match(
+    identity,
+    /enforceCurrentTenantMutationRateLimit/,
   );
 });

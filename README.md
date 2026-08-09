@@ -44,11 +44,13 @@
 16. Acceptance מאומת מבטל Outbox Pending, מעדכן Version, יוצר
    Membership פעיל וכותב Acceptance Audit immutable באותו D1 Batch.
    הוכחת הזהות אינה נשמרת, ו־Retry זהה אינו מכפיל Membership.
-17. ה־React נשאר Read-only עד חיבור Identity Provider אמיתי
-   והשלמת Browser E2E.
-18. Local Release Gate עובר עם 1013/1013 בדיקות, 30 Migrations,
-   ‏368 קובצי Source ו־18 Client dependency graphs.
-19. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
+17. Server Action לקבלה קורא את Clerk session בצד השרת, דורש
+   Primary Email מאומת ואוכף Rate Limit לפני Persistence. הדפדפן
+   שולח רק Invitation Key ואינו רשאי לספק Proof או Identity.
+18. ה־React נשאר Read-only עד הגדרת Clerk והשלמת Browser E2E.
+19. Local Release Gate עובר עם 1023/1023 בדיקות, 30 Migrations,
+   ‏371 קובצי Source ו־18 Client dependency graphs.
+20. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

@@ -21,3 +21,20 @@ export type TeamInvitationActionResult =
       status:
         TeamInvitationActionFailureStatus;
     };
+
+export type TeamInvitationAcceptanceActionResult =
+  | {
+      status: "accepted";
+    }
+  | {
+      status: "already-accepted";
+    }
+  | {
+      status:
+        | "configuration-required"
+        | "identity-verification-required"
+        | "temporarily-unavailable"
+        | "invitation-unavailable"
+        | "invalid-input"
+        | "server-error";
+    };
