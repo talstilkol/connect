@@ -7,7 +7,6 @@ export interface ProductionImplementationState {
   aiProvider: boolean;
   billingProvider: boolean;
   rateLimitPolicy: boolean;
-  dependencyAudit: boolean;
   fileScanner: boolean;
   monitoringAndAlerting: boolean;
   backupAndRestore: boolean;
@@ -25,7 +24,6 @@ export const currentProductionImplementationState:
     aiProvider: false,
     billingProvider: false,
     rateLimitPolicy: false,
-    dependencyAudit: false,
     fileScanner: false,
     monitoringAndAlerting: false,
     backupAndRestore: false,

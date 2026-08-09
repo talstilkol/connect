@@ -15,7 +15,6 @@ const readyImplementation = Object.freeze({
   aiProvider: true,
   billingProvider: true,
   rateLimitPolicy: true,
-  dependencyAudit: true,
   fileScanner: true,
   monitoringAndAlerting: true,
   backupAndRestore: true,
@@ -48,6 +47,7 @@ test("reports ready only when every production dependency is ready", () => {
     deploymentProvenance:
       "configured",
     ciExecution: "configured",
+    dependencyAudit: "configured",
     hosting: {
       d1: "DB",
       r2: "FILES",
@@ -123,6 +123,7 @@ test("rejects renamed or absent hosting bindings", () => {
     deploymentProvenance:
       "configured",
     ciExecution: "configured",
+    dependencyAudit: "configured",
     hosting: {
       d1: "DATABASE",
     },

@@ -14,7 +14,12 @@
 
 2.1 Local Release Gate עבר.
 
-2.2 Dependency Audit חיצוני עבר מול מקור Advisories מאושר.
+2.2 `npm run evidence:dependency-audit` עבר מול npm Registry הרשמי,
+ו־`DEPENDENCY_AUDIT_EVIDENCE_JSON` מכיל Evidence שטרם פג תוקפו עבור
+אותו Release, ‏Commit, ‏Git Tree ו־Lockfile.
+
+2.2.1 כל מוני `info`, ‏`low`, ‏`moderate`, ‏`high` ו־`critical` הם
+אפס. Evidence שמדווח על פגיעות נשמר לצורכי אבחון אך חוסם Production.
 
 2.3 Production Readiness מחזיר Ready עבור כל הבדיקות.
 

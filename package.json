@@ -32,6 +32,7 @@
     "preflight:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs --preflight",
     "e2e:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs",
     "evidence:team-invitation-browser": "node scripts/create-team-invitation-browser-evidence.mjs",
+    "evidence:dependency-audit": "node scripts/create-dependency-audit-evidence.mjs",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit"

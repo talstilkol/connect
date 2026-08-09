@@ -297,3 +297,23 @@ Store שמר את הערכים ואינו מבטיח שהקוד שנבדק בט�
 
 10.18 פעולת המחיקה אינה Secure Erase ואינה מוחקת עותקי Snapshot, ‏Backup
 או Secret Store. מחזור החיים של עותקים אלה נשלט במדיניות הספק.
+
+## 11. Dependency Audit Evidence
+
+11.1 `npm run evidence:dependency-audit` מפעיל את `npm audit` עם
+`--omit=dev`, ‏JSON ו־npm Registry הרשמי המוגדר במפורש. Registry אחר,
+כשל רשת או דוח שאינו גרסה 2 נכשלים סגור.
+
+11.2 הפלט נשמר ב־`.artifacts/dependency-audit-evidence.json`, אינו
+נכנס ל־Git ותקף ל־24 שעות לכל היותר.
+
+11.3 ה־Evidence כולל Release ID, ‏Commit, ‏Git Tree, ‏Lockfile Digest,
+‏Migration Set Digest, מספר תלויות Production ומוני חומרה בלבד. שמות
+Packages, ‏Advisory URLs ופרטי תיקון אינם מועתקים ל־Evidence.
+
+11.4 Production Readiness דורש את התוכן המאומת דרך
+`DEPENDENCY_AUDIT_EVIDENCE_JSON`. הוא מחשב מחדש את Release ID, מאמת
+Digest ותפוגה ומשווה ל־`APP_RELEASE_ID` ול־`APP_DEPLOYED_COMMIT_SHA`.
+
+11.5 פגיעות אחת לפחות מחזירה `DEPENDENCY_VULNERABILITIES_FOUND`.
+אין המרה אוטומטית ל־Ready ואין הפעלת `npm audit fix` או Downgrade.

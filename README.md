@@ -80,8 +80,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1157/1157 בדיקות, 30 Migrations,
-   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏711 קבצים
+31. Local Release Gate עובר עם 1165/1165 בדיקות, 30 Migrations,
+   ‏385 קובצי Source, ‏19 Client dependency graphs, ‏714 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -135,6 +135,10 @@
    ואז Evidence סמנטי לאותו Release. רק לאחר מכן הוא מעביר את שני
    הקבצים ל־Quarantine, מאמת אותם שוב ומבצע `unlink`. כשל מוקדם מחזיר
    אותם; הכלי אינו טוען למחיקת SSD, ‏Snapshot או Backup.
+51. Dependency Audit אינו עוד Boolean סטטי. מחולל ייעודי מריץ רק את
+   גרף Production מול npm Registry הרשמי, שומר Evidence קצר־חיים
+   הקשור ל־Release, ‏Commit, ‏Git Tree ו־Lockfile, ומציג פגיעויות
+   כמחסום מפורש במקום להסתיר אותן כשגיאת Parsing.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
@@ -176,6 +180,8 @@
 21. 15 בדיקות ממשק מקבעות RTL, נקודות שבירה, Focus, ‏Reduced Motion,
     ניווט, Mobile Menu, ‏Dialog ו־Skip Link.
 22. Dependency Lock מאמת 23 תלויות ישירות מול `package-lock.json`.
+    Dependency Audit דורש Evidence בן 24 שעות לכל היותר, הקשור
+    מתמטית לאותו Release וכולל רק מונים ללא פרטי Advisories.
 23. Local Release Gate עובר. Production Release Gate דורש תחילה
     Attestation קריפטוגרפי ל־Browser Evidence ורק לאחר מכן מריץ את
     33 בדיקות ה־Readiness. כרגע הוא נכשל בכוונה על Evidence חסר ועל
