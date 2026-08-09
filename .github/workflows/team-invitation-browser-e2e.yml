@@ -32,11 +32,24 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Install the governed browser
-        run: npx playwright install --with-deps chromium
-
       - name: Verify the local release gate
         run: npm run verify:release-gate:local
+
+      - name: Preflight the release-bound staging configuration
+        run: npm run preflight:team-invitation-browser
+        env:
+          APP_DEPLOYMENT_ARTIFACT_DIGEST: ${{ vars.APP_DEPLOYMENT_ARTIFACT_DIGEST }}
+          TEAM_INVITATION_BROWSER_AUTH_STATES_JSON: ${{ secrets.TEAM_INVITATION_BROWSER_AUTH_STATES_JSON }}
+          TEAM_INVITATION_BROWSER_CLOUDFLARE_ACCOUNT_ID: ${{ vars.TEAM_INVITATION_BROWSER_CLOUDFLARE_ACCOUNT_ID }}
+          TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN: ${{ secrets.TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN }}
+          TEAM_INVITATION_BROWSER_CLOUDFLARE_DATABASE_ID: ${{ vars.TEAM_INVITATION_BROWSER_CLOUDFLARE_DATABASE_ID }}
+          TEAM_INVITATION_BROWSER_E2E_CASES_JSON: ${{ secrets.TEAM_INVITATION_BROWSER_E2E_CASES_JSON }}
+          TEAM_INVITATION_BROWSER_E2E_ORIGIN: ${{ vars.TEAM_INVITATION_BROWSER_E2E_ORIGIN }}
+          TEAM_INVITATION_REREQUEST_POLICY: ${{ vars.TEAM_INVITATION_REREQUEST_POLICY }}
+          TEAM_INVITATION_TTL_HOURS: ${{ vars.TEAM_INVITATION_TTL_HOURS }}
+
+      - name: Install the governed browser
+        run: npx playwright install --with-deps chromium
 
       - name: Run the seven release-bound browser scenarios
         run: npm run e2e:team-invitation-browser

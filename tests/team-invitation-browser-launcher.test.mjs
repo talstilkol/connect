@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   parseTeamInvitationBrowserLauncherConfiguration,
+  preflightTeamInvitationBrowserLauncher,
   runTeamInvitationBrowserLauncher,
   TeamInvitationBrowserLauncherError,
 } from "../scripts/run-team-invitation-browser-e2e.mjs";
@@ -130,6 +131,63 @@ test("rejects a local or non-canonical browser origin before browser startup", (
       ),
     );
   }
+});
+
+test("preflights release, inventory, auth, and D1 configuration without browser or receipt access", async () => {
+  const events = [];
+  const dependencies = {
+    createReleaseManifest: async () => {
+      events.push("release");
+      return releaseManifest;
+    },
+    createCaseResolver: () => {
+      events.push("inventory");
+      return {
+        resolveScenarioCase: async () => ({}),
+      };
+    },
+    createD1Port: () => {
+      events.push("d1-configuration");
+      return {
+        readDatabaseProof: async () => ({}),
+      };
+    },
+    openBrowserSession: async () => {
+      events.push("browser");
+      throw new Error("BROWSER_MUST_NOT_OPEN");
+    },
+    createBrowserPort: () => {
+      events.push("browser-port");
+      return {};
+    },
+    executeRun: async () => {
+      events.push("execution");
+      return {};
+    },
+    writeReceipt: async () => {
+      events.push("receipt");
+    },
+  };
+
+  const result =
+    await preflightTeamInvitationBrowserLauncher({
+      environment: environment(),
+      clock: () =>
+        new Date(
+          "2026-08-09T10:00:00.000Z",
+        ),
+      dependencies,
+    });
+
+  assert.deepEqual(result, {
+    releaseId: releaseManifest.releaseId,
+    scenarioCount: 7,
+  });
+  assert.deepEqual(events, [
+    "release",
+    "inventory",
+    "d1-configuration",
+  ]);
 });
 
 test("composes case, browser, and D1 ports and writes only after browser closure", async () => {

@@ -366,11 +366,10 @@ const productionDependencies = Object.freeze({
   writeReceipt,
 });
 
-export async function runTeamInvitationBrowserLauncher({
-  environment = process.env,
-  clock = () => new Date(),
-  dependencies = productionDependencies,
-} = {}) {
+function validateLauncherRuntime(
+  clock,
+  dependencies,
+) {
   if (
     typeof clock !== "function" ||
     !isPlainObject(dependencies) ||
@@ -390,6 +389,17 @@ export async function runTeamInvitationBrowserLauncher({
   ) {
     failConfiguration();
   }
+}
+
+async function prepareTeamInvitationBrowserLauncher(
+  environment,
+  clock,
+  dependencies,
+) {
+  validateLauncherRuntime(
+    clock,
+    dependencies,
+  );
 
   const now = clock();
 
@@ -428,6 +438,48 @@ export async function runTeamInvitationBrowserLauncher({
     ...configuration.cloudflare,
     fetchImpl: fetch,
   });
+
+  return Object.freeze({
+    configuration,
+    caseResolver,
+    d1Port,
+  });
+}
+
+export async function preflightTeamInvitationBrowserLauncher({
+  environment = process.env,
+  clock = () => new Date(),
+  dependencies = productionDependencies,
+} = {}) {
+  const prepared =
+    await prepareTeamInvitationBrowserLauncher(
+      environment,
+      clock,
+      dependencies,
+    );
+
+  return Object.freeze({
+    releaseId:
+      prepared.configuration.releaseId,
+    scenarioCount:
+      teamInvitationBrowserScenarioRegistry.length,
+  });
+}
+
+export async function runTeamInvitationBrowserLauncher({
+  environment = process.env,
+  clock = () => new Date(),
+  dependencies = productionDependencies,
+} = {}) {
+  const {
+    configuration,
+    caseResolver,
+    d1Port,
+  } = await prepareTeamInvitationBrowserLauncher(
+    environment,
+    clock,
+    dependencies,
+  );
   const browserSession =
     await dependencies.openBrowserSession({
       clock,
@@ -491,7 +543,15 @@ export async function runTeamInvitationBrowserLauncher({
 }
 
 async function runCli() {
-  if (process.argv.length !== 2) {
+  const argumentsList = process.argv.slice(2);
+  const preflightOnly =
+    argumentsList.length === 1 &&
+    argumentsList[0] === "--preflight";
+
+  if (
+    argumentsList.length > 0 &&
+    !preflightOnly
+  ) {
     console.error(
       "Team invitation browser E2E: FAIL (INVALID_ARGUMENTS)",
     );
@@ -500,11 +560,14 @@ async function runCli() {
   }
 
   try {
-    const result =
-      await runTeamInvitationBrowserLauncher();
+    const result = preflightOnly
+      ? await preflightTeamInvitationBrowserLauncher()
+      : await runTeamInvitationBrowserLauncher();
 
     console.log(
-      `Team invitation browser E2E: PASS (${result.releaseId})`,
+      preflightOnly
+        ? `Team invitation browser preflight: PASS (${result.releaseId}, ${result.scenarioCount} scenarios)`
+        : `Team invitation browser E2E: PASS (${result.releaseId})`,
     );
   } catch (error) {
     const code =
@@ -516,7 +579,9 @@ async function runCli() {
         : "EXECUTION_FAILED";
 
     console.error(
-      `Team invitation browser E2E: FAIL (${code})`,
+      preflightOnly
+        ? `Team invitation browser preflight: FAIL (${code})`
+        : `Team invitation browser E2E: FAIL (${code})`,
     );
     process.exitCode = 1;
   }

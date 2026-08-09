@@ -34,7 +34,7 @@ test("keeps the staging proof workflow manual, read-only, and environment protec
   );
 });
 
-test("pins every external action and supplies secrets only to the browser step", async () => {
+test("pins every external action and supplies secrets only to preflight and browser execution", async () => {
   const workflow = await readFile(
     workflowPath,
     "utf8",
@@ -52,20 +52,32 @@ test("pins every external action and supplies secrets only to the browser step",
     ),
     true,
   );
-  assert.match(
-    workflow,
-    /TEAM_INVITATION_BROWSER_AUTH_STATES_JSON: \$\{\{ secrets\.TEAM_INVITATION_BROWSER_AUTH_STATES_JSON \}\}/,
-  );
-  assert.match(
-    workflow,
-    /TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN: \$\{\{ secrets\.TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN \}\}/,
-  );
-  assert.match(
-    workflow,
-    /TEAM_INVITATION_BROWSER_E2E_CASES_JSON: \$\{\{ secrets\.TEAM_INVITATION_BROWSER_E2E_CASES_JSON \}\}/,
-  );
+  for (const secretName of [
+    "TEAM_INVITATION_BROWSER_AUTH_STATES_JSON",
+    "TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN",
+    "TEAM_INVITATION_BROWSER_E2E_CASES_JSON",
+  ]) {
+    const secretReference =
+      `${secretName}: ` +
+      "${{ secrets." +
+      secretName +
+      " }}";
+
+    assert.equal(
+      workflow.split(secretReference).length - 1,
+      2,
+    );
+  }
   assert.match(
     workflow,
     /retention-days: 1/,
+  );
+  assert.ok(
+    workflow.indexOf(
+      "npm run preflight:team-invitation-browser",
+    ) <
+      workflow.indexOf(
+        "npx playwright install --with-deps chromium",
+      ),
   );
 });

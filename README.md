@@ -80,7 +80,7 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1109/1109 בדיקות, 30 Migrations,
+31. Local Release Gate עובר עם 1110/1110 בדיקות, 30 Migrations,
    ‏384 קובצי Source, ‏19 Client dependency graphs, ‏691 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
@@ -107,6 +107,9 @@
    המקובעים ל־Commit ומעלה Receipt ו־Evidence ליום אחד בלבד.
 42. הפעלת ה־Workflow נשארת פעולה חיצונית: יש ליצור את Environment,
    להזין Secrets ו־Variables אמיתיים ולהכין Inventory תואם לפריסה.
+43. שלב Preflight מאמת Release נקי, ‏Artifact, ‏Origin, ‏Policy,
+   Inventory, שישה Auth states ותצורת D1 לפני התקנת Chromium. הוא
+   אינו פונה לרשת, אינו פותח Browser ואינו כותב Receipt.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
