@@ -142,3 +142,33 @@ Tenant ID, ‏User ID, אימייל או Row מלא.
 
 6.5 אין Retry אוטומטי לתרחיש Mutation לאחר תוצאה לא ידועה. מצב כזה
 דורש Reconciliation ונכשל סגור.
+
+## 7. Database Proof Reader
+
+7.1 ה־Reader מקבל Invitation Key ו־Scope מדויק בלבד.
+
+7.2 `tenant-total` משמש כאשר אין זהות מאומתת, למשל בתרחיש משתמש
+לא מחובר. `external-user` משמש כאשר ה־CI מחזיק External User ID
+בזיכרון ה־Job.
+
+7.3 כל Snapshot נלקח ב־SELECT יחיד ומחזיר רק:
+
+7.3.1 `invitationCount`.
+
+7.3.2 `membershipCount`.
+
+7.3.3 `activeMembershipCount`.
+
+7.3.4 `acceptanceAuditCount`.
+
+7.4 Invitation ו־Acceptance Counts מוגבלים ל־0 או 1. Membership
+Counts מוגבלים ל־10,000, ו־Active אינו יכול להיות גדול מהסך הכולל.
+
+7.5 שכבת Database Assertion משווה Snapshot לפני ואחרי. היא מוכיחה
+Unchanged, יצירת Membership יחיד, יצירת Audit יחיד או Retry יציב.
+
+7.6 תוצאת Assertion אינה מחזירה Counts. היא מחזירה Name, ‏Source,
+‏Passed ו־Digest הקשור ל־Scenario, ל־Assertion ולשני ה־Snapshots.
+
+7.7 Reader או Assertion אינם Route או Server Action. חשיפתם ל־CI
+תתבצע רק דרך Adapter מאומת שייבנה לאחר בחירת סביבת ההרצה.
