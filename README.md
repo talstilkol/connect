@@ -81,7 +81,7 @@
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
 31. Local Release Gate עובר עם 1172/1172 בדיקות, 30 Migrations,
-   ‏385 קובצי Source, ‏19 Client dependency graphs, ‏717 קבצים
+   ‏385 קובצי Source, ‏19 Client dependency graphs, ‏719 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
