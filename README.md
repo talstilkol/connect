@@ -172,9 +172,9 @@
     ו־Secrets שרתיים במודולי Client.
 21. 15 בדיקות ממשק מקבעות RTL, נקודות שבירה, Focus, ‏Reduced Motion,
     ניווט, Mobile Menu, ‏Dialog ו־Skip Link.
-22. Dependency Lock מאמת 22 תלויות ישירות מול `package-lock.json`.
+22. Dependency Lock מאמת 23 תלויות ישירות מול `package-lock.json`.
 23. Local Release Gate עובר. Production Release Gate נכשל בכוונה
-    על 5 Ready, ‏15 Blocked ו־10 Decision Required.
+    על 5 Ready, ‏17 Blocked ו־11 Decision Required.
 24. כל הבדיקות, Build, ‏TypeScript ו־ESLint עוברים דרך Local
     Release Gate. Deployment Provenance דורש התאמה מלאה בין
     ה־Release Manifest, ‏Commit, ‏Artifact ופריסת Production.
