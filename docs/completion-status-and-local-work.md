@@ -1,0 +1,113 @@
+# מצב השלמה ומשימות מקומיות
+
+תאריך בדיקה: 2026-08-09
+
+## 1. אחוזי השלמה
+
+1.1 תוכנית הפיתוח המקומית: **100%**.
+
+1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
+
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,172 הבדיקות עוברים.
+
+1.2 מוכנות פורמלית ל־Production: **15.2%**.
+
+1.2.1 חמש מתוך 33 בדיקות ה־Production Readiness הן `ready`.
+
+1.2.2 17 בדיקות חסומות על תצורה, ספק, תשתית או Evidence חיצוני.
+
+1.2.3 11 בדיקות ממתינות להחלטת מוצר או מדיניות.
+
+1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **70% ±5%**.
+
+1.3.1 זהו אומדן מאמץ, לא יחס בין בדיקות. רוב עבודת ה־Domain, ה־UI,
+האבטחה והבדיקות כבר בוצעה; העבודה שנותרה תלויה יותר בספקים,
+חשבונות ענן, תרגילי שחזור וראיות CI.
+
+1.3.2 אין לחשב ממוצע פשוט בין 100% ל־15.2%, משום ששני המדדים מודדים
+דברים שונים וחלק מבדיקות ה־Production הן שערים ולא יחידות מאמץ.
+
+## 2. משימות מקומיות שנותרו
+
+האומדנים הם זמן פיתוח נטו של מפתח אחד, ללא המתנה לאישור ספק,
+Credentials, בדיקת עורך דין או זמני Review.
+
+2.1 השלמת שמונת PR Checks המקומיים החסרים ב־GitHub Actions.
+
+2.1.1 תכולה: Source guardrails, ‏Secret hygiene, ‏Interface guardrails,
+Dependency lock, ‏Migrations, ‏TypeScript, ‏ESLint ו־Tests/Build.
+
+2.1.2 אומדן: **6–10 שעות**.
+
+2.2 מחוללי Evidence ל־GitHub Governance ול־CI Execution.
+
+2.2.1 תכולה: קריאה בלבד מ־GitHub, אימות Branch Protection ותשעת
+ה־Checks, קישור ל־Commit ול־Release ויצירת Evidence קצר־חיים.
+
+2.2.2 אומדן: **8–12 שעות**.
+
+2.3 כלי Evidence ל־Cloudflare Environment Isolation ול־Deployment
+Provenance.
+
+2.3.1 תכולה: אימות שמשאבי D1, ‏R2, ‏Queues, ‏DLQ, ‏Rate Limits
+ו־Secrets אינם משותפים בין סביבות; קישור Artifact לפריסה.
+
+2.3.2 אומדן מקומי: **10–16 שעות**. אימות חי דורש חשבון Cloudflare.
+
+2.4 קישור Browser Evidence החתום ל־JSON המדויק של Runtime.
+
+2.4.1 המטרה היא למנוע מצב שבו הקובץ החתום תקין אך משתנה הסביבה
+מכיל Evidence אחר.
+
+2.4.2 אומדן: **4–6 שעות**.
+
+2.5 פיצול `WorkspaceApp` לפי Feature ללא שינוי התנהגות עסקית.
+
+2.5.1 אומדן: **8–12 שעות**.
+
+2.6 פיצול `ConversationInbox` ל־Thread list, ‏Message view,
+Assignment ו־Composer.
+
+2.6.1 אומדן: **6–10 שעות**.
+
+2.7 פיצול `app/globals.css` לקובצי Feature ושכבת Tokens.
+
+2.7.1 הקובץ הנוכחי מכיל כ־7,890 שורות ולכן יש לבצע את הפיצול
+במנות קטנות עם בדיקות Regression.
+
+2.7.2 אומדן: **12–20 שעות**.
+
+2.8 בדיקות עומס וכשל מקומיות נוספות.
+
+2.8.1 תכולה: Queue backlog, ‏DLQ, ‏Retry, ‏Provider timeout,
+Retention plan expiry ו־Restore evidence mismatch.
+
+2.8.2 אומדן: **8–12 שעות**.
+
+2.9 Release rehearsal מקומי ותיעוד מפעיל.
+
+2.9.1 תכולה: Fail-closed production gate, סדר הורדת Artifacts,
+הזרקת Evidence, Rollback/Forward-fix ו־Smoke checklist.
+
+2.9.2 אומדן: **4–6 שעות**.
+
+2.10 סך העבודה המקומית שנותרה:
+
+2.10.1 מאמץ ישיר: **66–104 שעות**, שהם כ־**8–13 ימי עבודה**.
+
+2.10.2 עם Review, תיקוני Regression ותיעוד: **10–15 ימי עבודה**.
+
+## 3. עבודה שאינה מקומית בלבד
+
+3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
+רק לאחר בחירת ספקים ופתיחת חשבונות אמיתיים.
+
+3.2 Staging Browser E2E דורש פריסה מבודדת, שש זהויות בדיקה,
+Case Inventory ו־D1 Read token.
+
+3.3 Backup/Restore ו־Retention אינם יכולים להיחשב מוכנים עד להרצה
+מול משאבי ענן אמיתיים ושמירת Evidence מתאים.
+
+3.4 Retention deletion adapter יישאר מושבת עד אישור משפטי של
+המדיניות ומימוש Legal Hold.
+
