@@ -163,6 +163,13 @@ test("fails closed for rejected, unavailable, thrown, and malformed identity ver
   const cases = [
     {
       verification: {
+        status: "unauthenticated",
+      },
+      code:
+        "AUTHENTICATION_REQUIRED",
+    },
+    {
+      verification: {
         status: "rejected",
       },
       code:

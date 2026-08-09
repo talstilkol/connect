@@ -107,29 +107,41 @@ test("accepts only a verified Clerk primary email", async () => {
   );
 });
 
-test("rejects absent, malformed, and unverified Clerk identities", async () => {
-  const users = [
-    null,
-    {},
+test("separates a missing Clerk session from malformed and unverified identities", async () => {
+  const cases = [
     {
-      id: "clerk-user-accepted",
-      primaryEmailAddress: null,
+      user: null,
+      status: "unauthenticated",
     },
     {
+      user: {},
+      status: "rejected",
+    },
+    {
+      user: {
       id: "clerk-user-accepted",
-      primaryEmailAddress: {
-        emailAddress:
-          "accepted.user@example.com",
-        verification: {
-          status: "unverified",
+      primaryEmailAddress: null,
+      },
+      status: "rejected",
+    },
+    {
+      user: {
+        id: "clerk-user-accepted",
+        primaryEmailAddress: {
+          emailAddress:
+            "accepted.user@example.com",
+          verification: {
+            status: "unverified",
+          },
         },
       },
+      status: "rejected",
     },
   ];
 
-  for (const user of users) {
+  for (const testCase of cases) {
     const fixture =
-      createContext(user);
+      createContext(testCase.user);
 
     assert.deepEqual(
       await fixture.context
@@ -137,7 +149,7 @@ test("rejects absent, malformed, and unverified Clerk identities", async () => {
         .verify(
           fixture.context.proof,
         ),
-      { status: "rejected" },
+      { status: testCase.status },
     );
     assert.deepEqual(
       fixture.calls,

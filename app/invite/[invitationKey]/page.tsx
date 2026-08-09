@@ -194,6 +194,7 @@ export default async function TeamInvitationPage({
           <>
             <div
               className="invitation-notice"
+              data-invitation-status="configuration-required"
               id="invitation-action-status"
               role="status"
             >

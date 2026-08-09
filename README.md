@@ -70,9 +70,12 @@
 27. Staging Case Inventory קצר־חיים מקושר לזהות הפריסה ומבודד שבעה
    Invitation Keys וזהויות. D1 Proof Port דוחה תוצאה שהושלמה לאחר
    Abort ואינו מוסיף Mutation או Route.
-28. Local Release Gate עובר עם 1082/1082 בדיקות, 30 Migrations,
-   ‏383 קובצי Source ו־19 Client dependency graphs.
-29. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+28. Browser Port Core ממפה שבעה Session Profiles ל־Observations
+   מסוננים. Session חסר ואימייל לא מאומת מייצרים Outcomes נפרדים;
+   תרחיש הנגישות משתמש ב־Invitation שכבר התקבל וללא Mutation חדש.
+29. Local Release Gate עובר עם 1090/1090 בדיקות, 30 Migrations,
+   ‏384 קובצי Source ו־19 Client dependency graphs.
+30. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

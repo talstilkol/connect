@@ -159,6 +159,10 @@ test("maps service and infrastructure failures without invitation enumeration", 
       "invalid-input",
     ],
     [
+      "AUTHENTICATION_REQUIRED",
+      "sign-in-required",
+    ],
+    [
       "IDENTITY_REJECTED",
       "identity-verification-required",
     ],

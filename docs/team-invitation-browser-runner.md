@@ -229,8 +229,8 @@ AbortSignal, עוצר את הריצה ואינו גורם ל־Retry אוטומט
 נכשלים מיד. התרחיש הבא אינו נפתח.
 
 9.7 ה־Executor אינו מכיל Credentials, אינו בוחר ספק ואינו Route.
-Case Resolver ו־D1 Port קיימים; Browser Port ייבנה רק לאחר בחירת
-CI ו־Browser Executor אמיתיים.
+Case Resolver, ‏D1 Port ו־Browser Port Core קיימים; מימוש ה־Session
+Driver ייבנה רק לאחר בחירת CI ו־Browser Provider אמיתיים.
 
 ## 10. Staging Case Inventory
 
@@ -255,3 +255,39 @@ Artifact ו־Policy Digest המדויקים.
 
 10.7 D1 Proof Port מעביר את ה־Case ל־Reader הקיים ובודק Abort לפני
 הקריאה ואחריה. Proof שהסתיים לאחר Abort אינו נכנס ל־Assertion.
+
+## 11. Browser Session Driver
+
+11.1 Browser Port ממפה כל Scenario ל־Session Profile קנוני. שמות
+Profiles אינם Credentials וה־Provider Adapter אחראי לפתרונם.
+
+11.2 ה־Driver מקבל URL מלא רק בזיכרון ה־Job. אסור לו להדפיס,
+לשמור או לצרף אותו ל־Screenshot, ‏Trace או Artifact.
+
+11.3 כל ריצה מחזירה Transcript מסונן בלבד:
+
+11.3.1 זמן השלמה ו־Run Fingerprint.
+
+11.3.2 אישור שה־Session היה מבודד ונסגר.
+
+11.3.3 Origin שנצפה ו־Outcome סמנטי מתוך `data-invitation-status`.
+
+11.3.4 Counts של שדות פרטיים ופרטי הזמנה שנחשפו.
+
+11.3.5 בתרחיש נגישות בלבד: Focus order, ‏Keyboard submit,
+Live-region observation ו־Focus indicator.
+
+11.4 Transcript בעל טקסט חופשי, Origin זר, Session פתוח, זמן פגום
+או שדה נוסף נפסל לפני יצירת Observations.
+
+11.5 `sign-in-required` נפרד מ־`identity-verification-required`.
+Clerk Session חסר ואימייל ראשי לא מאומת אינם עוד אותו Outcome.
+
+11.6 תרחיש הנגישות משתמש ב־Invitation שכבר התקבל. Keyboard Submit
+חייב להחזיר `already-accepted`, כדי לא ליצור Mutation לא מוכח.
+
+11.7 Focus order הקנוני הוא Skip link, ‏Brand link, ‏Accept button
+ו־Home link. סדר אחר הופך את Assertion ל־Failed.
+
+11.8 Browser Port Core ספק־נייטרלי קיים. עדיין אין Playwright,
+CI Provider, ‏Credentials או Sessions אמיתיים בקוד.

@@ -171,6 +171,14 @@ test("keeps the invitation landing route private and activation-gated", async ()
     form,
     /useActionState/,
   );
+  assert.match(
+    form,
+    /data-invitation-status/,
+  );
+  assert.match(
+    form,
+    /case "sign-in-required"/,
+  );
   assert.doesNotMatch(
     form,
     /invitationKey|email"|tenantId|externalUserId|type="hidden"/,

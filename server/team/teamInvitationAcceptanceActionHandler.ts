@@ -96,6 +96,10 @@ function mapFailure(
       return {
         status: "invalid-input",
       };
+    case "AUTHENTICATION_REQUIRED":
+      return {
+        status: "sign-in-required",
+      };
     case "IDENTITY_REJECTED":
       return {
         status:

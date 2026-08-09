@@ -32,6 +32,7 @@ export type TeamInvitationAcceptanceActionResult =
   | {
       status:
         | "configuration-required"
+        | "sign-in-required"
         | "identity-verification-required"
         | "temporarily-unavailable"
         | "invitation-unavailable"

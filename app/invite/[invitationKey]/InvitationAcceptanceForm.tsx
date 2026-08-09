@@ -40,6 +40,13 @@ function messageForResult(
           "אין צורך לבצע את הפעולה פעם נוספת.",
         complete: true,
       };
+    case "sign-in-required":
+      return {
+        heading: "נדרשת התחברות",
+        description:
+          "יש להתחבר לחשבון שאליו נשלחה ההזמנה ולאחר מכן לנסות שוב.",
+        complete: false,
+      };
     case "identity-verification-required":
       return {
         heading: "נדרש אימות זהות",
@@ -87,6 +94,9 @@ export function InvitationAcceptanceForm({
       <div
         aria-live="polite"
         className="invitation-notice"
+        data-invitation-status={
+          result?.status ?? "ready"
+        }
         id="invitation-action-status"
         role="status"
       >

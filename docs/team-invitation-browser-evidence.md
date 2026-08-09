@@ -81,6 +81,10 @@ Screenshot, Trace או לוג דפדפן אינם מותרים בתוך ה־Rece
 3.6 ה־Executor מסיר Invitation Key ו־Proof Scope לפני ההעברה
 ל־Runner Adapter. רק Assertions מאומתים נכנסים ל־Receipt.
 
+3.7 Browser Session Transcript אינו Receipt. הוא מסונן ל־Outcome,
+Exposure counts וראיות Keyboard/ARIA בלבד ונמחק לאחר יצירת
+Observations. גם הוא אינו נשמר כ־Artifact.
+
 ## 4. הפקה
 
 4.1 מגדירים `TEAM_INVITATION_RECEIPT_PATH` לנתיב המוחלט של ה־Receipt

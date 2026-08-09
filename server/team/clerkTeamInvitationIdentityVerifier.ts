@@ -94,6 +94,12 @@ export function createClerkTeamInvitationIdentityContext(
           };
         }
 
+        if (user === null) {
+          return {
+            status: "unauthenticated",
+          };
+        }
+
         if (!isRecord(user)) {
           return {
             status: "rejected",

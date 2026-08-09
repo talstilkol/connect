@@ -17,6 +17,9 @@ export type TeamInvitationIdentityVerification =
       verifiedEmail: unknown;
     }
   | {
+      status: "unauthenticated";
+    }
+  | {
       status: "rejected";
     }
   | {
@@ -35,6 +38,7 @@ export interface TeamInvitationAcceptanceClock {
 
 export type TeamInvitationAcceptanceServiceCode =
   | "INVALID_INPUT"
+  | "AUTHENTICATION_REQUIRED"
   | "IDENTITY_REJECTED"
   | "IDENTITY_UNAVAILABLE"
   | "INVITATION_NOT_FOUND"
@@ -123,6 +127,9 @@ function parseVerification(
       verifiedEmail: string;
     }
   | {
+      status: "unauthenticated";
+    }
+  | {
       status: "rejected";
     }
   | {
@@ -137,7 +144,8 @@ function parseVerification(
   if (
     (
       value.status ===
-        "rejected" ||
+        "unauthenticated" ||
+      value.status === "rejected" ||
       value.status ===
         "unavailable"
     ) &&
@@ -263,6 +271,15 @@ export function createTeamInvitationAcceptanceService(
 
         throw new TeamInvitationAcceptanceServiceError(
           "IDENTITY_UNAVAILABLE",
+        );
+      }
+
+      if (
+        verification.status ===
+        "unauthenticated"
+      ) {
+        throw new TeamInvitationAcceptanceServiceError(
+          "AUTHENTICATION_REQUIRED",
         );
       }
 
