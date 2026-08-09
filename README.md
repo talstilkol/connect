@@ -81,7 +81,7 @@
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
 31. Local Release Gate עובר עם 1173/1173 בדיקות, 30 Migrations,
-   ‏385 קובצי Source, ‏19 Client dependency graphs, ‏720 קבצים
+   ‏385 קובצי Source, ‏19 Client dependency graphs, ‏721 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -93,6 +93,9 @@
 35. שמונת שערי האיכות המקומיים מוגדרים כ־Pull Request Checks
    נפרדים ב־GitHub Actions; יחד עם Dependency Audit קיימים כל תשעת
    שמות ה־Checks שחוזה ה־Production דורש.
+36. Node `24.18.1` LTS נעול ב־`.node-version` ומשמש את כל ה־workflows;
+   `engines.node` דוחה גרסאות שאינן תומכות בהרצת קובצי TypeScript
+   הנדרשת על ידי כלי הבדיקות וה־Evidence.
 35. D1 Remote Proof Adapter שולח רק את שתי שאילתות ה־SELECT
    הקנוניות ל־Cloudflare API endpoint קבוע ומחייב D1 Read token.
 36. תגובת D1 מתקבלת רק כאשר ה־API מדווח `changed_db = false`,

@@ -24,7 +24,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
       - name: Verify source boundaries
         run: npm run verify:source-guardrails
 
@@ -41,7 +41,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
       - name: Scan tracked files and Git history
         run: npm run verify:secret-hygiene
 
@@ -57,7 +57,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
       - name: Verify interface accessibility boundaries
         run: npm run verify:interface-guardrails
 
@@ -73,7 +73,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
       - name: Verify the dependency lock
         run: npm run verify:dependency-lock
 
@@ -89,7 +89,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
       - name: Apply and verify every migration
         run: npm run verify:migrations
 
@@ -105,7 +105,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
           cache: npm
       - name: Install locked dependencies
         run: npm ci
@@ -124,7 +124,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
           cache: npm
       - name: Install locked dependencies
         run: npm ci
@@ -143,7 +143,7 @@ jobs:
       - name: Use the governed Node.js version
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 22.13.0
+          node-version-file: .node-version
           cache: npm
       - name: Install locked dependencies
         run: npm ci

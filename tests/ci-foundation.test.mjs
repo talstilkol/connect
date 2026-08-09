@@ -68,7 +68,7 @@ function releaseInput() {
       name: "connect-whatsapp-platform",
       version: "0.1.0",
       engines: {
-        node: ">=22.13.0",
+        node: ">=24.18.1",
       },
     },
     packageLockText:
@@ -247,13 +247,48 @@ test("keeps tracked secret files and private key material out of source", async 
 });
 
 test("runs every local release gate as a separately named pull request check", async () => {
-  const workflow = await readFile(
-    new URL(
-      "../.github/workflows/pull-request-quality-gates.yml",
-      import.meta.url,
-    ),
-    "utf8",
+  const workflowUrls = [
+    "pull-request-quality-gates.yml",
+    "dependency-audit-evidence.yml",
+    "team-invitation-browser-e2e.yml",
+  ].map(
+    (fileName) =>
+      new URL(
+        `../.github/workflows/${fileName}`,
+        import.meta.url,
+      ),
   );
+  const [workflow, ...supportingWorkflows] =
+    await Promise.all(
+      workflowUrls.map((url) =>
+        readFile(url, "utf8"),
+      ),
+    );
+  const nodeVersion = (
+    await readFile(
+      new URL(
+        "../.node-version",
+        import.meta.url,
+      ),
+      "utf8",
+    )
+  ).trim();
+
+  assert.equal(nodeVersion, "24.18.1");
+
+  for (const candidate of [
+    workflow,
+    ...supportingWorkflows,
+  ]) {
+    assert.match(
+      candidate,
+      /node-version-file: \.node-version/,
+    );
+    assert.doesNotMatch(
+      candidate,
+      /node-version: /,
+    );
+  }
 
   assert.match(workflow, /^on:\n  pull_request:\n/m);
   assert.match(
