@@ -176,6 +176,9 @@ const productionDependencies = Object.freeze({
     verifyTeamInvitationBrowserCaseInventoryFile,
 });
 
+export const teamInvitationBrowserSecretFileVerificationDependencies =
+  productionDependencies;
+
 export async function verifyTeamInvitationBrowserSecretFiles(
   rawConfiguration,
 ) {

@@ -355,3 +355,17 @@ npm run verify:team-invitation-browser-secret-files
 12.11 השער משתמש ב־Clock יחיד, דורש שישה Profiles ושבעה Scenarios,
 ומאמת ששני הקבצים שייכים לאותו Origin וש־Case Inventory שייך ל־Release
 הנוכחי. כשל אינו מדפיס תוכן מאחד הקבצים.
+
+12.12 רק לאחר שאומת כי שני הערכים נשמרו ב־Secret Store המאושר
+מריצים:
+
+```sh
+npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer
+```
+
+12.13 הפקודה כוללת אישור מפורש בשם שלה, מאמתת את שני הקבצים, מעבירה
+אותם ל־Quarantine פרטי ומאמתת שוב לפני `unlink`. כשל לפני תחילת
+המחיקה מחזיר את הקבצים לנתיביהם המקוריים.
+
+12.14 `unlink` מסיר את קישורי הקבצים המקומיים בלבד. הוא אינו מוכיח
+מחיקה פיזית מ־SSD, ‏Filesystem Snapshot, גיבוי או Secret Store.
