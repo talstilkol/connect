@@ -106,6 +106,14 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
     action,
     /createClerkTeamInvitationIdentityContext/,
   );
+  assert.match(
+    action,
+    /inspectTeamInvitationAcceptanceActivation/,
+  );
+  assert.match(
+    action,
+    /formData instanceof FormData/,
+  );
   assert.doesNotMatch(
     action,
     /requireCurrentTenantSession|requireCurrentTenantMutationSession/,
@@ -120,11 +128,16 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
   );
 });
 
-test("keeps the invitation landing route private and read-only", async () => {
-  const source =
-    await readSource(
-      "app/invite/[invitationKey]/page.tsx",
-    );
+test("keeps the invitation landing route private and activation-gated", async () => {
+  const [source, form] =
+    await Promise.all([
+      readSource(
+        "app/invite/[invitationKey]/page.tsx",
+      ),
+      readSource(
+        "app/invite/[invitationKey]/InvitationAcceptanceForm.tsx",
+      ),
+    ]);
 
   assert.match(
     source,
@@ -140,14 +153,26 @@ test("keeps the invitation landing route private and read-only", async () => {
   );
   assert.match(
     source,
-    /disabled/,
+    /inspectTeamInvitationAcceptanceActivation/,
+  );
+  assert.match(
+    source,
+    /acceptTeamInvitationFromPageAction\.bind/,
   );
   assert.doesNotMatch(
     source,
-    /acceptTeamInvitationAction|teamInvitationAcceptanceActions|requireRuntimeDatabase|currentUser/,
+    /acceptTeamInvitationAction|requireRuntimeDatabase|currentUser/,
+  );
+  assert.match(
+    form,
+    /^"use client";/,
+  );
+  assert.match(
+    form,
+    /useActionState/,
   );
   assert.doesNotMatch(
-    source,
-    /\{invitationKey\}/,
+    form,
+    /invitationKey|email"|tenantId|externalUserId|type="hidden"/,
   );
 });

@@ -5533,6 +5533,10 @@ label.file-button:focus-within {
   text-decoration: none;
 }
 
+.invitation-actions form .primary-button {
+  width: 100%;
+}
+
 .invitation-actions button:disabled {
   cursor: not-allowed;
   opacity: 0.52;

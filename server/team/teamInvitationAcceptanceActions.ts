@@ -10,11 +10,11 @@ import type {
   TeamInvitationAcceptanceActionResult,
 } from "../../shared/domain/teamInvitationView.ts";
 import {
-  inspectClerkConfiguration,
-} from "../auth/clerkConfiguration.ts";
-import {
   createClerkTeamInvitationIdentityContext,
 } from "./clerkTeamInvitationIdentityVerifier.ts";
+import {
+  inspectTeamInvitationAcceptanceActivation,
+} from "./teamInvitationAcceptanceActivation.ts";
 import {
   createTeamInvitationAcceptanceActionHandler,
 } from "./teamInvitationAcceptanceActionHandler.ts";
@@ -26,8 +26,8 @@ function createActionHandler() {
   return createTeamInvitationAcceptanceActionHandler(
     {
       applicationConfigured: () =>
-        inspectClerkConfiguration()
-          .status === "configured",
+        inspectTeamInvitationAcceptanceActivation()
+          .status === "ready",
       async createContext() {
         const database =
           await requireRuntimeDatabase();
@@ -56,6 +56,26 @@ function createActionHandler() {
       },
     },
   );
+}
+
+export async function acceptTeamInvitationFromPageAction(
+  invitationKey: unknown,
+  _previousResult:
+    TeamInvitationAcceptanceActionResult | null,
+  formData: FormData,
+): Promise<TeamInvitationAcceptanceActionResult> {
+  if (
+    !(formData instanceof FormData) ||
+    [...formData.keys()].length !== 0
+  ) {
+    return {
+      status: "invalid-input",
+    };
+  }
+
+  return acceptTeamInvitationAction({
+    invitationKey,
+  });
 }
 
 export async function acceptTeamInvitationAction(

@@ -4,11 +4,17 @@ import type {
 import Link from "next/link";
 
 import {
-  inspectClerkConfiguration,
-} from "../../../server/auth/clerkConfiguration.ts";
+  acceptTeamInvitationFromPageAction,
+} from "../../../server/team/teamInvitationAcceptanceActions.ts";
+import {
+  inspectTeamInvitationAcceptanceActivation,
+} from "../../../server/team/teamInvitationAcceptanceActivation.ts";
 import {
   requireTeamInvitationKey,
 } from "../../../server/team/teamInvitationValidation.ts";
+import {
+  InvitationAcceptanceForm,
+} from "./InvitationAcceptanceForm.tsx";
 
 export const metadata: Metadata = {
   title: "הזמנה לצוות | Connect",
@@ -48,12 +54,17 @@ export default async function TeamInvitationPage({
     isValidInvitationKey(
       invitationKey,
     );
-  const clerkConfigured =
-    inspectClerkConfiguration()
-      .status === "configured";
+  const activationReady =
+    inspectTeamInvitationAcceptanceActivation()
+      .status === "ready";
   const routeReady =
     validKey &&
-    clerkConfigured;
+    activationReady;
+  const acceptanceAction =
+    acceptTeamInvitationFromPageAction.bind(
+      null,
+      invitationKey,
+    );
 
   return (
     <main
@@ -136,7 +147,7 @@ export default async function TeamInvitationPage({
           </li>
           <li
             className={
-              clerkConfigured
+              activationReady
                 ? "pending"
                 : "blocked"
             }
@@ -154,7 +165,13 @@ export default async function TeamInvitationPage({
               </small>
             </div>
           </li>
-          <li className="blocked">
+          <li
+            className={
+              routeReady
+                ? "pending"
+                : "blocked"
+            }
+          >
             <span aria-hidden="true">
               3
             </span>
@@ -169,44 +186,53 @@ export default async function TeamInvitationPage({
           </li>
         </ol>
 
-        <div
-          className="invitation-notice"
-          id="invitation-action-status"
-          role="status"
-        >
-          <span aria-hidden="true">
-            !
-          </span>
-          <div>
-            <strong>
-              {validKey
-                ? "קבלת ההזמנה עדיין אינה זמינה"
-                : "לא ניתן להמשיך עם הקישור הזה"}
-            </strong>
-            <p>
-              {routeReady
-                ? "הפעלת הכפתור ממתינה לבדיקת Browser E2E מאומתת."
-                : "המסלול נשאר חסום עד השלמת תצורת הזהות ובדיקת E2E מאומתת."}
-            </p>
-          </div>
-        </div>
+        {routeReady ? (
+          <InvitationAcceptanceForm
+            action={acceptanceAction}
+          />
+        ) : (
+          <>
+            <div
+              className="invitation-notice"
+              id="invitation-action-status"
+              role="status"
+            >
+              <span aria-hidden="true">
+                !
+              </span>
+              <div>
+                <strong>
+                  {validKey
+                    ? "קבלת ההזמנה עדיין אינה זמינה"
+                    : "לא ניתן להמשיך עם הקישור הזה"}
+                </strong>
+                <p>
+                  המסלול נשאר חסום עד
+                  השלמת תצורת הזהות,
+                  סביבת ההפעלה ובדיקת E2E
+                  מאומתת.
+                </p>
+              </div>
+            </div>
 
-        <div className="invitation-actions">
-          <button
-            aria-describedby="invitation-action-status"
-            className="primary-button"
-            disabled
-            type="button"
-          >
-            קבלת ההזמנה
-          </button>
-          <Link
-            className="secondary-button"
-            href="/"
-          >
-            חזרה לעמוד הבית
-          </Link>
-        </div>
+            <div className="invitation-actions">
+              <button
+                aria-describedby="invitation-action-status"
+                className="primary-button"
+                disabled
+                type="button"
+              >
+                קבלת ההזמנה
+              </button>
+              <Link
+                className="secondary-button"
+                href="/"
+              >
+                חזרה לעמוד הבית
+              </Link>
+            </div>
+          </>
+        )}
 
         <p className="invitation-privacy-note">
           Connect אינו מציג בקישור

@@ -44,6 +44,9 @@ import {
   inspectTeamInvitationBrowserEvidence,
 } from "./teamInvitationBrowserEvidence.ts";
 import {
+  inspectTeamInvitationAcceptanceActivation,
+} from "../team/teamInvitationAcceptanceActivation.ts";
+import {
   inspectTeamInvitationPolicy,
 } from "../team/teamInvitationPolicy.ts";
 import type {
@@ -75,6 +78,8 @@ export interface ProductionReadinessInput {
     ConfigurationState;
   teamInvitationBrowserEvidence:
     ConfigurationState;
+  teamInvitationAcceptanceActivation:
+    ConfigurationState;
   metaEmbeddedSignup: ConfigurationState;
   metaWebhook: ConfigurationState;
   knowledgeUploadPolicy: ConfigurationState;
@@ -99,6 +104,10 @@ export interface ProductionReadinessEnvironment {
   TEAM_INVITATION_REREQUEST_POLICY?: string;
   TEAM_INVITATION_BROWSER_E2E_ORIGIN?: string;
   TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON?: string;
+  TEAM_INVITATION_ACCEPTANCE_MODE?: string;
+  APP_RUNTIME_ENVIRONMENT?: string;
+  APP_PUBLIC_ORIGIN?: string;
+  NODE_ENV?: string;
   META_APP_ID?: string;
   META_APP_SECRET?: string;
   META_EMBEDDED_SIGNUP_CONFIGURATION_ID?: string;
@@ -241,6 +250,19 @@ export function inspectProductionReadiness(
         "TEAM_INVITATION_BROWSER_E2E_EVIDENCE_VERIFIED",
       blockedCode:
         "TEAM_INVITATION_BROWSER_E2E_EVIDENCE_REQUIRED",
+    }),
+    toCheck({
+      id:
+        "identity.team-invitation-acceptance-activation",
+      category: "identity",
+      ready: isConfigured(
+        input
+          .teamInvitationAcceptanceActivation,
+      ),
+      readyCode:
+        "TEAM_INVITATION_ACCEPTANCE_ACTIVATION_VERIFIED",
+      blockedCode:
+        "TEAM_INVITATION_ACCEPTANCE_ACTIVATION_REQUIRED",
     }),
     toCheck({
       id: "storage.d1-binding",
@@ -517,6 +539,12 @@ export function inspectCurrentProductionReadiness(
       inspectTeamInvitationBrowserEvidence(
         environment,
       ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    teamInvitationAcceptanceActivation:
+      inspectTeamInvitationAcceptanceActivation(
+        environment,
+      ).status === "ready"
         ? "configured"
         : "incomplete",
     metaEmbeddedSignup:

@@ -36,5 +36,7 @@ declare module "cloudflare:workers" {
     RETENTION_POLICY_JSON?: string;
     TEAM_INVITATION_BROWSER_E2E_ORIGIN?: string;
     TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON?: string;
+    TEAM_INVITATION_ACCEPTANCE_MODE?: string;
+    APP_RUNTIME_ENVIRONMENT?: string;
   };
 }

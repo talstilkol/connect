@@ -47,20 +47,22 @@
 17. Server Action לקבלה קורא את Clerk session בצד השרת, דורש
    Primary Email מאומת ואוכף Rate Limit לפני Persistence. הדפדפן
    שולח רק Invitation Key ואינו רשאי לספק Proof או Identity.
-18. נתיב `/invite/[invitationKey]` מציג Landing Page נגיש במצב
-   Read-only. הוא מוגדר `noindex` ו־`no-referrer`, אינו מציג נתוני
-   Tenant או Identity, וכפתור הקבלה מוסבר ומושבת.
-19. ה־React נשאר Read-only עד הגדרת Clerk והשלמת Browser E2E.
+18. נתיב `/invite/[invitationKey]` מציג Landing Page נגיש המוגדר
+   `noindex` ו־`no-referrer` ואינו מציג נתוני Tenant או Identity.
+19. ברירת המחדל של React היא כפתור מושבת. מצב `staging-e2e` נפתח
+   רק ב־HTTPS מרוחק עם Clerk, ‏Policy וזהות Release מלאה.
 20. שער Browser E2E דורש Evidence קצר־חיים עבור שבעה תרחישים,
    המקושר ל־Release, ‏Commit, ‏Artifact, ‏Staging Origin ו־Policy.
-21. Local Release Gate עובר עם 1031/1031 בדיקות, 30 Migrations,
-   ‏373 קובצי Source ו־18 Client dependency graphs.
-22. Production נשאר No-Go: ‏5 Ready, ‏16 Blocked ו־11
+21. מצב `production` דורש בנוסף Browser Evidence ו־Deployment
+   Provenance תואמים. Server Action משתמש באותו Activation Gate.
+22. Local Release Gate עובר עם 1037/1037 בדיקות, 30 Migrations,
+   ‏375 קובצי Source ו־19 Client dependency graphs.
+23. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
 
-1. שער Production מרכז 32 בדיקות ונכשל סגור עבור כל חסימה או
+1. שער Production מרכז 33 בדיקות ונכשל סגור עבור כל חסימה או
    החלטה חסרה.
 2. Meta Webhook, פעולות Tenant ופעולות System Admin משתמשים בשלוש
    Policies נפרדות של Rate Limiting.
