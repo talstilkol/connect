@@ -243,3 +243,78 @@ test("server-renders auth and workspace feature routes", async () => {
     /textarea|החלטה \/ הערה/,
   );
 });
+
+test("server-renders a private read-only invitation landing route", async () => {
+  const invitationKey =
+    `team_invitation_v1_${"a".repeat(64)}`;
+  const response = await render(
+    `/invite/${invitationKey}`,
+  );
+
+  assert.equal(response.status, 200);
+  const html =
+    await response.text();
+
+  assert.match(
+    html,
+    /הזמנה להצטרף לצוות/,
+  );
+  assert.match(
+    html,
+    /מבנה הקישור תקין/,
+  );
+  assert.match(
+    html,
+    /קבלת ההזמנה[^<]*<\/button>/,
+  );
+  assert.match(
+    html,
+    /disabled=""/,
+  );
+  assert.match(
+    html,
+    /name="robots" content="noindex, nofollow"/,
+  );
+  assert.match(
+    html,
+    /name="referrer" content="no-referrer"/,
+  );
+  const visibleHtml =
+    html.replace(
+      /<script\b[\s\S]*?<\/script>/gi,
+      "",
+    );
+
+  assert.doesNotMatch(
+    visibleHtml,
+    new RegExp(invitationKey),
+  );
+  assert.doesNotMatch(
+    html,
+    /name="email"|tenantId|externalUserId|acceptTeamInvitationAction/,
+  );
+
+  const invalidResponse =
+    await render(
+      "/invite/not-an-invitation",
+    );
+  const invalidHtml =
+    await invalidResponse.text();
+
+  assert.equal(
+    invalidResponse.status,
+    200,
+  );
+  assert.match(
+    invalidHtml,
+    /הקישור אינו תקין/,
+  );
+  assert.match(
+    invalidHtml,
+    /לא ניתן להמשיך עם הקישור הזה/,
+  );
+  assert.match(
+    invalidHtml,
+    /disabled=""/,
+  );
+});

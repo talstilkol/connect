@@ -47,10 +47,13 @@
 17. Server Action לקבלה קורא את Clerk session בצד השרת, דורש
    Primary Email מאומת ואוכף Rate Limit לפני Persistence. הדפדפן
    שולח רק Invitation Key ואינו רשאי לספק Proof או Identity.
-18. ה־React נשאר Read-only עד הגדרת Clerk והשלמת Browser E2E.
-19. Local Release Gate עובר עם 1023/1023 בדיקות, 30 Migrations,
-   ‏371 קובצי Source ו־18 Client dependency graphs.
-20. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
+18. נתיב `/invite/[invitationKey]` מציג Landing Page נגיש במצב
+   Read-only. הוא מוגדר `noindex` ו־`no-referrer`, אינו מציג נתוני
+   Tenant או Identity, וכפתור הקבלה מוסבר ומושבת.
+19. ה־React נשאר Read-only עד הגדרת Clerk והשלמת Browser E2E.
+20. Local Release Gate עובר עם 1025/1025 בדיקות, 30 Migrations,
+   ‏372 קובצי Source ו־18 Client dependency graphs.
+21. Production נשאר No-Go: ‏5 Ready, ‏15 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

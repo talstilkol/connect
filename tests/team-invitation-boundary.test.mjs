@@ -119,3 +119,35 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
     /enforceCurrentTenantMutationRateLimit/,
   );
 });
+
+test("keeps the invitation landing route private and read-only", async () => {
+  const source =
+    await readSource(
+      "app/invite/[invitationKey]/page.tsx",
+    );
+
+  assert.match(
+    source,
+    /robots:[\s\S]*index: false,[\s\S]*follow: false/,
+  );
+  assert.match(
+    source,
+    /referrer: "no-referrer"/,
+  );
+  assert.match(
+    source,
+    /aria-describedby="invitation-action-status"/,
+  );
+  assert.match(
+    source,
+    /disabled/,
+  );
+  assert.doesNotMatch(
+    source,
+    /acceptTeamInvitationAction|teamInvitationAcceptanceActions|requireRuntimeDatabase|currentUser/,
+  );
+  assert.doesNotMatch(
+    source,
+    /\{invitationKey\}/,
+  );
+});
