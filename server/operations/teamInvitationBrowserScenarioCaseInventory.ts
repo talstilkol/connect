@@ -21,6 +21,10 @@ import {
 const maximumInventoryLength = 24_000;
 const maximumInventoryLifetimeMilliseconds =
   2 * 60 * 60 * 1_000;
+const minimumGeneratedInventoryLifetimeMinutes =
+  9;
+const maximumGeneratedInventoryLifetimeMinutes =
+  120;
 const releaseIdPattern =
   /^connect_release_v1_[a-f0-9]{64}$/;
 const commitPattern =
@@ -451,6 +455,109 @@ function parseInventory(
     policyDigest:
       value.policyDigest,
     cases: Object.freeze(parsedCases),
+  });
+}
+
+export function buildTeamInvitationBrowserScenarioCaseInventory(
+  input: unknown,
+  now: Date = new Date(),
+) {
+  if (
+    !isPlainObject(input) ||
+    !hasExactKeys(input, [
+      "origin",
+      "releaseId",
+      "commitSha",
+      "artifactDigest",
+      "policy",
+      "cases",
+      "lifetimeMinutes",
+    ]) ||
+    !Number.isFinite(now.getTime()) ||
+    !Number.isSafeInteger(
+      input.lifetimeMinutes,
+    ) ||
+    (input.lifetimeMinutes as number) <
+      minimumGeneratedInventoryLifetimeMinutes ||
+    (input.lifetimeMinutes as number) >
+      maximumGeneratedInventoryLifetimeMinutes
+  ) {
+    throw new TeamInvitationBrowserScenarioCaseInventoryError(
+      "INVENTORY_INVALID",
+    );
+  }
+
+  const policy = parsePolicy(input.policy);
+
+  if (policy === null) {
+    throw new TeamInvitationBrowserScenarioCaseInventoryError(
+      "INVENTORY_INVALID",
+    );
+  }
+
+  const preparedAt = now.toISOString();
+  const expiresAt = new Date(
+    now.getTime() +
+      (input.lifetimeMinutes as number) *
+        60 *
+        1_000,
+  ).toISOString();
+  const rawInventory = JSON.stringify({
+    schemaVersion: 1,
+    preparedAt,
+    expiresAt,
+    environment: "staging",
+    origin: input.origin,
+    releaseId: input.releaseId,
+    commitSha: input.commitSha,
+    artifactDigest:
+      input.artifactDigest,
+    policyDigest:
+      deriveTeamInvitationPolicyDigest(
+        policy,
+      ),
+    cases: input.cases,
+  });
+  const inventory =
+    rawInventory.length <= maximumInventoryLength
+      ? parseInventory(rawInventory)
+      : null;
+
+  if (inventory === null) {
+    throw new TeamInvitationBrowserScenarioCaseInventoryError(
+      "INVENTORY_INVALID",
+    );
+  }
+
+  return Object.freeze({
+    schemaVersion: inventory.schemaVersion,
+    preparedAt: inventory.preparedAt,
+    expiresAt: inventory.expiresAt,
+    environment: inventory.environment,
+    origin: inventory.origin,
+    releaseId: inventory.releaseId,
+    commitSha: inventory.commitSha,
+    artifactDigest:
+      inventory.artifactDigest,
+    policyDigest: inventory.policyDigest,
+    cases: Object.freeze(
+      inventory.cases.map(
+        (scenarioCase) =>
+          scenarioCase.proofScope === null
+            ? Object.freeze({
+                name: scenarioCase.name,
+                invitationKey:
+                  scenarioCase.invitationKey,
+              })
+            : Object.freeze({
+                name: scenarioCase.name,
+                invitationKey:
+                  scenarioCase.invitationKey,
+                proofScope:
+                  scenarioCase.proofScope,
+              }),
+      ),
+    ),
   });
 }
 

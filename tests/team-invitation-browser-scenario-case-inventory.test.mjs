@@ -8,6 +8,7 @@ import {
   deriveTeamInvitationPolicyDigest,
 } from "../server/operations/teamInvitationBrowserEvidence.ts";
 import {
+  buildTeamInvitationBrowserScenarioCaseInventory,
   createTeamInvitationBrowserScenarioCaseResolver,
   TeamInvitationBrowserScenarioCaseInventoryError,
 } from "../server/operations/teamInvitationBrowserScenarioCaseInventory.ts";
@@ -129,6 +130,77 @@ function expectsCode(code) {
     error.code === code &&
     error.message === code;
 }
+
+test("builds one canonical one-hour inventory from the seven real case inputs", () => {
+  const deployment = expected();
+  const inventory =
+    buildTeamInvitationBrowserScenarioCaseInventory(
+      {
+        origin: deployment.origin,
+        releaseId: deployment.releaseId,
+        commitSha: deployment.commitSha,
+        artifactDigest:
+          deployment.artifactDigest,
+        policy,
+        cases: createInventory().cases,
+        lifetimeMinutes: 60,
+      },
+      now,
+    );
+
+  assert.equal(
+    inventory.preparedAt,
+    "2026-08-09T12:00:00.000Z",
+  );
+  assert.equal(
+    inventory.expiresAt,
+    "2026-08-09T13:00:00.000Z",
+  );
+  assert.equal(
+    inventory.policyDigest,
+    deriveTeamInvitationPolicyDigest(policy),
+  );
+  assert.equal(inventory.cases.length, 7);
+  assert.ok(Object.isFrozen(inventory));
+  assert.doesNotThrow(() =>
+    createTeamInvitationBrowserScenarioCaseResolver(
+      JSON.stringify(inventory),
+      expected(),
+      now,
+    ),
+  );
+});
+
+test("rejects unsafe generated lifetimes and malformed case input", () => {
+  const deployment = expected();
+  const base = {
+    origin: deployment.origin,
+    releaseId: deployment.releaseId,
+    commitSha: deployment.commitSha,
+    artifactDigest:
+      deployment.artifactDigest,
+    policy,
+    cases: createInventory().cases,
+    lifetimeMinutes: 60,
+  };
+
+  for (const input of [
+    { ...base, lifetimeMinutes: 8 },
+    { ...base, lifetimeMinutes: 121 },
+    { ...base, policy: { ttlHours: 0 } },
+    { ...base, cases: base.cases.slice(1) },
+    { ...base, extra: "forbidden" },
+  ]) {
+    assert.throws(
+      () =>
+        buildTeamInvitationBrowserScenarioCaseInventory(
+          input,
+          now,
+        ),
+      expectsCode("INVENTORY_INVALID"),
+    );
+  }
+});
 
 test("resolves exactly seven isolated cases without exposing an inventory listing", async () => {
   const resolver = createResolver();
