@@ -179,6 +179,19 @@ test("keeps the invitation landing route private and activation-gated", async ()
     form,
     /case "sign-in-required"/,
   );
+  for (const focusReference of [
+    "skip-link",
+    "brand-link",
+    "accept-button",
+    "home-link",
+  ]) {
+    assert.match(
+      `${source}\n${form}`,
+      new RegExp(
+        `data-e2e-focus-ref="${focusReference}"`,
+      ),
+    );
+  }
   assert.doesNotMatch(
     form,
     /invitationKey|email"|tenantId|externalUserId|type="hidden"/,

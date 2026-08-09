@@ -114,6 +114,7 @@ export function InvitationAcceptanceForm({
           <button
             aria-describedby="invitation-action-status"
             className="primary-button"
+            data-e2e-focus-ref="accept-button"
             disabled={
               pending || message.complete
             }
@@ -126,6 +127,7 @@ export function InvitationAcceptanceForm({
         </form>
         <Link
           className="secondary-button"
+          data-e2e-focus-ref="home-link"
           href="/"
         >
           חזרה לעמוד הבית

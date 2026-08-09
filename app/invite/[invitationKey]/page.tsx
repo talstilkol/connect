@@ -73,6 +73,7 @@ export default async function TeamInvitationPage({
     >
       <a
         className="skip-link"
+        data-e2e-focus-ref="skip-link"
         href="#invitation-content"
       >
         דילוג לתוכן הראשי
@@ -87,6 +88,7 @@ export default async function TeamInvitationPage({
         <Link
           aria-label="Connect - עמוד הבית"
           className="public-brand invitation-brand"
+          data-e2e-focus-ref="brand-link"
           href="/"
         >
           <span
@@ -220,6 +222,7 @@ export default async function TeamInvitationPage({
               <button
                 aria-describedby="invitation-action-status"
                 className="primary-button"
+                data-e2e-focus-ref="accept-button"
                 disabled
                 type="button"
               >
@@ -227,6 +230,7 @@ export default async function TeamInvitationPage({
               </button>
               <Link
                 className="secondary-button"
+                data-e2e-focus-ref="home-link"
                 href="/"
               >
                 חזרה לעמוד הבית

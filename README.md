@@ -66,16 +66,23 @@
    מקבל `passed`, ‏Digest או `verifiedAt` מה־Executor.
 26. Executor Core מריץ את שבעת התרחישים ברצף, קורא D1 לפני ואחרי
    פעולת Browser ונכשל מיד על Timeout, Observation שגוי או מעבר
-   Database לא בטוח. ספקי CI ו־Browser עדיין אינם מוגדרים.
+   Database לא בטוח.
 27. Staging Case Inventory קצר־חיים מקושר לזהות הפריסה ומבודד שבעה
    Invitation Keys וזהויות. D1 Proof Port דוחה תוצאה שהושלמה לאחר
    Abort ואינו מוסיף Mutation או Route.
 28. Browser Port Core ממפה שבעה Session Profiles ל־Observations
    מסוננים. Session חסר ואימייל לא מאומת מייצרים Outcomes נפרדים;
    תרחיש הנגישות משתמש ב־Invitation שכבר התקבל וללא Mutation חדש.
-29. Local Release Gate עובר עם 1090/1090 בדיקות, 30 Migrations,
-   ‏384 קובצי Source ו־19 Client dependency graphs.
-30. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+29. Playwright Adapter פותח Chromium Headless ו־Browser Context חדש
+   לכל תרחיש, טוען Auth state מזיכרון בלבד וסוגר את ה־Context לפני
+   הפקת Transcript. הוא חוסם Referrer וניווט Cross-origin ואינו
+   מחזיר Cookies, ‏URL או Invitation Key.
+30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
+   חיבור CI ו־D1 מרוחק עדיין חסרים ולכן אין Browser Evidence אמיתי.
+31. Local Release Gate עובר עם 1095/1095 בדיקות, 30 Migrations,
+   ‏384 קובצי Source, ‏19 Client dependency graphs, ‏685 קבצים
+   בסריקת Secrets ו־23 Dependencies ישירים נעולים.
+32. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי
