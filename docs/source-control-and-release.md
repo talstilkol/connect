@@ -258,3 +258,7 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 אותו גבול קובץ על Case Inventory ומאמת מחדש את הקישור ל־Deployment
 ול־Policy. המחולל שומר JSON קומפקטי כדי שגבול 24,000 התווים יישמר
 גם בקובץ שנכתב בפועל.
+
+10.12 `npm run verify:team-invitation-browser-secret-files` מפעיל
+את שני השערים תחת Clock אחד ומוכיח התאמת Origin ו־Release לפני
+העברה ל־Secret Store. הוא אינו מדפיס או מחזיר את תוכן הקבצים.

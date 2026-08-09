@@ -344,3 +344,14 @@ npm run verify:team-invitation-browser-auth-file
 12.9 שער הקובץ דוחה Symlink, ‏Hard link, בעלות זרה, הרשאה שאינה
 `0600`, קובץ גדול או משתנה תוך כדי קריאה, UTF-8 פגום ו־State שאינו
 תקף לשמונה דקות נוספות לפחות. הוא אינו מדפיס את תוכן הקובץ.
+
+12.10 לאחר ששני הקבצים קיימים ולפני העברתם ל־Secret Store מריצים
+את השער המשולב:
+
+```sh
+npm run verify:team-invitation-browser-secret-files
+```
+
+12.11 השער משתמש ב־Clock יחיד, דורש שישה Profiles ושבעה Scenarios,
+ומאמת ששני הקבצים שייכים לאותו Origin וש־Case Inventory שייך ל־Release
+הנוכחי. כשל אינו מדפיס תוכן מאחד הקבצים.
