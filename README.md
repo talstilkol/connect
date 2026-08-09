@@ -64,9 +64,12 @@
 25. Runner Adapter מאמת בעצמו 14 Browser Observations ושמונה
    Database Assertions ומרכיב Receipt אחד בעל 22 Digests; הוא אינו
    מקבל `passed`, ‏Digest או `verifiedAt` מה־Executor.
-26. Local Release Gate עובר עם 1065/1065 בדיקות, 30 Migrations,
-   ‏380 קובצי Source ו־19 Client dependency graphs.
-27. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
+26. Executor Core מריץ את שבעת התרחישים ברצף, קורא D1 לפני ואחרי
+   פעולת Browser ונכשל מיד על Timeout, Observation שגוי או מעבר
+   Database לא בטוח. ספקי CI ו־Browser עדיין אינם מוגדרים.
+27. Local Release Gate עובר עם 1072/1072 בדיקות, 30 Migrations,
+   ‏381 קובצי Source ו־19 Client dependency graphs.
+28. Production נשאר No-Go: ‏5 Ready, ‏17 Blocked ו־11
    Decision Required.
 
 ## מצב שלב 14 — כל 7 היחידות הושלמו בקוד המקומי

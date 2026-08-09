@@ -23,6 +23,10 @@
 2.4 Clerk, ‏Invitation Policy, ‏D1 והזהויות הנדרשות לתרחישים חייבים
 להיות משאבי Staging נפרדים. אין להשתמש בנתוני Production.
 
+2.5 Executor Core מקומי קיים, אך הוא אינו מספק Browser, ‏CI,
+Credentials או Test Cases. שלושת ה־Ports חייבים להתחבר למשאבי
+Staging אמיתיים לפני שניתן להפיק Receipt.
+
 ## 3. חוזה ה־Receipt
 
 3.1 ה־Receipt הוא JSON בעל השדות המדויקים הבאים בלבד:
@@ -70,6 +74,9 @@
 
 3.5 אימייל, User ID, ‏Tenant ID, ‏Invitation Key, Cookie, Token,
 Screenshot, Trace או לוג דפדפן אינם מותרים בתוך ה־Receipt.
+
+3.6 ה־Executor מסיר Invitation Key ו־Proof Scope לפני ההעברה
+ל־Runner Adapter. רק Assertions מאומתים נכנסים ל־Receipt.
 
 ## 4. הפקה
 

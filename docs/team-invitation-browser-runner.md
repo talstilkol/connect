@@ -201,3 +201,32 @@ Deployment, ‏Policy ושבעה Scenario executions בלבד.
 
 8.6 אין Adapter ל־CI, ‏Browser או D1 Credentials. לכן קיום הקוד
 אינו מפעיל Staging ואינו משנה את מצב Production.
+
+## 9. Executor Port
+
+9.1 `executeTeamInvitationBrowserRun` מריץ את שבעת התרחישים בסדר
+ה־Registry ואינו מקבל רשימת תרחישים מה־Caller.
+
+9.2 שלושה Ports חיצוניים בלבד מותרים:
+
+9.2.1 פתרון Test Case סודי עבור Scenario קנוני.
+
+9.2.2 הרצת Browser Scenario ב־Session מבודד.
+
+9.2.3 קריאת Database Proof דרך D1 Read-only.
+
+9.3 בכל תרחיש בעל Database Assertions הסדר הוא: Resolve, ‏Before
+Snapshot, ‏Browser, ‏After Snapshot ואימות מיידי.
+
+9.4 Browser Port מקבל Scenario Name ו־Invitation Key ומחזיר רק
+זמן השלמה, Run Fingerprint ו־Observations מסודרים. הוא אינו מחזיר
+Status, ‏Digest, טקסט חופשי או Session data.
+
+9.5 לכל תרחיש נדרש Timeout מפורש של עד חמש דקות. Timeout מפעיל
+AbortSignal, עוצר את הריצה ואינו גורם ל־Retry אוטומטי.
+
+9.6 Observation או Database transition שאינם מוכיחים את ה־Assertion
+נכשלים מיד. התרחיש הבא אינו נפתח.
+
+9.7 ה־Executor אינו מכיל Credentials, אינו בוחר ספק ואינו Route.
+מימושי ה־Ports ייבנו רק לאחר בחירת CI ו־Browser Executor אמיתיים.
