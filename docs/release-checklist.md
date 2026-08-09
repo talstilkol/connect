@@ -71,6 +71,15 @@ Log זהים ל־Commit.
 5.7 Deployment Provenance Evidence תקף ומוכיח התאמה בין Release ID,
 ‏Commit, ‏Git Tree, ‏Lockfile, ‏Migration Set ו־Artifact הפריסה.
 
+5.8 שבעת תרחישי Invitation Browser E2E עברו מול Staging המבודד
+ועבור אותו Release, ‏Commit, ‏Artifact ו־Invitation Policy.
+
+5.9 Receipt הדפדפן אינו מכיל PII, ‏Token, ‏Cookie, ‏Invitation Key,
+Trace או Screenshot, והוא הופק על ידי מערכת ה־CI המאושרת.
+
+5.10 Browser Evidence הופק מה־Receipt באמצעות המחולל המקומי, טרם
+פג תוקף ומתאים בדיוק לערכי Runtime של ה־Release.
+
 ## 6. Operations
 
 6.1 Monitoring, ‏Alerting ו־SLO פעילים.

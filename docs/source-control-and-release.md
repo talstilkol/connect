@@ -214,3 +214,22 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 
 9.5 CI Execution Evidence אינו כולל לוגים, שמות Repository,
 כתובות Build או Credentials.
+
+## 10. Team Invitation Browser Evidence
+
+10.1 Receipt ה־Browser נוצר רק על ידי ריצת Staging אמיתית וכולל
+בדיוק שבעה Scenarios שעברו.
+
+10.2 `npm run evidence:team-invitation-browser` דורש Worktree נקי,
+מחשב מחדש את Release Manifest ומשווה את Release ID ו־Commit SHA
+ל־Receipt לפני יצירת Evidence.
+
+10.3 Receipt בעל PII, שדה נוסף, Scenario חסר או כפול, Fingerprint
+משותף, זמן עתידי או תוצאה ישנה נכשל סגור.
+
+10.4 הפלט נשמר ב־`.artifacts/team-invitation-browser-evidence.json`
+ואינו נכנס ל־Git. תוקפו המרבי 24 שעות ואינו מתחדש אוטומטית.
+
+10.5 המחולל מאמת Integrity וקישור ל־Release אך אינו מוכיח בעצמו
+מי הפעיל את הדפדפן. מערכת CI מאושרת והרשאות Runtime הן גבול
+ה־Authority עד בחירת ספק Attestation חיצוני.

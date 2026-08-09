@@ -41,7 +41,7 @@ export const requiredTeamInvitationBrowserScenarios =
 type TeamInvitationBrowserScenarioName =
   (typeof requiredTeamInvitationBrowserScenarios)[number];
 
-interface TeamInvitationBrowserScenarioEvidence {
+export interface TeamInvitationBrowserScenarioEvidence {
   name:
     TeamInvitationBrowserScenarioName;
   status: "passed";
@@ -50,7 +50,7 @@ interface TeamInvitationBrowserScenarioEvidence {
   outputDigest: string;
 }
 
-interface TeamInvitationBrowserEvidence {
+export interface TeamInvitationBrowserEvidence {
   schemaVersion: 1;
   verifiedAt: string;
   expiresAt: string;
@@ -313,6 +313,57 @@ function parseScenario(
   };
 }
 
+function parseScenarios(
+  value: unknown,
+): TeamInvitationBrowserScenarioEvidence[] | null {
+  if (
+    !Array.isArray(value) ||
+    value.length !==
+      requiredTeamInvitationBrowserScenarios.length
+  ) {
+    return null;
+  }
+
+  const scenarios = value.map(
+    parseScenario,
+  );
+
+  if (
+    scenarios.some(
+      (scenario) => scenario === null,
+    )
+  ) {
+    return null;
+  }
+
+  const parsedScenarios =
+    scenarios as
+      TeamInvitationBrowserScenarioEvidence[];
+  const names =
+    parsedScenarios.map(
+      (scenario) => scenario.name,
+    );
+  const runFingerprints =
+    parsedScenarios.map(
+      (scenario) =>
+        scenario.runFingerprint,
+    );
+
+  if (
+    new Set(names).size !==
+      requiredTeamInvitationBrowserScenarios.length ||
+    requiredTeamInvitationBrowserScenarios.some(
+      (name) => !names.includes(name),
+    ) ||
+    new Set(runFingerprints).size !==
+      requiredTeamInvitationBrowserScenarios.length
+  ) {
+    return null;
+  }
+
+  return parsedScenarios;
+}
+
 function parseEvidence(
   rawValue: string,
 ): TeamInvitationBrowserEvidence | null {
@@ -373,11 +424,7 @@ function parseEvidence(
     !policyDigestPattern.test(
       value.policyDigest,
     ) ||
-    !Array.isArray(
-      value.scenarios,
-    ) ||
-    value.scenarios.length !==
-      requiredTeamInvitationBrowserScenarios.length ||
+    !Array.isArray(value.scenarios) ||
     typeof value.evidenceDigest !==
       "string" ||
     !evidenceDigestPattern.test(
@@ -387,44 +434,10 @@ function parseEvidence(
     return null;
   }
 
-  const scenarios =
-    value.scenarios.map(
-      parseScenario,
-    );
-
-  if (
-    scenarios.some(
-      (scenario) =>
-        scenario === null,
-    )
-  ) {
-    return null;
-  }
-
   const parsedScenarios =
-    scenarios as
-      TeamInvitationBrowserScenarioEvidence[];
-  const names =
-    parsedScenarios.map(
-      (scenario) =>
-        scenario.name,
-    );
-  const runFingerprints =
-    parsedScenarios.map(
-      (scenario) =>
-        scenario.runFingerprint,
-    );
+    parseScenarios(value.scenarios);
 
-  if (
-    new Set(names).size !==
-      requiredTeamInvitationBrowserScenarios.length ||
-    requiredTeamInvitationBrowserScenarios.some(
-      (name) =>
-        !names.includes(name),
-    ) ||
-    new Set(runFingerprints).size !==
-      requiredTeamInvitationBrowserScenarios.length
-  ) {
+  if (parsedScenarios === null) {
     return null;
   }
 
@@ -599,4 +612,155 @@ export function inspectTeamInvitationBrowserEvidence(
       "TEAM_INVITATION_BROWSER_E2E_EVIDENCE_VERIFIED",
     verifiedScenarioCount: 7,
   };
+}
+
+export function buildTeamInvitationBrowserEvidence(
+  receipt: unknown,
+  now: Date = new Date(),
+): TeamInvitationBrowserEvidence {
+  if (
+    !isPlainObject(receipt) ||
+    !hasExactKeys(receipt, [
+      "schemaVersion",
+      "verifiedAt",
+      "environment",
+      "origin",
+      "releaseId",
+      "commitSha",
+      "artifactDigest",
+      "policy",
+      "scenarios",
+    ]) ||
+    receipt.schemaVersion !== 1 ||
+    receipt.environment !== "staging" ||
+    !isCanonicalTimestamp(
+      receipt.verifiedAt,
+    ) ||
+    typeof receipt.origin !== "string" ||
+    requireStagingOrigin(
+      receipt.origin,
+    ) === null ||
+    typeof receipt.releaseId !== "string" ||
+    !releaseIdPattern.test(
+      receipt.releaseId,
+    ) ||
+    typeof receipt.commitSha !== "string" ||
+    !commitPattern.test(
+      receipt.commitSha,
+    ) ||
+    typeof receipt.artifactDigest !==
+      "string" ||
+    !fingerprintPattern.test(
+      receipt.artifactDigest,
+    ) ||
+    !isPlainObject(receipt.policy) ||
+    !hasExactKeys(receipt.policy, [
+      "ttlHours",
+      "reRequest",
+    ]) ||
+    !Number.isSafeInteger(
+      receipt.policy.ttlHours,
+    ) ||
+    (receipt.policy.ttlHours as number) < 1 ||
+    (receipt.policy.ttlHours as number) > 8_760 ||
+    (
+      receipt.policy.reRequest !== "disabled" &&
+      receipt.policy.reRequest !==
+        "after-terminal"
+    )
+  ) {
+    throw new Error(
+      "TEAM_INVITATION_BROWSER_E2E_RECEIPT_INVALID",
+    );
+  }
+
+  const scenarios =
+    parseScenarios(
+      receipt.scenarios,
+    );
+
+  if (scenarios === null) {
+    throw new Error(
+      "TEAM_INVITATION_BROWSER_E2E_RECEIPT_INVALID",
+    );
+  }
+
+  const verifiedAtMilliseconds =
+    Date.parse(receipt.verifiedAt);
+  const expiresAt =
+    new Date(
+      verifiedAtMilliseconds +
+        maximumEvidenceLifetimeMilliseconds,
+    ).toISOString();
+  const policy: TeamInvitationPolicy = {
+    ttlHours:
+      receipt.policy.ttlHours as number,
+    reRequest:
+      receipt.policy.reRequest,
+  };
+  const evidenceWithoutDigest = {
+    schemaVersion: 1 as const,
+    verifiedAt:
+      receipt.verifiedAt,
+    expiresAt,
+    environment:
+      "staging" as const,
+    origin: receipt.origin,
+    releaseId:
+      receipt.releaseId,
+    commitSha:
+      receipt.commitSha,
+    artifactDigest:
+      receipt.artifactDigest,
+    policyDigest:
+      deriveTeamInvitationPolicyDigest(
+        policy,
+      ),
+    scenarios,
+  };
+  const evidence = {
+    ...evidenceWithoutDigest,
+    evidenceDigest:
+      deriveTeamInvitationBrowserEvidenceDigest(
+        evidenceWithoutDigest,
+      ),
+  };
+  const report =
+    inspectTeamInvitationBrowserEvidence(
+      {
+        APP_DEPLOYED_COMMIT_SHA:
+          evidence.commitSha,
+        APP_RELEASE_ID:
+          evidence.releaseId,
+        APP_DEPLOYMENT_ARTIFACT_DIGEST:
+          evidence.artifactDigest,
+        TEAM_INVITATION_TTL_HOURS:
+          String(policy.ttlHours),
+        TEAM_INVITATION_REREQUEST_POLICY:
+          policy.reRequest,
+        TEAM_INVITATION_BROWSER_E2E_ORIGIN:
+          evidence.origin,
+        TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON:
+          JSON.stringify(evidence),
+      },
+      now,
+    );
+
+  if (report.status !== "configured") {
+    throw new Error(
+      "TEAM_INVITATION_BROWSER_E2E_RECEIPT_INVALID",
+    );
+  }
+
+  return Object.freeze({
+    ...evidence,
+    scenarios: Object.freeze(
+      scenarios.map(
+        (scenario) =>
+          Object.freeze({
+            ...scenario,
+          }),
+      ),
+    ),
+  });
 }
