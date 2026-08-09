@@ -289,5 +289,38 @@ Clerk Session חסר ואימייל ראשי לא מאומת אינם עוד א�
 11.7 Focus order הקנוני הוא Skip link, ‏Brand link, ‏Accept button
 ו־Home link. סדר אחר הופך את Assertion ל־Failed.
 
-11.8 Browser Port Core ספק־נייטרלי קיים. עדיין אין Playwright,
-CI Provider, ‏Credentials או Sessions אמיתיים בקוד.
+11.8 Browser Port Core ו־Playwright Adapter קיימים מקומית. עדיין
+אין CI Provider, ‏Credentials או Sessions אמיתיים מאומתים.
+
+## 12. לכידת Auth State מאובטחת
+
+12.1 מגדירים `TEAM_INVITATION_BROWSER_E2E_ORIGIN` ל־Origin הקנוני
+של סביבת Staging המבודדת. הכלי דורש HTTPS מרוחק ודוחה Localhost;
+האחריות לוודא שזה אינו Preview או Production נשארת אצל המפעיל.
+
+12.2 מתקינים מקומית את Chromium התואם לגרסת Playwright, אם טרם
+הותקן, ולאחר מכן מריצים ב־Terminal אינטראקטיבי:
+
+```sh
+npx playwright install chromium
+npm run capture:team-invitation-browser-auth
+```
+
+12.3 הכלי פותח Context נקי ונפרד לכל אחד מששת ה־Profiles. המפעיל
+מתחבר ידנית בחלון שנפתח ולוחץ Enter רק לאחר החזרה ל־Origin של
+Staging. אין למסור סיסמה, Token או Cookie בשורת הפקודה.
+
+12.4 לאחר כל התחברות הכלי מסנן Cookies ו־Local Storage שאינם שייכים
+ל־Staging. State מורחב, Cookie לא מאובטח, תפוגה קצרה, Origin זר או
+Profile חסר מפסיקים את התהליך ללא קובץ חלקי.
+
+12.5 הקובץ המלא נכתב אטומית אל
+`.artifacts/team-invitation-browser-auth-states.json` בהרשאת `0600`
+ואינו נכנס ל־Git. הכלי אינו מדפיס את תוכנו.
+
+12.6 מעבירים את תוכן הקובץ ל־Secret Store המאושר בשם
+`TEAM_INVITATION_BROWSER_AUTH_STATES_JSON`, ומוחקים את העותק המקומי
+לאחר אימות ההעברה. אין להעלות אותו כ־Artifact רגיל.
+
+12.7 הלכידה מוכיחה Shape, ‏Scope ובידוד מקומי בלבד. ריצת שבעת
+תרחישי ה־E2E היא שמוכיחה שכל Profile אכן מייצג את הזהות המיועדת.

@@ -241,3 +241,11 @@ Scenario Output Digest נגזר מהסדר, מהשם, מהמקור ומה־Outpu
 10.7 `TEAM_INVITATION_BROWSER_E2E_CASES_JSON` הוא Secret זמני של
 Staging המכיל Invitation Keys ו־External User Scopes. הוא מוזרק
 מ־CI Secret Store, תקף עד שעתיים ואסור לשמור אותו כ־Artifact.
+
+10.8 `npm run capture:team-invitation-browser-auth` יוצר מקומית
+Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנית. הפלט נכתב
+אטומית בהרשאת `0600` תחת `.artifacts`, אינו מודפס ואינו נכנס ל־Git.
+
+10.9 רק Cookies ו־Local Storage של Origin ה־Staging נשמרים. State
+של ספק זהות חיצוני מסונן; State מורחב בתוך Scope של Staging נכשל
+סגור. לאחר ההעברה ל־Secret Store יש למחוק את העותק המקומי.

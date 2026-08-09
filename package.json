@@ -22,6 +22,7 @@
     "release:changelog": "node scripts/create-change-log.mjs",
     "release:verify-artifacts": "node scripts/verify-release-artifacts.mjs",
     "create:team-invitation-browser-cases": "node scripts/create-team-invitation-browser-case-inventory.mjs",
+    "capture:team-invitation-browser-auth": "node scripts/capture-team-invitation-browser-auth-states.mjs",
     "preflight:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs --preflight",
     "e2e:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs",
     "evidence:team-invitation-browser": "node scripts/create-team-invitation-browser-evidence.mjs",

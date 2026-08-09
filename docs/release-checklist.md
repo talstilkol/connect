@@ -77,10 +77,14 @@ Log זהים ל־Commit.
 5.9 Receipt הדפדפן אינו מכיל PII, ‏Token, ‏Cookie, ‏Invitation Key,
 Trace או Screenshot, והוא הופק על ידי מערכת ה־CI המאושרת.
 
-5.9.1 כל 22 ה־Assertions מה־Scenario Registry עברו, לרבות הוכחות
+5.9.1 ששת Auth states נלכדו ב־Contexts מבודדים מול Staging בלבד,
+עברו את ה־Validator והוזרקו מ־Secret Store. קובץ הלכידה המקומי אינו
+נשמר ב־Git או כ־Artifact רגיל.
+
+5.9.2 כל 22 ה־Assertions מה־Scenario Registry עברו, לרבות הוכחות
 Database עבור Mutation, Rejection ו־Idempotency.
 
-5.9.2 Database Proof נקרא מ־D1 של Staging בלבד דרך Reader
+5.9.3 Database Proof נקרא מ־D1 של Staging בלבד דרך Reader
 Read-only, ושום Row או Identifier לא נכתב ל־Receipt.
 
 5.10 Browser Evidence הופק מה־Receipt באמצעות המחולל המקומי, טרם
