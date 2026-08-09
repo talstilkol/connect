@@ -193,11 +193,7 @@ async function writeInventory(inventory) {
   try {
     await writeFile(
       temporaryPath,
-      `${JSON.stringify(
-        inventory,
-        null,
-        2,
-      )}\n`,
+      JSON.stringify(inventory),
       {
         encoding: "utf8",
         flag: "wx",

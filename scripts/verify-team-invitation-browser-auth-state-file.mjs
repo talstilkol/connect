@@ -1,11 +1,4 @@
 import {
-  constants,
-} from "node:fs";
-import {
-  open,
-} from "node:fs/promises";
-import {
-  isAbsolute,
   join,
 } from "node:path";
 import {
@@ -16,6 +9,10 @@ import {
   parseTeamInvitationBrowserAuthenticationStates,
   teamInvitationBrowserAuthenticatedProfiles,
 } from "./team-invitation-browser-auth-state-bundle.mjs";
+import {
+  readPrivateSecretFile,
+  PrivateSecretFileError,
+} from "./private-secret-file.mjs";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -62,8 +59,6 @@ function hasAllowedKeys(value, keys) {
 function requireConfiguration(value) {
   if (
     !isObject(value) ||
-    !Number.isInteger(constants.O_NOFOLLOW) ||
-    typeof process.getuid !== "function" ||
     !hasAllowedKeys(value, [
       "filePath",
       "origin",
@@ -73,7 +68,6 @@ function requireConfiguration(value) {
     value.filePath.length === 0 ||
     value.filePath.length > 4_096 ||
     value.filePath.includes("\0") ||
-    !isAbsolute(value.filePath) ||
     typeof value.origin !== "string" ||
     typeof (value.clock ?? (() => new Date())) !==
       "function"
@@ -111,130 +105,57 @@ function requireConfiguration(value) {
   });
 }
 
-function requireFileMetadata(value) {
-  if (
-    !value.isFile() ||
-    value.nlink !== 1 ||
-    (value.mode & 0o777) !== 0o600 ||
-    value.uid !== process.getuid() ||
-    value.size < 1 ||
-    value.size > maximumFileBytes
-  ) {
-    fail("AUTH_STATE_FILE_INVALID");
-  }
-}
-
-function hasUnchangedMetadata(before, after) {
-  return [
-    "dev",
-    "ino",
-    "mode",
-    "nlink",
-    "uid",
-    "size",
-    "mtimeMs",
-    "ctimeMs",
-  ].every((key) => before[key] === after[key]);
-}
-
-async function readBoundedFile(file) {
-  const buffer = Buffer.alloc(
-    maximumFileBytes + 1,
-  );
-  let bytesRead = 0;
-
-  while (bytesRead < buffer.length) {
-    const result = await file.read(
-      buffer,
-      bytesRead,
-      buffer.length - bytesRead,
-      null,
-    );
-
-    if (result.bytesRead === 0) {
-      break;
-    }
-
-    bytesRead += result.bytesRead;
-  }
-
-  if (
-    bytesRead === 0 ||
-    bytesRead > maximumFileBytes
-  ) {
-    fail("AUTH_STATE_FILE_INVALID");
-  }
-
-  try {
-    return new TextDecoder("utf-8", {
-      fatal: true,
-    }).decode(buffer.subarray(0, bytesRead));
-  } catch {
-    fail("AUTH_STATE_FILE_INVALID");
-  }
-}
-
 export async function verifyTeamInvitationBrowserAuthenticationStateFile(
   rawConfiguration,
 ) {
   const configuration =
     requireConfiguration(rawConfiguration);
-  let file;
+  let rawValue;
 
   try {
-    file = await open(
-      configuration.filePath,
-      constants.O_RDONLY |
-        constants.O_NOFOLLOW,
+    rawValue = await readPrivateSecretFile({
+      filePath: configuration.filePath,
+      maximumFileBytes,
+    });
+  } catch (error) {
+    fail(
+      error instanceof PrivateSecretFileError &&
+        error.code ===
+          "PRIVATE_SECRET_FILE_CONFIGURATION_INVALID"
+        ? "AUTH_STATE_FILE_CONFIGURATION_INVALID"
+        : "AUTH_STATE_FILE_INVALID",
+    );
+  }
+
+  const now = configuration.clock();
+
+  if (
+    !(now instanceof Date) ||
+    !Number.isFinite(now.getTime())
+  ) {
+    fail(
+      "AUTH_STATE_FILE_CONFIGURATION_INVALID",
+    );
+  }
+
+  try {
+    parseTeamInvitationBrowserAuthenticationStates(
+      rawValue,
+      {
+        origin: configuration.origin,
+        now,
+        minimumRemainingLifetimeMilliseconds,
+      },
     );
   } catch {
     fail("AUTH_STATE_FILE_INVALID");
   }
 
-  try {
-    const before = await file.stat();
-    requireFileMetadata(before);
-    const rawValue = await readBoundedFile(file);
-    const after = await file.stat();
-
-    if (
-      !hasUnchangedMetadata(before, after)
-    ) {
-      fail("AUTH_STATE_FILE_INVALID");
-    }
-
-    const now = configuration.clock();
-
-    if (
-      !(now instanceof Date) ||
-      !Number.isFinite(now.getTime())
-    ) {
-      fail(
-        "AUTH_STATE_FILE_CONFIGURATION_INVALID",
-      );
-    }
-
-    try {
-      parseTeamInvitationBrowserAuthenticationStates(
-        rawValue,
-        {
-          origin: configuration.origin,
-          now,
-          minimumRemainingLifetimeMilliseconds,
-        },
-      );
-    } catch {
-      fail("AUTH_STATE_FILE_INVALID");
-    }
-
-    return Object.freeze({
-      origin: configuration.origin,
-      profileCount:
-        teamInvitationBrowserAuthenticatedProfiles.length,
-    });
-  } finally {
-    await file.close();
-  }
+  return Object.freeze({
+    origin: configuration.origin,
+    profileCount:
+      teamInvitationBrowserAuthenticatedProfiles.length,
+  });
 }
 
 async function runCli() {

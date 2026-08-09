@@ -256,6 +256,16 @@ Artifact ו־Policy Digest המדויקים.
 10.7 D1 Proof Port מעביר את ה־Case ל־Reader הקיים ובודק Abort לפני
 הקריאה ואחריה. Proof שהסתיים לאחר Abort אינו נכנס ל־Assertion.
 
+10.8 מיד לפני העברת ה־Inventory ל־Secret Store מריצים:
+
+```sh
+npm run verify:team-invitation-browser-case-file
+```
+
+10.9 השער דורש קובץ פרטי רגיל ומאמת מחדש Origin, ‏Release, ‏Commit,
+Artifact, ‏Policy וכל שבעת ה־Cases. פלט השער אינו כולל Invitation Key
+או External User ID.
+
 ## 11. Browser Session Driver
 
 11.1 Browser Port ממפה כל Scenario ל־Session Profile קנוני. שמות

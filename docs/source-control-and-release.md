@@ -253,3 +253,8 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 10.10 `npm run verify:team-invitation-browser-auth-file` מאמת לפני
 ההעברה שה־Bundle אינו Symlink או Hard link, נמצא בבעלות המשתמש,
 פרטי בהרשאת `0600`, לא השתנה בזמן הקריאה ועדיין תקף לריצה.
+
+10.11 `npm run verify:team-invitation-browser-case-file` מחיל את
+אותו גבול קובץ על Case Inventory ומאמת מחדש את הקישור ל־Deployment
+ול־Policy. המחולל שומר JSON קומפקטי כדי שגבול 24,000 התווים יישמר
+גם בקובץ שנכתב בפועל.
