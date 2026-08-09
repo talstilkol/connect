@@ -7,11 +7,15 @@
 1.2 מעליו קיים Repository נוסף בתיקיית `connect`. המבנה המקונן
 מתועד ואסור להסיר אחד מהם לפני בחירת Repository Authority מפורשת.
 
-1.3 ל־Repository של `web` אין Remote מוגדר. לכן Branch Protection,
-Review Rules, ‏CODEOWNERS ו־Secret Scanning של ספק Git עדיין אינם
-פעילים.
+1.3 ה־Repository של `web` מחובר ל־Repository הפרטי
+`talstilkol/connect` ב־GitHub, ו־`main` הוא Branch ברירת המחדל.
 
-1.4 אין במסמך זה שמות בעלים מומצאים. בעלי Security, ‏Operations,
+1.4 שמונת שערי האיכות המקומיים ו־Dependency Audit מוגדרים כתשעה
+Pull Request Checks נפרדים. Branch Protection, ‏Review Rules,
+‏CODEOWNERS, ‏Secret Scanning ו־Push Protection עדיין אינם נחשבים
+פעילים עד לאימות מפורש מול הגדרות GitHub.
+
+1.5 אין במסמך זה שמות בעלים מומצאים. בעלי Security, ‏Operations,
 Release ו־Secrets הם unknown/unavailable עד למינוי מפורש.
 
 ## 2. שער CI מקומי

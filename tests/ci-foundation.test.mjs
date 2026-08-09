@@ -21,6 +21,17 @@ import {
 const repositoryRoot =
   new URL("../", import.meta.url);
 
+const localPullRequestChecks = [
+  "source-guardrails",
+  "secret-hygiene",
+  "interface-guardrails",
+  "dependency-lock",
+  "migrations",
+  "typecheck",
+  "lint",
+  "tests-and-build",
+];
+
 async function currentMigrationInput() {
   const migrationFiles = (
     await readdir(
@@ -233,4 +244,43 @@ test("keeps tracked secret files and private key material out of source", async 
     true,
   );
   assert.deepEqual(report.findings, []);
+});
+
+test("runs every local release gate as a separately named pull request check", async () => {
+  const workflow = await readFile(
+    new URL(
+      "../.github/workflows/pull-request-quality-gates.yml",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(workflow, /^on:\n  pull_request:\n/m);
+  assert.match(
+    workflow,
+    /^permissions:\n  contents: read$/m,
+  );
+  assert.doesNotMatch(
+    workflow,
+    /uses:\s+[^\s]+@(?![a-f0-9]{40}(?:\s|$))[^\s]+/,
+  );
+
+  for (const check of localPullRequestChecks) {
+    assert.match(
+      workflow,
+      new RegExp(
+        `^  ${check}:\\n    name: ${check}$`,
+        "m",
+      ),
+    );
+  }
+
+  assert.match(
+    workflow,
+    /secret-hygiene:[\s\S]*?fetch-depth: 0[\s\S]*?npm run verify:secret-hygiene/,
+  );
+  assert.match(
+    workflow,
+    /tests-and-build:[\s\S]*?npm ci[\s\S]*?npm test/,
+  );
 });
