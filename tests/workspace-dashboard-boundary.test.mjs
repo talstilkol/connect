@@ -12,10 +12,18 @@ async function readSource(relativePath) {
 }
 
 test("keeps dashboard behavior behind the workspace dashboard feature boundary", async () => {
-  const [workspaceSource, dashboardSource, setupStepsSource] =
+  const [
+    workspaceSource,
+    sectionSource,
+    dashboardSource,
+    setupStepsSource,
+  ] =
     await Promise.all([
       readSource(
         "features/workspace/WorkspaceApp.tsx",
+      ),
+      readSource(
+        "features/workspace/WorkspaceSectionContent.tsx",
       ),
       readSource(
         "features/workspace/WorkspaceDashboard.tsx",
@@ -26,7 +34,7 @@ test("keeps dashboard behavior behind the workspace dashboard feature boundary",
     ]);
 
   assert.match(
-    workspaceSource,
+    sectionSource,
     /<WorkspaceDashboard/,
   );
   assert.doesNotMatch(
@@ -48,10 +56,18 @@ test("keeps dashboard behavior behind the workspace dashboard feature boundary",
 });
 
 test("keeps onboarding state and persistence behind its feature boundary", async () => {
-  const [workspaceSource, onboardingSource, featurePageSource] =
+  const [
+    workspaceSource,
+    sectionSource,
+    onboardingSource,
+    featurePageSource,
+  ] =
     await Promise.all([
       readSource(
         "features/workspace/WorkspaceApp.tsx",
+      ),
+      readSource(
+        "features/workspace/WorkspaceSectionContent.tsx",
       ),
       readSource(
         "features/workspace/WorkspaceOnboarding.tsx",
@@ -62,7 +78,7 @@ test("keeps onboarding state and persistence behind its feature boundary", async
     ]);
 
   assert.match(
-    workspaceSource,
+    sectionSource,
     /<WorkspaceOnboarding/,
   );
   assert.doesNotMatch(
@@ -120,5 +136,42 @@ test("keeps Meta signup lifecycle and dialog behavior behind its feature boundar
   assert.match(
     guardrailSource,
     /file: "features\/workspace\/MetaConnectionPanel\.tsx"/,
+  );
+});
+
+test("keeps section selection outside the workspace navigation shell", async () => {
+  const [workspaceSource, sectionSource] =
+    await Promise.all([
+      readSource(
+        "features/workspace/WorkspaceApp.tsx",
+      ),
+      readSource(
+        "features/workspace/WorkspaceSectionContent.tsx",
+      ),
+    ]);
+
+  assert.match(
+    workspaceSource,
+    /<WorkspaceSectionContent/,
+  );
+  assert.doesNotMatch(
+    workspaceSource,
+    /activeSection === "(?:dashboard|onboarding|contacts|templates|campaigns|inbox|bot|ai|reports|billing|team|decisions)"/,
+  );
+  assert.match(
+    sectionSource,
+    /export function WorkspaceSectionContent/,
+  );
+  assert.match(
+    sectionSource,
+    /activeSection === "dashboard"/,
+  );
+  assert.match(
+    sectionSource,
+    /activeSection === "decisions"/,
+  );
+  assert.doesNotMatch(
+    sectionSource,
+    /useRouter|UserButton|TenantWorkspaceSwitcher/,
   );
 });
