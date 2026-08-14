@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,196 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,198 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -98,7 +98,7 @@ Inbox, ‏Bot, ‏AI, ‏Reports ו־Billing הועברו ל־`WorkspaceSectionC
 2.5.5 `WorkspaceApp` ירד מ־1,732 ל־377 שורות ללא שינוי ב־Props,
 Routes או בהתנהגות העסקית. ארבע בדיקות Boundary מקבעות את ההפרדה.
 
-2.6 **בביצוע:** פיצול `ConversationInbox` ל־Thread list, ‏Message view,
+2.6 **הושלם:** פיצול `ConversationInbox` ל־Thread list, ‏Message view,
 Assignment ו־Composer.
 
 2.6.1 רשימת השיחות, המסננים ומצבי הרענון הועברו
@@ -109,9 +109,12 @@ Assignment ו־Composer.
 ל־`ConversationMessageView`. פעולות השרת, ה־State וההרשאות נשארו
 בבקר הראשי ולא הועברה אליו יכולת שליחה חדשה.
 
-2.6.3 שתי בדיקות Boundary מונעות החזרת Markup הרשימה או ההודעות
-ל־`ConversationInbox`. נותרו Assignment ו־Composer boundary; אומדן:
-**2–6 שעות**.
+2.6.3 בקרי השיוך וסימון הקריאה הועברו
+ל־`ConversationAssignmentControls`. גבול ה־Composer הועבר
+ל־`ConversationComposerBoundary` ונשאר ללא שדה קלט או פעולת שליחה.
+
+2.6.4 ארבע בדיקות Boundary מונעות החזרת Markup הרשימה, ההודעות,
+השיוך או ה־Composer לקומפוננטות האב.
 
 2.7 פיצול `app/globals.css` לקובצי Feature ושכבת Tokens.
 
@@ -136,7 +139,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **26–44 שעות**, שהם כ־**4–6 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **24–38 שעות**, שהם כ־**3–5 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 

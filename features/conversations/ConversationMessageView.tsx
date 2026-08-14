@@ -15,6 +15,12 @@ import {
   messageBody,
   messageStatusLabels,
 } from "./conversationPresentation.ts";
+import {
+  ConversationAssignmentControls,
+} from "./ConversationAssignmentControls.tsx";
+import {
+  ConversationComposerBoundary,
+} from "./ConversationComposerBoundary.tsx";
 
 type ConversationMessageViewProps = {
   selectedThread: InboxConversationThreadView | null;
@@ -86,63 +92,18 @@ export function ConversationMessageView({
                   }
                 </p>
               </div>
-              <div className="conversation-stage-actions">
-                {canReply ? (
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    disabled={
-                      isBusy ||
-                      selectedThread.conversation
-                        .assignment === "other-user"
-                    }
-                    onClick={changeSelectedAssignment}
-                  >
-                    {pendingConversationKey ===
-                    selectedThread.conversation
-                      .conversationKey
-                      ? "מעדכן…"
-                      : selectedThread.conversation
-                            .assignment ===
-                          "current-user"
-                        ? "הסר שיוך שלי"
-                        : selectedThread.conversation
-                              .assignment ===
-                            "other-user"
-                          ? "משויכת לנציג אחר"
-                          : "שייך אליי"}
-                  </button>
-                ) : null}
-                {selectedThread.conversation
-                  .unreadCount > 0 ? (
-                  canReply ? (
-                    <button
-                      className="secondary-button"
-                      type="button"
-                      disabled={isBusy}
-                      onClick={markSelectedRead}
-                    >
-                      {pendingConversationKey ===
-                      selectedThread.conversation
-                        .conversationKey
-                        ? "מעדכן…"
-                        : "סימון כנקראה"}
-                    </button>
-                  ) : (
-                    <span className="status-pill warning">
-                      {
-                        selectedThread.conversation
-                          .unreadCount
-                      }{" "}
-                      לא נקראו
-                    </span>
-                  )
-                ) : (
-                  <span className="status-pill success">
-                    נקראה
-                  </span>
-                )}
-              </div>
+              <ConversationAssignmentControls
+                conversation={selectedThread.conversation}
+                canReply={canReply}
+                isBusy={isBusy}
+                pendingConversationKey={
+                  pendingConversationKey
+                }
+                changeSelectedAssignment={
+                  changeSelectedAssignment
+                }
+                markSelectedRead={markSelectedRead}
+              />
             </header>
 
             {!canReply ? (
@@ -310,15 +271,7 @@ export function ConversationMessageView({
               )}
             </div>
 
-            <footer className="outbound-boundary">
-              <span aria-hidden="true">i</span>
-              <p>
-                צפייה, שיוך ואישור תשובות AI פעילים.
-                אישור שומר את התשובה למסירה עתידית
-                בלבד; שליחה נשארת חסומה עד חיבור
-                Adapter מאושר.
-              </p>
-            </footer>
+            <ConversationComposerBoundary />
           </>
         ) : (
           <div className="conversation-stage-empty">

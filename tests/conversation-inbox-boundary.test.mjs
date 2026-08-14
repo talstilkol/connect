@@ -87,3 +87,65 @@ test("keeps message rendering behind the conversation message boundary", async (
     /changeSelectedAssignment|markSelectedRead|decideAiApproval/,
   );
 });
+
+test("keeps assignment controls behind their presentation boundary", async () => {
+  const [messageViewSource, assignmentSource] =
+    await Promise.all([
+      readSource(
+        "features/conversations/ConversationMessageView.tsx",
+      ),
+      readSource(
+        "features/conversations/ConversationAssignmentControls.tsx",
+      ),
+    ]);
+
+  assert.match(
+    messageViewSource,
+    /<ConversationAssignmentControls/,
+  );
+  assert.doesNotMatch(
+    messageViewSource,
+    /className="conversation-stage-actions"/,
+  );
+  assert.match(
+    assignmentSource,
+    /export function ConversationAssignmentControls/,
+  );
+  assert.match(
+    assignmentSource,
+    /changeSelectedAssignment|markSelectedRead/,
+  );
+});
+
+test("keeps the disabled composer contract behind its own boundary", async () => {
+  const [messageViewSource, composerSource] =
+    await Promise.all([
+      readSource(
+        "features/conversations/ConversationMessageView.tsx",
+      ),
+      readSource(
+        "features/conversations/ConversationComposerBoundary.tsx",
+      ),
+    ]);
+
+  assert.match(
+    messageViewSource,
+    /<ConversationComposerBoundary/,
+  );
+  assert.doesNotMatch(
+    messageViewSource,
+    /className="outbound-boundary"/,
+  );
+  assert.match(
+    composerSource,
+    /export function ConversationComposerBoundary/,
+  );
+  assert.match(
+    composerSource,
+    /שליחה נשארת חסומה/,
+  );
+  assert.doesNotMatch(
+    composerSource,
+    /<textarea|<input|<button/,
+  );
+});
