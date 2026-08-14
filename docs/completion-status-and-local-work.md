@@ -1,6 +1,6 @@
 # מצב השלמה ומשימות מקומיות
 
-תאריך בדיקה: 2026-08-09
+תאריך בדיקה: 2026-08-14
 
 ## 1. אחוזי השלמה
 
@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,188 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,190 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -64,12 +64,17 @@ Rate Limits, ‏Secrets ו־Scheduler אינם משותפים בין ארבע ה
 Artifact, ‏Deployment, ‏Version ו־script ETag. אימות חי עדיין דורש
 חשבון Cloudflare, ארבע פריסות מבודדות ו־Token לקריאה בלבד.
 
-2.4 קישור Browser Evidence החתום ל־JSON המדויק של Runtime.
+2.4 **הושלם מקומית:** קישור Browser Evidence החתום ל־JSON המדויק
+של Runtime.
 
-2.4.1 המטרה היא למנוע מצב שבו הקובץ החתום תקין אך משתנה הסביבה
-מכיל Evidence אחר.
+2.4.1 גם Verifier החתימה וגם Verifier הקובץ דורשים התאמה
+byte-for-byte בין הקובץ המוגן לבין
+`TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON`. שינוי תוכן או אפילו
+Whitespace נכשל סגור לפני Production Readiness או מחיקת Secrets.
 
-2.4.2 אומדן: **4–6 שעות**.
+2.4.2 האימות מתבצע באותה קריאה שבה נבדקים קובץ ה־Evidence וה־Bundle
+לפני ואחרי `gh attestation verify`, ולכן Digest תקין אינו יכול לאשר
+ערך Runtime אחר.
 
 2.5 פיצול `WorkspaceApp` לפי Feature ללא שינוי התנהגות עסקית.
 
@@ -103,9 +108,9 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **42–66 שעות**, שהם כ־**6–9 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **38–60 שעות**, שהם כ־**5–8 ימי עבודה**.
 
-2.10.2 עם Review, תיקוני Regression ותיעוד: **7–11 ימי עבודה**.
+2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
 ## 3. עבודה שאינה מקומית בלבד
 

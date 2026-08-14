@@ -327,12 +327,17 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 
 10.14 `npm run verify:team-invitation-browser-evidence-attestation -- --repo "$GITHUB_REPOSITORY"`
 מפעיל `gh attestation verify` על ה־Evidence וה־Bundle ודורש Repository,
-‏Signer Workflow ו־Commit מדויקים וכן GitHub-hosted runner.
+‏Signer Workflow ו־Commit מדויקים וכן GitHub-hosted runner. באותה
+קריאה הוא דורש התאמה byte-for-byte בין הקובץ שאומת לבין
+`TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON`; חתימה תקינה על קובץ אחר
+נכשלת עם `BROWSER_EVIDENCE_ATTESTATION_RUNTIME_MISMATCH`.
 
 10.15 `npm run verify:team-invitation-browser-evidence-file` מאמת
 שמסמך ה־Evidence שהורד מריצת CI הוא קובץ רגיל בבעלות המפעיל, ללא
 Symlink, ‏Hard link או הרשאת כתיבה זרה, ושהוא קצר־חיים ותואם בדיוק
-ל־Release, ‏Commit, ‏Artifact, ‏Origin ו־Policy הנוכחיים.
+ל־Release, ‏Commit, ‏Artifact, ‏Origin ו־Policy הנוכחיים. גם שער זה
+משווה את מלוא מחרוזת ה־Runtime לקובץ המוגן ואינו מחליף אותה זמנית
+בזיכרון לצורך הבדיקה.
 
 10.16 `npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer --repo "$GITHUB_REPOSITORY"`
 מורשה רק אחרי אישור ההעברה ואימות ה־Attestation וה־Browser Evidence.

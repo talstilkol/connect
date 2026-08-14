@@ -421,6 +421,9 @@ export async function removeTeamInvitationBrowserSecretFiles(
             repository: configuration.repository,
             releaseManifest:
               configuration.releaseManifest,
+            runtimeEvidenceJson:
+              configuration.environment
+                .TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON,
           }),
       );
 

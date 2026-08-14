@@ -104,7 +104,9 @@ Profiles, שבעה Scenarios, ‏Origin יחיד ו־Release נוכחי יחיד
 
 5.9.1.4 ה־Browser Evidence וה־Attestation Bundle הורדו מאותו Artifact
 קצר־חיים. `gh attestation verify` אישר Digest, ‏Repository, ‏Signer
-Workflow, ‏Release Commit ו־GitHub-hosted runner.
+Workflow, ‏Release Commit ו־GitHub-hosted runner, והקובץ החתום נמצא
+זהה byte-for-byte ל־`TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON` של
+ה־Runtime.
 
 5.9.1.5 לאחר אימות הערכים ב־Secret Store והרצה מוצלחת ממנו, קובץ
 Browser Evidence קצר־חיים ותואם Release עבר גם את השער הסמנטי.

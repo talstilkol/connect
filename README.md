@@ -80,7 +80,7 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1188/1188 בדיקות, 30 Migrations,
+31. Local Release Gate עובר עם 1190/1190 בדיקות, 30 Migrations,
    ‏385 קובצי Source, ‏19 Client dependency graphs, ‏723 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
@@ -147,7 +147,8 @@
 50. לאחר העברה מאומתת ל־Secret Store וריצת שבעת תרחישי ה־Staging,
    GitHub Actions חותם את Browser Evidence באמצעות Sigstore. כלי
    Cleanup דורש Attestation תקף מאותו Repository, ‏Workflow ו־Commit,
-   ואז Evidence סמנטי לאותו Release. רק לאחר מכן הוא מעביר את שני
+   התאמה byte-for-byte ל־JSON שב־Runtime ואז Evidence סמנטי לאותו
+   Release. רק לאחר מכן הוא מעביר את שני
    הקבצים ל־Quarantine, מאמת אותם שוב ומבצע `unlink`. כשל מוקדם מחזיר
    אותם; הכלי אינו טוען למחיקת SSD, ‏Snapshot או Backup.
 51. Dependency Audit אינו עוד Boolean סטטי. מחולל ייעודי מריץ רק את

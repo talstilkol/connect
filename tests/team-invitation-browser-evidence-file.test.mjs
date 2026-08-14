@@ -142,17 +142,26 @@ async function createEvidenceFile(
 }
 
 function configuration(
-  filePath,
+  file,
   overrides = {},
 ) {
+  const {
+    environment: environmentOverrides = {},
+    ...configurationOverrides
+  } = overrides;
+
   return {
-    filePath,
-    environment: environment(),
+    filePath: file.filePath,
+    environment: environment({
+      TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON:
+        file.text,
+      ...environmentOverrides,
+    }),
     releaseManifest,
     clock: () => now,
     dependencies:
       teamInvitationBrowserEvidenceFileVerificationDependencies,
-    ...overrides,
+    ...configurationOverrides,
   };
 }
 
@@ -176,7 +185,7 @@ test("accepts an owner-controlled short-lived evidence file for the current rele
 
   const result =
     await verifyTeamInvitationBrowserEvidenceFile(
-      configuration(file.filePath),
+      configuration(file),
     );
 
   assert.deepEqual(result, {
@@ -195,7 +204,7 @@ test("rejects group-writable and symbolic-link evidence files", async () => {
   await assert.rejects(
     () =>
       verifyTeamInvitationBrowserEvidenceFile(
-        configuration(writable.filePath),
+        configuration(writable),
       ),
     expectsError("BROWSER_EVIDENCE_FILE_INVALID"),
   );
@@ -210,7 +219,10 @@ test("rejects group-writable and symbolic-link evidence files", async () => {
   await assert.rejects(
     () =>
       verifyTeamInvitationBrowserEvidenceFile(
-        configuration(linkPath),
+        configuration({
+          ...linked,
+          filePath: linkPath,
+        }),
       ),
     expectsError("BROWSER_EVIDENCE_FILE_INVALID"),
   );
@@ -222,7 +234,7 @@ test("separates expired evidence from release and artifact mismatches", async ()
   await assert.rejects(
     () =>
       verifyTeamInvitationBrowserEvidenceFile(
-        configuration(file.filePath, {
+        configuration(file, {
           clock: () =>
             new Date(
               "2026-08-10T11:00:00.000Z",
@@ -235,11 +247,11 @@ test("separates expired evidence from release and artifact mismatches", async ()
   await assert.rejects(
     () =>
       verifyTeamInvitationBrowserEvidenceFile(
-        configuration(file.filePath, {
-          environment: environment({
+        configuration(file, {
+          environment: {
             APP_DEPLOYMENT_ARTIFACT_DIGEST:
               `sha256:${"d".repeat(64)}`,
-          }),
+          },
         }),
       ),
     expectsError("BROWSER_EVIDENCE_FILE_MISMATCH"),
@@ -257,7 +269,7 @@ test("rejects tampered evidence and invalid release input before trust", async (
   await assert.rejects(
     () =>
       verifyTeamInvitationBrowserEvidenceFile(
-        configuration(tampered.filePath),
+        configuration(tampered),
       ),
     expectsError("BROWSER_EVIDENCE_FILE_INVALID"),
   );
@@ -265,7 +277,7 @@ test("rejects tampered evidence and invalid release input before trust", async (
   await assert.rejects(
     () =>
       verifyTeamInvitationBrowserEvidenceFile(
-        configuration(tampered.filePath, {
+        configuration(tampered, {
           releaseManifest: {
             ...releaseManifest,
             commitSha: "invalid",
@@ -276,4 +288,29 @@ test("rejects tampered evidence and invalid release input before trust", async (
       "BROWSER_EVIDENCE_FILE_CONFIGURATION_INVALID",
     ),
   );
+});
+
+test("rejects runtime JSON that is not byte-for-byte identical to the trusted file", async () => {
+  const file = await createEvidenceFile();
+
+  for (const runtimeEvidenceJson of [
+    undefined,
+    file.text.trimEnd(),
+    `${file.text} `,
+  ]) {
+    await assert.rejects(
+      () =>
+        verifyTeamInvitationBrowserEvidenceFile(
+          configuration(file, {
+            environment: {
+              TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON:
+                runtimeEvidenceJson,
+            },
+          }),
+        ),
+      expectsError(
+        "BROWSER_EVIDENCE_FILE_RUNTIME_MISMATCH",
+      ),
+    );
+  }
 });
