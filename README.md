@@ -96,6 +96,9 @@
 36. Node `24.18.1` LTS נעול ב־`.node-version` ומשמש את כל ה־workflows;
    `engines.node` דוחה גרסאות שאינן תומכות בהרצת קובצי TypeScript
    הנדרשת על ידי כלי הבדיקות וה־Evidence.
+37. בדיקות Release ב־CI מורידות היסטוריית Git מלאה. במאגר פרטי
+   בבעלות משתמש אישי, Dependency Audit נשאר Check מחייב ומעלה Evidence
+   לא־חתום; שער Production אינו מקבל אותו כתחליף ל־Attestation אמיתי.
 35. D1 Remote Proof Adapter שולח רק את שתי שאילתות ה־SELECT
    הקנוניות ל־Cloudflare API endpoint קבוע ומחייב D1 Read token.
 36. תגובת D1 מתקבלת רק כאשר ה־API מדווח `changed_db = false`,

@@ -264,6 +264,8 @@ test("runs every local release gate as a separately named pull request check", a
         readFile(url, "utf8"),
       ),
     );
+  const dependencyAuditWorkflow =
+    supportingWorkflows[0];
   const nodeVersion = (
     await readFile(
       new URL(
@@ -316,6 +318,16 @@ test("runs every local release gate as a separately named pull request check", a
   );
   assert.match(
     workflow,
-    /tests-and-build:[\s\S]*?npm ci[\s\S]*?npm test/,
+    /tests-and-build:[\s\S]*?fetch-depth: 0[\s\S]*?npm ci[\s\S]*?npm test/,
+  );
+  assert.equal(
+    dependencyAuditWorkflow.match(
+      /if: \$\{\{ github\.event\.repository\.private == false \}\}/g,
+    )?.length,
+    2,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /path: \.artifacts\/dependency-audit-evidence\*\.json/,
   );
 });

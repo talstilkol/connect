@@ -53,6 +53,11 @@ Release ו־Secrets הם unknown/unavailable עד למינוי מפורש.
 2.2.4 `verify:release-gate:local` אינו דורש GitHub, ‏Bundle או Secrets
 חיצוניים ולכן נשאר שער פיתוח מקומי דטרמיניסטי.
 
+2.2.5 ב־Repository פרטי בבעלות משתמש אישי, GitHub אינו מאפשר שמירת
+Artifact Attestation. ‏PR Check של Dependency Audit עדיין דורש Audit
+מוצלח ומעלה Evidence קצר־חיים, אך אינו ממציא חתימה. שער ה־Production
+ממשיך לדרוש Attestation אמיתי ולכן נשאר חסום.
+
 2.3 `npm run verify:secret-hygiene` אינו מדפיס Secret, נתיב התאמה,
 Commit פגוע או תוכן קובץ. הוא מחזיר קוד ממצא מוגבל בלבד.
 
