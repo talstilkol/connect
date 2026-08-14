@@ -5,6 +5,7 @@ import {
 import test from "node:test";
 
 import {
+  buildCiExecutionEvidence,
   deriveCiExecutionEvidenceDigest,
   inspectCiExecutionEvidence,
 } from "../server/operations/ciExecutionEvidence.ts";
@@ -74,6 +75,116 @@ function createEnvironment(
       JSON.stringify(evidence),
   };
 }
+
+function createSnapshot() {
+  return {
+    verifiedAt:
+      "2026-07-27T11:30:00.000Z",
+    releaseId,
+    commitSha,
+    checks:
+      [...requiredPullRequestStatusChecks]
+        .reverse()
+        .map((name) => ({
+          name,
+          conclusion: "success",
+          completedAt:
+            "2026-07-27T11:00:00.000Z",
+          runIdentity:
+            `github-check-run:${name}`,
+          outputIdentity:
+            `github-check-output:${name}`,
+        })),
+  };
+}
+
+test("builds ordered bounded CI evidence without raw run identities", () => {
+  const snapshot = createSnapshot();
+  const evidence =
+    buildCiExecutionEvidence(snapshot);
+  const serialized = JSON.stringify(evidence);
+
+  assert.deepEqual(
+    evidence.checks.map(({ name }) => name),
+    requiredPullRequestStatusChecks,
+  );
+  assert.equal(
+    serialized.includes(
+      snapshot.checks[0].runIdentity,
+    ),
+    false,
+  );
+  assert.equal(
+    serialized.includes(
+      snapshot.checks[0].outputIdentity,
+    ),
+    false,
+  );
+  assert.equal(
+    evidence.expiresAt,
+    "2026-07-28T11:30:00.000Z",
+  );
+  assert.equal(Object.isFrozen(evidence), true);
+  assert.equal(
+    inspectCiExecutionEvidence(
+      {
+        APP_DEPLOYED_COMMIT_SHA:
+          commitSha,
+        APP_RELEASE_ID: releaseId,
+        CI_EXECUTION_EVIDENCE_JSON:
+          serialized,
+      },
+      now,
+    ).status,
+    "configured",
+  );
+});
+
+test("refuses failed, duplicate, stale, or extended CI snapshots", () => {
+  const snapshot = createSnapshot();
+  const variants = [
+    {
+      ...snapshot,
+      checks: snapshot.checks.slice(1),
+    },
+    {
+      ...snapshot,
+      checks: snapshot.checks.map(
+        (check, index) =>
+          index === 0
+            ? {
+                ...check,
+                conclusion: "failure",
+              }
+            : check,
+      ),
+    },
+    {
+      ...snapshot,
+      checks: snapshot.checks.map(
+        (check, index) =>
+          index === 0
+            ? {
+                ...check,
+                completedAt:
+                  "2026-07-26T11:29:59.999Z",
+              }
+            : check,
+      ),
+    },
+    {
+      ...snapshot,
+      unexpected: true,
+    },
+  ];
+
+  for (const value of variants) {
+    assert.throws(
+      () => buildCiExecutionEvidence(value),
+      /CI_EXECUTION_SNAPSHOT_INVALID/,
+    );
+  }
+});
 
 test("accepts all nine successful pull request checks for the deployed release", () => {
   assert.deepEqual(
