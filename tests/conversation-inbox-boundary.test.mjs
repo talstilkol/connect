@@ -50,3 +50,40 @@ test("keeps thread list rendering behind the conversation list boundary", async 
     /export function hasActiveInboxFilters/,
   );
 });
+
+test("keeps message rendering behind the conversation message boundary", async () => {
+  const [inboxSource, messageViewSource] =
+    await Promise.all([
+      readSource(
+        "features/conversations/ConversationInbox.tsx",
+      ),
+      readSource(
+        "features/conversations/ConversationMessageView.tsx",
+      ),
+    ]);
+
+  assert.match(
+    inboxSource,
+    /<ConversationMessageView/,
+  );
+  assert.doesNotMatch(
+    inboxSource,
+    /className="conversation-stage"|className="message-stream"/,
+  );
+  assert.match(
+    messageViewSource,
+    /export function ConversationMessageView/,
+  );
+  assert.match(
+    messageViewSource,
+    /aria-label="תוכן השיחה"/,
+  );
+  assert.match(
+    messageViewSource,
+    /className="message-stream"/,
+  );
+  assert.match(
+    messageViewSource,
+    /changeSelectedAssignment|markSelectedRead|decideAiApproval/,
+  );
+});

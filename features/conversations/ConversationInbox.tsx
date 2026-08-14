@@ -38,11 +38,8 @@ import {
   canMarkConversationRead,
   conversationAssignmentLabels,
   conversationStatusLabels,
-  formatInboxTimestamp,
   hasActiveInboxFilters,
   inboxDirectoryFailureMessages,
-  messageBody,
-  messageStatusLabels,
   replaceInboxConversation,
 } from "./conversationPresentation.ts";
 import {
@@ -53,6 +50,9 @@ import {
 import {
   ConversationThreadList,
 } from "./ConversationThreadList.tsx";
+import {
+  ConversationMessageView,
+} from "./ConversationMessageView.tsx";
 
 type Feedback = {
   tone: "success" | "warning";
@@ -625,293 +625,23 @@ export function ConversationInbox({
         loadThread={loadThread}
       />
 
-      <section
-        className="conversation-stage"
-        aria-label="תוכן השיחה"
-      >
-        {selectedThread ? (
-          <>
-            <header className="conversation-stage-header">
-              <div>
-                <span className="card-kicker">
-                  שיחה מאובטחת
-                </span>
-                <h2>
-                  {
-                    selectedThread.conversation.contact
-                      .displayName
-                  }
-                </h2>
-                <p>
-                  {
-                    conversationStatusLabels[
-                      selectedThread.conversation.status
-                    ]
-                  }
-                  {" · "}
-                  {
-                    conversationAssignmentLabels[
-                      selectedThread.conversation
-                        .assignment
-                    ]
-                  }
-                </p>
-              </div>
-              <div className="conversation-stage-actions">
-                {canReply ? (
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    disabled={
-                      isBusy ||
-                      selectedThread.conversation
-                        .assignment === "other-user"
-                    }
-                    onClick={changeSelectedAssignment}
-                  >
-                    {pendingConversationKey ===
-                    selectedThread.conversation
-                      .conversationKey
-                      ? "מעדכן…"
-                      : selectedThread.conversation
-                            .assignment ===
-                          "current-user"
-                        ? "הסר שיוך שלי"
-                        : selectedThread.conversation
-                              .assignment ===
-                            "other-user"
-                          ? "משויכת לנציג אחר"
-                          : "שייך אליי"}
-                  </button>
-                ) : null}
-                {selectedThread.conversation
-                  .unreadCount > 0 ? (
-                  canReply ? (
-                    <button
-                      className="secondary-button"
-                      type="button"
-                      disabled={isBusy}
-                      onClick={markSelectedRead}
-                    >
-                      {pendingConversationKey ===
-                      selectedThread.conversation
-                        .conversationKey
-                        ? "מעדכן…"
-                        : "סימון כנקראה"}
-                    </button>
-                  ) : (
-                    <span className="status-pill warning">
-                      {
-                        selectedThread.conversation
-                          .unreadCount
-                      }{" "}
-                      לא נקראו
-                    </span>
-                  )
-                ) : (
-                  <span className="status-pill success">
-                    נקראה
-                  </span>
-                )}
-              </div>
-            </header>
-
-            {!canReply ? (
-              <div className="inline-notice warning">
-                <span aria-hidden="true">i</span>
-                <p>
-                  לתפקיד הנוכחי יש הרשאת צפייה בלבד.
-                </p>
-              </div>
-            ) : null}
-
-            {feedback ? (
-              <div
-                className={`inline-notice ${feedback.tone}`}
-                role="status"
-              >
-                <span aria-hidden="true">
-                  {feedback.tone === "success"
-                    ? "✓"
-                    : "!"}
-                </span>
-                <p>{feedback.message}</p>
-              </div>
-            ) : null}
-
-            {aiApprovalStatus !== "ready" ? (
-              <div className="inline-notice warning">
-                <span aria-hidden="true">!</span>
-                <p>
-                  רשימת אישורי ה־AI אינה זמינה כרגע.
-                  השיחות עצמן נשארות זמינות לצפייה.
-                </p>
-              </div>
-            ) : null}
-
-            {selectedAiApprovals.map(
-              (approval) => (
-                <article
-                  className="ai-approval-card"
-                  key={approval.outboxKey}
-                >
-                  <header>
-                    <div>
-                      <span className="card-kicker">
-                        AI · ממתין להחלטה
-                      </span>
-                      <h3>תשובה מוצעת</h3>
-                    </div>
-                    <span className="status-pill warning">
-                      אישור נציג
-                    </span>
-                  </header>
-                  <p>{approval.replyText}</p>
-                  <dl>
-                    <div>
-                      <dt>Grounding</dt>
-                      <dd>
-                        {Math.floor(
-                          approval.groundingScoreBasisPoints /
-                            100,
-                        )}
-                        %
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>מקורות מאושרים</dt>
-                      <dd>
-                        {
-                          approval.groundedSourceCount
-                        }
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>נוצרה</dt>
-                      <dd>
-                        {formatInboxTimestamp(
-                          approval.createdAt,
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
-                  <footer>
-                    <button
-                      className="primary-button"
-                      type="button"
-                      disabled={
-                        !canDecideAi || isBusy
-                      }
-                      onClick={() =>
-                        decideAiApproval(
-                          approval,
-                          "approve",
-                        )
-                      }
-                    >
-                      {pendingApprovalKey ===
-                      approval.outboxKey
-                        ? "שומר החלטה…"
-                        : "אישור התשובה"}
-                    </button>
-                    <button
-                      className="secondary-button danger-text-button"
-                      type="button"
-                      disabled={
-                        !canDecideAi || isBusy
-                      }
-                      onClick={() =>
-                        decideAiApproval(
-                          approval,
-                          "reject",
-                        )
-                      }
-                    >
-                      דחייה
-                    </button>
-                  </footer>
-                  {!canDecideAi ? (
-                    <small>
-                      לתפקיד הנוכחי יש הרשאת צפייה
-                      בלבד.
-                    </small>
-                  ) : null}
-                </article>
-              ),
-            )}
-
-            <div
-              className="message-stream"
-              aria-live="polite"
-              aria-busy={isBusy}
-            >
-              {selectedThread.messages.length === 0 ? (
-                <div className="conversation-thread-empty">
-                  <strong>אין הודעות בשיחה</strong>
-                  <p>
-                    ה־Conversation קיימת, אך לא הוחזרו
-                    הודעות מה־Repository.
-                  </p>
-                </div>
-              ) : (
-                selectedThread.messages.map((message) => (
-                  <article
-                    className={`message-bubble ${message.direction}`}
-                    key={message.messageKey}
-                  >
-                    <p>{messageBody(message)}</p>
-                    <footer>
-                      <time
-                        dateTime={message.occurredAt}
-                      >
-                        {formatInboxTimestamp(
-                          message.occurredAt,
-                        )}
-                      </time>
-                      <span>
-                        {
-                          messageStatusLabels[
-                            message.status
-                          ]
-                        }
-                      </span>
-                    </footer>
-                  </article>
-                ))
-              )}
-            </div>
-
-            <footer className="outbound-boundary">
-              <span aria-hidden="true">i</span>
-              <p>
-                צפייה, שיוך ואישור תשובות AI פעילים.
-                אישור שומר את התשובה למסירה עתידית
-                בלבד; שליחה נשארת חסומה עד חיבור
-                Adapter מאושר.
-              </p>
-            </footer>
-          </>
-        ) : (
-          <div className="conversation-stage-empty">
-            <div
-              className="empty-orbit"
-              aria-hidden="true"
-            >
-              <span>◌</span>
-            </div>
-            <h2>
-              {conversations.length === 0
-                ? "אין תוצאות"
-                : "בחרו שיחה"}
-            </h2>
-            <p>
-              {conversations.length === 0
-                ? "שנו את המסננים כדי להציג שיחות."
-                : "ההודעות ופרטי איש הקשר יוצגו כאן לאחר טעינה מאומתת מהשרת."}
-            </p>
-          </div>
-        )}
-      </section>
+      <ConversationMessageView
+        selectedThread={selectedThread}
+        conversations={conversations}
+        selectedAiApprovals={selectedAiApprovals}
+        canReply={canReply}
+        canDecideAi={canDecideAi}
+        aiApprovalStatus={aiApprovalStatus}
+        feedback={feedback}
+        isBusy={isBusy}
+        pendingConversationKey={pendingConversationKey}
+        pendingApprovalKey={pendingApprovalKey}
+        changeSelectedAssignment={
+          changeSelectedAssignment
+        }
+        markSelectedRead={markSelectedRead}
+        decideAiApproval={decideAiApproval}
+      />
 
       <aside className="contact-panel">
         <span className="panel-label">
