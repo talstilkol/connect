@@ -77,3 +77,35 @@ test("keeps inbox base and responsive rules inside one feature stylesheet", asyn
   assert.doesNotMatch(conversationSource, /\.panel-label\s*\{/);
   assert.match(globalSource, /\.panel-label\s*\{/);
 });
+
+test("keeps bot builder and canvas rules inside one feature stylesheet", async () => {
+  const [globalSource, botSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/bot/bot.css"),
+    ]);
+  const conversationImport = globalSource.indexOf(
+    '@import "../features/conversations/conversations.css";',
+  );
+  const botImport = globalSource.indexOf(
+    '@import "../features/bot/bot.css";',
+  );
+
+  assert.ok(botImport > conversationImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.bot-builder|\.bot-flow-editor|\.canvas-grid|\.flow-node/,
+  );
+  assert.match(botSource, /^\.bot-builder\s*\{/);
+  assert.match(botSource, /\.bot-flow-editor\s*\{/);
+  assert.match(botSource, /\.canvas-grid\s*\{/);
+  assert.match(botSource, /\.flow-node\s*\{/);
+  assert.match(
+    botSource,
+    /@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    botSource,
+    /\.ai-layout|\.report-toolbar|\.public-hero/,
+  );
+});
