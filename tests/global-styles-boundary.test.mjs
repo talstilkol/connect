@@ -46,3 +46,34 @@ test("keeps document foundations in their ordered stylesheet", async () => {
   assert.match(foundationSource, /\*\s*\{[\s\S]*box-sizing:\s*border-box/);
   assert.match(foundationSource, /body\s*\{[\s\S]*background:\s*var\(--canvas\)/);
 });
+
+test("keeps inbox base and responsive rules inside one feature stylesheet", async () => {
+  const [globalSource, conversationSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource(
+        "features/conversations/conversations.css",
+      ),
+    ]);
+  const foundationImport = globalSource.indexOf(
+    '@import "../styles/foundations.css";',
+  );
+  const conversationImport = globalSource.indexOf(
+    '@import "../features/conversations/conversations.css";',
+  );
+
+  assert.ok(conversationImport > foundationImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.inbox-shell|\.conversation-stage|\.message-bubble/,
+  );
+  assert.match(conversationSource, /^\.inbox-shell\s*\{/);
+  assert.match(conversationSource, /\.conversation-stage\s*\{/);
+  assert.match(conversationSource, /\.message-bubble\s*\{/);
+  assert.match(
+    conversationSource,
+    /@media \(max-width: 1100px\)[\s\S]*@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(conversationSource, /\.panel-label\s*\{/);
+  assert.match(globalSource, /\.panel-label\s*\{/);
+});

@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,200 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,201 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -122,9 +122,13 @@ Assignment ו־Composer.
 בסיסיים הועברו ל־`styles/foundations.css`. סדר ה־Imports משמר את סדר
 ה־Cascade המקורי ושתי בדיקות Boundary מקבעות אותו.
 
-2.7.2 `app/globals.css` ירד מ־7,890 ל־7,847 שורות, ללא אובדן כללים.
-הפיצול לפי Features נותר לביצוע במנות עם בדיקות Regression; אומדן:
-**10–18 שעות**.
+2.7.2 כללי Inbox, שיחות, אישורי AI ו־Composer, כולל Breakpoints של
+1,100, ‏820 ו־560 פיקסלים, הועברו ל־`features/conversations/conversations.css`.
+כלל `panel-label` המשותף נשאר בשכבה הגלובלית כדי לשמר Cascade.
+
+2.7.3 `app/globals.css` ירד מ־7,890 ל־7,176 שורות. הפיצול של יתר
+ה־Features נותר לביצוע במנות עם בדיקות Regression; אומדן:
+**8–14 שעות**.
 
 2.8 בדיקות עומס וכשל מקומיות נוספות.
 
@@ -142,7 +146,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **22–36 שעות**, שהם כ־**3–5 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **20–32 שעות**, שהם כ־**3–4 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
