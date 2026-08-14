@@ -82,3 +82,43 @@ test("keeps onboarding state and persistence behind its feature boundary", async
     /export function FeaturePage/,
   );
 });
+
+test("keeps Meta signup lifecycle and dialog behavior behind its feature boundary", async () => {
+  const [workspaceSource, metaPanelSource, guardrailSource] =
+    await Promise.all([
+      readSource(
+        "features/workspace/WorkspaceApp.tsx",
+      ),
+      readSource(
+        "features/workspace/MetaConnectionPanel.tsx",
+      ),
+      readSource(
+        "scripts/verify-interface-guardrails.mjs",
+      ),
+    ]);
+
+  assert.match(
+    workspaceSource,
+    /<MetaConnectionPanel/,
+  );
+  assert.doesNotMatch(
+    workspaceSource,
+    /useAccessibleDialog|completeMetaEmbeddedSignupAction|META_SIGNUP_FLOW_TIMEOUT_MS/,
+  );
+  assert.match(
+    metaPanelSource,
+    /export function MetaConnectionPanel/,
+  );
+  assert.match(
+    metaPanelSource,
+    /useAccessibleDialog\(onClose\)/,
+  );
+  assert.match(
+    metaPanelSource,
+    /role="dialog"[\s\S]{0,80}aria-modal="true"/,
+  );
+  assert.match(
+    guardrailSource,
+    /file: "features\/workspace\/MetaConnectionPanel\.tsx"/,
+  );
+});

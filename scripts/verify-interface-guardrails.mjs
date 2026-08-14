@@ -70,7 +70,7 @@ const checks = [
   },
   {
     code: "DIALOG_SEMANTICS_REQUIRED",
-    file: "features/workspace/WorkspaceApp.tsx",
+    file: "features/workspace/MetaConnectionPanel.tsx",
     pattern:
       /role="dialog"[^>]*aria-modal="true"[^>]*aria-labelledby=/,
   },

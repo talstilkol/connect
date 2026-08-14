@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,192 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,193 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -87,8 +87,13 @@ Whitespace נכשל סגור לפני Production Readiness או מחיקת Secre
 2.5.2 בדיקות Boundary מונעות החזרת לוגיקת Dashboard או Onboarding
 ל־`WorkspaceApp`.
 
-2.5.3 נותרו לפיצול: Meta connection panel ו־Shell/section composition.
-אומדן שנותר למשימה: **4–8 שעות**.
+2.5.3 `MetaConnectionPanel`, מחזור חיי Meta SDK, תיאום תוצאת Embedded
+Signup והתנהגות ה־Dialog הועברו לגבול Feature עצמאי. בדיקת ה־Dialog
+הנגישה מצביעה כעת על הקובץ החדש.
+
+2.5.4 `WorkspaceApp` ירד מ־1,732 ל־693 שורות ללא שינוי ב־Props או
+בהתנהגות העסקית. נותר פיצול Shell/section composition; אומדן:
+**2–4 שעות**.
 
 2.6 פיצול `ConversationInbox` ל־Thread list, ‏Message view,
 Assignment ו־Composer.
@@ -118,7 +123,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **34–56 שעות**, שהם כ־**5–8 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **32–52 שעות**, שהם כ־**4–7 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
