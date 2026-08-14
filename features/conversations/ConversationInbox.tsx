@@ -36,8 +36,10 @@ import type {
 } from "../../shared/domain/aiReplyApprovalView.ts";
 import {
   canMarkConversationRead,
+  conversationAssignmentLabels,
   conversationStatusLabels,
   formatInboxTimestamp,
+  hasActiveInboxFilters,
   inboxDirectoryFailureMessages,
   messageBody,
   messageStatusLabels,
@@ -48,6 +50,9 @@ import {
   useInboxPolling,
   type InboxRefreshState,
 } from "./useInboxPolling.ts";
+import {
+  ConversationThreadList,
+} from "./ConversationThreadList.tsx";
 
 type Feedback = {
   tone: "success" | "warning";
@@ -78,15 +83,6 @@ const actionFailureMessages: Record<
     "השיחה כבר משויכת לנציג אחר ולכן לא שונתה.",
   "server-error":
     "הפעולה נכשלה בלי לחשוף פרטי שרת.",
-};
-
-const assignmentLabels: Record<
-  InboxConversationView["assignment"],
-  string
-> = {
-  unassigned: "ללא שיוך",
-  "current-user": "משויכת אליי",
-  "other-user": "משויכת לנציג אחר",
 };
 
 const aiApprovalFailureMessages: Record<
@@ -124,16 +120,6 @@ function failureState(
       <strong>תיבת השיחות אינה זמינה</strong>
       <p>{inboxDirectoryFailureMessages[status]}</p>
     </section>
-  );
-}
-
-function hasActiveFilters(
-  filters: InboxFilters,
-): boolean {
-  return (
-    filters.searchTerm !== "" ||
-    filters.status !== "all" ||
-    filters.assignment !== "all"
   );
 }
 
@@ -586,7 +572,7 @@ export function ConversationInbox({
 
   if (
     conversations.length === 0 &&
-    !hasActiveFilters(filters)
+    !hasActiveInboxFilters(filters)
   ) {
     return (
       <section className="card inbox-state empty">
@@ -625,226 +611,19 @@ export function ConversationInbox({
 
   return (
     <div className="inbox-shell card">
-      <section
-        className="conversation-list"
-        aria-label="רשימת שיחות"
-      >
-        <header className="conversation-list-header">
-          <div>
-            <span className="card-kicker">
-              D1 source of truth
-            </span>
-            <h2>שיחות אחרונות</h2>
-          </div>
-          <span className="status-pill">
-            {conversations.length}
-          </span>
-        </header>
-
-        <form
-          className="inbox-filters"
-          onSubmit={submitFilters}
-        >
-          <label>
-            <span>חיפוש</span>
-            <input
-              type="search"
-              maxLength={80}
-              value={filterDraft.searchTerm}
-              placeholder="שם או מספר טלפון"
-              onChange={(event) =>
-                setFilterDraft((current) => ({
-                  ...current,
-                  searchTerm: event.target.value,
-                }))
-              }
-            />
-          </label>
-          <div className="inbox-filter-row">
-            <label>
-              <span>מצב</span>
-              <select
-                value={filterDraft.status}
-                onChange={(event) =>
-                  setFilterDraft((current) => ({
-                    ...current,
-                    status: event.target
-                      .value as InboxFilters["status"],
-                  }))
-                }
-              >
-                <option value="all">כל המצבים</option>
-                {Object.entries(
-                  conversationStatusLabels,
-                ).map(([value, label]) => (
-                  <option
-                    key={value}
-                    value={value}
-                  >
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>שיוך</span>
-              <select
-                value={filterDraft.assignment}
-                onChange={(event) =>
-                  setFilterDraft((current) => ({
-                    ...current,
-                    assignment: event.target
-                      .value as InboxFilters["assignment"],
-                  }))
-                }
-              >
-                <option value="all">כל השיחות</option>
-                <option value="unassigned">
-                  ללא שיוך
-                </option>
-                <option value="mine">שלי</option>
-              </select>
-            </label>
-          </div>
-          <div className="inbox-filter-actions">
-            <button
-              className="primary-button"
-              type="submit"
-              disabled={isBusy}
-            >
-              {refreshState === "refreshing"
-                ? "טוען…"
-                : "החל מסננים"}
-            </button>
-            <button
-              className="text-button"
-              type="button"
-              disabled={
-                isBusy ||
-                (!hasActiveFilters(filters) &&
-                  !hasActiveFilters(filterDraft))
-              }
-              onClick={resetFilters}
-            >
-              ניקוי
-            </button>
-          </div>
-          <small
-            className={`inbox-refresh-state ${refreshState}`}
-            aria-live="polite"
-          >
-            {refreshState === "refreshing"
-              ? "מרענן מהשרת…"
-              : refreshState === "stale"
-                ? "הרענון האחרון נכשל"
-                : "רענון מאובטח כל 15 שניות"}
-          </small>
-        </form>
-
-        <div className="conversation-records">
-          {conversations.length === 0 ? (
-            <div className="conversation-list-empty">
-              <strong>לא נמצאו שיחות</strong>
-              <p>
-                אפשר לשנות את החיפוש או לנקות את
-                המסננים.
-              </p>
-            </div>
-          ) : (
-            conversations.map((conversation) => {
-              const isSelected =
-                selectedConversation?.conversationKey ===
-                conversation.conversationKey;
-              const isLoading =
-                pendingConversationKey ===
-                conversation.conversationKey;
-
-              return (
-                <button
-                  type="button"
-                  className={`conversation-record ${
-                    isSelected ? "selected" : ""
-                  }`}
-                  key={conversation.conversationKey}
-                  aria-pressed={isSelected}
-                  disabled={isBusy}
-                  onClick={() =>
-                    loadThread(conversation)
-                  }
-                >
-                  <span
-                    className="conversation-avatar"
-                    aria-hidden="true"
-                  >
-                    {conversation.contact.displayName
-                      .slice(0, 1)
-                      .toUpperCase()}
-                  </span>
-                  <span className="conversation-record-copy">
-                    <span className="conversation-record-topline">
-                      <strong>
-                        {
-                          conversation.contact
-                            .displayName
-                        }
-                      </strong>
-                      <time
-                        dateTime={
-                          conversation.lastMessage
-                            ?.occurredAt
-                        }
-                      >
-                        {conversation.lastMessage
-                          ? formatInboxTimestamp(
-                              conversation.lastMessage
-                                .occurredAt,
-                            )
-                          : "ללא הודעות"}
-                      </time>
-                    </span>
-                    <span className="conversation-preview">
-                      {isLoading
-                        ? "טוען שיחה…"
-                        : conversation.lastMessage
-                          ? conversation.lastMessage
-                              .contentKind === "text"
-                            ? conversation.lastMessage
-                                .textContent
-                            : "הודעה ללא תוכן טקסט"
-                          : "אין תצוגה מקדימה"}
-                    </span>
-                    <span className="conversation-record-meta">
-                      <span className="conversation-record-labels">
-                        <small>
-                          {
-                            conversationStatusLabels[
-                              conversation.status
-                            ]
-                          }
-                        </small>
-                        <small>
-                          {
-                            assignmentLabels[
-                              conversation.assignment
-                            ]
-                          }
-                        </small>
-                      </span>
-                      {conversation.unreadCount > 0 ? (
-                        <b
-                          aria-label={`${conversation.unreadCount} הודעות שלא נקראו`}
-                        >
-                          {conversation.unreadCount}
-                        </b>
-                      ) : null}
-                    </span>
-                  </span>
-                </button>
-              );
-            })
-          )}
-        </div>
-      </section>
+      <ConversationThreadList
+        conversations={conversations}
+        selectedConversation={selectedConversation}
+        pendingConversationKey={pendingConversationKey}
+        filters={filters}
+        filterDraft={filterDraft}
+        refreshState={refreshState}
+        isBusy={isBusy}
+        setFilterDraft={setFilterDraft}
+        submitFilters={submitFilters}
+        resetFilters={resetFilters}
+        loadThread={loadThread}
+      />
 
       <section
         className="conversation-stage"
@@ -871,7 +650,7 @@ export function ConversationInbox({
                   }
                   {" · "}
                   {
-                    assignmentLabels[
+                    conversationAssignmentLabels[
                       selectedThread.conversation
                         .assignment
                     ]
@@ -1172,7 +951,7 @@ export function ConversationInbox({
                 <dt>שיוך</dt>
                 <dd>
                   {
-                    assignmentLabels[
+                    conversationAssignmentLabels[
                       selectedConversation.assignment
                     ]
                   }

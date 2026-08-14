@@ -2,6 +2,7 @@ import type {
   InboxConversationThreadView,
   InboxConversationView,
   InboxDirectoryStatus,
+  InboxFilters,
   InboxMessageView,
 } from "../../shared/domain/conversationView.ts";
 import type {
@@ -37,6 +38,25 @@ export const conversationStatusLabels: Record<
   waiting_for_contact: "ממתינה ללקוח",
   closed: "סגורה",
 };
+
+export const conversationAssignmentLabels: Record<
+  InboxConversationView["assignment"],
+  string
+> = {
+  unassigned: "ללא שיוך",
+  "current-user": "משויכת אליי",
+  "other-user": "משויכת לנציג אחר",
+};
+
+export function hasActiveInboxFilters(
+  filters: InboxFilters,
+): boolean {
+  return (
+    filters.searchTerm !== "" ||
+    filters.status !== "all" ||
+    filters.assignment !== "all"
+  );
+}
 
 export const messageStatusLabels: Record<
   InboxMessageView["status"],
