@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,173 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,181 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -42,12 +42,15 @@ Credentials, בדיקת עורך דין או זמני Review.
 ה־Checks שדורשים חוזי Governance ו־CI Evidence. הפעלה חיה תאומת דרך
 Pull Request לפני סימון Governance כמוכן.
 
-2.2 מחוללי Evidence ל־GitHub Governance ול־CI Execution.
+2.2 **הושלם מקומית:** מחוללי Evidence ל־GitHub Governance ול־CI
+Execution.
 
-2.2.1 תכולה: קריאה בלבד מ־GitHub, אימות Branch Protection ותשעת
-ה־Checks, קישור ל־Commit ול־Release ויצירת Evidence קצר־חיים.
+2.2.1 המחולל דורש `GITHUB_REPOSITORY` מפורש, קורא ארבעה Endpoints
+ב־`GET` בלבד, מאמת Branch Protection, ‏CODEOWNERS, ‏Secret Scanning,
+‏Push Protection ותשעת ה־Checks, וקושר את הפלט ל־Commit ול־Release.
 
-2.2.2 אומדן: **8–12 שעות**.
+2.2.2 הפלט תקף ל־24 שעות ואינו כולל Repository, ‏Branch, ‏URL, לוג
+או Run ID גלוי. הרצה חיה נשארת חסומה עד שההגנות יופעלו ב־GitHub.
 
 2.3 כלי Evidence ל־Cloudflare Environment Isolation ול־Deployment
 Provenance.
@@ -96,9 +99,9 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **60–94 שעות**, שהם כ־**8–12 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **52–82 שעות**, שהם כ־**7–11 ימי עבודה**.
 
-2.10.2 עם Review, תיקוני Regression ותיעוד: **9–14 ימי עבודה**.
+2.10.2 עם Review, תיקוני Regression ותיעוד: **8–13 ימי עבודה**.
 
 ## 3. עבודה שאינה מקומית בלבד
 

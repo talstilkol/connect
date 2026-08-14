@@ -197,6 +197,19 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 הוא שער Release נפרד, משום שהוא דורש ראיות Runtime שנוצרות רק
 לאחר פריסה. הפרדה זו מונעת מעגל תלות שאינו ניתן להשלמה.
 
+7.9 `npm run evidence:github` דורש `GITHUB_REPOSITORY` מפורש ו־Release
+Manifest הנגזר מ־Worktree נקי. הוא קורא ב־`GET` בלבד את Metadata
+ה־Repository, הגנת Branch ברירת המחדל, Metadata של `CODEOWNERS`
+ו־Check Runs הקשורים ל־Commit המדויק.
+
+7.10 המחולל דורש Status Checks במצב Strict, אכיפה גם למנהלים,
+Review מבעל קוד, ביטול אישורים ישנים, פתרון שיחות, חסימת Force Push
+ומחיקת Branch, ‏Secret Scanning ו־Push Protection. חוסר הרשאה או
+Control חסר נכשל סגור ואינו מפיק Evidence חלקי.
+
+7.11 הפלט נשמר ב־`.artifacts/source-control-governance-evidence.json`
+ואינו כולל שם Repository, ‏Branch, ‏URL או זהות בעלים גלויה.
+
 ## 8. Deployment Provenance Evidence
 
 8.1 `DEPLOYMENT_PROVENANCE_EVIDENCE_JSON` מקבל Evidence v1
@@ -234,6 +247,14 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 
 9.5 CI Execution Evidence אינו כולל לוגים, שמות Repository,
 כתובות Build או Credentials.
+
+9.6 אותו מחולל קורא את ה־Check Runs האחרונים עבור Commit ה־Release,
+דורש בדיוק ריצה מוצלחת ולא־עמומה לכל אחד מתשעת השמות, ומסרב לקבל
+Run כפול, ישן, חלקי או השייך ל־Commit אחר.
+
+9.7 הפלט נשמר ב־`.artifacts/ci-execution-evidence.json`. מזהי Run,
+Check Suite ו־App משמשים רק ליצירת Fingerprint עם הפרדת תחומים ואינם
+נשמרים בפלט הגלוי.
 
 ## 10. Team Invitation Browser Evidence
 

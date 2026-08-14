@@ -5,6 +5,7 @@ import {
 import test from "node:test";
 
 import {
+  buildSourceControlGovernanceEvidence,
   deriveSourceControlGovernanceEvidenceDigest,
   inspectSourceControlGovernanceEvidence,
   requiredPullRequestStatusChecks,
@@ -56,6 +57,103 @@ function createEvidence() {
       ),
   };
 }
+
+function createSnapshot() {
+  return {
+    verifiedAt:
+      "2026-07-27T11:00:00.000Z",
+    repositoryIdentity:
+      "repository-owner/repository-name",
+    defaultBranchIdentity:
+      "repository-owner/repository-name:main",
+    releaseCommitSha:
+      deployedCommitSha,
+    requiredReviewCount: 1,
+    requiredStatusChecks:
+      requiredPullRequestStatusChecks,
+    controls: {
+      branchProtection: true,
+      codeOwnerReview: true,
+      dismissStaleApprovals: true,
+      conversationResolution: true,
+      forcePushBlocked: true,
+      branchDeletionBlocked: true,
+      secretScanning: true,
+      pushProtection: true,
+    },
+  };
+}
+
+test("builds bounded governance evidence without repository identities", () => {
+  const snapshot = createSnapshot();
+  const evidence =
+    buildSourceControlGovernanceEvidence(
+      snapshot,
+    );
+  const serialized = JSON.stringify(evidence);
+
+  assert.equal(
+    serialized.includes(
+      snapshot.repositoryIdentity,
+    ),
+    false,
+  );
+  assert.equal(
+    serialized.includes(
+      snapshot.defaultBranchIdentity,
+    ),
+    false,
+  );
+  assert.equal(
+    evidence.expiresAt,
+    "2026-07-28T11:00:00.000Z",
+  );
+  assert.equal(Object.isFrozen(evidence), true);
+  assert.equal(
+    inspectSourceControlGovernanceEvidence(
+      {
+        APP_DEPLOYED_COMMIT_SHA:
+          deployedCommitSha,
+        SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON:
+          serialized,
+      },
+      now,
+    ).status,
+    "configured",
+  );
+});
+
+test("refuses to build governance evidence from incomplete controls or checks", () => {
+  const snapshot = createSnapshot();
+
+  for (const value of [
+    {
+      ...snapshot,
+      requiredStatusChecks:
+        snapshot.requiredStatusChecks.slice(1),
+    },
+    {
+      ...snapshot,
+      controls: {
+        ...snapshot.controls,
+        pushProtection: false,
+      },
+    },
+    {
+      ...snapshot,
+      repositoryIdentity:
+        snapshot.defaultBranchIdentity,
+    },
+  ]) {
+    assert.throws(
+      () =>
+        buildSourceControlGovernanceEvidence(
+          value,
+        ),
+      /SOURCE_CONTROL_GOVERNANCE_SNAPSHOT_INVALID/,
+    );
+  }
+});
 
 test("accepts protected source control linked to the deployed commit", () => {
   assert.deepEqual(
@@ -173,6 +271,15 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     deriveSourceControlGovernanceEvidenceDigest(
       future,
     );
+  const excessiveLifetime = {
+    ...evidence,
+    expiresAt:
+      "2026-07-28T11:00:00.001Z",
+  };
+  excessiveLifetime.evidenceDigest =
+    deriveSourceControlGovernanceEvidenceDigest(
+      excessiveLifetime,
+    );
 
   assert.equal(
     inspectSourceControlGovernanceEvidence(
@@ -189,6 +296,7 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
 
   for (const value of [
     future,
+    excessiveLifetime,
     {
       ...evidence,
       untrusted: true,
