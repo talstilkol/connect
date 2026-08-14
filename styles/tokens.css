@@ -1,0 +1,16 @@
+:root {
+  --ink: #152c2a;
+  --muted: #667873;
+  --line: #dde5e2;
+  --surface: #ffffff;
+  --canvas: #f4f6f3;
+  --nav: #123834;
+  --nav-soft: #1c4843;
+  --mint: #baf3d1;
+  --mint-strong: #64d995;
+  --coral: #f46f5e;
+  --coral-soft: #fff0ed;
+  --amber: #d89736;
+  --amber-soft: #fff8e8;
+  --shadow: 0 16px 50px rgba(32, 56, 52, 0.08);
+}
