@@ -109,3 +109,35 @@ test("keeps bot builder and canvas rules inside one feature stylesheet", async (
     /\.ai-layout|\.report-toolbar|\.public-hero/,
   );
 });
+
+test("keeps AI workspace and responsive rules inside one feature stylesheet", async () => {
+  const [globalSource, aiSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/ai/ai.css"),
+    ]);
+  const botImport = globalSource.indexOf(
+    '@import "../features/bot/bot.css";',
+  );
+  const aiImport = globalSource.indexOf(
+    '@import "../features/ai/ai.css";',
+  );
+
+  assert.ok(aiImport > botImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.ai-layout|\.ai-agent-workspace|\.knowledge-dropzone|\.ai-readiness-card/,
+  );
+  assert.match(aiSource, /^\.ai-layout\s*\{/);
+  assert.match(aiSource, /\.ai-agent-workspace\s*\{/);
+  assert.match(aiSource, /\.knowledge-dropzone\s*\{/);
+  assert.match(aiSource, /\.ai-readiness-card\s*\{/);
+  assert.match(
+    aiSource,
+    /@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    aiSource,
+    /\.reports-grid|\.billing-card|\.public-hero/,
+  );
+});

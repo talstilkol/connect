@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,202 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,203 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -130,9 +130,13 @@ Assignment ו־Composer.
 של 820 ו־560 פיקסלים, הועברו ל־`features/bot/bot.css`. בדיקת Boundary
 מוודאת שאין בקובץ כללי AI, ‏Reports או Public page.
 
-2.7.4 `app/globals.css` ירד מ־7,890 ל־6,636 שורות. הפיצול של יתר
+2.7.4 כללי AI Workspace, ‏Directory, ‏Editor, ‏Knowledge ו־Readiness,
+כולל Breakpoints של 820 ו־560 פיקסלים, הועברו ל־`features/ai/ai.css`.
+כלל ה־Responsive המשותף עם Reports פוצל בלי לשנות את ערכו.
+
+2.7.5 `app/globals.css` ירד מ־7,890 ל־6,151 שורות. הפיצול של יתר
 ה־Features נותר לביצוע במנות עם בדיקות Regression; אומדן:
-**6–10 שעות**.
+**4–8 שעות**.
 
 2.8 בדיקות עומס וכשל מקומיות נוספות.
 
@@ -150,7 +154,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **18–28 שעות**, שהם כ־**3–4 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **16–26 שעות**, שהם כ־**2–4 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
