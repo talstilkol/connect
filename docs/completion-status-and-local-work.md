@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,190 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,191 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -76,9 +76,15 @@ Whitespace נכשל סגור לפני Production Readiness או מחיקת Secre
 לפני ואחרי `gh attestation verify`, ולכן Digest תקין אינו יכול לאשר
 ערך Runtime אחר.
 
-2.5 פיצול `WorkspaceApp` לפי Feature ללא שינוי התנהגות עסקית.
+2.5 **בביצוע:** פיצול `WorkspaceApp` לפי Feature ללא שינוי התנהגות
+עסקית.
 
-2.5.1 אומדן: **8–12 שעות**.
+2.5.1 ה־Dashboard ו־Metric cards הועברו ל־`WorkspaceDashboard`, ועשרת
+שלבי ההקמה הועברו ל־Registry משותף וקפוא. בדיקת Boundary מונעת החזרה
+שלהם ל־`WorkspaceApp`.
+
+2.5.2 נותרו לפיצול: Onboarding, ‏Meta connection panel ו־Shell/section
+composition. אומדן שנותר למשימה: **6–10 שעות**.
 
 2.6 פיצול `ConversationInbox` ל־Thread list, ‏Message view,
 Assignment ו־Composer.
@@ -108,7 +114,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **38–60 שעות**, שהם כ־**5–8 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **36–58 שעות**, שהם כ־**5–8 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
