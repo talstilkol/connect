@@ -165,6 +165,7 @@ export function buildChangeLog(commits) {
 export function createCurrentChangeLog() {
   const history = git([
     "log",
+    "--no-merges",
     "--reverse",
     "--format=%H%x09%s",
   ]);
