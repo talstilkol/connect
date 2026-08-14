@@ -157,10 +157,10 @@ Fingerprint, מועד Rotation אחרון ומועד Rotation הבא. Fingerprin
 6.4 הגדרת המשאבים תושלם דרך ספק Hosting רק לאחר בחירת Repository
 Authority, אישור הסביבות והרשאה מפורשת לפריסה.
 
-6.5 `ENVIRONMENT_ISOLATION_EVIDENCE_JSON` מקבל Evidence v1 קצר־חיים
+6.5 `ENVIRONMENT_ISOLATION_EVIDENCE_JSON` מקבל Evidence v2 קצר־חיים
 שמופק מ־Inventory אמיתי של ספק התשתית.
 
-6.6 ה־Evidence מכיל רק 44 Fingerprints מסוג SHA-256: אחת לכל מחלקת
+6.6 ה־Evidence מכיל רק 52 Fingerprints מסוג SHA-256: אחת לכל מחלקת
 משאב בכל אחת מארבע הסביבות. הוא אינו מכיל Resource ID או Secret.
 
 6.7 Fingerprint משותף, סביבה חסרה, Data Boundary שגוי, Digest שונה,
@@ -168,6 +168,18 @@ Authority, אישור הסביבות והרשאה מפורשת לפריסה.
 
 6.8 עצם קיום החוזה אינו הוכחת בידוד. שער Production נשאר חסום עד
 להזרקת Evidence שמופק ממשאבים אמיתיים.
+
+6.9 `npm run evidence:cloudflare` דורש Token מסוג Read בלבד וארבעה
+שמות Worker שונים. הוא קורא את ה־Deployment הפעיל, Version bindings,
+Cron triggers ורשימת Queues דרך Endpoints מסוג `GET` בלבד.
+
+6.10 המחולל דורש Deployment יחיד המשרת 100% מהתעבורה, משאבי D1,
+R2, שלושה Queues ושלושה DLQs שונים בכל סביבה, שלושה Rate Limit
+namespaces, Secret binding set ו־Scheduler. Queue ההזמנות וה־DLQ שלו
+כלולים בחוזה v2 ואינם יכולים להיות משותפים עם סביבה אחרת.
+
+6.11 שמות Worker, ‏Resource IDs, ‏Queue names ושמות Secrets משמשים
+רק בזמן האימות. הפלט כולל Fingerprints בלבד ותוקפו 24 שעות.
 
 ## 7. Source Control Governance Evidence
 
@@ -223,6 +235,11 @@ Control חסר נכשל סגור ואינו מפיק Evidence חלקי.
 ו־`APP_DEPLOYMENT_ARTIFACT_DIGEST` חייבים להתאים בדיוק לראיה.
 
 8.4 הראיה כוללת Artifact Digest ו־Deployment Fingerprint נפרדים.
+
+8.5 מחולל Cloudflare מחשב את Artifact Digest מכל קובצי `dist`, דורש
+ש־Deployment annotation יקשר בדיוק את Release ID, ‏Commit SHA
+ו־Artifact Digest, ואז קושר אותם ל־Deployment ID, ‏Version ID
+ו־script ETag. חוסר התאמה נכשל סגור ואינו מפיק Evidence חלקי.
 היא אינה כוללת כתובת פריסה, מזהה ספק או Credentials.
 
 8.5 Evidence חסר, פג תוקף, ארוך מ־24 שעות, שאינו עבור Production,

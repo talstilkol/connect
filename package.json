@@ -35,6 +35,7 @@
     "evidence:team-invitation-browser": "node scripts/create-team-invitation-browser-evidence.mjs",
     "evidence:dependency-audit": "node scripts/create-dependency-audit-evidence.mjs",
     "evidence:github": "node scripts/create-github-evidence.mjs",
+    "evidence:cloudflare": "node scripts/create-cloudflare-evidence.mjs",
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit"

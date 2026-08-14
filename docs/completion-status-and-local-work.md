@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,181 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,188 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -52,13 +52,17 @@ Execution.
 2.2.2 הפלט תקף ל־24 שעות ואינו כולל Repository, ‏Branch, ‏URL, לוג
 או Run ID גלוי. הרצה חיה נשארת חסומה עד שההגנות יופעלו ב־GitHub.
 
-2.3 כלי Evidence ל־Cloudflare Environment Isolation ול־Deployment
-Provenance.
+2.3 **הושלם מקומית:** כלי Evidence ל־Cloudflare Environment
+Isolation ול־Deployment Provenance.
 
-2.3.1 תכולה: אימות שמשאבי D1, ‏R2, ‏Queues, ‏DLQ, ‏Rate Limits
-ו־Secrets אינם משותפים בין סביבות; קישור Artifact לפריסה.
+2.3.1 המחולל קורא ב־`GET` בלבד Deployments, ‏Version bindings,
+Schedules ו־Queues, ומאמת שמשאבי D1, ‏R2, שלושה Queues ושלושה DLQs,
+Rate Limits, ‏Secrets ו־Scheduler אינם משותפים בין ארבע הסביבות.
 
-2.3.2 אומדן מקומי: **10–16 שעות**. אימות חי דורש חשבון Cloudflare.
+2.3.2 חוזה Environment Isolation שודרג ל־v2 עם 52 Fingerprints
+ותפוגה של 24 שעות. Deployment Provenance נקשר ל־Release, ‏Commit,
+Artifact, ‏Deployment, ‏Version ו־script ETag. אימות חי עדיין דורש
+חשבון Cloudflare, ארבע פריסות מבודדות ו־Token לקריאה בלבד.
 
 2.4 קישור Browser Evidence החתום ל־JSON המדויק של Runtime.
 
@@ -99,9 +103,9 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **52–82 שעות**, שהם כ־**7–11 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **42–66 שעות**, שהם כ־**6–9 ימי עבודה**.
 
-2.10.2 עם Review, תיקוני Regression ותיעוד: **8–13 ימי עבודה**.
+2.10.2 עם Review, תיקוני Regression ותיעוד: **7–11 ימי עבודה**.
 
 ## 3. עבודה שאינה מקומית בלבד
 

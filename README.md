@@ -80,7 +80,7 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1181/1181 בדיקות, 30 Migrations,
+31. Local Release Gate עובר עם 1188/1188 בדיקות, 30 Migrations,
    ‏385 קובצי Source, ‏19 Client dependency graphs, ‏723 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
@@ -102,6 +102,9 @@
 38. `npm run evidence:github` קורא ארבעה Endpoints של GitHub במצב
    Read-only, דורש Repository מפורש ו־Release נקי, ומפיק Governance
    ו־CI Evidence בני 24 שעות ללא שמות Repository, ‏Branch או Run.
+   `npm run evidence:cloudflare` קורא רק Endpoints מסוג `GET`, מאמת
+   52 משאבים מבודדים ופריסה יחידה המקושרת ל־Release ול־Artifact,
+   ומפיק Evidence בני 24 שעות ללא מזהי משאבי Cloudflare גלויים.
 35. D1 Remote Proof Adapter שולח רק את שתי שאילתות ה־SELECT
    הקנוניות ל־Cloudflare API endpoint קבוע ומחייב D1 Read token.
 36. תגובת D1 מתקבלת רק כאשר ה־API מדווח `changed_db = false`,

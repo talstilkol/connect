@@ -31,6 +31,19 @@ interface DeploymentProvenanceEvidence {
   evidenceDigest: string;
 }
 
+export interface DeploymentProvenanceSnapshot {
+  verifiedAt: string;
+  releaseManifest: {
+    releaseId: string;
+    commitSha: string;
+    treeSha: string;
+    packageLockSha256: string;
+    migrationSetSha256: string;
+  };
+  artifactDigest: string;
+  deploymentIdentity: string;
+}
+
 export interface DeploymentProvenanceEnvironment {
   APP_DEPLOYED_COMMIT_SHA?: string;
   APP_RELEASE_ID?: string;
@@ -171,6 +184,162 @@ export function deriveDeploymentProvenanceEvidenceDigest(
   return `deployment_provenance_evidence_v1_${sha256(
     canonicalEvidenceIdentity(evidence),
   )}`;
+}
+
+export function buildDeploymentProvenanceEvidence(
+  rawSnapshot: unknown,
+): Readonly<DeploymentProvenanceEvidence> {
+  if (
+    !isPlainObject(rawSnapshot) ||
+    !hasExactKeys(rawSnapshot, [
+      "verifiedAt",
+      "releaseManifest",
+      "artifactDigest",
+      "deploymentIdentity",
+    ]) ||
+    !isCanonicalTimestamp(
+      rawSnapshot.verifiedAt,
+    ) ||
+    !isPlainObject(
+      rawSnapshot.releaseManifest,
+    ) ||
+    !hasExactKeys(
+      rawSnapshot.releaseManifest,
+      [
+        "releaseId",
+        "commitSha",
+        "treeSha",
+        "packageLockSha256",
+        "migrationSetSha256",
+      ],
+    ) ||
+    typeof rawSnapshot.releaseManifest
+      .releaseId !== "string" ||
+    !releaseIdPattern.test(
+      rawSnapshot.releaseManifest
+        .releaseId,
+    ) ||
+    typeof rawSnapshot.releaseManifest
+      .commitSha !== "string" ||
+    !gitObjectPattern.test(
+      rawSnapshot.releaseManifest
+        .commitSha,
+    ) ||
+    typeof rawSnapshot.releaseManifest
+      .treeSha !== "string" ||
+    !gitObjectPattern.test(
+      rawSnapshot.releaseManifest.treeSha,
+    ) ||
+    typeof rawSnapshot.releaseManifest
+      .packageLockSha256 !== "string" ||
+    !sha256Pattern.test(
+      rawSnapshot.releaseManifest
+        .packageLockSha256,
+    ) ||
+    typeof rawSnapshot.releaseManifest
+      .migrationSetSha256 !== "string" ||
+    !sha256Pattern.test(
+      rawSnapshot.releaseManifest
+        .migrationSetSha256,
+    ) ||
+    typeof rawSnapshot.artifactDigest !==
+      "string" ||
+    !fingerprintPattern.test(
+      rawSnapshot.artifactDigest,
+    ) ||
+    typeof rawSnapshot.deploymentIdentity !==
+      "string" ||
+    rawSnapshot.deploymentIdentity.length < 1 ||
+    rawSnapshot.deploymentIdentity.length >
+      4_096 ||
+    /[\0\r\n]/.test(
+      rawSnapshot.deploymentIdentity,
+    )
+  ) {
+    throw new Error(
+      "DEPLOYMENT_PROVENANCE_SNAPSHOT_INVALID",
+    );
+  }
+
+  const manifest = {
+    releaseId:
+      rawSnapshot.releaseManifest
+        .releaseId as string,
+    commitSha:
+      rawSnapshot.releaseManifest
+        .commitSha as string,
+    treeSha:
+      rawSnapshot.releaseManifest
+        .treeSha as string,
+    packageLockSha256:
+      rawSnapshot.releaseManifest
+        .packageLockSha256 as string,
+    migrationSetSha256:
+      rawSnapshot.releaseManifest
+        .migrationSetSha256 as string,
+  };
+  const releaseIdentity = {
+    schemaVersion: 1 as const,
+    commitSha: manifest.commitSha,
+    treeSha: manifest.treeSha,
+    packageLockSha256:
+      manifest.packageLockSha256,
+    migrationSetSha256:
+      manifest.migrationSetSha256,
+  };
+
+  if (
+    deriveReleaseId(releaseIdentity) !==
+      manifest.releaseId
+  ) {
+    throw new Error(
+      "DEPLOYMENT_PROVENANCE_SNAPSHOT_INVALID",
+    );
+  }
+
+  const verifiedAt =
+    rawSnapshot.verifiedAt;
+  const deploymentFingerprint =
+    `sha256:${sha256(
+      `cloudflare-deployment:${rawSnapshot.deploymentIdentity}`,
+    )}`;
+  const evidence = {
+    schemaVersion: 1 as const,
+    verifiedAt,
+    expiresAt: new Date(
+      Date.parse(verifiedAt) +
+        maximumEvidenceLifetimeMilliseconds,
+    ).toISOString(),
+    environment:
+      "production" as const,
+    releaseId: manifest.releaseId,
+    commitSha: manifest.commitSha,
+    treeSha: manifest.treeSha,
+    packageLockSha256:
+      manifest.packageLockSha256,
+    migrationSetSha256:
+      manifest.migrationSetSha256,
+    artifactDigest:
+      rawSnapshot.artifactDigest,
+    deploymentFingerprint,
+  };
+
+  if (
+    evidence.artifactDigest ===
+      evidence.deploymentFingerprint
+  ) {
+    throw new Error(
+      "DEPLOYMENT_PROVENANCE_SNAPSHOT_INVALID",
+    );
+  }
+
+  return Object.freeze({
+    ...evidence,
+    evidenceDigest:
+      deriveDeploymentProvenanceEvidenceDigest(
+        evidence,
+      ),
+  });
 }
 
 function parseEvidence(
