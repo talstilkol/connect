@@ -46,3 +46,39 @@ test("keeps dashboard behavior behind the workspace dashboard feature boundary",
     /export const workspaceSetupSteps = Object\.freeze\(\[/,
   );
 });
+
+test("keeps onboarding state and persistence behind its feature boundary", async () => {
+  const [workspaceSource, onboardingSource, featurePageSource] =
+    await Promise.all([
+      readSource(
+        "features/workspace/WorkspaceApp.tsx",
+      ),
+      readSource(
+        "features/workspace/WorkspaceOnboarding.tsx",
+      ),
+      readSource(
+        "features/workspace/WorkspaceFeaturePage.tsx",
+      ),
+    ]);
+
+  assert.match(
+    workspaceSource,
+    /<WorkspaceOnboarding/,
+  );
+  assert.doesNotMatch(
+    workspaceSource,
+    /function Onboarding\b|saveBusinessProfileAction|inspectBusinessProfileCompleteness/,
+  );
+  assert.match(
+    onboardingSource,
+    /export function WorkspaceOnboarding/,
+  );
+  assert.match(
+    onboardingSource,
+    /saveBusinessProfileAction\(draft\)/,
+  );
+  assert.match(
+    featurePageSource,
+    /export function FeaturePage/,
+  );
+});

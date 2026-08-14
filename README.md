@@ -80,7 +80,7 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1191/1191 בדיקות, 30 Migrations,
+31. Local Release Gate עובר עם 1192/1192 בדיקות, 30 Migrations,
    ‏385 קובצי Source, ‏19 Client dependency graphs, ‏723 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
