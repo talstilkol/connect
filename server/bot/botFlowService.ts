@@ -20,6 +20,7 @@ import {
 } from "./botFlowKey.ts";
 import {
   compileKeywordBotFlowComposerDraft,
+  compileKeywordSequenceBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
 
 const BOT_FLOW_LIST_LIMIT = 100;
@@ -151,18 +152,33 @@ async function parseSaveDraftRequest(
   tenantId: number,
   input: unknown,
 ): Promise<SaveDraftRequest> {
-  const composerResult =
+  const sequenceComposerResult =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (sequenceComposerResult.success) {
+    return {
+      definition:
+        sequenceComposerResult.definition,
+      expectedFlowVersion:
+        sequenceComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const legacyComposerResult =
     await compileKeywordBotFlowComposerDraft(
       tenantId,
       input,
     );
 
-  if (composerResult.success) {
+  if (legacyComposerResult.success) {
     return {
       definition:
-        composerResult.definition,
+        legacyComposerResult.definition,
       expectedFlowVersion:
-        composerResult.expectedFlowVersion,
+        legacyComposerResult.expectedFlowVersion,
     };
   }
 
@@ -178,7 +194,11 @@ async function parseSaveDraftRequest(
       ))
   ) {
     throw new BotFlowInputError([
-      ...composerResult.issues,
+      ...(sequenceComposerResult.issues.includes(
+        "invalid-input",
+      )
+        ? legacyComposerResult.issues
+        : sequenceComposerResult.issues),
     ]);
   }
 

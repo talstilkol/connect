@@ -380,6 +380,48 @@ test("accepts the bounded composer request and derives every graph key on the se
   );
 });
 
+test("accepts an ordered reply sequence without accepting browser block keys", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "מענה מדורג לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "contains",
+      replyTexts: [
+        "קיבלנו את פנייתך.",
+        "נציג יחזור אליך בהקדם.",
+        "אין צורך לשלוח הודעה נוספת.",
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  assert.equal(
+    repository.calls.saves[0]
+      .definition.blocks.length,
+    7,
+  );
+  assert.equal(
+    repository.calls.saves[0]
+      .definition.blocks.filter(
+        (block) => block.type === "text",
+      ).length,
+    3,
+  );
+  assert.ok(
+    repository.calls.saves[0]
+      .definition.blocks.every(
+        (block) =>
+          /^bot_block_v1_[0-9a-f]{64}$/.test(
+            block.blockKey,
+          ),
+      ),
+  );
+});
+
 test("derives the next version from stored state without accepting a browser ordinal", async () => {
   const first = await definitionFixture(1);
   const second = await definitionFixture(2);

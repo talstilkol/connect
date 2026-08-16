@@ -9,8 +9,17 @@ import type {
   BotFlowKeywordMatchMode,
 } from "../../shared/domain/botFlow";
 import {
-  readKeywordBotFlowComposerDraft,
+  readKeywordSequenceBotFlowComposerDraft,
 } from "../../shared/domain/botFlowComposer";
+import {
+  appendBotFlowReplyStep,
+  createBotFlowReplySteps,
+  moveBotFlowReplyStep,
+  readBotFlowReplyTexts,
+  removeBotFlowReplyStep,
+  updateBotFlowReplyStep,
+  type BotFlowReplyStepMoveDirection,
+} from "../../shared/domain/botFlowSequenceEditor";
 import type {
   BotFlowDetailsView,
   BotFlowDirectoryStatus,
@@ -25,6 +34,9 @@ import {
   publishBotFlowDraftAction,
   saveBotFlowDraftAction,
 } from "../../server/bot/botFlowActions";
+import {
+  BotFlowReplySequenceEditor,
+} from "./BotFlowReplySequenceEditor";
 
 const directoryStatusMessages: Record<
   Exclude<BotFlowDirectoryStatus, "ready">,
@@ -59,7 +71,7 @@ const actionStatusMessages: Record<
   "permission-denied":
     "אין הרשאה לבצע פעולה זו.",
   "validation-error":
-    "השרת דחה את מבנה התהליך. בדקו שם, מילות מפתח וטקסט תשובה.",
+    "השרת דחה את מבנה התהליך. בדקו שם, מילות מפתח והודעות תשובה.",
   "invalid-input":
     "הבקשה אינה תקינה.",
   "not-found":
@@ -139,7 +151,7 @@ export function BotFlowBuilder({
     details?.versions[0] ??
     null;
   const initialComposerDraft = initialVersion
-    ? readKeywordBotFlowComposerDraft(
+    ? readKeywordSequenceBotFlowComposerDraft(
         initialVersion.definition,
       )
     : null;
@@ -156,8 +168,10 @@ export function BotFlowBuilder({
       initialComposerDraft?.matchMode ??
         "exact",
     );
-  const [replyText, setReplyText] = useState(
-    initialComposerDraft?.replyText ?? "",
+  const [replySteps, setReplySteps] = useState(
+    createBotFlowReplySteps(
+      initialComposerDraft?.replyTexts ?? [],
+    ),
   );
   const [unsupportedDefinition, setUnsupportedDefinition] =
     useState(
@@ -168,6 +182,8 @@ export function BotFlowBuilder({
     tone: "success" | "warning" | "danger";
     message: string;
   } | null>(null);
+  const [editorAnnouncement, setEditorAnnouncement] =
+    useState("");
   const [isLoading, startLoading] =
     useTransition();
   const [isSaving, startSaving] =
@@ -176,6 +192,9 @@ export function BotFlowBuilder({
     useTransition();
   const currentVersion = latestVersion(details);
   const keywords = splitKeywords(keywordsText);
+  const replyTexts = readBotFlowReplyTexts(
+    replySteps,
+  );
   const canWrite =
     initialStatus === "ready" &&
     initialDirectory.canWrite;
@@ -184,7 +203,9 @@ export function BotFlowBuilder({
     !unsupportedDefinition &&
     name.trim().length > 0 &&
     keywords.length > 0 &&
-    replyText.trim().length > 0 &&
+    replyTexts.every(
+      (replyText) => replyText.trim().length > 0,
+    ) &&
     !isSaving &&
     !isPublishing;
   const canPublish =
@@ -206,7 +227,7 @@ export function BotFlowBuilder({
       nextDetails,
     );
     const draft = nextVersion
-      ? readKeywordBotFlowComposerDraft(
+      ? readKeywordSequenceBotFlowComposerDraft(
           nextVersion.definition,
         )
       : null;
@@ -217,9 +238,14 @@ export function BotFlowBuilder({
       draft?.keywords.join("\n") ?? "",
     );
     setMatchMode(draft?.matchMode ?? "exact");
-    setReplyText(draft?.replyText ?? "");
+    setReplySteps(
+      createBotFlowReplySteps(
+        draft?.replyTexts ?? [],
+      ),
+    );
     setUnsupportedDefinition(!draft);
     setDirty(false);
+    setEditorAnnouncement("");
   };
 
   const beginNewFlow = () => {
@@ -227,10 +253,79 @@ export function BotFlowBuilder({
     setName("");
     setKeywordsText("");
     setMatchMode("exact");
-    setReplyText("");
+    setReplySteps(createBotFlowReplySteps([]));
     setUnsupportedDefinition(false);
     setDirty(false);
     setNotice(null);
+    setEditorAnnouncement("");
+  };
+
+  const changeReplyText = (
+    draftStepKey: string,
+    text: string,
+  ) => {
+    setReplySteps((current) =>
+      updateBotFlowReplyStep(
+        current,
+        draftStepKey,
+        text,
+      ),
+    );
+    markChanged();
+  };
+
+  const moveReplyStep = (
+    draftStepKey: string,
+    direction: BotFlowReplyStepMoveDirection,
+  ) => {
+    const currentIndex = replySteps.findIndex(
+      (step) => step.draftStepKey === draftStepKey,
+    );
+    const nextPosition =
+      direction === "up"
+        ? currentIndex
+        : currentIndex + 2;
+
+    setReplySteps((current) =>
+      moveBotFlowReplyStep(
+        current,
+        draftStepKey,
+        direction,
+      ),
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `הודעת הטקסט הועברה למיקום ${nextPosition}.`,
+    );
+  };
+
+  const removeReplyStep = (
+    draftStepKey: string,
+  ) => {
+    const currentIndex = replySteps.findIndex(
+      (step) => step.draftStepKey === draftStepKey,
+    );
+
+    setReplySteps((current) =>
+      removeBotFlowReplyStep(
+        current,
+        draftStepKey,
+      ),
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `הודעת הטקסט במיקום ${currentIndex + 1} נמחקה.`,
+    );
+  };
+
+  const addReplyStep = () => {
+    setReplySteps((current) =>
+      appendBotFlowReplyStep(current),
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `נוספה הודעת טקסט במיקום ${replySteps.length + 1}.`,
+    );
   };
 
   const loadFlow = (botFlowKey: string) => {
@@ -290,7 +385,7 @@ export function BotFlowBuilder({
           name,
           keywords,
           matchMode,
-          replyText,
+          replyTexts,
           expectedFlowVersion:
             details?.flow.version ?? null,
         });
@@ -513,7 +608,7 @@ export function BotFlowBuilder({
       >
         <aside className="card bot-flow-editor">
           <span className="card-kicker">
-            הגדרת מסלול MVP
+            הגדרת מסלול טקסט מדורג
           </span>
           <h2>
             {details
@@ -522,15 +617,15 @@ export function BotFlowBuilder({
           </h2>
           <p>
             הודעה נכנסת נבדקת מול מילות
-            המפתח. התאמה שולחת תשובה; אי־התאמה
-            מעבירה לנציג.
+            המפתח. התאמה שולחת את הודעות הטקסט
+            לפי הסדר; אי־התאמה מעבירה לנציג.
           </p>
 
           {unsupportedDefinition ? (
             <div className="inline-notice warning">
-              הגרסה נבנתה במבנה מתקדם שאינו
-              ניתן לעריכה במסלול ה־MVP. הנתונים
-              נשארו שמורים ללא שינוי.
+              הגרסה כוללת Buttons, תנאים או מבנה
+              מתקדם שעדיין אינו ניתן לעריכה בעורך
+              הרצף. הנתונים נשארו שמורים ללא שינוי.
             </div>
           ) : (
             <div className="bot-flow-fields">
@@ -600,24 +695,24 @@ export function BotFlowBuilder({
                 </select>
               </label>
 
-              <label>
-                <span>תשובה במקרה התאמה</span>
-                <textarea
-                  rows={6}
-                  value={replyText}
-                  onChange={(event) => {
-                    setReplyText(
-                      event.target.value,
-                    );
-                    markChanged();
-                  }}
-                  disabled={!canWrite}
-                  maxLength={4096}
-                  required
-                />
-              </label>
+              <BotFlowReplySequenceEditor
+                steps={replySteps}
+                disabled={!canWrite}
+                onTextChange={changeReplyText}
+                onMove={moveReplyStep}
+                onRemove={removeReplyStep}
+                onAdd={addReplyStep}
+              />
             </div>
           )}
+
+          <p
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+          >
+            {editorAnnouncement}
+          </p>
 
           <div className="bot-flow-editor-actions">
             <button
@@ -695,18 +790,34 @@ export function BotFlowBuilder({
                 <span className="bot-flow-branch-label success">
                   יש התאמה
                 </span>
-                <div className="flow-node">
-                  <span className="node-icon">
-                    T
-                  </span>
-                  <div>
-                    <small>הודעת טקסט</small>
-                    <strong>
-                      {replyText.trim()
-                        ? "שליחת התשובה שהוגדרה"
-                        : "לא הוגדרה תשובה"}
-                    </strong>
-                  </div>
+                <div className="bot-flow-reply-chain">
+                  {replySteps.map((step, index) => (
+                    <div key={step.draftStepKey}>
+                      <div className="flow-node">
+                        <span className="node-icon">
+                          T
+                        </span>
+                        <div>
+                          <small>
+                            הודעת טקסט {index + 1}
+                          </small>
+                          <strong>
+                            {step.text.trim()
+                              ? "שליחת ההודעה שהוגדרה"
+                              : "לא הוגדר תוכן"}
+                          </strong>
+                        </div>
+                      </div>
+                      {index < replySteps.length - 1 ? (
+                        <span
+                          className="bot-flow-chain-arrow"
+                          aria-hidden="true"
+                        >
+                          ↓
+                        </span>
+                      ) : null}
+                    </div>
+                  ))}
                 </div>
                 <span
                   className="bot-flow-terminal"

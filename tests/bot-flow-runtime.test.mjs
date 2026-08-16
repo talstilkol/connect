@@ -5,6 +5,9 @@ import {
   BotFlowRuntimeError,
   executeBotFlowTurn,
 } from "../server/bot/botFlowRuntime.ts";
+import {
+  compileKeywordSequenceBotFlowComposerDraft,
+} from "../server/bot/botFlowComposer.ts";
 
 const blockKey = (character) =>
   `bot_block_v1_${character.repeat(64)}`;
@@ -57,6 +60,55 @@ test("routes an exact keyword through text to End deterministically", () => {
         {
           kind: "text",
           text: "נציג שירות יחזור אליך",
+        },
+      ],
+      terminalEffect: {
+        outcome: "end",
+        stopExecution: true,
+        conversationStatus: null,
+        assignmentAction: "none",
+      },
+    },
+  );
+});
+
+test("executes every compiled reply step once and in editor order", async () => {
+  const compiled =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      {
+        name: "עדכון מדורג ללקוח",
+        keywords: ["עדכון"],
+        matchMode: "exact",
+        replyTexts: [
+          "הבקשה התקבלה.",
+          "הצוות בודק את הפרטים.",
+          "נעדכן עם סיום הבדיקה.",
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  assert.deepEqual(
+    executeBotFlowTurn(compiled.definition, {
+      lastInboundText: "עדכון",
+      conversationStatus: "new",
+    }),
+    {
+      outcome: "completed",
+      replies: [
+        {
+          kind: "text",
+          text: "הבקשה התקבלה.",
+        },
+        {
+          kind: "text",
+          text: "הצוות בודק את הפרטים.",
+        },
+        {
+          kind: "text",
+          text: "נעדכן עם סיום הבדיקה.",
         },
       ],
       terminalEffect: {

@@ -7,6 +7,10 @@ import {
 } from "../../shared/validation/botFlowDefinition.ts";
 import type {
   SaveKeywordBotFlowComposerDraftInput,
+  SaveKeywordSequenceBotFlowComposerDraftInput,
+} from "../../shared/domain/botFlowComposer.ts";
+import {
+  KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
 } from "../../shared/domain/botFlowComposer.ts";
 import type {
   ValidatedBotFlowDefinition,
@@ -77,16 +81,36 @@ function isComposerInput(
   ]);
 }
 
-export async function compileKeywordBotFlowComposerDraft(
+function isSequenceComposerInput(
+  input: Record<string, unknown>,
+): input is Record<
+  keyof SaveKeywordSequenceBotFlowComposerDraftInput,
+  unknown
+> {
+  return hasExactKeys(input, [
+    "name",
+    "keywords",
+    "matchMode",
+    "replyTexts",
+    "expectedFlowVersion",
+  ]);
+}
+
+async function compileKeywordSequence(
   tenantId: number,
-  input: unknown,
+  input: Record<
+    keyof SaveKeywordSequenceBotFlowComposerDraftInput,
+    unknown
+  >,
 ): Promise<CompileKeywordBotFlowComposerResult> {
   if (
-    !isRecord(input) ||
-    !isComposerInput(input) ||
     !isExpectedFlowVersion(
       input.expectedFlowVersion,
-    )
+    ) ||
+    !Array.isArray(input.replyTexts) ||
+    input.replyTexts.length === 0 ||
+    input.replyTexts.length >
+      KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT
   ) {
     return {
       success: false,
@@ -107,20 +131,28 @@ export async function compileKeywordBotFlowComposerDraft(
     tenantId,
     name,
   );
-  const [
-    triggerKey,
-    keywordKey,
-    textKey,
-    endKey,
-    handoffKey,
-  ] = await Promise.all(
-    [1, 2, 3, 4, 5].map((ordinal) =>
-      deriveBotFlowBlockKey(
-        botFlowKey,
-        ordinal,
-      ),
+  const blockKeys = await Promise.all(
+    Array.from(
+      { length: input.replyTexts.length + 4 },
+      (_, index) =>
+        deriveBotFlowBlockKey(
+          botFlowKey,
+          index + 1,
+        ),
     ),
   );
+  const triggerKey = blockKeys[0];
+  const keywordKey = blockKeys[1];
+  const replyKeys = blockKeys.slice(
+    2,
+    2 + input.replyTexts.length,
+  );
+  const endKey = blockKeys[
+    2 + input.replyTexts.length
+  ];
+  const handoffKey = blockKeys[
+    3 + input.replyTexts.length
+  ];
   const definition = {
     name,
     entryBlockKey: triggerKey,
@@ -135,15 +167,16 @@ export async function compileKeywordBotFlowComposerDraft(
         type: "keyword",
         keywords: input.keywords,
         matchMode: input.matchMode,
-        matchedBlockKey: textKey,
+        matchedBlockKey: replyKeys[0],
         unmatchedBlockKey: handoffKey,
       },
-      {
-        blockKey: textKey,
+      ...input.replyTexts.map((text, index) => ({
+        blockKey: replyKeys[index],
         type: "text",
-        text: input.replyText,
-        nextBlockKey: endKey,
-      },
+        text,
+        nextBlockKey:
+          replyKeys[index + 1] ?? endKey,
+      })),
       {
         blockKey: endKey,
         type: "end",
@@ -168,4 +201,48 @@ export async function compileKeywordBotFlowComposerDraft(
     expectedFlowVersion:
       input.expectedFlowVersion,
   };
+}
+
+export async function compileKeywordSequenceBotFlowComposerDraft(
+  tenantId: number,
+  input: unknown,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  if (
+    !isRecord(input) ||
+    !isSequenceComposerInput(input)
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  return compileKeywordSequence(tenantId, input);
+}
+
+export async function compileKeywordBotFlowComposerDraft(
+  tenantId: number,
+  input: unknown,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  if (
+    !isRecord(input) ||
+    !isComposerInput(input) ||
+    !isExpectedFlowVersion(
+      input.expectedFlowVersion,
+    )
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  return compileKeywordSequence(tenantId, {
+    name: input.name,
+    keywords: input.keywords,
+    matchMode: input.matchMode,
+    replyTexts: [input.replyText],
+    expectedFlowVersion:
+      input.expectedFlowVersion,
+  });
 }

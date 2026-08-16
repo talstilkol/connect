@@ -89,8 +89,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1324/1324 בדיקות, 34 Migrations,
-   ‏418 קובצי Source, ‏27 Client dependency graphs, ‏798 קבצים
+31. Local Release Gate עובר עם 1336/1336 בדיקות, 34 Migrations,
+   ‏420 קובצי Source, ‏28 Client dependency graphs, ‏802 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -692,8 +692,15 @@
         ואינו עוקף Assignment Lock.
    157. מסך הבוט טוען Flows וגרסאות מ־D1 ומאפשר שמירת Draft ופרסום
         דרך Server Actions ו־Expected Version.
-   158. Composer השרת מרכיב מסלול MVP של Trigger, ‏Keyword, ‏Text,
-        ‏End ו־Handoff וגוזר את כל המפתחות ללא Tenant מהדפדפן.
+   158. Composer השרת מרכיב מסלול של Trigger, ‏Keyword, הודעת Text
+        אחת או רצף הודעות, ‏End ו־Handoff, וגוזר את כל המפתחות ללא
+        Tenant או Block Keys מהדפדפן. החוזה הישן של הודעה יחידה נשמר.
+   158.1 עורך React מאפשר להוסיף, למחוק ולשנות את סדר הודעות ה־Text
+         באמצעות כפתורים נגישים למקלדת. לאחר הוספה או מחיקה ה־Focus
+         חוזר לרצף, ושינויי מבנה מוכרזים ב־Live Region.
+   158.2 כל הודעה נשמרת כ־Text Block אמיתי; Runtime test מוכיח שהרצף
+         מבוצע פעם אחת ובאותו סדר. Buttons, ‏Conditions ו־Drag-and-drop
+         עדיין אינם מוצגים כעורך Graph מלא.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
    160. Inbound Webhook מפעיל Runtime לאחר אחסון ההודעה. Retry חוזר
@@ -719,6 +726,9 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
+10. עריכת Graph מלאה ל־Bot: ‏Buttons, ‏Conditions, ‏Handoff וחיבורי
+    Canvas עם Drag-and-drop. רצף Text ניתן כעת לעריכה מלאה במקלדת,
+    אך אינו משלים לבדו את SPEC-18 או SPEC-19.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 

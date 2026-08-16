@@ -15,10 +15,27 @@ export interface SaveKeywordBotFlowComposerDraftInput
   expectedFlowVersion: number | null;
 }
 
-export function readKeywordBotFlowComposerDraft(
+export const KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT = 96;
+
+export interface KeywordSequenceBotFlowComposerDraft {
+  name: string;
+  keywords: readonly string[];
+  matchMode: BotFlowKeywordMatchMode;
+  replyTexts: readonly string[];
+}
+
+export interface SaveKeywordSequenceBotFlowComposerDraftInput
+  extends KeywordSequenceBotFlowComposerDraft {
+  expectedFlowVersion: number | null;
+}
+
+export function readKeywordSequenceBotFlowComposerDraft(
   definition: ValidatedBotFlowDefinition,
-): KeywordBotFlowComposerDraft | null {
-  if (definition.blocks.length !== 5) {
+): KeywordSequenceBotFlowComposerDraft | null {
+  if (
+    definition.blocks.length < 5 ||
+    definition.blocks.length > 100
+  ) {
     return null;
   }
 
@@ -44,36 +61,57 @@ export function readKeywordBotFlowComposerDraft(
     return null;
   }
 
-  const matched = blocksByKey.get(
-    keyword.matchedBlockKey,
-  );
   const unmatched = blocksByKey.get(
     keyword.unmatchedBlockKey,
   );
 
   if (
-    matched?.type !== "text" ||
     unmatched?.type !== "handoff" ||
     unmatched.reason !== "no-match"
   ) {
     return null;
   }
 
-  const end = blocksByKey.get(
-    matched.nextBlockKey,
-  );
-
-  if (end?.type !== "end") {
-    return null;
-  }
-
   const expectedKeys = new Set([
     trigger.blockKey,
     keyword.blockKey,
-    matched.blockKey,
     unmatched.blockKey,
-    end.blockKey,
   ]);
+  const replyTexts: string[] = [];
+  let nextBlockKey = keyword.matchedBlockKey;
+
+  while (true) {
+    if (expectedKeys.has(nextBlockKey)) {
+      return null;
+    }
+
+    const block = blocksByKey.get(nextBlockKey);
+
+    if (block?.type === "text") {
+      expectedKeys.add(block.blockKey);
+      replyTexts.push(block.text);
+
+      if (
+        replyTexts.length >
+        KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT
+      ) {
+        return null;
+      }
+
+      nextBlockKey = block.nextBlockKey;
+      continue;
+    }
+
+    if (
+      block?.type !== "end" ||
+      replyTexts.length === 0
+    ) {
+      return null;
+    }
+
+    expectedKeys.add(block.blockKey);
+    break;
+  }
 
   if (
     definition.blocks.some(
@@ -87,6 +125,26 @@ export function readKeywordBotFlowComposerDraft(
     name: definition.name,
     keywords: [...keyword.keywords],
     matchMode: keyword.matchMode,
-    replyText: matched.text,
+    replyTexts,
+  };
+}
+
+export function readKeywordBotFlowComposerDraft(
+  definition: ValidatedBotFlowDefinition,
+): KeywordBotFlowComposerDraft | null {
+  const sequence =
+    readKeywordSequenceBotFlowComposerDraft(
+      definition,
+    );
+
+  if (!sequence || sequence.replyTexts.length !== 1) {
+    return null;
+  }
+
+  return {
+    name: sequence.name,
+    keywords: sequence.keywords,
+    matchMode: sequence.matchMode,
+    replyText: sequence.replyTexts[0],
   };
 }

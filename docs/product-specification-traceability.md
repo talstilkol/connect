@@ -50,8 +50,8 @@ Design מלא.
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
-| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime ו־MVP composer | Canvas אינטראקטיבי, Drag-and-drop ועריכת Graph מלאה |
-| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | Domain ו־Runtime תומכים בבלוקים; Composer מצומצם | עריכה חזותית מלאה ובדיקות E2E |
+| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime ועורך רצף Text עם הוספה, מחיקה ושינוי סדר מלא במקלדת | Canvas אינטראקטיבי, Drag-and-drop ועריכת Graph מלאה |
+| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | Domain ו־Runtime תומכים בכל הבלוקים; רצף Text נשמר כ־Graph אמיתי ו־Handoff קבוע נשמר בשרת | עריכת Buttons, Conditions ו־Handoff ב־UI ובדיקות E2E |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
@@ -81,8 +81,11 @@ Queue. נותר אימות המדיניות מול חשבון Meta חי.
 4.2.2 להוסיף Recurring Campaign domain רק לאחר החלטת Product על
 תדירות, אזור זמן, End condition, שינוי Template וביטול סדרה.
 
-4.2.3 להרחיב את Bot composer ל־Graph editor נגיש. Drag-and-drop
-אינו יכול להיות דרך הקלט היחידה; נדרש גם מסלול Keyboard מלא.
+4.2.3 הושלם Slice ראשון של Bot Graph editor נגיש: אפשר להוסיף,
+למחוק ולשנות סדר של הודעות Text באמצעות כפתורי מקלדת, והמנוע גוזר
+לכל מיקום Block Key דטרמיניסטי ומריץ את ההודעות לפי הסדר. נותרו
+עריכת Buttons, ‏Conditions ו־Handoff, חיבור Graph מלא ו־Drag-and-drop.
+גם בהמשך Drag-and-drop לא יהיה דרך הקלט היחידה.
 
 4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
 להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף
