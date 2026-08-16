@@ -107,6 +107,43 @@ test("keeps inbox base and responsive rules inside one feature stylesheet", asyn
   assert.match(globalSource, /\.panel-label\s*\{/);
 });
 
+test("keeps contact directory and consent rules inside one feature stylesheet", async () => {
+  const [globalSource, contactSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/contacts/directory.css"),
+    ]);
+  const conversationImport = globalSource.indexOf(
+    '@import "../features/conversations/conversations.css";',
+  );
+  const contactImport = globalSource.indexOf(
+    '@import "../features/contacts/directory.css";',
+  );
+  const botImport = globalSource.indexOf(
+    '@import "../features/bot/bot.css";',
+  );
+
+  assert.ok(contactImport > conversationImport);
+  assert.ok(botImport > contactImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.contact-directory|\.contact-management-card|\.contact-record-row|\.consent-editor-card/,
+  );
+  assert.match(contactSource, /^\.contact-directory\s*\{/);
+  assert.match(contactSource, /\.contact-group-create-grid/);
+  assert.match(contactSource, /\.contact-record-row\s*\{/);
+  assert.match(contactSource, /\.consent-editor-card\s*\{/);
+  assert.match(
+    contactSource,
+    /@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    contactSource,
+    /\.csv-schema-metrics|\.template-workspace|\.contact-panel|\.danger-text-button/,
+  );
+  assert.match(globalSource, /\.danger-text-button\s*\{/);
+});
+
 test("keeps bot builder and canvas rules inside one feature stylesheet", async () => {
   const [globalSource, botSource] =
     await Promise.all([

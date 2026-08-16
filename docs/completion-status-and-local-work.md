@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,207 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,208 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -150,8 +150,13 @@ Assignment ו־Composer.
 ו־`hero-badge`, שמשמשים גם Auth ו־Invitation, הועברו לשכבת
 `styles/brand.css` משותפת במקום ליצור תלות בין Features.
 
-2.7.8 `app/globals.css` ירד מ־7,890 ל־4,422 שורות. פיצול יתר
-ה־Features והשכבות המשותפות שנותרו מוערך ב־**1–2 שעות**.
+2.7.8 כללי Contact Directory, ‏Consent, ניהול קבוצות ורשומות,
+כולל Breakpoints של 820 ו־560 פיקסלים, הועברו
+ל־`features/contacts/directory.css`. כלל `danger-text-button` נשאר
+משותף משום שהוא משמש גם את Conversation Inbox.
+
+2.7.9 `app/globals.css` ירד מ־7,890 ל־4,107 שורות. פיצול Contact
+Import, ‏Templates ויתר השכבות המשותפות מוערך ב־**0.5–1.5 שעות**.
 
 2.8 בדיקות עומס וכשל מקומיות נוספות.
 
@@ -169,7 +174,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **12–20 שעות**, שהם כ־**2–3 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **11–19 שעות**, שהם כ־**2–3 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
