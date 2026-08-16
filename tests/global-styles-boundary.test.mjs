@@ -144,6 +144,44 @@ test("keeps contact directory and consent rules inside one feature stylesheet", 
   assert.match(globalSource, /\.danger-text-button\s*\{/);
 });
 
+test("keeps template editor, preview, and breakpoints inside one feature stylesheet", async () => {
+  const [globalSource, templateSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/templates/templates.css"),
+    ]);
+  const contactImport = globalSource.indexOf(
+    '@import "../features/contacts/directory.css";',
+  );
+  const templateImport = globalSource.indexOf(
+    '@import "../features/templates/templates.css";',
+  );
+  const botImport = globalSource.indexOf(
+    '@import "../features/bot/bot.css";',
+  );
+
+  assert.ok(templateImport > contactImport);
+  assert.ok(botImport > templateImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.template-workspace|\.template-form|\.quick-reply-editor|\.phone-preview/,
+  );
+  assert.match(templateSource, /^\.template-form-card h2,/);
+  assert.match(templateSource, /\.template-workspace\s*\{/);
+  assert.match(templateSource, /\.template-variable-examples\s*\{/);
+  assert.match(templateSource, /\.quick-reply-editor\s*\{/);
+  assert.match(templateSource, /\.phone-preview\s*\{/);
+  assert.match(
+    templateSource,
+    /@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    templateSource,
+    /\.mapping-grid|\.csv-schema-metrics|\.contact-quality-grid|\.campaign-form/,
+  );
+  assert.match(globalSource, /\.mapping-grid\s*\{/);
+});
+
 test("keeps bot builder and canvas rules inside one feature stylesheet", async () => {
   const [globalSource, botSource] =
     await Promise.all([
@@ -209,10 +247,11 @@ test("keeps AI workspace and responsive rules inside one feature stylesheet", as
 });
 
 test("keeps campaign composer and audience rules inside one feature stylesheet", async () => {
-  const [globalSource, campaignSource] =
+  const [globalSource, campaignSource, templateSource] =
     await Promise.all([
       readSource("app/globals.css"),
       readSource("features/campaigns/campaigns.css"),
+      readSource("features/templates/templates.css"),
     ]);
   const aiImport = globalSource.indexOf(
     '@import "../features/ai/ai.css";',
@@ -244,7 +283,7 @@ test("keeps campaign composer and audience rules inside one feature stylesheet",
     campaignSource,
     /\.template-directory-card|\.quick-reply-heading|\.reports-grid/,
   );
-  assert.match(globalSource, /\.template-form-row/);
+  assert.match(templateSource, /\.template-form-row/);
 });
 
 test("keeps report surfaces and breakpoints inside one feature stylesheet", async () => {
