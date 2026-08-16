@@ -4,11 +4,14 @@
 
 ## 1. אחוזי השלמה
 
-1.1 תוכנית הפיתוח המקומית: **100%**.
+1.1 תוכנית ה־Baseline המקומית המקורית: **100%**.
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,209 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,231 הבדיקות עוברים.
+
+1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
+המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -207,3 +210,29 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 3.6 במסלול המקומי אנחנו בשלב 7 מתוך 9. לסיום החלק הנוכחי נשאר
 תת־שלב אחד בלבד: Contact Import, ‏CSV, ‏Mapping והשכבות המשותפות.
 אחריו נשארים שני שלבים מלאים, 8 ו־9.
+
+## 4. פערים שנוספו לאחר אימות PDF המקור
+
+4.1 המסמך המקורי אומת ב־2026-08-16 לפי SHA-256 המתועד במטריצת
+העקיבות. נמצאו ארבעה פערים פונקציונליים שאינם חלק מסיום ה־Baseline:
+
+4.1.1 Excel/XLSX import: ‏6–10 שעות פיתוח מקומי.
+
+4.1.2 Recurring Campaign domain ו־Scheduler: ‏10–16 שעות לאחר
+החלטת Product על מדיניות recurrence.
+
+4.1.3 Flow Builder חזותי ונגיש עם Drag-and-drop ו־Keyboard parity:
+‏24–40 שעות.
+
+4.1.4 עריכת Package, ‏Quota ופרטי קשר ב־Admin: ‏6–10 שעות.
+
+4.2 מסלול Rate Limiting נמצא בשלב 3 מתוך 4. חוזה Admission מחובר
+לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
+Reservation key, שחרור לפני Submit ו־Fail-closed adapter. חיבור
+ה־D1 resolver בפועל ו־Webhook reconciliation מוערכים ב־8–14 שעות.
+Adapter חי ל־Meta נשאר זמן `unknown/unavailable` עד קבלת WABA,
+Credentials ו־Live capacity state.
+
+4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
+הוספת פערי ה־PDF וה־Rate Limiting הוא **66.5–109 שעות פיתוח נטו**,
+ללא המתנה לספקים וללא זמן Adapter חי שאינו ניתן לאומדן כעת.

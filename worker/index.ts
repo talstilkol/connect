@@ -37,6 +37,9 @@ import {
   createUnavailableCampaignDeliveryProcessor,
 } from "../server/campaigns/unavailableCampaignDeliveryProcessor.ts";
 import {
+  createUnavailableCampaignDeliveryAdmission,
+} from "../server/campaigns/unavailableCampaignDeliveryAdmission.ts";
+import {
   createMetaWebhookEventDispatcher,
 } from "../server/meta/metaWebhookEventDispatcher.ts";
 import {
@@ -238,6 +241,7 @@ const worker = {
       const consumer =
         createCampaignDeliveryBatchHandler(
           env,
+          createUnavailableCampaignDeliveryAdmission(),
           createUnavailableCampaignDeliveryProcessor(),
         );
 

@@ -418,9 +418,28 @@ review. המנוע עצמו אינו משנה Campaign state ואינו שולח
 אינו שומר מספר טלפון או Provider payload, ודוחה State שאין לו
 Reservation/Settlement proof תואם.
 
-14.7.5 זהו עדיין רכיב Persistence מבודד: אין Provider adapter חי,
-אין חיבור ל־Campaign consumer ואין WABA/Throughput tier מאומת.
-לפיכך אין לראות בו Rate limiter מלא או Production evidence.
+14.7.5 זהו עדיין רכיב Persistence ללא Provider adapter חי וללא
+WABA/Throughput tier מאומת. לפיכך אין לראות בו Rate limiter מלא או
+Production evidence.
+
+14.8 `CampaignDeliveryAdmissionController` מחובר כעת לפני Claim של
+נמען ב־Campaign Queue:
+
+14.8.1 תוצאה `reserved` בלבד מאפשרת מעבר מ־`queued` ל־`sending`
+וקריאה ל־Provider. מפתח ה־Reservation מועבר ל־Delivery processor.
+
+14.8.2 תוצאה `deferred` משאירה את הנמען `queued` ומבצעת Retry בלי
+קריאה ל־Provider. ‏Delay שאינו מספר שלם חיובי או גדול מ־86,400
+שניות נדחה סגור, בהתאם ל־[Cloudflare Queues JavaScript API](https://developers.cloudflare.com/queues/configuration/javascript-apis/).
+
+14.8.3 Skip, ‏Duplicate או כשל D1 לפני Submit משחררים את
+ה־Reservation כ־`cancelled-before-submit`. דחיית Provider מפורשת
+נרשמת כ־`provider-failed`; תוצאה חיצונית לא ידועה נשארת
+`sending` ללא Retry אוטומטי.
+
+14.8.4 ה־Worker עדיין מזריק Admission adapter מושבת שנכשל סגור.
+חיבור D1 החי דורש Resolver למפתחות האטומים, Portfolio capacity
+ומצב WABA מאומת; Webhook reconciliation עדיין לא הושלם.
 
 ## 15. אחריות ועדכון
 

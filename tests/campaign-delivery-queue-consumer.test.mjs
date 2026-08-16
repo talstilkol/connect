@@ -11,6 +11,10 @@ const firstDeliveryKey =
   `campaign_delivery_v1_${"b".repeat(64)}`;
 const secondDeliveryKey =
   `campaign_delivery_v1_${"c".repeat(64)}`;
+const firstReservationKey =
+  `whatsapp_rate_reservation_v1_${"1".repeat(64)}`;
+const secondReservationKey =
+  `whatsapp_rate_reservation_v1_${"2".repeat(64)}`;
 const now = "2026-07-26T10:00:00.000Z";
 
 function recipient(deliveryKey = firstDeliveryKey) {
@@ -135,6 +139,9 @@ function fixture(options = {}) {
       { outcome: "accepted" },
     ]),
   ];
+  const admissionResults = [
+    ...(options.admissionResults ?? []),
+  ];
   const consumer =
     createCampaignDeliveryQueueConsumer(
       {
@@ -233,6 +240,46 @@ function fixture(options = {}) {
       },
       {
         isConfigured() {
+          return options.admissionConfigured !== false;
+        },
+        async reserve(request) {
+          calls.push({
+            operation: "reserve",
+            deliveryKey: request.deliveryKey,
+            reservedAt: request.reservedAt,
+          });
+
+          if (options.admissionError) {
+            throw options.admissionError;
+          }
+
+          return admissionResults.shift() ?? {
+            outcome: "reserved",
+            reservationKey:
+              request.deliveryKey === firstDeliveryKey
+                ? firstReservationKey
+                : secondReservationKey,
+          };
+        },
+        async settle(
+          reservationKey,
+          outcome,
+          timestamp,
+        ) {
+          calls.push({
+            operation: "settle",
+            reservationKey,
+            outcome,
+            timestamp,
+          });
+
+          if (options.settlementError) {
+            throw options.settlementError;
+          }
+        },
+      },
+      {
+        isConfigured() {
           return options.configured !== false;
         },
         async process(prepared) {
@@ -240,6 +287,8 @@ function fixture(options = {}) {
             operation: "process",
             deliveryKey:
               prepared.recipient.deliveryKey,
+            reservationKey:
+              prepared.rateLimitReservationKey,
           });
 
           if (options.processorError) {
@@ -263,6 +312,7 @@ function emptyResult(overrides = {}) {
   return {
     accepted: 0,
     rejected: 0,
+    deferred: 0,
     skipped: 0,
     duplicates: 0,
     ambiguous: 0,
@@ -292,6 +342,104 @@ test("retries before D1 claim when the delivery processor is unavailable", async
     },
   ]);
   assert.deepEqual(testFixture.calls, []);
+});
+
+test("retries before D1 access when rate-limit admission is unavailable", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    admissionConfigured: false,
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 60 },
+    },
+  ]);
+  assert.deepEqual(testFixture.calls, []);
+});
+
+test("defers a rate-limited delivery before claiming or contacting Meta", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    admissionResults: [
+      {
+        outcome: "deferred",
+        errorCode: "WHATSAPP_PAIR_LIMITED",
+        retryAfterSeconds: 6,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ deferred: 1, retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 6 },
+    },
+  ]);
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "prepare" ||
+        call.operation === "process",
+    ),
+    false,
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "reserve" &&
+        call.reservedAt === now,
+    ),
+    true,
+  );
+});
+
+test("rejects an admission delay beyond the Cloudflare Queue limit", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    admissionResults: [
+      {
+        outcome: "deferred",
+        errorCode: "WHATSAPP_MARKETING_COOLDOWN",
+        retryAfterSeconds: 86_401,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 30 },
+    },
+  ]);
+  assert.equal(
+    testFixture.calls.some(
+      (call) => call.operation === "prepare",
+    ),
+    false,
+  );
 });
 
 test("acknowledges malformed, skipped, and duplicate jobs without Meta", async () => {
@@ -339,6 +487,14 @@ test("acknowledges malformed, skipped, and duplicate jobs without Meta", async (
       (call) => call.operation === "process",
     ),
     false,
+  );
+  assert.equal(
+    testFixture.calls.filter(
+      (call) =>
+        call.operation === "settle" &&
+        call.outcome === "cancelled-before-submit",
+    ).length,
+    2,
   );
 });
 
@@ -391,6 +547,25 @@ test("records explicit accepted and rejected provider outcomes", async () => {
     ),
     true,
   );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "process" &&
+        call.deliveryKey === firstDeliveryKey &&
+        call.reservationKey === firstReservationKey,
+    ),
+    true,
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "settle" &&
+        call.reservationKey ===
+          secondReservationKey &&
+        call.outcome === "provider-failed",
+    ),
+    true,
+  );
 });
 
 test("keeps an unknown external outcome in sending without automatic retry", async () => {
@@ -420,6 +595,12 @@ test("keeps an unknown external outcome in sending without automatic retry", asy
     ),
     true,
   );
+  assert.equal(
+    testFixture.calls.some(
+      (call) => call.operation === "settle",
+    ),
+    false,
+  );
 });
 
 test("retries a D1 failure before the delivery is claimed", async () => {
@@ -441,6 +622,14 @@ test("retries a D1 failure before the delivery is claimed", async () => {
       options: { delaySeconds: 30 },
     },
   ]);
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "settle" &&
+        call.outcome === "cancelled-before-submit",
+    ),
+    true,
+  );
 });
 
 test("retries a missing campaign before claiming the delivery", async () => {

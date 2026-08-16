@@ -11,6 +11,7 @@ export interface MetaWebhookQueueTelemetryCounts {
 export interface CampaignDeliveryQueueTelemetryCounts {
   accepted: number;
   rejected: number;
+  deferred: number;
   skipped: number;
   duplicates: number;
   ambiguous: number;
@@ -71,6 +72,7 @@ const META_COUNT_KEYS = [
 const CAMPAIGN_COUNT_KEYS = [
   "accepted",
   "rejected",
+  "deferred",
   "skipped",
   "duplicates",
   "ambiguous",

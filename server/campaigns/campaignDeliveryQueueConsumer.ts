@@ -5,6 +5,8 @@ import type {
   CampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
 import type {
+  CampaignDeliveryAdmissionController,
+  CampaignDeliveryAdmissionResult,
   CampaignDeliveryProcessor,
   CampaignDeliveryProcessorResult,
 } from "../../shared/domain/campaignDelivery.ts";
@@ -17,8 +19,12 @@ import {
 
 const UNAVAILABLE_RETRY_DELAY_SECONDS = 60;
 const STORAGE_RETRY_DELAY_SECONDS = 30;
+const MAXIMUM_QUEUE_RETRY_DELAY_SECONDS =
+  24 * 60 * 60;
 const AMBIGUOUS_ERROR_CODE =
   "DELIVERY_OUTCOME_UNKNOWN";
+const reservationKeyPattern =
+  /^whatsapp_rate_reservation_v1_[0-9a-f]{64}$/;
 
 export interface CampaignDeliveryQueueDelivery {
   readonly id: string;
@@ -39,6 +45,7 @@ export interface CampaignDeliveryQueueBatch {
 export interface CampaignDeliveryQueueConsumerResult {
   accepted: number;
   rejected: number;
+  deferred: number;
   skipped: number;
   duplicates: number;
   ambiguous: number;
@@ -98,9 +105,63 @@ function parseProcessorResult(
   return null;
 }
 
+function parseAdmissionResult(
+  value: CampaignDeliveryAdmissionResult,
+): CampaignDeliveryAdmissionResult | null {
+  if (
+    value &&
+    value.outcome === "reserved" &&
+    reservationKeyPattern.test(value.reservationKey)
+  ) {
+    return {
+      outcome: "reserved",
+      reservationKey: value.reservationKey,
+    };
+  }
+
+  if (
+    value &&
+    value.outcome === "deferred" &&
+    isErrorCode(value.errorCode) &&
+    Number.isSafeInteger(value.retryAfterSeconds) &&
+    value.retryAfterSeconds > 0 &&
+    value.retryAfterSeconds <=
+      MAXIMUM_QUEUE_RETRY_DELAY_SECONDS
+  ) {
+    return {
+      outcome: "deferred",
+      errorCode: value.errorCode,
+      retryAfterSeconds: value.retryAfterSeconds,
+    };
+  }
+
+  return null;
+}
+
+async function settleSafely(
+  admission: CampaignDeliveryAdmissionController,
+  reservationKey: string,
+  outcome:
+    | "provider-failed"
+    | "cancelled-before-submit",
+  settledAt: string,
+): Promise<void> {
+  try {
+    await admission.settle(
+      reservationKey,
+      outcome,
+      settledAt,
+    );
+  } catch {
+    // A leaked reservation expires fail-closed. It must
+    // never cause a duplicate provider submission.
+  }
+}
+
 export function createCampaignDeliveryQueueConsumer(
   dispatch: CampaignDispatchRepository,
   campaigns: Pick<CampaignRepository, "findByKey">,
+  admission: CampaignDeliveryAdmissionController,
   processor: CampaignDeliveryProcessor,
   clock: CampaignDeliveryConsumerClock,
 ): {
@@ -114,6 +175,7 @@ export function createCampaignDeliveryQueueConsumer(
       const result: CampaignDeliveryQueueConsumerResult = {
         accepted: 0,
         rejected: 0,
+        deferred: 0,
         skipped: 0,
         duplicates: 0,
         ambiguous: 0,
@@ -133,7 +195,10 @@ export function createCampaignDeliveryQueueConsumer(
           continue;
         }
 
-        if (!processor.isConfigured()) {
+        if (
+          !admission.isConfigured() ||
+          !processor.isConfigured()
+        ) {
           delivery.retry({
             delaySeconds:
               UNAVAILABLE_RETRY_DELAY_SECONDS,
@@ -179,13 +244,36 @@ export function createCampaignDeliveryQueueConsumer(
           continue;
         }
 
-        let prepared;
+        let reservationKey: string;
 
         try {
-          prepared = await dispatch.prepareDelivery(
-            message.deliveryKey,
-            now,
-          );
+          const admissionResult =
+            parseAdmissionResult(
+              await admission.reserve({
+                campaign,
+                deliveryKey: message.deliveryKey,
+                reservedAt: now,
+              }),
+            );
+
+          if (!admissionResult) {
+            throw new Error(
+              "campaign delivery admission result is invalid",
+            );
+          }
+
+          if (admissionResult.outcome === "deferred") {
+            delivery.retry({
+              delaySeconds:
+                admissionResult.retryAfterSeconds,
+            });
+            result.deferred += 1;
+            result.retried += 1;
+            continue;
+          }
+
+          reservationKey =
+            admissionResult.reservationKey;
         } catch {
           delivery.retry({
             delaySeconds:
@@ -195,13 +283,47 @@ export function createCampaignDeliveryQueueConsumer(
           continue;
         }
 
+        let prepared;
+
+        try {
+          prepared = await dispatch.prepareDelivery(
+            message.deliveryKey,
+            now,
+          );
+        } catch {
+          await settleSafely(
+            admission,
+            reservationKey,
+            "cancelled-before-submit",
+            now,
+          );
+          delivery.retry({
+            delaySeconds:
+              STORAGE_RETRY_DELAY_SECONDS,
+          });
+          result.retried += 1;
+          continue;
+        }
+
         if (prepared.outcome === "skipped") {
+          await settleSafely(
+            admission,
+            reservationKey,
+            "cancelled-before-submit",
+            now,
+          );
           delivery.ack();
           result.skipped += 1;
           continue;
         }
 
         if (prepared.outcome === "duplicate") {
+          await settleSafely(
+            admission,
+            reservationKey,
+            "cancelled-before-submit",
+            now,
+          );
           delivery.ack();
           result.duplicates += 1;
           continue;
@@ -213,6 +335,8 @@ export function createCampaignDeliveryQueueConsumer(
               await processor.process({
                 campaign,
                 recipient: prepared.recipient,
+                rateLimitReservationKey:
+                  reservationKey,
               }),
             );
 
@@ -237,6 +361,12 @@ export function createCampaignDeliveryQueueConsumer(
           await dispatch.markRejected(
             message.deliveryKey,
             processorResult.errorCode,
+            now,
+          );
+          await settleSafely(
+            admission,
+            reservationKey,
+            "provider-failed",
             now,
           );
           delivery.ack();

@@ -48,6 +48,10 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   );
   assert.match(
     workerSource,
+    /createUnavailableCampaignDeliveryAdmission/,
+  );
+  assert.match(
+    workerSource,
     /controller\.cron !== CAMPAIGN_SCHEDULER_CRON/,
   );
   assert.match(

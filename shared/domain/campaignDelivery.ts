@@ -36,6 +36,38 @@ export type CampaignDeliveryPreparation =
 export interface PreparedCampaignDelivery {
   campaign: PersistedCampaign;
   recipient: PersistedCampaignRecipient;
+  rateLimitReservationKey: string;
+}
+
+export interface CampaignDeliveryAdmissionRequest {
+  campaign: PersistedCampaign;
+  deliveryKey: string;
+  reservedAt: string;
+}
+
+export type CampaignDeliveryAdmissionResult =
+  | {
+      outcome: "reserved";
+      reservationKey: string;
+    }
+  | {
+      outcome: "deferred";
+      errorCode: string;
+      retryAfterSeconds: number;
+    };
+
+export interface CampaignDeliveryAdmissionController {
+  isConfigured(): boolean;
+  reserve(
+    delivery: CampaignDeliveryAdmissionRequest,
+  ): Promise<CampaignDeliveryAdmissionResult>;
+  settle(
+    reservationKey: string,
+    outcome:
+      | "provider-failed"
+      | "cancelled-before-submit",
+    settledAt: string,
+  ): Promise<void>;
 }
 
 export type CampaignDeliveryProcessorResult =

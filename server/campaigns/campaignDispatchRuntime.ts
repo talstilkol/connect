@@ -9,6 +9,7 @@ import {
   type DatabaseEnvironment,
 } from "../../db/d1.ts";
 import type {
+  CampaignDeliveryAdmissionController,
   CampaignDeliveryProcessor,
 } from "../../shared/domain/campaignDelivery.ts";
 import {
@@ -79,6 +80,7 @@ export function createCampaignScheduledHandler(
 
 export function createCampaignDeliveryBatchHandler(
   environment: CampaignDispatchEnvironment,
+  admission: CampaignDeliveryAdmissionController,
   processor: CampaignDeliveryProcessor,
 ): {
   handle(
@@ -91,6 +93,7 @@ export function createCampaignDeliveryBatchHandler(
     createCampaignDeliveryQueueConsumer(
       createCampaignDispatchRepository(database),
       createCampaignRepository(database),
+      admission,
       processor,
       runtimeClock(),
     ),

@@ -150,6 +150,20 @@ test("rejects oversized Meta and campaign batches before business access", async
         isConfigured() {
           return true;
         },
+        async reserve() {
+          businessCalls += 1;
+          throw new Error(
+            "must not process an oversized batch",
+          );
+        },
+        async settle() {
+          businessCalls += 1;
+        },
+      },
+      {
+        isConfigured() {
+          return true;
+        },
         async process() {
           businessCalls += 1;
           return { outcome: "accepted" };

@@ -212,6 +212,7 @@ test("records a failed campaign batch and preserves the original failure", async
   assert.deepEqual(events[0].counts, {
     accepted: 0,
     rejected: 0,
+    deferred: 0,
     skipped: 0,
     duplicates: 0,
     ambiguous: 0,

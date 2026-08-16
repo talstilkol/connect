@@ -7,8 +7,9 @@
 
 1. [תוכנית העבודה הצוותית](docs/team-operating-plan.md).
 2. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
-3. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
-4. [Release checklist](docs/release-checklist.md).
+3. [עקיבות מלאה לאפיון המוצר](docs/product-specification-traceability.md).
+4. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
+5. [Release checklist](docs/release-checklist.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
@@ -87,8 +88,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1228/1228 בדיקות, 31 Migrations,
-   ‏398 קובצי Source, ‏26 Client dependency graphs, ‏759 קבצים
+31. Local Release Gate עובר עם 1231/1231 בדיקות, 31 Migrations,
+   ‏399 קובצי Source, ‏26 Client dependency graphs, ‏761 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
