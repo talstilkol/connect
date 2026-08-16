@@ -24,8 +24,9 @@ supersedes: none
 
 ## 2. הבעיה שצריך לפתור
 
-2.1 קיים Repository פרטי פעיל בשם `talstilkol/connect` עם היסטוריית
-הפיתוח, הבדיקות ומסמכי ה־Evidence.
+2.1 קיים Repository פעיל בשם `talstilkol/connect` עם היסטוריית
+הפיתוח, הבדיקות ומסמכי ה־Evidence. בבדיקת Governance חיה מ־
+2026-08-16 הוא נמצא `public`, בניגוד לדרישה שיהיה `private`.
 
 2.2 הבעלות הנוכחית היא תחת חשבון אישי. מצב זה מתאים לעבודה של אדם
 אחד, אך אינו מגדיר בעלות חברה, התאוששות מנהלית או תפקידים צוותיים
@@ -78,6 +79,11 @@ Authority היחיד לקוד, Pull Requests, ‏Releases ו־Deployment.
 4.3 לא לבצע Transfer לפני שנבדקו תוכנית ה־Organization, הרשאות
 היעד, Branch/Ruleset protections, ‏Actions secrets, ‏Environments,
 Apps, ‏Webhooks ו־Packages.
+
+4.4 לפני Transfer יש לסגור את חשיפת ה־Visibility: להפוך את
+ה־Repository הקיים ל־`private`, לאמת שלא נשמר Secret בהיסטוריה
+ולסובב כל Credential שקיים ספק לגביו. שינוי ה־Visibility הוא פעולה
+חיצונית ואינו מאושר על ידי מסמך `proposed` זה בלבד.
 
 ## 5. מטריצת גישה מוצעת
 
@@ -143,3 +149,7 @@ Environments, ‏Apps, ‏Webhooks, ‏Deploy keys ו־Packages. הערכים
 
 8.4 המקורות נבדקו בתאריך `2026-08-16`. תוכנית GitHub, שם
 Organization ו־Governance evidence חיים: `unknown/unavailable`.
+
+8.5 [GitHub Governance live audit](../github-governance-live-audit.md)
+— Snapshot מתוארך של Visibility, ‏Branches, ‏Rulesets, ‏Workflows,
+PRs ו־Authentication.

@@ -7,13 +7,18 @@
 1.2 מעליו קיים Repository נוסף בתיקיית `connect`. המבנה המקונן
 מתועד ואסור להסיר אחד מהם לפני בחירת Repository Authority מפורשת.
 
-1.3 ה־Repository של `web` מחובר ל־Repository הפרטי
-`talstilkol/connect` ב־GitHub, ו־`main` הוא Branch ברירת המחדל.
+1.3 ה־Repository של `web` מחובר ל־`talstilkol/connect` ב־GitHub,
+ו־`main` הוא Branch ברירת המחדל. בבדיקת Governance חיה מ־
+2026-08-16 ה־Repository נמצא `public`, בניגוד לדרישה שיהיה `private`.
 
 1.4 שמונת שערי האיכות המקומיים ו־Dependency Audit מוגדרים כתשעה
-Pull Request Checks נפרדים. Branch Protection, ‏Review Rules,
-‏CODEOWNERS, ‏Secret Scanning ו־Push Protection עדיין אינם נחשבים
-פעילים עד לאימות מפורש מול הגדרות GitHub.
+Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארבעת הענפים
+נמצאו לא מוגנים, לא נמצאו Rulesets או `CODEOWNERS`, ולכן ה־Checks
+אינם Required. מצב Secret Scanning, ‏Push Protection, ‏2FA
+ו־Collaborators נשאר `unknown/unavailable` עד Authentication תקף.
+
+1.4.1 הראיות, ההיקף וסדר התיקון נמצאים ב־
+`docs/github-governance-live-audit.md`.
 
 1.5 לפי עדכון הצוות מ־2026-08-16, רועי הוא Account owner ו־Approver,
 ראשה היא Deployment owner ודוד הוא WhatsApp backend owner. בעלי
