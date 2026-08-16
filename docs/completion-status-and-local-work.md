@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,298 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,299 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -119,7 +119,7 @@ Assignment ו־Composer.
 2.6.4 ארבע בדיקות Boundary מונעות החזרת Markup הרשימה, ההודעות,
 השיוך או ה־Composer לקומפוננטות האב.
 
-2.7 **בביצוע:** פיצול `app/globals.css` לקובצי Feature ושכבת Tokens.
+2.7 **הושלם:** פיצול `app/globals.css` לקובצי Feature ושכבת Tokens.
 
 2.7.1 שכבת ה־Design Tokens הועברה ל־`styles/tokens.css`, וכללי מסמך
 בסיסיים הועברו ל־`styles/foundations.css`. סדר ה־Imports משמר את סדר
@@ -163,8 +163,11 @@ Assignment ו־Composer.
 קבוצות Selectors משותפות עם Mapping ו־CSV פוצלו בלי להעביר את כללי
 Contact Import לתוך Feature ה־Templates.
 
-2.7.10 `app/globals.css` ירד מ־7,890 ל־3,466 שורות. פיצול Contact
-Import ויתר השכבות המשותפות מוערך ב־**0.5–1 שעה**.
+2.7.10 כללי Contact Import, ‏CSV schema, ‏Mapping, ‏Preview ואיכות
+הקובץ, יחד עם Breakpoints של 820 ו־560 פיקסלים, הועברו ל־
+`features/contacts/import.css`. ‏`app/globals.css` ירד מ־7,890
+ל־3,140 שורות, ובדיקת Boundary מקבעת את סדר Contact Directory,
+Contact Import ו־Templates בלי להעביר את `inline-notice` המשותף.
 
 2.8 בדיקות עומס וכשל מקומיות נוספות.
 
@@ -182,9 +185,8 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 סכום האומדנים המפורטים הוא **12.5–19 שעות**: 0.5–1 שעה
-לסיום שלב 7, ‏8–12 שעות לשלב 8 ו־4–6 שעות לשלב 9. זהו תיקון חשבוני
-לאומדן הקודם.
+2.10.1 סכום האומדנים המפורטים הוא **12–18 שעות**: 8–12 שעות
+לשלב 8 ו־4–6 שעות לשלב 9.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 
@@ -207,9 +209,8 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 `docs/team-operating-plan.md`. הוא אינו כלול באומדן המקומי בסעיף
 2.10, משום שזמני Accounts, ספקים ואישורים הם `unknown/unavailable`.
 
-3.6 במסלול המקומי אנחנו בשלב 7 מתוך 9. לסיום החלק הנוכחי נשאר
-תת־שלב אחד בלבד: Contact Import, ‏CSV, ‏Mapping והשכבות המשותפות.
-אחריו נשארים שני שלבים מלאים, 8 ו־9.
+3.6 במסלול המקומי שלב 7 מתוך 9 הושלם. נשארים שני שלבים מלאים:
+שלב 8 לבדיקות עומס וכשל ושלב 9 ל־Release rehearsal ותיעוד מפעיל.
 
 ## 4. פערים שנוספו לאחר אימות PDF המקור
 
@@ -243,5 +244,5 @@ Settlement ונשען על `MetaMessageFailurePolicy` המשותף. הם עדי�
 `unknown/unavailable` עד חיבור החשבון המורשה.
 
 4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
-הוספת פערי ה־PDF וה־Rate Limiting הוא **66.5–109 שעות פיתוח נטו**,
+הוספת פערי ה־PDF וה־Rate Limiting הוא **66–108 שעות פיתוח נטו**,
 ללא המתנה לספקים וללא זמן Adapter חי שאינו ניתן לאומדן כעת.

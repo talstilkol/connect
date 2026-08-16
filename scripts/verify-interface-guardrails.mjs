@@ -48,7 +48,7 @@ const checks = [
   },
   {
     code: "RESPONSIVE_OVERFLOW_REQUIRED",
-    file: "app/globals.css",
+    file: "features/contacts/import.css",
     pattern: /overflow-x:\s*auto/,
   },
   {

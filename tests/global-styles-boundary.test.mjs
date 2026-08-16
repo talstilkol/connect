@@ -144,6 +144,49 @@ test("keeps contact directory and consent rules inside one feature stylesheet", 
   assert.match(globalSource, /\.danger-text-button\s*\{/);
 });
 
+test("keeps contact import, CSV, and mapping rules inside one feature stylesheet", async () => {
+  const [globalSource, importSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/contacts/import.css"),
+    ]);
+  const directoryImport = globalSource.indexOf(
+    '@import "../features/contacts/directory.css";',
+  );
+  const contactImport = globalSource.indexOf(
+    '@import "../features/contacts/import.css";',
+  );
+  const templateImport = globalSource.indexOf(
+    '@import "../features/templates/templates.css";',
+  );
+
+  assert.ok(contactImport > directoryImport);
+  assert.ok(templateImport > contactImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.contact-import-flow|\.mapping-grid|\.csv-schema-metrics|\.contact-quality-grid|\.table-scroll/,
+  );
+  assert.match(importSource, /^\.file-button\s*\{/);
+  assert.match(importSource, /\.contact-import-flow\s*\{/);
+  assert.match(importSource, /\.mapping-grid\s*\{/);
+  assert.match(importSource, /\.csv-schema-metrics\s*\{/);
+  assert.match(importSource, /\.contact-quality-grid\s*\{/);
+  assert.match(importSource, /\.table-scroll\s*\{/);
+  assert.match(
+    importSource,
+    /@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    importSource,
+    /\.contact-directory|\.template-workspace|\.campaign-form|\.business-profile-checks/,
+  );
+  assert.doesNotMatch(
+    importSource,
+    /^\.inline-notice\s*\{/m,
+  );
+  assert.match(globalSource, /\.inline-notice\s*\{/);
+});
+
 test("keeps template editor, preview, and breakpoints inside one feature stylesheet", async () => {
   const [globalSource, templateSource] =
     await Promise.all([
@@ -179,7 +222,6 @@ test("keeps template editor, preview, and breakpoints inside one feature stylesh
     templateSource,
     /\.mapping-grid|\.csv-schema-metrics|\.contact-quality-grid|\.campaign-form/,
   );
-  assert.match(globalSource, /\.mapping-grid\s*\{/);
 });
 
 test("keeps bot builder and canvas rules inside one feature stylesheet", async () => {
