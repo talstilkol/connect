@@ -40,11 +40,21 @@ export type WhatsappRateLimitReservationResult =
       outcome: "tenant-not-found";
     }
   | {
+      outcome: "reservation-retired";
+      settlement: WhatsappRateLimitSettlement;
+    }
+  | {
       outcome: "pair-limited";
       retryAt: string;
     }
   | {
       outcome: "recipient-in-flight";
+      retryAt: string;
+    }
+  | {
+      outcome: "provider-cooldown";
+      scope: WhatsappProviderCooldownScope;
+      providerErrorCode: WhatsappProviderCooldownErrorCode;
       retryAt: string;
     }
   | {
@@ -80,6 +90,50 @@ export type WhatsappRateLimitSettlementResult =
     }
   | {
       outcome: "settlement-precedes-reservation";
+    }
+  | {
+      outcome: "settlement-conflict";
+      existing: WhatsappRateLimitSettlement;
+    };
+
+export const whatsappProviderCooldownScopes = [
+  "sender",
+  "portfolio-recipient",
+  "pair",
+] as const;
+
+export type WhatsappProviderCooldownScope =
+  (typeof whatsappProviderCooldownScopes)[number];
+
+export const whatsappProviderCooldownErrorCodes = [
+  130429,
+  131049,
+  131056,
+] as const;
+
+export type WhatsappProviderCooldownErrorCode =
+  (typeof whatsappProviderCooldownErrorCodes)[number];
+
+export interface WhatsappProviderCooldown {
+  reservationKey: string;
+  scope: WhatsappProviderCooldownScope;
+  providerErrorCode: WhatsappProviderCooldownErrorCode;
+  observedAt: string;
+  blockedUntil: string;
+}
+
+export type WhatsappProviderCooldownResult =
+  | {
+      outcome: "applied";
+      cooldown: WhatsappProviderCooldown;
+      idempotent: boolean;
+    }
+  | {
+      outcome: "reservation-not-found";
+    }
+  | {
+      outcome: "cooldown-conflict";
+      existing: WhatsappProviderCooldown;
     }
   | {
       outcome: "settlement-conflict";

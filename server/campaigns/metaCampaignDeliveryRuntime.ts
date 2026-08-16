@@ -19,6 +19,10 @@ import {
   createMetaCampaignDeliveryProcessor,
 } from "./metaCampaignDeliveryProcessor.ts";
 import {
+  createMetaCampaignDeliveryRetryPolicy,
+  type MetaCampaignDeliveryRetryEvidenceSource,
+} from "./metaCampaignDeliveryRetryPolicy.ts";
+import {
   createMetaCampaignTemplateAdapter,
 } from "./metaCampaignTemplateAdapter.ts";
 
@@ -29,6 +33,8 @@ export interface MetaCampaignDeliveryRuntimeInput {
     "findConnectionByTenantId"
   >;
   credentialVault: MetaCredentialVault;
+  retryEvidenceSource:
+    MetaCampaignDeliveryRetryEvidenceSource;
   transportOptions?: MetaGraphTransportOptions;
 }
 
@@ -45,6 +51,10 @@ export function createMetaCampaignDeliveryRuntime(
   return createMetaCampaignDeliveryProcessor({
     metaConnections: input.metaConnections,
     credentialVault: input.credentialVault,
+    retryPolicy:
+      createMetaCampaignDeliveryRetryPolicy(
+        input.retryEvidenceSource,
+      ),
     sender: createMetaCampaignTemplateAdapter(transport),
   });
 }

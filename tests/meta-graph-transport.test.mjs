@@ -211,7 +211,10 @@ test("sanitizes Meta API errors while retaining safe numeric codes", async () =>
           }),
           {
             status: 401,
-            headers: { "content-type": "application/json" },
+            headers: {
+              "content-type": "application/json",
+              "retry-after": "17",
+            },
           },
         );
       },
@@ -230,6 +233,7 @@ test("sanitizes Meta API errors while retaining safe numeric codes", async () =>
       assert.equal(error.httpStatus, 401);
       assert.equal(error.graphCode, 190);
       assert.equal(error.graphSubcode, 463);
+      assert.equal(error.retryAfterSeconds, 17);
       assert.doesNotMatch(error.message, new RegExp(responseSecret));
       assert.doesNotMatch(
         JSON.stringify(error),
@@ -238,6 +242,49 @@ test("sanitizes Meta API errors while retaining safe numeric codes", async () =>
       return true;
     },
   );
+
+  for (const retryAfter of [
+    "86401",
+    "Sun, 16 Aug 2026 10:00:00 GMT",
+  ]) {
+    const invalidRetryTransport =
+      createMetaGraphTransport(
+        { apiVersion: "v21.0" },
+        {
+          async fetchImplementation() {
+            return new Response(
+              JSON.stringify({
+                error: { code: 130429 },
+              }),
+              {
+                status: 429,
+                headers: {
+                  "content-type":
+                    "application/json",
+                  "retry-after": retryAfter,
+                },
+              },
+            );
+          },
+        },
+      );
+
+    await assert.rejects(
+      invalidRetryTransport.requestJson({
+        method: "GET",
+        pathSegments: ["waba-fixture"],
+        accessToken,
+      }),
+      (error) => {
+        assert.equal(
+          error instanceof MetaGraphError,
+          true,
+        );
+        assert.equal(error.retryAfterSeconds, null);
+        return true;
+      },
+    );
+  }
 });
 
 test("rejects invalid and oversized Meta responses", async (context) => {

@@ -20,6 +20,7 @@ export interface ResolvedCampaignDeliveryRateLimitContext {
   portfolioKey: string;
   senderKey: string;
   recipientKey: string;
+  templateCategory: "MARKETING" | "UTILITY";
   portfolioCapacity: WhatsappPortfolioCapacity;
   reservationExpiresAt: string;
 }
@@ -171,6 +172,17 @@ export function createCampaignDeliveryAdmission(
         };
       }
 
+      if (result.outcome === "provider-cooldown") {
+        return {
+          outcome: "deferred",
+          errorCode: "WHATSAPP_PROVIDER_COOLDOWN",
+          retryAfterSeconds: retryDelaySeconds(
+            result.retryAt,
+            request.reservedAt,
+          ),
+        };
+      }
+
       if (result.outcome === "recipient-in-flight") {
         return {
           outcome: "deferred",
@@ -238,6 +250,55 @@ export function createCampaignDeliveryAdmission(
       ) {
         throw new Error(
           "WhatsApp admission settlement is inconsistent",
+        );
+      }
+    },
+
+    async deferProviderRejection(
+      reservationKey,
+      scope,
+      providerErrorCode,
+      retryAfterSeconds,
+      observedAt,
+    ) {
+      if (
+        !reservationKey ||
+        !isCanonicalTimestamp(observedAt) ||
+        !Number.isSafeInteger(retryAfterSeconds) ||
+        retryAfterSeconds < 1 ||
+        retryAfterSeconds >
+          MAXIMUM_QUEUE_RETRY_DELAY_SECONDS
+      ) {
+        throw new Error(
+          "Provider cooldown request is invalid",
+        );
+      }
+
+      const blockedUntil = new Date(
+        Date.parse(observedAt) +
+          retryAfterSeconds * 1_000,
+      ).toISOString();
+      const result =
+        await repository.applyProviderCooldown({
+          reservationKey,
+          scope,
+          providerErrorCode,
+          observedAt,
+          blockedUntil,
+        });
+
+      if (
+        result.outcome !== "applied" ||
+        result.cooldown.reservationKey !==
+          reservationKey ||
+        result.cooldown.scope !== scope ||
+        result.cooldown.providerErrorCode !==
+          providerErrorCode ||
+        result.cooldown.observedAt !== observedAt ||
+        result.cooldown.blockedUntil !== blockedUntil
+      ) {
+        throw new Error(
+          "Provider cooldown was rejected",
         );
       }
     },

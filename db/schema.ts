@@ -109,6 +109,11 @@ export const whatsappRateLimitSettlementOutcomes = [
   "provider-failed",
   "cancelled-before-submit",
 ] as const;
+export const whatsappProviderCooldownScopes = [
+  "sender",
+  "portfolio-recipient",
+  "pair",
+] as const;
 export const campaignProviderDeliveryStatuses = [
   "accepted",
   "sent",
@@ -4519,6 +4524,161 @@ export const whatsappRateLimitSettlements =
     ],
   );
 
+export const whatsappProviderCooldownEvents =
+  sqliteTable(
+    "whatsapp_provider_cooldown_events",
+    {
+      reservationKey: text("reservation_key")
+        .primaryKey()
+        .references(
+          () =>
+            whatsappRateLimitReservations
+              .reservationKey,
+          { onDelete: "restrict" },
+        ),
+      scope: text("scope", {
+        enum: whatsappProviderCooldownScopes,
+      }).notNull(),
+      providerErrorCode: integer(
+        "provider_error_code",
+      ).notNull(),
+      observedAt: text("observed_at").notNull(),
+      blockedUntil: text("blocked_until").notNull(),
+      createdAt: text("created_at").notNull(),
+    },
+    (table) => [
+      check(
+        "whatsapp_provider_cooldowns_scope_code_valid",
+        sql`(
+          ${table.scope} = 'sender'
+          and ${table.providerErrorCode} = 130429
+        ) or (
+          ${table.scope} = 'portfolio-recipient'
+          and ${table.providerErrorCode} = 131049
+        ) or (
+          ${table.scope} = 'pair'
+          and ${table.providerErrorCode} = 131056
+        )`,
+      ),
+      check(
+        "whatsapp_provider_cooldowns_time_valid",
+        sql`length(${table.observedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.observedAt}
+          ) = ${table.observedAt}
+          and length(${table.blockedUntil}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.blockedUntil}
+          ) = ${table.blockedUntil}
+          and ${table.blockedUntil} > ${table.observedAt}
+          and ${table.blockedUntil} <= strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.observedAt},
+            '+24 hours'
+          )
+          and (
+            ${table.providerErrorCode} <> 131049
+            or ${table.blockedUntil} = strftime(
+              '%Y-%m-%dT%H:%M:%fZ',
+              ${table.observedAt},
+              '+24 hours'
+            )
+          )
+          and ${table.createdAt} = ${table.observedAt}`,
+      ),
+      index(
+        "whatsapp_provider_cooldown_events_expiry_idx",
+      ).on(table.blockedUntil),
+    ],
+  );
+
+export const whatsappProviderCooldownState =
+  sqliteTable(
+    "whatsapp_provider_cooldown_state",
+    {
+      scope: text("scope", {
+        enum: whatsappProviderCooldownScopes,
+      }).notNull(),
+      senderKey: text("sender_key").notNull(),
+      recipientKey: text("recipient_key").notNull(),
+      reservationKey: text("reservation_key")
+        .notNull()
+        .references(
+          () =>
+            whatsappProviderCooldownEvents
+              .reservationKey,
+          { onDelete: "restrict" },
+        ),
+      providerErrorCode: integer(
+        "provider_error_code",
+      ).notNull(),
+      blockedUntil: text("blocked_until").notNull(),
+      updatedAt: text("updated_at").notNull(),
+    },
+    (table) => [
+      primaryKey({
+        columns: [
+          table.scope,
+          table.senderKey,
+          table.recipientKey,
+        ],
+      }),
+      check(
+        "whatsapp_provider_cooldown_state_subject_valid",
+        sql`(
+          ${table.scope} = 'sender'
+          and length(${table.senderKey}) = 83
+          and substr(${table.senderKey}, 1, 19) =
+            'whatsapp_sender_v1_'
+          and substr(${table.senderKey}, 20)
+            not glob '*[^0-9a-f]*'
+          and ${table.recipientKey} = ''
+          and ${table.providerErrorCode} = 130429
+        ) or (
+          ${table.scope} = 'portfolio-recipient'
+          and ${table.senderKey} = ''
+          and length(${table.recipientKey}) = 86
+          and substr(${table.recipientKey}, 1, 22) =
+            'whatsapp_recipient_v1_'
+          and substr(${table.recipientKey}, 23)
+            not glob '*[^0-9a-f]*'
+          and ${table.providerErrorCode} = 131049
+        ) or (
+          ${table.scope} = 'pair'
+          and length(${table.senderKey}) = 83
+          and substr(${table.senderKey}, 1, 19) =
+            'whatsapp_sender_v1_'
+          and substr(${table.senderKey}, 20)
+            not glob '*[^0-9a-f]*'
+          and length(${table.recipientKey}) = 86
+          and substr(${table.recipientKey}, 1, 22) =
+            'whatsapp_recipient_v1_'
+          and substr(${table.recipientKey}, 23)
+            not glob '*[^0-9a-f]*'
+          and ${table.providerErrorCode} = 131056
+        )`,
+      ),
+      check(
+        "whatsapp_provider_cooldown_state_time_valid",
+        sql`length(${table.blockedUntil}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.blockedUntil}
+          ) = ${table.blockedUntil}
+          and length(${table.updatedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.updatedAt}
+          ) = ${table.updatedAt}`,
+      ),
+      index(
+        "whatsapp_provider_cooldown_state_expiry_idx",
+      ).on(table.blockedUntil),
+    ],
+  );
+
 export const campaignDeliveryProviderLinks =
   sqliteTable(
     "campaign_delivery_provider_links",
@@ -4715,6 +4875,12 @@ export type WhatsappRateLimitSettlementRow =
   typeof whatsappRateLimitSettlements.$inferSelect;
 export type NewWhatsappRateLimitSettlementRow =
   typeof whatsappRateLimitSettlements.$inferInsert;
+export type WhatsappProviderCooldownEventRow =
+  typeof whatsappProviderCooldownEvents.$inferSelect;
+export type NewWhatsappProviderCooldownEventRow =
+  typeof whatsappProviderCooldownEvents.$inferInsert;
+export type WhatsappProviderCooldownStateRow =
+  typeof whatsappProviderCooldownState.$inferSelect;
 export type CampaignDeliveryProviderLinkRow =
   typeof campaignDeliveryProviderLinks.$inferSelect;
 export type NewCampaignDeliveryProviderLinkRow =

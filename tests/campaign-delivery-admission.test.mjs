@@ -74,6 +74,9 @@ function request() {
     campaign: campaign(),
     deliveryKey,
     recipientPhoneNumber: "+972501234567",
+    deliveryAttemptNumber: 1,
+    queueAttemptNumber: 1,
+    queueMessageId: "queue-message-17",
     reservedAt,
   };
 }
@@ -85,6 +88,7 @@ function context(overrides = {}) {
     portfolioKey,
     senderKey,
     recipientKey,
+    templateCategory: "UTILITY",
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
@@ -124,6 +128,18 @@ function fixture(reservationResult, options = {}) {
         return options.settlementResult ?? {
           outcome: "settled",
           settlement: command,
+          idempotent: false,
+        };
+      },
+      async applyProviderCooldown(command) {
+        calls.push({
+          operation: "provider-cooldown",
+          command,
+        });
+
+        return options.cooldownResult ?? {
+          outcome: "applied",
+          cooldown: command,
           idempotent: false,
         };
       },
@@ -204,6 +220,24 @@ test("maps pair and in-flight locks to bounded queue delays", async () => {
       outcome: "deferred",
       errorCode: "WHATSAPP_RECIPIENT_IN_FLIGHT",
       retryAfterSeconds: 3_600,
+    },
+  );
+});
+
+test("maps persisted provider cooldowns to their remaining queue delay", async () => {
+  const testFixture = fixture({
+    outcome: "provider-cooldown",
+    scope: "sender",
+    providerErrorCode: 130429,
+    retryAt: "2026-08-16T10:00:12.000Z",
+  });
+
+  assert.deepEqual(
+    await testFixture.admission.reserve(request()),
+    {
+      outcome: "deferred",
+      errorCode: "WHATSAPP_PROVIDER_COOLDOWN",
+      retryAfterSeconds: 12,
     },
   );
 });
@@ -311,6 +345,14 @@ test("rejects unsafe retry timestamps and inconsistent reservations", async () =
     },
     idempotent: false,
   });
+  const retired = fixture({
+    outcome: "reservation-retired",
+    settlement: {
+      reservationKey,
+      outcome: "provider-failed",
+      settledAt: reservedAt,
+    },
+  });
 
   await assert.rejects(
     expired.admission.reserve(request()),
@@ -323,6 +365,10 @@ test("rejects unsafe retry timestamps and inconsistent reservations", async () =
   await assert.rejects(
     inconsistent.admission.reserve(request()),
     /reservation is inconsistent/,
+  );
+  await assert.rejects(
+    retired.admission.reserve(request()),
+    /reservation was rejected/,
   );
 });
 
@@ -364,5 +410,57 @@ test("settles only an exact repository result", async () => {
       reservedAt,
     ),
     /settlement was rejected/,
+  );
+});
+
+test("persists provider cooldown and failed settlement as one exact repository operation", async () => {
+  const accepted = fixture({
+    outcome: "tenant-not-found",
+  });
+  const rejected = fixture(
+    { outcome: "tenant-not-found" },
+    {
+      cooldownResult: {
+        outcome: "reservation-not-found",
+      },
+    },
+  );
+
+  await accepted.admission.deferProviderRejection(
+    reservationKey,
+    "pair",
+    131056,
+    6,
+    reservedAt,
+  );
+  assert.deepEqual(accepted.calls[0], {
+    operation: "provider-cooldown",
+    command: {
+      reservationKey,
+      scope: "pair",
+      providerErrorCode: 131056,
+      observedAt: reservedAt,
+      blockedUntil: "2026-08-16T10:00:06.000Z",
+    },
+  });
+  await assert.rejects(
+    rejected.admission.deferProviderRejection(
+      reservationKey,
+      "pair",
+      131056,
+      6,
+      reservedAt,
+    ),
+    /Provider cooldown was rejected/,
+  );
+  await assert.rejects(
+    accepted.admission.deferProviderRejection(
+      reservationKey,
+      "pair",
+      131056,
+      86_401,
+      reservedAt,
+    ),
+    /Provider cooldown request is invalid/,
   );
 });

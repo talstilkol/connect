@@ -1,6 +1,12 @@
 import {
+  whatsappProviderCooldownErrorCodes,
+  whatsappProviderCooldownScopes,
   whatsappPortfolioMessagingLimits,
   whatsappRateLimitSettlementOutcomes,
+  type WhatsappProviderCooldown,
+  type WhatsappProviderCooldownErrorCode,
+  type WhatsappProviderCooldownResult,
+  type WhatsappProviderCooldownScope,
   type WhatsappPortfolioCapacity,
   type WhatsappPortfolioMessagingLimit,
   type WhatsappRateLimitReservation,
@@ -73,6 +79,29 @@ const RESERVE_SQL = `
   )
     AND NOT EXISTS (
       SELECT 1
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?8
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?4
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'portfolio-recipient'
+            AND ?12 = 'MARKETING'
+            AND sender_key = ''
+            AND recipient_key = ?5
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?4
+            AND recipient_key = ?5
+          )
+        )
+    )
+    AND NOT EXISTS (
+      SELECT 1
       FROM whatsapp_pair_rate_limit_state
       WHERE sender_key = ?4
         AND recipient_key = ?5
@@ -126,6 +155,81 @@ const FIND_BLOCKER_SQL = `
       FROM tenants
       WHERE id = ?1
     ) AS tenantFound,
+    (
+      SELECT blocked_until
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?5
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?3
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'portfolio-recipient'
+            AND ?7 = 'MARKETING'
+            AND sender_key = ''
+            AND recipient_key = ?4
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?3
+            AND recipient_key = ?4
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    ) AS providerBlockedUntil,
+    (
+      SELECT scope
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?5
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?3
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'portfolio-recipient'
+            AND ?7 = 'MARKETING'
+            AND sender_key = ''
+            AND recipient_key = ?4
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?3
+            AND recipient_key = ?4
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    ) AS providerCooldownScope,
+    (
+      SELECT provider_error_code
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?5
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?3
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'portfolio-recipient'
+            AND ?7 = 'MARKETING'
+            AND sender_key = ''
+            AND recipient_key = ?4
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?3
+            AND recipient_key = ?4
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    ) AS providerErrorCode,
     (
       SELECT reserved_until
       FROM whatsapp_pair_rate_limit_state
@@ -182,6 +286,44 @@ const FIND_SETTLEMENT_SQL = `
   LIMIT 1
 `;
 
+const INSERT_PROVIDER_COOLDOWN_SQL = `
+  INSERT INTO whatsapp_provider_cooldown_events (
+    reservation_key,
+    scope,
+    provider_error_code,
+    observed_at,
+    blocked_until,
+    created_at
+  ) VALUES (?1, ?2, ?3, ?4, ?5, ?4)
+  ON CONFLICT (reservation_key) DO NOTHING
+`;
+
+const FIND_PROVIDER_COOLDOWN_SQL = `
+  SELECT
+    reservation_key AS reservationKey,
+    scope,
+    provider_error_code AS providerErrorCode,
+    observed_at AS observedAt,
+    blocked_until AS blockedUntil
+  FROM whatsapp_provider_cooldown_events
+  WHERE reservation_key = ?1
+  LIMIT 1
+`;
+
+const INSERT_PROVIDER_FAILED_SETTLEMENT_SQL = `
+  INSERT INTO whatsapp_rate_limit_settlements (
+    reservation_key,
+    outcome,
+    settled_at,
+    created_at
+  )
+  SELECT ?1, 'provider-failed', ?2, ?2
+  FROM whatsapp_rate_limit_reservations
+  WHERE reservation_key = ?1
+    AND reserved_at <= ?2
+  ON CONFLICT (reservation_key) DO NOTHING
+`;
+
 interface ReservationRow {
   reservationKey: unknown;
   tenantId: unknown;
@@ -197,6 +339,9 @@ interface ReservationRow {
 
 interface BlockerRow {
   tenantFound: unknown;
+  providerBlockedUntil: unknown;
+  providerCooldownScope: unknown;
+  providerErrorCode: unknown;
   pairReservedUntil: unknown;
   activeReservationExpiresAt: unknown;
   occupiedUniqueRecipients: unknown;
@@ -208,12 +353,21 @@ interface SettlementRow {
   settledAt: unknown;
 }
 
+interface ProviderCooldownRow {
+  reservationKey: unknown;
+  scope: unknown;
+  providerErrorCode: unknown;
+  observedAt: unknown;
+  blockedUntil: unknown;
+}
+
 export interface WhatsappRateLimitReservationCommand {
   reservationKey: unknown;
   tenantId: unknown;
   portfolioKey: unknown;
   senderKey: unknown;
   recipientKey: unknown;
+  templateCategory: unknown;
   portfolioCapacity: unknown;
   reservedAt: unknown;
   reservationExpiresAt: unknown;
@@ -225,6 +379,14 @@ export interface WhatsappRateLimitSettlementCommand {
   settledAt: unknown;
 }
 
+export interface WhatsappProviderCooldownCommand {
+  reservationKey: unknown;
+  scope: unknown;
+  providerErrorCode: unknown;
+  observedAt: unknown;
+  blockedUntil: unknown;
+}
+
 export interface WhatsappRateLimitRepository {
   reserveBusinessInitiatedMessage(
     command: WhatsappRateLimitReservationCommand,
@@ -232,6 +394,9 @@ export interface WhatsappRateLimitRepository {
   settle(
     command: WhatsappRateLimitSettlementCommand,
   ): Promise<WhatsappRateLimitSettlementResult>;
+  applyProviderCooldown(
+    command: WhatsappProviderCooldownCommand,
+  ): Promise<WhatsappProviderCooldownResult>;
 }
 
 function requirePattern(
@@ -258,6 +423,16 @@ function requireTenantId(value: unknown): number {
   }
 
   return Number(value);
+}
+
+function requireTemplateCategory(
+  value: unknown,
+): "MARKETING" | "UTILITY" {
+  if (value !== "MARKETING" && value !== "UTILITY") {
+    throw new Error("templateCategory is invalid");
+  }
+
+  return value;
 }
 
 function requireTimestamp(
@@ -352,6 +527,52 @@ function requireSettlementOutcome(
   }
 
   return value as WhatsappRateLimitSettlementOutcome;
+}
+
+function requireProviderCooldownScope(
+  value: unknown,
+): WhatsappProviderCooldownScope {
+  if (
+    typeof value !== "string" ||
+    !whatsappProviderCooldownScopes.some(
+      (scope) => scope === value,
+    )
+  ) {
+    throw new Error("provider cooldown scope is invalid");
+  }
+
+  return value as WhatsappProviderCooldownScope;
+}
+
+function requireProviderCooldownErrorCode(
+  value: unknown,
+): WhatsappProviderCooldownErrorCode {
+  if (
+    !Number.isSafeInteger(value) ||
+    !whatsappProviderCooldownErrorCodes.some(
+      (errorCode) => errorCode === value,
+    )
+  ) {
+    throw new Error(
+      "provider cooldown error code is invalid",
+    );
+  }
+
+  return value as WhatsappProviderCooldownErrorCode;
+}
+
+function scopeMatchesProviderErrorCode(
+  scope: WhatsappProviderCooldownScope,
+  providerErrorCode: WhatsappProviderCooldownErrorCode,
+): boolean {
+  return (
+    (scope === "sender" &&
+      providerErrorCode === 130429) ||
+    (scope === "portfolio-recipient" &&
+      providerErrorCode === 131049) ||
+    (scope === "pair" &&
+      providerErrorCode === 131056)
+  );
 }
 
 function parseCapacity(
@@ -456,6 +677,57 @@ function parseSettlement(
   };
 }
 
+function parseProviderCooldown(
+  row: ProviderCooldownRow,
+): WhatsappProviderCooldown {
+  const scope = requireProviderCooldownScope(
+    row.scope,
+  );
+  const providerErrorCode =
+    requireProviderCooldownErrorCode(
+      row.providerErrorCode,
+    );
+  const observedAt = requireTimestamp(
+    row.observedAt,
+    "D1 provider cooldown observedAt",
+  );
+  const blockedUntil = requireTimestamp(
+    row.blockedUntil,
+    "D1 provider cooldown blockedUntil",
+  );
+
+  if (
+    !scopeMatchesProviderErrorCode(
+      scope,
+      providerErrorCode,
+    ) ||
+    blockedUntil <= observedAt ||
+    Date.parse(blockedUntil) >
+      Date.parse(observedAt) +
+        ONE_DAY_MILLISECONDS ||
+    (providerErrorCode === 131049 &&
+      Date.parse(blockedUntil) !==
+        Date.parse(observedAt) +
+          ONE_DAY_MILLISECONDS)
+  ) {
+    throw new Error(
+      "D1 returned an invalid provider cooldown",
+    );
+  }
+
+  return {
+    reservationKey: requirePattern(
+      row.reservationKey,
+      reservationKeyPattern,
+      "D1 reservationKey",
+    ),
+    scope,
+    providerErrorCode,
+    observedAt,
+    blockedUntil,
+  };
+}
+
 function sameCapacity(
   left: WhatsappPortfolioCapacity,
   right: WhatsappPortfolioCapacity,
@@ -494,9 +766,25 @@ function sameReservation(
   );
 }
 
+function sameProviderCooldown(
+  left: WhatsappProviderCooldown,
+  right: WhatsappProviderCooldown,
+): boolean {
+  return (
+    left.reservationKey === right.reservationKey &&
+    left.scope === right.scope &&
+    left.providerErrorCode ===
+      right.providerErrorCode &&
+    left.observedAt === right.observedAt &&
+    left.blockedUntil === right.blockedUntil
+  );
+}
+
 function normalizeReservation(
   command: WhatsappRateLimitReservationCommand,
-): WhatsappRateLimitReservation {
+): WhatsappRateLimitReservation & {
+  templateCategory: "MARKETING" | "UTILITY";
+} {
   const reservedAt = requireTimestamp(
     command.reservedAt,
     "reservedAt",
@@ -543,12 +831,73 @@ function normalizeReservation(
       recipientKeyPattern,
       "recipientKey",
     ),
+    templateCategory: requireTemplateCategory(
+      command.templateCategory,
+    ),
     portfolioCapacity: requirePortfolioCapacity(
       command.portfolioCapacity,
     ),
     reservedAt,
     pairReservedUntil,
     reservationExpiresAt,
+  };
+}
+
+function normalizeProviderCooldown(
+  command: WhatsappProviderCooldownCommand,
+): WhatsappProviderCooldown {
+  const scope = requireProviderCooldownScope(
+    command.scope,
+  );
+  const providerErrorCode =
+    requireProviderCooldownErrorCode(
+      command.providerErrorCode,
+    );
+  const observedAt = requireTimestamp(
+    command.observedAt,
+    "observedAt",
+  );
+  const blockedUntil = requireTimestamp(
+    command.blockedUntil,
+    "blockedUntil",
+  );
+
+  if (
+    !scopeMatchesProviderErrorCode(
+      scope,
+      providerErrorCode,
+    )
+  ) {
+    throw new Error(
+      "provider cooldown scope does not match error code",
+    );
+  }
+
+  if (
+    blockedUntil <= observedAt ||
+    Date.parse(blockedUntil) >
+      Date.parse(observedAt) +
+        ONE_DAY_MILLISECONDS ||
+    (providerErrorCode === 131049 &&
+      Date.parse(blockedUntil) !==
+        Date.parse(observedAt) +
+          ONE_DAY_MILLISECONDS)
+  ) {
+    throw new Error(
+      "provider cooldown is outside the safe window",
+    );
+  }
+
+  return {
+    reservationKey: requirePattern(
+      command.reservationKey,
+      reservationKeyPattern,
+      "reservationKey",
+    ),
+    scope,
+    providerErrorCode,
+    observedAt,
+    blockedUntil,
   };
 }
 
@@ -587,6 +936,7 @@ export function createWhatsappRateLimitRepository(
           requested.pairReservedUntil,
           requested.reservationExpiresAt,
           windowStartAt,
+          requested.templateCategory,
         )
         .first<ReservationRow>();
 
@@ -612,6 +962,20 @@ export function createWhatsappRateLimitRepository(
           );
         }
 
+        const settlementRow = await database
+          .prepare(FIND_SETTLEMENT_SQL)
+          .bind(requested.reservationKey)
+          .first<SettlementRow>();
+
+        if (settlementRow) {
+          return {
+            outcome: "reservation-retired",
+            settlement: parseSettlement(
+              settlementRow,
+            ),
+          };
+        }
+
         return {
           outcome: "reserved",
           reservation: existing,
@@ -628,6 +992,7 @@ export function createWhatsappRateLimitRepository(
           requested.recipientKey,
           requested.reservedAt,
           windowStartAt,
+          requested.templateCategory,
         )
         .first<BlockerRow>();
 
@@ -639,6 +1004,53 @@ export function createWhatsappRateLimitRepository(
 
       if (blocker.tenantFound !== 1) {
         return { outcome: "tenant-not-found" };
+      }
+
+      if (
+        blocker.providerBlockedUntil !== null ||
+        blocker.providerCooldownScope !== null ||
+        blocker.providerErrorCode !== null
+      ) {
+        if (
+          blocker.providerBlockedUntil === null ||
+          blocker.providerCooldownScope === null ||
+          blocker.providerErrorCode === null
+        ) {
+          throw new Error(
+            "D1 returned incomplete provider cooldown state",
+          );
+        }
+
+        const retryAt = requireTimestamp(
+          blocker.providerBlockedUntil,
+          "D1 providerBlockedUntil",
+        );
+        const scope = requireProviderCooldownScope(
+          blocker.providerCooldownScope,
+        );
+        const providerErrorCode =
+          requireProviderCooldownErrorCode(
+            blocker.providerErrorCode,
+          );
+
+        if (
+          retryAt <= requested.reservedAt ||
+          !scopeMatchesProviderErrorCode(
+            scope,
+            providerErrorCode,
+          )
+        ) {
+          throw new Error(
+            "D1 returned invalid provider cooldown state",
+          );
+        }
+
+        return {
+          outcome: "provider-cooldown",
+          scope,
+          providerErrorCode,
+          retryAt,
+        };
       }
 
       if (
@@ -769,6 +1181,170 @@ export function createWhatsappRateLimitRepository(
       throw new Error(
         "D1 rejected a valid WhatsApp settlement",
       );
+    },
+
+    async applyProviderCooldown(command) {
+      const requested = normalizeProviderCooldown(
+        command,
+      );
+      const existingEventRow = await database
+        .prepare(FIND_PROVIDER_COOLDOWN_SQL)
+        .bind(requested.reservationKey)
+        .first<ProviderCooldownRow>();
+
+      if (existingEventRow) {
+        const existing = parseProviderCooldown(
+          existingEventRow,
+        );
+
+        if (!sameProviderCooldown(existing, requested)) {
+          return {
+            outcome: "cooldown-conflict",
+            existing,
+          };
+        }
+
+        const settlementRow = await database
+          .prepare(FIND_SETTLEMENT_SQL)
+          .bind(requested.reservationKey)
+          .first<SettlementRow>();
+
+        if (!settlementRow) {
+          throw new Error(
+            "Provider cooldown is missing settlement evidence",
+          );
+        }
+
+        const settlement = parseSettlement(
+          settlementRow,
+        );
+
+        if (
+          settlement.outcome !== "provider-failed" ||
+          settlement.settledAt !== requested.observedAt
+        ) {
+          return {
+            outcome: "settlement-conflict",
+            existing: settlement,
+          };
+        }
+
+        return {
+          outcome: "applied",
+          cooldown: existing,
+          idempotent: true,
+        };
+      }
+
+      const reservationRow = await database
+        .prepare(FIND_RESERVATION_SQL)
+        .bind(requested.reservationKey)
+        .first<ReservationRow>();
+
+      if (!reservationRow) {
+        return { outcome: "reservation-not-found" };
+      }
+
+      const reservation = parseReservation(
+        reservationRow,
+      );
+
+      if (requested.observedAt < reservation.reservedAt) {
+        throw new Error(
+          "provider cooldown precedes reservation",
+        );
+      }
+
+      const existingSettlementRow = await database
+        .prepare(FIND_SETTLEMENT_SQL)
+        .bind(requested.reservationKey)
+        .first<SettlementRow>();
+
+      if (existingSettlementRow) {
+        const existingSettlement = parseSettlement(
+          existingSettlementRow,
+        );
+
+        if (
+          existingSettlement.outcome !==
+            "provider-failed" ||
+          existingSettlement.settledAt !==
+            requested.observedAt
+        ) {
+          return {
+            outcome: "settlement-conflict",
+            existing: existingSettlement,
+          };
+        }
+      }
+
+      await database.batch([
+        database
+          .prepare(
+            INSERT_PROVIDER_FAILED_SETTLEMENT_SQL,
+          )
+          .bind(
+            requested.reservationKey,
+            requested.observedAt,
+          ),
+        database
+          .prepare(INSERT_PROVIDER_COOLDOWN_SQL)
+          .bind(
+            requested.reservationKey,
+            requested.scope,
+            requested.providerErrorCode,
+            requested.observedAt,
+            requested.blockedUntil,
+          ),
+      ]);
+
+      const [storedEventRow, storedSettlementRow] =
+        await Promise.all([
+          database
+            .prepare(FIND_PROVIDER_COOLDOWN_SQL)
+            .bind(requested.reservationKey)
+            .first<ProviderCooldownRow>(),
+          database
+            .prepare(FIND_SETTLEMENT_SQL)
+            .bind(requested.reservationKey)
+            .first<SettlementRow>(),
+        ]);
+
+      if (!storedEventRow || !storedSettlementRow) {
+        throw new Error(
+          "D1 did not persist provider cooldown evidence",
+        );
+      }
+
+      const stored = parseProviderCooldown(
+        storedEventRow,
+      );
+      const settlement = parseSettlement(
+        storedSettlementRow,
+      );
+
+      if (!sameProviderCooldown(stored, requested)) {
+        return {
+          outcome: "cooldown-conflict",
+          existing: stored,
+        };
+      }
+
+      if (
+        settlement.outcome !== "provider-failed" ||
+        settlement.settledAt !== requested.observedAt
+      ) {
+        return {
+          outcome: "settlement-conflict",
+          existing: settlement,
+        };
+      }
+
+      return {
+        outcome: "applied",
+        cooldown: stored,
+        idempotent: false,
+      };
     },
   };
 }

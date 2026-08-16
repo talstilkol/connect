@@ -208,6 +208,7 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
       campaignKey,
       tenantId: 7,
       recipientPhoneNumber: "+972501234567",
+      attemptCount: 0,
     },
   );
   database.allResults.push(
@@ -270,6 +271,7 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
       campaignKey,
       tenantId: 7,
       recipientPhoneNumber: "+972501234567",
+      nextDeliveryAttemptNumber: 1,
     },
   );
   assert.equal(
@@ -359,6 +361,32 @@ test("skips stale consent and claims each valid delivery only once", async () =>
   assert.match(
     database.recordings[1].sql,
     /THEN 'sending'[\s\S]+attempt_count = attempt_count \+ CASE/,
+  );
+});
+
+test("returns only a claimed delivery to queued after an explicit provider deferral", async () => {
+  const database = new RecordingDatabase();
+
+  database.firstResults.push({
+    deliveryKey: firstDeliveryKey,
+  });
+  const repository =
+    createCampaignDispatchRepository(database);
+
+  await repository.markDeferred(
+    firstDeliveryKey,
+    "META_PAIR_RATE_LIMITED",
+    runningAt,
+  );
+
+  assert.deepEqual(database.recordings[0].values, [
+    firstDeliveryKey,
+    "META_PAIR_RATE_LIMITED",
+    runningAt,
+  ]);
+  assert.match(
+    database.recordings[0].sql,
+    /status = 'queued'[\s\S]+status = 'sending'/,
   );
 });
 
@@ -553,6 +581,7 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
       campaignKey,
       tenantId: 1,
       recipientPhoneNumber: "+972501234567",
+      nextDeliveryAttemptNumber: 1,
     },
   );
 

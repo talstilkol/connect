@@ -26,6 +26,8 @@ const MAXIMUM_QUEUE_RETRY_DELAY_SECONDS =
   24 * 60 * 60;
 const AMBIGUOUS_ERROR_CODE =
   "DELIVERY_OUTCOME_UNKNOWN";
+const PROVIDER_RETRY_STATE_ERROR_CODE =
+  "PROVIDER_RETRY_STATE_UNKNOWN";
 const reservationKeyPattern =
   /^whatsapp_rate_reservation_v1_[0-9a-f]{64}$/;
 
@@ -99,6 +101,35 @@ function parseProcessorResult(
     return {
       outcome: "accepted",
       providerMessageId: value.providerMessageId,
+    };
+  }
+
+  if (
+    value &&
+    value.outcome === "deferred" &&
+    isErrorCode(value.errorCode) &&
+    Number.isSafeInteger(value.retryAfterSeconds) &&
+    value.retryAfterSeconds > 0 &&
+    value.retryAfterSeconds <=
+      MAXIMUM_QUEUE_RETRY_DELAY_SECONDS &&
+    (
+      (value.providerErrorCode === 130429 &&
+        value.cooldownScope === "sender") ||
+      (value.providerErrorCode === 131049 &&
+        value.cooldownScope ===
+          "portfolio-recipient" &&
+        value.retryAfterSeconds ===
+          MAXIMUM_QUEUE_RETRY_DELAY_SECONDS) ||
+      (value.providerErrorCode === 131056 &&
+        value.cooldownScope === "pair")
+    )
+  ) {
+    return {
+      outcome: "deferred",
+      errorCode: value.errorCode,
+      providerErrorCode: value.providerErrorCode,
+      cooldownScope: value.cooldownScope,
+      retryAfterSeconds: value.retryAfterSeconds,
     };
   }
 
@@ -209,6 +240,20 @@ export function createCampaignDeliveryQueueConsumer(
         }
 
         if (
+          !Number.isSafeInteger(delivery.attempts) ||
+          delivery.attempts < 1 ||
+          typeof delivery.id !== "string" ||
+          delivery.id.trim() !== delivery.id ||
+          !/^[^\u0000-\u001f\u007f]{1,255}$/.test(
+            delivery.id,
+          )
+        ) {
+          delivery.ack();
+          result.discarded += 1;
+          continue;
+        }
+
+        if (
           !admission.isConfigured() ||
           !processor.isConfigured()
         ) {
@@ -223,6 +268,7 @@ export function createCampaignDeliveryQueueConsumer(
         const now = currentTimestamp(clock);
         let campaign;
         let recipientPhoneNumber: string;
+        let deliveryAttemptNumber: number;
 
         try {
           const context =
@@ -252,6 +298,8 @@ export function createCampaignDeliveryQueueConsumer(
 
           recipientPhoneNumber =
             context.recipientPhoneNumber;
+          deliveryAttemptNumber =
+            context.nextDeliveryAttemptNumber;
         } catch {
           delivery.retry({
             delaySeconds:
@@ -270,6 +318,9 @@ export function createCampaignDeliveryQueueConsumer(
                 campaign,
                 deliveryKey: message.deliveryKey,
                 recipientPhoneNumber,
+                deliveryAttemptNumber,
+                queueAttemptNumber: delivery.attempts,
+                queueMessageId: delivery.id,
                 reservedAt: now,
               }),
             );
@@ -355,12 +406,25 @@ export function createCampaignDeliveryQueueConsumer(
                 recipient: prepared.recipient,
                 rateLimitReservationKey:
                   reservationKey,
+                deliveryAttemptNumber,
+                queueAttemptNumber: delivery.attempts,
               }),
             );
 
           if (!processorResult) {
             throw new Error(
               "campaign delivery result is invalid",
+            );
+          }
+
+          if (
+            processorResult.outcome === "deferred" &&
+            processorResult.providerErrorCode ===
+              131049 &&
+            campaign.template.category !== "MARKETING"
+          ) {
+            throw new Error(
+              "marketing cooldown cannot apply to this campaign",
             );
           }
 
@@ -377,6 +441,46 @@ export function createCampaignDeliveryQueueConsumer(
             });
             delivery.ack();
             result.accepted += 1;
+            continue;
+          }
+
+          if (
+            processorResult.outcome === "deferred"
+          ) {
+            try {
+              await admission.deferProviderRejection(
+                reservationKey,
+                processorResult.cooldownScope,
+                processorResult.providerErrorCode,
+                processorResult.retryAfterSeconds,
+                now,
+              );
+              await dispatch.markDeferred(
+                message.deliveryKey,
+                processorResult.errorCode,
+                now,
+              );
+              delivery.retry({
+                delaySeconds:
+                  processorResult.retryAfterSeconds,
+              });
+              result.deferred += 1;
+              result.retried += 1;
+            } catch {
+              try {
+                await dispatch.markAmbiguous(
+                  message.deliveryKey,
+                  PROVIDER_RETRY_STATE_ERROR_CODE,
+                  now,
+                );
+              } catch {
+                // The claimed delivery remains fail-closed.
+              }
+
+              delivery.ack();
+              result.ambiguous += 1;
+            }
+
             continue;
           }
 

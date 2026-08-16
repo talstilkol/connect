@@ -241,6 +241,7 @@ async function createFixture() {
       portfolioKey,
       senderKey,
       recipientKey,
+      templateCategory: "UTILITY",
       portfolioCapacity: {
         kind: "bounded",
         maximumUniqueRecipients: 250,

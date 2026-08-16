@@ -18,6 +18,7 @@ export class MetaGraphError extends Error {
   readonly httpStatus: number | null;
   readonly graphCode: number | null;
   readonly graphSubcode: number | null;
+  readonly retryAfterSeconds: number | null;
 
   constructor(
     code: MetaGraphErrorCode,
@@ -26,6 +27,7 @@ export class MetaGraphError extends Error {
       httpStatus?: number | null;
       graphCode?: number | null;
       graphSubcode?: number | null;
+      retryAfterSeconds?: number | null;
     } = {},
   ) {
     super(message);
@@ -34,6 +36,8 @@ export class MetaGraphError extends Error {
     this.httpStatus = details.httpStatus ?? null;
     this.graphCode = details.graphCode ?? null;
     this.graphSubcode = details.graphSubcode ?? null;
+    this.retryAfterSeconds =
+      details.retryAfterSeconds ?? null;
   }
 }
 
@@ -253,6 +257,21 @@ function safeGraphNumber(value: unknown): number | null {
   return Number.isSafeInteger(value) ? (value as number) : null;
 }
 
+function safeRetryAfterSeconds(
+  value: string | null,
+): number | null {
+  if (!value || !/^[1-9][0-9]{0,5}$/.test(value)) {
+    return null;
+  }
+
+  const seconds = Number(value);
+
+  return Number.isSafeInteger(seconds) &&
+    seconds <= 24 * 60 * 60
+    ? seconds
+    : null;
+}
+
 async function readBoundedJson(
   response: Response,
   maximumBytes: number,
@@ -395,6 +414,10 @@ export function createMetaGraphTransport(
             graphSubcode: safeGraphNumber(
               graphError?.error_subcode,
             ),
+            retryAfterSeconds:
+              safeRetryAfterSeconds(
+                response.headers.get("retry-after"),
+              ),
           },
         );
       }

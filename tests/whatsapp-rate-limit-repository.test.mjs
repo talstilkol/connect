@@ -154,6 +154,7 @@ function reservationCommand(overrides = {}) {
     portfolioKey,
     senderKey,
     recipientKey,
+    templateCategory: "UTILITY",
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
@@ -546,6 +547,341 @@ test("settles once, detects conflicts, and rejects unknown or early settlements"
   );
 });
 
+test("stores provider cooldown and failed settlement atomically and idempotently", async () => {
+  const { database, repository } =
+    await createSqliteD1();
+  const command = reservationCommand();
+  const observedAt = atOffset(reservedAt, 1_000);
+  const cooldown = {
+    reservationKey: command.reservationKey,
+    scope: "pair",
+    providerErrorCode: 131056,
+    observedAt,
+    blockedUntil: atOffset(observedAt, 12_000),
+  };
+
+  await repository.reserveBusinessInitiatedMessage(command);
+  assert.throws(
+    () => database.prepare(`
+      INSERT INTO whatsapp_provider_cooldown_events (
+        reservation_key,
+        scope,
+        provider_error_code,
+        observed_at,
+        blocked_until,
+        created_at
+      ) VALUES (?1, 'pair', 131056, ?2, ?3, ?2)
+    `).run(
+      command.reservationKey,
+      observedAt,
+      cooldown.blockedUntil,
+    ),
+    /lacks rejection proof/,
+  );
+
+  const first = await repository.applyProviderCooldown(
+    cooldown,
+  );
+  const repeated = await repository.applyProviderCooldown(
+    cooldown,
+  );
+  const retired = await repository
+    .reserveBusinessInitiatedMessage(command);
+  const blocked = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          30,
+        ),
+        reservedAt: atOffset(reservedAt, 7_000),
+        reservationExpiresAt: atOffset(
+          expiresAt,
+          7_000,
+        ),
+      }),
+    );
+
+  assert.deepEqual(first, {
+    outcome: "applied",
+    cooldown,
+    idempotent: false,
+  });
+  assert.deepEqual(repeated, {
+    outcome: "applied",
+    cooldown,
+    idempotent: true,
+  });
+  assert.deepEqual(retired, {
+    outcome: "reservation-retired",
+    settlement: {
+      reservationKey: command.reservationKey,
+      outcome: "provider-failed",
+      settledAt: observedAt,
+    },
+  });
+  assert.deepEqual(blocked, {
+    outcome: "provider-cooldown",
+    scope: "pair",
+    providerErrorCode: 131056,
+    retryAt: cooldown.blockedUntil,
+  });
+  assert.deepEqual(
+    { ...database.prepare(`
+      SELECT outcome, settled_at AS settledAt
+      FROM whatsapp_rate_limit_settlements
+      WHERE reservation_key = ?1
+    `).get(command.reservationKey) },
+    {
+      outcome: "provider-failed",
+      settledAt: observedAt,
+    },
+  );
+  assert.equal(
+    database.prepare(`
+      SELECT count(*) AS count
+      FROM whatsapp_provider_cooldown_events
+    `).get().count,
+    1,
+  );
+});
+
+test("isolates pair, sender, and portfolio-recipient provider cooldown scopes", async () => {
+  const { repository } = await createSqliteD1();
+  const first = reservationCommand();
+  const pairObservedAt = atOffset(reservedAt, 1_000);
+
+  await repository.reserveBusinessInitiatedMessage(first);
+  await repository.applyProviderCooldown({
+    reservationKey: first.reservationKey,
+    scope: "pair",
+    providerErrorCode: 131056,
+    observedAt: pairObservedAt,
+    blockedUntil: atOffset(pairObservedAt, 12_000),
+  });
+
+  const afterPairAt = atOffset(reservedAt, 7_000);
+  const differentSender = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          31,
+        ),
+        senderKey: secondSenderKey,
+        reservedAt: afterPairAt,
+        reservationExpiresAt: atOffset(
+          expiresAt,
+          7_000,
+        ),
+      }),
+    );
+
+  assert.equal(differentSender.outcome, "reserved");
+
+  const senderObservedAt = atOffset(
+    afterPairAt,
+    1_000,
+  );
+
+  await repository.applyProviderCooldown({
+    reservationKey:
+      differentSender.reservation.reservationKey,
+    scope: "sender",
+    providerErrorCode: 130429,
+    observedAt: senderObservedAt,
+    blockedUntil: atOffset(senderObservedAt, 30_000),
+  });
+
+  const senderBlocked = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          32,
+        ),
+        senderKey: secondSenderKey,
+        recipientKey: key(
+          "whatsapp_recipient_v1_",
+          50,
+        ),
+        reservedAt: atOffset(afterPairAt, 7_000),
+        reservationExpiresAt: atOffset(
+          expiresAt,
+          14_000,
+        ),
+      }),
+    );
+
+  assert.deepEqual(senderBlocked, {
+    outcome: "provider-cooldown",
+    scope: "sender",
+    providerErrorCode: 130429,
+    retryAt: atOffset(senderObservedAt, 30_000),
+  });
+
+  const recipientBaseAt = atOffset(reservedAt, 60_000);
+  const recipientReservation = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          33,
+        ),
+        recipientKey: key(
+          "whatsapp_recipient_v1_",
+          51,
+        ),
+        templateCategory: "MARKETING",
+        reservedAt: recipientBaseAt,
+        reservationExpiresAt: atOffset(
+          recipientBaseAt,
+          60_000,
+        ),
+      }),
+    );
+  const recipientObservedAt = atOffset(
+    recipientBaseAt,
+    1_000,
+  );
+
+  await repository.applyProviderCooldown({
+    reservationKey:
+      recipientReservation.reservation.reservationKey,
+    scope: "portfolio-recipient",
+    providerErrorCode: 131049,
+    observedAt: recipientObservedAt,
+    blockedUntil: atOffset(
+      recipientObservedAt,
+      86_400_000,
+    ),
+  });
+
+  const recipientBlocked = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          34,
+        ),
+        senderKey: secondSenderKey,
+        recipientKey:
+          recipientReservation.reservation.recipientKey,
+        templateCategory: "MARKETING",
+        reservedAt: atOffset(recipientBaseAt, 7_000),
+        reservationExpiresAt: atOffset(
+          recipientBaseAt,
+          67_000,
+        ),
+      }),
+    );
+
+  assert.deepEqual(recipientBlocked, {
+    outcome: "provider-cooldown",
+    scope: "portfolio-recipient",
+    providerErrorCode: 131049,
+    retryAt: atOffset(
+      recipientObservedAt,
+      86_400_000,
+    ),
+  });
+  const utilityAllowed = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          35,
+        ),
+        senderKey: secondSenderKey,
+        recipientKey:
+          recipientReservation.reservation.recipientKey,
+        templateCategory: "UTILITY",
+        reservedAt: atOffset(recipientBaseAt, 7_000),
+        reservationExpiresAt: atOffset(
+          recipientBaseAt,
+          67_000,
+        ),
+      }),
+    );
+
+  assert.equal(utilityAllowed.outcome, "reserved");
+});
+
+test("rejects mismatched, unsafe, conflicting, and manually shortened provider cooldowns", async () => {
+  const { database, repository } =
+    await createSqliteD1();
+  const command = reservationCommand();
+  const observedAt = atOffset(reservedAt, 1_000);
+
+  await repository.reserveBusinessInitiatedMessage(command);
+  await assert.rejects(
+    repository.applyProviderCooldown({
+      reservationKey: command.reservationKey,
+      scope: "sender",
+      providerErrorCode: 131056,
+      observedAt,
+      blockedUntil: atOffset(observedAt, 6_000),
+    }),
+    /scope does not match/,
+  );
+  await assert.rejects(
+    repository.applyProviderCooldown({
+      reservationKey: command.reservationKey,
+      scope: "portfolio-recipient",
+      providerErrorCode: 131049,
+      observedAt,
+      blockedUntil: atOffset(observedAt, 60_000),
+    }),
+    /outside the safe window/,
+  );
+
+  const cooldown = {
+    reservationKey: command.reservationKey,
+    scope: "pair",
+    providerErrorCode: 131056,
+    observedAt,
+    blockedUntil: atOffset(observedAt, 12_000),
+  };
+
+  await repository.applyProviderCooldown(cooldown);
+  assert.equal(
+    (
+      await repository.applyProviderCooldown({
+        ...cooldown,
+        blockedUntil: atOffset(observedAt, 13_000),
+      })
+    ).outcome,
+    "cooldown-conflict",
+  );
+  assert.throws(
+    () => database.prepare(`
+      UPDATE whatsapp_provider_cooldown_state
+      SET blocked_until = ?1,
+        updated_at = ?2
+      WHERE scope = 'pair'
+        AND sender_key = ?3
+        AND recipient_key = ?4
+    `).run(
+      atOffset(observedAt, 6_000),
+      observedAt,
+      senderKey,
+      recipientKey,
+    ),
+    /cannot be shortened|lacks event proof/,
+  );
+  assert.throws(
+    () => database.prepare(`
+      UPDATE whatsapp_provider_cooldown_events
+      SET blocked_until = ?1
+      WHERE reservation_key = ?2
+    `).run(
+      atOffset(observedAt, 13_000),
+      command.reservationKey,
+    ),
+    /events are immutable/,
+  );
+});
+
 test("reports a pre-reservation settlement before any terminal event exists", async () => {
   const { repository } = await createSqliteD1();
   const command = reservationCommand();
@@ -576,6 +912,14 @@ test("rejects unapproved limits, unsafe expiries, key collisions, and history mu
       }),
     ),
     /portfolioCapacity is invalid/,
+  );
+  await assert.rejects(
+    repository.reserveBusinessInitiatedMessage(
+      reservationCommand({
+        templateCategory: "AUTHENTICATION",
+      }),
+    ),
+    /templateCategory is invalid/,
   );
   await assert.rejects(
     repository.reserveBusinessInitiatedMessage(

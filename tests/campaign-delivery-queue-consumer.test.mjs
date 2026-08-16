@@ -101,15 +101,19 @@ function queueBody(deliveryKey = firstDeliveryKey) {
   };
 }
 
-function delivery(body = queueBody()) {
+function delivery(
+  body = queueBody(),
+  attempts = 1,
+  id = "queue-message-id",
+) {
   const actions = [];
 
   return {
     actions,
     message: {
-      id: "queue-message-id",
+      id,
       timestamp: new Date(now),
-      attempts: 1,
+      attempts,
       body,
       ack() {
         actions.push({ action: "ack" });
@@ -166,6 +170,8 @@ function fixture(options = {}) {
                 tenantId: 7,
                 recipientPhoneNumber:
                   "+972501234567",
+                nextDeliveryAttemptNumber:
+                  options.nextDeliveryAttemptNumber ?? 1,
               }
             : options.currentContext;
         },
@@ -198,6 +204,22 @@ function fixture(options = {}) {
             errorCode,
             timestamp,
           });
+        },
+        async markDeferred(
+          deliveryKey,
+          errorCode,
+          timestamp,
+        ) {
+          calls.push({
+            operation: "mark-deferred",
+            deliveryKey,
+            errorCode,
+            timestamp,
+          });
+
+          if (options.markDeferredError) {
+            throw options.markDeferredError;
+          }
         },
         async markAmbiguous(
           deliveryKey,
@@ -256,6 +278,11 @@ function fixture(options = {}) {
             deliveryKey: request.deliveryKey,
             recipientPhoneNumber:
               request.recipientPhoneNumber,
+            deliveryAttemptNumber:
+              request.deliveryAttemptNumber,
+            queueAttemptNumber:
+              request.queueAttemptNumber,
+            queueMessageId: request.queueMessageId,
             reservedAt: request.reservedAt,
           });
 
@@ -287,6 +314,26 @@ function fixture(options = {}) {
             throw options.settlementError;
           }
         },
+        async deferProviderRejection(
+          reservationKey,
+          scope,
+          providerErrorCode,
+          retryAfterSeconds,
+          observedAt,
+        ) {
+          calls.push({
+            operation: "provider-cooldown",
+            reservationKey,
+            scope,
+            providerErrorCode,
+            retryAfterSeconds,
+            observedAt,
+          });
+
+          if (options.providerCooldownError) {
+            throw options.providerCooldownError;
+          }
+        },
       },
       {
         isConfigured() {
@@ -299,6 +346,10 @@ function fixture(options = {}) {
               prepared.recipient.deliveryKey,
             reservationKey:
               prepared.rateLimitReservationKey,
+            deliveryAttemptNumber:
+              prepared.deliveryAttemptNumber,
+            queueAttemptNumber:
+              prepared.queueAttemptNumber,
           });
 
           if (options.processorError) {
@@ -350,6 +401,27 @@ test("retries before D1 claim when the delivery processor is unavailable", async
       action: "retry",
       options: { delaySeconds: 60 },
     },
+  ]);
+  assert.deepEqual(testFixture.calls, []);
+});
+
+test("discards an invalid queue attempt before reservation identity derivation", async () => {
+  const invalidAttempt = delivery(queueBody(), 0);
+  const invalidId = delivery(queueBody(), 1, "\n");
+  const testFixture = fixture();
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [invalidAttempt.message, invalidId.message],
+    }),
+    emptyResult({ discarded: 2 }),
+  );
+  assert.deepEqual(invalidAttempt.actions, [
+    { action: "ack" },
+  ]);
+  assert.deepEqual(invalidId.actions, [
+    { action: "ack" },
   ]);
   assert.deepEqual(testFixture.calls, []);
 });
@@ -413,7 +485,10 @@ test("defers a rate-limited delivery before claiming or contacting Meta", async 
     testFixture.calls.some(
       (call) =>
         call.operation === "reserve" &&
-        call.reservedAt === now,
+        call.reservedAt === now &&
+        call.deliveryAttemptNumber === 1 &&
+        call.queueAttemptNumber === 1 &&
+        call.queueMessageId === "queue-message-id",
     ),
     true,
   );
@@ -575,7 +650,9 @@ test("records explicit accepted and rejected provider outcomes", async () => {
       (call) =>
         call.operation === "process" &&
         call.deliveryKey === firstDeliveryKey &&
-        call.reservationKey === firstReservationKey,
+        call.reservationKey === firstReservationKey &&
+        call.deliveryAttemptNumber === 1 &&
+        call.queueAttemptNumber === 1,
     ),
     true,
   );
@@ -589,6 +666,172 @@ test("records explicit accepted and rejected provider outcomes", async () => {
     ),
     true,
   );
+});
+
+test("persists a scoped provider cooldown before returning an explicitly rejected delivery to the queue", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    processorResults: [
+      {
+        outcome: "deferred",
+        errorCode: "META_PAIR_RATE_LIMITED",
+        providerErrorCode: 131056,
+        cooldownScope: "pair",
+        retryAfterSeconds: 6,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ deferred: 1, retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 6 },
+    },
+  ]);
+  assert.deepEqual(
+    testFixture.calls
+      .filter((call) =>
+        [
+          "process",
+          "provider-cooldown",
+          "mark-deferred",
+        ].includes(call.operation),
+      )
+      .map((call) => call.operation),
+    ["process", "provider-cooldown", "mark-deferred"],
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "provider-cooldown" &&
+        call.reservationKey === firstReservationKey &&
+        call.scope === "pair" &&
+        call.providerErrorCode === 131056 &&
+        call.retryAfterSeconds === 6 &&
+        call.observedAt === now,
+    ),
+    true,
+  );
+});
+
+test("keeps a provider rejection fail-closed when cooldown evidence or queue state cannot be persisted", async () => {
+  const cases = [
+    fixture({
+      providerCooldownError: new Error(
+        "private cooldown failure",
+      ),
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_PHONE_THROUGHPUT_LIMITED",
+          providerErrorCode: 130429,
+          cooldownScope: "sender",
+          retryAfterSeconds: 12,
+        },
+      ],
+    }),
+    fixture({
+      markDeferredError: new Error(
+        "private queue state failure",
+      ),
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_PAIR_RATE_LIMITED",
+          providerErrorCode: 131056,
+          cooldownScope: "pair",
+          retryAfterSeconds: 6,
+        },
+      ],
+    }),
+  ];
+
+  for (const testFixture of cases) {
+    const testDelivery = delivery();
+
+    assert.deepEqual(
+      await testFixture.consumer.handle({
+        queue: "connect-campaign-deliveries",
+        messages: [testDelivery.message],
+      }),
+      emptyResult({ ambiguous: 1 }),
+    );
+    assert.deepEqual(testDelivery.actions, [
+      { action: "ack" },
+    ]);
+    assert.equal(
+      testFixture.calls.some(
+        (call) =>
+          call.operation === "ambiguous" &&
+          call.errorCode ===
+            "PROVIDER_RETRY_STATE_UNKNOWN",
+      ),
+      true,
+    );
+  }
+});
+
+test("rejects a processor cooldown with a mismatched scope or message category", async () => {
+  const marketingTemplate = {
+    ...campaign().template,
+    category: "MARKETING",
+  };
+  const cases = [
+    fixture({
+      currentCampaign: campaign({
+        template: marketingTemplate,
+      }),
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_PAIR_RATE_LIMITED",
+          providerErrorCode: 131056,
+          cooldownScope: "sender",
+          retryAfterSeconds: 6,
+        },
+      ],
+    }),
+    fixture({
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_MARKETING_RECIPIENT_LIMITED",
+          providerErrorCode: 131049,
+          cooldownScope: "portfolio-recipient",
+          retryAfterSeconds: 86_400,
+        },
+      ],
+    }),
+  ];
+
+  for (const testFixture of cases) {
+    const testDelivery = delivery();
+
+    assert.deepEqual(
+      await testFixture.consumer.handle({
+        queue: "connect-campaign-deliveries",
+        messages: [testDelivery.message],
+      }),
+      emptyResult({ ambiguous: 1 }),
+    );
+    assert.deepEqual(testDelivery.actions, [
+      { action: "ack" },
+    ]);
+    assert.equal(
+      testFixture.calls.some(
+        (call) =>
+          call.operation === "provider-cooldown",
+      ),
+      false,
+    );
+  }
 });
 
 test("keeps an unknown external outcome in sending without automatic retry", async () => {

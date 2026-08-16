@@ -456,7 +456,11 @@ Portfolio מלא נדחה בחלון שמרני של 24 שעות ורק כאשר
 באמצעות HMAC-SHA-256 עם Purpose separation ו־Secret ייעודי בשם
 `WHATSAPP_RATE_LIMIT_HMAC_KEY_V1`. מזהי Meta ומספר הטלפון אינם
 נשמרים בטבלאות ה־Rate Limit. החלפת Key version ללא Drain או Migration
-תפצל State ולכן אסורה.
+תפצל State ולכן אסורה. זהות Reservation כוללת גם את מספר ניסיון
+ה־Delivery השמור, מספר ניסיון ה־Queue ומזהה הודעת ה־Queue האטום;
+Retry לאחר Settlement מקבל Claim חדש, Retry זהה של אותו Claim נשאר
+Idempotent, ושתי רשומות Queue בעלות מזהים שונים אינן חולקות
+Reservation.
 
 14.8.8 ה־Worker עדיין מזריק Policy source מושבת, מפני שאין קריאת
 Capacity חיה ומאושרת. חסימה זו מונעת שליחה חדשה אך אינה חוסמת עיבוד
@@ -514,9 +518,48 @@ Body parameters, ‏Dynamic URL parameter ו־Quick Reply payload אטום
 אינה שולחת אותם שוב אוטומטית.
 
 14.10.5 המימוש אינו מחובר עדיין ל־Worker. לפני החיבור נדרשים מקור
-Capacity חי, מדיניות Provider Backoff/Cooldown מאושרת, Kill switch
-וראיות Sandbox של WABA. עד אז ה־Worker ממשיך להזריק Processor ו־Policy
-source מושבתים ונכשל סגור.
+Capacity חי, מקור Retry evidence מאושר, Kill switch וראיות Sandbox
+של WABA. עד אז ה־Worker ממשיך להזריק Processor ו־Policy source
+מושבתים ונכשל סגור.
+
+14.11 ‏Provider Backoff/Cooldown מקומי:
+
+14.11.1 `MetaCampaignDeliveryRetryPolicy` אינו מגדיר מספרי Retry
+עצמאיים. ה־Runtime מעביר Evidence מפורשת אל
+`MetaMessageFailurePolicy`, שהוא מקור ההחלטה המשותף גם ל־Graph
+responses וגם ל־Status webhooks. ‏Evidence חסרה, מורחבת או לא תקינה
+מחזירה `stop` ואינה יוצרת Retry.
+
+14.11.2 רק שלושה Scopes ניתנים כרגע לייצוג בטוח במסד: `130429`
+ברמת Sender, ‏`131049` ברמת Portfolio+Recipient ו־`131056` ברמת
+Sender+Recipient. חסימת `131049` חלה רק על Campaign מסוג
+`MARKETING`; הודעת `UTILITY` לא נחסמת על בסיס מגבלת Marketing של
+אותו נמען. ‏`4` ו־`80007` אינם נשלחים שוב אוטומטית מפני שאין עדיין
+מפתחות אטומים ל־App ול־WABA. ‏`131057` מקבל החלטת `pause` במדיניות
+המשותפת, אך עד למימוש מצב השהיה עמיד הוא מסתיים ללא Retry אוטומטי
+ואינו נשמר כ־Cooldown מתוזמן.
+
+14.11.3 מיגרציה `0032` שומרת אירוע Cooldown בלתי־ניתן לשינוי ומצב
+חסימה נגזר. שתי הטבלאות מכילות רק Reservation key ומפתחות HMAC
+אטומים; אין בהן Tenant ID, מזהה Meta גולמי, מספר טלפון, תוכן הודעה,
+Token או Provider payload.
+
+14.11.4 כתיבת אירוע ה־Cooldown ו־Settlement מסוג `provider-failed`
+מתבצעת באותו D1 batch. ‏Triggers דורשים Reservation קיים, Scope
+התואם לקוד, זמן עתידי של עד 24 שעות ו־Settlement מדויק מאותו רגע;
+מצב חסימה קיים ניתן רק להאריך ולא לקצר ידנית.
+
+14.11.5 ה־Queue מחזיר נמען מ־`sending` ל־`queued` רק לאחר שה־D1
+אישר את ה־Cooldown וה־Settlement. כשל בכתיבת הראיה או במעבר המצב
+משאיר את ה־Delivery חסום ללא Retry אוטומטי, כדי שלא תיווצר שליחה
+כפולה. ניסיון חדש נדרש לקבל Claim ו־Reservation חדשים; Repository
+מסרב להחזיר כ־Idempotent Reservation שכבר קיבלה Settlement.
+
+14.11.6 ‏`MetaGraphTransport` קולט רק ערך `Retry-After` מספרי ובטווח
+של שנייה עד 24 שעות ואינו שומר את ה־Header הגולמי. עדיין חסרים חיבור
+הערך אל מקור Evidence חי, ‏Pair exponent מתמשך, Capacity חי, Kill
+switch ו־WABA Sandbox; אלה נשארים `unknown/unavailable` עד חיבור
+החשבון המורשה.
 
 ## 15. אחריות ועדכון
 

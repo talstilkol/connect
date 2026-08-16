@@ -225,6 +225,13 @@
       "when": 1786891510000,
       "tag": "0031_campaign_delivery_provider_links",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1786895110000,
+      "tag": "0032_whatsapp_provider_cooldowns",
+      "breakpoints": true
     }
   ]
 }

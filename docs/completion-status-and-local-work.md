@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,280 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,298 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -235,9 +235,12 @@ Meta ל־Delivery ול־Reservation, ומיישב `delivered`, ‏`read` ו־`fa
 באופן Idempotent. ‏Meta sender adapter וה־Processor השרתי נבנו
 ונבדקו מקומית: הם מרכיבים Template parameters, טוענים Token רק דרך
 Credential Vault, מאמתים `wamid` ומסווגים תוצאה חיצונית לא ודאית
-ללא Retry אוטומטי. הם עדיין אינם מוזרקים ל־Worker. ה־Policy source
-הזמני נכשל סגור; טעינת Capacity חיה, מדיניות Backoff/Cooldown וראיות
-WABA נשארות `unknown/unavailable` עד חיבור החשבון המורשה.
+ללא Retry אוטומטי. נוסף Provider cooldown אטומי ל־Sender,
+Portfolio+Recipient ו־Sender+Recipient, המקושר ל־Reservation ול־
+Settlement ונשען על `MetaMessageFailurePolicy` המשותף. הם עדיין אינם
+מוזרקים ל־Worker. ה־Policy source הזמני נכשל סגור; טעינת Capacity
+חיה, מקור Retry evidence, ‏Kill switch וראיות WABA נשארים
+`unknown/unavailable` עד חיבור החשבון המורשה.
 
 4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
 הוספת פערי ה־PDF וה־Rate Limiting הוא **66.5–109 שעות פיתוח נטו**,

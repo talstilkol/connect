@@ -24,6 +24,8 @@ const campaignDeliveryKeyPattern =
 const phoneNumberPattern = /^\+[1-9][0-9]{0,14}$/;
 const canonicalTimestampPattern =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const queueMessageIdPattern =
+  /^[^\u0000-\u001f\u007f]{1,255}$/;
 
 export interface CampaignDeliveryRateLimitPolicyRequest {
   tenantId: number;
@@ -67,9 +69,27 @@ function assertRequest(
       request.campaign.tenantId,
     ) ||
     request.campaign.tenantId <= 0 ||
+    (
+      request.campaign.template.category !==
+        "MARKETING" &&
+      request.campaign.template.category !== "UTILITY"
+    ) ||
     !campaignDeliveryKeyPattern.test(
       request.deliveryKey,
     ) ||
+    !Number.isSafeInteger(
+      request.deliveryAttemptNumber,
+    ) ||
+    request.deliveryAttemptNumber < 1 ||
+    !Number.isSafeInteger(
+      request.queueAttemptNumber,
+    ) ||
+    request.queueAttemptNumber < 1 ||
+    !queueMessageIdPattern.test(
+      request.queueMessageId,
+    ) ||
+    request.queueMessageId.trim() !==
+      request.queueMessageId ||
     !phoneNumberPattern.test(
       request.recipientPhoneNumber,
     ) ||
@@ -241,6 +261,11 @@ export function createCampaignDeliveryRateLimitContextResolver(
         recipientPhoneNumber:
           request.recipientPhoneNumber,
         deliveryKey: request.deliveryKey,
+        deliveryAttemptNumber:
+          request.deliveryAttemptNumber,
+        queueAttemptNumber:
+          request.queueAttemptNumber,
+        queueMessageId: request.queueMessageId,
       });
       const reservationExpiresAt = new Date(
         Date.parse(request.reservedAt) +
@@ -251,6 +276,8 @@ export function createCampaignDeliveryRateLimitContextResolver(
       return {
         ...derived,
         tenantId: connection.tenantId,
+        templateCategory:
+          request.campaign.template.category,
         portfolioCapacity:
           policy.portfolioCapacity,
         reservationExpiresAt,

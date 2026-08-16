@@ -11,10 +11,16 @@ import {
 const hmacKey = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=";
 const reservedAt = "2026-08-16T10:00:00.000Z";
 const request = {
-  campaign: { tenantId: 7 },
+  campaign: {
+    tenantId: 7,
+    template: { category: "UTILITY" },
+  },
   deliveryKey:
     `campaign_delivery_v1_${"a".repeat(64)}`,
   recipientPhoneNumber: "+972501234567",
+  deliveryAttemptNumber: 1,
+  queueAttemptNumber: 1,
+  queueMessageId: "queue-message-17",
   reservedAt,
 };
 
@@ -239,6 +245,37 @@ test("rejects malformed delivery scope before D1 or policy access", async () => 
     testFixture.resolver.resolve({
       ...request,
       reservedAt: "2026-08-16 10:00:00",
+    }),
+    /request is invalid/,
+  );
+  await assert.rejects(
+    testFixture.resolver.resolve({
+      ...request,
+      deliveryAttemptNumber: 0,
+    }),
+    /request is invalid/,
+  );
+  await assert.rejects(
+    testFixture.resolver.resolve({
+      ...request,
+      queueAttemptNumber: 0,
+    }),
+    /request is invalid/,
+  );
+  await assert.rejects(
+    testFixture.resolver.resolve({
+      ...request,
+      queueMessageId: " queue-message-17",
+    }),
+    /request is invalid/,
+  );
+  await assert.rejects(
+    testFixture.resolver.resolve({
+      ...request,
+      campaign: {
+        ...request.campaign,
+        template: { category: "AUTHENTICATION" },
+      },
     }),
     /request is invalid/,
   );

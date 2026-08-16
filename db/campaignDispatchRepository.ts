@@ -155,7 +155,8 @@ const FIND_QUEUED_DELIVERY_CONTEXT_SQL = `
   SELECT
     campaign_recipients.campaign_key AS campaignKey,
     campaign_recipients.tenant_id AS tenantId,
-    campaign_recipients.phone_e164 AS recipientPhoneNumber
+    campaign_recipients.phone_e164 AS recipientPhoneNumber,
+    campaign_recipients.attempt_count AS attemptCount
   FROM campaign_recipients
   INNER JOIN campaigns
     ON campaigns.tenant_id =
@@ -349,6 +350,17 @@ const MARK_REJECTED_SQL = `
   RETURNING delivery_key AS deliveryKey
 `;
 
+const MARK_DEFERRED_SQL = `
+  UPDATE campaign_recipients
+  SET
+    status = 'queued',
+    last_error_code = ?2,
+    updated_at = ?3
+  WHERE delivery_key = ?1
+    AND status = 'sending'
+  RETURNING delivery_key AS deliveryKey
+`;
+
 const MARK_AMBIGUOUS_SQL = `
   UPDATE campaign_recipients
   SET
@@ -380,6 +392,7 @@ interface CampaignDeliveryContextRow {
   campaignKey: string;
   tenantId: number;
   recipientPhoneNumber: string;
+  attemptCount: number;
 }
 
 interface CampaignRecipientRow {
@@ -431,6 +444,11 @@ export interface CampaignDispatchRepository {
     now: string,
   ): Promise<CampaignDeliveryPreparation>;
   markRejected(
+    deliveryKey: string,
+    errorCode: string,
+    updatedAt: string,
+  ): Promise<void>;
+  markDeferred(
     deliveryKey: string,
     errorCode: string,
     updatedAt: string,
@@ -839,7 +857,10 @@ export function createCampaignDispatchRepository(
       if (
         !/^\+[1-9][0-9]{0,14}$/.test(
           row.recipientPhoneNumber,
-        )
+        ) ||
+        !Number.isSafeInteger(row.attemptCount) ||
+        row.attemptCount < 0 ||
+        row.attemptCount >= Number.MAX_SAFE_INTEGER
       ) {
         throw new Error(
           "D1 returned an invalid campaign delivery recipient",
@@ -851,6 +872,8 @@ export function createCampaignDispatchRepository(
         tenantId: row.tenantId,
         recipientPhoneNumber:
           row.recipientPhoneNumber,
+        nextDeliveryAttemptNumber:
+          row.attemptCount + 1,
       };
     },
 
@@ -899,6 +922,22 @@ export function createCampaignDispatchRepository(
       return requireTransition(
         database,
         MARK_REJECTED_SQL,
+        [deliveryKey, errorCode, updatedAt],
+      );
+    },
+
+    markDeferred(
+      deliveryKey,
+      errorCode,
+      updatedAt,
+    ) {
+      assertDeliveryKey(deliveryKey);
+      assertErrorCode(errorCode);
+      assertTimestamp(updatedAt);
+
+      return requireTransition(
+        database,
+        MARK_DEFERRED_SQL,
         [deliveryKey, errorCode, updatedAt],
       );
     },

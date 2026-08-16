@@ -16,6 +16,9 @@ export interface WhatsappRateLimitKeyInput {
   phoneNumberId: string;
   recipientPhoneNumber: string;
   deliveryKey: string;
+  deliveryAttemptNumber: number;
+  queueAttemptNumber: number;
+  queueMessageId: string;
 }
 
 export interface DerivedWhatsappRateLimitKeys {
@@ -76,9 +79,13 @@ function decodeKey(value: string | undefined): OwnedBytes | null {
 }
 
 function readProviderIdentifier(
-  value: string,
+  value: unknown,
   fieldName: string,
 ): string {
+  if (typeof value !== "string") {
+    throw new Error(`${fieldName} is invalid`);
+  }
+
   const normalized = value.trim();
 
   if (!providerIdentifierPattern.test(normalized)) {
@@ -95,7 +102,13 @@ function normalizeInput(
     !phoneNumberPattern.test(
       input.recipientPhoneNumber,
     ) ||
-    !deliveryKeyPattern.test(input.deliveryKey)
+    !deliveryKeyPattern.test(input.deliveryKey) ||
+    !Number.isSafeInteger(
+      input.deliveryAttemptNumber,
+    ) ||
+    input.deliveryAttemptNumber < 1 ||
+    !Number.isSafeInteger(input.queueAttemptNumber) ||
+    input.queueAttemptNumber < 1
   ) {
     throw new Error(
       "WhatsApp rate-limit key input is invalid",
@@ -114,6 +127,13 @@ function normalizeInput(
     recipientPhoneNumber:
       input.recipientPhoneNumber,
     deliveryKey: input.deliveryKey,
+    deliveryAttemptNumber:
+      input.deliveryAttemptNumber,
+    queueAttemptNumber: input.queueAttemptNumber,
+    queueMessageId: readProviderIdentifier(
+      input.queueMessageId,
+      "queueMessageId",
+    ),
   };
 }
 
@@ -230,6 +250,9 @@ export function createWhatsappRateLimitKeyDeriver(
             input.phoneNumberId,
             input.recipientPhoneNumber,
             input.deliveryKey,
+            String(input.deliveryAttemptNumber),
+            String(input.queueAttemptNumber),
+            input.queueMessageId,
           ]),
         ]);
 

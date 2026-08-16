@@ -6,6 +6,10 @@ import type {
   CampaignDeliveryProcessorResult,
   PreparedCampaignDelivery,
 } from "../../shared/domain/campaignDelivery.ts";
+import type {
+  WhatsappProviderCooldownErrorCode,
+  WhatsappProviderCooldownScope,
+} from "../../shared/domain/whatsappRateLimit.ts";
 import {
   MetaCredentialVaultError,
 } from "../meta/metaCredentialVault.ts";
@@ -36,6 +40,34 @@ export interface MetaCampaignDeliveryProcessorDependencies {
   >;
   credentialVault: MetaCredentialVault;
   sender: MetaCampaignTemplateSender;
+  retryPolicy: MetaCampaignDeliveryRetryPolicy;
+}
+
+export interface MetaCampaignDeliveryRetryPolicyRequest {
+  tenantId: number;
+  templateCategory: "MARKETING" | "UTILITY";
+  attemptCount: number;
+  providerErrorCode: WhatsappProviderCooldownErrorCode;
+  cooldownScope: WhatsappProviderCooldownScope;
+  providerRetryAfterSeconds: number | null;
+}
+
+export type MetaCampaignDeliveryRetryPolicyDecision =
+  | {
+      action: "stop";
+    }
+  | {
+      action: "defer";
+      retryAfterSeconds: number;
+    };
+
+export interface MetaCampaignDeliveryRetryPolicy {
+  isConfigured(): boolean;
+  decide(
+    request: MetaCampaignDeliveryRetryPolicyRequest,
+  ):
+    | MetaCampaignDeliveryRetryPolicyDecision
+    | Promise<MetaCampaignDeliveryRetryPolicyDecision>;
 }
 
 function rejected(
@@ -59,6 +91,14 @@ function deliveryIsValid(
     campaign.campaignKey === recipient.campaignKey &&
     campaign.status === "running" &&
     recipient.status === "sending" &&
+    Number.isSafeInteger(recipient.attemptCount) &&
+    recipient.attemptCount > 0 &&
+    recipient.attemptCount ===
+      delivery.deliveryAttemptNumber &&
+    Number.isSafeInteger(
+      delivery.queueAttemptNumber,
+    ) &&
+    delivery.queueAttemptNumber > 0 &&
     campaignKeyPattern.test(campaign.campaignKey) &&
     campaignDeliveryKeyPattern.test(
       recipient.deliveryKey,
@@ -106,9 +146,73 @@ function mappedGraphErrorCode(
   }
 }
 
-function classifySubmissionError(
+function providerCooldown(
+  graphCode: number | null,
+): {
+  providerErrorCode: WhatsappProviderCooldownErrorCode;
+  cooldownScope: WhatsappProviderCooldownScope;
+} | null {
+  switch (graphCode) {
+    case 130429:
+      return {
+        providerErrorCode: 130429,
+        cooldownScope: "sender",
+      };
+    case 131049:
+      return {
+        providerErrorCode: 131049,
+        cooldownScope: "portfolio-recipient",
+      };
+    case 131056:
+      return {
+        providerErrorCode: 131056,
+        cooldownScope: "pair",
+      };
+    default:
+      return null;
+  }
+}
+
+function retryPolicyIsConfigured(
+  policy: MetaCampaignDeliveryRetryPolicy,
+): boolean {
+  try {
+    return policy.isConfigured() === true;
+  } catch {
+    return false;
+  }
+}
+
+function validRetryDecision(
+  value: MetaCampaignDeliveryRetryPolicyDecision,
+  providerErrorCode: WhatsappProviderCooldownErrorCode,
+): value is MetaCampaignDeliveryRetryPolicyDecision {
+  if (
+    value &&
+    value.action === "stop" &&
+    Object.keys(value).length === 1
+  ) {
+    return true;
+  }
+
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    value.action === "defer" &&
+    Object.keys(value).length === 2 &&
+    Number.isSafeInteger(value.retryAfterSeconds) &&
+    value.retryAfterSeconds > 0 &&
+    value.retryAfterSeconds <= 24 * 60 * 60 &&
+    (providerErrorCode !== 131049 ||
+      value.retryAfterSeconds === 24 * 60 * 60)
+  );
+}
+
+async function classifySubmissionError(
   error: unknown,
-): CampaignDeliveryProcessorResult {
+  delivery: PreparedCampaignDelivery,
+  retryPolicy: MetaCampaignDeliveryRetryPolicy,
+): Promise<CampaignDeliveryProcessorResult> {
   if (
     error instanceof MetaCampaignTemplateContractError &&
     error.code === "INVALID_DELIVERY_REQUEST"
@@ -127,9 +231,57 @@ function classifySubmissionError(
       error.httpStatus >= 400 &&
       error.httpStatus < 500
     ) {
-      return rejected(
-        mappedGraphErrorCode(error.graphCode),
+      const errorCode = mappedGraphErrorCode(
+        error.graphCode,
       );
+      const cooldown = providerCooldown(
+        error.graphCode,
+      );
+
+      if (!cooldown) {
+        return rejected(errorCode);
+      }
+
+      if (
+        cooldown.providerErrorCode === 131049 &&
+        delivery.campaign.template.category !==
+          "MARKETING"
+      ) {
+        return rejected(errorCode);
+      }
+
+      try {
+        const decision = await retryPolicy.decide({
+          tenantId: delivery.campaign.tenantId,
+          templateCategory:
+            delivery.campaign.template.category,
+          attemptCount:
+            delivery.recipient.attemptCount,
+          providerRetryAfterSeconds:
+            error.retryAfterSeconds,
+          ...cooldown,
+        });
+
+        if (
+          !validRetryDecision(
+            decision,
+            cooldown.providerErrorCode,
+          ) ||
+          decision.action === "stop"
+        ) {
+          return rejected(errorCode);
+        }
+
+        return {
+          outcome: "deferred",
+          errorCode,
+          ...cooldown,
+          retryAfterSeconds:
+            decision.retryAfterSeconds,
+        };
+      } catch {
+        return rejected(errorCode);
+      }
     }
   }
 
@@ -143,10 +295,20 @@ export function createMetaCampaignDeliveryProcessor(
 ): CampaignDeliveryProcessor {
   return {
     isConfigured() {
-      return true;
+      return retryPolicyIsConfigured(
+        dependencies.retryPolicy,
+      );
     },
 
     async process(delivery) {
+      if (
+        !retryPolicyIsConfigured(
+          dependencies.retryPolicy,
+        )
+      ) {
+        return rejected("META_RETRY_POLICY_UNAVAILABLE");
+      }
+
       if (!deliveryIsValid(delivery)) {
         return rejected("META_DELIVERY_REQUEST_INVALID");
       }
@@ -215,7 +377,11 @@ export function createMetaCampaignDeliveryProcessor(
                     acceptance.providerMessageId,
                 };
               } catch (error) {
-                return classifySubmissionError(error);
+                return classifySubmissionError(
+                  error,
+                  delivery,
+                  dependencies.retryPolicy,
+                );
               }
             },
           );

@@ -13,6 +13,9 @@ const input = {
   recipientPhoneNumber: "+972501234567",
   deliveryKey:
     `campaign_delivery_v1_${"a".repeat(64)}`,
+  deliveryAttemptNumber: 1,
+  queueAttemptNumber: 1,
+  queueMessageId: "queue-message-17",
 };
 
 test("derives stable purpose-separated opaque WhatsApp keys", async () => {
@@ -69,6 +72,29 @@ test("shares provider scope without exposing tenant or provider identifiers", as
   assert.notEqual(
     first.reservationKey,
     anotherDelivery.reservationKey,
+  );
+
+  const nextClaim = await deriver.derive({
+    ...input,
+    deliveryAttemptNumber: 2,
+    queueAttemptNumber: 2,
+  });
+
+  assert.equal(first.portfolioKey, nextClaim.portfolioKey);
+  assert.equal(first.senderKey, nextClaim.senderKey);
+  assert.equal(first.recipientKey, nextClaim.recipientKey);
+  assert.notEqual(
+    first.reservationKey,
+    nextClaim.reservationKey,
+  );
+  const duplicateQueueMessage = await deriver.derive({
+    ...input,
+    queueMessageId: "queue-message-18",
+  });
+
+  assert.notEqual(
+    first.reservationKey,
+    duplicateQueueMessage.reservationKey,
   );
   assert.equal(
     Object.values(first).some(
@@ -130,5 +156,26 @@ test("rejects invalid provider, recipient, and delivery identities before signin
       deliveryKey: "../delivery",
     }),
     /key input is invalid/,
+  );
+  await assert.rejects(
+    deriver.derive({
+      ...input,
+      deliveryAttemptNumber: 0,
+    }),
+    /key input is invalid/,
+  );
+  await assert.rejects(
+    deriver.derive({
+      ...input,
+      queueAttemptNumber: 0,
+    }),
+    /key input is invalid/,
+  );
+  await assert.rejects(
+    deriver.derive({
+      ...input,
+      queueMessageId: "\n",
+    }),
+    /queueMessageId is invalid/,
   );
 });

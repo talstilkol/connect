@@ -103,6 +103,12 @@ Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
 ו־Kill switch. לאחר שבועיים של Staging telemetry יש לכייל את המכסות
 הפנימיות לפי p95 ועומסי Burst אמיתיים.
 
+5.7 מצב מימוש מקומי: חוזה ה־Campaign sender מפנה את החלטות ה־Retry
+ל־`MetaMessageFailurePolicy`, ומיגרציה `0032` שומרת Cooldown אטומי
+לשלושת ה־Scopes שניתנים לזיהוי מדויק. אין בכך אישור מדיניות: מקור
+`Retry-After`/Pair exponent חי, ערכי Capacity, ‏Alerts ו־Kill switch
+עדיין דורשים Evidence ואישור לפי RACI בסעיף 5.1.
+
 ## 6. החלטה 5 — File Scanner
 
 6.1 המלצה: **ClamAV `clamd` בתוך Cloudflare Container מבודד**.

@@ -71,6 +71,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0029_team_invitation_acceptance.sql",
     "0030_whatsapp_rate_limit_reservations.sql",
     "0031_campaign_delivery_provider_links.sql",
+    "0032_whatsapp_provider_cooldowns.sql",
   ]);
 
   const migration = await readFile(
@@ -341,6 +342,42 @@ test("campaign provider reconciliation migration links one target without retain
     migration,
     /INSERT INTO `whatsapp_rate_limit_settlements`/,
   );
+});
+
+test("provider cooldown migration derives opaque blocking state from immutable rejection evidence", async () => {
+  const migration = await readFile(
+    new URL(
+      "0032_whatsapp_provider_cooldowns.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_provider_cooldown_events`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_provider_cooldown_state`/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_provider_cooldown_events_proof_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_provider_cooldown_events_state_insert/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_provider_cooldown_state_monotonic_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /tenant_id|phone_e164|phone_number|message_body|access_token|provider_payload/,
+  );
+  assert.doesNotMatch(migration, /Math\.random/);
 });
 
 test("AI persistence migration stores immutable definitions and source metadata without file bytes or secrets", async () => {
@@ -852,6 +889,8 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "tenants",
     "whatsapp_pair_rate_limit_state",
     "whatsapp_portfolio_recipient_rate_limit_state",
+    "whatsapp_provider_cooldown_events",
+    "whatsapp_provider_cooldown_state",
     "whatsapp_rate_limit_reservations",
     "whatsapp_rate_limit_settlements",
   ]);

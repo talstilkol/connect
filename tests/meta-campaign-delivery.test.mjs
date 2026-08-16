@@ -17,6 +17,9 @@ import {
   createMetaCampaignDeliveryRuntime,
 } from "../server/campaigns/metaCampaignDeliveryRuntime.ts";
 import {
+  createMetaCampaignDeliveryRetryPolicy,
+} from "../server/campaigns/metaCampaignDeliveryRetryPolicy.ts";
+import {
   createMetaCampaignTemplateAdapter,
   MetaCampaignTemplateContractError,
 } from "../server/campaigns/metaCampaignTemplateAdapter.ts";
@@ -120,6 +123,8 @@ function preparedDelivery(overrides = {}) {
     campaign: campaign(),
     recipient: recipient(),
     rateLimitReservationKey: reservationKey,
+    deliveryAttemptNumber: 1,
+    queueAttemptNumber: 1,
     ...overrides,
   };
 }
@@ -170,6 +175,29 @@ function credentialVault(operationOverride) {
 
       return operation(accessToken);
     },
+  };
+}
+
+function retryPolicy(decide = () => ({ action: "stop" })) {
+  return {
+    isConfigured() {
+      return true;
+    },
+    decide,
+  };
+}
+
+function retryEvidenceSource(
+  load = () => ({
+    providerRetryAfterSeconds: null,
+    pairFailureExponent: null,
+  }),
+) {
+  return {
+    isConfigured() {
+      return true;
+    },
+    load,
   };
 }
 
@@ -396,6 +424,7 @@ test("treats a successful response without one valid wamid as uncertain", async 
 test("loads the connected phone and credential before provider submission", async () => {
   const calls = [];
   const processor = createMetaCampaignDeliveryProcessor({
+    retryPolicy: retryPolicy(),
     metaConnections: {
       async findConnectionByTenantId(requestedTenantId) {
         calls.push({ operation: "connection", requestedTenantId });
@@ -424,6 +453,36 @@ test("loads the connected phone and credential before provider submission", asyn
   assert.deepEqual(calls[1].input, senderInput());
 });
 
+test("rejects a reservation claim that does not match the persisted delivery attempt", async () => {
+  let connectionCalls = 0;
+  const processor = createMetaCampaignDeliveryProcessor({
+    retryPolicy: retryPolicy(),
+    metaConnections: {
+      async findConnectionByTenantId() {
+        connectionCalls += 1;
+        return connection();
+      },
+    },
+    credentialVault: credentialVault(),
+    sender: {
+      async send() {
+        throw new Error("must-not-run");
+      },
+    },
+  });
+
+  assert.deepEqual(
+    await processor.process(
+      preparedDelivery({ deliveryAttemptNumber: 2 }),
+    ),
+    {
+      outcome: "rejected",
+      errorCode: "META_DELIVERY_REQUEST_INVALID",
+    },
+  );
+  assert.equal(connectionCalls, 0);
+});
+
 test("maps explicit Meta rejections to bounded operational codes", async (context) => {
   const cases = [
     [4, "META_APP_RATE_LIMITED"],
@@ -446,6 +505,7 @@ test("maps explicit Meta rejections to bounded operational codes", async (contex
   for (const [graphCode, expectedErrorCode] of cases) {
     await context.test(String(graphCode), async () => {
       const processor = createMetaCampaignDeliveryProcessor({
+        retryPolicy: retryPolicy(),
         metaConnections: {
           async findConnectionByTenantId() {
             return connection();
@@ -474,6 +534,260 @@ test("maps explicit Meta rejections to bounded operational codes", async (contex
   }
 });
 
+test("defers only provider errors with an explicit scoped retry decision", async (context) => {
+  const cases = [
+    [
+      130429,
+      "META_PHONE_THROUGHPUT_LIMITED",
+      "sender",
+      12,
+    ],
+    [
+      131049,
+      "META_RECIPIENT_MARKETING_LIMITED",
+      "portfolio-recipient",
+      86_400,
+    ],
+    [131056, "META_PAIR_RATE_LIMITED", "pair", 6],
+  ];
+
+  for (const [
+    graphCode,
+    errorCode,
+    cooldownScope,
+    retryAfterSeconds,
+  ] of cases) {
+    await context.test(String(graphCode), async () => {
+      const decisions = [];
+      const templateCategory =
+        graphCode === 131049
+          ? "MARKETING"
+          : "UTILITY";
+      const processor = createMetaCampaignDeliveryProcessor({
+        retryPolicy: retryPolicy((request) => {
+          decisions.push(request);
+          return {
+            action: "defer",
+            retryAfterSeconds,
+          };
+        }),
+        metaConnections: {
+          async findConnectionByTenantId() {
+            return connection();
+          },
+        },
+        credentialVault: credentialVault(),
+        sender: {
+          async send() {
+            throw new MetaGraphError(
+              "API_ERROR",
+              "sensitive provider detail",
+              { httpStatus: 400, graphCode },
+            );
+          },
+        },
+      });
+
+      assert.deepEqual(
+        await processor.process(
+          preparedDelivery({
+            campaign: campaign({
+              template: template({
+                category: templateCategory,
+              }),
+            }),
+          }),
+        ),
+        {
+          outcome: "deferred",
+          errorCode,
+          providerErrorCode: graphCode,
+          cooldownScope,
+          retryAfterSeconds,
+        },
+      );
+      assert.deepEqual(decisions, [
+        {
+          tenantId,
+          templateCategory,
+          attemptCount: 1,
+          providerRetryAfterSeconds: null,
+          providerErrorCode: graphCode,
+          cooldownScope,
+        },
+      ]);
+    });
+  }
+});
+
+test("fails closed when retry policy is unavailable or returns an unsafe delay", async () => {
+  let connectionCalls = 0;
+  const unavailable = createMetaCampaignDeliveryProcessor({
+    retryPolicy: {
+      isConfigured() {
+        return false;
+      },
+      decide() {
+        throw new Error("must-not-run");
+      },
+    },
+    metaConnections: {
+      async findConnectionByTenantId() {
+        connectionCalls += 1;
+        return connection();
+      },
+    },
+    credentialVault: credentialVault(),
+    sender: {
+      async send() {
+        throw new Error("must-not-run");
+      },
+    },
+  });
+  const unsafe = createMetaCampaignDeliveryProcessor({
+    retryPolicy: retryPolicy(() => ({
+      action: "defer",
+      retryAfterSeconds: 86_400,
+    })),
+    metaConnections: {
+      async findConnectionByTenantId() {
+        return connection();
+      },
+    },
+    credentialVault: credentialVault(),
+    sender: {
+      async send() {
+        throw new MetaGraphError(
+          "API_ERROR",
+          "sensitive provider detail",
+          { httpStatus: 400, graphCode: 131049 },
+        );
+      },
+    },
+  });
+
+  assert.equal(unavailable.isConfigured(), false);
+  assert.deepEqual(
+    await unavailable.process(preparedDelivery()),
+    {
+      outcome: "rejected",
+      errorCode: "META_RETRY_POLICY_UNAVAILABLE",
+    },
+  );
+  assert.equal(connectionCalls, 0);
+  assert.deepEqual(
+    await unsafe.process(preparedDelivery()),
+    {
+      outcome: "rejected",
+      errorCode: "META_RECIPIENT_MARKETING_LIMITED",
+    },
+  );
+});
+
+test("derives campaign retry delays from the shared Meta failure policy", async () => {
+  const evidenceByCode = new Map([
+    [
+      130429,
+      {
+        providerRetryAfterSeconds: null,
+        pairFailureExponent: null,
+      },
+    ],
+    [
+      131049,
+      {
+        providerRetryAfterSeconds: null,
+        pairFailureExponent: null,
+      },
+    ],
+    [
+      131056,
+      {
+        providerRetryAfterSeconds: null,
+        pairFailureExponent: 2,
+      },
+    ],
+    [
+      131057,
+      {
+        providerRetryAfterSeconds: null,
+        pairFailureExponent: null,
+      },
+    ],
+  ]);
+  const policy = createMetaCampaignDeliveryRetryPolicy(
+    retryEvidenceSource((request) =>
+      evidenceByCode.get(request.providerErrorCode) ?? null,
+    ),
+  );
+  const baseRequest = {
+    tenantId,
+    templateCategory: "UTILITY",
+    attemptCount: 1,
+    providerRetryAfterSeconds: null,
+  };
+
+  assert.deepEqual(
+    await policy.decide({
+      ...baseRequest,
+      providerErrorCode: 130429,
+      cooldownScope: "sender",
+      providerRetryAfterSeconds: 17,
+    }),
+    { action: "defer", retryAfterSeconds: 17 },
+  );
+  assert.deepEqual(
+    await policy.decide({
+      ...baseRequest,
+      templateCategory: "MARKETING",
+      providerErrorCode: 131049,
+      cooldownScope: "portfolio-recipient",
+    }),
+    { action: "defer", retryAfterSeconds: 86_400 },
+  );
+  assert.deepEqual(
+    await policy.decide({
+      ...baseRequest,
+      providerErrorCode: 131049,
+      cooldownScope: "portfolio-recipient",
+    }),
+    { action: "stop" },
+  );
+  assert.deepEqual(
+    await policy.decide({
+      ...baseRequest,
+      providerErrorCode: 131056,
+      cooldownScope: "pair",
+    }),
+    { action: "defer", retryAfterSeconds: 16 },
+  );
+  assert.deepEqual(
+    await policy.decide({
+      ...baseRequest,
+      providerErrorCode: 131057,
+      cooldownScope: "sender",
+    }),
+    { action: "stop" },
+  );
+  const conflicting =
+    createMetaCampaignDeliveryRetryPolicy(
+      retryEvidenceSource(() => ({
+        providerRetryAfterSeconds: 31,
+        pairFailureExponent: null,
+      })),
+    );
+
+  assert.deepEqual(
+    await conflicting.decide({
+      ...baseRequest,
+      providerErrorCode: 130429,
+      cooldownScope: "sender",
+      providerRetryAfterSeconds: 17,
+    }),
+    { action: "stop" },
+  );
+});
+
 test("rejects unavailable connection and credential without provider access", async () => {
   let senderCalls = 0;
   const sender = {
@@ -483,6 +797,7 @@ test("rejects unavailable connection and credential without provider access", as
     },
   };
   const disconnected = createMetaCampaignDeliveryProcessor({
+    retryPolicy: retryPolicy(),
     metaConnections: {
       async findConnectionByTenantId() {
         return connection({ status: "restricted" });
@@ -493,6 +808,7 @@ test("rejects unavailable connection and credential without provider access", as
   });
   const missingCredential =
     createMetaCampaignDeliveryProcessor({
+      retryPolicy: retryPolicy(),
       metaConnections: {
         async findConnectionByTenantId() {
           return connection();
@@ -542,6 +858,7 @@ test("keeps network, server, and malformed success outcomes ambiguous", async ()
 
   for (const providerError of errors) {
     const processor = createMetaCampaignDeliveryProcessor({
+      retryPolicy: retryPolicy(),
       metaConnections: {
         async findConnectionByTenantId() {
           return connection();
@@ -569,6 +886,7 @@ test("keeps network, server, and malformed success outcomes ambiguous", async ()
 test("composes Graph transport without exposing the access token", async () => {
   const requests = [];
   const processor = createMetaCampaignDeliveryRuntime({
+    retryEvidenceSource: retryEvidenceSource(),
     environment: {
       META_GRAPH_API_VERSION: "v21.0",
     },
