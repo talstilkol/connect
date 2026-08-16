@@ -6,11 +6,12 @@
 ## מסמכי תכנון ותפעול מרכזיים
 
 1. [תוכנית העבודה הצוותית](docs/team-operating-plan.md).
-2. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
-3. [עקיבות מלאה לאפיון המוצר](docs/product-specification-traceability.md).
-4. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
-5. [Release checklist](docs/release-checklist.md).
-6. [Release operator runbook](docs/release-operator-runbook.md).
+2. [שאלון ההחלטות המהותיות](docs/connect-decisions-questionnaire.html).
+3. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
+4. [עקיבות מלאה לאפיון המוצר](docs/product-specification-traceability.md).
+5. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
+6. [Release checklist](docs/release-checklist.md).
+7. [Release operator runbook](docs/release-operator-runbook.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
