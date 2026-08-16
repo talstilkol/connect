@@ -14,6 +14,7 @@
     "verify:secret-hygiene": "node scripts/verify-secret-hygiene.mjs --history",
     "verify:interface-guardrails": "node scripts/verify-interface-guardrails.mjs",
     "verify:dependency-lock": "node scripts/verify-dependency-lock.mjs",
+    "verify:dependency-audit:development": "node scripts/verify-development-dependency-audit.mjs",
     "verify:migrations": "node scripts/verify-migrations.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",
     "verify:release-gate": "node scripts/verify-release-gate.mjs",

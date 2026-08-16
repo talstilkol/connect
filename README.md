@@ -95,14 +95,16 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1426/1426 בדיקות, 35 Migrations,
-   ‏438 קובצי Source, ‏32 Client dependency graphs, ‏844 קבצים
+31. Local Release Gate עובר עם 1433/1433 בדיקות, 35 Migrations,
+   ‏438 קובצי Source, ‏32 Client dependency graphs, ‏849 קבצים
    בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
    פגיעויות ידועות בגרף ה־Production.
-33. בגרף הפיתוח נשארו שש התראות ב־`drizzle-kit` וב־`vinext`.
-   הצעת התיקון האוטומטית היא Downgrade שובר ולכן אינה מיושמת.
+33. בגרף הפיתוח נשארו ארבעה ממצאי Moderate מאותו Advisory עקיף
+   ב־`drizzle-kit`. שתי התראות High של `image-size` הוסרו עם שדרוג
+   Vinext. שער CI חי חוסם כל Advisory חדש או חזרה של החבילה; הצעת
+   התיקון האוטומטית ל־Drizzle היא Downgrade שובר ולכן אינה מיושמת.
 34. Vite config משתמש כעת ב־JSON import attributes ובסיומת קובץ
    מפורשת, ללא אזהרת ה־Native config loader החדשה.
 35. שמונת שערי האיכות המקומיים מוגדרים כ־Pull Request Checks

@@ -254,3 +254,9 @@ Migration Tooling review נפרד.
 
 9.7 התראות GitHub בענף ברירת המחדל לא ייסגרו לפני Merge של התיקון.
 הבדיקה המקומית וה־PR אינן משנות את מצב `main` בעצמן.
+
+9.8 נוסף שער CI חי לגרף ה־Development. הוא מאשר זמנית רק את ארבעת
+הממצאים המדויקים של שרשרת Drizzle/esbuild המתועדת ונכשל עבור כל
+Advisory חדש, שינוי Severity, נתיב Package חדש או חזרה של
+`image-size`. קבלה זו היא Risk acceptance מוגבל לכלי פיתוח ואינה
+מסמנת את Advisory כמתוקן או מכניסה אותו ל־Production Readiness.

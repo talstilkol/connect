@@ -35,6 +35,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Reject unapproved development dependency findings
+        run: npm run verify:dependency-audit:development
+
       - name: Audit production dependencies and build release-bound evidence
         run: npm run evidence:dependency-audit
 
