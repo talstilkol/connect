@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,299 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,305 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -169,12 +169,27 @@ Contact Import לתוך Feature ה־Templates.
 ל־3,140 שורות, ובדיקת Boundary מקבעת את סדר Contact Directory,
 Contact Import ו־Templates בלי להעביר את `inline-notice` המשותף.
 
-2.8 בדיקות עומס וכשל מקומיות נוספות.
+2.8 **הושלם:** בדיקות עומס וכשל מקומיות נוספות.
 
-2.8.1 תכולה: Queue backlog, ‏DLQ, ‏Retry, ‏Provider timeout,
-Retention plan expiry ו־Restore evidence mismatch.
+2.8.1 `queue-backpressure-load.test.mjs` מעבד 100 Batches מלאים —
+1,000 הודעות — בכל אחד משלושת ה־Queues, ומוכיח שרק פריט אחד נמצא
+ב־flight בכל Consumer. ‏Batch גדול מהמכסה נדחה לפני גישה עסקית.
 
-2.8.2 אומדן: **8–12 שעות**.
+2.8.2 מסלולי DLQ של Meta, ‏Campaign ו־Team Invitation בודקים Metadata
+מסוננת, Recovery key, אישור מפורש, Requeue לפני Ack וכשל Queue ללא
+אובדן ההודעה. מסלול Team Invitation הושלם ב־
+`server/team/teamInvitationDeadLetter.ts`.
+
+2.8.3 ‏Retry וכשל ספק מכוסים ב־Queue consumer tests וב־
+`meta-graph-transport.test.mjs`: Timeout או תוצאה חיצונית לא ודאית
+אינם יוצרים שליחה אוטומטית כפולה, וכשל זמני מקבל Delay תחום בלבד.
+
+2.8.4 ‏`retention-policy-purge.test.mjs` דוחה Plan שפג תוקפו או
+Inventory שהשתנה לפני מחיקה. ‏`backup-restore-readiness.test.mjs`
+דוחה Restore שאינו מקושר או שה־Digest שלו אינו תואם לגיבוי.
+
+2.8.5 אלו בדיקות עומס דטרמיניסטיות מקומיות. הן אינן מחליפות Load
+test ו־DLQ rehearsal מול Cloudflare ו־Meta בסביבת Staging אמיתית.
 
 2.9 Release rehearsal מקומי ותיעוד מפעיל.
 
@@ -185,10 +200,10 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 סכום האומדנים המפורטים הוא **12–18 שעות**: 8–12 שעות
-לשלב 8 ו־4–6 שעות לשלב 9.
+2.10.1 נשארו **4–6 שעות** לשלב 9: Release rehearsal מקומי ותיעוד
+מפעיל.
 
-2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
+2.10.2 עם Review ותיקוני Regression: **2–4 ימי עבודה**.
 
 ## 3. עבודה שאינה מקומית בלבד
 
@@ -209,8 +224,8 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 `docs/team-operating-plan.md`. הוא אינו כלול באומדן המקומי בסעיף
 2.10, משום שזמני Accounts, ספקים ואישורים הם `unknown/unavailable`.
 
-3.6 במסלול המקומי שלב 7 מתוך 9 הושלם. נשארים שני שלבים מלאים:
-שלב 8 לבדיקות עומס וכשל ושלב 9 ל־Release rehearsal ותיעוד מפעיל.
+3.6 במסלול המקומי שלבים 7 ו־8 מתוך 9 הושלמו. נשאר שלב 9 בלבד:
+Release rehearsal מקומי ותיעוד מפעיל.
 
 ## 4. פערים שנוספו לאחר אימות PDF המקור
 
@@ -244,5 +259,5 @@ Settlement ונשען על `MetaMessageFailurePolicy` המשותף. הם עדי�
 `unknown/unavailable` עד חיבור החשבון המורשה.
 
 4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
-הוספת פערי ה־PDF וה־Rate Limiting הוא **66–108 שעות פיתוח נטו**,
+הוספת פערי ה־PDF וה־Rate Limiting הוא **58–96 שעות פיתוח נטו**,
 ללא המתנה לספקים וללא זמן Adapter חי שאינו ניתן לאומדן כעת.
