@@ -209,13 +209,14 @@ store של סביבת היעד.
 
 ## 7. Source Control Governance Evidence
 
-7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v2
+7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v3
 קצר־חיים שמופק מ־Repository אמיתי לאחר הגדרת Remote.
 
 7.2 ה־Evidence דורש תשעה Pull Request Status Checks: שמונת שערי
 האיכות המקומיים ו־Dependency Audit.
 
-7.3 ה־Evidence מאשר Branch Protection, ‏CODEOWNERS Review, ביטול
+7.3 ה־Evidence מאשר שה־Repository הוא Private, וכן Branch Protection,
+‏CODEOWNERS Review, ביטול
 אישורים ישנים, פתרון שיחות Review, חסימת Force Push ומחיקת Branch,
 ‏Secret Scanning ו־Push Protection.
 
@@ -240,7 +241,8 @@ Manifest הנגזר מ־Worktree נקי. הוא קורא ב־`GET` בלבד את
 ה־Repository, הגנת Branch ברירת המחדל, Metadata של `CODEOWNERS`
 ו־Check Runs הקשורים ל־Commit המדויק.
 
-7.10 המחולל דורש Status Checks במצב Strict, אכיפה גם למנהלים,
+7.10 המחולל דורש Metadata עקבי שבו `private=true` ו־
+`visibility=private`, ‏Status Checks במצב Strict, אכיפה גם למנהלים,
 Review מבעל קוד, ביטול אישורים ישנים, פתרון שיחות, חסימת Force Push
 ומחיקת Branch, ‏Secret Scanning ו־Push Protection. חוסר הרשאה או
 Control חסר נכשל סגור ואינו מפיק Evidence חלקי.

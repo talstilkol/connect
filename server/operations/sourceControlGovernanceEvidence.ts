@@ -15,6 +15,7 @@ export const requiredPullRequestStatusChecks =
   "dependency-audit",
 ] as const);
 const controlNames = Object.freeze([
+  "repositoryPrivate",
   "branchProtection",
   "codeOwnerReview",
   "dismissStaleApprovals",
@@ -31,13 +32,13 @@ const fingerprintPattern =
   /^sha256:[a-f0-9]{64}$/;
 const commitPattern = /^[a-f0-9]{40}$/;
 const evidenceDigestPattern =
-  /^source_control_governance_evidence_v2_[a-f0-9]{64}$/;
+  /^source_control_governance_evidence_v3_[a-f0-9]{64}$/;
 
 type GovernanceControl =
   (typeof controlNames)[number];
 
 export interface SourceControlGovernanceEvidence {
-  schemaVersion: 2;
+  schemaVersion: 3;
   verifiedAt: string;
   expiresAt: string;
   repositoryFingerprint: string;
@@ -79,7 +80,7 @@ export type SourceControlGovernanceReport =
         code:
           "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED";
         requiredStatusCheckCount: 9;
-        controlCount: 8;
+        controlCount: 9;
       }
     | {
         status:
@@ -195,7 +196,7 @@ export function deriveSourceControlGovernanceEvidenceDigest(
     "evidenceDigest"
   >,
 ): string {
-  return `source_control_governance_evidence_v2_${sha256(
+  return `source_control_governance_evidence_v3_${sha256(
     canonicalEvidenceIdentity(evidence),
   )}`;
 }
@@ -225,7 +226,7 @@ function parseEvidence(
       "controls",
       "evidenceDigest",
     ]) ||
-    value.schemaVersion !== 2 ||
+    value.schemaVersion !== 3 ||
     !isCanonicalTimestamp(
       value.verifiedAt,
     ) ||
@@ -298,7 +299,7 @@ function parseEvidence(
   }
 
   const evidence = {
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     verifiedAt: value.verifiedAt,
     expiresAt: value.expiresAt,
     repositoryFingerprint:
@@ -417,7 +418,7 @@ export function buildSourceControlGovernanceEvidence(
       maximumEvidenceLifetimeMilliseconds,
   ).toISOString();
   const evidence = {
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     verifiedAt,
     expiresAt,
     repositoryFingerprint: fingerprint(
@@ -570,6 +571,6 @@ export function inspectSourceControlGovernanceEvidence(
     code:
       "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
     requiredStatusCheckCount: 9,
-    controlCount: 8,
+    controlCount: 9,
   };
 }

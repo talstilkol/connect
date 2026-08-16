@@ -7,11 +7,13 @@
 
 1.1 Repository Authority נבחר ומתועד.
 
-1.2 ה־Commit נמצא ב־Remote המאושר.
+1.2 ה־Repository המאושר מדווח `private=true` ו־`visibility=private`.
 
-1.3 Branch Protection ו־Review חובה פעילים.
+1.3 ה־Commit נמצא ב־Remote המאושר.
 
-1.4 ה־Worktree נקי ואין קובץ שאינו שייך ל־Commit.
+1.4 Branch Protection ו־Review חובה פעילים.
+
+1.5 ה־Worktree נקי ואין קובץ שאינו שייך ל־Commit.
 
 ## 2. Quality gates
 
@@ -38,7 +40,8 @@
 2.5 Secret Inventory Evidence תקף, וכל מועדי ה־Rotation עתידיים.
 
 2.6 Source Control Governance Evidence תקף, מקושר ל־Commit הנפרס
-ומוכיח שכל תשעת ה־PR Status Checks ושמונת בקרי ה־Repository פעילים.
+ומוכיח שכל תשעת ה־PR Status Checks ותשעת בקרי ה־Repository פעילים,
+כולל Visibility מסוג Private.
 
 2.7 CI Execution Evidence תקף ומוכיח שכל תשעת ה־PR Checks הסתיימו
 בהצלחה עבור אותו Commit ואותו Release ID.

@@ -234,6 +234,8 @@ export function createGithubGovernanceEvidence({
       "string" ||
     repositoryResponse.full_name.toLowerCase() !==
       parsedRepository.nameWithOwner.toLowerCase() ||
+    repositoryResponse.private !== true ||
+    repositoryResponse.visibility !== "private" ||
     typeof repositoryResponse.default_branch !==
       "string" ||
     repositoryResponse.default_branch.length < 1 ||
@@ -318,6 +320,7 @@ export function createGithubGovernanceEvidence({
         protectionResponse,
       ),
     controls: {
+      repositoryPrivate: true,
       branchProtection: true,
       codeOwnerReview: true,
       dismissStaleApprovals: true,

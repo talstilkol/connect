@@ -37,6 +37,8 @@ function releaseManifest() {
 function repositoryResponse() {
   return {
     full_name: repository,
+    private: true,
+    visibility: "private",
     default_branch: "main",
     security_and_analysis: {
       secret_scanning: {
@@ -229,6 +231,13 @@ test("builds bounded GitHub governance and CI evidence from verified responses",
 });
 
 test("fails closed for incomplete governance and ambiguous CI checks", () => {
+  const publicRepository =
+    repositoryResponse();
+  publicRepository.private = false;
+  publicRepository.visibility = "public";
+  const inconsistentVisibility =
+    repositoryResponse();
+  inconsistentVisibility.visibility = "public";
   const disabledSecurity =
     repositoryResponse();
   disabledSecurity.security_and_analysis
@@ -246,6 +255,22 @@ test("fails closed for incomplete governance and ambiguous CI checks", () => {
   });
 
   for (const value of [
+    {
+      repositoryResponse:
+        publicRepository,
+      protectionResponse:
+        protectionResponse(),
+      codeOwnersResponse:
+        codeOwnersResponse(),
+    },
+    {
+      repositoryResponse:
+        inconsistentVisibility,
+      protectionResponse:
+        protectionResponse(),
+      codeOwnersResponse:
+        codeOwnersResponse(),
+    },
     {
       repositoryResponse:
         disabledSecurity,

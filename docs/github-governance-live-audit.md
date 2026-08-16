@@ -164,3 +164,18 @@ Execution Evidence עבור אותו Commit לאחר שכל הבקרות פעי�
 6.7 Governance Evidence תקף מקושר ל־Repository, ‏Commit ו־Release.
 
 6.8 עד להשלמת כל הסעיפים: Gate 1 נשאר `blocked`.
+
+## 7. תיקון מקומי לאחר ה־Audit
+
+7.1 בבדיקת עומק נוספת נמצא שחוזה Source Control Governance Evidence
+v2 לא כלל את Visibility של ה־Repository בין בקרי החובה.
+
+7.2 החוזה הועלה ל־v3 ונוסף לו הבקר `repositoryPrivate`. המחולל דורש
+כעת Metadata עקבי שבו `private=true` וגם `visibility=private`.
+
+7.3 Evidence v2 נדחה מעתה, משום שאינו יכול להוכיח שה־Repository
+פרטי. Repository ציבורי או Metadata סותר נכשלים סגור ואינם מפיקים
+Evidence.
+
+7.4 התיקון נשמר מקומית בלבד ואינו משנה את מצב GitHub בפועל. Gate 1
+נשאר `blocked` עד שבעל Admin ישנה את ה־Visibility ויאמת אותו מחדש.

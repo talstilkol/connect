@@ -23,7 +23,7 @@ function fingerprint(value) {
 
 function createEvidence() {
   const evidence = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     verifiedAt:
       "2026-07-27T11:00:00.000Z",
     expiresAt:
@@ -38,6 +38,7 @@ function createEvidence() {
     requiredStatusChecks:
       requiredPullRequestStatusChecks,
     controls: {
+      repositoryPrivate: true,
       branchProtection: true,
       codeOwnerReview: true,
       dismissStaleApprovals: true,
@@ -72,6 +73,7 @@ function createSnapshot() {
     requiredStatusChecks:
       requiredPullRequestStatusChecks,
     controls: {
+      repositoryPrivate: true,
       branchProtection: true,
       codeOwnerReview: true,
       dismissStaleApprovals: true,
@@ -141,6 +143,13 @@ test("refuses to build governance evidence from incomplete controls or checks", 
     },
     {
       ...snapshot,
+      controls: {
+        ...snapshot.controls,
+        repositoryPrivate: false,
+      },
+    },
+    {
+      ...snapshot,
       repositoryIdentity:
         snapshot.defaultBranchIdentity,
     },
@@ -173,7 +182,7 @@ test("accepts protected source control linked to the deployed commit", () => {
       code:
         "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
       requiredStatusCheckCount: 9,
-      controlCount: 8,
+      controlCount: 9,
     },
   );
 });
@@ -304,7 +313,7 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     {
       ...evidence,
       evidenceDigest:
-        "source_control_governance_evidence_v2_" +
+        "source_control_governance_evidence_v3_" +
         "0".repeat(64),
     },
     {
@@ -325,6 +334,35 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
       "invalid",
     );
   }
+});
+
+test("rejects legacy v2 evidence that cannot attest private visibility", () => {
+  const evidence = createEvidence();
+  const legacyEvidence = {
+    ...evidence,
+    schemaVersion: 2,
+    controls: Object.fromEntries(
+      Object.entries(evidence.controls).filter(
+        ([name]) => name !== "repositoryPrivate",
+      ),
+    ),
+    evidenceDigest:
+      "source_control_governance_evidence_v2_" +
+      "0".repeat(64),
+  };
+
+  assert.equal(
+    inspectSourceControlGovernanceEvidence(
+      {
+        APP_DEPLOYED_COMMIT_SHA:
+          deployedCommitSha,
+        SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON:
+          JSON.stringify(legacyEvidence),
+      },
+      now,
+    ).status,
+    "invalid",
+  );
 });
 
 test("fails closed without governance evidence or with an invalid clock", () => {
