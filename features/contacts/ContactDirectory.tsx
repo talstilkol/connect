@@ -236,7 +236,7 @@ export function ContactDirectory({
           <div className="inline-notice warning" role="status">
             <span aria-hidden="true">i</span>
             <p>
-              Clerk אינו מוגדר. ניתן לבדוק את מסלול ה־CSV המקומי, אך אי
+              Clerk אינו מוגדר. ניתן לבדוק את מסלול ה־CSV/XLSX המקומי, אך אי
               אפשר ליצור אנשי קשר קבועים.
             </p>
           </div>

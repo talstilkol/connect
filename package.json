@@ -45,9 +45,11 @@
     "@clerk/localizations": "4.13.8",
     "@clerk/nextjs": "7.6.0",
     "drizzle-orm": "0.45.2",
+    "fflate": "0.8.3",
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "read-excel-file": "9.2.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.51.1",

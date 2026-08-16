@@ -1,6 +1,6 @@
 # מטריצת עקיבות לאפיון המוצר
 
-תאריך אימות: 2026-08-16
+תאריך אימות: 2026-08-17
 
 ## 1. מקור האפיון
 
@@ -44,7 +44,7 @@ Design מלא.
 | SPEC-09 | Facebook Embedded Signup | external-blocked | UI, SDK adapter, Authorization exchange ו־Asset verification | Meta App, WABA ו־Credentials מורשים |
 | SPEC-10 | יצירת Templates ושליחה לאישור | external-blocked | Draft, Header/Body/Buttons/Variables ומחזור Submission | בדיקת Graph API חיה ואישור Template אמיתי |
 | SPEC-11 | נמענים במאגר פנימי | local-complete | Contacts, Consent, Lists ו־Tags | בדיקת Staging |
-| SPEC-12 | ייבוא נמענים מ־Excel | planned | CSV מאומת עם Mapping ו־Import jobs | Parser ל־XLSX, גבולות קובץ ובדיקות אבטחה |
+| SPEC-12 | ייבוא נמענים מ־Excel | local-complete | CSV/XLSX מאומתים מעל Mapping ו־Import jobs משותפים; Parser נעול, גבולות משאבים ובדיקות קלט עוין | בדיקת Browser ו־Staging על קובץ מורשה אמיתי |
 | SPEC-13 | Segments לפי Tags | local-complete | Tags, Lists ו־Campaign audience snapshot | מדדי ביצועים על קהל גדול |
 | SPEC-14 | שיגור Template המוני | partial | Campaign snapshot, Queue, Scheduler, DLQ, Meta sender, Provider cooldown אטומי, מקור Policy מתכלה ומסלול System Admin מאובטח עם Kill switch עמיד | Live capacity evidence, Retry evidence, חיבור Sender ל־Worker וניסוי WABA |
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
@@ -78,7 +78,10 @@ webhook באמצעות ראיות D1 אטומיות ו־Idempotent.
 
 4.2 מסלול P1 — פערים פונקציונליים מפורשים מה־PDF:
 
-4.2.1 להוסיף Excel/XLSX import מעל אותו Pipeline מאומת של CSV.
+4.2.1 הושלם מקומית: Excel/XLSX import משתמש באותו Pipeline מאומת של
+CSV. קבצי XLS ישנים, נוסחאות, Macros, קישורים חיצוניים, גיליונות
+נסתרים או מרובים וארכיונים החורגים מגבולות המשאבים נחסמים לפני
+ה־Mapping. נותר Browser/Staging acceptance עם קובץ מורשה אמיתי.
 
 4.2.2 להוסיף Recurring Campaign domain רק לאחר החלטת Product על
 תדירות, אזור זמן, End condition, שינוי Template וביטול סדרה.

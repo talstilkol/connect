@@ -14,6 +14,7 @@
 7. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
 8. [Release checklist](docs/release-checklist.md).
 9. [Release operator runbook](docs/release-operator-runbook.md).
+10. [חוזה אבטחה לייבוא אנשי קשר](docs/contact-import-security.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
@@ -327,7 +328,7 @@
 4. מרכז לתיעוד 10 ההחלטות העסקיות החוסמות.
 5. אינטראקציות מקומיות:
    1. ניווט בין המסכים.
-   2. קריאת CSV מקומית, מיפוי עמודות וייבוא מאומת לאחר אישור מפורש.
+   2. קריאת CSV/XLSX מקומית, מיפוי עמודות וייבוא מאומת לאחר אישור מפורש.
    3. הוספת בלוקים דטרמיניסטית לתהליך בוט.
    4. מרכז ההחלטות ב־Workspace הוא Read-only; שמירה קבועה זמינה
       רק ל־System Admin דרך `/admin/decisions`.
@@ -369,7 +370,7 @@
    9. ה־DTO לדפדפן אינו כולל `tenantId` או Evidence פנימי.
    10. Import Job קבוע שומר התקדמות ותוצאות שורה וניתן להמשך לאחר כשל.
    11. SHA-256 דטרמיניסטי מזהה קובץ, מיפוי ומספרי טלפון בלי Randomness.
-   12. CSV מעובד במנות של שש שורות, עם Created, Updated, Unchanged,
+   12. CSV/XLSX מעובדים במנות של שש שורות, עם Created, Updated, Unchanged,
        Rejected ו־Duplicate.
    13. ערכי Consent גולמיים בקובץ אינם מועברים למסלול הכתיבה ואינם
        מאפשרים דיוור.
@@ -378,6 +379,9 @@
    15. Tags ו־Lists קבועים מאפשרים ארגון ושיוך של אנשי קשר לפי Tenant.
    16. Unsubscribe הוא גלובלי; תגית או רשימה אינן יכולות לעקוף חסימת
        דיוור.
+   17. XLSX מוגבל ל־5 MiB, גיליון גלוי יחיד, 50,000 שורות, 100 עמודות
+       ו־500,000 תאים בטווח. נוסחאות, Macros, External links ותוכן פעיל
+       נחסמים לפני המיפוי.
 10. תשתית Meta ו־Webhook:
    1. Meta Connection שומר Business Portfolio ID, WABA ID ו־Phone Number
       ID בצד השרת בלבד.
@@ -729,14 +733,16 @@
    161. תוצאה חיצונית לא ידועה מסומנת Ambiguous ואינה נשלחת שוב.
         ספק Meta עדיין אינו מחובר ולכן הרשומה נשארת Pending וה־Queue
         מבקש Retry באופן Fail-Closed.
-   162. שלב 11 הושלם בקוד המקומי. Build, ‏TypeScript, ‏ESLint וכל
-        573 הבדיקות עוברים.
+   162. שלב 11 הושלם בקוד המקומי.
+   163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,419 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
 1. מפתחות Clerk אמיתיים והפעלת הזרימה מול משתמש אמיתי.
 2. משאבי D1/R2 בענן, החלת המיגרציות או נתוני Production.
-3. ייבוא Excel; מסלול ה־MVP הקבוע תומך כרגע ב־CSV.
+3. Browser/Staging acceptance של ייבוא Excel מול קובץ מורשה אמיתי;
+   ה־Parser וה־Pipeline המקומיים קיימים ונבדקו בקלטים שליליים.
 4. WebSocket/Push בזמן אמת, משאבי Queue אמיתיים, החלטת
    Tech Provider/BSP וחיבור End-to-End מול Meta App אמיתי. ה־Inbox
    המקומי כולל חיפוש, סינון, שיוך עצמי ו־Polling מאומת.

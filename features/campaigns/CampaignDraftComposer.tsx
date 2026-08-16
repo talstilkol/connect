@@ -322,7 +322,7 @@ export function CampaignDraftComposer() {
 
               {templateVariables.length > 0 ? (
                 <fieldset className="campaign-variable-mapping">
-                  <legend>התאמת משתני Template לעמודות CSV</legend>
+                  <legend>התאמת משתני Template לעמודות קובץ המקור</legend>
                   <p>
                     יש לבחור עמודה עבור כל משתנה. המערכת אינה מנחשת התאמות.
                   </p>
@@ -343,7 +343,7 @@ export function CampaignDraftComposer() {
                             markChanged();
                           }}
                         >
-                          <option value="">בחירת עמודת CSV</option>
+                          <option value="">בחירת עמודת מקור</option>
                           {contactImportDraft.headers.map(
                             (header, columnIndex) => (
                               <option
@@ -373,7 +373,7 @@ export function CampaignDraftComposer() {
                 <fieldset className="campaign-variable-mapping campaign-url-mapping">
                   <legend>מיפוי Dynamic URL נפרד</legend>
                   <p>
-                    משתנה ה־URL אינו משתנה גוף. יש לבחור עבורו עמודת CSV
+                    משתנה ה־URL אינו משתנה גוף. יש לבחור עבורו עמודת מקור
                     עצמאית.
                   </p>
                   <div className="campaign-variable-mapping-grid">
@@ -390,7 +390,7 @@ export function CampaignDraftComposer() {
                           markChanged();
                         }}
                       >
-                        <option value="">בחירת עמודת CSV</option>
+                        <option value="">בחירת עמודת מקור</option>
                         {contactImportDraft.headers.map(
                           (header, columnIndex) => (
                             <option
@@ -478,7 +478,7 @@ export function CampaignDraftComposer() {
                 <div className="inline-notice warning" role="status">
                   <span aria-hidden="true">!</span>
                   <p>
-                    נותרו {unmappedVariables.length} משתנים ללא עמודת CSV.
+                    נותרו {unmappedVariables.length} משתנים ללא עמודת מקור.
                     הם נשארים מסומנים בתוך ה־Preview.
                   </p>
                 </div>
@@ -738,7 +738,7 @@ export function CampaignDraftComposer() {
               description={
                 planningSummary.contactSnapshotAvailable
                   ? `${contactImportDraft?.quality.totalRows ?? 0} שורות נשמרו לתכנון מקומי.`
-                  : "נדרש קובץ CSV שמיפויו נבדק ונשמר."
+                  : "נדרש קובץ CSV או XLSX שמיפויו נבדק ונשמר."
               }
             />
             <PlanningItem
@@ -874,11 +874,11 @@ function buildVariablePlanningDescription(
 
   if (hasDynamicUrl) {
     return variableCount > 0
-      ? `${variableCount} משתני גוף ו־Dynamic URL מופו לעמודות CSV.`
-      : "ה־Dynamic URL מופה לעמודת CSV נפרדת.";
+      ? `${variableCount} משתני גוף ו־Dynamic URL מופו לעמודות מקור.`
+      : "ה־Dynamic URL מופה לעמודת מקור נפרדת.";
   }
 
-  return `כל ${variableCount} משתני הגוף מופו לעמודות CSV.`;
+  return `כל ${variableCount} משתני הגוף מופו לעמודות מקור.`;
 }
 
 function describeAudienceIssue(issue: AudienceRowIssue) {

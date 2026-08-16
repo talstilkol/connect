@@ -262,7 +262,12 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 4.1 המסמך המקורי אומת ב־2026-08-16 לפי SHA-256 המתועד במטריצת
 העקיבות. נמצאו ארבעה פערים פונקציונליים שאינם חלק מסיום ה־Baseline:
 
-4.1.1 Excel/XLSX import: ‏6–10 שעות פיתוח מקומי.
+4.1.1 Excel/XLSX import הושלם מקומית. `read-excel-file@9.2.0`
+ו־`fflate@0.8.3` נעולים ב־Lockfile, וקובצי XLSX עוברים בדיקת ZIP/XML
+מוגבלת לפני אותו Mapping ו־Import job של CSV. נוסחאות, Macros,
+קישורים חיצוניים, תוכן פעיל, גיליונות נסתרים או מרובים וחריגות גודל
+נחסמים. נותר Browser/Staging acceptance עם קובץ מורשה אמיתי; זמן
+המתנה לחשבון ולסביבה הוא `unknown/unavailable`.
 
 4.1.2 Recurring Campaign domain ו־Scheduler: ‏10–16 שעות לאחר
 החלטת Product על מדיניות recurrence.

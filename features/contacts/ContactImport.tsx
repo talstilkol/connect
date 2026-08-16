@@ -2,11 +2,11 @@
 
 import { ChangeEvent, useMemo, useRef, useState } from "react";
 import {
-  CsvParseError,
-  parseCsv,
-  type ParsedCsv,
-} from "../../shared/csv/parseCsv";
-import { deriveCsvSourceDigest } from "../../shared/csv/sourceDigest";
+  ContactImportSourceError,
+  parseContactImportSourceFile,
+  type ContactImportSourceFormat,
+} from "../../shared/contactImport/parseContactImportSource";
+import type { ParsedCsv } from "../../shared/csv/parseCsv";
 import {
   CONTACT_IMPORT_CHUNK_SIZE,
   type ContactImportCandidate,
@@ -82,6 +82,10 @@ export function ContactImport({
   const [sourceDigest, setSourceDigest] = useState<string | null>(
     contactImportDraft?.sourceDigest ?? null,
   );
+  const [sourceFormat, setSourceFormat] =
+    useState<ContactImportSourceFormat | null>(
+      contactImportDraft?.sourceFormat ?? null,
+    );
   const [csv, setCsv] = useState<ParsedCsv | null>(
     contactImportDraft
       ? {
@@ -131,6 +135,7 @@ export function ContactImport({
 
     setFileName(file?.name ?? null);
     setSourceDigest(null);
+    setSourceFormat(null);
     setCsv(null);
     setMapping({ ...emptyMapping });
     setError(null);
@@ -144,29 +149,23 @@ export function ContactImport({
       return;
     }
 
-    if (!file.name.toLowerCase().endsWith(".csv")) {
-      setError("בשלב זה נתמך CSV בלבד. תמיכת Excel תתווסף לאחר בחירת ספריית הייבוא.");
-      return;
-    }
-
     try {
-      const csvText = await file.text();
-      const parsed = parseCsv(csvText);
-      const digest = await deriveCsvSourceDigest(csvText);
+      const parsed = await parseContactImportSourceFile(file);
 
       if (currentRead !== readSequence.current) {
         return;
       }
 
-      setCsv(parsed);
-      setSourceDigest(digest);
+      setCsv({ headers: parsed.headers, rows: parsed.rows });
+      setSourceDigest(parsed.sourceDigest);
+      setSourceFormat(parsed.format);
     } catch (caughtError) {
       if (currentRead !== readSequence.current) {
         return;
       }
 
       setError(
-        caughtError instanceof CsvParseError
+        caughtError instanceof ContactImportSourceError
           ? caughtError.message
           : "לא ניתן לקרוא את הקובץ.",
       );
@@ -189,6 +188,7 @@ export function ContactImport({
     if (
       !csv ||
       !fileName ||
+      !sourceFormat ||
       !sourceDigest ||
       !canCheckMapping ||
       !qualitySummary ||
@@ -199,6 +199,7 @@ export function ContactImport({
 
     saveContactImportDraft({
       fileName,
+      sourceFormat,
       sourceDigest,
       headers: [...csv.headers],
       rows: csv.rows.map((row) => [...row]),
@@ -307,7 +308,7 @@ export function ContactImport({
       <section className="card import-start-card">
         <div className="import-start-copy">
           <span className="document-icon" aria-hidden="true">
-            CSV
+            {sourceFormat?.toUpperCase() ?? "CSV/XLSX"}
           </span>
           <div>
             <span className="card-kicker">שלב 1 — קובץ מקור</span>
@@ -317,11 +318,20 @@ export function ContactImport({
               זה. רק לאחר בדיקת המיפוי ואישור מפורש, שורות הפרופיל נשלחות
               לשרת במנות קטנות.
             </p>
+            <p>
+              עד 5 MiB, ‏50,000 שורות ו־100 עמודות. XLSX חייב לכלול
+              גיליון גלוי יחיד וערכים בלבד — ללא נוסחאות, Macros או
+              קישורים חיצוניים.
+            </p>
           </div>
         </div>
         <label className="primary-button file-button">
-          {fileName ? "בחירת קובץ אחר" : "בחירת CSV"}
-          <input type="file" accept=".csv,text/csv" onChange={handleFileChange} />
+          {fileName ? "בחירת קובץ אחר" : "בחירת CSV או XLSX"}
+          <input
+            type="file"
+            accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={handleFileChange}
+          />
         </label>
       </section>
 
@@ -338,7 +348,7 @@ export function ContactImport({
             <section className="card csv-schema-audit-card">
               <div className="card-header">
                 <div>
-                  <span className="card-kicker">CSV schema audit</span>
+                  <span className="card-kicker">Source schema audit</span>
                   <h2>בדיקת מבנה הקובץ</h2>
                 </div>
                 <span
@@ -461,7 +471,7 @@ export function ContactImport({
             {hasMappingCollision ? (
               <div className="inline-notice danger" role="alert">
                 <span aria-hidden="true">!</span>
-                <p>אותה עמודת CSV מופתה ליותר משדה אחד.</p>
+                <p>אותה עמודת מקור מופתה ליותר משדה אחד.</p>
               </div>
             ) : null}
 
@@ -681,8 +691,8 @@ export function ContactImport({
           <div>
             <strong>גבול המימוש הנוכחי</strong>
             <p>
-              Excel עדיין אינו נתמך. CSV נבדק מקומית, וייבוא קבוע זמין רק
-              לאחר אימות משתמש ו־Tenant פעיל.
+              CSV ו־XLSX נבדקים מקומית תחת מגבלות גודל ותוכן. ייבוא קבוע
+              זמין רק לאחר אימות משתמש ו־Tenant פעיל.
             </p>
           </div>
         </section>

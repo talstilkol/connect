@@ -13,6 +13,12 @@ import {
   type ContactImportProfileMapping,
 } from "../../shared/domain/contactImportJob.ts";
 import {
+  CONTACT_IMPORT_MAX_COLUMNS,
+  CONTACT_IMPORT_MAX_DATA_ROWS,
+  CONTACT_IMPORT_MAX_FILE_NAME_CHARACTERS,
+  isSupportedContactImportFileName,
+} from "../../shared/contactImport/sourcePolicy.ts";
+import {
   validatePersistedContact,
   type PersistedContactProfile,
 } from "../../shared/validation/persistedContact.ts";
@@ -94,7 +100,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isColumnIndex(value: unknown): value is number {
-  return Number.isSafeInteger(value) && Number(value) >= 0;
+  return (
+    Number.isSafeInteger(value) &&
+    Number(value) >= 0 &&
+    Number(value) < CONTACT_IMPORT_MAX_COLUMNS
+  );
 }
 
 function isOptionalColumnIndex(
@@ -108,10 +118,13 @@ function parseStartInput(input: unknown): StartContactImportRequest {
     !isRecord(input) ||
     typeof input.fileName !== "string" ||
     !input.fileName.trim() ||
+    input.fileName.trim().length > CONTACT_IMPORT_MAX_FILE_NAME_CHARACTERS ||
+    !isSupportedContactImportFileName(input.fileName) ||
     typeof input.sourceDigest !== "string" ||
     !/^[0-9a-f]{64}$/.test(input.sourceDigest) ||
     !Number.isSafeInteger(input.totalRows) ||
     Number(input.totalRows) <= 0 ||
+    Number(input.totalRows) > CONTACT_IMPORT_MAX_DATA_ROWS ||
     !isRecord(input.mapping)
   ) {
     throw new ContactImportInputError("invalid-start-input");
