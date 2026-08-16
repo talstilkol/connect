@@ -219,3 +219,38 @@ v3 חייב להמשיך להיכשל סגור.
 8.6 ‏PR #2 עבר את כל תשעת ה־Checks עבור Commit `aeefdbf`, אך הם
 עדיין אינם Required Checks. ה־PR נשאר Draft וכולל 49 Commits מול
 `main`; אין למזג אותו לפני Review והכרעה לגבי אסטרטגיית הענפים.
+
+## 9. בדיקת Dependency המשכית — 2026-08-17
+
+9.1 `npm audit` המלא זיהה שהשניים מבין שלושת Advisory findings
+ברמת High נובעים מ־`image-size@2.0.2`, שננעל כתלות של
+`vinext@0.0.50`. שני ה־Advisories עוסקים בלולאה אינסופית בפרסור
+ICNS ובפרסור JXL/HEIF.
+
+9.2 Vinext שודרג ל־`1.0.0-beta.6`, גרסה שאינה תלויה עוד ב־
+`image-size`. ‏Peer dependency מסוג `@vitejs/plugin-rsc` שודרג יחד
+עמו מ־`0.5.26` ל־`0.5.34`. לאחר ההתקנה `npm ls` הוכיח שאין
+`image-size` בגרף.
+
+9.3 Vinext החדש דחה את Matcher ה־Proxy הישן כביטוי עמום. הביטוי
+הוחלף ברשימה מפורשת של Root, ‏Login, ‏Register, ‏Workspace, ‏Admin,
+Invitation, ‏API, ‏TRPC ו־Clerk. בדיקת Boundary חדשה דורשת שכל
+המשטחים המאומתים יישארו ברשימה ואוסרת להחזיר את הביטוי העמום.
+
+9.4 Build, ‏TypeScript, ‏Dependency lock ו־`drizzle-kit check`
+עברו לאחר השינוי. `npm audit --omit=dev` מול Registry הרשמי החזיר
+אפס פגיעויות ב־32 תלויות Production.
+
+9.5 ה־Audit המלא עדיין מציג שרשרת אחת ברמת Moderate:
+`drizzle-kit@0.31.10` משתמש ב־`@esbuild-kit/esm-loader`, שמחזיק
+`esbuild@0.18.20`. ה־Advisory חל על שרת הפיתוח של esbuild; מסלול
+Connect אינו מפעיל שרת זה, ו־Drizzle Kit משמש רק ליצירה ולבדיקת
+מיגרציות.
+
+9.6 ‏npm מציע `drizzle-kit@0.18.1` כתיקון, אך זהו Downgrade שובר.
+אין לבצע `npm audit fix --force` או Override כפוי של esbuild. הממצא
+נשאר פתוח ושקוף עד ש־Drizzle יפרסם קו תואם ללא התלות הישנה או עד
+Migration Tooling review נפרד.
+
+9.7 התראות GitHub בענף ברירת המחדל לא ייסגרו לפני Merge של התיקון.
+הבדיקה המקומית וה־PR אינן משנות את מצב `main` בעצמן.

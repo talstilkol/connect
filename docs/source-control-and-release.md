@@ -419,3 +419,17 @@ Commit ו־GitHub-hosted runner מדויקים. הוא קורא מחדש את ש
 11.9 המאמת דורש גם זהות מבנית מלאה בין הקובץ החתום לבין
 `DEPENDENCY_AUDIT_EVIDENCE_JSON`. שער Production מפעיל אותו לפני
 Browser Attestation ולפני Production Readiness.
+
+11.10 בנוסף ל־Production Evidence, כל התראת Development dependency
+עוברת Triage נפרד. ממצא בכלי Build או Migration אינו מסומן כמתוקן
+רק מפני ש־`--omit=dev` נקי; יש לתעד Reachability, גרסה מתוקנת, סיכון
+שינוי ותוצאת Build וכלי הפיתוח הרלוונטי. אין להשתמש ב־Override של
+תלות טרנזיטיבית ללא בדיקת תאימות מלאה.
+
+11.11 ב־2026-08-17 הוסר `image-size@2.0.2` מגרף הפיתוח באמצעות
+שדרוג Vinext לגרסה `1.0.0-beta.6` ו־`@vitejs/plugin-rsc` לגרסה
+`0.5.34`. שתי התראות High של Parser DoS אינן קיימות עוד ב־Lockfile.
+ה־Production audit חזר עם אפס ממצאים. שרשרת Moderate של esbuild
+ישן בתוך Drizzle Kit נשארה גלויה ככלי פיתוח בלבד; אין לה תיקון
+Upstream תואם בקו `drizzle-kit@0.31.10`, ו־Downgrade או Override
+כפוי לא יבוצעו ללא תיקון ספק או בדיקת Migration ייעודית.
