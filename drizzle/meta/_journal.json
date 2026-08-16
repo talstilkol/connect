@@ -211,6 +211,13 @@
       "when": 1785958025000,
       "tag": "0029_team_invitation_acceptance",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1785961625000,
+      "tag": "0030_whatsapp_rate_limit_reservations",
+      "breakpoints": true
     }
   ]
 }

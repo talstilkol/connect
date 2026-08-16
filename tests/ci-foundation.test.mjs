@@ -90,7 +90,7 @@ test("applies every migration and verifies the current journal", async () => {
 
   assert.deepEqual(report, {
     status: "passed",
-    migrationCount: 30,
+    migrationCount: 31,
     findings: [],
   });
 });

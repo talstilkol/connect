@@ -69,6 +69,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0027_team_invitation_system_actor.sql",
     "0028_team_invitation_expiration_scan.sql",
     "0029_team_invitation_acceptance.sql",
+    "0030_whatsapp_rate_limit_reservations.sql",
   ]);
 
   const migration = await readFile(
@@ -233,6 +234,65 @@ test("Meta credential migration stores only tenant-bound encrypted envelopes", a
     /access_token|plaintext|provider_payload/,
   );
   assert.doesNotMatch(migration, /\bINSERT\s+INTO\b/i);
+});
+
+test("WhatsApp rate-limit migration stores only opaque keys and immutable lifecycle evidence", async () => {
+  const migration = await readFile(
+    new URL(
+      "0030_whatsapp_rate_limit_reservations.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_rate_limit_reservations`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_pair_rate_limit_state`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_portfolio_recipient_rate_limit_state`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_rate_limit_settlements`/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_rate_reservations_update_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_rate_settlements_state_update/,
+  );
+  const pairStateDefinition = migration.slice(
+    migration.indexOf(
+      "CREATE TABLE `whatsapp_pair_rate_limit_state`",
+    ),
+    migration.indexOf(
+      "CREATE TABLE `whatsapp_portfolio_recipient_rate_limit_state`",
+    ),
+  );
+  const portfolioStateDefinition = migration.slice(
+    migration.indexOf(
+      "CREATE TABLE `whatsapp_portfolio_recipient_rate_limit_state`",
+    ),
+    migration.indexOf(
+      "CREATE TRIGGER\n  `whatsapp_pair_state_insert_proof_guard`",
+    ),
+  );
+
+  assert.doesNotMatch(pairStateDefinition, /tenant_id/);
+  assert.doesNotMatch(portfolioStateDefinition, /tenant_id/);
+  assert.doesNotMatch(
+    migration,
+    /phone_e164|phone_number|message_body|access_token/,
+  );
+  assert.doesNotMatch(migration, /Math\.random/);
 });
 
 test("AI persistence migration stores immutable definitions and source metadata without file bytes or secrets", async () => {
@@ -741,6 +801,10 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "tenant_subscription_events",
     "tenant_subscriptions",
     "tenants",
+    "whatsapp_pair_rate_limit_state",
+    "whatsapp_portfolio_recipient_rate_limit_state",
+    "whatsapp_rate_limit_reservations",
+    "whatsapp_rate_limit_settlements",
   ]);
 });
 

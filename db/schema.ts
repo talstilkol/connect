@@ -100,6 +100,15 @@ export const metaWebhookReceiptStatuses = [
   "processed",
   "failed",
 ] as const;
+export const whatsappPortfolioLimitKinds = [
+  "bounded",
+  "unlimited",
+] as const;
+export const whatsappRateLimitSettlementOutcomes = [
+  "delivered",
+  "provider-failed",
+  "cancelled-before-submit",
+] as const;
 export const messageTemplateStatuses = [
   "draft",
   "submitting",
@@ -4181,6 +4190,324 @@ export const productionDecisionEvents =
     ],
   );
 
+export const whatsappRateLimitReservations =
+  sqliteTable(
+    "whatsapp_rate_limit_reservations",
+    {
+      reservationKey: text("reservation_key")
+        .primaryKey(),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      portfolioKey: text("portfolio_key")
+        .notNull(),
+      senderKey: text("sender_key")
+        .notNull(),
+      recipientKey: text("recipient_key")
+        .notNull(),
+      portfolioLimitKind: text(
+        "portfolio_limit_kind",
+        { enum: whatsappPortfolioLimitKinds },
+      ).notNull(),
+      portfolioLimitValue: integer(
+        "portfolio_limit_value",
+      ),
+      reservedAt: text("reserved_at")
+        .notNull(),
+      pairReservedUntil: text(
+        "pair_reserved_until",
+      ).notNull(),
+      reservationExpiresAt: text(
+        "reservation_expires_at",
+      ).notNull(),
+      createdAt: text("created_at")
+        .notNull(),
+    },
+    (table) => [
+      check(
+        "whatsapp_rate_reservations_key_sha256",
+        sql`length(${table.reservationKey}) = 93
+          and substr(${table.reservationKey}, 1, 29)
+            = 'whatsapp_rate_reservation_v1_'
+          and substr(${table.reservationKey}, 30)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_rate_reservations_portfolio_key_sha256",
+        sql`length(${table.portfolioKey}) = 86
+          and substr(${table.portfolioKey}, 1, 22)
+            = 'whatsapp_portfolio_v1_'
+          and substr(${table.portfolioKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_rate_reservations_sender_key_sha256",
+        sql`length(${table.senderKey}) = 83
+          and substr(${table.senderKey}, 1, 19)
+            = 'whatsapp_sender_v1_'
+          and substr(${table.senderKey}, 20)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_rate_reservations_recipient_key_sha256",
+        sql`length(${table.recipientKey}) = 86
+          and substr(${table.recipientKey}, 1, 22)
+            = 'whatsapp_recipient_v1_'
+          and substr(${table.recipientKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_rate_reservations_limit_valid",
+        sql`(
+          ${table.portfolioLimitKind} = 'bounded'
+          and ${table.portfolioLimitValue} in (
+            250, 2000, 10000, 100000
+          )
+        ) or (
+          ${table.portfolioLimitKind} = 'unlimited'
+          and ${table.portfolioLimitValue} is null
+        )`,
+      ),
+      check(
+        "whatsapp_rate_reservations_time_valid",
+        sql`length(${table.reservedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.reservedAt}
+          ) = ${table.reservedAt}
+          and length(${table.pairReservedUntil}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.pairReservedUntil}
+          ) = ${table.pairReservedUntil}
+          and ${table.pairReservedUntil} = strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.reservedAt},
+            '+6 seconds'
+          )
+          and length(${table.reservationExpiresAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.reservationExpiresAt}
+          ) = ${table.reservationExpiresAt}
+          and ${table.reservationExpiresAt}
+            >= ${table.pairReservedUntil}
+          and ${table.reservationExpiresAt} <= strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.reservedAt},
+            '+24 hours'
+          )
+          and ${table.createdAt} = ${table.reservedAt}`,
+      ),
+      index(
+        "whatsapp_rate_reservations_tenant_reserved_idx",
+      ).on(
+        table.tenantId,
+        table.reservedAt,
+      ),
+    ],
+  );
+
+export const whatsappPairRateLimitState =
+  sqliteTable(
+    "whatsapp_pair_rate_limit_state",
+    {
+      senderKey: text("sender_key")
+        .notNull(),
+      recipientKey: text("recipient_key")
+        .notNull(),
+      reservationKey: text("reservation_key")
+        .notNull()
+        .references(
+          () =>
+            whatsappRateLimitReservations
+              .reservationKey,
+          { onDelete: "restrict" },
+        ),
+      reservedUntil: text("reserved_until")
+        .notNull(),
+      updatedAt: text("updated_at")
+        .notNull(),
+    },
+    (table) => [
+      primaryKey({
+        columns: [
+          table.senderKey,
+          table.recipientKey,
+        ],
+      }),
+      check(
+        "whatsapp_pair_state_sender_key_sha256",
+        sql`length(${table.senderKey}) = 83
+          and substr(${table.senderKey}, 1, 19)
+            = 'whatsapp_sender_v1_'
+          and substr(${table.senderKey}, 20)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_pair_state_recipient_key_sha256",
+        sql`length(${table.recipientKey}) = 86
+          and substr(${table.recipientKey}, 1, 22)
+            = 'whatsapp_recipient_v1_'
+          and substr(${table.recipientKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_pair_state_time_canonical",
+        sql`length(${table.reservedUntil}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.reservedUntil}
+          ) = ${table.reservedUntil}
+          and length(${table.updatedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.updatedAt}
+          ) = ${table.updatedAt}`,
+      ),
+      index(
+        "whatsapp_pair_state_expiry_idx",
+      ).on(
+        table.reservedUntil,
+      ),
+    ],
+  );
+
+export const whatsappPortfolioRecipientRateLimitState =
+  sqliteTable(
+    "whatsapp_portfolio_recipient_rate_limit_state",
+    {
+      portfolioKey: text("portfolio_key")
+        .notNull(),
+      recipientKey: text("recipient_key")
+        .notNull(),
+      activeReservationKey: text(
+        "active_reservation_key",
+      ).references(
+        () =>
+          whatsappRateLimitReservations
+            .reservationKey,
+        { onDelete: "restrict" },
+      ),
+      activeReservationExpiresAt: text(
+        "active_reservation_expires_at",
+      ),
+      lastDeliveredAt: text(
+        "last_delivered_at",
+      ),
+      updatedAt: text("updated_at")
+        .notNull(),
+    },
+    (table) => [
+      primaryKey({
+        columns: [
+          table.portfolioKey,
+          table.recipientKey,
+        ],
+      }),
+      check(
+        "whatsapp_portfolio_state_portfolio_key_sha256",
+        sql`length(${table.portfolioKey}) = 86
+          and substr(${table.portfolioKey}, 1, 22)
+            = 'whatsapp_portfolio_v1_'
+          and substr(${table.portfolioKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_portfolio_state_recipient_key_sha256",
+        sql`length(${table.recipientKey}) = 86
+          and substr(${table.recipientKey}, 1, 22)
+            = 'whatsapp_recipient_v1_'
+          and substr(${table.recipientKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_portfolio_state_active_consistent",
+        sql`(
+          ${table.activeReservationKey} is null
+          and ${table.activeReservationExpiresAt} is null
+        ) or (
+          ${table.activeReservationKey} is not null
+          and ${table.activeReservationExpiresAt} is not null
+          and length(${table.activeReservationExpiresAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.activeReservationExpiresAt}
+          ) = ${table.activeReservationExpiresAt}
+        )`,
+      ),
+      check(
+        "whatsapp_portfolio_state_delivery_canonical",
+        sql`${table.lastDeliveredAt} is null
+          or (
+            length(${table.lastDeliveredAt}) = 24
+            and strftime(
+              '%Y-%m-%dT%H:%M:%fZ',
+              ${table.lastDeliveredAt}
+            ) = ${table.lastDeliveredAt}
+          )`,
+      ),
+      check(
+        "whatsapp_portfolio_state_updated_canonical",
+        sql`length(${table.updatedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.updatedAt}
+          ) = ${table.updatedAt}`,
+      ),
+      index(
+        "whatsapp_portfolio_state_capacity_idx",
+      ).on(
+        table.portfolioKey,
+        table.lastDeliveredAt,
+        table.activeReservationExpiresAt,
+      ),
+    ],
+  );
+
+export const whatsappRateLimitSettlements =
+  sqliteTable(
+    "whatsapp_rate_limit_settlements",
+    {
+      reservationKey: text("reservation_key")
+        .primaryKey()
+        .references(
+          () =>
+            whatsappRateLimitReservations
+              .reservationKey,
+          { onDelete: "restrict" },
+        ),
+      outcome: text("outcome", {
+        enum: whatsappRateLimitSettlementOutcomes,
+      }).notNull(),
+      settledAt: text("settled_at")
+        .notNull(),
+      createdAt: text("created_at")
+        .notNull(),
+    },
+    (table) => [
+      check(
+        "whatsapp_rate_settlements_outcome_valid",
+        sql`${table.outcome} in (
+          'delivered',
+          'provider-failed',
+          'cancelled-before-submit'
+        )`,
+      ),
+      check(
+        "whatsapp_rate_settlements_time_canonical",
+        sql`length(${table.settledAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.settledAt}
+          ) = ${table.settledAt}
+          and ${table.createdAt} = ${table.settledAt}`,
+      ),
+    ],
+  );
+
 export type TenantRow = typeof tenants.$inferSelect;
 export type NewTenantRow = typeof tenants.$inferInsert;
 export type TenantMembershipRow = typeof tenantMemberships.$inferSelect;
@@ -4213,6 +4540,18 @@ export type MetaWebhookReceiptRow =
   typeof metaWebhookReceipts.$inferSelect;
 export type NewMetaWebhookReceiptRow =
   typeof metaWebhookReceipts.$inferInsert;
+export type WhatsappRateLimitReservationRow =
+  typeof whatsappRateLimitReservations.$inferSelect;
+export type NewWhatsappRateLimitReservationRow =
+  typeof whatsappRateLimitReservations.$inferInsert;
+export type WhatsappPairRateLimitStateRow =
+  typeof whatsappPairRateLimitState.$inferSelect;
+export type WhatsappPortfolioRecipientRateLimitStateRow =
+  typeof whatsappPortfolioRecipientRateLimitState.$inferSelect;
+export type WhatsappRateLimitSettlementRow =
+  typeof whatsappRateLimitSettlements.$inferSelect;
+export type NewWhatsappRateLimitSettlementRow =
+  typeof whatsappRateLimitSettlements.$inferInsert;
 export type MessageTemplateRow =
   typeof messageTemplates.$inferSelect;
 export type NewMessageTemplateRow =

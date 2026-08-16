@@ -397,9 +397,30 @@ Unique-recipient rolling quota, כדי שמספרים מקבילים לא יצר
 14.6 `server/meta/metaMessageFailurePolicy.ts` מממש Decision engine
 קשיח לקודי Throttling ואכיפה. הוא דורש Signal מצומצם, מסרב להמציא
 Retry delay ומחזיר Defer, ‏Pause, ‏Block, ‏Circuit break או Manual
-review. בשלב זה הוא אינו מבצע Reservation, אינו משנה Campaign state
-ואינו שולח הודעה; לכן אין לראות בו Rate limiter מלא או Production
-evidence.
+review. המנוע עצמו אינו משנה Campaign state ואינו שולח הודעה.
+
+14.7 `db/whatsappRateLimitRepository.ts` ומיגרציה `0030` מממשים את
+שכבת ה־Reservation האטומית עבור הודעה Business-initiated:
+
+14.7.1 State של `Sender+Recipient` נאכף גלובלית לפי מפתחות אטומים
+לחלון שמרני של שש שניות ללא Burst.
+
+14.7.2 State של `Portfolio+Recipient` משותף לכל Tenant של Connect,
+כדי שחיבור אותו Business Portfolio במספר Workspaces לא יפצל את
+המכסה של Meta.
+
+14.7.3 Reservation ו־Settlement נשמרים כראיות Immutable. מצב
+`delivered` מעדכן את חלון 24 השעות; `provider-failed` או
+`cancelled-before-submit` משחררים Reservation מתאים. אירוע מאוחר
+אינו מוחק Reservation חדש יותר.
+
+14.7.4 D1 מקבל רק Portfolio tiers רשמיים או `unlimited` מפורש,
+אינו שומר מספר טלפון או Provider payload, ודוחה State שאין לו
+Reservation/Settlement proof תואם.
+
+14.7.5 זהו עדיין רכיב Persistence מבודד: אין Provider adapter חי,
+אין חיבור ל־Campaign consumer ואין WABA/Throughput tier מאומת.
+לפיכך אין לראות בו Rate limiter מלא או Production evidence.
 
 ## 15. אחריות ועדכון
 
