@@ -16,9 +16,11 @@
 1.4 שמונת שערי האיכות המקומיים ו־Dependency Audit מוגדרים כתשעה
 Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארבעת הענפים
 נמצאו לא מוגנים, לא נמצאו Rulesets או `CODEOWNERS`, ולכן ה־Checks
-אינם Required. שינוי ה־Visibility אינו מתקן בקרות אלה. מצב Secret
-Scanning, ‏Push Protection, ‏2FA ו־Collaborators נשאר
-`unknown/unavailable` עד בדיקה ייעודית.
+אינם Required. שינוי ה־Visibility אינו מתקן בקרות אלה. בדיקת המשך
+מצאה `0` Collaborators, ורק בעל החשבון יכול לתרום. ה־API החזיר
+`security_and_analysis: null`, ולכן Secret Scanning ו־Push Protection
+אינם מוכחים ואינם יכולים לספק Governance Evidence תקף. מצב 2FA
+נשאר `unknown/unavailable`.
 
 1.4.1 הראיות, ההיקף וסדר התיקון נמצאים ב־
 `docs/github-governance-live-audit.md`.

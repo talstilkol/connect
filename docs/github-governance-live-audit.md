@@ -194,3 +194,28 @@ Evidence.
 7.8 תיקון ה־Visibility סוגר את ממצא 3.1 בלבד. Gate 1 נשאר `blocked`
 בגלל בעלות אישית, היעדר Ruleset ו־CODEOWNERS, ענפים לא מוגנים,
 בקרות Security שטרם אומתו ו־Draft PR שאינו מוכן למיזוג.
+
+## 8. בדיקת המשך לאחר המעבר ל־Private
+
+8.1 ארבעת הענפים נבדקו מחדש לאחר התיקון וכולם עדיין דיווחו
+`protected: false`.
+
+8.2 מסך Collaborators דיווח `0` Collaborators ושהבעלים הוא היחיד
+שיכול לתרום. לכן אין כרגע Reviewer עצמאי, ואין להפעיל Approval חובה
+באופן שעלול לנעול את `main` ללא נתיב Merge מאושר.
+
+8.3 מסך Advanced Security הראה ש־Dependency graph, ‏Dependabot
+alerts ו־Dependabot security updates פעילים.
+
+8.4 אותו מסך הראה `0` Dependabot rules, ‏Malware alerts כבויים,
+Grouped security updates כבויים ו־Dependabot version updates אינם
+מוגדרים דרך קובץ ב־`main`.
+
+8.5 קריאת Repository Metadata מאומתת החזירה
+`security_and_analysis: null`. ‏Secret scanning ו־Push protection
+אינם מוצגים כבקרות פעילות, ולכן Source Control Governance Evidence
+v3 חייב להמשיך להיכשל סגור.
+
+8.6 ‏PR #2 עבר את כל תשעת ה־Checks עבור Commit `aeefdbf`, אך הם
+עדיין אינם Required Checks. ה־PR נשאר Draft וכולל 49 Commits מול
+`main`; אין למזג אותו לפני Review והכרעה לגבי אסטרטגיית הענפים.

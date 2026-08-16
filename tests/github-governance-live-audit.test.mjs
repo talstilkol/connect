@@ -92,7 +92,7 @@ test("records all nine successful jobs without treating them as required checks"
   );
 });
 
-test("keeps unavailable security settings unknown and orders privacy before transfer", () => {
+test("preserves the original unknown state and records the private-repository follow-up", () => {
   assert.match(
     audit,
     /רשימת Collaborators והרשאותיהם: `unknown\/unavailable`/,
@@ -104,6 +104,18 @@ test("keeps unavailable security settings unknown and orders privacy before tran
   assert.match(
     audit,
     /Secret scanning ו־Push protection:[\s\S]*`unknown\/unavailable`/,
+  );
+  assert.match(
+    audit,
+    /`0` Collaborators[\s\S]*Reviewer עצמאי/,
+  );
+  assert.match(
+    audit,
+    /`security_and_analysis: null`[\s\S]*להיכשל סגור/,
+  );
+  assert.match(
+    audit,
+    /PR #2 עבר את כל תשעת ה־Checks[\s\S]*49 Commits/,
   );
 
   const privacyStep = audit.indexOf(
