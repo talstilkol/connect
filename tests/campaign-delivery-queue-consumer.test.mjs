@@ -136,7 +136,10 @@ function fixture(options = {}) {
   ];
   const processorResults = [
     ...(options.processorResults ?? [
-      { outcome: "accepted" },
+      {
+        outcome: "accepted",
+        providerMessageId: "wamid.campaign-17",
+      },
     ]),
   ];
   const admissionResults = [
@@ -184,20 +187,6 @@ function fixture(options = {}) {
             outcome: "duplicate",
           };
         },
-        async markAccepted(
-          deliveryKey,
-          timestamp,
-        ) {
-          calls.push({
-            operation: "accepted",
-            deliveryKey,
-            timestamp,
-          });
-
-          if (options.transitionError) {
-            throw options.transitionError;
-          }
-        },
         async markRejected(
           deliveryKey,
           errorCode,
@@ -238,6 +227,23 @@ function fixture(options = {}) {
           return options.currentCampaign === undefined
             ? campaign()
             : options.currentCampaign;
+        },
+      },
+      {
+        async recordAccepted(input) {
+          calls.push({
+            operation: "accepted",
+            ...input,
+          });
+
+          if (options.transitionError) {
+            throw options.transitionError;
+          }
+
+          return {
+            outcome: "recorded",
+            link: {},
+          };
         },
       },
       {
@@ -519,7 +525,10 @@ test("records explicit accepted and rejected provider outcomes", async () => {
       },
     ],
     processorResults: [
-      { outcome: "accepted" },
+      {
+        outcome: "accepted",
+        providerMessageId: "wamid.campaign-17",
+      },
       {
         outcome: "rejected",
         errorCode: "PROVIDER_REJECTED",
@@ -548,6 +557,16 @@ test("records explicit accepted and rejected provider outcomes", async () => {
       (call) =>
         call.operation === "rejected" &&
         call.errorCode === "PROVIDER_REJECTED",
+    ),
+    true,
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "accepted" &&
+        call.providerMessageId ===
+          "wamid.campaign-17" &&
+        call.reservationKey === firstReservationKey,
     ),
     true,
   );
@@ -605,6 +624,43 @@ test("keeps an unknown external outcome in sending without automatic retry", asy
     ),
     false,
   );
+});
+
+test("keeps provider acceptance ambiguous when its durable identity cannot be linked", async () => {
+  const cases = [
+    fixture({
+      transitionError: new Error(
+        "private acceptance storage failure",
+      ),
+    }),
+    fixture({
+      processorResults: [
+        { outcome: "accepted" },
+      ],
+    }),
+  ];
+
+  for (const testFixture of cases) {
+    const testDelivery = delivery();
+    const result = await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    });
+
+    assert.deepEqual(
+      result,
+      emptyResult({ ambiguous: 1 }),
+    );
+    assert.deepEqual(testDelivery.actions, [
+      { action: "ack" },
+    ]);
+    assert.equal(
+      testFixture.calls.some(
+        (call) => call.operation === "settle",
+      ),
+      false,
+    );
+  }
 });
 
 test("retries a D1 failure before the delivery is claimed", async () => {

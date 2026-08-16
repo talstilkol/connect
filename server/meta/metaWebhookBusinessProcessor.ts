@@ -24,12 +24,17 @@ import {
 import type {
   InboundAutomationProcessor,
 } from "../automation/inboundAutomationProcessor.ts";
+import type {
+  CampaignDeliveryStatusReconciler,
+} from "../campaigns/campaignDeliveryStatusReconciler.ts";
 
 export interface MetaWebhookBusinessRepositories {
   conversations: ConversationRepository;
   templates: MessageTemplateRepository;
   inboundRuntime?:
     InboundAutomationProcessor;
+  campaignStatuses?:
+    CampaignDeliveryStatusReconciler;
 }
 
 function processorError(code: string): never {
@@ -43,6 +48,7 @@ export function createMetaWebhookBusinessBatchProcessor(
     createMetaMessageWebhookEventProcessor(
       repositories.conversations,
       repositories.inboundRuntime,
+      repositories.campaignStatuses,
     );
   const processTemplate =
     createMessageTemplateStatusEventProcessor(

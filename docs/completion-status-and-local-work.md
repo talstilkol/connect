@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,247 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,254 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -230,10 +230,11 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
 אותו D1. ‏Context Resolver מאמת Connection מחובר וגוזר מפתחות HMAC
-אטומים, אך ה־Policy source הזמני נכשל סגור. השלמת טעינת Capacity חיה
-ו־Webhook reconciliation מוערכת ב־6–10 שעות. Adapter חי ל־Meta נשאר זמן
-`unknown/unavailable` עד קבלת WABA, ‏Credentials ו־Live capacity
-state.
+אטומים. ‏Webhook reconciliation מקשר כעת אטומית את מזהה ההודעה של
+Meta ל־Delivery ול־Reservation, ומיישב `delivered`, ‏`read` ו־`failed`
+באופן Idempotent. ה־Policy source הזמני עדיין נכשל סגור; טעינת
+Capacity חיה ו־Adapter שליחה אמיתי נשארים `unknown/unavailable` עד
+קבלת WABA, ‏Credentials ו־Live capacity state.
 
 4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
 הוספת פערי ה־PDF וה־Rate Limiting הוא **66.5–109 שעות פיתוח נטו**,

@@ -75,6 +75,7 @@ export interface CampaignDeliveryAdmissionController {
 export type CampaignDeliveryProcessorResult =
   | {
       outcome: "accepted";
+      providerMessageId: string;
     }
   | {
       outcome: "rejected";

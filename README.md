@@ -88,8 +88,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1247/1247 בדיקות, 31 Migrations,
-   ‏402 קובצי Source, ‏26 Client dependency graphs, ‏767 קבצים
+31. Local Release Gate עובר עם 1254/1254 בדיקות, 32 Migrations,
+   ‏404 קובצי Source, ‏26 Client dependency graphs, ‏771 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -815,3 +815,12 @@ npm run db:generate
 7. Binding חסר או כושל נכשל סגור. אין Fallback בזיכרון Worker.
 8. שינויי מנוי ב־Admin משתמשים ב־`system-admin-mutation`; קריאת
    Directory אינה צורכת מכסה.
+9. קבלת Campaign אצל Meta נשמרת ב־D1 כקישור אטומי בין Delivery,
+   ‏Provider message ו־Rate-limit reservation. ‏Payload ותוכן הודעה
+   אינם נשמרים בקישור.
+10. Status webhooks מסוג `delivered` ו־`read` סוגרים את ה־Reservation
+    כמסירה; `failed` סוגר אותה ככשל Provider. ‏Retry חוזר לאותה
+    תוצאה טרמינלית ואינו סופר נמען פעמיים.
+11. קמפיין נשאר `running` בזמן שנמען במצב `accepted`; השלמה מותרת רק
+    לאחר תוצאות טרמינליות. מקור Capacity חי ו־Meta sender adapter
+    עדיין חסרים ולכן שליחה נשארת חסומה.

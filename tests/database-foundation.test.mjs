@@ -70,6 +70,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0028_team_invitation_expiration_scan.sql",
     "0029_team_invitation_acceptance.sql",
     "0030_whatsapp_rate_limit_reservations.sql",
+    "0031_campaign_delivery_provider_links.sql",
   ]);
 
   const migration = await readFile(
@@ -293,6 +294,53 @@ test("WhatsApp rate-limit migration stores only opaque keys and immutable lifecy
     /phone_e164|phone_number|message_body|access_token/,
   );
   assert.doesNotMatch(migration, /Math\.random/);
+});
+
+test("campaign provider reconciliation migration links one target without retaining message content", async () => {
+  const migration = await readFile(
+    new URL(
+      "0031_campaign_delivery_provider_links.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `campaign_delivery_provider_links`/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_insert_proof_guard/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_terminal_guard/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_settle_rate_limit/,
+  );
+  assert.match(
+    migration,
+    /messages_campaign_delivery_target_guard/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_delete_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /phone_e164|message_body|text_content|provider_payload|webhook_payload|access_token/,
+  );
+  assert.equal(
+    migration.match(/\bINSERT\s+INTO\b/gi)?.length,
+    1,
+  );
+  assert.match(
+    migration,
+    /INSERT INTO `whatsapp_rate_limit_settlements`/,
+  );
 });
 
 test("AI persistence migration stores immutable definitions and source metadata without file bytes or secrets", async () => {
@@ -771,6 +819,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "bot_flows",
     "bot_reply_deliveries",
     "business_profiles",
+    "campaign_delivery_provider_links",
     "campaign_recipients",
     "campaigns",
     "contact_consent_events",

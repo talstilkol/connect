@@ -24,6 +24,9 @@ import {
 import type {
   InboundAutomationProcessor,
 } from "../automation/inboundAutomationProcessor.ts";
+import type {
+  CampaignDeliveryStatusReconciler,
+} from "../campaigns/campaignDeliveryStatusReconciler.ts";
 
 const MAXIMUM_ITEMS_PER_EVENT = 100;
 const MAXIMUM_MESSAGE_TEXT_LENGTH = 16_384;
@@ -302,6 +305,8 @@ export function createMetaMessageWebhookEventProcessor(
   repository: ConversationRepository,
   inboundRuntime?:
     InboundAutomationProcessor,
+  campaignStatuses?:
+    CampaignDeliveryStatusReconciler,
 ): (
   event:
     | MetaInboundMessagesWebhookEvent
@@ -393,6 +398,11 @@ export function createMetaMessageWebhookEventProcessor(
     );
 
     for (const parsed of statuses) {
+      const statusEventKey =
+        await deriveDeliveryStatusEventKey(
+          event.dispatchKey,
+          parsed.statusIndex,
+        );
       let result;
 
       try {
@@ -400,11 +410,7 @@ export function createMetaMessageWebhookEventProcessor(
           tenantId: batch.tenantId,
           providerMessageId: parsed.providerMessageId,
           status: parsed.status,
-          statusEventKey:
-            await deriveDeliveryStatusEventKey(
-              event.dispatchKey,
-              parsed.statusIndex,
-            ),
+          statusEventKey,
           statusEventAt: parsed.statusEventAt,
         });
       } catch {
@@ -413,7 +419,33 @@ export function createMetaMessageWebhookEventProcessor(
         );
       }
 
-      if (result.outcome === "not-found") {
+      let campaignResult: {
+        outcome: "not-found" | "reconciled";
+      } = { outcome: "not-found" };
+
+      if (campaignStatuses) {
+        try {
+          campaignResult =
+            await campaignStatuses.reconcile({
+              tenantId: batch.tenantId,
+              providerMessageId:
+                parsed.providerMessageId,
+              status: parsed.status,
+              statusEventKey,
+              statusEventAt:
+                parsed.statusEventAt,
+            });
+        } catch {
+          return processorError(
+            "CAMPAIGN_STATUS_RECONCILIATION_FAILED",
+          );
+        }
+      }
+
+      if (
+        result.outcome === "not-found" &&
+        campaignResult.outcome === "not-found"
+      ) {
         return processorError(
           "MESSAGE_STATUS_TARGET_NOT_FOUND",
         );

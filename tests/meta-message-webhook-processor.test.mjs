@@ -469,6 +469,92 @@ test("derives one status event key and accepts applied, duplicate, or stale outc
   ]);
 });
 
+test("reconciles a campaign status when the provider message is not a conversation message", async () => {
+  const campaignWrites = [];
+  const processEvent =
+    createMetaMessageWebhookEventProcessor(
+      {
+        async resolveInboundContact() {
+          throw new Error("not used");
+        },
+        async recordInboundMessage() {
+          throw new Error("not used");
+        },
+        async applyDeliveryStatus() {
+          return { outcome: "not-found" };
+        },
+      },
+      undefined,
+      {
+        async reconcile(input) {
+          campaignWrites.push(input);
+          return { outcome: "reconciled" };
+        },
+      },
+    );
+
+  await processEvent(
+    deliveryEvent(),
+    batch([deliveryEvent()]),
+  );
+
+  assert.equal(campaignWrites.length, 1);
+  assert.deepEqual(
+    Object.keys(campaignWrites[0]).sort(),
+    [
+      "providerMessageId",
+      "status",
+      "statusEventAt",
+      "statusEventKey",
+      "tenantId",
+    ],
+  );
+  assert.equal(
+    campaignWrites[0].providerMessageId,
+    "wamid.outbound-17",
+  );
+  assert.equal(campaignWrites[0].status, "delivered");
+  assert.match(
+    campaignWrites[0].statusEventKey,
+    /^[0-9a-f]{64}$/,
+  );
+});
+
+test("maps campaign reconciliation failure to one bounded webhook retry code", async () => {
+  const processEvent =
+    createMetaMessageWebhookEventProcessor(
+      {
+        async resolveInboundContact() {
+          throw new Error("not used");
+        },
+        async recordInboundMessage() {
+          throw new Error("not used");
+        },
+        async applyDeliveryStatus() {
+          return { outcome: "not-found" };
+        },
+      },
+      undefined,
+      {
+        async reconcile() {
+          throw new Error("private settlement failure");
+        },
+      },
+    );
+
+  await assert.rejects(
+    processEvent(
+      deliveryEvent(),
+      batch([deliveryEvent()]),
+    ),
+    (error) =>
+      error instanceof MetaWebhookProcessorError &&
+      error.safeCode ===
+        "CAMPAIGN_STATUS_RECONCILIATION_FAILED" &&
+      !error.message.includes("private"),
+  );
+});
+
 test("maps missing targets, identity conflicts, and storage failures to safe codes", async () => {
   const cases = [
     {

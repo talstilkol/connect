@@ -8,6 +8,9 @@ import {
   createCampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
 import {
+  createCampaignDeliveryProviderRepository,
+} from "../../db/campaignDeliveryProviderRepository.ts";
+import {
   createWhatsappRateLimitRepository,
 } from "../../db/whatsappRateLimitRepository.ts";
 import {
@@ -111,6 +114,9 @@ export function createCampaignDeliveryBatchHandler(
     createCampaignDeliveryQueueConsumer(
       createCampaignDispatchRepository(database),
       createCampaignRepository(database),
+      createCampaignDeliveryProviderRepository(
+        database,
+      ),
       createCampaignDeliveryAdmission(
         createWhatsappRateLimitRepository(database),
         createCampaignDeliveryRateLimitContextResolver(

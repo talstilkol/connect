@@ -218,6 +218,13 @@
       "when": 1785961625000,
       "tag": "0030_whatsapp_rate_limit_reservations",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1786891510000,
+      "tag": "0031_campaign_delivery_provider_links",
+      "breakpoints": true
     }
   ]
 }

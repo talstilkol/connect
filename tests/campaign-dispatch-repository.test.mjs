@@ -306,7 +306,7 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
   );
   assert.match(
     database.recordings[4].sql,
-    /status = 'completed'[\s\S]+status IN \([\s\S]+'pending'[\s\S]+'queued'[\s\S]+'sending'/,
+    /status = 'completed'[\s\S]+status IN \([\s\S]+'pending'[\s\S]+'queued'[\s\S]+'sending'[\s\S]+'accepted'/,
   );
   assert.match(
     database.recordings[5].sql,
@@ -592,8 +592,9 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
     { outcome: "duplicate" },
   );
 
-  await dispatch.markAccepted(
+  await dispatch.markRejected(
     secondDeliveryKey,
+    "PROVIDER_REJECTED",
     "2026-07-26T10:03:00.000Z",
   );
   const states = database
@@ -618,9 +619,9 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
     },
     {
       contactId: 2,
-      status: "accepted",
+      status: "failed",
       attemptCount: 1,
-      lastErrorCode: null,
+      lastErrorCode: "PROVIDER_REJECTED",
     },
   ]);
 

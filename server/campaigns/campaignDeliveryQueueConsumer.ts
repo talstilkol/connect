@@ -5,6 +5,9 @@ import type {
   CampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
 import type {
+  CampaignDeliveryProviderRepository,
+} from "../../db/campaignDeliveryProviderRepository.ts";
+import type {
   CampaignDeliveryAdmissionController,
   CampaignDeliveryAdmissionResult,
   CampaignDeliveryProcessor,
@@ -86,9 +89,17 @@ function parseProcessorResult(
 ): CampaignDeliveryProcessorResult | null {
   if (
     value &&
-    value.outcome === "accepted"
+    value.outcome === "accepted" &&
+    typeof value.providerMessageId === "string" &&
+    value.providerMessageId.trim() ===
+      value.providerMessageId &&
+    value.providerMessageId.length > 0 &&
+    value.providerMessageId.length <= 255
   ) {
-    return { outcome: "accepted" };
+    return {
+      outcome: "accepted",
+      providerMessageId: value.providerMessageId,
+    };
   }
 
   if (
@@ -161,6 +172,8 @@ async function settleSafely(
 export function createCampaignDeliveryQueueConsumer(
   dispatch: CampaignDispatchRepository,
   campaigns: Pick<CampaignRepository, "findByKey">,
+  providerDeliveries:
+    Pick<CampaignDeliveryProviderRepository, "recordAccepted">,
   admission: CampaignDeliveryAdmissionController,
   processor: CampaignDeliveryProcessor,
   clock: CampaignDeliveryConsumerClock,
@@ -354,10 +367,14 @@ export function createCampaignDeliveryQueueConsumer(
           if (
             processorResult.outcome === "accepted"
           ) {
-            await dispatch.markAccepted(
-              message.deliveryKey,
-              now,
-            );
+            await providerDeliveries.recordAccepted({
+              tenantId: campaign.tenantId,
+              deliveryKey: message.deliveryKey,
+              providerMessageId:
+                processorResult.providerMessageId,
+              reservationKey,
+              acceptedAt: now,
+            });
             delivery.ack();
             result.accepted += 1;
             continue;

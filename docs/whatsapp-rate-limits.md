@@ -459,7 +459,34 @@ Portfolio מלא נדחה בחלון שמרני של 24 שעות ורק כאשר
 תפצל State ולכן אסורה.
 
 14.8.8 ה־Worker עדיין מזריק Policy source מושבת, מפני שאין קריאת
-Capacity חיה ומאושרת. ‏Webhook reconciliation עדיין לא הושלם.
+Capacity חיה ומאושרת. חסימה זו מונעת שליחה חדשה אך אינה חוסמת עיבוד
+Status webhooks עבור הודעות שכבר התקבלו אצל Meta.
+
+14.9 מיגרציה `0031` ו־
+`CampaignDeliveryStatusReconciler` משלימים את מסלול ה־Webhook:
+
+14.9.1 תשובת `accepted` מה־Delivery processor חייבת לכלול
+`providerMessageId`. ‏D1 מקשר אותו אטומית ל־`deliveryKey` ול־
+`reservationKey` לפני מעבר הנמען ל־`accepted`. התוכן, מספר הטלפון
+ו־Provider payload אינם נשמרים בטבלת הקישור.
+
+14.9.2 `sent` משאיר את ה־Reservation פעילה. ‏`delivered` או `read`
+יוצרים Settlement מסוג `delivered`; ‏`failed` יוצר
+`provider-failed`. ‏`read` נחשב הוכחת מסירה אך אינו משנה את זמן
+ה־Settlement הראשון שכבר נרשם עבור `delivered`.
+
+14.9.3 Retry של אותו Webhook מחזיר את אותה הוראת Settlement בדיוק.
+Event key שחוזר עם תוכן שונה או ניסיון להחליף תוצאה טרמינלית נכשלים
+סגור. Trigger של D1 כותב את ה־Settlement ואת מצב הנמען באותה
+טרנזקציה שבה נשמרת התוצאה הטרמינלית; Retry מאמת לאחר מכן את אותה
+ראיה בדיוק. Settlement ו־Provider identity נשמרים כראיות Immutable.
+
+14.9.4 Trigger מונע מאותו `providerMessageId` להיות גם הודעת
+Conversation וגם Campaign delivery באותו Tenant. קמפיין אינו עובר
+ל־`completed` כל עוד נמען נשאר `accepted` וממתין לתוצאה טרמינלית.
+
+14.9.5 מקור Capacity חי ו־Delivery adapter אמיתי עדיין חסרים. לכן
+השלמת Reconciliation אינה הופכת את שליחת הקמפיינים ל־Production-ready.
 
 ## 15. אחריות ועדכון
 

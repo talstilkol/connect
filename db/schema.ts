@@ -109,6 +109,17 @@ export const whatsappRateLimitSettlementOutcomes = [
   "provider-failed",
   "cancelled-before-submit",
 ] as const;
+export const campaignProviderDeliveryStatuses = [
+  "accepted",
+  "sent",
+  "delivered",
+  "read",
+  "failed",
+] as const;
+export const campaignProviderTerminalOutcomes = [
+  "delivered",
+  "provider-failed",
+] as const;
 export const messageTemplateStatuses = [
   "draft",
   "submitting",
@@ -4508,6 +4519,158 @@ export const whatsappRateLimitSettlements =
     ],
   );
 
+export const campaignDeliveryProviderLinks =
+  sqliteTable(
+    "campaign_delivery_provider_links",
+    {
+      deliveryKey: text("delivery_key")
+        .primaryKey()
+        .references(
+          () => campaignRecipients.deliveryKey,
+          { onDelete: "restrict" },
+        ),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      providerMessageId: text(
+        "provider_message_id",
+      ).notNull(),
+      reservationKey: text("reservation_key")
+        .notNull()
+        .references(
+          () =>
+            whatsappRateLimitReservations
+              .reservationKey,
+          { onDelete: "restrict" },
+        ),
+      providerStatus: text("provider_status", {
+        enum: campaignProviderDeliveryStatuses,
+      })
+        .notNull()
+        .default("accepted"),
+      lastStatusEventKey: text(
+        "last_status_event_key",
+      ),
+      lastStatusEventAt: text(
+        "last_status_event_at",
+      ),
+      terminalOutcome: text("terminal_outcome", {
+        enum: campaignProviderTerminalOutcomes,
+      }),
+      terminalSettledAt: text(
+        "terminal_settled_at",
+      ),
+      acceptedAt: text("accepted_at")
+        .notNull(),
+      createdAt: text("created_at")
+        .notNull(),
+      updatedAt: text("updated_at")
+        .notNull(),
+    },
+    (table) => [
+      check(
+        "campaign_delivery_provider_links_delivery_key_sha256",
+        sql`length(${table.deliveryKey}) = 85
+          and substr(${table.deliveryKey}, 1, 21)
+            = 'campaign_delivery_v1_'
+          and substr(${table.deliveryKey}, 22)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "campaign_delivery_provider_links_message_id_bounded",
+        sql`length(${table.providerMessageId}) between 1 and 255
+          and trim(${table.providerMessageId})
+            = ${table.providerMessageId}`,
+      ),
+      check(
+        "campaign_delivery_provider_links_reservation_key_sha256",
+        sql`length(${table.reservationKey}) = 93
+          and substr(${table.reservationKey}, 1, 29)
+            = 'whatsapp_rate_reservation_v1_'
+          and substr(${table.reservationKey}, 30)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "campaign_delivery_provider_links_status_valid",
+        sql`${table.providerStatus} in (
+          'accepted', 'sent', 'delivered', 'read', 'failed'
+        )`,
+      ),
+      check(
+        "campaign_delivery_provider_links_event_consistent",
+        sql`(
+          ${table.lastStatusEventKey} is null
+          and ${table.lastStatusEventAt} is null
+        ) or (
+          length(${table.lastStatusEventKey}) = 64
+          and ${table.lastStatusEventKey}
+            not glob '*[^0-9a-f]*'
+          and length(${table.lastStatusEventAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.lastStatusEventAt}
+          ) = ${table.lastStatusEventAt}
+        )`,
+      ),
+      check(
+        "campaign_delivery_provider_links_terminal_consistent",
+        sql`(
+          ${table.providerStatus} in ('accepted', 'sent')
+          and ${table.terminalOutcome} is null
+          and ${table.terminalSettledAt} is null
+        ) or (
+          ${table.providerStatus} in ('delivered', 'read')
+          and ${table.terminalOutcome} = 'delivered'
+          and length(${table.terminalSettledAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.terminalSettledAt}
+          ) = ${table.terminalSettledAt}
+        ) or (
+          ${table.providerStatus} = 'failed'
+          and ${table.terminalOutcome} = 'provider-failed'
+          and length(${table.terminalSettledAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.terminalSettledAt}
+          ) = ${table.terminalSettledAt}
+        )`,
+      ),
+      check(
+        "campaign_delivery_provider_links_time_canonical",
+        sql`length(${table.acceptedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.acceptedAt}
+          ) = ${table.acceptedAt}
+          and ${table.createdAt} = ${table.acceptedAt}
+          and length(${table.updatedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.updatedAt}
+          ) = ${table.updatedAt}`,
+      ),
+      uniqueIndex(
+        "campaign_delivery_provider_links_tenant_message_uq",
+      ).on(
+        table.tenantId,
+        table.providerMessageId,
+      ),
+      uniqueIndex(
+        "campaign_delivery_provider_links_reservation_uq",
+      ).on(table.reservationKey),
+      index(
+        "campaign_delivery_provider_links_terminal_idx",
+      ).on(
+        table.tenantId,
+        table.terminalOutcome,
+        table.terminalSettledAt,
+      ),
+    ],
+  );
+
 export type TenantRow = typeof tenants.$inferSelect;
 export type NewTenantRow = typeof tenants.$inferInsert;
 export type TenantMembershipRow = typeof tenantMemberships.$inferSelect;
@@ -4552,6 +4715,10 @@ export type WhatsappRateLimitSettlementRow =
   typeof whatsappRateLimitSettlements.$inferSelect;
 export type NewWhatsappRateLimitSettlementRow =
   typeof whatsappRateLimitSettlements.$inferInsert;
+export type CampaignDeliveryProviderLinkRow =
+  typeof campaignDeliveryProviderLinks.$inferSelect;
+export type NewCampaignDeliveryProviderLinkRow =
+  typeof campaignDeliveryProviderLinks.$inferInsert;
 export type MessageTemplateRow =
   typeof messageTemplates.$inferSelect;
 export type NewMessageTemplateRow =

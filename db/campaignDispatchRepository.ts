@@ -139,7 +139,8 @@ const COMPLETE_SETTLED_CAMPAIGNS_SQL = `
           AND campaign_recipients.status IN (
             'pending',
             'queued',
-            'sending'
+            'sending',
+            'accepted'
           )
       )
     ORDER BY
@@ -337,18 +338,6 @@ const PREPARE_RECIPIENT_FOR_DELIVERY_SQL = `
     updated_at AS updatedAt
 `;
 
-const MARK_ACCEPTED_SQL = `
-  UPDATE campaign_recipients
-  SET
-    status = 'accepted',
-    accepted_at = ?2,
-    last_error_code = NULL,
-    updated_at = ?2
-  WHERE delivery_key = ?1
-    AND status = 'sending'
-  RETURNING delivery_key AS deliveryKey
-`;
-
 const MARK_REJECTED_SQL = `
   UPDATE campaign_recipients
   SET
@@ -441,10 +430,6 @@ export interface CampaignDispatchRepository {
     deliveryKey: string,
     now: string,
   ): Promise<CampaignDeliveryPreparation>;
-  markAccepted(
-    deliveryKey: string,
-    acceptedAt: string,
-  ): Promise<void>;
   markRejected(
     deliveryKey: string,
     errorCode: string,
@@ -900,17 +885,6 @@ export function createCampaignDispatchRepository(
         outcome: "claimed",
         recipient,
       };
-    },
-
-    markAccepted(deliveryKey, acceptedAt) {
-      assertDeliveryKey(deliveryKey);
-      assertTimestamp(acceptedAt);
-
-      return requireTransition(
-        database,
-        MARK_ACCEPTED_SQL,
-        [deliveryKey, acceptedAt],
-      );
     },
 
     markRejected(

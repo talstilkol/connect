@@ -27,6 +27,12 @@ import {
   createMessageTemplateRepository,
 } from "../db/messageTemplateRepository.ts";
 import {
+  createCampaignDeliveryProviderRepository,
+} from "../db/campaignDeliveryProviderRepository.ts";
+import {
+  createWhatsappRateLimitRepository,
+} from "../db/whatsappRateLimitRepository.ts";
+import {
   createCampaignDeliveryBatchHandler,
   createCampaignScheduledHandler,
 } from "../server/campaigns/campaignDispatchRuntime.ts";
@@ -39,6 +45,9 @@ import {
 import {
   createUnavailableCampaignDeliveryRateLimitPolicySource,
 } from "../server/campaigns/unavailableCampaignDeliveryRateLimitPolicySource.ts";
+import {
+  createCampaignDeliveryStatusReconciler,
+} from "../server/campaigns/campaignDeliveryStatusReconciler.ts";
 import {
   createMetaWebhookEventDispatcher,
 } from "../server/meta/metaWebhookEventDispatcher.ts";
@@ -224,6 +233,15 @@ const worker = {
             createConversationRepository(env.DB),
           templates:
             createMessageTemplateRepository(env.DB),
+          campaignStatuses:
+            createCampaignDeliveryStatusReconciler(
+              createCampaignDeliveryProviderRepository(
+                env.DB,
+              ),
+              createWhatsappRateLimitRepository(
+                env.DB,
+              ),
+            ),
           inboundRuntime,
         }),
       );

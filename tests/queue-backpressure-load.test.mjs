@@ -147,6 +147,14 @@ test("rejects oversized Meta and campaign batches before business access", async
         },
       },
       {
+        async recordAccepted() {
+          businessCalls += 1;
+          throw new Error(
+            "must not process an oversized batch",
+          );
+        },
+      },
+      {
         isConfigured() {
           return true;
         },
@@ -166,7 +174,11 @@ test("rejects oversized Meta and campaign batches before business access", async
         },
         async process() {
           businessCalls += 1;
-          return { outcome: "accepted" };
+          return {
+            outcome: "accepted",
+            providerMessageId:
+              "wamid.oversized-batch",
+          };
         },
       },
       {
