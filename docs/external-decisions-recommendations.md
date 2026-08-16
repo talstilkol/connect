@@ -251,9 +251,9 @@ AnyDesk, צ'אט, GitHub או מסמך.
 
 15.1 כבר קיים Repository בשם `talstilkol/connect`. בבדיקת Governance
 חיה מ־2026-08-16 הוא נמצא `public` וללא Branch protection או
-Rulesets, בניגוד לדרישת הפרטיות. ההמלצה היא להפוך אותו תחילה ל־
-`private`, לא לפתוח עותק נוסף, ולאחר הכנת Organization מתאים להעביר
-את הקיים ולהגדיר אותו במפורש כ־Repository Authority.
+Rulesets. החשיפה תוקנה באותו יום ואימות חוזר דיווח שה־Repository
+`private`. אין לפתוח עותק נוסף; לאחר הכנת Organization מתאים יש
+להעביר את הקיים ולהגדיר אותו במפורש כ־Repository Authority.
 
 15.2 כל חבר צוות יעבוד בזהות אישית עם 2FA. רועי ינהל Membership
 ו־Roles; אין משתמש משותף ואין Push ישיר ל־`main`.

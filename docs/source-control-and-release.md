@@ -9,13 +9,16 @@
 
 1.3 ה־Repository של `web` מחובר ל־`talstilkol/connect` ב־GitHub,
 ו־`main` הוא Branch ברירת המחדל. בבדיקת Governance חיה מ־
-2026-08-16 ה־Repository נמצא `public`, בניגוד לדרישה שיהיה `private`.
+2026-08-16 ה־Repository נמצא `public`. החשיפה תוקנה באותו יום,
+ובאימות חוזר מ־`2026-08-16T19:47:05Z` ממשק GitHub וה־API המאומת
+דיווחו `private=true` ו־`visibility=private`.
 
 1.4 שמונת שערי האיכות המקומיים ו־Dependency Audit מוגדרים כתשעה
 Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארבעת הענפים
 נמצאו לא מוגנים, לא נמצאו Rulesets או `CODEOWNERS`, ולכן ה־Checks
-אינם Required. מצב Secret Scanning, ‏Push Protection, ‏2FA
-ו־Collaborators נשאר `unknown/unavailable` עד Authentication תקף.
+אינם Required. שינוי ה־Visibility אינו מתקן בקרות אלה. מצב Secret
+Scanning, ‏Push Protection, ‏2FA ו־Collaborators נשאר
+`unknown/unavailable` עד בדיקה ייעודית.
 
 1.4.1 הראיות, ההיקף וסדר התיקון נמצאים ב־
 `docs/github-governance-live-audit.md`.

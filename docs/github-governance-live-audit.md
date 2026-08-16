@@ -177,5 +177,20 @@ v2 לא כלל את Visibility של ה־Repository בין בקרי החובה.
 פרטי. Repository ציבורי או Metadata סותר נכשלים סגור ואינם מפיקים
 Evidence.
 
-7.4 התיקון נשמר מקומית בלבד ואינו משנה את מצב GitHub בפועל. Gate 1
-נשאר `blocked` עד שבעל Admin ישנה את ה־Visibility ויאמת אותו מחדש.
+7.4 ב־`2026-08-16T19:47:05Z`, לאחר Authentication אישי של טל,
+ה־Repository הועבר דרך GitHub Settings מ־Public ל־Private.
+
+7.5 האימות בוצע בשני ערוצים: ממשק GitHub הציג שה־Repository פרטי,
+ו־GitHub API המאומת החזיר `private: true` ו־`visibility: private`.
+
+7.6 שני ה־Commits המקומיים, כולל דוח זה וחוזה Evidence v3, נדחפו
+לענף `codex/cloudflare-evidence-builders`. ‏Draft PR #2 נפתח מול
+`main` ואינו מאושר ל־Merge אוטומטי.
+
+7.7 GitHub דיווח בזמן ה־Push על שלושה Dependabot findings בענף
+ברירת המחדל: שניים ברמת `high` ואחד ברמת `moderate`. פרטי החבילות
+והתיקונים עדיין `unknown/unavailable` עד בדיקה ייעודית.
+
+7.8 תיקון ה־Visibility סוגר את ממצא 3.1 בלבד. Gate 1 נשאר `blocked`
+בגלל בעלות אישית, היעדר Ruleset ו־CODEOWNERS, ענפים לא מוגנים,
+בקרות Security שטרם אומתו ו־Draft PR שאינו מוכן למיזוג.

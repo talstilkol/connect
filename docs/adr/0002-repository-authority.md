@@ -26,7 +26,9 @@ supersedes: none
 
 2.1 קיים Repository פעיל בשם `talstilkol/connect` עם היסטוריית
 הפיתוח, הבדיקות ומסמכי ה־Evidence. בבדיקת Governance חיה מ־
-2026-08-16 הוא נמצא `public`, בניגוד לדרישה שיהיה `private`.
+2026-08-16 הוא נמצא `public`. החשיפה תוקנה באותו יום ואימות חוזר
+דיווח `private=true` ו־`visibility=private`. הבעלות עדיין אישית
+ושאר דרישות ה־Governance אינן מושלמות.
 
 2.2 הבעלות הנוכחית היא תחת חשבון אישי. מצב זה מתאים לעבודה של אדם
 אחד, אך אינו מגדיר בעלות חברה, התאוששות מנהלית או תפקידים צוותיים
@@ -80,10 +82,10 @@ Authority היחיד לקוד, Pull Requests, ‏Releases ו־Deployment.
 היעד, Branch/Ruleset protections, ‏Actions secrets, ‏Environments,
 Apps, ‏Webhooks ו־Packages.
 
-4.4 לפני Transfer יש לסגור את חשיפת ה־Visibility: להפוך את
-ה־Repository הקיים ל־`private`, לאמת שלא נשמר Secret בהיסטוריה
-ולסובב כל Credential שקיים ספק לגביו. שינוי ה־Visibility הוא פעולה
-חיצונית ואינו מאושר על ידי מסמך `proposed` זה בלבד.
+4.4 חשיפת ה־Visibility נסגרה ב־2026-08-16 וה־Repository הקיים אומת
+כ־`private`. לפני Transfer עדיין יש לאמת שלא נשמר Secret בהיסטוריה
+ולסובב כל Credential שקיים ספק לגביו. התיקון אינו מאשר את יתר פרטי
+ה־ADR ואינו משנה את סטטוס ההחלטה מ־`proposed`.
 
 ## 5. מטריצת גישה מוצעת
 

@@ -26,9 +26,10 @@
 2.1 עובדות מאומתות מתוך ה־Repository:
 
 2.1.1 קיים Repository בשם `talstilkol/connect` ב־GitHub. בבדיקת
-Governance חיה מ־2026-08-16 הוא נמצא `public`, בניגוד לדרישה שיהיה
-`private`; ארבעת הענפים נמצאו לא מוגנים ולא נמצאו Rulesets. דוח
-הראיות נמצא ב־`docs/github-governance-live-audit.md`.
+Governance חיה מ־2026-08-16 הוא נמצא `public`; החשיפה תוקנה באותו
+יום ואימות חוזר דיווח `private=true` ו־`visibility=private`. ארבעת
+הענפים עדיין נמצאו לא מוגנים ולא נמצאו Rulesets. דוח הראיות נמצא
+ב־`docs/github-governance-live-audit.md`.
 
 2.1.2 האפליקציה היא Next.js/React full-stack שנבנית באמצעות Vinext
 כ־Cloudflare Worker יחיד.

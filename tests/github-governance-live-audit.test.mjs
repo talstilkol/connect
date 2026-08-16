@@ -41,21 +41,30 @@ test("records the observed public and unprotected repository state without marki
   assert.match(audit, /Gate 1 נשאר `blocked`/);
 });
 
-test("removes the stale claim that the live Connect repository is private", () => {
+test("distinguishes the original public snapshot from the remediated private state", () => {
   for (const document of [
     repositoryAdr,
     sourceControl,
     teamPlan,
   ]) {
-    assert.doesNotMatch(
+    assert.match(
       document,
-      /קיים Repository פרטי(?: פעיל)? בשם `talstilkol\/connect`/,
+      /`public`/,
     );
     assert.match(
       document,
-      /`public`[\s\S]*`private`/,
+      /`private=true` ו־`visibility=private`/,
     );
   }
+
+  assert.match(
+    audit,
+    /ממשק GitHub[\s\S]*`private: true` ו־`visibility: private`/,
+  );
+  assert.match(
+    audit,
+    /תיקון ה־Visibility[\s\S]*Gate 1 נשאר `blocked`/,
+  );
 });
 
 test("records all nine successful jobs without treating them as required checks", () => {
