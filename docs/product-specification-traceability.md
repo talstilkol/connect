@@ -46,7 +46,7 @@ Design מלא.
 | SPEC-11 | נמענים במאגר פנימי | local-complete | Contacts, Consent, Lists ו־Tags | בדיקת Staging |
 | SPEC-12 | ייבוא נמענים מ־Excel | planned | CSV מאומת עם Mapping ו־Import jobs | Parser ל־XLSX, גבולות קובץ ובדיקות אבטחה |
 | SPEC-13 | Segments לפי Tags | local-complete | Tags, Lists ו־Campaign audience snapshot | מדדי ביצועים על קהל גדול |
-| SPEC-14 | שיגור Template המוני | partial | Campaign snapshot, Queue, Scheduler, DLQ, Meta sender ו־Provider cooldown אטומי | Live capacity, Retry evidence, Kill switch, חיבור Worker וניסוי WABA |
+| SPEC-14 | שיגור Template המוני | partial | Campaign snapshot, Queue, Scheduler, DLQ, Meta sender, Provider cooldown אטומי ומקור Policy מתכלה עם Kill switch עמיד | Live capacity evidence, Retry evidence, מסלול Operator, חיבור Sender ל־Worker וניסוי WABA |
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
@@ -65,10 +65,12 @@ Design מלא.
 
 4.1 מסלול P0 — פתיחת יכולת שליחה בטוחה:
 
-4.1.1 הושלם מקומית: Rate Limiting ו־Provider cooldown של Campaign
-Queue. נותר אימות המדיניות מול חשבון Meta חי.
+4.1.1 הושלם מקומית: Rate Limiting, ‏Provider cooldown ומקור Policy
+מתכלה עם Kill switch עמיד של Campaign Queue. נותר אימות המדיניות
+מול חשבון Meta חי ומסלול Operator מורשה.
 
-4.1.2 לקשור Reservation לתוצאת Delivery ול־Status webhook.
+4.1.2 הושלם מקומית: Reservation קשורה לתוצאת Delivery ול־Status
+webhook באמצעות ראיות D1 אטומיות ו־Idempotent.
 
 4.1.3 לחבר Meta sender רק לאחר WABA מורשה ו־Live capacity state.
 

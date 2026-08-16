@@ -858,5 +858,7 @@ npm run db:generate
 11. קמפיין נשאר `running` בזמן שנמען במצב `accepted`; השלמה מותרת רק
     לאחר תוצאות טרמינליות. Meta sender adapter ו־Processor שרתי
     קיימים ונבדקים מקומית, כולל Credential Vault ו־`wamid`, אך אינם
-    מחוברים ל־Worker. מקור Capacity חי, Backoff/Cooldown מאושר וראיות
-    WABA עדיין חסרים ולכן שליחה נשארת חסומה.
+    מחוברים ל־Worker. מקור Policy מבוסס D1 מחובר ל־Worker ודורש
+    Evidence מתכלה הקשורה לחיבור Meta המדויק; Event `disabled` אחרון
+    הוא Kill switch עמיד. ערכי Capacity חיים, Retry evidence מאושר,
+    מסלול Operator וראיות WABA עדיין חסרים ולכן שליחה נשארת חסומה.

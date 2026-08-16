@@ -55,6 +55,10 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   );
   assert.match(
     workerSource,
+    /createD1CampaignDeliveryRateLimitPolicySource\([\s\S]+createWhatsappCampaignDeliveryPolicyRepository\([\s\S]+env\.DB/,
+  );
+  assert.doesNotMatch(
+    workerSource,
     /createUnavailableCampaignDeliveryRateLimitPolicySource/,
   );
   assert.match(

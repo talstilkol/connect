@@ -438,9 +438,9 @@ Production evidence.
 `sending` ללא Retry אוטומטי.
 
 14.8.4 ה־Runtime בונה את ה־Admission adapter מעל
-`WhatsappRateLimitRepository` של אותו D1. ה־Worker עדיין מזריק
-Context Resolver מושבת שנכשל סגור, ולכן אי־אפשר לעקוף את שכבת
-ה־Reservation באמצעות Controller חלופי בזמן פריסה.
+`WhatsappRateLimitRepository` של אותו D1. ה־Worker מזריק כעת מקור
+Policy מבוסס D1 אל אותו Context Resolver, ולכן אי־אפשר לעקוף את
+שכבת ה־Reservation באמצעות Controller חלופי בזמן פריסה.
 
 14.8.5 ה־Adapter ממפה Pair lock ו־Recipient in-flight ל־Delay
 הנגזר מ־`retryAt`, ודוחה Timestamp עבר או Delay גדול מ־24 שעות.
@@ -462,9 +462,21 @@ Retry לאחר Settlement מקבל Claim חדש, Retry זהה של אותו Clai
 Idempotent, ושתי רשומות Queue בעלות מזהים שונים אינן חולקות
 Reservation.
 
-14.8.8 ה־Worker עדיין מזריק Policy source מושבת, מפני שאין קריאת
-Capacity חיה ומאושרת. חסימה זו מונעת שליחה חדשה אך אינה חוסמת עיבוד
-Status webhooks עבור הודעות שכבר התקבלו אצל Meta.
+14.8.8 מיגרציה `0034` מוסיפה Event log בלתי־ניתן לשינוי עבור Policy
+השליחה. כל Event קשור לגרסה המדויקת של Meta connection, לגרסת Graph
+API מפורשת, ל־Digest של הראיה ולחלון תפוגה. רק ה־Event האחרון, במצב
+`enabled`, עם Evidence שעדיין תקפה ובמזהי Portfolio, ‏WABA ו־Phone
+התואמים לחיבור הנוכחי, יכול להחזיר Capacity ו־Reservation duration.
+
+14.8.9 Event אחרון במצב `disabled` הוא Kill switch עמיד. החלפת Meta
+connection, תפוגת Evidence, Policy חסרה, מזהה Provider לא תואם או
+גרסה לא רציפה נכשלים סגור. אין Tier או Duration אוטומטיים. כל Event
+כותב Audit אטומי ללא Provider payload, ו־Update/Delete חסומים ב־D1.
+
+14.8.10 ה־Policy source מחובר ל־Worker, אך אין במסמך או בקוד ערך
+Capacity חי של החשבון. עד שטל יקליט Evidence מתוארכת ומאושרת עבור
+ה־WABA והמספר המורשים, הקריאה תחזיר `null` ותמנע שליחה חדשה בלי
+לחסום Status webhooks עבור הודעות שכבר התקבלו אצל Meta.
 
 14.9 מיגרציה `0031` ו־
 `CampaignDeliveryStatusReconciler` משלימים את מסלול ה־Webhook:
@@ -489,9 +501,9 @@ Event key שחוזר עם תוכן שונה או ניסיון להחליף תו�
 Conversation וגם Campaign delivery באותו Tenant. קמפיין אינו עובר
 ל־`completed` כל עוד נמען נשאר `accepted` וממתין לתוצאה טרמינלית.
 
-14.9.5 מקור Capacity חי וחיבור Delivery adapter ל־Worker עדיין
-חסרים. לכן השלמת Reconciliation אינה הופכת את שליחת הקמפיינים
-ל־Production-ready.
+14.9.5 חוזה מקור ה־Capacity מחובר ל־Worker, אך Evidence חיה וה־
+Delivery adapter עדיין אינם מחוברים. לכן השלמת Reconciliation אינה
+הופכת את שליחת הקמפיינים ל־Production-ready.
 
 14.10 ‏Meta sender המקומי:
 
@@ -517,10 +529,11 @@ Body parameters, ‏Dynamic URL parameter ו־Quick Reply payload אטום
 5xx או תשובת 2xx ללא `wamid` נחשבים תוצאה חיצונית לא ודאית; ה־Queue
 אינה שולחת אותם שוב אוטומטית.
 
-14.10.5 המימוש אינו מחובר עדיין ל־Worker. לפני החיבור נדרשים מקור
-Capacity חי, מקור Retry evidence מאושר, Kill switch וראיות Sandbox
-של WABA. עד אז ה־Worker ממשיך להזריק Processor ו־Policy source
-מושבתים ונכשל סגור.
+14.10.5 ה־Processor אינו מחובר עדיין ל־Worker. מקור Policy ו־Kill
+switch עמיד מחוברים, אך ללא Evidence חיה הם חוסמים שליחה. לפני חיבור
+ה־Processor נדרשים ערכי Capacity חיים, מקור Retry evidence מאושר,
+מסלול Operator מורשה להפעלה ולכיבוי של ה־Policy וראיות Sandbox של
+WABA. עד אז ה־Worker מזריק Processor מושבת ונכשל סגור.
 
 14.11 ‏Provider Backoff/Cooldown מקומי:
 
@@ -557,9 +570,9 @@ Token או Provider payload.
 
 14.11.6 ‏`MetaGraphTransport` קולט רק ערך `Retry-After` מספרי ובטווח
 של שנייה עד 24 שעות ואינו שומר את ה־Header הגולמי. עדיין חסרים חיבור
-הערך אל מקור Evidence חי, ‏Pair exponent מתמשך, Capacity חי, Kill
-switch ו־WABA Sandbox; אלה נשארים `unknown/unavailable` עד חיבור
-החשבון המורשה.
+הערך אל מקור Evidence חי, ‏Pair exponent מתמשך, ערכי Capacity חיים,
+מסלול Operator ל־Kill switch ו־WABA Sandbox; אלה נשארים
+`unknown/unavailable` עד חיבור החשבון המורשה.
 
 ## 15. אחריות ועדכון
 

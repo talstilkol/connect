@@ -33,6 +33,9 @@ import {
   createWhatsappRateLimitRepository,
 } from "../db/whatsappRateLimitRepository.ts";
 import {
+  createWhatsappCampaignDeliveryPolicyRepository,
+} from "../db/whatsappCampaignDeliveryPolicyRepository.ts";
+import {
   createCampaignDeliveryBatchHandler,
   createCampaignScheduledHandler,
 } from "../server/campaigns/campaignDispatchRuntime.ts";
@@ -43,8 +46,8 @@ import {
   createUnavailableCampaignDeliveryProcessor,
 } from "../server/campaigns/unavailableCampaignDeliveryProcessor.ts";
 import {
-  createUnavailableCampaignDeliveryRateLimitPolicySource,
-} from "../server/campaigns/unavailableCampaignDeliveryRateLimitPolicySource.ts";
+  createD1CampaignDeliveryRateLimitPolicySource,
+} from "../server/campaigns/d1CampaignDeliveryRateLimitPolicySource.ts";
 import {
   createCampaignDeliveryStatusReconciler,
 } from "../server/campaigns/campaignDeliveryStatusReconciler.ts";
@@ -260,7 +263,11 @@ const worker = {
       const consumer =
         createCampaignDeliveryBatchHandler(
           env,
-          createUnavailableCampaignDeliveryRateLimitPolicySource(),
+          createD1CampaignDeliveryRateLimitPolicySource(
+            createWhatsappCampaignDeliveryPolicyRepository(
+              env.DB,
+            ),
+          ),
           createUnavailableCampaignDeliveryProcessor(),
         );
 

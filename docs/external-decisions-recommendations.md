@@ -105,9 +105,12 @@ Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
 
 5.7 מצב מימוש מקומי: חוזה ה־Campaign sender מפנה את החלטות ה־Retry
 ל־`MetaMessageFailurePolicy`, ומיגרציה `0032` שומרת Cooldown אטומי
-לשלושת ה־Scopes שניתנים לזיהוי מדויק. אין בכך אישור מדיניות: מקור
-`Retry-After`/Pair exponent חי, ערכי Capacity, ‏Alerts ו־Kill switch
-עדיין דורשים Evidence ואישור לפי RACI בסעיף 5.1.
+לשלושת ה־Scopes שניתנים לזיהוי מדויק. מיגרציה `0034` שומרת Policy
+Evidence מתכלה ובלתי־ניתנת לשינוי, ומאפשרת Event אחרון מסוג
+`disabled` כ־Kill switch עמיד. אין בכך אישור מדיניות: מקור
+`Retry-After`/Pair exponent חי, ערכי Capacity, ‏Alerts, מסלול
+Operator ותרגיל Kill switch עדיין דורשים Evidence ואישור לפי RACI
+בסעיף 5.1.
 
 ## 6. החלטה 5 — File Scanner
 

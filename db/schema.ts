@@ -104,6 +104,10 @@ export const whatsappPortfolioLimitKinds = [
   "bounded",
   "unlimited",
 ] as const;
+export const whatsappCampaignDeliveryPolicyStates = [
+  "enabled",
+  "disabled",
+] as const;
 export const whatsappRateLimitSettlementOutcomes = [
   "delivered",
   "provider-failed",
@@ -1318,6 +1322,160 @@ export const metaConnections = sqliteTable(
     index("meta_connections_status_idx").on(table.status),
   ],
 );
+
+export const whatsappCampaignDeliveryPolicyEvents =
+  sqliteTable(
+    "whatsapp_campaign_delivery_policy_events",
+    {
+      eventKey: text("event_key").primaryKey(),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => metaConnections.tenantId, {
+          onDelete: "restrict",
+        }),
+      connectionVersion: integer(
+        "connection_version",
+      ).notNull(),
+      policyVersion: integer(
+        "policy_version",
+      ).notNull(),
+      deliveryState: text("delivery_state", {
+        enum: whatsappCampaignDeliveryPolicyStates,
+      }).notNull(),
+      portfolioLimitKind: text(
+        "portfolio_limit_kind",
+        { enum: whatsappPortfolioLimitKinds },
+      ).notNull(),
+      portfolioLimitValue: integer(
+        "portfolio_limit_value",
+      ),
+      reservationDurationSeconds: integer(
+        "reservation_duration_seconds",
+      ).notNull(),
+      metaGraphApiVersion: text(
+        "meta_graph_api_version",
+      ).notNull(),
+      evidenceDigest: text(
+        "evidence_digest",
+      ).notNull(),
+      evidenceCheckedAt: text(
+        "evidence_checked_at",
+      ).notNull(),
+      evidenceExpiresAt: text(
+        "evidence_expires_at",
+      ).notNull(),
+      actorExternalUserId: text(
+        "actor_external_user_id",
+      ).notNull(),
+      recordedAt: text("recorded_at").notNull(),
+      createdAt: text("created_at").notNull(),
+    },
+    (table) => [
+      check(
+        "whatsapp_delivery_policy_events_key_sha256",
+        sql`length(${table.eventKey}) = 98
+          and substr(${table.eventKey}, 1, 34)
+            = 'whatsapp_delivery_policy_event_v1_'
+          and substr(${table.eventKey}, 35)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_versions_positive",
+        sql`${table.connectionVersion} >= 1
+          and ${table.policyVersion} >= 1`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_state_valid",
+        sql`${table.deliveryState} in ('enabled', 'disabled')`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_limit_valid",
+        sql`(
+          ${table.portfolioLimitKind} = 'bounded'
+          and ${table.portfolioLimitValue} in (
+            250, 2000, 10000, 100000
+          )
+        ) or (
+          ${table.portfolioLimitKind} = 'unlimited'
+          and ${table.portfolioLimitValue} is null
+        )`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_duration_valid",
+        sql`${table.reservationDurationSeconds}
+          between 6 and 86400`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_graph_version_valid",
+        sql`length(${table.metaGraphApiVersion}) between 4 and 20
+          and substr(${table.metaGraphApiVersion}, 1, 1) = 'v'
+          and instr(${table.metaGraphApiVersion}, '.')
+            between 3 and length(${table.metaGraphApiVersion}) - 1
+          and instr(
+            substr(
+              ${table.metaGraphApiVersion},
+              instr(${table.metaGraphApiVersion}, '.') + 1
+            ),
+            '.'
+          ) = 0
+          and substr(
+            ${table.metaGraphApiVersion},
+            2,
+            instr(${table.metaGraphApiVersion}, '.') - 2
+          ) not glob '*[^0-9]*'
+          and substr(
+            ${table.metaGraphApiVersion},
+            instr(${table.metaGraphApiVersion}, '.') + 1
+          ) not glob '*[^0-9]*'
+          and substr(${table.metaGraphApiVersion}, 2, 1)
+            between '1' and '9'`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_digest_sha256",
+        sql`length(${table.evidenceDigest}) = 64
+          and ${table.evidenceDigest}
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_actor_bounded",
+        sql`length(trim(${table.actorExternalUserId}))
+            between 1 and 255
+          and trim(${table.actorExternalUserId})
+            = ${table.actorExternalUserId}`,
+      ),
+      check(
+        "whatsapp_delivery_policy_events_time_valid",
+        sql`length(${table.evidenceCheckedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.evidenceCheckedAt}
+          ) = ${table.evidenceCheckedAt}
+          and length(${table.evidenceExpiresAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.evidenceExpiresAt}
+          ) = ${table.evidenceExpiresAt}
+          and length(${table.recordedAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.recordedAt}
+          ) = ${table.recordedAt}
+          and ${table.evidenceCheckedAt} <= ${table.recordedAt}
+          and ${table.evidenceCheckedAt} < ${table.evidenceExpiresAt}
+          and (
+            ${table.deliveryState} = 'disabled'
+            or ${table.recordedAt} < ${table.evidenceExpiresAt}
+          )
+          and ${table.createdAt} = ${table.recordedAt}`,
+      ),
+      uniqueIndex(
+        "whatsapp_delivery_policy_events_tenant_version_uq",
+      ).on(table.tenantId, table.policyVersion),
+      index(
+        "whatsapp_delivery_policy_events_tenant_recorded_idx",
+      ).on(table.tenantId, table.recordedAt),
+    ],
+  );
 
 export const metaCredentialEnvelopes = sqliteTable(
   "meta_credential_envelopes",
@@ -4950,6 +5108,10 @@ export type BusinessProfileRow = typeof businessProfiles.$inferSelect;
 export type NewBusinessProfileRow = typeof businessProfiles.$inferInsert;
 export type MetaConnectionRow = typeof metaConnections.$inferSelect;
 export type NewMetaConnectionRow = typeof metaConnections.$inferInsert;
+export type WhatsappCampaignDeliveryPolicyEventRow =
+  typeof whatsappCampaignDeliveryPolicyEvents.$inferSelect;
+export type NewWhatsappCampaignDeliveryPolicyEventRow =
+  typeof whatsappCampaignDeliveryPolicyEvents.$inferInsert;
 export type MetaCredentialEnvelopeRow =
   typeof metaCredentialEnvelopes.$inferSelect;
 export type NewMetaCredentialEnvelopeRow =

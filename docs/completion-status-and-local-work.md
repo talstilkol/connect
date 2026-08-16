@@ -1,6 +1,6 @@
 # מצב השלמה ומשימות מקומיות
 
-תאריך בדיקה: 2026-08-16
+תאריך בדיקה: 2026-08-17
 
 ## 1. אחוזי השלמה
 
@@ -295,9 +295,11 @@ Credential Vault, מאמתים `wamid` ומסווגים תוצאה חיצוני�
 ללא Retry אוטומטי. נוסף Provider cooldown אטומי ל־Sender,
 Portfolio+Recipient ו־Sender+Recipient, המקושר ל־Reservation ול־
 Settlement ונשען על `MetaMessageFailurePolicy` המשותף. הם עדיין אינם
-מוזרקים ל־Worker. ה־Policy source הזמני נכשל סגור; טעינת Capacity
-חיה, מקור Retry evidence, ‏Kill switch וראיות WABA נשארים
-`unknown/unavailable` עד חיבור החשבון המורשה.
+מוזרקים ל־Worker. מקור ה־Policy המבוסס D1 מחובר כעת ל־Worker ודורש
+Event בלתי־ניתן לשינוי הקשור לגרסת Meta connection, לגרסת Graph API,
+ל־Digest ולתפוגה. Event אחרון במצב `disabled` משמש Kill switch
+עמיד. ערכי Capacity חיים, מקור Retry evidence, מסלול Operator מורשה
+וראיות WABA נשארים `unknown/unavailable` עד חיבור החשבון המורשה.
 
 4.3 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם
 הוכרעו, הוא **46–78 שעות פיתוח נטו**. אם מאשרים את המודל המומלץ

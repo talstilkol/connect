@@ -73,6 +73,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0031_campaign_delivery_provider_links.sql",
     "0032_whatsapp_provider_cooldowns.sql",
     "0033_large_union_jack.sql",
+    "0034_whatsapp_campaign_delivery_policy_events.sql",
   ]);
 
   const migration = await readFile(
@@ -421,6 +422,49 @@ test("business profile admin migration stores digest-only immutable audit eviden
   assert.doesNotMatch(
     migration,
     /business_name|interface_language|Math\.random/,
+  );
+});
+
+test("WhatsApp delivery policy migration stores expiring immutable evidence and a kill switch", async () => {
+  const migration = await readFile(
+    new URL(
+      "0034_whatsapp_campaign_delivery_policy_events.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_campaign_delivery_policy_events`/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_connection_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_sequence_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_disable_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_insert_audit/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_update_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_delete_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /phone_e164|message_body|access_token|provider_payload|Math\.random/,
   );
 });
 
@@ -932,6 +976,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "tenant_subscription_events",
     "tenant_subscriptions",
     "tenants",
+    "whatsapp_campaign_delivery_policy_events",
     "whatsapp_pair_rate_limit_state",
     "whatsapp_portfolio_recipient_rate_limit_state",
     "whatsapp_provider_cooldown_events",
