@@ -141,3 +141,42 @@ test("keeps AI workspace and responsive rules inside one feature stylesheet", as
     /\.reports-grid|\.billing-card|\.public-hero/,
   );
 });
+
+test("keeps campaign composer and audience rules inside one feature stylesheet", async () => {
+  const [globalSource, campaignSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/campaigns/campaigns.css"),
+    ]);
+  const aiImport = globalSource.indexOf(
+    '@import "../features/ai/ai.css";',
+  );
+  const campaignImport = globalSource.indexOf(
+    '@import "../features/campaigns/campaigns.css";',
+  );
+
+  assert.ok(campaignImport > aiImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.campaign-composer-layout|\.campaign-form|\.audience-issue-samples|\.delivery-fieldset/,
+  );
+  assert.match(
+    campaignSource,
+    /^\.campaign-composer-layout\s*\{/,
+  );
+  assert.match(campaignSource, /\.campaign-form\s*\{/);
+  assert.match(
+    campaignSource,
+    /\.audience-issue-samples\s*\{/,
+  );
+  assert.match(campaignSource, /\.delivery-fieldset\s*\{/);
+  assert.match(
+    campaignSource,
+    /@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    campaignSource,
+    /\.template-directory-card|\.quick-reply-heading|\.reports-grid/,
+  );
+  assert.match(globalSource, /\.template-form-row/);
+});
