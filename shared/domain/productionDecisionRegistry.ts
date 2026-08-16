@@ -44,8 +44,8 @@ export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
     checkId: "security.rate-limit-policy",
     title: "מדיניות Rate Limit",
     detail:
-      "יש לאשר מכסות, חלונות זמן ופעולות חסומות לכל סוג משתמש ו־Webhook.",
-    owner: "אבטחה + פיתוח",
+      "טל מאמת מגבלות Meta עדכניות; דוד אחראי למימוש; אבטחה ומוצר מאשרים מכסות Connect, חלונות זמן, Backoff, Alerts ו־Kill switch.",
+    owner: "טל (מחקר ופיתוח) + דוד + אבטחה + מוצר",
   },
   {
     checkId: "security.file-scanner",

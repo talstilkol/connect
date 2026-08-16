@@ -3,6 +3,13 @@
 ממשק Web ראשוני למערכת ה־SaaS החדשה שמחליפה את חיבור WhatsApp Web הלא־רשמי
 ב־Connect הישן.
 
+## מסמכי תכנון ותפעול מרכזיים
+
+1. [תוכנית העבודה הצוותית](docs/team-operating-plan.md).
+2. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
+3. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
+4. [Release checklist](docs/release-checklist.md).
+
 ## מצב Master Plan — תשתית Stage 3
 
 1. בחירת סביבת עבודה למשתמש רב־Tenant נשמרת ב־D1 ולא ב־Cookie
@@ -80,8 +87,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1209/1209 בדיקות, 30 Migrations,
-   ‏395 קובצי Source, ‏26 Client dependency graphs, ‏749 קבצים
+31. Local Release Gate עובר עם 1213/1213 בדיקות, 30 Migrations,
+   ‏395 קובצי Source, ‏26 Client dependency graphs, ‏753 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס

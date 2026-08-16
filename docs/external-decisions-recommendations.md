@@ -64,21 +64,44 @@ Fraud ו־Customer portal, ולכן מפחית עומס משפטי ותפעול�
 
 ## 5. החלטה 4 — Rate Limit Policy
 
-5.1 המלצה התחלתית:
+5.1 RACI: טל Responsible למחקר ולאימות עובדות; דוד Accountable
+למימוש; אבטחה ומוצר Approvers של המדיניות.
 
-5.1.1 System Admin mutations: ‏10 פעולות לדקה לכל User.
+5.2 ההחלטה מחולקת לשלוש שכבות נפרדות:
 
-5.1.2 Tenant mutations: ‏120 פעולות לדקה לכל User+Tenant.
+5.2.1 מגבלות ספק Meta: ‏Messaging limit, ‏Phone throughput,
+Sender+Recipient pair rate, ‏Templates, ‏Quality, ‏Marketing,
+Management API ו־Policy enforcement.
 
-5.1.3 Meta Webhook ingress: ‏1,500 אירועים לדקה לכל Meta App או
-Phone Number ID, אחרי אימות חתימה ולפני Queue publication.
+5.2.2 קיבולת קליטת Webhook ו־Queue: אימות חתימה, Idempotency,
+Backpressure, ‏Retry ו־DLQ.
 
-5.2 המפתחות יהיו זהויות יציבות ולא כתובת IP. Cloudflare מציינת
+5.2.3 מכסות אפליקטיביות של Connect: ‏User, ‏Tenant, ‏Campaign,
+Phone number, ‏Recipient, ‏Template ופעולות ניהול.
+
+5.3 המספרים הבאים הם **Engineering starting proposal בלבד** ואינם
+מגבלות WhatsApp רשמיות:
+
+5.3.1 System Admin mutations: ‏10 פעולות לדקה לכל User.
+
+5.3.2 Tenant mutations: ‏120 פעולות לדקה לכל User+Tenant.
+
+5.3.3 Meta Webhook ingress: אין תקרה קבועה מראש. הקיבולת נגזרת
+מ־Phone throughput החי, פי שלושה Status events לתעבורה יוצאת,
+התעבורה הנכנסת הצפויה ו־Headroom שנבדק ב־Load test.
+
+5.4 Baseline המגבלות המתוארך, לרבות ערכים שאינם מפורסמים ומצב
+החשבון שעדיין אינו זמין, נמצא ב־`docs/whatsapp-rate-limits.md`. הוא
+אינו Production evidence עד שהוא מקושר למצב החי, Commit ו־Digest.
+
+5.5 המפתחות יהיו זהויות יציבות ולא כתובת IP. Cloudflare מציינת
 שמגבלת Workers היא מקומית ל־PoP ו־eventually consistent, ולכן היא
 אינה מנגנון Billing או Quota מדויק.
 
-5.3 לאחר שבועיים של Staging/Production telemetry יש לכייל את
-הספים לפי p95 ועומסי Burst אמיתיים.
+5.6 לפני אישור טל ימסור Evidence מתוארך הכולל מקור רשמי, גרסת API,
+Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
+ו־Kill switch. לאחר שבועיים של Staging telemetry יש לכייל את המכסות
+הפנימיות לפי p95 ועומסי Burst אמיתיים.
 
 ## 6. החלטה 5 — File Scanner
 
@@ -260,6 +283,11 @@ Kill switch ו־Audit.
 17.4 תוכנית הביצוע, חלוקת האחריות ותנאי הקבלה נמצאים ב־
 `docs/team-operating-plan.md`.
 
+17.5 לפני ה־Pilot טל מאמת את עובדות Meta והמצב החי; דוד מאשר את
+התאמת המימוש; אבטחה ומוצר מאשרים Internal caps, ‏Webhook capacity,
+‏Alerts ו־Kill switch. ערכי החשבון אינם מוסקים מתוכנית או מתעבורה
+קודמת.
+
 ## 18. מקורות רשמיים
 
 18.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
@@ -299,3 +327,23 @@ Kill switch ו־Audit.
 18.18 [Anthropic — Claude Team](https://support.claude.com/en/articles/9267247-get-started-with-the-team-plan).
 
 18.19 [AnyDesk — Two-factor authentication](https://anydesk.com/en/features/2-factor-authentication).
+
+18.20 [Meta — WhatsApp platform rate limits](https://developers.facebook.com/documentation/business-messaging/whatsapp/about-the-platform#rate-limits).
+
+18.21 [Meta — WhatsApp throughput](https://developers.facebook.com/documentation/business-messaging/whatsapp/throughput).
+
+18.22 [Meta — WhatsApp messaging limits](https://developers.facebook.com/documentation/business-messaging/whatsapp/messaging-limits).
+
+18.23 [Meta — WhatsApp template pacing](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/template-pacing).
+
+18.24 [Meta — WhatsApp business portfolio pacing](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/portfolio-pacing).
+
+18.25 [Meta — WhatsApp policy enforcement](https://developers.facebook.com/documentation/business-messaging/whatsapp/policy-enforcement).
+
+18.26 [Meta — WhatsApp error codes](https://developers.facebook.com/documentation/business-messaging/whatsapp/support/error-codes).
+
+18.27 [WhatsApp Business Solution Terms](https://www.whatsapp.com/legal/business-solution-terms/).
+
+18.28 [WhatsApp Business Messaging Policy](https://whatsappbusiness.com/policy/).
+
+18.29 [Meta Terms for WhatsApp Business](https://www.whatsapp.com/legal/meta-terms-whatsapp-business).

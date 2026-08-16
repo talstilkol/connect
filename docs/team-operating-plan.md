@@ -39,9 +39,12 @@ Code, אימות נכסי WABA, ‏Webhook חתום ו־Queue לעיבוד הא�
 
 2.2.3 ראשה אחראית ל־Deployment ולחיבור ה־UI אל ה־Backend דרך GitHub.
 
-2.2.4 כל חבר צוות יפתח זהות GitHub אישית ויעבוד דרך Pull Requests.
+2.2.4 טל אחראי למחקר ופיתוח של Rate Limiting ושל מגבלות
+WhatsApp/Meta על שליחת הודעות, קמפיינים ובוטים.
 
-2.2.5 החיבור ל־WhatsApp יהיה רק דרך WhatsApp Business Platform
+2.2.5 כל חבר צוות יפתח זהות GitHub אישית ויעבוד דרך Pull Requests.
+
+2.2.6 החיבור ל־WhatsApp יהיה רק דרך WhatsApp Business Platform
 הרשמי.
 
 2.3 החלטות שעדיין אינן סגורות:
@@ -192,13 +195,32 @@ mapping באמצעות בדיקות.
 
 4.3.4 מתעדת Deployment, ‏Health check, ‏Smoke test ו־Rollback.
 
-4.4 כלל הצוות:
+4.4 טל — WhatsApp limits ו־Rate Limiting R&D owner:
 
-4.4.1 GitHub account אישי, ‏2FA, Commit מזוהה ו־Pull Request.
+4.4.1 מתחזק מטריצה מתוארכת של מגבלות Meta הרשמיות, מצב ה־WABA
+החי, Error codes, ‏Retry behavior ו־Policy enforcement.
 
-4.4.2 אין Secret ב־Git, Prompt, Screenshot, Log או Ticket.
+4.4.2 מפריד בין מגבלות ספק Meta, קיבולת Webhook/Queue ומכסות
+פנימיות של Connect. ערך שלא פורסם או לא נקרא מחשבון מורשה נשאר
+`unknown/unavailable`.
 
-4.4.3 אין שימוש בנתוני לקוח ב־Development או Preview.
+4.4.3 מציע Quotas, ‏Headroom, ‏Backoff, ‏Alerts ו־Kill switch על
+בסיס תיעוד רשמי, Telemetry ו־Load tests. ‏טל מאמת את העובדות; דוד
+Accountable למימוש; אבטחה ומוצר מאשרים את המדיניות לפני הפעלה.
+
+4.4.4 בודק שינויים בתיעוד ובתנאי Meta לפני Pilot, לפני כל Production
+release ולפחות אחת ל־30 יום בזמן פיתוח פעיל.
+
+4.4.5 מקור העבודה הוא `docs/whatsapp-rate-limits.md`; ערכי חשבון חיים
+ודיגסט Release נשמרים ב־Evidence ולא במסמך סטטי.
+
+4.5 כלל הצוות:
+
+4.5.1 GitHub account אישי, ‏2FA, Commit מזוהה ו־Pull Request.
+
+4.5.2 אין Secret ב־Git, Prompt, Screenshot, Log או Ticket.
+
+4.5.3 אין שימוש בנתוני לקוח ב־Development או Preview.
 
 ## 5. תוכנית ביצוע לפי Gates
 
@@ -238,7 +260,10 @@ Credentials ובלי לכתוב API חדש לפני הבנת הקיים.
 5.4.1 מוגדרים Meta App, ‏Test WABA, מספר בדיקה, Webhook ו־Permissions
 בסביבה מבודדת.
 
-5.4.2 תנאי סיום: Challenge מאומת, Webhook חתום מתקבל פעם אחת,
+5.4.2 טל מפיק Baseline מאומת עבור מגבלות ה־Sandbox, ‏Error actions,
+Webhook capacity ו־Kill switch, בלי להציג ערך דינמי כעובדה קבועה.
+
+5.4.3 תנאי סיום: Challenge מאומת, Webhook חתום מתקבל פעם אחת,
 Duplicate נדחה באופן Idempotent והודעת Template מאושרת נשלחת לנמען
 בדיקה מורשה.
 
@@ -249,7 +274,11 @@ Duplicate נדחה באופן Idempotent והודעת Template מאושרת נש
 5.5.2 החוזה כולל Authentication, ‏Authorization, DTOs, שגיאות,
 Idempotency key, ‏Rate limits ו־Versioning.
 
-5.5.3 תנאי סיום: Unit, integration ו־negative tests עוברים; Meta
+5.5.3 טל מבצע Factual sign-off למגבלות Meta; דוד Accountable לכך
+שהחוזה מיישם אותן; אבטחה ומוצר מאשרים מכסות פנימיות, ‏Backoff,
+‏Circuit breakers ו־Telemetry לפי Scope.
+
+5.5.4 תנאי סיום: Unit, integration ו־negative tests עוברים; Meta
 Token אינו נגיש מה־Browser.
 
 5.6 Gate 5 — UI Integration:
@@ -276,7 +305,11 @@ observability ו־rollback נבדקו מול Commit יחיד.
 5.8.2 החיבור מתבצע ב־Staging/Pilot מבודד, עם Backup, מגבלת קצב,
 Kill switch ו־Audit.
 
-5.8.3 תנאי סיום: חיבור, קבלה ושליחה נבדקו ללא פגיעה ב־WordPress
+5.8.3 טל מאמת את מצב ה־WABA והמספר שנקראו בזמן אמת; דוד מאשר את
+התאמת המימוש; אבטחה ומוצר מאשרים את תקרות ה־Pilot, ‏Alerts,
+‏Queue headroom ותרגיל Kill switch.
+
+5.8.4 תנאי סיום: חיבור, קבלה ושליחה נבדקו ללא פגיעה ב־WordPress
 הקיים וללא הודעה לאדם שלא אושר.
 
 5.9 Gate 8 — Review והמשך אפיון:

@@ -149,4 +149,16 @@ Read-only, ושום Row או Identifier לא נכתב ל־Receipt.
 
 6.4 Smoke Test חיצוני עבר לאחר הפריסה.
 
-6.5 רק לאחר שכל הסעיפים הוכחו ניתן לאשר Production.
+6.5 קיים Evidence מתוארך וגרסתי המקשר את
+`docs/whatsapp-rate-limits.md` ואת ה־Digest שלו ל־Release, ‏Commit,
+‏Artifact, ‏Meta Graph API version ומצב ה־WABA, המספר וה־Templates.
+טל ביצע Factual sign-off; ערך חי לא זמין מסומן `unknown/unavailable`
+וחוסם Production כאשר הוא דרוש לבטיחות.
+
+6.6 Alerts פעילים עבור `account_update`, שינויי Quality ו־Capability,
+‏Template pacing/pause, שגיאות Throttling ו־Queue backlog.
+
+6.7 דוד אישר את התאמת המימוש; אבטחה ומוצר אישרו את תקרות ה־Rollout,
+‏Headroom ו־Kill switch, ואלה נבדקו בפועל בלי שליחה לנמען שאינו מורשה.
+
+6.8 רק לאחר שכל הסעיפים הוכחו ניתן לאשר Production.
