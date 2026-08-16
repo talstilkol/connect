@@ -236,7 +236,9 @@ release ולפחות אחת ל־30 יום בזמן פיתוח פעיל.
 
 5.1.1 רועי מאשר Repository Authority, מודל Claude ו־Hosting path.
 
-5.1.2 פלט: ADR חתום בהחלטה אחת — Cloudflare קיים או Migration מלא.
+5.1.2 פלט: [ADR-0001](adr/0001-hosting-topology.md) מאושר בהחלטה
+אחת — Cloudflare קיים או Migration מלא. כל עוד סטטוס ה־ADR הוא
+`proposed`, ‏Hosting נשאר החלטה פתוחה ו־Gate 0 אינו `verified`.
 
 5.1.3 תנאי סיום: אין סעיף Hosting או Account שמכיל שתי חלופות
 סותרות.

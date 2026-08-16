@@ -7,11 +7,12 @@
 
 1. [תוכנית העבודה הצוותית](docs/team-operating-plan.md).
 2. [שאלון ההחלטות המהותיות](docs/connect-decisions-questionnaire.html).
-3. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
-4. [עקיבות מלאה לאפיון המוצר](docs/product-specification-traceability.md).
-5. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
-6. [Release checklist](docs/release-checklist.md).
-7. [Release operator runbook](docs/release-operator-runbook.md).
+3. [Architecture Decision Records](docs/adr/README.md).
+4. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
+5. [עקיבות מלאה לאפיון המוצר](docs/product-specification-traceability.md).
+6. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
+7. [Release checklist](docs/release-checklist.md).
+8. [Release operator runbook](docs/release-operator-runbook.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
@@ -90,7 +91,7 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1366/1366 בדיקות, 34 Migrations,
+31. Local Release Gate עובר עם 1378/1378 בדיקות, 34 Migrations,
    ‏424 קובצי Source, ‏31 Client dependency graphs, ‏810 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
