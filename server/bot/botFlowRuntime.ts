@@ -17,6 +17,8 @@ import {
 } from "./botFlowLifecycle.ts";
 
 const INBOUND_TEXT_MAXIMUM_LENGTH = 4_096;
+const BOT_FLOW_BLOCK_KEY_PATTERN =
+  /^bot_block_v1_[0-9a-f]{64}$/;
 const UNSAFE_CONTROL_CHARACTERS =
   /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 
@@ -72,6 +74,7 @@ export type BotFlowExecutionPlan =
 export interface BotFlowTurnInput {
   lastInboundText: string | null;
   conversationStatus: ConversationStatus;
+  resumeFromBlockKey?: string | null;
 }
 
 function normalizeComparableText(
@@ -96,9 +99,14 @@ function parseTurnInput(
   const record =
     input as Record<string, unknown>;
   const keys = Object.keys(record);
+  const hasResumeFromBlockKey =
+    Object.hasOwn(
+      record,
+      "resumeFromBlockKey",
+    );
 
   if (
-    keys.length !== 2 ||
+    (keys.length !== 2 && keys.length !== 3) ||
     !Object.hasOwn(record, "lastInboundText") ||
     !Object.hasOwn(
       record,
@@ -108,6 +116,15 @@ function parseTurnInput(
       (status) =>
         status === record.conversationStatus,
     ) ||
+    (keys.length === 3 &&
+      !hasResumeFromBlockKey) ||
+    (hasResumeFromBlockKey &&
+      record.resumeFromBlockKey !== null &&
+      (typeof record.resumeFromBlockKey !==
+        "string" ||
+        !BOT_FLOW_BLOCK_KEY_PATTERN.test(
+          record.resumeFromBlockKey,
+        ))) ||
     (record.lastInboundText !== null &&
       (typeof record.lastInboundText !==
         "string" ||
@@ -131,6 +148,14 @@ function parseTurnInput(
         : record.lastInboundText.trim(),
     conversationStatus:
       record.conversationStatus as ConversationStatus,
+    ...(hasResumeFromBlockKey
+      ? {
+          resumeFromBlockKey:
+            record.resumeFromBlockKey as
+              | string
+              | null,
+        }
+      : {}),
   };
 }
 
@@ -182,6 +207,7 @@ export function executeBotFlowTurn(
   const replies: BotFlowReply[] = [];
   const visited = new Set<string>();
   let currentBlockKey =
+    input.resumeFromBlockKey ??
     definition.entryBlockKey;
 
   while (true) {

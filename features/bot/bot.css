@@ -232,6 +232,79 @@
   font-size: 8px;
 }
 
+.bot-flow-add-menu {
+  width: 100%;
+  min-height: 39px;
+  font-size: 8px;
+}
+
+.bot-flow-button-menu {
+  min-width: 0;
+  margin: 0;
+  padding: 13px;
+  border: 1px solid #cfe0d8;
+  border-radius: 12px;
+  background: #f7fbf9;
+}
+
+.bot-flow-button-menu legend {
+  padding: 0 5px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.bot-flow-button-menu > p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.bot-flow-button-menu > label > span {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.bot-flow-button-menu ol {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bot-flow-button-menu li {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid #dce8e2;
+  border-radius: 11px;
+  background: white;
+}
+
+.bot-flow-button-menu li > strong,
+.bot-flow-button-menu li > label {
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.bot-flow-button-menu li > label:not(:first-of-type) {
+  margin-top: 3px;
+}
+
+.bot-flow-button-menu-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.bot-flow-button-menu-actions button {
+  flex: 1;
+  min-height: 34px;
+  padding: 6px 8px;
+  font-size: 7px;
+}
+
 .bot-flow-editor-actions {
   display: flex;
   gap: 8px;
@@ -558,6 +631,49 @@
   font-size: 14px;
 }
 
+.bot-flow-buttons-node {
+  margin-top: 1px;
+  border-color: #b9c9e8;
+  background: #f9faff;
+}
+
+.bot-flow-option-branches {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(150px, 1fr)
+  );
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.bot-flow-option-branches > div {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+}
+
+.bot-flow-option-branches > div > span {
+  max-width: 100%;
+  padding: 4px 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef1fb;
+  color: #53658f;
+  font-size: 7px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bot-flow-option-branches .flow-node {
+  width: min(100%, 190px);
+  min-height: 62px;
+  padding: 10px;
+}
+
 .bot-flow-terminal {
   margin-top: 13px;
   padding: 7px 10px;
@@ -594,6 +710,10 @@
   }
 
   .bot-flow-editor-actions {
+    flex-direction: column;
+  }
+
+  .bot-flow-button-menu-actions {
     flex-direction: column;
   }
 

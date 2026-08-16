@@ -200,6 +200,7 @@ export function createBotInboundRuntimeProcessor(
           await runtime.processInbound(
             input.tenantId,
             input.conversationKey,
+            input.inboundMessageKey,
             input.textContent,
           );
       } catch {

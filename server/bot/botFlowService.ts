@@ -19,6 +19,7 @@ import {
   deriveBotFlowVersionKey,
 } from "./botFlowKey.ts";
 import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
@@ -152,6 +153,21 @@ async function parseSaveDraftRequest(
   tenantId: number,
   input: unknown,
 ): Promise<SaveDraftRequest> {
+  const buttonMenuComposerResult =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (buttonMenuComposerResult.success) {
+    return {
+      definition:
+        buttonMenuComposerResult.definition,
+      expectedFlowVersion:
+        buttonMenuComposerResult.expectedFlowVersion,
+    };
+  }
+
   const sequenceComposerResult =
     await compileKeywordSequenceBotFlowComposerDraft(
       tenantId,
@@ -193,12 +209,19 @@ async function parseSaveDraftRequest(
         input.expectedFlowVersion,
       ))
   ) {
+    const preferredComposerFailure = [
+      buttonMenuComposerResult,
+      sequenceComposerResult,
+      legacyComposerResult,
+    ].find(
+      (result) =>
+        !result.issues.includes("invalid-input"),
+    );
+
     throw new BotFlowInputError([
-      ...(sequenceComposerResult.issues.includes(
-        "invalid-input",
-      )
-        ? legacyComposerResult.issues
-        : sequenceComposerResult.issues),
+      ...(preferredComposerFailure?.issues ?? [
+        "invalid-input" as const,
+      ]),
     ]);
   }
 

@@ -4,9 +4,6 @@ import {
   useEffect,
   useRef,
 } from "react";
-import {
-  KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
-} from "../../shared/domain/botFlowComposer";
 import type {
   BotFlowReplyStepDraft,
   BotFlowReplyStepMoveDirection,
@@ -15,6 +12,7 @@ import type {
 export function BotFlowReplySequenceEditor({
   steps,
   disabled,
+  maximumSteps,
   onTextChange,
   onMove,
   onRemove,
@@ -22,6 +20,7 @@ export function BotFlowReplySequenceEditor({
 }: {
   steps: readonly BotFlowReplyStepDraft[];
   disabled: boolean;
+  maximumSteps: number;
   onTextChange(
     draftStepKey: string,
     text: string,
@@ -149,8 +148,7 @@ export function BotFlowReplySequenceEditor({
         }}
         disabled={
           disabled ||
-          steps.length >=
-            KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT
+          steps.length >= maximumSteps
         }
       >
         הוספת הודעת טקסט

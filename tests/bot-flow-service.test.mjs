@@ -422,6 +422,59 @@ test("accepts an ordered reply sequence without accepting browser block keys", a
   );
 });
 
+test("accepts a button menu while deriving block and option identities only on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "ניתוב למחלקה",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [
+        "קיבלנו את פנייתך.",
+        "בחרו מחלקה.",
+      ],
+      buttonText: "באיזו מחלקה לבחור?",
+      options: [
+        {
+          label: "מכירות",
+          replyText: "נעביר למכירות.",
+        },
+        {
+          label: "שירות",
+          replyText: "נעביר לשירות.",
+        },
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const buttonBlock = definition.blocks.find(
+    (block) => block.type === "buttons",
+  );
+
+  assert.equal(definition.blocks.length, 9);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.ok(buttonBlock);
+  assert.ok(
+    buttonBlock.options.every((option) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        option.optionKey,
+      ),
+    ),
+  );
+});
+
 test("derives the next version from stored state without accepting a browser ordinal", async () => {
   const first = await definitionFixture(1);
   const second = await definitionFixture(2);

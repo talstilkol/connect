@@ -58,10 +58,15 @@ export function createBotFlowReplySteps(
 
 export function appendBotFlowReplyStep(
   steps: readonly BotFlowReplyStepDraft[],
+  maximumStepCount =
+    KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
 ): readonly BotFlowReplyStepDraft[] {
   if (
-    steps.length >=
-    KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT
+    !Number.isSafeInteger(maximumStepCount) ||
+    maximumStepCount < 1 ||
+    maximumStepCount >
+      KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT ||
+    steps.length >= maximumStepCount
   ) {
     return steps;
   }

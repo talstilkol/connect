@@ -7,12 +7,17 @@ import {
   deriveBotFlowVersionKey,
 } from "../server/bot/botFlowKey.ts";
 import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
+} from "../server/bot/botFlowComposer.ts";
+import {
   BotRuntimeServiceError,
   createBotRuntimeService,
 } from "../server/bot/botRuntimeService.ts";
 
 const conversationKey =
   `conversation_v1_${"c".repeat(64)}`;
+const inboundMessageKey =
+  `message_v1_${"d".repeat(64)}`;
 
 async function activeFlowFixture(
   tenantId = 7,
@@ -115,6 +120,69 @@ async function activeFlowFixture(
   };
 }
 
+async function activeButtonMenuFixture() {
+  const compiled =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב פעיל למחלקה",
+        keywords: ["עזרה"],
+        matchMode: "exact",
+        introTexts: ["בחרו מחלקה."],
+        buttonText: "באיזו מחלקה לבחור?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "נעביר למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "נעביר לשירות.",
+          },
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const botFlowKey = await deriveBotFlowKey(
+    7,
+    compiled.definition.name,
+  );
+  const botFlowVersionKey =
+    await deriveBotFlowVersionKey(
+      7,
+      botFlowKey,
+      1,
+      compiled.definition,
+    );
+
+  return {
+    flow: {
+      botFlowKey,
+      tenantId: 7,
+      name: compiled.definition.name,
+      status: "active",
+      latestVersionKey: botFlowVersionKey,
+      latestVersionNumber: 1,
+      activeVersionKey: botFlowVersionKey,
+      version: 2,
+      createdAt: "2026-07-26 09:00:00",
+      updatedAt: "2026-07-26 09:05:00",
+    },
+    version: {
+      botFlowVersionKey,
+      botFlowKey,
+      tenantId: 7,
+      versionNumber: 1,
+      status: "published",
+      definition: compiled.definition,
+      publishedAt: "2026-07-26 09:05:00",
+      createdAt: "2026-07-26 09:00:00",
+    },
+  };
+}
+
 function conversation(overrides = {}) {
   return {
     conversationKey,
@@ -129,6 +197,7 @@ function conversation(overrides = {}) {
 function fixture(active, options = {}) {
   const calls = {
     conversations: [],
+    continuations: [],
     activeFlows: [],
     versions: [],
     handoffs: [],
@@ -188,6 +257,29 @@ function fixture(active, options = {}) {
       )
         ? options.conversation
         : conversation();
+    },
+    async findAcceptedButtonContinuation(
+      tenantId,
+      currentConversationKey,
+      currentInboundMessageKey,
+    ) {
+      calls.continuations.push({
+        tenantId,
+        conversationKey:
+          currentConversationKey,
+        inboundMessageKey:
+          currentInboundMessageKey,
+      });
+
+      if (options.continuationError) {
+        throw options.continuationError;
+      }
+
+      return (
+        options.continuation ?? {
+          outcome: "none",
+        }
+      );
     },
     async applyHandoff(
       tenantId,
@@ -256,6 +348,7 @@ test("skips missing, assigned, and ineligible conversations before flow lookup",
       await testFixture.service.processInbound(
         7,
         conversationKey,
+        inboundMessageKey,
         "מידע",
       ),
       {
@@ -290,6 +383,7 @@ test("fails closed for zero or multiple active flows without choosing one", asyn
     await none.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "מידע",
     ),
     {
@@ -301,6 +395,7 @@ test("fails closed for zero or multiple active flows without choosing one", asyn
     await multiple.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "מידע",
     ),
     {
@@ -322,6 +417,7 @@ test("returns a reply plan without mutating conversation state", async () => {
     await testFixture.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "בקשת מידע",
     );
 
@@ -342,6 +438,129 @@ test("returns a reply plan without mutating conversation state", async () => {
   );
 });
 
+test("resumes only from an accepted button delivery tied to the current active version", async () => {
+  const active = await activeButtonMenuFixture();
+  const buttons =
+    active.version.definition.blocks.find(
+      (block) => block.type === "buttons",
+    );
+
+  assert.ok(buttons);
+  const testFixture = fixture(active, {
+    continuation: {
+      outcome: "found",
+      evidence: {
+        botFlowVersionKey:
+          active.version.botFlowVersionKey,
+        replyJson: JSON.stringify({
+          kind: "buttons",
+          text: buttons.text,
+          options: buttons.options.map(
+            (option) => ({
+              optionKey: option.optionKey,
+              label: option.label,
+            }),
+          ),
+        }),
+        acceptedAt:
+          "2026-07-26T09:05:00.000Z",
+      },
+    },
+  });
+
+  const result =
+    await testFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "שירות",
+    );
+
+  assert.equal(result.outcome, "planned");
+  assert.equal(result.plan.outcome, "completed");
+  assert.deepEqual(result.plan.replies, [
+    {
+      kind: "text",
+      text: "נעביר לשירות.",
+    },
+  ]);
+  assert.deepEqual(
+    testFixture.calls.continuations,
+    [
+      {
+        tenantId: 7,
+        conversationKey,
+        inboundMessageKey,
+      },
+    ],
+  );
+});
+
+test("fails closed for missing current-message evidence or ambiguous continuation", async () => {
+  const active = await activeButtonMenuFixture();
+  const cases = [
+    [
+      { outcome: "current-message-not-found" },
+      "PERSISTENCE_FAILED",
+    ],
+    [
+      { outcome: "ambiguous" },
+      "FLOW_CONFIGURATION_INVALID",
+    ],
+  ];
+
+  for (const [continuation, code] of cases) {
+    const testFixture = fixture(active, {
+      continuation,
+    });
+
+    await assert.rejects(
+      testFixture.service.processInbound(
+        7,
+        conversationKey,
+        inboundMessageKey,
+        "שירות",
+      ),
+      (error) =>
+        error instanceof BotRuntimeServiceError &&
+        error.code === code,
+    );
+  }
+});
+
+test("rejects continuation evidence that does not identify exactly one button block", async () => {
+  const active = await activeButtonMenuFixture();
+  const testFixture = fixture(active, {
+    continuation: {
+      outcome: "found",
+      evidence: {
+        botFlowVersionKey:
+          active.version.botFlowVersionKey,
+        replyJson: JSON.stringify({
+          kind: "buttons",
+          text: "תפריט שלא נשלח",
+          options: [],
+        }),
+        acceptedAt:
+          "2026-07-26T09:05:00.000Z",
+      },
+    },
+  });
+
+  await assert.rejects(
+    testFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "שירות",
+    ),
+    (error) =>
+      error instanceof BotRuntimeServiceError &&
+      error.code ===
+        "FLOW_CONFIGURATION_INVALID",
+  );
+});
+
 test("applies handoff with the exact conversation version and never assigns an agent", async () => {
   const active = await activeFlowFixture();
   const testFixture = fixture(active);
@@ -350,6 +569,7 @@ test("applies handoff with the exact conversation version and never assigns an a
     await testFixture.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "לא מצאתי התאמה",
     );
 
@@ -453,6 +673,7 @@ test("fails closed before handoff when a graph would send and transfer in one tu
     testFixture.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "מידע",
     ),
     (error) =>
@@ -501,6 +722,7 @@ test("maps assignment, state, and optimistic concurrency misses without overwrit
       await testFixture.service.processInbound(
         7,
         conversationKey,
+        inboundMessageKey,
         "לא נמצא",
       ),
       expected,
@@ -522,6 +744,7 @@ test("rejects a mismatched active snapshot before execution or handoff", async (
     testFixture.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "לא נמצא",
     ),
     (error) =>
@@ -548,6 +771,7 @@ test("rejects invalid input before persistence and sanitizes storage failures", 
     invalid.service.processInbound(
       0,
       conversationKey,
+      inboundMessageKey,
       "מידע",
     ),
     (error) =>
@@ -558,6 +782,7 @@ test("rejects invalid input before persistence and sanitizes storage failures", 
     failed.service.processInbound(
       7,
       conversationKey,
+      inboundMessageKey,
       "מידע",
     ),
     (error) =>

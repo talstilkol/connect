@@ -41,7 +41,7 @@ test("keeps reply ordering operable through explicit keyboard buttons", async ()
   assert.match(source, /disabled=\{disabled \|\| index === 0\}/);
   assert.match(
     source,
-    /steps\.length >=\s*KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT/,
+    /steps\.length >= maximumSteps/,
   );
   assert.match(
     source,

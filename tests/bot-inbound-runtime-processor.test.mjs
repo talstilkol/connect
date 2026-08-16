@@ -89,12 +89,15 @@ function fixture(options = {}) {
         async processInbound(
           tenantId,
           currentConversationKey,
+          currentInboundMessageKey,
           textContent,
         ) {
           calls.runtime.push({
             tenantId,
             conversationKey:
               currentConversationKey,
+            inboundMessageKey:
+              currentInboundMessageKey,
             textContent,
           });
 

@@ -6,6 +6,7 @@ import {
   executeBotFlowTurn,
 } from "../server/bot/botFlowRuntime.ts";
 import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 
@@ -119,6 +120,67 @@ test("executes every compiled reply step once and in editor order", async () => 
       },
     },
   );
+});
+
+test("resumes a compiled button menu at its evidenced awaiting block", async () => {
+  const compiled =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב למחלקה",
+        keywords: ["עזרה"],
+        matchMode: "exact",
+        introTexts: [
+          "קיבלנו את פנייתך.",
+          "בחרו מחלקה.",
+        ],
+        buttonText: "באיזו מחלקה לבחור?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "נעביר למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "נעביר לשירות.",
+          },
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const prompt = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(prompt.outcome, "awaiting-input");
+  assert.deepEqual(
+    prompt.replies.map((reply) => reply.kind),
+    ["text", "text", "buttons"],
+  );
+
+  const selection = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "שירות",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        prompt.awaitingBlockKey,
+    },
+  );
+
+  assert.equal(selection.outcome, "completed");
+  assert.deepEqual(selection.replies, [
+    {
+      kind: "text",
+      text: "נעביר לשירות.",
+    },
+  ]);
 });
 
 test("uses the unmatched keyword branch for non-text input and requests handoff without assignment", () => {

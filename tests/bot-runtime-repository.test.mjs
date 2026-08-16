@@ -14,6 +14,16 @@ import {
 
 const conversationKey =
   `conversation_v1_${"a".repeat(64)}`;
+const previousInboundMessageKey =
+  `message_v1_${"b".repeat(64)}`;
+const currentInboundMessageKey =
+  `message_v1_${"c".repeat(64)}`;
+const nextInboundMessageKey =
+  `message_v1_${"d".repeat(64)}`;
+const botFlowKey =
+  `bot_flow_v1_${"e".repeat(64)}`;
+const botFlowVersionKey =
+  `bot_flow_version_v1_${"f".repeat(64)}`;
 
 class RecordingStatement {
   constructor(database, sql) {
@@ -37,10 +47,12 @@ class RecordingStatement {
   }
 
   async all() {
-    return {
-      success: true,
-      results: [],
-    };
+    return (
+      this.database.allResults.shift() ?? {
+        success: true,
+        results: [],
+      }
+    );
   }
 
   async run() {
@@ -52,6 +64,7 @@ class RecordingDatabase {
   constructor() {
     this.recordings = [];
     this.firstResults = [];
+    this.allResults = [];
   }
 
   prepare(sql) {
@@ -358,5 +371,210 @@ test("moves only an unassigned eligible conversation in SQLite and preserves the
       conversationKey,
     ),
     null,
+  );
+});
+
+test("derives a bounded continuation only from the accepted button reply to the immediately previous inbound message", async () => {
+  const { database, d1 } =
+    await createSqliteD1();
+  const acceptedAt = new Date().toISOString();
+  const replyJson = JSON.stringify({
+    kind: "buttons",
+    text: "באיזו מחלקה לבחור?",
+    options: [
+      {
+        optionKey:
+          `bot_option_v1_${"1".repeat(64)}`,
+        label: "שירות",
+      },
+    ],
+  });
+
+  database
+    .prepare(
+      "INSERT INTO tenants (display_name) VALUES (?)",
+    )
+    .run("tenant-one");
+  database
+    .prepare(
+      "INSERT INTO contacts (tenant_id, phone_e164) VALUES (?, ?)",
+    )
+    .run(1, "+972501234567");
+  database
+    .prepare(
+      `INSERT INTO conversations
+        (conversation_key, tenant_id, contact_id, status)
+       VALUES (?, ?, ?, ?)`,
+    )
+    .run(conversationKey, 1, 1, "bot_active");
+  database
+    .prepare(
+      `INSERT INTO bot_flows
+        (bot_flow_key, tenant_id, name, status, latest_version_key, latest_version_number, active_version_key)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      botFlowKey,
+      1,
+      "Flow",
+      "active",
+      botFlowVersionKey,
+      1,
+      botFlowVersionKey,
+    );
+  database
+    .prepare(
+      `INSERT INTO bot_flow_versions
+        (bot_flow_version_key, bot_flow_key, tenant_id, version_number, status, definition_json, published_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      botFlowVersionKey,
+      botFlowKey,
+      1,
+      1,
+      "published",
+      JSON.stringify({ name: "Flow" }),
+      acceptedAt,
+    );
+  const insertInbound = database.prepare(
+    `INSERT INTO messages
+      (message_key, conversation_key, tenant_id, provider_message_id, direction, content_kind, status, text_content, occurred_at, status_updated_at)
+     VALUES (?, ?, ?, ?, 'inbound', 'text', 'received', ?, ?, ?)`,
+  );
+
+  insertInbound.run(
+    previousInboundMessageKey,
+    conversationKey,
+    1,
+    "wamid.previous",
+    "עזרה",
+    "2026-08-16T08:00:00.000Z",
+    "2026-08-16T08:00:00.000Z",
+  );
+  insertInbound.run(
+    currentInboundMessageKey,
+    conversationKey,
+    1,
+    "wamid.current",
+    "שירות",
+    "2026-08-16T08:01:00.000Z",
+    "2026-08-16T08:01:00.000Z",
+  );
+  database
+    .prepare(
+      `INSERT INTO bot_reply_deliveries
+        (delivery_key, tenant_id, conversation_key, inbound_message_key, bot_flow_key, bot_flow_version_key, reply_index, recipient_phone_e164, reply_json, status, attempt_count, provider_message_id, accepted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', 1, ?, ?)`,
+    )
+    .run(
+      `bot_reply_delivery_v1_${"2".repeat(64)}`,
+      1,
+      conversationKey,
+      previousInboundMessageKey,
+      botFlowKey,
+      botFlowVersionKey,
+      1,
+      "+972501234567",
+      replyJson,
+      "wamid.button-reply",
+      acceptedAt,
+    );
+
+  const repository =
+    createBotRuntimeRepository(d1);
+
+  assert.deepEqual(
+    await repository.findAcceptedButtonContinuation(
+      1,
+      conversationKey,
+      currentInboundMessageKey,
+    ),
+    {
+      outcome: "found",
+      evidence: {
+        botFlowVersionKey,
+        replyJson,
+        acceptedAt,
+      },
+    },
+  );
+
+  database
+    .prepare(
+      `INSERT INTO bot_reply_deliveries
+        (delivery_key, tenant_id, conversation_key, inbound_message_key, bot_flow_key, bot_flow_version_key, reply_index, recipient_phone_e164, reply_json, status, attempt_count, provider_message_id, accepted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', 1, ?, ?)`,
+    )
+    .run(
+      `bot_reply_delivery_v1_${"3".repeat(64)}`,
+      1,
+      conversationKey,
+      previousInboundMessageKey,
+      botFlowKey,
+      botFlowVersionKey,
+      2,
+      "+972501234567",
+      replyJson,
+      "wamid.second-button-reply",
+      acceptedAt,
+    );
+
+  assert.deepEqual(
+    await repository.findAcceptedButtonContinuation(
+      1,
+      conversationKey,
+      currentInboundMessageKey,
+    ),
+    { outcome: "ambiguous" },
+  );
+
+  database
+    .prepare(
+      `UPDATE bot_reply_deliveries
+       SET accepted_at = ?
+       WHERE tenant_id = ?
+         AND inbound_message_key = ?`,
+    )
+    .run(
+      "2000-01-01T00:00:00.000Z",
+      1,
+      previousInboundMessageKey,
+    );
+
+  assert.deepEqual(
+    await repository.findAcceptedButtonContinuation(
+      1,
+      conversationKey,
+      currentInboundMessageKey,
+    ),
+    { outcome: "none" },
+  );
+
+  insertInbound.run(
+    nextInboundMessageKey,
+    conversationKey,
+    1,
+    "wamid.next",
+    "הודעה נוספת",
+    "2026-08-16T08:02:00.000Z",
+    "2026-08-16T08:02:00.000Z",
+  );
+
+  assert.deepEqual(
+    await repository.findAcceptedButtonContinuation(
+      1,
+      conversationKey,
+      nextInboundMessageKey,
+    ),
+    { outcome: "none" },
+  );
+  assert.deepEqual(
+    await repository.findAcceptedButtonContinuation(
+      1,
+      conversationKey,
+      `message_v1_${"9".repeat(64)}`,
+    ),
+    { outcome: "current-message-not-found" },
   );
 });

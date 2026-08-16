@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
 } from "../shared/domain/botFlowComposer.ts";
 import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
@@ -34,6 +36,35 @@ function sequenceComposerInput(overrides = {}) {
       "קיבלנו את פנייתך.",
       "נציג יחזור אליך בהקדם.",
       "אין צורך לשלוח הודעה נוספת.",
+    ],
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function buttonMenuComposerInput(overrides = {}) {
+  return {
+    name: "מענה לפניות שירות",
+    keywords: ["עזרה", "שירות"],
+    matchMode: "exact",
+    introTexts: [
+      "קיבלנו את פנייתך.",
+      "בחרו את המחלקה המתאימה.",
+    ],
+    buttonText: "לאיזו מחלקה לפנות?",
+    options: [
+      {
+        label: "מכירות",
+        replyText: "מחלקת מכירות תחזור אליך.",
+      },
+      {
+        label: "שירות",
+        replyText: "מחלקת שירות תחזור אליך.",
+      },
+      {
+        label: "כספים",
+        replyText: "מחלקת כספים תחזור אליך.",
+      },
     ],
     expectedFlowVersion: null,
     ...overrides,
@@ -291,4 +322,124 @@ test("rejects empty, oversized, and extended reply sequences", async () => {
     success: false,
     issues: ["invalid-input"],
   });
+});
+
+test("compiles a deterministic button menu with one response branch per option", async () => {
+  const result =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      buttonMenuComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 10);
+  assert.deepEqual(
+    readKeywordButtonMenuBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [
+        "קיבלנו את פנייתך.",
+        "בחרו את המחלקה המתאימה.",
+      ],
+      buttonText: "לאיזו מחלקה לפנות?",
+      options: [
+        {
+          label: "מכירות",
+          replyText:
+            "מחלקת מכירות תחזור אליך.",
+        },
+        {
+          label: "שירות",
+          replyText:
+            "מחלקת שירות תחזור אליך.",
+        },
+        {
+          label: "כספים",
+          replyText:
+            "מחלקת כספים תחזור אליך.",
+        },
+      ],
+    },
+  );
+
+  const buttonBlock =
+    result.definition.blocks.find(
+      (block) => block.type === "buttons",
+    );
+
+  assert.ok(buttonBlock);
+  assert.equal(
+    new Set(
+      buttonBlock.options.map(
+        (option) => option.optionKey,
+      ),
+    ).size,
+    3,
+  );
+  assert.ok(
+    buttonBlock.options.every((option) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        option.optionKey,
+      ),
+    ),
+  );
+});
+
+test("rejects incomplete, oversized, or extended button-menu drafts", async () => {
+  const cases = [
+    buttonMenuComposerInput({ introTexts: [] }),
+    buttonMenuComposerInput({ options: [] }),
+    buttonMenuComposerInput({
+      options: Array.from(
+        { length: 11 },
+        (_, index) => ({
+          label: `אפשרות ${index + 1}`,
+          replyText: `תשובה ${index + 1}`,
+        }),
+      ),
+    }),
+    buttonMenuComposerInput({
+      introTexts: Array.from(
+        { length: 94 },
+        (_, index) => `הודעה ${index + 1}`,
+      ),
+      options: [
+        {
+          label: "ראשונה",
+          replyText: "תשובה ראשונה",
+        },
+        {
+          label: "שנייה",
+          replyText: "תשובה שנייה",
+        },
+      ],
+    }),
+    buttonMenuComposerInput({
+      options: [
+        {
+          label: "שירות",
+          replyText: "נציג יחזור אליך.",
+          optionKey:
+            `bot_option_v1_${"a".repeat(64)}`,
+        },
+      ],
+    }),
+  ];
+
+  for (const input of cases) {
+    assert.deepEqual(
+      await compileKeywordButtonMenuBotFlowComposerDraft(
+        7,
+        input,
+      ),
+      {
+        success: false,
+        issues: ["invalid-input"],
+      },
+    );
+  }
 });

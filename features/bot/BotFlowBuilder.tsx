@@ -2,15 +2,34 @@
 
 import {
   type FormEvent,
+  useEffect,
+  useRef,
   useState,
   useTransition,
 } from "react";
 import type {
   BotFlowKeywordMatchMode,
+  ValidatedBotFlowDefinition,
 } from "../../shared/domain/botFlow";
 import {
+  KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT,
+  KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
+  KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
+  readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
 } from "../../shared/domain/botFlowComposer";
+import {
+  appendBotFlowButtonOption,
+  createBotFlowButtonMenuDraft,
+  moveBotFlowButtonOption,
+  readBotFlowButtonOptions,
+  removeBotFlowButtonOption,
+  updateBotFlowButtonOption,
+  updateBotFlowButtonText,
+  type BotFlowButtonMenuEditorDraft,
+  type BotFlowButtonOptionField,
+  type BotFlowButtonOptionMoveDirection,
+} from "../../shared/domain/botFlowButtonMenuEditor";
 import {
   appendBotFlowReplyStep,
   createBotFlowReplySteps,
@@ -34,6 +53,9 @@ import {
   publishBotFlowDraftAction,
   saveBotFlowDraftAction,
 } from "../../server/bot/botFlowActions";
+import {
+  BotFlowButtonMenuEditor,
+} from "./BotFlowButtonMenuEditor";
 import {
   BotFlowReplySequenceEditor,
 } from "./BotFlowReplySequenceEditor";
@@ -132,6 +154,39 @@ function splitKeywords(value: string): string[] {
     .filter((keyword) => keyword.length > 0);
 }
 
+function readEditableComposerDraft(
+  definition: ValidatedBotFlowDefinition,
+) {
+  const buttonMenu =
+    readKeywordButtonMenuBotFlowComposerDraft(
+      definition,
+    );
+
+  if (buttonMenu) {
+    return {
+      kind: "button-menu" as const,
+      name: buttonMenu.name,
+      keywords: buttonMenu.keywords,
+      matchMode: buttonMenu.matchMode,
+      replyTexts: buttonMenu.introTexts,
+      buttonMenu,
+    };
+  }
+
+  const sequence =
+    readKeywordSequenceBotFlowComposerDraft(
+      definition,
+    );
+
+  return sequence
+    ? {
+        kind: "sequence" as const,
+        ...sequence,
+        buttonMenu: null,
+      }
+    : null;
+}
+
 export function BotFlowBuilder({
   initialStatus,
   initialDirectory,
@@ -151,7 +206,7 @@ export function BotFlowBuilder({
     details?.versions[0] ??
     null;
   const initialComposerDraft = initialVersion
-    ? readKeywordSequenceBotFlowComposerDraft(
+    ? readEditableComposerDraft(
         initialVersion.definition,
       )
     : null;
@@ -173,6 +228,21 @@ export function BotFlowBuilder({
       initialComposerDraft?.replyTexts ?? [],
     ),
   );
+  const [buttonMenu, setButtonMenu] =
+    useState<BotFlowButtonMenuEditorDraft | null>(
+      initialComposerDraft?.kind === "button-menu"
+        ? createBotFlowButtonMenuDraft(
+            initialComposerDraft.buttonMenu.buttonText,
+            initialComposerDraft.buttonMenu.options,
+          )
+        : null,
+    );
+  const [focusButtonMenuOnMount, setFocusButtonMenuOnMount] =
+    useState(false);
+  const addButtonMenuButtonRef =
+    useRef<HTMLButtonElement>(null);
+  const focusAddButtonAfterRemovalRef =
+    useRef(false);
   const [unsupportedDefinition, setUnsupportedDefinition] =
     useState(
       Boolean(details && !initialComposerDraft),
@@ -195,6 +265,26 @@ export function BotFlowBuilder({
   const replyTexts = readBotFlowReplyTexts(
     replySteps,
   );
+  const buttonOptions = buttonMenu
+    ? readBotFlowButtonOptions(buttonMenu)
+    : [];
+  const maximumReplyStepCount = buttonMenu
+    ? KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
+      buttonMenu.options.length
+    : KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT;
+  const maximumButtonOptionCount = Math.min(
+    KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
+    KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
+      replySteps.length,
+  );
+  const buttonMenuComplete =
+    buttonMenu === null ||
+    (buttonMenu.buttonText.trim().length > 0 &&
+      buttonOptions.every(
+        (option) =>
+          option.label.trim().length > 0 &&
+          option.replyText.trim().length > 0,
+      ));
   const canWrite =
     initialStatus === "ready" &&
     initialDirectory.canWrite;
@@ -206,6 +296,7 @@ export function BotFlowBuilder({
     replyTexts.every(
       (replyText) => replyText.trim().length > 0,
     ) &&
+    buttonMenuComplete &&
     !isSaving &&
     !isPublishing;
   const canPublish =
@@ -214,6 +305,18 @@ export function BotFlowBuilder({
     currentVersion?.status === "draft" &&
     !isSaving &&
     !isPublishing;
+
+  useEffect(() => {
+    if (
+      buttonMenu !== null ||
+      !focusAddButtonAfterRemovalRef.current
+    ) {
+      return;
+    }
+
+    focusAddButtonAfterRemovalRef.current = false;
+    addButtonMenuButtonRef.current?.focus();
+  }, [buttonMenu]);
 
   const markChanged = () => {
     setDirty(true);
@@ -227,7 +330,7 @@ export function BotFlowBuilder({
       nextDetails,
     );
     const draft = nextVersion
-      ? readKeywordSequenceBotFlowComposerDraft(
+      ? readEditableComposerDraft(
           nextVersion.definition,
         )
       : null;
@@ -243,6 +346,15 @@ export function BotFlowBuilder({
         draft?.replyTexts ?? [],
       ),
     );
+    setButtonMenu(
+      draft?.kind === "button-menu"
+        ? createBotFlowButtonMenuDraft(
+            draft.buttonMenu.buttonText,
+            draft.buttonMenu.options,
+          )
+        : null,
+    );
+    setFocusButtonMenuOnMount(false);
     setUnsupportedDefinition(!draft);
     setDirty(false);
     setEditorAnnouncement("");
@@ -254,6 +366,8 @@ export function BotFlowBuilder({
     setKeywordsText("");
     setMatchMode("exact");
     setReplySteps(createBotFlowReplySteps([]));
+    setButtonMenu(null);
+    setFocusButtonMenuOnMount(false);
     setUnsupportedDefinition(false);
     setDirty(false);
     setNotice(null);
@@ -320,11 +434,138 @@ export function BotFlowBuilder({
 
   const addReplyStep = () => {
     setReplySteps((current) =>
-      appendBotFlowReplyStep(current),
+      appendBotFlowReplyStep(
+        current,
+        maximumReplyStepCount,
+      ),
     );
     markChanged();
     setEditorAnnouncement(
       `נוספה הודעת טקסט במיקום ${replySteps.length + 1}.`,
+    );
+  };
+
+  const addButtonMenu = () => {
+    if (
+      replySteps.length + 1 >
+      KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+    ) {
+      return;
+    }
+
+    setButtonMenu(
+      createBotFlowButtonMenuDraft("", []),
+    );
+    setFocusButtonMenuOnMount(true);
+    markChanged();
+    setEditorAnnouncement(
+      "נוספה שאלת כפתורים עם אפשרות אחת.",
+    );
+  };
+
+  const removeButtonMenu = () => {
+    focusAddButtonAfterRemovalRef.current = true;
+    setFocusButtonMenuOnMount(false);
+    setButtonMenu(null);
+    markChanged();
+    setEditorAnnouncement(
+      "שאלת הכפתורים וכל ענפיה הוסרו מהטיוטה.",
+    );
+  };
+
+  const changeButtonText = (value: string) => {
+    setButtonMenu((current) =>
+      current
+        ? updateBotFlowButtonText(current, value)
+        : current,
+    );
+    markChanged();
+  };
+
+  const changeButtonOption = (
+    draftOptionKey: string,
+    field: BotFlowButtonOptionField,
+    value: string,
+  ) => {
+    setButtonMenu((current) =>
+      current
+        ? updateBotFlowButtonOption(
+            current,
+            draftOptionKey,
+            field,
+            value,
+          )
+        : current,
+    );
+    markChanged();
+  };
+
+  const moveButtonOption = (
+    draftOptionKey: string,
+    direction: BotFlowButtonOptionMoveDirection,
+  ) => {
+    const currentIndex =
+      buttonMenu?.options.findIndex(
+        (option) =>
+          option.draftOptionKey ===
+          draftOptionKey,
+      ) ?? -1;
+    const nextPosition =
+      direction === "up"
+        ? currentIndex
+        : currentIndex + 2;
+
+    setButtonMenu((current) =>
+      current
+        ? moveBotFlowButtonOption(
+            current,
+            draftOptionKey,
+            direction,
+          )
+        : current,
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `אפשרות הכפתור הועברה למיקום ${nextPosition}.`,
+    );
+  };
+
+  const removeButtonOption = (
+    draftOptionKey: string,
+  ) => {
+    const currentIndex =
+      buttonMenu?.options.findIndex(
+        (option) =>
+          option.draftOptionKey ===
+          draftOptionKey,
+      ) ?? -1;
+
+    setButtonMenu((current) =>
+      current
+        ? removeBotFlowButtonOption(
+            current,
+            draftOptionKey,
+          )
+        : current,
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `אפשרות הכפתור במיקום ${currentIndex + 1} נמחקה.`,
+    );
+  };
+
+  const addButtonOption = () => {
+    setButtonMenu((current) =>
+      current
+        ? appendBotFlowButtonOption(
+            current,
+            maximumButtonOptionCount,
+          )
+        : current,
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `נוספה אפשרות כפתור במיקום ${(buttonMenu?.options.length ?? 0) + 1}.`,
     );
   };
 
@@ -380,15 +621,27 @@ export function BotFlowBuilder({
 
     setNotice(null);
     startSaving(async () => {
+      const draftInput = buttonMenu
+        ? {
+            name,
+            keywords,
+            matchMode,
+            introTexts: replyTexts,
+            buttonText: buttonMenu.buttonText,
+            options: buttonOptions,
+            expectedFlowVersion:
+              details?.flow.version ?? null,
+          }
+        : {
+            name,
+            keywords,
+            matchMode,
+            replyTexts,
+            expectedFlowVersion:
+              details?.flow.version ?? null,
+          };
       const result =
-        await saveBotFlowDraftAction({
-          name,
-          keywords,
-          matchMode,
-          replyTexts,
-          expectedFlowVersion:
-            details?.flow.version ?? null,
-        });
+        await saveBotFlowDraftAction(draftInput);
 
       if (result.status === "saved") {
         setFlows((current) =>
@@ -608,7 +861,7 @@ export function BotFlowBuilder({
       >
         <aside className="card bot-flow-editor">
           <span className="card-kicker">
-            הגדרת מסלול טקסט מדורג
+            הגדרת מסלול Text ו־Buttons
           </span>
           <h2>
             {details
@@ -618,14 +871,15 @@ export function BotFlowBuilder({
           <p>
             הודעה נכנסת נבדקת מול מילות
             המפתח. התאמה שולחת את הודעות הטקסט
-            לפי הסדר; אי־התאמה מעבירה לנציג.
+            לפי הסדר ויכולה להציג שאלת כפתורים;
+            אי־התאמה מעבירה לנציג.
           </p>
 
           {unsupportedDefinition ? (
             <div className="inline-notice warning">
-              הגרסה כוללת Buttons, תנאים או מבנה
-              מתקדם שעדיין אינו ניתן לעריכה בעורך
-              הרצף. הנתונים נשארו שמורים ללא שינוי.
+              הגרסה כוללת תנאים או מבנה Graph
+              מתקדם שעדיין אינו ניתן לעריכה בעורך.
+              הנתונים נשארו שמורים ללא שינוי.
             </div>
           ) : (
             <div className="bot-flow-fields">
@@ -698,11 +952,49 @@ export function BotFlowBuilder({
               <BotFlowReplySequenceEditor
                 steps={replySteps}
                 disabled={!canWrite}
+                maximumSteps={maximumReplyStepCount}
                 onTextChange={changeReplyText}
                 onMove={moveReplyStep}
                 onRemove={removeReplyStep}
                 onAdd={addReplyStep}
               />
+
+              {buttonMenu ? (
+                <BotFlowButtonMenuEditor
+                  draft={buttonMenu}
+                  disabled={!canWrite}
+                  focusOnMount={focusButtonMenuOnMount}
+                  maximumOptionCount={
+                    maximumButtonOptionCount
+                  }
+                  onButtonTextChange={
+                    changeButtonText
+                  }
+                  onOptionChange={
+                    changeButtonOption
+                  }
+                  onMoveOption={moveButtonOption}
+                  onRemoveOption={
+                    removeButtonOption
+                  }
+                  onAddOption={addButtonOption}
+                  onRemoveMenu={removeButtonMenu}
+                />
+              ) : (
+                <button
+                  ref={addButtonMenuButtonRef}
+                  type="button"
+                  className="secondary-button bot-flow-add-menu"
+                  onClick={addButtonMenu}
+                  disabled={
+                    !canWrite ||
+                    replySteps.length + 1 >
+                      KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+                  }
+                >
+                  הוספת שאלת כפתורים
+                </button>
+              )}
             </div>
           )}
 
@@ -808,7 +1100,8 @@ export function BotFlowBuilder({
                           </strong>
                         </div>
                       </div>
-                      {index < replySteps.length - 1 ? (
+                      {index < replySteps.length - 1 ||
+                      buttonMenu ? (
                         <span
                           className="bot-flow-chain-arrow"
                           aria-hidden="true"
@@ -819,6 +1112,54 @@ export function BotFlowBuilder({
                     </div>
                   ))}
                 </div>
+                {buttonMenu ? (
+                  <>
+                    <div className="flow-node bot-flow-buttons-node">
+                      <span className="node-icon">
+                        ⠿
+                      </span>
+                      <div>
+                        <small>שאלת כפתורים</small>
+                        <strong>
+                          {buttonMenu.buttonText.trim()
+                            ? `${buttonMenu.options.length} אפשרויות בחירה`
+                            : "לא הוגדר טקסט שאלה"}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="bot-flow-option-branches">
+                      {buttonMenu.options.map(
+                        (option, index) => (
+                          <div
+                            key={
+                              option.draftOptionKey
+                            }
+                          >
+                            <span>
+                              {option.label.trim() ||
+                                `אפשרות ${index + 1}`}
+                            </span>
+                            <div className="flow-node">
+                              <span className="node-icon">
+                                T
+                              </span>
+                              <div>
+                                <small>
+                                  תשובת ענף
+                                </small>
+                                <strong>
+                                  {option.replyText.trim()
+                                    ? "שליחת התשובה שהוגדרה"
+                                    : "לא הוגדרה תשובה"}
+                                </strong>
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </>
+                ) : null}
                 <span
                   className="bot-flow-terminal"
                   aria-label="סיום התהליך"

@@ -89,8 +89,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1336/1336 בדיקות, 34 Migrations,
-   ‏420 קובצי Source, ‏28 Client dependency graphs, ‏802 קבצים
+31. Local Release Gate עובר עם 1351/1351 בדיקות, 34 Migrations,
+   ‏422 קובצי Source, ‏29 Client dependency graphs, ‏806 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -699,8 +699,16 @@
          באמצעות כפתורים נגישים למקלדת. לאחר הוספה או מחיקה ה־Focus
          חוזר לרצף, ושינויי מבנה מוכרזים ב־Live Region.
    158.2 כל הודעה נשמרת כ־Text Block אמיתי; Runtime test מוכיח שהרצף
-         מבוצע פעם אחת ובאותו סדר. Buttons, ‏Conditions ו־Drag-and-drop
-         עדיין אינם מוצגים כעורך Graph מלא.
+         מבוצע פעם אחת ובאותו סדר.
+   158.3 אפשר להוסיף בסוף הרצף שאלת Buttons, לערוך עד עשר אפשרויות,
+         להגדיר לכל אפשרות תשובת Text, למחוק ולשנות סדר באמצעות
+         כפתורי מקלדת. ה־Browser שולח רק Label ותשובה; Block ו־Option
+         Keys נגזרים בשרת.
+   158.4 לאחר שליחת התפריט, Runtime ממשיך רק מ־Buttons Block שנמצא
+         באופן חד־משמעי מתוך Outbox Accepted של ההודעה הנכנסת הקודמת,
+         באותה גרסת Flow ובחלון של 24 שעות. אין Cursor זמני בדפדפן.
+   158.5 ‏Conditions, ‏Handoff ניתן להגדרה, חיבורי Canvas ו־
+         Drag-and-drop עדיין אינם מוצגים כעורך Graph מלא.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
    160. Inbound Webhook מפעיל Runtime לאחר אחסון ההודעה. Retry חוזר
@@ -726,9 +734,10 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
-10. עריכת Graph מלאה ל־Bot: ‏Buttons, ‏Conditions, ‏Handoff וחיבורי
-    Canvas עם Drag-and-drop. רצף Text ניתן כעת לעריכה מלאה במקלדת,
-    אך אינו משלים לבדו את SPEC-18 או SPEC-19.
+10. עריכת Graph מלאה ל־Bot: ‏Conditions, ‏Handoff וחיבורי Canvas עם
+    Drag-and-drop. רצף Text ושאלת Buttons מסיימת עם ענפי תשובה ניתנים
+    לעריכה מלאה במקלדת, אך עדיין אינם משלימים לבדם את SPEC-18 או
+    SPEC-19.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 
