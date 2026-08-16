@@ -56,6 +56,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
+      <head>
+        <link
+          href="/favicon.svg"
+          rel="icon"
+          type="image/svg+xml"
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClerkAppProvider>{children}</ClerkAppProvider>
       </body>

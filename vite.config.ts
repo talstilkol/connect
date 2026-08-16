@@ -1,5 +1,5 @@
 import vinext from "vinext";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import hostingConfig from "./.openai/hosting.json" with {
   type: "json",
 };
@@ -7,6 +7,72 @@ import { sites } from "./build/sites-vite-plugin.ts";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
+
+const CLERK_SAFE_NODE_APIS_IMPORT = "#safe-node-apis";
+const CLERK_ESM_PATH_FRAGMENT =
+  "/@clerk/nextjs/dist/esm/";
+const CLERK_SAFE_NODE_APIS_VIRTUAL_ID =
+  "\0connect:clerk-safe-node-apis";
+const RSC_DEPENDENCY_OPTIMIZATION_EXCLUSIONS = [
+  "@clerk/nextjs",
+  "next/link",
+];
+
+/**
+ * Clerk's ESM-only Node adapter currently contains raw CommonJS `require()`
+ * calls. Production builds rewrite those calls, but Cloudflare's Vite module
+ * runner executes the dependency as native ESM during development and has no
+ * global `require`. Resolve only Clerk's private import to an equivalent ESM
+ * module while serving; production continues to use Clerk's published code.
+ */
+function clerkSafeNodeApisDevInterop(): Plugin {
+  return {
+    name: "connect:clerk-safe-node-apis-dev-interop",
+    apply: "serve",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (
+        source !== CLERK_SAFE_NODE_APIS_IMPORT ||
+        !importer
+          ?.split("?", 1)[0]
+          .includes(CLERK_ESM_PATH_FRAGMENT)
+      ) {
+        return null;
+      }
+
+      return CLERK_SAFE_NODE_APIS_VIRTUAL_ID;
+    },
+    load(id) {
+      if (id !== CLERK_SAFE_NODE_APIS_VIRTUAL_ID) {
+        return null;
+      }
+
+      return `
+        import {
+          appendFileSync,
+          existsSync,
+          mkdirSync,
+          readFileSync,
+          rmSync,
+          writeFileSync,
+        } from "node:fs";
+        import * as path from "node:path";
+
+        const fs = {
+          appendFileSync,
+          existsSync,
+          mkdirSync,
+          readFileSync,
+          rmSync,
+          writeFileSync,
+        };
+        const cwd = () => process.cwd();
+
+        export default { fs, path, cwd };
+      `;
+    },
+  };
+}
 
 const { d1, r2 } = hostingConfig;
 
@@ -90,10 +156,34 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    // Clerk exposes both RSC and client boundaries from one package. Keeping
+    // it out of pre-bundling prevents Vite from assigning inconsistent module
+    // identities to those boundaries during dependency re-optimization.
+    optimizeDeps: {
+      exclude: [...RSC_DEPENDENCY_OPTIMIZATION_EXCLUSIONS],
+    },
+    environments: {
+      client: {
+        optimizeDeps: {
+          exclude: [...RSC_DEPENDENCY_OPTIMIZATION_EXCLUSIONS],
+        },
+      },
+      rsc: {
+        optimizeDeps: {
+          exclude: [...RSC_DEPENDENCY_OPTIMIZATION_EXCLUSIONS],
+        },
+      },
+      ssr: {
+        optimizeDeps: {
+          exclude: [...RSC_DEPENDENCY_OPTIMIZATION_EXCLUSIONS],
+        },
+      },
+    },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
     plugins: [
+      clerkSafeNodeApisDevInterop(),
       vinext(),
       sites(),
       cloudflare({

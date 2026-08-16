@@ -15,6 +15,7 @@
 8. [Release checklist](docs/release-checklist.md).
 9. [Release operator runbook](docs/release-operator-runbook.md).
 10. [חוזה אבטחה לייבוא אנשי קשר](docs/contact-import-security.md).
+11. [ראיית Browser מקומית לייבוא אנשי קשר](docs/contact-import-browser-acceptance.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
@@ -735,14 +736,15 @@
         מבקש Retry באופן Fail-Closed.
    162. שלב 11 הושלם בקוד המקומי.
    163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
-        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,419 הבדיקות עוברים.
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,421 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
 1. מפתחות Clerk אמיתיים והפעלת הזרימה מול משתמש אמיתי.
 2. משאבי D1/R2 בענן, החלת המיגרציות או נתוני Production.
-3. Browser/Staging acceptance של ייבוא Excel מול קובץ מורשה אמיתי;
-   ה־Parser וה־Pipeline המקומיים קיימים ונבדקו בקלטים שליליים.
+3. Staging acceptance של ייבוא Excel מול קובץ מורשה אמיתי, Tenant
+   מורשה ו־D1 מבודד; ה־Parser, ה־Pipeline ו־Browser acceptance המקומי
+   החיובי/שלילי הושלמו.
 4. WebSocket/Push בזמן אמת, משאבי Queue אמיתיים, החלטת
    Tech Provider/BSP וחיבור End-to-End מול Meta App אמיתי. ה־Inbox
    המקומי כולל חיפוש, סינון, שיוך עצמי ו־Polling מאומת.

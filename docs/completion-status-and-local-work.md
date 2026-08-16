@@ -266,8 +266,9 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 ו־`fflate@0.8.3` נעולים ב־Lockfile, וקובצי XLSX עוברים בדיקת ZIP/XML
 מוגבלת לפני אותו Mapping ו־Import job של CSV. נוסחאות, Macros,
 קישורים חיצוניים, תוכן פעיל, גיליונות נסתרים או מרובים וחריגות גודל
-נחסמים. נותר Browser/Staging acceptance עם קובץ מורשה אמיתי; זמן
-המתנה לחשבון ולסביבה הוא `unknown/unavailable`.
+נחסמים. Browser acceptance מקומי חיובי/שלילי הושלם ב־2026-08-17.
+נותר Staging acceptance עם קובץ מורשה אמיתי, Tenant מורשה ו־D1 מבודד;
+זמן המתנה לחשבון ולסביבה הוא `unknown/unavailable`.
 
 4.1.2 Recurring Campaign domain ו־Scheduler: ‏10–16 שעות לאחר
 החלטת Product על מדיניות recurrence.

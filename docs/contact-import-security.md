@@ -68,5 +68,9 @@ Stack trace אינם נחשפים בממשק.
 קובץ גדול, נוסחה, Macro, קישור חיצוני, גיליון מוסתר או מרובה וטווח
 תאים מסוכן.
 
-6.3 השלמה מקומית אינה ראיית Production. לפני Pilot נדרשת בדיקת Browser
-ו־Staging עם קובץ מורשה אמיתי, Tenant אמיתי ו־D1 מבודד.
+6.3 Browser acceptance מקומי הושלם ב־2026-08-17 לקובץ XLSX תקין ולקובץ
+עם Formula שנחסם. הראיה המלאה מתועדת ב־
+`docs/contact-import-browser-acceptance.md`.
+
+6.4 השלמה מקומית אינה ראיית Production. לפני Pilot נדרשת בדיקת Staging
+עם קובץ מורשה אמיתי, Tenant אמיתי ו־D1 מבודד.
