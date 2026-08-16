@@ -21,6 +21,7 @@ const secretNames = [
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
+  "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
 ];
 const now =
   new Date("2026-07-27T12:00:00.000Z");
@@ -84,7 +85,7 @@ test("accepts a complete isolated inventory with owners and rotation", () => {
       code:
         "SECRET_INVENTORY_EVIDENCE_VERIFIED",
       environmentCount: 4,
-      secretCount: 20,
+      secretCount: 24,
     },
   );
 });

@@ -207,6 +207,7 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
     {
       campaignKey,
       tenantId: 7,
+      recipientPhoneNumber: "+972501234567",
     },
   );
   database.allResults.push(
@@ -268,6 +269,7 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
     {
       campaignKey,
       tenantId: 7,
+      recipientPhoneNumber: "+972501234567",
     },
   );
   assert.equal(
@@ -550,6 +552,7 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
     {
       campaignKey,
       tenantId: 1,
+      recipientPhoneNumber: "+972501234567",
     },
   );
 

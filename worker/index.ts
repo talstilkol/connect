@@ -37,8 +37,8 @@ import {
   createUnavailableCampaignDeliveryProcessor,
 } from "../server/campaigns/unavailableCampaignDeliveryProcessor.ts";
 import {
-  createUnavailableCampaignDeliveryRateLimitContextResolver,
-} from "../server/campaigns/unavailableCampaignDeliveryRateLimitContextResolver.ts";
+  createUnavailableCampaignDeliveryRateLimitPolicySource,
+} from "../server/campaigns/unavailableCampaignDeliveryRateLimitPolicySource.ts";
 import {
   createMetaWebhookEventDispatcher,
 } from "../server/meta/metaWebhookEventDispatcher.ts";
@@ -109,6 +109,7 @@ interface Env {
   FILES: R2BucketBinding;
   META_APP_SECRET?: string;
   META_WEBHOOK_VERIFY_TOKEN?: string;
+  WHATSAPP_RATE_LIMIT_HMAC_KEY_V1?: string;
   META_WEBHOOK_QUEUE?: MetaWebhookQueueBinding;
   META_WEBHOOK_RATE_LIMITER?: RateLimitBinding;
   TENANT_MUTATION_RATE_LIMITER?: RateLimitBinding;
@@ -241,7 +242,7 @@ const worker = {
       const consumer =
         createCampaignDeliveryBatchHandler(
           env,
-          createUnavailableCampaignDeliveryRateLimitContextResolver(),
+          createUnavailableCampaignDeliveryRateLimitPolicySource(),
           createUnavailableCampaignDeliveryProcessor(),
         );
 

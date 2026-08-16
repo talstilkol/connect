@@ -209,6 +209,7 @@ export function createCampaignDeliveryQueueConsumer(
 
         const now = currentTimestamp(clock);
         let campaign;
+        let recipientPhoneNumber: string;
 
         try {
           const context =
@@ -235,6 +236,9 @@ export function createCampaignDeliveryQueueConsumer(
               "campaign delivery context is unavailable",
             );
           }
+
+          recipientPhoneNumber =
+            context.recipientPhoneNumber;
         } catch {
           delivery.retry({
             delaySeconds:
@@ -252,6 +256,7 @@ export function createCampaignDeliveryQueueConsumer(
               await admission.reserve({
                 campaign,
                 deliveryKey: message.deliveryKey,
+                recipientPhoneNumber,
                 reservedAt: now,
               }),
             );

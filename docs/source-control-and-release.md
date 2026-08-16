@@ -138,13 +138,15 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 
 5.2.4 `META_CREDENTIAL_ENCRYPTION_KEY_V1`.
 
+5.2.5 `WHATSAPP_RATE_LIMIT_HMAC_KEY_V1`.
+
 5.3 ערכים ממשיים אינם נשמרים ב־`.env.example`, בקוד, במסמך זה או
 ב־Release Manifest.
 
-5.4 `SECRET_INVENTORY_EVIDENCE_JSON` מגדיר Inventory v1 עבור חמשת
+5.4 `SECRET_INVENTORY_EVIDENCE_JSON` מגדיר Inventory v1 עבור ששת
 ערכי השרת הרגישים הקיימים ובכל ארבע הסביבות.
 
-5.5 כל אחת מ־20 הרשומות כוללת Secret Fingerprint, ‏Owner
+5.5 כל אחת מ־24 הרשומות כוללת Secret Fingerprint, ‏Owner
 Fingerprint, מועד Rotation אחרון ומועד Rotation הבא. Fingerprint
 של Secret אינו יכול להופיע ביותר מסביבה אחת.
 

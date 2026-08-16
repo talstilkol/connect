@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,238 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,247 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -229,9 +229,9 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 4.2 מסלול Rate Limiting נמצא בשלב 3 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
-אותו D1 ומקבל רק Context Resolver חיצוני; ה־Resolver הזמני נכשל
-סגור. השלמת גזירת המפתחות, טעינת Capacity חיה ו־Webhook
-reconciliation מוערכת ב־8–14 שעות. Adapter חי ל־Meta נשאר זמן
+אותו D1. ‏Context Resolver מאמת Connection מחובר וגוזר מפתחות HMAC
+אטומים, אך ה־Policy source הזמני נכשל סגור. השלמת טעינת Capacity חיה
+ו־Webhook reconciliation מוערכת ב־6–10 שעות. Adapter חי ל־Meta נשאר זמן
 `unknown/unavailable` עד קבלת WABA, ‏Credentials ו־Live capacity
 state.
 

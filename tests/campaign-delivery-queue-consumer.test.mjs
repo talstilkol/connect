@@ -161,6 +161,8 @@ function fixture(options = {}) {
             ? {
                 campaignKey,
                 tenantId: 7,
+                recipientPhoneNumber:
+                  "+972501234567",
               }
             : options.currentContext;
         },
@@ -246,6 +248,8 @@ function fixture(options = {}) {
           calls.push({
             operation: "reserve",
             deliveryKey: request.deliveryKey,
+            recipientPhoneNumber:
+              request.recipientPhoneNumber,
             reservedAt: request.reservedAt,
           });
 

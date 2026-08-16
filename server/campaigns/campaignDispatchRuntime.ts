@@ -2,6 +2,9 @@ import {
   createCampaignRepository,
 } from "../../db/campaignRepository.ts";
 import {
+  createMetaRepository,
+} from "../../db/metaRepository.ts";
+import {
   createCampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
 import {
@@ -16,8 +19,15 @@ import type {
 } from "../../shared/domain/campaignDelivery.ts";
 import {
   createCampaignDeliveryAdmission,
-  type CampaignDeliveryRateLimitContextResolver,
 } from "./campaignDeliveryAdmission.ts";
+import {
+  createCampaignDeliveryRateLimitContextResolver,
+  type CampaignDeliveryRateLimitPolicySource,
+} from "./campaignDeliveryRateLimitContextResolver.ts";
+import {
+  createWhatsappRateLimitKeyDeriver,
+  type WhatsappRateLimitKeyEnvironment,
+} from "./whatsappRateLimitKeyDeriver.ts";
 import {
   createCampaignDeliveryQueueConsumer,
   type CampaignDeliveryQueueBatch,
@@ -36,7 +46,8 @@ import {
 } from "../operations/queueTelemetry.ts";
 
 export interface CampaignDispatchEnvironment
-  extends DatabaseEnvironment {
+  extends DatabaseEnvironment,
+    WhatsappRateLimitKeyEnvironment {
   CAMPAIGN_DELIVERY_QUEUE?:
     CampaignDeliveryQueueBinding;
 }
@@ -86,8 +97,8 @@ export function createCampaignScheduledHandler(
 
 export function createCampaignDeliveryBatchHandler(
   environment: CampaignDispatchEnvironment,
-  rateLimitContext:
-    CampaignDeliveryRateLimitContextResolver,
+  rateLimitPolicy:
+    CampaignDeliveryRateLimitPolicySource,
   processor: CampaignDeliveryProcessor,
 ): {
   handle(
@@ -102,7 +113,13 @@ export function createCampaignDeliveryBatchHandler(
       createCampaignRepository(database),
       createCampaignDeliveryAdmission(
         createWhatsappRateLimitRepository(database),
-        rateLimitContext,
+        createCampaignDeliveryRateLimitContextResolver(
+          createMetaRepository(database),
+          createWhatsappRateLimitKeyDeriver(
+            environment,
+          ),
+          rateLimitPolicy,
+        ),
       ),
       processor,
       runtimeClock(),

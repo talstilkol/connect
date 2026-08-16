@@ -88,8 +88,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1238/1238 בדיקות, 31 Migrations,
-   ‏400 קובצי Source, ‏26 Client dependency graphs, ‏763 קבצים
+31. Local Release Gate עובר עם 1247/1247 בדיקות, 31 Migrations,
+   ‏402 קובצי Source, ‏26 Client dependency graphs, ‏767 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -779,18 +779,22 @@ npm run db:generate
    מעובדים; Account Update עדיין נכשל סגור.
 7. יש להגדיר `META_CREDENTIAL_ENCRYPTION_KEY_V1` כמפתח AES באורך
    32 bytes המקודד ב־Base64. המפתח נשאר Secret שרתי ואינו נשמר ב־D1.
-8. Adapter ההרשמה מופעל רק לאחר Code Exchange, אימות WABA ומספר
+8. יש להגדיר `WHATSAPP_RATE_LIMIT_HMAC_KEY_V1` כמפתח נפרד באורך
+   32 bytes המקודד ב־Base64. הוא גוזר מפתחות אטומים ל־Rate Limiting
+   ואסור להשתמש עבורו במפתח הצפנת ה־Credentials. מעבר ל־Key version
+   חדש דורש Drain או Migration מתועד של State פעיל.
+9. Adapter ההרשמה מופעל רק לאחר Code Exchange, אימות WABA ומספר
    ושמירת Credential מוצפן; אין בקוד Token או מזהה נכס חלופי.
-9. Code Exchange, Asset Verifier, Credential Vault ו־WABA Subscriber
+10. Code Exchange, Asset Verifier, Credential Vault ו־WABA Subscriber
    מחוברים ב־Runtime דרך Server Action מאומת.
-10. ה־Runtime טרם הורץ מול Access Token ונכסי Meta אמיתיים.
-11. Meta SDK Loader, ‏Launcher, ‏Parser ו־Listener פעילים רק כאשר
+11. ה־Runtime טרם הורץ מול Access Token ונכסי Meta אמיתיים.
+12. Meta SDK Loader, ‏Launcher, ‏Parser ו־Listener פעילים רק כאשר
     תצורת ה־Client והשרת מלאה. תוצאה תקינה נשלחת מיד ל־Server Action.
-12. תצורת הפיתוח המקומית מגדירה Producer בשם `META_WEBHOOK_QUEUE`,
+13. תצורת הפיתוח המקומית מגדירה Producer בשם `META_WEBHOOK_QUEUE`,
     Consumer עם Batch של עד 10 הודעות, עשרה ניסיונות ו־Dead Letter
     Queue בשם `connect-meta-webhooks-dlq`. יצירת המשאבים בענן לא
     מתבצעת אוטומטית.
-13. תצורת Campaign מגדירה `CAMPAIGN_DELIVERY_QUEUE`, ‏Consumer עם
+14. תצורת Campaign מגדירה `CAMPAIGN_DELIVERY_QUEUE`, ‏Consumer עם
     Batch של עד 10 הודעות, עשרה ניסיונות ו־Dead Letter Queue בשם
     `connect-campaign-deliveries-dlq`. Cron מתוזמן פעם בדקה; יצירת
     המשאבים בענן ושליחת Meta אמיתית אינן מתבצעות אוטומטית.

@@ -447,8 +447,19 @@ Context Resolver מושבת שנכשל סגור, ולכן אי־אפשר לעק�
 Portfolio מלא נדחה בחלון שמרני של 24 שעות ורק כאשר תוצאת ה־D1
 תואמת בדיוק ל־Capacity המאומת שסיפק ה־Resolver.
 
-14.8.6 השלמת ה־Resolver דורשת גזירת מפתחות אטומים, קריאת Portfolio
-capacity ומצב WABA מאומת. ‏Webhook reconciliation עדיין לא הושלם.
+14.8.6 ה־Context Resolver קורא רק Meta connection במצב `connected`,
+מקבל את מספר הנמען מרשומת Campaign במצב `queued`, ודורש Policy
+מפורשת עם Portfolio capacity רשמי ו־Reservation duration בין שש
+שניות ל־24 שעות. אין Tier או Duration ברירת מחדל.
+
+14.8.7 מפתחות Portfolio, ‏Sender, ‏Recipient ו־Reservation נגזרים
+באמצעות HMAC-SHA-256 עם Purpose separation ו־Secret ייעודי בשם
+`WHATSAPP_RATE_LIMIT_HMAC_KEY_V1`. מזהי Meta ומספר הטלפון אינם
+נשמרים בטבלאות ה־Rate Limit. החלפת Key version ללא Drain או Migration
+תפצל State ולכן אסורה.
+
+14.8.8 ה־Worker עדיין מזריק Policy source מושבת, מפני שאין קריאת
+Capacity חיה ומאושרת. ‏Webhook reconciliation עדיין לא הושלם.
 
 ## 15. אחריות ועדכון
 

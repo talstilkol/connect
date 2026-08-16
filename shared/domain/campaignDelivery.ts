@@ -19,6 +19,7 @@ export interface CampaignDeliveryQueueJob {
 export interface CampaignDeliveryContext {
   campaignKey: string;
   tenantId: number;
+  recipientPhoneNumber: string;
 }
 
 export type CampaignDeliveryPreparation =
@@ -42,6 +43,7 @@ export interface PreparedCampaignDelivery {
 export interface CampaignDeliveryAdmissionRequest {
   campaign: PersistedCampaign;
   deliveryKey: string;
+  recipientPhoneNumber: string;
   reservedAt: string;
 }
 

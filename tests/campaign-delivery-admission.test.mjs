@@ -73,6 +73,7 @@ function request() {
   return {
     campaign: campaign(),
     deliveryKey,
+    recipientPhoneNumber: "+972501234567",
     reservedAt,
   };
 }

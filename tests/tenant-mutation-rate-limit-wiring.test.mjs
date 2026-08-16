@@ -116,7 +116,7 @@ test("declares tenant and webhook rate limit bindings only on the server", async
   );
   assert.doesNotMatch(
     exampleEnvironment,
-    /RATE_LIMITER|RATE_LIMIT/,
+    /^(?:META_WEBHOOK|TENANT_MUTATION|SYSTEM_ADMIN_MUTATION)_RATE_LIMITER=/m,
   );
 });
 

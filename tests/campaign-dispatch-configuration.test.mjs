@@ -55,11 +55,15 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   );
   assert.match(
     workerSource,
-    /createUnavailableCampaignDeliveryRateLimitContextResolver/,
+    /createUnavailableCampaignDeliveryRateLimitPolicySource/,
   );
   assert.match(
     runtimeSource,
     /createCampaignDeliveryAdmission\([\s\S]+createWhatsappRateLimitRepository\(database\)/,
+  );
+  assert.match(
+    runtimeSource,
+    /createCampaignDeliveryRateLimitContextResolver\([\s\S]+createMetaRepository\(database\)[\s\S]+createWhatsappRateLimitKeyDeriver/,
   );
   assert.match(
     workerSource,

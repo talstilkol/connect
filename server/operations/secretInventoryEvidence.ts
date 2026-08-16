@@ -14,6 +14,7 @@ const secretNames = Object.freeze([
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
+  "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
 ] as const);
 const maximumEvidenceLength = 20_000;
 const fingerprintPattern =
@@ -54,7 +55,7 @@ export type SecretInventoryEvidenceReport =
         code:
           "SECRET_INVENTORY_EVIDENCE_VERIFIED";
         environmentCount: 4;
-        secretCount: 20;
+        secretCount: 24;
       }
     | {
         status:
@@ -440,6 +441,6 @@ export function inspectSecretInventoryEvidence(
     code:
       "SECRET_INVENTORY_EVIDENCE_VERIFIED",
     environmentCount: 4,
-    secretCount: 20,
+    secretCount: 24,
   };
 }

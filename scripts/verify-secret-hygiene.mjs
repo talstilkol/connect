@@ -22,6 +22,7 @@ const secretEnvironmentNames = [
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
+  "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
 ];
 const unsafeFilePatterns = [
   /(^|\/)\.env(?:\.|$)/,

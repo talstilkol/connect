@@ -153,7 +153,8 @@ const COMPLETE_SETTLED_CAMPAIGNS_SQL = `
 const FIND_QUEUED_DELIVERY_CONTEXT_SQL = `
   SELECT
     campaign_recipients.campaign_key AS campaignKey,
-    campaign_recipients.tenant_id AS tenantId
+    campaign_recipients.tenant_id AS tenantId,
+    campaign_recipients.phone_e164 AS recipientPhoneNumber
   FROM campaign_recipients
   INNER JOIN campaigns
     ON campaigns.tenant_id =
@@ -389,6 +390,7 @@ interface CampaignKeyRow {
 interface CampaignDeliveryContextRow {
   campaignKey: string;
   tenantId: number;
+  recipientPhoneNumber: string;
 }
 
 interface CampaignRecipientRow {
@@ -849,9 +851,21 @@ export function createCampaignDispatchRepository(
       assertCampaignKey(row.campaignKey);
       assertPositiveInteger(row.tenantId, "tenantId");
 
+      if (
+        !/^\+[1-9][0-9]{0,14}$/.test(
+          row.recipientPhoneNumber,
+        )
+      ) {
+        throw new Error(
+          "D1 returned an invalid campaign delivery recipient",
+        );
+      }
+
       return {
         campaignKey: row.campaignKey,
         tenantId: row.tenantId,
+        recipientPhoneNumber:
+          row.recipientPhoneNumber,
       };
     },
 
