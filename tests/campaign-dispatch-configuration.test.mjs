@@ -33,6 +33,13 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
     new URL("../worker/index.ts", import.meta.url),
     "utf8",
   );
+  const runtimeSource = await readFile(
+    new URL(
+      "../server/campaigns/campaignDispatchRuntime.ts",
+      import.meta.url,
+    ),
+    "utf8",
+  );
 
   assert.match(
     workerSource,
@@ -48,7 +55,11 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   );
   assert.match(
     workerSource,
-    /createUnavailableCampaignDeliveryAdmission/,
+    /createUnavailableCampaignDeliveryRateLimitContextResolver/,
+  );
+  assert.match(
+    runtimeSource,
+    /createCampaignDeliveryAdmission\([\s\S]+createWhatsappRateLimitRepository\(database\)/,
   );
   assert.match(
     workerSource,

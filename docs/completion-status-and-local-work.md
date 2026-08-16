@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,231 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,238 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -228,10 +228,12 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 
 4.2 מסלול Rate Limiting נמצא בשלב 3 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
-Reservation key, שחרור לפני Submit ו־Fail-closed adapter. חיבור
-ה־D1 resolver בפועל ו־Webhook reconciliation מוערכים ב־8–14 שעות.
-Adapter חי ל־Meta נשאר זמן `unknown/unavailable` עד קבלת WABA,
-Credentials ו־Live capacity state.
+Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
+אותו D1 ומקבל רק Context Resolver חיצוני; ה־Resolver הזמני נכשל
+סגור. השלמת גזירת המפתחות, טעינת Capacity חיה ו־Webhook
+reconciliation מוערכת ב־8–14 שעות. Adapter חי ל־Meta נשאר זמן
+`unknown/unavailable` עד קבלת WABA, ‏Credentials ו־Live capacity
+state.
 
 4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
 הוספת פערי ה־PDF וה־Rate Limiting הוא **66.5–109 שעות פיתוח נטו**,

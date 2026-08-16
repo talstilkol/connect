@@ -5,13 +5,19 @@ import {
   createCampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
 import {
+  createWhatsappRateLimitRepository,
+} from "../../db/whatsappRateLimitRepository.ts";
+import {
   requireDatabase,
   type DatabaseEnvironment,
 } from "../../db/d1.ts";
 import type {
-  CampaignDeliveryAdmissionController,
   CampaignDeliveryProcessor,
 } from "../../shared/domain/campaignDelivery.ts";
+import {
+  createCampaignDeliveryAdmission,
+  type CampaignDeliveryRateLimitContextResolver,
+} from "./campaignDeliveryAdmission.ts";
 import {
   createCampaignDeliveryQueueConsumer,
   type CampaignDeliveryQueueBatch,
@@ -80,7 +86,8 @@ export function createCampaignScheduledHandler(
 
 export function createCampaignDeliveryBatchHandler(
   environment: CampaignDispatchEnvironment,
-  admission: CampaignDeliveryAdmissionController,
+  rateLimitContext:
+    CampaignDeliveryRateLimitContextResolver,
   processor: CampaignDeliveryProcessor,
 ): {
   handle(
@@ -93,7 +100,10 @@ export function createCampaignDeliveryBatchHandler(
     createCampaignDeliveryQueueConsumer(
       createCampaignDispatchRepository(database),
       createCampaignRepository(database),
-      admission,
+      createCampaignDeliveryAdmission(
+        createWhatsappRateLimitRepository(database),
+        rateLimitContext,
+      ),
       processor,
       runtimeClock(),
     ),

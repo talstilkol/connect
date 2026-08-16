@@ -437,9 +437,18 @@ Production evidence.
 נרשמת כ־`provider-failed`; תוצאה חיצונית לא ידועה נשארת
 `sending` ללא Retry אוטומטי.
 
-14.8.4 ה־Worker עדיין מזריק Admission adapter מושבת שנכשל סגור.
-חיבור D1 החי דורש Resolver למפתחות האטומים, Portfolio capacity
-ומצב WABA מאומת; Webhook reconciliation עדיין לא הושלם.
+14.8.4 ה־Runtime בונה את ה־Admission adapter מעל
+`WhatsappRateLimitRepository` של אותו D1. ה־Worker עדיין מזריק
+Context Resolver מושבת שנכשל סגור, ולכן אי־אפשר לעקוף את שכבת
+ה־Reservation באמצעות Controller חלופי בזמן פריסה.
+
+14.8.5 ה־Adapter ממפה Pair lock ו־Recipient in-flight ל־Delay
+הנגזר מ־`retryAt`, ודוחה Timestamp עבר או Delay גדול מ־24 שעות.
+Portfolio מלא נדחה בחלון שמרני של 24 שעות ורק כאשר תוצאת ה־D1
+תואמת בדיוק ל־Capacity המאומת שסיפק ה־Resolver.
+
+14.8.6 השלמת ה־Resolver דורשת גזירת מפתחות אטומים, קריאת Portfolio
+capacity ומצב WABA מאומת. ‏Webhook reconciliation עדיין לא הושלם.
 
 ## 15. אחריות ועדכון
 
