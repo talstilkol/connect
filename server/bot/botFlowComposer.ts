@@ -9,6 +9,7 @@ import type {
   SaveKeywordButtonMenuBotFlowComposerDraftInput,
   SaveKeywordBotFlowComposerDraftInput,
   SaveKeywordConditionBotFlowComposerDraftInput,
+  SaveKeywordHandoffBotFlowComposerDraftInput,
   SaveKeywordSequenceBotFlowComposerDraftInput,
 } from "../../shared/domain/botFlowComposer.ts";
 import {
@@ -16,6 +17,7 @@ import {
   KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
   KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT,
   KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
+  keywordHandoffReasons,
 } from "../../shared/domain/botFlowComposer.ts";
 import type {
   ValidatedBotFlowDefinition,
@@ -133,6 +135,30 @@ function isConditionComposerInput(
     "condition",
     "expectedFlowVersion",
   ]);
+}
+
+function isHandoffComposerInput(
+  input: Record<string, unknown>,
+): input is Record<
+  keyof SaveKeywordHandoffBotFlowComposerDraftInput,
+  unknown
+> {
+  return hasExactKeys(input, [
+    "name",
+    "keywords",
+    "matchMode",
+    "handoffReason",
+    "expectedFlowVersion",
+  ]);
+}
+
+function isHandoffReason(value: unknown): boolean {
+  return (
+    typeof value === "string" &&
+    keywordHandoffReasons.some(
+      (reason) => reason === value,
+    )
+  );
 }
 
 function parseConditionDraft(
@@ -597,6 +623,108 @@ async function compileKeywordCondition(
     expectedFlowVersion:
       input.expectedFlowVersion,
   };
+}
+
+async function compileKeywordHandoff(
+  tenantId: number,
+  input: Record<
+    keyof SaveKeywordHandoffBotFlowComposerDraftInput,
+    unknown
+  >,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  if (
+    !isExpectedFlowVersion(
+      input.expectedFlowVersion,
+    ) ||
+    !isHandoffReason(input.handoffReason)
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  const name = normalizeBotFlowName(input.name);
+
+  if (!name) {
+    return {
+      success: false,
+      issues: ["invalid-name"],
+    };
+  }
+
+  const botFlowKey = await deriveBotFlowKey(
+    tenantId,
+    name,
+  );
+  const blockKeys = await Promise.all(
+    Array.from({ length: 4 }, (_, index) =>
+      deriveBotFlowBlockKey(
+        botFlowKey,
+        index + 1,
+      ),
+    ),
+  );
+  const [triggerKey, keywordKey, handoffKey, endKey] =
+    blockKeys;
+  const definition = {
+    name,
+    entryBlockKey: triggerKey,
+    blocks: [
+      {
+        blockKey: triggerKey,
+        type: "trigger",
+        nextBlockKey: keywordKey,
+      },
+      {
+        blockKey: keywordKey,
+        type: "keyword",
+        keywords: input.keywords,
+        matchMode: input.matchMode,
+        matchedBlockKey: handoffKey,
+        unmatchedBlockKey: endKey,
+      },
+      {
+        blockKey: handoffKey,
+        type: "handoff",
+        reason: input.handoffReason,
+      },
+      {
+        blockKey: endKey,
+        type: "end",
+      },
+    ],
+  };
+  const validation =
+    validateBotFlowDefinition(definition);
+
+  if (!validation.success) {
+    return validation;
+  }
+
+  return {
+    success: true,
+    definition: validation.value,
+    expectedFlowVersion:
+      input.expectedFlowVersion,
+  };
+}
+
+export async function compileKeywordHandoffBotFlowComposerDraft(
+  tenantId: number,
+  input: unknown,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  if (
+    !isRecord(input) ||
+    !isHandoffComposerInput(input)
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  return compileKeywordHandoff(tenantId, input);
 }
 
 export async function compileKeywordConditionBotFlowComposerDraft(

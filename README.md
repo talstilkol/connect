@@ -89,8 +89,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1358/1358 בדיקות, 34 Migrations,
-   ‏423 קובצי Source, ‏30 Client dependency graphs, ‏806 קבצים
+31. Local Release Gate עובר עם 1366/1366 בדיקות, 34 Migrations,
+   ‏424 קובצי Source, ‏31 Client dependency graphs, ‏810 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -711,9 +711,14 @@
          הנכנס או מצב השיחה, ולהגדיר תשובת Text נפרדת לענף מתקיים
          ולענף שאינו מתקיים. שני הענפים מתכנסים ל־End משותף וכל
          מפתחות ה־Graph נגזרים בשרת.
-   158.6 ‏Condition ו־Buttons הם כרגע חלופות סיום בטוחות. עריכת
-         Handoff, מסלולים מרובי תנאים או שאלות, חיבורי Canvas ו־
-         Drag-and-drop עדיין אינם מוצגים כעורך Graph מלא.
+   158.6 אפשר להגדיר מסלול Handoff שמופעל רק כאשר הודעה תואמת למילות
+         המפתח. ההתאמה מעבירה אטומית ל־`waiting_for_agent` ללא Reply
+         אוטומטי; אי־התאמה מגיעה ל־End ואינה משנה את השיחה. הסיבה
+         נשמרת כ־`customer-request` או `flow-rule` לצורכי Audit.
+   158.7 ‏Text, ‏Buttons, ‏Condition ו־Handoff הם כרגע מצבי מסלול
+         בטוחים ונפרדים. מסלולים מרובי תנאים או שאלות, Handoff מענף
+         פנימי, חיבורי Canvas ו־Drag-and-drop עדיין אינם מוצגים כעורך
+         Graph מלא.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
    160. Inbound Webhook מפעיל Runtime לאחר אחסון ההודעה. Retry חוזר
@@ -739,10 +744,11 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
-10. עריכת Graph מלאה ל־Bot: ‏Handoff ניתן להגדרה, מסלולים מרובי
-    Conditions או שאלות וחיבורי Canvas עם Drag-and-drop. רצף Text,
-    שאלת Buttons מסיימת ופיצול Condition יחיד ניתנים לעריכה מלאה
-    במקלדת, אך עדיין אינם משלימים לבדם את SPEC-18 או SPEC-19.
+10. עריכת Graph מלאה ל־Bot: מסלולים מרובי Conditions או שאלות,
+    Handoff מענף פנימי וחיבורי Canvas עם Drag-and-drop. רצף Text,
+    שאלת Buttons מסיימת, פיצול Condition יחיד ו־Handoff לפי Keyword
+    ניתנים לעריכה מלאה במקלדת, אך עדיין אינם משלימים לבדם את SPEC-18
+    או SPEC-19.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 

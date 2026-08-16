@@ -51,7 +51,7 @@ Design מלא.
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
 | SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime ועורך נגיש לרצף Text, לשאלת Buttons מסיימת ולפיצול Condition יחיד | Canvas אינטראקטיבי, חיבורים חופשיים, Drag-and-drop ועריכת Graph מלאה |
-| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons ופיצול Condition לפי טקסט נכנס או מצב שיחה נשמרים כ־Graph אמיתי; לכל ענף תשובת Text, המפתחות נגזרים בשרת וה־Runtime ממשיך מראיית Outbox Accepted תחומה | Handoff ניתן להגדרה, מסלולים מרובי Conditions/שאלות ובדיקות Browser E2E |
+| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons, פיצול Condition ו־Handoff לפי Keyword נשמרים כ־Graph אמיתי; Handoff תואם מעביר ללא Reply ואי־התאמה מסתיימת ללא Mutation; המפתחות נגזרים בשרת וה־Runtime ממשיך מראיית Outbox Accepted תחומה | Handoff מענף פנימי, מסלולים מרובי Conditions/שאלות ובדיקות Browser E2E |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
@@ -81,11 +81,12 @@ Queue. נותר אימות המדיניות מול חשבון Meta חי.
 4.2.2 להוסיף Recurring Campaign domain רק לאחר החלטת Product על
 תדירות, אזור זמן, End condition, שינוי Template וביטול סדרה.
 
-4.2.3 הושלמו שלושה Slices של Bot Graph editor נגיש: רצף Text, שאלת
-Buttons מסיימת ופיצול Condition יחיד לפי טקסט נכנס או מצב שיחה.
+4.2.3 הושלמו ארבעה Slices של Bot Graph editor נגיש: רצף Text, שאלת
+Buttons מסיימת, פיצול Condition יחיד לפי טקסט נכנס או מצב שיחה,
+ומסלול Handoff לפי Keyword שמעביר ללא Reply ורק בעת התאמה.
 אפשר להגדיר תשובת Text נפרדת לכל ענף, והמנוע גוזר בשרת את כל מפתחות
 ה־Block וה־Option. המשך בחירת Button נשען רק על ראיית Accepted תחומה.
-נותרו Handoff ניתן להגדרה, מסלולים מרובי Conditions או שאלות, חיבור
+נותרו Handoff מענף פנימי, מסלולים מרובי Conditions או שאלות, חיבור
 Graph מלא ו־Drag-and-drop. גם בהמשך Drag-and-drop לא יהיה דרך הקלט
 היחידה.
 

@@ -7,7 +7,7 @@ const builderUrl = new URL(
   import.meta.url,
 );
 const editorUrl = new URL(
-  "../features/bot/BotFlowConditionEditor.tsx",
+  "../features/bot/BotFlowHandoffEditor.tsx",
   import.meta.url,
 );
 const compilerUrl = new URL(
@@ -15,7 +15,7 @@ const compilerUrl = new URL(
   import.meta.url,
 );
 
-test("keeps the condition editor keyboard accessible and restores focus after removal", async () => {
+test("keeps keyword handoff explicit, keyboard accessible, and reversible", async () => {
   const [builder, editor] = await Promise.all([
     readFile(builderUrl, "utf8"),
     readFile(editorUrl, "utf8"),
@@ -23,11 +23,11 @@ test("keeps the condition editor keyboard accessible and restores focus after re
 
   assert.match(
     editor,
-    /if \(focusOnMount\) \{\s*factRef\.current\?\.focus\(\)/,
+    /if \(focusOnMount\) \{\s*reasonRef\.current\?\.focus\(\)/,
   );
   assert.match(
     editor,
-    /disabled=\{disabled \|\| checksConversationStatus\}/,
+    /במצב זה לא תישלח הודעת Bot/,
   );
   assert.match(
     editor,
@@ -35,9 +35,20 @@ test("keeps the condition editor keyboard accessible and restores focus after re
   );
   assert.match(
     builder,
-    /addConditionButtonRef\.current\?\.focus\(\)/,
+    /addHandoffButtonRef\.current\?\.focus\(\)/,
   );
-  assert.match(builder, /aria-live="polite"/);
+  assert.match(
+    builder,
+    /handoffEnabled \? \(\s*<BotFlowHandoffEditor/,
+  );
+  assert.match(
+    builder,
+    /handoffEnabled\s*\? handoffReason !== ""/,
+  );
+  assert.match(
+    builder,
+    /סיום ללא שינוי בשיחה/,
+  );
   assert.doesNotMatch(editor, /Math\.random\(/);
   assert.doesNotMatch(
     editor,
@@ -45,7 +56,7 @@ test("keeps the condition editor keyboard accessible and restores focus after re
   );
 });
 
-test("keeps Condition, Buttons, and Handoff mutually exclusive and submits no graph identities", async () => {
+test("submits only a bounded handoff reason and derives the four graph identities on the server", async () => {
   const [builder, compiler] = await Promise.all([
     readFile(builderUrl, "utf8"),
     readFile(compilerUrl, "utf8"),
@@ -53,27 +64,23 @@ test("keeps Condition, Buttons, and Handoff mutually exclusive and submits no gr
 
   assert.match(
     builder,
-    /: condition\s*\? \{/,
+    /const draftInput = handoffEnabled\s*\? \{/,
   );
   assert.match(
     builder,
-    /introTexts: replyTexts,\s*condition,\s*expectedFlowVersion:/,
-  );
-  assert.match(
-    builder,
-    /: buttonMenu\s*\? \{/,
+    /matchMode,\s*handoffReason,\s*expectedFlowVersion:/,
   );
   assert.match(
     compiler,
-    /isConditionComposerInput/,
+    /hasExactKeys\(input, \[\s*"name",\s*"keywords",\s*"matchMode",\s*"handoffReason",\s*"expectedFlowVersion",/,
   );
   assert.match(
     compiler,
-    /hasExactKeys\(value, \[\s*"fact",\s*"operator",\s*"value",\s*"matchedReplyText",\s*"unmatchedReplyText",/,
+    /Array\.from\(\{ length: 4 \}/,
   );
   assert.match(
     compiler,
-    /deriveBotFlowBlockKey\(\s*botFlowKey,\s*index \+ 1/,
+    /matchedBlockKey: handoffKey,\s*unmatchedBlockKey: endKey/,
   );
   assert.doesNotMatch(compiler, /Math\.random\(/);
   assert.doesNotMatch(

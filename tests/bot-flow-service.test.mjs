@@ -518,6 +518,52 @@ test("accepts a bounded condition while deriving every branch identity on the se
   );
 });
 
+test("accepts a keyword handoff that contains no reply block", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "בקשה לדבר עם נציג",
+      keywords: ["נציג", "אדם"],
+      matchMode: "contains",
+      handoffReason: "customer-request",
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const keyword = definition.blocks.find(
+    (block) => block.type === "keyword",
+  );
+
+  assert.equal(definition.blocks.length, 4);
+  assert.equal(
+    definition.blocks.some(
+      (block) => block.type === "text",
+    ),
+    false,
+  );
+  assert.equal(
+    definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        keyword.matchedBlockKey,
+    ).type,
+    "handoff",
+  );
+  assert.equal(
+    definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        keyword.unmatchedBlockKey,
+    ).type,
+    "end",
+  );
+});
+
 test("derives the next version from stored state without accepting a browser ordinal", async () => {
   const first = await definitionFixture(1);
   const second = await definitionFixture(2);

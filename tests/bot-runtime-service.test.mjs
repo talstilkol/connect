@@ -8,6 +8,7 @@ import {
 } from "../server/bot/botFlowKey.ts";
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 import {
   BotRuntimeServiceError,
@@ -140,6 +141,58 @@ async function activeButtonMenuFixture() {
             replyText: "נעביר לשירות.",
           },
         ],
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const botFlowKey = await deriveBotFlowKey(
+    7,
+    compiled.definition.name,
+  );
+  const botFlowVersionKey =
+    await deriveBotFlowVersionKey(
+      7,
+      botFlowKey,
+      1,
+      compiled.definition,
+    );
+
+  return {
+    flow: {
+      botFlowKey,
+      tenantId: 7,
+      name: compiled.definition.name,
+      status: "active",
+      latestVersionKey: botFlowVersionKey,
+      latestVersionNumber: 1,
+      activeVersionKey: botFlowVersionKey,
+      version: 2,
+      createdAt: "2026-07-26 09:00:00",
+      updatedAt: "2026-07-26 09:05:00",
+    },
+    version: {
+      botFlowVersionKey,
+      botFlowKey,
+      tenantId: 7,
+      versionNumber: 1,
+      status: "published",
+      definition: compiled.definition,
+      publishedAt: "2026-07-26 09:05:00",
+      createdAt: "2026-07-26 09:00:00",
+    },
+  };
+}
+
+async function activeHandoffFixture() {
+  const compiled =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      {
+        name: "העברה פעילה לנציג",
+        keywords: ["נציג"],
+        matchMode: "contains",
+        handoffReason: "customer-request",
         expectedFlowVersion: null,
       },
     );
@@ -600,6 +653,52 @@ test("applies handoff with the exact conversation version and never assigns an a
         expectedVersion: 3,
       },
     ],
+  );
+});
+
+test("applies a compiled keyword handoff only on the matched branch", async () => {
+  const active = await activeHandoffFixture();
+  const matchedFixture = fixture(active);
+  const unmatchedFixture = fixture(active);
+
+  const matched =
+    await matchedFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "אני מבקש נציג",
+    );
+  const unmatched =
+    await unmatchedFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "מה שעות הפעילות?",
+    );
+
+  assert.equal(
+    matched.outcome,
+    "handoff-applied",
+  );
+  assert.deepEqual(matched.plan.replies, []);
+  assert.equal(unmatched.outcome, "planned");
+  assert.equal(
+    unmatched.plan.outcome,
+    "completed",
+  );
+  assert.deepEqual(
+    matchedFixture.calls.handoffs,
+    [
+      {
+        tenantId: 7,
+        conversationKey,
+        expectedVersion: 3,
+      },
+    ],
+  );
+  assert.deepEqual(
+    unmatchedFixture.calls.handoffs,
+    [],
   );
 });
 

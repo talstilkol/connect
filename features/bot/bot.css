@@ -239,14 +239,20 @@
 }
 
 .bot-flow-add-menu,
-.bot-flow-add-condition {
+.bot-flow-add-condition,
+.bot-flow-add-handoff {
   width: 100%;
   min-height: 39px;
   font-size: 8px;
 }
 
+.bot-flow-add-handoff {
+  grid-column: 1 / -1;
+}
+
 .bot-flow-button-menu,
-.bot-flow-condition {
+.bot-flow-condition,
+.bot-flow-handoff {
   min-width: 0;
   margin: 0;
   padding: 13px;
@@ -256,14 +262,16 @@
 }
 
 .bot-flow-button-menu legend,
-.bot-flow-condition legend {
+.bot-flow-condition legend,
+.bot-flow-handoff legend {
   padding: 0 5px;
   font-size: 9px;
   font-weight: 800;
 }
 
 .bot-flow-button-menu > p,
-.bot-flow-condition > p {
+.bot-flow-condition > p,
+.bot-flow-handoff > p {
   margin: 0 0 12px;
   color: var(--muted);
   font-size: 8px;
@@ -271,21 +279,25 @@
 }
 
 .bot-flow-button-menu > label > span,
-.bot-flow-condition > label > span {
+.bot-flow-condition > label > span,
+.bot-flow-handoff > label > span {
   display: block;
   margin-bottom: 7px;
 }
 
-.bot-flow-condition {
+.bot-flow-condition,
+.bot-flow-handoff {
   display: grid;
   gap: 11px;
 }
 
-.bot-flow-condition > p {
+.bot-flow-condition > p,
+.bot-flow-handoff > p {
   margin-bottom: 1px;
 }
 
-.bot-flow-condition > label > small {
+.bot-flow-condition > label > small,
+.bot-flow-handoff > label > small {
   display: block;
   margin-top: 5px;
   color: var(--muted);
@@ -293,6 +305,11 @@
 }
 
 .bot-flow-remove-condition {
+  min-height: 34px;
+  margin-top: 1px;
+}
+
+.bot-flow-remove-handoff {
   min-height: 34px;
   margin-top: 1px;
 }
@@ -673,6 +690,11 @@
   margin-top: 1px;
   border-color: #d2c3e7;
   background: #fcfaff;
+}
+
+.bot-flow-handoff-node {
+  border-color: #efc991;
+  background: #fffaf1;
 }
 
 .bot-flow-condition-branches > div > span {

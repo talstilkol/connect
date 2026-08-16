@@ -5,12 +5,14 @@ import {
   readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordBotFlowComposerDraft,
   readKeywordConditionBotFlowComposerDraft,
+  readKeywordHandoffBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
 } from "../shared/domain/botFlowComposer.ts";
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
   compileKeywordConditionBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 import {
@@ -91,6 +93,17 @@ function conditionComposerInput(overrides = {}) {
       unmatchedReplyText:
         "הבוט ימשיך לטפל בפנייה.",
     },
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function handoffComposerInput(overrides = {}) {
+  return {
+    name: "העברה לנציג לפי בקשה",
+    keywords: ["נציג", "אדם"],
+    matchMode: "contains",
+    handoffReason: "customer-request",
     expectedFlowVersion: null,
     ...overrides,
   };
@@ -590,6 +603,99 @@ test("fails closed when a condition graph does not retain the exact editable top
     readKeywordConditionBotFlowComposerDraft(
       corrupted,
     ),
+    null,
+  );
+});
+
+test("compiles and reads a keyword-triggered handoff without a bot reply", async () => {
+  const result =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      handoffComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 4);
+  assert.deepEqual(
+    readKeywordHandoffBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "העברה לנציג לפי בקשה",
+      keywords: ["אדם", "נציג"],
+      matchMode: "contains",
+      handoffReason: "customer-request",
+    },
+  );
+  assert.deepEqual(
+    result.definition.blocks.map(
+      (block) => block.type,
+    ).sort(),
+    ["end", "handoff", "keyword", "trigger"],
+  );
+});
+
+test("rejects unsupported reasons and browser-supplied handoff graph fields", async () => {
+  const cases = [
+    handoffComposerInput({
+      handoffReason: "no-match",
+    }),
+    handoffComposerInput({
+      handoffReason: "unknown-reason",
+    }),
+    {
+      ...handoffComposerInput(),
+      replyText: "טקסט שאסור לשלוח לפני העברה",
+    },
+    {
+      ...handoffComposerInput(),
+      blockKey:
+        `bot_block_v1_${"a".repeat(64)}`,
+    },
+  ];
+
+  for (const input of cases) {
+    assert.deepEqual(
+      await compileKeywordHandoffBotFlowComposerDraft(
+        7,
+        input,
+      ),
+      {
+        success: false,
+        issues: ["invalid-input"],
+      },
+    );
+  }
+});
+
+test("does not project a handoff graph whose unmatched branch can mutate the conversation", async () => {
+  const result =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      handoffComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  const handoff = result.definition.blocks.find(
+    (block) => block.type === "handoff",
+  );
+  const keyword = result.definition.blocks.find(
+    (block) => block.type === "keyword",
+  );
+  const unsafe = {
+    ...result.definition,
+    blocks: result.definition.blocks.map((block) =>
+      block.blockKey === keyword.unmatchedBlockKey
+        ? {
+            ...handoff,
+            blockKey: block.blockKey,
+          }
+        : block,
+    ),
+  };
+
+  assert.equal(
+    readKeywordHandoffBotFlowComposerDraft(unsafe),
     null,
   );
 });

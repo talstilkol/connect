@@ -22,6 +22,7 @@ import {
   compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
   compileKeywordConditionBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
 
@@ -154,6 +155,20 @@ async function parseSaveDraftRequest(
   tenantId: number,
   input: unknown,
 ): Promise<SaveDraftRequest> {
+  const handoffComposerResult =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (handoffComposerResult.success) {
+    return {
+      definition: handoffComposerResult.definition,
+      expectedFlowVersion:
+        handoffComposerResult.expectedFlowVersion,
+    };
+  }
+
   const conditionComposerResult =
     await compileKeywordConditionBotFlowComposerDraft(
       tenantId,
@@ -226,6 +241,7 @@ async function parseSaveDraftRequest(
       ))
   ) {
     const preferredComposerFailure = [
+      handoffComposerResult,
       conditionComposerResult,
       buttonMenuComposerResult,
       sequenceComposerResult,

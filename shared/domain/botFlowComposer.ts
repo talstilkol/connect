@@ -1,6 +1,7 @@
 import type {
   BotFlowConditionFact,
   BotFlowConditionOperator,
+  BotFlowHandoffReason,
   BotFlowKeywordMatchMode,
   ValidatedBotFlowDefinition,
 } from "./botFlow.ts";
@@ -22,6 +23,21 @@ export const KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT = 10;
 export const KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT =
   95;
 export const KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT = 93;
+export const keywordHandoffReasons = [
+  "customer-request",
+  "flow-rule",
+] as const satisfies readonly BotFlowHandoffReason[];
+
+export type KeywordHandoffReason =
+  (typeof keywordHandoffReasons)[number];
+
+export function isKeywordHandoffReason(
+  value: BotFlowHandoffReason,
+): value is KeywordHandoffReason {
+  return keywordHandoffReasons.some(
+    (reason) => reason === value,
+  );
+}
 
 export interface KeywordSequenceBotFlowComposerDraft {
   name: string;
@@ -73,6 +89,76 @@ export interface KeywordConditionBotFlowComposerDraft {
 export interface SaveKeywordConditionBotFlowComposerDraftInput
   extends KeywordConditionBotFlowComposerDraft {
   expectedFlowVersion: number | null;
+}
+
+export interface KeywordHandoffBotFlowComposerDraft {
+  name: string;
+  keywords: readonly string[];
+  matchMode: BotFlowKeywordMatchMode;
+  handoffReason: KeywordHandoffReason;
+}
+
+export interface SaveKeywordHandoffBotFlowComposerDraftInput
+  extends KeywordHandoffBotFlowComposerDraft {
+  expectedFlowVersion: number | null;
+}
+
+export function readKeywordHandoffBotFlowComposerDraft(
+  definition: ValidatedBotFlowDefinition,
+): KeywordHandoffBotFlowComposerDraft | null {
+  if (definition.blocks.length !== 4) {
+    return null;
+  }
+
+  const blocksByKey = new Map(
+    definition.blocks.map((block) => [
+      block.blockKey,
+      block,
+    ]),
+  );
+  const trigger = blocksByKey.get(
+    definition.entryBlockKey,
+  );
+
+  if (trigger?.type !== "trigger") {
+    return null;
+  }
+
+  const keyword = blocksByKey.get(
+    trigger.nextBlockKey,
+  );
+
+  if (keyword?.type !== "keyword") {
+    return null;
+  }
+
+  const matched = blocksByKey.get(
+    keyword.matchedBlockKey,
+  );
+  const unmatched = blocksByKey.get(
+    keyword.unmatchedBlockKey,
+  );
+
+  if (
+    matched?.type !== "handoff" ||
+    !isKeywordHandoffReason(matched.reason) ||
+    unmatched?.type !== "end" ||
+    new Set([
+      trigger.blockKey,
+      keyword.blockKey,
+      matched.blockKey,
+      unmatched.blockKey,
+    ]).size !== 4
+  ) {
+    return null;
+  }
+
+  return {
+    name: definition.name,
+    keywords: [...keyword.keywords],
+    matchMode: keyword.matchMode,
+    handoffReason: matched.reason,
+  };
 }
 
 export function readKeywordSequenceBotFlowComposerDraft(

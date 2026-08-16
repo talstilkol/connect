@@ -20,8 +20,10 @@ import {
   KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
   readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordConditionBotFlowComposerDraft,
+  readKeywordHandoffBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
   type KeywordConditionDraft,
+  type KeywordHandoffReason,
 } from "../../shared/domain/botFlowComposer";
 import {
   appendBotFlowButtonOption,
@@ -64,6 +66,9 @@ import {
 import {
   BotFlowConditionEditor,
 } from "./BotFlowConditionEditor";
+import {
+  BotFlowHandoffEditor,
+} from "./BotFlowHandoffEditor";
 import {
   BotFlowReplySequenceEditor,
 } from "./BotFlowReplySequenceEditor";
@@ -165,6 +170,24 @@ function splitKeywords(value: string): string[] {
 function readEditableComposerDraft(
   definition: ValidatedBotFlowDefinition,
 ) {
+  const handoff =
+    readKeywordHandoffBotFlowComposerDraft(
+      definition,
+    );
+
+  if (handoff) {
+    return {
+      kind: "handoff" as const,
+      name: handoff.name,
+      keywords: handoff.keywords,
+      matchMode: handoff.matchMode,
+      replyTexts: [],
+      buttonMenu: null,
+      condition: null,
+      handoffReason: handoff.handoffReason,
+    };
+  }
+
   const condition =
     readKeywordConditionBotFlowComposerDraft(
       definition,
@@ -179,6 +202,7 @@ function readEditableComposerDraft(
       replyTexts: condition.introTexts,
       buttonMenu: null,
       condition: condition.condition,
+      handoffReason: null,
     };
   }
 
@@ -196,6 +220,7 @@ function readEditableComposerDraft(
       replyTexts: buttonMenu.introTexts,
       buttonMenu,
       condition: null,
+      handoffReason: null,
     };
   }
 
@@ -210,6 +235,7 @@ function readEditableComposerDraft(
         ...sequence,
         buttonMenu: null,
         condition: null,
+        handoffReason: null,
       }
     : null;
 }
@@ -270,17 +296,29 @@ export function BotFlowBuilder({
         ? initialComposerDraft.condition
         : null,
     );
+  const [handoffReason, setHandoffReason] =
+    useState<KeywordHandoffReason | "" | null>(
+      initialComposerDraft?.kind === "handoff"
+        ? initialComposerDraft.handoffReason
+        : null,
+    );
   const [focusButtonMenuOnMount, setFocusButtonMenuOnMount] =
     useState(false);
   const [focusConditionOnMount, setFocusConditionOnMount] =
+    useState(false);
+  const [focusHandoffOnMount, setFocusHandoffOnMount] =
     useState(false);
   const addButtonMenuButtonRef =
     useRef<HTMLButtonElement>(null);
   const addConditionButtonRef =
     useRef<HTMLButtonElement>(null);
+  const addHandoffButtonRef =
+    useRef<HTMLButtonElement>(null);
   const focusAddButtonAfterRemovalRef =
     useRef(false);
   const focusAddConditionAfterRemovalRef =
+    useRef(false);
+  const focusAddHandoffAfterRemovalRef =
     useRef(false);
   const [unsupportedDefinition, setUnsupportedDefinition] =
     useState(
@@ -300,6 +338,7 @@ export function BotFlowBuilder({
   const [isPublishing, startPublishing] =
     useTransition();
   const currentVersion = latestVersion(details);
+  const handoffEnabled = handoffReason !== null;
   const keywords = splitKeywords(keywordsText);
   const replyTexts = readBotFlowReplyTexts(
     replySteps,
@@ -341,9 +380,12 @@ export function BotFlowBuilder({
     !unsupportedDefinition &&
     name.trim().length > 0 &&
     keywords.length > 0 &&
-    replyTexts.every(
-      (replyText) => replyText.trim().length > 0,
-    ) &&
+    (handoffEnabled
+      ? handoffReason !== ""
+      : replyTexts.every(
+          (replyText) =>
+            replyText.trim().length > 0,
+        )) &&
     buttonMenuComplete &&
     conditionComplete &&
     !isSaving &&
@@ -378,6 +420,18 @@ export function BotFlowBuilder({
     focusAddConditionAfterRemovalRef.current = false;
     addConditionButtonRef.current?.focus();
   }, [condition]);
+
+  useEffect(() => {
+    if (
+      handoffReason !== null ||
+      !focusAddHandoffAfterRemovalRef.current
+    ) {
+      return;
+    }
+
+    focusAddHandoffAfterRemovalRef.current = false;
+    addHandoffButtonRef.current?.focus();
+  }, [handoffReason]);
 
   const markChanged = () => {
     setDirty(true);
@@ -420,8 +474,14 @@ export function BotFlowBuilder({
         ? draft.condition
         : null,
     );
+    setHandoffReason(
+      draft?.kind === "handoff"
+        ? draft.handoffReason
+        : null,
+    );
     setFocusButtonMenuOnMount(false);
     setFocusConditionOnMount(false);
+    setFocusHandoffOnMount(false);
     setUnsupportedDefinition(!draft);
     setDirty(false);
     setEditorAnnouncement("");
@@ -435,8 +495,10 @@ export function BotFlowBuilder({
     setReplySteps(createBotFlowReplySteps([]));
     setButtonMenu(null);
     setCondition(null);
+    setHandoffReason(null);
     setFocusButtonMenuOnMount(false);
     setFocusConditionOnMount(false);
+    setFocusHandoffOnMount(false);
     setUnsupportedDefinition(false);
     setDirty(false);
     setNotice(null);
@@ -517,6 +579,7 @@ export function BotFlowBuilder({
   const addButtonMenu = () => {
     if (
       condition !== null ||
+      handoffReason !== null ||
       replySteps.length + 1 >
       KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
     ) {
@@ -642,6 +705,7 @@ export function BotFlowBuilder({
   const addCondition = () => {
     if (
       buttonMenu !== null ||
+      handoffReason !== null ||
       replySteps.length >
         KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
     ) {
@@ -714,6 +778,39 @@ export function BotFlowBuilder({
     markChanged();
   };
 
+  const addHandoff = () => {
+    if (
+      buttonMenu !== null ||
+      condition !== null
+    ) {
+      return;
+    }
+
+    setHandoffReason("");
+    setFocusHandoffOnMount(true);
+    markChanged();
+    setEditorAnnouncement(
+      "נוסף מסלול העברה לנציג בעת התאמת מילת מפתח.",
+    );
+  };
+
+  const removeHandoff = () => {
+    focusAddHandoffAfterRemovalRef.current = true;
+    setFocusHandoffOnMount(false);
+    setHandoffReason(null);
+    markChanged();
+    setEditorAnnouncement(
+      "מסלול ההעברה לנציג הוסר מהטיוטה.",
+    );
+  };
+
+  const changeHandoffReason = (
+    reason: KeywordHandoffReason,
+  ) => {
+    setHandoffReason(reason);
+    markChanged();
+  };
+
   const loadFlow = (botFlowKey: string) => {
     if (isLoading) {
       return;
@@ -766,35 +863,44 @@ export function BotFlowBuilder({
 
     setNotice(null);
     startSaving(async () => {
-      const draftInput = condition
+      const draftInput = handoffEnabled
         ? {
             name,
             keywords,
             matchMode,
-            introTexts: replyTexts,
-            condition,
+            handoffReason,
             expectedFlowVersion:
               details?.flow.version ?? null,
           }
-        : buttonMenu
+        : condition
           ? {
-            name,
-            keywords,
-            matchMode,
-            introTexts: replyTexts,
-            buttonText: buttonMenu.buttonText,
-            options: buttonOptions,
-            expectedFlowVersion:
-              details?.flow.version ?? null,
+              name,
+              keywords,
+              matchMode,
+              introTexts: replyTexts,
+              condition,
+              expectedFlowVersion:
+                details?.flow.version ?? null,
             }
-          : {
-            name,
-            keywords,
-            matchMode,
-            replyTexts,
-            expectedFlowVersion:
-              details?.flow.version ?? null,
-            };
+          : buttonMenu
+            ? {
+                name,
+                keywords,
+                matchMode,
+                introTexts: replyTexts,
+                buttonText: buttonMenu.buttonText,
+                options: buttonOptions,
+                expectedFlowVersion:
+                  details?.flow.version ?? null,
+              }
+            : {
+                name,
+                keywords,
+                matchMode,
+                replyTexts,
+                expectedFlowVersion:
+                  details?.flow.version ?? null,
+              };
       const result =
         await saveBotFlowDraftAction(draftInput);
 
@@ -1016,7 +1122,7 @@ export function BotFlowBuilder({
       >
         <aside className="card bot-flow-editor">
           <span className="card-kicker">
-            הגדרת מסלול Text, ‏Buttons ו־Condition
+            הגדרת מסלול Text, ‏Buttons, ‏Condition ו־Handoff
           </span>
           <h2>
             {details
@@ -1025,10 +1131,9 @@ export function BotFlowBuilder({
           </h2>
           <p>
             הודעה נכנסת נבדקת מול מילות
-            המפתח. התאמה שולחת את הודעות הטקסט
-            לפי הסדר ויכולה להסתיים בשאלת כפתורים
-            או בפיצול לפי תנאי; אי־התאמה מעבירה
-            לנציג.
+            המפתח. התאמה יכולה לשלוח הודעות Text,
+            להציג Buttons, להתפצל לפי Condition או
+            להעביר מיד לנציג במסלול Handoff בטוח.
           </p>
 
           {unsupportedDefinition ? (
@@ -1105,95 +1210,116 @@ export function BotFlowBuilder({
                 </select>
               </label>
 
-              <BotFlowReplySequenceEditor
-                steps={replySteps}
-                disabled={!canWrite}
-                maximumSteps={maximumReplyStepCount}
-                onTextChange={changeReplyText}
-                onMove={moveReplyStep}
-                onRemove={removeReplyStep}
-                onAdd={addReplyStep}
-              />
-
-              {buttonMenu ? (
-                <BotFlowButtonMenuEditor
-                  draft={buttonMenu}
+              {handoffEnabled ? (
+                <BotFlowHandoffEditor
+                  handoffReason={handoffReason}
                   disabled={!canWrite}
-                  focusOnMount={focusButtonMenuOnMount}
-                  maximumOptionCount={
-                    maximumButtonOptionCount
-                  }
-                  onButtonTextChange={
-                    changeButtonText
-                  }
-                  onOptionChange={
-                    changeButtonOption
-                  }
-                  onMoveOption={moveButtonOption}
-                  onRemoveOption={
-                    removeButtonOption
-                  }
-                  onAddOption={addButtonOption}
-                  onRemoveMenu={removeButtonMenu}
-                />
-              ) : condition ? (
-                <BotFlowConditionEditor
-                  draft={condition}
-                  disabled={!canWrite}
-                  focusOnMount={focusConditionOnMount}
-                  onFactChange={changeConditionFact}
-                  onOperatorChange={
-                    changeConditionOperator
-                  }
-                  onValueChange={(value) =>
-                    changeConditionField(
-                      "value",
-                      value,
-                    )
-                  }
-                  onMatchedReplyChange={(value) =>
-                    changeConditionField(
-                      "matchedReplyText",
-                      value,
-                    )
-                  }
-                  onUnmatchedReplyChange={(value) =>
-                    changeConditionField(
-                      "unmatchedReplyText",
-                      value,
-                    )
-                  }
-                  onRemoveCondition={removeCondition}
+                  focusOnMount={focusHandoffOnMount}
+                  onReasonChange={changeHandoffReason}
+                  onRemoveHandoff={removeHandoff}
                 />
               ) : (
-                <div className="bot-flow-terminal-actions">
-                  <button
-                    ref={addButtonMenuButtonRef}
-                    type="button"
-                    className="secondary-button bot-flow-add-menu"
-                    onClick={addButtonMenu}
-                    disabled={
-                      !canWrite ||
-                      replySteps.length + 1 >
-                        KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
-                    }
-                  >
-                    הוספת שאלת כפתורים
-                  </button>
-                  <button
-                    ref={addConditionButtonRef}
-                    type="button"
-                    className="secondary-button bot-flow-add-condition"
-                    onClick={addCondition}
-                    disabled={
-                      !canWrite ||
-                      replySteps.length >
-                        KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
-                    }
-                  >
-                    הוספת פיצול לפי תנאי
-                  </button>
-                </div>
+                <>
+                  <BotFlowReplySequenceEditor
+                    steps={replySteps}
+                    disabled={!canWrite}
+                    maximumSteps={maximumReplyStepCount}
+                    onTextChange={changeReplyText}
+                    onMove={moveReplyStep}
+                    onRemove={removeReplyStep}
+                    onAdd={addReplyStep}
+                  />
+
+                  {buttonMenu ? (
+                    <BotFlowButtonMenuEditor
+                      draft={buttonMenu}
+                      disabled={!canWrite}
+                      focusOnMount={focusButtonMenuOnMount}
+                      maximumOptionCount={
+                        maximumButtonOptionCount
+                      }
+                      onButtonTextChange={
+                        changeButtonText
+                      }
+                      onOptionChange={
+                        changeButtonOption
+                      }
+                      onMoveOption={moveButtonOption}
+                      onRemoveOption={
+                        removeButtonOption
+                      }
+                      onAddOption={addButtonOption}
+                      onRemoveMenu={removeButtonMenu}
+                    />
+                  ) : condition ? (
+                    <BotFlowConditionEditor
+                      draft={condition}
+                      disabled={!canWrite}
+                      focusOnMount={focusConditionOnMount}
+                      onFactChange={changeConditionFact}
+                      onOperatorChange={
+                        changeConditionOperator
+                      }
+                      onValueChange={(value) =>
+                        changeConditionField(
+                          "value",
+                          value,
+                        )
+                      }
+                      onMatchedReplyChange={(value) =>
+                        changeConditionField(
+                          "matchedReplyText",
+                          value,
+                        )
+                      }
+                      onUnmatchedReplyChange={(value) =>
+                        changeConditionField(
+                          "unmatchedReplyText",
+                          value,
+                        )
+                      }
+                      onRemoveCondition={removeCondition}
+                    />
+                  ) : (
+                    <div className="bot-flow-terminal-actions">
+                      <button
+                        ref={addButtonMenuButtonRef}
+                        type="button"
+                        className="secondary-button bot-flow-add-menu"
+                        onClick={addButtonMenu}
+                        disabled={
+                          !canWrite ||
+                          replySteps.length + 1 >
+                            KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+                        }
+                      >
+                        הוספת שאלת כפתורים
+                      </button>
+                      <button
+                        ref={addConditionButtonRef}
+                        type="button"
+                        className="secondary-button bot-flow-add-condition"
+                        onClick={addCondition}
+                        disabled={
+                          !canWrite ||
+                          replySteps.length >
+                            KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
+                        }
+                      >
+                        הוספת פיצול לפי תנאי
+                      </button>
+                      <button
+                        ref={addHandoffButtonRef}
+                        type="button"
+                        className="secondary-button bot-flow-add-handoff"
+                        onClick={addHandoff}
+                        disabled={!canWrite}
+                      >
+                        מעבר למסלול Handoff
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -1282,63 +1408,141 @@ export function BotFlowBuilder({
                 <span className="bot-flow-branch-label success">
                   יש התאמה
                 </span>
-                <div className="bot-flow-reply-chain">
-                  {replySteps.map((step, index) => (
-                    <div key={step.draftStepKey}>
-                      <div className="flow-node">
-                        <span className="node-icon">
-                          T
-                        </span>
-                        <div>
-                          <small>
-                            הודעת טקסט {index + 1}
-                          </small>
-                          <strong>
-                            {step.text.trim()
-                              ? "שליחת ההודעה שהוגדרה"
-                              : "לא הוגדר תוכן"}
-                          </strong>
-                        </div>
-                      </div>
-                      {index < replySteps.length - 1 ||
-                      buttonMenu ||
-                      condition ? (
-                        <span
-                          className="bot-flow-chain-arrow"
-                          aria-hidden="true"
-                        >
-                          ↓
-                        </span>
-                      ) : null}
+                {handoffEnabled ? (
+                  <div className="flow-node bot-flow-handoff-node">
+                    <span className="node-icon">↗</span>
+                    <div>
+                      <small>Handoff אטומי</small>
+                      <strong>
+                        העברה להמתנה לנציג
+                      </strong>
                     </div>
-                  ))}
-                </div>
-                {buttonMenu ? (
+                  </div>
+                ) : (
                   <>
-                    <div className="flow-node bot-flow-buttons-node">
-                      <span className="node-icon">
-                        ⠿
-                      </span>
-                      <div>
-                        <small>שאלת כפתורים</small>
-                        <strong>
-                          {buttonMenu.buttonText.trim()
-                            ? `${buttonMenu.options.length} אפשרויות בחירה`
-                            : "לא הוגדר טקסט שאלה"}
-                        </strong>
-                      </div>
+                    <div className="bot-flow-reply-chain">
+                      {replySteps.map((step, index) => (
+                        <div key={step.draftStepKey}>
+                          <div className="flow-node">
+                            <span className="node-icon">
+                              T
+                            </span>
+                            <div>
+                              <small>
+                                הודעת טקסט {index + 1}
+                              </small>
+                              <strong>
+                                {step.text.trim()
+                                  ? "שליחת ההודעה שהוגדרה"
+                                  : "לא הוגדר תוכן"}
+                              </strong>
+                            </div>
+                          </div>
+                          {index < replySteps.length - 1 ||
+                          buttonMenu ||
+                          condition ? (
+                            <span
+                              className="bot-flow-chain-arrow"
+                              aria-hidden="true"
+                            >
+                              ↓
+                            </span>
+                          ) : null}
+                        </div>
+                      ))}
                     </div>
-                    <div className="bot-flow-option-branches">
-                      {buttonMenu.options.map(
-                        (option, index) => (
-                          <div
-                            key={
-                              option.draftOptionKey
-                            }
-                          >
+
+                    {buttonMenu ? (
+                      <>
+                        <div className="flow-node bot-flow-buttons-node">
+                          <span className="node-icon">
+                            ⠿
+                          </span>
+                          <div>
+                            <small>
+                              שאלת כפתורים
+                            </small>
+                            <strong>
+                              {buttonMenu.buttonText.trim()
+                                ? `${buttonMenu.options.length} אפשרויות בחירה`
+                                : "לא הוגדר טקסט שאלה"}
+                            </strong>
+                          </div>
+                        </div>
+                        <div className="bot-flow-option-branches">
+                          {buttonMenu.options.map(
+                            (option, index) => (
+                              <div
+                                key={
+                                  option.draftOptionKey
+                                }
+                              >
+                                <span>
+                                  {option.label.trim() ||
+                                    `אפשרות ${index + 1}`}
+                                </span>
+                                <div className="flow-node">
+                                  <span className="node-icon">
+                                    T
+                                  </span>
+                                  <div>
+                                    <small>
+                                      תשובת ענף
+                                    </small>
+                                    <strong>
+                                      {option.replyText.trim()
+                                        ? "שליחת התשובה שהוגדרה"
+                                        : "לא הוגדרה תשובה"}
+                                    </strong>
+                                  </div>
+                                </div>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </>
+                    ) : null}
+
+                    {condition ? (
+                      <>
+                        <div className="flow-node bot-flow-condition-node">
+                          <span className="node-icon">
+                            ◇
+                          </span>
+                          <div>
+                            <small>
+                              פיצול לפי תנאי
+                            </small>
+                            <strong>
+                              {condition.fact ===
+                              "conversation-status"
+                                ? "בדיקת מצב השיחה"
+                                : "בדיקת טקסט נכנס"}
+                            </strong>
+                          </div>
+                        </div>
+                        <div className="bot-flow-option-branches bot-flow-condition-branches">
+                          <div>
+                            <span>התנאי מתקיים</span>
+                            <div className="flow-node">
+                              <span className="node-icon">
+                                T
+                              </span>
+                              <div>
+                                <small>
+                                  תשובת ענף
+                                </small>
+                                <strong>
+                                  {condition.matchedReplyText.trim()
+                                    ? "שליחת התשובה שהוגדרה"
+                                    : "לא הוגדרה תשובה"}
+                                </strong>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
                             <span>
-                              {option.label.trim() ||
-                                `אפשרות ${index + 1}`}
+                              התנאי אינו מתקיים
                             </span>
                             <div className="flow-node">
                               <span className="node-icon">
@@ -1349,92 +1553,50 @@ export function BotFlowBuilder({
                                   תשובת ענף
                                 </small>
                                 <strong>
-                                  {option.replyText.trim()
+                                  {condition.unmatchedReplyText.trim()
                                     ? "שליחת התשובה שהוגדרה"
                                     : "לא הוגדרה תשובה"}
                                 </strong>
                               </div>
                             </div>
                           </div>
-                        ),
-                      )}
-                    </div>
-                  </>
-                ) : null}
-                {condition ? (
-                  <>
-                    <div className="flow-node bot-flow-condition-node">
-                      <span className="node-icon">
-                        ◇
-                      </span>
-                      <div>
-                        <small>פיצול לפי תנאי</small>
-                        <strong>
-                          {condition.fact ===
-                          "conversation-status"
-                            ? "בדיקת מצב השיחה"
-                            : "בדיקת טקסט נכנס"}
-                        </strong>
-                      </div>
-                    </div>
-                    <div className="bot-flow-option-branches bot-flow-condition-branches">
-                      <div>
-                        <span>התנאי מתקיים</span>
-                        <div className="flow-node">
-                          <span className="node-icon">
-                            T
-                          </span>
-                          <div>
-                            <small>תשובת ענף</small>
-                            <strong>
-                              {condition.matchedReplyText.trim()
-                                ? "שליחת התשובה שהוגדרה"
-                                : "לא הוגדרה תשובה"}
-                            </strong>
-                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <span>התנאי אינו מתקיים</span>
-                        <div className="flow-node">
-                          <span className="node-icon">
-                            T
-                          </span>
-                          <div>
-                            <small>תשובת ענף</small>
-                            <strong>
-                              {condition.unmatchedReplyText.trim()
-                                ? "שליחת התשובה שהוגדרה"
-                                : "לא הוגדרה תשובה"}
-                            </strong>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      </>
+                    ) : null}
+
+                    <span
+                      className="bot-flow-terminal"
+                      aria-label="סיום התהליך"
+                    >
+                      ■ סיום
+                    </span>
                   </>
-                ) : null}
-                <span
-                  className="bot-flow-terminal"
-                  aria-label="סיום התהליך"
-                >
-                  ■ סיום
-                </span>
+                )}
               </div>
               <div>
                 <span className="bot-flow-branch-label warning">
                   אין התאמה
                 </span>
-                <div className="flow-node">
-                  <span className="node-icon">
-                    ↗
+                {handoffEnabled ? (
+                  <span
+                    className="bot-flow-terminal"
+                    aria-label="סיום ללא שינוי בשיחה"
+                  >
+                    ■ סיום ללא שינוי
                   </span>
-                  <div>
-                    <small>פעולה אטומית</small>
-                    <strong>
-                      העברה להמתנה לנציג
-                    </strong>
+                ) : (
+                  <div className="flow-node">
+                    <span className="node-icon">
+                      ↗
+                    </span>
+                    <div>
+                      <small>פעולה אטומית</small>
+                      <strong>
+                        העברה להמתנה לנציג
+                      </strong>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

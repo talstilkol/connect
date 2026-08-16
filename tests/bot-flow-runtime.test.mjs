@@ -8,6 +8,7 @@ import {
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordConditionBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 
@@ -239,6 +240,58 @@ test("executes both branches of a compiled condition and converges at End", asyn
       "הבוט ימשיך בטיפול.",
     ],
   );
+});
+
+test("hands off only a matching keyword and never combines the transfer with a reply", async () => {
+  const compiled =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      {
+        name: "בקשת נציג",
+        keywords: ["נציג", "אדם"],
+        matchMode: "contains",
+        handoffReason: "customer-request",
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const matched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "אני רוצה נציג",
+      conversationStatus: "bot_active",
+    },
+  );
+  const unmatched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "מה שעות הפעילות?",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.deepEqual(matched, {
+    outcome: "handoff",
+    replies: [],
+    terminalEffect: {
+      outcome: "handoff",
+      stopExecution: true,
+      conversationStatus: "waiting_for_agent",
+      assignmentAction: "none",
+      reason: "customer-request",
+    },
+  });
+  assert.deepEqual(unmatched, {
+    outcome: "completed",
+    replies: [],
+    terminalEffect: {
+      outcome: "end",
+      stopExecution: true,
+      conversationStatus: null,
+      assignmentAction: "none",
+    },
+  });
 });
 
 test("uses the unmatched keyword branch for non-text input and requests handoff without assignment", () => {
