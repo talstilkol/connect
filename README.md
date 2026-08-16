@@ -88,8 +88,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1254/1254 בדיקות, 32 Migrations,
-   ‏404 קובצי Source, ‏26 Client dependency graphs, ‏771 קבצים
+31. Local Release Gate עובר עם 1280/1280 בדיקות, 32 Migrations,
+   ‏407 קובצי Source, ‏26 Client dependency graphs, ‏775 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -822,5 +822,7 @@ npm run db:generate
     כמסירה; `failed` סוגר אותה ככשל Provider. ‏Retry חוזר לאותה
     תוצאה טרמינלית ואינו סופר נמען פעמיים.
 11. קמפיין נשאר `running` בזמן שנמען במצב `accepted`; השלמה מותרת רק
-    לאחר תוצאות טרמינליות. מקור Capacity חי ו־Meta sender adapter
-    עדיין חסרים ולכן שליחה נשארת חסומה.
+    לאחר תוצאות טרמינליות. Meta sender adapter ו־Processor שרתי
+    קיימים ונבדקים מקומית, כולל Credential Vault ו־`wamid`, אך אינם
+    מחוברים ל־Worker. מקור Capacity חי, Backoff/Cooldown מאושר וראיות
+    WABA עדיין חסרים ולכן שליחה נשארת חסומה.

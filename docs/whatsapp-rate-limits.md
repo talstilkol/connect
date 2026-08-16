@@ -485,8 +485,38 @@ Event key שחוזר עם תוכן שונה או ניסיון להחליף תו�
 Conversation וגם Campaign delivery באותו Tenant. קמפיין אינו עובר
 ל־`completed` כל עוד נמען נשאר `accepted` וממתין לתוצאה טרמינלית.
 
-14.9.5 מקור Capacity חי ו־Delivery adapter אמיתי עדיין חסרים. לכן
-השלמת Reconciliation אינה הופכת את שליחת הקמפיינים ל־Production-ready.
+14.9.5 מקור Capacity חי וחיבור Delivery adapter ל־Worker עדיין
+חסרים. לכן השלמת Reconciliation אינה הופכת את שליחת הקמפיינים
+ל־Production-ready.
+
+14.10 ‏Meta sender המקומי:
+
+14.10.1 `MetaCampaignTemplateAdapter` מממש את חוזה Meta הרשמי של
+`POST /{phone-number-id}/messages` עבור Template מאושר. הוא שולח
+`messaging_product: whatsapp`, מספר נמען מנורמל, שם ושפת Template,
+Body parameters, ‏Dynamic URL parameter ו־Quick Reply payload אטום
+ודטרמיניסטי. המקור הוא
+[אוסף WhatsApp Cloud API הרשמי של Meta](https://www.postman.com/meta/whatsapp-business-platform/collection/wlk6lh4/whatsapp-cloud-api).
+
+14.10.2 ה־Adapter מקבל הצלחה רק כאשר Meta מחזירה מערך יחיד עם
+`messages[0].id` תקין שמתחיל ב־`wamid.`. קבלה זו אינה מסירה; הנמען
+עובר ל־`accepted` ורק Status webhook טרמינלי סוגר את ה־Reservation.
+
+14.10.3 `MetaCampaignDeliveryProcessor` טוען Connection מחובר ואת
+ה־Access Token המוצפן בצד השרת דרך `MetaCredentialVault`. ה־Token
+נשלח רק ב־Authorization header של `MetaGraphTransport`; הוא אינו
+נכנס ל־URL, ‏Payload, ‏D1 או תוצאת ה־Processor.
+
+14.10.4 דחיית HTTP מפורשת מסוג 4xx ממופה לקוד תפעולי מוגבל, כולל
+`4`, ‏`80007`, ‏`130429`, ‏`131048`, ‏`131049`, ‏`131056`,
+`131057`, ‏`131064`, ‏`132015` ו־`132016`. ‏Timeout, כשל רשת,
+5xx או תשובת 2xx ללא `wamid` נחשבים תוצאה חיצונית לא ודאית; ה־Queue
+אינה שולחת אותם שוב אוטומטית.
+
+14.10.5 המימוש אינו מחובר עדיין ל־Worker. לפני החיבור נדרשים מקור
+Capacity חי, מדיניות Provider Backoff/Cooldown מאושרת, Kill switch
+וראיות Sandbox של WABA. עד אז ה־Worker ממשיך להזריק Processor ו־Policy
+source מושבתים ונכשל סגור.
 
 ## 15. אחריות ועדכון
 

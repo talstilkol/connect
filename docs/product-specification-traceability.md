@@ -46,7 +46,7 @@ Design מלא.
 | SPEC-11 | נמענים במאגר פנימי | local-complete | Contacts, Consent, Lists ו־Tags | בדיקת Staging |
 | SPEC-12 | ייבוא נמענים מ־Excel | planned | CSV מאומת עם Mapping ו־Import jobs | Parser ל־XLSX, גבולות קובץ ובדיקות אבטחה |
 | SPEC-13 | Segments לפי Tags | local-complete | Tags, Lists ו־Campaign audience snapshot | מדדי ביצועים על קהל גדול |
-| SPEC-14 | שיגור Template המוני | partial | Campaign snapshot, Queue, Scheduler ו־DLQ | Rate-limit integration ו־Meta sender חי |
+| SPEC-14 | שיגור Template המוני | partial | Campaign snapshot, Queue, Scheduler, DLQ ו־Meta sender מקומי | Live capacity, Backoff/Cooldown, חיבור Worker וניסוי WABA |
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
@@ -55,7 +55,7 @@ Design מלא.
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
-| SPEC-23 | WhatsApp רשמי: שליחה וקבלה | partial | Webhook ingress, הודעות נכנסות, Status events ו־Queues | Outbound adapters חיים וניסוי WABA |
+| SPEC-23 | WhatsApp רשמי: שליחה וקבלה | partial | Webhook ingress, הודעות נכנסות, Status events, Queues ו־Outbound adapter מקומי | חיבור Runtime, Credentials וניסוי WABA |
 | SPEC-24 | הצפנת Tokens ו־PCI-DSS | partial | Credential envelope ו־Secret hygiene | Billing hosted checkout, Key rotation וראיות ספק |
 | SPEC-25 | Queue scalability ו־99.5% availability | partial | Queues, Backpressure, SLO domain ו־Alert ports | Load test, Metrics ו־Alert provider חיים |
 | SPEC-26 | Data isolation, הרשאות ו־Audit | local-complete | Tenant guards, RBAC, Audit ו־Source boundaries | Cloud evidence ו־adversarial staging test |
