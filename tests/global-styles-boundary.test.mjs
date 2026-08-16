@@ -180,3 +180,35 @@ test("keeps campaign composer and audience rules inside one feature stylesheet",
   );
   assert.match(globalSource, /\.template-form-row/);
 });
+
+test("keeps report surfaces and breakpoints inside one feature stylesheet", async () => {
+  const [globalSource, reportSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/reports/reports.css"),
+    ]);
+  const campaignImport = globalSource.indexOf(
+    '@import "../features/campaigns/campaigns.css";',
+  );
+  const reportImport = globalSource.indexOf(
+    '@import "../features/reports/reports.css";',
+  );
+
+  assert.ok(reportImport > campaignImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.reports-grid|\.report-toolbar|\.report-costs|\.report-empty-state/,
+  );
+  assert.match(reportSource, /^\.reports-grid\s*\{/);
+  assert.match(reportSource, /\.report-toolbar\s*\{/);
+  assert.match(reportSource, /\.report-costs\s*\{/);
+  assert.match(reportSource, /\.report-empty-state/);
+  assert.match(
+    reportSource,
+    /@media \(max-width: 1100px\)[\s\S]*@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    reportSource,
+    /\.billing-card|\.public-hero|\.sidebar/,
+  );
+});
