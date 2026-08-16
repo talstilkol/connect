@@ -2396,6 +2396,12 @@ label.file-button:focus-within {
   font-size: 16px;
 }
 
+.admin-tenant-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
 .admin-status {
   min-height: 29px;
   display: inline-flex;
@@ -2851,7 +2857,8 @@ label.file-button:focus-within {
 }
 
 .admin-decision-form input,
-.admin-decision-form textarea {
+.admin-decision-form textarea,
+.admin-decision-form select {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -2874,9 +2881,21 @@ label.file-button:focus-within {
 }
 
 .admin-decision-form input:focus,
-.admin-decision-form textarea:focus {
+.admin-decision-form textarea:focus,
+.admin-decision-form select:focus {
   border-color: #73aa91;
   outline: 3px solid #e5f4ec;
+}
+
+.admin-policy-form {
+  grid-template-columns:
+    repeat(2, minmax(220px, 1fr));
+}
+
+.admin-policy-form input,
+.admin-policy-form select {
+  min-height: 38px;
+  padding: 0 10px;
 }
 
 .admin-decision-form > div {

@@ -167,4 +167,9 @@ Read-only, ושום Row או Identifier לא נכתב ל־Receipt.
 6.7 דוד אישר את התאמת המימוש; אבטחה ומוצר אישרו את תקרות ה־Rollout,
 ‏Headroom ו־Kill switch, ואלה נבדקו בפועל בלי שליחה לנמען שאינו מורשה.
 
+6.7.1 תרגיל ה־Kill switch בוצע דרך מסלול System Admin האמיתי,
+החזיר Policy במצב `disabled`, יצר Audit יחיד וחסם Admission חדש גם
+לאחר תפוגת ה־Evidence הקודמת. צילום מסך לבדו אינו Evidence מספק;
+נדרשים גם מזהי Release ו־Digest של הרשומות המאומתות.
+
 6.8 רק לאחר שכל הסעיפים הוכחו ניתן לאשר Production.

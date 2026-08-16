@@ -216,6 +216,26 @@ function lookup(overrides = {}) {
   };
 }
 
+function recordCommand(overrides = {}) {
+  return {
+    tenantId: 7,
+    connectionVersion: 3,
+    expectedPolicyVersion: 0,
+    deliveryState: "enabled",
+    portfolioLimitKind: "bounded",
+    portfolioLimitValue: 250,
+    reservationDurationSeconds: 300,
+    metaGraphApiVersion: "v21.0",
+    evidenceDigest: "b".repeat(64),
+    evidenceCheckedAt: checkedAt,
+    evidenceExpiresAt: expiresAt,
+    actorExternalUserId:
+      "tal-rate-limit-research",
+    recordedAt,
+    ...overrides,
+  };
+}
+
 test("loads only current enabled evidence tied to the exact Meta connection", async () => {
   const { database, repository } =
     await createFixture();
@@ -382,5 +402,127 @@ test("rejects malformed lookup input before D1 access", async () => {
       lookup({ checkedAt: "2026-08-16 10:02:00" }),
     ),
     /lookup timestamp is invalid/,
+  );
+});
+
+test("records deterministic policy evidence atomically with its audit event", async () => {
+  const { database, repository } =
+    await createFixture();
+  const created =
+    await repository.recordPolicyEvent(
+      recordCommand(),
+    );
+
+  assert.equal(created.outcome, "created");
+  assert.match(
+    created.record.eventKey,
+    /^whatsapp_delivery_policy_event_v1_[0-9a-f]{64}$/,
+  );
+  assert.equal(
+    created.record.deliveryState,
+    "enabled",
+  );
+  assert.equal(
+    database.prepare(`
+      SELECT count(*) AS count
+      FROM audit_logs
+      WHERE idempotency_key = ?1
+        AND action = 'whatsapp.delivery_policy.recorded'
+    `).get(created.record.eventKey).count,
+    1,
+  );
+
+  const retried =
+    await repository.recordPolicyEvent(
+      recordCommand({
+        recordedAt:
+          "2026-08-16T10:01:30.000Z",
+      }),
+    );
+
+  assert.equal(retried.outcome, "unchanged");
+  assert.equal(
+    retried.record.eventKey,
+    created.record.eventKey,
+  );
+  assert.equal(
+    database.prepare(`
+      SELECT count(*) AS count
+      FROM whatsapp_campaign_delivery_policy_events
+    `).get().count,
+    1,
+  );
+});
+
+test("rejects stale policy versions and a kill switch that changes the approved snapshot", async () => {
+  const { repository } =
+    await createFixture();
+  await repository.recordPolicyEvent(
+    recordCommand(),
+  );
+
+  const stale =
+    await repository.recordPolicyEvent(
+      recordCommand({
+        evidenceDigest: "c".repeat(64),
+      }),
+    );
+  const changedKillSwitch =
+    await repository.recordPolicyEvent(
+      recordCommand({
+        expectedPolicyVersion: 1,
+        deliveryState: "disabled",
+        reservationDurationSeconds: 301,
+        recordedAt: lookupAt,
+      }),
+    );
+
+  assert.equal(stale.outcome, "conflict");
+  assert.equal(
+    changedKillSwitch.outcome,
+    "conflict",
+  );
+  assert.equal(
+    changedKillSwitch.record?.deliveryState,
+    "enabled",
+  );
+});
+
+test("records an inherited kill switch even after evidence expiry", async () => {
+  const { repository } =
+    await createFixture();
+  const enabled =
+    await repository.recordPolicyEvent(
+      recordCommand(),
+    );
+  assert.notEqual(enabled.outcome, "conflict");
+
+  const disabled =
+    await repository.recordPolicyEvent(
+      recordCommand({
+        expectedPolicyVersion: 1,
+        deliveryState: "disabled",
+        recordedAt:
+          "2026-08-16T11:00:00.000Z",
+      }),
+    );
+
+  assert.equal(disabled.outcome, "updated");
+  assert.equal(
+    disabled.record.deliveryState,
+    "disabled",
+  );
+  assert.deepEqual(
+    disabled.record.portfolioCapacity,
+    enabled.record.portfolioCapacity,
+  );
+  assert.equal(
+    await repository.findCurrentEnabledPolicy(
+      lookup({
+        checkedAt:
+          "2026-08-16T10:59:59.000Z",
+      }),
+    ),
+    null,
   );
 });

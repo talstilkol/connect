@@ -785,15 +785,23 @@ export function SystemAdminTenantPanel({
                         {tenant.displayName}
                       </h2>
                     </div>
-                    <span
-                      className={`admin-status ${tenant.tenantStatus}`}
-                    >
-                      {
-                        tenantStatusLabels[
-                          tenant.tenantStatus
-                        ]
-                      }
-                    </span>
+                    <div className="admin-tenant-heading-actions">
+                      <Link
+                        className="secondary-button"
+                        href={`/admin/whatsapp-delivery-policy/${tenant.tenantId}`}
+                      >
+                        מדיניות WhatsApp
+                      </Link>
+                      <span
+                        className={`admin-status ${tenant.tenantStatus}`}
+                      >
+                        {
+                          tenantStatusLabels[
+                            tenant.tenantStatus
+                          ]
+                        }
+                      </span>
+                    </div>
                   </div>
 
                   <SystemAdminBusinessProfileForm

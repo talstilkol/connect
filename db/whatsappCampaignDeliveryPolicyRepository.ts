@@ -1,27 +1,50 @@
 import type {
+  WhatsappCampaignDeliveryPolicyMutationResult,
+  WhatsappCampaignDeliveryPolicyRecord,
+  WhatsappCampaignDeliveryPolicyState,
+} from "../shared/domain/whatsappCampaignDeliveryPolicy.ts";
+import type {
   WhatsappPortfolioCapacity,
 } from "../shared/domain/whatsappRateLimit.ts";
 import {
-  whatsappPortfolioMessagingLimits,
-} from "../shared/domain/whatsappRateLimit.ts";
+  deriveWhatsappCampaignDeliveryPolicyEventKey,
+} from "../server/campaigns/whatsappCampaignDeliveryPolicyKey.ts";
+import {
+  requireWhatsappDeliveryPolicyDigest,
+  requireWhatsappDeliveryPolicyEventKey,
+  requireWhatsappDeliveryPolicyGraphVersion,
+  requireWhatsappDeliveryPolicyPositiveInteger,
+  requireWhatsappDeliveryPolicyState,
+  requireWhatsappDeliveryPolicyTimestamp,
+  requireWhatsappDeliveryPolicyVersion,
+  requireWhatsappPortfolioCapacity,
+  requireWhatsappProviderIdentifier,
+  requireWhatsappReservationDuration,
+} from "../server/campaigns/whatsappCampaignDeliveryPolicyValidation.ts";
 import type {
   D1DatabaseBinding,
+  D1Result,
 } from "./d1.ts";
 
+const POLICY_COLUMNS_SQL = `
+  policy.event_key AS eventKey,
+  policy.tenant_id AS tenantId,
+  policy.connection_version AS connectionVersion,
+  policy.policy_version AS policyVersion,
+  policy.delivery_state AS deliveryState,
+  policy.portfolio_limit_kind AS portfolioLimitKind,
+  policy.portfolio_limit_value AS portfolioLimitValue,
+  policy.reservation_duration_seconds AS reservationDurationSeconds,
+  policy.meta_graph_api_version AS metaGraphApiVersion,
+  policy.evidence_digest AS evidenceDigest,
+  policy.evidence_checked_at AS evidenceCheckedAt,
+  policy.evidence_expires_at AS evidenceExpiresAt,
+  policy.actor_external_user_id AS actorExternalUserId,
+  policy.recorded_at AS recordedAt
+`;
+
 const SELECT_CURRENT_POLICY_SQL = `
-  SELECT
-    policy.event_key AS eventKey,
-    policy.tenant_id AS tenantId,
-    policy.connection_version AS connectionVersion,
-    policy.policy_version AS policyVersion,
-    policy.portfolio_limit_kind AS portfolioLimitKind,
-    policy.portfolio_limit_value AS portfolioLimitValue,
-    policy.reservation_duration_seconds AS reservationDurationSeconds,
-    policy.meta_graph_api_version AS metaGraphApiVersion,
-    policy.evidence_digest AS evidenceDigest,
-    policy.evidence_checked_at AS evidenceCheckedAt,
-    policy.evidence_expires_at AS evidenceExpiresAt,
-    policy.recorded_at AS recordedAt
+  SELECT ${POLICY_COLUMNS_SQL}
   FROM whatsapp_campaign_delivery_policy_events AS policy
   INNER JOIN meta_connections AS connection
     ON connection.tenant_id = policy.tenant_id
@@ -43,22 +66,43 @@ const SELECT_CURRENT_POLICY_SQL = `
   LIMIT 1
 `;
 
-const eventKeyPattern =
-  /^whatsapp_delivery_policy_event_v1_[0-9a-f]{64}$/;
-const evidenceDigestPattern = /^[0-9a-f]{64}$/;
-const graphApiVersionPattern = /^v[1-9][0-9]*\.[0-9]+$/;
-const canonicalTimestampPattern =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const providerIdentifierPattern =
-  /^[^\u0000-\u001f\u007f]{1,255}$/;
-const MINIMUM_RESERVATION_SECONDS = 6;
-const MAXIMUM_RESERVATION_SECONDS = 24 * 60 * 60;
+const SELECT_LATEST_POLICY_SQL = `
+  SELECT ${POLICY_COLUMNS_SQL}
+  FROM whatsapp_campaign_delivery_policy_events AS policy
+  WHERE policy.tenant_id = ?1
+  ORDER BY policy.policy_version DESC
+  LIMIT 1
+`;
+
+const INSERT_POLICY_SQL = `
+  INSERT INTO whatsapp_campaign_delivery_policy_events (
+    event_key,
+    tenant_id,
+    connection_version,
+    policy_version,
+    delivery_state,
+    portfolio_limit_kind,
+    portfolio_limit_value,
+    reservation_duration_seconds,
+    meta_graph_api_version,
+    evidence_digest,
+    evidence_checked_at,
+    evidence_expires_at,
+    actor_external_user_id,
+    recorded_at,
+    created_at
+  ) VALUES (
+    ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
+    ?9, ?10, ?11, ?12, ?13, ?14, ?14
+  )
+`;
 
 interface PolicyRow {
   eventKey: unknown;
   tenantId: unknown;
   connectionVersion: unknown;
   policyVersion: unknown;
+  deliveryState: unknown;
   portfolioLimitKind: unknown;
   portfolioLimitValue: unknown;
   reservationDurationSeconds: unknown;
@@ -66,6 +110,7 @@ interface PolicyRow {
   evidenceDigest: unknown;
   evidenceCheckedAt: unknown;
   evidenceExpiresAt: unknown;
+  actorExternalUserId: unknown;
   recordedAt: unknown;
 }
 
@@ -91,121 +136,144 @@ export interface WhatsappCampaignDeliveryPolicyEvidence {
   recordedAt: string;
 }
 
+export interface RecordWhatsappCampaignDeliveryPolicyCommand {
+  tenantId: unknown;
+  connectionVersion: unknown;
+  expectedPolicyVersion: unknown;
+  deliveryState: unknown;
+  portfolioLimitKind: unknown;
+  portfolioLimitValue: unknown;
+  reservationDurationSeconds: unknown;
+  metaGraphApiVersion: unknown;
+  evidenceDigest: unknown;
+  evidenceCheckedAt: unknown;
+  evidenceExpiresAt: unknown;
+  actorExternalUserId: unknown;
+  recordedAt: unknown;
+}
+
 export interface WhatsappCampaignDeliveryPolicyRepository {
   findCurrentEnabledPolicy(
     input: FindWhatsappCampaignDeliveryPolicyInput,
   ): Promise<WhatsappCampaignDeliveryPolicyEvidence | null>;
+  findLatestPolicyEvent(
+    tenantId: unknown,
+  ): Promise<WhatsappCampaignDeliveryPolicyRecord | null>;
+  recordPolicyEvent(
+    command:
+      RecordWhatsappCampaignDeliveryPolicyCommand,
+  ): Promise<WhatsappCampaignDeliveryPolicyMutationResult>;
 }
 
-function requirePositiveInteger(
-  value: unknown,
-  field: string,
-): number {
-  if (!Number.isSafeInteger(value) || Number(value) < 1) {
-    throw new Error(`WhatsApp delivery policy ${field} is invalid`);
-  }
-
-  return Number(value);
-}
-
-function requireProviderIdentifier(
-  value: unknown,
-  field: string,
-): string {
-  if (
-    typeof value !== "string" ||
-    !providerIdentifierPattern.test(value) ||
-    value.trim() !== value
-  ) {
-    throw new Error(`WhatsApp delivery policy ${field} is invalid`);
-  }
-
-  return value;
-}
-
-function requireCanonicalTimestamp(
-  value: unknown,
-  field: string,
-): string {
-  if (
-    typeof value !== "string" ||
-    !canonicalTimestampPattern.test(value) ||
-    !Number.isFinite(Date.parse(value)) ||
-    new Date(value).toISOString() !== value
-  ) {
-    throw new Error(`WhatsApp delivery policy ${field} is invalid`);
-  }
-
-  return value;
-}
-
-function parseCapacity(
-  kind: unknown,
-  value: unknown,
-): WhatsappPortfolioCapacity {
-  if (kind === "unlimited" && value === null) {
-    return { kind: "unlimited" };
-  }
-
-  if (
-    kind === "bounded" &&
-    whatsappPortfolioMessagingLimits.some(
-      (limit) => limit === value,
-    )
-  ) {
-    return {
-      kind: "bounded",
-      maximumUniqueRecipients:
-        value as (typeof whatsappPortfolioMessagingLimits)[number],
-    };
-  }
-
-  throw new Error(
-    "WhatsApp delivery policy portfolio capacity is invalid",
-  );
+interface NormalizedCommand {
+  tenantId: number;
+  connectionVersion: number;
+  expectedPolicyVersion: number;
+  deliveryState:
+    WhatsappCampaignDeliveryPolicyState;
+  portfolioCapacity:
+    WhatsappPortfolioCapacity;
+  reservationDurationSeconds: number;
+  metaGraphApiVersion: string;
+  evidenceDigest: string;
+  evidenceCheckedAt: string;
+  evidenceExpiresAt: string;
+  actorExternalUserId: string;
+  recordedAt: string;
 }
 
 function parsePolicyRow(
   row: PolicyRow,
-  checkedAt: string,
-): WhatsappCampaignDeliveryPolicyEvidence {
+): WhatsappCampaignDeliveryPolicyRecord {
+  const deliveryState =
+    requireWhatsappDeliveryPolicyState(
+      row.deliveryState,
+    );
+  const evidenceCheckedAt =
+    requireWhatsappDeliveryPolicyTimestamp(
+      row.evidenceCheckedAt,
+      "evidence checked timestamp",
+    );
+  const evidenceExpiresAt =
+    requireWhatsappDeliveryPolicyTimestamp(
+      row.evidenceExpiresAt,
+      "evidence expiration timestamp",
+    );
+  const recordedAt =
+    requireWhatsappDeliveryPolicyTimestamp(
+      row.recordedAt,
+      "recorded timestamp",
+    );
+
   if (
-    typeof row.eventKey !== "string" ||
-    !eventKeyPattern.test(row.eventKey) ||
-    typeof row.metaGraphApiVersion !== "string" ||
-    !graphApiVersionPattern.test(row.metaGraphApiVersion) ||
-    typeof row.evidenceDigest !== "string" ||
-    !evidenceDigestPattern.test(row.evidenceDigest)
+    evidenceCheckedAt > recordedAt ||
+    evidenceCheckedAt >= evidenceExpiresAt ||
+    (deliveryState === "enabled" &&
+      recordedAt >= evidenceExpiresAt)
   ) {
     throw new Error(
-      "WhatsApp delivery policy evidence is malformed",
+      "WhatsApp delivery policy evidence timeline is invalid",
     );
   }
 
-  const evidenceCheckedAt = requireCanonicalTimestamp(
-    row.evidenceCheckedAt,
-    "evidence checked timestamp",
-  );
-  const evidenceExpiresAt = requireCanonicalTimestamp(
-    row.evidenceExpiresAt,
-    "evidence expiration timestamp",
-  );
-  const recordedAt = requireCanonicalTimestamp(
-    row.recordedAt,
-    "recorded timestamp",
-  );
-  const reservationDurationSeconds = requirePositiveInteger(
-    row.reservationDurationSeconds,
-    "reservation duration",
-  );
+  return {
+    eventKey:
+      requireWhatsappDeliveryPolicyEventKey(
+        row.eventKey,
+      ),
+    tenantId:
+      requireWhatsappDeliveryPolicyPositiveInteger(
+        row.tenantId,
+        "tenant",
+      ),
+    connectionVersion:
+      requireWhatsappDeliveryPolicyPositiveInteger(
+        row.connectionVersion,
+        "connection version",
+      ),
+    policyVersion:
+      requireWhatsappDeliveryPolicyVersion(
+        row.policyVersion,
+      ),
+    deliveryState,
+    portfolioCapacity:
+      requireWhatsappPortfolioCapacity(
+        row.portfolioLimitKind,
+        row.portfolioLimitValue,
+      ),
+    reservationDurationSeconds:
+      requireWhatsappReservationDuration(
+        row.reservationDurationSeconds,
+      ),
+    metaGraphApiVersion:
+      requireWhatsappDeliveryPolicyGraphVersion(
+        row.metaGraphApiVersion,
+      ),
+    evidenceDigest:
+      requireWhatsappDeliveryPolicyDigest(
+        row.evidenceDigest,
+      ),
+    evidenceCheckedAt,
+    evidenceExpiresAt,
+    actorExternalUserId:
+      requireWhatsappProviderIdentifier(
+        row.actorExternalUserId,
+        "actor",
+      ),
+    recordedAt,
+  };
+}
 
+function toEvidence(
+  record:
+    WhatsappCampaignDeliveryPolicyRecord,
+  checkedAt: string,
+): WhatsappCampaignDeliveryPolicyEvidence {
   if (
-    reservationDurationSeconds < MINIMUM_RESERVATION_SECONDS ||
-    reservationDurationSeconds > MAXIMUM_RESERVATION_SECONDS ||
-    evidenceCheckedAt > recordedAt ||
-    recordedAt > checkedAt ||
-    evidenceCheckedAt > checkedAt ||
-    checkedAt >= evidenceExpiresAt
+    record.deliveryState !== "enabled" ||
+    record.evidenceCheckedAt > checkedAt ||
+    record.recordedAt > checkedAt ||
+    checkedAt >= record.evidenceExpiresAt
   ) {
     throw new Error(
       "WhatsApp delivery policy evidence is not current",
@@ -213,54 +281,197 @@ function parsePolicyRow(
   }
 
   return {
-    eventKey: row.eventKey,
-    tenantId: requirePositiveInteger(row.tenantId, "tenant"),
-    connectionVersion: requirePositiveInteger(
-      row.connectionVersion,
-      "connection version",
-    ),
-    policyVersion: requirePositiveInteger(
-      row.policyVersion,
-      "policy version",
-    ),
-    portfolioCapacity: parseCapacity(
-      row.portfolioLimitKind,
-      row.portfolioLimitValue,
-    ),
-    reservationDurationSeconds,
-    metaGraphApiVersion: row.metaGraphApiVersion,
-    evidenceDigest: row.evidenceDigest,
+    eventKey: record.eventKey,
+    tenantId: record.tenantId,
+    connectionVersion:
+      record.connectionVersion,
+    policyVersion: record.policyVersion,
+    portfolioCapacity:
+      record.portfolioCapacity,
+    reservationDurationSeconds:
+      record.reservationDurationSeconds,
+    metaGraphApiVersion:
+      record.metaGraphApiVersion,
+    evidenceDigest:
+      record.evidenceDigest,
+    evidenceCheckedAt:
+      record.evidenceCheckedAt,
+    evidenceExpiresAt:
+      record.evidenceExpiresAt,
+    recordedAt: record.recordedAt,
+  };
+}
+
+function normalizeCommand(
+  command:
+    RecordWhatsappCampaignDeliveryPolicyCommand,
+): NormalizedCommand {
+  const deliveryState =
+    requireWhatsappDeliveryPolicyState(
+      command.deliveryState,
+    );
+  const evidenceCheckedAt =
+    requireWhatsappDeliveryPolicyTimestamp(
+      command.evidenceCheckedAt,
+      "evidence checked timestamp",
+    );
+  const evidenceExpiresAt =
+    requireWhatsappDeliveryPolicyTimestamp(
+      command.evidenceExpiresAt,
+      "evidence expiration timestamp",
+    );
+  const recordedAt =
+    requireWhatsappDeliveryPolicyTimestamp(
+      command.recordedAt,
+      "recorded timestamp",
+    );
+
+  if (
+    evidenceCheckedAt > recordedAt ||
+    evidenceCheckedAt >= evidenceExpiresAt ||
+    (deliveryState === "enabled" &&
+      recordedAt >= evidenceExpiresAt)
+  ) {
+    throw new Error(
+      "WhatsApp delivery policy evidence timeline is invalid",
+    );
+  }
+
+  return {
+    tenantId:
+      requireWhatsappDeliveryPolicyPositiveInteger(
+        command.tenantId,
+        "tenant",
+      ),
+    connectionVersion:
+      requireWhatsappDeliveryPolicyPositiveInteger(
+        command.connectionVersion,
+        "connection version",
+      ),
+    expectedPolicyVersion:
+      requireWhatsappDeliveryPolicyVersion(
+        command.expectedPolicyVersion,
+        true,
+      ),
+    deliveryState,
+    portfolioCapacity:
+      requireWhatsappPortfolioCapacity(
+        command.portfolioLimitKind,
+        command.portfolioLimitValue,
+      ),
+    reservationDurationSeconds:
+      requireWhatsappReservationDuration(
+        command.reservationDurationSeconds,
+      ),
+    metaGraphApiVersion:
+      requireWhatsappDeliveryPolicyGraphVersion(
+        command.metaGraphApiVersion,
+      ),
+    evidenceDigest:
+      requireWhatsappDeliveryPolicyDigest(
+        command.evidenceDigest,
+      ),
     evidenceCheckedAt,
     evidenceExpiresAt,
+    actorExternalUserId:
+      requireWhatsappProviderIdentifier(
+        command.actorExternalUserId,
+        "actor",
+      ),
     recordedAt,
   };
+}
+
+function capacityColumns(
+  capacity: WhatsappPortfolioCapacity,
+): readonly ["bounded", number] | readonly ["unlimited", null] {
+  return capacity.kind === "bounded"
+    ? [
+        "bounded",
+        capacity.maximumUniqueRecipients,
+      ]
+    : ["unlimited", null];
+}
+
+function samePolicySnapshot(
+  left:
+    WhatsappCampaignDeliveryPolicyRecord,
+  right: NormalizedCommand,
+): boolean {
+  return (
+    JSON.stringify(left.portfolioCapacity) ===
+      JSON.stringify(right.portfolioCapacity) &&
+    left.reservationDurationSeconds ===
+      right.reservationDurationSeconds &&
+    left.metaGraphApiVersion ===
+      right.metaGraphApiVersion &&
+    left.evidenceDigest ===
+      right.evidenceDigest &&
+    left.evidenceCheckedAt ===
+      right.evidenceCheckedAt &&
+    left.evidenceExpiresAt ===
+      right.evidenceExpiresAt
+  );
+}
+
+function requireSuccessfulResult(
+  result: D1Result,
+): void {
+  if (!result.success) {
+    throw new Error(
+      "D1 WhatsApp delivery policy mutation failed",
+    );
+  }
 }
 
 export function createWhatsappCampaignDeliveryPolicyRepository(
   database: D1DatabaseBinding,
 ): WhatsappCampaignDeliveryPolicyRepository {
-  return {
-    async findCurrentEnabledPolicy(input) {
-      const tenantId = requirePositiveInteger(
-        input.tenantId,
+  async function findLatestPolicyEvent(
+    tenantIdInput: unknown,
+  ): Promise<WhatsappCampaignDeliveryPolicyRecord | null> {
+    const tenantId =
+      requireWhatsappDeliveryPolicyPositiveInteger(
+        tenantIdInput,
         "tenant",
       );
-      const businessPortfolioId = requireProviderIdentifier(
-        input.businessPortfolioId,
-        "business portfolio identifier",
-      );
-      const wabaId = requireProviderIdentifier(
-        input.wabaId,
-        "WABA identifier",
-      );
-      const phoneNumberId = requireProviderIdentifier(
-        input.phoneNumberId,
-        "phone number identifier",
-      );
-      const checkedAt = requireCanonicalTimestamp(
-        input.checkedAt,
-        "lookup timestamp",
-      );
+    const row = await database
+      .prepare(SELECT_LATEST_POLICY_SQL)
+      .bind(tenantId)
+      .first<PolicyRow>();
+
+    return row === null
+      ? null
+      : parsePolicyRow(row);
+  }
+
+  return {
+    async findCurrentEnabledPolicy(input) {
+      const tenantId =
+        requireWhatsappDeliveryPolicyPositiveInteger(
+          input.tenantId,
+          "tenant",
+        );
+      const businessPortfolioId =
+        requireWhatsappProviderIdentifier(
+          input.businessPortfolioId,
+          "business portfolio identifier",
+        );
+      const wabaId =
+        requireWhatsappProviderIdentifier(
+          input.wabaId,
+          "WABA identifier",
+        );
+      const phoneNumberId =
+        requireWhatsappProviderIdentifier(
+          input.phoneNumberId,
+          "phone number identifier",
+        );
+      const checkedAt =
+        requireWhatsappDeliveryPolicyTimestamp(
+          input.checkedAt,
+          "lookup timestamp",
+        );
       const row = await database
         .prepare(SELECT_CURRENT_POLICY_SQL)
         .bind(
@@ -274,7 +485,139 @@ export function createWhatsappCampaignDeliveryPolicyRepository(
 
       return row === null
         ? null
-        : parsePolicyRow(row, checkedAt);
+        : toEvidence(
+            parsePolicyRow(row),
+            checkedAt,
+          );
+    },
+
+    findLatestPolicyEvent,
+
+    async recordPolicyEvent(command) {
+      const normalized =
+        normalizeCommand(command);
+      const [
+        portfolioLimitKind,
+        portfolioLimitValue,
+      ] = capacityColumns(
+        normalized.portfolioCapacity,
+      );
+      const eventKey =
+        await deriveWhatsappCampaignDeliveryPolicyEventKey({
+          ...normalized,
+          portfolioLimitKind,
+          portfolioLimitValue,
+        });
+      const current =
+        await findLatestPolicyEvent(
+          normalized.tenantId,
+        );
+
+      if (current?.eventKey === eventKey) {
+        return {
+          outcome: "unchanged",
+          record: current,
+        };
+      }
+
+      if (
+        (current?.policyVersion ?? 0) !==
+          normalized.expectedPolicyVersion ||
+        (normalized.deliveryState ===
+          "disabled" &&
+          (current?.deliveryState !==
+            "enabled" ||
+            !samePolicySnapshot(
+              current,
+              normalized,
+            )))
+      ) {
+        return {
+          outcome: "conflict",
+          record: current,
+        };
+      }
+
+      const nextPolicyVersion =
+        normalized.expectedPolicyVersion + 1;
+      let result: D1Result;
+
+      try {
+        result = await database
+          .prepare(INSERT_POLICY_SQL)
+          .bind(
+            eventKey,
+            normalized.tenantId,
+            normalized.connectionVersion,
+            nextPolicyVersion,
+            normalized.deliveryState,
+            portfolioLimitKind,
+            portfolioLimitValue,
+            normalized.reservationDurationSeconds,
+            normalized.metaGraphApiVersion,
+            normalized.evidenceDigest,
+            normalized.evidenceCheckedAt,
+            normalized.evidenceExpiresAt,
+            normalized.actorExternalUserId,
+            normalized.recordedAt,
+          )
+          .run();
+        requireSuccessfulResult(result);
+      } catch {
+        const competing =
+          await findLatestPolicyEvent(
+            normalized.tenantId,
+          );
+
+        if (competing?.eventKey === eventKey) {
+          return {
+            outcome: "unchanged",
+            record: competing,
+          };
+        }
+
+        if (
+          competing?.policyVersion !==
+          normalized.expectedPolicyVersion
+        ) {
+          return {
+            outcome: "conflict",
+            record: competing,
+          };
+        }
+
+        throw new Error(
+          "D1 WhatsApp delivery policy mutation failed",
+        );
+      }
+
+      const saved =
+        await findLatestPolicyEvent(
+          normalized.tenantId,
+        );
+
+      if (
+        saved?.eventKey !== eventKey ||
+        saved.policyVersion !==
+          nextPolicyVersion ||
+        saved.deliveryState !==
+          normalized.deliveryState
+      ) {
+        return {
+          outcome: "conflict",
+          record: saved,
+        };
+      }
+
+      return {
+        outcome:
+          Number(result.meta?.changes) === 1
+            ? normalized.expectedPolicyVersion === 0
+              ? "created"
+              : "updated"
+            : "unchanged",
+        record: saved,
+      };
     },
   };
 }

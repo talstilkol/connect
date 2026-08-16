@@ -108,9 +108,12 @@ Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
 לשלושת ה־Scopes שניתנים לזיהוי מדויק. מיגרציה `0034` שומרת Policy
 Evidence מתכלה ובלתי־ניתנת לשינוי, ומאפשרת Event אחרון מסוג
 `disabled` כ־Kill switch עמיד. אין בכך אישור מדיניות: מקור
-`Retry-After`/Pair exponent חי, ערכי Capacity, ‏Alerts, מסלול
-Operator ותרגיל Kill switch עדיין דורשים Evidence ואישור לפי RACI
-בסעיף 5.1.
+`Retry-After`/Pair exponent חי, ערכי Capacity, ‏Alerts ותרגיל Kill
+switch עדיין דורשים Evidence ואישור לפי RACI בסעיף 5.1. מסלול
+Operator המקומי הושלם תחת System Admin: הוא קושר את הקלט לזהויות
+ולגרסת Meta connection, גוזר Actor וזמן בשרת, שומר Audit אטומי
+ומאפשר Kill switch ללא שינוי ה־Snapshot שאושר. הוא אינו מחליף את
+האישור העובדתי של טל או את תרגיל ה־WABA החי.
 
 ## 6. החלטה 5 — File Scanner
 

@@ -530,10 +530,11 @@ Body parameters, ‏Dynamic URL parameter ו־Quick Reply payload אטום
 אינה שולחת אותם שוב אוטומטית.
 
 14.10.5 ה־Processor אינו מחובר עדיין ל־Worker. מקור Policy ו־Kill
-switch עמיד מחוברים, אך ללא Evidence חיה הם חוסמים שליחה. לפני חיבור
-ה־Processor נדרשים ערכי Capacity חיים, מקור Retry evidence מאושר,
-מסלול Operator מורשה להפעלה ולכיבוי של ה־Policy וראיות Sandbox של
-WABA. עד אז ה־Worker מזריק Processor מושבת ונכשל סגור.
+switch עמיד מחוברים, אך ללא Evidence חיה הם חוסמים שליחה. מסלול
+Operator מורשה להפעלה ולכיבוי של ה־Policy הושלם מקומית לפי סעיף
+14.12. לפני חיבור ה־Processor נדרשים ערכי Capacity חיים, מקור Retry
+evidence מאושר וראיות Sandbox של WABA. עד אז ה־Worker מזריק Processor
+מושבת ונכשל סגור.
 
 14.11 ‏Provider Backoff/Cooldown מקומי:
 
@@ -570,9 +571,33 @@ Token או Provider payload.
 
 14.11.6 ‏`MetaGraphTransport` קולט רק ערך `Retry-After` מספרי ובטווח
 של שנייה עד 24 שעות ואינו שומר את ה־Header הגולמי. עדיין חסרים חיבור
-הערך אל מקור Evidence חי, ‏Pair exponent מתמשך, ערכי Capacity חיים,
-מסלול Operator ל־Kill switch ו־WABA Sandbox; אלה נשארים
-`unknown/unavailable` עד חיבור החשבון המורשה.
+הערך אל מקור Evidence חי, ‏Pair exponent מתמשך, ערכי Capacity חיים
+ו־WABA Sandbox; אלה נשארים `unknown/unavailable` עד חיבור החשבון
+המורשה.
+
+14.12 מסלול Operator למדיניות שליחה:
+
+14.12.1 המסלול נמצא ב־
+`/admin/whatsapp-delivery-policy/{tenantId}` ודורש System Admin
+Session תקפה. כל Mutation עובר גם דרך מגבלת פעולות הניהול הקיימת.
+
+14.12.2 זהויות Business Portfolio, ‏WABA ו־Phone number וגרסת
+החיבור נקראות מ־D1 ומוצגות כ־Read-only. השמירה נכשלת סגור אם אחת
+הזהויות, גרסת החיבור או גרסת המדיניות השתנו מאז טעינת המסך.
+
+14.12.3 ה־Operator מזין ערך Capacity חי, ‏Reservation duration,
+גרסת Graph API, ‏SHA-256 digest וזמני בדיקה ותפוגה ב־UTC. השרת דוחה
+Evidence עתידית או שפג תוקפה, גוזר את זהות ה־Actor ואת זמן השמירה
+מה־Session ומהשעון בצד השרת, ומוסיף אירוע Audit באותה פעולת D1.
+
+14.12.4 Kill switch אינו מקבל מהדפדפן ערכי Capacity או Evidence.
+הוא יורש את ה־Snapshot האחרון, יוצר גרסה עוקבת מסוג `disabled` ופועל
+גם כאשר ה־Evidence הקודמת כבר פגה. ניסיון חוזר זהה אינו יוצר אירוע
+כפול.
+
+14.12.5 המסלול אינו מקבל Token או Secret ואינו מחבר את ה־Meta
+sender ל־Worker. חיבור השליחה נשאר Gate נפרד לאחר Evidence חיה,
+Sandbox מורשה, Load test ותרגיל Kill switch.
 
 ## 15. אחריות ועדכון
 

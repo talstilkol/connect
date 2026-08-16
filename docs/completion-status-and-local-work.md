@@ -283,7 +283,7 @@ Drag-and-drop ובדיקות Browser. אומדן ה־8–16 שעות נשמר ב
 ‏Quota ופרטי קשר נשאר החלטת Product פתוחה. לאחר אישור המודל, אומדן
 היישום המקומי הוא 8–14 שעות; חיבור Billing חי אינו כלול.
 
-4.2 מסלול Rate Limiting נמצא בשלב 3 מתוך 4. חוזה Admission מחובר
+4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
 אותו D1. ‏Context Resolver מאמת Connection מחובר וגוזר מפתחות HMAC
@@ -298,8 +298,12 @@ Settlement ונשען על `MetaMessageFailurePolicy` המשותף. הם עדי�
 מוזרקים ל־Worker. מקור ה־Policy המבוסס D1 מחובר כעת ל־Worker ודורש
 Event בלתי־ניתן לשינוי הקשור לגרסת Meta connection, לגרסת Graph API,
 ל־Digest ולתפוגה. Event אחרון במצב `disabled` משמש Kill switch
-עמיד. ערכי Capacity חיים, מקור Retry evidence, מסלול Operator מורשה
-וראיות WABA נשארים `unknown/unavailable` עד חיבור החשבון המורשה.
+עמיד. נוסף מסלול Operator מורשה תחת System Admin, כולל מסך
+Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor וזמן
+בשרת, שמירת Evidence אטומית והפעלת Kill switch שיורשת את ה־Snapshot
+האחרון. ערכי Capacity חיים, מקור Retry evidence וראיות WABA נשארים
+`unknown/unavailable` עד חיבור החשבון המורשה. ה־Meta sender נשאר חסום
+בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
 4.3 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם
 הוכרעו, הוא **46–78 שעות פיתוח נטו**. אם מאשרים את המודל המומלץ
