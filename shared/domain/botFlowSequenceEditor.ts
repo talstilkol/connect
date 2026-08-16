@@ -108,24 +108,41 @@ export function moveBotFlowReplyStep(
       ? sourceIndex - 1
       : sourceIndex + 1;
 
+  return moveBotFlowReplyStepToPosition(
+    steps,
+    draftStepKeyValue,
+    targetIndex,
+  );
+}
+
+export function moveBotFlowReplyStepToPosition(
+  steps: readonly BotFlowReplyStepDraft[],
+  draftStepKeyValue: string,
+  targetIndex: number,
+): readonly BotFlowReplyStepDraft[] {
+  const sourceIndex = steps.findIndex(
+    (step) =>
+      step.draftStepKey === draftStepKeyValue,
+  );
+
   if (
     sourceIndex < 0 ||
+    !Number.isSafeInteger(targetIndex) ||
     targetIndex < 0 ||
-    targetIndex >= steps.length
+    targetIndex >= steps.length ||
+    targetIndex === sourceIndex
   ) {
     return steps;
   }
 
   const reordered = [...steps];
-  const source = reordered[sourceIndex];
-  const target = reordered[targetIndex];
+  const [source] = reordered.splice(sourceIndex, 1);
 
-  if (!source || !target) {
+  if (!source) {
     return steps;
   }
 
-  reordered[sourceIndex] = target;
-  reordered[targetIndex] = source;
+  reordered.splice(targetIndex, 0, source);
   return reordered;
 }
 

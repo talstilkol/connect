@@ -200,6 +200,7 @@
 }
 
 .bot-flow-reply-sequence li {
+  position: relative;
   padding: 11px;
   border: 1px solid #e1e9e5;
   border-radius: 11px;
@@ -348,10 +349,44 @@
 .bot-flow-button-menu li {
   display: grid;
   gap: 7px;
+  position: relative;
   padding: 11px;
   border: 1px solid #dce8e2;
   border-radius: 11px;
   background: white;
+}
+
+.bot-flow-drag-handle {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  border: 1px solid #d5e3dc;
+  border-radius: 8px;
+  background: #f2f8f5;
+  color: #4b7d67;
+  cursor: grab;
+  font-size: 13px;
+  touch-action: none;
+  user-select: none;
+}
+
+.bot-flow-drag-handle:active {
+  cursor: grabbing;
+}
+
+.bot-flow-reply-sequence li.is-dragging,
+.bot-flow-button-menu li.is-dragging {
+  opacity: 0.55;
+}
+
+.bot-flow-reply-sequence li.is-drop-target,
+.bot-flow-button-menu li.is-drop-target {
+  border-color: #4f9d77;
+  box-shadow: 0 0 0 3px rgba(79, 157, 119, 0.16);
 }
 
 .bot-flow-button-menu li > strong,

@@ -140,24 +140,41 @@ export function moveBotFlowButtonOption(
       ? sourceIndex - 1
       : sourceIndex + 1;
 
+  return moveBotFlowButtonOptionToPosition(
+    draft,
+    draftOptionKeyValue,
+    targetIndex,
+  );
+}
+
+export function moveBotFlowButtonOptionToPosition(
+  draft: BotFlowButtonMenuEditorDraft,
+  draftOptionKeyValue: string,
+  targetIndex: number,
+): BotFlowButtonMenuEditorDraft {
+  const sourceIndex = draft.options.findIndex(
+    (option) =>
+      option.draftOptionKey === draftOptionKeyValue,
+  );
+
   if (
     sourceIndex < 0 ||
+    !Number.isSafeInteger(targetIndex) ||
     targetIndex < 0 ||
-    targetIndex >= draft.options.length
+    targetIndex >= draft.options.length ||
+    targetIndex === sourceIndex
   ) {
     return draft;
   }
 
   const options = [...draft.options];
-  const source = options[sourceIndex];
-  const target = options[targetIndex];
+  const [source] = options.splice(sourceIndex, 1);
 
-  if (!source || !target) {
+  if (!source) {
     return draft;
   }
 
-  options[sourceIndex] = target;
-  options[targetIndex] = source;
+  options.splice(targetIndex, 0, source);
   return { ...draft, options };
 }
 

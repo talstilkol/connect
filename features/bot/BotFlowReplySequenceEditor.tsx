@@ -3,6 +3,7 @@
 import {
   useEffect,
   useRef,
+  useState,
 } from "react";
 import type {
   BotFlowReplyStepDraft,
@@ -16,6 +17,7 @@ export function BotFlowReplySequenceEditor({
   maximumSteps,
   onTextChange,
   onMove,
+  onMoveToPosition,
   onRemove,
   onAdd,
 }: {
@@ -31,6 +33,10 @@ export function BotFlowReplySequenceEditor({
     draftStepKey: string,
     direction: BotFlowReplyStepMoveDirection,
   ): void;
+  onMoveToPosition(
+    draftStepKey: string,
+    targetIndex: number,
+  ): void;
   onRemove(draftStepKey: string): void;
   onAdd(): void;
 }) {
@@ -38,6 +44,19 @@ export function BotFlowReplySequenceEditor({
     useRef<HTMLFieldSetElement>(null);
   const pendingFocusPositionRef =
     useRef<number | null>(null);
+  const draggedStepKeyRef = useRef<string | null>(
+    null,
+  );
+  const [draggedStepKey, setDraggedStepKey] =
+    useState<string | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] =
+    useState<number | null>(null);
+
+  const finishDragging = () => {
+    draggedStepKeyRef.current = null;
+    setDraggedStepKey(null);
+    setDropTargetIndex(null);
+  };
 
   useEffect(() => {
     const position = pendingFocusPositionRef.current;
@@ -61,9 +80,10 @@ export function BotFlowReplySequenceEditor({
     >
       <legend>הודעות תשובה לפי סדר השליחה</legend>
       <p id="bot-flow-reply-sequence-help">
-        אפשר להוסיף כמה הודעות טקסט ולשנות את
-        הסדר באמצעות הכפתורים. כל הפעולות זמינות
-        גם עם מקלדת.
+        אפשר להוסיף כמה הודעות טקסט, לגרור אותן
+        למיקום חדש או לשנות את הסדר באמצעות
+        הכפתורים. כל פעולות הסידור זמינות גם עם
+        מקלדת.
       </p>
       <ol>
         {steps.map((step, index) => {
@@ -72,7 +92,71 @@ export function BotFlowReplySequenceEditor({
             `bot-flow-reply-${step.draftStepKey}`;
 
           return (
-            <li key={step.draftStepKey}>
+            <li
+              key={step.draftStepKey}
+              className={[
+                draggedStepKey === step.draftStepKey
+                  ? "is-dragging"
+                  : "",
+                dropTargetIndex === index &&
+                draggedStepKey !== step.draftStepKey
+                  ? "is-drop-target"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onDragOver={(event) => {
+                if (
+                  disabled ||
+                  draggedStepKeyRef.current === null ||
+                  draggedStepKeyRef.current ===
+                    step.draftStepKey
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+                setDropTargetIndex(index);
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                const sourceKey =
+                  draggedStepKeyRef.current;
+                finishDragging();
+
+                if (
+                  sourceKey &&
+                  sourceKey !== step.draftStepKey
+                ) {
+                  onMoveToPosition(sourceKey, index);
+                }
+              }}
+            >
+              <span
+                className="bot-flow-drag-handle"
+                draggable={
+                  !disabled && steps.length > 1
+                }
+                onDragStart={(event) => {
+                  draggedStepKeyRef.current =
+                    step.draftStepKey;
+                  setDraggedStepKey(
+                    step.draftStepKey,
+                  );
+                  event.dataTransfer.effectAllowed =
+                    "move";
+                  event.dataTransfer.setData(
+                    "text/plain",
+                    step.draftStepKey,
+                  );
+                }}
+                onDragEnd={finishDragging}
+                title={`גרירת הודעת טקסט ${position} למיקום חדש`}
+                aria-hidden="true"
+              >
+                ⠿
+              </span>
               <label htmlFor={inputId}>
                 הודעת טקסט {position}
               </label>

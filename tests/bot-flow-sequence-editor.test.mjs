@@ -5,6 +5,7 @@ import {
   appendBotFlowReplyStep,
   createBotFlowReplySteps,
   moveBotFlowReplyStep,
+  moveBotFlowReplyStepToPosition,
   readBotFlowReplyTexts,
   removeBotFlowReplyStep,
   updateBotFlowReplyStep,
@@ -53,6 +54,52 @@ test("adds, edits, and reorders reply steps without mutating prior state", () =>
       "bot_reply_step_draft_v1_2",
       "bot_reply_step_draft_v1_1",
     ],
+  );
+});
+
+test("moves a dragged reply directly to a deterministic target position", () => {
+  const initial = createBotFlowReplySteps([
+    "ראשונה",
+    "שנייה",
+    "שלישית",
+    "רביעית",
+  ]);
+  const movedToEnd = moveBotFlowReplyStepToPosition(
+    initial,
+    "bot_reply_step_draft_v1_1",
+    3,
+  );
+  const movedToStart = moveBotFlowReplyStepToPosition(
+    movedToEnd,
+    "bot_reply_step_draft_v1_4",
+    0,
+  );
+
+  assert.deepEqual(readBotFlowReplyTexts(initial), [
+    "ראשונה",
+    "שנייה",
+    "שלישית",
+    "רביעית",
+  ]);
+  assert.deepEqual(
+    readBotFlowReplyTexts(movedToStart),
+    ["רביעית", "שנייה", "שלישית", "ראשונה"],
+  );
+  assert.equal(
+    moveBotFlowReplyStepToPosition(
+      movedToStart,
+      "bot_reply_step_draft_v1_2",
+      1,
+    ),
+    movedToStart,
+  );
+  assert.equal(
+    moveBotFlowReplyStepToPosition(
+      movedToStart,
+      "bot_reply_step_draft_v1_2",
+      9,
+    ),
+    movedToStart,
   );
 });
 

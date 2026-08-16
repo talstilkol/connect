@@ -3,6 +3,7 @@
 import {
   useEffect,
   useRef,
+  useState,
 } from "react";
 import type {
   BotFlowButtonMenuEditorDraft,
@@ -18,6 +19,7 @@ export function BotFlowButtonMenuEditor({
   onButtonTextChange,
   onOptionChange,
   onMoveOption,
+  onMoveOptionToPosition,
   onRemoveOption,
   onAddOption,
   onRemoveMenu,
@@ -36,6 +38,10 @@ export function BotFlowButtonMenuEditor({
     draftOptionKey: string,
     direction: BotFlowButtonOptionMoveDirection,
   ): void;
+  onMoveOptionToPosition(
+    draftOptionKey: string,
+    targetIndex: number,
+  ): void;
   onRemoveOption(draftOptionKey: string): void;
   onAddOption(): void;
   onRemoveMenu(): void;
@@ -46,6 +52,19 @@ export function BotFlowButtonMenuEditor({
     useRef<HTMLTextAreaElement>(null);
   const pendingFocusPositionRef =
     useRef<number | null>(null);
+  const draggedOptionKeyRef = useRef<string | null>(
+    null,
+  );
+  const [draggedOptionKey, setDraggedOptionKey] =
+    useState<string | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] =
+    useState<number | null>(null);
+
+  const finishDragging = () => {
+    draggedOptionKeyRef.current = null;
+    setDraggedOptionKey(null);
+    setDropTargetIndex(null);
+  };
 
   useEffect(() => {
     if (focusOnMount) {
@@ -76,7 +95,9 @@ export function BotFlowButtonMenuEditor({
       <legend>שאלת כפתורים</legend>
       <p id="bot-flow-button-menu-help">
         כל אפשרות מנתבת לתשובת טקסט ייעודית.
-        המפתחות נשמרים ונגזרים רק בצד השרת.
+        אפשר לגרור אפשרויות למיקום חדש או להשתמש
+        בכפתורי למעלה ולמטה. המפתחות נשמרים
+        ונגזרים רק בצד השרת.
       </p>
       <label>
         <span>טקסט השאלה</span>
@@ -102,7 +123,76 @@ export function BotFlowButtonMenuEditor({
             `bot-flow-option-reply-${option.draftOptionKey}`;
 
           return (
-            <li key={option.draftOptionKey}>
+            <li
+              key={option.draftOptionKey}
+              className={[
+                draggedOptionKey ===
+                option.draftOptionKey
+                  ? "is-dragging"
+                  : "",
+                dropTargetIndex === index &&
+                draggedOptionKey !==
+                  option.draftOptionKey
+                  ? "is-drop-target"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onDragOver={(event) => {
+                if (
+                  disabled ||
+                  draggedOptionKeyRef.current === null ||
+                  draggedOptionKeyRef.current ===
+                    option.draftOptionKey
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+                setDropTargetIndex(index);
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                const sourceKey =
+                  draggedOptionKeyRef.current;
+                finishDragging();
+
+                if (
+                  sourceKey &&
+                  sourceKey !== option.draftOptionKey
+                ) {
+                  onMoveOptionToPosition(
+                    sourceKey,
+                    index,
+                  );
+                }
+              }}
+            >
+              <span
+                className="bot-flow-drag-handle"
+                draggable={
+                  !disabled && draft.options.length > 1
+                }
+                onDragStart={(event) => {
+                  draggedOptionKeyRef.current =
+                    option.draftOptionKey;
+                  setDraggedOptionKey(
+                    option.draftOptionKey,
+                  );
+                  event.dataTransfer.effectAllowed =
+                    "move";
+                  event.dataTransfer.setData(
+                    "text/plain",
+                    option.draftOptionKey,
+                  );
+                }}
+                onDragEnd={finishDragging}
+                title={`גרירת אפשרות ${position} למיקום חדש`}
+                aria-hidden="true"
+              >
+                ⠿
+              </span>
               <strong>אפשרות {position}</strong>
               <label htmlFor={labelId}>
                 תווית הכפתור

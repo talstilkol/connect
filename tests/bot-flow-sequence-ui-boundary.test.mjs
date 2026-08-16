@@ -48,6 +48,15 @@ test("keeps reply ordering operable through explicit keyboard buttons", async ()
     /querySelector<HTMLTextAreaElement>/,
   );
   assert.match(source, /\?\.focus\(\)/);
+  assert.match(
+    source,
+    /draggable=\{\s*!disabled && steps\.length > 1\s*\}/,
+  );
+  assert.match(
+    source,
+    /onMoveToPosition\(sourceKey, index\)/,
+  );
+  assert.match(source, /event\.dataTransfer\.dropEffect = "move"/);
 });
 
 test("announces sequence changes and submits only ordered text values", async () => {
@@ -65,6 +74,10 @@ test("announces sequence changes and submits only ordered text values", async ()
   assert.match(
     source,
     /const replyTexts = readBotFlowReplyTexts\(/,
+  );
+  assert.match(
+    source,
+    /onMoveToPosition=\{\s*moveReplyStepToPosition\s*\}/,
   );
 });
 

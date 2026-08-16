@@ -29,6 +29,7 @@ import {
   appendBotFlowButtonOption,
   createBotFlowButtonMenuDraft,
   moveBotFlowButtonOption,
+  moveBotFlowButtonOptionToPosition,
   readBotFlowButtonOptions,
   removeBotFlowButtonOption,
   updateBotFlowButtonOption,
@@ -41,6 +42,7 @@ import {
   appendBotFlowReplyStep,
   createBotFlowReplySteps,
   moveBotFlowReplyStep,
+  moveBotFlowReplyStepToPosition,
   readBotFlowReplyTexts,
   removeBotFlowReplyStep,
   updateBotFlowReplyStep,
@@ -566,6 +568,37 @@ export function BotFlowBuilder({
     );
   };
 
+  const moveReplyStepToPosition = (
+    draftStepKey: string,
+    targetIndex: number,
+  ) => {
+    const currentIndex = replySteps.findIndex(
+      (step) => step.draftStepKey === draftStepKey,
+    );
+
+    if (
+      currentIndex < 0 ||
+      !Number.isSafeInteger(targetIndex) ||
+      targetIndex < 0 ||
+      targetIndex >= replySteps.length ||
+      targetIndex === currentIndex
+    ) {
+      return;
+    }
+
+    setReplySteps((current) =>
+      moveBotFlowReplyStepToPosition(
+        current,
+        draftStepKey,
+        targetIndex,
+      ),
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `הודעת הטקסט נגררה למיקום ${targetIndex + 1}.`,
+    );
+  };
+
   const removeReplyStep = (
     draftStepKey: string,
   ) => {
@@ -683,6 +716,42 @@ export function BotFlowBuilder({
     markChanged();
     setEditorAnnouncement(
       `אפשרות הכפתור הועברה למיקום ${nextPosition}.`,
+    );
+  };
+
+  const moveButtonOptionToPosition = (
+    draftOptionKey: string,
+    targetIndex: number,
+  ) => {
+    const optionCount = buttonMenu?.options.length ?? 0;
+    const currentIndex =
+      buttonMenu?.options.findIndex(
+        (option) =>
+          option.draftOptionKey === draftOptionKey,
+      ) ?? -1;
+
+    if (
+      currentIndex < 0 ||
+      !Number.isSafeInteger(targetIndex) ||
+      targetIndex < 0 ||
+      targetIndex >= optionCount ||
+      targetIndex === currentIndex
+    ) {
+      return;
+    }
+
+    setButtonMenu((current) =>
+      current
+        ? moveBotFlowButtonOptionToPosition(
+            current,
+            draftOptionKey,
+            targetIndex,
+          )
+        : current,
+    );
+    markChanged();
+    setEditorAnnouncement(
+      `אפשרות הכפתור נגררה למיקום ${targetIndex + 1}.`,
     );
   };
 
@@ -1324,6 +1393,9 @@ export function BotFlowBuilder({
                     maximumSteps={maximumReplyStepCount}
                     onTextChange={changeReplyText}
                     onMove={moveReplyStep}
+                    onMoveToPosition={
+                      moveReplyStepToPosition
+                    }
                     onRemove={removeReplyStep}
                     onAdd={addReplyStep}
                   />
@@ -1343,6 +1415,9 @@ export function BotFlowBuilder({
                         changeButtonOption
                       }
                       onMoveOption={moveButtonOption}
+                      onMoveOptionToPosition={
+                        moveButtonOptionToPosition
+                      }
                       onRemoveOption={
                         removeButtonOption
                       }

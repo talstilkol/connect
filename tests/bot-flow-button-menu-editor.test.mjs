@@ -5,6 +5,7 @@ import {
   appendBotFlowButtonOption,
   createBotFlowButtonMenuDraft,
   moveBotFlowButtonOption,
+  moveBotFlowButtonOptionToPosition,
   readBotFlowButtonOptions,
   removeBotFlowButtonOption,
   updateBotFlowButtonOption,
@@ -87,6 +88,52 @@ test("adds, edits, and reorders options without mutating prior state", () => {
         replyText: "נעביר למכירות.",
       },
     ],
+  );
+});
+
+test("moves a dragged option directly to a deterministic target position", () => {
+  const initial = createBotFlowButtonMenuDraft(
+    "בחרו",
+    [
+      { label: "א", replyText: "תשובה א" },
+      { label: "ב", replyText: "תשובה ב" },
+      { label: "ג", replyText: "תשובה ג" },
+      { label: "ד", replyText: "תשובה ד" },
+    ],
+  );
+  const moved = moveBotFlowButtonOptionToPosition(
+    initial,
+    "bot_button_option_draft_v1_1",
+    3,
+  );
+
+  assert.deepEqual(
+    readBotFlowButtonOptions(initial).map(
+      (option) => option.label,
+    ),
+    ["א", "ב", "ג", "ד"],
+  );
+  assert.deepEqual(
+    readBotFlowButtonOptions(moved).map(
+      (option) => option.label,
+    ),
+    ["ב", "ג", "ד", "א"],
+  );
+  assert.equal(
+    moveBotFlowButtonOptionToPosition(
+      moved,
+      "bot_button_option_draft_v1_3",
+      1,
+    ),
+    moved,
+  );
+  assert.equal(
+    moveBotFlowButtonOptionToPosition(
+      moved,
+      "bot_button_option_draft_v1_3",
+      -1,
+    ),
+    moved,
   );
 });
 

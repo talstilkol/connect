@@ -43,6 +43,15 @@ test("keeps button options operable by keyboard and restores focus after structu
     /querySelector<HTMLInputElement>/,
   );
   assert.match(source, /\?\.focus\(\)/);
+  assert.match(
+    source,
+    /draggable=\{\s*!disabled && draft\.options\.length > 1\s*\}/,
+  );
+  assert.match(
+    source,
+    /onMoveOptionToPosition\(\s*sourceKey,\s*index,\s*\)/,
+  );
+  assert.match(source, /event\.dataTransfer\.dropEffect = "move"/);
   assert.doesNotMatch(source, /Math\.random\(/);
   assert.doesNotMatch(
     source,
@@ -63,6 +72,10 @@ test("submits only labels and replies while deriving persisted option identities
   assert.match(
     builder,
     /buttonText: buttonMenu\.buttonText,\s*options: buttonOptions/,
+  );
+  assert.match(
+    builder,
+    /onMoveOptionToPosition=\{\s*moveButtonOptionToPosition\s*\}/,
   );
   assert.match(
     compiler,
