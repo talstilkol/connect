@@ -1,0 +1,2069 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    >
+    <title>שאלון החלטות מהותיות — Connect</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17221d;
+        --muted: #56645d;
+        --line: #d9e1dc;
+        --panel: #ffffff;
+        --page: #f4f7f5;
+        --brand: #0d6a44;
+        --brand-dark: #074c31;
+        --green: #16763d;
+        --green-bg: #edf9f1;
+        --green-line: #7bc895;
+        --red: #a62f29;
+        --red-bg: #fff2f1;
+        --red-line: #e39a94;
+        --blue: #185abc;
+        --blue-bg: #eef5ff;
+        --amber: #754f00;
+        --amber-bg: #fff1bd;
+        --focus: #155eef;
+        --shadow: 0 14px 38px rgba(24, 49, 37, 0.09);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family: Arial, "Noto Sans Hebrew", system-ui, sans-serif;
+        line-height: 1.65;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      a {
+        color: var(--brand-dark);
+      }
+
+      .skip-link {
+        position: fixed;
+        inset-block-start: 8px;
+        inset-inline-start: 8px;
+        z-index: 100;
+        padding: 10px 14px;
+        border-radius: 8px;
+        color: #fff;
+        background: var(--focus);
+        transform: translateY(-180%);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
+      }
+
+      .hero {
+        color: #fff;
+        background:
+          radial-gradient(circle at 10% 15%, rgba(70, 218, 145, 0.25), transparent 28%),
+          linear-gradient(135deg, #063824, #0b6843 60%, #0c4d38);
+      }
+
+      .hero-inner,
+      .layout,
+      .toolbar-inner,
+      .footer-inner {
+        width: min(1220px, calc(100% - 32px));
+        margin-inline: auto;
+      }
+
+      .hero-inner {
+        padding-block: 48px 36px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        font-size: 0.84rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      h1 {
+        max-width: 850px;
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 4.2rem);
+        line-height: 1.08;
+      }
+
+      .hero-copy {
+        max-width: 820px;
+        margin: 18px 0 0;
+        color: #d9f4e5;
+        font-size: 1.05rem;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-block-start: 28px;
+      }
+
+      .legend-item {
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.14);
+      }
+
+      .legend-item strong,
+      .legend-item span {
+        display: block;
+      }
+
+      .legend-item span {
+        margin-block-start: 4px;
+        color: #d9f4e5;
+        font-size: 0.86rem;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin-block-start: 22px;
+      }
+
+      .summary-item {
+        padding: 12px 14px;
+        border-radius: 12px;
+        color: var(--ink);
+        background: #fff;
+      }
+
+      .summary-item strong,
+      .summary-item small {
+        display: block;
+      }
+
+      .summary-item strong {
+        font-size: 1.35rem;
+      }
+
+      .summary-item small {
+        color: var(--muted);
+      }
+
+      .toolbar {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 20;
+        border-block-end: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(10px);
+      }
+
+      .toolbar-inner {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(150px, 0.35fr)) auto;
+        gap: 10px;
+        align-items: end;
+        padding-block: 12px;
+      }
+
+      .control label {
+        display: block;
+        margin-block-end: 4px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .control input,
+      .control select,
+      .action-button {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid #aebbb4;
+        border-radius: 9px;
+        color: var(--ink);
+        background: #fff;
+      }
+
+      .control input,
+      .control select {
+        padding-inline: 11px;
+      }
+
+      .action-button {
+        width: auto;
+        padding-inline: 16px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .action-button.primary {
+        border-color: var(--brand);
+        color: #fff;
+        background: var(--brand);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 24px;
+        padding-block: 28px 64px;
+      }
+
+      .toc {
+        position: sticky;
+        inset-block-start: 92px;
+        align-self: start;
+        max-height: calc(100vh - 110px);
+        overflow: auto;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+      }
+
+      .toc h2 {
+        margin: 0 0 10px;
+        font-size: 0.95rem;
+      }
+
+      .toc ol {
+        display: grid;
+        gap: 7px;
+        margin: 0;
+        padding-inline-start: 20px;
+      }
+
+      .toc a {
+        font-size: 0.86rem;
+        text-decoration: none;
+      }
+
+      .content {
+        min-width: 0;
+      }
+
+      .intro-note,
+      .empty-state {
+        padding: 16px;
+        border: 1px solid #b8c7bf;
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .intro-note {
+        margin-block-end: 28px;
+      }
+
+      .intro-note strong {
+        color: var(--red);
+      }
+
+      .decision-section {
+        scroll-margin-block-start: 95px;
+        margin-block-end: 34px;
+      }
+
+      .section-heading {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        margin-block: 0 15px;
+      }
+
+      .section-heading h2 {
+        margin: 0;
+        font-size: 1.55rem;
+      }
+
+      .section-heading span {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .decision-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .decision {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 2px solid;
+        border-radius: 16px;
+        overflow: clip;
+        box-shadow: var(--shadow);
+        scroll-margin-block-start: 100px;
+      }
+
+      .decision.clear {
+        border-color: var(--green-line);
+        background: var(--green-bg);
+      }
+
+      .decision.hard {
+        border-color: var(--red-line);
+        background: var(--red-bg);
+      }
+
+      .decision[hidden],
+      .decision-section[hidden] {
+        display: none;
+      }
+
+      .decision legend {
+        width: 100%;
+        padding: 15px 18px 0;
+      }
+
+      .decision-title-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .decision-number,
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 25px;
+        padding-inline: 9px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+      }
+
+      .decision-number {
+        color: #fff;
+        background: #263b31;
+      }
+
+      .badge.clear {
+        color: #0b5c2d;
+        background: #c8f2d6;
+      }
+
+      .badge.hard {
+        color: #84211d;
+        background: #ffd8d5;
+      }
+
+      .badge.phase {
+        color: #31433a;
+        background: #e4ebe7;
+      }
+
+      .badge.registry {
+        color: var(--amber);
+        background: var(--amber-bg);
+      }
+
+      .decision-question {
+        display: block;
+        margin-block-start: 10px;
+        font-size: 1.22rem;
+        line-height: 1.35;
+      }
+
+      .decision-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+        gap: 18px;
+        padding: 16px 18px 20px;
+      }
+
+      .beginner,
+      .why,
+      .recommendation,
+      .subquestions {
+        padding: 13px;
+        border-radius: 10px;
+      }
+
+      .beginner {
+        border: 1px solid #b9d0c4;
+        background: #fff;
+      }
+
+      .why {
+        margin-block-start: 10px;
+        border-inline-start: 4px solid #62766c;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .beginner h3,
+      .why h3,
+      .recommendation h3,
+      .subquestions summary {
+        margin: 0 0 5px;
+        font-size: 0.9rem;
+      }
+
+      .beginner p,
+      .why p,
+      .recommendation p {
+        margin: 0;
+      }
+
+      .subquestions {
+        margin-block-start: 10px;
+        border: 1px dashed #9eaca4;
+        background: rgba(255, 255, 255, 0.75);
+      }
+
+      .subquestions summary {
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .subquestions ol {
+        display: grid;
+        gap: 7px;
+        margin-block: 10px 0;
+        padding-inline-start: 22px;
+      }
+
+      .options {
+        display: grid;
+        gap: 9px;
+      }
+
+      .option {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 8px 10px;
+        padding: 12px;
+        border: 1px solid #aebbb4;
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      .option.recommended {
+        border: 2px solid var(--blue);
+        background: var(--blue-bg);
+      }
+
+      .option input {
+        width: 18px;
+        height: 18px;
+        margin-block-start: 3px;
+        accent-color: var(--brand);
+      }
+
+      .option-copy strong,
+      .option-copy small {
+        display: block;
+      }
+
+      .option-copy small {
+        margin-block-start: 3px;
+        color: var(--muted);
+      }
+
+      .recommended-label {
+        display: inline-block;
+        margin-inline-start: 6px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        color: #fff;
+        background: var(--blue);
+        font-size: 0.68rem;
+      }
+
+      .recommendation {
+        margin-block-start: 11px;
+        border: 1px solid #9dbcf0;
+        background: #f5f8ff;
+      }
+
+      .evidence-note {
+        margin-block-start: 10px;
+        padding: 11px;
+        border: 1px solid #b8c7bf;
+        border-radius: 10px;
+        background: #fff;
+        font-size: 0.8rem;
+      }
+
+      .evidence-note strong,
+      .evidence-note span,
+      .evidence-note a {
+        display: block;
+      }
+
+      .clear-choice-button {
+        margin-block-start: 10px;
+        min-height: 38px;
+        font-size: 0.8rem;
+      }
+
+      .clear-choice-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-block-start: 10px;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .selection-status {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .empty-state {
+        text-align: center;
+      }
+
+      .footer {
+        border-block-start: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .footer-inner {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: center;
+        padding-block: 22px;
+      }
+
+      .footer-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .privacy-warning {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 900px) {
+        .legend,
+        .summary {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .toolbar {
+          position: static;
+        }
+
+        .toolbar-inner {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .toc {
+          position: static;
+          max-height: none;
+        }
+
+        .decision-body {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .hero-inner,
+        .layout,
+        .toolbar-inner,
+        .footer-inner {
+          width: min(100% - 20px, 1220px);
+        }
+
+        .legend,
+        .summary,
+        .toolbar-inner,
+        .footer-inner,
+        .meta {
+          grid-template-columns: 1fr;
+        }
+
+        .decision legend,
+        .decision-body {
+          padding-inline: 12px;
+        }
+
+        .footer-actions {
+          display: grid;
+        }
+
+        .action-button {
+          width: 100%;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        * {
+          transition: none !important;
+        }
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 14mm;
+      }
+
+      @media print {
+        * {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+
+        body {
+          background: #fff;
+          font-size: 10pt;
+        }
+
+        .toolbar,
+        .toc,
+        .footer-actions,
+        .clear-choice-button,
+        .skip-link,
+        .empty-state {
+          display: none !important;
+        }
+
+        .hero {
+          color: #000;
+          background: #fff;
+        }
+
+        .hero-inner,
+        .layout,
+        .footer-inner {
+          width: 100%;
+          padding-block: 0 12px;
+        }
+
+        .hero-copy,
+        .legend-item span {
+          color: #333;
+        }
+
+        .legend-item,
+        .summary-item {
+          border: 1px solid #777;
+          color: #000;
+          background: #fff;
+        }
+
+        .layout {
+          display: block;
+        }
+
+        .decision {
+          break-inside: avoid;
+          box-shadow: none;
+        }
+
+        .decision-body {
+          grid-template-columns: 1fr;
+        }
+
+        .decision[hidden],
+        .decision-section[hidden] {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">דלג לתוכן הראשי</a>
+    <header class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">CONNECT · מסמך החלטות</p>
+        <h1>כל השאלות המהותיות לפני ואחרי ה־Pilot</h1>
+        <p class="hero-copy">
+          השאלון מתרגם החלטות טכניות ועסקיות לשפה פשוטה. החלטה ירוקה
+          מסומנת מראש לפי ברירת המחדל ההנדסית. החלטה אדומה אינה נבחרת
+          אוטומטית: ההמלצה מודגשת, אך נדרש אישור מודע של הבעלים.
+        </p>
+        <div class="legend" aria-label="מקרא">
+          <div class="legend-item">
+            <strong>✓ ירוק — החלטה ברורה</strong>
+            <span>המלצה מקצועית חד־משמעית; עדיין נדרש אישור פורמלי.</span>
+          </div>
+          <div class="legend-item">
+            <strong>! אדום — החלטה קשה</strong>
+            <span>אין הכרעה חד־משמעית או שחסר מידע חיצוני חי.</span>
+          </div>
+          <div class="legend-item">
+            <strong>מומלץ — מסגרת כחולה</strong>
+            <span>האפשרות הטובה ביותר לפי המידע הקיים, עם נימוק.</span>
+          </div>
+        </div>
+        <div class="summary">
+          <div class="summary-item"><strong id="total-count">0</strong><small>החלטות במסמך</small></div>
+          <div class="summary-item"><strong id="default-count">0</strong><small>המלצות ירוקות מוצגות</small></div>
+          <div class="summary-item"><strong id="explicit-count">0</strong><small>בחירות מפורשות</small></div>
+          <div class="summary-item"><strong id="hard-open-count">0</strong><small>החלטות קשות פתוחות</small></div>
+          <div class="summary-item"><strong id="visible-count">0</strong><small>מוצגות כעת</small></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="toolbar" role="region" aria-label="חיפוש וסינון">
+      <div class="toolbar-inner">
+        <div class="control">
+          <label for="search">חיפוש לפי שאלה או מושג</label>
+          <input id="search" type="search" autocomplete="off" placeholder="לדוגמה: WhatsApp, חשבוניות, גיבוי">
+        </div>
+        <div class="control">
+          <label for="status-filter">סינון לפי מצב</label>
+          <select id="status-filter">
+            <option value="all">הכול</option>
+            <option value="clear">החלטות ברורות</option>
+            <option value="hard">החלטות קשות</option>
+            <option value="answered">נבחרה תשובה מפורשת</option>
+            <option value="unanswered">ללא בחירה מפורשת</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="phase-filter">סינון לפי שלב</label>
+          <select id="phase-filter">
+            <option value="all">כל השלבים</option>
+            <option value="before">לפני Pilot</option>
+            <option value="after">אחרי Pilot</option>
+          </select>
+        </div>
+        <button type="button" class="action-button primary" id="print-current">הדפסת התצוגה</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <nav class="toc" aria-label="ניווט בין פרקים">
+        <h2>תוכן עניינים</h2>
+        <ol id="toc-list"></ol>
+      </nav>
+
+      <main id="main" class="content" tabindex="-1">
+        <div class="intro-note">
+          <strong>חשוב:</strong> המסמך מכיל המלצות הנדסיות, לא ייעוץ
+          משפטי, מס או פרטיות. ערך שאינו ידוע מסומן ככזה ואין להסיק אותו
+          מתעבורה קודמת. אין להזין כאן Tokens, סיסמאות, מספרי כרטיס או PII.
+        </div>
+        <form id="decision-form">
+          <div id="sections"></div>
+        </form>
+        <div id="empty-state" class="empty-state" hidden>
+          לא נמצאו החלטות שמתאימות לחיפוש ולסינון שבחרת.
+        </div>
+        <section id="source-notes" class="intro-note" aria-labelledby="source-notes-title">
+          <h2 id="source-notes-title">10. מקורות, משמעות הבחירה ואופן האישור</h2>
+          <ol>
+            <li><a href="external-decisions-recommendations.md">המלצות להחלטות חיצוניות</a> — המלצות, בעלים וחסמי Production.</li>
+            <li><a href="team-operating-plan.md">תוכנית העבודה של הצוות</a> — תפקידים, Gates וחלוקת אחריות.</li>
+            <li><a href="whatsapp-rate-limits.md">מגבלות WhatsApp ו־Rate Limiting</a> — Baseline עובדתי ומדיניות Connect.</li>
+            <li><a href="product-specification-traceability.md">עקיבות האפיון</a> — קשר בין דרישות המוצר, מימוש וראיות.</li>
+            <li><a href="../shared/domain/productionDecisionRegistry.ts">Production Decision Registry</a> — ההחלטות הפורמליות שחוסמות מוכנות ל־Production.</li>
+          </ol>
+          <p>
+            בחירה במסמך היא חומר לדיון בלבד. היא אינה משנה קוד, אינה מפעילה ספק
+            ואינה מהווה אישור Production. החלטה נחשבת סגורה רק כאשר הבעלים והמאשרים
+            תיעדו אותה במקור האמת המתאים וצירפו Evidence מתוארך.
+          </p>
+        </section>
+        <noscript>
+          <div class="empty-state">
+            כדי להציג את השאלות האינטראקטיביות יש לפתוח JavaScript בדפדפן.
+            הקובץ אינו מתחבר לרשת ואינו שולח מידע החוצה.
+          </div>
+        </noscript>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <p class="privacy-warning" id="save-status">
+          הבחירות נשמרות במכשיר ובדפדפן הנוכחיים בלבד.
+        </p>
+        <div class="footer-actions">
+          <button type="button" class="action-button" id="export-answers">ייצוא בחירות ל־JSON</button>
+          <button type="button" class="action-button" id="reset-answers">איפוס הבחירות המקומיות</button>
+        </div>
+      </div>
+    </footer>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+    <script>
+      "use strict";
+
+      const STORAGE_KEY = "connect-decision-questionnaire:v1";
+      const STORAGE_PROBE_KEY = "connect-decision-questionnaire:storage-probe";
+      const sections = [
+        { id: "product-pilot", title: "מוצר, קהל יעד ו־Pilot", description: "מה בונים תחילה, למי, ובאילו גבולות מותר לבדוק עם משתמשים אמיתיים." },
+        { id: "team-code", title: "צוות, קוד וכלי עבודה", description: "מי אחראי, היכן נמצא הקוד ואיך משנים אותו בלי לאבד שליטה." },
+        { id: "hosting-security", title: "Hosting, גישה ואבטחה", description: "איפה המערכת רצה, איך נשמרים סודות ואיך מוכיחים מה נפרס." },
+        { id: "whatsapp", title: "WhatsApp ו־Meta", description: "החיבור הרשמי, נכסי העסק, סביבת הבדיקה וקצב השליחה." },
+        { id: "identity", title: "זהות והרשאות", description: "מי מנהל כניסה, הזמנות והרשאות לכל עסק במערכת." },
+        { id: "ai-knowledge", title: "AI, בוט ו־Knowledge", description: "איזה ספק מפעיל את הבוט, כמה עצמאות נותנים לו ואיך מגינים על קבצים." },
+        { id: "billing", title: "Billing, חבילות ומכסות", description: "מי גובה כסף, מה כל חבילה כוללת ומה קורה בחריגה או בכשל חיוב." },
+        { id: "operations-data", title: "תפעול, ניטור ומחזור חיי מידע", description: "איך יודעים שהמערכת בריאה, משחזרים מידע ומוחקים אותו כחוק." },
+        { id: "after-pilot", title: "החלטות לאחר ה־Pilot", description: "הרחבות חשובות שאפשר להחליט לפי מידע אמיתי מהניסוי ולא לפי ניחוש." }
+      ];
+
+      const decisions = [
+        {
+          code: "G01", section: "team-code", phase: "before", status: "clear",
+          question: "באיזו טכנולוגיה בונים את הממשק?",
+          beginner: "הטכנולוגיה היא בסיס הקוד שעליו נבנים המסכים. החלפת בסיס באמצע דומה להריסת שלד של בניין שכבר עומד: אפשר לעשות זאת, אבל המחיר והסיכון גבוהים.",
+          why: "המערכת הקיימת כבר כתובה כיישום Web ב־React/Next.js. Rewrite יעכב את ה־Pilot בלי יתרון מוכח.",
+          sub: ["האם נשארים עם המערכת הקיימת?", "האם יש צורך עסקי מוכח שמחייב Rewrite?"],
+          owner: "פיתוח", blocker: "אין חסם אם מאשרים את ברירת המחדל.",
+          recommendation: "להמשיך ב־React/Next.js ולא לחזור ל־Windows Forms. זו גם ההבהרה שכבר התקבלה מטל.",
+          options: [
+            { value: "react-next", title: "React/Next.js במערכת הקיימת", description: "ממשיכים מהקוד שכבר נבנה ונבדק.", recommended: true },
+            { value: "windows-forms", title: "Windows Forms", description: "לא מתאים למוצר Web רב־משתמשים ונוגד את ההחלטה שכבר התקבלה." },
+            { value: "web-rewrite", title: "Rewrite בטכנולוגיית Web אחרת", description: "אפשרי רק אם מתגלה חסם מהותי ומתועד; כרגע אין כזה." }
+          ]
+        },
+        {
+          code: "G02", section: "team-code", phase: "before", status: "clear",
+          question: "מהו ה־Repository הרשמי והיחיד של הקוד?",
+          beginner: "Repository הוא התיקייה המרכזית ששומרת את הקוד ואת היסטוריית השינויים. כשיש שני עותקים שמוגדרים רשמיים, הצוות עלול לפתח שתי גרסאות סותרות.",
+          why: "מקור אמת יחיד מאפשר Review, שחזור, CI/CD ותיעוד ברור של כל שינוי.",
+          sub: ["מי הבעלים החוקי של ה־Repository?", "האם כל הצוות עובד מאותו מקור אמת?", "מי רשאי לנהל Collaborators?", "כיצד מבטלים את מבנה ה־Git המקונן בלי לאבד היסטוריה או ליצור Repository מתחרה?"],
+          owner: "רועי", blocker: "Gate 0, עבודה צוותית ו־GitHub Governance.",
+          recommendation: "להעביר את talstilkol/connect הקיים ל־GitHub Organization של החברה ולהכריז עליו כ־Repository Authority; לא ליצור עותק מתחרה.",
+          options: [
+            { value: "transfer-existing", title: "העברת ה־Repository הקיים ל־Organization", description: "שומר את כל ההיסטוריה ומעביר בעלות לחברה.", recommended: true },
+            { value: "personal-owner", title: "השארה בבעלות אישית", description: "פשוט זמנית, אך יוצר תלות באדם יחיד וסיכון בעלות." },
+            { value: "copy-new", title: "פתיחת Repository חדש והעתקת הקוד", description: "יוצר כפילות ואי־ודאות לגבי הגרסה הרשמית." }
+          ]
+        },
+        {
+          code: "G03", section: "team-code", phase: "before", status: "clear",
+          question: "איך חברי הצוות משנים קוד ומאשרים אותו?",
+          beginner: "Branch הוא מסלול עבודה נפרד; Pull Request הוא בקשה מסודרת להכניס שינוי לענף הראשי לאחר Review ובדיקות. 2FA מוסיף שכבת אימות לחשבון.",
+          why: "זהות אישית ו־Review מאפשרים לדעת מי שינה מה, לעצור קוד שבור ולבטל גישה לאדם אחד בלבד.",
+          sub: ["האם 2FA חובה?", "כמה Reviews נדרשים?", "מי מוגדר ב־CODEOWNERS?", "אילו בדיקות CI חייבות לעבור?"],
+          owner: "רועי + Release/Security owner שטרם מונה", blocker: "שיתוף פעולה בטוח ו־Production evidence.",
+          recommendation: "חשבונות אישיים בלבד, 2FA, Branch Protection, Pull Request, Review, CODEOWNERS, Secret scanning ו־Checks חובה; אין Push ישיר ל־main.",
+          options: [
+            { value: "governed-pr", title: "חשבונות אישיים ותהליך Pull Request מוגן", description: "Audit מלא ובקרה לפני כל שינוי רשמי.", recommended: true },
+            { value: "direct-main", title: "חשבונות אישיים עם Push ישיר ל־main", description: "מהיר יותר לכאורה, אך שינוי שגוי נכנס בלי שער בטיחות." },
+            { value: "shared-account", title: "חשבון GitHub משותף", description: "לא מומלץ — אין אחריות אישית וקשה לבטל גישה בצורה בטוחה." }
+          ]
+        },
+        {
+          code: "G04", section: "team-code", phase: "before", status: "clear",
+          question: "איך הצוות משתמש ב־Claude וב־AnyDesk?",
+          beginner: "Seat אישי הוא משתמש נפרד לכל אדם. AnyDesk מאפשר שליטה מרחוק במחשב, ולכן שימוש בזהות משותפת מקשה לדעת מי ביצע פעולה ומגדיל סיכון.",
+          why: "גישה אישית משמרת Audit ומאפשרת להסיר עובד אחד בלי להחליף סיסמה לכל הצוות.",
+          sub: ["האם לכל אדם יש Seat אישי?", "האם למחשב המרוחק יש משתמש OS אישי ו־2FA?", "האם מותר להעתיק Secrets דרך Session מרוחק?"],
+          owner: "רועי + Security owner שטרם מונה", blocker: "גישה בטוחה לכלי הפיתוח.",
+          recommendation: "Claude Team בבעלות החברה עם Seat אישי. AnyDesk רק למחשב מוקשח, עם משתמש OS אישי, 2FA והרשאה מצומצמת; לעולם לא חשבון Claude משותף.",
+          options: [
+            { value: "company-seats", title: "Claude Team עם Seat אישי", description: "החברה שולטת בגישה ולכל פעולה יש זהות.", recommended: true },
+            { value: "approved-personal", title: "מנוי אישי נפרד ומאושר", description: "אפשרות ביניים אם מדיניות החברה מאשרת והמידע אינו רגיש." },
+            { value: "shared-session", title: "חשבון או Session משותף דרך AnyDesk", description: "לא מומלץ — פוגע באבטחה, Audit וביטול גישה." }
+          ]
+        },
+        {
+          code: "G05", section: "whatsapp", phase: "before", status: "clear",
+          question: "איך Connect מתחברת רשמית ל־WhatsApp?",
+          beginner: "Meta Cloud API הוא הממשק הרשמי לשליחה וקבלה. Access Token הוא מפתח סודי; הדפדפן של המשתמש אינו מקום בטוח לשמור אותו.",
+          why: "Backend מאפשר לשמור Token בסוד, לאכוף הרשאות, לתעד פעולות ולעצור שליחה מסוכנת.",
+          sub: ["היכן נשמר ה־Token?", "מי מאמת Webhooks?", "האם נדרש BSP מתווך?"],
+          owner: "דוד + Security owner", blocker: "חיבור Meta חי.",
+          recommendation: "Browser → Connect Backend → WhatsApp Business Platform הרשמי. Token לעולם לא נחשף ל־Frontend.",
+          options: [
+            { value: "backend-meta", title: "Meta Cloud API דרך Backend", description: "המסלול הרשמי והבטוח שמתאים לארכיטקטורה הקיימת.", recommended: true },
+            { value: "backend-bsp", title: "BSP מורשה דרך Backend", description: "אפשרי אם Discovery יוכיח צורך מסחרי או תפעולי אמיתי." },
+            { value: "browser-meta", title: "קריאה ישירה מהדפדפן ל־Meta", description: "לא מומלץ — חושף Token ועוקף בקרות שרת." }
+          ]
+        },
+        {
+          code: "G06", section: "whatsapp", phase: "before", status: "clear",
+          question: "מה עושים עם פרויקט ה־WordPress הקיים של האב?",
+          beginner: "הפרויקט הישן יכול ללמד אילו Webhooks ופעולות כבר עובדים, אך הוא עלול להכיל סיסמאות, Tokens ונתוני לקוחות אמיתיים.",
+          why: "העתקה עיוורת עלולה להדליף מידע או לשכפל החלטות ישנות שאינן מתאימות למערכת החדשה.",
+          sub: ["האם בעל הפרויקט אישר גישה?", "האם הוסרו Secrets ו־PII?", "אילו Endpoints, Webhooks ו־Providers נמצאו?"],
+          owner: "בעל הפרויקט + דוד + Security owner", blocker: "WordPress Discovery ו־חוזה ה־WhatsApp Backend.",
+          recommendation: "לקבל עותק מאושר, לבצע Sanitization וסריקת Secrets/PII, ואז להפיק Integration Inventory. להשתמש בו כמקור Discovery בלבד.",
+          options: [
+            { value: "sanitized-discovery", title: "Discovery מעותק מאושר ומושחר", description: "לומדים את החוזה הקיים בלי להעביר מידע רגיש.", recommended: true },
+            { value: "copy-api-first", title: "העתקת API או קוד לפני הבנה", description: "מסכנת את הפרויקט בתלות ובטעויות לא ידועות." },
+            { value: "full-project", title: "העברת הפרויקט המלא עם נתונים וסודות", description: "לא מומלץ — סיכון אבטחה ופרטיות מיידי." }
+          ]
+        },
+        {
+          code: "G07", section: "whatsapp", phase: "before", status: "clear",
+          question: "באיזה חשבון ומספר WhatsApp מבצעים את הבדיקה הראשונה?",
+          beginner: "Test WABA ומספר בדיקה הם סביבת ניסוי של Meta. הם מגינים על מספר עסקי פעיל ועל לקוחות אמיתיים מפני באג או שליחה שגויה.",
+          why: "ניסוי ראשון על נכס חי יכול לשלוח הודעה לאדם לא נכון, לפגוע באיכות המספר או להשבית פעילות קיימת.",
+          sub: ["מיהם נמעני הבדיקה המאושרים?", "מי רשאי להפעיל Kill switch?", "מתי מותר לעבור לנכס האב?"],
+          owner: "דוד + טל + Security/Product", blocker: "Meta Sandbox E2E.",
+          recommendation: "Test WABA תחילה. נכס האב רק לאחר מעבר Staging, אישור מפורש, בידוד ורשימת נמענים מורשים.",
+          options: [
+            { value: "test-waba", title: "Test WABA ומספר בדיקה", description: "הסביבה הבטוחה לניסוי הראשון.", recommended: true },
+            { value: "new-pilot-number", title: "מספר חדש ונפרד ל־Pilot", description: "מתאים לאחר הוכחת Sandbox ולפני שימוש במספר עסקי קיים." },
+            { value: "father-live-asset", title: "נכס WhatsApp הפעיל של האב", description: "לא מומלץ כניסוי ראשון; דורש אישור ובקרות מחמירות." }
+          ]
+        },
+        {
+          code: "G08", section: "identity", phase: "before", status: "clear",
+          question: "מי מנהל את הכניסה למערכת וזהות המשתמשים?",
+          beginner: "Authentication בודק מי האדם; Authorization בודק מה מותר לו לעשות. Identity Provider מנהל Login ו־Session, אך השרת עדיין חייב לבדוק הרשאה לכל פעולה.",
+          why: "המערכת כבר בנויה סביב חוזי Clerk. החלפה מוסיפה Migration וסיכון בלי יתרון ידוע.",
+          sub: ["האם Clerk עומד בדרישות Legal ותקציב?", "מי מגדיר Roles?", "האם MFA חובה ובאילו Roles?", "מהו Session expiry ואיך מבטלים Session לאחר הסרת משתמש?", "האם Passwordless מופעל?", "מי נכנס ל־Admin allowlist וכיצד מאשרים חריגה?"],
+          owner: "Product + Security + פיתוח", blocker: "Auth חי והזמנות צוות.",
+          recommendation: "להישאר עם Clerk, אלא אם יתגלה חסם עסקי, משפטי או אבטחתי מתועד.",
+          options: [
+            { value: "clerk", title: "Clerk בהתאם לחוזים הקיימים", description: "ממנף עבודה שכבר בוצעה ושומר את היקף השינוי קטן.", recommended: true },
+            { value: "other-idp", title: "Identity Provider אחר", description: "דורש השוואה ומיגרציה; מתאים רק אם קיים חסם מוכח." },
+            { value: "self-built", title: "מערכת Login עצמאית", description: "לא מומלץ — אחריות אבטחה מורכבת ללא צורך נוכחי." }
+          ]
+        },
+        {
+          code: "G09", section: "identity", phase: "before", status: "clear",
+          registryCheckId: "identity.team-invitation-policy",
+          question: "לכמה זמן הזמנת צוות תקפה ומתי אפשר להזמין מחדש?",
+          beginner: "Invitation TTL הוא הזמן שבו קישור הזמנה עדיין פעיל. קישור ישן עלול להגיע לאדם הלא נכון; הזמנות מקבילות עלולות ליצור בלבול או כפילות.",
+          why: "תפוגה קצרה מספיק מפחיתה סיכון, ו־Re-request רק אחרי מצב סופי מונע שתי הזמנות פעילות לאותו אדם.",
+          sub: ["מה קורה אחרי Expired?", "האם Revoked ניתן לשליחה מחדש?", "האם Pending חוסם הזמנה נוספת?"],
+          owner: "Product + Security", blocker: "identity.team-invitation-policy.",
+          recommendation: "תוקף של 72 שעות; הזמנה מחדש רק אחרי Expired, Revoked או Accepted, ולא בזמן Pending.",
+          options: [
+            { value: "72h-after-terminal", title: "72 שעות ו־Re-request אחרי מצב סופי", description: "איזון בין נוחות, עקביות ואבטחה.", recommended: true },
+            { value: "provider-default", title: "ברירת המחדל המשתנה של הספק", description: "פשוטה, אך אינה חוזה מוצר יציב של Connect." },
+            { value: "never-expires", title: "קישור ללא תפוגה", description: "לא מומלץ — קישור ישן נשאר מסוכן לאורך זמן." }
+          ]
+        },
+        {
+          code: "G10", section: "ai-knowledge", phase: "before", status: "clear",
+          registryCheckId: "security.file-scanner",
+          question: "איך בודקים שקובץ Knowledge אינו מכיל נוזקה?",
+          beginner: "Malware הוא קוד מזיק שיכול להסתתר בקובץ. Fail-closed אומר שאם שירות הסריקה אינו זמין, הקובץ נחסם במקום להיחשב נקי.",
+          why: "Extraction של קובץ לפני סריקה עלול להפעיל תוכן מסוכן בתוך סביבת העיבוד.",
+          sub: ["האם ה־Scanner מבודד?", "האם Extraction מותר רק אחרי clean?", "מהו Scanner timeout ומה קורה כשהוא חולף?", "מהו הגיל המרבי של חתימות Malware ומי מעדכן אותן?", "איך מטפלים ב־Scanner unavailable?"],
+          owner: "Security + פיתוח", blocker: "security.file-scanner.",
+          recommendation: "ClamAV clamd ב־Cloudflare Container מבודד, Fail-closed; אין Extraction לפני תוצאת clean.",
+          options: [
+            { value: "isolated-clamav", title: "ClamAV מבודד ו־Fail-closed", description: "ברירת המחדל שתואמת לתשתית ולחוזה הבטיחות.", recommended: true },
+            { value: "external-scanner", title: "שירות סריקה חיצוני", description: "אפשרי לאחר בדיקת פרטיות, עלות, זמינות ו־DPA." },
+            { value: "no-scan", title: "הסתמכות על סיומת או ללא סריקה", description: "לא מומלץ — סיומת קובץ אינה הוכחת בטיחות." }
+          ]
+        },
+        {
+          code: "G11", section: "ai-knowledge", phase: "before", status: "clear",
+          registryCheckId: "security.knowledge-upload-policy",
+          question: "אילו קבצי Knowledge מותר למשתמש להעלות?",
+          beginner: "Allowlist היא רשימה קטנה של סוגים מותרים. MIME ו־File signature בודקים את התוכן האמיתי, ולא רק את הסיומת שהמשתמש יכול לשנות.",
+          why: "צמצום סוג וגודל מפחית סיכון, זמן סריקה, עלויות ועומס על ה־AI.",
+          sub: ["מהו הגודל המרבי?", "אילו MIME types מותרים?", "האם קובץ מוצפן או Macro נחסם?"],
+          owner: "Product + Security", blocker: "security.knowledge-upload-policy.",
+          recommendation: "PDF, TXT ו־DOCX בלבד עד 10 MiB; לדחות MIME mismatch, קובץ מוצפן, ZIP, HTML, קוד ו־Macros.",
+          options: [
+            { value: "pdf-txt-docx-10", title: "PDF, TXT ו־DOCX עד 10 MiB", description: "Baseline מצומצם ובטוח לגרסה הראשונה.", recommended: true },
+            { value: "pdf-only", title: "PDF בלבד", description: "בטוח יותר אך מגביל שימוש לגיטימי ללא צורך מוכח." },
+            { value: "all-files", title: "כל סוג וגודל לפי הסיומת", description: "לא מומלץ — מגדיל מאוד את משטח התקיפה והעלות." }
+          ]
+        },
+        {
+          code: "G12", section: "ai-knowledge", phase: "before", status: "clear",
+          registryCheckId: "operations.knowledge-scan-recovery",
+          question: "מה עושים כאשר סריקת קובץ נתקעת?",
+          beginner: "Retry הוא ניסיון חוזר. בלי גבול הוא יכול לרוץ לנצח; בלי Retry קובץ תקין עלול להיכשל בגלל תקלה זמנית.",
+          why: "מדיניות מפורשת מונעת גם אובדן קובץ וגם לולאת ניסיונות אינסופית.",
+          sub: ["מתי מתחיל ניסיון חוזר?", "כמה ניסיונות מותרים?", "מי מטפל לאחר הכישלון האחרון?"],
+          owner: "Operations + פיתוח", blocker: "operations.knowledge-scan-recovery.",
+          recommendation: "Retry אחרי 15 דקות, עד שלושה ניסיונות, ואז Manual review; הקובץ נשאר חסום בכל הזמן הזה.",
+          options: [
+            { value: "15m-3-manual", title: "15 דקות, שלושה ניסיונות ואז Manual review", description: "גבול ברור עם מסלול התאוששות אנושי.", recommended: true },
+            { value: "retry-forever", title: "Retry ללא הגבלה", description: "לא מומלץ — יוצר עומס ותור שלא מסתיים." },
+            { value: "fail-immediately", title: "כישלון סופי מיד", description: "פשוט אך אינו מתמודד עם תקלה זמנית בסורק." }
+          ]
+        },
+        {
+          code: "G13", section: "operations-data", phase: "before", status: "clear",
+          registryCheckId: "operations.backup-policy",
+          question: "מהי מדיניות הגיבוי והשחזור הראשונית?",
+          beginner: "Backup הוא עותק של הנתונים; Restore הוא החזרתם. גיבוי שמעולם לא שוחזר הוא הבטחה, לא הוכחה שהוא באמת שימושי.",
+          why: "תרגיל שחזור מבודד מגלה בזמן אם הקבצים פגומים, חסרים או אינם תואמים למסד הנתונים.",
+          sub: ["באיזו תדירות מגבים?", "לכמה זמן שומרים?", "מתי מתרגלים Restore?", "האם Restore קשור ל־backupId ול־digests המדויקים?"],
+          owner: "Operations + Security", blocker: "operations.backup-policy ו־Production evidence.",
+          recommendation: "גיבוי יומי, שמירה 90 יום ותרגיל שחזור חודשי בסביבה מבודדת, עם Export מוצפן ו־digest validation. משך 90 הימים עדיין דורש אישורי עלות ו־Legal.",
+          options: [
+            { value: "daily-90-monthly", title: "יומי / 90 יום / Restore חודשי", description: "Baseline הנדסי מלא; תקופת השמירה כפופה לאישור פורמלי.", recommended: true },
+            { value: "time-travel-only", title: "D1 Time Travel בלבד", description: "אינו מחליף עותק מבודד והוכחת שחזור מקצה לקצה." },
+            { value: "backup-no-restore", title: "גיבוי ללא תרגיל Restore", description: "לא מומלץ — אין הוכחה שניתן להתאושש." }
+          ]
+        },
+        {
+          code: "G14", section: "operations-data", phase: "before", status: "clear",
+          registryCheckId: "operations.slo-measurement",
+          question: "מאילו נתונים מודדים את בריאות המערכת ואת ה־SLO?",
+          beginner: "SLO הוא יעד מדיד, למשל זמינות או זמן תגובה. Log מתעד אירוע; Trace מחבר שלבים של אותה בקשה; Telemetry היא כלל המדידות.",
+          why: "מקור יחיד עלול לפספס כשל. כשאין מספיק נתונים, הצגת ירוק מטעה יותר מהצגת unknown.",
+          sub: ["מהו חלון המדידה?", "כמה אירועים דרושים?", "מה מוצג כשאין מספיק נתונים?"],
+          owner: "Operations + פיתוח", blocker: "operations.slo-measurement.",
+          recommendation: "Cloudflare Logs/Traces יחד עם Telemetry של Connect; חלון 30 יום ומינימום 1,000 אירועים תקפים. מתחת לכך: insufficient-data.",
+          options: [
+            { value: "combined-telemetry", title: "Cloudflare ו־Telemetry אפליקטיבי", description: "תמונה משולבת של תשתית והתנהגות המוצר.", recommended: true },
+            { value: "app-logs-only", title: "לוגים של האפליקציה בלבד", description: "עלולים לפספס בעיה בשכבת התשתית או ברשת." },
+            { value: "manual-feeling", title: "בדיקה ידנית ללא מדד", description: "לא מומלץ — אי אפשר להוכיח יעד או לזהות מגמה." }
+          ]
+        },
+        {
+          code: "G15", section: "hosting-security", phase: "before", status: "clear",
+          question: "איך מגדירים את הכתובת הציבורית של כל סביבה?",
+          beginner: "Origin הוא השילוב של protocol, domain ו־port. ספקים משתמשים בו לקישורים, Redirects ו־Callbacks; כתובת שגויה יכולה להפנות משתמש לאתר זדוני.",
+          why: "ערך שרת קבוע ומאומת מונע Host-header injection וקישורים ל־localhost ב־Production.",
+          sub: ["מהו Domain של Development, Preview, Staging ו־Production?", "האם Preview מקבל Origin ייעודי או נשאר ללא Integrations חיים?", "האם HTTPS חובה?", "מי מאשר שינוי Origin?"],
+          owner: "ראשה/Deployment + Security", blocker: "Metadata, OAuth callbacks ו־Production deploy.",
+          recommendation: "APP_PUBLIC_ORIGIN קבוע בצד השרת, HTTPS לכל סביבה. localhost מותר רק ב־Development.",
+          options: [
+            { value: "fixed-https-per-env", title: "Domain HTTPS ייעודי לכל סביבה", description: "ברור, ניתן לאימות ומבודד בין סביבות.", recommended: true },
+            { value: "one-domain-paths", title: "Domain אחד ונתיב לכל סביבה", description: "מגדיל סיכון לערבוב Cookies, Redirects ונתונים." },
+            { value: "request-derived", title: "Origin מתוך בקשת המשתמש", description: "לא מומלץ — קלט חיצוני יכול לייצר Metadata זדוני." }
+          ]
+        },
+        {
+          code: "G16", section: "hosting-security", phase: "before", status: "clear",
+          question: "איך שומרים Secrets ומפעילים גישת חירום?",
+          beginner: "Secret הוא Token, סיסמה או מפתח שנותן גישה. Least privilege נותן רק את ההרשאה הנחוצה; Break-glass היא גישת חירום קצרה ומתועדת.",
+          why: "Secret משותף או קבוע מקשה לדעת מי השתמש בו ומגדיל נזק במקרה דליפה.",
+          sub: ["מי Owner של כל Secret?", "איפה הוא נשמר?", "מתי מבצעים Rotation?", "מי מאשר Break-glass וכיצד מבטלים אותו?"],
+          owner: "Security/Secrets owner שטרם מונה + רועי + ראשה", blocker: "Staging ו־Production.",
+          recommendation: "Secret store ייעודי, זהות אישית, Least privilege, Rotation, Audit ו־Revocation. אין לשלוח Token בצ'אט, מסמך או Git.",
+          options: [
+            { value: "managed-secrets", title: "Secrets מנוהלים עם Owner ו־Rotation", description: "גישה מדודה, ניתנת לביטול ולביקורת.", recommended: true },
+            { value: "shared-token", title: "Token משותף לצוות", description: "לא מומלץ — אין אחריות אישית או ביטול ממוקד." },
+            { value: "env-in-chat", title: "קובץ env בצ'אט או ב־Git", description: "לא מומלץ — דליפה ישירה של הרשאות." }
+          ]
+        },
+        {
+          code: "G17", section: "product-pilot", phase: "before", status: "clear",
+          question: "האם הממשק החדש צריך להעתיק את מראה ה־WordPress?",
+          beginner: "Workflow הוא רצף הפעולות שהמשתמש עושה כדי להשיג מטרה. אפשר לשמר Workflow מוצלח בלי להעתיק כל צבע, מרווח או מגבלה של המערכת הישנה.",
+          why: "העתקה עיוורת משמרת גם בעיות ישנות; עיצוב מחדש בלי Discovery עלול למחוק התנהגות שהלקוחות צריכים.",
+          sub: ["אילו Workflows ישנים עברו אימות?", "אילו רכיבים עוברים ל־Design System?", "מהם תנאי הקבלה לנגישות ולמובייל?"],
+          owner: "Product + ראשה", blocker: "UI Integration acceptance.",
+          recommendation: "לשמר Workflows והתנהגות עסקית מאומתת, אבל לבנות את הממשק ב־Design System של Connect ולא לבצע Pixel-perfect copy.",
+          options: [
+            { value: "preserve-workflows", title: "שימור Workflows, עיצוב Connect", description: "שומר ערך עסקי ומאפשר חוויית שימוש מודרנית ונגישה.", recommended: true },
+            { value: "pixel-copy", title: "העתקה Pixel-perfect", description: "משמרת גם מגבלות וחוב עיצובי של המערכת הישנה." },
+            { value: "ignore-old", title: "עיצוב מחדש ללא בדיקת הזרימות", description: "עלול להחמיץ דרישה עסקית שכבר הוכחה." }
+          ]
+        },
+        {
+          code: "G18", section: "product-pilot", phase: "before", status: "clear",
+          question: "איך משלימים Import של אנשי קשר מקובץ XLSX?",
+          beginner: "XLSX הוא פורמט Excel מורכב. ספרייה מוכרת ומקובעת לגרסה מדויקת קוראת אותו בצורה אמינה יותר מ־Parser שנכתב מאפס.",
+          why: "Parser עצמאי מגדיל זמן פיתוח וסיכון לשורות שגויות; Dependency לא נעולה יכולה להשתנות ללא Review.",
+          sub: ["האם XLSX נדרש ב־Pilot?", "האם גרסת הספרייה נעולה ונבדקה?", "מה קורה לשורה שגויה או כפולה?"],
+          owner: "Product + Security/Dependency owner", blocker: "פיתוח XLSX Import.",
+          recommendation: "לאשר לאחר Dependency review את read-excel-file@9.2.0 בגרסה נעולה. אם אין אישור, לתמוך ב־CSV בלבד עד לסגירה.",
+          options: [
+            { value: "locked-library", title: "read-excel-file@9.2.0 לאחר Review", description: "פתרון ממוקד עם גרסה מדויקת ובדיקות Import.", recommended: true },
+            { value: "csv-only", title: "CSV בלבד בשלב הראשון", description: "חלופה בטוחה אם אין אישור Dependency בזמן." },
+            { value: "custom-parser", title: "Parser XLSX עצמאי", description: "לא מומלץ — מורכבות ותחזוקה ללא יתרון ברור." }
+          ]
+        },
+        {
+          code: "R01", section: "hosting-security", phase: "before", status: "hard",
+          question: "באילו שירותי ענן מארחים את המערכת?",
+          beginner: "Hosting הוא המקום שבו ה־Frontend, ה־Backend, מסד הנתונים, הקבצים והתורים רצים. מעבר ספק אינו רק שינוי כתובת: לעיתים צריך להחליף Database, Queue, Workers ודרך הפריסה.",
+          why: "הקוד והראיות הקיימים בנויים ל־Cloudflare Workers, D1, R2 ו־Queues, בעוד תוכנית הצוות הזכירה Vercel ו־Railway. הסתירה חייבת הכרעה אחת.",
+          sub: ["האם נשארים ב־Cloudflare?", "אם עוברים — מה מחליף D1, R2, Queues, DLQ ו־Cron?", "מי אחראי לכל חלק ומי משלם?", "האם נכתב ADR ומיזם Migration מלא?"],
+          owner: "רועי + Architecture owner שטרם מונה + ראשה", blocker: "Deployment, Staging, חשבונות Hosting ו־Production topology.",
+          recommendation: "להישאר כעת ב־Cloudflare ולהגיע ל־Pilot עם הארכיטקטורה שכבר נבנתה. אם הנהלה מחייבת Vercel/Railway, לאשר Migration מלא — לא Hybrid זמני.",
+          options: [
+            { value: "cloudflare-full", title: "Cloudflare מלא", description: "המסלול הקצר והפחות מסוכן לפי הקוד הקיים.", recommended: true },
+            { value: "full-migration", title: "Migration מלא ל־Vercel + Railway", description: "דורש תכנון PostgreSQL, Queue, Storage, Workers, Backups ו־Observability מחדש." },
+            { value: "temporary-hybrid", title: "Hybrid זמני ללא מפת אחריות מלאה", description: "לא מומלץ — מוסיף רשת, Secrets, עלות ותקלות בין ספקים." }
+          ]
+        },
+        {
+          code: "R02", section: "team-code", phase: "before", status: "hard",
+          question: "מי האנשים שמחזיקים בתפקידי האחריות החסרים?",
+          beginner: "Owner מבצע את העבודה; Accountable הוא האדם היחיד שאחראי שהתוצאה נסגרת. הביטוי ‘הצוות אחראי’ לא אומר מי מחליט או מי קם בלילה בתקלה.",
+          why: "כמעט כל Gate ל־Production דורש שם של מאשר ושל מטפל במקרה כשל.",
+          sub: ["מי Product owner?", "מי Security, Operations, Privacy ו־Billing owner?", "מי Release ו־Secrets owner?", "מי Production on-call ומי המחליף שלו?"],
+          owner: "רועי/הנהלה", blocker: "אישורי Production, טיפול בתקריות ורוב ההחלטות האדומות.",
+          recommendation: "למנות אדם בשם מלא לכל Role, עם מחליף ודרך הסלמה. רועי: Accounts/Approver; דוד: WhatsApp Backend; ראשה: Deployment/UI; טל: Meta limits ו־Rate-limit R&D.",
+          options: [
+            { value: "named-raci", title: "RACI עם אדם ומחליף לכל תפקיד", description: "מבהיר מי מבצע, מי מאשר ומי מקבל עדכון.", recommended: true },
+            { value: "role-alias", title: "שם תפקיד ללא אדם", description: "מסמך נראה מלא, אך אין מי שאפשר לפנות אליו בפועל." },
+            { value: "everyone", title: "אחריות משותפת לכולם", description: "לא מומלץ — בפועל החלטות נופלות בין הכיסאות." }
+          ]
+        },
+        {
+          code: "R03", section: "product-pilot", phase: "before", status: "hard",
+          question: "מי קהל היעד הראשון של Connect?",
+          beginner: "ICP הוא תיאור הלקוח הראשון שעבורו מתכננים את המוצר. עסק יחיד וסוכנות שמנהלת עשרות לקוחות צריכים הרשאות, מסכים וחיוב שונים.",
+          why: "בלי ICP אחד, כל Feature, מחיר ואינטגרציה הופכים לדיון פתוח והמוצר גדל מהר מדי.",
+          sub: ["באיזה ענף הלקוח?", "כמה אנשי צוות יש לו?", "האם הוא מנהל עסק אחד או לקוחות רבים?", "מה הכאב המרכזי שהוא משלם כדי לפתור?"],
+          owner: "Product + רועי", blocker: "חבילות, תמחור, Integrations, Agency mode ושפות.",
+          recommendation: "להתחיל בעסק קטן/בינוני שמפעיל Workspace אחד. לבחור Agencies רק אם מחקר הלקוחות מוכיח שזה ה־ICP הראשון.",
+          options: [
+            { value: "single-smb", title: "עסק קטן/בינוני עם Workspace אחד", description: "היררכיית הרשאות ו־Billing פשוטה יותר ל־Pilot.", recommended: true },
+            { value: "agency", title: "סוכנות שמנהלת לקוחות רבים", description: "שוק אפשרי, אך מוסיף Multi-account, הרשאות וחיוב מורכבים." },
+            { value: "both", title: "עסקים וסוכנויות מהיום הראשון", description: "לא מומלץ — שני מוצרים כמעט שונים באותה גרסה." }
+          ]
+        },
+        {
+          code: "R04", section: "product-pilot", phase: "before", status: "hard",
+          question: "מהם הגבולות המדויקים של ה־Pilot?",
+          beginner: "Pilot הוא ניסוי מוגבל עם משתמשים אמיתיים; הוא אינו השקה פתוחה. Caps הם תקרות כתובות שמונעות מהניסוי לגדול בלי שליטה.",
+          why: "בלי גבול, תקלה קטנה יכולה להשפיע על לקוחות רבים, לעלות כסף או לפגוע באיכות מספר WhatsApp.",
+          sub: ["כמה Tenants, משתמשים ומספרי WhatsApp?", "מי רשאי לקבל הודעה?", "כמה הודעות וקמפיינים?", "אילו Features מופעלים?", "מה נחשב הצלחה?", "איזו תקלה עוצרת מיד?", "מי מפעיל Kill switch ו־Rollback?"],
+          owner: "Product + Operations + Security", blocker: "Gate 7 ותחילת Pilot עם נתונים אמיתיים.",
+          recommendation: "Pilot סגור וקטן, Test WABA תחילה, רשימת נמענים מאושרת, תקרות כתובות, Feature flags, Kill switch ותנאי הצלחה/עצירה מדידים.",
+          options: [
+            { value: "closed-capped", title: "Pilot סגור עם Caps ו־Kill switch", description: "מגביל את רדיוס הנזק ומייצר Evidence ברור.", recommended: true },
+            { value: "multi-tenant-beta", title: "Beta רב־לקוח", description: "אפשרי רק לאחר Pilot מוצלח ותמיכה תפעולית מוכחת." },
+            { value: "public-launch", title: "פתיחה לכל לקוח ללא Caps", description: "לא מומלץ — זו השקה, לא Pilot." }
+          ]
+        },
+        {
+          code: "R05", section: "product-pilot", phase: "before", status: "hard",
+          question: "אילו שפות זמינות ב־Pilot?",
+          beginner: "כל שפה דורשת תרגום, כיוון כתיבה RTL או LTR, בדיקות מסכים ותמיכה. ערבית ועברית נכתבות מימין לשמאל, אך אינן אותה עבודת תוכן.",
+          why: "יותר שפות מגדילות את קהל הניסוי אך גם את זמן QA ואת הסיכון לטקסט חסר או מסך שבור.",
+          sub: ["מהי שפת ה־ICP?", "מי מאשר תרגומים?", "האם התמיכה מסוגלת לענות בכל שפה?", "מהו תנאי הקבלה ל־RTL/LTR?"],
+          owner: "Product + ראשה", blocker: "Content QA ו־Pilot acceptance.",
+          recommendation: "אם ה־ICP ישראלי, עברית ב־Pilot ותשתית מוכנה לאנגלית ולערבית. האפיון המלא ממשיך לחייב שלוש שפות בהמשך.",
+          options: [
+            { value: "hebrew-first", title: "עברית בלבד ב־Pilot", description: "היקף QA קטן; מתאים רק אם ה־ICP אכן דובר עברית.", recommended: true },
+            { value: "hebrew-english", title: "עברית ואנגלית", description: "מאפשר קהל רחב יותר אך כמעט מכפיל עבודת תוכן ובדיקה." },
+            { value: "three-languages", title: "עברית, אנגלית וערבית", description: "מממש יעד רחב מוקדם, במחיר זמן ותמיכה גבוהים יותר." }
+          ]
+        },
+        {
+          code: "R06", section: "whatsapp", phase: "before", status: "hard",
+          question: "מי הבעלים החוקי והטכני של נכסי Meta?",
+          beginner: "Business Portfolio, WABA, מספר טלפון ו־Templates הם נכסים עסקיים. אם הם שייכים לחשבון אישי יחיד, אובדן הגישה יכול לעצור את כל השירות.",
+          why: "בעלות קובעת מי יכול לאשר Templates, להחליף Token, להעביר מספר ולהגיב לחסימה.",
+          sub: ["מי הבעלים החוקי של Business Portfolio?", "מי Admin טכני ומי גיבוי?", "למי שייכים WABA, המספר וה־Templates?", "כיצד מבטלים גישה לעובד שעזב?"],
+          owner: "רועי + בעל הנכס + Legal/Security", blocker: "Meta Pilot ו־Production.",
+          recommendation: "ב־Production: נכסים בבעלות החברה עם Admins אישיים. נכס האב יכול לשמש זמנית רק באישור מפורש, Scope מוגבל ותוכנית יציאה.",
+          options: [
+            { value: "company-owned", title: "נכסים בבעלות החברה", description: "בעלות יציבה, Admins אישיים ויכולת התאוששות.", recommended: true },
+            { value: "father-temporary", title: "נכס האב באופן זמני ומאושר", description: "מתאים לניסוי מוגבל בלבד עם חוזה אחריות ותאריך סיום." },
+            { value: "developer-personal", title: "נכס אישי של מפתח או Login משותף", description: "לא מומלץ — תלות באדם יחיד וחוסר Audit." }
+          ]
+        },
+        {
+          code: "R07", section: "whatsapp", phase: "before", status: "hard",
+          question: "האם פרויקט WordPress מחובר ישירות ל־Meta או דרך BSP?",
+          beginner: "BSP הוא ספק מורשה שמתווך בין העסק ל־WhatsApp. Direct Meta הוא חיבור ישיר ל־Cloud API. לכל מסלול חוזה, עלות ודרך תמיכה שונים.",
+          why: "אי אפשר לבנות Adapter נכון או לתכנן Migration לפני שיודעים מי הספק בפועל ואילו Webhooks ו־Credentials קיימים.",
+          sub: ["מהו Base URL של ה־API בלי לחשוף Secret?", "מי מנפיק Token?", "אילו Webhooks פעילים?", "האם קיימת תלות מסחרית ב־BSP?"],
+          owner: "דוד", blocker: "Gate 2 וחוזה ה־WhatsApp Backend.",
+          recommendation: "לא לנחש. דוד מפיק Inventory מהעותק המושחר; אם אין תלות מסחרית מוכחת ב־BSP, לבחור Direct Meta מאחורי Adapter.",
+          options: [
+            { value: "direct-meta-after-evidence", title: "Direct Meta לאחר אימות", description: "פחות שכבת תיווך; ההמלצה אם ה־Inventory מאשר.", recommended: true },
+            { value: "existing-bsp", title: "BSP קיים", description: "נכון אם הוא מספק יכולת או חוזה שהמוצר באמת צריך." },
+            { value: "unknown-adapter", title: "Adapter מותאם או שילוב", description: "נבחר רק אם ה־Inventory מגלה תצורה מורכבת אמיתית." }
+          ]
+        },
+        {
+          code: "R08", section: "ai-knowledge", phase: "before", status: "hard",
+          registryCheckId: "ai.provider",
+          question: "באיזה ספק ובאילו Models מפעילים את ה־AI?",
+          beginner: "Provider הוא החברה שמפעילה את שירות ה־AI; Model הוא המנוע המסוים. Adapter הוא שכבת תרגום שמאפשרת להחליף ספק בלי לשכתב את כל המערכת.",
+          why: "הבחירה משפיעה על איכות, פרטיות, DPA, מחיר, זמן תגובה וזמינות. שם מוכר אינו הוכחה שהמודל מתאים לשיחות Connect.",
+          sub: ["מהו Budget חודשי?", "אילו שני Models עוברים Eval על שיחות מושחרות?", "מהם Timeout ו־Fallback?", "האם store:false ו־Model allowlist מאושרים?", "מהו Exit condition מהספק?"],
+          owner: "Product + פיתוח + Security/Privacy", blocker: "ai.provider והפעלת AI חי.",
+          recommendation: "OpenAI Responses API מאחורי Adapter, רק לאחר Eval, אישור פרטיות ותקציב; להתחיל Canary מצומצם. אפשר להשאיר AI כבוי ב־Pilot עד הסגירה.",
+          options: [
+            { value: "openai-after-eval", title: "OpenAI Responses API לאחר Eval", description: "המלצה נוכחית, עם Adapter ו־store:false.", recommended: true },
+            { value: "other-after-eval", title: "ספק אחר לאחר Eval זהה", description: "לגיטימי אם הוא מנצח באיכות, פרטיות ועלות." },
+            { value: "multi-provider-v1", title: "Multi-provider מהגרסה הראשונה", description: "מוסיף מורכבות תפעולית לפני שיש שימוש שמצדיק אותה." },
+            { value: "ai-off-pilot", title: "AI כבוי ב־Pilot", description: "מסלול בטוח אם האישורים או ה־Eval טרם הושלמו." }
+          ]
+        },
+        {
+          code: "R09", section: "ai-knowledge", phase: "before", status: "hard",
+          question: "כמה עצמאות נותנים לבוט AI?",
+          beginner: "Draft-only אומר שה־AI מציע תשובה ואדם מאשר. Auto-send אומר שהמערכת שולחת בלי אישור אנושי. Handoff מעביר את השיחה לנציג כאשר הבוט אינו בטוח או הנושא רגיש.",
+          why: "שליחה אוטומטית יכולה לחסוך זמן, אך תשובה שגויה יוצאת ישירות ללקוח ועלולה לגרום נזק עסקי או משפטי.",
+          sub: ["אילו נושאים תמיד עוברים לנציג?", "מהו Confidence threshold?", "מתי אישור ישן מתבטל?", "מהי תקרת העלות לשיחה?", "איך עוצרים Auto-send מיד?"],
+          owner: "Product + AI owner שטרם מונה + Security", blocker: "AI Agent ב־Production.",
+          recommendation: "Draft-only או אישור נציג ב־Pilot. Auto-send רק לתרחישי Low-risk שעברו Eval, עם Budget, Audit, Handoff ו־Kill switch.",
+          options: [
+            { value: "draft-approval", title: "Draft ואישור נציג", description: "שומר אדם בלולאה בזמן איסוף Evidence.", recommended: true },
+            { value: "low-risk-auto", title: "Auto-send לתרחישים Low-risk בלבד", description: "שלב מתקדם לאחר Eval ומדיניות Confidence חתומה." },
+            { value: "full-auto", title: "Auto-send מלא", description: "לא מומלץ ל־Pilot — רדיוס נזק גבוה מדי." }
+          ]
+        },
+        {
+          code: "R21", section: "billing", phase: "before", status: "hard",
+          question: "האם מפעילים Billing אוטומטי בתוך ה־Pilot?",
+          beginner: "אפשר לבדוק את ערך המוצר בלי לגבות כסף. הפעלת Checkout ב־Pilot מוסיפה מס, החזרים, תמיכה בכשלי תשלום ונתונים כספיים לפני שהמוצר הוכח.",
+          why: "ערבוב ניסוי מוצר עם מערכת חיוב מרחיב את הסיכון ואת מספר הדברים שצריך לתמוך בהם בו־זמנית.",
+          sub: ["האם משתתפי ה־Pilot משלמים?", "אם לא — אילו Caps תפעוליים חלים עליהם?", "אם כן — מי מאשר מחיר, מסמך מס והחזר?", "מי מפעיל ומכבה את Checkout?"],
+          owner: "רועי/Product + Finance + Legal", blocker: "פתיחת Checkout ב־Pilot.",
+          recommendation: "להשאיר Billing אוטומטי כבוי ב־Pilot הסגור, אבל לאכוף Caps תפעוליים. לאסוף משוב על נכונות לשלם בלי לשמור פרטי תשלום.",
+          options: [
+            { value: "billing-off", title: "Billing כבוי ב־Pilot", description: "בודקים מוצר ושימוש לפני שמוסיפים מערכת כספית.", recommended: true },
+            { value: "manual-invoice", title: "חשבונית ידנית ללקוחות Pilot", description: "אפשרי רק לאחר אישור Finance/Legal ותהליך תמיכה ברור." },
+            { value: "live-checkout", title: "Checkout אוטומטי ב־Pilot", description: "מגדיל Scope ודורש לסגור ספק, מס, Refund ו־Lifecycle מראש." }
+          ]
+        },
+        {
+          code: "R10", section: "billing", phase: "before", status: "hard",
+          registryCheckId: "billing.provider",
+          question: "איזה ספק Billing מנהל תשלומים ומנויים?",
+          beginner: "Merchant of Record גובה מהלקוח ומטפל בחלק גדול מחובות המס והמסמכים כמוכר הרשום. ספק תשלומים רגיל משאיר יותר אחריות מס וחשבונאות על החברה.",
+          why: "הבחירה תלויה בישות המשפטית, חשבון הבנק, מדינות המכירה, Onboarding ועלויות שאינן ידועות מתוך הקוד.",
+          sub: ["באיזו מדינה רשומה החברה?", "האם Paddle מאשר את הישות וה־Payouts?", "האם קיימת תשתית מס ל־Stripe?", "מי יוצר Checkout session ואיזה Webhook חתום הוא מקור האמת?", "מהו ספק ה־Fallback אם ה־Onboarding נדחה?"],
+          owner: "Finance owner שטרם מונה + Product + פיתוח", blocker: "billing.provider ומכירה מסחרית.",
+          recommendation: "לפני GA בתשלום: Paddle כ־Merchant of Record אם הישות, Onboarding ו־Payouts מאושרים; אחרת Stripe רק עם תשתית מס מתאימה. ספק אחד בלבד ב־v1.",
+          options: [
+            { value: "paddle-approved", title: "Paddle לאחר אישור הישות", description: "המלצה ל־SaaS גלובלי קטן כאשר Onboarding ו־Payouts אפשריים.", recommended: true },
+            { value: "stripe-tax-ready", title: "Stripe עם תשתית מס קיימת", description: "מתאים כשהחברה מוכנה לנהל מס, חשבוניות וציות בעצמה." },
+            { value: "defer-provider", title: "דחיית בחירת ספק עד השלמת בדיקות הישות", description: "משאיר Checkout כבוי ואינו ממציא התאמה שעדיין לא אומתה." },
+            { value: "two-providers", title: "שני ספקים בגרסה הראשונה", description: "לא מומלץ — מכפיל Webhooks, Ledger ותקלות." }
+          ]
+        },
+        {
+          code: "R11", section: "billing", phase: "before", status: "hard",
+          question: "מהו מחזור החיים המלא של מנוי?",
+          beginner: "Subscription אינו רק תשלום ראשון. צריך להחליט מה קורה בתקופת ניסיון, בכשל חיוב, בזמן חסד, בהקפאה, בביטול ובהחזר.",
+          why: "בלי State machine מפורש, לקוח עלול לקבל שירות בלי תשלום או להיחסם ולמחוק מידע בטעות.",
+          sub: ["מי יוצר Checkout session ומציג את תנאי העסקה?", "כמה זמן Trial?", "מהו Grace period ומהו Dunning?", "מתי Suspension מתחיל ומה עדיין מותר לקרוא?", "מתי Cancellation נכנס לתוקף?", "מהם כללי Refund ו־Proration?", "כיצד Webhook חתום מעדכן את ה־Ledger פעם אחת בלבד?"],
+          owner: "Finance + Product + Legal + פיתוח", blocker: "Billing, Packages ומכירה מסחרית.",
+          recommendation: "להגדיר State machine גרסתי עם Trial, Grace, Dunning, Suspension, Cancellation ו־Refund; לא להפעיל חיוב לפני Webhooks חתומים ואידמפוטנטיים.",
+          options: [
+            { value: "explicit-lifecycle", title: "Lifecycle מלא ומפורש", description: "כל מעבר מצב, הרשאה והתראה מוגדרים ונבדקים.", recommended: true },
+            { value: "manual-billing", title: "חיוב ידני בלבד", description: "אפשרי ל־Pilot קטן, אך אינו פתרון ל־GA." },
+            { value: "immediate-block", title: "חסימה מיידית בכל כשל", description: "לא מומלץ — כרטיס שנדחה זמנית אינו הצדקה לאובדן עבודה." }
+          ]
+        },
+        {
+          code: "R12", section: "whatsapp", phase: "before", status: "hard",
+          registryCheckId: "security.rate-limit-policy",
+          evidence: {
+            checkedAt: "2026-08-16",
+            liveStatus: "unknown/unavailable — יש לקרוא מה־WABA ומהמספר לפני Pilot",
+            href: "whatsapp-rate-limits.md",
+            label: "מטריצת מגבלות WhatsApp ו־Rate Limiting"
+          },
+          question: "מהי מדיניות Rate Limiting של Meta ושל Connect?",
+          beginner: "Rate Limit הוא תקרת קצב. Meta מגבילה כמה מהר מספר שולח ולכמה נמענים ייחודיים; Connect צריכה מכסות פנימיות נמוכות יותר כדי למנוע הצפה, חסימה ועלות לא צפויה.",
+          why: "יש שלוש שכבות שונות: מגבלת ספק חיה, קיבולת Webhook/Queue ומכסת מוצר. ערבוב ביניהן יוצר מספר שקרי או חסימה של תעבורה לגיטימית.",
+          sub: ["מהם ה־Phone throughput וה־Portfolio messaging limit החיים?", "האם המספר Coexistence מוגבל ל־20 mps, רגיל ל־80 mps או שודרג ל־1,000 mps?", "איך נאכף Pair rate של הודעה אחת ל־6 שניות לאותו נמען?", "כמה Headroom שומרים ל־Inbound ול־Status webhooks?", "מהן מכסות Tenant, משתמש, קמפיין ומספר?", "כיצד מטפלים ב־429, Retry-After, Backoff, DLQ ו־Kill switch?"],
+          owner: "טל — Facts/R&D; דוד — Implementation; Product + Security — Approval", blocker: "security.rate-limit-policy, חיבור Meta חי ו־Pilot.",
+          recommendation: "טל מאמת מקורות Meta ואת ערכי החשבון החיים; דוד מיישם Limiter רב־שכבתי, Queue, Backoff ו־Kill switch. להתחיל שמרני ולהתאים לפי Telemetry ו־Load test. הערכים החיים כעת unknown/unavailable.",
+          options: [
+            { value: "dynamic-layered", title: "מכסות דינמיות ושמרניות לפי Scope", description: "מפריד ספק, תשתית ומוצר ומתעדכן לפי WABA/Phone החיים.", recommended: true },
+            { value: "static-doc-numbers", title: "מספרים קבועים מהתיעוד", description: "לא מספיק — חשבון חי, איכות ו־Tier יכולים להשתנות." },
+            { value: "send-until-error", title: "שליחה עד ש־Meta מחזירה שגיאה", description: "לא מומלץ — גורם ל־Retry storms, פגיעה באיכות וחוויית משתמש לא צפויה." }
+          ]
+        },
+        {
+          code: "R13", section: "operations-data", phase: "before", status: "hard",
+          registryCheckId: "operations.slo-alert-policy",
+          question: "מי מקבל התראת SLO ובאיזה כלי?",
+          beginner: "Alert הוא הודעה שדורשת פעולה; On-call הוא האדם התורן שמגיב. מדידה בלי אדם שמקבל אחריות אינה מגינה על Production.",
+          why: "התראה ללא בעלים נשארת פתוחה, והתראה שמכילה PII יוצרת אירוע פרטיות נוסף.",
+          sub: ["מי On-call ראשי ומחליף?", "מהו ספק ההתראות?", "מהו נתיב ההסלמה לפי חומרה?", "תוך כמה זמן חייבים לאשר קבלה?", "אילו פרטים אסור לכלול בהתראה?"],
+          owner: "Operations/on-call שטרם מונה", blocker: "operations.slo-alert-policy ושחרור Production.",
+          recommendation: "On-call ומחליף בשמות, ספק ייעודי כמו PagerDuty או חלופה מאושרת, והסלמה אוטומטית גם על SLO breach וגם על insufficient-data — בלי PII.",
+          options: [
+            { value: "dedicated-oncall", title: "On-call מוגדר וספק התראות ייעודי", description: "כולל אישור קבלה, הסלמה ותיעוד תקרית.", recommended: true },
+            { value: "chat-email", title: "Slack או Email בלבד", description: "פשוט יותר אך הודעה יכולה להיבלע ואין הבטחת תגובה." },
+            { value: "no-alerting", title: "ללא התראה אוטומטית", description: "לא מומלץ — תקלה תתגלה מהלקוח במקום מהמערכת." }
+          ]
+        },
+        {
+          code: "R14", section: "operations-data", phase: "before", status: "hard",
+          registryCheckId: "governance.data-retention-policy",
+          question: "כמה זמן שומרים כל סוג מידע ומתי מותר למחוק אותו?",
+          beginner: "Retention הוא זמן השמירה; Trigger הוא האירוע שמתחיל את הספירה, למשל סגירת Tenant. Legal Hold עוצר מחיקה כאשר יש צורך משפטי, גם אם הזמן עבר.",
+          why: "שמירה ארוכה מדי מגדילה סיכון ועלות; מחיקה מוקדמת יכולה להפר חוק, חוזה או לפגוע ביכולת תמיכה וחקירה.",
+          sub: ["האם Legal אישר כל אחת מ־25 מחלקות המידע?", "מהו Trigger החוקי לכל מחלקה?", "כיצד נחסמות רשומות פעילות ו־Legal Hold?", "מי יכול להפעיל ולשחרר Hold?", "מהו תהליך Export לבקשת לקוח או נושא מידע?", "מהו תהליך Deletion request ומי מאשר את ה־Scope?", "האם Dry run, Plan קצר־תוקף ו־Restore rehearsal עברו?"],
+          owner: "Legal + Security + Data/Privacy owner שטרם מונו", blocker: "governance.data-retention-policy; אסור לחבר Delete adapter לפני אישור.",
+          recommendation: "לאשר את Policy v2 לכל Data class עם Legal. ה־Baseline ההנדסי 30/90/730/2555 ימים לפי סוג מידע אינו ייעוץ משפטי; 2555 ימי Billing דורשים עו״ד ורו״ח.",
+          options: [
+            { value: "policy-v2-legal", title: "Policy v2 לאחר Legal review", description: "תקופה ו־Trigger נפרדים לכל מחלקה, Legal Hold ו־Audit.", recommended: true },
+            { value: "shorter-by-market", title: "תקופות קצרות יותר לפי שוק וחוזה", description: "אפשרי אם Legal מאשר והצרכים התפעוליים נשמרים." },
+            { value: "one-period", title: "תקופה אחת לכל הנתונים", description: "לא מומלץ — Billing, Consent, הודעות ו־Credentials אינם אותו מחזור חיים." },
+            { value: "keep-forever", title: "שמירה ללא הגבלה", description: "לא מומלץ כברירת מחדל — סיכון ועלות מצטברים." }
+          ]
+        },
+        {
+          code: "R15", section: "billing", phase: "before", status: "hard",
+          question: "אילו חבילות, מחירים ו־Entitlements מוכרים?",
+          beginner: "Plan הוא חבילת מנוי; Entitlement הוא מה שהלקוח רשאי לעשות במסגרתה. Usage ledger הוא רישום מדויק של הצריכה לאורך זמן.",
+          why: "אם ערכים קשיחים מפוזרים ב־UI, Backend ו־Billing, שינוי מחיר יוצר סתירות וחיוב לא נכון.",
+          sub: ["כמה Users, Numbers, Contacts ו־Messages כל Plan כולל?", "כמה Bots, AI usage ו־Storage?", "מה המחיר, המטבע ויחידת הזמן?", "האם Plan catalog גרסתי?", "מה מוצג ללקוח לפני חיוב?"],
+          owner: "רועי/Product + Billing owner שטרם מונה", blocker: "Package/Quota development ו־Billing.",
+          recommendation: "Plan catalog גרסתי כמקור אמת אחד, עם Entitlements ו־Usage ledger. אם ה־Pilot חינמי, להגדיר Caps תפעוליים בלי להמציא מחיר.",
+          options: [
+            { value: "versioned-catalog", title: "Plan catalog גרסתי", description: "Backend, UI ו־Billing קוראים אותה הגדרה ומחזיקים היסטוריה.", recommended: true },
+            { value: "one-plan-v1", title: "חבילה אחת בלבד ב־v1", description: "מפשטת השקה, אך עדיין דורשת Catalog וגבולות מפורשים." },
+            { value: "hardcoded-ui", title: "מחירים ומכסות קשיחים ב־UI", description: "לא מומלץ — ה־UI אינו מקור אמת או Ledger." }
+          ]
+        },
+        {
+          code: "R16", section: "billing", phase: "before", status: "hard",
+          question: "מה קורה כאשר לקוח חורג ממכסה או משנה חבילה?",
+          beginner: "Hard limit חוסם פעולה; Soft limit מתריע אך מאפשר; Overage מחייב תשלום נוסף. Proration הוא חישוב יחסי כאשר משנים חבילה באמצע תקופה.",
+          why: "כל משאב מתנהג אחרת: חריגת Storage אינה זהה לחריגת הודעות, ו־Downgrade אסור שימחק נתונים בשקט.",
+          sub: ["מהי התנהגות כל Entitlement?", "Upgrade מיד או במחזור הבא?", "Downgrade מיד או במחזור הבא?", "מה קורה לעבודות שכבר ב־Queue?", "מי רשאי Override ולכמה זמן?"],
+          owner: "Product + Billing + דוד", blocker: "Quota enforcement וחוויית Upgrade/Downgrade.",
+          recommendation: "החלטה נפרדת לכל Entitlement. Downgrade חוסם יצירה חדשה לפי Policy אך אינו מוחק נתונים; Overrides קצרים ומתועדים.",
+          options: [
+            { value: "per-entitlement-policy", title: "Policy נפרד לכל Entitlement", description: "מאפשר לבחור Hard, Soft או Overage לפי הסיכון והעלות.", recommended: true },
+            { value: "all-hard", title: "Hard limit לכל המשאבים", description: "ברור אך עלול לעצור פעילות לקוח בגלל חריגה קטנה." },
+            { value: "all-soft", title: "Soft limit לכל המשאבים", description: "נוח ללקוח אך עלול לייצר עלות וסיכון בלתי מוגבלים." }
+          ]
+        },
+        {
+          code: "R17", section: "billing", phase: "before", status: "hard",
+          question: "אילו פרטי קשר עסקיים שומרים ולמי מותר לערוך אותם?",
+          beginner: "איש הקשר לחשבוניות אינו בהכרח האדם שמקבל התראת אבטחה. Email וטלפון הם PII ולכן צריך לשמור רק את הנדרש ולשלוט בגישה.",
+          why: "Contact יחיד לכל העסק גורם להתראות להגיע לאדם הלא נכון; שדות חופשיים מקשים לאמת ולמחוק מידע.",
+          sub: ["האם יש Billing, Operations ו־Security contact נפרדים?", "אילו שדות חובה?", "איך מאמתים Email/Phone?", "מי רשאי לערוך?", "כמה זמן שומרים לאחר סגירת Tenant?"],
+          owner: "Product + Security + Legal", blocker: "Business profile, Billing ו־Notifications.",
+          recommendation: "ישויות קשר נפרדות לפי תפקיד, אימות, הרשאות ו־Audit. לא לשמור Email או Phone בתוך Display name או Notes.",
+          options: [
+            { value: "role-contacts", title: "Contacts נפרדים לכל תפקיד", description: "התראה מגיעה לבעל האחריות הנכון ונשמרת בצורה מובנית.", recommended: true },
+            { value: "single-contact", title: "Contact יחיד לכל העסק", description: "פשוט, אך אינו מתאים כאשר האחריות מפוצלת." },
+            { value: "free-text", title: "פרטים בתוך Display name או Notes", description: "לא מומלץ — קשה לאמת, להרשות ולמחוק." }
+          ]
+        },
+        {
+          code: "R18", section: "product-pilot", phase: "before", status: "hard",
+          question: "האם Recurring Campaign נכלל ב־Pilot, ואם כן כיצד הוא עובד?",
+          beginner: "Recurring Campaign שולח שוב לפי לוח זמנים. Idempotency מבטיחה שאותה ריצה שנקלטה פעמיים לא תיצור שתי שליחות.",
+          why: "טעות ב־Timezone, Template version או Retry יכולה ליצור שליחה כפולה או קמפיין שאין לו סוף.",
+          sub: ["האם Feature זה בכלל ב־Pilot scope?", "מהם Cadence, Timezone ו־End condition?", "איזו גרסת Template ננעלת לריצה?", "כיצד מבטלים ריצה שכבר נכנסה ל־Queue?"],
+          owner: "Product + Operations + פיתוח", blocker: "Recurring campaign implementation רק אם נכלל ב־Pilot.",
+          recommendation: "לדחות לאחר ה־Pilot. אם Product מכניס אותו ל־Pilot, לבנות Schedule גרסתי, סופי ואידמפוטנטי עם Caps וביטול ברור.",
+          options: [
+            { value: "defer-recurring", title: "דחייה לאחר Pilot", description: "שומר את ניסוי הליבה קטן ומפחית סיכון שליחה כפולה.", recommended: true },
+            { value: "limited-pilot", title: "הפעלה מוגבלת ב־Pilot", description: "רק עם תדירות, סוף, נמענים ו־Kill switch מוגדרים." },
+            { value: "unbounded-schedule", title: "לוח בלתי מוגבל ללא סוף", description: "לא מומלץ — פעולה מסוכנת וקשה לעצירה." }
+          ]
+        },
+        {
+          code: "R19", section: "operations-data", phase: "before", status: "hard",
+          question: "מהו היקף Legal ו־Privacy של ה־Pilot וההשקה?",
+          beginner: "החובות המשפטיות משתנות לפי מדינה, סוג לקוח וסוג מידע. DPA הוא הסכם עיבוד מידע; Subprocessor הוא ספק נוסף שמעבד מידע עבור Connect.",
+          why: "השקה בשוק לא מוגדר מקשה לדעת אילו הסכמות, מסמכים, מיקום מידע וזכויות מחיקה נדרשים.",
+          sub: ["מהו השוק והמדינות הראשונים?", "האם קיימים Terms, Privacy notice ו־DPA?", "מהי רשימת ה־Subprocessors?", "כיצד נשמר Opt-in?", "איך מטפלים בבקשת Export או מחיקה?", "האם Data residency נדרש בשוק הראשון?"],
+          owner: "Legal + Privacy + Product", blocker: "Pilot עם מידע אמיתי ו־GA.",
+          recommendation: "שוק ראשון צר ומוגדר, עם מסמכי Legal, Consent ledger, Subprocessor list ותהליך Data subject request לפני הרחבה.",
+          options: [
+            { value: "defined-first-market", title: "שוק ראשון מוגדר ותיעוד מלא", description: "מאפשר דרישות ברורות ובדיקת ציות ממוקדת.", recommended: true },
+            { value: "global-first", title: "השקה גלובלית מלאה", description: "מגדילה דרישות Legal, מס, שפה ותמיכה לפני הוכחת מוצר." },
+            { value: "documents-later", title: "השקה והשלמת מסמכים אחר כך", description: "לא מומלץ — חשיפה משפטית ופרטיות מיידית." }
+          ]
+        },
+        {
+          code: "R20", section: "hosting-security", phase: "before", status: "hard",
+          question: "איך מטפלים ב־Dependency Advisories ומוכיחים איזה קוד נפרס?",
+          beginner: "Dependency היא ספרייה חיצונית. Advisory מודיע על חולשה; SBOM הוא רשימת הרכיבים; Attestation היא ראיה חתומה שמקשרת Release לקוד ולבדיקות שלו.",
+          why: "גם קוד שלנו שנכתב נכון יכול להיפגע מספרייה פגיעה. בלי Attestation קשה להוכיח מה בדיוק הגיע ל־Production.",
+          sub: ["איזה GitHub Organization/Plan מפעיל Security features?", "מי מטפל ב־Dependabot ובאיזה SLA?", "האם lockfile ו־SBOM נשמרים?", "איזו Attestation נוצרת לכל Release?", "מי מאשר Exception?"],
+          owner: "Security + Release + רועי", blocker: "Supply-chain evidence ו־Production gate.",
+          recommendation: "GitHub Security/Dependabot, lockfile, SBOM ו־Attestation לכל Release; SLA לפי חומרה ו־Exception קצר ומתועד.",
+          options: [
+            { value: "github-sbom-attestation", title: "GitHub Security + SBOM + Attestation", description: "מסלול אחד שמחבר Advisory, קוד, Build ו־Release.", recommended: true },
+            { value: "external-sca", title: "ספק SCA חיצוני", description: "אפשרי אם נדרש כיסוי או Compliance שאין בתוכנית GitHub." },
+            { value: "manual-only", title: "סקירה ידנית בלבד", description: "לא מומלץ — קל לפספס עדכון ואין Evidence רציף." }
+          ]
+        },
+        {
+          code: "L01", section: "after-pilot", phase: "after", status: "hard",
+          question: "באיזה סדר סוגרים פערים מול המתחרים המובילים?",
+          beginner: "Feature gap הוא משהו שקיים אצל מתחרה וחסר אצלנו. לא כל פער חשוב ללקוח הראשון, ובנייה לפי רשימת מתחרה עלולה להפוך את המוצר לעמוס ולא ממוקד.",
+          why: "סדר נכון צריך להגיע מ־Telemetry, ראיונות ושימוש בפועל ב־Pilot — לא ממספר ה־Features בדף מכירה.",
+          sub: ["מה היה החסם השכיח ביותר ב־Pilot?", "איזה Workflow חסך הכי הרבה זמן?", "מה מבדיל אותנו מ־Respond.io, WATI ו־SleekFlow?", "מהו Impact מול Effort לכל פער?"],
+          owner: "Product", blocker: "Post-pilot roadmap; אינו חוסם את ה־Pilot.",
+          recommendation: "לתעדף לפי Evidence מה־Pilot: תחילה ה־Workflow בעל הערך הגבוה ביותר, ורק אחר כך Feature parity.",
+          options: [
+            { value: "evidence-first", title: "תעדוף לפי נתוני Pilot", description: "מחבר כל משימה לבעיה אמיתית ולמדד הצלחה.", recommended: true },
+            { value: "inbox-first", title: "Inbox-first", description: "מתאים אם ניהול שיחות הוא צוואר הבקבוק העיקרי." },
+            { value: "automation-first", title: "Automation-first", description: "מתאים אם חיסכון בעבודה ידנית הוא הבעיה המוכחת." },
+            { value: "feature-count", title: "העתקת כל Features המתחרים", description: "לא מומלץ — היקף גדול ללא הוכחת ערך." }
+          ]
+        },
+        {
+          code: "L02", section: "after-pilot", phase: "after", status: "hard",
+          question: "אילו Integrations בונים ראשונות?",
+          beginner: "Integration מחברת את Connect למערכת אחרת כמו CRM, חנות או Google Sheets. כל חיבור דורש Auth, מיפוי שדות, Retry, תמיכה ותחזוקה.",
+          why: "קטלוג רחב מוקדם יוצר הרבה קוד שקשה לבדוק, בלי לדעת באילו חיבורים הלקוחות באמת משתמשים.",
+          sub: ["אילו מערכות הופיעו אצל רוב לקוחות ה־Pilot?", "האם Public API מספיק תחילה?", "מי בעל ה־Integration?", "איך מטפלים ב־Token שפג ובסנכרון כפול?"],
+          owner: "Product + Architecture", blocker: "ICP ונתוני Pilot.",
+          recommendation: "לבחור 1–2 Integrations שחוזרות אצל ה־ICP, עם Adapter ו־Observability. לא לפתוח קטלוג רחב מראש.",
+          options: [
+            { value: "top-one-two", title: "1–2 Integrations לפי ביקוש מוכח", description: "מיקוד באיכות, תמיכה ואימוץ אמיתי.", recommended: true },
+            { value: "public-api-first", title: "Public API תחילה", description: "מתאים אם שותפים מסוגלים לבנות חיבורים בעצמם." },
+            { value: "large-catalog", title: "קטלוג רחב מיד", description: "לא מומלץ — עלות תמיכה ותחזוקה גבוהה ללא שימוש מוכח." }
+          ]
+        },
+        {
+          code: "L03", section: "after-pilot", phase: "after", status: "hard",
+          question: "מתי מוסיפים ערוצי תקשורת מעבר ל־WhatsApp?",
+          beginner: "Omnichannel מרכז WhatsApp, Email, SMS ורשתות חברתיות. כל ערוץ מביא חוקים, Webhooks, Templates, עלויות ואופן מסירה שונים.",
+          why: "הרחבה מוקדמת מפזרת את הצוות לפני שהליבה של WhatsApp יציבה ומוכחת.",
+          sub: ["איזה ערוץ הלקוחות ביקשו ובאיזו תדירות?", "האם Inbox המשותף כבר יציב?", "מהו מודל Consent ו־Retention של הערוץ?", "כיצד מזהים אותו אדם בין ערוצים?"],
+          owner: "Product", blocker: "Product-market evidence; אינו חוסם Pilot WhatsApp-first.",
+          recommendation: "WhatsApp-first עד שה־Core יציב. להוסיף ערוץ אחד בכל פעם רק לפי ביקוש מדיד ויכולת תמיכה.",
+          options: [
+            { value: "whatsapp-first", title: "WhatsApp בלבד עד יציבות הליבה", description: "שומר מיקוד ומאפשר ללמוד ערוץ אחד לעומק.", recommended: true },
+            { value: "next-one-channel", title: "הוספת ערוץ יחיד לפי ביקוש", description: "צעד סביר אחרי Evidence מה־Pilot." },
+            { value: "full-omnichannel", title: "Omnichannel מלא מיד", description: "לא מומלץ — מגדיל מאוד מורכבות ותמיכה." }
+          ]
+        },
+        {
+          code: "L04", section: "after-pilot", phase: "after", status: "hard",
+          question: "האם WhatsApp Commerce ו־Flows נדרשים לפני GA?",
+          beginner: "Commerce מאפשר קטלוג והזמנה בתוך WhatsApp; Flows מאפשרים טפסים ותהליכים בתוך השיחה. אלה יכולות נפרדות מדיוור ובוט בסיסי.",
+          why: "הן יכולות לייצר ערך גדול ל־ICP מסוים, אך מוסיפות API, מגבלות, בדיקות ותחזוקה שלא כל לקוח צריך.",
+          sub: ["האם לקוחות ה־Pilot מוכרים מוצרים או צריכים טופס בתוך WhatsApp?", "אילו מגבלות Meta חלות על Flows?", "מי מתחזק Catalog ותוכן?", "מהו מדד ההצלחה?"],
+          owner: "Product + WhatsApp owner", blocker: "Customer research; אינו חוסם Pilot בסיסי.",
+          recommendation: "לדחות עד ש־ICP מוכיח צורך במסחר או בטפסים. אם הצורך מוכח, לבחור יכולת אחת ולבנות Pilot ממוקד.",
+          options: [
+            { value: "defer-until-demand", title: "דחייה עד ביקוש מוכח", description: "מונע Feature יקר ללא משתמשים.", recommended: true },
+            { value: "flows-before-ga", title: "Flows לפני GA", description: "מתאים אם איסוף נתונים בתוך שיחה הוא צורך מרכזי." },
+            { value: "commerce-before-ga", title: "Commerce לפני GA", description: "מתאים רק ל־ICP שמוכר מוצרים דרך WhatsApp." },
+            { value: "both-before-ga", title: "שניהם לפני GA", description: "היקף גדול; דורש הצדקה חזקה ויכולת תחזוקה." }
+          ]
+        },
+        {
+          code: "L05", section: "after-pilot", phase: "after", status: "hard",
+          question: "האם צריך PWA או אפליקציית Mobile Native?",
+          beginner: "PWA היא אפליקציית Web מותאמת לטלפון שניתן להתקין. Native היא אפליקציה נפרדת ל־iOS/Android ודורשת Build, Store review ותחזוקה נוספים.",
+          why: "Native יכול לתת יכולות מכשיר עמוקות, אך כמעט מכפיל את משטח הפיתוח לפני שיודעים אם משתמשים באמת עובדים מהטלפון.",
+          sub: ["כמה שימוש ב־Pilot הגיע ממובייל?", "איזו יכולת חסרה ב־Web?", "האם Push notifications מספיקות דרך PWA?", "מי מתחזק Releases בחנויות?"],
+          owner: "Product + Engineering", blocker: "נתוני שימוש במובייל; אינו חוסם Web GA.",
+          recommendation: "Responsive Web/PWA תחילה. Native רק אם Telemetry וראיונות מוכיחים צורך שלא ניתן לפתור ב־Web.",
+          options: [
+            { value: "pwa-first", title: "Responsive Web ו־PWA", description: "בסיס קוד אחד ועלות תחזוקה נמוכה יותר.", recommended: true },
+            { value: "react-native", title: "React Native", description: "מתאים אם נדרשות יכולות מכשיר ושימוש מובייל משמעותי." },
+            { value: "separate-native", title: "אפליקציות iOS ו־Android נפרדות", description: "העלות הגבוהה ביותר; מוצדק רק בהיקף שימוש גדול." }
+          ]
+        },
+        {
+          code: "L06", section: "after-pilot", phase: "after", status: "hard",
+          question: "מתי מפעילים Agency mode?",
+          beginner: "Agency מנהלת כמה עסקים תחת חשבון אחד. היא צריכה היררכיית לקוחות, הרשאות צולבות, Branding וחיוב שונים מ־Tenant יחיד.",
+          why: "הפעלת Agency מוקדם משנה כמעט כל מודל נתונים ומסך. דחייה מאפשרת להוכיח קודם את מוצר הליבה.",
+          sub: ["האם Agencies הן ה־ICP?", "מי רואה נתונים בין לקוחות?", "מי משלם ומי מנהל Entitlements?", "האם נדרש White-label?"],
+          owner: "Product + Billing", blocker: "ICP; אינו חוסם מוצר ל־Tenant יחיד.",
+          recommendation: "אחרי הוכחת מוצר ל־Tenant יחיד, אלא אם הנהלה בוחרת Agencies כ־ICP הראשון.",
+          options: [
+            { value: "after-single-tenant", title: "אחרי הוכחת Tenant יחיד", description: "מוריד סיכון ומבסס ליבה לפני היררכיה נוספת.", recommended: true },
+            { value: "before-ga", title: "לפני GA", description: "מתאים רק אם לקוחות ההשקה הראשונים הם Agencies." },
+            { value: "separate-product", title: "מוצר או Tier נפרד", description: "מתאים אם הצרכים שונים משמעותית מהמוצר הבסיסי." }
+          ]
+        },
+        {
+          code: "L07", section: "after-pilot", phase: "after", status: "hard",
+          question: "האם נדרשים SAML, SCIM ו־Data residency?",
+          beginner: "SAML מאפשר כניסה ארגונית; SCIM מסנכרן משתמשים והרשאות; Data residency מגביל באיזה אזור גאוגרפי המידע נשמר.",
+          why: "אלה יכולות Enterprise יקרות. הן נדרשות כאשר לקוח או חוק מחייבים אותן, לא רק משום שמתחרה מציע אותן.",
+          sub: ["האם לקוח חתום דורש SSO או Provisioning?", "האם שוק ה־Pilot מחייב מיקום מידע?", "איזה SLA ותמיכה Enterprise נדרשים?", "מהי עלות בידוד אזורי?"],
+          owner: "Product + Security + Legal", blocker: "חוזי Enterprise. Data residency הופך לחסם מוקדם אם שוק ה־Pilot מחייב.",
+          recommendation: "לדחות עד שיש דרישה חוזית או חוקית. חריג: אם שוק ה־Pilot מחייב Data residency, לסגור זאת לפני הכנסת נתונים אמיתיים.",
+          options: [
+            { value: "contract-driven", title: "לפי דרישה חוזית או חוקית", description: "בונה יכולת כשיש לקוח, ערך ותנאי קבלה ברורים.", recommended: true },
+            { value: "enterprise-v1", title: "הכול ב־v1", description: "מגדיל עלות וזמן לפני שיש ביקוש מוכח." },
+            { value: "never", title: "לא יתמוך לעולם", description: "קשיח מדי ועלול לחסום שוק עתידי." }
+          ]
+        },
+        {
+          code: "L08", section: "after-pilot", phase: "after", status: "hard",
+          question: "איזו תוכנית Compliance או Certification נדרשת?",
+          beginner: "SOC 2 ו־ISO 27001 הן מסגרות שמוכיחות בקרות אבטחה ותהליכים. Certification דורש זמן, Evidence ועלות; הוא אינו מחליף אבטחה בפועל.",
+          why: "בחירה מוקדמת מדי שורפת משאבים; בחירה מאוחרת מדי עלולה לעכב מכירה ללקוח Enterprise.",
+          sub: ["מה דורשים ה־ICP והלקוחות החתומים?", "איזה Evidence כבר נאסף?", "מי מנהל Policies ו־Audit?", "מהו תקציב ולוח זמן?"],
+          owner: "Security + Legal + Sales", blocker: "דרישת שוק או Enterprise; אינו חוסם Pilot סגור אלא אם נדרש חוזית.",
+          recommendation: "לא לבחור Certification לפני ICP ודרישות מכירה; כן לשמור כבר עכשיו Evidence, Audit ו־Policies בצורה מסודרת.",
+          options: [
+            { value: "evidence-first", title: "Evidence עכשיו, Certification לפי ביקוש", description: "שומר מוכנות בלי להתחייב לתהליך שאולי אינו נדרש.", recommended: true },
+            { value: "soc2-first", title: "SOC 2 כיעד ראשון", description: "מתאים אם לקוחות היעד דורשים אותו במכירות." },
+            { value: "iso-first", title: "ISO 27001 כיעד ראשון", description: "מתאים אם שווקים וחוזים מעדיפים תקן זה." },
+            { value: "no-program", title: "ללא תוכנית Compliance", description: "לא מומלץ — גם בלי Certification נדרשות בקרות וראיות." }
+          ]
+        },
+        {
+          code: "L09", section: "after-pilot", phase: "after", status: "hard",
+          question: "אילו שווקים, מטבעות, שפות ומודל Support נכללים ב־GA?",
+          beginner: "GA היא השקה כללית. כל שוק חדש מוסיף מס, תנאי שימוש, שפה, שעות תמיכה, מטבע ולעיתים אחסון מידע שונה.",
+          why: "Global-first נשמע גדול, אך יכול ליצור התחייבויות שהצוות הקטן אינו מסוגל לתמוך בהן.",
+          sub: ["מהו השוק הראשון לאחר Pilot?", "באילו מטבעות מחייבים?", "באילו שעות ושפות ניתנת תמיכה?", "מהם SLA ונתיב הסלמה?", "מתי מתרחבים לשוק הבא?"],
+          owner: "Product + Finance + Legal + Support", blocker: "ICP, Billing ו־Pilot evidence.",
+          recommendation: "שוק ראשון צר ומוגדר, מטבע ושפות שתואמים לו, Support שאפשר לקיים בפועל; הרחבה לפי מדדי שימוש ויכולת Legal/Operations.",
+          options: [
+            { value: "narrow-first-market", title: "שוק ראשון צר ומוגדר", description: "מאפשר שירות, Legal ו־Billing אמינים לפני הרחבה.", recommended: true },
+            { value: "regional", title: "אזור רב־מדינתי מוגדר", description: "אפשרי אם התשתית המשפטית והתמיכה כבר קיימות." },
+            { value: "global-first", title: "Global-first", description: "לא מומלץ בלי צוות ותקציב שמכסים מס, שפות ותמיכה." }
+          ]
+        }
+      ];
+      const elements = {
+        sections: document.getElementById("sections"),
+        toc: document.getElementById("toc-list"),
+        search: document.getElementById("search"),
+        statusFilter: document.getElementById("status-filter"),
+        phaseFilter: document.getElementById("phase-filter"),
+        emptyState: document.getElementById("empty-state"),
+        totalCount: document.getElementById("total-count"),
+        defaultCount: document.getElementById("default-count"),
+        explicitCount: document.getElementById("explicit-count"),
+        hardOpenCount: document.getElementById("hard-open-count"),
+        visibleCount: document.getElementById("visible-count"),
+        saveStatus: document.getElementById("save-status"),
+        announcement: document.getElementById("announcement")
+      };
+
+      function createElement(tagName, className, textValue) {
+        const node = document.createElement(tagName);
+        if (className) node.className = className;
+        if (typeof textValue === "string") node.textContent = textValue;
+        return node;
+      }
+
+      function recommendedOption(decision) {
+        return decision.options.find((option) => option.recommended);
+      }
+
+      function isAllowedAnswer(decision, value) {
+        return decision.options.some((option) => option.value === value);
+      }
+
+      function detectStorageAvailability() {
+        try {
+          localStorage.setItem(STORAGE_PROBE_KEY, "available");
+          localStorage.removeItem(STORAGE_PROBE_KEY);
+          return true;
+        } catch (_error) {
+          return false;
+        }
+      }
+
+      let storageAvailable = detectStorageAvailability();
+
+      function loadStoredAnswers() {
+        const validAnswers = Object.create(null);
+        if (!storageAvailable) return validAnswers;
+        try {
+          const rawValue = localStorage.getItem(STORAGE_KEY);
+          if (!rawValue) return validAnswers;
+          const parsedValue = JSON.parse(rawValue);
+          if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
+            return validAnswers;
+          }
+          decisions.forEach((decision) => {
+            const candidate = parsedValue[decision.code];
+            if (typeof candidate === "string" && isAllowedAnswer(decision, candidate)) {
+              validAnswers[decision.code] = candidate;
+            }
+          });
+        } catch (_error) {
+          storageAvailable = false;
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (_storageError) {
+            // Some file:// and privacy modes deny localStorage entirely.
+          }
+        }
+        return validAnswers;
+      }
+
+      let storedAnswers = loadStoredAnswers();
+
+      function effectiveAnswer(decision) {
+        if (storedAnswers[decision.code]) return storedAnswers[decision.code];
+        const recommendation = recommendedOption(decision);
+        return decision.status === "clear" && recommendation ? recommendation.value : null;
+      }
+
+      function saveStoredAnswers() {
+        if (!storageAvailable) {
+          elements.saveStatus.textContent = "שמירה מקומית אינה זמינה; הבחירות יישמרו עד סגירת העמוד בלבד.";
+          return;
+        }
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(storedAnswers));
+          elements.saveStatus.textContent = "הבחירה נשמרה במכשיר ובדפדפן הנוכחיים בלבד.";
+        } catch (_error) {
+          storageAvailable = false;
+          elements.saveStatus.textContent = "לא ניתן לשמור בדפדפן זה; הבחירה תישאר רק עד סגירת העמוד.";
+        }
+      }
+
+      function updateInitialStorageStatus() {
+        elements.saveStatus.textContent = storageAvailable
+          ? "הבחירות המפורשות נשמרות במכשיר ובדפדפן הנוכחיים בלבד."
+          : "שמירה מקומית אינה זמינה; הבחירות יישמרו עד סגירת העמוד בלבד.";
+      }
+
+      function optionTitle(decision, value) {
+        const option = decision.options.find((candidate) => candidate.value === value);
+        return option ? option.title : "";
+      }
+
+      function createDecisionCard(decision) {
+        const fieldset = createElement("fieldset", `decision ${decision.status}`);
+        fieldset.id = `decision-${decision.code.toLowerCase()}`;
+        fieldset.dataset.code = decision.code;
+        fieldset.dataset.status = decision.status;
+        fieldset.dataset.phase = decision.phase;
+        fieldset.dataset.search = [
+          decision.code,
+          decision.question,
+          decision.beginner,
+          decision.why,
+          decision.recommendation,
+          decision.owner,
+          decision.blocker,
+          decision.registryCheckId || "",
+          decision.evidence ? `${decision.evidence.checkedAt} ${decision.evidence.liveStatus}` : "",
+          ...decision.sub,
+          ...decision.options.flatMap((option) => [option.title, option.description])
+        ].join(" ").toLocaleLowerCase("he");
+
+        const legend = document.createElement("legend");
+        const titleRow = createElement("span", "decision-title-row");
+        titleRow.appendChild(createElement("span", "decision-number", decision.code));
+        titleRow.appendChild(createElement(
+          "span",
+          `badge ${decision.status}`,
+          decision.status === "clear" ? "✓ החלטה ברורה — מומלץ לאשר" : "! החלטה מהותית — נדרש דיון ואישור"
+        ));
+        titleRow.appendChild(createElement(
+          "span",
+          "badge phase",
+          decision.phase === "before" ? "לפני Pilot" : "אחרי Pilot"
+        ));
+        if (decision.registryCheckId) {
+          titleRow.appendChild(createElement(
+            "span",
+            "badge registry",
+            "חסם Production — טרם אושר"
+          ));
+        }
+        legend.appendChild(titleRow);
+        legend.appendChild(createElement("strong", "decision-question", decision.question));
+        fieldset.appendChild(legend);
+
+        const body = createElement("div", "decision-body");
+        const explanationColumn = document.createElement("div");
+
+        const beginnerBox = createElement("section", "beginner");
+        beginnerBox.id = `${decision.code.toLowerCase()}-beginner`;
+        beginnerBox.appendChild(createElement("h3", "", "מה זה אומר למתחילים?"));
+        beginnerBox.appendChild(createElement("p", "", decision.beginner));
+        explanationColumn.appendChild(beginnerBox);
+
+        const whyBox = createElement("section", "why");
+        whyBox.id = `${decision.code.toLowerCase()}-why`;
+        whyBox.appendChild(createElement("h3", "", "למה ההחלטה חשובה?"));
+        whyBox.appendChild(createElement("p", "", decision.why));
+        explanationColumn.appendChild(whyBox);
+        fieldset.setAttribute(
+          "aria-describedby",
+          `${beginnerBox.id} ${whyBox.id}`
+        );
+
+        const subquestions = createElement("details", "subquestions");
+        const summary = createElement("summary", "", "שאלות משנה שחייבים לסגור");
+        subquestions.appendChild(summary);
+        const subList = document.createElement("ol");
+        decision.sub.forEach((question) => {
+          const item = document.createElement("li");
+          item.textContent = question;
+          subList.appendChild(item);
+        });
+        subquestions.appendChild(subList);
+        explanationColumn.appendChild(subquestions);
+
+        const choiceColumn = document.createElement("div");
+        const options = createElement("div", "options");
+        const currentAnswer = effectiveAnswer(decision);
+
+        decision.options.forEach((option, optionIndex) => {
+          const label = createElement("label", `option${option.recommended ? " recommended" : ""}`);
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = `answer-${decision.code}`;
+          radio.value = option.value;
+          radio.id = `answer-${decision.code.toLowerCase()}-${optionIndex + 1}`;
+          radio.checked = currentAnswer === option.value;
+          radio.addEventListener("change", () => {
+            if (!radio.checked || !isAllowedAnswer(decision, radio.value)) return;
+            handleDecisionSelection(decision, radio.value, fieldset);
+          });
+          label.appendChild(radio);
+
+          const optionCopy = createElement("span", "option-copy");
+          const title = createElement("strong", "", option.title);
+          if (option.recommended) {
+            title.appendChild(createElement("span", "recommended-label", "המלצה"));
+          }
+          optionCopy.appendChild(title);
+          optionCopy.appendChild(createElement("small", "", option.description));
+          label.appendChild(optionCopy);
+          options.appendChild(label);
+        });
+        choiceColumn.appendChild(options);
+
+        const recommendationBox = createElement("section", "recommendation");
+        recommendationBox.appendChild(createElement("h3", "", "ההמלצה שלנו ולמה"));
+        recommendationBox.appendChild(createElement("p", "", decision.recommendation));
+        choiceColumn.appendChild(recommendationBox);
+
+        if (decision.evidence) {
+          const evidenceNote = createElement("section", "evidence-note");
+          evidenceNote.appendChild(createElement(
+            "strong",
+            "",
+            `אומת מול מסמך המקור בתאריך: ${decision.evidence.checkedAt}`
+          ));
+          evidenceNote.appendChild(createElement(
+            "span",
+            "",
+            `מצב החשבון החי: ${decision.evidence.liveStatus}`
+          ));
+          const evidenceLink = document.createElement("a");
+          evidenceLink.href = decision.evidence.href;
+          evidenceLink.textContent = decision.evidence.label;
+          evidenceNote.appendChild(evidenceLink);
+          choiceColumn.appendChild(evidenceNote);
+        }
+
+        const meta = createElement("div", "meta");
+        meta.appendChild(createElement("span", "", `בעלים/מאשרים: ${decision.owner}`));
+        meta.appendChild(createElement("span", "", `מה נחסם: ${decision.blocker}`));
+        if (decision.registryCheckId) {
+          meta.appendChild(createElement(
+            "span",
+            "",
+            `Registry: ${decision.registryCheckId} · Not signed`
+          ));
+        }
+        choiceColumn.appendChild(meta);
+
+        const selectionStatus = createElement("p", "selection-status");
+        selectionStatus.dataset.selectionFor = decision.code;
+        choiceColumn.appendChild(selectionStatus);
+
+        const clearChoiceButton = createElement(
+          "button",
+          "action-button clear-choice-button",
+          decision.status === "clear" ? "חזור לברירת המחדל" : "החזר לטרם הוחלט"
+        );
+        clearChoiceButton.type = "button";
+        clearChoiceButton.dataset.clearChoiceFor = decision.code;
+        clearChoiceButton.addEventListener("click", () => resetSingleDecision(decision, fieldset));
+        choiceColumn.appendChild(clearChoiceButton);
+
+        body.appendChild(explanationColumn);
+        body.appendChild(choiceColumn);
+        fieldset.appendChild(body);
+        return fieldset;
+      }
+
+      function renderDocument() {
+        sections.forEach((section, sectionIndex) => {
+          const tocItem = document.createElement("li");
+          tocItem.dataset.tocSection = section.id;
+          const tocLink = document.createElement("a");
+          tocLink.href = `#section-${section.id}`;
+          tocLink.textContent = `${sectionIndex + 1}. ${section.title}`;
+          tocItem.appendChild(tocLink);
+          elements.toc.appendChild(tocItem);
+
+          const sectionNode = createElement("section", "decision-section");
+          sectionNode.id = `section-${section.id}`;
+          sectionNode.dataset.section = section.id;
+          const heading = createElement("div", "section-heading");
+          heading.appendChild(createElement("h2", "", `${sectionIndex + 1}. ${section.title}`));
+          const sectionDecisions = decisions.filter((decision) => decision.section === section.id);
+          heading.appendChild(createElement("span", "", `${sectionDecisions.length} החלטות · ${section.description}`));
+          sectionNode.appendChild(heading);
+
+          const list = createElement("div", "decision-list");
+          sectionDecisions.forEach((decision) => list.appendChild(createDecisionCard(decision)));
+          sectionNode.appendChild(list);
+          elements.sections.appendChild(sectionNode);
+        });
+      }
+
+      function announce(message) {
+        if (elements.announcement.textContent === message) {
+          elements.announcement.textContent = "";
+        }
+        window.setTimeout(() => {
+          elements.announcement.textContent = message;
+        }, 0);
+      }
+
+      function visibleCards() {
+        return Array.from(document.querySelectorAll(".decision:not([hidden])"));
+      }
+
+      function restoreFocusAfterFiltering(card, previousIndex) {
+        if (!card.hidden) return;
+        const remainingCards = visibleCards();
+        const nextCard = remainingCards[Math.min(previousIndex, remainingCards.length - 1)];
+        const nextRadio = nextCard ? nextCard.querySelector("input[type=radio]") : null;
+        if (nextRadio) {
+          nextRadio.focus();
+          return;
+        }
+        elements.statusFilter.focus();
+        announce("כל ההחלטות בתצוגה הנוכחית הושלמו.");
+      }
+
+      function synchronizeDecisionRadios(decision) {
+        const answer = effectiveAnswer(decision);
+        document.querySelectorAll(`input[name="answer-${decision.code}"]`).forEach((radio) => {
+          radio.checked = radio.value === answer;
+        });
+      }
+
+      function handleDecisionSelection(decision, value, card) {
+        const cardsBeforeUpdate = visibleCards();
+        const previousIndex = Math.max(cardsBeforeUpdate.indexOf(card), 0);
+        storedAnswers[decision.code] = value;
+        saveStoredAnswers();
+        updateInterface();
+        announce(`נבחרה תשובה מפורשת עבור ${decision.code}: ${optionTitle(decision, value)}.`);
+        restoreFocusAfterFiltering(card, previousIndex);
+      }
+
+      function resetSingleDecision(decision, card) {
+        if (!storedAnswers[decision.code]) return;
+        const cardsBeforeUpdate = visibleCards();
+        const previousIndex = Math.max(cardsBeforeUpdate.indexOf(card), 0);
+        delete storedAnswers[decision.code];
+        saveStoredAnswers();
+        synchronizeDecisionRadios(decision);
+        updateInterface();
+        announce(
+          decision.status === "clear"
+            ? `${decision.code} הוחזרה לברירת המחדל המקצועית.`
+            : `${decision.code} הוחזרה למצב טרם הוחלט.`
+        );
+        restoreFocusAfterFiltering(card, previousIndex);
+      }
+
+      function updateSelectionStatuses() {
+        decisions.forEach((decision) => {
+          const statusNode = document.querySelector(`[data-selection-for="${decision.code}"]`);
+          if (!statusNode) return;
+          const answer = effectiveAnswer(decision);
+          let nextText;
+          if (!answer) {
+            nextText = "טרם נבחרה תשובה. ההמלצה מוצגת, אך אינה מסומנת אוטומטית.";
+          } else {
+            const source = storedAnswers[decision.code]
+              ? "בחירה מפורשת שנשמרה מקומית"
+              : "ברירת המחדל המקצועית — עדיין נדרש אישור פורמלי";
+            nextText = `מוצג: ${optionTitle(decision, answer)} · ${source}.`;
+          }
+          if (statusNode.textContent !== nextText) statusNode.textContent = nextText;
+          const clearButton = document.querySelector(`[data-clear-choice-for="${decision.code}"]`);
+          if (clearButton) clearButton.disabled = !storedAnswers[decision.code];
+        });
+      }
+
+      function updateFilters() {
+        const query = elements.search.value.trim().toLocaleLowerCase("he");
+        const statusValue = elements.statusFilter.value;
+        const phaseValue = elements.phaseFilter.value;
+        let visibleDecisions = 0;
+
+        document.querySelectorAll(".decision").forEach((card) => {
+          const decision = decisions.find((candidate) => candidate.code === card.dataset.code);
+          const hasExplicitAnswer = Boolean(storedAnswers[decision.code]);
+          const matchesText = !query || card.dataset.search.includes(query);
+          const matchesPhase = phaseValue === "all" || card.dataset.phase === phaseValue;
+          const matchesStatus = statusValue === "all"
+            || card.dataset.status === statusValue
+            || (statusValue === "answered" && hasExplicitAnswer)
+            || (statusValue === "unanswered" && !hasExplicitAnswer);
+          const visible = matchesText && matchesPhase && matchesStatus;
+          card.hidden = !visible;
+          if (visible) visibleDecisions += 1;
+        });
+
+        document.querySelectorAll(".decision-section").forEach((sectionNode) => {
+          const hasVisibleCard = Array.from(sectionNode.querySelectorAll(".decision"))
+            .some((card) => !card.hidden);
+          sectionNode.hidden = !hasVisibleCard;
+          const tocItem = document.querySelector(`[data-toc-section="${sectionNode.dataset.section}"]`);
+          if (tocItem) tocItem.hidden = !hasVisibleCard;
+        });
+
+        elements.visibleCount.textContent = String(visibleDecisions);
+        elements.emptyState.hidden = visibleDecisions !== 0;
+      }
+
+      function updateSummary() {
+        const defaults = decisions.filter((decision) => decision.status === "clear").length;
+        const explicit = decisions.filter((decision) => Boolean(storedAnswers[decision.code])).length;
+        const hardOpen = decisions.filter(
+          (decision) => decision.status === "hard" && !storedAnswers[decision.code]
+        ).length;
+        elements.totalCount.textContent = String(decisions.length);
+        elements.defaultCount.textContent = String(defaults);
+        elements.explicitCount.textContent = String(explicit);
+        elements.hardOpenCount.textContent = String(hardOpen);
+      }
+
+      function updateInterface() {
+        updateSelectionStatuses();
+        updateSummary();
+        updateFilters();
+      }
+
+      function synchronizeRadios() {
+        decisions.forEach(synchronizeDecisionRadios);
+      }
+
+      function exportAnswers() {
+        const exportData = {
+          document: "Connect material decisions questionnaire",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          warning: "Selections are discussion input and do not replace formal approval evidence.",
+          decisions: decisions.map((decision) => {
+            const answer = effectiveAnswer(decision);
+            return {
+              code: decision.code,
+              phase: decision.phase,
+              classification: decision.status,
+              registryCheckId: decision.registryCheckId || null,
+              question: decision.question,
+              selectedValue: answer,
+              selectedLabel: answer ? optionTitle(decision, answer) : null,
+              selectionSource: storedAnswers[decision.code]
+                ? "user-selection"
+                : answer ? "default-recommendation" : "unanswered"
+            };
+          })
+        };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = "connect-decisions.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+        elements.saveStatus.textContent = "קובץ JSON נוצר במכשיר בלבד; לא נשלח מידע לרשת.";
+        announce("קובץ JSON נוצר במכשיר בלבד ולא נשלח מידע לרשת.");
+      }
+
+      renderDocument();
+      const sourcesTocItem = document.createElement("li");
+      const sourcesTocLink = document.createElement("a");
+      sourcesTocLink.href = "#source-notes";
+      sourcesTocLink.textContent = "10. מקורות ואישור";
+      sourcesTocItem.appendChild(sourcesTocLink);
+      elements.toc.appendChild(sourcesTocItem);
+      updateInitialStorageStatus();
+      updateInterface();
+
+      elements.search.addEventListener("input", updateFilters);
+      elements.statusFilter.addEventListener("change", () => {
+        updateFilters();
+        announce(`הסינון עודכן. מוצגות ${elements.visibleCount.textContent} החלטות.`);
+      });
+      elements.phaseFilter.addEventListener("change", () => {
+        updateFilters();
+        announce(`הסינון עודכן. מוצגות ${elements.visibleCount.textContent} החלטות.`);
+      });
+
+      let printDetailsState = [];
+      window.addEventListener("beforeprint", () => {
+        printDetailsState = Array.from(document.querySelectorAll("details.subquestions"))
+          .map((detailsNode) => ({ detailsNode, wasOpen: detailsNode.open }));
+        printDetailsState.forEach(({ detailsNode }) => {
+          detailsNode.open = true;
+        });
+      });
+      window.addEventListener("afterprint", () => {
+        printDetailsState.forEach(({ detailsNode, wasOpen }) => {
+          detailsNode.open = wasOpen;
+        });
+        printDetailsState = [];
+      });
+
+      document.getElementById("print-current").addEventListener("click", () => window.print());
+      document.getElementById("export-answers").addEventListener("click", exportAnswers);
+      document.getElementById("reset-answers").addEventListener("click", () => {
+        const confirmed = window.confirm("לאפס את כל הבחירות שנשמרו בדפדפן? ההמלצות הירוקות ימשיכו להופיע כברירת מחדל.");
+        if (!confirmed) return;
+        if (storageAvailable) {
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (_storageError) {
+            storageAvailable = false;
+          }
+        }
+        storedAnswers = Object.create(null);
+        synchronizeRadios();
+        updateInterface();
+        updateInitialStorageStatus();
+        announce("כל הבחירות המפורשות אופסו; ההמלצות הירוקות מוצגות כברירת מחדל בלבד.");
+      });
+    </script>
+  </body>
+</html>
