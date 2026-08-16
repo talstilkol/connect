@@ -173,11 +173,24 @@ async function createFixture() {
   };
 }
 
+function query(
+  afterTenantId = null,
+  overrides = {},
+) {
+  return {
+    afterTenantId,
+    search: "",
+    tenantStatus: "all",
+    subscription: "all",
+    ...overrides,
+  };
+}
+
 test("loads a bounded first page with real subscription state", async () => {
   const fixture = await createFixture();
   const page =
     await fixture.repository.listPage(
-      null,
+      query(),
     );
 
   assert.equal(page.tenants.length, 50);
@@ -227,7 +240,9 @@ test("loads a bounded first page with real subscription state", async () => {
 test("uses an exclusive keyset cursor and reports the end", async () => {
   const fixture = await createFixture();
   const page =
-    await fixture.repository.listPage(50);
+    await fixture.repository.listPage(
+      query(50),
+    );
 
   assert.deepEqual(
     page.tenants.map(
@@ -254,7 +269,7 @@ test("rejects an invalid cursor before D1 access", async () => {
     );
 
   await assert.rejects(
-    repository.listPage(0),
+    repository.listPage(query(0)),
     /positive/,
   );
   assert.equal(prepareCalls, 0);
@@ -270,7 +285,7 @@ test("fails closed when tenant and subscription states diverge", async () => {
     .run();
 
   await assert.rejects(
-    fixture.repository.listPage(null),
+    fixture.repository.listPage(query()),
     /invalid system admin subscription/,
   );
 });
@@ -285,7 +300,95 @@ test("fails closed when tenant and business profile names diverge", async () => 
     .run();
 
   await assert.rejects(
-    fixture.repository.listPage(null),
+    fixture.repository.listPage(query()),
     /invalid system admin business profile/,
+  );
+});
+
+test("searches and filters the complete tenant directory before keyset pagination", async () => {
+  const fixture = await createFixture();
+  const byName =
+    await fixture.repository.listPage(
+      query(null, {
+        search: "tenant-51",
+      }),
+    );
+  const byId =
+    await fixture.repository.listPage(
+      query(null, {
+        search: "52",
+      }),
+    );
+  const activeWithSubscription =
+    await fixture.repository.listPage(
+      query(null, {
+        tenantStatus: "active",
+        subscription:
+          "with-subscription",
+      }),
+    );
+  const withoutSubscription =
+    await fixture.repository.listPage(
+      query(null, {
+        subscription:
+          "without-subscription",
+      }),
+    );
+  const withoutSubscriptionEnd =
+    await fixture.repository.listPage(
+      query(
+        withoutSubscription.nextCursor,
+        {
+          subscription:
+            "without-subscription",
+        },
+      ),
+    );
+  const literalWildcard =
+    await fixture.repository.listPage(
+      query(null, {
+        search: "%",
+      }),
+    );
+
+  assert.deepEqual(
+    byName.tenants.map(
+      (tenant) => tenant.tenantId,
+    ),
+    [51],
+  );
+  assert.deepEqual(
+    byId.tenants.map(
+      (tenant) => tenant.tenantId,
+    ),
+    [52],
+  );
+  assert.deepEqual(
+    activeWithSubscription.tenants.map(
+      (tenant) => tenant.tenantId,
+    ),
+    [1],
+  );
+  assert.equal(
+    withoutSubscription.tenants.length,
+    50,
+  );
+  assert.equal(
+    withoutSubscription.nextCursor,
+    51,
+  );
+  assert.deepEqual(
+    withoutSubscriptionEnd.tenants.map(
+      (tenant) => tenant.tenantId,
+    ),
+    [52],
+  );
+  assert.equal(
+    withoutSubscriptionEnd.nextCursor,
+    null,
+  );
+  assert.deepEqual(
+    literalWildcard.tenants,
+    [],
   );
 });

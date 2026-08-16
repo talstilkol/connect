@@ -37,7 +37,7 @@ Design מלא.
 | SPEC-02 | Landing Page וחבילות | partial | דף ציבורי ו־Pricing section | חבילות, מחירים ומגבלות מאושרים |
 | SPEC-03 | Checkout וחיוב חודשי מתחדש | external-blocked | Billing domain, Webhook contracts ו־Fail-closed adapter | בחירת ספק, Checkout, אמצעי תשלום וחשבוניות |
 | SPEC-04 | Failed Payment, חיוב חוזר והשעיה | partial | מצבי Subscription ו־Tenant תומכים בכשל/השעיה | Dunning policy ואירועי ספק חיים |
-| SPEC-05 | רשימת מנויים וסינון Admin | partial | System Admin tenant directory | סינון מוצר מלא ו־Browser acceptance |
+| SPEC-05 | רשימת מנויים וסינון Admin | local-complete | System Admin tenant directory עם חיפוש שרתי מלא לפי שם/מזהה, סינון מצב וסינון קיום מנוי מעל Keyset pagination | בדיקת Staging עם זהות Admin ו־D1 אמיתיים |
 | SPEC-06 | יצירת מנוי ידני | local-complete | פעולת Admin עם RBAC, Version ו־Audit | בדיקת Staging עם זהות Admin אמיתית |
 | SPEC-07 | הארכה וביטול עם היסטוריה | local-complete | Subscription transitions ואירועים Immutable | בדיקת Staging |
 | SPEC-08 | עריכת לקוח, חבילה, מגבלות ופרטי קשר | partial | שינוי Status ותקופה; עריכת Business Profile קיים עם Expected Version ו־Audit מבוסס Digests | החלטה ומימוש של Package/Quota ושדות קשר ייעודיים |
@@ -100,6 +100,13 @@ Accepted תחומה. נותרו מסלולים מרובי Conditions או שאל
 4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
 להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף
 18 של `docs/external-decisions-recommendations.md`.
+
+4.2.5 הושלם מקומית חיפוש וסינון מלא ב־System Admin. החיפוש מתבצע
+בשרת על כל ה־Directory ולא רק על 50 הרשומות שכבר נטענו, תומך בשם או
+מזהה, במצב Tenant ובקיום מנוי, ושומר את אותם פילטרים בכל עמוד Keyset.
+ה־Repository משתמש ב־`INSTR` עם Bindings ולא ב־`LIKE`, ולכן `%` ו־`_`
+אינם Wildcards. נותרה בדיקת Staging עם Clerk System Admin ו־D1
+אמיתיים.
 
 4.3 מסלול P2 — אינטגרציות חיות:
 

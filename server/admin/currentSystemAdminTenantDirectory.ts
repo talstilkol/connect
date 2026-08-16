@@ -8,6 +8,9 @@ import type {
   CurrentSystemAdminTenantDirectory,
 } from "../../shared/domain/systemAdminTenantDirectory.ts";
 import {
+  DEFAULT_SYSTEM_ADMIN_TENANT_DIRECTORY_FILTERS,
+} from "../../shared/domain/systemAdminTenantDirectory.ts";
+import {
   inspectClerkConfiguration,
 } from "../auth/clerkConfiguration.ts";
 import {
@@ -57,6 +60,7 @@ export async function readCurrentSystemAdminTenantDirectory():
       session,
       {
         afterTenantId: null,
+        ...DEFAULT_SYSTEM_ADMIN_TENANT_DIRECTORY_FILTERS,
       },
     );
 

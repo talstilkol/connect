@@ -2281,9 +2281,9 @@ label.file-button:focus-within {
 }
 
 .admin-directory-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  justify-content: space-between;
   gap: 18px;
   margin-bottom: 15px;
   padding: 16px 18px;
@@ -2292,8 +2292,14 @@ label.file-button:focus-within {
   background: white;
 }
 
+.admin-directory-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(140px, 0.75fr) minmax(150px, 0.75fr);
+  align-items: end;
+  gap: 12px;
+}
+
 .admin-directory-toolbar label {
-  width: min(430px, 100%);
   display: grid;
   gap: 6px;
 }
@@ -2308,6 +2314,7 @@ label.file-button:focus-within {
 }
 
 .admin-directory-toolbar input,
+.admin-directory-toolbar select,
 .admin-business-profile-form input,
 .admin-business-profile-form select,
 .admin-create-subscription input,
@@ -2326,6 +2333,7 @@ label.file-button:focus-within {
 }
 
 .admin-directory-toolbar input:focus,
+.admin-directory-toolbar select:focus,
 .admin-business-profile-form input:focus,
 .admin-business-profile-form select:focus,
 .admin-create-subscription input:focus,
@@ -2336,7 +2344,17 @@ label.file-button:focus-within {
   outline: 3px solid #e5f4ec;
 }
 
-.admin-directory-toolbar > span {
+.admin-directory-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.admin-directory-actions > span {
+  width: 100%;
+  text-align: left;
   color: var(--muted);
   font-size: 9px;
   font-weight: 700;
@@ -2964,8 +2982,24 @@ label.file-button:focus-within {
   }
 
   .admin-directory-toolbar {
+    grid-template-columns: 1fr;
     align-items: stretch;
-    flex-direction: column;
+  }
+
+  .admin-directory-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-directory-actions {
+    justify-content: stretch;
+  }
+
+  .admin-directory-actions > span {
+    text-align: right;
+  }
+
+  .admin-directory-actions button {
+    flex: 1 1 140px;
   }
 
   .admin-subscription-summary {

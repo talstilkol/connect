@@ -3,14 +3,20 @@
 import Link from "next/link";
 import {
   type FormEvent,
-  useMemo,
   useState,
   useTransition,
 } from "react";
 import type {
+  SystemAdminSubscriptionFilter,
+  SystemAdminTenantDirectoryFilters,
   SystemAdminTenantDirectoryPage,
   SystemAdminTenantDirectoryStatus,
   SystemAdminTenantRecord,
+  SystemAdminTenantStatusFilter,
+} from "../../shared/domain/systemAdminTenantDirectory.ts";
+import {
+  DEFAULT_SYSTEM_ADMIN_TENANT_DIRECTORY_FILTERS,
+  matchesSystemAdminTenantDirectoryFilters,
 } from "../../shared/domain/systemAdminTenantDirectory.ts";
 import type {
   TenantSubscriptionAdminView,
@@ -18,6 +24,9 @@ import type {
 import {
   loadSystemAdminTenantDirectoryAction,
 } from "../../server/admin/systemAdminTenantDirectoryActions.ts";
+import type {
+  SystemAdminTenantDirectoryActionResult,
+} from "../../server/admin/systemAdminTenantDirectoryActionResult.ts";
 import {
   cancelTenantSubscriptionAdminAction,
   changeTenantSubscriptionStatusAdminAction,
@@ -135,6 +144,37 @@ type Feedback = {
   tone: "success" | "danger";
   message: string;
 } | null;
+
+function hasDirectoryFilters(
+  filters:
+    SystemAdminTenantDirectoryFilters,
+): boolean {
+  return (
+    filters.search.trim().length > 0 ||
+    filters.tenantStatus !== "all" ||
+    filters.subscription !== "all"
+  );
+}
+
+function directoryLoadErrorMessage(
+  status: Exclude<
+    SystemAdminTenantDirectoryActionResult["status"],
+    "loaded"
+  >,
+): string {
+  switch (status) {
+    case "invalid-input":
+      return "פרטי החיפוש או הסינון אינם תקינים.";
+    case "permission-denied":
+      return "אין הרשאת System Admin.";
+    case "unauthenticated":
+      return "ה־Session הסתיים. יש להתחבר מחדש.";
+    case "configuration-required":
+      return "תצורת System Admin אינה מלאה.";
+    case "server-error":
+      return "טעינת רשימת ה־Tenants נכשלה.";
+  }
+}
 
 function formatDateTime(
   value: string,
@@ -310,31 +350,28 @@ export function SystemAdminTenantPanel({
       initialDirectory.nextCursor,
     );
   const [query, setQuery] = useState("");
+  const [tenantStatusFilter, setTenantStatusFilter] =
+    useState<SystemAdminTenantStatusFilter>(
+      "all",
+    );
+  const [subscriptionFilter, setSubscriptionFilter] =
+    useState<SystemAdminSubscriptionFilter>(
+      "all",
+    );
+  const [appliedFilters, setAppliedFilters] =
+    useState<SystemAdminTenantDirectoryFilters>(
+      DEFAULT_SYSTEM_ADMIN_TENANT_DIRECTORY_FILTERS,
+    );
   const [feedback, setFeedback] =
     useState<Feedback>(null);
   const [isPending, startTransition] =
     useTransition();
 
-  const visibleTenants = useMemo(() => {
-    const normalizedQuery =
-      query.trim().toLocaleLowerCase(
-        "he-IL",
-      );
-
-    if (!normalizedQuery) {
-      return tenants;
-    }
-
-    return tenants.filter(
-      (tenant) =>
-        tenant.displayName
-          .toLocaleLowerCase("he-IL")
-          .includes(normalizedQuery) ||
-        String(tenant.tenantId).includes(
-          normalizedQuery,
-        ),
-    );
-  }, [query, tenants]);
+  const draftFilters = {
+    search: query,
+    tenantStatus: tenantStatusFilter,
+    subscription: subscriptionFilter,
+  } satisfies SystemAdminTenantDirectoryFilters;
 
   const subscriptionCount =
     tenants.filter(
@@ -378,6 +415,11 @@ export function SystemAdminTenantPanel({
           current,
           tenantId,
           result.subscription,
+        ).filter((tenant) =>
+          matchesSystemAdminTenantDirectoryFilters(
+            tenant,
+            appliedFilters,
+          ),
         ),
       );
       setFeedback({
@@ -419,6 +461,11 @@ export function SystemAdminTenantPanel({
           current,
           tenantId,
           result.profile,
+        ).filter((tenant) =>
+          matchesSystemAdminTenantDirectoryFilters(
+            tenant,
+            appliedFilters,
+          ),
         ),
       );
       setFeedback({
@@ -599,26 +646,16 @@ export function SystemAdminTenantPanel({
         await loadSystemAdminTenantDirectoryAction(
           {
             afterTenantId: nextCursor,
+            ...appliedFilters,
           },
         );
 
       if (result.status !== "loaded") {
         setFeedback({
           tone: "danger",
-          message:
-            result.status ===
-            "invalid-input"
-              ? "Cursor הרשימה אינו תקין."
-              : result.status ===
-                  "permission-denied"
-                ? "אין הרשאת System Admin."
-                : result.status ===
-                    "unauthenticated"
-                  ? "ה־Session הסתיים. יש להתחבר מחדש."
-                  : result.status ===
-                      "configuration-required"
-                    ? "תצורת System Admin אינה מלאה."
-                    : "טעינת העמוד הבא נכשלה.",
+          message: directoryLoadErrorMessage(
+            result.status,
+          ),
         });
         return;
       }
@@ -644,6 +681,68 @@ export function SystemAdminTenantPanel({
         result.directory.nextCursor,
       );
     });
+  }
+
+  function requestFilteredDirectory(
+    filters:
+      SystemAdminTenantDirectoryFilters,
+  ) {
+    const normalizedFilters = {
+      ...filters,
+      search: filters.search.trim(),
+    };
+
+    setFeedback(null);
+
+    startTransition(async () => {
+      const result =
+        await loadSystemAdminTenantDirectoryAction(
+          {
+            afterTenantId: null,
+            ...normalizedFilters,
+          },
+        );
+
+      if (result.status !== "loaded") {
+        setFeedback({
+          tone: "danger",
+          message: directoryLoadErrorMessage(
+            result.status,
+          ),
+        });
+        return;
+      }
+
+      setTenants([
+        ...result.directory.tenants,
+      ]);
+      setNextCursor(
+        result.directory.nextCursor,
+      );
+      setAppliedFilters(normalizedFilters);
+      setQuery(normalizedFilters.search);
+      setTenantStatusFilter(
+        normalizedFilters.tenantStatus,
+      );
+      setSubscriptionFilter(
+        normalizedFilters.subscription,
+      );
+    });
+  }
+
+  function applyDirectoryFilters(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+    requestFilteredDirectory(
+      draftFilters,
+    );
+  }
+
+  function clearDirectoryFilters() {
+    requestFilteredDirectory(
+      DEFAULT_SYSTEM_ADMIN_TENANT_DIRECTORY_FILTERS,
+    );
   }
 
   return (
@@ -712,24 +811,106 @@ export function SystemAdminTenantPanel({
           </div>
         </section>
 
-        <section className="admin-directory-toolbar">
-          <label>
-            <span>חיפוש בתוצאות שנטענו</span>
-            <input
-              type="search"
-              value={query}
-              onChange={(event) =>
-                setQuery(
-                  event.target.value,
-                )
+        <form
+          className="admin-directory-toolbar"
+          onSubmit={applyDirectoryFilters}
+          aria-controls="admin-tenant-results"
+        >
+          <div className="admin-directory-filters">
+            <label className="admin-directory-search">
+              <span>חיפוש בכל ה־Tenants</span>
+              <input
+                type="search"
+                value={query}
+                maxLength={80}
+                onChange={(event) =>
+                  setQuery(
+                    event.target.value,
+                  )
+                }
+                placeholder="שם Tenant או מזהה"
+              />
+            </label>
+            <label>
+              <span>מצב Tenant</span>
+              <select
+                value={tenantStatusFilter}
+                onChange={(event) =>
+                  setTenantStatusFilter(
+                    event.target.value as SystemAdminTenantStatusFilter,
+                  )
+                }
+              >
+                <option value="all">
+                  כל המצבים
+                </option>
+                {Object.entries(
+                  tenantStatusLabels,
+                ).map(([value, label]) => (
+                  <option
+                    value={value}
+                    key={value}
+                  >
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>רשומת מנוי</span>
+              <select
+                value={subscriptionFilter}
+                onChange={(event) =>
+                  setSubscriptionFilter(
+                    event.target.value as SystemAdminSubscriptionFilter,
+                  )
+                }
+              >
+                <option value="all">
+                  עם ובלי מנוי
+                </option>
+                <option value="with-subscription">
+                  עם מנוי
+                </option>
+                <option value="without-subscription">
+                  ללא מנוי
+                </option>
+              </select>
+            </label>
+          </div>
+          <div className="admin-directory-actions">
+            <span
+              role="status"
+              aria-live="polite"
+            >
+              {tenants.length} תוצאות נטענו
+            </span>
+            <button
+              className="primary-button"
+              disabled={isPending}
+            >
+              {isPending
+                ? "טוען…"
+                : "חיפוש וסינון"}
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={
+                isPending ||
+                (!hasDirectoryFilters(
+                  draftFilters,
+                ) &&
+                  !hasDirectoryFilters(
+                    appliedFilters,
+                  ))
               }
-              placeholder="שם Tenant או מזהה"
-            />
-          </label>
-          <span>
-            {visibleTenants.length} תוצאות
-          </span>
-        </section>
+              onClick={clearDirectoryFilters}
+            >
+              ניקוי סינון
+            </button>
+          </div>
+        </form>
 
         {feedback ? (
           <p
@@ -745,31 +926,30 @@ export function SystemAdminTenantPanel({
           </p>
         ) : null}
 
-        {tenants.length === 0 ? (
-          <section
-            className="admin-empty-state"
-            role="status"
-          >
-            <h2>אין Tenants להצגה</h2>
-            <p>
-              D1 החזיר רשימה ריקה. לא נוספו
-              נתוני תצוגה חלופיים.
-            </p>
-          </section>
-        ) : visibleTenants.length === 0 ? (
-          <section
-            className="admin-empty-state"
-            role="status"
-          >
-            <h2>לא נמצאה התאמה</h2>
-            <p>
-              ניתן לנקות את שדה החיפוש כדי
-              להציג את הרשומות שנטענו.
-            </p>
-          </section>
-        ) : (
-          <section className="admin-tenant-list">
-            {visibleTenants.map(
+        <div id="admin-tenant-results">
+          {tenants.length === 0 ? (
+            <section
+              className="admin-empty-state"
+              role="status"
+            >
+              <h2>
+                {hasDirectoryFilters(
+                  appliedFilters,
+                )
+                  ? "לא נמצאה התאמה"
+                  : "אין Tenants להצגה"}
+              </h2>
+              <p>
+                {hasDirectoryFilters(
+                  appliedFilters,
+                )
+                  ? "ניתן לשנות או לנקות את הסינון כדי לחפש בכל הרשומות."
+                  : "D1 החזיר רשימה ריקה. לא נוספו נתוני תצוגה חלופיים."}
+              </p>
+            </section>
+          ) : (
+            <section className="admin-tenant-list">
+              {tenants.map(
               (tenant) => (
                 <article
                   className="admin-tenant-card"
@@ -1013,9 +1193,10 @@ export function SystemAdminTenantPanel({
                   )}
                 </article>
               ),
-            )}
-          </section>
-        )}
+              )}
+            </section>
+          )}
+        </div>
 
         {nextCursor !== null ? (
           <button
