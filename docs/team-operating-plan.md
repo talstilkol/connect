@@ -234,7 +234,13 @@ release ולפחות אחת ל־30 יום בזמן פיתוח פעיל.
 
 5.1 Gate 0 — החלטות ותיחום:
 
-5.1.1 רועי מאשר Repository Authority, מודל Claude ו־Hosting path.
+5.1.1 רועי מאשר את שלושת מסמכי ההחלטה של Gate 0:
+
+5.1.1.1 [ADR-0001 — Hosting topology](adr/0001-hosting-topology.md).
+
+5.1.1.2 [ADR-0002 — Repository Authority](adr/0002-repository-authority.md).
+
+5.1.1.3 [ADR-0003 — Claude account model](adr/0003-ai-development-account-model.md).
 
 5.1.2 פלט: [ADR-0001](adr/0001-hosting-topology.md) מאושר בהחלטה
 אחת — Cloudflare קיים או Migration מלא. כל עוד סטטוס ה־ADR הוא
@@ -251,6 +257,10 @@ JSON מהשאלון משמש סיכום לדיון בלבד; בעלי הסמכו
 5.1.5 תנאי קבלה נוסף: לכל חסם ב־`productionDecisionRegistry` יש
 Owner, החלטה מאושרת או סטטוס פתוח מפורש, וקישור לראיה הנדרשת. אין
 לסמן חסם כ־`ready` בגלל בחירה מקומית בשאלון בלבד.
+
+5.1.6 כל שלושת ה־ADRs נמצאים כעת בסטטוס `proposed`. לכן Gate 0
+נשאר `not verified` עד שבעלי הסמכות משלימים בכל מסמך אפשרות מאושרת,
+מועד UTC ואישורים אמיתיים.
 
 5.2 Gate 1 — GitHub Governance:
 

@@ -14,6 +14,12 @@ const adrIndex = readProjectFile(
 const hostingAdr = readProjectFile(
   "docs/adr/0001-hosting-topology.md",
 );
+const repositoryAdr = readProjectFile(
+  "docs/adr/0002-repository-authority.md",
+);
+const aiAccountAdr = readProjectFile(
+  "docs/adr/0003-ai-development-account-model.md",
+);
 const projectReadme = readProjectFile("README.md");
 const teamPlan = readProjectFile(
   "docs/team-operating-plan.md",
@@ -53,6 +59,22 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
   assert.match(
     teamPlan,
     /\(adr\/0001-hosting-topology\.md\)/,
+  );
+  assert.match(
+    adrIndex,
+    /\(0002-repository-authority\.md\)/,
+  );
+  assert.match(
+    adrIndex,
+    /\(0003-ai-development-account-model\.md\)/,
+  );
+  assert.match(
+    teamPlan,
+    /\(adr\/0002-repository-authority\.md\)/,
+  );
+  assert.match(
+    teamPlan,
+    /\(adr\/0003-ai-development-account-model\.md\)/,
   );
 });
 
@@ -126,5 +148,72 @@ test("requires real approval metadata before an ADR can be accepted", () => {
   assert.match(
     hostingAdr,
     /שמות המאשרים, האפשרות שנבחרה ומועד UTC קנוני נכתבים במסמך/,
+  );
+});
+
+test("keeps every Gate 0 ADR proposed until external owners approve it", () => {
+  for (const adr of [
+    hostingAdr,
+    repositoryAdr,
+    aiAccountAdr,
+  ]) {
+    const metadata = parseFrontMatter(adr);
+    assert.equal(metadata.status, "proposed");
+    assert.equal(
+      metadata.approved_option,
+      "unknown/unavailable",
+    );
+    assert.equal(
+      metadata.approved_at,
+      "unknown/unavailable",
+    );
+  }
+
+  assert.match(
+    teamPlan,
+    /כל שלושת ה־ADRs[\s\S]*`proposed`[\s\S]*Gate 0[\s\S]*`not verified`/,
+  );
+});
+
+test("keeps one repository authority and rejects a competing copy", () => {
+  assert.match(
+    repositoryAdr,
+    /אפשרות A — העברת ה־Repository הקיים ל־Organization של החברה/,
+  );
+  assert.match(
+    repositoryAdr,
+    /Repository\s+Authority היחיד/,
+  );
+  assert.match(
+    repositoryAdr,
+    /אפשרות C — פתיחת Repository חדש והעתקת הקוד/,
+  );
+  assert.match(
+    repositoryAdr,
+    /תוכנית GitHub[\s\S]*`unknown\/unavailable`/,
+  );
+});
+
+test("requires named Claude seats and rejects shared sessions", () => {
+  assert.match(
+    aiAccountAdr,
+    /אפשרות A — Claude Team בבעלות החברה עם Seat אישי/,
+  );
+  assert.match(
+    aiAccountAdr,
+    /אפשרות C — חשבון משותף או Session משותף דרך AnyDesk/,
+  );
+  assert.match(aiAccountAdr, /האפשרות נדחית/);
+  assert.match(
+    aiAccountAdr,
+    /הוא אינו תחליף ל־Seat אישי/,
+  );
+  assert.match(
+    aiAccountAdr,
+    /Feedback מפורש הוא חריג/,
+  );
+  assert.match(
+    aiAccountAdr,
+    /מחיר מקומי, Seats,[\s\S]*`unknown\/unavailable`/,
   );
 });

@@ -40,3 +40,9 @@
 
 4.1 [ADR-0001 — Hosting topology for Pilot](0001-hosting-topology.md) —
 `proposed`.
+
+4.2 [ADR-0002 — Repository Authority and GitHub governance](0002-repository-authority.md)
+— `proposed`.
+
+4.3 [ADR-0003 — Claude and AI development account model](0003-ai-development-account-model.md)
+— `proposed`.
