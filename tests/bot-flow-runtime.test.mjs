@@ -242,6 +242,62 @@ test("executes both branches of a compiled condition and converges at End", asyn
   );
 });
 
+test("hands off from an internal condition branch without planning a reply", async () => {
+  const compiled =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב פנימי לנציג",
+        keywords: ["עזרה"],
+        matchMode: "contains",
+        introTexts: [],
+        condition: {
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "נציג",
+          matchedReplyText: "",
+          unmatchedReplyText:
+            "הבוט ימשיך בטיפול.",
+          matchedHandoffReason:
+            "customer-request",
+          unmatchedHandoffReason: null,
+        },
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  assert.deepEqual(
+    executeBotFlowTurn(compiled.definition, {
+      lastInboundText: "עזרה, אבקש נציג",
+      conversationStatus: "bot_active",
+    }),
+    {
+      outcome: "handoff",
+      replies: [],
+      terminalEffect: {
+        outcome: "handoff",
+        stopExecution: true,
+        conversationStatus: "waiting_for_agent",
+        assignmentAction: "none",
+        reason: "customer-request",
+      },
+    },
+  );
+  assert.deepEqual(
+    executeBotFlowTurn(compiled.definition, {
+      lastInboundText: "עזרה בנושא החשבון",
+      conversationStatus: "bot_active",
+    }).replies,
+    [
+      {
+        kind: "text",
+        text: "הבוט ימשיך בטיפול.",
+      },
+    ],
+  );
+});
+
 test("hands off only a matching keyword and never combines the transfer with a reply", async () => {
   const compiled =
     await compileKeywordHandoffBotFlowComposerDraft(

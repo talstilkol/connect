@@ -46,8 +46,9 @@ test("keeps the condition editor keyboard accessible and restores focus after re
 });
 
 test("keeps Condition, Buttons, and Handoff mutually exclusive and submits no graph identities", async () => {
-  const [builder, compiler] = await Promise.all([
+  const [builder, editor, compiler] = await Promise.all([
     readFile(builderUrl, "utf8"),
+    readFile(editorUrl, "utf8"),
     readFile(compilerUrl, "utf8"),
   ]);
 
@@ -69,7 +70,23 @@ test("keeps Condition, Buttons, and Handoff mutually exclusive and submits no gr
   );
   assert.match(
     compiler,
-    /hasExactKeys\(value, \[\s*"fact",\s*"operator",\s*"value",\s*"matchedReplyText",\s*"unmatchedReplyText",/,
+    /const legacyKeys = \[\s*"fact",\s*"operator",\s*"value",\s*"matchedReplyText",\s*"unmatchedReplyText",/,
+  );
+  assert.match(
+    compiler,
+    /const branchKeys = \[\s*\.\.\.legacyKeys,\s*"matchedHandoffReason",\s*"unmatchedHandoffReason",/,
+  );
+  assert.match(
+    builder,
+    /conditionHasHandoff[\s\S]*setReplySteps\(\[\]\)/,
+  );
+  assert.match(
+    editor,
+    /<option value="handoff">\s*העברה לנציג/,
+  );
+  assert.match(
+    editor,
+    /matchedHandoffReason === null/,
   );
   assert.match(
     compiler,

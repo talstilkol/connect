@@ -132,8 +132,14 @@ export function moveBotFlowReplyStep(
 export function removeBotFlowReplyStep(
   steps: readonly BotFlowReplyStepDraft[],
   draftStepKeyValue: string,
+  minimumStepCount = 1,
 ): readonly BotFlowReplyStepDraft[] {
-  if (steps.length <= 1) {
+  if (
+    !Number.isSafeInteger(minimumStepCount) ||
+    minimumStepCount < 0 ||
+    minimumStepCount > 1 ||
+    steps.length <= minimumStepCount
+  ) {
     return steps;
   }
 

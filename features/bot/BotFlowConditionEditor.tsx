@@ -10,6 +10,7 @@ import type {
 } from "../../shared/domain/botFlow";
 import type {
   KeywordConditionDraft,
+  KeywordHandoffReason,
 } from "../../shared/domain/botFlowComposer";
 import {
   persistedConversationStatuses,
@@ -33,6 +34,10 @@ export function BotFlowConditionEditor({
   onValueChange,
   onMatchedReplyChange,
   onUnmatchedReplyChange,
+  onMatchedBranchKindChange,
+  onUnmatchedBranchKindChange,
+  onMatchedHandoffReasonChange,
+  onUnmatchedHandoffReasonChange,
   onRemoveCondition,
 }: {
   draft: KeywordConditionDraft;
@@ -45,6 +50,18 @@ export function BotFlowConditionEditor({
   onValueChange(value: string): void;
   onMatchedReplyChange(value: string): void;
   onUnmatchedReplyChange(value: string): void;
+  onMatchedBranchKindChange(
+    value: "reply" | "handoff",
+  ): void;
+  onUnmatchedBranchKindChange(
+    value: "reply" | "handoff",
+  ): void;
+  onMatchedHandoffReasonChange(
+    value: KeywordHandoffReason,
+  ): void;
+  onUnmatchedHandoffReasonChange(
+    value: KeywordHandoffReason,
+  ): void;
   onRemoveCondition(): void;
 }) {
   const factRef = useRef<HTMLSelectElement>(null);
@@ -57,13 +74,18 @@ export function BotFlowConditionEditor({
 
   const checksConversationStatus =
     draft.fact === "conversation-status";
+  const matchedHandoffReason =
+    draft.matchedHandoffReason ?? null;
+  const unmatchedHandoffReason =
+    draft.unmatchedHandoffReason ?? null;
 
   return (
     <fieldset className="bot-flow-condition">
       <legend>פיצול לפי תנאי</legend>
       <p id="bot-flow-condition-help">
-        התנאי נבדק אחרי הודעות הטקסט. כל תוצאה
-        שולחת תשובה אחרת ואז מסיימת את התהליך.
+        כל תוצאה יכולה לשלוח תשובת Text או להעביר
+        לנציג. כאשר נבחר Handoff לא נשלחת לפניו
+        הודעת Intro באותו Turn.
       </p>
 
       <label>
@@ -148,35 +170,143 @@ export function BotFlowConditionEditor({
         )}
       </label>
 
-      <label>
-        <span>תשובה כאשר התנאי מתקיים</span>
-        <textarea
-          rows={4}
-          value={draft.matchedReplyText}
-          onChange={(event) =>
-            onMatchedReplyChange(event.target.value)
-          }
-          disabled={disabled}
-          maxLength={4096}
-          required
-        />
-      </label>
+      <fieldset className="bot-flow-condition-branch">
+        <legend>כאשר התנאי מתקיים</legend>
+        <label>
+          <span>פעולת הענף</span>
+          <select
+            value={
+              matchedHandoffReason === null
+                ? "reply"
+                : "handoff"
+            }
+            onChange={(event) =>
+              onMatchedBranchKindChange(
+                event.target.value as
+                  | "reply"
+                  | "handoff",
+              )
+            }
+            disabled={disabled}
+          >
+            <option value="reply">תשובת Text</option>
+            <option value="handoff">
+              העברה לנציג
+            </option>
+          </select>
+        </label>
+        {matchedHandoffReason === null ? (
+          <label>
+            <span>תשובת הענף</span>
+            <textarea
+              rows={4}
+              value={draft.matchedReplyText}
+              onChange={(event) =>
+                onMatchedReplyChange(
+                  event.target.value,
+                )
+              }
+              disabled={disabled}
+              maxLength={4096}
+              required
+            />
+          </label>
+        ) : (
+          <label>
+            <span>סיבת ההעברה</span>
+            <select
+              value={matchedHandoffReason}
+              onChange={(event) =>
+                onMatchedHandoffReasonChange(
+                  event.target
+                    .value as KeywordHandoffReason,
+                )
+              }
+              disabled={disabled}
+              required
+            >
+              <option value="" disabled>
+                בחירת סיבה
+              </option>
+              <option value="customer-request">
+                בקשת הלקוח
+              </option>
+              <option value="flow-rule">
+                כלל בתהליך
+              </option>
+            </select>
+          </label>
+        )}
+      </fieldset>
 
-      <label>
-        <span>תשובה כאשר התנאי אינו מתקיים</span>
-        <textarea
-          rows={4}
-          value={draft.unmatchedReplyText}
-          onChange={(event) =>
-            onUnmatchedReplyChange(
-              event.target.value,
-            )
-          }
-          disabled={disabled}
-          maxLength={4096}
-          required
-        />
-      </label>
+      <fieldset className="bot-flow-condition-branch">
+        <legend>כאשר התנאי אינו מתקיים</legend>
+        <label>
+          <span>פעולת הענף</span>
+          <select
+            value={
+              unmatchedHandoffReason === null
+                ? "reply"
+                : "handoff"
+            }
+            onChange={(event) =>
+              onUnmatchedBranchKindChange(
+                event.target.value as
+                  | "reply"
+                  | "handoff",
+              )
+            }
+            disabled={disabled}
+          >
+            <option value="reply">תשובת Text</option>
+            <option value="handoff">
+              העברה לנציג
+            </option>
+          </select>
+        </label>
+        {unmatchedHandoffReason === null ? (
+          <label>
+            <span>תשובת הענף</span>
+            <textarea
+              rows={4}
+              value={draft.unmatchedReplyText}
+              onChange={(event) =>
+                onUnmatchedReplyChange(
+                  event.target.value,
+                )
+              }
+              disabled={disabled}
+              maxLength={4096}
+              required
+            />
+          </label>
+        ) : (
+          <label>
+            <span>סיבת ההעברה</span>
+            <select
+              value={unmatchedHandoffReason}
+              onChange={(event) =>
+                onUnmatchedHandoffReasonChange(
+                  event.target
+                    .value as KeywordHandoffReason,
+                )
+              }
+              disabled={disabled}
+              required
+            >
+              <option value="" disabled>
+                בחירת סיבה
+              </option>
+              <option value="customer-request">
+                בקשת הלקוח
+              </option>
+              <option value="flow-rule">
+                כלל בתהליך
+              </option>
+            </select>
+          </label>
+        )}
+      </fieldset>
 
       <button
         type="button"

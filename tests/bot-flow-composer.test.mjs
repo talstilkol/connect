@@ -536,7 +536,6 @@ test("compiles and reads one deterministic condition with two reply branches", a
 
 test("rejects unsafe or extended condition drafts before graph persistence", async () => {
   const cases = [
-    conditionComposerInput({ introTexts: [] }),
     conditionComposerInput({
       introTexts: Array.from(
         { length: 94 },
@@ -558,6 +557,48 @@ test("rejects unsafe or extended condition drafts before graph persistence", asy
           `bot_block_v1_${"a".repeat(64)}`,
       },
     }),
+    conditionComposerInput({
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedHandoffReason: "flow-rule",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "תוכן נסתר אסור",
+        matchedHandoffReason: "flow-rule",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "",
+        matchedHandoffReason: "no-match",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "",
+        matchedHandoffReason: "",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "",
+        matchedHandoffReason: "flow-rule",
+      },
+    }),
     {
       ...conditionComposerInput(),
       tenantId: 8,
@@ -573,6 +614,68 @@ test("rejects unsafe or extended condition drafts before graph persistence", asy
 
     assert.equal(result.success, false);
   }
+});
+
+test("compiles an internal condition branch handoff without a bot reply in the same turn", async () => {
+  const input = conditionComposerInput({
+    introTexts: [],
+    condition: {
+      ...conditionComposerInput().condition,
+      matchedReplyText: "",
+      matchedHandoffReason: "customer-request",
+      unmatchedHandoffReason: null,
+    },
+  });
+  const result =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      input,
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 7);
+  assert.deepEqual(
+    readKeywordConditionBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [],
+      condition: {
+        fact: "last-inbound-text",
+        operator: "contains",
+        value: "נציג",
+        matchedReplyText: "",
+        unmatchedReplyText:
+          "הבוט ימשיך לטפל בפנייה.",
+        matchedHandoffReason:
+          "customer-request",
+        unmatchedHandoffReason: null,
+      },
+    },
+  );
+
+  const condition = result.definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+  assert.equal(
+    result.definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        condition.matchedBlockKey,
+    ).type,
+    "handoff",
+  );
+  assert.equal(
+    result.definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        condition.unmatchedBlockKey,
+    ).type,
+    "text",
+  );
 });
 
 test("fails closed when a condition graph does not retain the exact editable topology", async () => {

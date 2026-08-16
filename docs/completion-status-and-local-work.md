@@ -268,13 +268,16 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 החלטת Product על מדיניות recurrence.
 
 4.1.3 Flow Builder חזותי ונגיש: עורך רצף Text, שאלת Buttons מסיימת,
-פיצול Condition יחיד ומסלול Handoff לפי Keyword הושלמו. Handoff
-מעביר רק בעת התאמה, ללא Reply, ואי־התאמה מסתיימת ללא Mutation. לכל
-Button ולכל תוצאת Condition תשובת Text נפרדת; הגרף והמפתחות נגזרים
-בשרת, והמשך בחירה נשען על Outbox Accepted של ההודעה הקודמת באותה
-גרסה ובחלון 24 שעות. נותרו Handoff מענף פנימי, מסלולים מרובי
-Conditions או שאלות, חיבור Graph מלא, Drag-and-drop ובדיקות Browser:
-‏8–16 שעות.
+פיצול Condition יחיד ומסלולי Handoff לפי Keyword או מתוך כל אחד
+מענפי ה־Condition הושלמו. Handoff מעביר רק בענף שנבחר, ללא Reply
+באותו Turn; בחירת Handoff פנימי מסירה וחוסמת הודעות Intro, ו־Payload
+שמנסה לשלב תוכן נסתר עם ההעברה נדחה בשרת. אי־התאמת Keyword במסלול
+Handoff ישיר מסתיימת ללא Mutation. לכל Button ולכל תוצאת Condition
+שאינה Handoff תשובת Text נפרדת; הגרף והמפתחות נגזרים בשרת, והמשך
+בחירה נשען על Outbox Accepted של ההודעה הקודמת באותה גרסה ובחלון 24
+שעות. נותרו מסלולים מרובי Conditions או שאלות, חיבור Graph מלא,
+Drag-and-drop ובדיקות Browser. אומדן ה־8–16 שעות נשמר בשלב זה משום
+שה־Canvas, ריבוי הענפים וה־Browser E2E הם רוב אי־הוודאות שנותרה.
 
 4.1.4 עריכת Business Profile הקיים ב־Admin הושלמה. מודל Package,
 ‏Quota ופרטי קשר נשאר החלטת Product פתוחה. לאחר אישור המודל, אומדן

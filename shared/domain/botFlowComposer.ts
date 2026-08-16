@@ -76,6 +76,8 @@ export interface KeywordConditionDraft {
   value: string;
   matchedReplyText: string;
   unmatchedReplyText: string;
+  matchedHandoffReason?: KeywordHandoffReason | "" | null;
+  unmatchedHandoffReason?: KeywordHandoffReason | "" | null;
 }
 
 export interface KeywordConditionBotFlowComposerDraft {
@@ -413,7 +415,7 @@ export function readKeywordConditionBotFlowComposerDraft(
   definition: ValidatedBotFlowDefinition,
 ): KeywordConditionBotFlowComposerDraft | null {
   if (
-    definition.blocks.length < 8 ||
+    definition.blocks.length < 6 ||
     definition.blocks.length > 100
   ) {
     return null;
@@ -495,45 +497,78 @@ export function readKeywordConditionBotFlowComposerDraft(
     break;
   }
 
-  if (!conditionBlock || introTexts.length === 0) {
+  if (!conditionBlock) {
     return null;
   }
 
   expectedKeys.add(conditionBlock.blockKey);
-  const matchedReply = blocksByKey.get(
+  const matchedBranch = blocksByKey.get(
     conditionBlock.matchedBlockKey,
   );
-  const unmatchedReply = blocksByKey.get(
+  const unmatchedBranch = blocksByKey.get(
     conditionBlock.unmatchedBlockKey,
   );
 
   if (
     conditionBlock.matchedBlockKey ===
       conditionBlock.unmatchedBlockKey ||
-    matchedReply?.type !== "text" ||
-    unmatchedReply?.type !== "text" ||
-    matchedReply.nextBlockKey !==
-      unmatchedReply.nextBlockKey ||
-    expectedKeys.has(matchedReply.blockKey) ||
-    expectedKeys.has(unmatchedReply.blockKey)
+    !matchedBranch ||
+    !unmatchedBranch ||
+    expectedKeys.has(matchedBranch.blockKey) ||
+    expectedKeys.has(unmatchedBranch.blockKey) ||
+    (matchedBranch.type !== "text" &&
+      (matchedBranch.type !== "handoff" ||
+        !isKeywordHandoffReason(
+          matchedBranch.reason,
+        ))) ||
+    (unmatchedBranch.type !== "text" &&
+      (unmatchedBranch.type !== "handoff" ||
+        !isKeywordHandoffReason(
+          unmatchedBranch.reason,
+        ))) ||
+    ((matchedBranch.type === "handoff" ||
+      unmatchedBranch.type === "handoff") &&
+      introTexts.length > 0)
   ) {
     return null;
   }
 
-  expectedKeys.add(matchedReply.blockKey);
-  expectedKeys.add(unmatchedReply.blockKey);
-  const end = blocksByKey.get(
-    matchedReply.nextBlockKey,
+  expectedKeys.add(matchedBranch.blockKey);
+  expectedKeys.add(unmatchedBranch.blockKey);
+  const branchEndKeys = [
+    matchedBranch,
+    unmatchedBranch,
+  ].flatMap((branch) =>
+    branch.type === "text"
+      ? [branch.nextBlockKey]
+      : [],
   );
+  const uniqueEndKeys = new Set(branchEndKeys);
 
   if (
-    end?.type !== "end" ||
-    expectedKeys.has(end.blockKey)
+    uniqueEndKeys.size > 1 ||
+    (uniqueEndKeys.size === 0 &&
+      (matchedBranch.type !== "handoff" ||
+        unmatchedBranch.type !== "handoff"))
   ) {
     return null;
   }
 
-  expectedKeys.add(end.blockKey);
+  if (uniqueEndKeys.size === 1) {
+    const [endKey] = uniqueEndKeys;
+    const end = endKey
+      ? blocksByKey.get(endKey)
+      : undefined;
+
+    if (
+      end?.type !== "end" ||
+      expectedKeys.has(end.blockKey)
+    ) {
+      return null;
+    }
+
+    expectedKeys.add(end.blockKey);
+  }
 
   if (
     definition.blocks.some(
@@ -543,18 +578,44 @@ export function readKeywordConditionBotFlowComposerDraft(
     return null;
   }
 
+  const condition: KeywordConditionDraft = {
+    fact: conditionBlock.fact,
+    operator: conditionBlock.operator,
+    value: conditionBlock.value,
+    matchedReplyText:
+      matchedBranch.type === "text"
+        ? matchedBranch.text
+        : "",
+    unmatchedReplyText:
+      unmatchedBranch.type === "text"
+        ? unmatchedBranch.text
+        : "",
+  };
+
+  if (
+    matchedBranch.type === "handoff" ||
+    unmatchedBranch.type === "handoff"
+  ) {
+    condition.matchedHandoffReason =
+      matchedBranch.type === "handoff" &&
+      isKeywordHandoffReason(matchedBranch.reason)
+        ? matchedBranch.reason
+        : null;
+    condition.unmatchedHandoffReason =
+      unmatchedBranch.type === "handoff" &&
+      isKeywordHandoffReason(
+        unmatchedBranch.reason,
+      )
+        ? unmatchedBranch.reason
+        : null;
+  }
+
   return {
     name: definition.name,
     keywords: [...keyword.keywords],
     matchMode: keyword.matchMode,
     introTexts,
-    condition: {
-      fact: conditionBlock.fact,
-      operator: conditionBlock.operator,
-      value: conditionBlock.value,
-      matchedReplyText: matchedReply.text,
-      unmatchedReplyText: unmatchedReply.text,
-    },
+    condition,
   };
 }
 

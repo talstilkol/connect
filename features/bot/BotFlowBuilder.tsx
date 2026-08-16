@@ -277,9 +277,12 @@ export function BotFlowBuilder({
         "exact",
     );
   const [replySteps, setReplySteps] = useState(
-    createBotFlowReplySteps(
-      initialComposerDraft?.replyTexts ?? [],
-    ),
+    initialComposerDraft?.kind === "condition" &&
+      initialComposerDraft.replyTexts.length === 0
+      ? []
+      : createBotFlowReplySteps(
+          initialComposerDraft?.replyTexts ?? [],
+        ),
   );
   const [buttonMenu, setButtonMenu] =
     useState<BotFlowButtonMenuEditorDraft | null>(
@@ -339,6 +342,15 @@ export function BotFlowBuilder({
     useTransition();
   const currentVersion = latestVersion(details);
   const handoffEnabled = handoffReason !== null;
+  const matchedConditionHandoffReason =
+    condition?.matchedHandoffReason ?? null;
+  const unmatchedConditionHandoffReason =
+    condition?.unmatchedHandoffReason ?? null;
+  const conditionHasHandoff = Boolean(
+    condition &&
+      (matchedConditionHandoffReason !== null ||
+        unmatchedConditionHandoffReason !== null),
+  );
   const keywords = splitKeywords(keywordsText);
   const replyTexts = readBotFlowReplyTexts(
     replySteps,
@@ -346,12 +358,14 @@ export function BotFlowBuilder({
   const buttonOptions = buttonMenu
     ? readBotFlowButtonOptions(buttonMenu)
     : [];
-  const maximumReplyStepCount = buttonMenu
-    ? KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
-      buttonMenu.options.length
-    : condition
-      ? KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
-      : KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT;
+  const maximumReplyStepCount = conditionHasHandoff
+    ? 0
+    : buttonMenu
+      ? KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
+        buttonMenu.options.length
+      : condition
+        ? KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
+        : KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT;
   const maximumButtonOptionCount = Math.min(
     KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
     KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
@@ -368,8 +382,13 @@ export function BotFlowBuilder({
   const conditionComplete =
     condition === null ||
     (condition.value.trim().length > 0 &&
-      condition.matchedReplyText.trim().length > 0 &&
-      condition.unmatchedReplyText.trim().length > 0 &&
+      (matchedConditionHandoffReason === null
+        ? condition.matchedReplyText.trim().length > 0
+        : matchedConditionHandoffReason !== "") &&
+      (unmatchedConditionHandoffReason === null
+        ? condition.unmatchedReplyText.trim().length > 0
+        : unmatchedConditionHandoffReason !== "") &&
+      (!conditionHasHandoff || replyTexts.length === 0) &&
       (condition.fact === "last-inbound-text" ||
         condition.operator === "equals"));
   const canWrite =
@@ -457,9 +476,12 @@ export function BotFlowBuilder({
     );
     setMatchMode(draft?.matchMode ?? "exact");
     setReplySteps(
-      createBotFlowReplySteps(
-        draft?.replyTexts ?? [],
-      ),
+      draft?.kind === "condition" &&
+        draft.replyTexts.length === 0
+        ? []
+        : createBotFlowReplySteps(
+            draft?.replyTexts ?? [],
+          ),
     );
     setButtonMenu(
       draft?.kind === "button-menu"
@@ -555,6 +577,7 @@ export function BotFlowBuilder({
       removeBotFlowReplyStep(
         current,
         draftStepKey,
+        condition ? 0 : 1,
       ),
     );
     markChanged();
@@ -773,6 +796,80 @@ export function BotFlowBuilder({
     setCondition((current) =>
       current
         ? { ...current, [field]: value }
+        : current,
+    );
+    markChanged();
+  };
+
+  const changeConditionBranchKind = (
+    branch: "matched" | "unmatched",
+    kind: "reply" | "handoff",
+  ) => {
+    setCondition((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const matchedReason =
+        current.matchedHandoffReason ?? null;
+      const unmatchedReason =
+        current.unmatchedHandoffReason ?? null;
+
+      return branch === "matched"
+        ? {
+            ...current,
+            matchedReplyText:
+              kind === "handoff"
+                ? ""
+                : current.matchedReplyText,
+            matchedHandoffReason:
+              kind === "handoff" ? "" : null,
+            unmatchedHandoffReason:
+              unmatchedReason,
+          }
+        : {
+            ...current,
+            unmatchedReplyText:
+              kind === "handoff"
+                ? ""
+                : current.unmatchedReplyText,
+            matchedHandoffReason: matchedReason,
+            unmatchedHandoffReason:
+              kind === "handoff" ? "" : null,
+          };
+    });
+
+    if (kind === "handoff") {
+      setReplySteps([]);
+    }
+
+    markChanged();
+    setEditorAnnouncement(
+      kind === "handoff"
+        ? "הענף הוגדר להעברה לנציג ללא הודעת Intro באותו Turn."
+        : "הענף הוגדר לשליחת תשובת Text.",
+    );
+  };
+
+  const changeConditionHandoffReason = (
+    branch: "matched" | "unmatched",
+    reason: KeywordHandoffReason,
+  ) => {
+    setCondition((current) =>
+      current
+        ? {
+            ...current,
+            matchedHandoffReason:
+              branch === "matched"
+                ? reason
+                : (current.matchedHandoffReason ??
+                  null),
+            unmatchedHandoffReason:
+              branch === "unmatched"
+                ? reason
+                : (current.unmatchedHandoffReason ??
+                  null),
+          }
         : current,
     );
     markChanged();
@@ -1223,6 +1320,7 @@ export function BotFlowBuilder({
                   <BotFlowReplySequenceEditor
                     steps={replySteps}
                     disabled={!canWrite}
+                    minimumSteps={condition ? 0 : 1}
                     maximumSteps={maximumReplyStepCount}
                     onTextChange={changeReplyText}
                     onMove={moveReplyStep}
@@ -1275,6 +1373,30 @@ export function BotFlowBuilder({
                       onUnmatchedReplyChange={(value) =>
                         changeConditionField(
                           "unmatchedReplyText",
+                          value,
+                        )
+                      }
+                      onMatchedBranchKindChange={(value) =>
+                        changeConditionBranchKind(
+                          "matched",
+                          value,
+                        )
+                      }
+                      onUnmatchedBranchKindChange={(value) =>
+                        changeConditionBranchKind(
+                          "unmatched",
+                          value,
+                        )
+                      }
+                      onMatchedHandoffReasonChange={(value) =>
+                        changeConditionHandoffReason(
+                          "matched",
+                          value,
+                        )
+                      }
+                      onUnmatchedHandoffReasonChange={(value) =>
+                        changeConditionHandoffReason(
+                          "unmatched",
                           value,
                         )
                       }
@@ -1524,18 +1646,36 @@ export function BotFlowBuilder({
                         <div className="bot-flow-option-branches bot-flow-condition-branches">
                           <div>
                             <span>התנאי מתקיים</span>
-                            <div className="flow-node">
+                            <div
+                              className={`flow-node${
+                                matchedConditionHandoffReason !==
+                                null
+                                  ? " bot-flow-handoff-node"
+                                  : ""
+                              }`}
+                            >
                               <span className="node-icon">
-                                T
+                                {matchedConditionHandoffReason !==
+                                null
+                                  ? "↗"
+                                  : "T"}
                               </span>
                               <div>
                                 <small>
-                                  תשובת ענף
+                                  {matchedConditionHandoffReason !==
+                                  null
+                                    ? "Handoff אטומי"
+                                    : "תשובת ענף"}
                                 </small>
                                 <strong>
-                                  {condition.matchedReplyText.trim()
-                                    ? "שליחת התשובה שהוגדרה"
-                                    : "לא הוגדרה תשובה"}
+                                  {matchedConditionHandoffReason !==
+                                  null
+                                    ? matchedConditionHandoffReason
+                                      ? "העברה להמתנה לנציג"
+                                      : "לא הוגדרה סיבת העברה"
+                                    : condition.matchedReplyText.trim()
+                                      ? "שליחת התשובה שהוגדרה"
+                                      : "לא הוגדרה תשובה"}
                                 </strong>
                               </div>
                             </div>
@@ -1544,18 +1684,36 @@ export function BotFlowBuilder({
                             <span>
                               התנאי אינו מתקיים
                             </span>
-                            <div className="flow-node">
+                            <div
+                              className={`flow-node${
+                                unmatchedConditionHandoffReason !==
+                                null
+                                  ? " bot-flow-handoff-node"
+                                  : ""
+                              }`}
+                            >
                               <span className="node-icon">
-                                T
+                                {unmatchedConditionHandoffReason !==
+                                null
+                                  ? "↗"
+                                  : "T"}
                               </span>
                               <div>
                                 <small>
-                                  תשובת ענף
+                                  {unmatchedConditionHandoffReason !==
+                                  null
+                                    ? "Handoff אטומי"
+                                    : "תשובת ענף"}
                                 </small>
                                 <strong>
-                                  {condition.unmatchedReplyText.trim()
-                                    ? "שליחת התשובה שהוגדרה"
-                                    : "לא הוגדרה תשובה"}
+                                  {unmatchedConditionHandoffReason !==
+                                  null
+                                    ? unmatchedConditionHandoffReason
+                                      ? "העברה להמתנה לנציג"
+                                      : "לא הוגדרה סיבת העברה"
+                                    : condition.unmatchedReplyText.trim()
+                                      ? "שליחת התשובה שהוגדרה"
+                                      : "לא הוגדרה תשובה"}
                                 </strong>
                               </div>
                             </div>
@@ -1564,12 +1722,16 @@ export function BotFlowBuilder({
                       </>
                     ) : null}
 
-                    <span
-                      className="bot-flow-terminal"
-                      aria-label="סיום התהליך"
-                    >
-                      ■ סיום
-                    </span>
+                    {!condition ||
+                    matchedConditionHandoffReason === null ||
+                    unmatchedConditionHandoffReason === null ? (
+                      <span
+                        className="bot-flow-terminal"
+                        aria-label="סיום התהליך"
+                      >
+                        ■ סיום
+                      </span>
+                    ) : null}
                   </>
                 )}
               </div>

@@ -168,18 +168,28 @@ function parseConditionDraft(
   | "operator"
   | "value"
   | "matchedReplyText"
-  | "unmatchedReplyText",
+  | "unmatchedReplyText"
+  | "matchedHandoffReason"
+  | "unmatchedHandoffReason",
   unknown
 > | null {
+  const legacyKeys = [
+    "fact",
+    "operator",
+    "value",
+    "matchedReplyText",
+    "unmatchedReplyText",
+  ] as const;
+  const branchKeys = [
+    ...legacyKeys,
+    "matchedHandoffReason",
+    "unmatchedHandoffReason",
+  ] as const;
+
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, [
-      "fact",
-      "operator",
-      "value",
-      "matchedReplyText",
-      "unmatchedReplyText",
-    ])
+    (!hasExactKeys(value, legacyKeys) &&
+      !hasExactKeys(value, branchKeys))
   ) {
     return null;
   }
@@ -190,7 +200,23 @@ function parseConditionDraft(
     value: value.value,
     matchedReplyText: value.matchedReplyText,
     unmatchedReplyText: value.unmatchedReplyText,
+    matchedHandoffReason:
+      value.matchedHandoffReason ?? null,
+    unmatchedHandoffReason:
+      value.unmatchedHandoffReason ?? null,
   };
+}
+
+function parseConditionHandoffReason(
+  value: unknown,
+): string | null | undefined {
+  if (value === null) {
+    return null;
+  }
+
+  return isHandoffReason(value)
+    ? (value as string)
+    : undefined;
 }
 
 function parseButtonMenuOptions(
@@ -498,16 +524,34 @@ async function compileKeywordCondition(
   const condition = parseConditionDraft(
     input.condition,
   );
+  const matchedHandoffReason = condition
+    ? parseConditionHandoffReason(
+        condition.matchedHandoffReason,
+      )
+    : undefined;
+  const unmatchedHandoffReason = condition
+    ? parseConditionHandoffReason(
+        condition.unmatchedHandoffReason,
+      )
+    : undefined;
 
   if (
     !isExpectedFlowVersion(
       input.expectedFlowVersion,
     ) ||
     !Array.isArray(input.introTexts) ||
-    input.introTexts.length === 0 ||
     input.introTexts.length >
       KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT ||
-    !condition
+    !condition ||
+    matchedHandoffReason === undefined ||
+    unmatchedHandoffReason === undefined ||
+    ((matchedHandoffReason !== null ||
+      unmatchedHandoffReason !== null) &&
+      input.introTexts.length > 0) ||
+    (matchedHandoffReason !== null &&
+      condition.matchedReplyText !== "") ||
+    (unmatchedHandoffReason !== null &&
+      condition.unmatchedReplyText !== "")
   ) {
     return {
       success: false,
@@ -528,9 +572,16 @@ async function compileKeywordCondition(
     tenantId,
     name,
   );
+  const hasReplyBranch =
+    matchedHandoffReason === null ||
+    unmatchedHandoffReason === null;
   const blockKeys = await Promise.all(
     Array.from(
-      { length: input.introTexts.length + 7 },
+      {
+        length:
+          input.introTexts.length +
+          (hasReplyBranch ? 7 : 6),
+      },
       (_, index) =>
         deriveBotFlowBlockKey(
           botFlowKey,
@@ -550,10 +601,31 @@ async function compileKeywordCondition(
     blockKeys[3 + input.introTexts.length];
   const unmatchedReplyKey =
     blockKeys[4 + input.introTexts.length];
-  const endKey =
-    blockKeys[5 + input.introTexts.length];
+  const endKey = hasReplyBranch
+    ? blockKeys[5 + input.introTexts.length]
+    : null;
   const handoffKey =
-    blockKeys[6 + input.introTexts.length];
+    blockKeys[
+      (hasReplyBranch ? 6 : 5) +
+        input.introTexts.length
+    ];
+  const branchBlock = (
+    blockKey: string,
+    replyText: unknown,
+    handoffReason: string | null,
+  ) =>
+    handoffReason === null
+      ? {
+          blockKey,
+          type: "text" as const,
+          text: replyText,
+          nextBlockKey: endKey,
+        }
+      : {
+          blockKey,
+          type: "handoff" as const,
+          reason: handoffReason,
+        };
   const definition = {
     name,
     entryBlockKey: triggerKey,
@@ -568,7 +640,8 @@ async function compileKeywordCondition(
         type: "keyword",
         keywords: input.keywords,
         matchMode: input.matchMode,
-        matchedBlockKey: introKeys[0],
+        matchedBlockKey:
+          introKeys[0] ?? conditionKey,
         unmatchedBlockKey: handoffKey,
       },
       ...input.introTexts.map((text, index) => ({
@@ -587,22 +660,24 @@ async function compileKeywordCondition(
         matchedBlockKey: matchedReplyKey,
         unmatchedBlockKey: unmatchedReplyKey,
       },
-      {
-        blockKey: matchedReplyKey,
-        type: "text",
-        text: condition.matchedReplyText,
-        nextBlockKey: endKey,
-      },
-      {
-        blockKey: unmatchedReplyKey,
-        type: "text",
-        text: condition.unmatchedReplyText,
-        nextBlockKey: endKey,
-      },
-      {
-        blockKey: endKey,
-        type: "end",
-      },
+      branchBlock(
+        matchedReplyKey,
+        condition.matchedReplyText,
+        matchedHandoffReason,
+      ),
+      branchBlock(
+        unmatchedReplyKey,
+        condition.unmatchedReplyText,
+        unmatchedHandoffReason,
+      ),
+      ...(endKey
+        ? [
+            {
+              blockKey: endKey,
+              type: "end" as const,
+            },
+          ]
+        : []),
       {
         blockKey: handoffKey,
         type: "handoff",

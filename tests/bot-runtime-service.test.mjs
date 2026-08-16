@@ -8,6 +8,7 @@ import {
 } from "../server/bot/botFlowKey.ts";
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
   compileKeywordHandoffBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 import {
@@ -193,6 +194,69 @@ async function activeHandoffFixture() {
         keywords: ["נציג"],
         matchMode: "contains",
         handoffReason: "customer-request",
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const botFlowKey = await deriveBotFlowKey(
+    7,
+    compiled.definition.name,
+  );
+  const botFlowVersionKey =
+    await deriveBotFlowVersionKey(
+      7,
+      botFlowKey,
+      1,
+      compiled.definition,
+    );
+
+  return {
+    flow: {
+      botFlowKey,
+      tenantId: 7,
+      name: compiled.definition.name,
+      status: "active",
+      latestVersionKey: botFlowVersionKey,
+      latestVersionNumber: 1,
+      activeVersionKey: botFlowVersionKey,
+      version: 2,
+      createdAt: "2026-07-26 09:00:00",
+      updatedAt: "2026-07-26 09:05:00",
+    },
+    version: {
+      botFlowVersionKey,
+      botFlowKey,
+      tenantId: 7,
+      versionNumber: 1,
+      status: "published",
+      definition: compiled.definition,
+      publishedAt: "2026-07-26 09:05:00",
+      createdAt: "2026-07-26 09:00:00",
+    },
+  };
+}
+
+async function activeConditionHandoffFixture() {
+  const compiled =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב פנימי פעיל לנציג",
+        keywords: ["עזרה"],
+        matchMode: "contains",
+        introTexts: [],
+        condition: {
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "נציג",
+          matchedReplyText: "",
+          unmatchedReplyText:
+            "הבוט ימשיך בטיפול.",
+          matchedHandoffReason:
+            "customer-request",
+          unmatchedHandoffReason: null,
+        },
         expectedFlowVersion: null,
       },
     );
@@ -685,6 +749,55 @@ test("applies a compiled keyword handoff only on the matched branch", async () =
   assert.equal(
     unmatched.plan.outcome,
     "completed",
+  );
+  assert.deepEqual(
+    matchedFixture.calls.handoffs,
+    [
+      {
+        tenantId: 7,
+        conversationKey,
+        expectedVersion: 3,
+      },
+    ],
+  );
+  assert.deepEqual(
+    unmatchedFixture.calls.handoffs,
+    [],
+  );
+});
+
+test("applies an internal condition handoff atomically without a reply", async () => {
+  const active =
+    await activeConditionHandoffFixture();
+  const matchedFixture = fixture(active);
+  const unmatchedFixture = fixture(active);
+
+  const matched =
+    await matchedFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "עזרה, אבקש נציג",
+    );
+  const unmatched =
+    await unmatchedFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "עזרה בנושא החשבון",
+    );
+
+  assert.equal(matched.outcome, "handoff-applied");
+  assert.deepEqual(matched.plan.replies, []);
+  assert.equal(unmatched.outcome, "planned");
+  assert.deepEqual(
+    unmatched.plan.replies,
+    [
+      {
+        kind: "text",
+        text: "הבוט ימשיך בטיפול.",
+      },
+    ],
   );
   assert.deepEqual(
     matchedFixture.calls.handoffs,

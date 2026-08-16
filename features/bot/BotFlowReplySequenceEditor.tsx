@@ -12,6 +12,7 @@ import type {
 export function BotFlowReplySequenceEditor({
   steps,
   disabled,
+  minimumSteps = 1,
   maximumSteps,
   onTextChange,
   onMove,
@@ -20,6 +21,7 @@ export function BotFlowReplySequenceEditor({
 }: {
   steps: readonly BotFlowReplyStepDraft[];
   disabled: boolean;
+  minimumSteps?: 0 | 1;
   maximumSteps: number;
   onTextChange(
     draftStepKey: string,
@@ -127,7 +129,8 @@ export function BotFlowReplySequenceEditor({
                     onRemove(step.draftStepKey);
                   }}
                   disabled={
-                    disabled || steps.length === 1
+                    disabled ||
+                    steps.length <= minimumSteps
                   }
                   aria-label={`מחק את הודעת הטקסט ${position}`}
                 >

@@ -86,6 +86,21 @@ test("keeps one required reply and ignores missing or out-of-range edits", () =>
   );
 });
 
+test("allows a condition editor to remove its last optional intro step", () => {
+  const single = createBotFlowReplySteps([
+    "הודעת Intro אופציונלית",
+  ]);
+
+  assert.deepEqual(
+    removeBotFlowReplyStep(
+      single,
+      single[0].draftStepKey,
+      0,
+    ),
+    [],
+  );
+});
+
 test("removes only the requested step and keeps draft keys collision-free", () => {
   const threeSteps = appendBotFlowReplyStep(
     appendBotFlowReplyStep(
