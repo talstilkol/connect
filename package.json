@@ -52,6 +52,7 @@
     "read-excel-file": "9.2.0"
   },
   "devDependencies": {
+    "@clerk/eslint-plugin": "0.2.0",
     "@cloudflare/vite-plugin": "1.51.1",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",

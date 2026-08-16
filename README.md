@@ -16,6 +16,7 @@
 9. [Release operator runbook](docs/release-operator-runbook.md).
 10. [חוזה אבטחה לייבוא אנשי קשר](docs/contact-import-security.md).
 11. [ראיית Browser מקומית לייבוא אנשי קשר](docs/contact-import-browser-acceptance.md).
+12. [חוזה הגנת משאבי Clerk](docs/clerk-resource-auth-protection.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
@@ -94,9 +95,9 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1386/1386 בדיקות, 34 Migrations,
-   ‏424 קובצי Source, ‏31 Client dependency graphs, ‏819 קבצים
-   בסריקת Secrets ו־23 Dependencies ישירים נעולים.
+31. Local Release Gate עובר עם 1426/1426 בדיקות, 35 Migrations,
+   ‏438 קובצי Source, ‏32 Client dependency graphs, ‏844 קבצים
+   בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
    פגיעויות ידועות בגרף ה־Production.
@@ -342,7 +343,8 @@
       העלאה ציבורי או פעולה מול Bucket אמיתי.
 7. תשתית זהות והרשאות:
    1. Clerk מחובר למסכי Login ו־Registration עם ממשק עברי.
-   2. `proxy.ts` מגן על Routes של ה־Workspace כאשר Clerk מוגדר.
+   2. `proxy.ts` מפעיל את Clerk על Routes מפורשים; כל Page ו־Layout
+      רגישים מגינים על עצמם ב־`auth.protect()` לפני קריאת מידע.
    3. Tenant Session נגזר מ־Clerk User ומ־Membership פעיל ב־D1,
       ורק כאשר זהות המשתמש תואמת והרשומה שייכת ל־Tenant נגיש.
    4. מטריצת RBAC נאכפת בצד השרת לפני גישה ל־Repository.

@@ -9,7 +9,7 @@ const proxyUrl = new URL(
   import.meta.url,
 );
 
-test("routes every authenticated application surface through the explicit Clerk proxy matcher", async () => {
+test("runs Clerk middleware on every explicit application surface without path-level authorization", async () => {
   const source = await readFile(
     proxyUrl,
     "utf8",
@@ -38,6 +38,10 @@ test("routes every authenticated application surface through the explicit Clerk 
   );
   assert.match(
     source,
-    /createRouteMatcher\(\["\/workspace\(\.\*\)"\]\)/,
+    /configuredClerkMiddleware = clerkMiddleware\(\)/,
+  );
+  assert.doesNotMatch(
+    source,
+    /createRouteMatcher|auth\.protect/,
   );
 });

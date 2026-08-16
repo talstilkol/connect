@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import WorkspaceApp from "../../../features/workspace/WorkspaceApp";
 import { hasClerkServerConfiguration } from "../../../server/auth/clerkConfiguration";
@@ -18,18 +19,25 @@ import { configurationRequiredMetaConnection } from "../../../shared/domain/meta
 import { defaultInboxFilters } from "../../../shared/domain/conversationView";
 import { isSectionId } from "../../../shared/workspace/navigation";
 
+// Clerk's experimental lint rule cannot follow the intentional config-disabled rehearsal branch; source-contract tests enforce the conditional direct protection.
+// eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function WorkspaceSectionPage({
   params,
 }: {
   params: Promise<{ section: string }>;
 }) {
+  const authEnabled = hasClerkServerConfiguration();
+
+  if (authEnabled) {
+    await auth.protect();
+  }
+
   const { section } = await params;
 
   if (!isSectionId(section)) {
     notFound();
   }
 
-  const authEnabled = hasClerkServerConfiguration();
   const [
     contactsResult,
     initialMetaConnection,

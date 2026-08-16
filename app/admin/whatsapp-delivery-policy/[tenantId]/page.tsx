@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import {
   notFound,
 } from "next/navigation";
@@ -5,6 +6,7 @@ import {
 import {
   SystemAdminWhatsappDeliveryPolicyPanel,
 } from "../../../../features/admin/SystemAdminWhatsappDeliveryPolicyPanel.tsx";
+import { hasClerkServerConfiguration } from "../../../../server/auth/clerkConfiguration.ts";
 import {
   readCurrentSystemAdminWhatsappDeliveryPolicy,
 } from "../../../../server/campaigns/currentSystemAdminWhatsappDeliveryPolicy.ts";
@@ -25,6 +27,8 @@ function parseTenantId(
     : null;
 }
 
+// Clerk's experimental lint rule cannot follow the intentional config-disabled rehearsal branch; source-contract tests enforce the conditional direct protection.
+// eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function SystemAdminWhatsappDeliveryPolicyPage({
   params,
 }: {
@@ -32,6 +36,10 @@ export default async function SystemAdminWhatsappDeliveryPolicyPage({
     tenantId: string;
   }>;
 }) {
+  if (hasClerkServerConfiguration()) {
+    await auth.protect();
+  }
+
   const { tenantId: rawTenantId } =
     await params;
   const tenantId = parseTenantId(
