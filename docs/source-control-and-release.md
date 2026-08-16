@@ -120,6 +120,11 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 4.7 `npm run release:verify-artifacts` מחשב מחדש את שתי הראיות
 מה־Commit, דורש Worktree נקי ונכשל אם Artifact חסר, פגום או ישן.
 
+4.8 `npm run release:rehearse:local` מריץ את כל המסלול המקומי ומוכיח
+ששער Production נכשל סגור כאשר סמכויות ה־Attestation הוסרו במכוון.
+התוצאה היא `local-only`; סדר העבודה המלא נמצא ב־
+`docs/release-operator-runbook.md`.
+
 ## 5. Secrets
 
 5.1 שמות התצורה הציבורית:

@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,305 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,309 הבדיקות עוברים.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -191,19 +191,30 @@ Inventory שהשתנה לפני מחיקה. ‏`backup-restore-readiness.test.mj
 2.8.5 אלו בדיקות עומס דטרמיניסטיות מקומיות. הן אינן מחליפות Load
 test ו־DLQ rehearsal מול Cloudflare ו־Meta בסביבת Staging אמיתית.
 
-2.9 Release rehearsal מקומי ותיעוד מפעיל.
+2.9 **הושלם:** Release rehearsal מקומי ותיעוד מפעיל.
 
-2.9.1 תכולה: Fail-closed production gate, סדר הורדת Artifacts,
-הזרקת Evidence, Rollback/Forward-fix ו־Smoke checklist.
+2.9.1 `npm run release:rehearse:local` דורש Worktree נקי, מריץ את
+שער השחרור המקומי, יוצר Manifest ו־Change Log, מאמת אותם ומריץ
+Production Probe מבודד.
 
-2.9.2 אומדן: **4–6 שעות**.
+2.9.2 ה־Probe מתקבל רק כאשר כל השערים המקומיים עברו ו־Production
+נחסם בדיוק ב־`DEPENDENCY_AUDIT_ATTESTATION_ARGUMENTS_INVALID`.
+כשל אחר או Production PASS בלתי צפוי מכשילים את ה־Rehearsal.
+
+2.9.3 התוצאה נשמרת ב־`.artifacts/local-release-rehearsal.json`
+כראיה `local-only` ללא Secret, ‏PII, ‏Timestamp או נתוני ספק.
+
+2.9.4 `docs/release-operator-runbook.md` מקבע את סדר ה־Artifacts,
+הזרקת Evidence, בחירת Rollback/Forward Fix ו־Smoke checklist.
+Smoke חיצוני עדיין דורש Staging וחשבונות אמיתיים.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 נשארו **4–6 שעות** לשלב 9: Release rehearsal מקומי ותיעוד
-מפעיל.
+2.10.1 כל **9 מתוך 9** שלבי מסלול ה־Baseline המקומי הושלמו. לא
+נשאר שלב פיתוח במסלול זה.
 
-2.10.2 עם Review ותיקוני Regression: **2–4 ימי עבודה**.
+2.10.2 Review צוותי ותיקוני Regression, אם יימצאו, אינם ניתנים
+לאומדן לפני Review ולכן הם `unknown/unavailable`.
 
 ## 3. עבודה שאינה מקומית בלבד
 
@@ -224,8 +235,8 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 `docs/team-operating-plan.md`. הוא אינו כלול באומדן המקומי בסעיף
 2.10, משום שזמני Accounts, ספקים ואישורים הם `unknown/unavailable`.
 
-3.6 במסלול המקומי שלבים 7 ו־8 מתוך 9 הושלמו. נשאר שלב 9 בלבד:
-Release rehearsal מקומי ותיעוד מפעיל.
+3.6 במסלול ה־Baseline המקומי כל 9 השלבים הושלמו. הדבר אינו סוגר
+את פערי האפיון בסעיף 4 ואינו מחליף אף Gate חיצוני.
 
 ## 4. פערים שנוספו לאחר אימות PDF המקור
 

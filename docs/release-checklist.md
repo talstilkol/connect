@@ -1,5 +1,8 @@
 # Release Checklist
 
+סדר הביצוע, נקודות העצירה ותרשים Rollback/Forward Fix נמצאים ב־
+`docs/release-operator-runbook.md`.
+
 ## 1. Source authority
 
 1.1 Repository Authority נבחר ומתועד.

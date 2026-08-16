@@ -21,6 +21,7 @@
     "release:manifest": "node scripts/create-release-manifest.mjs",
     "release:changelog": "node scripts/create-change-log.mjs",
     "release:verify-artifacts": "node scripts/verify-release-artifacts.mjs",
+    "release:rehearse:local": "node scripts/rehearse-local-release.mjs",
     "create:team-invitation-browser-cases": "node scripts/create-team-invitation-browser-case-inventory.mjs",
     "verify:team-invitation-browser-case-file": "node scripts/verify-team-invitation-browser-case-inventory-file.mjs",
     "capture:team-invitation-browser-auth": "node scripts/capture-team-invitation-browser-auth-states.mjs",

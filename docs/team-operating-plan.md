@@ -323,17 +323,15 @@ Kill switch ו־Audit.
 
 ## 6. מצב והיקף שנותר
 
-6.1 במסלול הפיתוח המקומי הנוכחי אנחנו בשלב 7 מתוך 9.
+6.1 במסלול ה־Baseline המקומי כל 9 מתוך 9 השלבים הושלמו.
 
-6.2 לסיום שלב 7 נשאר תת־שלב אחד: פיצול Contact Import, ‏CSV,
-Mapping והשכבות המשותפות מתוך `app/globals.css`. האומדן הוא 0.5–1
-שעת פיתוח נטו.
+6.2 שלב 7 הסתיים בפיצול Contact Import ו־CSS לפי Feature; שלב 8
+הסתיים בבדיקות עומס, DLQ וכשל; שלב 9 הסתיים ב־Release rehearsal
+וב־`docs/release-operator-runbook.md`.
 
-6.3 לאחריו נשארים שני שלבים מלאים:
-
-6.3.1 שלב 8 — בדיקות עומס וכשל: 8–12 שעות.
-
-6.3.2 שלב 9 — Release rehearsal ותיעוד מפעיל: 4–6 שעות.
+6.3 לא נשאר שלב פיתוח במסלול ה־Baseline המקומי. פערי PDF נוספים
+ומשימות Rate Limiting מתועדים בנפרד ב־
+`docs/completion-status-and-local-work.md` ואינם מסומנים כגמורים.
 
 6.4 החיבור החי לצוות ולספקים הוא Workstream חיצוני נפרד בן תשעה
 Gates, ‏0–8. Gate 1 ו־Gate 4 במצב `partial`; יתר ה־Gates אינם
