@@ -1,6 +1,6 @@
 # המלצות להחלטות החיצוניות
 
-תאריך בדיקה: 2026-08-09
+תאריך בדיקה: 2026-08-16
 
 ## 1. עקרונות החלטה
 
@@ -205,31 +205,97 @@ Legal Hold, Dry run, Plan קצר־תוקף ותרגיל Restore מוצלח.
 13.3 לכל החלטה יירשמו Owner, ‏Approver, תאריך, חלופה שנדחתה,
 עלות חודשית מקסימלית ותנאי Exit.
 
-## 14. מקורות רשמיים
+## 14. החלטה 12 — זהויות Claude וגישה מרחוק
 
-14.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+14.1 המלצה: Claude Team בבעלות החברה עם Seat אישי לכל מפתח.
+מנוי אישי נפרד יכול לשמש רק אם מדיניות החברה מאשרת אותו; חשבון
+רגיל משותף אינו מאושר.
 
-14.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+14.2 AnyDesk הוא ערוץ גישה למחשב חברה, לא מנגנון לשיתוף Claude.
+אם הוא נדרש, יש להפעיל 2FA, ‏Access Control List, משתמש OS אישי
+ו־Permission Profile מצומצם.
 
-14.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+14.3 אין לשתף Password, ‏Cookie, ‏Session, קוד כניסה או Token דרך
+AnyDesk, צ'אט, GitHub או מסמך.
 
-14.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+## 15. החלטה 13 — GitHub ו־Repository Authority
 
-14.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+15.1 כבר קיים Repository פרטי בשם `talstilkol/connect`. ההמלצה היא
+לא לפתוח עותק נוסף, אלא להעביר את הקיים ל־Organization של החברה
+ולהגדיר אותו במפורש כ־Repository Authority.
 
-14.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+15.2 כל חבר צוות יעבוד בזהות אישית עם 2FA. רועי ינהל Membership
+ו־Roles; אין משתמש משותף ואין Push ישיר ל־`main`.
 
-14.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+15.3 Branch Protection, ‏CODEOWNERS, Review חובה, תשעת ה־Checks,
+Secret scanning ו־Push protection יופעלו לפני עבודה משותפת.
 
-14.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+## 16. החלטה 14 — Hosting
 
-14.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+16.1 המלצה: להשאיר בשלב הנוכחי את ה־Runtime המלא על Cloudflare.
+הקוד הקיים משתמש ישירות ב־Worker, ‏D1, ‏R2, ‏Queues, ‏DLQs, ‏Rate
+Limits ו־Cron, ולכן Vercel + Railway הם Migration ולא פריסה רגילה.
 
-14.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+16.2 אם Vercel + Railway הם דרישה מחייבת, יש לאשר תחילה ADR שמגדיר
+Vercel UI, ‏Railway API/Worker, ‏PostgreSQL ו־Queue חלופי, ולבנות
+מחדש את חוזי Auth, ‏Backup, ‏Evidence ו־Release.
 
-14.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+16.3 אין לשתף Deployment Token. יש להזמין את ראשה כ־Member עם
+Least privilege. לפי התיעוד העדכני, שיתוף Members ב־Railway מיועד
+ל־Pro/Enterprise, ולכן תוכנית Hobby של 5 דולר אינה תואמת לבדה למודל
+הגישה שהוצע.
 
-14.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+## 17. החלטה 15 — WhatsApp Business Platform
 
-14.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+17.1 המלצה: Meta Cloud API רשמי מאחורי ה־Backend הקיים. ה־Browser
+לא יקבל Meta Access Token ולא יקרא ישירות ל־Graph API.
 
+17.2 פרויקט ה־WordPress יעבור Sanitization ו־Secret/PII scan לפני
+שיתוף. דוד יחלץ ממנו Integration Inventory וחוזה התנהגות בלבד.
+
+17.3 החיבור הראשון יתבצע עם Test WABA ומספר בדיקה. נכס האב יחובר
+רק ב־Pilot מבודד, באישור מפורש, עם נמענים מורשים, Rate limit,
+Kill switch ו־Audit.
+
+17.4 תוכנית הביצוע, חלוקת האחריות ותנאי הקבלה נמצאים ב־
+`docs/team-operating-plan.md`.
+
+## 18. מקורות רשמיים
+
+18.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+
+18.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+
+18.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+
+18.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+
+18.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+
+18.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+
+18.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+
+18.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+
+18.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+
+18.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+
+18.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+
+18.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+
+18.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+
+18.14 [GitHub — Managing repository access](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository?apiVersion=2022-11-28).
+
+18.15 [Railway — Pricing plans](https://docs.railway.com/pricing/plans).
+
+18.16 [Vercel — Managing team members](https://vercel.com/docs/rbac/managing-team-members).
+
+18.17 [Meta — WhatsApp Business Platform](https://www.postman.com/meta/whatsapp-business-platform/overview).
+
+18.18 [Anthropic — Claude Team](https://support.claude.com/en/articles/9267247-get-started-with-the-team-plan).
+
+18.19 [AnyDesk — Two-factor authentication](https://anydesk.com/en/features/2-factor-authentication).

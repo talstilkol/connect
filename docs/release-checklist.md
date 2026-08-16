@@ -62,7 +62,17 @@
 
 4.3 Preview ו־Development אינן משתמשות בנתוני Production.
 
+4.3.1 Credentials, מספרים, הודעות ונתוני לקוחות מפרויקט ה־WordPress
+או מחשבון האב אינם נכנסים ל־Development או Preview. ‏Pilot אמיתי
+מתבצע רק בסביבת Staging/Pilot מבודדת ובאישור בעל הנכס.
+
 4.4 `APP_PUBLIC_ORIGIN` הוא HTTPS קנוני של סביבת היעד.
+
+4.5 ספק ה־Hosting וה־Topology תואמים ל־ADR המאושר. אין פריסה
+היברידית לא מתועדת בין Cloudflare, ‏Vercel ו־Railway.
+
+4.6 כל גישת Deployment היא דרך Membership אישי ו־Least privilege;
+לא נעשה שימוש ב־Token או חשבון משותף.
 
 ## 5. Release evidence
 

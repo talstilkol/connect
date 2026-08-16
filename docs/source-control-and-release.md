@@ -15,8 +15,14 @@ Pull Request Checks נפרדים. Branch Protection, ‏Review Rules,
 ‏CODEOWNERS, ‏Secret Scanning ו־Push Protection עדיין אינם נחשבים
 פעילים עד לאימות מפורש מול הגדרות GitHub.
 
-1.5 אין במסמך זה שמות בעלים מומצאים. בעלי Security, ‏Operations,
-Release ו־Secrets הם unknown/unavailable עד למינוי מפורש.
+1.5 לפי עדכון הצוות מ־2026-08-16, רועי הוא Account owner ו־Approver,
+ראשה היא Deployment owner ודוד הוא WhatsApp backend owner. בעלי
+Security, ‏Operations, ‏Release ו־Secrets עדיין `unknown/unavailable`
+עד למינוי מפורש; התפקידים החדשים אינם ממלאים אותם אוטומטית.
+
+1.6 אין לפתוח Repository כפול לפני הכרעה לגבי המבנה המקונן והבעלות.
+תוכנית העבודה, מודל ההרשאות ותנאי הקבלה נמצאים ב־
+`docs/team-operating-plan.md`.
 
 ## 2. שער CI מקומי
 
@@ -180,6 +186,14 @@ namespaces, Secret binding set ו־Scheduler. Queue ההזמנות וה־DLQ ש�
 
 6.11 שמות Worker, ‏Resource IDs, ‏Queue names ושמות Secrets משמשים
 רק בזמן האימות. הפלט כולל Fingerprints בלבד ותוקפו 24 שעות.
+
+6.12 ההצעה להשתמש ב־Vercel וב־Railway אינה תואמת כרגע לחוזי
+ה־Runtime וה־Evidence של Cloudflare. אין לראות בה ספק מאושר לפני ADR
+שמכריע אם Cloudflare נשאר או שמתבצע Migration מלא.
+
+6.13 אין לשתף Platform token עם Deployment owner. הגישה תינתן
+באמצעות Membership אישי ו־Least privilege; Secrets יוזנו רק ל־Secret
+store של סביבת היעד.
 
 ## 7. Source Control Governance Evidence
 
