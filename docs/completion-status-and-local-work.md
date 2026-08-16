@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,205 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,207 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -144,8 +144,14 @@ Assignment ו־Composer.
 ל־`features/reports/reports.css`. כללי Billing, ‏Sidebar ו־Public page
 נשארו מחוץ לגבול ה־Feature.
 
-2.7.7 `app/globals.css` ירד מ־7,890 ל־5,101 שורות. ניקוי השכבות
-המשותפות ויתר ה־Features שנותרו מוערך ב־**1–3 שעות**.
+2.7.7 כללי דף ה־Public, כולל Header, ‏Hero, ‏Product map,
+‏Capabilities, ‏Architecture, ‏Pricing, ‏Footer ושלושת ה־Breakpoints,
+הועברו ל־`features/public/public.css`. רכיבי `public-brand`
+ו־`hero-badge`, שמשמשים גם Auth ו־Invitation, הועברו לשכבת
+`styles/brand.css` משותפת במקום ליצור תלות בין Features.
+
+2.7.8 `app/globals.css` ירד מ־7,890 ל־4,422 שורות. פיצול יתר
+ה־Features והשכבות המשותפות שנותרו מוערך ב־**1–2 שעות**.
 
 2.8 בדיקות עומס וכשל מקומיות נוספות.
 
@@ -163,7 +169,7 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר שנותר: **13–21 שעות**, שהם כ־**2–3 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **12–20 שעות**, שהם כ־**2–3 ימי עבודה**.
 
 2.10.2 עם Review, תיקוני Regression ותיעוד: **6–10 ימי עבודה**.
 

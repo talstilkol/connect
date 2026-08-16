@@ -47,6 +47,35 @@ test("keeps document foundations in their ordered stylesheet", async () => {
   assert.match(foundationSource, /body\s*\{[\s\S]*background:\s*var\(--canvas\)/);
 });
 
+test("keeps shared brand primitives outside feature stylesheets", async () => {
+  const [globalSource, brandSource, publicSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("styles/brand.css"),
+      readSource("features/public/public.css"),
+    ]);
+  const foundationImport = globalSource.indexOf(
+    '@import "../styles/foundations.css";',
+  );
+  const brandImport = globalSource.indexOf(
+    '@import "../styles/brand.css";',
+  );
+  const conversationImport = globalSource.indexOf(
+    '@import "../features/conversations/conversations.css";',
+  );
+
+  assert.ok(brandImport > foundationImport);
+  assert.ok(conversationImport > brandImport);
+  assert.match(brandSource, /^\.public-brand\s*\{/);
+  assert.match(brandSource, /\.hero-badge\s*\{/);
+  assert.match(
+    brandSource,
+    /@media \(max-width: 560px\)[\s\S]*\.public-brand small/,
+  );
+  assert.doesNotMatch(publicSource, /^\.public-brand\s*\{/m);
+  assert.doesNotMatch(publicSource, /^\.hero-badge\s*\{/m);
+});
+
 test("keeps inbox base and responsive rules inside one feature stylesheet", async () => {
   const [globalSource, conversationSource] =
     await Promise.all([
@@ -210,5 +239,38 @@ test("keeps report surfaces and breakpoints inside one feature stylesheet", asyn
   assert.doesNotMatch(
     reportSource,
     /\.billing-card|\.public-hero|\.sidebar/,
+  );
+});
+
+test("keeps the public landing page and breakpoints inside one feature stylesheet", async () => {
+  const [globalSource, publicSource] =
+    await Promise.all([
+      readSource("app/globals.css"),
+      readSource("features/public/public.css"),
+    ]);
+  const reportImport = globalSource.indexOf(
+    '@import "../features/reports/reports.css";',
+  );
+  const publicImport = globalSource.indexOf(
+    '@import "../features/public/public.css";',
+  );
+
+  assert.ok(publicImport > reportImport);
+  assert.doesNotMatch(
+    globalSource,
+    /\.public-shell|\.public-hero|\.capability-grid|\.architecture-section/,
+  );
+  assert.match(publicSource, /^\.public-shell\s*\{/);
+  assert.match(publicSource, /\.public-hero\s*\{/);
+  assert.match(publicSource, /\.capability-grid\s*\{/);
+  assert.match(publicSource, /\.architecture-section\s*\{/);
+  assert.match(publicSource, /\.pricing-section\s*\{/);
+  assert.match(
+    publicSource,
+    /@media \(max-width: 1100px\)[\s\S]*@media \(max-width: 820px\)[\s\S]*@media \(max-width: 560px\)/,
+  );
+  assert.doesNotMatch(
+    publicSource,
+    /\.auth-shell|\.billing-card|\.admin-content|\.sidebar/,
   );
 });
