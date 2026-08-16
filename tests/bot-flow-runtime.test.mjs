@@ -7,6 +7,7 @@ import {
 } from "../server/bot/botFlowRuntime.ts";
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 
@@ -181,6 +182,63 @@ test("resumes a compiled button menu at its evidenced awaiting block", async () 
       text: "נעביר לשירות.",
     },
   ]);
+});
+
+test("executes both branches of a compiled condition and converges at End", async () => {
+  const compiled =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      {
+        name: "מענה לפי בקשת נציג",
+        keywords: ["עזרה"],
+        matchMode: "contains",
+        introTexts: ["קיבלנו את הפנייה."],
+        condition: {
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "נציג",
+          matchedReplyText:
+            "הבקשה לנציג התקבלה.",
+          unmatchedReplyText:
+            "הבוט ימשיך בטיפול.",
+        },
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+
+  const matched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה, אבקש נציג",
+      conversationStatus: "bot_active",
+    },
+  );
+  const unmatched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה בנושא החשבון",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(matched.outcome, "completed");
+  assert.deepEqual(
+    matched.replies.map((reply) => reply.text),
+    [
+      "קיבלנו את הפנייה.",
+      "הבקשה לנציג התקבלה.",
+    ],
+  );
+  assert.equal(unmatched.outcome, "completed");
+  assert.deepEqual(
+    unmatched.replies.map((reply) => reply.text),
+    [
+      "קיבלנו את הפנייה.",
+      "הבוט ימשיך בטיפול.",
+    ],
+  );
 });
 
 test("uses the unmatched keyword branch for non-text input and requests handoff without assignment", () => {

@@ -8,11 +8,13 @@ import {
 import type {
   SaveKeywordButtonMenuBotFlowComposerDraftInput,
   SaveKeywordBotFlowComposerDraftInput,
+  SaveKeywordConditionBotFlowComposerDraftInput,
   SaveKeywordSequenceBotFlowComposerDraftInput,
 } from "../../shared/domain/botFlowComposer.ts";
 import {
   KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT,
   KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
+  KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT,
   KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
 } from "../../shared/domain/botFlowComposer.ts";
 import type {
@@ -115,6 +117,54 @@ function isButtonMenuComposerInput(
     "options",
     "expectedFlowVersion",
   ]);
+}
+
+function isConditionComposerInput(
+  input: Record<string, unknown>,
+): input is Record<
+  keyof SaveKeywordConditionBotFlowComposerDraftInput,
+  unknown
+> {
+  return hasExactKeys(input, [
+    "name",
+    "keywords",
+    "matchMode",
+    "introTexts",
+    "condition",
+    "expectedFlowVersion",
+  ]);
+}
+
+function parseConditionDraft(
+  value: unknown,
+): Record<
+  | "fact"
+  | "operator"
+  | "value"
+  | "matchedReplyText"
+  | "unmatchedReplyText",
+  unknown
+> | null {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      "fact",
+      "operator",
+      "value",
+      "matchedReplyText",
+      "unmatchedReplyText",
+    ])
+  ) {
+    return null;
+  }
+
+  return {
+    fact: value.fact,
+    operator: value.operator,
+    value: value.value,
+    matchedReplyText: value.matchedReplyText,
+    unmatchedReplyText: value.unmatchedReplyText,
+  };
 }
 
 function parseButtonMenuOptions(
@@ -410,6 +460,160 @@ async function compileKeywordButtonMenu(
     expectedFlowVersion:
       input.expectedFlowVersion,
   };
+}
+
+async function compileKeywordCondition(
+  tenantId: number,
+  input: Record<
+    keyof SaveKeywordConditionBotFlowComposerDraftInput,
+    unknown
+  >,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  const condition = parseConditionDraft(
+    input.condition,
+  );
+
+  if (
+    !isExpectedFlowVersion(
+      input.expectedFlowVersion,
+    ) ||
+    !Array.isArray(input.introTexts) ||
+    input.introTexts.length === 0 ||
+    input.introTexts.length >
+      KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT ||
+    !condition
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  const name = normalizeBotFlowName(input.name);
+
+  if (!name) {
+    return {
+      success: false,
+      issues: ["invalid-name"],
+    };
+  }
+
+  const botFlowKey = await deriveBotFlowKey(
+    tenantId,
+    name,
+  );
+  const blockKeys = await Promise.all(
+    Array.from(
+      { length: input.introTexts.length + 7 },
+      (_, index) =>
+        deriveBotFlowBlockKey(
+          botFlowKey,
+          index + 1,
+        ),
+    ),
+  );
+  const triggerKey = blockKeys[0];
+  const keywordKey = blockKeys[1];
+  const introKeys = blockKeys.slice(
+    2,
+    2 + input.introTexts.length,
+  );
+  const conditionKey =
+    blockKeys[2 + input.introTexts.length];
+  const matchedReplyKey =
+    blockKeys[3 + input.introTexts.length];
+  const unmatchedReplyKey =
+    blockKeys[4 + input.introTexts.length];
+  const endKey =
+    blockKeys[5 + input.introTexts.length];
+  const handoffKey =
+    blockKeys[6 + input.introTexts.length];
+  const definition = {
+    name,
+    entryBlockKey: triggerKey,
+    blocks: [
+      {
+        blockKey: triggerKey,
+        type: "trigger",
+        nextBlockKey: keywordKey,
+      },
+      {
+        blockKey: keywordKey,
+        type: "keyword",
+        keywords: input.keywords,
+        matchMode: input.matchMode,
+        matchedBlockKey: introKeys[0],
+        unmatchedBlockKey: handoffKey,
+      },
+      ...input.introTexts.map((text, index) => ({
+        blockKey: introKeys[index],
+        type: "text",
+        text,
+        nextBlockKey:
+          introKeys[index + 1] ?? conditionKey,
+      })),
+      {
+        blockKey: conditionKey,
+        type: "condition",
+        fact: condition.fact,
+        operator: condition.operator,
+        value: condition.value,
+        matchedBlockKey: matchedReplyKey,
+        unmatchedBlockKey: unmatchedReplyKey,
+      },
+      {
+        blockKey: matchedReplyKey,
+        type: "text",
+        text: condition.matchedReplyText,
+        nextBlockKey: endKey,
+      },
+      {
+        blockKey: unmatchedReplyKey,
+        type: "text",
+        text: condition.unmatchedReplyText,
+        nextBlockKey: endKey,
+      },
+      {
+        blockKey: endKey,
+        type: "end",
+      },
+      {
+        blockKey: handoffKey,
+        type: "handoff",
+        reason: "no-match",
+      },
+    ],
+  };
+  const validation =
+    validateBotFlowDefinition(definition);
+
+  if (!validation.success) {
+    return validation;
+  }
+
+  return {
+    success: true,
+    definition: validation.value,
+    expectedFlowVersion:
+      input.expectedFlowVersion,
+  };
+}
+
+export async function compileKeywordConditionBotFlowComposerDraft(
+  tenantId: number,
+  input: unknown,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  if (
+    !isRecord(input) ||
+    !isConditionComposerInput(input)
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  return compileKeywordCondition(tenantId, input);
 }
 
 export async function compileKeywordButtonMenuBotFlowComposerDraft(

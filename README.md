@@ -89,8 +89,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1351/1351 בדיקות, 34 Migrations,
-   ‏422 קובצי Source, ‏29 Client dependency graphs, ‏806 קבצים
+31. Local Release Gate עובר עם 1358/1358 בדיקות, 34 Migrations,
+   ‏423 קובצי Source, ‏30 Client dependency graphs, ‏806 קבצים
    בסריקת Secrets ו־23 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -707,7 +707,12 @@
    158.4 לאחר שליחת התפריט, Runtime ממשיך רק מ־Buttons Block שנמצא
          באופן חד־משמעי מתוך Outbox Accepted של ההודעה הנכנסת הקודמת,
          באותה גרסת Flow ובחלון של 24 שעות. אין Cursor זמני בדפדפן.
-   158.5 ‏Conditions, ‏Handoff ניתן להגדרה, חיבורי Canvas ו־
+   158.5 אפשר להוסיף בסוף רצף ה־Text פיצול Condition יחיד לפי הטקסט
+         הנכנס או מצב השיחה, ולהגדיר תשובת Text נפרדת לענף מתקיים
+         ולענף שאינו מתקיים. שני הענפים מתכנסים ל־End משותף וכל
+         מפתחות ה־Graph נגזרים בשרת.
+   158.6 ‏Condition ו־Buttons הם כרגע חלופות סיום בטוחות. עריכת
+         Handoff, מסלולים מרובי תנאים או שאלות, חיבורי Canvas ו־
          Drag-and-drop עדיין אינם מוצגים כעורך Graph מלא.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
@@ -734,10 +739,10 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
-10. עריכת Graph מלאה ל־Bot: ‏Conditions, ‏Handoff וחיבורי Canvas עם
-    Drag-and-drop. רצף Text ושאלת Buttons מסיימת עם ענפי תשובה ניתנים
-    לעריכה מלאה במקלדת, אך עדיין אינם משלימים לבדם את SPEC-18 או
-    SPEC-19.
+10. עריכת Graph מלאה ל־Bot: ‏Handoff ניתן להגדרה, מסלולים מרובי
+    Conditions או שאלות וחיבורי Canvas עם Drag-and-drop. רצף Text,
+    שאלת Buttons מסיימת ופיצול Condition יחיד ניתנים לעריכה מלאה
+    במקלדת, אך עדיין אינם משלימים לבדם את SPEC-18 או SPEC-19.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 

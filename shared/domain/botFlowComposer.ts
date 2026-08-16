@@ -1,4 +1,6 @@
 import type {
+  BotFlowConditionFact,
+  BotFlowConditionOperator,
   BotFlowKeywordMatchMode,
   ValidatedBotFlowDefinition,
 } from "./botFlow.ts";
@@ -19,6 +21,7 @@ export const KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT = 96;
 export const KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT = 10;
 export const KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT =
   95;
+export const KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT = 93;
 
 export interface KeywordSequenceBotFlowComposerDraft {
   name: string;
@@ -48,6 +51,27 @@ export interface KeywordButtonMenuBotFlowComposerDraft {
 
 export interface SaveKeywordButtonMenuBotFlowComposerDraftInput
   extends KeywordButtonMenuBotFlowComposerDraft {
+  expectedFlowVersion: number | null;
+}
+
+export interface KeywordConditionDraft {
+  fact: BotFlowConditionFact;
+  operator: BotFlowConditionOperator;
+  value: string;
+  matchedReplyText: string;
+  unmatchedReplyText: string;
+}
+
+export interface KeywordConditionBotFlowComposerDraft {
+  name: string;
+  keywords: readonly string[];
+  matchMode: BotFlowKeywordMatchMode;
+  introTexts: readonly string[];
+  condition: KeywordConditionDraft;
+}
+
+export interface SaveKeywordConditionBotFlowComposerDraftInput
+  extends KeywordConditionBotFlowComposerDraft {
   expectedFlowVersion: number | null;
 }
 
@@ -296,6 +320,155 @@ export function readKeywordButtonMenuBotFlowComposerDraft(
     introTexts,
     buttonText: buttonsBlock.text,
     options,
+  };
+}
+
+export function readKeywordConditionBotFlowComposerDraft(
+  definition: ValidatedBotFlowDefinition,
+): KeywordConditionBotFlowComposerDraft | null {
+  if (
+    definition.blocks.length < 8 ||
+    definition.blocks.length > 100
+  ) {
+    return null;
+  }
+
+  const blocksByKey = new Map(
+    definition.blocks.map((block) => [
+      block.blockKey,
+      block,
+    ]),
+  );
+  const trigger = blocksByKey.get(
+    definition.entryBlockKey,
+  );
+
+  if (trigger?.type !== "trigger") {
+    return null;
+  }
+
+  const keyword = blocksByKey.get(
+    trigger.nextBlockKey,
+  );
+
+  if (keyword?.type !== "keyword") {
+    return null;
+  }
+
+  const keywordUnmatched = blocksByKey.get(
+    keyword.unmatchedBlockKey,
+  );
+
+  if (
+    keywordUnmatched?.type !== "handoff" ||
+    keywordUnmatched.reason !== "no-match"
+  ) {
+    return null;
+  }
+
+  const expectedKeys = new Set([
+    trigger.blockKey,
+    keyword.blockKey,
+    keywordUnmatched.blockKey,
+  ]);
+  const introTexts: string[] = [];
+  let nextBlockKey = keyword.matchedBlockKey;
+  let conditionBlock:
+    | Extract<
+        (typeof definition.blocks)[number],
+        { type: "condition" }
+      >
+    | null = null;
+
+  while (true) {
+    if (expectedKeys.has(nextBlockKey)) {
+      return null;
+    }
+
+    const block = blocksByKey.get(nextBlockKey);
+
+    if (block?.type === "text") {
+      expectedKeys.add(block.blockKey);
+      introTexts.push(block.text);
+
+      if (
+        introTexts.length >
+        KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
+      ) {
+        return null;
+      }
+
+      nextBlockKey = block.nextBlockKey;
+      continue;
+    }
+
+    if (block?.type === "condition") {
+      conditionBlock = block;
+    }
+
+    break;
+  }
+
+  if (!conditionBlock || introTexts.length === 0) {
+    return null;
+  }
+
+  expectedKeys.add(conditionBlock.blockKey);
+  const matchedReply = blocksByKey.get(
+    conditionBlock.matchedBlockKey,
+  );
+  const unmatchedReply = blocksByKey.get(
+    conditionBlock.unmatchedBlockKey,
+  );
+
+  if (
+    conditionBlock.matchedBlockKey ===
+      conditionBlock.unmatchedBlockKey ||
+    matchedReply?.type !== "text" ||
+    unmatchedReply?.type !== "text" ||
+    matchedReply.nextBlockKey !==
+      unmatchedReply.nextBlockKey ||
+    expectedKeys.has(matchedReply.blockKey) ||
+    expectedKeys.has(unmatchedReply.blockKey)
+  ) {
+    return null;
+  }
+
+  expectedKeys.add(matchedReply.blockKey);
+  expectedKeys.add(unmatchedReply.blockKey);
+  const end = blocksByKey.get(
+    matchedReply.nextBlockKey,
+  );
+
+  if (
+    end?.type !== "end" ||
+    expectedKeys.has(end.blockKey)
+  ) {
+    return null;
+  }
+
+  expectedKeys.add(end.blockKey);
+
+  if (
+    definition.blocks.some(
+      (block) => !expectedKeys.has(block.blockKey),
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    name: definition.name,
+    keywords: [...keyword.keywords],
+    matchMode: keyword.matchMode,
+    introTexts,
+    condition: {
+      fact: conditionBlock.fact,
+      operator: conditionBlock.operator,
+      value: conditionBlock.value,
+      matchedReplyText: matchedReply.text,
+      unmatchedReplyText: unmatchedReply.text,
+    },
   };
 }
 

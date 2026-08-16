@@ -232,13 +232,21 @@
   font-size: 8px;
 }
 
-.bot-flow-add-menu {
+.bot-flow-terminal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.bot-flow-add-menu,
+.bot-flow-add-condition {
   width: 100%;
   min-height: 39px;
   font-size: 8px;
 }
 
-.bot-flow-button-menu {
+.bot-flow-button-menu,
+.bot-flow-condition {
   min-width: 0;
   margin: 0;
   padding: 13px;
@@ -247,22 +255,46 @@
   background: #f7fbf9;
 }
 
-.bot-flow-button-menu legend {
+.bot-flow-button-menu legend,
+.bot-flow-condition legend {
   padding: 0 5px;
   font-size: 9px;
   font-weight: 800;
 }
 
-.bot-flow-button-menu > p {
+.bot-flow-button-menu > p,
+.bot-flow-condition > p {
   margin: 0 0 12px;
   color: var(--muted);
   font-size: 8px;
   line-height: 1.55;
 }
 
-.bot-flow-button-menu > label > span {
+.bot-flow-button-menu > label > span,
+.bot-flow-condition > label > span {
   display: block;
   margin-bottom: 7px;
+}
+
+.bot-flow-condition {
+  display: grid;
+  gap: 11px;
+}
+
+.bot-flow-condition > p {
+  margin-bottom: 1px;
+}
+
+.bot-flow-condition > label > small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.bot-flow-remove-condition {
+  min-height: 34px;
+  margin-top: 1px;
 }
 
 .bot-flow-button-menu ol {
@@ -637,6 +669,17 @@
   background: #f9faff;
 }
 
+.bot-flow-condition-node {
+  margin-top: 1px;
+  border-color: #d2c3e7;
+  background: #fcfaff;
+}
+
+.bot-flow-condition-branches > div > span {
+  background: #f1eafa;
+  color: #6f548e;
+}
+
 .bot-flow-option-branches {
   width: 100%;
   display: grid;
@@ -715,6 +758,10 @@
 
   .bot-flow-button-menu-actions {
     flex-direction: column;
+  }
+
+  .bot-flow-terminal-actions {
+    grid-template-columns: 1fr;
   }
 
   .bot-flow-branches {

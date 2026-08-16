@@ -21,6 +21,7 @@ import {
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
 
@@ -153,6 +154,21 @@ async function parseSaveDraftRequest(
   tenantId: number,
   input: unknown,
 ): Promise<SaveDraftRequest> {
+  const conditionComposerResult =
+    await compileKeywordConditionBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (conditionComposerResult.success) {
+    return {
+      definition:
+        conditionComposerResult.definition,
+      expectedFlowVersion:
+        conditionComposerResult.expectedFlowVersion,
+    };
+  }
+
   const buttonMenuComposerResult =
     await compileKeywordButtonMenuBotFlowComposerDraft(
       tenantId,
@@ -210,6 +226,7 @@ async function parseSaveDraftRequest(
       ))
   ) {
     const preferredComposerFailure = [
+      conditionComposerResult,
       buttonMenuComposerResult,
       sequenceComposerResult,
       legacyComposerResult,

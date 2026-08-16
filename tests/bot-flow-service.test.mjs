@@ -475,6 +475,49 @@ test("accepts a button menu while deriving block and option identities only on t
   );
 });
 
+test("accepts a bounded condition while deriving every branch identity on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "פיצול מענה לפי מצב שיחה",
+      keywords: ["בדיקה"],
+      matchMode: "exact",
+      introTexts: ["הבקשה התקבלה."],
+      condition: {
+        fact: "conversation-status",
+        operator: "equals",
+        value: "bot_active",
+        matchedReplyText: "הבוט ממשיך בטיפול.",
+        unmatchedReplyText: "הטיפול ייבדק מחדש.",
+      },
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const condition = definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+
+  assert.equal(definition.blocks.length, 8);
+  assert.ok(condition);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.notEqual(
+    condition.matchedBlockKey,
+    condition.unmatchedBlockKey,
+  );
+});
+
 test("derives the next version from stored state without accepting a browser ordinal", async () => {
   const first = await definitionFixture(1);
   const second = await definitionFixture(2);

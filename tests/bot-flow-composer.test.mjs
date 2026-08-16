@@ -4,11 +4,13 @@ import test from "node:test";
 import {
   readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordBotFlowComposerDraft,
+  readKeywordConditionBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
 } from "../shared/domain/botFlowComposer.ts";
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 import {
@@ -66,6 +68,29 @@ function buttonMenuComposerInput(overrides = {}) {
         replyText: "מחלקת כספים תחזור אליך.",
       },
     ],
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function conditionComposerInput(overrides = {}) {
+  return {
+    name: "מענה לפניות שירות",
+    keywords: ["עזרה", "שירות"],
+    matchMode: "exact",
+    introTexts: [
+      "קיבלנו את פנייתך.",
+      "נבדוק מהו מסלול המענה המתאים.",
+    ],
+    condition: {
+      fact: "last-inbound-text",
+      operator: "contains",
+      value: "נציג",
+      matchedReplyText:
+        "הפנייה תועבר לטיפול נציג.",
+      unmatchedReplyText:
+        "הבוט ימשיך לטפל בפנייה.",
+    },
     expectedFlowVersion: null,
     ...overrides,
   };
@@ -442,4 +467,129 @@ test("rejects incomplete, oversized, or extended button-menu drafts", async () =
       },
     );
   }
+});
+
+test("compiles and reads one deterministic condition with two reply branches", async () => {
+  const result =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      conditionComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 9);
+  assert.deepEqual(
+    readKeywordConditionBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [
+        "קיבלנו את פנייתך.",
+        "נבדוק מהו מסלול המענה המתאים.",
+      ],
+      condition: {
+        fact: "last-inbound-text",
+        operator: "contains",
+        value: "נציג",
+        matchedReplyText:
+          "הפנייה תועבר לטיפול נציג.",
+        unmatchedReplyText:
+          "הבוט ימשיך לטפל בפנייה.",
+      },
+    },
+  );
+
+  const condition = result.definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+  const replies = result.definition.blocks.filter(
+    (block) =>
+      block.type === "text" &&
+      (block.blockKey === condition.matchedBlockKey ||
+        block.blockKey === condition.unmatchedBlockKey),
+  );
+
+  assert.equal(replies.length, 2);
+  assert.equal(
+    new Set(
+      replies.map((reply) => reply.nextBlockKey),
+    ).size,
+    1,
+  );
+});
+
+test("rejects unsafe or extended condition drafts before graph persistence", async () => {
+  const cases = [
+    conditionComposerInput({ introTexts: [] }),
+    conditionComposerInput({
+      introTexts: Array.from(
+        { length: 94 },
+        (_, index) => `הודעה ${index + 1}`,
+      ),
+    }),
+    conditionComposerInput({
+      condition: {
+        ...conditionComposerInput().condition,
+        fact: "conversation-status",
+        operator: "contains",
+        value: "new",
+      },
+    }),
+    conditionComposerInput({
+      condition: {
+        ...conditionComposerInput().condition,
+        blockKey:
+          `bot_block_v1_${"a".repeat(64)}`,
+      },
+    }),
+    {
+      ...conditionComposerInput(),
+      tenantId: 8,
+    },
+  ];
+
+  for (const input of cases) {
+    const result =
+      await compileKeywordConditionBotFlowComposerDraft(
+        7,
+        input,
+      );
+
+    assert.equal(result.success, false);
+  }
+});
+
+test("fails closed when a condition graph does not retain the exact editable topology", async () => {
+  const result =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      conditionComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  const condition = result.definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+  const corrupted = {
+    ...result.definition,
+    blocks: result.definition.blocks.map((block) =>
+      block.blockKey === condition.unmatchedBlockKey
+        ? {
+            ...block,
+            nextBlockKey:
+              result.definition.entryBlockKey,
+          }
+        : block,
+    ),
+  };
+
+  assert.equal(
+    readKeywordConditionBotFlowComposerDraft(
+      corrupted,
+    ),
+    null,
+  );
 });

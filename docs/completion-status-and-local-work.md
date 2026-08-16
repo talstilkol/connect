@@ -267,12 +267,13 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 4.1.2 Recurring Campaign domain ו־Scheduler: ‏10–16 שעות לאחר
 החלטת Product על מדיניות recurrence.
 
-4.1.3 Flow Builder חזותי ונגיש: עורך רצף Text ושאלת Buttons מסיימת
-עם ענף תשובת Text לכל אפשרות הושלמו, כולל הוספה, מחיקה, שינוי סדר,
-החזרת Focus והכרזת Status למקלדת. הגרף והמפתחות נגזרים בשרת, והמשך
-בחירה נשען על Outbox Accepted של ההודעה הקודמת באותה גרסה ובחלון
-24 שעות. נותרו עריכת Conditions ו־Handoff, מסלולים מרובי שאלות,
-חיבור Graph מלא, Drag-and-drop ובדיקות Browser: ‏14–26 שעות.
+4.1.3 Flow Builder חזותי ונגיש: עורך רצף Text, שאלת Buttons מסיימת
+ופיצול Condition יחיד לפי טקסט נכנס או מצב שיחה הושלמו. לכל Button
+ולכל תוצאת Condition תשובת Text נפרדת; הגרף והמפתחות נגזרים בשרת,
+והמשך בחירה נשען על Outbox Accepted של ההודעה הקודמת באותה גרסה
+ובחלון 24 שעות. נותרו Handoff ניתן להגדרה, מסלולים מרובי Conditions
+או שאלות, חיבור Graph מלא, Drag-and-drop ובדיקות Browser: ‏10–20
+שעות.
 
 4.1.4 עריכת Business Profile הקיים ב־Admin הושלמה. מודל Package,
 ‏Quota ופרטי קשר נשאר החלטת Product פתוחה. לאחר אישור המודל, אומדן

@@ -8,15 +8,20 @@ import {
   useTransition,
 } from "react";
 import type {
+  BotFlowConditionFact,
+  BotFlowConditionOperator,
   BotFlowKeywordMatchMode,
   ValidatedBotFlowDefinition,
 } from "../../shared/domain/botFlow";
 import {
   KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT,
   KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
+  KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT,
   KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
   readKeywordButtonMenuBotFlowComposerDraft,
+  readKeywordConditionBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
+  type KeywordConditionDraft,
 } from "../../shared/domain/botFlowComposer";
 import {
   appendBotFlowButtonOption,
@@ -56,6 +61,9 @@ import {
 import {
   BotFlowButtonMenuEditor,
 } from "./BotFlowButtonMenuEditor";
+import {
+  BotFlowConditionEditor,
+} from "./BotFlowConditionEditor";
 import {
   BotFlowReplySequenceEditor,
 } from "./BotFlowReplySequenceEditor";
@@ -157,6 +165,23 @@ function splitKeywords(value: string): string[] {
 function readEditableComposerDraft(
   definition: ValidatedBotFlowDefinition,
 ) {
+  const condition =
+    readKeywordConditionBotFlowComposerDraft(
+      definition,
+    );
+
+  if (condition) {
+    return {
+      kind: "condition" as const,
+      name: condition.name,
+      keywords: condition.keywords,
+      matchMode: condition.matchMode,
+      replyTexts: condition.introTexts,
+      buttonMenu: null,
+      condition: condition.condition,
+    };
+  }
+
   const buttonMenu =
     readKeywordButtonMenuBotFlowComposerDraft(
       definition,
@@ -170,6 +195,7 @@ function readEditableComposerDraft(
       matchMode: buttonMenu.matchMode,
       replyTexts: buttonMenu.introTexts,
       buttonMenu,
+      condition: null,
     };
   }
 
@@ -183,6 +209,7 @@ function readEditableComposerDraft(
         kind: "sequence" as const,
         ...sequence,
         buttonMenu: null,
+        condition: null,
       }
     : null;
 }
@@ -237,11 +264,23 @@ export function BotFlowBuilder({
           )
         : null,
     );
+  const [condition, setCondition] =
+    useState<KeywordConditionDraft | null>(
+      initialComposerDraft?.kind === "condition"
+        ? initialComposerDraft.condition
+        : null,
+    );
   const [focusButtonMenuOnMount, setFocusButtonMenuOnMount] =
+    useState(false);
+  const [focusConditionOnMount, setFocusConditionOnMount] =
     useState(false);
   const addButtonMenuButtonRef =
     useRef<HTMLButtonElement>(null);
+  const addConditionButtonRef =
+    useRef<HTMLButtonElement>(null);
   const focusAddButtonAfterRemovalRef =
+    useRef(false);
+  const focusAddConditionAfterRemovalRef =
     useRef(false);
   const [unsupportedDefinition, setUnsupportedDefinition] =
     useState(
@@ -271,7 +310,9 @@ export function BotFlowBuilder({
   const maximumReplyStepCount = buttonMenu
     ? KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
       buttonMenu.options.length
-    : KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT;
+    : condition
+      ? KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
+      : KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT;
   const maximumButtonOptionCount = Math.min(
     KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
     KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
@@ -285,6 +326,13 @@ export function BotFlowBuilder({
           option.label.trim().length > 0 &&
           option.replyText.trim().length > 0,
       ));
+  const conditionComplete =
+    condition === null ||
+    (condition.value.trim().length > 0 &&
+      condition.matchedReplyText.trim().length > 0 &&
+      condition.unmatchedReplyText.trim().length > 0 &&
+      (condition.fact === "last-inbound-text" ||
+        condition.operator === "equals"));
   const canWrite =
     initialStatus === "ready" &&
     initialDirectory.canWrite;
@@ -297,6 +345,7 @@ export function BotFlowBuilder({
       (replyText) => replyText.trim().length > 0,
     ) &&
     buttonMenuComplete &&
+    conditionComplete &&
     !isSaving &&
     !isPublishing;
   const canPublish =
@@ -317,6 +366,18 @@ export function BotFlowBuilder({
     focusAddButtonAfterRemovalRef.current = false;
     addButtonMenuButtonRef.current?.focus();
   }, [buttonMenu]);
+
+  useEffect(() => {
+    if (
+      condition !== null ||
+      !focusAddConditionAfterRemovalRef.current
+    ) {
+      return;
+    }
+
+    focusAddConditionAfterRemovalRef.current = false;
+    addConditionButtonRef.current?.focus();
+  }, [condition]);
 
   const markChanged = () => {
     setDirty(true);
@@ -354,7 +415,13 @@ export function BotFlowBuilder({
           )
         : null,
     );
+    setCondition(
+      draft?.kind === "condition"
+        ? draft.condition
+        : null,
+    );
     setFocusButtonMenuOnMount(false);
+    setFocusConditionOnMount(false);
     setUnsupportedDefinition(!draft);
     setDirty(false);
     setEditorAnnouncement("");
@@ -367,7 +434,9 @@ export function BotFlowBuilder({
     setMatchMode("exact");
     setReplySteps(createBotFlowReplySteps([]));
     setButtonMenu(null);
+    setCondition(null);
     setFocusButtonMenuOnMount(false);
+    setFocusConditionOnMount(false);
     setUnsupportedDefinition(false);
     setDirty(false);
     setNotice(null);
@@ -447,6 +516,7 @@ export function BotFlowBuilder({
 
   const addButtonMenu = () => {
     if (
+      condition !== null ||
       replySteps.length + 1 >
       KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
     ) {
@@ -569,6 +639,81 @@ export function BotFlowBuilder({
     );
   };
 
+  const addCondition = () => {
+    if (
+      buttonMenu !== null ||
+      replySteps.length >
+        KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
+    ) {
+      return;
+    }
+
+    setCondition({
+      fact: "last-inbound-text",
+      operator: "equals",
+      value: "",
+      matchedReplyText: "",
+      unmatchedReplyText: "",
+    });
+    setFocusConditionOnMount(true);
+    markChanged();
+    setEditorAnnouncement(
+      "נוסף פיצול לפי תנאי עם שני ענפי תשובה.",
+    );
+  };
+
+  const removeCondition = () => {
+    focusAddConditionAfterRemovalRef.current = true;
+    setFocusConditionOnMount(false);
+    setCondition(null);
+    markChanged();
+    setEditorAnnouncement(
+      "התנאי ושני ענפי התשובה הוסרו מהטיוטה.",
+    );
+  };
+
+  const changeConditionFact = (
+    fact: BotFlowConditionFact,
+  ) => {
+    setCondition((current) =>
+      current
+        ? {
+            ...current,
+            fact,
+            operator: "equals",
+            value: "",
+          }
+        : current,
+    );
+    markChanged();
+  };
+
+  const changeConditionOperator = (
+    operator: BotFlowConditionOperator,
+  ) => {
+    setCondition((current) =>
+      current
+        ? { ...current, operator }
+        : current,
+    );
+    markChanged();
+  };
+
+  const changeConditionField = (
+    field:
+      | "value"
+      | "matchedReplyText"
+      | "unmatchedReplyText",
+    value: string,
+  ) => {
+    setCondition((current) =>
+      current
+        ? { ...current, [field]: value }
+        : current,
+    );
+    markChanged();
+  };
+
   const loadFlow = (botFlowKey: string) => {
     if (isLoading) {
       return;
@@ -621,8 +766,18 @@ export function BotFlowBuilder({
 
     setNotice(null);
     startSaving(async () => {
-      const draftInput = buttonMenu
+      const draftInput = condition
         ? {
+            name,
+            keywords,
+            matchMode,
+            introTexts: replyTexts,
+            condition,
+            expectedFlowVersion:
+              details?.flow.version ?? null,
+          }
+        : buttonMenu
+          ? {
             name,
             keywords,
             matchMode,
@@ -631,15 +786,15 @@ export function BotFlowBuilder({
             options: buttonOptions,
             expectedFlowVersion:
               details?.flow.version ?? null,
-          }
-        : {
+            }
+          : {
             name,
             keywords,
             matchMode,
             replyTexts,
             expectedFlowVersion:
               details?.flow.version ?? null,
-          };
+            };
       const result =
         await saveBotFlowDraftAction(draftInput);
 
@@ -861,7 +1016,7 @@ export function BotFlowBuilder({
       >
         <aside className="card bot-flow-editor">
           <span className="card-kicker">
-            הגדרת מסלול Text ו־Buttons
+            הגדרת מסלול Text, ‏Buttons ו־Condition
           </span>
           <h2>
             {details
@@ -871,14 +1026,15 @@ export function BotFlowBuilder({
           <p>
             הודעה נכנסת נבדקת מול מילות
             המפתח. התאמה שולחת את הודעות הטקסט
-            לפי הסדר ויכולה להציג שאלת כפתורים;
-            אי־התאמה מעבירה לנציג.
+            לפי הסדר ויכולה להסתיים בשאלת כפתורים
+            או בפיצול לפי תנאי; אי־התאמה מעבירה
+            לנציג.
           </p>
 
           {unsupportedDefinition ? (
             <div className="inline-notice warning">
-              הגרסה כוללת תנאים או מבנה Graph
-              מתקדם שעדיין אינו ניתן לעריכה בעורך.
+              הגרסה כוללת מבנה Graph מתקדם שעדיין
+              אינו ניתן לעריכה בעורך.
               הנתונים נשארו שמורים ללא שינוי.
             </div>
           ) : (
@@ -980,20 +1136,64 @@ export function BotFlowBuilder({
                   onAddOption={addButtonOption}
                   onRemoveMenu={removeButtonMenu}
                 />
-              ) : (
-                <button
-                  ref={addButtonMenuButtonRef}
-                  type="button"
-                  className="secondary-button bot-flow-add-menu"
-                  onClick={addButtonMenu}
-                  disabled={
-                    !canWrite ||
-                    replySteps.length + 1 >
-                      KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+              ) : condition ? (
+                <BotFlowConditionEditor
+                  draft={condition}
+                  disabled={!canWrite}
+                  focusOnMount={focusConditionOnMount}
+                  onFactChange={changeConditionFact}
+                  onOperatorChange={
+                    changeConditionOperator
                   }
-                >
-                  הוספת שאלת כפתורים
-                </button>
+                  onValueChange={(value) =>
+                    changeConditionField(
+                      "value",
+                      value,
+                    )
+                  }
+                  onMatchedReplyChange={(value) =>
+                    changeConditionField(
+                      "matchedReplyText",
+                      value,
+                    )
+                  }
+                  onUnmatchedReplyChange={(value) =>
+                    changeConditionField(
+                      "unmatchedReplyText",
+                      value,
+                    )
+                  }
+                  onRemoveCondition={removeCondition}
+                />
+              ) : (
+                <div className="bot-flow-terminal-actions">
+                  <button
+                    ref={addButtonMenuButtonRef}
+                    type="button"
+                    className="secondary-button bot-flow-add-menu"
+                    onClick={addButtonMenu}
+                    disabled={
+                      !canWrite ||
+                      replySteps.length + 1 >
+                        KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+                    }
+                  >
+                    הוספת שאלת כפתורים
+                  </button>
+                  <button
+                    ref={addConditionButtonRef}
+                    type="button"
+                    className="secondary-button bot-flow-add-condition"
+                    onClick={addCondition}
+                    disabled={
+                      !canWrite ||
+                      replySteps.length >
+                        KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
+                    }
+                  >
+                    הוספת פיצול לפי תנאי
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -1101,7 +1301,8 @@ export function BotFlowBuilder({
                         </div>
                       </div>
                       {index < replySteps.length - 1 ||
-                      buttonMenu ? (
+                      buttonMenu ||
+                      condition ? (
                         <span
                           className="bot-flow-chain-arrow"
                           aria-hidden="true"
@@ -1157,6 +1358,58 @@ export function BotFlowBuilder({
                           </div>
                         ),
                       )}
+                    </div>
+                  </>
+                ) : null}
+                {condition ? (
+                  <>
+                    <div className="flow-node bot-flow-condition-node">
+                      <span className="node-icon">
+                        ◇
+                      </span>
+                      <div>
+                        <small>פיצול לפי תנאי</small>
+                        <strong>
+                          {condition.fact ===
+                          "conversation-status"
+                            ? "בדיקת מצב השיחה"
+                            : "בדיקת טקסט נכנס"}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="bot-flow-option-branches bot-flow-condition-branches">
+                      <div>
+                        <span>התנאי מתקיים</span>
+                        <div className="flow-node">
+                          <span className="node-icon">
+                            T
+                          </span>
+                          <div>
+                            <small>תשובת ענף</small>
+                            <strong>
+                              {condition.matchedReplyText.trim()
+                                ? "שליחת התשובה שהוגדרה"
+                                : "לא הוגדרה תשובה"}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <span>התנאי אינו מתקיים</span>
+                        <div className="flow-node">
+                          <span className="node-icon">
+                            T
+                          </span>
+                          <div>
+                            <small>תשובת ענף</small>
+                            <strong>
+                              {condition.unmatchedReplyText.trim()
+                                ? "שליחת התשובה שהוגדרה"
+                                : "לא הוגדרה תשובה"}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </>
                 ) : null}
