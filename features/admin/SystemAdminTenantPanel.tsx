@@ -27,6 +27,19 @@ import {
 import type {
   SystemAdminSubscriptionActionResult,
 } from "../../server/billing/systemAdminSubscriptionActionResult.ts";
+import {
+  updateBusinessProfileAdminAction,
+} from "../../server/admin/systemAdminBusinessProfileActions.ts";
+import type {
+  SystemAdminBusinessProfileActionResult,
+} from "../../server/admin/systemAdminBusinessProfileActionResult.ts";
+import type {
+  SystemAdminBusinessProfileView,
+} from "../../shared/domain/systemAdminBusinessProfile.ts";
+import {
+  SystemAdminBusinessProfileForm,
+  type SystemAdminBusinessProfileDraft,
+} from "./SystemAdminBusinessProfileForm.tsx";
 
 const directoryStatusMessages: Record<
   Exclude<
@@ -83,6 +96,29 @@ const actionMessages: Record<
     "המעבר המבוקש אינו מותר במצב הנוכחי.",
   "server-error":
     "הפעולה נכשלה בשרת ולא נשמר שינוי חלקי.",
+};
+
+const profileActionMessages: Record<
+  Exclude<
+    SystemAdminBusinessProfileActionResult["status"],
+    "saved"
+  >,
+  string
+> = {
+  "configuration-required":
+    "תצורת System Admin אינה מלאה.",
+  unauthenticated:
+    "ה־Session הסתיים. יש להתחבר מחדש.",
+  "permission-denied":
+    "אין לזהות הנוכחית הרשאת System Admin.",
+  "invalid-input":
+    "פרטי העסק אינם תקינים.",
+  "not-found":
+    "ה־Tenant או הפרופיל העסקי אינם קיימים.",
+  conflict:
+    "פרטי העסק השתנו מאז הטעינה. יש לרענן את הרשימה.",
+  "server-error":
+    "עדכון פרטי העסק נכשל ולא נשמר שינוי חלקי.",
 };
 
 const tenantStatusLabels = {
@@ -157,6 +193,25 @@ function replaceSubscription(
           tenantStatus:
             subscription.status,
           subscription,
+        }
+      : tenant,
+  );
+}
+
+function replaceBusinessProfile(
+  tenants:
+    readonly SystemAdminTenantRecord[],
+  tenantId: number,
+  businessProfile:
+    SystemAdminBusinessProfileView,
+): SystemAdminTenantRecord[] {
+  return tenants.map((tenant) =>
+    tenant.tenantId === tenantId
+      ? {
+          ...tenant,
+          displayName:
+            businessProfile.businessName,
+          businessProfile,
         }
       : tenant,
   );
@@ -328,6 +383,50 @@ export function SystemAdminTenantPanel({
       setFeedback({
         tone: "success",
         message: successMessage,
+      });
+    });
+  }
+
+  function updateBusinessProfile(
+    tenantId: number,
+    draft:
+      SystemAdminBusinessProfileDraft,
+  ) {
+    setFeedback(null);
+
+    startTransition(async () => {
+      const result =
+        await updateBusinessProfileAdminAction(
+          {
+            tenantId,
+            ...draft,
+          },
+        );
+
+      if (result.status !== "saved") {
+        setFeedback({
+          tone: "danger",
+          message:
+            profileActionMessages[
+              result.status
+            ],
+        });
+        return;
+      }
+
+      setTenants((current) =>
+        replaceBusinessProfile(
+          current,
+          tenantId,
+          result.profile,
+        ),
+      );
+      setFeedback({
+        tone: "success",
+        message:
+          result.outcome === "updated"
+            ? "פרטי העסק עודכנו ונרשמו ב־Audit."
+            : "פרטי העסק כבר היו מעודכנים; לא נוצר אירוע כפול.",
       });
     });
   }
@@ -696,6 +795,20 @@ export function SystemAdminTenantPanel({
                       }
                     </span>
                   </div>
+
+                  <SystemAdminBusinessProfileForm
+                    tenantId={tenant.tenantId}
+                    profile={
+                      tenant.businessProfile
+                    }
+                    disabled={isPending}
+                    onSave={(draft) =>
+                      updateBusinessProfile(
+                        tenant.tenantId,
+                        draft,
+                      )
+                    }
+                  />
 
                   {tenant.subscription ? (
                     <>

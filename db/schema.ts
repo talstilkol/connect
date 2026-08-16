@@ -1159,6 +1159,101 @@ export const businessProfiles = sqliteTable(
   ],
 );
 
+export const businessProfileAdminEvents =
+  sqliteTable(
+    "business_profile_admin_events",
+    {
+      eventKey: text("event_key")
+        .primaryKey(),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(
+          () => businessProfiles.tenantId,
+          { onDelete: "cascade" },
+        ),
+      previousProfileDigest: text(
+        "previous_profile_digest",
+      ).notNull(),
+      newProfileDigest: text(
+        "new_profile_digest",
+      ).notNull(),
+      changedFields: text(
+        "changed_fields",
+      ).notNull(),
+      actorExternalUserId: text(
+        "actor_external_user_id",
+      ).notNull(),
+      profileVersion: integer(
+        "profile_version",
+      ).notNull(),
+      occurredAt: text(
+        "occurred_at",
+      ).notNull(),
+      createdAt: text("created_at")
+        .notNull()
+        .default(sql`CURRENT_TIMESTAMP`),
+    },
+    (table) => [
+      check(
+        "business_profile_admin_events_key_sha256",
+        sql`length(${table.eventKey}) = 96
+          and substr(${table.eventKey}, 1, 32)
+            = 'business_profile_admin_event_v1_'
+          and substr(${table.eventKey}, 33)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "business_profile_admin_events_previous_digest_sha256",
+        sql`length(${table.previousProfileDigest}) = 64
+          and ${table.previousProfileDigest}
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "business_profile_admin_events_new_digest_sha256",
+        sql`length(${table.newProfileDigest}) = 64
+          and ${table.newProfileDigest}
+            not glob '*[^0-9a-f]*'
+          and ${table.newProfileDigest}
+            <> ${table.previousProfileDigest}`,
+      ),
+      check(
+        "business_profile_admin_events_changed_fields_valid",
+        sql`${table.changedFields} in (
+          'businessName',
+          'timezone',
+          'interfaceLanguage',
+          'businessName,timezone',
+          'businessName,interfaceLanguage',
+          'timezone,interfaceLanguage',
+          'businessName,timezone,interfaceLanguage'
+        )`,
+      ),
+      check(
+        "business_profile_admin_events_actor_bounded",
+        sql`length(trim(${table.actorExternalUserId})) between 1 and 255`,
+      ),
+      check(
+        "business_profile_admin_events_version_valid",
+        sql`${table.profileVersion} >= 2`,
+      ),
+      check(
+        "business_profile_admin_events_occurred_at_canonical",
+        sql`length(${table.occurredAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.occurredAt})
+            = ${table.occurredAt}`,
+      ),
+      uniqueIndex(
+        "business_profile_admin_events_tenant_version_uq",
+      ).on(
+        table.tenantId,
+        table.profileVersion,
+      ),
+      index(
+        "business_profile_admin_events_tenant_occurred_idx",
+      ).on(table.tenantId, table.occurredAt),
+    ],
+  );
+
 export const metaConnections = sqliteTable(
   "meta_connections",
   {

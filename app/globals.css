@@ -2299,6 +2299,7 @@ label.file-button:focus-within {
 }
 
 .admin-directory-toolbar label span,
+.admin-business-profile-form label span,
 .admin-create-subscription label span,
 .admin-mutation-grid label span {
   color: var(--muted);
@@ -2307,6 +2308,8 @@ label.file-button:focus-within {
 }
 
 .admin-directory-toolbar input,
+.admin-business-profile-form input,
+.admin-business-profile-form select,
 .admin-create-subscription input,
 .admin-create-subscription select,
 .admin-mutation-grid input,
@@ -2323,6 +2326,8 @@ label.file-button:focus-within {
 }
 
 .admin-directory-toolbar input:focus,
+.admin-business-profile-form input:focus,
+.admin-business-profile-form select:focus,
 .admin-create-subscription input:focus,
 .admin-create-subscription select:focus,
 .admin-mutation-grid input:focus,
@@ -2424,6 +2429,89 @@ label.file-button:focus-within {
 .admin-status.blocked {
   background: #fff0ed;
   color: #a84c40;
+}
+
+.admin-business-profile-form {
+  display: grid;
+  gap: 13px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #edf1ef;
+  background: #fff;
+}
+
+.admin-business-profile-form > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-business-profile-form > header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-business-profile-form > header strong {
+  font-size: 10px;
+}
+
+.admin-business-profile-form > header small {
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.admin-business-profile-form > header > span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #edf9f2;
+  color: #287351;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.admin-business-profile-form fieldset {
+  min-width: 0;
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1.2fr)
+    minmax(180px, 1fr)
+    minmax(140px, 0.7fr)
+    auto;
+  align-items: end;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-business-profile-form label {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.admin-business-profile-form button {
+  min-height: 38px;
+  justify-content: center;
+}
+
+.admin-business-profile-missing {
+  display: grid;
+  gap: 5px;
+  padding: 14px 22px;
+  border-bottom: 1px solid #edf1ef;
+  background: #fffaf0;
+}
+
+.admin-business-profile-missing strong {
+  font-size: 10px;
+}
+
+.admin-business-profile-missing p {
+  margin: 0;
+  color: #7f6d4c;
+  font-size: 8px;
+  line-height: 1.6;
 }
 
 .admin-subscription-summary {
@@ -2825,6 +2913,10 @@ label.file-button:focus-within {
     grid-template-columns: 1fr 1fr;
   }
 
+  .admin-business-profile-form fieldset {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .admin-danger-zone {
     grid-column: 1 / -1;
   }
@@ -2845,6 +2937,7 @@ label.file-button:focus-within {
   }
 
   .admin-stat-grid,
+  .admin-business-profile-form fieldset,
   .admin-subscription-summary,
   .admin-mutation-grid,
   .admin-create-subscription {
@@ -2892,6 +2985,8 @@ label.file-button:focus-within {
   }
 
   .admin-tenant-heading,
+  .admin-business-profile-form,
+  .admin-business-profile-missing,
   .admin-mutation-grid,
   .admin-create-subscription,
   .admin-subscription-summary {

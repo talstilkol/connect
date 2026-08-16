@@ -40,7 +40,7 @@ Design מלא.
 | SPEC-05 | רשימת מנויים וסינון Admin | partial | System Admin tenant directory | סינון מוצר מלא ו־Browser acceptance |
 | SPEC-06 | יצירת מנוי ידני | local-complete | פעולת Admin עם RBAC, Version ו־Audit | בדיקת Staging עם זהות Admin אמיתית |
 | SPEC-07 | הארכה וביטול עם היסטוריה | local-complete | Subscription transitions ואירועים Immutable | בדיקת Staging |
-| SPEC-08 | עריכת לקוח, חבילה, מגבלות ופרטי קשר | partial | שינוי Status ותקופה קיימים | מודל Package/Quota ועריכת פרטי קשר |
+| SPEC-08 | עריכת לקוח, חבילה, מגבלות ופרטי קשר | partial | שינוי Status ותקופה; עריכת Business Profile קיים עם Expected Version ו־Audit מבוסס Digests | החלטה ומימוש של Package/Quota ושדות קשר ייעודיים |
 | SPEC-09 | Facebook Embedded Signup | external-blocked | UI, SDK adapter, Authorization exchange ו־Asset verification | Meta App, WABA ו־Credentials מורשים |
 | SPEC-10 | יצירת Templates ושליחה לאישור | external-blocked | Draft, Header/Body/Buttons/Variables ומחזור Submission | בדיקת Graph API חיה ואישור Template אמיתי |
 | SPEC-11 | נמענים במאגר פנימי | local-complete | Contacts, Consent, Lists ו־Tags | בדיקת Staging |
@@ -84,7 +84,9 @@ Queue. נותר אימות המדיניות מול חשבון Meta חי.
 4.2.3 להרחיב את Bot composer ל־Graph editor נגיש. Drag-and-drop
 אינו יכול להיות דרך הקלט היחידה; נדרש גם מסלול Keyboard מלא.
 
-4.2.4 להשלים עריכת Package, ‏Quota ופרטי קשר ב־Admin.
+4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
+להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף
+18 של `docs/external-decisions-recommendations.md`.
 
 4.3 מסלול P2 — אינטגרציות חיות:
 

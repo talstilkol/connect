@@ -8,7 +8,9 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,309 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל בדיקות השער המקומי עוברים.
+מספר הבדיקות המדויק מתעדכן לאחר כל הרחבת אפיון ואינו תנאי להגדרת
+ה־Baseline המקורי.
 
 1.1.3 נתון זה אינו אומר שכל דרישות ה־PDF הושלמו. מטריצת הכיסוי
 המדויקת נמצאת ב־`docs/product-specification-traceability.md`.
@@ -216,6 +218,23 @@ Smoke חיצוני עדיין דורש Staging וחשבונות אמיתיים.
 2.10.2 Review צוותי ותיקוני Regression, אם יימצאו, אינם ניתנים
 לאומדן לפני Review ולכן הם `unknown/unavailable`.
 
+2.11 **הושלם מקומית לאחר אימות ה־PDF:** עריכת Business Profile קיים
+ב־System Admin.
+
+2.11.1 ה־Directory טוען את שם העסק, אזור הזמן, שפת הממשק וגרסת
+הפרופיל מ־D1, ונכשל סגור אם שם ה־Tenant והפרופיל אינם מסונכרנים.
+
+2.11.2 פעולת העדכון דורשת Expected Version, גוזרת Actor וזמן
+מה־Session ומהשרת, ומעדכנת אטומית את `business_profiles`, שם ה־Tenant,
+אירוע Immutable ו־Audit Log.
+
+2.11.3 אירוע ה־Audit שומר Previous/New SHA-256 Digests ורשימת שדות
+שהשתנו, בלי לשכפל שם עסק, אזור זמן או שפת ממשק. Retry זהה אינו יוצר
+אירוע נוסף; גרסה ישנה עם יעד אחר מוחזרת כ־Conflict.
+
+2.11.4 אין במסלול זה Package, ‏Quota, אימייל, טלפון או Contact person.
+שדות אלה אינם מוגדרים באפיון ולכן לא נוצרו כנתוני דמה.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
@@ -251,7 +270,9 @@ Sandbox, חיבור API, ‏Staging ו־Pilot — מתועד ב־
 4.1.3 Flow Builder חזותי ונגיש עם Drag-and-drop ו־Keyboard parity:
 ‏24–40 שעות.
 
-4.1.4 עריכת Package, ‏Quota ופרטי קשר ב־Admin: ‏6–10 שעות.
+4.1.4 עריכת Business Profile הקיים ב־Admin הושלמה. מודל Package,
+‏Quota ופרטי קשר נשאר החלטת Product פתוחה. לאחר אישור המודל, אומדן
+היישום המקומי הוא 8–14 שעות; חיבור Billing חי אינו כלול.
 
 4.2 מסלול Rate Limiting נמצא בשלב 3 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
@@ -269,6 +290,7 @@ Settlement ונשען על `MetaMessageFailurePolicy` המשותף. הם עדי�
 חיה, מקור Retry evidence, ‏Kill switch וראיות WABA נשארים
 `unknown/unavailable` עד חיבור החשבון המורשה.
 
-4.3 לכן סך העבודה המקומית הידועה אינו עוד 12.5–19 שעות. לאחר
-הוספת פערי ה־PDF וה־Rate Limiting הוא **58–96 שעות פיתוח נטו**,
-ללא המתנה לספקים וללא זמן Adapter חי שאינו ניתן לאומדן כעת.
+4.3 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם
+הוכרעו, הוא **52–86 שעות פיתוח נטו**. אם מאשרים את המודל המומלץ
+בסעיף 18 של מסמך ההחלטות, הטווח התכנוני הופך ל־**60–100 שעות**.
+הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

@@ -147,6 +147,22 @@ async function createFixture() {
       "2026-09-01T00:00:00.000Z",
       1,
     );
+  database
+    .prepare(
+      `INSERT INTO business_profiles (
+        tenant_id,
+        business_name,
+        timezone,
+        interface_language
+      )
+      VALUES (?, ?, ?, ?)`,
+    )
+    .run(
+      1,
+      "tenant-1",
+      "Asia/Jerusalem",
+      "he",
+    );
 
   return {
     database,
@@ -170,6 +186,18 @@ test("loads a bounded first page with real subscription state", async () => {
     tenantId: 1,
     displayName: "tenant-1",
     tenantStatus: "active",
+    businessProfile: {
+      businessName: "tenant-1",
+      timezone: "Asia/Jerusalem",
+      interfaceLanguage: "he",
+      version: 1,
+      createdAt:
+        page.tenants[0].businessProfile
+          .createdAt,
+      updatedAt:
+        page.tenants[0].businessProfile
+          .updatedAt,
+    },
     subscription: {
       status: "active",
       startsAt:
@@ -188,6 +216,10 @@ test("loads a bounded first page with real subscription state", async () => {
   });
   assert.equal(
     page.tenants[1].subscription,
+    null,
+  );
+  assert.equal(
+    page.tenants[1].businessProfile,
     null,
   );
 });
@@ -240,5 +272,20 @@ test("fails closed when tenant and subscription states diverge", async () => {
   await assert.rejects(
     fixture.repository.listPage(null),
     /invalid system admin subscription/,
+  );
+});
+
+test("fails closed when tenant and business profile names diverge", async () => {
+  const fixture = await createFixture();
+
+  fixture.database
+    .prepare(
+      "UPDATE tenants SET display_name = 'drifted-name' WHERE id = 1",
+    )
+    .run();
+
+  await assert.rejects(
+    fixture.repository.listPage(null),
+    /invalid system admin business profile/,
   );
 });

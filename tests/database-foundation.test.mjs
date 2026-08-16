@@ -72,6 +72,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0030_whatsapp_rate_limit_reservations.sql",
     "0031_campaign_delivery_provider_links.sql",
     "0032_whatsapp_provider_cooldowns.sql",
+    "0033_large_union_jack.sql",
   ]);
 
   const migration = await readFile(
@@ -378,6 +379,49 @@ test("provider cooldown migration derives opaque blocking state from immutable r
     /tenant_id|phone_e164|phone_number|message_body|access_token|provider_payload/,
   );
   assert.doesNotMatch(migration, /Math\.random/);
+});
+
+test("business profile admin migration stores digest-only immutable audit evidence", async () => {
+  const migration = await readFile(
+    new URL(
+      "0033_large_union_jack.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `business_profile_admin_events`/,
+  );
+  assert.match(
+    migration,
+    /previous_profile_digest/,
+  );
+  assert.match(
+    migration,
+    /new_profile_digest/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_proof_guard/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_insert_audit/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_update_guard/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_delete_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /business_name|interface_language|Math\.random/,
+  );
 });
 
 test("AI persistence migration stores immutable definitions and source metadata without file bytes or secrets", async () => {
@@ -855,6 +899,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "bot_flow_versions",
     "bot_flows",
     "bot_reply_deliveries",
+    "business_profile_admin_events",
     "business_profiles",
     "campaign_delivery_provider_links",
     "campaign_recipients",

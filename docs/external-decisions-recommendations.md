@@ -294,43 +294,99 @@ Kill switch ו־Audit.
 ‏Alerts ו־Kill switch. ערכי החשבון אינם מוסקים מתוכנית או מתעבורה
 קודמת.
 
-## 18. מקורות רשמיים
+## 18. החלטה 16 — Package, ‏Quota ופרטי קשר
 
-18.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+18.1 סטטוס: **פתוח**. האפיון דורש יכולת עריכה, אך אינו קובע שמות
+חבילות, מחירים, יחידת זמן, מספר הודעות, מספר נמענים, מספר Bots,
+מספר משתמשים, חריגה מותרת או שדות קשר מחייבים. אין לקודד ערכים
+לפני החלטת Product.
 
-18.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+18.2 החלטות שחייבים לסגור:
 
-18.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+18.2.1 אילו Entitlements יש לכל Package ומה יחידת המדידה של כל אחד.
 
-18.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+18.2.2 האם Quota היא Hard limit, ‏Soft limit עם Alert, או Overage
+בתשלום; ומה קורה לפעולות שכבר נמצאות ב־Queue כאשר המכסה מסתיימת.
 
-18.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+18.2.3 האם שינוי חבילה חל מיד או במחזור הבא, וכיצד מטפלים ב־Downgrade
+כאשר שימוש קיים גבוה מהמכסה החדשה.
 
-18.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+18.2.4 אילו פרטי קשר נדרשים בנפרד: Billing, ‏Operational ו־Security;
+מי רשאי לערוך אותם, כיצד מאמתים Email/Phone ומהי מדיניות ה־Retention.
 
-18.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+18.3 המלצת מודל:
 
-18.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+18.3.1 `plans` בגרסאות, עם Code יציב ו־Lifecycle מפורש; אין לשנות
+רטרואקטיבית Entitlements של Tenant שכבר הוקצו לו.
 
-18.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+18.3.2 `plan_entitlements` יגדיר גבולות מאושרים, ו־Usage Ledger נפרד
+ימדוד צריכה בפועל. אין להשתמש ב־Rate Limiter כמנגנון Billing או
+כמקור אמת ל־Quota.
 
-18.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+18.3.3 `tenant_plan_assignments` יכלול Expected Version, חלון תחולה
+ו־Audit. Override ידני יחייב סיבה, Actor ותפוגה; לא תהיה מכסה נסתרת
+בקוד UI.
 
-18.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+18.3.4 פרטי קשר יישמרו בישות ייעודית ומצומצמת, לא בתוך Display Name.
+יש להגדיר PII access, ‏Encryption, ‏Retention ו־Audit לפני הוספת
+Email או Phone.
 
-18.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+18.4 התנהגות בטוחה מומלצת:
 
-18.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+18.4.1 Downgrade אינו מוחק נתונים קיימים. הוא חוסם יצירה או שליחה
+חדשה לפי Policy מאושרת ומציג למפעיל את הסיבה ואת דרך התיקון.
 
-18.14 [GitHub — Managing repository access](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository?apiVersion=2022-11-28).
+18.4.2 שינוי Admin דורש Expected Version ו־Audit אטומי. אירוע Audit
+ישמור Digests ושמות שדות, ולא יעתיק PII ללא צורך משפטי מאושר.
 
-18.15 [Railway — Pricing plans](https://docs.railway.com/pricing/plans).
+18.4.3 עד להחלטה, המימוש הקיים מאפשר רק שינוי שם עסק, אזור זמן ושפת
+ממשק. הוא אינו טוען שהשלים Package, ‏Quota או פרטי קשר.
 
-18.16 [Vercel — Managing team members](https://vercel.com/docs/rbac/managing-team-members).
+18.5 בעלות מומלצת: רועי / Product Accountable על הגדרת החבילות;
+דוד Responsible למודל ולאכיפה; אבטחה ו־Legal מאשרים PII ו־Retention;
+Billing owner מאשר התאמה לספק שייבחר.
 
-18.17 [Meta — WhatsApp Business Platform](https://www.postman.com/meta/whatsapp-business-platform/overview).
+18.6 אומדן לאחר החלטה חתומה: 8–14 שעות לפיתוח מקומי ולבדיקות של
+המודל המצומצם. Checkout, ‏Webhooks, חשבוניות ו־Provider metering הם
+Workstream חיצוני נפרד וזמנם `unknown/unavailable`.
 
-18.18 [Anthropic — Claude Team](https://support.claude.com/en/articles/9267247-get-started-with-the-team-plan).
+## 19. מקורות רשמיים
+
+19.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+
+19.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+
+19.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+
+19.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+
+19.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+
+19.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+
+19.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+
+19.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+
+19.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+
+19.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+
+19.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+
+19.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+
+19.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+
+19.14 [GitHub — Managing repository access](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository?apiVersion=2022-11-28).
+
+19.15 [Railway — Pricing plans](https://docs.railway.com/pricing/plans).
+
+19.16 [Vercel — Managing team members](https://vercel.com/docs/rbac/managing-team-members).
+
+19.17 [Meta — WhatsApp Business Platform](https://www.postman.com/meta/whatsapp-business-platform/overview).
+
+19.18 [Anthropic — Claude Team](https://support.claude.com/en/articles/9267247-get-started-with-the-team-plan).
 
 18.19 [AnyDesk — Two-factor authentication](https://anydesk.com/en/features/2-factor-authentication).
 

@@ -4,11 +4,16 @@ import type {
 import type {
   TenantSubscriptionAdminView,
 } from "./tenantSubscriptionAdminView.ts";
+import type {
+  SystemAdminBusinessProfileView,
+} from "./systemAdminBusinessProfile.ts";
 
 export interface SystemAdminTenantRecord {
   tenantId: number;
   displayName: string;
   tenantStatus: TenantStatus;
+  businessProfile:
+    SystemAdminBusinessProfileView | null;
   subscription:
     TenantSubscriptionAdminView | null;
 }
