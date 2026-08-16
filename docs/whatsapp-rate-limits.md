@@ -394,6 +394,13 @@ Unique-recipient rolling quota, כדי שמספרים מקבילים לא יצר
 ה־Load test, התעבורה הנכנסת וה־Tier החי, דוד מאשר את התאמת המימוש,
 ואבטחה ומוצר מאשרים את ה־Headroom כמדיניות.
 
+14.6 `server/meta/metaMessageFailurePolicy.ts` מממש Decision engine
+קשיח לקודי Throttling ואכיפה. הוא דורש Signal מצומצם, מסרב להמציא
+Retry delay ומחזיר Defer, ‏Pause, ‏Block, ‏Circuit break או Manual
+review. בשלב זה הוא אינו מבצע Reservation, אינו משנה Campaign state
+ואינו שולח הודעה; לכן אין לראות בו Rate limiter מלא או Production
+evidence.
+
 ## 15. אחריות ועדכון
 
 15.1 טל מתחזק מטריצה מתוארכת המכילה לכל מגבלה: Scope, ערך,
