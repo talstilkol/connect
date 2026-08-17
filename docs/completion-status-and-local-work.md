@@ -1272,6 +1272,25 @@ Publish ו־Version append מקבילים, Reply stage יחיד ו־Delivery cla
 אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials, ‏Railway
 environment, ‏Staging או Pilot.
 
+4.20 ‏PostgreSQL Knowledge Source ו־Passage lifecycle הושלם מקומית.
+Migration מספר `0016_ai_knowledge.sql` מוסיף את טבלאות המקור, המקטעים וקישור
+המקורות לגרסאות AI. ‏`postgresKnowledgeSourceRepository.ts` מממש רישום,
+קריאות ומעברי מצב תחת נעילה. ‏`postgresKnowledgePassageRepository.ts`
+מבצע אימות SHA-256, כתיבת כל המקטעים וסימון Ready באותה Transaction. שני
+ה־Repositories מחוברים ל־`railwayPostgresFoundation.ts`, שמכיל כעת 26
+Adapters.
+
+4.20.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (17 migrations, 32 concurrency scenarios)`. הוא הוכיח Registration,
+Validation, ‏Scanning, ‏Recovery ו־Passage processing מקבילים, Replay מדויק,
+Tenant isolation ו־Rollback כאשר מספר המקטעים שנשמר אינו מלא. השרת הזמני
+נעצר והתיקייה נמחקה לאחר האימות.
+
+4.21 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **8–32 שעות פיתוח נטו**.
+הירידה משקפת Migration אחת, שני Repositories וחמישה תרחישי Concurrency
+אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials, ‏Railway
+environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

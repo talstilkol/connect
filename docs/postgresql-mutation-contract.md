@@ -38,7 +38,7 @@ Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 24 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 26 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -181,6 +181,15 @@ Stage ו־Claim מקבילים מסווגים ל־Created/Duplicate ול־Claime
 נעילת שורה. ה־Harness הוכיח שלושה תרחישי Flow ושני תרחישי Delivery במקביל,
 והעלה את הסך ל־27 תרחישי Concurrency.
 
+1.25 ‏Migration מספר `0016_ai_knowledge.sql` מוסיף את `knowledge_sources`,
+`knowledge_passages` ו־`ai_agent_version_sources` עם Tenant-bound Foreign
+Keys, מצב Source עקבי, Passages בלתי משתנים וקישור Restrict לגרסאות AI.
+`postgresKnowledgeSourceRepository.ts` מממש רישום Metadata דטרמיניסטי,
+מעברי Validation/Scanning/Recovery/Reject/Archive ונעילת `FOR UPDATE`.
+`postgresKnowledgePassageRepository.ts` מאמת SHA-256 וזהות לכל Passage,
+שומר את כל המקטעים ומסמן את המקור Ready באותה Transaction. ‏Harness אמיתי
+הוכיח חמישה תרחישים מקבילים נוספים והעלה את הסך ל־32.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
@@ -251,7 +260,7 @@ Receipt פעיל ל־Audit נצחי.
 
 5.5 ערכי משתמש נשלחים רק כ־Parameters; הם אינם משורשרים אל מחרוזות SQL.
 
-5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 40 טבלאות ה־Critical
+5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 45 טבלאות ה־Critical
 Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ויצירת מזהים אקראית.
 
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.
@@ -265,7 +274,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 24 ה־Adapters, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 26 ה־Adapters, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 

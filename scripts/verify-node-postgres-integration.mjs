@@ -29,6 +29,13 @@ import {
   deriveBotReplyDeliveryKey,
 } from "../server/bot/botReplyDeliveryKey.ts";
 import {
+  deriveKnowledgePassageKey,
+  deriveKnowledgeSourceKey,
+} from "../server/ai/aiAgentKey.ts";
+import {
+  sha256Hex,
+} from "../server/meta/metaWebhookSecurity.ts";
+import {
   RAILWAY_API_CONTRACT_VERSION,
   RAILWAY_API_ENDPOINT_PATH,
   VERCEL_OIDC_HEADER,
@@ -63,6 +70,7 @@ const migrationFiles = Object.freeze([
   "0013_whatsapp_phone_throughput.sql",
   "0014_worker_scheduler_lease.sql",
   "0015_campaign_dispatch.sql",
+  "0016_ai_knowledge.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2134,6 +2142,146 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
   }]);
 }
 
+async function verifyKnowledgeLifecycle(pool, foundation, tenantId) {
+  const sourceContent =
+    "שעות הפעילות מופיעות באתר. ניתן לפנות לשירות דרך WhatsApp.";
+  const contentSha256 = await sha256Hex(
+    new TextEncoder().encode(sourceContent),
+  );
+  const sourceKey = await deriveKnowledgeSourceKey(
+    tenantId,
+    contentSha256,
+  );
+  const registerInput = Object.freeze({
+    tenantId,
+    sourceKey,
+    contentSha256,
+    fileName: "service-policy.txt",
+    mediaType: "text/plain",
+    sizeBytes: new TextEncoder().encode(sourceContent).byteLength,
+  });
+  const registrations = await Promise.all([
+    foundation.knowledgeSources.registerUploaded(registerInput),
+    foundation.knowledgeSources.registerUploaded(registerInput),
+  ]);
+  assert.deepEqual(
+    registrations.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+
+  const transition = (expectedVersion, action) => Object.freeze({
+    tenantId,
+    sourceKey,
+    expectedVersion,
+    action,
+    errorCode: null,
+  });
+  const validation = await Promise.all([
+    foundation.knowledgeSources.transition(
+      transition(1, "validation-passed"),
+    ),
+    foundation.knowledgeSources.transition(
+      transition(1, "validation-passed"),
+    ),
+  ]);
+  assert.deepEqual(
+    validation.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+  const scanning = await Promise.all([
+    foundation.knowledgeSources.transition(transition(2, "scan-started")),
+    foundation.knowledgeSources.transition(transition(2, "scan-started")),
+  ]);
+  assert.deepEqual(
+    scanning.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+  const recovery = await Promise.all([
+    foundation.knowledgeSources.transition(
+      transition(3, "scan-retry-started"),
+    ),
+    foundation.knowledgeSources.transition(
+      transition(3, "scan-retry-started"),
+    ),
+  ]);
+  assert.deepEqual(
+    recovery.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+
+  async function passage(passageOrdinal, content) {
+    const passageDigest = await sha256Hex(
+      new TextEncoder().encode(content),
+    );
+    return Object.freeze({
+      passageKey: await deriveKnowledgePassageKey(
+        tenantId,
+        sourceKey,
+        passageOrdinal,
+        passageDigest,
+      ),
+      passageOrdinal,
+      contentSha256: passageDigest,
+      content,
+    });
+  }
+  const passages = Object.freeze([
+    await passage(1, "שעות הפעילות מופיעות באתר."),
+    await passage(2, "ניתן לפנות לשירות דרך WhatsApp."),
+  ]);
+  const processingInput = Object.freeze({
+    tenantId,
+    sourceKey,
+    expectedSourceVersion: 4,
+    passages,
+  });
+  const processing = await Promise.all([
+    foundation.knowledgePassages.storeProcessedAndMarkReady(processingInput),
+    foundation.knowledgePassages.storeProcessedAndMarkReady(processingInput),
+  ]);
+  assert.deepEqual(
+    processing.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+  const approved = await foundation.knowledgePassages
+    .listApprovedBySourceKeys(tenantId, [sourceKey], 100);
+  assert.equal(approved.length, 2);
+  assert.deepEqual(
+    approved.map(({ passageOrdinal }) => passageOrdinal),
+    [1, 2],
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       source.status,
+       source.version,
+       count(passage.passage_key)::integer AS passage_count
+     FROM knowledge_sources AS source
+     INNER JOIN knowledge_passages AS passage
+       ON passage.tenant_id = source.tenant_id
+      AND passage.source_key = source.source_key
+     WHERE source.tenant_id = $1
+       AND source.source_key = $2
+     GROUP BY source.status, source.version`,
+    [tenantId, sourceKey],
+  );
+  assert.deepEqual(persisted.rows, [{
+    status: "ready",
+    version: 5,
+    passage_count: 2,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE knowledge_sources
+       SET ready_at = NULL
+       WHERE tenant_id = $1
+         AND source_key = $2`,
+      [tenantId, sourceKey],
+    ),
+    (error) => error?.code === "23514",
+  );
+}
+
 async function verifyAiReportingSchema(pool, foundation, tenantId) {
   const conversationKey = `conversation_v1_${"a".repeat(64)}`;
   const inboundMessageKey = `message_v1_${"b".repeat(64)}`;
@@ -2756,6 +2904,7 @@ export async function verifyNodePostgresIntegration(
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyConversationLifecycle(pool, foundation, tenantId);
       await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
+      await verifyKnowledgeLifecycle(pool, foundation, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
@@ -2766,7 +2915,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 27,
+      concurrencyScenarios: 32,
     });
   } finally {
     await pool.end();

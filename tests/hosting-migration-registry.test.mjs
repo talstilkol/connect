@@ -227,6 +227,8 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresConversationRepository.ts",
     "server/platform/postgresBotFlowRepository.ts",
     "server/platform/postgresBotReplyDeliveryRepository.ts",
+    "server/platform/postgresKnowledgeSourceRepository.ts",
+    "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
@@ -250,6 +252,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0013_whatsapp_phone_throughput.sql",
     "postgres/migrations/0014_worker_scheduler_lease.sql",
     "postgres/migrations/0015_campaign_dispatch.sql",
+    "postgres/migrations/0016_ai_knowledge.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -260,7 +263,11 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /twenty-four-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /twenty-six-adapter PostgreSQL foundation/);
+  assert.match(
+    boundary.cutoverBlocker,
+    /knowledge-source lifecycle and atomic knowledge-passage persistence/,
+  );
   assert.match(boundary.cutoverBlocker, /bot-flow version\/publication and reply-delivery persistence/);
   assert.match(boundary.cutoverBlocker, /conversation\/message inbox persistence/);
   assert.match(boundary.cutoverBlocker, /message-template lifecycle/);
@@ -314,6 +321,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresConversationRepository.ts",
     "server/platform/postgresBotFlowRepository.ts",
     "server/platform/postgresBotReplyDeliveryRepository.ts",
+    "server/platform/postgresKnowledgeSourceRepository.ts",
+    "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
@@ -343,6 +352,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0013_whatsapp_phone_throughput.sql",
     "postgres/migrations/0014_worker_scheduler_lease.sql",
     "postgres/migrations/0015_campaign_dispatch.sql",
+    "postgres/migrations/0016_ai_knowledge.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -350,15 +360,19 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /sixteen ordered/);
+  assert.match(database.cutoverBlocker, /seventeen ordered/);
   assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
   assert.match(database.cutoverBlocker, /atomic contact-profile plus import-outcome writes/);
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /twenty-seven real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /thirty-two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /twenty-four-adapter foundation/);
+  assert.match(database.cutoverBlocker, /twenty-six-adapter foundation/);
+  assert.match(
+    database.cutoverBlocker,
+    /deterministic knowledge-source registration, validation\/scanning\/recovery transitions and atomic passage processing\/replay/,
+  );
   assert.match(database.cutoverBlocker, /concurrent bot-flow draft replay/);
   assert.match(database.cutoverBlocker, /referentially scoped reply staging/);
   assert.match(database.cutoverBlocker, /exact inbound-message replay\/conflict/);

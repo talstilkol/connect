@@ -55,6 +55,9 @@ const requiredTableSequence = Object.freeze([
   "whatsapp_provider_cooldown_state",
   "worker_scheduler_leases",
   "campaign_recipients",
+  "knowledge_sources",
+  "knowledge_passages",
+  "ai_agent_version_sources",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -73,6 +76,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0013_whatsapp_phone_throughput.sql",
   "0014_worker_scheduler_lease.sql",
   "0015_campaign_dispatch.sql",
+  "0016_ai_knowledge.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

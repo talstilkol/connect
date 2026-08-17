@@ -52,6 +52,8 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "invitationDeliveries",
     "invitationExpirations",
     "invitations",
+    "knowledgePassages",
+    "knowledgeSources",
     "membershipMutations",
     "memberships",
     "messageTemplates",
@@ -85,6 +87,14 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "function",
   );
   assert.equal(typeof foundation.messageTemplates.saveDraft, "function");
+  assert.equal(
+    typeof foundation.knowledgeSources.registerUploaded,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.knowledgePassages.storeProcessedAndMarkReady,
+    "function",
+  );
   assert.equal(typeof foundation.metaWebhooks.claimWebhookReceipt, "function");
   assert.equal(
     typeof foundation.whatsappDeliveryPolicies.recordPolicyEvent,

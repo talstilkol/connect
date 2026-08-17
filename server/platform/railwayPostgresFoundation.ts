@@ -63,6 +63,12 @@ import {
   createPostgresMessageTemplateRepository,
 } from "./postgresMessageTemplateRepository.ts";
 import {
+  createPostgresKnowledgePassageRepository,
+} from "./postgresKnowledgePassageRepository.ts";
+import {
+  createPostgresKnowledgeSourceRepository,
+} from "./postgresKnowledgeSourceRepository.ts";
+import {
   createPostgresMetaRepository,
 } from "./postgresMetaRepository.ts";
 import {
@@ -150,6 +156,12 @@ export interface RailwayPostgresFoundation {
   >;
   readonly messageTemplates: ReturnType<
     typeof createPostgresMessageTemplateRepository
+  >;
+  readonly knowledgePassages: ReturnType<
+    typeof createPostgresKnowledgePassageRepository
+  >;
+  readonly knowledgeSources: ReturnType<
+    typeof createPostgresKnowledgeSourceRepository
   >;
   readonly whatsappDeliveryPolicies: ReturnType<
     typeof createPostgresWhatsappCampaignDeliveryPolicyRepository
@@ -288,6 +300,14 @@ export function createRailwayPostgresFoundation(
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
     messageTemplates: createPostgresMessageTemplateRepository({
+      queries,
+      transactions,
+    }),
+    knowledgePassages: createPostgresKnowledgePassageRepository({
+      queries,
+      transactions,
+    }),
+    knowledgeSources: createPostgresKnowledgeSourceRepository({
       queries,
       transactions,
     }),

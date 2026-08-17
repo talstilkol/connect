@@ -382,6 +382,13 @@ Submission lifecycle ו־Status events על PostgreSQL. ‏Draft מקביל מט
 Rejected/Ambiguous עם בדיקת הקשר בין Inbound message, ‏Conversation וגרסת
 Flow. ‏Harness אמיתי עבר עם 16 Migrations ו־27 תרחישי Concurrency.
 
+7.1.41 ‏`0016_ai_knowledge.sql` ו־Repositories ייעודיים ממירים את מחזור
+Knowledge Source ואת ה־Passages המעובדים ל־PostgreSQL. ‏Source ננעל לפני
+כל מעבר מצב; זהות ודיגסט של כל Passage נבדקים לפני כתיבה; כל המקטעים וסימון
+Ready נשמרים באותה Transaction. ‏Harness אמיתי עבר עם 17 Migrations ו־32
+תרחישי Concurrency, כולל Registration, ‏Validation, ‏Scanning, ‏Recovery
+ו־Processing מקבילים.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

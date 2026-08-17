@@ -35,6 +35,7 @@ const whatsappRateLimitLedgerSchema = migrationSources[12];
 const whatsappPhoneThroughputSchema = migrationSources[13];
 const workerSchedulerLeaseSchema = migrationSources[14];
 const campaignDispatchSchema = migrationSources[15];
+const aiKnowledgeSchema = migrationSources[16];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -54,15 +55,40 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0013_whatsapp_phone_throughput.sql",
     "0014_worker_scheduler_lease.sql",
     "0015_campaign_dispatch.sql",
+    "0016_ai_knowledge.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 16,
+      migrationCount: 17,
       findings: [],
     },
   );
+});
+
+test("defines tenant-bound PostgreSQL AI knowledge and immutable passages", () => {
+  assert.match(
+    aiKnowledgeSchema,
+    /CREATE TABLE knowledge_sources[\s\S]*CREATE TABLE knowledge_passages[\s\S]*CREATE TABLE ai_agent_version_sources/,
+  );
+  assert.match(
+    aiKnowledgeSchema,
+    /knowledge_passages_source_fk[\s\S]*FOREIGN KEY \(tenant_id, source_key\)[\s\S]*REFERENCES knowledge_sources \(tenant_id, source_key\)/,
+  );
+  assert.match(
+    aiKnowledgeSchema,
+    /ai_agent_version_sources_version_fk[\s\S]*REFERENCES ai_agent_versions \(tenant_id, ai_agent_version_key\)/,
+  );
+  assert.match(
+    aiKnowledgeSchema,
+    /ai_agent_version_sources_source_fk[\s\S]*REFERENCES knowledge_sources \(tenant_id, source_key\)[\s\S]*ON DELETE RESTRICT/,
+  );
+  assert.match(
+    aiKnowledgeSchema,
+    /knowledge_sources_state_consistent[\s\S]*status = 'ready'[\s\S]*status = 'rejected'[\s\S]*status = 'archived'/,
+  );
+  assert.doesNotMatch(aiKnowledgeSchema, /random|uuid/i);
 });
 
 test("defines tenant-bound PostgreSQL campaign dispatch rows", () => {
