@@ -25,6 +25,7 @@ const accessSchema = migrationSources[2];
 const membershipEventSchema = migrationSources[3];
 const invitationSchema = migrationSources[4];
 const conversationSchema = migrationSources[5];
+const campaignSchema = migrationSources[6];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -34,12 +35,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0003_tenant_membership_events.sql",
     "0004_team_invitation_lifecycle.sql",
     "0005_conversations_messages.sql",
+    "0006_message_templates_campaigns.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 6,
+      migrationCount: 7,
       findings: [],
     },
   );
@@ -65,6 +67,29 @@ test("defines tenant-scoped PostgreSQL conversations and messages", () => {
   assert.match(
     conversationSchema,
     /messages_tenant_occurred_idx[\s\S]*\(tenant_id, occurred_at\)/,
+  );
+});
+
+test("defines PostgreSQL templates and tenant-scoped campaigns", () => {
+  assert.match(
+    campaignSchema,
+    /CREATE TABLE message_templates[\s\S]*CREATE TABLE campaigns/,
+  );
+  assert.match(
+    campaignSchema,
+    /message_templates_lifecycle_consistent[\s\S]*status = 'submitting'[\s\S]*status = 'pending_review'/,
+  );
+  assert.match(
+    campaignSchema,
+    /campaigns_template_fk[\s\S]*FOREIGN KEY \(tenant_id, template_key\)[\s\S]*REFERENCES message_templates \(tenant_id, template_key\)/,
+  );
+  assert.match(
+    campaignSchema,
+    /campaigns_schedule_consistent[\s\S]*delivery_mode = 'immediate'[\s\S]*delivery_mode = 'scheduled'/,
+  );
+  assert.match(
+    campaignSchema,
+    /campaigns_tenant_created_idx[\s\S]*\(tenant_id, created_at\)/,
   );
 });
 

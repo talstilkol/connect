@@ -187,12 +187,13 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו שש Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו שבע Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
 השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
 Membership event ledger. החמישית יוצרת את כל ארבע טבלאות ה־Invitation
 lifecycle ואת Triggers הבטיחותיים שלה.
+השישית מוסיפה Conversations/Messages והשביעית Message templates/Campaigns.
 כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי. ‏Node driver adapter
 ו־Integration rehearsal עבור Contact ו־Invitation קיימים, אך אין עדיין
 Schema parity מלאה, ערכי Production pool חיים או Staging evidence.
@@ -218,7 +219,7 @@ Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`
 כיסוי יתר המסלולים ופעולות API מחוברות.
 
 7.1.19 ‏`node-postgres` מחובר דרך Adapter יחיד שמפריד Query בודד מ־Transaction
-מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל שש
+מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל שבע
 Migrations ומוכיח DML, ‏Rollback ושני Races בלי לקבל Production credential.
 
 7.1.20 חוזה Pool נפרד דורש TLS, ‏Pool size וכל Timeout במפורש. הוא דוחה
@@ -237,8 +238,8 @@ repository; ערבוב D1/PostgreSQL אינו מסלול Cutover מאושר.
 
 7.1.23 ‏`reports.read` קיבל PostgreSQL Adapter בעל Statement יחיד שמחשב את
 כל ששת מקורות הדוח מאותו Snapshot ומאמת 35 שדות לפני החזרתם. ה־Adapter מחובר
-ל־Foundation. ‏Conversations ו־Messages הומרו ונבדקו מול PostgreSQL אמיתי,
-אך ארבע טבלאות המקור האחרות עדיין אינן בשרשרת ה־Migrations; לכן Route חי
+ל־Foundation. ‏Conversations, ‏Messages, ‏Templates ו־Campaigns הומרו
+ונבדקו מול PostgreSQL אמיתי, אך שלוש טבלאות המקור האחרות עדיין אינן בשרשרת ה־Migrations; לכן Route חי
 ו־Cutover נשארים חסומים.
 
 7.2 עדיין חסר:

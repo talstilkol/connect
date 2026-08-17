@@ -34,6 +34,7 @@ const migrationFiles = Object.freeze([
   "0003_tenant_membership_events.sql",
   "0004_team_invitation_lifecycle.sql",
   "0005_conversations_messages.sql",
+  "0006_message_templates_campaigns.sql",
 ]);
 
 function fail(code) {
@@ -341,6 +342,143 @@ async function verifyConversationMessageSchema(pool, tenantId) {
   );
 }
 
+async function verifyTemplateCampaignSchema(pool, tenantId) {
+  const templateKey = `template_v1_${"d".repeat(64)}`;
+  const campaignKey = `campaign_v1_${"e".repeat(64)}`;
+  const audienceKey = "f".repeat(64);
+  const occurredAt = "2026-08-17T10:00:00.000Z";
+  const definition = JSON.stringify({ body: "Integration template" });
+
+  await pool.query(
+    `INSERT INTO message_templates (
+       template_key,
+       tenant_id,
+       name,
+       language,
+       category,
+       status,
+       definition_json,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       'integration_template',
+       'he',
+       'UTILITY',
+       'draft',
+       $3::jsonb,
+       $4::timestamptz,
+       $4::timestamptz
+     )`,
+    [templateKey, tenantId, definition, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO campaigns (
+       campaign_key,
+       tenant_id,
+       name,
+       status,
+       delivery_mode,
+       timezone,
+       template_key,
+       template_snapshot_json,
+       audience_snapshot_key,
+       recipient_count,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       'Integration campaign',
+       'draft',
+       'immediate',
+       'UTC',
+       $3,
+       $4::jsonb,
+       $5,
+       2,
+       $6::timestamptz,
+       $6::timestamptz
+     )`,
+    [
+      campaignKey,
+      tenantId,
+      templateKey,
+      definition,
+      audienceKey,
+      occurredAt,
+    ],
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       campaign.status,
+       campaign.recipient_count,
+       template.status AS template_status
+     FROM campaigns AS campaign
+     JOIN message_templates AS template
+       ON template.tenant_id = campaign.tenant_id
+      AND template.template_key = campaign.template_key
+     WHERE campaign.tenant_id = $1
+       AND campaign.campaign_key = $2`,
+    [tenantId, campaignKey],
+  );
+  assert.deepEqual(persisted.rows, [
+    {
+      status: "draft",
+      recipient_count: 2,
+      template_status: "draft",
+    },
+  ]);
+
+  await assert.rejects(
+    pool.query(
+      `INSERT INTO campaigns (
+         campaign_key,
+         tenant_id,
+         name,
+         status,
+         delivery_mode,
+         scheduled_at,
+         timezone,
+         template_key,
+         template_snapshot_json,
+         audience_snapshot_key,
+         recipient_count,
+         created_at,
+         updated_at
+       )
+       VALUES (
+         $1,
+         $2,
+         'Invalid scheduled campaign',
+         'draft',
+         'scheduled',
+         NULL,
+         'UTC',
+         $3,
+         $4::jsonb,
+         $5,
+         1,
+         $6::timestamptz,
+         $6::timestamptz
+       )`,
+      [
+        `campaign_v1_${"0".repeat(64)}`,
+        tenantId,
+        templateKey,
+        definition,
+        "1".repeat(64),
+        occurredAt,
+      ],
+    ),
+    (error) => error?.code === "23514",
+  );
+}
+
 async function prepareBlockedInvitation(
   invitationRepository,
   deliveryRepository,
@@ -496,6 +634,7 @@ export async function verifyNodePostgresIntegration(
         tenantId,
       );
       await verifyConversationMessageSchema(pool, tenantId);
+      await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
     } finally {
       await foundation.close();

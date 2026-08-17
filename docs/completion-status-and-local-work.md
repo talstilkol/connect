@@ -636,6 +636,25 @@ Message במצב `received` עם Constraint violation. התוצאה הייתה
 `bot_reply_deliveries`, ‏`ai_runtime_audit_events` ו־`ai_runtime_usage`, יחד
 עם טבלאות התלות שלהן. אין לחבר את Route הדוחות לפני השלמתן.
 
+2.35 **הושלם מקומית:** PostgreSQL Message templates ו־Campaigns schema.
+
+2.35.1 Migration מספר `0006_message_templates_campaigns.sql` ממיר את מצב
+הסכמה הסופי של Templates, כולל Submission lifecycle ו־Status evidence,
+ואת Campaigns עם Tenant+Template foreign key, ‏JSONB snapshots, ‏Delivery
+mode, ‏Schedule, מכסת נמענים וזהויות Deterministic.
+
+2.35.2 נוספו Constraints למעברי Template, זוגות Status event, תזמוני
+Campaign, ‏JSONB bounded ו־Tenant isolation. ‏Index `tenant_id + created_at`
+משרת ישירות את Aggregate הדוחות. ה־Guard מכסה כעת שבע Migrations ו־16 טבלאות.
+
+2.35.3 ה־Harness החיל את שבע ה־Migrations על PostgreSQL 16.13 ריק, יצר
+Template ו־Campaign תקינים, קרא את הקשר ביניהם וחסם Campaign מתוזמן ללא
+`scheduled_at`. התוצאה: `PASS (7 migrations, 2 concurrency scenarios)`.
+סביבת הבדיקה הזמנית נעצרה ונמחקה.
+
+2.35.4 לדוח מלא נותרו שלוש טבלאות מקור: `bot_reply_deliveries`,
+`ai_runtime_audit_events` ו־`ai_runtime_usage`, יחד עם טבלאות התלות שלהן.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

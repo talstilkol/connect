@@ -21,11 +21,11 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | מזהה | היום | יעד | הצעד הבא |
 | --- | --- | --- | --- |
 | `web.build-runtime` | Vinext + Cloudflare Vite/Sites | Vercel Web | החלפת Build/runtime |
-| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות, Mutation מאובטח, PostgreSQL `contacts.list`, ‏Adapter חד־שאילתי ל־`reports.read` ו־Foundation של 11 Adapters הושלמו; Conversations/Messages הומרו ונבדקו, ונותרו ארבע טבלאות מקור לדוחות, ‏Live pool values, ‏Parity מלאה, יתר ה־Mutations, ‏Routes ו־Staging evidence |
+| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות, Mutation מאובטח, PostgreSQL `contacts.list`, ‏Adapter חד־שאילתי ל־`reports.read` ו־Foundation של 11 Adapters הושלמו; Conversations, Messages, Templates ו־Campaigns הומרו ונבדקו, ונותרו שלוש טבלאות מקור לדוחות, ‏Live pool values, ‏Parity מלאה, יתר ה־Mutations, ‏Routes ו־Staging evidence |
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
-| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, ‏Node driver, חוזה Pool מאובטח ו־Foundation של 11 Adapters; Harness אמיתי עבר עם Contact/Conversation/Message DML ושני תרחישי Concurrency. Adapter הדוחות קיים אך ארבע טבלאות המקור הנותרות טרם הומרו; נותרו ספק וערכי Pool חיים, יתר ה־Repositories, ‏Parity מלאה מול 35 Migrations וראיות Staging |
+| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, ‏Node driver, חוזה Pool מאובטח ו־Foundation של 11 Adapters; Harness אמיתי עבר עם Contact/Conversation/Message/Template/Campaign DML ושני תרחישי Concurrency. Adapter הדוחות קיים אך שלוש טבלאות המקור הנותרות טרם הומרו; נותרו ספק וערכי Pool חיים, יתר ה־Repositories, ‏Parity מלאה מול 35 Migrations וראיות Staging |
 | `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |
