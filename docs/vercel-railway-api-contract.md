@@ -336,6 +336,13 @@ Load evidence וערכי חשבון מאומתים עדיין חסרים.
 להשלים לאחר השתלטות. סך הכול עברו תשעה תרחישי Concurrency. ‏Always-on timer,
 ‏Redis/BullMQ ו־Queue adapters עדיין חסרים.
 
+7.1.35 ‏`railwayWorkerSchedulerService.ts` מפעיל ריצה מיידית ומחשב לאחר כל
+ריצה את הזמן המדויק עד גבול הדקה הבא. הוא אינו משתמש ב־`setInterval`, מדכא
+callback חופף, ממשיך לאחר כשל Tick תחום וממתין לריצה פעילה לפני סגירת
+PostgreSQL. ‏`railwayWorkerProcess.ts` מחבר `SIGINT` ו־`SIGTERM` לאותו מסלול
+סגירה אידמפוטנטי. ה־Timer וה־Process מוכנים מקומית; Composition עם Campaign
+repositories ב־PostgreSQL ועם Redis/BullMQ עדיין חסר.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

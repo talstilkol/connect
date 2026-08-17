@@ -149,7 +149,9 @@ rate limits; PostgreSQL נשאר מקור האמת ל־Idempotency ול־Audit.
 
 3.3.5.6 ‏Railway Worker קבוע מפעיל Tick של דקה עם Lease אטומי
 ב־PostgreSQL. Railway Cron אינו מתאים ל־Scheduler המרכזי כי הוא
-מתחיל בחמש דקות ואינו מבטיח דיוק לדקה.
+מתחיל בחמש דקות ואינו מבטיח דיוק לדקה. ה־Lease, ‏Fencing, ‏Catch-up,
+Timer מיושר לדקה ו־SIGINT/SIGTERM lifecycle הושלמו מקומית; חיבור משימות
+PostgreSQL ו־BullMQ לתהליך החי עדיין חסר.
 
 3.3.5.7 ספק Object storage עדיין פתוח. ההמלצה היא AWS S3 עם
 Encryption, ‏Versioning ו־Lifecycle; ‏Vercel Private Blob הוא חלופה.

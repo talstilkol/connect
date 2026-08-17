@@ -1166,6 +1166,18 @@ expiration scheduler, ממתין לשניהם ומבצע Catch-up של עד חמ
 4.7 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **82–182 שעות פיתוח
 נטו**. הירידה משקפת את השלמת ה־Lease וה־Catch-up בלבד; היא אינה מניחה שספק
 Queue, ‏Credentials או סביבת Railway כבר קיימים.
+
+4.8 ‏Railway Always-on Worker timer ו־Process lifecycle הושלמו מקומית.
+השירות מתזמן ריצה מיידית, מתיישר מחדש לגבול הדקה אחרי כל ריצה, אינו משתמש
+ב־`setInterval`, מדכא callback חופף וממשיך לאחר כשל Tick באמצעות Signal
+תחום בלבד. בסגירה הוא מבטל Timer ממתין, מחכה לריצה פעילה ורק אז סוגר את
+PostgreSQL runtime. ‏`SIGINT` ו־`SIGTERM` משתמשים באותו מסלול סגירה
+אידמפוטנטי. עדיין חסרים Composition למשימות Campaign על PostgreSQL,
+‏Redis/BullMQ ו־Queue adapters חיים.
+
+4.9 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **78–174 שעות פיתוח
+נטו**. הטווח אינו כולל המתנה לבחירת ספק Queue, ‏Credentials, ‏Railway
+Environment או בדיקות Staging.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

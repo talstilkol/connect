@@ -339,6 +339,8 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "shared/domain/workerScheduler.ts",
       "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
       "server/platform/railwayWorkerScheduler.ts",
+      "server/platform/railwayWorkerSchedulerService.ts",
+      "server/platform/railwayWorkerProcess.ts",
       "postgres/migrations/0014_worker_scheduler_lease.sql",
     ],
     targetPlacement: "railway-worker",
@@ -348,7 +350,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "Railway Cron cannot satisfy the one-minute cadence. The atomic PostgreSQL lease, fencing token, two-task orchestrator and five-tick catch-up are implemented and passed a real concurrency rehearsal; the always-on timer/process composition and target queue adapters are not implemented.",
+      "Railway Cron cannot satisfy the one-minute cadence. The atomic PostgreSQL lease, fencing token, two-task orchestrator, five-tick catch-up, minute-aligned timer, overlap suppression, active-run drain and SIGINT/SIGTERM process lifecycle are implemented; composition with the PostgreSQL campaign runtime and target queue adapters is not implemented.",
   }),
   capability({
     id: "security.distributed-rate-limits",

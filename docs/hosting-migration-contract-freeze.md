@@ -30,7 +30,7 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |
 | `queue.team-invitation` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
-| `worker.scheduler` | Cloudflare Cron של דקה | Railway Worker קבוע | Lease אטומי, Fencing ו־Catch-up של עד חמישה Ticks הושלמו ונבדקו; נותרו Always-on timer וחיבור Queue adapters. ‏Railway Cron אינו מתאים |
+| `worker.scheduler` | Cloudflare Cron של דקה | Railway Worker קבוע | Lease אטומי, Fencing, ‏Catch-up של עד חמישה Ticks, ‏Timer מיושר לדקה, מניעת overlap ו־Signal shutdown הושלמו ונבדקו; נותרו Composition למשימות PostgreSQL וחיבור Queue adapters. ‏Railway Cron אינו מתאים |
 | `security.distributed-rate-limits` | Cloudflare bindings + D1 ledger | Shared service | בחירת מנגנון אטומי |
 | `security.secret-management` | Worker secrets | Vercel + Railway | Inventory, חלוקה ו־Rotation |
 | `operations.environment-isolation-evidence` | Cloudflare evidence v2 | Vercel + Railway | Evidence חדש רב־ספקי |

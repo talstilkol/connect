@@ -309,6 +309,10 @@ Runtime composition בעל `close` מסודר עבר גם הוא מסלול HTTP
 Vercel ו־Clerk, ‏Tenant resolution והרשאה. נוסף Node HTTP adapter עם
 Liveness, ‏PostgreSQL readiness, גבולות Request ו־Service owner שסוגר HTTP
 לפני Pool. ‏`PORT`, ‏`SIGINT` ו־`SIGTERM` מחוברים ב־Process controller מקומי.
+ל־Railway Worker נוספו גם Timer שמתחיל מיד ומתיישר מחדש לגבול כל דקה,
+מניעת overlap, המתנה לריצה פעילה לפני סגירת PostgreSQL ו־Process controller
+משותף ל־`SIGINT`/`SIGTERM`. ה־Composition למשימות Campaign על PostgreSQL
+ול־Queue adapters עדיין חסר, ולכן אין Startup executable חי.
 ‏Railway API מלא נשאר חסום עד Rate-limit adapter מבוזר, השלמת יתר ה־Routes
 וה־Mutations, ‏Parity מלאה, ערכי Pool חיים וראיות Staging, כדי לא ליצור
 Hybrid לא מתועד עם D1.

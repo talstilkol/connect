@@ -163,12 +163,20 @@ test("requires an always-on adapter instead of an incompatible Railway Cron", ()
   assert.match(scheduler.targetContract, /atomic PostgreSQL lease/);
   assert.match(scheduler.cutoverBlocker, /Railway Cron cannot satisfy/);
   assert.match(scheduler.cutoverBlocker, /lease, fencing token/);
-  assert.match(scheduler.cutoverBlocker, /five-tick catch-up are implemented/);
-  assert.match(scheduler.cutoverBlocker, /always-on timer\/process composition/);
+  assert.match(
+    scheduler.cutoverBlocker,
+    /five-tick catch-up,[\s\S]*SIGINT\/SIGTERM process lifecycle are implemented/,
+  );
+  assert.match(scheduler.cutoverBlocker, /minute-aligned timer/);
+  assert.match(scheduler.cutoverBlocker, /active-run drain/);
+  assert.match(scheduler.cutoverBlocker, /SIGINT\/SIGTERM process lifecycle/);
+  assert.match(scheduler.cutoverBlocker, /composition with the PostgreSQL campaign runtime/);
   for (const path of [
     "shared/domain/workerScheduler.ts",
     "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
     "server/platform/railwayWorkerScheduler.ts",
+    "server/platform/railwayWorkerSchedulerService.ts",
+    "server/platform/railwayWorkerProcess.ts",
     "postgres/migrations/0014_worker_scheduler_lease.sql",
   ]) {
     assert.equal(scheduler.sourceFiles.includes(path), true);
