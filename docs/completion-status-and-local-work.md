@@ -612,9 +612,29 @@ Conversation, ‏Bot, ‏AI ו־AI usage בשאילתת PostgreSQL יחידה. �
 מסודרים ומספרים בטווח JavaScript בטוח. ארבע בדיקות שליליות/חיוביות עברו.
 
 2.33.3 ה־Foundation חושף כעת Port עסקי `reports` ומחבר 11 Adapters לאותו
-Pool. שש טבלאות המקור — Campaigns, Messages, Conversations, Bot deliveries,
-AI audit ו־AI usage — אינן עדיין בחמש ה־Migrations של PostgreSQL. לכן לא
-נרשמה ראיית Database אמיתי עבור הדוח, וה־Cutover נשאר חסום במפורש.
+Pool. ‏Conversations ו־Messages הומרו בסעיף 2.34; ארבע טבלאות המקור האחרות
+עדיין חסרות ולכן לא נרשמה עדיין ראיית Database מלאה עבור הדוח, וה־Cutover
+נשאר חסום במפורש.
+
+2.34 **הושלם מקומית:** PostgreSQL Conversations ו־Messages schema.
+
+2.34.1 Migration מספר `0005_conversations_messages.sql` ממיר את שתי טבלאות
+המקור הראשונות של הדוח עם Tenant/Contact foreign keys, זהויות Deterministic,
+מצבי Conversation/Message סגורים, התאמת Direction ל־Status, התאמת Content,
+ציר זמן במילישניות ו־Unique constraints לכל Tenant.
+
+2.34.2 נוספו Indexes ייעודיים ל־Tenant + activity time ול־Tenant + message
+time, כדי ששאילתת הדוח לא תיאלץ לסרוק Tenant אחר. ה־Migration guard מכסה כעת
+שש Migrations ו־14 טבלאות בסדר תלות קבוע.
+
+2.34.3 ה־Harness החוזר החיל את כל שש ה־Migrations על PostgreSQL 16.13 ריק,
+יצר Conversation ו־Message תקינים, קישר את ההודעה האחרונה וחסם Outbound
+Message במצב `received` עם Constraint violation. התוצאה הייתה
+`PASS (6 migrations, 2 concurrency scenarios)`. סביבת הבדיקה נעצרה ונמחקה.
+
+2.34.4 לדוח מלא עדיין חסרות ארבע טבלאות מקור: `campaigns`,
+`bot_reply_deliveries`, ‏`ai_runtime_audit_events` ו־`ai_runtime_usage`, יחד
+עם טבלאות התלות שלהן. אין לחבר את Route הדוחות לפני השלמתן.
 
 ## 3. עבודה שאינה מקומית בלבד
 

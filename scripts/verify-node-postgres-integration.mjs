@@ -33,6 +33,7 @@ const migrationFiles = Object.freeze([
   "0002_tenant_access_foundation.sql",
   "0003_tenant_membership_events.sql",
   "0004_team_invitation_lifecycle.sql",
+  "0005_conversations_messages.sql",
 ]);
 
 function fail(code) {
@@ -208,6 +209,138 @@ async function verifyContactLifecycle(
   assert.equal(persisted.rows[0]?.name, "Integration");
 }
 
+async function verifyConversationMessageSchema(pool, tenantId) {
+  const contact = await pool.query(
+    `SELECT id
+     FROM contacts
+     WHERE tenant_id = $1
+     ORDER BY id ASC
+     LIMIT 1`,
+    [tenantId],
+  );
+  const contactId = Number(contact.rows[0]?.id);
+  assert.equal(Number.isSafeInteger(contactId) && contactId > 0, true);
+
+  const conversationKey = `conversation_v1_${"a".repeat(64)}`;
+  const messageKey = `message_v1_${"b".repeat(64)}`;
+  const occurredAt = "2026-08-17T09:00:00.000Z";
+
+  await pool.query(
+    `INSERT INTO conversations (
+       conversation_key,
+       tenant_id,
+       contact_id,
+       status,
+       unread_count,
+       created_at,
+       updated_at
+     )
+     VALUES ($1, $2, $3, 'new', 1, $4::timestamptz, $4::timestamptz)`,
+    [conversationKey, tenantId, contactId, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO messages (
+       message_key,
+       conversation_key,
+       tenant_id,
+       provider_message_id,
+       direction,
+       content_kind,
+       status,
+       text_content,
+       occurred_at,
+       status_updated_at,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       'driver-integration-message-1',
+       'inbound',
+       'text',
+       'received',
+       'Integration message',
+       $4::timestamptz,
+       $4::timestamptz,
+       $4::timestamptz,
+       $4::timestamptz
+     )`,
+    [messageKey, conversationKey, tenantId, occurredAt],
+  );
+  await pool.query(
+    `UPDATE conversations
+     SET
+       last_message_key = $1,
+       last_message_at = $2::timestamptz,
+       updated_at = $2::timestamptz,
+       version = version + 1
+     WHERE tenant_id = $3
+       AND conversation_key = $4`,
+    [messageKey, occurredAt, tenantId, conversationKey],
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       conversation.status,
+       conversation.last_message_key,
+       message.direction,
+       message.status AS message_status
+     FROM conversations AS conversation
+     JOIN messages AS message
+       ON message.tenant_id = conversation.tenant_id
+      AND message.conversation_key = conversation.conversation_key
+     WHERE conversation.tenant_id = $1
+       AND conversation.conversation_key = $2`,
+    [tenantId, conversationKey],
+  );
+  assert.deepEqual(persisted.rows, [
+    {
+      status: "new",
+      last_message_key: messageKey,
+      direction: "inbound",
+      message_status: "received",
+    },
+  ]);
+
+  await assert.rejects(
+    pool.query(
+      `INSERT INTO messages (
+         message_key,
+         conversation_key,
+         tenant_id,
+         provider_message_id,
+         direction,
+         content_kind,
+         status,
+         text_content,
+         occurred_at,
+         status_updated_at
+       )
+       VALUES (
+         $1,
+         $2,
+         $3,
+         'driver-integration-message-invalid',
+         'outbound',
+         'text',
+         'received',
+         'Invalid state',
+         $4::timestamptz,
+         $4::timestamptz
+       )`,
+      [
+        `message_v1_${"c".repeat(64)}`,
+        conversationKey,
+        tenantId,
+        occurredAt,
+      ],
+    ),
+    (error) => error?.code === "23514",
+  );
+}
+
 async function prepareBlockedInvitation(
   invitationRepository,
   deliveryRepository,
@@ -362,6 +495,7 @@ export async function verifyNodePostgresIntegration(
         foundation.contacts,
         tenantId,
       );
+      await verifyConversationMessageSchema(pool, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
     } finally {
       await foundation.close();

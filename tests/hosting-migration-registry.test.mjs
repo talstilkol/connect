@@ -198,6 +198,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresContactReadRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
+    "postgres/migrations/0005_conversations_messages.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -211,7 +212,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /eleven-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\.list read/);
   assert.match(boundary.cutoverBlocker, /single-statement reports\.read adapter/);
-  assert.match(boundary.cutoverBlocker, /six operational-report source tables/);
+  assert.match(boundary.cutoverBlocker, /Conversations and messages are migrated/);
+  assert.match(boundary.cutoverBlocker, /other four operational-report source tables/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
@@ -246,6 +248,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0002_tenant_access_foundation.sql",
     "postgres/migrations/0003_tenant_membership_events.sql",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
+    "postgres/migrations/0005_conversations_messages.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -253,14 +256,14 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /five ordered/);
+  assert.match(database.cutoverBlocker, /six ordered/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
   assert.match(database.cutoverBlocker, /eleven-adapter foundation/);
   assert.match(database.cutoverBlocker, /contacts\.list/);
   assert.match(database.cutoverBlocker, /reports\.read/);
-  assert.match(database.cutoverBlocker, /six operational-report source tables/);
+  assert.match(database.cutoverBlocker, /other four operational-report source tables/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /remaining repository DML\/concurrency/);

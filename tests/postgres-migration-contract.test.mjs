@@ -24,6 +24,7 @@ const coreSchema = migrationSources[0];
 const accessSchema = migrationSources[2];
 const membershipEventSchema = migrationSources[3];
 const invitationSchema = migrationSources[4];
+const conversationSchema = migrationSources[5];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -32,14 +33,38 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0002_tenant_access_foundation.sql",
     "0003_tenant_membership_events.sql",
     "0004_team_invitation_lifecycle.sql",
+    "0005_conversations_messages.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 5,
+      migrationCount: 6,
       findings: [],
     },
+  );
+});
+
+test("defines tenant-scoped PostgreSQL conversations and messages", () => {
+  assert.match(
+    conversationSchema,
+    /CREATE TABLE conversations[\s\S]*CREATE TABLE messages/,
+  );
+  assert.match(
+    conversationSchema,
+    /conversations_contact_fk[\s\S]*FOREIGN KEY \(tenant_id, contact_id\)[\s\S]*REFERENCES contacts \(tenant_id, id\)/,
+  );
+  assert.match(
+    conversationSchema,
+    /conversations_last_message_pair_consistent[\s\S]*last_message_key IS NULL AND last_message_at IS NULL/,
+  );
+  assert.match(
+    conversationSchema,
+    /messages_direction_status_consistent[\s\S]*direction = 'inbound'[\s\S]*status = 'received'/,
+  );
+  assert.match(
+    conversationSchema,
+    /messages_tenant_occurred_idx[\s\S]*\(tenant_id, occurred_at\)/,
   );
 });
 

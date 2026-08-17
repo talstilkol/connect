@@ -290,7 +290,7 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 שלוש פעולות Read-only ו־`contacts.save` עם Transaction executor
 ספק־נייטרלי, Tenant access, ‏Team membership mutations וכל Invitation
-lifecycle repositories וחמש Migrations ל־Critical Path כבר קיימים מקומית.
+lifecycle repositories ושש Migrations ל־Critical Path כבר קיימים מקומית.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
 `node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation DML, ‏Rollback ושני
 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.
@@ -298,9 +298,10 @@ lifecycle repositories וחמש Migrations ל־Critical Path כבר קיימים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
 Foundation אחד מחבר 11 Adapters קיימים לאותו Pool בלי לחשוף אותו.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
-ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי, אך שש טבלאות
-המקור שלו טרם הומרו ל־PostgreSQL. ‏Railway API מלא נשאר חסום עד השלמת סכמת
-המקור והוכחתה במסד אמיתי, כדי לא ליצור Hybrid לא מתועד עם D1.
+ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations
+ו־Messages הומרו ונבדקו מול PostgreSQL אמיתי, אך ארבע טבלאות המקור האחרות
+טרם הומרו. ‏Railway API מלא נשאר חסום עד השלמת סכמת המקור והוכחתה במסד
+אמיתי, כדי לא ליצור Hybrid לא מתועד עם D1.
 
 ## 12. מקורות רשמיים שנבדקו
 
