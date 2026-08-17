@@ -50,8 +50,8 @@ Design מלא.
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
-| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, Drag-and-drop עם חלופת מקלדת לרצף ולאפשרויות, שתי שאלות Buttons עוקבות לפי ענף, ו־Canvas חי עם Summary סמנטי נגיש ל־Trigger, ענפים, Text, Buttons, Condition, Handoff ו־End | חיבורים חופשיים, רצפים שרירותיים של שאלות/Conditions ועריכת Graph מלאה |
-| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons מסיימת או שתי שאלות Buttons עוקבות, פיצול Condition ו־Handoff לפי Keyword או מכל ענף Condition נשמרים כ־Graph אמיתי; Handoff מעביר ללא Reply באותו Turn, ו־Intro נחסם כאשר ענף פנימי מעביר; המפתחות נגזרים בשרת וה־Runtime ממשיך מכל Buttons Block לפי ראיית Outbox Accepted תחומה | רצפים שרירותיים של Conditions/שאלות ובדיקות Browser E2E |
+| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, Drag-and-drop עם חלופת מקלדת לרצף ולאפשרויות, שתי שאלות Buttons עוקבות לפי ענף, Canvas נגיש, וחוזה Graph Draft כללי עם Compiler ו־Reader שאינם חושפים זהויות מתמידות | חיבור עורך ה־UI לחוזה הכללי, Canvas connections, עריכת Graph מלאה ו־Browser E2E |
+| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons מסיימת או שתי שאלות Buttons עוקבות, פיצול Condition ו־Handoff נשמרים כ־Graph אמיתי; Compiler כללי תומך ברצפים חופשיים ומרובי Conditions/שאלות וגוזר את כל המפתחות בשרת | עורך UI כללי ובדיקות Browser E2E |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
@@ -103,6 +103,13 @@ Accepted תחומה לכל שאלת Buttons. נותרו רצפים שרירות�
 מקוראי מסך ובמקומו מוצג עץ סמנטי המתאר את סדר הפעולות, שני הענפים
 ומצבי הסיום. נותרה עריכה חופשית של חיבורים ו־Nodes; גם בהמשך
 Drag-and-drop לא יהיה דרך הקלט היחידה.
+
+4.2.3.1 הושלמה תשתית ה־Graph Draft הכללית: הדפדפן שולח רק מפתחות Draft
+זמניים לצורך חיבור בין Nodes. השרת קובע סדר קנוני לפי הטופולוגיה,
+גוזר את כל מפתחות ה־Block וה־Option, ומאמת שאין Cycle, ‏Node מנותק,
+Reference חסר או זהות מתמידה שסופקה מהדפדפן. Reader הופך Graph קיים
+בחזרה ל־Draft דטרמיניסטי ללא חשיפת המפתחות השמורים. נותר לחבר את
+החוזה לעורך ה־UI ול־Canvas האינטראקטיבי.
 
 4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
 להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף

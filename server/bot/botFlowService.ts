@@ -26,6 +26,9 @@ import {
   compileKeywordSequenceBotFlowComposerDraft,
   compileKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
+import {
+  compileKeywordGraphBotFlowComposerDraft,
+} from "./botFlowGraphComposer.ts";
 
 const BOT_FLOW_LIST_LIMIT = 100;
 const BOT_FLOW_VERSION_LIST_LIMIT = 100;
@@ -156,6 +159,20 @@ async function parseSaveDraftRequest(
   tenantId: number,
   input: unknown,
 ): Promise<SaveDraftRequest> {
+  const graphComposerResult =
+    await compileKeywordGraphBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (graphComposerResult.success) {
+    return {
+      definition: graphComposerResult.definition,
+      expectedFlowVersion:
+        graphComposerResult.expectedFlowVersion,
+    };
+  }
+
   const handoffComposerResult =
     await compileKeywordHandoffBotFlowComposerDraft(
       tenantId,
@@ -257,8 +274,10 @@ async function parseSaveDraftRequest(
       ))
   ) {
     const preferredComposerFailure = [
+      graphComposerResult,
       handoffComposerResult,
       conditionComposerResult,
+      twoStepButtonMenuComposerResult,
       buttonMenuComposerResult,
       sequenceComposerResult,
       legacyComposerResult,

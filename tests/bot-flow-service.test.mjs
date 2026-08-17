@@ -638,6 +638,68 @@ test("accepts a keyword handoff that contains no reply block", async () => {
   );
 });
 
+test("accepts a free graph draft while deriving every persisted identity on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "ניתוב חופשי",
+      keywords: ["ניתוב"],
+      matchMode: "contains",
+      entryDraftNodeKey: "draft_node_v1_1",
+      nodes: [
+        {
+          draftNodeKey: "draft_node_v1_1",
+          type: "condition",
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "חיוב",
+          matchedDraftNodeKey:
+            "draft_node_v1_2",
+          unmatchedDraftNodeKey:
+            "draft_node_v1_4",
+        },
+        {
+          draftNodeKey: "draft_node_v1_2",
+          type: "text",
+          text: "הפנייה תועבר לבדיקת חיוב.",
+          nextDraftNodeKey: "draft_node_v1_3",
+        },
+        {
+          draftNodeKey: "draft_node_v1_3",
+          type: "end",
+        },
+        {
+          draftNodeKey: "draft_node_v1_4",
+          type: "handoff",
+          reason: "flow-rule",
+        },
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+
+  assert.equal(definition.blocks.length, 7);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.equal(
+    JSON.stringify(definition).includes(
+      "draft_node_v1_",
+    ),
+    false,
+  );
+});
+
 test("derives the next version from stored state without accepting a browser ordinal", async () => {
   const first = await definitionFixture(1);
   const second = await definitionFixture(2);

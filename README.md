@@ -95,8 +95,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1452/1452 בדיקות, 35 Migrations,
-   ‏441 קובצי Source, ‏33 Client dependency graphs, ‏857 קבצים
+31. Local Release Gate עובר עם 1460/1460 בדיקות, 35 Migrations,
+   ‏443 קובצי Source, ‏33 Client dependency graphs, ‏861 קבצים
    בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -735,6 +735,11 @@
          הם כרגע מבני מסלול בטוחים. רצפים שרירותיים של תנאים או שאלות,
          חיבורי Canvas ו־Drag-and-drop עדיין אינם מוצגים כעורך Graph
          מלא.
+   158.8 חוזה Graph Draft כללי מאפשר לייצג רצפים חופשיים של Text,
+         ‏Buttons, ‏Condition, ‏Handoff ו־End באמצעות References זמניים.
+         Compiler השרת מסדר את ה־Nodes לפי הטופולוגיה וגוזר את כל
+         מפתחות ה־Block וה־Option; Reader מחזיר Graph קיים לעריכה ללא
+         חשיפת הזהויות המתמידות. חיבור ה־UI לחוזה הזה עדיין נותר.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
    160. Inbound Webhook מפעיל Runtime לאחר אחסון ההודעה. Retry חוזר
@@ -744,7 +749,7 @@
         מבקש Retry באופן Fail-Closed.
    162. שלב 11 הושלם בקוד המקומי.
    163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
-        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,452 הבדיקות עוברים.
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,460 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
@@ -763,8 +768,8 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
-10. עריכת Graph מלאה ל־Bot: רצפים שרירותיים של Conditions או שאלות
-    וחיבורי Canvas עם Drag-and-drop. רצף Text, שאלת Buttons מסיימת,
+10. עריכת Graph מלאה ל־Bot: חיבור עורך ה־UI וה־Canvas לחוזה Graph Draft
+    הכללי, כולל Drag-and-drop ו־Browser E2E. רצף Text, שאלת Buttons מסיימת,
     שתי שאלות Buttons עוקבות, פיצול Condition יחיד ו־Handoff לפי
     Keyword או מתוך ענף Condition ניתנים לעריכה מלאה במקלדת, אך עדיין
     אינם משלימים לבדם את SPEC-18 או SPEC-19.
