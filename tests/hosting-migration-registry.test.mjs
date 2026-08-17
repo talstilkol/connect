@@ -172,16 +172,21 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.ok(boundary);
   assert.equal(boundary.decisionState, "selected");
   assert.equal(boundary.nextAction, "adapter-required");
-  assert.deepEqual(
-    boundary.sourceFiles.filter((path) =>
-      path.startsWith("server/platform/railwayApi"),
-    ),
-    [
-      "server/platform/railwayApiContract.ts",
-      "server/platform/railwayApiClient.ts",
-      "server/platform/railwayApiHttpHandler.ts",
-    ],
-  );
-  assert.match(boundary.cutoverBlocker, /live Vercel OIDC/);
+  const expectedBoundaryFiles = [
+    "server/platform/railwayApiContract.ts",
+    "server/platform/railwayApiClient.ts",
+    "server/platform/railwayApiHttpHandler.ts",
+    "server/platform/railwayApiIdentityConfiguration.ts",
+    "server/platform/railwayApiIdentityAdapters.ts",
+    "server/platform/vercelOidcVerifier.ts",
+    "server/platform/clerkEndUserSessionVerifier.ts",
+  ];
+
+  for (const path of expectedBoundaryFiles) {
+    assert.equal(boundary.sourceFiles.includes(path), true);
+  }
+
+  assert.match(boundary.cutoverBlocker, /cryptographic Vercel OIDC/);
+  assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });

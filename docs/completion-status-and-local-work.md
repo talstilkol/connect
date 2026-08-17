@@ -333,9 +333,23 @@ Tenant/User identity מתוך Payload.
 דטרמיניסטי מבוסס SHA-256. בקשה ותגובה מוגבלות בעומק, Nodes, שדות,
 מחרוזות ו־Bytes; שדות Secret/Identity ו־Prototype נדחים בכל עומק.
 
-2.18.3 המימוש עדיין אינו Endpoint חי. חסרים `jose`/JWKS Adapter,
-Clerk verifier, ‏Operation registry, ‏Routes מפוצלים, Accounts,
-Staging ו־Evidence. לכן היכולת נשארת `adapter-required`.
+2.18.3 המימוש עדיין אינו Endpoint חי. שכבות האימות שנוספו בסעיף
+2.19 משלימות את ה־Adapters המקומיים, אך Operation registry, ‏Routes
+מפוצלים, Accounts, ‏Staging ו־Evidence עדיין חסרים. לכן היכולת נשארת
+`adapter-required`.
+
+2.19 **הושלם מקומית:** Adapters קריפטוגרפיים לגבול Vercel/Railway.
+
+2.19.1 ‏Vercel OIDC מאומת באמצעות `jose` מול Remote JWKS קבוע,
+Issuer, ‏Audience ו־Subject מדויקים ל־Team, ‏Project ו־Environment.
+
+2.19.2 ‏Clerk מאמת רק `session_token` ורק מול `authorizedParties`
+הנגזרים מ־`APP_PUBLIC_ORIGIN`. ה־Adapter מחזיר רק External User ID;
+Tenant membership והרשאה נשארים אחריות ה־Operation ב־Railway.
+
+2.19.3 תצורה חסרה, חלקית או לא חוקית נכשלת לפני בניית Providers.
+ערכי Accounts האמיתיים נשארים `unknown/unavailable`, ולכן Routes,
+Operations, ‏Staging ו־Deployment evidence עדיין חסרים.
 
 ## 3. עבודה שאינה מקומית בלבד
 

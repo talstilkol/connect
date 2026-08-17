@@ -149,6 +149,14 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 
 5.1.2 כתובות Clerk הציבוריות.
 
+5.1.3 `APP_PUBLIC_ORIGIN`.
+
+5.1.4 `VERCEL_OIDC_TEAM_SLUG`.
+
+5.1.5 `VERCEL_OIDC_PROJECT_NAME`.
+
+5.1.6 `VERCEL_OIDC_ENVIRONMENT`.
+
 5.2 שמות Secret המחייבים אחסון שרתי, בעלים ו־Rotation:
 
 5.2.1 `CLERK_SECRET_KEY`.

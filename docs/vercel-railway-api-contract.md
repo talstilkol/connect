@@ -41,6 +41,11 @@ User proof חסר או שגוי
 `Authorization` ל־Clerk ומעביר את ה־OIDC ב־Header הייעודי שכבר משמש
 Vercel Functions. שני הערכים רגישים וחייבים Redaction מלא בלוגים.
 
+2.5 ‏Railway יוצר את שני ה־Verifiers מאותה תצורה Fail-closed. ה־OIDC
+נבדק מול JWKS קבוע של Vercel ו־`issuer`, ‏`audience` ו־`subject`
+מדויקים. Clerk מקבל רק `session_token` ורק מ־`APP_PUBLIC_ORIGIN`
+שאושר באמצעות `authorizedParties`.
+
 ## 3. חוזה הבקשה
 
 3.1 ה־Endpoint הקבוע הוא `/v1/connect`. ה־Client אינו רשאי לקבל Path,
@@ -140,13 +145,24 @@ Path, ‏Query או Fragment.
 7.1.5 בדיקות חיוביות ושליליות ל־Identity, ‏Environment, ‏Origin,
 Body limits, ‏Sensitive fields, ‏Timeout ו־Error mapping.
 
+7.1.6 ‏Vercel OIDC Adapter אמיתי עם `jose`, ‏Remote JWKS וולידציה
+של Issuer/Audience/Subject. כשל חתימה או Claims מחזיר Unauthenticated;
+כשל Network/JWKS מסווג כ־Dependency outage.
+
+7.1.7 ‏Clerk Adapter אמיתי עם `authenticateRequest`, ‏
+`acceptsToken: session_token` ו־`authorizedParties` קבועים. הוא מחזיר
+רק `externalUserId` ואינו מקבל Tenant או Permission מה־Token.
+
+7.1.8 ‏Environment contract נכשל סגור כאשר Origin, ‏Clerk keys,
+Team, ‏Project או Vercel Environment חסרים או אינם חוקיים.
+
 7.2 עדיין חסר:
 
-7.2.1 ‏Vercel OIDC Adapter אמיתי עם `jose`, ‏JWKS, ‏Issuer, ‏Audience
-ו־Subject מאושרים.
+7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
+בכל חשבון וסביבה, יחד עם Evidence שה־Claims בפועל תואמים לחוזה.
 
-7.2.2 ‏Clerk Adapter אמיתי עם `authenticateRequest`, ‏authorized
-parties ו־Session-token-only policy.
+7.2.2 ‏Clerk keys אמיתיים בכל סביבה והוכחת `authorizedParties` מול
+Production ו־Preview origins המאושרים.
 
 7.2.3 ‏Operation registry שמחבר Use cases אמיתיים ובודק Permission.
 
@@ -158,16 +174,34 @@ evidence.
 7.3 לכן `web.server-api-boundary` נשאר `adapter-required` ואינו
 `ready` ל־Cutover.
 
-## 8. מקורות רשמיים
+## 8. מפת תצורה
 
-8.1 [Vercel — Connect OIDC to your own API](https://vercel.com/docs/oidc/api).
+8.1 `APP_PUBLIC_ORIGIN` — Origin קנוני שמשמש גם Authorized Party.
 
-8.2 [Vercel — OIDC Federation](https://vercel.com/docs/oidc).
+8.2 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — מפתח Clerk הציבורי.
 
-8.3 [Clerk — authenticateRequest](https://clerk.com/docs/reference/backend/authenticate-request).
+8.3 `CLERK_SECRET_KEY` — Secret שרתי בלבד.
 
-8.4 [Clerk — Authenticated requests](https://clerk.com/docs/guides/development/making-requests).
+8.4 `VERCEL_OIDC_TEAM_SLUG` — Team המדויק מתוך Vercel.
 
-8.5 תאריך אימות: `2026-08-17`. ערכי Team, ‏Project, ‏Issuer,
+8.5 `VERCEL_OIDC_PROJECT_NAME` — Project המדויק מתוך Vercel.
+
+8.6 `VERCEL_OIDC_ENVIRONMENT` — אחד מ־`development`, ‏`preview` או
+`production` לפי ה־Environment שמורשה לפנות לשירות Railway המסוים.
+
+8.7 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
+חסר, חלקי או לא חוקי מונע יצירת Verifier.
+
+## 9. מקורות רשמיים
+
+9.1 [Vercel — Connect OIDC to your own API](https://vercel.com/docs/oidc/api).
+
+9.2 [Vercel — OIDC Federation](https://vercel.com/docs/oidc).
+
+9.3 [Clerk — authenticateRequest](https://clerk.com/docs/reference/backend/authenticate-request).
+
+9.4 [Clerk — Authenticated requests](https://clerk.com/docs/guides/development/making-requests).
+
+9.5 תאריך אימות: `2026-08-17`. ערכי Team, ‏Project, ‏Issuer,
 Audience, ‏authorized parties ו־Production origin נשארים
 `unknown/unavailable` עד אישור Accounts.
