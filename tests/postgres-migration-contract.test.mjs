@@ -22,20 +22,45 @@ const migrationSources = migrationFiles.map((fileName) =>
 );
 const coreSchema = migrationSources[0];
 const accessSchema = migrationSources[2];
+const membershipEventSchema = migrationSources[3];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
     "0000_core_contacts.sql",
     "0001_railway_api_mutation_receipts.sql",
     "0002_tenant_access_foundation.sql",
+    "0003_tenant_membership_events.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 3,
+      migrationCount: 4,
       findings: [],
     },
+  );
+});
+
+test("defines an immutable PostgreSQL membership event ledger", () => {
+  assert.match(
+    membershipEventSchema,
+    /CREATE TABLE tenant_membership_events[\s\S]*UNIQUE \(operation_key, target_external_user_id\)/,
+  );
+  assert.match(
+    membershipEventSchema,
+    /tenant_membership_events_shape_valid[\s\S]*owner-transfer-out[\s\S]*owner-transfer-in/,
+  );
+  assert.match(
+    membershipEventSchema,
+    /CREATE TRIGGER tenant_membership_events_update_delete_guard[\s\S]*BEFORE UPDATE OR DELETE/,
+  );
+  assert.match(
+    membershipEventSchema,
+    /CREATE TRIGGER tenant_membership_events_state_guard[\s\S]*BEFORE INSERT/,
+  );
+  assert.match(
+    membershipEventSchema,
+    /CREATE TRIGGER tenant_memberships_last_owner_update_guard[\s\S]*CREATE TRIGGER tenant_memberships_last_owner_delete_guard/,
   );
 });
 

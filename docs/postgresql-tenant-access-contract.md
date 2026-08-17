@@ -44,6 +44,13 @@ Clerk identity
 3.5 ‏`business_profiles` מקושרת ל־Tenant ומגבילה את שפת הממשק ל־`he`, ‏`en`
 או `ar`.
 
+3.6 ‏`tenant_membership_events` הוא Ledger בלתי־ניתן לשינוי. כל Event מכיל
+מפתח פעולה דטרמיניסטי, Actor, מצב קודם, מצב חדש ומעבר Version מדויק. ‏Unique
+constraint על `(operation_key, target_external_user_id)` מונע Event כפול.
+
+3.7 Triggers חוסמים Update/Delete של Event, מוודאים שהמצב החדש כבר נשמר
+ב־Membership ומונעים הסרה או השעיה של ה־Owner הפעיל האחרון.
+
 ## 4. חוזה Repository
 
 4.1 Membership reads משתמשים רק ב־Parameters, מחזירים לכל היותר 100 שורות
@@ -60,6 +67,14 @@ Membership חוקי הוא Rejected.
 DISTINCT FROM` מונע הגדלת Version כאשר הערכים לא השתנו, והתוצאה נטענת מחדש
 ומאומתת לפני Commit.
 
+4.5 שינוי Role או Status נועל תחילה את רשומת ה־Tenant ואחר כך את ה־Membership
+באמצעות `FOR UPDATE`. העדכון וה־Event נשמרים באותה Transaction; כשל באחד מהם
+מבטל את שניהם.
+
+4.6 העברת Owner נועלת את ה־Tenant ואת שני ה־Memberships בסדר קבוע, מקדמת
+קודם את ה־Owner החדש ורק אחר כך מורידה את הקודם. Retry מדויק מזוהה לפי שני
+ה־Events ומוחזר כ־`unchanged` ללא כתיבה נוספת.
+
 ## 5. מה נבדק מקומית
 
 5.1 נרמול ערכי `BIGINT` שמוחזרים כמחרוזת על ידי Driver עתידי.
@@ -71,14 +86,17 @@ DISTINCT FROM` מונע הגדלת Version כאשר הערכים לא השתנו
 5.4 Business profile create/update, no-op ואימות Rollback כאשר התוצאה שונה
 מהבקשה.
 
-5.5 Migration guard מאמת שלוש Migrations ושבע טבלאות Critical Path בסדר
+5.5 Migration guard מאמת ארבע Migrations ושמונה טבלאות Critical Path בסדר
 התלויות הנכון.
+
+5.6 Team mutation contract tests מכסים שינוי Role/Status, ‏Replay, העברת
+Owner אטומית, Conflict, בידוד Tenant ו־Rollback כאשר שמירת Event נכשלת.
 
 ## 6. מה עדיין חסר
 
 6.1 בחירת Node driver וכלי Migration.
 
-6.2 המרת Membership event ledger ופעולות Team mutation ל־PostgreSQL.
+6.2 המרת יתר פעולות Team, ובראשן Invitation lifecycle, ל־PostgreSQL.
 
 6.3 Integration tests מול PostgreSQL אמיתי, כולל שתי Transactions מקבילות.
 
@@ -98,3 +116,11 @@ constraint או Unique index מתאים.
 7.3 [PostgreSQL — INSERT ו־ON CONFLICT](https://www.postgresql.org/docs/current/sql-insert.html)
 מגדיר ש־`RETURNING` מחזיר רק שורות שנוספו או עודכנו בפועל וש־`ON CONFLICT`
 מספק Upsert אטומי.
+
+7.4 [PostgreSQL — Trigger behavior](https://www.postgresql.org/docs/current/trigger-definition.html)
+מגדיר ש־Trigger רץ בתוך אותה Transaction; שגיאה ב־Trigger מבטלת גם את
+הפקודה שהפעילה אותו.
+
+7.5 [PostgreSQL — Explicit locking](https://www.postgresql.org/docs/current/explicit-locking.html)
+מגדיר ש־`FOR UPDATE` מונע שינוי או נעילה מתחרים של אותה שורה עד לסיום
+ה־Transaction. נעילת Tenant יחידה מסדרת את פעולות ה־Membership באותו Workspace.

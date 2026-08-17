@@ -21,11 +21,11 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | מזהה | היום | יעד | הצעד הבא |
 | --- | --- | --- | --- |
 | `web.build-runtime` | Vinext + Cloudflare Vite/Sites | Vercel Web | החלפת Build/runtime |
-| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות, Mutation מאובטח, Tenant access repositories ו־Critical-path PostgreSQL schema הושלמו; נותרו Driver, Parity מלאה, יתר ה־Repositories/Mutations, Routes, Live configuration ו־Staging evidence |
+| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות, Mutation מאובטח, Tenant access ו־Team membership mutation repositories ו־Critical-path PostgreSQL schema הושלמו; נותרו Driver, Parity מלאה, יתר ה־Repositories/Mutations, Routes, Live configuration ו־Staging evidence |
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
-| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, Tenant access repositories ושלוש Migrations מסודרות ל־Critical Path קיימים; נותרו ספק, Driver, Parity מלאה מול 35 Migrations וראיות מול Database אמיתי |
+| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, Tenant access ו־Team membership mutation repositories וארבע Migrations מסודרות ל־Critical Path קיימים; נותרו ספק, Driver, Parity מלאה מול 35 Migrations וראיות מול Database אמיתי |
 | `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |

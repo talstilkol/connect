@@ -440,6 +440,25 @@ Transaction, משתמש ב־`IS DISTINCT FROM` ומאמת את הרשומה לפ
 2.24.5 החוזה מתועד ב־`docs/postgresql-tenant-access-contract.md`. עדיין אין
 Driver, ‏Database חי, Full schema parity או Concurrency evidence.
 
+2.25 **הושלם מקומית:** PostgreSQL Team membership mutation ledger.
+
+2.25.1 Migration רביעית מוסיפה `tenant_membership_events` עם מפתחות פעולה
+ו־Event דטרמיניסטיים, מעברי State/Version מוגבלים, Unique idempotency ו־Trigger
+שחוסם Update/Delete. ‏Trigger נוסף דורש שה־Event יתאים למצב שכבר נשמר ומונע
+הסרה של ה־Owner הפעיל האחרון.
+
+2.25.2 Repository ספק־נייטרלי מבצע שינוי Role/Status והעברת Owner בתוך
+`read-committed` Transaction. הוא נועל קודם את ה־Tenant, נועל את ה־Members,
+מעדכן State וכותב Event; כשל Event מבטל את כל הפעולה.
+
+2.25.3 Retry מדויק מוחזר כ־`unchanged`, ‏Expected version ישן מחזיר
+`conflict`, מעבר Owner שאינו חוקי נחסם ותוצאה חוצה Tenant או Row shape פגום
+נכשלות סגור.
+
+2.25.4 הבדיקות המקומיות משתמשות ב־Transaction adapter דטרמיניסטי ומוכיחות
+Commit/Rollback ברמת החוזה. עדיין חסרים Driver, ‏PostgreSQL חי ובדיקת שתי
+Transactions מקבילות; לכן אין טענה שהמסלול מוכן לפריסה.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

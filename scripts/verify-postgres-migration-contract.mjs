@@ -20,11 +20,13 @@ const requiredTableSequence = Object.freeze([
   "tenant_memberships",
   "tenant_selections",
   "business_profiles",
+  "tenant_membership_events",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
   "0001_railway_api_mutation_receipts.sql",
   "0002_tenant_access_foundation.sql",
+  "0003_tenant_membership_events.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

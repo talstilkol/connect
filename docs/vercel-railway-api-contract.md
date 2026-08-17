@@ -187,10 +187,11 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו שלוש Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו ארבע Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
-השלישית יוצרת Membership, ‏Selection ו־Business profile.
+השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
+Membership event ledger.
 ה־Executor וה־SQL נבדקים מקומית, אך אין עדיין Driver, ‏Schema parity מלאה,
 Migration שרץ מול Database אמיתי או Integration evidence.
 
@@ -199,6 +200,11 @@ Migration שרץ מול Database אמיתי או Integration evidence.
 Membership נכשלות סגור על תוצאה חוצה User/Tenant או על יותר מ־100 רשומות.
 החוזה המלא מתועד ב־
 [PostgreSQL Tenant Access](postgresql-tenant-access-contract.md).
+
+7.1.17 נוסף Team membership mutation repository ספק־נייטרלי. שינויי
+Role/Status והעברת Owner נועלים את ה־Tenant ואת הרשומות הרלוונטיות באמצעות
+`FOR UPDATE`, כותבים State ו־Event באותה Transaction ומזהים Retry לפי מפתחות
+SHA-256 דטרמיניסטיים. אין בכך הוכחת Concurrency מול PostgreSQL חי.
 
 7.2 עדיין חסר:
 

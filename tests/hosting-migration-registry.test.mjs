@@ -185,6 +185,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/railwayApiMutationExecutor.ts",
     "server/platform/postgresTransaction.ts",
     "server/platform/postgresTenantMembershipRepository.ts",
+    "server/platform/postgresTenantMembershipMutationRepository.ts",
     "server/platform/postgresTenantSelectionRepository.ts",
     "server/platform/postgresRailwayApiMutationExecutor.ts",
     "server/platform/railwayApiRuntime.ts",
@@ -217,11 +218,13 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresRailwayApiMutationExecutor.ts",
     "server/platform/postgresResultValidation.ts",
     "server/platform/postgresTenantMembershipRepository.ts",
+    "server/platform/postgresTenantMembershipMutationRepository.ts",
     "server/platform/postgresTenantSelectionRepository.ts",
     "server/platform/postgresBusinessProfileRepository.ts",
     "postgres/migrations/0000_core_contacts.sql",
     "postgres/migrations/0001_railway_api_mutation_receipts.sql",
     "postgres/migrations/0002_tenant_access_foundation.sql",
+    "postgres/migrations/0003_tenant_membership_events.sql",
     "scripts/verify-postgres-migration-contract.mjs",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
