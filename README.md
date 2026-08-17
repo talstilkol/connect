@@ -95,8 +95,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1469/1469 בדיקות, 35 Migrations,
-   ‏445 קובצי Source, ‏34 Client dependency graphs, ‏865 קבצים
+31. Local Release Gate עובר עם 1472/1472 בדיקות, 35 Migrations,
+   ‏445 קובצי Source, ‏34 Client dependency graphs, ‏868 קבצים
    בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -753,7 +753,7 @@
         מבקש Retry באופן Fail-Closed.
    162. שלב 11 הושלם בקוד המקומי.
    163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
-        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,469 הבדיקות עוברים.
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,472 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
@@ -772,12 +772,10 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
-10. השלמת Graph מלאה ל־Bot: Browser E2E. עורך ה־UI מחובר לחוזה Graph
-    Draft הכללי וכולל מפת Connections חזותית; רצף Text,
-    שאלת Buttons מסיימת,
-    שתי שאלות Buttons עוקבות, פיצול Condition יחיד ו־Handoff לפי
-    Keyword או מתוך ענף Condition ניתנים לעריכה מלאה במקלדת, אך עדיין
-    אינם משלימים לבדם את SPEC-18 או SPEC-19.
+10. בדיקת שמירה ופרסום של Bot Graph ב־Staging עם Clerk ו־D1 מורשים.
+    עורך ה־Graph המקומי, כל סוגי ה־Nodes, המקלדת, Drag-and-drop,
+    החיבורים, Focus וה־Preview עברו Browser E2E מקומי ב־Chromium;
+    לכן SPEC-18 ו־SPEC-19 הושלמו ברמת הקוד המקומי.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 
@@ -786,6 +784,7 @@
 ```bash
 npm install
 npm run dev
+npm run e2e:bot-flow-graph-browser
 ```
 
 ## בדיקות

@@ -50,8 +50,8 @@ Design מלא.
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
-| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, עורך Graph כללי ליצירה, חיבור, עריכה, מחיקה וסידור של כל סוגי ה־Nodes; Drag-and-drop כולל חלופת מקלדת, Canvas נגיש עם מפת Connections חזותית, ו־Compiler/Reader שאינם חושפים זהויות מתמידות | Browser E2E |
-| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | עורך ה־UI הכללי תומך ברצפים חופשיים ומרובי Text, ‏Buttons, ‏Conditions, ‏Handoff ו־End; Cycles ו־Nodes מנותקים חוסמים שמירה וכל המפתחות נגזרים בשרת | בדיקות Browser E2E |
+| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | local-complete | Flow domain, Versioning, Runtime, עורך Graph כללי ליצירה, חיבור, עריכה, מחיקה וסידור של כל סוגי ה־Nodes; Drag-and-drop כולל חלופת מקלדת, Canvas נגיש עם מפת Connections חזותית, Compiler/Reader שאינם חושפים זהויות מתמידות ו־Browser E2E מקומי ב־Chromium | בדיקת שמירה ופרסום ב־Staging עם Clerk ו־D1 מורשים |
+| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | local-complete | העורך הכללי תומך ברצפים חופשיים ומרובי Text, ‏Buttons, ‏Conditions, ‏Handoff ו־End; Cycles ו־Nodes מנותקים חוסמים שמירה, כל המפתחות נגזרים בשרת וכל סוגי ה־Nodes והחיבורים אומתו ב־Browser E2E מקומי | בדיקת End-to-End ב־Staging ומול WABA מורשה |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
@@ -96,13 +96,8 @@ Buttons מסיימת, שתי שאלות Buttons עוקבות שבהן כל בח�
 Intro באותו Turn; ה־UI מסיר אותו והשרת דוחה ניסיון לעקוף את הגבול.
 אפשר להגדיר תשובת Text נפרדת לכל ענף שאינו מעביר, והמנוע גוזר בשרת
 את כל מפתחות ה־Block וה־Option. המשך בחירת Button נשען רק על ראיית
-Accepted תחומה לכל שאלת Buttons. נותרו רצפים שרירותיים של Conditions
-או שאלות וחיבור Graph מלא. Drag-and-drop קיים לסידור רצף Text
-ואפשרויות Buttons, וסידור ענפי השאלה הראשונה נגיש באמצעות כפתורי
-מקלדת מקבילים. ה־Canvas החי חולץ לרכיב עצמאי; התרשים החזותי מוסתר
-מקוראי מסך ובמקומו מוצג עץ סמנטי המתאר את סדר הפעולות, שני הענפים
-ומצבי הסיום. נותרה עריכה חופשית של חיבורים ו־Nodes; גם בהמשך
-Drag-and-drop לא יהיה דרך הקלט היחידה.
+Accepted תחומה לכל שאלת Buttons. ה־Slices הייעודיים סיפקו את בסיס
+המקלדת וה־Preview לעורך ה־Graph הכללי המתועד בסעיף הבא.
 
 4.2.3.1 הושלם עורך ה־Graph הכללי מעל תשתית ה־Graph Draft: הדפדפן שולח
 רק מפתחות Draft
@@ -113,7 +108,9 @@ Reference חסר או זהות מתמידה שסופקה מהדפדפן. Reader 
 לערוך, למחוק, לסדר ולחבר את כל סוגי ה־Nodes באמצעות Selects נגישים,
 כפתורי מקלדת או Drag-and-drop לסדר הכרטיסים. ה־Preview מתאר כל Connection
 בעץ סמנטי ומציג עותק חזותי ומפת Connections עם חצים, המוסתרים מקוראי
-מסך כדי למנוע הקראה כפולה. נותר Browser E2E.
+מסך כדי למנוע הקראה כפולה. Browser E2E מקומי מרכיב את רכיבי ה־Production
+ב־Chromium ובודק את כל סוגי ה־Nodes, מקלדת, Drag-and-drop, חיבורים,
+מחיקה, Focus וה־Preview. נותרה בדיקת שמירה ופרסום ב־Staging מורשה.
 
 4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
 להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף

@@ -34,6 +34,7 @@
     "remove:team-invitation-browser-secret-files": "node scripts/remove-team-invitation-browser-secret-files.mjs",
     "preflight:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs --preflight",
     "e2e:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs",
+    "e2e:bot-flow-graph-browser": "node scripts/run-bot-flow-graph-browser-e2e.mjs",
     "evidence:team-invitation-browser": "node scripts/create-team-invitation-browser-evidence.mjs",
     "evidence:dependency-audit": "node scripts/create-dependency-audit-evidence.mjs",
     "evidence:github": "node scripts/create-github-evidence.mjs",
