@@ -208,8 +208,10 @@ Role/Status והעברת Owner נועלים את ה־Tenant ואת הרשומו�
 SHA-256 דטרמיניסטיים. אין בכך הוכחת Concurrency מול PostgreSQL חי.
 
 7.1.18 נוסף [חוזה PostgreSQL למחזור חיי הזמנת צוות](postgresql-team-invitation-contract.md).
-ה־Schema מאחד את State, ‏Event ledger, ‏Delivery outbox ו־Acceptance ledger,
-אך ה־Repositories ופעולות ה־API עבורו עדיין לא מומשו.
+ה־Schema מאחד את State, ‏Event ledger, ‏Delivery outbox ו־Acceptance ledger.
+Repositories ספק־נייטרליים מממשים Request, ‏Re-request, ‏Revoke, ‏Expiration
+וסריקת Keyset; כל משפטי ה־SQL שלהם עברו Parser מקומי של PostgreSQL. עדיין
+חסרים Delivery/Acceptance repositories, ‏Driver ופעולות API מחוברות.
 
 7.2 עדיין חסר:
 

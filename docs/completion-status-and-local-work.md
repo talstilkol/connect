@@ -475,9 +475,28 @@ Event ו־Acceptance ledgers בלתי־ניתנים לשינוי, Delivery recon
 Dependency. הראיה מתועדת ב־
 `docs/postgresql-team-invitation-contract.md`.
 
-2.26.4 עדיין חסרים Invitation repositories, ‏Node driver, ‏Runtime
-integration, בדיקות שתי Transactions מקבילות ו־Staging evidence; לכן אין
-טענה שמחזור החיים מוכן לפריסה.
+2.26.4 Repositories של Request/Transition/Expiration שנוספו לאחר ה־Schema
+מתועדים בסעיף 2.27. עדיין חסרים Node driver, ‏Runtime integration, בדיקות
+שתי Transactions מקבילות ו־Staging evidence; לכן אין טענה שמחזור החיים
+מוכן לפריסה.
+
+2.27 **הושלם מקומית:** PostgreSQL Invitation request ו־expiration repositories.
+
+2.27.1 Repository ספק־נייטרלי נועל Tenant ואז Invitation, מסווג Replay,
+Conflict ו־Invalid transition, ושומר Request/Re-request או Revoke/Expiration
+יחד עם Event immutable ו־Delivery outbox באותה `read-committed` Transaction.
+
+2.27.2 Expiration repository נפרד מחזיר לכל היותר 50 הזמנות בסדר
+`expiresAt + invitationKey`, משתמש ב־Cursor בלעדי ואינו מחזיר הזמנה שהתקבלה
+או הזמנה אחרי Cutoff.
+
+2.27.3 שבע בדיקות חוזה מוכיחות את מחזור החיים, Rollback, גבולות תוצאה
+ו־Keyset pagination. כל 13 משפטי ה־SQL עברו `PREPARE` על PostgreSQL 16.13
+מקומי לאחר החלת חמש ה־Migrations.
+
+2.27.4 עדיין חסרים Delivery ו־Acceptance repositories, ‏Driver, ‏DML
+integration מול PostgreSQL אמיתי ובדיקות Concurrency; לכן המימוש אינו מחובר
+ל־Runtime ואינו מוכן לפריסה.
 
 ## 3. עבודה שאינה מקומית בלבד
 

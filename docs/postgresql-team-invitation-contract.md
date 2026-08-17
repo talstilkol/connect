@@ -9,7 +9,10 @@
 טבלאות ו־16 Triggers מפורשים. היא הוחלה כחלק משרשרת של חמש Migrations על
 PostgreSQL 16.13 מקומי ומבודד.
 
-1.3 זוהי הוכחת Schema ו־Dependency אמיתית. היא אינה הוכחת Driver, ‏Runtime,
+1.3 Repositories ספק־נייטרליים קיימים עבור Find, ‏Request, ‏Re-request,
+Revoke, ‏Expiration transition וסריקת Expiration מדורגת.
+
+1.4 זוהי הוכחת Schema ו־Dependency אמיתית. היא אינה הוכחת Driver, ‏Runtime,
 שתי Transactions מקבילות, Staging או Production.
 
 ## 2. הסבר למתחילים
@@ -86,21 +89,24 @@ expiration actor.
 
 5.4 סביבת הבדיקה נמחקה לאחר הבדיקה ולא הכילה Seed או נתוני מוצר מדומים.
 
+5.5 שבע בדיקות Repository מכסות יצירה, Replay, ‏Revoke, ‏Re-request,
+Expiration מערכתי, ‏Conflict, ‏Acceptance, ‏Delivery פעיל, ‏Rollback ו־Keyset
+pagination. כל 13 משפטי ה־SQL עברו `PREPARE` על PostgreSQL 16.13 לאחר החלת
+ה־Schema.
+
 ## 6. מה עדיין חסר
 
-6.1 Repository עבור Request, ‏Revoke, ‏Re-request ו־Expiration.
-
-6.2 Repository עבור Delivery claim, ‏Submit, ‏Ambiguous reconciliation,
+6.1 Repository עבור Delivery claim, ‏Submit, ‏Ambiguous reconciliation,
 Block ו־Cancel.
 
-6.3 Repository אטומי עבור Acceptance ויצירת Membership.
+6.2 Repository אטומי עבור Acceptance ויצירת Membership.
 
-6.4 Node driver וכלי Migration מאושרים, חיבור Runtime ו־API operations.
+6.3 Node driver וכלי Migration מאושרים, חיבור Runtime ו־API operations.
 
-6.5 בדיקות Integration מול PostgreSQL אמיתי עם תרחישי הצלחה וכשל, ושתי
+6.4 בדיקות Integration של DML מול PostgreSQL אמיתי עם תרחישי הצלחה וכשל, ושתי
 Transactions מקבילות עבור אותו אימייל, Operation key ו־Delivery claim.
 
-6.6 Staging migration evidence, ‏Backup/Restore rehearsal ו־Load test.
+6.5 Staging migration evidence, ‏Backup/Restore rehearsal ו־Load test.
 
 ## 7. תנאי קבלה לשלב הבא
 
