@@ -23,6 +23,8 @@ export function BotFlowButtonMenuEditor({
   onRemoveOption,
   onAddOption,
   onRemoveMenu,
+  removeLabel = "הסרת שאלת הכפתורים",
+  removeDisabled = false,
 }: {
   draft: BotFlowButtonMenuEditorDraft;
   disabled: boolean;
@@ -45,6 +47,8 @@ export function BotFlowButtonMenuEditor({
   onRemoveOption(draftOptionKey: string): void;
   onAddOption(): void;
   onRemoveMenu(): void;
+  removeLabel?: string;
+  removeDisabled?: boolean;
 }) {
   const fieldsetRef =
     useRef<HTMLFieldSetElement>(null);
@@ -108,7 +112,7 @@ export function BotFlowButtonMenuEditor({
           onChange={(event) =>
             onButtonTextChange(event.target.value)
           }
-          disabled={disabled}
+          disabled={disabled || removeDisabled}
           maxLength={4096}
           aria-describedby="bot-flow-button-menu-help"
           required
@@ -310,7 +314,7 @@ export function BotFlowButtonMenuEditor({
           onClick={onRemoveMenu}
           disabled={disabled}
         >
-          הסרת שאלת הכפתורים
+          {removeLabel}
         </button>
       </div>
     </fieldset>

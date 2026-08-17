@@ -11,12 +11,14 @@ import type {
   SaveKeywordConditionBotFlowComposerDraftInput,
   SaveKeywordHandoffBotFlowComposerDraftInput,
   SaveKeywordSequenceBotFlowComposerDraftInput,
+  SaveKeywordTwoStepButtonMenuBotFlowComposerDraftInput,
 } from "../../shared/domain/botFlowComposer.ts";
 import {
   KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT,
   KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
   KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT,
   KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
+  KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT,
   keywordHandoffReasons,
 } from "../../shared/domain/botFlowComposer.ts";
 import type {
@@ -117,6 +119,23 @@ function isButtonMenuComposerInput(
     "introTexts",
     "buttonText",
     "options",
+    "expectedFlowVersion",
+  ]);
+}
+
+function isTwoStepButtonMenuComposerInput(
+  input: Record<string, unknown>,
+): input is Record<
+  keyof SaveKeywordTwoStepButtonMenuBotFlowComposerDraftInput,
+  unknown
+> {
+  return hasExactKeys(input, [
+    "name",
+    "keywords",
+    "matchMode",
+    "introTexts",
+    "firstButtonText",
+    "branches",
     "expectedFlowVersion",
   ]);
 }
@@ -257,6 +276,64 @@ function parseButtonMenuOptions(
   }
 
   return options;
+}
+
+function parseTwoStepButtonBranches(
+  value: unknown,
+): readonly {
+  label: unknown;
+  buttonText: unknown;
+  options: readonly Record<
+    "label" | "replyText",
+    unknown
+  >[];
+}[] | null {
+  if (
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    value.length >
+      KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT
+  ) {
+    return null;
+  }
+
+  const branches: {
+    label: unknown;
+    buttonText: unknown;
+    options: readonly Record<
+      "label" | "replyText",
+      unknown
+    >[];
+  }[] = [];
+
+  for (const candidate of value) {
+    if (
+      !isRecord(candidate) ||
+      !hasExactKeys(candidate, [
+        "label",
+        "buttonText",
+        "options",
+      ])
+    ) {
+      return null;
+    }
+
+    const options = parseButtonMenuOptions(
+      candidate.options,
+    );
+
+    if (!options) {
+      return null;
+    }
+
+    branches.push({
+      label: candidate.label,
+      buttonText: candidate.buttonText,
+      options,
+    });
+  }
+
+  return branches;
 }
 
 async function compileKeywordSequence(
@@ -488,6 +565,221 @@ async function compileKeywordButtonMenu(
         text: option.replyText,
         nextBlockKey: endKey,
       })),
+      {
+        blockKey: endKey,
+        type: "end",
+      },
+      {
+        blockKey: handoffKey,
+        type: "handoff",
+        reason: "no-match",
+      },
+    ],
+  };
+  const validation =
+    validateBotFlowDefinition(definition);
+
+  if (!validation.success) {
+    return validation;
+  }
+
+  return {
+    success: true,
+    definition: validation.value,
+    expectedFlowVersion:
+      input.expectedFlowVersion,
+  };
+}
+
+async function compileKeywordTwoStepButtonMenu(
+  tenantId: number,
+  input: Record<
+    keyof SaveKeywordTwoStepButtonMenuBotFlowComposerDraftInput,
+    unknown
+  >,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  const branches = parseTwoStepButtonBranches(
+    input.branches,
+  );
+  const nestedOptionCount =
+    branches?.reduce(
+      (count, branch) =>
+        count + branch.options.length,
+      0,
+    ) ?? 0;
+
+  if (
+    !isExpectedFlowVersion(
+      input.expectedFlowVersion,
+    ) ||
+    !Array.isArray(input.introTexts) ||
+    input.introTexts.length === 0 ||
+    !branches ||
+    input.introTexts.length +
+      branches.length +
+      nestedOptionCount >
+      KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  const name = normalizeBotFlowName(input.name);
+
+  if (!name) {
+    return {
+      success: false,
+      issues: ["invalid-name"],
+    };
+  }
+
+  const botFlowKey = await deriveBotFlowKey(
+    tenantId,
+    name,
+  );
+  const blockKeys = await Promise.all(
+    Array.from(
+      {
+        length:
+          input.introTexts.length +
+          branches.length +
+          nestedOptionCount +
+          5,
+      },
+      (_, index) =>
+        deriveBotFlowBlockKey(
+          botFlowKey,
+          index + 1,
+        ),
+    ),
+  );
+  const triggerKey = blockKeys[0];
+  const keywordKey = blockKeys[1];
+  const introKeys = blockKeys.slice(
+    2,
+    2 + input.introTexts.length,
+  );
+  const firstButtonKey =
+    blockKeys[2 + input.introTexts.length];
+  let nextBlockOrdinal =
+    3 + input.introTexts.length;
+  const branchLayouts = branches.map(
+    (branch) => {
+      const buttonKey =
+        blockKeys[nextBlockOrdinal];
+      nextBlockOrdinal += 1;
+      const responseKeys = blockKeys.slice(
+        nextBlockOrdinal,
+        nextBlockOrdinal +
+          branch.options.length,
+      );
+      nextBlockOrdinal +=
+        branch.options.length;
+
+      return {
+        branch,
+        buttonKey,
+        responseKeys,
+      };
+    },
+  );
+  const endKey = blockKeys[nextBlockOrdinal];
+  const handoffKey =
+    blockKeys[nextBlockOrdinal + 1];
+  const firstOptionKeys = await Promise.all(
+    branches.map((_, index) =>
+      deriveBotFlowOptionKey(
+        firstButtonKey,
+        index + 1,
+      ),
+    ),
+  );
+  const followupOptionKeys =
+    await Promise.all(
+      branchLayouts.map((layout) =>
+        Promise.all(
+          layout.branch.options.map(
+            (_, index) =>
+              deriveBotFlowOptionKey(
+                layout.buttonKey,
+                index + 1,
+              ),
+          ),
+        ),
+      ),
+    );
+  const definition = {
+    name,
+    entryBlockKey: triggerKey,
+    blocks: [
+      {
+        blockKey: triggerKey,
+        type: "trigger",
+        nextBlockKey: keywordKey,
+      },
+      {
+        blockKey: keywordKey,
+        type: "keyword",
+        keywords: input.keywords,
+        matchMode: input.matchMode,
+        matchedBlockKey: introKeys[0],
+        unmatchedBlockKey: handoffKey,
+      },
+      ...input.introTexts.map((text, index) => ({
+        blockKey: introKeys[index],
+        type: "text",
+        text,
+        nextBlockKey:
+          introKeys[index + 1] ??
+          firstButtonKey,
+      })),
+      {
+        blockKey: firstButtonKey,
+        type: "buttons",
+        text: input.firstButtonText,
+        options: branchLayouts.map(
+          (layout, index) => ({
+            optionKey: firstOptionKeys[index],
+            label: layout.branch.label,
+            nextBlockKey: layout.buttonKey,
+          }),
+        ),
+      },
+      ...branchLayouts.flatMap(
+        (layout, branchIndex) => [
+          {
+            blockKey: layout.buttonKey,
+            type: "buttons" as const,
+            text: layout.branch.buttonText,
+            options: layout.branch.options.map(
+              (option, optionIndex) => ({
+                optionKey:
+                  followupOptionKeys[
+                    branchIndex
+                  ][optionIndex],
+                label: option.label,
+                nextBlockKey:
+                  layout.responseKeys[
+                    optionIndex
+                  ],
+              }),
+            ),
+          },
+          ...layout.branch.options.map(
+            (option, optionIndex) => ({
+              blockKey:
+                layout.responseKeys[
+                  optionIndex
+                ],
+              type: "text" as const,
+              text: option.replyText,
+              nextBlockKey: endKey,
+            }),
+          ),
+        ],
+      ),
       {
         blockKey: endKey,
         type: "end",
@@ -834,6 +1126,26 @@ export async function compileKeywordButtonMenuBotFlowComposerDraft(
   }
 
   return compileKeywordButtonMenu(tenantId, input);
+}
+
+export async function compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
+  tenantId: number,
+  input: unknown,
+): Promise<CompileKeywordBotFlowComposerResult> {
+  if (
+    !isRecord(input) ||
+    !isTwoStepButtonMenuComposerInput(input)
+  ) {
+    return {
+      success: false,
+      issues: ["invalid-input"],
+    };
+  }
+
+  return compileKeywordTwoStepButtonMenu(
+    tenantId,
+    input,
+  );
 }
 
 export async function compileKeywordSequenceBotFlowComposerDraft(

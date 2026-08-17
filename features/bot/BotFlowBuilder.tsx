@@ -18,10 +18,12 @@ import {
   KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT,
   KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT,
   KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT,
+  KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT,
   readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordConditionBotFlowComposerDraft,
   readKeywordHandoffBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
+  readKeywordTwoStepButtonMenuBotFlowComposerDraft,
   type KeywordConditionDraft,
   type KeywordHandoffReason,
 } from "../../shared/domain/botFlowComposer";
@@ -48,6 +50,11 @@ import {
   updateBotFlowReplyStep,
   type BotFlowReplyStepMoveDirection,
 } from "../../shared/domain/botFlowSequenceEditor";
+import {
+  createBotFlowTwoStepButtonMenuDraft,
+  readBotFlowTwoStepButtonBranches,
+  type BotFlowTwoStepButtonMenuEditorDraft,
+} from "../../shared/domain/botFlowTwoStepButtonMenuEditor";
 import type {
   BotFlowDetailsView,
   BotFlowDirectoryStatus,
@@ -77,6 +84,9 @@ import {
 import {
   BotFlowReplySequenceEditor,
 } from "./BotFlowReplySequenceEditor";
+import {
+  BotFlowTwoStepButtonMenuEditor,
+} from "./BotFlowTwoStepButtonMenuEditor";
 
 const directoryStatusMessages: Record<
   Exclude<BotFlowDirectoryStatus, "ready">,
@@ -188,6 +198,7 @@ function readEditableComposerDraft(
       matchMode: handoff.matchMode,
       replyTexts: [],
       buttonMenu: null,
+      twoStepButtonMenu: null,
       condition: null,
       handoffReason: handoff.handoffReason,
     };
@@ -206,7 +217,27 @@ function readEditableComposerDraft(
       matchMode: condition.matchMode,
       replyTexts: condition.introTexts,
       buttonMenu: null,
+      twoStepButtonMenu: null,
       condition: condition.condition,
+      handoffReason: null,
+    };
+  }
+
+  const twoStepButtonMenu =
+    readKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      definition,
+    );
+
+  if (twoStepButtonMenu) {
+    return {
+      kind: "two-step-button-menu" as const,
+      name: twoStepButtonMenu.name,
+      keywords: twoStepButtonMenu.keywords,
+      matchMode: twoStepButtonMenu.matchMode,
+      replyTexts: twoStepButtonMenu.introTexts,
+      buttonMenu: null,
+      twoStepButtonMenu,
+      condition: null,
       handoffReason: null,
     };
   }
@@ -224,6 +255,7 @@ function readEditableComposerDraft(
       matchMode: buttonMenu.matchMode,
       replyTexts: buttonMenu.introTexts,
       buttonMenu,
+      twoStepButtonMenu: null,
       condition: null,
       handoffReason: null,
     };
@@ -239,6 +271,7 @@ function readEditableComposerDraft(
         kind: "sequence" as const,
         ...sequence,
         buttonMenu: null,
+        twoStepButtonMenu: null,
         condition: null,
         handoffReason: null,
       }
@@ -298,6 +331,18 @@ export function BotFlowBuilder({
           )
         : null,
     );
+  const [twoStepButtonMenu, setTwoStepButtonMenu] =
+    useState<BotFlowTwoStepButtonMenuEditorDraft | null>(
+      initialComposerDraft?.kind ===
+      "two-step-button-menu"
+        ? createBotFlowTwoStepButtonMenuDraft(
+            initialComposerDraft.twoStepButtonMenu
+              .firstButtonText,
+            initialComposerDraft.twoStepButtonMenu
+              .branches,
+          )
+        : null,
+    );
   const [condition, setCondition] =
     useState<KeywordConditionDraft | null>(
       initialComposerDraft?.kind === "condition"
@@ -314,17 +359,23 @@ export function BotFlowBuilder({
     useState(false);
   const [focusConditionOnMount, setFocusConditionOnMount] =
     useState(false);
+  const [focusTwoStepOnMount, setFocusTwoStepOnMount] =
+    useState(false);
   const [focusHandoffOnMount, setFocusHandoffOnMount] =
     useState(false);
   const addButtonMenuButtonRef =
     useRef<HTMLButtonElement>(null);
   const addConditionButtonRef =
     useRef<HTMLButtonElement>(null);
+  const addTwoStepButtonRef =
+    useRef<HTMLButtonElement>(null);
   const addHandoffButtonRef =
     useRef<HTMLButtonElement>(null);
   const focusAddButtonAfterRemovalRef =
     useRef(false);
   const focusAddConditionAfterRemovalRef =
+    useRef(false);
+  const focusAddTwoStepAfterRemovalRef =
     useRef(false);
   const focusAddHandoffAfterRemovalRef =
     useRef(false);
@@ -363,9 +414,24 @@ export function BotFlowBuilder({
   const buttonOptions = buttonMenu
     ? readBotFlowButtonOptions(buttonMenu)
     : [];
+  const twoStepButtonBranches = twoStepButtonMenu
+    ? readBotFlowTwoStepButtonBranches(
+        twoStepButtonMenu,
+      )
+    : [];
+  const twoStepNestedOptionCount =
+    twoStepButtonBranches.reduce(
+      (count, branch) =>
+        count + branch.options.length,
+      0,
+    );
   const maximumReplyStepCount = conditionHasHandoff
     ? 0
-    : buttonMenu
+    : twoStepButtonMenu
+      ? KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
+        twoStepButtonBranches.length -
+        twoStepNestedOptionCount
+      : buttonMenu
       ? KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
         buttonMenu.options.length
       : condition
@@ -383,6 +449,20 @@ export function BotFlowBuilder({
         (option) =>
           option.label.trim().length > 0 &&
           option.replyText.trim().length > 0,
+      ));
+  const twoStepButtonMenuComplete =
+    twoStepButtonMenu === null ||
+    (twoStepButtonMenu.firstButtonText.trim()
+      .length > 0 &&
+      twoStepButtonBranches.every(
+        (branch) =>
+          branch.label.trim().length > 0 &&
+          branch.buttonText.trim().length > 0 &&
+          branch.options.every(
+            (option) =>
+              option.label.trim().length > 0 &&
+              option.replyText.trim().length > 0,
+          ),
       ));
   const conditionComplete =
     condition === null ||
@@ -411,6 +491,7 @@ export function BotFlowBuilder({
             replyText.trim().length > 0,
         )) &&
     buttonMenuComplete &&
+    twoStepButtonMenuComplete &&
     conditionComplete &&
     !isSaving &&
     !isPublishing;
@@ -444,6 +525,18 @@ export function BotFlowBuilder({
     focusAddConditionAfterRemovalRef.current = false;
     addConditionButtonRef.current?.focus();
   }, [condition]);
+
+  useEffect(() => {
+    if (
+      twoStepButtonMenu !== null ||
+      !focusAddTwoStepAfterRemovalRef.current
+    ) {
+      return;
+    }
+
+    focusAddTwoStepAfterRemovalRef.current = false;
+    addTwoStepButtonRef.current?.focus();
+  }, [twoStepButtonMenu]);
 
   useEffect(() => {
     if (
@@ -496,6 +589,15 @@ export function BotFlowBuilder({
           )
         : null,
     );
+    setTwoStepButtonMenu(
+      draft?.kind === "two-step-button-menu"
+        ? createBotFlowTwoStepButtonMenuDraft(
+            draft.twoStepButtonMenu
+              .firstButtonText,
+            draft.twoStepButtonMenu.branches,
+          )
+        : null,
+    );
     setCondition(
       draft?.kind === "condition"
         ? draft.condition
@@ -508,6 +610,7 @@ export function BotFlowBuilder({
     );
     setFocusButtonMenuOnMount(false);
     setFocusConditionOnMount(false);
+    setFocusTwoStepOnMount(false);
     setFocusHandoffOnMount(false);
     setUnsupportedDefinition(!draft);
     setDirty(false);
@@ -521,10 +624,12 @@ export function BotFlowBuilder({
     setMatchMode("exact");
     setReplySteps(createBotFlowReplySteps([]));
     setButtonMenu(null);
+    setTwoStepButtonMenu(null);
     setCondition(null);
     setHandoffReason(null);
     setFocusButtonMenuOnMount(false);
     setFocusConditionOnMount(false);
+    setFocusTwoStepOnMount(false);
     setFocusHandoffOnMount(false);
     setUnsupportedDefinition(false);
     setDirty(false);
@@ -638,6 +743,7 @@ export function BotFlowBuilder({
   const addButtonMenu = () => {
     if (
       condition !== null ||
+      twoStepButtonMenu !== null ||
       handoffReason !== null ||
       replySteps.length + 1 >
       KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
@@ -797,9 +903,52 @@ export function BotFlowBuilder({
     );
   };
 
+  const addTwoStepButtonMenu = () => {
+    if (
+      buttonMenu !== null ||
+      condition !== null ||
+      handoffReason !== null ||
+      replySteps.length + 2 >
+        KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+    ) {
+      return;
+    }
+
+    setTwoStepButtonMenu(
+      createBotFlowTwoStepButtonMenuDraft(
+        "",
+        [],
+      ),
+    );
+    setFocusTwoStepOnMount(true);
+    markChanged();
+    setEditorAnnouncement(
+      "נוספו שתי שאלות Buttons עוקבות עם ענף ראשון.",
+    );
+  };
+
+  const changeTwoStepButtonMenu = (
+    nextDraft:
+      BotFlowTwoStepButtonMenuEditorDraft,
+  ) => {
+    setTwoStepButtonMenu(nextDraft);
+    markChanged();
+  };
+
+  const removeTwoStepButtonMenu = () => {
+    focusAddTwoStepAfterRemovalRef.current = true;
+    setFocusTwoStepOnMount(false);
+    setTwoStepButtonMenu(null);
+    markChanged();
+    setEditorAnnouncement(
+      "שתי שאלות ה־Buttons וכל ענפיהן הוסרו מהטיוטה.",
+    );
+  };
+
   const addCondition = () => {
     if (
       buttonMenu !== null ||
+      twoStepButtonMenu !== null ||
       handoffReason !== null ||
       replySteps.length >
         KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
@@ -950,6 +1099,7 @@ export function BotFlowBuilder({
   const addHandoff = () => {
     if (
       buttonMenu !== null ||
+      twoStepButtonMenu !== null ||
       condition !== null
     ) {
       return;
@@ -1051,6 +1201,18 @@ export function BotFlowBuilder({
               expectedFlowVersion:
                 details?.flow.version ?? null,
             }
+          : twoStepButtonMenu
+            ? {
+                name,
+                keywords,
+                matchMode,
+                introTexts: replyTexts,
+                firstButtonText:
+                  twoStepButtonMenu.firstButtonText,
+                branches: twoStepButtonBranches,
+                expectedFlowVersion:
+                  details?.flow.version ?? null,
+              }
           : buttonMenu
             ? {
                 name,
@@ -1403,7 +1565,19 @@ export function BotFlowBuilder({
                     onAdd={addReplyStep}
                   />
 
-                  {buttonMenu ? (
+                  {twoStepButtonMenu ? (
+                    <BotFlowTwoStepButtonMenuEditor
+                      draft={twoStepButtonMenu}
+                      disabled={!canWrite}
+                      focusOnMount={focusTwoStepOnMount}
+                      maximumBranchBlockCount={
+                        KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT -
+                        replySteps.length
+                      }
+                      onChange={changeTwoStepButtonMenu}
+                      onRemove={removeTwoStepButtonMenu}
+                    />
+                  ) : buttonMenu ? (
                     <BotFlowButtonMenuEditor
                       draft={buttonMenu}
                       disabled={!canWrite}
@@ -1509,6 +1683,19 @@ export function BotFlowBuilder({
                         הוספת פיצול לפי תנאי
                       </button>
                       <button
+                        ref={addTwoStepButtonRef}
+                        type="button"
+                        className="secondary-button bot-flow-add-two-step"
+                        onClick={addTwoStepButtonMenu}
+                        disabled={
+                          !canWrite ||
+                          replySteps.length + 2 >
+                            KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
+                        }
+                      >
+                        הוספת שתי שאלות עוקבות
+                      </button>
+                      <button
                         ref={addHandoffButtonRef}
                         type="button"
                         className="secondary-button bot-flow-add-handoff"
@@ -1575,6 +1762,7 @@ export function BotFlowBuilder({
           matchMode={matchMode}
           replySteps={replySteps}
           buttonMenu={buttonMenu}
+          twoStepButtonMenu={twoStepButtonMenu}
           condition={condition}
           handoffReason={handoffReason}
         />

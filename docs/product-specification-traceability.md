@@ -50,8 +50,8 @@ Design מלא.
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
-| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, Drag-and-drop עם חלופת מקלדת לרצף ולאפשרויות, ו־Canvas חי עם Summary סמנטי נגיש ל־Trigger, ענפים, Text, Buttons, Condition, Handoff ו־End | חיבורים חופשיים, מסלולים מרובי שאלות/Conditions ועריכת Graph מלאה |
-| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons, פיצול Condition ו־Handoff לפי Keyword או מכל ענף Condition נשמרים כ־Graph אמיתי; Handoff מעביר ללא Reply באותו Turn, ו־Intro נחסם כאשר ענף פנימי מעביר; המפתחות נגזרים בשרת וה־Runtime ממשיך מראיית Outbox Accepted תחומה | מסלולים מרובי Conditions/שאלות ובדיקות Browser E2E |
+| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, Drag-and-drop עם חלופת מקלדת לרצף ולאפשרויות, שתי שאלות Buttons עוקבות לפי ענף, ו־Canvas חי עם Summary סמנטי נגיש ל־Trigger, ענפים, Text, Buttons, Condition, Handoff ו־End | חיבורים חופשיים, רצפים שרירותיים של שאלות/Conditions ועריכת Graph מלאה |
+| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons מסיימת או שתי שאלות Buttons עוקבות, פיצול Condition ו־Handoff לפי Keyword או מכל ענף Condition נשמרים כ־Graph אמיתי; Handoff מעביר ללא Reply באותו Turn, ו־Intro נחסם כאשר ענף פנימי מעביר; המפתחות נגזרים בשרת וה־Runtime ממשיך מכל Buttons Block לפי ראיית Outbox Accepted תחומה | רצפים שרירותיים של Conditions/שאלות ובדיקות Browser E2E |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
@@ -87,15 +87,18 @@ acceptance עם קובץ מורשה אמיתי, Tenant מורשה ו־D1 מבו�
 4.2.2 להוסיף Recurring Campaign domain רק לאחר החלטת Product על
 תדירות, אזור זמן, End condition, שינוי Template וביטול סדרה.
 
-4.2.3 הושלמו ארבעה Slices של Bot Graph editor נגיש: רצף Text, שאלת
-Buttons מסיימת, פיצול Condition יחיד לפי טקסט נכנס או מצב שיחה,
+4.2.3 הושלמו חמישה Slices של Bot Graph editor נגיש: רצף Text, שאלת
+Buttons מסיימת, שתי שאלות Buttons עוקבות שבהן כל בחירה ראשונה פותחת
+שאלה שנייה ייעודית וכל בחירה שנייה שולחת Text ומתכנסת ל־End משותף,
+פיצול Condition יחיד לפי טקסט נכנס או מצב שיחה,
 מסלול Handoff לפי Keyword שמעביר ללא Reply ורק בעת התאמה, ו־Handoff
 מתוך כל אחד מענפי ה־Condition. ענף פנימי שמעביר אינו יכול לשלוח
 Intro באותו Turn; ה־UI מסיר אותו והשרת דוחה ניסיון לעקוף את הגבול.
 אפשר להגדיר תשובת Text נפרדת לכל ענף שאינו מעביר, והמנוע גוזר בשרת
 את כל מפתחות ה־Block וה־Option. המשך בחירת Button נשען רק על ראיית
-Accepted תחומה. נותרו מסלולים מרובי Conditions או שאלות, חיבור Graph
-מלא. Drag-and-drop קיים לסידור רצף Text ואפשרויות Buttons עם כפתורי
+Accepted תחומה לכל שאלת Buttons. נותרו רצפים שרירותיים של Conditions
+או שאלות וחיבור Graph מלא. Drag-and-drop קיים לסידור רצף Text
+ואפשרויות Buttons, וסידור ענפי השאלה הראשונה נגיש באמצעות כפתורי
 מקלדת מקבילים. ה־Canvas החי חולץ לרכיב עצמאי; התרשים החזותי מוסתר
 מקוראי מסך ובמקומו מוצג עץ סמנטי המתאר את סדר הפעולות, שני הענפים
 ומצבי הסיום. נותרה עריכה חופשית של חיבורים ו־Nodes; גם בהמשך

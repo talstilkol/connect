@@ -22,6 +22,8 @@ export const KEYWORD_SEQUENCE_MAXIMUM_REPLY_COUNT = 96;
 export const KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT = 10;
 export const KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT =
   95;
+export const KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT =
+  95;
 export const KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT = 93;
 export const keywordHandoffReasons = [
   "customer-request",
@@ -67,6 +69,26 @@ export interface KeywordButtonMenuBotFlowComposerDraft {
 
 export interface SaveKeywordButtonMenuBotFlowComposerDraftInput
   extends KeywordButtonMenuBotFlowComposerDraft {
+  expectedFlowVersion: number | null;
+}
+
+export interface KeywordTwoStepButtonBranchDraft {
+  label: string;
+  buttonText: string;
+  options: readonly KeywordButtonMenuOptionDraft[];
+}
+
+export interface KeywordTwoStepButtonMenuBotFlowComposerDraft {
+  name: string;
+  keywords: readonly string[];
+  matchMode: BotFlowKeywordMatchMode;
+  introTexts: readonly string[];
+  firstButtonText: string;
+  branches: readonly KeywordTwoStepButtonBranchDraft[];
+}
+
+export interface SaveKeywordTwoStepButtonMenuBotFlowComposerDraftInput
+  extends KeywordTwoStepButtonMenuBotFlowComposerDraft {
   expectedFlowVersion: number | null;
 }
 
@@ -408,6 +430,185 @@ export function readKeywordButtonMenuBotFlowComposerDraft(
     introTexts,
     buttonText: buttonsBlock.text,
     options,
+  };
+}
+
+export function readKeywordTwoStepButtonMenuBotFlowComposerDraft(
+  definition: ValidatedBotFlowDefinition,
+): KeywordTwoStepButtonMenuBotFlowComposerDraft | null {
+  const blocksByKey = new Map(
+    definition.blocks.map((block) => [
+      block.blockKey,
+      block,
+    ]),
+  );
+  const trigger = blocksByKey.get(
+    definition.entryBlockKey,
+  );
+
+  if (trigger?.type !== "trigger") {
+    return null;
+  }
+
+  const keyword = blocksByKey.get(
+    trigger.nextBlockKey,
+  );
+
+  if (keyword?.type !== "keyword") {
+    return null;
+  }
+
+  const unmatched = blocksByKey.get(
+    keyword.unmatchedBlockKey,
+  );
+
+  if (
+    unmatched?.type !== "handoff" ||
+    unmatched.reason !== "no-match"
+  ) {
+    return null;
+  }
+
+  const expectedKeys = new Set([
+    trigger.blockKey,
+    keyword.blockKey,
+    unmatched.blockKey,
+  ]);
+  const introTexts: string[] = [];
+  let nextBlockKey = keyword.matchedBlockKey;
+  let firstButtons:
+    | Extract<
+        (typeof definition.blocks)[number],
+        { type: "buttons" }
+      >
+    | null = null;
+
+  while (true) {
+    if (expectedKeys.has(nextBlockKey)) {
+      return null;
+    }
+
+    const block = blocksByKey.get(nextBlockKey);
+
+    if (block?.type === "text") {
+      expectedKeys.add(block.blockKey);
+      introTexts.push(block.text);
+      nextBlockKey = block.nextBlockKey;
+      continue;
+    }
+
+    if (block?.type === "buttons") {
+      firstButtons = block;
+    }
+
+    break;
+  }
+
+  if (
+    !firstButtons ||
+    introTexts.length === 0 ||
+    firstButtons.options.length === 0 ||
+    firstButtons.options.length >
+      KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT
+  ) {
+    return null;
+  }
+
+  expectedKeys.add(firstButtons.blockKey);
+  const branches: KeywordTwoStepButtonBranchDraft[] = [];
+  let endBlockKey: string | null = null;
+  let nestedOptionCount = 0;
+
+  for (const firstOption of firstButtons.options) {
+    if (expectedKeys.has(firstOption.nextBlockKey)) {
+      return null;
+    }
+
+    const followup = blocksByKey.get(
+      firstOption.nextBlockKey,
+    );
+
+    if (
+      followup?.type !== "buttons" ||
+      followup.options.length === 0 ||
+      followup.options.length >
+        KEYWORD_BUTTON_MENU_MAXIMUM_OPTION_COUNT
+    ) {
+      return null;
+    }
+
+    expectedKeys.add(followup.blockKey);
+    const options: KeywordButtonMenuOptionDraft[] = [];
+
+    for (const followupOption of followup.options) {
+      if (
+        expectedKeys.has(
+          followupOption.nextBlockKey,
+        )
+      ) {
+        return null;
+      }
+
+      const response = blocksByKey.get(
+        followupOption.nextBlockKey,
+      );
+
+      if (response?.type !== "text") {
+        return null;
+      }
+
+      if (
+        endBlockKey !== null &&
+        endBlockKey !== response.nextBlockKey
+      ) {
+        return null;
+      }
+
+      endBlockKey = response.nextBlockKey;
+      expectedKeys.add(response.blockKey);
+      nestedOptionCount += 1;
+      options.push({
+        label: followupOption.label,
+        replyText: response.text,
+      });
+    }
+
+    branches.push({
+      label: firstOption.label,
+      buttonText: followup.text,
+      options,
+    });
+  }
+
+  if (
+    introTexts.length +
+      branches.length +
+      nestedOptionCount >
+      KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT ||
+    endBlockKey === null ||
+    expectedKeys.has(endBlockKey) ||
+    blocksByKey.get(endBlockKey)?.type !== "end"
+  ) {
+    return null;
+  }
+
+  expectedKeys.add(endBlockKey);
+
+  if (
+    definition.blocks.some(
+      (block) => !expectedKeys.has(block.blockKey),
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    name: definition.name,
+    keywords: [...keyword.keywords],
+    matchMode: keyword.matchMode,
+    introTexts,
+    firstButtonText: firstButtons.text,
+    branches,
   };
 }
 

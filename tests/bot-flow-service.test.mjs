@@ -475,6 +475,80 @@ test("accepts a button menu while deriving block and option identities only on t
   );
 });
 
+test("accepts two sequential button questions while deriving every graph identity on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "ניתוב מדורג למחלקה",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: ["נמצא יחד את המחלקה המתאימה."],
+      firstButtonText: "באיזה נושא הפנייה?",
+      branches: [
+        {
+          label: "חשבונות",
+          buttonText: "איזו פעולת חשבון נדרשת?",
+          options: [
+            {
+              label: "חשבונית",
+              replyText: "נעביר לטיפול בחשבוניות.",
+            },
+            {
+              label: "זיכוי",
+              replyText: "נעביר לטיפול בזיכויים.",
+            },
+          ],
+        },
+        {
+          label: "תמיכה",
+          buttonText: "באיזה מוצר נדרשת תמיכה?",
+          options: [
+            {
+              label: "אתר",
+              replyText: "נעביר לתמיכת האתר.",
+            },
+          ],
+        },
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const buttonBlocks = definition.blocks.filter(
+    (block) => block.type === "buttons",
+  );
+  const optionKeys = buttonBlocks.flatMap(
+    (block) =>
+      block.options.map(
+        (option) => option.optionKey,
+      ),
+  );
+
+  assert.equal(definition.blocks.length, 11);
+  assert.equal(buttonBlocks.length, 3);
+  assert.equal(optionKeys.length, 5);
+  assert.equal(new Set(optionKeys).size, 5);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.ok(
+    optionKeys.every((optionKey) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        optionKey,
+      ),
+    ),
+  );
+});
+
 test("accepts a bounded condition while deriving every branch identity on the server", async () => {
   const repository = repositoryFixture();
 

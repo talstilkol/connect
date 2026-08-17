@@ -7,6 +7,7 @@ import {
   readKeywordConditionBotFlowComposerDraft,
   readKeywordHandoffBotFlowComposerDraft,
   readKeywordSequenceBotFlowComposerDraft,
+  readKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "../shared/domain/botFlowComposer.ts";
 import {
   compileKeywordButtonMenuBotFlowComposerDraft,
@@ -14,6 +15,7 @@ import {
   compileKeywordConditionBotFlowComposerDraft,
   compileKeywordHandoffBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
+  compileKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 import {
   deriveBotFlowBlockKey,
@@ -68,6 +70,48 @@ function buttonMenuComposerInput(overrides = {}) {
       {
         label: "כספים",
         replyText: "מחלקת כספים תחזור אליך.",
+      },
+    ],
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function twoStepButtonMenuComposerInput(overrides = {}) {
+  return {
+    name: "בירור רב שלבי",
+    keywords: ["בירור"],
+    matchMode: "exact",
+    introTexts: ["נאסוף שני פרטים."],
+    firstButtonText: "האם זו פנייה קיימת?",
+    branches: [
+      {
+        label: "כן",
+        buttonText: "לאיזו מחלקה לפנות?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "הפנייה נותבה למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "הפנייה נותבה לשירות.",
+          },
+        ],
+      },
+      {
+        label: "לא",
+        buttonText: "מהו נושא הפנייה?",
+        options: [
+          {
+            label: "רכישה",
+            replyText: "נציג רכישה יחזור אליך.",
+          },
+          {
+            label: "מידע",
+            replyText: "נציג מידע יחזור אליך.",
+          },
+        ],
       },
     ],
     expectedFlowVersion: null,
@@ -471,6 +515,138 @@ test("rejects incomplete, oversized, or extended button-menu drafts", async () =
   for (const input of cases) {
     assert.deepEqual(
       await compileKeywordButtonMenuBotFlowComposerDraft(
+        7,
+        input,
+      ),
+      {
+        success: false,
+        issues: ["invalid-input"],
+      },
+    );
+  }
+});
+
+test("compiles and reads two button questions without browser graph identities", async () => {
+  const input = twoStepButtonMenuComposerInput();
+  const result =
+    await compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      7,
+      input,
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 12);
+  assert.deepEqual(
+    readKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: input.name,
+      keywords: input.keywords,
+      matchMode: input.matchMode,
+      introTexts: input.introTexts,
+      firstButtonText: input.firstButtonText,
+      branches: input.branches,
+    },
+  );
+
+  const buttonBlocks =
+    result.definition.blocks.filter(
+      (block) => block.type === "buttons",
+    );
+  const optionKeys = buttonBlocks.flatMap(
+    (block) =>
+      block.options.map(
+        (option) => option.optionKey,
+      ),
+  );
+
+  assert.equal(buttonBlocks.length, 3);
+  assert.equal(optionKeys.length, 6);
+  assert.equal(
+    new Set(optionKeys).size,
+    optionKeys.length,
+  );
+  assert.ok(
+    optionKeys.every((key) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        key,
+      ),
+    ),
+  );
+});
+
+test("rejects incomplete, excessive, and identity-bearing two-step button drafts", async () => {
+  const cases = [
+    twoStepButtonMenuComposerInput({
+      introTexts: [],
+    }),
+    twoStepButtonMenuComposerInput({
+      branches: [],
+    }),
+    twoStepButtonMenuComposerInput({
+      branches: [
+        {
+          label: "כן",
+          buttonText: "לאיזו מחלקה לפנות?",
+          options: [],
+        },
+      ],
+    }),
+    twoStepButtonMenuComposerInput({
+      branches: Array.from(
+        { length: 11 },
+        (_, index) => ({
+          label: `ענף ${index + 1}`,
+          buttonText: `שאלה ${index + 1}`,
+          options: [
+            {
+              label: "המשך",
+              replyText: "הפעולה הסתיימה.",
+            },
+          ],
+        }),
+      ),
+    }),
+    twoStepButtonMenuComposerInput({
+      introTexts: Array.from(
+        { length: 85 },
+        (_, index) => `הודעה ${index + 1}`,
+      ),
+      branches: [
+        {
+          label: "המשך",
+          buttonText: "בחרו אפשרות",
+          options: Array.from(
+            { length: 10 },
+            (_, index) => ({
+              label: `אפשרות ${index + 1}`,
+              replyText: `תשובה ${index + 1}`,
+            }),
+          ),
+        },
+      ],
+    }),
+    {
+      ...twoStepButtonMenuComposerInput(),
+      firstButtonKey:
+        `bot_block_v1_${"a".repeat(64)}`,
+    },
+    twoStepButtonMenuComposerInput({
+      branches: [
+        {
+          ...twoStepButtonMenuComposerInput()
+            .branches[0],
+          buttonKey:
+            `bot_block_v1_${"b".repeat(64)}`,
+        },
+      ],
+    }),
+  ];
+
+  for (const input of cases) {
+    assert.deepEqual(
+      await compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
         7,
         input,
       ),

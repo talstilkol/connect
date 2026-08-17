@@ -11,6 +11,9 @@ import {
   compileKeywordHandoffBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
+import {
+  validateBotFlowDefinition,
+} from "../shared/validation/botFlowDefinition.ts";
 
 const blockKey = (character) =>
   `bot_block_v1_${character.repeat(64)}`;
@@ -181,6 +184,153 @@ test("resumes a compiled button menu at its evidenced awaiting block", async () 
     {
       kind: "text",
       text: "נעביר לשירות.",
+    },
+  ]);
+});
+
+test("resumes two sequential button questions from their exact awaiting blocks", () => {
+  const definition = {
+    name: "בירור דו שלבי",
+    blocks: [
+      {
+        blockKey: blockKey("a"),
+        type: "trigger",
+        nextBlockKey: blockKey("b"),
+      },
+      {
+        blockKey: blockKey("b"),
+        type: "keyword",
+        keywords: ["בירור"],
+        matchMode: "exact",
+        matchedBlockKey: blockKey("c"),
+        unmatchedBlockKey: blockKey("8"),
+      },
+      {
+        blockKey: blockKey("c"),
+        type: "buttons",
+        text: "האם זו פנייה קיימת?",
+        options: [
+          {
+            optionKey: optionKey("1"),
+            label: "כן",
+            nextBlockKey: blockKey("d"),
+          },
+          {
+            optionKey: optionKey("2"),
+            label: "לא",
+            nextBlockKey: blockKey("d"),
+          },
+        ],
+      },
+      {
+        blockKey: blockKey("d"),
+        type: "buttons",
+        text: "לאיזו מחלקה לפנות?",
+        options: [
+          {
+            optionKey: optionKey("3"),
+            label: "מכירות",
+            nextBlockKey: blockKey("e"),
+          },
+          {
+            optionKey: optionKey("4"),
+            label: "שירות",
+            nextBlockKey: blockKey("f"),
+          },
+        ],
+      },
+      {
+        blockKey: blockKey("e"),
+        type: "text",
+        text: "הפנייה נותבה למכירות.",
+        nextBlockKey: blockKey("7"),
+      },
+      {
+        blockKey: blockKey("f"),
+        type: "text",
+        text: "הפנייה נותבה לשירות.",
+        nextBlockKey: blockKey("7"),
+      },
+      {
+        blockKey: blockKey("7"),
+        type: "end",
+      },
+      {
+        blockKey: blockKey("8"),
+        type: "handoff",
+        reason: "no-match",
+      },
+    ],
+  };
+  const validation =
+    validateBotFlowDefinition(definition);
+
+  assert.equal(
+    validation.success,
+    true,
+    validation.success
+      ? undefined
+      : validation.issues.join(","),
+  );
+  const firstQuestion = executeBotFlowTurn(
+    definition,
+    {
+      lastInboundText: "בירור",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(
+    firstQuestion.outcome,
+    "awaiting-input",
+  );
+  assert.equal(
+    firstQuestion.awaitingBlockKey,
+    blockKey("c"),
+  );
+
+  const secondQuestion = executeBotFlowTurn(
+    definition,
+    {
+      lastInboundText: "כן",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        firstQuestion.awaitingBlockKey,
+    },
+  );
+
+  assert.equal(
+    secondQuestion.outcome,
+    "awaiting-input",
+  );
+  assert.equal(
+    secondQuestion.awaitingBlockKey,
+    blockKey("d"),
+  );
+  assert.deepEqual(secondQuestion.replies, [
+    {
+      kind: "buttons",
+      text: "לאיזו מחלקה לפנות?",
+      options:
+        definition.blocks[3].options,
+    },
+  ]);
+
+  const completed = executeBotFlowTurn(
+    definition,
+    {
+      lastInboundText: "מכירות",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        secondQuestion.awaitingBlockKey,
+    },
+  );
+
+  assert.equal(completed.outcome, "completed");
+  assert.deepEqual(completed.replies, [
+    {
+      kind: "text",
+      text: "הפנייה נותבה למכירות.",
     },
   ]);
 });

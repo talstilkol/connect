@@ -11,6 +11,9 @@ import type {
 import type {
   BotFlowReplyStepDraft,
 } from "../../shared/domain/botFlowSequenceEditor";
+import type {
+  BotFlowTwoStepButtonMenuEditorDraft,
+} from "../../shared/domain/botFlowTwoStepButtonMenuEditor";
 
 const PREVIEW_TITLE_ID =
   "bot-flow-draft-preview-title";
@@ -45,6 +48,7 @@ function AccessibleDraftSummary({
   matchMode,
   replySteps,
   buttonMenu,
+  twoStepButtonMenu,
   condition,
   handoffReason,
 }: {
@@ -52,6 +56,8 @@ function AccessibleDraftSummary({
   matchMode: BotFlowKeywordMatchMode;
   replySteps: readonly BotFlowReplyStepDraft[];
   buttonMenu: BotFlowButtonMenuEditorDraft | null;
+  twoStepButtonMenu:
+    BotFlowTwoStepButtonMenuEditorDraft | null;
   condition: KeywordConditionDraft | null;
   handoffReason: KeywordHandoffReason | "" | null;
 }) {
@@ -101,6 +107,43 @@ function AccessibleDraftSummary({
                   </ol>
                 </li>
               ) : null}
+              {twoStepButtonMenu ? (
+                <li>
+                  שאלת Buttons ראשונה: {configuredText(
+                    twoStepButtonMenu.firstButtonText,
+                  )}.
+                  <ol>
+                    {twoStepButtonMenu.branches.map(
+                      (branch, branchIndex) => (
+                        <li key={branch.draftBranchKey}>
+                          {branch.label.trim() ||
+                            `ענף ${branchIndex + 1}`}:
+                          שאלת Buttons שנייה, {configuredText(
+                            branch.menu.buttonText,
+                          )}.
+                          <ol>
+                            {branch.menu.options.map(
+                              (option, optionIndex) => (
+                                <li
+                                  key={
+                                    option.draftOptionKey
+                                  }
+                                >
+                                  {option.label.trim() ||
+                                    `אפשרות ${optionIndex + 1}`}:
+                                  {" "}{configuredText(
+                                    option.replyText,
+                                  )}, ואז סיום.
+                                </li>
+                              ),
+                            )}
+                          </ol>
+                        </li>
+                      ),
+                    )}
+                  </ol>
+                </li>
+              ) : null}
               {condition ? (
                 <li>
                   Condition על {condition.fact ===
@@ -123,7 +166,9 @@ function AccessibleDraftSummary({
                   </ol>
                 </li>
               ) : null}
-              {!buttonMenu && !condition ? (
+              {!buttonMenu &&
+              !twoStepButtonMenu &&
+              !condition ? (
                 <li>סיום התהליך.</li>
               ) : null}
             </ol>
@@ -146,6 +191,7 @@ export function BotFlowDraftPreview({
   matchMode,
   replySteps,
   buttonMenu,
+  twoStepButtonMenu,
   condition,
   handoffReason,
 }: {
@@ -155,6 +201,8 @@ export function BotFlowDraftPreview({
   matchMode: BotFlowKeywordMatchMode;
   replySteps: readonly BotFlowReplyStepDraft[];
   buttonMenu: BotFlowButtonMenuEditorDraft | null;
+  twoStepButtonMenu:
+    BotFlowTwoStepButtonMenuEditorDraft | null;
   condition: KeywordConditionDraft | null;
   handoffReason: KeywordHandoffReason | "" | null;
 }) {
@@ -181,6 +229,7 @@ export function BotFlowDraftPreview({
         matchMode={matchMode}
         replySteps={replySteps}
         buttonMenu={buttonMenu}
+        twoStepButtonMenu={twoStepButtonMenu}
         condition={condition}
         handoffReason={handoffReason}
       />
@@ -244,6 +293,7 @@ export function BotFlowDraftPreview({
                       </div>
                       {index < replySteps.length - 1 ||
                       buttonMenu ||
+                      twoStepButtonMenu ||
                       condition ? (
                         <span className="bot-flow-chain-arrow">
                           ↓
@@ -286,6 +336,64 @@ export function BotFlowDraftPreview({
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </>
+                ) : null}
+
+                {twoStepButtonMenu ? (
+                  <>
+                    <div className="flow-node bot-flow-buttons-node">
+                      <span className="node-icon">⠿</span>
+                      <div>
+                        <small>שאלת Buttons ראשונה</small>
+                        <strong>
+                          {twoStepButtonMenu.firstButtonText.trim()
+                            ? `${twoStepButtonMenu.branches.length} ענפים לשאלה שנייה`
+                            : "לא הוגדר טקסט שאלה"}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="bot-flow-option-branches bot-flow-two-step-preview-branches">
+                      {twoStepButtonMenu.branches.map(
+                        (branch, index) => (
+                          <div key={branch.draftBranchKey}>
+                            <span>
+                              {branch.label.trim() ||
+                                `ענף ${index + 1}`}
+                            </span>
+                            <div className="flow-node bot-flow-buttons-node">
+                              <span className="node-icon">
+                                ⠿
+                              </span>
+                              <div>
+                                <small>
+                                  שאלת Buttons שנייה
+                                </small>
+                                <strong>
+                                  {branch.menu.buttonText.trim()
+                                    ? `${branch.menu.options.length} אפשרויות תשובה`
+                                    : "לא הוגדר טקסט שאלה"}
+                                </strong>
+                              </div>
+                            </div>
+                            <div className="bot-flow-two-step-preview-options">
+                              {branch.menu.options.map(
+                                (option, optionIndex) => (
+                                  <span
+                                    key={
+                                      option.draftOptionKey
+                                    }
+                                  >
+                                    {option.label.trim() ||
+                                      `אפשרות ${optionIndex + 1}`}
+                                    {" → Text → End"}
+                                  </span>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </>
                 ) : null}

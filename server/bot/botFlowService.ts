@@ -24,6 +24,7 @@ import {
   compileKeywordConditionBotFlowComposerDraft,
   compileKeywordHandoffBotFlowComposerDraft,
   compileKeywordSequenceBotFlowComposerDraft,
+  compileKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
 
 const BOT_FLOW_LIST_LIMIT = 100;
@@ -181,6 +182,21 @@ async function parseSaveDraftRequest(
         conditionComposerResult.definition,
       expectedFlowVersion:
         conditionComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const twoStepButtonMenuComposerResult =
+    await compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (twoStepButtonMenuComposerResult.success) {
+    return {
+      definition:
+        twoStepButtonMenuComposerResult.definition,
+      expectedFlowVersion:
+        twoStepButtonMenuComposerResult.expectedFlowVersion,
     };
   }
 

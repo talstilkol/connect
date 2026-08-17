@@ -241,17 +241,20 @@
 
 .bot-flow-add-menu,
 .bot-flow-add-condition,
+.bot-flow-add-two-step,
 .bot-flow-add-handoff {
   width: 100%;
   min-height: 39px;
   font-size: 8px;
 }
 
+.bot-flow-add-two-step,
 .bot-flow-add-handoff {
   grid-column: 1 / -1;
 }
 
 .bot-flow-button-menu,
+.bot-flow-two-step-menu,
 .bot-flow-condition,
 .bot-flow-handoff {
   min-width: 0;
@@ -263,6 +266,7 @@
 }
 
 .bot-flow-button-menu legend,
+.bot-flow-two-step-menu legend,
 .bot-flow-condition legend,
 .bot-flow-handoff legend {
   padding: 0 5px;
@@ -271,6 +275,7 @@
 }
 
 .bot-flow-button-menu > p,
+.bot-flow-two-step-menu > p,
 .bot-flow-condition > p,
 .bot-flow-handoff > p {
   margin: 0 0 12px;
@@ -280,6 +285,7 @@
 }
 
 .bot-flow-button-menu > label > span,
+.bot-flow-two-step-menu > label > span,
 .bot-flow-condition > label > span,
 .bot-flow-handoff > label > span {
   display: block;
@@ -287,17 +293,20 @@
 }
 
 .bot-flow-condition,
+.bot-flow-two-step-menu,
 .bot-flow-handoff {
   display: grid;
   gap: 11px;
 }
 
 .bot-flow-condition > p,
+.bot-flow-two-step-menu > p,
 .bot-flow-handoff > p {
   margin-bottom: 1px;
 }
 
 .bot-flow-condition > label > small,
+.bot-flow-two-step-menu > label > small,
 .bot-flow-handoff > label > small {
   display: block;
   margin-top: 5px;
@@ -336,6 +345,41 @@
 .bot-flow-remove-handoff {
   min-height: 34px;
   margin-top: 1px;
+}
+
+.bot-flow-two-step-branches {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bot-flow-two-step-branches > li {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #dbe7e1;
+  border-radius: 11px;
+  background: white;
+}
+
+.bot-flow-two-step-branch-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bot-flow-two-step-branch-header > strong,
+.bot-flow-two-step-branches > li > label {
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.bot-flow-two-step-branches .bot-flow-button-menu {
+  margin-top: 3px;
 }
 
 .bot-flow-button-menu ol {
@@ -800,6 +844,30 @@
   width: min(100%, 190px);
   min-height: 62px;
   padding: 10px;
+}
+
+.bot-flow-two-step-preview-branches > div {
+  align-content: start;
+}
+
+.bot-flow-two-step-preview-options {
+  width: 100%;
+  display: grid;
+  gap: 5px;
+}
+
+.bot-flow-two-step-preview-options > span {
+  min-width: 0;
+  padding: 5px 7px;
+  overflow: hidden;
+  border: 1px solid #dce4f2;
+  border-radius: 8px;
+  background: #f8faff;
+  color: #53658f;
+  font-size: 7px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bot-flow-terminal {
