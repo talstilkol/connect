@@ -30,6 +30,12 @@ import {
   createPostgresBusinessProfileRepository,
 } from "./postgresBusinessProfileRepository.ts";
 import {
+  createPostgresBotFlowRepository,
+} from "./postgresBotFlowRepository.ts";
+import {
+  createPostgresBotReplyDeliveryRepository,
+} from "./postgresBotReplyDeliveryRepository.ts";
+import {
   createPostgresCampaignDispatchRepository,
 } from "./postgresCampaignDispatchRepository.ts";
 import {
@@ -119,6 +125,10 @@ export interface RailwayPostgresFoundationOptions {
 
 export interface RailwayPostgresFoundation {
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
+  readonly botFlows: ReturnType<typeof createPostgresBotFlowRepository>;
+  readonly botReplyDeliveries: ReturnType<
+    typeof createPostgresBotReplyDeliveryRepository
+  >;
   readonly contacts: ReturnType<typeof createContactListService>;
   readonly conversations: ReturnType<
     typeof createPostgresConversationRepository
@@ -251,6 +261,11 @@ export function createRailwayPostgresFoundation(
 
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
+    botFlows: createPostgresBotFlowRepository({ queries, transactions }),
+    botReplyDeliveries: createPostgresBotReplyDeliveryRepository({
+      queries,
+      transactions,
+    }),
     contacts: createContactListService({ contacts: contactReads }),
     conversations: createPostgresConversationRepository({
       queries,

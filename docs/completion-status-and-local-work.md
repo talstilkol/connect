@@ -1255,6 +1255,23 @@ Mark-read וב־Assignment, וכן Delivery event יחיד לצד Duplicate ו־
 Concurrency אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials,
 Railway environment, ‏Staging או Pilot.
 
+4.18 ‏PostgreSQL Bot Flow ו־Reply Delivery lifecycle הושלם מקומית.
+`postgresBotFlowRepository.ts` מממש Draft creation/versioning, קריאות,
+Publication replacement ו־Replay אטומי. ‏`postgresBotReplyDeliveryRepository.ts`
+מממש Stage, ‏Claim והמעברים Accepted/Rejected/Ambiguous, עם בדיקה שהודעת
+Inbound שייכת לאותה Conversation ולגרסת Flow התואמת. שני ה־Repositories
+מחוברים ל־`railwayPostgresFoundation.ts`, שמכיל כעת 24 Adapters.
+
+4.18.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (16 migrations, 27 concurrency scenarios)`. הוא הוכיח Flow create,
+Publish ו־Version append מקבילים, Reply stage יחיד ו־Delivery claim יחיד.
+שרת PostgreSQL הזמני נעצר והתיקייה נמחקה לאחר האימות.
+
+4.19 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **16–56 שעות פיתוח
+נטו**. הירידה משקפת שני Repositories מלאים וחמישה תרחישי Concurrency
+אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials, ‏Railway
+environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

@@ -21,6 +21,14 @@ import {
   createRailwayPostgresApiRuntime,
 } from "../server/platform/railwayPostgresApiRuntime.ts";
 import {
+  deriveBotFlowBlockKey,
+  deriveBotFlowKey,
+  deriveBotFlowVersionKey,
+} from "../server/bot/botFlowKey.ts";
+import {
+  deriveBotReplyDeliveryKey,
+} from "../server/bot/botReplyDeliveryKey.ts";
+import {
   RAILWAY_API_CONTRACT_VERSION,
   RAILWAY_API_ENDPOINT_PATH,
   VERCEL_OIDC_HEADER,
@@ -1932,6 +1940,200 @@ async function verifyBotDeliverySchema(pool, tenantId) {
   );
 }
 
+async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
+  const name = "PostgreSQL integration bot flow";
+  const botFlowKey = await deriveBotFlowKey(tenantId, name);
+
+  async function flowVersion(versionNumber) {
+    const triggerKey = await deriveBotFlowBlockKey(botFlowKey, 1);
+    const textKey = await deriveBotFlowBlockKey(botFlowKey, 2);
+    const endKey = await deriveBotFlowBlockKey(botFlowKey, 3);
+    const definition = Object.freeze({
+      name,
+      entryBlockKey: triggerKey,
+      blocks: Object.freeze([
+        Object.freeze({
+          blockKey: triggerKey,
+          type: "trigger",
+          nextBlockKey: textKey,
+        }),
+        Object.freeze({
+          blockKey: textKey,
+          type: "text",
+          text: versionNumber === 1
+            ? "Integration reply"
+            : "Updated integration reply",
+          nextBlockKey: endKey,
+        }),
+        Object.freeze({
+          blockKey: endKey,
+          type: "end",
+        }),
+      ].sort((first, second) =>
+        first.blockKey.localeCompare(second.blockKey))),
+    });
+    const botFlowVersionKey = await deriveBotFlowVersionKey(
+      tenantId,
+      botFlowKey,
+      versionNumber,
+      definition,
+    );
+    return Object.freeze({
+      tenantId,
+      botFlowKey,
+      botFlowVersionKey,
+      versionNumber,
+      definition,
+    });
+  }
+
+  const first = await flowVersion(1);
+  const firstInput = Object.freeze({
+    ...first,
+    expectedFlowVersion: null,
+  });
+  const firstDrafts = await Promise.all([
+    foundation.botFlows.saveDraft(firstInput),
+    foundation.botFlows.saveDraft(firstInput),
+  ]);
+  assert.deepEqual(
+    firstDrafts.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+
+  const publications = await Promise.all([
+    foundation.botFlows.publishDraft(
+      tenantId,
+      botFlowKey,
+      first.botFlowVersionKey,
+      1,
+    ),
+    foundation.botFlows.publishDraft(
+      tenantId,
+      botFlowKey,
+      first.botFlowVersionKey,
+      1,
+    ),
+  ]);
+  assert.deepEqual(
+    publications.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+
+  const second = await flowVersion(2);
+  const secondInput = Object.freeze({
+    ...second,
+    expectedFlowVersion: 2,
+  });
+  const secondDrafts = await Promise.all([
+    foundation.botFlows.saveDraft(secondInput),
+    foundation.botFlows.saveDraft(secondInput),
+  ]);
+  assert.deepEqual(
+    secondDrafts.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+  assert.equal(
+    (await foundation.botFlows.listVersions(tenantId, botFlowKey, 10)).length,
+    2,
+  );
+  assert.equal(
+    (await foundation.botFlows.listActiveByTenant(tenantId, 100)).some(
+      ({ botFlowKey: storedKey }) => storedKey === botFlowKey,
+    ),
+    true,
+  );
+
+  const conversationKey = `conversation_v1_${"1".repeat(64)}`;
+  const inboundMessageKey = `message_v1_${"2".repeat(64)}`;
+  const phone = await pool.query(
+    `SELECT contacts.phone_e164 AS "phoneNumber"
+     FROM conversations
+     INNER JOIN contacts
+       ON contacts.tenant_id = conversations.tenant_id
+      AND contacts.id = conversations.contact_id
+     WHERE conversations.tenant_id = $1
+       AND conversations.conversation_key = $2`,
+    [tenantId, conversationKey],
+  );
+  assert.equal(phone.rowCount, 1);
+  const reply = Object.freeze({ kind: "text", text: "Integration reply" });
+  const deliveryKey = await deriveBotReplyDeliveryKey(tenantId, {
+    conversationKey,
+    inboundMessageKey,
+    botFlowVersionKey: first.botFlowVersionKey,
+    replyIndex: 1,
+    reply,
+  });
+  const deliveryInput = Object.freeze({
+    deliveryKey,
+    tenantId,
+    conversationKey,
+    inboundMessageKey,
+    botFlowKey,
+    botFlowVersionKey: first.botFlowVersionKey,
+    replyIndex: 1,
+    recipientPhoneNumber: phone.rows[0].phoneNumber,
+    reply,
+  });
+  const staged = await Promise.all([
+    foundation.botReplyDeliveries.stage(deliveryInput),
+    foundation.botReplyDeliveries.stage(deliveryInput),
+  ]);
+  assert.deepEqual(
+    staged.map(({ outcome }) => outcome).sort(),
+    ["created", "duplicate"],
+  );
+  const createdDelivery = staged.find(({ outcome }) => outcome === "created")
+    ?.delivery;
+  assert.ok(createdDelivery);
+  const claimAt = new Date(
+    Date.parse(createdDelivery.createdAt) + 1_000,
+  ).toISOString();
+  const claims = await Promise.all([
+    foundation.botReplyDeliveries.claim(tenantId, deliveryKey, claimAt),
+    foundation.botReplyDeliveries.claim(tenantId, deliveryKey, claimAt),
+  ]);
+  assert.deepEqual(
+    claims.map(({ outcome }) => outcome).sort(),
+    ["claimed", "uncertain"],
+  );
+  const acceptedAt = new Date(Date.parse(claimAt) + 1_000).toISOString();
+  const accepted = await foundation.botReplyDeliveries.markAccepted(
+    tenantId,
+    deliveryKey,
+    "wamid.bot-integration-1",
+    acceptedAt,
+  );
+  assert.equal(accepted.status, "accepted");
+  assert.equal(accepted.attemptCount, 1);
+
+  const persisted = await pool.query(
+    `SELECT
+       flow.status AS flow_status,
+       flow.version AS flow_version,
+       count(version.bot_flow_version_key)::integer AS version_count,
+       max(delivery.status) AS delivery_status
+     FROM bot_flows AS flow
+     INNER JOIN bot_flow_versions AS version
+       ON version.tenant_id = flow.tenant_id
+      AND version.bot_flow_key = flow.bot_flow_key
+     LEFT JOIN bot_reply_deliveries AS delivery
+       ON delivery.tenant_id = flow.tenant_id
+      AND delivery.bot_flow_key = flow.bot_flow_key
+     WHERE flow.tenant_id = $1
+       AND flow.bot_flow_key = $2
+     GROUP BY flow.status, flow.version`,
+    [tenantId, botFlowKey],
+  );
+  assert.deepEqual(persisted.rows, [{
+    flow_status: "active",
+    flow_version: 3,
+    version_count: 2,
+    delivery_status: "accepted",
+  }]);
+}
+
 async function verifyAiReportingSchema(pool, foundation, tenantId) {
   const conversationKey = `conversation_v1_${"a".repeat(64)}`;
   const inboundMessageKey = `message_v1_${"b".repeat(64)}`;
@@ -2553,6 +2755,7 @@ export async function verifyNodePostgresIntegration(
       await verifyAiReportingSchema(pool, foundation, tenantId);
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyConversationLifecycle(pool, foundation, tenantId);
+      await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
@@ -2563,7 +2766,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 22,
+      concurrencyScenarios: 27,
     });
   } finally {
     await pool.end();

@@ -77,6 +77,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
   assert.match(source, /verifyBotDeliverySchema/);
+  assert.match(source, /verifyBotFlowDeliveryLifecycle/);
   assert.match(source, /verifyAiReportingSchema/);
   assert.match(source, /verifyWhatsappDeliveryPolicy/);
   assert.match(source, /verifyWhatsappRateLimitLedger/);
@@ -88,6 +89,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.messageTemplates\.saveDraft/);
   assert.match(source, /foundation\.messageTemplates\.applyStatusEvent/);
   assert.match(source, /foundation\.conversations\.recordInboundMessage/);
+  assert.match(source, /foundation\.botFlows\.saveDraft/);
+  assert.match(source, /foundation\.botReplyDeliveries\.stage/);
   assert.match(source, /runtime\.handler\.handle/);
   assert.match(source, /runtime\.readiness\.check/);
   assert.match(source, /createRailwayPostgresApiRuntime/);

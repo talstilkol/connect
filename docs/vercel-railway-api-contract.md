@@ -375,6 +375,13 @@ Submission lifecycle ו־Status events על PostgreSQL. ‏Draft מקביל מט
 מסווגים לפי Event key, זמן וקדימות. ‏Harness אמיתי עבר עם 16 Migrations
 ו־22 תרחישי Concurrency.
 
+7.1.40 ‏`postgresBotFlowRepository.ts` מממש יצירת Draft, הוספת Version,
+קריאות ופרסום אטומי של Bot Flows. נעילת Flow מסדרת כתיבות מקבילות; Snapshot
+נשמר לפני קידום הגרסה, ו־Published ישן עובר ל־Archived לפני החלפתו.
+`postgresBotReplyDeliveryRepository.ts` מממש Stage, ‏Claim ו־Accepted/
+Rejected/Ambiguous עם בדיקת הקשר בין Inbound message, ‏Conversation וגרסת
+Flow. ‏Harness אמיתי עבר עם 16 Migrations ו־27 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
