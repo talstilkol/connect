@@ -195,6 +195,33 @@ test("server-renders the complete template surface in English and Arabic", async
   assert.doesNotMatch(arabicHtml, /תבניות שמורות/);
 });
 
+test("server-renders both campaign flows in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/campaigns?lang=en"),
+    render("/workspace/campaigns?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Campaign draft/);
+  assert.match(englishHtml, /Local draft completeness/);
+  assert.match(englishHtml, /No approved templates/);
+  assert.match(englishHtml, /Delivery blocked/);
+  assert.doesNotMatch(englishHtml, /שלמות הטיוטה המקומית/);
+
+  assert.match(arabicHtml, /مسودة حملة/);
+  assert.match(arabicHtml, /اكتمال المسودة المحلية/);
+  assert.match(arabicHtml, /لا توجد قوالب معتمدة/);
+  assert.match(arabicHtml, /الإرسال محظور/);
+  assert.doesNotMatch(arabicHtml, /שלמות הטיוטה המקומית/);
+});
+
 test("server-renders auth and workspace feature routes", async () => {
   const [
     loginResponse,
@@ -268,8 +295,8 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.match(contactsHtml, /ניהול אנשי קשר קבוע/);
   assert.match(contactsHtml, /Clerk אינו מוגדר/);
   assert.doesNotMatch(contactsHtml, /שמירת איש קשר/);
-  assert.match(campaignsHtml, /Campaign draft/);
-  assert.match(campaignsHtml, /Planning completeness/);
+  assert.match(campaignsHtml, /טיוטת קמפיין/);
+  assert.match(campaignsHtml, /שלמות תכנון/);
   assert.match(campaignsHtml, /שלמות הטיוטה המקומית/);
   assert.match(campaignsHtml, /אין תבניות מאושרות/);
   assert.match(campaignsHtml, /אין טיוטת Template מקומית/);

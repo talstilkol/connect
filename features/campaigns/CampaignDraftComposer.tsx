@@ -9,6 +9,9 @@ import type {
   ContactColumnMapping,
   ContactField,
 } from "../../shared/domain/contactImportDraft";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import {
   applyTemplateVariableValues,
   inspectTemplateVariables,
@@ -20,8 +23,14 @@ import {
   type AudienceRowIssue,
 } from "../../shared/validation/audiencePersonalization";
 import { useWorkspaceDrafts } from "../workspace/WorkspaceDraftProvider";
+import { readCampaignMessages } from "./campaignMessages";
 
-export function CampaignDraftComposer() {
+export function CampaignDraftComposer({
+  language,
+}: {
+  language: InterfaceLanguage;
+}) {
+  const messages = readCampaignMessages(language);
   const {
     campaignDraft,
     contactImportDraft,
@@ -194,17 +203,21 @@ export function CampaignDraftComposer() {
       <section className="card campaign-form-card">
         <div className="card-header">
           <div>
-            <span className="card-kicker">Campaign draft</span>
-            <h2>פרטי הקמפיין</h2>
+            <span className="card-kicker">
+              {messages.rehearsal.form.kicker}
+            </span>
+            <h2>{messages.rehearsal.form.title}</h2>
           </div>
           <span className={`status-pill ${draftSaved ? "success" : "warning"}`}>
-            {draftSaved ? "טיוטה מקומית נשמרה" : "טיוטה לא נשמרה"}
+            {draftSaved
+              ? messages.rehearsal.form.saved
+              : messages.rehearsal.form.unsaved}
           </span>
         </div>
 
         <form className="campaign-form" onSubmit={saveDraft}>
           <label>
-            <span>שם הקמפיין</span>
+            <span>{messages.rehearsal.form.name}</span>
             <input
               value={name}
               onChange={(event) => {
@@ -217,32 +230,38 @@ export function CampaignDraftComposer() {
 
           <div className="campaign-locked-row">
             <label>
-              <span>תבנית לקמפיין</span>
+              <span>{messages.rehearsal.form.template}</span>
               <select disabled>
                 <option>
-                  {templateDraft?.name ?? "אין תבניות מאושרות"}
+                  {templateDraft?.name ??
+                    messages.rehearsal.form.noApprovedTemplates}
                 </option>
               </select>
               <small>
                 {templateDraft
-                  ? "טיוטה מקומית מחוברת לצורכי תכנון בלבד; היא אינה מאושרת."
-                  : "אין טיוטת Template מקומית ונדרש גם סנכרון מ־WABA."}
+                  ? messages.rehearsal.form.templateLinked
+                  : messages.rehearsal.form.templateMissing}
               </small>
             </label>
 
             <label>
-              <span>קהל יעד</span>
+              <span>{messages.rehearsal.form.audience}</span>
               <select disabled>
                 <option>
                   {contactImportDraft
-                    ? `${contactImportDraft.rows.length} שורות בקובץ המקומי`
-                    : "אין קהל כשיר לשליחה"}
+                    ? messages.rehearsal.form.localRows(
+                        contactImportDraft.rows.length,
+                      )
+                    : messages.rehearsal.form.noEligibleAudience}
                 </option>
               </select>
               <small>
                 {contactImportDraft
-                  ? `${contactImportDraft.quality.rowsWithPhone} מתוך ${contactImportDraft.quality.totalRows} שורות כוללות ערך טלפון Raw. Consent ו־Unsubscribe לא אומתו.`
-                  : "נדרש קהל שעבר בדיקת Consent ו־Unsubscribe."}
+                  ? messages.rehearsal.form.rawPhoneSummary(
+                      contactImportDraft.quality.rowsWithPhone,
+                      contactImportDraft.quality.totalRows,
+                    )
+                  : messages.rehearsal.form.audienceRequired}
               </small>
             </label>
           </div>
@@ -251,7 +270,9 @@ export function CampaignDraftComposer() {
             <section className="campaign-template-rehearsal">
               <div className="template-rehearsal-header">
                 <div>
-                  <span className="card-kicker">Template rehearsal</span>
+                  <span className="card-kicker">
+                    {messages.rehearsal.form.templateKicker}
+                  </span>
                   <strong>{templateDraft.name}</strong>
                 </div>
                 <div className="template-rehearsal-meta">
@@ -268,10 +289,7 @@ export function CampaignDraftComposer() {
               ) : null}
               <div className="inline-notice warning">
                 <span aria-hidden="true">i</span>
-                <p>
-                  זהו Rehearsal מקומי. הטיוטה אינה תבנית מאושרת ולא ניתן
-                  להשתמש בה לשליחה.
-                </p>
+                <p>{messages.rehearsal.form.templateWarning}</p>
               </div>
             </section>
           ) : null}
@@ -280,10 +298,14 @@ export function CampaignDraftComposer() {
             <section className="campaign-personalization">
               <div className="card-header">
                 <div>
-                  <span className="card-kicker">Contact preview</span>
-                  <h3>מיפוי משתנים לאיש קשר</h3>
+                  <span className="card-kicker">
+                    {messages.rehearsal.personalization.kicker}
+                  </span>
+                  <h3>{messages.rehearsal.personalization.title}</h3>
                 </div>
-                <span className="status-pill warning">ללא אישור שליחה</span>
+                <span className="status-pill warning">
+                  {messages.rehearsal.personalization.notApproved}
+                </span>
               </div>
 
               {contactImportDraft.quality.rowsWithoutPhone > 0 ||
@@ -291,16 +313,16 @@ export function CampaignDraftComposer() {
                 <div className="inline-notice warning" role="status">
                   <span aria-hidden="true">!</span>
                   <p>
-                    בקובץ יש {contactImportDraft.quality.rowsWithoutPhone} שורות
-                    ללא טלפון ו־
-                    {contactImportDraft.quality.exactDuplicateRows} כפילויות
-                    מדויקות. הנתונים מוצגים בלבד ולא נוקו.
+                    {messages.rehearsal.personalization.sourceQualityWarning(
+                      contactImportDraft.quality.rowsWithoutPhone,
+                      contactImportDraft.quality.exactDuplicateRows,
+                    )}
                   </p>
                 </div>
               ) : null}
 
               <label className="contact-preview-select">
-                <span>איש קשר לתצוגה מקדימה</span>
+                <span>{messages.rehearsal.personalization.previewContact}</span>
                 <select
                   value={String(activeContactIndex)}
                   onChange={(event) => {
@@ -314,6 +336,7 @@ export function CampaignDraftComposer() {
                         row,
                         rowIndex,
                         contactImportDraft.mapping,
+                        messages.rehearsal.personalization.fallbackRow,
                       )}
                     </option>
                   ))}
@@ -322,9 +345,11 @@ export function CampaignDraftComposer() {
 
               {templateVariables.length > 0 ? (
                 <fieldset className="campaign-variable-mapping">
-                  <legend>התאמת משתני Template לעמודות קובץ המקור</legend>
+                  <legend>
+                    {messages.rehearsal.personalization.mappingLegend}
+                  </legend>
                   <p>
-                    יש לבחור עמודה עבור כל משתנה. המערכת אינה מנחשת התאמות.
+                    {messages.rehearsal.personalization.mappingDescription}
                   </p>
                   <div className="campaign-variable-mapping-grid">
                     {templateVariables.map((variableNumber) => (
@@ -343,15 +368,25 @@ export function CampaignDraftComposer() {
                             markChanged();
                           }}
                         >
-                          <option value="">בחירת עמודת מקור</option>
+                          <option value="">
+                            {
+                              messages.rehearsal.personalization
+                                .chooseSourceColumn
+                            }
+                          </option>
                           {contactImportDraft.headers.map(
                             (header, columnIndex) => (
                               <option
                                 value={String(columnIndex)}
                                 key={`variable-${variableNumber}-column-${columnIndex}`}
                               >
-                                {header || "עמודה ללא שם"} · עמודה{" "}
-                                {columnIndex + 1}
+                                {header ||
+                                  messages.rehearsal.personalization
+                                    .unnamedColumn}{" "}
+                                ·{" "}
+                                {messages.rehearsal.personalization.column(
+                                  columnIndex + 1,
+                                )}
                               </option>
                             ),
                           )}
@@ -363,18 +398,17 @@ export function CampaignDraftComposer() {
               ) : (
                 <div className="inline-notice success" role="status">
                   <span aria-hidden="true">✓</span>
-                  <p>
-                    גוף התבנית אינו כולל משתנים ולכן אינו דורש מיפוי עמודות.
-                  </p>
+                  <p>{messages.rehearsal.personalization.noBodyVariables}</p>
                 </div>
               )}
 
               {hasDynamicUrl ? (
                 <fieldset className="campaign-variable-mapping campaign-url-mapping">
-                  <legend>מיפוי Dynamic URL נפרד</legend>
+                  <legend>
+                    {messages.rehearsal.personalization.dynamicUrlLegend}
+                  </legend>
                   <p>
-                    משתנה ה־URL אינו משתנה גוף. יש לבחור עבורו עמודת מקור
-                    עצמאית.
+                    {messages.rehearsal.personalization.dynamicUrlDescription}
                   </p>
                   <div className="campaign-variable-mapping-grid">
                     <label>
@@ -390,15 +424,25 @@ export function CampaignDraftComposer() {
                           markChanged();
                         }}
                       >
-                        <option value="">בחירת עמודת מקור</option>
+                        <option value="">
+                          {
+                            messages.rehearsal.personalization
+                              .chooseSourceColumn
+                          }
+                        </option>
                         {contactImportDraft.headers.map(
                           (header, columnIndex) => (
                             <option
                               value={String(columnIndex)}
                               key={`url-column-${columnIndex}`}
                             >
-                              {header || "עמודה ללא שם"} · עמודה{" "}
-                              {columnIndex + 1}
+                              {header ||
+                                messages.rehearsal.personalization
+                                  .unnamedColumn}{" "}
+                              ·{" "}
+                              {messages.rehearsal.personalization.column(
+                                columnIndex + 1,
+                              )}
                             </option>
                           ),
                         )}
@@ -406,7 +450,9 @@ export function CampaignDraftComposer() {
                     </label>
                   </div>
                   <div className="campaign-url-preview">
-                    <span>URL עבור השורה שנבחרה</span>
+                    <span>
+                      {messages.rehearsal.personalization.selectedRowUrl}
+                    </span>
                     <code dir="ltr">{personalizedUrlPreview}</code>
                   </div>
                   <div
@@ -424,17 +470,19 @@ export function CampaignDraftComposer() {
                     </span>
                     <p>
                       {dynamicUrlColumnIndex === null
-                        ? "טרם נבחרה עמודה למשתנה ה־URL."
+                        ? messages.rehearsal.personalization.urlColumnMissing
                         : dynamicUrlContactValue
-                          ? "משתנה ה־URL קיבל ערך מהשורה שנבחרה."
-                          : "העמודה מופתה, אך בשורה שנבחרה אין ערך עבור ה־URL."}
+                          ? messages.rehearsal.personalization.urlValueReady
+                          : messages.rehearsal.personalization.urlValueMissing}
                     </p>
                   </div>
                 </fieldset>
               ) : null}
 
               <div className="personalized-message-preview">
-                <span>Preview עבור השורה שנבחרה</span>
+                <span>
+                  {messages.rehearsal.personalization.selectedRowPreview}
+                </span>
                 {templateDraft.header.trim() ? (
                   <h4>{templateDraft.header}</h4>
                 ) : null}
@@ -478,25 +526,24 @@ export function CampaignDraftComposer() {
                 <div className="inline-notice warning" role="status">
                   <span aria-hidden="true">!</span>
                   <p>
-                    נותרו {unmappedVariables.length} משתנים ללא עמודת מקור.
-                    הם נשארים מסומנים בתוך ה־Preview.
+                    {messages.rehearsal.personalization.unmappedVariables(
+                      unmappedVariables.length,
+                    )}
                   </p>
                 </div>
               ) : emptyContactValues.length > 0 ? (
                 <div className="inline-notice warning" role="status">
                   <span aria-hidden="true">!</span>
                   <p>
-                    בשורה שנבחרה חסרים ערכים עבור {emptyContactValues.length}
-                    {" "}משתנים. לא הוזנו ערכי ברירת מחדל.
+                    {messages.rehearsal.personalization.emptyValues(
+                      emptyContactValues.length,
+                    )}
                   </p>
                 </div>
               ) : (
                 <div className="inline-notice success" role="status">
                   <span aria-hidden="true">✓</span>
-                  <p>
-                    כל משתני ה־Preview קיבלו ערך מהשורה שנבחרה. זה עדיין אינו
-                    אישור לשליחה.
-                  </p>
+                  <p>{messages.rehearsal.personalization.previewComplete}</p>
                 </div>
               )}
 
@@ -504,9 +551,9 @@ export function CampaignDraftComposer() {
                 <div className="card-header">
                   <div>
                     <span className="card-kicker">
-                      Audience personalization audit
+                      {messages.rehearsal.audit.kicker}
                     </span>
-                    <h4>שלמות ערכי ההתאמה בכל הקובץ</h4>
+                    <h4>{messages.rehearsal.audit.title}</h4>
                   </div>
                   <span
                     className={`status-pill ${
@@ -514,8 +561,8 @@ export function CampaignDraftComposer() {
                     }`}
                   >
                     {audienceAudit.mappingComplete
-                      ? "נבדק מקומית"
-                      : "ממתין למיפוי"}
+                      ? messages.rehearsal.audit.completeStatus
+                      : messages.rehearsal.audit.pendingStatus}
                   </span>
                 </div>
 
@@ -523,23 +570,25 @@ export function CampaignDraftComposer() {
                   <>
                     <div className="audience-audit-grid">
                       <div>
-                        <span>שורות שנבדקו</span>
+                        <span>{messages.rehearsal.audit.rowsAudited}</span>
                         <strong>{audienceAudit.auditedRows}</strong>
                       </div>
                       <div>
-                        <span>ערכים מלאים</span>
+                        <span>{messages.rehearsal.audit.completeRows}</span>
                         <strong>{audienceAudit.completeRows}</strong>
                       </div>
                       <div>
-                        <span>שורות לא שלמות</span>
+                        <span>{messages.rehearsal.audit.incompleteRows}</span>
                         <strong>{audienceAudit.incompleteRows}</strong>
                       </div>
                       <div>
-                        <span>חסרי ערכי גוף</span>
+                        <span>
+                          {messages.rehearsal.audit.missingBodyValues}
+                        </span>
                         <strong>{audienceAudit.rowsMissingBodyValues}</strong>
                       </div>
                       <div>
-                        <span>חסרי ערך URL</span>
+                        <span>{messages.rehearsal.audit.missingUrlValue}</span>
                         <strong>
                           {audienceAudit.rowsMissingDynamicUrlValue}
                         </strong>
@@ -558,17 +607,21 @@ export function CampaignDraftComposer() {
                       </span>
                       <p>
                         {audienceAudit.incompleteRows === 0
-                          ? "לכל השורות יש ערכים עבור ההתאמות שהוגדרו. לא נבדקו טלפון, Consent או כשירות לשליחה."
-                          : `${audienceAudit.incompleteRows} שורות חסרות ערכי התאמה. הן לא הוסרו ולא שונו.`}
+                          ? messages.rehearsal.audit.allComplete
+                          : messages.rehearsal.audit.incomplete(
+                              audienceAudit.incompleteRows,
+                            )}
                       </p>
                     </div>
                     {audienceAudit.issueSamples.length > 0 ? (
                       <div className="audience-issue-samples">
                         <div>
-                          <strong>שורות ראשונות לבדיקה</strong>
+                          <strong>{messages.rehearsal.audit.samplesTitle}</strong>
                           <small>
-                            מוצגות {audienceAudit.issueSamples.length} מתוך{" "}
-                            {audienceAudit.incompleteRows} שורות לא שלמות.
+                            {messages.rehearsal.audit.samplesSummary(
+                              audienceAudit.issueSamples.length,
+                              audienceAudit.incompleteRows,
+                            )}
                           </small>
                         </div>
                         <div>
@@ -585,11 +638,21 @@ export function CampaignDraftComposer() {
                                 setSelectedContactIndex(issue.rowIndex);
                                 markChanged();
                               }}
-                              aria-label={`בחירת שורה ${issue.sourceRowNumber} לתצוגה מקדימה`}
+                              aria-label={
+                                messages.rehearsal.audit.chooseRowAria(
+                                  issue.sourceRowNumber,
+                                )
+                              }
                             >
-                              <span>שורה {issue.sourceRowNumber}</span>
-                              <small>{describeAudienceIssue(issue)}</small>
-                              <b>בחירה ל־Preview</b>
+                              <span>
+                                {messages.rehearsal.audit.row(
+                                  issue.sourceRowNumber,
+                                )}
+                              </span>
+                              <small>
+                                {describeAudienceIssue(issue, messages)}
+                              </small>
+                              <b>{messages.rehearsal.audit.choosePreview}</b>
                             </button>
                           ))}
                         </div>
@@ -599,16 +662,11 @@ export function CampaignDraftComposer() {
                 ) : (
                   <div className="inline-notice warning" role="status">
                     <span aria-hidden="true">i</span>
-                    <p>
-                      יש להשלים את כל מיפויי הגוף וה־Dynamic URL לפני בדיקת
-                      השורות. טרם בוצע Audit.
-                    </p>
+                    <p>{messages.rehearsal.audit.mappingRequired}</p>
                   </div>
                 )}
 
-                <small>
-                  כפילויות נשארות שורות נפרדות. זהו Audit של ערכי התאמה בלבד.
-                </small>
+                <small>{messages.rehearsal.audit.duplicatesBoundary}</small>
               </section>
             </section>
           ) : (
@@ -616,14 +674,14 @@ export function CampaignDraftComposer() {
               <span aria-hidden="true">i</span>
               <p>
                 {!templateDraft
-                  ? "יש לשמור תחילה טיוטת Template מקומית."
-                  : "אין קובץ אנשי קשר שנבדק ונשמר ב־Workspace המקומי."}
+                  ? messages.rehearsal.boundary.templateRequired
+                  : messages.rehearsal.boundary.contactsRequired}
               </p>
             </div>
           )}
 
           <fieldset className="delivery-fieldset">
-            <legend>מועד שליחה</legend>
+            <legend>{messages.rehearsal.timing.legend}</legend>
             <label className={deliveryMode === "immediate" ? "selected" : ""}>
               <input
                 type="radio"
@@ -636,8 +694,8 @@ export function CampaignDraftComposer() {
                 }}
               />
               <span>
-                <strong>שליחה מיידית</strong>
-                <small>תופעל בעתיד רק לאחר מעבר כל בדיקות המוכנות.</small>
+                <strong>{messages.rehearsal.timing.immediate}</strong>
+                <small>{messages.rehearsal.timing.immediateDetail}</small>
               </span>
             </label>
             <label className={deliveryMode === "scheduled" ? "selected" : ""}>
@@ -652,15 +710,15 @@ export function CampaignDraftComposer() {
                 }}
               />
               <span>
-                <strong>שליחה מתוזמנת</strong>
-                <small>הזמן יומר בצד השרת לפי אזור הזמן של ה־Tenant.</small>
+                <strong>{messages.rehearsal.timing.scheduled}</strong>
+                <small>{messages.rehearsal.timing.scheduledDetail}</small>
               </span>
             </label>
           </fieldset>
 
           {deliveryMode === "scheduled" ? (
             <label>
-              <span>תאריך ושעה כפי שהוזנו</span>
+              <span>{messages.rehearsal.timing.dateTime}</span>
               <input
                 type="datetime-local"
                 value={scheduledAt}
@@ -671,8 +729,7 @@ export function CampaignDraftComposer() {
                 required
               />
               <small className="schedule-boundary-note">
-                בדיקת עבר/עתיד והמרת אזור זמן יבוצעו רק לאחר שמירת Timezone
-                מאומת ל־Tenant.
+                {messages.rehearsal.timing.timezoneBoundary}
               </small>
             </label>
           ) : null}
@@ -683,7 +740,7 @@ export function CampaignDraftComposer() {
               className="primary-button"
               disabled={!canSaveDraft}
             >
-              שמירת טיוטה מקומית
+              {messages.rehearsal.timing.save}
             </button>
             <button
               type="button"
@@ -691,7 +748,7 @@ export function CampaignDraftComposer() {
               disabled={!canSaveDraft}
               onClick={() => setReadinessChecked(true)}
             >
-              בדיקת מוכנות
+              {messages.rehearsal.timing.checkReadiness}
             </button>
           </div>
         </form>
@@ -701,8 +758,10 @@ export function CampaignDraftComposer() {
         <section className="campaign-planning-section">
           <div className="card-header">
             <div>
-              <span className="card-kicker">Planning completeness</span>
-              <h2>שלמות הטיוטה המקומית</h2>
+              <span className="card-kicker">
+                {messages.rehearsal.planning.kicker}
+              </span>
+              <h2>{messages.rehearsal.planning.title}</h2>
             </div>
             <span
               className={`readiness-score ${
@@ -716,34 +775,38 @@ export function CampaignDraftComposer() {
           <div className="planning-list">
             <PlanningItem
               complete={planningSummary.detailsComplete}
-              title="פרטי קמפיין ומועד"
+              title={messages.rehearsal.planning.detailsTitle}
               description={
                 planningSummary.detailsComplete
-                  ? "שם הקמפיין ומצב התזמון הוגדרו."
-                  : "נדרשים שם קמפיין ומועד כאשר נבחר תזמון."
+                  ? messages.rehearsal.planning.detailsComplete
+                  : messages.rehearsal.planning.detailsIncomplete
               }
             />
             <PlanningItem
               complete={planningSummary.templateDraftAvailable}
-              title="טיוטת Template מקומית"
+              title={messages.rehearsal.planning.templateTitle}
               description={
                 planningSummary.templateDraftAvailable
-                  ? `הטיוטה "${templateDraft?.name}" מחוברת לתכנון.`
-                  : "נדרשת טיוטת Template שמורה."
+                  ? messages.rehearsal.planning.templateComplete(
+                      templateDraft?.name ?? "",
+                    )
+                  : messages.rehearsal.planning.templateIncomplete
               }
             />
             <PlanningItem
               complete={planningSummary.contactSnapshotAvailable}
-              title="Contact Snapshot"
+              title={messages.rehearsal.planning.contactsTitle}
               description={
                 planningSummary.contactSnapshotAvailable
-                  ? `${contactImportDraft?.quality.totalRows ?? 0} שורות נשמרו לתכנון מקומי.`
-                  : "נדרש קובץ CSV או XLSX שמיפויו נבדק ונשמר."
+                  ? messages.rehearsal.planning.contactsComplete(
+                      contactImportDraft?.quality.totalRows ?? 0,
+                    )
+                  : messages.rehearsal.planning.contactsIncomplete
               }
             />
             <PlanningItem
               complete={planningSummary.variableMappingComplete}
-              title="מיפוי משתני Template"
+              title={messages.rehearsal.planning.mappingTitle}
               description={buildVariablePlanningDescription(
                 templateDraft !== null,
                 contactImportDraft !== null,
@@ -751,15 +814,16 @@ export function CampaignDraftComposer() {
                 missingVariableMappings,
                 hasDynamicUrl,
                 dynamicUrlColumnIndex === null,
+                messages,
               )}
             />
             <PlanningItem
               complete={planningSummary.draftSaved}
-              title="שמירת Snapshot מקומי"
+              title={messages.rehearsal.planning.snapshotTitle}
               description={
                 planningSummary.draftSaved
-                  ? "הגרסה הנוכחית נשמרה ב־Workspace."
-                  : "יש לשמור את הטיוטה לאחר סיום השינויים."
+                  ? messages.rehearsal.planning.snapshotComplete
+                  : messages.rehearsal.planning.snapshotIncomplete
               }
             />
           </div>
@@ -775,8 +839,8 @@ export function CampaignDraftComposer() {
             </span>
             <p>
               {planningSummary.isComplete
-                ? "התכנון המקומי הושלם. אין בכך אישור או הרשאה לשליחת הודעות."
-                : "אפשר לשמור טיוטה חלקית ולהשלים את הפריטים החסרים בהמשך."}
+                ? messages.rehearsal.planning.complete
+                : messages.rehearsal.planning.incomplete}
             </p>
           </div>
         </section>
@@ -785,56 +849,62 @@ export function CampaignDraftComposer() {
 
         <div className="card-header">
           <div>
-            <span className="card-kicker">Readiness gate</span>
-            <h2>תנאים לפני שליחה</h2>
+            <span className="card-kicker">
+              {messages.rehearsal.readiness.kicker}
+            </span>
+            <h2>{messages.rehearsal.readiness.title}</h2>
           </div>
           <span className="readiness-score">0/4</span>
         </div>
 
         <div className="readiness-list">
           <ReadinessItem
-            title="מספר WhatsApp מחובר"
-            description="אין כרגע WABA ומספר מאומתים."
+            title={messages.rehearsal.readiness.phoneTitle}
+            description={messages.rehearsal.readiness.phoneDescription}
           />
           <ReadinessItem
-            title="תבנית מאושרת"
+            title={messages.rehearsal.readiness.templateTitle}
             description={
               templateDraft
-                ? `הטיוטה המקומית "${templateDraft.name}" טרם אושרה על ידי Meta.`
-                : "אין טיוטה מקומית ואין תבנית שאושרה על ידי Meta."
+                ? messages.rehearsal.readiness.templateDraftPending(
+                    templateDraft.name,
+                  )
+                : messages.rehearsal.readiness.templateMissing
             }
           />
           <ReadinessItem
-            title="קהל עם הסכמה תקפה"
+            title={messages.rehearsal.readiness.audienceTitle}
             description={
               contactImportDraft
-                ? `${contactImportDraft.quality.rowsWithPhone} שורות כוללות ערך טלפון Raw; ${contactImportDraft.quality.rowsWithoutPhone} חסרות ערך ו-${contactImportDraft.quality.exactDuplicateRows} כפולות במדויק. Consent ו-Unsubscribe לא אומתו.`
-                : "מדיניות Consent ו-Unsubscribe עדיין לא הוגדרה."
+                ? messages.rehearsal.readiness.audienceSnapshot(
+                    contactImportDraft.quality.rowsWithPhone,
+                    contactImportDraft.quality.rowsWithoutPhone,
+                    contactImportDraft.quality.exactDuplicateRows,
+                  )
+                : messages.rehearsal.readiness.audienceMissing
             }
           />
           <ReadinessItem
-            title="שליחת ניסיון מוצלחת"
-            description="תתאפשר רק לאחר חיבור Meta והקמת Queue."
+            title={messages.rehearsal.readiness.testTitle}
+            description={messages.rehearsal.readiness.testDescription}
           />
         </div>
 
         {readinessChecked ? (
           <div className="inline-notice danger" role="status">
             <span aria-hidden="true">!</span>
-            <p>
-              הקמפיין אינו מוכן לשליחה. הטיוטה לא נשלחה ולא נוסף Job לתור.
-            </p>
+            <p>{messages.rehearsal.readiness.blockedNotice}</p>
           </div>
         ) : (
           <div className="campaign-cost-state">
-            <span>הערכת עלות</span>
-            <strong>לא זמינה</strong>
-            <small>נדרש ספק Meta, תמחור עדכני וקהל כשיר.</small>
+            <span>{messages.rehearsal.readiness.costLabel}</span>
+            <strong>{messages.rehearsal.readiness.costUnavailable}</strong>
+            <small>{messages.rehearsal.readiness.costDescription}</small>
           </div>
         )}
 
         <button type="button" className="primary-button" disabled>
-          השליחה חסומה
+          {messages.rehearsal.readiness.sendBlocked}
         </button>
       </aside>
     </div>
@@ -848,47 +918,61 @@ function buildVariablePlanningDescription(
   missingMappingCount: number,
   hasDynamicUrl: boolean,
   dynamicUrlMappingMissing: boolean,
+  messages: ReturnType<typeof readCampaignMessages>,
 ) {
   if (!hasTemplateDraft) {
-    return "נדרשת טיוטת Template לפני בדיקת המשתנים.";
+    return messages.rehearsal.planning.variable.templateRequired;
   }
 
   if (variableCount === 0 && !hasDynamicUrl) {
-    return "התבנית אינה כוללת משתני גוף או Dynamic URL.";
+    return messages.rehearsal.planning.variable.notRequired;
   }
 
   if (!hasContactSnapshot) {
-    return "נדרש Contact Snapshot לצורך מיפוי עמודות.";
+    return messages.rehearsal.planning.variable.contactsRequired;
   }
 
   const missingParts = [
     missingMappingCount > 0
-      ? `${missingMappingCount} משתני גוף`
+      ? messages.rehearsal.planning.variable.missingBody(
+          missingMappingCount,
+        )
       : null,
-    hasDynamicUrl && dynamicUrlMappingMissing ? "Dynamic URL" : null,
+    hasDynamicUrl && dynamicUrlMappingMissing
+      ? messages.rehearsal.planning.variable.dynamicUrl
+      : null,
   ].filter(Boolean);
 
   if (missingParts.length > 0) {
-    return `נותרו ללא מיפוי: ${missingParts.join(" ו־")}.`;
+    return messages.rehearsal.planning.variable.missing(
+      missingParts.join(messages.rehearsal.planning.variable.and),
+    );
   }
 
   if (hasDynamicUrl) {
     return variableCount > 0
-      ? `${variableCount} משתני גוף ו־Dynamic URL מופו לעמודות מקור.`
-      : "ה־Dynamic URL מופה לעמודת מקור נפרדת.";
+      ? messages.rehearsal.planning.variable.allWithUrl(variableCount)
+      : messages.rehearsal.planning.variable.urlOnly;
   }
 
-  return `כל ${variableCount} משתני הגוף מופו לעמודות מקור.`;
+  return messages.rehearsal.planning.variable.allBody(variableCount);
 }
 
-function describeAudienceIssue(issue: AudienceRowIssue) {
+function describeAudienceIssue(
+  issue: AudienceRowIssue,
+  messages: ReturnType<typeof readCampaignMessages>,
+) {
   const issueParts = [
     issue.missingBodyVariableNumbers.length > 0
-      ? `משתני גוף: ${issue.missingBodyVariableNumbers
-          .map((variableNumber) => `{{${variableNumber}}}`)
-          .join(", ")}`
+      ? messages.rehearsal.audit.bodyVariables(
+          issue.missingBodyVariableNumbers
+            .map((variableNumber) => `{{${variableNumber}}}`)
+            .join(", "),
+        )
       : null,
-    issue.missingDynamicUrlValue ? "Dynamic URL" : null,
+    issue.missingDynamicUrlValue
+      ? messages.rehearsal.audit.dynamicUrl
+      : null,
   ].filter(Boolean);
 
   return issueParts.join(" · ");
@@ -898,6 +982,7 @@ function buildContactPreviewLabel(
   row: string[],
   rowIndex: number,
   mapping: ContactColumnMapping,
+  fallbackRow: (rowNumber: number) => string,
 ) {
   const name = [
     readContactValue(row, mapping, "firstName"),
@@ -907,7 +992,10 @@ function buildContactPreviewLabel(
     .join(" ");
   const phoneNumber = readContactValue(row, mapping, "phoneNumber");
 
-  return [name, phoneNumber].filter(Boolean).join(" · ") || `שורה ${rowIndex + 1}`;
+  return (
+    [name, phoneNumber].filter(Boolean).join(" · ") ||
+    fallbackRow(rowIndex + 1)
+  );
 }
 
 function readContactValue(

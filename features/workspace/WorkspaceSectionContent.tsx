@@ -1,6 +1,6 @@
 "use client";
 
-import { CampaignManager } from "../campaigns/CampaignManager";
+import { lazy, Suspense } from "react";
 import { BotFlowBuilder } from "../bot/BotFlowBuilder";
 import { AiAgentEditor } from "../ai/AiAgentEditor";
 import {
@@ -77,6 +77,15 @@ import {
 import {
   readTemplateEditorMessages,
 } from "../templates/templateEditorMessages";
+import {
+  readCampaignPageMessages,
+} from "../campaigns/campaignPageMessages";
+
+const CampaignManager = lazy(() =>
+  import("../campaigns/CampaignManager").then((module) => ({
+    default: module.CampaignManager,
+  })),
+);
 
 export function WorkspaceSectionContent({
   activeSection,
@@ -196,6 +205,7 @@ export function WorkspaceSectionContent({
           {activeSection === "campaigns" ? (
             <Campaigns
               authEnabled={authEnabled}
+              language={language}
               initialCampaigns={initialCampaigns}
               initialTemplates={
                 initialCampaignTemplates
@@ -338,6 +348,7 @@ function Templates({
 
 function Campaigns({
   authEnabled,
+  language,
   initialCampaigns,
   initialTemplates,
   initialAudiences,
@@ -346,6 +357,7 @@ function Campaigns({
   deliveryStatus,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialCampaigns: readonly CampaignView[];
   initialTemplates:
     readonly CampaignTemplateOptionView[];
@@ -355,21 +367,33 @@ function Campaigns({
   deliveryStatus:
     CampaignDeliveryReadinessStatus;
 }) {
+  const messages = readCampaignPageMessages(language);
+
   return (
     <FeaturePage
-      eyebrow="שליחה ותזמון"
-      title="קמפיינים"
-      description="הכנת טיוטה, בחירת מועד ובדיקת התנאים הנדרשים לפני שליחה."
+      eyebrow={messages.eyebrow}
+      title={messages.title}
+      description={messages.description}
     >
-      <CampaignManager
-        authEnabled={authEnabled}
-        initialCampaigns={initialCampaigns}
-        initialTemplates={initialTemplates}
-        initialAudiences={initialAudiences}
-        initialStatus={initialStatus}
-        canWrite={canWrite}
-        deliveryStatus={deliveryStatus}
-      />
+      <Suspense
+        fallback={
+          <div className="inline-notice" role="status">
+            <span aria-hidden="true">i</span>
+            <p>{messages.loading}</p>
+          </div>
+        }
+      >
+        <CampaignManager
+          authEnabled={authEnabled}
+          language={language}
+          initialCampaigns={initialCampaigns}
+          initialTemplates={initialTemplates}
+          initialAudiences={initialAudiences}
+          initialStatus={initialStatus}
+          canWrite={canWrite}
+          deliveryStatus={deliveryStatus}
+        />
+      </Suspense>
     </FeaturePage>
   );
 }

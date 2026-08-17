@@ -412,6 +412,17 @@ Quick Reply, ‏Call to Action וכל מצבי השמירה זמינים בעב�
 וערבית, `LTR/RTL`, שגיאת תחביר משתנה ו־Console נקי. בדיקות Boundary
 מונעות החזרת טקסט עברי קשיח לעורך ול־Validation המשותף.
 
+4.1.13 Slice תשיעי של לוקליזציה הושלם בשני מסלולי Campaigns: המסלול
+הקבוע ב־D1 וה־Rehearsal המקומי. יצירת טיוטה, בחירת Template וקהל,
+Personalization, ‏Dynamic URL, ‏Audience audit, תזמון, Planning,
+Readiness, רשימת הקמפיינים וכל תוצאות השמירה וההפעלה זמינים בעברית,
+אנגלית וערבית. המילון המוקלד מכסה שבעה מצבי Campaign, ‏11 תוצאות שמירה
+ו־10 תוצאות הפעלה בלי לשנות את חסימות Consent, ‏Delivery או Adapter.
+בדיקות Server-rendered HTML ו־Chromium אימתו את ה־Rehearsal האנגלי
+והערבי, פעולה Fail-closed של Readiness, ‏LTR/RTL ו־Console נקי. כדי
+לא להגדיל את מעטפת ה־Workspace, ‏Campaigns פוצל ל־Route chunk של
+כ־68KB וה־Chunk הראשי ירד מכ־500KB לכ־436KB ללא העלאת סף האזהרה.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -435,10 +446,11 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
-ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts ו־Templates,
+ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates
+ו־Campaigns,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **15–24 שעות
+הוא **12–20 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**23–38 שעות**.
+הופך ל־**20–34 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.
