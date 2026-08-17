@@ -415,6 +415,7 @@ export default function WorkspaceApp({
         <MetaConnectionPanel
           connection={initialMetaConnection}
           embeddedSignup={initialMetaEmbeddedSignup}
+          language={language}
           onClose={() => setMetaPanelOpen(false)}
         />
       ) : null}

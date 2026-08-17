@@ -14,6 +14,13 @@ import {
 import {
   presentMetaConnection,
 } from "../features/workspace/metaConnectionPresentation.ts";
+import {
+  isMetaEmbeddedSignupSdkErrorStatus,
+  metaEmbeddedSignupSdkErrorStatuses,
+  metaEmbeddedSignupSdkStatuses,
+  metaSignupAttemptStatuses,
+  readMetaConnectionPanelMessages,
+} from "../features/workspace/metaConnectionPanelMessages.ts";
 
 const projectRoot = new URL("../", import.meta.url);
 
@@ -99,13 +106,78 @@ test("localizes every Meta presentation without changing readiness semantics", (
   );
 });
 
+test("localizes every Meta connection panel SDK and attempt state", () => {
+  assert.equal(metaEmbeddedSignupSdkErrorStatuses.length, 7);
+  assert.equal(metaEmbeddedSignupSdkStatuses.length, 10);
+  assert.equal(metaSignupAttemptStatuses.length, 19);
+
+  for (const errorStatus of metaEmbeddedSignupSdkErrorStatuses) {
+    assert.equal(
+      isMetaEmbeddedSignupSdkErrorStatus(errorStatus),
+      true,
+    );
+  }
+
+  assert.equal(
+    isMetaEmbeddedSignupSdkErrorStatus("UNKNOWN_SDK_ERROR"),
+    false,
+  );
+
+  for (const language of ["he", "en", "ar"]) {
+    const messages = readMetaConnectionPanelMessages(language);
+
+    assert.equal(
+      Object.keys(messages.sdkDetails).length,
+      metaEmbeddedSignupSdkStatuses.length + 1,
+    );
+    assert.equal(
+      Object.keys(messages.attemptDetails).length,
+      metaSignupAttemptStatuses.length,
+    );
+    assert.ok(
+      metaEmbeddedSignupSdkStatuses.every(
+        (status) =>
+          messages.sdkDetails[status].trim().length > 0,
+      ),
+    );
+    assert.ok(
+      metaSignupAttemptStatuses.every((status) =>
+        status === "idle"
+          ? messages.attemptDetails[status] === null
+          : messages.attemptDetails[status].trim().length > 0,
+      ),
+    );
+    assert.ok(
+      Object.values(messages.actions).every(
+        (label) => label.trim().length > 0,
+      ),
+    );
+  }
+
+  assert.equal(
+    readMetaConnectionPanelMessages("en").header.title,
+    "Connect Meta and WhatsApp",
+  );
+  assert.equal(
+    readMetaConnectionPanelMessages("ar").header.title,
+    "ربط Meta وWhatsApp",
+  );
+});
+
 test("passes the validated workspace language through setup feature boundaries", async () => {
-  const [workspaceApp, sectionContent, dashboard, onboarding] =
+  const [
+    workspaceApp,
+    sectionContent,
+    dashboard,
+    onboarding,
+    metaPanel,
+  ] =
     await Promise.all([
       readSource("features/workspace/WorkspaceApp.tsx"),
       readSource("features/workspace/WorkspaceSectionContent.tsx"),
       readSource("features/workspace/WorkspaceDashboard.tsx"),
       readSource("features/workspace/WorkspaceOnboarding.tsx"),
+      readSource("features/workspace/MetaConnectionPanel.tsx"),
     ]);
 
   assert.match(
@@ -137,4 +209,21 @@ test("passes the validated workspace language through setup feature boundaries",
     onboarding,
     /presentMetaConnection\([\s\S]{0,80}language/,
   );
+  assert.match(
+    workspaceApp,
+    /<MetaConnectionPanel[\s\S]{0,180}language=\{language\}/,
+  );
+  assert.match(
+    metaPanel,
+    /language: InterfaceLanguage/,
+  );
+  assert.match(
+    metaPanel,
+    /readMetaConnectionPanelMessages\(language\)/,
+  );
+  assert.match(
+    metaPanel,
+    /presentMetaConnection\([\s\S]{0,80}language/,
+  );
+  assert.doesNotMatch(metaPanel, /[\u0590-\u05ff]/);
 });

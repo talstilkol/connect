@@ -10,14 +10,14 @@ import type {
   MetaEmbeddedSignupView,
 } from "../../shared/domain/metaEmbeddedSignupView";
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import type {
   MetaConnectionView,
 } from "../../shared/domain/metaConnectionView";
 import {
   completeMetaEmbeddedSignupAction,
 } from "../../server/meta/metaEmbeddedSignupActions";
-import type {
-  MetaEmbeddedSignupCompletionResult,
-} from "../../server/meta/metaEmbeddedSignupCompletion";
 import {
   createMetaEmbeddedSignupAttemptCoordinator,
   launchMetaEmbeddedSignup,
@@ -27,21 +27,16 @@ import { presentMetaConnection } from
   "./metaConnectionPresentation";
 import {
   metaEmbeddedSignupSdkLoader,
-  type MetaEmbeddedSignupSdkErrorCode,
   type MetaFacebookSdk,
 } from "./metaEmbeddedSignupSdk";
+import {
+  isMetaEmbeddedSignupSdkErrorStatus,
+  readMetaConnectionPanelMessages,
+  type MetaEmbeddedSignupSdkStatus,
+  type MetaSignupAttemptStatus,
+} from "./metaConnectionPanelMessages";
 import { useAccessibleDialog } from
   "./useAccessibleDialog";
-
-type MetaSignupAttemptStatus =
-  | "idle"
-  | "launching"
-  | "awaiting-results"
-  | "submitting"
-  | "client-cancelled"
-  | "client-error"
-  | "unsupported-flow"
-  | MetaEmbeddedSignupCompletionResult["status"];
 
 interface ActiveMetaSignupAttempt {
   cleanup: () => void;
@@ -53,14 +48,20 @@ const META_AUTHORIZATION_CODE_TIMEOUT_MS = 25_000;
 export function MetaConnectionPanel({
   connection,
   embeddedSignup,
+  language,
   onClose,
 }: {
   connection: MetaConnectionView;
   embeddedSignup: MetaEmbeddedSignupView;
+  language: InterfaceLanguage;
   onClose: () => void;
 }) {
   const router = useRouter();
-  const presentation = presentMetaConnection(connection);
+  const presentation = presentMetaConnection(
+    connection,
+    language,
+  );
+  const messages = readMetaConnectionPanelMessages(language);
   const hasAssetSnapshot = [
     "pending",
     "connected",
@@ -71,12 +72,8 @@ export function MetaConnectionPanel({
   ].includes(connection.status);
   const hasEmbeddedSignupConfiguration =
     embeddedSignup.status === "configured";
-  const [sdkStatus, setSdkStatus] = useState<
-    | "idle"
-    | "loading"
-    | "ready"
-    | MetaEmbeddedSignupSdkErrorCode
-  >(() =>
+  const [sdkStatus, setSdkStatus] =
+    useState<MetaEmbeddedSignupSdkStatus>(() =>
     embeddedSignup.status === "configured" &&
     !presentation.setupComplete
       ? "loading"
@@ -120,12 +117,15 @@ export function MetaConnectionPanel({
         }
 
         sdkRef.current = null;
-        setSdkStatus(
+        const errorCode =
           error &&
-            typeof error === "object" &&
-            "code" in error &&
-            typeof error.code === "string"
-            ? (error.code as MetaEmbeddedSignupSdkErrorCode)
+          typeof error === "object" &&
+          "code" in error
+            ? error.code
+            : null;
+        setSdkStatus(
+          isMetaEmbeddedSignupSdkErrorStatus(errorCode)
+            ? errorCode
             : "LOAD_FAILED",
         );
       });
@@ -253,55 +253,51 @@ export function MetaConnectionPanel({
   const sdkReady =
     presentation.setupComplete || sdkStatus === "ready";
   const sdkDetail = presentation.setupComplete
-    ? "החיבור כבר פעיל ואין צורך בטעינה מחדש"
-    : sdkStatus === "ready"
-      ? "Meta JavaScript SDK נטען ואותחל"
-      : sdkStatus === "loading"
-        ? "Meta JavaScript SDK נטען כעת"
-        : sdkStatus === "idle"
-          ? "הטעינה ממתינה לתצורת Embedded Signup תקינה"
-          : "טעינת Meta JavaScript SDK נכשלה באופן בטוח";
+    ? messages.sdkDetails["setup-complete"]
+    : messages.sdkDetails[sdkStatus];
   const steps = [
     {
-      title: "הגדרת ספק ומזהי Meta",
+      title: messages.steps.provider.title,
       detail: hasEmbeddedSignupConfiguration
-        ? `Meta App ו־Graph API ${embeddedSignup.apiVersion} הוגדרו בצד השרת`
+        ? messages.steps.provider.configured(
+            embeddedSignup.apiVersion,
+          )
         : embeddedSignup.status === "configuration-invalid"
-          ? "הגדרת Embedded Signup חלקית או לא תקינה"
+          ? messages.steps.provider.invalid
           : hasAssetSnapshot
-        ? "נשמר Snapshot מאומת בצד השרת"
-        : "החלטה ופרטי Meta App עדיין נדרשים",
+            ? messages.steps.provider.snapshot
+            : messages.steps.provider.required,
       complete:
         hasEmbeddedSignupConfiguration || hasAssetSnapshot,
     },
     {
-      title: "טעינת Meta JavaScript SDK",
+      title: messages.steps.sdk.title,
       detail: sdkDetail,
       complete: sdkReady,
     },
     {
-      title: "חוזה Embedded Signup v4",
+      title: messages.steps.contract.title,
       detail: presentation.setupComplete
-        ? "תוצאת החיבור כבר אומתה ונשמרה בצד השרת"
+        ? messages.steps.contract.verified
         : sdkStatus === "ready"
-          ? "FB.login ואירועי Meta מוכנים להעברה מיידית לשרת"
-          : "קליטת האירועים תופעל רק לאחר טעינת SDK תקינה",
+          ? messages.steps.contract.ready
+          : messages.steps.contract.waiting,
       complete:
         presentation.setupComplete ||
         attemptStatus === "submitting" ||
         attemptStatus === "connected",
     },
     {
-      title: "Business Portfolio, WABA ומספר",
+      title: messages.steps.assets.title,
       detail: hasAssetSnapshot
-        ? "המזהים נשמרו ואינם מוצגים בדפדפן"
-        : "השלב יבוצע דרך Embedded Signup",
+        ? messages.steps.assets.stored
+        : messages.steps.assets.embeddedSignup,
       complete: hasAssetSnapshot,
     },
     {
-      title: "Webhook ואימות החיבור",
+      title: messages.steps.webhook.title,
       detail: presentation.setupComplete
-        ? "הרשמת ה־Webhook אושרה"
+        ? messages.steps.webhook.verified
         : presentation.statusLabel,
       complete: presentation.setupComplete,
     },
@@ -312,47 +308,14 @@ export function MetaConnectionPanel({
     "submitting",
   ].includes(attemptStatus);
   const attemptDetail =
-    attemptStatus === "launching"
-      ? "פותח את חלון Meta"
-      : attemptStatus === "awaiting-results"
-        ? "ממתין להשלמת החיבור ב־Meta"
-        : attemptStatus === "submitting"
-          ? "מאמת ושומר את החיבור בצד השרת"
-          : attemptStatus === "client-cancelled"
-            ? "תהליך החיבור בוטל לפני השלמה"
-            : attemptStatus === "unsupported-flow"
-              ? "Meta החזירה זרימה שאינה נתמכת ב־MVP"
-              : attemptStatus === "authorization-failed"
-                ? "הקוד של Meta נדחה או פג תוקף"
-                : attemptStatus === "verification-failed"
-                  ? "נכסי Meta לא עברו אימות בעלות"
-                  : attemptStatus === "subscription-failed"
-                    ? "הרשמת ה־WABA נכשלה וניתן לנסות שוב"
-                    : attemptStatus === "permission-denied" ||
-                        attemptStatus === "unauthenticated" ||
-                        attemptStatus === "onboarding-required" ||
-                        attemptStatus ===
-                          "tenant-selection-required"
-                      ? "אין הרשאה להשלים את החיבור בסביבת העבודה"
-                      : attemptStatus ===
-                            "configuration-required" ||
-                          attemptStatus ===
-                            "configuration-invalid"
-                        ? "תצורת השרת לחיבור Meta אינה מלאה"
-                        : attemptStatus === "validation-error" ||
-                            attemptStatus === "client-error" ||
-                            attemptStatus === "server-error"
-                          ? "החיבור לא הושלם באופן בטוח"
-                          : attemptStatus === "connected"
-                            ? "החיבור אומת ונשמר"
-                            : null;
+    messages.attemptDetails[attemptStatus];
 
   return (
     <div className="modal-layer" role="presentation">
       <button
         type="button"
         className="modal-backdrop"
-        aria-label="סגירת חלון חיבור"
+        aria-label={messages.aria.closeBackdrop}
         tabIndex={-1}
         onClick={onClose}
       />
@@ -367,13 +330,15 @@ export function MetaConnectionPanel({
       >
         <div className="panel-header">
           <div>
-            <span className="card-kicker">חיבור רשמי</span>
-            <h2 id="meta-title">חיבור Meta ו־WhatsApp</h2>
+            <span className="card-kicker">
+              {messages.header.kicker}
+            </span>
+            <h2 id="meta-title">{messages.header.title}</h2>
           </div>
           <button
             type="button"
             className="close-button"
-            aria-label="סגירה"
+            aria-label={messages.aria.closeButton}
             data-dialog-initial-focus
             onClick={onClose}
           >
@@ -426,7 +391,7 @@ export function MetaConnectionPanel({
         ) : null}
         <div className="panel-footer">
           <button type="button" className="secondary-button" onClick={onClose}>
-            סגירה
+            {messages.actions.close}
           </button>
           <button
             type="button"
@@ -441,29 +406,29 @@ export function MetaConnectionPanel({
             onClick={startMetaEmbeddedSignup}
           >
             {presentation.setupComplete
-              ? "החיבור פעיל"
+              ? messages.actions.active
               : attemptStatus === "launching"
-                ? "פותח את Meta"
+                ? messages.actions.launching
                 : attemptStatus === "awaiting-results"
-                  ? "ממתין ל־Meta"
+                  ? messages.actions.awaitingResults
                   : attemptStatus === "submitting"
-                    ? "מאמת את החיבור"
+                    ? messages.actions.submitting
                     : attemptStatus === "connected"
-                      ? "החיבור הושלם"
+                      ? messages.actions.connected
               : hasEmbeddedSignupConfiguration
                 ? sdkStatus === "loading"
-                  ? "טוען Meta SDK"
+                  ? messages.actions.sdkLoading
                   : sdkStatus === "ready"
                     ? attemptStatus === "idle"
-                      ? "חיבור Meta ו־WhatsApp"
-                      : "ניסיון חוזר לחיבור Meta"
+                      ? messages.actions.connect
+                      : messages.actions.retry
                     : sdkStatus === "idle"
-                      ? "טעינת Meta SDK ממתינה"
-                      : "טעינת Meta SDK נכשלה"
+                      ? messages.actions.sdkWaiting
+                      : messages.actions.sdkFailed
                 : embeddedSignup.status ===
                     "configuration-invalid"
-                  ? "הגדרת Meta אינה תקינה"
-                  : "פתיחת Meta טרם זמינה"}
+                  ? messages.actions.invalidConfiguration
+                  : messages.actions.unavailable}
           </button>
         </div>
       </section>

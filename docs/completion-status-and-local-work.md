@@ -380,8 +380,16 @@ Locale אופציונלי ומדויק מ־`?lang=he|en|ar`, מתרגם Metadata
 בשלוש השפות בלי לשנות Tone או Readiness, וחצי הפעולה מתהפכים ב־LTR.
 בדיקות Server-rendered HTML ו־Chromium אימתו Dashboard אנגלי,
 Onboarding אנגלי וערבי, Locale מתמשך, Labels נגישים, RTL ו־Console
-נקי. חלון Embedded Signup עצמו נשאר בעברית ונחשב Slice תפעולי נפרד;
-גם יתר Feature pages ו־Admin עדיין לא תורגמו.
+נקי. יתר Feature pages ו־Admin עדיין לא תורגמו בשלב זה.
+
+4.1.10 Slice שישי של לוקליזציה הושלם בחלון Meta Embedded Signup.
+מילון Feature תלת־לשוני מכסה את כותרת ה־Dialog, Labels נגישים, חמשת
+שלבי החיבור, כל 10 מצבי טעינת ה־SDK וכל 19 מצבי ניסיון החיבור. קוד
+שגיאת SDK לא מוכר נכשל סגור ל־`LOAD_FAILED` במקום ליצור טקסט חסר.
+שפת ה־Workspace עוברת לחלון וגם ל־Meta Presentation הקיים בלי לשנות
+Readiness, הרשאות, Timeouts או פעולות שרת. בדיקות Boundary מונעות
+החזרת טקסט עברי קשיח לרכיב. Chromium אימת חלון אנגלי וערבי, `RTL`
+מחושב, Focus ראשוני, סגירת `Escape`, החזרת Focus ו־Console נקי.
 
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
@@ -406,10 +414,10 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
-ה־Dashboard וה־Onboarding,
+ה־Dashboard, ה־Onboarding וחלון Embedded Signup,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **26–43 שעות
+הוא **23–38 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**34–57 שעות**.
+הופך ל־**31–52 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.
