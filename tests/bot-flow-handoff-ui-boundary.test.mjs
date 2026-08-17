@@ -69,7 +69,7 @@ test("submits only a bounded handoff reason and derives the four graph identitie
 
   assert.match(
     builder,
-    /const draftInput = handoffEnabled\s*\? \{/,
+    /: handoffEnabled\s*\? \{/,
   );
   assert.match(
     builder,

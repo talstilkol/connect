@@ -55,6 +55,14 @@ import {
   readBotFlowTwoStepButtonBranches,
   type BotFlowTwoStepButtonMenuEditorDraft,
 } from "../../shared/domain/botFlowTwoStepButtonMenuEditor";
+import {
+  readKeywordGraphBotFlowComposerDraft,
+} from "../../shared/domain/botFlowGraphDraft";
+import {
+  createBotFlowGraphEditorDraft,
+  isBotFlowGraphEditorDraftComplete,
+  type BotFlowGraphEditorDraft,
+} from "../../shared/domain/botFlowGraphEditor";
 import type {
   BotFlowDetailsView,
   BotFlowDirectoryStatus,
@@ -81,6 +89,9 @@ import {
 import {
   BotFlowHandoffEditor,
 } from "./BotFlowHandoffEditor";
+import {
+  BotFlowGraphEditor,
+} from "./BotFlowGraphEditor";
 import {
   BotFlowReplySequenceEditor,
 } from "./BotFlowReplySequenceEditor";
@@ -184,7 +195,29 @@ function splitKeywords(value: string): string[] {
 
 function readEditableComposerDraft(
   definition: ValidatedBotFlowDefinition,
+  preferGraph = false,
 ) {
+  const preferredGraphDraft = preferGraph
+    ? readKeywordGraphBotFlowComposerDraft(
+        definition,
+      )
+    : null;
+
+  if (preferredGraphDraft) {
+    return {
+      kind: "graph" as const,
+      name: preferredGraphDraft.name,
+      keywords: preferredGraphDraft.keywords,
+      matchMode: preferredGraphDraft.matchMode,
+      replyTexts: [],
+      buttonMenu: null,
+      twoStepButtonMenu: null,
+      graphDraft: preferredGraphDraft,
+      condition: null,
+      handoffReason: null,
+    };
+  }
+
   const handoff =
     readKeywordHandoffBotFlowComposerDraft(
       definition,
@@ -199,6 +232,7 @@ function readEditableComposerDraft(
       replyTexts: [],
       buttonMenu: null,
       twoStepButtonMenu: null,
+      graphDraft: null,
       condition: null,
       handoffReason: handoff.handoffReason,
     };
@@ -218,6 +252,7 @@ function readEditableComposerDraft(
       replyTexts: condition.introTexts,
       buttonMenu: null,
       twoStepButtonMenu: null,
+      graphDraft: null,
       condition: condition.condition,
       handoffReason: null,
     };
@@ -237,6 +272,7 @@ function readEditableComposerDraft(
       replyTexts: twoStepButtonMenu.introTexts,
       buttonMenu: null,
       twoStepButtonMenu,
+      graphDraft: null,
       condition: null,
       handoffReason: null,
     };
@@ -256,6 +292,7 @@ function readEditableComposerDraft(
       replyTexts: buttonMenu.introTexts,
       buttonMenu,
       twoStepButtonMenu: null,
+      graphDraft: null,
       condition: null,
       handoffReason: null,
     };
@@ -266,12 +303,33 @@ function readEditableComposerDraft(
       definition,
     );
 
-  return sequence
+  if (sequence) {
+    return {
+      kind: "sequence" as const,
+      ...sequence,
+      buttonMenu: null,
+      twoStepButtonMenu: null,
+      graphDraft: null,
+      condition: null,
+      handoffReason: null,
+    };
+  }
+
+  const graphDraft =
+    readKeywordGraphBotFlowComposerDraft(
+      definition,
+    );
+
+  return graphDraft
     ? {
-        kind: "sequence" as const,
-        ...sequence,
+        kind: "graph" as const,
+        name: graphDraft.name,
+        keywords: graphDraft.keywords,
+        matchMode: graphDraft.matchMode,
+        replyTexts: [],
         buttonMenu: null,
         twoStepButtonMenu: null,
+        graphDraft,
         condition: null,
         handoffReason: null,
       }
@@ -301,6 +359,9 @@ export function BotFlowBuilder({
         initialVersion.definition,
       )
     : null;
+  const preferGraphEditorRef = useRef(
+    initialComposerDraft?.kind === "graph",
+  );
   const [name, setName] = useState(
     initialComposerDraft?.name ?? "",
   );
@@ -343,6 +404,14 @@ export function BotFlowBuilder({
           )
         : null,
     );
+  const [graphDraft, setGraphDraft] =
+    useState<BotFlowGraphEditorDraft | null>(
+      initialComposerDraft?.kind === "graph"
+        ? createBotFlowGraphEditorDraft(
+            initialComposerDraft.graphDraft,
+          )
+        : null,
+    );
   const [condition, setCondition] =
     useState<KeywordConditionDraft | null>(
       initialComposerDraft?.kind === "condition"
@@ -363,6 +432,8 @@ export function BotFlowBuilder({
     useState(false);
   const [focusHandoffOnMount, setFocusHandoffOnMount] =
     useState(false);
+  const [focusGraphOnMount, setFocusGraphOnMount] =
+    useState(false);
   const addButtonMenuButtonRef =
     useRef<HTMLButtonElement>(null);
   const addConditionButtonRef =
@@ -370,6 +441,8 @@ export function BotFlowBuilder({
   const addTwoStepButtonRef =
     useRef<HTMLButtonElement>(null);
   const addHandoffButtonRef =
+    useRef<HTMLButtonElement>(null);
+  const addGraphButtonRef =
     useRef<HTMLButtonElement>(null);
   const focusAddButtonAfterRemovalRef =
     useRef(false);
@@ -397,6 +470,11 @@ export function BotFlowBuilder({
   const [isPublishing, startPublishing] =
     useTransition();
   const currentVersion = latestVersion(details);
+  const storedGraphDraft = currentVersion
+    ? readKeywordGraphBotFlowComposerDraft(
+        currentVersion.definition,
+      )
+    : null;
   const handoffEnabled = handoffReason !== null;
   const matchedConditionHandoffReason =
     condition?.matchedHandoffReason ?? null;
@@ -464,6 +542,9 @@ export function BotFlowBuilder({
               option.replyText.trim().length > 0,
           ),
       ));
+  const graphDraftComplete =
+    graphDraft === null ||
+    isBotFlowGraphEditorDraftComplete(graphDraft);
   const conditionComplete =
     condition === null ||
     (condition.value.trim().length > 0 &&
@@ -484,12 +565,14 @@ export function BotFlowBuilder({
     !unsupportedDefinition &&
     name.trim().length > 0 &&
     keywords.length > 0 &&
-    (handoffEnabled
-      ? handoffReason !== ""
-      : replyTexts.every(
-          (replyText) =>
-            replyText.trim().length > 0,
-        )) &&
+    (graphDraft
+      ? graphDraftComplete
+      : handoffEnabled
+        ? handoffReason !== ""
+        : replyTexts.every(
+            (replyText) =>
+              replyText.trim().length > 0,
+          )) &&
     buttonMenuComplete &&
     twoStepButtonMenuComplete &&
     conditionComplete &&
@@ -564,6 +647,7 @@ export function BotFlowBuilder({
     const draft = nextVersion
       ? readEditableComposerDraft(
           nextVersion.definition,
+          preferGraphEditorRef.current,
         )
       : null;
 
@@ -598,6 +682,13 @@ export function BotFlowBuilder({
           )
         : null,
     );
+    setGraphDraft(
+      draft?.kind === "graph"
+        ? createBotFlowGraphEditorDraft(
+            draft.graphDraft,
+          )
+        : null,
+    );
     setCondition(
       draft?.kind === "condition"
         ? draft.condition
@@ -612,12 +703,14 @@ export function BotFlowBuilder({
     setFocusConditionOnMount(false);
     setFocusTwoStepOnMount(false);
     setFocusHandoffOnMount(false);
+    setFocusGraphOnMount(false);
     setUnsupportedDefinition(!draft);
     setDirty(false);
     setEditorAnnouncement("");
   };
 
   const beginNewFlow = () => {
+    preferGraphEditorRef.current = false;
     setDetails(null);
     setName("");
     setKeywordsText("");
@@ -625,12 +718,14 @@ export function BotFlowBuilder({
     setReplySteps(createBotFlowReplySteps([]));
     setButtonMenu(null);
     setTwoStepButtonMenu(null);
+    setGraphDraft(null);
     setCondition(null);
     setHandoffReason(null);
     setFocusButtonMenuOnMount(false);
     setFocusConditionOnMount(false);
     setFocusTwoStepOnMount(false);
     setFocusHandoffOnMount(false);
+    setFocusGraphOnMount(false);
     setUnsupportedDefinition(false);
     setDirty(false);
     setNotice(null);
@@ -744,6 +839,7 @@ export function BotFlowBuilder({
     if (
       condition !== null ||
       twoStepButtonMenu !== null ||
+      graphDraft !== null ||
       handoffReason !== null ||
       replySteps.length + 1 >
       KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
@@ -907,6 +1003,7 @@ export function BotFlowBuilder({
     if (
       buttonMenu !== null ||
       condition !== null ||
+      graphDraft !== null ||
       handoffReason !== null ||
       replySteps.length + 2 >
         KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
@@ -949,6 +1046,7 @@ export function BotFlowBuilder({
     if (
       buttonMenu !== null ||
       twoStepButtonMenu !== null ||
+      graphDraft !== null ||
       handoffReason !== null ||
       replySteps.length >
         KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
@@ -1100,7 +1198,8 @@ export function BotFlowBuilder({
     if (
       buttonMenu !== null ||
       twoStepButtonMenu !== null ||
-      condition !== null
+      condition !== null ||
+      graphDraft !== null
     ) {
       return;
     }
@@ -1130,11 +1229,69 @@ export function BotFlowBuilder({
     markChanged();
   };
 
+  const enterGraphEditor = () => {
+    if (dirty && details) {
+      setNotice({
+        tone: "warning",
+        message:
+          "יש לשמור או לטעון מחדש את השינויים לפני מעבר לעורך Graph מלא.",
+      });
+      return;
+    }
+
+    if (details && !storedGraphDraft) {
+      setNotice({
+        tone: "warning",
+        message:
+          "מבנה התהליך הנוכחי אינו ניתן להמרה בטוחה לעורך Graph מלא.",
+      });
+      return;
+    }
+
+    if (
+      !details &&
+      replySteps.some(
+        (step) => step.text.trim().length > 0,
+      )
+    ) {
+      setNotice({
+        tone: "warning",
+        message:
+          "יש להתחיל תהליך חדש וריק לפני מעבר לעורך Graph מלא.",
+      });
+      return;
+    }
+
+    preferGraphEditorRef.current = true;
+    setGraphDraft(
+      createBotFlowGraphEditorDraft(
+        storedGraphDraft ?? undefined,
+      ),
+    );
+    setReplySteps([]);
+    setButtonMenu(null);
+    setTwoStepButtonMenu(null);
+    setCondition(null);
+    setHandoffReason(null);
+    setFocusButtonMenuOnMount(false);
+    setFocusConditionOnMount(false);
+    setFocusTwoStepOnMount(false);
+    setFocusHandoffOnMount(false);
+    setFocusGraphOnMount(true);
+    markChanged();
+    setEditorAnnouncement(
+      storedGraphDraft
+        ? "התהליך הומר לעורך Graph מלא ללא שינוי בחיבורים."
+        : "נוצר Graph חדש עם Text ו־End מחוברים.",
+    );
+  };
+
   const loadFlow = (botFlowKey: string) => {
     if (isLoading) {
       return;
     }
 
+    preferGraphEditorRef.current = false;
     setNotice(null);
     startLoading(async () => {
       const result =
@@ -1182,16 +1339,27 @@ export function BotFlowBuilder({
 
     setNotice(null);
     startSaving(async () => {
-      const draftInput = handoffEnabled
+      const draftInput = graphDraft
         ? {
+            name,
+            keywords,
+            matchMode,
+            entryDraftNodeKey:
+              graphDraft.entryDraftNodeKey,
+            nodes: graphDraft.nodes,
+            expectedFlowVersion:
+              details?.flow.version ?? null,
+          }
+        : handoffEnabled
+          ? {
             name,
             keywords,
             matchMode,
             handoffReason,
             expectedFlowVersion:
               details?.flow.version ?? null,
-          }
-        : condition
+            }
+          : condition
           ? {
               name,
               keywords,
@@ -1541,7 +1709,52 @@ export function BotFlowBuilder({
                 </select>
               </label>
 
-              {handoffEnabled ? (
+              {!graphDraft ? (
+                <div className="bot-flow-graph-mode-action">
+                  <button
+                    ref={addGraphButtonRef}
+                    type="button"
+                    className="secondary-button"
+                    onClick={enterGraphEditor}
+                    disabled={
+                      !canWrite ||
+                      (Boolean(details) &&
+                        storedGraphDraft === null)
+                    }
+                  >
+                    מעבר לעורך Graph מלא
+                  </button>
+                  <small>
+                    המעבר מאפשר חיבורים חופשיים בין כל
+                    סוגי ה־Nodes. זהויות השמירה עדיין
+                    נגזרות רק בשרת.
+                  </small>
+                </div>
+              ) : null}
+
+              {graphDraft ? (
+                <>
+                  <BotFlowGraphEditor
+                    draft={graphDraft}
+                    disabled={!canWrite}
+                    focusOnMount={focusGraphOnMount}
+                    onChange={(nextDraft) => {
+                      setGraphDraft(nextDraft);
+                      markChanged();
+                    }}
+                    onAnnouncement={
+                      setEditorAnnouncement
+                    }
+                  />
+                  {!graphDraftComplete ? (
+                    <div className="inline-notice warning">
+                      יש להשלים את כל התכנים והחיבורים,
+                      להסיר Cycles ולחבר כל Node למסלול
+                      הכניסה לפני השמירה.
+                    </div>
+                  ) : null}
+                </>
+              ) : handoffEnabled ? (
                 <BotFlowHandoffEditor
                   handoffReason={handoffReason}
                   disabled={!canWrite}
@@ -1763,6 +1976,7 @@ export function BotFlowBuilder({
           replySteps={replySteps}
           buttonMenu={buttonMenu}
           twoStepButtonMenu={twoStepButtonMenu}
+          graphDraft={graphDraft}
           condition={condition}
           handoffReason={handoffReason}
         />

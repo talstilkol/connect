@@ -6,6 +6,8 @@ import {
 import {
   BOT_FLOW_GRAPH_DRAFT_MAXIMUM_NODE_COUNT,
   BOT_FLOW_GRAPH_DRAFT_MAXIMUM_OPTION_COUNT,
+  isBotFlowGraphDraftNodeKey,
+  isBotFlowGraphDraftOptionKey,
   type BotFlowGraphDraftNode,
   type SaveKeywordGraphBotFlowComposerDraftInput,
 } from "../../shared/domain/botFlowGraphDraft.ts";
@@ -24,11 +26,6 @@ import {
   deriveBotFlowKey,
   deriveBotFlowOptionKey,
 } from "./botFlowKey.ts";
-
-const DRAFT_NODE_KEY_PATTERN =
-  /^draft_node_v1_[1-9][0-9]{0,2}$/;
-const DRAFT_OPTION_KEY_PATTERN =
-  /^draft_option_v1_[1-9][0-9]{0,2}_[1-9][0-9]?$/;
 
 function isRecord(
   value: unknown,
@@ -66,19 +63,13 @@ function isExpectedFlowVersion(
 function isDraftNodeKey(
   value: unknown,
 ): value is string {
-  return (
-    typeof value === "string" &&
-    DRAFT_NODE_KEY_PATTERN.test(value)
-  );
+  return isBotFlowGraphDraftNodeKey(value);
 }
 
 function isDraftOptionKey(
   value: unknown,
 ): value is string {
-  return (
-    typeof value === "string" &&
-    DRAFT_OPTION_KEY_PATTERN.test(value)
-  );
+  return isBotFlowGraphDraftOptionKey(value);
 }
 
 function isOneOf<TValue extends string>(

@@ -50,8 +50,8 @@ Design מלא.
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
-| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, Drag-and-drop עם חלופת מקלדת לרצף ולאפשרויות, שתי שאלות Buttons עוקבות לפי ענף, Canvas נגיש, וחוזה Graph Draft כללי עם Compiler ו־Reader שאינם חושפים זהויות מתמידות | חיבור עורך ה־UI לחוזה הכללי, Canvas connections, עריכת Graph מלאה ו־Browser E2E |
-| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons מסיימת או שתי שאלות Buttons עוקבות, פיצול Condition ו־Handoff נשמרים כ־Graph אמיתי; Compiler כללי תומך ברצפים חופשיים ומרובי Conditions/שאלות וגוזר את כל המפתחות בשרת | עורך UI כללי ובדיקות Browser E2E |
+| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, עורך Graph כללי ליצירה, חיבור, עריכה, מחיקה וסידור של כל סוגי ה־Nodes; Drag-and-drop כולל חלופת מקלדת, Canvas נגיש עם מפת Connections חזותית, ו־Compiler/Reader שאינם חושפים זהויות מתמידות | Browser E2E |
+| SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | עורך ה־UI הכללי תומך ברצפים חופשיים ומרובי Text, ‏Buttons, ‏Conditions, ‏Handoff ו־End; Cycles ו־Nodes מנותקים חוסמים שמירה וכל המפתחות נגזרים בשרת | בדיקות Browser E2E |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
 | SPEC-22 | Fallback בין Bot, ‏AI ואדם | partial | Inbound routing, Handoff ו־Fail-closed AI policy | Provider E2E ו־Product policy מאושרת |
@@ -104,12 +104,16 @@ Accepted תחומה לכל שאלת Buttons. נותרו רצפים שרירות�
 ומצבי הסיום. נותרה עריכה חופשית של חיבורים ו־Nodes; גם בהמשך
 Drag-and-drop לא יהיה דרך הקלט היחידה.
 
-4.2.3.1 הושלמה תשתית ה־Graph Draft הכללית: הדפדפן שולח רק מפתחות Draft
+4.2.3.1 הושלם עורך ה־Graph הכללי מעל תשתית ה־Graph Draft: הדפדפן שולח
+רק מפתחות Draft
 זמניים לצורך חיבור בין Nodes. השרת קובע סדר קנוני לפי הטופולוגיה,
 גוזר את כל מפתחות ה־Block וה־Option, ומאמת שאין Cycle, ‏Node מנותק,
 Reference חסר או זהות מתמידה שסופקה מהדפדפן. Reader הופך Graph קיים
-בחזרה ל־Draft דטרמיניסטי ללא חשיפת המפתחות השמורים. נותר לחבר את
-החוזה לעורך ה־UI ול־Canvas האינטראקטיבי.
+בחזרה ל־Draft דטרמיניסטי ללא חשיפת המפתחות השמורים. ב־UI ניתן ליצור,
+לערוך, למחוק, לסדר ולחבר את כל סוגי ה־Nodes באמצעות Selects נגישים,
+כפתורי מקלדת או Drag-and-drop לסדר הכרטיסים. ה־Preview מתאר כל Connection
+בעץ סמנטי ומציג עותק חזותי ומפת Connections עם חצים, המוסתרים מקוראי
+מסך כדי למנוע הקראה כפולה. נותר Browser E2E.
 
 4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
 להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף

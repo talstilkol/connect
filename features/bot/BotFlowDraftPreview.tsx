@@ -14,6 +14,12 @@ import type {
 import type {
   BotFlowTwoStepButtonMenuEditorDraft,
 } from "../../shared/domain/botFlowTwoStepButtonMenuEditor";
+import type {
+  BotFlowGraphEditorDraft,
+} from "../../shared/domain/botFlowGraphEditor";
+import type {
+  BotFlowGraphDraftNode,
+} from "../../shared/domain/botFlowGraphDraft";
 
 const PREVIEW_TITLE_ID =
   "bot-flow-draft-preview-title";
@@ -43,12 +49,81 @@ function conditionBranchSummary(
   return `תשובת Text, ${configuredText(replyText)}, ואז סיום`;
 }
 
+function graphNodeTitle(
+  node: BotFlowGraphDraftNode,
+  index: number,
+): string {
+  return `Node ${index + 1}, ${node.type}`;
+}
+
+function graphNodeTargetSummary(
+  node: BotFlowGraphDraftNode,
+  positions: ReadonlyMap<string, number>,
+): string {
+  const position = (key: string) =>
+    positions.get(key) ?? 0;
+
+  if (node.type === "text") {
+    return `ממשיך ל־Node ${position(node.nextDraftNodeKey)}`;
+  }
+
+  if (node.type === "buttons") {
+    return node.options
+      .map(
+        (option, index) =>
+          `${option.label.trim() || `אפשרות ${index + 1}`} אל Node ${position(option.nextDraftNodeKey)}`,
+      )
+      .join("; ");
+  }
+
+  if (node.type === "condition") {
+    return `מתקיים אל Node ${position(node.matchedDraftNodeKey)}; אינו מתקיים אל Node ${position(node.unmatchedDraftNodeKey)}`;
+  }
+
+  return node.type === "handoff"
+    ? "מעביר לנציג ומסיים"
+    : "מסיים את הרצת הבוט";
+}
+
+function graphNodeConnectionLabels(
+  node: BotFlowGraphDraftNode,
+  index: number,
+  positions: ReadonlyMap<string, number>,
+): readonly string[] {
+  const source = `Node ${index + 1}`;
+  const target = (key: string) =>
+    `Node ${positions.get(key) ?? 0}`;
+
+  if (node.type === "text") {
+    return [
+      `${source} → ${target(node.nextDraftNodeKey)}`,
+    ];
+  }
+
+  if (node.type === "buttons") {
+    return node.options.map(
+      (option, optionIndex) =>
+        `${source} — ${option.label.trim() || `אפשרות ${optionIndex + 1}`} → ${target(option.nextDraftNodeKey)}`,
+    );
+  }
+
+  if (node.type === "condition") {
+    return [
+      `${source} — מתקיים → ${target(node.matchedDraftNodeKey)}`,
+      `${source} — אינו מתקיים → ${target(node.unmatchedDraftNodeKey)}`,
+    ];
+  }
+
+  return [];
+}
+
 function AccessibleDraftSummary({
   keywords,
   matchMode,
   replySteps,
   buttonMenu,
   twoStepButtonMenu,
+  graphDraft,
   condition,
   handoffReason,
 }: {
@@ -58,10 +133,17 @@ function AccessibleDraftSummary({
   buttonMenu: BotFlowButtonMenuEditorDraft | null;
   twoStepButtonMenu:
     BotFlowTwoStepButtonMenuEditorDraft | null;
+  graphDraft: BotFlowGraphEditorDraft | null;
   condition: KeywordConditionDraft | null;
   handoffReason: KeywordHandoffReason | "" | null;
 }) {
   const handoffEnabled = handoffReason !== null;
+  const graphNodePositions = new Map(
+    graphDraft?.nodes.map((node, index) => [
+      node.draftNodeKey,
+      index + 1,
+    ]) ?? [],
+  );
 
   return (
     <div className="sr-only">
@@ -94,6 +176,28 @@ function AccessibleDraftSummary({
                   הודעת Text {index + 1}: {configuredText(step.text)}.
                 </li>
               ))}
+              {graphDraft ? (
+                <li>
+                  Graph מלא. Node הכניסה הוא Node{" "}
+                  {graphNodePositions.get(
+                    graphDraft.entryDraftNodeKey,
+                  ) ?? 0}
+                  .
+                  <ol>
+                    {graphDraft.nodes.map(
+                      (node, index) => (
+                        <li key={node.draftNodeKey}>
+                          {graphNodeTitle(node, index)}:{" "}
+                          {graphNodeTargetSummary(
+                            node,
+                            graphNodePositions,
+                          )}.
+                        </li>
+                      ),
+                    )}
+                  </ol>
+                </li>
+              ) : null}
               {buttonMenu ? (
                 <li>
                   שאלת Buttons: {configuredText(buttonMenu.buttonText)}.
@@ -168,6 +272,7 @@ function AccessibleDraftSummary({
               ) : null}
               {!buttonMenu &&
               !twoStepButtonMenu &&
+              !graphDraft &&
               !condition ? (
                 <li>סיום התהליך.</li>
               ) : null}
@@ -192,6 +297,7 @@ export function BotFlowDraftPreview({
   replySteps,
   buttonMenu,
   twoStepButtonMenu,
+  graphDraft,
   condition,
   handoffReason,
 }: {
@@ -203,6 +309,7 @@ export function BotFlowDraftPreview({
   buttonMenu: BotFlowButtonMenuEditorDraft | null;
   twoStepButtonMenu:
     BotFlowTwoStepButtonMenuEditorDraft | null;
+  graphDraft: BotFlowGraphEditorDraft | null;
   condition: KeywordConditionDraft | null;
   handoffReason: KeywordHandoffReason | "" | null;
 }) {
@@ -211,6 +318,12 @@ export function BotFlowDraftPreview({
     condition?.matchedHandoffReason ?? null;
   const unmatchedConditionHandoffReason =
     condition?.unmatchedHandoffReason ?? null;
+  const graphNodePositions = new Map(
+    graphDraft?.nodes.map((node, index) => [
+      node.draftNodeKey,
+      index + 1,
+    ]) ?? [],
+  );
 
   return (
     <section
@@ -230,6 +343,7 @@ export function BotFlowDraftPreview({
         replySteps={replySteps}
         buttonMenu={buttonMenu}
         twoStepButtonMenu={twoStepButtonMenu}
+        graphDraft={graphDraft}
         condition={condition}
         handoffReason={handoffReason}
       />
@@ -294,6 +408,7 @@ export function BotFlowDraftPreview({
                       {index < replySteps.length - 1 ||
                       buttonMenu ||
                       twoStepButtonMenu ||
+                      graphDraft ||
                       condition ? (
                         <span className="bot-flow-chain-arrow">
                           ↓
@@ -302,6 +417,58 @@ export function BotFlowDraftPreview({
                     </div>
                   ))}
                 </div>
+
+                {graphDraft ? (
+                  <div className="bot-flow-graph-preview">
+                    <div className="bot-flow-graph-preview-list">
+                      {graphDraft.nodes.map((node, index) => (
+                        <div
+                          className="flow-node bot-flow-graph-preview-node"
+                          key={node.draftNodeKey}
+                        >
+                          <span className="node-icon">
+                            {node.type === "text"
+                              ? "T"
+                              : node.type === "buttons"
+                                ? "⠿"
+                                : node.type === "condition"
+                                  ? "◇"
+                                  : node.type === "handoff"
+                                    ? "↗"
+                                    : "■"}
+                          </span>
+                          <div>
+                            <small>
+                              {graphNodeTitle(node, index)}
+                              {node.draftNodeKey ===
+                              graphDraft.entryDraftNodeKey
+                                ? " — כניסה"
+                                : ""}
+                            </small>
+                            <strong>
+                              {graphNodeTargetSummary(
+                                node,
+                                graphNodePositions,
+                              )}
+                            </strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="bot-flow-graph-preview-connections">
+                      {graphDraft.nodes.flatMap(
+                        (node, index) =>
+                          graphNodeConnectionLabels(
+                            node,
+                            index,
+                            graphNodePositions,
+                          ).map((label) => (
+                            <span key={label}>{label}</span>
+                          )),
+                      )}
+                    </div>
+                  </div>
+                ) : null}
 
                 {buttonMenu ? (
                   <>
@@ -481,9 +648,10 @@ export function BotFlowDraftPreview({
                   </>
                 ) : null}
 
-                {!condition ||
-                matchedConditionHandoffReason === null ||
-                unmatchedConditionHandoffReason === null ? (
+                {!graphDraft &&
+                (!condition ||
+                  matchedConditionHandoffReason === null ||
+                  unmatchedConditionHandoffReason === null) ? (
                   <span className="bot-flow-terminal">
                     ■ סיום
                   </span>

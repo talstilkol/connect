@@ -9,6 +9,63 @@ import type {
 
 export const BOT_FLOW_GRAPH_DRAFT_MAXIMUM_NODE_COUNT = 97;
 export const BOT_FLOW_GRAPH_DRAFT_MAXIMUM_OPTION_COUNT = 10;
+const BOT_FLOW_GRAPH_DRAFT_NODE_KEY_PATTERN =
+  /^draft_node_v1_[1-9][0-9]{0,2}$/;
+const BOT_FLOW_GRAPH_DRAFT_OPTION_KEY_PATTERN =
+  /^draft_option_v1_[1-9][0-9]{0,2}_[1-9][0-9]?$/;
+
+export function isBotFlowGraphDraftNodeKey(
+  value: unknown,
+): value is string {
+  return (
+    typeof value === "string" &&
+    BOT_FLOW_GRAPH_DRAFT_NODE_KEY_PATTERN.test(
+      value,
+    )
+  );
+}
+
+export function isBotFlowGraphDraftOptionKey(
+  value: unknown,
+): value is string {
+  return (
+    typeof value === "string" &&
+    BOT_FLOW_GRAPH_DRAFT_OPTION_KEY_PATTERN.test(
+      value,
+    )
+  );
+}
+
+export function createBotFlowGraphDraftNodeKey(
+  ordinal: number,
+): string {
+  if (
+    !Number.isSafeInteger(ordinal) ||
+    ordinal <= 0 ||
+    ordinal > 999
+  ) {
+    throw new Error("draft node ordinal is invalid");
+  }
+
+  return `draft_node_v1_${ordinal}`;
+}
+
+export function createBotFlowGraphDraftOptionKey(
+  nodeOrdinal: number,
+  optionOrdinal: number,
+): string {
+  createBotFlowGraphDraftNodeKey(nodeOrdinal);
+
+  if (
+    !Number.isSafeInteger(optionOrdinal) ||
+    optionOrdinal <= 0 ||
+    optionOrdinal > 99
+  ) {
+    throw new Error("draft option ordinal is invalid");
+  }
+
+  return `draft_option_v1_${nodeOrdinal}_${optionOrdinal}`;
+}
 
 export type BotFlowGraphDraftNodeType = Exclude<
   BotFlowBlock["type"],
@@ -108,14 +165,17 @@ function referencedBlockKeys(
 }
 
 function draftNodeKey(ordinal: number): string {
-  return `draft_node_v1_${ordinal}`;
+  return createBotFlowGraphDraftNodeKey(ordinal);
 }
 
 function draftOptionKey(
   nodeOrdinal: number,
   optionOrdinal: number,
 ): string {
-  return `draft_option_v1_${nodeOrdinal}_${optionOrdinal}`;
+  return createBotFlowGraphDraftOptionKey(
+    nodeOrdinal,
+    optionOrdinal,
+  );
 }
 
 export function readKeywordGraphBotFlowComposerDraft(

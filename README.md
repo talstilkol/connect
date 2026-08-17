@@ -95,8 +95,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1460/1460 בדיקות, 35 Migrations,
-   ‏443 קובצי Source, ‏33 Client dependency graphs, ‏861 קבצים
+31. Local Release Gate עובר עם 1469/1469 בדיקות, 35 Migrations,
+   ‏445 קובצי Source, ‏34 Client dependency graphs, ‏865 קבצים
    בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -735,11 +735,15 @@
          הם כרגע מבני מסלול בטוחים. רצפים שרירותיים של תנאים או שאלות,
          חיבורי Canvas ו־Drag-and-drop עדיין אינם מוצגים כעורך Graph
          מלא.
-   158.8 חוזה Graph Draft כללי מאפשר לייצג רצפים חופשיים של Text,
+   158.8 עורך Graph כללי מאפשר ליצור ולחבר רצפים חופשיים של Text,
          ‏Buttons, ‏Condition, ‏Handoff ו־End באמצעות References זמניים.
          Compiler השרת מסדר את ה־Nodes לפי הטופולוגיה וגוזר את כל
          מפתחות ה־Block וה־Option; Reader מחזיר Graph קיים לעריכה ללא
-         חשיפת הזהויות המתמידות. חיבור ה־UI לחוזה הזה עדיין נותר.
+         חשיפת הזהויות המתמידות. ה־UI חוסם שמירה של Cycle או Node מנותק,
+         תומך בחיבור יעדים באמצעות מקלדת ובסידור כרטיסים באמצעות כפתורים
+         או Drag-and-drop, ומציג Preview סמנטי של כל Connection.
+         מפת Connections חזותית מציגה גם חצים בין מספרי ה־Nodes ונשארת
+         מוסתרת מקוראי מסך כדי למנוע הקראה כפולה.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
    160. Inbound Webhook מפעיל Runtime לאחר אחסון ההודעה. Retry חוזר
@@ -749,7 +753,7 @@
         מבקש Retry באופן Fail-Closed.
    162. שלב 11 הושלם בקוד המקומי.
    163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
-        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,460 הבדיקות עוברים.
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,469 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
@@ -768,8 +772,9 @@
 9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
    WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
    מקומית; ה־Adapter נשאר Fail-Closed.
-10. עריכת Graph מלאה ל־Bot: חיבור עורך ה־UI וה־Canvas לחוזה Graph Draft
-    הכללי, כולל Drag-and-drop ו־Browser E2E. רצף Text, שאלת Buttons מסיימת,
+10. השלמת Graph מלאה ל־Bot: Browser E2E. עורך ה־UI מחובר לחוזה Graph
+    Draft הכללי וכולל מפת Connections חזותית; רצף Text,
+    שאלת Buttons מסיימת,
     שתי שאלות Buttons עוקבות, פיצול Condition יחיד ו־Handoff לפי
     Keyword או מתוך ענף Condition ניתנים לעריכה מלאה במקלדת, אך עדיין
     אינם משלימים לבדם את SPEC-18 או SPEC-19.
