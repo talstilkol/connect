@@ -30,7 +30,7 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |
 | `queue.team-invitation` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
-| `worker.scheduler` | Cloudflare Cron | Railway Worker | Scheduler חד־תביעה |
+| `worker.scheduler` | Cloudflare Cron של דקה | Railway Worker קבוע | Tick של דקה, Lease אטומי ב־PostgreSQL ו־Catch-up מוגבל; Railway Cron אינו מתאים |
 | `security.distributed-rate-limits` | Cloudflare bindings + D1 ledger | Shared service | בחירת מנגנון אטומי |
 | `security.secret-management` | Worker secrets | Vercel + Railway | Inventory, חלוקה ו־Rotation |
 | `operations.environment-isolation-evidence` | Cloudflare evidence v2 | Vercel + Railway | Evidence חדש רב־ספקי |
@@ -52,6 +52,12 @@ rehearsal, ‏40–80 שעות.
 
 3.4 שלב D — שלושת ה־Queues, ‏DLQs, ‏Delays, ‏Consumers ו־Scheduler,
 20–40 שעות.
+
+3.4.1 ‏[ADR-0004](adr/0004-target-service-topology.md) מציע Redis +
+BullMQ לתורים ו־Railway Worker קבוע ל־Scheduler. Railway Cron אינו
+יכול להחליף את ה־Cron הנוכחי משום שהתדירות המינימלית שלו היא חמש
+דקות ואינה מדויקת לדקה. ההצעה נשארת `proposed` עד האישורים המנויים
+ב־ADR.
 
 3.5 שלב E — Object storage, ‏Scanner path ו־Browser proof,
 12–24 שעות.

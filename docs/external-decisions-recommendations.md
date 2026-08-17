@@ -295,6 +295,17 @@ Least privilege. לפי התיעוד העדכני, שיתוף Members ב־Railwa
 16.4 אסור Hybrid לא מתועד. ‏Migration מתבצע דרך Contract freeze,
 Adapter parity, ‏Staging מבודד ו־Cutover מבוקר עם Rollback מתורגל.
 
+16.5 ‏[ADR-0004](adr/0004-target-service-topology.md) מרכז את ההמלצה
+המפורטת: Vercel Web/BFF מזדהה ל־Railway API בעזרת OIDC; ‏Railway
+Worker קבוע מפעיל Scheduler של דקה; PostgreSQL הוא מקור האמת;
+Redis + BullMQ מפעילים Queues ו־Backpressure. ה־ADR נשאר `proposed`.
+
+16.6 Object storage נשאר החלטה פתוחה. AWS S3 הוא ההמלצה עבור
+Encryption, ‏Versioning, ‏Lifecycle ו־Legal Hold; ‏Vercel Private
+Blob הוא חלופה. Railway Bucket אינו מומלץ כרגע למסמכים רגישים או
+לגיבויים משום שחסרים בו Server-side encryption, ‏Versioning,
+Object Lock ו־Lifecycle configuration.
+
 ## 17. החלטה 15 — WhatsApp Business Platform
 
 17.1 המלצה: Meta Cloud API רשמי מאחורי ה־Backend הקיים. ה־Browser

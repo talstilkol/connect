@@ -49,3 +49,7 @@ UTC לפני שהיא פותחת Gate.
 
 4.3 [ADR-0003 — Claude and AI development account model](0003-ai-development-account-model.md)
 — `proposed`.
+
+4.4 [ADR-0004 — Detailed Vercel and Railway target topology](0004-target-service-topology.md)
+— `proposed`; מפרט את המלצת השירותים, OIDC, ‏PostgreSQL, ‏Redis,
+Scheduler, ‏Storage, ‏Recovery ו־Observability בלי להמציא אישור.

@@ -20,6 +20,9 @@ const repositoryAdr = readProjectFile(
 const aiAccountAdr = readProjectFile(
   "docs/adr/0003-ai-development-account-model.md",
 );
+const targetTopologyAdr = readProjectFile(
+  "docs/adr/0004-target-service-topology.md",
+);
 const projectReadme = readProjectFile("README.md");
 const teamPlan = readProjectFile(
   "docs/team-operating-plan.md",
@@ -69,12 +72,20 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
     /\(0003-ai-development-account-model\.md\)/,
   );
   assert.match(
+    adrIndex,
+    /\(0004-target-service-topology\.md\)/,
+  );
+  assert.match(
     teamPlan,
     /\(adr\/0002-repository-authority\.md\)/,
   );
   assert.match(
     teamPlan,
     /\(adr\/0003-ai-development-account-model\.md\)/,
+  );
+  assert.match(
+    teamPlan,
+    /\(adr\/0004-target-service-topology\.md\)/,
   );
 });
 
@@ -155,10 +166,11 @@ test("requires real approval metadata before an ADR can be accepted", () => {
   );
 });
 
-test("records two accepted Gate 0 directions and keeps the AI account decision proposed", () => {
+test("records two accepted Gate 0 directions and keeps unresolved ADRs proposed", () => {
   const hostingMetadata = parseFrontMatter(hostingAdr);
   const repositoryMetadata = parseFrontMatter(repositoryAdr);
   const aiMetadata = parseFrontMatter(aiAccountAdr);
+  const targetTopologyMetadata = parseFrontMatter(targetTopologyAdr);
 
   assert.equal(hostingMetadata.status, "accepted");
   assert.equal(repositoryMetadata.status, "accepted");
@@ -175,10 +187,74 @@ test("records two accepted Gate 0 directions and keeps the AI account decision p
     aiMetadata.approved_at,
     "unknown/unavailable",
   );
+  assert.equal(targetTopologyMetadata.status, "proposed");
+  assert.equal(
+    targetTopologyMetadata.approved_option,
+    "unknown/unavailable",
+  );
+  assert.equal(
+    targetTopologyMetadata.approved_at,
+    "unknown/unavailable",
+  );
 
   assert.match(
     teamPlan,
-    /שני ADRs[\s\S]*`accepted`[\s\S]*אחד ב־`proposed`[\s\S]*Gate 0[\s\S]*`not verified`/,
+    /שני ADRs[\s\S]*`accepted`[\s\S]*שניים ב־`proposed`[\s\S]*Gate 0[\s\S]*`not verified`/,
+  );
+});
+
+test("proposes one bounded Vercel and Railway service topology without opening deployment", () => {
+  assert.match(targetTopologyAdr, /Vercel Web\/BFF/);
+  assert.match(targetTopologyAdr, /Railway API/);
+  assert.match(targetTopologyAdr, /Railway Worker/);
+  assert.match(
+    targetTopologyAdr,
+    /אינה[\s\S]*פונה ישירות ל־PostgreSQL, ‏Redis או Meta/,
+  );
+  assert.match(targetTopologyAdr, /Vercel OIDC token קצר־חיים/);
+  assert.match(
+    targetTopologyAdr,
+    /אפשרות שאושרה: `unknown\/unavailable`/,
+  );
+});
+
+test("rejects Railway Cron for the one-minute scheduler and preserves atomic claims", () => {
+  assert.match(
+    targetTopologyAdr,
+    /Railway Cron מאפשר תדירות[\s\S]*חמש דקות/,
+  );
+  assert.match(
+    targetTopologyAdr,
+    /Scheduler המרכזי[\s\S]*Always-on[\s\S]*PostgreSQL Lease אטומי/,
+  );
+  assert.match(targetTopologyAdr, /Catch-up מוגבל/);
+});
+
+test("separates Redis delivery mechanics from durable business truth", () => {
+  assert.match(targetTopologyAdr, /Redis \+ BullMQ/);
+  assert.match(targetTopologyAdr, /`maxmemory-policy=noeviction`/);
+  assert.match(targetTopologyAdr, /AOF persistence/);
+  assert.match(
+    targetTopologyAdr,
+    /Redis משמש Broker[\s\S]*אינו מקור[\s\S]*האמת העסקי/,
+  );
+  assert.match(
+    targetTopologyAdr,
+    /תוצאת שליחה[\s\S]*לא ידועה[\s\S]*אינה חוזרת לתור השליחה/,
+  );
+});
+
+test("keeps object storage unresolved and records the safety gaps of each option", () => {
+  assert.match(
+    targetTopologyAdr,
+    /בחירת הספק נשארת `unknown\/unavailable`/,
+  );
+  assert.match(targetTopologyAdr, /AWS S3 private bucket/);
+  assert.match(targetTopologyAdr, /Vercel Private Blob/);
+  assert.match(targetTopologyAdr, /Railway Storage Bucket/);
+  assert.match(
+    targetTopologyAdr,
+    /אינו תומך Server-side encryption, ‏Object versioning, ‏Object Lock/,
   );
 });
 

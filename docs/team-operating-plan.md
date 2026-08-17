@@ -143,10 +143,18 @@ ADR-0001; הוא נשמר כנקודת השוואה עד השלמת ה־Migratio
 
 3.3.5.4 PostgreSQL — מקור הנתונים המרכזי במקום D1.
 
-3.3.5.5 Redis או Postgres job queue — Retry, ‏DLQ, ‏Backpressure,
-Idempotency ו־Rate limits.
+3.3.5.5 המלצת [ADR-0004](adr/0004-target-service-topology.md):
+Railway Redis + BullMQ — Retry, ‏Failed state, ‏Backpressure ו־Fast
+rate limits; PostgreSQL נשאר מקור האמת ל־Idempotency ול־Audit.
 
-3.3.5.6 R2 יכול להישאר Object storage דרך S3 API, אך נדרש Adapter.
+3.3.5.6 ‏Railway Worker קבוע מפעיל Tick של דקה עם Lease אטומי
+ב־PostgreSQL. Railway Cron אינו מתאים ל־Scheduler המרכזי כי הוא
+מתחיל בחמש דקות ואינו מבטיח דיוק לדקה.
+
+3.3.5.7 ספק Object storage עדיין פתוח. ההמלצה היא AWS S3 עם
+Encryption, ‏Versioning ו־Lifecycle; ‏Vercel Private Blob הוא חלופה.
+Railway Bucket אינו מומלץ כרגע למסמכים רגישים או לגיבויים מפני
+שחסרים בו Encryption, ‏Versioning, ‏Object Lock ו־Lifecycle.
 
 3.3.6 אין להתחיל פריסה היברידית. ערבוב זמני של Server Actions, ‏D1,
 Cloudflare Queues, ‏Vercel UI ו־Railway API מנוגד ל־ADR-0001.
@@ -253,6 +261,8 @@ Collaborators והגנות GitHub עד העברה עתידית מאושרת.
 
 5.1.1.3 [ADR-0003 — Claude account model](adr/0003-ai-development-account-model.md).
 
+5.1.1.4 [ADR-0004 — Detailed target topology](adr/0004-target-service-topology.md).
+
 5.1.2 ‏[ADR-0001](adr/0001-hosting-topology.md) הוא `accepted` ונבחר
 Migration מלא ל־Vercel ול־Railway. בחירת PostgreSQL, ‏Queue, ‏Storage,
 Scheduler, ‏Secrets ו־Observability נשארת פתוחה וחוסמת Deployment.
@@ -262,6 +272,10 @@ Scheduler, ‏Secrets ו־Observability נשארת פתוחה וחוסמת Deplo
 
 5.1.2.2 ‏[ADR-0003](adr/0003-ai-development-account-model.md) נשאר
 `proposed` עד שבעל חשבונות החברה מאשר מודל Seats וזהויות.
+
+5.1.2.3 ‏[ADR-0004](adr/0004-target-service-topology.md) נשאר
+`proposed`. הוא מרכז המלצה אחת ל־Network, ‏Queues, ‏Scheduler,
+Storage ו־Recovery; הוא אינו פותח Deployment עד אישורי סעיף 10 בו.
 
 5.1.3 תנאי סיום: אין סעיף Hosting או Account שמכיל שתי חלופות
 סותרות.
@@ -275,9 +289,9 @@ JSON מהשאלון משמש סיכום לדיון בלבד; בעלי הסמכו
 Owner, החלטה מאושרת או סטטוס פתוח מפורש, וקישור לראיה הנדרשת. אין
 לסמן חסם כ־`ready` בגלל בחירה מקומית בשאלון בלבד.
 
-5.1.6 שני ADRs נמצאים ב־`accepted` ואחד ב־`proposed`. ‏Gate 0 נשאר
+5.1.6 שני ADRs נמצאים ב־`accepted` ושניים ב־`proposed`. ‏Gate 0 נשאר
 `not verified` עד אישור ADR-0003 ועד שרועי, ראשה, דוד ואבטחה משלימים
-את אישורי התקציב, המימוש והגישה שנדרשים ב־ADR-0001.
+את אישורי התקציב, המימוש והגישה שנדרשים ב־ADR-0001 וב־ADR-0004.
 
 5.2 Gate 1 — GitHub Governance:
 

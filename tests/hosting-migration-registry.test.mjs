@@ -151,3 +151,15 @@ test("keeps the contract freeze deterministic and randomness-free", () => {
   assert.doesNotMatch(source, /\bcrypto\.randomUUID\s*\(/);
   assert.doesNotMatch(source, /\bDate\.now\s*\(/);
 });
+
+test("requires an always-on adapter instead of an incompatible Railway Cron", () => {
+  const scheduler = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "worker.scheduler",
+  );
+
+  assert.ok(scheduler);
+  assert.equal(scheduler.targetProvider, "railway");
+  assert.equal(scheduler.nextAction, "adapter-required");
+  assert.match(scheduler.targetContract, /atomic PostgreSQL lease/);
+  assert.match(scheduler.cutoverBlocker, /Railway Cron cannot satisfy/);
+});

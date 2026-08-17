@@ -248,12 +248,12 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     ],
     targetPlacement: "railway-worker",
     targetContract:
-      "Single-claim one-minute scheduler with bounded runs",
+      "Always-on one-minute scheduler with an atomic PostgreSQL lease and bounded catch-up",
     targetProvider: "railway",
     decisionState: "selected",
-    nextAction: "configuration-required",
+    nextAction: "adapter-required",
     cutoverBlocker:
-      "The scheduler is invoked only through the Cloudflare scheduled handler.",
+      "Railway Cron cannot satisfy the one-minute cadence; an always-on worker adapter and PostgreSQL lease are not implemented.",
   }),
   capability({
     id: "security.distributed-rate-limits",
