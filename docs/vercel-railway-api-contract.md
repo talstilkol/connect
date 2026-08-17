@@ -195,7 +195,7 @@ Membership event ledger. החמישית יוצרת את כל ארבע טבלאו
 lifecycle ואת Triggers הבטיחותיים שלה.
 כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי. ‏Node driver adapter
 ו־Integration rehearsal עבור Contact ו־Invitation קיימים, אך אין עדיין
-Schema parity מלאה, Production pool configuration או Staging evidence.
+Schema parity מלאה, ערכי Production pool חיים או Staging evidence.
 
 7.1.16 נוספו Membership, ‏Tenant selection ו־Business profile repositories
 ספק־נייטרליים. מסלולי Selection ו־Profile משתמשים ב־Transaction, וקריאות
@@ -221,6 +221,11 @@ Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`
 מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל חמש
 Migrations ומוכיח DML, ‏Rollback ושני Races בלי לקבל Production credential.
 
+7.1.20 חוזה Pool נפרד דורש TLS, ‏Pool size וכל Timeout במפורש. הוא דוחה
+Loopback ב־Staging/Production וכל Query string ב־Database URL, משום ש־
+`sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
+בלבד ולא Error או Connection string.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -232,7 +237,8 @@ Production ו־Preview origins המאושרים.
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
-Production pool מאושר, Migration מלא וכיסוי Concurrency לכל ה־Repositories.
+ערכי Production pool מאושרים, Migration מלא וכיסוי Concurrency לכל
+ה־Repositories.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.
@@ -258,7 +264,20 @@ evidence.
 8.6 `VERCEL_OIDC_ENVIRONMENT` — אחד מ־`development`, ‏`preview` או
 `production` לפי ה־Environment שמורשה לפנות לשירות Railway המסוים.
 
-8.7 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
+8.7 `DATABASE_URL` — Secret שרתי בלבד. אסור להעביר אותו ל־Vercel Web,
+Browser, ‏Logs או Evidence.
+
+8.8 `APP_RUNTIME_ENVIRONMENT`, ‏`POSTGRES_APPLICATION_NAME`, ‏
+`POSTGRES_MAX_CONNECTIONS`, ‏`POSTGRES_CONNECTION_TIMEOUT_MS`, ‏
+`POSTGRES_IDLE_TIMEOUT_MS`, ‏`POSTGRES_STATEMENT_TIMEOUT_MS`, ‏
+`POSTGRES_QUERY_TIMEOUT_MS`, ‏`POSTGRES_LOCK_TIMEOUT_MS`, ‏
+`POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS` ו־`POSTGRES_MAX_LIFETIME_SECONDS` —
+חוזה Pool מפורש ללא Defaults.
+
+8.9 `POSTGRES_TLS_MODE` חייב להיות `verify-full` ב־Staging/Production.
+`POSTGRES_TLS_CA_PEM` אופציונלי רק כאשר הספק דורש Root CA מותאם.
+
+8.10 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
 חסר, חלקי או לא חוקי מונע יצירת Verifier.
 
 ## 9. מקורות רשמיים
@@ -274,3 +293,7 @@ evidence.
 9.5 תאריך אימות: `2026-08-17`. ערכי Team, ‏Project, ‏Issuer,
 Audience, ‏authorized parties ו־Production origin נשארים
 `unknown/unavailable` עד אישור Accounts.
+
+9.6 [node-postgres — SSL](https://node-postgres.com/features/ssl).
+
+9.7 [node-postgres — Pool](https://node-postgres.com/apis/pool).

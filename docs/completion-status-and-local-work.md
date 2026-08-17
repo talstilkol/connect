@@ -542,6 +542,27 @@ Idempotency וקבלת Invitation יחידה. התוצאה הייתה `PASS (5 m
 כיסוי DML/Concurrency ליתר ה־Repositories, ‏Parity מול כל 35 ה־Migrations,
 Runtime composition ו־Staging evidence.
 
+2.30 **הושלם מקומית:** חוזה Production Pool מאובטח ל־PostgreSQL.
+
+2.30.1 כל 12 ערכי החיבור, Pool ו־Timeouts נדרשים במפורש. אין שימוש בברירות
+המחדל של `pg`; מצב חסר, חלקי ולא חוקי נשמרים נפרדים בלי להחזיר את ערכי
+ה־Environment.
+
+2.30.2 ‏Staging/Production מחייבים `verify-full`. ‏TLS כבוי מותר רק
+ב־Development/Test. ‏URL עם Query parameters, ‏Fragment או Loopback בסביבה
+מרוחקת נחסם, כדי ש־`sslmode` מתוך URL לא ידרוס את אובייקט ה־TLS המאומת.
+
+2.30.3 ‏Pool size, ‏Connection/Idle/Statement/Query/Lock/Idle-transaction
+timeouts ו־Client lifetime מוגבלים לטווחים סגורים. ‏Application name מוגבל
+לתווים בטוחים; Custom CA, אם קיים, עובר Parser של X.509.
+
+2.30.4 ‏Idle-client error מפיק Signal ללא Error object. גם Configuration
+מורחב או מזויף נבדק מחדש לפני יצירת Pool. ‏6 בדיקות מכסות Production,
+Development, חסר/חלקי, TLS/URL זדוני, גבולות מספריים ו־Telemetry.
+
+2.30.5 עדיין חסרים ערכי ספק אמיתיים, אישור Pool sizing, ‏CA/TLS evidence,
+Telemetry sink, ‏Migration identity ו־Staging connection proof.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

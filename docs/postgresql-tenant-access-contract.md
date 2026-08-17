@@ -95,8 +95,8 @@ Owner אטומית, Conflict, בידוד Tenant ו־Rollback כאשר שמירת
 
 ## 6. מה עדיין חסר
 
-6.1 ‏Node driver נבחר מקומית. נותרו כלי Migration ותצורת Pool/TLS/Timeouts
-מאושרים ל־Production.
+6.1 ‏Node driver וחוזה Pool/TLS/Timeouts נבחרו מקומית. נותרו כלי Migration
+וערכי Pool/CA/Telemetry מאושרים ל־Production.
 
 6.2 סכמת Invitation lifecycle וכל Repositories של Request, ‏Transition,
 Expiration, ‏Delivery ו־Acceptance קיימים; Contact ו־Invitation
