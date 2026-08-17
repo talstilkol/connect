@@ -40,12 +40,39 @@
 
 .public-header-actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  align-items: center;
   gap: 9px;
 }
 
 .public-header-actions a {
   text-decoration: none;
+}
+
+.public-language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.public-language-switcher a {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.public-language-switcher a[aria-current="page"] {
+  background: var(--nav);
+  color: white;
 }
 
 .public-hero {
@@ -268,6 +295,12 @@
   background: var(--mint-strong);
 }
 
+.trust-strip > span {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(17px, 3vw, 42px);
+}
+
 .public-section {
   width: min(1160px, calc(100% - 48px));
   margin: 0 auto;
@@ -437,7 +470,7 @@
 
 .public-footer > div {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: 20px;
 }
 
@@ -500,6 +533,12 @@
 
   .public-header-actions .secondary-button {
     display: none;
+  }
+
+  .public-language-switcher a {
+    min-height: 28px;
+    padding: 0 6px;
+    font-size: 7px;
   }
 
   .public-header-actions .primary-button {

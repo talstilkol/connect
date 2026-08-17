@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ClerkAppProvider from "../features/auth/ClerkAppProvider";
 import { resolvePublicOrigin } from "../server/operations/publicOrigin";
+import { publicLandingMessages } from "../shared/i18n/publicLanding";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +15,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const title = "Connect | WhatsApp Business Platform";
-const description =
-  "מערכת SaaS לניהול WhatsApp Business רשמי, קמפיינים, שיחות, בוטים וסוכני AI.";
+const { title, description } =
+  publicLandingMessages.he.metadata;
 
 export function generateMetadata(): Metadata {
   const publicOrigin = resolvePublicOrigin(

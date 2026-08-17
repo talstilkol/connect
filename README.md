@@ -95,8 +95,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1472/1472 בדיקות, 35 Migrations,
-   ‏445 קובצי Source, ‏34 Client dependency graphs, ‏868 קבצים
+31. Local Release Gate עובר עם 1475/1475 בדיקות, 35 Migrations,
+   ‏448 קובצי Source, ‏34 Client dependency graphs, ‏872 קבצים
    בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -113,6 +113,10 @@
 36. Node `24.18.1` LTS נעול ב־`.node-version` ומשמש את כל ה־workflows;
    `engines.node` דוחה גרסאות שאינן תומכות בהרצת קובצי TypeScript
    הנדרשת על ידי כלי הבדיקות וה־Evidence.
+37. דף הנחיתה הציבורי משתמש כעת ברכיב Server משותף ובמילונים מלאים
+   לעברית, אנגלית וערבית. הנתיבים `/`, ‏`/en` ו־`/ar` מפיקים Metadata
+   מתורגם, כיוון `RTL/LTR` סמנטי ובורר שפה נגיש; Locale שאינו נתמך
+   מחזיר `404`. שלוש השפות וניווט המקלדת אומתו ב־Chromium מקומי.
 37. בדיקות Release ב־CI מורידות היסטוריית Git מלאה. במאגר פרטי
    בבעלות משתמש אישי, Dependency Audit נשאר Check מחייב ומעלה Evidence
    לא־חתום; שער Production אינו מקבל אותו כתחליף ל־Attestation אמיתי.
@@ -753,7 +757,7 @@
         מבקש Retry באופן Fail-Closed.
    162. שלב 11 הושלם בקוד המקומי.
    163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
-        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,472 הבדיקות עוברים.
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,475 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
@@ -776,6 +780,9 @@
     עורך ה־Graph המקומי, כל סוגי ה־Nodes, המקלדת, Drag-and-drop,
     החיבורים, Focus וה־Preview עברו Browser E2E מקומי ב־Chromium;
     לכן SPEC-18 ו־SPEC-19 הושלמו ברמת הקוד המקומי.
+11. תרגום מלא של מסכי ההתחברות, ההזמנות, סביבת העבודה וה־Admin
+    לעברית, אנגלית וערבית, ולאחריו Browser acceptance לכל שפה.
+    דף הנחיתה הציבורי בשלוש השפות כבר הושלם ואומת מקומית.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 
