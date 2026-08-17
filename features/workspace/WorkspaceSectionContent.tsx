@@ -74,6 +74,9 @@ import { FeaturePage } from "./WorkspaceFeaturePage";
 import {
   readContactDirectoryMessages,
 } from "../contacts/contactDirectoryMessages";
+import {
+  readTemplateEditorMessages,
+} from "../templates/templateEditorMessages";
 
 export function WorkspaceSectionContent({
   activeSection,
@@ -184,6 +187,7 @@ export function WorkspaceSectionContent({
           {activeSection === "templates" ? (
             <Templates
               authEnabled={authEnabled}
+              language={language}
               initialTemplates={initialMessageTemplates}
               initialStatus={initialMessageTemplateStatus}
               canWrite={initialCanWriteMessageTemplates}
@@ -302,23 +306,28 @@ function Contacts({
 
 function Templates({
   authEnabled,
+  language,
   initialTemplates,
   initialStatus,
   canWrite,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialTemplates: readonly MessageTemplateView[];
   initialStatus: MessageTemplateDirectoryStatus;
   canWrite: boolean;
 }) {
+  const messages = readTemplateEditorMessages(language);
+
   return (
     <FeaturePage
-      eyebrow="Meta Message Templates"
-      title="תבניות הודעה"
-      description="יצירה, תצוגה מקדימה ומעקב אחר תהליך האישור הרשמי מול Meta."
+      eyebrow={messages.page.eyebrow}
+      title={messages.page.title}
+      description={messages.page.description}
     >
       <TemplateDraftEditor
         authEnabled={authEnabled}
+        interfaceLanguage={language}
         initialTemplates={initialTemplates}
         initialStatus={initialStatus}
         canWrite={canWrite}

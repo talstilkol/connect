@@ -402,6 +402,16 @@ Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL
 בחירת CSV/XLSX ו־Console נקי. בדיקות Boundary מונעות החזרת טקסט עברי
 קשיח לשלושת רכיבי ה־Feature.
 
+4.1.12 Slice שמיני של לוקליזציה הושלם בכל Surface התבניות. העורך,
+רשימת התבניות, Preview, בחירת קטגוריה ושפת Template, משתנים, Examples,
+Quick Reply, ‏Call to Action וכל מצבי השמירה זמינים בעברית, אנגלית
+וערבית. מילון מוקלד מכסה שבעה מצבי תבנית, תשע תוצאות שמירה, 17 תוצאות
+שליחה ו־13 תוצאות סנכרון. בדיקת משתני `{{1}}` מחזירה כעת קוד שגיאה
+ניטרלי לשפה ושכבת ה־UI מתרגמת אותו, במקום שטקסט עברי יזלוג משכבת
+ה־Validation. בדיקות Server-rendered HTML ו־Chromium אימתו אנגלית
+וערבית, `LTR/RTL`, שגיאת תחביר משתנה ו־Console נקי. בדיקות Boundary
+מונעות החזרת טקסט עברי קשיח לעורך ול־Validation המשותף.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -425,10 +435,10 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
-ה־Dashboard, ה־Onboarding, חלון Embedded Signup ו־Contacts,
+ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts ו־Templates,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **19–31 שעות
+הוא **15–24 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**27–45 שעות**.
+הופך ל־**23–38 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

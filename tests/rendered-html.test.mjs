@@ -168,6 +168,33 @@ test("server-renders the complete contacts surface in English and Arabic", async
   assert.doesNotMatch(arabicHtml, /ניהול אנשי קשר קבוע/);
 });
 
+test("server-renders the complete template surface in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/templates?lang=en"),
+    render("/workspace/templates?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Persistent templates/);
+  assert.match(englishHtml, /Template setup/);
+  assert.match(englishHtml, /Save local rehearsal/);
+  assert.match(englishHtml, /Message preview/);
+  assert.doesNotMatch(englishHtml, /תבניות שמורות/);
+
+  assert.match(arabicHtml, /قوالب دائمة/);
+  assert.match(arabicHtml, /إعداد القالب/);
+  assert.match(arabicHtml, /حفظ التجربة محليًا/);
+  assert.match(arabicHtml, /معاينة الرسالة/);
+  assert.doesNotMatch(arabicHtml, /תבניות שמורות/);
+});
+
 test("server-renders auth and workspace feature routes", async () => {
   const [
     loginResponse,
@@ -223,14 +250,14 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.match(templateHtml, /תבניות הודעה/);
   assert.match(templateHtml, /תבניות שמורות/);
   assert.match(templateHtml, /סנכרון מול Meta/);
-  assert.match(templateHtml, /Local rehearsal/);
+  assert.match(templateHtml, /תרגול מקומי/);
   assert.match(
     templateHtml,
-    /שמירת Rehearsal מקומית/,
+    /שמירת תרגול מקומי/,
   );
   assert.match(
     templateHtml,
-    /תימחק ברענון ולא תישלח ל־Meta/,
+    /יימחק ברענון ולא יישלח ל־Meta/,
   );
   assert.match(templateHtml, /Footer — רשות/);
   assert.match(templateHtml, /Quick Reply/);

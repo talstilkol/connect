@@ -24,6 +24,9 @@ import type {
   MessageTemplateView,
 } from "../../shared/domain/messageTemplateView";
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import type {
   SaveMessageTemplateDraftActionResult,
   SubmitMessageTemplateActionResult,
   SyncMessageTemplatesActionResult,
@@ -39,17 +42,21 @@ import {
   inspectTemplateVariables,
 } from "../../shared/validation/templateVariables";
 import { useWorkspaceDrafts } from "../workspace/WorkspaceDraftProvider";
+import {
+  readTemplateEditorMessages,
+  type TemplateEditorMessages,
+} from "./templateEditorMessages";
 
-const categories: Array<{ value: TemplateCategory; label: string }> = [
-  { value: "MARKETING", label: "Marketing — שיווק" },
-  { value: "UTILITY", label: "Utility — עדכון שירותי" },
-  { value: "AUTHENTICATION", label: "Authentication — אימות" },
+const categories: readonly TemplateCategory[] = [
+  "MARKETING",
+  "UTILITY",
+  "AUTHENTICATION",
 ];
 
-const languages: Array<{ value: TemplateLanguage; label: string }> = [
-  { value: "he", label: "עברית — he" },
-  { value: "en_US", label: "English (US) — en_US" },
-  { value: "ar", label: "العربية — ar" },
+const languages: readonly TemplateLanguage[] = [
+  "he",
+  "en_US",
+  "ar",
 ];
 
 function toTemplateDraft(
@@ -74,15 +81,18 @@ function toTemplateDraft(
 
 export function TemplateDraftEditor({
   authEnabled,
+  interfaceLanguage,
   initialTemplates,
   initialStatus,
   canWrite,
 }: {
   authEnabled: boolean;
+  interfaceLanguage: InterfaceLanguage;
   initialTemplates: readonly MessageTemplateView[];
   initialStatus: MessageTemplateDirectoryStatus;
   canWrite: boolean;
 }) {
+  const messages = readTemplateEditorMessages(interfaceLanguage);
   const {
     templateDraft,
     saveTemplateDraft,
@@ -178,6 +188,14 @@ export function TemplateDraftEditor({
     () => inspectTemplateVariables(body),
     [body],
   );
+  const variableErrorMessage =
+    variableResult.error === null
+      ? null
+      : variableResult.error.code === "invalid-syntax"
+        ? messages.editor.variableGuidance.invalidSyntax
+        : messages.editor.variableGuidance.missingSequence(
+            variableResult.error.expected,
+          );
   const completedVariableCount = variableResult.numbers.filter(
     (variableNumber) => variableValues[variableNumber]?.trim(),
   ).length;
@@ -453,6 +471,7 @@ export function TemplateDraftEditor({
         initialStatus={initialStatus}
         isSubmitting={isSubmitting}
         isSyncing={isSyncing}
+        messages={messages}
         onLoad={loadTemplate}
         onNew={newTemplate}
         onSubmit={submitTemplate}
@@ -468,29 +487,29 @@ export function TemplateDraftEditor({
           <div>
             <span className="card-kicker">
               {initialStatus === "ready"
-                ? "Persistent draft"
+                ? messages.editor.kickers.persistent
                 : localRehearsalEnabled
-                  ? "Local rehearsal"
-                  : "Persistence unavailable"}
+                  ? messages.editor.kickers.local
+                  : messages.editor.kickers.unavailable}
             </span>
-            <h2>הגדרת התבנית</h2>
+            <h2>{messages.editor.title}</h2>
           </div>
           <span className={`status-pill ${draftSaved ? "success" : "warning"}`}>
             {isSaving
-              ? "שומר בשרת"
+              ? messages.editor.persistence.saving
               : draftSaved && initialStatus === "ready"
-                  ? "נשמרה בשרת"
+                  ? messages.editor.persistence.savedServer
                   : draftSaved && localRehearsalEnabled
-                    ? "נשמרה מקומית"
+                    ? messages.editor.persistence.savedLocal
                     : draftSaved
-                      ? "לא נשמרה בשרת"
-                      : "שינויים לא נשמרו"}
+                      ? messages.editor.persistence.notSavedServer
+                      : messages.editor.persistence.unsavedChanges}
           </span>
         </div>
 
         <form className="template-form" onSubmit={saveDraft}>
           <label>
-            <span>שם תבנית</span>
+            <span>{messages.editor.fields.name}</span>
             <input
               value={name}
               onChange={(event) => {
@@ -503,7 +522,7 @@ export function TemplateDraftEditor({
 
           <div className="template-form-row">
             <label>
-              <span>קטגוריה</span>
+              <span>{messages.editor.fields.category}</span>
               <select
                 value={category}
                 onChange={(event) => {
@@ -512,15 +531,15 @@ export function TemplateDraftEditor({
                 }}
               >
                 {categories.map((item) => (
-                  <option value={item.value} key={item.value}>
-                    {item.label}
+                  <option value={item} key={item}>
+                    {messages.options.categories[item]}
                   </option>
                 ))}
               </select>
             </label>
 
             <label>
-              <span>שפה</span>
+              <span>{messages.editor.fields.language}</span>
               <select
                 value={language}
                 onChange={(event) => {
@@ -529,8 +548,8 @@ export function TemplateDraftEditor({
                 }}
               >
                 {languages.map((item) => (
-                  <option value={item.value} key={item.value}>
-                    {item.label}
+                  <option value={item} key={item}>
+                    {messages.options.languages[item]}
                   </option>
                 ))}
               </select>
@@ -540,15 +559,12 @@ export function TemplateDraftEditor({
           {category === "AUTHENTICATION" ? (
             <div className="inline-notice warning" role="status">
               <span aria-hidden="true">i</span>
-              <p>
-                Authentication דורש עורך ייעודי לרכיבי OTP ולכפתורי אימות.
-                העורך הכללי הנוכחי אינו שומר טיוטה בקטגוריה זו.
-              </p>
+              <p>{messages.editor.authenticationNotice}</p>
             </div>
           ) : null}
 
           <label>
-            <span>כותרת טקסט — רשות וללא משתנים בשלב זה</span>
+            <span>{messages.editor.fields.header}</span>
             <input
               value={header}
               onChange={(event) => {
@@ -561,15 +577,12 @@ export function TemplateDraftEditor({
           {headerHasVariableSyntax ? (
             <div className="inline-notice danger" role="alert">
               <span aria-hidden="true">!</span>
-              <p>
-                משתנים בכותרת דורשים מסלול Examples נפרד. בשלב זה יש להסיר
-                אותם מהכותרת או להשתמש בהם בגוף ההודעה.
-              </p>
+              <p>{messages.editor.headerVariableError}</p>
             </div>
           ) : null}
 
           <label>
-            <span>גוף ההודעה</span>
+            <span>{messages.editor.fields.body}</span>
             <textarea
               value={body}
               onChange={(event) => {
@@ -584,27 +597,28 @@ export function TemplateDraftEditor({
 
           <div
             id="template-variable-guidance"
-            className={`variable-guidance ${variableResult.error ? "invalid" : ""}`}
+            className={`variable-guidance ${variableErrorMessage ? "invalid" : ""}`}
           >
             <span aria-hidden="true">
-              {variableResult.error ? "!" : variableResult.numbers.length}
+              {variableErrorMessage ? "!" : variableResult.numbers.length}
             </span>
             <p>
-              {variableResult.error ??
+              {variableErrorMessage ??
                 (variableResult.numbers.length > 0
-                  ? `${variableResult.numbers.length} משתנים תקינים נמצאו. יש להזין עבורם ערכי בדיקה.`
-                  : "אפשר להוסיף משתנים סדרתיים: {{1}}, {{2}} וכן הלאה.")}
+                  ? messages.editor.variableGuidance.found(
+                      variableResult.numbers.length,
+                    )
+                  : messages.editor.variableGuidance.none)}
             </p>
           </div>
 
           {variableResult.error === null &&
           variableResult.numbers.length > 0 ? (
             <fieldset className="template-variable-examples">
-              <legend>ערכי בדיקה למשתנים</legend>
-              <p>
-                הערכים נשמרים כחלק מהטיוטה ונשלחים ל־Meta כדוגמאות בעת
-                הגשה. הם אינם נשלחים לנמענים.
-              </p>
+              <legend>
+                {messages.editor.variableGuidance.examplesTitle}
+              </legend>
+              <p>{messages.editor.variableGuidance.examplesDescription}</p>
               <div>
                 {variableResult.numbers.map((variableNumber) => (
                   <label key={variableNumber}>
@@ -632,15 +646,15 @@ export function TemplateDraftEditor({
                 </span>
                 <p>
                   {allVariablesHaveValues
-                    ? "כל ערכי הבדיקה הוזנו."
-                    : "הטיוטה לא תהיה מוכנה עד שכל משתנה יקבל ערך בדיקה."}
+                    ? messages.editor.variableGuidance.complete
+                    : messages.editor.variableGuidance.incomplete}
                 </p>
               </div>
             </fieldset>
           ) : null}
 
           <label>
-            <span>Footer — רשות וללא משתנים</span>
+            <span>{messages.editor.fields.footer}</span>
             <input
               value={footer}
               onChange={(event) => {
@@ -653,17 +667,26 @@ export function TemplateDraftEditor({
           {footerHasVariableSyntax ? (
             <div className="inline-notice danger" role="alert">
               <span aria-hidden="true">!</span>
-              <p>Footer עם משתנים אינו נתמך בעורך המקומי.</p>
+              <p>{messages.editor.footerVariableError}</p>
             </div>
           ) : null}
 
           <fieldset className="template-button-editor">
-            <legend>מסלול כפתורים — רשות</legend>
+            <legend>{messages.editor.buttons.legend}</legend>
             <div className="button-mode-selector">
               {[
-                { value: "none", label: "ללא כפתורים" },
-                { value: "quick_reply", label: "Quick Reply" },
-                { value: "call_to_action", label: "Call to Action" },
+                {
+                  value: "none",
+                  label: messages.options.buttonModes.none,
+                },
+                {
+                  value: "quick_reply",
+                  label: messages.options.buttonModes.quick_reply,
+                },
+                {
+                  value: "call_to_action",
+                  label: messages.options.buttonModes.call_to_action,
+                },
               ].map((mode) => (
                 <label
                   className={buttonMode === mode.value ? "selected" : ""}
@@ -683,18 +706,15 @@ export function TemplateDraftEditor({
                 </label>
               ))}
             </div>
-            <p>
-              כדי לשמור על טיוטה חד־משמעית, העורך המקומי משתמש במסלול כפתורים
-              אחד בכל פעם.
-            </p>
+            <p>{messages.editor.buttons.explanation}</p>
           </fieldset>
 
           {buttonMode === "quick_reply" ? (
             <>
               <fieldset className="quick-reply-editor">
-                <legend>כפתורי Quick Reply</legend>
+                <legend>{messages.editor.buttons.quickReplyLegend}</legend>
                 <div className="quick-reply-heading">
-                  <p>העורך המקומי תומך כרגע בעד שני כפתורים.</p>
+                  <p>{messages.editor.buttons.quickReplyLimit}</p>
                   <button
                     type="button"
                     className="secondary-button"
@@ -704,7 +724,7 @@ export function TemplateDraftEditor({
                       markChanged();
                     }}
                   >
-                    הוספת כפתור
+                    {messages.editor.buttons.add}
                   </button>
                 </div>
 
@@ -713,7 +733,9 @@ export function TemplateDraftEditor({
                     {quickReplies.map((quickReply, index) => (
                       <div key={`quick-reply-${index}`}>
                         <label>
-                          <span>טקסט כפתור {index + 1}</span>
+                          <span>
+                            {messages.editor.buttons.quickReplyText(index + 1)}
+                          </span>
                           <input
                             value={quickReply}
                             onChange={(event) => {
@@ -732,7 +754,9 @@ export function TemplateDraftEditor({
                         <button
                           type="button"
                           className="remove-quick-reply"
-                          aria-label={`הסרת כפתור ${index + 1}`}
+                          aria-label={
+                            messages.editor.buttons.removeAriaLabel(index + 1)
+                          }
                           onClick={() => {
                             setQuickReplies((current) =>
                               current.filter(
@@ -749,7 +773,7 @@ export function TemplateDraftEditor({
                   </div>
                 ) : (
                   <p className="quick-reply-empty">
-                    יש להוסיף לפחות כפתור אחד או לבחור מסלול ללא כפתורים.
+                    {messages.editor.buttons.quickReplyEmpty}
                   </p>
                 )}
               </fieldset>
@@ -757,7 +781,7 @@ export function TemplateDraftEditor({
               {quickReplyHasVariableSyntax ? (
                 <div className="inline-notice danger" role="alert">
                   <span aria-hidden="true">!</span>
-                  <p>טקסט Quick Reply אינו תומך במשתנים בעורך המקומי.</p>
+                  <p>{messages.editor.buttons.quickReplyVariableError}</p>
                 </div>
               ) : null}
             </>
@@ -765,14 +789,12 @@ export function TemplateDraftEditor({
 
           {buttonMode === "call_to_action" ? (
             <fieldset className="cta-editor">
-              <legend>כפתורי Call to Action</legend>
-              <p>
-                ניתן להגדיר כתובת HTTPS סטטית, מספר טלפון, או את שניהם.
-              </p>
+              <legend>{messages.editor.buttons.ctaLegend}</legend>
+              <p>{messages.editor.buttons.ctaDescription}</p>
 
               <CtaToggle
                 checked={urlButtonEnabled}
-                label="פתיחת כתובת אתר"
+                label={messages.editor.buttons.openWebsite}
                 onChange={(checked) => {
                   setUrlButtonEnabled(checked);
                   markChanged();
@@ -781,7 +803,7 @@ export function TemplateDraftEditor({
               {urlButtonEnabled ? (
                 <div className="cta-fields">
                   <fieldset className="url-mode-selector">
-                    <legend>סוג כתובת</legend>
+                    <legend>{messages.editor.buttons.urlType}</legend>
                     <label
                       className={urlButtonMode === "static" ? "selected" : ""}
                     >
@@ -795,7 +817,7 @@ export function TemplateDraftEditor({
                           markChanged();
                         }}
                       />
-                      <span>URL סטטי</span>
+                      <span>{messages.options.urlModes.static}</span>
                     </label>
                     <label
                       className={urlButtonMode === "dynamic" ? "selected" : ""}
@@ -810,11 +832,11 @@ export function TemplateDraftEditor({
                           markChanged();
                         }}
                       />
-                      <span>URL דינמי</span>
+                      <span>{messages.options.urlModes.dynamic}</span>
                     </label>
                   </fieldset>
                   <label>
-                    <span>טקסט כפתור URL</span>
+                    <span>{messages.editor.buttons.urlText}</span>
                     <input
                       value={urlButtonText}
                       onChange={(event) => {
@@ -827,8 +849,8 @@ export function TemplateDraftEditor({
                   <label>
                     <span>
                       {urlButtonMode === "static"
-                        ? "כתובת HTTPS סטטית"
-                        : "כתובת HTTPS עם משתנה {{1}}"}
+                        ? messages.editor.buttons.staticUrl
+                        : messages.editor.buttons.dynamicUrl}
                     </span>
                     <input
                       type={urlButtonMode === "static" ? "url" : "text"}
@@ -843,7 +865,7 @@ export function TemplateDraftEditor({
                   </label>
                   {urlButtonMode === "dynamic" ? (
                     <label>
-                      <span>Example עבור משתנה ה־URL</span>
+                      <span>{messages.editor.buttons.urlExample}</span>
                       <input
                         value={urlButtonExample}
                         onChange={(event) => {
@@ -857,13 +879,13 @@ export function TemplateDraftEditor({
                   {!urlButtonValid ? (
                     <p className="field-error">
                       {urlButtonMode === "static"
-                        ? "נדרשים טקסט וכתובת HTTPS תקינה ללא משתנים."
-                        : "נדרשים טקסט, כתובת HTTPS עם משתנה {{1}} יחיד ו-Example ללא משתנים."}
+                        ? messages.editor.buttons.staticUrlError
+                        : messages.editor.buttons.dynamicUrlError}
                     </p>
                   ) : null}
                   {urlButtonMode === "dynamic" && urlButtonValid ? (
                     <div className="dynamic-url-preview" role="status">
-                      <span>URL לאחר הצבת Example</span>
+                      <span>{messages.editor.buttons.resolvedUrl}</span>
                       <code dir="ltr">{urlPreviewValue}</code>
                     </div>
                   ) : null}
@@ -872,7 +894,7 @@ export function TemplateDraftEditor({
 
               <CtaToggle
                 checked={phoneButtonEnabled}
-                label="התקשרות למספר טלפון"
+                label={messages.editor.buttons.callPhone}
                 onChange={(checked) => {
                   setPhoneButtonEnabled(checked);
                   markChanged();
@@ -881,7 +903,7 @@ export function TemplateDraftEditor({
               {phoneButtonEnabled ? (
                 <div className="cta-fields">
                   <label>
-                    <span>טקסט כפתור טלפון</span>
+                    <span>{messages.editor.buttons.phoneText}</span>
                     <input
                       value={phoneButtonText}
                       onChange={(event) => {
@@ -892,7 +914,7 @@ export function TemplateDraftEditor({
                     />
                   </label>
                   <label>
-                    <span>מספר טלפון</span>
+                    <span>{messages.editor.buttons.phoneNumber}</span>
                     <input
                       type="tel"
                       value={phoneButtonValue}
@@ -906,8 +928,7 @@ export function TemplateDraftEditor({
                   </label>
                   {!phoneButtonValid ? (
                     <p className="field-error">
-                      נדרשים טקסט ומספר הכולל ספרות בלבד, עם `+` אופציונלי
-                      בתחילתו.
+                      {messages.editor.buttons.phoneError}
                     </p>
                   ) : null}
                 </div>
@@ -915,7 +936,7 @@ export function TemplateDraftEditor({
 
               {!urlButtonEnabled && !phoneButtonEnabled ? (
                 <p className="field-error">
-                  יש להפעיל לפחות כפתור CTA אחד.
+                  {messages.editor.buttons.ctaEmpty}
                 </p>
               ) : null}
             </fieldset>
@@ -931,20 +952,21 @@ export function TemplateDraftEditor({
             }
           >
             {!canWrite && initialStatus === "ready"
-              ? "אין הרשאת שמירה"
+              ? messages.editor.save.noPermission
               : isSaving
-              ? "שומר..."
+              ? messages.editor.save.saving
               : initialStatus === "ready"
-                ? "שמירת טיוטה בשרת"
+                ? messages.editor.save.server
                 : localRehearsalEnabled
-                  ? "שמירת Rehearsal מקומית"
-                  : "השמירה אינה זמינה"}
+                  ? messages.editor.save.local
+                  : messages.editor.save.unavailable}
           </button>
           {saveResult ? (
             <ActionNotice
               message={describeSaveResult(
                 saveResult,
                 initialStatus,
+                messages,
               )}
               tone={
                 saveResult.status === "saved" ||
@@ -960,8 +982,10 @@ export function TemplateDraftEditor({
       <aside className="card template-preview-card">
         <div className="card-header">
           <div>
-            <span className="card-kicker">Preview</span>
-            <h2>תצוגה מקדימה</h2>
+            <span className="card-kicker">
+              {messages.editor.preview.kicker}
+            </span>
+            <h2>{messages.editor.preview.title}</h2>
           </div>
           <div className="template-preview-meta">
             <span className="template-language-code">{language}</span>
@@ -1020,10 +1044,10 @@ export function TemplateDraftEditor({
           <span aria-hidden="true">i</span>
           <p>
             {initialStatus === "ready"
-              ? "שמירת הטיוטה מתבצעת ב־D1. לאחר השמירה ניתן לשלוח אותה לאישור מתוך הרשימה שמעל."
+              ? messages.editor.preview.persistentNotice
               : localRehearsalEnabled
-                ? "ללא Clerk ו־D1 הטיוטה נשמרת בזיכרון המסך בלבד ואינה נשלחת ל־Meta."
-                : "השמירה אינה זמינה עד לפתרון מצב החשבון או השרת שמופיע מעל."}
+                ? messages.editor.preview.localNotice
+                : messages.editor.preview.unavailableNotice}
           </p>
         </div>
       </aside>
@@ -1032,50 +1056,17 @@ export function TemplateDraftEditor({
   );
 }
 
-const templateStatusPresentation: Record<
+const templateStatusTones: Record<
   MessageTemplateView["status"],
-  {
-    label: string;
-    tone: "success" | "warning" | "critical";
-    detail: string;
-  }
+  "success" | "warning" | "critical"
 > = {
-  draft: {
-    label: "טיוטה",
-    tone: "warning",
-    detail: "ניתנת לעריכה ולשליחה לאישור.",
-  },
-  submitting: {
-    label: "תוצאת הגשה בבדיקה",
-    tone: "warning",
-    detail:
-      "לא תתבצע שליחה חוזרת עד שסנכרון Meta יקבע את התוצאה.",
-  },
-  pending_review: {
-    label: "ממתינה לאישור",
-    tone: "warning",
-    detail: "Meta קיבלה את התבנית והיא ממתינה לבדיקה.",
-  },
-  approved: {
-    label: "אושרה",
-    tone: "success",
-    detail: "התבנית זמינה לשימוש לאחר סנכרון הקמפיינים.",
-  },
-  rejected: {
-    label: "נדחתה",
-    tone: "critical",
-    detail: "התבנית נעולה; סטטוס הדחייה הגיע מ־Meta.",
-  },
-  disabled: {
-    label: "הושבתה",
-    tone: "critical",
-    detail: "Meta סימנה את התבנית כלא פעילה.",
-  },
-  deleted: {
-    label: "נמחקה",
-    tone: "critical",
-    detail: "Meta סימנה את התבנית כמחוקה.",
-  },
+  draft: "warning",
+  submitting: "warning",
+  pending_review: "warning",
+  approved: "success",
+  rejected: "critical",
+  disabled: "critical",
+  deleted: "critical",
 };
 
 function MessageTemplateDirectory({
@@ -1085,6 +1076,7 @@ function MessageTemplateDirectory({
   initialStatus,
   isSubmitting,
   isSyncing,
+  messages,
   onLoad,
   onNew,
   onSubmit,
@@ -1099,6 +1091,7 @@ function MessageTemplateDirectory({
   initialStatus: MessageTemplateDirectoryStatus;
   isSubmitting: boolean;
   isSyncing: boolean;
+  messages: TemplateEditorMessages;
   onLoad: (template: MessageTemplateView) => void;
   onNew: () => void;
   onSubmit: (templateKey: string) => void;
@@ -1111,6 +1104,7 @@ function MessageTemplateDirectory({
     describeDirectoryFailure(
       authEnabled,
       initialStatus,
+      messages,
     );
   const localRehearsalEnabled =
     !authEnabled ||
@@ -1121,9 +1115,9 @@ function MessageTemplateDirectory({
       <div className="card-header">
         <div>
           <span className="card-kicker">
-            Persistent templates
+            {messages.directory.kicker}
           </span>
-          <h2>תבניות שמורות</h2>
+          <h2>{messages.directory.title}</h2>
         </div>
         <div className="template-directory-actions">
           <span
@@ -1134,10 +1128,10 @@ function MessageTemplateDirectory({
             }`}
           >
             {initialStatus === "ready"
-              ? `${templates.length} מהשרת`
+              ? messages.directory.fromServer(templates.length)
               : localRehearsalEnabled
-                ? "מצב מקומי"
-                : "לא זמין"}
+                ? messages.directory.localMode
+                : messages.directory.unavailable}
           </span>
           <button
             type="button"
@@ -1150,8 +1144,8 @@ function MessageTemplateDirectory({
             }
           >
             {isSyncing
-              ? "מסנכרן..."
-              : "סנכרון מול Meta"}
+              ? messages.directory.syncing
+              : messages.directory.sync}
           </button>
           <button
             type="button"
@@ -1162,7 +1156,7 @@ function MessageTemplateDirectory({
               (initialStatus !== "ready" || !canWrite)
             }
           >
-            טיוטה חדשה
+            {messages.directory.newDraft}
           </button>
         </div>
       </div>
@@ -1177,25 +1171,20 @@ function MessageTemplateDirectory({
           {!canWrite ? (
             <div className="inline-notice warning">
               <span aria-hidden="true">i</span>
-              <p>
-                התפקיד הנוכחי מורשה לצפות בתבניות אך
-                אינו מורשה לשמור או לשלוח אותן.
-              </p>
+              <p>{messages.directory.readOnly}</p>
             </div>
           ) : null}
           {templates.length === 0 ? (
         <div className="template-directory-empty">
-          <strong>אין תבניות שמורות</strong>
-          <p>
-            הטיוטה הראשונה תופיע כאן לאחר שמירה
-            מוצלחת ב־D1.
-          </p>
+          <strong>{messages.directory.emptyTitle}</strong>
+          <p>{messages.directory.emptyDescription}</p>
         </div>
           ) : (
         <div className="template-record-list">
           {templates.map((template) => {
             const presentation =
-              templateStatusPresentation[template.status];
+              messages.directory.statuses[template.status];
+            const tone = templateStatusTones[template.status];
 
             return (
               <article
@@ -1211,7 +1200,7 @@ function MessageTemplateDirectory({
                   <div>
                     <strong>{template.name}</strong>
                     <span
-                      className={`status-pill ${presentation.tone}`}
+                      className={`status-pill ${tone}`}
                     >
                       {presentation.label}
                     </span>
@@ -1219,7 +1208,7 @@ function MessageTemplateDirectory({
                   <p>{presentation.detail}</p>
                   <small>
                     {template.language} ·{" "}
-                    {template.category} · עודכן{" "}
+                    {template.category} · {messages.directory.updated}{" "}
                     {formatStoredTimestamp(
                       template.updatedAt,
                     )}
@@ -1234,7 +1223,7 @@ function MessageTemplateDirectory({
                         className="secondary-button"
                         onClick={() => onLoad(template)}
                       >
-                        טעינה לעריכה
+                        {messages.directory.load}
                       </button>
                       <button
                         type="button"
@@ -1245,8 +1234,8 @@ function MessageTemplateDirectory({
                         }
                       >
                         {isSubmitting
-                          ? "שולח..."
-                          : "שליחה לאישור"}
+                          ? messages.directory.submitting
+                          : messages.directory.submit}
                       </button>
                     </>
                   ) : null}
@@ -1261,7 +1250,7 @@ function MessageTemplateDirectory({
 
       {submitResult ? (
         <ActionNotice
-          message={describeSubmitResult(submitResult)}
+          message={describeSubmitResult(submitResult, messages)}
           tone={
             submitResult.status === "submitted"
               ? "success"
@@ -1275,7 +1264,7 @@ function MessageTemplateDirectory({
 
       {syncResult ? (
         <ActionNotice
-          message={describeSyncResult(syncResult)}
+          message={describeSyncResult(syncResult, messages)}
           tone={
             syncResult.status === "synced"
               ? "success"
@@ -1295,25 +1284,26 @@ function MessageTemplateDirectory({
 function describeDirectoryFailure(
   authEnabled: boolean,
   status: MessageTemplateDirectoryStatus,
+  messages: TemplateEditorMessages,
 ): string | null {
   if (!authEnabled || status === "configuration-required") {
-    return "Clerk ו־D1 אינם מוגדרים. אפשר להכין Rehearsal מקומית, אך היא תימחק ברענון ולא תישלח ל־Meta.";
+    return messages.feedback.directoryFailures["configuration-required"];
   }
 
   if (status === "onboarding-required") {
-    return "יש להשלים תחילה את פרטי העסק כדי ליצור Tenant פעיל.";
+    return messages.feedback.directoryFailures[status];
   }
 
   if (status === "tenant-selection-required") {
-    return "המשתמש משויך למספר Tenants ונדרשת בחירה מפורשת.";
+    return messages.feedback.directoryFailures[status];
   }
 
   if (status === "permission-denied") {
-    return "התפקיד הנוכחי אינו מורשה לקרוא תבניות.";
+    return messages.feedback.directoryFailures[status];
   }
 
   if (status === "server-error") {
-    return "לא ניתן היה לטעון את התבניות מהשרת. לא הוצג מידע חלופי.";
+    return messages.feedback.directoryFailures[status];
   }
 
   return null;
@@ -1322,44 +1312,17 @@ function describeDirectoryFailure(
 function describeSaveResult(
   result: SaveMessageTemplateDraftActionResult,
   directoryStatus: MessageTemplateDirectoryStatus,
+  messages: TemplateEditorMessages,
 ): string {
-  if (result.status === "saved") {
-    return "הטיוטה נשמרה ב־D1 והיא זמינה לאחר רענון.";
-  }
-
   if (
     directoryStatus === "configuration-required" &&
     (result.status === "configuration-required" ||
       result.status === "server-error")
   ) {
-    return "ה־Rehearsal נשמרה בזיכרון המסך בלבד ולא בשרת.";
+    return messages.feedback.localRehearsalSaved;
   }
 
-  if (result.status === "validation-error") {
-    return "השרת דחה את הטיוטה מפני שאחד או יותר מהשדות אינם תקינים.";
-  }
-
-  if (result.status === "not-editable") {
-    return "תבנית שכבר נשלחה ל־Meta נעולה ואינה ניתנת לדריסה.";
-  }
-
-  if (result.status === "unauthenticated") {
-    return "נדרשת התחברות מחדש לפני שמירת התבנית.";
-  }
-
-  if (result.status === "onboarding-required") {
-    return "יש להשלים תחילה את פרטי העסק.";
-  }
-
-  if (result.status === "tenant-selection-required") {
-    return "נדרשת בחירה מפורשת של Tenant.";
-  }
-
-  if (result.status === "permission-denied") {
-    return "התפקיד הנוכחי אינו מורשה לשמור תבניות.";
-  }
-
-  return "שמירת הטיוטה בשרת נכשלה. היא לא סומנה כשמורה.";
+  return messages.feedback.saveResults[result.status];
 }
 
 function saveFailureForDirectoryStatus(
@@ -1382,96 +1345,20 @@ function saveFailureForDirectoryStatus(
 
 function describeSubmitResult(
   result: SubmitMessageTemplateActionResult,
+  messages: TemplateEditorMessages,
 ): string {
-  const messages: Record<
-    SubmitMessageTemplateActionResult["status"],
-    string
-  > = {
-    submitted:
-      "Meta קיבלה את התבנית והיא ממתינה לאישור.",
-    "invalid-input": "מזהה התבנית אינו תקין.",
-    "not-found": "התבנית לא נמצאה ב־Tenant הנוכחי.",
-    "not-editable":
-      "רק טיוטה שטרם נשלחה ניתנת להגשה.",
-    "meta-not-connected":
-      "נדרש חיבור Meta פעיל לפני שליחת תבנית.",
-    "meta-configuration-required":
-      "נדרשת הגדרת Graph API ומפתח Credential בצד השרת.",
-    "meta-configuration-invalid":
-      "הגדרת Meta השרתית חלקית או לא תקינה.",
-    "credential-unavailable":
-      "לא נמצא Credential מוצפן עבור ה־Tenant.",
-    "state-conflict":
-      "הטיוטה השתנתה במקביל. יש לטעון מחדש לפני ניסיון נוסף.",
-    "submission-rejected":
-      "Meta דחתה את בקשת יצירת התבנית. הטיוטה נשארה זמינה לעריכה.",
-    "submission-uncertain":
-      "תוצאת ההגשה אינה ידועה. המערכת לא תשלח שוב עד לסנכרון מול Meta.",
-    "configuration-required":
-      "Clerk ו־D1 אינם מוגדרים.",
-    unauthenticated:
-      "נדרשת התחברות מחדש לפני השליחה.",
-    "onboarding-required":
-      "יש להשלים תחילה את פרטי העסק.",
-    "tenant-selection-required":
-      "נדרשת בחירה מפורשת של Tenant.",
-    "permission-denied":
-      "התפקיד הנוכחי אינו מורשה לשלוח תבניות.",
-    "server-error":
-      "השרת לא הצליח להשלים את הפעולה.",
-  };
-
-  return messages[result.status];
+  return messages.feedback.submitResults[result.status];
 }
 
 function describeSyncResult(
   result: SyncMessageTemplatesActionResult,
+  messages: TemplateEditorMessages,
 ): string {
   if (result.status === "synced") {
-    return [
-      `Meta החזירה ${result.summary.received} תבניות.`,
-      `${result.summary.updated} עודכנו,`,
-      `${result.summary.unchanged} לא השתנו,`,
-      `${result.summary.stale} אירועים ישנים דולגו,`,
-      `${result.summary.unmatched} אינן מנוהלות מקומית`,
-      `ו־${result.summary.unsupported} אינן נתמכות במסלול הנוכחי.`,
-    ].join(" ");
+    return messages.feedback.syncSummary(result.summary);
   }
 
-  const messages: Record<
-    Exclude<
-      SyncMessageTemplatesActionResult["status"],
-      "synced"
-    >,
-    string
-  > = {
-    "meta-not-connected":
-      "נדרש חיבור Meta פעיל לפני סנכרון תבניות.",
-    "meta-configuration-required":
-      "נדרשת הגדרת Graph API ומפתח Credential בצד השרת.",
-    "meta-configuration-invalid":
-      "הגדרת Meta השרתית חלקית או לא תקינה.",
-    "credential-unavailable":
-      "לא נמצא Credential מוצפן עבור ה־Tenant.",
-    "identity-conflict":
-      "מזהה Template של Meta מתנגש בשם, בשפה או בקטגוריה המקומיים. לא בוצע תיקון אוטומטי.",
-    "sync-failed":
-      "Meta או D1 לא השלימו את הסנכרון. לא הוצג סטטוס חלופי.",
-    "configuration-required":
-      "Clerk ו־D1 אינם מוגדרים.",
-    unauthenticated:
-      "נדרשת התחברות מחדש לפני הסנכרון.",
-    "onboarding-required":
-      "יש להשלים תחילה את פרטי העסק.",
-    "tenant-selection-required":
-      "נדרשת בחירה מפורשת של Tenant.",
-    "permission-denied":
-      "התפקיד הנוכחי אינו מורשה לסנכרן תבניות.",
-    "server-error":
-      "השרת לא הצליח להתחיל את הסנכרון.",
-  };
-
-  return messages[result.status];
+  return messages.feedback.syncResults[result.status];
 }
 
 function formatStoredTimestamp(value: string): string {
