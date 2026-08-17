@@ -1,6 +1,6 @@
 # המלצות להחלטות החיצוניות
 
-תאריך בדיקה: 2026-08-16
+תאריך בדיקה: 2026-08-17
 
 ## 1. עקרונות החלטה
 
@@ -19,8 +19,10 @@
 
 2.2 המלצה: `TEAM_INVITATION_REREQUEST_POLICY=after-terminal`.
 
-2.3 Clerk יוכיח את זהות המשתמש והאימייל המאומת, אך D1 יישאר מקור
-האמת ל־Invitation state, ‏Role, ‏Audit ו־Idempotency.
+2.3 Clerk יוכיח את זהות המשתמש והאימייל המאומת, אך שכבת ה־Persistence
+של Connect תישאר מקור האמת ל־Invitation state, ‏Role, ‏Audit
+ו־Idempotency. במימוש הקיים זו D1; ביעד Vercel/Railway היא תעבור
+ל־PostgreSQL רק דרך Adapter שעובר את אותם Contract tests.
 
 2.4 הסיבה: 72 שעות מצמצמות חשיפה של קישור ישן בלי להכביד מדי על
 הזמנה עסקית. Re-request מותר רק אחרי Expired, ‏Revoked או Accepted,
@@ -94,9 +96,10 @@ Phone number, ‏Recipient, ‏Template ופעולות ניהול.
 החשבון שעדיין אינו זמין, נמצא ב־`docs/whatsapp-rate-limits.md`. הוא
 אינו Production evidence עד שהוא מקושר למצב החי, Commit ו־Digest.
 
-5.5 המפתחות יהיו זהויות יציבות ולא כתובת IP. Cloudflare מציינת
-שמגבלת Workers היא מקומית ל־PoP ו־eventually consistent, ולכן היא
-אינה מנגנון Billing או Quota מדויק.
+5.5 המפתחות יהיו זהויות יציבות ולא כתובת IP. מנגנון Rate limit
+תשתיתי מקומי ל־Instance או Region אינו מנגנון Billing או Quota
+מדויק; ה־Migration חייב לשמר מכסות אטומיות ברמת Portfolio/Sender/
+Recipient במאגר משותף.
 
 5.6 לפני אישור טל ימסור Evidence מתוארך הכולל מקור רשמי, גרסת API,
 Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
@@ -117,10 +120,13 @@ Operator המקומי הושלם תחת System Admin: הוא קושר את הק�
 
 ## 6. החלטה 5 — File Scanner
 
-6.1 המלצה: **ClamAV `clamd` בתוך Cloudflare Container מבודד**.
+6.1 המלצה ל־Topology שנבחרה: **ClamAV `clamd` בשירות Railway פרטי
+ומבודד**, ללא כתובת ציבורית. הבחירה נשארת פתוחה עד בדיקת משאבים,
+עדכוני חתימות, עלות ו־Failure recovery ב־Staging.
 
-6.2 Worker יקרא את האובייקט מ־R2, יזרים את הבתים ל־Scanner ולא
-ישלח קישור ציבורי או Object Key לספק צד שלישי.
+6.2 ‏Worker יקרא את האובייקט דרך ObjectStoragePort, יזרים את הבתים
+ל־Scanner ברשת פרטית ולא ישלח קישור ציבורי או Object Key לספק צד
+שלישי. ספק ה־Storage עדיין `unknown/unavailable`.
 
 6.3 ה־Container יעדכן חתימות באמצעות `freshclam`, ייחסם ל־Egress
 שאושר מראש ויחזיר רק `clean`, ‏`infected` או `unavailable`.
@@ -143,8 +149,8 @@ Operator המקומי הושלם תחת System Admin: הוא קושר את הק�
 7.3 אין לאפשר ZIP, קוד, HTML, Office macros, קובץ מוצפן או MIME
 שאינו תואם לחתימת הקובץ.
 
-7.4 כל Upload יעבור Size check, ‏Digest, ‏R2 write, ‏Read-back,
-Malware scan, Extraction ורק אז Passage publication.
+7.4 כל Upload יעבור Size check, ‏Digest, ‏Object storage write,
+Read-back, ‏Malware scan, ‏Extraction ורק אז Passage publication.
 
 ## 8. החלטה 7 — Knowledge Scan Recovery
 
@@ -166,17 +172,20 @@ Malware scan, Extraction ורק אז Passage publication.
 
 9.1.3 `RESTORE_REHEARSAL_INTERVAL_DAYS=30`.
 
-9.2 D1 Time Travel מספק Point-in-time recovery של עד 30 ימים
-בתוכנית Workers Paid. לצורך 90 יום יש להוסיף Export מוצפן ל־R2
-Backup bucket נפרד.
+9.2 יעד ה־Migration דורש PostgreSQL עם Point-in-time recovery
+והעתקים מוצפנים לחשבון/Project נפרד. ספק PostgreSQL, חלון PITR,
+אזור גיבוי ועלות עדיין `unknown/unavailable` ואסור להסיק אותם מ־D1.
 
-9.3 R2 Lifecycle ינהל תפוגה של 90 יום. Restore rehearsal יתבצע רק
-לסביבה מבודדת ויאמת D1, ‏R2 manifests ו־digests לפני יצירת Evidence.
+9.3 Lifecycle של Backup storage ינהל תפוגה של 90 יום. ‏Restore
+rehearsal יתבצע רק לסביבה מבודדת ויאמת PostgreSQL snapshot, ‏Object
+manifests ו־digests לפני יצירת Evidence.
 
 ## 10. החלטה 9 — מקור מדידת SLO
 
-10.1 המלצה: Cloudflare Workers Logs ו־Traces כמקור התשתיתי, יחד עם
-אירועי Telemetry המצומצמים שכבר קיימים באפליקציה.
+10.1 המלצה ל־Topology שנבחרה: OpenTelemetry עקבי מ־Vercel Web ומ־
+Railway API/Worker, יחד עם אירועי Telemetry המצומצמים שכבר קיימים
+באפליקציה. ספק האחסון וההתראות נשאר `unknown/unavailable` עד החלטה
+והוכחת Retention, ‏PII redaction ועלות.
 
 10.2 תצורה התחלתית:
 
@@ -255,32 +264,36 @@ AnyDesk, צ'אט, GitHub או מסמך.
 
 ## 15. החלטה 13 — GitHub ו־Repository Authority
 
-15.1 כבר קיים Repository בשם `talstilkol/connect`. בבדיקת Governance
-חיה מ־2026-08-16 הוא נמצא `public` וללא Branch protection או
-Rulesets. החשיפה תוקנה באותו יום ואימות חוזר דיווח שה־Repository
-`private`. אין לפתוח עותק נוסף; לאחר הכנת Organization מתאים יש
-להעביר את הקיים ולהגדיר אותו במפורש כ־Repository Authority.
+15.1 החלטת טל מ־2026-08-17: ה־Repository הפרטי
+`talstilkol/connect` נשאר בבעלותו והוא Repository Authority היחיד
+בשלב הנוכחי. אין לפתוח עותק נוסף. העברה עתידית ל־Organization היא
+שלב התבגרות אפשרי ותעביר את אותו Repository בלבד.
 
-15.2 כל חבר צוות יעבוד בזהות אישית עם 2FA. רועי ינהל Membership
-ו־Roles; אין משתמש משותף ואין Push ישיר ל־`main`.
+15.2 כל חבר צוות יעבוד בזהות אישית עם 2FA. טל מנהל Membership
+ו־Roles כל עוד ה־Repository בבעלותו; אין משתמש משותף ואין Push ישיר
+ל־`main`.
 
 15.3 Branch Protection, ‏CODEOWNERS, Review חובה, תשעת ה־Checks,
 Secret scanning ו־Push protection יופעלו לפני עבודה משותפת.
 
 ## 16. החלטה 14 — Hosting
 
-16.1 המלצה: להשאיר בשלב הנוכחי את ה־Runtime המלא על Cloudflare.
-הקוד הקיים משתמש ישירות ב־Worker, ‏D1, ‏R2, ‏Queues, ‏DLQs, ‏Rate
-Limits ו־Cron, ולכן Vercel + Railway הם Migration ולא פריסה רגילה.
+16.1 החלטת טל מ־2026-08-17: לבצע Migration מלא ל־Vercel ול־Railway.
+Vercel מיועד לשכבת ה־Web ו־Railway לשירותי API ו־Worker נפרדים.
+Cloudflare נשאר בסיס המימוש הקיים בלבד ואינו יעד ה־Production שנבחר.
 
-16.2 אם Vercel + Railway הם דרישה מחייבת, יש לאשר תחילה ADR שמגדיר
-Vercel UI, ‏Railway API/Worker, ‏PostgreSQL ו־Queue חלופי, ולבנות
-מחדש את חוזי Auth, ‏Backup, ‏Evidence ו־Release.
+16.2 בחירת הספקים אינה בוחרת אוטומטית PostgreSQL, ‏Queue/DLQ,
+Storage, ‏Scheduler, ‏Rate limiting, ‏Secrets, ‏Monitoring או Backup.
+יש לאשר מפת מחליפים ולבנות מחדש את חוזי Auth, ‏Data, ‏Backup,
+Evidence ו־Release לפני Deployment.
 
 16.3 אין לשתף Deployment Token. יש להזמין את ראשה כ־Member עם
 Least privilege. לפי התיעוד העדכני, שיתוף Members ב־Railway מיועד
 ל־Pro/Enterprise, ולכן תוכנית Hobby של 5 דולר אינה תואמת לבדה למודל
 הגישה שהוצע.
+
+16.4 אסור Hybrid לא מתועד. ‏Migration מתבצע דרך Contract freeze,
+Adapter parity, ‏Staging מבודד ו־Cutover מבוקר עם Rollback מתורגל.
 
 ## 17. החלטה 15 — WhatsApp Business Platform
 

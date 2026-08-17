@@ -77,6 +77,12 @@
 4.5 ספק ה־Hosting וה־Topology תואמים ל־ADR המאושר. אין פריסה
 היברידית לא מתועדת בין Cloudflare, ‏Vercel ו־Railway.
 
+4.5.1 עבור ADR-0001 הנוכחי, Vercel Web ו־Railway API/Worker הם יעד
+הפריסה. חוזי D1/R2/Cloudflare Queues בסעיפים 4.1–4.3 הם Baseline
+שיש להחליף במיפוי PostgreSQL, ‏Storage, ‏Queue/DLQ, ‏Scheduler,
+Rate limit ו־Secret stores לפני Release. אין לקבל Cloudflare
+Evidence כהוכחת בידוד של היעד החדש.
+
 4.6 כל גישת Deployment היא דרך Membership אישי ו־Least privilege;
 לא נעשה שימוש ב־Token או חשבון משותף.
 

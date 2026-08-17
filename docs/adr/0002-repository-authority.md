@@ -1,10 +1,10 @@
 ---
 id: ADR-0002
 title: Repository Authority and GitHub governance
-status: proposed
-decision_owner: רועי
-approved_option: unknown/unavailable
-approved_at: unknown/unavailable
+status: accepted
+decision_owner: טל
+approved_option: current-private-personal-authority
+approved_at: 2026-08-17T05:17:48Z
 supersedes: none
 ---
 
@@ -12,15 +12,18 @@ supersedes: none
 
 ## 1. מצב ההחלטה
 
-1.1 סטטוס: `proposed`.
+1.1 סטטוס: `accepted`.
 
-1.2 בעל ההחלטה: רועי — בעלות ארגונית, Billing והרשאות GitHub.
+1.2 בעל ההחלטה: טל — בעל ה־Repository וה־Repository Authority.
 
-1.3 אפשרות שאושרה: `unknown/unavailable`.
+1.3 אפשרות שאושרה: אפשרות B — `talstilkol/connect` הפרטי נשאר
+Repository Authority יחיד בבעלות טל בשלב הנוכחי.
 
-1.4 מועד אישור: `unknown/unavailable`.
+1.4 מועד אישור: `2026-08-17T05:17:48Z`.
 
-1.5 שם ה־GitHub Organization של החברה: `unknown/unavailable`.
+1.5 שם GitHub Organization עתידי של החברה: `unknown/unavailable`.
+היעדר Organization אינו פותח Repository מתחרה ואינו משנה את מקור
+האמת שאושר.
 
 ## 2. הבעיה שצריך לפתור
 
@@ -70,30 +73,34 @@ Offboarding שניתן לבצע בלי להחליף חשבון משותף.
 3.3.2 היא יוצרת Repository מתחרה, סיכון לאובדן היסטוריה ושאלה
 חוזרת לגבי המקום שממנו מותר לפרוס.
 
-## 4. ההמלצה
+## 4. ההחלטה
 
-4.1 לבחור באפשרות A — להעביר את ה־Repository הקיים ל־GitHub
-Organization בבעלות החברה.
+4.1 נבחרה אפשרות B — ה־Repository הפרטי `talstilkol/connect` נשאר
+בבעלות טל ובשלב הנוכחי הוא Repository Authority היחיד.
 
 4.2 לשמור על Repository פרטי ולהכריז עליו במפורש כ־Repository
 Authority היחיד לקוד, Pull Requests, ‏Releases ו־Deployment.
 
-4.3 לא לבצע Transfer לפני שנבדקו תוכנית ה־Organization, הרשאות
-היעד, Branch/Ruleset protections, ‏Actions secrets, ‏Environments,
-Apps, ‏Webhooks ו־Packages.
+4.3 אפשרות A נשארת המלצת התבגרות עתידית לאחר בחירת הישות המשפטית,
+Organization, ‏Billing, שני Owners ונתיב התאוששות. אם תתבצע העברה,
+מעבירים את אותו Repository ולא מעתיקים אותו.
 
 4.4 חשיפת ה־Visibility נסגרה ב־2026-08-16 וה־Repository הקיים אומת
 כ־`private`. לפני Transfer עדיין יש לאמת שלא נשמר Secret בהיסטוריה
-ולסובב כל Credential שקיים ספק לגביו. התיקון אינו מאשר את יתר פרטי
-ה־ADR ואינו משנה את סטטוס ההחלטה מ־`proposed`.
+ולסובב כל Credential שקיים ספק לגביו. החלטת ה־Authority אינה מוכיחה
+Branch Protection, ‏Review, ‏CI, ‏Secret scanning או Push protection;
+אלה נשארים תנאי Gate 1 נפרדים.
+
+4.5 אפשרות C נדחית. אסור ליצור Repository רשמי נוסף או לפרוס מעותק
+שאינו ה־Authority המאושר.
 
 ## 5. מטריצת גישה מוצעת
 
-5.1 רועי — Organization Owner ו־Repository Admin לצורך בעלות,
-Billing, הגנות וגישה. נדרש Owner נוסף להתאוששות; זהותו
-`unknown/unavailable`.
+5.1 טל — Owner ו־Repository Admin בשלב הנוכחי. רק הוא מנהל
+Collaborators והגנות עד העברה עתידית מאושרת.
 
-5.2 ראשה — `Maintain` וגישת Deployment מצומצמת. `Admin` יינתן רק
+5.2 ראשה — `Maintain` וגישת Deployment מצומצמת לאחר הזמנה אישית.
+`Admin` יינתן רק
 אם פעולה נדרשת אינה אפשרית בהרשאה נמוכה יותר.
 
 5.3 דוד — `Write` עבור Backend, ‏API ו־WhatsApp integration.
@@ -103,31 +110,32 @@ Billing, הגנות וגישה. נדרש Owner נוסף להתאוששות; זה
 5.5 משתמשים נוספים — `Read`, ‏`Triage` או `Write` לפי אחריות
 מפורשת; אין הרשאת בסיס רחבה לכל הארגון.
 
-## 6. תנאי קבלה לפני שינוי ל־accepted
+## 6. תנאי קבלה ל־Gate 1
 
-6.1 שם ה־Organization החוקי והטכני מתועד, והחברה שולטת ב־Billing
-ובערוצי ההתאוששות שלו.
+6.1 ה־Repository נשאר `private`, כתובת ה־Remote תואמת בדיוק ל־
+`talstilkol/connect` ואין Remote רשמי מתחרה.
 
-6.2 קיימים לפחות שני Organization Owners מזוהים עם 2FA ונתיב
-התאוששות מאושר.
+6.2 כל Collaborator משתמש בחשבון אישי עם 2FA והרשאת Least
+privilege. אין Login, ‏Token או Session משותפים.
 
 6.3 תוכנית GitHub שנבחרה תומכת ב־Repository פרטי וב־Rulesets,
 Status checks, ‏CODEOWNERS והגנות שנדרשות על ידי ה־Release contract.
 
-6.4 לפני Transfer נוצר Inventory של Actions secrets, ‏Variables,
-Environments, ‏Apps, ‏Webhooks, ‏Deploy keys ו־Packages. הערכים
-הרגישים עצמם אינם נכנסים למסמך.
+6.4 נוצר Inventory של Actions secrets, ‏Variables, ‏Environments,
+Apps, ‏Webhooks, ‏Deploy keys ו־Packages. הערכים הרגישים עצמם אינם
+נכנסים למסמך.
 
-6.5 לאחר Transfer מעדכנים את `origin`, מריצים Fetch ו־Push בטוחים,
-ומוכיחים ש־Pull Request אמיתי עובר Review ואת תשעת ה־Checks.
+6.5 Pull Request אמיתי עובר Review ואת תשעת ה־Checks הנדרשים ללא
+Push ישיר ל־`main`.
 
 6.6 מופק Governance Evidence קצר־חיים עבור אותו Repository ו־Commit.
 
 ## 7. אישורים
 
-7.1 רועי — `unknown/unavailable`.
+7.1 טל — Repository Authority ובעלות נוכחית: `approved` ב־
+`2026-08-17T05:17:48Z`.
 
-7.2 Owner נוסף של ה־Organization — `unknown/unavailable`.
+7.2 רועי — בעלות חברה והעברה עתידית: `unknown/unavailable`.
 
 7.3 ראשה — `unknown/unavailable`.
 
@@ -150,7 +158,7 @@ Environments, ‏Apps, ‏Webhooks, ‏Deploy keys ו־Packages. הערכים
 ועל תלות הזמינות בתוכנית ובסוג ה־Repository.
 
 8.4 המקורות נבדקו בתאריך `2026-08-16`. תוכנית GitHub, שם
-Organization ו־Governance evidence חיים: `unknown/unavailable`.
+Organization עתידי ו־Governance evidence חיים: `unknown/unavailable`.
 
 8.5 [GitHub Governance live audit](../github-governance-live-audit.md)
 — Snapshot מתוארך של Visibility, ‏Branches, ‏Rulesets, ‏Workflows,

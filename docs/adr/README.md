@@ -23,8 +23,9 @@
 
 3.1 רק ADR בסטטוס `accepted` יכול לפתוח Gate שתלוי בהחלטה.
 
-3.2 בחירה בשאלון, המלצה במסמך, הודעת צ'אט או ערך ברירת מחדל אינם
-אישור.
+3.2 בחירה מקומית או ברירת מחדל בשאלון אינן אישור. החלטה שמסומנת
+במפורש `approved` על ידי בעל הסמכות חייבת לעבור ל־ADR עם זהות ומועד
+UTC לפני שהיא פותחת Gate.
 
 3.3 ADR בסטטוס `accepted` חייב לכלול:
 
@@ -39,10 +40,12 @@
 ## 4. אינדקס
 
 4.1 [ADR-0001 — Hosting topology for Pilot](0001-hosting-topology.md) —
-`proposed`.
+`accepted`; נבחר Migration מלא ל־Vercel ול־Railway. ה־Deployment
+עדיין חסום עד השלמת מפת המחליפים, ה־Adapters וה־Evidence.
 
 4.2 [ADR-0002 — Repository Authority and GitHub governance](0002-repository-authority.md)
-— `proposed`.
+— `accepted`; ‏`talstilkol/connect` הפרטי הוא ה־Authority היחיד.
+ה־Governance עדיין חסום עד הפעלת ההגנות והפקת Evidence.
 
 4.3 [ADR-0003 — Claude and AI development account model](0003-ai-development-account-model.md)
 — `proposed`.

@@ -1,6 +1,6 @@
 # תוכנית עבודה צוותית — GitHub, Hosting ו־WhatsApp רשמי
 
-תאריך עדכון: 2026-08-16
+תאריך עדכון: 2026-08-17
 
 ## 1. מטרת המסמך
 
@@ -59,22 +59,27 @@ WhatsApp/Meta על שליחת הודעות, קמפיינים ובוטים.
 2.2.6 החיבור ל־WhatsApp יהיה רק דרך WhatsApp Business Platform
 הרשמי.
 
+2.2.7 ‏`talstilkol/connect` הפרטי שבבעלות טל הוא Repository
+Authority היחיד בשלב הנוכחי. אין לפתוח עותק מתחרה.
+
+2.2.8 יעד ה־Hosting שנבחר הוא Migration מלא: Vercel עבור שכבת
+ה־Web ו־Railway עבור API ו־Worker נפרדים. זה אינו מתיר Hybrid זמני
+ואינו הופך את הקוד הנוכחי לפריס ביעד ללא Migration.
+
 2.3 החלטות שעדיין אינן סגורות:
 
-2.3.1 האם ה־Repository הקיים הוא Repository Authority סופי והאם
-הבעלות תישאר אישית או תעבור ל־GitHub Organization של החברה.
-
-2.3.2 האם נשארים בארכיטקטורת Cloudflare הקיימת או מבצעים Migration
-ל־Vercel ול־Railway.
-
-2.3.3 האם כלי הפיתוח הוא Claude Team עם Seat אישי לכל מפתח או
+2.3.1 האם כלי הפיתוח הוא Claude Team עם Seat אישי לכל מפתח או
 מנוי אישי נפרד. חשבון רגיל משותף אינו חלופה מאושרת.
 
-2.3.4 האם פרויקט ה־WordPress משתמש ב־Meta Cloud API ישיר או ב־BSP
+2.3.2 האם פרויקט ה־WordPress משתמש ב־Meta Cloud API ישיר או ב־BSP
 חיצוני. המצב הוא `unknown/unavailable` עד שדוד ישלים Inventory נקי.
 
-2.3.5 מי הבעלים החוקי והטכני של Meta Business Portfolio, ‏WABA,
+2.3.3 מי הבעלים החוקי והטכני של Meta Business Portfolio, ‏WABA,
 מספר הטלפון וה־Templates שישמשו את ה־Pilot.
+
+2.3.4 מי הם ספקי PostgreSQL, ‏Queue/DLQ, ‏Object storage,
+Scheduler, ‏Rate limiting, ‏Secrets, ‏Monitoring ו־Backup ב־Topology
+של Vercel ו־Railway. בחירת שני ספקי ה־Hosting אינה מכריעה רכיבים אלה.
 
 ## 3. הערות ותיקונים לתוכנית המקורית
 
@@ -96,11 +101,12 @@ File transfer ו־Unattended access יהיו כבויים אלא אם צורך �
 
 3.2 GitHub:
 
-3.2.1 אין לפתוח Repository כפול לפני הכרעה לגבי `talstilkol/connect`.
-ברירת המחדל המומלצת היא להעביר את ה־Repository הקיים ל־Organization
-של החברה ולהגדיר אותו כ־Authority.
+3.2.1 אין לפתוח Repository כפול. ‏`talstilkol/connect` הפרטי הוא
+ה־Authority שאושר. העברה עתידית ל־Organization תעביר את אותו
+Repository ורק לאחר בחירת ישות משפטית ונתיב התאוששות.
 
-3.2.2 רועי יזמין משתמשים אישיים; אין משתמש GitHub משותף. כל משתמש
+3.2.2 טל יזמין משתמשים אישיים כבעל ה־Repository; אין משתמש GitHub
+משותף. כל משתמש
 יפעיל 2FA ויקבל Least privilege לפי תפקידו.
 
 3.2.3 לפני עבודה משותפת יוגדרו Branch Protection, ‏CODEOWNERS,
@@ -123,12 +129,11 @@ Hobby כוללת קרדיט שימוש חודשי, והחיוב עשוי לגד�
 לתוכניות Pro/Enterprise. יש לבחור Plan ו־Role לפני הזמנה, ולא לשתף
 Access Token.
 
-3.3.4 ההמלצה למסלול המהיר היא להשאיר כרגע את האפליקציה המלאה על
-Cloudflare, מפני שהקוד, הנתונים, ה־Queues וה־Evidence כבר בנויים
-עבורה. אפשר להשתמש ב־Vercel ל־Landing סטטי או ב־Railway לשירות
-Container ייעודי בעתיד, לאחר ADR נפרד.
+3.3.4 ‏Cloudflare הוא בסיס המימוש והבדיקות הקיימים, אך אינו יעד
+ה־Production שנבחר. אין לפרוס אותו כברירת מחדל חלופית לאחר אישור
+ADR-0001; הוא נשמר כנקודת השוואה עד השלמת ה־Migration.
 
-3.3.5 אם Vercel + Railway הם דרישת הנהלה, זהו Migration נפרד:
+3.3.5 Vercel + Railway נבחרו, ולכן נדרש Migration מלא:
 
 3.3.5.1 Vercel — Next.js UI בלבד.
 
@@ -143,9 +148,8 @@ Idempotency ו־Rate limits.
 
 3.3.5.6 R2 יכול להישאר Object storage דרך S3 API, אך נדרש Adapter.
 
-3.3.6 אין להתחיל פריסה היברידית לפני ADR שמכריע בין 3.3.4 ל־3.3.5.
-ערבוב זמני של Server Actions, ‏D1, ‏Cloudflare Queues, ‏Vercel UI
-ו־Railway API הוא המסלול בעל הסיכון הגבוה ביותר.
+3.3.6 אין להתחיל פריסה היברידית. ערבוב זמני של Server Actions, ‏D1,
+Cloudflare Queues, ‏Vercel UI ו־Railway API מנוגד ל־ADR-0001.
 
 3.4 WhatsApp ופרויקט ה־WordPress:
 
@@ -179,7 +183,7 @@ GitHub Issue, Log או Frontend bundle.
 
 4.1 רועי — Account owner ו־Approver:
 
-4.1.1 מאשר Repository Authority, ‏Hosting topology, תקציב וגישה.
+4.1.1 מאשר תקציב, Plans, חשבונות וגישה ל־Vercel ול־Railway.
 
 4.1.2 פותח או מעביר חשבונות חברה ומזמין Members לפי Role.
 
@@ -226,6 +230,9 @@ release ולפחות אחת ל־30 יום בזמן פיתוח פעיל.
 4.4.5 מקור העבודה הוא `docs/whatsapp-rate-limits.md`; ערכי חשבון חיים
 ודיגסט Release נשמרים ב־Evidence ולא במסמך סטטי.
 
+4.4.6 טל הוא גם Owner של Repository Authority הנוכחי. הוא מנהל
+Collaborators והגנות GitHub עד העברה עתידית מאושרת.
+
 4.5 כלל הצוות:
 
 4.5.1 GitHub account אישי, ‏2FA, Commit מזוהה ו־Pull Request.
@@ -238,7 +245,7 @@ release ולפחות אחת ל־30 יום בזמן פיתוח פעיל.
 
 5.1 Gate 0 — החלטות ותיחום:
 
-5.1.1 רועי מאשר את שלושת מסמכי ההחלטה של Gate 0:
+5.1.1 מסמכי ההחלטה של Gate 0 מנוהלים כך:
 
 5.1.1.1 [ADR-0001 — Hosting topology](adr/0001-hosting-topology.md).
 
@@ -246,9 +253,15 @@ release ולפחות אחת ל־30 יום בזמן פיתוח פעיל.
 
 5.1.1.3 [ADR-0003 — Claude account model](adr/0003-ai-development-account-model.md).
 
-5.1.2 פלט: [ADR-0001](adr/0001-hosting-topology.md) מאושר בהחלטה
-אחת — Cloudflare קיים או Migration מלא. כל עוד סטטוס ה־ADR הוא
-`proposed`, ‏Hosting נשאר החלטה פתוחה ו־Gate 0 אינו `verified`.
+5.1.2 ‏[ADR-0001](adr/0001-hosting-topology.md) הוא `accepted` ונבחר
+Migration מלא ל־Vercel ול־Railway. בחירת PostgreSQL, ‏Queue, ‏Storage,
+Scheduler, ‏Secrets ו־Observability נשארת פתוחה וחוסמת Deployment.
+
+5.1.2.1 ‏[ADR-0002](adr/0002-repository-authority.md) הוא `accepted`:
+`talstilkol/connect` הפרטי הוא מקור האמת היחיד בבעלות טל.
+
+5.1.2.2 ‏[ADR-0003](adr/0003-ai-development-account-model.md) נשאר
+`proposed` עד שבעל חשבונות החברה מאשר מודל Seats וזהויות.
 
 5.1.3 תנאי סיום: אין סעיף Hosting או Account שמכיל שתי חלופות
 סותרות.
@@ -262,16 +275,17 @@ JSON מהשאלון משמש סיכום לדיון בלבד; בעלי הסמכו
 Owner, החלטה מאושרת או סטטוס פתוח מפורש, וקישור לראיה הנדרשת. אין
 לסמן חסם כ־`ready` בגלל בחירה מקומית בשאלון בלבד.
 
-5.1.6 כל שלושת ה־ADRs נמצאים כעת בסטטוס `proposed`. לכן Gate 0
-נשאר `not verified` עד שבעלי הסמכות משלימים בכל מסמך אפשרות מאושרת,
-מועד UTC ואישורים אמיתיים.
+5.1.6 שני ADRs נמצאים ב־`accepted` ואחד ב־`proposed`. ‏Gate 0 נשאר
+`not verified` עד אישור ADR-0003 ועד שרועי, ראשה, דוד ואבטחה משלימים
+את אישורי התקציב, המימוש והגישה שנדרשים ב־ADR-0001.
 
 5.2 Gate 1 — GitHub Governance:
 
 5.2.1 כל המשתמשים פותחים חשבון אישי ומפעילים 2FA.
 
-5.2.2 רועי מזמין Collaborators, מגדיר Roles ומפעיל את כל הגנות
-ה־Repository.
+5.2.2 טל מזמין Collaborators, מגדיר Roles ומפעיל את כל הגנות
+ה־Repository. העברה עתידית ל־Organization אינה תנאי לעבודה, אך
+Review, ‏2FA, ‏Least privilege וכל ההגנות עדיין חובה.
 
 5.2.3 תנאי סיום: Pull Request אמיתי עובר Review ואת תשעת Checks,
 ו־Governance Evidence נוצר עבור אותו Commit.

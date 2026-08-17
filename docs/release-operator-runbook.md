@@ -88,8 +88,10 @@ Attestation, שלב זה נשאר חסום; אין ליצור Bundle מקומי 
 `team-invitation-browser-evidence-<commit>` ואת ה־Attestation מאותה
 ריצה.
 
-4.5 מפיקים Evidence של GitHub ושל Cloudflare מקריאות Read-only,
-לאחר שה־Deployment הפעיל כבר מצביע ל־Release הנבדק.
+4.5 מפיקים Evidence של GitHub ושל ספקי ה־Hosting המאושרים מקריאות
+Read-only, לאחר שה־Deployment הפעיל כבר מצביע ל־Release הנבדק.
+מחולל Cloudflare הקיים הוא ראיית המימוש הישן בלבד; הוא אינו מאשר
+פריסת Vercel/Railway עד שיוחלף במחוללים תואמי ADR-0001.
 
 4.6 סדר האימות המחייב הוא:
 
@@ -110,7 +112,9 @@ Platform token. גישה ניתנת ב־Membership אישי וב־Least privileg
 
 ## 5. סדר הפריסה
 
-5.1 פריסה ראשונה היא ל־Staging מבודד בלבד.
+5.1 פריסה ראשונה היא ל־Staging מבודד בלבד, עם Vercel Web ושירותי
+Railway API/Worker נפרדים לפי ADR-0001. אין לבצע Hybrid זמני עם
+D1 או Cloudflare Queues.
 
 5.2 מחילים Migrations בסדר עולה ומאמתים Journal, ‏Integrity ו־Foreign
 Keys. מיגרציה שנכשלה עוצרת את ה־Release.

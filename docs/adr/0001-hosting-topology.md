@@ -1,10 +1,10 @@
 ---
 id: ADR-0001
 title: Hosting topology for Pilot
-status: proposed
-decision_owner: רועי
-approved_option: unknown/unavailable
-approved_at: unknown/unavailable
+status: accepted
+decision_owner: טל
+approved_option: full-migration-vercel-railway
+approved_at: 2026-08-17T05:17:48Z
 supersedes: none
 ---
 
@@ -12,16 +12,17 @@ supersedes: none
 
 ## 1. מצב ההחלטה
 
-1.1 סטטוס: `proposed`.
+1.1 סטטוס: `accepted`.
 
-1.2 בעל ההחלטה: רועי — Accounts, תקציב ו־Hosting topology.
+1.2 בעל ההחלטה: טל — בחירת כיוון המוצר וה־Hosting topology.
 
-1.3 אפשרות שאושרה: `unknown/unavailable`.
+1.3 אפשרות שאושרה: אפשרות B — Migration מלא ל־Vercel ול־Railway.
 
-1.4 מועד אישור: `unknown/unavailable`.
+1.4 מועד אישור: `2026-08-17T05:17:48Z`.
 
-1.5 המשמעות: המסמך מכיל המלצה בלבד. הוא אינו מתיר Deployment ואינו
-מסמן את Gate 0 כ־`verified`.
+1.5 המשמעות: בחירת הספקים נסגרה, אך האישור אינו מתיר Deployment
+של הקוד הנוכחי. ‏Topology מפורטת, תקציב, Accounts, ‏Adapters,
+Migration evidence ואישורי המימוש עדיין חייבים לעבור את תנאי סעיף 5.
 
 ## 2. הבעיה שצריך לפתור
 
@@ -76,19 +77,22 @@ Auth, ‏Data, ‏Concurrency, ‏Recovery, ‏Evidence ו־Release מחדש.
 3.3.2 האפשרות אינה מומלצת. היא יוצרת כמה גבולות Auth, כמה מסלולי
 Deployment ו־Failure modes שקשה לשחזר ולנטר לפני Pilot.
 
-## 4. ההמלצה
+## 4. ההחלטה
 
-4.1 לבחור באפשרות A — Cloudflare מלא ל־Pilot.
+4.1 נבחרה אפשרות B — Migration מלא ל־Vercel ול־Railway.
 
-4.2 הסיבה היא יחס סיכון־זמן: זו האפשרות היחידה שמשתמשת בארכיטקטורה
-ובבדיקות הקיימות בלי Migration לפני שנאסף Pilot evidence.
+4.2 ‏Vercel יארח את שכבת ה־Web; ‏Railway יארח API ו־Worker כשני
+שירותים נפרדים. אין לחבר את ה־Browser ישירות ל־Meta או למסד הנתונים.
 
-4.3 אם הנהלה מחייבת Vercel ו־Railway, יש לבחור באפשרות B במפורש,
-לעצור Deployment ולפתוח תוכנית Migration נפרדת. אין לאשר אפשרות C.
+4.3 Cloudflare נשאר בסיס המימוש הקיים ונקודת השוואה לבדיקות בלבד עד
+השלמת ה־Migration. הוא אינו יעד ה־Production המאושר לאחר החלטה זו.
 
-## 5. תנאי קבלה לפני שינוי ל־accepted
+4.4 אפשרות C נדחית. אין להפעיל Hybrid לא מתועד או לפרוס חלקים
+מהמערכת לפני שמפת הנתונים, ה־Queues, ה־Secrets וה־Rollback שלמה.
 
-5.1 רועי בוחר במפורש אפשרות A או B ומאשר תקציב ובעלות חשבונות.
+## 5. תנאי קבלה לפני Deployment או Cutover
+
+5.1 רועי מאשר תקציב, Plans ובעלות חשבונות Vercel ו־Railway.
 
 5.2 ראשה מאשרת שה־Deployment, ‏Rollback ו־Least-privilege access
 ישימים ב־Topology שנבחרה.
@@ -99,31 +103,53 @@ Deployment ו־Failure modes שקשה לשחזר ולנטר לפני Pilot.
 5.4 אבטחה מאשרת הפרדת סביבות, Secret management, ‏Audit,
 Backup/Restore ו־Incident access.
 
-5.5 שמות המאשרים, האפשרות שנבחרה ומועד UTC קנוני נכתבים במסמך.
+5.5 Architecture owner מתעד ADR המשך שמכריע PostgreSQL, ‏Queue,
+DLQ, ‏Object storage, ‏Cron, ‏Rate limiting, ‏Secrets ו־Observability.
 
 5.6 ‏Release checklist, ‏Runbook ו־Evidence generators תואמים לספק
 שנבחר ואינם מניחים Topology אחרת.
 
+5.7 Contract tests, ‏Migration rehearsal, ‏Load tests, ‏Backup/Restore,
+Rollback ו־Staging smoke עוברים מול אותו Commit ואותו Artifact.
+
 ## 6. השלכות לאחר אישור
 
-6.1 אם אפשרות A מתקבלת, ראשה יכולה להתחיל Provisioning של Staging
-מבודד ב־Cloudflare לפי ה־Release runbook.
+6.1 ראשה יכולה להתחיל Provisioning רק לאחר שסעיפים 5.1–5.5 הושלמו.
+היא אינה מקבלת Token משותף; הגישה היא Membership אישי ו־Least
+privilege בכל ספק.
 
-6.2 אם אפשרות B מתקבלת, אין לפרוס את הקוד הנוכחי כפתרון זמני.
-נדרש ADR נוסף לתוכנית ה־Migration ולמיפוי כל Binding למחליף מאושר.
+6.2 אין לפרוס את הקוד הנוכחי ל־Vercel או ל־Railway כפתרון זמני.
+נדרש למפות כל Binding קיים ל־Port ול־Adapter מאושר לפני Cutover.
 
 6.3 בכל אפשרות, אין לשתף Deployment token. לכל חבר צוות נדרשת זהות
 אישית והרשאת Least privilege.
 
+6.4 תוכנית ה־Migration מחולקת לארבעה שלבים סגורים:
+
+6.4.1 Contract freeze — מיפוי D1, ‏R2, ‏Queues, ‏DLQs, ‏Cron,
+Rate limits, ‏Secrets ו־Evidence, ללא שינוי התנהגות עסקית.
+
+6.4.2 Adapter parity — מימוש PostgreSQL, ‏Queue, ‏Storage,
+Scheduler ו־Secret ports עם אותה סמנטיקת Idempotency ו־Fail-closed.
+
+6.4.3 Isolated staging — פריסת Vercel UI ושירותי Railway מבודדים,
+Migration rehearsal, ‏Load, ‏Recovery, ‏Observability ו־Security tests.
+
+6.4.4 Controlled cutover — Backup אחרון, חלון שינוי, Smoke, ניטור,
+Rollback מתורגל ורק לאחר מכן Pilot מוגבל.
+
 ## 7. אישורים
 
-7.1 רועי — `unknown/unavailable`.
+7.1 טל — החלטת הספקים: `approved` ב־`2026-08-17T05:17:48Z`.
 
-7.2 ראשה — `unknown/unavailable`.
+7.2 רועי — תקציב, Plans וחשבונות: `unknown/unavailable`.
 
-7.3 דוד — `unknown/unavailable`.
+7.3 ראשה — Deployment ו־Rollback: `unknown/unavailable`.
 
-7.4 אבטחה — `unknown/unavailable`.
+7.4 דוד — API, ‏Meta, ‏Queues ו־Schedulers: `unknown/unavailable`.
+
+7.5 אבטחה — בידוד, Secrets, ‏Backup ו־Incident access:
+`unknown/unavailable`.
 
 ## 8. Evidence מקומי
 
@@ -134,8 +160,8 @@ Queues, ‏DLQs ו־Cron המקומיים.
 Plugin ו־Wrangler.
 
 8.3 [`source-control-and-release.md`](../source-control-and-release.md)
-— חוזי Cloudflare Evidence והאיסור לראות ב־Vercel/Railway ספק מאושר
-לפני ADR.
+— חוזי ה־Evidence הקיימים והפער שיש להחליף לפני פריסת ה־Topology
+המאושרת.
 
 8.4 [`team-operating-plan.md`](../team-operating-plan.md) — בעלי
 התפקידים, החלופות ושערי הקבלה.

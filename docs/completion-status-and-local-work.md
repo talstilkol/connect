@@ -297,6 +297,18 @@ Production חסום. בדיקות שליליות דוחות Arguments נוספי
 תואמים, מזהים כפולים וקודים שאינם בטוחים. כך צוות Deployment יכול
 לצרוך את המצב באוטומציה בלי להפוך Report ל־Evidence מזויף.
 
+2.16 **הושלם תכנונית:** החלטות Repository Authority ו־Hosting
+הועברו מהשאלון ל־Architecture Decision Records.
+
+2.16.1 ‏`talstilkol/connect` הפרטי הוא מקור האמת היחיד בבעלות טל.
+ההחלטה אינה מחליפה Branch Protection, ‏Review, ‏CI, ‏Secret scanning
+או Governance evidence שעדיין חסרים.
+
+2.16.2 נבחר Migration מלא ל־Vercel ול־Railway. המסלול חולק ל־
+Contract freeze, ‏Adapter parity, ‏Staging מבודד ו־Cutover מבוקר.
+הקוד עדיין Cloudflare-specific ולכן Deployment ליעד החדש נשאר חסום
+עד בחירת רכיבי הנתונים/Queue/Storage והשלמת ה־Migration.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

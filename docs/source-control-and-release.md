@@ -5,7 +5,9 @@
 1.1 ה־Repository שמכיל את האפליקציה הוא תיקיית `web`.
 
 1.2 מעליו קיים Repository נוסף בתיקיית `connect`. המבנה המקונן
-מתועד ואסור להסיר אחד מהם לפני בחירת Repository Authority מפורשת.
+מתועד, אך `web` המחובר ל־`talstilkol/connect` הוא Repository Authority
+היחיד שאושר. אין למחוק את ה־Repository החיצוני בלי Inventory נפרד,
+אך גם אין לפרוס או לפתח ממנו כ־Authority מתחרה.
 
 1.3 ה־Repository של `web` מחובר ל־`talstilkol/connect` ב־GitHub,
 ו־`main` הוא Branch ברירת המחדל. בבדיקת Governance חיה מ־
@@ -30,8 +32,12 @@ Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארב
 Security, ‏Operations, ‏Release ו־Secrets עדיין `unknown/unavailable`
 עד למינוי מפורש; התפקידים החדשים אינם ממלאים אותם אוטומטית.
 
-1.6 אין לפתוח Repository כפול לפני הכרעה לגבי המבנה המקונן והבעלות.
-תוכנית העבודה, מודל ההרשאות ותנאי הקבלה נמצאים ב־
+1.5.1 לפי ADR-0002 שאושר ב־2026-08-17, טל הוא Owner של
+`talstilkol/connect` ומנהל את ה־Collaborators והגנות ה־Repository
+בשלב הנוכחי.
+
+1.6 אין לפתוח Repository כפול. העברה עתידית ל־Organization תעביר
+את ה־Repository הקיים בלבד. תוכנית העבודה, מודל ההרשאות ותנאי הקבלה נמצאים ב־
 `docs/team-operating-plan.md`.
 
 ## 2. שער CI מקומי
@@ -204,9 +210,11 @@ namespaces, Secret binding set ו־Scheduler. Queue ההזמנות וה־DLQ ש�
 6.11 שמות Worker, ‏Resource IDs, ‏Queue names ושמות Secrets משמשים
 רק בזמן האימות. הפלט כולל Fingerprints בלבד ותוקפו 24 שעות.
 
-6.12 ההצעה להשתמש ב־Vercel וב־Railway אינה תואמת כרגע לחוזי
-ה־Runtime וה־Evidence של Cloudflare. אין לראות בה ספק מאושר לפני ADR
-שמכריע אם Cloudflare נשאר או שמתבצע Migration מלא.
+6.12 ‏ADR-0001 אישר Migration מלא ל־Vercel ול־Railway. חוזי
+ה־Runtime וה־Evidence הקיימים עדיין Cloudflare-specific ולכן אינם
+מוכיחים את יעד ה־Production החדש. Deployment נשאר חסום עד החלפת
+D1, ‏Queues, ‏DLQs, ‏Cron, ‏Rate limits ו־Deployment evidence בחוזים
+וב־Adapters תואמי ה־Topology המאושרת.
 
 6.13 אין לשתף Platform token עם Deployment owner. הגישה תינתן
 באמצעות Membership אישי ו־Least privilege; Secrets יוזנו רק ל־Secret

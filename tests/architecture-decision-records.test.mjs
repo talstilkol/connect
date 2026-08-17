@@ -78,7 +78,7 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
   );
 });
 
-test("keeps a proposed hosting recommendation fail-closed", () => {
+test("records the accepted hosting direction while deployment remains fail-closed", () => {
   const metadata = parseFrontMatter(hostingAdr);
 
   assert.deepEqual(
@@ -94,22 +94,22 @@ test("keeps a proposed hosting recommendation fail-closed", () => {
     ],
   );
   assert.equal(metadata.id, "ADR-0001");
-  assert.equal(metadata.status, "proposed");
+  assert.equal(metadata.status, "accepted");
   assert.equal(
     metadata.approved_option,
-    "unknown/unavailable",
+    "full-migration-vercel-railway",
   );
-  assert.equal(
+  assert.match(
     metadata.approved_at,
-    "unknown/unavailable",
+    /^2026-08-17T\d{2}:\d{2}:\d{2}Z$/,
   );
   assert.match(
     teamPlan,
-    /`proposed`[\s\S]*Gate 0 אינו `verified`/,
+    /ADR-0001[\s\S]*`accepted`[\s\S]*Deployment/,
   );
 });
 
-test("documents one recommendation, one full migration, and rejects an undocumented hybrid", () => {
+test("selects the full migration and rejects an undocumented hybrid", () => {
   assert.match(
     hostingAdr,
     /אפשרות A — Cloudflare מלא ל־Pilot/,
@@ -124,7 +124,7 @@ test("documents one recommendation, one full migration, and rejects an undocumen
   );
   assert.match(
     hostingAdr,
-    /אין לאשר אפשרות C/,
+    /אפשרות C נדחית/,
   );
   assert.match(
     hostingAdr,
@@ -147,38 +147,45 @@ test("requires real approval metadata before an ADR can be accepted", () => {
   );
   assert.match(
     hostingAdr,
-    /שמות המאשרים, האפשרות שנבחרה ומועד UTC קנוני נכתבים במסמך/,
+    /טל — החלטת הספקים: `approved` ב־`2026-08-17T\d{2}:\d{2}:\d{2}Z`/,
+  );
+  assert.match(
+    hostingAdr,
+    /רועי — תקציב, Plans וחשבונות: `unknown\/unavailable`/,
   );
 });
 
-test("keeps every Gate 0 ADR proposed until external owners approve it", () => {
-  for (const adr of [
-    hostingAdr,
-    repositoryAdr,
-    aiAccountAdr,
-  ]) {
-    const metadata = parseFrontMatter(adr);
-    assert.equal(metadata.status, "proposed");
-    assert.equal(
-      metadata.approved_option,
-      "unknown/unavailable",
-    );
-    assert.equal(
-      metadata.approved_at,
-      "unknown/unavailable",
-    );
-  }
+test("records two accepted Gate 0 directions and keeps the AI account decision proposed", () => {
+  const hostingMetadata = parseFrontMatter(hostingAdr);
+  const repositoryMetadata = parseFrontMatter(repositoryAdr);
+  const aiMetadata = parseFrontMatter(aiAccountAdr);
+
+  assert.equal(hostingMetadata.status, "accepted");
+  assert.equal(repositoryMetadata.status, "accepted");
+  assert.equal(
+    repositoryMetadata.approved_option,
+    "current-private-personal-authority",
+  );
+  assert.equal(aiMetadata.status, "proposed");
+  assert.equal(
+    aiMetadata.approved_option,
+    "unknown/unavailable",
+  );
+  assert.equal(
+    aiMetadata.approved_at,
+    "unknown/unavailable",
+  );
 
   assert.match(
     teamPlan,
-    /כל שלושת ה־ADRs[\s\S]*`proposed`[\s\S]*Gate 0[\s\S]*`not verified`/,
+    /שני ADRs[\s\S]*`accepted`[\s\S]*אחד ב־`proposed`[\s\S]*Gate 0[\s\S]*`not verified`/,
   );
 });
 
 test("keeps one repository authority and rejects a competing copy", () => {
   assert.match(
     repositoryAdr,
-    /אפשרות A — העברת ה־Repository הקיים ל־Organization של החברה/,
+    /אפשרות B — ה־Repository הפרטי `talstilkol\/connect` נשאר/,
   );
   assert.match(
     repositoryAdr,
