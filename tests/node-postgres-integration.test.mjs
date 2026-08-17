@@ -71,12 +71,14 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0011_whatsapp_delivery_policy\.sql/);
   assert.match(source, /0012_whatsapp_rate_limit_ledger\.sql/);
   assert.match(source, /0013_whatsapp_phone_throughput\.sql/);
+  assert.match(source, /0014_worker_scheduler_lease\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyTemplateCampaignSchema/);
   assert.match(source, /verifyBotDeliverySchema/);
   assert.match(source, /verifyAiReportingSchema/);
   assert.match(source, /verifyWhatsappDeliveryPolicy/);
   assert.match(source, /verifyWhatsappRateLimitLedger/);
+  assert.match(source, /verifyWorkerSchedulerLease/);
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /runtime\.handler\.handle/);

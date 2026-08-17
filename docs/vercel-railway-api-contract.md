@@ -187,7 +187,7 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו 13 Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו 15 Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
 השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
@@ -204,6 +204,8 @@ envelopes עם קשר Tenant/WABA מורכב.
 Audit אטומי, קישור לגרסת חיבור Meta ו־Kill switch מוגבל.
 השלוש־עשרה מוסיפה Reservation, ‏Settlement ו־Provider-cooldown ledger עם
 נעילות Pair/Portfolio ו־State projections מוכחי Evidence.
+הרבע־עשרה מוסיפה Phone throughput מתגלגל הקשור ל־Policy המאושר, והחמש־עשרה
+מוסיפה Lease עם Fencing token ו־Catch-up תחום ל־Railway Worker scheduler.
 כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי. ‏Node driver adapter
 ו־Integration rehearsal עבור Contact ו־Invitation קיימים, אך אין עדיין
 Schema parity מלאה, ערכי Production pool חיים או Staging evidence.
@@ -229,15 +231,15 @@ Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`
 כיסוי יתר המסלולים ופעולות API מחוברות.
 
 7.1.19 ‏`node-postgres` מחובר דרך Adapter יחיד שמפריד Query בודד מ־Transaction
-מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל 13
-Migrations ומוכיח DML, ‏Rollback ושישה Races בלי לקבל Production credential.
+מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל 15
+Migrations ומוכיח DML, ‏Rollback ותשעה Races בלי לקבל Production credential.
 
 7.1.20 חוזה Pool נפרד דורש TLS, ‏Pool size וכל Timeout במפורש. הוא דוחה
 Loopback ב־Staging/Production וכל Query string ב־Database URL, משום ש־
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
-7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 17 ה־Adapters שהושלמו לאותו
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 18 ה־Adapters שהושלמו לאותו
 Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי.
 
 7.1.22 ‏`contacts.list` משתמש כעת ב־PostgreSQL repository בעל Tenant filter,
@@ -326,6 +328,13 @@ advisory lock. ‏D1 מקבל את אותו חוזה במיגרציה `0035`. �
 תחרות של שלוש בקשות תחת תקרה `2/s`: שתיים נשמרו והשלישית נדחתה עד קצה
 החלון. סך הכול עברו שבעה תרחישי Concurrency. ‏Queue worker, ‏Sender חי,
 Load evidence וערכי חשבון מאומתים עדיין חסרים.
+
+7.1.34 ‏`0014_worker_scheduler_lease.sql` מוסיף Claim אטומי לכל Tick של
+דקה, Lease שפג ו־Fencing token עולה. ‏`railwayWorkerScheduler.ts` מריץ את
+שתי משימות ה־Scheduler תחת אותו Claim ומשלים עד חמישה Ticks חסרים. ‏Harness
+אמיתי הוכיח ששתי תביעות מקבילות יוצרות זוכה יחיד וש־Worker ישן אינו יכול
+להשלים לאחר השתלטות. סך הכול עברו תשעה תרחישי Concurrency. ‏Always-on timer,
+‏Redis/BullMQ ו־Queue adapters עדיין חסרים.
 
 7.2 עדיין חסר:
 

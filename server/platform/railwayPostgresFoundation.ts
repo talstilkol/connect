@@ -54,6 +54,9 @@ import {
   createPostgresWhatsappRateLimitRepository,
 } from "./postgresWhatsappRateLimitRepository.ts";
 import {
+  createPostgresWorkerSchedulerLeaseRepository,
+} from "./postgresWorkerSchedulerLeaseRepository.ts";
+import {
   createPostgresReadinessProbe,
 } from "./postgresReadinessProbe.ts";
 import {
@@ -125,6 +128,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly whatsappRateLimits: ReturnType<
     typeof createPostgresWhatsappRateLimitRepository
+  >;
+  readonly workerSchedulerLeases: ReturnType<
+    typeof createPostgresWorkerSchedulerLeaseRepository
   >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
@@ -248,6 +254,8 @@ export function createRailwayPostgresFoundation(
         queries,
         transactions,
       }),
+    workerSchedulerLeases:
+      createPostgresWorkerSchedulerLeaseRepository(queries),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),

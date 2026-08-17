@@ -58,6 +58,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "selections",
     "whatsappDeliveryPolicies",
     "whatsappRateLimits",
+    "workerSchedulerLeases",
   ]);
   assert.equal(
     typeof foundation.memberships.findActiveByExternalUserId,
@@ -78,6 +79,10 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   );
   assert.equal(
     typeof foundation.whatsappRateLimits.reserveBusinessInitiatedMessage,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.workerSchedulerLeases.claimNext,
     "function",
   );
   assert.equal(typeof foundation.readiness.check, "function");

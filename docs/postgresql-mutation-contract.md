@@ -11,7 +11,7 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 13 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 15 Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
 foundation, הרביעית את Membership event ledger והחמישית את Team invitation
@@ -23,20 +23,21 @@ jobs/rows עם בידוד Tenant מורכב. האחת־עשרה יוצרת Meta 
 receipts ו־Credential envelopes מוצפנים. השתים־עשרה יוצרת Ledger בלתי־ניתן
 לשינוי עבור WhatsApp delivery policy, ‏Audit אטומי ו־Kill switch. השלוש־עשרה
 יוצרת WhatsApp reservation, settlement ו־provider-cooldown ledger אטומי.
-השרשרת הוחלה בהצלחה
-על PostgreSQL 16.13 מקומי ומבודד, אך אינה
-מוכיחה עדיין Parity עם כל 35 ה־Migrations של D1 או מוכנות לפריסה.
+הרבע־עשרה מוסיפה אכיפת Phone throughput מתגלגלת הקשורה ל־Policy המאושר,
+והחמש־עשרה מוסיפה Lease מגודר ל־Railway Worker scheduler. השרשרת הוחלה
+בהצלחה על PostgreSQL 16.13 מקומי ומבודד, אך אינה מוכיחה עדיין Parity עם
+כל 36 ה־Migrations של D1 או מוכנות לפריסה.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 13 ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח שישה תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+Loopback ייעודי וריק. הוא החיל את 15 ה־Migrations על PostgreSQL 16.13,
+הפעיל DML אמיתי והוכיח תשעה תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 17 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 18 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -122,6 +123,15 @@ Immutable. ‏Replay, ‏Collision וכל Blocker מוחזרים כתוצאה ת
 בחלון מתגלגל של שנייה ונקשר ל־Policy Event העדכני. Trigger מבצע את אותו
 Guard גם מול INSERT ישיר. המימוש אינו מחליף Queue worker, ‏Load evidence
 או אימות ערך ה־WABA/Phone החי.
+
+1.19 ‏`0014_worker_scheduler_lease.sql` ו־
+`postgresWorkerSchedulerLeaseRepository.ts` מוסיפים Claim אטומי לכל Tick של
+דקה. שני Workers מתחרים אינם יכולים לקבל אותו Tick; השתלטות לאחר תפוגה
+מגדילה `fencing_token`, ולכן Worker ישן אינו יכול לסמן את הריצה כהושלמה.
+`railwayWorkerScheduler.ts` מריץ את Campaign scheduler ואת Expiration
+scheduler יחד, משלים לכל היותר חמישה Ticks חסרים ומשאיר Tick כלא־מושלם אם
+אחת המשימות נכשלה. ה־Harness הוכיח Claim מקביל, Catch-up והשתלטות מול
+PostgreSQL 16.13 אמיתי. חיבור Timer תמידי ו־BullMQ עדיין לא בוצע.
 
 ## 2. הסבר למתחילים
 
@@ -220,11 +230,12 @@ Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 עדיין חסרים ערכים ואישור Production, ‏Telemetry sink, ‏CA evidence וכלי
 Migration מאושר ב־Railway.
 
-6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 35 ה־Migrations
+6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 36 ה־Migrations
 של D1 עדיין לא קיימות.
 
 6.4 Contact, ‏Contact organization/import, ‏Meta connection/webhook/credential,
-‏WhatsApp delivery policy/rate-limit ledger ו־Invitation DML ושישה תרחישי Concurrency נבדקו
+‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler lease,
+‏Invitation DML ותשעה תרחישי Concurrency נבדקו
 מול PostgreSQL מקומי אמיתי.
 עדיין חסרים Adapters וכיסוי
 DML/Concurrency לכל יתר ה־Repositories,

@@ -28,6 +28,9 @@ import {
 import {
   deriveTeamInvitationDeliveryKey,
 } from "../server/team/teamInvitationKey.ts";
+import {
+  railwayWorkerSchedulerId,
+} from "../shared/domain/workerScheduler.ts";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -50,6 +53,7 @@ const migrationFiles = Object.freeze([
   "0011_whatsapp_delivery_policy.sql",
   "0012_whatsapp_rate_limit_ledger.sql",
   "0013_whatsapp_phone_throughput.sql",
+  "0014_worker_scheduler_lease.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -1801,6 +1805,133 @@ async function verifyInvitationLifecycle(
   assert.equal(acceptanceCount.rows[0]?.count, 1);
 }
 
+async function verifyWorkerSchedulerLease(pool, foundation) {
+  const firstTick = "2026-08-17T10:00:00.000Z";
+  const firstObservedAt = "2026-08-17T10:00:15.000Z";
+  const firstOwner = `scheduler_owner_v1_${"1".repeat(64)}`;
+  const secondOwner = `scheduler_owner_v1_${"2".repeat(64)}`;
+  const claimCommand = (ownerKey) => ({
+    schedulerId: railwayWorkerSchedulerId,
+    ownerKey,
+    currentTick: firstTick,
+    observedAt: firstObservedAt,
+    leaseSeconds: 60,
+    maximumCatchUpTicks: 5,
+  });
+  const concurrent = await Promise.all([
+    foundation.workerSchedulerLeases.claimNext(claimCommand(firstOwner)),
+    foundation.workerSchedulerLeases.claimNext(claimCommand(secondOwner)),
+  ]);
+  assert.deepEqual(
+    concurrent.map(({ outcome }) => outcome).sort(),
+    ["claimed", "not-claimed"],
+  );
+  const firstClaim = concurrent.find(({ outcome }) => outcome === "claimed");
+  assert.equal(firstClaim?.outcome, "claimed");
+  assert.equal(firstClaim.claim.tick, firstTick);
+  assert.deepEqual(
+    await foundation.workerSchedulerLeases.complete({
+      schedulerId: railwayWorkerSchedulerId,
+      ownerKey: firstClaim.claim.ownerKey,
+      fencingToken: firstClaim.claim.fencingToken,
+      tick: firstClaim.claim.tick,
+      completedAt: "2026-08-17T10:00:20.000Z",
+    }),
+    { outcome: "completed", completedTick: firstTick },
+  );
+
+  const catchUpTicks = [];
+  for (let minute = 1; minute <= 4; minute += 1) {
+    const catchUp = await foundation.workerSchedulerLeases.claimNext({
+      schedulerId: railwayWorkerSchedulerId,
+      ownerKey: firstOwner,
+      currentTick: "2026-08-17T10:04:00.000Z",
+      observedAt: "2026-08-17T10:04:15.000Z",
+      leaseSeconds: 60,
+      maximumCatchUpTicks: 5,
+    });
+    assert.equal(catchUp.outcome, "claimed");
+    catchUpTicks.push(catchUp.claim.tick);
+    assert.deepEqual(
+      await foundation.workerSchedulerLeases.complete({
+        schedulerId: railwayWorkerSchedulerId,
+        ownerKey: catchUp.claim.ownerKey,
+        fencingToken: catchUp.claim.fencingToken,
+        tick: catchUp.claim.tick,
+        completedAt: "2026-08-17T10:04:20.000Z",
+      }),
+      { outcome: "completed", completedTick: catchUp.claim.tick },
+    );
+  }
+  assert.deepEqual(catchUpTicks, [
+    "2026-08-17T10:01:00.000Z",
+    "2026-08-17T10:02:00.000Z",
+    "2026-08-17T10:03:00.000Z",
+    "2026-08-17T10:04:00.000Z",
+  ]);
+
+  const expiring = await foundation.workerSchedulerLeases.claimNext({
+    schedulerId: railwayWorkerSchedulerId,
+    ownerKey: firstOwner,
+    currentTick: "2026-08-17T10:05:00.000Z",
+    observedAt: "2026-08-17T10:05:00.000Z",
+    leaseSeconds: 60,
+    maximumCatchUpTicks: 5,
+  });
+  assert.equal(expiring.outcome, "claimed");
+  const takeover = await foundation.workerSchedulerLeases.claimNext({
+    schedulerId: railwayWorkerSchedulerId,
+    ownerKey: secondOwner,
+    currentTick: "2026-08-17T10:06:00.000Z",
+    observedAt: "2026-08-17T10:06:01.000Z",
+    leaseSeconds: 60,
+    maximumCatchUpTicks: 5,
+  });
+  assert.equal(takeover.outcome, "claimed");
+  assert.equal(takeover.claim.tick, expiring.claim.tick);
+  assert.equal(takeover.claim.fencingToken > expiring.claim.fencingToken, true);
+  assert.deepEqual(
+    await foundation.workerSchedulerLeases.complete({
+      schedulerId: railwayWorkerSchedulerId,
+      ownerKey: expiring.claim.ownerKey,
+      fencingToken: expiring.claim.fencingToken,
+      tick: expiring.claim.tick,
+      completedAt: "2026-08-17T10:06:02.000Z",
+    }),
+    { outcome: "claim-lost", completedTick: null },
+  );
+  assert.deepEqual(
+    await foundation.workerSchedulerLeases.complete({
+      schedulerId: railwayWorkerSchedulerId,
+      ownerKey: takeover.claim.ownerKey,
+      fencingToken: takeover.claim.fencingToken,
+      tick: takeover.claim.tick,
+      completedAt: "2026-08-17T10:06:03.000Z",
+    }),
+    { outcome: "completed", completedTick: takeover.claim.tick },
+  );
+
+  const rows = await pool.query(
+    `SELECT
+       state,
+       current_tick AS "currentTick",
+       last_completed_tick AS "lastCompletedTick"
+     FROM worker_scheduler_leases
+     WHERE scheduler_id = $1`,
+    [railwayWorkerSchedulerId],
+  );
+  assert.equal(rows.rowCount, 1);
+  assert.equal(rows.rows[0]?.state, "completed");
+  assert.equal(
+    rows.rows[0]?.currentTick.toISOString(),
+    "2026-08-17T10:05:00.000Z",
+  );
+  assert.equal(
+    rows.rows[0]?.lastCompletedTick.toISOString(),
+    "2026-08-17T10:05:00.000Z",
+  );
+}
+
 export async function verifyNodePostgresIntegration(
   connectionString,
 ) {
@@ -1866,6 +1997,7 @@ export async function verifyNodePostgresIntegration(
       await verifyAiReportingSchema(pool, foundation, tenantId);
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
+      await verifyWorkerSchedulerLease(pool, foundation);
     } finally {
       await foundation.close();
     }
@@ -1873,7 +2005,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 7,
+      concurrencyScenarios: 9,
     });
   } finally {
     await pool.end();

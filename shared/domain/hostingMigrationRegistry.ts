@@ -127,6 +127,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresMetaCredentialRepository.ts",
       "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
       "server/platform/postgresWhatsappRateLimitRepository.ts",
+      "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
       "server/platform/postgresOperationalReportRepository.ts",
       "postgres/migrations/0004_team_invitation_lifecycle.sql",
       "postgres/migrations/0005_conversations_messages.sql",
@@ -138,6 +139,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "postgres/migrations/0011_whatsapp_delivery_policy.sql",
       "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
       "postgres/migrations/0013_whatsapp_phone_throughput.sql",
+      "postgres/migrations/0014_worker_scheduler_lease.sql",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
     ],
@@ -148,7 +150,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, contact-organization, atomic contact-import, Meta connection/webhook and encrypted credential paths, immutable WhatsApp delivery-policy evidence and kill switch, serialized WhatsApp reservation/settlement/provider-cooldown ledger, provider-bound rolling phone-throughput enforcement, single-statement reports.read adapter, seventeen-adapter PostgreSQL foundation, owned PostgreSQL API runtime composition, bounded Node HTTP adapter, database readiness probe, ordered HTTP-before-pool shutdown owner, strict PORT configuration, and SIGINT/SIGTERM lifecycle exist. All six operational-report source families are migrated, and the complete authenticated reports.read HTTP path passed against PostgreSQL 16.13. Cutover remains blocked because the executable bootstrap cannot be safely composed without a provider-bound distributed mutation rate-limit adapter, live provider-bound pool values, full 36-migration schema parity, remaining domain mutations, live account configuration, and staging evidence.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, contact-organization, atomic contact-import, Meta connection/webhook and encrypted credential paths, immutable WhatsApp delivery-policy evidence and kill switch, serialized WhatsApp reservation/settlement/provider-cooldown ledger, provider-bound rolling phone-throughput enforcement, fenced worker-scheduler lease, single-statement reports.read adapter, eighteen-adapter PostgreSQL foundation, owned PostgreSQL API runtime composition, bounded Node HTTP adapter, database readiness probe, ordered HTTP-before-pool shutdown owner, strict PORT configuration, and SIGINT/SIGTERM lifecycle exist. All six operational-report source families are migrated, and the complete authenticated reports.read HTTP path passed against PostgreSQL 16.13. Cutover remains blocked because the executable bootstrap cannot be safely composed without a provider-bound distributed mutation rate-limit adapter, live provider-bound pool values, full 36-migration schema parity, remaining domain mutations, live account configuration, and staging evidence.",
   }),
   capability({
     id: "web.static-assets",
@@ -218,6 +220,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresMetaCredentialRepository.ts",
       "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
       "server/platform/postgresWhatsappRateLimitRepository.ts",
+      "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
       "server/platform/postgresOperationalReportRepository.ts",
       "server/platform/postgresReadinessProbe.ts",
       "server/platform/railwayPostgresApiRuntime.ts",
@@ -235,6 +238,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "postgres/migrations/0011_whatsapp_delivery_policy.sql",
       "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
       "postgres/migrations/0013_whatsapp_phone_throughput.sql",
+      "postgres/migrations/0014_worker_scheduler_lease.sql",
       "scripts/verify-postgres-migration-contract.mjs",
       "scripts/verify-node-postgres-integration.mjs",
     ],
@@ -245,7 +249,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, contacts.list, contact organization, atomic contact import, Meta connection/webhook and encrypted credential persistence, immutable WhatsApp delivery-policy evidence and kill switch, serialized WhatsApp reservation/settlement/provider-cooldown persistence, provider-bound rolling phone-throughput enforcement, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus fourteen ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, seventeen-adapter foundation, owned API runtime composition, exact readiness query, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, tenant-isolated contact organization/import schema, atomic contact-profile plus import-outcome writes, tenant-bound Meta connection/credential state, webhook claim/replay/conflict behavior, atomic delivery-policy audit/replay/conflict, disable and re-enable behavior, WhatsApp pair/portfolio/phone-throughput reservation replay, settlement, cooldown and tamper rejection, the complete authenticated six-source reporting HTTP path, conversation/message, template/campaign, bot delivery and AI reporting constraints, commit/replay/rollback, invitation delivery/acceptance, and seven real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 36-migration parity conversion, remaining repository DML/concurrency coverage, controlled-environment migration evidence, queue runtime and load evidence are not implemented.",
+      "Provider-neutral contacts.save, contacts.list, contact organization, atomic contact import, Meta connection/webhook and encrypted credential persistence, immutable WhatsApp delivery-policy evidence and kill switch, serialized WhatsApp reservation/settlement/provider-cooldown persistence, provider-bound rolling phone-throughput enforcement, fenced worker-scheduler lease, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus fifteen ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, eighteen-adapter foundation, owned API runtime composition, exact readiness query, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, tenant-isolated contact organization/import schema, atomic contact-profile plus import-outcome writes, tenant-bound Meta connection/credential state, webhook claim/replay/conflict behavior, atomic delivery-policy audit/replay/conflict, disable and re-enable behavior, WhatsApp pair/portfolio/phone-throughput reservation replay, settlement, cooldown and tamper rejection, scheduler claim/catch-up/fencing, the complete authenticated six-source reporting HTTP path, conversation/message, template/campaign, bot delivery and AI reporting constraints, commit/replay/rollback, invitation delivery/acceptance, and nine real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 36-migration parity conversion, remaining repository DML/concurrency coverage, controlled-environment migration evidence, queue runtime and load evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",
@@ -332,6 +336,10 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "worker/index.ts",
       "server/campaigns/campaignDispatchRuntime.ts",
       "server/team/teamInvitationExpirationRuntime.ts",
+      "shared/domain/workerScheduler.ts",
+      "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
+      "server/platform/railwayWorkerScheduler.ts",
+      "postgres/migrations/0014_worker_scheduler_lease.sql",
     ],
     targetPlacement: "railway-worker",
     targetContract:
@@ -340,7 +348,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "Railway Cron cannot satisfy the one-minute cadence; an always-on worker adapter and PostgreSQL lease are not implemented.",
+      "Railway Cron cannot satisfy the one-minute cadence. The atomic PostgreSQL lease, fencing token, two-task orchestrator and five-tick catch-up are implemented and passed a real concurrency rehearsal; the always-on timer/process composition and target queue adapters are not implemented.",
   }),
   capability({
     id: "security.distributed-rate-limits",

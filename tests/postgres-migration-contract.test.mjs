@@ -33,6 +33,7 @@ const metaConnectionCredentialSchema = migrationSources[10];
 const whatsappDeliveryPolicySchema = migrationSources[11];
 const whatsappRateLimitLedgerSchema = migrationSources[12];
 const whatsappPhoneThroughputSchema = migrationSources[13];
+const workerSchedulerLeaseSchema = migrationSources[14];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -50,15 +51,32 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0011_whatsapp_delivery_policy.sql",
     "0012_whatsapp_rate_limit_ledger.sql",
     "0013_whatsapp_phone_throughput.sql",
+    "0014_worker_scheduler_lease.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 14,
+      migrationCount: 15,
       findings: [],
     },
   );
+});
+
+test("defines one fenced PostgreSQL lease for the Railway scheduler", () => {
+  assert.match(
+    workerSchedulerLeaseSchema,
+    /CREATE TABLE worker_scheduler_leases[\s\S]*fencing_token BIGINT[\s\S]*state IN \('claimed', 'completed'\)/,
+  );
+  assert.match(
+    workerSchedulerLeaseSchema,
+    /current_tick = date_trunc\('minute', current_tick\)[\s\S]*last_completed_tick < current_tick/,
+  );
+  assert.match(
+    workerSchedulerLeaseSchema,
+    /worker_scheduler_leases_expiry_idx[\s\S]*WHERE state = 'claimed'/,
+  );
+  assert.doesNotMatch(workerSchedulerLeaseSchema, /random|uuid/i);
 });
 
 test("defines provider-bound PostgreSQL phone throughput enforcement", () => {

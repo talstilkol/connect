@@ -1153,6 +1153,19 @@ Legacy Policy נכשל סגור אך נשאר ניתן להשבתה. ‏D1 ו־P
 4.5 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **86–188 שעות פיתוח
 נטו**. הטווח אינו כולל המתנה לחשבונות, אישורי Meta, פריסת Staging או
 חלון Pilot; הוא יתעדכן לאחר כל Slice שנבדק ונדחף.
+
+4.6 ‏Railway Worker scheduler lease המקומי הושלם. מיגרציה `0014` מוסיפה
+Claim אטומי לכל Tick של דקה, Lease שפג ו־Fencing token עולה. שני Workers
+מתחרים אינם יכולים לקבל אותו Tick, ו־Worker ישן אינו יכול להשלים לאחר
+השתלטות. ה־Orchestrator מריץ יחד את Campaign scheduler ואת Team invitation
+expiration scheduler, ממתין לשניהם ומבצע Catch-up של עד חמישה Ticks בלבד.
+בדיקת PostgreSQL 16.13 זמנית עברה עם
+`PASS (15 migrations, 9 concurrency scenarios)`; השרת נעצר והתיקייה נמחקה.
+חיבור Timer תמידי, ‏Redis/BullMQ ו־Queue adapters חיים עדיין חסרים.
+
+4.7 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **82–182 שעות פיתוח
+נטו**. הירידה משקפת את השלמת ה־Lease וה־Catch-up בלבד; היא אינה מניחה שספק
+Queue, ‏Credentials או סביבת Railway כבר קיימים.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

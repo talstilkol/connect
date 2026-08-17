@@ -162,6 +162,17 @@ test("requires an always-on adapter instead of an incompatible Railway Cron", ()
   assert.equal(scheduler.nextAction, "adapter-required");
   assert.match(scheduler.targetContract, /atomic PostgreSQL lease/);
   assert.match(scheduler.cutoverBlocker, /Railway Cron cannot satisfy/);
+  assert.match(scheduler.cutoverBlocker, /lease, fencing token/);
+  assert.match(scheduler.cutoverBlocker, /five-tick catch-up are implemented/);
+  assert.match(scheduler.cutoverBlocker, /always-on timer\/process composition/);
+  for (const path of [
+    "shared/domain/workerScheduler.ts",
+    "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
+    "server/platform/railwayWorkerScheduler.ts",
+    "postgres/migrations/0014_worker_scheduler_lease.sql",
+  ]) {
+    assert.equal(scheduler.sourceFiles.includes(path), true);
+  }
 });
 
 test("records the local API contract without claiming live adapter readiness", () => {
@@ -207,6 +218,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresMetaCredentialRepository.ts",
     "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
     "server/platform/postgresWhatsappRateLimitRepository.ts",
+    "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "postgres/migrations/0005_conversations_messages.sql",
@@ -218,6 +230,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0011_whatsapp_delivery_policy.sql",
     "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
     "postgres/migrations/0013_whatsapp_phone_throughput.sql",
+    "postgres/migrations/0014_worker_scheduler_lease.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -228,7 +241,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /seventeen-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /eighteen-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /contact-organization/);
   assert.match(boundary.cutoverBlocker, /atomic contact-import/);
   assert.match(boundary.cutoverBlocker, /Meta connection\/webhook and encrypted credential paths/);
@@ -298,6 +311,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0011_whatsapp_delivery_policy.sql",
     "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
     "postgres/migrations/0013_whatsapp_phone_throughput.sql",
+    "postgres/migrations/0014_worker_scheduler_lease.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -305,15 +319,16 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /fourteen ordered/);
+  assert.match(database.cutoverBlocker, /fifteen ordered/);
   assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
   assert.match(database.cutoverBlocker, /atomic contact-profile plus import-outcome writes/);
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /seven real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /nine real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /seventeen-adapter foundation/);
+  assert.match(database.cutoverBlocker, /eighteen-adapter foundation/);
+  assert.match(database.cutoverBlocker, /scheduler claim\/catch-up\/fencing/);
   assert.match(
     database.cutoverBlocker,
     /atomic delivery-policy audit\/replay\/conflict, disable and re-enable behavior/,
