@@ -391,6 +391,17 @@ Readiness, הרשאות, Timeouts או פעולות שרת. בדיקות Boundar
 החזרת טקסט עברי קשיח לרכיב. Chromium אימת חלון אנגלי וערבי, `RTL`
 מחושב, Focus ראשוני, סגירת `Escape`, החזרת Focus ו־Console נקי.
 
+4.1.11 Slice שביעי של לוקליזציה הושלם בכל Surface אנשי הקשר. מסך
+ה־Directory, יצירת פרופיל, טעינה מדורגת, מצבי דיוור והסכמה, עורך
+אירועי הסכמה, תגיות, רשימות וכל ארבעת שלבי CSV/XLSX זמינים בעברית,
+אנגלית וערבית. המילונים מכסים שמונה שדות מיפוי, 21 קודי כשל של קובץ,
+תשעה כשלים תחומים של משימת ייבוא ושמונה כשלים של פעולות אנשי קשר.
+ה־UI ממפה `ContactImportSourceError.code` במקום להציג `Error.message`,
+בלי לשנות Parsing, מגבלות קובץ, הרשאות או פעולות שרת. בדיקות
+Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL`, רכיב
+בחירת CSV/XLSX ו־Console נקי. בדיקות Boundary מונעות החזרת טקסט עברי
+קשיח לשלושת רכיבי ה־Feature.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -414,10 +425,10 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
-ה־Dashboard, ה־Onboarding וחלון Embedded Signup,
+ה־Dashboard, ה־Onboarding, חלון Embedded Signup ו־Contacts,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **23–38 שעות
+הוא **19–31 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**31–52 שעות**.
+הופך ל־**27–45 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

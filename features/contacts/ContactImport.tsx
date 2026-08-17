@@ -15,6 +15,9 @@ import {
 } from "../../shared/domain/contactImportJob";
 import type { ContactRecord } from "../../shared/domain/contactRecord";
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import type {
   ContactColumnMapping,
   ContactField,
 } from "../../shared/domain/contactImportDraft";
@@ -25,32 +28,24 @@ import {
   startContactImportAction,
 } from "../../server/contacts/contactImportActions";
 import { useWorkspaceDrafts } from "../workspace/WorkspaceDraftProvider";
+import {
+  readContactImportMessages,
+  type ContactImportActionFailureStatus,
+  type ContactImportMessages,
+} from "./contactImportMessages";
 
-const contactFields: Array<{
+const contactFieldDefinitions: Array<{
   id: ContactField;
-  label: string;
   required: boolean;
 }> = [
-  { id: "phoneNumber", label: "מספר טלפון", required: true },
-  { id: "firstName", label: "שם פרטי", required: false },
-  { id: "lastName", label: "שם משפחה", required: false },
-  { id: "email", label: "אימייל", required: false },
-  { id: "company", label: "חברה", required: false },
-  {
-    id: "consentStatusRaw",
-    label: "מצב הסכמה — Raw",
-    required: false,
-  },
-  {
-    id: "consentSourceRaw",
-    label: "מקור הסכמה — Raw",
-    required: false,
-  },
-  {
-    id: "consentRecordedAtRaw",
-    label: "מועד הסכמה — Raw",
-    required: false,
-  },
+  { id: "phoneNumber", required: true },
+  { id: "firstName", required: false },
+  { id: "lastName", required: false },
+  { id: "email", required: false },
+  { id: "company", required: false },
+  { id: "consentStatusRaw", required: false },
+  { id: "consentSourceRaw", required: false },
+  { id: "consentRecordedAtRaw", required: false },
 ];
 
 const emptyMapping: ContactColumnMapping = {
@@ -65,12 +60,19 @@ const emptyMapping: ContactColumnMapping = {
 };
 
 export function ContactImport({
+  language,
   serverImportEnabled,
   onImportedContacts,
 }: {
+  language: InterfaceLanguage;
   serverImportEnabled: boolean;
   onImportedContacts: (contacts: readonly ContactRecord[]) => void;
 }) {
+  const messages = readContactImportMessages(language);
+  const contactFields = contactFieldDefinitions.map((field) => ({
+    ...field,
+    label: messages.fields[field.id],
+  }));
   const {
     contactImportDraft,
     saveContactImportDraft,
@@ -166,8 +168,8 @@ export function ContactImport({
 
       setError(
         caughtError instanceof ContactImportSourceError
-          ? caughtError.message
-          : "לא ניתן לקרוא את הקובץ.",
+          ? messages.sourceFailures[caughtError.code]
+          : messages.runtime.unreadableFile,
       );
     }
   };
@@ -252,7 +254,12 @@ export function ContactImport({
       });
 
       if (startResult.status !== "ready") {
-        setImportError(contactImportFailureMessage(startResult.status));
+        setImportError(
+          contactImportFailureMessage(
+            startResult.status,
+            messages,
+          ),
+        );
         return;
       }
 
@@ -260,7 +267,7 @@ export function ContactImport({
       setImportJob(currentJob);
 
       if (currentJob.status === "completed") {
-        setImportMessage("הייבוא הזה כבר הושלם בעבר; לא נוצרו רשומות כפולות.");
+        setImportMessage(messages.runtime.alreadyCompleted);
         return;
       }
 
@@ -282,7 +289,12 @@ export function ContactImport({
         });
 
         if (result.status !== "processed") {
-          setImportError(contactImportFailureMessage(result.status));
+          setImportError(
+            contactImportFailureMessage(
+              result.status,
+              messages,
+            ),
+          );
           return;
         }
 
@@ -293,11 +305,11 @@ export function ContactImport({
 
       setImportMessage(
         currentJob.status === "completed"
-          ? "הייבוא הושלם ונשמר במסד הנתונים."
-          : "העיבוד נעצר לפני שכל השורות הושלמו. ניתן להפעיל שוב כדי להמשיך.",
+          ? messages.runtime.completed
+          : messages.runtime.incomplete,
       );
     } catch {
-      setImportError("החיבור לשרת נכשל. ניתן להפעיל שוב כדי להמשיך מאותה נקודה.");
+      setImportError(messages.runtime.connectionFailed);
     } finally {
       setIsImporting(false);
     }
@@ -311,22 +323,16 @@ export function ContactImport({
             {sourceFormat?.toUpperCase() ?? "CSV/XLSX"}
           </span>
           <div>
-            <span className="card-kicker">שלב 1 — קובץ מקור</span>
-            <h2>{fileName ?? "בחירת קובץ אנשי קשר"}</h2>
-            <p>
-              הקובץ נקרא תחילה מקומית בדפדפן והנתונים אינם מועלים בשלב
-              זה. רק לאחר בדיקת המיפוי ואישור מפורש, שורות הפרופיל נשלחות
-              לשרת במנות קטנות.
-            </p>
-            <p>
-              עד 5 MiB, ‏50,000 שורות ו־100 עמודות. XLSX חייב לכלול
-              גיליון גלוי יחיד וערכים בלבד — ללא נוסחאות, Macros או
-              קישורים חיצוניים.
-            </p>
+            <span className="card-kicker">{messages.source.kicker}</span>
+            <h2>{fileName ?? messages.source.chooseTitle}</h2>
+            <p>{messages.source.description}</p>
+            <p>{messages.source.limits}</p>
           </div>
         </div>
         <label className="primary-button file-button">
-          {fileName ? "בחירת קובץ אחר" : "בחירת CSV או XLSX"}
+          {fileName
+            ? messages.source.chooseAnother
+            : messages.source.chooseFile}
           <input
             type="file"
             accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -348,8 +354,10 @@ export function ContactImport({
             <section className="card csv-schema-audit-card">
               <div className="card-header">
                 <div>
-                  <span className="card-kicker">Source schema audit</span>
-                  <h2>בדיקת מבנה הקובץ</h2>
+                  <span className="card-kicker">
+                    {messages.schema.kicker}
+                  </span>
+                  <h2>{messages.schema.title}</h2>
                 </div>
                 <span
                   className={`status-pill ${
@@ -357,26 +365,26 @@ export function ContactImport({
                   }`}
                 >
                   {schemaAudit.isConsistent
-                    ? "מבנה עקבי"
-                    : "נדרשת בדיקה"}
+                    ? messages.schema.consistent
+                    : messages.schema.reviewRequired}
                 </span>
               </div>
 
               <div className="csv-schema-metrics">
                 <div>
-                  <span>עמודות בכותרת</span>
+                  <span>{messages.schema.headerColumns}</span>
                   <strong>{schemaAudit.headerColumnCount}</strong>
                 </div>
                 <div>
-                  <span>כותרות ריקות</span>
+                  <span>{messages.schema.emptyHeaders}</span>
                   <strong>{schemaAudit.emptyHeaderColumns.length}</strong>
                 </div>
                 <div>
-                  <span>כותרות כפולות</span>
+                  <span>{messages.schema.duplicateHeaders}</span>
                   <strong>{schemaAudit.duplicateHeaders.length}</strong>
                 </div>
                 <div>
-                  <span>שורות ברוחב שונה</span>
+                  <span>{messages.schema.mismatchedRows}</span>
                   <strong>{schemaAudit.rowsWithColumnCountMismatch}</strong>
                 </div>
               </div>
@@ -385,26 +393,30 @@ export function ContactImport({
                 <div className="csv-schema-issues">
                   {schemaAudit.emptyHeaderColumns.length > 0 ? (
                     <p>
-                      <strong>כותרות ריקות:</strong> עמודות{" "}
+                      <strong>{messages.schema.emptyHeadersDetail}</strong>{" "}
+                      {messages.schema.columns}{" "}
                       {schemaAudit.emptyHeaderColumns.join(", ")}
                     </p>
                   ) : null}
                   {schemaAudit.duplicateHeaders.map((duplicate) => (
                     <p key={`duplicate-header-${duplicate.header}`}>
-                      <strong>כותרת כפולה:</strong>{" "}
-                      <code>{duplicate.header}</code> בעמודות{" "}
+                      <strong>{messages.schema.duplicateHeaderDetail}</strong>{" "}
+                      <code>{duplicate.header}</code>{" "}
+                      {messages.schema.columns}{" "}
                       {duplicate.columnNumbers.join(", ")}
                     </p>
                   ))}
                   {schemaAudit.rowIssueSamples.length > 0 ? (
                     <div>
-                      <strong>שורות ראשונות ברוחב שונה:</strong>
+                      <strong>{messages.schema.firstMismatchedRows}</strong>
                       <ul>
                         {schemaAudit.rowIssueSamples.map((issue) => (
                           <li key={`schema-row-${issue.rowIndex}`}>
-                            שורה {issue.sourceRowNumber}: נמצאו{" "}
-                            {issue.actualColumnCount} עמודות במקום{" "}
-                            {issue.expectedColumnCount}
+                            {messages.schema.rowIssue(
+                              issue.sourceRowNumber,
+                              issue.actualColumnCount,
+                              issue.expectedColumnCount,
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -424,8 +436,11 @@ export function ContactImport({
                 </span>
                 <p>
                   {schemaAudit.isConsistent
-                    ? "הכותרות ייחודיות וכל שורות הנתונים תואמות למספר העמודות."
-                    : `נמצאו ${schemaAudit.shortRows} שורות קצרות ו-${schemaAudit.longRows} שורות ארוכות. הקובץ לא תוקן אוטומטית.`}
+                    ? messages.schema.consistentDetail
+                    : messages.schema.inconsistentDetail(
+                        schemaAudit.shortRows,
+                        schemaAudit.longRows,
+                      )}
                 </p>
               </div>
             </section>
@@ -434,13 +449,17 @@ export function ContactImport({
           <section className="card mapping-card">
             <div className="card-header">
               <div>
-                <span className="card-kicker">שלב 2 — התאמת עמודות</span>
-                <h2>נמצאו {csv.rows.length} שורות נתונים</h2>
+                <span className="card-kicker">
+                  {messages.mapping.kicker}
+                </span>
+                <h2>{messages.mapping.rowsFound(csv.rows.length)}</h2>
               </div>
               <span
                 className={`status-pill ${mappingChecked ? "success" : "warning"}`}
               >
-                {mappingChecked ? "המיפוי מוכן לייבוא" : "טרם נשמר"}
+                {mappingChecked
+                  ? messages.mapping.ready
+                  : messages.mapping.notSaved}
               </span>
             </div>
 
@@ -449,7 +468,11 @@ export function ContactImport({
                 <label key={field.id}>
                   <span>
                     {field.label}
-                    {field.required ? <b>חובה</b> : <small>רשות</small>}
+                    {field.required ? (
+                      <b>{messages.mapping.required}</b>
+                    ) : (
+                      <small>{messages.mapping.optional}</small>
+                    )}
                   </span>
                   <select
                     value={mapping[field.id] ?? ""}
@@ -457,10 +480,11 @@ export function ContactImport({
                       updateMapping(field.id, event.target.value)
                     }
                   >
-                    <option value="">לא למפות</option>
+                    <option value="">{messages.mapping.doNotMap}</option>
                     {csv.headers.map((header, index) => (
                       <option value={String(index)} key={`column-${index}`}>
-                        {header || "עמודה ללא שם"} · עמודה {index + 1}
+                        {header || messages.mapping.unnamedColumn} ·{" "}
+                        {messages.mapping.column(index + 1)}
                       </option>
                     ))}
                   </select>
@@ -471,7 +495,7 @@ export function ContactImport({
             {hasMappingCollision ? (
               <div className="inline-notice danger" role="alert">
                 <span aria-hidden="true">!</span>
-                <p>אותה עמודת מקור מופתה ליותר משדה אחד.</p>
+                <p>{messages.mapping.collision}</p>
               </div>
             ) : null}
 
@@ -482,12 +506,9 @@ export function ContactImport({
                 disabled={!canCheckMapping}
                 onClick={checkAndSaveMapping}
               >
-                בדיקת המיפוי והכנה לייבוא
+                {messages.mapping.check}
               </button>
-              <p>
-                אין נרמול מספרים בשלב זה. הבדיקה משווה רק ערכי טלפון זהים
-                לחלוטין לאחר הסרת רווחים בתחילת ובסוף הערך.
-              </p>
+              <p>{messages.mapping.normalizationNotice}</p>
             </div>
 
             {mapping.consentStatusRaw !== null ||
@@ -495,11 +516,7 @@ export function ContactImport({
             mapping.consentRecordedAtRaw !== null ? (
               <div className="inline-notice warning" role="status">
                 <span aria-hidden="true">i</span>
-                <p>
-                  עמודות ההסכמה מוצגות כ־Raw בלבד. המערכת עדיין אינה מתרגמת
-                  ערכים ל״מאושר״ או ״חסום״, והייבוא הקבוע מתעלם מהן. כל איש
-                  קשר חדש נשמר חסום לדיוור עד לאירוע הסכמה נפרד.
-                </p>
+                <p>{messages.mapping.rawConsentNotice}</p>
               </div>
             ) : null}
           </section>
@@ -508,8 +525,10 @@ export function ContactImport({
             <section className="card contact-import-commit-card">
               <div className="card-header">
                 <div>
-                  <span className="card-kicker">שלב 3 — ייבוא קבוע</span>
-                  <h2>שמירת פרופילי אנשי הקשר</h2>
+                  <span className="card-kicker">
+                    {messages.commit.kicker}
+                  </span>
+                  <h2>{messages.commit.title}</h2>
                 </div>
                 <span
                   className={`status-pill ${
@@ -520,34 +539,31 @@ export function ContactImport({
                 >
                   {importJob
                     ? `${importJob.processedRows}/${importJob.totalRows}`
-                    : "טרם הופעל"}
+                    : messages.commit.notStarted}
                 </span>
               </div>
 
-              <p>
-                השרת מאמת שוב כל שורה, מזהה כפילויות בתוך הקובץ ושומר
-                התקדמות. שדות Consent גולמיים אינם משנים הרשאת דיוור.
-              </p>
+              <p>{messages.commit.description}</p>
 
               {importJob ? (
                 <div
                   className="contact-quality-grid"
-                  aria-label="סיכום תוצאות הייבוא"
+                  aria-label={messages.commit.summaryAriaLabel}
                 >
                   <div>
-                    <span>נוצרו</span>
+                    <span>{messages.commit.created}</span>
                     <strong>{importJob.createdRows}</strong>
                   </div>
                   <div>
-                    <span>עודכנו</span>
+                    <span>{messages.commit.updated}</span>
                     <strong>{importJob.updatedRows}</strong>
                   </div>
                   <div>
-                    <span>ללא שינוי</span>
+                    <span>{messages.commit.unchanged}</span>
                     <strong>{importJob.unchangedRows}</strong>
                   </div>
                   <div>
-                    <span>נדחו / כפולים</span>
+                    <span>{messages.commit.rejectedOrDuplicate}</span>
                     <strong>
                       {importJob.rejectedRows + importJob.duplicateRows}
                     </strong>
@@ -558,10 +574,7 @@ export function ContactImport({
               {!serverImportEnabled ? (
                 <div className="inline-notice warning" role="status">
                   <span aria-hidden="true">i</span>
-                  <p>
-                    נדרשים Clerk ו־Tenant פעיל כדי לבצע ייבוא קבוע. בדיקת
-                    הקובץ המקומית נשארת זמינה.
-                  </p>
+                  <p>{messages.commit.disabledNotice}</p>
                 </div>
               ) : null}
 
@@ -586,10 +599,13 @@ export function ContactImport({
                 onClick={startPersistentImport}
               >
                 {isImporting
-                  ? `מעבד ${importJob?.processedRows ?? 0}/${csv.rows.length}...`
+                  ? messages.commit.processing(
+                      importJob?.processedRows ?? 0,
+                      csv.rows.length,
+                    )
                   : importJob?.status === "processing"
-                    ? "המשך ייבוא"
-                    : "התחלת ייבוא קבוע"}
+                    ? messages.commit.continueImport
+                    : messages.commit.startImport}
               </button>
             </section>
           ) : null}
@@ -597,11 +613,15 @@ export function ContactImport({
           <section className="card csv-preview-card">
             <div className="card-header">
               <div>
-                <span className="card-kicker">שלב 4 — תצוגה מקדימה</span>
-                <h2>עד 5 שורות ראשונות מהקובץ</h2>
+                <span className="card-kicker">
+                  {messages.preview.kicker}
+                </span>
+                <h2>{messages.preview.title}</h2>
               </div>
               {mappingChecked ? (
-                <span className="status-pill success">המיפוי נבדק מקומית</span>
+                <span className="status-pill success">
+                  {messages.preview.mappingChecked}
+                </span>
               ) : null}
             </div>
 
@@ -634,27 +654,30 @@ export function ContactImport({
               </div>
             ) : (
               <p className="preview-placeholder">
-                יש למפות לפחות עמודה אחת כדי להציג נתונים.
+                {messages.preview.mapAtLeastOne}
               </p>
             )}
 
             {mappingChecked ? (
               <>
-                <div className="contact-quality-grid" aria-label="סיכום איכות הקובץ">
+                <div
+                  className="contact-quality-grid"
+                  aria-label={messages.preview.qualityAriaLabel}
+                >
                   <div>
-                    <span>שורות בקובץ</span>
+                    <span>{messages.preview.fileRows}</span>
                     <strong>{qualitySummary?.totalRows ?? 0}</strong>
                   </div>
                   <div>
-                    <span>עם ערך טלפון Raw</span>
+                    <span>{messages.preview.rawPhone}</span>
                     <strong>{qualitySummary?.rowsWithPhone ?? 0}</strong>
                   </div>
                   <div>
-                    <span>ללא ערך טלפון</span>
+                    <span>{messages.preview.missingPhone}</span>
                     <strong>{qualitySummary?.rowsWithoutPhone ?? 0}</strong>
                   </div>
                   <div>
-                    <span>כפילויות מדויקות</span>
+                    <span>{messages.preview.exactDuplicates}</span>
                     <strong>{qualitySummary?.exactDuplicateRows ?? 0}</strong>
                   </div>
                 </div>
@@ -677,8 +700,8 @@ export function ContactImport({
                   <p>
                     {(qualitySummary?.rowsWithoutPhone ?? 0) > 0 ||
                     (qualitySummary?.exactDuplicateRows ?? 0) > 0
-                      ? "נמצאו בעיות איכות גולמיות. לא הוסרו שורות ולא נקבעה מדיניות טיפול."
-                      : "לכל השורות יש ערך טלפון ולא נמצאו כפילויות מדויקות. לא בוצעו אימות E.164 או בדיקת Consent."}
+                      ? messages.preview.issues
+                      : messages.preview.clean}
                   </p>
                 </div>
               </>
@@ -689,11 +712,8 @@ export function ContactImport({
         <section className="card import-boundaries">
           <span aria-hidden="true">i</span>
           <div>
-            <strong>גבול המימוש הנוכחי</strong>
-            <p>
-              CSV ו־XLSX נבדקים מקומית תחת מגבלות גודל ותוכן. ייבוא קבוע
-              זמין רק לאחר אימות משתמש ו־Tenant פעיל.
-            </p>
+            <strong>{messages.boundary.title}</strong>
+            <p>{messages.boundary.description}</p>
           </div>
         </section>
       )}
@@ -720,38 +740,9 @@ function toImportCandidate(
   };
 }
 
-function contactImportFailureMessage(status: string): string {
-  if (status === "configuration-required") {
-    return "חיבור Clerk אינו מוגדר.";
-  }
-
-  if (status === "unauthenticated") {
-    return "ה־Session אינו פעיל. יש להתחבר מחדש.";
-  }
-
-  if (status === "onboarding-required") {
-    return "יש להשלים תחילה את יצירת סביבת העבודה.";
-  }
-
-  if (status === "tenant-selection-required") {
-    return "נדרשת בחירת Tenant מפורשת.";
-  }
-
-  if (status === "permission-denied") {
-    return "לתפקיד הנוכחי אין הרשאה לייבא אנשי קשר.";
-  }
-
-  if (status === "not-found") {
-    return "משימת הייבוא אינה שייכת ל־Tenant הנוכחי.";
-  }
-
-  if (status === "conflict") {
-    return "פרטי משימת הייבוא אינם תואמים לקובץ שנשמר קודם.";
-  }
-
-  if (status === "validation-error") {
-    return "מבנה בקשת הייבוא אינו תקין.";
-  }
-
-  return "הייבוא נכשל בשרת. ניתן להפעיל שוב כדי להמשיך מאותה נקודה.";
+function contactImportFailureMessage(
+  status: ContactImportActionFailureStatus,
+  messages: ContactImportMessages,
+): string {
+  return messages.actionFailures[status];
 }

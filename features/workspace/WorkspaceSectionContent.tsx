@@ -71,6 +71,9 @@ import { DecisionCenter } from "./DecisionCenter";
 import { WorkspaceDashboard } from "./WorkspaceDashboard";
 import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
 import { FeaturePage } from "./WorkspaceFeaturePage";
+import {
+  readContactDirectoryMessages,
+} from "../contacts/contactDirectoryMessages";
 
 export function WorkspaceSectionContent({
   activeSection,
@@ -171,6 +174,7 @@ export function WorkspaceSectionContent({
           {activeSection === "contacts" ? (
             <Contacts
               authEnabled={authEnabled}
+              language={language}
               initialContacts={initialContacts}
               initialContactsCursor={initialContactsCursor}
               initialContactOrganization={initialContactOrganization}
@@ -263,25 +267,30 @@ export function WorkspaceSectionContent({
 
 function Contacts({
   authEnabled,
+  language,
   initialContacts,
   initialContactsCursor,
   initialContactOrganization,
   initialStatus,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialContacts: readonly ContactRecord[];
   initialContactsCursor: number | null;
   initialContactOrganization: ContactOrganizationSnapshot;
   initialStatus: ContactDirectoryStatus;
 }) {
+  const messages = readContactDirectoryMessages(language);
+
   return (
     <FeaturePage
-      eyebrow="קהל ונתונים"
-      title="אנשי קשר"
-      description="ניהול אנשי קשר, תגיות, רשימות ותיעוד הסכמה לקבלת הודעות."
+      eyebrow={messages.page.eyebrow}
+      title={messages.page.title}
+      description={messages.page.description}
     >
       <ContactDirectory
         authEnabled={authEnabled}
+        language={language}
         initialContacts={initialContacts}
         initialNextCursor={initialContactsCursor}
         initialOrganization={initialContactOrganization}

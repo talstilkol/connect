@@ -141,6 +141,33 @@ test("server-renders localized Dashboard and Onboarding content", async () => {
   assert.match(arabicHtml, /مسار الإعداد/);
 });
 
+test("server-renders the complete contacts surface in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/contacts?lang=en"),
+    render("/workspace/contacts?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Persistent contact management/);
+  assert.match(englishHtml, /Review a file before importing/);
+  assert.match(englishHtml, /Choose a contact file/);
+  assert.match(englishHtml, /Current implementation boundary/);
+  assert.doesNotMatch(englishHtml, /ניהול אנשי קשר קבוע/);
+
+  assert.match(arabicHtml, /إدارة جهات الاتصال الدائمة/);
+  assert.match(arabicHtml, /فحص ملف قبل الاستيراد/);
+  assert.match(arabicHtml, /اختيار ملف جهات اتصال/);
+  assert.match(arabicHtml, /حد التنفيذ الحالي/);
+  assert.doesNotMatch(arabicHtml, /ניהול אנשי קשר קבוע/);
+});
+
 test("server-renders auth and workspace feature routes", async () => {
   const [
     loginResponse,
