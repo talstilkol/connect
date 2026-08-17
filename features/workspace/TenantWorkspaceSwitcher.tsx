@@ -18,34 +18,16 @@ import type {
   TenantSelectionDirectory,
 } from "../../server/auth/tenantSelectionService.ts";
 import {
-  roleLabels,
-} from "../../shared/domain/model.ts";
+  readWorkspaceShellMessages,
+} from "../../shared/i18n/workspace";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 
 const TenantWorkspaceContext =
   createContext<TenantSelectionDirectory | null>(
     null,
   );
-
-const failureMessages = {
-  "configuration-required":
-    "החלפת סביבת העבודה אינה מוגדרת.",
-  unauthenticated:
-    "יש להתחבר מחדש כדי להחליף סביבת עבודה.",
-  "onboarding-required":
-    "לא נמצאה סביבת עבודה זמינה.",
-  "selection-required":
-    "סביבת העבודה אינה זמינה עוד.",
-  conflict:
-    "הבחירה השתנתה. הנתונים נטענים מחדש.",
-  "rate-limited":
-    "בוצעו יותר מדי ניסיונות. נא להמתין.",
-  "temporarily-unavailable":
-    "החלפת סביבת העבודה אינה זמינה כרגע.",
-  "server-error":
-    "לא ניתן לשמור את הבחירה כרגע.",
-  "validation-error":
-    "הבחירה שנשלחה אינה תקינה.",
-} as const;
 
 export function TenantWorkspaceProvider({
   children,
@@ -66,13 +48,17 @@ export function TenantWorkspaceProvider({
 
 export function TenantWorkspaceSwitcher({
   connectionStatus,
+  language,
 }: {
   connectionStatus: string;
+  language: InterfaceLanguage;
 }) {
   const directory = useContext(
     TenantWorkspaceContext,
   );
   const router = useRouter();
+  const messages =
+    readWorkspaceShellMessages(language).tenant;
   const [
     selectedKey,
     setSelectedKey,
@@ -101,7 +87,7 @@ export function TenantWorkspaceSwitcher({
     "";
   const displayName =
     currentOption?.displayName ??
-    "סביבת עבודה לא מחוברת";
+    messages.disconnectedWorkspace;
   const avatar =
     Array.from(displayName.trim())[0] ??
     "C";
@@ -120,9 +106,7 @@ export function TenantWorkspaceSwitcher({
     }
 
     setSelectedKey(selectionKey);
-    setMessage(
-      "שומר את סביבת העבודה…",
-    );
+    setMessage(messages.saving);
     startTransition(async () => {
       const result =
         await selectTenantAction({
@@ -134,16 +118,14 @@ export function TenantWorkspaceSwitcher({
       if (
         result.status === "selected"
       ) {
-        setMessage(
-          "סביבת העבודה הוחלפה.",
-        );
+        setMessage(messages.switched);
         router.refresh();
         return;
       }
 
       setSelectedKey(null);
       setMessage(
-        failureMessages[
+        messages.failures[
           result.status
         ],
       );
@@ -174,7 +156,7 @@ export function TenantWorkspaceSwitcher({
               className="sr-only"
               htmlFor="tenant-workspace-select"
             >
-              החלפת סביבת עבודה
+              {messages.switchLabel}
             </label>
             <select
               aria-describedby="tenant-workspace-status"
@@ -202,7 +184,7 @@ export function TenantWorkspaceSwitcher({
                     {option.displayName}
                     {" — "}
                     {
-                      roleLabels[
+                      messages.roles[
                         option.role
                       ]
                     }
@@ -227,9 +209,9 @@ export function TenantWorkspaceSwitcher({
         <button
           type="button"
           className="icon-button"
-          aria-label="הגדרות חשבון"
+          aria-label={messages.accountSettingsAriaLabel}
           aria-describedby="unavailable-navigation-actions"
-          title="הגדרות החשבון עדיין אינן זמינות"
+          title={messages.accountSettingsUnavailableTitle}
           disabled
         >
           •••

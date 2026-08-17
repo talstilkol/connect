@@ -18,15 +18,22 @@ import { configurationRequiredMetaEmbeddedSignup } from "../../../shared/domain/
 import { configurationRequiredMetaConnection } from "../../../shared/domain/metaConnectionView";
 import { defaultInboxFilters } from "../../../shared/domain/conversationView";
 import { isSectionId } from "../../../shared/workspace/navigation";
+import { readWorkspaceLanguage } from "../../../shared/i18n/workspace";
 
 // Clerk's experimental lint rule cannot follow the intentional config-disabled rehearsal branch; source-contract tests enforce the conditional direct protection.
 // eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function WorkspaceSectionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ section: string }>;
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
 }) {
   const authEnabled = hasClerkServerConfiguration();
+  const { lang } = await searchParams;
+  const language = readWorkspaceLanguage(lang);
 
   if (authEnabled) {
     await auth.protect();
@@ -165,6 +172,7 @@ export default async function WorkspaceSectionPage({
   return (
     <WorkspaceApp
       activeSection={section}
+      language={language}
       authEnabled={authEnabled}
       initialContacts={contactsResult.contacts}
       initialContactsCursor={contactsResult.nextCursor}

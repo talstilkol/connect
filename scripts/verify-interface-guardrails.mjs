@@ -55,7 +55,7 @@ const checks = [
     code: "MAIN_NAVIGATION_LABEL_REQUIRED",
     file: "features/workspace/WorkspaceApp.tsx",
     pattern:
-      /<nav[^>]*aria-label="ניווט ראשי"/,
+      /<nav[\s\S]{0,120}aria-label=\{messages\.primaryNavigationAriaLabel\}/,
   },
   {
     code: "MOBILE_MENU_STATE_REQUIRED",
@@ -90,7 +90,7 @@ const checks = [
     code: "UNAVAILABLE_ACTIONS_DISABLED",
     file: "features/workspace/WorkspaceApp.tsx",
     pattern:
-      /aria-label="עזרה"[\s\S]{0,220}\bdisabled\b[\s\S]{0,300}aria-label="התראות"[\s\S]{0,220}\bdisabled\b/,
+      /aria-label=\{messages\.helpAriaLabel\}[\s\S]{0,260}\bdisabled\b[\s\S]{0,340}aria-label=\{messages\.notificationsAriaLabel\}[\s\S]{0,260}\bdisabled\b/,
   },
 ];
 

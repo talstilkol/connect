@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import type {
   ContactDirectoryStatus,
 } from "../contacts/ContactDirectory";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import type { ContactRecord } from "../../shared/domain/contactRecord";
 import type {
   MessageTemplateDirectoryStatus,
@@ -61,11 +64,15 @@ import {
   type TeamDirectoryView,
 } from "../../shared/domain/teamDirectoryView";
 import {
-  workspaceNavigation,
   workspaceSectionPath,
   type SectionId,
 } from "../../shared/workspace/navigation";
-import { presentMetaConnection } from "./metaConnectionPresentation";
+import {
+  readWorkspaceDirection,
+  readWorkspaceLocaleLinks,
+  readWorkspaceNavigation,
+  readWorkspaceShellMessages,
+} from "../../shared/i18n/workspace";
 import {
   TenantWorkspaceSwitcher,
 } from "./TenantWorkspaceSwitcher";
@@ -76,6 +83,7 @@ import {
 
 export default function WorkspaceApp({
   activeSection = "dashboard",
+  language = "he",
   authEnabled = false,
   initialContacts = [],
   initialContactsCursor = null,
@@ -141,6 +149,7 @@ export default function WorkspaceApp({
   initialProductionReadiness,
 }: {
   activeSection?: SectionId;
+  language?: InterfaceLanguage;
   authEnabled?: boolean;
   initialContacts?: readonly ContactRecord[];
   initialContactsCursor?: number | null;
@@ -185,22 +194,23 @@ export default function WorkspaceApp({
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [metaPanelOpen, setMetaPanelOpen] = useState(false);
-  const workspaceMetaPresentation = presentMetaConnection(
-    initialMetaConnection,
-  );
+  const messages = readWorkspaceShellMessages(language);
+  const direction = readWorkspaceDirection(language);
+  const localizedNavigation = readWorkspaceNavigation(language);
+  const localeLinks = readWorkspaceLocaleLinks(activeSection);
 
   const navigate = (section: SectionId) => {
-    router.push(workspaceSectionPath(section));
+    router.push(workspaceSectionPath(section, language));
     setMobileMenuOpen(false);
   };
 
   return (
-    <main className="app-shell" dir="rtl">
+    <main className="app-shell" lang={language} dir={direction}>
       <a
         className="skip-link"
         href="#workspace-content"
       >
-        דילוג לתוכן הראשי
+        {messages.skipLink}
       </a>
       <aside className={`sidebar ${mobileMenuOpen ? "sidebar-open" : ""}`}>
         <div className="brand">
@@ -215,18 +225,28 @@ export default function WorkspaceApp({
           </div>
         </div>
 
-        <nav className="main-navigation" aria-label="ניווט ראשי">
-          {workspaceNavigation.map((item, index) => {
+        <nav
+          className="main-navigation"
+          aria-label={messages.primaryNavigationAriaLabel}
+        >
+          {localizedNavigation.map((item, index) => {
             const previousGroup =
-              index > 0 ? workspaceNavigation[index - 1].group : null;
+              index > 0 ? localizedNavigation[index - 1].group : null;
             const showGroup = item.group && item.group !== previousGroup;
 
             return (
               <div key={item.id}>
-                {showGroup ? <p className="nav-group">{item.group}</p> : null}
+                {showGroup ? (
+                  <p className="nav-group">{item.groupLabel}</p>
+                ) : null}
                 <button
                   type="button"
                   className={`nav-item ${activeSection === item.id ? "active" : ""}`}
+                  aria-current={
+                    activeSection === item.id
+                      ? "page"
+                      : undefined
+                  }
                   onClick={() => navigate(item.id)}
                 >
                   <span className="nav-icon" aria-hidden="true">
@@ -249,8 +269,11 @@ export default function WorkspaceApp({
 
         <TenantWorkspaceSwitcher
           connectionStatus={
-            workspaceMetaPresentation.statusLabel
+            messages.metaConnectionStatuses[
+              initialMetaConnection.status
+            ]
           }
+          language={language}
         />
       </aside>
 
@@ -258,7 +281,7 @@ export default function WorkspaceApp({
         <button
           className="mobile-overlay"
           type="button"
-          aria-label="סגירת תפריט"
+          aria-label={messages.closeMenuAriaLabel}
           onClick={() => setMobileMenuOpen(false)}
         />
       ) : null}
@@ -273,7 +296,7 @@ export default function WorkspaceApp({
             <button
               type="button"
               className="mobile-menu-button"
-              aria-label="פתיחת תפריט"
+              aria-label={messages.openMenuAriaLabel}
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen((open) => !open)}
             >
@@ -283,21 +306,43 @@ export default function WorkspaceApp({
               <span>Connect</span>
               <b>/</b>
               <strong>
-                {workspaceNavigation.find((item) => item.id === activeSection)?.label}
+                {localizedNavigation.find((item) => item.id === activeSection)?.label}
               </strong>
             </div>
           </div>
           <div className="topbar-actions">
+            <nav
+              className="workspace-language-switcher"
+              aria-label={messages.languageSelectorAriaLabel}
+            >
+              {localeLinks.map((locale) => (
+                <a
+                  key={locale.language}
+                  href={locale.href}
+                  hrefLang={locale.language}
+                  lang={locale.language}
+                  dir={locale.direction}
+                  aria-current={
+                    locale.language === language
+                      ? "page"
+                      : undefined
+                  }
+                  title={locale.nativeName}
+                >
+                  {locale.language.toUpperCase()}
+                </a>
+              ))}
+            </nav>
             <span className="environment-badge">
               <i />
-              סביבת הקמה
+              {messages.setupEnvironment}
             </span>
             <button
               type="button"
               className="topbar-icon"
-              aria-label="עזרה"
+              aria-label={messages.helpAriaLabel}
               aria-describedby="unavailable-navigation-actions"
-              title="מרכז העזרה עדיין אינו זמין"
+              title={messages.helpUnavailableTitle}
               disabled
             >
               ?
@@ -305,9 +350,9 @@ export default function WorkspaceApp({
             <button
               type="button"
               className="topbar-icon"
-              aria-label="התראות"
+              aria-label={messages.notificationsAriaLabel}
               aria-describedby="unavailable-navigation-actions"
-              title="מרכז ההתראות עדיין אינו זמין"
+              title={messages.notificationsUnavailableTitle}
               disabled
             >
               ♢
@@ -316,7 +361,7 @@ export default function WorkspaceApp({
               className="sr-only"
               id="unavailable-navigation-actions"
             >
-              פעולה זו עדיין אינה זמינה בגרסה הנוכחית.
+              {messages.unavailableActionDescription}
             </span>
             {authEnabled ? (
               <UserButton
