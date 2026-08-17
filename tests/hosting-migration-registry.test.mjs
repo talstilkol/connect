@@ -163,3 +163,25 @@ test("requires an always-on adapter instead of an incompatible Railway Cron", ()
   assert.match(scheduler.targetContract, /atomic PostgreSQL lease/);
   assert.match(scheduler.cutoverBlocker, /Railway Cron cannot satisfy/);
 });
+
+test("records the local API contract without claiming live adapter readiness", () => {
+  const boundary = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "web.server-api-boundary",
+  );
+
+  assert.ok(boundary);
+  assert.equal(boundary.decisionState, "selected");
+  assert.equal(boundary.nextAction, "adapter-required");
+  assert.deepEqual(
+    boundary.sourceFiles.filter((path) =>
+      path.startsWith("server/platform/railwayApi"),
+    ),
+    [
+      "server/platform/railwayApiContract.ts",
+      "server/platform/railwayApiClient.ts",
+      "server/platform/railwayApiHttpHandler.ts",
+    ],
+  );
+  assert.match(boundary.cutoverBlocker, /live Vercel OIDC/);
+  assert.match(boundary.cutoverBlocker, /staging evidence/);
+});

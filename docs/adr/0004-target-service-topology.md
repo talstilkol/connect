@@ -284,6 +284,10 @@ Lifecycle, ‏Legal Hold, ‏Backup ו־Credential rotation.
 11.7 Load test מוכיח Webhook ingress, ‏Queue backlog recovery,
 Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 
+11.8 ‏[חוזה API בין Vercel ל־Railway](../vercel-railway-api-contract.md)
+מקפיא Contract/Client/Handler מקומיים. הוא אינו ממלא את תנאי
+ה־Live verifier, ‏Operations, ‏Staging או Deployment evidence.
+
 ## 12. מקורות רשמיים שנבדקו
 
 12.1 [Railway — Cron, Workers and Queues](https://docs.railway.com/guides/cron-workers-queues).

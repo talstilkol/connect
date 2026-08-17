@@ -323,6 +323,20 @@ Distributed rate limits, ‏Backup, ‏Browser proof ו־Observability.
 החלטות הספקים. הטווח נוסף לתוכנית בעקבות שינוי ה־Hosting ואינו חלק
 מה־Baseline המקומי המקורי שהושלם.
 
+2.18 **הושלם מקומית:** חוזה API ראשוני בין Vercel ל־Railway.
+
+2.18.1 ‏Contract, ‏Client ו־HTTP Handler מפרידים בין Vercel OIDC
+לבין Clerk session token, מאמתים Environment מדויק ומונעים קבלת
+Tenant/User identity מתוך Payload.
+
+2.18.2 ‏Query אינו מקבל Idempotency key ו־Mutation מחייב מפתח
+דטרמיניסטי מבוסס SHA-256. בקשה ותגובה מוגבלות בעומק, Nodes, שדות,
+מחרוזות ו־Bytes; שדות Secret/Identity ו־Prototype נדחים בכל עומק.
+
+2.18.3 המימוש עדיין אינו Endpoint חי. חסרים `jose`/JWKS Adapter,
+Clerk verifier, ‏Operation registry, ‏Routes מפוצלים, Accounts,
+Staging ו־Evidence. לכן היכולת נשארת `adapter-required`.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

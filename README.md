@@ -19,6 +19,7 @@
 12. [חוזה הגנת משאבי Clerk](docs/clerk-resource-auth-protection.md).
 13. [Contract freeze למעבר ל־Vercel ול־Railway](docs/hosting-migration-contract-freeze.md).
 14. [טופולוגיית היעד המפורטת — ADR-0004](docs/adr/0004-target-service-topology.md).
+15. [חוזה API בין Vercel ל־Railway](docs/vercel-railway-api-contract.md).
 
 ## מצב Master Plan — תשתית Stage 3
 

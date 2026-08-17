@@ -92,6 +92,9 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     sourceFiles: [
       "app",
       "server",
+      "server/platform/railwayApiContract.ts",
+      "server/platform/railwayApiClient.ts",
+      "server/platform/railwayApiHttpHandler.ts",
       "worker/index.ts",
     ],
     targetPlacement: "vercel-web+railway-api",
@@ -101,7 +104,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "Web actions currently call co-located services and Cloudflare bindings.",
+      "The local HTTP contract exists, but live Vercel OIDC and Clerk verifiers, concrete operations, split routes, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
