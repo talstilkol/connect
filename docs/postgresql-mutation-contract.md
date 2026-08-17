@@ -31,14 +31,14 @@ receipts ו־Credential envelopes מוצפנים. השתים־עשרה יוצר�
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
 Loopback ייעודי וריק. הוא החיל את 16 ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח 14 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+הפעיל DML אמיתי והוכיח 17 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 20 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 21 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -151,6 +151,15 @@ Lease; ‏`railwayPostgresWorkerService.ts` מחבר אותם ל־Pool ול־Tim
 התנגשות בעלת אותו מספר נמענים אך תוכן אחר נכשלת סגור. ה־Harness הוכיח שתי
 כתיבות מקבילות זהות, Snapshot יחיד והמשך Dispatch מלא, ובכך העלה את ההוכחה
 ל־14 תרחישי Concurrency.
+
+1.22 ‏`postgresMessageTemplateRepository.ts` ממיר את מחזור החיים המלא של
+Message Templates. ‏Draft insert, עדכון ושחזור Replay מתבצעים באותה
+Transaction ומטפלים בשני ה־Unique constraints בלי להחליף זהות. ‏Claim,
+Complete ו־Release משתמשים במעברי מצב אטומיים. אירוע Status חדש נכתב תחת
+נעילת שורה; אירוע זהה מוחזר כ־`duplicate`, אירוע ישן כ־`stale`, והתנגשות
+Meta ID נכשלת כ־`IDENTITY_CONFLICT`. ה־Harness הוכיח Draft מקביל, זוכה יחיד
+ב־Submission ושילוב `applied`/`duplicate` מקביל, והעלה את הסך ל־17 תרחישי
+Concurrency.
 
 ## 2. הסבר למתחילים
 

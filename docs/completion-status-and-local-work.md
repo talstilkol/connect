@@ -1219,6 +1219,24 @@ PostgreSQL הזמני נעצר והתיקייה נמחקה לאחר האימות
 ותרחיש Concurrency אמיתי נוסף. הטווח אינו כולל המתנה לבחירת ספקים,
 Credentials, ‏Railway environment, ‏Staging או Pilot.
 
+4.14 ‏PostgreSQL Message Template lifecycle הושלם מקומית.
+`postgresMessageTemplateRepository.ts` מממש Draft insert/update/replay,
+קריאה לפי Key ו־Meta ID, רשימת Tenant, ‏Submission claim/complete/release
+והחלת Status events. שתי זהויות Unique מטופלות בלי Race; אירועים ננעלים
+ומסווגים ל־Applied, ‏Duplicate, ‏Stale, ‏Not-found או Identity conflict.
+ה־Repository מחובר ל־`railwayPostgresFoundation.ts`, שמכיל כעת 21 Adapters.
+
+4.14.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (16 migrations, 17 concurrency scenarios)`. הוא הוכיח שני Draft
+writes מקבילים, Submission claim יחיד, ‏Status event יחיד לצד Duplicate,
+Template מאושר וצריכתו המיידית ב־Campaign snapshot וב־Dispatch המלא. שרת
+PostgreSQL הזמני נעצר והתיקייה נמחקה לאחר האימות.
+
+4.15 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **48–120 שעות פיתוח
+נטו**. הירידה משקפת את השלמת כל חוזה Message Template ושלושה תרחישי
+Concurrency אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials,
+Railway environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

@@ -1340,47 +1340,83 @@ async function verifyCampaignDispatch(pool, foundation, tenantId) {
     [tenantId, contacts.rows.map(({ id }) => id)],
   );
 
-  await pool.query(
-    `INSERT INTO message_templates (
-       template_key,
-       tenant_id,
-       meta_template_id,
-       name,
-       language,
-       category,
-       status,
-       definition_json,
-       submission_key,
-       submission_started_at,
-       submitted_at,
-       reviewed_at,
-       created_at,
-       updated_at
-     )
-     VALUES (
-       $1,
-       $2,
-       $3,
-       'dispatch_integration',
-       'he',
-       'UTILITY',
-       'approved',
-       $4::jsonb,
-       $5,
-       $6::timestamptz,
-       $6::timestamptz,
-       $6::timestamptz,
-       $6::timestamptz,
-       $6::timestamptz
-     )`,
-    [
-      templateKey,
+  const templateDraft = Object.freeze({
+    templateKey,
+    tenantId,
+    name: "dispatch_integration",
+    language: "he",
+    category: "UTILITY",
+    ...templateDefinition,
+  });
+  const templateWrites = await Promise.all([
+    foundation.messageTemplates.saveDraft(templateDraft),
+    foundation.messageTemplates.saveDraft(templateDraft),
+  ]);
+  assert.equal(
+    templateWrites.every(
+      (template) => template.status === "draft" && template.version === 1,
+    ),
+    true,
+  );
+
+  const submissionClaims = await Promise.allSettled([
+    foundation.messageTemplates.claimSubmission(
       tenantId,
-      metaTemplateId,
-      JSON.stringify(templateDefinition),
+      templateKey,
+      1,
       templateSubmissionKey,
-      createdAt,
-    ],
+    ),
+    foundation.messageTemplates.claimSubmission(
+      tenantId,
+      templateKey,
+      1,
+      templateSubmissionKey,
+    ),
+  ]);
+  assert.deepEqual(
+    submissionClaims.map(({ status }) => status).sort(),
+    ["fulfilled", "rejected"],
+  );
+
+  const completedTemplate =
+    await foundation.messageTemplates.completeSubmission(
+      tenantId,
+      templateKey,
+      templateSubmissionKey,
+      metaTemplateId,
+    );
+  assert.equal(completedTemplate.status, "pending_review");
+  const statusEventAt = new Date(
+    Date.parse(completedTemplate.updatedAt) + 1_000,
+  ).toISOString();
+  const statusEvent = Object.freeze({
+    tenantId,
+    metaTemplateId,
+    name: "dispatch_integration",
+    language: "he",
+    category: "UTILITY",
+    status: "approved",
+    statusEventKey: "b".repeat(64),
+    statusEventAt,
+  });
+  const statusEvents = await Promise.all([
+    foundation.messageTemplates.applyStatusEvent(statusEvent),
+    foundation.messageTemplates.applyStatusEvent(statusEvent),
+  ]);
+  assert.deepEqual(
+    statusEvents.map(({ outcome }) => outcome).sort(),
+    ["applied", "duplicate"],
+  );
+  const approvedTemplate =
+    await foundation.messageTemplates.findByKey(tenantId, templateKey);
+  assert.ok(approvedTemplate);
+  assert.equal(approvedTemplate.status, "approved");
+  assert.equal(approvedTemplate.version, 4);
+  assert.equal(
+    (await foundation.messageTemplates.listByTenant(tenantId, 100)).some(
+      ({ templateKey: savedKey }) => savedKey === templateKey,
+    ),
+    true,
   );
   const snapshot = Object.freeze({
     campaignKey,
@@ -1395,7 +1431,7 @@ async function verifyCampaignDispatch(pool, foundation, tenantId) {
       name: "dispatch_integration",
       category: "UTILITY",
       language: "he",
-      version: 1,
+      version: approvedTemplate.version,
       ...templateDefinition,
     },
     audienceSnapshotKey: "a".repeat(64),
@@ -2319,7 +2355,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 14,
+      concurrencyScenarios: 17,
     });
   } finally {
     await pool.end();

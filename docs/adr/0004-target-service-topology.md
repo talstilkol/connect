@@ -293,14 +293,15 @@ coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 lifecycle repositories ו־16 Migrations ל־Critical Path כבר קיימים מקומית,
 כולל WhatsApp delivery-policy, ‏Kill switch ו־Rate-limit ledger אטומיים.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
-`node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation/Meta/Campaign DML,
-‏Rollback ו־14 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
+`node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation/Meta/Template/Campaign DML,
+‏Rollback ו־17 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
 Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
-Foundation אחד מחבר 20 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
+Foundation אחד מחבר 21 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
 Contact organization/import אטומי ו־Meta connection, ‏Webhook receipts ו־
-Credential envelopes מוצפנים, וכן Campaign snapshot אטומי לפני Dispatch.
+Credential envelopes מוצפנים, ‏Message Template lifecycle וכן Campaign
+snapshot אטומי לפני Dispatch.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
 ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations,
 Messages, ‏Templates, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage הומרו

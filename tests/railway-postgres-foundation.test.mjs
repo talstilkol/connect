@@ -51,6 +51,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "invitations",
     "membershipMutations",
     "memberships",
+    "messageTemplates",
     "metaConnections",
     "metaCredentialEnvelopes",
     "metaWebhooks",
@@ -74,6 +75,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     typeof foundation.metaCredentialEnvelopes.findByTenantId,
     "function",
   );
+  assert.equal(typeof foundation.messageTemplates.saveDraft, "function");
   assert.equal(typeof foundation.metaWebhooks.claimWebhookReceipt, "function");
   assert.equal(
     typeof foundation.whatsappDeliveryPolicies.recordPolicyEvent,

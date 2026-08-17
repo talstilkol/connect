@@ -359,6 +359,14 @@ Contacts בעלי גרסה ו־Consent תקפים, וגודל JSONB תחום. �
 בנמענים נכשל סגור, גם אם מספר הנמענים זהה. ‏Harness אמיתי הוכיח שתי כתיבות
 מקבילות, Snapshot יחיד, קריאה לפי Tenant והמשך מחזור Dispatch מלא.
 
+7.1.38 ‏`postgresMessageTemplateRepository.ts` מממש Draft, קריאות,
+Submission lifecycle ו־Status events על PostgreSQL. ‏Draft מקביל מטופל
+באמצעות Insert כללי, Update מדויק ו־`FOR UPDATE`, כדי לכסות גם Primary key
+וגם זהות `tenant+name+language`. אירועי Meta ננעלים ומסווגים ל־`applied`,
+`duplicate`, ‏`stale`, ‏`not-found` או Identity conflict. ‏Harness אמיתי
+עבר עם 16 Migrations ו־17 תרחישי Concurrency, והוכיח Template מאושר שנצרך
+מיד על ידי Campaign snapshot ו־Dispatch.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
