@@ -59,7 +59,7 @@ Design מלא.
 | SPEC-24 | הצפנת Tokens ו־PCI-DSS | partial | Credential envelope ו־Secret hygiene | Billing hosted checkout, Key rotation וראיות ספק |
 | SPEC-25 | Queue scalability ו־99.5% availability | partial | Queues, Backpressure, SLO domain ו־Alert ports | Load test, Metrics ו־Alert provider חיים |
 | SPEC-26 | Data isolation, הרשאות ו־Audit | local-complete | Tenant guards, RBAC, Audit ו־Source boundaries | Cloud evidence ו־adversarial staging test |
-| SPEC-27 | עברית, אנגלית וערבית | partial | Language domain ו־RTL foundation; דף הנחיתה מתורגם במלואו ב־`/`, ‏`/en` ו־`/ar`, כולל Metadata, בורר שפה, RTL/LTR ו־Browser acceptance מקומי | תרגום מסכי Auth, הזמנות, Workspace ו־Admin ובדיקות Browser לכל שפה |
+| SPEC-27 | עברית, אנגלית וערבית | partial | Language domain ו־RTL foundation; דף הנחיתה ומעטפת Login/Register מתורגמים במלואם בשלוש השפות, כולל Metadata, נתיבים מקומיים, Clerk localization לפי נתיב ו־Browser acceptance מקומי | תרגום הזמנות, Workspace ו־Admin; Browser acceptance לכל שפה ואימות Widget חי של Clerk ב־Staging |
 
 ## 4. עדכון תוכנית הביצוע
 
@@ -135,9 +135,10 @@ evidence בסביבות אמיתיות.
 
 4.4 מסלול P3 — השלמת מוצר:
 
-4.4.1 Slice דף הנחיתה בעברית, אנגלית וערבית הושלם. להמשיך במסלול
-מסך־אחר־מסך עבור Auth, הזמנות, Workspace ו־Admin, ולאמת כל Surface
-בשלוש השפות.
+4.4.1 Slices דף הנחיתה ומעטפת Login/Register בעברית, אנגלית וערבית
+הושלמו. להמשיך במסלול מסך־אחר־מסך עבור הזמנות, Workspace ו־Admin,
+ולאמת כל Surface בשלוש השפות. את Widget ה־Auth החי יש לאמת בנפרד
+ב־Staging עם Clerk Keys מורשים.
 
 4.4.2 לבצע UX/UI acceptance בכל מסכי האפיון.
 

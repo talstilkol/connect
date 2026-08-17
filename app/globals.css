@@ -1693,6 +1693,15 @@ label.file-button:focus-within {
   width: min(480px, 100%);
 }
 
+.auth-language-switcher {
+  width: fit-content;
+  margin-bottom: 24px;
+}
+
+.auth-language-switcher a {
+  text-decoration: none;
+}
+
 .auth-provider-slot {
   min-height: 260px;
   margin-top: 24px;
@@ -1860,7 +1869,7 @@ label.file-button:focus-within {
 }
 
 .auth-switch a {
-  margin-right: 5px;
+  margin-inline-start: 5px;
   color: #2f825f;
   font-weight: 800;
   text-decoration: none;

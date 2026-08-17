@@ -4,6 +4,9 @@ import type {
   InterfaceLanguage,
 } from "../../shared/domain/businessProfileDraft";
 import {
+  readAuthHref,
+} from "../../shared/i18n/auth";
+import {
   publicLandingLocales,
   readPublicLandingDirection,
   readPublicLandingMessages,
@@ -29,6 +32,8 @@ export function PublicLandingPage({
     publicLandingLocales.find(
       (locale) => locale.language === language,
     ) ?? publicLandingLocales[0];
+  const signInHref = readAuthHref(language, "login");
+  const registerHref = readAuthHref(language, "register");
 
   return (
     <main
@@ -89,10 +94,10 @@ export function PublicLandingPage({
               </Link>
             ))}
           </div>
-          <Link href="/login" className="secondary-button">
+          <Link href={signInHref} className="secondary-button">
             {messages.authentication.signIn}
           </Link>
-          <Link href="/register" className="primary-button">
+          <Link href={registerHref} className="primary-button">
             {messages.authentication.register}
           </Link>
         </div>
@@ -236,10 +241,10 @@ export function PublicLandingPage({
         </Link>
         <p>{messages.footerDescription}</p>
         <div>
-          <Link href="/login">
+          <Link href={signInHref}>
             {messages.authentication.signIn}
           </Link>
-          <Link href="/register">
+          <Link href={registerHref}>
             {messages.authentication.register}
           </Link>
         </div>

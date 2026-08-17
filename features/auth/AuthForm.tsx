@@ -1,41 +1,75 @@
 import { SignIn, SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { inspectClerkConfiguration } from "../../server/auth/clerkConfiguration";
-
-type AuthMode = "login" | "register";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import {
+  readAuthDirection,
+  readAuthHref,
+  readAuthLocaleLinks,
+  readAuthMessages,
+  type AuthMode,
+} from "../../shared/i18n/auth";
+import {
+  publicLandingLocales,
+} from "../../shared/i18n/publicLanding";
 
 function ConfigurationNotice({
+  language,
   status,
 }: {
+  language: InterfaceLanguage;
   status: "disabled" | "incomplete";
 }) {
+  const messages = readAuthMessages(language).configuration;
+
   return (
     <div className="auth-configuration-notice" role="status">
       <span aria-hidden="true">i</span>
       <div>
         <strong>
           {status === "disabled"
-            ? "Clerk מוכן לחיבור אך טרם הופעל"
-            : "הגדרת Clerk אינה מלאה"}
+            ? messages.disabledTitle
+            : messages.incompleteTitle}
         </strong>
         <p>
           {status === "disabled"
-            ? "יש להגדיר Publishable Key ו־Secret Key בסביבת ההרצה. לא נוצר משתמש חלופי ולא בוצעה כניסה מדומה."
-            : "הוגדר רק חלק מחוזה ההתחברות. מטעמי אבטחה הטופס נשאר חסום עד השלמת שני המפתחות."}
+            ? messages.disabledDescription
+            : messages.incompleteDescription}
         </p>
       </div>
     </div>
   );
 }
 
-export default function AuthForm({ mode }: { mode: AuthMode }) {
+export default function AuthForm({
+  language,
+  mode,
+}: {
+  language: InterfaceLanguage;
+  mode: AuthMode;
+}) {
   const isRegister = mode === "register";
   const configuration = inspectClerkConfiguration();
+  const messages = readAuthMessages(language);
+  const formMessages = messages.form[mode];
+  const direction = readAuthDirection(language);
+  const homeHref =
+    publicLandingLocales.find(
+      (locale) => locale.language === language,
+    )?.href ?? "/";
+  const signInUrl = readAuthHref(language, "login");
+  const signUpUrl = readAuthHref(language, "register");
 
   return (
-    <main className="auth-shell" dir="rtl">
+    <main
+      className="auth-shell"
+      lang={language}
+      dir={direction}
+    >
       <section className="auth-brand-panel">
-        <Link href="/" className="public-brand auth-brand">
+        <Link href={homeHref} className="public-brand auth-brand">
           <span className="brand-mark" aria-hidden="true">
             <i />
             <i />
@@ -49,37 +83,52 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
         <div className="auth-panel-copy">
           <span className="hero-badge">
             <i />
-            React SaaS
+            {messages.brand.badge}
           </span>
           <h1>
-            סביבת עבודה אחת.
+            {messages.brand.titleFirstLine}
             <br />
-            כל התקשורת העסקית.
+            {messages.brand.titleSecondLine}
           </h1>
-          <p>
-            כל משתמש מזוהה על ידי Clerk, ולאחר מכן Membership בצד השרת
-            קובע לאיזה Tenant ולאילו הרשאות הוא שייך.
-          </p>
+          <p>{messages.brand.description}</p>
         </div>
         <div className="auth-security-note">
           <span>✓</span>
           <div>
-            <strong>הסיסמה אינה נשמרת ב־Connect</strong>
-            <small>אימות, Verification ואיפוס סיסמה מנוהלים דרך Clerk.</small>
+            <strong>{messages.brand.securityTitle}</strong>
+            <small>{messages.brand.securityDescription}</small>
           </div>
         </div>
       </section>
 
       <section className="auth-form-panel">
         <div className="auth-form-wrap">
+          <div
+            className="public-language-switcher auth-language-switcher"
+            role="group"
+            aria-label={messages.languageSelectorAriaLabel}
+          >
+            {readAuthLocaleLinks(mode).map((locale) => (
+              <Link
+                key={locale.language}
+                href={locale.href}
+                hrefLang={locale.language}
+                lang={locale.language}
+                dir={locale.direction}
+                aria-current={
+                  locale.language === language
+                    ? "page"
+                    : undefined
+                }
+              >
+                {locale.nativeName}
+              </Link>
+            ))}
+          </div>
           <div className="auth-heading">
-            <span>{isRegister ? "הצטרפות מאובטחת" : "כניסה מאובטחת"}</span>
-            <h2>{isRegister ? "פתיחת חשבון" : "ברוכים השבים"}</h2>
-            <p>
-              {isRegister
-                ? "לאחר אימות הזהות יתחיל תהליך יצירת סביבת העבודה."
-                : "הגישה ל־Workspace דורשת Session מאומת ו-Membership פעיל."}
-            </p>
+            <span>{formMessages.eyebrow}</span>
+            <h2>{formMessages.title}</h2>
+            <p>{formMessages.description}</p>
           </div>
 
           <div className="auth-provider-slot">
@@ -87,25 +136,28 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
               isRegister ? (
                 <SignUp
                   routing="hash"
-                  signInUrl="/login"
+                  signInUrl={signInUrl}
                   fallbackRedirectUrl="/workspace/onboarding"
                 />
               ) : (
                 <SignIn
                   routing="hash"
-                  signUpUrl="/register"
+                  signUpUrl={signUpUrl}
                   fallbackRedirectUrl="/workspace"
                 />
               )
             ) : (
-              <ConfigurationNotice status={configuration.status} />
+              <ConfigurationNotice
+                language={language}
+                status={configuration.status}
+              />
             )}
           </div>
 
           <p className="auth-switch">
-            {isRegister ? "כבר יש לך חשבון?" : "עדיין אין לך חשבון?"}
-            <Link href={isRegister ? "/login" : "/register"}>
-              {isRegister ? "התחברות" : "פתיחת חשבון"}
+            {formMessages.switchPrompt}
+            <Link href={isRegister ? signInUrl : signUpUrl}>
+              {formMessages.switchAction}
             </Link>
           </p>
         </div>

@@ -332,7 +332,21 @@ Fallback מטעה. Browser acceptance מקומי ב־Chromium אימת את של
 השפות, את כיוון חצי הזרימה ואת מיקוד קישור הדילוג במקלדת. במהלך
 הבדיקה נמצא ותוקן שם נגישות כפול באזור עקרונות המערכת. אין שימוש
 ב־Client storage או במצב דפדפן עבור בחירת השפה. נותר לתרגם את מסכי
-ההתחברות, ההזמנות, סביבת העבודה וה־Admin ולבדוק כל Surface בכל שפה.
+ההזמנות, סביבת העבודה וה־Admin ולבדוק כל Surface בכל שפה.
+
+4.1.6 Slice שני של לוקליזציה הושלם במעטפת Login/Register. הנתיבים
+העבריים `/login` ו־`/register`, האנגליים `/en/login` ו־`/en/register`
+והערביים `/ar/login` ו־`/ar/register` משתמשים במילון Auth משותף,
+Metadata מתורגם, `lang/dir` סמנטיים ובורר שפה ששומר על פעולת ה־Auth.
+גם קישורי ה־Auth בדף הנחיתה שומרים כעת על השפה. `ClerkProvider` בוחר
+באופן דטרמיניסטי `heIL`, ‏`enUS` או `arSA` לפי Segment מדויק בנתיב;
+ה־Client boundary מקבל רק Publishable Key, בעוד בדיקת Secret Key
+נשארת בשרת. Browser acceptance מקומי ב־Chromium אימת את ששת הנתיבים
+ואת 404 עבור `/fr/login`. סביבת הפיתוח אינה כוללת Clerk Keys, ולכן
+ה־Widget החי נשאר `unknown/unavailable` עד Staging. ה־API הרשמי של
+Clerk מסמן Localization כ־Experimental ואינו מתרגם Account Portal;
+לכן נדרשת בדיקת רגרסיה חיה בכל שדרוג Clerk:
+`https://clerk.com/docs/guides/customizing-clerk/localization`.
 
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
@@ -356,8 +370,8 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 `unknown/unavailable` עד חיבור החשבון המורשה. ה־Meta sender נשאר חסום
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
-4.3 לאחר השלמת Slice דף הנחיתה, סך העבודה המקומית הידועה, ללא
-Package/Quota/Contact שטרם הוכרעו, הוא **36–59 שעות פיתוח נטו**.
+4.3 לאחר השלמת Slices דף הנחיתה וה־Auth, סך העבודה המקומית הידועה,
+ללא Package/Quota/Contact שטרם הוכרעו, הוא **34–56 שעות פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**44–73 שעות**.
+הופך ל־**42–70 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.
