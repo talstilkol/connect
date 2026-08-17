@@ -290,7 +290,7 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 שלוש פעולות Read-only ו־`contacts.save` עם Transaction executor
 ספק־נייטרלי, Tenant access, ‏Team membership mutations וכל Invitation
-lifecycle repositories ושמונה Migrations ל־Critical Path כבר קיימים מקומית.
+lifecycle repositories ותשע Migrations ל־Critical Path כבר קיימים מקומית.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
 `node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation DML, ‏Rollback ושני
 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.
@@ -298,11 +298,11 @@ lifecycle repositories ושמונה Migrations ל־Critical Path כבר קיימ
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
 Foundation אחד מחבר 11 Adapters קיימים לאותו Pool בלי לחשוף אותו.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
-ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations
-ו־Messages וכן Templates ו־Campaigns הומרו ונבדקו מול PostgreSQL אמיתי,
-ו־Bot deliveries הומרו ונבדקו גם הם. שתי טבלאות המקור של AI
-טרם הומרו. ‏Railway API מלא נשאר חסום עד השלמת סכמת המקור והוכחתה במסד
-אמיתי, כדי לא ליצור Hybrid לא מתועד עם D1.
+ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations,
+Messages, ‏Templates, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage הומרו
+ונבדקו מול PostgreSQL אמיתי, וה־Harness קרא דוח מלא מכל ששת המקורות.
+‏Railway API מלא נשאר חסום עד השלמת יתר ה־Routes וה־Mutations, ‏Parity מלאה,
+ערכי Pool חיים וראיות Staging, כדי לא ליצור Hybrid לא מתועד עם D1.
 
 ## 12. מקורות רשמיים שנבדקו
 

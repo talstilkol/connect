@@ -36,6 +36,7 @@ const migrationFiles = Object.freeze([
   "0005_conversations_messages.sql",
   "0006_message_templates_campaigns.sql",
   "0007_bot_flows_deliveries.sql",
+  "0008_ai_reporting.sql",
 ]);
 
 function fail(code) {
@@ -608,6 +609,231 @@ async function verifyBotDeliverySchema(pool, tenantId) {
   );
 }
 
+async function verifyAiReportingSchema(pool, foundation, tenantId) {
+  const conversationKey = `conversation_v1_${"a".repeat(64)}`;
+  const inboundMessageKey = `message_v1_${"b".repeat(64)}`;
+  const aiAgentKey = `ai_agent_v1_${"3".repeat(64)}`;
+  const aiAgentVersionKey = `ai_agent_version_v1_${"4".repeat(64)}`;
+  const requestKey = `ai_provider_request_v1_${"5".repeat(64)}`;
+  const auditKey = `ai_runtime_audit_v1_${"6".repeat(64)}`;
+  const occurredAt = "2026-08-17T12:00:00.000Z";
+  const definition = JSON.stringify({ responseMode: "automatic" });
+
+  await pool.query(
+    `INSERT INTO ai_agents (
+       ai_agent_key,
+       tenant_id,
+       name,
+       status,
+       latest_version_key,
+       latest_version_number,
+       active_version_key,
+       version,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       'Integration AI agent',
+       'draft',
+       $3,
+       1,
+       NULL,
+       1,
+       $4::timestamptz,
+       $4::timestamptz
+     )`,
+    [aiAgentKey, tenantId, aiAgentVersionKey, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO ai_agent_versions (
+       ai_agent_version_key,
+       ai_agent_key,
+       tenant_id,
+       version_number,
+       status,
+       definition_json,
+       published_at,
+       created_at
+     )
+     VALUES ($1, $2, $3, 1, 'draft', $4::jsonb, NULL, $5::timestamptz)`,
+    [aiAgentVersionKey, aiAgentKey, tenantId, definition, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO ai_runtime_cost_authorizations (
+       request_key,
+       tenant_id,
+       ai_agent_key,
+       period_start,
+       monthly_limit_minor_units,
+       currency,
+       created_at
+     )
+     VALUES ($1, $2, $3, '2026-08-01'::date, 100, 'USD', $4::timestamptz)`,
+    [requestKey, tenantId, aiAgentKey, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO ai_runtime_usage (
+       request_key,
+       tenant_id,
+       ai_agent_key,
+       period_start,
+       input_tokens,
+       output_tokens,
+       cost_minor_units,
+       currency,
+       within_limit,
+       created_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       '2026-08-01'::date,
+       10,
+       5,
+       2,
+       'USD',
+       TRUE,
+       $4::timestamptz
+     )`,
+    [requestKey, tenantId, aiAgentKey, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO ai_runtime_audit_events (
+       audit_key,
+       request_key,
+       tenant_id,
+       conversation_key,
+       inbound_message_key,
+       ai_agent_key,
+       ai_agent_version_key,
+       expected_conversation_version,
+       outcome,
+       reason,
+       response_mode,
+       grounding_score_basis_points,
+       input_tokens,
+       output_tokens,
+       cost_minor_units,
+       currency,
+       created_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       $4,
+       $5,
+       $6,
+       $7,
+       2,
+       'reply-planned',
+       NULL,
+       'automatic',
+       9000,
+       10,
+       5,
+       2,
+       'USD',
+       $8::timestamptz
+     )`,
+    [
+      auditKey,
+      requestKey,
+      tenantId,
+      conversationKey,
+      inboundMessageKey,
+      aiAgentKey,
+      aiAgentVersionKey,
+      occurredAt,
+    ],
+  );
+
+  const report = await foundation.reports.read(
+    {
+      tenantId,
+      externalUserId: "driver-integration-owner",
+      displayName: "Driver integration tenant",
+      status: "active",
+      role: "owner",
+    },
+    {
+      startDate: "2026-08-17",
+      endDate: "2026-08-17",
+    },
+  );
+  assert.deepEqual(report.period, {
+    startDate: "2026-08-17",
+    endDate: "2026-08-17",
+  });
+  assert.deepEqual(report.snapshot.campaigns, {
+    total: 1,
+    recipientCount: 2,
+    draft: 1,
+    scheduled: 0,
+    running: 0,
+    paused: 0,
+    completed: 0,
+    cancelled: 0,
+    failed: 0,
+  });
+  assert.deepEqual(report.snapshot.messages, {
+    total: 1,
+    inbound: 1,
+    outbound: 0,
+    received: 1,
+    sent: 0,
+    delivered: 0,
+    read: 0,
+    failed: 0,
+  });
+  assert.deepEqual(report.snapshot.conversations, {
+    active: 1,
+    unreadCount: 1,
+    new: 1,
+    botActive: 0,
+    waitingForAgent: 0,
+    agentActive: 0,
+    waitingForContact: 0,
+    closed: 0,
+  });
+  assert.deepEqual(report.snapshot.bot, {
+    total: 1,
+    pending: 1,
+    sending: 0,
+    accepted: 0,
+    rejected: 0,
+    ambiguous: 0,
+  });
+  assert.deepEqual(report.snapshot.ai, {
+    totalTurns: 1,
+    replyPlanned: 1,
+    handoff: 0,
+  });
+  assert.deepEqual(report.snapshot.aiUsage, [
+    {
+      currency: "USD",
+      requestCount: 1,
+      inputTokens: 10,
+      outputTokens: 5,
+      costMinorUnits: 2,
+    },
+  ]);
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE ai_runtime_audit_events
+       SET outcome = 'handoff'
+       WHERE tenant_id = $1
+         AND audit_key = $2`,
+      [tenantId, auditKey],
+    ),
+    (error) => error?.code === "23514",
+  );
+}
+
 async function prepareBlockedInvitation(
   invitationRepository,
   deliveryRepository,
@@ -765,6 +991,7 @@ export async function verifyNodePostgresIntegration(
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
+      await verifyAiReportingSchema(pool, foundation, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
     } finally {
       await foundation.close();

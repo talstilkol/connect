@@ -675,6 +675,28 @@ Flow, Version ו־Pending delivery מקושרים, וקיבל Constraint violati
 יחד עם טבלאות התלות `ai_agents`, ‏`ai_agent_versions` ו־
 `ai_runtime_cost_authorizations`.
 
+2.37 **הושלם מקומית:** PostgreSQL AI reporting schema ודוח תפעולי מלא.
+
+2.37.1 Migration מספר `0008_ai_reporting.sql` מוסיף את חמש טבלאות ה־AI:
+Agents, גרסאות Immutable, הרשאות עלות, Usage ו־Audit events. הוא משתמש
+ב־`JSONB`, ‏`DATE`, ‏`BIGINT`, ‏`BOOLEAN` ו־`TIMESTAMPTZ` ומקשר כל רשומה
+ל־Tenant, ל־Agent ולגרסה המדויקת שלה.
+
+2.37.2 Constraints אוכפים זהויות דטרמיניסטיות, Lifecycle של Agent וגרסה,
+חודש ומטבע תקינים, מספרי Tokens ועלות בטווח JavaScript בטוח, וכן התאמה בין
+`reply-planned` לבין Handoff מנומק. Indexes לפי Tenant וזמן משרתים את שני
+Aggregates של AI בדוח. ה־Guard מכסה תשע Migrations ו־24 טבלאות.
+
+2.37.3 ה־Harness החיל את תשע ה־Migrations על PostgreSQL 16.13 ריק, יצר את
+כל שרשרת ה־AI, חסם מעבר Handoff ללא Reason, וקרא דרך ה־Foundation דוח מלא
+המכיל Campaign, Message, Conversation, Bot, ‏AI ו־AI usage. התוצאה:
+`PASS (9 migrations, 2 concurrency scenarios)`. סביבת הבדיקה נעצרה ונמחקה.
+
+2.37.4 מסלול `reports.read` הושלם מקומית ואינו עוד חסם Schema. המסלול
+המקומי הקריטי שנותר הוא Runtime composition ל־Routes בפועל, יתר ה־Mutations,
+Parity מול כל 35 ה־Migrations והקשחת הוכחות הפריסה. בחירת ספק, ערכי Pool חיים
+ו־Staging נשארים עבודה חיצונית.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

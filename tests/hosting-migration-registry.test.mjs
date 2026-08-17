@@ -201,6 +201,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0005_conversations_messages.sql",
     "postgres/migrations/0006_message_templates_campaigns.sql",
     "postgres/migrations/0007_bot_flows_deliveries.sql",
+    "postgres/migrations/0008_ai_reporting.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -214,9 +215,10 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /eleven-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\.list read/);
   assert.match(boundary.cutoverBlocker, /single-statement reports\.read adapter/);
-  assert.match(boundary.cutoverBlocker, /bot flows, and bot deliveries are migrated/);
-  assert.match(boundary.cutoverBlocker, /two AI operational-report source tables/);
+  assert.match(boundary.cutoverBlocker, /All six operational-report source families are migrated/);
+  assert.match(boundary.cutoverBlocker, /complete report passed against PostgreSQL 16\.13/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
+  assert.match(boundary.cutoverBlocker, /35-migration schema parity/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
@@ -253,6 +255,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0005_conversations_messages.sql",
     "postgres/migrations/0006_message_templates_campaigns.sql",
     "postgres/migrations/0007_bot_flows_deliveries.sql",
+    "postgres/migrations/0008_ai_reporting.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -260,14 +263,15 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /eight ordered/);
+  assert.match(database.cutoverBlocker, /nine ordered/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
   assert.match(database.cutoverBlocker, /eleven-adapter foundation/);
   assert.match(database.cutoverBlocker, /contacts\.list/);
   assert.match(database.cutoverBlocker, /reports\.read/);
-  assert.match(database.cutoverBlocker, /two AI operational-report source tables/);
+  assert.match(database.cutoverBlocker, /complete six-source operational reporting/);
+  assert.match(database.cutoverBlocker, /AI reporting constraints/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /remaining repository DML\/concurrency/);

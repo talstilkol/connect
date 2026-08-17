@@ -11,18 +11,19 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת שמונה Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת תשע Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
 foundation, הרביעית את Membership event ledger והחמישית את Team invitation
 lifecycle. השישית יוצרת `conversations` ו־`messages`, והשביעית את
 `message_templates` ו־`campaigns`. השמינית יוצרת Bot flows, גרסאות ו־
-Deliveries. השרשרת הוחלה בהצלחה
+Deliveries. התשיעית יוצרת AI agents, גרסאות, הרשאות עלות, Usage ו־Audit
+הדרושים לדוח התפעולי. השרשרת הוחלה בהצלחה
 על PostgreSQL 16.13 מקומי ומבודד, אך אינה
 מוכיחה עדיין Parity עם כל 35 ה־Migrations של D1 או מוכנות לפריסה.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את שמונה ה־Migrations על PostgreSQL 16.13,
+Loopback ייעודי וריק. הוא החיל את תשע ה־Migrations על PostgreSQL 16.13,
 הפעיל DML אמיתי והוכיח שני תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
@@ -32,7 +33,8 @@ TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפ�
 
 1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 11 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
-היברידי כל עוד Reports עדיין אינם ב־PostgreSQL.
+היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
+לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
 
 1.7 ‏`postgresContactReadRepository.ts` מממש את `contacts.list` עם סינון
 Tenant מחייב, Keyset pagination לפי `id`, מגבלת עמוד של 100 ואימות מבנה,
@@ -42,9 +44,10 @@ Consent וסדר התוצאות לפני החזרתן לשכבה העסקית. �
 1.8 ‏`postgresOperationalReportRepository.ts` מממש את `reports.read` בשאילתת
 PostgreSQL יחידה, כדי שכל ששת ה־Aggregates ייקראו מאותו Statement snapshot.
 הוא מאמת 35 שדות, סכומי קטגוריות, סדר מטבעות ומספרים בטווח JavaScript בטוח.
-Conversations, ‏Messages, ‏Campaigns ו־Bot deliveries כבר נוספו ונבדקו;
-שתי טבלאות המקור של AI טרם
-נוספו ל־Migrations ולכן זה עדיין חוזה Adapter, לא ראיית Runtime מלאה.
+Conversations, ‏Messages, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage
+נוספו ונבדקו. ה־Harness קרא בפועל דוח מלא מכל ששת מקורות הנתונים ולכן מסלול
+הקריאה של הדוח מוכח מקומית. אין בכך הוכחת Staging או Parity לכל 35
+ה־Migrations.
 
 ## 2. הסבר למתחילים
 

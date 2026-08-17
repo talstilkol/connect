@@ -27,6 +27,7 @@ const invitationSchema = migrationSources[4];
 const conversationSchema = migrationSources[5];
 const campaignSchema = migrationSources[6];
 const botSchema = migrationSources[7];
+const aiSchema = migrationSources[8];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -38,12 +39,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0005_conversations_messages.sql",
     "0006_message_templates_campaigns.sql",
     "0007_bot_flows_deliveries.sql",
+    "0008_ai_reporting.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 8,
+      migrationCount: 9,
       findings: [],
     },
   );
@@ -115,6 +117,29 @@ test("defines PostgreSQL bot flows, versions, and deliveries", () => {
   assert.match(
     botSchema,
     /bot_reply_deliveries_tenant_created_idx[\s\S]*\(tenant_id, created_at\)/,
+  );
+});
+
+test("defines PostgreSQL AI agents, usage, and audit report sources", () => {
+  assert.match(
+    aiSchema,
+    /CREATE TABLE ai_agents[\s\S]*CREATE TABLE ai_agent_versions[\s\S]*CREATE TABLE ai_runtime_cost_authorizations[\s\S]*CREATE TABLE ai_runtime_usage[\s\S]*CREATE TABLE ai_runtime_audit_events/,
+  );
+  assert.match(
+    aiSchema,
+    /ai_runtime_usage_authorization_fk[\s\S]*FOREIGN KEY \(tenant_id, request_key\)/,
+  );
+  assert.match(
+    aiSchema,
+    /ai_runtime_audit_events_agent_version_fk[\s\S]*FOREIGN KEY \(tenant_id, ai_agent_key, ai_agent_version_key\)/,
+  );
+  assert.match(
+    aiSchema,
+    /ai_runtime_audit_events_state_consistent[\s\S]*outcome = 'reply-planned'[\s\S]*outcome = 'handoff'/,
+  );
+  assert.match(
+    aiSchema,
+    /ai_runtime_usage_tenant_created_idx[\s\S]*ai_runtime_audit_events_tenant_created_idx/,
   );
 });
 
