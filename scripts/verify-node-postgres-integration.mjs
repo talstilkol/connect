@@ -47,6 +47,7 @@ const migrationFiles = Object.freeze([
   "0008_ai_reporting.sql",
   "0009_contact_organization_imports.sql",
   "0010_meta_connection_credentials.sql",
+  "0011_whatsapp_delivery_policy.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -670,6 +671,113 @@ async function verifyMetaConnectionCredentials(
       ciphertext_length: 24,
     },
   ]);
+}
+
+async function verifyWhatsappDeliveryPolicy(
+  pool,
+  foundation,
+  tenantId,
+) {
+  const enabledCommand = Object.freeze({
+    tenantId,
+    connectionVersion: 2,
+    expectedPolicyVersion: 0,
+    deliveryState: "enabled",
+    portfolioLimitKind: "bounded",
+    portfolioLimitValue: 250,
+    reservationDurationSeconds: 300,
+    metaGraphApiVersion: "v21.0",
+    evidenceDigest: "e".repeat(64),
+    evidenceCheckedAt: "2026-08-17T08:31:00.000Z",
+    evidenceExpiresAt: "2026-08-18T08:31:00.000Z",
+    actorExternalUserId: "tal-rate-limit-research",
+    recordedAt: "2026-08-17T08:32:00.000Z",
+  });
+  const concurrent = await Promise.all([
+    foundation.whatsappDeliveryPolicies.recordPolicyEvent(enabledCommand),
+    foundation.whatsappDeliveryPolicies.recordPolicyEvent(enabledCommand),
+  ]);
+
+  assert.deepEqual(
+    concurrent.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+  assert.equal(
+    concurrent[0].record.eventKey,
+    concurrent[1].record.eventKey,
+  );
+
+  const current =
+    await foundation.whatsappDeliveryPolicies.findCurrentEnabledPolicy({
+      tenantId,
+      businessPortfolioId: "integration-business-portfolio",
+      wabaId: "integration-waba",
+      phoneNumberId: "integration-phone-number",
+      checkedAt: "2026-08-17T08:33:00.000Z",
+    });
+  assert.equal(current?.policyVersion, 1);
+  assert.deepEqual(current?.portfolioCapacity, {
+    kind: "bounded",
+    maximumUniqueRecipients: 250,
+  });
+
+  const disabled = await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
+    ...enabledCommand,
+    expectedPolicyVersion: 1,
+    deliveryState: "disabled",
+    recordedAt: "2026-08-17T08:34:00.000Z",
+  });
+  assert.equal(disabled.outcome, "updated");
+  assert.equal(disabled.record.policyVersion, 2);
+  assert.equal(disabled.record.deliveryState, "disabled");
+  assert.equal(
+    await foundation.whatsappDeliveryPolicies.findCurrentEnabledPolicy({
+      tenantId,
+      businessPortfolioId: "integration-business-portfolio",
+      wabaId: "integration-waba",
+      phoneNumberId: "integration-phone-number",
+      checkedAt: "2026-08-17T08:35:00.000Z",
+    }),
+    null,
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       count(*)::integer AS event_count,
+       max(policy_version)::integer AS latest_version,
+       count(*) FILTER (
+         WHERE delivery_state = 'disabled'
+       )::integer AS disabled_count
+     FROM whatsapp_campaign_delivery_policy_events
+     WHERE tenant_id = $1`,
+    [tenantId],
+  );
+  assert.deepEqual(persisted.rows, [
+    { event_count: 2, latest_version: 2, disabled_count: 1 },
+  ]);
+
+  const audit = await pool.query(
+    `SELECT count(*)::integer AS count
+     FROM audit_logs
+     WHERE tenant_id = $1
+       AND action = 'whatsapp.delivery_policy.recorded'
+       AND target_type = 'whatsapp_campaign_delivery_policy'`,
+    [tenantId],
+  );
+  assert.equal(audit.rows[0]?.count, 2);
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE whatsapp_campaign_delivery_policy_events
+       SET reservation_duration_seconds = 600
+       WHERE tenant_id = $1
+         AND policy_version = 1`,
+      [tenantId],
+    ),
+    (error) =>
+      error?.code === "P0001" &&
+      /immutable/.test(error.message),
+  );
 }
 
 async function verifyConversationMessageSchema(pool, tenantId) {
@@ -1545,6 +1653,7 @@ export async function verifyNodePostgresIntegration(
         tenantId,
       );
       await verifyMetaConnectionCredentials(pool, foundation, tenantId);
+      await verifyWhatsappDeliveryPolicy(pool, foundation, tenantId);
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
@@ -1558,7 +1667,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 4,
+      concurrencyScenarios: 5,
     });
   } finally {
     await pool.end();

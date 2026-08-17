@@ -56,6 +56,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "readiness",
     "reports",
     "selections",
+    "whatsappDeliveryPolicies",
   ]);
   assert.equal(
     typeof foundation.memberships.findActiveByExternalUserId,
@@ -70,6 +71,10 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "function",
   );
   assert.equal(typeof foundation.metaWebhooks.claimWebhookReceipt, "function");
+  assert.equal(
+    typeof foundation.whatsappDeliveryPolicies.recordPolicyEvent,
+    "function",
+  );
   assert.equal(typeof foundation.readiness.check, "function");
   assert.equal(typeof foundation.reports.read, "function");
   assert.equal(typeof foundation.selections.save, "function");

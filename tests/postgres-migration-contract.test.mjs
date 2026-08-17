@@ -30,6 +30,7 @@ const botSchema = migrationSources[7];
 const aiSchema = migrationSources[8];
 const contactOrganizationImportSchema = migrationSources[9];
 const metaConnectionCredentialSchema = migrationSources[10];
+const whatsappDeliveryPolicySchema = migrationSources[11];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -44,14 +45,34 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0008_ai_reporting.sql",
     "0009_contact_organization_imports.sql",
     "0010_meta_connection_credentials.sql",
+    "0011_whatsapp_delivery_policy.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 11,
+      migrationCount: 12,
       findings: [],
     },
+  );
+});
+
+test("defines immutable and audited PostgreSQL WhatsApp delivery policy", () => {
+  assert.match(
+    whatsappDeliveryPolicySchema,
+    /CREATE TABLE whatsapp_campaign_delivery_policy_events/,
+  );
+  assert.match(
+    whatsappDeliveryPolicySchema,
+    /enforce_whatsapp_delivery_policy_insert[\s\S]*FOR UPDATE[\s\S]*version is not sequential[\s\S]*disable transition is invalid/,
+  );
+  assert.match(
+    whatsappDeliveryPolicySchema,
+    /audit_whatsapp_delivery_policy_insert[\s\S]*INSERT INTO audit_logs[\s\S]*whatsapp\.delivery_policy\.recorded/,
+  );
+  assert.match(
+    whatsappDeliveryPolicySchema,
+    /reject_whatsapp_delivery_policy_mutation[\s\S]*events are immutable[\s\S]*BEFORE UPDATE[\s\S]*BEFORE DELETE/,
   );
 });
 
@@ -402,4 +423,29 @@ test("rejects destructive, seeded, and random-identity migrations", () => {
     true,
   );
   assert.equal(codes.includes("POSTGRES_RANDOM_IDENTITY"), true);
+});
+
+test("rejects seed data hidden inside a PostgreSQL function body", () => {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[11] = `${tamperedSources[11]}
+    CREATE FUNCTION seed_hidden_policy()
+    RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+      INSERT INTO whatsapp_campaign_delivery_policy_events (
+        event_key
+      ) VALUES ('forbidden-seed');
+    END;
+    $$;
+  `;
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
 });

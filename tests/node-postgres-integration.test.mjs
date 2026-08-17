@@ -68,10 +68,12 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0006_message_templates_campaigns\.sql/);
   assert.match(source, /0007_bot_flows_deliveries\.sql/);
   assert.match(source, /0008_ai_reporting\.sql/);
+  assert.match(source, /0011_whatsapp_delivery_policy\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyTemplateCampaignSchema/);
   assert.match(source, /verifyBotDeliverySchema/);
   assert.match(source, /verifyAiReportingSchema/);
+  assert.match(source, /verifyWhatsappDeliveryPolicy/);
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /runtime\.handler\.handle/);

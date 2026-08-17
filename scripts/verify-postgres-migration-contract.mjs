@@ -46,6 +46,7 @@ const requiredTableSequence = Object.freeze([
   "meta_connections",
   "meta_webhook_receipts",
   "meta_credential_envelopes",
+  "whatsapp_campaign_delivery_policy_events",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -59,6 +60,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0008_ai_reporting.sql",
   "0009_contact_organization_imports.sql",
   "0010_meta_connection_credentials.sql",
+  "0011_whatsapp_delivery_policy.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({
@@ -95,6 +97,9 @@ const destructiveStatement =
 const randomIdentity =
   /\b(?:random|gen_random_uuid|uuid_generate_v[1-5])\s*\(/i;
 const dataInsertion = /\bINSERT\s+INTO\b/i;
+const functionDefinition =
+  /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\b[\s\S]*?\bAS\s+\$\$([\s\S]*?)\$\$\s*;/gi;
+const triggerRowReference = /\b(?:NEW|OLD)\.[a-z][a-z0-9_]*/i;
 
 function rootUrl(root) {
   return pathToFileURL(
@@ -117,6 +122,29 @@ function extractCreatedTables(source) {
     ),
     (match) => match[1].toLowerCase(),
   );
+}
+
+function containsSeedData(source) {
+  for (const match of source.matchAll(functionDefinition)) {
+    const body = match[1];
+    const statements = body.split(";");
+
+    if (
+      statements.some(
+        (statement) =>
+          dataInsertion.test(statement) &&
+          !triggerRowReference.test(statement),
+      )
+    ) {
+      return true;
+    }
+  }
+
+  const sourceWithoutFunctionBodies = source.replace(
+    functionDefinition,
+    "",
+  );
+  return dataInsertion.test(sourceWithoutFunctionBodies);
 }
 
 export function validatePostgresMigrationSources({
@@ -209,7 +237,7 @@ export function validatePostgresMigrationSources({
       );
     }
 
-    if (dataInsertion.test(source)) {
+    if (containsSeedData(source)) {
       findings.push(
         finding(
           "POSTGRES_SEED_DATA_PRESENT",

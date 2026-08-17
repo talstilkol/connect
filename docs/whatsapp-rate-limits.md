@@ -478,6 +478,15 @@ Capacity חי של החשבון. עד שטל יקליט Evidence מתוארכת 
 ה־WABA והמספר המורשים, הקריאה תחזיר `null` ותמנע שליחה חדשה בלי
 לחסום Status webhooks עבור הודעות שכבר התקבלו אצל Meta.
 
+14.8.11 מיגרציית PostgreSQL `0011_whatsapp_delivery_policy.sql` ו־
+`postgresWhatsappCampaignDeliveryPolicyRepository.ts` ממירים כעת גם את
+מקור ה־Policy ליעד Railway. ‏`FOR UPDATE` על חיבור Meta מסדר בקשות מתחרות;
+Trigger במסד אוכף גרסה עוקבת, Connection נוכחי, Kill switch זהה ו־Audit
+אטומי. ‏Harness אמיתי הוכיח Event יחיד ו־Replay בשתי בקשות מקבילות. זהו
+עדיין רק מקור Policy: ‏Reservation/Settlement ledger, ‏Provider limiter
+מבוזר, Queue worker ו־Sender חיים טרם הומרו ל־PostgreSQL/Railway ולכן אין
+לסמן שליחת Production כמוכנה.
+
 14.9 מיגרציה `0031` ו־
 `CampaignDeliveryStatusReconciler` משלימים את מסלול ה־Webhook:
 

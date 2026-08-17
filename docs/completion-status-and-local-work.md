@@ -845,6 +845,27 @@ Receipt יחיד, אחת התביעות אושרה והשנייה סווגה Dup
 לא הופעל שוב ו־Evidence סותר נדחה. התוצאה:
 `PASS (11 migrations, 4 concurrency scenarios)`. סביבת הבדיקה נעצרה ונמחקה.
 
+2.45 **הושלם מקומית:** PostgreSQL WhatsApp delivery policy מאומת ואטומי.
+
+2.45.1 ‏`0011_whatsapp_delivery_policy.sql` מוסיף Ledger בלתי־ניתן לשינוי
+של החלטות השליחה. כל Event קשור לגרסה המדויקת של חיבור Meta, מתקדם בגרסה
+עוקבת בלבד, ומאפשר `enabled` רק כשהחיבור פעיל וה־Evidence עדיין בתוקף.
+
+2.45.2 מעבר `disabled` משמש Kill switch: הוא חייב לרשת בדיוק את Snapshot
+המכסה הקודם ואינו יכול לשנות מכסה תוך כדי עצירה. Trigger נועל את שורת חיבור
+Meta, ו־Trigger נוסף כותב Audit באותה Transaction. ‏Update ו־Delete נדחים.
+
+2.45.3 ‏`postgresWhatsappCampaignDeliveryPolicyRepository.ts` מבצע נעילת
+`FOR UPDATE`, מזהה Replay באמצעות Event key דטרמיניסטי, מחזיר Conflict על
+גרסה ישנה ומאמת מחדש כל Row ו־Tenant. ה־Foundation כולל כעת 16 Adapters
+וחושף את ה־Policy repository בלי לחבר עדיין Sender חי.
+
+2.45.4 שמונה בדיקות Repository וארבע בדיקות Contract/Composition רלוונטיות
+עברו. ה־Harness הריץ שתי בקשות Policy זהות במקביל מול PostgreSQL 16.13:
+נוצר Event יחיד, והשנייה הוחזרה כ־Replay. הוכחו גם Audit אטומי, Kill switch
+ו־Immutability. התוצאה: `PASS (12 migrations, 5 concurrency scenarios)`.
+סביבת הבדיקה הזמנית נעצרה ונמחקה.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

@@ -205,6 +205,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
     "server/platform/postgresMetaCredentialRepository.ts",
+    "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "postgres/migrations/0005_conversations_messages.sql",
@@ -213,6 +214,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0008_ai_reporting.sql",
     "postgres/migrations/0009_contact_organization_imports.sql",
     "postgres/migrations/0010_meta_connection_credentials.sql",
+    "postgres/migrations/0011_whatsapp_delivery_policy.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -223,10 +225,11 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /fifteen-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /sixteen-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /contact-organization/);
   assert.match(boundary.cutoverBlocker, /atomic contact-import/);
   assert.match(boundary.cutoverBlocker, /Meta connection\/webhook and encrypted credential paths/);
+  assert.match(boundary.cutoverBlocker, /immutable WhatsApp delivery-policy evidence and kill switch/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\.list read/);
   assert.match(boundary.cutoverBlocker, /single-statement reports\.read adapter/);
   assert.match(boundary.cutoverBlocker, /owned PostgreSQL API runtime composition/);
@@ -272,6 +275,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
     "server/platform/postgresMetaCredentialRepository.ts",
+    "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "server/platform/postgresReadinessProbe.ts",
     "server/platform/railwayPostgresApiRuntime.ts",
@@ -286,6 +290,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0008_ai_reporting.sql",
     "postgres/migrations/0009_contact_organization_imports.sql",
     "postgres/migrations/0010_meta_connection_credentials.sql",
+    "postgres/migrations/0011_whatsapp_delivery_policy.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -293,15 +298,16 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /eleven ordered/);
+  assert.match(database.cutoverBlocker, /twelve ordered/);
   assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
   assert.match(database.cutoverBlocker, /atomic contact-profile plus import-outcome writes/);
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /four real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /five real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /fifteen-adapter foundation/);
+  assert.match(database.cutoverBlocker, /sixteen-adapter foundation/);
+  assert.match(database.cutoverBlocker, /atomic delivery-policy audit\/replay\/conflict and disable behavior/);
   assert.match(database.cutoverBlocker, /owned API runtime composition/);
   assert.match(database.cutoverBlocker, /exact readiness query/);
   assert.match(database.cutoverBlocker, /contacts\.list/);

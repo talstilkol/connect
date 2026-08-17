@@ -48,6 +48,9 @@ import {
   createPostgresMetaRepository,
 } from "./postgresMetaRepository.ts";
 import {
+  createPostgresWhatsappCampaignDeliveryPolicyRepository,
+} from "./postgresWhatsappCampaignDeliveryPolicyRepository.ts";
+import {
   createPostgresReadinessProbe,
 } from "./postgresReadinessProbe.ts";
 import {
@@ -113,6 +116,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly metaCredentialEnvelopes: ReturnType<
     typeof createPostgresMetaCredentialRepository
+  >;
+  readonly whatsappDeliveryPolicies: ReturnType<
+    typeof createPostgresWhatsappCampaignDeliveryPolicyRepository
   >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
@@ -226,6 +232,11 @@ export function createRailwayPostgresFoundation(
     }),
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
+    whatsappDeliveryPolicies:
+      createPostgresWhatsappCampaignDeliveryPolicyRepository({
+        queries,
+        transactions,
+      }),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),
