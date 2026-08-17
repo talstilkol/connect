@@ -1201,6 +1201,24 @@ Executable bootstrap, ערכי Railway ו־Load evidence עדיין חסרים.
 נוספים ו־Worker composition. הטווח אינו כולל המתנה לבחירת Queue provider,
 Credentials, ‏Railway environment או Staging/Pilot.
 
+4.12 ‏PostgreSQL Campaign snapshot persistence הושלם מקומית.
+`postgresCampaignRepository.ts` שומר Campaign ואת כל Recipient snapshots
+ב־Transaction אחת, מאמת Template מאושר וזהה, Contact version ו־Consent חי,
+ומבצע Replay רק לאחר השוואה מלאה של כל השדות וכל הנמענים. קונפליקט בעל אותו
+Campaign key ואותו Recipient count אך תוכן אחר נכשל סגור. ה־Repository מחובר
+ל־`railwayPostgresFoundation.ts`, שמכיל כעת 20 Adapters.
+
+4.12.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (16 migrations, 14 concurrency scenarios)`. הוא הוכיח שתי כתיבות
+Snapshot מקבילות וזהות, רשומה יחידה, קריאה מבודדת Tenant והמשך מחזור
+Activation, ‏Promotion, ‏Claim, ‏Retry, משיכת Consent ו־Completion. שרת
+PostgreSQL הזמני נעצר והתיקייה נמחקה לאחר האימות.
+
+4.13 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **60–144 שעות פיתוח
+נטו**. הירידה משקפת את Repository ה־Snapshot, בדיקות Conflict/Rollback
+ותרחיש Concurrency אמיתי נוסף. הטווח אינו כולל המתנה לבחירת ספקים,
+Credentials, ‏Railway environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

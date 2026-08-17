@@ -346,10 +346,18 @@ PostgreSQL. ‏`railwayWorkerProcess.ts` מחבר `SIGINT` ו־`SIGTERM` לאו�
 keys מורכבים ל־Tenant, ‏Campaign ו־Contact. ‏PostgreSQL repository מממש
 Activation, ‏Promotion, ‏Claim, ‏Consent revalidation, ‏Retry ו־Completion.
 בחירת Campaigns ונמענים משתמשת ב־`FOR UPDATE SKIP LOCKED`; Harness אמיתי
-עבר עם 16 Migrations ו־13 תרחישי Concurrency. ‏`railwayWorkerRuntime.ts`
+עבר עם 16 Migrations ו־14 תרחישי Concurrency לאחר הוספת הוכחת Snapshot
+אטומי בסעיף הבא. ‏`railwayWorkerRuntime.ts`
 ו־`railwayPostgresWorkerService.ts` מחברים את Campaign ואת Invitation
 expiration לאותו Lease, ‏Pool, ‏Timer ומסלול סגירה. ‏Queue adapter,
 ‏Executable bootstrap ותצורת Railway חיה עדיין חסרים.
+
+7.1.37 ‏`postgresCampaignRepository.ts` שומר את הגדרת ה־Campaign ואת כל
+Recipient snapshots ב־Transaction אחת. הכתיבה דורשת Template מאושר וזהה,
+Contacts בעלי גרסה ו־Consent תקפים, וגודל JSONB תחום. ‏Replay מקביל זהה
+מוחזר בבטחה לאחר `FOR UPDATE`; אותו Campaign key עם כל שינוי בשדות או
+בנמענים נכשל סגור, גם אם מספר הנמענים זהה. ‏Harness אמיתי הוכיח שתי כתיבות
+מקבילות, Snapshot יחיד, קריאה לפי Tenant והמשך מחזור Dispatch מלא.
 
 7.2 עדיין חסר:
 

@@ -33,6 +33,9 @@ import {
   createPostgresCampaignDispatchRepository,
 } from "./postgresCampaignDispatchRepository.ts";
 import {
+  createPostgresCampaignRepository,
+} from "./postgresCampaignRepository.ts";
+import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
 import {
@@ -137,6 +140,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly campaignDispatch: ReturnType<
     typeof createPostgresCampaignDispatchRepository
+  >;
+  readonly campaigns: ReturnType<
+    typeof createPostgresCampaignRepository
   >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
@@ -264,6 +270,10 @@ export function createRailwayPostgresFoundation(
       createPostgresWorkerSchedulerLeaseRepository(queries),
     campaignDispatch:
       createPostgresCampaignDispatchRepository(queries),
+    campaigns: createPostgresCampaignRepository({
+      queries,
+      transactions,
+    }),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),

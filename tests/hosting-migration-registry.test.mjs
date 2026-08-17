@@ -233,6 +233,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "server/platform/postgresCampaignDispatchRepository.ts",
+    "server/platform/postgresCampaignRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "postgres/migrations/0005_conversations_messages.sql",
     "postgres/migrations/0006_message_templates_campaigns.sql",
@@ -255,7 +256,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /nineteen-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /twenty-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /campaign-snapshot and campaign-dispatch persistence/);
   assert.match(boundary.cutoverBlocker, /contact-organization/);
   assert.match(boundary.cutoverBlocker, /atomic contact-import/);
   assert.match(boundary.cutoverBlocker, /Meta connection\/webhook and encrypted credential paths/);
@@ -308,6 +310,9 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresMetaCredentialRepository.ts",
     "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
     "server/platform/postgresWhatsappRateLimitRepository.ts",
+    "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
+    "server/platform/postgresCampaignDispatchRepository.ts",
+    "server/platform/postgresCampaignRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "server/platform/postgresReadinessProbe.ts",
     "server/platform/railwayPostgresApiRuntime.ts",
@@ -326,6 +331,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
     "postgres/migrations/0013_whatsapp_phone_throughput.sql",
     "postgres/migrations/0014_worker_scheduler_lease.sql",
+    "postgres/migrations/0015_campaign_dispatch.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -339,9 +345,10 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /thirteen real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /fourteen real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /nineteen-adapter foundation/);
+  assert.match(database.cutoverBlocker, /twenty-adapter foundation/);
+  assert.match(database.cutoverBlocker, /exact campaign-snapshot replay\/conflict\/rollback/);
   assert.match(database.cutoverBlocker, /campaign activation\/claim\/retry\/consent revalidation\/completion/);
   assert.match(database.cutoverBlocker, /scheduler claim\/catch-up\/fencing/);
   assert.match(

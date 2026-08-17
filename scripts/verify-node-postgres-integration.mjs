@@ -1117,7 +1117,36 @@ async function verifyTemplateCampaignSchema(pool, tenantId) {
   const campaignKey = `campaign_v1_${"e".repeat(64)}`;
   const audienceKey = "f".repeat(64);
   const occurredAt = "2026-08-17T10:00:00.000Z";
-  const definition = JSON.stringify({ body: "Integration template" });
+  const templateDefinition = Object.freeze({
+    header: "",
+    body: "Integration template",
+    footer: "",
+    variableExamples: {},
+    buttonMode: "none",
+    quickReplies: [],
+    urlButton: {
+      enabled: false,
+      mode: "static",
+      text: "",
+      value: "",
+      example: "",
+    },
+    phoneButton: {
+      enabled: false,
+      text: "",
+      value: "",
+    },
+  });
+  const definition = JSON.stringify(templateDefinition);
+  const campaignTemplateSnapshot = JSON.stringify({
+    templateKey,
+    metaTemplateId: "987654321098765",
+    name: "integration_template",
+    language: "he",
+    category: "UTILITY",
+    version: 1,
+    ...templateDefinition,
+  });
 
   await pool.query(
     `INSERT INTO message_templates (
@@ -1177,7 +1206,7 @@ async function verifyTemplateCampaignSchema(pool, tenantId) {
       campaignKey,
       tenantId,
       templateKey,
-      definition,
+      campaignTemplateSnapshot,
       audienceKey,
       occurredAt,
     ],
@@ -1240,7 +1269,7 @@ async function verifyTemplateCampaignSchema(pool, tenantId) {
         `campaign_v1_${"0".repeat(64)}`,
         tenantId,
         templateKey,
-        definition,
+        campaignTemplateSnapshot,
         "1".repeat(64),
         occurredAt,
       ],
@@ -1258,8 +1287,26 @@ async function verifyCampaignDispatch(pool, foundation, tenantId) {
   const personalizationKey = "9".repeat(64);
   const metaTemplateId = "123456789012345";
   const createdAt = "2026-08-17T12:00:00.000Z";
-  const activatedAt = "2026-08-17T12:01:00.000Z";
-  const runningAt = "2026-08-17T12:02:00.000Z";
+  const templateDefinition = Object.freeze({
+    header: "",
+    body: "Dispatch integration",
+    footer: "",
+    variableExamples: {},
+    buttonMode: "none",
+    quickReplies: [],
+    urlButton: {
+      enabled: false,
+      mode: "static",
+      text: "",
+      value: "",
+      example: "",
+    },
+    phoneButton: {
+      enabled: false,
+      text: "",
+      value: "",
+    },
+  });
   const contacts = await pool.query(
     `SELECT id, phone_e164 AS "phoneNumber", version
      FROM contacts
@@ -1330,90 +1377,63 @@ async function verifyCampaignDispatch(pool, foundation, tenantId) {
       templateKey,
       tenantId,
       metaTemplateId,
-      JSON.stringify({ body: "Dispatch integration" }),
+      JSON.stringify(templateDefinition),
       templateSubmissionKey,
       createdAt,
     ],
   );
-  await pool.query(
-    `INSERT INTO campaigns (
-       campaign_key,
-       tenant_id,
-       name,
-       status,
-       delivery_mode,
-       timezone,
-       template_key,
-       template_snapshot_json,
-       audience_snapshot_key,
-       recipient_count,
-       created_at,
-       updated_at
-     )
-     VALUES (
-       $1,
-       $2,
-       'Dispatch integration',
-       'draft',
-       'immediate',
-       'UTC',
-       $3,
-       $4::jsonb,
-       $5,
-       2,
-       $6::timestamptz,
-       $6::timestamptz
-     )`,
-    [
-      campaignKey,
-      tenantId,
+  const snapshot = Object.freeze({
+    campaignKey,
+    tenantId,
+    name: "Dispatch integration",
+    deliveryMode: "immediate",
+    scheduledAt: null,
+    timezone: "UTC",
+    template: {
       templateKey,
-      JSON.stringify({ metaTemplateId, version: 1 }),
-      "a".repeat(64),
-      createdAt,
-    ],
+      metaTemplateId,
+      name: "dispatch_integration",
+      category: "UTILITY",
+      language: "he",
+      version: 1,
+      ...templateDefinition,
+    },
+    audienceSnapshotKey: "a".repeat(64),
+    recipientCount: 2,
+    recipients: eligibleContacts.rows.map((contact, index) => ({
+      contactId: Number(contact.id),
+      contactVersion: contact.version,
+      phoneNumber: contact.phoneNumber,
+      personalization: {},
+      personalizationKey,
+      deliveryKey: index === 0 ? firstDeliveryKey : secondDeliveryKey,
+    })),
+  });
+  const snapshotWrites = await Promise.all([
+    foundation.campaigns.saveSnapshot(snapshot),
+    foundation.campaigns.saveSnapshot(snapshot),
+  ]);
+  assert.equal(
+    snapshotWrites.every(({ campaignKey: savedKey }) => savedKey === campaignKey),
+    true,
   );
-
-  for (const [index, contact] of eligibleContacts.rows.entries()) {
-    await pool.query(
-      `INSERT INTO campaign_recipients (
-         campaign_key,
-         tenant_id,
-         contact_id,
-         contact_version,
-         phone_e164,
-         personalization_json,
-         personalization_key,
-         delivery_key,
-         status,
-         created_at,
-         updated_at
-       )
-       VALUES (
-         $1,
-         $2,
-         $3,
-         $4,
-         $5,
-         '{}'::jsonb,
-         $6,
-         $7,
-         'pending',
-         $8::timestamptz,
-         $8::timestamptz
-       )`,
-      [
-        campaignKey,
-        tenantId,
-        contact.id,
-        contact.version,
-        contact.phoneNumber,
-        personalizationKey,
-        index === 0 ? firstDeliveryKey : secondDeliveryKey,
-        createdAt,
-      ],
-    );
-  }
+  const campaignCreatedAt = snapshotWrites[0].createdAt;
+  const activatedAt = new Date(
+    Date.parse(campaignCreatedAt) + 60_000,
+  ).toISOString();
+  const runningAt = new Date(
+    Date.parse(campaignCreatedAt) + 120_000,
+  ).toISOString();
+  assert.equal(
+    (await foundation.campaigns.findByKey(tenantId, campaignKey))?.status,
+    "draft",
+  );
+  assert.equal(
+    (await foundation.campaigns.listByTenant(tenantId, 100)).some(
+      ({ campaignKey: savedKey }) => savedKey === campaignKey,
+    ),
+    true,
+  );
 
   const activation = await Promise.all([
     foundation.campaignDispatch.activateCampaign(
@@ -2299,7 +2319,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 13,
+      concurrencyScenarios: 14,
     });
   } finally {
     await pool.end();
