@@ -49,6 +49,14 @@ Conversations, ‏Messages, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI 
 הקריאה של הדוח מוכח מקומית. אין בכך הוכחת Staging או Parity לכל 35
 ה־Migrations.
 
+1.9 ‏`railwayPostgresApiRuntime.ts` מחבר את ה־Foundation ל־HTTP Runtime
+המאומת ומחזיר רק Handler ופעולת `close` Idempotent. תצורת הזהות ותצורת מסד
+הנתונים נשארות אובייקטים נפרדים כדי למנוע העברת Credential ל־Adapter הלא
+נכון. ה־Harness הפעיל `reports.read` דרך Vercel OIDC, ‏Clerk, ‏Tenant
+resolution והרשאה מול PostgreSQL אמיתי, ואימת שהתגובה אינה חושפת Tenant,
+User או Connection data. עדיין חסר Node HTTP entrypoint עם Health ו־Graceful
+shutdown לפני שניתן להריץ את השירות ב־Railway.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

@@ -697,6 +697,26 @@ Aggregates של AI בדוח. ה־Guard מכסה תשע Migrations ו־24 טבל�
 Parity מול כל 35 ה־Migrations והקשחת הוכחות הפריסה. בחירת ספק, ערכי Pool חיים
 ו־Staging נשארים עבודה חיצונית.
 
+2.38 **הושלם מקומית:** PostgreSQL API runtime composition ומסלול HTTP מלא.
+
+2.38.1 ‏`railwayPostgresApiRuntime.ts` מחבר PostgreSQL Foundation יחיד אל
+גבול הזהות והפעולות. הוא חושף רק Handler ו־`close`, דוחה Options מורחבים,
+ושומר את Environment הזהות נפרד מ־Environment מסד הנתונים.
+
+2.38.2 אם בניית Identity adapters נכשלת לאחר יצירת ה־Foundation, ה־Factory
+סוגר את ה־Pool לפני החזרת השגיאה. פעולת הסגירה Idempotent ואינה חושפת Pool,
+Connection string או Credentials.
+
+2.38.3 ה־Harness החוזר הוסיף Membership אמיתי וביצע `reports.read` דרך
+בקשת HTTP מלאה: Vercel OIDC, ‏Clerk session, ‏Tenant resolution, ‏Permission
+ו־PostgreSQL. כל ששת מקורות הדוח הוחזרו ותגובה ללא Tenant/User internals
+אומתה. תוצאת מסד הנתונים נשארה
+`PASS (9 migrations, 2 concurrency scenarios)`.
+
+2.38.4 נותר מקומית Node HTTP entrypoint עם Route קשיח, Health endpoints,
+Graceful shutdown ו־Contract tests לתהליך. לאחריו יישארו בעיקר הרחבת
+Operations/Parity וחסמי Environment חיצוניים.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

@@ -187,6 +187,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/nodePostgresAdapter.ts",
     "server/platform/nodePostgresPoolConfiguration.ts",
     "server/platform/railwayPostgresFoundation.ts",
+    "server/platform/railwayPostgresApiRuntime.ts",
     "server/platform/postgresTenantMembershipRepository.ts",
     "server/platform/postgresTenantMembershipMutationRepository.ts",
     "server/platform/postgresTenantSelectionRepository.ts",
@@ -215,8 +216,11 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /eleven-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\.list read/);
   assert.match(boundary.cutoverBlocker, /single-statement reports\.read adapter/);
+  assert.match(boundary.cutoverBlocker, /owned PostgreSQL API runtime composition/);
   assert.match(boundary.cutoverBlocker, /All six operational-report source families are migrated/);
-  assert.match(boundary.cutoverBlocker, /complete report passed against PostgreSQL 16\.13/);
+  assert.match(boundary.cutoverBlocker, /complete authenticated reports\.read HTTP path passed against PostgreSQL 16\.13/);
+  assert.match(boundary.cutoverBlocker, /deployable Node HTTP entrypoint/);
+  assert.match(boundary.cutoverBlocker, /health and shutdown lifecycle/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
   assert.match(boundary.cutoverBlocker, /35-migration schema parity/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
@@ -247,6 +251,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "server/platform/postgresContactReadRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
+    "server/platform/railwayPostgresApiRuntime.ts",
     "postgres/migrations/0000_core_contacts.sql",
     "postgres/migrations/0001_railway_api_mutation_receipts.sql",
     "postgres/migrations/0002_tenant_access_foundation.sql",
@@ -268,9 +273,10 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
   assert.match(database.cutoverBlocker, /eleven-adapter foundation/);
+  assert.match(database.cutoverBlocker, /owned API runtime composition/);
   assert.match(database.cutoverBlocker, /contacts\.list/);
   assert.match(database.cutoverBlocker, /reports\.read/);
-  assert.match(database.cutoverBlocker, /complete six-source operational reporting/);
+  assert.match(database.cutoverBlocker, /complete authenticated six-source reporting HTTP path/);
   assert.match(database.cutoverBlocker, /AI reporting constraints/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);

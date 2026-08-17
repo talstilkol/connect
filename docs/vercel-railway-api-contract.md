@@ -247,6 +247,14 @@ deliveries, ‏AI audit ו־AI usage הומרו ונבדקו מול PostgreSQL �
 ה־Routes וה־Mutations, ‏Parity מלאה, ערכי Pool חיים וראיות Staging — לא בשל
 מקורות הדוח.
 
+7.1.24 ‏`railwayPostgresApiRuntime.ts` מחבר את גבול הזהות והפעולות אל
+PostgreSQL Foundation אחד, ובעל ה־Runtime מחזיק גם בסגירת ה־Pool. ‏Harness
+אמיתי ביצע `reports.read` דרך HTTP, אימת Vercel OIDC ו־Clerk, פתר Tenant מתוך
+Membership ב־PostgreSQL, הפעיל Permission וקרא את כל ששת מקורות הדוח. התגובה
+נבדקה ללא Tenant ID, ‏External user או Connection data. עדיין חסרים Node
+HTTP entrypoint, ‏Health endpoints, ‏Graceful shutdown ו־Railway environment
+אמיתי.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

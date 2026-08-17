@@ -18,6 +18,14 @@ import {
   createRailwayPostgresFoundation,
 } from "../server/platform/railwayPostgresFoundation.ts";
 import {
+  createRailwayPostgresApiRuntime,
+} from "../server/platform/railwayPostgresApiRuntime.ts";
+import {
+  RAILWAY_API_CONTRACT_VERSION,
+  RAILWAY_API_ENDPOINT_PATH,
+  VERCEL_OIDC_HEADER,
+} from "../server/platform/railwayApiContract.ts";
+import {
   deriveTeamInvitationDeliveryKey,
 } from "../server/team/teamInvitationKey.ts";
 
@@ -38,6 +46,23 @@ const migrationFiles = Object.freeze([
   "0007_bot_flows_deliveries.sql",
   "0008_ai_reporting.sql",
 ]);
+
+function postgresEnvironment(connectionString) {
+  return {
+    APP_RUNTIME_ENVIRONMENT: "test",
+    DATABASE_URL: connectionString,
+    POSTGRES_APPLICATION_NAME: "connect-integration",
+    POSTGRES_MAX_CONNECTIONS: "4",
+    POSTGRES_CONNECTION_TIMEOUT_MS: "2000",
+    POSTGRES_IDLE_TIMEOUT_MS: "2000",
+    POSTGRES_STATEMENT_TIMEOUT_MS: "15000",
+    POSTGRES_QUERY_TIMEOUT_MS: "20000",
+    POSTGRES_LOCK_TIMEOUT_MS: "3000",
+    POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS: "10000",
+    POSTGRES_MAX_LIFETIME_SECONDS: "1800",
+    POSTGRES_TLS_MODE: "disabled",
+  };
+}
 
 function fail(code) {
   throw new Error(`NODE_POSTGRES_INTEGRATION_${code}`);
@@ -99,6 +124,7 @@ async function applyMigrations(pool) {
 }
 
 async function createTenant(pool) {
+  const occurredAt = "2026-08-17T08:00:00.000Z";
   const result = await pool.query(
     `INSERT INTO tenants (
        display_name, status, created_at, updated_at
@@ -107,7 +133,7 @@ async function createTenant(pool) {
      RETURNING id`,
     [
       "Driver integration tenant",
-      "2026-08-17T08:00:00.000Z",
+      occurredAt,
     ],
   );
   const tenantId = Number(result.rows[0]?.id);
@@ -115,6 +141,20 @@ async function createTenant(pool) {
   if (!Number.isSafeInteger(tenantId) || tenantId < 1) {
     fail("TENANT_INVALID");
   }
+
+  await pool.query(
+    `INSERT INTO tenant_memberships (
+       tenant_id,
+       external_user_id,
+       role,
+       status,
+       version,
+       created_at,
+       updated_at
+     )
+     VALUES ($1, 'driver-integration-owner', 'owner', 'active', 1, $2, $2)`,
+    [tenantId, occurredAt],
+  );
 
   return tenantId;
 }
@@ -834,6 +874,107 @@ async function verifyAiReportingSchema(pool, foundation, tenantId) {
   );
 }
 
+async function verifyPostgresHttpRuntime(connectionString) {
+  const runtime = await createRailwayPostgresApiRuntime({
+    identityEnvironment: {
+      APP_PUBLIC_ORIGIN: "https://connect.example.com",
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+        "publishable-key-for-driver-integration",
+      CLERK_SECRET_KEY: "secret-key-for-driver-integration",
+      VERCEL_OIDC_TEAM_SLUG: "connect-team",
+      VERCEL_OIDC_PROJECT_NAME: "connect-web",
+      VERCEL_OIDC_ENVIRONMENT: "production",
+      NODE_ENV: "production",
+    },
+    postgresEnvironment: postgresEnvironment(connectionString),
+    identityDependencies: {
+      vercelOidc: {
+        createRemoteKeySet() {
+          return async () => {};
+        },
+        async verifyJwt() {},
+      },
+      clerk: {
+        create() {
+          return {
+            async authenticateRequest() {
+              return {
+                isAuthenticated: true,
+                toAuth() {
+                  return {
+                    isAuthenticated: true,
+                    tokenType: "session_token",
+                    userId: "driver-integration-owner",
+                  };
+                },
+              };
+            },
+          };
+        },
+      },
+    },
+    postgresTelemetry: {
+      recordIdleClientError() {},
+    },
+    mutationRateLimit: {
+      async consume() {
+        return { outcome: "allowed" };
+      },
+    },
+  });
+
+  try {
+    const compactJwt = "header.payload.signature";
+    const response = await runtime.handler.handle(
+      new Request(
+        new URL(
+          RAILWAY_API_ENDPOINT_PATH,
+          "https://railway.example.com",
+        ),
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${compactJwt}`,
+            "content-type": "application/json",
+            [VERCEL_OIDC_HEADER]: compactJwt,
+          },
+          body: JSON.stringify({
+            contractVersion: RAILWAY_API_CONTRACT_VERSION,
+            operation: "reports.read",
+            requestKind: "query",
+            idempotencyKey: null,
+            payload: {
+              startDate: "2026-08-17",
+              endDate: "2026-08-17",
+            },
+          }),
+        },
+      ),
+    );
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.contractVersion, RAILWAY_API_CONTRACT_VERSION);
+    assert.equal(body.outcome, "ok");
+    assert.deepEqual(body.data.period, {
+      startDate: "2026-08-17",
+      endDate: "2026-08-17",
+    });
+    assert.equal(body.data.snapshot.campaigns.total, 1);
+    assert.equal(body.data.snapshot.messages.total, 1);
+    assert.equal(body.data.snapshot.conversations.active, 1);
+    assert.equal(body.data.snapshot.bot.total, 1);
+    assert.equal(body.data.snapshot.ai.totalTurns, 1);
+    assert.equal(body.data.snapshot.aiUsage[0]?.requestCount, 1);
+    assert.doesNotMatch(
+      JSON.stringify(body),
+      /tenantId|externalUserId|driver-integration-owner/,
+    );
+  } finally {
+    await runtime.close();
+  }
+}
+
 async function prepareBlockedInvitation(
   invitationRepository,
   deliveryRepository,
@@ -961,20 +1102,7 @@ export async function verifyNodePostgresIntegration(
     const tenantId = await createTenant(pool);
     const transactions = createNodePostgresTransactionManager(pool);
     const foundation = createRailwayPostgresFoundation({
-      environment: {
-        APP_RUNTIME_ENVIRONMENT: "test",
-        DATABASE_URL: checkedConnectionString,
-        POSTGRES_APPLICATION_NAME: "connect-integration",
-        POSTGRES_MAX_CONNECTIONS: "4",
-        POSTGRES_CONNECTION_TIMEOUT_MS: "2000",
-        POSTGRES_IDLE_TIMEOUT_MS: "2000",
-        POSTGRES_STATEMENT_TIMEOUT_MS: "15000",
-        POSTGRES_QUERY_TIMEOUT_MS: "20000",
-        POSTGRES_LOCK_TIMEOUT_MS: "3000",
-        POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS: "10000",
-        POSTGRES_MAX_LIFETIME_SECONDS: "1800",
-        POSTGRES_TLS_MODE: "disabled",
-      },
+      environment: postgresEnvironment(checkedConnectionString),
       telemetry: {
         recordIdleClientError() {},
       },
@@ -992,6 +1120,7 @@ export async function verifyNodePostgresIntegration(
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
       await verifyAiReportingSchema(pool, foundation, tenantId);
+      await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
     } finally {
       await foundation.close();
