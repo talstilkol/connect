@@ -3,6 +3,8 @@ import type {
 } from "../../db/metaRepository.ts";
 import {
   whatsappPortfolioMessagingLimits,
+  whatsappPhoneThroughputLimits,
+  type WhatsappPhoneThroughputPolicy,
   type WhatsappPortfolioCapacity,
 } from "../../shared/domain/whatsappRateLimit.ts";
 import type {
@@ -36,7 +38,9 @@ export interface CampaignDeliveryRateLimitPolicyRequest {
 }
 
 export interface CampaignDeliveryRateLimitPolicy {
+  eventKey: string;
   portfolioCapacity: WhatsappPortfolioCapacity;
+  phoneThroughput: WhatsappPhoneThroughputPolicy;
   reservationDurationSeconds: number;
 }
 
@@ -172,6 +176,8 @@ function normalizePolicy(
     typeof value !== "object" ||
     value === null ||
     !hasExactKeys(value, [
+      "eventKey",
+      "phoneThroughput",
       "portfolioCapacity",
       "reservationDurationSeconds",
     ])
@@ -182,9 +188,15 @@ function normalizePolicy(
   const portfolioCapacity = normalizeCapacity(
     value.portfolioCapacity,
   );
+  const phoneThroughput =
+    normalizePhoneThroughput(value.phoneThroughput);
 
   if (
+    !/^whatsapp_delivery_policy_event_v1_[0-9a-f]{64}$/.test(
+      value.eventKey,
+    ) ||
     !portfolioCapacity ||
+    !phoneThroughput ||
     !Number.isSafeInteger(
       value.reservationDurationSeconds,
     ) ||
@@ -197,9 +209,46 @@ function normalizePolicy(
   }
 
   return {
+    eventKey: value.eventKey,
     portfolioCapacity,
+    phoneThroughput,
     reservationDurationSeconds:
       value.reservationDurationSeconds,
+  };
+}
+
+function normalizePhoneThroughput(
+  value: unknown,
+): WhatsappPhoneThroughputPolicy | null {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value) ||
+    !hasExactKeys(value, [
+      "maximumMessagesPerSecond",
+      "maximumOutboundMessagesPerSecond",
+    ]) ||
+    !("maximumMessagesPerSecond" in value) ||
+    !("maximumOutboundMessagesPerSecond" in value) ||
+    !whatsappPhoneThroughputLimits.includes(
+      value.maximumMessagesPerSecond as never,
+    ) ||
+    !Number.isSafeInteger(
+      value.maximumOutboundMessagesPerSecond,
+    ) ||
+    Number(value.maximumOutboundMessagesPerSecond) < 1 ||
+    Number(value.maximumOutboundMessagesPerSecond) >=
+      Number(value.maximumMessagesPerSecond)
+  ) {
+    return null;
+  }
+
+  return {
+    maximumMessagesPerSecond:
+      value.maximumMessagesPerSecond as (typeof whatsappPhoneThroughputLimits)[number],
+    maximumOutboundMessagesPerSecond: Number(
+      value.maximumOutboundMessagesPerSecond,
+    ),
   };
 }
 
@@ -275,11 +324,14 @@ export function createCampaignDeliveryRateLimitContextResolver(
 
       return {
         ...derived,
+        policyEventKey: policy.eventKey,
         tenantId: connection.tenantId,
         templateCategory:
           request.campaign.template.category,
         portfolioCapacity:
           policy.portfolioCapacity,
+        phoneThroughput:
+          policy.phoneThroughput,
         reservationExpiresAt,
       };
     },

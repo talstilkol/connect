@@ -1,7 +1,9 @@
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "../../shared/domain/whatsappRateLimit.ts";
 import {
+  whatsappPhoneThroughputLimits,
   whatsappPortfolioMessagingLimits,
 } from "../../shared/domain/whatsappRateLimit.ts";
 import {
@@ -175,6 +177,35 @@ export function requireWhatsappPortfolioCapacity(
   throw new Error(
     "WhatsApp delivery policy portfolio capacity is invalid",
   );
+}
+
+export function requireWhatsappPhoneThroughputPolicy(
+  maximumMessagesPerSecond: unknown,
+  maximumOutboundMessagesPerSecond: unknown,
+): WhatsappPhoneThroughputPolicy {
+  if (
+    !whatsappPhoneThroughputLimits.includes(
+      maximumMessagesPerSecond as never,
+    ) ||
+    !Number.isSafeInteger(
+      maximumOutboundMessagesPerSecond,
+    ) ||
+    Number(maximumOutboundMessagesPerSecond) < 1 ||
+    Number(maximumOutboundMessagesPerSecond) >=
+      Number(maximumMessagesPerSecond)
+  ) {
+    throw new Error(
+      "WhatsApp delivery policy phone throughput is invalid",
+    );
+  }
+
+  return {
+    maximumMessagesPerSecond:
+      maximumMessagesPerSecond as (typeof whatsappPhoneThroughputLimits)[number],
+    maximumOutboundMessagesPerSecond: Number(
+      maximumOutboundMessagesPerSecond,
+    ),
+  };
 }
 
 export function requireWhatsappReservationDuration(

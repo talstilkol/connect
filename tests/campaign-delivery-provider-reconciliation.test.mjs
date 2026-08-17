@@ -35,6 +35,8 @@ const senderKey =
   `whatsapp_sender_v1_${"6".repeat(64)}`;
 const recipientKey =
   `whatsapp_recipient_v1_${"7".repeat(64)}`;
+const policyEventKey =
+  `whatsapp_delivery_policy_event_v1_${"b".repeat(64)}`;
 const providerMessageId = "wamid.campaign-live-17";
 const reservedAt = "2026-08-16T10:00:00.000Z";
 const acceptedAt = "2026-08-16T10:00:01.000Z";
@@ -136,6 +138,53 @@ async function createFixture() {
       updated_at
     ) VALUES (7, 'Tenant 7', 'active', ?1, ?1)
   `).run(reservedAt);
+  database.prepare(`
+    INSERT INTO meta_connections (
+      tenant_id,
+      business_portfolio_id,
+      waba_id,
+      phone_number_id,
+      status,
+      webhook_subscribed_at,
+      connected_at,
+      version,
+      created_at,
+      updated_at
+    ) VALUES (
+      7, '400001', '400002', '400003', 'connected',
+      ?1, ?1, 1, ?1, ?1
+    )
+  `).run(reservedAt);
+  database.prepare(`
+    INSERT INTO whatsapp_campaign_delivery_policy_events (
+      event_key,
+      tenant_id,
+      connection_version,
+      policy_version,
+      delivery_state,
+      portfolio_limit_kind,
+      portfolio_limit_value,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
+      reservation_duration_seconds,
+      meta_graph_api_version,
+      evidence_digest,
+      evidence_checked_at,
+      evidence_expires_at,
+      actor_external_user_id,
+      recorded_at,
+      created_at
+    ) VALUES (
+      ?1, 7, 1, 1, 'enabled', 'bounded', 250,
+      80, 64, 300, 'v21.0', ?2, ?3, ?4,
+      'tal-rate-limit-research', ?3, ?3
+    )
+  `).run(
+    policyEventKey,
+    "c".repeat(64),
+    reservedAt,
+    "2026-08-17T10:00:00.000Z",
+  );
   database.prepare(`
     INSERT INTO message_templates (
       template_key,
@@ -241,10 +290,15 @@ async function createFixture() {
       portfolioKey,
       senderKey,
       recipientKey,
+      policyEventKey,
       templateCategory: "UTILITY",
       portfolioCapacity: {
         kind: "bounded",
         maximumUniqueRecipients: 250,
+      },
+      phoneThroughput: {
+        maximumMessagesPerSecond: 80,
+        maximumOutboundMessagesPerSecond: 64,
       },
       reservedAt,
       reservationExpiresAt:

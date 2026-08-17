@@ -74,6 +74,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0032_whatsapp_provider_cooldowns.sql",
     "0033_large_union_jack.sql",
     "0034_whatsapp_campaign_delivery_policy_events.sql",
+    "0035_whatsapp_phone_throughput.sql",
   ]);
 
   const migration = await readFile(

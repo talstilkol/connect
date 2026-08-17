@@ -1,4 +1,5 @@
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "./whatsappRateLimit.ts";
 
@@ -19,6 +20,8 @@ export interface WhatsappCampaignDeliveryPolicyRecord {
     WhatsappCampaignDeliveryPolicyState;
   portfolioCapacity:
     WhatsappPortfolioCapacity;
+  phoneThroughput:
+    WhatsappPhoneThroughputPolicy | null;
   reservationDurationSeconds: number;
   metaGraphApiVersion: string;
   evidenceDigest: string;
@@ -88,6 +91,8 @@ export function toWhatsappCampaignDeliveryPolicyRecordView(
     deliveryState: record.deliveryState,
     portfolioCapacity:
       record.portfolioCapacity,
+    phoneThroughput:
+      record.phoneThroughput,
     reservationDurationSeconds:
       record.reservationDurationSeconds,
     metaGraphApiVersion:

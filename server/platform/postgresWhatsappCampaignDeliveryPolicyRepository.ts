@@ -12,6 +12,7 @@ import {
   persistedMetaConnectionStatuses,
 } from "../../shared/domain/metaConnection.ts";
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "../../shared/domain/whatsappRateLimit.ts";
 import {
@@ -26,6 +27,7 @@ import {
   requireWhatsappDeliveryPolicyTimestamp,
   requireWhatsappDeliveryPolicyVersion,
   requireWhatsappPortfolioCapacity,
+  requireWhatsappPhoneThroughputPolicy,
   requireWhatsappProviderIdentifier,
   requireWhatsappReservationDuration,
 } from "../campaigns/whatsappCampaignDeliveryPolicyValidation.ts";
@@ -49,6 +51,8 @@ const policyRowKeys = Object.freeze([
   "deliveryState",
   "portfolioLimitKind",
   "portfolioLimitValue",
+  "phoneThroughputMessagesPerSecond",
+  "maximumOutboundMessagesPerSecond",
   "reservationDurationSeconds",
   "metaGraphApiVersion",
   "evidenceDigest",
@@ -73,6 +77,8 @@ function policyColumns(alias?: string): string {
     ${prefix}delivery_state AS "deliveryState",
     ${prefix}portfolio_limit_kind AS "portfolioLimitKind",
     ${prefix}portfolio_limit_value AS "portfolioLimitValue",
+    ${prefix}phone_throughput_messages_per_second AS "phoneThroughputMessagesPerSecond",
+    ${prefix}maximum_outbound_messages_per_second AS "maximumOutboundMessagesPerSecond",
     ${prefix}reservation_duration_seconds AS "reservationDurationSeconds",
     ${prefix}meta_graph_api_version AS "metaGraphApiVersion",
     ${prefix}evidence_digest AS "evidenceDigest",
@@ -131,6 +137,8 @@ export const postgresWhatsappCampaignDeliveryPolicySql = Object.freeze({
       delivery_state,
       portfolio_limit_kind,
       portfolio_limit_value,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
       reservation_duration_seconds,
       meta_graph_api_version,
       evidence_digest,
@@ -141,8 +149,9 @@ export const postgresWhatsappCampaignDeliveryPolicySql = Object.freeze({
       created_at
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8,
-      $9, $10, $11::timestamptz, $12::timestamptz,
-      $13, $14::timestamptz, $14::timestamptz
+      $9, $10, $11, $12, $13::timestamptz,
+      $14::timestamptz, $15, $16::timestamptz,
+      $16::timestamptz
     )
     RETURNING ${policyColumns()}
   `,
@@ -159,6 +168,8 @@ interface NormalizedCommand {
   readonly expectedPolicyVersion: number;
   readonly deliveryState: WhatsappCampaignDeliveryPolicyState;
   readonly portfolioCapacity: WhatsappPortfolioCapacity;
+  readonly phoneThroughput:
+    WhatsappPhoneThroughputPolicy | null;
   readonly reservationDurationSeconds: number;
   readonly metaGraphApiVersion: string;
   readonly evidenceDigest: string;
@@ -221,6 +232,20 @@ function parsePolicyRow(value: unknown): WhatsappCampaignDeliveryPolicyRecord {
       row.portfolioLimitKind,
       parsePortfolioLimitValue(row.portfolioLimitValue),
     ),
+    phoneThroughput:
+      row.phoneThroughputMessagesPerSecond === null &&
+      row.maximumOutboundMessagesPerSecond === null
+        ? null
+        : requireWhatsappPhoneThroughputPolicy(
+            parsePolicyInteger(
+              row.phoneThroughputMessagesPerSecond,
+              "phone throughput",
+            ),
+            parsePolicyInteger(
+              row.maximumOutboundMessagesPerSecond,
+              "maximum outbound throughput",
+            ),
+          ),
     reservationDurationSeconds: requireWhatsappReservationDuration(
       parsePolicyInteger(
         row.reservationDurationSeconds,
@@ -260,6 +285,12 @@ function toEvidence(
     connectionVersion: record.connectionVersion,
     policyVersion: record.policyVersion,
     portfolioCapacity: record.portfolioCapacity,
+    phoneThroughput:
+      record.phoneThroughput ?? (() => {
+        throw new Error(
+          "PostgreSQL WhatsApp policy lacks throughput evidence",
+        );
+      })(),
     reservationDurationSeconds: record.reservationDurationSeconds,
     metaGraphApiVersion: record.metaGraphApiVersion,
     evidenceDigest: record.evidenceDigest,
@@ -314,6 +345,15 @@ function normalizeCommand(
       command.portfolioLimitKind,
       command.portfolioLimitValue,
     ),
+    phoneThroughput:
+      deliveryState === "disabled" &&
+      command.phoneThroughputMessagesPerSecond == null &&
+      command.maximumOutboundMessagesPerSecond == null
+        ? null
+        : requireWhatsappPhoneThroughputPolicy(
+            command.phoneThroughputMessagesPerSecond,
+            command.maximumOutboundMessagesPerSecond,
+          ),
     reservationDurationSeconds: requireWhatsappReservationDuration(
       command.reservationDurationSeconds,
     ),
@@ -347,6 +387,8 @@ function samePolicySnapshot(
     current.connectionVersion === command.connectionVersion &&
     JSON.stringify(current.portfolioCapacity) ===
       JSON.stringify(command.portfolioCapacity) &&
+    JSON.stringify(current.phoneThroughput) ===
+      JSON.stringify(command.phoneThroughput) &&
     current.reservationDurationSeconds ===
       command.reservationDurationSeconds &&
     current.metaGraphApiVersion === command.metaGraphApiVersion &&
@@ -489,6 +531,12 @@ export function createPostgresWhatsappCampaignDeliveryPolicyRepository(
         ...normalized,
         portfolioLimitKind,
         portfolioLimitValue,
+        phoneThroughputMessagesPerSecond:
+          normalized.phoneThroughput
+            ?.maximumMessagesPerSecond ?? null,
+        maximumOutboundMessagesPerSecond:
+          normalized.phoneThroughput
+            ?.maximumOutboundMessagesPerSecond ?? null,
       });
 
       return dependencies.transactions.transaction(
@@ -530,6 +578,10 @@ export function createPostgresWhatsappCampaignDeliveryPolicyRepository(
               normalized.deliveryState,
               portfolioLimitKind,
               portfolioLimitValue,
+              normalized.phoneThroughput
+                ?.maximumMessagesPerSecond ?? null,
+              normalized.phoneThroughput
+                ?.maximumOutboundMessagesPerSecond ?? null,
               normalized.reservationDurationSeconds,
               normalized.metaGraphApiVersion,
               normalized.evidenceDigest,

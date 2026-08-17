@@ -6,10 +6,12 @@ import type {
 } from "../../db/whatsappRateLimitRepository.ts";
 import {
   whatsappPortfolioMessagingLimits,
+  whatsappPhoneThroughputLimits,
   whatsappProviderCooldownErrorCodes,
   whatsappProviderCooldownScopes,
   whatsappRateLimitSettlementOutcomes,
   type WhatsappPortfolioCapacity,
+  type WhatsappPhoneThroughputPolicy,
   type WhatsappProviderCooldown,
   type WhatsappProviderCooldownErrorCode,
   type WhatsappProviderCooldownScope,
@@ -38,12 +40,17 @@ const reservationKeyPattern =
 const portfolioKeyPattern = /^whatsapp_portfolio_v1_[0-9a-f]{64}$/;
 const senderKeyPattern = /^whatsapp_sender_v1_[0-9a-f]{64}$/;
 const recipientKeyPattern = /^whatsapp_recipient_v1_[0-9a-f]{64}$/;
+const policyEventKeyPattern =
+  /^whatsapp_delivery_policy_event_v1_[0-9a-f]{64}$/;
 const reservationRowKeys = Object.freeze([
   "reservationKey",
   "tenantId",
   "portfolioKey",
   "senderKey",
   "recipientKey",
+  "policyEventKey",
+  "phoneThroughputMessagesPerSecond",
+  "maximumOutboundMessagesPerSecond",
   "templateCategory",
   "portfolioLimitKind",
   "portfolioLimitValue",
@@ -70,6 +77,8 @@ const blockerRowKeys = Object.freeze([
   "providerErrorCode",
   "pairReservedUntil",
   "activeReservationExpiresAt",
+  "throughputReservationCount",
+  "throughputOldestReservedAt",
   "recipientDeliveredInWindow",
   "occupiedUniqueRecipients",
 ]);
@@ -79,6 +88,9 @@ const reservationColumns = `
   portfolio_key AS "portfolioKey",
   sender_key AS "senderKey",
   recipient_key AS "recipientKey",
+  policy_event_key AS "policyEventKey",
+  phone_throughput_messages_per_second AS "phoneThroughputMessagesPerSecond",
+  maximum_outbound_messages_per_second AS "maximumOutboundMessagesPerSecond",
   template_category AS "templateCategory",
   portfolio_limit_kind AS "portfolioLimitKind",
   portfolio_limit_value AS "portfolioLimitValue",
@@ -101,9 +113,15 @@ const cooldownColumns = `
 
 export const postgresWhatsappRateLimitSql = Object.freeze({
   lockPairScope: `
+    /* whatsapp-pair-lock */
     SELECT pg_advisory_xact_lock(hashtextextended($1, 0)) AS locked
   `,
   lockPortfolioScope: `
+    /* whatsapp-portfolio-lock */
+    SELECT pg_advisory_xact_lock(hashtextextended($1, 0)) AS locked
+  `,
+  lockThroughputScope: `
+    /* whatsapp-throughput-lock */
     SELECT pg_advisory_xact_lock(hashtextextended($1, 0)) AS locked
   `,
   findReservation: `
@@ -166,6 +184,20 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
         FROM whatsapp_portfolio_recipient_rate_limit_state
         WHERE portfolio_key = $2 AND recipient_key = $4
       ) AS "activeReservationExpiresAt",
+      (
+        SELECT count(*)
+        FROM whatsapp_rate_limit_reservations
+        WHERE sender_key = $3
+          AND reserved_at > $8::timestamptz
+          AND reserved_at <= $5::timestamptz
+      ) AS "throughputReservationCount",
+      (
+        SELECT min(reserved_at)
+        FROM whatsapp_rate_limit_reservations
+        WHERE sender_key = $3
+          AND reserved_at > $8::timestamptz
+          AND reserved_at <= $5::timestamptz
+      ) AS "throughputOldestReservedAt",
       EXISTS (
         SELECT 1
         FROM whatsapp_portfolio_recipient_rate_limit_state
@@ -193,6 +225,9 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
       portfolio_key,
       sender_key,
       recipient_key,
+      policy_event_key,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
       template_category,
       portfolio_limit_kind,
       portfolio_limit_value,
@@ -201,7 +236,8 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
       reservation_expires_at,
       created_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8,
+      $1, $2, $3, $4, $5, $12, $13, $14,
+      $6, $7, $8,
       $9::timestamptz, $10::timestamptz,
       $11::timestamptz, $9::timestamptz
     )
@@ -253,6 +289,8 @@ export interface PostgresWhatsappRateLimitDependencies {
 }
 
 interface NormalizedReservation extends WhatsappRateLimitReservation {
+  readonly policyEventKey: string;
+  readonly phoneThroughput: WhatsappPhoneThroughputPolicy;
   readonly templateCategory: "MARKETING" | "UTILITY";
 }
 
@@ -336,6 +374,40 @@ function requireCapacity(value: unknown): WhatsappPortfolioCapacity {
     });
   }
   throw new Error("portfolioCapacity is invalid");
+}
+
+function requirePhoneThroughput(
+  value: unknown,
+): WhatsappPhoneThroughputPolicy {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value)
+  ) {
+    throw new Error("phoneThroughput is invalid");
+  }
+  const record = value as Record<string, unknown>;
+  if (
+    Object.keys(record).length !== 2 ||
+    !whatsappPhoneThroughputLimits.includes(
+      record.maximumMessagesPerSecond as never,
+    ) ||
+    !Number.isSafeInteger(
+      record.maximumOutboundMessagesPerSecond,
+    ) ||
+    Number(record.maximumOutboundMessagesPerSecond) < 1 ||
+    Number(record.maximumOutboundMessagesPerSecond) >=
+      Number(record.maximumMessagesPerSecond)
+  ) {
+    throw new Error("phoneThroughput is invalid");
+  }
+  return Object.freeze({
+    maximumMessagesPerSecond:
+      record.maximumMessagesPerSecond as (typeof whatsappPhoneThroughputLimits)[number],
+    maximumOutboundMessagesPerSecond: Number(
+      record.maximumOutboundMessagesPerSecond,
+    ),
+  });
 }
 
 function parseCapacity(kind: unknown, value: unknown): WhatsappPortfolioCapacity {
@@ -433,8 +505,16 @@ function normalizeReservation(
       recipientKeyPattern,
       "recipientKey",
     ),
+    policyEventKey: requirePattern(
+      command.policyEventKey,
+      policyEventKeyPattern,
+      "policyEventKey",
+    ),
     templateCategory: requireTemplateCategory(command.templateCategory),
     portfolioCapacity: requireCapacity(command.portfolioCapacity),
+    phoneThroughput: requirePhoneThroughput(
+      command.phoneThroughput,
+    ),
     reservedAt,
     pairReservedUntil,
     reservationExpiresAt,
@@ -515,10 +595,32 @@ function parseReservation(value: unknown): StoredReservation {
         recipientKeyPattern,
         "PostgreSQL recipientKey",
       ),
+      policyEventKey:
+        row.policyEventKey === null
+          ? null
+          : requirePattern(
+              row.policyEventKey,
+              policyEventKeyPattern,
+              "PostgreSQL policyEventKey",
+            ),
       portfolioCapacity: parseCapacity(
         row.portfolioLimitKind,
         row.portfolioLimitValue,
       ),
+      phoneThroughput:
+        row.phoneThroughputMessagesPerSecond === null &&
+        row.maximumOutboundMessagesPerSecond === null
+          ? null
+          : requirePhoneThroughput({
+              maximumMessagesPerSecond:
+                parsePostgresPositiveInteger(
+                  row.phoneThroughputMessagesPerSecond,
+                ),
+              maximumOutboundMessagesPerSecond:
+                parsePostgresPositiveInteger(
+                  row.maximumOutboundMessagesPerSecond,
+                ),
+            }),
       reservedAt,
       pairReservedUntil,
       reservationExpiresAt,
@@ -589,7 +691,10 @@ function sameReservation(
     left.portfolioKey === requested.portfolioKey &&
     left.senderKey === requested.senderKey &&
     left.recipientKey === requested.recipientKey &&
+    left.policyEventKey === requested.policyEventKey &&
     sameCapacity(left.portfolioCapacity, requested.portfolioCapacity) &&
+    JSON.stringify(left.phoneThroughput) ===
+      JSON.stringify(requested.phoneThroughput) &&
     left.reservedAt === requested.reservedAt &&
     left.pairReservedUntil === requested.pairReservedUntil &&
     left.reservationExpiresAt === requested.reservationExpiresAt
@@ -662,6 +767,10 @@ async function acquireReservationLocks(
 ): Promise<void> {
   for (const [sql, key] of [
     [
+      postgresWhatsappRateLimitSql.lockThroughputScope,
+      `whatsapp-throughput:${requested.senderKey}`,
+    ],
+    [
       postgresWhatsappRateLimitSql.lockPairScope,
       `whatsapp-pair:${requested.senderKey}:${requested.recipientKey}`,
     ],
@@ -721,6 +830,9 @@ export function createPostgresWhatsappRateLimitRepository(
           const windowStartAt = new Date(
             Date.parse(requested.reservedAt) - oneDayMilliseconds,
           ).toISOString();
+          const throughputWindowStartAt = new Date(
+            Date.parse(requested.reservedAt) - 1_000,
+          ).toISOString();
           const blockerResult = await transaction.query<
             Record<string, unknown>
           >(postgresWhatsappRateLimitSql.findBlocker, [
@@ -731,6 +843,7 @@ export function createPostgresWhatsappRateLimitRepository(
             requested.reservedAt,
             windowStartAt,
             requested.templateCategory,
+            throughputWindowStartAt,
           ]);
           const blockerRows = requirePostgresRows(blockerResult, 1);
           if (blockerRows.length !== 1) {
@@ -804,6 +917,35 @@ export function createPostgresWhatsappRateLimitRepository(
             }
           }
 
+          const throughputReservationCount =
+            requireNonnegativeInteger(
+              blocker.throughputReservationCount,
+              "throughputReservationCount",
+            );
+          if (
+            throughputReservationCount >=
+              requested.phoneThroughput
+                .maximumOutboundMessagesPerSecond
+          ) {
+            const oldestReservedAt = parseTimestamp(
+              blocker.throughputOldestReservedAt,
+              "throughputOldestReservedAt",
+            );
+            const retryAt = new Date(
+              Date.parse(oldestReservedAt) + 1_000,
+            ).toISOString();
+            if (retryAt <= requested.reservedAt) {
+              throw new Error(
+                "PostgreSQL returned invalid throughput state",
+              );
+            }
+            return Object.freeze({
+              outcome:
+                "phone-throughput-limited" as const,
+              retryAt,
+            });
+          }
+
           if (typeof blocker.recipientDeliveredInWindow !== "boolean") {
             throw new Error("PostgreSQL returned invalid recipient state");
           }
@@ -842,6 +984,11 @@ export function createPostgresWhatsappRateLimitRepository(
             requested.reservedAt,
             requested.pairReservedUntil,
             requested.reservationExpiresAt,
+            requested.policyEventKey,
+            requested.phoneThroughput
+              .maximumMessagesPerSecond,
+            requested.phoneThroughput
+              .maximumOutboundMessagesPerSecond,
           ]);
           const insertedRows = requirePostgresRows(insertResult, 1);
           const saved = insertedRows.length === 1

@@ -77,6 +77,14 @@ test("operator UI reads exact server state and exposes only the bounded system-a
     panelSource,
     /activateSystemAdminWhatsappDeliveryPolicyKillSwitchAction/,
   );
+  assert.match(
+    panelSource,
+    /phoneThroughputMessagesPerSecond/,
+  );
+  assert.match(
+    panelSource,
+    /maximumOutboundMessagesPerSecond/,
+  );
   assert.doesNotMatch(
     panelSource,
     /actorExternalUserId\s*:/,

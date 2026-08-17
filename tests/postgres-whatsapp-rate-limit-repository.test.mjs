@@ -10,6 +10,8 @@ const reservationKey = `whatsapp_rate_reservation_v1_${"a".repeat(64)}`;
 const portfolioKey = `whatsapp_portfolio_v1_${"b".repeat(64)}`;
 const senderKey = `whatsapp_sender_v1_${"c".repeat(64)}`;
 const recipientKey = `whatsapp_recipient_v1_${"d".repeat(64)}`;
+const policyEventKey =
+  `whatsapp_delivery_policy_event_v1_${"e".repeat(64)}`;
 const reservedAt = "2026-08-17T09:00:00.000Z";
 const pairReservedUntil = "2026-08-17T09:00:06.000Z";
 const reservationExpiresAt = "2026-08-17T09:05:00.000Z";
@@ -21,10 +23,15 @@ function reservationCommand(overrides = {}) {
     portfolioKey,
     senderKey,
     recipientKey,
+    policyEventKey,
     templateCategory: "MARKETING",
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
+    },
+    phoneThroughput: {
+      maximumMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 64,
     },
     reservedAt,
     reservationExpiresAt,
@@ -39,6 +46,9 @@ function reservationRow(overrides = {}) {
     portfolioKey,
     senderKey,
     recipientKey,
+    policyEventKey,
+    phoneThroughputMessagesPerSecond: 80,
+    maximumOutboundMessagesPerSecond: 64,
     templateCategory: "MARKETING",
     portfolioLimitKind: "bounded",
     portfolioLimitValue: 250,
@@ -57,6 +67,8 @@ function blockerRow(overrides = {}) {
     providerErrorCode: null,
     pairReservedUntil: null,
     activeReservationExpiresAt: null,
+    throughputReservationCount: "0",
+    throughputOldestReservedAt: null,
     recipientDeliveredInWindow: false,
     occupiedUniqueRecipients: "0",
     ...overrides,
@@ -106,6 +118,15 @@ function fixture(transactionResults = [], queryResults = []) {
           return execute({
             async query(sql, parameters) {
               transactionCalls.push({ sql, parameters });
+              if (
+                sql ===
+                postgresWhatsappRateLimitSql.lockThroughputScope
+              ) {
+                return {
+                  rows: [{ locked: "" }],
+                  rowCount: 1,
+                };
+              }
               const rows = transactionResults[transactionIndex] ?? [];
               transactionIndex += 1;
               return { rows, rowCount: rows.length };
@@ -132,6 +153,7 @@ test("reserves one bounded recipient behind pair and portfolio locks", async () 
   assert.equal(result.outcome, "reserved");
   assert.equal(result.idempotent, false);
   assert.deepEqual(testFixture.transactionCalls.map(({ sql }) => sql), [
+    postgresWhatsappRateLimitSql.lockThroughputScope,
     postgresWhatsappRateLimitSql.lockPairScope,
     postgresWhatsappRateLimitSql.lockPortfolioScope,
     postgresWhatsappRateLimitSql.findReservation,
@@ -219,7 +241,7 @@ test("classifies provider, pair, in-flight, and portfolio blockers", async () =>
       testFixture.dependencies,
     ).reserveBusinessInitiatedMessage(reservationCommand());
     assert.equal(result.outcome, expectedOutcome);
-    assert.equal(testFixture.transactionCalls.length, 4);
+    assert.equal(testFixture.transactionCalls.length, 5);
   }
 });
 
@@ -240,6 +262,30 @@ test("does not consume portfolio capacity twice for a delivered recipient", asyn
     testFixture.dependencies,
   ).reserveBusinessInitiatedMessage(reservationCommand());
   assert.equal(result.outcome, "reserved");
+});
+
+test("returns the exact rolling phone-throughput retry boundary", async () => {
+  const testFixture = fixture([
+    [{ locked: "" }],
+    [{ locked: "" }],
+    [],
+    [
+      blockerRow({
+        throughputReservationCount: "64",
+        throughputOldestReservedAt: new Date(
+          "2026-08-17T08:59:59.500Z",
+        ),
+      }),
+    ],
+  ]);
+  const result = await createPostgresWhatsappRateLimitRepository(
+    testFixture.dependencies,
+  ).reserveBusinessInitiatedMessage(reservationCommand());
+
+  assert.deepEqual(result, {
+    outcome: "phone-throughput-limited",
+    retryAt: "2026-08-17T09:00:00.500Z",
+  });
 });
 
 test("settles once behind the locked reservation and detects conflict", async () => {

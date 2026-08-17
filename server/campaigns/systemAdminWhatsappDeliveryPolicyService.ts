@@ -9,6 +9,7 @@ import type {
   WhatsappCampaignDeliveryPolicyRecord,
 } from "../../shared/domain/whatsappCampaignDeliveryPolicy.ts";
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "../../shared/domain/whatsappRateLimit.ts";
 import type {
@@ -21,6 +22,7 @@ import {
   requireWhatsappDeliveryPolicyTimestamp,
   requireWhatsappDeliveryPolicyVersion,
   requireWhatsappPortfolioCapacity,
+  requireWhatsappPhoneThroughputPolicy,
   requireWhatsappProviderIdentifier,
   requireWhatsappReservationDuration,
 } from "./whatsappCampaignDeliveryPolicyValidation.ts";
@@ -80,6 +82,7 @@ interface NormalizedApprovalInput {
   phoneNumberId: string;
   portfolioCapacity:
     WhatsappPortfolioCapacity;
+  phoneThroughput: WhatsappPhoneThroughputPolicy;
   reservationDurationSeconds: number;
   metaGraphApiVersion: string;
   evidenceDigest: string;
@@ -134,6 +137,8 @@ function normalizeApprovalInput(
       "phoneNumberId",
       "portfolioLimitKind",
       "portfolioLimitValue",
+      "phoneThroughputMessagesPerSecond",
+      "maximumOutboundMessagesPerSecond",
       "reservationDurationSeconds",
       "metaGraphApiVersion",
       "evidenceDigest",
@@ -180,6 +185,11 @@ function normalizeApprovalInput(
         requireWhatsappPortfolioCapacity(
           input.portfolioLimitKind,
           input.portfolioLimitValue,
+        ),
+      phoneThroughput:
+        requireWhatsappPhoneThroughputPolicy(
+          input.phoneThroughputMessagesPerSecond,
+          input.maximumOutboundMessagesPerSecond,
         ),
       reservationDurationSeconds:
         requireWhatsappReservationDuration(
@@ -456,6 +466,12 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
           deliveryState: "enabled",
           portfolioLimitKind,
           portfolioLimitValue,
+          phoneThroughputMessagesPerSecond:
+            normalized.phoneThroughput
+              .maximumMessagesPerSecond,
+          maximumOutboundMessagesPerSecond:
+            normalized.phoneThroughput
+              .maximumOutboundMessagesPerSecond,
           reservationDurationSeconds:
             normalized.reservationDurationSeconds,
           metaGraphApiVersion:
@@ -531,6 +547,12 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
           deliveryState: "disabled",
           portfolioLimitKind,
           portfolioLimitValue,
+          phoneThroughputMessagesPerSecond:
+            latestPolicy.phoneThroughput
+              ?.maximumMessagesPerSecond ?? null,
+          maximumOutboundMessagesPerSecond:
+            latestPolicy.phoneThroughput
+              ?.maximumOutboundMessagesPerSecond ?? null,
           reservationDurationSeconds:
             latestPolicy.reservationDurationSeconds,
           metaGraphApiVersion:

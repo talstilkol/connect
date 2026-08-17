@@ -115,8 +115,13 @@ Snapshot ולשנות את המצב ל־`disabled`. אירועים קיימים 
 `postgresWhatsappRateLimitRepository.ts` ממירים Reservation, ‏Settlement
 ו־Provider cooldown. ‏Pair ו־Portfolio scopes ננעלים באותה Transaction;
 State נגזר רק מ־Evidence תואם, ו־Reservation/Settlement/Cooldown events הם
-Immutable. ‏Replay, ‏Collision וכל Blocker מוחזרים כתוצאה תחומה. המימוש אינו
-מחליף עדיין Phone-throughput limiter, ‏Queue worker או Load evidence.
+Immutable. ‏Replay, ‏Collision וכל Blocker מוחזרים כתוצאה תחומה.
+
+1.18 ‏`0013_whatsapp_phone_throughput.sql` מוסיף לתוכנית השליחה ערך Meta
+מפורש ותקרת Outbound קטנה ממנו. ‏Reservation ננעל לפי Sender אטום, נספר
+בחלון מתגלגל של שנייה ונקשר ל־Policy Event העדכני. Trigger מבצע את אותו
+Guard גם מול INSERT ישיר. המימוש אינו מחליף Queue worker, ‏Load evidence
+או אימות ערך ה־WABA/Phone החי.
 
 ## 2. הסבר למתחילים
 

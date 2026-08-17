@@ -59,6 +59,15 @@ type SystemAdminWhatsappPolicyMessages = {
   unlimitedQuota: string;
   boundedQuotaValue: string;
   chooseTier: string;
+  phoneThroughput: string;
+  choosePhoneThroughput: string;
+  maximumOutboundThroughput: string;
+  outboundThroughputHelp: string;
+  phoneThroughputSummary: (
+    maximum: number,
+    outbound: number,
+  ) => string;
+  legacyThroughputMissing: string;
   reservationDuration: string;
   graphApiVersion: string;
   evidenceDigest: string;
@@ -144,6 +153,15 @@ const messages = {
     unlimitedQuota: "Unlimited",
     boundedQuotaValue: "ערך מכסה מוגבלת",
     chooseTier: "בחירת Tier",
+    phoneThroughput: "תקרת Meta למספר הטלפון (הודעות לשנייה)",
+    choosePhoneThroughput: "בחירת תקרה מאומתת",
+    maximumOutboundThroughput: "תקרת Outbound פנימית (הודעות לשנייה)",
+    outboundThroughputHelp:
+      "חייבת להיות נמוכה מתקרת Meta כדי להשאיר מקום להודעות נכנסות.",
+    phoneThroughputSummary: (maximum, outbound) =>
+      `Throughput: Meta ${maximum}/s · Outbound ${outbound}/s`,
+    legacyThroughputMissing:
+      "Policy ישן — חסר Evidence של Throughput; שליחה חסומה.",
     reservationDuration: "משך Reservation בשניות",
     graphApiVersion: "גרסת Meta Graph API",
     evidenceDigest: "Evidence SHA-256 digest",
@@ -227,6 +245,15 @@ const messages = {
     unlimitedQuota: "Unlimited",
     boundedQuotaValue: "Bounded quota value",
     chooseTier: "Select Tier",
+    phoneThroughput: "Meta phone limit (messages per second)",
+    choosePhoneThroughput: "Select verified limit",
+    maximumOutboundThroughput: "Internal outbound limit (messages per second)",
+    outboundThroughputHelp:
+      "Must be below the Meta limit to reserve capacity for inbound traffic.",
+    phoneThroughputSummary: (maximum, outbound) =>
+      `Throughput: Meta ${maximum}/s · Outbound ${outbound}/s`,
+    legacyThroughputMissing:
+      "Legacy Policy — throughput Evidence is missing; delivery is blocked.",
     reservationDuration: "Reservation duration in seconds",
     graphApiVersion: "Meta Graph API version",
     evidenceDigest: "Evidence SHA-256 digest",
@@ -310,6 +337,15 @@ const messages = {
     unlimitedQuota: "Unlimited",
     boundedQuotaValue: "قيمة الحصة المحدودة",
     chooseTier: "اختيار Tier",
+    phoneThroughput: "حد Meta لرقم الهاتف (رسائل في الثانية)",
+    choosePhoneThroughput: "اختيار الحد الموثق",
+    maximumOutboundThroughput: "حد Outbound الداخلي (رسائل في الثانية)",
+    outboundThroughputHelp:
+      "يجب أن يكون أقل من حد Meta لترك سعة للرسائل الواردة.",
+    phoneThroughputSummary: (maximum, outbound) =>
+      `Throughput: Meta ${maximum}/s · Outbound ${outbound}/s`,
+    legacyThroughputMissing:
+      "Policy قديم — Evidence الخاص بـThroughput مفقود؛ الإرسال محظور.",
     reservationDuration: "مدة Reservation بالثواني",
     graphApiVersion: "إصدار Meta Graph API",
     evidenceDigest: "بصمة Evidence ‏SHA-256",

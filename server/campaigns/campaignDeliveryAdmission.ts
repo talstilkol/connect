@@ -6,6 +6,7 @@ import type {
   CampaignDeliveryAdmissionRequest,
 } from "../../shared/domain/campaignDelivery.ts";
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "../../shared/domain/whatsappRateLimit.ts";
 
@@ -21,7 +22,9 @@ export interface ResolvedCampaignDeliveryRateLimitContext {
   senderKey: string;
   recipientKey: string;
   templateCategory: "MARKETING" | "UTILITY";
+  policyEventKey: string;
   portfolioCapacity: WhatsappPortfolioCapacity;
+  phoneThroughput: WhatsappPhoneThroughputPolicy;
   reservationExpiresAt: string;
 }
 
@@ -140,10 +143,18 @@ export function createCampaignDeliveryAdmission(
             context.senderKey ||
           result.reservation.recipientKey !==
             context.recipientKey ||
+          result.reservation.policyEventKey !==
+            context.policyEventKey ||
           !samePortfolioCapacity(
             result.reservation.portfolioCapacity,
             context.portfolioCapacity,
           ) ||
+          JSON.stringify(
+            result.reservation.phoneThroughput,
+          ) !==
+            JSON.stringify(
+              context.phoneThroughput,
+            ) ||
           result.reservation.reservedAt !==
             request.reservedAt ||
           result.reservation.reservationExpiresAt !==
@@ -217,6 +228,20 @@ export function createCampaignDeliveryAdmission(
           errorCode: "WHATSAPP_PORTFOLIO_LIMITED",
           retryAfterSeconds:
             MAXIMUM_QUEUE_RETRY_DELAY_SECONDS,
+        };
+      }
+
+      if (
+        result.outcome === "phone-throughput-limited"
+      ) {
+        return {
+          outcome: "deferred",
+          errorCode:
+            "WHATSAPP_PHONE_THROUGHPUT_LIMITED",
+          retryAfterSeconds: retryDelaySeconds(
+            result.retryAt,
+            request.reservedAt,
+          ),
         };
       }
 

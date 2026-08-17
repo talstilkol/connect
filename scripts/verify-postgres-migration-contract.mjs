@@ -68,6 +68,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0010_meta_connection_credentials.sql",
   "0011_whatsapp_delivery_policy.sql",
   "0012_whatsapp_rate_limit_ledger.sql",
+  "0013_whatsapp_phone_throughput.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

@@ -214,6 +214,16 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
           "reservationDurationSeconds",
         ),
       );
+    const phoneThroughputMessagesPerSecond = Number(
+      formData.get(
+        "phoneThroughputMessagesPerSecond",
+      ),
+    );
+    const maximumOutboundMessagesPerSecond = Number(
+      formData.get(
+        "maximumOutboundMessagesPerSecond",
+      ),
+    );
     const metaGraphApiVersion =
       formData.get("metaGraphApiVersion");
     const evidenceDigest =
@@ -241,6 +251,15 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
       !Number.isSafeInteger(
         reservationDurationSeconds,
       ) ||
+      ![20, 80, 1000].includes(
+        phoneThroughputMessagesPerSecond,
+      ) ||
+      !Number.isSafeInteger(
+        maximumOutboundMessagesPerSecond,
+      ) ||
+      maximumOutboundMessagesPerSecond < 1 ||
+      maximumOutboundMessagesPerSecond >=
+        phoneThroughputMessagesPerSecond ||
       typeof metaGraphApiVersion !==
         "string" ||
       typeof evidenceDigest !== "string" ||
@@ -276,6 +295,8 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
               "bounded"
                 ? boundedLimit
                 : null,
+            phoneThroughputMessagesPerSecond,
+            maximumOutboundMessagesPerSecond,
             reservationDurationSeconds,
             metaGraphApiVersion,
             evidenceDigest,
@@ -440,6 +461,16 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
                   ),
                 )}
               </span>
+              <span>
+                {record.phoneThroughput
+                  ? messages.phoneThroughputSummary(
+                      record.phoneThroughput
+                        .maximumMessagesPerSecond,
+                      record.phoneThroughput
+                        .maximumOutboundMessagesPerSecond,
+                    )
+                  : messages.legacyThroughputMissing}
+              </span>
             </div>
           ) : (
             <p>
@@ -485,6 +516,48 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
                 <option value="10000">10,000</option>
                 <option value="100000">100,000</option>
               </select>
+            </label>
+            <label>
+              <span>
+                {messages.phoneThroughput}
+              </span>
+              <select
+                name="phoneThroughputMessagesPerSecond"
+                required
+                defaultValue={
+                  record?.phoneThroughput
+                    ?.maximumMessagesPerSecond
+                    ?.toString() ?? ""
+                }
+              >
+                <option value="" disabled>
+                  {messages.choosePhoneThroughput}
+                </option>
+                <option value="20">20</option>
+                <option value="80">80</option>
+                <option value="1000">1,000</option>
+              </select>
+            </label>
+            <label>
+              <span>
+                {messages.maximumOutboundThroughput}
+              </span>
+              <input
+                name="maximumOutboundMessagesPerSecond"
+                type="number"
+                min="1"
+                max="999"
+                step="1"
+                defaultValue={
+                  record?.phoneThroughput
+                    ?.maximumOutboundMessagesPerSecond
+                }
+                aria-describedby="outbound-throughput-help"
+                required
+              />
+              <small id="outbound-throughput-help">
+                {messages.outboundThroughputHelp}
+              </small>
             </label>
             <label>
               <span>

@@ -2,12 +2,14 @@ import {
   whatsappProviderCooldownErrorCodes,
   whatsappProviderCooldownScopes,
   whatsappPortfolioMessagingLimits,
+  whatsappPhoneThroughputLimits,
   whatsappRateLimitSettlementOutcomes,
   type WhatsappProviderCooldown,
   type WhatsappProviderCooldownErrorCode,
   type WhatsappProviderCooldownResult,
   type WhatsappProviderCooldownScope,
   type WhatsappPortfolioCapacity,
+  type WhatsappPhoneThroughputPolicy,
   type WhatsappPortfolioMessagingLimit,
   type WhatsappRateLimitReservation,
   type WhatsappRateLimitReservationResult,
@@ -30,6 +32,8 @@ const senderKeyPattern =
   /^whatsapp_sender_v1_[0-9a-f]{64}$/;
 const recipientKeyPattern =
   /^whatsapp_recipient_v1_[0-9a-f]{64}$/;
+const policyEventKeyPattern =
+  /^whatsapp_delivery_policy_event_v1_[0-9a-f]{64}$/;
 const canonicalTimestampPattern =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
@@ -39,6 +43,9 @@ const RESERVATION_COLUMNS_SQL = `
   portfolio_key AS portfolioKey,
   sender_key AS senderKey,
   recipient_key AS recipientKey,
+  policy_event_key AS policyEventKey,
+  phone_throughput_messages_per_second AS phoneThroughputMessagesPerSecond,
+  maximum_outbound_messages_per_second AS maximumOutboundMessagesPerSecond,
   portfolio_limit_kind AS portfolioLimitKind,
   portfolio_limit_value AS portfolioLimitValue,
   reserved_at AS reservedAt,
@@ -53,6 +60,9 @@ const RESERVE_SQL = `
     portfolio_key,
     sender_key,
     recipient_key,
+    policy_event_key,
+    phone_throughput_messages_per_second,
+    maximum_outbound_messages_per_second,
     portfolio_limit_kind,
     portfolio_limit_value,
     reserved_at,
@@ -66,6 +76,9 @@ const RESERVE_SQL = `
     ?3,
     ?4,
     ?5,
+    ?13,
+    ?14,
+    ?15,
     ?6,
     ?7,
     ?8,
@@ -100,6 +113,13 @@ const RESERVE_SQL = `
           )
         )
     )
+    AND (
+      SELECT count(*)
+      FROM whatsapp_rate_limit_reservations
+      WHERE sender_key = ?4
+        AND reserved_at > ?16
+        AND reserved_at <= ?8
+    ) < ?15
     AND NOT EXISTS (
       SELECT 1
       FROM whatsapp_pair_rate_limit_state
@@ -246,6 +266,20 @@ const FIND_BLOCKER_SQL = `
     ) AS activeReservationExpiresAt,
     (
       SELECT count(*)
+      FROM whatsapp_rate_limit_reservations
+      WHERE sender_key = ?3
+        AND reserved_at > ?8
+        AND reserved_at <= ?5
+    ) AS throughputReservationCount,
+    (
+      SELECT min(reserved_at)
+      FROM whatsapp_rate_limit_reservations
+      WHERE sender_key = ?3
+        AND reserved_at > ?8
+        AND reserved_at <= ?5
+    ) AS throughputOldestReservedAt,
+    (
+      SELECT count(*)
       FROM whatsapp_portfolio_recipient_rate_limit_state
       WHERE portfolio_key = ?2
         AND (
@@ -330,6 +364,9 @@ interface ReservationRow {
   portfolioKey: unknown;
   senderKey: unknown;
   recipientKey: unknown;
+  policyEventKey: unknown;
+  phoneThroughputMessagesPerSecond: unknown;
+  maximumOutboundMessagesPerSecond: unknown;
   portfolioLimitKind: unknown;
   portfolioLimitValue: unknown;
   reservedAt: unknown;
@@ -344,6 +381,8 @@ interface BlockerRow {
   providerErrorCode: unknown;
   pairReservedUntil: unknown;
   activeReservationExpiresAt: unknown;
+  throughputReservationCount: unknown;
+  throughputOldestReservedAt: unknown;
   occupiedUniqueRecipients: unknown;
 }
 
@@ -367,8 +406,10 @@ export interface WhatsappRateLimitReservationCommand {
   portfolioKey: unknown;
   senderKey: unknown;
   recipientKey: unknown;
+  policyEventKey: unknown;
   templateCategory: unknown;
   portfolioCapacity: unknown;
+  phoneThroughput: unknown;
   reservedAt: unknown;
   reservationExpiresAt: unknown;
 }
@@ -514,6 +555,51 @@ function requirePortfolioCapacity(
   throw new Error("portfolioCapacity is invalid");
 }
 
+function requirePhoneThroughputPolicy(
+  value: unknown,
+): WhatsappPhoneThroughputPolicy {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value)
+  ) {
+    throw new Error("phoneThroughput is invalid");
+  }
+
+  const record = value as Record<string, unknown>;
+
+  if (
+    Object.keys(record).length !== 2 ||
+    !Object.hasOwn(
+      record,
+      "maximumMessagesPerSecond",
+    ) ||
+    !Object.hasOwn(
+      record,
+      "maximumOutboundMessagesPerSecond",
+    ) ||
+    !whatsappPhoneThroughputLimits.includes(
+      record.maximumMessagesPerSecond as never,
+    ) ||
+    !Number.isSafeInteger(
+      record.maximumOutboundMessagesPerSecond,
+    ) ||
+    Number(record.maximumOutboundMessagesPerSecond) < 1 ||
+    Number(record.maximumOutboundMessagesPerSecond) >=
+      Number(record.maximumMessagesPerSecond)
+  ) {
+    throw new Error("phoneThroughput is invalid");
+  }
+
+  return {
+    maximumMessagesPerSecond:
+      record.maximumMessagesPerSecond as (typeof whatsappPhoneThroughputLimits)[number],
+    maximumOutboundMessagesPerSecond: Number(
+      record.maximumOutboundMessagesPerSecond,
+    ),
+  };
+}
+
 function requireSettlementOutcome(
   value: unknown,
 ): WhatsappRateLimitSettlementOutcome {
@@ -650,10 +736,28 @@ function parseReservation(
       recipientKeyPattern,
       "D1 recipientKey",
     ),
+    policyEventKey:
+      row.policyEventKey === null
+        ? null
+        : requirePattern(
+            row.policyEventKey,
+            policyEventKeyPattern,
+            "D1 policyEventKey",
+          ),
     portfolioCapacity: parseCapacity(
       row.portfolioLimitKind,
       row.portfolioLimitValue,
     ),
+    phoneThroughput:
+      row.phoneThroughputMessagesPerSecond === null &&
+      row.maximumOutboundMessagesPerSecond === null
+        ? null
+        : requirePhoneThroughputPolicy({
+            maximumMessagesPerSecond:
+              row.phoneThroughputMessagesPerSecond,
+            maximumOutboundMessagesPerSecond:
+              row.maximumOutboundMessagesPerSecond,
+          }),
     reservedAt,
     pairReservedUntil,
     reservationExpiresAt,
@@ -755,10 +859,13 @@ function sameReservation(
     left.portfolioKey === right.portfolioKey &&
     left.senderKey === right.senderKey &&
     left.recipientKey === right.recipientKey &&
+    left.policyEventKey === right.policyEventKey &&
     sameCapacity(
       left.portfolioCapacity,
       right.portfolioCapacity,
     ) &&
+    JSON.stringify(left.phoneThroughput) ===
+      JSON.stringify(right.phoneThroughput) &&
     left.reservedAt === right.reservedAt &&
     left.pairReservedUntil === right.pairReservedUntil &&
     left.reservationExpiresAt ===
@@ -782,7 +889,12 @@ function sameProviderCooldown(
 
 function normalizeReservation(
   command: WhatsappRateLimitReservationCommand,
-): WhatsappRateLimitReservation & {
+): Omit<
+  WhatsappRateLimitReservation,
+  "policyEventKey" | "phoneThroughput"
+> & {
+  policyEventKey: string;
+  phoneThroughput: WhatsappPhoneThroughputPolicy;
   templateCategory: "MARKETING" | "UTILITY";
 } {
   const reservedAt = requireTimestamp(
@@ -831,12 +943,21 @@ function normalizeReservation(
       recipientKeyPattern,
       "recipientKey",
     ),
+    policyEventKey: requirePattern(
+      command.policyEventKey,
+      policyEventKeyPattern,
+      "policyEventKey",
+    ),
     templateCategory: requireTemplateCategory(
       command.templateCategory,
     ),
     portfolioCapacity: requirePortfolioCapacity(
       command.portfolioCapacity,
     ),
+    phoneThroughput:
+      requirePhoneThroughputPolicy(
+        command.phoneThroughput,
+      ),
     reservedAt,
     pairReservedUntil,
     reservationExpiresAt,
@@ -922,6 +1043,9 @@ export function createWhatsappRateLimitRepository(
         Date.parse(requested.reservedAt) -
           ONE_DAY_MILLISECONDS,
       ).toISOString();
+      const throughputWindowStartAt = new Date(
+        Date.parse(requested.reservedAt) - 1_000,
+      ).toISOString();
       const inserted = await database
         .prepare(RESERVE_SQL)
         .bind(
@@ -937,6 +1061,12 @@ export function createWhatsappRateLimitRepository(
           requested.reservationExpiresAt,
           windowStartAt,
           requested.templateCategory,
+          requested.policyEventKey,
+          requested.phoneThroughput
+            .maximumMessagesPerSecond,
+          requested.phoneThroughput
+            .maximumOutboundMessagesPerSecond,
+          throughputWindowStartAt,
         )
         .first<ReservationRow>();
 
@@ -993,6 +1123,7 @@ export function createWhatsappRateLimitRepository(
           requested.reservedAt,
           windowStartAt,
           requested.templateCategory,
+          throughputWindowStartAt,
         )
         .first<BlockerRow>();
 
@@ -1083,6 +1214,37 @@ export function createWhatsappRateLimitRepository(
             retryAt,
           };
         }
+      }
+
+      const throughputReservationCount =
+        requireNonnegativeInteger(
+          blocker.throughputReservationCount,
+          "D1 throughputReservationCount",
+        );
+
+      if (
+        throughputReservationCount >=
+          requested.phoneThroughput
+            .maximumOutboundMessagesPerSecond
+      ) {
+        const oldestReservedAt = requireTimestamp(
+          blocker.throughputOldestReservedAt,
+          "D1 throughputOldestReservedAt",
+        );
+        const retryAt = new Date(
+          Date.parse(oldestReservedAt) + 1_000,
+        ).toISOString();
+
+        if (retryAt <= requested.reservedAt) {
+          throw new Error(
+            "D1 returned invalid throughput state",
+          );
+        }
+
+        return {
+          outcome: "phone-throughput-limited",
+          retryAt,
+        };
       }
 
       if (requested.portfolioCapacity.kind === "bounded") {

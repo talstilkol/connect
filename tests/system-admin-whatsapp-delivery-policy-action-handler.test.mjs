@@ -23,6 +23,10 @@ const record = {
     kind: "bounded",
     maximumUniqueRecipients: 250,
   },
+  phoneThroughput: {
+    maximumMessagesPerSecond: 80,
+    maximumOutboundMessagesPerSecond: 64,
+  },
   reservationDurationSeconds: 300,
   metaGraphApiVersion: "v21.0",
   evidenceDigest: "b".repeat(64),

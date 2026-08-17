@@ -30,6 +30,17 @@ const recipientKey = key(
 );
 const reservedAt = "2026-08-16T10:00:00.000Z";
 const expiresAt = "2026-08-16T10:01:00.000Z";
+const policyRecordedAt =
+  "2026-08-16T09:59:00.000Z";
+const policyExpiresAt =
+  "2026-08-17T09:59:00.000Z";
+
+function policyEventKeyForTenant(tenantId) {
+  return key(
+    "whatsapp_delivery_policy_event_v1_",
+    10_000 + tenantId,
+  );
+}
 
 function key(prefix, value) {
   return `${prefix}${value.toString(16).padStart(64, "0")}`;
@@ -105,7 +116,70 @@ class SqliteD1Database {
   }
 }
 
-async function createSqliteD1() {
+function insertConnectedPolicy(
+  database,
+  tenantId,
+  maximumMessagesPerSecond = 1000,
+  maximumOutboundMessagesPerSecond = 999,
+) {
+  database.prepare(`
+    INSERT INTO meta_connections (
+      tenant_id,
+      business_portfolio_id,
+      waba_id,
+      phone_number_id,
+      status,
+      webhook_subscribed_at,
+      connected_at,
+      version,
+      created_at,
+      updated_at
+    ) VALUES (
+      ?1, ?2, ?3, ?4, 'connected', ?5, ?5, 1, ?5, ?5
+    )
+  `).run(
+    tenantId,
+    `portfolio-${tenantId}`,
+    `waba-${tenantId}`,
+    `phone-${tenantId}`,
+    policyRecordedAt,
+  );
+  database.prepare(`
+    INSERT INTO whatsapp_campaign_delivery_policy_events (
+      event_key,
+      tenant_id,
+      connection_version,
+      policy_version,
+      delivery_state,
+      portfolio_limit_kind,
+      portfolio_limit_value,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
+      reservation_duration_seconds,
+      meta_graph_api_version,
+      evidence_digest,
+      evidence_checked_at,
+      evidence_expires_at,
+      actor_external_user_id,
+      recorded_at,
+      created_at
+    ) VALUES (
+      ?1, ?2, 1, 1, 'enabled', 'bounded', 250,
+      ?3, ?4, 300, 'v21.0', ?5, ?6, ?7,
+      'tal-rate-limit-research', ?6, ?6
+    )
+  `).run(
+    policyEventKeyForTenant(tenantId),
+    tenantId,
+    maximumMessagesPerSecond,
+    maximumOutboundMessagesPerSecond,
+    tenantId.toString(16).padStart(64, "0"),
+    policyRecordedAt,
+    policyExpiresAt,
+  );
+}
+
+async function createSqliteD1(options = {}) {
   const migrationsUrl = new URL(
     "../drizzle/",
     import.meta.url,
@@ -135,6 +209,12 @@ async function createSqliteD1() {
       updated_at
     ) VALUES (7, 'Tenant 7', 'active', ?1, ?1)
   `).run(reservedAt);
+  insertConnectedPolicy(
+    database,
+    7,
+    options.maximumMessagesPerSecond,
+    options.maximumOutboundMessagesPerSecond,
+  );
 
   return {
     database,
@@ -145,25 +225,107 @@ async function createSqliteD1() {
 }
 
 function reservationCommand(overrides = {}) {
+  const tenantId = overrides.tenantId ?? 7;
+  const maximumMessagesPerSecond =
+    overrides.phoneThroughput
+      ?.maximumMessagesPerSecond ?? 1000;
+  const maximumOutboundMessagesPerSecond =
+    overrides.phoneThroughput
+      ?.maximumOutboundMessagesPerSecond ?? 999;
+
   return {
     reservationKey: key(
       "whatsapp_rate_reservation_v1_",
       10,
     ),
-    tenantId: 7,
+    tenantId,
     portfolioKey,
     senderKey,
     recipientKey,
+    policyEventKey:
+      policyEventKeyForTenant(tenantId),
     templateCategory: "UTILITY",
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
+    },
+    phoneThroughput: {
+      maximumMessagesPerSecond,
+      maximumOutboundMessagesPerSecond,
     },
     reservedAt,
     reservationExpiresAt: expiresAt,
     ...overrides,
   };
 }
+
+test("enforces the approved rolling phone throughput before provider access", async () => {
+  const phoneThroughput = {
+    maximumMessagesPerSecond: 20,
+    maximumOutboundMessagesPerSecond: 2,
+  };
+  const { repository } = await createSqliteD1(
+    phoneThroughput,
+  );
+
+  for (let value = 1; value <= 2; value += 1) {
+    const result = await repository
+      .reserveBusinessInitiatedMessage(
+        reservationCommand({
+          reservationKey: key(
+            "whatsapp_rate_reservation_v1_",
+            20_000 + value,
+          ),
+          recipientKey: key(
+            "whatsapp_recipient_v1_",
+            20_000 + value,
+          ),
+          phoneThroughput,
+        }),
+      );
+    assert.equal(result.outcome, "reserved");
+  }
+
+  const limited = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          20_003,
+        ),
+        recipientKey: key(
+          "whatsapp_recipient_v1_",
+          20_003,
+        ),
+        phoneThroughput,
+      }),
+    );
+  assert.deepEqual(limited, {
+    outcome: "phone-throughput-limited",
+    retryAt: atOffset(reservedAt, 1_000),
+  });
+
+  const next = await repository
+    .reserveBusinessInitiatedMessage(
+      reservationCommand({
+        reservationKey: key(
+          "whatsapp_rate_reservation_v1_",
+          20_004,
+        ),
+        recipientKey: key(
+          "whatsapp_recipient_v1_",
+          20_004,
+        ),
+        phoneThroughput,
+        reservedAt: atOffset(reservedAt, 1_000),
+        reservationExpiresAt: atOffset(
+          expiresAt,
+          1_000,
+        ),
+      }),
+    );
+  assert.equal(next.outcome, "reserved");
+});
 
 test("atomically reserves pair and portfolio state and repeats idempotently", async () => {
   const { database, repository } =
@@ -263,6 +425,7 @@ test("shares provider pair and recipient locks across Connect tenants", async ()
       updated_at
     ) VALUES (8, 'Tenant 8', 'active', ?1, ?1)
   `).run(reservedAt);
+  insertConnectedPolicy(database, 8);
   await repository.reserveBusinessInitiatedMessage(
     reservationCommand(),
   );

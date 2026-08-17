@@ -148,6 +148,8 @@ function policyEvent(overrides = {}) {
     deliveryState: "enabled",
     portfolioLimitKind: "bounded",
     portfolioLimitValue: 250,
+    phoneThroughputMessagesPerSecond: 80,
+    maximumOutboundMessagesPerSecond: 64,
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
     evidenceDigest: "b".repeat(64),
@@ -172,6 +174,8 @@ function insertPolicy(database, overrides = {}) {
       delivery_state,
       portfolio_limit_kind,
       portfolio_limit_value,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
       reservation_duration_seconds,
       meta_graph_api_version,
       evidence_digest,
@@ -182,7 +186,8 @@ function insertPolicy(database, overrides = {}) {
       created_at
     ) VALUES (
       ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
-      ?9, ?10, ?11, ?12, ?13, ?14, ?15
+      ?9, ?10, ?11, ?12, ?13, ?14, ?15,
+      ?16, ?17
     )
   `).run(
     event.eventKey,
@@ -192,6 +197,8 @@ function insertPolicy(database, overrides = {}) {
     event.deliveryState,
     event.portfolioLimitKind,
     event.portfolioLimitValue,
+    event.phoneThroughputMessagesPerSecond,
+    event.maximumOutboundMessagesPerSecond,
     event.reservationDurationSeconds,
     event.metaGraphApiVersion,
     event.evidenceDigest,
@@ -224,6 +231,8 @@ function recordCommand(overrides = {}) {
     deliveryState: "enabled",
     portfolioLimitKind: "bounded",
     portfolioLimitValue: 250,
+    phoneThroughputMessagesPerSecond: 80,
+    maximumOutboundMessagesPerSecond: 64,
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
     evidenceDigest: "b".repeat(64),
@@ -253,6 +262,10 @@ test("loads only current enabled evidence tied to the exact Meta connection", as
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
+    },
+    phoneThroughput: {
+      maximumMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 64,
     },
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
@@ -287,7 +300,13 @@ test("maps D1 evidence to the narrow runtime policy contract", async () => {
 
   assert.equal(source.isConfigured(), true);
   assert.deepEqual(await source.load(lookup()), {
+    eventKey:
+      `whatsapp_delivery_policy_event_v1_${"a".repeat(64)}`,
     portfolioCapacity: { kind: "unlimited" },
+    phoneThroughput: {
+      maximumMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 64,
+    },
     reservationDurationSeconds: 600,
   });
 });

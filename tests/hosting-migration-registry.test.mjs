@@ -217,6 +217,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0010_meta_connection_credentials.sql",
     "postgres/migrations/0011_whatsapp_delivery_policy.sql",
     "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
+    "postgres/migrations/0013_whatsapp_phone_throughput.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -246,7 +247,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /executable bootstrap cannot be safely composed/);
   assert.match(boundary.cutoverBlocker, /provider-bound distributed mutation rate-limit adapter/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
-  assert.match(boundary.cutoverBlocker, /35-migration schema parity/);
+  assert.match(boundary.cutoverBlocker, /36-migration schema parity/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
@@ -296,6 +297,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0010_meta_connection_credentials.sql",
     "postgres/migrations/0011_whatsapp_delivery_policy.sql",
     "postgres/migrations/0012_whatsapp_rate_limit_ledger.sql",
+    "postgres/migrations/0013_whatsapp_phone_throughput.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -303,17 +305,20 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /thirteen ordered/);
+  assert.match(database.cutoverBlocker, /fourteen ordered/);
   assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
   assert.match(database.cutoverBlocker, /atomic contact-profile plus import-outcome writes/);
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /six real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /seven real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
   assert.match(database.cutoverBlocker, /seventeen-adapter foundation/);
-  assert.match(database.cutoverBlocker, /atomic delivery-policy audit\/replay\/conflict and disable behavior/);
-  assert.match(database.cutoverBlocker, /WhatsApp pair\/portfolio reservation replay, settlement, cooldown and tamper rejection/);
+  assert.match(
+    database.cutoverBlocker,
+    /atomic delivery-policy audit\/replay\/conflict, disable and re-enable behavior/,
+  );
+  assert.match(database.cutoverBlocker, /WhatsApp pair\/portfolio\/phone-throughput reservation replay, settlement, cooldown and tamper rejection/);
   assert.match(database.cutoverBlocker, /owned API runtime composition/);
   assert.match(database.cutoverBlocker, /exact readiness query/);
   assert.match(database.cutoverBlocker, /contacts\.list/);
@@ -321,6 +326,6 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /complete authenticated six-source reporting HTTP path/);
   assert.match(database.cutoverBlocker, /AI reporting constraints/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
-  assert.match(database.cutoverBlocker, /35-migration parity conversion/);
+  assert.match(database.cutoverBlocker, /36-migration parity conversion/);
   assert.match(database.cutoverBlocker, /remaining repository DML\/concurrency/);
 });

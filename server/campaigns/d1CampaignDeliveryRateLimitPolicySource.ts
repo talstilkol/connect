@@ -24,8 +24,11 @@ export function createD1CampaignDeliveryRateLimitPolicySource(
       }
 
       return {
+        eventKey: policy.eventKey,
         portfolioCapacity:
           policy.portfolioCapacity,
+        phoneThroughput:
+          policy.phoneThroughput,
         reservationDurationSeconds:
           policy.reservationDurationSeconds,
       };

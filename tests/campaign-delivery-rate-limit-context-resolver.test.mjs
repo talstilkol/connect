@@ -42,9 +42,15 @@ function connection(overrides = {}) {
 
 function policy(overrides = {}) {
   return {
+    eventKey:
+      `whatsapp_delivery_policy_event_v1_${"9".repeat(64)}`,
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
+    },
+    phoneThroughput: {
+      maximumMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 64,
     },
     reservationDurationSeconds: 300,
     ...overrides,

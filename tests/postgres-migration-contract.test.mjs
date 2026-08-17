@@ -32,6 +32,7 @@ const contactOrganizationImportSchema = migrationSources[9];
 const metaConnectionCredentialSchema = migrationSources[10];
 const whatsappDeliveryPolicySchema = migrationSources[11];
 const whatsappRateLimitLedgerSchema = migrationSources[12];
+const whatsappPhoneThroughputSchema = migrationSources[13];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -48,14 +49,30 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0010_meta_connection_credentials.sql",
     "0011_whatsapp_delivery_policy.sql",
     "0012_whatsapp_rate_limit_ledger.sql",
+    "0013_whatsapp_phone_throughput.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 13,
+      migrationCount: 14,
       findings: [],
     },
+  );
+});
+
+test("defines provider-bound PostgreSQL phone throughput enforcement", () => {
+  assert.match(
+    whatsappPhoneThroughputSchema,
+    /phone_throughput_messages_per_second IN \(20, 80, 1000\)/,
+  );
+  assert.match(
+    whatsappPhoneThroughputSchema,
+    /maximum_outbound_messages_per_second[\s\S]*< phone_throughput_messages_per_second/,
+  );
+  assert.match(
+    whatsappPhoneThroughputSchema,
+    /pg_advisory_xact_lock[\s\S]*interval '1 second'[\s\S]*phone throughput limit exceeded/,
   );
 });
 

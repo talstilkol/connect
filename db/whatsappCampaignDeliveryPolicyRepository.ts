@@ -4,6 +4,7 @@ import type {
   WhatsappCampaignDeliveryPolicyState,
 } from "../shared/domain/whatsappCampaignDeliveryPolicy.ts";
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "../shared/domain/whatsappRateLimit.ts";
 import {
@@ -18,6 +19,7 @@ import {
   requireWhatsappDeliveryPolicyTimestamp,
   requireWhatsappDeliveryPolicyVersion,
   requireWhatsappPortfolioCapacity,
+  requireWhatsappPhoneThroughputPolicy,
   requireWhatsappProviderIdentifier,
   requireWhatsappReservationDuration,
 } from "../server/campaigns/whatsappCampaignDeliveryPolicyValidation.ts";
@@ -34,6 +36,8 @@ const POLICY_COLUMNS_SQL = `
   policy.delivery_state AS deliveryState,
   policy.portfolio_limit_kind AS portfolioLimitKind,
   policy.portfolio_limit_value AS portfolioLimitValue,
+  policy.phone_throughput_messages_per_second AS phoneThroughputMessagesPerSecond,
+  policy.maximum_outbound_messages_per_second AS maximumOutboundMessagesPerSecond,
   policy.reservation_duration_seconds AS reservationDurationSeconds,
   policy.meta_graph_api_version AS metaGraphApiVersion,
   policy.evidence_digest AS evidenceDigest,
@@ -83,6 +87,8 @@ const INSERT_POLICY_SQL = `
     delivery_state,
     portfolio_limit_kind,
     portfolio_limit_value,
+    phone_throughput_messages_per_second,
+    maximum_outbound_messages_per_second,
     reservation_duration_seconds,
     meta_graph_api_version,
     evidence_digest,
@@ -93,7 +99,8 @@ const INSERT_POLICY_SQL = `
     created_at
   ) VALUES (
     ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
-    ?9, ?10, ?11, ?12, ?13, ?14, ?14
+    ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
+    ?16
   )
 `;
 
@@ -105,6 +112,8 @@ interface PolicyRow {
   deliveryState: unknown;
   portfolioLimitKind: unknown;
   portfolioLimitValue: unknown;
+  phoneThroughputMessagesPerSecond: unknown;
+  maximumOutboundMessagesPerSecond: unknown;
   reservationDurationSeconds: unknown;
   metaGraphApiVersion: unknown;
   evidenceDigest: unknown;
@@ -128,6 +137,7 @@ export interface WhatsappCampaignDeliveryPolicyEvidence {
   connectionVersion: number;
   policyVersion: number;
   portfolioCapacity: WhatsappPortfolioCapacity;
+  phoneThroughput: WhatsappPhoneThroughputPolicy;
   reservationDurationSeconds: number;
   metaGraphApiVersion: string;
   evidenceDigest: string;
@@ -143,6 +153,8 @@ export interface RecordWhatsappCampaignDeliveryPolicyCommand {
   deliveryState: unknown;
   portfolioLimitKind: unknown;
   portfolioLimitValue: unknown;
+  phoneThroughputMessagesPerSecond: unknown;
+  maximumOutboundMessagesPerSecond: unknown;
   reservationDurationSeconds: unknown;
   metaGraphApiVersion: unknown;
   evidenceDigest: unknown;
@@ -173,6 +185,8 @@ interface NormalizedCommand {
     WhatsappCampaignDeliveryPolicyState;
   portfolioCapacity:
     WhatsappPortfolioCapacity;
+  phoneThroughput:
+    WhatsappPhoneThroughputPolicy | null;
   reservationDurationSeconds: number;
   metaGraphApiVersion: string;
   evidenceDigest: string;
@@ -241,6 +255,14 @@ function parsePolicyRow(
         row.portfolioLimitKind,
         row.portfolioLimitValue,
       ),
+    phoneThroughput:
+      row.phoneThroughputMessagesPerSecond === null &&
+      row.maximumOutboundMessagesPerSecond === null
+        ? null
+        : requireWhatsappPhoneThroughputPolicy(
+            row.phoneThroughputMessagesPerSecond,
+            row.maximumOutboundMessagesPerSecond,
+          ),
     reservationDurationSeconds:
       requireWhatsappReservationDuration(
         row.reservationDurationSeconds,
@@ -288,6 +310,12 @@ function toEvidence(
     policyVersion: record.policyVersion,
     portfolioCapacity:
       record.portfolioCapacity,
+    phoneThroughput:
+      record.phoneThroughput ?? (() => {
+        throw new Error(
+          "WhatsApp delivery policy lacks throughput evidence",
+        );
+      })(),
     reservationDurationSeconds:
       record.reservationDurationSeconds,
     metaGraphApiVersion:
@@ -359,6 +387,15 @@ function normalizeCommand(
         command.portfolioLimitKind,
         command.portfolioLimitValue,
       ),
+    phoneThroughput:
+      deliveryState === "disabled" &&
+      command.phoneThroughputMessagesPerSecond == null &&
+      command.maximumOutboundMessagesPerSecond == null
+        ? null
+        : requireWhatsappPhoneThroughputPolicy(
+            command.phoneThroughputMessagesPerSecond,
+            command.maximumOutboundMessagesPerSecond,
+          ),
     reservationDurationSeconds:
       requireWhatsappReservationDuration(
         command.reservationDurationSeconds,
@@ -401,6 +438,8 @@ function samePolicySnapshot(
   return (
     JSON.stringify(left.portfolioCapacity) ===
       JSON.stringify(right.portfolioCapacity) &&
+    JSON.stringify(left.phoneThroughput) ===
+      JSON.stringify(right.phoneThroughput) &&
     left.reservationDurationSeconds ===
       right.reservationDurationSeconds &&
     left.metaGraphApiVersion ===
@@ -507,6 +546,12 @@ export function createWhatsappCampaignDeliveryPolicyRepository(
           ...normalized,
           portfolioLimitKind,
           portfolioLimitValue,
+          phoneThroughputMessagesPerSecond:
+            normalized.phoneThroughput
+              ?.maximumMessagesPerSecond ?? null,
+          maximumOutboundMessagesPerSecond:
+            normalized.phoneThroughput
+              ?.maximumOutboundMessagesPerSecond ?? null,
         });
       const current =
         await findLatestPolicyEvent(
@@ -553,6 +598,10 @@ export function createWhatsappCampaignDeliveryPolicyRepository(
             normalized.deliveryState,
             portfolioLimitKind,
             portfolioLimitValue,
+            normalized.phoneThroughput
+              ?.maximumMessagesPerSecond ?? null,
+            normalized.phoneThroughput
+              ?.maximumOutboundMessagesPerSecond ?? null,
             normalized.reservationDurationSeconds,
             normalized.metaGraphApiVersion,
             normalized.evidenceDigest,

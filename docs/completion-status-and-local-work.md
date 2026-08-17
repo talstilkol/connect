@@ -1139,6 +1139,20 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 ה־Workspace וה־System Admin — **לא נותרה עבודת לוקליזציה מקומית
 ידועה** בשלוש השפות. ‏Package/Quota/Contact נשארו מחוץ למימוש מפני
 שמודל המוצר טרם הוכרע, ולא מפני שחסר להם תרגום.
+
+4.4 ‏Provider Throughput Limiter המקומי הושלם. ‏Policy חדש מחייב
+Phone throughput רשמי של `20/80/1000` ותקרת Outbound נמוכה ממנו;
+Legacy Policy נכשל סגור אך נשאר ניתן להשבתה. ‏D1 ו־PostgreSQL אוכפים
+חלון מתגלגל של שנייה לפני פנייה ל־Meta, ו־PostgreSQL מגן גם על כתיבה
+ישירה באמצעות Trigger ו־Advisory lock. מסך System Admin, החוזה המשותף,
+ה־Registry והבדיקות משתמשים באותה Evidence. בדיקת PostgreSQL 16.13
+זמנית עברה עם `PASS (14 migrations, 7 concurrency scenarios)`; השרת
+הזמני נעצר והתיקייה נמחקה. ערך החשבון החי, Queue worker, ‏Sender חי
+ו־Load evidence נשארים חסומים עד Credentials ואישור חיצוני של טל.
+
+4.5 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **86–188 שעות פיתוח
+נטו**. הטווח אינו כולל המתנה לחשבונות, אישורי Meta, פריסת Staging או
+חלון Pilot; הוא יתעדכן לאחר כל Slice שנבדק ונדחף.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

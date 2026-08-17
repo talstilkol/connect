@@ -1,4 +1,5 @@
 import type {
+  WhatsappPhoneThroughputPolicy,
   WhatsappPortfolioCapacity,
 } from "../../shared/domain/whatsappRateLimit.ts";
 import type {
@@ -15,6 +16,7 @@ import {
   requireWhatsappDeliveryPolicyTimestamp,
   requireWhatsappDeliveryPolicyVersion,
   requireWhatsappPortfolioCapacity,
+  requireWhatsappPhoneThroughputPolicy,
   requireWhatsappProviderIdentifier,
   requireWhatsappReservationDuration,
 } from "./whatsappCampaignDeliveryPolicyValidation.ts";
@@ -26,6 +28,8 @@ export interface WhatsappCampaignDeliveryPolicyEventIdentity {
   deliveryState: unknown;
   portfolioLimitKind: unknown;
   portfolioLimitValue: unknown;
+  phoneThroughputMessagesPerSecond: unknown;
+  maximumOutboundMessagesPerSecond: unknown;
   reservationDurationSeconds: unknown;
   metaGraphApiVersion: unknown;
   evidenceDigest: unknown;
@@ -42,6 +46,8 @@ interface NormalizedIdentity {
     WhatsappCampaignDeliveryPolicyState;
   portfolioCapacity:
     WhatsappPortfolioCapacity;
+  phoneThroughput:
+    WhatsappPhoneThroughputPolicy | null;
   reservationDurationSeconds: number;
   metaGraphApiVersion: string;
   evidenceDigest: string;
@@ -54,6 +60,20 @@ function normalizeIdentity(
   identity:
     WhatsappCampaignDeliveryPolicyEventIdentity,
 ): NormalizedIdentity {
+  const deliveryState =
+    requireWhatsappDeliveryPolicyState(
+      identity.deliveryState,
+    );
+  const phoneThroughput =
+    deliveryState === "disabled" &&
+    identity.phoneThroughputMessagesPerSecond == null &&
+    identity.maximumOutboundMessagesPerSecond == null
+      ? null
+      : requireWhatsappPhoneThroughputPolicy(
+          identity.phoneThroughputMessagesPerSecond,
+          identity.maximumOutboundMessagesPerSecond,
+        );
+
   return {
     tenantId:
       requireWhatsappDeliveryPolicyPositiveInteger(
@@ -70,15 +90,13 @@ function normalizeIdentity(
         identity.expectedPolicyVersion,
         true,
       ),
-    deliveryState:
-      requireWhatsappDeliveryPolicyState(
-        identity.deliveryState,
-      ),
+    deliveryState,
     portfolioCapacity:
       requireWhatsappPortfolioCapacity(
         identity.portfolioLimitKind,
         identity.portfolioLimitValue,
       ),
+    phoneThroughput,
     reservationDurationSeconds:
       requireWhatsappReservationDuration(
         identity.reservationDurationSeconds,

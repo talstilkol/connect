@@ -49,6 +49,7 @@ const migrationFiles = Object.freeze([
   "0010_meta_connection_credentials.sql",
   "0011_whatsapp_delivery_policy.sql",
   "0012_whatsapp_rate_limit_ledger.sql",
+  "0013_whatsapp_phone_throughput.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -686,6 +687,8 @@ async function verifyWhatsappDeliveryPolicy(
     deliveryState: "enabled",
     portfolioLimitKind: "bounded",
     portfolioLimitValue: 250,
+    phoneThroughputMessagesPerSecond: 20,
+    maximumOutboundMessagesPerSecond: 2,
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
     evidenceDigest: "e".repeat(64),
@@ -720,6 +723,10 @@ async function verifyWhatsappDeliveryPolicy(
   assert.deepEqual(current?.portfolioCapacity, {
     kind: "bounded",
     maximumUniqueRecipients: 250,
+  });
+  assert.deepEqual(current?.phoneThroughput, {
+    maximumMessagesPerSecond: 20,
+    maximumOutboundMessagesPerSecond: 2,
   });
 
   const disabled = await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
@@ -779,12 +786,24 @@ async function verifyWhatsappDeliveryPolicy(
       error?.code === "P0001" &&
       /immutable/.test(error.message),
   );
+
+  const reenabled =
+    await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
+      ...enabledCommand,
+      expectedPolicyVersion: 2,
+      recordedAt: "2026-08-17T08:36:00.000Z",
+    });
+  assert.equal(reenabled.outcome, "updated");
+  assert.equal(reenabled.record.deliveryState, "enabled");
+
+  return reenabled.record.eventKey;
 }
 
 async function verifyWhatsappRateLimitLedger(
   pool,
   foundation,
   tenantId,
+  policyEventKey,
 ) {
   const command = Object.freeze({
     reservationKey: `whatsapp_rate_reservation_v1_${"1".repeat(64)}`,
@@ -792,10 +811,15 @@ async function verifyWhatsappRateLimitLedger(
     portfolioKey: `whatsapp_portfolio_v1_${"2".repeat(64)}`,
     senderKey: `whatsapp_sender_v1_${"3".repeat(64)}`,
     recipientKey: `whatsapp_recipient_v1_${"4".repeat(64)}`,
+    policyEventKey,
     templateCategory: "MARKETING",
     portfolioCapacity: Object.freeze({
       kind: "bounded",
       maximumUniqueRecipients: 250,
+    }),
+    phoneThroughput: Object.freeze({
+      maximumMessagesPerSecond: 20,
+      maximumOutboundMessagesPerSecond: 2,
     }),
     reservedAt: "2026-08-17T09:00:00.000Z",
     reservationExpiresAt: "2026-08-17T09:05:00.000Z",
@@ -863,6 +887,44 @@ async function verifyWhatsappRateLimitLedger(
   assert.equal(providerLimited.providerErrorCode, 131056);
   assert.equal(providerLimited.retryAt, "2026-08-17T09:00:30.000Z");
 
+  const throughputCommands = ["8", "9", "a"].map(
+    (suffix, index) => ({
+      ...command,
+      reservationKey:
+        `whatsapp_rate_reservation_v1_${suffix.repeat(64)}`,
+      recipientKey:
+        `whatsapp_recipient_v1_${String(index + 5).repeat(64)}`,
+      reservedAt: "2026-08-17T09:01:00.000Z",
+      reservationExpiresAt:
+        "2026-08-17T09:06:00.000Z",
+    }),
+  );
+  const throughputResults = await Promise.all(
+    throughputCommands.map((throughputCommand) =>
+      foundation.whatsappRateLimits
+        .reserveBusinessInitiatedMessage(
+          throughputCommand,
+        ),
+    ),
+  );
+  assert.deepEqual(
+    throughputResults
+      .map(({ outcome }) => outcome)
+      .sort(),
+    [
+      "phone-throughput-limited",
+      "reserved",
+      "reserved",
+    ],
+  );
+  assert.equal(
+    throughputResults.find(
+      ({ outcome }) =>
+        outcome === "phone-throughput-limited",
+    )?.retryAt,
+    "2026-08-17T09:01:01.000Z",
+  );
+
   const persisted = await pool.query(
     `SELECT
        (
@@ -887,7 +949,7 @@ async function verifyWhatsappRateLimitLedger(
     [tenantId],
   );
   assert.deepEqual(persisted.rows, [
-    { reservation_count: 2, settlement_count: 2, cooldown_count: 1 },
+    { reservation_count: 4, settlement_count: 2, cooldown_count: 1 },
   ]);
 
   await assert.rejects(
@@ -1786,8 +1848,18 @@ export async function verifyNodePostgresIntegration(
         tenantId,
       );
       await verifyMetaConnectionCredentials(pool, foundation, tenantId);
-      await verifyWhatsappDeliveryPolicy(pool, foundation, tenantId);
-      await verifyWhatsappRateLimitLedger(pool, foundation, tenantId);
+      const whatsappPolicyEventKey =
+        await verifyWhatsappDeliveryPolicy(
+          pool,
+          foundation,
+          tenantId,
+        );
+      await verifyWhatsappRateLimitLedger(
+        pool,
+        foundation,
+        tenantId,
+        whatsappPolicyEventKey,
+      );
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
@@ -1801,7 +1873,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 6,
+      concurrencyScenarios: 7,
     });
   } finally {
     await pool.end();

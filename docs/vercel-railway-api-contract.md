@@ -318,8 +318,14 @@ port, אך אינו ממציא Encryption key או Vault configuration. ‏Harne
 ו־Provider cooldown ל־PostgreSQL. ‏Transaction-scoped locks מסדרים Pair
 ו־Portfolio admission, ו־Triggers אוכפים Evidence ו־Immutability גם מול
 כתיבה ישירה. ‏Harness אמיתי הוכיח Race זהה, Replay, Pair limit, שחרור,
-Cooldown וחסימת Tamper. סך הכול עברו שישה תרחישי Concurrency. ‏Provider
-throughput limiter, ‏Queue worker, ‏Sender ו־Load evidence עדיין חסרים.
+Cooldown וחסימת Tamper. סך הכול עברו שישה תרחישי Concurrency.
+
+7.1.33 ‏`0013_whatsapp_phone_throughput.sql` מוסיף Throughput evidence
+מפורשת ל־Policy ול־Reservation ואוכף חלון מתגלגל של שנייה תחת Sender
+advisory lock. ‏D1 מקבל את אותו חוזה במיגרציה `0035`. ‏Harness אמיתי הוכיח
+תחרות של שלוש בקשות תחת תקרה `2/s`: שתיים נשמרו והשלישית נדחתה עד קצה
+החלון. סך הכול עברו שבעה תרחישי Concurrency. ‏Queue worker, ‏Sender חי,
+Load evidence וערכי חשבון מאומתים עדיין חסרים.
 
 7.2 עדיין חסר:
 

@@ -17,6 +17,8 @@ const senderKey =
   `whatsapp_sender_v1_${"e".repeat(64)}`;
 const recipientKey =
   `whatsapp_recipient_v1_${"f".repeat(64)}`;
+const policyEventKey =
+  `whatsapp_delivery_policy_event_v1_${"9".repeat(64)}`;
 const reservedAt = "2026-08-16T10:00:00.000Z";
 const reservationExpiresAt =
   "2026-08-16T10:05:00.000Z";
@@ -88,10 +90,15 @@ function context(overrides = {}) {
     portfolioKey,
     senderKey,
     recipientKey,
+    policyEventKey,
     templateCategory: "UTILITY",
     portfolioCapacity: {
       kind: "bounded",
       maximumUniqueRecipients: 250,
+    },
+    phoneThroughput: {
+      maximumMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 64,
     },
     reservationExpiresAt,
     ...overrides,
@@ -257,6 +264,19 @@ test("defers a full rolling portfolio window without inventing a tier", async ()
       retryAfterSeconds: 86_400,
     },
   );
+});
+
+test("defers a saturated phone throughput window to its exact boundary", async () => {
+  const { admission } = fixture({
+    outcome: "phone-throughput-limited",
+    retryAt: "2026-08-16T10:00:01.000Z",
+  });
+
+  assert.deepEqual(await admission.reserve(request()), {
+    outcome: "deferred",
+    errorCode: "WHATSAPP_PHONE_THROUGHPUT_LIMITED",
+    retryAfterSeconds: 1,
+  });
 });
 
 test("rejects a portfolio block that does not match the verified capacity", async () => {

@@ -18,13 +18,31 @@ export type WhatsappPortfolioCapacity =
       kind: "unlimited";
     };
 
+export const whatsappPhoneThroughputLimits = [
+  20,
+  80,
+  1_000,
+] as const;
+
+export type WhatsappPhoneThroughputLimit =
+  (typeof whatsappPhoneThroughputLimits)[number];
+
+export interface WhatsappPhoneThroughputPolicy {
+  maximumMessagesPerSecond:
+    WhatsappPhoneThroughputLimit;
+  maximumOutboundMessagesPerSecond: number;
+}
+
 export interface WhatsappRateLimitReservation {
   reservationKey: string;
   tenantId: number;
   portfolioKey: string;
   senderKey: string;
   recipientKey: string;
+  policyEventKey: string | null;
   portfolioCapacity: WhatsappPortfolioCapacity;
+  phoneThroughput:
+    WhatsappPhoneThroughputPolicy | null;
   reservedAt: string;
   pairReservedUntil: string;
   reservationExpiresAt: string;
@@ -62,6 +80,10 @@ export type WhatsappRateLimitReservationResult =
       occupiedUniqueRecipients: number;
       maximumUniqueRecipients:
         WhatsappPortfolioMessagingLimit;
+    }
+  | {
+      outcome: "phone-throughput-limited";
+      retryAt: string;
     };
 
 export const whatsappRateLimitSettlementOutcomes = [

@@ -418,9 +418,9 @@ review. המנוע עצמו אינו משנה Campaign state ואינו שולח
 אינו שומר מספר טלפון או Provider payload, ודוחה State שאין לו
 Reservation/Settlement proof תואם.
 
-14.7.5 זהו עדיין רכיב Persistence ללא Provider adapter חי וללא
-WABA/Throughput tier מאומת. לפיכך אין לראות בו Rate limiter מלא או
-Production evidence.
+14.7.5 זהו רכיב אכיפה מקומי מלא עבור Evidence שנשמרה, אך ללא
+WABA/Throughput חי ומאומת. לפיכך אין לראות בבדיקות המקומיות
+Production evidence או הוכחה לערך החשבון בפועל.
 
 14.8 `CampaignDeliveryAdmissionController` מחובר כעת לפני Claim של
 נמען ב־Campaign Queue:
@@ -449,8 +449,9 @@ Portfolio מלא נדחה בחלון שמרני של 24 שעות ורק כאשר
 
 14.8.6 ה־Context Resolver קורא רק Meta connection במצב `connected`,
 מקבל את מספר הנמען מרשומת Campaign במצב `queued`, ודורש Policy
-מפורשת עם Portfolio capacity רשמי ו־Reservation duration בין שש
-שניות ל־24 שעות. אין Tier או Duration ברירת מחדל.
+מפורשת עם Portfolio capacity רשמי, Phone throughput מאומת מתוך
+`20/80/1000`, תקרת Outbound פנימית נמוכה ממנו ו־Reservation duration
+בין שש שניות ל־24 שעות. אין Tier, ‏Throughput או Duration ברירת מחדל.
 
 14.8.7 מפתחות Portfolio, ‏Sender, ‏Recipient ו־Reservation נגזרים
 באמצעות HMAC-SHA-256 עם Purpose separation ו־Secret ייעודי בשם
@@ -464,7 +465,8 @@ Reservation.
 
 14.8.8 מיגרציה `0034` מוסיפה Event log בלתי־ניתן לשינוי עבור Policy
 השליחה. כל Event קשור לגרסה המדויקת של Meta connection, לגרסת Graph
-API מפורשת, ל־Digest של הראיה ולחלון תפוגה. רק ה־Event האחרון, במצב
+API מפורשת, ל־Digest של הראיה, ל־Phone throughput, לתקרת Outbound
+ולחלון תפוגה. רק ה־Event האחרון, במצב
 `enabled`, עם Evidence שעדיין תקפה ובמזהי Portfolio, ‏WABA ו־Phone
 התואמים לחיבור הנוכחי, יכול להחזיר Capacity ו־Reservation duration.
 
@@ -483,8 +485,8 @@ Capacity חי של החשבון. עד שטל יקליט Evidence מתוארכת 
 מקור ה־Policy ליעד Railway. ‏`FOR UPDATE` על חיבור Meta מסדר בקשות מתחרות;
 Trigger במסד אוכף גרסה עוקבת, Connection נוכחי, Kill switch זהה ו־Audit
 אטומי. ‏Harness אמיתי הוכיח Event יחיד ו־Replay בשתי בקשות מקבילות. זהו
-עדיין רק מקור Policy: ‏Reservation/Settlement ledger, ‏Provider limiter
-מבוזר, Queue worker ו־Sender חיים טרם הומרו ל־PostgreSQL/Railway ולכן אין
+עדיין רק מקור Policy: ‏Queue worker ו־Sender חיים טרם הומרו במלואם
+ל־PostgreSQL/Railway ולכן אין
 לסמן שליחת Production כמוכנה.
 
 14.8.12 מיגרציית PostgreSQL `0012_whatsapp_rate_limit_ledger.sql` ו־
@@ -492,8 +494,21 @@ Trigger במסד אוכף גרסה עוקבת, Connection נוכחי, Kill switc
 Settlement ו־Provider cooldown. ‏Advisory locks טרנזקציוניים מסדרים Pair
 ו־Portfolio checks, ו־Proof guards מגנים על State projections. ‏Harness אמיתי
 הוכיח Replay תחת Race, Pair limit, שחרור, Cooldown ו־Tamper rejection. זהו
-Ledger durable בלבד: ‏Phone throughput של 20/80/1000 mps, ‏Queue worker,
-Provider sender, מדידות עומס וערכי חשבון חיים עדיין אינם מחוברים.
+Ledger durable בלבד: ‏Queue worker, ‏Provider sender, מדידות עומס וערכי
+חשבון חיים עדיין אינם מחוברים.
+
+14.8.13 מיגרציות `0035_whatsapp_phone_throughput.sql` ו־
+`0013_whatsapp_phone_throughput.sql` מחברות את ה־Phone throughput לאותו
+Admission. כל Policy חדש חייב לשמור ערך Meta מפורש של `20`, ‏`80` או
+`1000` mps ותקרת Outbound קטנה ממנו; ההפרש הוא Headroom מפורש לתעבורה
+נכנסת, מפני ש־Meta סופרת את שני הכיוונים. D1 ו־PostgreSQL סופרים
+Reservations בחלון מתגלגל של שנייה לפי Sender אטום, ללא פרצת Fixed-window.
+PostgreSQL נועל את Scope באמצעות Advisory lock, וה־Trigger אוכף את אותה
+החלטה גם מול כתיבה ישירה. Legacy Policy נשאר קריא וניתן להשבתה, אך אינו
+מאשר שליחה חדשה בלי Throughput evidence. ‏Harness אמיתי על PostgreSQL
+16.13 הוכיח ששתי בקשות מתוך שלוש מתקבלות בתקרה `2/s`, והשלישית נדחית
+בדיוק עד קצה החלון. אין בכך הוכחה שתקרת החשבון החי היא אחד הערכים הללו;
+טל עדיין חייב לאשר Evidence מתוארכת מהחשבון המורשה.
 
 14.9 מיגרציה `0031` ו־
 `CampaignDeliveryStatusReconciler` משלימים את מסלול ה־Webhook:

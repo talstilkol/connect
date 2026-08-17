@@ -1349,6 +1349,12 @@ export const whatsappCampaignDeliveryPolicyEvents =
       portfolioLimitValue: integer(
         "portfolio_limit_value",
       ),
+      phoneThroughputMessagesPerSecond: integer(
+        "phone_throughput_messages_per_second",
+      ),
+      maximumOutboundMessagesPerSecond: integer(
+        "maximum_outbound_messages_per_second",
+      ),
       reservationDurationSeconds: integer(
         "reservation_duration_seconds",
       ).notNull(),
@@ -1404,6 +1410,20 @@ export const whatsappCampaignDeliveryPolicyEvents =
         "whatsapp_delivery_policy_events_duration_valid",
         sql`${table.reservationDurationSeconds}
           between 6 and 86400`,
+      ),
+      check(
+        "whatsapp_delivery_policy_throughput_valid",
+        sql`(
+          ${table.phoneThroughputMessagesPerSecond}
+            in (20, 80, 1000)
+          and ${table.maximumOutboundMessagesPerSecond} >= 1
+          and ${table.maximumOutboundMessagesPerSecond}
+            < ${table.phoneThroughputMessagesPerSecond}
+        ) or (
+          ${table.deliveryState} = 'disabled'
+          and ${table.phoneThroughputMessagesPerSecond} is null
+          and ${table.maximumOutboundMessagesPerSecond} is null
+        )`,
       ),
       check(
         "whatsapp_delivery_policy_events_graph_version_valid",
@@ -4476,6 +4496,16 @@ export const whatsappRateLimitReservations =
         .notNull(),
       recipientKey: text("recipient_key")
         .notNull(),
+      policyEventKey: text("policy_event_key").references(
+        () => whatsappCampaignDeliveryPolicyEvents.eventKey,
+        { onDelete: "restrict" },
+      ),
+      phoneThroughputMessagesPerSecond: integer(
+        "phone_throughput_messages_per_second",
+      ),
+      maximumOutboundMessagesPerSecond: integer(
+        "maximum_outbound_messages_per_second",
+      ),
       portfolioLimitKind: text(
         "portfolio_limit_kind",
         { enum: whatsappPortfolioLimitKinds },
@@ -4540,6 +4570,25 @@ export const whatsappRateLimitReservations =
         )`,
       ),
       check(
+        "whatsapp_rate_reservations_throughput_valid",
+        sql`(
+          ${table.policyEventKey} is null
+          and ${table.phoneThroughputMessagesPerSecond} is null
+          and ${table.maximumOutboundMessagesPerSecond} is null
+        ) or (
+          length(${table.policyEventKey}) = 98
+          and substr(${table.policyEventKey}, 1, 34)
+            = 'whatsapp_delivery_policy_event_v1_'
+          and substr(${table.policyEventKey}, 35)
+            not glob '*[^0-9a-f]*'
+          and ${table.phoneThroughputMessagesPerSecond}
+            in (20, 80, 1000)
+          and ${table.maximumOutboundMessagesPerSecond} >= 1
+          and ${table.maximumOutboundMessagesPerSecond}
+            < ${table.phoneThroughputMessagesPerSecond}
+        )`,
+      ),
+      check(
         "whatsapp_rate_reservations_time_valid",
         sql`length(${table.reservedAt}) = 24
           and strftime(
@@ -4574,6 +4623,12 @@ export const whatsappRateLimitReservations =
         "whatsapp_rate_reservations_tenant_reserved_idx",
       ).on(
         table.tenantId,
+        table.reservedAt,
+      ),
+      index(
+        "whatsapp_rate_reservations_sender_reserved_idx",
+      ).on(
+        table.senderKey,
         table.reservedAt,
       ),
     ],

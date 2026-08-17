@@ -47,6 +47,10 @@ function policyRecord(overrides = {}) {
       kind: "bounded",
       maximumUniqueRecipients: 250,
     },
+    phoneThroughput: {
+      maximumMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 64,
+    },
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
     evidenceDigest: "b".repeat(64),
@@ -69,6 +73,8 @@ function approvalInput(overrides = {}) {
     phoneNumberId: "400003",
     portfolioLimitKind: "bounded",
     portfolioLimitValue: 250,
+    phoneThroughputMessagesPerSecond: 80,
+    maximumOutboundMessagesPerSecond: 64,
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
     evidenceDigest: "b".repeat(64),
@@ -186,6 +192,8 @@ test("approves only evidence bound to the exact live Meta connection", async () 
     deliveryState: "enabled",
     portfolioLimitKind: "bounded",
     portfolioLimitValue: 250,
+    phoneThroughputMessagesPerSecond: 80,
+    maximumOutboundMessagesPerSecond: 64,
     reservationDurationSeconds: 300,
     metaGraphApiVersion: "v21.0",
     evidenceDigest: "b".repeat(64),
@@ -215,6 +223,13 @@ test("rejects client-supplied audit fields, unknown fields, and expired evidence
     approvalInput({
       evidenceCheckedAt:
         "2026-08-16T10:02:00.000Z",
+    }),
+    approvalInput({
+      phoneThroughputMessagesPerSecond: 80,
+      maximumOutboundMessagesPerSecond: 80,
+    }),
+    approvalInput({
+      phoneThroughputMessagesPerSecond: 70,
     }),
   ]) {
     const testFixture = fixture();

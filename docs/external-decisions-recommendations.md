@@ -110,8 +110,10 @@ Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
 ל־`MetaMessageFailurePolicy`, ומיגרציה `0032` שומרת Cooldown אטומי
 לשלושת ה־Scopes שניתנים לזיהוי מדויק. מיגרציה `0034` שומרת Policy
 Evidence מתכלה ובלתי־ניתנת לשינוי, ומאפשרת Event אחרון מסוג
-`disabled` כ־Kill switch עמיד. אין בכך אישור מדיניות: מקור
-`Retry-After`/Pair exponent חי, ערכי Capacity, ‏Alerts ותרגיל Kill
+`disabled` כ־Kill switch עמיד. מיגרציה `0035` וגרסת PostgreSQL `0013`
+אוכפות כעת חלון Phone throughput מתגלגל לפי Policy מאושרת, כולל Headroom
+מפורש בין תקרת Meta לתקרת Outbound. אין בכך אישור מדיניות: מקור
+`Retry-After`/Pair exponent חי, ערכי החשבון, ‏Alerts ותרגיל Kill
 switch עדיין דורשים Evidence ואישור לפי RACI בסעיף 5.1. מסלול
 Operator המקומי הושלם תחת System Admin: הוא קושר את הקלט לזהויות
 ולגרסת Meta connection, גוזר Actor וזמן בשרת, שומר Audit אטומי
