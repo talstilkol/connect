@@ -9,8 +9,14 @@ import {
   createNodePostgresTransactionManager,
 } from "./nodePostgresAdapter.ts";
 import {
+  createContactListService,
+} from "../contacts/contactService.ts";
+import {
   createPostgresBusinessProfileRepository,
 } from "./postgresBusinessProfileRepository.ts";
+import {
+  createPostgresContactReadRepository,
+} from "./postgresContactReadRepository.ts";
 import {
   createPostgresRailwayApiMutationExecutor,
 } from "./postgresRailwayApiMutationExecutor.ts";
@@ -58,6 +64,7 @@ export interface RailwayPostgresFoundationOptions {
 }
 
 export interface RailwayPostgresFoundation {
+  readonly contacts: ReturnType<typeof createContactListService>;
   readonly memberships: ReturnType<
     typeof createPostgresTenantMembershipRepository
   >;
@@ -139,9 +146,11 @@ export function createRailwayPostgresFoundation(
   );
   const queries = createNodePostgresQueryExecutor(pool);
   const transactions = createNodePostgresTransactionManager(pool);
+  const contactReads = createPostgresContactReadRepository(queries);
   let closed = false;
 
   return Object.freeze({
+    contacts: createContactListService({ contacts: contactReads }),
     memberships: createPostgresTenantMembershipRepository(queries),
     membershipMutations:
       createPostgresTenantMembershipMutationRepository({

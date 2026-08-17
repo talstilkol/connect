@@ -145,6 +145,7 @@ async function verifyContactLifecycle(
   pool,
   transactions,
   contacts,
+  contactReads,
   tenantId,
 ) {
   const command = contactCommand(tenantId, "c");
@@ -164,6 +165,24 @@ async function verifyContactLifecycle(
     concurrent.map(({ outcome }) => outcome).sort(),
     ["committed", "replayed"],
   );
+
+  const page = await contactReads.list(
+    {
+      tenantId,
+      externalUserId: "driver-integration-owner",
+      displayName: "Driver integration tenant",
+      status: "active",
+      role: "owner",
+    },
+    null,
+  );
+  assert.equal(page.contacts.length, 2);
+  assert.equal(page.nextCursor, null);
+  assert.equal(
+    page.contacts.every((contact) => contact.tenantId === tenantId),
+    true,
+  );
+  assert.equal(page.contacts[0].id > page.contacts[1].id, true);
 
   const rollbackMarker = new Error("EXPECTED_ROLLBACK_MARKER");
   await assert.rejects(
@@ -340,6 +359,7 @@ export async function verifyNodePostgresIntegration(
         pool,
         transactions,
         foundation.railwayApiMutations,
+        foundation.contacts,
         tenantId,
       );
       await verifyInvitationLifecycle(pool, foundation, tenantId);

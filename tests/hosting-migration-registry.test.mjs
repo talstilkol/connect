@@ -195,6 +195,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresTeamInvitationExpirationRepository.ts",
     "server/platform/postgresTeamInvitationDeliveryRepository.ts",
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
+    "server/platform/postgresContactReadRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
@@ -206,8 +207,9 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /nine-repository PostgreSQL foundation/);
-  assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\/report reads/);
+  assert.match(boundary.cutoverBlocker, /ten-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\.list read/);
+  assert.match(boundary.cutoverBlocker, /PostgreSQL reports\.read repository/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
@@ -235,6 +237,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresTeamInvitationExpirationRepository.ts",
     "server/platform/postgresTeamInvitationDeliveryRepository.ts",
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
+    "server/platform/postgresContactReadRepository.ts",
     "postgres/migrations/0000_core_contacts.sql",
     "postgres/migrations/0001_railway_api_mutation_receipts.sql",
     "postgres/migrations/0002_tenant_access_foundation.sql",
@@ -251,7 +254,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /nine-repository foundation/);
+  assert.match(database.cutoverBlocker, /ten-adapter foundation/);
+  assert.match(database.cutoverBlocker, /contacts\.list/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /remaining repository DML\/concurrency/);

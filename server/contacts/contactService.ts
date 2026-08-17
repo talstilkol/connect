@@ -87,6 +87,10 @@ export interface ContactServiceDependencies {
   consentEvents: ContactConsentRepository;
 }
 
+export interface ContactListServiceDependencies {
+  contacts: Pick<ContactRepository, "listPageByTenant">;
+}
+
 function assertContactId(contactId: number): void {
   if (!Number.isSafeInteger(contactId) || contactId <= 0) {
     throw new Error("contactId must be a positive integer");
@@ -103,6 +107,37 @@ function parseContactCursor(value: unknown): number | null {
   }
 
   return Number(value);
+}
+
+export function createContactListService(
+  dependencies: Readonly<ContactListServiceDependencies>,
+): Pick<ContactService, "list"> {
+  if (typeof dependencies.contacts?.listPageByTenant !== "function") {
+    throw new Error("Contact list dependencies are invalid");
+  }
+
+  return Object.freeze({
+    async list(session: TenantSession, beforeContactId?: unknown) {
+      requireTenantPermission(session, "contacts.read");
+      const cursor = parseContactCursor(beforeContactId);
+      const contacts = await dependencies.contacts.listPageByTenant(
+        session.tenantId,
+        cursor,
+        CONTACT_PAGE_SIZE + 1,
+      );
+      const hasMore = contacts.length > CONTACT_PAGE_SIZE;
+      const pageContacts = hasMore
+        ? contacts.slice(0, CONTACT_PAGE_SIZE)
+        : contacts;
+
+      return {
+        contacts: pageContacts,
+        nextCursor: hasMore
+          ? pageContacts[pageContacts.length - 1]?.id ?? null
+          : null,
+      };
+    },
+  });
 }
 
 async function recordConsentTransition(
@@ -140,27 +175,10 @@ async function recordConsentTransition(
 export function createContactService(
   dependencies: ContactServiceDependencies,
 ): ContactService {
-  return {
-    async list(session, beforeContactId) {
-      requireTenantPermission(session, "contacts.read");
-      const cursor = parseContactCursor(beforeContactId);
-      const contacts = await dependencies.contacts.listPageByTenant(
-        session.tenantId,
-        cursor,
-        CONTACT_PAGE_SIZE + 1,
-      );
-      const hasMore = contacts.length > CONTACT_PAGE_SIZE;
-      const pageContacts = hasMore
-        ? contacts.slice(0, CONTACT_PAGE_SIZE)
-        : contacts;
+  const listService = createContactListService(dependencies);
 
-      return {
-        contacts: pageContacts,
-        nextCursor: hasMore
-          ? pageContacts[pageContacts.length - 1]?.id ?? null
-          : null,
-      };
-    },
+  return {
+    list: listService.list,
 
     async saveProfile(session, input) {
       requireTenantPermission(session, "contacts.write");

@@ -102,7 +102,8 @@ Owner אטומית, Conflict, בידוד Tenant ו־Rollback כאשר שמירת
 Expiration, ‏Delivery ו־Acceptance קיימים; Contact ו־Invitation
 Delivery/Acceptance כבר נבדקו דרך Driver אמיתי, אך יתר המסלולים לא.
 
-6.3 Integration tests של יתר ה־Repositories מול PostgreSQL אמיתי, כולל
+6.3 ‏Contact write/read ו־Invitation delivery/acceptance כבר נבדקו מול
+PostgreSQL אמיתי. עדיין נדרשים Integration tests ליתר ה־Repositories, כולל
 Transactions מקבילות לכל סדרי הנעילות של Membership ו־Selection.
 
 6.4 Runtime composition עם Pool מאושר ו־Staging evidence.

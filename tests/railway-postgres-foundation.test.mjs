@@ -40,6 +40,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   assert.deepEqual(Object.keys(foundation).sort(), [
     "businessProfiles",
     "close",
+    "contacts",
     "invitationAcceptances",
     "invitationDeliveries",
     "invitationExpirations",
@@ -53,6 +54,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     typeof foundation.memberships.findActiveByExternalUserId,
     "function",
   );
+  assert.equal(typeof foundation.contacts.list, "function");
   assert.equal(typeof foundation.selections.save, "function");
   assert.equal(
     typeof foundation.railwayApiMutations.saveContact,

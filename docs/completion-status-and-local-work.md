@@ -565,9 +565,9 @@ Telemetry sink, ‏Migration identity ו־Staging connection proof.
 
 2.31 **הושלם מקומית:** PostgreSQL persistence foundation ל־Railway.
 
-2.31.1 Composition יחיד יוצר מאותו Pool את כל תשעת ה־Adapters שכבר קיימים:
+2.31.1 Composition יחיד יוצר מאותו Pool את כל עשרת ה־Adapters שכבר קיימים:
 Membership reads/mutations, ‏Tenant selection, ‏Business profile,
-`contacts.save`, וכל ארבעת מסלולי Invitation lifecycle.
+`contacts.save`, ‏`contacts.list` וכל ארבעת מסלולי Invitation lifecycle.
 
 2.31.2 ה־Foundation אינו מחזיר Pool, ‏Driver, ‏Query executor או Connection
 string ל־Caller. הוא חושף רק Ports עסקיים ו־`close()` אידמפוטנטי. ‏Options
@@ -577,9 +577,28 @@ string ל־Caller. הוא חושף רק Ports עסקיים ו־`close()` איד�
 והחזיר `PASS (5 migrations, 2 concurrency scenarios)`. סביבת הבדיקה הזמנית
 נעצרה ונמחקה לאחר מכן.
 
-2.31.4 אין עדיין Full Railway API runtime על PostgreSQL: ‏`contacts.list`
-ו־`reports.read` עדיין דורשים Repositories מקבילים, ו־Hybrid שמערב D1 ו־
-PostgreSQL אינו מאושר. גם Routes, ‏Live values ו־Staging evidence חסרים.
+2.31.4 אין עדיין Full Railway API runtime על PostgreSQL: ‏`reports.read`
+עדיין דורש Repository מקביל, ו־Hybrid שמערב D1 ו־PostgreSQL אינו מאושר.
+גם Routes, ‏Live values ו־Staging evidence חסרים.
+
+2.32 **הושלם מקומית:** PostgreSQL read path ל־`contacts.list`.
+
+2.32.1 לוגיקת הרשימה הופרדה מ־Contact mutations ל־`createContactListService`,
+בלי לשנות הרשאות, Cursor או מבנה תשובה. כך Railway יכול להשתמש באותו Use case
+מבלי להזדקק ל־D1 consent mutation repository.
+
+2.32.2 ‏`postgresContactReadRepository.ts` מסנן תמיד לפי Tenant, משתמש ב־
+Keyset pagination יורד לפי `id`, מגביל עמוד ל־100 ומאמת במדויק את Row shape,
+פרופיל, Consent, Timeline, ‏Tenant, Cursor וסדר לפני החזרת נתונים.
+
+2.32.3 ה־Foundation כולל כעת עשרה Adapters ופורט עסקי `contacts`. ה־Harness
+החוזר הופעל מול PostgreSQL 16.13 ריק והחזיר
+`PASS (5 migrations, 2 concurrency scenarios)`, כולל יצירת שני Contacts
+וקריאתם דרך `contacts.list`. סביבת הבדיקה הזמנית נעצרה ונמחקה.
+
+2.32.4 ‏`reports.read` הוא מסלול הקריאה האחרון שחוסם חיבור מלא של פעולות
+ה־Read הקיימות ל־PostgreSQL. בנוסף נשארים Routes, ‏Live pool values,
+Schema parity ו־Staging evidence; לכן אין עדיין טענת Cutover.
 
 ## 3. עבודה שאינה מקומית בלבד
 
