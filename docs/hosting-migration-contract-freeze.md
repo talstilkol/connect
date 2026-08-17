@@ -21,11 +21,11 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | מזהה | היום | יעד | הצעד הבא |
 | --- | --- | --- | --- |
 | `web.build-runtime` | Vinext + Cloudflare Vite/Sites | Vercel Web | החלפת Build/runtime |
-| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות, Mutation מאובטח, Tenant access, Team membership mutations ו־Invitation request/expiration repositories הושלמו; נותרו Driver, ‏Delivery/Acceptance repositories, ‏Parity מלאה, יתר ה־Mutations, ‏Routes, ‏Live configuration ו־Staging evidence |
+| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות, Mutation מאובטח, Tenant access, Team membership mutations וכל Invitation lifecycle repositories הושלמו; נותרו Driver, ‏Parity מלאה, יתר ה־Mutations, ‏Routes, ‏Live configuration ו־Staging evidence |
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
-| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, Tenant access, Team membership mutations ו־Invitation request/expiration repositories וחמש Migrations קיימים; ה־Schema ו־Invitation SQL עברו PostgreSQL מקומי. נותרו ספק, Driver, ‏Delivery/Acceptance repositories, ‏Parity מלאה מול 35 Migrations וראיות Staging/Concurrency |
+| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, Tenant access, Team membership mutations וכל Invitation lifecycle repositories וחמש Migrations קיימים; ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. נותרו ספק, Driver, ‏Parity מלאה מול 35 Migrations וראיות DML/Staging/Concurrency |
 | `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |

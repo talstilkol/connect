@@ -494,9 +494,27 @@ Conflict ו־Invalid transition, ושומר Request/Re-request או Revoke/Expir
 ו־Keyset pagination. כל 13 משפטי ה־SQL עברו `PREPARE` על PostgreSQL 16.13
 מקומי לאחר החלת חמש ה־Migrations.
 
-2.27.4 עדיין חסרים Delivery ו־Acceptance repositories, ‏Driver, ‏DML
-integration מול PostgreSQL אמיתי ובדיקות Concurrency; לכן המימוש אינו מחובר
-ל־Runtime ואינו מוכן לפריסה.
+2.27.4 Delivery ו־Acceptance repositories שנוספו אחר כך מתועדים בסעיף 2.28.
+עדיין חסרים Driver, ‏DML integration מול PostgreSQL אמיתי ובדיקות
+Concurrency; לכן המימוש אינו מחובר ל־Runtime ואינו מוכן לפריסה.
+
+2.28 **הושלם מקומית:** PostgreSQL Invitation delivery ו־acceptance repositories.
+
+2.28.1 Delivery repository תובע Pending delivery פעם אחת, מחזיר Prepared
+invitation רק לאחר Claim, שומר Submitted/Blocked/Ambiguous ומאפשר
+Reconciliation מ־Ambiguous ללא שליחה חוזרת.
+
+2.28.2 Acceptance repository נועל Invitation, ‏Membership ו־Delivery בסדר
+קבוע. הוא מבטל Pending delivery ושומר Version חדש, Membership פעיל ו־Acceptance
+immutable באותה Transaction; Retry מדויק מוחזר כ־`unchanged`.
+
+2.28.3 תשע בדיקות חדשות מכסות Provider acceptance, ‏Ambiguous reconciliation,
+ביטול Delivery לא כשיר, קבלה כפולה, אימייל שגוי, חבר קיים ו־Rollback של כל
+ארבע הישויות. יחד עם 4.2ב קיימות 16 בדיקות Invitation PostgreSQL.
+
+2.28.4 כל 27 משפטי ה־Invitation SQL עברו `PREPARE` על PostgreSQL 16.13 לאחר
+החלת חמש ה־Migrations. עדיין חסרים Driver, ‏DML integration אמיתי,
+Concurrency ו־Staging evidence; לכן אין טענה למוכנות פריסה.
 
 ## 3. עבודה שאינה מקומית בלבד
 

@@ -190,6 +190,8 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresRailwayApiMutationExecutor.ts",
     "server/platform/postgresTeamInvitationRepository.ts",
     "server/platform/postgresTeamInvitationExpirationRepository.ts",
+    "server/platform/postgresTeamInvitationDeliveryRepository.ts",
+    "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
@@ -226,6 +228,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresBusinessProfileRepository.ts",
     "server/platform/postgresTeamInvitationRepository.ts",
     "server/platform/postgresTeamInvitationExpirationRepository.ts",
+    "server/platform/postgresTeamInvitationDeliveryRepository.ts",
+    "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "postgres/migrations/0000_core_contacts.sql",
     "postgres/migrations/0001_railway_api_mutation_receipts.sql",
     "postgres/migrations/0002_tenant_access_foundation.sql",
@@ -239,6 +243,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /provider-neutral/i);
   assert.match(database.cutoverBlocker, /five ordered/);
   assert.match(database.cutoverBlocker, /parse on local PostgreSQL/);
+  assert.match(database.cutoverBlocker, /27 invitation SQL statements/);
   assert.match(database.cutoverBlocker, /Node driver/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /real concurrency tests/);

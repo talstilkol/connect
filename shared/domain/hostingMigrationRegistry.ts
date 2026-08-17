@@ -110,6 +110,8 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresRailwayApiMutationExecutor.ts",
       "server/platform/postgresTeamInvitationRepository.ts",
       "server/platform/postgresTeamInvitationExpirationRepository.ts",
+      "server/platform/postgresTeamInvitationDeliveryRepository.ts",
+      "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
       "postgres/migrations/0004_team_invitation_lifecycle.sql",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
@@ -121,7 +123,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, tenant access repositories, team membership mutations, and invitation request/transition/expiration repositories exist, but the database driver, invitation delivery and acceptance repositories, full schema parity, remaining mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, tenant access repositories, team membership mutations, and the complete invitation lifecycle repositories exist, but the database driver, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -182,6 +184,8 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresBusinessProfileRepository.ts",
       "server/platform/postgresTeamInvitationRepository.ts",
       "server/platform/postgresTeamInvitationExpirationRepository.ts",
+      "server/platform/postgresTeamInvitationDeliveryRepository.ts",
+      "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
       "postgres/migrations/0000_core_contacts.sql",
       "postgres/migrations/0001_railway_api_mutation_receipts.sql",
       "postgres/migrations/0002_tenant_access_foundation.sql",
@@ -196,7 +200,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, tenant access, team membership mutation, and invitation request/transition/expiration repositories plus five ordered critical-path PostgreSQL migrations exist; the schema and all invitation SQL parse on local PostgreSQL. The provider, Node driver, invitation delivery and acceptance repositories, full 35-migration parity conversion, real concurrency tests, and controlled-environment migration evidence are not implemented.",
+      "Provider-neutral contacts.save, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist; the schema and all 27 invitation SQL statements parse on local PostgreSQL. The provider, Node driver, full 35-migration parity conversion, real DML tests, real concurrency tests, and controlled-environment migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

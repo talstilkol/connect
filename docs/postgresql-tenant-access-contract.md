@@ -97,8 +97,9 @@ Owner אטומית, Conflict, בידוד Tenant ו־Rollback כאשר שמירת
 
 6.1 בחירת Node driver וכלי Migration.
 
-6.2 סכמת Invitation lifecycle ו־Repositories של Request, ‏Revoke,
-Re-request ו־Expiration קיימים; עדיין חסרים Delivery ו־Acceptance.
+6.2 סכמת Invitation lifecycle וכל Repositories של Request, ‏Transition,
+Expiration, ‏Delivery ו־Acceptance קיימים; עדיין חסרים Driver ו־DML
+integration מול PostgreSQL אמיתי.
 
 6.3 Integration tests של ה־Repositories מול PostgreSQL אמיתי, כולל שתי
 Transactions מקבילות.

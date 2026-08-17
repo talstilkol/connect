@@ -210,8 +210,9 @@ SHA-256 דטרמיניסטיים. אין בכך הוכחת Concurrency מול Po
 7.1.18 נוסף [חוזה PostgreSQL למחזור חיי הזמנת צוות](postgresql-team-invitation-contract.md).
 ה־Schema מאחד את State, ‏Event ledger, ‏Delivery outbox ו־Acceptance ledger.
 Repositories ספק־נייטרליים מממשים Request, ‏Re-request, ‏Revoke, ‏Expiration
-וסריקת Keyset; כל משפטי ה־SQL שלהם עברו Parser מקומי של PostgreSQL. עדיין
-חסרים Delivery/Acceptance repositories, ‏Driver ופעולות API מחוברות.
+וסריקת Keyset, ‏Delivery settlement/reconciliation ו־Acceptance אטומי עם
+Membership. כל 27 משפטי ה־SQL עברו Parser מקומי של PostgreSQL. עדיין חסרים
+Driver, ‏DML integration, ‏Concurrency ופעולות API מחוברות.
 
 7.2 עדיין חסר:
 
