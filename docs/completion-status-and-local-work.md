@@ -433,6 +433,17 @@ Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL
 Chunk נפרד ו־Console נקי. ‏Inbox פוצל ל־Route chunk של כ־37KB
 וה־Chunk הראשי ירד מכ־436KB לכ־416KB ללא העלאת סף האזהרה.
 
+4.1.15 Slice אחד־עשר של לוקליזציה הושלם בכל Surface סוכן ה־AI,
+מקורות הידע ומוכנות ההפעלה. ה־Directory, עורך ה־Definition, מדיניות
+אישור תשובות, Grounding, מגבלת עלות, היסטוריית גרסאות, תשעת חוסמי
+ההפעלה וכל שבעת מצבי מקור הידע זמינים בעברית, אנגלית וערבית. המילון
+המוקלד מכסה גם את כל מצבי ה־Directory ותוצאות פעולות השרת, בלי לשנות
+הרשאות, Validation, פעולות D1 או חסימת Provider. לכפתור העלאת המקור
+החסום נוסף הסבר נגיש המפרט את R2, סוגי הקובץ, מגבלת הגודל והסריקה
+החסרים. בדיקות Server-rendered HTML ו־Chromium אימתו אנגלית וערבית,
+`LTR/RTL`, טעינת Chunk נפרד ו־Console נקי. ‏AI Agent פוצל ל־Route
+chunk של כ־26KB וה־Chunk הראשי ירד מכ־416KB לכ־403KB.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -457,10 +468,10 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
 ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates
-‏Campaigns, ‏Inbox ואישורי AI,
+‏Campaigns, ‏Inbox, אישורי AI, סוכן AI ומקורות ידע,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **9–15 שעות
+הוא **6–10 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**17–29 שעות**.
+הופך ל־**14–24 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

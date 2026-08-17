@@ -2,7 +2,6 @@
 
 import { lazy, Suspense } from "react";
 import { BotFlowBuilder } from "../bot/BotFlowBuilder";
-import { AiAgentEditor } from "../ai/AiAgentEditor";
 import {
   OperationalReports,
 } from "../reports/OperationalReports";
@@ -80,6 +79,9 @@ import {
 import {
   readConversationPageMessages,
 } from "../conversations/conversationPageMessages";
+import {
+  readAiAgentPageMessages,
+} from "../ai/aiAgentPageMessages";
 
 const CampaignManager = lazy(() =>
   import("../campaigns/CampaignManager").then((module) => ({
@@ -93,6 +95,12 @@ const ConversationInbox = lazy(() =>
       default: module.ConversationInbox,
     }),
   ),
+);
+
+const AiAgentEditor = lazy(() =>
+  import("../ai/AiAgentEditor").then((module) => ({
+    default: module.AiAgentEditor,
+  })),
 );
 
 export function WorkspaceSectionContent({
@@ -252,6 +260,7 @@ export function WorkspaceSectionContent({
           ) : null}
           {activeSection === "ai" ? (
             <AiAgent
+              language={language}
               initialDirectory={initialAiAgents}
               initialStatus={
                 initialAiAgentStatus
@@ -479,22 +488,36 @@ function Bot({
 }
 
 function AiAgent({
+  language,
   initialDirectory,
   initialStatus,
 }: {
+  language: InterfaceLanguage;
   initialDirectory: AiAgentDirectoryView;
   initialStatus: AiAgentDirectoryStatus;
 }) {
+  const messages = readAiAgentPageMessages(language);
+
   return (
     <FeaturePage
-      eyebrow="מענה חכם"
-      title="סוכן AI"
-      description="הגדרת תפקיד, כללי מענה, מקורות ידע ומעבר בטוח לנציג אנושי — עם טיוטות ופרסום מבוקר."
+      eyebrow={messages.eyebrow}
+      title={messages.title}
+      description={messages.description}
     >
-      <AiAgentEditor
-        initialDirectory={initialDirectory}
-        initialStatus={initialStatus}
-      />
+      <Suspense
+        fallback={
+          <div className="inline-notice" role="status">
+            <span aria-hidden="true">i</span>
+            <p>{messages.loading}</p>
+          </div>
+        }
+      >
+        <AiAgentEditor
+          language={language}
+          initialDirectory={initialDirectory}
+          initialStatus={initialStatus}
+        />
+      </Suspense>
     </FeaturePage>
   );
 }

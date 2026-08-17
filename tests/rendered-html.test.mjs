@@ -250,6 +250,36 @@ test("server-renders the conversation inbox boundary in English and Arabic", asy
   assert.doesNotMatch(arabicHtml, /תיבת השיחות אינה זמינה/);
 });
 
+test("server-renders the AI agent boundary in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/ai?lang=en"),
+    render("/workspace/ai?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /AI agent library/);
+  assert.match(
+    englishHtml,
+    /Configure Clerk and D1 before loading or saving AI agents/,
+  );
+  assert.match(englishHtml, /Server readiness check/);
+  assert.match(englishHtml, /No saved knowledge sources/);
+  assert.doesNotMatch(englishHtml, /ספריית סוכני AI/);
+
+  assert.match(arabicHtml, /مكتبة وكلاء AI/);
+  assert.match(arabicHtml, /يجب إعداد Clerk وD1/);
+  assert.match(arabicHtml, /فحص الجاهزية على الخادم/);
+  assert.match(arabicHtml, /لا توجد مصادر معرفة محفوظة/);
+  assert.doesNotMatch(arabicHtml, /ספריית סוכני AI/);
+});
+
 test("server-renders auth and workspace feature routes", async () => {
   const [
     loginResponse,
