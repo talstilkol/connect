@@ -168,3 +168,7 @@ Plugin ו־Wrangler.
 
 8.5 Evidence של חשבון, Staging ו־Deployment חי:
 `unknown/unavailable`.
+
+8.6 [`hosting-migration-contract-freeze.md`](../hosting-migration-contract-freeze.md)
+ו־`shared/domain/hostingMigrationRegistry.ts` — מיפוי דטרמיניסטי של
+18 היכולות שחייבות Adapter, תצורה, החלטת ספק או Evidence חדש.

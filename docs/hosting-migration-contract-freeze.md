@@ -1,0 +1,81 @@
+# Contract freeze ל־Vercel ול־Railway
+
+תאריך מיפוי: 2026-08-17
+
+## 1. מטרה
+
+1.1 המסמך מקבע את כל היכולות שתלויות כיום ב־Cloudflare לפני שינוי
+קוד. מקור האמת ה־Machine-readable הוא
+`shared/domain/hostingMigrationRegistry.ts`.
+
+1.2 ‏Contract freeze אינו Migration ואינו Deployment. הוא מונע מצב
+שבו מחליפים את ה־Web runtime ושוכחים Database, ‏Queue, ‏DLQ,
+Scheduler, ‏Rate limit, ‏Evidence או Recovery.
+
+1.3 הרשימה כוללת 18 יכולות: תשע מהן כבר קיבלו ספק/מיקום יעד ברמת
+Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. אף יכולת אינה
+`ready` ל־Cutover.
+
+## 2. מפת היכולות
+
+| מזהה | היום | יעד | הצעד הבא |
+| --- | --- | --- | --- |
+| `web.build-runtime` | Vinext + Cloudflare Vite/Sites | Vercel Web | החלפת Build/runtime |
+| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | חוזה HTTP מאומת וגרסתי |
+| `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
+| `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
+| `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
+| `data.relational-database` | D1/SQLite | PostgreSQL | בחירת ספק ו־Adapter parity |
+| `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
+| `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
+| `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |
+| `queue.team-invitation` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
+| `worker.scheduler` | Cloudflare Cron | Railway Worker | Scheduler חד־תביעה |
+| `security.distributed-rate-limits` | Cloudflare bindings + D1 ledger | Shared service | בחירת מנגנון אטומי |
+| `security.secret-management` | Worker secrets | Vercel + Railway | Inventory, חלוקה ו־Rotation |
+| `operations.environment-isolation-evidence` | Cloudflare evidence v2 | Vercel + Railway | Evidence חדש רב־ספקי |
+| `operations.deployment-provenance-evidence` | Cloudflare deployment | Vercel + שני שירותי Railway | Provenance משותף ל־Release |
+| `operations.backup-restore` | D1/R2 evidence | PostgreSQL + Storage | בחירת PITR, אזור ו־Restore |
+| `operations.browser-database-proof` | Cloudflare D1 API | PostgreSQL read-only | Proof adapter חדש |
+| `operations.observability` | המלצת Workers logs/traces | Vercel + Railway | בחירת Sink ו־Alert provider |
+
+## 3. סדר ביצוע מחייב
+
+3.1 שלב A — החלטות ספקים משותפים, 4–8 שעות עבודה נטו לאחר קבלת
+תקציב ו־Accounts: PostgreSQL, ‏Queue/DLQ, ‏Object storage, ‏Rate
+limit, ‏Monitoring ו־Backup.
+
+3.2 שלב B — Web build וגבול Vercel/Railway API, ‏20–40 שעות.
+
+3.3 שלב C — PostgreSQL schema, ‏Repositories, טרנזקציות ו־Migration
+rehearsal, ‏40–80 שעות.
+
+3.4 שלב D — שלושת ה־Queues, ‏DLQs, ‏Delays, ‏Consumers ו־Scheduler,
+20–40 שעות.
+
+3.5 שלב E — Object storage, ‏Scanner path ו־Browser proof,
+12–24 שעות.
+
+3.6 שלב F — Distributed rate limits, ‏Reservation ledger ו־Load
+tests, ‏16–32 שעות.
+
+3.7 שלב G — Secrets, ‏Observability, ‏Backup/Restore ושני מחוללי
+Evidence, ‏20–40 שעות.
+
+3.8 שלב H — Staging, ‏Security/Load/Recovery, ‏Cutover ו־Rollback,
+24–48 שעות.
+
+3.9 סך תכנוני: **156–312 שעות פיתוח ואימות נטו** לאחר החלטות
+הספקים. זהו טווח ראשוני ל־Migration החדש ואינו כולל זמני אישור,
+פתיחת חשבונות, Review או המתנה לספקים.
+
+## 4. תנאי יציאה מ־Contract freeze
+
+4.1 כל 18 הרשומות נשארות ב־Registry עד שיש להן Adapter או תצורה,
+בדיקת Contract, בעלים וראיית Staging.
+
+4.2 אין למחוק D1/R2/Queue implementation לפני Export, ‏Rehearsal
+ו־Rollback שנבדקו מול נתונים מורשים בסביבה מבודדת.
+
+4.3 אין לסמן את יעד ה־Production כ־Ready על בסיס Build של Vercel או
+Health check של Railway בלבד.

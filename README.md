@@ -17,6 +17,7 @@
 10. [חוזה אבטחה לייבוא אנשי קשר](docs/contact-import-security.md).
 11. [ראיית Browser מקומית לייבוא אנשי קשר](docs/contact-import-browser-acceptance.md).
 12. [חוזה הגנת משאבי Clerk](docs/clerk-resource-auth-protection.md).
+13. [Contract freeze למעבר ל־Vercel ול־Railway](docs/hosting-migration-contract-freeze.md).
 
 ## מצב Master Plan — תשתית Stage 3
 

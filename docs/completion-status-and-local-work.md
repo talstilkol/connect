@@ -309,6 +309,20 @@ Contract freeze, ‏Adapter parity, ‏Staging מבודד ו־Cutover מבוקר
 הקוד עדיין Cloudflare-specific ולכן Deployment ליעד החדש נשאר חסום
 עד בחירת רכיבי הנתונים/Queue/Storage והשלמת ה־Migration.
 
+2.17 **הושלם מקומית:** Contract freeze ל־Migration.
+
+2.17.1 Registry מוקפא ממפה 18 יכולות Cloudflare אל יעד Vercel/
+Railway ומקשר כל יכולת לקובצי המקור האמיתיים שלה. בדיקות מונעות
+Binding חסר, כפילות, מקור שאינו קיים או ספק מומצא.
+
+2.17.2 תשע יכולות קיבלו מיקום יעד ברמת Vercel/Railway ותשע נשארו
+`decision-required`: PostgreSQL, ‏Object storage, שלושת ה־Queues,
+Distributed rate limits, ‏Backup, ‏Browser proof ו־Observability.
+
+2.17.3 טווח ה־Migration הראשוני הוא 156–312 שעות נטו לאחר קבלת
+החלטות הספקים. הטווח נוסף לתוכנית בעקבות שינוי ה־Hosting ואינו חלק
+מה־Baseline המקומי המקורי שהושלם.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
