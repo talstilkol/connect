@@ -187,11 +187,18 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו שתי Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו שלוש Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
+השלישית יוצרת Membership, ‏Selection ו־Business profile.
 ה־Executor וה־SQL נבדקים מקומית, אך אין עדיין Driver, ‏Schema parity מלאה,
 Migration שרץ מול Database אמיתי או Integration evidence.
+
+7.1.16 נוספו Membership, ‏Tenant selection ו־Business profile repositories
+ספק־נייטרליים. מסלולי Selection ו־Profile משתמשים ב־Transaction, וקריאות
+Membership נכשלות סגור על תוצאה חוצה User/Tenant או על יותר מ־100 רשומות.
+החוזה המלא מתועד ב־
+[PostgreSQL Tenant Access](postgresql-tenant-access-contract.md).
 
 7.2 עדיין חסר:
 

@@ -184,6 +184,8 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/railwayApiOperationRegistry.ts",
     "server/platform/railwayApiMutationExecutor.ts",
     "server/platform/postgresTransaction.ts",
+    "server/platform/postgresTenantMembershipRepository.ts",
+    "server/platform/postgresTenantSelectionRepository.ts",
     "server/platform/postgresRailwayApiMutationExecutor.ts",
     "server/platform/railwayApiRuntime.ts",
   ];
@@ -200,7 +202,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
 
-test("records the PostgreSQL mutation contract without selecting a provider", () => {
+test("records the PostgreSQL persistence contracts without selecting a provider", () => {
   const database = HOSTING_MIGRATION_REGISTRY.find(
     ({ id }) => id === "data.relational-database",
   );
@@ -213,14 +215,19 @@ test("records the PostgreSQL mutation contract without selecting a provider", ()
   for (const path of [
     "server/platform/postgresTransaction.ts",
     "server/platform/postgresRailwayApiMutationExecutor.ts",
+    "server/platform/postgresResultValidation.ts",
+    "server/platform/postgresTenantMembershipRepository.ts",
+    "server/platform/postgresTenantSelectionRepository.ts",
+    "server/platform/postgresBusinessProfileRepository.ts",
     "postgres/migrations/0000_core_contacts.sql",
     "postgres/migrations/0001_railway_api_mutation_receipts.sql",
+    "postgres/migrations/0002_tenant_access_foundation.sql",
     "scripts/verify-postgres-migration-contract.mjs",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
   }
 
-  assert.match(database.cutoverBlocker, /provider-neutral/);
+  assert.match(database.cutoverBlocker, /provider-neutral/i);
   assert.match(database.cutoverBlocker, /Node driver/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /real concurrency tests/);

@@ -10,9 +10,10 @@
 `PostgresTransactionManager`, ולכן Driver עתידי יכול לחבר `pg`, ‏Postgres.js
 או חלופה מאושרת בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת שתי Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת שלוש Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
-והשנייה יוצרת את `railway_api_mutation_receipts`. הן אינן מוכיחות עדיין
+השנייה יוצרת את `railway_api_mutation_receipts`, והשלישית את Tenant access
+foundation. הן אינן מוכיחות עדיין
 Parity עם כל 35 ה־Migrations של D1 ואינן הורצו מול Database אמיתי.
 
 ## 2. הסבר למתחילים
@@ -85,7 +86,7 @@ Receipt פעיל ל־Audit נצחי.
 
 5.5 ערכי משתמש נשלחים רק כ־Parameters; הם אינם משורשרים אל מחרוזות SQL.
 
-5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת ארבע טבלאות ה־Critical
+5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת שבע טבלאות ה־Critical
 Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ויצירת מזהים אקראית.
 
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.

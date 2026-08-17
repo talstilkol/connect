@@ -9,12 +9,14 @@ export interface PostgresQueryResult<TRow> {
   readonly rowCount: number;
 }
 
-export interface PostgresTransaction {
+export interface PostgresQueryExecutor {
   query<TRow>(
     sql: string,
     parameters: readonly PostgresParameter[],
   ): Promise<Readonly<PostgresQueryResult<TRow>>>;
 }
+
+export type PostgresTransaction = PostgresQueryExecutor;
 
 export interface PostgresTransactionOptions {
   readonly isolationLevel: "read-committed";

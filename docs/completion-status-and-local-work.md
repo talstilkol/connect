@@ -421,6 +421,25 @@ Schema parity מול 35 ה־Migrations ובדיקת Concurrency מול PostgreSQ
 2.23.4 זהו Critical Path בלבד. הוא אינו ממיר עדיין את מלוא 35 ה־Migrations,
 אינו בוחר Driver ואינו מהווה הוכחת הרצה מול PostgreSQL אמיתי.
 
+2.24 **הושלם מקומית:** PostgreSQL Tenant access foundation.
+
+2.24.1 Migration שלישית מוסיפה `tenant_memberships`, ‏`tenant_selections`
+ו־`business_profiles`. ‏Composite Foreign Key קושר Selection ל־Membership
+המדויק, ו־Trigger אוכף מעבר Version מדויק בשינוי Role או Status.
+
+2.24.2 Membership repository ספק־נייטרלי משתמש ב־Parameters, מגביל תוצאה
+ל־100 ונכשל סגור על Cross-user, ‏Cross-tenant או Row shape פגום.
+
+2.24.3 Selection repository יוצר בחירה רק עבור Membership פעיל ו־Tenant
+מורשה. כתיבה משתמשת ב־Expected version וב־Transaction; Replay נטען עם
+`FOR UPDATE`, ‏Version מתקדם מחזיר Conflict והיעדר הרשאה מחזיר Rejected.
+
+2.24.4 Business profile repository שומר את שם ה־Tenant ואת הפרופיל באותה
+Transaction, משתמש ב־`IS DISTINCT FROM` ומאמת את הרשומה לפני Commit.
+
+2.24.5 החוזה מתועד ב־`docs/postgresql-tenant-access-contract.md`. עדיין אין
+Driver, ‏Database חי, Full schema parity או Concurrency evidence.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

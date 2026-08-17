@@ -103,6 +103,9 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/railwayApiOperationRegistry.ts",
       "server/platform/railwayApiMutationExecutor.ts",
       "server/platform/postgresTransaction.ts",
+      "server/platform/postgresResultValidation.ts",
+      "server/platform/postgresTenantMembershipRepository.ts",
+      "server/platform/postgresTenantSelectionRepository.ts",
       "server/platform/postgresRailwayApiMutationExecutor.ts",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
@@ -114,7 +117,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, and critical-path schema exist, but the database driver, full schema parity, remaining mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, tenant access repositories, and critical-path schema exist, but the database driver, full schema parity, remaining repositories and mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -168,8 +171,13 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "drizzle.config.ts",
       "server/platform/postgresTransaction.ts",
       "server/platform/postgresRailwayApiMutationExecutor.ts",
+      "server/platform/postgresResultValidation.ts",
+      "server/platform/postgresTenantMembershipRepository.ts",
+      "server/platform/postgresTenantSelectionRepository.ts",
+      "server/platform/postgresBusinessProfileRepository.ts",
       "postgres/migrations/0000_core_contacts.sql",
       "postgres/migrations/0001_railway_api_mutation_receipts.sql",
+      "postgres/migrations/0002_tenant_access_foundation.sql",
       "scripts/verify-postgres-migration-contract.mjs",
     ],
     targetPlacement: "shared-managed-service",
@@ -179,7 +187,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "A provider-neutral contacts.save transaction executor and two ordered critical-path PostgreSQL migrations exist, but the provider, Node driver, full 35-migration parity conversion, real concurrency tests, and migration evidence are not implemented.",
+      "Provider-neutral contacts.save and tenant access repositories plus three ordered critical-path PostgreSQL migrations exist, but the provider, Node driver, full 35-migration parity conversion, real concurrency tests, and migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

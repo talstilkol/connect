@@ -21,17 +21,19 @@ const migrationSources = migrationFiles.map((fileName) =>
   readFileSync(new URL(fileName, migrationsUrl), "utf8"),
 );
 const coreSchema = migrationSources[0];
+const accessSchema = migrationSources[2];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
     "0000_core_contacts.sql",
     "0001_railway_api_mutation_receipts.sql",
+    "0002_tenant_access_foundation.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 2,
+      migrationCount: 3,
       findings: [],
     },
   );
@@ -72,6 +74,29 @@ test("scopes audit idempotency to tenant and action", () => {
   assert.doesNotMatch(
     coreSchema,
     /UNIQUE\s*\(idempotency_key\)/,
+  );
+});
+
+test("defines tenant access isolation and exact membership version transitions", () => {
+  assert.match(
+    accessSchema,
+    /CREATE TABLE tenant_memberships[\s\S]*UNIQUE \(tenant_id, external_user_id\)/,
+  );
+  assert.match(
+    accessSchema,
+    /CREATE TABLE tenant_selections[\s\S]*FOREIGN KEY \(tenant_id, external_user_id\)[\s\S]*REFERENCES tenant_memberships \(tenant_id, external_user_id\)[\s\S]*ON DELETE CASCADE/,
+  );
+  assert.match(
+    accessSchema,
+    /CREATE TRIGGER tenant_memberships_state_version_guard[\s\S]*BEFORE UPDATE OF role, status, version/,
+  );
+  assert.match(
+    accessSchema,
+    /NEW\.version <> OLD\.version \+ 1/,
+  );
+  assert.match(
+    accessSchema,
+    /CREATE TABLE business_profiles[\s\S]*interface_language IN \('he', 'en', 'ar'\)/,
   );
 });
 
