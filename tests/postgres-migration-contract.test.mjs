@@ -26,6 +26,7 @@ const membershipEventSchema = migrationSources[3];
 const invitationSchema = migrationSources[4];
 const conversationSchema = migrationSources[5];
 const campaignSchema = migrationSources[6];
+const botSchema = migrationSources[7];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -36,12 +37,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0004_team_invitation_lifecycle.sql",
     "0005_conversations_messages.sql",
     "0006_message_templates_campaigns.sql",
+    "0007_bot_flows_deliveries.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 7,
+      migrationCount: 8,
       findings: [],
     },
   );
@@ -90,6 +92,29 @@ test("defines PostgreSQL templates and tenant-scoped campaigns", () => {
   assert.match(
     campaignSchema,
     /campaigns_tenant_created_idx[\s\S]*\(tenant_id, created_at\)/,
+  );
+});
+
+test("defines PostgreSQL bot flows, versions, and deliveries", () => {
+  assert.match(
+    botSchema,
+    /CREATE TABLE bot_flows[\s\S]*CREATE TABLE bot_flow_versions[\s\S]*CREATE TABLE bot_reply_deliveries/,
+  );
+  assert.match(
+    botSchema,
+    /bot_flow_versions_one_published_uq[\s\S]*WHERE status = 'published'/,
+  );
+  assert.match(
+    botSchema,
+    /bot_reply_deliveries_flow_version_fk[\s\S]*FOREIGN KEY \(tenant_id, bot_flow_key, bot_flow_version_key\)/,
+  );
+  assert.match(
+    botSchema,
+    /bot_reply_deliveries_state_consistent[\s\S]*status = 'pending'[\s\S]*status = 'accepted'[\s\S]*status IN \('rejected', 'ambiguous'\)/,
+  );
+  assert.match(
+    botSchema,
+    /bot_reply_deliveries_tenant_created_idx[\s\S]*\(tenant_id, created_at\)/,
   );
 });
 

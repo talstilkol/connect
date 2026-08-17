@@ -29,6 +29,9 @@ const requiredTableSequence = Object.freeze([
   "messages",
   "message_templates",
   "campaigns",
+  "bot_flows",
+  "bot_flow_versions",
+  "bot_reply_deliveries",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -38,6 +41,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0004_team_invitation_lifecycle.sql",
   "0005_conversations_messages.sql",
   "0006_message_templates_campaigns.sql",
+  "0007_bot_flows_deliveries.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

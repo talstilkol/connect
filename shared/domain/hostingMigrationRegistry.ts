@@ -120,6 +120,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "postgres/migrations/0004_team_invitation_lifecycle.sql",
       "postgres/migrations/0005_conversations_messages.sql",
       "postgres/migrations/0006_message_templates_campaigns.sql",
+      "postgres/migrations/0007_bot_flows_deliveries.sql",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
     ],
@@ -130,7 +131,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, single-statement reports.read adapter, and eleven-adapter PostgreSQL foundation exist. Conversations, messages, templates, and campaigns are migrated and tested, but cutover remains blocked because the other three operational-report source tables are absent from the critical-path PostgreSQL migrations, and live provider-bound pool values, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, single-statement reports.read adapter, and eleven-adapter PostgreSQL foundation exist. Conversations, messages, templates, campaigns, bot flows, and bot deliveries are migrated and tested, but cutover remains blocked because the two AI operational-report source tables are absent from the critical-path PostgreSQL migrations, and live provider-bound pool values, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -202,6 +203,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "postgres/migrations/0004_team_invitation_lifecycle.sql",
       "postgres/migrations/0005_conversations_messages.sql",
       "postgres/migrations/0006_message_templates_campaigns.sql",
+      "postgres/migrations/0007_bot_flows_deliveries.sql",
       "scripts/verify-postgres-migration-contract.mjs",
       "scripts/verify-node-postgres-integration.mjs",
     ],
@@ -212,7 +214,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, contacts.list, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus seven ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, eleven-adapter foundation, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, conversation/message and template/campaign constraints, commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The other three operational-report source tables are not yet present in the PostgreSQL migrations, and the provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
+      "Provider-neutral contacts.save, contacts.list, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus eight ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, eleven-adapter foundation, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, conversation/message, template/campaign, and bot delivery constraints, commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The two AI operational-report source tables are not yet present in the PostgreSQL migrations, and the provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

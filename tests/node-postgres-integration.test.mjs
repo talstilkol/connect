@@ -66,8 +66,10 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0004_team_invitation_lifecycle\.sql/);
   assert.match(source, /0005_conversations_messages\.sql/);
   assert.match(source, /0006_message_templates_campaigns\.sql/);
+  assert.match(source, /0007_bot_flows_deliveries\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyTemplateCampaignSchema/);
+  assert.match(source, /verifyBotDeliverySchema/);
   assert.match(source, /messages_direction_status_consistent|23514/);
   assert.match(source, /createRailwayPostgresFoundation/);
   assert.doesNotMatch(source, /Math\.random|randomUUID/);

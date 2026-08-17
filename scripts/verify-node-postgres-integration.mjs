@@ -35,6 +35,7 @@ const migrationFiles = Object.freeze([
   "0004_team_invitation_lifecycle.sql",
   "0005_conversations_messages.sql",
   "0006_message_templates_campaigns.sql",
+  "0007_bot_flows_deliveries.sql",
 ]);
 
 function fail(code) {
@@ -479,6 +480,134 @@ async function verifyTemplateCampaignSchema(pool, tenantId) {
   );
 }
 
+async function verifyBotDeliverySchema(pool, tenantId) {
+  const conversationKey = `conversation_v1_${"a".repeat(64)}`;
+  const inboundMessageKey = `message_v1_${"b".repeat(64)}`;
+  const botFlowKey = `bot_flow_v1_${"7".repeat(64)}`;
+  const botFlowVersionKey = `bot_flow_version_v1_${"8".repeat(64)}`;
+  const deliveryKey = `bot_reply_delivery_v1_${"9".repeat(64)}`;
+  const occurredAt = "2026-08-17T11:00:00.000Z";
+  const definition = JSON.stringify({ entry: "integration" });
+  const reply = JSON.stringify({ type: "text", text: "Integration reply" });
+
+  await pool.query(
+    `INSERT INTO bot_flows (
+       bot_flow_key,
+       tenant_id,
+       name,
+       status,
+       latest_version_key,
+       latest_version_number,
+       active_version_key,
+       version,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       'Integration bot flow',
+       'draft',
+       $3,
+       1,
+       NULL,
+       1,
+       $4::timestamptz,
+       $4::timestamptz
+     )`,
+    [botFlowKey, tenantId, botFlowVersionKey, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO bot_flow_versions (
+       bot_flow_version_key,
+       bot_flow_key,
+       tenant_id,
+       version_number,
+       status,
+       definition_json,
+       published_at,
+       created_at
+     )
+     VALUES ($1, $2, $3, 1, 'draft', $4::jsonb, NULL, $5::timestamptz)`,
+    [botFlowVersionKey, botFlowKey, tenantId, definition, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO bot_reply_deliveries (
+       delivery_key,
+       tenant_id,
+       conversation_key,
+       inbound_message_key,
+       bot_flow_key,
+       bot_flow_version_key,
+       reply_index,
+       recipient_phone_e164,
+       reply_json,
+       status,
+       attempt_count,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       $4,
+       $5,
+       $6,
+       1,
+       '+972501234567',
+       $7::jsonb,
+       'pending',
+       0,
+       $8::timestamptz,
+       $8::timestamptz
+     )`,
+    [
+      deliveryKey,
+      tenantId,
+      conversationKey,
+      inboundMessageKey,
+      botFlowKey,
+      botFlowVersionKey,
+      reply,
+      occurredAt,
+    ],
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       delivery.status,
+       delivery.attempt_count,
+       version.status AS version_status
+     FROM bot_reply_deliveries AS delivery
+     JOIN bot_flow_versions AS version
+       ON version.tenant_id = delivery.tenant_id
+      AND version.bot_flow_key = delivery.bot_flow_key
+      AND version.bot_flow_version_key = delivery.bot_flow_version_key
+     WHERE delivery.tenant_id = $1
+       AND delivery.delivery_key = $2`,
+    [tenantId, deliveryKey],
+  );
+  assert.deepEqual(persisted.rows, [
+    {
+      status: "pending",
+      attempt_count: 0,
+      version_status: "draft",
+    },
+  ]);
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE bot_reply_deliveries
+       SET attempt_count = 1
+       WHERE tenant_id = $1
+         AND delivery_key = $2`,
+      [tenantId, deliveryKey],
+    ),
+    (error) => error?.code === "23514",
+  );
+}
+
 async function prepareBlockedInvitation(
   invitationRepository,
   deliveryRepository,
@@ -635,6 +764,7 @@ export async function verifyNodePostgresIntegration(
       );
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
+      await verifyBotDeliverySchema(pool, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
     } finally {
       await foundation.close();

@@ -11,17 +11,18 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת שבע Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת שמונה Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
 foundation, הרביעית את Membership event ledger והחמישית את Team invitation
 lifecycle. השישית יוצרת `conversations` ו־`messages`, והשביעית את
-`message_templates` ו־`campaigns`. השרשרת הוחלה בהצלחה
+`message_templates` ו־`campaigns`. השמינית יוצרת Bot flows, גרסאות ו־
+Deliveries. השרשרת הוחלה בהצלחה
 על PostgreSQL 16.13 מקומי ומבודד, אך אינה
 מוכיחה עדיין Parity עם כל 35 ה־Migrations של D1 או מוכנות לפריסה.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את שבע ה־Migrations על PostgreSQL 16.13,
+Loopback ייעודי וריק. הוא החיל את שמונה ה־Migrations על PostgreSQL 16.13,
 הפעיל DML אמיתי והוכיח שני תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
@@ -41,7 +42,8 @@ Consent וסדר התוצאות לפני החזרתן לשכבה העסקית. �
 1.8 ‏`postgresOperationalReportRepository.ts` מממש את `reports.read` בשאילתת
 PostgreSQL יחידה, כדי שכל ששת ה־Aggregates ייקראו מאותו Statement snapshot.
 הוא מאמת 35 שדות, סכומי קטגוריות, סדר מטבעות ומספרים בטווח JavaScript בטוח.
-Conversations, ‏Messages ו־Campaigns כבר נוספו ונבדקו; שלוש טבלאות המקור האחרות טרם
+Conversations, ‏Messages, ‏Campaigns ו־Bot deliveries כבר נוספו ונבדקו;
+שתי טבלאות המקור של AI טרם
 נוספו ל־Migrations ולכן זה עדיין חוזה Adapter, לא ראיית Runtime מלאה.
 
 ## 2. הסבר למתחילים

@@ -655,6 +655,26 @@ Template ו־Campaign תקינים, קרא את הקשר ביניהם וחסם C
 2.35.4 לדוח מלא נותרו שלוש טבלאות מקור: `bot_reply_deliveries`,
 `ai_runtime_audit_events` ו־`ai_runtime_usage`, יחד עם טבלאות התלות שלהן.
 
+2.36 **הושלם מקומית:** PostgreSQL Bot flows ו־Reply deliveries schema.
+
+2.36.1 Migration מספר `0007_bot_flows_deliveries.sql` ממיר Bot flows,
+גרסאות Immutable ו־Delivery state machine. הוא מקשר Delivery לאותו Tenant,
+Conversation, Inbound message ולצמד Flow+Version המדויק.
+
+2.36.2 Constraints אוכפים Draft/Published lifecycle, גרסה Published יחידה,
+זהויות Deterministic, ‏JSONB bounded ואת חמשת מצבי Delivery עם השילוב המדויק
+של Attempt, Provider ID, Error ו־Accepted timestamp. ה־Guard מכסה שמונה
+Migrations ו־19 טבלאות.
+
+2.36.3 ה־Harness החיל את שמונה ה־Migrations על PostgreSQL 16.13 ריק, יצר
+Flow, Version ו־Pending delivery מקושרים, וקיבל Constraint violation כשניסה
+להגדיל Attempt בלי להעביר את מצב ה־Delivery. התוצאה:
+`PASS (8 migrations, 2 concurrency scenarios)`. סביבת הבדיקה נעצרה ונמחקה.
+
+2.36.4 לדוח מלא נותרו רק `ai_runtime_audit_events` ו־`ai_runtime_usage`,
+יחד עם טבלאות התלות `ai_agents`, ‏`ai_agent_versions` ו־
+`ai_runtime_cost_authorizations`.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
