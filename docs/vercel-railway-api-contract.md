@@ -187,7 +187,7 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו 12 Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו 13 Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
 השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
@@ -202,6 +202,8 @@ Keys מורכבים שמבודדים Tenant.
 envelopes עם קשר Tenant/WABA מורכב.
 השתים־עשרה מוסיפה WhatsApp delivery-policy ledger בלתי־ניתן לשינוי עם
 Audit אטומי, קישור לגרסת חיבור Meta ו־Kill switch מוגבל.
+השלוש־עשרה מוסיפה Reservation, ‏Settlement ו־Provider-cooldown ledger עם
+נעילות Pair/Portfolio ו־State projections מוכחי Evidence.
 כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי. ‏Node driver adapter
 ו־Integration rehearsal עבור Contact ו־Invitation קיימים, אך אין עדיין
 Schema parity מלאה, ערכי Production pool חיים או Staging evidence.
@@ -227,15 +229,15 @@ Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`
 כיסוי יתר המסלולים ופעולות API מחוברות.
 
 7.1.19 ‏`node-postgres` מחובר דרך Adapter יחיד שמפריד Query בודד מ־Transaction
-מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל 12
-Migrations ומוכיח DML, ‏Rollback וחמישה Races בלי לקבל Production credential.
+מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל 13
+Migrations ומוכיח DML, ‏Rollback ושישה Races בלי לקבל Production credential.
 
 7.1.20 חוזה Pool נפרד דורש TLS, ‏Pool size וכל Timeout במפורש. הוא דוחה
 Loopback ב־Staging/Production וכל Query string ב־Database URL, משום ש־
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
-7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 16 ה־Adapters שהושלמו לאותו
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 17 ה־Adapters שהושלמו לאותו
 Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי.
 
 7.1.22 ‏`contacts.list` משתמש כעת ב־PostgreSQL repository בעל Tenant filter,
@@ -310,6 +312,14 @@ port, אך אינו ממציא Encryption key או Vault configuration. ‏Harne
 של שתי בקשות זהות, Event יחיד, Replay, השבתה ו־Audit. סך הכול עברו חמישה
 תרחישי Concurrency. ‏Reservation ledger, ‏Provider limiter ו־Sender חי עדיין
 אינם מחוברים.
+
+7.1.32 ‏`0012_whatsapp_rate_limit_ledger.sql` ו־
+`postgresWhatsappRateLimitRepository.ts` ממירים Reservation, ‏Settlement
+ו־Provider cooldown ל־PostgreSQL. ‏Transaction-scoped locks מסדרים Pair
+ו־Portfolio admission, ו־Triggers אוכפים Evidence ו־Immutability גם מול
+כתיבה ישירה. ‏Harness אמיתי הוכיח Race זהה, Replay, Pair limit, שחרור,
+Cooldown וחסימת Tamper. סך הכול עברו שישה תרחישי Concurrency. ‏Provider
+throughput limiter, ‏Queue worker, ‏Sender ו־Load evidence עדיין חסרים.
 
 7.2 עדיין חסר:
 

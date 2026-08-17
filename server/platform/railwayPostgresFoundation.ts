@@ -51,6 +51,9 @@ import {
   createPostgresWhatsappCampaignDeliveryPolicyRepository,
 } from "./postgresWhatsappCampaignDeliveryPolicyRepository.ts";
 import {
+  createPostgresWhatsappRateLimitRepository,
+} from "./postgresWhatsappRateLimitRepository.ts";
+import {
   createPostgresReadinessProbe,
 } from "./postgresReadinessProbe.ts";
 import {
@@ -119,6 +122,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly whatsappDeliveryPolicies: ReturnType<
     typeof createPostgresWhatsappCampaignDeliveryPolicyRepository
+  >;
+  readonly whatsappRateLimits: ReturnType<
+    typeof createPostgresWhatsappRateLimitRepository
   >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
@@ -234,6 +240,11 @@ export function createRailwayPostgresFoundation(
       createPostgresMetaCredentialRepository(queries),
     whatsappDeliveryPolicies:
       createPostgresWhatsappCampaignDeliveryPolicyRepository({
+        queries,
+        transactions,
+      }),
+    whatsappRateLimits:
+      createPostgresWhatsappRateLimitRepository({
         queries,
         transactions,
       }),

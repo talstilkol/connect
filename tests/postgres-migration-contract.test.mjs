@@ -31,6 +31,7 @@ const aiSchema = migrationSources[8];
 const contactOrganizationImportSchema = migrationSources[9];
 const metaConnectionCredentialSchema = migrationSources[10];
 const whatsappDeliveryPolicySchema = migrationSources[11];
+const whatsappRateLimitLedgerSchema = migrationSources[12];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -46,14 +47,47 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0009_contact_organization_imports.sql",
     "0010_meta_connection_credentials.sql",
     "0011_whatsapp_delivery_policy.sql",
+    "0012_whatsapp_rate_limit_ledger.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 12,
+      migrationCount: 13,
       findings: [],
     },
+  );
+});
+
+test("defines serialized PostgreSQL WhatsApp rate-limit evidence", () => {
+  for (const tableName of [
+    "whatsapp_rate_limit_reservations",
+    "whatsapp_pair_rate_limit_state",
+    "whatsapp_portfolio_recipient_rate_limit_state",
+    "whatsapp_rate_limit_settlements",
+    "whatsapp_provider_cooldown_events",
+    "whatsapp_provider_cooldown_state",
+  ]) {
+    assert.match(
+      whatsappRateLimitLedgerSchema,
+      new RegExp(`CREATE TABLE ${tableName}`),
+    );
+  }
+  assert.match(
+    whatsappRateLimitLedgerSchema,
+    /enforce_whatsapp_rate_reservation_insert[\s\S]*pg_advisory_xact_lock[\s\S]*portfolio recipient limit reached/,
+  );
+  assert.match(
+    whatsappRateLimitLedgerSchema,
+    /project_whatsapp_rate_settlement_state[\s\S]*last_delivered_at[\s\S]*cancelled-before-submit/,
+  );
+  assert.match(
+    whatsappRateLimitLedgerSchema,
+    /provider cooldown lacks rejection proof[\s\S]*project_whatsapp_provider_cooldown_state/,
+  );
+  assert.match(
+    whatsappRateLimitLedgerSchema,
+    /rate-limit evidence is immutable[\s\S]*state cannot be deleted/,
   );
 });
 

@@ -48,6 +48,7 @@ const migrationFiles = Object.freeze([
   "0009_contact_organization_imports.sql",
   "0010_meta_connection_credentials.sql",
   "0011_whatsapp_delivery_policy.sql",
+  "0012_whatsapp_rate_limit_ledger.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -777,6 +778,138 @@ async function verifyWhatsappDeliveryPolicy(
     (error) =>
       error?.code === "P0001" &&
       /immutable/.test(error.message),
+  );
+}
+
+async function verifyWhatsappRateLimitLedger(
+  pool,
+  foundation,
+  tenantId,
+) {
+  const command = Object.freeze({
+    reservationKey: `whatsapp_rate_reservation_v1_${"1".repeat(64)}`,
+    tenantId,
+    portfolioKey: `whatsapp_portfolio_v1_${"2".repeat(64)}`,
+    senderKey: `whatsapp_sender_v1_${"3".repeat(64)}`,
+    recipientKey: `whatsapp_recipient_v1_${"4".repeat(64)}`,
+    templateCategory: "MARKETING",
+    portfolioCapacity: Object.freeze({
+      kind: "bounded",
+      maximumUniqueRecipients: 250,
+    }),
+    reservedAt: "2026-08-17T09:00:00.000Z",
+    reservationExpiresAt: "2026-08-17T09:05:00.000Z",
+  });
+  const concurrent = await Promise.all([
+    foundation.whatsappRateLimits.reserveBusinessInitiatedMessage(command),
+    foundation.whatsappRateLimits.reserveBusinessInitiatedMessage(command),
+  ]);
+  assert.equal(
+    concurrent.every(({ outcome }) => outcome === "reserved"),
+    true,
+  );
+  assert.deepEqual(
+    concurrent.map(({ idempotent }) => idempotent).sort(),
+    [false, true],
+  );
+
+  const pairLimited =
+    await foundation.whatsappRateLimits.reserveBusinessInitiatedMessage({
+      ...command,
+      reservationKey: `whatsapp_rate_reservation_v1_${"5".repeat(64)}`,
+    });
+  assert.equal(pairLimited.outcome, "pair-limited");
+  assert.equal(pairLimited.retryAt, "2026-08-17T09:00:06.000Z");
+
+  const cancelled = await foundation.whatsappRateLimits.settle({
+    reservationKey: command.reservationKey,
+    outcome: "cancelled-before-submit",
+    settledAt: "2026-08-17T09:00:02.000Z",
+  });
+  assert.equal(cancelled.outcome, "settled");
+  assert.equal(cancelled.idempotent, false);
+
+  const secondCommand = Object.freeze({
+    ...command,
+    reservationKey: `whatsapp_rate_reservation_v1_${"6".repeat(64)}`,
+    reservedAt: "2026-08-17T09:00:02.000Z",
+    reservationExpiresAt: "2026-08-17T09:05:02.000Z",
+  });
+  const second =
+    await foundation.whatsappRateLimits.reserveBusinessInitiatedMessage(
+      secondCommand,
+    );
+  assert.equal(second.outcome, "reserved");
+
+  const cooldown = await foundation.whatsappRateLimits.applyProviderCooldown({
+    reservationKey: secondCommand.reservationKey,
+    scope: "pair",
+    providerErrorCode: 131056,
+    observedAt: "2026-08-17T09:00:03.000Z",
+    blockedUntil: "2026-08-17T09:00:30.000Z",
+  });
+  assert.equal(cooldown.outcome, "applied");
+  assert.equal(cooldown.idempotent, false);
+
+  const providerLimited =
+    await foundation.whatsappRateLimits.reserveBusinessInitiatedMessage({
+      ...command,
+      reservationKey: `whatsapp_rate_reservation_v1_${"7".repeat(64)}`,
+      reservedAt: "2026-08-17T09:00:09.000Z",
+      reservationExpiresAt: "2026-08-17T09:05:09.000Z",
+    });
+  assert.equal(providerLimited.outcome, "provider-cooldown");
+  assert.equal(providerLimited.scope, "pair");
+  assert.equal(providerLimited.providerErrorCode, 131056);
+  assert.equal(providerLimited.retryAt, "2026-08-17T09:00:30.000Z");
+
+  const persisted = await pool.query(
+    `SELECT
+       (
+         SELECT count(*)::integer
+         FROM whatsapp_rate_limit_reservations
+         WHERE tenant_id = $1
+       ) AS reservation_count,
+       (
+         SELECT count(*)::integer
+         FROM whatsapp_rate_limit_settlements AS settlement
+         INNER JOIN whatsapp_rate_limit_reservations AS reservation
+           USING (reservation_key)
+         WHERE reservation.tenant_id = $1
+       ) AS settlement_count,
+       (
+         SELECT count(*)::integer
+         FROM whatsapp_provider_cooldown_events AS cooldown
+         INNER JOIN whatsapp_rate_limit_reservations AS reservation
+           USING (reservation_key)
+         WHERE reservation.tenant_id = $1
+       ) AS cooldown_count`,
+    [tenantId],
+  );
+  assert.deepEqual(persisted.rows, [
+    { reservation_count: 2, settlement_count: 2, cooldown_count: 1 },
+  ]);
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE whatsapp_rate_limit_reservations
+       SET template_category = 'UTILITY'
+       WHERE reservation_key = $1`,
+      [command.reservationKey],
+    ),
+    (error) => error?.code === "P0001" && /immutable/.test(error.message),
+  );
+  await assert.rejects(
+    pool.query(
+      `UPDATE whatsapp_pair_rate_limit_state
+       SET reserved_until = reserved_until + INTERVAL '1 hour'
+       WHERE sender_key = $1
+         AND recipient_key = $2`,
+      [command.senderKey, command.recipientKey],
+    ),
+    (error) => error?.code === "P0001" && /lacks reservation proof/.test(
+      error.message,
+    ),
   );
 }
 
@@ -1654,6 +1787,7 @@ export async function verifyNodePostgresIntegration(
       );
       await verifyMetaConnectionCredentials(pool, foundation, tenantId);
       await verifyWhatsappDeliveryPolicy(pool, foundation, tenantId);
+      await verifyWhatsappRateLimitLedger(pool, foundation, tenantId);
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
@@ -1667,7 +1801,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 5,
+      concurrencyScenarios: 6,
     });
   } finally {
     await pool.end();

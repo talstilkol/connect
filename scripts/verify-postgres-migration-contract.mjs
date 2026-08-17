@@ -47,6 +47,12 @@ const requiredTableSequence = Object.freeze([
   "meta_webhook_receipts",
   "meta_credential_envelopes",
   "whatsapp_campaign_delivery_policy_events",
+  "whatsapp_rate_limit_reservations",
+  "whatsapp_pair_rate_limit_state",
+  "whatsapp_portfolio_recipient_rate_limit_state",
+  "whatsapp_rate_limit_settlements",
+  "whatsapp_provider_cooldown_events",
+  "whatsapp_provider_cooldown_state",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -61,6 +67,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0009_contact_organization_imports.sql",
   "0010_meta_connection_credentials.sql",
   "0011_whatsapp_delivery_policy.sql",
+  "0012_whatsapp_rate_limit_ledger.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

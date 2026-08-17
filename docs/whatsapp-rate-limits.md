@@ -487,6 +487,14 @@ Trigger במסד אוכף גרסה עוקבת, Connection נוכחי, Kill switc
 מבוזר, Queue worker ו־Sender חיים טרם הומרו ל־PostgreSQL/Railway ולכן אין
 לסמן שליחת Production כמוכנה.
 
+14.8.12 מיגרציית PostgreSQL `0012_whatsapp_rate_limit_ledger.sql` ו־
+`postgresWhatsappRateLimitRepository.ts` ממירים גם את Reservation,
+Settlement ו־Provider cooldown. ‏Advisory locks טרנזקציוניים מסדרים Pair
+ו־Portfolio checks, ו־Proof guards מגנים על State projections. ‏Harness אמיתי
+הוכיח Replay תחת Race, Pair limit, שחרור, Cooldown ו־Tamper rejection. זהו
+Ledger durable בלבד: ‏Phone throughput של 20/80/1000 mps, ‏Queue worker,
+Provider sender, מדידות עומס וערכי חשבון חיים עדיין אינם מחוברים.
+
 14.9 מיגרציה `0031` ו־
 `CampaignDeliveryStatusReconciler` משלימים את מסלול ה־Webhook:
 

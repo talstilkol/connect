@@ -866,6 +866,27 @@ Meta, ו־Trigger נוסף כותב Audit באותה Transaction. ‏Update ו־
 ו־Immutability. התוצאה: `PASS (12 migrations, 5 concurrency scenarios)`.
 סביבת הבדיקה הזמנית נעצרה ונמחקה.
 
+2.46 **הושלם מקומית:** PostgreSQL WhatsApp rate-limit ledger אטומי.
+
+2.46.1 ‏`0012_whatsapp_rate_limit_ledger.sql` מוסיף Reservation, ‏Pair state,
+Portfolio-recipient state, ‏Settlement ו־Provider cooldown event/state ללא
+מספר טלפון או מזהה Meta גלוי. המפתחות הם HMAC אטומים קיימים.
+
+2.46.2 ‏Transaction-scoped advisory locks מסדרים בקשות לפי Pair ו־Portfolio
+לפני בדיקת חלון שש השניות, נמען פעיל, Cooldown ומכסת נמענים ייחודיים ב־24
+שעות. Trigger חוזר על בדיקות הבטיחות כדי שגם כתיבה שעוקפת Repository תיכשל.
+
+2.46.3 ‏`postgresWhatsappRateLimitRepository.ts` מחזיר תוצאות תחומות עבור
+Replay, ‏Pair limit, ‏Recipient in-flight, ‏Portfolio limit ו־Provider
+cooldown. ‏Settlement ו־Cooldown נכתבים באותה Transaction; אירוע חסר הוכחת
+`provider-failed` נדחה. ה־Foundation כולל כעת 17 Adapters.
+
+2.46.4 שמונה בדיקות Repository ושתי בדיקות Contract/Composition חדשות עברו.
+ה־Harness הוכיח Race של שתי Reservations זהות, שחרור לפני Submit, חסימת Pair,
+Cooldown, חסימת ניסיון חדש ודחיית State מזויף. התוצאה:
+`PASS (13 migrations, 6 concurrency scenarios)`. סביבת הבדיקה הזמנית נעצרה
+ונמחקה. עדיין חסרים Provider throughput limiter, ‏Queue worker ו־Load test.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
