@@ -28,6 +28,7 @@ const conversationSchema = migrationSources[5];
 const campaignSchema = migrationSources[6];
 const botSchema = migrationSources[7];
 const aiSchema = migrationSources[8];
+const contactOrganizationImportSchema = migrationSources[9];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -40,14 +41,42 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0006_message_templates_campaigns.sql",
     "0007_bot_flows_deliveries.sql",
     "0008_ai_reporting.sql",
+    "0009_contact_organization_imports.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 9,
+      migrationCount: 10,
       findings: [],
     },
+  );
+});
+
+test("defines tenant-isolated PostgreSQL contact organization and imports", () => {
+  assert.match(
+    contactOrganizationImportSchema,
+    /CREATE TABLE contact_tags[\s\S]*CREATE TABLE contact_lists[\s\S]*CREATE TABLE contact_tag_assignments[\s\S]*CREATE TABLE contact_list_memberships[\s\S]*CREATE TABLE contact_import_jobs[\s\S]*CREATE TABLE contact_import_rows/,
+  );
+  assert.match(
+    contactOrganizationImportSchema,
+    /contact_tag_assignments_contact_fk[\s\S]*FOREIGN KEY \(tenant_id, contact_id\)[\s\S]*REFERENCES contacts \(tenant_id, id\)/,
+  );
+  assert.match(
+    contactOrganizationImportSchema,
+    /contact_list_memberships_list_fk[\s\S]*FOREIGN KEY \(tenant_id, list_id\)[\s\S]*REFERENCES contact_lists \(tenant_id, id\)/,
+  );
+  assert.match(
+    contactOrganizationImportSchema,
+    /contact_import_rows_job_fk[\s\S]*FOREIGN KEY \(tenant_id, job_id\)[\s\S]*REFERENCES contact_import_jobs \(tenant_id, id\)/,
+  );
+  assert.match(
+    contactOrganizationImportSchema,
+    /contact_import_jobs_counts_valid[\s\S]*processed_rows = created_rows[\s\S]*duplicate_rows/,
+  );
+  assert.match(
+    contactOrganizationImportSchema,
+    /contact_import_rows_outcome_consistent[\s\S]*status IN \('created', 'updated', 'unchanged'\)[\s\S]*status = 'duplicate'[\s\S]*status = 'rejected'/,
   );
 });
 

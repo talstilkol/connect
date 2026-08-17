@@ -45,6 +45,7 @@ const migrationFiles = Object.freeze([
   "0006_message_templates_campaigns.sql",
   "0007_bot_flows_deliveries.sql",
   "0008_ai_reporting.sql",
+  "0009_contact_organization_imports.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -250,6 +251,233 @@ async function verifyContactLifecycle(
     [tenantId, command.profile.phoneNumber],
   );
   assert.equal(persisted.rows[0]?.name, "Integration");
+}
+
+async function verifyContactOrganizationImportSchema(pool, tenantId) {
+  const occurredAt = "2026-08-17T08:30:00.000Z";
+  const contacts = await pool.query(
+    `SELECT id
+     FROM contacts
+     WHERE tenant_id = $1
+     ORDER BY id ASC`,
+    [tenantId],
+  );
+  const contactId = Number(contacts.rows[0]?.id);
+
+  assert.equal(Number.isSafeInteger(contactId) && contactId > 0, true);
+
+  const tag = await pool.query(
+    `INSERT INTO contact_tags (
+       tenant_id,
+       name,
+       normalized_name,
+       created_at,
+       updated_at
+     )
+     VALUES ($1, 'Priority', 'priority', $2, $2)
+     RETURNING id`,
+    [tenantId, occurredAt],
+  );
+  const list = await pool.query(
+    `INSERT INTO contact_lists (
+       tenant_id,
+       name,
+       normalized_name,
+       created_at,
+       updated_at
+     )
+     VALUES ($1, 'Pilot', 'pilot', $2, $2)
+     RETURNING id`,
+    [tenantId, occurredAt],
+  );
+  const tagId = Number(tag.rows[0]?.id);
+  const listId = Number(list.rows[0]?.id);
+
+  assert.equal(Number.isSafeInteger(tagId) && tagId > 0, true);
+  assert.equal(Number.isSafeInteger(listId) && listId > 0, true);
+
+  await pool.query(
+    `INSERT INTO contact_tag_assignments (
+       tenant_id, contact_id, tag_id, created_at
+     )
+     VALUES ($1, $2, $3, $4)`,
+    [tenantId, contactId, tagId, occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO contact_list_memberships (
+       tenant_id, contact_id, list_id, created_at
+     )
+     VALUES ($1, $2, $3, $4)`,
+    [tenantId, contactId, listId, occurredAt],
+  );
+
+  const job = await pool.query(
+    `INSERT INTO contact_import_jobs (
+       tenant_id,
+       idempotency_key,
+       file_name,
+       total_rows,
+       created_by_external_user_id,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       'integration.csv',
+       2,
+       'driver-integration-owner',
+       $3,
+       $3
+     )
+     RETURNING id`,
+    [tenantId, `contact_import_v1_${"a".repeat(64)}`, occurredAt],
+  );
+  const jobId = Number(job.rows[0]?.id);
+
+  assert.equal(Number.isSafeInteger(jobId) && jobId > 0, true);
+
+  await pool.query(
+    `INSERT INTO contact_import_rows (
+       tenant_id,
+       job_id,
+       source_row_number,
+       contact_id,
+       phone_fingerprint,
+       status,
+       reason,
+       created_at
+     )
+     VALUES ($1, $2, 2, $3, $4, 'created', NULL, $5)`,
+    [tenantId, jobId, contactId, "b".repeat(64), occurredAt],
+  );
+  await pool.query(
+    `INSERT INTO contact_import_rows (
+       tenant_id,
+       job_id,
+       source_row_number,
+       contact_id,
+       phone_fingerprint,
+       status,
+       reason,
+       created_at
+     )
+     VALUES ($1, $2, 3, NULL, NULL, 'rejected', 'missing_phone', $3)`,
+    [tenantId, jobId, occurredAt],
+  );
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE contact_import_jobs
+       SET status = 'completed'
+       WHERE tenant_id = $1
+         AND id = $2`,
+      [tenantId, jobId],
+    ),
+    (error) => error?.code === "23514",
+  );
+
+  await pool.query(
+    `UPDATE contact_import_jobs
+     SET
+       processed_rows = 2,
+       created_rows = 1,
+       rejected_rows = 1,
+       status = 'completed',
+       completed_at = $3,
+       updated_at = $3
+     WHERE tenant_id = $1
+       AND id = $2`,
+    [tenantId, jobId, occurredAt],
+  );
+
+  const snapshot = await pool.query(
+    `SELECT
+       tag.name AS tag_name,
+       count(DISTINCT assignment.contact_id)::integer AS tagged_contacts,
+       list.name AS list_name,
+       count(DISTINCT membership.contact_id)::integer AS listed_contacts,
+       job.status AS job_status,
+       job.processed_rows,
+       job.created_rows,
+       job.rejected_rows
+     FROM contact_tags AS tag
+     JOIN contact_tag_assignments AS assignment
+       ON assignment.tenant_id = tag.tenant_id
+      AND assignment.tag_id = tag.id
+     JOIN contact_lists AS list
+       ON list.tenant_id = tag.tenant_id
+     JOIN contact_list_memberships AS membership
+       ON membership.tenant_id = list.tenant_id
+      AND membership.list_id = list.id
+     JOIN contact_import_jobs AS job
+       ON job.tenant_id = tag.tenant_id
+     WHERE tag.tenant_id = $1
+       AND tag.id = $2
+       AND list.id = $3
+       AND job.id = $4
+     GROUP BY tag.name, list.name, job.id`,
+    [tenantId, tagId, listId, jobId],
+  );
+  assert.deepEqual(snapshot.rows, [
+    {
+      tag_name: "Priority",
+      tagged_contacts: 1,
+      list_name: "Pilot",
+      listed_contacts: 1,
+      job_status: "completed",
+      processed_rows: 2,
+      created_rows: 1,
+      rejected_rows: 1,
+    },
+  ]);
+
+  const otherTenant = await pool.query(
+    `INSERT INTO tenants (
+       display_name, status, created_at, updated_at
+     )
+     VALUES ('Isolated tenant', 'active', $1, $1)
+     RETURNING id`,
+    [occurredAt],
+  );
+  const otherTenantId = Number(otherTenant.rows[0]?.id);
+  const otherTag = await pool.query(
+    `INSERT INTO contact_tags (
+       tenant_id, name, normalized_name, created_at, updated_at
+     )
+     VALUES ($1, 'Other', 'other', $2, $2)
+     RETURNING id`,
+    [otherTenantId, occurredAt],
+  );
+  const otherTagId = Number(otherTag.rows[0]?.id);
+
+  await assert.rejects(
+    pool.query(
+      `INSERT INTO contact_tag_assignments (
+         tenant_id, contact_id, tag_id, created_at
+       )
+       VALUES ($1, $2, $3, $4)`,
+      [tenantId, contactId, otherTagId, occurredAt],
+    ),
+    (error) => error?.code === "23503",
+  );
+  await assert.rejects(
+    pool.query(
+      `INSERT INTO contact_import_rows (
+         tenant_id,
+         job_id,
+         source_row_number,
+         contact_id,
+         phone_fingerprint,
+         status,
+         reason,
+         created_at
+       )
+       VALUES ($1, $2, 4, NULL, NULL, 'rejected', 'invalid_phone', $3)`,
+      [otherTenantId, jobId, occurredAt],
+    ),
+    (error) => error?.code === "23503",
+  );
 }
 
 async function verifyConversationMessageSchema(pool, tenantId) {
@@ -1119,6 +1347,7 @@ export async function verifyNodePostgresIntegration(
         foundation.contacts,
         tenantId,
       );
+      await verifyContactOrganizationImportSchema(pool, tenantId);
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);

@@ -11,19 +11,20 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת תשע Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת עשר Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
 foundation, הרביעית את Membership event ledger והחמישית את Team invitation
 lifecycle. השישית יוצרת `conversations` ו־`messages`, והשביעית את
 `message_templates` ו־`campaigns`. השמינית יוצרת Bot flows, גרסאות ו־
 Deliveries. התשיעית יוצרת AI agents, גרסאות, הרשאות עלות, Usage ו־Audit
-הדרושים לדוח התפעולי. השרשרת הוחלה בהצלחה
+הדרושים לדוח התפעולי. העשירית יוצרת Tags, ‏Lists, שיוכי Contact ו־Import
+jobs/rows עם בידוד Tenant מורכב. השרשרת הוחלה בהצלחה
 על PostgreSQL 16.13 מקומי ומבודד, אך אינה
 מוכיחה עדיין Parity עם כל 35 ה־Migrations של D1 או מוכנות לפריסה.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את תשע ה־Migrations על PostgreSQL 16.13,
+Loopback ייעודי וריק. הוא החיל את עשר ה־Migrations על PostgreSQL 16.13,
 הפעיל DML אמיתי והוכיח שני תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
@@ -71,6 +72,12 @@ Timeouts ו־Request target, ואינו סומך על Host שסיפק הלקוח
 את התהליך בלי לחשוף פרטי Runtime. ‏Startup executable עדיין חסום בכוונה:
 אין לחבר את `contacts.save` לפני בחירת Distributed rate limiter והזרקתו
 ל־Runtime.
+
+1.12 ‏`0009_contact_organization_imports.sql` מוסיף שש טבלאות עבור ארגון
+אנשי קשר וייבוא מתחדש. ה־Foreign Keys כוללים `tenant_id`, וה־Harness חסם
+בפועל שיוך Tag ושורת Import שחצו Tenant. מוני Job, מצב Completion ותוצאת כל
+שורה נאכפים ב־Constraints. ה־Schema הוכח מקומית; Adapters מקבילים ל־D1 עדיין
+נדרשים לפני חיבור הפעולות ל־Railway.
 
 ## 2. הסבר למתחילים
 
@@ -172,8 +179,9 @@ Migration מאושר ב־Railway.
 6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 35 ה־Migrations
 של D1 עדיין לא קיימות.
 
-6.4 Contact ו־Invitation DML ושני תרחישי Concurrency נבדקו מול PostgreSQL
-מקומי אמיתי. עדיין חסרים כיסוי DML/Concurrency לכל יתר ה־Repositories,
+6.4 Contact, ‏Contact organization/import ו־Invitation DML ושני תרחישי
+Concurrency נבדקו מול PostgreSQL מקומי אמיתי. עדיין חסרים Adapters ו־כיסוי
+DML/Concurrency לכל יתר ה־Repositories,
 Staging evidence, ‏Backup/Restore rehearsal ו־Load test.
 
 ## 7. מקורות PostgreSQL רשמיים

@@ -271,6 +271,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0006_message_templates_campaigns.sql",
     "postgres/migrations/0007_bot_flows_deliveries.sql",
     "postgres/migrations/0008_ai_reporting.sql",
+    "postgres/migrations/0009_contact_organization_imports.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -278,7 +279,9 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /nine ordered/);
+  assert.match(database.cutoverBlocker, /ten ordered/);
+  assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
+  assert.match(database.cutoverBlocker, /PostgreSQL adapters for contact organization\/import operations/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);

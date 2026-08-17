@@ -187,7 +187,7 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו תשע Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו עשר Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
 השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
@@ -196,6 +196,8 @@ lifecycle ואת Triggers הבטיחותיים שלה.
 השישית מוסיפה Conversations/Messages והשביעית Message templates/Campaigns.
 השמינית מוסיפה Bot flows, גרסאות ו־Deliveries. התשיעית מוסיפה AI agents,
 גרסאות, הרשאות עלות, Usage ו־Audit לדוח התפעולי.
+העשירית מוסיפה Tags, ‏Lists, שיוכי Contact ו־Import jobs/rows בעלי Foreign
+Keys מורכבים שמבודדים Tenant.
 כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי. ‏Node driver adapter
 ו־Integration rehearsal עבור Contact ו־Invitation קיימים, אך אין עדיין
 Schema parity מלאה, ערכי Production pool חיים או Staging evidence.
@@ -221,7 +223,7 @@ Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`
 כיסוי יתר המסלולים ופעולות API מחוברות.
 
 7.1.19 ‏`node-postgres` מחובר דרך Adapter יחיד שמפריד Query בודד מ־Transaction
-מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל תשע
+מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל עשר
 Migrations ומוכיח DML, ‏Rollback ושני Races בלי לקבל Production credential.
 
 7.1.20 חוזה Pool נפרד דורש TLS, ‏Pool size וכל Timeout במפורש. הוא דוחה
@@ -267,6 +269,13 @@ PostgreSQL, מגבלת Header של 16KB ו־Timeouts מפורשים. Request tar
 מוכן מקומית; קובץ Bootstrap שמפעיל אותו נשאר חסום עד שניתן להרכיב Runtime
 עם Distributed mutation rate limiter אמיתי, ולא Stub שמאפשר כתיבות ללא
 מכסה משותפת.
+
+7.1.27 ‏`0009_contact_organization_imports.sql` ממיר שש טבלאות של Tags,
+Lists ו־Contact import. קשרים אינם מסתמכים על מזהה גלובלי בלבד: כל Foreign
+Key עסקי כולל `tenant_id`. ‏Harness PostgreSQL אמיתי הוכיח יצירה וקריאה של
+שיוכים ו־Import שהושלם, חסם מצב Job לא עקבי וחסם שני ניסיונות Cross-tenant.
+ה־Schema הושלם; Repository adapters ופעולות Railway עבור יכולות אלה עדיין
+לא חוברו.
 
 7.2 עדיין חסר:
 

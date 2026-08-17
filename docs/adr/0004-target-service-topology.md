@@ -290,7 +290,7 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 שלוש פעולות Read-only ו־`contacts.save` עם Transaction executor
 ספק־נייטרלי, Tenant access, ‏Team membership mutations וכל Invitation
-lifecycle repositories ותשע Migrations ל־Critical Path כבר קיימים מקומית.
+lifecycle repositories ועשר Migrations ל־Critical Path כבר קיימים מקומית.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
 `node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation DML, ‏Rollback ושני
 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.

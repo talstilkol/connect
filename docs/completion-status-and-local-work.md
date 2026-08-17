@@ -754,6 +754,27 @@ Shutdown. שני Signals משתמשים באותו Close Idempotent. כשל חל
 `contacts.save` למסלול Production ללא הגנה משותפת ולכן אסור. זהו כעת חסם
 Provider/Environment, לא חוסר ב־Node process lifecycle.
 
+2.41 **הושלם מקומית:** PostgreSQL schema לארגון אנשי קשר ולייבוא מתחדש.
+
+2.41.1 ‏Migration מספר `0009_contact_organization_imports.sql` מוסיף Tags,
+Lists, שיוכים, Import jobs ו־Import row outcomes. ה־Guard מכסה כעת עשר
+Migrations ו־30 טבלאות לפי סדר דטרמיניסטי, ללא Seed, מחיקה או זהות אקראית.
+
+2.41.2 כל קשר בין Contact, ‏Tag, ‏List, ‏Import job ו־Import row כולל
+`tenant_id` בתוך ה־Foreign Key. לכן מזהה תקין מעסק אחר אינו יכול להיכנס
+לשיוך או לייבוא של העסק הנוכחי. מונים, מצב השלמה, סוגי Outcome, סיבות דחייה,
+מפתחות SHA-256, שמות קבצים וטווחי שורות נאכפים גם ברמת PostgreSQL.
+
+2.41.3 ה־Harness החיל את כל עשר ה־Migrations על PostgreSQL 16.13 ריק, יצר
+Tag, ‏List, שני שיוכים ו־Import שהושלם עם שורה שנוצרה ושורה שנדחתה. ניסיון
+לסמן Job לא עקבי נכשל ב־`23514`, ושני ניסיונות Cross-tenant נכשלו ב־`23503`.
+התוצאה: `PASS (10 migrations, 2 concurrency scenarios)`. סביבת הבדיקה
+הזמנית נעצרה ונמחקה.
+
+2.41.4 ה־Schema מוכן אך עדיין אינו מחובר ל־Railway operations. השלב המקומי
+הבא הוא PostgreSQL adapters עבור `contactOrganizationRepository` ו־
+`contactImportRepository`, כולל Atomic import row write ו־Job refresh.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

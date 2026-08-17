@@ -87,7 +87,7 @@ DISTINCT FROM` מונע הגדלת Version כאשר הערכים לא השתנו
 5.4 Business profile create/update, no-op ואימות Rollback כאשר התוצאה שונה
 מהבקשה.
 
-5.5 Migration guard מאמת תשע Migrations ו־24 טבלאות Critical Path בסדר
+5.5 Migration guard מאמת עשר Migrations ו־30 טבלאות Critical Path בסדר
 התלויות הנכון.
 
 5.6 Team mutation contract tests מכסים שינוי Role/Status, ‏Replay, העברת

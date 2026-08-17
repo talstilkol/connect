@@ -25,7 +25,7 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
-| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, ‏Node driver, חוזה Pool מאובטח, ‏Foundation של 11 Adapters, ‏Readiness query ו־Runtime בעל סגירה מסודרת; Harness אמיתי עבר עם תשע Migrations, דוח HTTP מלא, Contact/Conversation/Message/Template/Campaign/Bot/AI DML ושני תרחישי Concurrency. נותרו ספק וערכי Pool חיים, יתר ה־Repositories, ‏Parity מלאה מול 35 Migrations וראיות Staging |
+| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, ‏Node driver, חוזה Pool מאובטח, ‏Foundation של 11 Adapters, ‏Readiness query ו־Runtime בעל סגירה מסודרת; Harness אמיתי עבר עם עשר Migrations, דוח HTTP מלא, Contact organization/import isolation, ‏Contact/Conversation/Message/Template/Campaign/Bot/AI DML ושני תרחישי Concurrency. נותרו ספק וערכי Pool חיים, Adapters לארגון אנשי קשר ולייבוא, יתר ה־Repositories, ‏Parity מלאה מול 35 Migrations וראיות Staging |
 | `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |
