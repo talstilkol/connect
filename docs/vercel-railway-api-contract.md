@@ -340,8 +340,16 @@ Load evidence וערכי חשבון מאומתים עדיין חסרים.
 ריצה את הזמן המדויק עד גבול הדקה הבא. הוא אינו משתמש ב־`setInterval`, מדכא
 callback חופף, ממשיך לאחר כשל Tick תחום וממתין לריצה פעילה לפני סגירת
 PostgreSQL. ‏`railwayWorkerProcess.ts` מחבר `SIGINT` ו־`SIGTERM` לאותו מסלול
-סגירה אידמפוטנטי. ה־Timer וה־Process מוכנים מקומית; Composition עם Campaign
-repositories ב־PostgreSQL ועם Redis/BullMQ עדיין חסר.
+סגירה אידמפוטנטי. ה־Timer וה־Process מוכנים מקומית.
+
+7.1.36 ‏`0015_campaign_dispatch.sql` מוסיף `campaign_recipients` עם Foreign
+keys מורכבים ל־Tenant, ‏Campaign ו־Contact. ‏PostgreSQL repository מממש
+Activation, ‏Promotion, ‏Claim, ‏Consent revalidation, ‏Retry ו־Completion.
+בחירת Campaigns ונמענים משתמשת ב־`FOR UPDATE SKIP LOCKED`; Harness אמיתי
+עבר עם 16 Migrations ו־13 תרחישי Concurrency. ‏`railwayWorkerRuntime.ts`
+ו־`railwayPostgresWorkerService.ts` מחברים את Campaign ואת Invitation
+expiration לאותו Lease, ‏Pool, ‏Timer ומסלול סגירה. ‏Queue adapter,
+‏Executable bootstrap ותצורת Railway חיה עדיין חסרים.
 
 7.2 עדיין חסר:
 

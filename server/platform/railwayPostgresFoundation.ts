@@ -30,6 +30,9 @@ import {
   createPostgresBusinessProfileRepository,
 } from "./postgresBusinessProfileRepository.ts";
 import {
+  createPostgresCampaignDispatchRepository,
+} from "./postgresCampaignDispatchRepository.ts";
+import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
 import {
@@ -131,6 +134,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly workerSchedulerLeases: ReturnType<
     typeof createPostgresWorkerSchedulerLeaseRepository
+  >;
+  readonly campaignDispatch: ReturnType<
+    typeof createPostgresCampaignDispatchRepository
   >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
@@ -256,6 +262,8 @@ export function createRailwayPostgresFoundation(
       }),
     workerSchedulerLeases:
       createPostgresWorkerSchedulerLeaseRepository(queries),
+    campaignDispatch:
+      createPostgresCampaignDispatchRepository(queries),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),

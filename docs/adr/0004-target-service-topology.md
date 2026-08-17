@@ -290,15 +290,15 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 שלוש פעולות Read-only ו־`contacts.save` עם Transaction executor
 ספק־נייטרלי, Tenant access, ‏Team membership mutations וכל Invitation
-lifecycle repositories ו־15 Migrations ל־Critical Path כבר קיימים מקומית,
+lifecycle repositories ו־16 Migrations ל־Critical Path כבר קיימים מקומית,
 כולל WhatsApp delivery-policy, ‏Kill switch ו־Rate-limit ledger אטומיים.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
 `node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation/Meta DML, ‏Rollback
-ותשעה תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
+ו־13 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
 Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
-Foundation אחד מחבר 18 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
+Foundation אחד מחבר 19 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
 Contact organization/import אטומי ו־Meta connection, ‏Webhook receipts ו־
 Credential envelopes מוצפנים.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
@@ -311,8 +311,9 @@ Liveness, ‏PostgreSQL readiness, גבולות Request ו־Service owner שסו
 לפני Pool. ‏`PORT`, ‏`SIGINT` ו־`SIGTERM` מחוברים ב־Process controller מקומי.
 ל־Railway Worker נוספו גם Timer שמתחיל מיד ומתיישר מחדש לגבול כל דקה,
 מניעת overlap, המתנה לריצה פעילה לפני סגירת PostgreSQL ו־Process controller
-משותף ל־`SIGINT`/`SIGTERM`. ה־Composition למשימות Campaign על PostgreSQL
-ול־Queue adapters עדיין חסר, ולכן אין Startup executable חי.
+משותף ל־`SIGINT`/`SIGTERM`. ‏Campaign dispatch ו־Invitation expiration
+מחוברים לאותו Lease ול־PostgreSQL foundation; ‏Queue adapter, ‏Live config
+ו־Startup executable עדיין חסרים.
 ‏Railway API מלא נשאר חסום עד Rate-limit adapter מבוזר, השלמת יתר ה־Routes
 וה־Mutations, ‏Parity מלאה, ערכי Pool חיים וראיות Staging, כדי לא ליצור
 Hybrid לא מתועד עם D1.

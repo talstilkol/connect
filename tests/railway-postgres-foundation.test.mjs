@@ -39,6 +39,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
 
   assert.deepEqual(Object.keys(foundation).sort(), [
     "businessProfiles",
+    "campaignDispatch",
     "close",
     "contactImports",
     "contactOrganization",
@@ -83,6 +84,10 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   );
   assert.equal(
     typeof foundation.workerSchedulerLeases.claimNext,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.campaignDispatch.claimPendingRecipients,
     "function",
   );
   assert.equal(typeof foundation.readiness.check, "function");

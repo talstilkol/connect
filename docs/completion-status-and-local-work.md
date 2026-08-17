@@ -1178,6 +1178,29 @@ PostgreSQL runtime. ‏`SIGINT` ו־`SIGTERM` משתמשים באותו מסלו
 4.9 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **78–174 שעות פיתוח
 נטו**. הטווח אינו כולל המתנה לבחירת ספק Queue, ‏Credentials, ‏Railway
 Environment או בדיקות Staging.
+
+4.10 ‏PostgreSQL Campaign dispatch ו־Railway Worker composition הושלמו
+מקומית. מיגרציה `0015` מוסיפה `campaign_recipients` עם Tenant-bound foreign
+keys, ‏JSONB bounded, זהויות דטרמיניסטיות ואינדקסי Dispatch. ה־Repository
+מממש Activation, ‏Promotion, ‏Claim, ‏Consent revalidation, ‏Retry,
+Release ו־Completion. בחירת Campaigns ונמענים משתמשת ב־
+`FOR UPDATE SKIP LOCKED`, ומעברי Delivery הם אטומיים.
+
+4.10.1 ‏Harness זמני על PostgreSQL 16.13 נקי עבר עם
+`PASS (16 migrations, 13 concurrency scenarios)`. הוא הוכיח Activation
+יחיד, Promotion יחיד, Claims שונים, Prepare יחיד, Retry, משיכת Consent
+ו־Completion. השרת הזמני נעצר והתיקייה נמחקה.
+
+4.10.2 ‏`railwayWorkerRuntime.ts` מחבר את Campaign scheduler ואת Team
+invitation expiration scheduler לאותו Lease. ‏`railwayPostgresWorkerService.ts`
+מחבר אותם לאותו Pool, ל־Timer ולמסלול הסגירה. ‏Queue adapter אמיתי,
+Executable bootstrap, ערכי Railway ו־Load evidence עדיין חסרים.
+
+4.11 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **68–158 שעות פיתוח
+נטו**. הירידה משקפת את השלמת Schema, ‏Repository, ארבעה תרחישי Concurrency
+נוספים ו־Worker composition. הטווח אינו כולל המתנה לבחירת Queue provider,
+Credentials, ‏Railway environment או Staging/Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

@@ -54,6 +54,7 @@ const migrationFiles = Object.freeze([
   "0012_whatsapp_rate_limit_ledger.sql",
   "0013_whatsapp_phone_throughput.sql",
   "0014_worker_scheduler_lease.sql",
+  "0015_campaign_dispatch.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -1248,6 +1249,298 @@ async function verifyTemplateCampaignSchema(pool, tenantId) {
   );
 }
 
+async function verifyCampaignDispatch(pool, foundation, tenantId) {
+  const templateKey = `template_v1_${"4".repeat(64)}`;
+  const campaignKey = `campaign_v1_${"5".repeat(64)}`;
+  const firstDeliveryKey = `campaign_delivery_v1_${"6".repeat(64)}`;
+  const secondDeliveryKey = `campaign_delivery_v1_${"7".repeat(64)}`;
+  const templateSubmissionKey = `template_submission_v1_${"8".repeat(64)}`;
+  const personalizationKey = "9".repeat(64);
+  const metaTemplateId = "123456789012345";
+  const createdAt = "2026-08-17T12:00:00.000Z";
+  const activatedAt = "2026-08-17T12:01:00.000Z";
+  const runningAt = "2026-08-17T12:02:00.000Z";
+  const contacts = await pool.query(
+    `SELECT id, phone_e164 AS "phoneNumber", version
+     FROM contacts
+     WHERE tenant_id = $1
+     ORDER BY id ASC
+     LIMIT 2`,
+    [tenantId],
+  );
+  assert.equal(contacts.rowCount, 2);
+
+  await pool.query(
+    `UPDATE contacts
+     SET
+       mailing_status = 'subscribed',
+       consent_status = 'granted',
+       consent_source = 'driver-integration',
+       consent_recorded_at = $2::timestamptz,
+       consent_withdrawn_at = NULL,
+       version = version + 1,
+       updated_at = $2::timestamptz
+     WHERE tenant_id = $1
+       AND id = ANY($3::bigint[])`,
+    [tenantId, createdAt, contacts.rows.map(({ id }) => id)],
+  );
+  const eligibleContacts = await pool.query(
+    `SELECT id, phone_e164 AS "phoneNumber", version
+     FROM contacts
+     WHERE tenant_id = $1
+       AND id = ANY($2::bigint[])
+     ORDER BY id ASC`,
+    [tenantId, contacts.rows.map(({ id }) => id)],
+  );
+
+  await pool.query(
+    `INSERT INTO message_templates (
+       template_key,
+       tenant_id,
+       meta_template_id,
+       name,
+       language,
+       category,
+       status,
+       definition_json,
+       submission_key,
+       submission_started_at,
+       submitted_at,
+       reviewed_at,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       'dispatch_integration',
+       'he',
+       'UTILITY',
+       'approved',
+       $4::jsonb,
+       $5,
+       $6::timestamptz,
+       $6::timestamptz,
+       $6::timestamptz,
+       $6::timestamptz,
+       $6::timestamptz
+     )`,
+    [
+      templateKey,
+      tenantId,
+      metaTemplateId,
+      JSON.stringify({ body: "Dispatch integration" }),
+      templateSubmissionKey,
+      createdAt,
+    ],
+  );
+  await pool.query(
+    `INSERT INTO campaigns (
+       campaign_key,
+       tenant_id,
+       name,
+       status,
+       delivery_mode,
+       timezone,
+       template_key,
+       template_snapshot_json,
+       audience_snapshot_key,
+       recipient_count,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       'Dispatch integration',
+       'draft',
+       'immediate',
+       'UTC',
+       $3,
+       $4::jsonb,
+       $5,
+       2,
+       $6::timestamptz,
+       $6::timestamptz
+     )`,
+    [
+      campaignKey,
+      tenantId,
+      templateKey,
+      JSON.stringify({ metaTemplateId, version: 1 }),
+      "a".repeat(64),
+      createdAt,
+    ],
+  );
+
+  for (const [index, contact] of eligibleContacts.rows.entries()) {
+    await pool.query(
+      `INSERT INTO campaign_recipients (
+         campaign_key,
+         tenant_id,
+         contact_id,
+         contact_version,
+         phone_e164,
+         personalization_json,
+         personalization_key,
+         delivery_key,
+         status,
+         created_at,
+         updated_at
+       )
+       VALUES (
+         $1,
+         $2,
+         $3,
+         $4,
+         $5,
+         '{}'::jsonb,
+         $6,
+         $7,
+         'pending',
+         $8::timestamptz,
+         $8::timestamptz
+       )`,
+      [
+        campaignKey,
+        tenantId,
+        contact.id,
+        contact.version,
+        contact.phoneNumber,
+        personalizationKey,
+        index === 0 ? firstDeliveryKey : secondDeliveryKey,
+        createdAt,
+      ],
+    );
+  }
+
+  const activation = await Promise.all([
+    foundation.campaignDispatch.activateCampaign(
+      tenantId,
+      campaignKey,
+      1,
+      activatedAt,
+    ),
+    foundation.campaignDispatch.activateCampaign(
+      tenantId,
+      campaignKey,
+      1,
+      activatedAt,
+    ),
+  ]);
+  assert.deepEqual(
+    activation.map((state) => state?.status ?? null).sort(),
+    [null, "scheduled"],
+  );
+
+  const promotion = await Promise.all([
+    foundation.campaignDispatch.promoteDueCampaigns(runningAt, 1),
+    foundation.campaignDispatch.promoteDueCampaigns(runningAt, 1),
+  ]);
+  assert.deepEqual(
+    promotion.map((states) => states.length).sort(),
+    [0, 1],
+  );
+
+  const claims = await Promise.all([
+    foundation.campaignDispatch.claimPendingRecipients(runningAt, 1),
+    foundation.campaignDispatch.claimPendingRecipients(runningAt, 1),
+  ]);
+  assert.deepEqual(
+    claims.flat().map(({ deliveryKey }) => deliveryKey).sort(),
+    [firstDeliveryKey, secondDeliveryKey].sort(),
+  );
+  assert.deepEqual(
+    await foundation.campaignDispatch.findQueuedDeliveryContext(
+      firstDeliveryKey,
+    ),
+    {
+      campaignKey,
+      tenantId,
+      recipientPhoneNumber: eligibleContacts.rows[0].phoneNumber,
+      nextDeliveryAttemptNumber: 1,
+    },
+  );
+
+  const preparation = await Promise.all([
+    foundation.campaignDispatch.prepareDelivery(firstDeliveryKey, runningAt),
+    foundation.campaignDispatch.prepareDelivery(firstDeliveryKey, runningAt),
+  ]);
+  assert.deepEqual(
+    preparation.map(({ outcome }) => outcome).sort(),
+    ["claimed", "duplicate"],
+  );
+  await foundation.campaignDispatch.markDeferred(
+    firstDeliveryKey,
+    "PROVIDER_THROTTLED",
+    runningAt,
+  );
+  const retried = await foundation.campaignDispatch.prepareDelivery(
+    firstDeliveryKey,
+    runningAt,
+  );
+  assert.equal(retried.outcome, "claimed");
+  assert.equal(retried.recipient.attemptCount, 2);
+  await foundation.campaignDispatch.markRejected(
+    firstDeliveryKey,
+    "PROVIDER_REJECTED",
+    runningAt,
+  );
+
+  await pool.query(
+    `UPDATE contacts
+     SET
+       mailing_status = 'unsubscribed',
+       consent_status = 'withdrawn',
+       consent_withdrawn_at = $3::timestamptz,
+       version = version + 1,
+       updated_at = $3::timestamptz
+     WHERE tenant_id = $1
+       AND id = $2`,
+    [tenantId, eligibleContacts.rows[1].id, runningAt],
+  );
+  assert.deepEqual(
+    await foundation.campaignDispatch.prepareDelivery(
+      secondDeliveryKey,
+      runningAt,
+    ),
+    { outcome: "skipped" },
+  );
+  assert.equal(
+    await foundation.campaignDispatch.completeSettledCampaigns(runningAt, 1),
+    1,
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       campaigns.status,
+       campaigns.version,
+       count(*) FILTER (
+         WHERE recipients.status = 'failed'
+       )::integer AS failed,
+       count(*) FILTER (
+         WHERE recipients.status = 'skipped'
+       )::integer AS skipped,
+       max(recipients.attempt_count)::integer AS "maximumAttempts"
+     FROM campaigns
+     INNER JOIN campaign_recipients AS recipients
+       ON recipients.tenant_id = campaigns.tenant_id
+       AND recipients.campaign_key = campaigns.campaign_key
+     WHERE campaigns.tenant_id = $1
+       AND campaigns.campaign_key = $2
+     GROUP BY campaigns.status, campaigns.version`,
+    [tenantId, campaignKey],
+  );
+  assert.deepEqual(persisted.rows, [{
+    status: "completed",
+    version: 4,
+    failed: 1,
+    skipped: 1,
+    maximumAttempts: 2,
+  }]);
+}
+
 async function verifyBotDeliverySchema(pool, tenantId) {
   const conversationKey = `conversation_v1_${"a".repeat(64)}`;
   const inboundMessageKey = `message_v1_${"b".repeat(64)}`;
@@ -1998,6 +2291,7 @@ export async function verifyNodePostgresIntegration(
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
+      await verifyCampaignDispatch(pool, foundation, tenantId);
     } finally {
       await foundation.close();
     }
@@ -2005,7 +2299,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 9,
+      concurrencyScenarios: 13,
     });
   } finally {
     await pool.end();

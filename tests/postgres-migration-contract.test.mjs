@@ -34,6 +34,7 @@ const whatsappDeliveryPolicySchema = migrationSources[11];
 const whatsappRateLimitLedgerSchema = migrationSources[12];
 const whatsappPhoneThroughputSchema = migrationSources[13];
 const workerSchedulerLeaseSchema = migrationSources[14];
+const campaignDispatchSchema = migrationSources[15];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -52,15 +53,36 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0012_whatsapp_rate_limit_ledger.sql",
     "0013_whatsapp_phone_throughput.sql",
     "0014_worker_scheduler_lease.sql",
+    "0015_campaign_dispatch.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 15,
+      migrationCount: 16,
       findings: [],
     },
   );
+});
+
+test("defines tenant-bound PostgreSQL campaign dispatch rows", () => {
+  assert.match(
+    campaignDispatchSchema,
+    /CREATE TABLE campaign_recipients[\s\S]*PRIMARY KEY \(campaign_key, contact_id\)/,
+  );
+  assert.match(
+    campaignDispatchSchema,
+    /campaign_recipients_campaign_fk[\s\S]*FOREIGN KEY \(tenant_id, campaign_key\)[\s\S]*REFERENCES campaigns \(tenant_id, campaign_key\)/,
+  );
+  assert.match(
+    campaignDispatchSchema,
+    /campaign_recipients_contact_fk[\s\S]*FOREIGN KEY \(tenant_id, contact_id\)[\s\S]*REFERENCES contacts \(tenant_id, id\)/,
+  );
+  assert.match(
+    campaignDispatchSchema,
+    /campaign_recipients_delivery_key_uq[\s\S]*campaign_recipients_dispatch_idx/,
+  );
+  assert.doesNotMatch(campaignDispatchSchema, /random|uuid/i);
 });
 
 test("defines one fenced PostgreSQL lease for the Railway scheduler", () => {

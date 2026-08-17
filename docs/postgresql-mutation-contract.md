@@ -11,7 +11,7 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 15 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 16 Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
 foundation, הרביעית את Membership event ledger והחמישית את Team invitation
@@ -24,20 +24,21 @@ receipts ו־Credential envelopes מוצפנים. השתים־עשרה יוצר�
 לשינוי עבור WhatsApp delivery policy, ‏Audit אטומי ו־Kill switch. השלוש־עשרה
 יוצרת WhatsApp reservation, settlement ו־provider-cooldown ledger אטומי.
 הרבע־עשרה מוסיפה אכיפת Phone throughput מתגלגלת הקשורה ל־Policy המאושר,
-והחמש־עשרה מוסיפה Lease מגודר ל־Railway Worker scheduler. השרשרת הוחלה
+החמש־עשרה מוסיפה Lease מגודר ל־Railway Worker scheduler, והשש־עשרה מוסיפה
+את `campaign_recipients` עבור Dispatch מקביל ובטוח. השרשרת הוחלה
 בהצלחה על PostgreSQL 16.13 מקומי ומבודד, אך אינה מוכיחה עדיין Parity עם
 כל 36 ה־Migrations של D1 או מוכנות לפריסה.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 15 ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח תשעה תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+Loopback ייעודי וריק. הוא החיל את 16 ה־Migrations על PostgreSQL 16.13,
+הפעיל DML אמיתי והוכיח 13 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 18 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 19 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -131,7 +132,17 @@ Guard גם מול INSERT ישיר. המימוש אינו מחליף Queue worker
 `railwayWorkerScheduler.ts` מריץ את Campaign scheduler ואת Expiration
 scheduler יחד, משלים לכל היותר חמישה Ticks חסרים ומשאיר Tick כלא־מושלם אם
 אחת המשימות נכשלה. ה־Harness הוכיח Claim מקביל, Catch-up והשתלטות מול
-PostgreSQL 16.13 אמיתי. חיבור Timer תמידי ו־BullMQ עדיין לא בוצע.
+PostgreSQL 16.13 אמיתי. Timer תמידי ו־Process lifecycle הושלמו; ‏BullMQ
+adapter ו־Bootstrap חי עדיין לא בוצעו.
+
+1.20 ‏`0015_campaign_dispatch.sql` ו־
+`postgresCampaignDispatchRepository.ts` מוסיפים את מצב הנמענים החסר
+ל־PostgreSQL. ‏Activation, ‏Promotion, ‏Claim, ‏Prepare, ‏Retry ו־Completion
+נעשים בפקודות אטומיות; בחירת עבודה מקבילה משתמשת ב־
+`FOR UPDATE SKIP LOCKED`. ה־Harness הוכיח זוכה יחיד ב־Activation/Promotion,
+Claims שונים לשני Workers, ‏Prepare יחיד, ‏Retry ושינוי Consent לפני שליחה.
+`railwayWorkerRuntime.ts` מחבר את Campaign ואת Invitation expiration לאותו
+Lease; ‏`railwayPostgresWorkerService.ts` מחבר אותם ל־Pool ול־Timer.
 
 ## 2. הסבר למתחילים
 
