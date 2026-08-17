@@ -29,6 +29,7 @@ const campaignSchema = migrationSources[6];
 const botSchema = migrationSources[7];
 const aiSchema = migrationSources[8];
 const contactOrganizationImportSchema = migrationSources[9];
+const metaConnectionCredentialSchema = migrationSources[10];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -42,14 +43,42 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0007_bot_flows_deliveries.sql",
     "0008_ai_reporting.sql",
     "0009_contact_organization_imports.sql",
+    "0010_meta_connection_credentials.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 10,
+      migrationCount: 11,
       findings: [],
     },
+  );
+});
+
+test("defines tenant-bound PostgreSQL Meta state without plaintext credentials", () => {
+  assert.match(
+    metaConnectionCredentialSchema,
+    /CREATE TABLE meta_connections[\s\S]*CREATE TABLE meta_webhook_receipts[\s\S]*CREATE TABLE meta_credential_envelopes/,
+  );
+  assert.match(
+    metaConnectionCredentialSchema,
+    /meta_webhook_receipts_connection_fk[\s\S]*FOREIGN KEY \(tenant_id, waba_id\)[\s\S]*REFERENCES meta_connections \(tenant_id, waba_id\)/,
+  );
+  assert.match(
+    metaConnectionCredentialSchema,
+    /meta_connections_lifecycle_consistent[\s\S]*status = 'pending'[\s\S]*status = 'connected'/,
+  );
+  assert.match(
+    metaConnectionCredentialSchema,
+    /meta_webhook_receipts_state_consistent[\s\S]*status = 'processing'[\s\S]*status = 'processed'[\s\S]*status = 'failed'/,
+  );
+  assert.match(
+    metaConnectionCredentialSchema,
+    /meta_credential_envelopes_ciphertext_bounded[\s\S]*ciphertext ~ '\^\[A-Za-z0-9\+\/\]\+=\{0,2\}\$'/,
+  );
+  assert.doesNotMatch(
+    metaConnectionCredentialSchema,
+    /access_token|plaintext|secret_value/i,
   );
 });
 

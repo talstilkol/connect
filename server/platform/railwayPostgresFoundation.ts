@@ -21,6 +21,12 @@ import {
   createOperationalReportService,
 } from "../reports/operationalReportService.ts";
 import {
+  createMetaConnectionService,
+} from "../meta/metaConnectionService.ts";
+import type {
+  MetaRepository,
+} from "../../db/metaRepository.ts";
+import {
   createPostgresBusinessProfileRepository,
 } from "./postgresBusinessProfileRepository.ts";
 import {
@@ -35,6 +41,12 @@ import {
 import {
   createPostgresOperationalReportRepository,
 } from "./postgresOperationalReportRepository.ts";
+import {
+  createPostgresMetaCredentialRepository,
+} from "./postgresMetaCredentialRepository.ts";
+import {
+  createPostgresMetaRepository,
+} from "./postgresMetaRepository.ts";
 import {
   createPostgresReadinessProbe,
 } from "./postgresReadinessProbe.ts";
@@ -91,6 +103,17 @@ export interface RailwayPostgresFoundation {
     typeof createContactOrganizationService
   >;
   readonly contactImports: ReturnType<typeof createContactImportService>;
+  readonly metaConnections: ReturnType<typeof createMetaConnectionService>;
+  readonly metaWebhooks: Pick<
+    MetaRepository,
+    | "findConnectionByWabaId"
+    | "claimWebhookReceipt"
+    | "completeWebhookReceipt"
+    | "failWebhookReceipt"
+  >;
+  readonly metaCredentialEnvelopes: ReturnType<
+    typeof createPostgresMetaCredentialRepository
+  >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
     typeof createPostgresTenantMembershipRepository
@@ -181,6 +204,7 @@ export function createRailwayPostgresFoundation(
     queries,
     transactions,
   });
+  const meta = createPostgresMetaRepository({ queries, transactions });
   let closed = false;
 
   return Object.freeze({
@@ -193,6 +217,15 @@ export function createRailwayPostgresFoundation(
       contacts: contactReads,
       imports: contactImports,
     }),
+    metaConnections: createMetaConnectionService(meta),
+    metaWebhooks: Object.freeze({
+      findConnectionByWabaId: meta.findConnectionByWabaId,
+      claimWebhookReceipt: meta.claimWebhookReceipt,
+      completeWebhookReceipt: meta.completeWebhookReceipt,
+      failWebhookReceipt: meta.failWebhookReceipt,
+    }),
+    metaCredentialEnvelopes:
+      createPostgresMetaCredentialRepository(queries),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),

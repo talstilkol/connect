@@ -820,6 +820,31 @@ Contact וטלפון קנוני.
 תוצאה עקבית. התוצאה: `PASS (10 migrations, 3 concurrency scenarios)`.
 סביבת הבדיקה הזמנית נעצרה ונמחקה.
 
+2.44 **הושלם מקומית:** PostgreSQL Meta connection, Webhook receipts ו־
+Credential envelopes.
+
+2.44.1 ‏`0010_meta_connection_credentials.sql` מוסיף שלוש טבלאות. ‏Meta
+connection מבודד לפי Tenant ומחזיק WABA ו־Phone number גלובליים ייחודיים;
+Webhook receipt קשור ב־Foreign Key מורכב לאותו Tenant ול־WABA. ‏Lifecycle,
+גרסאות, SHA-256, Error code וזמנים במילישניות נאכפים במסד.
+
+2.44.2 ‏`postgresMetaRepository.ts` מממש קריאות Connection, ‏Asset snapshot,
+מעברי מצב ו־Webhook claim/complete/fail. ‏Asset snapshot ומעבר מצב נכתבים
+ונקראים חזרה באותה Transaction. ‏Webhook claim משתמש ב־`ON CONFLICT` אטומי;
+Replay זהה אינו מעובד שוב ו־WABA/Object סותרים לאותו Event key נכשלים סגור.
+
+2.44.3 ‏`postgresMetaCredentialRepository.ts` שומר רק `keyVersion`, ‏IV ו־
+Ciphertext מוצפן; אין שדה Access token או Payload גלוי. Row shape, ‏Base64,
+Tenant ותוצאת Upsert נבדקים לפני החזרה. ה־Foundation כולל כעת 15 Adapters
+וחושף Meta connection service, ‏Webhook port ו־Encrypted-envelope port בלי
+ליצור Vault ללא מפתח Environment אמיתי.
+
+2.44.4 שתים־עשרה בדיקות Repository חדשות עברו. ה־Harness הפעיל חיבור Meta,
+Credential envelope ושתי תביעות Webhook מקבילות מול PostgreSQL 16.13. נוצר
+Receipt יחיד, אחת התביעות אושרה והשנייה סווגה Duplicate; Replay לאחר Completion
+לא הופעל שוב ו־Evidence סותר נדחה. התוצאה:
+`PASS (11 migrations, 4 concurrency scenarios)`. סביבת הבדיקה נעצרה ונמחקה.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

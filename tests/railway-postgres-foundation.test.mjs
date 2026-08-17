@@ -49,6 +49,9 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "invitations",
     "membershipMutations",
     "memberships",
+    "metaConnections",
+    "metaCredentialEnvelopes",
+    "metaWebhooks",
     "railwayApiMutations",
     "readiness",
     "reports",
@@ -61,6 +64,12 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   assert.equal(typeof foundation.contacts.list, "function");
   assert.equal(typeof foundation.contactOrganization.createTag, "function");
   assert.equal(typeof foundation.contactImports.start, "function");
+  assert.equal(typeof foundation.metaConnections.read, "function");
+  assert.equal(
+    typeof foundation.metaCredentialEnvelopes.findByTenantId,
+    "function",
+  );
+  assert.equal(typeof foundation.metaWebhooks.claimWebhookReceipt, "function");
   assert.equal(typeof foundation.readiness.check, "function");
   assert.equal(typeof foundation.reports.read, "function");
   assert.equal(typeof foundation.selections.save, "function");

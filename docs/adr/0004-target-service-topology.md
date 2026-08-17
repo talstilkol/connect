@@ -290,14 +290,16 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 שלוש פעולות Read-only ו־`contacts.save` עם Transaction executor
 ספק־נייטרלי, Tenant access, ‏Team membership mutations וכל Invitation
-lifecycle repositories ועשר Migrations ל־Critical Path כבר קיימים מקומית.
+lifecycle repositories ו־11 Migrations ל־Critical Path כבר קיימים מקומית.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
-`node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation DML, ‏Rollback ושני
-תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.
+`node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation/Meta DML, ‏Rollback
+וארבעה תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
+Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
-Foundation אחד מחבר 13 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
-Contact organization ו־Contact import אטומי.
+Foundation אחד מחבר 15 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
+Contact organization/import אטומי ו־Meta connection, ‏Webhook receipts ו־
+Credential envelopes מוצפנים.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
 ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations,
 Messages, ‏Templates, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage הומרו

@@ -43,6 +43,9 @@ const requiredTableSequence = Object.freeze([
   "contact_list_memberships",
   "contact_import_jobs",
   "contact_import_rows",
+  "meta_connections",
+  "meta_webhook_receipts",
+  "meta_credential_envelopes",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -55,6 +58,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0007_bot_flows_deliveries.sql",
   "0008_ai_reporting.sql",
   "0009_contact_organization_imports.sql",
+  "0010_meta_connection_credentials.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

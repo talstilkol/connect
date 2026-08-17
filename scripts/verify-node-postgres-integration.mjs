@@ -46,6 +46,7 @@ const migrationFiles = Object.freeze([
   "0007_bot_flows_deliveries.sql",
   "0008_ai_reporting.sql",
   "0009_contact_organization_imports.sql",
+  "0010_meta_connection_credentials.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -542,6 +543,133 @@ async function verifyContactOrganizationImportSchema(
     ),
     (error) => error?.code === "23503",
   );
+}
+
+async function verifyMetaConnectionCredentials(
+  pool,
+  foundation,
+  tenantId,
+) {
+  const session = {
+    tenantId,
+    externalUserId: "driver-integration-owner",
+    displayName: "Driver integration tenant",
+    status: "active",
+    role: "owner",
+  };
+  const pending = await foundation.metaConnections.captureVerifiedAssets(
+    session,
+    {
+      businessPortfolioId: "integration-business-portfolio",
+      wabaId: "integration-waba",
+      phoneNumberId: "integration-phone-number",
+    },
+  );
+
+  assert.equal(pending.status, "pending");
+  assert.equal(pending.version, 1);
+  await foundation.metaCredentialEnvelopes.store({
+    tenantId,
+    keyVersion: "v1",
+    initializationVector: "AQIDBAUGBwgJCgsM",
+    ciphertext: "AQIDBAUGBwgJCgsMDQ4PEA==",
+  });
+  const envelope = await foundation.metaCredentialEnvelopes.findByTenantId(
+    tenantId,
+  );
+
+  assert.deepEqual(
+    envelope === null
+      ? null
+      : {
+          tenantId: envelope.tenantId,
+          keyVersion: envelope.keyVersion,
+          initializationVector: envelope.initializationVector,
+          ciphertext: envelope.ciphertext,
+        },
+    {
+      tenantId,
+      keyVersion: "v1",
+      initializationVector: "AQIDBAUGBwgJCgsM",
+      ciphertext: "AQIDBAUGBwgJCgsMDQ4PEA==",
+    },
+  );
+
+  const connected = await foundation.metaConnections.confirmWebhookSubscription(
+    session,
+  );
+  assert.equal(connected.status, "connected");
+  assert.equal(connected.version, 2);
+  assert.equal(connected.webhookSubscribedAt !== null, true);
+  assert.equal(connected.connectedAt !== null, true);
+  assert.equal(
+    (await foundation.metaWebhooks.findConnectionByWabaId(
+      "integration-waba",
+    ))?.tenantId,
+    tenantId,
+  );
+
+  const concurrentClaimInput = Object.freeze({
+    tenantId,
+    wabaId: "integration-waba",
+    eventKey: "d".repeat(64),
+    objectType: "whatsapp_business_account",
+  });
+  const concurrentClaims = await Promise.all([
+    foundation.metaWebhooks.claimWebhookReceipt(concurrentClaimInput),
+    foundation.metaWebhooks.claimWebhookReceipt(concurrentClaimInput),
+  ]);
+
+  assert.deepEqual(
+    concurrentClaims.map(({ claimed }) => claimed).sort(),
+    [false, true],
+  );
+  const receiptId = concurrentClaims[0].receipt.id;
+  assert.equal(
+    concurrentClaims.every(({ receipt }) => receipt.id === receiptId),
+    true,
+  );
+  await foundation.metaWebhooks.completeWebhookReceipt(tenantId, receiptId);
+  const processedDuplicate =
+    await foundation.metaWebhooks.claimWebhookReceipt(concurrentClaimInput);
+  assert.equal(processedDuplicate.claimed, false);
+  assert.equal(processedDuplicate.receipt.status, "processed");
+  await assert.rejects(
+    foundation.metaWebhooks.claimWebhookReceipt({
+      ...concurrentClaimInput,
+      objectType: "different_object",
+    }),
+    /conflicts with stored evidence/,
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       connection.status,
+       connection.version,
+       receipt.status AS receipt_status,
+       receipt.attempt_count,
+       envelope.key_version,
+       length(envelope.ciphertext)::integer AS ciphertext_length
+     FROM meta_connections AS connection
+     JOIN meta_webhook_receipts AS receipt
+       ON receipt.tenant_id = connection.tenant_id
+      AND receipt.waba_id = connection.waba_id
+     JOIN meta_credential_envelopes AS envelope
+       ON envelope.tenant_id = connection.tenant_id
+     WHERE connection.tenant_id = $1
+       AND receipt.event_key = $2`,
+    [tenantId, concurrentClaimInput.eventKey],
+  );
+  assert.deepEqual(persisted.rows, [
+    {
+      status: "connected",
+      version: 2,
+      receipt_status: "processed",
+      attempt_count: 1,
+      key_version: "v1",
+      ciphertext_length: 24,
+    },
+  ]);
 }
 
 async function verifyConversationMessageSchema(pool, tenantId) {
@@ -1416,6 +1544,7 @@ export async function verifyNodePostgresIntegration(
         foundation,
         tenantId,
       );
+      await verifyMetaConnectionCredentials(pool, foundation, tenantId);
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
@@ -1429,7 +1558,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 3,
+      concurrencyScenarios: 4,
     });
   } finally {
     await pool.end();
