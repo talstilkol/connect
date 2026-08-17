@@ -388,7 +388,8 @@ Transaction. אין עדיין Adapter כזה ולכן אין טענה שכתי�
 2.22 **הושלם מקומית:** ליבת PostgreSQL ספק־נייטרלית ל־`contacts.save`.
 
 2.22.1 ‏`PostgresTransactionManager` מקפיא חוזה של Connection אחד,
-`BEGIN`, ‏`COMMIT` ו־`ROLLBACK`. בחירת Node driver נשארת החלטה חיצונית.
+`BEGIN`, ‏`COMMIT` ו־`ROLLBACK`. בשלב זה Driver טרם נבחר; הבחירה והמימוש
+שנוספו לאחר מכן מתועדים בסעיף 2.29.
 
 2.22.2 ה־Executor תובע Receipt אטומי לפי Tenant, ‏Operation ומפתח
 Idempotency. מתחרה על אותו מפתח ממתין דרך Unique conflict ואז נועל את
@@ -401,9 +402,9 @@ Transaction. ‏`IS DISTINCT FROM` מונע הגדלת Version כאשר הפרו
 פנימיים.
 
 2.22.4 נוסף Schema contract עבור `railway_api_mutation_receipts` ומסמך
-`docs/postgresql-mutation-contract.md`. בשלב זה עדיין חסרים ספק, Driver,
-Schema parity מול 35 ה־Migrations ובדיקת Concurrency מול PostgreSQL אמיתי; לכן אין
-טענה שה־Database adapter מוכן לפריסה.
+`docs/postgresql-mutation-contract.md`. ספק, Schema parity מול 35 ה־Migrations
+ו־Production evidence עדיין חסרים. Driver ובדיקת Concurrency מוגדרת שנוספו
+לאחר מכן מתועדים בסעיף 2.29; אין טענה שה־Database adapter מוכן לפריסה.
 
 2.23 **הושלם מקומית:** PostgreSQL Critical-path schema ו־Migration guard.
 
@@ -418,8 +419,9 @@ Schema parity מול 35 ה־Migrations ובדיקת Concurrency מול PostgreSQ
 2.23.3 נוסף Gate מקומי שמכשיל סדר קבצים שגוי, תחביר SQLite, Seed data,
 פעולות הרסניות ויצירת מזהים אקראית. הוא צורף ל־Release Gate הקיים.
 
-2.23.4 זהו Critical Path בלבד. הוא אינו ממיר עדיין את מלוא 35 ה־Migrations,
-אינו בוחר Driver ואינו מהווה הוכחת הרצה מול PostgreSQL אמיתי.
+2.23.4 זהו Critical Path בלבד. בשלב זה הוא לא בחר Driver ולא הוכיח הרצה
+מול PostgreSQL אמיתי; הראיות שנוספו אחר כך מתועדות בסעיף 2.29. המרה של מלוא
+35 ה־Migrations עדיין חסרה.
 
 2.24 **הושלם מקומית:** PostgreSQL Tenant access foundation.
 
@@ -437,8 +439,9 @@ Schema parity מול 35 ה־Migrations ובדיקת Concurrency מול PostgreSQ
 2.24.4 Business profile repository שומר את שם ה־Tenant ואת הפרופיל באותה
 Transaction, משתמש ב־`IS DISTINCT FROM` ומאמת את הרשומה לפני Commit.
 
-2.24.5 החוזה מתועד ב־`docs/postgresql-tenant-access-contract.md`. עדיין אין
-Driver, ‏Database חי, Full schema parity או Concurrency evidence.
+2.24.5 החוזה מתועד ב־`docs/postgresql-tenant-access-contract.md`. ‏Driver
+ו־Database חי עבור המסלולים המוגדרים מתועדים בסעיף 2.29; ל־Tenant access
+עצמו עדיין חסרים DML/Concurrency evidence, ‏Full schema parity ו־Staging.
 
 2.25 **הושלם מקומית:** PostgreSQL Team membership mutation ledger.
 
@@ -456,9 +459,9 @@ Driver, ‏Database חי, Full schema parity או Concurrency evidence.
 נכשלות סגור.
 
 2.25.4 הבדיקות המקומיות משתמשות ב־Transaction adapter דטרמיניסטי ומוכיחות
-Commit/Rollback ברמת החוזה. שרשרת ה־Schema עברה על PostgreSQL מקומי, אך עדיין
-חסרים Driver, ‏Repository integration ובדיקת שתי Transactions מקבילות;
-לכן אין טענה שהמסלול מוכן לפריסה.
+Commit/Rollback ברמת החוזה. שרשרת ה־Schema עברה על PostgreSQL מקומי. ‏Driver
+ושני Races מוגדרים שנוספו אחר כך מתועדים בסעיף 2.29; יתר Repository integration
+ו־Concurrency coverage עדיין חסרים ולכן אין טענה שהמסלול מוכן לפריסה.
 
 2.26 **הושלם מקומית:** PostgreSQL Team invitation lifecycle schema.
 
@@ -476,9 +479,9 @@ Dependency. הראיה מתועדת ב־
 `docs/postgresql-team-invitation-contract.md`.
 
 2.26.4 Repositories של Request/Transition/Expiration שנוספו לאחר ה־Schema
-מתועדים בסעיף 2.27. עדיין חסרים Node driver, ‏Runtime integration, בדיקות
-שתי Transactions מקבילות ו־Staging evidence; לכן אין טענה שמחזור החיים
-מוכן לפריסה.
+מתועדים בסעיף 2.27. ‏Node driver ותרחיש Acceptance מקביל שנוספו אחר כך
+מתועדים בסעיף 2.29; עדיין חסרים Runtime integration, כיסוי מקביל מלא
+ו־Staging evidence, ולכן אין טענה שמחזור החיים מוכן לפריסה.
 
 2.27 **הושלם מקומית:** PostgreSQL Invitation request ו־expiration repositories.
 
@@ -495,8 +498,9 @@ Conflict ו־Invalid transition, ושומר Request/Re-request או Revoke/Expir
 מקומי לאחר החלת חמש ה־Migrations.
 
 2.27.4 Delivery ו־Acceptance repositories שנוספו אחר כך מתועדים בסעיף 2.28.
-עדיין חסרים Driver, ‏DML integration מול PostgreSQL אמיתי ובדיקות
-Concurrency; לכן המימוש אינו מחובר ל־Runtime ואינו מוכן לפריסה.
+Driver ו־DML/Concurrency מוגדרים שנוספו אחר כך מתועדים בסעיף 2.29. יתר
+Integration ו־Concurrency, ‏Runtime ו־Staging עדיין חסרים; לכן המימוש אינו
+מוכן לפריסה.
 
 2.28 **הושלם מקומית:** PostgreSQL Invitation delivery ו־acceptance repositories.
 
@@ -513,8 +517,30 @@ immutable באותה Transaction; Retry מדויק מוחזר כ־`unchanged`.
 ארבע הישויות. יחד עם 4.2ב קיימות 16 בדיקות Invitation PostgreSQL.
 
 2.28.4 כל 27 משפטי ה־Invitation SQL עברו `PREPARE` על PostgreSQL 16.13 לאחר
-החלת חמש ה־Migrations. עדיין חסרים Driver, ‏DML integration אמיתי,
-Concurrency ו־Staging evidence; לכן אין טענה למוכנות פריסה.
+החלת חמש ה־Migrations. ‏Driver, ‏DML ושני תרחישי Concurrency שנוספו אחר כך
+מתועדים בסעיף 2.29. עדיין חסרים כיסוי מלא ו־Staging evidence; לכן אין טענה
+למוכנות פריסה.
+
+2.29 **הושלם מקומית:** Node PostgreSQL driver ו־Integration rehearsal חוזר.
+
+2.29.1 ‏`pg@8.23.0` ו־`@types/pg@8.21.0` ננעלו ב־Lockfile. ‏Adapter אחד
+מחבר Pool לקריאות בודדות ומצמיד Client יחיד לכל Transaction מסוג
+`read-committed`; כשל BEGIN/COMMIT/ROLLBACK משמיד את ה־Client במקום להחזירו
+ל־Pool.
+
+2.29.2 ‏7 בדיקות Adapter מכסות Query, ‏Commit, ‏Rollback, כשלי Transaction
+control, תוצאה פגומה ותצורה לא חוקית. ‏3 בדיקות Harness מגבילות אותו ל־URL
+Loopback ללא Password ול־Database הייעודי `connect_driver_integration`.
+
+2.29.3 ‏`verify:node-postgres-integration` הוחל על PostgreSQL 16.13 נקי.
+הוא החיל את חמש ה־Migrations, הוכיח Contact commit/replay/rollback,
+Invitation delivery/acceptance ושני תרחישי Concurrency אמיתיים: Contact
+Idempotency וקבלת Invitation יחידה. התוצאה הייתה `PASS (5 migrations,
+2 concurrency scenarios)` והסביבה הזמנית נמחקה לאחר מכן.
+
+2.29.4 עדיין חסרים ספק ותצורת Pool/TLS/Timeouts ל־Production, כלי Migration,
+כיסוי DML/Concurrency ליתר ה־Repositories, ‏Parity מול כל 35 ה־Migrations,
+Runtime composition ו־Staging evidence.
 
 ## 3. עבודה שאינה מקומית בלבד
 

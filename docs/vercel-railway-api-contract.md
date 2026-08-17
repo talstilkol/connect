@@ -193,8 +193,9 @@ Database timestamps.
 השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
 Membership event ledger. החמישית יוצרת את כל ארבע טבלאות ה־Invitation
 lifecycle ואת Triggers הבטיחותיים שלה.
-כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי, אך אין עדיין Driver,
-Schema parity מלאה, Repository integration או Staging evidence.
+כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי. ‏Node driver adapter
+ו־Integration rehearsal עבור Contact ו־Invitation קיימים, אך אין עדיין
+Schema parity מלאה, Production pool configuration או Staging evidence.
 
 7.1.16 נוספו Membership, ‏Tenant selection ו־Business profile repositories
 ספק־נייטרליים. מסלולי Selection ו־Profile משתמשים ב־Transaction, וקריאות
@@ -205,14 +206,20 @@ Membership נכשלות סגור על תוצאה חוצה User/Tenant או על 
 7.1.17 נוסף Team membership mutation repository ספק־נייטרלי. שינויי
 Role/Status והעברת Owner נועלים את ה־Tenant ואת הרשומות הרלוונטיות באמצעות
 `FOR UPDATE`, כותבים State ו־Event באותה Transaction ומזהים Retry לפי מפתחות
-SHA-256 דטרמיניסטיים. אין בכך הוכחת Concurrency מול PostgreSQL חי.
+SHA-256 דטרמיניסטיים. ה־Harness החדש הוכיח Concurrency עבור Contact
+Idempotency ו־Invitation acceptance, אך עדיין לא לכל פעולות Membership.
 
 7.1.18 נוסף [חוזה PostgreSQL למחזור חיי הזמנת צוות](postgresql-team-invitation-contract.md).
 ה־Schema מאחד את State, ‏Event ledger, ‏Delivery outbox ו־Acceptance ledger.
 Repositories ספק־נייטרליים מממשים Request, ‏Re-request, ‏Revoke, ‏Expiration
 וסריקת Keyset, ‏Delivery settlement/reconciliation ו־Acceptance אטומי עם
-Membership. כל 27 משפטי ה־SQL עברו Parser מקומי של PostgreSQL. עדיין חסרים
-Driver, ‏DML integration, ‏Concurrency ופעולות API מחוברות.
+Membership. כל 27 משפטי ה־SQL עברו Parser מקומי של PostgreSQL. ‏Delivery,
+Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`; עדיין חסרים
+כיסוי יתר המסלולים ופעולות API מחוברות.
+
+7.1.19 ‏`node-postgres` מחובר דרך Adapter יחיד שמפריד Query בודד מ־Transaction
+מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל חמש
+Migrations ומוכיח DML, ‏Rollback ושני Races בלי לקבל Production credential.
 
 7.2 עדיין חסר:
 
@@ -224,8 +231,8 @@ Production ו־Preview origins המאושרים.
 
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
-ו־Transaction וכן Executor ספק־נייטרלי. עדיין חסרים Driver מאושר,
-Migration מלא ובדיקת Concurrency מול PostgreSQL אמיתי.
+ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
+Production pool מאושר, Migration מלא וכיסוי Concurrency לכל ה־Repositories.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.

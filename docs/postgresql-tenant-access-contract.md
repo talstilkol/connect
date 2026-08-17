@@ -5,9 +5,9 @@
 1.1 מסמך זה מקפיא את שכבת ה־PostgreSQL המקומית הנדרשת כדי לפתור Tenant
 session ב־Railway בלי לסמוך על Tenant ID שמגיע מה־Browser.
 
-1.2 קיימים Schema ו־Adapters ספק־נייטרליים, ושרשרת ה־Migrations הוחלה על
-PostgreSQL 16.13 מקומי ומבודד. עדיין אין Node driver, ‏Runtime integration
-או Staging evidence, ולכן אין טענה שהמסלול מוכן ל־Production.
+1.2 קיימים Schema, ‏Adapters ספק־נייטרליים ו־Node driver adapter, ושרשרת
+ה־Migrations הוחלה על PostgreSQL 16.13 מקומי ומבודד. עדיין אין Runtime
+integration או Staging evidence, ולכן אין טענה שהמסלול מוכן ל־Production.
 
 ## 2. הסבר למתחילים
 
@@ -78,7 +78,7 @@ DISTINCT FROM` מונע הגדלת Version כאשר הערכים לא השתנו
 
 ## 5. מה נבדק מקומית
 
-5.1 נרמול ערכי `BIGINT` שמוחזרים כמחרוזת על ידי Driver עתידי.
+5.1 נרמול ערכי `BIGINT` שמוחזרים כמחרוזת על ידי `node-postgres`.
 
 5.2 חסימת Row shape פגום, Cross-user, ‏Cross-tenant ויותר מ־100 Memberships.
 
@@ -95,16 +95,17 @@ Owner אטומית, Conflict, בידוד Tenant ו־Rollback כאשר שמירת
 
 ## 6. מה עדיין חסר
 
-6.1 בחירת Node driver וכלי Migration.
+6.1 ‏Node driver נבחר מקומית. נותרו כלי Migration ותצורת Pool/TLS/Timeouts
+מאושרים ל־Production.
 
 6.2 סכמת Invitation lifecycle וכל Repositories של Request, ‏Transition,
-Expiration, ‏Delivery ו־Acceptance קיימים; עדיין חסרים Driver ו־DML
-integration מול PostgreSQL אמיתי.
+Expiration, ‏Delivery ו־Acceptance קיימים; Contact ו־Invitation
+Delivery/Acceptance כבר נבדקו דרך Driver אמיתי, אך יתר המסלולים לא.
 
-6.3 Integration tests של ה־Repositories מול PostgreSQL אמיתי, כולל שתי
-Transactions מקבילות.
+6.3 Integration tests של יתר ה־Repositories מול PostgreSQL אמיתי, כולל
+Transactions מקבילות לכל סדרי הנעילות של Membership ו־Selection.
 
-6.4 Runtime composition עם Driver אמיתי ו־Staging evidence.
+6.4 Runtime composition עם Pool מאושר ו־Staging evidence.
 
 6.5 Parity מלאה מול כל סט 35 ה־Migrations של D1.
 

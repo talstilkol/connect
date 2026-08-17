@@ -103,6 +103,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/railwayApiOperationRegistry.ts",
       "server/platform/railwayApiMutationExecutor.ts",
       "server/platform/postgresTransaction.ts",
+      "server/platform/nodePostgresAdapter.ts",
       "server/platform/postgresResultValidation.ts",
       "server/platform/postgresTenantMembershipRepository.ts",
       "server/platform/postgresTenantMembershipMutationRepository.ts",
@@ -123,7 +124,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, tenant access repositories, team membership mutations, and the complete invitation lifecycle repositories exist, but the database driver, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, tenant access repositories, team membership mutations, and the complete invitation lifecycle repositories exist, but production pool configuration, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -192,6 +193,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "postgres/migrations/0003_tenant_membership_events.sql",
       "postgres/migrations/0004_team_invitation_lifecycle.sql",
       "scripts/verify-postgres-migration-contract.mjs",
+      "scripts/verify-node-postgres-integration.mjs",
     ],
     targetPlacement: "shared-managed-service",
     targetContract:
@@ -200,7 +202,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist; the schema and all 27 invitation SQL statements parse on local PostgreSQL. The provider, Node driver, full 35-migration parity conversion, real DML tests, real concurrency tests, and controlled-environment migration evidence are not implemented.",
+      "Provider-neutral contacts.save, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist. A node-postgres adapter and repeatable loopback PostgreSQL 16.13 rehearsal prove contact commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The provider, production pool configuration, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

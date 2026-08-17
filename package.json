@@ -17,6 +17,7 @@
     "verify:dependency-audit:development": "node scripts/verify-development-dependency-audit.mjs",
     "verify:migrations": "node scripts/verify-migrations.mjs",
     "verify:postgres-migration-contract": "node scripts/verify-postgres-migration-contract.mjs",
+    "verify:node-postgres-integration": "node scripts/verify-node-postgres-integration.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",
     "verify:release-gate": "node scripts/verify-release-gate.mjs",
     "verify:production-readiness": "node scripts/verify-production-readiness.mjs",
@@ -53,6 +54,7 @@
     "fflate": "0.8.3",
     "jose": "6.2.3",
     "next": "16.3.0",
+    "pg": "8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "read-excel-file": "9.2.0"
@@ -62,6 +64,7 @@
     "@cloudflare/vite-plugin": "1.51.1",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
+    "@types/pg": "8.21.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",

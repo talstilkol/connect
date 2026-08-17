@@ -184,6 +184,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/railwayApiOperationRegistry.ts",
     "server/platform/railwayApiMutationExecutor.ts",
     "server/platform/postgresTransaction.ts",
+    "server/platform/nodePostgresAdapter.ts",
     "server/platform/postgresTenantMembershipRepository.ts",
     "server/platform/postgresTenantMembershipMutationRepository.ts",
     "server/platform/postgresTenantSelectionRepository.ts",
@@ -203,7 +204,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /database driver/);
+  assert.match(boundary.cutoverBlocker, /node-postgres transaction adapter/);
+  assert.match(boundary.cutoverBlocker, /production pool configuration/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
@@ -236,15 +238,16 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0003_tenant_membership_events.sql",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "scripts/verify-postgres-migration-contract.mjs",
+    "scripts/verify-node-postgres-integration.mjs",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
   assert.match(database.cutoverBlocker, /five ordered/);
-  assert.match(database.cutoverBlocker, /parse on local PostgreSQL/);
-  assert.match(database.cutoverBlocker, /27 invitation SQL statements/);
-  assert.match(database.cutoverBlocker, /Node driver/);
+  assert.match(database.cutoverBlocker, /node-postgres adapter/);
+  assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /production pool configuration/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
-  assert.match(database.cutoverBlocker, /real concurrency tests/);
+  assert.match(database.cutoverBlocker, /remaining repository DML\/concurrency/);
 });

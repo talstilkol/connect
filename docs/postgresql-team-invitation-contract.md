@@ -13,8 +13,8 @@ PostgreSQL 16.13 מקומי ומבודד.
 Revoke, ‏Expiration transition, סריקת Expiration מדורגת, ‏Delivery
 claim/settlement/reconciliation ו־Acceptance אטומי עם Membership.
 
-1.4 זוהי הוכחת Schema ו־Dependency אמיתית. היא אינה הוכחת Driver, ‏Runtime,
-שתי Transactions מקבילות, Staging או Production.
+1.4 קיימת גם הוכחת Driver ו־DML מקומית עבור Delivery/Acceptance ושתי קבלות
+מקבילות. היא אינה הוכחת Runtime, כיסוי Concurrency מלא, Staging או Production.
 
 ## 2. הסבר למתחילים
 
@@ -95,12 +95,18 @@ Expiration מערכתי, ‏Delivery claim/settlement/reconciliation, ‏Accepta
 Conflict, ‏Delivery פעיל, ‏Rollback ו־Keyset pagination. כל 27 משפטי ה־SQL
 עברו `PREPARE` על PostgreSQL 16.13 לאחר החלת ה־Schema.
 
+5.6 ‏`verify:node-postgres-integration` החיל את חמש ה־Migrations מחדש על
+Database ייעודי וריק, יצר Invitation, תבע וחסם Delivery, יצר Acceptance
+ו־Membership והחזיר Replay מדויק. שתי Transactions מקבילות לאותה קבלה
+הסתיימו ב־`created + unchanged`, ונשמרה Acceptance אחת בלבד.
+
 ## 6. מה עדיין חסר
 
-6.1 Node driver וכלי Migration מאושרים, חיבור Runtime ו־API operations.
+6.1 תצורת Pool מאושרת ל־Production, כלי Migration, חיבור Runtime ו־API
+operations. ‏`node-postgres` וה־Adapter המקומי כבר קיימים.
 
-6.2 בדיקות Integration של DML מול PostgreSQL אמיתי עם תרחישי הצלחה וכשל, ושתי
-Transactions מקבילות עבור אותו אימייל, Operation key ו־Delivery claim.
+6.2 הרחבת בדיקות ה־DML וה־Concurrency ל־Request/Re-request זהים, ‏Expiration,
+Delivery claim/Reconciliation מקבילים ו־Failure injection בכל גבול Commit.
 
 6.3 Staging migration evidence, ‏Backup/Restore rehearsal ו־Load test.
 
