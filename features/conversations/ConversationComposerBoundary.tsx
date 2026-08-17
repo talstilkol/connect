@@ -1,12 +1,22 @@
-export function ConversationComposerBoundary() {
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import {
+  readConversationMessages,
+} from "./conversationMessages.ts";
+
+export function ConversationComposerBoundary({
+  language,
+}: {
+  language: InterfaceLanguage;
+}) {
+  const message =
+    readConversationMessages(language).composerBoundary;
+
   return (
     <footer className="outbound-boundary">
       <span aria-hidden="true">i</span>
-      <p>
-        צפייה, שיוך ואישור תשובות AI פעילים. אישור שומר את התשובה
-        למסירה עתידית בלבד; שליחה נשארת חסומה עד חיבור Adapter
-        מאושר.
-      </p>
+      <p>{message}</p>
     </footer>
   );
 }

@@ -1,11 +1,18 @@
 "use client";
 
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import type {
   InboxConversationView,
 } from "../../shared/domain/conversationView.ts";
+import {
+  readConversationMessages,
+} from "./conversationMessages.ts";
 
 type ConversationAssignmentControlsProps = {
   conversation: InboxConversationView;
+  language: InterfaceLanguage;
   canReply: boolean;
   isBusy: boolean;
   pendingConversationKey: string | null;
@@ -15,12 +22,16 @@ type ConversationAssignmentControlsProps = {
 
 export function ConversationAssignmentControls({
   conversation,
+  language,
   canReply,
   isBusy,
   pendingConversationKey,
   changeSelectedAssignment,
   markSelectedRead,
 }: ConversationAssignmentControlsProps) {
+  const messages = readConversationMessages(
+    language,
+  ).assignmentControls;
   const isPending =
     pendingConversationKey === conversation.conversationKey;
 
@@ -37,12 +48,12 @@ export function ConversationAssignmentControls({
           onClick={changeSelectedAssignment}
         >
           {isPending
-            ? "מעדכן…"
+            ? messages.updating
             : conversation.assignment === "current-user"
-              ? "הסר שיוך שלי"
+              ? messages.unassignSelf
               : conversation.assignment === "other-user"
-                ? "משויכת לנציג אחר"
-                : "שייך אליי"}
+                ? messages.assignedToOther
+                : messages.assignSelf}
         </button>
       ) : null}
       {conversation.unreadCount > 0 ? (
@@ -53,16 +64,20 @@ export function ConversationAssignmentControls({
             disabled={isBusy}
             onClick={markSelectedRead}
           >
-            {isPending ? "מעדכן…" : "סימון כנקראה"}
+            {isPending
+              ? messages.updating
+              : messages.markRead}
           </button>
         ) : (
           <span className="status-pill warning">
-            {conversation.unreadCount} לא נקראו
+            {messages.unread(
+              conversation.unreadCount,
+            )}
           </span>
         )
       ) : (
         <span className="status-pill success">
-          נקראה
+          {messages.read}
         </span>
       )}
     </div>

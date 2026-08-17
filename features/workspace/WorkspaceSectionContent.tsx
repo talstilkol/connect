@@ -7,9 +7,6 @@ import {
   OperationalReports,
 } from "../reports/OperationalReports";
 import {
-  ConversationInbox,
-} from "../conversations/ConversationInbox";
-import {
   ContactDirectory,
   type ContactDirectoryStatus,
 } from "../contacts/ContactDirectory";
@@ -80,11 +77,22 @@ import {
 import {
   readCampaignPageMessages,
 } from "../campaigns/campaignPageMessages";
+import {
+  readConversationPageMessages,
+} from "../conversations/conversationPageMessages";
 
 const CampaignManager = lazy(() =>
   import("../campaigns/CampaignManager").then((module) => ({
     default: module.CampaignManager,
   })),
+);
+
+const ConversationInbox = lazy(() =>
+  import("../conversations/ConversationInbox").then(
+    (module) => ({
+      default: module.ConversationInbox,
+    }),
+  ),
 );
 
 export function WorkspaceSectionContent({
@@ -223,6 +231,7 @@ export function WorkspaceSectionContent({
           {activeSection === "inbox" ? (
             <Inbox
               authEnabled={authEnabled}
+              language={language}
               initialInbox={initialInbox}
               initialStatus={initialInboxStatus}
               initialAiReplyApprovals={
@@ -400,12 +409,14 @@ function Campaigns({
 
 function Inbox({
   authEnabled,
+  language,
   initialInbox,
   initialStatus,
   initialAiReplyApprovals,
   initialAiReplyApprovalStatus,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialInbox: InboxView;
   initialStatus: InboxDirectoryStatus;
   initialAiReplyApprovals:
@@ -413,23 +424,35 @@ function Inbox({
   initialAiReplyApprovalStatus:
     AiReplyApprovalDirectoryStatus;
 }) {
+  const messages = readConversationPageMessages(language);
+
   return (
     <FeaturePage
-      eyebrow="שירות לקוחות"
-      title="תיבת שיחות"
-      description="כל ההודעות הנכנסות, הקצאה לנציג ומעבר מבוט לאדם במקום אחד."
+      eyebrow={messages.eyebrow}
+      title={messages.title}
+      description={messages.description}
     >
-      <ConversationInbox
-        authEnabled={authEnabled}
-        initialInbox={initialInbox}
-        initialStatus={initialStatus}
-        initialAiReplyApprovals={
-          initialAiReplyApprovals
+      <Suspense
+        fallback={
+          <div className="inline-notice" role="status">
+            <span aria-hidden="true">i</span>
+            <p>{messages.loading}</p>
+          </div>
         }
-        initialAiReplyApprovalStatus={
-          initialAiReplyApprovalStatus
-        }
-      />
+      >
+        <ConversationInbox
+          authEnabled={authEnabled}
+          language={language}
+          initialInbox={initialInbox}
+          initialStatus={initialStatus}
+          initialAiReplyApprovals={
+            initialAiReplyApprovals
+          }
+          initialAiReplyApprovalStatus={
+            initialAiReplyApprovalStatus
+          }
+        />
+      </Suspense>
     </FeaturePage>
   );
 }

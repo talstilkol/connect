@@ -39,7 +39,7 @@ test("keeps thread list rendering behind the conversation list boundary", async 
   );
   assert.match(
     threadListSource,
-    /aria-label="רשימת שיחות"/,
+    /aria-label=\{listMessages\.ariaLabel\}/,
   );
   assert.match(
     presentationSource,
@@ -76,7 +76,7 @@ test("keeps message rendering behind the conversation message boundary", async (
   );
   assert.match(
     messageViewSource,
-    /aria-label="תוכן השיחה"/,
+    /aria-label=\{viewMessages\.ariaLabel\}/,
   );
   assert.match(
     messageViewSource,
@@ -142,7 +142,7 @@ test("keeps the disabled composer contract behind its own boundary", async () =>
   );
   assert.match(
     composerSource,
-    /שליחה נשארת חסומה/,
+    /readConversationMessages\(language\)\.composerBoundary/,
   );
   assert.doesNotMatch(
     composerSource,

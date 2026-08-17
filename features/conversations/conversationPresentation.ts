@@ -1,4 +1,7 @@
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import type {
   InboxConversationThreadView,
   InboxConversationView,
   InboxDirectoryStatus,
@@ -8,45 +11,26 @@ import type {
 import type {
   ConversationStatus,
 } from "../../shared/domain/model.ts";
+import {
+  readConversationMessages,
+} from "./conversationMessages.ts";
+
+const hebrewMessages = readConversationMessages("he");
 
 export const inboxDirectoryFailureMessages: Record<
   Exclude<InboxDirectoryStatus, "ready">,
   string
-> = {
-  "configuration-required":
-    "Clerk או D1 אינם מוגדרים. לא נטענות שיחות ולא נוצרים נתוני תצוגה חלופיים.",
-  unauthenticated:
-    "נדרשת התחברות לפני צפייה בשיחות.",
-  "onboarding-required":
-    "נדרש להשלים יצירת סביבת עבודה לפני פתיחת תיבת השיחות.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה לפני פתיחת תיבת השיחות.",
-  "permission-denied":
-    "לתפקיד הנוכחי אין הרשאה לקריאת שיחות.",
-  "server-error":
-    "לא ניתן לטעון כרגע את תיבת השיחות מהשרת.",
-};
+> = hebrewMessages.directoryFailures;
 
 export const conversationStatusLabels: Record<
   ConversationStatus,
   string
-> = {
-  new: "חדשה",
-  bot_active: "בוט פעיל",
-  waiting_for_agent: "ממתינה לנציג",
-  agent_active: "נציג פעיל",
-  waiting_for_contact: "ממתינה ללקוח",
-  closed: "סגורה",
-};
+> = hebrewMessages.labels.conversationStatuses;
 
 export const conversationAssignmentLabels: Record<
   InboxConversationView["assignment"],
   string
-> = {
-  unassigned: "ללא שיוך",
-  "current-user": "משויכת אליי",
-  "other-user": "משויכת לנציג אחר",
-};
+> = hebrewMessages.labels.assignments;
 
 export function hasActiveInboxFilters(
   filters: InboxFilters,
@@ -61,43 +45,31 @@ export function hasActiveInboxFilters(
 export const messageStatusLabels: Record<
   InboxMessageView["status"],
   string
-> = {
-  received: "התקבלה",
-  sent: "נשלחה",
-  delivered: "נמסרה",
-  read: "נקראה",
-  failed: "נכשלה",
-};
-
-const nonTextContentLabels: Record<
-  Exclude<InboxMessageView["contentKind"], "text">,
-  string
-> = {
-  image: "התקבלה תמונה. תוכן המדיה עדיין אינו נשמר.",
-  audio: "התקבלה הודעת שמע. תוכן המדיה עדיין אינו נשמר.",
-  video: "התקבל סרטון. תוכן המדיה עדיין אינו נשמר.",
-  document: "התקבל מסמך. תוכן הקובץ עדיין אינו נשמר.",
-  sticker: "התקבלה מדבקה. תוכן המדיה עדיין אינו נשמר.",
-  location: "התקבל מיקום. פרטי המיקום עדיין אינם נשמרים.",
-  contacts: "התקבל איש קשר. פרטיו עדיין אינם נשמרים כהודעה.",
-  interactive: "התקבלה תגובה אינטראקטיבית ללא Payload שמור.",
-  unsupported: "התקבל סוג הודעה שעדיין אינו נתמך.",
-};
+> = hebrewMessages.labels.messageStatuses;
 
 export function messageBody(
   message: InboxMessageView,
+  language: InterfaceLanguage = "he",
 ): string {
   if (message.contentKind === "text") {
     return message.textContent ?? "";
   }
 
-  return nonTextContentLabels[message.contentKind];
+  return readConversationMessages(language).labels
+    .nonTextContent[message.contentKind];
 }
 
 export function formatInboxTimestamp(
   value: string,
+  language: InterfaceLanguage = "he",
 ): string {
-  return new Intl.DateTimeFormat("he-IL", {
+  const locale = {
+    he: "he-IL",
+    en: "en-US",
+    ar: "ar",
+  }[language];
+
+  return new Intl.DateTimeFormat(locale, {
     timeZone: "UTC",
     day: "2-digit",
     month: "2-digit",

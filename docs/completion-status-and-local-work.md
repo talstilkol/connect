@@ -423,6 +423,16 @@ Readiness, רשימת הקמפיינים וכל תוצאות השמירה והה
 לא להגדיל את מעטפת ה־Workspace, ‏Campaigns פוצל ל־Route chunk של
 כ־68KB וה־Chunk הראשי ירד מכ־500KB לכ־436KB ללא העלאת סף האזהרה.
 
+4.1.14 Slice עשירי של לוקליזציה הושלם בכל Surface ה־Inbox ובזרימת
+אישורי תשובות AI. רשימת השיחות, מסננים, מצבי שיחה ושיוך, זרם
+ההודעות, תוכן שאינו טקסט, פעולות סימון ושיוך, Contact panel וכל מצבי
+הכשל התחומים של שיחות ואישורי AI זמינים בעברית, אנגלית וערבית.
+המילון המוקלד מכסה את כל מצבי ה־Directory, פעולות השיחה והחלטות AI,
+בלי לשנות הרשאות, Polling, פעולות שרת או חסימת השליחה. בדיקות
+Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL`, טעינת
+Chunk נפרד ו־Console נקי. ‏Inbox פוצל ל־Route chunk של כ־37KB
+וה־Chunk הראשי ירד מכ־436KB לכ־416KB ללא העלאת סף האזהרה.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -447,10 +457,10 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
 ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates
-ו־Campaigns,
+‏Campaigns, ‏Inbox ואישורי AI,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **12–20 שעות
+הוא **9–15 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**20–34 שעות**.
+הופך ל־**17–29 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

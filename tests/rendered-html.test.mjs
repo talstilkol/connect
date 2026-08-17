@@ -222,6 +222,34 @@ test("server-renders both campaign flows in English and Arabic", async () => {
   assert.doesNotMatch(arabicHtml, /שלמות הטיוטה המקומית/);
 });
 
+test("server-renders the conversation inbox boundary in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/inbox?lang=en"),
+    render("/workspace/inbox?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Conversation inbox/);
+  assert.match(englishHtml, /Inbox unavailable/);
+  assert.match(
+    englishHtml,
+    /Conversations are not loaded and no fallback display data is created/,
+  );
+  assert.doesNotMatch(englishHtml, /תיבת השיחות אינה זמינה/);
+
+  assert.match(arabicHtml, /صندوق المحادثات/);
+  assert.match(arabicHtml, /صندوق المحادثات غير متاح/);
+  assert.match(arabicHtml, /لا يتم تحميل المحادثات/);
+  assert.doesNotMatch(arabicHtml, /תיבת השיחות אינה זמינה/);
+});
+
 test("server-renders auth and workspace feature routes", async () => {
   const [
     loginResponse,

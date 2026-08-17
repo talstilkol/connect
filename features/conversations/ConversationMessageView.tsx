@@ -1,6 +1,9 @@
 "use client";
 
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import type {
   InboxConversationThreadView,
   InboxConversationView,
 } from "../../shared/domain/conversationView.ts";
@@ -9,12 +12,12 @@ import type {
   AiReplyApprovalView,
 } from "../../shared/domain/aiReplyApprovalView.ts";
 import {
-  conversationAssignmentLabels,
-  conversationStatusLabels,
   formatInboxTimestamp,
   messageBody,
-  messageStatusLabels,
 } from "./conversationPresentation.ts";
+import {
+  readConversationMessages,
+} from "./conversationMessages.ts";
 import {
   ConversationAssignmentControls,
 } from "./ConversationAssignmentControls.tsx";
@@ -23,6 +26,7 @@ import {
 } from "./ConversationComposerBoundary.tsx";
 
 type ConversationMessageViewProps = {
+  language: InterfaceLanguage;
   selectedThread: InboxConversationThreadView | null;
   conversations: readonly InboxConversationView[];
   selectedAiApprovals: readonly AiReplyApprovalView[];
@@ -45,6 +49,7 @@ type ConversationMessageViewProps = {
 };
 
 export function ConversationMessageView({
+  language,
   selectedThread,
   conversations,
   selectedAiApprovals,
@@ -59,17 +64,20 @@ export function ConversationMessageView({
   markSelectedRead,
   decideAiApproval,
 }: ConversationMessageViewProps) {
+  const messages = readConversationMessages(language);
+  const viewMessages = messages.messageView;
+
   return (
       <section
         className="conversation-stage"
-        aria-label="תוכן השיחה"
+        aria-label={viewMessages.ariaLabel}
       >
         {selectedThread ? (
           <>
             <header className="conversation-stage-header">
               <div>
                 <span className="card-kicker">
-                  שיחה מאובטחת
+                  {viewMessages.secureConversation}
                 </span>
                 <h2>
                   {
@@ -79,13 +87,14 @@ export function ConversationMessageView({
                 </h2>
                 <p>
                   {
-                    conversationStatusLabels[
+                    messages.labels
+                      .conversationStatuses[
                       selectedThread.conversation.status
                     ]
                   }
                   {" · "}
                   {
-                    conversationAssignmentLabels[
+                    messages.labels.assignments[
                       selectedThread.conversation
                         .assignment
                     ]
@@ -93,6 +102,7 @@ export function ConversationMessageView({
                 </p>
               </div>
               <ConversationAssignmentControls
+                language={language}
                 conversation={selectedThread.conversation}
                 canReply={canReply}
                 isBusy={isBusy}
@@ -110,7 +120,7 @@ export function ConversationMessageView({
               <div className="inline-notice warning">
                 <span aria-hidden="true">i</span>
                 <p>
-                  לתפקיד הנוכחי יש הרשאת צפייה בלבד.
+                  {viewMessages.readOnly}
                 </p>
               </div>
             ) : null}
@@ -133,8 +143,7 @@ export function ConversationMessageView({
               <div className="inline-notice warning">
                 <span aria-hidden="true">!</span>
                 <p>
-                  רשימת אישורי ה־AI אינה זמינה כרגע.
-                  השיחות עצמן נשארות זמינות לצפייה.
+                  {viewMessages.aiUnavailable}
                 </p>
               </div>
             ) : null}
@@ -148,18 +157,20 @@ export function ConversationMessageView({
                   <header>
                     <div>
                       <span className="card-kicker">
-                        AI · ממתין להחלטה
+                        {viewMessages.aiPending}
                       </span>
-                      <h3>תשובה מוצעת</h3>
+                      <h3>
+                        {viewMessages.proposedReply}
+                      </h3>
                     </div>
                     <span className="status-pill warning">
-                      אישור נציג
+                      {viewMessages.agentApproval}
                     </span>
                   </header>
                   <p>{approval.replyText}</p>
                   <dl>
                     <div>
-                      <dt>Grounding</dt>
+                      <dt>{viewMessages.grounding}</dt>
                       <dd>
                         {Math.floor(
                           approval.groundingScoreBasisPoints /
@@ -169,7 +180,9 @@ export function ConversationMessageView({
                       </dd>
                     </div>
                     <div>
-                      <dt>מקורות מאושרים</dt>
+                      <dt>
+                        {viewMessages.approvedSources}
+                      </dt>
                       <dd>
                         {
                           approval.groundedSourceCount
@@ -177,10 +190,11 @@ export function ConversationMessageView({
                       </dd>
                     </div>
                     <div>
-                      <dt>נוצרה</dt>
+                      <dt>{viewMessages.createdAt}</dt>
                       <dd>
                         {formatInboxTimestamp(
                           approval.createdAt,
+                          language,
                         )}
                       </dd>
                     </div>
@@ -201,8 +215,8 @@ export function ConversationMessageView({
                     >
                       {pendingApprovalKey ===
                       approval.outboxKey
-                        ? "שומר החלטה…"
-                        : "אישור התשובה"}
+                        ? viewMessages.savingDecision
+                        : viewMessages.approve}
                     </button>
                     <button
                       className="secondary-button danger-text-button"
@@ -217,13 +231,12 @@ export function ConversationMessageView({
                         )
                       }
                     >
-                      דחייה
+                      {viewMessages.reject}
                     </button>
                   </footer>
                   {!canDecideAi ? (
                     <small>
-                      לתפקיד הנוכחי יש הרשאת צפייה
-                      בלבד.
+                      {viewMessages.readOnly}
                     </small>
                   ) : null}
                 </article>
@@ -237,10 +250,11 @@ export function ConversationMessageView({
             >
               {selectedThread.messages.length === 0 ? (
                 <div className="conversation-thread-empty">
-                  <strong>אין הודעות בשיחה</strong>
+                  <strong>
+                    {viewMessages.emptyThreadTitle}
+                  </strong>
                   <p>
-                    ה־Conversation קיימת, אך לא הוחזרו
-                    הודעות מה־Repository.
+                    {viewMessages.emptyThreadDescription}
                   </p>
                 </div>
               ) : (
@@ -249,18 +263,21 @@ export function ConversationMessageView({
                     className={`message-bubble ${message.direction}`}
                     key={message.messageKey}
                   >
-                    <p>{messageBody(message)}</p>
+                    <p>
+                      {messageBody(message, language)}
+                    </p>
                     <footer>
                       <time
                         dateTime={message.occurredAt}
                       >
                         {formatInboxTimestamp(
                           message.occurredAt,
+                          language,
                         )}
                       </time>
                       <span>
                         {
-                          messageStatusLabels[
+                          messages.labels.messageStatuses[
                             message.status
                           ]
                         }
@@ -271,7 +288,9 @@ export function ConversationMessageView({
               )}
             </div>
 
-            <ConversationComposerBoundary />
+            <ConversationComposerBoundary
+              language={language}
+            />
           </>
         ) : (
           <div className="conversation-stage-empty">
@@ -283,13 +302,13 @@ export function ConversationMessageView({
             </div>
             <h2>
               {conversations.length === 0
-                ? "אין תוצאות"
-                : "בחרו שיחה"}
+                ? viewMessages.noResults
+                : viewMessages.selectConversation}
             </h2>
             <p>
               {conversations.length === 0
-                ? "שנו את המסננים כדי להציג שיחות."
-                : "ההודעות ופרטי איש הקשר יוצגו כאן לאחר טעינה מאומתת מהשרת."}
+                ? viewMessages.changeFilters
+                : viewMessages.selectionDescription}
             </p>
           </div>
         )}

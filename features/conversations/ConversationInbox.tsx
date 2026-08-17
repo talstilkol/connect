@@ -7,11 +7,8 @@ import {
   type FormEvent,
 } from "react";
 import type {
-  ConversationActionFailure,
-} from "../../server/conversations/conversationActionResult.ts";
-import type {
-  AiReplyApprovalActionFailure,
-} from "../../server/ai/aiReplyApprovalActionResult.ts";
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
 import {
   decideAiReplyApprovalAction,
 } from "../../server/ai/aiReplyApprovalActions.ts";
@@ -36,12 +33,13 @@ import type {
 } from "../../shared/domain/aiReplyApprovalView.ts";
 import {
   canMarkConversationRead,
-  conversationAssignmentLabels,
-  conversationStatusLabels,
   hasActiveInboxFilters,
-  inboxDirectoryFailureMessages,
   replaceInboxConversation,
 } from "./conversationPresentation.ts";
+import {
+  readConversationMessages,
+  type ConversationMessages,
+} from "./conversationMessages.ts";
 import {
   canEnableInboxPolling,
   useInboxPolling,
@@ -59,78 +57,29 @@ type Feedback = {
   message: string;
 } | null;
 
-const actionFailureMessages: Record<
-  ConversationActionFailure["status"],
-  string
-> = {
-  "configuration-required":
-    "הפעולה דורשת Clerk ו־D1 מוגדרים.",
-  unauthenticated:
-    "נדרשת התחברות מחדש לפני ביצוע הפעולה.",
-  "onboarding-required":
-    "נדרש להשלים יצירת סביבת עבודה.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה.",
-  "permission-denied":
-    "אין הרשאה לבצע את הפעולה.",
-  "invalid-input":
-    "זהות השיחה, הגרסה או המסננים אינם תקינים.",
-  "not-found":
-    "השיחה אינה קיימת עוד ב־Tenant הפעיל.",
-  "state-conflict":
-    "השיחה השתנתה במקביל. יש לטעון אותה מחדש.",
-  "assignment-conflict":
-    "השיחה כבר משויכת לנציג אחר ולכן לא שונתה.",
-  "server-error":
-    "הפעולה נכשלה בלי לחשוף פרטי שרת.",
-};
-
-const aiApprovalFailureMessages: Record<
-  AiReplyApprovalActionFailure["status"],
-  string
-> = {
-  "configuration-required":
-    "אישורי AI דורשים Clerk ו־D1 מוגדרים.",
-  unauthenticated:
-    "נדרשת התחברות מחדש לפני החלטה.",
-  "onboarding-required":
-    "נדרש להשלים יצירת סביבת עבודה.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה.",
-  "permission-denied":
-    "אין הרשאה לאשר או לדחות תשובת AI.",
-  "invalid-input":
-    "זהות האישור או הגרסה אינן תקינות.",
-  "not-found":
-    "טיוטת ה־AI אינה קיימת עוד.",
-  "state-conflict":
-    "טיוטת ה־AI כבר השתנתה או הוכרעה.",
-  "invalid-state":
-    "נכנסה הודעה חדשה או שהשיחה אינה מאפשרת עוד את האישור.",
-  "server-error":
-    "פעולת אישור ה־AI נכשלה בלי לחשוף פרטי שרת.",
-};
-
 function failureState(
   status: Exclude<InboxDirectoryStatus, "ready">,
+  messages: ConversationMessages,
 ) {
   return (
     <section className="card inbox-state">
       <span aria-hidden="true">!</span>
-      <strong>תיבת השיחות אינה זמינה</strong>
-      <p>{inboxDirectoryFailureMessages[status]}</p>
+      <strong>{messages.failureState.title}</strong>
+      <p>{messages.directoryFailures[status]}</p>
     </section>
   );
 }
 
 export function ConversationInbox({
   authEnabled,
+  language,
   initialInbox,
   initialStatus,
   initialAiReplyApprovals,
   initialAiReplyApprovalStatus,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialInbox: InboxView;
   initialStatus: InboxDirectoryStatus;
   initialAiReplyApprovals:
@@ -138,6 +87,7 @@ export function ConversationInbox({
   initialAiReplyApprovalStatus:
     AiReplyApprovalDirectoryStatus;
 }) {
+  const messages = readConversationMessages(language);
   const [conversations, setConversations] =
     useState<readonly InboxConversationView[]>(
       initialInbox.conversations,
@@ -204,11 +154,14 @@ export function ConversationInbox({
     !authEnabled ||
     initialStatus === "configuration-required"
   ) {
-    return failureState("configuration-required");
+    return failureState(
+      "configuration-required",
+      messages,
+    );
   }
 
   if (initialStatus !== "ready") {
-    return failureState(initialStatus);
+    return failureState(initialStatus, messages);
   }
 
   const applyInboxView = (
@@ -231,8 +184,7 @@ export function ConversationInbox({
     if (isPending || refreshInFlight.current) {
       setFeedback({
         tone: "warning",
-        message:
-          "מתבצע רענון כעת. אפשר לנסות שוב מיד בסיומו.",
+        message: messages.feedback.refreshBusy,
       });
       return;
     }
@@ -252,7 +204,7 @@ export function ConversationInbox({
           setFeedback({
             tone: "warning",
             message:
-              actionFailureMessages[result.status],
+              messages.actionFailures[result.status],
           });
           setRefreshState("stale");
           return;
@@ -264,7 +216,7 @@ export function ConversationInbox({
         setFeedback({
           tone: "warning",
           message:
-            actionFailureMessages["server-error"],
+            messages.actionFailures["server-error"],
         });
         setRefreshState("stale");
       } finally {
@@ -312,7 +264,7 @@ export function ConversationInbox({
           setFeedback({
             tone: "warning",
             message:
-              actionFailureMessages[result.status],
+              messages.actionFailures[result.status],
           });
           return;
         }
@@ -328,7 +280,7 @@ export function ConversationInbox({
         setFeedback({
           tone: "warning",
           message:
-            actionFailureMessages["server-error"],
+            messages.actionFailures["server-error"],
         });
       } finally {
         setPendingConversationKey(null);
@@ -368,7 +320,7 @@ export function ConversationInbox({
           setFeedback({
             tone: "warning",
             message:
-              actionFailureMessages[result.status],
+              messages.actionFailures[result.status],
           });
           return;
         }
@@ -398,13 +350,13 @@ export function ConversationInbox({
         );
         setFeedback({
           tone: "success",
-          message: "השיחה סומנה כנקראה.",
+          message: messages.feedback.markedRead,
         });
       } catch {
         setFeedback({
           tone: "warning",
           message:
-            actionFailureMessages["server-error"],
+            messages.actionFailures["server-error"],
         });
       } finally {
         setPendingConversationKey(null);
@@ -456,7 +408,7 @@ export function ConversationInbox({
           setFeedback({
             tone: "warning",
             message:
-              actionFailureMessages[result.status],
+              messages.actionFailures[result.status],
           });
           return;
         }
@@ -489,14 +441,14 @@ export function ConversationInbox({
           message:
             result.conversation.assignment ===
             "current-user"
-              ? "השיחה שויכה אליך."
-              : "השיוך שלך הוסר מהשיחה.",
+              ? messages.feedback.assigned
+              : messages.feedback.unassigned,
         });
       } catch {
         setFeedback({
           tone: "warning",
           message:
-            actionFailureMessages["server-error"],
+            messages.actionFailures["server-error"],
         });
       } finally {
         setPendingConversationKey(null);
@@ -534,7 +486,7 @@ export function ConversationInbox({
           setFeedback({
             tone: "warning",
             message:
-              aiApprovalFailureMessages[
+              messages.aiApprovalFailures[
                 result.status
               ],
           });
@@ -553,14 +505,14 @@ export function ConversationInbox({
           message:
             result.approval.status ===
             "ready-for-delivery"
-              ? "תשובת ה־AI אושרה ונשמרה למסירה עתידית. היא עדיין לא נשלחה."
-              : "תשובת ה־AI נדחתה ולא תימסר.",
+              ? messages.feedback.aiApproved
+              : messages.feedback.aiRejected,
         });
       } catch {
         setFeedback({
           tone: "warning",
           message:
-            aiApprovalFailureMessages[
+            messages.aiApprovalFailures[
               "server-error"
             ],
         });
@@ -577,20 +529,17 @@ export function ConversationInbox({
     return (
       <section className="card inbox-state empty">
         <span aria-hidden="true">◌</span>
-        <strong>אין שיחות בתיבה</strong>
-        <p>
-          שיחה תופיע כאן רק לאחר קבלת הודעה מאומתת
-          דרך Webhook של Meta ושמירתה ב־D1.
-        </p>
+        <strong>{messages.emptyInbox.title}</strong>
+        <p>{messages.emptyInbox.description}</p>
         <small
           className={`inbox-refresh-state ${refreshState}`}
           aria-live="polite"
         >
           {refreshState === "refreshing"
-            ? "בודק הודעות חדשות…"
+            ? messages.emptyInbox.refreshing
             : refreshState === "stale"
-              ? "הרענון האחרון נכשל"
-              : "בדיקה אוטומטית כל 15 שניות"}
+              ? messages.emptyInbox.stale
+              : messages.emptyInbox.idle}
         </small>
       </section>
     );
@@ -612,6 +561,7 @@ export function ConversationInbox({
   return (
     <div className="inbox-shell card">
       <ConversationThreadList
+        language={language}
         conversations={conversations}
         selectedConversation={selectedConversation}
         pendingConversationKey={pendingConversationKey}
@@ -626,6 +576,7 @@ export function ConversationInbox({
       />
 
       <ConversationMessageView
+        language={language}
         selectedThread={selectedThread}
         conversations={conversations}
         selectedAiApprovals={selectedAiApprovals}
@@ -645,7 +596,7 @@ export function ConversationInbox({
 
       <aside className="contact-panel">
         <span className="panel-label">
-          פרטי איש קשר
+          {messages.contactPanel.label}
         </span>
         {selectedConversation ? (
           <div className="contact-panel-content">
@@ -668,40 +619,43 @@ export function ConversationInbox({
             </a>
             <dl>
               <div>
-                <dt>מצב שיחה</dt>
+                <dt>
+                  {messages.contactPanel.conversationStatus}
+                </dt>
                 <dd>
                   {
-                    conversationStatusLabels[
+                    messages.labels
+                      .conversationStatuses[
                       selectedConversation.status
                     ]
                   }
                 </dd>
               </div>
               <div>
-                <dt>שיוך</dt>
+                <dt>{messages.contactPanel.assignment}</dt>
                 <dd>
                   {
-                    conversationAssignmentLabels[
+                    messages.labels.assignments[
                       selectedConversation.assignment
                     ]
                   }
                 </dd>
               </div>
               <div>
-                <dt>לא נקראו</dt>
+                <dt>{messages.contactPanel.unread}</dt>
                 <dd>
                   {selectedConversation.unreadCount}
                 </dd>
               </div>
               <div>
-                <dt>גרסה</dt>
+                <dt>{messages.contactPanel.version}</dt>
                 <dd>{selectedConversation.version}</dd>
               </div>
             </dl>
           </div>
         ) : (
           <p className="contact-panel-empty">
-            יש לבחור שיחה להצגת הפרטים.
+            {messages.contactPanel.empty}
           </p>
         )}
       </aside>

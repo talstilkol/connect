@@ -6,21 +6,26 @@ import type {
   SetStateAction,
 } from "react";
 import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import type {
   InboxConversationView,
   InboxFilters,
 } from "../../shared/domain/conversationView.ts";
 import {
-  conversationAssignmentLabels,
-  conversationStatusLabels,
   formatInboxTimestamp,
   hasActiveInboxFilters,
 } from "./conversationPresentation.ts";
+import {
+  readConversationMessages,
+} from "./conversationMessages.ts";
 import type {
   InboxRefreshState,
 } from "./useInboxPolling.ts";
 
 export function ConversationThreadList({
   conversations,
+  language,
   selectedConversation,
   pendingConversationKey,
   filters,
@@ -33,6 +38,7 @@ export function ConversationThreadList({
   loadThread,
 }: {
   conversations: readonly InboxConversationView[];
+  language: InterfaceLanguage;
   selectedConversation: InboxConversationView | null;
   pendingConversationKey: string | null;
   filters: InboxFilters;
@@ -47,17 +53,20 @@ export function ConversationThreadList({
   loadThread:
     (conversation: InboxConversationView) => void;
 }) {
+  const messages = readConversationMessages(language);
+  const listMessages = messages.threadList;
+
   return (
       <section
         className="conversation-list"
-        aria-label="רשימת שיחות"
+        aria-label={listMessages.ariaLabel}
       >
         <header className="conversation-list-header">
           <div>
             <span className="card-kicker">
               D1 source of truth
             </span>
-            <h2>שיחות אחרונות</h2>
+            <h2>{listMessages.title}</h2>
           </div>
           <span className="status-pill">
             {conversations.length}
@@ -69,12 +78,14 @@ export function ConversationThreadList({
           onSubmit={submitFilters}
         >
           <label>
-            <span>חיפוש</span>
+            <span>{listMessages.searchLabel}</span>
             <input
               type="search"
               maxLength={80}
               value={filterDraft.searchTerm}
-              placeholder="שם או מספר טלפון"
+              placeholder={
+                listMessages.searchPlaceholder
+              }
               onChange={(event) =>
                 setFilterDraft((current) => ({
                   ...current,
@@ -85,7 +96,7 @@ export function ConversationThreadList({
           </label>
           <div className="inbox-filter-row">
             <label>
-              <span>מצב</span>
+              <span>{listMessages.statusLabel}</span>
               <select
                 value={filterDraft.status}
                 onChange={(event) =>
@@ -96,9 +107,12 @@ export function ConversationThreadList({
                   }))
                 }
               >
-                <option value="all">כל המצבים</option>
+                <option value="all">
+                  {listMessages.allStatuses}
+                </option>
                 {Object.entries(
-                  conversationStatusLabels,
+                  messages.labels
+                    .conversationStatuses,
                 ).map(([value, label]) => (
                   <option
                     key={value}
@@ -110,7 +124,9 @@ export function ConversationThreadList({
               </select>
             </label>
             <label>
-              <span>שיוך</span>
+              <span>
+                {listMessages.assignmentLabel}
+              </span>
               <select
                 value={filterDraft.assignment}
                 onChange={(event) =>
@@ -121,11 +137,15 @@ export function ConversationThreadList({
                   }))
                 }
               >
-                <option value="all">כל השיחות</option>
-                <option value="unassigned">
-                  ללא שיוך
+                <option value="all">
+                  {listMessages.allAssignments}
                 </option>
-                <option value="mine">שלי</option>
+                <option value="unassigned">
+                  {listMessages.unassigned}
+                </option>
+                <option value="mine">
+                  {listMessages.mine}
+                </option>
               </select>
             </label>
           </div>
@@ -136,8 +156,8 @@ export function ConversationThreadList({
               disabled={isBusy}
             >
               {refreshState === "refreshing"
-                ? "טוען…"
-                : "החל מסננים"}
+                ? listMessages.loading
+                : listMessages.applyFilters}
             </button>
             <button
               className="text-button"
@@ -149,7 +169,7 @@ export function ConversationThreadList({
               }
               onClick={resetFilters}
             >
-              ניקוי
+              {listMessages.clear}
             </button>
           </div>
           <small
@@ -157,21 +177,18 @@ export function ConversationThreadList({
             aria-live="polite"
           >
             {refreshState === "refreshing"
-              ? "מרענן מהשרת…"
+              ? listMessages.refreshing
               : refreshState === "stale"
-                ? "הרענון האחרון נכשל"
-                : "רענון מאובטח כל 15 שניות"}
+                ? listMessages.stale
+                : listMessages.polling}
           </small>
         </form>
 
         <div className="conversation-records">
           {conversations.length === 0 ? (
             <div className="conversation-list-empty">
-              <strong>לא נמצאו שיחות</strong>
-              <p>
-                אפשר לשנות את החיפוש או לנקות את
-                המסננים.
-              </p>
+              <strong>{listMessages.emptyTitle}</strong>
+              <p>{listMessages.emptyDescription}</p>
             </div>
           ) : (
             conversations.map((conversation) => {
@@ -221,33 +238,35 @@ export function ConversationThreadList({
                           ? formatInboxTimestamp(
                               conversation.lastMessage
                                 .occurredAt,
+                              language,
                             )
-                          : "ללא הודעות"}
+                          : listMessages.noMessages}
                       </time>
                     </span>
                     <span className="conversation-preview">
                       {isLoading
-                        ? "טוען שיחה…"
+                        ? listMessages.loadingThread
                         : conversation.lastMessage
                           ? conversation.lastMessage
                               .contentKind === "text"
                             ? conversation.lastMessage
                                 .textContent
-                            : "הודעה ללא תוכן טקסט"
-                          : "אין תצוגה מקדימה"}
+                            : listMessages.noTextContent
+                          : listMessages.noPreview}
                     </span>
                     <span className="conversation-record-meta">
                       <span className="conversation-record-labels">
                         <small>
                           {
-                            conversationStatusLabels[
+                            messages.labels
+                              .conversationStatuses[
                               conversation.status
                             ]
                           }
                         </small>
                         <small>
                           {
-                            conversationAssignmentLabels[
+                            messages.labels.assignments[
                               conversation.assignment
                             ]
                           }
@@ -255,7 +274,11 @@ export function ConversationThreadList({
                       </span>
                       {conversation.unreadCount > 0 ? (
                         <b
-                          aria-label={`${conversation.unreadCount} הודעות שלא נקראו`}
+                          aria-label={
+                            listMessages.unreadLabel(
+                              conversation.unreadCount,
+                            )
+                          }
                         >
                           {conversation.unreadCount}
                         </b>
