@@ -2,6 +2,12 @@
 
 import type { MetaConnectionView } from
   "../../shared/domain/metaConnectionView";
+import type { InterfaceLanguage } from
+  "../../shared/domain/businessProfileDraft";
+import { readWorkspaceDirection } from
+  "../../shared/i18n/workspace";
+import { readWorkspaceSetupMessages } from
+  "../../shared/i18n/workspaceSetup";
 import { inspectDashboardSetup } from
   "../../shared/validation/dashboardSetup";
 import type { SectionId } from
@@ -10,17 +16,19 @@ import { presentMetaConnection } from
   "./metaConnectionPresentation";
 import { useWorkspaceDrafts } from
   "./WorkspaceDraftProvider";
-import { workspaceSetupSteps } from
+import { readWorkspaceSetupSteps } from
   "./workspaceSetupSteps";
 
 export function WorkspaceDashboard({
   metaConnection,
   decisionRequiredCount,
+  language,
   onNavigate,
   onConnectMeta,
 }: {
   metaConnection: MetaConnectionView;
   decisionRequiredCount: number;
+  language: InterfaceLanguage;
   onNavigate: (section: SectionId) => void;
   onConnectMeta: () => void;
 }) {
@@ -32,8 +40,18 @@ export function WorkspaceDashboard({
     businessProfileDraft,
     metaConnection,
   );
-  const metaPresentation = presentMetaConnection(metaConnection);
-  const progressLabel = `${setupState.completedSteps} מתוך ${setupState.totalSteps}`;
+  const messages = readWorkspaceSetupMessages(language).dashboard;
+  const metaPresentation = presentMetaConnection(
+    metaConnection,
+    language,
+  );
+  const setupSteps = readWorkspaceSetupSteps(language);
+  const flowArrow =
+    readWorkspaceDirection(language) === "rtl" ? "←" : "→";
+  const progressLabel = messages.progress(
+    setupState.completedSteps,
+    setupState.totalSteps,
+  );
 
   const continueSetup = () => {
     if (setupState.nextAction === "business-profile") {
@@ -53,34 +71,35 @@ export function WorkspaceDashboard({
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">מרכז השליטה</p>
+          <p className="eyebrow">{messages.eyebrow}</p>
           <h1>
             {setupState.businessProfileComplete
-              ? `בוקר טוב, ${businessProfileDraft?.businessName}. ממשיכים לשלב הבא.`
-              : "בוקר טוב, מתחילים לחבר את העסק."}
+              ? messages.greetingWithBusiness(
+                  businessProfileDraft?.businessName ?? "",
+                )
+              : messages.greetingWithoutBusiness}
           </h1>
           {setupState.businessProfileComplete ? (
             <p>
               {setupState.metaConnectionComplete
-                ? "פרטי העסק וחיבור Meta נשמרו בשרת. ניתן להמשיך לשלב הבא באשף."
+                ? messages.descriptions.profileAndMetaComplete
                 : businessProfilePersistence === "server"
-                  ? "פרטי העסק נשמרו בשרת עבור Tenant מאומת. השלב הבא הוא חיבור רשמי ל־Meta."
-                  : "פרטי העסק נשמרו מקומית. השלב הבא הוא חיבור רשמי ל־Meta; עדיין לא נוצר Tenant ולא נשלחה בקשת Backend."}
+                  ? messages.descriptions.serverProfileComplete
+                  : messages.descriptions.localProfileComplete}
             </p>
           ) : (
             <p>
-              סביבת העבודה מוכנה. כדי להתקדם לחיבור הרשמי יש להשלים תחילה את
-              פרטי העסק.
+              {messages.descriptions.profileIncomplete}
             </p>
           )}
         </div>
         <div className="heading-actions">
           <button type="button" className="secondary-button" onClick={() => onNavigate("decisions")}>
-            הצגת החלטות פתוחות
+            {messages.showOpenDecisions}
           </button>
           <button type="button" className="primary-button" onClick={onConnectMeta}>
             {metaPresentation.actionLabel}
-            <span aria-hidden="true">←</span>
+            <span aria-hidden="true">{flowArrow}</span>
           </button>
         </div>
       </div>
@@ -104,26 +123,45 @@ export function WorkspaceDashboard({
         </button>
       </section>
 
-      <section className="metrics-grid" aria-label="מדדי חשבון">
-        <MetricCard label="הודעות החודש" icon="↗" />
-        <MetricCard label="אנשי קשר" icon="♙" />
-        <MetricCard label="קמפיינים פעילים" icon="◒" />
-        <MetricCard label="צריכת AI" icon="✦" />
+      <section
+        className="metrics-grid"
+        aria-label={messages.metricsAriaLabel}
+      >
+        <MetricCard
+          label={messages.metrics[0]}
+          icon="↗"
+          noDataLabel={messages.noMetricSource}
+        />
+        <MetricCard
+          label={messages.metrics[1]}
+          icon="♙"
+          noDataLabel={messages.noMetricSource}
+        />
+        <MetricCard
+          label={messages.metrics[2]}
+          icon="◒"
+          noDataLabel={messages.noMetricSource}
+        />
+        <MetricCard
+          label={messages.metrics[3]}
+          icon="✦"
+          noDataLabel={messages.noMetricSource}
+        />
       </section>
 
       <div className="dashboard-grid">
         <section className="card onboarding-card">
           <div className="card-header">
             <div>
-              <span className="card-kicker">אשף הקמה</span>
-              <h2>10 צעדים עד לשליחה הראשונה</h2>
+              <span className="card-kicker">{messages.setupKicker}</span>
+              <h2>{messages.setupTitle}</h2>
             </div>
             <span className="progress-label">{progressLabel}</span>
           </div>
           <div
             className="progress-track"
             role="progressbar"
-            aria-label={`התקדמות ${progressLabel}`}
+            aria-label={messages.progressAriaLabel(progressLabel)}
             aria-valuemin={0}
             aria-valuemax={setupState.totalSteps}
             aria-valuenow={setupState.completedSteps}
@@ -131,7 +169,7 @@ export function WorkspaceDashboard({
             <span style={{ width: `${setupState.progressPercent}%` }} />
           </div>
           <div className="setup-list">
-            {workspaceSetupSteps.slice(0, 5).map((step, index) => {
+            {setupSteps.slice(0, 5).map((step, index) => {
               const isReady =
                 (index === 0 && setupState.businessProfileComplete) ||
                 (index >= 1 &&
@@ -153,11 +191,11 @@ export function WorkspaceDashboard({
                   <span className="step-state">
                     {isReady
                       ? index >= 1
-                        ? "נשמר בשרת"
+                        ? messages.stepStates.server
                         : businessProfilePersistence === "server"
-                        ? "נשמר בשרת"
-                        : "נשמר מקומית"
-                      : "טרם התחיל"}
+                        ? messages.stepStates.server
+                        : messages.stepStates.local
+                      : messages.stepStates.notStarted}
                   </span>
                 </div>
               );
@@ -165,11 +203,11 @@ export function WorkspaceDashboard({
           </div>
           <button type="button" className="text-button" onClick={continueSetup}>
             {setupState.nextAction === "business-profile"
-              ? "השלמת פרטי העסק"
+              ? messages.continueActions.businessProfile
               : setupState.nextAction === "meta"
-                ? "מעבר לחיבור Meta"
-                : "המשך באשף ההקמה"}
-            <span aria-hidden="true">←</span>
+                ? messages.continueActions.meta
+                : messages.continueActions.onboarding}
+            <span aria-hidden="true">{flowArrow}</span>
           </button>
         </section>
 
@@ -177,35 +215,36 @@ export function WorkspaceDashboard({
           <section className="card decision-card">
             <div className="decision-top">
               <span className="decision-icon">!</span>
-              <span className="status-pill critical">דורש החלטה</span>
+              <span className="status-pill critical">
+                {messages.decisionRequired}
+              </span>
             </div>
             <h2>
-              {decisionRequiredCount}{" "}
-              החלטות חוסמות Production
+              {messages.blockingDecisions(decisionRequiredCount)}
             </h2>
             <p>
-              ספק Meta, סליקה, חבילות, AI ומדיניות מידע עדיין לא הוגדרו באפיון.
+              {messages.blockingDecisionDescription}
             </p>
             <button type="button" className="text-button" onClick={() => onNavigate("decisions")}>
-              פתיחת מרכז ההחלטות
-              <span aria-hidden="true">←</span>
+              {messages.openDecisionCenter}
+              <span aria-hidden="true">{flowArrow}</span>
             </button>
           </section>
 
           <section className="card quick-actions-card">
-            <span className="card-kicker">פעולות מהירות</span>
+            <span className="card-kicker">{messages.quickActions}</span>
             <div className="quick-actions">
               <button type="button" onClick={() => onNavigate("contacts")}>
                 <span>＋</span>
-                ייבוא אנשי קשר
+                {messages.importContacts}
               </button>
               <button type="button" onClick={() => onNavigate("bot")}>
                 <span>⌘</span>
-                בניית תהליך
+                {messages.buildFlow}
               </button>
               <button type="button" onClick={() => onNavigate("ai")}>
                 <span>✦</span>
-                הגדרת סוכן AI
+                {messages.configureAiAgent}
               </button>
             </div>
           </section>
@@ -218,9 +257,11 @@ export function WorkspaceDashboard({
 function MetricCard({
   label,
   icon,
+  noDataLabel,
 }: {
   label: string;
   icon: string;
+  noDataLabel: string;
 }) {
   return (
     <article className="metric-card">
@@ -230,7 +271,7 @@ function MetricCard({
       <div>
         <span>{label}</span>
         <strong>—</strong>
-        <small>טרם קיים מקור נתונים</small>
+        <small>{noDataLabel}</small>
       </div>
     </article>
   );

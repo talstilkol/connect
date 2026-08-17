@@ -59,7 +59,7 @@ Design מלא.
 | SPEC-24 | הצפנת Tokens ו־PCI-DSS | partial | Credential envelope ו־Secret hygiene | Billing hosted checkout, Key rotation וראיות ספק |
 | SPEC-25 | Queue scalability ו־99.5% availability | partial | Queues, Backpressure, SLO domain ו־Alert ports | Load test, Metrics ו־Alert provider חיים |
 | SPEC-26 | Data isolation, הרשאות ו־Audit | local-complete | Tenant guards, RBAC, Audit ו־Source boundaries | Cloud evidence ו־adversarial staging test |
-| SPEC-27 | עברית, אנגלית וערבית | partial | Language domain ו־RTL foundation; דף הנחיתה, מעטפת Login/Register, מסך קבלת ההזמנה ומעטפת ה־Workspace מתורגמים בשלוש השפות. ה־Workspace כולל Registry ניווט יחיד, Locale מתמשך, Tenant switcher, תפקידי משתמש, מצבי Meta, פריסת LTR/RTL, מובייל ו־Browser acceptance מקומי | תרגום תוכן Feature pages ב־Workspace ו־Admin; Browser acceptance לכל שפה ואימות Widget Clerk ותוצאות הזמנה חיות ב־Staging |
+| SPEC-27 | עברית, אנגלית וערבית | partial | Language domain ו־RTL foundation; דף הנחיתה, מעטפת Login/Register, מסך קבלת ההזמנה, מעטפת ה־Workspace, ה־Dashboard וה־Onboarding מתורגמים בשלוש השפות. ה־Workspace כולל Registry ניווט ושלבי הקמה, Locale מתמשך, Tenant switcher, מצבי Meta, Form labels, פריסת LTR/RTL, מובייל ו־Browser acceptance מקומי | תרגום חלון Embedded Signup, יתר Feature pages ב־Workspace ו־Admin; Browser acceptance לכל שפה ואימות Widget Clerk ותוצאות הזמנה חיות ב־Staging |
 
 ## 4. עדכון תוכנית הביצוע
 
@@ -135,11 +135,12 @@ evidence בסביבות אמיתיות.
 
 4.4 מסלול P3 — השלמת מוצר:
 
-4.4.1 Slices דף הנחיתה, מעטפת Login/Register, מסך קבלת ההזמנה
-ומעטפת ה־Workspace בעברית, אנגלית וערבית הושלמו. להמשיך במסלול
-מסך־אחר־מסך עבור תוכן ה־Feature pages ב־Workspace ועבור Admin,
-ולאמת כל Surface בשלוש השפות. את Widget ה־Auth ותוצאות ההזמנה החיות
-יש לאמת בנפרד ב־Staging מורשה.
+4.4.1 Slices דף הנחיתה, מעטפת Login/Register, מסך קבלת ההזמנה,
+מעטפת ה־Workspace, ה־Dashboard וה־Onboarding בעברית, אנגלית וערבית
+הושלמו. להמשיך במסלול מסך־אחר־מסך עבור חלון Embedded Signup,
+יתר תוכן ה־Feature pages ב־Workspace ועבור Admin, ולאמת כל Surface
+בשלוש השפות. את Widget ה־Auth ותוצאות ההזמנה החיות יש לאמת בנפרד
+ב־Staging מורשה.
 
 4.4.2 לבצע UX/UI acceptance בכל מסכי האפיון.
 

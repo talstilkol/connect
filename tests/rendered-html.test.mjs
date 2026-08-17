@@ -112,10 +112,33 @@ test("server-renders local business profile completeness boundaries", async () =
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /Business profile completeness/);
+  assert.match(html, /שלמות פרופיל העסק/);
   assert.match(html, /שלמות פרטי העסק/);
   assert.match(html, /שמירת פרטי העסק מקומית/);
   assert.match(html, /לא נוצר Tenant/);
+});
+
+test("server-renders localized Dashboard and Onboarding content", async () => {
+  const [englishDashboard, arabicOnboarding] =
+    await Promise.all([
+      render("/workspace?lang=en"),
+      render("/workspace/onboarding?lang=ar"),
+    ]);
+
+  assert.equal(englishDashboard.status, 200);
+  assert.equal(arabicOnboarding.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishDashboard.text(),
+    arabicOnboarding.text(),
+  ]);
+
+  assert.match(englishHtml, /Control center/);
+  assert.match(englishHtml, /10 steps to the first message/);
+  assert.match(englishHtml, /Server-side Meta configuration required/);
+  assert.match(arabicHtml, /إعداد مساحة العمل/);
+  assert.match(arabicHtml, /الخطوة 1 من 10/);
+  assert.match(arabicHtml, /مسار الإعداد/);
 });
 
 test("server-renders auth and workspace feature routes", async () => {

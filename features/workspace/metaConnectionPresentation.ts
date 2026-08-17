@@ -2,6 +2,12 @@ import type {
   MetaConnectionView,
   MetaConnectionViewStatus,
 } from "../../shared/domain/metaConnectionView";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import {
+  readWorkspaceShellMessages,
+} from "../../shared/i18n/workspace.ts";
 
 export interface MetaConnectionPresentation {
   tone: "warning" | "critical" | "success";
@@ -151,8 +157,229 @@ const presentations: Record<
   },
 };
 
+type LocalizedMetaPresentationText = Pick<
+  MetaConnectionPresentation,
+  "heading" | "description" | "actionLabel" | "panelNotice"
+>;
+
+const localizedPresentationText = {
+  en: {
+    "configuration-required": {
+      heading: "Server-side Meta configuration required",
+      description:
+        "The App Secret and Webhook Verify Token are not configured in the server environment.",
+      actionLabel: "Review requirements",
+      panelNotice:
+        "Embedded Signup cannot start until the Meta App details and operating model are configured.",
+    },
+    "onboarding-required": {
+      heading: "Complete the business setup first",
+      description:
+        "The verified user is not associated with an active tenant yet.",
+      actionLabel: "View status",
+      panelNotice:
+        "A Meta connection requires an active tenant derived from the verified session.",
+    },
+    "tenant-selection-required": {
+      heading: "No workspace is selected",
+      description:
+        "The user belongs to multiple tenants, so Connect will not choose one automatically.",
+      actionLabel: "View status",
+      panelNotice:
+        "Select a tenant explicitly before loading or changing the Meta connection.",
+    },
+    "permission-denied": {
+      heading: "Meta status is protected by role",
+      description:
+        "The current role lacks workspace.manage permission to read connection details.",
+      actionLabel: "View status",
+      panelNotice:
+        "Only a role with workspace management permission can manage the Meta connection.",
+    },
+    disconnected: {
+      heading: "Official Meta WhatsApp Business connection",
+      description:
+        "No Meta connection exists for the verified tenant.",
+      actionLabel: "Review requirements",
+      panelNotice:
+        "There is no verified snapshot of the Business Portfolio, WABA, and Meta phone number yet.",
+    },
+    pending: {
+      heading: "Meta assets are stored on the server",
+      description:
+        "The snapshot was verified, but the webhook subscription is not approved, so the connection is not active.",
+      actionLabel: "View status",
+      panelNotice:
+        "The Business Portfolio, WABA, and Meta number are stored; webhook subscription remains required.",
+    },
+    connected: {
+      heading: "Meta connection active",
+      description:
+        "The assets are stored on the server and the webhook subscription is approved for the tenant.",
+      actionLabel: "Connection details",
+      panelNotice:
+        "The server marks this connection active. Secrets and Meta identifiers are not exposed in the browser.",
+    },
+    verification_required: {
+      heading: "The connection requires action in Meta",
+      description:
+        "A Meta connection exists, but verification must finish before sending can be enabled.",
+      actionLabel: "View status",
+      panelNotice:
+        "Meta verification is required. Connect does not mark this connection active.",
+    },
+    revoked: {
+      heading: "Meta revoked the connection",
+      description:
+        "The stored connection is no longer authorized and must be connected again.",
+      actionLabel: "View status",
+      panelNotice:
+        "Authorization was revoked. The previous credential must not be used for sending or synchronization.",
+    },
+    error: {
+      heading: "Meta connection inactive",
+      description:
+        "The server stored an error state and sending remains blocked.",
+      actionLabel: "View status",
+      panelNotice:
+        "The server reported a connection error. Connect does not silently treat it as connected.",
+    },
+    restricted: {
+      heading: "Meta restricted the connection",
+      description:
+        "The account is currently ineligible to send and the restriction requires attention.",
+      actionLabel: "View status",
+      panelNotice:
+        "Restricted status blocks send readiness even when asset identifiers are stored.",
+    },
+    "server-error": {
+      heading: "Meta connection could not be loaded",
+      description:
+        "Reading the durable state failed; Connect did not show a fallback or simulated connection.",
+      actionLabel: "View status",
+      panelNotice:
+        "The server could not load the Meta connection. Review the infrastructure before trying again.",
+    },
+  },
+  ar: {
+    "configuration-required": {
+      heading: "إعداد Meta على الخادم مطلوب",
+      description:
+        "لم يتم إعداد App Secret وWebhook Verify Token في بيئة الخادم.",
+      actionLabel: "مراجعة المتطلبات",
+      panelNotice:
+        "لا يمكن بدء Embedded Signup قبل إعداد بيانات تطبيق Meta ونموذج التشغيل.",
+    },
+    "onboarding-required": {
+      heading: "أكمل إعداد النشاط أولاً",
+      description:
+        "المستخدم الموثق غير مرتبط بمؤسسة نشطة بعد.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "يتطلب ربط Meta مؤسسة نشطة مستنتجة من الـSession الموثق.",
+    },
+    "tenant-selection-required": {
+      heading: "لم يتم اختيار مساحة عمل",
+      description:
+        "ينتمي المستخدم إلى عدة مؤسسات، لذلك لن يختار Connect إحداها تلقائياً.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "اختر مؤسسة بشكل صريح قبل تحميل ربط Meta أو تغييره.",
+    },
+    "permission-denied": {
+      heading: "حالة Meta محمية حسب الدور",
+      description:
+        "لا يملك الدور الحالي صلاحية workspace.manage لقراءة تفاصيل الاتصال.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "يمكن فقط لدور يملك صلاحية إدارة مساحة العمل إدارة ربط Meta.",
+    },
+    disconnected: {
+      heading: "الربط الرسمي مع Meta WhatsApp Business",
+      description:
+        "لا يوجد ربط Meta للمؤسسة الموثقة.",
+      actionLabel: "مراجعة المتطلبات",
+      panelNotice:
+        "لا توجد بعد لقطة موثقة لـBusiness Portfolio وWABA ورقم Meta.",
+    },
+    pending: {
+      heading: "تم حفظ أصول Meta على الخادم",
+      description:
+        "تم التحقق من اللقطة، لكن اشتراك Webhook غير معتمد ولذلك الاتصال غير نشط.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "تم حفظ Business Portfolio وWABA ورقم Meta؛ ولا يزال اشتراك Webhook مطلوباً.",
+    },
+    connected: {
+      heading: "ربط Meta نشط",
+      description:
+        "تم حفظ الأصول على الخادم واعتماد اشتراك Webhook للمؤسسة.",
+      actionLabel: "تفاصيل الاتصال",
+      panelNotice:
+        "يصنف الخادم الاتصال كنشط. لا تُعرض الأسرار أو معرفات Meta في المتصفح.",
+    },
+    verification_required: {
+      heading: "يتطلب الاتصال إجراءً في Meta",
+      description:
+        "يوجد ربط Meta، لكن يجب إكمال التحقق قبل تفعيل الإرسال.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "تحقق Meta مطلوب. لا يصنف Connect الاتصال كنشط.",
+    },
+    revoked: {
+      heading: "ألغت Meta الاتصال",
+      description:
+        "لم يعد الاتصال المحفوظ مصرحاً ويجب ربطه من جديد.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "تم إلغاء التفويض. يجب عدم استخدام بيانات الاعتماد السابقة للإرسال أو المزامنة.",
+    },
+    error: {
+      heading: "ربط Meta غير نشط",
+      description:
+        "حفظ الخادم حالة خطأ ولا يزال الإرسال محظوراً.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "أبلغ الخادم عن خطأ في الاتصال. لا يعامله Connect بصمت كاتصال نشط.",
+    },
+    restricted: {
+      heading: "قيّدت Meta الاتصال",
+      description:
+        "الحساب غير مؤهل حالياً للإرسال ويتطلب القيد معالجة.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "تحظر حالة Restricted جاهزية الإرسال حتى عند حفظ معرفات الأصول.",
+    },
+    "server-error": {
+      heading: "تعذر تحميل ربط Meta",
+      description:
+        "فشلت قراءة الحالة الدائمة؛ لم يعرض Connect اتصالاً بديلاً أو وهمياً.",
+      actionLabel: "عرض الحالة",
+      panelNotice:
+        "تعذر على الخادم تحميل ربط Meta. راجع البنية التحتية قبل المحاولة مجدداً.",
+    },
+  },
+} as const satisfies Record<
+  Exclude<InterfaceLanguage, "he">,
+  Record<MetaConnectionViewStatus, LocalizedMetaPresentationText>
+>;
+
 export function presentMetaConnection(
   connection: MetaConnectionView,
+  language: InterfaceLanguage = "he",
 ): MetaConnectionPresentation {
-  return presentations[connection.status];
+  const basePresentation = presentations[connection.status];
+
+  if (language === "he") {
+    return basePresentation;
+  }
+
+  return {
+    ...basePresentation,
+    ...localizedPresentationText[language][connection.status],
+    statusLabel:
+      readWorkspaceShellMessages(language).metaConnectionStatuses[
+        connection.status
+      ],
+  };
 }

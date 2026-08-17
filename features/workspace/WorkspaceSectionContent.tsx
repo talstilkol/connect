@@ -65,6 +65,8 @@ import type {
 } from "../../shared/domain/teamDirectoryView";
 import type { SectionId } from
   "../../shared/workspace/navigation";
+import type { InterfaceLanguage } from
+  "../../shared/domain/businessProfileDraft";
 import { DecisionCenter } from "./DecisionCenter";
 import { WorkspaceDashboard } from "./WorkspaceDashboard";
 import { WorkspaceOnboarding } from "./WorkspaceOnboarding";
@@ -72,6 +74,7 @@ import { FeaturePage } from "./WorkspaceFeaturePage";
 
 export function WorkspaceSectionContent({
   activeSection,
+  language,
   authEnabled,
   initialContacts,
   initialContactsCursor,
@@ -104,6 +107,7 @@ export function WorkspaceSectionContent({
   onConnectMeta,
 }: {
   activeSection: SectionId;
+  language: InterfaceLanguage;
   authEnabled: boolean;
   initialContacts: readonly ContactRecord[];
   initialContactsCursor: number | null;
@@ -151,6 +155,7 @@ export function WorkspaceSectionContent({
                 initialProductionReadiness.counts
                   .decisionRequired
               }
+              language={language}
               onNavigate={onNavigate}
               onConnectMeta={onConnectMeta}
             />
@@ -158,6 +163,7 @@ export function WorkspaceSectionContent({
           {activeSection === "onboarding" ? (
             <WorkspaceOnboarding
               metaConnection={initialMetaConnection}
+              language={language}
               onConnectMeta={onConnectMeta}
               serverPersistenceEnabled={authEnabled}
             />

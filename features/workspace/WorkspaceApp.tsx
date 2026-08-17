@@ -377,6 +377,7 @@ export default function WorkspaceApp({
 
         <WorkspaceSectionContent
           activeSection={activeSection}
+          language={language}
           authEnabled={authEnabled}
           initialContacts={initialContacts}
           initialContactsCursor={initialContactsCursor}

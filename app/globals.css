@@ -160,6 +160,10 @@ label.file-button:focus-within {
   margin-left: auto;
 }
 
+.app-shell[dir="ltr"] .connection-banner {
+  text-align: left;
+}
+
 .sidebar {
   position: fixed;
   inset: 0 0 0 auto;

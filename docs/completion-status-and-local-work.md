@@ -371,6 +371,18 @@ Locale אופציונלי ומדויק מ־`?lang=he|en|ar`, מתרגם Metadata
 מתמשך, מעטפת ערבית, פריסת Desktop, פתיחת תפריט מובייל ו־Console נקי.
 תוכן ה־Feature pages נשאר בעברית בשלב זה ואינו מסומן כמתורגם.
 
+4.1.9 Slice חמישי של לוקליזציה הושלם בתוכן ה־Dashboard וה־Onboarding.
+ה־Dashboard מתרגם כותרת, מצב פרופיל העסק, Meta banner, ארבעה מדדים,
+התקדמות, חמשת שלבי ההקמה הראשונים, מצבי שמירה, החלטות ופעולות מהירות.
+ה־Onboarding מתרגם כותרות, Form labels, מצבי שמירה מקומית ושרתית,
+בדיקות שלמות, ששת מצבי הכשל ו־Roadmap מלא של עשרה שלבים. Registry
+השלבים קפוא ונפרד לכל שפה. כל 12 מצבי Meta מספקים Presentation מלא
+בשלוש השפות בלי לשנות Tone או Readiness, וחצי הפעולה מתהפכים ב־LTR.
+בדיקות Server-rendered HTML ו־Chromium אימתו Dashboard אנגלי,
+Onboarding אנגלי וערבי, Locale מתמשך, Labels נגישים, RTL ו־Console
+נקי. חלון Embedded Signup עצמו נשאר בעברית ונחשב Slice תפעולי נפרד;
+גם יתר Feature pages ו־Admin עדיין לא תורגמו.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -393,10 +405,11 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 `unknown/unavailable` עד חיבור החשבון המורשה. ה־Meta sender נשאר חסום
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
-4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה ומעטפת ה־Workspace,
+4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
+ה־Dashboard וה־Onboarding,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **30–49 שעות
+הוא **26–43 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**38–63 שעות**.
+הופך ל־**34–57 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

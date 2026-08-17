@@ -47,11 +47,11 @@ test("keeps dashboard behavior behind the workspace dashboard feature boundary",
   );
   assert.match(
     dashboardSource,
-    /workspaceSetupSteps\.slice\(0, 5\)/,
+    /setupSteps\.slice\(0, 5\)/,
   );
   assert.match(
     setupStepsSource,
-    /export const workspaceSetupSteps = Object\.freeze\(\[/,
+    /const setupStepsByLanguage = Object\.freeze\(\{/,
   );
 });
 

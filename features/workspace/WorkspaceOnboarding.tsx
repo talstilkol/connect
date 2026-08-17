@@ -6,6 +6,8 @@ import {
 } from "react";
 import type { InterfaceLanguage } from
   "../../shared/domain/businessProfileDraft";
+import { readWorkspaceSetupMessages } from
+  "../../shared/i18n/workspaceSetup";
 import type { MetaConnectionView } from
   "../../shared/domain/metaConnectionView";
 import { inspectBusinessProfileCompleteness } from
@@ -19,15 +21,17 @@ import { presentMetaConnection } from
   "./metaConnectionPresentation";
 import { useWorkspaceDrafts } from
   "./WorkspaceDraftProvider";
-import { workspaceSetupSteps } from
+import { readWorkspaceSetupSteps } from
   "./workspaceSetupSteps";
 
 export function WorkspaceOnboarding({
   metaConnection,
+  language,
   onConnectMeta,
   serverPersistenceEnabled,
 }: {
   metaConnection: MetaConnectionView;
+  language: InterfaceLanguage;
   onConnectMeta: () => void;
   serverPersistenceEnabled: boolean;
 }) {
@@ -64,7 +68,12 @@ export function WorkspaceOnboarding({
   });
   const currentSnapshotIsServer =
     profileSaved && businessProfilePersistence === "server";
-  const metaPresentation = presentMetaConnection(metaConnection);
+  const messages = readWorkspaceSetupMessages(language).onboarding;
+  const setupSteps = readWorkspaceSetupSteps(language);
+  const metaPresentation = presentMetaConnection(
+    metaConnection,
+    language,
+  );
   const markChanged = () => {
     setProfileSaved(false);
     setSaveResult(null);
@@ -107,32 +116,25 @@ export function WorkspaceOnboarding({
   };
 
   const serverSaveError =
-    saveResult?.status === "validation-error"
-      ? "השרת דחה אחד או יותר מהשדות. יש לבדוק את הערכים ולנסות שוב."
-      : saveResult?.status === "unauthenticated"
-        ? "ה-Session אינו פעיל. יש להתחבר מחדש."
-        : saveResult?.status === "tenant-selection-required"
-          ? "המשתמש שייך למספר Tenants ונדרשת בחירה מפורשת."
-          : saveResult?.status === "permission-denied"
-            ? "לתפקיד הנוכחי אין הרשאה לשנות את פרטי העסק."
-            : saveResult?.status === "configuration-required"
-              ? "חיבור Clerk אינו מוגדר במלואו."
-              : saveResult?.status === "server-error"
-                ? "השמירה בשרת נכשלה. לא בוצע מעבר שקט לשמירה מקומית."
-                : null;
+    saveResult && saveResult.status !== "saved"
+      ? messages.saveFailures[saveResult.status]
+      : null;
 
   return (
     <FeaturePage
-      eyebrow="הקמת סביבת עבודה"
-      title="אשף הקמה"
-      description="השלבים בנויים לפי האפיון. רק נתונים שהוזנו בפועל מוצגים כמוכנים."
+      eyebrow={messages.heading.eyebrow}
+      title={messages.heading.title}
+      description={messages.heading.description}
       action={
         <span className="decision-progress">
           {profileSaved
             ? currentSnapshotIsServer
-              ? "שלב 1 נשמר בשרת"
-              : "שלב 1 מוכן מקומית"
-            : `פרטי העסק ${completeness.completedCount}/${completeness.totalCount}`}
+              ? messages.progress.server
+              : messages.progress.local
+            : messages.progress.profile(
+                completeness.completedCount,
+                completeness.totalCount,
+              )}
         </span>
       }
     >
@@ -140,23 +142,23 @@ export function WorkspaceOnboarding({
         <section className="card onboarding-form-card">
           <div className="card-header">
             <div>
-              <span className="card-kicker">שלב 1 מתוך 10</span>
-              <h2>פרטי העסק</h2>
+              <span className="card-kicker">{messages.stepOneOfTen}</span>
+              <h2>{messages.businessDetails}</h2>
             </div>
             <span className={`status-pill ${profileSaved ? "success" : "warning"}`}>
               {isSaving
-                ? "שומר בשרת"
+                ? messages.statuses.saving
                 : currentSnapshotIsServer
-                  ? "נשמר בשרת"
+                  ? messages.statuses.server
                   : profileSaved
-                    ? "טיוטה מקומית נשמרה"
-                    : "טרם נשמר"}
+                    ? messages.statuses.local
+                    : messages.statuses.unsaved}
             </span>
           </div>
           <p className="form-explanation">
             {serverPersistenceEnabled
-              ? "השמירה מתבצעת דרך Server Action מאומת. ה-Tenant נגזר מה-Session ולא מתקבל מהטופס."
-              : "Clerk אינו פעיל ולכן הנתונים נשמרים רק ב־Workspace הזמני. רענון מלא מוחק אותם ולא נוצר Tenant."}
+              ? messages.explanations.server
+              : messages.explanations.local}
           </p>
           <form
             className="business-profile-form"
@@ -166,7 +168,7 @@ export function WorkspaceOnboarding({
             }}
           >
             <label>
-              <span>שם העסק</span>
+              <span>{messages.fields.businessName}</span>
               <input
                 value={businessName}
                 onChange={(event) => {
@@ -178,7 +180,7 @@ export function WorkspaceOnboarding({
               />
             </label>
             <label>
-              <span>אזור זמן</span>
+              <span>{messages.fields.timezone}</span>
               <select
                 value={timezone}
                 onChange={(event) => {
@@ -187,14 +189,14 @@ export function WorkspaceOnboarding({
                 }}
                 required
               >
-                <option value="">יש לבחור</option>
+                <option value="">{messages.fields.choose}</option>
                 <option value="Asia/Jerusalem">Asia/Jerusalem</option>
                 <option value="Europe/London">Europe/London</option>
                 <option value="America/New_York">America/New_York</option>
               </select>
             </label>
             <label>
-              <span>שפת ממשק</span>
+              <span>{messages.fields.interfaceLanguage}</span>
               <select
                 value={interfaceLanguage}
                 onChange={(event) => {
@@ -205,7 +207,7 @@ export function WorkspaceOnboarding({
                 }}
                 required
               >
-                <option value="">יש לבחור</option>
+                <option value="">{messages.fields.choose}</option>
                 <option value="he">עברית</option>
                 <option value="en">English</option>
                 <option value="ar">العربية</option>
@@ -217,10 +219,10 @@ export function WorkspaceOnboarding({
               disabled={!canCaptureProfile || isSaving}
             >
               {isSaving
-                ? "שומר..."
+                ? messages.saveActions.saving
                 : serverPersistenceEnabled
-                  ? "שמירת פרטי העסק בשרת"
-                  : "שמירת פרטי העסק מקומית"}
+                  ? messages.saveActions.server
+                  : messages.saveActions.local}
             </button>
           </form>
 
@@ -228,9 +230,9 @@ export function WorkspaceOnboarding({
             <div className="card-header">
               <div>
                 <span className="card-kicker">
-                  Business profile completeness
+                  {messages.completenessKicker}
                 </span>
-                <h3>שלמות פרטי העסק</h3>
+                <h3>{messages.completenessTitle}</h3>
               </div>
               <span
                 className={`readiness-score ${
@@ -244,19 +246,19 @@ export function WorkspaceOnboarding({
             <div className="business-profile-checks">
               <BusinessProfileCheck
                 complete={completeness.businessNameComplete}
-                label="שם העסק הוזן"
+                label={messages.checks[0]}
               />
               <BusinessProfileCheck
                 complete={completeness.timezoneComplete}
-                label="אזור הזמן נבחר"
+                label={messages.checks[1]}
               />
               <BusinessProfileCheck
                 complete={completeness.interfaceLanguageComplete}
-                label="שפת הממשק נבחרה"
+                label={messages.checks[2]}
               />
               <BusinessProfileCheck
                 complete={completeness.draftSaved}
-                label="הגרסה הנוכחית נשמרה"
+                label={messages.checks[3]}
               />
             </div>
 
@@ -274,12 +276,12 @@ export function WorkspaceOnboarding({
                   ? currentSnapshotIsServer
                     ? saveResult?.status === "saved" &&
                       saveResult.createdTenant
-                      ? "Tenant, Owner Membership ופרטי העסק נוצרו ונשמרו בשרת."
-                      : "פרטי העסק נשמרו מחדש בשרת עבור ה-Tenant המאומת."
-                    : "פרטי העסק נשמרו מקומית. לא נוצר Tenant ולא נשלחה בקשה לשרת."
+                      ? messages.notices.tenantCreated
+                      : messages.notices.serverUpdated
+                    : messages.notices.localSaved
                   : canCaptureProfile
-                    ? "כל השדות מולאו. יש לשמור את הגרסה הנוכחית."
-                    : "יש להשלים את השדות החסרים; ניתן לעבור למסך אחר ולחזור לגרסה האחרונה שנשמרה."}
+                    ? messages.notices.readyToSave
+                    : messages.notices.missingFields}
               </p>
             </div>
             {serverSaveError ? (
@@ -292,9 +294,9 @@ export function WorkspaceOnboarding({
         </section>
 
         <aside className="card onboarding-roadmap">
-          <span className="card-kicker">מסלול הקמה</span>
+          <span className="card-kicker">{messages.roadmapKicker}</span>
           <div className="roadmap-steps">
-            {workspaceSetupSteps.map((step, index) => {
+            {setupSteps.map((step, index) => {
               const isReady =
                 (index === 0 && profileSaved) ||
                 (index >= 1 &&
