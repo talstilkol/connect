@@ -444,3 +444,13 @@ Browser Attestation ולפני Production Readiness.
 דטרמיניסטי תחת `.wrangler`, מאמת שנוצרו SQL ו־Journal ומוחק את
 התוצרים. כך נבדקות בפועל גם קריאת ה־Config, טרנספורמציית TypeScript,
 טעינת ה־Schema ויצירת Migration לפני הפקת Evidence החתום.
+
+11.13 ‏Dependabot version updates מוגדרים ב־`.github/dependabot.yml`
+ל־npm בכל יום שני ול־GitHub Actions בכל יום שלישי, בשעה 06:00 לפי
+`Asia/Jerusalem`. עדכוני Minor/Patch מקובצים בנפרד עבור תלויות
+Production, תלויות Development ו־Actions; עדכוני Major נשארים PR
+נפרד כדי לא לערב שינויים שוברים. אין `ignore`, ‏Registry פרטי,
+Target branch חלופי או External code execution. מספר PRs פתוחים
+מוגבל, וכל Action ב־Workflows נשאר מוצמד ל־Commit SHA מלא. בדיקת
+חוזה מקומית נכשלת אם אחד מהגבולות האלה נחלש. Security updates נשארים
+מחוץ לקבוצות ה־Version כדי שלא לעכב טיפול דחוף.

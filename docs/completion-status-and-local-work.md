@@ -272,6 +272,18 @@ Clerk System Admin וב־D1 של Staging.
 האמיתי, מאמת SQL ו־Journal ומוחק את התוצר הזמני. כך עדכון התלות אינו
 נסמך על Build כללי בלבד.
 
+2.14 **הושלם מקומית:** מנגנון מניעת התיישנות תלויות.
+
+2.14.1 ‏Dependabot בודק npm בכל יום שני ו־GitHub Actions בכל יום
+שלישי. עדכוני Minor/Patch מקובצים לפי Production, ‏Development
+ו־Actions; עדכוני Major נשארים מבודדים לבדיקת תאימות נפרדת.
+
+2.14.2 אין Ignore rules, ‏Registry פרטי, Target branch חלופי או
+External code execution. מספר ה־PRs מוגבל, ו־Workflow actions נשארים
+מוצמדים ל־SHA מלא. בדיקות חוזה מקומיות מגינות על המדיניות. ההפעלה
+ב־GitHub תתרחש רק לאחר Merge לענף ברירת המחדל, והרצת Checks על PRs
+של Dependabot עדיין תלויה בפתרון חסימת ה־Billing.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
