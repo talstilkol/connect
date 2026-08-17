@@ -318,3 +318,54 @@ test("server-renders a private read-only invitation landing route", async () => 
     /disabled=""/,
   );
 });
+
+test("server-renders localized invitation views without copying the key into visible HTML", async () => {
+  const invitationKey =
+    `team_invitation_v1_${"b".repeat(64)}`;
+  const englishResponse = await render(
+    `/invite/${invitationKey}?lang=en`,
+  );
+  const englishHtml = await englishResponse.text();
+
+  assert.equal(englishResponse.status, 200);
+  assert.match(
+    englishHtml,
+    /<title>Team invitation \| Connect<\/title>/,
+  );
+  assert.match(
+    englishHtml,
+    /<main[^>]*lang="en"[^>]*dir="ltr"/,
+  );
+  assert.match(englishHtml, /Invitation to join the team/);
+  assert.match(englishHtml, /href="\?lang=ar"/);
+
+  const englishVisibleHtml = englishHtml.replace(
+    /<script\b[\s\S]*?<\/script>/gi,
+    "",
+  );
+  assert.doesNotMatch(
+    englishVisibleHtml,
+    new RegExp(invitationKey),
+  );
+
+  const arabicResponse = await render(
+    `/invite/${invitationKey}?lang=ar`,
+  );
+  const arabicHtml = await arabicResponse.text();
+
+  assert.equal(arabicResponse.status, 200);
+  assert.match(
+    arabicHtml,
+    /<main[^>]*lang="ar"[^>]*dir="rtl"/,
+  );
+  assert.match(arabicHtml, /دعوة للانضمام إلى الفريق/);
+  assert.match(arabicHtml, /href="\?lang=en"/);
+
+  const ambiguousResponse = await render(
+    `/invite/${invitationKey}?lang=en&lang=ar`,
+  );
+  const ambiguousHtml = await ambiguousResponse.text();
+
+  assert.equal(ambiguousResponse.status, 200);
+  assert.match(ambiguousHtml, /הזמנה להצטרף לצוות/);
+});

@@ -6,10 +6,18 @@ import {
 } from "react";
 
 import type {
+  InterfaceLanguage,
+} from "../../../shared/domain/businessProfileDraft.ts";
+import type {
   TeamInvitationAcceptanceActionResult,
 } from "../../../shared/domain/teamInvitationView.ts";
+import {
+  readInvitationMessages,
+  readInvitationResultMessage,
+} from "../../../shared/i18n/invitation.ts";
 
 interface InvitationAcceptanceFormProps {
+  language: InterfaceLanguage;
   action(
     previousResult:
       TeamInvitationAcceptanceActionResult | null,
@@ -17,77 +25,14 @@ interface InvitationAcceptanceFormProps {
   ): Promise<TeamInvitationAcceptanceActionResult>;
 }
 
-function messageForResult(
-  result:
-    TeamInvitationAcceptanceActionResult | null,
-): {
-  heading: string;
-  description: string;
-  complete: boolean;
-} {
-  switch (result?.status) {
-    case "accepted":
-      return {
-        heading: "ההצטרפות לצוות הושלמה",
-        description:
-          "החברות נוצרה ונרשמה ביומן הבקרה.",
-        complete: true,
-      };
-    case "already-accepted":
-      return {
-        heading: "ההזמנה כבר התקבלה",
-        description:
-          "אין צורך לבצע את הפעולה פעם נוספת.",
-        complete: true,
-      };
-    case "sign-in-required":
-      return {
-        heading: "נדרשת התחברות",
-        description:
-          "יש להתחבר לחשבון שאליו נשלחה ההזמנה ולאחר מכן לנסות שוב.",
-        complete: false,
-      };
-    case "identity-verification-required":
-      return {
-        heading: "נדרש אימות זהות",
-        description:
-          "יש להתחבר עם כתובת האימייל הראשית והמאומתת שאליה נשלחה ההזמנה.",
-        complete: false,
-      };
-    case "invitation-unavailable":
-    case "invalid-input":
-      return {
-        heading: "לא ניתן לקבל את ההזמנה",
-        description:
-          "הקישור אינו זמין או שאינו מתאים למשתמש המחובר.",
-        complete: false,
-      };
-    case "temporarily-unavailable":
-    case "configuration-required":
-    case "server-error":
-      return {
-        heading: "הפעולה אינה זמינה כרגע",
-        description:
-          "לא בוצע שינוי. אפשר לנסות שוב מאוחר יותר.",
-        complete: false,
-      };
-    default:
-      return {
-        heading: "אפשר לאמת ולקבל את ההזמנה",
-        description:
-          "השרת יאמת את המשתמש ואת האימייל לפני יצירת החברות.",
-        complete: false,
-      };
-  }
-}
-
 export function InvitationAcceptanceForm({
   action,
+  language,
 }: InvitationAcceptanceFormProps) {
   const [result, formAction, pending] =
     useActionState(action, null);
-  const message =
-    messageForResult(result);
+  const messages = readInvitationMessages(language);
+  const message = readInvitationResultMessage(language, result);
 
   return (
     <>
@@ -121,16 +66,18 @@ export function InvitationAcceptanceForm({
             type="submit"
           >
             {pending
-              ? "מאמת את ההזמנה…"
-              : "קבלת ההזמנה"}
+              ? messages.actions.accepting
+              : messages.actions.accept}
           </button>
         </form>
         <Link
           className="secondary-button"
           data-e2e-focus-ref="home-link"
-          href="/"
+          href={
+            language === "he" ? "/" : `/${language}`
+          }
         >
-          חזרה לעמוד הבית
+          {messages.actions.backHome}
         </Link>
       </div>
     </>

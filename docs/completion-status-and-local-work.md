@@ -348,6 +348,17 @@ Clerk מסמן Localization כ־Experimental ואינו מתרגם Account Porta
 לכן נדרשת בדיקת רגרסיה חיה בכל שדרוג Clerk:
 `https://clerk.com/docs/guides/customizing-clerk/localization`.
 
+4.1.7 Slice שלישי של לוקליזציה הושלם במסך קבלת ההזמנה. המסך קורא
+Locale אופציונלי ומדויק מ־`?lang=he|en|ar`, מתרגם Metadata, שלבים,
+מצבי חסימה, פעולות וכל תשעת Outcomes של קבלת ההזמנה, ומגדיר `lang/dir`
+מתאימים. בורר השפה משתמש רק בקישורים יחסיים `?lang=...`; הוא אינו
+משכפל את ה־Invitation Key ב־DOM או ל־Form input. Locale חסר, מורחב,
+כפול או לא מוכר חוזר לעברית. בדיקות Server-rendered HTML ו־Chromium
+אימתו אנגלית וערבית, Focus ראשון על Skip Link, מפתח שאינו מופיע בתוך
+`main`, וקישור לא תקין שנשאר חסום עם כפתור Disabled וללא Mutation.
+כל תוצאות הפעולה נבדקו ברמת חוזה; תוצאות קבלה חיות נשארות תלויות
+ב־Clerk, ‏D1 ו־Staging מורשים.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -370,8 +381,9 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 `unknown/unavailable` עד חיבור החשבון המורשה. ה־Meta sender נשאר חסום
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
-4.3 לאחר השלמת Slices דף הנחיתה וה־Auth, סך העבודה המקומית הידועה,
-ללא Package/Quota/Contact שטרם הוכרעו, הוא **34–56 שעות פיתוח נטו**.
+4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth וההזמנה, סך העבודה המקומית
+הידועה, ללא Package/Quota/Contact שטרם הוכרעו, הוא **32–53 שעות
+פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**42–70 שעות**.
+הופך ל־**40–67 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

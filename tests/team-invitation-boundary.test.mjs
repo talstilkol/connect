@@ -129,13 +129,16 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
 });
 
 test("keeps the invitation landing route private and activation-gated", async () => {
-  const [source, form] =
+  const [source, form, presentation] =
     await Promise.all([
       readSource(
         "app/invite/[invitationKey]/page.tsx",
       ),
       readSource(
         "app/invite/[invitationKey]/InvitationAcceptanceForm.tsx",
+      ),
+      readSource(
+        "shared/i18n/invitation.ts",
       ),
     ]);
 
@@ -177,8 +180,24 @@ test("keeps the invitation landing route private and activation-gated", async ()
   );
   assert.match(
     form,
-    /case "sign-in-required"/,
+    /readInvitationResultMessage\(language, result\)/,
   );
+  for (const status of [
+    "accepted",
+    "already-accepted",
+    "sign-in-required",
+    "identity-verification-required",
+    "invitation-unavailable",
+    "invalid-input",
+    "temporarily-unavailable",
+    "configuration-required",
+    "server-error",
+  ]) {
+    assert.match(
+      presentation,
+      new RegExp(`(?:"${status}"|${status}):`),
+    );
+  }
   for (const focusReference of [
     "skip-link",
     "brand-link",

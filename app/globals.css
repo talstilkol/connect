@@ -1424,6 +1424,19 @@ label.file-button:focus-within {
   width: fit-content;
 }
 
+.invitation-language-switcher {
+  width: fit-content;
+  margin-top: 28px;
+}
+
+.invitation-language-switcher a {
+  text-decoration: none;
+}
+
+.invitation-language-switcher + .invitation-heading {
+  margin-top: 24px;
+}
+
 .invitation-heading {
   margin-top: clamp(36px, 6vw, 58px);
 }

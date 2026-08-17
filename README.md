@@ -95,8 +95,8 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1479/1479 בדיקות, 35 Migrations,
-   ‏452 קובצי Source, ‏35 Client dependency graphs, ‏877 קבצים
+31. Local Release Gate עובר עם 1485/1485 בדיקות, 35 Migrations,
+   ‏453 קובצי Source, ‏35 Client dependency graphs, ‏879 קבצים
    בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
@@ -119,7 +119,10 @@
    מחזיר `404`. גם מסכי Login ו־Register זמינים בשלוש השפות, עם
    נתיבי Auth מקומיים ו־Clerk localization הנבחר לפי הנתיב. מעטפת
    Connect, ה־Metadata והניווט בששת מסכי Auth אומתו ב־Chromium מקומי;
-   Widget חי של Clerk נשאר תלוי ב־Keys מורשים של Staging.
+   Widget חי של Clerk נשאר תלוי ב־Keys מורשים של Staging. גם מסך
+   קבלת ההזמנה מתורגם בשלוש השפות באמצעות `?lang=` יחסי, כדי לא
+   לשכפל את ה־Invitation Key ב־DOM. כל מצבי התוצאה מתורגמים ומצב
+   קישור לא תקין נשאר חסום ללא Mutation.
 37. בדיקות Release ב־CI מורידות היסטוריית Git מלאה. במאגר פרטי
    בבעלות משתמש אישי, Dependency Audit נשאר Check מחייב ומעלה Evidence
    לא־חתום; שער Production אינו מקבל אותו כתחליף ל־Attestation אמיתי.
@@ -760,7 +763,7 @@
         מבקש Retry באופן Fail-Closed.
    162. שלב 11 הושלם בקוד המקומי.
    163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
-        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,479 הבדיקות עוברים.
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,485 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
@@ -783,10 +786,10 @@
     עורך ה־Graph המקומי, כל סוגי ה־Nodes, המקלדת, Drag-and-drop,
     החיבורים, Focus וה־Preview עברו Browser E2E מקומי ב־Chromium;
     לכן SPEC-18 ו־SPEC-19 הושלמו ברמת הקוד המקומי.
-11. תרגום מלא של מסכי ההזמנות, סביבת העבודה וה־Admin לעברית,
-    אנגלית וערבית, ולאחריו Browser acceptance לכל שפה. דף הנחיתה
-    ומעטפת Login/Register בשלוש השפות כבר הושלמו ואומתו מקומית;
-    Widget חי של Clerk דורש Keys מורשים של Staging.
+11. תרגום מלא של סביבת העבודה וה־Admin לעברית, אנגלית וערבית,
+    ולאחריו Browser acceptance לכל שפה. דף הנחיתה, מעטפת
+    Login/Register ומסך קבלת ההזמנה כבר הושלמו ואומתו מקומית.
+    Widget חי של Clerk ותוצאות קבלה חיות דורשים Staging מורשה.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 
