@@ -3,6 +3,9 @@ import {
   readFile,
 } from "node:fs/promises";
 import test from "node:test";
+import {
+  readSystemAdminTenantMessages,
+} from "../features/admin/systemAdminTenantMessages.ts";
 
 const componentUrl = new URL(
   "../features/admin/SystemAdminTenantPanel.tsx",
@@ -33,7 +36,11 @@ test("keeps complete tenant search and filters behind an explicit accessible for
   );
   assert.match(
     source,
-    /חיפוש בכל ה־Tenants/,
+    /messages\.searchLabel/,
+  );
+  assert.equal(
+    readSystemAdminTenantMessages("he").searchLabel,
+    "חיפוש בכל ה־Tenants",
   );
   assert.match(source, /maxLength=\{80\}/);
   assert.match(
@@ -50,7 +57,7 @@ test("keeps complete tenant search and filters behind an explicit accessible for
   );
   assert.doesNotMatch(
     source,
-    /חיפוש בתוצאות שנטענו|visibleTenants/,
+    /visibleTenants/,
   );
 });
 

@@ -24,9 +24,6 @@ import type {
 import {
   loadSystemAdminTenantDirectoryAction,
 } from "../../server/admin/systemAdminTenantDirectoryActions.ts";
-import type {
-  SystemAdminTenantDirectoryActionResult,
-} from "../../server/admin/systemAdminTenantDirectoryActionResult.ts";
 import {
   cancelTenantSubscriptionAdminAction,
   changeTenantSubscriptionStatusAdminAction,
@@ -40,105 +37,29 @@ import {
   updateBusinessProfileAdminAction,
 } from "../../server/admin/systemAdminBusinessProfileActions.ts";
 import type {
-  SystemAdminBusinessProfileActionResult,
-} from "../../server/admin/systemAdminBusinessProfileActionResult.ts";
-import type {
   SystemAdminBusinessProfileView,
 } from "../../shared/domain/systemAdminBusinessProfile.ts";
 import {
   SystemAdminBusinessProfileForm,
   type SystemAdminBusinessProfileDraft,
 } from "./SystemAdminBusinessProfileForm.tsx";
-
-const directoryStatusMessages: Record<
-  Exclude<
-    SystemAdminTenantDirectoryStatus,
-    "ready"
-  >,
-  {
-    title: string;
-    description: string;
-  }
-> = {
-  "configuration-required": {
-    title: "סביבת Admin אינה מוגדרת",
-    description:
-      "נדרשות תצורות Clerk, ‏System Admin ו־D1 מלאות לפני טעינת Tenants.",
-  },
-  unauthenticated: {
-    title: "נדרשת התחברות",
-    description:
-      "יש להתחבר עם זהות Clerk מורשית לפני כניסה לסביבת Admin.",
-  },
-  "permission-denied": {
-    title: "אין הרשאת System Admin",
-    description:
-      "הזהות המחוברת אינה נמצאת ב־Allowlist השרת של מנהלי המערכת.",
-  },
-  "server-error": {
-    title: "לא ניתן לטעון את סביבת Admin",
-    description:
-      "הקריאה נכשלה באופן חסום. לא מוצגים נתונים חלופיים.",
-  },
-};
-
-const actionMessages: Record<
-  Exclude<
-    SystemAdminSubscriptionActionResult["status"],
-    "saved"
-  >,
-  string
-> = {
-  "configuration-required":
-    "תצורת System Admin אינה מלאה.",
-  unauthenticated:
-    "ה־Session הסתיים. יש להתחבר מחדש.",
-  "permission-denied":
-    "אין לזהות הנוכחית הרשאת System Admin.",
-  "invalid-input":
-    "פרטי הפעולה אינם תקינים.",
-  "not-found":
-    "ה־Tenant או המנוי אינם קיימים.",
-  conflict:
-    "המנוי השתנה מאז הטעינה. יש לרענן את הרשימה.",
-  "invalid-transition":
-    "המעבר המבוקש אינו מותר במצב הנוכחי.",
-  "server-error":
-    "הפעולה נכשלה בשרת ולא נשמר שינוי חלקי.",
-};
-
-const profileActionMessages: Record<
-  Exclude<
-    SystemAdminBusinessProfileActionResult["status"],
-    "saved"
-  >,
-  string
-> = {
-  "configuration-required":
-    "תצורת System Admin אינה מלאה.",
-  unauthenticated:
-    "ה־Session הסתיים. יש להתחבר מחדש.",
-  "permission-denied":
-    "אין לזהות הנוכחית הרשאת System Admin.",
-  "invalid-input":
-    "פרטי העסק אינם תקינים.",
-  "not-found":
-    "ה־Tenant או הפרופיל העסקי אינם קיימים.",
-  conflict:
-    "פרטי העסק השתנו מאז הטעינה. יש לרענן את הרשימה.",
-  "server-error":
-    "עדכון פרטי העסק נכשל ולא נשמר שינוי חלקי.",
-};
-
-const tenantStatusLabels = {
-  trial: "ניסיון",
-  active: "פעיל",
-  payment_failed: "כשל תשלום",
-  suspended: "מושהה",
-  cancelled: "מבוטל",
-  expired: "פג תוקף",
-  blocked: "חסום",
-} as const;
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import {
+  adminHomePath,
+  adminPath,
+} from "../../shared/i18n/admin.ts";
+import {
+  workspaceSectionPath,
+} from "../../shared/workspace/navigation.ts";
+import { AdminLanguageSelector } from "./AdminLanguageSelector.tsx";
+import {
+  readSystemAdminTenantMessages,
+} from "./systemAdminTenantMessages.ts";
+import {
+  useAdminDocumentLocale,
+} from "./useAdminDocumentLocale.ts";
 
 type Feedback = {
   tone: "success" | "danger";
@@ -156,28 +77,9 @@ function hasDirectoryFilters(
   );
 }
 
-function directoryLoadErrorMessage(
-  status: Exclude<
-    SystemAdminTenantDirectoryActionResult["status"],
-    "loaded"
-  >,
-): string {
-  switch (status) {
-    case "invalid-input":
-      return "פרטי החיפוש או הסינון אינם תקינים.";
-    case "permission-denied":
-      return "אין הרשאת System Admin.";
-    case "unauthenticated":
-      return "ה־Session הסתיים. יש להתחבר מחדש.";
-    case "configuration-required":
-      return "תצורת System Admin אינה מלאה.";
-    case "server-error":
-      return "טעינת רשימת ה־Tenants נכשלה.";
-  }
-}
-
 function formatDateTime(
   value: string,
+  locale: string,
 ): string {
   const parsed = new Date(value);
 
@@ -186,7 +88,7 @@ function formatDateTime(
   }
 
   return new Intl.DateTimeFormat(
-    "he-IL",
+    locale,
     {
       dateStyle: "short",
       timeStyle: "short",
@@ -258,18 +160,27 @@ function replaceBusinessProfile(
 }
 
 function AdminState({
+  language,
+  direction,
   status,
 }: {
+  language: InterfaceLanguage;
+  direction: "ltr" | "rtl";
   status: Exclude<
     SystemAdminTenantDirectoryStatus,
     "ready"
   >;
 }) {
-  const content =
-    directoryStatusMessages[status];
+  const messages =
+    readSystemAdminTenantMessages(language);
+  const content = messages.states[status];
 
   return (
-    <main className="admin-state-shell">
+    <main
+      className="admin-state-shell"
+      dir={direction}
+      lang={language}
+    >
       <section
         className="admin-state-card"
         role={
@@ -282,8 +193,15 @@ function AdminState({
         <p>Connect System Admin</p>
         <h1>{content.title}</h1>
         <p>{content.description}</p>
-        <Link href="/" className="secondary-button">
-          חזרה לעמוד הראשי
+        <AdminLanguageSelector
+          language={language}
+          pathname="/admin"
+        />
+        <Link
+          href={adminHomePath(language)}
+          className="secondary-button"
+        >
+          {messages.backHome}
         </Link>
       </section>
     </main>
@@ -291,40 +209,48 @@ function AdminState({
 }
 
 function SubscriptionSummary({
+  language,
   subscription,
 }: {
+  language: InterfaceLanguage;
   subscription:
     TenantSubscriptionAdminView;
 }) {
+  const messages =
+    readSystemAdminTenantMessages(language);
+
   return (
     <dl className="admin-subscription-summary">
       <div>
-        <dt>תחילת תקופה</dt>
+        <dt>{messages.periodStart}</dt>
         <dd>
           {formatDateTime(
             subscription.startsAt,
+            messages.locale,
           )}
           {" UTC"}
         </dd>
       </div>
       <div>
-        <dt>סיום תקופה</dt>
+        <dt>{messages.periodEnd}</dt>
         <dd>
           {formatDateTime(
             subscription.endsAt,
+            messages.locale,
           )}
           {" UTC"}
         </dd>
       </div>
       <div>
-        <dt>גרסה</dt>
+        <dt>{messages.version}</dt>
         <dd>{subscription.version}</dd>
       </div>
       <div>
-        <dt>עדכון אחרון</dt>
+        <dt>{messages.lastUpdated}</dt>
         <dd>
           {formatDateTime(
             subscription.updatedAt,
+            messages.locale,
           )}
         </dd>
       </div>
@@ -333,14 +259,20 @@ function SubscriptionSummary({
 }
 
 export function SystemAdminTenantPanel({
+  language,
   initialStatus,
   initialDirectory,
 }: {
+  language: InterfaceLanguage;
   initialStatus:
     SystemAdminTenantDirectoryStatus;
   initialDirectory:
     SystemAdminTenantDirectoryPage;
 }) {
+  const messages =
+    readSystemAdminTenantMessages(language);
+  const direction =
+    useAdminDocumentLocale(language);
   const [tenants, setTenants] =
     useState([
       ...initialDirectory.tenants,
@@ -386,7 +318,11 @@ export function SystemAdminTenantPanel({
 
   if (initialStatus !== "ready") {
     return (
-      <AdminState status={initialStatus} />
+      <AdminState
+        language={language}
+        direction={direction}
+        status={initialStatus}
+      />
     );
   }
 
@@ -405,7 +341,9 @@ export function SystemAdminTenantPanel({
         setFeedback({
           tone: "danger",
           message:
-            actionMessages[result.status],
+            messages.subscriptionActionFailures[
+              result.status
+            ],
         });
         return;
       }
@@ -449,7 +387,7 @@ export function SystemAdminTenantPanel({
         setFeedback({
           tone: "danger",
           message:
-            profileActionMessages[
+            messages.profileActionFailures[
               result.status
             ],
         });
@@ -472,8 +410,8 @@ export function SystemAdminTenantPanel({
         tone: "success",
         message:
           result.outcome === "updated"
-            ? "פרטי העסק עודכנו ונרשמו ב־Audit."
-            : "פרטי העסק כבר היו מעודכנים; לא נוצר אירוע כפול.",
+            ? messages.profileUpdated
+            : messages.profileUnchanged,
       });
     });
   }
@@ -504,7 +442,7 @@ export function SystemAdminTenantPanel({
       setFeedback({
         tone: "danger",
         message:
-          "יש לבחור תקופה ומצב התחלה תקינים.",
+          messages.invalidCreation,
       });
       return;
     }
@@ -520,7 +458,7 @@ export function SystemAdminTenantPanel({
             endsAt,
           },
         ),
-      "המנוי נוצר ונרשם ב־Audit.",
+      messages.subscriptionCreated,
     );
   }
 
@@ -545,7 +483,7 @@ export function SystemAdminTenantPanel({
       setFeedback({
         tone: "danger",
         message:
-          "יש לבחור תאריך סיום תקין.",
+          messages.invalidEndDate,
       });
       return;
     }
@@ -561,7 +499,7 @@ export function SystemAdminTenantPanel({
             newEndsAt,
           },
         ),
-      "תקופת המנוי הוארכה.",
+      messages.subscriptionExtended,
     );
   }
 
@@ -588,7 +526,7 @@ export function SystemAdminTenantPanel({
       setFeedback({
         tone: "danger",
         message:
-          "יש לבחור מצב תפעולי תקין.",
+          messages.invalidOperationalStatus,
       });
       return;
     }
@@ -604,7 +542,7 @@ export function SystemAdminTenantPanel({
             status,
           },
         ),
-      "מצב המנוי עודכן.",
+      messages.subscriptionStatusUpdated,
     );
   }
 
@@ -614,7 +552,9 @@ export function SystemAdminTenantPanel({
     if (
       !tenant.subscription ||
       !window.confirm(
-        `לבטל את המנוי של ${tenant.displayName}? לא ניתן לבטל פעולה זו דרך המסך.`,
+        messages.cancelConfirmation(
+          tenant.displayName,
+        ),
       )
     ) {
       return;
@@ -630,7 +570,7 @@ export function SystemAdminTenantPanel({
               tenant.subscription?.version,
           },
         ),
-      "המנוי בוטל.",
+      messages.subscriptionCancelled,
     );
   }
 
@@ -653,9 +593,10 @@ export function SystemAdminTenantPanel({
       if (result.status !== "loaded") {
         setFeedback({
           tone: "danger",
-          message: directoryLoadErrorMessage(
-            result.status,
-          ),
+          message:
+            messages.directoryLoadFailures[
+              result.status
+            ],
         });
         return;
       }
@@ -706,9 +647,10 @@ export function SystemAdminTenantPanel({
       if (result.status !== "loaded") {
         setFeedback({
           tone: "danger",
-          message: directoryLoadErrorMessage(
-            result.status,
-          ),
+          message:
+            messages.directoryLoadFailures[
+              result.status
+            ],
         });
         return;
       }
@@ -746,12 +688,16 @@ export function SystemAdminTenantPanel({
   }
 
   return (
-    <main className="admin-shell">
+    <main
+      className="admin-shell"
+      dir={direction}
+      lang={language}
+    >
       <header className="admin-header">
         <Link
-          href="/"
+          href={adminHomePath(language)}
           className="admin-brand"
-          aria-label="Connect — עמוד ראשי"
+          aria-label={messages.homeAriaLabel}
         >
           <span aria-hidden="true">
             <i />
@@ -764,20 +710,30 @@ export function SystemAdminTenantPanel({
           </div>
         </Link>
         <div className="admin-header-actions">
+          <AdminLanguageSelector
+            language={language}
+            pathname="/admin"
+          />
           <span className="admin-security-badge">
-            הרשאת שרת פעילה
+            {messages.serverPermission}
           </span>
           <Link
-            href="/admin/decisions"
+            href={adminPath(
+              "/admin/decisions",
+              language,
+            )}
             className="secondary-button"
           >
-            החלטות Production
+            {messages.decisionsLink}
           </Link>
           <Link
-            href="/workspace"
+            href={workspaceSectionPath(
+              "dashboard",
+              language,
+            )}
             className="secondary-button"
           >
-            סביבת לקוח
+            {messages.workspaceLink}
           </Link>
         </div>
       </header>
@@ -785,27 +741,23 @@ export function SystemAdminTenantPanel({
       <div className="admin-content">
         <section className="admin-hero">
           <div>
-            <span>ניהול מערכת</span>
-            <h1>Tenants ומנויים</h1>
-            <p>
-              פעולות המנוי מתבצעות דרך
-              System Admin Session ונרשמות
-              אטומית ב־Audit Log.
-            </p>
+            <span>{messages.eyebrow}</span>
+            <h1>{messages.title}</h1>
+            <p>{messages.description}</p>
           </div>
           <div className="admin-stat-grid">
             <article>
-              <small>Tenants שנטענו</small>
+              <small>{messages.loadedTenants}</small>
               <strong>{tenants.length}</strong>
             </article>
             <article>
-              <small>עם מנוי</small>
+              <small>{messages.withSubscription}</small>
               <strong>
                 {subscriptionCount}
               </strong>
             </article>
             <article>
-              <small>מנויים פעילים</small>
+              <small>{messages.activeSubscriptions}</small>
               <strong>{activeCount}</strong>
             </article>
           </div>
@@ -818,7 +770,7 @@ export function SystemAdminTenantPanel({
         >
           <div className="admin-directory-filters">
             <label className="admin-directory-search">
-              <span>חיפוש בכל ה־Tenants</span>
+              <span>{messages.searchLabel}</span>
               <input
                 type="search"
                 value={query}
@@ -828,11 +780,11 @@ export function SystemAdminTenantPanel({
                     event.target.value,
                   )
                 }
-                placeholder="שם Tenant או מזהה"
+                placeholder={messages.searchPlaceholder}
               />
             </label>
             <label>
-              <span>מצב Tenant</span>
+              <span>{messages.tenantStatus}</span>
               <select
                 value={tenantStatusFilter}
                 onChange={(event) =>
@@ -842,10 +794,10 @@ export function SystemAdminTenantPanel({
                 }
               >
                 <option value="all">
-                  כל המצבים
+                  {messages.allStatuses}
                 </option>
                 {Object.entries(
-                  tenantStatusLabels,
+                  messages.tenantStatuses,
                 ).map(([value, label]) => (
                   <option
                     value={value}
@@ -857,7 +809,7 @@ export function SystemAdminTenantPanel({
               </select>
             </label>
             <label>
-              <span>רשומת מנוי</span>
+              <span>{messages.subscriptionRecord}</span>
               <select
                 value={subscriptionFilter}
                 onChange={(event) =>
@@ -867,13 +819,13 @@ export function SystemAdminTenantPanel({
                 }
               >
                 <option value="all">
-                  עם ובלי מנוי
+                  {messages.allSubscriptionRecords}
                 </option>
                 <option value="with-subscription">
-                  עם מנוי
+                  {messages.withSubscriptionFilter}
                 </option>
                 <option value="without-subscription">
-                  ללא מנוי
+                  {messages.withoutSubscriptionFilter}
                 </option>
               </select>
             </label>
@@ -883,15 +835,17 @@ export function SystemAdminTenantPanel({
               role="status"
               aria-live="polite"
             >
-              {tenants.length} תוצאות נטענו
+              {messages.loadedResults(
+                tenants.length,
+              )}
             </span>
             <button
               className="primary-button"
               disabled={isPending}
             >
               {isPending
-                ? "טוען…"
-                : "חיפוש וסינון"}
+                ? messages.loading
+                : messages.searchAndFilter}
             </button>
             <button
               type="button"
@@ -907,7 +861,7 @@ export function SystemAdminTenantPanel({
               }
               onClick={clearDirectoryFilters}
             >
-              ניקוי סינון
+              {messages.clearFilters}
             </button>
           </div>
         </form>
@@ -936,15 +890,15 @@ export function SystemAdminTenantPanel({
                 {hasDirectoryFilters(
                   appliedFilters,
                 )
-                  ? "לא נמצאה התאמה"
-                  : "אין Tenants להצגה"}
+                  ? messages.noMatch
+                  : messages.noTenants}
               </h2>
               <p>
                 {hasDirectoryFilters(
                   appliedFilters,
                 )
-                  ? "ניתן לשנות או לנקות את הסינון כדי לחפש בכל הרשומות."
-                  : "D1 החזיר רשימה ריקה. לא נוספו נתוני תצוגה חלופיים."}
+                  ? messages.filteredEmpty
+                  : messages.unfilteredEmpty}
               </p>
             </section>
           ) : (
@@ -958,8 +912,9 @@ export function SystemAdminTenantPanel({
                   <div className="admin-tenant-heading">
                     <div>
                       <small>
-                        Tenant #
-                        {tenant.tenantId}
+                        {messages.tenantNumber(
+                          tenant.tenantId,
+                        )}
                       </small>
                       <h2>
                         {tenant.displayName}
@@ -968,15 +923,18 @@ export function SystemAdminTenantPanel({
                     <div className="admin-tenant-heading-actions">
                       <Link
                         className="secondary-button"
-                        href={`/admin/whatsapp-delivery-policy/${tenant.tenantId}`}
+                        href={adminPath(
+                          `/admin/whatsapp-delivery-policy/${tenant.tenantId}`,
+                          language,
+                        )}
                       >
-                        מדיניות WhatsApp
+                        {messages.whatsappPolicy}
                       </Link>
                       <span
                         className={`admin-status ${tenant.tenantStatus}`}
                       >
                         {
-                          tenantStatusLabels[
+                          messages.tenantStatuses[
                             tenant.tenantStatus
                           ]
                         }
@@ -985,6 +943,7 @@ export function SystemAdminTenantPanel({
                   </div>
 
                   <SystemAdminBusinessProfileForm
+                    language={language}
                     tenantId={tenant.tenantId}
                     profile={
                       tenant.businessProfile
@@ -1001,6 +960,7 @@ export function SystemAdminTenantPanel({
                   {tenant.subscription ? (
                     <>
                       <SubscriptionSummary
+                        language={language}
                         subscription={
                           tenant.subscription
                         }
@@ -1015,12 +975,11 @@ export function SystemAdminTenantPanel({
                           }
                         >
                           <strong>
-                            הארכת תקופה
+                            {messages.extendPeriod}
                           </strong>
                           <label>
                             <span>
-                              תאריך סיום חדש
-                              (UTC)
+                              {messages.newEndDate}
                             </span>
                             <input
                               name="newEndsAt"
@@ -1042,7 +1001,7 @@ export function SystemAdminTenantPanel({
                             className="secondary-button"
                             disabled={isPending}
                           >
-                            הארכת מנוי
+                            {messages.extendSubscription}
                           </button>
                         </form>
 
@@ -1055,11 +1014,11 @@ export function SystemAdminTenantPanel({
                           }
                         >
                           <strong>
-                            מצב תפעולי
+                            {messages.operationalStatus}
                           </strong>
                           <label>
                             <span>
-                              מצב יעד
+                              {messages.targetStatus}
                             </span>
                             <select
                               name="status"
@@ -1083,13 +1042,13 @@ export function SystemAdminTenantPanel({
                               }
                             >
                               <option value="active">
-                                פעיל
+                                {messages.tenantStatuses.active}
                               </option>
                               <option value="suspended">
-                                מושהה
+                                {messages.tenantStatuses.suspended}
                               </option>
                               <option value="blocked">
-                                חסום
+                                {messages.tenantStatuses.blocked}
                               </option>
                             </select>
                           </label>
@@ -1097,17 +1056,16 @@ export function SystemAdminTenantPanel({
                             className="secondary-button"
                             disabled={isPending}
                           >
-                            עדכון מצב
+                            {messages.updateStatus}
                           </button>
                         </form>
 
                         <div className="admin-danger-zone">
                           <strong>
-                            ביטול
+                            {messages.cancel}
                           </strong>
                           <p>
-                            ביטול הוא מצב סופי
-                            במסלול הידני.
+                            {messages.cancelDescription}
                           </p>
                           <button
                             type="button"
@@ -1125,7 +1083,7 @@ export function SystemAdminTenantPanel({
                               )
                             }
                           >
-                            ביטול מנוי
+                            {messages.cancelSubscription}
                           </button>
                         </div>
                       </div>
@@ -1142,30 +1100,29 @@ export function SystemAdminTenantPanel({
                     >
                       <div>
                         <strong>
-                          יצירת מנוי ידני
+                          {messages.createManualSubscription}
                         </strong>
                         <p>
-                          אין ל־Tenant רשומת
-                          מנוי.
+                          {messages.tenantHasNoSubscription}
                         </p>
                       </div>
                       <label>
-                        <span>מצב התחלה</span>
+                        <span>{messages.initialStatus}</span>
                         <select
                           name="status"
                           defaultValue="trial"
                         >
                           <option value="trial">
-                            ניסיון
+                            {messages.tenantStatuses.trial}
                           </option>
                           <option value="active">
-                            פעיל
+                            {messages.tenantStatuses.active}
                           </option>
                         </select>
                       </label>
                       <label>
                         <span>
-                          תחילת תקופה (UTC)
+                          {messages.periodStartUtc}
                         </span>
                         <input
                           name="startsAt"
@@ -1175,7 +1132,7 @@ export function SystemAdminTenantPanel({
                       </label>
                       <label>
                         <span>
-                          סיום תקופה (UTC)
+                          {messages.periodEndUtc}
                         </span>
                         <input
                           name="endsAt"
@@ -1187,7 +1144,7 @@ export function SystemAdminTenantPanel({
                         className="primary-button"
                         disabled={isPending}
                       >
-                        יצירת מנוי
+                        {messages.createSubscription}
                       </button>
                     </form>
                   )}
@@ -1206,12 +1163,12 @@ export function SystemAdminTenantPanel({
             disabled={isPending}
           >
             {isPending
-              ? "טוען…"
-              : "טעינת 50 Tenants נוספים"}
+              ? messages.loading
+              : messages.loadMore}
           </button>
         ) : tenants.length > 0 ? (
           <p className="admin-list-end">
-            כל ה־Tenants הזמינים נטענו.
+            {messages.allLoaded}
           </p>
         ) : null}
       </div>

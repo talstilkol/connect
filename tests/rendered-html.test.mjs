@@ -107,6 +107,49 @@ test("server-renders the production decision admin route in a fail-closed state"
   );
 });
 
+test("server-renders every Admin boundary in English and Arabic", async () => {
+  const responses = await Promise.all([
+    render("/admin?lang=en"),
+    render("/admin?lang=ar"),
+    render("/admin/decisions?lang=en"),
+    render("/admin/decisions?lang=ar"),
+    render("/admin/whatsapp-delivery-policy/1?lang=en"),
+    render("/admin/whatsapp-delivery-policy/1?lang=ar"),
+  ]);
+
+  for (const response of responses) {
+    assert.equal(response.status, 200);
+  }
+
+  const [
+    englishTenants,
+    arabicTenants,
+    englishDecisions,
+    arabicDecisions,
+    englishPolicy,
+    arabicPolicy,
+  ] = await Promise.all(
+    responses.map((response) => response.text()),
+  );
+
+  assert.match(englishTenants, /Admin environment is not configured/);
+  assert.match(arabicTenants, /بيئة Admin غير معدّة/);
+  assert.match(englishDecisions, /before managing decisions/);
+  assert.match(arabicDecisions, /قبل إدارة القرارات/);
+  assert.match(englishPolicy, /before managing delivery policy/);
+  assert.match(arabicPolicy, /قبل إدارة سياسة الإرسال/);
+
+  for (const html of [englishTenants, englishDecisions, englishPolicy]) {
+    assert.match(html, /class="admin-state-shell" dir="ltr" lang="en"/);
+    assert.doesNotMatch(html, /סביבת Admin אינה מוגדרת/);
+  }
+
+  for (const html of [arabicTenants, arabicDecisions, arabicPolicy]) {
+    assert.match(html, /class="admin-state-shell" dir="rtl" lang="ar"/);
+    assert.doesNotMatch(html, /סביבת Admin אינה מוגדרת/);
+  }
+});
+
 test("server-renders local business profile completeness boundaries", async () => {
   const response = await render("/workspace/onboarding");
   assert.equal(response.status, 200);

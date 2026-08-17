@@ -2283,7 +2283,41 @@ label.file-button:focus-within {
 .admin-header-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.admin-language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: white;
+}
+
+.admin-language-switcher a {
+  min-width: 29px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.admin-language-switcher a:hover,
+.admin-language-switcher a:focus-visible {
+  color: var(--nav);
+  background: var(--mint-soft);
+}
+
+.admin-language-switcher a[aria-current="page"] {
+  color: var(--nav);
+  background: var(--mint);
 }
 
 .admin-security-badge {

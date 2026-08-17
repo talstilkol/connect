@@ -10,6 +10,9 @@ import { hasClerkServerConfiguration } from "../../../../server/auth/clerkConfig
 import {
   readCurrentSystemAdminWhatsappDeliveryPolicy,
 } from "../../../../server/campaigns/currentSystemAdminWhatsappDeliveryPolicy.ts";
+import {
+  readAdminLanguage,
+} from "../../../../shared/i18n/admin.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -31,11 +34,18 @@ function parseTenantId(
 // eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function SystemAdminWhatsappDeliveryPolicyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     tenantId: string;
   }>;
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
 }) {
+  const { lang } = await searchParams;
+  const language = readAdminLanguage(lang);
+
   if (hasClerkServerConfiguration()) {
     await auth.protect();
   }
@@ -57,6 +67,8 @@ export default async function SystemAdminWhatsappDeliveryPolicyPage({
 
   return (
     <SystemAdminWhatsappDeliveryPolicyPanel
+      language={language}
+      tenantId={tenantId}
       initialResult={result}
     />
   );

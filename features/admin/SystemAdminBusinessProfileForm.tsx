@@ -9,6 +9,9 @@ import type {
 import type {
   SystemAdminBusinessProfileView,
 } from "../../shared/domain/systemAdminBusinessProfile.ts";
+import {
+  readSystemAdminBusinessProfileMessages,
+} from "./systemAdminBusinessProfileMessages.ts";
 
 export interface SystemAdminBusinessProfileDraft {
   expectedVersion: number;
@@ -17,18 +20,14 @@ export interface SystemAdminBusinessProfileDraft {
   interfaceLanguage: InterfaceLanguage;
 }
 
-const interfaceLanguageLabels = {
-  he: "עברית",
-  en: "English",
-  ar: "العربية",
-} as const;
-
 export function SystemAdminBusinessProfileForm({
+  language,
   tenantId,
   profile,
   disabled,
   onSave,
 }: {
+  language: InterfaceLanguage;
   tenantId: number;
   profile:
     SystemAdminBusinessProfileView | null;
@@ -38,18 +37,19 @@ export function SystemAdminBusinessProfileForm({
       SystemAdminBusinessProfileDraft,
   ): void;
 }) {
+  const messages =
+    readSystemAdminBusinessProfileMessages(
+      language,
+    );
+
   if (!profile) {
     return (
       <section
         className="admin-business-profile-missing"
         role="status"
       >
-        <strong>פרופיל עסקי חסר</strong>
-        <p>
-          אין רשומת Business Profile לעריכה.
-          יצירת פרופיל בשם הלקוח אינה חלק
-          מפעולת Admin זו.
-        </p>
+        <strong>{messages.missingTitle}</strong>
+        <p>{messages.missingDescription}</p>
       </section>
     );
   }
@@ -98,17 +98,19 @@ export function SystemAdminBusinessProfileForm({
     >
       <header>
         <div>
-          <strong>פרטי העסק</strong>
+          <strong>{messages.title}</strong>
           <small>
-            גרסה {profile.version} · עודכן {" "}
-            {profile.updatedAt}
+            {messages.version(
+              profile.version,
+              profile.updatedAt,
+            )}
           </small>
         </div>
-        <span>Audit אטומי</span>
+        <span>{messages.audit}</span>
       </header>
       <fieldset disabled={disabled}>
         <label>
-          <span>שם העסק</span>
+          <span>{messages.businessName}</span>
           <input
             name="businessName"
             defaultValue={profile.businessName}
@@ -118,7 +120,7 @@ export function SystemAdminBusinessProfileForm({
           />
         </label>
         <label>
-          <span>אזור זמן IANA</span>
+          <span>{messages.timezone}</span>
           <input
             name="timezone"
             defaultValue={profile.timezone}
@@ -134,7 +136,7 @@ export function SystemAdminBusinessProfileForm({
           </datalist>
         </label>
         <label>
-          <span>שפת ממשק</span>
+          <span>{messages.interfaceLanguage}</span>
           <select
             name="interfaceLanguage"
             defaultValue={
@@ -142,7 +144,7 @@ export function SystemAdminBusinessProfileForm({
             }
           >
             {Object.entries(
-              interfaceLanguageLabels,
+              messages.languageLabels,
             ).map(([value, label]) => (
               <option
                 value={value}
@@ -157,7 +159,7 @@ export function SystemAdminBusinessProfileForm({
           className="secondary-button"
           disabled={disabled}
         >
-          שמירת פרטי העסק
+          {messages.save}
         </button>
       </fieldset>
     </form>

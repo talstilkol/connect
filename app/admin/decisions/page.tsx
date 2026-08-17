@@ -9,12 +9,24 @@ import {
 import {
   readCurrentSystemAdminProductionDecisions,
 } from "../../../server/operations/currentSystemAdminProductionDecisions.ts";
+import {
+  readAdminLanguage,
+} from "../../../shared/i18n/admin.ts";
 
 export const dynamic = "force-dynamic";
 
 // Clerk's experimental lint rule cannot follow the intentional config-disabled rehearsal branch; source-contract tests enforce the conditional direct protection.
 // eslint-disable-next-line @clerk/next/require-auth-protection
-export default async function SystemAdminDecisionsPage() {
+export default async function SystemAdminDecisionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
+}) {
+  const { lang } = await searchParams;
+  const language = readAdminLanguage(lang);
+
   if (hasClerkServerConfiguration()) {
     await auth.protect();
   }
@@ -27,6 +39,7 @@ export default async function SystemAdminDecisionsPage() {
 
   return (
     <SystemAdminDecisionPanel
+      language={language}
       initialStatus={result.status}
       initialRecords={result.records}
       readinessReport={readinessReport}

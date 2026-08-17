@@ -23,7 +23,7 @@
 
 1.2.3 11 בדיקות ממתינות להחלטת מוצר או מדיניות.
 
-1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **88% ±5%**.
+1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **90% ±5%**.
 
 1.3.1 זהו אומדן מאמץ, לא יחס בין בדיקות. רוב עבודת ה־Domain, ה־UI,
 האבטחה והבדיקות כבר בוצעה; העבודה שנותרה תלויה יותר בספקים,
@@ -466,6 +466,20 @@ Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL
 תוקן גם פער נגישות שבו מעטפת ה־Workspace החליפה כיוון אך תגית
 ה־HTML העליונה נשארה בעברית.
 
+4.1.18 Slice ארבעה־עשר והאחרון של הלוקליזציה המקומית הושלם בכל
+מסכי System Admin: ספריית ה־Tenants, עריכת Business Profile, מרכז
+החלטות Production ומדיניות WhatsApp Delivery לכל Tenant. כל Labels,
+מצבי Empty/Error/Success, פעולות, תאריכים והסברים זמינים בעברית,
+אנגלית וערבית; הקישורים בין מסכי Admin ול־Workspace משמרים שפה,
+ותגית `html` מקבלת `lang/dir` תואמים. ה־Registry המשותף נשאר מקור
+האמת לזהויות ולסטטוסי החלטות, וכל הרשאה, Validation ופעולת D1 נשארו
+ללא שינוי. Browser acceptance מקומי אימת English ב־Desktop,
+Arabic/RTL ב־Mobile ונתיב Tenant-specific, ללא גלישה אופקית וללא
+שגיאות או אזהרות Console. ה־Chunks הגדולים במסלול הם כ־32KB לספריית
+ה־Tenants, כ־18KB למדיניות WhatsApp וכ־13KB למרכז ההחלטות. ‏Ready-state
+ופעולות שינוי אמיתיות דורשים עדיין Clerk System Admin ו־D1 מורשים
+ב־Staging.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -488,12 +502,11 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 `unknown/unavailable` עד חיבור החשבון המורשה. ה־Meta sender נשאר חסום
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
-4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
-ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates,
-‏Campaigns, ‏Inbox, אישורי AI, סוכן AI, מקורות ידע, ‏Bot Flow Builder,
-‏Reports, ‏Billing, ‏Team ו־Decision Center, סך העבודה המקומית הידועה
-לתרגום ואימות מסכי Admin, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **2–4 שעות פיתוח נטו**.
+4.3 לאחר השלמת כל 14 Slices — מדף הנחיתה וה־Auth ועד כל מסכי
+ה־Workspace וה־System Admin — **לא נותרה עבודת לוקליזציה מקומית
+ידועה** בשלוש השפות. ‏Package/Quota/Contact נשארו מחוץ למימוש מפני
+שמודל המוצר טרם הוכרע, ולא מפני שחסר להם תרגום.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**8–16 שעות**.
-הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.
+למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
+הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter
+חי שאינו ניתן לאומדן אמין לפני בחירת ספק וקבלת Credentials.

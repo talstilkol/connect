@@ -19,68 +19,19 @@ import {
   activateSystemAdminWhatsappDeliveryPolicyKillSwitchAction,
   approveSystemAdminWhatsappDeliveryPolicyAction,
 } from "../../server/campaigns/systemAdminWhatsappDeliveryPolicyActions.ts";
-
-const stateMessages: Record<
-  Exclude<
-    SystemAdminWhatsappDeliveryPolicyViewStatus,
-    "ready"
-  >,
-  {
-    title: string;
-    description: string;
-  }
-> = {
-  "configuration-required": {
-    title: "סביבת Admin אינה מוגדרת",
-    description:
-      "נדרשות תצורות Clerk, System Admin ו־D1 לפני ניהול מדיניות שליחה.",
-  },
-  unauthenticated: {
-    title: "נדרשת התחברות",
-    description:
-      "יש להתחבר עם זהות Clerk מורשית.",
-  },
-  "permission-denied": {
-    title: "אין הרשאת System Admin",
-    description:
-      "רק זהות שנמצאת ב־Allowlist של השרת רשאית לשנות את המדיניות.",
-  },
-  "not-found": {
-    title: "לא נמצא חיבור Meta",
-    description:
-      "ל־Tenant שנבחר אין חיבור Meta שממנו ניתן לגזור זהויות וגרסה.",
-  },
-  "server-error": {
-    title: "לא ניתן לטעון את המדיניות",
-    description:
-      "הקריאה נכשלה באופן חסום ולא מוצגים ערכים חלופיים.",
-  },
-};
-
-const actionMessages: Record<
-  Exclude<
-    SystemAdminWhatsappDeliveryPolicyActionResult["status"],
-    "saved"
-  >,
-  string
-> = {
-  "configuration-required":
-    "תצורת System Admin אינה מלאה.",
-  unauthenticated:
-    "ה־Session הסתיים. יש להתחבר מחדש.",
-  "permission-denied":
-    "אין לזהות הנוכחית הרשאת System Admin.",
-  "invalid-input":
-    "ה־Evidence או ערכי המדיניות אינם תקינים או אינם בתוקף.",
-  "not-found":
-    "חיבור Meta או מדיניות קודמת לא נמצאו.",
-  "connection-not-ready":
-    "חיבור Meta אינו במצב connected.",
-  conflict:
-    "גרסת החיבור או המדיניות השתנתה. יש לרענן לפני פעולה נוספת.",
-  "server-error":
-    "הפעולה נכשלה בשרת ולא נשמר שינוי חלקי.",
-};
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import {
+  adminPath,
+} from "../../shared/i18n/admin.ts";
+import { AdminLanguageSelector } from "./AdminLanguageSelector.tsx";
+import {
+  readSystemAdminWhatsappPolicyMessages,
+} from "./systemAdminWhatsappPolicyMessages.ts";
+import {
+  useAdminDocumentLocale,
+} from "./useAdminDocumentLocale.ts";
 
 type Feedback = {
   tone: "success" | "danger";
@@ -88,17 +39,31 @@ type Feedback = {
 } | null;
 
 function AdminState({
+  language,
+  direction,
+  tenantId,
   status,
 }: {
+  language: InterfaceLanguage;
+  direction: "ltr" | "rtl";
+  tenantId: number;
   status: Exclude<
     SystemAdminWhatsappDeliveryPolicyViewStatus,
     "ready"
   >;
 }) {
-  const content = stateMessages[status];
+  const messages =
+    readSystemAdminWhatsappPolicyMessages(
+      language,
+    );
+  const content = messages.states[status];
 
   return (
-    <main className="admin-state-shell">
+    <main
+      className="admin-state-shell"
+      dir={direction}
+      lang={language}
+    >
       <section
         className="admin-state-card"
         role={
@@ -111,11 +76,15 @@ function AdminState({
         <p>Connect System Admin</p>
         <h1>{content.title}</h1>
         <p>{content.description}</p>
+        <AdminLanguageSelector
+          language={language}
+          pathname={`/admin/whatsapp-delivery-policy/${tenantId}`}
+        />
         <Link
-          href="/admin"
+          href={adminPath("/admin", language)}
           className="secondary-button"
         >
-          חזרה לניהול המערכת
+          {messages.backToAdmin}
         </Link>
       </section>
     </main>
@@ -144,9 +113,10 @@ function canonicalUtcDateTime(
 
 function formatTimestamp(
   value: string,
+  locale: string,
 ): string {
   return new Intl.DateTimeFormat(
-    "he-IL",
+    locale,
     {
       dateStyle: "short",
       timeStyle: "medium",
@@ -156,11 +126,21 @@ function formatTimestamp(
 }
 
 export function SystemAdminWhatsappDeliveryPolicyPanel({
+  language,
+  tenantId,
   initialResult,
 }: {
+  language: InterfaceLanguage;
+  tenantId: number;
   initialResult:
     CurrentSystemAdminWhatsappDeliveryPolicy;
 }) {
+  const messages =
+    readSystemAdminWhatsappPolicyMessages(
+      language,
+    );
+  const direction =
+    useAdminDocumentLocale(language);
   const [record, setRecord] =
     useState<WhatsappCampaignDeliveryPolicyRecordView | null>(
       initialResult.record,
@@ -178,6 +158,9 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
   ) {
     return (
       <AdminState
+        language={language}
+        direction={direction}
+        tenantId={tenantId}
         status={
           initialResult.status === "ready"
             ? "server-error"
@@ -198,7 +181,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
       setFeedback({
         tone: "danger",
         message:
-          actionMessages[result.status],
+          messages.actionFailures[result.status],
       });
       return;
     }
@@ -208,7 +191,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
       tone: "success",
       message:
         result.outcome === "unchanged"
-          ? "המצב כבר היה שמור; לא נוצר אירוע כפול."
+          ? messages.unchanged
           : successMessage,
     });
   }
@@ -267,7 +250,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
       setFeedback({
         tone: "danger",
         message:
-          "יש להשלים ערכי Evidence תקינים ומתוארכים ב־UTC.",
+          messages.invalidEvidence,
       });
       return;
     }
@@ -303,7 +286,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
 
       applyResult(
         result,
-        "ה־Evidence אושר ונרשם כאירוע Immutable עם Audit.",
+        messages.approved,
       );
     });
   }
@@ -313,7 +296,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
       !record ||
       record.deliveryState !== "enabled" ||
       !window.confirm(
-        "להפעיל Kill Switch ולחסום מיד שליחת קמפיינים עבור Tenant זה?",
+        messages.killSwitchConfirmation,
       )
     ) {
       return;
@@ -334,18 +317,22 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
 
       applyResult(
         result,
-        "Kill Switch הופעל ונרשם ב־Audit.",
+        messages.killSwitchActivated,
       );
     });
   }
 
   return (
-    <main className="admin-shell">
+    <main
+      className="admin-shell"
+      dir={direction}
+      lang={language}
+    >
       <header className="admin-header">
         <Link
-          href="/admin"
+          href={adminPath("/admin", language)}
           className="admin-brand"
-          aria-label="Connect — ניהול מערכת"
+          aria-label={messages.adminAriaLabel}
         >
           <span aria-hidden="true">
             <i />
@@ -357,20 +344,26 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             <small>System Admin</small>
           </div>
         </Link>
-        <span className="admin-security-badge">
-          Fail-closed
-        </span>
+        <div className="admin-header-actions">
+          <AdminLanguageSelector
+            language={language}
+            pathname={`/admin/whatsapp-delivery-policy/${readyConnection.tenantId}`}
+          />
+          <span className="admin-security-badge">
+            {messages.failClosed}
+          </span>
+        </div>
       </header>
 
       <div className="admin-content">
         <section className="admin-hero">
           <div>
-            <span>WhatsApp Safety</span>
-            <h1>מדיניות שליחת קמפיינים</h1>
+            <span>{messages.eyebrow}</span>
+            <h1>{messages.title}</h1>
             <p>
-              אישור Evidence מתכלה והפעלת
-              Kill Switch עבור Tenant #
-              {readyConnection.tenantId}.
+              {messages.description(
+                readyConnection.tenantId,
+              )}
             </p>
           </div>
         </section>
@@ -380,13 +373,10 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
           role="note"
         >
           <strong>
-            אין להזין Token, Secret או מספרי
-            טלפון של נמענים.
+            {messages.secretWarning}
           </strong>
           <p>
-            מסך זה אינו מחבר את Meta sender.
-            שליחה נשארת חסומה עד לחיבור נפרד
-            ולבדיקות WABA מורשות.
+            {messages.secretDescription}
           </p>
         </section>
 
@@ -408,15 +398,17 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
           <header>
             <div>
               <small>
-                Connection version {readyConnection.version}
+                {messages.connectionVersion(
+                  readyConnection.version,
+                )}
               </small>
-              <h2>חיבור Meta נוכחי</h2>
+              <h2>{messages.currentConnection}</h2>
               <p>
-                Portfolio: {readyConnection.businessPortfolioId}
-                {" · WABA: "}
-                {readyConnection.wabaId}
-                {" · Phone: "}
-                {readyConnection.phoneNumberId}
+                {messages.connectionIdentifiers(
+                  readyConnection.businessPortfolioId,
+                  readyConnection.wabaId,
+                  readyConnection.phoneNumberId,
+                )}
               </p>
             </div>
             <span
@@ -429,21 +421,29 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
           {record ? (
             <div className="admin-decision-meta">
               <span>
-                Policy v{record.policyVersion}
+                {messages.policyVersion(
+                  record.policyVersion,
+                )}
               </span>
               <span>
-                {record.deliveryState}
+                {
+                  messages.deliveryStates[
+                    record.deliveryState
+                  ]
+                }
               </span>
               <span>
-                Evidence expires: {formatTimestamp(
-                  record.evidenceExpiresAt,
-                )} UTC
+                {messages.evidenceExpires(
+                  formatTimestamp(
+                    record.evidenceExpiresAt,
+                    messages.locale,
+                  ),
+                )}
               </span>
             </div>
           ) : (
             <p>
-              טרם נשמרה מדיניות. ללא מדיניות
-              פעילה המערכת נכשלת סגור.
+              {messages.noPolicy}
             </p>
           )}
 
@@ -452,33 +452,33 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             onSubmit={approve}
           >
             <label>
-              <span>Messaging limit</span>
+              <span>{messages.messagingLimit}</span>
               <select
                 name="portfolioLimitKind"
                 required
                 defaultValue=""
               >
                 <option value="" disabled>
-                  בחירת סוג מכסה
+                  {messages.chooseQuotaType}
                 </option>
                 <option value="bounded">
-                  מכסה מוגבלת
+                  {messages.boundedQuota}
                 </option>
                 <option value="unlimited">
-                  Unlimited
+                  {messages.unlimitedQuota}
                 </option>
               </select>
             </label>
             <label>
               <span>
-                ערך מכסה מוגבלת
+                {messages.boundedQuotaValue}
               </span>
               <select
                 name="portfolioLimitValue"
                 defaultValue=""
               >
                 <option value="" disabled>
-                  בחירת Tier
+                  {messages.chooseTier}
                 </option>
                 <option value="250">250</option>
                 <option value="2000">2,000</option>
@@ -488,7 +488,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             </label>
             <label>
               <span>
-                Reservation duration בשניות
+                {messages.reservationDuration}
               </span>
               <input
                 name="reservationDurationSeconds"
@@ -500,7 +500,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
               />
             </label>
             <label>
-              <span>Meta Graph API version</span>
+              <span>{messages.graphApiVersion}</span>
               <input
                 name="metaGraphApiVersion"
                 type="text"
@@ -511,7 +511,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             </label>
             <label>
               <span>
-                Evidence SHA-256 digest
+                {messages.evidenceDigest}
               </span>
               <input
                 name="evidenceDigest"
@@ -525,7 +525,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             </label>
             <label>
               <span>
-                Evidence checked at (UTC)
+                {messages.evidenceCheckedAt}
               </span>
               <input
                 name="evidenceCheckedAt"
@@ -536,7 +536,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             </label>
             <label>
               <span>
-                Evidence expires at (UTC)
+                {messages.evidenceExpiresAt}
               </span>
               <input
                 name="evidenceExpiresAt"
@@ -547,8 +547,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
             </label>
             <div>
               <small>
-                השמירה דורשת גרסת Connection
-                ו־Policy מדויקות.
+                {messages.concurrencyHelp}
               </small>
               <button
                 className="primary-button"
@@ -559,18 +558,15 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
                 }
               >
                 {isPending
-                  ? "שומר…"
-                  : "אישור Evidence והפעלת Policy"}
+                  ? messages.saving
+                  : messages.approvePolicy}
               </button>
             </div>
           </form>
 
           <div className="admin-danger-zone">
-            <strong>Kill Switch</strong>
-            <p>
-              יוצר אירוע disabled חדש ואינו
-              משנה את ה־Evidence שאושר.
-            </p>
+            <strong>{messages.killSwitch}</strong>
+            <p>{messages.killSwitchDescription}</p>
             <button
               type="button"
               className="admin-danger-button"
@@ -581,7 +577,7 @@ export function SystemAdminWhatsappDeliveryPolicyPanel({
               }
               onClick={activateKillSwitch}
             >
-              חסימת שליחת קמפיינים
+              {messages.blockCampaigns}
             </button>
           </div>
         </section>
