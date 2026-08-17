@@ -20,6 +20,9 @@
 13. [Contract freeze למעבר ל־Vercel ול־Railway](docs/hosting-migration-contract-freeze.md).
 14. [טופולוגיית היעד המפורטת — ADR-0004](docs/adr/0004-target-service-topology.md).
 15. [חוזה API בין Vercel ל־Railway](docs/vercel-railway-api-contract.md).
+16. [חוזה PostgreSQL ל־Railway Mutations](docs/postgresql-mutation-contract.md).
+17. [חוזה PostgreSQL ל־Tenant Access](docs/postgresql-tenant-access-contract.md).
+18. [חוזה PostgreSQL למחזור חיי הזמנת צוות](docs/postgresql-team-invitation-contract.md).
 
 ## מצב Master Plan — תשתית Stage 3
 

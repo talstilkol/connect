@@ -5,8 +5,9 @@
 1.1 מסמך זה מקפיא את שכבת ה־PostgreSQL המקומית הנדרשת כדי לפתור Tenant
 session ב־Railway בלי לסמוך על Tenant ID שמגיע מה־Browser.
 
-1.2 קיימים Schema ו־Adapters ספק־נייטרליים, אך אין עדיין Node driver,
-Database חי או Migration evidence. לכן אין טענה שהמסלול מוכן ל־Production.
+1.2 קיימים Schema ו־Adapters ספק־נייטרליים, ושרשרת ה־Migrations הוחלה על
+PostgreSQL 16.13 מקומי ומבודד. עדיין אין Node driver, ‏Runtime integration
+או Staging evidence, ולכן אין טענה שהמסלול מוכן ל־Production.
 
 ## 2. הסבר למתחילים
 
@@ -86,7 +87,7 @@ DISTINCT FROM` מונע הגדלת Version כאשר הערכים לא השתנו
 5.4 Business profile create/update, no-op ואימות Rollback כאשר התוצאה שונה
 מהבקשה.
 
-5.5 Migration guard מאמת ארבע Migrations ושמונה טבלאות Critical Path בסדר
+5.5 Migration guard מאמת חמש Migrations ו־12 טבלאות Critical Path בסדר
 התלויות הנכון.
 
 5.6 Team mutation contract tests מכסים שינוי Role/Status, ‏Replay, העברת
@@ -96,9 +97,11 @@ Owner אטומית, Conflict, בידוד Tenant ו־Rollback כאשר שמירת
 
 6.1 בחירת Node driver וכלי Migration.
 
-6.2 המרת יתר פעולות Team, ובראשן Invitation lifecycle, ל־PostgreSQL.
+6.2 סכמת Invitation lifecycle קיימת; עדיין חסרים ה־Repositories שמפעילים
+Request, ‏Revoke, ‏Re-request, ‏Expiration, ‏Delivery ו־Acceptance.
 
-6.3 Integration tests מול PostgreSQL אמיתי, כולל שתי Transactions מקבילות.
+6.3 Integration tests של ה־Repositories מול PostgreSQL אמיתי, כולל שתי
+Transactions מקבילות.
 
 6.4 Runtime composition עם Driver אמיתי ו־Staging evidence.
 

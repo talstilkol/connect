@@ -188,6 +188,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresTenantMembershipMutationRepository.ts",
     "server/platform/postgresTenantSelectionRepository.ts",
     "server/platform/postgresRailwayApiMutationExecutor.ts",
+    "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -225,12 +226,15 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0001_railway_api_mutation_receipts.sql",
     "postgres/migrations/0002_tenant_access_foundation.sql",
     "postgres/migrations/0003_tenant_membership_events.sql",
+    "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "scripts/verify-postgres-migration-contract.mjs",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
+  assert.match(database.cutoverBlocker, /five ordered/);
+  assert.match(database.cutoverBlocker, /apply on local PostgreSQL/);
   assert.match(database.cutoverBlocker, /Node driver/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /real concurrency tests/);

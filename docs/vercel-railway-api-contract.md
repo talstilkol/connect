@@ -187,13 +187,14 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוספו ארבע Migrations מסודרות ל־Critical Path ומסמך
+7.1.15 נוספו חמש Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
 הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
 השלישית יוצרת Membership, ‏Selection ו־Business profile, והרביעית את
-Membership event ledger.
-ה־Executor וה־SQL נבדקים מקומית, אך אין עדיין Driver, ‏Schema parity מלאה,
-Migration שרץ מול Database אמיתי או Integration evidence.
+Membership event ledger. החמישית יוצרת את כל ארבע טבלאות ה־Invitation
+lifecycle ואת Triggers הבטיחותיים שלה.
+כל שרשרת ה־SQL הוחלה על PostgreSQL 16.13 מקומי, אך אין עדיין Driver,
+Schema parity מלאה, Repository integration או Staging evidence.
 
 7.1.16 נוספו Membership, ‏Tenant selection ו־Business profile repositories
 ספק־נייטרליים. מסלולי Selection ו־Profile משתמשים ב־Transaction, וקריאות
@@ -205,6 +206,10 @@ Membership נכשלות סגור על תוצאה חוצה User/Tenant או על 
 Role/Status והעברת Owner נועלים את ה־Tenant ואת הרשומות הרלוונטיות באמצעות
 `FOR UPDATE`, כותבים State ו־Event באותה Transaction ומזהים Retry לפי מפתחות
 SHA-256 דטרמיניסטיים. אין בכך הוכחת Concurrency מול PostgreSQL חי.
+
+7.1.18 נוסף [חוזה PostgreSQL למחזור חיי הזמנת צוות](postgresql-team-invitation-contract.md).
+ה־Schema מאחד את State, ‏Event ledger, ‏Delivery outbox ו־Acceptance ledger,
+אך ה־Repositories ופעולות ה־API עבורו עדיין לא מומשו.
 
 7.2 עדיין חסר:
 

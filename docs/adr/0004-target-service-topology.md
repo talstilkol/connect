@@ -289,9 +289,10 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 ה־Live configuration, ‏PostgreSQL driver ו־Schema parity מלאה, מלוא ה־Mutation
 coverage, ‏Staging או Deployment evidence. ה־Cryptographic verifiers,
 שלוש פעולות Read-only ו־`contacts.save` עם Transaction executor
-ספק־נייטרלי, Tenant access ו־Team membership mutation repositories וארבע Migrations ל־Critical Path
-כבר קיימים מקומית; אין בכך
-הוכחה לכתיבה חיה או ל־Concurrency מול PostgreSQL אמיתי.
+ספק־נייטרלי, Tenant access ו־Team membership mutation repositories וחמש
+Migrations ל־Critical Path כבר קיימים מקומית. שרשרת ה־Schema הוחלה על
+PostgreSQL מקומי; אין בכך הוכחה ל־Repository integration, כתיבה חיה דרך
+Driver או Concurrency.
 
 ## 12. מקורות רשמיים שנבדקו
 

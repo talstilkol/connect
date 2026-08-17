@@ -10,11 +10,12 @@
 `PostgresTransactionManager`, ולכן Driver עתידי יכול לחבר `pg`, ‏Postgres.js
 או חלופה מאושרת בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת ארבע Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת חמש Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
-foundation והרביעית את Membership event ledger. הן אינן מוכיחות עדיין
-Parity עם כל 35 ה־Migrations של D1 ואינן הורצו מול Database אמיתי.
+foundation, הרביעית את Membership event ledger והחמישית את Team invitation
+lifecycle. השרשרת הוחלה בהצלחה על PostgreSQL 16.13 מקומי ומבודד, אך אינה
+מוכיחה עדיין Parity עם כל 35 ה־Migrations של D1 או מוכנות לפריסה.
 
 ## 2. הסבר למתחילים
 
@@ -86,7 +87,7 @@ Receipt פעיל ל־Audit נצחי.
 
 5.5 ערכי משתמש נשלחים רק כ־Parameters; הם אינם משורשרים אל מחרוזות SQL.
 
-5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת שמונה טבלאות ה־Critical
+5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 12 טבלאות ה־Critical
 Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ויצירת מזהים אקראית.
 
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.
@@ -103,7 +104,8 @@ Compatibility עם Railway ו־Node 24.
 6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 35 ה־Migrations
 של D1 עדיין לא קיימות.
 
-6.4 עדיין חסרים Integration tests מול PostgreSQL אמיתי, בדיקת שתי Transactions
+6.4 שרשרת ה־Schema נבדקה מול PostgreSQL מקומי אמיתי. עדיין חסרים Driver,
+Integration tests של ה־Repositories מול PostgreSQL, בדיקת שתי Transactions
 מקבילות, Staging evidence, ‏Backup/Restore rehearsal ו־Load test.
 
 ## 7. מקורות PostgreSQL רשמיים

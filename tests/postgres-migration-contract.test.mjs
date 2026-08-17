@@ -23,6 +23,7 @@ const migrationSources = migrationFiles.map((fileName) =>
 const coreSchema = migrationSources[0];
 const accessSchema = migrationSources[2];
 const membershipEventSchema = migrationSources[3];
+const invitationSchema = migrationSources[4];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -30,14 +31,69 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0001_railway_api_mutation_receipts.sql",
     "0002_tenant_access_foundation.sql",
     "0003_tenant_membership_events.sql",
+    "0004_team_invitation_lifecycle.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 4,
+      migrationCount: 5,
       findings: [],
     },
+  );
+});
+
+test("defines the complete PostgreSQL invitation lifecycle in dependency order", () => {
+  assert.match(
+    invitationSchema,
+    /CREATE TABLE team_invitations[\s\S]*CREATE TABLE team_invitation_events[\s\S]*CREATE TABLE team_invitation_deliveries[\s\S]*CREATE TABLE team_invitation_acceptances/,
+  );
+  assert.match(
+    invitationSchema,
+    /team_invitations_tenant_email_uq[\s\S]*UNIQUE \(tenant_id, normalized_email\)/,
+  );
+  assert.match(
+    invitationSchema,
+    /team_invitation_events_operation_uq[\s\S]*UNIQUE \(operation_key\)/,
+  );
+  assert.match(
+    invitationSchema,
+    /team_invitation_deliveries_invitation_version_uq[\s\S]*UNIQUE \(invitation_key, invitation_version\)/,
+  );
+  assert.match(
+    invitationSchema,
+    /team_invitation_acceptances_tenant_user_uq[\s\S]*UNIQUE \(tenant_id, external_user_id\)/,
+  );
+});
+
+test("guards invitation state, delivery reconciliation, and immutable evidence", () => {
+  assert.match(
+    invitationSchema,
+    /CREATE TRIGGER team_invitations_state_version_guard[\s\S]*BEFORE UPDATE OF[\s\S]*last_actor_kind/,
+  );
+  assert.match(
+    invitationSchema,
+    /CREATE TRIGGER team_invitation_events_state_guard[\s\S]*BEFORE INSERT/,
+  );
+  assert.match(
+    invitationSchema,
+    /OLD\.status = 'ambiguous'[\s\S]*NEW\.status = 'submitted'[\s\S]*OLD\.status = 'ambiguous'[\s\S]*NEW\.status = 'blocked'/,
+  );
+  assert.match(
+    invitationSchema,
+    /CREATE TRIGGER team_invitations_delivery_active_guard[\s\S]*BEFORE UPDATE OF role, status, version/,
+  );
+  assert.match(
+    invitationSchema,
+    /CREATE TRIGGER team_invitation_acceptances_state_guard[\s\S]*BEFORE INSERT/,
+  );
+  assert.match(
+    invitationSchema,
+    /CREATE TRIGGER team_invitation_acceptances_update_delete_guard[\s\S]*BEFORE UPDATE OR DELETE/,
+  );
+  assert.match(
+    invitationSchema,
+    /team-invitation-expiration-scheduler-v1/,
   );
 });
 

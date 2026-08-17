@@ -25,7 +25,7 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
-| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, Tenant access ו־Team membership mutation repositories וארבע Migrations מסודרות ל־Critical Path קיימים; נותרו ספק, Driver, Parity מלאה מול 35 Migrations וראיות מול Database אמיתי |
+| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor, Tenant access ו־Team membership mutation repositories וחמש Migrations מסודרות ל־Critical Path קיימים; שרשרת ה־Schema עברה על PostgreSQL מקומי. נותרו ספק, Driver, ‏Invitation repositories, ‏Parity מלאה מול 35 Migrations וראיות Staging/Concurrency |
 | `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |

@@ -456,8 +456,28 @@ Driver, ‏Database חי, Full schema parity או Concurrency evidence.
 נכשלות סגור.
 
 2.25.4 הבדיקות המקומיות משתמשות ב־Transaction adapter דטרמיניסטי ומוכיחות
-Commit/Rollback ברמת החוזה. עדיין חסרים Driver, ‏PostgreSQL חי ובדיקת שתי
-Transactions מקבילות; לכן אין טענה שהמסלול מוכן לפריסה.
+Commit/Rollback ברמת החוזה. שרשרת ה־Schema עברה על PostgreSQL מקומי, אך עדיין
+חסרים Driver, ‏Repository integration ובדיקת שתי Transactions מקבילות;
+לכן אין טענה שהמסלול מוכן לפריסה.
+
+2.26 **הושלם מקומית:** PostgreSQL Team invitation lifecycle schema.
+
+2.26.1 Migration חמישית מוסיפה `team_invitations`,
+`team_invitation_events`, ‏`team_invitation_deliveries` ו־
+`team_invitation_acceptances` בסדר התלויות הנכון.
+
+2.26.2 ‏16 Triggers מפורשים אוכפים זהות immutable, מעברי State/Version,
+Event ו־Acceptance ledgers בלתי־ניתנים לשינוי, Delivery reconciliation,
+חסימת שינוי בזמן מסירה פעילה ו־Expiration רק על ידי Actor מערכתי קבוע.
+
+2.26.3 כל שרשרת חמש ה־Migrations הוחלה בהצלחה על PostgreSQL 16.13 מקומי
+ומבודד. נוצרו 12 טבלאות, ובהן ארבע טבלאות ההזמנה, ללא שגיאת Syntax או
+Dependency. הראיה מתועדת ב־
+`docs/postgresql-team-invitation-contract.md`.
+
+2.26.4 עדיין חסרים Invitation repositories, ‏Node driver, ‏Runtime
+integration, בדיקות שתי Transactions מקבילות ו־Staging evidence; לכן אין
+טענה שמחזור החיים מוכן לפריסה.
 
 ## 3. עבודה שאינה מקומית בלבד
 
