@@ -27,11 +27,11 @@ test("keeps both button-question levels keyboard operable and restores focus aft
 
   assert.match(
     editor,
-    /aria-label={`העבר את ענף \$\{position\} למעלה`}/,
+    /aria-label=\{messages\.moveUpLabel\(position\)\}/,
   );
   assert.match(
     editor,
-    /aria-label={`העבר את ענף \$\{position\} למטה`}/,
+    /aria-label=\{messages\.moveDownLabel\(position\)\}/,
   );
   assert.match(
     editor,
@@ -85,11 +85,11 @@ test("describes both button levels in one semantic topology and hides the visual
   );
   assert.match(
     preview,
-    /שאלת Buttons ראשונה/,
+    /messages\.firstButtonQuestion/,
   );
   assert.match(
     preview,
-    /שאלת Buttons שנייה/,
+    /messages\.secondButtonQuestion/,
   );
   assert.match(
     preview,

@@ -10,8 +10,13 @@ import type {
   BotFlowButtonOptionField,
   BotFlowButtonOptionMoveDirection,
 } from "../../shared/domain/botFlowButtonMenuEditor";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 export function BotFlowButtonMenuEditor({
+  language,
   draft,
   disabled,
   focusOnMount,
@@ -23,9 +28,10 @@ export function BotFlowButtonMenuEditor({
   onRemoveOption,
   onAddOption,
   onRemoveMenu,
-  removeLabel = "הסרת שאלת הכפתורים",
+  removeLabel,
   removeDisabled = false,
 }: {
+  language: InterfaceLanguage;
   draft: BotFlowButtonMenuEditorDraft;
   disabled: boolean;
   focusOnMount: boolean;
@@ -50,6 +56,8 @@ export function BotFlowButtonMenuEditor({
   removeLabel?: string;
   removeDisabled?: boolean;
 }) {
+  const messages = readBotFlowMessages(language);
+  const menuMessages = messages.menu;
   const fieldsetRef =
     useRef<HTMLFieldSetElement>(null);
   const promptRef =
@@ -96,15 +104,12 @@ export function BotFlowButtonMenuEditor({
       ref={fieldsetRef}
       className="bot-flow-button-menu"
     >
-      <legend>שאלת כפתורים</legend>
+      <legend>{menuMessages.legend}</legend>
       <p id="bot-flow-button-menu-help">
-        כל אפשרות מנתבת לתשובת טקסט ייעודית.
-        אפשר לגרור אפשרויות למיקום חדש או להשתמש
-        בכפתורי למעלה ולמטה. המפתחות נשמרים
-        ונגזרים רק בצד השרת.
+        {menuMessages.help}
       </p>
       <label>
-        <span>טקסט השאלה</span>
+        <span>{menuMessages.prompt}</span>
         <textarea
           ref={promptRef}
           rows={4}
@@ -192,14 +197,14 @@ export function BotFlowButtonMenuEditor({
                   );
                 }}
                 onDragEnd={finishDragging}
-                title={`גרירת אפשרות ${position} למיקום חדש`}
+                title={menuMessages.dragTitle(position)}
                 aria-hidden="true"
               >
                 ⠿
               </span>
-              <strong>אפשרות {position}</strong>
+              <strong>{menuMessages.option(position)}</strong>
               <label htmlFor={labelId}>
-                תווית הכפתור
+                {menuMessages.buttonLabel}
               </label>
               <input
                 id={labelId}
@@ -217,7 +222,7 @@ export function BotFlowButtonMenuEditor({
                 required
               />
               <label htmlFor={replyId}>
-                תשובה לאחר בחירה
+                {menuMessages.reply}
               </label>
               <textarea
                 id={replyId}
@@ -245,9 +250,9 @@ export function BotFlowButtonMenuEditor({
                     )
                   }
                   disabled={disabled || index === 0}
-                  aria-label={`העבר את אפשרות ${position} למעלה`}
+                  aria-label={menuMessages.moveUpLabel(position)}
                 >
-                  ↑ למעלה
+                  {menuMessages.up}
                 </button>
                 <button
                   type="button"
@@ -262,9 +267,9 @@ export function BotFlowButtonMenuEditor({
                     disabled ||
                     index === draft.options.length - 1
                   }
-                  aria-label={`העבר את אפשרות ${position} למטה`}
+                  aria-label={menuMessages.moveDownLabel(position)}
                 >
-                  ↓ למטה
+                  {menuMessages.down}
                 </button>
                 <button
                   type="button"
@@ -283,9 +288,9 @@ export function BotFlowButtonMenuEditor({
                     disabled ||
                     draft.options.length === 1
                   }
-                  aria-label={`מחק את אפשרות ${position}`}
+                  aria-label={menuMessages.deleteLabel(position)}
                 >
-                  מחיקה
+                  {menuMessages.delete}
                 </button>
               </div>
             </li>
@@ -306,7 +311,7 @@ export function BotFlowButtonMenuEditor({
             draft.options.length >= maximumOptionCount
           }
         >
-          הוספת אפשרות
+          {menuMessages.add}
         </button>
         <button
           type="button"
@@ -314,7 +319,7 @@ export function BotFlowButtonMenuEditor({
           onClick={onRemoveMenu}
           disabled={disabled}
         >
-          {removeLabel}
+          {removeLabel ?? menuMessages.remove}
         </button>
       </div>
     </fieldset>

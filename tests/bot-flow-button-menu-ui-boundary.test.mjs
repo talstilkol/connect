@@ -24,15 +24,15 @@ test("keeps button options operable by keyboard and restores focus after structu
 
   assert.match(
     source,
-    /aria-label={`העבר את אפשרות \$\{position\} למעלה`}/,
+    /aria-label=\{menuMessages\.moveUpLabel\(position\)\}/,
   );
   assert.match(
     source,
-    /aria-label={`העבר את אפשרות \$\{position\} למטה`}/,
+    /aria-label=\{menuMessages\.moveDownLabel\(position\)\}/,
   );
   assert.match(
     source,
-    /aria-label={`מחק את אפשרות \$\{position\}`}/,
+    /aria-label=\{menuMessages\.deleteLabel\(position\)\}/,
   );
   assert.match(
     source,

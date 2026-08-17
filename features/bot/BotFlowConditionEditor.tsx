@@ -15,17 +15,13 @@ import type {
 import {
   persistedConversationStatuses,
 } from "../../shared/domain/conversation";
-
-const conversationStatusLabels = {
-  new: "שיחה חדשה",
-  bot_active: "הבוט פעיל",
-  waiting_for_agent: "ממתינה לנציג",
-  agent_active: "נציג פעיל",
-  waiting_for_contact: "ממתינה ללקוח",
-  closed: "סגורה",
-} as const;
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 export function BotFlowConditionEditor({
+  language,
   draft,
   disabled,
   focusOnMount,
@@ -40,6 +36,7 @@ export function BotFlowConditionEditor({
   onUnmatchedHandoffReasonChange,
   onRemoveCondition,
 }: {
+  language: InterfaceLanguage;
   draft: KeywordConditionDraft;
   disabled: boolean;
   focusOnMount: boolean;
@@ -64,6 +61,8 @@ export function BotFlowConditionEditor({
   ): void;
   onRemoveCondition(): void;
 }) {
+  const botMessages = readBotFlowMessages(language);
+  const messages = botMessages.condition;
   const factRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
@@ -81,15 +80,13 @@ export function BotFlowConditionEditor({
 
   return (
     <fieldset className="bot-flow-condition">
-      <legend>פיצול לפי תנאי</legend>
+      <legend>{messages.legend}</legend>
       <p id="bot-flow-condition-help">
-        כל תוצאה יכולה לשלוח תשובת Text או להעביר
-        לנציג. כאשר נבחר Handoff לא נשלחת לפניו
-        הודעת Intro באותו Turn.
+        {messages.help}
       </p>
 
       <label>
-        <span>המידע שנבדק</span>
+        <span>{messages.fact}</span>
         <select
           ref={factRef}
           value={draft.fact}
@@ -103,16 +100,16 @@ export function BotFlowConditionEditor({
           aria-describedby="bot-flow-condition-help"
         >
           <option value="last-inbound-text">
-            טקסט ההודעה הנכנסת האחרונה
+            {messages.inboundText}
           </option>
           <option value="conversation-status">
-            מצב השיחה
+            {messages.conversationStatus}
           </option>
         </select>
       </label>
 
       <label>
-        <span>אופן הבדיקה</span>
+        <span>{messages.operator}</span>
         <select
           value={draft.operator}
           onChange={(event) =>
@@ -123,20 +120,20 @@ export function BotFlowConditionEditor({
           }
           disabled={disabled || checksConversationStatus}
         >
-          <option value="equals">שווה ל־</option>
+          <option value="equals">{messages.equals}</option>
           {!checksConversationStatus ? (
-            <option value="contains">מכיל</option>
+            <option value="contains">{messages.contains}</option>
           ) : null}
         </select>
         {checksConversationStatus ? (
           <small>
-            מצב שיחה תומך בבדיקת שוויון בלבד.
+            {messages.statusEqualsOnly}
           </small>
         ) : null}
       </label>
 
       <label>
-        <span>הערך להשוואה</span>
+        <span>{messages.value}</span>
         {checksConversationStatus ? (
           <select
             value={draft.value}
@@ -147,12 +144,12 @@ export function BotFlowConditionEditor({
             required
           >
             <option value="" disabled>
-              בחירת מצב שיחה
+              {messages.chooseStatus}
             </option>
             {persistedConversationStatuses.map(
               (status) => (
                 <option key={status} value={status}>
-                  {conversationStatusLabels[status]}
+                  {botMessages.labels.conversationStatuses[status]}
                 </option>
               ),
             )}
@@ -171,9 +168,9 @@ export function BotFlowConditionEditor({
       </label>
 
       <fieldset className="bot-flow-condition-branch">
-        <legend>כאשר התנאי מתקיים</legend>
+        <legend>{messages.matched}</legend>
         <label>
-          <span>פעולת הענף</span>
+          <span>{messages.branchAction}</span>
           <select
             value={
               matchedHandoffReason === null
@@ -189,15 +186,15 @@ export function BotFlowConditionEditor({
             }
             disabled={disabled}
           >
-            <option value="reply">תשובת Text</option>
+            <option value="reply">{messages.textReply}</option>
             <option value="handoff">
-              העברה לנציג
+              {messages.handoff}
             </option>
           </select>
         </label>
         {matchedHandoffReason === null ? (
           <label>
-            <span>תשובת הענף</span>
+            <span>{messages.branchReply}</span>
             <textarea
               rows={4}
               value={draft.matchedReplyText}
@@ -213,7 +210,7 @@ export function BotFlowConditionEditor({
           </label>
         ) : (
           <label>
-            <span>סיבת ההעברה</span>
+            <span>{messages.handoffReason}</span>
             <select
               value={matchedHandoffReason}
               onChange={(event) =>
@@ -226,13 +223,13 @@ export function BotFlowConditionEditor({
               required
             >
               <option value="" disabled>
-                בחירת סיבה
+                {messages.chooseReason}
               </option>
               <option value="customer-request">
-                בקשת הלקוח
+                {messages.customerRequest}
               </option>
               <option value="flow-rule">
-                כלל בתהליך
+                {messages.flowRule}
               </option>
             </select>
           </label>
@@ -240,9 +237,9 @@ export function BotFlowConditionEditor({
       </fieldset>
 
       <fieldset className="bot-flow-condition-branch">
-        <legend>כאשר התנאי אינו מתקיים</legend>
+        <legend>{messages.unmatched}</legend>
         <label>
-          <span>פעולת הענף</span>
+          <span>{messages.branchAction}</span>
           <select
             value={
               unmatchedHandoffReason === null
@@ -258,15 +255,15 @@ export function BotFlowConditionEditor({
             }
             disabled={disabled}
           >
-            <option value="reply">תשובת Text</option>
+            <option value="reply">{messages.textReply}</option>
             <option value="handoff">
-              העברה לנציג
+              {messages.handoff}
             </option>
           </select>
         </label>
         {unmatchedHandoffReason === null ? (
           <label>
-            <span>תשובת הענף</span>
+            <span>{messages.branchReply}</span>
             <textarea
               rows={4}
               value={draft.unmatchedReplyText}
@@ -282,7 +279,7 @@ export function BotFlowConditionEditor({
           </label>
         ) : (
           <label>
-            <span>סיבת ההעברה</span>
+            <span>{messages.handoffReason}</span>
             <select
               value={unmatchedHandoffReason}
               onChange={(event) =>
@@ -295,13 +292,13 @@ export function BotFlowConditionEditor({
               required
             >
               <option value="" disabled>
-                בחירת סיבה
+                {messages.chooseReason}
               </option>
               <option value="customer-request">
-                בקשת הלקוח
+                {messages.customerRequest}
               </option>
               <option value="flow-rule">
-                כלל בתהליך
+                {messages.flowRule}
               </option>
             </select>
           </label>
@@ -314,7 +311,7 @@ export function BotFlowConditionEditor({
         onClick={onRemoveCondition}
         disabled={disabled}
       >
-        הסרת התנאי
+        {messages.remove}
       </button>
     </fieldset>
   );

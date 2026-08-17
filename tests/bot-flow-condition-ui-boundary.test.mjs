@@ -82,7 +82,7 @@ test("keeps Condition, Buttons, and Handoff mutually exclusive and submits no gr
   );
   assert.match(
     editor,
-    /<option value="handoff">\s*העברה לנציג/,
+    /<option value="handoff">\s*\{messages\.handoff\}/,
   );
   assert.match(
     editor,

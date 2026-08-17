@@ -27,8 +27,13 @@ import {
 import {
   BotFlowButtonMenuEditor,
 } from "./BotFlowButtonMenuEditor";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 export function BotFlowTwoStepButtonMenuEditor({
+  language,
   draft,
   disabled,
   focusOnMount,
@@ -36,6 +41,7 @@ export function BotFlowTwoStepButtonMenuEditor({
   onChange,
   onRemove,
 }: {
+  language: InterfaceLanguage;
   draft: BotFlowTwoStepButtonMenuEditorDraft;
   disabled: boolean;
   focusOnMount: boolean;
@@ -45,6 +51,7 @@ export function BotFlowTwoStepButtonMenuEditor({
   ): void;
   onRemove(): void;
 }) {
+  const messages = readBotFlowMessages(language).twoStep;
   const fieldsetRef =
     useRef<HTMLFieldSetElement>(null);
   const firstQuestionRef =
@@ -92,14 +99,12 @@ export function BotFlowTwoStepButtonMenuEditor({
       ref={fieldsetRef}
       className="bot-flow-two-step-menu"
     >
-      <legend>שתי שאלות Buttons עוקבות</legend>
+      <legend>{messages.legend}</legend>
       <p id="bot-flow-two-step-menu-help">
-        הבחירה בשאלה הראשונה פותחת שאלה שנייה
-        ייעודית לאותו ענף. רק הבחירה השנייה
-        שולחת תשובת Text ומסיימת את המסלול.
+        {messages.help}
       </p>
       <label>
-        <span>טקסט השאלה הראשונה</span>
+        <span>{messages.firstQuestion}</span>
         <textarea
           ref={firstQuestionRef}
           rows={4}
@@ -143,7 +148,7 @@ export function BotFlowTwoStepButtonMenuEditor({
           return (
             <li key={branch.draftBranchKey}>
               <div className="bot-flow-two-step-branch-header">
-                <strong>ענף {position}</strong>
+                <strong>{messages.branch(position)}</strong>
                 <div className="bot-flow-step-actions">
                   <button
                     type="button"
@@ -158,9 +163,9 @@ export function BotFlowTwoStepButtonMenuEditor({
                       )
                     }
                     disabled={disabled || index === 0}
-                    aria-label={`העבר את ענף ${position} למעלה`}
+                    aria-label={messages.moveUpLabel(position)}
                   >
-                    ↑ למעלה
+                    {messages.up}
                   </button>
                   <button
                     type="button"
@@ -178,14 +183,14 @@ export function BotFlowTwoStepButtonMenuEditor({
                       disabled ||
                       index === draft.branches.length - 1
                     }
-                    aria-label={`העבר את ענף ${position} למטה`}
+                    aria-label={messages.moveDownLabel(position)}
                   >
-                    ↓ למטה
+                    {messages.down}
                   </button>
                 </div>
               </div>
               <label htmlFor={labelId}>
-                תווית הבחירה בשאלה הראשונה
+                {messages.firstChoiceLabel}
               </label>
               <input
                 id={labelId}
@@ -205,6 +210,7 @@ export function BotFlowTwoStepButtonMenuEditor({
                 required
               />
               <BotFlowButtonMenuEditor
+                language={language}
                 draft={branch.menu}
                 disabled={disabled}
                 focusOnMount={false}
@@ -284,7 +290,7 @@ export function BotFlowTwoStepButtonMenuEditor({
                     ),
                   );
                 }}
-                removeLabel="הסרת הענף והשאלה השנייה"
+                removeLabel={messages.removeBranch}
                 removeDisabled={
                   draft.branches.length === 1
                 }
@@ -306,7 +312,7 @@ export function BotFlowTwoStepButtonMenuEditor({
           }}
           disabled={disabled || !canAddBranch}
         >
-          הוספת ענף לשאלה הראשונה
+          {messages.addBranch}
         </button>
         <button
           type="button"
@@ -314,7 +320,7 @@ export function BotFlowTwoStepButtonMenuEditor({
           onClick={onRemove}
           disabled={disabled}
         >
-          הסרת שתי השאלות
+          {messages.remove}
         </button>
       </div>
     </fieldset>

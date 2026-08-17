@@ -23,7 +23,7 @@
 
 1.2.3 11 בדיקות ממתינות להחלטת מוצר או מדיניות.
 
-1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **70% ±5%**.
+1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **85% ±5%**.
 
 1.3.1 זהו אומדן מאמץ, לא יחס בין בדיקות. רוב עבודת ה־Domain, ה־UI,
 האבטחה והבדיקות כבר בוצעה; העבודה שנותרה תלויה יותר בספקים,
@@ -444,6 +444,17 @@ Chunk נפרד ו־Console נקי. ‏Inbox פוצל ל־Route chunk של כ־37
 `LTR/RTL`, טעינת Chunk נפרד ו־Console נקי. ‏AI Agent פוצל ל־Route
 chunk של כ־26KB וה־Chunk הראשי ירד מכ־416KB לכ־403KB.
 
+4.1.16 Slice שנים־עשר של לוקליזציה הושלם בכל Surface ה־Bot Flow
+Builder. ספריית התהליכים, עורך הרצף, שאלות Buttons ברמה אחת ובשתי
+רמות, ‏Condition, ‏Handoff, עורך Graph מלא, הודעות Drag-and-drop,
+מצבי כשל ו־Preview חזותי ונגיש זמינים בעברית, אנגלית וערבית. המילון
+המוקלד מכסה את כל מצבי ה־Directory ותוצאות פעולות השרת, תוויות מצב
+שיחה, הודעות Screen Reader והודעות שינוי מבנה, בלי לשנות Compiler,
+זהויות דטרמיניסטיות, פעולות D1 או גבולות השמירה והפרסום. בדיקות
+Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL`, ללא
+גלישה אופקית וב־Console נקי. ‏Bot Flow Builder פוצל ל־Route chunk של
+כ־64KB וה־Chunk הראשי ירד מכ־403KB לכ־384KB.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -467,11 +478,11 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 בכוונה עד השלמת הראיות החיצוניות והתרגיל המבוקר.
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
-ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates
-‏Campaigns, ‏Inbox, אישורי AI, סוכן AI ומקורות ידע,
+ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates,
+‏Campaigns, ‏Inbox, אישורי AI, סוכן AI, מקורות ידע ו־Bot Flow Builder,
 סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **6–10 שעות
+הוא **2–4 שעות
 פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**14–24 שעות**.
+הופך ל־**10–18 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

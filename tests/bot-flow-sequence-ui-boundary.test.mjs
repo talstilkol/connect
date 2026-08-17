@@ -24,15 +24,15 @@ test("keeps reply ordering operable through explicit keyboard buttons", async ()
   );
   assert.match(
     source,
-    /aria-label={`העבר את הודעת הטקסט \$\{position\} למעלה`}/,
+    /aria-label=\{messages\.moveUpLabel\(position\)\}/,
   );
   assert.match(
     source,
-    /aria-label={`העבר את הודעת הטקסט \$\{position\} למטה`}/,
+    /aria-label=\{messages\.moveDownLabel\(position\)\}/,
   );
   assert.match(
     source,
-    /aria-label={`מחק את הודעת הטקסט \$\{position\}`}/,
+    /aria-label=\{messages\.deleteLabel\(position\)\}/,
   );
   assert.ok(
     (source.match(/type="button"/g) ?? []).length >=

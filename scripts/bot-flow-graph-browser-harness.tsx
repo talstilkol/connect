@@ -48,6 +48,7 @@ function BotFlowGraphBrowserHarness() {
         {announcement}
       </p>
       <BotFlowGraphEditor
+        language="he"
         draft={draft}
         disabled={false}
         focusOnMount
@@ -55,6 +56,7 @@ function BotFlowGraphBrowserHarness() {
         onAnnouncement={setAnnouncement}
       />
       <BotFlowDraftPreview
+        language="he"
         name=""
         versionLabel="טרם נשמר"
         keywords={[]}

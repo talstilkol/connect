@@ -141,6 +141,31 @@ test("server-renders localized Dashboard and Onboarding content", async () => {
   assert.match(arabicHtml, /مسار الإعداد/);
 });
 
+test("server-renders the complete bot-flow workspace in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/bot?lang=en"),
+    render("/workspace/bot?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Bot flow builder/);
+  assert.match(englishHtml, /Flow library/);
+  assert.match(englishHtml, /Keywords — one per line/);
+  assert.doesNotMatch(englishHtml, /ספריית תהליכים/);
+
+  assert.match(arabicHtml, /منشئ مسارات البوت/);
+  assert.match(arabicHtml, /مكتبة المسارات/);
+  assert.match(arabicHtml, /الكلمات المفتاحية — واحدة في كل سطر/);
+  assert.doesNotMatch(arabicHtml, /ספריית תהליכים/);
+});
+
 test("server-renders the complete contacts surface in English and Arabic", async () => {
   const [englishResponse, arabicResponse] = await Promise.all([
     render("/workspace/contacts?lang=en"),

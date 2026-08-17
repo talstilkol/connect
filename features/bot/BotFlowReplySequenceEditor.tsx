@@ -9,8 +9,13 @@ import type {
   BotFlowReplyStepDraft,
   BotFlowReplyStepMoveDirection,
 } from "../../shared/domain/botFlowSequenceEditor";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 export function BotFlowReplySequenceEditor({
+  language,
   steps,
   disabled,
   minimumSteps = 1,
@@ -21,6 +26,7 @@ export function BotFlowReplySequenceEditor({
   onRemove,
   onAdd,
 }: {
+  language: InterfaceLanguage;
   steps: readonly BotFlowReplyStepDraft[];
   disabled: boolean;
   minimumSteps?: 0 | 1;
@@ -40,6 +46,7 @@ export function BotFlowReplySequenceEditor({
   onRemove(draftStepKey: string): void;
   onAdd(): void;
 }) {
+  const messages = readBotFlowMessages(language).sequence;
   const fieldsetRef =
     useRef<HTMLFieldSetElement>(null);
   const pendingFocusPositionRef =
@@ -78,12 +85,9 @@ export function BotFlowReplySequenceEditor({
       ref={fieldsetRef}
       className="bot-flow-reply-sequence"
     >
-      <legend>הודעות תשובה לפי סדר השליחה</legend>
+      <legend>{messages.legend}</legend>
       <p id="bot-flow-reply-sequence-help">
-        אפשר להוסיף כמה הודעות טקסט, לגרור אותן
-        למיקום חדש או לשנות את הסדר באמצעות
-        הכפתורים. כל פעולות הסידור זמינות גם עם
-        מקלדת.
+        {messages.help}
       </p>
       <ol>
         {steps.map((step, index) => {
@@ -152,13 +156,13 @@ export function BotFlowReplySequenceEditor({
                   );
                 }}
                 onDragEnd={finishDragging}
-                title={`גרירת הודעת טקסט ${position} למיקום חדש`}
+                title={messages.dragTitle(position)}
                 aria-hidden="true"
               >
                 ⠿
               </span>
               <label htmlFor={inputId}>
-                הודעת טקסט {position}
+                {messages.label(position)}
               </label>
               <textarea
                 id={inputId}
@@ -184,9 +188,9 @@ export function BotFlowReplySequenceEditor({
                     onMove(step.draftStepKey, "up")
                   }
                   disabled={disabled || index === 0}
-                  aria-label={`העבר את הודעת הטקסט ${position} למעלה`}
+                  aria-label={messages.moveUpLabel(position)}
                 >
-                  ↑ למעלה
+                  {messages.up}
                 </button>
                 <button
                   type="button"
@@ -197,9 +201,9 @@ export function BotFlowReplySequenceEditor({
                   disabled={
                     disabled || index === steps.length - 1
                   }
-                  aria-label={`העבר את הודעת הטקסט ${position} למטה`}
+                  aria-label={messages.moveDownLabel(position)}
                 >
-                  ↓ למטה
+                  {messages.down}
                 </button>
                 <button
                   type="button"
@@ -216,9 +220,9 @@ export function BotFlowReplySequenceEditor({
                     disabled ||
                     steps.length <= minimumSteps
                   }
-                  aria-label={`מחק את הודעת הטקסט ${position}`}
+                  aria-label={messages.deleteLabel(position)}
                 >
-                  מחיקה
+                  {messages.delete}
                 </button>
               </div>
             </li>
@@ -238,7 +242,7 @@ export function BotFlowReplySequenceEditor({
           steps.length >= maximumSteps
         }
       >
-        הוספת הודעת טקסט
+        {messages.add}
       </button>
     </fieldset>
   );

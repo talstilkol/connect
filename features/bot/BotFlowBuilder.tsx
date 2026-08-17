@@ -70,8 +70,8 @@ import type {
   BotFlowSummaryView,
 } from "../../shared/domain/botFlowView";
 import type {
-  BotFlowActionFailure,
-} from "../../server/bot/botFlowActionResult";
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import {
   loadBotFlowDetailsAction,
   publishBotFlowDraftAction,
@@ -98,58 +98,7 @@ import {
 import {
   BotFlowTwoStepButtonMenuEditor,
 } from "./BotFlowTwoStepButtonMenuEditor";
-
-const directoryStatusMessages: Record<
-  Exclude<BotFlowDirectoryStatus, "ready">,
-  string
-> = {
-  "configuration-required":
-    "נדרשת הגדרת Clerk ו־D1 כדי לשמור תהליכי בוט.",
-  unauthenticated:
-    "יש להתחבר לפני צפייה בתהליכי הבוט.",
-  "onboarding-required":
-    "יש להשלים יצירת סביבת עבודה לפני שמירת תהליך.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה לפני שמירת תהליך.",
-  "permission-denied":
-    "אין לחשבון הנוכחי הרשאה לערוך תהליכי בוט.",
-  "server-error":
-    "לא ניתן לטעון כרגע את תהליכי הבוט.",
-};
-
-const actionStatusMessages: Record<
-  BotFlowActionFailure["status"],
-  string
-> = {
-  "configuration-required":
-    "החיבור ל־Clerk או ל־D1 אינו מוגדר.",
-  unauthenticated:
-    "החיבור פג. יש להתחבר מחדש.",
-  "onboarding-required":
-    "יש להשלים יצירת סביבת עבודה.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה.",
-  "permission-denied":
-    "אין הרשאה לבצע פעולה זו.",
-  "validation-error":
-    "השרת דחה את מבנה התהליך. בדקו שם, מילות מפתח והודעות תשובה.",
-  "invalid-input":
-    "הבקשה אינה תקינה.",
-  "not-found":
-    "התהליך או הגרסה כבר אינם קיימים.",
-  "state-conflict":
-    "התהליך השתנה בחלון אחר. טענו אותו מחדש לפני שמירה.",
-  "invalid-state":
-    "אי אפשר לפרסם את הגרסה במצבה הנוכחי.",
-  "server-error":
-    "הפעולה נכשלה בשרת. לא בוצע שינוי חלקי.",
-};
-
-const flowStatusLabels = {
-  draft: "טיוטה",
-  active: "פעיל",
-  inactive: "לא פעיל",
-} as const;
+import { readBotFlowMessages } from "./botFlowMessages";
 
 function replaceFlow(
   flows: readonly BotFlowSummaryView[],
@@ -337,12 +286,15 @@ function readEditableComposerDraft(
 }
 
 export function BotFlowBuilder({
+  language,
   initialStatus,
   initialDirectory,
 }: {
+  language: InterfaceLanguage;
   initialStatus: BotFlowDirectoryStatus;
   initialDirectory: BotFlowDirectoryView;
 }) {
+  const messages = readBotFlowMessages(language);
   const [flows, setFlows] = useState(
     initialDirectory.flows,
   );
@@ -767,7 +719,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `הודעת הטקסט הועברה למיקום ${nextPosition}.`,
+      messages.announcements.replyMoved(nextPosition),
     );
   };
 
@@ -798,7 +750,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `הודעת הטקסט נגררה למיקום ${targetIndex + 1}.`,
+      messages.announcements.replyDragged(targetIndex + 1),
     );
   };
 
@@ -818,7 +770,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `הודעת הטקסט במיקום ${currentIndex + 1} נמחקה.`,
+      messages.announcements.replyRemoved(currentIndex + 1),
     );
   };
 
@@ -831,7 +783,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `נוספה הודעת טקסט במיקום ${replySteps.length + 1}.`,
+      messages.announcements.replyAdded(replySteps.length + 1),
     );
   };
 
@@ -853,7 +805,7 @@ export function BotFlowBuilder({
     setFocusButtonMenuOnMount(true);
     markChanged();
     setEditorAnnouncement(
-      "נוספה שאלת כפתורים עם אפשרות אחת.",
+      messages.announcements.menuAdded,
     );
   };
 
@@ -863,7 +815,7 @@ export function BotFlowBuilder({
     setButtonMenu(null);
     markChanged();
     setEditorAnnouncement(
-      "שאלת הכפתורים וכל ענפיה הוסרו מהטיוטה.",
+      messages.announcements.menuRemoved,
     );
   };
 
@@ -920,7 +872,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `אפשרות הכפתור הועברה למיקום ${nextPosition}.`,
+      messages.announcements.optionMoved(nextPosition),
     );
   };
 
@@ -956,7 +908,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `אפשרות הכפתור נגררה למיקום ${targetIndex + 1}.`,
+      messages.announcements.optionDragged(targetIndex + 1),
     );
   };
 
@@ -980,7 +932,7 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `אפשרות הכפתור במיקום ${currentIndex + 1} נמחקה.`,
+      messages.announcements.optionRemoved(currentIndex + 1),
     );
   };
 
@@ -995,7 +947,9 @@ export function BotFlowBuilder({
     );
     markChanged();
     setEditorAnnouncement(
-      `נוספה אפשרות כפתור במיקום ${(buttonMenu?.options.length ?? 0) + 1}.`,
+      messages.announcements.optionAdded(
+        (buttonMenu?.options.length ?? 0) + 1,
+      ),
     );
   };
 
@@ -1020,7 +974,7 @@ export function BotFlowBuilder({
     setFocusTwoStepOnMount(true);
     markChanged();
     setEditorAnnouncement(
-      "נוספו שתי שאלות Buttons עוקבות עם ענף ראשון.",
+      messages.announcements.twoStepAdded,
     );
   };
 
@@ -1038,7 +992,7 @@ export function BotFlowBuilder({
     setTwoStepButtonMenu(null);
     markChanged();
     setEditorAnnouncement(
-      "שתי שאלות ה־Buttons וכל ענפיהן הוסרו מהטיוטה.",
+      messages.announcements.twoStepRemoved,
     );
   };
 
@@ -1064,7 +1018,7 @@ export function BotFlowBuilder({
     setFocusConditionOnMount(true);
     markChanged();
     setEditorAnnouncement(
-      "נוסף פיצול לפי תנאי עם שני ענפי תשובה.",
+      messages.announcements.conditionAdded,
     );
   };
 
@@ -1074,7 +1028,7 @@ export function BotFlowBuilder({
     setCondition(null);
     markChanged();
     setEditorAnnouncement(
-      "התנאי ושני ענפי התשובה הוסרו מהטיוטה.",
+      messages.announcements.conditionRemoved,
     );
   };
 
@@ -1165,8 +1119,8 @@ export function BotFlowBuilder({
     markChanged();
     setEditorAnnouncement(
       kind === "handoff"
-        ? "הענף הוגדר להעברה לנציג ללא הודעת Intro באותו Turn."
-        : "הענף הוגדר לשליחת תשובת Text.",
+        ? messages.announcements.branchHandoff
+        : messages.announcements.branchReply,
     );
   };
 
@@ -1208,7 +1162,7 @@ export function BotFlowBuilder({
     setFocusHandoffOnMount(true);
     markChanged();
     setEditorAnnouncement(
-      "נוסף מסלול העברה לנציג בעת התאמת מילת מפתח.",
+      messages.announcements.handoffAdded,
     );
   };
 
@@ -1218,7 +1172,7 @@ export function BotFlowBuilder({
     setHandoffReason(null);
     markChanged();
     setEditorAnnouncement(
-      "מסלול ההעברה לנציג הוסר מהטיוטה.",
+      messages.announcements.handoffRemoved,
     );
   };
 
@@ -1233,8 +1187,7 @@ export function BotFlowBuilder({
     if (dirty && details) {
       setNotice({
         tone: "warning",
-        message:
-          "יש לשמור או לטעון מחדש את השינויים לפני מעבר לעורך Graph מלא.",
+        message: messages.announcements.graphDirty,
       });
       return;
     }
@@ -1242,8 +1195,7 @@ export function BotFlowBuilder({
     if (details && !storedGraphDraft) {
       setNotice({
         tone: "warning",
-        message:
-          "מבנה התהליך הנוכחי אינו ניתן להמרה בטוחה לעורך Graph מלא.",
+        message: messages.announcements.graphUnsupported,
       });
       return;
     }
@@ -1256,8 +1208,7 @@ export function BotFlowBuilder({
     ) {
       setNotice({
         tone: "warning",
-        message:
-          "יש להתחיל תהליך חדש וריק לפני מעבר לעורך Graph מלא.",
+        message: messages.announcements.graphRequiresEmpty,
       });
       return;
     }
@@ -1281,8 +1232,8 @@ export function BotFlowBuilder({
     markChanged();
     setEditorAnnouncement(
       storedGraphDraft
-        ? "התהליך הומר לעורך Graph מלא ללא שינוי בחיבורים."
-        : "נוצר Graph חדש עם Text ו־End מחוברים.",
+        ? messages.announcements.graphConverted
+        : messages.announcements.graphCreated,
     );
   };
 
@@ -1307,7 +1258,7 @@ export function BotFlowBuilder({
       setNotice({
         tone: "danger",
         message:
-          actionStatusMessages[result.status],
+          messages.actionStatuses[result.status],
       });
     });
   };
@@ -1438,10 +1389,10 @@ export function BotFlowBuilder({
             : "warning",
           message:
             !reloaded
-              ? "הטיוטה נשמרה, אך טעינת ההיסטוריה המלאה נכשלה. אפשר לטעון את התהליך מחדש מהרשימה."
+              ? messages.feedback.savedReloadFailed
               : result.outcome === "unchanged"
-              ? "הטיוטה כבר הייתה שמורה ללא שינוי."
-              : "הטיוטה נשמרה ב־D1 כגרסה חדשה.",
+              ? messages.feedback.draftUnchanged
+              : messages.feedback.draftSaved,
         });
         return;
       }
@@ -1449,7 +1400,7 @@ export function BotFlowBuilder({
       setNotice({
         tone: "danger",
         message:
-          actionStatusMessages[result.status],
+          messages.actionStatuses[result.status],
       });
     });
   };
@@ -1516,10 +1467,10 @@ export function BotFlowBuilder({
             : "warning",
           message:
             !reloaded
-              ? "הגרסה פורסמה, אך טעינת ההיסטוריה המלאה נכשלה. אפשר לטעון את התהליך מחדש מהרשימה."
+              ? messages.feedback.publishedReloadFailed
               : result.outcome === "unchanged"
-              ? "הגרסה כבר הייתה פעילה."
-              : "הגרסה פורסמה והיא זמינה למנוע הבוט.",
+              ? messages.feedback.publishedUnchanged
+              : messages.feedback.published,
         });
         return;
       }
@@ -1527,7 +1478,7 @@ export function BotFlowBuilder({
       setNotice({
         tone: "danger",
         message:
-          actionStatusMessages[result.status],
+          messages.actionStatuses[result.status],
       });
     });
   };
@@ -1538,9 +1489,9 @@ export function BotFlowBuilder({
         <div className="card-header">
           <div>
             <span className="card-kicker">
-              תהליכים שמורים
+              {messages.directory.kicker}
             </span>
-            <h2>ספריית תהליכים</h2>
+            <h2>{messages.directory.title}</h2>
           </div>
           <button
             type="button"
@@ -1548,14 +1499,14 @@ export function BotFlowBuilder({
             onClick={beginNewFlow}
             disabled={!canWrite}
           >
-            תהליך חדש
+            {messages.directory.newFlow}
           </button>
         </div>
 
         {initialStatus !== "ready" ? (
           <div className="inline-notice warning">
             {
-              directoryStatusMessages[
+              messages.directoryStatuses[
                 initialStatus
               ]
             }
@@ -1565,15 +1516,15 @@ export function BotFlowBuilder({
         {initialStatus === "ready" &&
         !initialDirectory.canWrite ? (
           <div className="inline-notice warning">
-            החשבון הנוכחי נמצא במצב צפייה בלבד.
+            {messages.directory.readOnly}
           </div>
         ) : null}
 
         {flows.length === 0 ? (
           <div className="bot-flow-directory-empty">
-            <strong>עדיין אין תהליכים</strong>
+            <strong>{messages.directory.emptyTitle}</strong>
             <p>
-              צרו תהליך ראשון ושמרו אותו כטיוטה.
+              {messages.directory.emptyDescription}
             </p>
           </div>
         ) : (
@@ -1596,8 +1547,9 @@ export function BotFlowBuilder({
                 <span>
                   <strong>{flow.name}</strong>
                   <small>
-                    גרסה{" "}
-                    {flow.latestVersionNumber}
+                    {messages.directory.version(
+                      flow.latestVersionNumber,
+                    )}
                   </small>
                 </span>
                 <span
@@ -1607,7 +1559,7 @@ export function BotFlowBuilder({
                       : "warning"
                   }`}
                 >
-                  {flowStatusLabels[flow.status]}
+                  {messages.labels.flowStatuses[flow.status]}
                 </span>
               </button>
             ))}
@@ -1621,30 +1573,25 @@ export function BotFlowBuilder({
       >
         <aside className="card bot-flow-editor">
           <span className="card-kicker">
-            הגדרת מסלול Text, ‏Buttons, ‏Condition ו־Handoff
+            {messages.editor.kicker}
           </span>
           <h2>
             {details
-              ? "עריכת תהליך"
-              : "תהליך חדש"}
+              ? messages.editor.editTitle
+              : messages.editor.newTitle}
           </h2>
           <p>
-            הודעה נכנסת נבדקת מול מילות
-            המפתח. התאמה יכולה לשלוח הודעות Text,
-            להציג Buttons, להתפצל לפי Condition או
-            להעביר מיד לנציג במסלול Handoff בטוח.
+            {messages.editor.description}
           </p>
 
           {unsupportedDefinition ? (
             <div className="inline-notice warning">
-              הגרסה כוללת מבנה Graph מתקדם שעדיין
-              אינו ניתן לעריכה בעורך.
-              הנתונים נשארו שמורים ללא שינוי.
+              {messages.editor.unsupported}
             </div>
           ) : (
             <div className="bot-flow-fields">
               <label>
-                <span>שם התהליך</span>
+                <span>{messages.editor.name}</span>
                 <input
                   value={name}
                   onChange={(event) => {
@@ -1659,15 +1606,14 @@ export function BotFlowBuilder({
                 />
                 {details ? (
                   <small>
-                    השם הוא הזהות הדטרמיניסטית
-                    ולכן אינו משתנה לאחר השמירה.
+                    {messages.editor.immutableName}
                   </small>
                 ) : null}
               </label>
 
               <label>
                 <span>
-                  מילות מפתח — אחת בכל שורה
+                  {messages.editor.keywords}
                 </span>
                 <textarea
                   rows={5}
@@ -1682,13 +1628,12 @@ export function BotFlowBuilder({
                   required
                 />
                 <small>
-                  עד 20 מילים או ביטויים, עד 80
-                  תווים לכל ערך.
+                  {messages.editor.keywordsHelp}
                 </small>
               </label>
 
               <label>
-                <span>אופן התאמה</span>
+                <span>{messages.editor.matchMode}</span>
                 <select
                   value={matchMode}
                   onChange={(event) => {
@@ -1701,10 +1646,10 @@ export function BotFlowBuilder({
                   disabled={!canWrite}
                 >
                   <option value="exact">
-                    התאמה מלאה
+                    {messages.editor.exact}
                   </option>
                   <option value="contains">
-                    ההודעה מכילה
+                    {messages.editor.contains}
                   </option>
                 </select>
               </label>
@@ -1722,12 +1667,10 @@ export function BotFlowBuilder({
                         storedGraphDraft === null)
                     }
                   >
-                    מעבר לעורך Graph מלא
+                    {messages.editor.enterGraph}
                   </button>
                   <small>
-                    המעבר מאפשר חיבורים חופשיים בין כל
-                    סוגי ה־Nodes. זהויות השמירה עדיין
-                    נגזרות רק בשרת.
+                    {messages.editor.graphHelp}
                   </small>
                 </div>
               ) : null}
@@ -1735,6 +1678,7 @@ export function BotFlowBuilder({
               {graphDraft ? (
                 <>
                   <BotFlowGraphEditor
+                    language={language}
                     draft={graphDraft}
                     disabled={!canWrite}
                     focusOnMount={focusGraphOnMount}
@@ -1748,14 +1692,13 @@ export function BotFlowBuilder({
                   />
                   {!graphDraftComplete ? (
                     <div className="inline-notice warning">
-                      יש להשלים את כל התכנים והחיבורים,
-                      להסיר Cycles ולחבר כל Node למסלול
-                      הכניסה לפני השמירה.
+                      {messages.editor.graphIncomplete}
                     </div>
                   ) : null}
                 </>
               ) : handoffEnabled ? (
                 <BotFlowHandoffEditor
+                  language={language}
                   handoffReason={handoffReason}
                   disabled={!canWrite}
                   focusOnMount={focusHandoffOnMount}
@@ -1765,6 +1708,7 @@ export function BotFlowBuilder({
               ) : (
                 <>
                   <BotFlowReplySequenceEditor
+                    language={language}
                     steps={replySteps}
                     disabled={!canWrite}
                     minimumSteps={condition ? 0 : 1}
@@ -1780,6 +1724,7 @@ export function BotFlowBuilder({
 
                   {twoStepButtonMenu ? (
                     <BotFlowTwoStepButtonMenuEditor
+                      language={language}
                       draft={twoStepButtonMenu}
                       disabled={!canWrite}
                       focusOnMount={focusTwoStepOnMount}
@@ -1792,6 +1737,7 @@ export function BotFlowBuilder({
                     />
                   ) : buttonMenu ? (
                     <BotFlowButtonMenuEditor
+                      language={language}
                       draft={buttonMenu}
                       disabled={!canWrite}
                       focusOnMount={focusButtonMenuOnMount}
@@ -1816,6 +1762,7 @@ export function BotFlowBuilder({
                     />
                   ) : condition ? (
                     <BotFlowConditionEditor
+                      language={language}
                       draft={condition}
                       disabled={!canWrite}
                       focusOnMount={focusConditionOnMount}
@@ -1880,7 +1827,7 @@ export function BotFlowBuilder({
                             KEYWORD_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
                         }
                       >
-                        הוספת שאלת כפתורים
+                        {messages.editor.addMenu}
                       </button>
                       <button
                         ref={addConditionButtonRef}
@@ -1893,7 +1840,7 @@ export function BotFlowBuilder({
                             KEYWORD_CONDITION_MAXIMUM_INTRO_COUNT
                         }
                       >
-                        הוספת פיצול לפי תנאי
+                        {messages.editor.addCondition}
                       </button>
                       <button
                         ref={addTwoStepButtonRef}
@@ -1906,7 +1853,7 @@ export function BotFlowBuilder({
                             KEYWORD_TWO_STEP_BUTTON_MENU_MAXIMUM_BRANCH_BLOCK_COUNT
                         }
                       >
-                        הוספת שתי שאלות עוקבות
+                        {messages.editor.addTwoStep}
                       </button>
                       <button
                         ref={addHandoffButtonRef}
@@ -1915,7 +1862,7 @@ export function BotFlowBuilder({
                         onClick={addHandoff}
                         disabled={!canWrite}
                       >
-                        מעבר למסלול Handoff
+                        {messages.editor.addHandoff}
                       </button>
                     </div>
                   )}
@@ -1939,8 +1886,8 @@ export function BotFlowBuilder({
               disabled={!canSave}
             >
               {isSaving
-                ? "שומר טיוטה…"
-                : "שמירת טיוטה"}
+                ? messages.editor.saving
+                : messages.editor.save}
             </button>
             <button
               type="button"
@@ -1949,8 +1896,8 @@ export function BotFlowBuilder({
               disabled={!canPublish}
             >
               {isPublishing
-                ? "מפרסם…"
-                : "פרסום גרסה"}
+                ? messages.editor.publishing
+                : messages.editor.publish}
             </button>
           </div>
 
@@ -1965,11 +1912,14 @@ export function BotFlowBuilder({
         </aside>
 
         <BotFlowDraftPreview
+          language={language}
           name={name}
           versionLabel={
             details
-              ? `גרסה ${details.flow.latestVersionNumber}`
-              : "טרם נשמר"
+              ? messages.directory.version(
+                  details.flow.latestVersionNumber,
+                )
+              : messages.editor.notSaved
           }
           keywords={keywords}
           matchMode={matchMode}

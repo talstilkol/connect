@@ -20,14 +20,22 @@ import type {
 import type {
   BotFlowGraphDraftNode,
 } from "../../shared/domain/botFlowGraphDraft";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 const PREVIEW_TITLE_ID =
   "bot-flow-draft-preview-title";
 
-function configuredText(value: string): string {
+function configuredText(
+  value: string,
+  language: InterfaceLanguage,
+): string {
+  const messages = readBotFlowMessages(language).preview;
   return value.trim().length > 0
-    ? "תוכן מוגדר"
-    : "התוכן עדיין לא הוגדר";
+    ? messages.configured
+    : messages.notConfigured;
 }
 
 function conditionBranchSummary(
@@ -37,59 +45,79 @@ function conditionBranchSummary(
     | ""
     | null
     | undefined,
+  language: InterfaceLanguage,
 ): string {
+  const messages = readBotFlowMessages(language).preview;
   if (handoffReason === "") {
-    return "Handoff לנציג; סיבת ההעברה עדיין לא הוגדרה";
+    return messages.handoffReasonMissing;
   }
 
   if (handoffReason) {
-    return "Handoff לנציג ללא שליחת תשובה באותו Turn";
+    return messages.handoffNoReply;
   }
 
-  return `תשובת Text, ${configuredText(replyText)}, ואז סיום`;
+  return messages.textThenEnd(
+    configuredText(replyText, language),
+  );
 }
 
 function graphNodeTitle(
   node: BotFlowGraphDraftNode,
   index: number,
+  language: InterfaceLanguage,
 ): string {
-  return `Node ${index + 1}, ${node.type}`;
+  return readBotFlowMessages(language).preview.nodeTitle(
+    index + 1,
+    node.type,
+  );
 }
 
 function graphNodeTargetSummary(
   node: BotFlowGraphDraftNode,
   positions: ReadonlyMap<string, number>,
+  language: InterfaceLanguage,
 ): string {
+  const messages = readBotFlowMessages(language).preview;
   const position = (key: string) =>
     positions.get(key) ?? 0;
 
   if (node.type === "text") {
-    return `ממשיך ל־Node ${position(node.nextDraftNodeKey)}`;
+    return messages.continuesTo(
+      position(node.nextDraftNodeKey),
+    );
   }
 
   if (node.type === "buttons") {
     return node.options
       .map(
         (option, index) =>
-          `${option.label.trim() || `אפשרות ${index + 1}`} אל Node ${position(option.nextDraftNodeKey)}`,
+          messages.optionToNode(
+            option.label.trim() || messages.option(index + 1),
+            position(option.nextDraftNodeKey),
+          ),
       )
       .join("; ");
   }
 
   if (node.type === "condition") {
-    return `מתקיים אל Node ${position(node.matchedDraftNodeKey)}; אינו מתקיים אל Node ${position(node.unmatchedDraftNodeKey)}`;
+    return messages.conditionTargets(
+      position(node.matchedDraftNodeKey),
+      position(node.unmatchedDraftNodeKey),
+    );
   }
 
   return node.type === "handoff"
-    ? "מעביר לנציג ומסיים"
-    : "מסיים את הרצת הבוט";
+    ? messages.handoffEnds
+    : messages.botEnds;
 }
 
 function graphNodeConnectionLabels(
   node: BotFlowGraphDraftNode,
   index: number,
   positions: ReadonlyMap<string, number>,
+  language: InterfaceLanguage,
 ): readonly string[] {
+  const messages = readBotFlowMessages(language).preview;
   const source = `Node ${index + 1}`;
   const target = (key: string) =>
     `Node ${positions.get(key) ?? 0}`;
@@ -103,14 +131,14 @@ function graphNodeConnectionLabels(
   if (node.type === "buttons") {
     return node.options.map(
       (option, optionIndex) =>
-        `${source} — ${option.label.trim() || `אפשרות ${optionIndex + 1}`} → ${target(option.nextDraftNodeKey)}`,
+        `${source} — ${option.label.trim() || messages.option(optionIndex + 1)} → ${target(option.nextDraftNodeKey)}`,
     );
   }
 
   if (node.type === "condition") {
     return [
-      `${source} — מתקיים → ${target(node.matchedDraftNodeKey)}`,
-      `${source} — אינו מתקיים → ${target(node.unmatchedDraftNodeKey)}`,
+      `${source} — ${messages.matched} → ${target(node.matchedDraftNodeKey)}`,
+      `${source} — ${messages.unmatched} → ${target(node.unmatchedDraftNodeKey)}`,
     ];
   }
 
@@ -118,6 +146,7 @@ function graphNodeConnectionLabels(
 }
 
 function AccessibleDraftSummary({
+  language,
   keywords,
   matchMode,
   replySteps,
@@ -127,6 +156,7 @@ function AccessibleDraftSummary({
   condition,
   handoffReason,
 }: {
+  language: InterfaceLanguage;
   keywords: readonly string[];
   matchMode: BotFlowKeywordMatchMode;
   replySteps: readonly BotFlowReplyStepDraft[];
@@ -137,6 +167,7 @@ function AccessibleDraftSummary({
   condition: KeywordConditionDraft | null;
   handoffReason: KeywordHandoffReason | "" | null;
 }) {
+  const messages = readBotFlowMessages(language).preview;
   const handoffEnabled = handoffReason !== null;
   const graphNodePositions = new Map(
     graphDraft?.nodes.map((node, index) => [
@@ -148,49 +179,54 @@ function AccessibleDraftSummary({
   return (
     <div className="sr-only">
       <p>
-        סיכום נגיש של מסלול הטיוטה, לפי הסדר
-        והענפים המוצגים בתרשים.
+        {messages.accessibleIntro}
       </p>
       <ol>
-        <li>נקודת התחלה: הודעה נכנסת.</li>
+        <li>{messages.startSummary}</li>
         <li>
-          בדיקת {keywords.length} מילות מפתח
-          בשיטת {matchMode === "exact"
-            ? "התאמה מלאה"
-            : "ההודעה מכילה"}.
+          {messages.keywordSummary(
+            keywords.length,
+            matchMode === "exact"
+              ? messages.exact
+              : messages.contains,
+          )}
         </li>
         <li>
-          ענף יש התאמה.
+          {messages.matchedBranch}
           {handoffEnabled ? (
             <ol>
               <li>
                 {handoffReason
-                  ? "Handoff לנציג ללא תשובה אוטומטית."
-                  : "Handoff לנציג; סיבת ההעברה עדיין לא הוגדרה."}
+                  ? messages.handoffAutomatic
+                  : messages.handoffMissingPeriod}
               </li>
             </ol>
           ) : (
             <ol>
               {replySteps.map((step, index) => (
                 <li key={step.draftStepKey}>
-                  הודעת Text {index + 1}: {configuredText(step.text)}.
+                  {messages.textMessage(
+                    index + 1,
+                    configuredText(step.text, language),
+                  )}
                 </li>
               ))}
               {graphDraft ? (
                 <li>
-                  Graph מלא. Node הכניסה הוא Node{" "}
-                  {graphNodePositions.get(
-                    graphDraft.entryDraftNodeKey,
-                  ) ?? 0}
-                  .
+                  {messages.graphEntry(
+                    graphNodePositions.get(
+                      graphDraft.entryDraftNodeKey,
+                    ) ?? 0,
+                  )}
                   <ol>
                     {graphDraft.nodes.map(
                       (node, index) => (
                         <li key={node.draftNodeKey}>
-                          {graphNodeTitle(node, index)}:{" "}
+                          {graphNodeTitle(node, index, language)}:{" "}
                           {graphNodeTargetSummary(
                             node,
                             graphNodePositions,
+                            language,
                           )}.
                         </li>
                       ),
@@ -200,12 +236,19 @@ function AccessibleDraftSummary({
               ) : null}
               {buttonMenu ? (
                 <li>
-                  שאלת Buttons: {configuredText(buttonMenu.buttonText)}.
+                  {messages.buttonQuestion(
+                    configuredText(
+                      buttonMenu.buttonText,
+                      language,
+                    ),
+                  )}
                   <ol>
                     {buttonMenu.options.map((option, index) => (
                       <li key={option.draftOptionKey}>
-                        {option.label.trim() || `אפשרות ${index + 1}`}:
-                        {" "}{configuredText(option.replyText)}, ואז סיום.
+                        {messages.optionThenEnd(
+                          option.label.trim() || messages.option(index + 1),
+                          configuredText(option.replyText, language),
+                        )}
                       </li>
                     ))}
                   </ol>
@@ -213,18 +256,24 @@ function AccessibleDraftSummary({
               ) : null}
               {twoStepButtonMenu ? (
                 <li>
-                  שאלת Buttons ראשונה: {configuredText(
-                    twoStepButtonMenu.firstButtonText,
-                  )}.
+                  {messages.firstButtonQuestion(
+                    configuredText(
+                      twoStepButtonMenu.firstButtonText,
+                      language,
+                    ),
+                  )}
                   <ol>
                     {twoStepButtonMenu.branches.map(
                       (branch, branchIndex) => (
                         <li key={branch.draftBranchKey}>
-                          {branch.label.trim() ||
-                            `ענף ${branchIndex + 1}`}:
-                          שאלת Buttons שנייה, {configuredText(
-                            branch.menu.buttonText,
-                          )}.
+                          {messages.secondButtonQuestion(
+                            branch.label.trim() ||
+                              messages.branch(branchIndex + 1),
+                            configuredText(
+                              branch.menu.buttonText,
+                              language,
+                            ),
+                          )}
                           <ol>
                             {branch.menu.options.map(
                               (option, optionIndex) => (
@@ -233,11 +282,14 @@ function AccessibleDraftSummary({
                                     option.draftOptionKey
                                   }
                                 >
-                                  {option.label.trim() ||
-                                    `אפשרות ${optionIndex + 1}`}:
-                                  {" "}{configuredText(
-                                    option.replyText,
-                                  )}, ואז סיום.
+                                  {messages.optionThenEnd(
+                                    option.label.trim() ||
+                                      messages.option(optionIndex + 1),
+                                    configuredText(
+                                      option.replyText,
+                                      language,
+                                    ),
+                                  )}
                                 </li>
                               ),
                             )}
@@ -250,22 +302,29 @@ function AccessibleDraftSummary({
               ) : null}
               {condition ? (
                 <li>
-                  Condition על {condition.fact ===
-                  "conversation-status"
-                    ? "מצב השיחה"
-                    : "הטקסט הנכנס"}.
+                  {messages.conditionOn(
+                    condition.fact === "conversation-status"
+                      ? messages.conversationFact
+                      : messages.inboundFact,
+                  )}
                   <ol>
                     <li>
-                      התנאי מתקיים: {conditionBranchSummary(
-                        condition.matchedReplyText,
-                        condition.matchedHandoffReason,
-                      )}.
+                      {messages.matchedSummary(
+                        conditionBranchSummary(
+                          condition.matchedReplyText,
+                          condition.matchedHandoffReason,
+                          language,
+                        ),
+                      )}
                     </li>
                     <li>
-                      התנאי אינו מתקיים: {conditionBranchSummary(
-                        condition.unmatchedReplyText,
-                        condition.unmatchedHandoffReason,
-                      )}.
+                      {messages.unmatchedSummary(
+                        conditionBranchSummary(
+                          condition.unmatchedReplyText,
+                          condition.unmatchedHandoffReason,
+                          language,
+                        ),
+                      )}
                     </li>
                   </ol>
                 </li>
@@ -274,15 +333,17 @@ function AccessibleDraftSummary({
               !twoStepButtonMenu &&
               !graphDraft &&
               !condition ? (
-                <li>סיום התהליך.</li>
+                <li>{messages.flowEnd}</li>
               ) : null}
             </ol>
           )}
         </li>
         <li>
-          ענף אין התאמה: {handoffEnabled
-            ? "סיום ללא שינוי בשיחה"
-            : "Handoff לנציג"}.
+          {messages.unmatchedBranch(
+            handoffEnabled
+              ? messages.noChangeEnd
+              : messages.handoff,
+          )}
         </li>
       </ol>
     </div>
@@ -290,6 +351,7 @@ function AccessibleDraftSummary({
 }
 
 export function BotFlowDraftPreview({
+  language,
   name,
   versionLabel,
   keywords,
@@ -301,6 +363,7 @@ export function BotFlowDraftPreview({
   condition,
   handoffReason,
 }: {
+  language: InterfaceLanguage;
   name: string;
   versionLabel: string;
   keywords: readonly string[];
@@ -313,6 +376,7 @@ export function BotFlowDraftPreview({
   condition: KeywordConditionDraft | null;
   handoffReason: KeywordHandoffReason | "" | null;
 }) {
+  const messages = readBotFlowMessages(language).preview;
   const handoffEnabled = handoffReason !== null;
   const matchedConditionHandoffReason =
     condition?.matchedHandoffReason ?? null;
@@ -332,12 +396,13 @@ export function BotFlowDraftPreview({
     >
       <div className="canvas-toolbar">
         <h3 id={PREVIEW_TITLE_ID}>
-          {name.trim() || "תהליך ללא שם"}
+          {name.trim() || messages.unnamed}
         </h3>
         <span>{versionLabel}</span>
       </div>
 
       <AccessibleDraftSummary
+        language={language}
         keywords={keywords}
         matchMode={matchMode}
         replySteps={replySteps}
@@ -355,8 +420,8 @@ export function BotFlowDraftPreview({
         <div className="start-node">
           <span>▶</span>
           <div>
-            <small>נקודת התחלה</small>
-            <strong>הודעה נכנסת</strong>
+            <small>{messages.start}</small>
+            <strong>{messages.inboundMessage}</strong>
           </div>
         </div>
 
@@ -365,11 +430,11 @@ export function BotFlowDraftPreview({
         <div className="flow-node bot-flow-node-main">
           <span className="node-icon">#</span>
           <div>
-            <small>בדיקה</small>
+            <small>{messages.check}</small>
             <strong>
               {keywords.length > 0
-                ? `${keywords.length} מילות מפתח`
-                : "לא הוגדרו מילות מפתח"}
+                ? messages.keywordCount(keywords.length)
+                : messages.noKeywords}
             </strong>
           </div>
         </div>
@@ -377,14 +442,14 @@ export function BotFlowDraftPreview({
         <div className="bot-flow-branches">
           <div>
             <span className="bot-flow-branch-label success">
-              יש התאמה
+              {messages.match}
             </span>
             {handoffEnabled ? (
               <div className="flow-node bot-flow-handoff-node">
                 <span className="node-icon">↗</span>
                 <div>
-                  <small>Handoff אטומי</small>
-                  <strong>העברה להמתנה לנציג</strong>
+                  <small>{messages.atomicHandoff}</small>
+                  <strong>{messages.transferToAgent}</strong>
                 </div>
               </div>
             ) : (
@@ -396,12 +461,12 @@ export function BotFlowDraftPreview({
                         <span className="node-icon">T</span>
                         <div>
                           <small>
-                            הודעת טקסט {index + 1}
+                            {messages.textMessageLabel(index + 1)}
                           </small>
                           <strong>
                             {step.text.trim()
-                              ? "שליחת ההודעה שהוגדרה"
-                              : "לא הוגדר תוכן"}
+                              ? messages.sendConfigured
+                              : messages.noContent}
                           </strong>
                         </div>
                       </div>
@@ -439,16 +504,17 @@ export function BotFlowDraftPreview({
                           </span>
                           <div>
                             <small>
-                              {graphNodeTitle(node, index)}
+                              {graphNodeTitle(node, index, language)}
                               {node.draftNodeKey ===
                               graphDraft.entryDraftNodeKey
-                                ? " — כניסה"
+                                ? messages.entrySuffix
                                 : ""}
                             </small>
                             <strong>
                               {graphNodeTargetSummary(
                                 node,
                                 graphNodePositions,
+                                language,
                               )}
                             </strong>
                           </div>
@@ -462,6 +528,7 @@ export function BotFlowDraftPreview({
                             node,
                             index,
                             graphNodePositions,
+                            language,
                           ).map((label) => (
                             <span key={label}>{label}</span>
                           )),
@@ -475,11 +542,11 @@ export function BotFlowDraftPreview({
                     <div className="flow-node bot-flow-buttons-node">
                       <span className="node-icon">⠿</span>
                       <div>
-                        <small>שאלת כפתורים</small>
+                        <small>{messages.buttonQuestionLabel}</small>
                         <strong>
                           {buttonMenu.buttonText.trim()
-                            ? `${buttonMenu.options.length} אפשרויות בחירה`
-                            : "לא הוגדר טקסט שאלה"}
+                            ? messages.choiceCount(buttonMenu.options.length)
+                            : messages.noQuestion}
                         </strong>
                       </div>
                     </div>
@@ -488,16 +555,16 @@ export function BotFlowDraftPreview({
                         <div key={option.draftOptionKey}>
                           <span>
                             {option.label.trim() ||
-                              `אפשרות ${index + 1}`}
+                              messages.option(index + 1)}
                           </span>
                           <div className="flow-node">
                             <span className="node-icon">T</span>
                             <div>
-                              <small>תשובת ענף</small>
+                              <small>{messages.branchReply}</small>
                               <strong>
                                 {option.replyText.trim()
-                                  ? "שליחת התשובה שהוגדרה"
-                                  : "לא הוגדרה תשובה"}
+                                  ? messages.sendReply
+                                  : messages.noReply}
                               </strong>
                             </div>
                           </div>
@@ -512,11 +579,13 @@ export function BotFlowDraftPreview({
                     <div className="flow-node bot-flow-buttons-node">
                       <span className="node-icon">⠿</span>
                       <div>
-                        <small>שאלת Buttons ראשונה</small>
+                        <small>{messages.firstButtons}</small>
                         <strong>
                           {twoStepButtonMenu.firstButtonText.trim()
-                            ? `${twoStepButtonMenu.branches.length} ענפים לשאלה שנייה`
-                            : "לא הוגדר טקסט שאלה"}
+                            ? messages.secondBranchCount(
+                                twoStepButtonMenu.branches.length,
+                              )
+                            : messages.noQuestion}
                         </strong>
                       </div>
                     </div>
@@ -526,7 +595,7 @@ export function BotFlowDraftPreview({
                           <div key={branch.draftBranchKey}>
                             <span>
                               {branch.label.trim() ||
-                                `ענף ${index + 1}`}
+                                messages.branch(index + 1)}
                             </span>
                             <div className="flow-node bot-flow-buttons-node">
                               <span className="node-icon">
@@ -534,12 +603,14 @@ export function BotFlowDraftPreview({
                               </span>
                               <div>
                                 <small>
-                                  שאלת Buttons שנייה
+                                  {messages.secondButtons}
                                 </small>
                                 <strong>
                                   {branch.menu.buttonText.trim()
-                                    ? `${branch.menu.options.length} אפשרויות תשובה`
-                                    : "לא הוגדר טקסט שאלה"}
+                                    ? messages.replyOptionCount(
+                                        branch.menu.options.length,
+                                      )
+                                    : messages.noQuestion}
                                 </strong>
                               </div>
                             </div>
@@ -552,7 +623,7 @@ export function BotFlowDraftPreview({
                                     }
                                   >
                                     {option.label.trim() ||
-                                      `אפשרות ${optionIndex + 1}`}
+                                      messages.option(optionIndex + 1)}
                                     {" → Text → End"}
                                   </span>
                                 ),
@@ -570,18 +641,18 @@ export function BotFlowDraftPreview({
                     <div className="flow-node bot-flow-condition-node">
                       <span className="node-icon">◇</span>
                       <div>
-                        <small>פיצול לפי תנאי</small>
+                        <small>{messages.conditionSplit}</small>
                         <strong>
                           {condition.fact ===
                           "conversation-status"
-                            ? "בדיקת מצב השיחה"
-                            : "בדיקת טקסט נכנס"}
+                            ? messages.statusCheck
+                            : messages.textCheck}
                         </strong>
                       </div>
                     </div>
                     <div className="bot-flow-option-branches bot-flow-condition-branches">
                       <div>
-                        <span>התנאי מתקיים</span>
+                        <span>{messages.conditionMatched}</span>
                         <div
                           className={`flow-node${
                             matchedConditionHandoffReason !== null
@@ -597,23 +668,23 @@ export function BotFlowDraftPreview({
                           <div>
                             <small>
                               {matchedConditionHandoffReason !== null
-                                ? "Handoff אטומי"
-                                : "תשובת ענף"}
+                                ? messages.atomicHandoff
+                                : messages.branchReply}
                             </small>
                             <strong>
                               {matchedConditionHandoffReason !== null
                                 ? matchedConditionHandoffReason
-                                  ? "העברה להמתנה לנציג"
-                                  : "לא הוגדרה סיבת העברה"
+                                  ? messages.transferToAgent
+                                  : messages.noHandoffReason
                                 : condition.matchedReplyText.trim()
-                                  ? "שליחת התשובה שהוגדרה"
-                                  : "לא הוגדרה תשובה"}
+                                  ? messages.sendReply
+                                  : messages.noReply}
                             </strong>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <span>התנאי אינו מתקיים</span>
+                        <span>{messages.conditionUnmatched}</span>
                         <div
                           className={`flow-node${
                             unmatchedConditionHandoffReason !== null
@@ -629,17 +700,17 @@ export function BotFlowDraftPreview({
                           <div>
                             <small>
                               {unmatchedConditionHandoffReason !== null
-                                ? "Handoff אטומי"
-                                : "תשובת ענף"}
+                                ? messages.atomicHandoff
+                                : messages.branchReply}
                             </small>
                             <strong>
                               {unmatchedConditionHandoffReason !== null
                                 ? unmatchedConditionHandoffReason
-                                  ? "העברה להמתנה לנציג"
-                                  : "לא הוגדרה סיבת העברה"
+                                  ? messages.transferToAgent
+                                  : messages.noHandoffReason
                                 : condition.unmatchedReplyText.trim()
-                                  ? "שליחת התשובה שהוגדרה"
-                                  : "לא הוגדרה תשובה"}
+                                  ? messages.sendReply
+                                  : messages.noReply}
                             </strong>
                           </div>
                         </div>
@@ -653,7 +724,7 @@ export function BotFlowDraftPreview({
                   matchedConditionHandoffReason === null ||
                   unmatchedConditionHandoffReason === null) ? (
                   <span className="bot-flow-terminal">
-                    ■ סיום
+                    {messages.end}
                   </span>
                 ) : null}
               </>
@@ -661,18 +732,18 @@ export function BotFlowDraftPreview({
           </div>
           <div>
             <span className="bot-flow-branch-label warning">
-              אין התאמה
+              {messages.noMatch}
             </span>
             {handoffEnabled ? (
               <span className="bot-flow-terminal">
-                ■ סיום ללא שינוי
+                {messages.endNoChange}
               </span>
             ) : (
               <div className="flow-node">
                 <span className="node-icon">↗</span>
                 <div>
-                  <small>פעולה אטומית</small>
-                  <strong>העברה להמתנה לנציג</strong>
+                  <small>{messages.atomicAction}</small>
+                  <strong>{messages.transferToAgent}</strong>
                 </div>
               </div>
             )}

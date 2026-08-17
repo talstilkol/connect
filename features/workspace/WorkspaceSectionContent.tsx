@@ -1,7 +1,6 @@
 "use client";
 
 import { lazy, Suspense } from "react";
-import { BotFlowBuilder } from "../bot/BotFlowBuilder";
 import {
   OperationalReports,
 } from "../reports/OperationalReports";
@@ -82,6 +81,7 @@ import {
 import {
   readAiAgentPageMessages,
 } from "../ai/aiAgentPageMessages";
+import { readBotFlowMessages } from "../bot/botFlowMessages";
 
 const CampaignManager = lazy(() =>
   import("../campaigns/CampaignManager").then((module) => ({
@@ -100,6 +100,12 @@ const ConversationInbox = lazy(() =>
 const AiAgentEditor = lazy(() =>
   import("../ai/AiAgentEditor").then((module) => ({
     default: module.AiAgentEditor,
+  })),
+);
+
+const BotFlowBuilder = lazy(() =>
+  import("../bot/BotFlowBuilder").then((module) => ({
+    default: module.BotFlowBuilder,
   })),
 );
 
@@ -252,6 +258,7 @@ export function WorkspaceSectionContent({
           ) : null}
           {activeSection === "bot" ? (
             <Bot
+              language={language}
               initialDirectory={initialBotFlows}
               initialStatus={
                 initialBotFlowStatus
@@ -467,22 +474,36 @@ function Inbox({
 }
 
 function Bot({
+  language,
   initialDirectory,
   initialStatus,
 }: {
+  language: InterfaceLanguage;
   initialDirectory: BotFlowDirectoryView;
   initialStatus: BotFlowDirectoryStatus;
 }) {
+  const messages = readBotFlowMessages(language).page;
+
   return (
     <FeaturePage
-      eyebrow="אוטומציה"
-      title="בונה תהליכי בוט"
-      description="בניית זרימה ויזואלית הנשמרת ב־D1, עם גרסאות טיוטה ופרסום מבוקר למנוע הבוט."
+      eyebrow={messages.eyebrow}
+      title={messages.title}
+      description={messages.description}
     >
-      <BotFlowBuilder
-        initialDirectory={initialDirectory}
-        initialStatus={initialStatus}
-      />
+      <Suspense
+        fallback={
+          <div className="inline-notice" role="status">
+            <span aria-hidden="true">i</span>
+            <p>{messages.loading}</p>
+          </div>
+        }
+      >
+        <BotFlowBuilder
+          language={language}
+          initialDirectory={initialDirectory}
+          initialStatus={initialStatus}
+        />
+      </Suspense>
     </FeaturePage>
   );
 }

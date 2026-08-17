@@ -32,7 +32,7 @@ test("keeps keyword handoff explicit, keyboard accessible, and reversible", asyn
   );
   assert.match(
     editor,
-    /במצב זה לא תישלח הודעת Bot/,
+    /\{messages\.help\}/,
   );
   assert.match(
     editor,
@@ -52,7 +52,7 @@ test("keeps keyword handoff explicit, keyboard accessible, and reversible", asyn
   );
   assert.match(
     preview,
-    /סיום ללא שינוי בשיחה/,
+    /messages\.noChangeEnd/,
   );
   assert.doesNotMatch(editor, /Math\.random\(/);
   assert.doesNotMatch(

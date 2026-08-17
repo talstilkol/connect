@@ -67,19 +67,19 @@ test("describes trigger outcomes, condition branches, buttons, handoff, and end 
     "utf8",
   );
 
-  for (const expectedText of [
-    "נקודת התחלה: הודעה נכנסת",
-    "ענף יש התאמה",
-    "ענף אין התאמה",
-    "שאלת Buttons",
-    "התנאי מתקיים",
-    "התנאי אינו מתקיים",
-    "Handoff לנציג",
-    "סיום התהליך",
+  for (const expectedMessageKey of [
+    "startSummary",
+    "matchedBranch",
+    "unmatchedBranch",
+    "buttonQuestion",
+    "matchedSummary",
+    "unmatchedSummary",
+    "handoffNoReply",
+    "flowEnd",
   ]) {
     assert.match(
       previewSource,
-      new RegExp(expectedText),
+      new RegExp(`messages\\.${expectedMessageKey}`),
     );
   }
 });

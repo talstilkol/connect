@@ -7,20 +7,27 @@ import {
 import type {
   KeywordHandoffReason,
 } from "../../shared/domain/botFlowComposer";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 export function BotFlowHandoffEditor({
+  language,
   handoffReason,
   disabled,
   focusOnMount,
   onReasonChange,
   onRemoveHandoff,
 }: {
+  language: InterfaceLanguage;
   handoffReason: KeywordHandoffReason | "";
   disabled: boolean;
   focusOnMount: boolean;
   onReasonChange(value: KeywordHandoffReason): void;
   onRemoveHandoff(): void;
 }) {
+  const messages = readBotFlowMessages(language).handoff;
   const reasonRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
@@ -31,15 +38,13 @@ export function BotFlowHandoffEditor({
 
   return (
     <fieldset className="bot-flow-handoff">
-      <legend>העברה לנציג לפי מילת מפתח</legend>
+      <legend>{messages.legend}</legend>
       <p id="bot-flow-handoff-help">
-        רק הודעה שתואמת למילות המפתח תעביר את
-        השיחה להמתנה לנציג. אי־התאמה תסתיים ללא
-        שינוי, ובמצב זה לא תישלח הודעת Bot.
+        {messages.help}
       </p>
 
       <label>
-        <span>סיבת ההעברה לצורכי Audit</span>
+        <span>{messages.reason}</span>
         <select
           ref={reasonRef}
           value={handoffReason}
@@ -53,13 +58,13 @@ export function BotFlowHandoffEditor({
           aria-describedby="bot-flow-handoff-help"
         >
           <option value="" disabled>
-            בחירת סיבת העברה
+            {messages.chooseReason}
           </option>
           <option value="customer-request">
-            הלקוח ביקש נציג
+            {messages.customerRequest}
           </option>
           <option value="flow-rule">
-            כלל עסקי דורש נציג
+            {messages.flowRule}
           </option>
         </select>
       </label>
@@ -70,7 +75,7 @@ export function BotFlowHandoffEditor({
         onClick={onRemoveHandoff}
         disabled={disabled}
       >
-        הסרת מסלול ההעברה
+        {messages.remove}
       </button>
     </fieldset>
   );

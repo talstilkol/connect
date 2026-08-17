@@ -29,6 +29,10 @@ import {
 import {
   persistedConversationStatuses,
 } from "../../shared/domain/conversation";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readBotFlowMessages } from "./botFlowMessages";
 
 const nodeTypeLabels = {
   text: "Text",
@@ -41,17 +45,23 @@ const nodeTypeLabels = {
 function nodeLabel(
   node: BotFlowGraphDraftNode,
   index: number,
+  language: InterfaceLanguage,
 ): string {
-  return `Node ${index + 1} — ${nodeTypeLabels[node.type]}`;
+  return readBotFlowMessages(language).graph.nodeLabel(
+    index + 1,
+    nodeTypeLabels[node.type],
+  );
 }
 
 function NodeTargetSelect({
+  language,
   value,
   nodes,
   label,
   disabled,
   onChange,
 }: {
+  language: InterfaceLanguage;
   value: string;
   nodes: readonly BotFlowGraphDraftNode[];
   label: string;
@@ -73,7 +83,7 @@ function NodeTargetSelect({
             key={node.draftNodeKey}
             value={node.draftNodeKey}
           >
-            {nodeLabel(node, index)}
+            {nodeLabel(node, index, language)}
           </option>
         ))}
       </select>
@@ -82,6 +92,7 @@ function NodeTargetSelect({
 }
 
 function GraphNodeFields({
+  language,
   node,
   draft,
   disabled,
@@ -89,6 +100,7 @@ function GraphNodeFields({
   onAnnouncement,
   onRequestNodeFocus,
 }: {
+  language: InterfaceLanguage;
   node: BotFlowGraphDraftNode;
   draft: BotFlowGraphEditorDraft;
   disabled: boolean;
@@ -96,6 +108,8 @@ function GraphNodeFields({
   onAnnouncement(message: string): void;
   onRequestNodeFocus(): void;
 }) {
+  const botMessages = readBotFlowMessages(language);
+  const messages = botMessages.graph;
   const fallbackTarget =
     draft.nodes.find(
       (candidate) => candidate.type === "end",
@@ -105,7 +119,7 @@ function GraphNodeFields({
     return (
       <div className="bot-flow-graph-node-fields">
         <label>
-          <span>תוכן ההודעה</span>
+          <span>{messages.messageContent}</span>
           <textarea
             rows={4}
             value={node.text}
@@ -121,9 +135,10 @@ function GraphNodeFields({
           />
         </label>
         <NodeTargetSelect
+          language={language}
           value={node.nextDraftNodeKey}
           nodes={draft.nodes}
-          label="ה־Node הבא"
+          label={messages.nextNode}
           disabled={disabled}
           onChange={(nextDraftNodeKey) =>
             onNodeChange({
@@ -140,7 +155,7 @@ function GraphNodeFields({
     return (
       <div className="bot-flow-graph-node-fields">
         <label>
-          <span>טקסט השאלה</span>
+          <span>{messages.question}</span>
           <textarea
             rows={4}
             value={node.text}
@@ -159,13 +174,13 @@ function GraphNodeFields({
           {node.options.map((option, index) => (
             <li key={option.draftOptionKey}>
               <div className="bot-flow-graph-option-header">
-                <strong>אפשרות {index + 1}</strong>
+                <strong>{messages.option(index + 1)}</strong>
                 <div className="bot-flow-step-actions">
                   <button
                     type="button"
                     className="secondary-button"
                     disabled={disabled || index === 0}
-                    aria-label={`העבר את אפשרות ${index + 1} למעלה`}
+                    aria-label={messages.moveOptionUp(index + 1)}
                     onClick={() => {
                       onNodeChange(
                         moveBotFlowGraphButtonOption(
@@ -175,7 +190,7 @@ function GraphNodeFields({
                         ),
                       );
                       onAnnouncement(
-                        `אפשרות ${index + 1} הועברה למעלה.`,
+                        messages.optionMovedUp(index + 1),
                       );
                     }}
                   >
@@ -188,7 +203,7 @@ function GraphNodeFields({
                       disabled ||
                       index === node.options.length - 1
                     }
-                    aria-label={`העבר את אפשרות ${index + 1} למטה`}
+                    aria-label={messages.moveOptionDown(index + 1)}
                     onClick={() => {
                       onNodeChange(
                         moveBotFlowGraphButtonOption(
@@ -198,7 +213,7 @@ function GraphNodeFields({
                         ),
                       );
                       onAnnouncement(
-                        `אפשרות ${index + 1} הועברה למטה.`,
+                        messages.optionMovedDown(index + 1),
                       );
                     }}
                   >
@@ -210,7 +225,7 @@ function GraphNodeFields({
                     disabled={
                       disabled || node.options.length === 1
                     }
-                    aria-label={`מחק את אפשרות ${index + 1}`}
+                    aria-label={messages.deleteOption(index + 1)}
                     onClick={() => {
                       onRequestNodeFocus();
                       onNodeChange(
@@ -220,16 +235,16 @@ function GraphNodeFields({
                         ),
                       );
                       onAnnouncement(
-                        `אפשרות ${index + 1} נמחקה.`,
+                        messages.optionDeleted(index + 1),
                       );
                     }}
                   >
-                    מחיקה
+                    {messages.delete}
                   </button>
                 </div>
               </div>
               <label>
-                <span>תווית הכפתור</span>
+                <span>{messages.buttonLabel}</span>
                 <input
                   value={option.label}
                   maxLength={80}
@@ -249,9 +264,10 @@ function GraphNodeFields({
                 />
               </label>
               <NodeTargetSelect
+                language={language}
                 value={option.nextDraftNodeKey}
                 nodes={draft.nodes}
-                label="יעד הבחירה"
+                label={messages.choiceTarget}
                 disabled={disabled}
                 onChange={(nextDraftNodeKey) =>
                   onNodeChange(
@@ -283,10 +299,10 @@ function GraphNodeFields({
                 fallbackTarget,
               ),
             );
-            onAnnouncement("נוספה אפשרות כפתור.");
+            onAnnouncement(messages.optionAdded);
           }}
         >
-          הוספת אפשרות
+          {messages.addOption}
         </button>
       </div>
     );
@@ -297,7 +313,7 @@ function GraphNodeFields({
       <div className="bot-flow-graph-node-fields">
         <div className="bot-flow-graph-condition-row">
           <label>
-            <span>שדה לבדיקה</span>
+            <span>{messages.fact}</span>
             <select
               value={node.fact}
               disabled={disabled}
@@ -311,15 +327,15 @@ function GraphNodeFields({
               }
             >
               <option value="last-inbound-text">
-                טקסט נכנס אחרון
+                {messages.inboundText}
               </option>
               <option value="conversation-status">
-                מצב השיחה
+                {messages.conversationStatus}
               </option>
             </select>
           </label>
           <label>
-            <span>פעולת ההשוואה</span>
+            <span>{messages.operator}</span>
             <select
               value={node.operator}
               disabled={
@@ -336,13 +352,13 @@ function GraphNodeFields({
                 )
               }
             >
-              <option value="equals">שווה</option>
-              <option value="contains">מכיל</option>
+              <option value="equals">{messages.equals}</option>
+              <option value="contains">{messages.contains}</option>
             </select>
           </label>
         </div>
         <label>
-          <span>ערך להשוואה</span>
+          <span>{messages.value}</span>
           {node.fact === "conversation-status" ? (
             <select
               value={node.value}
@@ -356,12 +372,12 @@ function GraphNodeFields({
               }
             >
               <option value="" disabled>
-                בחירת מצב שיחה
+                {messages.chooseStatus}
               </option>
               {persistedConversationStatuses.map(
                 (status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {botMessages.labels.conversationStatuses[status]}
                   </option>
                 ),
               )}
@@ -382,9 +398,10 @@ function GraphNodeFields({
           )}
         </label>
         <NodeTargetSelect
+          language={language}
           value={node.matchedDraftNodeKey}
           nodes={draft.nodes}
-          label="יעד כאשר התנאי מתקיים"
+          label={messages.matchedTarget}
           disabled={disabled}
           onChange={(matchedDraftNodeKey) =>
             onNodeChange({
@@ -394,9 +411,10 @@ function GraphNodeFields({
           }
         />
         <NodeTargetSelect
+          language={language}
           value={node.unmatchedDraftNodeKey}
           nodes={draft.nodes}
-          label="יעד כאשר התנאי אינו מתקיים"
+          label={messages.unmatchedTarget}
           disabled={disabled}
           onChange={(unmatchedDraftNodeKey) =>
             onNodeChange({
@@ -412,7 +430,7 @@ function GraphNodeFields({
   if (node.type === "handoff") {
     return (
       <label className="bot-flow-graph-node-fields">
-        <span>סיבת ההעברה לנציג</span>
+        <span>{messages.handoffReason}</span>
         <select
           value={node.reason}
           disabled={disabled}
@@ -425,10 +443,10 @@ function GraphNodeFields({
           }
         >
           <option value="customer-request">
-            בקשת הלקוח
+            {messages.customerRequest}
           </option>
           <option value="flow-rule">
-            כלל בתהליך
+            {messages.flowRule}
           </option>
         </select>
       </label>
@@ -437,24 +455,27 @@ function GraphNodeFields({
 
   return (
     <p className="bot-flow-graph-end-description">
-      Node זה מסיים את הרצת הבוט ללא שינוי במצב השיחה.
+      {messages.endDescription}
     </p>
   );
 }
 
 export function BotFlowGraphEditor({
+  language,
   draft,
   disabled,
   focusOnMount,
   onChange,
   onAnnouncement,
 }: {
+  language: InterfaceLanguage;
   draft: BotFlowGraphEditorDraft;
   disabled: boolean;
   focusOnMount: boolean;
   onChange(draft: BotFlowGraphEditorDraft): void;
   onAnnouncement(message: string): void;
 }) {
+  const messages = readBotFlowMessages(language).graph;
   const editorRef = useRef<HTMLFieldSetElement>(null);
   const pendingFocusKeyRef = useRef<string | null>(null);
   const draggedNodeKeyRef = useRef<string | null>(null);
@@ -500,7 +521,7 @@ export function BotFlowGraphEditor({
       nextDraft.nodes.at(-1)?.draftNodeKey ?? null;
     onChange(nextDraft);
     onAnnouncement(
-      `נוסף Node מסוג ${nodeTypeLabels[type]}.`,
+      messages.nodeAdded(nodeTypeLabels[type]),
     );
   };
 
@@ -509,14 +530,12 @@ export function BotFlowGraphEditor({
       ref={editorRef}
       className="bot-flow-graph-editor"
     >
-      <legend>עורך Graph מלא</legend>
+      <legend>{messages.legend}</legend>
       <p id="bot-flow-graph-help">
-        כל Connection נבחר בשדה יעד. אפשר לסדר את כרטיסי
-        ה־Nodes בגרירה או בכפתורי המקלדת; הסדר החזותי אינו
-        משנה את החיבורים.
+        {messages.help}
       </p>
       <label className="bot-flow-graph-entry">
-        <span>Node הכניסה לאחר התאמת מילת המפתח</span>
+        <span>{messages.entry}</span>
         <select
           value={draft.entryDraftNodeKey}
           disabled={disabled}
@@ -527,7 +546,7 @@ export function BotFlowGraphEditor({
                 event.target.value,
               ),
             );
-            onAnnouncement("Node הכניסה השתנה.");
+            onAnnouncement(messages.entryChanged);
           }}
         >
           {draft.nodes.map((node, index) => (
@@ -535,7 +554,7 @@ export function BotFlowGraphEditor({
               key={node.draftNodeKey}
               value={node.draftNodeKey}
             >
-              {nodeLabel(node, index)}
+              {nodeLabel(node, index, language)}
             </option>
           ))}
         </select>
@@ -589,7 +608,7 @@ export function BotFlowGraphEditor({
                   ),
                 );
                 onAnnouncement(
-                  `כרטיס ה־Node נגרר למיקום ${index + 1}.`,
+                  messages.cardDragged(index + 1),
                 );
               }}
             >
@@ -600,15 +619,15 @@ export function BotFlowGraphEditor({
                   tabIndex={-1}
                   aria-describedby="bot-flow-graph-help"
                 >
-                  {nodeLabel(node, index)}
-                  {isEntry ? " — כניסה" : ""}
+                  {nodeLabel(node, index, language)}
+                  {isEntry ? messages.entrySuffix : ""}
                 </h4>
                 <div className="bot-flow-step-actions">
                   <button
                     type="button"
                     className="secondary-button"
                     disabled={disabled || index === 0}
-                    aria-label={`העבר את Node ${index + 1} למעלה`}
+                    aria-label={messages.moveNodeUp(index + 1)}
                     onClick={() => {
                       onChange(
                         moveBotFlowGraphNode(
@@ -618,7 +637,7 @@ export function BotFlowGraphEditor({
                         ),
                       );
                       onAnnouncement(
-                        `Node ${index + 1} הועבר למעלה.`,
+                        messages.nodeMovedUp(index + 1),
                       );
                     }}
                   >
@@ -631,7 +650,7 @@ export function BotFlowGraphEditor({
                       disabled ||
                       index === draft.nodes.length - 1
                     }
-                    aria-label={`העבר את Node ${index + 1} למטה`}
+                    aria-label={messages.moveNodeDown(index + 1)}
                     onClick={() => {
                       onChange(
                         moveBotFlowGraphNode(
@@ -641,7 +660,7 @@ export function BotFlowGraphEditor({
                         ),
                       );
                       onAnnouncement(
-                        `Node ${index + 1} הועבר למטה.`,
+                        messages.nodeMovedDown(index + 1),
                       );
                     }}
                   >
@@ -653,9 +672,9 @@ export function BotFlowGraphEditor({
                     disabled={removeDisabled}
                     title={
                       isEntry
-                        ? "יש לבחור Node כניסה אחר לפני המחיקה."
+                        ? messages.chooseEntryBeforeDelete
                         : references > 0
-                          ? "יש להסיר תחילה את החיבורים אל ה־Node."
+                          ? messages.removeReferencesBeforeDelete
                           : undefined
                     }
                     onClick={() => {
@@ -678,11 +697,11 @@ export function BotFlowGraphEditor({
                         ]?.draftNodeKey ?? null;
                       onChange(nextDraft);
                       onAnnouncement(
-                        `Node ${index + 1} נמחק.`,
+                        messages.nodeDeleted(index + 1),
                       );
                     }}
                   >
-                    מחיקת Node
+                    {messages.deleteNode}
                   </button>
                 </div>
               </div>
@@ -690,11 +709,12 @@ export function BotFlowGraphEditor({
               (isEntry || references > 0) ? (
                 <small className="bot-flow-graph-remove-help">
                   {isEntry
-                    ? "כדי למחוק Node זה יש לבחור קודם Node כניסה אחר."
-                    : `כדי למחוק Node זה יש להסיר קודם ${references} חיבורים שמפנים אליו.`}
+                    ? messages.chooseEntryHelp
+                    : messages.removeReferencesHelp(references)}
                 </small>
               ) : null}
               <GraphNodeFields
+                language={language}
                 node={node}
                 draft={draft}
                 disabled={disabled}
@@ -737,7 +757,7 @@ export function BotFlowGraphEditor({
             }
             onClick={() => addNode(type)}
           >
-            הוספת {nodeTypeLabels[type]}
+            {messages.addNode(nodeTypeLabels[type])}
           </button>
         ))}
       </div>

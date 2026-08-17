@@ -20,15 +20,15 @@ test("keeps Graph creation, ordering, connections, and deletion keyboard accessi
 
   assert.match(
     editor,
-    /aria-label={`העבר את Node \$\{index \+ 1\} למעלה`}/,
+    /aria-label=\{messages\.moveNodeUp\(index \+ 1\)\}/,
   );
   assert.match(
     editor,
-    /aria-label={`העבר את Node \$\{index \+ 1\} למטה`}/,
+    /aria-label=\{messages\.moveNodeDown\(index \+ 1\)\}/,
   );
   assert.match(
     editor,
-    /aria-label={`העבר את אפשרות \$\{index \+ 1\} למעלה`}/,
+    /aria-label=\{messages\.moveOptionUp\(index \+ 1\)\}/,
   );
   assert.match(
     editor,
@@ -87,7 +87,7 @@ test("submits temporary Graph references and keeps persisted identities behind t
 test("describes every free Graph connection semantically and hides the duplicate visual canvas", async () => {
   const preview = await readFile(previewUrl, "utf8");
 
-  assert.match(preview, /Graph מלא\. Node הכניסה/);
+  assert.match(preview, /messages\.graphEntry/);
   assert.match(preview, /graphNodeTargetSummary/);
   assert.match(
     preview,
