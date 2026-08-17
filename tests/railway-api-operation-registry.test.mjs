@@ -28,6 +28,25 @@ const dispatchContext = {
     externalUserId: "verified-user",
   },
 };
+const idempotencyKey =
+  `connect_idempotency_v1_${"a".repeat(64)}`;
+const contactProfile = {
+  phoneNumber: "+972501234567",
+  firstName: "Tal",
+  lastName: null,
+  email: null,
+  company: "Connect",
+};
+
+function mutationRequest(payload = contactProfile) {
+  return {
+    contractVersion: "connect.railway-api.v1",
+    operation: "contacts.save",
+    requestKind: "mutation",
+    idempotencyKey,
+    payload,
+  };
+}
 
 function session(role = "owner") {
   return {
@@ -66,11 +85,18 @@ function fixture({
   tenantError = null,
   contactError = null,
   reportError = null,
+  rateLimitDecision = { outcome: "allowed" },
+  rateLimitError = null,
+  mutationOutcome = "committed",
+  mutationError = null,
+  mutationResult = undefined,
 } = {}) {
   const calls = {
     tenantIdentities: [],
     contactInputs: [],
     reportInputs: [],
+    rateLimitSubjects: [],
+    mutationCommands: [],
   };
   const registry = createRailwayApiOperationRegistry({
     tenantSessions: {
@@ -120,6 +146,51 @@ function fixture({
         };
       },
     },
+    mutationRateLimit: {
+      async consume(subject) {
+        calls.rateLimitSubjects.push(subject);
+
+        if (rateLimitError) {
+          throw rateLimitError;
+        }
+
+        return rateLimitDecision;
+      },
+    },
+    mutations: {
+      async saveContact(command) {
+        calls.mutationCommands.push(command);
+
+        if (mutationError) {
+          throw mutationError;
+        }
+
+        if (mutationResult !== undefined) {
+          return mutationResult;
+        }
+
+        if (
+          mutationOutcome === "conflict" ||
+          mutationOutcome === "unavailable"
+        ) {
+          return {
+            outcome: mutationOutcome,
+            contact: null,
+          };
+        }
+
+        return {
+          outcome: mutationOutcome,
+          contact: persistedContact({
+            phoneNumber: command.profile.phoneNumber,
+            firstName: command.profile.firstName,
+            lastName: command.profile.lastName,
+            email: command.profile.email,
+            company: command.profile.company,
+          }),
+        };
+      },
+    },
   });
 
   return { calls, registry };
@@ -140,16 +211,30 @@ test("publishes one immutable policy for every concrete operation", () => {
       id: "workspace.context.read",
       requestKind: "query",
       permission: null,
+      mutationSafety: null,
     },
     {
       id: "contacts.list",
       requestKind: "query",
       permission: "contacts.read",
+      mutationSafety: null,
+    },
+    {
+      id: "contacts.save",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "atomic-request-digest-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
     },
     {
       id: "reports.read",
       requestKind: "query",
       permission: "reports.read",
+      mutationSafety: null,
     },
   ]);
   assert.equal(Object.isFrozen(railwayApiOperationPolicies), true);
@@ -234,6 +319,186 @@ test("lists contacts through the resolved tenant and safe mapper", async () => {
   );
 });
 
+test("saves a contact through rate limit and transactional mutation boundaries", async () => {
+  const { calls, registry } = fixture({
+    tenantSession: session("manager"),
+  });
+  const result = await operation(
+    registry,
+    "contacts.save",
+  ).execute(
+    dispatchContext,
+    contactProfile,
+    mutationRequest(),
+  );
+
+  assert.deepEqual(calls.rateLimitSubjects, [
+    "7:verified-user:contacts.save",
+  ]);
+  assert.equal(calls.mutationCommands.length, 1);
+  assert.deepEqual(calls.mutationCommands[0].profile, contactProfile);
+  assert.equal(
+    calls.mutationCommands[0].idempotencyKey,
+    idempotencyKey,
+  );
+  assert.match(
+    calls.mutationCommands[0].requestDigest,
+    /^railway_mutation_request_v1_[0-9a-f]{64}$/,
+  );
+  assert.equal(calls.mutationCommands[0].session.tenantId, 7);
+  assert.deepEqual(result, {
+    replayed: false,
+    contact: {
+      id: 23,
+      phoneNumber: "+972501234567",
+      firstName: "Tal",
+      lastName: null,
+      email: null,
+      company: "Connect",
+      mailingStatus: "subscribed",
+      consentStatus: "granted",
+      consentSource: "verified-source",
+      consentRecordedAt: "2026-08-17T00:00:00.000Z",
+      consentWithdrawnAt: null,
+      version: 4,
+    },
+  });
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /tenantId|externalUserId|evidence|createdAt|updatedAt/,
+  );
+});
+
+test("marks an identical completed contact mutation as replayed", async () => {
+  const { registry } = fixture({
+    mutationOutcome: "replayed",
+  });
+  const result = await operation(
+    registry,
+    "contacts.save",
+  ).execute(
+    dispatchContext,
+    contactProfile,
+    mutationRequest(),
+  );
+
+  assert.equal(result.replayed, true);
+});
+
+test("denies contact mutation before rate limit or persistence", async () => {
+  const { calls, registry } = fixture({
+    tenantSession: session("agent"),
+  });
+
+  await assert.rejects(
+    operation(registry, "contacts.save").execute(
+      dispatchContext,
+      contactProfile,
+      mutationRequest(),
+    ),
+    (error) => error.code === "AUTHORIZATION_DENIED",
+  );
+  assert.deepEqual(calls.rateLimitSubjects, []);
+  assert.deepEqual(calls.mutationCommands, []);
+});
+
+test("fails closed when mutation rate limiting denies or is unavailable", async () => {
+  const limited = fixture({
+    rateLimitDecision: { outcome: "limited" },
+  });
+  const unavailable = fixture({
+    rateLimitError: new Error("private limiter detail"),
+  });
+  const malformed = fixture({
+    rateLimitDecision: { outcome: "unknown" },
+  });
+
+  await assert.rejects(
+    operation(limited.registry, "contacts.save").execute(
+      dispatchContext,
+      contactProfile,
+      mutationRequest(),
+    ),
+    (error) => error.code === "RATE_LIMITED",
+  );
+  await assert.rejects(
+    operation(unavailable.registry, "contacts.save").execute(
+      dispatchContext,
+      contactProfile,
+      mutationRequest(),
+    ),
+    (error) => error.code === "DEPENDENCY_UNAVAILABLE",
+  );
+  await assert.rejects(
+    operation(malformed.registry, "contacts.save").execute(
+      dispatchContext,
+      contactProfile,
+      mutationRequest(),
+    ),
+    (error) => error.code === "DEPENDENCY_UNAVAILABLE",
+  );
+  assert.deepEqual(limited.calls.mutationCommands, []);
+  assert.deepEqual(unavailable.calls.mutationCommands, []);
+  assert.deepEqual(malformed.calls.mutationCommands, []);
+});
+
+test("maps mutation idempotency conflict and storage outage to bounded codes", async () => {
+  const conflict = fixture({ mutationOutcome: "conflict" });
+  const unavailable = fixture({ mutationOutcome: "unavailable" });
+
+  await assert.rejects(
+    operation(conflict.registry, "contacts.save").execute(
+      dispatchContext,
+      contactProfile,
+      mutationRequest(),
+    ),
+    (error) => error.code === "CONFLICT",
+  );
+  await assert.rejects(
+    operation(unavailable.registry, "contacts.save").execute(
+      dispatchContext,
+      contactProfile,
+      mutationRequest(),
+    ),
+    (error) => error.code === "DEPENDENCY_UNAVAILABLE",
+  );
+});
+
+test("rejects thrown, malformed, and cross-tenant mutation results", async () => {
+  const thrown = fixture({
+    mutationError: new Error("private database error"),
+  });
+  const malformed = fixture({
+    mutationResult: {
+      outcome: "unexpected",
+      contact: persistedContact(),
+    },
+  });
+  const crossTenant = fixture({
+    mutationResult: {
+      outcome: "committed",
+      contact: persistedContact({
+        tenantId: 11,
+        firstName: "Tal",
+        company: "Connect",
+      }),
+    },
+  });
+
+  for (const testFixture of [thrown, malformed, crossTenant]) {
+    await assert.rejects(
+      operation(testFixture.registry, "contacts.save").execute(
+        dispatchContext,
+        contactProfile,
+        mutationRequest(),
+      ),
+      (error) =>
+        error.code === "DEPENDENCY_UNAVAILABLE" &&
+        !error.message.includes("private"),
+    );
+  }
+});
+
 test("enforces report permission before calling the report service", async () => {
   const { calls, registry } = fixture({
     tenantSession: session("agent"),
@@ -259,6 +524,30 @@ test("validates operation payload before tenant or service access", async () => 
     ["contacts.list", {}],
     ["contacts.list", { beforeContactId: 0 }],
     ["contacts.list", { beforeContactId: "51" }],
+    [
+      "contacts.save",
+      {
+        phoneNumber: "+972501234567",
+        firstName: null,
+        lastName: null,
+        email: 17,
+        company: null,
+      },
+    ],
+    [
+      "contacts.save",
+      {
+        ...contactProfile,
+        phoneNumber: "0501234567",
+      },
+    ],
+    [
+      "contacts.save",
+      {
+        ...contactProfile,
+        tenantId: 7,
+      },
+    ],
     [
       "reports.read",
       { startDate: "2026-08-01", endDate: "invalid" },
@@ -288,13 +577,17 @@ test("validates operation payload before tenant or service access", async () => 
       operation(registry, id).execute(
         dispatchContext,
         payload,
-        {},
+        id === "contacts.save"
+          ? mutationRequest(payload)
+          : {},
       ),
       (error) => error.code === "INVALID_REQUEST",
     );
     assert.deepEqual(calls.tenantIdentities, []);
     assert.deepEqual(calls.contactInputs, []);
     assert.deepEqual(calls.reportInputs, []);
+    assert.deepEqual(calls.rateLimitSubjects, []);
+    assert.deepEqual(calls.mutationCommands, []);
   }
 });
 

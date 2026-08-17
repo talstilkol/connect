@@ -364,7 +364,26 @@ Workspaces הוא משתמש רק בבחירת ה־Tenant השמורה ומאמ�
 
 2.20.3 ‏Runtime factory אחד מחבר Vercel OIDC, ‏Clerk, ‏Tenant
 resolution, ‏Operation registry ו־HTTP Handler. עדיין חסרים Routes,
-PostgreSQL repositories, ‏Mutation operations ו־Live evidence.
+PostgreSQL repositories, רוב פעולות ה־Mutation ו־Live evidence; חוזה
+ה־Mutation הראשון מתועד בסעיף 2.21.
+
+2.21 **הושלם מקומית:** חוזה Mutation מאובטח ראשון ל־Railway API.
+
+2.21.1 הפעולה `contacts.save` מקבלת רק חמישה שדות מוגדרים, מנרמלת
+אותם לפני גישה ל־Tenant, דורשת `contacts.write` ואינה מקבלת `tenantId`
+או זהות משתמש מה־Caller.
+
+2.21.2 לאחר הרשאה מופעל Rate limiter במצב Fail-closed. ‏SHA-256
+קנוני קושר את ה־Idempotency key ל־Operation ול־Payload המנורמל; Replay
+זהה מוחזר כתוצאה קיימת ושימוש חוזר במפתח עבור תוכן שונה מוחזר כ־Conflict.
+
+2.21.3 ‏Port ייעודי מחייב את ה־Adapter העתידי לשמור Mutation, ‏Audit,
+Idempotency claim, ‏Request digest ותוצאת Replay באותה PostgreSQL
+Transaction. אין עדיין Adapter כזה ולכן אין טענה שכתיבה חיה מוכנה.
+
+2.21.4 תגובת ה־API משתמשת ב־Contact mapper הקיים ומסירה `tenantId`,
+זהות משתמש, Evidence ו־Database timestamps. עדיין חסרים Executor אמיתי,
+שאר ה־Mutations, ‏Routes, ‏Live configuration ו־Staging evidence.
 
 ## 3. עבודה שאינה מקומית בלבד
 

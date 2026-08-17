@@ -101,6 +101,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/clerkEndUserSessionVerifier.ts",
       "server/platform/railwayTenantSessionResolver.ts",
       "server/platform/railwayApiOperationRegistry.ts",
+      "server/platform/railwayApiMutationExecutor.ts",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
     ],
@@ -111,7 +112,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime and initial read operations exist, but target PostgreSQL repositories, mutation operations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, and guarded contacts.save mutation contract exist, but the target PostgreSQL transactional executor, remaining mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",

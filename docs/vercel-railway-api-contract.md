@@ -169,6 +169,17 @@ lookup ושדות Tenant/User פנימיים מוסרים מהתגובה.
 resolution, ‏Operation policies ו־HTTP Handler מאובטח לנקודת Composition
 אחת. הוא עדיין אינו Route פרוס.
 
+7.1.12 פעולת Mutation ראשונה, `contacts.save`, כוללת Payload סגור,
+הרשאת `contacts.write`, ‏Rate-limit fail-closed ומפתח Idempotency. ‏SHA-256
+מחושב על Operation ועל Payload מנורמל בסדר שדות קנוני, ולכן אותו תוכן מפיק
+Digest זהה בלי קשר לסדר השדות ב־JSON.
+
+7.1.13 ה־Mutation אינו כותב ישירות דרך D1. הוא עובר ב־Port שמחייב את
+ה־PostgreSQL Adapter העתידי לבצע שינוי עסקי, Claim של Idempotency,
+השוואת Request digest, ‏Audit immutable ושמירת תוצאת Replay באותה
+Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממופות
+לקודים סגורים ללא מידע פנימי. ה־Port קיים; מימוש PostgreSQL חי עדיין חסר.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -177,8 +188,9 @@ resolution, ‏Operation policies ו־HTTP Handler מאובטח לנקודת Com
 7.2.2 ‏Clerk keys אמיתיים בכל סביבה והוכחת `authorizedParties` מול
 Production ו־Preview origins המאושרים.
 
-7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ול־Mutations עם Idempotency,
-Rate limiting, ‏Audit ו־Transaction boundaries.
+7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
+`contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
+ו־Transaction; עדיין חסר Executor אטומי אמיתי ב־PostgreSQL.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.

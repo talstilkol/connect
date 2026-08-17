@@ -10,6 +10,9 @@ import type {
 import type {
   OperationalReportService,
 } from "../reports/operationalReportService.ts";
+import type {
+  RateLimitGuard,
+} from "../security/rateLimit.ts";
 import {
   createRailwayApiIdentityAdapters,
   type RailwayApiIdentityAdapterDependencies,
@@ -24,6 +27,9 @@ import {
 import {
   createRailwayApiOperationRegistry,
 } from "./railwayApiOperationRegistry.ts";
+import type {
+  RailwayApiMutationExecutor,
+} from "./railwayApiMutationExecutor.ts";
 import {
   createRailwayTenantSessionResolver,
 } from "./railwayTenantSessionResolver.ts";
@@ -35,6 +41,8 @@ export interface RailwayApiRuntimeOptions {
   readonly selections: TenantSelectionRepository;
   readonly contacts: Pick<ContactService, "list">;
   readonly reports: Pick<OperationalReportService, "read">;
+  readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
+  readonly mutations: RailwayApiMutationExecutor;
   readonly maximumBodyBytes?: number;
   readonly maximumResponseBytes?: number;
 }
@@ -54,6 +62,8 @@ export function createRailwayApiRuntime(
     tenantSessions,
     contacts: options.contacts,
     reports: options.reports,
+    mutationRateLimit: options.mutationRateLimit,
+    mutations: options.mutations,
   });
 
   return createRailwayApiHttpHandler({

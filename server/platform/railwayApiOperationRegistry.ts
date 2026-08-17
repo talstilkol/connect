@@ -1,6 +1,10 @@
 import type {
   Permission,
 } from "../../shared/domain/model.ts";
+import {
+  validatePersistedContact,
+  type PersistedContactProfile,
+} from "../../shared/validation/persistedContact.ts";
 import type {
   ContactService,
 } from "../contacts/contactService.ts";
@@ -17,6 +21,9 @@ import {
   OperationalReportInputError,
   validateOperationalReportInput,
 } from "../reports/operationalReportService.ts";
+import type {
+  RateLimitGuard,
+} from "../security/rateLimit.ts";
 import {
   requireTenantPermission,
   TenantSessionError,
@@ -24,6 +31,7 @@ import {
 } from "../auth/tenantSession.ts";
 import type {
   RailwayApiJsonObject,
+  RailwayApiRequestEnvelope,
   RailwayApiRequestKind,
 } from "./railwayApiContract.ts";
 import {
@@ -34,11 +42,24 @@ import {
 import type {
   RailwayTenantSessionResolver,
 } from "./railwayTenantSessionResolver.ts";
+import {
+  deriveRailwayApiMutationRequestDigest,
+  type RailwayApiContactSaveResult,
+  type RailwayApiMutationExecutor,
+} from "./railwayApiMutationExecutor.ts";
+
+export interface RailwayApiMutationSafetyPolicy {
+  readonly rateLimit: "tenant-mutation";
+  readonly idempotency: "atomic-request-digest-replay";
+  readonly audit: "atomic-immutable-event";
+  readonly transaction: "required";
+}
 
 export interface RailwayApiOperationPolicy {
   readonly id: string;
   readonly requestKind: RailwayApiRequestKind;
   readonly permission: Permission | null;
+  readonly mutationSafety: Readonly<RailwayApiMutationSafetyPolicy> | null;
 }
 
 export const railwayApiOperationPolicies = Object.freeze([
@@ -46,16 +67,30 @@ export const railwayApiOperationPolicies = Object.freeze([
     id: "workspace.context.read",
     requestKind: "query" as const,
     permission: null,
+    mutationSafety: null,
   }),
   Object.freeze({
     id: "contacts.list",
     requestKind: "query" as const,
     permission: "contacts.read" as const,
+    mutationSafety: null,
+  }),
+  Object.freeze({
+    id: "contacts.save",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
   }),
   Object.freeze({
     id: "reports.read",
     requestKind: "query" as const,
     permission: "reports.read" as const,
+    mutationSafety: null,
   }),
 ] as const satisfies readonly Readonly<RailwayApiOperationPolicy>[]);
 
@@ -63,6 +98,8 @@ export interface RailwayApiOperationRegistryDependencies {
   readonly tenantSessions: RailwayTenantSessionResolver;
   readonly contacts: Pick<ContactService, "list">;
   readonly reports: Pick<OperationalReportService, "read">;
+  readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
+  readonly mutations: RailwayApiMutationExecutor;
 }
 
 export interface RailwayApiOperationRegistry {
@@ -76,6 +113,7 @@ type OperationPayloadParser<TPayload> = (
 type OperationExecutor<TPayload> = (
   session: Readonly<TenantSession>,
   payload: TPayload,
+  request: Readonly<RailwayApiRequestEnvelope>,
 ) => Promise<unknown>;
 
 function hasExactKeys(
@@ -95,6 +133,18 @@ function hasExactKeys(
 
 function invalidRequest(): never {
   throw new RailwayApiDispatchError("INVALID_REQUEST");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function isStringOrNull(value: unknown): boolean {
+  return value === null || typeof value === "string";
 }
 
 function parseEmptyPayload(
@@ -124,6 +174,90 @@ function parseContactListPayload(
   }
 
   return value === null ? null : Number(value);
+}
+
+function parseContactSavePayload(
+  payload: RailwayApiJsonObject,
+): Readonly<PersistedContactProfile> {
+  if (
+    !hasExactKeys(payload, [
+      "phoneNumber",
+      "firstName",
+      "lastName",
+      "email",
+      "company",
+    ]) ||
+    typeof payload.phoneNumber !== "string" ||
+    !isStringOrNull(payload.firstName) ||
+    !isStringOrNull(payload.lastName) ||
+    !isStringOrNull(payload.email) ||
+    !isStringOrNull(payload.company)
+  ) {
+    invalidRequest();
+  }
+
+  const validation = validatePersistedContact(payload);
+
+  if (!validation.success) {
+    invalidRequest();
+  }
+
+  return Object.freeze({ ...validation.value });
+}
+
+function isValidContactSaveResult(
+  value: unknown,
+  session: Readonly<TenantSession>,
+  profile: Readonly<PersistedContactProfile>,
+): value is RailwayApiContactSaveResult {
+  if (!isRecord(value) || typeof value.outcome !== "string") {
+    return false;
+  }
+
+  if (
+    value.outcome === "conflict" ||
+    value.outcome === "unavailable"
+  ) {
+    return value.contact === null;
+  }
+
+  if (
+    (value.outcome !== "committed" &&
+      value.outcome !== "replayed") ||
+    !isRecord(value.contact)
+  ) {
+    return false;
+  }
+
+  const contact = value.contact;
+  const validation = validatePersistedContact(contact);
+
+  return (
+    validation.success &&
+    Number.isSafeInteger(contact.id) &&
+    Number(contact.id) > 0 &&
+    contact.tenantId === session.tenantId &&
+    Number.isSafeInteger(contact.version) &&
+    Number(contact.version) > 0 &&
+    (contact.mailingStatus === "subscribed" ||
+      contact.mailingStatus === "unsubscribed") &&
+    (contact.consentStatus === "unknown" ||
+      contact.consentStatus === "granted" ||
+      contact.consentStatus === "withdrawn") &&
+    isStringOrNull(contact.consentSource) &&
+    isStringOrNull(contact.consentRecordedAt) &&
+    isStringOrNull(contact.consentWithdrawnAt) &&
+    isStringOrNull(contact.consentEvidenceReference) &&
+    typeof contact.createdAt === "string" &&
+    contact.createdAt.length > 0 &&
+    typeof contact.updatedAt === "string" &&
+    contact.updatedAt.length > 0 &&
+    validation.value.phoneNumber === profile.phoneNumber &&
+    validation.value.firstName === profile.firstName &&
+    validation.value.lastName === profile.lastName &&
+    validation.value.email === profile.email &&
+    validation.value.company === profile.company
+  );
 }
 
 function parseReportPayload(
@@ -184,6 +318,7 @@ function createOperation<TPayload>(
     async execute(
       context: Readonly<RailwayApiDispatchContext>,
       payload: RailwayApiJsonObject,
+      request: Readonly<RailwayApiRequestEnvelope>,
     ) {
       try {
         const parsedPayload = parsePayload(payload);
@@ -195,12 +330,91 @@ function createOperation<TPayload>(
           requireTenantPermission(session, policy.permission);
         }
 
-        return await execute(session, parsedPayload);
+        return await execute(session, parsedPayload, request);
       } catch (error) {
         mapOperationError(error);
       }
     },
   });
+}
+
+async function executeContactSave(
+  dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
+  session: Readonly<TenantSession>,
+  profile: Readonly<PersistedContactProfile>,
+  request: Readonly<RailwayApiRequestEnvelope>,
+): Promise<unknown> {
+  if (
+    request.operation !== "contacts.save" ||
+    request.requestKind !== "mutation" ||
+    request.idempotencyKey === null
+  ) {
+    invalidRequest();
+  }
+
+  let rateLimitDecision;
+
+  try {
+    rateLimitDecision =
+      await dependencies.mutationRateLimit.consume(
+        `${session.tenantId}:${session.externalUserId}:contacts.save`,
+      );
+  } catch {
+    throw new RailwayApiDispatchError(
+      "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+
+  if (rateLimitDecision.outcome === "limited") {
+    throw new RailwayApiDispatchError("RATE_LIMITED");
+  }
+
+  if (rateLimitDecision.outcome !== "allowed") {
+    throw new RailwayApiDispatchError(
+      "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+
+  const requestDigest =
+    await deriveRailwayApiMutationRequestDigest(
+      "contacts.save",
+      profile,
+    );
+  let result: unknown;
+
+  try {
+    result = await dependencies.mutations.saveContact({
+      session,
+      idempotencyKey: request.idempotencyKey,
+      requestDigest,
+      profile,
+    });
+  } catch {
+    throw new RailwayApiDispatchError(
+      "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+
+  if (!isValidContactSaveResult(result, session, profile)) {
+    throw new RailwayApiDispatchError(
+      "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+
+  if (result.contact === null) {
+    if (result.outcome === "conflict") {
+      throw new RailwayApiDispatchError("CONFLICT");
+    }
+
+    throw new RailwayApiDispatchError(
+      "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+
+  return {
+    replayed: result.outcome === "replayed",
+    contact: toContactRecord(result.contact),
+  };
 }
 
 export function createRailwayApiOperationRegistry(
@@ -209,14 +423,21 @@ export function createRailwayApiOperationRegistry(
   if (
     typeof dependencies.tenantSessions?.resolve !== "function" ||
     typeof dependencies.contacts?.list !== "function" ||
-    typeof dependencies.reports?.read !== "function"
+    typeof dependencies.reports?.read !== "function" ||
+    typeof dependencies.mutationRateLimit?.consume !== "function" ||
+    typeof dependencies.mutations?.saveContact !== "function"
   ) {
     throw new Error(
       "Railway API operation dependencies are invalid",
     );
   }
 
-  const [workspacePolicy, contactsPolicy, reportsPolicy] =
+  const [
+    workspacePolicy,
+    contactsPolicy,
+    contactSavePolicy,
+    reportsPolicy,
+  ] =
     railwayApiOperationPolicies;
   const operations = [
     createOperation(
@@ -246,6 +467,18 @@ export function createRailwayApiOperationRegistry(
           nextCursor: page.nextCursor,
         };
       },
+    ),
+    createOperation(
+      contactSavePolicy,
+      dependencies,
+      parseContactSavePayload,
+      async (session, profile, request) =>
+        executeContactSave(
+          dependencies,
+          session,
+          profile,
+          request,
+        ),
     ),
     createOperation(
       reportsPolicy,

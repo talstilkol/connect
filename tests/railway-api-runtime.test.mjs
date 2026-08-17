@@ -10,6 +10,8 @@ import {
 } from "../server/platform/railwayApiRuntime.ts";
 
 const compactJwt = "header.payload.signature";
+const idempotencyKey =
+  `connect_idempotency_v1_${"b".repeat(64)}`;
 const environment = {
   APP_PUBLIC_ORIGIN: "https://connect.example.com",
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
@@ -37,6 +39,8 @@ function fixture(selectedRole = "owner") {
     memberships: 0,
     contacts: [],
     reports: [],
+    mutationSubjects: [],
+    mutationCommands: [],
   };
   const handler = createRailwayApiRuntime({
     environment,
@@ -108,12 +112,44 @@ function fixture(selectedRole = "owner") {
         };
       },
     },
+    mutationRateLimit: {
+      async consume(subject) {
+        calls.mutationSubjects.push(subject);
+        return { outcome: "allowed" };
+      },
+    },
+    mutations: {
+      async saveContact(command) {
+        calls.mutationCommands.push(command);
+        return {
+          outcome: "committed",
+          contact: {
+            id: 31,
+            tenantId: command.session.tenantId,
+            ...command.profile,
+            mailingStatus: "subscribed",
+            consentStatus: "unknown",
+            consentSource: null,
+            consentRecordedAt: null,
+            consentWithdrawnAt: null,
+            consentEvidenceReference: null,
+            version: 1,
+            createdAt: "2026-08-17T00:00:00.000Z",
+            updatedAt: "2026-08-17T00:00:00.000Z",
+          },
+        };
+      },
+    },
   });
 
   return { calls, handler };
 }
 
-function request(operation, payload) {
+function request(
+  operation,
+  payload,
+  requestKind = "query",
+) {
   return new Request("https://railway.example.com/v1/connect", {
     method: "POST",
     headers: {
@@ -124,8 +160,11 @@ function request(operation, payload) {
     body: JSON.stringify({
       contractVersion: RAILWAY_API_CONTRACT_VERSION,
       operation,
-      requestKind: "query",
-      idempotencyKey: null,
+      requestKind,
+      idempotencyKey:
+        requestKind === "mutation"
+          ? idempotencyKey
+          : null,
       payload,
     }),
   });
@@ -171,6 +210,45 @@ test("returns only bounded workspace context through the complete boundary", asy
   assert.doesNotMatch(
     JSON.stringify(body),
     /tenantId|externalUserId|verified-user/,
+  );
+});
+
+test("runs a tenant-scoped contact mutation through every security boundary", async () => {
+  const testFixture = fixture("manager");
+  const response = await testFixture.handler.handle(
+    request(
+      "contacts.save",
+      {
+        phoneNumber: "+972501234567",
+        firstName: "Tal",
+        lastName: null,
+        email: null,
+        company: "Connect",
+      },
+      "mutation",
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.replayed, false);
+  assert.equal(body.data.contact.id, 31);
+  assert.equal(body.data.contact.phoneNumber, "+972501234567");
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /tenantId|externalUserId|createdAt|updatedAt/,
+  );
+  assert.deepEqual(testFixture.calls.mutationSubjects, [
+    "11:verified-user:contacts.save",
+  ]);
+  assert.equal(testFixture.calls.mutationCommands.length, 1);
+  assert.equal(
+    testFixture.calls.mutationCommands[0].idempotencyKey,
+    idempotencyKey,
+  );
+  assert.match(
+    testFixture.calls.mutationCommands[0].requestDigest,
+    /^railway_mutation_request_v1_[0-9a-f]{64}$/,
   );
 });
 
