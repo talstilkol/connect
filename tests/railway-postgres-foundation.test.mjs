@@ -45,6 +45,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "contactImports",
     "contactOrganization",
     "contacts",
+    "conversations",
     "invitationAcceptances",
     "invitationDeliveries",
     "invitationExpirations",
@@ -68,6 +69,10 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "function",
   );
   assert.equal(typeof foundation.contacts.list, "function");
+  assert.equal(
+    typeof foundation.conversations.recordInboundMessage,
+    "function",
+  );
   assert.equal(typeof foundation.contactOrganization.createTag, "function");
   assert.equal(typeof foundation.contactImports.start, "function");
   assert.equal(typeof foundation.metaConnections.read, "function");

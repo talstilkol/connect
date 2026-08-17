@@ -1237,6 +1237,24 @@ PostgreSQL הזמני נעצר והתיקייה נמחקה לאחר האימות
 Concurrency אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials,
 Railway environment, ‏Staging או Pilot.
 
+4.16 ‏PostgreSQL Conversation/Message lifecycle הושלם מקומית.
+`postgresConversationRepository.ts` מממש Contact resolution, קליטת הודעה
+נכנסת אטומית, Replay/Identity conflict, קריאות Inbox והיסטוריית הודעות,
+Mark-read, ‏Assignment ועדכוני Delivery status. כל הקריאות מבודדות Tenant;
+הכתיבות משתמשות ב־Transaction, ‏Optimistic version ובנעילת שורה לפי הצורך.
+ה־Repository מחובר ל־`railwayPostgresFoundation.ts`, שמכיל כעת 22 Adapters.
+
+4.16.1 ‏Harness נקי על PostgreSQL 16 עבר עם
+`PASS (16 migrations, 22 concurrency scenarios)`. הוא הוכיח Contact upsert
+מקביל יחיד, שתי קליטות Inbound זהות עם הגדלת Unread יחידה, זוכה יחיד ב־
+Mark-read וב־Assignment, וכן Delivery event יחיד לצד Duplicate ו־Stale.
+שרת PostgreSQL הזמני נעצר והתיקייה נמחקה לאחר האימות.
+
+4.17 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **32–88 שעות פיתוח
+נטו**. הירידה משקפת את השלמת כל חוזה Conversation/Message וחמישה תרחישי
+Concurrency אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials,
+Railway environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

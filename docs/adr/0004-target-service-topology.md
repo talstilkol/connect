@@ -294,13 +294,14 @@ lifecycle repositories ו־16 Migrations ל־Critical Path כבר קיימים �
 כולל WhatsApp delivery-policy, ‏Kill switch ו־Rate-limit ledger אטומיים.
 שרשרת ה־Schema וכל 27 משפטי ה־Invitation SQL עברו PostgreSQL מקומי. ‏Adapter
 `node-postgres` ו־Harness חוזר הוכיחו Contact/Invitation/Meta/Template/Campaign DML,
-‏Rollback ו־17 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
+‏Rollback ו־22 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת
 Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
-Foundation אחד מחבר 21 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
+Foundation אחד מחבר 22 Adapters קיימים לאותו Pool בלי לחשוף אותו, ובהם
 Contact organization/import אטומי ו־Meta connection, ‏Webhook receipts ו־
-Credential envelopes מוצפנים, ‏Message Template lifecycle וכן Campaign
+Credential envelopes מוצפנים, ‏Conversation/Message inbox אטומי,
+‏Message Template lifecycle וכן Campaign
 snapshot אטומי לפני Dispatch.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
 ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations,

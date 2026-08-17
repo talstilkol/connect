@@ -224,6 +224,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresTeamInvitationDeliveryRepository.ts",
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "server/platform/postgresContactReadRepository.ts",
+    "server/platform/postgresConversationRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
@@ -257,7 +258,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /twenty-one-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /twenty-two-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /conversation\/message inbox persistence/);
   assert.match(boundary.cutoverBlocker, /message-template lifecycle/);
   assert.match(boundary.cutoverBlocker, /campaign-snapshot and campaign-dispatch persistence/);
   assert.match(boundary.cutoverBlocker, /contact-organization/);
@@ -306,6 +308,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresTeamInvitationDeliveryRepository.ts",
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "server/platform/postgresContactReadRepository.ts",
+    "server/platform/postgresConversationRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
@@ -348,9 +351,10 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /seventeen real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /twenty-two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /twenty-one-adapter foundation/);
+  assert.match(database.cutoverBlocker, /twenty-two-adapter foundation/);
+  assert.match(database.cutoverBlocker, /exact inbound-message replay\/conflict/);
   assert.match(database.cutoverBlocker, /single submission claim and duplicate status-event classification/);
   assert.match(database.cutoverBlocker, /exact campaign-snapshot replay\/conflict\/rollback/);
   assert.match(database.cutoverBlocker, /campaign activation\/claim\/retry\/consent revalidation\/completion/);

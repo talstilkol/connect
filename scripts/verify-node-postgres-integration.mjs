@@ -1112,6 +1112,213 @@ async function verifyConversationMessageSchema(pool, tenantId) {
   );
 }
 
+async function verifyConversationLifecycle(pool, foundation, tenantId) {
+  const phoneNumber = "+972509876541";
+  const contacts = await Promise.all([
+    foundation.conversations.resolveInboundContact(tenantId, phoneNumber),
+    foundation.conversations.resolveInboundContact(tenantId, phoneNumber),
+  ]);
+  assert.equal(contacts[0].contactId, contacts[1].contactId);
+  assert.equal(contacts[0].tenantId, tenantId);
+  const contactCount = await pool.query(
+    `SELECT count(*)::integer AS count
+     FROM contacts
+     WHERE tenant_id = $1
+       AND phone_e164 = $2`,
+    [tenantId, phoneNumber],
+  );
+  assert.deepEqual(contactCount.rows, [{ count: 1 }]);
+
+  const conversationKey = `conversation_v1_${"1".repeat(64)}`;
+  const inboundMessageKey = `message_v1_${"2".repeat(64)}`;
+  const inboundOccurredAt = "2026-08-17T09:10:00.000Z";
+  const inboundInput = Object.freeze({
+    tenantId,
+    conversationKey,
+    messageKey: inboundMessageKey,
+    contactId: contacts[0].contactId,
+    providerMessageId: "driver-conversation-inbound-1",
+    contentKind: "text",
+    textContent: "PostgreSQL conversation lifecycle",
+    occurredAt: inboundOccurredAt,
+  });
+  const inboundResults = await Promise.all([
+    foundation.conversations.recordInboundMessage(inboundInput),
+    foundation.conversations.recordInboundMessage(inboundInput),
+  ]);
+  assert.deepEqual(
+    inboundResults.map(({ outcome }) => outcome).sort(),
+    ["created", "duplicate"],
+  );
+
+  const inbox = await foundation.conversations.findByKey(
+    tenantId,
+    conversationKey,
+  );
+  assert.ok(inbox);
+  assert.equal(inbox.unreadCount, 1);
+  assert.equal(inbox.version, 2);
+  assert.equal(inbox.lastMessageKey, inboundMessageKey);
+  assert.equal(inbox.contact.phoneNumber, phoneNumber);
+  const filtered = await foundation.conversations.listFilteredByTenant(
+    tenantId,
+    {
+      searchTerm: "6541",
+      status: "new",
+      assignment: "unassigned",
+      currentExternalUserId: null,
+    },
+    25,
+  );
+  assert.equal(
+    filtered.some((conversation) =>
+      conversation.conversationKey === conversationKey),
+    true,
+  );
+  const inboundMessages = await foundation.conversations
+    .listMessagesByConversation(tenantId, conversationKey, 50);
+  assert.equal(inboundMessages.length, 1);
+  assert.equal(inboundMessages[0].providerMessageId, inboundInput.providerMessageId);
+
+  const readResults = await Promise.all([
+    foundation.conversations.markRead(tenantId, conversationKey, 2),
+    foundation.conversations.markRead(tenantId, conversationKey, 2),
+  ]);
+  assert.deepEqual(
+    readResults.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+  const readState = await foundation.conversations.findByKey(
+    tenantId,
+    conversationKey,
+  );
+  assert.equal(readState?.unreadCount, 0);
+  assert.equal(readState?.version, 3);
+
+  const externalUserId = "auth0|postgres-conversation-agent";
+  const assignmentResults = await Promise.all([
+    foundation.conversations.changeAssignment(
+      tenantId,
+      conversationKey,
+      3,
+      externalUserId,
+      "assign-self",
+    ),
+    foundation.conversations.changeAssignment(
+      tenantId,
+      conversationKey,
+      3,
+      externalUserId,
+      "assign-self",
+    ),
+  ]);
+  assert.deepEqual(
+    assignmentResults.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+  const assigned = await foundation.conversations.findByKey(
+    tenantId,
+    conversationKey,
+  );
+  assert.equal(assigned?.assignedExternalUserId, externalUserId);
+  assert.equal(assigned?.version, 4);
+
+  const outboundMessageKey = `message_v1_${"3".repeat(64)}`;
+  const outboundProviderMessageId = "driver-conversation-outbound-1";
+  const outboundOccurredAt = new Date(
+    Date.parse(inboundOccurredAt) + 60_000,
+  ).toISOString();
+  await pool.query(
+    `INSERT INTO messages (
+       message_key,
+       conversation_key,
+       tenant_id,
+       provider_message_id,
+       direction,
+       content_kind,
+       status,
+       text_content,
+       occurred_at,
+       status_updated_at
+     )
+     VALUES (
+       $1,
+       $2,
+       $3,
+       $4,
+       'outbound',
+       'text',
+       'sent',
+       'PostgreSQL outbound lifecycle',
+       $5::timestamptz,
+       $5::timestamptz
+     )`,
+    [
+      outboundMessageKey,
+      conversationKey,
+      tenantId,
+      outboundProviderMessageId,
+      outboundOccurredAt,
+    ],
+  );
+  const deliveryEventAt = new Date(
+    Date.parse(outboundOccurredAt) + 60_000,
+  ).toISOString();
+  const deliveryInput = Object.freeze({
+    tenantId,
+    providerMessageId: outboundProviderMessageId,
+    status: "delivered",
+    statusEventKey: "4".repeat(64),
+    statusEventAt: deliveryEventAt,
+  });
+  const deliveryResults = await Promise.all([
+    foundation.conversations.applyDeliveryStatus(deliveryInput),
+    foundation.conversations.applyDeliveryStatus(deliveryInput),
+  ]);
+  assert.deepEqual(
+    deliveryResults.map(({ outcome }) => outcome).sort(),
+    ["applied", "duplicate"],
+  );
+  const stale = await foundation.conversations.applyDeliveryStatus({
+    ...deliveryInput,
+    status: "read",
+    statusEventKey: "5".repeat(64),
+    statusEventAt: new Date(
+      Date.parse(outboundOccurredAt) + 30_000,
+    ).toISOString(),
+  });
+  assert.equal(stale.outcome, "stale");
+
+  const persisted = await pool.query(
+    `SELECT
+       conversation.unread_count,
+       conversation.version,
+       conversation.assigned_external_user_id,
+       count(message.message_key)::integer AS message_count,
+       max(message.status) FILTER (
+         WHERE message.provider_message_id = $3
+       ) AS outbound_status
+     FROM conversations AS conversation
+     INNER JOIN messages AS message
+       ON message.tenant_id = conversation.tenant_id
+      AND message.conversation_key = conversation.conversation_key
+     WHERE conversation.tenant_id = $1
+       AND conversation.conversation_key = $2
+     GROUP BY
+       conversation.unread_count,
+       conversation.version,
+       conversation.assigned_external_user_id`,
+    [tenantId, conversationKey, outboundProviderMessageId],
+  );
+  assert.deepEqual(persisted.rows, [{
+    unread_count: 0,
+    version: 4,
+    assigned_external_user_id: externalUserId,
+    message_count: 2,
+    outbound_status: "delivered",
+  }]);
+}
+
 async function verifyTemplateCampaignSchema(pool, tenantId) {
   const templateKey = `template_v1_${"d".repeat(64)}`;
   const campaignKey = `campaign_v1_${"e".repeat(64)}`;
@@ -2345,6 +2552,7 @@ export async function verifyNodePostgresIntegration(
       await verifyBotDeliverySchema(pool, tenantId);
       await verifyAiReportingSchema(pool, foundation, tenantId);
       await verifyPostgresHttpRuntime(checkedConnectionString);
+      await verifyConversationLifecycle(pool, foundation, tenantId);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
@@ -2355,7 +2563,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 17,
+      concurrencyScenarios: 22,
     });
   } finally {
     await pool.end();

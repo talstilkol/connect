@@ -39,6 +39,9 @@ import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
 import {
+  createPostgresConversationRepository,
+} from "./postgresConversationRepository.ts";
+import {
   createPostgresContactImportRepository,
 } from "./postgresContactImportRepository.ts";
 import {
@@ -117,6 +120,9 @@ export interface RailwayPostgresFoundationOptions {
 export interface RailwayPostgresFoundation {
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly contacts: ReturnType<typeof createContactListService>;
+  readonly conversations: ReturnType<
+    typeof createPostgresConversationRepository
+  >;
   readonly contactOrganization: ReturnType<
     typeof createContactOrganizationService
   >;
@@ -246,6 +252,10 @@ export function createRailwayPostgresFoundation(
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
     contacts: createContactListService({ contacts: contactReads }),
+    conversations: createPostgresConversationRepository({
+      queries,
+      transactions,
+    }),
     contactOrganization: createContactOrganizationService(
       contactOrganization,
     ),

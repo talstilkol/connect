@@ -31,14 +31,14 @@ receipts ו־Credential envelopes מוצפנים. השתים־עשרה יוצר�
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
 Loopback ייעודי וריק. הוא החיל את 16 ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח 17 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+הפעיל DML אמיתי והוכיח 22 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 21 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 22 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -161,6 +161,16 @@ Meta ID נכשלת כ־`IDENTITY_CONFLICT`. ה־Harness הוכיח Draft מקב�
 ב־Submission ושילוב `applied`/`duplicate` מקביל, והעלה את הסך ל־17 תרחישי
 Concurrency.
 
+1.23 ‏`postgresConversationRepository.ts` ממיר את מחזור החיים התפעולי של
+Conversations ו־Messages. קליטת הודעה נכנסת יוצרת Conversation, מגדילה
+`unread_count` ושומרת Message באותה Transaction. ‏Replay זהה אינו מגדיל את
+המונה שוב, וזהות Provider בעלת תוכן סותר נכשלת ומבצעת Rollback. עדכוני
+Delivery מסווגים לפי זמן וקדימות ל־`applied`, ‏`duplicate` או `stale`.
+Mark-read ו־Assignment משתמשים בגרסה צפויה וב־`FOR UPDATE`; חיפוש Inbox
+משתמש ב־`position` ולכן `%` ו־`_` נשארים תווים רגילים. ה־Harness הוכיח
+Contact upsert, ‏Inbound replay, ‏Mark-read, ‏Assignment ו־Delivery status
+במקביל, והעלה את הסך ל־22 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
@@ -245,7 +255,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 17 ה־Adapters, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 22 ה־Adapters, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 

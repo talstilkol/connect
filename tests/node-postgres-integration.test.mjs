@@ -74,6 +74,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0014_worker_scheduler_lease\.sql/);
   assert.match(source, /0015_campaign_dispatch\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
+  assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
   assert.match(source, /verifyBotDeliverySchema/);
   assert.match(source, /verifyAiReportingSchema/);
@@ -86,6 +87,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.campaigns\.saveSnapshot/);
   assert.match(source, /foundation\.messageTemplates\.saveDraft/);
   assert.match(source, /foundation\.messageTemplates\.applyStatusEvent/);
+  assert.match(source, /foundation\.conversations\.recordInboundMessage/);
   assert.match(source, /runtime\.handler\.handle/);
   assert.match(source, /runtime\.readiness\.check/);
   assert.match(source, /createRailwayPostgresApiRuntime/);

@@ -367,6 +367,14 @@ Submission lifecycle ו־Status events על PostgreSQL. ‏Draft מקביל מט
 עבר עם 16 Migrations ו־17 תרחישי Concurrency, והוכיח Template מאושר שנצרך
 מיד על ידי Campaign snapshot ו־Dispatch.
 
+7.1.39 ‏`postgresConversationRepository.ts` מממש Contact resolution,
+קליטת Inbound idempotent, קריאת Inbox/Message history, ‏Mark-read, ‏Assignment
+ו־Delivery status על PostgreSQL. קליטה מתבצעת ב־Transaction יחידה ומונעת
+הגדלה כפולה של `unread_count`; התנגשות Provider identity מבטלת את כל
+הכתיבה. ‏Mark-read ו־Assignment מוגנים בגרסה ובנעילת שורה, ו־Status events
+מסווגים לפי Event key, זמן וקדימות. ‏Harness אמיתי עבר עם 16 Migrations
+ו־22 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
