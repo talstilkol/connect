@@ -89,6 +89,7 @@ export interface RailwayApiHttpHandlerOptions {
 }
 
 export type RailwayApiDispatchFailureCode =
+  | "INVALID_REQUEST"
   | "AUTHORIZATION_DENIED"
   | "NOT_FOUND"
   | "CONFLICT"
@@ -96,6 +97,7 @@ export type RailwayApiDispatchFailureCode =
   | "DEPENDENCY_UNAVAILABLE";
 
 const railwayApiDispatchFailureCodes = [
+  "INVALID_REQUEST",
   "AUTHORIZATION_DENIED",
   "NOT_FOUND",
   "CONFLICT",
@@ -270,6 +272,8 @@ function dispatchFailureStatus(
   code: RailwayApiDispatchFailureCode,
 ): number {
   switch (code) {
+    case "INVALID_REQUEST":
+      return 400;
     case "AUTHORIZATION_DENIED":
       return 403;
     case "NOT_FOUND":

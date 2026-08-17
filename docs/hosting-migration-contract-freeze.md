@@ -21,7 +21,7 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | מזהה | היום | יעד | הצעד הבא |
 | --- | --- | --- | --- |
 | `web.build-runtime` | Vinext + Cloudflare Vite/Sites | Vercel Web | החלפת Build/runtime |
-| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Contract/Client/Handler ו־OIDC/Clerk adapters מקומיים הושלמו; נותרו Live configuration, Operations, Routes ו־Staging evidence |
+| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime ושלוש פעולות Read-only הושלמו; נותרו PostgreSQL adapters, Mutations, Routes, Live configuration ו־Staging evidence |
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
@@ -52,7 +52,8 @@ limit, ‏Monitoring ו־Backup.
 מפריד בין Vercel OIDC לבין Clerk session, מגביל Payload/Response
 ונכשל סגור מול Preview identity, ‏Origin זדוני ושדות רגישים. הוא אינו
 Endpoint חי ואינו משנה את חסם ה־Deployment. ה־Cryptographic adapters
-נוספו, אך ללא Accounts ו־Evidence הם אינם מוכיחים תצורת Production.
+ושלוש פעולות Read-only חוברו ל־Runtime מקומי, אך ללא Accounts,
+PostgreSQL adapters ו־Evidence הם אינם מוכיחים תצורת Production.
 
 3.3 שלב C — PostgreSQL schema, ‏Repositories, טרנזקציות ו־Migration
 rehearsal, ‏40–80 שעות.

@@ -99,6 +99,9 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/railwayApiIdentityAdapters.ts",
       "server/platform/vercelOidcVerifier.ts",
       "server/platform/clerkEndUserSessionVerifier.ts",
+      "server/platform/railwayTenantSessionResolver.ts",
+      "server/platform/railwayApiOperationRegistry.ts",
+      "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
     ],
     targetPlacement: "vercel-web+railway-api",
@@ -108,7 +111,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The cryptographic Vercel OIDC and Clerk adapters exist, but live account configuration, concrete operations, split routes, and staging evidence are not implemented.",
+      "The authenticated runtime and initial read operations exist, but target PostgreSQL repositories, mutation operations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",

@@ -337,6 +337,7 @@ test("rejects unknown operations and request-kind mismatches", async (context) =
 
 test("maps only approved operation failure codes", async (context) => {
   const cases = [
+    ["INVALID_REQUEST", 400],
     ["AUTHORIZATION_DENIED", 403],
     ["NOT_FOUND", 404],
     ["CONFLICT", 409],

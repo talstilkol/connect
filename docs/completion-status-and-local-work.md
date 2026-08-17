@@ -334,9 +334,9 @@ Tenant/User identity מתוך Payload.
 מחרוזות ו־Bytes; שדות Secret/Identity ו־Prototype נדחים בכל עומק.
 
 2.18.3 המימוש עדיין אינו Endpoint חי. שכבות האימות שנוספו בסעיף
-2.19 משלימות את ה־Adapters המקומיים, אך Operation registry, ‏Routes
-מפוצלים, Accounts, ‏Staging ו־Evidence עדיין חסרים. לכן היכולת נשארת
-`adapter-required`.
+2.19 וה־Registry הראשוני שנוסף בסעיף 2.20 משלימים את גבול הקריאה
+המקומי, אך Routes מפוצלים, שאר ה־Operations, ‏Accounts, ‏Staging
+ו־Evidence עדיין חסרים. לכן היכולת נשארת `adapter-required`.
 
 2.19 **הושלם מקומית:** Adapters קריפטוגרפיים לגבול Vercel/Railway.
 
@@ -349,7 +349,22 @@ Tenant membership והרשאה נשארים אחריות ה־Operation ב־Railw
 
 2.19.3 תצורה חסרה, חלקית או לא חוקית נכשלת לפני בניית Providers.
 ערכי Accounts האמיתיים נשארים `unknown/unavailable`, ולכן Routes,
-Operations, ‏Staging ו־Deployment evidence עדיין חסרים.
+שאר ה־Operations, ‏Staging ו־Deployment evidence עדיין חסרים.
+
+2.20 **הושלם מקומית:** Operation registry והרשאות Tenant ראשונות.
+
+2.20.1 ה־Runtime טוען Memberships לפי Clerk user. כאשר קיימים כמה
+Workspaces הוא משתמש רק בבחירת ה־Tenant השמורה ומאמת אותה מחדש מול
+החברויות הפעילות. אין `tenantId` ב־API Payload או בתגובה.
+
+2.20.2 שלוש פעולות Read-only חוברו לשירותים קיימים:
+`workspace.context.read`, ‏`contacts.list` ו־`reports.read`. אנשי קשר
+דורשים `contacts.read`; דוחות דורשים `reports.read`; קלט לא חוקי נחסם
+לפני Database access.
+
+2.20.3 ‏Runtime factory אחד מחבר Vercel OIDC, ‏Clerk, ‏Tenant
+resolution, ‏Operation registry ו־HTTP Handler. עדיין חסרים Routes,
+PostgreSQL repositories, ‏Mutation operations ו־Live evidence.
 
 ## 3. עבודה שאינה מקומית בלבד
 

@@ -156,6 +156,19 @@ Body limits, ‏Sensitive fields, ‏Timeout ו־Error mapping.
 7.1.8 ‏Environment contract נכשל סגור כאשר Origin, ‏Clerk keys,
 Team, ‏Project או Vercel Environment חסרים או אינם חוקיים.
 
+7.1.9 ‏Tenant session resolver טוען Memberships מהשרת. כאשר קיימת
+חברות אחת הוא משתמש בה; כאשר קיימות כמה הוא דורש את הבחירה השמורה
+ב־Database ומאמת שהיא עדיין פעילה. `tenantId` אינו מתקבל מה־Payload.
+
+7.1.10 ‏Operation registry ראשוני כולל שלוש פעולות Read-only:
+`workspace.context.read`, ‏`contacts.list` ו־`reports.read`. לכל פעולה
+חוזה Payload סגור ו־Permission מפורש; קלט לא חוקי נעצר לפני Tenant
+lookup ושדות Tenant/User פנימיים מוסרים מהתגובה.
+
+7.1.11 ‏Runtime factory מחבר את שני ה־Identity verifiers, ‏Tenant
+resolution, ‏Operation policies ו־HTTP Handler מאובטח לנקודת Composition
+אחת. הוא עדיין אינו Route פרוס.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -164,9 +177,11 @@ Team, ‏Project או Vercel Environment חסרים או אינם חוקיים.
 7.2.2 ‏Clerk keys אמיתיים בכל סביבה והוכחת `authorizedParties` מול
 Production ו־Preview origins המאושרים.
 
-7.2.3 ‏Operation registry שמחבר Use cases אמיתיים ובודק Permission.
+7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ול־Mutations עם Idempotency,
+Rate limiting, ‏Audit ו־Transaction boundaries.
 
-7.2.4 Route ו־Runtime נפרדים ל־Vercel ול־Railway.
+7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
+PostgreSQL במקום D1.
 
 7.2.5 Live accounts, ‏Secrets, ‏Staging, ‏Load test ו־Deployment
 evidence.

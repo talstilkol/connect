@@ -286,7 +286,9 @@ Rate limiting ו־Graceful shutdown לפי ה־SLO המאושר.
 
 11.8 ‏[חוזה API בין Vercel ל־Railway](../vercel-railway-api-contract.md)
 מקפיא Contract/Client/Handler מקומיים. הוא אינו ממלא את תנאי
-ה־Live verifier, ‏Operations, ‏Staging או Deployment evidence.
+ה־Live configuration, ‏PostgreSQL repositories, ‏Mutation coverage,
+Staging או Deployment evidence. ה־Cryptographic verifiers ושלוש פעולות
+Read-only כבר מחוברים ב־Runtime מקומי.
 
 ## 12. מקורות רשמיים שנבדקו
 

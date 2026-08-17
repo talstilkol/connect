@@ -131,6 +131,12 @@ function parsePeriod(
   };
 }
 
+export function validateOperationalReportInput(
+  input: unknown,
+): void {
+  parsePeriod(input);
+}
+
 function requireClockDate(
   now: () => Date,
 ): Date {

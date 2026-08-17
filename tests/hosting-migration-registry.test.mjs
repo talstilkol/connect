@@ -180,13 +180,17 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/railwayApiIdentityAdapters.ts",
     "server/platform/vercelOidcVerifier.ts",
     "server/platform/clerkEndUserSessionVerifier.ts",
+    "server/platform/railwayTenantSessionResolver.ts",
+    "server/platform/railwayApiOperationRegistry.ts",
+    "server/platform/railwayApiRuntime.ts",
   ];
 
   for (const path of expectedBoundaryFiles) {
     assert.equal(boundary.sourceFiles.includes(path), true);
   }
 
-  assert.match(boundary.cutoverBlocker, /cryptographic Vercel OIDC/);
+  assert.match(boundary.cutoverBlocker, /authenticated runtime/);
+  assert.match(boundary.cutoverBlocker, /PostgreSQL repositories/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
