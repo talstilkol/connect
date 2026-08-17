@@ -1,0 +1,284 @@
+import {
+  readFile,
+  readdir,
+} from "node:fs/promises";
+import {
+  fileURLToPath,
+  pathToFileURL,
+} from "node:url";
+
+const projectRoot = fileURLToPath(
+  new URL("../", import.meta.url),
+);
+const migrationNamePattern =
+  /^(\d{4})_[a-z0-9_]+\.sql$/;
+const requiredTableSequence = Object.freeze([
+  "tenants",
+  "audit_logs",
+  "contacts",
+  "railway_api_mutation_receipts",
+]);
+const requiredMigrationPrefix = Object.freeze([
+  "0000_core_contacts.sql",
+  "0001_railway_api_mutation_receipts.sql",
+]);
+const forbiddenSyntax = Object.freeze([
+  Object.freeze({
+    code: "POSTGRES_SQLITE_IDENTIFIER_QUOTE",
+    pattern: /`/,
+  }),
+  Object.freeze({
+    code: "POSTGRES_SQLITE_AUTOINCREMENT",
+    pattern: /\bAUTOINCREMENT\b/i,
+  }),
+  Object.freeze({
+    code: "POSTGRES_SQLITE_FUNCTION",
+    pattern: /\b(?:strftime|unixepoch|instr)\s*\(/i,
+  }),
+  Object.freeze({
+    code: "POSTGRES_SQLITE_OPERATOR",
+    pattern: /\bGLOB\b/i,
+  }),
+  Object.freeze({
+    code: "POSTGRES_SQLITE_TRIGGER_ABORT",
+    pattern: /\bRAISE\s*\(/i,
+  }),
+  Object.freeze({
+    code: "POSTGRES_SQLITE_PRAGMA",
+    pattern: /\bPRAGMA\b/i,
+  }),
+  Object.freeze({
+    code: "POSTGRES_SQLITE_INSERT_MODE",
+    pattern: /\bINSERT\s+OR\s+(?:ABORT|FAIL|IGNORE|REPLACE|ROLLBACK)\b/i,
+  }),
+]);
+const destructiveStatement =
+  /\b(?:DROP\s+(?:TABLE|INDEX|SCHEMA)|TRUNCATE|DELETE\s+FROM)\b/i;
+const randomIdentity =
+  /\b(?:random|gen_random_uuid|uuid_generate_v[1-5])\s*\(/i;
+const dataInsertion = /\bINSERT\s+INTO\b/i;
+
+function rootUrl(root) {
+  return pathToFileURL(
+    root.endsWith("/") ? root : `${root}/`,
+  );
+}
+
+function finding(code, fileName = null, index = null) {
+  return Object.freeze({
+    code,
+    fileName,
+    index,
+  });
+}
+
+function extractCreatedTables(source) {
+  return Array.from(
+    source.matchAll(
+      /\bCREATE\s+TABLE\s+([a-z][a-z0-9_]*)\s*\(/gi,
+    ),
+    (match) => match[1].toLowerCase(),
+  );
+}
+
+export function validatePostgresMigrationSources({
+  migrationFiles,
+  sources,
+}) {
+  if (
+    !Array.isArray(migrationFiles) ||
+    !Array.isArray(sources) ||
+    migrationFiles.length !== sources.length
+  ) {
+    return Object.freeze([
+      finding("POSTGRES_MIGRATION_INPUT_INVALID"),
+    ]);
+  }
+
+  const findings = [];
+  const createdTables = [];
+
+  if (
+    migrationFiles.length < requiredMigrationPrefix.length ||
+    requiredMigrationPrefix.some(
+      (fileName, index) => migrationFiles[index] !== fileName,
+    )
+  ) {
+    findings.push(
+      finding("POSTGRES_REQUIRED_MIGRATION_PREFIX_INVALID"),
+    );
+  }
+
+  for (
+    let index = 0;
+    index < migrationFiles.length;
+    index += 1
+  ) {
+    const fileName = migrationFiles[index];
+    const source = sources[index];
+    const expectedPrefix = String(index).padStart(4, "0");
+    const match =
+      typeof fileName === "string"
+        ? migrationNamePattern.exec(fileName)
+        : null;
+
+    if (!match || match[1] !== expectedPrefix) {
+      findings.push(
+        finding(
+          "POSTGRES_MIGRATION_SEQUENCE_INVALID",
+          typeof fileName === "string" ? fileName : null,
+          index,
+        ),
+      );
+    }
+
+    if (typeof source !== "string" || source.trim().length === 0) {
+      findings.push(
+        finding(
+          "POSTGRES_MIGRATION_SOURCE_INVALID",
+          typeof fileName === "string" ? fileName : null,
+          index,
+        ),
+      );
+      continue;
+    }
+
+    for (const forbidden of forbiddenSyntax) {
+      if (forbidden.pattern.test(source)) {
+        findings.push(
+          finding(forbidden.code, fileName, index),
+        );
+      }
+    }
+
+    if (destructiveStatement.test(source)) {
+      findings.push(
+        finding(
+          "POSTGRES_DESTRUCTIVE_STATEMENT",
+          fileName,
+          index,
+        ),
+      );
+    }
+
+    if (randomIdentity.test(source)) {
+      findings.push(
+        finding(
+          "POSTGRES_RANDOM_IDENTITY",
+          fileName,
+          index,
+        ),
+      );
+    }
+
+    if (dataInsertion.test(source)) {
+      findings.push(
+        finding(
+          "POSTGRES_SEED_DATA_PRESENT",
+          fileName,
+          index,
+        ),
+      );
+    }
+
+    createdTables.push(...extractCreatedTables(source));
+  }
+
+  const requiredTables = createdTables.slice(
+    0,
+    requiredTableSequence.length,
+  );
+
+  if (
+    requiredTables.length !== requiredTableSequence.length ||
+    requiredTables.some(
+      (table, index) => table !== requiredTableSequence[index],
+    )
+  ) {
+    findings.push(
+      finding("POSTGRES_REQUIRED_TABLE_SEQUENCE_INVALID"),
+    );
+  }
+
+  if (
+    new Set(createdTables).size !== createdTables.length
+  ) {
+    findings.push(
+      finding("POSTGRES_DUPLICATE_TABLE_CREATION"),
+    );
+  }
+
+  return Object.freeze(findings);
+}
+
+export async function inspectPostgresMigrationContract(
+  root = projectRoot,
+) {
+  const migrationsUrl = new URL(
+    "postgres/migrations/",
+    rootUrl(root),
+  );
+  let migrationFiles;
+
+  try {
+    migrationFiles = (await readdir(migrationsUrl))
+      .filter((fileName) => fileName.endsWith(".sql"))
+      .sort();
+  } catch {
+    return Object.freeze({
+      status: "failed",
+      migrationCount: 0,
+      findings: Object.freeze([
+        finding("POSTGRES_MIGRATION_DIRECTORY_UNAVAILABLE"),
+      ]),
+    });
+  }
+
+  const sources = await Promise.all(
+    migrationFiles.map((fileName) =>
+      readFile(new URL(fileName, migrationsUrl), "utf8"),
+    ),
+  );
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources,
+  });
+
+  return Object.freeze({
+    status: findings.length === 0 ? "passed" : "failed",
+    migrationCount: migrationFiles.length,
+    findings,
+  });
+}
+
+async function runCli() {
+  if (process.argv.length !== 2) {
+    console.error(
+      "PostgreSQL migration contract: INVALID_ARGUMENTS",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  const report = await inspectPostgresMigrationContract();
+
+  if (report.status !== "passed") {
+    console.error(
+      `PostgreSQL migration contract: FAIL (${report.findings.length} findings)`,
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(
+    `PostgreSQL migration contract: PASS (${report.migrationCount} critical-path migrations)`,
+  );
+}
+
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) ===
+    fileURLToPath(pathToFileURL(process.argv[1]))
+) {
+  await runCli();
+}

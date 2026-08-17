@@ -16,6 +16,7 @@
     "verify:dependency-lock": "node scripts/verify-dependency-lock.mjs",
     "verify:dependency-audit:development": "node scripts/verify-development-dependency-audit.mjs",
     "verify:migrations": "node scripts/verify-migrations.mjs",
+    "verify:postgres-migration-contract": "node scripts/verify-postgres-migration-contract.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",
     "verify:release-gate": "node scripts/verify-release-gate.mjs",
     "verify:production-readiness": "node scripts/verify-production-readiness.mjs",

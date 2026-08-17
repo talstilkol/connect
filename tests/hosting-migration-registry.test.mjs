@@ -213,13 +213,15 @@ test("records the PostgreSQL mutation contract without selecting a provider", ()
   for (const path of [
     "server/platform/postgresTransaction.ts",
     "server/platform/postgresRailwayApiMutationExecutor.ts",
-    "postgres/schema/railway_api_mutation_receipts.sql",
+    "postgres/migrations/0000_core_contacts.sql",
+    "postgres/migrations/0001_railway_api_mutation_receipts.sql",
+    "scripts/verify-postgres-migration-contract.mjs",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/);
   assert.match(database.cutoverBlocker, /Node driver/);
-  assert.match(database.cutoverBlocker, /35-migration conversion/);
+  assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /real concurrency tests/);
 });

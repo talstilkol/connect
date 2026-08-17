@@ -187,10 +187,11 @@ Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממו
 שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
 Database timestamps.
 
-7.1.15 נוסף Schema contract ל־Mutation receipts ומסמך
+7.1.15 נוספו שתי Migrations מסודרות ל־Critical Path ומסמך
 [חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
-ה־Executor וה־SQL נבדקים מקומית, אך אין עדיין Driver, סכמת PostgreSQL
-בסיסית, Migration רץ או Integration evidence מול Database אמיתי.
+הראשונה יוצרת Tenant, ‏Audit ו־Contact prerequisites והשנייה את Receipt.
+ה־Executor וה־SQL נבדקים מקומית, אך אין עדיין Driver, ‏Schema parity מלאה,
+Migration שרץ מול Database אמיתי או Integration evidence.
 
 7.2 עדיין חסר:
 

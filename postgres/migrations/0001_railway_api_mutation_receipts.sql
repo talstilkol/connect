@@ -1,5 +1,4 @@
--- PostgreSQL schema contract for the provider-neutral Railway mutation executor.
--- Apply only after the target tenants, contacts, and audit_logs tables exist.
+-- PostgreSQL receipt schema for the provider-neutral Railway mutation executor.
 
 CREATE TABLE railway_api_mutation_receipts (
   tenant_id BIGINT NOT NULL,

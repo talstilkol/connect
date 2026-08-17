@@ -55,6 +55,13 @@ const steps = [
     ],
   },
   {
+    id: "postgres-migration-contract",
+    command: process.execPath,
+    arguments: [
+      "scripts/verify-postgres-migration-contract.mjs",
+    ],
+  },
+  {
     id: "typecheck",
     command: "npm",
     arguments: ["run", "typecheck"],

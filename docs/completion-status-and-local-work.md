@@ -401,9 +401,25 @@ Transaction. ‏`IS DISTINCT FROM` מונע הגדלת Version כאשר הפרו
 פנימיים.
 
 2.22.4 נוסף Schema contract עבור `railway_api_mutation_receipts` ומסמך
-`docs/postgresql-mutation-contract.md`. עדיין חסרים ספק, Driver, סכמת בסיס,
-המרת 35 ה־Migrations ובדיקת Concurrency מול PostgreSQL אמיתי; לכן אין
+`docs/postgresql-mutation-contract.md`. בשלב זה עדיין חסרים ספק, Driver,
+Schema parity מול 35 ה־Migrations ובדיקת Concurrency מול PostgreSQL אמיתי; לכן אין
 טענה שה־Database adapter מוכן לפריסה.
+
+2.23 **הושלם מקומית:** PostgreSQL Critical-path schema ו־Migration guard.
+
+2.23.1 נוספו שתי Migrations מסודרות: `tenants`, ‏`audit_logs` ו־`contacts`
+נוצרים לפני `railway_api_mutation_receipts`. המזהים הם Identity columns,
+הזמנים הם `TIMESTAMPTZ` והשדות המובנים הם `JSONB`.
+
+2.23.2 Audit idempotency מבודד לפי Tenant, פעולה ומפתח. Contact uniqueness
+נשמר לפי Tenant ומספר E.164, וכל Lifecycle constraints הדרושים ל־Executor
+נשארו Fail-closed.
+
+2.23.3 נוסף Gate מקומי שמכשיל סדר קבצים שגוי, תחביר SQLite, Seed data,
+פעולות הרסניות ויצירת מזהים אקראית. הוא צורף ל־Release Gate הקיים.
+
+2.23.4 זהו Critical Path בלבד. הוא אינו ממיר עדיין את מלוא 35 ה־Migrations,
+אינו בוחר Driver ואינו מהווה הוכחת הרצה מול PostgreSQL אמיתי.
 
 ## 3. עבודה שאינה מקומית בלבד
 

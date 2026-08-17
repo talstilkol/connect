@@ -4,7 +4,7 @@ import test from "node:test";
 
 const schema = readFileSync(
   new URL(
-    "../postgres/schema/railway_api_mutation_receipts.sql",
+    "../postgres/migrations/0001_railway_api_mutation_receipts.sql",
     import.meta.url,
   ),
   "utf8",
