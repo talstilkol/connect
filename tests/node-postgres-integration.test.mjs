@@ -64,5 +64,6 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /DATABASE_NOT_EMPTY/);
   assert.match(source, /Promise\.all/);
   assert.match(source, /0004_team_invitation_lifecycle\.sql/);
+  assert.match(source, /createRailwayPostgresFoundation/);
   assert.doesNotMatch(source, /Math\.random|randomUUID/);
 });

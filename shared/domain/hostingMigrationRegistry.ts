@@ -105,6 +105,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresTransaction.ts",
       "server/platform/nodePostgresAdapter.ts",
       "server/platform/nodePostgresPoolConfiguration.ts",
+      "server/platform/railwayPostgresFoundation.ts",
       "server/platform/postgresResultValidation.ts",
       "server/platform/postgresTenantMembershipRepository.ts",
       "server/platform/postgresTenantMembershipMutationRepository.ts",
@@ -125,7 +126,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter and pool contract, tenant access repositories, team membership mutations, and the complete invitation lifecycle repositories exist, but live provider-bound pool values, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, and nine-repository PostgreSQL foundation exist, but live provider-bound pool values, PostgreSQL contacts/report reads, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -203,7 +204,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
+      "Provider-neutral contacts.save, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, nine-repository foundation, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

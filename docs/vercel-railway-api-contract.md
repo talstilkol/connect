@@ -226,6 +226,11 @@ Loopback ב־Staging/Production וכל Query string ב־Database URL, משום �
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל תשעת ה־Adapters שהושלמו לאותו
+Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי. אין לחבר
+אותו ל־Railway API המלא לפני ש־`contacts.list` ו־`reports.read` מקבלים
+PostgreSQL repositories; ערבוב D1/PostgreSQL אינו מסלול Cutover מאושר.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

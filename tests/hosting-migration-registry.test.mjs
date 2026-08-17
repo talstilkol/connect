@@ -186,6 +186,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresTransaction.ts",
     "server/platform/nodePostgresAdapter.ts",
     "server/platform/nodePostgresPoolConfiguration.ts",
+    "server/platform/railwayPostgresFoundation.ts",
     "server/platform/postgresTenantMembershipRepository.ts",
     "server/platform/postgresTenantMembershipMutationRepository.ts",
     "server/platform/postgresTenantSelectionRepository.ts",
@@ -205,7 +206,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /node-postgres transaction adapter and pool contract/);
+  assert.match(boundary.cutoverBlocker, /nine-repository PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\/report reads/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
@@ -249,6 +251,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
+  assert.match(database.cutoverBlocker, /nine-repository foundation/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
   assert.match(database.cutoverBlocker, /35-migration parity conversion/);
   assert.match(database.cutoverBlocker, /remaining repository DML\/concurrency/);

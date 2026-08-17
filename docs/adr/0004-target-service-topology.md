@@ -296,6 +296,9 @@ lifecycle repositories וחמש Migrations ל־Critical Path כבר קיימים
 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
+Foundation אחד מחבר תשעה Repositories קיימים לאותו Pool בלי לחשוף אותו.
+Railway API מלא נשאר חסום עד השלמת Contact/Report reads ב־PostgreSQL, כדי
+לא ליצור Hybrid לא מתועד עם D1.
 
 ## 12. מקורות רשמיים שנבדקו
 

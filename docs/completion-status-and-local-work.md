@@ -563,6 +563,24 @@ Development, חסר/חלקי, TLS/URL זדוני, גבולות מספריים ו
 2.30.5 עדיין חסרים ערכי ספק אמיתיים, אישור Pool sizing, ‏CA/TLS evidence,
 Telemetry sink, ‏Migration identity ו־Staging connection proof.
 
+2.31 **הושלם מקומית:** PostgreSQL persistence foundation ל־Railway.
+
+2.31.1 Composition יחיד יוצר מאותו Pool את כל תשעת ה־Adapters שכבר קיימים:
+Membership reads/mutations, ‏Tenant selection, ‏Business profile,
+`contacts.save`, וכל ארבעת מסלולי Invitation lifecycle.
+
+2.31.2 ה־Foundation אינו מחזיר Pool, ‏Driver, ‏Query executor או Connection
+string ל־Caller. הוא חושף רק Ports עסקיים ו־`close()` אידמפוטנטי. ‏Options
+מורחבים, Telemetry חסר או Configuration חסר/חלקי/לא חוקי נחסמים לפני יצירה.
+
+2.31.3 ה־Harness החוזר הופעל שוב על PostgreSQL 16.13 ריק דרך ה־Foundation
+והחזיר `PASS (5 migrations, 2 concurrency scenarios)`. סביבת הבדיקה הזמנית
+נעצרה ונמחקה לאחר מכן.
+
+2.31.4 אין עדיין Full Railway API runtime על PostgreSQL: ‏`contacts.list`
+ו־`reports.read` עדיין דורשים Repositories מקבילים, ו־Hybrid שמערב D1 ו־
+PostgreSQL אינו מאושר. גם Routes, ‏Live values ו־Staging evidence חסרים.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

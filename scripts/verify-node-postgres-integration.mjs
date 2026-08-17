@@ -12,21 +12,11 @@ import {
 import pg from "pg";
 
 import {
-  createNodePostgresQueryExecutor,
   createNodePostgresTransactionManager,
 } from "../server/platform/nodePostgresAdapter.ts";
 import {
-  createPostgresRailwayApiMutationExecutor,
-} from "../server/platform/postgresRailwayApiMutationExecutor.ts";
-import {
-  createPostgresTeamInvitationAcceptanceRepository,
-} from "../server/platform/postgresTeamInvitationAcceptanceRepository.ts";
-import {
-  createPostgresTeamInvitationDeliveryRepository,
-} from "../server/platform/postgresTeamInvitationDeliveryRepository.ts";
-import {
-  createPostgresTeamInvitationRepository,
-} from "../server/platform/postgresTeamInvitationRepository.ts";
+  createRailwayPostgresFoundation,
+} from "../server/platform/railwayPostgresFoundation.ts";
 import {
   deriveTeamInvitationDeliveryKey,
 } from "../server/team/teamInvitationKey.ts";
@@ -154,11 +144,9 @@ function contactCommand(tenantId, suffix) {
 async function verifyContactLifecycle(
   pool,
   transactions,
+  contacts,
   tenantId,
 ) {
-  const contacts = createPostgresRailwayApiMutationExecutor(
-    transactions,
-  );
   const command = contactCommand(tenantId, "c");
   const created = await contacts.saveContact(command);
   const replay = await contacts.saveContact(command);
@@ -244,18 +232,12 @@ async function prepareBlockedInvitation(
 
 async function verifyInvitationLifecycle(
   pool,
-  queries,
-  transactions,
+  foundation,
   tenantId,
 ) {
-  const invitationRepository = createPostgresTeamInvitationRepository({
-    queries,
-    transactions,
-  });
-  const deliveryRepository =
-    createPostgresTeamInvitationDeliveryRepository({ queries });
-  const acceptanceRepository =
-    createPostgresTeamInvitationAcceptanceRepository({ transactions });
+  const invitationRepository = foundation.invitations;
+  const deliveryRepository = foundation.invitationDeliveries;
+  const acceptanceRepository = foundation.invitationAcceptances;
   const invitation = await prepareBlockedInvitation(
     invitationRepository,
     deliveryRepository,
@@ -311,8 +293,11 @@ export async function verifyNodePostgresIntegration(
   connectionString,
 ) {
   const { Pool } = pg;
+  const checkedConnectionString = requireLocalIntegrationUrl(
+    connectionString,
+  );
   const pool = new Pool({
-    connectionString: requireLocalIntegrationUrl(connectionString),
+    connectionString: checkedConnectionString,
     max: 4,
     connectionTimeoutMillis: 2_000,
     idleTimeoutMillis: 2_000,
@@ -329,16 +314,38 @@ export async function verifyNodePostgresIntegration(
 
     await applyMigrations(pool);
     const tenantId = await createTenant(pool);
-    const queries = createNodePostgresQueryExecutor(pool);
     const transactions = createNodePostgresTransactionManager(pool);
+    const foundation = createRailwayPostgresFoundation({
+      environment: {
+        APP_RUNTIME_ENVIRONMENT: "test",
+        DATABASE_URL: checkedConnectionString,
+        POSTGRES_APPLICATION_NAME: "connect-integration",
+        POSTGRES_MAX_CONNECTIONS: "4",
+        POSTGRES_CONNECTION_TIMEOUT_MS: "2000",
+        POSTGRES_IDLE_TIMEOUT_MS: "2000",
+        POSTGRES_STATEMENT_TIMEOUT_MS: "15000",
+        POSTGRES_QUERY_TIMEOUT_MS: "20000",
+        POSTGRES_LOCK_TIMEOUT_MS: "3000",
+        POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS: "10000",
+        POSTGRES_MAX_LIFETIME_SECONDS: "1800",
+        POSTGRES_TLS_MODE: "disabled",
+      },
+      telemetry: {
+        recordIdleClientError() {},
+      },
+    });
 
-    await verifyContactLifecycle(pool, transactions, tenantId);
-    await verifyInvitationLifecycle(
-      pool,
-      queries,
-      transactions,
-      tenantId,
-    );
+    try {
+      await verifyContactLifecycle(
+        pool,
+        transactions,
+        foundation.railwayApiMutations,
+        tenantId,
+      );
+      await verifyInvitationLifecycle(pool, foundation, tenantId);
+    } finally {
+      await foundation.close();
+    }
 
     return Object.freeze({
       status: "passed",
