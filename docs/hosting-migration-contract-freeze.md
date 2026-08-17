@@ -21,11 +21,11 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | מזהה | היום | יעד | הצעד הבא |
 | --- | --- | --- | --- |
 | `web.build-runtime` | Vinext + Cloudflare Vite/Sites | Vercel Web | החלפת Build/runtime |
-| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות וחוזה Mutation מאובטח ראשון הושלמו; נותרו PostgreSQL executor, שאר ה־Mutations, Routes, Live configuration ו־Staging evidence |
+| `web.server-api-boundary` | Web ו־Business services באותו Worker | Vercel Web מול Railway API | Authenticated runtime, שלוש קריאות ו־Mutation מאובטח עם PostgreSQL executor ספק־נייטרלי הושלמו; נותרו Driver, סכמת בסיס, שאר ה־Mutations, Routes, Live configuration ו־Staging evidence |
 | `web.static-assets` | `ASSETS` | Vercel Web | תצורת Assets |
 | `web.image-optimization` | `IMAGES` | Vercel Web | Adapter ובדיקות גבול |
 | `api.meta-webhook-ingress` | Worker route | Railway API | Route חתום, מוגבל ועמיד |
-| `data.relational-database` | D1/SQLite | PostgreSQL | בחירת ספק ו־Adapter parity |
+| `data.relational-database` | D1/SQLite | PostgreSQL | Transaction executor ו־Receipt schema contract קיימים; נותרו ספק, Driver, סכמת בסיס, המרת 35 Migrations וראיות מול Database אמיתי |
 | `data.object-storage` | R2 | Object storage | בחירת ספק ו־Adapter |
 | `queue.meta-webhook` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |

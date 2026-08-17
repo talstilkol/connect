@@ -80,6 +80,25 @@ function persistedContact(overrides = {}) {
   };
 }
 
+function contactRecord(overrides = {}) {
+  const contact = persistedContact(overrides);
+
+  return {
+    id: contact.id,
+    phoneNumber: contact.phoneNumber,
+    firstName: contact.firstName,
+    lastName: contact.lastName,
+    email: contact.email,
+    company: contact.company,
+    mailingStatus: contact.mailingStatus,
+    consentStatus: contact.consentStatus,
+    consentSource: contact.consentSource,
+    consentRecordedAt: contact.consentRecordedAt,
+    consentWithdrawnAt: contact.consentWithdrawnAt,
+    version: contact.version,
+  };
+}
+
 function fixture({
   tenantSession = session(),
   tenantError = null,
@@ -175,13 +194,15 @@ function fixture({
         ) {
           return {
             outcome: mutationOutcome,
+            tenantId: null,
             contact: null,
           };
         }
 
         return {
           outcome: mutationOutcome,
-          contact: persistedContact({
+          tenantId: command.session.tenantId,
+          contact: contactRecord({
             phoneNumber: command.profile.phoneNumber,
             firstName: command.profile.firstName,
             lastName: command.profile.lastName,
@@ -471,14 +492,15 @@ test("rejects thrown, malformed, and cross-tenant mutation results", async () =>
   const malformed = fixture({
     mutationResult: {
       outcome: "unexpected",
-      contact: persistedContact(),
+      tenantId: 7,
+      contact: contactRecord(),
     },
   });
   const crossTenant = fixture({
     mutationResult: {
       outcome: "committed",
-      contact: persistedContact({
-        tenantId: 11,
+      tenantId: 11,
+      contact: contactRecord({
         firstName: "Tal",
         company: "Connect",
       }),

@@ -178,7 +178,19 @@ Digest זהה בלי קשר לסדר השדות ב־JSON.
 ה־PostgreSQL Adapter העתידי לבצע שינוי עסקי, Claim של Idempotency,
 השוואת Request digest, ‏Audit immutable ושמירת תוצאת Replay באותה
 Transaction. תוצאות `conflict`, ‏`rate-limited` ו־`unavailable` ממופות
-לקודים סגורים ללא מידע פנימי. ה־Port קיים; מימוש PostgreSQL חי עדיין חסר.
+לקודים סגורים ללא מידע פנימי.
+
+7.1.14 נוסף Executor ספק־נייטרלי ל־PostgreSQL. הוא משתמש ב־Claim מסוג
+`ON CONFLICT DO NOTHING`, נעילת `FOR UPDATE`, ‏Contact upsert עם
+`IS DISTINCT FROM`, ‏Audit ללא PII והשלמת Receipt באותה Transaction.
+תוצאת Database שאינה תואמת ל־Tenant ול־Payload נכשלת סגור. ה־Receipt
+שומר רק את תגובת Contact הציבורית המדויקת, ללא Tenant, ‏Evidence או
+Database timestamps.
+
+7.1.15 נוסף Schema contract ל־Mutation receipts ומסמך
+[חוזה PostgreSQL ל־Railway Mutations](postgresql-mutation-contract.md).
+ה־Executor וה־SQL נבדקים מקומית, אך אין עדיין Driver, סכמת PostgreSQL
+בסיסית, Migration רץ או Integration evidence מול Database אמיתי.
 
 7.2 עדיין חסר:
 
@@ -190,7 +202,8 @@ Production ו־Preview origins המאושרים.
 
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
-ו־Transaction; עדיין חסר Executor אטומי אמיתי ב־PostgreSQL.
+ו־Transaction וכן Executor ספק־נייטרלי. עדיין חסרים Driver מאושר,
+Migration מלא ובדיקת Concurrency מול PostgreSQL אמיתי.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.

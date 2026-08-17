@@ -183,6 +183,8 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/railwayTenantSessionResolver.ts",
     "server/platform/railwayApiOperationRegistry.ts",
     "server/platform/railwayApiMutationExecutor.ts",
+    "server/platform/postgresTransaction.ts",
+    "server/platform/postgresRailwayApiMutationExecutor.ts",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -192,7 +194,32 @@ test("records the local API contract without claiming live adapter readiness", (
 
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
-  assert.match(boundary.cutoverBlocker, /PostgreSQL transactional executor/);
+  assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
+  assert.match(boundary.cutoverBlocker, /database driver/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
+});
+
+test("records the PostgreSQL mutation contract without selecting a provider", () => {
+  const database = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "data.relational-database",
+  );
+
+  assert.ok(database);
+  assert.equal(database.decisionState, "decision-required");
+  assert.equal(database.targetProvider, "unknown/unavailable");
+  assert.equal(database.nextAction, "provider-decision-required");
+
+  for (const path of [
+    "server/platform/postgresTransaction.ts",
+    "server/platform/postgresRailwayApiMutationExecutor.ts",
+    "postgres/schema/railway_api_mutation_receipts.sql",
+  ]) {
+    assert.equal(database.sourceFiles.includes(path), true);
+  }
+
+  assert.match(database.cutoverBlocker, /provider-neutral/);
+  assert.match(database.cutoverBlocker, /Node driver/);
+  assert.match(database.cutoverBlocker, /35-migration conversion/);
+  assert.match(database.cutoverBlocker, /real concurrency tests/);
 });

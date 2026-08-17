@@ -102,6 +102,8 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/railwayTenantSessionResolver.ts",
       "server/platform/railwayApiOperationRegistry.ts",
       "server/platform/railwayApiMutationExecutor.ts",
+      "server/platform/postgresTransaction.ts",
+      "server/platform/postgresRailwayApiMutationExecutor.ts",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
     ],
@@ -112,7 +114,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, and guarded contacts.save mutation contract exist, but the target PostgreSQL transactional executor, remaining mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, and provider-neutral PostgreSQL transaction executor exist, but the database driver, base schema parity, remaining mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -161,7 +163,13 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     id: "data.relational-database",
     currentBindings: ["DB"],
     currentResources: ["Cloudflare D1", "35 SQL migrations"],
-    sourceFiles: ["db", "drizzle.config.ts"],
+    sourceFiles: [
+      "db",
+      "drizzle.config.ts",
+      "server/platform/postgresTransaction.ts",
+      "server/platform/postgresRailwayApiMutationExecutor.ts",
+      "postgres/schema/railway_api_mutation_receipts.sql",
+    ],
     targetPlacement: "shared-managed-service",
     targetContract:
       "PostgreSQL persistence with transactional and concurrency parity",
@@ -169,7 +177,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Repositories and migration evidence use D1 and SQLite semantics directly.",
+      "A provider-neutral contacts.save transaction executor and receipt schema contract exist, but the provider, Node driver, base PostgreSQL schema, 35-migration conversion, real concurrency tests, and migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

@@ -1,6 +1,6 @@
 import type {
-  PersistedContact,
-} from "../../db/contactRepository.ts";
+  ContactRecord,
+} from "../../shared/domain/contactRecord.ts";
 import type {
   PersistedContactProfile,
 } from "../../shared/validation/persistedContact.ts";
@@ -24,10 +24,12 @@ export interface RailwayApiContactSaveCommand {
 export type RailwayApiContactSaveResult =
   | Readonly<{
       outcome: "committed" | "replayed";
-      contact: PersistedContact;
+      tenantId: number;
+      contact: ContactRecord;
     }>
   | Readonly<{
       outcome: "conflict" | "unavailable";
+      tenantId: null;
       contact: null;
     }>;
 

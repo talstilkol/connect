@@ -382,8 +382,28 @@ Idempotency claim, ‏Request digest ותוצאת Replay באותה PostgreSQL
 Transaction. אין עדיין Adapter כזה ולכן אין טענה שכתיבה חיה מוכנה.
 
 2.21.4 תגובת ה־API משתמשת ב־Contact mapper הקיים ומסירה `tenantId`,
-זהות משתמש, Evidence ו־Database timestamps. עדיין חסרים Executor אמיתי,
-שאר ה־Mutations, ‏Routes, ‏Live configuration ו־Staging evidence.
+זהות משתמש, Evidence ו־Database timestamps. בשלב זה היה קיים Port בלבד;
+ליבת ה־Executor המקומית שנוספה אחריו מתועדת בסעיף 2.22.
+
+2.22 **הושלם מקומית:** ליבת PostgreSQL ספק־נייטרלית ל־`contacts.save`.
+
+2.22.1 ‏`PostgresTransactionManager` מקפיא חוזה של Connection אחד,
+`BEGIN`, ‏`COMMIT` ו־`ROLLBACK`. בחירת Node driver נשארת החלטה חיצונית.
+
+2.22.2 ה־Executor תובע Receipt אטומי לפי Tenant, ‏Operation ומפתח
+Idempotency. מתחרה על אותו מפתח ממתין דרך Unique conflict ואז נועל את
+התוצאה ב־`FOR UPDATE`. Digest שונה מחזיר Conflict ו־Digest זהה מחזיר Replay.
+
+2.22.3 Contact upsert, ‏Audit ללא PII והשלמת Receipt מבוצעים באותה
+Transaction. ‏`IS DISTINCT FROM` מונע הגדלת Version כאשר הפרופיל לא השתנה.
+תוצאה פגומה או Cross-tenant גורמת ל־Rollback ול־`unavailable`. ‏Replay JSON
+שומר רק את תגובת ה־API הציבורית ואינו משכפל Tenant, ‏Evidence או timestamps
+פנימיים.
+
+2.22.4 נוסף Schema contract עבור `railway_api_mutation_receipts` ומסמך
+`docs/postgresql-mutation-contract.md`. עדיין חסרים ספק, Driver, סכמת בסיס,
+המרת 35 ה־Migrations ובדיקת Concurrency מול PostgreSQL אמיתי; לכן אין
+טענה שה־Database adapter מוכן לפריסה.
 
 ## 3. עבודה שאינה מקומית בלבד
 

@@ -117,7 +117,7 @@ type OperationExecutor<TPayload> = (
 ) => Promise<unknown>;
 
 function hasExactKeys(
-  value: RailwayApiJsonObject,
+  value: Readonly<Record<string, unknown>>,
   expectedKeys: readonly string[],
 ): boolean {
   const actualKeys = Object.keys(value).sort();
@@ -218,13 +218,29 @@ function isValidContactSaveResult(
     value.outcome === "conflict" ||
     value.outcome === "unavailable"
   ) {
-    return value.contact === null;
+    return value.tenantId === null && value.contact === null;
   }
 
   if (
     (value.outcome !== "committed" &&
       value.outcome !== "replayed") ||
-    !isRecord(value.contact)
+    !Number.isSafeInteger(value.tenantId) ||
+    Number(value.tenantId) !== session.tenantId ||
+    !isRecord(value.contact) ||
+    !hasExactKeys(value.contact, [
+      "id",
+      "phoneNumber",
+      "firstName",
+      "lastName",
+      "email",
+      "company",
+      "mailingStatus",
+      "consentStatus",
+      "consentSource",
+      "consentRecordedAt",
+      "consentWithdrawnAt",
+      "version",
+    ])
   ) {
     return false;
   }
@@ -236,7 +252,6 @@ function isValidContactSaveResult(
     validation.success &&
     Number.isSafeInteger(contact.id) &&
     Number(contact.id) > 0 &&
-    contact.tenantId === session.tenantId &&
     Number.isSafeInteger(contact.version) &&
     Number(contact.version) > 0 &&
     (contact.mailingStatus === "subscribed" ||
@@ -247,11 +262,6 @@ function isValidContactSaveResult(
     isStringOrNull(contact.consentSource) &&
     isStringOrNull(contact.consentRecordedAt) &&
     isStringOrNull(contact.consentWithdrawnAt) &&
-    isStringOrNull(contact.consentEvidenceReference) &&
-    typeof contact.createdAt === "string" &&
-    contact.createdAt.length > 0 &&
-    typeof contact.updatedAt === "string" &&
-    contact.updatedAt.length > 0 &&
     validation.value.phoneNumber === profile.phoneNumber &&
     validation.value.firstName === profile.firstName &&
     validation.value.lastName === profile.lastName &&
@@ -413,7 +423,7 @@ async function executeContactSave(
 
   return {
     replayed: result.outcome === "replayed",
-    contact: toContactRecord(result.contact),
+    contact: result.contact,
   };
 }
 

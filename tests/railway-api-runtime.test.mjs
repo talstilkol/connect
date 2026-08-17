@@ -123,19 +123,16 @@ function fixture(selectedRole = "owner") {
         calls.mutationCommands.push(command);
         return {
           outcome: "committed",
+          tenantId: command.session.tenantId,
           contact: {
             id: 31,
-            tenantId: command.session.tenantId,
             ...command.profile,
             mailingStatus: "subscribed",
             consentStatus: "unknown",
             consentSource: null,
             consentRecordedAt: null,
             consentWithdrawnAt: null,
-            consentEvidenceReference: null,
             version: 1,
-            createdAt: "2026-08-17T00:00:00.000Z",
-            updatedAt: "2026-08-17T00:00:00.000Z",
           },
         };
       },
