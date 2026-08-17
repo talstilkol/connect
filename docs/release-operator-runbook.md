@@ -27,6 +27,20 @@ Manifest כאילו הוא חלק מה־Release.
 2.5 בעלי Release, ‏Operations, ‏Security ו־On-call מונו. כל בעלים
 שלא מונה נשאר `unknown/unavailable` וחוסם Production.
 
+2.6 לקבלת Snapshot בטוח לקריאה על ידי אוטומציה מריצים:
+
+```bash
+npm run --silent verify:production-readiness:json
+```
+
+2.6.1 הפלט הוא JSON בשורה אחת עם `schemaVersion`, סטטוס, מונים
+ורשימת `id/status/code` בלבד. הוא אינו כולל ערכי Environment,
+Credentials, ‏Tenant IDs או פרטי ספק.
+
+2.6.2 הפקודה מחזירה Exit code שאינו אפס כל עוד שער כלשהו חסום או
+דורש החלטה. אין לפרש יצירת JSON כהוכחת מוכנות; רק `status=ready`
+ויציאה מוצלחת מאשרים שכל 33 הבדיקות עברו.
+
 ## 3. Rehearsal מקומי
 
 3.1 מריצים על Worktree נקי:

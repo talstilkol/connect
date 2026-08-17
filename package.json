@@ -19,6 +19,7 @@
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",
     "verify:release-gate": "node scripts/verify-release-gate.mjs",
     "verify:production-readiness": "node scripts/verify-production-readiness.mjs",
+    "verify:production-readiness:json": "node scripts/verify-production-readiness.mjs --json",
     "release:manifest": "node scripts/create-release-manifest.mjs",
     "release:changelog": "node scripts/create-change-log.mjs",
     "release:verify-artifacts": "node scripts/verify-release-artifacts.mjs",

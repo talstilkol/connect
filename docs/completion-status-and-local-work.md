@@ -284,6 +284,19 @@ External code execution. מספר ה־PRs מוגבל, ו־Workflow actions נש�
 ב־GitHub תתרחש רק לאחר Merge לענף ברירת המחדל, והרצת Checks על PRs
 של Dependabot עדיין תלויה בפתרון חסימת ה־Billing.
 
+2.15 **הושלם מקומית:** חוזה Machine-readable למצב Production
+Readiness.
+
+2.15.1 `npm run --silent verify:production-readiness:json` מחזיר Payload
+בגרסה 1 הכולל רק סטטוס, מונים ו־`id/status/code` עבור 33 השערים.
+ערכי Environment, ‏Credentials, ‏Tenant IDs ושדות מקור מורחבים אינם
+מועתקים לפלט.
+
+2.15.2 גם במצב JSON הפקודה נכשלת ב־Exit code שאינו אפס כל עוד
+Production חסום. בדיקות שליליות דוחות Arguments נוספים, מונים שאינם
+תואמים, מזהים כפולים וקודים שאינם בטוחים. כך צוות Deployment יכול
+לצרוך את המצב באוטומציה בלי להפוך Report ל־Evidence מזויף.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל
