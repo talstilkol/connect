@@ -5,6 +5,9 @@ import type {
   NodePostgresPoolEnvironment,
   NodePostgresPoolTelemetry,
 } from "./nodePostgresPoolConfiguration.ts";
+import type {
+  PostgresReadinessProbe,
+} from "./postgresReadinessProbe.ts";
 import {
   createRailwayApiRuntime,
 } from "./railwayApiRuntime.ts";
@@ -35,6 +38,7 @@ export interface RailwayPostgresApiRuntimeOptions {
 
 export interface RailwayPostgresApiRuntime {
   readonly handler: RailwayApiHttpHandler;
+  readonly readiness: Readonly<PostgresReadinessProbe>;
   readonly close: () => Promise<void>;
 }
 
@@ -96,6 +100,7 @@ export async function createRailwayPostgresApiRuntime(
 
     return Object.freeze({
       handler,
+      readiness: foundation.readiness,
       close: foundation.close,
     });
   } catch (error) {

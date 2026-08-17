@@ -924,6 +924,9 @@ async function verifyPostgresHttpRuntime(connectionString) {
   });
 
   try {
+    assert.deepEqual(await runtime.readiness.check(), {
+      status: "ready",
+    });
     const compactJwt = "header.payload.signature";
     const response = await runtime.handler.handle(
       new Request(

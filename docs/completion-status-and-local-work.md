@@ -713,9 +713,46 @@ Connection string או Credentials.
 אומתה. תוצאת מסד הנתונים נשארה
 `PASS (9 migrations, 2 concurrency scenarios)`.
 
-2.38.4 נותר מקומית Node HTTP entrypoint עם Route קשיח, Health endpoints,
+2.38.4 בשלב זה נותר מקומית Node HTTP entrypoint עם Route קשיח, Health endpoints,
 Graceful shutdown ו־Contract tests לתהליך. לאחריו יישארו בעיקר הרחבת
 Operations/Parity וחסמי Environment חיצוניים.
+
+2.39 **הושלם מקומית:** Node HTTP adapter, ‏PostgreSQL readiness ו־Service
+lifecycle.
+
+2.39.1 ‏`postgresReadinessProbe.ts` מריץ שאילתת `SELECT 1` קבועה ללא קלט,
+מקבל רק שורה ושדה מדויקים ונכשל סגור ל־`unavailable` בלי לחשוף Error.
+ה־Harness אימת את ה־Probe מול PostgreSQL 16.13 אמיתי כחלק מתוצאת
+`PASS (9 migrations, 2 concurrency scenarios)`.
+
+2.39.2 ‏`railwayNodeHttpServer.ts` מקבל רק Origin-form request targets,
+משתמש ב־Origin פנימי קבוע במקום לסמוך על Host, ומנתב רק `health/live`,
+‏`health/ready` ו־`/v1/connect`. ‏Headers מוגבלים ל־16KB, מספר Headers ל־64,
+מספר בקשות לחיבור ל־100 ו־Timeouts מפורשים. תגובות Health אינן נשמרות ב־Cache.
+
+2.39.3 ‏`railwayNodeService.ts` הוא בעל החיים של Listener ושל PostgreSQL
+runtime. הוא מפעיל פעם אחת, עוצר HTTP לפני סגירת Pool, מנסה את שתי הסגירות
+גם בכשל ומחזיר רק קוד כשל תחום. כל Start/Close/Failure contracts נבדקו.
+
+2.39.4 בשלב זה נותר מקומית לחבר Startup executable אל `PORT` ואל Process signals.
+החיבור ל־Mutation rate limiter מבוזר אינו מקומי בלבד ותלוי בהחלטת Provider
+וב־Credentials; אין להפעיל `contacts.save` ללא Adapter כזה. לאחר מכן יישארו
+הרחבת Operations ו־Parity מול יתר ה־D1 schema.
+
+2.40 **הושלם מקומית:** Railway process configuration ו־Signal lifecycle.
+
+2.40.1 ‏`railwayNodeProcess.ts` מקבל רק `PORT` קנוני בטווח 1–65535 ודוחה
+אפס, Leading zero, חריגה ושדה Environment נוסף. הוא אינו מאפשר ללקוח לבחור
+Host; ה־Listener נשאר על `0.0.0.0` מתוך קוד השרת בלבד.
+
+2.40.2 ‏`SIGINT` ו־`SIGTERM` נרשמים רק אחרי Start מוצלח ומוסרים לפני
+Shutdown. שני Signals משתמשים באותו Close Idempotent. כשל חלקי ברישום Signal
+מסיר Listener שכבר נרשם, סוגר את השירות ומחזיר קוד `start-failed` תחום.
+
+2.40.3 לא נוצר Bootstrap executable לא בטוח. כדי להרכיב Runtime מלא נדרש
+`mutationRateLimit` מבוזר אמיתי; Stub מקומי שיחזיר תמיד `allowed` יהפוך את
+`contacts.save` למסלול Production ללא הגנה משותפת ולכן אסור. זהו כעת חסם
+Provider/Environment, לא חוסר ב־Node process lifecycle.
 
 ## 3. עבודה שאינה מקומית בלבד
 

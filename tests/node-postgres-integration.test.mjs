@@ -75,6 +75,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /runtime\.handler\.handle/);
+  assert.match(source, /runtime\.readiness\.check/);
   assert.match(source, /createRailwayPostgresApiRuntime/);
   assert.match(source, /messages_direction_status_consistent|23514/);
   assert.match(source, /createRailwayPostgresFoundation/);

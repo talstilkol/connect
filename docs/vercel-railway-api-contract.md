@@ -251,9 +251,22 @@ deliveries, ‏AI audit ו־AI usage הומרו ונבדקו מול PostgreSQL �
 PostgreSQL Foundation אחד, ובעל ה־Runtime מחזיק גם בסגירת ה־Pool. ‏Harness
 אמיתי ביצע `reports.read` דרך HTTP, אימת Vercel OIDC ו־Clerk, פתר Tenant מתוך
 Membership ב־PostgreSQL, הפעיל Permission וקרא את כל ששת מקורות הדוח. התגובה
-נבדקה ללא Tenant ID, ‏External user או Connection data. עדיין חסרים Node
-HTTP entrypoint, ‏Health endpoints, ‏Graceful shutdown ו־Railway environment
-אמיתי.
+נבדקה ללא Tenant ID, ‏External user או Connection data. שכבת Node HTTP
+ו־Service lifecycle מתועדת בסעיף הבא; Railway environment אמיתי עדיין חסר.
+
+7.1.25 נוסף Node HTTP adapter עם Route API יחיד, Liveness, ‏Readiness מבוסס
+PostgreSQL, מגבלת Header של 16KB ו־Timeouts מפורשים. Request target חייב
+להיות Origin-form ואינו נגזר מ־Host לא מהימן. ‏Service owner מפעיל פעם אחת,
+עוצר HTTP לפני סגירת Pool ומחזיר כשלים תחומים ללא פרטי Listener או Database.
+בשלב זה Startup executable נשאר חסום עד חיבור Process signals, ‏`PORT` מאומת
+ו־Distributed rate-limit adapter; ה־Process lifecycle הושלם בסעיף הבא.
+
+7.1.26 ‏`railwayNodeProcess.ts` מאמת את `PORT`, מחבר `SIGINT` ו־`SIGTERM`
+רק לאחר Start, ומנתב Signal לאותו Service shutdown שסוגר HTTP לפני Pool.
+כשל ברישום Signal מסיר Wiring חלקי וסוגר את השירות. ה־Process controller
+מוכן מקומית; קובץ Bootstrap שמפעיל אותו נשאר חסום עד שניתן להרכיב Runtime
+עם Distributed mutation rate limiter אמיתי, ולא Stub שמאפשר כתיבות ללא
+מכסה משותפת.
 
 7.2 עדיין חסר:
 

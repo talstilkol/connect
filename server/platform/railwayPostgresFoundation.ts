@@ -24,6 +24,9 @@ import {
   createPostgresOperationalReportRepository,
 } from "./postgresOperationalReportRepository.ts";
 import {
+  createPostgresReadinessProbe,
+} from "./postgresReadinessProbe.ts";
+import {
   createPostgresRailwayApiMutationExecutor,
 } from "./postgresRailwayApiMutationExecutor.ts";
 import {
@@ -70,6 +73,7 @@ export interface RailwayPostgresFoundationOptions {
 }
 
 export interface RailwayPostgresFoundation {
+  readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly contacts: ReturnType<typeof createContactListService>;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
@@ -157,6 +161,7 @@ export function createRailwayPostgresFoundation(
   let closed = false;
 
   return Object.freeze({
+    readiness: createPostgresReadinessProbe(queries),
     contacts: createContactListService({ contacts: contactReads }),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),

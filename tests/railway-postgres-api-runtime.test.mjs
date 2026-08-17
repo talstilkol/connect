@@ -69,8 +69,13 @@ function options(overrides = {}) {
 test("composes one authenticated handler over the PostgreSQL foundation", async () => {
   const runtime = await createRailwayPostgresApiRuntime(options());
 
-  assert.deepEqual(Object.keys(runtime).sort(), ["close", "handler"]);
+  assert.deepEqual(Object.keys(runtime).sort(), [
+    "close",
+    "handler",
+    "readiness",
+  ]);
   assert.equal(typeof runtime.handler.handle, "function");
+  assert.equal(typeof runtime.readiness.check, "function");
   assert.equal(typeof runtime.close, "function");
   assert.doesNotMatch(
     JSON.stringify(runtime),

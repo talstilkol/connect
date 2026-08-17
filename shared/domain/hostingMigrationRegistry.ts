@@ -105,8 +105,12 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresTransaction.ts",
       "server/platform/nodePostgresAdapter.ts",
       "server/platform/nodePostgresPoolConfiguration.ts",
+      "server/platform/postgresReadinessProbe.ts",
       "server/platform/railwayPostgresFoundation.ts",
       "server/platform/railwayPostgresApiRuntime.ts",
+      "server/platform/railwayNodeHttpServer.ts",
+      "server/platform/railwayNodeProcess.ts",
+      "server/platform/railwayNodeService.ts",
       "server/platform/postgresResultValidation.ts",
       "server/platform/postgresTenantMembershipRepository.ts",
       "server/platform/postgresTenantMembershipMutationRepository.ts",
@@ -133,7 +137,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, single-statement reports.read adapter, eleven-adapter PostgreSQL foundation, and owned PostgreSQL API runtime composition exist. All six operational-report source families are migrated, and the complete authenticated reports.read HTTP path passed against PostgreSQL 16.13. Cutover remains blocked because the deployable Node HTTP entrypoint, health and shutdown lifecycle, live provider-bound pool values, full 35-migration schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, single-statement reports.read adapter, eleven-adapter PostgreSQL foundation, owned PostgreSQL API runtime composition, bounded Node HTTP adapter, database readiness probe, ordered HTTP-before-pool shutdown owner, strict PORT configuration, and SIGINT/SIGTERM lifecycle exist. All six operational-report source families are migrated, and the complete authenticated reports.read HTTP path passed against PostgreSQL 16.13. Cutover remains blocked because the executable bootstrap cannot be safely composed without a provider-bound distributed mutation rate-limit adapter, live provider-bound pool values, full 35-migration schema parity, remaining domain mutations, live account configuration, and staging evidence.",
   }),
   capability({
     id: "web.static-assets",
@@ -198,6 +202,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
       "server/platform/postgresContactReadRepository.ts",
       "server/platform/postgresOperationalReportRepository.ts",
+      "server/platform/postgresReadinessProbe.ts",
       "server/platform/railwayPostgresApiRuntime.ts",
       "postgres/migrations/0000_core_contacts.sql",
       "postgres/migrations/0001_railway_api_mutation_receipts.sql",
@@ -218,7 +223,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, contacts.list, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus nine ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, eleven-adapter foundation, owned API runtime composition, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, the complete authenticated six-source reporting HTTP path, conversation/message, template/campaign, bot delivery and AI reporting constraints, commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
+      "Provider-neutral contacts.save, contacts.list, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus nine ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, eleven-adapter foundation, owned API runtime composition, exact readiness query, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, the complete authenticated six-source reporting HTTP path, conversation/message, template/campaign, bot delivery and AI reporting constraints, commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

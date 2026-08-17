@@ -302,10 +302,12 @@ Foundation אחד מחבר 11 Adapters קיימים לאותו Pool בלי לח�
 Messages, ‏Templates, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage הומרו
 ונבדקו מול PostgreSQL אמיתי, וה־Harness קרא דוח מלא מכל ששת המקורות.
 Runtime composition בעל `close` מסודר עבר גם הוא מסלול HTTP מלא דרך זהויות
-Vercel ו־Clerk, ‏Tenant resolution והרשאה. ‏Railway API מלא נשאר חסום עד
-Node HTTP entrypoint ו־Health/shutdown, השלמת יתר ה־Routes וה־Mutations,
-‏Parity מלאה, ערכי Pool חיים וראיות Staging, כדי לא ליצור Hybrid לא מתועד
-עם D1.
+Vercel ו־Clerk, ‏Tenant resolution והרשאה. נוסף Node HTTP adapter עם
+Liveness, ‏PostgreSQL readiness, גבולות Request ו־Service owner שסוגר HTTP
+לפני Pool. ‏`PORT`, ‏`SIGINT` ו־`SIGTERM` מחוברים ב־Process controller מקומי.
+‏Railway API מלא נשאר חסום עד Rate-limit adapter מבוזר, השלמת יתר ה־Routes
+וה־Mutations, ‏Parity מלאה, ערכי Pool חיים וראיות Staging, כדי לא ליצור
+Hybrid לא מתועד עם D1.
 
 ## 12. מקורות רשמיים שנבדקו
 

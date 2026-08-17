@@ -54,8 +54,23 @@ Conversations, ‏Messages, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI 
 הנתונים נשארות אובייקטים נפרדים כדי למנוע העברת Credential ל־Adapter הלא
 נכון. ה־Harness הפעיל `reports.read` דרך Vercel OIDC, ‏Clerk, ‏Tenant
 resolution והרשאה מול PostgreSQL אמיתי, ואימת שהתגובה אינה חושפת Tenant,
-User או Connection data. עדיין חסר Node HTTP entrypoint עם Health ו־Graceful
-shutdown לפני שניתן להריץ את השירות ב־Railway.
+User או Connection data. שכבת Node HTTP ו־Service lifecycle מתועדת בסעיף
+הבא; Startup executable עדיין אינו מחובר.
+
+1.10 ‏`postgresReadinessProbe.ts` מבצע רק `SELECT 1::integer AS ready`, דורש
+שורה ושדה מדויקים ומחזיר `unavailable` בלי Error פנימי בכל כשל. ‏Node HTTP
+adapter מוסיף Routes קשיחים ל־Liveness, ‏Readiness ו־API, מגביל Headers,
+Timeouts ו־Request target, ואינו סומך על Host שסיפק הלקוח. ‏Service owner
+עוצר תחילה קבלת HTTP ורק אחר כך סוגר את PostgreSQL runtime, ומנסה את שתי
+השכבות גם במקרה כשל. בשלב זה נותר לחבר Process signals ו־Rate-limit provider
+אמיתי; Signal lifecycle הושלם בסעיף הבא.
+
+1.11 ‏`railwayNodeProcess.ts` מקבל רק `PORT` עשרוני קנוני בטווח 1–65535,
+מתקין `SIGINT` ו־`SIGTERM` רק לאחר Start מוצלח, ומסיר גם Wiring חלקי אם
+רישום Signal נכשל. כל Signal עובר באותו Close Idempotent; כשל Shutdown מסמן
+את התהליך בלי לחשוף פרטי Runtime. ‏Startup executable עדיין חסום בכוונה:
+אין לחבר את `contacts.save` לפני בחירת Distributed rate limiter והזרקתו
+ל־Runtime.
 
 ## 2. הסבר למתחילים
 
