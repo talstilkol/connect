@@ -50,7 +50,7 @@ Design מלא.
 | SPEC-15 | דוח נשלח/נמסר/נקרא/נכשל | partial | Recipient statuses, Message statuses ו־Operational reports | Campaign report חי מקצה לקצה |
 | SPEC-16 | תזמון חד־פעמי | local-complete | Scheduled campaign ו־Cron promotion | פריסה ובדיקת Cron אמיתי |
 | SPEC-17 | Recurring Campaigns | planned | אין recurrence model | החלטת Policy, Schema, next-run claim וביטול סדרה |
-| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime ועורך נגיש לרצף Text, לשאלת Buttons מסיימת ולפיצול Condition יחיד | Canvas אינטראקטיבי, חיבורים חופשיים, Drag-and-drop ועריכת Graph מלאה |
+| SPEC-18 | Flow Builder ויזואלי Drag-and-drop | partial | Flow domain, Versioning, Runtime, Drag-and-drop עם חלופת מקלדת לרצף ולאפשרויות, ו־Canvas חי עם Summary סמנטי נגיש ל־Trigger, ענפים, Text, Buttons, Condition, Handoff ו־End | חיבורים חופשיים, מסלולים מרובי שאלות/Conditions ועריכת Graph מלאה |
 | SPEC-19 | תנאים, Text, Buttons ו־Human handoff | partial | רצף Text, שאלת Buttons, פיצול Condition ו־Handoff לפי Keyword או מכל ענף Condition נשמרים כ־Graph אמיתי; Handoff מעביר ללא Reply באותו Turn, ו־Intro נחסם כאשר ענף פנימי מעביר; המפתחות נגזרים בשרת וה־Runtime ממשיך מראיית Outbox Accepted תחומה | מסלולים מרובי Conditions/שאלות ובדיקות Browser E2E |
 | SPEC-20 | System Prompt | local-complete | AI Agent versioned definition | ספק AI חי ו־Eval |
 | SPEC-21 | Knowledge Base ו־RAG | external-blocked | Upload contract, R2 port, Scanner port, Passages ו־Retrieval | R2, Scanner, Extraction ו־Vector/Retrieval חיים |
@@ -95,7 +95,11 @@ Intro באותו Turn; ה־UI מסיר אותו והשרת דוחה ניסיון
 אפשר להגדיר תשובת Text נפרדת לכל ענף שאינו מעביר, והמנוע גוזר בשרת
 את כל מפתחות ה־Block וה־Option. המשך בחירת Button נשען רק על ראיית
 Accepted תחומה. נותרו מסלולים מרובי Conditions או שאלות, חיבור Graph
-מלא ו־Drag-and-drop. גם בהמשך Drag-and-drop לא יהיה דרך הקלט היחידה.
+מלא. Drag-and-drop קיים לסידור רצף Text ואפשרויות Buttons עם כפתורי
+מקלדת מקבילים. ה־Canvas החי חולץ לרכיב עצמאי; התרשים החזותי מוסתר
+מקוראי מסך ובמקומו מוצג עץ סמנטי המתאר את סדר הפעולות, שני הענפים
+ומצבי הסיום. נותרה עריכה חופשית של חיבורים ו־Nodes; גם בהמשך
+Drag-and-drop לא יהיה דרך הקלט היחידה.
 
 4.2.4 הושלמה עריכת שדות Business Profile הקיימים ב־Admin. יש
 להשלים Package, ‏Quota ושדות קשר רק לאחר אישור המודל המפורט בסעיף

@@ -10,15 +10,20 @@ const editorUrl = new URL(
   "../features/bot/BotFlowHandoffEditor.tsx",
   import.meta.url,
 );
+const previewUrl = new URL(
+  "../features/bot/BotFlowDraftPreview.tsx",
+  import.meta.url,
+);
 const compilerUrl = new URL(
   "../server/bot/botFlowComposer.ts",
   import.meta.url,
 );
 
 test("keeps keyword handoff explicit, keyboard accessible, and reversible", async () => {
-  const [builder, editor] = await Promise.all([
+  const [builder, editor, preview] = await Promise.all([
     readFile(builderUrl, "utf8"),
     readFile(editorUrl, "utf8"),
+    readFile(previewUrl, "utf8"),
   ]);
 
   assert.match(
@@ -46,7 +51,7 @@ test("keeps keyword handoff explicit, keyboard accessible, and reversible", asyn
     /handoffEnabled\s*\? handoffReason !== ""/,
   );
   assert.match(
-    builder,
+    preview,
     /סיום ללא שינוי בשיחה/,
   );
   assert.doesNotMatch(editor, /Math\.random\(/);

@@ -490,6 +490,11 @@
   font-weight: 800;
 }
 
+.canvas-toolbar h3 {
+  margin: 0;
+  font: inherit;
+}
+
 .canvas-toolbar div {
   display: flex;
   align-items: center;
