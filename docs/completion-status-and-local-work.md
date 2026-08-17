@@ -565,9 +565,10 @@ Telemetry sink, ‏Migration identity ו־Staging connection proof.
 
 2.31 **הושלם מקומית:** PostgreSQL persistence foundation ל־Railway.
 
-2.31.1 Composition יחיד יוצר מאותו Pool את כל עשרת ה־Adapters שכבר קיימים:
+2.31.1 Composition יחיד יוצר מאותו Pool את כל 11 ה־Adapters שכבר קיימים:
 Membership reads/mutations, ‏Tenant selection, ‏Business profile,
-`contacts.save`, ‏`contacts.list` וכל ארבעת מסלולי Invitation lifecycle.
+`contacts.save`, ‏`contacts.list`, ‏`reports.read` וכל ארבעת מסלולי
+Invitation lifecycle.
 
 2.31.2 ה־Foundation אינו מחזיר Pool, ‏Driver, ‏Query executor או Connection
 string ל־Caller. הוא חושף רק Ports עסקיים ו־`close()` אידמפוטנטי. ‏Options
@@ -596,9 +597,24 @@ Keyset pagination יורד לפי `id`, מגביל עמוד ל־100 ומאמת �
 `PASS (5 migrations, 2 concurrency scenarios)`, כולל יצירת שני Contacts
 וקריאתם דרך `contacts.list`. סביבת הבדיקה הזמנית נעצרה ונמחקה.
 
-2.32.4 ‏`reports.read` הוא מסלול הקריאה האחרון שחוסם חיבור מלא של פעולות
-ה־Read הקיימות ל־PostgreSQL. בנוסף נשארים Routes, ‏Live pool values,
+2.32.4 ‏`reports.read` היה מסלול הקריאה הבא. ה־Adapter שלו מתועד בסעיף 2.33,
+אך סכמת המקור עדיין חוסמת חיבור מלא. בנוסף נשארים Routes, ‏Live pool values,
 Schema parity ו־Staging evidence; לכן אין עדיין טענת Cutover.
+
+2.33 **הושלם מקומית ברמת Adapter:** PostgreSQL read path ל־`reports.read`.
+
+2.33.1 ‏`postgresOperationalReportRepository.ts` מחשב Campaign, ‏Message,
+Conversation, ‏Bot, ‏AI ו־AI usage בשאילתת PostgreSQL יחידה. כך כל המדדים
+נקראים מאותו Statement snapshot ולא משישה רגעים שונים.
+
+2.33.2 ה־Adapter מסנן כל CTE לפי Tenant וחלון זמן, מחזיר Counts כמחרוזות כדי
+למנוע איבוד דיוק ב־`bigint`, ומאמת בדיוק 35 שדות, סכומי קטגוריות, מטבעות
+מסודרים ומספרים בטווח JavaScript בטוח. ארבע בדיקות שליליות/חיוביות עברו.
+
+2.33.3 ה־Foundation חושף כעת Port עסקי `reports` ומחבר 11 Adapters לאותו
+Pool. שש טבלאות המקור — Campaigns, Messages, Conversations, Bot deliveries,
+AI audit ו־AI usage — אינן עדיין בחמש ה־Migrations של PostgreSQL. לכן לא
+נרשמה ראיית Database אמיתי עבור הדוח, וה־Cutover נשאר חסום במפורש.
 
 ## 3. עבודה שאינה מקומית בלבד
 

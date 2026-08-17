@@ -12,11 +12,17 @@ import {
   createContactListService,
 } from "../contacts/contactService.ts";
 import {
+  createOperationalReportService,
+} from "../reports/operationalReportService.ts";
+import {
   createPostgresBusinessProfileRepository,
 } from "./postgresBusinessProfileRepository.ts";
 import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
+import {
+  createPostgresOperationalReportRepository,
+} from "./postgresOperationalReportRepository.ts";
 import {
   createPostgresRailwayApiMutationExecutor,
 } from "./postgresRailwayApiMutationExecutor.ts";
@@ -65,6 +71,7 @@ export interface RailwayPostgresFoundationOptions {
 
 export interface RailwayPostgresFoundation {
   readonly contacts: ReturnType<typeof createContactListService>;
+  readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
     typeof createPostgresTenantMembershipRepository
   >;
@@ -151,6 +158,9 @@ export function createRailwayPostgresFoundation(
 
   return Object.freeze({
     contacts: createContactListService({ contacts: contactReads }),
+    reports: createOperationalReportService(
+      createPostgresOperationalReportRepository(queries),
+    ),
     memberships: createPostgresTenantMembershipRepository(queries),
     membershipMutations:
       createPostgresTenantMembershipMutationRepository({

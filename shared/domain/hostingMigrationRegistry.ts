@@ -116,6 +116,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresTeamInvitationDeliveryRepository.ts",
       "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
       "server/platform/postgresContactReadRepository.ts",
+      "server/platform/postgresOperationalReportRepository.ts",
       "postgres/migrations/0004_team_invitation_lifecycle.sql",
       "server/platform/railwayApiRuntime.ts",
       "worker/index.ts",
@@ -127,7 +128,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, and ten-adapter PostgreSQL foundation exist, but live provider-bound pool values, the PostgreSQL reports.read repository, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
+      "The authenticated runtime, initial reads, guarded contacts.save mutation, provider-neutral PostgreSQL transaction executor, node-postgres transaction adapter, pool contract, PostgreSQL contacts.list read, single-statement reports.read adapter, and eleven-adapter PostgreSQL foundation exist. Cutover remains blocked because the six operational-report source tables are absent from the critical-path PostgreSQL migrations, and live provider-bound pool values, full schema parity, remaining domain mutations, split routes, live account configuration, and staging evidence are not implemented.",
   }),
   capability({
     id: "web.static-assets",
@@ -191,6 +192,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresTeamInvitationDeliveryRepository.ts",
       "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
       "server/platform/postgresContactReadRepository.ts",
+      "server/platform/postgresOperationalReportRepository.ts",
       "postgres/migrations/0000_core_contacts.sql",
       "postgres/migrations/0001_railway_api_mutation_receipts.sql",
       "postgres/migrations/0002_tenant_access_foundation.sql",
@@ -206,7 +208,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "Provider-neutral contacts.save, contacts.list, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, ten-adapter foundation, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
+      "Provider-neutral contacts.save, contacts.list, single-statement reports.read, tenant access, team membership mutation, and complete invitation lifecycle repositories plus five ordered critical-path PostgreSQL migrations exist. A node-postgres adapter, fail-closed production pool configuration contract, eleven-adapter foundation, and repeatable loopback PostgreSQL 16.13 rehearsal prove contact write/read, commit/replay/rollback, invitation delivery/acceptance, and two real concurrency scenarios. The six operational-report source tables are not yet present in the PostgreSQL migrations, and the provider, live provider-bound pool values and telemetry, full 35-migration parity conversion, remaining repository DML/concurrency coverage, and controlled-environment migration evidence are not implemented.",
   }),
   capability({
     id: "data.object-storage",

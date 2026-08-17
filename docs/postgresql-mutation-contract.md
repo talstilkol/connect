@@ -27,7 +27,7 @@ Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל עשרת ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 11 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי כל עוד Reports עדיין אינם ב־PostgreSQL.
 
@@ -35,6 +35,12 @@ TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפ�
 Tenant מחייב, Keyset pagination לפי `id`, מגבלת עמוד של 100 ואימות מבנה,
 Consent וסדר התוצאות לפני החזרתן לשכבה העסקית. ה־Harness האמיתי מאמת גם
 קריאה זו דרך ה־Foundation.
+
+1.8 ‏`postgresOperationalReportRepository.ts` מממש את `reports.read` בשאילתת
+PostgreSQL יחידה, כדי שכל ששת ה־Aggregates ייקראו מאותו Statement snapshot.
+הוא מאמת 35 שדות, סכומי קטגוריות, סדר מטבעות ומספרים בטווח JavaScript בטוח.
+שש טבלאות המקור טרם נוספו ל־Migrations ולכן זה עדיין חוזה Adapter, לא ראיית
+Runtime מלאה.
 
 ## 2. הסבר למתחילים
 
@@ -120,7 +126,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל עשרת ה־Ports, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 11 ה־Ports, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 

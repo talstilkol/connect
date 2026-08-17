@@ -226,7 +226,7 @@ Loopback ב־Staging/Production וכל Query string ב־Database URL, משום �
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
-7.1.21 ‏PostgreSQL foundation אחד מחבר את כל עשרת ה־Adapters שהושלמו לאותו
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 11 ה־Adapters שהושלמו לאותו
 Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי.
 
 7.1.22 ‏`contacts.list` משתמש כעת ב־PostgreSQL repository בעל Tenant filter,
@@ -234,6 +234,11 @@ Keyset pagination, מגבלת 100 רשומות ואימות מחמיר של מב
 וסדר התוצאות. הוא נבדק מול PostgreSQL אמיתי דרך אותו Foundation. אין לחבר
 את ה־Foundation ל־Railway API המלא לפני שגם `reports.read` מקבל PostgreSQL
 repository; ערבוב D1/PostgreSQL אינו מסלול Cutover מאושר.
+
+7.1.23 ‏`reports.read` קיבל PostgreSQL Adapter בעל Statement יחיד שמחשב את
+כל ששת מקורות הדוח מאותו Snapshot ומאמת 35 שדות לפני החזרתם. ה־Adapter מחובר
+ל־Foundation, אך שש טבלאות המקור עדיין אינן בשרשרת ה־PostgreSQL Migrations;
+לכן Route חי ו־Cutover נשארים חסומים.
 
 7.2 עדיין חסר:
 

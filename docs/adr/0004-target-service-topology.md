@@ -296,10 +296,11 @@ lifecycle repositories וחמש Migrations ל־Critical Path כבר קיימים
 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
-Foundation אחד מחבר עשרה Adapters קיימים לאותו Pool בלי לחשוף אותו.
+Foundation אחד מחבר 11 Adapters קיימים לאותו Pool בלי לחשוף אותו.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
-ו־Keyset pagination. ‏Railway API מלא נשאר חסום עד השלמת `reports.read`
-ב־PostgreSQL, כדי לא ליצור Hybrid לא מתועד עם D1.
+ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי, אך שש טבלאות
+המקור שלו טרם הומרו ל־PostgreSQL. ‏Railway API מלא נשאר חסום עד השלמת סכמת
+המקור והוכחתה במסד אמיתי, כדי לא ליצור Hybrid לא מתועד עם D1.
 
 ## 12. מקורות רשמיים שנבדקו
 
