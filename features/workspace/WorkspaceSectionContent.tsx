@@ -2,9 +2,6 @@
 
 import { lazy, Suspense } from "react";
 import {
-  OperationalReports,
-} from "../reports/OperationalReports";
-import {
   ContactDirectory,
   type ContactDirectoryStatus,
 } from "../contacts/ContactDirectory";
@@ -82,6 +79,20 @@ import {
   readAiAgentPageMessages,
 } from "../ai/aiAgentPageMessages";
 import { readBotFlowMessages } from "../bot/botFlowMessages";
+import {
+  readOperationalReportMessages,
+} from "../reports/operationalReportMessages";
+import {
+  readWorkspaceRemainingMessages,
+} from "./workspaceRemainingMessages";
+
+const OperationalReports = lazy(() =>
+  import("../reports/OperationalReports").then(
+    (module) => ({
+      default: module.OperationalReports,
+    }),
+  ),
+);
 
 const CampaignManager = lazy(() =>
   import("../campaigns/CampaignManager").then((module) => ({
@@ -276,6 +287,7 @@ export function WorkspaceSectionContent({
           ) : null}
           {activeSection === "reports" ? (
             <Reports
+              language={language}
               initialReport={
                 initialOperationalReport
               }
@@ -284,9 +296,12 @@ export function WorkspaceSectionContent({
               }
             />
           ) : null}
-          {activeSection === "billing" ? <Billing /> : null}
+          {activeSection === "billing" ? (
+            <Billing language={language} />
+          ) : null}
           {activeSection === "team" ? (
             <TeamDirectory
+              language={language}
               directory={
                 initialTeamDirectory
               }
@@ -297,6 +312,7 @@ export function WorkspaceSectionContent({
           ) : null}
           {activeSection === "decisions" ? (
             <DecisionCenter
+              language={language}
               report={initialProductionReadiness}
             />
           ) : null}
@@ -544,51 +560,73 @@ function AiAgent({
 }
 
 function Reports({
+  language,
   initialReport,
   initialStatus,
 }: {
+  language: InterfaceLanguage;
   initialReport:
     OperationalReportView | null;
   initialStatus: OperationalReportStatus;
 }) {
+  const messages =
+    readOperationalReportMessages(language);
+
   return (
     <FeaturePage
-      eyebrow="ביצועים"
-      title="דוחות"
-      description="מדדי שליחה, מסירה, קריאה, תגובה, עלות וביצועי בוט ו־AI."
+      eyebrow={messages.page.eyebrow}
+      title={messages.page.title}
+      description={messages.page.description}
     >
-      <OperationalReports
-        initialReport={initialReport}
-        initialStatus={initialStatus}
-      />
+      <Suspense
+        fallback={
+          <div className="inline-notice" role="status">
+            <span aria-hidden="true">i</span>
+            <p>{messages.page.loading}</p>
+          </div>
+        }
+      >
+        <OperationalReports
+          language={language}
+          initialReport={initialReport}
+          initialStatus={initialStatus}
+        />
+      </Suspense>
     </FeaturePage>
   );
 }
 
-function Billing() {
+function Billing({
+  language,
+}: {
+  language: InterfaceLanguage;
+}) {
+  const messages = readWorkspaceRemainingMessages(
+    language,
+  ).billing;
+
   return (
     <FeaturePage
-      eyebrow="חשבון"
-      title="מנוי וחיוב"
-      description="חבילה, מגבלות שימוש, אמצעי תשלום, חשבוניות והיסטוריית חיובים."
+      eyebrow={messages.page.eyebrow}
+      title={messages.page.title}
+      description={messages.page.description}
     >
       <section className="card billing-card">
         <div>
-          <span className="status-pill critical">לא הוגדר באפיון</span>
-          <h2>אין עדיין חבילה או מחיר להצגה</h2>
-          <p>
-            ספק הסליקה, המחירים, המע״מ, תקופת הניסיון ומדיניות ניסיונות החיוב
-            טרם הוכרעו. לכן לא מוצגים כאן נתוני חיוב מומצאים.
-          </p>
+          <span className="status-pill critical">
+            {messages.unspecified}
+          </span>
+          <h2>{messages.title}</h2>
+          <p>{messages.description}</p>
         </div>
         <div className="billing-logic">
-          <span>בחירת חבילה</span>
-          <b>←</b>
-          <span>אישור תשלום</span>
-          <b>←</b>
-          <span>יצירת Tenant</span>
-          <b>←</b>
-          <span>אשף הקמה</span>
+          <span>{messages.steps[0]}</span>
+          <b>{messages.arrow}</b>
+          <span>{messages.steps[1]}</span>
+          <b>{messages.arrow}</b>
+          <span>{messages.steps[2]}</span>
+          <b>{messages.arrow}</b>
+          <span>{messages.steps[3]}</span>
         </div>
       </section>
     </FeaturePage>

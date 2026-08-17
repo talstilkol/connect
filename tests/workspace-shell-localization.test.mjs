@@ -120,6 +120,9 @@ test("wires validated query language through both workspace routes and shell", a
     workspaceApp,
     /<main className="app-shell" lang=\{language\} dir=\{direction\}>/,
   );
+  assert.match(workspaceApp, /document\.documentElement/);
+  assert.match(workspaceApp, /root\.lang = language/);
+  assert.match(workspaceApp, /root\.dir = direction/);
   assert.match(workspaceApp, /readWorkspaceNavigation\(language\)/);
   assert.match(workspaceApp, /readWorkspaceLocaleLinks\(activeSection\)/);
   assert.match(workspaceApp, /workspaceSectionPath\(section, language\)/);

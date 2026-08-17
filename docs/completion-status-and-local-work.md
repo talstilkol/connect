@@ -23,7 +23,7 @@
 
 1.2.3 11 בדיקות ממתינות להחלטת מוצר או מדיניות.
 
-1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **85% ±5%**.
+1.3 אומדן ניהולי לכל הדרך מהאפיון עד מערכת חיה: **88% ±5%**.
 
 1.3.1 זהו אומדן מאמץ, לא יחס בין בדיקות. רוב עבודת ה־Domain, ה־UI,
 האבטחה והבדיקות כבר בוצעה; העבודה שנותרה תלויה יותר בספקים,
@@ -455,6 +455,17 @@ Server-rendered HTML ו־Chromium אימתו אנגלית וערבית, `LTR/RTL
 גלישה אופקית וב־Console נקי. ‏Bot Flow Builder פוצל ל־Route chunk של
 כ־64KB וה־Chunk הראשי ירד מכ־403KB לכ־384KB.
 
+4.1.17 Slice שלושה־עשר של לוקליזציה הושלם ב־Reports, ‏Billing,
+‏Team וב־Decision Center. כל מצבי הדוחות, המדדים, העלות, ספריית
+הצוות, תפקידי RBAC, מסך החיוב ה־Fail-closed וכל 11 החלטות ה־Production
+זמינים בעברית, אנגלית וערבית. תוכן ההחלטות מתורגם לפי `checkId`, אך
+ה־Registry המשותף נשאר מקור האמת היחיד לזהויות, קודים וסטטוסים.
+‏Reports נטען כעת ב־Route chunk נפרד של כ־6KB; ה־Chunk הראשי הוא
+כ־391KB. בדיקות Chromium אימתו את ארבעת המסכים, `html lang/dir`,
+‏LTR/RTL, ‏11 החלטות, ללא גלישה אופקית וב־Console נקי. במהלך הבדיקה
+תוקן גם פער נגישות שבו מעטפת ה־Workspace החליפה כיוון אך תגית
+ה־HTML העליונה נשארה בעברית.
+
 4.2 מסלול Rate Limiting נמצא בשלב 4 מתוך 4. חוזה Admission מחובר
 לפני Claim ב־Campaign Queue, כולל `deferred`, ‏Delay תחום,
 Reservation key ושחרור לפני Submit. ה־Runtime בונה את ה־Adapter מעל
@@ -479,10 +490,10 @@ Tenant-specific, אימות גרסאות Connection ו־Policy, גזירת Actor
 
 4.3 לאחר השלמת Slices דף הנחיתה, ה־Auth, ההזמנה, מעטפת ה־Workspace,
 ה־Dashboard, ה־Onboarding, חלון Embedded Signup, ‏Contacts, ‏Templates,
-‏Campaigns, ‏Inbox, אישורי AI, סוכן AI, מקורות ידע ו־Bot Flow Builder,
-סך העבודה המקומית הידועה, ללא Package/Quota/Contact שטרם הוכרעו,
-הוא **2–4 שעות
-פיתוח נטו**.
+‏Campaigns, ‏Inbox, אישורי AI, סוכן AI, מקורות ידע, ‏Bot Flow Builder,
+‏Reports, ‏Billing, ‏Team ו־Decision Center, סך העבודה המקומית הידועה
+לתרגום ואימות מסכי Admin, ללא Package/Quota/Contact שטרם הוכרעו,
+הוא **2–4 שעות פיתוח נטו**.
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
-הופך ל־**10–18 שעות**.
+הופך ל־**8–16 שעות**.
 הטווח אינו כולל המתנה לספקים או זמן Adapter חי שאינו ניתן לאומדן.

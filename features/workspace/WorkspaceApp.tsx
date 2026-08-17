@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
   ContactDirectoryStatus,
@@ -198,6 +198,20 @@ export default function WorkspaceApp({
   const direction = readWorkspaceDirection(language);
   const localizedNavigation = readWorkspaceNavigation(language);
   const localeLinks = readWorkspaceLocaleLinks(activeSection);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const previousLanguage = root.lang;
+    const previousDirection = root.dir;
+
+    root.lang = language;
+    root.dir = direction;
+
+    return () => {
+      root.lang = previousLanguage;
+      root.dir = previousDirection;
+    };
+  }, [direction, language]);
 
   const navigate = (section: SectionId) => {
     router.push(workspaceSectionPath(section, language));
