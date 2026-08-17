@@ -105,6 +105,42 @@ test("accepts a valid granted consent row", async () => {
   assert.equal(contact.consentRecordedAt, "2026-08-17T08:01:00.000Z");
 });
 
+test("finds one contact by tenant and canonical phone", async () => {
+  const fixture = queryFixture([contactRow()]);
+  const contact = await createPostgresContactReadRepository(
+    fixture.queries,
+  ).findByTenantAndPhone(7, "+972501234567");
+
+  assert.equal(contact?.id, 23);
+  assert.deepEqual(fixture.calls, [
+    {
+      sql: postgresContactReadSql.findByTenantAndPhone,
+      parameters: [7, "+972501234567"],
+    },
+  ]);
+  assert.match(
+    postgresContactReadSql.findByTenantAndPhone,
+    /tenant_id = \$1[\s\S]*phone_e164 = \$2/,
+  );
+});
+
+test("rejects invalid phone input and cross-tenant lookup rows", async () => {
+  const repository = createPostgresContactReadRepository(
+    queryFixture([]).queries,
+  );
+
+  await assert.rejects(
+    repository.findByTenantAndPhone(7, "0501234567"),
+    /canonical E\.164/,
+  );
+  await assert.rejects(
+    createPostgresContactReadRepository(
+      queryFixture([contactRow({ tenantId: "8" })]).queries,
+    ).findByTenantAndPhone(7, "+972501234567"),
+    /cross-tenant contact/,
+  );
+});
+
 test("rejects cross-tenant, cursor, duplicate, and unordered rows", async () => {
   const invalidPages = [
     [contactRow({ tenantId: "8" })],

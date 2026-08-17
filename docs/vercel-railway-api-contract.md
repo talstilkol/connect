@@ -224,14 +224,14 @@ Acceptance ו־Concurrency מוגדרים נבדקו גם דרך `node-postgres`
 
 7.1.19 ‏`node-postgres` מחובר דרך Adapter יחיד שמפריד Query בודד מ־Transaction
 מוצמדת. ‏Harness חוזר מסכים רק ל־Database Loopback ייעודי וריק, מחיל עשר
-Migrations ומוכיח DML, ‏Rollback ושני Races בלי לקבל Production credential.
+Migrations ומוכיח DML, ‏Rollback ושלושה Races בלי לקבל Production credential.
 
 7.1.20 חוזה Pool נפרד דורש TLS, ‏Pool size וכל Timeout במפורש. הוא דוחה
 Loopback ב־Staging/Production וכל Query string ב־Database URL, משום ש־
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
-7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 12 ה־Adapters שהושלמו לאותו
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 13 ה־Adapters שהושלמו לאותו
 Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי.
 
 7.1.22 ‏`contacts.list` משתמש כעת ב־PostgreSQL repository בעל Tenant filter,
@@ -274,15 +274,21 @@ PostgreSQL, מגבלת Header של 16KB ו־Timeouts מפורשים. Request tar
 Lists ו־Contact import. קשרים אינם מסתמכים על מזהה גלובלי בלבד: כל Foreign
 Key עסקי כולל `tenant_id`. ‏Harness PostgreSQL אמיתי הוכיח יצירה וקריאה של
 שיוכים ו־Import שהושלם, חסם מצב Job לא עקבי וחסם שני ניסיונות Cross-tenant.
-ה־Schema הושלם; Repository adapters ופעולות Railway עבור יכולות אלה עדיין
-לא חוברו.
+ה־Schema הושלם; שני ה־Repository adapters והפעולות העסקיות חוברו בסעיפים
+7.1.28–7.1.29.
 
 7.1.28 ‏`postgresContactOrganizationRepository.ts` ממיר את חמש פעולות
 ה־Repository של Tag/List ושיוכים. Placeholders של Contact scope נוצרים רק
 מאורך מערך שאומת ומוגבל ל־50. כתיבת Relationship היא Statement אטומי שמוכיח
 Contact ו־Group באותו Tenant לפני שינוי. ה־Foundation חושף את ה־Service,
 וה־Harness הפעיל Create ו־Assign דרך Session והרשאה מול PostgreSQL אמיתי.
-`contactImportRepository` עדיין אינו מומר.
+
+7.1.29 ‏`postgresContactImportRepository.ts` ממיר את פעולות הייבוא המתחדש.
+Contact ותוצאת Row מאושרת נכתבים באותה Transaction, וה־Status נגזר מהמצב
+הנעול במסד. Replay זהה הוא Idempotent ו־Evidence סותר נכשל סגור. חיפוש הטלפון
+הקנוני מחובר ל־PostgreSQL, וה־Foundation חושף את `contactImports` Service.
+ה־Harness הפעיל Import מלא דרך Session ו־RBAC, וב־Race של שני Chunks זהים
+נוצרו Contact יחיד ותוצאת Import יחידה. סך הכול עברו שלושה תרחישי Concurrency.
 
 7.2 עדיין חסר:
 

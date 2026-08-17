@@ -25,14 +25,14 @@ jobs/rows עם בידוד Tenant מורכב. השרשרת הוחלה בהצלח�
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
 Loopback ייעודי וריק. הוא החיל את עשר ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח שני תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+הפעיל DML אמיתי והוכיח שלושה תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 12 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 13 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -76,13 +76,20 @@ Timeouts ו־Request target, ואינו סומך על Host שסיפק הלקוח
 1.12 ‏`0009_contact_organization_imports.sql` מוסיף שש טבלאות עבור ארגון
 אנשי קשר וייבוא מתחדש. ה־Foreign Keys כוללים `tenant_id`, וה־Harness חסם
 בפועל שיוך Tag ושורת Import שחצו Tenant. מוני Job, מצב Completion ותוצאת כל
-שורה נאכפים ב־Constraints. ה־Schema הוכח מקומית; Adapters מקבילים ל־D1 עדיין
-נדרשים לפני חיבור הפעולות ל־Railway.
+שורה נאכפים ב־Constraints. ה־Schema הוכח מקומית, וה־Adapters המקבילים ל־D1
+מחוברים כמתואר בסעיפים 1.13–1.14.
 
 1.13 ‏`postgresContactOrganizationRepository.ts` מחובר ל־Service בתוך
 ה־Foundation. הוא קורא Counts ושיוכים רק מתוך Tenant scope, ודורש Contact
 ו־Tag/List מאותו Tenant בתוך Statement הכתיבה עצמו. ה־Harness הוכיח Create
-ו־Assign דרך RBAC מול PostgreSQL אמיתי. ‏Contact import נשאר ה־Adapter הבא.
+ו־Assign דרך RBAC מול PostgreSQL אמיתי.
+
+1.14 ‏`postgresContactImportRepository.ts` מחובר ל־Contact import service
+בתוך ה־Foundation. Contact ותוצאת Row מאושרת נכתבים באותה Transaction;
+ה־Status נגזר מהמצב הנעול במסד ולא מ־Hint של ה־Caller. ‏Replay זהה הוא
+Idempotent, תוצאה סותרת נכשלת סגור, ומונים מחושבים מחדש מתוך אותו Tenant.
+ה־Harness הוכיח Import מלא ו־Race שבו שתי בקשות זהות יצרו Contact יחיד
+ותוצאת Import יחידה.
 
 ## 2. הסבר למתחילים
 
@@ -154,7 +161,7 @@ Receipt פעיל ל־Audit נצחי.
 
 5.5 ערכי משתמש נשלחים רק כ־Parameters; הם אינם משורשרים אל מחרוזות SQL.
 
-5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 12 טבלאות ה־Critical
+5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 30 טבלאות ה־Critical
 Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ויצירת מזהים אקראית.
 
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.
@@ -168,7 +175,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 12 ה־Ports, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 13 ה־Ports, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 
@@ -184,7 +191,7 @@ Migration מאושר ב־Railway.
 6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 35 ה־Migrations
 של D1 עדיין לא קיימות.
 
-6.4 Contact, ‏Contact organization/import ו־Invitation DML ושני תרחישי
+6.4 Contact, ‏Contact organization/import ו־Invitation DML ושלושה תרחישי
 Concurrency נבדקו מול PostgreSQL מקומי אמיתי. עדיין חסרים Adapters ו־כיסוי
 DML/Concurrency לכל יתר ה־Repositories,
 Staging evidence, ‏Backup/Restore rehearsal ו־Load test.

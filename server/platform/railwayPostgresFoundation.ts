@@ -12,6 +12,9 @@ import {
   createContactListService,
 } from "../contacts/contactService.ts";
 import {
+  createContactImportService,
+} from "../contacts/contactImportService.ts";
+import {
   createContactOrganizationService,
 } from "../contacts/contactOrganizationService.ts";
 import {
@@ -23,6 +26,9 @@ import {
 import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
+import {
+  createPostgresContactImportRepository,
+} from "./postgresContactImportRepository.ts";
 import {
   createPostgresContactOrganizationRepository,
 } from "./postgresContactOrganizationRepository.ts";
@@ -84,6 +90,7 @@ export interface RailwayPostgresFoundation {
   readonly contactOrganization: ReturnType<
     typeof createContactOrganizationService
   >;
+  readonly contactImports: ReturnType<typeof createContactImportService>;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
     typeof createPostgresTenantMembershipRepository
@@ -170,6 +177,10 @@ export function createRailwayPostgresFoundation(
   const contactOrganization = createPostgresContactOrganizationRepository(
     queries,
   );
+  const contactImports = createPostgresContactImportRepository({
+    queries,
+    transactions,
+  });
   let closed = false;
 
   return Object.freeze({
@@ -178,6 +189,10 @@ export function createRailwayPostgresFoundation(
     contactOrganization: createContactOrganizationService(
       contactOrganization,
     ),
+    contactImports: createContactImportService({
+      contacts: contactReads,
+      imports: contactImports,
+    }),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),

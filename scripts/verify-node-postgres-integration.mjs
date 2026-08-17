@@ -309,84 +309,150 @@ async function verifyContactOrganizationImportSchema(
     { contactId, listId },
   ]);
 
-  const job = await pool.query(
-    `INSERT INTO contact_import_jobs (
-       tenant_id,
-       idempotency_key,
-       file_name,
-       total_rows,
-       created_by_external_user_id,
-       created_at,
-       updated_at
-     )
-     VALUES (
-       $1,
-       $2,
-       'integration.csv',
-       2,
-       'driver-integration-owner',
-       $3,
-       $3
-     )
-     RETURNING id`,
-    [tenantId, `contact_import_v1_${"a".repeat(64)}`, occurredAt],
+  const importJob = await foundation.contactImports.start(session, {
+    fileName: "integration.csv",
+    sourceDigest: "a".repeat(64),
+    totalRows: 2,
+    mapping: {
+      phoneNumber: 0,
+      firstName: 1,
+      lastName: 2,
+      email: 3,
+      company: 4,
+    },
+  });
+  const importResult = await foundation.contactImports.processChunk(
+    session,
+    {
+      jobId: importJob.id,
+      rows: [
+        {
+          sourceRowNumber: 2,
+          phoneNumber: "+972501234569",
+          firstName: "Imported",
+          lastName: "Contact",
+          email: "",
+          company: "Connect",
+        },
+        {
+          sourceRowNumber: 3,
+          phoneNumber: "",
+          firstName: "Rejected",
+          lastName: "Contact",
+          email: "",
+          company: "Connect",
+        },
+      ],
+    },
   );
-  const jobId = Number(job.rows[0]?.id);
+  const jobId = importResult.job.id;
 
   assert.equal(Number.isSafeInteger(jobId) && jobId > 0, true);
+  assert.deepEqual(importResult.job, {
+    id: jobId,
+    fileName: "integration.csv",
+    totalRows: 2,
+    processedRows: 2,
+    createdRows: 1,
+    updatedRows: 0,
+    unchangedRows: 0,
+    rejectedRows: 1,
+    duplicateRows: 0,
+    status: "completed",
+  });
+  assert.equal(importResult.contacts.length, 1);
+  assert.equal(importResult.contacts[0]?.phoneNumber, "+972501234569");
+  assert.deepEqual(
+    await foundation.contactImports.processChunk(session, {
+      jobId,
+      rows: [
+        {
+          sourceRowNumber: 2,
+          phoneNumber: "+972501234569",
+          firstName: "Imported",
+          lastName: "Contact",
+          email: "",
+          company: "Connect",
+        },
+      ],
+    }),
+    {
+      job: importResult.job,
+      contacts: [],
+    },
+  );
 
-  await pool.query(
-    `INSERT INTO contact_import_rows (
-       tenant_id,
-       job_id,
-       source_row_number,
-       contact_id,
-       phone_fingerprint,
-       status,
-       reason,
-       created_at
-     )
-     VALUES ($1, $2, 2, $3, $4, 'created', NULL, $5)`,
-    [tenantId, jobId, contactId, "b".repeat(64), occurredAt],
+  const concurrentImportJob = await foundation.contactImports.start(
+    session,
+    {
+      fileName: "concurrent.csv",
+      sourceDigest: "c".repeat(64),
+      totalRows: 1,
+      mapping: {
+        phoneNumber: 0,
+        firstName: 1,
+        lastName: 2,
+        email: 3,
+        company: 4,
+      },
+    },
   );
-  await pool.query(
-    `INSERT INTO contact_import_rows (
-       tenant_id,
-       job_id,
-       source_row_number,
-       contact_id,
-       phone_fingerprint,
-       status,
-       reason,
-       created_at
-     )
-     VALUES ($1, $2, 3, NULL, NULL, 'rejected', 'missing_phone', $3)`,
-    [tenantId, jobId, occurredAt],
+  const concurrentChunk = {
+    jobId: concurrentImportJob.id,
+    rows: [
+      {
+        sourceRowNumber: 2,
+        phoneNumber: "+972501234570",
+        firstName: "Concurrent",
+        lastName: "Import",
+        email: "",
+        company: "Connect",
+      },
+    ],
+  };
+  const concurrentImports = await Promise.all([
+    foundation.contactImports.processChunk(session, concurrentChunk),
+    foundation.contactImports.processChunk(session, concurrentChunk),
+  ]);
+
+  assert.equal(
+    concurrentImports.every(
+      ({ job: concurrentJob }) =>
+        concurrentJob.status === "completed" &&
+        concurrentJob.processedRows === 1 &&
+        concurrentJob.createdRows === 1,
+    ),
+    true,
   );
+  const concurrentImportCounts = await pool.query(
+    `SELECT
+       (
+         SELECT count(*)::integer
+         FROM contact_import_rows
+         WHERE tenant_id = $1
+           AND job_id = $2
+       ) AS row_count,
+       (
+         SELECT count(*)::integer
+         FROM contacts
+         WHERE tenant_id = $1
+           AND phone_e164 = '+972501234570'
+       ) AS contact_count`,
+    [tenantId, concurrentImportJob.id],
+  );
+  assert.deepEqual(concurrentImportCounts.rows, [
+    { row_count: 1, contact_count: 1 },
+  ]);
 
   await assert.rejects(
     pool.query(
       `UPDATE contact_import_jobs
-       SET status = 'completed'
+       SET processed_rows = 1
        WHERE tenant_id = $1
          AND id = $2`,
       [tenantId, jobId],
     ),
     (error) => error?.code === "23514",
-  );
-
-  await pool.query(
-    `UPDATE contact_import_jobs
-     SET
-       processed_rows = 2,
-       created_rows = 1,
-       rejected_rows = 1,
-       status = 'completed',
-       completed_at = $3,
-       updated_at = $3
-     WHERE tenant_id = $1
-       AND id = $2`,
-    [tenantId, jobId, occurredAt],
   );
 
   const snapshot = await pool.query(
@@ -1363,7 +1429,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 2,
+      concurrencyScenarios: 3,
     });
   } finally {
     await pool.end();

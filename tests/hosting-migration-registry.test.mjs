@@ -202,6 +202,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "server/platform/postgresContactReadRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
+    "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "postgres/migrations/0004_team_invitation_lifecycle.sql",
     "postgres/migrations/0005_conversations_messages.sql",
@@ -218,8 +219,9 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /twelve-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /thirteen-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /contact-organization paths/);
+  assert.match(boundary.cutoverBlocker, /atomic contact-import path/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL contacts\.list read/);
   assert.match(boundary.cutoverBlocker, /single-statement reports\.read adapter/);
   assert.match(boundary.cutoverBlocker, /owned PostgreSQL API runtime composition/);
@@ -262,6 +264,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresTeamInvitationAcceptanceRepository.ts",
     "server/platform/postgresContactReadRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
+    "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "server/platform/postgresReadinessProbe.ts",
     "server/platform/railwayPostgresApiRuntime.ts",
@@ -284,12 +287,12 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /provider-neutral/i);
   assert.match(database.cutoverBlocker, /ten ordered/);
   assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
-  assert.match(database.cutoverBlocker, /contact organization service operations/);
-  assert.match(database.cutoverBlocker, /PostgreSQL adapter for contact import operations/);
+  assert.match(database.cutoverBlocker, /contact organization and import service operations/);
+  assert.match(database.cutoverBlocker, /atomic contact-profile plus import-outcome writes/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /two real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /three real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /twelve-adapter foundation/);
+  assert.match(database.cutoverBlocker, /thirteen-adapter foundation/);
   assert.match(database.cutoverBlocker, /owned API runtime composition/);
   assert.match(database.cutoverBlocker, /exact readiness query/);
   assert.match(database.cutoverBlocker, /contacts\.list/);

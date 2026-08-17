@@ -36,6 +36,29 @@ const contactRowKeys = Object.freeze([
 ]);
 
 export const postgresContactReadSql = Object.freeze({
+  findByTenantAndPhone: `
+    SELECT
+      id,
+      tenant_id AS "tenantId",
+      phone_e164 AS "phoneNumber",
+      first_name AS "firstName",
+      last_name AS "lastName",
+      email,
+      company,
+      mailing_status AS "mailingStatus",
+      consent_status AS "consentStatus",
+      consent_source AS "consentSource",
+      consent_recorded_at AS "consentRecordedAt",
+      consent_withdrawn_at AS "consentWithdrawnAt",
+      consent_evidence_reference AS "consentEvidenceReference",
+      version,
+      created_at AS "createdAt",
+      updated_at AS "updatedAt"
+    FROM contacts
+    WHERE tenant_id = $1
+      AND phone_e164 = $2
+    LIMIT 1
+  `,
   listPageByTenant: `
     SELECT
       id,
@@ -63,6 +86,7 @@ export const postgresContactReadSql = Object.freeze({
 });
 
 export interface PostgresContactReadRepository {
+  readonly findByTenantAndPhone: ContactRepository["findByTenantAndPhone"];
   readonly listPageByTenant: ContactRepository["listPageByTenant"];
 }
 
@@ -214,6 +238,40 @@ export function createPostgresContactReadRepository(
   }
 
   return Object.freeze({
+    async findByTenantAndPhone(
+      tenantIdInput: number,
+      phoneNumberInput: string,
+    ) {
+      const tenantId = requirePositiveInteger(tenantIdInput, "tenantId");
+      const validation = validatePersistedContact({
+        phoneNumber: phoneNumberInput,
+        firstName: null,
+        lastName: null,
+        email: null,
+        company: null,
+      });
+
+      if (
+        !validation.success ||
+        validation.value.phoneNumber !== phoneNumberInput
+      ) {
+        throw new Error("phoneNumber must be a canonical E.164 value");
+      }
+
+      const result = await queries.query<Record<string, unknown>>(
+        postgresContactReadSql.findByTenantAndPhone,
+        [tenantId, phoneNumberInput],
+      );
+      const rows = requirePostgresRows(result, 1);
+      const contact = rows.length === 0 ? null : parseContact(rows[0]);
+
+      if (contact !== null && contact.tenantId !== tenantId) {
+        throw new Error("PostgreSQL returned a cross-tenant contact");
+      }
+
+      return contact;
+    },
+
     async listPageByTenant(
       tenantIdInput: number,
       beforeContactIdInput: number | null,

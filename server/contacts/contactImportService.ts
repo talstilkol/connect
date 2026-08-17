@@ -91,7 +91,7 @@ export interface ContactImportService {
 }
 
 export interface ContactImportServiceDependencies {
-  contacts: ContactRepository;
+  contacts: Pick<ContactRepository, "findByTenantAndPhone">;
   imports: ContactImportRepository;
 }
 

@@ -795,7 +795,30 @@ PostgreSQL 16.13. התוצאה נשארה
 
 2.42.4 נותרה באותו Feature המרת `contactImportRepository` ל־PostgreSQL.
 אין לחבר Import Route ל־Railway לפני שה־Contact upsert וכתיבת Row outcome
-מתבצעים באותה Transaction וש־Job counters נטענים מחדש מאותו Tenant.
+מתבצעים באותה Transaction וש־Job counters נטענים מחדש מאותו Tenant. דרישה
+זו הושלמה לאחר מכן בסעיף 2.43.
+
+2.43 **הושלם מקומית:** PostgreSQL Contact import adapter אטומי.
+
+2.43.1 ‏`postgresContactImportRepository.ts` מממש פתיחת Job, נעילת Job,
+כתיבת תוצאות `accepted`/`rejected`/`duplicate`, טעינת Job ורענון מונים. פתיחת
+Job חוזרת בטוחה תחת Race, וטווח Source rows מוגבל לשורות 2–50001.
+
+2.43.2 Contact profile ותוצאת Import מאושרת נכתבים באותה Transaction.
+ה־Status בפועל — `created`, ‏`updated` או `unchanged` — נגזר מהמצב הנעול
+ב־PostgreSQL ולא מרמז שסיפק ה־Caller. Replay זהה הוא Idempotent; Evidence
+שונה לאותה שורה נכשל סגור. כל תוצאה נבדקת מחדש מול Tenant, ‏Job, ‏Row,
+Contact וטלפון קנוני.
+
+2.43.3 ‏`postgresContactReadRepository.ts` מספק כעת גם חיפוש Contact לפי
+טלפון קנוני בתוך Tenant, וה־Foundation מחבר 13 Adapters וחושף
+`contactImports` דרך אותו Service, ‏Session ו־RBAC.
+
+2.43.4 שמונה בדיקות Adapter ושתי בדיקות Contact lookup חדשות עברו. ה־Harness
+הפעיל Import מלא דרך Service מול PostgreSQL 16.13 ובדק גם שתי בקשות מקבילות
+לאותו Chunk. נוצרו Contact יחיד ותוצאת Import יחידה, ושני ה־Callers קיבלו
+תוצאה עקבית. התוצאה: `PASS (10 migrations, 3 concurrency scenarios)`.
+סביבת הבדיקה הזמנית נעצרה ונמחקה.
 
 ## 3. עבודה שאינה מקומית בלבד
 
