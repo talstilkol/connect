@@ -241,22 +241,23 @@ Invitation, ‏API, ‏TRPC ו־Clerk. בדיקת Boundary חדשה דורשת �
 עברו לאחר השינוי. `npm audit --omit=dev` מול Registry הרשמי החזיר
 אפס פגיעויות ב־32 תלויות Production.
 
-9.5 ה־Audit המלא עדיין מציג שרשרת אחת ברמת Moderate:
-`drizzle-kit@0.31.10` משתמש ב־`@esbuild-kit/esm-loader`, שמחזיק
-`esbuild@0.18.20`. ה־Advisory חל על שרת הפיתוח של esbuild; מסלול
-Connect אינו מפעיל שרת זה, ו־Drizzle Kit משמש רק ליצירה ולבדיקת
-מיגרציות.
+9.5 ה־Audit המלא הציג שרשרת אחת ברמת Moderate:
+`drizzle-kit@0.31.10` השתמש ב־`@esbuild-kit/esm-loader`, שהחזיק
+`esbuild@0.18.20`. ה־Advisory חל על שרת הפיתוח של esbuild, אך הממצא
+לא נשאר פתוח רק משום שהמסלול אינו נגיש ב־Production.
 
-9.6 ‏npm מציע `drizzle-kit@0.18.1` כתיקון, אך זהו Downgrade שובר.
-אין לבצע `npm audit fix --force` או Override כפוי של esbuild. הממצא
-נשאר פתוח ושקוף עד ש־Drizzle יפרסם קו תואם ללא התלות הישנה או עד
-Migration Tooling review נפרד.
+9.6 ‏npm הציע `drizzle-kit@0.18.1` כתיקון, אך זהו Downgrade שובר.
+במקום `npm audit fix --force`, נוסף Override צר ומפורש עבור
+`@esbuild-kit/core-utils` אל `esbuild@0.25.12`. זו גרסה מתוקנת שכבר
+נצרכה ישירות על ידי אותה גרסת Drizzle Kit, ולכן היא צמצמה את שינוי
+הגרף לעותק הטרנזיטיבי הפגיע בלבד.
 
 9.7 התראות GitHub בענף ברירת המחדל לא ייסגרו לפני Merge של התיקון.
 הבדיקה המקומית וה־PR אינן משנות את מצב `main` בעצמן.
 
-9.8 נוסף שער CI חי לגרף ה־Development. הוא מאשר זמנית רק את ארבעת
-הממצאים המדויקים של שרשרת Drizzle/esbuild המתועדת ונכשל עבור כל
-Advisory חדש, שינוי Severity, נתיב Package חדש או חזרה של
-`image-size`. קבלה זו היא Risk acceptance מוגבל לכלי פיתוח ואינה
-מסמנת את Advisory כמתוקן או מכניסה אותו ל־Production Readiness.
+9.8 שער CI החי לגרף ה־Development מקבל מעתה רק אפס ממצאים ונכשל עבור
+כל Advisory או חזרה של `image-size`. ה־Lockfile guard דורש גם את
+ה־Override ואת `esbuild@0.25.12` המדויקים. שער ה־Migrations מריץ
+`drizzle-kit check` ויצירת Migration מבודדת מה־Schema האמיתי, ומאמת
+SQL ו־Journal לפני מחיקת התוצר הזמני. בכך ה־Risk acceptance הקודם
+בוטל והוחלף בתיקון עם בדיקת תאימות בפועל.

@@ -26,8 +26,18 @@ function currentPackageLock() {
         dev: true,
       },
       "node_modules/@esbuild-kit/core-utils/node_modules/esbuild": {
-        version: "0.18.20",
+        version: "0.25.12",
         dev: true,
+      },
+    },
+  };
+}
+
+function currentPackageJson() {
+  return {
+    overrides: {
+      "@esbuild-kit/core-utils": {
+        esbuild: "0.25.12",
       },
     },
   };
@@ -161,31 +171,30 @@ function expectsUnapproved() {
   };
 }
 
-test("accepts only the exact documented Drizzle esbuild development chain", () => {
-  assert.deepEqual(
-    inspectDevelopmentDependencyAudit(
-      currentAcceptedAuditReport(),
-      currentPackageLock(),
-    ),
-    {
-      status: "accepted-risk",
-      vulnerabilityCount: 4,
-      advisory: "GHSA-67mh-4wv8-2f99",
-    },
-  );
-});
-
-test("accepts a future clean audit without weakening the lockfile boundary", () => {
+test("accepts a clean audit with the exact reviewed esbuild override", () => {
   assert.deepEqual(
     inspectDevelopmentDependencyAudit(
       cleanAuditReport(),
       currentPackageLock(),
+      currentPackageJson(),
     ),
     {
       status: "clean",
       vulnerabilityCount: 0,
       advisory: null,
     },
+  );
+});
+
+test("rejects the previously accepted Drizzle esbuild advisory chain", () => {
+  assert.throws(
+    () =>
+      inspectDevelopmentDependencyAudit(
+        currentAcceptedAuditReport(),
+        currentPackageLock(),
+        currentPackageJson(),
+      ),
+    expectsUnapproved(),
   );
 });
 
@@ -207,12 +216,13 @@ test("rejects a duplicate advisory or a severity increase", () => {
       inspectDevelopmentDependencyAudit(
         newAdvisory,
         currentPackageLock(),
+        currentPackageJson(),
       ),
     expectsUnapproved(),
   );
 });
 
-test("rejects a reintroduced image-size package before evaluating accepted risk", () => {
+test("rejects a reintroduced image-size package before audit evaluation", () => {
   const packageLock = currentPackageLock();
   packageLock.packages[
     "node_modules/image-size"
@@ -226,22 +236,37 @@ test("rejects a reintroduced image-size package before evaluating accepted risk"
       inspectDevelopmentDependencyAudit(
         currentAcceptedAuditReport(),
         packageLock,
+        currentPackageJson(),
       ),
     expectsUnapproved(),
   );
 });
 
-test("rejects an unreviewed Drizzle or nested esbuild version", () => {
+test("rejects a missing override or unreviewed nested esbuild version", () => {
   const packageLock = currentPackageLock();
   packageLock.packages[
     "node_modules/@esbuild-kit/core-utils/node_modules/esbuild"
-  ].version = "0.18.19";
+  ].version = "0.25.11";
 
   assert.throws(
     () =>
       inspectDevelopmentDependencyAudit(
-        currentAcceptedAuditReport(),
+        cleanAuditReport(),
         packageLock,
+        currentPackageJson(),
+      ),
+    expectsUnapproved(),
+  );
+
+  const packageJson = currentPackageJson();
+  delete packageJson.overrides;
+
+  assert.throws(
+    () =>
+      inspectDevelopmentDependencyAudit(
+        cleanAuditReport(),
+        currentPackageLock(),
+        packageJson,
       ),
     expectsUnapproved(),
   );

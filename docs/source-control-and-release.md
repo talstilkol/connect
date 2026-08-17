@@ -430,15 +430,17 @@ Browser Attestation ולפני Production Readiness.
 שדרוג Vinext לגרסה `1.0.0-beta.6` ו־`@vitejs/plugin-rsc` לגרסה
 `0.5.34`. שתי התראות High של Parser DoS אינן קיימות עוד ב־Lockfile.
 ה־Production audit חזר עם אפס ממצאים. שרשרת Moderate של esbuild
-ישן בתוך Drizzle Kit נשארה גלויה ככלי פיתוח בלבד; אין לה תיקון
-Upstream תואם בקו `drizzle-kit@0.31.10`, ו־Downgrade או Override
-כפוי לא יבוצעו ללא תיקון ספק או בדיקת Migration ייעודית.
+ישן בתוך Drizzle Kit טופלה ב־Override תחום מ־`esbuild@0.18.20`
+ל־`esbuild@0.25.12`, שהיא גם הגרסה המתוקנת שכבר נמצאת בתלות הישירה
+של `drizzle-kit@0.31.10`. ה־Override אושר רק לאחר בדיקת Migration
+ייעודית המתוארת בסעיף הבא.
 
 11.12 `npm run verify:dependency-audit:development` פונה ל־Registry
-הרשמי ונכשל סגור. הוא מקבל רק אחד משני מצבים: אפס ממצאים, או ארבעת
-הממצאים הטרנזיטיביים המדויקים הנגזרים מ־Advisory
-`GHSA-67mh-4wv8-2f99` דרך `drizzle-kit@0.31.10`. כל Package, ‏Node,
-טווח, Severity, ‏Fix או Advisory נוספים נכשלים. ה־Lockfile חייב גם
-להוכיח ש־`image-size` נעדר ושהעותק הישן של esbuild נמצא רק בנתיב
-ה־Development הידוע. ה־Workflow מריץ שער זה לפני הפקת Evidence
-החתום לגרף ה־Production.
+הרשמי ונכשל סגור. מעתה הוא מקבל רק אפס ממצאים; כל Package, ‏Node,
+טווח, Severity, ‏Fix או Advisory נכשלים. ה־Lockfile חייב להוכיח
+ש־`image-size` נעדר, שה־Override המדויק קיים ושעותק esbuild בנתיב
+`@esbuild-kit/core-utils` הוא `0.25.12`. שער ה־Migrations מריץ גם
+`drizzle-kit check` וגם `drizzle-kit generate` מבודד אל נתיב זמני
+דטרמיניסטי תחת `.wrangler`, מאמת שנוצרו SQL ו־Journal ומוחק את
+התוצרים. כך נבדקות בפועל גם קריאת ה־Config, טרנספורמציית TypeScript,
+טעינת ה־Schema ויצירת Migration לפני הפקת Evidence החתום.

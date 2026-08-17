@@ -21,88 +21,7 @@ const packageLockPath = join(
 const maximumAuditOutputBytes = 2_097_152;
 const officialRegistryArgument =
   "--registry=https://registry.npmjs.org/";
-const knownAdvisoryUrl =
-  "https://github.com/advisories/GHSA-67mh-4wv8-2f99";
-
-const acceptedRiskFingerprint = Object.freeze({
-  counts: {
-    info: 0,
-    low: 0,
-    moderate: 4,
-    high: 0,
-    critical: 0,
-    total: 4,
-  },
-  vulnerabilities: [
-    {
-      packageName: "@esbuild-kit/core-utils",
-      severity: "moderate",
-      isDirect: false,
-      via: ["esbuild"],
-      effects: ["@esbuild-kit/esm-loader"],
-      range: "*",
-      nodes: ["node_modules/@esbuild-kit/core-utils"],
-      fixAvailable: {
-        name: "drizzle-kit",
-        version: "0.18.1",
-        isSemVerMajor: true,
-      },
-    },
-    {
-      packageName: "@esbuild-kit/esm-loader",
-      severity: "moderate",
-      isDirect: false,
-      via: ["@esbuild-kit/core-utils"],
-      effects: ["drizzle-kit"],
-      range: "*",
-      nodes: ["node_modules/@esbuild-kit/esm-loader"],
-      fixAvailable: {
-        name: "drizzle-kit",
-        version: "0.18.1",
-        isSemVerMajor: true,
-      },
-    },
-    {
-      packageName: "drizzle-kit",
-      severity: "moderate",
-      isDirect: true,
-      via: ["@esbuild-kit/esm-loader"],
-      effects: [],
-      range: "0.19.0 - 1.0.0-beta.1-fd8bfcc",
-      nodes: ["node_modules/drizzle-kit"],
-      fixAvailable: {
-        name: "drizzle-kit",
-        version: "0.18.1",
-        isSemVerMajor: true,
-      },
-    },
-    {
-      packageName: "esbuild",
-      severity: "moderate",
-      isDirect: false,
-      via: [
-        {
-          source: 1102341,
-          name: "esbuild",
-          dependency: "esbuild",
-          url: knownAdvisoryUrl,
-          severity: "moderate",
-          range: "<=0.24.2",
-        },
-      ],
-      effects: ["@esbuild-kit/core-utils"],
-      range: "<=0.24.2",
-      nodes: [
-        "node_modules/@esbuild-kit/core-utils/node_modules/esbuild",
-      ],
-      fixAvailable: {
-        name: "drizzle-kit",
-        version: "0.18.1",
-        isSemVerMajor: true,
-      },
-    },
-  ],
-});
+const patchedEsbuildVersion = "0.25.12";
 
 function isRecord(value) {
   return (
@@ -208,7 +127,10 @@ function buildAuditFingerprint(report) {
   };
 }
 
-function assertLockfileBoundary(packageLock) {
+function assertLockfileBoundary(
+  packageLock,
+  packageJson,
+) {
   if (
     !isRecord(packageLock) ||
     !isRecord(packageLock.packages) ||
@@ -223,21 +145,30 @@ function assertLockfileBoundary(packageLock) {
   const drizzleKit = packageLock.packages[
     "node_modules/drizzle-kit"
   ];
-  const vulnerableEsbuild =
+  const patchedEsbuild =
     packageLock.packages[
       "node_modules/@esbuild-kit/core-utils/node_modules/esbuild"
     ];
+  const expectedOverrides = {
+    "@esbuild-kit/core-utils": {
+      esbuild: patchedEsbuildVersion,
+    },
+  };
 
   if (
+    !isRecord(packageJson) ||
+    JSON.stringify(packageJson.overrides) !==
+      JSON.stringify(expectedOverrides) ||
     !isRecord(rootPackage) ||
     !isRecord(rootPackage.devDependencies) ||
     rootPackage.devDependencies["drizzle-kit"] !==
       "0.31.10" ||
     !isRecord(drizzleKit) ||
     drizzleKit.version !== "0.31.10" ||
-    !isRecord(vulnerableEsbuild) ||
-    vulnerableEsbuild.version !== "0.18.20" ||
-    vulnerableEsbuild.dev !== true
+    !isRecord(patchedEsbuild) ||
+    patchedEsbuild.version !==
+      patchedEsbuildVersion ||
+    patchedEsbuild.dev !== true
   ) {
     fail();
   }
@@ -268,8 +199,12 @@ export function parseDevelopmentDependencyAuditOutput(
 export function inspectDevelopmentDependencyAudit(
   report,
   packageLock,
+  packageJson,
 ) {
-  assertLockfileBoundary(packageLock);
+  assertLockfileBoundary(
+    packageLock,
+    packageJson,
+  );
   const fingerprint = buildAuditFingerprint(
     report,
   );
@@ -286,27 +221,16 @@ export function inspectDevelopmentDependencyAudit(
   };
 
   if (
-    JSON.stringify(fingerprint) ===
-    JSON.stringify(cleanFingerprint)
-  ) {
-    return {
-      status: "clean",
-      vulnerabilityCount: 0,
-      advisory: null,
-    };
-  }
-
-  if (
     JSON.stringify(fingerprint) !==
-    JSON.stringify(acceptedRiskFingerprint)
+    JSON.stringify(cleanFingerprint)
   ) {
     fail();
   }
 
   return {
-    status: "accepted-risk",
-    vulnerabilityCount: 4,
-    advisory: "GHSA-67mh-4wv8-2f99",
+    status: "clean",
+    vulnerabilityCount: 0,
+    advisory: null,
   };
 }
 
@@ -354,26 +278,35 @@ async function runCli() {
     );
   }
 
-  const [report, rawPackageLock] =
+  const [
+    report,
+    rawPackageLock,
+    rawPackageJson,
+  ] =
     await Promise.all([
       Promise.resolve(
         runDevelopmentDependencyAudit(),
       ),
       readFile(packageLockPath, "utf8"),
+      readFile(
+        join(projectRoot, "package.json"),
+        "utf8",
+      ),
     ]);
   const packageLock = JSON.parse(
     rawPackageLock,
   );
-  const result =
-    inspectDevelopmentDependencyAudit(
-      report,
-      packageLock,
-    );
+  const packageJson = JSON.parse(
+    rawPackageJson,
+  );
+  inspectDevelopmentDependencyAudit(
+    report,
+    packageLock,
+    packageJson,
+  );
 
   console.log(
-    result.status === "clean"
-      ? "Development dependency audit: PASS (0 vulnerabilities)"
-      : `Development dependency audit: ACCEPTED RISK (${result.advisory}, ${result.vulnerabilityCount} transitive findings, development only)`,
+    "Development dependency audit: PASS (0 vulnerabilities)",
   );
 }
 

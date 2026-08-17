@@ -254,6 +254,24 @@ Smoke חיצוני עדיין דורש Staging וחשבונות אמיתיים.
 ו־Live region למספר התוצאות. Browser acceptance חי נשאר תלוי בזהות
 Clerk System Admin וב־D1 של Staging.
 
+2.13 **הושלם מקומית:** שלוש התראות התלויות שעליהן דיווח GitHub
+טופלו בענף העבודה.
+
+2.13.1 שתי התראות High של `image-size@2.0.2` כבר הוסרו מה־Lockfile
+באמצעות שדרוג Vinext. התראות אלה יישארו מוצגות ב־GitHub כל עוד
+ענף ברירת המחדל לא כולל את ה־PR.
+
+2.13.2 שרשרת Moderate של `esbuild@0.18.20` בתוך
+`@esbuild-kit/core-utils` הוחלפה ב־Override תחום אל
+`esbuild@0.25.12`. ‏`npm audit` מלא מול Registry הרשמי מחזיר כעת
+אפס פגיעויות.
+
+2.13.3 Risk acceptance הקודם בוטל. שער ה־Development audit מקבל רק
+אפס ממצאים ודורש את ה־Override וה־Lockfile המדויקים. שער ה־Migrations
+מריץ גם `drizzle-kit check` וגם יצירת Migration מבודדת מה־Schema
+האמיתי, מאמת SQL ו־Journal ומוחק את התוצר הזמני. כך עדכון התלות אינו
+נסמך על Build כללי בלבד.
+
 ## 3. עבודה שאינה מקומית בלבד
 
 3.1 חיבור Meta, ‏AI, ‏Billing, ‏File Scanner ו־Alert provider מתחיל

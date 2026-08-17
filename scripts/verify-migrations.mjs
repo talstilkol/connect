@@ -10,6 +10,10 @@ import {
   pathToFileURL,
 } from "node:url";
 
+import {
+  inspectDrizzleToolingCompatibility,
+} from "./verify-drizzle-tooling.mjs";
+
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
 );
@@ -243,6 +247,20 @@ async function runCli() {
   const report = await inspectMigrations();
 
   if (report.status === "passed") {
+    const toolingReport =
+      await inspectDrizzleToolingCompatibility();
+
+    if (toolingReport.status !== "passed") {
+      console.error(
+        `Drizzle tooling compatibility: FAIL (${toolingReport.code})`,
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    console.log(
+      "Drizzle tooling compatibility: PASS (check + isolated generate)",
+    );
     console.log(
       `Migration validation: PASS (${report.migrationCount} migrations)`,
     );
