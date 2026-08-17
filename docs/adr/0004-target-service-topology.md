@@ -296,7 +296,7 @@ lifecycle repositories ועשר Migrations ל־Critical Path כבר קיימים
 תרחישי Concurrency; עדיין אין בכך הוכחה לכל ה־Repositories או לסביבת Staging.
 חוזה Pool מאובטח קיים, אך ספק, גודל Pool, ‏CA, ‏Timeouts ו־Telemetry חיים
 נשארים `unknown/unavailable` עד קבלת החלטה וראיות Environment.
-Foundation אחד מחבר 11 Adapters קיימים לאותו Pool בלי לחשוף אותו.
+Foundation אחד מחבר 12 Adapters קיימים לאותו Pool בלי לחשוף אותו.
 `contacts.list` מחובר ל־PostgreSQL ונבדק מול מסד אמיתי עם Tenant isolation
 ו־Keyset pagination. ‏`reports.read` קיבל Adapter חד־שאילתי; Conversations,
 Messages, ‏Templates, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage הומרו

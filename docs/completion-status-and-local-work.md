@@ -771,9 +771,31 @@ Tag, ‏List, שני שיוכים ו־Import שהושלם עם שורה שנוצ
 התוצאה: `PASS (10 migrations, 2 concurrency scenarios)`. סביבת הבדיקה
 הזמנית נעצרה ונמחקה.
 
-2.41.4 ה־Schema מוכן אך עדיין אינו מחובר ל־Railway operations. השלב המקומי
-הבא הוא PostgreSQL adapters עבור `contactOrganizationRepository` ו־
+2.41.4 בשלב זה ה־Schema היה מוכן אך עדיין לא מחובר ל־Railway operations.
+Adapter ארגון אנשי הקשר הושלם בסעיף 2.42; השלב המקומי הבא הוא
 `contactImportRepository`, כולל Atomic import row write ו־Job refresh.
+
+2.42 **הושלם מקומית:** PostgreSQL Contact organization adapter.
+
+2.42.1 ‏`postgresContactOrganizationRepository.ts` מממש Upsert של Tag/List,
+קריאת Counts ושיוכים, והוספה/הסרה Idempotent. כל Query מסונן לפי Tenant;
+רשימת Contact IDs מוגבלת ל־50 ומייצרת רק Placeholders מספריים מתוך אורך
+שאומת, ללא הכנסת קלט לתוך SQL.
+
+2.42.2 כתיבת שיוך משתמשת ב־Data-modifying CTE יחיד: היא מוכיחה תחילה ש־
+Contact וה־Group נמצאים באותו Tenant, מבצעת Insert/Delete ומחזירה רק `found`
+בוליאני. Target חסר ממופה לאותה שגיאת Domain של D1; Row shape, Scope, סדר,
+כפילויות ומונים חריגים נכשלים סגור.
+
+2.42.3 ה־Adapter מחובר ל־Contact organization service מתוך Foundation אחד,
+שמכיל כעת 12 Adapters. שבע בדיקות יחידה חדשות עברו, וה־Harness הפעיל בפועל
+Create tag/list ושני שיוכים דרך Session, ‏RBAC, ‏Service ו־Repository מול
+PostgreSQL 16.13. התוצאה נשארה
+`PASS (10 migrations, 2 concurrency scenarios)`. סביבת הבדיקה נעצרה ונמחקה.
+
+2.42.4 נותרה באותו Feature המרת `contactImportRepository` ל־PostgreSQL.
+אין לחבר Import Route ל־Railway לפני שה־Contact upsert וכתיבת Row outcome
+מתבצעים באותה Transaction וש־Job counters נטענים מחדש מאותו Tenant.
 
 ## 3. עבודה שאינה מקומית בלבד
 

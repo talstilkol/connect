@@ -253,7 +253,11 @@ async function verifyContactLifecycle(
   assert.equal(persisted.rows[0]?.name, "Integration");
 }
 
-async function verifyContactOrganizationImportSchema(pool, tenantId) {
+async function verifyContactOrganizationImportSchema(
+  pool,
+  foundation,
+  tenantId,
+) {
   const occurredAt = "2026-08-17T08:30:00.000Z";
   const contacts = await pool.query(
     `SELECT id
@@ -266,50 +270,44 @@ async function verifyContactOrganizationImportSchema(pool, tenantId) {
 
   assert.equal(Number.isSafeInteger(contactId) && contactId > 0, true);
 
-  const tag = await pool.query(
-    `INSERT INTO contact_tags (
-       tenant_id,
-       name,
-       normalized_name,
-       created_at,
-       updated_at
-     )
-     VALUES ($1, 'Priority', 'priority', $2, $2)
-     RETURNING id`,
-    [tenantId, occurredAt],
+  const session = {
+    tenantId,
+    externalUserId: "driver-integration-owner",
+    displayName: "Driver integration tenant",
+    status: "active",
+    role: "owner",
+  };
+  const tagSnapshot = await foundation.contactOrganization.createTag(
+    session,
+    "Priority",
   );
-  const list = await pool.query(
-    `INSERT INTO contact_lists (
-       tenant_id,
-       name,
-       normalized_name,
-       created_at,
-       updated_at
-     )
-     VALUES ($1, 'Pilot', 'pilot', $2, $2)
-     RETURNING id`,
-    [tenantId, occurredAt],
+  const listSnapshot = await foundation.contactOrganization.createList(
+    session,
+    "Pilot",
   );
-  const tagId = Number(tag.rows[0]?.id);
-  const listId = Number(list.rows[0]?.id);
+  const tagId = Number(tagSnapshot.tags[0]?.id);
+  const listId = Number(listSnapshot.lists[0]?.id);
 
   assert.equal(Number.isSafeInteger(tagId) && tagId > 0, true);
   assert.equal(Number.isSafeInteger(listId) && listId > 0, true);
 
-  await pool.query(
-    `INSERT INTO contact_tag_assignments (
-       tenant_id, contact_id, tag_id, created_at
-     )
-     VALUES ($1, $2, $3, $4)`,
-    [tenantId, contactId, tagId, occurredAt],
-  );
-  await pool.query(
-    `INSERT INTO contact_list_memberships (
-       tenant_id, contact_id, list_id, created_at
-     )
-     VALUES ($1, $2, $3, $4)`,
-    [tenantId, contactId, listId, occurredAt],
-  );
+  await foundation.contactOrganization.setTagAssignment(session, {
+    contactId,
+    groupId: tagId,
+    assigned: true,
+  });
+  const organizationSnapshot =
+    await foundation.contactOrganization.setListMembership(session, {
+      contactId,
+      groupId: listId,
+      assigned: true,
+    });
+  assert.deepEqual(organizationSnapshot.tagAssignments, [
+    { contactId, tagId },
+  ]);
+  assert.deepEqual(organizationSnapshot.listMemberships, [
+    { contactId, listId },
+  ]);
 
   const job = await pool.query(
     `INSERT INTO contact_import_jobs (
@@ -1347,7 +1345,11 @@ export async function verifyNodePostgresIntegration(
         foundation.contacts,
         tenantId,
       );
-      await verifyContactOrganizationImportSchema(pool, tenantId);
+      await verifyContactOrganizationImportSchema(
+        pool,
+        foundation,
+        tenantId,
+      );
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);

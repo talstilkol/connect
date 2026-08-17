@@ -231,7 +231,7 @@ Loopback ב־Staging/Production וכל Query string ב־Database URL, משום �
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
-7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 11 ה־Adapters שהושלמו לאותו
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 12 ה־Adapters שהושלמו לאותו
 Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי.
 
 7.1.22 ‏`contacts.list` משתמש כעת ב־PostgreSQL repository בעל Tenant filter,
@@ -276,6 +276,13 @@ Key עסקי כולל `tenant_id`. ‏Harness PostgreSQL אמיתי הוכיח �
 שיוכים ו־Import שהושלם, חסם מצב Job לא עקבי וחסם שני ניסיונות Cross-tenant.
 ה־Schema הושלם; Repository adapters ופעולות Railway עבור יכולות אלה עדיין
 לא חוברו.
+
+7.1.28 ‏`postgresContactOrganizationRepository.ts` ממיר את חמש פעולות
+ה־Repository של Tag/List ושיוכים. Placeholders של Contact scope נוצרים רק
+מאורך מערך שאומת ומוגבל ל־50. כתיבת Relationship היא Statement אטומי שמוכיח
+Contact ו־Group באותו Tenant לפני שינוי. ה־Foundation חושף את ה־Service,
+וה־Harness הפעיל Create ו־Assign דרך Session והרשאה מול PostgreSQL אמיתי.
+`contactImportRepository` עדיין אינו מומר.
 
 7.2 עדיין חסר:
 

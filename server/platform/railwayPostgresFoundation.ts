@@ -12,6 +12,9 @@ import {
   createContactListService,
 } from "../contacts/contactService.ts";
 import {
+  createContactOrganizationService,
+} from "../contacts/contactOrganizationService.ts";
+import {
   createOperationalReportService,
 } from "../reports/operationalReportService.ts";
 import {
@@ -20,6 +23,9 @@ import {
 import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
+import {
+  createPostgresContactOrganizationRepository,
+} from "./postgresContactOrganizationRepository.ts";
 import {
   createPostgresOperationalReportRepository,
 } from "./postgresOperationalReportRepository.ts";
@@ -75,6 +81,9 @@ export interface RailwayPostgresFoundationOptions {
 export interface RailwayPostgresFoundation {
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly contacts: ReturnType<typeof createContactListService>;
+  readonly contactOrganization: ReturnType<
+    typeof createContactOrganizationService
+  >;
   readonly reports: ReturnType<typeof createOperationalReportService>;
   readonly memberships: ReturnType<
     typeof createPostgresTenantMembershipRepository
@@ -158,11 +167,17 @@ export function createRailwayPostgresFoundation(
   const queries = createNodePostgresQueryExecutor(pool);
   const transactions = createNodePostgresTransactionManager(pool);
   const contactReads = createPostgresContactReadRepository(queries);
+  const contactOrganization = createPostgresContactOrganizationRepository(
+    queries,
+  );
   let closed = false;
 
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
     contacts: createContactListService({ contacts: contactReads }),
+    contactOrganization: createContactOrganizationService(
+      contactOrganization,
+    ),
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),

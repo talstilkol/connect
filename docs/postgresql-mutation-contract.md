@@ -32,7 +32,7 @@ Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 11 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 12 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -78,6 +78,11 @@ Timeouts ו־Request target, ואינו סומך על Host שסיפק הלקוח
 בפועל שיוך Tag ושורת Import שחצו Tenant. מוני Job, מצב Completion ותוצאת כל
 שורה נאכפים ב־Constraints. ה־Schema הוכח מקומית; Adapters מקבילים ל־D1 עדיין
 נדרשים לפני חיבור הפעולות ל־Railway.
+
+1.13 ‏`postgresContactOrganizationRepository.ts` מחובר ל־Service בתוך
+ה־Foundation. הוא קורא Counts ושיוכים רק מתוך Tenant scope, ודורש Contact
+ו־Tag/List מאותו Tenant בתוך Statement הכתיבה עצמו. ה־Harness הוכיח Create
+ו־Assign דרך RBAC מול PostgreSQL אמיתי. ‏Contact import נשאר ה־Adapter הבא.
 
 ## 2. הסבר למתחילים
 
@@ -163,7 +168,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 11 ה־Ports, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 12 ה־Ports, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 
