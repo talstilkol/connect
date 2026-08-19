@@ -33,6 +33,9 @@ import {
   createPostgresAiAgentRepository,
 } from "./postgresAiAgentRepository.ts";
 import {
+  createPostgresAiReplyOutboxRepository,
+} from "./postgresAiReplyOutboxRepository.ts";
+import {
   createPostgresAiRuntimePersistence,
 } from "./postgresAiRuntimeRepository.ts";
 import {
@@ -138,6 +141,9 @@ export interface RailwayPostgresFoundationOptions {
 export interface RailwayPostgresFoundation {
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly aiAgents: ReturnType<typeof createPostgresAiAgentRepository>;
+  readonly aiReplyOutbox: ReturnType<
+    typeof createPostgresAiReplyOutboxRepository
+  >;
   readonly aiRuntime: ReturnType<typeof createPostgresAiRuntimePersistence>;
   readonly botFlows: ReturnType<typeof createPostgresBotFlowRepository>;
   readonly botReplyDeliveries: ReturnType<
@@ -282,6 +288,10 @@ export function createRailwayPostgresFoundation(
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
+    aiReplyOutbox: createPostgresAiReplyOutboxRepository({
+      queries,
+      transactions,
+    }),
     aiRuntime: createPostgresAiRuntimePersistence({ queries, transactions }),
     botFlows: createPostgresBotFlowRepository({ queries, transactions }),
     botReplyDeliveries: createPostgresBotReplyDeliveryRepository({

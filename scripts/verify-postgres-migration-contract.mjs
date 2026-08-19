@@ -58,6 +58,7 @@ const requiredTableSequence = Object.freeze([
   "knowledge_sources",
   "knowledge_passages",
   "ai_agent_version_sources",
+  "ai_reply_outbox",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -77,6 +78,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0014_worker_scheduler_lease.sql",
   "0015_campaign_dispatch.sql",
   "0016_ai_knowledge.sql",
+  "0017_ai_reply_outbox.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

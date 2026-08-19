@@ -74,6 +74,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0014_worker_scheduler_lease\.sql/);
   assert.match(source, /0015_campaign_dispatch\.sql/);
   assert.match(source, /0016_ai_knowledge\.sql/);
+  assert.match(source, /0017_ai_reply_outbox\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
@@ -99,7 +100,9 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.aiAgents\.saveDraft/);
   assert.match(source, /foundation\.aiRuntime\.costGate\.authorize/);
   assert.match(source, /foundation\.aiRuntime\.auditSink\.record/);
-  assert.match(source, /concurrencyScenarios: 40/);
+  assert.match(source, /foundation\.aiReplyOutbox\.stage/);
+  assert.match(source, /foundation\.aiReplyOutbox\.decide/);
+  assert.match(source, /concurrencyScenarios: 42/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

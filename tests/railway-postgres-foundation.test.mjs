@@ -39,6 +39,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
 
   assert.deepEqual(Object.keys(foundation).sort(), [
     "aiAgents",
+    "aiReplyOutbox",
     "aiRuntime",
     "botFlows",
     "botReplyDeliveries",
@@ -75,6 +76,8 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "function",
   );
   assert.equal(typeof foundation.aiAgents.saveDraft, "function");
+  assert.equal(typeof foundation.aiReplyOutbox.stage, "function");
+  assert.equal(typeof foundation.aiReplyOutbox.decide, "function");
   assert.equal(typeof foundation.aiRuntime.costGate.authorize, "function");
   assert.equal(typeof foundation.aiRuntime.auditSink.record, "function");
   assert.equal(typeof foundation.botFlows.saveDraft, "function");

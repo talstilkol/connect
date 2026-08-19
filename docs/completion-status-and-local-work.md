@@ -1326,6 +1326,24 @@ authorization ו־Usage replay מקבילים, שתי הוצאות שונות ה
 הטווח מיועד להשלמת Adapters מקומיים שנותרו ולסנכרון חוזי השחרור; הוא אינו
 כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging או Pilot.
 
+4.26 ‏PostgreSQL AI Reply Outbox הושלם מקומית.
+Migration מספר `0017_ai_reply_outbox.sql` מוסיף Outbox מאומת ל־Reply
+מתוכנן, כולל Foreign Key ל־Audit, מצב Approval עקבי וייחודיות לפי Request
+והודעת Inbound. ‏`postgresAiReplyOutboxRepository.ts` מממש Stage, קריאות,
+רשימת אישורים ו־Approve/Reject תחת נעילות שורה. אישור נחסם אם הגיעה הודעת
+לקוח חדשה. ה־Repository מחובר ל־Foundation, שמכיל כעת 29 Adapters.
+
+4.26.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (18 migrations, 42 concurrency scenarios)`. הוא הוכיח Stage מקביל
+יחיד ו־Approval מקביל יחיד עם Replay עקבי. השרת הזמני נעצר והתיקייה נמחקה.
+
+4.27 לאחר מיפוי מחודש של כל שמות ה־D1 Repositories, האומדן המקומי הכולל
+מתוקן ל־**16–48 שעות פיתוח נטו**. האומדן הקודם בסעיף 4.25 היה אופטימי מדי:
+נותרו חוזים שאינם רק AI, ובהם Subscription, ‏Provisioning, ‏Production
+decisions וקריאות System Admin; חלק משמות ה־D1 כבר מכוסים ב־Adapters אחרים
+ודורשים אימות Parity ולא Repository חדש. הטווח אינו כולל ספקים, Credentials,
+Staging, ‏Load test או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

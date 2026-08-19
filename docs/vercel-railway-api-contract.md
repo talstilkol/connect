@@ -403,6 +403,13 @@ Audit ו־Handoff ל־PostgreSQL. נעילת Agent משותפת מסדרת את 
 ה־Repository מחובר ל־Foundation, שמכיל כעת 28 Adapters. ‏Harness אמיתי
 עבר עם 17 Migrations ו־40 תרחישי Concurrency.
 
+7.1.44 ‏`0017_ai_reply_outbox.sql` ו־
+`postgresAiReplyOutboxRepository.ts` ממירים Stage של תשובת AI, רשימת
+אישורים והחלטת Approve/Reject ל־PostgreSQL. ה־Outbox קשור ל־Audit מתוכנן,
+להודעת Inbound העדכנית ולמקורות ידע Ready. ‏Stage והחלטה ננעלים ומחזירים
+Replay עקבי בלי לטעון שנשלחה הודעה לספק. ה־Foundation מכיל כעת 29 Adapters;
+Harness אמיתי עבר עם 18 Migrations ו־42 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

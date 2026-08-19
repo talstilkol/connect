@@ -35,6 +35,9 @@ import {
   deriveKnowledgeSourceKey,
 } from "../server/ai/aiAgentKey.ts";
 import {
+  deriveAiReplyOutboxKey,
+} from "../server/ai/aiReplyOutboxKey.ts";
+import {
   deriveAiProviderRequestKey,
   deriveAiRuntimeAuditKey,
 } from "../server/ai/aiRuntimeKey.ts";
@@ -77,6 +80,7 @@ const migrationFiles = Object.freeze([
   "0014_worker_scheduler_lease.sql",
   "0015_campaign_dispatch.sql",
   "0016_ai_knowledge.sql",
+  "0017_ai_reply_outbox.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2443,6 +2447,7 @@ async function verifyAiAgentLifecycle(
   return Object.freeze({
     aiAgentKey,
     aiAgentVersionKey: second.aiAgentVersionKey,
+    sourceKey,
   });
 }
 
@@ -2546,6 +2551,82 @@ async function verifyAiRuntimePersistence(
     [false, true],
   );
 
+  const replyAuditEvent = Object.freeze({
+    auditKey: identityInputs[1].auditKey,
+    requestKey: identityInputs[1].requestKey,
+    tenantId,
+    conversationKey: identityInputs[1].conversationKey,
+    inboundMessageKey: identityInputs[1].inboundMessageKey,
+    expectedConversationVersion: 2,
+    aiAgentKey: aiAgent.aiAgentKey,
+    aiAgentVersionKey: aiAgent.aiAgentVersionKey,
+    outcome: "reply-planned",
+    reason: null,
+    responseMode: "agent-approval",
+    groundingScoreBasisPoints: 9_000,
+    inputTokens: 120,
+    outputTokens: 24,
+    costMinorUnits: 2,
+    currency: "ILS",
+  });
+  assert.deepEqual(
+    await foundation.aiRuntime.auditSink.record(replyAuditEvent),
+    { outcome: "recorded" },
+  );
+  const replyOutboxKey = await deriveAiReplyOutboxKey(
+    tenantId,
+    identityInputs[1].requestKey,
+  );
+  const stageInput = Object.freeze({
+    outboxKey: replyOutboxKey,
+    requestKey: identityInputs[1].requestKey,
+    auditKey: identityInputs[1].auditKey,
+    tenantId,
+    conversationKey: identityInputs[1].conversationKey,
+    inboundMessageKey: identityInputs[1].inboundMessageKey,
+    aiAgentKey: aiAgent.aiAgentKey,
+    aiAgentVersionKey: aiAgent.aiAgentVersionKey,
+    expectedConversationVersion: 2,
+    recipientPhoneNumber: "+97250987002",
+    responseMode: "agent-approval",
+    replyText: "Approved knowledge supports this response.",
+    groundedSourceKeys: Object.freeze([aiAgent.sourceKey]),
+    groundingScoreBasisPoints: 9_000,
+  });
+  const stagedReplies = await Promise.all([
+    foundation.aiReplyOutbox.stage(stageInput),
+    foundation.aiReplyOutbox.stage(stageInput),
+  ]);
+  assert.deepEqual(
+    stagedReplies.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+  assert.equal(
+    (await foundation.aiReplyOutbox.listAwaitingApproval(tenantId, 10)).some(
+      ({ outboxKey: storedKey }) => storedKey === replyOutboxKey,
+    ),
+    true,
+  );
+  const decisionAt = new Date(
+    Date.parse(stagedReplies[0].item.createdAt) + 1_000,
+  ).toISOString();
+  const decision = Object.freeze({
+    tenantId,
+    outboxKey: replyOutboxKey,
+    expectedVersion: 1,
+    decidedByExternalUserId: "auth0|postgres-ai-approver",
+    decision: "approve",
+    decidedAt: decisionAt,
+  });
+  const decisions = await Promise.all([
+    foundation.aiReplyOutbox.decide(decision),
+    foundation.aiReplyOutbox.decide(decision),
+  ]);
+  assert.deepEqual(
+    decisions.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+
   const handoffEvent = Object.freeze({
     auditKey: identityInputs[2].auditKey,
     requestKey: identityInputs[2].requestKey,
@@ -2594,6 +2675,14 @@ async function verifyAiRuntimePersistence(
         FROM ai_runtime_audit_events
         WHERE tenant_id = $1
           AND audit_key = $3) AS audit_count,
+       (SELECT count(*)::integer
+        FROM ai_reply_outbox
+        WHERE tenant_id = $1
+          AND outbox_key = $5) AS outbox_count,
+       (SELECT status
+        FROM ai_reply_outbox
+        WHERE tenant_id = $1
+          AND outbox_key = $5) AS outbox_status,
        conversation.status,
        conversation.version
      FROM conversations AS conversation
@@ -2604,6 +2693,7 @@ async function verifyAiRuntimePersistence(
       aiAgent.aiAgentKey,
       identityInputs[2].auditKey,
       identityInputs[2].conversationKey,
+      replyOutboxKey,
     ],
   );
   assert.deepEqual(persisted.rows, [{
@@ -2611,6 +2701,8 @@ async function verifyAiRuntimePersistence(
     usage_count: 3,
     total_cost: 11,
     audit_count: 1,
+    outbox_count: 1,
+    outbox_status: "ready-for-delivery",
     status: "waiting_for_agent",
     version: 3,
   }]);
@@ -3265,7 +3357,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 40,
+      concurrencyScenarios: 42,
     });
   } finally {
     await pool.end();

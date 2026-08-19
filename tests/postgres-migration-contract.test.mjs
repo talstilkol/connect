@@ -36,6 +36,7 @@ const whatsappPhoneThroughputSchema = migrationSources[13];
 const workerSchedulerLeaseSchema = migrationSources[14];
 const campaignDispatchSchema = migrationSources[15];
 const aiKnowledgeSchema = migrationSources[16];
+const aiReplyOutboxSchema = migrationSources[17];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -56,15 +57,32 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0014_worker_scheduler_lease.sql",
     "0015_campaign_dispatch.sql",
     "0016_ai_knowledge.sql",
+    "0017_ai_reply_outbox.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 17,
+      migrationCount: 18,
       findings: [],
     },
   );
+});
+
+test("defines a tenant-bound PostgreSQL AI reply approval outbox", () => {
+  assert.match(
+    aiReplyOutboxSchema,
+    /CREATE TABLE ai_reply_outbox[\s\S]*FOREIGN KEY \(tenant_id, audit_key\)[\s\S]*REFERENCES ai_runtime_audit_events/,
+  );
+  assert.match(
+    aiReplyOutboxSchema,
+    /response_mode = 'automatic'[\s\S]*status = 'ready-for-delivery'[\s\S]*response_mode = 'agent-approval'[\s\S]*status = 'awaiting-approval'/,
+  );
+  assert.match(
+    aiReplyOutboxSchema,
+    /tenant_request_uq[\s\S]*tenant_inbound_uq[\s\S]*tenant_status_created_idx/,
+  );
+  assert.doesNotMatch(aiReplyOutboxSchema, /random|uuid/i);
 });
 
 test("defines tenant-bound PostgreSQL AI knowledge and immutable passages", () => {

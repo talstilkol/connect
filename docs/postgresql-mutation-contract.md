@@ -206,6 +206,13 @@ Published קודמת ל־Archived ומפעיל את גרסת היעד באותה
 Inbound message וגרסה פעילה, ורושם Handoff באותה Transaction. ‏Harness
 אמיתי הוכיח ארבעה תרחישים מקבילים נוספים והעלה את הסך ל־40.
 
+1.28 ‏Migration מספר `0017_ai_reply_outbox.sql` ו־
+`postgresAiReplyOutboxRepository.ts` מוסיפים Outbox לתשובת AI מאושרת.
+Stage דורש Audit מסוג `reply-planned`, אותה גרסת Conversation, אותה הודעת
+Inbound ומקורות Knowledge במצב Ready. ‏Approve/Reject נועלים Outbox ואת
+השיחה, וחוסמים החלטה לאחר הודעת לקוח חדשה. ה־Harness הוכיח Stage והחלטה
+מקבילים והעלה את הסך ל־42 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
