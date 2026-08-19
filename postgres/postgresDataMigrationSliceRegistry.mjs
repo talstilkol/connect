@@ -121,7 +121,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "conversations-messages",
     order: 6,
-    status: "next",
+    status: "rehearsed",
     requires: ["core", "meta-connection"],
     tables: ["conversations", "messages"],
     d1Migrations: ["0012_conversations_and_messages.sql"],
@@ -130,7 +130,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "bot-runtime",
     order: 7,
-    status: "planned",
+    status: "next",
     requires: ["core", "conversations-messages"],
     tables: ["bot_flows", "bot_flow_versions", "bot_reply_deliveries"],
     d1Migrations: [

@@ -25,6 +25,7 @@
     "verify:postgres-contact-organization-import-data-migration": "node scripts/verify-postgres-contact-organization-import-data-migration.mjs",
     "verify:postgres-meta-connection-data-migration": "node scripts/verify-postgres-meta-connection-data-migration.mjs",
     "verify:postgres-templates-campaigns-data-migration": "node scripts/verify-postgres-templates-campaigns-data-migration.mjs",
+    "verify:postgres-conversations-messages-data-migration": "node scripts/verify-postgres-conversations-messages-data-migration.mjs",
     "verify:postgres-core-semantic-parity": "node scripts/verify-postgres-core-semantic-parity.mjs",
     "verify:railway-api-startup": "node scripts/verify-railway-api-startup.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",

@@ -1740,3 +1740,26 @@ Conversations & Messages ובו שתי טבלאות.
 551 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,123 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,062
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.56 ‏PostgreSQL Conversations & Messages data migration ו־Semantic parity
+הושלמו מקומית עבור שתי הטבלאות ב־Slice השישי. ה־Snapshot חוסם Provider
+identity לא חתוכה, כשלי Direction/Status, ‏Content shape סותר וסדר זמנים
+שאינו עומד בחוזה PostgreSQL.
+
+4.56.1 לפני Commit המנגנון מוכיח שכל Last-message projection מצביע ל־
+Message באותו Tenant, באותה Conversation ובאותו `occurred_at`. ‏Manifest
+ו־Evidence אינם מכילים Text content, ‏Provider message ID, שיוך או סטטוס
+שיחה.
+
+4.56.2 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 2 tables, 5 rows, replay rejected, tenant isolation verified, message content private, 9 parity scenarios)`.
+השרת הזמני נעצר ותיקייתו נמחקה.
+
+4.56.3 ‏26 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 25
+טבלאות, ‏Export חי, ‏Staging, ‏Load/Recovery ו־Cutover. ה־Slice הבא הוא
+Bot Runtime ובו שלוש טבלאות.
+
+4.56.4 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+552 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,128 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,068
+הבדיקות** עברו יחד ללא כשל או Skip.
