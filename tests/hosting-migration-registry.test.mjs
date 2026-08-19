@@ -349,13 +349,16 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /HTTP-before-pool shutdown/);
   assert.match(boundary.cutoverBlocker, /strict PORT configuration/);
   assert.match(boundary.cutoverBlocker, /SIGINT\/SIGTERM lifecycle/);
+  assert.match(boundary.cutoverBlocker, /executable API bootstrap/);
+  assert.match(boundary.cutoverBlocker, /graceful SIGTERM shutdown/);
+  assert.match(boundary.cutoverBlocker, /live Railway service configuration/);
+  assert.doesNotMatch(boundary.cutoverBlocker, /missing executable bootstrap/);
   assert.match(boundary.cutoverBlocker, /All six operational-report source families are migrated/);
   assert.match(boundary.cutoverBlocker, /complete authenticated reports\.read HTTP path passed against PostgreSQL 16\.13/);
   assert.match(boundary.cutoverBlocker, /shared PostgreSQL tenant-mutation token bucket/);
-  assert.match(boundary.cutoverBlocker, /missing executable bootstrap/);
   assert.match(
     boundary.cutoverBlocker,
-    /live provider-bound pool and rate-limit policy values/,
+    /provider-bound pool and rate-limit policy values/,
   );
   assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
   assert.match(boundary.cutoverBlocker, /controlled-environment migration rehearsal and semantic parity evidence/);

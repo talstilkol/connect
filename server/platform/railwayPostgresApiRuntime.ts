@@ -95,7 +95,9 @@ export async function createRailwayPostgresApiRuntime(
   }
 
   const foundation = createRailwayPostgresFoundation({
-    environment: options.postgresEnvironment,
+    ...(options.postgresEnvironment === undefined
+      ? {}
+      : { environment: options.postgresEnvironment }),
     telemetry: options.postgresTelemetry,
   });
 

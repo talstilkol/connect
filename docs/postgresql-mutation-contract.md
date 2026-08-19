@@ -54,21 +54,23 @@ Conversations, ‏Messages, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI 
 נכון. ה־Harness הפעיל `reports.read` דרך Vercel OIDC, ‏Clerk, ‏Tenant
 resolution והרשאה מול PostgreSQL אמיתי, ואימת שהתגובה אינה חושפת Tenant,
 User או Connection data. שכבת Node HTTP ו־Service lifecycle מתועדת בסעיף
-הבא; Startup executable עדיין אינו מחובר.
+הבא; Startup executable מחובר ומתועד ב־`railway-api-startup.md`.
 
 1.10 ‏`postgresReadinessProbe.ts` מבצע רק `SELECT 1::integer AS ready`, דורש
 שורה ושדה מדויקים ומחזיר `unavailable` בלי Error פנימי בכל כשל. ‏Node HTTP
 adapter מוסיף Routes קשיחים ל־Liveness, ‏Readiness ו־API, מגביל Headers,
 Timeouts ו־Request target, ואינו סומך על Host שסיפק הלקוח. ‏Service owner
 עוצר תחילה קבלת HTTP ורק אחר כך סוגר את PostgreSQL runtime, ומנסה את שתי
-השכבות גם במקרה כשל. בשלב זה נותר לחבר Process signals ו־Rate-limit provider
-אמיתי; Signal lifecycle ומנגנון ה־Rate limit הושלמו בסעיפים הבאים.
+השכבות גם במקרה כשל. ‏Signal lifecycle, מנגנון Rate limit ו־Executable
+הושלמו; נותרו ערכי Environment חיים וראיית Railway.
 
 1.11 ‏`railwayNodeProcess.ts` מקבל רק `PORT` עשרוני קנוני בטווח 1–65535,
 מתקין `SIGINT` ו־`SIGTERM` רק לאחר Start מוצלח, ומסיר גם Wiring חלקי אם
 רישום Signal נכשל. כל Signal עובר באותו Close Idempotent; כשל Shutdown מסמן
-את התהליך בלי לחשוף פרטי Runtime. ‏Startup executable עדיין אינו קיים.
-`contacts.save` מחובר כעת ל־Rate limiter אטומי ב־PostgreSQL, אך הפעלת Runtime
+את התהליך בלי לחשוף פרטי Runtime. ‏`start-railway-api.mjs` מחבר את ה־Runtime
+ואת ה־Process לאחר אימות `PORT`; Rehearsal הוכיח Liveness, ‏Readiness וסגירת
+`SIGTERM` נקייה מול PostgreSQL 16 אמיתי. `contacts.save` מחובר כעת ל־Rate
+limiter אטומי ב־PostgreSQL, אך הפעלת Runtime
 דורשת Policy version, ‏Capacity וחלון Refill מפורשים ומאושרים ב־Environment;
 אין ערכי ברירת מחדל.
 

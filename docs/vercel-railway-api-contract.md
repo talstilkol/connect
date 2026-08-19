@@ -489,6 +489,13 @@ fail-closed לשבע טבלאות. Snapshot D1 דורש Schema ו־Integrity ת�
 Transaction. ‏Rehearsal אמיתי עבר עם 36 מיגרציות D1, ‏24 מיגרציות
 PostgreSQL, ‏7 טבלאות ו־Replay חסום. נותרו 44 טבלאות וראיית Staging.
 
+7.1.56 ‏`railwayApiMain.ts` ו־`start-railway-api.mjs` סוגרים את פער ה־API
+Startup executable. ‏`PORT` מאומת לפני יצירת Pool, תצורת Runtime נקראת
+מה־Environment ללא Defaults, וכל כשל מבצע Cleanup ומוחזר ללא פרטי תשתית.
+Rehearsal הפעיל Child process אמיתי מול PostgreSQL 16 עם 24 מיגרציות, הוכיח
+Liveness ו־Readiness ושלח `SIGTERM`; HTTP נסגר לפני Pool והתהליך יצא בקוד
+`0` ללא פלט שגיאה. עדיין חסרים Railway Service ו־Environment חיים.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -500,7 +507,7 @@ Production ו־Preview origins המאושרים.
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
-ערכי Production pool ו־Rate-limit policy מאושרים, Startup executable,
+ערכי Production pool ו־Rate-limit policy מאושרים, תצורת Railway Service חיה,
 Data migration rehearsal ל־44 הטבלאות שמחוץ ל־Core, ‏Semantic parity
 וכיסוי Concurrency למסלולים שאינם כלולים עדיין ב־Harness.
 

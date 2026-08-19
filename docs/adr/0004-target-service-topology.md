@@ -315,8 +315,10 @@ Liveness, ‏PostgreSQL readiness, גבולות Request ו־Service owner שסו
 מניעת overlap, המתנה לריצה פעילה לפני סגירת PostgreSQL ו־Process controller
 משותף ל־`SIGINT`/`SIGTERM`. ‏Campaign dispatch ו־Invitation expiration
 מחוברים לאותו Lease ול־PostgreSQL foundation; ‏Queue adapter, ‏Live config
-ו־Startup executable עדיין חסרים.
-‏Railway API מלא נשאר חסום עד Rate-limit adapter מבוזר, השלמת יתר ה־Routes
+ו־Worker Startup executable עדיין חסרים. ‏Railway API Startup executable
+הושלם מקומית ועבר Rehearsal של Liveness, ‏Readiness ו־SIGTERM מול
+PostgreSQL 16; נותרה תצורת Railway Service חיה.
+‏Railway API מלא נשאר חסום עד השלמת יתר ה־Routes
 וה־Mutations, ‏Parity מלאה, ערכי Pool חיים וראיות Staging, כדי לא ליצור
 Hybrid לא מתועד עם D1.
 

@@ -151,7 +151,7 @@ rate limits; PostgreSQL נשאר מקור האמת ל־Idempotency ול־Audit.
 ב־PostgreSQL. Railway Cron אינו מתאים ל־Scheduler המרכזי כי הוא
 מתחיל בחמש דקות ואינו מבטיח דיוק לדקה. ה־Lease, ‏Fencing, ‏Catch-up,
 Timer מיושר לדקה, ‏SIGINT/SIGTERM lifecycle וחיבור משימות Campaign/Invitation
-ל־PostgreSQL הושלמו מקומית; ‏BullMQ adapter, ‏Bootstrap ותצורת Railway חיה
+ל־PostgreSQL הושלמו מקומית; ‏BullMQ adapter, ‏Worker Bootstrap ותצורת Railway חיה
 עדיין חסרים.
 
 3.3.5.7 ספק Object storage עדיין פתוח. ההמלצה היא AWS S3 עם

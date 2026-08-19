@@ -1569,3 +1569,26 @@ Semantic parity, ‏Load/Recovery ו־Cutover evidence. לכן Production נשא
 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,094 קבצים והיסטוריית Git,
 ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,017 הבדיקות** עברו
 יחד. ‏Production נשאר חסום על 44 הטבלאות הנותרות ועל ראיות חיות בלבד.
+
+4.49 ‏Railway API Startup executable הושלם מקומית. ‏`railwayApiMain.ts`
+מאמת `PORT` לפני יצירת Pool, מרכיב את PostgreSQL Runtime מתוך Environment
+מלא ללא Defaults ומוסר אותו ל־Process controller. ‏`start-railway-api.mjs`
+הוא Entry point תחום שאינו מדפיס Configuration או Error פנימי. כשל Startup
+מנסה לסגור כל Runtime שכבר נוצר.
+
+4.49.1 ‏Rehearsal הפעיל Child process אמיתי מול PostgreSQL 16 עם כל 24
+המיגרציות. `GET /health/live` ו־`GET /health/ready` עברו, `SIGTERM` סגר HTTP
+לפני Pool והתהליך יצא בקוד `0` ללא stdout/stderr. במהלך ההרצה אותר ותוקן באג
+Composition: ‏Runtime עם `postgresEnvironment` חסר העביר בטעות
+`environment: undefined` במקום להשמיט את השדה, ולכן ה־Bootstrap לא יכול היה
+לקרוא את `process.env`. שרת הבדיקה נעצר ותיקייתו נמחקה.
+
+4.49.2 עדיין חסרים Railway Project/Service ו־Environment values חיים,
+Healthcheck ו־Grace period מאומתים, Deployment evidence, וה־Worker Startup
+הנפרד. אין ליצור `railway.json` עם Project או Service מומצאים לפני שראשה/רועי
+מספקים את היעד החי.
+
+4.49.3 שער השחרור המקומי המלא עבר לאחר ה־Startup executable. ‏Source guard
+סרק 546 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,099 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,024 הבדיקות**
+עברו יחד ללא כשל או Skip.
