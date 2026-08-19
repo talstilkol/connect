@@ -437,6 +437,13 @@ Decisions ל־PostgreSQL. ה־Schema מכיר רק את 11 מזהי ה־Registry
 Replay עקבי. ה־Foundation מכיל כעת 33 Adapters; Harness אמיתי עבר עם
 20 Migrations ו־51 תרחישי Concurrency.
 
+7.1.49 ‏`0020_system_admin_business_profiles.sql`,‏
+`postgresSystemAdminTenantDirectoryRepository.ts` ו־
+`postgresSystemAdminBusinessProfileRepository.ts` מוסיפים קריאת System Admin
+מוגבלת ועריכת Business Profile אטומית עם Version, סנכרון Tenant ו־Audit
+בלתי־משתנה. ה־Foundation מכיל כעת 35 Adapters; Harness אמיתי עבר עם
+21 Migrations ו־53 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

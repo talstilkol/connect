@@ -83,6 +83,7 @@ const migrationFiles = Object.freeze([
   "0017_ai_reply_outbox.sql",
   "0018_tenant_subscriptions.sql",
   "0019_production_decisions.sql",
+  "0020_system_admin_business_profiles.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2502,6 +2503,130 @@ async function verifyTenantProvisioningLifecycle(pool, foundation) {
     ownerCount: 1,
     auditCount: 1,
   }]);
+
+  return exactRetries[0].tenantId;
+}
+
+async function verifySystemAdminLifecycle(pool, foundation, tenantId) {
+  const directory = await foundation.systemAdminTenantDirectory.listPage({
+    search: "postgresql provisioned",
+    tenantStatus: "trial",
+    subscription: "without-subscription",
+    afterTenantId: null,
+  });
+  assert.equal(directory.tenants.length, 1);
+  assert.equal(directory.tenants[0]?.tenantId, tenantId);
+  assert.equal(directory.tenants[0]?.businessProfile?.version, 1);
+
+  const actorExternalUserId = "system-admin-postgres-profile";
+  const firstUpdate = Object.freeze({
+    tenantId,
+    expectedVersion: 1,
+    businessName: "PostgreSQL administered workspace",
+    timezone: "Europe/London",
+    interfaceLanguage: "en",
+    actorExternalUserId,
+    occurredAt: "2026-08-20T15:00:00.000Z",
+  });
+  const identical = await Promise.all([
+    foundation.systemAdminBusinessProfiles.update(firstUpdate),
+    foundation.systemAdminBusinessProfiles.update(firstUpdate),
+  ]);
+  assert.deepEqual(
+    identical.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+
+  const competingBase = Object.freeze({
+    tenantId,
+    expectedVersion: 2,
+    timezone: "Asia/Jerusalem",
+    interfaceLanguage: "he",
+    actorExternalUserId,
+    occurredAt: "2026-08-21T15:05:00.000Z",
+  });
+  const competing = await Promise.all([
+    foundation.systemAdminBusinessProfiles.update({
+      ...competingBase,
+      businessName: "Competing admin profile A",
+    }),
+    foundation.systemAdminBusinessProfiles.update({
+      ...competingBase,
+      businessName: "Competing admin profile B",
+    }),
+  ]);
+  assert.deepEqual(
+    competing.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       profile.version,
+       profile.business_name AS "businessName",
+       tenant.display_name AS "tenantDisplayName",
+       count(DISTINCT event.event_key)::integer AS "eventCount",
+       count(DISTINCT audit.id)::integer AS "auditCount"
+     FROM business_profiles AS profile
+     INNER JOIN tenants AS tenant
+       ON tenant.id = profile.tenant_id
+     INNER JOIN business_profile_admin_events AS event
+       ON event.tenant_id = profile.tenant_id
+     INNER JOIN audit_logs AS audit
+       ON audit.tenant_id = profile.tenant_id
+      AND audit.action = 'business_profile.updated'
+     WHERE profile.tenant_id = $1
+     GROUP BY profile.version, profile.business_name, tenant.display_name`,
+    [tenantId],
+  );
+  assert.deepEqual(persisted.rows, [{
+    version: 3,
+    businessName: persisted.rows[0]?.tenantDisplayName,
+    tenantDisplayName: persisted.rows[0]?.tenantDisplayName,
+    eventCount: 2,
+    auditCount: 2,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE business_profile_admin_events
+       SET changed_fields = 'timezone'
+       WHERE tenant_id = $1`,
+      [tenantId],
+    ),
+    /events are immutable/i,
+  );
+  await assert.rejects(
+    pool.query(
+      `DELETE FROM business_profile_admin_events
+       WHERE tenant_id = $1`,
+      [tenantId],
+    ),
+    /events are immutable/i,
+  );
+  await assert.rejects(
+    pool.query(
+      `INSERT INTO business_profile_admin_events (
+         event_key,
+         tenant_id,
+         previous_profile_digest,
+         new_profile_digest,
+         changed_fields,
+         actor_external_user_id,
+         profile_version,
+         occurred_at
+       ) VALUES ($1, $2, $3, $4, 'businessName', $5, 4, $6)`,
+      [
+        `business_profile_admin_event_v1_${"0".repeat(64)}`,
+        tenantId,
+        "a".repeat(64),
+        "b".repeat(64),
+        actorExternalUserId,
+        "2026-08-22T15:10:00.000Z",
+      ],
+    ),
+    (error) => error?.code === "23514" &&
+      /not linked to current state/.test(error.message),
+  );
 }
 
 async function verifyProductionDecisionLifecycle(pool, foundation) {
@@ -3779,7 +3904,13 @@ export async function verifyNodePostgresIntegration(
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
       await verifyTenantSubscriptionLifecycle(pool, foundation);
-      await verifyTenantProvisioningLifecycle(pool, foundation);
+      const provisionedTenantId =
+        await verifyTenantProvisioningLifecycle(pool, foundation);
+      await verifySystemAdminLifecycle(
+        pool,
+        foundation,
+        provisionedTenantId,
+      );
       await verifyProductionDecisionLifecycle(pool, foundation);
     } finally {
       await foundation.close();
@@ -3788,7 +3919,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 51,
+      concurrencyScenarios: 53,
     });
   } finally {
     await pool.end();

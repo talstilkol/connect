@@ -39,6 +39,7 @@ const aiKnowledgeSchema = migrationSources[16];
 const aiReplyOutboxSchema = migrationSources[17];
 const tenantSubscriptionSchema = migrationSources[18];
 const productionDecisionSchema = migrationSources[19];
+const systemAdminBusinessProfileSchema = migrationSources[20];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -62,15 +63,36 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0017_ai_reply_outbox.sql",
     "0018_tenant_subscriptions.sql",
     "0019_production_decisions.sql",
+    "0020_system_admin_business_profiles.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 20,
+      migrationCount: 21,
       findings: [],
     },
   );
+});
+
+test("defines PostgreSQL system-admin profile evidence with proof and immutable audit", () => {
+  assert.match(
+    systemAdminBusinessProfileSchema,
+    /CREATE TABLE business_profile_admin_events[\s\S]*business_profile_admin_events_tenant_version_uq/,
+  );
+  assert.match(
+    systemAdminBusinessProfileSchema,
+    /enforce_business_profile_admin_event_proof[\s\S]*version = NEW\.profile_version[\s\S]*updated_at = NEW\.occurred_at/,
+  );
+  assert.match(
+    systemAdminBusinessProfileSchema,
+    /audit_business_profile_admin_event[\s\S]*INSERT INTO audit_logs[\s\S]*business_profile\.updated/,
+  );
+  assert.match(
+    systemAdminBusinessProfileSchema,
+    /reject_business_profile_admin_event_mutation[\s\S]*events are immutable[\s\S]*BEFORE UPDATE[\s\S]*BEFORE DELETE/i,
+  );
+  assert.doesNotMatch(systemAdminBusinessProfileSchema, /random|uuid/i);
 });
 
 test("defines registered PostgreSQL production decisions with immutable evidence", () => {

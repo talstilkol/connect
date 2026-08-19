@@ -242,6 +242,15 @@ Business Profile ו־Audit באותה Transaction. ‏Retry זהה נשאר Idem
 ה־Repository נועל החלטה קיימת ומסווג Retry או Conflict. ה־Harness הוכיח
 Create ו־Update מקבילים והעלה את הסך ל־51 תרחישי Concurrency.
 
+1.33 ‏Migration מספר `0020_system_admin_business_profiles.sql`,‏
+`postgresSystemAdminTenantDirectoryRepository.ts` ו־
+`postgresSystemAdminBusinessProfileRepository.ts` ממירים את ספריית ה־Tenants
+ואת עריכת ה־Business Profile של System Admin. הקריאה מוגבלת ל־50 רשומות
+עם Cursor ומאמתת שכל Join נשאר באותו Tenant. העריכה נועלת את ה־Profile,
+דורשת Version צפוי, מסנכרנת את שם ה־Tenant וכותבת Event ו־Audit באותה
+Transaction. ה־Harness הוכיח Retry זהה ועריכות מתחרות והעלה את הסך ל־53
+תרחישי Concurrency; שינוי ומחיקת Events נחסמים במסד.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

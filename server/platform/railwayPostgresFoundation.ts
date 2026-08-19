@@ -128,6 +128,12 @@ import {
 import {
   createPostgresProductionDecisionRepository,
 } from "./postgresProductionDecisionRepository.ts";
+import {
+  createPostgresSystemAdminBusinessProfileRepository,
+} from "./postgresSystemAdminBusinessProfileRepository.ts";
+import {
+  createPostgresSystemAdminTenantDirectoryRepository,
+} from "./postgresSystemAdminTenantDirectoryRepository.ts";
 
 export type RailwayPostgresFoundationErrorCode =
   | "configuration-disabled"
@@ -223,6 +229,12 @@ export interface RailwayPostgresFoundation {
   >;
   readonly productionDecisions: ReturnType<
     typeof createPostgresProductionDecisionRepository
+  >;
+  readonly systemAdminBusinessProfiles: ReturnType<
+    typeof createPostgresSystemAdminBusinessProfileRepository
+  >;
+  readonly systemAdminTenantDirectory: ReturnType<
+    typeof createPostgresSystemAdminTenantDirectoryRepository
   >;
   readonly businessProfiles: ReturnType<
     typeof createPostgresBusinessProfileRepository
@@ -397,6 +409,13 @@ export function createRailwayPostgresFoundation(
       queries,
       transactions,
     }),
+    systemAdminBusinessProfiles:
+      createPostgresSystemAdminBusinessProfileRepository({
+        queries,
+        transactions,
+      }),
+    systemAdminTenantDirectory:
+      createPostgresSystemAdminTenantDirectoryRepository(queries),
     businessProfiles: createPostgresBusinessProfileRepository({
       queries,
       transactions,

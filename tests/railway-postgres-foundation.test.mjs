@@ -71,6 +71,8 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "reports",
     "selections",
     "subscriptions",
+    "systemAdminBusinessProfiles",
+    "systemAdminTenantDirectory",
     "whatsappDeliveryPolicies",
     "whatsappRateLimits",
     "workerSchedulerLeases",
@@ -135,6 +137,14 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "function",
   );
   assert.equal(typeof foundation.productionDecisions.save, "function");
+  assert.equal(
+    typeof foundation.systemAdminBusinessProfiles.update,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.systemAdminTenantDirectory.listPage,
+    "function",
+  );
   assert.equal(
     typeof foundation.railwayApiMutations.saveContact,
     "function",

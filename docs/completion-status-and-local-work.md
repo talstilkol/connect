@@ -1421,3 +1421,22 @@ Migration מספר `0019_production_decisions.sql` מוסיף Records ו־Events
 נטו**. הירידה משקפת Migration, ‏Repository ושני תרחישי Concurrency אמיתיים.
 הטווח אינו כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging,
 Load test או Pilot.
+
+4.36 ‏PostgreSQL System Admin הושלם מקומית ברמת Persistence.
+`postgresSystemAdminTenantDirectoryRepository.ts` קורא עד 50 Tenants בכל דף,
+מבצע Search ללא Wildcards ומוודא ש־Business Profile ו־Subscription שייכים
+לאותו Tenant. ‏`postgresSystemAdminBusinessProfileRepository.ts` נועל את
+ה־Profile, מסווג Retry ו־Conflict, מסנכרן את שם ה־Tenant ושומר Event ו־Audit
+באותה Transaction. ‏Migration מספר
+`0020_system_admin_business_profiles.sql` מונע שינוי או מחיקה של Events.
+ה־Foundation מכיל כעת 35 Adapters.
+
+4.36.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (21 migrations, 53 concurrency scenarios)`. הוא הוכיח Retry מקביל
+זהה, שתי עריכות מתחרות, Version עוקב, שני Events ושני Audit records בלבד,
+וכן חסימת Tampering ישיר. השרת הזמני נעצר והתיקייה נמחקה.
+
+4.37 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **1–12 שעות פיתוח
+נטו**. הטווח מיועד למיפוי ה־D1 האחרון מול ה־Adapters הקיימים, סנכרון חוזי
+השחרור ותיקון פער מקומי נוסף אם יימצא. הוא אינו כולל החלטות ספקים,
+Credentials, ‏Railway environment, ‏Staging, ‏Load test או Pilot.
