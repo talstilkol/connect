@@ -228,6 +228,13 @@ Trigger במסד מוסיף Audit לכל Event, ועדכון או מחיקה ש�
 ה־Harness הוכיח ארבע פעולות מקבילות נוספות והעלה את הסך ל־47 תרחישי
 Concurrency.
 
+1.31 ‏`postgresTenantProvisioningRepository.ts` ממיר את יצירת סביבת
+הלקוח הראשונה ל־PostgreSQL ללא Migration חדשה. ה־Repository יוצר או נועל
+Tenant לפי Provisioning key דטרמיניסטי, מוודא Owner יחיד, ושומר Owner,
+Business Profile ו־Audit באותה Transaction. ‏Retry זהה נשאר Idempotent;
+מפתח זהה עם זהות אחרת נכשל סגור. ה־Harness הוכיח שני מרוצים נוספים והעלה
+את הסך ל־49 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

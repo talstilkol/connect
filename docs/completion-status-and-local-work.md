@@ -1385,3 +1385,21 @@ Idempotent וכן הארכה, השעיה וביטול מקבילים, שבכל �
 נטו**. הירידה משקפת Migration, ‏Repository וארבעה תרחישי Concurrency
 אמיתיים. הטווח אינו כולל החלטות ספקים, Credentials, ‏Railway environment,
 Staging, ‏Load test או Pilot.
+
+4.32 ‏PostgreSQL Tenant Provisioning הושלם מקומית ללא Migration חדשה.
+`postgresTenantProvisioningRepository.ts` יוצר או טוען Tenant לפי מפתח
+דטרמיניסטי, נועל אותו לפני יצירת Owner ושומר Owner membership, ‏Business
+Profile ו־Audit באותה Transaction. ‏Retry זהה אינו מעלה את Version ואינו
+מכפיל רשומות. Provisioning key קיים עם Owner אחר נכשל סגור. ה־Repository
+מחובר ל־`railwayPostgresFoundation.ts`, שמכיל כעת 32 Adapters.
+
+4.32.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (19 migrations, 49 concurrency scenarios)`. הוא הוכיח יצירה כפולה
+Idempotent וכן מרוץ בין שתי זהויות על אותו מפתח, שבו נשמרו Owner ו־Audit
+יחידים ורק בקשה אחת הצליחה. במהלך הבדיקה אותרה ותוקנה אי־התאמת טיפוס
+`BIGINT`/`TEXT` בכתיבת Audit. השרת הזמני נעצר והתיקייה נמחקה.
+
+4.33 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **6–28 שעות פיתוח
+נטו**. הירידה משקפת Repository מלא ושני תרחישי Concurrency אמיתיים. הטווח
+אינו כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging,
+Load test או Pilot.

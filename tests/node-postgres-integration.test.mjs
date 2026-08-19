@@ -90,6 +90,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyWorkerSchedulerLease/);
   assert.match(source, /verifyCampaignDispatch/);
   assert.match(source, /verifyTenantSubscriptionLifecycle/);
+  assert.match(source, /verifyTenantProvisioningLifecycle/);
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /foundation\.campaigns\.saveSnapshot/);
@@ -113,7 +114,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.subscriptions\.extend/);
   assert.match(source, /foundation\.subscriptions\.changeStatus/);
   assert.match(source, /foundation\.subscriptions\.cancel/);
-  assert.match(source, /concurrencyScenarios: 47/);
+  assert.match(source, /foundation\.provisioning\.provisionOwnerWorkspace/);
+  assert.match(source, /concurrencyScenarios: 49/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

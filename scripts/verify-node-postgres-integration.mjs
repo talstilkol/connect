@@ -2415,6 +2415,94 @@ async function verifyTenantSubscriptionLifecycle(pool, foundation) {
   );
 }
 
+async function verifyTenantProvisioningLifecycle(pool, foundation) {
+  const provisioningKey = `tenant_v1_${"d".repeat(64)}`;
+  const input = Object.freeze({
+    provisioningKey,
+    externalUserId: "clerk|postgres-provisioning-owner",
+    businessName: "PostgreSQL provisioned workspace",
+    timezone: "Asia/Jerusalem",
+    interfaceLanguage: "he",
+  });
+  const exactRetries = await Promise.all([
+    foundation.provisioning.provisionOwnerWorkspace(input),
+    foundation.provisioning.provisionOwnerWorkspace(input),
+  ]);
+  assert.equal(exactRetries[0].tenantId, exactRetries[1].tenantId);
+  assert.equal(exactRetries[0].profileVersion, 1);
+  assert.equal(exactRetries[1].profileVersion, 1);
+
+  const persisted = await pool.query(
+    `SELECT
+       tenant.status AS "tenantStatus",
+       count(DISTINCT membership.id)::integer AS "ownerCount",
+       count(DISTINCT profile.tenant_id)::integer AS "profileCount",
+       count(DISTINCT audit.id)::integer AS "auditCount"
+     FROM tenants AS tenant
+     INNER JOIN tenant_memberships AS membership
+       ON membership.tenant_id = tenant.id
+      AND membership.role = 'owner'
+      AND membership.status = 'active'
+     INNER JOIN business_profiles AS profile
+       ON profile.tenant_id = tenant.id
+     INNER JOIN audit_logs AS audit
+       ON audit.tenant_id = tenant.id
+      AND audit.action = 'tenant.provisioned'
+     WHERE tenant.provisioning_key = $1
+     GROUP BY tenant.status`,
+    [provisioningKey],
+  );
+  assert.deepEqual(persisted.rows, [{
+    tenantStatus: "trial",
+    ownerCount: 1,
+    profileCount: 1,
+    auditCount: 1,
+  }]);
+
+  const collisionKey = `tenant_v1_${"e".repeat(64)}`;
+  const collisionBase = Object.freeze({
+    provisioningKey: collisionKey,
+    businessName: "Provisioning collision workspace",
+    timezone: "Asia/Jerusalem",
+    interfaceLanguage: "en",
+  });
+  const collision = await Promise.allSettled([
+    foundation.provisioning.provisionOwnerWorkspace({
+      ...collisionBase,
+      externalUserId: "clerk|postgres-provisioning-collision-a",
+    }),
+    foundation.provisioning.provisionOwnerWorkspace({
+      ...collisionBase,
+      externalUserId: "clerk|postgres-provisioning-collision-b",
+    }),
+  ]);
+  assert.deepEqual(
+    collision.map(({ status }) => status).sort(),
+    ["fulfilled", "rejected"],
+  );
+  const rejected = collision.find(({ status }) => status === "rejected");
+  assert.match(rejected?.reason?.message ?? "", /identity conflict/);
+  const collisionPersisted = await pool.query(
+    `SELECT
+       count(DISTINCT membership.id)::integer AS "ownerCount",
+       count(DISTINCT audit.id)::integer AS "auditCount"
+     FROM tenants AS tenant
+     INNER JOIN tenant_memberships AS membership
+       ON membership.tenant_id = tenant.id
+      AND membership.role = 'owner'
+      AND membership.status = 'active'
+     INNER JOIN audit_logs AS audit
+       ON audit.tenant_id = tenant.id
+      AND audit.action = 'tenant.provisioned'
+     WHERE tenant.provisioning_key = $1`,
+    [collisionKey],
+  );
+  assert.deepEqual(collisionPersisted.rows, [{
+    ownerCount: 1,
+    auditCount: 1,
+  }]);
+}
+
 async function verifyKnowledgeLifecycle(pool, foundation, tenantId) {
   const sourceContent =
     "שעות הפעילות מופיעות באתר. ניתן לפנות לשירות דרך WhatsApp.";
@@ -3614,6 +3702,7 @@ export async function verifyNodePostgresIntegration(
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
       await verifyTenantSubscriptionLifecycle(pool, foundation);
+      await verifyTenantProvisioningLifecycle(pool, foundation);
     } finally {
       await foundation.close();
     }
@@ -3621,7 +3710,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 47,
+      concurrencyScenarios: 49,
     });
   } finally {
     await pool.end();

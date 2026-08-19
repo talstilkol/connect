@@ -424,6 +424,12 @@ Version ובנעילת שורה, מסנכרן את מצב ה־Tenant וכותב 
 באותה Transaction. ה־Foundation מכיל כעת 31 Adapters; Harness אמיתי עבר
 עם 19 Migrations ו־47 תרחישי Concurrency.
 
+7.1.47 ‏`postgresTenantProvisioningRepository.ts` ממיר יצירת Tenant ראשון,
+Owner membership, ‏Business Profile ו־Audit ל־Transaction אחת. שורת ה־Tenant
+ננעלת לפני בדיקת Owner; Replay זהה אינו מכפיל נתונים; Provisioning key זהה
+עם זהות אחרת נחסם. ה־Foundation מכיל כעת 32 Adapters; Harness אמיתי עבר
+עם 19 Migrations ו־49 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

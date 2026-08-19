@@ -122,6 +122,9 @@ import {
 import {
   createPostgresTenantSubscriptionRepository,
 } from "./postgresTenantSubscriptionRepository.ts";
+import {
+  createPostgresTenantProvisioningRepository,
+} from "./postgresTenantProvisioningRepository.ts";
 
 export type RailwayPostgresFoundationErrorCode =
   | "configuration-disabled"
@@ -211,6 +214,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly subscriptions: ReturnType<
     typeof createPostgresTenantSubscriptionRepository
+  >;
+  readonly provisioning: ReturnType<
+    typeof createPostgresTenantProvisioningRepository
   >;
   readonly businessProfiles: ReturnType<
     typeof createPostgresBusinessProfileRepository
@@ -374,6 +380,10 @@ export function createRailwayPostgresFoundation(
       transactions,
     }),
     subscriptions: createPostgresTenantSubscriptionRepository({
+      queries,
+      transactions,
+    }),
+    provisioning: createPostgresTenantProvisioningRepository({
       queries,
       transactions,
     }),
