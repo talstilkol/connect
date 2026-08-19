@@ -389,6 +389,13 @@ Ready נשמרים באותה Transaction. ‏Harness אמיתי עבר עם 17 
 תרחישי Concurrency, כולל Registration, ‏Validation, ‏Scanning, ‏Recovery
 ו־Processing מקבילים.
 
+7.1.42 ‏`postgresAiAgentRepository.ts` ממיר Drafts, גרסאות בלתי־משתנות,
+קישורי Knowledge Source ופרסום סוכני AI ל־PostgreSQL. הכתיבה נועלת את
+ה־Agent, מאמתת שכל Source שייך לאותו Tenant, שומרת Version וקישורים לפני
+קידום המצביע ומעבירה Published קודם ל־Archived בזמן פרסום. ‏Replay זהה
+מוחזר כ־`unchanged`, וקישור מקור חסר או סותר נכשל ללא כתיבה חלקית. ‏Harness
+אמיתי עבר עם 17 Migrations ו־36 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

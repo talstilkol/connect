@@ -80,6 +80,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyBotDeliverySchema/);
   assert.match(source, /verifyBotFlowDeliveryLifecycle/);
   assert.match(source, /verifyKnowledgeLifecycle/);
+  assert.match(source, /verifyAiAgentLifecycle/);
   assert.match(source, /verifyAiReportingSchema/);
   assert.match(source, /verifyWhatsappDeliveryPolicy/);
   assert.match(source, /verifyWhatsappRateLimitLedger/);
@@ -94,6 +95,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.botFlows\.saveDraft/);
   assert.match(source, /foundation\.botReplyDeliveries\.stage/);
   assert.match(source, /foundation\.knowledgeSources\.registerUploaded/);
+  assert.match(source, /foundation\.aiAgents\.saveDraft/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

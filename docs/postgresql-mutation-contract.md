@@ -11,7 +11,7 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 16 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 17 Migrations מסודרות עבור
 ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
 השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
 foundation, הרביעית את Membership event ledger והחמישית את Team invitation
@@ -24,21 +24,22 @@ receipts ו־Credential envelopes מוצפנים. השתים־עשרה יוצר�
 לשינוי עבור WhatsApp delivery policy, ‏Audit אטומי ו־Kill switch. השלוש־עשרה
 יוצרת WhatsApp reservation, settlement ו־provider-cooldown ledger אטומי.
 הרבע־עשרה מוסיפה אכיפת Phone throughput מתגלגלת הקשורה ל־Policy המאושר,
-החמש־עשרה מוסיפה Lease מגודר ל־Railway Worker scheduler, והשש־עשרה מוסיפה
-את `campaign_recipients` עבור Dispatch מקביל ובטוח. השרשרת הוחלה
+החמש־עשרה מוסיפה Lease מגודר ל־Railway Worker scheduler, השש־עשרה מוסיפה
+את `campaign_recipients` עבור Dispatch מקביל ובטוח, והשבע־עשרה מוסיפה
+Knowledge Sources, ‏Passages וקישורי מקור לגרסאות AI. השרשרת הוחלה
 בהצלחה על PostgreSQL 16.13 מקומי ומבודד, אך אינה מוכיחה עדיין Parity עם
 כל 36 ה־Migrations של D1 או מוכנות לפריסה.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 16 ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח 27 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+Loopback ייעודי וריק. הוא החיל את 17 ה־Migrations על PostgreSQL 16.13,
+הפעיל DML אמיתי והוכיח 36 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 26 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 27 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -190,6 +191,14 @@ Keys, מצב Source עקבי, Passages בלתי משתנים וקישור Restri
 שומר את כל המקטעים ומסמן את המקור Ready באותה Transaction. ‏Harness אמיתי
 הוכיח חמישה תרחישים מקבילים נוספים והעלה את הסך ל־32.
 
+1.26 ‏`postgresAiAgentRepository.ts` ממיר את מחזור החיים המלא של סוכן AI:
+יצירת Draft, היסטוריית Version בלתי־משתנה, קישור מדויק למקורות ידע ופרסום.
+ה־Agent ננעל לפני שינוי; מקורות נבדקים באותו Tenant לפני כתיבת Version;
+ה־Version והקישורים נשמרים לפני קידום מצביע ה־Agent. פרסום מעביר גרסה
+Published קודמת ל־Archived ומפעיל את גרסת היעד באותה Transaction. ‏Harness
+אמיתי הוכיח Create, ‏Publish, ‏Version append ו־Publication replacement
+מקבילים והעלה את הסך ל־36 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
@@ -274,7 +283,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 26 ה־Adapters, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 27 ה־Adapters, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 
@@ -290,10 +299,11 @@ Migration מאושר ב־Railway.
 6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 36 ה־Migrations
 של D1 עדיין לא קיימות.
 
-6.4 Contact, ‏Contact organization/import, ‏Meta connection/webhook/credential,
-‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler lease,
-‏Invitation DML ותשעה תרחישי Concurrency נבדקו
-מול PostgreSQL מקומי אמיתי.
+6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
+‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/
+credential, ‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler
+lease, ‏Message Template/Campaign ו־Invitation DML נבדקו ב־36 תרחישי
+Concurrency מול PostgreSQL מקומי אמיתי.
 עדיין חסרים Adapters וכיסוי
 DML/Concurrency לכל יתר ה־Repositories,
 Staging evidence, ‏Backup/Restore rehearsal ו־Load test.

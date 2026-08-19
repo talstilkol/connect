@@ -172,3 +172,8 @@ Plugin ו־Wrangler.
 8.6 [`hosting-migration-contract-freeze.md`](../hosting-migration-contract-freeze.md)
 ו־`shared/domain/hostingMigrationRegistry.ts` — מיפוי דטרמיניסטי של
 18 היכולות שחייבות Adapter, תצורה, החלטת ספק או Evidence חדש.
+
+8.7 מצב Adapter parity המקומי: Foundation של 27 Adapters ו־Harness על
+PostgreSQL 16.13 שעבר 17 Migrations ו־36 תרחישי Concurrency, לרבות מחזור
+Draft/Version/Source-link/Publication של AI Agent. זו אינה ראיית Staging
+או הרשאה ל־Cutover.

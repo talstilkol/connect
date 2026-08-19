@@ -29,6 +29,8 @@ import {
   deriveBotReplyDeliveryKey,
 } from "../server/bot/botReplyDeliveryKey.ts";
 import {
+  deriveAiAgentKey,
+  deriveAiAgentVersionKey,
   deriveKnowledgePassageKey,
   deriveKnowledgeSourceKey,
 } from "../server/ai/aiAgentKey.ts";
@@ -2280,6 +2282,159 @@ async function verifyKnowledgeLifecycle(pool, foundation, tenantId) {
     ),
     (error) => error?.code === "23514",
   );
+
+  return sourceKey;
+}
+
+async function verifyAiAgentLifecycle(
+  pool,
+  foundation,
+  tenantId,
+  sourceKey,
+) {
+  const name = "PostgreSQL integration AI agent";
+  const aiAgentKey = await deriveAiAgentKey(tenantId, name);
+
+  async function agentVersion(versionNumber) {
+    const definition = Object.freeze({
+      name,
+      systemPrompt: versionNumber === 1
+        ? "Answer only from approved knowledge sources."
+        : "Answer concisely and only from approved knowledge sources.",
+      handoffMessage: "Approved knowledge is unavailable. Escalating to an agent.",
+      responseMode: "agent-approval",
+      minimumGroundingScoreBasisPoints: 8_000,
+      monthlyCostLimitMinorUnits: 50_000,
+      billingCurrency: "ILS",
+      knowledgeSourceKeys: Object.freeze([sourceKey]),
+    });
+    return Object.freeze({
+      tenantId,
+      aiAgentKey,
+      aiAgentVersionKey: await deriveAiAgentVersionKey(
+        tenantId,
+        aiAgentKey,
+        versionNumber,
+        definition,
+      ),
+      versionNumber,
+      definition,
+    });
+  }
+
+  const first = await agentVersion(1);
+  const firstDrafts = await Promise.all([
+    foundation.aiAgents.saveDraft(Object.freeze({
+      ...first,
+      expectedAgentVersion: null,
+    })),
+    foundation.aiAgents.saveDraft(Object.freeze({
+      ...first,
+      expectedAgentVersion: null,
+    })),
+  ]);
+  assert.deepEqual(
+    firstDrafts.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+
+  const firstPublications = await Promise.all([
+    foundation.aiAgents.publishDraft(
+      tenantId,
+      aiAgentKey,
+      first.aiAgentVersionKey,
+      1,
+    ),
+    foundation.aiAgents.publishDraft(
+      tenantId,
+      aiAgentKey,
+      first.aiAgentVersionKey,
+      1,
+    ),
+  ]);
+  assert.deepEqual(
+    firstPublications.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+
+  const second = await agentVersion(2);
+  const secondDrafts = await Promise.all([
+    foundation.aiAgents.saveDraft(Object.freeze({
+      ...second,
+      expectedAgentVersion: 2,
+    })),
+    foundation.aiAgents.saveDraft(Object.freeze({
+      ...second,
+      expectedAgentVersion: 2,
+    })),
+  ]);
+  assert.deepEqual(
+    secondDrafts.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+
+  const secondPublications = await Promise.all([
+    foundation.aiAgents.publishDraft(
+      tenantId,
+      aiAgentKey,
+      second.aiAgentVersionKey,
+      3,
+    ),
+    foundation.aiAgents.publishDraft(
+      tenantId,
+      aiAgentKey,
+      second.aiAgentVersionKey,
+      3,
+    ),
+  ]);
+  assert.deepEqual(
+    secondPublications.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+
+  const versions = await foundation.aiAgents.listVersions(
+    tenantId,
+    aiAgentKey,
+    10,
+  );
+  assert.deepEqual(
+    versions.map(({ versionNumber, status }) => ({ versionNumber, status })),
+    [
+      { versionNumber: 2, status: "published" },
+      { versionNumber: 1, status: "archived" },
+    ],
+  );
+  assert.equal(
+    (await foundation.aiAgents.listActiveByTenant(tenantId, 100)).some(
+      ({ aiAgentKey: storedKey }) => storedKey === aiAgentKey,
+    ),
+    true,
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       agent.status AS agent_status,
+       agent.version AS agent_version,
+       count(DISTINCT version.ai_agent_version_key)::integer AS version_count,
+       count(link.source_key)::integer AS source_link_count
+     FROM ai_agents AS agent
+     INNER JOIN ai_agent_versions AS version
+       ON version.tenant_id = agent.tenant_id
+      AND version.ai_agent_key = agent.ai_agent_key
+     INNER JOIN ai_agent_version_sources AS link
+       ON link.tenant_id = version.tenant_id
+      AND link.ai_agent_version_key = version.ai_agent_version_key
+     WHERE agent.tenant_id = $1
+       AND agent.ai_agent_key = $2
+     GROUP BY agent.status, agent.version`,
+    [tenantId, aiAgentKey],
+  );
+  assert.deepEqual(persisted.rows, [{
+    agent_status: "active",
+    agent_version: 4,
+    version_count: 2,
+    source_link_count: 2,
+  }]);
 }
 
 async function verifyAiReportingSchema(pool, foundation, tenantId) {
@@ -2904,7 +3059,12 @@ export async function verifyNodePostgresIntegration(
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyConversationLifecycle(pool, foundation, tenantId);
       await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
-      await verifyKnowledgeLifecycle(pool, foundation, tenantId);
+      const sourceKey = await verifyKnowledgeLifecycle(
+        pool,
+        foundation,
+        tenantId,
+      );
+      await verifyAiAgentLifecycle(pool, foundation, tenantId, sourceKey);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
@@ -2915,7 +3075,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 32,
+      concurrencyScenarios: 36,
     });
   } finally {
     await pool.end();

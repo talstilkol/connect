@@ -1291,6 +1291,23 @@ Tenant isolation ו־Rollback כאשר מספר המקטעים שנשמר אינ
 אמיתיים. הטווח אינו כולל המתנה לבחירת ספקים, Credentials, ‏Railway
 environment, ‏Staging או Pilot.
 
+4.22 ‏PostgreSQL AI Agent lifecycle הושלם מקומית.
+`postgresAiAgentRepository.ts` מממש Draft creation, היסטוריית Version
+בלתי־משתנה, קישורי Knowledge Source מדויקים ו־Publication replacement.
+כל שינוי נועל את ה־Agent, מאמת את המקורות באותו Tenant ושומר Version
+וקישורים לפני עדכון המצביע. ה־Repository מחובר ל־
+`railwayPostgresFoundation.ts`, שמכיל כעת 27 Adapters.
+
+4.22.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (17 migrations, 36 concurrency scenarios)`. הוא הוכיח Create,
+Publish, ‏Version append ו־Publication replacement תחת בקשות מקבילות,
+כולל Archive לגרסה הקודמת ושני קישורי מקור מדויקים. השרת הזמני נעצר
+והתיקייה נמחקה לאחר האימות.
+
+4.23 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **4–16 שעות פיתוח נטו**.
+הירידה משקפת Repository מלא וארבעה תרחישי Concurrency אמיתיים. הטווח אינו
+כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter
