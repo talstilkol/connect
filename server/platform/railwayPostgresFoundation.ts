@@ -51,6 +51,9 @@ import {
   createPostgresCampaignDispatchRepository,
 } from "./postgresCampaignDispatchRepository.ts";
 import {
+  createPostgresCampaignDeliveryProviderRepository,
+} from "./postgresCampaignDeliveryProviderRepository.ts";
+import {
   createPostgresCampaignAudienceRepository,
 } from "./postgresCampaignAudienceRepository.ts";
 import {
@@ -219,6 +222,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly campaignDispatch: ReturnType<
     typeof createPostgresCampaignDispatchRepository
+  >;
+  readonly campaignProviderDeliveries: ReturnType<
+    typeof createPostgresCampaignDeliveryProviderRepository
   >;
   readonly campaigns: ReturnType<
     typeof createPostgresCampaignRepository
@@ -397,6 +403,8 @@ export function createRailwayPostgresFoundation(
       createPostgresCampaignAudienceRepository(queries),
     campaignDispatch:
       createPostgresCampaignDispatchRepository(queries),
+    campaignProviderDeliveries:
+      createPostgresCampaignDeliveryProviderRepository({ transactions }),
     campaigns: createPostgresCampaignRepository({
       queries,
       transactions,

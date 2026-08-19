@@ -1482,3 +1482,31 @@ reconciliation עבור משלוחי Campaign. אומדן העבודה המקו�
 **3–10 שעות פיתוח נטו**: כ־2–6 שעות ל־Repository ולתרחישי מרוץ, וכ־1–4 שעות
 לסנכרון חוזים ושער מלא. הטווח אינו כולל החלטות ספקים, Credentials, ‏Railway
 environment, ‏Staging, ‏Load test או Pilot.
+
+4.43 ‏PostgreSQL Campaign Provider Reconciliation הושלם מקומית.
+Migration מספר `0022_campaign_delivery_provider_links.sql` מוסיף Evidence
+קשיח בין Campaign delivery, ‏Provider message ו־Rate-limit reservation.
+`postgresCampaignDeliveryProviderRepository.ts` מסווג Acceptance replay,
+Event conflict, ‏Terminal conflict ו־Stale events, ומקרין Status ו־Settlement
+באותה Transaction. ‏Triggers חוסמים Provider ID שכבר שייך ל־Message רגיל,
+שינוי זהות, Status שאינו מתקדם ומחיקת Evidence. ה־Repository מחובר ל־
+`railwayPostgresFoundation.ts`, שמכיל כעת 38 Adapters.
+
+4.43.1 ‏Harness נקי על PostgreSQL 16 עבר עם
+`PASS (23 migrations, 57 concurrency scenarios)`. במהלך ההרצה אותר ותוקן
+באג MVCC: לאחר המתנה ל־Transaction מקבילה, ה־Link יכול היה להיקרא מהמצב
+החדש וה־Recipient מ־Snapshot ישן. התיקון נועל את שתי השורות יחד, ונוספה
+בדיקת רגרסיה. ההרצה הוכיחה Acceptance ו־Delivery מקבילים, Settlement ו־
+Portfolio projection אטומיים, ‏Read advancement וחסימת Tampering. השרת
+הזמני נעצר והתיקייה נמחקה.
+
+4.44 לא נותר פער Repository מקומי ברשימת ה־D1 שמופה ל־PostgreSQL.
+עדיין לא הושלמה Parity של כל 36 מיגרציות D1, ואין להסיק מכך שה־Migration
+ל־Railway מוכן ל־Production. נותרו סנכרון Gate מלא, ספק וערכי Pool חיים,
+Queues, ‏Runtime routes, ‏Staging, ‏Load/Recovery evidence ו־Cutover.
+
+4.45 שער השחרור המקומי המלא עבר לאחר Slice זה. ‏Build, ‏TypeScript,
+ESLint, ‏Source guard, ‏Secret hygiene עם היסטוריית Git, כל 36 מיגרציות D1,
+חוזה 23 מיגרציות PostgreSQL וכל **1,994 הבדיקות** עברו יחד. סטטוס
+Production נשאר חסום רק על עבודה חיה והחלטות שאינן מוכחות מקומית; אין להפוך
+את ה־Gate ל־Ready ללא Accounts, ‏Credentials ו־Staging evidence אמיתיים.

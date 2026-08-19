@@ -79,6 +79,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0019_production_decisions\.sql/);
   assert.match(source, /0020_system_admin_business_profiles\.sql/);
   assert.match(source, /0021_contact_consent_events\.sql/);
+  assert.match(source, /0022_campaign_delivery_provider_links\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
@@ -92,6 +93,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyWhatsappRateLimitLedger/);
   assert.match(source, /verifyWorkerSchedulerLease/);
   assert.match(source, /verifyCampaignDispatch/);
+  assert.match(source, /verifyCampaignProviderReconciliation/);
   assert.match(source, /verifyTenantSubscriptionLifecycle/);
   assert.match(source, /verifyTenantProvisioningLifecycle/);
   assert.match(source, /verifyProductionDecisionLifecycle/);
@@ -130,7 +132,9 @@ test("keeps the real integration proof explicit and outside the default gate", a
     source,
     /foundation\.campaignAudiences\.listEligibleBySource/,
   );
-  assert.match(source, /concurrencyScenarios: 55/);
+  assert.match(source, /foundation\.campaignProviderDeliveries\.recordAccepted/);
+  assert.match(source, /foundation\.campaignProviderDeliveries\.applyProviderStatus/);
+  assert.match(source, /concurrencyScenarios: 57/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

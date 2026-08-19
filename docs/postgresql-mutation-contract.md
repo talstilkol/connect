@@ -267,6 +267,16 @@ Tenant. ה־Adapter מגביל את התוצאה ל־100,001, מאמת Tenant, �
 והסרה מיידית מהקהל לאחר ביטול הסכמה. מספר תרחישי ה־Concurrency נשאר 55 משום
 שזהו חוזה קריאה בלבד.
 
+1.36 ‏Migration מספר `0022_campaign_delivery_provider_links.sql` ו־
+`postgresCampaignDeliveryProviderRepository.ts` ממירים את קבלת מזהה ההודעה
+מהספק ואת Webhooks ה־Status של משלוחי Campaign ל־PostgreSQL. ה־Schema קושר
+כל Provider message ל־Delivery ול־Rate-limit reservation יחידים, מקרין
+`accepted/delivered/read/failed` ל־Recipient, וכותב Settlement סופי באותה
+Transaction. ‏Triggers חוסמים זהות כפולה מול טבלת `messages`, שינוי זהות,
+Status שאינו מתקדם ומחיקת Evidence. נעילת ה־Link וה־Recipient יחד מונעת
+Snapshot חלקי לאחר המתנה ל־Transaction מקבילה. ה־Harness הוכיח קבלה ו־Status
+סופי מקבילים והעלה את הסך ל־57 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

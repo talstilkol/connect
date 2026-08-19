@@ -88,6 +88,7 @@ const migrationFiles = Object.freeze([
   "0019_production_decisions.sql",
   "0020_system_admin_business_profiles.sql",
   "0021_contact_consent_events.sql",
+  "0022_campaign_delivery_provider_links.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2055,6 +2056,325 @@ async function verifyCampaignDispatch(pool, foundation, tenantId) {
     skipped: 1,
     maximumAttempts: 2,
   }]);
+}
+
+async function verifyCampaignProviderReconciliation(
+  pool,
+  foundation,
+  tenantId,
+  policyEventKey,
+) {
+  const sourceCampaignKey = `campaign_v1_${"5".repeat(64)}`;
+  const campaignKey = `campaign_v1_${"c".repeat(64)}`;
+  const deliveryKey = `campaign_delivery_v1_${"d".repeat(64)}`;
+  const reservationKey =
+    `whatsapp_rate_reservation_v1_${"e".repeat(64)}`;
+  const providerMessageId = "wamid.postgres-campaign-reconciliation";
+  const createdAt = "2026-08-17T12:30:00.000Z";
+  const reservedAt = "2026-08-17T13:00:00.000Z";
+  const acceptedAt = "2026-08-17T13:00:01.000Z";
+  const deliveredAt = "2026-08-17T13:00:03.000Z";
+  const readAt = "2026-08-17T13:00:04.000Z";
+  const contact = await pool.query(
+    `SELECT id, phone_e164 AS "phoneNumber", version
+     FROM contacts
+     WHERE tenant_id = $1
+       AND mailing_status = 'subscribed'
+       AND consent_status = 'granted'
+     ORDER BY id ASC
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(contact.rowCount, 1);
+
+  const campaign = await pool.query(
+    `INSERT INTO campaigns (
+       campaign_key,
+       tenant_id,
+       name,
+       status,
+       delivery_mode,
+       scheduled_at,
+       timezone,
+       template_key,
+       template_snapshot_json,
+       audience_snapshot_key,
+       recipient_count,
+       version,
+       activated_at,
+       started_at,
+       created_at,
+       updated_at
+     )
+     SELECT
+       $3,
+       tenant_id,
+       'Provider reconciliation integration',
+       'running',
+       'immediate',
+       NULL,
+       timezone,
+       template_key,
+       template_snapshot_json,
+       $4,
+       1,
+       3,
+       $5::timestamptz,
+       $5::timestamptz,
+       $5::timestamptz,
+       $5::timestamptz
+     FROM campaigns
+     WHERE tenant_id = $1
+       AND campaign_key = $2
+     RETURNING campaign_key AS "campaignKey"`,
+    [
+      tenantId,
+      sourceCampaignKey,
+      campaignKey,
+      "f".repeat(64),
+      createdAt,
+    ],
+  );
+  assert.deepEqual(campaign.rows, [{ campaignKey }]);
+
+  await pool.query(
+    `INSERT INTO campaign_recipients (
+       campaign_key,
+       tenant_id,
+       contact_id,
+       contact_version,
+       phone_e164,
+       personalization_json,
+       personalization_key,
+       delivery_key,
+       status,
+       attempt_count,
+       queued_at,
+       created_at,
+       updated_at
+     ) VALUES (
+       $1, $2, $3, $4, $5,
+       '{}'::jsonb, $6, $7,
+       'sending', 1,
+       $8::timestamptz, $8::timestamptz, $8::timestamptz
+     )`,
+    [
+      campaignKey,
+      tenantId,
+      contact.rows[0].id,
+      contact.rows[0].version,
+      contact.rows[0].phoneNumber,
+      "1".repeat(64),
+      deliveryKey,
+      createdAt,
+    ],
+  );
+
+  const reservation =
+    await foundation.whatsappRateLimits.reserveBusinessInitiatedMessage({
+      reservationKey,
+      tenantId,
+      portfolioKey: `whatsapp_portfolio_v1_${"c".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"d".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"e".repeat(64)}`,
+      policyEventKey,
+      templateCategory: "UTILITY",
+      portfolioCapacity: Object.freeze({
+        kind: "bounded",
+        maximumUniqueRecipients: 250,
+      }),
+      phoneThroughput: Object.freeze({
+        maximumMessagesPerSecond: 20,
+        maximumOutboundMessagesPerSecond: 2,
+      }),
+      reservedAt,
+      reservationExpiresAt: "2026-08-17T13:05:00.000Z",
+    });
+  assert.equal(reservation.outcome, "reserved");
+
+  const acceptance = Object.freeze({
+    tenantId,
+    deliveryKey,
+    providerMessageId,
+    reservationKey,
+    acceptedAt,
+  });
+  const accepted = await Promise.all([
+    foundation.campaignProviderDeliveries.recordAccepted(acceptance),
+    foundation.campaignProviderDeliveries.recordAccepted(acceptance),
+  ]);
+  assert.deepEqual(
+    accepted.map(({ outcome }) => outcome).sort(),
+    ["idempotent", "recorded"],
+  );
+
+  const delivered = Object.freeze({
+    tenantId,
+    providerMessageId,
+    status: "delivered",
+    statusEventKey: "2".repeat(64),
+    statusEventAt: deliveredAt,
+  });
+  const reconciled = await Promise.all([
+    foundation.campaignProviderDeliveries.applyProviderStatus(delivered),
+    foundation.campaignProviderDeliveries.applyProviderStatus(delivered),
+  ]);
+  assert.deepEqual(
+    reconciled.map(({ outcome }) => outcome).sort(),
+    ["applied", "duplicate"],
+  );
+  assert.equal(
+    reconciled.every(
+      (result) =>
+        "settlement" in result &&
+        result.settlement?.reservationKey === reservationKey &&
+        result.settlement?.outcome === "delivered" &&
+        result.settlement?.settledAt === deliveredAt,
+    ),
+    true,
+  );
+
+  assert.equal(
+    (await foundation.campaignProviderDeliveries.applyProviderStatus({
+      ...delivered,
+      status: "read",
+    })).outcome,
+    "event-conflict",
+  );
+  assert.equal(
+    (await foundation.campaignProviderDeliveries.applyProviderStatus({
+      ...delivered,
+      status: "failed",
+      statusEventKey: "3".repeat(64),
+      statusEventAt: readAt,
+    })).outcome,
+    "terminal-conflict",
+  );
+  assert.equal(
+    (await foundation.campaignProviderDeliveries.applyProviderStatus({
+      ...delivered,
+      status: "sent",
+      statusEventKey: "4".repeat(64),
+      statusEventAt: readAt,
+    })).outcome,
+    "stale",
+  );
+  const read = await foundation.campaignProviderDeliveries.applyProviderStatus({
+    ...delivered,
+    status: "read",
+    statusEventKey: "5".repeat(64),
+    statusEventAt: readAt,
+  });
+  assert.equal(read.outcome, "applied");
+  assert.equal("link" in read ? read.link.recipientStatus : null, "read");
+
+  const evidence = await pool.query(
+    `SELECT
+       link.provider_status AS "providerStatus",
+       link.terminal_outcome AS "terminalOutcome",
+       link.terminal_settled_at AS "terminalSettledAt",
+       recipient.status AS "recipientStatus",
+       settlement.outcome AS "settlementOutcome",
+       settlement.settled_at AS "settlementAt",
+       portfolio.active_reservation_key AS "activeReservationKey",
+       portfolio.last_delivered_at AS "lastDeliveredAt"
+     FROM campaign_delivery_provider_links AS link
+     INNER JOIN campaign_recipients AS recipient
+       ON recipient.delivery_key = link.delivery_key
+      AND recipient.tenant_id = link.tenant_id
+     INNER JOIN whatsapp_rate_limit_reservations AS reservation
+       ON reservation.reservation_key = link.reservation_key
+     INNER JOIN whatsapp_rate_limit_settlements AS settlement
+       ON settlement.reservation_key = reservation.reservation_key
+     INNER JOIN whatsapp_portfolio_recipient_rate_limit_state AS portfolio
+       ON portfolio.portfolio_key = reservation.portfolio_key
+      AND portfolio.recipient_key = reservation.recipient_key
+     WHERE link.tenant_id = $1
+       AND link.delivery_key = $2`,
+    [tenantId, deliveryKey],
+  );
+  assert.deepEqual(evidence.rows, [{
+    providerStatus: "read",
+    terminalOutcome: "delivered",
+    terminalSettledAt: new Date(deliveredAt),
+    recipientStatus: "read",
+    settlementOutcome: "delivered",
+    settlementAt: new Date(deliveredAt),
+    activeReservationKey: null,
+    lastDeliveredAt: new Date(deliveredAt),
+  }]);
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE campaign_delivery_provider_links
+       SET provider_message_id = 'wamid.tampered'
+       WHERE delivery_key = $1`,
+      [deliveryKey],
+    ),
+    /identity is immutable/i,
+  );
+  await assert.rejects(
+    pool.query(
+      `UPDATE campaign_delivery_provider_links
+       SET
+         last_status_event_key = $2,
+         last_status_event_at = $3::timestamptz,
+         updated_at = $3::timestamptz
+       WHERE delivery_key = $1`,
+      [deliveryKey, "6".repeat(64), deliveredAt],
+    ),
+    /status does not advance/i,
+  );
+  await assert.rejects(
+    pool.query(
+      `DELETE FROM campaign_delivery_provider_links
+       WHERE delivery_key = $1`,
+      [deliveryKey],
+    ),
+    /immutable evidence/i,
+  );
+
+  const conversation = await pool.query(
+    `SELECT conversation_key AS "conversationKey"
+     FROM conversations
+     WHERE tenant_id = $1
+     ORDER BY conversation_key ASC
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(conversation.rowCount, 1);
+  await assert.rejects(
+    pool.query(
+      `INSERT INTO messages (
+         message_key,
+         conversation_key,
+         tenant_id,
+         provider_message_id,
+         direction,
+         content_kind,
+         status,
+         text_content,
+         occurred_at,
+         status_updated_at,
+         created_at,
+         updated_at
+       ) VALUES (
+         $1, $2, $3, $4,
+         'outbound', 'text', 'sent',
+         'Provider collision proof',
+         $5::timestamptz, $5::timestamptz,
+         $5::timestamptz, $5::timestamptz
+       )`,
+      [
+        `message_v1_${"f".repeat(64)}`,
+        conversation.rows[0].conversationKey,
+        tenantId,
+        providerMessageId,
+        acceptedAt,
+      ],
+    ),
+    /already belongs to a campaign delivery/i,
+  );
 }
 
 async function verifyBotDeliverySchema(pool, tenantId) {
@@ -4133,6 +4453,12 @@ export async function verifyNodePostgresIntegration(
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
+      await verifyCampaignProviderReconciliation(
+        pool,
+        foundation,
+        tenantId,
+        whatsappPolicyEventKey,
+      );
       await verifyTenantSubscriptionLifecycle(pool, foundation);
       const provisionedTenantId =
         await verifyTenantProvisioningLifecycle(pool, foundation);
@@ -4149,7 +4475,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 55,
+      concurrencyScenarios: 57,
     });
   } finally {
     await pool.end();

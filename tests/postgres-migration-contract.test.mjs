@@ -41,6 +41,7 @@ const tenantSubscriptionSchema = migrationSources[18];
 const productionDecisionSchema = migrationSources[19];
 const systemAdminBusinessProfileSchema = migrationSources[20];
 const contactConsentSchema = migrationSources[21];
+const campaignDeliveryProviderSchema = migrationSources[22];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -66,15 +67,40 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0019_production_decisions.sql",
     "0020_system_admin_business_profiles.sql",
     "0021_contact_consent_events.sql",
+    "0022_campaign_delivery_provider_links.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 22,
+      migrationCount: 23,
       findings: [],
     },
   );
+});
+
+test("defines atomic PostgreSQL campaign provider reconciliation evidence", () => {
+  assert.match(
+    campaignDeliveryProviderSchema,
+    /CREATE TABLE campaign_delivery_provider_links[\s\S]*FOREIGN KEY \(delivery_key\)[\s\S]*REFERENCES campaign_recipients \(delivery_key\)/,
+  );
+  assert.match(
+    campaignDeliveryProviderSchema,
+    /pg_advisory_xact_lock[\s\S]*provider-message:/,
+  );
+  assert.match(
+    campaignDeliveryProviderSchema,
+    /Campaign delivery provider link lacks active proof/,
+  );
+  assert.match(
+    campaignDeliveryProviderSchema,
+    /INSERT INTO whatsapp_rate_limit_settlements[\s\S]*ON CONFLICT \(reservation_key\) DO NOTHING/,
+  );
+  assert.match(
+    campaignDeliveryProviderSchema,
+    /provider identity is immutable[\s\S]*terminal outcome is immutable[\s\S]*status does not advance[\s\S]*immutable evidence/i,
+  );
+  assert.doesNotMatch(campaignDeliveryProviderSchema, /random|uuid/i);
 });
 
 test("defines tenant-scoped immutable PostgreSQL consent evidence", () => {

@@ -47,6 +47,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "businessProfiles",
     "campaignAudiences",
     "campaignDispatch",
+    "campaignProviderDeliveries",
     "campaigns",
     "close",
     "contactConsents",
@@ -132,6 +133,14 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   );
   assert.equal(
     typeof foundation.campaignDispatch.claimPendingRecipients,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.campaignProviderDeliveries.recordAccepted,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.campaignProviderDeliveries.applyProviderStatus,
     "function",
   );
   assert.equal(typeof foundation.campaigns.saveSnapshot, "function");

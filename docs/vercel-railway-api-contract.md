@@ -456,6 +456,16 @@ PostgreSQL תחומה ל־Tenant ול־Consent פעיל עבור `all`, ‏List 
 מוגבלת, מסודרת ומאומתת ללא חשיפת Tenant ב־DTO. ה־Foundation מכיל כעת 37
 Adapters; ‏Harness אמיתי עבר עם 22 Migrations ו־55 תרחישי Concurrency.
 
+7.1.52 ‏`0022_campaign_delivery_provider_links.sql` ו־
+`postgresCampaignDeliveryProviderRepository.ts` מוסיפים Provider
+reconciliation אטומי למשלוחי Campaign. קבלת `providerMessageId` מקרינה
+`accepted`, אירוע סופי מקרין את מצב ה־Recipient וכותב Settlement ל־Ledger
+באותה Transaction. ‏Replay זהה נשאר Idempotent; ‏Event key עם תוכן אחר,
+Terminal סותר, זהות כפולה ושינוי Evidence ישיר נחסמים. קריאת ה־Link וה־
+Recipient ננעלת יחד כדי למנוע Snapshot חלקי תחת תחרות. ה־Foundation מכיל
+כעת 38 Adapters; ‏Harness אמיתי עבר עם 23 Migrations ו־57 תרחישי
+Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
