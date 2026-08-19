@@ -1629,3 +1629,34 @@ conversion או Parity של חמש הטבלאות כהושלמו.
 4.51.2 שער השחרור המקומי המלא עבר לאחר הוספת מפת ה־Slices. ‏Build,
 TypeScript, ‏ESLint, ‏Source/Secret/Interface guards, כל חוזי המיגרציה וכל
 **2,029 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.52 ‏PostgreSQL Tenant Access data migration ו־Semantic parity הושלמו
+מקומית עבור חמש הטבלאות ב־Slice השני. נוסף Protocol כללי עם Plan קצר־תוקף,
+HMAC לכל טבלה, Advisory/Exclusive locks, יעד ריק, Batch insert, ‏Read-back
+ואימות Digest לפני Commit. ‏D1 reader בודק Schema מדויק, ‏Integrity ו־Foreign
+keys בתוך Snapshot יחיד.
+
+4.52.1 ארבע טבלאות Ledger דורשות כיבוי זמני של `USER triggers`, משום
+שאירוע היסטורי חוקי אינו תואם בהכרח למצב הסופי. המנגנון מאמת תחילה שכל
+ה־Triggers פעילים, משבית רק את ארבע הטבלאות המוגדרות, מפעיל אותם מחדש
+ומאמת Lineage, מצב נוכחי וקשרי Delivery/Acceptance לפני Commit. כשל מבצע
+Rollback גם לשינוי מצב ה־Triggers.
+
+4.52.2 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 5 tables, 11 rows, replay rejected, triggers restored, 7 parity scenarios)`.
+שבעת התרחישים הוכיחו Immutability, הגנת Owner אחרון, חסימת נסיגת Delivery
+ושני מעברי Lifecycle חוקיים; המצב הסופי היה זהה בשני המנועים. שרת הבדיקה
+נעצר ותיקייתו נמחקה.
+
+4.52.3 במהלך ההרצה אותר ותוקן פער ב־Node adapter: גם `ALTER TABLE`, כמו
+`LOCK`, מוחזר על ידי `node-postgres` עם `rowCount=null`. הקבלה הוגבלה
+במפורש לפקודות `ALTER` או `LOCK` ללא Rows, ונוספה בדיקת Regression.
+
+4.52.4 12 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 39
+טבלאות, ‏Export חי, ‏Staging, ‏Load/Recovery ו־Cutover. ה־Slice הבא הוא
+Contact Organization & Import.
+
+4.52.5 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+548 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,105 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,042
+הבדיקות** עברו יחד ללא כשל או Skip.

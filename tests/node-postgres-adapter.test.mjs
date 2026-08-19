@@ -109,6 +109,21 @@ test("normalizes a PostgreSQL LOCK command with no affected-row count", async ()
   );
 });
 
+test("normalizes a PostgreSQL ALTER command with no affected-row count", async () => {
+  const fixture = poolFixture([
+    { command: "ALTER", rows: [], rowCount: null },
+  ]);
+  const executor = createNodePostgresQueryExecutor(fixture.pool);
+
+  assert.deepEqual(
+    await executor.query(
+      "ALTER TABLE contacts DISABLE TRIGGER USER",
+      [],
+    ),
+    { rows: [], rowCount: 0 },
+  );
+});
+
 test("pins every callback query between begin and commit", async () => {
   const fixture = poolFixture([
     queryResult([{ id: "41" }]),

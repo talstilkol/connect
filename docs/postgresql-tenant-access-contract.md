@@ -108,9 +108,13 @@ Transactions מקבילות לכל סדרי הנעילות של Membership ו־S
 
 6.4 Runtime composition עם Pool מאושר ו־Staging evidence.
 
-6.5 מיפוי Source מכסה כעת את כל 36 מיגרציות D1 ואת כל 51 הטבלאות. עדיין
-חסרים Data migration rehearsal ו־Semantic parity למסלולי Tenant access
-שאינם מכוסים ב־Integration tests מקבילים.
+6.5 מיפוי Source מכסה את כל 36 מיגרציות D1 ואת כל 51 הטבלאות. Data
+migration rehearsal ו־Semantic parity הושלמו כעת לחמש טבלאות Tenant
+Access, כולל היסטוריה מרובת Versions, ‏Replay חסום ושחזור Triggers. פרטי
+הראיה נמצאים ב־`docs/postgresql-tenant-access-data-migration-rehearsal.md`.
+
+6.6 עדיין חסרים Export חי, ‏Staging, עומס ו־Recovery, וכן Data migration
+ו־Semantic parity ל־39 הטבלאות שנותרו.
 
 ## 7. מקורות רשמיים
 

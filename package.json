@@ -21,6 +21,7 @@
     "verify:postgres-migration-parity": "node scripts/verify-postgres-migration-parity.mjs",
     "verify:node-postgres-integration": "node scripts/verify-node-postgres-integration.mjs",
     "verify:postgres-core-data-migration": "node scripts/verify-postgres-core-data-migration.mjs",
+    "verify:postgres-tenant-access-data-migration": "node scripts/verify-postgres-tenant-access-data-migration.mjs",
     "verify:postgres-core-semantic-parity": "node scripts/verify-postgres-core-semantic-parity.mjs",
     "verify:railway-api-startup": "node scripts/verify-railway-api-startup.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",

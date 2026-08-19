@@ -38,7 +38,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "tenant-access",
     order: 2,
-    status: "next",
+    status: "rehearsed",
     requires: ["core"],
     tables: [
       "tenant_membership_events",
@@ -65,7 +65,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "contact-organization-import",
     order: 3,
-    status: "planned",
+    status: "next",
     requires: ["core"],
     tables: [
       "contact_tags",

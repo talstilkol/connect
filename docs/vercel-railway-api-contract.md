@@ -508,7 +508,8 @@ Production ו־Preview origins המאושרים.
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
 ערכי Production pool ו־Rate-limit policy מאושרים, תצורת Railway Service חיה,
-Data migration rehearsal ל־44 הטבלאות שמחוץ ל־Core, ‏Semantic parity
+Data migration rehearsal ל־39 הטבלאות שאינן ב־Core או Tenant Access,
+‏Semantic parity
 וכיסוי Concurrency למסלולים שאינם כלולים עדיין ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור

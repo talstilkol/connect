@@ -74,7 +74,7 @@ async function executeQuery<TRow>(
   );
 
   const commandWithoutRows =
-    result.command === "LOCK" &&
+    ["ALTER", "LOCK"].includes(result.command) &&
     result.rowCount === null &&
     Array.isArray(result.rows) &&
     result.rows.length === 0;
