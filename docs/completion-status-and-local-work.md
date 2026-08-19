@@ -1763,3 +1763,30 @@ Bot Runtime ובו שלוש טבלאות.
 552 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,128 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,068
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.57 ‏PostgreSQL Bot Runtime data migration ו־Semantic parity הושלמו
+מקומית עבור `bot_flows`, ‏`bot_flow_versions` ו־`bot_reply_deliveries`.
+ה־Snapshot מפעיל את Validator העסקי המלא על Definition ועל Reply, ודורש
+Lifecycle עקבי לכל Flow, ‏Version ו־Delivery.
+
+4.57.1 לפני Commit המנגנון מוכיח שמפתחות הגרסה האחרונה והפעילה שייכים
+לאותו Flow ו־Tenant, ושכל Delivery מקושר להודעת Inbound באותה Conversation
+ולצמד Flow/Version מלא. בכך נסגר פער D1 ישן שאינו כולל `bot_flow_key`
+ב־Foreign key של Delivery.
+
+4.57.2 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 3 tables, 6 rows, replay rejected, tenant isolation verified, bot payload private, 9 parity scenarios)`.
+השרת הזמני נעצר ותיקייתו נמחקה לאחר הרצת הפקודה הרשמית האחרונה.
+
+4.57.3 נמצא פער Hardening: שני מנועי ה־Schema מאפשרים שם Flow עם רווחים
+חיצוניים, אך ה־Runtime אינו מאפשר זאת. חוזה ה־Migration דוחה Legacy row כזה
+במקום לשנות נתון בשקט.
+
+4.57.4 ‏29 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 22
+טבלאות, ‏Export חי, ‏Staging, ‏Load/Recovery ו־Cutover. ה־Slice הבא הוא
+AI & Knowledge Runtime ובו תשע טבלאות.
+
+4.57.5 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+553 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,133 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,075
+הבדיקות** עברו יחד ללא כשל או Skip.

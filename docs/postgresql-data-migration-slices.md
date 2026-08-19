@@ -25,13 +25,13 @@
 | 4 | `meta-connection` | 3 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
 | 5 | `templates-campaigns` | 3 | Core, Contacts, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
 | 6 | `conversations-messages` | 2 | Core, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
-| 7 | `bot-runtime` | 3 | Core, Conversations | הבא לביצוע | 4–10 שעות |
-| 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | מתוכנן | 10–24 שעות |
+| 7 | `bot-runtime` | 3 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
+| 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | הבא לביצוע | 10–24 שעות |
 | 9 | `governance-billing` | 5 | `core` | מתוכנן | 5–12 שעות |
 | 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | מתוכנן | 10–24 שעות |
 
-2.1 נותרו 25 טבלאות לאחר ששת ה־Slices שהושלמו. האומדן הכולל ל־Data
-migration ו־Parity המקומיים הוא **29–70 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
+2.1 נותרו 22 טבלאות לאחר שבעת ה־Slices שהושלמו. האומדן הכולל ל־Data
+migration ו־Parity המקומיים הוא **25–60 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
 Accounts, המתנה לספקים, Staging, Load/Recovery או Cutover.
 
 ## 3. Slice שהושלם — Tenant Access
@@ -124,21 +124,42 @@ Semantic parity כיסו Delivery status, ‏Read state, שיוך Agent, הוד�
 Text וכפילויות Provider. פרטי הראיה נמצאים ב־
 `docs/postgresql-conversations-messages-data-migration-rehearsal.md`.
 
-## 8. Slice הבא — Bot Runtime
+## 8. Slice שהושלם — Bot Runtime
 
 8.1 שלוש הטבלאות הבאות הן `bot_flows`, ‏`bot_flow_versions` ו־
 `bot_reply_deliveries`. הן תלויות ב־Core וב־Conversations, שכבר עברו
 Rehearsal.
 
-## 9. תנאי בטיחות
+8.2 ה־Rehearsal העביר שש רשומות, חסם Replay, הוכיח בידוד Tenant ואימת
+שכל Projection של גרסה אחרונה/פעילה מצביע לגרסה של אותו Flow. כל Delivery
+נבדק מול הודעת Inbound באותה Conversation ומול צמד Flow/Version מלא — קשר
+ש־D1 הישן אינו אוכף במלואו.
 
-9.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
+8.3 תשעה תרחישי Semantic parity כיסו יצירת Draft נוסף, Projection של
+הגרסה האחרונה, Claim ו־Acceptance של Delivery, כפילויות ו־Cross-tenant.
+Definition, ‏Reply, טלפון, ‏Provider ID ו־Error code אינם מופיעים ב־Manifest
+או ב־Evidence. פרטי הראיה נמצאים ב־
+`docs/postgresql-bot-runtime-data-migration-rehearsal.md`.
+
+8.4 נמצא פער Hardening: ‏D1 ו־PostgreSQL מאפשרים Name עם רווחים חיצוניים,
+אך חוזה ה־Runtime דורש ערך חתוך. ה־Snapshot חוסם Legacy row כזה לפני טעינה;
+הפער אינו הותר כ־Semantic parity.
+
+## 9. Slice הבא — AI & Knowledge Runtime
+
+9.1 תשע הטבלאות כוללות Agent וגרסאותיו, Knowledge sources/passages,
+קישורי Version/Source, הרשאות עלות, Usage, ‏Audit ו־Reply outbox. ה־Slice
+תלוי ב־Core וב־Conversations שכבר עברו Rehearsal.
+
+## 10. תנאי בטיחות
+
+10.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
 הרצת PostgreSQL אמיתית ו־Semantic parity מתועד.
 
-9.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
+10.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
 Manifest ו־Evidence משלו, כדי ש־Replay או החלפת Payload ייכשלו סגור.
 
-9.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
+10.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
 שכבר עומדים בחוזה היעד.
 
-9.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.
+10.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.
