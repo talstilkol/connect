@@ -1592,3 +1592,24 @@ Healthcheck ו־Grace period מאומתים, Deployment evidence, וה־Worker S
 סרק 546 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,099 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,024 הבדיקות**
 עברו יחד ללא כשל או Skip.
+
+4.50 ‏PostgreSQL Core semantic parity הושלם מקומית עבור אותן שבע טבלאות
+Core. ה־Verifier מתחיל מ־D1 אמיתי בזיכרון, טוען את ה־Snapshot דרך מנגנון
+ה־Migration ל־PostgreSQL ומריץ את אותם Repository contracts בשני המנועים.
+הוא משווה Memberships, ‏Selection optimistic concurrency, ‏Business profile
+idempotency, ‏Contact isolation/pagination ו־Consent ordering/idempotency.
+
+4.50.1 הרצה נקייה מול PostgreSQL 16 אמיתי עברה עם
+`PASS (19 scenarios, 7 tables, 19 rows)`. בנוסף לתוצאות הפעולות הושווה מצב
+סופי קנוני של כל שבע הטבלאות באמצעות SHA-256 digests. במהלך האימות נמצאו
+רק שני הבדלי ייצוג של Driver — `BIGINT` כמחרוזת ו־`JSONB` כאובייקט —
+ונוסף נרמול מוגבל לעמודות הידועות. לא נמצא פער עסקי. השרת הזמני נעצר
+ותיקייתו נמחקה.
+
+4.50.2 ה־Core parity אינו מוכיח את 44 הטבלאות הנותרות, Export חי, עומס,
+Recovery, ‏Staging או Cutover. אלו נשארים חסמי Production מפורשים.
+
+4.50.3 שער השחרור המקומי המלא עבר לאחר הוספת ה־Verifier. ‏Source guard סרק
+546 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,099 קבצים והיסטוריית Git,
+ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,026 הבדיקות** עברו
+יחד ללא כשל או Skip.
