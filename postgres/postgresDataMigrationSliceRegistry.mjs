@@ -100,31 +100,28 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "templates-campaigns",
     order: 5,
-    status: "next",
+    status: "rehearsed",
     requires: ["core", "contact-organization-import", "meta-connection"],
     tables: [
       "message_templates",
       "campaigns",
       "campaign_recipients",
-      "campaign_delivery_provider_links",
     ],
     d1Migrations: [
       "0008_message_templates.sql",
       "0009_template_submission_lifecycle.sql",
       "0010_template_status_events.sql",
       "0011_campaign_foundation.sql",
-      "0031_campaign_delivery_provider_links.sql",
     ],
     postgresMigrations: [
       "0006_message_templates_campaigns.sql",
       "0015_campaign_dispatch.sql",
-      "0022_campaign_delivery_provider_links.sql",
     ],
   }),
   slice({
     id: "conversations-messages",
     order: 6,
-    status: "planned",
+    status: "next",
     requires: ["core", "meta-connection"],
     tables: ["conversations", "messages"],
     d1Migrations: ["0012_conversations_and_messages.sql"],
@@ -197,8 +194,9 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
     id: "whatsapp-delivery-policy",
     order: 10,
     status: "planned",
-    requires: ["core", "meta-connection"],
+    requires: ["core", "meta-connection", "templates-campaigns"],
     tables: [
+      "campaign_delivery_provider_links",
       "whatsapp_campaign_delivery_policy_events",
       "whatsapp_rate_limit_reservations",
       "whatsapp_pair_rate_limit_state",
@@ -209,6 +207,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
     ],
     d1Migrations: [
       "0030_whatsapp_rate_limit_reservations.sql",
+      "0031_campaign_delivery_provider_links.sql",
       "0032_whatsapp_provider_cooldowns.sql",
       "0034_whatsapp_campaign_delivery_policy_events.sql",
       "0035_whatsapp_phone_throughput.sql",
@@ -217,6 +216,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
       "0011_whatsapp_delivery_policy.sql",
       "0012_whatsapp_rate_limit_ledger.sql",
       "0013_whatsapp_phone_throughput.sql",
+      "0022_campaign_delivery_provider_links.sql",
     ],
   }),
 ]);

@@ -80,7 +80,7 @@ test("keeps slice dependencies ordered and linked to real migrations", () => {
   }
 });
 
-test("marks four slices rehearsed and the next slice explicitly", () => {
+test("marks five slices rehearsed and the next slice explicitly", () => {
   const rehearsed = POSTGRES_DATA_MIGRATION_SLICES
     .filter(({ status }) => status === "rehearsed");
   const next = POSTGRES_DATA_MIGRATION_SLICES
@@ -94,17 +94,40 @@ test("marks four slices rehearsed and the next slice explicitly", () => {
     "tenant-access",
     "contact-organization-import",
     "meta-connection",
+    "templates-campaigns",
   ]);
   assert.equal(
     rehearsed.reduce((total, slice) => total + slice.tables.length, 0),
-    21,
+    24,
   );
-  assert.deepEqual(next.map(({ id }) => id), ["templates-campaigns"]);
-  assert.deepEqual(next[0].requires, [
-    "core",
-    "contact-organization-import",
-    "meta-connection",
-  ]);
-  assert.equal(next[0].tables.length, 4);
-  assert.equal(remainingCount, 30);
+  assert.deepEqual(next.map(({ id }) => id), ["conversations-messages"]);
+  assert.deepEqual(next[0].requires, ["core", "meta-connection"]);
+  assert.equal(next[0].tables.length, 2);
+  assert.equal(remainingCount, 27);
+});
+
+test("keeps provider delivery evidence with its rate-limit proof", () => {
+  const templates = POSTGRES_DATA_MIGRATION_SLICES.find(
+    ({ id }) => id === "templates-campaigns",
+  );
+  const deliveryPolicy = POSTGRES_DATA_MIGRATION_SLICES.find(
+    ({ id }) => id === "whatsapp-delivery-policy",
+  );
+
+  assert.equal(
+    templates.tables.includes("campaign_delivery_provider_links"),
+    false,
+  );
+  assert.equal(
+    deliveryPolicy.tables.includes("campaign_delivery_provider_links"),
+    true,
+  );
+  assert.equal(
+    deliveryPolicy.requires.includes("templates-campaigns"),
+    true,
+  );
+  assert.equal(
+    deliveryPolicy.tables.includes("whatsapp_rate_limit_reservations"),
+    true,
+  );
 });
