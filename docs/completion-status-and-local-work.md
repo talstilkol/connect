@@ -1613,3 +1613,19 @@ Recovery, ‏Staging או Cutover. אלו נשארים חסמי Production מפ�
 546 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,099 קבצים והיסטוריית Git,
 ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,026 הבדיקות** עברו
 יחד ללא כשל או Skip.
+
+4.51 ‏PostgreSQL Data migration slice registry הושלם מקומית. הוא מחלק את
+כל 51 טבלאות D1 בדיוק פעם אחת לעשרה Slices בסדר תלות מפורש. שבע טבלאות
+Core מסומנות `rehearsed`, חמש טבלאות Tenant Access מסומנות `next`, ו־39
+טבלאות נוספות נשארות `planned`. בדיקה מריצה את כל 36 מיגרציות D1, קוראת
+את ה־Schema הסופי ומשווה אותו גם ל־51 טבלאות PostgreSQL שאינן Railway-only.
+
+4.51.1 ה־Slice הבא הוא Tenant Access: ‏Membership events, ‏Invitations,
+Invitation events, ‏Delivery outbox ו־Acceptance evidence. הוא תלוי רק ב־
+Tenants/Memberships שכבר עברו ב־Core ואינו תלוי בהחלטת Queue, ‏Meta,
+Storage או AI. ה־Registry הוא תכנון מאומת בלבד; הוא אינו מסמן Data
+conversion או Parity של חמש הטבלאות כהושלמו.
+
+4.51.2 שער השחרור המקומי המלא עבר לאחר הוספת מפת ה־Slices. ‏Build,
+TypeScript, ‏ESLint, ‏Source/Secret/Interface guards, כל חוזי המיגרציה וכל
+**2,029 הבדיקות** עברו יחד ללא כשל או Skip.
