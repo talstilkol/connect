@@ -94,6 +94,21 @@ test("adapts one pool query without changing parameters", async () => {
   ]);
 });
 
+test("normalizes a PostgreSQL LOCK command with no affected-row count", async () => {
+  const fixture = poolFixture([
+    { command: "LOCK", rows: [], rowCount: null },
+  ]);
+  const executor = createNodePostgresQueryExecutor(fixture.pool);
+
+  assert.deepEqual(
+    await executor.query(
+      "LOCK TABLE contacts IN ACCESS EXCLUSIVE MODE",
+      [],
+    ),
+    { rows: [], rowCount: 0 },
+  );
+});
+
 test("pins every callback query between begin and commit", async () => {
   const fixture = poolFixture([
     queryResult([{ id: "41" }]),

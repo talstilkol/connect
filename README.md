@@ -23,6 +23,7 @@
 16. [חוזה PostgreSQL ל־Railway Mutations](docs/postgresql-mutation-contract.md).
 17. [חוזה PostgreSQL ל־Tenant Access](docs/postgresql-tenant-access-contract.md).
 18. [חוזה PostgreSQL למחזור חיי הזמנת צוות](docs/postgresql-team-invitation-contract.md).
+19. [PostgreSQL Core Data Migration Rehearsal](docs/postgresql-core-data-migration-rehearsal.md).
 
 ## מצב Master Plan — תשתית Stage 3
 

@@ -73,18 +73,31 @@ async function executeQuery<TRow>(
     [...parameters],
   );
 
+  const commandWithoutRows =
+    result.command === "LOCK" &&
+    result.rowCount === null &&
+    Array.isArray(result.rows) &&
+    result.rows.length === 0;
+
   if (
-    !Number.isSafeInteger(result.rowCount) ||
-    result.rowCount === null ||
-    result.rowCount < 0 ||
-    !Array.isArray(result.rows)
+    !Array.isArray(result.rows) ||
+    (
+      !commandWithoutRows &&
+      (
+        !Number.isSafeInteger(result.rowCount) ||
+        result.rowCount === null ||
+        result.rowCount < 0
+      )
+    )
   ) {
     throw new NodePostgresAdapterError("invalid-query-result");
   }
 
+  const rowCount = result.rowCount ?? 0;
+
   return Object.freeze({
     rows: Object.freeze([...result.rows]) as readonly TRow[],
-    rowCount: result.rowCount,
+    rowCount,
   });
 }
 

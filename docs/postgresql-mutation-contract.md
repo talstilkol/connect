@@ -364,8 +364,9 @@ Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ו
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.
 Audit idempotency מבודד לפי `(tenant_id, action, idempotency_key)`.
 
-5.8 ‏7 בדיקות Adapter מוכיחות Connection מוצמד, ‏Commit, ‏Rollback והשמדת
-Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכיח גם
+5.8 ‏8 בדיקות Adapter מוכיחות Connection מוצמד, ‏Commit, ‏Rollback, פקודת
+`LOCK` ללא `rowCount` והשמדת Client לאחר כשל BEGIN/COMMIT/ROLLBACK.
+ה־Harness האמיתי הוכיח גם
 `committed + replayed` עבור שתי בקשות `contacts.save` מקבילות.
 
 5.9 ‏6 בדיקות Pool configuration דוחות מצב חלקי, Loopback ב־Production,
@@ -386,8 +387,9 @@ Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 Migration מאושר ב־Railway.
 
 6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 24
-מיגרציות PostgreSQL. עדיין חסרים כלי Data migration מאושר, Dry run עם נתונים
-מייצגים בסביבה נשלטת, השוואת Counts/Digests וראיית Semantic parity חתומה.
+מיגרציות PostgreSQL. ‏Core rehearsal לשבע טבלאות עבר עם HMAC, ‏Counts,
+Sequences ו־Replay חסום. עדיין חסרים כלי Data migration מאושר ל־44 הטבלאות
+הנותרות, Dry run עם נתונים מייצגים בסביבה נשלטת וראיית Semantic parity חתומה.
 
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/

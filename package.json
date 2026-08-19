@@ -19,6 +19,7 @@
     "verify:postgres-migration-contract": "node scripts/verify-postgres-migration-contract.mjs",
     "verify:postgres-migration-parity": "node scripts/verify-postgres-migration-parity.mjs",
     "verify:node-postgres-integration": "node scripts/verify-node-postgres-integration.mjs",
+    "verify:postgres-core-data-migration": "node scripts/verify-postgres-core-data-migration.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",
     "verify:release-gate": "node scripts/verify-release-gate.mjs",
     "verify:production-readiness": "node scripts/verify-production-readiness.mjs",

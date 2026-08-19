@@ -482,6 +482,13 @@ Policy version, ‏Capacity וחלון Refill מפורשים; ערך חסר, ח�
 זמן PostgreSQL. ‏Harness אמיתי עבר עם 24 Migrations ו־58 תרחישי Concurrency,
 כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות במכסה `2`.
 
+7.1.55 ‏`postgresCoreDataMigration.ts`,‏ `read-d1-core-data-snapshot.mjs`
+ו־`verify-postgres-core-data-migration.mjs` מוסיפים Core data migration
+fail-closed לשבע טבלאות. Snapshot D1 דורש Schema ו־Integrity תקינים; Plan
+קצר־תוקף קשור ל־HMAC; היעד ננעל, חייב להיות ריק, נטען ומאומת באותה
+Transaction. ‏Rehearsal אמיתי עבר עם 36 מיגרציות D1, ‏24 מיגרציות
+PostgreSQL, ‏7 טבלאות ו־Replay חסום. נותרו 44 טבלאות וראיית Staging.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -494,7 +501,7 @@ Production ו־Preview origins המאושרים.
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
 ערכי Production pool ו־Rate-limit policy מאושרים, Startup executable,
-Data migration rehearsal, ‏Semantic parity
+Data migration rehearsal ל־44 הטבלאות שמחוץ ל־Core, ‏Semantic parity
 וכיסוי Concurrency למסלולים שאינם כלולים עדיין ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור

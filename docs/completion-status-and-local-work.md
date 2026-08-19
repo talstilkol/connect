@@ -1546,3 +1546,26 @@ API. ‏Migration מספר `0023_api_mutation_rate_limits.sql` מוסיף Token 
 וכל **2,007 הבדיקות** עברו יחד. ‏Production נשאר חסום על ערכי Policy חיים,
 Startup executable, ‏Data migration rehearsal, ‏Semantic parity וראיות
 Staging/Load; תוצאת Local זו אינה מחליפה אותם.
+
+4.48 ‏PostgreSQL Core data migration rehearsal הושלם מקומית לשבע טבלאות:
+Tenants, ‏Memberships, ‏Selections, ‏Business profiles, ‏Contacts, ‏Consent
+events ו־Audit logs. ה־Snapshot בודק Schema, ‏Integrity ו־Foreign keys;
+Plan קצר־תוקף קשור ל־HMAC; PostgreSQL ננעל, חייב להיות ריק, נטען ומאומת
+באותה Transaction. ‏Evidence אינו מכיל PII. ‏Consent legacy ללא Actor או
+מפתח תקני נחסם במקום לעבור Backfill שקט.
+
+4.48.1 ‏Rehearsal נקי עבר מול SQLite ו־PostgreSQL 16 אמיתיים עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 7 tables, 7 rows, replay rejected)`.
+כל חמשת Identity sequences סונכרנו. במהלך ההרצה אותר ותוקן פער ב־Node
+adapter עבור `LOCK TABLE`, ש־PostgreSQL מחזיר עבורו `rowCount=null`; הקבלה
+מוגבלת כעת במפורש לפקודת `LOCK` חוקית ללא Rows. השרת הזמני נעצר ותיקייתו
+נמחקה.
+
+4.48.2 נותרו Data conversion ל־44 טבלאות, Export חי מ־D1, ‏Staging rehearsal,
+Semantic parity, ‏Load/Recovery ו־Cutover evidence. לכן Production נשאר
+חסום ואין לפרש את ה־Core rehearsal כהשלמת Migration מלאה.
+
+4.48.3 שער השחרור המקומי המלא עבר לאחר ה־rehearsal. ‏Source guard סרק 545
+קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,094 קבצים והיסטוריית Git,
+ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,017 הבדיקות** עברו
+יחד. ‏Production נשאר חסום על 44 הטבלאות הנותרות ועל ראיות חיות בלבד.
