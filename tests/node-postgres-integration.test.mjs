@@ -96,13 +96,18 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.conversations\.recordInboundMessage/);
   assert.match(source, /foundation\.botFlows\.saveDraft/);
   assert.match(source, /foundation\.botReplyDeliveries\.stage/);
+  assert.match(
+    source,
+    /foundation\.botRuntime[\s\S]*\.findAcceptedButtonContinuation/,
+  );
+  assert.match(source, /foundation\.botRuntime\.applyHandoff/);
   assert.match(source, /foundation\.knowledgeSources\.registerUploaded/);
   assert.match(source, /foundation\.aiAgents\.saveDraft/);
   assert.match(source, /foundation\.aiRuntime\.costGate\.authorize/);
   assert.match(source, /foundation\.aiRuntime\.auditSink\.record/);
   assert.match(source, /foundation\.aiReplyOutbox\.stage/);
   assert.match(source, /foundation\.aiReplyOutbox\.decide/);
-  assert.match(source, /concurrencyScenarios: 42/);
+  assert.match(source, /concurrencyScenarios: 43/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

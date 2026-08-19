@@ -1348,3 +1348,21 @@ Staging, ‏Load test או Pilot.
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter
 חי שאינו ניתן לאומדן אמין לפני בחירת ספק וקבלת Credentials.
+
+4.28 ‏PostgreSQL Bot Runtime הושלם מקומית.
+`postgresBotRuntimeRepository.ts` מממש קריאת מצב שיחה, זיהוי המשך רק מתוך
+תשובת Buttons מאושרת להודעת Inbound הקודמת המיידית ובחלון של 24 שעות,
+והעברה אטומית לנציג. יותר מראיית המשך אחת מוחזרת כ־`ambiguous`; Handoff
+נועל את השיחה ומחזיר Replay כ־`unchanged`. ה־Repository מחובר ל־Foundation,
+שמכיל כעת 30 Adapters.
+
+4.28.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (18 migrations, 43 concurrency scenarios)`. הוא הוכיח Continuation
+מתשובת Buttons אמיתית ו־Handoff מקביל יחיד עם תוצאה עקבית. בדרך תוקנו גם
+ספירת Version שהוכפלה ב־Join והתנגשות בין מפתחות בדיקה. השרת הזמני נעצר
+והתיקייה נמחקה.
+
+4.29 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **14–44 שעות פיתוח
+נטו**. הירידה משקפת Adapter מלא ותרחיש Concurrency אמיתי נוסף. הטווח אינו
+כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging, ‏Load test
+או Pilot.

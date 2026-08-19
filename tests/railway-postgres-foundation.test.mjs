@@ -43,6 +43,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "aiRuntime",
     "botFlows",
     "botReplyDeliveries",
+    "botRuntime",
     "businessProfiles",
     "campaignDispatch",
     "campaigns",
@@ -82,6 +83,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   assert.equal(typeof foundation.aiRuntime.auditSink.record, "function");
   assert.equal(typeof foundation.botFlows.saveDraft, "function");
   assert.equal(typeof foundation.botReplyDeliveries.stage, "function");
+  assert.equal(typeof foundation.botRuntime.applyHandoff, "function");
   assert.equal(typeof foundation.contacts.list, "function");
   assert.equal(
     typeof foundation.conversations.recordInboundMessage,

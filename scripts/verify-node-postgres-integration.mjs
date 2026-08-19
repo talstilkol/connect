@@ -2126,11 +2126,133 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
   assert.equal(accepted.status, "accepted");
   assert.equal(accepted.attemptCount, 1);
 
+  const continuationPhoneNumber = "+972509876542";
+  const continuationContact = await foundation.conversations
+    .resolveInboundContact(tenantId, continuationPhoneNumber);
+  const continuationConversationKey = `conversation_v1_${"4".repeat(64)}`;
+  const previousInboundMessageKey = `message_v1_${"5".repeat(64)}`;
+  const currentInboundMessageKey = `message_v1_${"6".repeat(64)}`;
+  const previousOccurredAt = "2026-08-19T08:00:00.000Z";
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey: continuationConversationKey,
+    messageKey: previousInboundMessageKey,
+    contactId: continuationContact.contactId,
+    providerMessageId: "driver-bot-continuation-previous",
+    contentKind: "text",
+    textContent: "עזרה",
+    occurredAt: previousOccurredAt,
+  }));
+  const buttonReply = Object.freeze({
+    kind: "buttons",
+    text: "באיזו מחלקה לבחור?",
+    options: Object.freeze([Object.freeze({
+      optionKey: `bot_option_v1_${"9".repeat(64)}`,
+      label: "שירות",
+    })]),
+  });
+  const buttonDeliveryKey = await deriveBotReplyDeliveryKey(tenantId, {
+    conversationKey: continuationConversationKey,
+    inboundMessageKey: previousInboundMessageKey,
+    botFlowVersionKey: first.botFlowVersionKey,
+    replyIndex: 1,
+    reply: buttonReply,
+  });
+  const buttonStage = await foundation.botReplyDeliveries.stage(Object.freeze({
+    deliveryKey: buttonDeliveryKey,
+    tenantId,
+    conversationKey: continuationConversationKey,
+    inboundMessageKey: previousInboundMessageKey,
+    botFlowKey,
+    botFlowVersionKey: first.botFlowVersionKey,
+    replyIndex: 1,
+    recipientPhoneNumber: continuationPhoneNumber,
+    reply: buttonReply,
+  }));
+  assert.equal(buttonStage.outcome, "created");
+  const buttonClaimAt = new Date(
+    Date.parse(buttonStage.delivery.createdAt) + 1_000,
+  ).toISOString();
+  assert.equal(
+    (await foundation.botReplyDeliveries.claim(
+      tenantId,
+      buttonDeliveryKey,
+      buttonClaimAt,
+    )).outcome,
+    "claimed",
+  );
+  const buttonAcceptedAt = new Date(
+    Date.parse(buttonClaimAt) + 1_000,
+  ).toISOString();
+  await foundation.botReplyDeliveries.markAccepted(
+    tenantId,
+    buttonDeliveryKey,
+    "wamid.bot-integration-buttons",
+    buttonAcceptedAt,
+  );
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey: continuationConversationKey,
+    messageKey: currentInboundMessageKey,
+    contactId: continuationContact.contactId,
+    providerMessageId: "driver-bot-continuation-current",
+    contentKind: "text",
+    textContent: "שירות",
+    occurredAt: new Date(Date.parse(previousOccurredAt) + 60_000).toISOString(),
+  }));
+  const continuation = await foundation.botRuntime
+    .findAcceptedButtonContinuation(
+      tenantId,
+      continuationConversationKey,
+      currentInboundMessageKey,
+    );
+  assert.equal(continuation.outcome, "found");
+  assert.equal(continuation.evidence.botFlowVersionKey, first.botFlowVersionKey);
+  assert.deepEqual(JSON.parse(continuation.evidence.replyJson), buttonReply);
+
+  const handoffPhoneNumber = "+972509876543";
+  const handoffContact = await foundation.conversations.resolveInboundContact(
+    tenantId,
+    handoffPhoneNumber,
+  );
+  const handoffConversationKey = `conversation_v1_${"c".repeat(64)}`;
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey: handoffConversationKey,
+    messageKey: `message_v1_${"d".repeat(64)}`,
+    contactId: handoffContact.contactId,
+    providerMessageId: "driver-bot-handoff-inbound",
+    contentKind: "text",
+    textContent: "נציג",
+    occurredAt: "2026-08-19T08:02:00.000Z",
+  }));
+  const handoffs = await Promise.all([
+    foundation.botRuntime.applyHandoff(tenantId, handoffConversationKey, 2),
+    foundation.botRuntime.applyHandoff(tenantId, handoffConversationKey, 2),
+  ]);
+  assert.deepEqual(
+    handoffs.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+  assert.deepEqual(
+    await foundation.botRuntime.findConversationState(
+      tenantId,
+      handoffConversationKey,
+    ),
+    {
+      conversationKey: handoffConversationKey,
+      tenantId,
+      status: "waiting_for_agent",
+      assignedExternalUserId: null,
+      version: 3,
+    },
+  );
+
   const persisted = await pool.query(
     `SELECT
        flow.status AS flow_status,
        flow.version AS flow_version,
-       count(version.bot_flow_version_key)::integer AS version_count,
+       count(DISTINCT version.bot_flow_version_key)::integer AS version_count,
        max(delivery.status) AS delivery_status
      FROM bot_flows AS flow
      INNER JOIN bot_flow_versions AS version
@@ -3357,7 +3479,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 42,
+      concurrencyScenarios: 43,
     });
   } finally {
     await pool.end();

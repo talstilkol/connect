@@ -227,6 +227,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresConversationRepository.ts",
     "server/platform/postgresBotFlowRepository.ts",
     "server/platform/postgresBotReplyDeliveryRepository.ts",
+    "server/platform/postgresBotRuntimeRepository.ts",
     "server/platform/postgresKnowledgeSourceRepository.ts",
     "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresAiAgentRepository.ts",
@@ -267,7 +268,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /twenty-nine-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /thirty-adapter PostgreSQL foundation/);
   assert.match(
     boundary.cutoverBlocker,
     /knowledge-source lifecycle and atomic knowledge-passage persistence/,
@@ -276,7 +277,10 @@ test("records the local API contract without claiming live adapter readiness", (
     boundary.cutoverBlocker,
     /AI-agent draft\/version\/source-link\/publication persistence/,
   );
-  assert.match(boundary.cutoverBlocker, /bot-flow version\/publication and reply-delivery persistence/);
+  assert.match(
+    boundary.cutoverBlocker,
+    /bot-flow version\/publication, reply-delivery and bot-runtime continuation\/handoff persistence/,
+  );
   assert.match(boundary.cutoverBlocker, /conversation\/message inbox persistence/);
   assert.match(boundary.cutoverBlocker, /message-template lifecycle/);
   assert.match(boundary.cutoverBlocker, /campaign-snapshot and campaign-dispatch persistence/);
@@ -329,6 +333,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresConversationRepository.ts",
     "server/platform/postgresBotFlowRepository.ts",
     "server/platform/postgresBotReplyDeliveryRepository.ts",
+    "server/platform/postgresBotRuntimeRepository.ts",
     "server/platform/postgresKnowledgeSourceRepository.ts",
     "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresAiAgentRepository.ts",
@@ -378,9 +383,11 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /forty-two real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /forty-three real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /twenty-nine-adapter foundation/);
+  assert.match(database.cutoverBlocker, /thirty-adapter foundation/);
+  assert.match(database.cutoverBlocker, /accepted-button continuation/);
+  assert.match(database.cutoverBlocker, /serialized bot handoff replay/);
   assert.match(
     database.cutoverBlocker,
     /deterministic knowledge-source registration, validation\/scanning\/recovery transitions and atomic passage processing\/replay/,

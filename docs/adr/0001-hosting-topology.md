@@ -173,8 +173,9 @@ Plugin ו־Wrangler.
 ו־`shared/domain/hostingMigrationRegistry.ts` — מיפוי דטרמיניסטי של
 18 היכולות שחייבות Adapter, תצורה, החלטת ספק או Evidence חדש.
 
-8.7 מצב Adapter parity המקומי: Foundation של 29 Adapters ו־Harness על
-PostgreSQL 16.13 שעבר 18 Migrations ו־42 תרחישי Concurrency, לרבות מחזור
+8.7 מצב Adapter parity המקומי: Foundation של 30 Adapters ו־Harness על
+PostgreSQL 16.13 שעבר 18 Migrations ו־43 תרחישי Concurrency, לרבות מחזור
 Draft/Version/Source-link/Publication של AI Agent וכן Cost/Usage/Audit/
-Handoff ו־Reply approval outbox של AI Runtime. זו אינה ראיית Staging או
+Handoff ו־Reply approval outbox של AI Runtime, וכן Bot continuation ו־
+Handoff אטומי. זו אינה ראיית Staging או
 הרשאה ל־Cutover.

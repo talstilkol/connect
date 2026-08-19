@@ -213,6 +213,13 @@ Inbound ומקורות Knowledge במצב Ready. ‏Approve/Reject נועלים 
 השיחה, וחוסמים החלטה לאחר הודעת לקוח חדשה. ה־Harness הוכיח Stage והחלטה
 מקבילים והעלה את הסך ל־42 תרחישי Concurrency.
 
+1.29 ‏`postgresBotRuntimeRepository.ts` ממיר קריאת מצב Conversation,
+זיהוי תשובת Buttons מאושרת להודעת Inbound הקודמת והעברה לנציג. סדר
+ההודעות נקבע באמצעות `(occurred_at, message_key)` ולא באמצעות מזהה פנימי;
+Evidence ישן מ־24 שעות או יותר מ־Delivery מאושר אחד נבלמים. Handoff מתבצע
+תחת `FOR UPDATE`, כך ששתי בקשות מקבילות מחזירות `updated` ו־`unchanged`
+בלי עדכון כפול. ה־Harness העלה את הסך ל־43 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

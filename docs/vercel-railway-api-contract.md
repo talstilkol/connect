@@ -239,7 +239,7 @@ Loopback ב־Staging/Production וכל Query string ב־Database URL, משום �
 `sslmode` עלול לדרוס את אובייקט ה־TLS. ‏Idle-client telemetry מקבל Signal
 בלבד ולא Error או Connection string.
 
-7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 18 ה־Adapters שהושלמו לאותו
+7.1.21 ‏PostgreSQL foundation אחד מחבר את כל 30 ה־Adapters שהושלמו לאותו
 Pool ומחזיר רק Ports עסקיים ו־Close. הוא נבדק גם ב־Harness האמיתי.
 
 7.1.22 ‏`contacts.list` משתמש כעת ב־PostgreSQL repository בעל Tenant filter,
@@ -409,6 +409,13 @@ Audit ו־Handoff ל־PostgreSQL. נעילת Agent משותפת מסדרת את 
 להודעת Inbound העדכנית ולמקורות ידע Ready. ‏Stage והחלטה ננעלים ומחזירים
 Replay עקבי בלי לטעון שנשלחה הודעה לספק. ה־Foundation מכיל כעת 29 Adapters;
 Harness אמיתי עבר עם 18 Migrations ו־42 תרחישי Concurrency.
+
+7.1.45 ‏`postgresBotRuntimeRepository.ts` ממיר את קריאת מצב השיחה, המשך
+לאחר תשובת כפתורים מאושרת ו־Handoff לנציג ל־PostgreSQL. ההמשך קשור להודעת
+Inbound הקודמת המיידית לפי `(occurred_at, message_key)`, מוגבל ל־24 שעות
+ודוחה יותר מראיית Buttons מאושרת אחת. Handoff נועל את השיחה ומספק Replay
+עקבי. ה־Foundation מכיל כעת 30 Adapters; Harness אמיתי עבר עם 18 Migrations
+ו־43 תרחישי Concurrency.
 
 7.2 עדיין חסר:
 

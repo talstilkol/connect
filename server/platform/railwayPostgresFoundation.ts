@@ -42,6 +42,9 @@ import {
   createPostgresBotFlowRepository,
 } from "./postgresBotFlowRepository.ts";
 import {
+  createPostgresBotRuntimeRepository,
+} from "./postgresBotRuntimeRepository.ts";
+import {
   createPostgresBotReplyDeliveryRepository,
 } from "./postgresBotReplyDeliveryRepository.ts";
 import {
@@ -146,6 +149,7 @@ export interface RailwayPostgresFoundation {
   >;
   readonly aiRuntime: ReturnType<typeof createPostgresAiRuntimePersistence>;
   readonly botFlows: ReturnType<typeof createPostgresBotFlowRepository>;
+  readonly botRuntime: ReturnType<typeof createPostgresBotRuntimeRepository>;
   readonly botReplyDeliveries: ReturnType<
     typeof createPostgresBotReplyDeliveryRepository
   >;
@@ -294,6 +298,7 @@ export function createRailwayPostgresFoundation(
     }),
     aiRuntime: createPostgresAiRuntimePersistence({ queries, transactions }),
     botFlows: createPostgresBotFlowRepository({ queries, transactions }),
+    botRuntime: createPostgresBotRuntimeRepository({ queries, transactions }),
     botReplyDeliveries: createPostgresBotReplyDeliveryRepository({
       queries,
       transactions,
