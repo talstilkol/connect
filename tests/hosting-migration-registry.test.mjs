@@ -230,6 +230,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresKnowledgeSourceRepository.ts",
     "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresAiAgentRepository.ts",
+    "server/platform/postgresAiRuntimeRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
@@ -264,7 +265,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /twenty-seven-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /twenty-eight-adapter PostgreSQL foundation/);
   assert.match(
     boundary.cutoverBlocker,
     /knowledge-source lifecycle and atomic knowledge-passage persistence/,
@@ -329,6 +330,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresKnowledgeSourceRepository.ts",
     "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresAiAgentRepository.ts",
+    "server/platform/postgresAiRuntimeRepository.ts",
     "server/platform/postgresContactOrganizationRepository.ts",
     "server/platform/postgresContactImportRepository.ts",
     "server/platform/postgresMetaRepository.ts",
@@ -372,9 +374,9 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /thirty-six real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /forty real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /twenty-seven-adapter foundation/);
+  assert.match(database.cutoverBlocker, /twenty-eight-adapter foundation/);
   assert.match(
     database.cutoverBlocker,
     /deterministic knowledge-source registration, validation\/scanning\/recovery transitions and atomic passage processing\/replay/,

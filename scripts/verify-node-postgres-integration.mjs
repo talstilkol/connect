@@ -35,6 +35,10 @@ import {
   deriveKnowledgeSourceKey,
 } from "../server/ai/aiAgentKey.ts";
 import {
+  deriveAiProviderRequestKey,
+  deriveAiRuntimeAuditKey,
+} from "../server/ai/aiRuntimeKey.ts";
+import {
   sha256Hex,
 } from "../server/meta/metaWebhookSecurity.ts";
 import {
@@ -2435,6 +2439,186 @@ async function verifyAiAgentLifecycle(
     version_count: 2,
     source_link_count: 2,
   }]);
+
+  return Object.freeze({
+    aiAgentKey,
+    aiAgentVersionKey: second.aiAgentVersionKey,
+  });
+}
+
+async function verifyAiRuntimePersistence(
+  pool,
+  foundation,
+  tenantId,
+  aiAgent,
+) {
+  const identityInputs = await Promise.all(
+    ["7", "8", "9"].map(async (hexDigit, index) => {
+      const contact = await foundation.conversations.resolveInboundContact(
+        tenantId,
+        `+9725098700${index + 1}`,
+      );
+      const conversationKey = `conversation_v1_${hexDigit.repeat(64)}`;
+      const inboundMessageKey = `message_v1_${hexDigit.repeat(64)}`;
+      await foundation.conversations.recordInboundMessage(Object.freeze({
+        tenantId,
+        conversationKey,
+        messageKey: inboundMessageKey,
+        contactId: contact.contactId,
+        providerMessageId: `driver-ai-runtime-inbound-${index + 1}`,
+        contentKind: "text",
+        textContent: `AI runtime persistence ${index + 1}`,
+        occurredAt: `2026-08-17T13:0${index}:00.000Z`,
+      }));
+      const identity = Object.freeze({
+        conversationKey,
+        inboundMessageKey,
+        aiAgentVersionKey: aiAgent.aiAgentVersionKey,
+      });
+      return Object.freeze({
+        ...identity,
+        requestKey: await deriveAiProviderRequestKey(tenantId, identity),
+        auditKey: await deriveAiRuntimeAuditKey(tenantId, identity),
+      });
+    }),
+  );
+
+  function authorization(identity) {
+    return Object.freeze({
+      requestKey: identity.requestKey,
+      tenantId,
+      aiAgentKey: aiAgent.aiAgentKey,
+      monthlyLimitMinorUnits: 10,
+      currency: "ILS",
+    });
+  }
+
+  function usage(identity, costMinorUnits) {
+    return Object.freeze({
+      requestKey: identity.requestKey,
+      tenantId,
+      aiAgentKey: aiAgent.aiAgentKey,
+      usage: Object.freeze({
+        inputTokens: 120,
+        outputTokens: 24,
+        costMinorUnits,
+        currency: "ILS",
+      }),
+    });
+  }
+
+  const authorizationReplay = await Promise.all([
+    foundation.aiRuntime.costGate.authorize(authorization(identityInputs[0])),
+    foundation.aiRuntime.costGate.authorize(authorization(identityInputs[0])),
+  ]);
+  assert.deepEqual(
+    authorizationReplay.map(({ outcome }) => outcome),
+    ["authorized", "authorized"],
+  );
+
+  const usageReplay = await Promise.all([
+    foundation.aiRuntime.costGate.recordUsage(usage(identityInputs[0], 7)),
+    foundation.aiRuntime.costGate.recordUsage(usage(identityInputs[0], 7)),
+  ]);
+  assert.deepEqual(
+    usageReplay.map(({ outcome, withinLimit }) => ({ outcome, withinLimit })),
+    [
+      { outcome: "recorded", withinLimit: true },
+      { outcome: "recorded", withinLimit: true },
+    ],
+  );
+
+  assert.deepEqual(
+    await Promise.all(
+      identityInputs.slice(1).map((identity) =>
+        foundation.aiRuntime.costGate.authorize(authorization(identity)),
+      ),
+    ),
+    [{ outcome: "authorized" }, { outcome: "authorized" }],
+  );
+  const budgetRace = await Promise.all(
+    identityInputs.slice(1).map((identity) =>
+      foundation.aiRuntime.costGate.recordUsage(usage(identity, 2)),
+    ),
+  );
+  assert.deepEqual(
+    budgetRace.map(({ withinLimit }) => withinLimit).sort(),
+    [false, true],
+  );
+
+  const handoffEvent = Object.freeze({
+    auditKey: identityInputs[2].auditKey,
+    requestKey: identityInputs[2].requestKey,
+    tenantId,
+    conversationKey: identityInputs[2].conversationKey,
+    inboundMessageKey: identityInputs[2].inboundMessageKey,
+    expectedConversationVersion: 2,
+    aiAgentKey: aiAgent.aiAgentKey,
+    aiAgentVersionKey: aiAgent.aiAgentVersionKey,
+    outcome: "handoff",
+    reason: "customer-request",
+    responseMode: "agent-approval",
+    groundingScoreBasisPoints: null,
+    inputTokens: null,
+    outputTokens: null,
+    costMinorUnits: null,
+    currency: "ILS",
+  });
+  const handoffReplay = await Promise.all([
+    foundation.aiRuntime.auditSink.record(handoffEvent),
+    foundation.aiRuntime.auditSink.record(handoffEvent),
+  ]);
+  assert.deepEqual(handoffReplay, [
+    { outcome: "recorded" },
+    { outcome: "recorded" },
+  ]);
+
+  const persisted = await pool.query(
+    `SELECT
+       (SELECT count(*)::integer
+        FROM ai_runtime_cost_authorizations
+        WHERE tenant_id = $1
+          AND ai_agent_key = $2
+          AND currency = 'ILS') AS authorization_count,
+       (SELECT count(*)::integer
+        FROM ai_runtime_usage
+        WHERE tenant_id = $1
+          AND ai_agent_key = $2
+          AND currency = 'ILS') AS usage_count,
+       (SELECT sum(cost_minor_units)::integer
+        FROM ai_runtime_usage
+        WHERE tenant_id = $1
+          AND ai_agent_key = $2
+          AND currency = 'ILS') AS total_cost,
+       (SELECT count(*)::integer
+        FROM ai_runtime_audit_events
+        WHERE tenant_id = $1
+          AND audit_key = $3) AS audit_count,
+       conversation.status,
+       conversation.version
+     FROM conversations AS conversation
+     WHERE conversation.tenant_id = $1
+       AND conversation.conversation_key = $4`,
+    [
+      tenantId,
+      aiAgent.aiAgentKey,
+      identityInputs[2].auditKey,
+      identityInputs[2].conversationKey,
+    ],
+  );
+  assert.deepEqual(persisted.rows, [{
+    authorization_count: 3,
+    usage_count: 3,
+    total_cost: 11,
+    audit_count: 1,
+    status: "waiting_for_agent",
+    version: 3,
+  }]);
+
+  await assert.rejects(
+    foundation.aiRuntime.costGate.recordUsage(usage(identityInputs[0], 8)),
+    /conflicting AI usage/,
+  );
 }
 
 async function verifyAiReportingSchema(pool, foundation, tenantId) {
@@ -3064,7 +3248,13 @@ export async function verifyNodePostgresIntegration(
         foundation,
         tenantId,
       );
-      await verifyAiAgentLifecycle(pool, foundation, tenantId, sourceKey);
+      const aiAgent = await verifyAiAgentLifecycle(
+        pool,
+        foundation,
+        tenantId,
+        sourceKey,
+      );
+      await verifyAiRuntimePersistence(pool, foundation, tenantId, aiAgent);
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
@@ -3075,7 +3265,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 36,
+      concurrencyScenarios: 40,
     });
   } finally {
     await pool.end();

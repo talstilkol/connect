@@ -199,6 +199,13 @@ Published קודמת ל־Archived ומפעיל את גרסת היעד באותה
 אמיתי הוכיח Create, ‏Publish, ‏Version append ו־Publication replacement
 מקבילים והעלה את הסך ל־36 תרחישי Concurrency.
 
+1.27 ‏`postgresAiRuntimeRepository.ts` ממיר את שכבת ההרצה של סוכן AI:
+הרשאת עלות חודשית, רישום Token/Cost, ‏Audit והעברה לנציג. כל חישובי העלות
+של Agent ננעלים על אותה שורת Agent, ולכן שתי בקשות שונות אינן יכולות לקרוא
+אותו Total ולהחליט שתיהן שהן בתוך התקציב. ‏Audit נועל Conversation, מאמת
+Inbound message וגרסה פעילה, ורושם Handoff באותה Transaction. ‏Harness
+אמיתי הוכיח ארבעה תרחישים מקבילים נוספים והעלה את הסך ל־40.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

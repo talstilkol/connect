@@ -1308,6 +1308,24 @@ Publish, ‏Version append ו־Publication replacement תחת בקשות מקב�
 הירידה משקפת Repository מלא וארבעה תרחישי Concurrency אמיתיים. הטווח אינו
 כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging או Pilot.
 
+4.24 ‏PostgreSQL AI Runtime persistence הושלם מקומית.
+`postgresAiRuntimeRepository.ts` מממש Cost authorization, רישום Usage,
+Audit ו־Handoff. כל פעולת עלות נועלת את ה־AI Agent המשותף לפני חישוב
+ההוצאה החודשית, כך שבקשות שונות אינן יכולות לעקוף זו את זו. Audit נועל את
+השיחה ומבצע את שינוי ה־Handoff באותה Transaction. ‏Replay זהה מוחזר באופן
+Idempotent, בעוד Payload סותר או שורת PostgreSQL לא תקינה נכשלים סגור.
+ה־Repository מחובר ל־`railwayPostgresFoundation.ts`, שמכיל כעת 28 Adapters.
+
+4.24.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (17 migrations, 40 concurrency scenarios)`. הוא הוכיח Cost
+authorization ו־Usage replay מקבילים, שתי הוצאות שונות המתחרות על אותו
+תקציב חודשי, ו־Handoff מקביל יחיד עם תוצאה עקבית לשני ה־Callers. השרת
+הזמני נעצר והתיקייה נמחקה לאחר האימות.
+
+4.25 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **2–10 שעות פיתוח נטו**.
+הטווח מיועד להשלמת Adapters מקומיים שנותרו ולסנכרון חוזי השחרור; הוא אינו
+כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging או Pilot.
+
 אם מאשרים את המודל המומלץ בסעיף 18 של מסמך ההחלטות, הטווח התכנוני
 למימוש השדות והחוזים הנלווים הוא **6–12 שעות פיתוח נטו**.
 הטווח אינו כולל המתנה לספקים, בדיקות Staging מורשות או זמן Adapter

@@ -33,6 +33,9 @@ import {
   createPostgresAiAgentRepository,
 } from "./postgresAiAgentRepository.ts";
 import {
+  createPostgresAiRuntimePersistence,
+} from "./postgresAiRuntimeRepository.ts";
+import {
   createPostgresBotFlowRepository,
 } from "./postgresBotFlowRepository.ts";
 import {
@@ -135,6 +138,7 @@ export interface RailwayPostgresFoundationOptions {
 export interface RailwayPostgresFoundation {
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly aiAgents: ReturnType<typeof createPostgresAiAgentRepository>;
+  readonly aiRuntime: ReturnType<typeof createPostgresAiRuntimePersistence>;
   readonly botFlows: ReturnType<typeof createPostgresBotFlowRepository>;
   readonly botReplyDeliveries: ReturnType<
     typeof createPostgresBotReplyDeliveryRepository
@@ -278,6 +282,7 @@ export function createRailwayPostgresFoundation(
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
+    aiRuntime: createPostgresAiRuntimePersistence({ queries, transactions }),
     botFlows: createPostgresBotFlowRepository({ queries, transactions }),
     botReplyDeliveries: createPostgresBotReplyDeliveryRepository({
       queries,

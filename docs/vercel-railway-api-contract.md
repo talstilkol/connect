@@ -396,6 +396,13 @@ Ready נשמרים באותה Transaction. ‏Harness אמיתי עבר עם 17 
 מוחזר כ־`unchanged`, וקישור מקור חסר או סותר נכשל ללא כתיבה חלקית. ‏Harness
 אמיתי עבר עם 17 Migrations ו־36 תרחישי Concurrency.
 
+7.1.43 ‏`postgresAiRuntimeRepository.ts` ממיר Cost authorization, ‏Usage,
+Audit ו־Handoff ל־PostgreSQL. נעילת Agent משותפת מסדרת את כל ההוצאות של
+אותו Agent לפני חישוב התקציב; נעילת Conversation מסדרת Audit ו־Handoff
+באותה Transaction. ‏Retry זהה משחזר את התוצאה, ו־Payload סותר נכשל סגור.
+ה־Repository מחובר ל־Foundation, שמכיל כעת 28 Adapters. ‏Harness אמיתי
+עבר עם 17 Migrations ו־40 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

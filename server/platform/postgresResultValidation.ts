@@ -67,6 +67,26 @@ export function parsePostgresPositiveInteger(
   return Number(normalized);
 }
 
+export function parsePostgresNonnegativeInteger(
+  value: unknown,
+): number {
+  const normalized =
+    typeof value === "string" && /^(?:0|[1-9][0-9]*)$/.test(value)
+      ? Number(value)
+      : value;
+
+  if (
+    !Number.isSafeInteger(normalized) ||
+    Number(normalized) < 0
+  ) {
+    throw new Error(
+      "PostgreSQL returned an invalid nonnegative integer",
+    );
+  }
+
+  return Number(normalized);
+}
+
 export function parsePostgresTimestamp(
   value: unknown,
 ): string {
