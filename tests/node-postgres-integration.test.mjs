@@ -80,6 +80,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0020_system_admin_business_profiles\.sql/);
   assert.match(source, /0021_contact_consent_events\.sql/);
   assert.match(source, /0022_campaign_delivery_provider_links\.sql/);
+  assert.match(source, /0023_api_mutation_rate_limits\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
@@ -101,6 +102,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyContactConsentLifecycle/);
   assert.match(source, /verifyCampaignAudienceRead/);
   assert.match(source, /verifyPostgresHttpRuntime/);
+  assert.match(source, /verifyApiMutationRateLimit/);
+  assert.match(source, /foundation\.createMutationRateLimitBinding/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /foundation\.campaigns\.saveSnapshot/);
   assert.match(source, /foundation\.messageTemplates\.saveDraft/);
@@ -134,7 +137,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   );
   assert.match(source, /foundation\.campaignProviderDeliveries\.recordAccepted/);
   assert.match(source, /foundation\.campaignProviderDeliveries\.applyProviderStatus/);
-  assert.match(source, /concurrencyScenarios: 57/);
+  assert.match(source, /concurrencyScenarios: 58/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

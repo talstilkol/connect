@@ -57,10 +57,10 @@ function options(overrides = {}) {
     postgresTelemetry: {
       recordIdleClientError() {},
     },
-    mutationRateLimit: {
-      async consume() {
-        return { outcome: "allowed" };
-      },
+    mutationRateLimitEnvironment: {
+      TENANT_MUTATION_RATE_LIMIT_POLICY_VERSION: "3",
+      TENANT_MUTATION_RATE_LIMIT_CAPACITY: "120",
+      TENANT_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "60",
     },
     ...overrides,
   };
@@ -114,8 +114,10 @@ test("rejects extended or incomplete composition options", async () => {
   await assert.rejects(
     createRailwayPostgresApiRuntime({
       ...options(),
-      mutationRateLimit: {},
+      mutationRateLimitEnvironment: {
+        TENANT_MUTATION_RATE_LIMIT_POLICY_VERSION: "3",
+      },
     }),
-    /runtime options are invalid/,
+    /mutation rate-limit configuration is unavailable/,
   );
 });

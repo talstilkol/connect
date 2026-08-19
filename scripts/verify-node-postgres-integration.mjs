@@ -89,6 +89,7 @@ const migrationFiles = Object.freeze([
   "0020_system_admin_business_profiles.sql",
   "0021_contact_consent_events.sql",
   "0022_campaign_delivery_provider_links.sql",
+  "0023_api_mutation_rate_limits.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -4077,10 +4078,10 @@ async function verifyPostgresHttpRuntime(connectionString) {
     postgresTelemetry: {
       recordIdleClientError() {},
     },
-    mutationRateLimit: {
-      async consume() {
-        return { outcome: "allowed" };
-      },
+    mutationRateLimitEnvironment: {
+      TENANT_MUTATION_RATE_LIMIT_POLICY_VERSION: "3",
+      TENANT_MUTATION_RATE_LIMIT_CAPACITY: "120",
+      TENANT_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "60",
     },
   });
 
@@ -4134,9 +4135,138 @@ async function verifyPostgresHttpRuntime(connectionString) {
       JSON.stringify(body),
       /tenantId|externalUserId|driver-integration-owner/,
     );
+
+    const mutationResponse = await runtime.handler.handle(
+      new Request(
+        new URL(
+          RAILWAY_API_ENDPOINT_PATH,
+          "https://railway.example.com",
+        ),
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${compactJwt}`,
+            "content-type": "application/json",
+            [VERCEL_OIDC_HEADER]: compactJwt,
+          },
+          body: JSON.stringify({
+            contractVersion: RAILWAY_API_CONTRACT_VERSION,
+            operation: "contacts.save",
+            requestKind: "mutation",
+            idempotencyKey: `connect_idempotency_v1_${"9".repeat(64)}`,
+            payload: {
+              phoneNumber: "+972501234580",
+              firstName: "Runtime",
+              lastName: null,
+              email: null,
+              company: "Connect",
+            },
+          }),
+        },
+      ),
+    );
+    const mutationBody = await mutationResponse.json();
+
+    assert.equal(mutationResponse.status, 200);
+    assert.equal(mutationBody.outcome, "ok");
+    assert.equal(mutationBody.data.replayed, false);
+    assert.equal(
+      mutationBody.data.contact.phoneNumber,
+      "+972501234580",
+    );
+    assert.doesNotMatch(
+      JSON.stringify(mutationBody),
+      /tenantId|externalUserId|driver-integration-owner/,
+    );
   } finally {
     await runtime.close();
   }
+}
+
+async function verifyApiMutationRateLimit(pool, foundation) {
+  const policy = Object.freeze({
+    policyId: "tenant-mutation",
+    policyVersion: 7,
+    capacity: 2,
+    refillPeriodSeconds: 60,
+  });
+  const binding = foundation.createMutationRateLimitBinding(policy);
+  const subjectKey = `rate_limit_v1_${"3".repeat(64)}`;
+  const concurrent = await Promise.all([
+    binding.limit({ key: subjectKey }),
+    binding.limit({ key: subjectKey }),
+    binding.limit({ key: subjectKey }),
+  ]);
+
+  assert.deepEqual(
+    concurrent.map(({ success }) => success).sort(),
+    [false, true, true],
+  );
+  assert.deepEqual(
+    await binding.limit({
+      key: `rate_limit_v1_${"4".repeat(64)}`,
+    }),
+    { success: true },
+  );
+
+  const stored = await pool.query(
+    `SELECT
+       policy_id AS "policyId",
+       policy_version AS "policyVersion",
+       subject_key AS "subjectKey",
+       capacity,
+       refill_period_seconds AS "refillPeriodSeconds",
+       available_tokens::text AS "availableTokens"
+     FROM api_mutation_rate_limit_buckets
+     WHERE policy_id = $1
+       AND policy_version = $2
+       AND subject_key = $3`,
+    [policy.policyId, policy.policyVersion, subjectKey],
+  );
+  assert.equal(stored.rowCount, 1);
+  assert.deepEqual(
+    {
+      policyId: stored.rows[0]?.policyId,
+      policyVersion: stored.rows[0]?.policyVersion,
+      subjectKey: stored.rows[0]?.subjectKey,
+      capacity: stored.rows[0]?.capacity,
+      refillPeriodSeconds: stored.rows[0]?.refillPeriodSeconds,
+    },
+    {
+      policyId: "tenant-mutation",
+      policyVersion: 7,
+      subjectKey,
+      capacity: 2,
+      refillPeriodSeconds: 60,
+    },
+  );
+  const availableTokens = Number(stored.rows[0]?.availableTokens);
+  assert.equal(Number.isFinite(availableTokens), true);
+  assert.equal(availableTokens >= 0 && availableTokens < 1, true);
+
+  await assert.rejects(
+    foundation
+      .createMutationRateLimitBinding({
+        ...policy,
+        capacity: 3,
+      })
+      .limit({ key: subjectKey }),
+    /policy version conflicts/,
+  );
+
+  await pool.query(
+    `UPDATE api_mutation_rate_limit_buckets
+     SET
+       refilled_at = refilled_at - interval '60 seconds',
+       updated_at = updated_at
+     WHERE policy_id = $1
+       AND policy_version = $2
+       AND subject_key = $3`,
+    [policy.policyId, policy.policyVersion, subjectKey],
+  );
+  assert.deepEqual(await binding.limit({ key: subjectKey }), {
+    success: true,
+  });
 }
 
 async function prepareBlockedInvitation(
@@ -4435,6 +4565,7 @@ export async function verifyNodePostgresIntegration(
       await verifyTemplateCampaignSchema(pool, tenantId);
       await verifyBotDeliverySchema(pool, tenantId);
       await verifyAiReportingSchema(pool, foundation, tenantId);
+      await verifyApiMutationRateLimit(pool, foundation);
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyConversationLifecycle(pool, foundation, tenantId);
       await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
@@ -4475,7 +4606,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 57,
+      concurrencyScenarios: 58,
     });
   } finally {
     await pool.end();

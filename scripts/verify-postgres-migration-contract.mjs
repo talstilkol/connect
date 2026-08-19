@@ -66,6 +66,7 @@ const requiredTableSequence = Object.freeze([
   "business_profile_admin_events",
   "contact_consent_events",
   "campaign_delivery_provider_links",
+  "api_mutation_rate_limit_buckets",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -91,6 +92,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0020_system_admin_business_profiles.sql",
   "0021_contact_consent_events.sql",
   "0022_campaign_delivery_provider_links.sql",
+  "0023_api_mutation_rate_limits.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

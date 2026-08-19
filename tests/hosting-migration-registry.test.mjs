@@ -141,6 +141,30 @@ test("does not invent providers for unresolved shared services", () => {
   );
 });
 
+test("separates the completed PostgreSQL tenant limiter from unresolved ingress limits", () => {
+  const rateLimits = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "security.distributed-rate-limits",
+  );
+
+  assert.ok(rateLimits);
+  assert.equal(rateLimits.decisionState, "decision-required");
+  for (const path of [
+    "postgres/migrations/0023_api_mutation_rate_limits.sql",
+    "server/platform/postgresMutationRateLimitBinding.ts",
+    "server/platform/postgresMutationRateLimitConfiguration.ts",
+    "server/platform/railwayPostgresApiRuntime.ts",
+  ]) {
+    assert.equal(rateLimits.sourceFiles.includes(path), true);
+  }
+  assert.match(
+    rateLimits.cutoverBlocker,
+    /atomic shared tenant-mutation token bucket/,
+  );
+  assert.match(rateLimits.cutoverBlocker, /System-admin mutations/);
+  assert.match(rateLimits.cutoverBlocker, /Meta webhook ingress/);
+  assert.match(rateLimits.cutoverBlocker, /approved live policy values/);
+});
+
 test("keeps the contract freeze deterministic and randomness-free", () => {
   const source = readFileSync(
     projectFile("shared/domain/hostingMigrationRegistry.ts"),
@@ -271,8 +295,11 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0020_system_admin_business_profiles.sql",
     "postgres/migrations/0021_contact_consent_events.sql",
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
+    "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
+    "server/platform/postgresMutationRateLimitBinding.ts",
+    "server/platform/postgresMutationRateLimitConfiguration.ts",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -283,7 +310,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /thirty-eight-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /thirty-nine-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /immutable contact-consent evidence/);
   assert.match(boundary.cutoverBlocker, /tenant-isolated campaign-audience reads/);
   assert.match(boundary.cutoverBlocker, /tenant-subscription lifecycle persistence/);
@@ -324,9 +351,12 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /SIGINT\/SIGTERM lifecycle/);
   assert.match(boundary.cutoverBlocker, /All six operational-report source families are migrated/);
   assert.match(boundary.cutoverBlocker, /complete authenticated reports\.read HTTP path passed against PostgreSQL 16\.13/);
-  assert.match(boundary.cutoverBlocker, /executable bootstrap cannot be safely composed/);
-  assert.match(boundary.cutoverBlocker, /provider-bound distributed mutation rate-limit adapter/);
-  assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
+  assert.match(boundary.cutoverBlocker, /shared PostgreSQL tenant-mutation token bucket/);
+  assert.match(boundary.cutoverBlocker, /missing executable bootstrap/);
+  assert.match(
+    boundary.cutoverBlocker,
+    /live provider-bound pool and rate-limit policy values/,
+  );
   assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
   assert.match(boundary.cutoverBlocker, /controlled-environment migration rehearsal and semantic parity evidence/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
@@ -409,16 +439,19 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0020_system_admin_business_profiles.sql",
     "postgres/migrations/0021_contact_consent_events.sql",
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
+    "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
     "scripts/verify-node-postgres-integration.mjs",
+    "server/platform/postgresMutationRateLimitBinding.ts",
+    "server/platform/postgresMutationRateLimitConfiguration.ts",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /twenty-three ordered/);
+  assert.match(database.cutoverBlocker, /twenty-four ordered/);
   assert.match(database.cutoverBlocker, /immutable contact-consent evidence/);
   assert.match(
     database.cutoverBlocker,
@@ -429,9 +462,12 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /fifty-seven real concurrency scenarios/);
-  assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /thirty-eight-adapter foundation/);
+  assert.match(database.cutoverBlocker, /fifty-eight real concurrency scenarios/);
+  assert.match(
+    database.cutoverBlocker,
+    /production pool and rate-limit configuration contracts/,
+  );
+  assert.match(database.cutoverBlocker, /thirty-nine-adapter foundation/);
   assert.match(
     database.cutoverBlocker,
     /consent-filtered all\/list\/tag campaign audiences with cross-tenant group isolation/,
@@ -480,7 +516,10 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /reports\.read/);
   assert.match(database.cutoverBlocker, /complete authenticated six-source reporting HTTP path/);
   assert.match(database.cutoverBlocker, /AI reporting constraints/);
-  assert.match(database.cutoverBlocker, /live provider-bound pool values/);
+  assert.match(
+    database.cutoverBlocker,
+    /live provider-bound pool and rate-limit policy values/,
+  );
   assert.match(database.cutoverBlocker, /maps every one of the 36 D1 migrations and all 51 D1 tables/);
   assert.match(database.cutoverBlocker, /deeper semantic parity evidence/);
   assert.match(

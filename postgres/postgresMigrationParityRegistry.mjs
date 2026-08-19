@@ -318,4 +318,10 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "An always-on Railway scheduler requires a fenced database lease that Cloudflare Cron did not need.",
   }),
+  Object.freeze({
+    migration: "0023_api_mutation_rate_limits.sql",
+    token: "CREATE TABLE api_mutation_rate_limit_buckets",
+    summary:
+      "Multiple Railway API instances require one shared mutation token bucket in place of a Cloudflare Rate Limit binding.",
+  }),
 ]);

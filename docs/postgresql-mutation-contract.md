@@ -11,7 +11,7 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 23 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 24 Migrations מסודרות עבור
 ה־Critical Path. הן מכסות את יסודות Tenant/Contact, ‏HTTP mutation receipts,
 Access/Membership/Invitation, ‏Conversation, ‏Templates/Campaigns, ‏Bot,
 AI/Knowledge, ‏Contact organization/import, ‏Meta credentials/Webhooks,
@@ -22,15 +22,15 @@ Production decisions ו־System Admin. השרשרת הוחלה בהצלחה על
 rehearsal בסביבה נשלטת.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 23 ה־Migrations על PostgreSQL 16,
-הפעיל DML אמיתי והוכיח 57 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+Loopback ייעודי וריק. הוא החיל את 24 ה־Migrations על PostgreSQL 16,
+הפעיל DML אמיתי והוכיח 58 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 38 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 39 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -62,14 +62,15 @@ adapter מוסיף Routes קשיחים ל־Liveness, ‏Readiness ו־API, מג�
 Timeouts ו־Request target, ואינו סומך על Host שסיפק הלקוח. ‏Service owner
 עוצר תחילה קבלת HTTP ורק אחר כך סוגר את PostgreSQL runtime, ומנסה את שתי
 השכבות גם במקרה כשל. בשלב זה נותר לחבר Process signals ו־Rate-limit provider
-אמיתי; Signal lifecycle הושלם בסעיף הבא.
+אמיתי; Signal lifecycle ומנגנון ה־Rate limit הושלמו בסעיפים הבאים.
 
 1.11 ‏`railwayNodeProcess.ts` מקבל רק `PORT` עשרוני קנוני בטווח 1–65535,
 מתקין `SIGINT` ו־`SIGTERM` רק לאחר Start מוצלח, ומסיר גם Wiring חלקי אם
 רישום Signal נכשל. כל Signal עובר באותו Close Idempotent; כשל Shutdown מסמן
-את התהליך בלי לחשוף פרטי Runtime. ‏Startup executable עדיין חסום בכוונה:
-אין לחבר את `contacts.save` לפני בחירת Distributed rate limiter והזרקתו
-ל־Runtime.
+את התהליך בלי לחשוף פרטי Runtime. ‏Startup executable עדיין אינו קיים.
+`contacts.save` מחובר כעת ל־Rate limiter אטומי ב־PostgreSQL, אך הפעלת Runtime
+דורשת Policy version, ‏Capacity וחלון Refill מפורשים ומאושרים ב־Environment;
+אין ערכי ברירת מחדל.
 
 1.12 ‏`0009_contact_organization_imports.sql` מוסיף שש טבלאות עבור ארגון
 אנשי קשר וייבוא מתחדש. ה־Foreign Keys כוללים `tenant_id`, וה־Harness חסם
@@ -260,9 +261,9 @@ Tenant. ה־Adapter מגביל את התוצאה ל־100,001, מאמת Tenant, �
 
 1.37 ‏`postgresMigrationParityRegistry.mjs` ממפה כל אחת מ־36 מיגרציות D1
 למיגרציות PostgreSQL המתאימות ול־Schema tokens קיימים. ה־Verifier דורש שכל
-מיגרציית D1 תופיע פעם אחת, שכל 51 טבלאות D1 קיימות ב־PostgreSQL, שכל 23
-מיגרציות PostgreSQL מוסברות, וששתי תוספות Railway בלבד—API mutation receipts
-ו־Scheduler lease—יישארו מסומנות בנפרד. ה־Check מחובר ל־Release gate המקומי
+מיגרציית D1 תופיע פעם אחת, שכל 51 טבלאות D1 קיימות ב־PostgreSQL, שכל 24
+מיגרציות PostgreSQL מוסברות, וששלוש תוספות Railway בלבד—API mutation receipts,
+Scheduler lease ו־API mutation token buckets—יישארו מסומנות בנפרד. ה־Check מחובר ל־Release gate המקומי
 ול־Job ה־`migrations` של Pull Request. זו הוכחת Source coverage, לא הוכחת
 Data conversion או Semantic parity בסביבת Production.
 
@@ -275,6 +276,17 @@ Transaction. ‏Triggers חוסמים זהות כפולה מול טבלת `messa
 Status שאינו מתקדם ומחיקת Evidence. נעילת ה־Link וה־Recipient יחד מונעת
 Snapshot חלקי לאחר המתנה ל־Transaction מקבילה. ה־Harness הוכיח קבלה ו־Status
 סופי מקבילים והעלה את הסך ל־57 תרחישי Concurrency.
+
+1.38 ‏Migration מספר `0023_api_mutation_rate_limits.sql`,‏
+`postgresMutationRateLimitBinding.ts` ו־
+`postgresMutationRateLimitConfiguration.ts` מוסיפים Token bucket משותף לכל
+מופעי Railway API. המפתח הוא SHA-256 אטום שכבר נגזר לפי Policy; User ו־Tenant
+אינם נשמרים. Advisory lock ו־`FOR UPDATE` מסדרים גם יצירה ראשונה וגם צריכה
+מקבילה, וה־Refill מחושב לפי זמן PostgreSQL. ‏Policy version, ‏Capacity וחלון
+Refill הם Environment חובה ללא Defaults; שינוי ערכים תחת אותה גרסה נכשל
+סגור. ה־Runtime יוצר את ה־Guard מתוך אותו Pool. ‏Harness אמיתי הוכיח ששתי
+בקשות מתוך שלוש מתקבלות במכסה `2`, שהשלישית נחסמת וש־Refill מאפשר בקשה
+נוספת; הסך עלה ל־58 תרחישי Concurrency.
 
 ## 2. הסבר למתחילים
 
@@ -346,7 +358,7 @@ Receipt פעיל ל־Audit נצחי.
 
 5.5 ערכי משתמש נשלחים רק כ־Parameters; הם אינם משורשרים אל מחרוזות SQL.
 
-5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 45 טבלאות ה־Critical
+5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 54 טבלאות ה־Critical
 Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ויצירת מזהים אקראית.
 
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.
@@ -360,7 +372,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 38 ה־Adapters, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 39 ה־Adapters, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 
@@ -373,14 +385,14 @@ Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 עדיין חסרים ערכים ואישור Production, ‏Telemetry sink, ‏CA evidence וכלי
 Migration מאושר ב־Railway.
 
-6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 23
+6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 24
 מיגרציות PostgreSQL. עדיין חסרים כלי Data migration מאושר, Dry run עם נתונים
 מייצגים בסביבה נשלטת, השוואת Counts/Digests וראיית Semantic parity חתומה.
 
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/
 credential, ‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler
-lease, ‏Message Template/Campaign ו־Invitation DML נבדקו ב־57 תרחישי
+lease, ‏Message Template/Campaign, ‏API mutation rate limit ו־Invitation DML נבדקו ב־58 תרחישי
 Concurrency מול PostgreSQL מקומי אמיתי.
 לא נותר פער Repository ברשימת ה־D1 שמופה. עדיין חסרים Staging evidence,
 ‏Backup/Restore rehearsal, ‏Load test וראיית Cutover/Rollback עם נתונים חיים.

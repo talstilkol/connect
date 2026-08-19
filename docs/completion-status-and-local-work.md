@@ -1512,9 +1512,10 @@ Production נשאר חסום רק על עבודה חיה והחלטות שאינ
 את ה־Gate ל־Ready ללא Accounts, ‏Credentials ו־Staging evidence אמיתיים.
 
 4.46 ‏PostgreSQL migration source parity הושלם מקומית. Registry
-Machine-readable ממפה בדיוק פעם אחת את כל 36 מיגרציות D1 אל 23 מיגרציות
-PostgreSQL, מאמת שכל 51 טבלאות D1 קיימות, ומסווג בנפרד שתי מיגרציות
-Railway-only: ‏API mutation receipts ו־Scheduler lease. ה־Verifier מחובר
+Machine-readable ממפה בדיוק פעם אחת את כל 36 מיגרציות D1 אל 24 מיגרציות
+PostgreSQL, מאמת שכל 51 טבלאות D1 קיימות, ומסווג בנפרד שלוש מיגרציות
+Railway-only: ‏API mutation receipts, ‏Scheduler lease ו־API mutation token
+buckets. ה־Verifier מחובר
 ל־Release gate ול־Pull Request `migrations` check. בכך נסגר פער הכיסוי
 המבני; עדיין חסרים Data conversion, ‏Semantic parity ו־Staging evidence.
 
@@ -1523,3 +1524,25 @@ Railway-only: ‏API mutation receipts ו־Scheduler lease. ה־Verifier מחו�
 D1, חוזה 23 מיגרציות PostgreSQL, בדיקת כיסוי 51 הטבלאות וכל **1,998
 הבדיקות** עברו יחד. תוצאה זו מוכיחה את תקינות ה־Source המקומי בלבד ואינה
 מחליפה Migration rehearsal או Evidence מסביבת Railway חיה.
+
+4.47 ‏Distributed tenant mutation rate limiting הושלם מקומית עבור Railway
+API. ‏Migration מספר `0023_api_mutation_rate_limits.sql` מוסיף Token buckets
+משותפים ואטומיים. ה־Binding שומר רק מפתח SHA-256 אטום, משתמש ב־Advisory lock
+וב־`FOR UPDATE`, מחשב Continuous refill לפי זמן PostgreSQL ונכשל סגור כאשר
+אותה Policy version מקבלת Capacity או חלון שונים. ‏Policy version, ‏Capacity
+ו־Refill period הם Environment חובה ללא Defaults. ה־Foundation מכיל כעת
+39 Adapters וה־API Runtime יוצר ממנו את Guard של `contacts.save`.
+
+4.47.1 ‏Harness נקי על PostgreSQL 16 עבר עם
+`PASS (24 migrations, 58 concurrency scenarios)`. הוא הוכיח שבמכסה `2`,
+שלוש צריכות מקבילות מחזירות בדיוק שתי הצלחות וחסימה אחת, ש־Scope אחר מבודד,
+ששינוי Policy ללא העלאת גרסה נכשל וש־Refill מאפשר בקשה נוספת. במהלך האימות
+אותר ותוקן Cast לא עקבי בין `INTEGER` ל־`NUMERIC`, וכן תוקן Assertion שהיה
+תלוי בטעות באפס זמן מוחלט. שרת הבדיקה נעצר והתיקייה הזמנית נמחקה.
+
+4.47.2 שער השחרור המקומי המלא עבר לאחר ה־Staging. ‏Source guard סרק 544
+קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,089 קבצים והיסטוריית Git,
+ו־Build, ‏TypeScript, ‏ESLint, חוזה 24 מיגרציות PostgreSQL, ‏Migration parity
+וכל **2,007 הבדיקות** עברו יחד. ‏Production נשאר חסום על ערכי Policy חיים,
+Startup executable, ‏Data migration rehearsal, ‏Semantic parity וראיות
+Staging/Load; תוצאת Local זו אינה מחליפה אותם.

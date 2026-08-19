@@ -468,11 +468,19 @@ Concurrency.
 
 7.1.53 ‏`postgresMigrationParityRegistry.mjs` ו־
 `verify-postgres-migration-parity.mjs` מקבעים מיפוי Machine-readable של כל
-36 מיגרציות D1 ושל כל 51 הטבלאות אל 23 מיגרציות PostgreSQL. שתי מיגרציות
-Railway-only—HTTP mutation receipts ו־Scheduler lease—מסומנות בנפרד. ה־
+36 מיגרציות D1 ושל כל 51 הטבלאות אל 24 מיגרציות PostgreSQL. שלוש מיגרציות
+Railway-only—HTTP mutation receipts, ‏Scheduler lease ו־API mutation token
+buckets—מסומנות בנפרד. ה־
 Verifier דוחה Migration חסרה, כפולה, לא מוסברת או Evidence token שאינו קיים,
 ורץ גם ב־Release gate וגם ב־Pull Request `migrations` check. זה סוגר את פער
 Source coverage; הוא אינו מוכיח Data conversion או Semantic parity ב־Staging.
+
+7.1.54 ‏`0023_api_mutation_rate_limits.sql` וה־PostgreSQL binding מחברים
+את `contacts.save` למכסה אטומית המשותפת לכל מופעי Railway. ה־Runtime דורש
+Policy version, ‏Capacity וחלון Refill מפורשים; ערך חסר, חלקי או לא חוקי
+נכשל סגור. ה־DB שומר רק מפתח SHA-256 אטום, נועל כל Scope ומחשב Refill לפי
+זמן PostgreSQL. ‏Harness אמיתי עבר עם 24 Migrations ו־58 תרחישי Concurrency,
+כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות במכסה `2`.
 
 7.2 עדיין חסר:
 
@@ -485,7 +493,8 @@ Production ו־Preview origins המאושרים.
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
-ערכי Production pool מאושרים, Data migration rehearsal, ‏Semantic parity
+ערכי Production pool ו־Rate-limit policy מאושרים, Startup executable,
+Data migration rehearsal, ‏Semantic parity
 וכיסוי Concurrency למסלולים שאינם כלולים עדיין ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
@@ -525,7 +534,12 @@ Browser, ‏Logs או Evidence.
 8.9 `POSTGRES_TLS_MODE` חייב להיות `verify-full` ב־Staging/Production.
 `POSTGRES_TLS_CA_PEM` אופציונלי רק כאשר הספק דורש Root CA מותאם.
 
-8.10 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
+8.10 `TENANT_MUTATION_RATE_LIMIT_POLICY_VERSION`,‏
+`TENANT_MUTATION_RATE_LIMIT_CAPACITY` ו־
+`TENANT_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS` — Policy פנימית מפורשת
+ל־Railway API. אין Defaults; שינוי Capacity או חלון מחייב גרסה חדשה.
+
+8.11 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
 חסר, חלקי או לא חוקי מונע יצירת Verifier.
 
 ## 9. מקורות רשמיים

@@ -55,6 +55,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "contactOrganization",
     "contacts",
     "conversations",
+    "createMutationRateLimitBinding",
     "invitationAcceptances",
     "invitationDeliveries",
     "invitationExpirations",
@@ -165,6 +166,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     typeof foundation.railwayApiMutations.saveContact,
     "function",
   );
+  assert.equal(typeof foundation.createMutationRateLimitBinding, "function");
   assert.equal(typeof foundation.invitations.request, "function");
   assert.equal(
     typeof foundation.invitationDeliveries.claim,

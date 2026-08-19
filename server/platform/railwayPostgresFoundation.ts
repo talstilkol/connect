@@ -143,6 +143,10 @@ import {
 import {
   createPostgresSystemAdminTenantDirectoryRepository,
 } from "./postgresSystemAdminTenantDirectoryRepository.ts";
+import {
+  createPostgresMutationRateLimitBinding,
+  type PostgresMutationRateLimitPolicy,
+} from "./postgresMutationRateLimitBinding.ts";
 
 export type RailwayPostgresFoundationErrorCode =
   | "configuration-disabled"
@@ -260,6 +264,9 @@ export interface RailwayPostgresFoundation {
   readonly railwayApiMutations: ReturnType<
     typeof createPostgresRailwayApiMutationExecutor
   >;
+  readonly createMutationRateLimitBinding: (
+    policy: Readonly<PostgresMutationRateLimitPolicy>,
+  ) => ReturnType<typeof createPostgresMutationRateLimitBinding>;
   readonly invitations: ReturnType<
     typeof createPostgresTeamInvitationRepository
   >;
@@ -447,6 +454,11 @@ export function createRailwayPostgresFoundation(
     }),
     railwayApiMutations:
       createPostgresRailwayApiMutationExecutor(transactions),
+    createMutationRateLimitBinding(
+      policy: Readonly<PostgresMutationRateLimitPolicy>,
+    ) {
+      return createPostgresMutationRateLimitBinding(transactions, policy);
+    },
     invitations: createPostgresTeamInvitationRepository({
       queries,
       transactions,

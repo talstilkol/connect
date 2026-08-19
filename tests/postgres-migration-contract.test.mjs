@@ -42,6 +42,7 @@ const productionDecisionSchema = migrationSources[19];
 const systemAdminBusinessProfileSchema = migrationSources[20];
 const contactConsentSchema = migrationSources[21];
 const campaignDeliveryProviderSchema = migrationSources[22];
+const apiMutationRateLimitSchema = migrationSources[23];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -68,15 +69,36 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0020_system_admin_business_profiles.sql",
     "0021_contact_consent_events.sql",
     "0022_campaign_delivery_provider_links.sql",
+    "0023_api_mutation_rate_limits.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 23,
+      migrationCount: 24,
       findings: [],
     },
   );
+});
+
+test("defines bounded opaque PostgreSQL API mutation token buckets", () => {
+  assert.match(
+    apiMutationRateLimitSchema,
+    /CREATE TABLE api_mutation_rate_limit_buckets[\s\S]*PRIMARY KEY \(policy_id, policy_version, subject_key\)/,
+  );
+  assert.match(
+    apiMutationRateLimitSchema,
+    /policy_id IN \('tenant-mutation', 'system-admin-mutation'\)/,
+  );
+  assert.match(
+    apiMutationRateLimitSchema,
+    /subject_key ~ '\^rate_limit_v1_\[a-f0-9\]\{64\}\$'/,
+  );
+  assert.match(
+    apiMutationRateLimitSchema,
+    /available_tokens >= 0[\s\S]*available_tokens <= capacity/,
+  );
+  assert.doesNotMatch(apiMutationRateLimitSchema, /random|uuid/i);
 });
 
 test("defines atomic PostgreSQL campaign provider reconciliation evidence", () => {

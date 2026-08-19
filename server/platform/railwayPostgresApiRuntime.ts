@@ -1,5 +1,5 @@
-import type {
-  RateLimitGuard,
+import {
+  createRateLimitGuard,
 } from "../security/rateLimit.ts";
 import type {
   NodePostgresPoolEnvironment,
@@ -23,6 +23,10 @@ import type {
 import {
   createRailwayPostgresFoundation,
 } from "./railwayPostgresFoundation.ts";
+import {
+  inspectPostgresTenantMutationRateLimitConfiguration,
+  type PostgresTenantMutationRateLimitEnvironment,
+} from "./postgresMutationRateLimitConfiguration.ts";
 
 export interface RailwayPostgresApiRuntimeOptions {
   readonly identityEnvironment?: RailwayApiIdentityEnvironment;
@@ -31,7 +35,8 @@ export interface RailwayPostgresApiRuntimeOptions {
     RailwayApiIdentityAdapterDependencies
   >;
   readonly postgresTelemetry: NodePostgresPoolTelemetry;
-  readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
+  readonly mutationRateLimitEnvironment?:
+    PostgresTenantMutationRateLimitEnvironment;
   readonly maximumBodyBytes?: number;
   readonly maximumResponseBytes?: number;
 }
@@ -47,7 +52,7 @@ const optionKeys = Object.freeze([
   "identityEnvironment",
   "maximumBodyBytes",
   "maximumResponseBytes",
-  "mutationRateLimit",
+  "mutationRateLimitEnvironment",
   "postgresEnvironment",
   "postgresTelemetry",
 ]);
@@ -63,8 +68,7 @@ function requireOptions(
 
   if (
     keys.some((key) => !optionKeys.includes(key)) ||
-    typeof options.postgresTelemetry?.recordIdleClientError !== "function" ||
-    typeof options.mutationRateLimit?.consume !== "function"
+    typeof options.postgresTelemetry?.recordIdleClientError !== "function"
   ) {
     throw new Error("Railway PostgreSQL API runtime options are invalid");
   }
@@ -79,6 +83,17 @@ export async function createRailwayPostgresApiRuntime(
   options: Readonly<RailwayPostgresApiRuntimeOptions>,
 ): Promise<Readonly<RailwayPostgresApiRuntime>> {
   requireOptions(options);
+  const mutationRateLimitConfiguration =
+    inspectPostgresTenantMutationRateLimitConfiguration(
+      options.mutationRateLimitEnvironment,
+    );
+
+  if (mutationRateLimitConfiguration.status !== "configured") {
+    throw new Error(
+      "Railway PostgreSQL mutation rate-limit configuration is unavailable",
+    );
+  }
+
   const foundation = createRailwayPostgresFoundation({
     environment: options.postgresEnvironment,
     telemetry: options.postgresTelemetry,
@@ -92,7 +107,12 @@ export async function createRailwayPostgresApiRuntime(
       selections: foundation.selections,
       contacts: foundation.contacts,
       reports: foundation.reports,
-      mutationRateLimit: options.mutationRateLimit,
+      mutationRateLimit: createRateLimitGuard(
+        foundation.createMutationRateLimitBinding(
+          mutationRateLimitConfiguration.policy,
+        ),
+        "tenant-mutation",
+      ),
       mutations: foundation.railwayApiMutations,
       maximumBodyBytes: options.maximumBodyBytes,
       maximumResponseBytes: options.maximumResponseBytes,
