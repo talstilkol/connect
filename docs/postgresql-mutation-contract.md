@@ -220,6 +220,14 @@ Evidence ישן מ־24 שעות או יותר מ־Delivery מאושר אחד נ�
 תחת `FOR UPDATE`, כך ששתי בקשות מקבילות מחזירות `updated` ו־`unchanged`
 בלי עדכון כפול. ה־Harness העלה את הסך ל־43 תרחישי Concurrency.
 
+1.30 ‏Migration מספר `0018_tenant_subscriptions.sql` ו־
+`postgresTenantSubscriptionRepository.ts` ממירים יצירה, הארכה, שינוי מצב
+וביטול של Tenant Subscription. כל מעבר נועל את שורת המנוי, בודק גרסה
+צפויה ושומר באותה Transaction גם את מצב ה־Tenant וגם Event דטרמיניסטי.
+Trigger במסד מוסיף Audit לכל Event, ועדכון או מחיקה של Events חסומים.
+ה־Harness הוכיח ארבע פעולות מקבילות נוספות והעלה את הסך ל־47 תרחישי
+Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

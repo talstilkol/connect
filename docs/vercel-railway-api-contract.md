@@ -417,6 +417,13 @@ Inbound הקודמת המיידית לפי `(occurred_at, message_key)`, מוג�
 עקבי. ה־Foundation מכיל כעת 30 Adapters; Harness אמיתי עבר עם 18 Migrations
 ו־43 תרחישי Concurrency.
 
+7.1.46 ‏`0018_tenant_subscriptions.sql` ו־
+`postgresTenantSubscriptionRepository.ts` ממירים יצירה, הארכה, השעיה,
+הפעלה וביטול של מנוי Tenant ל־PostgreSQL. כל שינוי משתמש ב־Optimistic
+Version ובנעילת שורה, מסנכרן את מצב ה־Tenant וכותב Event ו־Audit בלתי־משתנים
+באותה Transaction. ה־Foundation מכיל כעת 31 Adapters; Harness אמיתי עבר
+עם 19 Migrations ו־47 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

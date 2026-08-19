@@ -1366,3 +1366,22 @@ Staging, ‏Load test או Pilot.
 נטו**. הירידה משקפת Adapter מלא ותרחיש Concurrency אמיתי נוסף. הטווח אינו
 כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging, ‏Load test
 או Pilot.
+
+4.30 ‏PostgreSQL Tenant Subscription persistence הושלם מקומית.
+Migration מספר `0018_tenant_subscriptions.sql` מוסיף מצב מנוי מסונכרן עם
+Tenant, היסטוריית Events דטרמיניסטית ו־Audit הנוצר ב־Trigger. ‏
+`postgresTenantSubscriptionRepository.ts` מממש יצירה Idempotent, הארכה,
+שינוי מצב וביטול תחת נעילות שורה ו־Optimistic Version. ‏Events אינם ניתנים
+לעדכון או למחיקה. ה־Repository מחובר ל־`railwayPostgresFoundation.ts`,
+שמכיל כעת 31 Adapters.
+
+4.30.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (19 migrations, 47 concurrency scenarios)`. הוא הוכיח יצירה כפולה
+Idempotent וכן הארכה, השעיה וביטול מקבילים, שבכל אחד מהם רק שינוי אחד
+מצליח והשני מסווג כ־Conflict. ארבעת ה־Events וארבעת רישומי ה־Audit אומתו,
+והשרת הזמני נעצר והתיקייה נמחקה.
+
+4.31 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **10–36 שעות פיתוח
+נטו**. הירידה משקפת Migration, ‏Repository וארבעה תרחישי Concurrency
+אמיתיים. הטווח אינו כולל החלטות ספקים, Credentials, ‏Railway environment,
+Staging, ‏Load test או Pilot.

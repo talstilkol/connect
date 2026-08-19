@@ -81,6 +81,7 @@ const migrationFiles = Object.freeze([
   "0015_campaign_dispatch.sql",
   "0016_ai_knowledge.sql",
   "0017_ai_reply_outbox.sql",
+  "0018_tenant_subscriptions.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2274,6 +2275,146 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
   }]);
 }
 
+async function verifyTenantSubscriptionLifecycle(pool, foundation) {
+  const tenant = await pool.query(
+    `INSERT INTO tenants (display_name, status)
+     VALUES ('Subscription integration tenant', 'trial')
+     RETURNING id`,
+  );
+  const subscriptionTenantId = Number(tenant.rows[0]?.id);
+  assert.equal(
+    Number.isSafeInteger(subscriptionTenantId) && subscriptionTenantId > 0,
+    true,
+  );
+  const actorExternalUserId = "system-admin-subscription-integration";
+  const startsAt = "2026-08-01T00:00:00.000Z";
+  const firstEndsAt = "2026-09-01T00:00:00.000Z";
+  const extendedEndsAt = "2026-10-01T00:00:00.000Z";
+  const createInput = Object.freeze({
+    tenantId: subscriptionTenantId,
+    status: "active",
+    startsAt,
+    endsAt: firstEndsAt,
+    actorExternalUserId,
+    occurredAt: "2026-07-26T12:00:00.000Z",
+  });
+  const created = await Promise.all([
+    foundation.subscriptions.create(createInput),
+    foundation.subscriptions.create(createInput),
+  ]);
+  assert.deepEqual(
+    created.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+
+  const extendInput = Object.freeze({
+    tenantId: subscriptionTenantId,
+    expectedVersion: 1,
+    newEndsAt: extendedEndsAt,
+    actorExternalUserId,
+    occurredAt: "2026-08-15T08:00:00.000Z",
+  });
+  const extended = await Promise.all([
+    foundation.subscriptions.extend(extendInput),
+    foundation.subscriptions.extend(extendInput),
+  ]);
+  assert.deepEqual(
+    extended.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+
+  const statusInput = Object.freeze({
+    tenantId: subscriptionTenantId,
+    expectedVersion: 2,
+    status: "suspended",
+    actorExternalUserId,
+    occurredAt: "2026-08-20T08:00:00.000Z",
+  });
+  const suspended = await Promise.all([
+    foundation.subscriptions.changeStatus(statusInput),
+    foundation.subscriptions.changeStatus(statusInput),
+  ]);
+  assert.deepEqual(
+    suspended.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+
+  const cancelInput = Object.freeze({
+    tenantId: subscriptionTenantId,
+    expectedVersion: 3,
+    actorExternalUserId,
+    occurredAt: "2026-08-21T08:00:00.000Z",
+  });
+  const cancelled = await Promise.all([
+    foundation.subscriptions.cancel(cancelInput),
+    foundation.subscriptions.cancel(cancelInput),
+  ]);
+  assert.deepEqual(
+    cancelled.map(({ outcome }) => outcome).sort(),
+    ["conflict", "updated"],
+  );
+
+  const events = await foundation.subscriptions.listEvents(
+    subscriptionTenantId,
+  );
+  assert.deepEqual(
+    events.map(({ eventType, subscriptionVersion }) => ({
+      eventType,
+      subscriptionVersion,
+    })),
+    [
+      { eventType: "cancelled", subscriptionVersion: 4 },
+      { eventType: "status-changed", subscriptionVersion: 3 },
+      { eventType: "extended", subscriptionVersion: 2 },
+      { eventType: "created", subscriptionVersion: 1 },
+    ],
+  );
+  const persisted = await pool.query(
+    `SELECT
+       subscription.status,
+       subscription.version,
+       subscription.ends_at AS "endsAt",
+       subscription.cancelled_at AS "cancelledAt",
+       tenant.status AS "tenantStatus",
+       count(DISTINCT event.event_key)::integer AS "eventCount",
+       count(DISTINCT audit.id)::integer AS "auditCount"
+     FROM tenant_subscriptions AS subscription
+     INNER JOIN tenants AS tenant
+       ON tenant.id = subscription.tenant_id
+     INNER JOIN tenant_subscription_events AS event
+       ON event.tenant_id = subscription.tenant_id
+     INNER JOIN audit_logs AS audit
+       ON audit.tenant_id = subscription.tenant_id
+      AND audit.target_type = 'tenant_subscription'
+     WHERE subscription.tenant_id = $1
+     GROUP BY
+       subscription.status,
+       subscription.version,
+       subscription.ends_at,
+       subscription.cancelled_at,
+       tenant.status`,
+    [subscriptionTenantId],
+  );
+  assert.deepEqual(persisted.rows, [{
+    status: "cancelled",
+    version: 4,
+    endsAt: new Date(extendedEndsAt),
+    cancelledAt: new Date(cancelInput.occurredAt),
+    tenantStatus: "cancelled",
+    eventCount: 4,
+    auditCount: 4,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE tenant_subscription_events
+       SET actor_external_user_id = 'tampered'
+       WHERE tenant_id = $1`,
+      [subscriptionTenantId],
+    ),
+    /events are immutable/,
+  );
+}
+
 async function verifyKnowledgeLifecycle(pool, foundation, tenantId) {
   const sourceContent =
     "שעות הפעילות מופיעות באתר. ניתן לפנות לשירות דרך WhatsApp.";
@@ -3472,6 +3613,7 @@ export async function verifyNodePostgresIntegration(
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
       await verifyCampaignDispatch(pool, foundation, tenantId);
+      await verifyTenantSubscriptionLifecycle(pool, foundation);
     } finally {
       await foundation.close();
     }
@@ -3479,7 +3621,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 43,
+      concurrencyScenarios: 47,
     });
   } finally {
     await pool.end();

@@ -68,6 +68,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "readiness",
     "reports",
     "selections",
+    "subscriptions",
     "whatsappDeliveryPolicies",
     "whatsappRateLimits",
     "workerSchedulerLeases",
@@ -126,6 +127,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   assert.equal(typeof foundation.readiness.check, "function");
   assert.equal(typeof foundation.reports.read, "function");
   assert.equal(typeof foundation.selections.save, "function");
+  assert.equal(typeof foundation.subscriptions.create, "function");
   assert.equal(
     typeof foundation.railwayApiMutations.saveContact,
     "function",

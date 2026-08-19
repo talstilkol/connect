@@ -37,6 +37,7 @@ const workerSchedulerLeaseSchema = migrationSources[14];
 const campaignDispatchSchema = migrationSources[15];
 const aiKnowledgeSchema = migrationSources[16];
 const aiReplyOutboxSchema = migrationSources[17];
+const tenantSubscriptionSchema = migrationSources[18];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -58,15 +59,40 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0015_campaign_dispatch.sql",
     "0016_ai_knowledge.sql",
     "0017_ai_reply_outbox.sql",
+    "0018_tenant_subscriptions.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 18,
+      migrationCount: 19,
       findings: [],
     },
   );
+});
+
+test("defines synchronized PostgreSQL subscriptions with immutable audited events", () => {
+  assert.match(
+    tenantSubscriptionSchema,
+    /CREATE TABLE tenant_subscriptions[\s\S]*CREATE TABLE tenant_subscription_events/,
+  );
+  assert.match(
+    tenantSubscriptionSchema,
+    /tenant_subscriptions_cancelled_state_consistent[\s\S]*status = 'cancelled'[\s\S]*cancelled_at IS NOT NULL/,
+  );
+  assert.match(
+    tenantSubscriptionSchema,
+    /tenant_subscription_events_tenant_version_uq[\s\S]*UNIQUE \(tenant_id, subscription_version\)/,
+  );
+  assert.match(
+    tenantSubscriptionSchema,
+    /audit_tenant_subscription_event_insert[\s\S]*INSERT INTO audit_logs[\s\S]*subscription\.status_changed/,
+  );
+  assert.match(
+    tenantSubscriptionSchema,
+    /reject_tenant_subscription_event_mutation[\s\S]*events are immutable[\s\S]*BEFORE UPDATE[\s\S]*BEFORE DELETE/,
+  );
+  assert.doesNotMatch(tenantSubscriptionSchema, /random|uuid/i);
 });
 
 test("defines a tenant-bound PostgreSQL AI reply approval outbox", () => {

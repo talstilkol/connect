@@ -75,6 +75,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0015_campaign_dispatch\.sql/);
   assert.match(source, /0016_ai_knowledge\.sql/);
   assert.match(source, /0017_ai_reply_outbox\.sql/);
+  assert.match(source, /0018_tenant_subscriptions\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
@@ -88,6 +89,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyWhatsappRateLimitLedger/);
   assert.match(source, /verifyWorkerSchedulerLease/);
   assert.match(source, /verifyCampaignDispatch/);
+  assert.match(source, /verifyTenantSubscriptionLifecycle/);
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /foundation\.campaigns\.saveSnapshot/);
@@ -107,7 +109,11 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.aiRuntime\.auditSink\.record/);
   assert.match(source, /foundation\.aiReplyOutbox\.stage/);
   assert.match(source, /foundation\.aiReplyOutbox\.decide/);
-  assert.match(source, /concurrencyScenarios: 43/);
+  assert.match(source, /foundation\.subscriptions\.create/);
+  assert.match(source, /foundation\.subscriptions\.extend/);
+  assert.match(source, /foundation\.subscriptions\.changeStatus/);
+  assert.match(source, /foundation\.subscriptions\.cancel/);
+  assert.match(source, /concurrencyScenarios: 47/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,
