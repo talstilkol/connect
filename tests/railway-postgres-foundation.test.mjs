@@ -48,6 +48,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "campaignDispatch",
     "campaigns",
     "close",
+    "contactConsents",
     "contactImports",
     "contactOrganization",
     "contacts",
@@ -90,6 +91,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   assert.equal(typeof foundation.botReplyDeliveries.stage, "function");
   assert.equal(typeof foundation.botRuntime.applyHandoff, "function");
   assert.equal(typeof foundation.contacts.list, "function");
+  assert.equal(typeof foundation.contactConsents.recordEvent, "function");
   assert.equal(
     typeof foundation.conversations.recordInboundMessage,
     "function",

@@ -444,6 +444,13 @@ Replay עקבי. ה־Foundation מכיל כעת 33 Adapters; Harness אמיתי 
 בלתי־משתנה. ה־Foundation מכיל כעת 35 Adapters; Harness אמיתי עבר עם
 21 Migrations ו־53 תרחישי Concurrency.
 
+7.1.50 ‏`0021_contact_consent_events.sql` ו־
+`postgresContactConsentRepository.ts` מוסיפים היסטוריית Consent בלתי־משתנה
+והקרנת מצב אטומית לפי ה־Event העדכני ביותר. מפתח Event מחושב מחדש לפני כתיבה,
+ה־Contact ננעל, Retry זהה נשאר Idempotent ו־Event ישן אינו דורס מצב חדש. ה־
+Foundation מכיל כעת 36 Adapters; ‏Harness אמיתי עבר עם 22 Migrations ו־55
+תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

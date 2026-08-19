@@ -40,6 +40,7 @@ const aiReplyOutboxSchema = migrationSources[17];
 const tenantSubscriptionSchema = migrationSources[18];
 const productionDecisionSchema = migrationSources[19];
 const systemAdminBusinessProfileSchema = migrationSources[20];
+const contactConsentSchema = migrationSources[21];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -64,15 +65,36 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0018_tenant_subscriptions.sql",
     "0019_production_decisions.sql",
     "0020_system_admin_business_profiles.sql",
+    "0021_contact_consent_events.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 21,
+      migrationCount: 22,
       findings: [],
     },
   );
+});
+
+test("defines tenant-scoped immutable PostgreSQL consent evidence", () => {
+  assert.match(
+    contactConsentSchema,
+    /CREATE TABLE contact_consent_events[\s\S]*FOREIGN KEY \(tenant_id, contact_id\)[\s\S]*REFERENCES contacts \(tenant_id, id\)/,
+  );
+  assert.match(
+    contactConsentSchema,
+    /contact_consent_events_key_sha256[\s\S]*contact_consent_v1_/,
+  );
+  assert.match(
+    contactConsentSchema,
+    /contact_consent_events_tenant_key_uq[\s\S]*UNIQUE \(tenant_id, idempotency_key\)/,
+  );
+  assert.match(
+    contactConsentSchema,
+    /reject_contact_consent_event_mutation[\s\S]*events are immutable[\s\S]*BEFORE UPDATE[\s\S]*BEFORE DELETE/i,
+  );
+  assert.doesNotMatch(contactConsentSchema, /random|uuid/i);
 });
 
 test("defines PostgreSQL system-admin profile evidence with proof and immutable audit", () => {

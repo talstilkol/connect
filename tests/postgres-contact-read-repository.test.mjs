@@ -124,6 +124,23 @@ test("finds one contact by tenant and canonical phone", async () => {
   );
 });
 
+test("finds one contact by tenant and contact identity", async () => {
+  const fixture = queryFixture([contactRow()]);
+  const contact = await createPostgresContactReadRepository(
+    fixture.queries,
+  ).findByTenantAndId(7, 23);
+
+  assert.equal(contact?.phoneNumber, "+972501234567");
+  assert.deepEqual(fixture.calls, [{
+    sql: postgresContactReadSql.findByTenantAndId,
+    parameters: [7, 23],
+  }]);
+  assert.match(
+    postgresContactReadSql.findByTenantAndId,
+    /tenant_id = \$1[\s\S]*id = \$2/,
+  );
+});
+
 test("rejects invalid phone input and cross-tenant lookup rows", async () => {
   const repository = createPostgresContactReadRepository(
     queryFixture([]).queries,
@@ -137,6 +154,12 @@ test("rejects invalid phone input and cross-tenant lookup rows", async () => {
     createPostgresContactReadRepository(
       queryFixture([contactRow({ tenantId: "8" })]).queries,
     ).findByTenantAndPhone(7, "+972501234567"),
+    /cross-tenant contact/,
+  );
+  await assert.rejects(
+    createPostgresContactReadRepository(
+      queryFixture([contactRow({ id: "24" })]).queries,
+    ).findByTenantAndId(7, 23),
     /cross-tenant contact/,
   );
 });

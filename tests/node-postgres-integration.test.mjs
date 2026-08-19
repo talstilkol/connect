@@ -78,6 +78,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0018_tenant_subscriptions\.sql/);
   assert.match(source, /0019_production_decisions\.sql/);
   assert.match(source, /0020_system_admin_business_profiles\.sql/);
+  assert.match(source, /0021_contact_consent_events\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
@@ -95,6 +96,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyTenantProvisioningLifecycle/);
   assert.match(source, /verifyProductionDecisionLifecycle/);
   assert.match(source, /verifySystemAdminLifecycle/);
+  assert.match(source, /verifyContactConsentLifecycle/);
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /foundation\.campaigns\.saveSnapshot/);
@@ -122,7 +124,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.productionDecisions\.save/);
   assert.match(source, /foundation\.systemAdminTenantDirectory\.listPage/);
   assert.match(source, /foundation\.systemAdminBusinessProfiles\.update/);
-  assert.match(source, /concurrencyScenarios: 53/);
+  assert.match(source, /foundation\.contactConsents\.recordEvent/);
+  assert.match(source, /concurrencyScenarios: 55/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

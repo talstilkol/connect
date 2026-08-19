@@ -53,6 +53,9 @@ import {
   deriveTeamInvitationDeliveryKey,
 } from "../server/team/teamInvitationKey.ts";
 import {
+  deriveContactConsentEventKey,
+} from "../server/contacts/contactConsentEventKey.ts";
+import {
   railwayWorkerSchedulerId,
 } from "../shared/domain/workerScheduler.ts";
 
@@ -84,6 +87,7 @@ const migrationFiles = Object.freeze([
   "0018_tenant_subscriptions.sql",
   "0019_production_decisions.sql",
   "0020_system_admin_business_profiles.sql",
+  "0021_contact_consent_events.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -289,6 +293,127 @@ async function verifyContactLifecycle(
     [tenantId, command.profile.phoneNumber],
   );
   assert.equal(persisted.rows[0]?.name, "Integration");
+}
+
+async function verifyContactConsentLifecycle(pool, foundation, tenantId) {
+  const createdAt = "2026-08-19T08:15:00.000Z";
+  const inserted = await pool.query(
+    `INSERT INTO contacts (
+       tenant_id,
+       phone_e164,
+       first_name,
+       mailing_status,
+       consent_status,
+       version,
+       created_at,
+       updated_at
+     ) VALUES (
+       $1, '+972501234579', 'Consent',
+       'unsubscribed', 'unknown', 1,
+       $2::timestamptz, $2::timestamptz
+     )
+     RETURNING id`,
+    [tenantId, createdAt],
+  );
+  const contactId = Number(inserted.rows[0]?.id);
+  assert.equal(Number.isSafeInteger(contactId) && contactId > 0, true);
+
+  const actorExternalUserId = "driver-integration-owner";
+  const consentInput = async (eventType, occurredAt, evidenceReference) => {
+    const identity = Object.freeze({
+      tenantId,
+      contactId,
+      eventType,
+      source: "documented-whatsapp-opt-in",
+      occurredAt,
+      evidenceReference,
+      actorExternalUserId,
+    });
+    return Object.freeze({
+      ...identity,
+      idempotencyKey: await deriveContactConsentEventKey(identity),
+    });
+  };
+
+  const grant = await consentInput(
+    "granted",
+    "2026-08-20T09:00:00.000Z",
+    "consent-proof-granted",
+  );
+  const exact = await Promise.all([
+    foundation.contactConsents.recordEvent(grant),
+    foundation.contactConsents.recordEvent(grant),
+  ]);
+  assert.deepEqual(exact.map(({ version }) => version), [2, 2]);
+  assert.equal(exact.every(({ consentStatus }) => consentStatus === "granted"), true);
+
+  const older = await consentInput(
+    "unsubscribed",
+    "2026-08-19T09:00:00.000Z",
+    "consent-proof-older-unsubscribe",
+  );
+  const newer = await consentInput(
+    "unsubscribed",
+    "2026-08-21T09:00:00.000Z",
+    "consent-proof-newer-unsubscribe",
+  );
+  await Promise.all([
+    foundation.contactConsents.recordEvent(older),
+    foundation.contactConsents.recordEvent(newer),
+  ]);
+
+  const persisted = await pool.query(
+    `SELECT
+       contact.mailing_status AS "mailingStatus",
+       contact.consent_status AS "consentStatus",
+       contact.consent_recorded_at AS "consentRecordedAt",
+       contact.consent_withdrawn_at AS "consentWithdrawnAt",
+       contact.consent_evidence_reference AS "evidenceReference",
+       contact.version,
+       count(event.id)::integer AS "eventCount"
+     FROM contacts AS contact
+     INNER JOIN contact_consent_events AS event
+       ON event.tenant_id = contact.tenant_id
+      AND event.contact_id = contact.id
+     WHERE contact.tenant_id = $1
+       AND contact.id = $2
+     GROUP BY
+       contact.mailing_status,
+       contact.consent_status,
+       contact.consent_recorded_at,
+       contact.consent_withdrawn_at,
+       contact.consent_evidence_reference,
+       contact.version`,
+    [tenantId, contactId],
+  );
+  assert.deepEqual(persisted.rows, [{
+    mailingStatus: "unsubscribed",
+    consentStatus: "withdrawn",
+    consentRecordedAt: new Date(grant.occurredAt),
+    consentWithdrawnAt: new Date(newer.occurredAt),
+    evidenceReference: newer.evidenceReference,
+    version: 3,
+    eventCount: 3,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE contact_consent_events
+       SET source = 'tampered'
+       WHERE tenant_id = $1
+         AND contact_id = $2`,
+      [tenantId, contactId],
+    ),
+    /events are immutable/i,
+  );
+  await assert.rejects(
+    pool.query(
+      `DELETE FROM contact_consent_events
+       WHERE tenant_id = $1
+         AND contact_id = $2`,
+      [tenantId, contactId],
+    ),
+    /events are immutable/i,
+  );
 }
 
 async function verifyContactOrganizationImportSchema(
@@ -3863,6 +3988,7 @@ export async function verifyNodePostgresIntegration(
         foundation.contacts,
         tenantId,
       );
+      await verifyContactConsentLifecycle(pool, foundation, tenantId);
       await verifyContactOrganizationImportSchema(
         pool,
         foundation,
@@ -3919,7 +4045,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 53,
+      concurrencyScenarios: 55,
     });
   } finally {
     await pool.end();

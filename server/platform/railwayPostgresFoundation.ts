@@ -57,6 +57,9 @@ import {
   createPostgresContactReadRepository,
 } from "./postgresContactReadRepository.ts";
 import {
+  createPostgresContactConsentRepository,
+} from "./postgresContactConsentRepository.ts";
+import {
   createPostgresConversationRepository,
 } from "./postgresConversationRepository.ts";
 import {
@@ -169,6 +172,9 @@ export interface RailwayPostgresFoundation {
     typeof createPostgresBotReplyDeliveryRepository
   >;
   readonly contacts: ReturnType<typeof createContactListService>;
+  readonly contactConsents: ReturnType<
+    typeof createPostgresContactConsentRepository
+  >;
   readonly conversations: ReturnType<
     typeof createPostgresConversationRepository
   >;
@@ -334,6 +340,9 @@ export function createRailwayPostgresFoundation(
       transactions,
     }),
     contacts: createContactListService({ contacts: contactReads }),
+    contactConsents: createPostgresContactConsentRepository({
+      transactions,
+    }),
     conversations: createPostgresConversationRepository({
       queries,
       transactions,

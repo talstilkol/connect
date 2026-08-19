@@ -64,6 +64,7 @@ const requiredTableSequence = Object.freeze([
   "production_decision_records",
   "production_decision_events",
   "business_profile_admin_events",
+  "contact_consent_events",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -87,6 +88,7 @@ const requiredMigrationPrefix = Object.freeze([
   "0018_tenant_subscriptions.sql",
   "0019_production_decisions.sql",
   "0020_system_admin_business_profiles.sql",
+  "0021_contact_consent_events.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

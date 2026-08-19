@@ -1440,3 +1440,27 @@ Load test או Pilot.
 נטו**. הטווח מיועד למיפוי ה־D1 האחרון מול ה־Adapters הקיימים, סנכרון חוזי
 השחרור ותיקון פער מקומי נוסף אם יימצא. הוא אינו כולל החלטות ספקים,
 Credentials, ‏Railway environment, ‏Staging, ‏Load test או Pilot.
+
+4.38 ‏PostgreSQL Contact Consent הושלם מקומית.
+Migration מספר `0021_contact_consent_events.sql` מוסיף Ledger בלתי־משתנה של
+Grant ו־Unsubscribe, עם Foreign Key מורכב ל־Tenant ול־Contact ומפתח Event
+דטרמיניסטי. ‏`postgresContactConsentRepository.ts` מאמת את המפתח, נועל את
+ה־Contact, שומר Evidence ומקרין רק את ה־Event העדכני ביותר באותה Transaction.
+Retry זהה אינו מעלה Version ו־Event ישן אינו דורס מצב חדש. ה־Repository מחובר
+ל־`railwayPostgresFoundation.ts`, שמכיל כעת 36 Adapters.
+
+4.38.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (22 migrations, 55 concurrency scenarios)`. הוא הוכיח Retry מקביל
+יחיד, סדר אירועים לפי זמן, שמירת Grant ו־Withdrawal מדויקים וחסימת Update או
+Delete ישירים של ה־Evidence. במהלך ההרצה אותרה ותוקנה התנגשות בין מספרי טלפון
+של שני תרחישי Integration. השרת הזמני נעצר והתיקייה נמחקה.
+
+4.39 מיפוי D1 מול PostgreSQL מצא שני פערי Persistence מקומיים שנותרו:
+קריאת קהל Campaign ו־Provider reconciliation של משלוחי Campaign. יתר השמות
+שנבדקו מכוסים ב־Adapters קיימים בשם זהה או בשם ספק־נייטרלי, או שהם פורטים של
+Evidence/Runtime שאינם Repository PostgreSQL.
+
+4.40 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **6–18 שעות פיתוח נטו**:
+כ־2–6 שעות ל־Campaign Audience read, כ־3–8 שעות ל־Provider reconciliation,
+וכ־1–4 שעות לסנכרון חוזים ושער מלא. הטווח אינו כולל החלטות ספקים, Credentials,
+Railway environment, ‏Staging, ‏Load test או Pilot.

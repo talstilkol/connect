@@ -251,6 +251,14 @@ Create ו־Update מקבילים והעלה את הסך ל־51 תרחישי Conc
 Transaction. ה־Harness הוכיח Retry זהה ועריכות מתחרות והעלה את הסך ל־53
 תרחישי Concurrency; שינוי ומחיקת Events נחסמים במסד.
 
+1.34 ‏Migration מספר `0021_contact_consent_events.sql` ו־
+`postgresContactConsentRepository.ts` ממירים את היסטוריית ההסכמה של Contact
+ל־PostgreSQL. כל Event מקבל מפתח SHA-256 דטרמיניסטי, קשור ל־Tenant ול־Contact
+ב־Foreign Key מורכב ואינו ניתן לעדכון או למחיקה. ה־Repository נועל את ה־Contact,
+שומר את הראיה ומקרין רק את ה־Event העדכני ביותר באותה Transaction. ‏Retry זהה
+אינו מעלה Version, ו־Event ישן אינו דורס הסכמה חדשה יותר. ה־Harness הוכיח שני
+מרוצים נוספים והעלה את הסך ל־55 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
