@@ -22,16 +22,16 @@
 | 1 | `core` | 7 | אין | Rehearsal + Semantic parity הושלמו | הושלם |
 | 2 | `tenant-access` | 5 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
 | 3 | `contact-organization-import` | 6 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
-| 4 | `meta-connection` | 3 | `core` | הבא לביצוע | 4–10 שעות |
-| 5 | `templates-campaigns` | 4 | Core, Contacts, Meta | מתוכנן | 6–16 שעות |
+| 4 | `meta-connection` | 3 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
+| 5 | `templates-campaigns` | 4 | Core, Contacts, Meta | הבא לביצוע | 6–16 שעות |
 | 6 | `conversations-messages` | 2 | Core, Meta | מתוכנן | 4–10 שעות |
 | 7 | `bot-runtime` | 3 | Core, Conversations | מתוכנן | 4–10 שעות |
 | 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | מתוכנן | 10–24 שעות |
 | 9 | `governance-billing` | 5 | `core` | מתוכנן | 5–12 שעות |
 | 10 | `whatsapp-delivery-policy` | 7 | Core, Meta | מתוכנן | 10–24 שעות |
 
-2.1 נותרו 33 טבלאות לאחר שלושת ה־Slices שהושלמו. האומדן הכולל ל־Data
-migration ו־Parity המקומיים הוא **43–106 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
+2.1 נותרו 30 טבלאות לאחר ארבעת ה־Slices שהושלמו. האומדן הכולל ל־Data
+migration ו־Parity המקומיים הוא **39–96 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
 Accounts, המתנה לספקים, Staging, Load/Recovery או Cutover.
 
 ## 3. Slice שהושלם — Tenant Access
@@ -84,23 +84,37 @@ Storage או AI.
 חשפו שמות קבצים, Actors, שמות קבוצות או Fingerprints. פרטי הראיה נמצאים ב־
 `docs/postgresql-contact-organization-import-data-migration-rehearsal.md`.
 
-## 5. Slice הבא — Meta Connection
+## 5. Slice שהושלם — Meta Connection
 
 5.1 שלוש הטבלאות הבאות הן `meta_connections`,
 `meta_webhook_receipts` ו־`meta_credential_envelopes`.
 
-5.2 ה־Slice תלוי רק ב־Core, אך מחייב בדיקה נפרדת שאין פענוח, הדפסה או
+5.2 ה־Slice תלוי רק ב־Core, וקיבל בדיקה נפרדת שאין פענוח, הדפסה או
 העתקה של Credentials גולמיים: רק Envelopes מוצפנים ורפרנסים מותרים.
 
-## 6. תנאי בטיחות
+5.3 ה־Rehearsal העביר שש רשומות, חסם Replay וקישור Receipt ל־WABA של
+Tenant אחר, ואימת שאין עמודת Plaintext או Access token. שמונה תרחישי
+Semantic parity עברו והמצב הסופי הושווה. פרטי הראיה נמצאים ב־
+`docs/postgresql-meta-connection-data-migration-rehearsal.md`.
 
-6.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
+## 6. Slice הבא — Templates & Campaigns
+
+6.1 ארבע הטבלאות הבאות הן `message_templates`, ‏`campaigns`,
+`campaign_recipients` ו־`campaign_delivery_provider_links`.
+
+6.2 ה־Slice מתחיל רק כעת משום שכל שלוש התלויות שלו — Core, ‏Contacts
+ו־Meta — כבר עברו Rehearsal. הוא חייב לשמור Frozen snapshots, ‏Provider
+identity, ‏Recipient isolation ו־Lifecycle בלי תוכן ספק גולמי.
+
+## 7. תנאי בטיחות
+
+7.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
 הרצת PostgreSQL אמיתית ו־Semantic parity מתועד.
 
-6.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
+7.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
 Manifest ו־Evidence משלו, כדי ש־Replay או החלפת Payload ייכשלו סגור.
 
-6.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
+7.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
 שכבר עומדים בחוזה היעד.
 
-6.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.
+7.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.

@@ -1684,3 +1684,31 @@ Meta Connection ובו שלוש טבלאות; Credentials גולמיים אינ�
 549 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,113 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,049
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.54 ‏PostgreSQL Meta Connection data migration ו־Semantic parity הושלמו
+מקומית עבור שלוש הטבלאות ב־Slice הרביעי. ה־Snapshot בודק מזהי Meta,
+Lifecycle, ‏SHA-256, ‏Error codes, זמנים ומבנה Base64 של IV/Ciphertext בלי
+לפענח או להחזיר Access token.
+
+4.54.1 ‏Connected connection חייב Envelope מוצפן, ו־Envelope ללא Connection
+נחסם לפני Commit. ‏Receipt מקושר ל־Connection באמצעות Foreign key מורכב
+של `tenant_id` ו־`waba_id`. ה־Manifest וה־Evidence מכילים רק Counts ו־HMAC;
+ה־Plan payload נשאר Artifact תפעולי סודי ואינו מיועד ל־Git או Logs.
+
+4.54.2 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 3 tables, 6 rows, replay rejected, tenant isolation verified, no plaintext columns, 8 parity scenarios)`.
+Inventory חי הוכיח שאין עמודת Plaintext או Access token. השרת הזמני נעצר
+ותיקייתו נמחקה.
+
+4.54.3 בהרצה הראשונה נמצא פער Legacy אמיתי: D1 מאפשר Padding של Base64
+באמצע Ciphertext, בעוד PostgreSQL דוחה. התרחיש הוצא מ־Semantic parity וסווג
+כ־Security hardening; ה־Snapshot והיעד דוחים אותו במפורש.
+
+4.54.4 21 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 30
+טבלאות, ‏Export חי, ‏Staging, ‏Load/Recovery ו־Cutover. ה־Slice הבא הוא
+Templates & Campaigns ובו ארבע טבלאות.
+
+4.54.5 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+550 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,118 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,055
+הבדיקות** עברו יחד ללא כשל או Skip.

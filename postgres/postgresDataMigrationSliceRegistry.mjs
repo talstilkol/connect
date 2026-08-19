@@ -84,7 +84,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "meta-connection",
     order: 4,
-    status: "next",
+    status: "rehearsed",
     requires: ["core"],
     tables: [
       "meta_connections",
@@ -100,7 +100,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "templates-campaigns",
     order: 5,
-    status: "planned",
+    status: "next",
     requires: ["core", "contact-organization-import", "meta-connection"],
     tables: [
       "message_templates",
