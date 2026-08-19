@@ -1,0 +1,321 @@
+function target(migration, token) {
+  return Object.freeze({ migration, token });
+}
+
+function covered(d1Migration, postgresMigrations, targetEvidence, summary) {
+  return Object.freeze({
+    d1Migration,
+    postgresMigrations: Object.freeze(postgresMigrations),
+    status: "covered",
+    targetEvidence: Object.freeze(targetEvidence),
+    summary,
+  });
+}
+
+export const POSTGRES_MIGRATION_PARITY_REGISTRY = Object.freeze([
+  covered(
+    "0000_connect_foundation.sql",
+    ["0000_core_contacts.sql", "0002_tenant_access_foundation.sql"],
+    [
+      target("0000_core_contacts.sql", "CREATE TABLE tenants"),
+      target("0000_core_contacts.sql", "CREATE TABLE audit_logs"),
+      target("0002_tenant_access_foundation.sql", "CREATE TABLE business_profiles"),
+      target("0002_tenant_access_foundation.sql", "CREATE TABLE tenant_memberships"),
+    ],
+    "The D1 foundation is split between PostgreSQL core data and tenant access.",
+  ),
+  covered(
+    "0001_tenant_provisioning.sql",
+    ["0000_core_contacts.sql"],
+    [
+      target("0000_core_contacts.sql", "provisioning_key TEXT"),
+      target("0000_core_contacts.sql", "audit_logs_tenant_action_idempotency_uq"),
+    ],
+    "Provisioning identity and scoped audit idempotency are present from the PostgreSQL baseline.",
+  ),
+  covered(
+    "0002_contacts_and_consent.sql",
+    ["0000_core_contacts.sql", "0021_contact_consent_events.sql"],
+    [
+      target("0000_core_contacts.sql", "CREATE TABLE contacts"),
+      target("0021_contact_consent_events.sql", "CREATE TABLE contact_consent_events"),
+    ],
+    "Contact state and immutable consent history are separated in PostgreSQL.",
+  ),
+  covered(
+    "0003_contact_import_jobs.sql",
+    ["0009_contact_organization_imports.sql"],
+    [
+      target("0009_contact_organization_imports.sql", "CREATE TABLE contact_import_jobs"),
+      target("0009_contact_organization_imports.sql", "CREATE TABLE contact_import_rows"),
+    ],
+    "Import jobs and row outcomes share one PostgreSQL migration.",
+  ),
+  covered(
+    "0004_contact_cursor_index.sql",
+    ["0000_core_contacts.sql"],
+    [target("0000_core_contacts.sql", "CREATE INDEX contacts_tenant_id_idx")],
+    "The contact keyset index is part of the PostgreSQL contact baseline.",
+  ),
+  covered(
+    "0005_contact_tags_and_lists.sql",
+    ["0009_contact_organization_imports.sql"],
+    [
+      target("0009_contact_organization_imports.sql", "CREATE TABLE contact_tags"),
+      target("0009_contact_organization_imports.sql", "CREATE TABLE contact_lists"),
+      target("0009_contact_organization_imports.sql", "CREATE TABLE contact_tag_assignments"),
+      target("0009_contact_organization_imports.sql", "CREATE TABLE contact_list_memberships"),
+    ],
+    "Contact organization and import storage are consolidated in PostgreSQL.",
+  ),
+  covered(
+    "0006_meta_connection_webhooks.sql",
+    ["0010_meta_connection_credentials.sql"],
+    [
+      target("0010_meta_connection_credentials.sql", "CREATE TABLE meta_connections"),
+      target("0010_meta_connection_credentials.sql", "CREATE TABLE meta_webhook_receipts"),
+    ],
+    "Meta connection and webhook receipt state are consolidated with credential envelopes.",
+  ),
+  covered(
+    "0007_meta_credential_vault.sql",
+    ["0010_meta_connection_credentials.sql"],
+    [target("0010_meta_connection_credentials.sql", "CREATE TABLE meta_credential_envelopes")],
+    "Encrypted credential envelopes are tenant-bound in PostgreSQL.",
+  ),
+  covered(
+    "0008_message_templates.sql",
+    ["0006_message_templates_campaigns.sql"],
+    [target("0006_message_templates_campaigns.sql", "CREATE TABLE message_templates")],
+    "Template and campaign foundations share one PostgreSQL migration.",
+  ),
+  covered(
+    "0009_template_submission_lifecycle.sql",
+    ["0006_message_templates_campaigns.sql"],
+    [
+      target("0006_message_templates_campaigns.sql", "submission_started_at TIMESTAMPTZ"),
+      target("0006_message_templates_campaigns.sql", "message_templates_lifecycle_consistent"),
+    ],
+    "The final PostgreSQL template table includes the submission lifecycle directly.",
+  ),
+  covered(
+    "0010_template_status_events.sql",
+    ["0006_message_templates_campaigns.sql"],
+    [
+      target("0006_message_templates_campaigns.sql", "last_status_event_at TIMESTAMPTZ"),
+      target("0006_message_templates_campaigns.sql", "message_templates_status_event_pair_consistent"),
+    ],
+    "The final PostgreSQL template table includes paired provider status evidence.",
+  ),
+  covered(
+    "0011_campaign_foundation.sql",
+    ["0006_message_templates_campaigns.sql", "0015_campaign_dispatch.sql"],
+    [
+      target("0006_message_templates_campaigns.sql", "CREATE TABLE campaigns"),
+      target("0015_campaign_dispatch.sql", "CREATE TABLE campaign_recipients"),
+    ],
+    "Campaign metadata and dispatch recipients are intentionally split in PostgreSQL.",
+  ),
+  covered(
+    "0012_conversations_and_messages.sql",
+    ["0005_conversations_messages.sql"],
+    [
+      target("0005_conversations_messages.sql", "CREATE TABLE conversations"),
+      target("0005_conversations_messages.sql", "CREATE TABLE messages"),
+    ],
+    "Conversation and normalized message storage have a direct PostgreSQL counterpart.",
+  ),
+  covered(
+    "0013_bot_flow_foundation.sql",
+    ["0007_bot_flows_deliveries.sql"],
+    [
+      target("0007_bot_flows_deliveries.sql", "CREATE TABLE bot_flows"),
+      target("0007_bot_flows_deliveries.sql", "CREATE TABLE bot_flow_versions"),
+    ],
+    "Bot flow identity and immutable versions are consolidated with delivery state.",
+  ),
+  covered(
+    "0014_neat_kingpin.sql",
+    ["0007_bot_flows_deliveries.sql"],
+    [target("0007_bot_flows_deliveries.sql", "CREATE TABLE bot_reply_deliveries")],
+    "Bot reply delivery evidence is part of the PostgreSQL bot lifecycle migration.",
+  ),
+  covered(
+    "0015_chilly_dreaming_celestial.sql",
+    ["0008_ai_reporting.sql", "0016_ai_knowledge.sql"],
+    [
+      target("0008_ai_reporting.sql", "CREATE TABLE ai_agents"),
+      target("0008_ai_reporting.sql", "CREATE TABLE ai_agent_versions"),
+      target("0016_ai_knowledge.sql", "CREATE TABLE knowledge_sources"),
+      target("0016_ai_knowledge.sql", "CREATE TABLE ai_agent_version_sources"),
+    ],
+    "AI agent reporting state and knowledge relationships are separated by concern.",
+  ),
+  covered(
+    "0016_uneven_firestar.sql",
+    ["0008_ai_reporting.sql"],
+    [
+      target("0008_ai_reporting.sql", "CREATE TABLE ai_runtime_cost_authorizations"),
+      target("0008_ai_reporting.sql", "CREATE TABLE ai_runtime_usage"),
+      target("0008_ai_reporting.sql", "CREATE TABLE ai_runtime_audit_events"),
+    ],
+    "AI authorization, usage and audit evidence have direct PostgreSQL tables.",
+  ),
+  covered(
+    "0017_unusual_veda.sql",
+    ["0016_ai_knowledge.sql"],
+    [target("0016_ai_knowledge.sql", "CREATE TABLE knowledge_passages")],
+    "Verified knowledge passages are stored with the knowledge lifecycle.",
+  ),
+  covered(
+    "0018_material_guardian.sql",
+    ["0017_ai_reply_outbox.sql"],
+    [target("0017_ai_reply_outbox.sql", "CREATE TABLE ai_reply_outbox")],
+    "The AI approval outbox has a dedicated PostgreSQL migration.",
+  ),
+  covered(
+    "0019_purple_silvermane.sql",
+    ["0018_tenant_subscriptions.sql"],
+    [
+      target("0018_tenant_subscriptions.sql", "CREATE TABLE tenant_subscriptions"),
+      target("0018_tenant_subscriptions.sql", "CREATE TABLE tenant_subscription_events"),
+    ],
+    "Subscription state and immutable events have direct PostgreSQL counterparts.",
+  ),
+  covered(
+    "0020_production_decision_records.sql",
+    ["0019_production_decisions.sql"],
+    [
+      target("0019_production_decisions.sql", "CREATE TABLE production_decision_records"),
+      target("0019_production_decisions.sql", "CREATE TABLE production_decision_events"),
+    ],
+    "Registered production decisions and their event ledger are preserved.",
+  ),
+  covered(
+    "0021_tenant_selection.sql",
+    ["0002_tenant_access_foundation.sql"],
+    [target("0002_tenant_access_foundation.sql", "CREATE TABLE tenant_selections")],
+    "Tenant selection is part of the PostgreSQL access foundation.",
+  ),
+  covered(
+    "0022_tenant_membership_lifecycle.sql",
+    ["0002_tenant_access_foundation.sql", "0003_tenant_membership_events.sql"],
+    [
+      target("0002_tenant_access_foundation.sql", "tenant_memberships_state_version_guard"),
+      target("0003_tenant_membership_events.sql", "CREATE TABLE tenant_membership_events"),
+      target("0003_tenant_membership_events.sql", "tenant_memberships_last_owner_update_guard"),
+    ],
+    "Membership state guards and immutable events are split across two PostgreSQL migrations.",
+  ),
+  covered(
+    "0023_team_invitation_lifecycle.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [
+      target("0004_team_invitation_lifecycle.sql", "CREATE TABLE team_invitations"),
+      target("0004_team_invitation_lifecycle.sql", "CREATE TABLE team_invitation_events"),
+    ],
+    "The final invitation schema folds the complete D1 lifecycle into one migration.",
+  ),
+  covered(
+    "0024_team_invitation_outbox.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [target("0004_team_invitation_lifecycle.sql", "CREATE TABLE team_invitation_deliveries")],
+    "Invitation delivery outbox evidence is included in the final PostgreSQL lifecycle.",
+  ),
+  covered(
+    "0025_team_invitation_reconciliation.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [target("0004_team_invitation_lifecycle.sql", "enforce_team_invitation_delivery_transition")],
+    "Reconciliation transitions are enforced by the consolidated PostgreSQL trigger function.",
+  ),
+  covered(
+    "0026_team_invitation_transition_outbox_guard.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [target("0004_team_invitation_lifecycle.sql", "team_invitations_delivery_active_guard")],
+    "Invitation transitions are bound to active delivery evidence in PostgreSQL.",
+  ),
+  covered(
+    "0027_team_invitation_system_actor.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [
+      target("0004_team_invitation_lifecycle.sql", "last_actor_kind TEXT"),
+      target("0004_team_invitation_lifecycle.sql", "actor_kind TEXT"),
+    ],
+    "The bounded expiration scheduler identity is present from initial PostgreSQL creation.",
+  ),
+  covered(
+    "0028_team_invitation_expiration_scan.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [target("0004_team_invitation_lifecycle.sql", "CREATE INDEX team_invitations_expiration_scan_idx")],
+    "The expiration keyset index is created with the PostgreSQL invitation lifecycle.",
+  ),
+  covered(
+    "0029_team_invitation_acceptance.sql",
+    ["0004_team_invitation_lifecycle.sql"],
+    [target("0004_team_invitation_lifecycle.sql", "CREATE TABLE team_invitation_acceptances")],
+    "Acceptance evidence and guards are included in the consolidated PostgreSQL lifecycle.",
+  ),
+  covered(
+    "0030_whatsapp_rate_limit_reservations.sql",
+    ["0012_whatsapp_rate_limit_ledger.sql"],
+    [
+      target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_rate_limit_reservations"),
+      target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_pair_rate_limit_state"),
+      target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_portfolio_recipient_rate_limit_state"),
+      target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_rate_limit_settlements"),
+    ],
+    "The reservation and settlement ledgers have direct PostgreSQL counterparts.",
+  ),
+  covered(
+    "0031_campaign_delivery_provider_links.sql",
+    ["0022_campaign_delivery_provider_links.sql"],
+    [target("0022_campaign_delivery_provider_links.sql", "CREATE TABLE campaign_delivery_provider_links")],
+    "Campaign provider identity and status evidence have a hardened PostgreSQL counterpart.",
+  ),
+  covered(
+    "0032_whatsapp_provider_cooldowns.sql",
+    ["0012_whatsapp_rate_limit_ledger.sql"],
+    [
+      target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_provider_cooldown_events"),
+      target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_provider_cooldown_state"),
+    ],
+    "Provider cooldown evidence is consolidated with the PostgreSQL rate-limit ledger.",
+  ),
+  covered(
+    "0033_large_union_jack.sql",
+    ["0020_system_admin_business_profiles.sql"],
+    [target("0020_system_admin_business_profiles.sql", "CREATE TABLE business_profile_admin_events")],
+    "System-admin profile evidence has a dedicated PostgreSQL migration.",
+  ),
+  covered(
+    "0034_whatsapp_campaign_delivery_policy_events.sql",
+    ["0011_whatsapp_delivery_policy.sql"],
+    [target("0011_whatsapp_delivery_policy.sql", "CREATE TABLE whatsapp_campaign_delivery_policy_events")],
+    "Immutable delivery-policy evidence has a direct PostgreSQL counterpart.",
+  ),
+  covered(
+    "0035_whatsapp_phone_throughput.sql",
+    ["0013_whatsapp_phone_throughput.sql"],
+    [
+      target("0013_whatsapp_phone_throughput.sql", "phone_throughput_messages_per_second"),
+      target("0013_whatsapp_phone_throughput.sql", "maximum_outbound_messages_per_second"),
+      target("0013_whatsapp_phone_throughput.sql", "whatsapp_rate_limit_reservations_throughput_guard"),
+    ],
+    "Provider-bound throughput evidence and rolling admission have a direct PostgreSQL migration.",
+  ),
+]);
+
+export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
+  Object.freeze({
+    migration: "0001_railway_api_mutation_receipts.sql",
+    token: "CREATE TABLE railway_api_mutation_receipts",
+    summary:
+      "Railway requires durable HTTP mutation idempotency that the co-located D1 runtime did not need.",
+  }),
+  Object.freeze({
+    migration: "0014_worker_scheduler_lease.sql",
+    token: "CREATE TABLE worker_scheduler_leases",
+    summary:
+      "An always-on Railway scheduler requires a fenced database lease that Cloudflare Cron did not need.",
+  }),
+]);

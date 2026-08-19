@@ -108,7 +108,9 @@ Transactions מקבילות לכל סדרי הנעילות של Membership ו־S
 
 6.4 Runtime composition עם Pool מאושר ו־Staging evidence.
 
-6.5 Parity מלאה מול כל סט 35 ה־Migrations של D1.
+6.5 מיפוי Source מכסה כעת את כל 36 מיגרציות D1 ואת כל 51 הטבלאות. עדיין
+חסרים Data migration rehearsal ו־Semantic parity למסלולי Tenant access
+שאינם מכוסים ב־Integration tests מקבילים.
 
 ## 7. מקורות רשמיים
 

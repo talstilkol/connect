@@ -1501,12 +1501,25 @@ Portfolio projection אטומיים, ‏Read advancement וחסימת Tampering.
 הזמני נעצר והתיקייה נמחקה.
 
 4.44 לא נותר פער Repository מקומי ברשימת ה־D1 שמופה ל־PostgreSQL.
-עדיין לא הושלמה Parity של כל 36 מיגרציות D1, ואין להסיק מכך שה־Migration
-ל־Railway מוכן ל־Production. נותרו סנכרון Gate מלא, ספק וערכי Pool חיים,
-Queues, ‏Runtime routes, ‏Staging, ‏Load/Recovery evidence ו־Cutover.
+עדיין אין להסיק מכך שה־Migration ל־Railway מוכן ל־Production. נותרו הוכחת
+Semantic parity, ‏Data migration rehearsal, ספק וערכי Pool חיים, ‏Queues,
+‏Runtime routes, ‏Staging, ‏Load/Recovery evidence ו־Cutover.
 
 4.45 שער השחרור המקומי המלא עבר לאחר Slice זה. ‏Build, ‏TypeScript,
 ESLint, ‏Source guard, ‏Secret hygiene עם היסטוריית Git, כל 36 מיגרציות D1,
 חוזה 23 מיגרציות PostgreSQL וכל **1,994 הבדיקות** עברו יחד. סטטוס
 Production נשאר חסום רק על עבודה חיה והחלטות שאינן מוכחות מקומית; אין להפוך
 את ה־Gate ל־Ready ללא Accounts, ‏Credentials ו־Staging evidence אמיתיים.
+
+4.46 ‏PostgreSQL migration source parity הושלם מקומית. Registry
+Machine-readable ממפה בדיוק פעם אחת את כל 36 מיגרציות D1 אל 23 מיגרציות
+PostgreSQL, מאמת שכל 51 טבלאות D1 קיימות, ומסווג בנפרד שתי מיגרציות
+Railway-only: ‏API mutation receipts ו־Scheduler lease. ה־Verifier מחובר
+ל־Release gate ול־Pull Request `migrations` check. בכך נסגר פער הכיסוי
+המבני; עדיין חסרים Data conversion, ‏Semantic parity ו־Staging evidence.
+
+4.46.1 שער השחרור המקומי המלא עבר לאחר הוספת ה־Registry וה־Verifier.
+‏Build, ‏TypeScript, ‏ESLint, ‏Source guard, ‏Secret hygiene, כל 36 מיגרציות
+D1, חוזה 23 מיגרציות PostgreSQL, בדיקת כיסוי 51 הטבלאות וכל **1,998
+הבדיקות** עברו יחד. תוצאה זו מוכיחה את תקינות ה־Source המקומי בלבד ואינה
+מחליפה Migration rehearsal או Evidence מסביבת Railway חיה.

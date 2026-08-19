@@ -91,7 +91,10 @@ jobs:
         with:
           node-version-file: .node-version
       - name: Apply and verify every migration
-        run: npm run verify:migrations
+        run: |
+          npm run verify:migrations
+          npm run verify:postgres-migration-contract
+          npm run verify:postgres-migration-parity
 
   typecheck:
     name: typecheck

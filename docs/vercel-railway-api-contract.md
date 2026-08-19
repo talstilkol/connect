@@ -466,6 +466,14 @@ Recipient ננעלת יחד כדי למנוע Snapshot חלקי תחת תחרו�
 כעת 38 Adapters; ‏Harness אמיתי עבר עם 23 Migrations ו־57 תרחישי
 Concurrency.
 
+7.1.53 ‏`postgresMigrationParityRegistry.mjs` ו־
+`verify-postgres-migration-parity.mjs` מקבעים מיפוי Machine-readable של כל
+36 מיגרציות D1 ושל כל 51 הטבלאות אל 23 מיגרציות PostgreSQL. שתי מיגרציות
+Railway-only—HTTP mutation receipts ו־Scheduler lease—מסומנות בנפרד. ה־
+Verifier דוחה Migration חסרה, כפולה, לא מוסברת או Evidence token שאינו קיים,
+ורץ גם ב־Release gate וגם ב־Pull Request `migrations` check. זה סוגר את פער
+Source coverage; הוא אינו מוכיח Data conversion או Semantic parity ב־Staging.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -477,8 +485,8 @@ Production ו־Preview origins המאושרים.
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
-ערכי Production pool מאושרים, Migration מלא וכיסוי Concurrency לכל
-ה־Repositories.
+ערכי Production pool מאושרים, Data migration rehearsal, ‏Semantic parity
+וכיסוי Concurrency למסלולים שאינם כלולים עדיין ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.

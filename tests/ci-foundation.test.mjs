@@ -318,6 +318,10 @@ test("runs every local release gate as a separately named pull request check", a
   );
   assert.match(
     workflow,
+    /migrations:[\s\S]*?npm run verify:migrations[\s\S]*?npm run verify:postgres-migration-contract[\s\S]*?npm run verify:postgres-migration-parity/,
+  );
+  assert.match(
+    workflow,
     /tests-and-build:[\s\S]*?fetch-depth: 0[\s\S]*?npm ci[\s\S]*?npm test/,
   );
   assert.equal(

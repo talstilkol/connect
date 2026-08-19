@@ -11,35 +11,26 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 17 Migrations מסודרות עבור
-ה־Critical Path בלבד: הראשונה יוצרת `tenants`, ‏`audit_logs` ו־`contacts`,
-השנייה יוצרת את `railway_api_mutation_receipts`, השלישית את Tenant access
-foundation, הרביעית את Membership event ledger והחמישית את Team invitation
-lifecycle. השישית יוצרת `conversations` ו־`messages`, והשביעית את
-`message_templates` ו־`campaigns`. השמינית יוצרת Bot flows, גרסאות ו־
-Deliveries. התשיעית יוצרת AI agents, גרסאות, הרשאות עלות, Usage ו־Audit
-הדרושים לדוח התפעולי. העשירית יוצרת Tags, ‏Lists, שיוכי Contact ו־Import
-jobs/rows עם בידוד Tenant מורכב. האחת־עשרה יוצרת Meta connections, ‏Webhook
-receipts ו־Credential envelopes מוצפנים. השתים־עשרה יוצרת Ledger בלתי־ניתן
-לשינוי עבור WhatsApp delivery policy, ‏Audit אטומי ו־Kill switch. השלוש־עשרה
-יוצרת WhatsApp reservation, settlement ו־provider-cooldown ledger אטומי.
-הרבע־עשרה מוסיפה אכיפת Phone throughput מתגלגלת הקשורה ל־Policy המאושר,
-החמש־עשרה מוסיפה Lease מגודר ל־Railway Worker scheduler, השש־עשרה מוסיפה
-את `campaign_recipients` עבור Dispatch מקביל ובטוח, והשבע־עשרה מוסיפה
-Knowledge Sources, ‏Passages וקישורי מקור לגרסאות AI. השרשרת הוחלה
-בהצלחה על PostgreSQL 16.13 מקומי ומבודד, אך אינה מוכיחה עדיין Parity עם
-כל 36 ה־Migrations של D1 או מוכנות לפריסה.
+1.3 התיקייה `postgres/migrations` מכילה כעת 23 Migrations מסודרות עבור
+ה־Critical Path. הן מכסות את יסודות Tenant/Contact, ‏HTTP mutation receipts,
+Access/Membership/Invitation, ‏Conversation, ‏Templates/Campaigns, ‏Bot,
+AI/Knowledge, ‏Contact organization/import, ‏Meta credentials/Webhooks,
+WhatsApp policy/rate limits/provider reconciliation, ‏Scheduler, ‏Subscription,
+Production decisions ו־System Admin. השרשרת הוחלה בהצלחה על PostgreSQL 16
+מקומי ומבודד. Registry דטרמיניסטי ממפה את כל 36 מיגרציות D1 ואת כל 51
+טבלאות D1 לשרשרת זו, אך אינו מחליף הוכחת Semantic parity או Migration
+rehearsal בסביבה נשלטת.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 17 ה־Migrations על PostgreSQL 16.13,
-הפעיל DML אמיתי והוכיח 36 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+Loopback ייעודי וריק. הוא החיל את 23 ה־Migrations על PostgreSQL 16,
+הפעיל DML אמיתי והוכיח 57 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 27 ה־Adapters
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 38 ה־Adapters
 שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
@@ -54,8 +45,8 @@ PostgreSQL יחידה, כדי שכל ששת ה־Aggregates ייקראו מאות
 הוא מאמת 35 שדות, סכומי קטגוריות, סדר מטבעות ומספרים בטווח JavaScript בטוח.
 Conversations, ‏Messages, ‏Campaigns, ‏Bot deliveries, ‏AI audit ו־AI usage
 נוספו ונבדקו. ה־Harness קרא בפועל דוח מלא מכל ששת מקורות הנתונים ולכן מסלול
-הקריאה של הדוח מוכח מקומית. אין בכך הוכחת Staging או Parity לכל 35
-ה־Migrations.
+הקריאה של הדוח מוכח מקומית. אין בכך הוכחת Staging או שוויון סמנטי מלא בין
+שני מנועי המסד.
 
 1.9 ‏`railwayPostgresApiRuntime.ts` מחבר את ה־Foundation ל־HTTP Runtime
 המאומת ומחזיר רק Handler ופעולת `close` Idempotent. תצורת הזהות ותצורת מסד
@@ -267,6 +258,14 @@ Tenant. ה־Adapter מגביל את התוצאה ל־100,001, מאמת Tenant, �
 והסרה מיידית מהקהל לאחר ביטול הסכמה. מספר תרחישי ה־Concurrency נשאר 55 משום
 שזהו חוזה קריאה בלבד.
 
+1.37 ‏`postgresMigrationParityRegistry.mjs` ממפה כל אחת מ־36 מיגרציות D1
+למיגרציות PostgreSQL המתאימות ול־Schema tokens קיימים. ה־Verifier דורש שכל
+מיגרציית D1 תופיע פעם אחת, שכל 51 טבלאות D1 קיימות ב־PostgreSQL, שכל 23
+מיגרציות PostgreSQL מוסברות, וששתי תוספות Railway בלבד—API mutation receipts
+ו־Scheduler lease—יישארו מסומנות בנפרד. ה־Check מחובר ל־Release gate המקומי
+ול־Job ה־`migrations` של Pull Request. זו הוכחת Source coverage, לא הוכחת
+Data conversion או Semantic parity בסביבת Production.
+
 1.36 ‏Migration מספר `0022_campaign_delivery_provider_links.sql` ו־
 `postgresCampaignDeliveryProviderRepository.ts` ממירים את קבלת מזהה ההודעה
 מהספק ואת Webhooks ה־Status של משלוחי Campaign ל־PostgreSQL. ה־Schema קושר
@@ -361,7 +360,7 @@ Client לאחר כשל BEGIN/COMMIT/ROLLBACK. ה־Harness האמיתי הוכי�
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 27 ה־Adapters, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 38 ה־Adapters, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 
@@ -374,17 +373,17 @@ Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 עדיין חסרים ערכים ואישור Production, ‏Telemetry sink, ‏CA evidence וכלי
 Migration מאושר ב־Railway.
 
-6.3 סכמת ה־Critical Path קיימת, אך Parity מלאה והמרה של כל סט 36 ה־Migrations
-של D1 עדיין לא קיימות.
+6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 23
+מיגרציות PostgreSQL. עדיין חסרים כלי Data migration מאושר, Dry run עם נתונים
+מייצגים בסביבה נשלטת, השוואת Counts/Digests וראיית Semantic parity חתומה.
 
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/
 credential, ‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler
-lease, ‏Message Template/Campaign ו־Invitation DML נבדקו ב־36 תרחישי
+lease, ‏Message Template/Campaign ו־Invitation DML נבדקו ב־57 תרחישי
 Concurrency מול PostgreSQL מקומי אמיתי.
-עדיין חסרים Adapters וכיסוי
-DML/Concurrency לכל יתר ה־Repositories,
-Staging evidence, ‏Backup/Restore rehearsal ו־Load test.
+לא נותר פער Repository ברשימת ה־D1 שמופה. עדיין חסרים Staging evidence,
+‏Backup/Restore rehearsal, ‏Load test וראיית Cutover/Rollback עם נתונים חיים.
 
 ## 7. מקורות PostgreSQL רשמיים
 

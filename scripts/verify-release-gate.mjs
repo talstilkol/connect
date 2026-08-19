@@ -62,6 +62,13 @@ const steps = [
     ],
   },
   {
+    id: "postgres-migration-parity",
+    command: process.execPath,
+    arguments: [
+      "scripts/verify-postgres-migration-parity.mjs",
+    ],
+  },
+  {
     id: "typecheck",
     command: "npm",
     arguments: ["run", "typecheck"],

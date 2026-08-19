@@ -271,6 +271,8 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0020_system_admin_business_profiles.sql",
     "postgres/migrations/0021_contact_consent_events.sql",
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
+    "postgres/postgresMigrationParityRegistry.mjs",
+    "scripts/verify-postgres-migration-parity.mjs",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -325,7 +327,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /executable bootstrap cannot be safely composed/);
   assert.match(boundary.cutoverBlocker, /provider-bound distributed mutation rate-limit adapter/);
   assert.match(boundary.cutoverBlocker, /live provider-bound pool values/);
-  assert.match(boundary.cutoverBlocker, /36-migration schema parity/);
+  assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
+  assert.match(boundary.cutoverBlocker, /controlled-environment migration rehearsal and semantic parity evidence/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
@@ -406,7 +409,9 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0020_system_admin_business_profiles.sql",
     "postgres/migrations/0021_contact_consent_events.sql",
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
+    "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/verify-postgres-migration-contract.mjs",
+    "scripts/verify-postgres-migration-parity.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
     assert.equal(database.sourceFiles.includes(path), true);
@@ -476,7 +481,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /complete authenticated six-source reporting HTTP path/);
   assert.match(database.cutoverBlocker, /AI reporting constraints/);
   assert.match(database.cutoverBlocker, /live provider-bound pool values/);
-  assert.match(database.cutoverBlocker, /36-migration parity conversion/);
+  assert.match(database.cutoverBlocker, /maps every one of the 36 D1 migrations and all 51 D1 tables/);
+  assert.match(database.cutoverBlocker, /deeper semantic parity evidence/);
   assert.match(
     database.cutoverBlocker,
     /concurrent provider acceptance and terminal status reconciliation/,
