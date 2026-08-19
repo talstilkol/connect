@@ -80,7 +80,7 @@ test("keeps slice dependencies ordered and linked to real migrations", () => {
   }
 });
 
-test("marks core and tenant access rehearsed and the next slice explicitly", () => {
+test("marks three slices rehearsed and the next slice explicitly", () => {
   const rehearsed = POSTGRES_DATA_MIGRATION_SLICES
     .filter(({ status }) => status === "rehearsed");
   const next = POSTGRES_DATA_MIGRATION_SLICES
@@ -89,13 +89,17 @@ test("marks core and tenant access rehearsed and the next slice explicitly", () 
     .filter(({ status }) => status !== "rehearsed")
     .reduce((total, slice) => total + slice.tables.length, 0);
 
-  assert.deepEqual(rehearsed.map(({ id }) => id), ["core", "tenant-access"]);
+  assert.deepEqual(rehearsed.map(({ id }) => id), [
+    "core",
+    "tenant-access",
+    "contact-organization-import",
+  ]);
   assert.equal(
     rehearsed.reduce((total, slice) => total + slice.tables.length, 0),
-    12,
+    18,
   );
-  assert.deepEqual(next.map(({ id }) => id), ["contact-organization-import"]);
+  assert.deepEqual(next.map(({ id }) => id), ["meta-connection"]);
   assert.deepEqual(next[0].requires, ["core"]);
-  assert.equal(next[0].tables.length, 6);
-  assert.equal(remainingCount, 39);
+  assert.equal(next[0].tables.length, 3);
+  assert.equal(remainingCount, 33);
 });

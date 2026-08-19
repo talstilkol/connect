@@ -49,6 +49,7 @@ function createTargetFixture({
   nonEmpty = false,
   targetRows = sourceRows,
   verifyResult = true,
+  insertError = null,
 } = {}) {
   const calls = [];
   let committed = false;
@@ -67,6 +68,7 @@ function createTargetFixture({
               };
             }
             if (/^INSERT INTO /i.test(sql)) {
+              if (insertError) throw insertError;
               return { rows: [], rowCount: 1 };
             }
             if (/^SELECT setval/i.test(sql)) {
@@ -294,6 +296,30 @@ test("rolls back when post-load lineage verification fails", async () => {
     (error) => (
       error instanceof PostgresDataMigrationError &&
       error.code === "target-verification-failed"
+    ),
+  );
+  assert.equal(fixture.committed, false);
+  assert.equal(fixture.rolledBack, true);
+});
+
+test("maps raw insert failures to a bounded privacy-safe error", async () => {
+  const privateValue = "private-row-value@example.com";
+  const fixture = createTargetFixture({
+    insertError: new Error(`database rejected ${privateValue}`),
+  });
+
+  await assert.rejects(
+    createProtocol().execute({
+      plan: createPlan(),
+      transactions: fixture.manager,
+      evidenceHmacKey,
+      now: "2026-08-20T08:05:00.000Z",
+    }),
+    (error) => (
+      error instanceof PostgresDataMigrationError &&
+      error.code === "target-verification-failed" &&
+      error.table === "records" &&
+      !error.message.includes(privateValue)
     ),
   );
   assert.equal(fixture.committed, false);

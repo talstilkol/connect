@@ -625,7 +625,9 @@ export function createPostgresDataMigrationProtocol(
           ({ name }) => name,
         ).join(", ")}) VALUES ${values.join(", ")}`,
         parameters,
-      );
+      ).catch(() => {
+        fail("target-verification-failed", { table: table.name });
+      });
       if (result.rowCount !== batch.length) {
         fail("target-verification-failed", { table: table.name });
       }

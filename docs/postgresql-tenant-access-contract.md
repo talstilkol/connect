@@ -113,8 +113,10 @@ migration rehearsal ו־Semantic parity הושלמו כעת לחמש טבלאו�
 Access, כולל היסטוריה מרובת Versions, ‏Replay חסום ושחזור Triggers. פרטי
 הראיה נמצאים ב־`docs/postgresql-tenant-access-data-migration-rehearsal.md`.
 
-6.6 עדיין חסרים Export חי, ‏Staging, עומס ו־Recovery, וכן Data migration
-ו־Semantic parity ל־39 הטבלאות שנותרו.
+6.6 Slice ‏Contact Organization & Import הושלם לאחר מסמך זה. עדיין חסרים
+Export חי, ‏Staging, עומס ו־Recovery, וכן Data migration ו־Semantic parity
+ל־33 הטבלאות שנותרו. הראיה החדשה נמצאת ב־
+`docs/postgresql-contact-organization-import-data-migration-rehearsal.md`.
 
 ## 7. מקורות רשמיים
 

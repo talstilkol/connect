@@ -1660,3 +1660,27 @@ Contact Organization & Import.
 548 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,105 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,042
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.53 ‏PostgreSQL Contact Organization & Import data migration ו־Semantic
+parity הושלמו מקומית עבור שש הטבלאות ב־Slice השלישי. חוזה ה־Snapshot חוסם
+Legacy rows שאינם עומדים בשמות חתוכים, ‏Import keys, ‏Filename, ‏Actor,
+50,000 rows, ‏Counters, ‏Timestamps, ‏Fingerprint ו־Outcome של היעד.
+
+4.53.1 לפני Commit ה־Protocol משווה כל Counter של Import job לשורות
+האמיתיות לפי Status, מוודא ש־Source row אינו עובר את Total, מסנכרן ארבעה
+Identity sequences וקורא את שש הטבלאות בחזרה ל־Count/HMAC. שגיאת Driver
+גולמית בזמן INSERT ממופה כעת לשגיאה מוגבלת שאינה מחזירה ערכי שורה רגישים.
+
+4.53.2 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 6 tables, 10 rows, replay rejected, tenant isolation verified, 7 parity scenarios)`.
+נבדקו Upsert, קשרי Tag/List, כפילויות, מוני Import, Job חדש ובידוד Tenant
+ברמת Foreign keys מורכבים. השרת הזמני נעצר ותיקייתו נמחקה.
+
+4.53.3 18 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 33
+טבלאות, ‏Export חי, ‏Staging, ‏Load/Recovery ו־Cutover. ה־Slice הבא הוא
+Meta Connection ובו שלוש טבלאות; Credentials גולמיים אינם חלק מההעברה.
+
+4.53.4 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+549 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,113 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,049
+הבדיקות** עברו יחד ללא כשל או Skip.
