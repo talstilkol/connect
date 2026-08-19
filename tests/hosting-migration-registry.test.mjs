@@ -246,6 +246,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
     "server/platform/postgresWhatsappRateLimitRepository.ts",
     "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
+    "server/platform/postgresCampaignAudienceRepository.ts",
     "server/platform/postgresOperationalReportRepository.ts",
     "server/platform/postgresCampaignDispatchRepository.ts",
     "server/platform/postgresCampaignRepository.ts",
@@ -278,8 +279,9 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /thirty-six-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /thirty-seven-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /immutable contact-consent evidence/);
+  assert.match(boundary.cutoverBlocker, /tenant-isolated campaign-audience reads/);
   assert.match(boundary.cutoverBlocker, /tenant-subscription lifecycle persistence/);
   assert.match(boundary.cutoverBlocker, /first-owner tenant provisioning/);
   assert.match(boundary.cutoverBlocker, /registered production-decision persistence/);
@@ -367,6 +369,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts",
     "server/platform/postgresWhatsappRateLimitRepository.ts",
     "server/platform/postgresWorkerSchedulerLeaseRepository.ts",
+    "server/platform/postgresCampaignAudienceRepository.ts",
     "server/platform/postgresCampaignDispatchRepository.ts",
     "server/platform/postgresCampaignRepository.ts",
     "server/platform/postgresMessageTemplateRepository.ts",
@@ -415,7 +418,11 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /fifty-five real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /thirty-six-adapter foundation/);
+  assert.match(database.cutoverBlocker, /thirty-seven-adapter foundation/);
+  assert.match(
+    database.cutoverBlocker,
+    /consent-filtered all\/list\/tag campaign audiences with cross-tenant group isolation/,
+  );
   assert.match(
     database.cutoverBlocker,
     /concurrent tenant-subscription creation\/extension\/status\/cancellation replay/,
@@ -464,6 +471,6 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /36-migration parity conversion/);
   assert.match(
     database.cutoverBlocker,
-    /campaign-audience and provider-reconciliation repository DML\/concurrency/,
+    /provider-reconciliation repository DML\/concurrency/,
   );
 });

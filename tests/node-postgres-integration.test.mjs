@@ -97,6 +97,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyProductionDecisionLifecycle/);
   assert.match(source, /verifySystemAdminLifecycle/);
   assert.match(source, /verifyContactConsentLifecycle/);
+  assert.match(source, /verifyCampaignAudienceRead/);
   assert.match(source, /verifyPostgresHttpRuntime/);
   assert.match(source, /foundation\.reports\.read/);
   assert.match(source, /foundation\.campaigns\.saveSnapshot/);
@@ -125,6 +126,10 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.systemAdminTenantDirectory\.listPage/);
   assert.match(source, /foundation\.systemAdminBusinessProfiles\.update/);
   assert.match(source, /foundation\.contactConsents\.recordEvent/);
+  assert.match(
+    source,
+    /foundation\.campaignAudiences\.listEligibleBySource/,
+  );
   assert.match(source, /concurrencyScenarios: 55/);
   assert.match(
     source,

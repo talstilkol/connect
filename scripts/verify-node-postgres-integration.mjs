@@ -525,6 +525,11 @@ async function verifyContactOrganizationImportSchema(
   });
   assert.equal(importResult.contacts.length, 1);
   assert.equal(importResult.contacts[0]?.phoneNumber, "+972501234569");
+  const importedContactId = Number(importResult.contacts[0]?.id);
+  assert.equal(
+    Number.isSafeInteger(importedContactId) && importedContactId > 0,
+    true,
+  );
   assert.deepEqual(
     await foundation.contactImports.processChunk(session, {
       jobId,
@@ -705,6 +710,100 @@ async function verifyContactOrganizationImportSchema(
     ),
     (error) => error?.code === "23503",
   );
+
+  return Object.freeze({
+    contactId,
+    importedContactId,
+    listId,
+    otherTagId,
+    tagId,
+  });
+}
+
+async function verifyCampaignAudienceRead(
+  foundation,
+  tenantId,
+  organization,
+) {
+  const actorExternalUserId = "driver-integration-owner";
+  const recordConsent = async (contactId, eventType, occurredAt) => {
+    const identity = Object.freeze({
+      tenantId,
+      contactId,
+      eventType,
+      source: "campaign-audience-integration",
+      occurredAt,
+      evidenceReference: `campaign-audience-consent-${contactId}-${eventType}`,
+      actorExternalUserId,
+    });
+    await foundation.contactConsents.recordEvent(Object.freeze({
+      ...identity,
+      idempotencyKey: await deriveContactConsentEventKey(identity),
+    }));
+  };
+
+  await recordConsent(
+    organization.contactId,
+    "granted",
+    "2026-08-22T08:00:00.000Z",
+  );
+  await recordConsent(
+    organization.importedContactId,
+    "granted",
+    "2026-08-22T08:01:00.000Z",
+  );
+
+  const all = await foundation.campaignAudiences.listEligibleBySource(
+    tenantId,
+    { kind: "all" },
+    100,
+  );
+  const expectedAllIds = [
+    organization.contactId,
+    organization.importedContactId,
+  ].sort((first, second) => first - second);
+  assert.deepEqual(all.map(({ contactId }) => contactId), expectedAllIds);
+  assert.equal(all.every(({ consentStatus }) => consentStatus === "granted"), true);
+
+  const listed = await foundation.campaignAudiences.listEligibleBySource(
+    tenantId,
+    { kind: "list", listId: organization.listId },
+    100,
+  );
+  const tagged = await foundation.campaignAudiences.listEligibleBySource(
+    tenantId,
+    { kind: "tag", tagId: organization.tagId },
+    100,
+  );
+  assert.deepEqual(listed.map(({ contactId }) => contactId), [
+    organization.contactId,
+  ]);
+  assert.deepEqual(tagged.map(({ contactId }) => contactId), [
+    organization.contactId,
+  ]);
+  assert.deepEqual(
+    await foundation.campaignAudiences.listEligibleBySource(
+      tenantId,
+      { kind: "tag", tagId: organization.otherTagId },
+      100,
+    ),
+    [],
+  );
+
+  await recordConsent(
+    organization.importedContactId,
+    "unsubscribed",
+    "2026-08-22T09:00:00.000Z",
+  );
+  const afterWithdrawal =
+    await foundation.campaignAudiences.listEligibleBySource(
+      tenantId,
+      { kind: "all" },
+      100,
+    );
+  assert.deepEqual(afterWithdrawal.map(({ contactId }) => contactId), [
+    organization.contactId,
+  ]);
 }
 
 async function verifyMetaConnectionCredentials(
@@ -3989,10 +4088,15 @@ export async function verifyNodePostgresIntegration(
         tenantId,
       );
       await verifyContactConsentLifecycle(pool, foundation, tenantId);
-      await verifyContactOrganizationImportSchema(
+      const contactOrganization = await verifyContactOrganizationImportSchema(
         pool,
         foundation,
         tenantId,
+      );
+      await verifyCampaignAudienceRead(
+        foundation,
+        tenantId,
+        contactOrganization,
       );
       await verifyMetaConnectionCredentials(pool, foundation, tenantId);
       const whatsappPolicyEventKey =

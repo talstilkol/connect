@@ -451,6 +451,11 @@ Replay עקבי. ה־Foundation מכיל כעת 33 Adapters; Harness אמיתי 
 Foundation מכיל כעת 36 Adapters; ‏Harness אמיתי עבר עם 22 Migrations ו־55
 תרחישי Concurrency.
 
+7.1.51 ‏`postgresCampaignAudienceRepository.ts` מוסיף קריאת קהל
+PostgreSQL תחומה ל־Tenant ול־Consent פעיל עבור `all`, ‏List ו־Tag. התוצאה
+מוגבלת, מסודרת ומאומתת ללא חשיפת Tenant ב־DTO. ה־Foundation מכיל כעת 37
+Adapters; ‏Harness אמיתי עבר עם 22 Migrations ו־55 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

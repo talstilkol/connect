@@ -45,6 +45,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "botReplyDeliveries",
     "botRuntime",
     "businessProfiles",
+    "campaignAudiences",
     "campaignDispatch",
     "campaigns",
     "close",
@@ -123,6 +124,10 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   );
   assert.equal(
     typeof foundation.workerSchedulerLeases.claimNext,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.campaignAudiences.listEligibleBySource,
     "function",
   );
   assert.equal(

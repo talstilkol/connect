@@ -259,6 +259,14 @@ Transaction. ה־Harness הוכיח Retry זהה ועריכות מתחרות ו�
 אינו מעלה Version, ו־Event ישן אינו דורס הסכמה חדשה יותר. ה־Harness הוכיח שני
 מרוצים נוספים והעלה את הסך ל־55 תרחישי Concurrency.
 
+1.35 ‏`postgresCampaignAudienceRepository.ts` ממיר את קריאת קהל הקמפיין
+ל־PostgreSQL ללא Migration חדשה. Query קבועה מחזירה רק Contacts מאותו Tenant
+שמצבם `subscribed` וגם `granted`, ומסננת לפי `all`, ‏List או Tag הקשורים לאותו
+Tenant. ה־Adapter מגביל את התוצאה ל־100,001, מאמת Tenant, צורת שורה, סדר עולה
+ומזהים ייחודיים. ה־Harness הוכיח קהל מלא, List, ‏Tag, בידוד קבוצה חוצה־Tenant
+והסרה מיידית מהקהל לאחר ביטול הסכמה. מספר תרחישי ה־Concurrency נשאר 55 משום
+שזהו חוזה קריאה בלבד.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת

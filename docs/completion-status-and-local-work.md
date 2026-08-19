@@ -1464,3 +1464,21 @@ Evidence/Runtime שאינם Repository PostgreSQL.
 כ־2–6 שעות ל־Campaign Audience read, כ־3–8 שעות ל־Provider reconciliation,
 וכ־1–4 שעות לסנכרון חוזים ושער מלא. הטווח אינו כולל החלטות ספקים, Credentials,
 Railway environment, ‏Staging, ‏Load test או Pilot.
+
+4.41 ‏PostgreSQL Campaign Audience הושלם מקומית ללא Migration חדשה.
+`postgresCampaignAudienceRepository.ts` קורא רק Contacts באותו Tenant עם
+`subscribed + granted`, לפי `all`, ‏List או Tag. הוא מגביל תוצאה ל־100,001,
+מאמת את Tenant המקור, צורת השורה, סדר ומזהים ייחודיים. ה־Repository מחובר
+ל־`railwayPostgresFoundation.ts`, שמכיל כעת 37 Adapters.
+
+4.41.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (22 migrations, 55 concurrency scenarios)`. הוא הוכיח קהל מלא, List,
+Tag, בידוד Group של Tenant אחר והסרה מיידית מהקהל לאחר Unsubscribe. מספר
+תרחישי ה־Concurrency לא השתנה מפני שה־Slice הוא Read-only. השרת הזמני נעצר
+והתיקייה נמחקה.
+
+4.42 נותר פער Persistence מקומי ממופה אחד: PostgreSQL Provider
+reconciliation עבור משלוחי Campaign. אומדן העבודה המקומית שנותרה הוא
+**3–10 שעות פיתוח נטו**: כ־2–6 שעות ל־Repository ולתרחישי מרוץ, וכ־1–4 שעות
+לסנכרון חוזים ושער מלא. הטווח אינו כולל החלטות ספקים, Credentials, ‏Railway
+environment, ‏Staging, ‏Load test או Pilot.
