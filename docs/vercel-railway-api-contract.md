@@ -430,6 +430,13 @@ Owner membership, ‏Business Profile ו־Audit ל־Transaction אחת. שורת
 עם זהות אחרת נחסם. ה־Foundation מכיל כעת 32 Adapters; Harness אמיתי עבר
 עם 19 Migrations ו־49 תרחישי Concurrency.
 
+7.1.48 ‏`0019_production_decisions.sql` ו־
+`postgresProductionDecisionRepository.ts` ממירים קריאה ושמירה של Production
+Decisions ל־PostgreSQL. ה־Schema מכיר רק את 11 מזהי ה־Registry, דורש Version
+עוקב ומייצר Event בלתי־משתנה באמצעות Trigger. יצירה ועדכון מקבילים מחזירים
+Replay עקבי. ה־Foundation מכיל כעת 33 Adapters; Harness אמיתי עבר עם
+20 Migrations ו־51 תרחישי Concurrency.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

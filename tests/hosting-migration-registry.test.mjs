@@ -230,6 +230,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresBotRuntimeRepository.ts",
     "server/platform/postgresTenantSubscriptionRepository.ts",
     "server/platform/postgresTenantProvisioningRepository.ts",
+    "server/platform/postgresProductionDecisionRepository.ts",
     "server/platform/postgresKnowledgeSourceRepository.ts",
     "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresAiAgentRepository.ts",
@@ -261,6 +262,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0016_ai_knowledge.sql",
     "postgres/migrations/0017_ai_reply_outbox.sql",
     "postgres/migrations/0018_tenant_subscriptions.sql",
+    "postgres/migrations/0019_production_decisions.sql",
     "server/platform/railwayApiRuntime.ts",
   ];
 
@@ -271,9 +273,10 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /thirty-two-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /thirty-three-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /tenant-subscription lifecycle persistence/);
   assert.match(boundary.cutoverBlocker, /first-owner tenant provisioning/);
+  assert.match(boundary.cutoverBlocker, /registered production-decision persistence/);
   assert.match(
     boundary.cutoverBlocker,
     /knowledge-source lifecycle and atomic knowledge-passage persistence/,
@@ -341,6 +344,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "server/platform/postgresBotRuntimeRepository.ts",
     "server/platform/postgresTenantSubscriptionRepository.ts",
     "server/platform/postgresTenantProvisioningRepository.ts",
+    "server/platform/postgresProductionDecisionRepository.ts",
     "server/platform/postgresKnowledgeSourceRepository.ts",
     "server/platform/postgresKnowledgePassageRepository.ts",
     "server/platform/postgresAiAgentRepository.ts",
@@ -378,6 +382,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0016_ai_knowledge.sql",
     "postgres/migrations/0017_ai_reply_outbox.sql",
     "postgres/migrations/0018_tenant_subscriptions.sql",
+    "postgres/migrations/0019_production_decisions.sql",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-node-postgres-integration.mjs",
   ]) {
@@ -385,15 +390,15 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /nineteen ordered/);
+  assert.match(database.cutoverBlocker, /twenty ordered/);
   assert.match(database.cutoverBlocker, /tenant-isolated contact organization\/import schema/);
   assert.match(database.cutoverBlocker, /atomic contact-profile plus import-outcome writes/);
   assert.match(database.cutoverBlocker, /tenant-bound Meta connection\/credential state/);
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
-  assert.match(database.cutoverBlocker, /forty-nine real concurrency scenarios/);
+  assert.match(database.cutoverBlocker, /fifty-one real concurrency scenarios/);
   assert.match(database.cutoverBlocker, /pool configuration contract/);
-  assert.match(database.cutoverBlocker, /thirty-two-adapter foundation/);
+  assert.match(database.cutoverBlocker, /thirty-three-adapter foundation/);
   assert.match(
     database.cutoverBlocker,
     /concurrent tenant-subscription creation\/extension\/status\/cancellation replay/,
@@ -401,6 +406,10 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(
     database.cutoverBlocker,
     /concurrent first-owner provisioning replay and identity-collision rejection/,
+  );
+  assert.match(
+    database.cutoverBlocker,
+    /concurrent production-decision creation\/update replay with immutable event guards/,
   );
   assert.match(database.cutoverBlocker, /accepted-button continuation/);
   assert.match(database.cutoverBlocker, /serialized bot handoff replay/);

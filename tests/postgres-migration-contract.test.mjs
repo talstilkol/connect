@@ -38,6 +38,7 @@ const campaignDispatchSchema = migrationSources[15];
 const aiKnowledgeSchema = migrationSources[16];
 const aiReplyOutboxSchema = migrationSources[17];
 const tenantSubscriptionSchema = migrationSources[18];
+const productionDecisionSchema = migrationSources[19];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -60,15 +61,40 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0016_ai_knowledge.sql",
     "0017_ai_reply_outbox.sql",
     "0018_tenant_subscriptions.sql",
+    "0019_production_decisions.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 19,
+      migrationCount: 20,
       findings: [],
     },
   );
+});
+
+test("defines registered PostgreSQL production decisions with immutable evidence", () => {
+  assert.match(
+    productionDecisionSchema,
+    /CREATE TABLE production_decision_records[\s\S]*CREATE TABLE production_decision_events/,
+  );
+  assert.match(
+    productionDecisionSchema,
+    /production_decision_records_check_id_registered[\s\S]*identity\.team-invitation-policy[\s\S]*governance\.data-retention-policy/,
+  );
+  assert.match(
+    productionDecisionSchema,
+    /enforce_production_decision_record_transition[\s\S]*NEW\.version <> OLD\.version \+ 1/,
+  );
+  assert.match(
+    productionDecisionSchema,
+    /audit_production_decision_record[\s\S]*INSERT INTO production_decision_events/,
+  );
+  assert.match(
+    productionDecisionSchema,
+    /reject_production_decision_event_mutation[\s\S]*events are immutable[\s\S]*BEFORE UPDATE[\s\S]*BEFORE DELETE/i,
+  );
+  assert.doesNotMatch(productionDecisionSchema, /random|uuid/i);
 });
 
 test("defines synchronized PostgreSQL subscriptions with immutable audited events", () => {

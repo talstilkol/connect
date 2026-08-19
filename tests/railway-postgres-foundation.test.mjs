@@ -64,6 +64,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "metaConnections",
     "metaCredentialEnvelopes",
     "metaWebhooks",
+    "productionDecisions",
     "provisioning",
     "railwayApiMutations",
     "readiness",
@@ -133,6 +134,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     typeof foundation.provisioning.provisionOwnerWorkspace,
     "function",
   );
+  assert.equal(typeof foundation.productionDecisions.save, "function");
   assert.equal(
     typeof foundation.railwayApiMutations.saveContact,
     "function",

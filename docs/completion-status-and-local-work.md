@@ -1403,3 +1403,21 @@ Idempotent וכן מרוץ בין שתי זהויות על אותו מפתח, ש
 נטו**. הירידה משקפת Repository מלא ושני תרחישי Concurrency אמיתיים. הטווח
 אינו כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging,
 Load test או Pilot.
+
+4.34 ‏PostgreSQL Production Decisions הושלם מקומית.
+Migration מספר `0019_production_decisions.sql` מוסיף Records ו־Events עבור
+11 מזהי ההחלטות שב־Registry בלבד. Trigger כותב Event לכל יצירה או עדכון;
+קפיצת Version ושינוי או מחיקת Event חסומים במסד. ‏
+`postgresProductionDecisionRepository.ts` מממש List, ‏Read ו־Save עם נעילת
+שורה, Replay דטרמיניסטי ו־Conflict מפורש. ה־Repository מחובר ל־Foundation,
+שמכיל כעת 33 Adapters.
+
+4.34.1 ‏Harness נקי על PostgreSQL 16.13 עבר עם
+`PASS (20 migrations, 51 concurrency scenarios)`. הוא הוכיח יצירה ועדכון
+מקבילים של אותה החלטה, שתי גרסאות ושני Events מדויקים, וחסימה של Tampering
+או Version skip בכתיבה ישירה. השרת הזמני נעצר והתיקייה נמחקה.
+
+4.35 אומדן העבודה המקומית שנותרה לאחר Slice זה הוא **3–20 שעות פיתוח
+נטו**. הירידה משקפת Migration, ‏Repository ושני תרחישי Concurrency אמיתיים.
+הטווח אינו כולל החלטות ספקים, Credentials, ‏Railway environment, ‏Staging,
+Load test או Pilot.

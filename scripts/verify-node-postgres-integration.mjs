@@ -82,6 +82,7 @@ const migrationFiles = Object.freeze([
   "0016_ai_knowledge.sql",
   "0017_ai_reply_outbox.sql",
   "0018_tenant_subscriptions.sql",
+  "0019_production_decisions.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2503,6 +2504,82 @@ async function verifyTenantProvisioningLifecycle(pool, foundation) {
   }]);
 }
 
+async function verifyProductionDecisionLifecycle(pool, foundation) {
+  const actorExternalUserId = "system-admin-postgres-decision";
+  const createCommand = Object.freeze({
+    checkId: "ai.provider",
+    expectedVersion: 0,
+    selection: "Approved provider contract",
+    rationale: "The provider and bounded fallback policy completed review.",
+    actorExternalUserId,
+    occurredAt: "2026-08-19T14:00:00.000Z",
+  });
+  const created = await Promise.all([
+    foundation.productionDecisions.save(createCommand),
+    foundation.productionDecisions.save(createCommand),
+  ]);
+  assert.deepEqual(
+    created.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+
+  const updateCommand = Object.freeze({
+    ...createCommand,
+    expectedVersion: 1,
+    selection: "Approved provider and fallback contract",
+    rationale: "The revised decision includes fail-closed fallback limits.",
+    occurredAt: "2026-08-19T14:05:00.000Z",
+  });
+  const updated = await Promise.all([
+    foundation.productionDecisions.save(updateCommand),
+    foundation.productionDecisions.save(updateCommand),
+  ]);
+  assert.deepEqual(
+    updated.map(({ outcome }) => outcome).sort(),
+    ["unchanged", "updated"],
+  );
+  const records = await foundation.productionDecisions.list();
+  assert.deepEqual(
+    records.map(({ checkId, version }) => ({ checkId, version })),
+    [{ checkId: "ai.provider", version: 2 }],
+  );
+
+  const persisted = await pool.query(
+    `SELECT
+       record.version,
+       count(event.event_key)::integer AS "eventCount",
+       array_agg(event.decision_version ORDER BY event.decision_version)
+         AS "eventVersions"
+     FROM production_decision_records AS record
+     INNER JOIN production_decision_events AS event
+       ON event.check_id = record.check_id
+     WHERE record.check_id = 'ai.provider'
+     GROUP BY record.version`,
+  );
+  assert.deepEqual(persisted.rows, [{
+    version: 2,
+    eventCount: 2,
+    eventVersions: [1, 2],
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE production_decision_events
+       SET rationale = 'tampered'
+       WHERE check_id = 'ai.provider'`,
+    ),
+    /events are immutable/i,
+  );
+  await assert.rejects(
+    pool.query(
+      `UPDATE production_decision_records
+       SET version = version + 2
+       WHERE check_id = 'ai.provider'`,
+    ),
+    (error) => error?.code === "23514" &&
+      /invalid production decision transition/.test(error.message),
+  );
+}
+
 async function verifyKnowledgeLifecycle(pool, foundation, tenantId) {
   const sourceContent =
     "שעות הפעילות מופיעות באתר. ניתן לפנות לשירות דרך WhatsApp.";
@@ -3703,6 +3780,7 @@ export async function verifyNodePostgresIntegration(
       await verifyCampaignDispatch(pool, foundation, tenantId);
       await verifyTenantSubscriptionLifecycle(pool, foundation);
       await verifyTenantProvisioningLifecycle(pool, foundation);
+      await verifyProductionDecisionLifecycle(pool, foundation);
     } finally {
       await foundation.close();
     }
@@ -3710,7 +3788,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 49,
+      concurrencyScenarios: 51,
     });
   } finally {
     await pool.end();

@@ -235,6 +235,13 @@ Business Profile ו־Audit באותה Transaction. ‏Retry זהה נשאר Idem
 מפתח זהה עם זהות אחרת נכשל סגור. ה־Harness הוכיח שני מרוצים נוספים והעלה
 את הסך ל־49 תרחישי Concurrency.
 
+1.32 ‏Migration מספר `0019_production_decisions.sql` ו־
+`postgresProductionDecisionRepository.ts` ממירים את 11 החלטות ה־Production
+הרשומות ב־Registry. המסד דוחה Check ID לא רשום, קפיצת Version ושינוי Event
+היסטורי; Trigger יוצר Event לכל Insert או Update באותה Transaction.
+ה־Repository נועל החלטה קיימת ומסווג Retry או Conflict. ה־Harness הוכיח
+Create ו־Update מקבילים והעלה את הסך ל־51 תרחישי Concurrency.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
