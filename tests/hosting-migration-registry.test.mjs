@@ -299,6 +299,8 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
+    "scripts/read-d1-full-data-migration-snapshot.mjs",
+    "scripts/verify-d1-full-data-migration-snapshot.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
     "server/platform/postgresMutationRateLimitBinding.ts",
     "server/platform/postgresMutationRateLimitConfiguration.ts",
@@ -364,6 +366,8 @@ test("records the local API contract without claiming live adapter readiness", (
   );
   assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
   assert.match(boundary.cutoverBlocker, /all ten slices and all 51 tables/);
+  assert.match(boundary.cutoverBlocker, /single-transaction full-source snapshot boundary/);
+  assert.match(boundary.cutoverBlocker, /live controlled-environment export and signed full rehearsal/);
   assert.doesNotMatch(boundary.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
@@ -448,6 +452,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
+    "scripts/read-d1-full-data-migration-snapshot.mjs",
+    "scripts/verify-d1-full-data-migration-snapshot.mjs",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
     "scripts/verify-node-postgres-integration.mjs",
@@ -529,6 +535,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   );
   assert.match(database.cutoverBlocker, /maps every one of the 36 D1 migrations and all 51 D1 tables/);
   assert.match(database.cutoverBlocker, /all ten slices and all 51 tables/);
+  assert.match(database.cutoverBlocker, /single-transaction full-source snapshot boundary/);
+  assert.match(database.cutoverBlocker, /live controlled-environment export and signed full rehearsal/);
   assert.doesNotMatch(database.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(
     database.cutoverBlocker,

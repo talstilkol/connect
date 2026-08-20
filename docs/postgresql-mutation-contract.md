@@ -393,6 +393,10 @@ Migration מאושר ב־Railway.
 עם HMAC, ‏Counts, ‏Sequences, ‏Replay חסום ו־Semantic parity. עדיין חסרים
 Export חי, Dry run עם נתונים מורשים בסביבה נשלטת וראיית Staging חתומה.
 
+6.3.1 ‏Full-source snapshot preflight קורא Export SQLite מורשה במצב
+Read-only תחת Transaction יחיד. הוא בודק את כל 51 הטבלאות ואינו מדפיס נתיב
+או שורות. הוא אינו מחליף טעינה ו־Recovery בסביבת Staging.
+
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/
 credential, ‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler

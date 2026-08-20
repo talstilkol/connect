@@ -1880,3 +1880,26 @@ Reservation, הקרנות Pair/Portfolio, רצף Cooldown וקישור Provider 
 guard סרק 556 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,148 קבצים
 והיסטוריית Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל
 **2,097 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.61 ‏Full-source D1 migration snapshot הושלם מקומית. מנגנון משותף קורא
+את כל 10 ה־Slices ואת כל 51 הטבלאות תחת `BEGIN DEFERRED` יחיד, ומריץ Schema,
+‏Integrity ו־Foreign-key verification פעם אחת על אותו מצב מקור.
+
+4.61.1 ‏Registry coverage נבדק Fail-closed: עשרה IDs באותו סדר, כל Slice
+במצב `rehearsed`, וכל טבלה בדיוק פעם אחת. שינוי Schema בטבלה האחרונה או
+כשל Validator גורמים ל־Rollback של כל ה־Snapshot; אין תוצאה חלקית.
+
+4.61.2 פקודת `verify:d1-full-migration-snapshot` פותחת רק קובץ `.sqlite`
+מוחלט, רגיל ובבעלות המפעיל, עם הרשאות Owner בלבד, ללא Symbolic/Hard links,
+במצב `readOnly` וללא SQLite extensions. לאחר הקריאה היא בודקת מחדש Device,
+‏Inode, גודל וזמן שינוי כדי לזהות החלפת מקור תוך כדי הבדיקה.
+
+4.61.3 הפלט מכיל רק מספר Slices, טבלאות ושורות כולל; נתיב ה־Export ותוכן
+השורות אינם מודפסים. המנגנון אינו מסומן כ־Export חי או Staging evidence —
+עדיין נדרשים Export מורשה, טעינת כל ה־Plans, ‏Recovery ו־Rollback בסביבה
+מבוקרת.
+
+4.61.4 שער השחרור המקומי המלא עבר לאחר הוספת חוזה ה־Source. ‏Source guard
+סרק 556 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,154 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,103
+הבדיקות** עברו יחד ללא כשל או Skip.

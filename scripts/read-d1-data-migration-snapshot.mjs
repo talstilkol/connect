@@ -27,6 +27,52 @@ function requireDependency(configuration) {
   return { database, tableContracts, createSnapshot };
 }
 
+function requireSliceDefinitions(configuration) {
+  const { database, slices } = configuration ?? {};
+  if (
+    !database ||
+    typeof database !== "object" ||
+    typeof database.exec !== "function" ||
+    typeof database.prepare !== "function" ||
+    !Array.isArray(slices) ||
+    slices.length === 0 ||
+    slices.length > 20
+  ) {
+    fail("dependency-invalid");
+  }
+
+  const sliceIds = new Set();
+  const tableNames = new Set();
+  for (const slice of slices) {
+    if (
+      !slice ||
+      typeof slice !== "object" ||
+      typeof slice.id !== "string" ||
+      !/^[a-z][a-z0-9-]*$/.test(slice.id) ||
+      sliceIds.has(slice.id) ||
+      !Array.isArray(slice.tableContracts) ||
+      slice.tableContracts.length === 0 ||
+      typeof slice.createSnapshot !== "function"
+    ) {
+      fail("dependency-invalid");
+    }
+    sliceIds.add(slice.id);
+    for (const table of slice.tableContracts) {
+      if (
+        !table ||
+        typeof table !== "object" ||
+        typeof table.name !== "string" ||
+        tableNames.has(table.name)
+      ) {
+        fail("dependency-invalid", table?.name ?? null);
+      }
+      tableNames.add(table.name);
+    }
+  }
+
+  return { database, slices };
+}
+
 function requireCurrentSchema(database, tableContracts) {
   for (const table of tableContracts) {
     const actualColumns = database
@@ -72,19 +118,37 @@ function selectSourceRows(database, tableContracts) {
 export function readD1DataMigrationSnapshot(configuration) {
   const { database, tableContracts, createSnapshot } =
     requireDependency(configuration);
+  return readD1DataMigrationSnapshots({
+    database,
+    slices: [{
+      id: "single-slice",
+      tableContracts,
+      createSnapshot,
+    }],
+  })[0].snapshot;
+}
+
+export function readD1DataMigrationSnapshots(configuration) {
+  const { database, slices } = requireSliceDefinitions(configuration);
   let transactionStarted = false;
 
   try {
     database.exec("BEGIN DEFERRED");
     transactionStarted = true;
-    requireCurrentSchema(database, tableContracts);
-    requireSourceIntegrity(database);
-    const snapshot = createSnapshot(
-      selectSourceRows(database, tableContracts),
+    requireCurrentSchema(
+      database,
+      slices.flatMap(({ tableContracts }) => tableContracts),
     );
+    requireSourceIntegrity(database);
+    const snapshots = Object.freeze(slices.map((slice) => Object.freeze({
+      id: slice.id,
+      snapshot: slice.createSnapshot(
+        selectSourceRows(database, slice.tableContracts),
+      ),
+    })));
     database.exec("COMMIT");
     transactionStarted = false;
-    return snapshot;
+    return snapshots;
   } catch (error) {
     if (transactionStarted) {
       try {

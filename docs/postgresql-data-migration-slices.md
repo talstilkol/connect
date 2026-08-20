@@ -34,6 +34,11 @@
 מקומיים. עדיין חסרים Export חי, ‏Accounts, המתנה לספקים, ‏Staging,
 ‏Load/Recovery ו־Cutover מבוקר.
 
+2.2 ‏`read-d1-full-data-migration-snapshot.mjs` קורא כעת את כל עשרת
+ה־Slices תחת Transaction מקור יחיד ומוכיח Schema, ‏Integrity ו־Foreign keys
+לכל 51 הטבלאות. החוזה והפקודה ל־Export מורשה מתועדים ב־
+`docs/postgresql-full-source-snapshot-contract.md`.
+
 ## 3. Slice שהושלם — Tenant Access
 
 3.1 הטבלאות:

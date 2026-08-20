@@ -509,7 +509,9 @@ Production ו־Preview origins המאושרים.
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
 ערכי Production pool ו־Rate-limit policy מאושרים, תצורת Railway Service חיה,
 ‏Data migration ו־Semantic parity מקומיים הושלמו לכל 51 הטבלאות. עדיין
-חסרים Export חי, ‏Staging וכיסוי Concurrency למסלולים שאינם כלולים ב־Harness.
+קיים גם Full-source preflight אטומי ל־Export SQLite במצב Read-only. עדיין
+חסרים Export חי, טעינה ו־Recovery ב־Staging וכיסוי Concurrency למסלולים
+שאינם כלולים ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.
