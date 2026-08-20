@@ -347,7 +347,7 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /authenticated runtime/);
   assert.match(boundary.cutoverBlocker, /contacts\.save/);
   assert.match(boundary.cutoverBlocker, /PostgreSQL transaction executor/);
-  assert.match(boundary.cutoverBlocker, /thirty-nine-adapter PostgreSQL foundation/);
+  assert.match(boundary.cutoverBlocker, /forty-adapter PostgreSQL foundation/);
   assert.match(boundary.cutoverBlocker, /immutable contact-consent evidence/);
   assert.match(boundary.cutoverBlocker, /tenant-isolated campaign-audience reads/);
   assert.match(boundary.cutoverBlocker, /tenant-subscription lifecycle persistence/);

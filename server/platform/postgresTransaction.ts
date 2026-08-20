@@ -19,7 +19,7 @@ export interface PostgresQueryExecutor {
 export type PostgresTransaction = PostgresQueryExecutor;
 
 export interface PostgresTransactionOptions {
-  readonly isolationLevel: "read-committed";
+  readonly isolationLevel: "read-committed" | "repeatable-read";
 }
 
 /**

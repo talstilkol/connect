@@ -21,9 +21,17 @@ import type {
 import type {
   ContactOrganizationService,
 } from "../contacts/contactOrganizationService.ts";
+import {
+  ContactOrganizationInputError,
+  parseContactOrganizationAssignment,
+  parseContactOrganizationName,
+} from "../contacts/contactOrganizationService.ts";
 import type {
   ContactOrganizationSnapshot,
 } from "../../shared/domain/contactOrganization.ts";
+import {
+  parseRailwayContactOrganizationSnapshot,
+} from "../contacts/railwayContactDirectoryHandler.ts";
 import {
   ContactConsentInputError,
   ContactCursorInputError,
@@ -68,6 +76,11 @@ import {
   type RailwayApiContactSaveResult,
   type RailwayApiMutationExecutor,
 } from "./railwayApiMutationExecutor.ts";
+import type {
+  RailwayContactOrganizationMutationExecutor,
+  RailwayContactOrganizationMutationOperation,
+  RailwayContactOrganizationMutationResult,
+} from "./railwayContactOrganizationMutationExecutor.ts";
 
 export interface RailwayApiMutationSafetyPolicy {
   readonly rateLimit: "tenant-mutation";
@@ -132,6 +145,50 @@ export const railwayApiOperationPolicies = Object.freeze([
     }),
   }),
   Object.freeze({
+    id: "contacts.organization.tag.save",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
+    id: "contacts.organization.list.save",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
+    id: "contacts.organization.tag-assignment",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
+    id: "contacts.organization.list-membership",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
     id: "reports.read",
     requestKind: "query" as const,
     permission: "reports.read" as const,
@@ -147,6 +204,8 @@ export interface RailwayApiOperationRegistryDependencies {
     "grantConsent" | "unsubscribe"
   >;
   readonly contactOrganization: Pick<ContactOrganizationService, "read">;
+  readonly contactOrganizationMutations:
+    RailwayContactOrganizationMutationExecutor;
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
   readonly mutations: RailwayApiMutationExecutor;
@@ -172,6 +231,16 @@ interface ContactSavePayload extends PersistedContactProfile {
 
 interface ContactConsentPayload extends ContactConsentTransition {
   readonly contactId: number;
+}
+
+interface ContactOrganizationNamePayload {
+  readonly name: string;
+}
+
+interface ContactOrganizationAssignmentPayload {
+  readonly contactId: number;
+  readonly groupId: number;
+  readonly assigned: boolean;
 }
 
 function hasExactKeys(
@@ -314,6 +383,31 @@ function parseContactConsentPayload(
     contactId: Number(payload.contactId),
     ...validation.value,
   });
+}
+
+function parseContactOrganizationNamePayload(
+  payload: RailwayApiJsonObject,
+): Readonly<ContactOrganizationNamePayload> {
+  if (
+    !hasExactKeys(payload, ["name"]) ||
+    typeof payload.name !== "string"
+  ) {
+    invalidRequest();
+  }
+
+  const parsed = parseContactOrganizationName(payload.name);
+
+  return Object.freeze({ name: parsed.name });
+}
+
+function parseContactOrganizationAssignmentPayload(
+  payload: RailwayApiJsonObject,
+): Readonly<ContactOrganizationAssignmentPayload> {
+  if (!hasExactKeys(payload, ["assigned", "contactId", "groupId"])) {
+    invalidRequest();
+  }
+
+  return parseContactOrganizationAssignment(payload);
 }
 
 function isValidContactRecord(
@@ -477,6 +571,7 @@ function mapOperationError(error: unknown): never {
   if (
     error instanceof ContactCursorInputError ||
     error instanceof ContactConsentInputError ||
+    error instanceof ContactOrganizationInputError ||
     error instanceof OperationalReportInputError
   ) {
     throw new RailwayApiDispatchError("INVALID_REQUEST");
@@ -690,6 +785,85 @@ async function executeContactConsent(
   return { contact };
 }
 
+async function executeContactOrganizationMutation(
+  dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
+  session: Readonly<TenantSession>,
+  operation: RailwayContactOrganizationMutationOperation,
+  payload: Readonly<
+    ContactOrganizationNamePayload | ContactOrganizationAssignmentPayload
+  >,
+  request: Readonly<RailwayApiRequestEnvelope>,
+): Promise<unknown> {
+  const mutationRequest = await requireTenantMutationRequest(
+    dependencies,
+    session,
+    operation,
+    payload,
+    request,
+  );
+  let rawResult: unknown;
+
+  try {
+    rawResult = await dependencies.contactOrganizationMutations.execute({
+      session,
+      operation,
+      idempotencyKey: mutationRequest.idempotencyKey,
+      requestDigest: mutationRequest.requestDigest,
+      payload,
+    });
+  } catch {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+  }
+
+  if (
+    !isRecord(rawResult) ||
+    typeof rawResult.outcome !== "string" ||
+    !hasExactKeys(rawResult, ["organization", "outcome", "tenantId"])
+  ) {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+  }
+
+  const result = rawResult as RailwayContactOrganizationMutationResult;
+
+  if (
+    result.outcome === "conflict" ||
+    result.outcome === "not-found" ||
+    result.outcome === "unavailable"
+  ) {
+    if (result.tenantId !== null || result.organization !== null) {
+      throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+    }
+
+    throw new RailwayApiDispatchError(
+      result.outcome === "conflict"
+        ? "CONFLICT"
+        : result.outcome === "not-found"
+          ? "NOT_FOUND"
+          : "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+
+  const expectedContactIds = "contactId" in payload
+    ? [payload.contactId]
+    : [];
+  const organization = parseRailwayContactOrganizationSnapshot(
+    result.organization,
+    expectedContactIds,
+  );
+
+  if (
+    result.tenantId !== session.tenantId ||
+    organization === null
+  ) {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+  }
+
+  return Object.freeze({
+    replayed: result.outcome === "replayed",
+    organization,
+  });
+}
+
 export function createRailwayApiOperationRegistry(
   dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
 ): Readonly<RailwayApiOperationRegistry> {
@@ -699,6 +873,7 @@ export function createRailwayApiOperationRegistry(
     typeof dependencies.contactConsent?.grantConsent !== "function" ||
     typeof dependencies.contactConsent?.unsubscribe !== "function" ||
     typeof dependencies.contactOrganization?.read !== "function" ||
+    typeof dependencies.contactOrganizationMutations?.execute !== "function" ||
     typeof dependencies.reports?.read !== "function" ||
     typeof dependencies.mutationRateLimit?.consume !== "function" ||
     typeof dependencies.mutations?.saveContact !== "function"
@@ -714,6 +889,10 @@ export function createRailwayApiOperationRegistry(
     contactSavePolicy,
     contactConsentGrantPolicy,
     contactConsentUnsubscribePolicy,
+    contactTagSavePolicy,
+    contactListSavePolicy,
+    contactTagAssignmentPolicy,
+    contactListMembershipPolicy,
     reportsPolicy,
   ] =
     railwayApiOperationPolicies;
@@ -788,6 +967,58 @@ export function createRailwayApiOperationRegistry(
           payload,
           request,
           "unsubscribe",
+        ),
+    ),
+    createOperation(
+      contactTagSavePolicy,
+      dependencies,
+      parseContactOrganizationNamePayload,
+      (session, payload, request) =>
+        executeContactOrganizationMutation(
+          dependencies,
+          session,
+          "contacts.organization.tag.save",
+          payload,
+          request,
+        ),
+    ),
+    createOperation(
+      contactListSavePolicy,
+      dependencies,
+      parseContactOrganizationNamePayload,
+      (session, payload, request) =>
+        executeContactOrganizationMutation(
+          dependencies,
+          session,
+          "contacts.organization.list.save",
+          payload,
+          request,
+        ),
+    ),
+    createOperation(
+      contactTagAssignmentPolicy,
+      dependencies,
+      parseContactOrganizationAssignmentPayload,
+      (session, payload, request) =>
+        executeContactOrganizationMutation(
+          dependencies,
+          session,
+          "contacts.organization.tag-assignment",
+          payload,
+          request,
+        ),
+    ),
+    createOperation(
+      contactListMembershipPolicy,
+      dependencies,
+      parseContactOrganizationAssignmentPayload,
+      (session, payload, request) =>
+        executeContactOrganizationMutation(
+          dependencies,
+          session,
+          "contacts.organization.list-membership",
+          payload,
+          request,
         ),
     ),
     createOperation(

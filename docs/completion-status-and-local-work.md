@@ -2259,3 +2259,31 @@ guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,211 קובצי Working 
 תלויות ישירות. `git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, Clerk,
 PostgreSQL וערכי Rate-limit policy חיים, פריסת Railway/Vercel וראיית
 Staging; אין עדיין טענת Production cutover.
+
+4.76 ארבע פעולות Contact organization הועברו מקומית מ־D1 ל־Railway API
+ול־PostgreSQL ללא Fallback: שמירת Tag, שמירת List, הגדרת Tag assignment
+והגדרת List membership. ה־Payloads אינם מקבלים Tenant או Actor; השניים
+נגזרים מ־Clerk session, ‏Membership ו־Selection בצד Railway. שמות Group
+מוגבלים ל־128 תווים ללא תווי בקרה, ו־Assignment דורש שלושה שדות מדויקים.
+
+4.76.1 לכל פעולה מפתח Idempotency דטרמיניסטי הנבדק מחדש לפני צריכת מכסת
+`tenant-mutation`. ‏Receipt claim, שינוי ה־Domain, קריאת Snapshot, ‏Audit
+בלתי־משתנה ושמירת Replay response מבוצעים באותה PostgreSQL Transaction.
+‏node-postgres adapter הורחב באופן מפורש ל־`repeatable-read`, כך שכל שאילתות
+ה־Snapshot רואות תמונת מסד עקבית יחד עם כתיבת הפעולה. ‏Conflict, יעד חסר
+ותלות לא זמינה נשמרים כתוצאות נפרדות ונכשלים באופן סגור.
+
+4.76.2 ה־Vercel BFF מקבל רק Replay flag בוליאני ו־Organization snapshot
+קנוני: Scope ריק לאחר שמירת Group או Contact יחיד לאחר שינוי Relationship.
+Response מורחבת, Relationship חוצה־Scope או Group/Contact לא תקינים נדחים
+לפני React state. בדיקת Failure path חשפה ותיקנה סיווג Audit שגוי של
+`tag-assignment` כ־`list-membership`. קובץ ה־Server Actions הפעיל אינו מייבא
+עוד Runtime D1, ‏D1 repository או Tenant mutation session מקומי.
+
+4.76.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,268 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `86/86`. ‏Source guard סרק 588 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,219
+קובצי Working tree — 1,211 מנוהלים ושמונה חדשים — כולל היסטוריית Git,
+ו־Dependency lock אימת 31 תלויות ישירות. `git diff --check` עבר. עדיין
+חסרים Origin, ‏OIDC, Clerk, ‏PostgreSQL וערכי Rate-limit policy חיים,
+פריסת Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.

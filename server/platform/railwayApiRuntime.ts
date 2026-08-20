@@ -33,6 +33,9 @@ import {
 import type {
   RailwayApiMutationExecutor,
 } from "./railwayApiMutationExecutor.ts";
+import type {
+  RailwayContactOrganizationMutationExecutor,
+} from "./railwayContactOrganizationMutationExecutor.ts";
 import {
   createRailwaySystemAdminBusinessProfileOperation,
   type RailwaySystemAdminBusinessProfileOperationDependencies,
@@ -64,6 +67,8 @@ export interface RailwayApiRuntimeOptions {
     "grantConsent" | "unsubscribe"
   >;
   readonly contactOrganization: Pick<ContactOrganizationService, "read">;
+  readonly contactOrganizationMutations:
+    RailwayContactOrganizationMutationExecutor;
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
   readonly mutations: RailwayApiMutationExecutor;
@@ -93,6 +98,7 @@ export function createRailwayApiRuntime(
     contacts: options.contacts,
     contactConsent: options.contactConsent,
     contactOrganization: options.contactOrganization,
+    contactOrganizationMutations: options.contactOrganizationMutations,
     reports: options.reports,
     mutationRateLimit: options.mutationRateLimit,
     mutations: options.mutations,

@@ -201,6 +201,8 @@ export async function createRailwayPostgresApiRuntime(
         consentEvents: foundation.contactConsents,
       }),
       contactOrganization: foundation.contactOrganization,
+      contactOrganizationMutations:
+        foundation.railwayContactOrganizationMutations,
       reports: foundation.reports,
       mutationRateLimit: createRateLimitGuard(
         foundation.createMutationRateLimitBinding(

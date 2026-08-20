@@ -32,7 +32,7 @@ const auditedServerFunctions = new Map([
     "createCurrentRailwayContactConsentHandler",
   ]],
   ["server/contacts/contactImportActions.ts", ["requireCurrentTenantMutationSession"]],
-  ["server/contacts/contactOrganizationActions.ts", ["requireCurrentTenantMutationSession"]],
+  ["server/contacts/contactOrganizationActions.ts", ["createCurrentRailwayContactOrganizationHandler"]],
   ["server/conversations/conversationActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/meta/metaEmbeddedSignupActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/onboarding/saveBusinessProfileAction.ts", ["readClerkIdentity"]],

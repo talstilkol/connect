@@ -176,6 +176,26 @@ function fixture(selectedRole = "owner") {
         };
       },
     },
+    contactOrganizationMutations: {
+      async execute(command) {
+        calls.contactOrganizations.push({ mutation: command });
+        const contactIds = "contactId" in command.payload
+          ? [command.payload.contactId]
+          : [];
+
+        return {
+          outcome: "committed",
+          tenantId: command.session.tenantId,
+          organization: {
+            scopeContactIds: contactIds,
+            tags: [],
+            lists: [],
+            tagAssignments: [],
+            listMemberships: [],
+          },
+        };
+      },
+    },
     reports: {
       async read(session, input) {
         calls.reports.push({ session, input });
@@ -790,6 +810,50 @@ test("records contact consent through identity, tenant, quota, and PostgreSQL se
   assert.doesNotMatch(
     JSON.stringify(body),
     /tenantId|externalUserId|consentEvidenceReference|createdAt|updatedAt/,
+  );
+});
+
+test("sets contact organization membership through the complete boundary", async () => {
+  const testFixture = fixture("manager");
+  const operationId = "contacts.organization.list-membership";
+  const payload = {
+    contactId: 31,
+    groupId: 8,
+    assigned: true,
+  };
+  const organizationIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      operationId,
+      payload,
+    );
+  const response = await testFixture.handler.handle(
+    request(
+      operationId,
+      payload,
+      "mutation",
+      organizationIdempotencyKey,
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.replayed, false);
+  assert.deepEqual(body.data.organization.scopeContactIds, [31]);
+  assert.deepEqual(testFixture.calls.mutationSubjects, [
+    "11:verified-user:contacts.organization.list-membership",
+  ]);
+  const mutationCall = testFixture.calls.contactOrganizations.find(
+    (entry) => "mutation" in entry,
+  );
+  assert.equal(mutationCall.mutation.session.tenantId, 11);
+  assert.equal(mutationCall.mutation.operation, operationId);
+  assert.equal(
+    mutationCall.mutation.idempotencyKey,
+    organizationIdempotencyKey,
+  );
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /tenantId|externalUserId|requestDigest|idempotencyKey/,
   );
 });
 

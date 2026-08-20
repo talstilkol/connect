@@ -286,9 +286,9 @@ function parseGroups(value: unknown): readonly Readonly<ContactGroupRecord>[] | 
 
 function parseScopeContactIds(
   value: unknown,
-  contacts: readonly Readonly<ContactRecord>[],
+  expectedContactIds: readonly number[],
 ): readonly number[] | null {
-  if (!Array.isArray(value) || value.length !== contacts.length) {
+  if (!Array.isArray(value) || value.length !== expectedContactIds.length) {
     return null;
   }
 
@@ -297,7 +297,7 @@ function parseScopeContactIds(
   for (let index = 0; index < value.length; index += 1) {
     const id = parsePositiveInteger(value[index]);
 
-    if (id === null || id !== contacts[index]?.id) {
+    if (id === null || id !== expectedContactIds[index]) {
       return null;
     }
 
@@ -355,9 +355,9 @@ function parseRelationships<T extends ContactTagAssignment | ContactListMembersh
   return Object.freeze(relationships);
 }
 
-function parseOrganization(
+export function parseRailwayContactOrganizationSnapshot(
   value: unknown,
-  contacts: readonly Readonly<ContactRecord>[],
+  expectedContactIds: readonly number[],
 ): Readonly<ContactOrganizationSnapshot> | null {
   if (!isExactRecord(value, organizationKeys)) {
     return null;
@@ -365,7 +365,7 @@ function parseOrganization(
 
   const scopeContactIds = parseScopeContactIds(
     value.scopeContactIds,
-    contacts,
+    expectedContactIds,
   );
   const tags = parseGroups(value.tags);
   const lists = parseGroups(value.lists);
@@ -425,7 +425,10 @@ function parseSuccess(data: unknown): Readonly<{
     return null;
   }
 
-  const organization = parseOrganization(data.organization, contacts);
+  const organization = parseRailwayContactOrganizationSnapshot(
+    data.organization,
+    contacts.map(({ id }) => id),
+  );
 
   return organization === null
     ? null

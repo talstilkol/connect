@@ -71,6 +71,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "productionDecisions",
     "provisioning",
     "railwayApiMutations",
+    "railwayContactOrganizationMutations",
     "readiness",
     "reports",
     "selections",

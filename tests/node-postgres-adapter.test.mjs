@@ -18,7 +18,10 @@ function poolFixture(responses = []) {
   const client = {
     async query(sql, parameters) {
       calls.push({ scope: "client", sql, parameters });
-      if (sql === "BEGIN ISOLATION LEVEL READ COMMITTED") {
+      if (
+        sql === "BEGIN ISOLATION LEVEL READ COMMITTED" ||
+        sql === "BEGIN ISOLATION LEVEL REPEATABLE READ"
+      ) {
         const controlResponse = queued[0];
         if (
           controlResponse?.control === sql &&
@@ -157,6 +160,25 @@ test("pins every callback query between begin and commit", async () => {
         sql: "SELECT id FROM contacts WHERE tenant_id = $1 FOR UPDATE",
       },
       { scope: "client", sql: "COMMIT" },
+    ],
+  );
+  assert.deepEqual(fixture.releases, [undefined]);
+});
+
+test("supports an explicit repeatable-read transaction", async () => {
+  const fixture = poolFixture();
+
+  await createNodePostgresTransactionManager(fixture.pool).transaction(
+    { isolationLevel: "repeatable-read" },
+    async () => "complete",
+  );
+
+  assert.deepEqual(
+    fixture.calls.map(({ sql }) => sql),
+    [
+      "connect",
+      "BEGIN ISOLATION LEVEL REPEATABLE READ",
+      "COMMIT",
     ],
   );
   assert.deepEqual(fixture.releases, [undefined]);

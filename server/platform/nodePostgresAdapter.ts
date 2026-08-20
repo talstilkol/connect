@@ -50,7 +50,8 @@ function requireTransactionOptions(
   if (
     !options ||
     typeof options !== "object" ||
-    options.isolationLevel !== "read-committed" ||
+    (options.isolationLevel !== "read-committed" &&
+      options.isolationLevel !== "repeatable-read") ||
     Object.keys(options).length !== 1
   ) {
     throw new NodePostgresAdapterError(
@@ -153,7 +154,11 @@ export function createNodePostgresTransactionManager(
       let destroyReason: unknown;
 
       try {
-        await client.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+        await client.query(
+          options.isolationLevel === "repeatable-read"
+            ? "BEGIN ISOLATION LEVEL REPEATABLE READ"
+            : "BEGIN ISOLATION LEVEL READ COMMITTED",
+        );
         transactionStarted = true;
 
         const result = await execute(createPinnedExecutor(client));

@@ -15,7 +15,6 @@ test("routes tenant-only mutation modules through the mutation session", async (
   const paths = [
     "campaigns/campaignActions.ts",
     "contacts/contactImportActions.ts",
-    "contacts/contactOrganizationActions.ts",
     "meta/metaEmbeddedSignupActions.ts",
     "team/teamInvitationActions.ts",
     "team/teamMembershipActions.ts",
@@ -36,6 +35,21 @@ test("routes tenant-only mutation modules through the mutation session", async (
       path,
     );
   }
+});
+
+test("routes contact organization mutations through Railway", async () => {
+  const source = await readServerSource(
+    "contacts/contactOrganizationActions.ts",
+  );
+
+  assert.match(
+    source,
+    /createCurrentRailwayContactOrganizationHandler/,
+  );
+  assert.doesNotMatch(
+    source,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createContactOrganizationRepository/,
+  );
 });
 
 test("separates reads from mutations in mixed action modules", async () => {

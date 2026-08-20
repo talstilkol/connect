@@ -610,6 +610,22 @@ Operations נפרדות: `contacts.consent.grant` ו־
 Fallback ל־D1. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC, Clerk, ‏PostgreSQL
 וראיית Staging חיים לפני Cutover.
 
+7.1.66 ארבע פעולות Contact organization הועברו מקומית מ־D1 ל־Railway:
+`contacts.organization.tag.save`, ‏`contacts.organization.list.save`,
+`contacts.organization.tag-assignment` ו־
+`contacts.organization.list-membership`. שמות Group מוגבלים ל־128 תווים
+ללא תווי בקרה, ו־Assignment מקבל רק Contact ID, ‏Group ID ו־Boolean מדויקים.
+Tenant ו־Actor נגזרים בצד Railway ואינם חוצים את ה־Payload.
+
+7.1.67 כל פעולה מחשבת מחדש מפתח Idempotency לפני צריכת מכסת
+`tenant-mutation`. ‏Receipt claim, כתיבת Tag/List או Relationship, קריאת
+Snapshot, ‏Audit בלתי־משתנה ושמירת Replay response מבוצעים באותה PostgreSQL
+Transaction ברמת `repeatable-read`. ‏Conflict, יעד חסר ותלות לא זמינה
+נשמרים כמצבים נפרדים. ה־BFF מקבל רק Replay flag בוליאני ו־Snapshot קנוני
+ב־Scope ריק ליצירת Group או ב־Scope של Contact יחיד לשינוי Relationship;
+אין D1 fallback. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC, Clerk,
+PostgreSQL וראיית Staging חיים לפני Cutover.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -619,9 +635,10 @@ Fallback ל־D1. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC, Cl
 Production ו־Preview origins המאושרים.
 
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
-`contacts.save` ופעולות Consent כבר כוללים Idempotency, ‏Rate limiting,
-Audit ו־Transaction לפי מנגנון ה־Persistence המתאים לכל אחד; לשמירת Contact
-קיימים גם Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
+`contacts.save`, פעולות Consent ופעולות Contact organization כבר כוללים
+Idempotency, ‏Rate limiting, ‏Audit ו־Transaction לפי מנגנון ה־Persistence
+המתאים לכל אחד; לשמירת Contact ול־Organization קיימים גם Executors
+אטומיים ו־Node driver adapter. עדיין חסרים
 ערכי Production pool ו־Rate-limit policy מאושרים, תצורת Railway Service חיה,
 ‏Data migration ו־Semantic parity מקומיים הושלמו לכל 51 הטבלאות. עדיין
 קיים גם Full-source preflight אטומי ל־Export SQLite במצב Read-only. עדיין

@@ -85,6 +85,20 @@ async function consentMutationRequest(
   };
 }
 
+async function organizationMutationRequest(operation, payload) {
+  return {
+    contractVersion: "connect.railway-api.v1",
+    operation,
+    requestKind: "mutation",
+    idempotencyKey:
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        operation,
+        payload,
+      ),
+    payload,
+  };
+}
+
 function session(role = "owner") {
   return {
     externalUserId: "verified-user",
@@ -142,6 +156,9 @@ function fixture({
   contactError = null,
   consentError = null,
   consentResult = undefined,
+  organizationMutationError = null,
+  organizationMutationOutcome = "committed",
+  organizationMutationResult = undefined,
   reportError = null,
   rateLimitDecision = { outcome: "allowed" },
   rateLimitError = null,
@@ -154,6 +171,7 @@ function fixture({
     contactInputs: [],
     consentInputs: [],
     organizationInputs: [],
+    organizationMutationCommands: [],
     reportInputs: [],
     rateLimitSubjects: [],
     mutationCommands: [],
@@ -240,6 +258,38 @@ function fixture({
           tagAssignments: [{ contactId: 23, tagId: 5 }],
           listMemberships: [],
           internalTenantId: receivedSession.tenantId,
+        };
+      },
+    },
+    contactOrganizationMutations: {
+      async execute(command) {
+        calls.organizationMutationCommands.push(command);
+        if (organizationMutationError) throw organizationMutationError;
+        if (organizationMutationResult !== undefined) {
+          return organizationMutationResult;
+        }
+        const contactIds = "contactId" in command.payload
+          ? [command.payload.contactId]
+          : [];
+
+        return {
+          outcome: organizationMutationOutcome,
+          tenantId:
+            organizationMutationOutcome === "committed" ||
+            organizationMutationOutcome === "replayed"
+              ? command.session.tenantId
+              : null,
+          organization:
+            organizationMutationOutcome === "committed" ||
+            organizationMutationOutcome === "replayed"
+              ? {
+                  scopeContactIds: contactIds,
+                  tags: [],
+                  lists: [],
+                  tagAssignments: [],
+                  listMemberships: [],
+                }
+              : null,
         };
       },
     },
@@ -415,6 +465,50 @@ test("publishes one immutable policy for every concrete operation", () => {
       mutationSafety: {
         rateLimit: "tenant-mutation",
         idempotency: "deterministic-domain-event-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
+      id: "contacts.organization.tag.save",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "atomic-request-digest-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
+      id: "contacts.organization.list.save",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "atomic-request-digest-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
+      id: "contacts.organization.tag-assignment",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "atomic-request-digest-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
+      id: "contacts.organization.list-membership",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "atomic-request-digest-replay",
         audit: "atomic-immutable-event",
         transaction: "required",
       },
@@ -686,6 +780,119 @@ test("rejects forged consent keys and maps missing or cross-tenant contacts", as
   assert.deepEqual(limited.calls.consentInputs, []);
 });
 
+test("routes all contact organization mutations through atomic receipts", async () => {
+  const { calls, registry } = fixture();
+  const cases = [
+    ["contacts.organization.tag.save", { name: "Priority" }],
+    ["contacts.organization.list.save", { name: "Pilot" }],
+    ["contacts.organization.tag-assignment", {
+      contactId: 23,
+      groupId: 5,
+      assigned: true,
+    }],
+    ["contacts.organization.list-membership", {
+      contactId: 23,
+      groupId: 8,
+      assigned: false,
+    }],
+  ];
+
+  for (const [operationId, payload] of cases) {
+    const request = await organizationMutationRequest(operationId, payload);
+    const result = await operation(registry, operationId).execute(
+      dispatchContext,
+      payload,
+      request,
+    );
+
+    assert.equal(result.replayed, false);
+    assert.deepEqual(
+      result.organization.scopeContactIds,
+      "contactId" in payload ? [payload.contactId] : [],
+    );
+  }
+
+  assert.equal(calls.organizationMutationCommands.length, 4);
+  assert.deepEqual(
+    calls.organizationMutationCommands.map(({ operation }) => operation),
+    cases.map(([operationId]) => operationId),
+  );
+  assert.deepEqual(calls.rateLimitSubjects, cases.map(([operationId]) =>
+    `7:verified-user:${operationId}`
+  ));
+});
+
+test("rejects unsafe organization requests and maps bounded outcomes", async () => {
+  const payload = { name: "Priority" };
+  const request = await organizationMutationRequest(
+    "contacts.organization.tag.save",
+    payload,
+  );
+  const invalidFixture = fixture();
+
+  await assert.rejects(
+    operation(
+      invalidFixture.registry,
+      "contacts.organization.tag.save",
+    ).execute(
+      dispatchContext,
+      { ...payload, tenantId: 7 },
+      request,
+    ),
+    (error) => error.code === "INVALID_REQUEST",
+  );
+  await assert.rejects(
+    operation(
+      invalidFixture.registry,
+      "contacts.organization.tag.save",
+    ).execute(
+      dispatchContext,
+      payload,
+      { ...request, idempotencyKey: `connect_idempotency_v1_${"f".repeat(64)}` },
+    ),
+    (error) => error.code === "INVALID_REQUEST",
+  );
+  assert.equal(invalidFixture.calls.organizationMutationCommands.length, 0);
+
+  for (const [outcome, code] of [
+    ["conflict", "CONFLICT"],
+    ["not-found", "NOT_FOUND"],
+    ["unavailable", "DEPENDENCY_UNAVAILABLE"],
+  ]) {
+    const testFixture = fixture({
+      organizationMutationOutcome: outcome,
+    });
+    await assert.rejects(
+      operation(
+        testFixture.registry,
+        "contacts.organization.tag.save",
+      ).execute(dispatchContext, payload, request),
+      (error) => error.code === code,
+    );
+  }
+
+  for (const organizationMutationResult of [
+    { outcome: "committed", tenantId: 11, organization: {
+      scopeContactIds: [],
+      tags: [],
+      lists: [],
+      tagAssignments: [],
+      listMemberships: [],
+    } },
+    { outcome: "committed", tenantId: 7, organization: null },
+    { outcome: "unavailable", tenantId: 7, organization: null },
+  ]) {
+    const testFixture = fixture({ organizationMutationResult });
+    await assert.rejects(
+      operation(
+        testFixture.registry,
+        "contacts.organization.tag.save",
+      ).execute(dispatchContext, payload, request),
+      (error) => error.code === "DEPENDENCY_UNAVAILABLE",
+    );
+  }
+});
+
 test("rejects a non-deterministic contact mutation key before rate limiting", async () => {
   const { calls, registry } = fixture();
 
@@ -909,6 +1116,22 @@ test("validates operation payload before tenant or service access", async () => 
       },
     ],
     [
+      "contacts.organization.tag.save",
+      { name: " " },
+    ],
+    [
+      "contacts.organization.list.save",
+      { name: "Pilot", tenantId: 7 },
+    ],
+    [
+      "contacts.organization.tag-assignment",
+      { contactId: 0, groupId: 5, assigned: true },
+    ],
+    [
+      "contacts.organization.list-membership",
+      { contactId: 23, groupId: 8, assigned: true, extra: true },
+    ],
+    [
       "contacts.consent.unsubscribe",
       {
         ...contactConsentPayload,
@@ -960,6 +1183,7 @@ test("validates operation payload before tenant or service access", async () => 
     assert.deepEqual(calls.tenantIdentities, []);
     assert.deepEqual(calls.contactInputs, []);
     assert.deepEqual(calls.consentInputs, []);
+    assert.deepEqual(calls.organizationMutationCommands, []);
     assert.deepEqual(calls.reportInputs, []);
     assert.deepEqual(calls.rateLimitSubjects, []);
     assert.deepEqual(calls.mutationCommands, []);

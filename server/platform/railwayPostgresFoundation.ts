@@ -108,6 +108,9 @@ import {
   createPostgresRailwayApiMutationExecutor,
 } from "./postgresRailwayApiMutationExecutor.ts";
 import {
+  createPostgresRailwayContactOrganizationMutationExecutor,
+} from "./postgresRailwayContactOrganizationMutationExecutor.ts";
+import {
   createPostgresTeamInvitationAcceptanceRepository,
 } from "./postgresTeamInvitationAcceptanceRepository.ts";
 import {
@@ -263,6 +266,9 @@ export interface RailwayPostgresFoundation {
   >;
   readonly railwayApiMutations: ReturnType<
     typeof createPostgresRailwayApiMutationExecutor
+  >;
+  readonly railwayContactOrganizationMutations: ReturnType<
+    typeof createPostgresRailwayContactOrganizationMutationExecutor
   >;
   readonly createMutationRateLimitBinding: (
     policy: Readonly<PostgresMutationRateLimitPolicy>,
@@ -454,6 +460,10 @@ export function createRailwayPostgresFoundation(
     }),
     railwayApiMutations:
       createPostgresRailwayApiMutationExecutor(transactions),
+    railwayContactOrganizationMutations:
+      createPostgresRailwayContactOrganizationMutationExecutor(
+        transactions,
+      ),
     createMutationRateLimitBinding(
       policy: Readonly<PostgresMutationRateLimitPolicy>,
     ) {
