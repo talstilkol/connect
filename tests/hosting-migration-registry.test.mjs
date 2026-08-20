@@ -153,6 +153,7 @@ test("separates the completed shared PostgreSQL limiter from unresolved live pro
     "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
     "server/platform/postgresMutationRateLimitBinding.ts",
     "server/platform/postgresMutationRateLimitConfiguration.ts",
+    "server/platform/railwayMetaWebhookRuntime.ts",
     "server/platform/railwayPostgresApiRuntime.ts",
   ]) {
     assert.equal(rateLimits.sourceFiles.includes(path), true);
@@ -163,8 +164,33 @@ test("separates the completed shared PostgreSQL limiter from unresolved live pro
   );
   assert.match(rateLimits.cutoverBlocker, /system-admin-mutation/);
   assert.match(rateLimits.cutoverBlocker, /Meta-webhook/);
-  assert.match(rateLimits.cutoverBlocker, /Railway route wiring/);
+  assert.match(rateLimits.cutoverBlocker, /System-admin route wiring/);
   assert.match(rateLimits.cutoverBlocker, /approved live policy values/);
+});
+
+test("records the bounded Railway Meta webhook route without selecting a queue provider", () => {
+  const webhook = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "api.meta-webhook-ingress",
+  );
+
+  assert.ok(webhook);
+  assert.equal(webhook.targetProvider, "railway");
+  assert.equal(webhook.nextAction, "adapter-required");
+  for (const path of [
+    "server/meta/metaWebhookQueuePort.ts",
+    "server/meta/metaWebhookQueuePublisher.ts",
+    "server/platform/railwayMetaWebhookRuntime.ts",
+    "server/platform/railwayPostgresApiRuntime.ts",
+    "server/platform/railwayNodeHttpServer.ts",
+  ]) {
+    assert.equal(webhook.sourceFiles.includes(path), true);
+  }
+  assert.match(webhook.cutoverBlocker, /signed, bounded Railway Node route/);
+  assert.match(webhook.cutoverBlocker, /provider-neutral durable queue port/);
+  assert.match(webhook.cutoverBlocker, /returning 503/);
+  assert.match(webhook.cutoverBlocker, /selected queue adapter/);
+  assert.match(webhook.cutoverBlocker, /live secrets and policy values/);
+  assert.match(webhook.cutoverBlocker, /load evidence/);
 });
 
 test("keeps the contract freeze deterministic and randomness-free", () => {
@@ -238,6 +264,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "server/platform/postgresReadinessProbe.ts",
     "server/platform/railwayPostgresFoundation.ts",
     "server/platform/railwayPostgresApiRuntime.ts",
+    "server/platform/railwayMetaWebhookRuntime.ts",
     "server/platform/railwayNodeHttpServer.ts",
     "server/platform/railwayNodeProcess.ts",
     "server/platform/railwayNodeService.ts",

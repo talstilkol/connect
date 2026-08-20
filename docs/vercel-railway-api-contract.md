@@ -482,8 +482,11 @@ Source coverage; הוא אינו מוכיח Data conversion או Semantic parity
 לא חוקי נכשל סגור. ה־DB שומר רק מפתח SHA-256 אטום, נועל כל Scope ומחשב
 Refill לפי זמן PostgreSQL. ‏Harness אמיתי עדכני עבר עם 26 Migrations ו־58
 תרחישי Concurrency, כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות
-במכסה `2`. רק Tenant mutation מחובר כעת ל־Railway API route; שני ה־Routes
-האחרים עדיין דורשים Wiring ו־Evidence חיים.
+במכסה `2`. ‏Tenant mutation מחובר ל־Railway API, ו־Meta webhook מחובר
+כאופציה חתומה ב־Node dispatcher עם PostgreSQL WABA lookup ו־Queue port
+ספק־נייטרלי. כאשר ההרכבה חסרה Route זה מחזיר `503` ולא נופל ל־D1.
+System Admin עדיין דורש Route wiring; כל שלושת המסלולים דורשים ערכי Policy
+ו־Evidence חיים.
 
 7.1.55 ‏`postgresCoreDataMigration.ts`,‏ `read-d1-core-data-snapshot.mjs`
 ו־`verify-postgres-core-data-migration.mjs` מוסיפים Core data migration

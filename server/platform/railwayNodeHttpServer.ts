@@ -18,6 +18,7 @@ import type {
 const INTERNAL_REQUEST_ORIGIN = "http://127.0.0.1";
 const LIVENESS_PATH = "/health/live";
 const READINESS_PATH = "/health/ready";
+export const RAILWAY_META_WEBHOOK_PATH = "/webhooks/meta";
 const MAXIMUM_REQUEST_TARGET_LENGTH = 2_048;
 const MAXIMUM_HEADER_BYTES = 16_384;
 const RESPONSE_HEADERS = Object.freeze({
@@ -29,11 +30,15 @@ const RESPONSE_HEADERS = Object.freeze({
 
 export interface RailwayNodeHttpServerOptions {
   readonly port: number;
-  readonly runtime: Pick<
-    RailwayPostgresApiRuntime,
-    "handler" | "readiness"
-  >;
+  readonly runtime: RailwayNodeHttpRuntime;
 }
+
+export type RailwayNodeHttpRuntime = Pick<
+  RailwayPostgresApiRuntime,
+  "handler" | "readiness"
+> & Partial<
+  Pick<RailwayPostgresApiRuntime, "metaWebhookHandler">
+>;
 
 export interface RailwayNodeHttpServer {
   readonly start: () => Promise<void>;
@@ -111,11 +116,14 @@ export function createRailwayNodeWebRequest(
 }
 
 export function createRailwayNodeRequestDispatcher(
-  runtime: Pick<RailwayPostgresApiRuntime, "handler" | "readiness">,
+  runtime: RailwayNodeHttpRuntime,
 ): (request: Request) => Promise<Response> {
   if (
     typeof runtime?.handler?.handle !== "function" ||
-    typeof runtime?.readiness?.check !== "function"
+    typeof runtime?.readiness?.check !== "function" ||
+    (runtime.metaWebhookHandler !== undefined &&
+      runtime.metaWebhookHandler !== null &&
+      typeof runtime.metaWebhookHandler.handle !== "function")
   ) {
     throw new Error("Railway Node HTTP runtime is invalid");
   }
@@ -123,7 +131,26 @@ export function createRailwayNodeRequestDispatcher(
   return async (request) => {
     const url = new URL(request.url);
 
-    if (url.search !== "" || url.hash !== "") {
+    if (url.hash !== "") {
+      return jsonResponse(404, "not-found");
+    }
+
+    if (url.pathname === RAILWAY_META_WEBHOOK_PATH) {
+      if (!runtime.metaWebhookHandler) {
+        return new Response("WEBHOOK_UNAVAILABLE", {
+          status: 503,
+          headers: {
+            "cache-control": "no-store",
+            "content-type": "text/plain; charset=utf-8",
+            "x-content-type-options": "nosniff",
+          },
+        });
+      }
+
+      return runtime.metaWebhookHandler.handle(request);
+    }
+
+    if (url.search !== "") {
       return jsonResponse(404, "not-found");
     }
 

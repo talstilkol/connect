@@ -38,7 +38,7 @@ export interface RailwayNodeServiceDependencies {
       port: number;
       runtime: Pick<
         RailwayPostgresApiRuntime,
-        "handler" | "readiness"
+        "handler" | "metaWebhookHandler" | "readiness"
       >;
     }>,
   ) => Readonly<RailwayNodeHttpServer>;
@@ -60,6 +60,9 @@ function requireOptions(
     options.port < 1 ||
     options.port > 65_535 ||
     typeof options.runtime?.handler?.handle !== "function" ||
+    (options.runtime.metaWebhookHandler !== undefined &&
+      options.runtime.metaWebhookHandler !== null &&
+      typeof options.runtime.metaWebhookHandler?.handle !== "function") ||
     typeof options.runtime?.readiness?.check !== "function" ||
     typeof options.runtime?.close !== "function" ||
     typeof dependencies?.createHttpServer !== "function"

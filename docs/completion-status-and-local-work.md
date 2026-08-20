@@ -1993,3 +1993,26 @@ Capacity ו־Refill period. אין Defaults; מצב חסר, חלקי או לא �
 כעת ל־Railway API route. עדיין נדרשים חיבור System Admin ו־Meta webhook
 ל־Railway routes, ערכי Policy חיים באישור טל והצוות, Telemetry, ‏Load
 evidence ותצורת Railway פעילה.
+
+4.66 ‏Railway Meta webhook ingress הושלם מקומית ברמת Route composition.
+ה־Publisher משתמש כעת ב־Queue port ספק־נייטרלי; Adapter קטן שומר את חוזה
+Cloudflare הקיים עם `contentType: v8`. ה־Railway runtime דורש Meta secrets
+ו־Policy `meta-webhook` מלאים, מאמת חתימה, צורך מכסה אטומית, טוען רק WABA
+מחובר מ־PostgreSQL ומפרסם לתור לפני החזרת `200`.
+
+4.66.1 ‏Node dispatcher מכיר רק את הנתיב הקשיח `/webhooks/meta`, מעביר
+Query של Meta verification ל־Handler ואינו סומך על Host שסיפק הלקוח. כאשר
+ה־Composition או Queue adapter חסרים הוא מחזיר `503 WEBHOOK_UNAVAILABLE`
+עם `no-store`; אין Fallback ל־D1 ואין סימון Readiness שגוי.
+
+4.66.2 בדיקות חיוביות ושליליות מוכיחות Verification ללא גישה למסד או
+לתור, סדר Signature → Rate limit → PostgreSQL connection → Queue, חסימה
+לפני מסד, סניטציית כשל Queue ודחיית Options מורחבים. עדיין חסרים בחירת
+Queue/DLQ, ‏Adapter חי, Secrets וערכי Policy, ‏Telemetry, ‏Load evidence
+ו־Railway staging proof. ‏System Admin route wiring נשאר פער מקומי נפרד.
+
+4.66.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,127 הבדיקות** עברו ללא כשל,
+Skip או Todo. בדיקות היעד עברו `42/42`. ‏Source guard סרק 561 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,167
+קבצים כולל היסטוריית Git ו־Dependency lock אימת 30 תלויות ישירות.
+`git diff --check` נשאר נקי.

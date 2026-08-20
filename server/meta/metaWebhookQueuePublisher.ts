@@ -16,8 +16,10 @@ import {
 import {
   createMetaWebhookQueueMessage,
   MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
-  type MetaWebhookQueueBinding,
 } from "./metaWebhookQueueMessage.ts";
+import type {
+  MetaWebhookQueuePort,
+} from "./metaWebhookQueuePort.ts";
 
 export {
   MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
@@ -53,8 +55,8 @@ export interface MetaWebhookQueuePublisher {
 }
 
 export function createMetaWebhookQueuePublisher(
-  repository: MetaRepository,
-  queue: MetaWebhookQueueBinding,
+  repository: Pick<MetaRepository, "findConnectionByWabaId">,
+  queue: MetaWebhookQueuePort,
   appSecret: string,
   rateLimitGuard: RateLimitGuard,
 ): MetaWebhookQueuePublisher {
@@ -65,7 +67,7 @@ export function createMetaWebhookQueuePublisher(
     throw new Error("META_APP_SECRET must be configured");
   }
 
-  if (!queue || typeof queue.send !== "function") {
+  if (!queue || typeof queue.publish !== "function") {
     throw new Error(
       "META_WEBHOOK_QUEUE binding must be configured",
     );
@@ -164,14 +166,11 @@ export function createMetaWebhookQueuePublisher(
       }
 
       try {
-        await queue.send(
+        await queue.publish(
           createMetaWebhookQueueMessage(
             rawPayload,
             signatureHeader,
           ),
-          {
-            contentType: "v8",
-          },
         );
       } catch {
         throw new MetaWebhookQueuePublisherError(

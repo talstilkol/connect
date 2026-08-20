@@ -72,9 +72,11 @@ test("composes one authenticated handler over the PostgreSQL foundation", async 
   assert.deepEqual(Object.keys(runtime).sort(), [
     "close",
     "handler",
+    "metaWebhookHandler",
     "readiness",
   ]);
   assert.equal(typeof runtime.handler.handle, "function");
+  assert.equal(runtime.metaWebhookHandler, null);
   assert.equal(typeof runtime.readiness.check, "function");
   assert.equal(typeof runtime.close, "function");
   assert.doesNotMatch(
@@ -91,6 +93,42 @@ test("composes one authenticated handler over the PostgreSQL foundation", async 
   assert.equal(response.status, 405);
   assert.equal(response.headers.get("allow"), "POST");
   await runtime.close();
+  await runtime.close();
+});
+
+test("composes the optional Meta webhook route without exposing its secrets", async () => {
+  const runtime = await createRailwayPostgresApiRuntime(
+    options({
+      metaWebhook: {
+        environment: {
+          META_APP_SECRET: "railway-meta-app-secret",
+          META_WEBHOOK_VERIFY_TOKEN: "railway-meta-verify-token",
+          META_WEBHOOK_RATE_LIMIT_POLICY_VERSION: "8",
+          META_WEBHOOK_RATE_LIMIT_CAPACITY: "960",
+          META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS: "1",
+        },
+        queue: {
+          async publish() {
+            throw new Error("not called by verification");
+          },
+        },
+      },
+    }),
+  );
+
+  assert.equal(typeof runtime.metaWebhookHandler?.handle, "function");
+  assert.doesNotMatch(
+    JSON.stringify(runtime),
+    /railway-meta-app-secret|railway-meta-verify-token/,
+  );
+  const response = await runtime.metaWebhookHandler.handle(
+    new Request(
+      "https://railway.example.com/webhooks/meta?hub.mode=subscribe&hub.verify_token=railway-meta-verify-token&hub.challenge=13579",
+    ),
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), "13579");
   await runtime.close();
 });
 
@@ -119,5 +157,16 @@ test("rejects extended or incomplete composition options", async () => {
       },
     }),
     /mutation rate-limit configuration is unavailable/,
+  );
+  await assert.rejects(
+    createRailwayPostgresApiRuntime({
+      ...options(),
+      metaWebhook: {
+        environment: {},
+        queue: { async publish() {} },
+        tenantId: 7,
+      },
+    }),
+    /runtime options are invalid/,
   );
 });

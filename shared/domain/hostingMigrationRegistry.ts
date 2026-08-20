@@ -108,6 +108,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "server/platform/postgresReadinessProbe.ts",
       "server/platform/railwayPostgresFoundation.ts",
       "server/platform/railwayPostgresApiRuntime.ts",
+      "server/platform/railwayMetaWebhookRuntime.ts",
       "server/platform/railwayNodeHttpServer.ts",
       "server/platform/railwayNodeProcess.ts",
       "server/platform/railwayNodeService.ts",
@@ -225,7 +226,12 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     currentResources: ["Worker fetch route /webhooks/meta"],
     sourceFiles: [
       "worker/index.ts",
+      "server/meta/metaWebhookQueuePort.ts",
+      "server/meta/metaWebhookQueuePublisher.ts",
       "server/meta/metaWebhookQueueRuntime.ts",
+      "server/platform/railwayMetaWebhookRuntime.ts",
+      "server/platform/railwayPostgresApiRuntime.ts",
+      "server/platform/railwayNodeHttpServer.ts",
     ],
     targetPlacement: "railway-api",
     targetContract:
@@ -234,7 +240,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "selected",
     nextAction: "adapter-required",
     cutoverBlocker:
-      "The webhook route and execution lifecycle are owned by the Worker entry point.",
+      "A signed, bounded Railway Node route now composes PostgreSQL connection lookup, an isolated shared Meta-webhook token bucket and a provider-neutral durable queue port, while returning 503 when that composition is absent. A selected queue adapter, live secrets and policy values, telemetry, load evidence and Railway staging proof are still unavailable.",
   }),
   capability({
     id: "data.relational-database",
@@ -459,6 +465,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
       "server/platform/postgresMutationRateLimitBinding.ts",
       "server/platform/postgresMutationRateLimitConfiguration.ts",
+      "server/platform/railwayMetaWebhookRuntime.ts",
       "server/platform/railwayPostgresApiRuntime.ts",
       "worker/index.ts",
     ],
@@ -469,7 +476,7 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     decisionState: "decision-required",
     nextAction: "provider-decision-required",
     cutoverBlocker:
-      "PostgreSQL now provides one atomic shared token-bucket contract with isolated, versioned tenant-mutation, system-admin-mutation and Meta-webhook policies; the existing PostgreSQL ledger covers WhatsApp reservations. Railway route wiring, approved live policy values, telemetry and load evidence still lack a complete distributed target proof.",
+      "PostgreSQL now provides one atomic shared token-bucket contract with isolated, versioned tenant-mutation, system-admin-mutation and Meta-webhook policies; the existing PostgreSQL ledger covers WhatsApp reservations. Tenant mutations and the optional Meta webhook route have local Railway composition. System-admin route wiring, approved live policy values, telemetry and load evidence still lack a complete distributed target proof.",
   }),
   capability({
     id: "security.secret-management",

@@ -74,6 +74,44 @@ test("fails readiness closed without leaking dependency errors", async () => {
   assert.equal(fixture.calls.length, 0);
 });
 
+test("routes Meta webhook queries only to a configured bounded handler", async () => {
+  const unavailableFixture = runtime();
+  const unavailable = await createRailwayNodeRequestDispatcher(
+    unavailableFixture.value,
+  )(
+    new Request(
+      "http://127.0.0.1/webhooks/meta?hub.mode=subscribe",
+    ),
+  );
+
+  assert.equal(unavailable.status, 503);
+  assert.equal(await unavailable.text(), "WEBHOOK_UNAVAILABLE");
+  assert.equal(unavailable.headers.get("cache-control"), "no-store");
+
+  const configuredFixture = runtime();
+  const webhookCalls = [];
+  configuredFixture.value.metaWebhookHandler = {
+    async handle(request) {
+      webhookCalls.push(request.url);
+      return new Response("24680", { status: 200 });
+    },
+  };
+  const configured = await createRailwayNodeRequestDispatcher(
+    configuredFixture.value,
+  )(
+    new Request(
+      "http://127.0.0.1/webhooks/meta?hub.mode=subscribe&hub.challenge=24680",
+    ),
+  );
+
+  assert.equal(configured.status, 200);
+  assert.equal(await configured.text(), "24680");
+  assert.deepEqual(webhookCalls, [
+    "http://127.0.0.1/webhooks/meta?hub.mode=subscribe&hub.challenge=24680",
+  ]);
+  assert.equal(configuredFixture.calls.length, 0);
+});
+
 test("adapts one bounded origin-form Node request without trusting Host", async () => {
   const incoming = Readable.from([Buffer.from('{"value":1}')]);
   incoming.method = "POST";
