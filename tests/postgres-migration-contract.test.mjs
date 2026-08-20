@@ -44,6 +44,7 @@ const contactConsentSchema = migrationSources[21];
 const campaignDeliveryProviderSchema = migrationSources[22];
 const apiMutationRateLimitSchema = migrationSources[23];
 const whatsappLegacyReservationCategorySchema = migrationSources[24];
+const dataMigrationBundleReceiptSchema = migrationSources[25];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -72,15 +73,36 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0022_campaign_delivery_provider_links.sql",
     "0023_api_mutation_rate_limits.sql",
     "0024_whatsapp_legacy_reservation_category.sql",
+    "0025_data_migration_bundle_receipts.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 25,
+      migrationCount: 26,
       findings: [],
     },
   );
+});
+
+test("defines immutable all-slice migration bundle receipts", () => {
+  assert.match(
+    dataMigrationBundleReceiptSchema,
+    /CREATE TABLE data_migration_bundle_receipts[\s\S]*execution_scope TEXT PRIMARY KEY[\s\S]*bundle_id TEXT NOT NULL UNIQUE[\s\S]*source_digest TEXT NOT NULL UNIQUE[\s\S]*evidence_digest TEXT NOT NULL UNIQUE/,
+  );
+  assert.match(
+    dataMigrationBundleReceiptSchema,
+    /execution_scope = 'full-d1-cutover'/,
+  );
+  assert.match(
+    dataMigrationBundleReceiptSchema,
+    /slice_count = 10[\s\S]*table_count = 51[\s\S]*total_row_count >= 0/,
+  );
+  assert.match(
+    dataMigrationBundleReceiptSchema,
+    /reject_data_migration_bundle_receipt_mutation[\s\S]*BEFORE UPDATE OR DELETE/,
+  );
+  assert.doesNotMatch(dataMigrationBundleReceiptSchema, /random|uuid/i);
 });
 
 test("preserves unknown legacy reservation categories without weakening new writes", () => {

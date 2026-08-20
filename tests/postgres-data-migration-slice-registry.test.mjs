@@ -9,6 +9,7 @@ import {
 
 const railwayOnlyTables = new Set([
   "api_mutation_rate_limit_buckets",
+  "data_migration_bundle_receipts",
   "railway_api_mutation_receipts",
   "worker_scheduler_leases",
 ]);

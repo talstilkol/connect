@@ -298,10 +298,13 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
+    "postgres/migrations/0025_data_migration_bundle_receipts.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/read-d1-full-data-migration-snapshot.mjs",
     "scripts/verify-d1-full-data-migration-snapshot.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
+    "server/platform/postgresDataMigrationBundleProtocol.ts",
+    "server/platform/postgresFullDataMigrationBundle.ts",
     "server/platform/postgresMutationRateLimitBinding.ts",
     "server/platform/postgresMutationRateLimitConfiguration.ts",
     "server/platform/railwayApiRuntime.ts",
@@ -367,6 +370,8 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
   assert.match(boundary.cutoverBlocker, /all ten slices and all 51 tables/);
   assert.match(boundary.cutoverBlocker, /single-transaction full-source snapshot boundary/);
+  assert.match(boundary.cutoverBlocker, /signed all-slice bundle/);
+  assert.match(boundary.cutoverBlocker, /immutable source-level replay receipt/);
   assert.match(boundary.cutoverBlocker, /live controlled-environment export and signed full rehearsal/);
   assert.doesNotMatch(boundary.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
@@ -451,12 +456,15 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
+    "postgres/migrations/0025_data_migration_bundle_receipts.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/read-d1-full-data-migration-snapshot.mjs",
     "scripts/verify-d1-full-data-migration-snapshot.mjs",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
     "scripts/verify-node-postgres-integration.mjs",
+    "server/platform/postgresDataMigrationBundleProtocol.ts",
+    "server/platform/postgresFullDataMigrationBundle.ts",
     "server/platform/postgresMutationRateLimitBinding.ts",
     "server/platform/postgresMutationRateLimitConfiguration.ts",
   ]) {
@@ -464,7 +472,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /twenty-five ordered/);
+  assert.match(database.cutoverBlocker, /twenty-six ordered/);
+  assert.match(database.cutoverBlocker, /four Railway-only migrations/);
   assert.match(database.cutoverBlocker, /immutable contact-consent evidence/);
   assert.match(
     database.cutoverBlocker,
@@ -536,6 +545,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   assert.match(database.cutoverBlocker, /maps every one of the 36 D1 migrations and all 51 D1 tables/);
   assert.match(database.cutoverBlocker, /all ten slices and all 51 tables/);
   assert.match(database.cutoverBlocker, /single-transaction full-source snapshot boundary/);
+  assert.match(database.cutoverBlocker, /signed all-slice bundle/);
+  assert.match(database.cutoverBlocker, /immutable receipt unique by bundle and source digest/);
   assert.match(database.cutoverBlocker, /live controlled-environment export and signed full rehearsal/);
   assert.doesNotMatch(database.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(

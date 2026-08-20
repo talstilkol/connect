@@ -11,7 +11,7 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 25 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 26 Migrations מסודרות עבור
 ה־Critical Path. הן מכסות את יסודות Tenant/Contact, ‏HTTP mutation receipts,
 Access/Membership/Invitation, ‏Conversation, ‏Templates/Campaigns, ‏Bot,
 AI/Knowledge, ‏Contact organization/import, ‏Meta credentials/Webhooks,
@@ -22,7 +22,7 @@ Production decisions ו־System Admin. השרשרת הוחלה בהצלחה על
 rehearsal בסביבה נשלטת.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 24 ה־Migrations על PostgreSQL 16,
+Loopback ייעודי וריק. הוא החיל את 26 ה־Migrations על PostgreSQL 16,
 הפעיל DML אמיתי והוכיח 58 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
@@ -396,6 +396,11 @@ Export חי, Dry run עם נתונים מורשים בסביבה נשלטת ור
 6.3.1 ‏Full-source snapshot preflight קורא Export SQLite מורשה במצב
 Read-only תחת Transaction יחיד. הוא בודק את כל 51 הטבלאות ואינו מדפיס נתיב
 או שורות. הוא אינו מחליף טעינה ו־Recovery בסביבת Staging.
+
+6.3.2 ‏Signed all-slice bundle מחבר את כל עשרת ה־Plans תחת Transaction
+יעד יחיד. `data_migration_bundle_receipts` חוסמת Replay לפי Bundle ולפי
+Source digest ונכתבת רק לאחר אימות כל 51 הטבלאות. מנגנון זה עבר מקומית מול
+PostgreSQL 16.13 עם מקור ריק; נתוני Staging מורשים עדיין חסרים.
 
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/

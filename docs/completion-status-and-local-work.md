@@ -1903,3 +1903,32 @@ guard סרק 556 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,1
 סרק 556 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,154 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,103
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.62 ‏Signed all-slice PostgreSQL migration bundle הושלם מקומית. עשרת
+ה־Child plans נוצרים עם אותו חלון קצר־תוקף, נקשרים ב־HMAC ל־Source digest
+יציב ול־Bundle digest תלוי־חלון, ונבדקים במלואם לפני פתיחת Transaction יעד.
+
+4.62.1 הביצוע רוכש לפי סדר קבוע את כל ששת ה־Advisory locks הקיימים ומריץ
+את כל עשרת ה־Slice protocols דרך Transaction manager מקונן תחת Transaction
+חיצוני יחיד. בדיקה שלילית הוכיחה שכשל ב־Slice מאוחר מבטל גם Slice מוקדם
+ואינו כותב Receipt.
+
+4.62.2 ‏Migration `0025_data_migration_bundle_receipts.sql` מוסיפה Receipt
+בלתי־משתנה וייחודי לפי Bundle, ‏Source, חתימת Bundle וחתימת Evidence. כך גם
+Source ריק אינו יכול להיטען שוב באמצעות Plan חדש. ‏Execution scope יחיד
+חוסם Cutover מלא שני גם לאחר החלפת HMAC key. ה־Receipt נכתב רק לאחר
+אימות Target digests של כל 51 הטבלאות ובאותו Transaction.
+
+4.62.3 חזרה נקייה מול PostgreSQL 16.13 אמיתי עברה עם כל 26 ה־Migrations,
+עשרה Slices, ‏51 טבלאות, Receipt יחיד ודחיית Replay. כל 58 תרחישי
+ה־Concurrency הקיימים עברו לאחר מכן. ה־Harness תוקן גם להסרת תלות בשעת
+מערכת קשיחה: זמני עדכון Admin נגזרים כעת מזמן יצירת ה־Profile שנשמר בפועל.
+
+4.62.4 שער השחרור המקומי המלא עבר לאחר התיקון. ‏Source guard סרק 558
+קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,163 קבצים והיסטוריית Git,
+ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,110 הבדיקות**
+עברו יחד ללא כשל או Skip.
+
+4.62.5 החזרה המלאה עדיין אינה ראיית Staging: היא השתמשה ב־D1 schema אמיתי
+ללא שורות לקוח. עדיין נדרשים Export מורשה, ספק PostgreSQL וערכי Pool חיים,
+הרצת אותו Bundle בסביבה מבוקרת, ‏Load/Recovery ו־Evidence חתום לשחרור.

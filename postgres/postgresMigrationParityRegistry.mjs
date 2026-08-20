@@ -328,4 +328,10 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Multiple Railway API instances require one shared mutation token bucket in place of a Cloudflare Rate Limit binding.",
   }),
+  Object.freeze({
+    migration: "0025_data_migration_bundle_receipts.sql",
+    token: "CREATE TABLE data_migration_bundle_receipts",
+    summary:
+      "A Railway cutover needs one immutable receipt for atomic all-slice execution and source-level replay protection.",
+  }),
 ]);

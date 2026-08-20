@@ -57,7 +57,7 @@ Repository contracts ומשווה גם את תוצאות הפעולות וגם �
 flowchart LR
   D1["D1/SQLite + 36 migrations"] --> Snapshot["Core snapshot"]
   Snapshot --> Plan["HMAC-bound migration plan"]
-  Plan --> PG["PostgreSQL 16 + 25 migrations"]
+  Plan --> PG["PostgreSQL 16 + 26 migrations"]
   D1 --> D1Repo["D1 repositories"]
   PG --> PGRepo["PostgreSQL repositories"]
   D1Repo --> Compare["19 paired scenarios"]

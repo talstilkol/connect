@@ -39,6 +39,11 @@
 לכל 51 הטבלאות. החוזה והפקודה ל־Export מורשה מתועדים ב־
 `docs/postgresql-full-source-snapshot-contract.md`.
 
+2.3 ‏`postgresFullDataMigrationBundle.ts` יוצר Plan מאוחד וחתום, מאמת את
+עשרת ה־Child plans לפני Transaction, מריץ אותם לפי סדר התלות תחת Transaction
+PostgreSQL יחיד וכותב Receipt בלתי־משתנה. החזרה הריקה עברה מול PostgreSQL
+16.13 עם 26 Migrations; עדיין נדרשת חזרה עם Export מורשה.
+
 ## 3. Slice שהושלם — Tenant Access
 
 3.1 הטבלאות:

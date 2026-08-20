@@ -3,17 +3,32 @@ import {
   readFile,
 } from "node:fs/promises";
 import {
+  readFileSync,
+  readdirSync,
+} from "node:fs";
+import {
   join,
 } from "node:path";
 import {
   fileURLToPath,
 } from "node:url";
+import { DatabaseSync } from "node:sqlite";
 
 import pg from "pg";
 
 import {
   createNodePostgresTransactionManager,
 } from "../server/platform/nodePostgresAdapter.ts";
+import {
+  createPostgresFullDataMigrationBundlePlan,
+  executePostgresFullDataMigrationBundle,
+} from "../server/platform/postgresFullDataMigrationBundle.ts";
+import {
+  PostgresDataMigrationBundleError,
+} from "../server/platform/postgresDataMigrationBundleProtocol.ts";
+import {
+  readD1FullDataMigrationSnapshot,
+} from "./read-d1-full-data-migration-snapshot.mjs";
 import {
   createRailwayPostgresFoundation,
 } from "../server/platform/railwayPostgresFoundation.ts";
@@ -91,6 +106,7 @@ const migrationFiles = Object.freeze([
   "0022_campaign_delivery_provider_links.sql",
   "0023_api_mutation_rate_limits.sql",
   "0024_whatsapp_legacy_reservation_category.sql",
+  "0025_data_migration_bundle_receipts.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -166,6 +182,73 @@ async function applyMigrations(pool) {
       "utf8",
     );
     await pool.query(sql);
+  }
+}
+
+async function verifyFullDataMigrationBundle(pool, transactions) {
+  const sourceDatabase = new DatabaseSync(":memory:");
+  const evidenceHmacKey = Buffer.alloc(32, 29).toString("base64");
+  const createdAt = "2026-08-17T07:00:00.000Z";
+  const expiresAt = "2026-08-17T07:15:00.000Z";
+  const now = "2026-08-17T07:05:00.000Z";
+  try {
+    sourceDatabase.exec("PRAGMA foreign_keys = ON");
+    for (const fileName of readdirSync(join(projectRoot, "drizzle"))
+      .filter((name) => /^\d{4}_[a-z0-9_]+\.sql$/.test(name))
+      .sort()) {
+      sourceDatabase.exec(
+        readFileSync(join(projectRoot, "drizzle", fileName), "utf8")
+          .replaceAll("--> statement-breakpoint", ""),
+      );
+    }
+    const source = readD1FullDataMigrationSnapshot(sourceDatabase);
+    const plan = createPostgresFullDataMigrationBundlePlan({
+      snapshots: source.slices,
+      createdAt,
+      expiresAt,
+      evidenceHmacKey,
+    });
+    const evidence = await executePostgresFullDataMigrationBundle({
+      plan,
+      transactions,
+      evidenceHmacKey,
+      now,
+    });
+    assert.equal(evidence.sliceCount, 10);
+    assert.equal(evidence.tableCount, 51);
+    assert.equal(evidence.totalRowCount, 0);
+    assert.match(evidence.evidenceDigest, /^hmac_sha256_v1_[0-9a-f]{64}$/);
+
+    await assert.rejects(
+      executePostgresFullDataMigrationBundle({
+        plan,
+        transactions,
+        evidenceHmacKey,
+        now,
+      }),
+      (error) => error instanceof PostgresDataMigrationBundleError &&
+        error.code === "bundle-replayed",
+    );
+    const receipt = await pool.query(
+      `SELECT
+         bundle_id AS "bundleId",
+         source_digest AS "sourceDigest",
+         evidence_digest AS "evidenceDigest",
+         slice_count AS "sliceCount",
+         table_count AS "tableCount",
+         total_row_count AS "totalRowCount"
+       FROM data_migration_bundle_receipts`,
+      [],
+    );
+    assert.equal(receipt.rowCount, 1);
+    assert.equal(receipt.rows[0]?.bundleId, plan.bundleId);
+    assert.equal(receipt.rows[0]?.sourceDigest, plan.sourceDigest);
+    assert.equal(receipt.rows[0]?.evidenceDigest, evidence.evidenceDigest);
+    assert.equal(receipt.rows[0]?.sliceCount, 10);
+    assert.equal(receipt.rows[0]?.tableCount, 51);
+    assert.equal(Number(receipt.rows[0]?.totalRowCount), 0);
+  } finally {
+    sourceDatabase.close();
   }
 }
 
@@ -3064,6 +3147,22 @@ async function verifySystemAdminLifecycle(pool, foundation, tenantId) {
   assert.equal(directory.tenants[0]?.tenantId, tenantId);
   assert.equal(directory.tenants[0]?.businessProfile?.version, 1);
 
+  const profileClock = await pool.query(
+    `SELECT created_at AS "createdAt"
+     FROM business_profiles
+     WHERE tenant_id = $1`,
+    [tenantId],
+  );
+  assert.equal(profileClock.rowCount, 1);
+  const profileCreatedAt = profileClock.rows[0]?.createdAt;
+  assert.equal(profileCreatedAt instanceof Date, true);
+  const firstUpdateAt = new Date(
+    profileCreatedAt.getTime() + 60_000,
+  ).toISOString();
+  const competingUpdateAt = new Date(
+    profileCreatedAt.getTime() + 120_000,
+  ).toISOString();
+
   const actorExternalUserId = "system-admin-postgres-profile";
   const firstUpdate = Object.freeze({
     tenantId,
@@ -3072,7 +3171,7 @@ async function verifySystemAdminLifecycle(pool, foundation, tenantId) {
     timezone: "Europe/London",
     interfaceLanguage: "en",
     actorExternalUserId,
-    occurredAt: "2026-08-20T15:00:00.000Z",
+    occurredAt: firstUpdateAt,
   });
   const identical = await Promise.all([
     foundation.systemAdminBusinessProfiles.update(firstUpdate),
@@ -3089,7 +3188,7 @@ async function verifySystemAdminLifecycle(pool, foundation, tenantId) {
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
     actorExternalUserId,
-    occurredAt: "2026-08-21T15:05:00.000Z",
+    occurredAt: competingUpdateAt,
   });
   const competing = await Promise.all([
     foundation.systemAdminBusinessProfiles.update({
@@ -4521,8 +4620,9 @@ export async function verifyNodePostgresIntegration(
     assert.match(identity.rows[0]?.version, /^16\./);
 
     await applyMigrations(pool);
-    const tenantId = await createTenant(pool);
     const transactions = createNodePostgresTransactionManager(pool);
+    await verifyFullDataMigrationBundle(pool, transactions);
+    const tenantId = await createTenant(pool);
     const foundation = createRailwayPostgresFoundation({
       environment: postgresEnvironment(checkedConnectionString),
       telemetry: {
