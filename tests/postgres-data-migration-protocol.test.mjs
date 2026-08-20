@@ -325,3 +325,141 @@ test("maps raw insert failures to a bounded privacy-safe error", async () => {
   assert.equal(fixture.committed, false);
   assert.equal(fixture.rolledBack, true);
 });
+
+test("normalizes D1 integer and PostgreSQL boolean values identically", async () => {
+  const protocol = createPostgresDataMigrationProtocol({
+    version: "connect_postgres_boolean_protocol_test_v1",
+    planKind: "postgres-boolean-protocol-test-migration-plan",
+    evidenceKind: "postgres-boolean-protocol-test-migration-evidence",
+    advisoryLockKey: [1129270867, 3],
+    tables: [{
+      name: "flags",
+      columns: [
+        { name: "id", kind: "positive-integer" },
+        { name: "enabled", kind: "boolean-integer" },
+      ],
+      orderBy: ["id"],
+    }],
+  });
+  const snapshot = protocol.createSnapshot({
+    flags: [{ id: 1, enabled: 1 }, { id: 2, enabled: 0 }],
+  });
+  const plan = protocol.createPlan({
+    snapshot,
+    createdAt,
+    expiresAt,
+    evidenceHmacKey,
+  });
+  const calls = [];
+  const transactions = {
+    async transaction(_options, execute) {
+      return execute({
+        async query(sql, parameters) {
+          calls.push({ sql, parameters });
+          if (/^SELECT count\(\*\)::bigint AS count/i.test(sql)) {
+            return { rows: [{ count: "0" }], rowCount: 1 };
+          }
+          if (/^INSERT INTO flags/i.test(sql)) {
+            return { rows: [], rowCount: 2 };
+          }
+          if (/^SELECT [\s\S]+FROM flags\s+ORDER BY/i.test(sql)) {
+            return {
+              rows: [{ id: "1", enabled: true }, { id: "2", enabled: false }],
+              rowCount: 2,
+            };
+          }
+          return { rows: [{}], rowCount: 1 };
+        },
+      });
+    },
+  };
+  const evidence = await protocol.execute({
+    plan,
+    transactions,
+    evidenceHmacKey,
+    now: "2026-08-20T08:05:00.000Z",
+  });
+  const insert = calls.find(({ sql }) => /^INSERT INTO flags/i.test(sql));
+  assert.match(insert.sql, /\(\$2::integer\)::boolean/);
+  assert.deepEqual(insert.parameters, [1, 1, 2, 0]);
+  assert.equal(evidence.tables[0].sourceDigest, evidence.tables[0].targetDigest);
+
+  for (const invalid of [2, -1, "true", null]) {
+    assert.throws(
+      () => protocol.createSnapshot({ flags: [{ id: 1, enabled: invalid }] }),
+      (error) => error instanceof PostgresDataMigrationError &&
+        error.code === "row-invalid",
+    );
+  }
+});
+
+test("reads calendar dates as text without a timezone conversion", async () => {
+  const protocol = createPostgresDataMigrationProtocol({
+    version: "connect_postgres_date_protocol_test_v1",
+    planKind: "postgres-date-protocol-test-migration-plan",
+    evidenceKind: "postgres-date-protocol-test-migration-evidence",
+    advisoryLockKey: [1129270867, 4],
+    tables: [{
+      name: "periods",
+      columns: [
+        { name: "id", kind: "positive-integer" },
+        { name: "period_start", kind: "date" },
+      ],
+      orderBy: ["id"],
+    }],
+  });
+  const snapshot = protocol.createSnapshot({
+    periods: [{ id: 1, period_start: "2026-08-01" }],
+  });
+  const plan = protocol.createPlan({
+    snapshot,
+    createdAt,
+    expiresAt,
+    evidenceHmacKey,
+  });
+  const calls = [];
+  const evidence = await protocol.execute({
+    plan,
+    evidenceHmacKey,
+    now: "2026-08-20T08:05:00.000Z",
+    transactions: {
+      async transaction(_options, execute) {
+        return execute({
+          async query(sql, parameters) {
+            calls.push({ sql, parameters });
+            if (/^SELECT count\(\*\)::bigint AS count/i.test(sql)) {
+              return { rows: [{ count: "0" }], rowCount: 1 };
+            }
+            if (/^INSERT INTO periods/i.test(sql)) {
+              return { rows: [], rowCount: 1 };
+            }
+            if (/^SELECT [\s\S]+FROM periods\s+ORDER BY/i.test(sql)) {
+              return {
+                rows: [{ id: "1", period_start: "2026-08-01" }],
+                rowCount: 1,
+              };
+            }
+            return { rows: [{}], rowCount: 1 };
+          },
+        });
+      },
+    },
+  });
+  const insert = calls.find(({ sql }) => /^INSERT INTO periods/i.test(sql));
+  const targetRead = calls.find(({ sql }) => (
+    /^SELECT [\s\S]+FROM periods\s+ORDER BY/i.test(sql)
+  ));
+  assert.match(insert.sql, /\$2::date/);
+  assert.match(targetRead.sql, /period_start::text AS period_start/);
+  assert.equal(evidence.tables[0].sourceDigest, evidence.tables[0].targetDigest);
+
+  for (const invalid of ["2026-02-30", "2026-8-01", "not-a-date", null]) {
+    assert.throws(
+      () => protocol.createSnapshot({
+        periods: [{ id: 1, period_start: invalid }],
+      }),
+      (error) => error instanceof PostgresDataMigrationError &&
+        error.code === "row-invalid",
+    );
+  }
+});

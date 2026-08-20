@@ -26,12 +26,12 @@
 | 5 | `templates-campaigns` | 3 | Core, Contacts, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
 | 6 | `conversations-messages` | 2 | Core, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
 | 7 | `bot-runtime` | 3 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
-| 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | הבא לביצוע | 10–24 שעות |
-| 9 | `governance-billing` | 5 | `core` | מתוכנן | 5–12 שעות |
+| 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
+| 9 | `governance-billing` | 5 | `core` | הבא לביצוע | 5–12 שעות |
 | 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | מתוכנן | 10–24 שעות |
 
-2.1 נותרו 22 טבלאות לאחר שבעת ה־Slices שהושלמו. האומדן הכולל ל־Data
-migration ו־Parity המקומיים הוא **25–60 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
+2.1 נותרו 13 טבלאות לאחר שמונת ה־Slices שהושלמו. האומדן הכולל ל־Data
+migration ו־Parity המקומיים הוא **15–36 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
 Accounts, המתנה לספקים, Staging, Load/Recovery או Cutover.
 
 ## 3. Slice שהושלם — Tenant Access
@@ -145,21 +145,38 @@ Definition, ‏Reply, טלפון, ‏Provider ID ו־Error code אינם מופ�
 אך חוזה ה־Runtime דורש ערך חתוך. ה־Snapshot חוסם Legacy row כזה לפני טעינה;
 הפער אינו הותר כ־Semantic parity.
 
-## 9. Slice הבא — AI & Knowledge Runtime
+## 9. Slice שהושלם — AI & Knowledge Runtime
 
 9.1 תשע הטבלאות כוללות Agent וגרסאותיו, Knowledge sources/passages,
 קישורי Version/Source, הרשאות עלות, Usage, ‏Audit ו־Reply outbox. ה־Slice
 תלוי ב־Core וב־Conversations שכבר עברו Rehearsal.
 
-## 10. תנאי בטיחות
+9.2 ה־Rehearsal העביר תשע רשומות, חסם Replay, הוכיח בידוד Tenant והשווה
+Counts ו־HMAC digests לכל טבלה. לפני Commit נבדקו Projection של Agent,
+מיפוי Version/Source, רציפות Passages, התאמת Usage להרשאת עלות וקישור מלא
+של Audit ו־Reply outbox להודעת Inbound ולמקורות ה־Knowledge.
 
-10.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
+9.3 תשעה תרחישי Semantic parity כיסו אישור תשובת AI, ארכוב Source, כיבוי
+והפעלה של Agent, כפילויות Source/Passage, Cross-tenant והרשאות עלות. ‏Prompt,
+תוכן Passage, תשובת AI, טלפון, Provider ID ומפתחות עסקיים אינם מופיעים ב־
+Manifest או ב־Evidence. פרטי הראיה נמצאים ב־
+`docs/postgresql-ai-knowledge-runtime-data-migration-rehearsal.md`.
+
+## 10. Slice הבא — Governance & Billing
+
+10.1 חמש הטבלאות הן Subscription והיסטוריית האירועים שלו, Production
+decision records/events ו־Business profile admin events. ה־Slice תלוי רק
+ב־Core שכבר עבר Rehearsal.
+
+## 11. תנאי בטיחות
+
+11.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
 הרצת PostgreSQL אמיתית ו־Semantic parity מתועד.
 
-10.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
+11.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
 Manifest ו־Evidence משלו, כדי ש־Replay או החלפת Payload ייכשלו סגור.
 
-10.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
+11.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
 שכבר עומדים בחוזה היעד.
 
-10.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.
+11.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.

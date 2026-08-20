@@ -80,7 +80,7 @@ test("keeps slice dependencies ordered and linked to real migrations", () => {
   }
 });
 
-test("marks seven slices rehearsed and the next slice explicitly", () => {
+test("marks eight slices rehearsed and the next slice explicitly", () => {
   const rehearsed = POSTGRES_DATA_MIGRATION_SLICES
     .filter(({ status }) => status === "rehearsed");
   const next = POSTGRES_DATA_MIGRATION_SLICES
@@ -97,15 +97,16 @@ test("marks seven slices rehearsed and the next slice explicitly", () => {
     "templates-campaigns",
     "conversations-messages",
     "bot-runtime",
+    "ai-knowledge-runtime",
   ]);
   assert.equal(
     rehearsed.reduce((total, slice) => total + slice.tables.length, 0),
-    29,
+    38,
   );
-  assert.deepEqual(next.map(({ id }) => id), ["ai-knowledge-runtime"]);
-  assert.deepEqual(next[0].requires, ["core", "conversations-messages"]);
-  assert.equal(next[0].tables.length, 9);
-  assert.equal(remainingCount, 22);
+  assert.deepEqual(next.map(({ id }) => id), ["governance-billing"]);
+  assert.deepEqual(next[0].requires, ["core"]);
+  assert.equal(next[0].tables.length, 5);
+  assert.equal(remainingCount, 13);
 });
 
 test("keeps provider delivery evidence with its rate-limit proof", () => {

@@ -20,6 +20,8 @@ const maximumColumns = 64;
 const batchSize = 200;
 
 export type PostgresDataMigrationColumnKind =
+  | "boolean-integer"
+  | "date"
   | "json"
   | "nonnegative-integer"
   | "positive-integer"
@@ -219,6 +221,8 @@ function requireConfiguration(
         !identifierPattern.test(column.name) ||
         columnNames.has(column.name) ||
         ![
+          "boolean-integer",
+          "date",
           "json",
           "nonnegative-integer",
           "positive-integer",
@@ -292,6 +296,22 @@ function normalizeTimestamp(value: unknown): string {
   return parsed.toISOString();
 }
 
+function normalizeDate(value: unknown): string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    fail("row-invalid");
+  }
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() + 1 !== month ||
+    parsed.getUTCDate() !== day
+  ) {
+    fail("row-invalid");
+  }
+  return value;
+}
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value === "boolean") return JSON.stringify(value);
   if (typeof value === "number") {
@@ -331,6 +351,13 @@ function normalizeValue(
     fail("row-invalid");
   }
   if (
+    column.kind === "boolean-integer"
+  ) {
+    if (value === true || value === 1 || value === "1") return 1;
+    if (value === false || value === 0 || value === "0") return 0;
+    fail("row-invalid");
+  }
+  if (
     column.kind === "positive-integer" ||
     column.kind === "nonnegative-integer"
   ) {
@@ -343,6 +370,7 @@ function normalizeValue(
     }
     return Number(normalized);
   }
+  if (column.kind === "date") return normalizeDate(value);
   if (column.kind === "timestamp") return normalizeTimestamp(value);
   if (column.kind === "json") return normalizeJson(value);
   if (typeof value !== "string") fail("row-invalid");
@@ -412,6 +440,10 @@ function placeholders(
 ): string {
   return `(${columns.map((column, index) => {
     const placeholder = `$${rowOffset + index + 1}`;
+    if (column.kind === "boolean-integer") {
+      return `(${placeholder}::integer)::boolean`;
+    }
+    if (column.kind === "date") return `${placeholder}::date`;
     if (column.kind === "timestamp") return `${placeholder}::timestamptz`;
     if (column.kind === "json") return `${placeholder}::jsonb`;
     return placeholder;
@@ -658,7 +690,9 @@ export function createPostgresDataMigrationProtocol(
     table: Readonly<PostgresDataMigrationTableContract>,
   ): Promise<readonly PostgresDataMigrationRow[]> {
     const result = await transaction.query<Record<string, unknown>>(
-      `SELECT ${table.columns.map(({ name }) => name).join(", ")}
+      `SELECT ${table.columns.map(({ name, kind }) => (
+        kind === "date" ? `${name}::text AS ${name}` : name
+      )).join(", ")}
        FROM ${table.name}
        ORDER BY ${table.orderBy.join(", ")}`,
       [],

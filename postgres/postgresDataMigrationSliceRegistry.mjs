@@ -142,7 +142,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "ai-knowledge-runtime",
     order: 8,
-    status: "next",
+    status: "rehearsed",
     requires: ["core", "conversations-messages"],
     tables: [
       "ai_agents",
@@ -170,7 +170,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "governance-billing",
     order: 9,
-    status: "planned",
+    status: "next",
     requires: ["core"],
     tables: [
       "tenant_subscriptions",

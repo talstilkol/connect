@@ -1790,3 +1790,32 @@ AI & Knowledge Runtime ובו תשע טבלאות.
 553 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,133 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,075
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.58 ‏PostgreSQL AI & Knowledge Runtime data migration ו־Semantic parity
+הושלמו מקומית עבור תשע הטבלאות של Agent, ‏Version, ‏Knowledge,
+Cost/Usage, ‏Audit ו־Reply outbox.
+
+4.58.1 ה־Snapshot מאמת מחדש את כל המפתחות הדטרמיניסטיים, מפעיל את
+Validator העסקי המלא על הגדרת Agent ודורש Lifecycle עקבי. לפני Commit
+נבדקים Projection של גרסה אחרונה/פעילה, מיפוי Version/Source, רציפות
+Passages, התאמת Usage להרשאת עלות וקישור Audit/Outbox מלא להודעת Inbound,
+ל־Contact ולמקורות Knowledge.
+
+4.58.2 חוזה ה־Migration המשותף הורחב ל־Boolean של D1/PostgreSQL ול־Date
+קלנדרי. ‏`DATE` נקרא חזרה כ־Text ונכתב עם `::date`, ולכן אין שינוי יום עקב
+Timezone. ערכי 0/1 של D1 מושווים דטרמיניסטית ל־Boolean של PostgreSQL.
+
+4.58.3 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 9 tables, 9 rows, replay rejected, tenant isolation verified, AI payload private, 9 parity scenarios)`.
+‏Prompt, תוכן Passage, תשובת AI, טלפון ו־Provider ID לא נחשפו ב־Manifest
+או ב־Evidence.
+
+4.58.4 ‏38 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 13
+טבלאות, ‏Export חי, ‏Staging, ‏Load/Recovery ו־Cutover. ה־Slice הבא הוא
+Governance & Billing ובו חמש טבלאות. אומדן העבודה המקומית לשני ה־Slices
+שנותרו הוא **15–36 שעות פיתוח ואימות נטו**.
+
+4.58.5 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+554 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,138 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,083
+הבדיקות** עברו יחד ללא כשל או Skip.
