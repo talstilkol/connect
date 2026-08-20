@@ -113,6 +113,7 @@ function fixture({
   const calls = {
     tenantIdentities: [],
     contactInputs: [],
+    organizationInputs: [],
     reportInputs: [],
     rateLimitSubjects: [],
     mutationCommands: [],
@@ -143,6 +144,27 @@ function fixture({
         return {
           contacts: [persistedContact()],
           nextCursor: null,
+        };
+      },
+    },
+    contactOrganization: {
+      async read(receivedSession, contactIds) {
+        calls.organizationInputs.push({
+          session: receivedSession,
+          contactIds,
+        });
+        return {
+          scopeContactIds: contactIds,
+          tags: [{
+            id: 5,
+            name: "Customers",
+            contactCount: 1,
+            internalTagKey: "private-tag-key",
+          }],
+          lists: [],
+          tagAssignments: [{ contactId: 23, tagId: 5 }],
+          listMemberships: [],
+          internalTenantId: receivedSession.tenantId,
         };
       },
     },
@@ -382,10 +404,21 @@ test("lists contacts through the resolved tenant and safe mapper", async () => {
       },
     ],
     nextCursor: null,
+    organization: {
+      scopeContactIds: [23],
+      tags: [{ id: 5, name: "Customers", contactCount: 1 }],
+      lists: [],
+      tagAssignments: [{ contactId: 23, tagId: 5 }],
+      listMemberships: [],
+    },
   });
+  assert.deepEqual(calls.organizationInputs, [{
+    session: calls.contactInputs[0].session,
+    contactIds: [23],
+  }]);
   assert.doesNotMatch(
     JSON.stringify(result),
-    /tenantId|evidence|createdAt|updatedAt/,
+    /tenantId|evidence|createdAt|updatedAt|internalTagKey|private-tag-key/,
   );
 });
 
@@ -737,6 +770,7 @@ test("rejects missing operation dependencies", () => {
       createRailwayApiOperationRegistry({
         tenantSessions: {},
         contacts: {},
+        contactOrganization: {},
         reports: {},
       }),
     /operation dependencies are invalid/,

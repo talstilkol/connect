@@ -571,6 +571,19 @@ Campaign/Message/Conversation/Bot/AI, סכומי קטגוריות, Currency orde
 חסר, Selection חסרה והרשאה חסרה, כדי לשמר את מצבי ההתאוששות הקיימים ב־UI.
 עדיין נדרשים Origin, ‏OIDC, Clerk, ‏PostgreSQL וראיית Staging חיים.
 
+7.1.63 טעינת Contact Directory הועברה מקומית מ־D1 ל־Railway API
+ול־PostgreSQL ללא Fallback, הן לטעינה הראשונה והן ל־Pagination. הפעולה
+`contacts.list` פותרת Tenant והרשאת `contacts.read` ב־Railway ומחזירה באותה
+תגובה גם Snapshot של Tags, ‏Lists והשיוכים עבור עד 50 אנשי הקשר שבדף.
+ה־Payload מכיל רק Cursor חיובי או `null`; ‏Tenant או זהות משתמש אינם חוצים
+את הגבול. ה־Vercel BFF מאמת מפתחות מדויקים, Contact IDs בסדר יורד, Cursor
+התואם לרשומה האחרונה בדף מלא, Contact profile ו־timestamps קנוניים, Scope
+זהה לדף, Group IDs ייחודיים ו־Relationships מסודרים המצביעים רק על Contact
+ו־Group קיימים. טעינת Contacts וארגון בשתי קריאות PostgreSQL נפרדות שומרת
+את הסמנטיקה הקיימת ואינה מבטיחה Snapshot טרנזקציוני חדש. פעולות שמירת
+Contact, ‏Consent ושינוי Tags/Lists נשארו בשלב Mutation נפרד. עדיין נדרשים
+Origin, ‏OIDC, Clerk, ‏PostgreSQL וראיית Staging חיים לפני Cutover.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

@@ -41,6 +41,7 @@ function fixture(selectedRole = "owner") {
   const calls = {
     memberships: 0,
     contacts: [],
+    contactOrganizations: [],
     reports: [],
     mutationSubjects: [],
     mutationCommands: [],
@@ -105,6 +106,18 @@ function fixture(selectedRole = "owner") {
         return {
           contacts: [],
           nextCursor: null,
+        };
+      },
+    },
+    contactOrganization: {
+      async read(session, contactIds) {
+        calls.contactOrganizations.push({ session, contactIds });
+        return {
+          scopeContactIds: contactIds,
+          tags: [],
+          lists: [],
+          tagAssignments: [],
+          listMemberships: [],
         };
       },
     },
@@ -594,10 +607,18 @@ test("runs a selected-tenant contact query through the complete boundary", async
     data: {
       contacts: [],
       nextCursor: null,
+      organization: {
+        scopeContactIds: [],
+        tags: [],
+        lists: [],
+        tagAssignments: [],
+        listMemberships: [],
+      },
     },
   });
   assert.equal(testFixture.calls.memberships, 1);
   assert.equal(testFixture.calls.contacts.length, 1);
+  assert.equal(testFixture.calls.contactOrganizations.length, 1);
   assert.equal(testFixture.calls.contacts[0].session.tenantId, 11);
   assert.equal(
     testFixture.calls.contacts[0].session.externalUserId,

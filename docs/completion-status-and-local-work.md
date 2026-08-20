@@ -2172,3 +2172,29 @@ Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סר
 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
 עדיין חסרים Origin, ‏OIDC, Clerk ו־PostgreSQL חיים, פריסת Railway/Vercel
 וראיית Staging; אין עדיין טענת Production cutover.
+
+4.73 טעינת Contact Directory הועברה מקומית מ־D1 ל־Railway API
+ול־PostgreSQL ללא Fallback. גם הקריאה הראשונית של מסך Contacts וגם פעולת
+“טען עוד” משתמשות ב־`contacts.list`. ה־Payload כולל רק Cursor חיובי או
+`null`; ‏Tenant, ‏Membership, ‏Selection והרשאת `contacts.read` נגזרים
+ונבדקים בצד Railway.
+
+4.73.1 ה־Operation מחזירה יחד את עד 50 אנשי הקשר ואת Snapshot ה־Tags,
+ה־Lists והשיוכים עבור אותם Contact IDs. ה־BFF מאמת Response בעלת מפתחות
+מדויקים, IDs חיוביים וייחודיים בסדר יורד, Cursor של דף מלא, פרופיל ו־Consent
+timestamps קנוניים, Scope זהה לדף ו־Relationships מסודרים שאינם מצביעים
+מחוץ ל־Scope או לקבוצה חסרה. Response מורחבת, כפולה, לא מסודרת או חוצת־Scope
+נכשלת לפני React state.
+
+4.73.2 `currentContacts.ts` אינו מייבא עוד Runtime D1, ‏D1 repositories או
+Tenant session מקומי. גם גוף `loadMoreContactsAction` עובר ישירות דרך ה־
+Railway handler; בדיקת Boundary מקבעת שאין בו Fallback. פעולות שמירת Contact,
+תיעוד Consent ושינוי Tags/Lists עדיין משתמשות במסלול Mutation הקיים ויועברו
+בנפרד עם Idempotency, ‏Rate limiting ו־Audit מתאימים.
+
+4.73.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,226 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `43/43`. ‏Source guard סרק 579 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,200
+קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+`git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, Clerk ו־PostgreSQL חיים,
+פריסת Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.

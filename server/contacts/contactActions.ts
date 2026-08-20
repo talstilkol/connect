@@ -4,95 +4,40 @@ import {
   ContactNotFoundError,
   createContactConsentRepository,
 } from "../../db/contactConsentRepository.ts";
-import {
-  createContactOrganizationRepository,
-} from "../../db/contactOrganizationRepository.ts";
 import { createContactRepository } from "../../db/contactRepository.ts";
 import { requireRuntimeDatabase } from "../../db/runtimeDatabase.ts";
-import type { ContactRecord } from "../../shared/domain/contactRecord";
-import type {
-  ContactOrganizationSnapshot,
-} from "../../shared/domain/contactOrganization";
-import type {
-  ContactConsentValidationIssue,
-} from "../../shared/validation/contactConsent";
-import type {
-  PersistedContactValidationIssue,
-} from "../../shared/validation/persistedContact";
 import { inspectClerkConfiguration } from "../auth/clerkConfiguration.ts";
-import { requireCurrentTenantSession } from "../auth/currentTenantSession.ts";
 import {
   requireCurrentTenantMutationSession,
 } from "../auth/currentTenantMutationSession.ts";
 import { TenantSessionError } from "../auth/tenantSession.ts";
 import {
   ContactConsentInputError,
-  ContactCursorInputError,
   ContactInputError,
   createContactService,
 } from "./contactService.ts";
 import {
-  createContactOrganizationService,
-} from "./contactOrganizationService.ts";
+  createCurrentRailwayContactDirectoryHandler,
+} from "./currentRailwayContactDirectoryHandler.ts";
 import { toContactRecord } from "./contactRecordMapper.ts";
+import type {
+  ContactActionFailure,
+  ContactConsentActionResult,
+  LoadMoreContactsActionResult,
+  SaveContactActionResult,
+} from "./contactActionResult.ts";
 
-type ContactActionFailure =
-  | { status: "configuration-required" }
-  | { status: "unauthenticated" }
-  | { status: "onboarding-required" }
-  | { status: "tenant-selection-required" }
-  | { status: "permission-denied" }
-  | { status: "not-found" }
-  | { status: "server-error" };
+export type {
+  ContactConsentActionResult,
+  LoadMoreContactsActionResult,
+  SaveContactActionResult,
+} from "./contactActionResult.ts";
 
-export type SaveContactActionResult =
-  | {
-      status: "saved";
-      contact: ContactRecord;
-    }
-  | {
-      status: "validation-error";
-      issues: readonly PersistedContactValidationIssue[];
-    }
-  | ContactActionFailure;
-
-export type ContactConsentActionResult =
-  | {
-      status: "saved";
-      contact: ContactRecord;
-    }
-  | {
-      status: "validation-error";
-      issues: readonly ContactConsentValidationIssue[];
-    }
-  | ContactActionFailure;
-
-export type LoadMoreContactsActionResult =
-  | {
-      status: "loaded";
-      contacts: readonly ContactRecord[];
-      nextCursor: number | null;
-      organization: ContactOrganizationSnapshot;
-    }
-  | {
-      status: "validation-error";
-    }
-  | ContactActionFailure;
-
-async function createActionContext(
-  mutation: boolean,
-) {
+async function createActionContext() {
   const database = await requireRuntimeDatabase();
-  const session = mutation
-    ? await requireCurrentTenantMutationSession(
-        database,
-      )
-    : await requireCurrentTenantSession(database);
+  const session = await requireCurrentTenantMutationSession(database);
   const contacts = createContactRepository(database);
   const consentEvents = createContactConsentRepository(database);
-  const organization = createContactOrganizationService(
-    createContactOrganizationRepository(database),
-  );
 
   return {
     session,
@@ -100,7 +45,6 @@ async function createActionContext(
       contacts,
       consentEvents,
     }),
-    organization,
   };
 }
 
@@ -143,7 +87,7 @@ export async function saveContactAction(
 
   try {
     const { session, service } =
-      await createActionContext(true);
+      await createActionContext();
     const contact = await service.saveProfile(session, input);
 
     return {
@@ -165,31 +109,12 @@ export async function saveContactAction(
 export async function loadMoreContactsAction(
   beforeContactId: unknown,
 ): Promise<LoadMoreContactsActionResult> {
-  if (inspectClerkConfiguration().status !== "configured") {
-    return { status: "configuration-required" };
-  }
-
   try {
-    const { session, service, organization } =
-      await createActionContext(false);
-    const page = await service.list(session, beforeContactId);
-    const organizationSnapshot = await organization.read(
-      session,
-      page.contacts.map((contact) => contact.id),
+    return await createCurrentRailwayContactDirectoryHandler().load(
+      beforeContactId,
     );
-
-    return {
-      status: "loaded",
-      contacts: page.contacts.map(toContactRecord),
-      nextCursor: page.nextCursor,
-      organization: organizationSnapshot,
-    };
-  } catch (error) {
-    if (error instanceof ContactCursorInputError) {
-      return { status: "validation-error" };
-    }
-
-    return mapSharedFailure(error);
+  } catch {
+    return { status: "server-error" };
   }
 }
 
@@ -218,7 +143,7 @@ async function changeContactConsent(
 
   try {
     const { session, service } =
-      await createActionContext(true);
+      await createActionContext();
     const contact =
       action === "grant"
         ? await service.grantConsent(session, contactId, input)

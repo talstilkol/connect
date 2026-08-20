@@ -8,6 +8,12 @@ import {
 import type {
   ContactService,
 } from "../contacts/contactService.ts";
+import type {
+  ContactOrganizationService,
+} from "../contacts/contactOrganizationService.ts";
+import type {
+  ContactOrganizationSnapshot,
+} from "../../shared/domain/contactOrganization.ts";
 import {
   ContactCursorInputError,
 } from "../contacts/contactService.ts";
@@ -100,6 +106,7 @@ export const railwayApiOperationPolicies = Object.freeze([
 export interface RailwayApiOperationRegistryDependencies {
   readonly tenantSessions: RailwayTenantSessionResolver;
   readonly contacts: Pick<ContactService, "list">;
+  readonly contactOrganization: Pick<ContactOrganizationService, "read">;
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
   readonly mutations: RailwayApiMutationExecutor;
@@ -300,6 +307,34 @@ function parseReportPayload(
   });
 }
 
+function toContactOrganizationView(
+  snapshot: Readonly<ContactOrganizationSnapshot>,
+): Readonly<ContactOrganizationSnapshot> {
+  return Object.freeze({
+    scopeContactIds: Object.freeze([...snapshot.scopeContactIds]),
+    tags: Object.freeze(
+      snapshot.tags.map(({ id, name, contactCount }) =>
+        Object.freeze({ id, name, contactCount }),
+      ),
+    ),
+    lists: Object.freeze(
+      snapshot.lists.map(({ id, name, contactCount }) =>
+        Object.freeze({ id, name, contactCount }),
+      ),
+    ),
+    tagAssignments: Object.freeze(
+      snapshot.tagAssignments.map(({ contactId, tagId }) =>
+        Object.freeze({ contactId, tagId }),
+      ),
+    ),
+    listMemberships: Object.freeze(
+      snapshot.listMemberships.map(({ contactId, listId }) =>
+        Object.freeze({ contactId, listId }),
+      ),
+    ),
+  });
+}
+
 function mapOperationError(error: unknown): never {
   if (error instanceof RailwayApiDispatchError) {
     throw error;
@@ -449,6 +484,7 @@ export function createRailwayApiOperationRegistry(
   if (
     typeof dependencies.tenantSessions?.resolve !== "function" ||
     typeof dependencies.contacts?.list !== "function" ||
+    typeof dependencies.contactOrganization?.read !== "function" ||
     typeof dependencies.reports?.read !== "function" ||
     typeof dependencies.mutationRateLimit?.consume !== "function" ||
     typeof dependencies.mutations?.saveContact !== "function"
@@ -487,10 +523,16 @@ export function createRailwayApiOperationRegistry(
           session,
           beforeContactId,
         );
+        const organization =
+          await dependencies.contactOrganization.read(
+            session,
+            page.contacts.map((contact) => contact.id),
+          );
 
         return {
           contacts: page.contacts.map(toContactRecord),
           nextCursor: page.nextCursor,
+          organization: toContactOrganizationView(organization),
         };
       },
     ),

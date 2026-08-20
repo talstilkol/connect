@@ -8,6 +8,9 @@ import type {
   ContactService,
 } from "../contacts/contactService.ts";
 import type {
+  ContactOrganizationService,
+} from "../contacts/contactOrganizationService.ts";
+import type {
   OperationalReportService,
 } from "../reports/operationalReportService.ts";
 import type {
@@ -56,6 +59,7 @@ export interface RailwayApiRuntimeOptions {
   readonly memberships: TenantMembershipRepository;
   readonly selections: TenantSelectionRepository;
   readonly contacts: Pick<ContactService, "list">;
+  readonly contactOrganization: Pick<ContactOrganizationService, "read">;
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
   readonly mutations: RailwayApiMutationExecutor;
@@ -83,6 +87,7 @@ export function createRailwayApiRuntime(
   const operations = createRailwayApiOperationRegistry({
     tenantSessions,
     contacts: options.contacts,
+    contactOrganization: options.contactOrganization,
     reports: options.reports,
     mutationRateLimit: options.mutationRateLimit,
     mutations: options.mutations,

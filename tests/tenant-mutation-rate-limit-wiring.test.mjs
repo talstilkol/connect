@@ -43,7 +43,6 @@ test("separates reads from mutations in mixed action modules", async () => {
     "ai/aiAgentActions.ts",
     "ai/aiReplyApprovalActions.ts",
     "bot/botFlowActions.ts",
-    "contacts/contactActions.ts",
     "conversations/conversationActions.ts",
   ];
 
@@ -71,6 +70,30 @@ test("separates reads from mutations in mixed action modules", async () => {
       path,
     );
   }
+});
+
+test("keeps contact mutations local while pagination crosses the Railway boundary", async () => {
+  const source = await readServerSource("contacts/contactActions.ts");
+
+  assert.match(source, /requireCurrentTenantMutationSession/);
+  assert.doesNotMatch(
+    source,
+    /from "\.\.\/auth\/currentTenantSession/,
+  );
+
+  const loadMoreSource = source.match(
+    /export async function loadMoreContactsAction[\s\S]*?(?=export async function grantContactConsentAction)/,
+  )?.[0];
+
+  assert.ok(loadMoreSource);
+  assert.match(
+    loadMoreSource,
+    /createCurrentRailwayContactDirectoryHandler/,
+  );
+  assert.doesNotMatch(
+    loadMoreSource,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createActionContext/,
+  );
 });
 
 test("limits initial onboarding by authenticated server identity before persistence", async () => {
