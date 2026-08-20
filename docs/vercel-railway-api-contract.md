@@ -476,11 +476,14 @@ Verifier דוחה Migration חסרה, כפולה, לא מוסברת או Evidenc
 Source coverage; הוא אינו מוכיח Data conversion או Semantic parity ב־Staging.
 
 7.1.54 ‏`0023_api_mutation_rate_limits.sql` וה־PostgreSQL binding מחברים
-את `contacts.save` למכסה אטומית המשותפת לכל מופעי Railway. ה־Runtime דורש
-Policy version, ‏Capacity וחלון Refill מפורשים; ערך חסר, חלקי או לא חוקי
-נכשל סגור. ה־DB שומר רק מפתח SHA-256 אטום, נועל כל Scope ומחשב Refill לפי
-זמן PostgreSQL. ‏Harness אמיתי עבר עם 24 Migrations ו־58 תרחישי Concurrency,
-כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות במכסה `2`.
+את `contacts.save` למכסה אטומית המשותפת לכל מופעי Railway. אותו חוזה תומך
+גם ב־Policies מבודדים עבור System Admin mutations ו־Meta webhook ingress.
+כל Policy דורש Version, ‏Capacity וחלון Refill מפורשים; ערך חסר, חלקי או
+לא חוקי נכשל סגור. ה־DB שומר רק מפתח SHA-256 אטום, נועל כל Scope ומחשב
+Refill לפי זמן PostgreSQL. ‏Harness אמיתי עדכני עבר עם 26 Migrations ו־58
+תרחישי Concurrency, כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות
+במכסה `2`. רק Tenant mutation מחובר כעת ל־Railway API route; שני ה־Routes
+האחרים עדיין דורשים Wiring ו־Evidence חיים.
 
 7.1.55 ‏`postgresCoreDataMigration.ts`,‏ `read-d1-core-data-snapshot.mjs`
 ו־`verify-postgres-core-data-migration.mjs` מוסיפים Core data migration
@@ -555,6 +558,17 @@ Browser, ‏Logs או Evidence.
 `TENANT_MUTATION_RATE_LIMIT_CAPACITY` ו־
 `TENANT_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS` — Policy פנימית מפורשת
 ל־Railway API. אין Defaults; שינוי Capacity או חלון מחייב גרסה חדשה.
+
+8.10.1 `SYSTEM_ADMIN_MUTATION_RATE_LIMIT_POLICY_VERSION`,‏
+`SYSTEM_ADMIN_MUTATION_RATE_LIMIT_CAPACITY` ו־
+`SYSTEM_ADMIN_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS` — Policy נפרדת
+לפעולות System Admin.
+
+8.10.2 `META_WEBHOOK_RATE_LIMIT_POLICY_VERSION`,‏
+`META_WEBHOOK_RATE_LIMIT_CAPACITY` ו־
+`META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS` — Policy נפרדת ל־Meta
+webhook ingress. הערכים צריכים להיגזר מה־Throughput החי ולא מתקרה קשיחה
+שמסתכנת בדחיית Webhooks תקינים.
 
 8.11 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
 חסר, חלקי או לא חוקי מונע יצירת Verifier.

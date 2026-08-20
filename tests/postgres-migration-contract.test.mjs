@@ -131,7 +131,7 @@ test("defines bounded opaque PostgreSQL API mutation token buckets", () => {
   );
   assert.match(
     apiMutationRateLimitSchema,
-    /policy_id IN \('tenant-mutation', 'system-admin-mutation'\)/,
+    /policy_id IN \([\s\S]*'meta-webhook'[\s\S]*'tenant-mutation'[\s\S]*'system-admin-mutation'[\s\S]*\)/,
   );
   assert.match(
     apiMutationRateLimitSchema,

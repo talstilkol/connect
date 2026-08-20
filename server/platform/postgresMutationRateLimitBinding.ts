@@ -10,6 +10,7 @@ import type {
 } from "./postgresTransaction.ts";
 
 export const postgresMutationRateLimitPolicyIds = Object.freeze([
+  "meta-webhook",
   "tenant-mutation",
   "system-admin-mutation",
 ] as const);

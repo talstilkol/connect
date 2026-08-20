@@ -1976,3 +1976,20 @@ Registry נחסמת כעת בקוד `DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILE
 שהחיבור ל־npm Registry לא היה זמין; הוא נשאר תנאי חיצוני Fail-closed.
 שלושה Attempts של GitHub CI נכשלו לפני Step ראשון בגלל Billing או
 Spending limit בחשבון. אין בכך כשל קוד, אך גם אין CI Evidence תקף.
+
+4.65 חוזה Distributed rate limiting של PostgreSQL הורחב מקומית לשלושה
+Policy IDs נפרדים: `tenant-mutation`, ‏`system-admin-mutation` ו־
+`meta-webhook`. לכל Policy קיימים Environment keys נפרדים עבור Version,
+Capacity ו־Refill period. אין Defaults; מצב חסר, חלקי או לא חוקי נכשל סגור.
+מפתח ה־Subject נשאר SHA-256 אטום, וה־Policy ID משתתף ב־Advisory lock ובמפתח
+הראשי ולכן שלושת ה־Buckets אינם צורכים מכסה זה של זה.
+
+4.65.1 Build, ‏TypeScript, ‏ESLint, חוזה 26 מיגרציות PostgreSQL וכל
+**2,119 הבדיקות** עברו ללא כשל, Skip או Todo. חזרה נקייה מול PostgreSQL 16
+אמיתי עברה עם `PASS (26 migrations, 58 concurrency scenarios)`; שרת הבדיקה
+הזמני נעצר והתיקייה נמחקה.
+
+4.65.2 העבודה המקומית אינה ראיית Production: רק `tenant-mutation` מחובר
+כעת ל־Railway API route. עדיין נדרשים חיבור System Admin ו־Meta webhook
+ל־Railway routes, ערכי Policy חיים באישור טל והצוות, Telemetry, ‏Load
+evidence ותצורת Railway פעילה.

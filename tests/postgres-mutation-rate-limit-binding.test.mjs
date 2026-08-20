@@ -106,6 +106,31 @@ test("returns the database token decision for an existing policy version", async
   }
 });
 
+test("isolates tenant, system-admin, and Meta webhook buckets by policy", async () => {
+  for (const policyId of [
+    "tenant-mutation",
+    "system-admin-mutation",
+    "meta-webhook",
+  ]) {
+    const fixture = transactionFixture([
+      lockResult(),
+      { rows: [], rowCount: 0 },
+      { rows: [{ success: true }], rowCount: 1 },
+    ]);
+    const binding = createPostgresMutationRateLimitBinding(
+      fixture.manager,
+      { ...policy, policyId },
+    );
+
+    assert.deepEqual(await binding.limit({ key: subjectKey }), {
+      success: true,
+    });
+    assert.equal(fixture.calls[0].parameters[0], policyId);
+    assert.equal(fixture.calls[2].parameters[0], policyId);
+    fixture.assertConsumed();
+  }
+});
+
 test("serializes every scope and uses database time for continuous refill", () => {
   assert.match(
     postgresMutationRateLimitSql.lockScope,

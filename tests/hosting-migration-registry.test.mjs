@@ -141,7 +141,7 @@ test("does not invent providers for unresolved shared services", () => {
   );
 });
 
-test("separates the completed PostgreSQL tenant limiter from unresolved ingress limits", () => {
+test("separates the completed shared PostgreSQL limiter from unresolved live proof", () => {
   const rateLimits = HOSTING_MIGRATION_REGISTRY.find(
     ({ id }) => id === "security.distributed-rate-limits",
   );
@@ -159,10 +159,11 @@ test("separates the completed PostgreSQL tenant limiter from unresolved ingress 
   }
   assert.match(
     rateLimits.cutoverBlocker,
-    /atomic shared tenant-mutation token bucket/,
+    /atomic shared token-bucket contract/,
   );
-  assert.match(rateLimits.cutoverBlocker, /System-admin mutations/);
-  assert.match(rateLimits.cutoverBlocker, /Meta webhook ingress/);
+  assert.match(rateLimits.cutoverBlocker, /system-admin-mutation/);
+  assert.match(rateLimits.cutoverBlocker, /Meta-webhook/);
+  assert.match(rateLimits.cutoverBlocker, /Railway route wiring/);
   assert.match(rateLimits.cutoverBlocker, /approved live policy values/);
 });
 
@@ -364,7 +365,10 @@ test("records the local API contract without claiming live adapter readiness", (
   assert.doesNotMatch(boundary.cutoverBlocker, /missing executable bootstrap/);
   assert.match(boundary.cutoverBlocker, /All six operational-report source families are migrated/);
   assert.match(boundary.cutoverBlocker, /complete authenticated reports\.read HTTP path passed against PostgreSQL 16\.13/);
-  assert.match(boundary.cutoverBlocker, /shared PostgreSQL tenant-mutation token bucket/);
+  assert.match(
+    boundary.cutoverBlocker,
+    /shared PostgreSQL token-bucket contracts for tenant mutations, system-admin mutations and Meta webhook ingress/,
+  );
   assert.match(
     boundary.cutoverBlocker,
     /provider-bound pool and rate-limit policy values/,

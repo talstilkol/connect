@@ -74,6 +74,14 @@ limiter אטומי ב־PostgreSQL, אך הפעלת Runtime
 דורשת Policy version, ‏Capacity וחלון Refill מפורשים ומאושרים ב־Environment;
 אין ערכי ברירת מחדל.
 
+1.11.1 אותו PostgreSQL token bucket תומך בשלושה Policy IDs מבודדים:
+`tenant-mutation`, ‏`system-admin-mutation` ו־`meta-webhook`. לכל Policy יש
+שלושה ערכי Environment נפרדים — Version, ‏Capacity ו־Refill period — ללא
+ברירת מחדל. Parser משותף מסווג `disabled`, ‏`incomplete`, ‏`invalid` או
+`configured`, ולכן Policy חלקי או לא תקין נכשל סגור. בשלב זה רק
+`tenant-mutation` מחובר ל־Railway API route; חיבור System Admin ו־Meta
+webhook ל־Routes, ערכים חיים, Telemetry ו־Load evidence עדיין חסרים.
+
 1.12 ‏`0009_contact_organization_imports.sql` מוסיף שש טבלאות עבור ארגון
 אנשי קשר וייבוא מתחדש. ה־Foreign Keys כוללים `tenant_id`, וה־Harness חסם
 בפועל שיוך Tag ושורת Import שחצו Tenant. מוני Job, מצב Completion ותוצאת כל

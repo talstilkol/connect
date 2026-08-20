@@ -9,7 +9,11 @@ CREATE TABLE api_mutation_rate_limit_buckets (
   updated_at TIMESTAMPTZ NOT NULL,
   PRIMARY KEY (policy_id, policy_version, subject_key),
   CONSTRAINT api_mutation_rate_limit_policy_valid CHECK (
-    policy_id IN ('tenant-mutation', 'system-admin-mutation')
+    policy_id IN (
+      'meta-webhook',
+      'tenant-mutation',
+      'system-admin-mutation'
+    )
   ),
   CONSTRAINT api_mutation_rate_limit_policy_version_valid CHECK (
     policy_version BETWEEN 1 AND 2147483647
