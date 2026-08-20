@@ -2198,3 +2198,36 @@ Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סר
 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
 `git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, Clerk ו־PostgreSQL חיים,
 פריסת Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.
+
+4.74 שמירת Contact profile הועברה מקומית מ־D1 ל־Railway API ול־PostgreSQL
+ללא Fallback. ‏`saveContactAction` מנרמל את חמשת שדות הפרופיל, משתמש ב־Vercel
+OIDC וב־Clerk session בצד השרת ושולח `contacts.save`; ‏Tenant וזהות Actor
+נגזרים ב־Railway ואינם מתקבלים מה־Browser או מ־Vercel payload.
+
+4.74.1 לכל Submit מוצמד `submissionOccurredAt` קנוני ומונוטוני שנוצר פעם
+אחת לפני הפעלת ה־Server Action. הוא אינו זמן עסקי ואינו זמן Audit; הוא מבדיל
+פעולה חדשה מ־Retry של אותה בקשה בלי Randomness. מפתח ה־Idempotency נגזר מכל
+ה־Payload ונבדק מחדש ב־Railway לפני Rate limit או Persistence. כך Retry זהה
+נשאר Replay, אך שמירה חדשה של אותו פרופיל אינה מקבלת Contact response ישנה.
+
+4.74.2 Railway אוכף Permission, צורך מכסת `tenant-mutation`, משווה Request
+digest ושומר Receipt, ‏Contact upsert, ‏Audit ו־Replay response באותה
+Transaction. ה־BFF מקבל רק Response מדויקת עם Replay flag ו־Contact קנוני
+התואם לפרופיל שנשלח. Response מורחבת, סותרת או בעלת שדה פנימי נכשלת לפני
+React state. פעולות Consent ו־Tags/Lists נשארו במסלול D1 הקיים עד שיוגדרו
+להן Operations אטומיים נפרדים.
+
+4.74.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,236 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `43/43`. ‏Source guard סרק 581 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,208
+קובצי Working tree כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+`git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, Clerk, ‏PostgreSQL וערכי
+Rate-limit policy חיים, פריסת Railway/Vercel וראיית Staging; אין עדיין טענת
+Production cutover.
+
+4.74.4 שער Secret hygiene הוקשח לאחר שהתגלה כי `git ls-files` לבדו אינו
+כולל קבצים חדשים שטרם נוספו ל־Git. השער מאחד כעת קבצים מנוהלים עם קובצי
+Working tree שאינם מנוהלים ואינם מוחרגים, סורק את שמם ואת תוכנם, ובנפרד
+סורק את היסטוריית Git. באימות הנוכחי נסרקו **1,208 קובצי Working tree** —
+1,205 מנוהלים ושלושת קובצי המימוש החדשים — והיסטוריית Git; בדיקת Regression
+מקבעת שגם קובץ חדש נכלל במלאי הסריקה.

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useRef,
   useState,
   useTransition,
   type FormEvent,
@@ -79,6 +80,7 @@ export function ContactDirectory({
   const [evidenceReference, setEvidenceReference] = useState("");
   const [isPending, startTransition] = useTransition();
   const [isLoadingMore, startLoadingMore] = useTransition();
+  const lastContactSubmissionMilliseconds = useRef(0);
   const [loadMoreResult, setLoadMoreResult] =
     useState<LoadMoreContactsActionResult | null>(null);
 
@@ -117,6 +119,11 @@ export function ContactDirectory({
   const submitContact = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaveResult(null);
+    const submissionMilliseconds = Math.max(
+      Date.now(),
+      lastContactSubmissionMilliseconds.current + 1,
+    );
+    lastContactSubmissionMilliseconds.current = submissionMilliseconds;
 
     startTransition(async () => {
       const result = await saveContactAction({
@@ -125,6 +132,9 @@ export function ContactDirectory({
         lastName,
         email,
         company,
+        submissionOccurredAt: new Date(
+          submissionMilliseconds,
+        ).toISOString(),
       });
       setSaveResult(result);
 

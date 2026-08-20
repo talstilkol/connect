@@ -14,6 +14,9 @@ import {
   createRailwayApiOperationRegistry,
   railwayApiOperationPolicies,
 } from "../server/platform/railwayApiOperationRegistry.ts";
+import {
+  deriveRailwayApiDeterministicIdempotencyKey,
+} from "../server/platform/railwayApiMutationExecutor.ts";
 
 const dispatchContext = {
   serviceIdentity: {
@@ -28,8 +31,6 @@ const dispatchContext = {
     externalUserId: "verified-user",
   },
 };
-const idempotencyKey =
-  `connect_idempotency_v1_${"a".repeat(64)}`;
 const contactProfile = {
   phoneNumber: "+972501234567",
   firstName: "Tal",
@@ -37,8 +38,17 @@ const contactProfile = {
   email: null,
   company: "Connect",
 };
+const contactSavePayload = {
+  ...contactProfile,
+  submissionOccurredAt: "2026-08-20T20:00:00.000Z",
+};
+const idempotencyKey =
+  await deriveRailwayApiDeterministicIdempotencyKey(
+    "contacts.save",
+    contactSavePayload,
+  );
 
-function mutationRequest(payload = contactProfile) {
+function mutationRequest(payload = contactSavePayload) {
   return {
     contractVersion: "connect.railway-api.v1",
     operation: "contacts.save",
@@ -431,7 +441,7 @@ test("saves a contact through rate limit and transactional mutation boundaries",
     "contacts.save",
   ).execute(
     dispatchContext,
-    contactProfile,
+    contactSavePayload,
     mutationRequest(),
   );
 
@@ -481,11 +491,29 @@ test("marks an identical completed contact mutation as replayed", async () => {
     "contacts.save",
   ).execute(
     dispatchContext,
-    contactProfile,
+    contactSavePayload,
     mutationRequest(),
   );
 
   assert.equal(result.replayed, true);
+});
+
+test("rejects a non-deterministic contact mutation key before rate limiting", async () => {
+  const { calls, registry } = fixture();
+
+  await assert.rejects(
+    operation(registry, "contacts.save").execute(
+      dispatchContext,
+      contactSavePayload,
+      {
+        ...mutationRequest(),
+        idempotencyKey: `connect_idempotency_v1_${"f".repeat(64)}`,
+      },
+    ),
+    (error) => error.code === "INVALID_REQUEST",
+  );
+  assert.deepEqual(calls.rateLimitSubjects, []);
+  assert.deepEqual(calls.mutationCommands, []);
 });
 
 test("denies contact mutation before rate limit or persistence", async () => {
@@ -496,7 +524,7 @@ test("denies contact mutation before rate limit or persistence", async () => {
   await assert.rejects(
     operation(registry, "contacts.save").execute(
       dispatchContext,
-      contactProfile,
+      contactSavePayload,
       mutationRequest(),
     ),
     (error) => error.code === "PERMISSION_DENIED",
@@ -519,7 +547,7 @@ test("fails closed when mutation rate limiting denies or is unavailable", async 
   await assert.rejects(
     operation(limited.registry, "contacts.save").execute(
       dispatchContext,
-      contactProfile,
+      contactSavePayload,
       mutationRequest(),
     ),
     (error) => error.code === "RATE_LIMITED",
@@ -527,7 +555,7 @@ test("fails closed when mutation rate limiting denies or is unavailable", async 
   await assert.rejects(
     operation(unavailable.registry, "contacts.save").execute(
       dispatchContext,
-      contactProfile,
+      contactSavePayload,
       mutationRequest(),
     ),
     (error) => error.code === "DEPENDENCY_UNAVAILABLE",
@@ -535,7 +563,7 @@ test("fails closed when mutation rate limiting denies or is unavailable", async 
   await assert.rejects(
     operation(malformed.registry, "contacts.save").execute(
       dispatchContext,
-      contactProfile,
+      contactSavePayload,
       mutationRequest(),
     ),
     (error) => error.code === "DEPENDENCY_UNAVAILABLE",
@@ -552,7 +580,7 @@ test("maps mutation idempotency conflict and storage outage to bounded codes", a
   await assert.rejects(
     operation(conflict.registry, "contacts.save").execute(
       dispatchContext,
-      contactProfile,
+      contactSavePayload,
       mutationRequest(),
     ),
     (error) => error.code === "CONFLICT",
@@ -560,7 +588,7 @@ test("maps mutation idempotency conflict and storage outage to bounded codes", a
   await assert.rejects(
     operation(unavailable.registry, "contacts.save").execute(
       dispatchContext,
-      contactProfile,
+      contactSavePayload,
       mutationRequest(),
     ),
     (error) => error.code === "DEPENDENCY_UNAVAILABLE",
@@ -593,7 +621,7 @@ test("rejects thrown, malformed, and cross-tenant mutation results", async () =>
     await assert.rejects(
       operation(testFixture.registry, "contacts.save").execute(
         dispatchContext,
-        contactProfile,
+        contactSavePayload,
         mutationRequest(),
       ),
       (error) =>
@@ -661,20 +689,28 @@ test("validates operation payload before tenant or service access", async () => 
         lastName: null,
         email: 17,
         company: null,
+        submissionOccurredAt: contactSavePayload.submissionOccurredAt,
       },
     ],
     [
       "contacts.save",
       {
-        ...contactProfile,
+        ...contactSavePayload,
         phoneNumber: "0501234567",
       },
     ],
     [
       "contacts.save",
       {
-        ...contactProfile,
+        ...contactSavePayload,
         tenantId: 7,
+      },
+    ],
+    [
+      "contacts.save",
+      {
+        ...contactProfile,
+        submissionOccurredAt: "invalid",
       },
     ],
     [

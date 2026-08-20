@@ -52,6 +52,7 @@ import type {
   RailwayTenantSessionResolver,
 } from "./railwayTenantSessionResolver.ts";
 import {
+  deriveRailwayApiDeterministicIdempotencyKey,
   deriveRailwayApiMutationRequestDigest,
   type RailwayApiContactSaveResult,
   type RailwayApiMutationExecutor,
@@ -126,6 +127,10 @@ type OperationExecutor<TPayload> = (
   request: Readonly<RailwayApiRequestEnvelope>,
 ) => Promise<unknown>;
 
+interface ContactSavePayload extends PersistedContactProfile {
+  readonly submissionOccurredAt: string;
+}
+
 function hasExactKeys(
   value: Readonly<Record<string, unknown>>,
   expectedKeys: readonly string[],
@@ -188,31 +193,48 @@ function parseContactListPayload(
 
 function parseContactSavePayload(
   payload: RailwayApiJsonObject,
-): Readonly<PersistedContactProfile> {
+): Readonly<ContactSavePayload> {
   if (
     !hasExactKeys(payload, [
-      "phoneNumber",
+      "company",
+      "email",
       "firstName",
       "lastName",
-      "email",
-      "company",
+      "phoneNumber",
+      "submissionOccurredAt",
     ]) ||
     typeof payload.phoneNumber !== "string" ||
     !isStringOrNull(payload.firstName) ||
     !isStringOrNull(payload.lastName) ||
     !isStringOrNull(payload.email) ||
-    !isStringOrNull(payload.company)
+    !isStringOrNull(payload.company) ||
+    typeof payload.submissionOccurredAt !== "string"
   ) {
     invalidRequest();
   }
 
   const validation = validatePersistedContact(payload);
 
-  if (!validation.success) {
+  const submissionMilliseconds = Date.parse(
+    payload.submissionOccurredAt,
+  );
+
+  if (
+    !validation.success ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(
+      payload.submissionOccurredAt,
+    ) ||
+    !Number.isFinite(submissionMilliseconds) ||
+    new Date(submissionMilliseconds).toISOString() !==
+      payload.submissionOccurredAt
+  ) {
     invalidRequest();
   }
 
-  return Object.freeze({ ...validation.value });
+  return Object.freeze({
+    ...validation.value,
+    submissionOccurredAt: payload.submissionOccurredAt,
+  });
 }
 
 function isValidContactSaveResult(
@@ -402,7 +424,7 @@ function createOperation<TPayload>(
 async function executeContactSave(
   dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
   session: Readonly<TenantSession>,
-  profile: Readonly<PersistedContactProfile>,
+  payload: Readonly<ContactSavePayload>,
   request: Readonly<RailwayApiRequestEnvelope>,
 ): Promise<unknown> {
   if (
@@ -410,6 +432,25 @@ async function executeContactSave(
     request.requestKind !== "mutation" ||
     request.idempotencyKey === null
   ) {
+    invalidRequest();
+  }
+
+  let requestDigest: string;
+  let expectedIdempotencyKey: string;
+
+  try {
+    [requestDigest, expectedIdempotencyKey] = await Promise.all([
+      deriveRailwayApiMutationRequestDigest("contacts.save", payload),
+      deriveRailwayApiDeterministicIdempotencyKey(
+        "contacts.save",
+        payload,
+      ),
+    ]);
+  } catch {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+  }
+
+  if (request.idempotencyKey !== expectedIdempotencyKey) {
     invalidRequest();
   }
 
@@ -436,11 +477,13 @@ async function executeContactSave(
     );
   }
 
-  const requestDigest =
-    await deriveRailwayApiMutationRequestDigest(
-      "contacts.save",
-      profile,
-    );
+  const profile = Object.freeze({
+    phoneNumber: payload.phoneNumber,
+    firstName: payload.firstName,
+    lastName: payload.lastName,
+    email: payload.email,
+    company: payload.company,
+  });
   let result: unknown;
 
   try {

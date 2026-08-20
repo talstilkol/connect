@@ -72,7 +72,7 @@ test("separates reads from mutations in mixed action modules", async () => {
   }
 });
 
-test("keeps contact mutations local while pagination crosses the Railway boundary", async () => {
+test("keeps consent local while contact profile saves and pagination cross Railway", async () => {
   const source = await readServerSource("contacts/contactActions.ts");
 
   assert.match(source, /requireCurrentTenantMutationSession/);
@@ -94,6 +94,18 @@ test("keeps contact mutations local while pagination crosses the Railway boundar
     loadMoreSource,
     /requireRuntimeDatabase|requireCurrentTenantMutationSession|createActionContext/,
   );
+
+  const saveSource = source.match(
+    /export async function saveContactAction[\s\S]*?(?=export async function loadMoreContactsAction)/,
+  )?.[0];
+
+  assert.ok(saveSource);
+  assert.match(saveSource, /createCurrentRailwayContactMutationHandler/);
+  assert.doesNotMatch(
+    saveSource,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createConsentActionContext/,
+  );
+  assert.match(source, /createConsentActionContext/);
 });
 
 test("limits initial onboarding by authenticated server identity before persistence", async () => {

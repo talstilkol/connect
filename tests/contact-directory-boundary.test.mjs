@@ -37,6 +37,25 @@ test("routes initial and paginated contact reads through Railway", () => {
   );
 });
 
+test("routes contact profile saves through Railway without moving consent implicitly", () => {
+  const saveSource = actionSource.match(
+    /export async function saveContactAction[\s\S]*?(?=export async function loadMoreContactsAction)/,
+  )?.[0];
+  const consentSource = actionSource.match(
+    /async function changeContactConsent[\s\S]*$/,
+  )?.[0];
+
+  assert.ok(saveSource);
+  assert.match(saveSource, /createCurrentRailwayContactMutationHandler/);
+  assert.doesNotMatch(
+    saveSource,
+    /runtimeDatabase|createConsentActionContext|currentTenantMutationSession|createContactRepository/,
+  );
+  assert.ok(consentSource);
+  assert.match(consentSource, /createConsentActionContext/);
+  assert.match(actionSource, /requireCurrentTenantMutationSession/);
+});
+
 test("keeps the current adapter on reviewed Railway identity and client boundaries", () => {
   assert.match(currentHandlerSource, /inspectClerkConfiguration/);
   assert.match(currentHandlerSource, /inspectRailwayApiClientConfiguration/);

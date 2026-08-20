@@ -647,17 +647,25 @@ test("returns only bounded workspace context through the complete boundary", asy
 
 test("runs a tenant-scoped contact mutation through every security boundary", async () => {
   const testFixture = fixture("manager");
+  const contactPayload = {
+    phoneNumber: "+972501234567",
+    firstName: "Tal",
+    lastName: null,
+    email: null,
+    company: "Connect",
+    submissionOccurredAt: "2026-08-20T20:00:00.000Z",
+  };
+  const contactIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      "contacts.save",
+      contactPayload,
+    );
   const response = await testFixture.handler.handle(
     request(
       "contacts.save",
-      {
-        phoneNumber: "+972501234567",
-        firstName: "Tal",
-        lastName: null,
-        email: null,
-        company: "Connect",
-      },
+      contactPayload,
       "mutation",
+      contactIdempotencyKey,
     ),
   );
   const body = await response.json();
@@ -676,7 +684,7 @@ test("runs a tenant-scoped contact mutation through every security boundary", as
   assert.equal(testFixture.calls.mutationCommands.length, 1);
   assert.equal(
     testFixture.calls.mutationCommands[0].idempotencyKey,
-    idempotencyKey,
+    contactIdempotencyKey,
   );
   assert.match(
     testFixture.calls.mutationCommands[0].requestDigest,

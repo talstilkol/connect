@@ -115,6 +115,60 @@ function git(argumentsList) {
   );
 }
 
+function parseNullSeparatedFileNames(
+  output,
+) {
+  return output
+    .split("\0")
+    .filter(Boolean);
+}
+
+export function buildWorkingFileInventory({
+  trackedFiles,
+  untrackedFiles,
+}) {
+  const workingFiles = [
+    ...new Set([
+      ...trackedFiles,
+      ...untrackedFiles,
+    ]),
+  ].sort();
+
+  return Object.freeze({
+    trackedFileCount:
+      trackedFiles.length,
+    untrackedFileCount:
+      untrackedFiles.length,
+    workingFiles: Object.freeze(
+      workingFiles,
+    ),
+  });
+}
+
+function listWorkingFileInventory() {
+  const trackedFiles =
+    parseNullSeparatedFileNames(
+      git([
+        "ls-files",
+        "-z",
+      ]),
+    );
+  const untrackedFiles =
+    parseNullSeparatedFileNames(
+      git([
+        "ls-files",
+        "--others",
+        "--exclude-standard",
+        "-z",
+      ]),
+    );
+
+  return buildWorkingFileInventory({
+    trackedFiles,
+    untrackedFiles,
+  });
+}
+
 function inspectHistory() {
   const findings = [];
   const commits = git([
@@ -194,14 +248,13 @@ export async function inspectSecretHygiene({
   includeHistory = false,
 } = {}) {
   const findings = [];
-  const trackedFiles = git([
-    "ls-files",
-    "-z",
-  ])
-    .split("\0")
-    .filter(Boolean);
+  const inventory =
+    listWorkingFileInventory();
 
-  for (const fileName of trackedFiles) {
+  for (
+    const fileName of
+      inventory.workingFiles
+  ) {
     findings.push(
       ...inspectTrackedFileName(fileName),
     );
@@ -248,7 +301,12 @@ export async function inspectSecretHygiene({
       findings.length === 0
         ? "passed"
         : "failed",
-    trackedFileCount: trackedFiles.length,
+    workingFileCount:
+      inventory.workingFiles.length,
+    trackedFileCount:
+      inventory.trackedFileCount,
+    untrackedFileCount:
+      inventory.untrackedFileCount,
     historyIncluded: includeHistory,
     findings: Object.freeze(findings),
   });
@@ -277,7 +335,7 @@ async function runCli() {
 
   if (report.status === "passed") {
     console.log(
-      `Secret hygiene: PASS (${report.trackedFileCount} tracked files${
+      `Secret hygiene: PASS (${report.workingFileCount} working files; ${report.trackedFileCount} tracked, ${report.untrackedFileCount} untracked${
         report.historyIncluded
           ? ", history included"
           : ""

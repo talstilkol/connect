@@ -155,7 +155,9 @@ function isCanonicalTimestampOrNull(value: unknown): value is string | null {
   );
 }
 
-function parseContact(value: unknown): Readonly<ContactRecord> | null {
+export function parseRailwayContactRecord(
+  value: unknown,
+): Readonly<ContactRecord> | null {
   if (!isExactRecord(value, contactKeys)) {
     return null;
   }
@@ -232,7 +234,7 @@ function parseContacts(value: unknown): readonly Readonly<ContactRecord>[] | nul
   let previousId: number | null = null;
 
   for (const item of value) {
-    const contact = parseContact(item);
+    const contact = parseRailwayContactRecord(item);
 
     if (
       contact === null ||

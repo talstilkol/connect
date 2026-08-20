@@ -13,6 +13,7 @@ import {
   validateMigrationInventory,
 } from "../scripts/verify-migrations.mjs";
 import {
+  buildWorkingFileInventory,
   inspectSecretHygiene,
   inspectSecretText,
   inspectTrackedFileName,
@@ -201,6 +202,27 @@ test("rejects malformed release and migration identities", () => {
 
 test("keeps tracked secret files and private key material out of source", async () => {
   assert.deepEqual(
+    buildWorkingFileInventory({
+      trackedFiles: [
+        "server/existing.ts",
+        "shared/common.ts",
+      ],
+      untrackedFiles: [
+        "server/new.ts",
+        "shared/common.ts",
+      ],
+    }),
+    {
+      trackedFileCount: 2,
+      untrackedFileCount: 2,
+      workingFiles: [
+        "server/existing.ts",
+        "server/new.ts",
+        "shared/common.ts",
+      ],
+    },
+  );
+  assert.deepEqual(
     inspectTrackedFileName(
       "config/.env.production",
     ),
@@ -242,6 +264,11 @@ test("keeps tracked secret files and private key material out of source", async 
   assert.equal(
     report.trackedFileCount > 0,
     true,
+  );
+  assert.equal(
+    report.workingFileCount,
+    report.trackedFileCount +
+      report.untrackedFileCount,
   );
   assert.deepEqual(report.findings, []);
 });

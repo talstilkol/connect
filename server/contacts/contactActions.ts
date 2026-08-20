@@ -13,12 +13,14 @@ import {
 import { TenantSessionError } from "../auth/tenantSession.ts";
 import {
   ContactConsentInputError,
-  ContactInputError,
   createContactService,
 } from "./contactService.ts";
 import {
   createCurrentRailwayContactDirectoryHandler,
 } from "./currentRailwayContactDirectoryHandler.ts";
+import {
+  createCurrentRailwayContactMutationHandler,
+} from "./currentRailwayContactMutationHandler.ts";
 import { toContactRecord } from "./contactRecordMapper.ts";
 import type {
   ContactActionFailure,
@@ -33,7 +35,7 @@ export type {
   SaveContactActionResult,
 } from "./contactActionResult.ts";
 
-async function createActionContext() {
+async function createConsentActionContext() {
   const database = await requireRuntimeDatabase();
   const session = await requireCurrentTenantMutationSession(database);
   const contacts = createContactRepository(database);
@@ -81,28 +83,10 @@ function mapSharedFailure(error: unknown): ContactActionFailure {
 export async function saveContactAction(
   input: unknown,
 ): Promise<SaveContactActionResult> {
-  if (inspectClerkConfiguration().status !== "configured") {
-    return { status: "configuration-required" };
-  }
-
   try {
-    const { session, service } =
-      await createActionContext();
-    const contact = await service.saveProfile(session, input);
-
-    return {
-      status: "saved",
-      contact: toContactRecord(contact),
-    };
-  } catch (error) {
-    if (error instanceof ContactInputError) {
-      return {
-        status: "validation-error",
-        issues: error.issues,
-      };
-    }
-
-    return mapSharedFailure(error);
+    return await createCurrentRailwayContactMutationHandler().save(input);
+  } catch {
+    return { status: "server-error" };
   }
 }
 
@@ -143,7 +127,7 @@ async function changeContactConsent(
 
   try {
     const { session, service } =
-      await createActionContext();
+      await createConsentActionContext();
     const contact =
       action === "grant"
         ? await service.grantConsent(session, contactId, input)

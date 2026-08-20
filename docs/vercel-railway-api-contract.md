@@ -584,6 +584,20 @@ Campaign/Message/Conversation/Bot/AI, סכומי קטגוריות, Currency orde
 Contact, ‏Consent ושינוי Tags/Lists נשארו בשלב Mutation נפרד. עדיין נדרשים
 Origin, ‏OIDC, Clerk, ‏PostgreSQL וראיית Staging חיים לפני Cutover.
 
+7.1.64 שמירת Contact profile הועברה מקומית מ־D1 ל־Railway operation
+`contacts.save`. ‏Vercel מנרמל את חמשת שדות הפרופיל ומצרף
+`submissionOccurredAt` קנוני ומונוטוני שנוצר פעם אחת בכל Submit. השדה אינו
+זמן עסקי, אינו מחליף את זמן ה־Audit שמופק בצד Railway ואינו משמש להכרעת
+Conflict; תפקידו היחיד הוא להבדיל בין פעולה חדשה לבין Retry של אותה בקשה.
+מפתח ה־Idempotency נגזר מכל ה־Payload, ו־Railway מחשב אותו מחדש ודוחה מפתח
+שאינו תואם לפני צריכת מכסה או כתיבת PostgreSQL. לאחר מכן נשמר סדר ההגנות:
+Tenant/Permission, ‏Rate limit, קבלת Receipt אטומית, השוואת Request digest,
+Contact upsert, ‏Audit בלתי־משתנה ושמירת Replay response באותה Transaction.
+ה־BFF מאמת תגובה בעלת מפתחות מדויקים, Replay flag בוליאני ו־Contact קנוני
+התואם לפרופיל שנשלח לפני עדכון React. פעולות Consent ו־Tags/Lists עדיין
+נשארות במסלול Mutation נפרד. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC,
+Clerk, ‏PostgreSQL וראיית Staging חיים לפני Cutover.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
