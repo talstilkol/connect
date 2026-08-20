@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  readFile,
+} from "node:fs/promises";
+import {
   buildChangeLog,
   createCurrentChangeLog,
   parseCommitHistory,
@@ -31,6 +34,21 @@ test("builds a deterministic change log from the real repository history", () =>
   assert.doesNotMatch(
     first,
     /Generated at|Date:|Math\.random/,
+  );
+});
+
+test("excludes synthetic merge commits from the repository history", async () => {
+  const source = await readFile(
+    new URL(
+      "../scripts/create-change-log.mjs",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    source,
+    /"log",\s*"--no-merges",\s*"--reverse",/,
   );
 });
 

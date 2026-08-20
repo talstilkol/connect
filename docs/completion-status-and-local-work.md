@@ -8,7 +8,7 @@
 
 1.1.1 כל 14 שלבי ה־Master Plan הושלמו בקוד המקומי.
 
-1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,172 הבדיקות עוברים.
+1.1.2 Build, ‏TypeScript, ‏ESLint וכל 1,173 הבדיקות עוברים.
 
 1.2 מוכנות פורמלית ל־Production: **15.2%**.
 
@@ -27,17 +27,20 @@
 1.3.2 אין לחשב ממוצע פשוט בין 100% ל־15.2%, משום ששני המדדים מודדים
 דברים שונים וחלק מבדיקות ה־Production הן שערים ולא יחידות מאמץ.
 
-## 2. משימות מקומיות שנותרו
+## 2. משימות מקומיות: הושלם ונותר
 
 האומדנים הם זמן פיתוח נטו של מפתח אחד, ללא המתנה לאישור ספק,
 Credentials, בדיקת עורך דין או זמני Review.
 
-2.1 השלמת שמונת PR Checks המקומיים החסרים ב־GitHub Actions.
+2.1 **הושלם:** שמונת PR Checks המקומיים נוספו ל־GitHub Actions.
 
-2.1.1 תכולה: Source guardrails, ‏Secret hygiene, ‏Interface guardrails,
-Dependency lock, ‏Migrations, ‏TypeScript, ‏ESLint ו־Tests/Build.
+2.1.1 כל שער רץ כ־Job נפרד בשם החוזי שלו: Source guardrails,
+‏Secret hygiene, ‏Interface guardrails, ‏Dependency lock, ‏Migrations,
+‏TypeScript, ‏ESLint ו־Tests/Build.
 
-2.1.2 אומדן: **6–10 שעות**.
+2.1.2 יחד עם `dependency-audit` הקיים, ה־Repository מגדיר את כל תשעת
+ה־Checks שדורשים חוזי Governance ו־CI Evidence. הפעלה חיה תאומת דרך
+Pull Request לפני סימון Governance כמוכן.
 
 2.2 מחוללי Evidence ל־GitHub Governance ול־CI Execution.
 
@@ -93,9 +96,9 @@ Retention plan expiry ו־Restore evidence mismatch.
 
 2.10 סך העבודה המקומית שנותרה:
 
-2.10.1 מאמץ ישיר: **66–104 שעות**, שהם כ־**8–13 ימי עבודה**.
+2.10.1 מאמץ ישיר שנותר: **60–94 שעות**, שהם כ־**8–12 ימי עבודה**.
 
-2.10.2 עם Review, תיקוני Regression ותיעוד: **10–15 ימי עבודה**.
+2.10.2 עם Review, תיקוני Regression ותיעוד: **9–14 ימי עבודה**.
 
 ## 3. עבודה שאינה מקומית בלבד
 
@@ -110,4 +113,3 @@ Case Inventory ו־D1 Read token.
 
 3.4 Retention deletion adapter יישאר מושבת עד אישור משפטי של
 המדיניות ומימוש Legal Hold.
-
