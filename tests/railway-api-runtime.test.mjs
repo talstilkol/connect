@@ -8,6 +8,9 @@ import {
 import {
   createRailwayApiRuntime,
 } from "../server/platform/railwayApiRuntime.ts";
+import {
+  deriveRailwayApiDeterministicIdempotencyKey,
+} from "../server/platform/railwayApiMutationExecutor.ts";
 
 const compactJwt = "header.payload.signature";
 const idempotencyKey =
@@ -41,6 +44,8 @@ function fixture(selectedRole = "owner") {
     reports: [],
     mutationSubjects: [],
     mutationCommands: [],
+    systemAdminMutationSubjects: [],
+    systemAdminProfileInputs: [],
   };
   const handler = createRailwayApiRuntime({
     environment,
@@ -137,6 +142,32 @@ function fixture(selectedRole = "owner") {
         };
       },
     },
+    systemAdmin: {
+      allowedExternalUserIds: ["verified-user"],
+      mutationRateLimit: {
+        async consume(subject) {
+          calls.systemAdminMutationSubjects.push(subject);
+          return { outcome: "allowed" };
+        },
+      },
+      businessProfiles: {
+        async update(input) {
+          calls.systemAdminProfileInputs.push(input);
+          return {
+            outcome: "updated",
+            profile: {
+              tenantId: input.tenantId,
+              businessName: input.businessName,
+              timezone: input.timezone,
+              interfaceLanguage: input.interfaceLanguage,
+              version: input.expectedVersion + 1,
+              createdAt: "2026-08-01T09:00:00.000Z",
+              updatedAt: input.occurredAt,
+            },
+          };
+        },
+      },
+    },
   });
 
   return { calls, handler };
@@ -146,6 +177,7 @@ function request(
   operation,
   payload,
   requestKind = "query",
+  mutationIdempotencyKey = idempotencyKey,
 ) {
   return new Request("https://railway.example.com/v1/connect", {
     method: "POST",
@@ -160,12 +192,57 @@ function request(
       requestKind,
       idempotencyKey:
         requestKind === "mutation"
-          ? idempotencyKey
+          ? mutationIdempotencyKey
           : null,
       payload,
     }),
   });
 }
+
+test("runs a system-admin profile mutation without resolving tenant membership", async () => {
+  const testFixture = fixture("agent");
+  const adminPayload = {
+    targetTenantId: 19,
+    expectedVersion: 2,
+    businessName: "Connect Support",
+    timezone: "Asia/Jerusalem",
+    interfaceLanguage: "he",
+  };
+  const adminIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      "system-admin.business-profile.update",
+      adminPayload,
+    );
+  const response = await testFixture.handler.handle(
+    request(
+      "system-admin.business-profile.update",
+      adminPayload,
+      "mutation",
+      adminIdempotencyKey,
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.outcome, "updated");
+  assert.equal(body.data.profile.businessName, "Connect Support");
+  assert.equal(testFixture.calls.memberships, 0);
+  assert.deepEqual(
+    testFixture.calls.systemAdminMutationSubjects,
+    [
+      "verified-user:system-admin.business-profile.update",
+    ],
+  );
+  assert.equal(testFixture.calls.systemAdminProfileInputs.length, 1);
+  assert.equal(
+    testFixture.calls.systemAdminProfileInputs[0].tenantId,
+    19,
+  );
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /tenantId|externalUserId|verified-user/,
+  );
+});
 
 test("runs a selected-tenant contact query through the complete boundary", async () => {
   const testFixture = fixture("agent");

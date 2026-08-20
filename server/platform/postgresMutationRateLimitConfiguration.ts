@@ -43,6 +43,9 @@ export type PostgresRateLimitEnvironment = Partial<
 export type PostgresTenantMutationRateLimitEnvironment =
   PostgresRateLimitEnvironment;
 
+export type PostgresSystemAdminMutationRateLimitEnvironment =
+  PostgresRateLimitEnvironment;
+
 export type PostgresRateLimitConfigurationState =
   | Readonly<{
       status: "configured";

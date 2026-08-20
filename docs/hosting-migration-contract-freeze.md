@@ -31,7 +31,7 @@ Vercel/Railway, ותשע עדיין דורשות בחירת ספק משותף. �
 | `queue.campaign-delivery` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ/Delay |
 | `queue.team-invitation` | Cloudflare Queue + DLQ | Railway Worker | בחירת Queue/DLQ |
 | `worker.scheduler` | Cloudflare Cron של דקה | Railway Worker קבוע | Lease אטומי, Fencing, ‏Catch-up של עד חמישה Ticks, ‏Timer מיושר לדקה, מניעת overlap, ‏Signal shutdown ו־Composition של Campaign/Invitation על PostgreSQL הושלמו ונבדקו; נותרו Queue adapter, ‏Bootstrap חי ותצורת Railway. ‏Railway Cron אינו מתאים |
-| `security.distributed-rate-limits` | Cloudflare bindings + D1 ledger | Shared service | חוזה PostgreSQL token bucket אטומי ומבודד הושלם עבור Tenant mutation, ‏System Admin mutation ו־Meta webhook; Tenant ו־Meta webhook מחוברים מקומית ל־Railway composition. נותרו System Admin route, ערכי Policy חיים, Telemetry ו־Load evidence |
+| `security.distributed-rate-limits` | Cloudflare bindings + D1 ledger | Shared service | חוזה PostgreSQL token bucket אטומי ומבודד הושלם עבור Tenant mutation, ‏System Admin mutation ו־Meta webhook; שלושתם מחוברים מקומית ל־Railway composition. נותרו ערכי Policy חיים, Telemetry, ‏Load evidence וראיית Staging |
 | `security.secret-management` | Worker secrets | Vercel + Railway | Inventory, חלוקה ו־Rotation |
 | `operations.environment-isolation-evidence` | Cloudflare evidence v2 | Vercel + Railway | Evidence חדש רב־ספקי |
 | `operations.deployment-provenance-evidence` | Cloudflare deployment | Vercel + שני שירותי Railway | Provenance משותף ל־Release |

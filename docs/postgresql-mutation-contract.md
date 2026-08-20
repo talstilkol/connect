@@ -78,9 +78,10 @@ limiter אטומי ב־PostgreSQL, אך הפעלת Runtime
 `tenant-mutation`, ‏`system-admin-mutation` ו־`meta-webhook`. לכל Policy יש
 שלושה ערכי Environment נפרדים — Version, ‏Capacity ו־Refill period — ללא
 ברירת מחדל. Parser משותף מסווג `disabled`, ‏`incomplete`, ‏`invalid` או
-`configured`, ולכן Policy חלקי או לא תקין נכשל סגור. בשלב זה רק
-`tenant-mutation` מחובר ל־Railway API route; חיבור System Admin ו־Meta
-webhook ל־Routes, ערכים חיים, Telemetry ו־Load evidence עדיין חסרים.
+`configured`, ולכן Policy חלקי או לא תקין נכשל סגור. `tenant-mutation`
+ו־`system-admin-mutation` מחוברים כעת ל־Railway API composition, ו־
+`meta-webhook` מחובר ל־Node route חתום כאשר מסופק Queue port. עדיין חסרים
+ערכים חיים, Telemetry, ‏Load evidence וראיית Staging לכל שלושת המסלולים.
 
 1.12 ‏`0009_contact_organization_imports.sql` מוסיף שש טבלאות עבור ארגון
 אנשי קשר וייבוא מתחדש. ה־Foreign Keys כוללים `tenant_id`, וה־Harness חסם

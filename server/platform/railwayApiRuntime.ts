@@ -31,6 +31,10 @@ import type {
   RailwayApiMutationExecutor,
 } from "./railwayApiMutationExecutor.ts";
 import {
+  createRailwaySystemAdminBusinessProfileOperation,
+  type RailwaySystemAdminBusinessProfileOperationDependencies,
+} from "./railwaySystemAdminBusinessProfileOperation.ts";
+import {
   createRailwayTenantSessionResolver,
 } from "./railwayTenantSessionResolver.ts";
 
@@ -43,6 +47,9 @@ export interface RailwayApiRuntimeOptions {
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
   readonly mutations: RailwayApiMutationExecutor;
+  readonly systemAdmin?: Readonly<
+    RailwaySystemAdminBusinessProfileOperationDependencies
+  >;
   readonly maximumBodyBytes?: number;
   readonly maximumResponseBytes?: number;
 }
@@ -65,12 +72,23 @@ export function createRailwayApiRuntime(
     mutationRateLimit: options.mutationRateLimit,
     mutations: options.mutations,
   });
+  const systemAdminOperation =
+    options.systemAdmin === undefined
+      ? []
+      : [
+          createRailwaySystemAdminBusinessProfileOperation(
+            options.systemAdmin,
+          ),
+        ];
 
   return createRailwayApiHttpHandler({
     expectedServiceIdentity: identity.expectedServiceIdentity,
     oidcVerifier: identity.oidcVerifier,
     endUserSessionVerifier: identity.endUserSessionVerifier,
-    operations: operations.operations,
+    operations: [
+      ...operations.operations,
+      ...systemAdminOperation,
+    ],
     maximumBodyBytes: options.maximumBodyBytes,
     maximumResponseBytes: options.maximumResponseBytes,
   });

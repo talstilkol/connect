@@ -13,6 +13,8 @@ import {
 
 export const RAILWAY_API_MUTATION_REQUEST_DIGEST_PREFIX =
   "railway_mutation_request_v1_" as const;
+export const RAILWAY_API_DETERMINISTIC_IDEMPOTENCY_KEY_PREFIX =
+  "connect_idempotency_v1_" as const;
 
 export interface RailwayApiContactSaveCommand {
   readonly session: Readonly<TenantSession>;
@@ -138,5 +140,26 @@ export async function deriveRailwayApiMutationRequestDigest(
 
   return `${RAILWAY_API_MUTATION_REQUEST_DIGEST_PREFIX}${bytesToHex(
     new Uint8Array(digest),
+  )}`;
+}
+
+/**
+ * Produces a caller-verifiable key for mutations whose persistence layer
+ * already records a deterministic immutable event. Binding the key to the
+ * canonical request prevents one key from being reused with another payload.
+ */
+export async function deriveRailwayApiDeterministicIdempotencyKey(
+  operation: string,
+  payload: Readonly<object>,
+  cryptoOverride?: Pick<Crypto, "subtle">,
+): Promise<string> {
+  const requestDigest = await deriveRailwayApiMutationRequestDigest(
+    operation,
+    payload,
+    cryptoOverride,
+  );
+
+  return `${RAILWAY_API_DETERMINISTIC_IDEMPOTENCY_KEY_PREFIX}${requestDigest.slice(
+    RAILWAY_API_MUTATION_REQUEST_DIGEST_PREFIX.length,
   )}`;
 }

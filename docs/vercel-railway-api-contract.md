@@ -482,11 +482,10 @@ Source coverage; הוא אינו מוכיח Data conversion או Semantic parity
 לא חוקי נכשל סגור. ה־DB שומר רק מפתח SHA-256 אטום, נועל כל Scope ומחשב
 Refill לפי זמן PostgreSQL. ‏Harness אמיתי עדכני עבר עם 26 Migrations ו־58
 תרחישי Concurrency, כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות
-במכסה `2`. ‏Tenant mutation מחובר ל־Railway API, ו־Meta webhook מחובר
-כאופציה חתומה ב־Node dispatcher עם PostgreSQL WABA lookup ו־Queue port
-ספק־נייטרלי. כאשר ההרכבה חסרה Route זה מחזיר `503` ולא נופל ל־D1.
-System Admin עדיין דורש Route wiring; כל שלושת המסלולים דורשים ערכי Policy
-ו־Evidence חיים.
+במכסה `2`. ‏Tenant mutation ו־System Admin mutation מחוברים ל־Railway API,
+ו־Meta webhook מחובר כאופציה חתומה ב־Node dispatcher עם PostgreSQL WABA
+lookup ו־Queue port ספק־נייטרלי. כאשר הרכבת Meta חסרה Route זה מחזיר `503`
+ולא נופל ל־D1. כל שלושת המסלולים עדיין דורשים ערכי Policy ו־Evidence חיים.
 
 7.1.55 ‏`postgresCoreDataMigration.ts`,‏ `read-d1-core-data-snapshot.mjs`
 ו־`verify-postgres-core-data-migration.mjs` מוסיפים Core data migration
@@ -501,6 +500,19 @@ Startup executable. ‏`PORT` מאומת לפני יצירת Pool, תצורת Ru
 Rehearsal הפעיל Child process אמיתי מול PostgreSQL 16 עם 24 מיגרציות, הוכיח
 Liveness ו־Readiness ושלח `SIGTERM`; HTTP נסגר לפני Pool והתהליך יצא בקוד
 `0` ללא פלט שגיאה. עדיין חסרים Railway Service ו־Environment חיים.
+
+7.1.57 הפעולה `system-admin.business-profile.update` מחוברת כאופציה נפרדת
+ל־Railway runtime ואינה עוברת ב־Tenant session resolver. היא דורשת Clerk
+identity שנמצאת ב־`CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS`, צורכת את Policy
+`system-admin-mutation` לפני כתיבת PostgreSQL ומקבלת רק `targetTenantId`,‏
+`expectedVersion` ושלושת שדות הפרופיל. מפתח Idempotency מחושב דטרמיניסטית
+מה־Operation ומה־Payload הקנוני; Repository קיים נועל את הפרופיל, בודק
+Version, מסנכרן את שם ה־Tenant וכותב Event ו־Audit בלתי־משתנים באותה
+Transaction. תגובת ה־API אינה כוללת Tenant ID, ‏External user ID או פרטי
+Database. Allowlist או Rate-limit policy חלקיים/לא חוקיים נכשלים סגור;
+כאשר שניהם חסרים הפעולה כלל אינה נרשמת.
+חיבור פעולת ה־Vercel/React הקיימת ל־Railway operation והוכחת Staging עדיין
+נדרשים לפני Cutover; ה־Route המקומי לבדו אינו ראיית Deployment.
 
 7.2 עדיין חסר:
 

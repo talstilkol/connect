@@ -2016,3 +2016,29 @@ Skip או Todo. בדיקות היעד עברו `42/42`. ‏Source guard סרק 5
 Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,167
 קבצים כולל היסטוריית Git ו־Dependency lock אימת 30 תלויות ישירות.
 `git diff --check` נשאר נקי.
+
+4.67 ‏System Admin Business Profile מחובר מקומית ל־Railway API כפעולת
+Mutation נפרדת: `system-admin.business-profile.update`. הפעולה אינה עוברת
+ב־Tenant session resolver ואינה מקבלת Tenant מהזהות הרגילה; היא דורשת
+Clerk identity מאומתת שנמצאת ב־Server allowlist ומקבלת Target מפורש רק בשדה
+`targetTenantId` הסגור.
+
+4.67.1 לפני PostgreSQL הפעולה מאמתת Operation/Request kind, דורשת מפתח
+Idempotency דטרמיניסטי הקשור ל־Payload הקנוני וצורכת מכסה מבודדת מסוג
+`system-admin-mutation`. זהות שאינה ב־allowlist, מפתח שאינו תואם, Payload
+מורחב, מכסה חסומה או תלות לא זמינה נעצרים ללא כתיבה.
+
+4.67.2 הכתיבה משתמשת ב־PostgreSQL Repository הקיים: נעילת Profile,
+`expectedVersion`, זיהוי Retry זהה לפי Event דטרמיניסטי, סנכרון Display name
+וכתיבת Event ו־Audit בלתי־משתנים באותה Transaction. התגובה כוללת רק View
+ציבורי של הפרופיל ואינה חושפת Tenant ID, ‏External user ID או פרטי מסד.
+
+4.67.3 הרכבת ה־Route אופציונלית רק כאשר גם
+`CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS` וגם שלושת ערכי Policy של System
+Admin מוגדרים ותקינים. אם שניהם חסרים הפעולה אינה נרשמת; מצב חלקי או לא
+חוקי מפיל את ה־Runtime סגור. Build וכל **2,137 הבדיקות** עברו ללא כשל, Skip
+או Todo; 22 בדיקות היעד עברו יחד. חזרת PostgreSQL 16 זמנית ונקייה עברה עם
+`PASS (26 migrations, 58 concurrency scenarios)` ולאחריה השרת והתיקייה
+הזמניים הוסרו. ערכי Allowlist ו־Policy חיים, Telemetry, ‏Load evidence
+וראיית Railway Staging עדיין חיצוניים ולא הושלמו. גם פעולת ה־Vercel/React
+הקיימת עדיין צריכה לעבור מה־D1 action אל ה־Railway operation לפני Cutover.

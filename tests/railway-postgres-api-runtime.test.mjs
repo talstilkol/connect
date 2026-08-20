@@ -132,6 +132,27 @@ test("composes the optional Meta webhook route without exposing its secrets", as
   await runtime.close();
 });
 
+test("composes the optional system-admin route only with complete isolated policy", async () => {
+  const runtime = await createRailwayPostgresApiRuntime(
+    options({
+      systemAdminEnvironment: {
+        CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS:
+          '["railway-system-admin"]',
+        SYSTEM_ADMIN_MUTATION_RATE_LIMIT_POLICY_VERSION: "5",
+        SYSTEM_ADMIN_MUTATION_RATE_LIMIT_CAPACITY: "30",
+        SYSTEM_ADMIN_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "60",
+      },
+    }),
+  );
+
+  assert.equal(typeof runtime.handler.handle, "function");
+  assert.doesNotMatch(
+    JSON.stringify(runtime),
+    /railway-system-admin|SYSTEM_ADMIN_MUTATION_RATE_LIMIT/,
+  );
+  await runtime.close();
+});
+
 test("fails closed and closes ownership when identity configuration is absent", async () => {
   await assert.rejects(
     createRailwayPostgresApiRuntime(
@@ -157,6 +178,27 @@ test("rejects extended or incomplete composition options", async () => {
       },
     }),
     /mutation rate-limit configuration is unavailable/,
+  );
+  await assert.rejects(
+    createRailwayPostgresApiRuntime({
+      ...options(),
+      systemAdminEnvironment: {
+        CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS:
+          '["railway-system-admin"]',
+      },
+    }),
+    /system-admin configuration is unavailable/,
+  );
+  await assert.rejects(
+    createRailwayPostgresApiRuntime({
+      ...options(),
+      systemAdminEnvironment: {
+        SYSTEM_ADMIN_MUTATION_RATE_LIMIT_POLICY_VERSION: "5",
+        SYSTEM_ADMIN_MUTATION_RATE_LIMIT_CAPACITY: "30",
+        SYSTEM_ADMIN_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "60",
+      },
+    }),
+    /system-admin configuration is unavailable/,
   );
   await assert.rejects(
     createRailwayPostgresApiRuntime({

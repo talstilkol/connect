@@ -1,6 +1,10 @@
 import {
   createRateLimitGuard,
 } from "../security/rateLimit.ts";
+import {
+  inspectSystemAdminConfiguration,
+  type SystemAdminEnvironment,
+} from "../auth/systemAdminConfiguration.ts";
 import type {
   NodePostgresPoolEnvironment,
   NodePostgresPoolTelemetry,
@@ -35,8 +39,14 @@ import {
 } from "./railwayPostgresFoundation.ts";
 import {
   inspectPostgresTenantMutationRateLimitConfiguration,
+  inspectPostgresSystemAdminMutationRateLimitConfiguration,
+  type PostgresSystemAdminMutationRateLimitEnvironment,
   type PostgresTenantMutationRateLimitEnvironment,
 } from "./postgresMutationRateLimitConfiguration.ts";
+
+export type RailwaySystemAdminEnvironment =
+  SystemAdminEnvironment &
+    PostgresSystemAdminMutationRateLimitEnvironment;
 
 export interface RailwayPostgresApiRuntimeOptions {
   readonly identityEnvironment?: RailwayApiIdentityEnvironment;
@@ -47,6 +57,8 @@ export interface RailwayPostgresApiRuntimeOptions {
   readonly postgresTelemetry: NodePostgresPoolTelemetry;
   readonly mutationRateLimitEnvironment?:
     PostgresTenantMutationRateLimitEnvironment;
+  readonly systemAdminEnvironment?:
+    RailwaySystemAdminEnvironment;
   readonly metaWebhook?: Readonly<{
     environment: RailwayMetaWebhookRuntimeEnvironment;
     queue: MetaWebhookQueuePort;
@@ -72,6 +84,7 @@ const optionKeys = Object.freeze([
   "mutationRateLimitEnvironment",
   "postgresEnvironment",
   "postgresTelemetry",
+  "systemAdminEnvironment",
 ]);
 
 function validMetaWebhookOptions(value: unknown): boolean {
@@ -136,6 +149,36 @@ export async function createRailwayPostgresApiRuntime(
       "Railway PostgreSQL mutation rate-limit configuration is unavailable",
     );
   }
+  const systemAdminConfiguration =
+    inspectSystemAdminConfiguration(
+      options.systemAdminEnvironment,
+    );
+  const systemAdminRateLimitConfiguration =
+    inspectPostgresSystemAdminMutationRateLimitConfiguration(
+      options.systemAdminEnvironment,
+    );
+  const systemAdminDisabled =
+    systemAdminConfiguration.status === "disabled" &&
+    systemAdminRateLimitConfiguration.status === "disabled";
+  const systemAdminRuntimeConfiguration =
+    systemAdminConfiguration.status === "configured" &&
+    systemAdminRateLimitConfiguration.status === "configured"
+      ? Object.freeze({
+          externalUserIds:
+            systemAdminConfiguration.externalUserIds,
+          rateLimitPolicy:
+            systemAdminRateLimitConfiguration.policy,
+        })
+      : null;
+
+  if (
+    !systemAdminDisabled &&
+    systemAdminRuntimeConfiguration === null
+  ) {
+    throw new Error(
+      "Railway PostgreSQL system-admin configuration is unavailable",
+    );
+  }
 
   const foundation = createRailwayPostgresFoundation({
     ...(options.postgresEnvironment === undefined
@@ -159,6 +202,22 @@ export async function createRailwayPostgresApiRuntime(
         "tenant-mutation",
       ),
       mutations: foundation.railwayApiMutations,
+      ...(systemAdminRuntimeConfiguration === null
+        ? {}
+        : {
+            systemAdmin: {
+              allowedExternalUserIds:
+                systemAdminRuntimeConfiguration.externalUserIds,
+              mutationRateLimit: createRateLimitGuard(
+                foundation.createMutationRateLimitBinding(
+                  systemAdminRuntimeConfiguration.rateLimitPolicy,
+                ),
+                "system-admin-mutation",
+              ),
+              businessProfiles:
+                foundation.systemAdminBusinessProfiles,
+            },
+          }),
       maximumBodyBytes: options.maximumBodyBytes,
       maximumResponseBytes: options.maximumResponseBytes,
     });

@@ -24,7 +24,7 @@ export type SystemAdminConfigurationState =
       externalUserIds: readonly [];
     };
 
-type SystemAdminEnvironment = Partial<
+export type SystemAdminEnvironment = Partial<
   Record<
     typeof systemAdminEnvironmentKey,
     string | undefined
