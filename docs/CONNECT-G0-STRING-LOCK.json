@@ -1,0 +1,16 @@
+{
+  "version": "RC-005-lock",
+  "date": "2026-08-20",
+  "pin_sha": "5cb6a0fc8e021ec4250e0f4652603cfd3369a61d",
+  "test_path": "tests/rendered-html.test.mjs",
+  "test_blob": "dc907ffd0de950a4ce5d87899b1f9200059c8b2a",
+  "photos": "NOT_RUN",
+  "test_execution": "NOT_RUN",
+  "result": "STRING_LOCK_VERIFIED",
+  "not": ["PASS_FAILCLOSED", "PRODUCTION_COMPLETE"],
+  "adapters": {
+    "campaignDeliveryAdapter": false,
+    "botReplyDeliveryAdapter": false,
+    "source": "server/operations/productionImplementationState.ts"
+  }
+}
