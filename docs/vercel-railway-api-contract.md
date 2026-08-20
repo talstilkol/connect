@@ -468,7 +468,7 @@ Concurrency.
 
 7.1.53 ‏`postgresMigrationParityRegistry.mjs` ו־
 `verify-postgres-migration-parity.mjs` מקבעים מיפוי Machine-readable של כל
-36 מיגרציות D1 ושל כל 51 הטבלאות אל 24 מיגרציות PostgreSQL. שלוש מיגרציות
+36 מיגרציות D1 ושל כל 51 הטבלאות אל 25 מיגרציות PostgreSQL. שלוש מיגרציות
 Railway-only—HTTP mutation receipts, ‏Scheduler lease ו־API mutation token
 buckets—מסומנות בנפרד. ה־
 Verifier דוחה Migration חסרה, כפולה, לא מוסברת או Evidence token שאינו קיים,
@@ -508,9 +508,8 @@ Production ו־Preview origins המאושרים.
 `contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
 ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
 ערכי Production pool ו־Rate-limit policy מאושרים, תצורת Railway Service חיה,
-Data migration rehearsal ל־8 הטבלאות שאינן בתשעת ה־Slices שהושלמו,
-‏Semantic parity
-וכיסוי Concurrency למסלולים שאינם כלולים עדיין ב־Harness.
+‏Data migration ו־Semantic parity מקומיים הושלמו לכל 51 הטבלאות. עדיין
+חסרים Export חי, ‏Staging וכיסוי Concurrency למסלולים שאינם כלולים ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
 PostgreSQL במקום D1.

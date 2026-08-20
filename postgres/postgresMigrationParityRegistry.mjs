@@ -257,14 +257,18 @@ export const POSTGRES_MIGRATION_PARITY_REGISTRY = Object.freeze([
   ),
   covered(
     "0030_whatsapp_rate_limit_reservations.sql",
-    ["0012_whatsapp_rate_limit_ledger.sql"],
+    [
+      "0012_whatsapp_rate_limit_ledger.sql",
+      "0024_whatsapp_legacy_reservation_category.sql",
+    ],
     [
       target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_rate_limit_reservations"),
       target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_pair_rate_limit_state"),
       target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_portfolio_recipient_rate_limit_state"),
       target("0012_whatsapp_rate_limit_ledger.sql", "CREATE TABLE whatsapp_rate_limit_settlements"),
+      target("0024_whatsapp_legacy_reservation_category.sql", "template_category IS NULL"),
     ],
-    "The reservation and settlement ledgers have direct PostgreSQL counterparts.",
+    "The reservation and settlement ledgers have direct PostgreSQL counterparts; an explicit null preserves the category that legacy D1 never stored, while a trigger rejects unknown categories on every new PostgreSQL reservation.",
   ),
   covered(
     "0031_campaign_delivery_provider_links.sql",

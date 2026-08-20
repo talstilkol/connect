@@ -193,7 +193,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "whatsapp-delivery-policy",
     order: 10,
-    status: "next",
+    status: "rehearsed",
     requires: ["core", "meta-connection", "templates-campaigns"],
     tables: [
       "campaign_delivery_provider_links",
@@ -217,6 +217,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
       "0012_whatsapp_rate_limit_ledger.sql",
       "0013_whatsapp_phone_throughput.sql",
       "0022_campaign_delivery_provider_links.sql",
+      "0024_whatsapp_legacy_reservation_category.sql",
     ],
   }),
 ]);

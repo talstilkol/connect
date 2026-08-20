@@ -28,11 +28,11 @@
 | 7 | `bot-runtime` | 3 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
 | 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
 | 9 | `governance-billing` | 5 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
-| 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | הבא לביצוע | 10–24 שעות |
+| 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | Rehearsal + Semantic parity הושלמו | הושלם |
 
-2.1 נותרו 8 טבלאות לאחר תשעת ה־Slices שהושלמו. האומדן הכולל ל־Data
-migration ו־Parity המקומיים הוא **10–24 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
-Accounts, המתנה לספקים, Staging, Load/Recovery או Cutover.
+2.1 כל 10 ה־Slices וכל 51 הטבלאות עברו Data migration ו־Semantic parity
+מקומיים. עדיין חסרים Export חי, ‏Accounts, המתנה לספקים, ‏Staging,
+‏Load/Recovery ו־Cutover מבוקר.
 
 ## 3. Slice שהושלם — Tenant Access
 
@@ -178,11 +178,21 @@ Production, עדכון Profile בידי Admin, כפילויות, Version gaps ו
 בלתי־משתנים. פרטי הראיה והפערים הקיימים ב־D1 מתועדים ב־
 `docs/postgresql-governance-billing-data-migration-rehearsal.md`.
 
-## 11. Slice הבא — WhatsApp Delivery Policy
+## 11. Slice שהושלם — WhatsApp Delivery Policy
 
 11.1 שמונה הטבלאות כוללות Provider links, ‏Delivery-policy evidence,
 Reservations, ‏Pair/Portfolio state, ‏Settlements ו־Provider cooldowns.
 ה־Slice תלוי ב־Core, ‏Meta וב־Templates/Campaigns שכבר עברו Rehearsal.
+
+11.2 ה־Rehearsal העביר 12 רשומות, חסם Replay והוכיח תשעה תרחישי
+Semantic parity. לפני Cutover כל Reservation חייב להיות Settled, וכל
+Policy, ‏Pair/Portfolio projection, ‏Cooldown ו־Provider link נבדקים מול
+הראיה שממנה נגזרו.
+
+11.3 ‏D1 לא שמר `template_category` היסטורית. לכן PostgreSQL שומר ברשומה
+מיובאת `NULL` מפורש, חוסם Replay עמום, אך מאפשר Settlement. כל Reservation
+חדש עדיין חייב `MARKETING` או `UTILITY`. פרטי הראיה נמצאים ב־
+`docs/postgresql-whatsapp-delivery-policy-data-migration-rehearsal.md`.
 
 ## 12. תנאי בטיחות
 

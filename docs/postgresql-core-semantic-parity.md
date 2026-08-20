@@ -11,9 +11,9 @@
 טוענת אותו ל־PostgreSQL דרך מנגנון ה־Core migration, מפעילה את אותם
 Repository contracts ומשווה גם את תוצאות הפעולות וגם את המצב הסופי.
 
-1.3 ההוכחה אינה טוענת ל־Semantic parity של כל 51 הטבלאות. היא מכסה את
-שבע טבלאות ה־Core בלבד; 44 הטבלאות הנותרות דורשות Data conversion
-ותרחישי Parity נפרדים.
+1.3 ההוכחה במסמך זה מכסה את שבע טבלאות ה־Core בלבד. ‏44 הטבלאות האחרות
+עברו מאז Data conversion ותרחישי Parity נפרדים בתשעת מסמכי ה־Slice
+הנוספים; אין לייחס את הראיה שלהם ל־Core harness המצומצם.
 
 ## 2. היקף
 
@@ -57,7 +57,7 @@ Repository contracts ומשווה גם את תוצאות הפעולות וגם �
 flowchart LR
   D1["D1/SQLite + 36 migrations"] --> Snapshot["Core snapshot"]
   Snapshot --> Plan["HMAC-bound migration plan"]
-  Plan --> PG["PostgreSQL 16 + 24 migrations"]
+  Plan --> PG["PostgreSQL 16 + 25 migrations"]
   D1 --> D1Repo["D1 repositories"]
   PG --> PGRepo["PostgreSQL repositories"]
   D1Repo --> Compare["19 paired scenarios"]

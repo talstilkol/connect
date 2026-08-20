@@ -29,7 +29,7 @@ test("maps every D1 migration and table to the PostgreSQL inventory", async () =
     {
       status: "passed",
       d1MigrationCount: 36,
-      postgresMigrationCount: 24,
+      postgresMigrationCount: 25,
       coveredD1TableCount: 51,
       targetOnlyMigrationCount: 3,
     },

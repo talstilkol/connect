@@ -81,6 +81,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0021_contact_consent_events\.sql/);
   assert.match(source, /0022_campaign_delivery_provider_links\.sql/);
   assert.match(source, /0023_api_mutation_rate_limits\.sql/);
+  assert.match(source, /0024_whatsapp_legacy_reservation_category\.sql/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);

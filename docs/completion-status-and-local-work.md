@@ -1851,3 +1851,32 @@ Version מתקבל ב־SQL ישיר, ו־Subscription/Production Decision events
 555 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,143 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,089
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.60 ‏PostgreSQL WhatsApp Delivery Policy data migration ו־Semantic parity
+הושלמו מקומית עבור שמונה טבלאות Policy, ‏Reservation, ‏Pair/Portfolio,
+‏Settlement, ‏Cooldown ו־Provider link.
+
+4.60.1 ה־Snapshot מאמת מפתחות Policy דטרמיניסטיים, רצף גרסאות, ‏Audit,
+תוקף Evidence וקשר לחיבור Meta. לפני Commit נבדקים Settlement מלא לכל
+Reservation, הקרנות Pair/Portfolio, רצף Cooldown וקישור Provider link
+ל־Campaign delivery ול־Settlement הטרמינלי.
+
+4.60.2 ‏D1 אינו שומר `template_category` היסטורי. ‏PostgreSQL מייצג את
+הערך החסר כ־`NULL` מפורש במקום להמציא Category. ‏Runtime inserts חדשים
+עדיין חייבים `MARKETING` או `UTILITY`; ‏Legacy settlement נתמך ו־Replay
+עמום נחסם.
+
+4.60.3 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 25 PostgreSQL migrations, 8 tables, 12 rows, replay rejected, legacy category unknown, delivery evidence private, 9 parity scenarios)`.
+‏Provider ID, מספר טלפון, Actor, ‏Policy evidence ו־Delivery keys לא נחשפו
+ב־Manifest או ב־Evidence. השרת הזמני נעצר ותיקייתו נמחקה.
+
+4.60.4 כל 10 ה־Slices וכל 51 טבלאות D1 הוכחו כעת ב־Data migration
+וב־Semantic parity מקומיים. לא נותר Slice מקומי. עדיין נדרשים Export חי
+ועקבי, ‏Staging, ‏Load/Recovery, ערכי Railway/Meta חיים, ‏Cutover ו־Rollback
+בסביבה מבוקרת.
+
+4.60.5 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice האחרון. ‏Source
+guard סרק 556 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,148 קבצים
+והיסטוריית Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל
+**2,097 הבדיקות** עברו יחד ללא כשל או Skip.

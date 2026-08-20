@@ -150,6 +150,7 @@ test("separates the completed PostgreSQL tenant limiter from unresolved ingress 
   assert.equal(rateLimits.decisionState, "decision-required");
   for (const path of [
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
+    "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
     "server/platform/postgresMutationRateLimitBinding.ts",
     "server/platform/postgresMutationRateLimitConfiguration.ts",
     "server/platform/railwayPostgresApiRuntime.ts",
@@ -296,6 +297,7 @@ test("records the local API contract without claiming live adapter readiness", (
     "postgres/migrations/0021_contact_consent_events.sql",
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
+    "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
     "server/platform/postgresMutationRateLimitBinding.ts",
@@ -361,8 +363,8 @@ test("records the local API contract without claiming live adapter readiness", (
     /provider-bound pool and rate-limit policy values/,
   );
   assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
-  assert.match(boundary.cutoverBlocker, /first nine slices and 43 tables/);
-  assert.match(boundary.cutoverBlocker, /remaining eight D1 tables/);
+  assert.match(boundary.cutoverBlocker, /all ten slices and all 51 tables/);
+  assert.doesNotMatch(boundary.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
@@ -444,6 +446,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     "postgres/migrations/0021_contact_consent_events.sql",
     "postgres/migrations/0022_campaign_delivery_provider_links.sql",
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
+    "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
     "postgres/postgresMigrationParityRegistry.mjs",
     "scripts/verify-postgres-migration-contract.mjs",
     "scripts/verify-postgres-migration-parity.mjs",
@@ -455,7 +458,7 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
   }
 
   assert.match(database.cutoverBlocker, /provider-neutral/i);
-  assert.match(database.cutoverBlocker, /twenty-four ordered/);
+  assert.match(database.cutoverBlocker, /twenty-five ordered/);
   assert.match(database.cutoverBlocker, /immutable contact-consent evidence/);
   assert.match(
     database.cutoverBlocker,
@@ -525,8 +528,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     /live provider-bound pool and rate-limit policy values/,
   );
   assert.match(database.cutoverBlocker, /maps every one of the 36 D1 migrations and all 51 D1 tables/);
-  assert.match(database.cutoverBlocker, /first nine slices and 43 tables/);
-  assert.match(database.cutoverBlocker, /remaining eight D1 tables/);
+  assert.match(database.cutoverBlocker, /all ten slices and all 51 tables/);
+  assert.doesNotMatch(database.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(
     database.cutoverBlocker,
     /concurrent provider acceptance and terminal status reconciliation/,

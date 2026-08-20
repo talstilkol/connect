@@ -43,6 +43,7 @@ const systemAdminBusinessProfileSchema = migrationSources[20];
 const contactConsentSchema = migrationSources[21];
 const campaignDeliveryProviderSchema = migrationSources[22];
 const apiMutationRateLimitSchema = migrationSources[23];
+const whatsappLegacyReservationCategorySchema = migrationSources[24];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -70,14 +71,34 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0021_contact_consent_events.sql",
     "0022_campaign_delivery_provider_links.sql",
     "0023_api_mutation_rate_limits.sql",
+    "0024_whatsapp_legacy_reservation_category.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 24,
+      migrationCount: 25,
       findings: [],
     },
+  );
+});
+
+test("preserves unknown legacy reservation categories without weakening new writes", () => {
+  assert.match(
+    whatsappLegacyReservationCategorySchema,
+    /ALTER COLUMN template_category DROP NOT NULL/,
+  );
+  assert.match(
+    whatsappLegacyReservationCategorySchema,
+    /template_category IS NULL[\s\S]*MARKETING[\s\S]*UTILITY/,
+  );
+  assert.match(
+    whatsappLegacyReservationCategorySchema,
+    /requires a template category[\s\S]*BEFORE INSERT/,
+  );
+  assert.doesNotMatch(
+    whatsappLegacyReservationCategorySchema,
+    /random|uuid/i,
   );
 });
 

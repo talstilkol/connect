@@ -29,6 +29,7 @@
     "verify:postgres-bot-runtime-data-migration": "node scripts/verify-postgres-bot-runtime-data-migration.mjs",
     "verify:postgres-ai-knowledge-runtime-data-migration": "node scripts/verify-postgres-ai-knowledge-runtime-data-migration.mjs",
     "verify:postgres-governance-billing-data-migration": "node scripts/verify-postgres-governance-billing-data-migration.mjs",
+    "verify:postgres-whatsapp-delivery-policy-data-migration": "node scripts/verify-postgres-whatsapp-delivery-policy-data-migration.mjs",
     "verify:postgres-core-semantic-parity": "node scripts/verify-postgres-core-semantic-parity.mjs",
     "verify:railway-api-startup": "node scripts/verify-railway-api-startup.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",

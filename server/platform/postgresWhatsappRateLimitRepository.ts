@@ -296,7 +296,7 @@ interface NormalizedReservation extends WhatsappRateLimitReservation {
 
 interface StoredReservation {
   readonly reservation: WhatsappRateLimitReservation;
-  readonly templateCategory: "MARKETING" | "UTILITY";
+  readonly templateCategory: "MARKETING" | "UTILITY" | null;
 }
 
 function requirePattern(value: unknown, pattern: RegExp, field: string): string {
@@ -572,7 +572,10 @@ function parseReservation(value: unknown): StoredReservation {
     throw new Error("PostgreSQL returned invalid reservation times");
   }
   return Object.freeze({
-    templateCategory: requireTemplateCategory(row.templateCategory),
+    templateCategory:
+      row.templateCategory === null
+        ? null
+        : requireTemplateCategory(row.templateCategory),
     reservation: Object.freeze({
       reservationKey: requirePattern(
         row.reservationKey,

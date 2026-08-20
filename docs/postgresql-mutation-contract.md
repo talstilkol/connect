@@ -11,7 +11,7 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 24 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 25 Migrations מסודרות עבור
 ה־Critical Path. הן מכסות את יסודות Tenant/Contact, ‏HTTP mutation receipts,
 Access/Membership/Invitation, ‏Conversation, ‏Templates/Campaigns, ‏Bot,
 AI/Knowledge, ‏Contact organization/import, ‏Meta credentials/Webhooks,
@@ -388,10 +388,10 @@ Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 עדיין חסרים ערכים ואישור Production, ‏Telemetry sink, ‏CA evidence וכלי
 Migration מאושר ב־Railway.
 
-6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 24
-מיגרציות PostgreSQL. ‏Core rehearsal לשבע טבלאות עבר עם HMAC, ‏Counts,
-Sequences ו־Replay חסום. עדיין חסרים כלי Data migration מאושר ל־44 הטבלאות
-הנותרות, Dry run עם נתונים מייצגים בסביבה נשלטת וראיית Semantic parity חתומה.
+6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 25
+מיגרציות PostgreSQL. כל 10 ה־Data migration rehearsals וכל 51 הטבלאות עברו
+עם HMAC, ‏Counts, ‏Sequences, ‏Replay חסום ו־Semantic parity. עדיין חסרים
+Export חי, Dry run עם נתונים מורשים בסביבה נשלטת וראיית Staging חתומה.
 
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/

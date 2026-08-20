@@ -90,6 +90,7 @@ const migrationFiles = Object.freeze([
   "0021_contact_consent_events.sql",
   "0022_campaign_delivery_provider_links.sql",
   "0023_api_mutation_rate_limits.sql",
+  "0024_whatsapp_legacy_reservation_category.sql",
 ]);
 
 function postgresEnvironment(connectionString) {

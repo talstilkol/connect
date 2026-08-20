@@ -322,6 +322,35 @@ test("settles once behind the locked reservation and detects conflict", async ()
   assert.equal(conflict.outcome, "settlement-conflict");
 });
 
+test("settles an imported legacy reservation while rejecting its ambiguous replay", async () => {
+  const legacyRow = reservationRow({ templateCategory: null });
+  const settlementFixture = fixture([
+    [legacyRow],
+    [],
+    [settlementRow()],
+  ]);
+  const settled = await createPostgresWhatsappRateLimitRepository(
+    settlementFixture.dependencies,
+  ).settle({
+    reservationKey,
+    outcome: "delivered",
+    settledAt: "2026-08-17T09:01:00.000Z",
+  });
+  assert.equal(settled.outcome, "settled");
+
+  const replayFixture = fixture([
+    [{ locked: "" }],
+    [{ locked: "" }],
+    [legacyRow],
+  ]);
+  await assert.rejects(
+    createPostgresWhatsappRateLimitRepository(
+      replayFixture.dependencies,
+    ).reserveBusinessInitiatedMessage(reservationCommand()),
+    /reservation key collision/,
+  );
+});
+
 test("stores provider-failed settlement and cooldown in one transaction", async () => {
   const testFixture = fixture([
     [reservationRow()],

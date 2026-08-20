@@ -117,8 +117,8 @@ Access, כולל היסטוריה מרובת Versions, ‏Replay חסום ושח
 Campaigns, ‏Conversations & Messages, ‏Bot Runtime, ‏AI & Knowledge Runtime
 ו־Governance & Billing
 הושלמו לאחר מסמך זה. עדיין חסרים
-Export חי, ‏Staging, עומס ו־Recovery, וכן Data migration ו־Semantic parity
-ל־8 הטבלאות שנותרו.
+Export חי, ‏Staging, עומס ו־Recovery. ‏Data migration ו־Semantic parity
+הושלמו כעת לכל 51 הטבלאות.
 הראיות החדשות נמצאות ב־
 `docs/postgresql-contact-organization-import-data-migration-rehearsal.md`
 ב־`docs/postgresql-meta-connection-data-migration-rehearsal.md` וב־
@@ -126,7 +126,8 @@ Export חי, ‏Staging, עומס ו־Recovery, וכן Data migration ו־Semant
 `docs/postgresql-conversations-messages-data-migration-rehearsal.md` וב־
 `docs/postgresql-bot-runtime-data-migration-rehearsal.md` וב־
 `docs/postgresql-ai-knowledge-runtime-data-migration-rehearsal.md` וב־
-`docs/postgresql-governance-billing-data-migration-rehearsal.md`.
+`docs/postgresql-governance-billing-data-migration-rehearsal.md` וב־
+`docs/postgresql-whatsapp-delivery-policy-data-migration-rehearsal.md`.
 
 ## 7. מקורות רשמיים
 
