@@ -361,8 +361,8 @@ test("records the local API contract without claiming live adapter readiness", (
     /provider-bound pool and rate-limit policy values/,
   );
   assert.match(boundary.cutoverBlocker, /maps all 36 D1 migrations and all 51 D1 tables/);
-  assert.match(boundary.cutoverBlocker, /first eight slices and 38 tables/);
-  assert.match(boundary.cutoverBlocker, /remaining thirteen D1 tables/);
+  assert.match(boundary.cutoverBlocker, /first nine slices and 43 tables/);
+  assert.match(boundary.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(boundary.cutoverBlocker, /live account configuration/);
   assert.match(boundary.cutoverBlocker, /staging evidence/);
 });
@@ -525,8 +525,8 @@ test("records the PostgreSQL persistence contracts without selecting a provider"
     /live provider-bound pool and rate-limit policy values/,
   );
   assert.match(database.cutoverBlocker, /maps every one of the 36 D1 migrations and all 51 D1 tables/);
-  assert.match(database.cutoverBlocker, /first eight slices and 38 tables/);
-  assert.match(database.cutoverBlocker, /remaining thirteen D1 tables/);
+  assert.match(database.cutoverBlocker, /first nine slices and 43 tables/);
+  assert.match(database.cutoverBlocker, /remaining eight D1 tables/);
   assert.match(
     database.cutoverBlocker,
     /concurrent provider acceptance and terminal status reconciliation/,

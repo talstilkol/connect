@@ -170,7 +170,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "governance-billing",
     order: 9,
-    status: "next",
+    status: "rehearsed",
     requires: ["core"],
     tables: [
       "tenant_subscriptions",
@@ -193,7 +193,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
   slice({
     id: "whatsapp-delivery-policy",
     order: 10,
-    status: "planned",
+    status: "next",
     requires: ["core", "meta-connection", "templates-campaigns"],
     tables: [
       "campaign_delivery_provider_links",

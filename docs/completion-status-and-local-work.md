@@ -1819,3 +1819,35 @@ Governance & Billing ובו חמש טבלאות. אומדן העבודה המק�
 554 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,138 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,083
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.59 ‏PostgreSQL Governance & Billing data migration ו־Semantic parity
+הושלמו מקומית עבור חמש טבלאות Subscription, ‏Production Decisions ו־
+Business Profile Admin events.
+
+4.59.1 ה־Snapshot מאמת מפתחות Event דטרמיניסטיים, סטטוסים, זמנים,
+Check IDs מתוך Registry ו־Profile digests. לפני Commit נבדקים רצף מלא של
+Subscription Events, התאמת החלטה לאירוע האחרון וקישור Subscription/Admin
+events ל־Audit המקורי שכבר הועבר ב־Core.
+
+4.59.2 Triggers שיוצרים Audit או Decision Events מושבתים רק בתוך
+Transaction ההעברה ומופעלים מחדש לפני האימות. בכך נמנעת יצירת ראיות כפולות
+בזמן טעינת Ledger היסטורי.
+
+4.59.3 Rehearsal נקי מול SQLite ו־PostgreSQL 16 אמיתיים עבר עם
+`PASS (36 D1 migrations, 24 PostgreSQL migrations, 5 tables, 7 rows, replay rejected, audit lineage verified, governance payload private, 9 parity scenarios)`.
+Selection, ‏Rationale, ‏Actor ונתוני Profile לא נחשפו ב־Manifest או Evidence.
+
+4.59.4 נמצאו שני פערי Hardening קיימים ב־D1: ‏Subscription Event בעל קפיצת
+Version מתקבל ב־SQL ישיר, ו־Subscription/Production Decision events אינם
+מוגנים שם מ־Update/Delete. ה־Repositories אינם מציעים פעולות כאלה,
+ה־Migration verifier דוחה Ledger לא רציף, ו־PostgreSQL חוסם Mutation. הפערים
+מתועדים ואינם מסומנים כ־Parity.
+
+4.59.5 ‏43 מתוך 51 טבלאות הוכחו כעת ב־Data migration ו־Parity. נותרו 8
+טבלאות ב־Slice האחרון — WhatsApp Delivery Policy — בהערכת **10–24 שעות
+פיתוח ואימות נטו**, בנוסף ל־Export חי, ‏Staging, ‏Load/Recovery ו־Cutover.
+
+4.59.6 שער השחרור המקומי המלא עבר לאחר השלמת ה־Slice. ‏Source guard סרק
+555 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,143 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,089
+הבדיקות** עברו יחד ללא כשל או Skip.

@@ -27,11 +27,11 @@
 | 6 | `conversations-messages` | 2 | Core, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
 | 7 | `bot-runtime` | 3 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
 | 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
-| 9 | `governance-billing` | 5 | `core` | הבא לביצוע | 5–12 שעות |
-| 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | מתוכנן | 10–24 שעות |
+| 9 | `governance-billing` | 5 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
+| 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | הבא לביצוע | 10–24 שעות |
 
-2.1 נותרו 13 טבלאות לאחר שמונת ה־Slices שהושלמו. האומדן הכולל ל־Data
-migration ו־Parity המקומיים הוא **15–36 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
+2.1 נותרו 8 טבלאות לאחר תשעת ה־Slices שהושלמו. האומדן הכולל ל־Data
+migration ו־Parity המקומיים הוא **10–24 שעות פיתוח ואימות נטו**. הוא אינו כולל Export חי,
 Accounts, המתנה לספקים, Staging, Load/Recovery או Cutover.
 
 ## 3. Slice שהושלם — Tenant Access
@@ -162,21 +162,37 @@ Counts ו־HMAC digests לכל טבלה. לפני Commit נבדקו Projection �
 Manifest או ב־Evidence. פרטי הראיה נמצאים ב־
 `docs/postgresql-ai-knowledge-runtime-data-migration-rehearsal.md`.
 
-## 10. Slice הבא — Governance & Billing
+## 10. Slice שהושלם — Governance & Billing
 
 10.1 חמש הטבלאות הן Subscription והיסטוריית האירועים שלו, Production
 decision records/events ו־Business profile admin events. ה־Slice תלוי רק
 ב־Core שכבר עבר Rehearsal.
 
-## 11. תנאי בטיחות
+10.2 ה־Rehearsal העביר שבע רשומות, חסם Replay והשווה Counts ו־HMAC digests.
+לפני Commit נבדקו Projection ורצף גרסאות של Subscription, התאמת ההחלטה
+לאירוע האחרון, Registry של Check IDs וקישור אירועי Subscription/Admin אל
+ה־Audit המקורי שכבר הועבר ב־Core.
 
-11.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
+10.3 תשעה תרחישי Semantic parity כיסו הארכת מנוי, השעיה, שינוי החלטת
+Production, עדכון Profile בידי Admin, כפילויות, Version gaps ו־constraints
+בלתי־משתנים. פרטי הראיה והפערים הקיימים ב־D1 מתועדים ב־
+`docs/postgresql-governance-billing-data-migration-rehearsal.md`.
+
+## 11. Slice הבא — WhatsApp Delivery Policy
+
+11.1 שמונה הטבלאות כוללות Provider links, ‏Delivery-policy evidence,
+Reservations, ‏Pair/Portfolio state, ‏Settlements ו־Provider cooldowns.
+ה־Slice תלוי ב־Core, ‏Meta וב־Templates/Campaigns שכבר עברו Rehearsal.
+
+## 12. תנאי בטיחות
+
+12.1 ה־Registry אינו מעביר נתונים בעצמו. סטטוס `rehearsed` ניתן רק לאחר
 הרצת PostgreSQL אמיתית ו־Semantic parity מתועד.
 
-11.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
+12.2 אין להרחיב את ה־Core plan בשקט. לכל Slice יהיו Version, Plan ID,
 Manifest ו־Evidence משלו, כדי ש־Replay או החלפת Payload ייכשלו סגור.
 
-11.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
+12.3 אין לטעון Secrets גולמיים. ב־Meta slice יועברו רק Envelopes מוצפנים
 שכבר עומדים בחוזה היעד.
 
-11.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.
+12.4 אין להריץ את המנגנון על מסד יעד שאינו ריק ואין לבצע Merge אוטומטי.
