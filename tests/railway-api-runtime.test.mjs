@@ -46,6 +46,7 @@ function fixture(selectedRole = "owner") {
     mutationCommands: [],
     systemAdminMutationSubjects: [],
     systemAdminProfileInputs: [],
+    systemAdminSubscriptionInputs: [],
   };
   const handler = createRailwayApiRuntime({
     environment,
@@ -167,6 +168,84 @@ function fixture(selectedRole = "owner") {
           };
         },
       },
+      subscriptions: {
+        async create(input) {
+          calls.systemAdminSubscriptionInputs.push({
+            operation: "create",
+            input,
+          });
+          return {
+            outcome: "created",
+            subscription: {
+              tenantId: input.tenantId,
+              status: input.status,
+              startsAt: input.startsAt,
+              endsAt: input.endsAt,
+              cancelledAt: null,
+              version: 1,
+              createdAt: input.occurredAt,
+              updatedAt: input.occurredAt,
+            },
+          };
+        },
+        async extend(input) {
+          calls.systemAdminSubscriptionInputs.push({
+            operation: "extend",
+            input,
+          });
+          return {
+            outcome: "updated",
+            subscription: {
+              tenantId: input.tenantId,
+              status: "active",
+              startsAt: "2026-08-01T00:00:00.000Z",
+              endsAt: input.newEndsAt,
+              cancelledAt: null,
+              version: input.expectedVersion + 1,
+              createdAt: "2026-08-01T00:00:00.000Z",
+              updatedAt: input.occurredAt,
+            },
+          };
+        },
+        async changeStatus(input) {
+          calls.systemAdminSubscriptionInputs.push({
+            operation: "changeStatus",
+            input,
+          });
+          return {
+            outcome: "updated",
+            subscription: {
+              tenantId: input.tenantId,
+              status: input.status,
+              startsAt: "2026-08-01T00:00:00.000Z",
+              endsAt: "2026-10-01T00:00:00.000Z",
+              cancelledAt: null,
+              version: input.expectedVersion + 1,
+              createdAt: "2026-08-01T00:00:00.000Z",
+              updatedAt: input.occurredAt,
+            },
+          };
+        },
+        async cancel(input) {
+          calls.systemAdminSubscriptionInputs.push({
+            operation: "cancel",
+            input,
+          });
+          return {
+            outcome: "updated",
+            subscription: {
+              tenantId: input.tenantId,
+              status: "cancelled",
+              startsAt: "2026-08-01T00:00:00.000Z",
+              endsAt: "2026-10-01T00:00:00.000Z",
+              cancelledAt: input.occurredAt,
+              version: input.expectedVersion + 1,
+              createdAt: "2026-08-01T00:00:00.000Z",
+              updatedAt: input.occurredAt,
+            },
+          };
+        },
+      },
     },
   });
 
@@ -236,6 +315,47 @@ test("runs a system-admin profile mutation without resolving tenant membership",
   assert.equal(testFixture.calls.systemAdminProfileInputs.length, 1);
   assert.equal(
     testFixture.calls.systemAdminProfileInputs[0].tenantId,
+    19,
+  );
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /tenantId|externalUserId|verified-user/,
+  );
+});
+
+test("runs a system-admin subscription mutation without resolving tenant membership", async () => {
+  const testFixture = fixture("agent");
+  const operationId = "system-admin.subscription.cancel";
+  const adminPayload = {
+    targetTenantId: 19,
+    expectedVersion: 2,
+  };
+  const adminIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      operationId,
+      adminPayload,
+    );
+  const response = await testFixture.handler.handle(
+    request(
+      operationId,
+      adminPayload,
+      "mutation",
+      adminIdempotencyKey,
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.outcome, "updated");
+  assert.equal(body.data.subscription.status, "cancelled");
+  assert.equal(testFixture.calls.memberships, 0);
+  assert.deepEqual(
+    testFixture.calls.systemAdminMutationSubjects,
+    [`verified-user:${operationId}`],
+  );
+  assert.equal(testFixture.calls.systemAdminSubscriptionInputs.length, 1);
+  assert.equal(
+    testFixture.calls.systemAdminSubscriptionInputs[0].input.tenantId,
     19,
   );
   assert.doesNotMatch(

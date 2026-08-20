@@ -120,7 +120,7 @@ test("declares tenant and webhook rate limit bindings only on the server", async
   );
 });
 
-test("uses a mutation session for subscription writes and a regular session for admin reads", async () => {
+test("uses the Railway server identity for subscription writes and a regular session for admin reads", async () => {
   const mutationSource = await readServerSource(
     "billing/systemAdminSubscriptionActions.ts",
   );
@@ -130,11 +130,11 @@ test("uses a mutation session for subscription writes and a regular session for 
 
   assert.match(
     mutationSource,
-    /requireCurrentSystemAdminMutationSession/,
+    /resolveCurrentRailwayApiServerIdentity/,
   );
   assert.doesNotMatch(
     mutationSource,
-    /requireCurrentSystemAdminSession/,
+    /requireCurrentSystemAdminSession|requireCurrentSystemAdminMutationSession|requireRuntimeDatabase/,
   );
   assert.match(
     readSource,

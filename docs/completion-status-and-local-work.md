@@ -2071,3 +2071,28 @@ Skip או Todo. בדיקות היעד עברו `39/39`, ולאחר עדכון ר
 ו־35 Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק
 1,172 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
 התקנת `@vercel/oidc@3.8.4` דיווחה על אפס חולשות ו־`git diff --check` עבר.
+
+4.69 ארבע פעולות React/Vercel לניהול System Admin Tenant Subscription
+הועברו מקומית מ־D1 ל־Railway API ללא Fallback: יצירה, הארכה, שינוי סטטוס
+וביטול. כל פעולה משתמשת ב־Operation ID וב־Payload מצומצמים משלה, ומפתח
+Idempotency נגזר מה־Operation ומהתוכן הקנוני. ה־Server Action הפעיל אינו
+מייבא עוד Runtime D1, ‏D1 Repository או Cloudflare mutation session.
+
+4.69.1 ‏Railway מאמת Vercel OIDC ו־Clerk session, דורש System Admin
+Allowlist, צורך מכסת `system-admin-mutation` עם Operation ID ב־Subject ורק
+אז קורא ל־PostgreSQL Repository. ה־Repository נועל את הרשומה, בודק Version,
+מסנכרן Tenant status וכותב Subscription event בלתי־משתנה באותה Transaction.
+Actor ו־timestamp נגזרים בצד השרת ואינם מתקבלים מ־Vercel.
+
+4.69.2 תגובת Railway אינה כוללת Tenant ID או Audit identity. ה־BFF מאמת
+Status, ‏Window, ‏Cancellation timestamp, ‏Version והתאמה לפעולה לפני החזרת
+`saved` ל־React. נוסף לחוזה קוד `INVALID_TRANSITION` שמוחזר כ־`409` ונשמר
+כסטטוס UI נפרד. ארבעת ה־Operations אינם עוברים דרך Tenant membership
+resolver, ותלויות Runtime מוקרנות בנפרד כדי לחסום Options מורחבים.
+
+4.69.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,170 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `90/90`. ‏Source guard סרק 568 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,179
+קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+`git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, ‏Allowlist ו־Policy חיים,
+פריסת Railway/Vercel וראיית Staging; לכן אין עדיין טענת Production cutover.

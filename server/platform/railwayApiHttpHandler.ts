@@ -93,6 +93,7 @@ export type RailwayApiDispatchFailureCode =
   | "AUTHORIZATION_DENIED"
   | "NOT_FOUND"
   | "CONFLICT"
+  | "INVALID_TRANSITION"
   | "RATE_LIMITED"
   | "DEPENDENCY_UNAVAILABLE";
 
@@ -101,6 +102,7 @@ const railwayApiDispatchFailureCodes = [
   "AUTHORIZATION_DENIED",
   "NOT_FOUND",
   "CONFLICT",
+  "INVALID_TRANSITION",
   "RATE_LIMITED",
   "DEPENDENCY_UNAVAILABLE",
 ] as const satisfies readonly RailwayApiDispatchFailureCode[];
@@ -279,6 +281,7 @@ function dispatchFailureStatus(
     case "NOT_FOUND":
       return 404;
     case "CONFLICT":
+    case "INVALID_TRANSITION":
       return 409;
     case "RATE_LIMITED":
       return 429;

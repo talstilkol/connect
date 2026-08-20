@@ -341,6 +341,7 @@ test("maps only approved operation failure codes", async (context) => {
     ["AUTHORIZATION_DENIED", 403],
     ["NOT_FOUND", 404],
     ["CONFLICT", 409],
+    ["INVALID_TRANSITION", 409],
     ["RATE_LIMITED", 429],
     ["DEPENDENCY_UNAVAILABLE", 503],
   ];

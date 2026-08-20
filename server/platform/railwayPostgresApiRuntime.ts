@@ -216,6 +216,8 @@ export async function createRailwayPostgresApiRuntime(
               ),
               businessProfiles:
                 foundation.systemAdminBusinessProfiles,
+              subscriptions:
+                foundation.subscriptions,
             },
           }),
       maximumBodyBytes: options.maximumBodyBytes,

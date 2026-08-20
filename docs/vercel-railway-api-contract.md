@@ -524,6 +524,17 @@ Version ו־timestamps לפני עדכון React state. קלט מורחב, Origi
 Identity חסרה, Response לא תואמת או Network failure נכשלים סגור. עדיין
 נדרשים `RAILWAY_API_ORIGIN` חי, הגדרת OIDC ב־Vercel וראיית Staging אמיתית.
 
+7.1.59 ארבע פעולות System Admin לניהול Tenant Subscription הועברו מקומית
+מ־D1 ל־Railway API ללא Fallback: יצירה, הארכה, שינוי סטטוס וביטול. לכל
+פעולה Operation ID נפרד, Payload מדויק ומפתח Idempotency דטרמיניסטי; כולן
+משתמשות באותו Allowlist וב־Policy `system-admin-mutation`, אך כל Subject
+כולל את ה־Operation ID ולכן נשאר ניתן למדידה. Railway מעביר ל־PostgreSQL רק
+Target מפורש ושדות פעולה, וגוזר Actor וזמן בצד השרת. ה־BFF מאמת שוב Status,
+Window, ‏Version, ‏Cancellation timestamp והתאמה לפעולה לפני עדכון ה־UI.
+החוזה כולל כעת `INVALID_TRANSITION` ככשל `409` נפרד, כדי לא לערבב מעבר מצב
+עסקי אסור עם Payload לא חוקי. המימוש עדיין דורש Origin, ‏OIDC, ‏Allowlist,
+Rate-limit policy וראיית Staging חיים לפני Cutover.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

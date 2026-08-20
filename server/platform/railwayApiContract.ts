@@ -19,6 +19,7 @@ export const railwayApiFailureCodes = [
   "AUTHORIZATION_DENIED",
   "NOT_FOUND",
   "CONFLICT",
+  "INVALID_TRANSITION",
   "RATE_LIMITED",
   "DEPENDENCY_UNAVAILABLE",
   "SERVER_ERROR",
