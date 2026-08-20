@@ -312,6 +312,28 @@ test("runs a full development audit only against the official registry", () => {
   );
 });
 
+test("reports an npm registry failure separately from an unapproved advisory", () => {
+  assert.throws(
+    () =>
+      runDevelopmentDependencyAudit(() => ({
+        status: 1,
+        signal: null,
+        stdout: JSON.stringify({
+          message:
+            "request to the audit endpoint failed",
+          error: {
+            summary: "",
+            detail: "",
+          },
+        }),
+      })),
+    {
+      message:
+        "DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILED",
+    },
+  );
+});
+
 test("runs the development audit before production evidence in GitHub CI", async () => {
   const workflow = await readFile(
     new URL(

@@ -261,3 +261,41 @@ Invitation, ‏API, ‏TRPC ו־Clerk. בדיקת Boundary חדשה דורשת �
 `drizzle-kit check` ויצירת Migration מבודדת מה־Schema האמיתי, ומאמת
 SQL ו־Journal לפני מחיקת התוצר הזמני. בכך ה־Risk acceptance הקודם
 בוטל והוחלף בתיקון עם בדיקת תאימות בפועל.
+
+## 10. אימות חוזר של Dependabot — 2026-08-20
+
+10.1 מסך Dependabot המאומת מציג עדיין שלוש התראות פתוחות ב־`main`:
+
+10.1.1 ‏#3, ‏High: ‏`image-size <= 2.0.2`, ‏ICNS parser DoS,
+`CVE-2025-71330` / `GHSA-w3rx-r6r6-pgpr`. ‏GitHub אינו מציג גרסה
+מתוקנת.
+
+10.1.2 ‏#2, ‏High: ‏`image-size <= 2.0.2`, ‏JXL/HEIF parser DoS,
+`CVE-2025-71329` / `GHSA-5p2g-fcmc-qvqq`. ‏GitHub אינו מציג גרסה
+מתוקנת.
+
+10.1.3 ‏#1, ‏Moderate: ‏`esbuild <= 0.24.2`, ‏Development server
+CORS, ‏`GHSA-67mh-4wv8-2f99`. הגרסה המתוקנת הראשונה היא `0.25.0`.
+
+10.2 ההבדל בין הענפים אומת מחדש: `origin/main` עדיין נועל
+`image-size@2.0.2` ו־`esbuild@0.18.20`, ואילו ענף העבודה אינו מכיל
+`image-size` כלל ומכיל רק `esbuild@0.25.12` ו־`0.28.1`. לכן אין
+לסגור או לדחות את ההתראות; הן ייסגרו רק לאחר שהתיקון יגיע לענף ברירת
+המחדל.
+
+10.3 ‏Draft PR #2 פתוח ו־Mergeable מול `main`, אך גדל ל־151 Commits
+ו־578 קבצים. ה־Head המאומת הוא `2515ec991b4ddc1c89466bee58cf1f047aaa95d1`.
+ה־PR אינו מוכן למיזוג ללא Review ואסטרטגיית Merge מפורשת.
+
+10.4 שני Workflow runs עבור אותו Head נכשלו בלי להתחיל אף Step, ולא
+נוצרו עבורם Logs זמינים. לכן הכשל אינו ראיה לכשל Build או Audit, אך גם
+אינו מספק CI Evidence תקף.
+
+10.5 רענון `npm audit` מקומי לא הושלם משום שהסביבה לא הצליחה להגיע ל־
+npm Registry. שער הפיתוח נשאר Fail-closed, אך כשל Registry מדווח מעתה
+כ־`DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILED` במקום להיראות בטעות
+כ־Advisory חדש.
+
+10.6 האימות שאינו תלוי ברשת עבר: Build, ‏TypeScript, ‏ESLint, ‏Dependency
+Lock, ‏Source Guard, ‏Secret Hygiene וכל 2,116 הבדיקות. אין לפרש תוצאה זו
+כתחליף ל־Audit חי ומאושר מול ה־Registry.

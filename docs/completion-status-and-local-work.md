@@ -1958,3 +1958,19 @@ Confirmation או מבנה ה־Digest אינם תקינים. לאחר הקריא
 559 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,167 קבצים והיסטוריית
 Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,115
 הבדיקות** עברו יחד ללא כשל או Skip.
+
+4.64 בדיקת Dependabot חוזרת הוכיחה ששלוש ההתראות הפתוחות שייכות עדיין
+ל־`main` הישן, ולא לגרף הנעול בענף העבודה: שתי התראות High של
+`image-size@2.0.2` והתראת Moderate של `esbuild@0.18.20`.
+
+4.64.1 בענף העבודה `image-size` אינו קיים ועותקי esbuild הם `0.25.12`
+ו־`0.28.1`. ההתראות יישארו פתוחות עד שהשינויים יגיעו לענף ברירת המחדל;
+אין לדחות אותן ידנית.
+
+4.64.2 תוקן פער אבחוני בשער ה־Development dependency audit: שגיאת npm
+Registry נחסמת כעת בקוד `DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILED`
+ואינה מסווגת בטעות כ־Advisory לא מאושר. בדיקה שלילית מקבעת את ההבחנה.
+
+4.64.3 Build, ‏TypeScript, ‏ESLint, ‏Dependency Lock, ‏Source Guard,
+‏Secret Hygiene וכל **2,116 הבדיקות** עברו. Audit חי לא רוענן משום
+שהחיבור ל־npm Registry לא היה זמין; הוא נשאר תנאי חיצוני Fail-closed.

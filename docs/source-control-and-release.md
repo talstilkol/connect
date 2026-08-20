@@ -461,6 +461,11 @@ Browser Attestation ולפני Production Readiness.
 התוצרים. כך נבדקות בפועל גם קריאת ה־Config, טרנספורמציית TypeScript,
 טעינת ה־Schema ויצירת Migration לפני הפקת Evidence החתום.
 
+11.12.1 גם כשל Registry חוסם את השער, אך מוחזר כ־
+`DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILED` ולא כ־Advisory לא
+מאושר. ההפרדה אינה מרככת את מדיניות Fail-closed; היא מונעת מהמפעיל
+לטפל בתקלה ברשת כאילו התגלתה פגיעות חדשה.
+
 11.13 ‏Dependabot version updates מוגדרים ב־`.github/dependabot.yml`
 ל־npm בכל יום שני ול־GitHub Actions בכל יום שלישי, בשעה 06:00 לפי
 `Asia/Jerusalem`. עדכוני Minor/Patch מקובצים בנפרד עבור תלויות

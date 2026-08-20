@@ -266,9 +266,21 @@ export function runDevelopmentDependencyAudit(
     );
   }
 
-  return parseDevelopmentDependencyAuditOutput(
+  const report = parseDevelopmentDependencyAuditOutput(
     result.stdout,
   );
+
+  if (
+    isRecord(report.error) ||
+    (typeof report.message === "string" &&
+      report.auditReportVersion === undefined)
+  ) {
+    throw new Error(
+      "DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILED",
+    );
+  }
+
+  return report;
 }
 
 async function runCli() {
