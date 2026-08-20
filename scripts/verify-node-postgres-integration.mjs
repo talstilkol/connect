@@ -20,12 +20,11 @@ import {
   createNodePostgresTransactionManager,
 } from "../server/platform/nodePostgresAdapter.ts";
 import {
-  createPostgresFullDataMigrationBundlePlan,
-  executePostgresFullDataMigrationBundle,
-} from "../server/platform/postgresFullDataMigrationBundle.ts";
-import {
-  PostgresDataMigrationBundleError,
-} from "../server/platform/postgresDataMigrationBundleProtocol.ts";
+  POSTGRES_FULL_DATA_MIGRATION_CONFIRMATION,
+  PostgresFullDataMigrationCutoverError,
+  createPostgresFullDataMigrationCutoverPreflight,
+  executePostgresFullDataMigrationCutover,
+} from "../server/platform/postgresFullDataMigrationCutover.ts";
 import {
   readD1FullDataMigrationSnapshot,
 } from "./read-d1-full-data-migration-snapshot.mjs";
@@ -189,7 +188,6 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
   const sourceDatabase = new DatabaseSync(":memory:");
   const evidenceHmacKey = Buffer.alloc(32, 29).toString("base64");
   const createdAt = "2026-08-17T07:00:00.000Z";
-  const expiresAt = "2026-08-17T07:15:00.000Z";
   const now = "2026-08-17T07:05:00.000Z";
   try {
     sourceDatabase.exec("PRAGMA foreign_keys = ON");
@@ -202,17 +200,20 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
       );
     }
     const source = readD1FullDataMigrationSnapshot(sourceDatabase);
-    const plan = createPostgresFullDataMigrationBundlePlan({
+    const preflight = createPostgresFullDataMigrationCutoverPreflight({
       snapshots: source.slices,
-      createdAt,
-      expiresAt,
+      startedAt: createdAt,
       evidenceHmacKey,
     });
-    const evidence = await executePostgresFullDataMigrationBundle({
-      plan,
+    assert.equal(preflight.expiresAt, "2026-08-17T07:10:00.000Z");
+    const evidence = await executePostgresFullDataMigrationCutover({
+      snapshots: source.slices,
+      startedAt: now,
       transactions,
       evidenceHmacKey,
-      now,
+      approvedSourceDigest: preflight.sourceDigest,
+      confirmation: POSTGRES_FULL_DATA_MIGRATION_CONFIRMATION,
+      targetEnvironment: "staging",
     });
     assert.equal(evidence.sliceCount, 10);
     assert.equal(evidence.tableCount, 51);
@@ -220,14 +221,17 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
     assert.match(evidence.evidenceDigest, /^hmac_sha256_v1_[0-9a-f]{64}$/);
 
     await assert.rejects(
-      executePostgresFullDataMigrationBundle({
-        plan,
+      executePostgresFullDataMigrationCutover({
+        snapshots: source.slices,
+        startedAt: now,
         transactions,
         evidenceHmacKey,
-        now,
+        approvedSourceDigest: preflight.sourceDigest,
+        confirmation: POSTGRES_FULL_DATA_MIGRATION_CONFIRMATION,
+        targetEnvironment: "staging",
       }),
-      (error) => error instanceof PostgresDataMigrationBundleError &&
-        error.code === "bundle-replayed",
+      (error) => error instanceof PostgresFullDataMigrationCutoverError &&
+        error.code === "target-already-cut-over",
     );
     const receipt = await pool.query(
       `SELECT
@@ -241,8 +245,8 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
       [],
     );
     assert.equal(receipt.rowCount, 1);
-    assert.equal(receipt.rows[0]?.bundleId, plan.bundleId);
-    assert.equal(receipt.rows[0]?.sourceDigest, plan.sourceDigest);
+    assert.equal(receipt.rows[0]?.bundleId, evidence.bundleId);
+    assert.equal(receipt.rows[0]?.sourceDigest, preflight.sourceDigest);
     assert.equal(receipt.rows[0]?.evidenceDigest, evidence.evidenceDigest);
     assert.equal(receipt.rows[0]?.sliceCount, 10);
     assert.equal(receipt.rows[0]?.tableCount, 51);

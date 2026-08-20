@@ -65,7 +65,7 @@ export function requireD1FullDataMigrationSourcePath(value) {
   return inspectSource(value).path;
 }
 
-export function verifyD1FullDataMigrationSnapshot(sourcePath) {
+export function readVerifiedD1FullDataMigrationSnapshot(sourcePath) {
   const source = inspectSource(sourcePath);
   let database;
   try {
@@ -92,6 +92,11 @@ export function verifyD1FullDataMigrationSnapshot(sourcePath) {
   ) {
     throw new D1FullDataMigrationSourceError("source-changed");
   }
+  return snapshot;
+}
+
+export function verifyD1FullDataMigrationSnapshot(sourcePath) {
+  const snapshot = readVerifiedD1FullDataMigrationSnapshot(sourcePath);
   return Object.freeze({
     sliceCount: snapshot.slices.length,
     tableCount: snapshot.tableCount,

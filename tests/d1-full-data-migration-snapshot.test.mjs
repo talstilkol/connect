@@ -28,6 +28,7 @@ import {
 } from "../scripts/read-d1-full-data-migration-snapshot.mjs";
 import {
   D1FullDataMigrationSourceError,
+  readVerifiedD1FullDataMigrationSnapshot,
   requireD1FullDataMigrationSourcePath,
   verifyD1FullDataMigrationSnapshot,
 } from "../scripts/verify-d1-full-data-migration-snapshot.mjs";
@@ -208,6 +209,10 @@ test("verifies one immutable SQLite export without exposing its path", () => {
       tableCount: 51,
       totalRowCount: 0,
     });
+    const snapshot = readVerifiedD1FullDataMigrationSnapshot(sourcePath);
+    assert.equal(snapshot.slices.length, 10);
+    assert.equal(snapshot.tableCount, 51);
+    assert.equal(snapshot.totalRowCount, 0);
     const after = lstatSync(sourcePath);
     assert.equal(after.size, before.size);
     assert.equal(after.mtimeMs, before.mtimeMs);

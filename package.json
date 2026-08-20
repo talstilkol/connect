@@ -31,6 +31,7 @@
     "verify:postgres-governance-billing-data-migration": "node scripts/verify-postgres-governance-billing-data-migration.mjs",
     "verify:postgres-whatsapp-delivery-policy-data-migration": "node scripts/verify-postgres-whatsapp-delivery-policy-data-migration.mjs",
     "verify:d1-full-migration-snapshot": "node scripts/verify-d1-full-data-migration-snapshot.mjs",
+    "cutover:postgres-full": "node scripts/run-postgres-full-data-migration-cutover.mjs",
     "verify:postgres-core-semantic-parity": "node scripts/verify-postgres-core-semantic-parity.mjs",
     "verify:railway-api-startup": "node scripts/verify-railway-api-startup.mjs",
     "verify:release-gate:local": "node scripts/verify-release-gate.mjs --local",

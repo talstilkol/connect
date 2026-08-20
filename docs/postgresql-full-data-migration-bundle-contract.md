@@ -103,11 +103,16 @@ Transaction נוסף. רק ה־Transaction manager החיצוני רשאי לב�
 
 ## 7. מה עדיין חסר
 
-7.1 נדרשת חזרה בסביבה מבוקרת עם Export מורשה ומלא, PostgreSQL Staging ריק,
-HMAC key זמני המנוהל כ־Secret, ניטור משאבים ו־Rollback תפעולי.
+7.1 כלי Cutover דו־שלבי קיים כעת ומחייב Preflight, אישור `sourceDigest`
+ו־Confirmation מפורש לפני פתיחת Transaction. עדיין נדרשת הפעלתו בסביבה
+מבוקרת עם Export מורשה ומלא, PostgreSQL Staging ריק, HMAC key זמני המנוהל
+כ־Secret, ניטור משאבים ו־Rollback תפעולי.
 
 7.2 אין להעביר לוגים, Plans או Evidence המכילים Payload של המקור. ראיית
 השחרור החיצונית תכיל רק IDs, ‏Digests, Counts ותוצאות מאושרות.
 
 7.3 ה־Bundle המקומי אינו הופך את יכולת Database ל־Production Ready. בחירת
 ספק PostgreSQL, ערכי Pool חיים ו־Staging evidence עדיין פתוחים.
+
+7.4 הוראות ההפעלה והכשל מתועדות ב־
+`docs/postgresql-full-data-migration-cutover-runbook.md`.

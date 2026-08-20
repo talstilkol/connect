@@ -84,8 +84,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /0024_whatsapp_legacy_reservation_category\.sql/);
   assert.match(source, /0025_data_migration_bundle_receipts\.sql/);
   assert.match(source, /verifyFullDataMigrationBundle/);
-  assert.match(source, /executePostgresFullDataMigrationBundle/);
-  assert.match(source, /bundle-replayed/);
+  assert.match(source, /executePostgresFullDataMigrationCutover/);
+  assert.match(source, /target-already-cut-over/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);

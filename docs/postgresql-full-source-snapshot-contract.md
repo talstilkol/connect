@@ -76,11 +76,14 @@ D1 full migration source snapshot: PASS (10 slices, 51 tables, <row-count> rows)
 
 1. Export חי ועקבי שנוצר באמצעות כלי Cloudflare מאושר.
 2. HMAC key זמני ומוגן ליצירת Plans קצרי־תוקף.
-3. PostgreSQL Staging ריק עם 25 המיגרציות המדויקות.
-4. הפעלת ה־Bundle הקיים על הנתונים המורשים ואימות ראיות מאוחד.
+3. PostgreSQL Staging ריק עם 26 המיגרציות המדויקות.
+4. הפעלת כלי ה־Cutover הדו־שלבי על הנתונים המורשים ואימות ראיות מאוחד.
 5. Load/Recovery rehearsal, ‏Rollback וחיסול מאובטח של Export ו־Plans.
 
 5.2 אין לסמן את יכולת Database כ־Ready על בסיס בדיקת Source זו בלבד.
 
 5.3 חוזה ה־Bundle האטומי, ה־Receipt והחזרה הריקה מול PostgreSQL מתועדים
 ב־`docs/postgresql-full-data-migration-bundle-contract.md`.
+
+5.4 ה־Operator flow, האישור הכפול והגדרות ההרצה מתועדים ב־
+`docs/postgresql-full-data-migration-cutover-runbook.md`.

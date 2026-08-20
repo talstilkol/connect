@@ -1932,3 +1932,29 @@ Source ריק אינו יכול להיטען שוב באמצעות Plan חדש. 
 4.62.5 החזרה המלאה עדיין אינה ראיית Staging: היא השתמשה ב־D1 schema אמיתי
 ללא שורות לקוח. עדיין נדרשים Export מורשה, ספק PostgreSQL וערכי Pool חיים,
 הרצת אותו Bundle בסביבה מבוקרת, ‏Load/Recovery ו־Evidence חתום לשחרור.
+
+4.63 ‏PostgreSQL Full Data Migration Cutover runner הושלם מקומית. הוא
+מפריד בין `preflight` ללא כתיבה לבין `execute`, ומחזיר בשני השלבים רק DTO
+מצומצם ללא Payload, נתיב מקור, Database URL או HMAC key.
+
+4.63.1 ‏Preflight קורא Export מוגן דרך אותו Full-source verifier ויוצר
+`sourceDigest` יציב וחלון Plan של עשר דקות. ה־Plan ו־51 טבלאות המקור נשארים
+בזיכרון בלבד ואינם נכתבים ל־stdout או לקובץ.
+
+4.63.2 ‏Execute נכשל לפני קריאת המקור כאשר Environment, ‏TLS/Pool,
+Confirmation או מבנה ה־Digest אינם תקינים. לאחר הקריאה הוא מחשב מחדש את
+ה־Source HMAC ודורש התאמה בזמן קבוע ל־Digest שאושר ב־Preflight. רק
+`staging` או `production` מותרים ואין ברירת מחדל למפתח או לאישור.
+
+4.63.3 חזרה נקייה מול PostgreSQL 16.13 אמיתי עברה דרך שכבת ה־Cutover עם
+כל 26 ה־Migrations, עשרה Slices, ‏51 טבלאות, Receipt יחיד ודחיית ניסיון
+שני כ־`target-already-cut-over`. כל 58 תרחישי ה־Concurrency עברו.
+
+4.63.4 נותרו לפני ראיית Staging: Export מורשה עם נתונים, ספק וערכי Pool
+חיים, Approval תפעולי, ‏Load/Recovery, ‏Backup/Restore, חלון Cutover
+ו־Rollback חתום. הכלי אינו מסמן אף אחד מהם כ־Ready.
+
+4.63.5 שער השחרור המקומי המלא עבר לאחר הוספת ה־Runner. ‏Source guard סרק
+559 קבצים ו־35 גרפי Client, ‏Secret hygiene סרק 1,167 קבצים והיסטוריית
+Git, ו־Build, ‏TypeScript, ‏ESLint, חוזי D1/PostgreSQL וכל **2,115
+הבדיקות** עברו יחד ללא כשל או Skip.
