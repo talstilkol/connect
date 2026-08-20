@@ -1,0 +1,23 @@
+{
+  "version": "RC-006",
+  "date": "2026-08-20",
+  "pin_sha": "5cb6a0fc8e021ec4250e0f4652603cfd3369a61d",
+  "branch": "main",
+  "package_version": "0.1.0",
+  "terminal": "REHEARSAL_CERT_CANDIDATE",
+  "not": "PRODUCTION_COMPLETE",
+  "pass_executed": 0,
+  "packs": [
+    {"id":"PCERT-01","title":"Release identity","status":"NOT_RUN","scope":"narrow"},
+    {"id":"PCERT-02","title":"Test proof","status":"NOT_RUN","scope":"narrow"},
+    {"id":"PCERT-03","title":"Security / supply chain","status":"NOT_RUN","scope":"production"},
+    {"id":"PCERT-04","title":"Backup / restore","status":"PASS_NOT_APPLICABLE","scope":"narrow"},
+    {"id":"PCERT-05","title":"Reliability / fail-closed","status":"NOT_RUN","scope":"narrow"},
+    {"id":"PCERT-06","title":"Performance","status":"PASS_NOT_APPLICABLE","scope":"narrow"},
+    {"id":"PCERT-07","title":"Deploy / rollback","status":"BLOCKED_EXTERNAL","scope":"production"},
+    {"id":"PCERT-08","title":"Operations","status":"PASS_NOT_APPLICABLE","scope":"narrow"},
+    {"id":"PCERT-09","title":"Compliance / commerce","status":"BLOCKED_EXTERNAL","scope":"production"},
+    {"id":"PCERT-10","title":"Evidence close on same SHA","status":"NOT_RUN","scope":"narrow"},
+    {"id":"AIC","title":"AI certification","status":"PASS_NOT_APPLICABLE","scope":"narrow"}
+  ]
+}
