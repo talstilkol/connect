@@ -594,9 +594,21 @@ Conflict; תפקידו היחיד הוא להבדיל בין פעולה חדשה
 Tenant/Permission, ‏Rate limit, קבלת Receipt אטומית, השוואת Request digest,
 Contact upsert, ‏Audit בלתי־משתנה ושמירת Replay response באותה Transaction.
 ה־BFF מאמת תגובה בעלת מפתחות מדויקים, Replay flag בוליאני ו־Contact קנוני
-התואם לפרופיל שנשלח לפני עדכון React. פעולות Consent ו־Tags/Lists עדיין
-נשארות במסלול Mutation נפרד. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC,
+התואם לפרופיל שנשלח לפני עדכון React. פעולות Tags/Lists עדיין נשארות
+במסלול Mutation נפרד. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC,
 Clerk, ‏PostgreSQL וראיית Staging חיים לפני Cutover.
+
+7.1.65 פעולות תיעוד Consent ו־Unsubscribe הועברו מקומית מ־D1 לשתי
+Operations נפרדות: `contacts.consent.grant` ו־
+`contacts.consent.unsubscribe`. ה־Payload כולל רק Contact ID חיובי ו־Evidence
+מנורמל; Tenant ו־Actor נגזרים ב־Railway. כל בקשה דורשת הרשאת
+`contacts.write`, מפתח Idempotency המחושב מחדש לפני צריכת מכסה ו־Rate limit
+משותף. בניגוד ל־`contacts.save`, ה־Replay נשען על Domain event דטרמיניסטי
+ובלתי־משתנה שנשמר יחד עם הקרנת מצב ה־Contact באותה PostgreSQL Transaction;
+החוזה אינו טוען ל־Request receipt שאינו קיים. ה־BFF מקבל רק Contact קנוני
+באותו ID, מסיר Tenant, ‏Actor, ‏Evidence reference וזמני Database, ואין
+Fallback ל־D1. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC, Clerk, ‏PostgreSQL
+וראיית Staging חיים לפני Cutover.
 
 7.2 עדיין חסר:
 
@@ -607,8 +619,9 @@ Clerk, ‏PostgreSQL וראיית Staging חיים לפני Cutover.
 Production ו־Preview origins המאושרים.
 
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
-`contacts.save` כבר קיים חוזה Idempotency, ‏Rate limiting, ‏Audit
-ו־Transaction, ‏Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
+`contacts.save` ופעולות Consent כבר כוללים Idempotency, ‏Rate limiting,
+Audit ו־Transaction לפי מנגנון ה־Persistence המתאים לכל אחד; לשמירת Contact
+קיימים גם Executor ספק־נייטרלי ו־Node driver adapter. עדיין חסרים
 ערכי Production pool ו־Rate-limit policy מאושרים, תצורת Railway Service חיה,
 ‏Data migration ו־Semantic parity מקומיים הושלמו לכל 51 הטבלאות. עדיין
 קיים גם Full-source preflight אטומי ל־Export SQLite במצב Read-only. עדיין

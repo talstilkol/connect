@@ -2,6 +2,9 @@ import {
   createRateLimitGuard,
 } from "../security/rateLimit.ts";
 import {
+  createContactConsentService,
+} from "../contacts/contactService.ts";
+import {
   inspectSystemAdminConfiguration,
   type SystemAdminEnvironment,
 } from "../auth/systemAdminConfiguration.ts";
@@ -194,6 +197,9 @@ export async function createRailwayPostgresApiRuntime(
       memberships: foundation.memberships,
       selections: foundation.selections,
       contacts: foundation.contacts,
+      contactConsent: createContactConsentService({
+        consentEvents: foundation.contactConsents,
+      }),
       contactOrganization: foundation.contactOrganization,
       reports: foundation.reports,
       mutationRateLimit: createRateLimitGuard(

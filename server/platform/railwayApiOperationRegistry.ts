@@ -1,6 +1,16 @@
+import {
+  ContactNotFoundError,
+} from "../../db/contactConsentRepository.ts";
+import type {
+  ContactRecord,
+} from "../../shared/domain/contactRecord.ts";
 import type {
   Permission,
 } from "../../shared/domain/model.ts";
+import {
+  validateContactConsentTransition,
+  type ContactConsentTransition,
+} from "../../shared/validation/contactConsent.ts";
 import {
   validatePersistedContact,
   type PersistedContactProfile,
@@ -15,6 +25,7 @@ import type {
   ContactOrganizationSnapshot,
 } from "../../shared/domain/contactOrganization.ts";
 import {
+  ContactConsentInputError,
   ContactCursorInputError,
 } from "../contacts/contactService.ts";
 import {
@@ -60,7 +71,9 @@ import {
 
 export interface RailwayApiMutationSafetyPolicy {
   readonly rateLimit: "tenant-mutation";
-  readonly idempotency: "atomic-request-digest-replay";
+  readonly idempotency:
+    | "atomic-request-digest-replay"
+    | "deterministic-domain-event-replay";
   readonly audit: "atomic-immutable-event";
   readonly transaction: "required";
 }
@@ -97,6 +110,28 @@ export const railwayApiOperationPolicies = Object.freeze([
     }),
   }),
   Object.freeze({
+    id: "contacts.consent.grant",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "deterministic-domain-event-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
+    id: "contacts.consent.unsubscribe",
+    requestKind: "mutation" as const,
+    permission: "contacts.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "deterministic-domain-event-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
     id: "reports.read",
     requestKind: "query" as const,
     permission: "reports.read" as const,
@@ -107,6 +142,10 @@ export const railwayApiOperationPolicies = Object.freeze([
 export interface RailwayApiOperationRegistryDependencies {
   readonly tenantSessions: RailwayTenantSessionResolver;
   readonly contacts: Pick<ContactService, "list">;
+  readonly contactConsent: Pick<
+    ContactService,
+    "grantConsent" | "unsubscribe"
+  >;
   readonly contactOrganization: Pick<ContactOrganizationService, "read">;
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
@@ -129,6 +168,10 @@ type OperationExecutor<TPayload> = (
 
 interface ContactSavePayload extends PersistedContactProfile {
   readonly submissionOccurredAt: string;
+}
+
+interface ContactConsentPayload extends ContactConsentTransition {
+  readonly contactId: number;
 }
 
 function hasExactKeys(
@@ -237,6 +280,84 @@ function parseContactSavePayload(
   });
 }
 
+function parseContactConsentPayload(
+  payload: RailwayApiJsonObject,
+): Readonly<ContactConsentPayload> {
+  if (
+    !hasExactKeys(payload, [
+      "contactId",
+      "evidenceReference",
+      "occurredAt",
+      "source",
+    ]) ||
+    !Number.isSafeInteger(payload.contactId) ||
+    Number(payload.contactId) <= 0 ||
+    typeof payload.source !== "string" ||
+    typeof payload.occurredAt !== "string" ||
+    (payload.evidenceReference !== null &&
+      typeof payload.evidenceReference !== "string")
+  ) {
+    invalidRequest();
+  }
+
+  const validation = validateContactConsentTransition({
+    source: payload.source,
+    occurredAt: payload.occurredAt,
+    evidenceReference: payload.evidenceReference,
+  });
+
+  if (!validation.success) {
+    invalidRequest();
+  }
+
+  return Object.freeze({
+    contactId: Number(payload.contactId),
+    ...validation.value,
+  });
+}
+
+function isValidContactRecord(
+  value: unknown,
+): value is ContactRecord {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      "id",
+      "phoneNumber",
+      "firstName",
+      "lastName",
+      "email",
+      "company",
+      "mailingStatus",
+      "consentStatus",
+      "consentSource",
+      "consentRecordedAt",
+      "consentWithdrawnAt",
+      "version",
+    ])
+  ) {
+    return false;
+  }
+
+  const validation = validatePersistedContact(value);
+
+  return (
+    validation.success &&
+    Number.isSafeInteger(value.id) &&
+    Number(value.id) > 0 &&
+    Number.isSafeInteger(value.version) &&
+    Number(value.version) > 0 &&
+    (value.mailingStatus === "subscribed" ||
+      value.mailingStatus === "unsubscribed") &&
+    (value.consentStatus === "unknown" ||
+      value.consentStatus === "granted" ||
+      value.consentStatus === "withdrawn") &&
+    isStringOrNull(value.consentSource) &&
+    isStringOrNull(value.consentRecordedAt) &&
+    isStringOrNull(value.consentWithdrawnAt)
+  );
+}
+
 function isValidContactSaveResult(
   value: unknown,
   session: Readonly<TenantSession>,
@@ -258,21 +379,7 @@ function isValidContactSaveResult(
       value.outcome !== "replayed") ||
     !Number.isSafeInteger(value.tenantId) ||
     Number(value.tenantId) !== session.tenantId ||
-    !isRecord(value.contact) ||
-    !hasExactKeys(value.contact, [
-      "id",
-      "phoneNumber",
-      "firstName",
-      "lastName",
-      "email",
-      "company",
-      "mailingStatus",
-      "consentStatus",
-      "consentSource",
-      "consentRecordedAt",
-      "consentWithdrawnAt",
-      "version",
-    ])
+    !isValidContactRecord(value.contact)
   ) {
     return false;
   }
@@ -282,18 +389,6 @@ function isValidContactSaveResult(
 
   return (
     validation.success &&
-    Number.isSafeInteger(contact.id) &&
-    Number(contact.id) > 0 &&
-    Number.isSafeInteger(contact.version) &&
-    Number(contact.version) > 0 &&
-    (contact.mailingStatus === "subscribed" ||
-      contact.mailingStatus === "unsubscribed") &&
-    (contact.consentStatus === "unknown" ||
-      contact.consentStatus === "granted" ||
-      contact.consentStatus === "withdrawn") &&
-    isStringOrNull(contact.consentSource) &&
-    isStringOrNull(contact.consentRecordedAt) &&
-    isStringOrNull(contact.consentWithdrawnAt) &&
     validation.value.phoneNumber === profile.phoneNumber &&
     validation.value.firstName === profile.firstName &&
     validation.value.lastName === profile.lastName &&
@@ -381,9 +476,14 @@ function mapOperationError(error: unknown): never {
 
   if (
     error instanceof ContactCursorInputError ||
+    error instanceof ContactConsentInputError ||
     error instanceof OperationalReportInputError
   ) {
     throw new RailwayApiDispatchError("INVALID_REQUEST");
+  }
+
+  if (error instanceof ContactNotFoundError) {
+    throw new RailwayApiDispatchError("NOT_FOUND");
   }
 
   throw error;
@@ -421,14 +521,18 @@ function createOperation<TPayload>(
   });
 }
 
-async function executeContactSave(
+async function requireTenantMutationRequest(
   dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
   session: Readonly<TenantSession>,
-  payload: Readonly<ContactSavePayload>,
+  operation: string,
+  payload: Readonly<object>,
   request: Readonly<RailwayApiRequestEnvelope>,
-): Promise<unknown> {
+): Promise<Readonly<{
+  idempotencyKey: string;
+  requestDigest: string;
+}>> {
   if (
-    request.operation !== "contacts.save" ||
+    request.operation !== operation ||
     request.requestKind !== "mutation" ||
     request.idempotencyKey === null
   ) {
@@ -440,11 +544,8 @@ async function executeContactSave(
 
   try {
     [requestDigest, expectedIdempotencyKey] = await Promise.all([
-      deriveRailwayApiMutationRequestDigest("contacts.save", payload),
-      deriveRailwayApiDeterministicIdempotencyKey(
-        "contacts.save",
-        payload,
-      ),
+      deriveRailwayApiMutationRequestDigest(operation, payload),
+      deriveRailwayApiDeterministicIdempotencyKey(operation, payload),
     ]);
   } catch {
     throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
@@ -457,14 +558,11 @@ async function executeContactSave(
   let rateLimitDecision;
 
   try {
-    rateLimitDecision =
-      await dependencies.mutationRateLimit.consume(
-        `${session.tenantId}:${session.externalUserId}:contacts.save`,
-      );
-  } catch {
-    throw new RailwayApiDispatchError(
-      "DEPENDENCY_UNAVAILABLE",
+    rateLimitDecision = await dependencies.mutationRateLimit.consume(
+      `${session.tenantId}:${session.externalUserId}:${operation}`,
     );
+  } catch {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
   }
 
   if (rateLimitDecision.outcome === "limited") {
@@ -472,10 +570,28 @@ async function executeContactSave(
   }
 
   if (rateLimitDecision.outcome !== "allowed") {
-    throw new RailwayApiDispatchError(
-      "DEPENDENCY_UNAVAILABLE",
-    );
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
   }
+
+  return Object.freeze({
+    idempotencyKey: request.idempotencyKey,
+    requestDigest,
+  });
+}
+
+async function executeContactSave(
+  dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
+  session: Readonly<TenantSession>,
+  payload: Readonly<ContactSavePayload>,
+  request: Readonly<RailwayApiRequestEnvelope>,
+): Promise<unknown> {
+  const mutationRequest = await requireTenantMutationRequest(
+    dependencies,
+    session,
+    "contacts.save",
+    payload,
+    request,
+  );
 
   const profile = Object.freeze({
     phoneNumber: payload.phoneNumber,
@@ -489,8 +605,8 @@ async function executeContactSave(
   try {
     result = await dependencies.mutations.saveContact({
       session,
-      idempotencyKey: request.idempotencyKey,
-      requestDigest,
+      idempotencyKey: mutationRequest.idempotencyKey,
+      requestDigest: mutationRequest.requestDigest,
       profile,
     });
   } catch {
@@ -521,12 +637,67 @@ async function executeContactSave(
   };
 }
 
+async function executeContactConsent(
+  dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
+  session: Readonly<TenantSession>,
+  payload: Readonly<ContactConsentPayload>,
+  request: Readonly<RailwayApiRequestEnvelope>,
+  action: "grant" | "unsubscribe",
+): Promise<unknown> {
+  const operation = action === "grant"
+    ? "contacts.consent.grant"
+    : "contacts.consent.unsubscribe";
+
+  await requireTenantMutationRequest(
+    dependencies,
+    session,
+    operation,
+    payload,
+    request,
+  );
+
+  const transition = Object.freeze({
+    source: payload.source,
+    occurredAt: payload.occurredAt,
+    evidenceReference: payload.evidenceReference,
+  });
+  const persisted = action === "grant"
+    ? await dependencies.contactConsent.grantConsent(
+        session,
+        payload.contactId,
+        transition,
+      )
+    : await dependencies.contactConsent.unsubscribe(
+        session,
+        payload.contactId,
+        transition,
+      );
+
+  if (
+    !isRecord(persisted) ||
+    persisted.tenantId !== session.tenantId ||
+    persisted.id !== payload.contactId
+  ) {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+  }
+
+  const contact = toContactRecord(persisted);
+
+  if (!isValidContactRecord(contact)) {
+    throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+  }
+
+  return { contact };
+}
+
 export function createRailwayApiOperationRegistry(
   dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
 ): Readonly<RailwayApiOperationRegistry> {
   if (
     typeof dependencies.tenantSessions?.resolve !== "function" ||
     typeof dependencies.contacts?.list !== "function" ||
+    typeof dependencies.contactConsent?.grantConsent !== "function" ||
+    typeof dependencies.contactConsent?.unsubscribe !== "function" ||
     typeof dependencies.contactOrganization?.read !== "function" ||
     typeof dependencies.reports?.read !== "function" ||
     typeof dependencies.mutationRateLimit?.consume !== "function" ||
@@ -541,6 +712,8 @@ export function createRailwayApiOperationRegistry(
     workspacePolicy,
     contactsPolicy,
     contactSavePolicy,
+    contactConsentGrantPolicy,
+    contactConsentUnsubscribePolicy,
     reportsPolicy,
   ] =
     railwayApiOperationPolicies;
@@ -589,6 +762,32 @@ export function createRailwayApiOperationRegistry(
           session,
           profile,
           request,
+        ),
+    ),
+    createOperation(
+      contactConsentGrantPolicy,
+      dependencies,
+      parseContactConsentPayload,
+      async (session, payload, request) =>
+        executeContactConsent(
+          dependencies,
+          session,
+          payload,
+          request,
+          "grant",
+        ),
+    ),
+    createOperation(
+      contactConsentUnsubscribePolicy,
+      dependencies,
+      parseContactConsentPayload,
+      async (session, payload, request) =>
+        executeContactConsent(
+          dependencies,
+          session,
+          payload,
+          request,
+          "unsubscribe",
         ),
     ),
     createOperation(

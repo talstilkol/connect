@@ -2231,3 +2231,31 @@ Working tree שאינם מנוהלים ואינם מוחרגים, סורק את 
 סורק את היסטוריית Git. באימות הנוכחי נסרקו **1,208 קובצי Working tree** —
 1,205 מנוהלים ושלושת קובצי המימוש החדשים — והיסטוריית Git; בדיקת Regression
 מקבעת שגם קובץ חדש נכלל במלאי הסריקה.
+
+4.75 פעולות מתן הסכמה והסרה מרשימת דיוור של Contact הועברו מקומית מ־D1
+ל־Railway API ול־PostgreSQL ללא Fallback. נוספו שתי Operations נפרדות:
+`contacts.consent.grant` ו־`contacts.consent.unsubscribe`. ה־Payload מכיל רק
+Contact ID, מקור, זמן האירוע והפניה לראיה; Tenant וזהות Actor נגזרים בצד
+Railway ואינם מתקבלים מה־Browser או מ־Vercel.
+
+4.75.1 ‏Railway מאמת Vercel OIDC ו־Clerk session, דורש `contacts.write`,
+צורך מכסת `tenant-mutation` ורק אז מפעיל את שירות ה־Consent. מפתח הבקשה
+נגזר באופן דטרמיניסטי מה־Operation ומה־Payload הקנוני. מנגנון ה־Replay נשען
+על Domain event בלתי־משתנה שמפתחו כולל Tenant, ‏Actor, ‏Contact, פעולה
+וראיה, ונכתב באותה Transaction עם הקרנת מצב ה־Contact. זה אינו API receipt:
+Retry מחזיר את מצב ה־Contact התקף כעת ולכן התגובה אינה מציגה `replayed`.
+
+4.75.2 ה־BFF מאמת גבולות אורך ותווי בקרה, שולח רק Payload מדויק ומקבל רק
+`Contact` קנוני שמזההו תואם לבקשה. קודי כשל מוכרים ממופים לתוצאה מצומצמת;
+Response מורחבת, סותרת או חוצת Contact נכשלת לפני React state. כל
+`contactActions.ts` משתמש כעת ב־Railway לקריאה, שמירת פרופיל ושינוי Consent,
+ואינו מייבא Runtime D1, ‏D1 repositories או Tenant session מקומי.
+
+4.75.3 ‏TypeScript, ‏ESLint וכל **2,247 הבדיקות** עברו ללא כשל, Skip או
+Todo. בדיקות היעד עברו `69/69`, ובדיקות Boundary ו־Authentication ממוקדות
+עברו `5/5`. ‏Source guard סרק 583 קבצים ו־35 Client graphs, ‏Interface
+guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,211 קובצי Working tree — 1,208
+מנוהלים ושלושה חדשים — כולל היסטוריית Git, ו־Dependency lock אימת 31
+תלויות ישירות. `git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, Clerk,
+PostgreSQL וערכי Rate-limit policy חיים, פריסת Railway/Vercel וראיית
+Staging; אין עדיין טענת Production cutover.

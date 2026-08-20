@@ -17,6 +17,13 @@ const currentHandlerSource = await readFile(
   ),
   "utf8",
 );
+const currentConsentHandlerSource = await readFile(
+  new URL(
+    "../server/contacts/currentRailwayContactConsentHandler.ts",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
 test("routes initial and paginated contact reads through Railway", () => {
   assert.match(currentSource, /createCurrentRailwayContactDirectoryHandler/);
@@ -37,7 +44,7 @@ test("routes initial and paginated contact reads through Railway", () => {
   );
 });
 
-test("routes contact profile saves through Railway without moving consent implicitly", () => {
+test("routes contact profile and consent mutations through Railway without D1 fallback", () => {
   const saveSource = actionSource.match(
     /export async function saveContactAction[\s\S]*?(?=export async function loadMoreContactsAction)/,
   )?.[0];
@@ -52,8 +59,11 @@ test("routes contact profile saves through Railway without moving consent implic
     /runtimeDatabase|createConsentActionContext|currentTenantMutationSession|createContactRepository/,
   );
   assert.ok(consentSource);
-  assert.match(consentSource, /createConsentActionContext/);
-  assert.match(actionSource, /requireCurrentTenantMutationSession/);
+  assert.match(consentSource, /createCurrentRailwayContactConsentHandler/);
+  assert.doesNotMatch(
+    actionSource,
+    /runtimeDatabase|requireCurrentTenantMutationSession|createContactRepository|createContactConsentRepository|createConsentActionContext/,
+  );
 });
 
 test("keeps the current adapter on reviewed Railway identity and client boundaries", () => {
@@ -63,6 +73,19 @@ test("keeps the current adapter on reviewed Railway identity and client boundari
   assert.match(currentHandlerSource, /createRailwayApiClient/);
   assert.doesNotMatch(
     currentHandlerSource,
+    /runtimeDatabase|D1|tenantId|externalUserId/,
+  );
+  assert.match(currentConsentHandlerSource, /inspectClerkConfiguration/);
+  assert.match(
+    currentConsentHandlerSource,
+    /inspectRailwayApiClientConfiguration/,
+  );
+  assert.match(
+    currentConsentHandlerSource,
+    /resolveCurrentRailwayApiServerIdentity/,
+  );
+  assert.doesNotMatch(
+    currentConsentHandlerSource,
     /runtimeDatabase|D1|tenantId|externalUserId/,
   );
 });

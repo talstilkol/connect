@@ -91,6 +91,10 @@ export interface ContactListServiceDependencies {
   contacts: Pick<ContactRepository, "listPageByTenant">;
 }
 
+export interface ContactConsentServiceDependencies {
+  consentEvents: ContactConsentRepository;
+}
+
 function assertContactId(contactId: number): void {
   if (!Number.isSafeInteger(contactId) || contactId <= 0) {
     throw new Error("contactId must be a positive integer");
@@ -140,8 +144,38 @@ export function createContactListService(
   });
 }
 
+export function createContactConsentService(
+  dependencies: Readonly<ContactConsentServiceDependencies>,
+): Pick<ContactService, "grantConsent" | "unsubscribe"> {
+  if (typeof dependencies.consentEvents?.recordEvent !== "function") {
+    throw new Error("Contact consent dependencies are invalid");
+  }
+
+  return Object.freeze({
+    grantConsent(session, contactId, input) {
+      return recordConsentTransition(
+        dependencies,
+        session,
+        contactId,
+        "granted",
+        input,
+      );
+    },
+
+    unsubscribe(session, contactId, input) {
+      return recordConsentTransition(
+        dependencies,
+        session,
+        contactId,
+        "unsubscribed",
+        input,
+      );
+    },
+  });
+}
+
 async function recordConsentTransition(
-  dependencies: ContactServiceDependencies,
+  dependencies: ContactConsentServiceDependencies,
   session: TenantSession,
   contactId: number,
   eventType: ContactConsentEventType,
@@ -176,6 +210,7 @@ export function createContactService(
   dependencies: ContactServiceDependencies,
 ): ContactService {
   const listService = createContactListService(dependencies);
+  const consentService = createContactConsentService(dependencies);
 
   return {
     list: listService.list,
@@ -195,24 +230,7 @@ export function createContactService(
       });
     },
 
-    grantConsent(session, contactId, input) {
-      return recordConsentTransition(
-        dependencies,
-        session,
-        contactId,
-        "granted",
-        input,
-      );
-    },
-
-    unsubscribe(session, contactId, input) {
-      return recordConsentTransition(
-        dependencies,
-        session,
-        contactId,
-        "unsubscribed",
-        input,
-      );
-    },
+    grantConsent: consentService.grantConsent,
+    unsubscribe: consentService.unsubscribe,
   };
 }

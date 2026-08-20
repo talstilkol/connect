@@ -72,13 +72,12 @@ test("separates reads from mutations in mixed action modules", async () => {
   }
 });
 
-test("keeps consent local while contact profile saves and pagination cross Railway", async () => {
+test("routes contact reads, profile saves, and consent mutations through Railway", async () => {
   const source = await readServerSource("contacts/contactActions.ts");
 
-  assert.match(source, /requireCurrentTenantMutationSession/);
   assert.doesNotMatch(
     source,
-    /from "\.\.\/auth\/currentTenantSession/,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|currentTenantSession|createContactRepository|createContactConsentRepository/,
   );
 
   const loadMoreSource = source.match(
@@ -105,7 +104,7 @@ test("keeps consent local while contact profile saves and pagination cross Railw
     saveSource,
     /requireRuntimeDatabase|requireCurrentTenantMutationSession|createConsentActionContext/,
   );
-  assert.match(source, /createConsentActionContext/);
+  assert.match(source, /createCurrentRailwayContactConsentHandler/);
 });
 
 test("limits initial onboarding by authenticated server identity before persistence", async () => {

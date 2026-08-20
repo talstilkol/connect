@@ -26,7 +26,11 @@ const auditedServerFunctions = new Map([
   ["server/bot/botFlowActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/campaigns/campaignActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/campaigns/systemAdminWhatsappDeliveryPolicyActions.ts", ["requireCurrentSystemAdminMutationSession"]],
-  ["server/contacts/contactActions.ts", ["requireCurrentTenantMutationSession"]],
+  ["server/contacts/contactActions.ts", [
+    "createCurrentRailwayContactDirectoryHandler",
+    "createCurrentRailwayContactMutationHandler",
+    "createCurrentRailwayContactConsentHandler",
+  ]],
   ["server/contacts/contactImportActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/contacts/contactOrganizationActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/conversations/conversationActions.ts", ["requireCurrentTenantMutationSession"]],

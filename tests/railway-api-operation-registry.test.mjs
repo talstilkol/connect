@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  ContactNotFoundError,
+} from "../db/contactConsentRepository.ts";
+
+import {
   ContactCursorInputError,
 } from "../server/contacts/contactService.ts";
 import {
@@ -47,6 +51,12 @@ const idempotencyKey =
     "contacts.save",
     contactSavePayload,
   );
+const contactConsentPayload = {
+  contactId: 23,
+  source: "website-form",
+  occurredAt: "2026-08-20T20:05:00.000Z",
+  evidenceReference: "consent-evidence-v1",
+};
 
 function mutationRequest(payload = contactSavePayload) {
   return {
@@ -54,6 +64,23 @@ function mutationRequest(payload = contactSavePayload) {
     operation: "contacts.save",
     requestKind: "mutation",
     idempotencyKey,
+    payload,
+  };
+}
+
+async function consentMutationRequest(
+  operation,
+  payload = contactConsentPayload,
+) {
+  return {
+    contractVersion: "connect.railway-api.v1",
+    operation,
+    requestKind: "mutation",
+    idempotencyKey:
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        operation,
+        payload,
+      ),
     payload,
   };
 }
@@ -113,6 +140,8 @@ function fixture({
   tenantSession = session(),
   tenantError = null,
   contactError = null,
+  consentError = null,
+  consentResult = undefined,
   reportError = null,
   rateLimitDecision = { outcome: "allowed" },
   rateLimitError = null,
@@ -123,6 +152,7 @@ function fixture({
   const calls = {
     tenantIdentities: [],
     contactInputs: [],
+    consentInputs: [],
     organizationInputs: [],
     reportInputs: [],
     rateLimitSubjects: [],
@@ -155,6 +185,41 @@ function fixture({
           contacts: [persistedContact()],
           nextCursor: null,
         };
+      },
+    },
+    contactConsent: {
+      async grantConsent(receivedSession, contactId, input) {
+        calls.consentInputs.push({
+          action: "grant",
+          session: receivedSession,
+          contactId,
+          input,
+        });
+        if (consentError) throw consentError;
+        return consentResult ?? persistedContact({
+          id: contactId,
+          consentStatus: "granted",
+          mailingStatus: "subscribed",
+          consentSource: input.source,
+          consentRecordedAt: input.occurredAt,
+          consentWithdrawnAt: null,
+        });
+      },
+      async unsubscribe(receivedSession, contactId, input) {
+        calls.consentInputs.push({
+          action: "unsubscribe",
+          session: receivedSession,
+          contactId,
+          input,
+        });
+        if (consentError) throw consentError;
+        return consentResult ?? persistedContact({
+          id: contactId,
+          consentStatus: "withdrawn",
+          mailingStatus: "unsubscribed",
+          consentSource: input.source,
+          consentWithdrawnAt: input.occurredAt,
+        });
       },
     },
     contactOrganization: {
@@ -333,6 +398,28 @@ test("publishes one immutable policy for every concrete operation", () => {
       },
     },
     {
+      id: "contacts.consent.grant",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "deterministic-domain-event-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
+      id: "contacts.consent.unsubscribe",
+      requestKind: "mutation",
+      permission: "contacts.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "deterministic-domain-event-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
       id: "reports.read",
       requestKind: "query",
       permission: "reports.read",
@@ -496,6 +583,107 @@ test("marks an identical completed contact mutation as replayed", async () => {
   );
 
   assert.equal(result.replayed, true);
+});
+
+test("records grant and unsubscribe consent through the immutable Railway boundary", async () => {
+  for (const action of ["grant", "unsubscribe"]) {
+    const operationId = `contacts.consent.${action}`;
+    const { calls, registry } = fixture({
+      tenantSession: session("manager"),
+    });
+    const result = await operation(registry, operationId).execute(
+      dispatchContext,
+      contactConsentPayload,
+      await consentMutationRequest(operationId),
+    );
+
+    assert.deepEqual(calls.rateLimitSubjects, [
+      `7:verified-user:${operationId}`,
+    ]);
+    assert.deepEqual(calls.consentInputs, [{
+      action,
+      session: session("manager"),
+      contactId: 23,
+      input: {
+        source: "website-form",
+        occurredAt: "2026-08-20T20:05:00.000Z",
+        evidenceReference: "consent-evidence-v1",
+      },
+    }]);
+    assert.equal(result.contact.id, 23);
+    assert.equal(
+      result.contact.consentStatus,
+      action === "grant" ? "granted" : "withdrawn",
+    );
+    assert.doesNotMatch(
+      JSON.stringify(result),
+      /tenantId|externalUserId|consentEvidenceReference|createdAt|updatedAt/,
+    );
+  }
+});
+
+test("rejects forged consent keys and maps missing or cross-tenant contacts", async () => {
+  const operationId = "contacts.consent.grant";
+  const forged = fixture();
+  const denied = fixture({ tenantSession: session("agent") });
+  const limited = fixture({
+    rateLimitDecision: { outcome: "limited" },
+  });
+  const missing = fixture({
+    consentError: new ContactNotFoundError(),
+  });
+  const crossTenant = fixture({
+    consentResult: persistedContact({ tenantId: 11 }),
+  });
+
+  await assert.rejects(
+    operation(forged.registry, operationId).execute(
+      dispatchContext,
+      contactConsentPayload,
+      {
+        ...await consentMutationRequest(operationId),
+        idempotencyKey: `connect_idempotency_v1_${"f".repeat(64)}`,
+      },
+    ),
+    (error) => error.code === "INVALID_REQUEST",
+  );
+  await assert.rejects(
+    operation(denied.registry, operationId).execute(
+      dispatchContext,
+      contactConsentPayload,
+      await consentMutationRequest(operationId),
+    ),
+    (error) => error.code === "PERMISSION_DENIED",
+  );
+  await assert.rejects(
+    operation(limited.registry, operationId).execute(
+      dispatchContext,
+      contactConsentPayload,
+      await consentMutationRequest(operationId),
+    ),
+    (error) => error.code === "RATE_LIMITED",
+  );
+  await assert.rejects(
+    operation(missing.registry, operationId).execute(
+      dispatchContext,
+      contactConsentPayload,
+      await consentMutationRequest(operationId),
+    ),
+    (error) => error.code === "NOT_FOUND",
+  );
+  await assert.rejects(
+    operation(crossTenant.registry, operationId).execute(
+      dispatchContext,
+      contactConsentPayload,
+      await consentMutationRequest(operationId),
+    ),
+    (error) => error.code === "DEPENDENCY_UNAVAILABLE",
+  );
+  assert.deepEqual(forged.calls.rateLimitSubjects, []);
+  assert.deepEqual(forged.calls.consentInputs, []);
+  assert.deepEqual(denied.calls.rateLimitSubjects, []);
+  assert.deepEqual(denied.calls.consentInputs, []);
+  assert.deepEqual(limited.calls.consentInputs, []);
 });
 
 test("rejects a non-deterministic contact mutation key before rate limiting", async () => {
@@ -714,6 +902,27 @@ test("validates operation payload before tenant or service access", async () => 
       },
     ],
     [
+      "contacts.consent.grant",
+      {
+        ...contactConsentPayload,
+        contactId: 0,
+      },
+    ],
+    [
+      "contacts.consent.unsubscribe",
+      {
+        ...contactConsentPayload,
+        occurredAt: "invalid",
+      },
+    ],
+    [
+      "contacts.consent.grant",
+      {
+        ...contactConsentPayload,
+        tenantId: 7,
+      },
+    ],
+    [
       "reports.read",
       { startDate: "2026-08-01", endDate: "invalid" },
     ],
@@ -750,6 +959,7 @@ test("validates operation payload before tenant or service access", async () => 
     );
     assert.deepEqual(calls.tenantIdentities, []);
     assert.deepEqual(calls.contactInputs, []);
+    assert.deepEqual(calls.consentInputs, []);
     assert.deepEqual(calls.reportInputs, []);
     assert.deepEqual(calls.rateLimitSubjects, []);
     assert.deepEqual(calls.mutationCommands, []);
@@ -806,6 +1016,7 @@ test("rejects missing operation dependencies", () => {
       createRailwayApiOperationRegistry({
         tenantSessions: {},
         contacts: {},
+        contactConsent: {},
         contactOrganization: {},
         reports: {},
       }),

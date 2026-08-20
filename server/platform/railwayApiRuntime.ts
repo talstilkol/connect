@@ -59,6 +59,10 @@ export interface RailwayApiRuntimeOptions {
   readonly memberships: TenantMembershipRepository;
   readonly selections: TenantSelectionRepository;
   readonly contacts: Pick<ContactService, "list">;
+  readonly contactConsent: Pick<
+    ContactService,
+    "grantConsent" | "unsubscribe"
+  >;
   readonly contactOrganization: Pick<ContactOrganizationService, "read">;
   readonly reports: Pick<OperationalReportService, "read">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
@@ -87,6 +91,7 @@ export function createRailwayApiRuntime(
   const operations = createRailwayApiOperationRegistry({
     tenantSessions,
     contacts: options.contacts,
+    contactConsent: options.contactConsent,
     contactOrganization: options.contactOrganization,
     reports: options.reports,
     mutationRateLimit: options.mutationRateLimit,

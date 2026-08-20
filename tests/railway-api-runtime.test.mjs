@@ -41,6 +41,7 @@ function fixture(selectedRole = "owner") {
   const calls = {
     memberships: 0,
     contacts: [],
+    contactConsents: [],
     contactOrganizations: [],
     reports: [],
     mutationSubjects: [],
@@ -106,6 +107,60 @@ function fixture(selectedRole = "owner") {
         return {
           contacts: [],
           nextCursor: null,
+        };
+      },
+    },
+    contactConsent: {
+      async grantConsent(session, contactId, input) {
+        calls.contactConsents.push({
+          action: "grant",
+          session,
+          contactId,
+          input,
+        });
+        return {
+          id: contactId,
+          tenantId: session.tenantId,
+          phoneNumber: "+972501234567",
+          firstName: "Tal",
+          lastName: null,
+          email: null,
+          company: "Connect",
+          mailingStatus: "subscribed",
+          consentStatus: "granted",
+          consentSource: input.source,
+          consentRecordedAt: input.occurredAt,
+          consentWithdrawnAt: null,
+          consentEvidenceReference: input.evidenceReference,
+          version: 2,
+          createdAt: "2026-08-20T20:00:00.000Z",
+          updatedAt: input.occurredAt,
+        };
+      },
+      async unsubscribe(session, contactId, input) {
+        calls.contactConsents.push({
+          action: "unsubscribe",
+          session,
+          contactId,
+          input,
+        });
+        return {
+          id: contactId,
+          tenantId: session.tenantId,
+          phoneNumber: "+972501234567",
+          firstName: "Tal",
+          lastName: null,
+          email: null,
+          company: "Connect",
+          mailingStatus: "unsubscribed",
+          consentStatus: "withdrawn",
+          consentSource: input.source,
+          consentRecordedAt: "2026-08-20T20:00:00.000Z",
+          consentWithdrawnAt: input.occurredAt,
+          consentEvidenceReference: input.evidenceReference,
+          version: 3,
+          createdAt: "2026-08-20T20:00:00.000Z",
+          updatedAt: input.occurredAt,
         };
       },
     },
@@ -689,6 +744,52 @@ test("runs a tenant-scoped contact mutation through every security boundary", as
   assert.match(
     testFixture.calls.mutationCommands[0].requestDigest,
     /^railway_mutation_request_v1_[0-9a-f]{64}$/,
+  );
+});
+
+test("records contact consent through identity, tenant, quota, and PostgreSQL service boundaries", async () => {
+  const testFixture = fixture("manager");
+  const operationId = "contacts.consent.grant";
+  const payload = {
+    contactId: 31,
+    source: "website-form",
+    occurredAt: "2026-08-20T20:05:00.000Z",
+    evidenceReference: "consent-evidence-v1",
+  };
+  const consentIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      operationId,
+      payload,
+    );
+  const response = await testFixture.handler.handle(
+    request(
+      operationId,
+      payload,
+      "mutation",
+      consentIdempotencyKey,
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.contact.id, 31);
+  assert.equal(body.data.contact.consentStatus, "granted");
+  assert.deepEqual(testFixture.calls.mutationSubjects, [
+    "11:verified-user:contacts.consent.grant",
+  ]);
+  assert.equal(testFixture.calls.contactConsents.length, 1);
+  assert.equal(
+    testFixture.calls.contactConsents[0].session.tenantId,
+    11,
+  );
+  assert.deepEqual(testFixture.calls.contactConsents[0].input, {
+    source: "website-form",
+    occurredAt: "2026-08-20T20:05:00.000Z",
+    evidenceReference: "consent-evidence-v1",
+  });
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /tenantId|externalUserId|consentEvidenceReference|createdAt|updatedAt/,
   );
 });
 
