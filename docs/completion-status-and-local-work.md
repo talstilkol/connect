@@ -2096,3 +2096,28 @@ Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סר
 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
 `git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, ‏Allowlist ו־Policy חיים,
 פריסת Railway/Vercel וראיית Staging; לכן אין עדיין טענת Production cutover.
+
+4.70 מרכז החלטות ה־Production של System Admin הועבר מקומית במלואו מ־D1
+ל־Railway API ול־PostgreSQL ללא Fallback. הקריאה והשמירה חולקו ל־Operations
+נפרדים. ה־Query דורשת Allowlist אך אינה צורכת מכסת Mutation; השמירה דורשת
+Allowlist, מפתח Idempotency דטרמיניסטי ומכסת `system-admin-mutation` לפני
+Repository access.
+
+4.70.1 ‏PostgreSQL מגביל Check IDs לאותו Registry שמשמש את
+`productionReadiness`, נועל רשומה, אוכף `expectedVersion`, מזהה Retry זהה
+וכותב Event בלתי־משתנה. Actor ו־timestamp נגזרים בצד Railway ואינם מתקבלים
+מ־Vercel. התגובה כוללת רק Check ID, ‏Selection, ‏Rationale, ‏Version
+ו־timestamps; ‏External user ID ו־Event key אינם חוצים את הגבול.
+
+4.70.2 ‏Vercel handler אחד משרת את ה־Loader ואת ה־Server Action, מאמת
+Registry membership, רשימה ללא כפילויות, תוכן מנורמל, Version ו־timestamps
+לפני הצגה או עדכון React state. שני קובצי ה־Runtime הפעילים אינם מייבאים עוד
+D1 repository, ‏Runtime database או Cloudflare System Admin session. בדיקות
+Boundary מקבעות את ההפרדה.
+
+4.70.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,187 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `41/41`. ‏Source guard סרק 571 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,184
+קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+`git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, ‏Allowlist ו־Policy חיים,
+פריסת Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.

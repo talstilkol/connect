@@ -58,6 +58,13 @@ export interface SystemAdminProductionDecisionService {
   ): Promise<ProductionDecisionMutationResult>;
 }
 
+export interface NormalizedSystemAdminProductionDecisionInput {
+  readonly checkId: ProductionDecisionRecord["checkId"];
+  readonly expectedVersion: number;
+  readonly selection: string;
+  readonly rationale: string;
+}
+
 type Clock = () => string;
 
 function inputError(): never {
@@ -131,11 +138,13 @@ function currentTimestamp(
   }
 }
 
-function normalizeInput(input: unknown) {
+export function normalizeSystemAdminProductionDecisionInput(
+  input: unknown,
+): Readonly<NormalizedSystemAdminProductionDecisionInput> {
   assertExactInput(input);
 
   try {
-    return {
+    return Object.freeze({
       checkId:
         requireProductionDecisionCheckId(
           input.checkId,
@@ -153,7 +162,7 @@ function normalizeInput(input: unknown) {
         requireProductionDecisionRationale(
           input.rationale,
         ),
-    };
+    });
   } catch {
     return inputError();
   }
@@ -184,7 +193,7 @@ export function createSystemAdminProductionDecisionService(
       const actorExternalUserId =
         requireSessionActor(session);
       const normalized =
-        normalizeInput(input);
+        normalizeSystemAdminProductionDecisionInput(input);
       let result:
         ProductionDecisionMutationResult;
 

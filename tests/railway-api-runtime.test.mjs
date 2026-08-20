@@ -47,6 +47,8 @@ function fixture(selectedRole = "owner") {
     systemAdminMutationSubjects: [],
     systemAdminProfileInputs: [],
     systemAdminSubscriptionInputs: [],
+    systemAdminProductionDecisionLists: 0,
+    systemAdminProductionDecisionInputs: [],
   };
   const handler = createRailwayApiRuntime({
     environment,
@@ -246,6 +248,42 @@ function fixture(selectedRole = "owner") {
           };
         },
       },
+      productionDecisions: {
+        async list() {
+          calls.systemAdminProductionDecisionLists += 1;
+          return [
+            {
+              checkId: "ai.provider",
+              selection: "Provider choice approved",
+              rationale:
+                "The decision passed product and security review.",
+              version: 1,
+              lastEventKey:
+                `production_decision_event_v1_${"a".repeat(64)}`,
+              decidedByExternalUserId: "verified-user",
+              decidedAt: "2026-08-20T09:00:00.000Z",
+              updatedAt: "2026-08-20T09:00:00.000Z",
+            },
+          ];
+        },
+        async save(input) {
+          calls.systemAdminProductionDecisionInputs.push(input);
+          return {
+            outcome: input.expectedVersion === 0 ? "created" : "updated",
+            record: {
+              checkId: input.checkId,
+              selection: input.selection,
+              rationale: input.rationale,
+              version: input.expectedVersion + 1,
+              lastEventKey:
+                `production_decision_event_v1_${"b".repeat(64)}`,
+              decidedByExternalUserId: input.actorExternalUserId,
+              decidedAt: input.occurredAt,
+              updatedAt: input.occurredAt,
+            },
+          };
+        },
+      },
     },
   });
 
@@ -361,6 +399,73 @@ test("runs a system-admin subscription mutation without resolving tenant members
   assert.doesNotMatch(
     JSON.stringify(body),
     /tenantId|externalUserId|verified-user/,
+  );
+});
+
+test("lists system-admin production decisions without tenant membership or mutation quota", async () => {
+  const testFixture = fixture("agent");
+  const response = await testFixture.handler.handle(
+    request(
+      "system-admin.production-decisions.list",
+      {},
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.records.length, 1);
+  assert.equal(body.data.records[0].checkId, "ai.provider");
+  assert.equal(testFixture.calls.memberships, 0);
+  assert.equal(testFixture.calls.systemAdminProductionDecisionLists, 1);
+  assert.deepEqual(testFixture.calls.systemAdminMutationSubjects, []);
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /externalUserId|lastEventKey|verified-user/,
+  );
+});
+
+test("saves a system-admin production decision through the isolated mutation boundary", async () => {
+  const testFixture = fixture("agent");
+  const operationId = "system-admin.production-decisions.save";
+  const adminPayload = {
+    checkId: "ai.provider",
+    expectedVersion: 0,
+    selection: "Provider choice approved",
+    rationale:
+      "The decision passed product and security review.",
+  };
+  const adminIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      operationId,
+      adminPayload,
+    );
+  const response = await testFixture.handler.handle(
+    request(
+      operationId,
+      adminPayload,
+      "mutation",
+      adminIdempotencyKey,
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.outcome, "created");
+  assert.equal(body.data.record.version, 1);
+  assert.equal(testFixture.calls.memberships, 0);
+  assert.deepEqual(
+    testFixture.calls.systemAdminMutationSubjects,
+    [`verified-user:${operationId}`],
+  );
+  assert.equal(testFixture.calls.systemAdminProductionDecisionInputs.length, 1);
+  assert.equal(
+    testFixture.calls.systemAdminProductionDecisionInputs[0]
+      .actorExternalUserId,
+    "verified-user",
+  );
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /externalUserId|lastEventKey|verified-user/,
   );
 });
 

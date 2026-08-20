@@ -535,6 +535,17 @@ Window, ‏Version, ‏Cancellation timestamp והתאמה לפעולה לפני
 עסקי אסור עם Payload לא חוקי. המימוש עדיין דורש Origin, ‏OIDC, ‏Allowlist,
 Rate-limit policy וראיית Staging חיים לפני Cutover.
 
+7.1.60 מרכז החלטות ה־Production של System Admin הועבר מקומית במלואו מ־D1
+ל־Railway API ללא Fallback. ‏`system-admin.production-decisions.list` היא
+Query מאומתת שאינה צורכת Mutation quota ומחזירה רק רשומות השייכות ל־Registry
+ללא Actor או Event key. ‏`system-admin.production-decisions.save` היא
+Mutation בעלת Payload מצומצם, מפתח Idempotency דטרמיניסטי, Allowlist ומכסת
+`system-admin-mutation`. ‏PostgreSQL נועל לפי Check ID, אוכף Version ורושם
+Event בלתי־משתנה; Actor וזמן נגזרים בצד Railway. ה־Vercel handler מאמת מחדש
+Registry membership, כפילויות, תוכן, Version ו־timestamps לפני הצגת הרשימה
+או עדכון React state. גם ה־Loader וגם ה־Server Action הפעילים אינם מייבאים
+עוד D1. עדיין נדרשים Origin, ‏OIDC, ‏Allowlist, ‏Policy וראיית Staging חיים.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

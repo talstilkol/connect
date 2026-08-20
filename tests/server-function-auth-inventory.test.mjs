@@ -32,7 +32,7 @@ const auditedServerFunctions = new Map([
   ["server/conversations/conversationActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/meta/metaEmbeddedSignupActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/onboarding/saveBusinessProfileAction.ts", ["readClerkIdentity"]],
-  ["server/operations/systemAdminProductionDecisionActions.ts", ["requireCurrentSystemAdminMutationSession"]],
+  ["server/operations/systemAdminProductionDecisionActions.ts", ["createCurrentRailwaySystemAdminProductionDecisionHandler"]],
   ["server/reports/operationalReportActions.ts", ["requireCurrentTenantSession"]],
   ["server/team/teamInvitationAcceptanceActions.ts", ["createClerkTeamInvitationIdentityContext"]],
   ["server/team/teamInvitationActions.ts", ["requireCurrentTenantMutationSession"]],
