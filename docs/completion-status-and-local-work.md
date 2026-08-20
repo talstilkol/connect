@@ -1974,3 +1974,5 @@ Registry נחסמת כעת בקוד `DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILE
 4.64.3 Build, ‏TypeScript, ‏ESLint, ‏Dependency Lock, ‏Source Guard,
 ‏Secret Hygiene וכל **2,116 הבדיקות** עברו. Audit חי לא רוענן משום
 שהחיבור ל־npm Registry לא היה זמין; הוא נשאר תנאי חיצוני Fail-closed.
+שלושה Attempts של GitHub CI נכשלו לפני Step ראשון בגלל Billing או
+Spending limit בחשבון. אין בכך כשל קוד, אך גם אין CI Evidence תקף.

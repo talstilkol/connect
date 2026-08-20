@@ -287,9 +287,11 @@ CORS, ‏`GHSA-67mh-4wv8-2f99`. הגרסה המתוקנת הראשונה היא 
 ו־578 קבצים. ה־Head המאומת הוא `2515ec991b4ddc1c89466bee58cf1f047aaa95d1`.
 ה־PR אינו מוכן למיזוג ללא Review ואסטרטגיית Merge מפורשת.
 
-10.4 שני Workflow runs עבור אותו Head נכשלו בלי להתחיל אף Step, ולא
-נוצרו עבורם Logs זמינים. לכן הכשל אינו ראיה לכשל Build או Audit, אך גם
-אינו מספק CI Evidence תקף.
+10.4 שני Workflow runs עבור אותו Head הופעלו בשלושה Attempts ונכשלו
+בלי להתחיל אף Step ובלי ליצור Logs. ממשק GitHub הציג Annotation שלפיו
+ה־Job לא התחיל משום שתשלומי החשבון האחרונים נכשלו או שיש להגדיל את
+Spending limit. לכן הכשל אינו ראיה לכשל Build או Audit, אך גם אינו מספק
+CI Evidence תקף. אין להפעיל Attempt נוסף לפני הסדרת Billing.
 
 10.5 רענון `npm audit` מקומי לא הושלם משום שהסביבה לא הצליחה להגיע ל־
 npm Registry. שער הפיתוח נשאר Fail-closed, אך כשל Registry מדווח מעתה

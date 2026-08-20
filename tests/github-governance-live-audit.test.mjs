@@ -17,6 +17,9 @@ const repositoryAdr = readProjectFile(
 const sourceControl = readProjectFile(
   "docs/source-control-and-release.md",
 );
+const releaseRunbook = readProjectFile(
+  "docs/release-operator-runbook.md",
+);
 const teamPlan = readProjectFile(
   "docs/team-operating-plan.md",
 );
@@ -126,4 +129,45 @@ test("preserves the original unknown state and records the private-repository fo
   );
   assert.ok(privacyStep >= 0);
   assert.ok(transferStep > privacyStep);
+});
+
+test("keeps zero-step billing failures outside code regression evidence", () => {
+  const zeroStepFailure = releaseRunbook.indexOf(
+    "ללא Step אחד, ללא Logs",
+  );
+  const noCodeEvidence = releaseRunbook.indexOf(
+    "ראיה שה־Checkout, ההתקנה או הקוד רצו",
+  );
+  const billingFailure = releaseRunbook.indexOf(
+    "כשל תשלום או Spending limit",
+  );
+  const stopReruns = releaseRunbook.indexOf(
+    "עוצרים הפעלות חוזרות",
+  );
+
+  assert.ok(zeroStepFailure >= 0);
+  assert.ok(noCodeEvidence > zeroStepFailure);
+  assert.ok(billingFailure > noCodeEvidence);
+  assert.ok(stopReruns > billingFailure);
+  assert.match(
+    releaseRunbook,
+    /אותם Workflows עבור אותו Commit SHA/,
+  );
+  const selfHosted = releaseRunbook.indexOf(
+    "Self-hosted runner",
+  );
+  const githubHosted = releaseRunbook.indexOf(
+    "GitHub-hosted runner",
+  );
+  const attempts = audit.indexOf("שלושה Attempts");
+  const spendingLimit = audit.indexOf("Spending limit");
+  const noFurtherAttempt = audit.indexOf(
+    "אין להפעיל Attempt נוסף",
+  );
+
+  assert.ok(selfHosted >= 0);
+  assert.ok(githubHosted > selfHosted);
+  assert.ok(attempts >= 0);
+  assert.ok(spendingLimit > attempts);
+  assert.ok(noFurtherAttempt > spendingLimit);
 });

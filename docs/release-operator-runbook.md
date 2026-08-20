@@ -41,6 +41,22 @@ Credentials, ‏Tenant IDs או פרטי ספק.
 דורש החלטה. אין לפרש יצירת JSON כהוכחת מוכנות; רק `status=ready`
 ויציאה מוצלחת מאשרים שכל 33 הבדיקות עברו.
 
+2.7 לפני שמסווגים CI כ־Regression בודקים אם ה־Job התחיל בפועל.
+כאשר כל ה־Jobs מסתיימים ללא Step אחד, ללא Logs ובתוך שניות, אין
+ראיה שה־Checkout, ההתקנה או הקוד רצו.
+
+2.7.1 אם GitHub מציג Annotation של כשל תשלום או Spending limit,
+עוצרים הפעלות חוזרות. Account owner מסדיר את Billing ורק לאחר מכן
+מריצים מחדש את אותם Workflows עבור אותו Commit SHA.
+
+2.7.2 לאחר הסרת החסימה נדרש Attempt חדש שבו קיימים Steps ו־Logs וכל
+תשעת ה־Checks עוברים. Attempt ללא Runner אינו יכול לשמש CI Evidence,
+גם אם כל הבדיקות המקומיות עברו.
+
+2.7.3 אין לעקוף חסימת Billing באמצעות Self-hosted runner זמני. חוזי
+ה־Attestation דורשים GitHub-hosted runner, ומעבר Runner משנה את גבול
+האמון ודורש החלטה ובדיקת Governance נפרדות.
+
 ## 3. Rehearsal מקומי
 
 3.1 מריצים על Worktree נקי:
