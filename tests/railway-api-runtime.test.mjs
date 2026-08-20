@@ -114,9 +114,56 @@ function fixture(selectedRole = "owner") {
         return {
           period: input,
           snapshot: {
+            window: {
+              startAt: `${input.startDate}T00:00:00.000Z`,
+              endAt: "2026-08-18T00:00:00.000Z",
+            },
+            generatedAt: "2026-08-17T12:00:00.000Z",
+            campaigns: {
+              total: 0,
+              recipientCount: 0,
+              draft: 0,
+              scheduled: 0,
+              running: 0,
+              paused: 0,
+              completed: 0,
+              cancelled: 0,
+              failed: 0,
+            },
             messages: {
               total: 0,
+              inbound: 0,
+              outbound: 0,
+              received: 0,
+              sent: 0,
+              delivered: 0,
+              read: 0,
+              failed: 0,
             },
+            conversations: {
+              active: 0,
+              unreadCount: 0,
+              new: 0,
+              botActive: 0,
+              waitingForAgent: 0,
+              agentActive: 0,
+              waitingForContact: 0,
+              closed: 0,
+            },
+            bot: {
+              total: 0,
+              pending: 0,
+              sending: 0,
+              accepted: 0,
+              rejected: 0,
+              ambiguous: 0,
+            },
+            ai: {
+              totalTurns: 0,
+              replyPlanned: 0,
+              handoff: 0,
+            },
+            aiUsage: [],
           },
         };
       },
@@ -616,7 +663,7 @@ test("runs a tenant-scoped contact mutation through every security boundary", as
   );
 });
 
-test("returns authorization denied before an agent reaches reports", async () => {
+test("returns permission denied before an agent reaches reports", async () => {
   const testFixture = fixture("agent");
   const response = await testFixture.handler.handle(
     request("reports.read", {
@@ -629,9 +676,33 @@ test("returns authorization denied before an agent reaches reports", async () =>
   assert.deepEqual(await response.json(), {
     contractVersion: RAILWAY_API_CONTRACT_VERSION,
     outcome: "error",
-    code: "AUTHORIZATION_DENIED",
+    code: "PERMISSION_DENIED",
   });
   assert.deepEqual(testFixture.calls.reports, []);
+});
+
+test("returns a bounded PostgreSQL operational report through the complete boundary", async () => {
+  const testFixture = fixture("manager");
+  const input = {
+    startDate: "2026-08-01",
+    endDate: "2026-08-17",
+  };
+  const response = await testFixture.handler.handle(
+    request("reports.read", input),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.data.period, input);
+  assert.equal(body.data.generatedAt, "2026-08-17T12:00:00.000Z");
+  assert.equal(body.data.messages.total, 0);
+  assert.equal(testFixture.calls.memberships, 1);
+  assert.equal(testFixture.calls.reports.length, 1);
+  assert.deepEqual(testFixture.calls.reports[0].input, input);
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /tenantId|externalUserId|startAt|endAt|verified-user/,
+  );
 });
 
 test("rejects invalid operation payload before tenant lookup", async () => {

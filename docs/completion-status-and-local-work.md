@@ -2147,3 +2147,28 @@ Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סר
 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
 `git diff --check` עבר. עדיין חסרים Origin, ‏OIDC ו־Allowlist חיים, פריסת
 Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.
+
+4.72 ‏Operational Reports הועברו מקומית במלואם מ־D1 ל־Railway API
+ול־PostgreSQL ללא Fallback. ה־Railway operation `reports.read` שהיה קיים
+מחובר כעת גם לטעינת עמוד Reports הראשונה וגם ל־Server Action של שינוי טווח.
+ה־Payload מכיל רק שני תאריכי UTC; Tenant, ‏Membership, ‏Selection והרשאת
+`reports.read` נגזרים ונבדקים בצד Railway.
+
+4.72.1 תגובת ה־Operation צומצמה מ־Repository result ל־
+`OperationalReportView`, כך שחלון `startAt/endAt` ושדות פנימיים אינם חוזרים
+ל־Vercel. ה־BFF דורש Response בעלת מפתחות מדויקים, Period תואם, timestamp
+קנוני, מונים שלמים ולא־שליליים, סכומי קטגוריות עקביים ו־AI usage מסודר ללא
+Currency כפולה. Response מורחבת, סותרת או לא קנונית נכשלת לפני React state.
+
+4.72.2 כדי לשמר את התנהגות ה־UI, חוזה Railway v1 הורחב באופן תואם לאחור
+בשלושה Failure codes: ‏`TENANT_MEMBERSHIP_REQUIRED`,‏
+`TENANT_SELECTION_REQUIRED` ו־`PERMISSION_DENIED`. כולם מוחזרים כ־HTTP 403,
+אך ה־BFF ממפה אותם בנפרד ל־Onboarding, בחירת Workspace או חסימת הרשאה.
+‏System Admin ממשיך להשתמש ב־`AUTHORIZATION_DENIED` ואינו מושפע.
+
+4.72.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,215 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `95/95`. ‏Source guard סרק 576 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,196
+קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+עדיין חסרים Origin, ‏OIDC, Clerk ו־PostgreSQL חיים, פריסת Railway/Vercel
+וראיית Staging; אין עדיין טענת Production cutover.

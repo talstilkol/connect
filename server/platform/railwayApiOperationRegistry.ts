@@ -21,6 +21,9 @@ import {
   OperationalReportInputError,
   validateOperationalReportInput,
 } from "../reports/operationalReportService.ts";
+import {
+  toOperationalReportView,
+} from "../reports/operationalReportView.ts";
 import type {
   RateLimitGuard,
 } from "../security/rateLimit.ts";
@@ -303,7 +306,20 @@ function mapOperationError(error: unknown): never {
   }
 
   if (error instanceof TenantSessionError) {
-    throw new RailwayApiDispatchError("AUTHORIZATION_DENIED");
+    switch (error.code) {
+      case "TENANT_MEMBERSHIP_REQUIRED":
+        throw new RailwayApiDispatchError(
+          "TENANT_MEMBERSHIP_REQUIRED",
+        );
+      case "TENANT_SELECTION_REQUIRED":
+        throw new RailwayApiDispatchError(
+          "TENANT_SELECTION_REQUIRED",
+        );
+      case "PERMISSION_DENIED":
+        throw new RailwayApiDispatchError("PERMISSION_DENIED");
+      default:
+        throw new RailwayApiDispatchError("AUTHORIZATION_DENIED");
+    }
   }
 
   if (
@@ -495,9 +511,11 @@ export function createRailwayApiOperationRegistry(
       dependencies,
       parseReportPayload,
       async (session, reportInput) =>
-        dependencies.reports.read(
-          session,
-          reportInput,
+        toOperationalReportView(
+          await dependencies.reports.read(
+            session,
+            reportInput,
+          ),
         ),
     ),
   ];

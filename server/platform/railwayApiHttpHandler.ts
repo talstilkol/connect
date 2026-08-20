@@ -91,6 +91,9 @@ export interface RailwayApiHttpHandlerOptions {
 export type RailwayApiDispatchFailureCode =
   | "INVALID_REQUEST"
   | "AUTHORIZATION_DENIED"
+  | "TENANT_MEMBERSHIP_REQUIRED"
+  | "TENANT_SELECTION_REQUIRED"
+  | "PERMISSION_DENIED"
   | "NOT_FOUND"
   | "CONFLICT"
   | "INVALID_TRANSITION"
@@ -100,6 +103,9 @@ export type RailwayApiDispatchFailureCode =
 const railwayApiDispatchFailureCodes = [
   "INVALID_REQUEST",
   "AUTHORIZATION_DENIED",
+  "TENANT_MEMBERSHIP_REQUIRED",
+  "TENANT_SELECTION_REQUIRED",
+  "PERMISSION_DENIED",
   "NOT_FOUND",
   "CONFLICT",
   "INVALID_TRANSITION",
@@ -277,6 +283,9 @@ function dispatchFailureStatus(
     case "INVALID_REQUEST":
       return 400;
     case "AUTHORIZATION_DENIED":
+    case "TENANT_MEMBERSHIP_REQUIRED":
+    case "TENANT_SELECTION_REQUIRED":
+    case "PERMISSION_DENIED":
       return 403;
     case "NOT_FOUND":
       return 404;

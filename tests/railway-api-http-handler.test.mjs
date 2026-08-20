@@ -339,6 +339,9 @@ test("maps only approved operation failure codes", async (context) => {
   const cases = [
     ["INVALID_REQUEST", 400],
     ["AUTHORIZATION_DENIED", 403],
+    ["TENANT_MEMBERSHIP_REQUIRED", 403],
+    ["TENANT_SELECTION_REQUIRED", 403],
+    ["PERMISSION_DENIED", 403],
     ["NOT_FOUND", 404],
     ["CONFLICT", 409],
     ["INVALID_TRANSITION", 409],

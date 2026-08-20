@@ -160,7 +160,56 @@ function fixture({
         return {
           period: input,
           snapshot: {
-            campaigns: { total: 0 },
+            window: {
+              startAt: `${input.startDate}T00:00:00.000Z`,
+              endAt: "2026-08-18T00:00:00.000Z",
+            },
+            generatedAt: "2026-08-17T12:00:00.000Z",
+            campaigns: {
+              total: 0,
+              recipientCount: 0,
+              draft: 0,
+              scheduled: 0,
+              running: 0,
+              paused: 0,
+              completed: 0,
+              cancelled: 0,
+              failed: 0,
+            },
+            messages: {
+              total: 0,
+              inbound: 0,
+              outbound: 0,
+              received: 0,
+              sent: 0,
+              delivered: 0,
+              read: 0,
+              failed: 0,
+            },
+            conversations: {
+              active: 0,
+              unreadCount: 0,
+              new: 0,
+              botActive: 0,
+              waitingForAgent: 0,
+              agentActive: 0,
+              waitingForContact: 0,
+              closed: 0,
+            },
+            bot: {
+              total: 0,
+              pending: 0,
+              sending: 0,
+              accepted: 0,
+              rejected: 0,
+              ambiguous: 0,
+            },
+            ai: {
+              totalTurns: 0,
+              replyPlanned: 0,
+              handoff: 0,
+            },
+            aiUsage: [],
           },
         };
       },
@@ -417,7 +466,7 @@ test("denies contact mutation before rate limit or persistence", async () => {
       contactProfile,
       mutationRequest(),
     ),
-    (error) => error.code === "AUTHORIZATION_DENIED",
+    (error) => error.code === "PERMISSION_DENIED",
   );
   assert.deepEqual(calls.rateLimitSubjects, []);
   assert.deepEqual(calls.mutationCommands, []);
@@ -535,9 +584,34 @@ test("enforces report permission before calling the report service", async () =>
       },
       {},
     ),
-    (error) => error.code === "AUTHORIZATION_DENIED",
+    (error) => error.code === "PERMISSION_DENIED",
   );
   assert.deepEqual(calls.reportInputs, []);
+});
+
+test("returns a bounded operational report view without repository window fields", async () => {
+  const { calls, registry } = fixture({
+    tenantSession: session("viewer"),
+  });
+  const input = {
+    startDate: "2026-08-01",
+    endDate: "2026-08-17",
+  };
+  const result = await operation(registry, "reports.read").execute(
+    dispatchContext,
+    input,
+    {},
+  );
+
+  assert.deepEqual(result.period, input);
+  assert.equal(result.generatedAt, "2026-08-17T12:00:00.000Z");
+  assert.equal(result.campaigns.total, 0);
+  assert.deepEqual(result.aiUsage, []);
+  assert.equal(calls.reportInputs.length, 1);
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /startAt|endAt|tenantId|externalUserId/,
+  );
 });
 
 test("validates operation payload before tenant or service access", async () => {
@@ -633,7 +707,7 @@ test("maps tenant and service validation failures to bounded codes", async () =>
       "workspace.context.read",
     ).execute(dispatchContext, {}, {}),
     (error) =>
-      error.code === "AUTHORIZATION_DENIED" &&
+      error.code === "TENANT_SELECTION_REQUIRED" &&
       !error.message.includes("private"),
   );
   await assert.rejects(

@@ -559,6 +559,18 @@ Subscription, ‏Status, ‏timestamps, סדר, Cursor והתאמה ל־Filters.
 System Admin session מקומי. עדיין נדרשים Origin, ‏OIDC, ‏Allowlist, פריסה
 וראיית Staging חיים; העבודה המקומית אינה טענת Production cutover.
 
+7.1.62 ‏Operational Reports הועברו מקומית מ־D1 ל־Railway API ול־PostgreSQL
+ללא Fallback. גם טעינת ברירת המחדל של 30 ימי UTC וגם שינוי טווח התאריכים
+משתמשים כעת ב־`reports.read`, עם Vercel OIDC ו־Clerk session שנקראים רק בצד
+השרת. ה־Operation פותר Tenant מתוך Membership/Selection ב־Railway, אוכף
+`reports.read` ואינו מקבל Tenant ID ב־Payload. התגובה צומצמה ל־
+`OperationalReportView`: חלון Repository, ‏Tenant context ושדות פנימיים אינם
+חוצים את הגבול. ה־BFF מאמת מחדש Period, ‏timestamp, כל מפתחות ומוני
+Campaign/Message/Conversation/Bot/AI, סכומי קטגוריות, Currency ordering
+ו־AI usage לפני עדכון React. חוזה הכשלים קיבל קודים נפרדים ל־Membership
+חסר, Selection חסרה והרשאה חסרה, כדי לשמר את מצבי ההתאוששות הקיימים ב־UI.
+עדיין נדרשים Origin, ‏OIDC, Clerk, ‏PostgreSQL וראיית Staging חיים.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
