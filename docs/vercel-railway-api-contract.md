@@ -546,6 +546,19 @@ Registry membership, כפילויות, תוכן, Version ו־timestamps לפני
 או עדכון React state. גם ה־Loader וגם ה־Server Action הפעילים אינם מייבאים
 עוד D1. עדיין נדרשים Origin, ‏OIDC, ‏Allowlist, ‏Policy וראיית Staging חיים.
 
+7.1.61 ספריית ה־Tenants של System Admin הועברה מקומית מ־D1 ל־Railway API
+ול־PostgreSQL ללא Fallback. הפעולה `system-admin.tenant-directory.list` היא
+Query לקריאה בלבד: היא דורשת Clerk identity שנמצאת ב־System Admin Allowlist,
+אך אינה עוברת ב־Tenant membership resolver ואינה צורכת מכסת Mutation.
+ה־Payload כולל רק Cursor, חיפוש ושני Filters תחומים; ה־Repository מחזיר עד
+50 רשומות בסדר Tenant עולה עם Keyset cursor. תגובת Railway משתמשת ב־
+`targetTenantId` כדי לא לפתוח מחדש את שדה `tenantId` האסור בחוזה הכללי,
+וה־Vercel BFF ממפה אותו חזרה רק ל־View הפנימי לאחר אימות מלא של Profile,
+Subscription, ‏Status, ‏timestamps, סדר, Cursor והתאמה ל־Filters. גם ה־Loader
+הראשוני וגם פעולת החיפוש/Pagination הפעילים אינם מייבאים עוד Runtime D1 או
+System Admin session מקומי. עדיין נדרשים Origin, ‏OIDC, ‏Allowlist, פריסה
+וראיית Staging חיים; העבודה המקומית אינה טענת Production cutover.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים

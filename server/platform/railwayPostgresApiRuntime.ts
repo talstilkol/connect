@@ -220,6 +220,8 @@ export async function createRailwayPostgresApiRuntime(
                 foundation.subscriptions,
               productionDecisions:
                 foundation.productionDecisions,
+              tenantDirectory:
+                foundation.systemAdminTenantDirectory,
             },
           }),
       maximumBodyBytes: options.maximumBodyBytes,

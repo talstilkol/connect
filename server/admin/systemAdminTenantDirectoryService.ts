@@ -45,7 +45,7 @@ const subscriptionFilters = new Set<string>(
   SYSTEM_ADMIN_SUBSCRIPTION_FILTERS,
 );
 
-function parseQueryInput(
+export function normalizeSystemAdminTenantDirectoryInput(
   input: unknown,
 ): SystemAdminTenantDirectoryQuery {
   if (
@@ -150,7 +150,7 @@ export function createSystemAdminTenantDirectoryService(
       }
 
       return repository.listPage(
-        parseQueryInput(input),
+        normalizeSystemAdminTenantDirectoryInput(input),
       );
     },
   };

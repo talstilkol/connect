@@ -49,6 +49,7 @@ function fixture(selectedRole = "owner") {
     systemAdminSubscriptionInputs: [],
     systemAdminProductionDecisionLists: 0,
     systemAdminProductionDecisionInputs: [],
+    systemAdminTenantDirectoryQueries: [],
   };
   const handler = createRailwayApiRuntime({
     environment,
@@ -284,6 +285,36 @@ function fixture(selectedRole = "owner") {
           };
         },
       },
+      tenantDirectory: {
+        async listPage(query) {
+          calls.systemAdminTenantDirectoryQueries.push(query);
+          return {
+            tenants: [{
+              tenantId: 19,
+              displayName: "Connect Support",
+              tenantStatus: "active",
+              businessProfile: {
+                businessName: "Connect Support",
+                timezone: "Asia/Jerusalem",
+                interfaceLanguage: "he",
+                version: 2,
+                createdAt: "2026-08-01T09:00:00.000Z",
+                updatedAt: "2026-08-20T09:00:00.000Z",
+              },
+              subscription: {
+                status: "active",
+                startsAt: "2026-08-01T00:00:00.000Z",
+                endsAt: "2026-10-01T00:00:00.000Z",
+                cancelledAt: null,
+                version: 2,
+                createdAt: "2026-08-01T00:00:00.000Z",
+                updatedAt: "2026-08-20T09:00:00.000Z",
+              },
+            }],
+            nextCursor: null,
+          };
+        },
+      },
     },
   });
 
@@ -421,6 +452,40 @@ test("lists system-admin production decisions without tenant membership or mutat
   assert.doesNotMatch(
     JSON.stringify(body),
     /externalUserId|lastEventKey|verified-user/,
+  );
+});
+
+test("lists the system-admin tenant directory without tenant membership or mutation quota", async () => {
+  const testFixture = fixture("agent");
+  const payload = {
+    afterTenantId: null,
+    search: "connect",
+    tenantStatus: "active",
+    subscription: "with-subscription",
+  };
+  const response = await testFixture.handler.handle(
+    request(
+      "system-admin.tenant-directory.list",
+      payload,
+    ),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data.directory.tenants.length, 1);
+  assert.equal(
+    body.data.directory.tenants[0].targetTenantId,
+    19,
+  );
+  assert.equal(testFixture.calls.memberships, 0);
+  assert.deepEqual(
+    testFixture.calls.systemAdminTenantDirectoryQueries,
+    [payload],
+  );
+  assert.deepEqual(testFixture.calls.systemAdminMutationSubjects, []);
+  assert.doesNotMatch(
+    JSON.stringify(body),
+    /"tenantId"|externalUserId|verified-user/,
   );
 });
 

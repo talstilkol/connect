@@ -43,6 +43,10 @@ import {
   type RailwaySystemAdminProductionDecisionOperationDependencies,
 } from "./railwaySystemAdminProductionDecisionOperations.ts";
 import {
+  createRailwaySystemAdminTenantDirectoryOperation,
+  type RailwaySystemAdminTenantDirectoryOperationDependencies,
+} from "./railwaySystemAdminTenantDirectoryOperation.ts";
+import {
   createRailwayTenantSessionResolver,
 } from "./railwayTenantSessionResolver.ts";
 
@@ -58,7 +62,8 @@ export interface RailwayApiRuntimeOptions {
   readonly systemAdmin?: Readonly<
     RailwaySystemAdminBusinessProfileOperationDependencies &
       RailwaySystemAdminSubscriptionOperationDependencies &
-      RailwaySystemAdminProductionDecisionOperationDependencies
+      RailwaySystemAdminProductionDecisionOperationDependencies &
+      RailwaySystemAdminTenantDirectoryOperationDependencies
   >;
   readonly maximumBodyBytes?: number;
   readonly maximumResponseBytes?: number;
@@ -116,6 +121,12 @@ export function createRailwayApiRuntime(
                 options.systemAdmin.productionDecisions,
             },
           ),
+          createRailwaySystemAdminTenantDirectoryOperation({
+            allowedExternalUserIds:
+              options.systemAdmin.allowedExternalUserIds,
+            tenantDirectory:
+              options.systemAdmin.tenantDirectory,
+          }),
         ];
 
   return createRailwayApiHttpHandler({

@@ -2121,3 +2121,29 @@ Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סר
 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
 `git diff --check` עבר. עדיין חסרים Origin, ‏OIDC, ‏Allowlist ו־Policy חיים,
 פריסת Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.
+
+4.71 ספריית ה־Tenants של System Admin הועברה מקומית במלואה מ־D1 ל־Railway
+API ול־PostgreSQL ללא Fallback. ‏Operation יחידה לקריאה בלבד מקבלת Cursor,
+חיפוש, סטטוס Tenant ומצב Subscription, דורשת Allowlist ומעבירה ל־Repository
+רק Query מנורמלת. היא אינה פותרת Tenant membership ואינה צורכת מכסת
+`system-admin-mutation`.
+
+4.71.1 ‏PostgreSQL Repository הקיים מחזיר עד 50 רשומות בסדר עולה עם
+Keyset cursor. תגובת Railway מחליפה את שדה ה־Tenant הפנימי ב־
+`targetTenantId`, ואינה כוללת External user ID, ‏Audit actor או פרטי מסד.
+ה־Vercel handler מאמת מחדש את כל מפתחות התגובה, מזהים, Profile,
+Subscription, ‏Status, ‏Version, ‏timestamps, סדר, Cursor והתאמה ל־Filters
+לפני החזרת View ל־React.
+
+4.71.2 גם טעינת עמוד Admin הראשונה וגם חיפוש, Filter ו־Pagination משתמשים
+באותו Handler ובאותו Railway operation. שני קובצי ה־Runtime הפעילים אינם
+מייבאים עוד D1 repository, ‏Runtime database או System Admin session מקומי;
+בדיקת Boundary מקבעת שאין Fallback. שכבות D1 הישנות נשארו כרגע כקוד Legacy
+לא פעיל עד להסרה מבוקרת נפרדת.
+
+4.71.3 ‏Build, ‏TypeScript, ‏ESLint וכל **2,202 הבדיקות** עברו ללא כשל,
+Skip או Todo; בדיקות היעד עברו `41/41`. ‏Source guard סרק 574 קבצים ו־35
+Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק 1,190
+קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+`git diff --check` עבר. עדיין חסרים Origin, ‏OIDC ו־Allowlist חיים, פריסת
+Railway/Vercel וראיית Staging; אין עדיין טענת Production cutover.

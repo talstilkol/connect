@@ -120,7 +120,7 @@ test("declares tenant and webhook rate limit bindings only on the server", async
   );
 });
 
-test("uses the Railway server identity for subscription writes and a regular session for admin reads", async () => {
+test("uses the Railway server identity for system-admin writes and directory reads", async () => {
   const mutationSource = await readServerSource(
     "billing/systemAdminSubscriptionActions.ts",
   );
@@ -138,10 +138,10 @@ test("uses the Railway server identity for subscription writes and a regular ses
   );
   assert.match(
     readSource,
-    /requireCurrentSystemAdminSession/,
+    /createCurrentRailwaySystemAdminTenantDirectoryHandler/,
   );
   assert.doesNotMatch(
     readSource,
-    /requireCurrentSystemAdminMutationSession/,
+    /requireCurrentSystemAdminSession|requireCurrentSystemAdminMutationSession|requireRuntimeDatabase/,
   );
 });
