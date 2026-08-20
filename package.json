@@ -66,6 +66,7 @@
     "@clerk/backend": "3.13.1",
     "@clerk/localizations": "4.13.8",
     "@clerk/nextjs": "7.6.0",
+    "@vercel/oidc": "3.8.4",
     "drizzle-orm": "0.45.2",
     "fflate": "0.8.3",
     "jose": "6.2.3",

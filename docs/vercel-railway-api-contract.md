@@ -514,6 +514,16 @@ Database. Allowlist או Rate-limit policy חלקיים/לא חוקיים נכש
 חיבור פעולת ה־Vercel/React הקיימת ל־Railway operation והוכחת Staging עדיין
 נדרשים לפני Cutover; ה־Route המקומי לבדו אינו ראיית Deployment.
 
+7.1.58 פעולת ה־Server Action של עריכת Business Profile הועברה מקומית מ־D1
+אל Railway API ללא Fallback. ‏Vercel BFF מנרמל את חמשת שדות הקלט, משנה רק
+את שם שדה היעד מ־`tenantId` ל־`targetTenantId`, גוזר מפתח Idempotency
+דטרמיניסטי ושולח את החוזה הקפוא ל־`/v1/connect`. ‏Clerk `auth().getToken()`
+מספק את ה־Session token ו־`@vercel/oidc` מספק את Vercel OIDC token בזמן
+הבקשה; שני הטוקנים נשארים בצד השרת בלבד. תגובה מוצלחת נבדקת שוב מול הקלט,
+Version ו־timestamps לפני עדכון React state. קלט מורחב, Origin זדוני,
+Identity חסרה, Response לא תואמת או Network failure נכשלים סגור. עדיין
+נדרשים `RAILWAY_API_ORIGIN` חי, הגדרת OIDC ב־Vercel וראיית Staging אמיתית.
+
 7.2 עדיין חסר:
 
 7.2.1 ערכי Team, ‏Project, ‏Environment ו־`APP_PUBLIC_ORIGIN` אמיתיים
@@ -555,6 +565,10 @@ evidence.
 
 8.6 `VERCEL_OIDC_ENVIRONMENT` — אחד מ־`development`, ‏`preview` או
 `production` לפי ה־Environment שמורשה לפנות לשירות Railway המסוים.
+
+8.6.1 `RAILWAY_API_ORIGIN` — Origin קנוני של Railway API ללא Path, ‏Query,
+Fragment או Credentials. נדרש HTTPS; רק `development` מאפשר HTTP אל
+`localhost`, ‏`127.0.0.1` או `::1`.
 
 8.7 `DATABASE_URL` — Secret שרתי בלבד. אסור להעביר אותו ל־Vercel Web,
 Browser, ‏Logs או Evidence.

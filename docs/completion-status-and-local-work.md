@@ -2042,3 +2042,32 @@ Admin מוגדרים ותקינים. אם שניהם חסרים הפעולה א�
 הזמניים הוסרו. ערכי Allowlist ו־Policy חיים, Telemetry, ‏Load evidence
 וראיית Railway Staging עדיין חיצוניים ולא הושלמו. גם פעולת ה־Vercel/React
 הקיימת עדיין צריכה לעבור מה־D1 action אל ה־Railway operation לפני Cutover.
+
+4.68 פעולת React/Vercel לעריכת System Admin Business Profile הועברה מקומית
+מ־D1 ל־Railway API. קובץ ה־Server Action הפעיל אינו מייבא עוד Runtime D1,
+Repository D1 או Cloudflare System Admin rate limiter, ואין בו Fallback
+שקט. ה־UI ממשיך לקבל בדיוק את אותו `SystemAdminBusinessProfileActionResult`.
+
+4.68.1 נוסף חוזה `RAILWAY_API_ORIGIN` fail-closed: ‏HTTPS קנוני בלבד ללא
+Path, ‏Query, ‏Fragment או Credentials; HTTP מותר רק ל־Loopback וב־
+`development`. מצב חסר, חלקי או לא חוקי מוחזר כ־`configuration-required`
+לפני Identity או Network.
+
+4.68.2 ‏Clerk session token מתקבל בזמן הבקשה מ־`auth().getToken()` ו־Vercel
+OIDC token מתקבל מ־`@vercel/oidc` הרשמי. Resolver טהור מפריד בין Signed-out
+לבין Dependency unavailable, דורש שני JWTs תחומים ואינו מחזיר טוקן חלקי.
+ה־Framework adapter מבודד מהלוגיקה הנבדקת ואינו קורא ידנית
+`VERCEL_OIDC_TOKEN`.
+
+4.68.3 ה־BFF מנרמל את קלט הפרופיל, גוזר מפתח Idempotency מתוכן Canonical,
+שולח רק `targetTenantId`, ‏`expectedVersion` ושלושת שדות הפרופיל, ומאמת
+Response מול הפרופיל המבוקש, Version ו־timestamps לפני עדכון React state.
+עדיין חסרים Origin ו־OIDC חיים, פריסת Railway/Vercel וראיית Staging; העבודה
+המקומית אינה מסמנת Cutover או Production readiness.
+
+4.68.4 ‏Build, ‏TypeScript, ‏ESLint וכל **2,153 הבדיקות** עברו ללא כשל,
+Skip או Todo. בדיקות היעד עברו `39/39`, ולאחר עדכון רשימת גבולות האימות
+נבדקו שוב `19/19` תרחישי Boundary ו־Identity. ‏Source guard סרק 566 קבצים
+ו־35 Client graphs, ‏Interface guard עבר 15 בדיקות, ‏Secret hygiene סרק
+1,172 קבצים כולל היסטוריית Git ו־Dependency lock אימת 31 תלויות ישירות.
+התקנת `@vercel/oidc@3.8.4` דיווחה על אפס חולשות ו־`git diff --check` עבר.

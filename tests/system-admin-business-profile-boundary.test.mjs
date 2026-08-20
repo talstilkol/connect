@@ -16,23 +16,48 @@ const formUrl = new URL(
   "../features/admin/SystemAdminBusinessProfileForm.tsx",
   import.meta.url,
 );
+const railwayIdentityUrl = new URL(
+  "../server/platform/currentRailwayApiServerIdentity.ts",
+  import.meta.url,
+);
 
 test("wires profile edits through the protected system admin mutation boundary", async () => {
-  const [actions, panel, form] =
+  const [actions, panel, form, railwayIdentity] =
     await Promise.all([
       readFile(actionsUrl, "utf8"),
       readFile(panelUrl, "utf8"),
       readFile(formUrl, "utf8"),
+      readFile(railwayIdentityUrl, "utf8"),
     ]);
   const clientCode = `${panel}\n${form}`;
 
   assert.match(
     actions,
-    /requireCurrentSystemAdminMutationSession/,
+    /resolveCurrentRailwayApiServerIdentity/,
   );
   assert.match(
     actions,
-    /createSystemAdminBusinessProfileRepository/,
+    /createRailwayApiClient/,
+  );
+  assert.match(
+    actions,
+    /inspectRailwayApiClientConfiguration/,
+  );
+  assert.doesNotMatch(
+    actions,
+    /requireRuntimeDatabase|createSystemAdminBusinessProfileRepository|requireCurrentSystemAdminMutationSession/,
+  );
+  assert.match(
+    railwayIdentity,
+    /from "@vercel\/oidc"/,
+  );
+  assert.match(
+    railwayIdentity,
+    /state\.getToken\(\)/,
+  );
+  assert.doesNotMatch(
+    railwayIdentity,
+    /VERCEL_OIDC_TOKEN|localStorage|sessionStorage/,
   );
   assert.match(
     panel,

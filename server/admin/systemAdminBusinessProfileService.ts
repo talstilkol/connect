@@ -53,6 +53,14 @@ export interface SystemAdminBusinessProfileService {
   ): Promise<SystemAdminBusinessProfileMutationResult>;
 }
 
+export interface NormalizedSystemAdminBusinessProfileInput {
+  readonly tenantId: number;
+  readonly expectedVersion: number;
+  readonly businessName: string;
+  readonly timezone: string;
+  readonly interfaceLanguage: "he" | "en" | "ar";
+}
+
 type Clock = () => string;
 
 function inputError(): never {
@@ -116,6 +124,70 @@ function currentTimestamp(
   }
 }
 
+export function normalizeSystemAdminBusinessProfileInput(
+  input: unknown,
+): Readonly<NormalizedSystemAdminBusinessProfileInput> {
+  if (
+    !isExactRecord(input, [
+      "tenantId",
+      "expectedVersion",
+      "businessName",
+      "timezone",
+      "interfaceLanguage",
+    ]) ||
+    typeof input.tenantId !== "number" ||
+    typeof input.expectedVersion !== "number"
+  ) {
+    return inputError();
+  }
+
+  let tenantId;
+  let expectedVersion;
+
+  try {
+    tenantId = requirePositiveTenantId(
+      input.tenantId,
+    );
+    expectedVersion =
+      requirePositiveVersion(
+        input.expectedVersion,
+      );
+  } catch {
+    return inputError();
+  }
+
+  const validation =
+    validatePersistedBusinessProfile({
+      businessName:
+        input.businessName,
+      timezone: input.timezone,
+      interfaceLanguage:
+        input.interfaceLanguage,
+    });
+
+  if (
+    !validation.success ||
+    validation.value.businessName
+      .length > 500 ||
+    validation.value.timezone.length >
+      500 ||
+    /[\u0000-\u001f\u007f]/.test(
+      validation.value.businessName,
+    ) ||
+    /[\u0000-\u001f\u007f]/.test(
+      validation.value.timezone,
+    )
+  ) {
+    return inputError();
+  }
+
+  return Object.freeze({
+    tenantId,
+    expectedVersion,
+    ...validation.value,
+  });
+}
+
 function requireResult(
   result:
     SystemAdminBusinessProfileMutationResult,
@@ -154,70 +226,16 @@ export function createSystemAdminBusinessProfileService(
   return {
     async update(session, input) {
       assertSession(session);
-
-      if (
-        !isExactRecord(input, [
-          "tenantId",
-          "expectedVersion",
-          "businessName",
-          "timezone",
-          "interfaceLanguage",
-        ]) ||
-        typeof input.tenantId !==
-          "number" ||
-        typeof input.expectedVersion !==
-          "number"
-      ) {
-        return inputError();
-      }
-
-      let tenantId;
-      let expectedVersion;
-
-      try {
-        tenantId = requirePositiveTenantId(
-          input.tenantId,
+      const normalized =
+        normalizeSystemAdminBusinessProfileInput(
+          input,
         );
-        expectedVersion =
-          requirePositiveVersion(
-            input.expectedVersion,
-          );
-      } catch {
-        return inputError();
-      }
-
-      const validation =
-        validatePersistedBusinessProfile({
-          businessName:
-            input.businessName,
-          timezone: input.timezone,
-          interfaceLanguage:
-            input.interfaceLanguage,
-        });
-
-      if (
-        !validation.success ||
-        validation.value.businessName
-          .length > 500 ||
-        validation.value.timezone.length >
-          500 ||
-        /[\u0000-\u001f\u007f]/.test(
-          validation.value.businessName,
-        ) ||
-        /[\u0000-\u001f\u007f]/.test(
-          validation.value.timezone,
-        )
-      ) {
-        return inputError();
-      }
 
       let result;
 
       try {
         result = await repository.update({
-          tenantId,
-          expectedVersion,
-          ...validation.value,
+          ...normalized,
           actorExternalUserId:
             session.externalUserId,
           occurredAt:
@@ -231,7 +249,7 @@ export function createSystemAdminBusinessProfileService(
 
       return requireResult(
         result,
-        tenantId,
+        normalized.tenantId,
       );
     },
   };

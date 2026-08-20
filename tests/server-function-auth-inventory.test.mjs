@@ -16,7 +16,7 @@ const serverRoot = path.join(
 );
 
 const auditedServerFunctions = new Map([
-  ["server/admin/systemAdminBusinessProfileActions.ts", ["requireCurrentSystemAdminMutationSession"]],
+  ["server/admin/systemAdminBusinessProfileActions.ts", ["resolveCurrentRailwayApiServerIdentity"]],
   ["server/admin/systemAdminTenantDirectoryActions.ts", ["requireCurrentSystemAdminSession"]],
   ["server/ai/aiAgentActions.ts", ["requireCurrentTenantMutationSession"]],
   ["server/ai/aiReplyApprovalActions.ts", ["requireCurrentTenantMutationSession"]],
