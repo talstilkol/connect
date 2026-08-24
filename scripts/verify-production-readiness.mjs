@@ -4,6 +4,12 @@ import { fileURLToPath } from "node:url";
 import {
   inspectCurrentProductionReadiness,
 } from "../server/operations/productionReadiness.ts";
+import {
+  readCurrentRailwayProductionReadinessV2,
+} from "../server/platform/currentRailwayProductionReadinessV2.ts";
+import {
+  currentProductionReadinessV2SourceVersion,
+} from "../server/operations/currentProductionReadinessV2Source.ts";
 
 const hostingUrl = new URL(
   "../.openai/hosting.json",
@@ -16,6 +22,13 @@ const allowedStatuses = new Set([
   "ready",
   "blocked",
   "decision-required",
+]);
+const allowedV2Statuses = new Set([
+  "ready",
+  "blocked",
+  "decision-required",
+  "unavailable",
+  "stale",
 ]);
 
 async function readHostingBindings() {
@@ -79,8 +92,171 @@ export function readProductionReadinessCliMode(
     return "json";
   }
 
+  if (
+    argumentsList.length === 1 &&
+    argumentsList[0] === "--v2"
+  ) {
+    return "v2-human";
+  }
+
+  if (
+    argumentsList.length === 2 &&
+    argumentsList.includes("--v2") &&
+    argumentsList.includes("--json")
+  ) {
+    return "v2-json";
+  }
+
   throw new Error(
     "PRODUCTION_READINESS_ARGUMENTS_INVALID",
+  );
+}
+
+export function createProductionReadinessV2SourcePayload(
+  state,
+) {
+  if (
+    !isRecord(state) ||
+    state.schemaVersion !== 2 ||
+    state.sourceVersion !== currentProductionReadinessV2SourceVersion ||
+    typeof state.status !== "string" ||
+    typeof state.code !== "string" ||
+    !safeCodePattern.test(state.code) ||
+    !["blocked", "active"].includes(state.status) ||
+    !["disabled", "invalid", "configured"].includes(
+      state.sourceStatus,
+    ) ||
+    !(state.source === null || state.source === "postgresql")
+  ) {
+    fail();
+  }
+
+  if (state.status === "blocked") {
+    if (
+      state.activeVersion !== null ||
+      state.candidateDigest !== null ||
+      state.report !== null ||
+      (state.sourceStatus === "configured") !==
+        (state.source === "postgresql")
+    ) {
+      fail();
+    }
+    return Object.freeze({
+      schemaVersion: 2,
+      status: "blocked",
+      code: state.code,
+      source: state.source,
+      sourceStatus: state.sourceStatus,
+      activeVersion: null,
+      candidateDigest: null,
+      counts: null,
+      checks: Object.freeze([]),
+    });
+  }
+
+  if (
+    state.source !== "postgresql" ||
+    state.sourceStatus !== "configured" ||
+    !Number.isSafeInteger(state.activeVersion) ||
+    state.activeVersion < 1 ||
+    typeof state.candidateDigest !== "string" ||
+    !/^production_readiness_candidate_v2_[a-f0-9]{64}$/.test(
+      state.candidateDigest,
+    ) ||
+    !isRecord(state.report) ||
+    !Array.isArray(state.report.checks) ||
+    !isRecord(state.report.counts) ||
+    typeof state.report.readyForProduction !== "boolean"
+  ) {
+    fail();
+  }
+
+  const checks = state.report.checks.map((check) => {
+    if (
+      !isRecord(check) ||
+      typeof check.id !== "string" ||
+      !safeIdPattern.test(check.id) ||
+      typeof check.status !== "string" ||
+      !allowedV2Statuses.has(check.status) ||
+      typeof check.code !== "string" ||
+      !safeCodePattern.test(check.code)
+    ) {
+      fail();
+    }
+    return Object.freeze({
+      id: check.id,
+      status: check.status,
+      code: check.code,
+    });
+  });
+  const counts = Object.freeze({
+    ready: checks.filter(({ status }) => status === "ready").length,
+    blocked: checks.filter(({ status }) => status === "blocked").length,
+    decisionRequired: checks.filter(
+      ({ status }) => status === "decision-required",
+    ).length,
+    unavailable: checks.filter(
+      ({ status }) => status === "unavailable",
+    ).length,
+    stale: checks.filter(({ status }) => status === "stale").length,
+  });
+  if (
+    new Set(checks.map(({ id }) => id)).size !== checks.length ||
+    Object.entries(counts).some(
+      ([key, count]) => state.report.counts[key] !== count,
+    ) ||
+    state.report.readyForProduction !==
+      (counts.ready === checks.length)
+  ) {
+    fail();
+  }
+
+  return Object.freeze({
+    schemaVersion: 2,
+    status: state.report.readyForProduction ? "ready" : "blocked",
+    code: state.code,
+    source: "postgresql",
+    sourceStatus: "configured",
+    activeVersion: state.activeVersion,
+    candidateDigest: state.candidateDigest,
+    counts,
+    checks: Object.freeze(checks),
+  });
+}
+
+export function renderProductionReadinessV2SourceHuman(
+  state,
+) {
+  const payload = createProductionReadinessV2SourcePayload(state);
+  const source = payload.source === null
+    ? "NONE"
+    : payload.source.toUpperCase();
+  const lines = [
+    `Production readiness v2: ${payload.status.toUpperCase()}`,
+    `Source: ${source} (${payload.sourceStatus})`,
+    `Code: ${payload.code}`,
+  ];
+  if (payload.counts !== null) {
+    lines.push(
+      `Checks: ${payload.counts.ready} ready, ` +
+        `${payload.counts.blocked} blocked, ` +
+        `${payload.counts.decisionRequired} decision-required, ` +
+        `${payload.counts.unavailable} unavailable, ` +
+        `${payload.counts.stale} stale`,
+      ...payload.checks.map(
+        (check) =>
+          `[${check.status.toUpperCase()}] ${check.id}: ${check.code}`,
+      ),
+    );
+  }
+  return lines.join("\n");
+}
+
+export function renderProductionReadinessV2SourceJson(
+  state,
+) {
+  return JSON.stringify(
+    createProductionReadinessV2SourcePayload(state),
   );
 }
 
@@ -207,6 +383,25 @@ async function runCli() {
   }
 
   try {
+    if (mode === "v2-human" || mode === "v2-json") {
+      const state =
+        await readCurrentRailwayProductionReadinessV2(
+          process.env,
+        );
+      console.log(
+        mode === "v2-json"
+          ? renderProductionReadinessV2SourceJson(state)
+          : renderProductionReadinessV2SourceHuman(state),
+      );
+      if (
+        state.status !== "active" ||
+        !state.report.readyForProduction
+      ) {
+        process.exitCode = 1;
+      }
+      return;
+    }
+
     const report =
       inspectCurrentProductionReadiness(
         process.env,
