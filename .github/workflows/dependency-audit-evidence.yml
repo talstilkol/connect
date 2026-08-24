@@ -41,15 +41,19 @@ jobs:
       - name: Audit production dependencies and build release-bound evidence
         run: npm run evidence:dependency-audit
 
+      - name: Require private-repository attestation capability
+        if: ${{ github.event.repository.private == true && vars.CONNECT_PRIVATE_ARTIFACT_ATTESTATIONS_ENABLED != 'true' }}
+        run: |
+          echo "::error title=Private artifact attestation capability required::DEPENDENCY_AUDIT_ATTESTATION_PRIVATE_REPOSITORY_CAPABILITY_REQUIRED: GitHub Artifact Attestations for private repositories require GitHub Enterprise Cloud. Set CONNECT_PRIVATE_ARTIFACT_ATTESTATIONS_ENABLED=true only after that entitlement is confirmed."
+          exit 1
+
       - name: Attest the dependency audit evidence provenance
-        if: ${{ github.event.repository.private == false }}
         id: attest-dependency-audit
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-path: .artifacts/dependency-audit-evidence.json
 
       - name: Stage the signed attestation bundle
-        if: ${{ github.event.repository.private == false }}
         run: >-
           install -m 0644 "$ATTESTATION_BUNDLE_PATH"
           .artifacts/dependency-audit-evidence-attestation.json
@@ -57,6 +61,7 @@ jobs:
           ATTESTATION_BUNDLE_PATH: ${{ steps.attest-dependency-audit.outputs.bundle-path }}
 
       - name: Upload the bounded evidence artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dependency-audit-evidence-${{ github.sha }}

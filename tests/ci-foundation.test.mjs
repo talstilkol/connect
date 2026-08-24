@@ -361,11 +361,25 @@ test("runs every local release gate as a separately named pull request check", a
     workflow,
     /tests-and-build:[\s\S]*?fetch-depth: 0[\s\S]*?npm ci[\s\S]*?npm test/,
   );
-  assert.equal(
-    dependencyAuditWorkflow.match(
-      /if: \$\{\{ github\.event\.repository\.private == false \}\}/g,
-    )?.length,
-    2,
+  assert.doesNotMatch(
+    dependencyAuditWorkflow,
+    /github\.event\.repository\.private == false/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /github\.event\.repository\.private == true && vars\.CONNECT_PRIVATE_ARTIFACT_ATTESTATIONS_ENABLED != 'true'/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /DEPENDENCY_AUDIT_ATTESTATION_PRIVATE_REPOSITORY_CAPABILITY_REQUIRED/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /Attest the dependency audit evidence provenance\n        id: attest-dependency-audit/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /Upload the bounded evidence artifacts\n        if: \$\{\{ always\(\) \}\}/,
   );
   assert.match(
     dependencyAuditWorkflow,
