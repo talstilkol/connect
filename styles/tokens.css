@@ -1,4 +1,7 @@
 :root {
+  --font-geist-sans: Arial, "Noto Sans Hebrew", sans-serif;
+  --font-geist-mono: ui-monospace, "SFMono-Regular", Consolas,
+    "Liberation Mono", monospace;
   --ink: #152c2a;
   --muted: #667873;
   --line: #dde5e2;

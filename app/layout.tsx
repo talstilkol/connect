@@ -1,19 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import ClerkAppProvider from "../features/auth/ClerkAppProvider";
 import { resolvePublicOrigin } from "../server/operations/publicOrigin";
 import { publicLandingMessages } from "../shared/i18n/publicLanding";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const { title, description } =
   publicLandingMessages.he.metadata;
@@ -63,7 +52,7 @@ export default function RootLayout({
           type="image/svg+xml"
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
         <ClerkAppProvider>{children}</ClerkAppProvider>
       </body>
     </html>
