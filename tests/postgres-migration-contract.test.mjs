@@ -62,6 +62,7 @@ const serviceWindowRejectionSchema = migrationSources[38];
 const providerRequestFenceSchema = migrationSources[39];
 const releaseEvidenceSchema = migrationSources[40];
 const productionReadinessV2EvidenceSchema = migrationSources[41];
+const botReplyProviderOutcomeRequestFenceSchema = migrationSources[42];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -107,14 +108,41 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0039_bot_reply_provider_request_fence.sql",
     "0040_bot_reply_staging_release_evidence.sql",
     "0041_production_readiness_release_evidence_v2.sql",
+    "0042_bot_reply_provider_outcome_request_fence.sql",
+    "0043_bot_reply_staging_release_evidence_operator_audit.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 42,
+      migrationCount: 44,
       findings: [],
     },
+  );
+});
+
+test("binds every Bot reply provider outcome to its preceding request", () => {
+  assert.match(
+    botReplyProviderOutcomeRequestFenceSchema,
+    /CREATE OR REPLACE FUNCTION enforce_bot_reply_provider_link_insert\(\)/,
+  );
+  assert.match(
+    botReplyProviderOutcomeRequestFenceSchema,
+    /CREATE OR REPLACE FUNCTION enforce_bot_reply_provider_deferral_insert\(\)/,
+  );
+  assert.match(
+    botReplyProviderOutcomeRequestFenceSchema,
+    /CREATE OR REPLACE FUNCTION enforce_bot_reply_window_rejection_insert\(\)/,
+  );
+  assert.equal(
+    (botReplyProviderOutcomeRequestFenceSchema.match(
+      /INNER JOIN bot_reply_provider_request_claims AS request/g,
+    ) ?? []).length,
+    4,
+  );
+  assert.doesNotMatch(
+    botReplyProviderOutcomeRequestFenceSchema,
+    /DROP\s+(?:TABLE|COLUMN)|TRUNCATE|DELETE\s+FROM/i,
   );
 });
 

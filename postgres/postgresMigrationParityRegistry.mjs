@@ -504,4 +504,18 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway stages immutable multi-service readiness candidates and promotes only a candidate with one atomic head compare-and-set plus append-only activation evidence.",
   }),
+  Object.freeze({
+    migration: "0042_bot_reply_provider_outcome_request_fence.sql",
+    token: "Bot reply provider link lacks an exact provider request claim",
+    summary:
+      "Railway rejects Bot reply acceptance, provider deferral, and service-window rejection outcomes unless each matches the exact tenant, delivery, claim, reservation, and preceding provider request.",
+  }),
+  Object.freeze({
+    migration:
+      "0043_bot_reply_staging_release_evidence_operator_audit.sql",
+    token:
+      "CREATE TABLE bot_reply_staging_release_evidence_operator_events",
+    summary:
+      "Railway adds immutable system-admin actor and deterministic operator-request evidence for audited Bot reply staging release-evidence publications; runtime activation remains separately fail-closed.",
+  }),
 ]);
