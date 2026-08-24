@@ -307,6 +307,116 @@ export const POSTGRES_MIGRATION_PARITY_REGISTRY = Object.freeze([
     ],
     "Provider-bound throughput evidence and rolling admission have a direct PostgreSQL migration.",
   ),
+  covered(
+    "0036_team_invitation_delivery_deferrals.sql",
+    ["0029_team_invitation_delivery_deferrals.sql"],
+    [
+      target(
+        "0029_team_invitation_delivery_deferrals.sql",
+        "CREATE TABLE team_invitation_delivery_deferrals",
+      ),
+      target(
+        "0029_team_invitation_delivery_deferrals.sql",
+        "apply_team_invitation_delivery_deferral",
+      ),
+    ],
+    "Durable provider Retry-After evidence and the atomic sending-to-pending transition have a direct PostgreSQL counterpart.",
+  ),
+  covered(
+    "0037_whatsapp_service_reply_reservations.sql",
+    ["0030_whatsapp_service_reply_reservations.sql"],
+    [
+      target(
+        "0030_whatsapp_service_reply_reservations.sql",
+        "reservation_class",
+      ),
+      target(
+        "0030_whatsapp_service_reply_reservations.sql",
+        "service-reply",
+      ),
+      target(
+        "0030_whatsapp_service_reply_reservations.sql",
+        "reservation.reservation_class = 'business-initiated'",
+      ),
+    ],
+    "Service-window replies share pair and phone throughput admission while remaining outside the business-initiated unique-recipient quota in both databases.",
+  ),
+  covered(
+    "0038_bot_reply_delivery_deferrals.sql",
+    ["0031_bot_reply_delivery_deferrals.sql"],
+    [
+      target(
+        "0031_bot_reply_delivery_deferrals.sql",
+        "claim_version",
+      ),
+      target(
+        "0031_bot_reply_delivery_deferrals.sql",
+        "next_attempt_at",
+      ),
+      target(
+        "0031_bot_reply_delivery_deferrals.sql",
+        "enforce_bot_reply_delivery_transition",
+      ),
+    ],
+    "Bot replies have a durable due time and fenced claim lifecycle in both databases.",
+  ),
+  covered(
+    "0039_bot_reply_delivery_provider_links.sql",
+    ["0032_bot_reply_delivery_provider_links.sql"],
+    [
+      target(
+        "0032_bot_reply_delivery_provider_links.sql",
+        "CREATE TABLE bot_reply_delivery_provider_links",
+      ),
+      target(
+        "0032_bot_reply_delivery_provider_links.sql",
+        "project_bot_reply_provider_acceptance",
+      ),
+      target(
+        "0032_bot_reply_delivery_provider_links.sql",
+        "project_bot_reply_provider_status",
+      ),
+    ],
+    "Bot reply provider identity, accepted projection and terminal rate-limit settlement are guarded atomically in both databases.",
+  ),
+  covered(
+    "0040_inbound_button_reply_provenance.sql",
+    ["0037_inbound_button_reply_provenance.sql"],
+    [
+      target(
+        "0037_inbound_button_reply_provenance.sql",
+        "CREATE TABLE inbound_button_reply_events",
+      ),
+      target(
+        "0037_inbound_button_reply_provenance.sql",
+        "enforce_inbound_button_reply_insert",
+      ),
+      target(
+        "0037_inbound_button_reply_provenance.sql",
+        "reject_inbound_button_reply_mutation",
+      ),
+    ],
+    "Inbound button replies are bound immutably to the exact accepted Bot delivery and selected option in both databases.",
+  ),
+  covered(
+    "0041_bot_reply_service_window_rejection_provenance.sql",
+    ["0038_bot_reply_service_window_rejection_provenance.sql"],
+    [
+      target(
+        "0038_bot_reply_service_window_rejection_provenance.sql",
+        "CREATE TABLE bot_reply_service_window_rejection_events",
+      ),
+      target(
+        "0038_bot_reply_service_window_rejection_provenance.sql",
+        "enforce_bot_reply_window_rejection_insert",
+      ),
+      target(
+        "0038_bot_reply_service_window_rejection_provenance.sql",
+        "reject_bot_reply_window_rejection_mutation",
+      ),
+    ],
+    "Meta 131047 rejections are bound immutably to one service-reply reservation, settlement, delivery claim and local service window in both databases.",
+  ),
 ]);
 
 export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
@@ -333,5 +443,65 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE data_migration_bundle_receipts",
     summary:
       "A Railway cutover needs one immutable receipt for atomic all-slice execution and source-level replay protection.",
+  }),
+  Object.freeze({
+    migration: "0026_message_template_submission_outbox.sql",
+    token: "CREATE TABLE message_template_submission_outbox",
+    summary:
+      "Railway requires a durable Meta template submission outbox and immutable recovery evidence around the external provider side effect.",
+  }),
+  Object.freeze({
+    migration: "0027_clerk_organization_binding.sql",
+    token: "ADD COLUMN clerk_organization_id TEXT",
+    summary:
+      "Railway binds each tenant to one signed Clerk Organization while legacy D1 remains frozen for migration.",
+  }),
+  Object.freeze({
+    migration: "0028_clerk_invitation_rate_limit.sql",
+    token: "clerk-organization-invitation",
+    summary:
+      "Railway workers share one PostgreSQL token bucket for Clerk Organization invitation creation while legacy D1 remains frozen for migration.",
+  }),
+  Object.freeze({
+    migration: "0033_bot_reply_staging_runs.sql",
+    token: "CREATE TABLE bot_reply_staging_runs",
+    summary:
+      "Railway stores fenced, audited staging evidence runs that never existed in the legacy D1 production path.",
+  }),
+  Object.freeze({
+    migration: "0034_bot_reply_staging_authorizations.sql",
+    token: "CREATE TABLE bot_reply_staging_authorization_events",
+    summary:
+      "Railway stores immutable staging-only recipient opt-in and Tal rate-limit approval evidence without raw phone numbers or provider credentials.",
+  }),
+  Object.freeze({
+    migration: "0035_bot_reply_staging_observations.sql",
+    token: "CREATE TABLE bot_reply_staging_observation_events",
+    summary:
+      "Railway stores immutable, PII-free staging observation facts bound to one active fenced run and one exact operation.",
+  }),
+  Object.freeze({
+    migration: "0036_bot_reply_provider_attempt_provenance.sql",
+    token: "CREATE TABLE bot_reply_provider_deferral_events",
+    summary:
+      "Railway binds each provider-enforced Bot reply deferral to one exact delivery claim, service-reply reservation, settlement, cooldown and retry deadline without storing message or phone payloads.",
+  }),
+  Object.freeze({
+    migration: "0039_bot_reply_provider_request_fence.sql",
+    token: "CREATE TABLE bot_reply_provider_request_claims",
+    summary:
+      "Railway creates one immutable, payload-free provider request fence per Bot reply delivery claim and service-reply reservation before the Meta POST boundary.",
+  }),
+  Object.freeze({
+    migration: "0040_bot_reply_staging_release_evidence.sql",
+    token: "CREATE TABLE bot_reply_staging_release_evidence",
+    summary:
+      "Railway stores short-lived cross-service activation evidence behind a release-bound PostgreSQL compare-and-set contract.",
+  }),
+  Object.freeze({
+    migration: "0041_production_readiness_release_evidence_v2.sql",
+    token: "CREATE TABLE production_readiness_release_heads_v2",
+    summary:
+      "Railway stages immutable multi-service readiness candidates and promotes only a candidate with one atomic head compare-and-set plus append-only activation evidence.",
   }),
 ]);

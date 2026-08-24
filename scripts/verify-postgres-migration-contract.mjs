@@ -68,6 +68,9 @@ const requiredTableSequence = Object.freeze([
   "campaign_delivery_provider_links",
   "api_mutation_rate_limit_buckets",
   "data_migration_bundle_receipts",
+  "message_template_submission_outbox",
+  "message_template_submission_events",
+  "team_invitation_delivery_deferrals",
 ]);
 const requiredMigrationPrefix = Object.freeze([
   "0000_core_contacts.sql",
@@ -96,6 +99,10 @@ const requiredMigrationPrefix = Object.freeze([
   "0023_api_mutation_rate_limits.sql",
   "0024_whatsapp_legacy_reservation_category.sql",
   "0025_data_migration_bundle_receipts.sql",
+  "0026_message_template_submission_outbox.sql",
+  "0027_clerk_organization_binding.sql",
+  "0028_clerk_invitation_rate_limit.sql",
+  "0029_team_invitation_delivery_deferrals.sql",
 ]);
 const forbiddenSyntax = Object.freeze([
   Object.freeze({

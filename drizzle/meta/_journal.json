@@ -253,6 +253,48 @@
       "when": 1787002654000,
       "tag": "0035_whatsapp_phone_throughput",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1787089054000,
+      "tag": "0036_team_invitation_delivery_deferrals",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1787175454000,
+      "tag": "0037_whatsapp_service_reply_reservations",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1787261854000,
+      "tag": "0038_bot_reply_delivery_deferrals",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "6",
+      "when": 1787348254000,
+      "tag": "0039_bot_reply_delivery_provider_links",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "6",
+      "when": 1787434654000,
+      "tag": "0040_inbound_button_reply_provenance",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "6",
+      "when": 1787521054000,
+      "tag": "0041_bot_reply_service_window_rejection_provenance",
+      "breakpoints": true
     }
   ]
 }

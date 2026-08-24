@@ -28,10 +28,10 @@ test("maps every D1 migration and table to the PostgreSQL inventory", async () =
     await inspectPostgresMigrationParityContract(),
     {
       status: "passed",
-      d1MigrationCount: 36,
-      postgresMigrationCount: 26,
-      coveredD1TableCount: 51,
-      targetOnlyMigrationCount: 4,
+      d1MigrationCount: 42,
+      postgresMigrationCount: 42,
+      coveredD1TableCount: 55,
+      targetOnlyMigrationCount: 14,
     },
   );
   assert.equal(

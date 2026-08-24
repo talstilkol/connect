@@ -45,6 +45,23 @@ const campaignDeliveryProviderSchema = migrationSources[22];
 const apiMutationRateLimitSchema = migrationSources[23];
 const whatsappLegacyReservationCategorySchema = migrationSources[24];
 const dataMigrationBundleReceiptSchema = migrationSources[25];
+const messageTemplateSubmissionOutboxSchema = migrationSources[26];
+const clerkOrganizationBindingSchema = migrationSources[27];
+const clerkInvitationRateLimitSchema = migrationSources[28];
+const invitationDeferralSchema = migrationSources[29];
+const whatsappServiceReplyReservationSchema =
+  migrationSources[30];
+const botReplyDeliveryProviderSchema =
+  migrationSources[32];
+const botReplyStagingRunSchema = migrationSources[33];
+const botReplyStagingAuthorizationSchema = migrationSources[34];
+const botReplyStagingObservationSchema = migrationSources[35];
+const botReplyProviderDeferralSchema = migrationSources[36];
+const inboundButtonReplySchema = migrationSources[37];
+const serviceWindowRejectionSchema = migrationSources[38];
+const providerRequestFenceSchema = migrationSources[39];
+const releaseEvidenceSchema = migrationSources[40];
+const productionReadinessV2EvidenceSchema = migrationSources[41];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -74,14 +91,430 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0023_api_mutation_rate_limits.sql",
     "0024_whatsapp_legacy_reservation_category.sql",
     "0025_data_migration_bundle_receipts.sql",
+    "0026_message_template_submission_outbox.sql",
+    "0027_clerk_organization_binding.sql",
+    "0028_clerk_invitation_rate_limit.sql",
+    "0029_team_invitation_delivery_deferrals.sql",
+    "0030_whatsapp_service_reply_reservations.sql",
+    "0031_bot_reply_delivery_deferrals.sql",
+    "0032_bot_reply_delivery_provider_links.sql",
+    "0033_bot_reply_staging_runs.sql",
+    "0034_bot_reply_staging_authorizations.sql",
+    "0035_bot_reply_staging_observations.sql",
+    "0036_bot_reply_provider_attempt_provenance.sql",
+    "0037_inbound_button_reply_provenance.sql",
+    "0038_bot_reply_service_window_rejection_provenance.sql",
+    "0039_bot_reply_provider_request_fence.sql",
+    "0040_bot_reply_staging_release_evidence.sql",
+    "0041_production_readiness_release_evidence_v2.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 26,
+      migrationCount: 42,
       findings: [],
     },
+  );
+});
+
+test("keeps readiness v2 candidates separate until atomic activation", () => {
+  assert.match(
+    productionReadinessV2EvidenceSchema,
+    /CREATE TABLE production_readiness_release_heads_v2/,
+  );
+  assert.match(
+    productionReadinessV2EvidenceSchema,
+    /CREATE TABLE production_readiness_release_candidates_v2/,
+  );
+  assert.match(
+    productionReadinessV2EvidenceSchema,
+    /CREATE TABLE production_readiness_release_activation_events_v2/,
+  );
+  assert.doesNotMatch(
+    productionReadinessV2EvidenceSchema,
+    /REFERENCES\s+bot_reply_staging_release_evidence/i,
+  );
+});
+
+test("stores release evidence behind one versioned compare-and-set row", () => {
+  assert.match(
+    releaseEvidenceSchema,
+    /CREATE TABLE bot_reply_staging_release_evidence/,
+  );
+  assert.match(releaseEvidenceSchema, /evidence_version INTEGER NOT NULL/);
+  assert.match(releaseEvidenceSchema, /octet_length\(evidence_json\)/);
+  assert.match(releaseEvidenceSchema, /'releaseId' = release_id/);
+  assert.match(releaseEvidenceSchema, /'evidenceDigest' = evidence_digest/);
+  assert.match(releaseEvidenceSchema, /INTERVAL '60 seconds'/);
+  assert.match(releaseEvidenceSchema, /INTERVAL '900 seconds'/);
+  assert.doesNotMatch(releaseEvidenceSchema, /random|uuid/i);
+});
+
+test("binds provider cooldown deferrals to exact durable Bot reply facts", () => {
+  assert.match(
+    botReplyProviderDeferralSchema,
+    /CREATE TABLE bot_reply_provider_deferral_events/,
+  );
+  assert.match(
+    botReplyProviderDeferralSchema,
+    /reservation\.reservation_class = 'service-reply'/,
+  );
+  assert.match(
+    botReplyProviderDeferralSchema,
+    /settlement\.outcome = 'provider-failed'/,
+  );
+  assert.match(
+    botReplyProviderDeferralSchema,
+    /cooldown\.blocked_until = NEW\.retry_at/,
+  );
+  assert.match(
+    botReplyProviderDeferralSchema,
+    /delivery\.claim_version = NEW\.claim_version/,
+  );
+  assert.match(
+    botReplyProviderDeferralSchema,
+    /provider deferral evidence is immutable/,
+  );
+  assert.doesNotMatch(
+    botReplyProviderDeferralSchema,
+    /phone_number|recipient_phone|access_token|ciphertext|raw_payload/,
+  );
+});
+
+test("binds inbound button replies to one accepted delivery and immutable option", () => {
+  assert.match(
+    inboundButtonReplySchema,
+    /CREATE TABLE inbound_button_reply_events/,
+  );
+  assert.match(
+    inboundButtonReplySchema,
+    /delivery\.status = 'accepted'/,
+  );
+  assert.match(
+    inboundButtonReplySchema,
+    /jsonb_array_elements\(delivery\.reply_json -> 'options'\)/,
+  );
+  assert.match(
+    inboundButtonReplySchema,
+    /reject_inbound_button_reply_mutation/,
+  );
+  assert.match(
+    inboundButtonReplySchema,
+    /DROP CONSTRAINT data_migration_bundle_counts_valid[\s\S]*table_count IN \(51, 52, 53, 54\)/,
+  );
+  assert.doesNotMatch(
+    inboundButtonReplySchema,
+    /phone_e164|recipient_phone|message_payload|access_token/,
+  );
+});
+
+test("binds Meta 131047 to one exact service-window rejection", () => {
+  assert.match(
+    serviceWindowRejectionSchema,
+    /CREATE TABLE bot_reply_service_window_rejection_events/,
+  );
+  assert.match(
+    serviceWindowRejectionSchema,
+    /provider_error_code = 131047/,
+  );
+  assert.match(
+    serviceWindowRejectionSchema,
+    /reservation\.reservation_class = 'service-reply'/,
+  );
+  assert.match(
+    serviceWindowRejectionSchema,
+    /settlement\.outcome = 'provider-failed'/,
+  );
+  assert.match(
+    serviceWindowRejectionSchema,
+    /delivery\.claim_version = NEW\.claim_version/,
+  );
+  assert.match(
+    serviceWindowRejectionSchema,
+    /service-window rejection evidence is immutable/,
+  );
+  assert.match(
+    serviceWindowRejectionSchema,
+    /table_count IN \(51, 52, 53, 54, 55\)/,
+  );
+  assert.doesNotMatch(
+    serviceWindowRejectionSchema,
+    /phone_e164|recipient_phone|message_payload|access_token|raw_payload/,
+  );
+});
+
+test("fences each Bot reply provider request before the Meta boundary", () => {
+  assert.match(
+    providerRequestFenceSchema,
+    /CREATE TABLE bot_reply_provider_request_claims/,
+  );
+  assert.match(
+    providerRequestFenceSchema,
+    /UNIQUE INDEX bot_reply_provider_requests_delivery_claim_uq/,
+  );
+  assert.match(
+    providerRequestFenceSchema,
+    /reservation\.reservation_class = 'service-reply'/,
+  );
+  assert.match(
+    providerRequestFenceSchema,
+    /delivery\.status = 'sending'/,
+  );
+  assert.match(
+    providerRequestFenceSchema,
+    /settlement\.reservation_key IS NULL/,
+  );
+  assert.match(
+    providerRequestFenceSchema,
+    /provider request evidence is immutable/,
+  );
+  assert.doesNotMatch(
+    providerRequestFenceSchema,
+    /phone_e164|recipient_phone|message_payload|access_token|raw_payload/,
+  );
+});
+
+test("keeps Bot reply staging observations immutable, scoped, and PII-free", () => {
+  assert.match(
+    botReplyStagingObservationSchema,
+    /CREATE TABLE bot_reply_staging_observation_events/,
+  );
+  assert.match(
+    botReplyStagingObservationSchema,
+    /CREATE UNIQUE INDEX bot_reply_staging_observation_operation_uq/,
+  );
+  assert.match(
+    botReplyStagingObservationSchema,
+    /observation lacks an active run/,
+  );
+  assert.match(
+    botReplyStagingObservationSchema,
+    /observation subject is invalid/,
+  );
+  assert.match(
+    botReplyStagingObservationSchema,
+    /observation is immutable/,
+  );
+  assert.match(
+    botReplyStagingObservationSchema,
+    /provider_request_count = 0/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingObservationSchema,
+    /phone_number|access_token|ciphertext|raw_payload/,
+  );
+});
+
+test("keeps Bot reply staging authorization immutable and provider-safe", () => {
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /CREATE TABLE bot_reply_staging_authorization_events/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /recipient_fingerprint ~ '\^sha256:/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /rate_limit_approved_by = 'tal'/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /authorization version is not sequential/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /authorization revocation is invalid/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /authorization events are immutable/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationSchema,
+    /BEFORE UPDATE OR DELETE ON audit_logs/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingAuthorizationSchema,
+    /phone_number|access_token|ciphertext/,
+  );
+});
+
+test("fences and audits every Railway Bot reply staging run", () => {
+  assert.match(
+    botReplyStagingRunSchema,
+    /CREATE TABLE bot_reply_staging_runs/,
+  );
+  assert.match(
+    botReplyStagingRunSchema,
+    /NEW\.claim_version <> OLD\.claim_version \+ 1/,
+  );
+  assert.match(
+    botReplyStagingRunSchema,
+    /Completed Bot reply staging run is immutable/,
+  );
+  assert.match(
+    botReplyStagingRunSchema,
+    /'bot-reply-staging\.started'/,
+  );
+  assert.match(
+    botReplyStagingRunSchema,
+    /'bot-reply-staging\.completed'/,
+  );
+  assert.match(
+    botReplyStagingRunSchema,
+    /BEFORE UPDATE OR DELETE ON audit_logs/,
+  );
+});
+
+test("separates service replies from business-initiated portfolio quota", () => {
+  assert.match(
+    whatsappServiceReplyReservationSchema,
+    /reservation_class IN \([\s\S]*'business-initiated'[\s\S]*'service-reply'/,
+  );
+  assert.match(
+    whatsappServiceReplyReservationSchema,
+    /NEW\.reservation_class = 'business-initiated'[\s\S]*whatsapp_portfolio_recipient_rate_limit_state/,
+  );
+  assert.match(
+    whatsappServiceReplyReservationSchema,
+    /reservation\.reservation_class = 'business-initiated'/,
+  );
+  assert.match(
+    whatsappServiceReplyReservationSchema,
+    /NEW\.reservation_class = 'business-initiated'[\s\S]*NEW\.template_category IS NULL/,
+  );
+});
+
+test("fences deferred bot replies inside the WhatsApp service window", () => {
+  const migration = readFileSync(
+    new URL(
+      "0031_bot_reply_delivery_deferrals.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(migration, /ADD COLUMN claim_version INTEGER NOT NULL DEFAULT 0/);
+  assert.match(migration, /NEW\.claim_version <> OLD\.claim_version \+ 1/);
+  assert.match(migration, /NEW\.next_attempt_at >= service_window_expires_at/);
+  assert.match(migration, /bot_reply_deliveries_transition_guard/);
+});
+
+test("binds bot provider acceptance and terminal settlement atomically", () => {
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /CREATE TABLE bot_reply_delivery_provider_links/,
+  );
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /reservation\.reservation_class = 'service-reply'/,
+  );
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /project_bot_reply_provider_acceptance/,
+  );
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /INSERT INTO whatsapp_rate_limit_settlements/,
+  );
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /Provider message already belongs to another target/,
+  );
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /BEFORE UPDATE OF tenant_id, provider_message_id ON messages/,
+  );
+  assert.match(
+    botReplyDeliveryProviderSchema,
+    /DROP CONSTRAINT data_migration_bundle_counts_valid[\s\S]*table_count IN \(51, 52, 53\)/,
+  );
+});
+
+test("binds every Railway tenant to at most one Clerk Organization", () => {
+  assert.match(
+    clerkOrganizationBindingSchema,
+    /ALTER TABLE tenants[\s\S]*ADD COLUMN clerk_organization_id TEXT/,
+  );
+  assert.match(
+    clerkOrganizationBindingSchema,
+    /CREATE UNIQUE INDEX tenants_clerk_organization_id_uq[\s\S]*WHERE clerk_organization_id IS NOT NULL/,
+  );
+  assert.match(
+    clerkOrganizationBindingSchema,
+    /length\(clerk_organization_id\) BETWEEN 1 AND 255/,
+  );
+  assert.doesNotMatch(clerkOrganizationBindingSchema, /random|uuid/i);
+});
+
+test("allows a dedicated Clerk invitation policy in the shared PostgreSQL limiter", () => {
+  assert.match(
+    clerkInvitationRateLimitSchema,
+    /DROP CONSTRAINT api_mutation_rate_limit_policy_valid/,
+  );
+  assert.match(
+    clerkInvitationRateLimitSchema,
+    /policy_id IN[\s\S]*'clerk-organization-invitation'/,
+  );
+});
+
+test("persists bounded Clerk Retry-After evidence and atomically releases delivery claims", () => {
+  assert.match(
+    invitationDeferralSchema,
+    /CREATE TABLE team_invitation_delivery_deferrals/,
+  );
+  assert.match(
+    invitationDeferralSchema,
+    /retry_after_at <= deferred_at \+ INTERVAL '1 day'/,
+  );
+  assert.match(
+    invitationDeferralSchema,
+    /OLD\.status = 'sending'[\s\S]*NEW\.status = 'pending'[\s\S]*NEW\.attempt_count = 0/,
+  );
+  assert.match(
+    invitationDeferralSchema,
+    /NEW\.status = 'pending'[\s\S]*EXISTS \([\s\S]*FROM team_invitation_delivery_deferrals[\s\S]*deferred_at = NEW\.updated_at/,
+  );
+  assert.match(
+    invitationDeferralSchema,
+    /AFTER INSERT OR UPDATE[\s\S]*apply_team_invitation_delivery_deferral/,
+  );
+});
+
+test("defines a durable Meta template outbox with immutable recovery evidence", () => {
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /CREATE TABLE message_template_submission_outbox[\s\S]*CREATE TABLE message_template_submission_events/,
+  );
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /FOREIGN KEY \([\s\S]*request_operation,[\s\S]*request_idempotency_key[\s\S]*REFERENCES railway_api_mutation_receipts/,
+  );
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /request_operation = 'templates\.submit'/,
+  );
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /status IN \([\s\S]*'pending'[\s\S]*'submitting'[\s\S]*'submitted'[\s\S]*'rejected'[\s\S]*'blocked'[\s\S]*'ambiguous'/,
+  );
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /OLD\.status = 'pending'[\s\S]*OLD\.status = 'submitting'[\s\S]*OLD\.status = 'ambiguous'/,
+  );
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /CREATE CONSTRAINT TRIGGER message_template_submission_outbox_event_guard[\s\S]*DEFERRABLE INITIALLY DEFERRED/,
+  );
+  assert.match(
+    messageTemplateSubmissionOutboxSchema,
+    /message_template_submission_events_immutable_guard[\s\S]*BEFORE UPDATE OR DELETE/,
+  );
+  assert.doesNotMatch(
+    messageTemplateSubmissionOutboxSchema,
+    /Math\.random|random\s*\(|uuid/i,
   );
 });
 
@@ -97,6 +530,10 @@ test("defines immutable all-slice migration bundle receipts", () => {
   assert.match(
     dataMigrationBundleReceiptSchema,
     /slice_count = 10[\s\S]*table_count = 51[\s\S]*total_row_count >= 0/,
+  );
+  assert.match(
+    invitationDeferralSchema,
+    /DROP CONSTRAINT data_migration_bundle_counts_valid[\s\S]*table_count IN \(51, 52\)/,
   );
   assert.match(
     dataMigrationBundleReceiptSchema,
