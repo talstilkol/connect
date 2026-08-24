@@ -39,9 +39,20 @@ function reservationCommand(overrides = {}) {
   };
 }
 
+function serviceReplyCommand(overrides = {}) {
+  const command = { ...reservationCommand() };
+  Reflect.deleteProperty(command, "templateCategory");
+
+  return {
+    ...command,
+    ...overrides,
+  };
+}
+
 function reservationRow(overrides = {}) {
   return {
     reservationKey,
+    reservationClass: "business-initiated",
     tenantId: "7",
     portfolioKey,
     senderKey,
@@ -58,6 +69,74 @@ function reservationRow(overrides = {}) {
     ...overrides,
   };
 }
+
+test("reserves a service reply behind shared throughput and pair locks only", async () => {
+  const testFixture = fixture([
+    [{ locked: "" }],
+    [],
+    [blockerRow()],
+    [reservationRow({
+      reservationClass: "service-reply",
+      templateCategory: null,
+    })],
+  ]);
+  const result = await createPostgresWhatsappRateLimitRepository(
+    testFixture.dependencies,
+  ).reserveServiceReply(serviceReplyCommand());
+
+  assert.equal(result.outcome, "reserved");
+  assert.equal(
+    result.reservation.reservationClass,
+    "service-reply",
+  );
+  assert.deepEqual(testFixture.transactionCalls.map(({ sql }) => sql), [
+    postgresWhatsappRateLimitSql.lockThroughputScope,
+    postgresWhatsappRateLimitSql.lockPairScope,
+    postgresWhatsappRateLimitSql.findReservation,
+    postgresWhatsappRateLimitSql.findServiceReplyBlocker,
+    postgresWhatsappRateLimitSql.insertReservation,
+  ]);
+  assert.deepEqual(testFixture.transactionCalls[3].parameters, [
+    7,
+    senderKey,
+    recipientKey,
+    reservedAt,
+    "2026-08-17T08:59:59.000Z",
+  ]);
+  assert.equal(
+    testFixture.transactionCalls.at(-1).parameters[5],
+    "service-reply",
+  );
+  assert.equal(
+    testFixture.transactionCalls.at(-1).parameters[6],
+    null,
+  );
+});
+
+test("rejects portfolio-recipient cooldown for a service reply before settlement", async () => {
+  const testFixture = fixture([
+    [reservationRow({
+      reservationClass: "service-reply",
+      templateCategory: null,
+    })],
+  ]);
+  await assert.rejects(
+    createPostgresWhatsappRateLimitRepository(
+      testFixture.dependencies,
+    ).applyProviderCooldown({
+      reservationKey,
+      scope: "portfolio-recipient",
+      providerErrorCode: 131049,
+      observedAt: "2026-08-17T09:01:00.000Z",
+      blockedUntil: "2026-08-18T09:01:00.000Z",
+    }),
+    /scope is invalid for a service reply/,
+  );
+  assert.deepEqual(
+    testFixture.transactionCalls.map(({ sql }) => sql),
+    [postgresWhatsappRateLimitSql.findReservationForUpdate],
+  );
+});
 
 function blockerRow(overrides = {}) {
   return {

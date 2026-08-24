@@ -3,6 +3,7 @@ import {
   whatsappProviderCooldownScopes,
   whatsappPortfolioMessagingLimits,
   whatsappPhoneThroughputLimits,
+  whatsappRateLimitReservationClasses,
   whatsappRateLimitSettlementOutcomes,
   type WhatsappProviderCooldown,
   type WhatsappProviderCooldownErrorCode,
@@ -12,6 +13,7 @@ import {
   type WhatsappPhoneThroughputPolicy,
   type WhatsappPortfolioMessagingLimit,
   type WhatsappRateLimitReservation,
+  type WhatsappRateLimitReservationClass,
   type WhatsappRateLimitReservationResult,
   type WhatsappRateLimitSettlement,
   type WhatsappRateLimitSettlementOutcome,
@@ -39,6 +41,8 @@ const canonicalTimestampPattern =
 
 const RESERVATION_COLUMNS_SQL = `
   reservation_key AS reservationKey,
+  reservation_class AS reservationClass,
+  template_category AS templateCategory,
   tenant_id AS tenantId,
   portfolio_key AS portfolioKey,
   sender_key AS senderKey,
@@ -56,6 +60,8 @@ const RESERVATION_COLUMNS_SQL = `
 const RESERVE_SQL = `
   INSERT INTO whatsapp_rate_limit_reservations (
     reservation_key,
+    reservation_class,
+    template_category,
     tenant_id,
     portfolio_key,
     sender_key,
@@ -72,6 +78,8 @@ const RESERVE_SQL = `
   )
   SELECT
     ?1,
+    'business-initiated',
+    ?12,
     ?2,
     ?3,
     ?4,
@@ -156,6 +164,82 @@ const RESERVE_SQL = `
             )
           )
       ) < ?7
+    )
+  ON CONFLICT (reservation_key) DO NOTHING
+  RETURNING ${RESERVATION_COLUMNS_SQL}
+`;
+
+const RESERVE_SERVICE_REPLY_SQL = `
+  INSERT INTO whatsapp_rate_limit_reservations (
+    reservation_key,
+    reservation_class,
+    template_category,
+    tenant_id,
+    portfolio_key,
+    sender_key,
+    recipient_key,
+    policy_event_key,
+    phone_throughput_messages_per_second,
+    maximum_outbound_messages_per_second,
+    portfolio_limit_kind,
+    portfolio_limit_value,
+    reserved_at,
+    pair_reserved_until,
+    reservation_expires_at,
+    created_at
+  )
+  SELECT
+    ?1,
+    'service-reply',
+    NULL,
+    ?2,
+    ?3,
+    ?4,
+    ?5,
+    ?13,
+    ?14,
+    ?15,
+    ?6,
+    ?7,
+    ?8,
+    ?9,
+    ?10,
+    ?8
+  WHERE EXISTS (
+    SELECT 1
+    FROM tenants
+    WHERE id = ?2
+  )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?8
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?4
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?4
+            AND recipient_key = ?5
+          )
+        )
+    )
+    AND (
+      SELECT count(*)
+      FROM whatsapp_rate_limit_reservations
+      WHERE sender_key = ?4
+        AND reserved_at > ?16
+        AND reserved_at <= ?8
+    ) < ?15
+    AND NOT EXISTS (
+      SELECT 1
+      FROM whatsapp_pair_rate_limit_state
+      WHERE sender_key = ?4
+        AND recipient_key = ?5
+        AND reserved_until > ?8
     )
   ON CONFLICT (reservation_key) DO NOTHING
   RETURNING ${RESERVATION_COLUMNS_SQL}
@@ -292,6 +376,93 @@ const FIND_BLOCKER_SQL = `
     ) AS occupiedUniqueRecipients
 `;
 
+const FIND_SERVICE_REPLY_BLOCKER_SQL = `
+  SELECT
+    EXISTS (
+      SELECT 1 FROM tenants WHERE id = ?1
+    ) AS tenantFound,
+    (
+      SELECT blocked_until
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?5
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?3
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?3
+            AND recipient_key = ?4
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    ) AS providerBlockedUntil,
+    (
+      SELECT scope
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?5
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?3
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?3
+            AND recipient_key = ?4
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    ) AS providerCooldownScope,
+    (
+      SELECT provider_error_code
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > ?5
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = ?3
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = ?3
+            AND recipient_key = ?4
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    ) AS providerErrorCode,
+    (
+      SELECT reserved_until
+      FROM whatsapp_pair_rate_limit_state
+      WHERE sender_key = ?3
+        AND recipient_key = ?4
+      LIMIT 1
+    ) AS pairReservedUntil,
+    NULL AS activeReservationExpiresAt,
+    (
+      SELECT count(*)
+      FROM whatsapp_rate_limit_reservations
+      WHERE sender_key = ?3
+        AND reserved_at > ?8
+        AND reserved_at <= ?5
+    ) AS throughputReservationCount,
+    (
+      SELECT min(reserved_at)
+      FROM whatsapp_rate_limit_reservations
+      WHERE sender_key = ?3
+        AND reserved_at > ?8
+        AND reserved_at <= ?5
+    ) AS throughputOldestReservedAt,
+    0 AS occupiedUniqueRecipients
+`;
+
 const INSERT_SETTLEMENT_SQL = `
   INSERT INTO whatsapp_rate_limit_settlements (
     reservation_key,
@@ -360,6 +531,8 @@ const INSERT_PROVIDER_FAILED_SETTLEMENT_SQL = `
 
 interface ReservationRow {
   reservationKey: unknown;
+  reservationClass: unknown;
+  templateCategory: unknown;
   tenantId: unknown;
   portfolioKey: unknown;
   senderKey: unknown;
@@ -414,6 +587,12 @@ export interface WhatsappRateLimitReservationCommand {
   reservationExpiresAt: unknown;
 }
 
+export type WhatsappServiceReplyRateLimitReservationCommand =
+  Omit<
+    WhatsappRateLimitReservationCommand,
+    "templateCategory"
+  >;
+
 export interface WhatsappRateLimitSettlementCommand {
   reservationKey: unknown;
   outcome: unknown;
@@ -431,6 +610,9 @@ export interface WhatsappProviderCooldownCommand {
 export interface WhatsappRateLimitRepository {
   reserveBusinessInitiatedMessage(
     command: WhatsappRateLimitReservationCommand,
+  ): Promise<WhatsappRateLimitReservationResult>;
+  reserveServiceReply(
+    command: WhatsappServiceReplyRateLimitReservationCommand,
   ): Promise<WhatsappRateLimitReservationResult>;
   settle(
     command: WhatsappRateLimitSettlementCommand,
@@ -474,6 +656,21 @@ function requireTemplateCategory(
   }
 
   return value;
+}
+
+function requireReservationClass(
+  value: unknown,
+): WhatsappRateLimitReservationClass {
+  if (
+    typeof value !== "string" ||
+    !whatsappRateLimitReservationClasses.some(
+      (reservationClass) => reservationClass === value,
+    )
+  ) {
+    throw new Error("reservationClass is invalid");
+  }
+
+  return value as WhatsappRateLimitReservationClass;
 }
 
 function requireTimestamp(
@@ -720,6 +917,9 @@ function parseReservation(
       reservationKeyPattern,
       "D1 reservationKey",
     ),
+    reservationClass: requireReservationClass(
+      row.reservationClass,
+    ),
     tenantId: requireTenantId(row.tenantId),
     portfolioKey: requirePattern(
       row.portfolioKey,
@@ -761,6 +961,35 @@ function parseReservation(
     reservedAt,
     pairReservedUntil,
     reservationExpiresAt,
+  };
+}
+
+interface StoredReservation {
+  reservation: WhatsappRateLimitReservation;
+  templateCategory: "MARKETING" | "UTILITY" | null;
+}
+
+function parseStoredReservation(
+  row: ReservationRow,
+): StoredReservation {
+  const reservation = parseReservation(row);
+  const templateCategory =
+    row.templateCategory === null
+      ? null
+      : requireTemplateCategory(row.templateCategory);
+
+  if (
+    reservation.reservationClass === "service-reply" &&
+    templateCategory !== null
+  ) {
+    throw new Error(
+      "D1 returned an invalid reservation class/category pair",
+    );
+  }
+
+  return {
+    reservation,
+    templateCategory,
   };
 }
 
@@ -855,6 +1084,7 @@ function sameReservation(
 ): boolean {
   return (
     left.reservationKey === right.reservationKey &&
+    left.reservationClass === right.reservationClass &&
     left.tenantId === right.tenantId &&
     left.portfolioKey === right.portfolioKey &&
     left.senderKey === right.senderKey &&
@@ -888,14 +1118,17 @@ function sameProviderCooldown(
 }
 
 function normalizeReservation(
-  command: WhatsappRateLimitReservationCommand,
+  command:
+    | WhatsappRateLimitReservationCommand
+    | WhatsappServiceReplyRateLimitReservationCommand,
+  reservationClass: WhatsappRateLimitReservationClass,
 ): Omit<
   WhatsappRateLimitReservation,
   "policyEventKey" | "phoneThroughput"
 > & {
   policyEventKey: string;
   phoneThroughput: WhatsappPhoneThroughputPolicy;
-  templateCategory: "MARKETING" | "UTILITY";
+  templateCategory: "MARKETING" | "UTILITY" | null;
 } {
   const reservedAt = requireTimestamp(
     command.reservedAt,
@@ -927,6 +1160,7 @@ function normalizeReservation(
       reservationKeyPattern,
       "reservationKey",
     ),
+    reservationClass,
     tenantId: requireTenantId(command.tenantId),
     portfolioKey: requirePattern(
       command.portfolioKey,
@@ -948,9 +1182,13 @@ function normalizeReservation(
       policyEventKeyPattern,
       "policyEventKey",
     ),
-    templateCategory: requireTemplateCategory(
-      command.templateCategory,
-    ),
+    templateCategory:
+      reservationClass === "business-initiated" &&
+      "templateCategory" in command
+        ? requireTemplateCategory(
+            command.templateCategory,
+          )
+        : null,
     portfolioCapacity: requirePortfolioCapacity(
       command.portfolioCapacity,
     ),
@@ -1033,9 +1271,16 @@ function capacityValues(
 export function createWhatsappRateLimitRepository(
   database: D1DatabaseBinding,
 ): WhatsappRateLimitRepository {
-  return {
-    async reserveBusinessInitiatedMessage(command) {
-      const requested = normalizeReservation(command);
+  const reserve = async (
+    command:
+      | WhatsappRateLimitReservationCommand
+      | WhatsappServiceReplyRateLimitReservationCommand,
+    reservationClass: WhatsappRateLimitReservationClass,
+  ): Promise<WhatsappRateLimitReservationResult> => {
+      const requested = normalizeReservation(
+        command,
+        reservationClass,
+      );
       const [limitKind, limitValue] = capacityValues(
         requested.portfolioCapacity,
       );
@@ -1047,7 +1292,11 @@ export function createWhatsappRateLimitRepository(
         Date.parse(requested.reservedAt) - 1_000,
       ).toISOString();
       const inserted = await database
-        .prepare(RESERVE_SQL)
+        .prepare(
+          reservationClass === "business-initiated"
+            ? RESERVE_SQL
+            : RESERVE_SERVICE_REPLY_SQL,
+        )
         .bind(
           requested.reservationKey,
           requested.tenantId,
@@ -1071,9 +1320,11 @@ export function createWhatsappRateLimitRepository(
         .first<ReservationRow>();
 
       if (inserted) {
+        const saved = parseStoredReservation(inserted);
+
         return {
           outcome: "reserved",
-          reservation: parseReservation(inserted),
+          reservation: saved.reservation,
           idempotent: false,
         };
       }
@@ -1084,9 +1335,13 @@ export function createWhatsappRateLimitRepository(
         .first<ReservationRow>();
 
       if (existingRow) {
-        const existing = parseReservation(existingRow);
+        const existing = parseStoredReservation(existingRow);
 
-        if (!sameReservation(existing, requested)) {
+        if (
+          !sameReservation(existing.reservation, requested) ||
+          existing.templateCategory !==
+            requested.templateCategory
+        ) {
           throw new Error(
             "WhatsApp reservation key collision",
           );
@@ -1108,13 +1363,17 @@ export function createWhatsappRateLimitRepository(
 
         return {
           outcome: "reserved",
-          reservation: existing,
+          reservation: existing.reservation,
           idempotent: true,
         };
       }
 
       const blocker = await database
-        .prepare(FIND_BLOCKER_SQL)
+        .prepare(
+          reservationClass === "business-initiated"
+            ? FIND_BLOCKER_SQL
+            : FIND_SERVICE_REPLY_BLOCKER_SQL,
+        )
         .bind(
           requested.tenantId,
           requested.portfolioKey,
@@ -1247,7 +1506,10 @@ export function createWhatsappRateLimitRepository(
         };
       }
 
-      if (requested.portfolioCapacity.kind === "bounded") {
+      if (
+        reservationClass === "business-initiated" &&
+        requested.portfolioCapacity.kind === "bounded"
+      ) {
         return {
           outcome: "portfolio-limited",
           occupiedUniqueRecipients:
@@ -1262,8 +1524,19 @@ export function createWhatsappRateLimitRepository(
       }
 
       throw new Error(
-        "D1 rejected an unlimited WhatsApp reservation without a blocker",
+        reservationClass === "business-initiated"
+          ? "D1 rejected an unlimited WhatsApp reservation without a blocker"
+          : "D1 rejected a service-reply WhatsApp reservation without a blocker",
       );
+  };
+
+  return {
+    reserveBusinessInitiatedMessage(command) {
+      return reserve(command, "business-initiated");
+    },
+
+    reserveServiceReply(command) {
+      return reserve(command, "service-reply");
     },
 
     async settle(command) {
@@ -1410,6 +1683,15 @@ export function createWhatsappRateLimitRepository(
       const reservation = parseReservation(
         reservationRow,
       );
+
+      if (
+        reservation.reservationClass === "service-reply" &&
+        requested.scope === "portfolio-recipient"
+      ) {
+        throw new Error(
+          "provider cooldown scope is invalid for a service reply",
+        );
+      }
 
       if (requested.observedAt < reservation.reservedAt) {
         throw new Error(

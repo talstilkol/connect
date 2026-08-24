@@ -259,6 +259,182 @@ function reservationCommand(overrides = {}) {
   };
 }
 
+function serviceReplyCommand(overrides = {}) {
+  const command = { ...reservationCommand() };
+  Reflect.deleteProperty(command, "templateCategory");
+
+  return {
+    ...command,
+    ...overrides,
+  };
+}
+
+test("keeps service replies outside portfolio occupancy while sharing pair admission", async () => {
+  const { database, repository } =
+    await createSqliteD1();
+  const serviceCommand = serviceReplyCommand({
+    reservationKey: key(
+      "whatsapp_rate_reservation_v1_",
+      50_001,
+    ),
+  });
+  const service = await repository.reserveServiceReply(
+    serviceCommand,
+  );
+
+  assert.equal(service.outcome, "reserved");
+  assert.equal(
+    service.reservation.reservationClass,
+    "service-reply",
+  );
+  assert.equal(
+    database.prepare(`
+      SELECT count(*) AS count
+      FROM whatsapp_portfolio_recipient_rate_limit_state
+    `).get().count,
+    0,
+  );
+
+  const pairBlocked = await repository.reserveBusinessInitiatedMessage(
+    reservationCommand({
+      reservationKey: key(
+        "whatsapp_rate_reservation_v1_",
+        50_002,
+      ),
+      reservedAt: atOffset(reservedAt, 1_000),
+      reservationExpiresAt: atOffset(expiresAt, 1_000),
+    }),
+  );
+  assert.deepEqual(pairBlocked, {
+    outcome: "pair-limited",
+    retryAt: atOffset(reservedAt, 6_000),
+  });
+
+  const business = await repository.reserveBusinessInitiatedMessage(
+    reservationCommand({
+      reservationKey: key(
+        "whatsapp_rate_reservation_v1_",
+        50_003,
+      ),
+      senderKey: secondSenderKey,
+      reservedAt: atOffset(reservedAt, 1_000),
+      reservationExpiresAt: atOffset(expiresAt, 1_000),
+    }),
+  );
+  assert.equal(business.outcome, "reserved");
+  assert.equal(
+    database.prepare(`
+      SELECT count(*) AS count
+      FROM whatsapp_portfolio_recipient_rate_limit_state
+    `).get().count,
+    1,
+  );
+});
+
+test("fails closed when a reservation class or business category is missing", async () => {
+  const { database, repository } =
+    await createSqliteD1();
+  const command = serviceReplyCommand({
+    reservationKey: key(
+      "whatsapp_rate_reservation_v1_",
+      50_005,
+    ),
+  });
+  const reserved = await repository.reserveServiceReply(command);
+  assert.equal(reserved.outcome, "reserved");
+
+  const cloneReservation = database.prepare(`
+    INSERT INTO whatsapp_rate_limit_reservations (
+      reservation_key,
+      reservation_class,
+      template_category,
+      tenant_id,
+      portfolio_key,
+      sender_key,
+      recipient_key,
+      policy_event_key,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
+      portfolio_limit_kind,
+      portfolio_limit_value,
+      reserved_at,
+      pair_reserved_until,
+      reservation_expires_at,
+      created_at
+    )
+    SELECT
+      ?1,
+      ?2,
+      NULL,
+      tenant_id,
+      portfolio_key,
+      sender_key,
+      recipient_key,
+      policy_event_key,
+      phone_throughput_messages_per_second,
+      maximum_outbound_messages_per_second,
+      portfolio_limit_kind,
+      portfolio_limit_value,
+      reserved_at,
+      pair_reserved_until,
+      reservation_expires_at,
+      created_at
+    FROM whatsapp_rate_limit_reservations
+    WHERE reservation_key = ?3
+  `);
+
+  assert.throws(
+    () => cloneReservation.run(
+      key("whatsapp_rate_reservation_v1_", 50_006),
+      null,
+      command.reservationKey,
+    ),
+    /WhatsApp reservation class is invalid/,
+  );
+  assert.throws(
+    () => cloneReservation.run(
+      key("whatsapp_rate_reservation_v1_", 50_007),
+      "business-initiated",
+      command.reservationKey,
+    ),
+    /WhatsApp reservation class is invalid/,
+  );
+});
+
+test("rejects a marketing cooldown for a service reply without retiring it", async () => {
+  const { database, repository } =
+    await createSqliteD1();
+  const command = serviceReplyCommand({
+    reservationKey: key(
+      "whatsapp_rate_reservation_v1_",
+      50_004,
+    ),
+  });
+  const reserved = await repository.reserveServiceReply(command);
+  assert.equal(reserved.outcome, "reserved");
+
+  await assert.rejects(
+    repository.applyProviderCooldown({
+      reservationKey: command.reservationKey,
+      scope: "portfolio-recipient",
+      providerErrorCode: 131049,
+      observedAt: atOffset(reservedAt, 1_000),
+      blockedUntil: atOffset(
+        reservedAt,
+        24 * 60 * 60 * 1_000 + 1_000,
+      ),
+    }),
+    /scope is invalid for a service reply/,
+  );
+  assert.equal(
+    database.prepare(`
+      SELECT count(*) AS count
+      FROM whatsapp_rate_limit_settlements
+    `).get().count,
+    0,
+  );
+});
+
 test("enforces the approved rolling phone throughput before provider access", async () => {
   const phoneThroughput = {
     maximumMessagesPerSecond: 20,

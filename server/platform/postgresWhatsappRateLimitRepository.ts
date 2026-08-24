@@ -2,6 +2,7 @@ import type {
   WhatsappProviderCooldownCommand,
   WhatsappRateLimitRepository,
   WhatsappRateLimitReservationCommand,
+  WhatsappServiceReplyRateLimitReservationCommand,
   WhatsappRateLimitSettlementCommand,
 } from "../../db/whatsappRateLimitRepository.ts";
 import {
@@ -9,6 +10,7 @@ import {
   whatsappPhoneThroughputLimits,
   whatsappProviderCooldownErrorCodes,
   whatsappProviderCooldownScopes,
+  whatsappRateLimitReservationClasses,
   whatsappRateLimitSettlementOutcomes,
   type WhatsappPortfolioCapacity,
   type WhatsappPhoneThroughputPolicy,
@@ -16,6 +18,8 @@ import {
   type WhatsappProviderCooldownErrorCode,
   type WhatsappProviderCooldownScope,
   type WhatsappRateLimitReservation,
+  type WhatsappRateLimitReservationClass,
+  type WhatsappRateLimitReservationResult,
   type WhatsappRateLimitSettlement,
   type WhatsappRateLimitSettlementOutcome,
 } from "../../shared/domain/whatsappRateLimit.ts";
@@ -44,6 +48,7 @@ const policyEventKeyPattern =
   /^whatsapp_delivery_policy_event_v1_[0-9a-f]{64}$/;
 const reservationRowKeys = Object.freeze([
   "reservationKey",
+  "reservationClass",
   "tenantId",
   "portfolioKey",
   "senderKey",
@@ -84,6 +89,7 @@ const blockerRowKeys = Object.freeze([
 ]);
 const reservationColumns = `
   reservation_key AS "reservationKey",
+  reservation_class AS "reservationClass",
   tenant_id AS "tenantId",
   portfolio_key AS "portfolioKey",
   sender_key AS "senderKey",
@@ -218,9 +224,63 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
           )
       ) AS "occupiedUniqueRecipients"
   `,
+  findServiceReplyBlocker: `
+    WITH provider AS (
+      SELECT
+        blocked_until,
+        scope,
+        provider_error_code
+      FROM whatsapp_provider_cooldown_state
+      WHERE blocked_until > $4::timestamptz
+        AND (
+          (
+            scope = 'sender'
+            AND sender_key = $2
+            AND recipient_key = ''
+          )
+          OR (
+            scope = 'pair'
+            AND sender_key = $2
+            AND recipient_key = $3
+          )
+        )
+      ORDER BY blocked_until DESC, scope ASC
+      LIMIT 1
+    )
+    SELECT
+      EXISTS (
+        SELECT 1 FROM tenants WHERE id = $1
+      ) AS "tenantFound",
+      (SELECT blocked_until FROM provider) AS "providerBlockedUntil",
+      (SELECT scope FROM provider) AS "providerCooldownScope",
+      (SELECT provider_error_code FROM provider) AS "providerErrorCode",
+      (
+        SELECT reserved_until
+        FROM whatsapp_pair_rate_limit_state
+        WHERE sender_key = $2 AND recipient_key = $3
+      ) AS "pairReservedUntil",
+      NULL::timestamptz AS "activeReservationExpiresAt",
+      (
+        SELECT count(*)
+        FROM whatsapp_rate_limit_reservations
+        WHERE sender_key = $2
+          AND reserved_at > $5::timestamptz
+          AND reserved_at <= $4::timestamptz
+      ) AS "throughputReservationCount",
+      (
+        SELECT min(reserved_at)
+        FROM whatsapp_rate_limit_reservations
+        WHERE sender_key = $2
+          AND reserved_at > $5::timestamptz
+          AND reserved_at <= $4::timestamptz
+      ) AS "throughputOldestReservedAt",
+      false AS "recipientDeliveredInWindow",
+      0::bigint AS "occupiedUniqueRecipients"
+  `,
   insertReservation: `
     INSERT INTO whatsapp_rate_limit_reservations (
       reservation_key,
+      reservation_class,
       tenant_id,
       portfolio_key,
       sender_key,
@@ -236,10 +296,10 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
       reservation_expires_at,
       created_at
     ) VALUES (
-      $1, $2, $3, $4, $5, $12, $13, $14,
-      $6, $7, $8,
-      $9::timestamptz, $10::timestamptz,
-      $11::timestamptz, $9::timestamptz
+      $1, $6, $2, $3, $4, $5, $13, $14, $15,
+      $7, $8, $9,
+      $10::timestamptz, $11::timestamptz,
+      $12::timestamptz, $10::timestamptz
     )
     ON CONFLICT (reservation_key) DO NOTHING
     RETURNING ${reservationColumns}
@@ -291,7 +351,7 @@ export interface PostgresWhatsappRateLimitDependencies {
 interface NormalizedReservation extends WhatsappRateLimitReservation {
   readonly policyEventKey: string;
   readonly phoneThroughput: WhatsappPhoneThroughputPolicy;
-  readonly templateCategory: "MARKETING" | "UTILITY";
+  readonly templateCategory: "MARKETING" | "UTILITY" | null;
 }
 
 interface StoredReservation {
@@ -349,6 +409,15 @@ function requireTemplateCategory(value: unknown): "MARKETING" | "UTILITY" {
     throw new Error("templateCategory is invalid");
   }
   return value;
+}
+
+function requireReservationClass(
+  value: unknown,
+): WhatsappRateLimitReservationClass {
+  if (!whatsappRateLimitReservationClasses.includes(value as never)) {
+    throw new Error("reservationClass is invalid");
+  }
+  return value as WhatsappRateLimitReservationClass;
 }
 
 function requireCapacity(value: unknown): WhatsappPortfolioCapacity {
@@ -471,7 +540,10 @@ function scopeMatchesCode(
 }
 
 function normalizeReservation(
-  command: WhatsappRateLimitReservationCommand,
+  command:
+    | WhatsappRateLimitReservationCommand
+    | WhatsappServiceReplyRateLimitReservationCommand,
+  reservationClass: WhatsappRateLimitReservationClass,
 ): NormalizedReservation {
   const reservedAt = requireTimestamp(command.reservedAt, "reservedAt");
   const reservationExpiresAt = requireTimestamp(
@@ -493,6 +565,7 @@ function normalizeReservation(
       reservationKeyPattern,
       "reservationKey",
     ),
+    reservationClass,
     tenantId: requireTenantId(command.tenantId),
     portfolioKey: requirePattern(
       command.portfolioKey,
@@ -510,7 +583,11 @@ function normalizeReservation(
       policyEventKeyPattern,
       "policyEventKey",
     ),
-    templateCategory: requireTemplateCategory(command.templateCategory),
+    templateCategory:
+      reservationClass === "business-initiated" &&
+      "templateCategory" in command
+        ? requireTemplateCategory(command.templateCategory)
+        : null,
     portfolioCapacity: requireCapacity(command.portfolioCapacity),
     phoneThroughput: requirePhoneThroughput(
       command.phoneThroughput,
@@ -581,6 +658,9 @@ function parseReservation(value: unknown): StoredReservation {
         row.reservationKey,
         reservationKeyPattern,
         "PostgreSQL reservationKey",
+      ),
+      reservationClass: requireReservationClass(
+        row.reservationClass,
       ),
       tenantId: parsePostgresPositiveInteger(row.tenantId),
       portfolioKey: requirePattern(
@@ -690,6 +770,7 @@ function sameReservation(
   return (
     stored.templateCategory === requested.templateCategory &&
     left.reservationKey === requested.reservationKey &&
+    left.reservationClass === requested.reservationClass &&
     left.tenantId === requested.tenantId &&
     left.portfolioKey === requested.portfolioKey &&
     left.senderKey === requested.senderKey &&
@@ -768,7 +849,7 @@ async function acquireReservationLocks(
   transaction: PostgresTransaction,
   requested: NormalizedReservation,
 ): Promise<void> {
-  for (const [sql, key] of [
+  const locks: Array<readonly [string, string]> = [
     [
       postgresWhatsappRateLimitSql.lockThroughputScope,
       `whatsapp-throughput:${requested.senderKey}`,
@@ -777,11 +858,16 @@ async function acquireReservationLocks(
       postgresWhatsappRateLimitSql.lockPairScope,
       `whatsapp-pair:${requested.senderKey}:${requested.recipientKey}`,
     ],
-    [
+  ];
+
+  if (requested.reservationClass === "business-initiated") {
+    locks.push([
       postgresWhatsappRateLimitSql.lockPortfolioScope,
       `whatsapp-portfolio:${requested.portfolioKey}`,
-    ],
-  ] as const) {
+    ]);
+  }
+
+  for (const [sql, key] of locks) {
     const result = await transaction.query<Record<string, unknown>>(sql, [key]);
     requirePostgresRows(result, 1);
   }
@@ -797,11 +883,16 @@ export function createPostgresWhatsappRateLimitRepository(
     throw new Error("PostgreSQL WhatsApp rate-limit dependencies are invalid");
   }
 
-  return Object.freeze({
-    async reserveBusinessInitiatedMessage(
-      command: WhatsappRateLimitReservationCommand,
-    ) {
-      const requested = normalizeReservation(command);
+  const reserve = async (
+    command:
+      | WhatsappRateLimitReservationCommand
+      | WhatsappServiceReplyRateLimitReservationCommand,
+    reservationClass: WhatsappRateLimitReservationClass,
+  ): Promise<WhatsappRateLimitReservationResult> => {
+      const requested = normalizeReservation(
+        command,
+        reservationClass,
+      );
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
@@ -838,16 +929,29 @@ export function createPostgresWhatsappRateLimitRepository(
           ).toISOString();
           const blockerResult = await transaction.query<
             Record<string, unknown>
-          >(postgresWhatsappRateLimitSql.findBlocker, [
-            requested.tenantId,
-            requested.portfolioKey,
-            requested.senderKey,
-            requested.recipientKey,
-            requested.reservedAt,
-            windowStartAt,
-            requested.templateCategory,
-            throughputWindowStartAt,
-          ]);
+          >(
+            reservationClass === "business-initiated"
+              ? postgresWhatsappRateLimitSql.findBlocker
+              : postgresWhatsappRateLimitSql.findServiceReplyBlocker,
+            reservationClass === "business-initiated"
+              ? [
+                  requested.tenantId,
+                  requested.portfolioKey,
+                  requested.senderKey,
+                  requested.recipientKey,
+                  requested.reservedAt,
+                  windowStartAt,
+                  requested.templateCategory,
+                  throughputWindowStartAt,
+                ]
+              : [
+                  requested.tenantId,
+                  requested.senderKey,
+                  requested.recipientKey,
+                  requested.reservedAt,
+                  throughputWindowStartAt,
+                ],
+          );
           const blockerRows = requirePostgresRows(blockerResult, 1);
           if (blockerRows.length !== 1) {
             throw new Error("PostgreSQL did not return WhatsApp rate-limit state");
@@ -957,6 +1061,7 @@ export function createPostgresWhatsappRateLimitRepository(
             "occupiedUniqueRecipients",
           );
           if (
+            reservationClass === "business-initiated" &&
             requested.portfolioCapacity.kind === "bounded" &&
             !blocker.recipientDeliveredInWindow &&
             occupiedUniqueRecipients >=
@@ -981,6 +1086,7 @@ export function createPostgresWhatsappRateLimitRepository(
             requested.portfolioKey,
             requested.senderKey,
             requested.recipientKey,
+            requested.reservationClass,
             requested.templateCategory,
             limitKind,
             limitValue,
@@ -1007,6 +1113,19 @@ export function createPostgresWhatsappRateLimitRepository(
           });
         },
       );
+  };
+
+  return Object.freeze({
+    reserveBusinessInitiatedMessage(
+      command: WhatsappRateLimitReservationCommand,
+    ) {
+      return reserve(command, "business-initiated");
+    },
+
+    reserveServiceReply(
+      command: WhatsappServiceReplyRateLimitReservationCommand,
+    ) {
+      return reserve(command, "service-reply");
     },
 
     async settle(command: WhatsappRateLimitSettlementCommand) {
@@ -1083,6 +1202,15 @@ export function createPostgresWhatsappRateLimitRepository(
           );
           if (reservation === null) {
             return Object.freeze({ outcome: "reservation-not-found" as const });
+          }
+          if (
+            reservation.reservation.reservationClass ===
+              "service-reply" &&
+            requested.scope === "portfolio-recipient"
+          ) {
+            throw new Error(
+              "provider cooldown scope is invalid for a service reply",
+            );
           }
           if (requested.observedAt < reservation.reservation.reservedAt) {
             throw new Error("provider cooldown precedes reservation");

@@ -33,8 +33,17 @@ export interface WhatsappPhoneThroughputPolicy {
   maximumOutboundMessagesPerSecond: number;
 }
 
+export const whatsappRateLimitReservationClasses = [
+  "business-initiated",
+  "service-reply",
+] as const;
+
+export type WhatsappRateLimitReservationClass =
+  (typeof whatsappRateLimitReservationClasses)[number];
+
 export interface WhatsappRateLimitReservation {
   reservationKey: string;
+  reservationClass: WhatsappRateLimitReservationClass;
   tenantId: number;
   portfolioKey: string;
   senderKey: string;
