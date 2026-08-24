@@ -113,7 +113,7 @@ test("detects forbidden randomness in an isolated source tree", async () => {
   ]);
 });
 
-test("detects a server secret identifier in a client module", async () => {
+test("detects every protected server secret identifier in client modules", async () => {
   const root = await mkdtemp(
     join(tmpdir(), "connect-client-secret-"),
   );
@@ -127,13 +127,21 @@ test("detects a server secret identifier in a client module", async () => {
     await mkdir(join(root, directory));
   }
 
-  await writeFile(
-    join(root, "features", "unsafe.tsx"),
+  await Promise.all(
     [
-      '"use client";',
-      "export const key = process.env.META_APP_SECRET;",
-      "",
-    ].join("\n"),
+      ["bot.tsx", "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1"],
+      ["database.tsx", "DATABASE_URL"],
+      ["monitoring.tsx", "BETTER_STACK_INCIDENT_API_TOKEN"],
+    ].map(([file, identifier]) =>
+      writeFile(
+        join(root, "features", file),
+        [
+          '"use client";',
+          `export const key = process.env.${identifier};`,
+          "",
+        ].join("\n"),
+      ),
+    ),
   );
 
   const report =
@@ -143,12 +151,22 @@ test("detects a server secret identifier in a client module", async () => {
     {
       code:
         "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
-      file: "features/unsafe.tsx",
+      file: "features/bot.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/database.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/monitoring.tsx",
     },
   ]);
 });
 
-test("scans database and worker source roots", async () => {
+test("scans database, worker, and root runtime sources", async () => {
   const root = await mkdtemp(
     join(tmpdir(), "connect-db-guardrails-"),
   );
@@ -169,6 +187,14 @@ test("scans database and worker source roots", async () => {
     join(root, "db", "unsafe.ts"),
     "export const value = Math.random();\n",
   );
+  await writeFile(
+    join(root, "worker", "unsafe.ts"),
+    "export const value = eval('1');\n",
+  );
+  await writeFile(
+    join(root, "proxy.ts"),
+    "export const dangerouslySetInnerHTML = true;\n",
+  );
 
   const report =
     await inspectSourceGuardrails(root);
@@ -177,6 +203,14 @@ test("scans database and worker source roots", async () => {
     {
       code: "RANDOMNESS_FORBIDDEN",
       file: "db/unsafe.ts",
+    },
+    {
+      code: "UNSAFE_HTML_INJECTION_FORBIDDEN",
+      file: "proxy.ts",
+    },
+    {
+      code: "DYNAMIC_CODE_EXECUTION_FORBIDDEN",
+      file: "worker/unsafe.ts",
     },
   ]);
 });
@@ -228,6 +262,315 @@ test("detects a transitive client to server-only dependency boundary", async () 
       code:
         "CLIENT_SERVER_BOUNDARY_FORBIDDEN",
       file: "features/client.ts",
+    },
+  ]);
+});
+
+test("uses TypeScript aliases and import-equals edges in the client graph", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-typescript-graph-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "features", "client.ts"),
+    [
+      '"use client";',
+      'import { value } from "@/shared/bridge";',
+      "export { value };",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "shared", "bridge.ts"),
+    [
+      'import privateModule = require("../server/private");',
+      "export const value = privateModule.value;",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "server", "private.ts"),
+    "export const value = 1;\n",
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.equal(
+    report.graphEngine,
+    "typescript-compiler-api",
+  );
+  assert.ok(report.dependencyEdgesInspected >= 2);
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "CLIENT_SERVER_BOUNDARY_FORBIDDEN",
+      file: "features/client.ts",
+    },
+  ]);
+});
+
+test("excludes type-only imports from the runtime dependency graph", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-type-only-graph-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "features", "client.ts"),
+    [
+      '"use client";',
+      'import { type PrivateView } from "../server/private";',
+      "export const value = 1;",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "server", "private.ts"),
+    "export type PrivateView = { value: number };\n",
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.equal(report.status, "passed");
+  assert.equal(report.dependencyEdgesInspected, 0);
+  assert.deepEqual(report.findings, []);
+});
+
+test("keeps a use-server module as an explicit client boundary", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-server-action-graph-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "features", "client.ts"),
+    [
+      '"use client";',
+      'import { action } from "../server/action";',
+      "export const invoke = action;",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "server", "action.ts"),
+    [
+      '"use server";',
+      'import { value } from "../db/private";',
+      "export async function action() { return value; }",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "db", "private.ts"),
+    "export const value = 1;\n",
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.equal(report.status, "passed");
+  assert.deepEqual(report.findings, []);
+});
+
+test("fails closed when a client local import cannot be resolved", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-unresolved-client-graph-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "features", "client.ts"),
+    [
+      '"use client";',
+      'import { value } from "./missing";',
+      "export { value };",
+      "",
+    ].join("\n"),
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code: "CLIENT_LOCAL_IMPORT_UNRESOLVED",
+      file: "features/client.ts",
+    },
+  ]);
+});
+
+test("fails closed when TypeScript source cannot be parsed", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-unparseable-source-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "features", "invalid.ts"),
+    '"use client"; import {\n',
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code: "SOURCE_PARSE_FAILED",
+      file: "features/invalid.ts",
+    },
+  ]);
+});
+
+test("treats instrumentation-client as a client entry by convention", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-instrumentation-client-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "instrumentation-client.ts"),
+    [
+      'import { value } from "./server/private";',
+      "export const observed = value;",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "server", "private.ts"),
+    "export const value = 1;\n",
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.equal(report.clientEntriesInspected, 1);
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "CLIENT_SERVER_BOUNDARY_FORBIDDEN",
+      file: "instrumentation-client.ts",
+    },
+  ]);
+});
+
+test("fails closed for non-literal dynamic import and require in client graphs", async () => {
+  const root = await mkdtemp(
+    join(tmpdir(), "connect-non-literal-import-"),
+  );
+
+  await Promise.all(
+    [
+      "app",
+      "features",
+      "server",
+      "shared",
+      "db",
+      "worker",
+    ].map((directory) =>
+      mkdir(join(root, directory)),
+    ),
+  );
+  await writeFile(
+    join(root, "features", "dynamic-client.ts"),
+    [
+      '"use client";',
+      'const target = "../server/private";',
+      "export const load = () => import(target);",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(root, "features", "require-client.ts"),
+    [
+      '"use client";',
+      'const target = "../server/private";',
+      "export const loaded = require(target);",
+      "",
+    ].join("\n"),
+  );
+
+  const report =
+    await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "CLIENT_NON_LITERAL_RUNTIME_IMPORT_FORBIDDEN",
+      file: "features/dynamic-client.ts",
+    },
+    {
+      code:
+        "CLIENT_NON_LITERAL_RUNTIME_IMPORT_FORBIDDEN",
+      file: "features/require-client.ts",
     },
   ]);
 });

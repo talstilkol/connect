@@ -3,7 +3,6 @@ import {
   readFile,
 } from "node:fs/promises";
 import {
-  dirname,
   extname,
   join,
   normalize,
@@ -11,6 +10,7 @@ import {
   resolve,
 } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -25,10 +25,17 @@ const sourceRoots = [
 ];
 const rootRuntimeFiles = [
   "proxy.ts",
+  "middleware.ts",
+  "instrumentation.ts",
+  "instrumentation-client.ts",
   "vite.config.ts",
   "next.config.ts",
   "drizzle.config.ts",
+  "postcss.config.mjs",
   "cloudflare-env.d.ts",
+  "scripts/start-railway-api.mjs",
+  "scripts/start-railway-bullmq-api.mjs",
+  "scripts/start-railway-bullmq-worker.mjs",
 ];
 const sourceExtensions = new Set([
   ".js",
@@ -38,14 +45,6 @@ const sourceExtensions = new Set([
   ".mjs",
   ".mts",
 ]);
-const resolvableExtensions = [
-  ".ts",
-  ".tsx",
-  ".js",
-  ".jsx",
-  ".mjs",
-  ".mts",
-];
 const bannedPatterns = [
   {
     code: "RANDOMNESS_FORBIDDEN",
@@ -77,19 +76,35 @@ const bannedPatterns = [
   },
 ];
 const serverOnlyIdentifiers = [
+  "DATABASE_URL",
   "CLERK_SECRET_KEY",
+  "CONNECT_TRACE_CONTEXT_HMAC_KEY",
   "CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS",
+  "REDIS_URL",
+  "RAILWAY_WORKER_SCHEDULER_OWNER_KEY",
+  "CLOUDFLARE_API_TOKEN",
+  "TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN",
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
   "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_OBSERVATION_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_PRIVATE_CASES_JSON",
+  "BETTER_STACK_SOURCE_TOKEN",
+  "BETTER_STACK_INCIDENT_API_TOKEN",
 ];
 const serverOnlyImportPattern =
-  /["'](?:cloudflare:workers|server-only|next\/headers|next\/server|@clerk\/nextjs\/server)["']/;
-const clientDirectivePattern =
-  /^\s*["']use client["']\s*;?/m;
-const serverActionDirectivePattern =
-  /^\s*["']use server["']\s*;?/m;
+  /^(?:cloudflare:workers|server-only|next\/headers|next\/server|@clerk\/nextjs\/server)$/;
+const conventionClientEntryPaths = new Set([
+  "instrumentation-client.ts",
+]);
+const rootServerOnlyPaths = new Set(
+  rootRuntimeFiles.filter(
+    (file) =>
+      !conventionClientEntryPaths.has(file),
+  ),
+);
 
 async function listSourceFiles(directory) {
   let entries;
@@ -133,50 +148,287 @@ async function listSourceFiles(directory) {
   return nested.flat();
 }
 
-function runtimeImportSpecifiers(source) {
-  const specifiers = [];
-  const patterns = [
-    /\bimport\s+(?!type\b)(?:[^"'();]*?\s+from\s+)?["']([^"']+)["']/g,
-    /\bexport\s+(?!type\b)[^"';]*?\s+from\s+["']([^"']+)["']/g,
-    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
-  ];
+function scriptKind(file) {
+  const extension = extname(file);
 
-  for (const pattern of patterns) {
-    for (const match of source.matchAll(pattern)) {
-      specifiers.push(match[1]);
+  if (extension === ".tsx") {
+    return ts.ScriptKind.TSX;
+  }
+  if (extension === ".jsx") {
+    return ts.ScriptKind.JSX;
+  }
+  if (
+    extension === ".js" ||
+    extension === ".mjs"
+  ) {
+    return ts.ScriptKind.JS;
+  }
+  return ts.ScriptKind.TS;
+}
+
+function parseSourceFile(file, source) {
+  return ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    false,
+    scriptKind(file),
+  );
+}
+
+function hasDirective(sourceFile, directive) {
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isExpressionStatement(statement) ||
+      !ts.isStringLiteral(statement.expression)
+    ) {
+      return false;
+    }
+
+    if (statement.expression.text === directive) {
+      return true;
     }
   }
 
-  return specifiers;
+  return false;
+}
+
+function importDeclarationIsTypeOnly(node) {
+  const clause = node.importClause;
+
+  if (!clause) {
+    return false;
+  }
+  if (clause.isTypeOnly) {
+    return true;
+  }
+  if (clause.name) {
+    return false;
+  }
+
+  return (
+    clause.namedBindings !== undefined &&
+    ts.isNamedImports(clause.namedBindings) &&
+    clause.namedBindings.elements.length > 0 &&
+    clause.namedBindings.elements.every(
+      (element) => element.isTypeOnly,
+    )
+  );
+}
+
+function exportDeclarationIsTypeOnly(node) {
+  if (node.isTypeOnly) {
+    return true;
+  }
+
+  return (
+    node.exportClause !== undefined &&
+    ts.isNamedExports(node.exportClause) &&
+    node.exportClause.elements.length > 0 &&
+    node.exportClause.elements.every(
+      (element) => element.isTypeOnly,
+    )
+  );
+}
+
+function analyzeRuntimeDependencies(sourceFile) {
+  const specifiers = new Set();
+  let hasNonLiteralRuntimeImport = false;
+  const addStringLiteral = (node) => {
+    if (node && ts.isStringLiteralLike(node)) {
+      specifiers.add(node.text);
+      return true;
+    }
+
+    return false;
+  };
+  const visit = (node) => {
+    if (
+      ts.isImportDeclaration(node) &&
+      !importDeclarationIsTypeOnly(node)
+    ) {
+      addStringLiteral(node.moduleSpecifier);
+    } else if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      !exportDeclarationIsTypeOnly(node)
+    ) {
+      addStringLiteral(node.moduleSpecifier);
+    } else if (
+      ts.isImportEqualsDeclaration(node) &&
+      !node.isTypeOnly &&
+      ts.isExternalModuleReference(
+        node.moduleReference,
+      )
+    ) {
+      addStringLiteral(
+        node.moduleReference.expression,
+      );
+    } else if (ts.isCallExpression(node)) {
+      const isDynamicImport =
+        node.expression.kind ===
+        ts.SyntaxKind.ImportKeyword;
+      const isRequireCall =
+        ts.isIdentifier(node.expression) &&
+        node.expression.text === "require";
+
+      if (
+        (isDynamicImport || isRequireCall) &&
+        (!addStringLiteral(node.arguments[0]) ||
+          (isRequireCall &&
+            node.arguments.length !== 1))
+      ) {
+        hasNonLiteralRuntimeImport = true;
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return {
+    specifiers: [...specifiers],
+    hasNonLiteralRuntimeImport,
+  };
+}
+
+async function readCompilerOptions(root) {
+  const fallback = {
+    allowJs: true,
+    allowImportingTsExtensions: true,
+    baseUrl: root,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution:
+      ts.ModuleResolutionKind.Bundler,
+    paths: {
+      "@/*": ["*"],
+    },
+    resolveJsonModule: true,
+  };
+  let configSource;
+
+  try {
+    configSource = await readFile(
+      join(root, "tsconfig.json"),
+      "utf8",
+    );
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      return {
+        options: fallback,
+        diagnostics: [],
+      };
+    }
+    throw error;
+  }
+
+  const parsed = ts.parseConfigFileTextToJson(
+    join(root, "tsconfig.json"),
+    configSource,
+  );
+
+  if (parsed.error) {
+    return {
+      options: fallback,
+      diagnostics: [parsed.error],
+    };
+  }
+
+  const converted =
+    ts.convertCompilerOptionsFromJson(
+      parsed.config.compilerOptions ?? {},
+      root,
+      join(root, "tsconfig.json"),
+    );
+
+  return {
+    options: {
+      ...fallback,
+      ...converted.options,
+      baseUrl:
+        converted.options.baseUrl ?? root,
+    },
+    diagnostics: converted.errors,
+  };
 }
 
 function resolveLocalImport(
+  root,
   importer,
   specifier,
+  compilerOptions,
   availableFiles,
+  moduleResolutionCache,
 ) {
-  if (!specifier.startsWith(".")) {
+  const resolvedModule = ts.resolveModuleName(
+    specifier,
+    importer,
+    compilerOptions,
+    ts.sys,
+    moduleResolutionCache,
+  ).resolvedModule;
+
+  if (!resolvedModule) {
     return null;
   }
 
-  const basePath = normalize(
-    resolve(dirname(importer), specifier),
+  const resolvedFile = normalize(
+    resolve(resolvedModule.resolvedFileName),
   );
-  const candidates = [
-    basePath,
-    ...resolvableExtensions.map(
-      (extension) => `${basePath}${extension}`,
-    ),
-    ...resolvableExtensions.map(
-      (extension) =>
-        join(basePath, `index${extension}`),
-    ),
-  ];
+
+  if (!availableFiles.has(resolvedFile)) {
+    return null;
+  }
+
+  return resolvedFile.startsWith(
+    `${normalize(resolve(root))}/`,
+  )
+    ? resolvedFile
+    : null;
+}
+
+function matchesPathAlias(specifier, pattern) {
+  const wildcardIndex = pattern.indexOf("*");
+
+  if (wildcardIndex === -1) {
+    return specifier === pattern;
+  }
 
   return (
-    candidates.find((candidate) =>
-      availableFiles.has(candidate),
-    ) ?? null
+    specifier.startsWith(
+      pattern.slice(0, wildcardIndex),
+    ) &&
+    specifier.endsWith(
+      pattern.slice(wildcardIndex + 1),
+    )
+  );
+}
+
+function isProjectLocalSpecifier(
+  specifier,
+  compilerOptions,
+) {
+  return (
+    specifier.startsWith(".") ||
+    Object.keys(
+      compilerOptions.paths ?? {},
+    ).some((pattern) =>
+      matchesPathAlias(specifier, pattern),
+    )
+  );
+}
+
+function isSourceLikeSpecifier(specifier) {
+  const extension = extname(specifier);
+
+  return (
+    extension.length === 0 ||
+    sourceExtensions.has(extension)
   );
 }
 
@@ -190,14 +442,19 @@ function relativePath(root, file) {
 function isServerOnlyModule(
   root,
   file,
-  source,
+  runtimeSpecifiers,
 ) {
   const path = relativePath(root, file);
 
   return (
+    path.startsWith("server/") ||
     path.startsWith("db/") ||
     path.startsWith("worker/") ||
-    serverOnlyImportPattern.test(source)
+    rootServerOnlyPaths.has(path) ||
+    /(^|\/)route\.(?:[cm]?[jt]sx?)$/.test(path) ||
+    runtimeSpecifiers.some((specifier) =>
+      serverOnlyImportPattern.test(specifier),
+    )
   );
 }
 
@@ -249,19 +506,90 @@ export async function inspectSourceGuardrails(
       findings.push(finding);
     }
   };
+  const compilerConfiguration =
+    await readCompilerOptions(root);
+
+  if (
+    compilerConfiguration.diagnostics.length > 0
+  ) {
+    addFinding({
+      code: "SOURCE_GRAPH_CONFIGURATION_FAILED",
+      file: "tsconfig.json",
+    });
+  }
+
+  const parsedSources = new Map(
+    files.map((file) => [
+      file,
+      parseSourceFile(file, sources.get(file)),
+    ]),
+  );
+  const runtimeSpecifiersByFile = new Map();
+  const nonLiteralRuntimeImportsByFile =
+    new Map();
+
+  for (const file of files) {
+    const sourceFile = parsedSources.get(file);
+
+    if (sourceFile.parseDiagnostics.length > 0) {
+      addFinding({
+        code: "SOURCE_PARSE_FAILED",
+        file: relativePath(root, file),
+      });
+    }
+
+    const dependencyAnalysis =
+      analyzeRuntimeDependencies(sourceFile);
+
+    runtimeSpecifiersByFile.set(
+      file,
+      dependencyAnalysis.specifiers,
+    );
+    nonLiteralRuntimeImportsByFile.set(
+      file,
+      dependencyAnalysis.hasNonLiteralRuntimeImport,
+    );
+  }
+
+  const canonicalFileName = (file) =>
+    ts.sys.useCaseSensitiveFileNames
+      ? file
+      : file.toLowerCase();
+  const moduleResolutionCache =
+    ts.createModuleResolutionCache(
+      root,
+      canonicalFileName,
+      compilerConfiguration.options,
+    );
+  const resolvedDependenciesBySpecifier =
+    new Map(
+      files.map((file) => [
+        file,
+        new Map(
+          runtimeSpecifiersByFile
+            .get(file)
+            .map((specifier) => [
+              specifier,
+              resolveLocalImport(
+                root,
+                file,
+                specifier,
+                compilerConfiguration.options,
+                availableFiles,
+                moduleResolutionCache,
+              ),
+            ]),
+        ),
+      ]),
+    );
   const graph = new Map(
     files.map((file) => [
       file,
-      runtimeImportSpecifiers(
-        sources.get(file),
-      )
-        .map((specifier) =>
-          resolveLocalImport(
-            file,
-            specifier,
-            availableFiles,
-          ),
-        )
+      [
+        ...resolvedDependenciesBySpecifier
+          .get(file)
+          .values(),
+      ]
         .filter(Boolean),
     ]),
   );
@@ -280,11 +608,17 @@ export async function inspectSourceGuardrails(
     }
   }
 
-  const clientEntries = files.filter((file) =>
-    clientDirectivePattern.test(
-      sources.get(file),
-    ),
-  );
+  const clientEntries = files.filter((file) => {
+    const path = relativePath(root, file);
+
+    return (
+      conventionClientEntryPaths.has(path) ||
+      hasDirective(
+        parsedSources.get(file),
+        "use client",
+      )
+    );
+  });
 
   for (const clientEntry of clientEntries) {
     const pending = [clientEntry];
@@ -299,16 +633,21 @@ export async function inspectSourceGuardrails(
 
       visited.add(file);
       const source = sources.get(file);
+      const sourceFile = parsedSources.get(file);
 
       if (
         file !== clientEntry &&
-        serverActionDirectivePattern.test(source)
+        hasDirective(sourceFile, "use server")
       ) {
         continue;
       }
 
       if (
-        isServerOnlyModule(root, file, source)
+        isServerOnlyModule(
+          root,
+          file,
+          runtimeSpecifiersByFile.get(file),
+        )
       ) {
         addFinding({
           code: "CLIENT_SERVER_BOUNDARY_FORBIDDEN",
@@ -328,11 +667,51 @@ export async function inspectSourceGuardrails(
         });
       }
 
+      if (
+        nonLiteralRuntimeImportsByFile.get(file)
+      ) {
+        addFinding({
+          code:
+            "CLIENT_NON_LITERAL_RUNTIME_IMPORT_FORBIDDEN",
+          file: relativePath(root, clientEntry),
+        });
+      }
+
       for (const dependency of graph.get(file) ?? []) {
         pending.push(dependency);
       }
+
+      for (
+        const specifier of
+          runtimeSpecifiersByFile.get(file)
+      ) {
+        if (
+          isProjectLocalSpecifier(
+            specifier,
+            compilerConfiguration.options,
+          ) &&
+          isSourceLikeSpecifier(specifier) &&
+          resolvedDependenciesBySpecifier
+            .get(file)
+            .get(specifier) === null
+        ) {
+          addFinding({
+            code:
+              "CLIENT_LOCAL_IMPORT_UNRESOLVED",
+            file: relativePath(root, clientEntry),
+          });
+        }
+      }
     }
   }
+
+  const dependencyEdgesInspected = [
+    ...graph.values(),
+  ].reduce(
+    (total, dependencies) =>
+      total + dependencies.length,
+    0,
+  );
 
   return Object.freeze({
     status:
@@ -342,6 +721,8 @@ export async function inspectSourceGuardrails(
     filesInspected: files.length,
     clientEntriesInspected:
       clientEntries.length,
+    dependencyEdgesInspected,
+    graphEngine: "typescript-compiler-api",
     findings: Object.freeze(findings),
   });
 }
@@ -352,7 +733,7 @@ async function runCli() {
 
   if (report.status === "passed") {
     console.log(
-      `Source guardrails: PASS (${report.filesInspected} files, ${report.clientEntriesInspected} client graphs)`,
+      `Source guardrails: PASS (${report.filesInspected} files, ${report.clientEntriesInspected} client graphs, ${report.dependencyEdgesInspected} TypeScript dependency edges)`,
     );
     return;
   }
