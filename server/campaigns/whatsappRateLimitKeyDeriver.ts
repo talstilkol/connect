@@ -4,6 +4,8 @@ const providerIdentifierPattern =
   /^[^\u0000-\u001f\u007f]{1,255}$/;
 const deliveryKeyPattern =
   /^campaign_delivery_v1_[0-9a-f]{64}$/;
+const botReplyDeliveryKeyPattern =
+  /^bot_reply_delivery_v1_[0-9a-f]{64}$/;
 const phoneNumberPattern = /^\+[1-9][0-9]{0,14}$/;
 type OwnedBytes = Uint8Array<ArrayBuffer>;
 
@@ -28,10 +30,21 @@ export interface DerivedWhatsappRateLimitKeys {
   recipientKey: string;
 }
 
+export interface WhatsappServiceReplyRateLimitKeyInput {
+  businessPortfolioId: string;
+  phoneNumberId: string;
+  recipientPhoneNumber: string;
+  deliveryKey: string;
+  deliveryAttemptNumber: number;
+}
+
 export interface WhatsappRateLimitKeyDeriver {
   isConfigured(): boolean;
   derive(
     input: WhatsappRateLimitKeyInput,
+  ): Promise<DerivedWhatsappRateLimitKeys>;
+  deriveServiceReply(
+    input: WhatsappServiceReplyRateLimitKeyInput,
   ): Promise<DerivedWhatsappRateLimitKeys>;
 }
 
@@ -137,6 +150,35 @@ function normalizeInput(
   };
 }
 
+function normalizeServiceReplyInput(
+  input: WhatsappServiceReplyRateLimitKeyInput,
+): WhatsappServiceReplyRateLimitKeyInput {
+  if (
+    !phoneNumberPattern.test(input.recipientPhoneNumber) ||
+    !botReplyDeliveryKeyPattern.test(input.deliveryKey) ||
+    !Number.isSafeInteger(input.deliveryAttemptNumber) ||
+    input.deliveryAttemptNumber < 1
+  ) {
+    throw new Error(
+      "WhatsApp service-reply rate-limit key input is invalid",
+    );
+  }
+
+  return {
+    businessPortfolioId: readProviderIdentifier(
+      input.businessPortfolioId,
+      "businessPortfolioId",
+    ),
+    phoneNumberId: readProviderIdentifier(
+      input.phoneNumberId,
+      "phoneNumberId",
+    ),
+    recipientPhoneNumber: input.recipientPhoneNumber,
+    deliveryKey: input.deliveryKey,
+    deliveryAttemptNumber: input.deliveryAttemptNumber,
+  };
+}
+
 function hexadecimal(bytes: Uint8Array): string {
   return Array.from(
     bytes,
@@ -228,6 +270,35 @@ export function createWhatsappRateLimitKeyDeriver(
     return hexadecimal(signature);
   };
 
+  const deriveProviderScopes = async (
+    businessPortfolioId: string,
+    phoneNumberId: string,
+    recipientPhoneNumber: string,
+    reservationPurpose: string,
+    reservationValues: readonly string[],
+  ): Promise<DerivedWhatsappRateLimitKeys> => {
+    const [portfolio, sender, recipient, reservation] =
+      await Promise.all([
+        sign("portfolio", [businessPortfolioId]),
+        sign("sender", [phoneNumberId]),
+        sign("recipient", [
+          businessPortfolioId,
+          recipientPhoneNumber,
+        ]),
+        sign(reservationPurpose, reservationValues),
+      ]);
+
+    return {
+      reservationKey:
+        `whatsapp_rate_reservation_v1_${reservation}`,
+      portfolioKey:
+        `whatsapp_portfolio_v1_${portfolio}`,
+      senderKey: `whatsapp_sender_v1_${sender}`,
+      recipientKey:
+        `whatsapp_recipient_v1_${recipient}`,
+    };
+  };
+
   return {
     isConfigured() {
       return configured;
@@ -235,36 +306,38 @@ export function createWhatsappRateLimitKeyDeriver(
 
     async derive(rawInput) {
       const input = normalizeInput(rawInput);
-      const [portfolio, sender, recipient, reservation] =
-        await Promise.all([
-          sign("portfolio", [
-            input.businessPortfolioId,
-          ]),
-          sign("sender", [input.phoneNumberId]),
-          sign("recipient", [
-            input.businessPortfolioId,
-            input.recipientPhoneNumber,
-          ]),
-          sign("reservation", [
-            input.businessPortfolioId,
-            input.phoneNumberId,
-            input.recipientPhoneNumber,
-            input.deliveryKey,
-            String(input.deliveryAttemptNumber),
-            String(input.queueAttemptNumber),
-            input.queueMessageId,
-          ]),
-        ]);
+      return deriveProviderScopes(
+        input.businessPortfolioId,
+        input.phoneNumberId,
+        input.recipientPhoneNumber,
+        "reservation",
+        [
+          input.businessPortfolioId,
+          input.phoneNumberId,
+          input.recipientPhoneNumber,
+          input.deliveryKey,
+          String(input.deliveryAttemptNumber),
+          String(input.queueAttemptNumber),
+          input.queueMessageId,
+        ],
+      );
+    },
 
-      return {
-        reservationKey:
-          `whatsapp_rate_reservation_v1_${reservation}`,
-        portfolioKey:
-          `whatsapp_portfolio_v1_${portfolio}`,
-        senderKey: `whatsapp_sender_v1_${sender}`,
-        recipientKey:
-          `whatsapp_recipient_v1_${recipient}`,
-      };
+    async deriveServiceReply(rawInput) {
+      const input = normalizeServiceReplyInput(rawInput);
+      return deriveProviderScopes(
+        input.businessPortfolioId,
+        input.phoneNumberId,
+        input.recipientPhoneNumber,
+        "service-reply-reservation",
+        [
+          input.businessPortfolioId,
+          input.phoneNumberId,
+          input.recipientPhoneNumber,
+          input.deliveryKey,
+          String(input.deliveryAttemptNumber),
+        ],
+      );
     },
   };
 }

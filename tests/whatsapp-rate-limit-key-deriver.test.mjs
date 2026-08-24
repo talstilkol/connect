@@ -17,6 +17,14 @@ const input = {
   queueAttemptNumber: 1,
   queueMessageId: "queue-message-17",
 };
+const serviceReplyInput = {
+  businessPortfolioId: input.businessPortfolioId,
+  phoneNumberId: input.phoneNumberId,
+  recipientPhoneNumber: input.recipientPhoneNumber,
+  deliveryKey:
+    `bot_reply_delivery_v1_${"b".repeat(64)}`,
+  deliveryAttemptNumber: 1,
+};
 
 test("derives stable purpose-separated opaque WhatsApp keys", async () => {
   const deriver = createWhatsappRateLimitKeyDeriver({
@@ -107,6 +115,28 @@ test("shares provider scope without exposing tenant or provider identifiers", as
   );
 });
 
+test("shares provider scopes with service replies but separates reservation identity", async () => {
+  const deriver = createWhatsappRateLimitKeyDeriver({
+    WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: firstKey,
+  });
+  const business = await deriver.derive(input);
+  const service = await deriver.deriveServiceReply(
+    serviceReplyInput,
+  );
+  const repeated = await deriver.deriveServiceReply(
+    serviceReplyInput,
+  );
+
+  assert.equal(service.portfolioKey, business.portfolioKey);
+  assert.equal(service.senderKey, business.senderKey);
+  assert.equal(service.recipientKey, business.recipientKey);
+  assert.notEqual(
+    service.reservationKey,
+    business.reservationKey,
+  );
+  assert.deepEqual(service, repeated);
+});
+
 test("separates key rotations and rejects missing or malformed configuration", async () => {
   const first = createWhatsappRateLimitKeyDeriver({
     WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: firstKey,
@@ -177,5 +207,12 @@ test("rejects invalid provider, recipient, and delivery identities before signin
       queueMessageId: "\n",
     }),
     /queueMessageId is invalid/,
+  );
+  await assert.rejects(
+    deriver.deriveServiceReply({
+      ...serviceReplyInput,
+      deliveryKey: input.deliveryKey,
+    }),
+    /service-reply rate-limit key input is invalid/,
   );
 });
