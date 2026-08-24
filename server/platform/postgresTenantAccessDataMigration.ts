@@ -240,6 +240,38 @@ function validateDelivery(row: PostgresDataMigrationRow): void {
   if (!validShape) invalid();
 }
 
+function validateDeliveryDeferral(
+  row: PostgresDataMigrationRow,
+): void {
+  if (
+    !keyPatterns.delivery.test(
+      text(row, "delivery_key"),
+    ) ||
+    text(row, "reason_code") !==
+      "PROVIDER_RATE_LIMITED"
+  ) {
+    invalid();
+  }
+
+  const deferredAt = timestamp(
+    row,
+    "deferred_at",
+  );
+  const retryAfterAt = timestamp(
+    row,
+    "retry_after_at",
+  );
+  const delayMilliseconds =
+    retryAfterAt - deferredAt;
+
+  if (
+    delayMilliseconds < 1_000 ||
+    delayMilliseconds > 86_400_000
+  ) {
+    invalid();
+  }
+}
+
 function validateAcceptance(row: PostgresDataMigrationRow): void {
   if (
     !keyPatterns.acceptance.test(text(row, "acceptance_key")) ||
@@ -366,6 +398,22 @@ export const POSTGRES_TENANT_ACCESS_DATA_TABLE_CONTRACTS = Object.freeze([
     validate: validateDelivery,
   }),
   Object.freeze({
+    name: "team_invitation_delivery_deferrals",
+    columns: Object.freeze([
+      column("delivery_key", "text"),
+      column("tenant_id", "positive-integer"),
+      column("reason_code", "text"),
+      column("retry_after_at", "timestamp"),
+      column("deferred_at", "timestamp"),
+    ]),
+    orderBy: Object.freeze([
+      "tenant_id",
+      "retry_after_at",
+      "delivery_key",
+    ]),
+    validate: validateDeliveryDeferral,
+  }),
+  Object.freeze({
     name: "team_invitation_acceptances",
     columns: Object.freeze([
       column("acceptance_key", "text"),
@@ -416,6 +464,12 @@ async function requireUserTriggersEnabled(
           'team_invitation_deliveries_transition_guard'),
          ('team_invitation_deliveries',
           'team_invitation_deliveries_active_delete_guard'),
+         ('team_invitation_delivery_deferrals',
+          'team_invitation_delivery_deferrals_state_guard'),
+         ('team_invitation_delivery_deferrals',
+          'team_invitation_delivery_deferrals_transition'),
+         ('team_invitation_delivery_deferrals',
+          'team_invitation_delivery_deferrals_active_delete_guard'),
          ('team_invitation_acceptances',
           'team_invitation_acceptances_state_guard'),
          ('team_invitation_acceptances',
@@ -434,6 +488,7 @@ async function requireUserTriggersEnabled(
            'tenant_membership_events',
            'team_invitation_events',
            'team_invitation_deliveries',
+           'team_invitation_delivery_deferrals',
            'team_invitation_acceptances'
          )
          AND NOT trigger.tgisinternal
@@ -609,6 +664,24 @@ async function verifyTenantAccessLoadedState(
   await requireNoRows(
     transaction,
     `SELECT 1
+     FROM team_invitation_delivery_deferrals AS deferral
+     LEFT JOIN team_invitation_deliveries AS delivery
+       ON delivery.delivery_key = deferral.delivery_key
+       AND delivery.tenant_id = deferral.tenant_id
+     WHERE delivery.delivery_key IS NULL
+       OR delivery.status <> 'pending'
+       OR delivery.attempt_count <> 0
+       OR delivery.last_error_code IS NOT NULL
+       OR delivery.submitted_at IS NOT NULL
+       OR delivery.updated_at IS DISTINCT FROM deferral.deferred_at
+       OR deferral.reason_code <> 'PROVIDER_RATE_LIMITED'
+       OR deferral.retry_after_at <= deferral.deferred_at
+       OR deferral.retry_after_at > deferral.deferred_at + INTERVAL '1 day'
+     LIMIT 1`,
+  );
+  await requireNoRows(
+    transaction,
+    `SELECT 1
      FROM team_invitation_acceptances AS acceptance
      LEFT JOIN team_invitations AS invitation
        ON invitation.tenant_id = acceptance.tenant_id
@@ -643,7 +716,7 @@ async function verifyTenantAccessLoadedState(
 }
 
 const protocol = createPostgresDataMigrationProtocol({
-  version: "connect_postgres_tenant_access_data_v1",
+  version: "connect_postgres_tenant_access_data_v2",
   planKind: "postgres-tenant-access-data-migration-plan",
   evidenceKind: "postgres-tenant-access-data-migration-evidence",
   advisoryLockKey: [1129270867, 1],
@@ -652,6 +725,7 @@ const protocol = createPostgresDataMigrationProtocol({
     "tenant_membership_events",
     "team_invitation_events",
     "team_invitation_deliveries",
+    "team_invitation_delivery_deferrals",
     "team_invitation_acceptances",
   ],
   verifyTargetReady: requireUserTriggersEnabled,

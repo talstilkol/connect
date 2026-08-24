@@ -7,7 +7,7 @@
 1.1 החוזה קורא Export יחיד של D1/SQLite ומפיק בזיכרון Snapshot פרטי לכל
 עשרת ה־Data migration slices.
 
-1.2 כל 51 הטבלאות נקראות תחת `BEGIN DEFERRED` יחיד. כך כל ה־Slices רואים
+1.2 כל 55 הטבלאות נקראות תחת `BEGIN DEFERRED` יחיד. כך כל ה־Slices רואים
 אותה נקודת זמן לוגית ולא עשרה מצבים שנקראו בזה אחר זה.
 
 1.3 זהו Source preflight בלבד. הוא אינו כותב ל־PostgreSQL, אינו יוצר
@@ -18,7 +18,7 @@ Cutover plan ואינו מוכיח Staging או Production readiness.
 ```mermaid
 flowchart LR
   Export["D1 SQLite export — read only"] --> Begin["BEGIN DEFERRED"]
-  Begin --> Schema["Exact schema — 51 tables"]
+  Begin --> Schema["Exact schema — 55 tables"]
   Schema --> Integrity["Integrity + foreign keys"]
   Integrity --> Slices["10 validated private snapshots"]
   Slices --> Commit["COMMIT read transaction"]
@@ -37,7 +37,7 @@ Symbolic link. הוא חייב להיות בבעלות המשתמש המריץ, 
 
 1. עשרה Slice IDs ובאותו סדר תלות.
 2. סטטוס `rehearsed` לכל Slice.
-3. כל 51 הטבלאות בדיוק פעם אחת.
+3. כל 55 הטבלאות בדיוק פעם אחת.
 4. חוזה העמודות והסדר של כל טבלה.
 
 3.3 ‏`PRAGMA integrity_check` ו־`PRAGMA foreign_key_check` רצים פעם אחת
@@ -64,7 +64,7 @@ CONNECT_D1_FULL_MIGRATION_SOURCE_PATH="/absolute/protected/path/connect-export.s
 4.2 הצלחה מחזירה רק:
 
 ```text
-D1 full migration source snapshot: PASS (10 slices, 51 tables, <row-count> rows)
+D1 full migration source snapshot: PASS (10 slices, 55 tables, <row-count> rows)
 ```
 
 4.3 מספר השורות הוא נתון תפעולי מצטבר בלבד. אין לצרף אותו ל־Ticket או
@@ -76,7 +76,7 @@ D1 full migration source snapshot: PASS (10 slices, 51 tables, <row-count> rows)
 
 1. Export חי ועקבי שנוצר באמצעות כלי Cloudflare מאושר.
 2. HMAC key זמני ומוגן ליצירת Plans קצרי־תוקף.
-3. PostgreSQL Staging ריק עם 26 המיגרציות המדויקות.
+3. PostgreSQL Staging ריק עם 42 המיגרציות המדויקות, `0000` עד `0041`.
 4. הפעלת כלי ה־Cutover הדו־שלבי על הנתונים המורשים ואימות ראיות מאוחד.
 5. Load/Recovery rehearsal, ‏Rollback וחיסול מאובטח של Export ו־Plans.
 

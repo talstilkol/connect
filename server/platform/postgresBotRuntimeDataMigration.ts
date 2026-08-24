@@ -184,10 +184,19 @@ function validateVersion(row: PostgresDataMigrationRow): void {
 function validateDelivery(row: PostgresDataMigrationRow): void {
   const status = text(row, "status");
   const attemptCount = integer(row, "attempt_count");
+  const claimVersion = integer(row, "claim_version");
+  const nextAttemptAt = nullableTimestamp(row, "next_attempt_at");
+  const deferredAt = nullableTimestamp(row, "deferred_at");
+  const lastDeferralReasonCode = nullableText(
+    row,
+    "last_deferral_reason_code",
+  );
   const providerMessageId = nullableText(row, "provider_message_id");
   const lastErrorCode = nullableText(row, "last_error_code");
   const acceptedAt = nullableTimestamp(row, "accepted_at");
   const replyJson = text(row, "reply_json");
+  const createdAt = timestamp(row, "created_at");
+  const updatedAt = timestamp(row, "updated_at");
   if (providerMessageId !== null) requireTrimmedText(providerMessageId, 255);
   if (
     !deliveryKeyPattern.test(text(row, "delivery_key")) ||
@@ -196,27 +205,45 @@ function validateDelivery(row: PostgresDataMigrationRow): void {
     !botFlowKeyPattern.test(text(row, "bot_flow_key")) ||
     !botFlowVersionKeyPattern.test(text(row, "bot_flow_version_key")) ||
     integer(row, "reply_index") < 1 ||
+    (() => {
+      const value = text(row, "sender_phone_number_id");
+      return value.trim() !== value ||
+        value.length < 1 || value.length > 255 ||
+        /[\u0000-\u001f\u007f]/.test(value);
+    })() ||
     !phonePattern.test(text(row, "recipient_phone_e164")) ||
     new TextEncoder().encode(replyJson).byteLength > 50_000 ||
     !validReply(parseJson(row, "reply_json")) ||
     !deliveryStatuses.has(status) ||
     attemptCount < 0 ||
+    claimVersion < 0 ||
     (lastErrorCode !== null && !errorCodePattern.test(lastErrorCode)) ||
+    (lastDeferralReasonCode !== null &&
+      !errorCodePattern.test(lastDeferralReasonCode)) ||
     !(
       (status === "pending" && attemptCount === 0 &&
         providerMessageId === null && lastErrorCode === null &&
-        acceptedAt === null) ||
-      (status === "sending" && attemptCount >= 1 &&
+        acceptedAt === null &&
+        ((claimVersion === 0 && nextAttemptAt === null &&
+          deferredAt === null && lastDeferralReasonCode === null) ||
+          (claimVersion >= 1 && nextAttemptAt !== null &&
+            deferredAt !== null && lastDeferralReasonCode !== null &&
+            nextAttemptAt > deferredAt && updatedAt === deferredAt))) ||
+      (status === "sending" && attemptCount === 1 && claimVersion >= 1 &&
         providerMessageId === null && lastErrorCode === null &&
-        acceptedAt === null) ||
-      (status === "accepted" && attemptCount >= 1 &&
+        acceptedAt === null && nextAttemptAt === null &&
+        deferredAt === null && lastDeferralReasonCode === null) ||
+      (status === "accepted" && attemptCount >= 1 && claimVersion >= 1 &&
         providerMessageId !== null && lastErrorCode === null &&
-        acceptedAt !== null) ||
+        acceptedAt !== null && nextAttemptAt === null &&
+        deferredAt === null && lastDeferralReasonCode === null) ||
       (["rejected", "ambiguous"].includes(status) && attemptCount >= 1 &&
+        claimVersion >= 1 &&
         providerMessageId === null && lastErrorCode !== null &&
-        acceptedAt === null)
+        acceptedAt === null && nextAttemptAt === null &&
+        deferredAt === null && lastDeferralReasonCode === null)
     ) ||
-    timestamp(row, "updated_at") < timestamp(row, "created_at")
+    updatedAt < createdAt
   ) {
     invalid();
   }
@@ -291,15 +318,55 @@ export const POSTGRES_BOT_RUNTIME_DATA_TABLE_CONTRACTS = Object.freeze([
       column("accepted_at", "timestamp", true),
       column("created_at", "timestamp"),
       column("updated_at", "timestamp"),
+      column("sender_phone_number_id", "text"),
+      column("claim_version", "nonnegative-integer"),
+      column("next_attempt_at", "timestamp", true),
+      column("deferred_at", "timestamp", true),
+      column("last_deferral_reason_code", "text", true),
     ]),
     orderBy: Object.freeze(["tenant_id", "created_at", "delivery_key"]),
     validate: validateDelivery,
   }),
 ] satisfies readonly PostgresDataMigrationTableContract[]);
 
+async function requireBotReplyDeliveryTriggersEnabled(
+  transaction: PostgresQueryExecutor,
+): Promise<void> {
+  const result = await transaction.query(
+    `WITH expected(trigger_name) AS (
+       VALUES
+         ('bot_reply_deliveries_insert_contract_guard'),
+         ('bot_reply_deliveries_transition_guard')
+     ), actual AS (
+       SELECT trigger.tgname AS trigger_name, trigger.tgenabled
+       FROM pg_trigger AS trigger
+       INNER JOIN pg_class AS relation ON relation.oid = trigger.tgrelid
+       INNER JOIN pg_namespace AS namespace
+         ON namespace.oid = relation.relnamespace
+       WHERE namespace.nspname = current_schema()
+         AND relation.relname = 'bot_reply_deliveries'
+         AND NOT trigger.tgisinternal
+     )
+     SELECT 1
+     FROM expected
+     LEFT JOIN actual USING (trigger_name)
+     WHERE actual.trigger_name IS NULL OR actual.tgenabled <> 'O'
+     UNION ALL
+     SELECT 1
+     FROM actual
+     WHERE actual.tgenabled <> 'O'
+     LIMIT 1`,
+    [],
+  );
+  if (result.rowCount !== 0) {
+    throw new Error("bot-runtime-delivery-trigger-state-invalid");
+  }
+}
+
 async function verifyLoadedState(
   transaction: PostgresQueryExecutor,
 ): Promise<void> {
+  await requireBotReplyDeliveryTriggersEnabled(transaction);
   const projections = await transaction.query(
     `SELECT 1
      FROM bot_flows AS flow
@@ -336,6 +403,11 @@ async function verifyLoadedState(
        AND version.bot_flow_version_key = delivery.bot_flow_version_key
      WHERE inbound.message_key IS NULL
        OR version.bot_flow_version_key IS NULL
+       OR (
+         delivery.next_attempt_at IS NOT NULL
+         AND delivery.next_attempt_at >=
+           inbound.occurred_at + INTERVAL '24 hours'
+       )
      LIMIT 1`,
     [],
   );
@@ -345,11 +417,13 @@ async function verifyLoadedState(
 }
 
 const protocol = createPostgresDataMigrationProtocol({
-  version: "connect_postgres_bot_runtime_data_v1",
+  version: "connect_postgres_bot_runtime_data_v2",
   planKind: "postgres-bot-runtime-data-migration-plan",
   evidenceKind: "postgres-bot-runtime-data-migration-evidence",
   advisoryLockKey: [1129270867, 2],
   tables: POSTGRES_BOT_RUNTIME_DATA_TABLE_CONTRACTS,
+  triggerDisabledTables: ["bot_reply_deliveries"],
+  verifyTargetReady: requireBotReplyDeliveryTriggersEnabled,
   verifyLoadedState,
 });
 

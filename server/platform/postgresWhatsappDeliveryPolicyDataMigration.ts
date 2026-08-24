@@ -24,6 +24,11 @@ const portfolioKeyPattern = /^whatsapp_portfolio_v1_[0-9a-f]{64}$/;
 const senderKeyPattern = /^whatsapp_sender_v1_[0-9a-f]{64}$/;
 const recipientKeyPattern = /^whatsapp_recipient_v1_[0-9a-f]{64}$/;
 const deliveryKeyPattern = /^campaign_delivery_v1_[0-9a-f]{64}$/;
+const botReplyDeliveryKeyPattern = /^bot_reply_delivery_v1_[0-9a-f]{64}$/;
+const messageKeyPattern = /^message_v1_[0-9a-f]{64}$/;
+const botOptionKeyPattern = /^bot_option_v1_[0-9a-f]{64}$/;
+const windowRejectionEventKeyPattern =
+  /^bot_reply_window_rejection_v1_[0-9a-f]{64}$/;
 const digestPattern = /^[0-9a-f]{64}$/;
 const graphVersionPattern = /^v[1-9][0-9]*\.[0-9]+$/;
 const unsafeControlPattern =
@@ -35,6 +40,14 @@ const providerStatuses = new Set([
 ]);
 const settlementOutcomes = new Set([
   "delivered", "provider-failed", "cancelled-before-submit",
+]);
+const reservationClasses = new Set([
+  "business-initiated",
+  "service-reply",
+]);
+const templateCategories = new Set([
+  "MARKETING",
+  "UTILITY",
 ]);
 
 function invalid(): never {
@@ -208,6 +221,14 @@ function validateReservation(row: PostgresDataMigrationRow): void {
     row,
     "maximum_outbound_messages_per_second",
   );
+  const reservationClass = text(
+    row,
+    "reservation_class",
+  );
+  const templateCategory = nullableText(
+    row,
+    "template_category",
+  );
   requireCapacity(
     text(row, "portfolio_limit_kind"),
     nullableInteger(row, "portfolio_limit_value"),
@@ -218,6 +239,15 @@ function validateReservation(row: PostgresDataMigrationRow): void {
     !portfolioKeyPattern.test(text(row, "portfolio_key")) ||
     !senderKeyPattern.test(text(row, "sender_key")) ||
     !recipientKeyPattern.test(text(row, "recipient_key")) ||
+    !reservationClasses.has(reservationClass) ||
+    (
+      templateCategory !== null &&
+      !templateCategories.has(templateCategory)
+    ) ||
+    (
+      reservationClass === "service-reply" &&
+      templateCategory !== null
+    ) ||
     ((policyKey === null) !== (maximum === null && outbound === null)) ||
     (policyKey !== null && !policyEventKeyPattern.test(policyKey)) ||
     Date.parse(pairUntil) !== Date.parse(reservedAt) + 6_000 ||
@@ -329,6 +359,7 @@ function validateProviderLink(row: PostgresDataMigrationRow): void {
   const outcome = nullableText(row, "terminal_outcome");
   const settledAt = nullableTimestamp(row, "terminal_settled_at");
   const acceptedAt = timestamp(row, "accepted_at");
+  const updatedAt = timestamp(row, "updated_at");
   const providerMessageId = text(row, "provider_message_id");
   requireBoundedText(providerMessageId);
   const terminalValid =
@@ -344,8 +375,94 @@ function validateProviderLink(row: PostgresDataMigrationRow): void {
     !providerStatuses.has(status) ||
     ((eventKey === null) !== (eventAt === null)) ||
     (eventKey !== null && !digestPattern.test(eventKey)) ||
+    (status === "accepted" && (
+      eventKey !== null || eventAt !== null || updatedAt !== acceptedAt
+    )) ||
+    (status !== "accepted" && (
+      eventKey === null || eventAt === null ||
+      updatedAt !== (eventAt > acceptedAt ? eventAt : acceptedAt)
+    )) ||
     !terminalValid || timestamp(row, "created_at") !== acceptedAt ||
-    timestamp(row, "updated_at") < acceptedAt
+    updatedAt < acceptedAt
+  ) {
+    invalid();
+  }
+}
+
+function validateBotReplyProviderLink(
+  row: PostgresDataMigrationRow,
+): void {
+  const status = text(row, "provider_status");
+  const eventKey = nullableText(row, "last_status_event_key");
+  const eventAt = nullableTimestamp(row, "last_status_event_at");
+  const outcome = nullableText(row, "terminal_outcome");
+  const settledAt = nullableTimestamp(row, "terminal_settled_at");
+  const acceptedAt = timestamp(row, "accepted_at");
+  const updatedAt = timestamp(row, "updated_at");
+  const providerMessageId = text(row, "provider_message_id");
+  requireBoundedText(providerMessageId);
+  const terminalValid =
+    (["accepted", "sent"].includes(status) && outcome === null &&
+      settledAt === null) ||
+    (["delivered", "read"].includes(status) && outcome === "delivered" &&
+      settledAt !== null) ||
+    (status === "failed" && outcome === "provider-failed" &&
+      settledAt !== null);
+  if (
+    !botReplyDeliveryKeyPattern.test(text(row, "delivery_key")) ||
+    !reservationKeyPattern.test(text(row, "reservation_key")) ||
+    !providerStatuses.has(status) ||
+    ((eventKey === null) !== (eventAt === null)) ||
+    (eventKey !== null && !digestPattern.test(eventKey)) ||
+    (status === "accepted" && (
+      eventKey !== null || eventAt !== null || updatedAt !== acceptedAt
+    )) ||
+    (status !== "accepted" && (
+      eventKey === null || eventAt === null || eventAt < acceptedAt ||
+      updatedAt !== eventAt
+    )) ||
+    !terminalValid || timestamp(row, "created_at") !== acceptedAt ||
+    updatedAt < acceptedAt
+  ) {
+    invalid();
+  }
+}
+
+function validateInboundButtonReplyEvent(
+  row: PostgresDataMigrationRow,
+): void {
+  const occurredAt = timestamp(row, "occurred_at");
+  if (
+    !messageKeyPattern.test(text(row, "message_key")) ||
+    !botOptionKeyPattern.test(
+      text(row, "selected_bot_option_key"),
+    ) ||
+    !botReplyDeliveryKeyPattern.test(
+      text(row, "subject_delivery_key"),
+    ) ||
+    timestamp(row, "created_at") !== occurredAt
+  ) {
+    invalid();
+  }
+}
+
+function validateServiceWindowRejectionEvent(
+  row: PostgresDataMigrationRow,
+): void {
+  const openedAt = timestamp(row, "service_window_opened_at");
+  const expiresAt = timestamp(row, "service_window_expires_at");
+  const attemptedAt = timestamp(row, "attempted_at");
+  const rejectedAt = timestamp(row, "rejected_at");
+  if (
+    !windowRejectionEventKeyPattern.test(text(row, "event_key")) ||
+    !botReplyDeliveryKeyPattern.test(text(row, "delivery_key")) ||
+    !reservationKeyPattern.test(text(row, "reservation_key")) ||
+    integer(row, "claim_version") < 1 ||
+    integer(row, "provider_error_code") !== 131047 ||
+    text(row, "reason_code") !== "META_SERVICE_WINDOW_CLOSED" ||
+    Date.parse(expiresAt) - Date.parse(openedAt) !== 24 * 60 * 60 * 1_000 ||
+    attemptedAt < openedAt || attemptedAt >= expiresAt ||
+    rejectedAt < attemptedAt || timestamp(row, "created_at") !== rejectedAt
   ) {
     invalid();
   }
@@ -406,6 +523,8 @@ export const POSTGRES_WHATSAPP_DELIVERY_POLICY_DATA_TABLE_CONTRACTS =
         column("policy_event_key", "text", true),
         column("phone_throughput_messages_per_second", "positive-integer", true),
         column("maximum_outbound_messages_per_second", "positive-integer", true),
+        column("reservation_class", "text"),
+        column("template_category", "text", true),
       ]),
       orderBy: Object.freeze(["reserved_at", "reservation_key"]),
       validate: validateReservation,
@@ -492,7 +611,312 @@ export const POSTGRES_WHATSAPP_DELIVERY_POLICY_DATA_TABLE_CONTRACTS =
       orderBy: Object.freeze(["tenant_id", "delivery_key"]),
       validate: validateProviderLink,
     }),
+    Object.freeze({
+      name: "bot_reply_delivery_provider_links",
+      columns: Object.freeze([
+        column("delivery_key", "text"),
+        column("tenant_id", "positive-integer"),
+        column("provider_message_id", "text"),
+        column("reservation_key", "text"),
+        column("provider_status", "text"),
+        column("last_status_event_key", "text", true),
+        column("last_status_event_at", "timestamp", true),
+        column("terminal_outcome", "text", true),
+        column("terminal_settled_at", "timestamp", true),
+        column("accepted_at", "timestamp"),
+        column("created_at", "timestamp"),
+        column("updated_at", "timestamp"),
+      ]),
+      orderBy: Object.freeze(["tenant_id", "delivery_key"]),
+      validate: validateBotReplyProviderLink,
+    }),
+    Object.freeze({
+      name: "inbound_button_reply_events",
+      columns: Object.freeze([
+        column("message_key", "text"),
+        column("tenant_id", "positive-integer"),
+        column("selected_bot_option_key", "text"),
+        column("subject_delivery_key", "text"),
+        column("occurred_at", "timestamp"),
+        column("created_at", "timestamp"),
+      ]),
+      orderBy: Object.freeze([
+        "tenant_id",
+        "occurred_at",
+        "message_key",
+      ]),
+      validate: validateInboundButtonReplyEvent,
+    }),
+    Object.freeze({
+      name: "bot_reply_service_window_rejection_events",
+      columns: Object.freeze([
+        column("event_key", "text"),
+        column("delivery_key", "text"),
+        column("tenant_id", "positive-integer"),
+        column("claim_version", "positive-integer"),
+        column("reservation_key", "text"),
+        column("provider_error_code", "positive-integer"),
+        column("reason_code", "text"),
+        column("service_window_opened_at", "timestamp"),
+        column("service_window_expires_at", "timestamp"),
+        column("attempted_at", "timestamp"),
+        column("rejected_at", "timestamp"),
+        column("created_at", "timestamp"),
+      ]),
+      orderBy: Object.freeze([
+        "tenant_id",
+        "attempted_at",
+        "event_key",
+      ]),
+      validate: validateServiceWindowRejectionEvent,
+    }),
   ] satisfies readonly PostgresDataMigrationTableContract[]);
+
+export const POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY =
+  Object.freeze([
+    Object.freeze({
+      tableName: "whatsapp_campaign_delivery_policy_events",
+      triggerName: "whatsapp_delivery_policy_events_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_campaign_delivery_policy_events",
+      triggerName: "whatsapp_delivery_policy_events_insert_audit",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_campaign_delivery_policy_events",
+      triggerName: "whatsapp_delivery_policy_events_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_campaign_delivery_policy_events",
+      triggerName: "whatsapp_delivery_policy_events_throughput_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_campaign_delivery_policy_events",
+      triggerName: "whatsapp_delivery_policy_events_update_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_reservations",
+      triggerName: "whatsapp_rate_limit_reservations_throughput_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_reservations",
+      triggerName: "whatsapp_rate_reservations_category_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_reservations",
+      triggerName: "whatsapp_rate_reservations_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_reservations",
+      triggerName: "whatsapp_rate_reservations_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_reservations",
+      triggerName: "whatsapp_rate_reservations_state_projection",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_reservations",
+      triggerName: "whatsapp_rate_reservations_update_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_pair_rate_limit_state",
+      triggerName: "whatsapp_pair_state_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_pair_rate_limit_state",
+      triggerName: "whatsapp_pair_state_write_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_portfolio_recipient_rate_limit_state",
+      triggerName: "whatsapp_portfolio_state_business_class_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_portfolio_recipient_rate_limit_state",
+      triggerName: "whatsapp_portfolio_state_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_portfolio_recipient_rate_limit_state",
+      triggerName: "whatsapp_portfolio_state_write_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_settlements",
+      triggerName: "whatsapp_rate_settlements_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_settlements",
+      triggerName: "whatsapp_rate_settlements_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_settlements",
+      triggerName: "whatsapp_rate_settlements_state_projection",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_rate_limit_settlements",
+      triggerName: "whatsapp_rate_settlements_update_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_events",
+      triggerName: "whatsapp_provider_cooldown_events_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_events",
+      triggerName: "whatsapp_provider_cooldown_events_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_events",
+      triggerName: "whatsapp_provider_cooldown_events_state_projection",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_events",
+      triggerName: "whatsapp_provider_cooldown_events_update_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_events",
+      triggerName: "whatsapp_provider_cooldown_service_scope_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_state",
+      triggerName: "whatsapp_provider_cooldown_state_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "whatsapp_provider_cooldown_state",
+      triggerName: "whatsapp_provider_cooldown_state_write_guard",
+    }),
+    Object.freeze({
+      tableName: "campaign_delivery_provider_links",
+      triggerName: "campaign_delivery_provider_links_accept_recipient",
+    }),
+    Object.freeze({
+      tableName: "campaign_delivery_provider_links",
+      triggerName: "campaign_delivery_provider_links_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "campaign_delivery_provider_links",
+      triggerName: "campaign_delivery_provider_links_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "campaign_delivery_provider_links",
+      triggerName: "campaign_delivery_provider_links_reconcile_recipient",
+    }),
+    Object.freeze({
+      tableName: "campaign_delivery_provider_links",
+      triggerName: "campaign_delivery_provider_links_update_guard",
+    }),
+    Object.freeze({
+      tableName: "campaign_delivery_provider_links",
+      triggerName: "campaign_provider_links_bot_target_guard",
+    }),
+    Object.freeze({
+      tableName: "messages",
+      triggerName: "messages_bot_reply_target_guard",
+    }),
+    Object.freeze({
+      tableName: "messages",
+      triggerName: "messages_bot_reply_target_guard_update",
+    }),
+    Object.freeze({
+      tableName: "messages",
+      triggerName: "messages_campaign_delivery_target_guard",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_delivery_provider_links",
+      triggerName: "bot_reply_provider_links_accept_delivery",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_delivery_provider_links",
+      triggerName: "bot_reply_provider_links_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_delivery_provider_links",
+      triggerName: "bot_reply_provider_links_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_delivery_provider_links",
+      triggerName: "bot_reply_provider_links_settle_rate_limit",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_delivery_provider_links",
+      triggerName: "bot_reply_provider_links_update_guard",
+    }),
+    Object.freeze({
+      tableName: "inbound_button_reply_events",
+      triggerName: "inbound_button_reply_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "inbound_button_reply_events",
+      triggerName: "inbound_button_reply_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "inbound_button_reply_events",
+      triggerName: "inbound_button_reply_update_guard",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_service_window_rejection_events",
+      triggerName: "bot_reply_window_rejection_delete_guard",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_service_window_rejection_events",
+      triggerName: "bot_reply_window_rejection_insert_guard",
+    }),
+    Object.freeze({
+      tableName: "bot_reply_service_window_rejection_events",
+      triggerName: "bot_reply_window_rejection_update_guard",
+    }),
+  ] as const);
+
+const expectedTriggerValuesSql =
+  POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY.map(
+    ({ tableName, triggerName }) => `('${tableName}', '${triggerName}')`,
+  ).join(",\n      ");
+
+async function requireWhatsappDeliveryPolicyTriggersEnabled(
+  transaction: PostgresQueryExecutor,
+): Promise<void> {
+  await requireNoRows(transaction, `
+    WITH expected_triggers(table_name, trigger_name) AS (
+      VALUES
+      ${expectedTriggerValuesSql}
+    ), actual_triggers AS (
+      SELECT
+        relation.relname::text AS table_name,
+        trigger.tgname::text AS trigger_name,
+        trigger.tgenabled::text AS enabled
+      FROM pg_catalog.pg_trigger AS trigger
+      INNER JOIN pg_catalog.pg_class AS relation
+        ON relation.oid = trigger.tgrelid
+      INNER JOIN pg_catalog.pg_namespace AS namespace
+        ON namespace.oid = relation.relnamespace
+      WHERE namespace.nspname = current_schema()
+        AND NOT trigger.tgisinternal
+        AND relation.relname IN (
+          ${Array.from(new Set(
+            POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY.map(
+              ({ tableName }) => tableName,
+            ),
+          )).sort().map((tableName) => `'${tableName}'`).join(", ")}
+        )
+    ), invalid_triggers AS (
+      SELECT
+        expected.table_name,
+        expected.trigger_name,
+        actual.enabled
+      FROM expected_triggers AS expected
+      LEFT JOIN actual_triggers AS actual
+        USING (table_name, trigger_name)
+      WHERE actual.trigger_name IS NULL OR actual.enabled <> 'O'
+      UNION ALL
+      SELECT
+        actual.table_name,
+        actual.trigger_name,
+        actual.enabled
+      FROM actual_triggers AS actual
+      LEFT JOIN expected_triggers AS expected
+        USING (table_name, trigger_name)
+      WHERE expected.trigger_name IS NULL
+    )
+    SELECT 1 FROM invalid_triggers LIMIT 1`,
+  "whatsapp-delivery-policy-trigger-inventory-invalid");
+}
 
 async function requireNoRows(
   transaction: PostgresQueryExecutor,
@@ -506,6 +930,8 @@ async function requireNoRows(
 async function verifyLoadedState(
   transaction: PostgresQueryExecutor,
 ): Promise<void> {
+  await requireWhatsappDeliveryPolicyTriggersEnabled(transaction);
+
   await requireNoRows(transaction, `
     SELECT 1
     FROM whatsapp_campaign_delivery_policy_events AS policy
@@ -586,8 +1012,16 @@ async function verifyLoadedState(
 
   await requireNoRows(transaction, `
     SELECT 1 FROM whatsapp_rate_limit_reservations
-    WHERE template_category IS NOT NULL
-    LIMIT 1`, "legacy-category-not-explicitly-unknown");
+    WHERE reservation_class NOT IN (
+        'business-initiated',
+        'service-reply'
+      )
+      OR template_category NOT IN ('MARKETING', 'UTILITY')
+      OR (
+        reservation_class = 'service-reply'
+        AND template_category IS NOT NULL
+      )
+    LIMIT 1`, "reservation-class-category-invalid");
 
   await requireNoRows(transaction, `
     SELECT 1
@@ -629,8 +1063,24 @@ async function verifyLoadedState(
 
   await requireNoRows(transaction, `
     SELECT 1
+    FROM whatsapp_rate_limit_reservations AS reservation
+    LEFT JOIN whatsapp_pair_rate_limit_state AS state
+      ON state.sender_key = reservation.sender_key
+      AND state.recipient_key = reservation.recipient_key
+    WHERE state.reservation_key IS NULL
+    LIMIT 1`, "pair-projection-missing");
+
+  await requireNoRows(transaction, `
+    SELECT 1
     FROM whatsapp_portfolio_recipient_rate_limit_state AS state
-    WHERE state.active_reservation_key IS NOT NULL
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM whatsapp_rate_limit_reservations AS business_reservation
+        WHERE business_reservation.portfolio_key = state.portfolio_key
+          AND business_reservation.recipient_key = state.recipient_key
+          AND business_reservation.reservation_class = 'business-initiated'
+      )
+      OR state.active_reservation_key IS NOT NULL
       OR state.active_reservation_expires_at IS NOT NULL
       OR state.last_delivered_at IS DISTINCT FROM (
         SELECT max(settlement.settled_at)
@@ -638,14 +1088,16 @@ async function verifyLoadedState(
         JOIN whatsapp_rate_limit_settlements AS settlement USING (reservation_key)
         WHERE reservation.portfolio_key = state.portfolio_key
           AND reservation.recipient_key = state.recipient_key
+          AND reservation.reservation_class = 'business-initiated'
           AND settlement.outcome = 'delivered'
       )
-      OR state.updated_at <> (
+      OR state.updated_at IS DISTINCT FROM (
         SELECT max(moment) FROM (
           SELECT item.reserved_at AS moment
           FROM whatsapp_rate_limit_reservations AS item
           WHERE item.portfolio_key = state.portfolio_key
             AND item.recipient_key = state.recipient_key
+            AND item.reservation_class = 'business-initiated'
           UNION ALL
           SELECT item_settlement.settled_at AS moment
           FROM whatsapp_rate_limit_reservations AS item
@@ -653,9 +1105,20 @@ async function verifyLoadedState(
             USING (reservation_key)
           WHERE item.portfolio_key = state.portfolio_key
             AND item.recipient_key = state.recipient_key
+            AND item.reservation_class = 'business-initiated'
         ) AS moments
       )
     LIMIT 1`, "portfolio-projection-invalid");
+
+  await requireNoRows(transaction, `
+    SELECT 1
+    FROM whatsapp_rate_limit_reservations AS reservation
+    LEFT JOIN whatsapp_portfolio_recipient_rate_limit_state AS state
+      ON state.portfolio_key = reservation.portfolio_key
+      AND state.recipient_key = reservation.recipient_key
+    WHERE reservation.reservation_class = 'business-initiated'
+      AND state.portfolio_key IS NULL
+    LIMIT 1`, "portfolio-projection-missing");
 
   await requireNoRows(transaction, `
     SELECT 1
@@ -667,6 +1130,10 @@ async function verifyLoadedState(
       AND settlement.outcome = 'provider-failed'
       AND settlement.settled_at = event.observed_at
     WHERE reservation.reservation_key IS NULL OR settlement.reservation_key IS NULL
+      OR (
+        event.scope = 'portfolio-recipient'
+        AND reservation.reservation_class <> 'business-initiated'
+      )
     LIMIT 1`, "cooldown-event-proof-invalid");
 
   await requireNoRows(transaction, `
@@ -681,6 +1148,10 @@ async function verifyLoadedState(
     LEFT JOIN whatsapp_rate_limit_reservations AS reservation
       ON reservation.reservation_key = state.reservation_key
     WHERE event.reservation_key IS NULL OR reservation.reservation_key IS NULL
+      OR (
+        state.scope = 'portfolio-recipient'
+        AND reservation.reservation_class <> 'business-initiated'
+      )
       OR (state.scope = 'sender' AND (
         state.sender_key <> reservation.sender_key OR state.recipient_key <> ''))
       OR (state.scope = 'portfolio-recipient' AND (
@@ -709,6 +1180,33 @@ async function verifyLoadedState(
 
   await requireNoRows(transaction, `
     SELECT 1
+    FROM whatsapp_provider_cooldown_events AS event
+    INNER JOIN whatsapp_rate_limit_reservations AS reservation
+      ON reservation.reservation_key = event.reservation_key
+    LEFT JOIN whatsapp_provider_cooldown_state AS state
+      ON state.scope = event.scope
+      AND (
+        (
+          event.scope = 'sender'
+          AND state.sender_key = reservation.sender_key
+          AND state.recipient_key = ''
+        )
+        OR (
+          event.scope = 'portfolio-recipient'
+          AND state.sender_key = ''
+          AND state.recipient_key = reservation.recipient_key
+        )
+        OR (
+          event.scope = 'pair'
+          AND state.sender_key = reservation.sender_key
+          AND state.recipient_key = reservation.recipient_key
+        )
+      )
+    WHERE state.reservation_key IS NULL
+    LIMIT 1`, "cooldown-projection-missing");
+
+  await requireNoRows(transaction, `
+    SELECT 1
     FROM campaign_delivery_provider_links AS link
     LEFT JOIN campaign_recipients AS recipient
       ON recipient.delivery_key = link.delivery_key
@@ -720,8 +1218,31 @@ async function verifyLoadedState(
       ON settlement.reservation_key = link.reservation_key
       AND settlement.outcome = link.terminal_outcome
       AND settlement.settled_at = link.terminal_settled_at
+    LEFT JOIN messages AS message
+      ON message.tenant_id = link.tenant_id
+      AND message.provider_message_id = link.provider_message_id
     WHERE recipient.delivery_key IS NULL OR reservation.reservation_key IS NULL
       OR link.terminal_outcome IS NULL OR settlement.reservation_key IS NULL
+      OR message.message_key IS NOT NULL
+      OR (
+        link.provider_status = 'accepted'
+        AND (
+          link.last_status_event_key IS NOT NULL
+          OR link.last_status_event_at IS NOT NULL
+          OR link.updated_at IS DISTINCT FROM link.accepted_at
+        )
+      )
+      OR (
+        link.provider_status <> 'accepted'
+        AND (
+          link.last_status_event_key IS NULL
+          OR link.last_status_event_at IS NULL
+          OR link.updated_at IS DISTINCT FROM greatest(
+            link.accepted_at,
+            link.last_status_event_at
+          )
+        )
+      )
       OR recipient.status <> CASE link.provider_status
         WHEN 'delivered' THEN 'delivered'
         WHEN 'read' THEN 'read'
@@ -733,10 +1254,124 @@ async function verifyLoadedState(
         WHEN link.provider_status = 'failed' THEN 'META_DELIVERY_FAILED'
         ELSE NULL END
     LIMIT 1`, "provider-link-projection-invalid");
+
+  await requireNoRows(transaction, `
+    SELECT 1
+    FROM bot_reply_delivery_provider_links AS link
+    LEFT JOIN bot_reply_deliveries AS delivery
+      ON delivery.delivery_key = link.delivery_key
+      AND delivery.tenant_id = link.tenant_id
+    LEFT JOIN whatsapp_rate_limit_reservations AS reservation
+      ON reservation.reservation_key = link.reservation_key
+      AND reservation.tenant_id = link.tenant_id
+      AND reservation.reservation_class = 'service-reply'
+    LEFT JOIN whatsapp_rate_limit_settlements AS settlement
+      ON settlement.reservation_key = link.reservation_key
+      AND settlement.outcome = link.terminal_outcome
+      AND settlement.settled_at = link.terminal_settled_at
+    LEFT JOIN messages AS message
+      ON message.tenant_id = link.tenant_id
+      AND message.provider_message_id = link.provider_message_id
+    LEFT JOIN campaign_delivery_provider_links AS campaign_link
+      ON campaign_link.tenant_id = link.tenant_id
+      AND campaign_link.provider_message_id = link.provider_message_id
+    WHERE delivery.delivery_key IS NULL
+      OR reservation.reservation_key IS NULL
+      OR link.accepted_at < reservation.reserved_at
+      OR link.accepted_at > reservation.reservation_expires_at
+      OR link.terminal_outcome IS NULL
+      OR settlement.reservation_key IS NULL
+      OR message.message_key IS NOT NULL
+      OR campaign_link.delivery_key IS NOT NULL
+      OR (
+        link.provider_status = 'accepted'
+        AND (
+          link.last_status_event_key IS NOT NULL
+          OR link.last_status_event_at IS NOT NULL
+          OR link.updated_at IS DISTINCT FROM link.accepted_at
+        )
+      )
+      OR (
+        link.provider_status <> 'accepted'
+        AND (
+          link.last_status_event_key IS NULL
+          OR link.last_status_event_at IS NULL
+          OR link.last_status_event_at < link.accepted_at
+          OR link.updated_at IS DISTINCT FROM link.last_status_event_at
+        )
+      )
+      OR delivery.status <> 'accepted'
+      OR delivery.provider_message_id <> link.provider_message_id
+      OR delivery.accepted_at <> link.accepted_at
+      OR delivery.updated_at <> link.accepted_at
+      OR delivery.last_error_code IS NOT NULL
+    LIMIT 1`, "bot-reply-provider-link-projection-invalid");
+
+  await requireNoRows(transaction, `
+    SELECT 1
+    FROM inbound_button_reply_events AS event
+    LEFT JOIN messages AS inbound
+      ON inbound.tenant_id = event.tenant_id
+      AND inbound.message_key = event.message_key
+    LEFT JOIN bot_reply_deliveries AS delivery
+      ON delivery.tenant_id = event.tenant_id
+      AND delivery.delivery_key = event.subject_delivery_key
+    LEFT JOIN bot_reply_delivery_provider_links AS provider_link
+      ON provider_link.tenant_id = event.tenant_id
+      AND provider_link.delivery_key = event.subject_delivery_key
+    WHERE inbound.message_key IS NULL
+      OR inbound.direction <> 'inbound'
+      OR inbound.status <> 'received'
+      OR inbound.content_kind <> 'interactive'
+      OR inbound.occurred_at <> event.occurred_at
+      OR inbound.occurred_at < provider_link.accepted_at
+      OR delivery.delivery_key IS NULL
+      OR delivery.conversation_key <> inbound.conversation_key
+      OR delivery.status <> 'accepted'
+      OR delivery.reply_json ->> 'kind' <> 'buttons'
+      OR provider_link.delivery_key IS NULL
+      OR NOT EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(delivery.reply_json -> 'options') AS option
+        WHERE option ->> 'optionKey' = event.selected_bot_option_key
+      )
+    LIMIT 1`, "inbound-button-reply-provenance-invalid");
+
+  await requireNoRows(transaction, `
+    SELECT 1
+    FROM bot_reply_service_window_rejection_events AS event
+    LEFT JOIN bot_reply_deliveries AS delivery
+      ON delivery.tenant_id = event.tenant_id
+      AND delivery.delivery_key = event.delivery_key
+    LEFT JOIN messages AS inbound
+      ON inbound.tenant_id = event.tenant_id
+      AND inbound.message_key = delivery.inbound_message_key
+      AND inbound.direction = 'inbound'
+    LEFT JOIN whatsapp_rate_limit_reservations AS reservation
+      ON reservation.reservation_key = event.reservation_key
+      AND reservation.tenant_id = event.tenant_id
+      AND reservation.reservation_class = 'service-reply'
+      AND reservation.reserved_at = event.attempted_at
+    LEFT JOIN whatsapp_rate_limit_settlements AS settlement
+      ON settlement.reservation_key = event.reservation_key
+      AND settlement.outcome = 'provider-failed'
+      AND settlement.settled_at = event.attempted_at
+    WHERE delivery.delivery_key IS NULL
+      OR delivery.status <> 'rejected'
+      OR delivery.claim_version <> event.claim_version
+      OR delivery.last_error_code <> event.reason_code
+      OR delivery.updated_at <> event.rejected_at
+      OR inbound.message_key IS NULL
+      OR inbound.occurred_at <> event.service_window_opened_at
+      OR inbound.occurred_at + INTERVAL '24 hours' <>
+        event.service_window_expires_at
+      OR reservation.reservation_key IS NULL
+      OR settlement.reservation_key IS NULL
+    LIMIT 1`, "bot-reply-window-rejection-provenance-invalid");
 }
 
 const protocol = createPostgresDataMigrationProtocol({
-  version: "connect_postgres_whatsapp_delivery_policy_data_v1",
+  version: "connect_postgres_whatsapp_delivery_policy_data_v2",
   planKind: "postgres-whatsapp-delivery-policy-migration-plan",
   evidenceKind: "postgres-whatsapp-delivery-policy-migration-evidence",
   advisoryLockKey: [1129270867, 6],
@@ -745,6 +1380,7 @@ const protocol = createPostgresDataMigrationProtocol({
     POSTGRES_WHATSAPP_DELIVERY_POLICY_DATA_TABLE_CONTRACTS.map(
       ({ name }) => name,
     ),
+  verifyTargetReady: requireWhatsappDeliveryPolicyTriggersEnabled,
   verifyLoadedState,
 });
 

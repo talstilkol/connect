@@ -12,6 +12,7 @@ import {
 } from "../server/platform/postgresDataMigrationProtocol.ts";
 import {
   POSTGRES_WHATSAPP_DELIVERY_POLICY_DATA_TABLE_CONTRACTS,
+  POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY,
   createPostgresWhatsappDeliveryPolicyDataMigrationPlan,
   createPostgresWhatsappDeliveryPolicyDataSnapshot,
   executePostgresWhatsappDeliveryPolicyDataMigration,
@@ -45,6 +46,19 @@ const values = Object.freeze({
   secondExpires: "2026-08-20T10:07:00.000Z",
   secondSettled: "2026-08-20T10:03:00.000Z",
   advanced: "2026-08-20T10:04:00.000Z",
+  buttonSource: "2026-08-20T09:45:00.000Z",
+  buttonReserved: "2026-08-20T10:05:00.000Z",
+  buttonPair: "2026-08-20T10:05:06.000Z",
+  buttonExpires: "2026-08-20T10:10:00.000Z",
+  buttonAccepted: "2026-08-20T10:05:30.000Z",
+  buttonSettled: "2026-08-20T10:06:00.000Z",
+  buttonInbound: "2026-08-20T10:06:30.000Z",
+  windowOpened: "2026-08-20T08:15:00.000Z",
+  windowExpires: "2026-08-21T08:15:00.000Z",
+  windowAttempted: "2026-08-20T10:07:00.000Z",
+  windowPair: "2026-08-20T10:07:06.000Z",
+  windowReservationExpires: "2026-08-20T10:12:00.000Z",
+  windowRejected: "2026-08-20T10:07:00.001Z",
   expires: "2026-08-21T09:00:00.000Z",
 });
 
@@ -72,7 +86,61 @@ const keys = Object.freeze({
   personalization: "9".repeat(64),
   deliveredEvent: "4".repeat(64),
   readEvent: "5".repeat(64),
+  botConversation: opaque("conversation_v1_", "a"),
+  botFlow: opaque("bot_flow_v1_", "b"),
+  botFlowVersion: opaque("bot_flow_version_v1_", "c"),
+  buttonSourceMessage: opaque("message_v1_", "d"),
+  buttonInboundMessage: opaque("message_v1_", "e"),
+  windowInboundMessage: opaque("message_v1_", "f"),
+  buttonDelivery: opaque("bot_reply_delivery_v1_", "6"),
+  windowDelivery: opaque("bot_reply_delivery_v1_", "7"),
+  buttonOption: opaque("bot_option_v1_", "8"),
+  buttonReservation: opaque("whatsapp_rate_reservation_v1_", "9"),
+  buttonSender: opaque("whatsapp_sender_v1_", "a"),
+  buttonRecipient: opaque("whatsapp_recipient_v1_", "b"),
+  buttonStatusEvent: "a".repeat(64),
+  windowReservation: opaque("whatsapp_rate_reservation_v1_", "c"),
+  windowSender: opaque("whatsapp_sender_v1_", "d"),
+  windowRecipient: opaque("whatsapp_recipient_v1_", "e"),
+  windowRejection: opaque("bot_reply_window_rejection_v1_", "f"),
+  crossTenantConversation: opaque("conversation_v1_", "0"),
+  crossTenantMessage: opaque("message_v1_", "0"),
+  crossTenantCampaignMessage: opaque("message_v1_", "1"),
+  campaignProviderCollisionMessage: opaque("message_v1_", "2"),
 });
+
+function botBlockKey(character) {
+  return opaque("bot_block_v1_", character);
+}
+
+function botDefinition() {
+  return {
+    name: "מענה מדיניות WhatsApp",
+    entryBlockKey: botBlockKey("1"),
+    blocks: [
+      {
+        blockKey: botBlockKey("1"),
+        type: "trigger",
+        nextBlockKey: botBlockKey("2"),
+      },
+      {
+        blockKey: botBlockKey("2"),
+        type: "text",
+        text: "מענה מאומת",
+        nextBlockKey: botBlockKey("3"),
+      },
+      { blockKey: botBlockKey("3"), type: "end" },
+    ],
+  };
+}
+
+function buttonReply() {
+  return {
+    kind: "buttons",
+    text: "בחרו מחלקה",
+    options: [{ optionKey: keys.buttonOption, label: "שירות" }],
+  };
+}
 
 function fail(code) {
   throw new Error(`POSTGRES_WHATSAPP_DELIVERY_POLICY_DATA_${code}`);
@@ -195,6 +263,8 @@ function insertD1Reservation(database, {
   reservedAt,
   pairUntil,
   expiresAt,
+  reservationClass = "business-initiated",
+  templateCategory = "UTILITY",
 }) {
   database.prepare(
     `INSERT INTO whatsapp_rate_limit_reservations (
@@ -202,10 +272,238 @@ function insertD1Reservation(database, {
        portfolio_limit_kind, portfolio_limit_value, reserved_at,
        pair_reserved_until, reservation_expires_at, created_at,
        policy_event_key, phone_throughput_messages_per_second,
-       maximum_outbound_messages_per_second
-     ) VALUES (?, 1, ?, ?, ?, 'bounded', 250, ?, ?, ?, ?, ?, 80, 64)`,
+       maximum_outbound_messages_per_second, reservation_class,
+       template_category
+     ) VALUES (?, 1, ?, ?, ?, 'bounded', 250, ?, ?, ?, ?, ?, 80, 64,
+       ?, ?)`,
   ).run(reservationKey, keys.portfolio, senderKey, recipientKey, reservedAt,
-    pairUntil, expiresAt, reservedAt, enabledPolicyKey);
+    pairUntil, expiresAt, reservedAt, enabledPolicyKey, reservationClass,
+    templateCategory);
+}
+
+function insertD1BotDelivery(database, {
+  deliveryKey,
+  inboundMessageKey,
+  replyIndex,
+  reply,
+  createdAt,
+}) {
+  database.prepare(
+    `INSERT INTO bot_reply_deliveries (
+       delivery_key, tenant_id, conversation_key, inbound_message_key,
+       bot_flow_key, bot_flow_version_key, reply_index,
+       recipient_phone_e164, reply_json, status, attempt_count,
+       provider_message_id, last_error_code, accepted_at, created_at,
+       updated_at, sender_phone_number_id, claim_version,
+       next_attempt_at, deferred_at, last_deferral_reason_code
+     ) VALUES (?, 1, ?, ?, ?, ?, ?, '+972501234567', ?, 'pending', 0,
+       NULL, NULL, NULL, ?, ?, 'phone-live', 0, NULL, NULL, NULL)`,
+  ).run(
+    deliveryKey,
+    keys.botConversation,
+    inboundMessageKey,
+    keys.botFlow,
+    keys.botFlowVersion,
+    replyIndex,
+    JSON.stringify(reply),
+    createdAt,
+    createdAt,
+  );
+}
+
+function seedD1BotDependencies(database) {
+  database.prepare(
+    `INSERT INTO conversations (
+       conversation_key, tenant_id, contact_id, status, unread_count,
+       version, created_at, updated_at
+     ) VALUES (?, 1, 1, 'bot_active', 2, 1, ?, ?)`,
+  ).run(keys.botConversation, values.windowOpened, values.buttonSource);
+  database.prepare(
+    `INSERT INTO bot_flows (
+       bot_flow_key, tenant_id, name, status, latest_version_key,
+       latest_version_number, active_version_key, version, created_at,
+       updated_at
+     ) VALUES (?, 1, 'מענה מדיניות WhatsApp', 'active', ?, 1, ?, 2, ?, ?)`,
+  ).run(
+    keys.botFlow,
+    keys.botFlowVersion,
+    keys.botFlowVersion,
+    values.base,
+    values.buttonSource,
+  );
+  database.prepare(
+    `INSERT INTO bot_flow_versions (
+       bot_flow_version_key, bot_flow_key, tenant_id, version_number,
+       status, definition_json, published_at, created_at
+     ) VALUES (?, ?, 1, 1, 'published', ?, ?, ?)`,
+  ).run(
+    keys.botFlowVersion,
+    keys.botFlow,
+    JSON.stringify(botDefinition()),
+    values.buttonSource,
+    values.base,
+  );
+  const message = database.prepare(
+    `INSERT INTO messages (
+       message_key, conversation_key, tenant_id, provider_message_id,
+       direction, content_kind, status, text_content, occurred_at,
+       status_updated_at, created_at, updated_at
+     ) VALUES (?, ?, 1, ?, 'inbound', 'text', 'received', ?, ?, ?, ?, ?)`,
+  );
+  message.run(
+    keys.buttonSourceMessage,
+    keys.botConversation,
+    "wamid.bot-button-source",
+    "בחירת שירות",
+    values.buttonSource,
+    values.buttonSource,
+    values.buttonSource,
+    values.buttonSource,
+  );
+  message.run(
+    keys.windowInboundMessage,
+    keys.botConversation,
+    "wamid.bot-window-source",
+    "בדיקת חלון שירות",
+    values.windowOpened,
+    values.windowOpened,
+    values.windowOpened,
+    values.windowOpened,
+  );
+  insertD1BotDelivery(database, {
+    deliveryKey: keys.buttonDelivery,
+    inboundMessageKey: keys.buttonSourceMessage,
+    replyIndex: 1,
+    reply: buttonReply(),
+    createdAt: values.buttonSource,
+  });
+  insertD1BotDelivery(database, {
+    deliveryKey: keys.windowDelivery,
+    inboundMessageKey: keys.windowInboundMessage,
+    replyIndex: 2,
+    reply: { kind: "text", text: "בדיקת חלון השירות" },
+    createdAt: values.windowOpened,
+  });
+}
+
+function seedD1BotEvidence(database) {
+  database.prepare(
+    `UPDATE bot_reply_deliveries
+     SET status = 'sending', attempt_count = 1,
+         claim_version = claim_version + 1, updated_at = ?
+     WHERE delivery_key = ? AND status = 'pending'`,
+  ).run(values.buttonReserved, keys.buttonDelivery);
+  insertD1Reservation(database, {
+    reservationKey: keys.buttonReservation,
+    senderKey: keys.buttonSender,
+    recipientKey: keys.buttonRecipient,
+    reservedAt: values.buttonReserved,
+    pairUntil: values.buttonPair,
+    expiresAt: values.buttonExpires,
+    reservationClass: "service-reply",
+    templateCategory: null,
+  });
+  database.prepare(
+    `INSERT INTO bot_reply_delivery_provider_links (
+       delivery_key, tenant_id, provider_message_id, reservation_key,
+       provider_status, accepted_at, created_at, updated_at
+     ) VALUES (?, 1, 'wamid.bot-button-outbound', ?, 'accepted', ?, ?, ?)`,
+  ).run(
+    keys.buttonDelivery,
+    keys.buttonReservation,
+    values.buttonAccepted,
+    values.buttonAccepted,
+    values.buttonAccepted,
+  );
+  database.prepare(
+    `UPDATE bot_reply_delivery_provider_links
+     SET provider_status = 'delivered', last_status_event_key = ?,
+         last_status_event_at = ?, terminal_outcome = 'delivered',
+         terminal_settled_at = ?, updated_at = ?
+     WHERE delivery_key = ?`,
+  ).run(
+    keys.buttonStatusEvent,
+    values.buttonSettled,
+    values.buttonSettled,
+    values.buttonSettled,
+    keys.buttonDelivery,
+  );
+  database.prepare(
+    `INSERT INTO messages (
+       message_key, conversation_key, tenant_id, provider_message_id,
+       direction, content_kind, status, text_content, occurred_at,
+       status_updated_at, created_at, updated_at
+     ) VALUES (?, ?, 1, 'wamid.bot-button-inbound', 'inbound',
+       'interactive', 'received', NULL, ?, ?, ?, ?)`,
+  ).run(
+    keys.buttonInboundMessage,
+    keys.botConversation,
+    values.buttonInbound,
+    values.buttonInbound,
+    values.buttonInbound,
+    values.buttonInbound,
+  );
+  database.prepare(
+    `INSERT INTO inbound_button_reply_events (
+       message_key, tenant_id, selected_bot_option_key,
+       subject_delivery_key, occurred_at, created_at
+     ) VALUES (?, 1, ?, ?, ?, ?)`,
+  ).run(
+    keys.buttonInboundMessage,
+    keys.buttonOption,
+    keys.buttonDelivery,
+    values.buttonInbound,
+    values.buttonInbound,
+  );
+
+  database.prepare(
+    `UPDATE bot_reply_deliveries
+     SET status = 'sending', attempt_count = 1,
+         claim_version = claim_version + 1, updated_at = ?
+     WHERE delivery_key = ? AND status = 'pending'`,
+  ).run(values.windowAttempted, keys.windowDelivery);
+  insertD1Reservation(database, {
+    reservationKey: keys.windowReservation,
+    senderKey: keys.windowSender,
+    recipientKey: keys.windowRecipient,
+    reservedAt: values.windowAttempted,
+    pairUntil: values.windowPair,
+    expiresAt: values.windowReservationExpires,
+    reservationClass: "service-reply",
+    templateCategory: null,
+  });
+  database.prepare(
+    `INSERT INTO whatsapp_rate_limit_settlements (
+       reservation_key, outcome, settled_at, created_at
+     ) VALUES (?, 'provider-failed', ?, ?)`,
+  ).run(
+    keys.windowReservation,
+    values.windowAttempted,
+    values.windowAttempted,
+  );
+  database.prepare(
+    `UPDATE bot_reply_deliveries
+     SET status = 'rejected', last_error_code = 'META_SERVICE_WINDOW_CLOSED',
+         updated_at = ?
+     WHERE delivery_key = ? AND status = 'sending'`,
+  ).run(values.windowRejected, keys.windowDelivery);
+  database.prepare(
+    `INSERT INTO bot_reply_service_window_rejection_events (
+       event_key, delivery_key, tenant_id, claim_version, reservation_key,
+       provider_error_code, reason_code, service_window_opened_at,
+       service_window_expires_at, attempted_at, rejected_at, created_at
+     ) VALUES (?, ?, 1, 1, ?, 131047, 'META_SERVICE_WINDOW_CLOSED',
+       ?, ?, ?, ?, ?)`,
+  ).run(
+    keys.windowRejection,
+    keys.windowDelivery,
+    keys.windowReservation,
+    values.windowOpened,
+    values.windowExpires,
+    values.windowAttempted,
+    values.windowRejected,
+    values.windowRejected,
+  );
 }
 
 function seedD1(database) {
@@ -229,6 +527,7 @@ function seedD1(database) {
      ) VALUES (1, 1, '+972501234567', 'Delivery', 'subscribed',
        'granted', 'explicit-form', ?, 1, ?, ?)`,
   ).run(values.base, values.base, values.base);
+  seedD1BotDependencies(database);
   database.prepare(
     `INSERT INTO message_templates (
        template_key, tenant_id, meta_template_id, name, language, category,
@@ -309,13 +608,143 @@ function seedD1(database) {
      WHERE delivery_key = ?`,
   ).run(keys.deliveredEvent, values.secondSettled, values.secondSettled,
     values.secondSettled, keys.delivery);
+  seedD1BotEvidence(database);
+}
+
+async function seedPostgresBotDependencies(pool) {
+  await pool.query(
+    `INSERT INTO conversations (
+       conversation_key, tenant_id, contact_id, status, unread_count,
+       version, created_at, updated_at
+     ) VALUES ($1, 1, 1, 'bot_active', 3, 1, $2, $3)`,
+    [keys.botConversation, values.windowOpened, values.buttonInbound],
+  );
+  await pool.query(
+    `INSERT INTO bot_flows (
+       bot_flow_key, tenant_id, name, status, latest_version_key,
+       latest_version_number, active_version_key, version, created_at,
+       updated_at
+     ) VALUES ($1, 1, 'מענה מדיניות WhatsApp', 'active', $2, 1, $2, 2,
+       $3, $4)`,
+    [keys.botFlow, keys.botFlowVersion, values.base, values.buttonSource],
+  );
+  await pool.query(
+    `INSERT INTO bot_flow_versions (
+       bot_flow_version_key, bot_flow_key, tenant_id, version_number,
+       status, definition_json, published_at, created_at
+     ) VALUES ($1, $2, 1, 1, 'published', $3::jsonb, $4, $5)`,
+    [keys.botFlowVersion, keys.botFlow, JSON.stringify(botDefinition()),
+      values.buttonSource, values.base],
+  );
+  await pool.query(
+    `INSERT INTO messages (
+       message_key, conversation_key, tenant_id, provider_message_id,
+       direction, content_kind, status, text_content, occurred_at,
+       status_updated_at, created_at, updated_at
+     ) VALUES
+       ($1, $4, 1, 'wamid.bot-button-source', 'inbound', 'text',
+        'received', 'בחירת שירות', $5, $5, $5, $5),
+       ($2, $4, 1, 'wamid.bot-window-source', 'inbound', 'text',
+        'received', 'בדיקת חלון שירות', $6, $6, $6, $6),
+       ($3, $4, 1, 'wamid.bot-button-inbound', 'inbound', 'interactive',
+        'received', NULL, $7, $7, $7, $7)`,
+    [keys.buttonSourceMessage, keys.windowInboundMessage,
+      keys.buttonInboundMessage, keys.botConversation, values.buttonSource,
+      values.windowOpened, values.buttonInbound],
+  );
+  const insertDelivery = async ({ deliveryKey, inboundMessageKey,
+    replyIndex, reply, createdAt }) => {
+    await pool.query(
+      `INSERT INTO bot_reply_deliveries (
+         delivery_key, tenant_id, conversation_key, inbound_message_key,
+         bot_flow_key, bot_flow_version_key, reply_index,
+         recipient_phone_e164, reply_json, status, attempt_count,
+         provider_message_id, last_error_code, accepted_at, created_at,
+         updated_at, sender_phone_number_id, claim_version,
+         next_attempt_at, deferred_at, last_deferral_reason_code
+       ) VALUES ($1, 1, $2, $3, $4, $5, $6, '+972501234567', $7::jsonb,
+         'pending', 0, NULL, NULL, NULL, $8, $8, 'phone-live', 0,
+         NULL, NULL, NULL)`,
+      [deliveryKey, keys.botConversation, inboundMessageKey, keys.botFlow,
+        keys.botFlowVersion, replyIndex, JSON.stringify(reply), createdAt],
+    );
+  };
+  await insertDelivery({
+    deliveryKey: keys.buttonDelivery,
+    inboundMessageKey: keys.buttonSourceMessage,
+    replyIndex: 1,
+    reply: buttonReply(),
+    createdAt: values.buttonSource,
+  });
+  await insertDelivery({
+    deliveryKey: keys.windowDelivery,
+    inboundMessageKey: keys.windowInboundMessage,
+    replyIndex: 2,
+    reply: { kind: "text", text: "בדיקת חלון השירות" },
+    createdAt: values.windowOpened,
+  });
+  await pool.query(
+    `UPDATE bot_reply_deliveries
+     SET status = 'sending', attempt_count = 1,
+         claim_version = claim_version + 1, updated_at = $1
+     WHERE delivery_key = $2 AND status = 'pending'`,
+    [values.buttonReserved, keys.buttonDelivery],
+  );
+  await pool.query(
+    `UPDATE bot_reply_deliveries
+     SET status = 'accepted', provider_message_id = 'wamid.bot-button-outbound',
+         accepted_at = $1, updated_at = $1
+     WHERE delivery_key = $2 AND status = 'sending'`,
+    [values.buttonAccepted, keys.buttonDelivery],
+  );
+  await pool.query(
+    `UPDATE bot_reply_deliveries
+     SET status = 'sending', attempt_count = 1,
+         claim_version = claim_version + 1, updated_at = $1
+     WHERE delivery_key = $2 AND status = 'pending'`,
+    [values.windowAttempted, keys.windowDelivery],
+  );
+  await pool.query(
+    `UPDATE bot_reply_deliveries
+     SET status = 'rejected', last_error_code = 'META_SERVICE_WINDOW_CLOSED',
+         updated_at = $1
+     WHERE delivery_key = $2 AND status = 'sending'`,
+    [values.windowRejected, keys.windowDelivery],
+  );
+  await pool.query(
+    `INSERT INTO conversations (
+       conversation_key, tenant_id, contact_id, status, unread_count,
+       version, created_at, updated_at
+     ) VALUES ($1, 2, 2, 'bot_active', 1, 1, $2, $2)`,
+    [keys.crossTenantConversation, values.base],
+  );
+  await pool.query(
+    `INSERT INTO messages (
+       message_key, conversation_key, tenant_id, provider_message_id,
+       direction, content_kind, status, text_content, occurred_at,
+       status_updated_at, created_at, updated_at
+     ) VALUES
+       ($1, $2, 2, 'wamid.bot-button-outbound', 'inbound', 'text',
+        'received', 'מזהה בוט זהה בטננט אחר', $4, $4, $4, $4),
+       ($3, $2, 2, 'wamid.delivery-proof', 'inbound', 'text',
+        'received', 'מזהה קמפיין זהה בטננט אחר', $4, $4, $4, $4)`,
+    [
+      keys.crossTenantMessage,
+      keys.crossTenantConversation,
+      keys.crossTenantCampaignMessage,
+      values.base,
+    ],
+  );
 }
 
 async function seedPostgresDependencies(database, pool) {
   await pool.query(
     `INSERT INTO tenants (
        id, display_name, status, created_at, updated_at, provisioning_key
-     ) VALUES (1, 'Connect Delivery', 'active', $1, $1, 'whatsapp-delivery')`,
+     ) VALUES
+       (1, 'Connect Delivery', 'active', $1, $1, 'whatsapp-delivery'),
+       (2, 'Cross-tenant proof', 'active', $1, $1,
+        'whatsapp-delivery-cross-tenant')`,
     [values.base],
   );
   await pool.query(
@@ -331,10 +760,14 @@ async function seedPostgresDependencies(database, pool) {
        id, tenant_id, phone_e164, first_name, mailing_status,
        consent_status, consent_source, consent_recorded_at,
        version, created_at, updated_at
-     ) VALUES (1, 1, '+972501234567', 'Delivery', 'subscribed',
-       'granted', 'explicit-form', $1, 1, $1, $1)`,
+     ) VALUES
+       (1, 1, '+972501234567', 'Delivery', 'subscribed',
+        'granted', 'explicit-form', $1, 1, $1, $1),
+       (2, 2, '+972509999999', 'Cross tenant', 'unsubscribed',
+        'unknown', NULL, NULL, 1, $1, $1)`,
     [values.base],
   );
+  await seedPostgresBotDependencies(pool);
   await pool.query(
     `INSERT INTO message_templates (
        template_key, tenant_id, meta_template_id, name, language, category,
@@ -393,20 +826,31 @@ async function seedPostgresDependencies(database, pool) {
 async function captureOutcome(operation) {
   try {
     await operation();
-    return "accepted";
-  } catch {
-    return "rejected";
+    return Object.freeze({ outcome: "accepted", errorMessage: null });
+  } catch (error) {
+    return Object.freeze({
+      outcome: "rejected",
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 
 async function compareOutcome(observations, name, d1Operation,
-  postgresOperation, expected) {
-  const [d1Outcome, postgresOutcome] = await Promise.all([
+  postgresOperation, expected, expectedErrorMessage = null) {
+  const [d1Result, postgresResult] = await Promise.all([
     captureOutcome(d1Operation),
     captureOutcome(postgresOperation),
   ]);
-  assert.equal(postgresOutcome, d1Outcome, `${name} diverged`);
-  assert.equal(d1Outcome, expected, `${name} outcome was not ${expected}`);
+  assert.equal(postgresResult.outcome, d1Result.outcome, `${name} diverged`);
+  assert.equal(
+    d1Result.outcome,
+    expected,
+    `${name} outcome was not ${expected}`,
+  );
+  if (expectedErrorMessage !== null) {
+    assert.equal(d1Result.errorMessage, expectedErrorMessage);
+    assert.equal(postgresResult.errorMessage, expectedErrorMessage);
+  }
   observations.push(Object.freeze({ name, outcome: expected }));
 }
 
@@ -488,6 +932,36 @@ async function runSemanticParityScenarios(database, pool) {
         "DELETE FROM campaign_delivery_provider_links WHERE delivery_key = $1",
         [keys.delivery],
       )],
+    ["campaign-provider-message-collision",
+      () => database.prepare(
+        `INSERT INTO messages (
+           message_key, conversation_key, tenant_id, provider_message_id,
+           direction, content_kind, status, text_content, occurred_at,
+           status_updated_at, created_at, updated_at
+         ) VALUES (?, ?, 1, 'wamid.delivery-proof', 'inbound', 'text',
+           'received', 'התנגשות הוכחת קמפיין', ?, ?, ?, ?)`,
+      ).run(
+        keys.campaignProviderCollisionMessage,
+        keys.botConversation,
+        values.advanced,
+        values.advanced,
+        values.advanced,
+        values.advanced,
+      ),
+      () => pool.query(
+        `INSERT INTO messages (
+           message_key, conversation_key, tenant_id, provider_message_id,
+           direction, content_kind, status, text_content, occurred_at,
+           status_updated_at, created_at, updated_at
+         ) VALUES ($1, $2, 1, 'wamid.delivery-proof', 'inbound', 'text',
+           'received', 'התנגשות הוכחת קמפיין', $3, $3, $3, $3)`,
+        [
+          keys.campaignProviderCollisionMessage,
+          keys.botConversation,
+          values.advanced,
+        ],
+      ),
+      "Provider message already belongs to a campaign delivery"],
     ["policy-version-gap",
       () => database.prepare(
         `INSERT INTO whatsapp_campaign_delivery_policy_events (
@@ -532,23 +1006,26 @@ async function runSemanticParityScenarios(database, pool) {
            portfolio_limit_value, reserved_at, pair_reserved_until,
            reservation_expires_at, created_at, policy_event_key,
            phone_throughput_messages_per_second,
-           maximum_outbound_messages_per_second
+           maximum_outbound_messages_per_second, reservation_class
          ) VALUES ($1, 1, $2, $3, $4, 'UTILITY', 'bounded', 250,
-           $5, $6, $7, $5, $8, 80, 64)`,
+           $5, $6, $7, $5, $8, 80, 64, 'business-initiated')`,
         [opaque("whatsapp_rate_reservation_v1_", "a"), keys.portfolio,
           opaque("whatsapp_sender_v1_", "a"),
           opaque("whatsapp_recipient_v1_", "a"), values.advanced,
           "2026-08-20T10:04:06.000Z", "2026-08-20T10:09:00.000Z",
           enabledPolicyKey],
-      )],
+      ),
+      "WhatsApp reservation lacks current throughput evidence"],
   ];
-  for (const [name, d1Operation, postgresOperation] of rejected) {
+  for (const [name, d1Operation, postgresOperation,
+    expectedErrorMessage] of rejected) {
     await compareOutcome(
       observations,
       name,
       d1Operation,
       postgresOperation,
       "rejected",
+      expectedErrorMessage,
     );
   }
   return observations;
@@ -573,6 +1050,278 @@ async function readPostgresState(pool) {
   ));
 }
 
+async function requirePostgresTriggerInventory(pool) {
+  const expected = POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY
+    .map(({ tableName, triggerName }) => ({
+      tableName,
+      triggerName,
+      enabled: "O",
+    }))
+    .sort((left, right) => (
+      left.tableName.localeCompare(right.tableName) ||
+      left.triggerName.localeCompare(right.triggerName)
+    ));
+  const relationNames = Array.from(new Set(
+    expected.map(({ tableName }) => tableName),
+  )).sort();
+  const result = await pool.query(
+    `SELECT
+       relation.relname::text AS "tableName",
+       trigger.tgname::text AS "triggerName",
+       trigger.tgenabled::text AS enabled
+     FROM pg_catalog.pg_trigger AS trigger
+     INNER JOIN pg_catalog.pg_class AS relation
+       ON relation.oid = trigger.tgrelid
+     INNER JOIN pg_catalog.pg_namespace AS namespace
+       ON namespace.oid = relation.relnamespace
+     WHERE namespace.nspname = current_schema()
+       AND NOT trigger.tgisinternal
+       AND relation.relname = ANY($1::text[])
+     ORDER BY relation.relname, trigger.tgname`,
+    [relationNames],
+  );
+  assert.deepEqual(result.rows, expected);
+  assert.equal(result.rowCount, 47);
+  return result.rowCount;
+}
+
+async function requireDisabledTriggerPreflightRejection(pool, plan) {
+  const tableName = "whatsapp_rate_limit_reservations";
+  const triggerName = "whatsapp_rate_reservations_insert_guard";
+  await pool.query(
+    `ALTER TABLE ${tableName} DISABLE TRIGGER ${triggerName}`,
+  );
+  try {
+    const disabled = await pool.query(
+      `SELECT trigger.tgenabled::text AS enabled
+       FROM pg_catalog.pg_trigger AS trigger
+       INNER JOIN pg_catalog.pg_class AS relation
+         ON relation.oid = trigger.tgrelid
+       WHERE relation.relname = $1 AND trigger.tgname = $2`,
+      [tableName, triggerName],
+    );
+    assert.deepEqual(disabled.rows, [{ enabled: "D" }]);
+    await assert.rejects(
+      executePostgresWhatsappDeliveryPolicyDataMigration({
+        plan,
+        transactions: createNodePostgresTransactionManager(pool),
+        evidenceHmacKey,
+        now: "2026-08-20T11:05:00.000Z",
+      }),
+      (error) => error instanceof PostgresDataMigrationError &&
+        error.code === "target-verification-failed",
+    );
+    const target = await readPostgresState(pool);
+    assert.equal(Object.values(target).flat().length, 0);
+  } finally {
+    await pool.query(
+      `ALTER TABLE ${tableName} ENABLE TRIGGER ${triggerName}`,
+    );
+  }
+}
+
+function requireD1BotPolicyEvidence(database) {
+  const provider = database.prepare(
+    `SELECT
+       link.provider_status AS providerStatus,
+       link.terminal_outcome AS terminalOutcome,
+       reservation.reservation_class AS reservationClass,
+       settlement.outcome AS settlementOutcome,
+       delivery.status AS deliveryStatus,
+       delivery.provider_message_id AS providerMessageId,
+       delivery.accepted_at AS acceptedAt
+     FROM bot_reply_delivery_provider_links AS link
+     INNER JOIN bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = link.delivery_key
+       AND delivery.tenant_id = link.tenant_id
+     INNER JOIN whatsapp_rate_limit_reservations AS reservation
+       ON reservation.reservation_key = link.reservation_key
+     INNER JOIN whatsapp_rate_limit_settlements AS settlement
+       ON settlement.reservation_key = link.reservation_key
+     WHERE link.delivery_key = ?`,
+  ).get(keys.buttonDelivery);
+  assert.deepEqual({ ...provider }, {
+    providerStatus: "delivered",
+    terminalOutcome: "delivered",
+    reservationClass: "service-reply",
+    settlementOutcome: "delivered",
+    deliveryStatus: "accepted",
+    providerMessageId: "wamid.bot-button-outbound",
+    acceptedAt: values.buttonAccepted,
+  });
+
+  const button = database.prepare(
+    `SELECT
+       event.selected_bot_option_key AS selectedOptionKey,
+       inbound.content_kind AS contentKind,
+       delivery.status AS deliveryStatus,
+       json_extract(delivery.reply_json, '$.kind') AS replyKind
+     FROM inbound_button_reply_events AS event
+     INNER JOIN messages AS inbound
+       ON inbound.message_key = event.message_key
+       AND inbound.tenant_id = event.tenant_id
+     INNER JOIN bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = event.subject_delivery_key
+       AND delivery.tenant_id = event.tenant_id
+     WHERE event.message_key = ?`,
+  ).get(keys.buttonInboundMessage);
+  assert.deepEqual({ ...button }, {
+    selectedOptionKey: keys.buttonOption,
+    contentKind: "interactive",
+    deliveryStatus: "accepted",
+    replyKind: "buttons",
+  });
+
+  const rejection = database.prepare(
+    `SELECT
+       event.provider_error_code AS providerErrorCode,
+       event.reason_code AS reasonCode,
+       event.claim_version AS claimVersion,
+       delivery.status AS deliveryStatus,
+       reservation.reservation_class AS reservationClass,
+       settlement.outcome AS settlementOutcome,
+       event.service_window_opened_at AS serviceWindowOpenedAt,
+       event.attempted_at AS attemptedAt,
+       event.rejected_at AS rejectedAt
+     FROM bot_reply_service_window_rejection_events AS event
+     INNER JOIN bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = event.delivery_key
+       AND delivery.tenant_id = event.tenant_id
+     INNER JOIN whatsapp_rate_limit_reservations AS reservation
+       ON reservation.reservation_key = event.reservation_key
+     INNER JOIN whatsapp_rate_limit_settlements AS settlement
+       ON settlement.reservation_key = event.reservation_key
+     WHERE event.event_key = ?`,
+  ).get(keys.windowRejection);
+  assert.deepEqual({ ...rejection }, {
+    providerErrorCode: 131047,
+    reasonCode: "META_SERVICE_WINDOW_CLOSED",
+    claimVersion: 1,
+    deliveryStatus: "rejected",
+    reservationClass: "service-reply",
+    settlementOutcome: "provider-failed",
+    serviceWindowOpenedAt: values.windowOpened,
+    attemptedAt: values.windowAttempted,
+    rejectedAt: values.windowRejected,
+  });
+}
+
+async function requirePostgresBotPolicyEvidence(pool) {
+  const providerResult = await pool.query(
+    `SELECT
+       link.provider_status AS "providerStatus",
+       link.terminal_outcome AS "terminalOutcome",
+       reservation.reservation_class AS "reservationClass",
+       settlement.outcome AS "settlementOutcome",
+       delivery.status AS "deliveryStatus",
+       delivery.provider_message_id AS "providerMessageId",
+       delivery.accepted_at AS "acceptedAt"
+     FROM bot_reply_delivery_provider_links AS link
+     INNER JOIN bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = link.delivery_key
+       AND delivery.tenant_id = link.tenant_id
+     INNER JOIN whatsapp_rate_limit_reservations AS reservation
+       ON reservation.reservation_key = link.reservation_key
+     INNER JOIN whatsapp_rate_limit_settlements AS settlement
+       ON settlement.reservation_key = link.reservation_key
+     WHERE link.delivery_key = $1`,
+    [keys.buttonDelivery],
+  );
+  assert.deepEqual({
+    ...providerResult.rows[0],
+    acceptedAt: providerResult.rows[0]?.acceptedAt.toISOString(),
+  }, {
+    providerStatus: "delivered",
+    terminalOutcome: "delivered",
+    reservationClass: "service-reply",
+    settlementOutcome: "delivered",
+    deliveryStatus: "accepted",
+    providerMessageId: "wamid.bot-button-outbound",
+    acceptedAt: values.buttonAccepted,
+  });
+  const crossTenantProviderId = await pool.query(
+    `SELECT
+       provider_message_id AS "providerMessageId",
+       tenant_id::integer AS "tenantId"
+     FROM messages
+     WHERE provider_message_id IN (
+       'wamid.bot-button-outbound',
+       'wamid.delivery-proof'
+     )
+     ORDER BY provider_message_id, tenant_id`,
+  );
+  assert.deepEqual(crossTenantProviderId.rows, [{
+    providerMessageId: "wamid.bot-button-outbound",
+    tenantId: 2,
+  }, {
+    providerMessageId: "wamid.delivery-proof",
+    tenantId: 2,
+  }]);
+
+  const buttonResult = await pool.query(
+    `SELECT
+       event.selected_bot_option_key AS "selectedOptionKey",
+       inbound.content_kind AS "contentKind",
+       delivery.status AS "deliveryStatus",
+       delivery.reply_json ->> 'kind' AS "replyKind"
+     FROM inbound_button_reply_events AS event
+     INNER JOIN messages AS inbound
+       ON inbound.message_key = event.message_key
+       AND inbound.tenant_id = event.tenant_id
+     INNER JOIN bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = event.subject_delivery_key
+       AND delivery.tenant_id = event.tenant_id
+     WHERE event.message_key = $1`,
+    [keys.buttonInboundMessage],
+  );
+  assert.deepEqual(buttonResult.rows[0], {
+    selectedOptionKey: keys.buttonOption,
+    contentKind: "interactive",
+    deliveryStatus: "accepted",
+    replyKind: "buttons",
+  });
+
+  const rejectionResult = await pool.query(
+    `SELECT
+       event.provider_error_code::integer AS "providerErrorCode",
+       event.reason_code AS "reasonCode",
+       event.claim_version::integer AS "claimVersion",
+       delivery.status AS "deliveryStatus",
+       reservation.reservation_class AS "reservationClass",
+       settlement.outcome AS "settlementOutcome",
+       event.service_window_opened_at AS "serviceWindowOpenedAt",
+       event.attempted_at AS "attemptedAt",
+       event.rejected_at AS "rejectedAt"
+     FROM bot_reply_service_window_rejection_events AS event
+     INNER JOIN bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = event.delivery_key
+       AND delivery.tenant_id = event.tenant_id
+     INNER JOIN whatsapp_rate_limit_reservations AS reservation
+       ON reservation.reservation_key = event.reservation_key
+     INNER JOIN whatsapp_rate_limit_settlements AS settlement
+       ON settlement.reservation_key = event.reservation_key
+     WHERE event.event_key = $1`,
+    [keys.windowRejection],
+  );
+  const rejection = rejectionResult.rows[0];
+  assert.deepEqual({
+    ...rejection,
+    serviceWindowOpenedAt: rejection?.serviceWindowOpenedAt.toISOString(),
+    attemptedAt: rejection?.attemptedAt.toISOString(),
+    rejectedAt: rejection?.rejectedAt.toISOString(),
+  }, {
+    providerErrorCode: 131047,
+    reasonCode: "META_SERVICE_WINDOW_CLOSED",
+    claimVersion: 1,
+    deliveryStatus: "rejected",
+    reservationClass: "service-reply",
+    settlementOutcome: "provider-failed",
+    serviceWindowOpenedAt: values.windowOpened,
+    attemptedAt: values.windowAttempted,
+    rejectedAt: values.windowRejected,
+  });
+}
+
 function comparableSnapshot(tables) {
   return JSON.parse(JSON.stringify(
     createPostgresWhatsappDeliveryPolicyDataSnapshot(tables).tables,
@@ -590,6 +1339,7 @@ async function main() {
     const d1MigrationCount = await applyD1Migrations(database);
     const postgresMigrationCount = await applyPostgresMigrations(pool);
     seedD1(database);
+    requireD1BotPolicyEvidence(database);
     await seedPostgresDependencies(database, pool);
     const snapshot = readD1WhatsappDeliveryPolicySnapshot(database);
     const plan = createPostgresWhatsappDeliveryPolicyDataMigrationPlan({
@@ -598,14 +1348,23 @@ async function main() {
       expiresAt: "2026-08-20T11:15:00.000Z",
       evidenceHmacKey,
     });
+    const triggerCountBefore = await requirePostgresTriggerInventory(pool);
+    await requireDisabledTriggerPreflightRejection(pool, plan);
+    assert.equal(
+      await requirePostgresTriggerInventory(pool),
+      triggerCountBefore,
+    );
     const evidence = await executePostgresWhatsappDeliveryPolicyDataMigration({
       plan,
       transactions: createNodePostgresTransactionManager(pool),
       evidenceHmacKey,
       now: "2026-08-20T11:05:00.000Z",
     });
-    assert.equal(evidence.tableCount, 8);
-    assert.equal(evidence.totalRowCount, 12);
+    const triggerCountAfter = await requirePostgresTriggerInventory(pool);
+    assert.equal(triggerCountAfter, triggerCountBefore);
+    await requirePostgresBotPolicyEvidence(pool);
+    assert.equal(evidence.tableCount, 11);
+    assert.equal(evidence.totalRowCount, 21);
     await assert.rejects(
       executePostgresWhatsappDeliveryPolicyDataMigration({
         plan,
@@ -617,13 +1376,13 @@ async function main() {
         error.code === "target-not-empty",
     );
     const observations = await runSemanticParityScenarios(database, pool);
-    assert.equal(observations.length, 9);
+    assert.equal(observations.length, 10);
     assert.deepEqual(
       comparableSnapshot(await readPostgresState(pool)),
       comparableSnapshot(readD1State(database)),
     );
     console.log(
-      `PostgreSQL WhatsApp delivery-policy data rehearsal: PASS (${d1MigrationCount} D1 migrations, ${postgresMigrationCount} PostgreSQL migrations, 8 tables, 12 rows, replay rejected, legacy category unknown, delivery evidence private, ${observations.length} parity scenarios)`,
+      `PostgreSQL WhatsApp delivery-policy data rehearsal: PASS (${d1MigrationCount} D1 migrations, ${postgresMigrationCount} PostgreSQL migrations, 11 tables, 21 rows, replay rejected, disabled-trigger preflight rejected, reservation class explicit, 47 expected triggers inventoried and restored, bot provider/button/window evidence verified in D1 and PostgreSQL, delivery evidence private, ${observations.length} parity scenarios)`,
     );
   } finally {
     database.close();

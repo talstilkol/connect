@@ -1,20 +1,22 @@
 # PostgreSQL Bot Runtime Data Migration Rehearsal
 
-תאריך אימות: 2026-08-20
+תאריך אימות v2: 2026-08-25
 
 ## 1. תוצאה
 
 1.1 ‏Slice 7 עבר חזרה נקייה מול SQLite/D1 ומול PostgreSQL 16 אמיתי:
 
 ```text
-PASS (36 D1 migrations, 24 PostgreSQL migrations, 3 tables, 6 rows,
-replay rejected, tenant isolation verified, bot payload private,
+PASS (42 D1 migrations, 42 PostgreSQL migrations, 3 tables, 7 rows,
+replay rejected, tenant isolation verified, deferred retry verified,
+bot payload private,
 9 parity scenarios)
 ```
 
 1.2 שלוש הטבלאות הן `bot_flows`, ‏`bot_flow_versions` ו־
-`bot_reply_deliveries`. יחד עם ששת ה־Slices הקודמים הוכחו כעת 29 מתוך 51
-טבלאות.
+`bot_reply_deliveries`. הראיה הנוכחית כוללת Delivery דחוי לא־ריק עם
+`claim_version=1`, ‏`PROVIDER_RATE_LIMITED` וזמן Retry חוקי בתוך חלון
+השירות. Registry ההעברה המלא מכסה 55 טבלאות.
 
 ## 2. מה החוזה מגן עליו
 
@@ -25,8 +27,8 @@ Version חיובי וזמנים מסודרים.
 שעובר את Validator העסקי המלא ולהתאים בין `status` לבין `published_at`.
 
 2.3 כל Delivery חייב להכיל Reply JSON שה־Runtime יודע לעבד, מספר E.164,
-Lifecycle עקבי והתאמה מלאה בין Status, מספר ניסיונות, ‏Provider ID,
-Error code ו־`accepted_at`.
+זהות שולח, Lifecycle עקבי והתאמה מלאה בין Status, מספר ניסיונות,
+`claim_version`, ‏Provider ID, ‏Error code ו־`accepted_at`.
 
 2.4 לפני Commit מתבצעות שתי בדיקות קישור נוספות:
 
@@ -38,6 +40,11 @@ Error code ו־`accepted_at`.
 2.5 הבדיקה השנייה סוגרת פער מקור: ה־Foreign key הישן של D1 מקשר Delivery
 רק לפי Tenant ו־Version key. PostgreSQL וה־Migration verifier דורשים גם את
 ה־Flow key, ולכן Payload שמחליף Flow בלי להחליף Version נכשל לפני Commit.
+
+2.6 עבור Delivery דחוי, החוזה דורש `updated_at === deferred_at`, זמן Retry
+מאוחר מזמן הדחייה אך מוקדם באופן מחמיר מ־24 שעות לאחר הודעת ה־Inbound.
+USER triggers של `bot_reply_deliveries` נבדקים, מושבתים רק בתוך Transaction
+הטעינה ומאומתים שוב לאחר החזרתם.
 
 ## 3. פרטיות וראיות
 
@@ -68,7 +75,8 @@ digests. הם אינם מכילים:
 9. חסימת Lifecycle סותר של Delivery.
 
 4.2 לאחר התרחישים נקראו שלוש הטבלאות מחדש בשני המנועים והושוו Row-for-row
-באמצעות Snapshot קנוני ודטרמיניסטי.
+באמצעות Snapshot קנוני ודטרמיניסטי. בנוסף אומתו במפורש שדות ה־Deferral
+והחזרת שני ה־USER triggers למצב פעיל.
 
 ## 5. פער Hardening מכוון
 
@@ -104,5 +112,5 @@ CONNECT_POSTGRES_BOT_RUNTIME_DATA_MIGRATION_REHEARSAL_URL="postgresql://<local-u
 עקבי, ‏Staging, ‏Load/Recovery rehearsal, בדיקות עומס, ערכי Railway חיים
 וחלון Cutover מאושר.
 
-7.2 ה־Slice הבא הוא `ai-knowledge-runtime`, ובו תשע טבלאות. אסור לסמן אותו
-`rehearsed` לפני חזרה אמיתית ו־Semantic parity משלו.
+7.2 עדיין נדרש Full integration מאוכלס לכל 55 הטבלאות מול baseline של
+42 migrations, ולא רק Rehearsal נפרד לכל Slice.

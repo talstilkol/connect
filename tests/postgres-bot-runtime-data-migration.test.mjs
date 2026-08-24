@@ -24,6 +24,8 @@ import {
 const evidenceHmacKey = Buffer.alloc(32, 71).toString("base64");
 const createdAt = "2026-08-20T08:00:00.000Z";
 const changedAt = "2026-08-20T08:05:00.000Z";
+const deferredAt = "2026-08-20T08:06:00.000Z";
+const retryAt = "2026-08-20T08:10:00.000Z";
 const conversationKey = `conversation_v1_${"1".repeat(64)}`;
 const messageKey = `message_v1_${"2".repeat(64)}`;
 const flowKey = `bot_flow_v1_${"3".repeat(64)}`;
@@ -87,6 +89,8 @@ function rawTables() {
       bot_flow_key: flowKey,
       bot_flow_version_key: versionKey,
       reply_index: 1,
+      sender_phone_number_id:
+        "phone-number-id",
       recipient_phone_e164: "+972501234567",
       reply_json: JSON.stringify({
         kind: "text",
@@ -94,6 +98,10 @@ function rawTables() {
       }),
       status: "accepted",
       attempt_count: 1,
+      claim_version: 1,
+      next_attempt_at: null,
+      deferred_at: null,
+      last_deferral_reason_code: null,
       provider_message_id: "wamid.private-bot-reply",
       last_error_code: null,
       accepted_at: changedAt,
@@ -101,6 +109,26 @@ function rawTables() {
       updated_at: changedAt,
     }],
   };
+}
+
+function deferredTables({
+  nextAttemptAt = retryAt,
+  updatedAt = deferredAt,
+} = {}) {
+  const tables = rawTables();
+  Object.assign(tables.bot_reply_deliveries[0], {
+    status: "pending",
+    attempt_count: 0,
+    claim_version: 1,
+    next_attempt_at: nextAttemptAt,
+    deferred_at: deferredAt,
+    last_deferral_reason_code: "PROVIDER_RATE_LIMITED",
+    provider_message_id: null,
+    last_error_code: null,
+    accepted_at: null,
+    updated_at: updatedAt,
+  });
+  return tables;
 }
 
 function createPlan(tables = rawTables()) {
@@ -116,9 +144,11 @@ function tableNameFromTargetRead(sql) {
   return /^SELECT[\s\S]+?FROM\s+([a-z_]+)\s+ORDER BY/i.exec(sql)?.[1] ?? null;
 }
 
-function createTargetFixture({ invalidProjection = false,
-  invalidDelivery = false } = {}) {
-  const tables = createPlan().payload.tables;
+function createTargetFixture({ tables = rawTables(),
+  invalidProjection = false, invalidDelivery = false,
+  invalidDeferralWindow = false, disabledTrigger = false } = {}) {
+  const targetTables = createPlan(tables).payload.tables;
+  const calls = [];
   let committed = false;
   let rolledBack = false;
   const manager = {
@@ -127,12 +157,21 @@ function createTargetFixture({ invalidProjection = false,
       try {
         const result = await execute({
           async query(sql) {
+            calls.push(sql);
+            if (/^WITH expected\(trigger_name\)/i.test(sql)) {
+              return disabledTrigger
+                ? { rows: [{ invalid: 1 }], rowCount: 1 }
+                : { rows: [], rowCount: 0 };
+            }
             if (/^SELECT count\(\*\)::bigint AS count/i.test(sql)) {
               return { rows: [{ count: "0" }], rowCount: 1 };
             }
             const insert = /^INSERT INTO ([a-z_]+)/i.exec(sql);
             if (insert) {
-              return { rows: [], rowCount: tables[insert[1]].length };
+              return {
+                rows: [],
+                rowCount: targetTables[insert[1]].length,
+              };
             }
             if (/^SELECT 1\s+FROM bot_flows AS flow/i.test(sql)) {
               return invalidProjection
@@ -140,15 +179,15 @@ function createTargetFixture({ invalidProjection = false,
                 : { rows: [], rowCount: 0 };
             }
             if (/^SELECT 1\s+FROM bot_reply_deliveries AS delivery/i.test(sql)) {
-              return invalidDelivery
+              return invalidDelivery || invalidDeferralWindow
                 ? { rows: [{ invalid: 1 }], rowCount: 1 }
                 : { rows: [], rowCount: 0 };
             }
             const tableName = tableNameFromTargetRead(sql);
             if (tableName) {
               return {
-                rows: tables[tableName],
-                rowCount: tables[tableName].length,
+                rows: targetTables[tableName],
+                rowCount: targetTables[tableName].length,
               };
             }
             return { rows: [{}], rowCount: 1 };
@@ -164,6 +203,7 @@ function createTargetFixture({ invalidProjection = false,
   };
   return {
     manager,
+    calls,
     get committed() { return committed; },
     get rolledBack() { return rolledBack; },
   };
@@ -194,8 +234,26 @@ test("builds privacy-safe evidence without bot definitions or delivery data",
     assert.equal(evidence.tableCount, 3);
     assert.equal(evidence.totalRowCount, 3);
     assert.equal(fixture.committed, true);
+    assert.equal(
+      fixture.calls.filter((sql) => (
+        sql === "ALTER TABLE bot_reply_deliveries DISABLE TRIGGER USER"
+      )).length,
+      1,
+    );
+    assert.equal(
+      fixture.calls.filter((sql) => (
+        sql === "ALTER TABLE bot_reply_deliveries ENABLE TRIGGER USER"
+      )).length,
+      1,
+    );
+    assert.equal(
+      fixture.calls.filter((sql) => (
+        /^WITH expected\(trigger_name\)/i.test(sql)
+      )).length,
+      2,
+    );
     assert.match(plan.planId,
-      /^connect_postgres_bot_runtime_data_v1_[0-9a-f]{64}$/);
+      /^connect_postgres_bot_runtime_data_v2_[0-9a-f]{64}$/);
     assert.doesNotMatch(publicArtifacts,
       /מענה אוטומטי|תוכן תשובה|wamid|972501234567|accepted/);
   });
@@ -220,6 +278,36 @@ test("rejects unsafe legacy bot definition and delivery lifecycle values", () =>
   }
 });
 
+test("rejects a deferred row whose update time is not its deferral time", () => {
+  const tables = deferredTables({ updatedAt: changedAt });
+  assert.throws(
+    () => createPostgresBotRuntimeDataSnapshot(tables),
+    (error) => error instanceof PostgresDataMigrationError &&
+      error.code === "row-invalid" &&
+      error.table === "bot_reply_deliveries" &&
+      error.rowIndex === 0,
+  );
+});
+
+test("refuses a target whose bot delivery triggers are disabled", async () => {
+  const fixture = createTargetFixture({ disabledTrigger: true });
+  await assert.rejects(
+    executePostgresBotRuntimeDataMigration({
+      plan: createPlan(),
+      transactions: fixture.manager,
+      evidenceHmacKey,
+      now: "2026-08-20T10:05:00.000Z",
+    }),
+    (error) => error instanceof PostgresDataMigrationError &&
+      error.code === "target-verification-failed",
+  );
+  assert.equal(
+    fixture.calls.some((sql) => /DISABLE TRIGGER USER/.test(sql)),
+    false,
+  );
+  assert.equal(fixture.rolledBack, true);
+});
+
 test("rolls back when a flow projection does not identify its version",
   async () => {
     const fixture = createTargetFixture({ invalidProjection: true });
@@ -242,6 +330,37 @@ test("rolls back when a delivery is not linked to its inbound message",
       error.code === "target-verification-failed");
     assert.equal(fixture.committed, false);
     assert.equal(fixture.rolledBack, true);
+  });
+
+test("rolls back when a deferred delivery exceeds the inbound service window",
+  async () => {
+    const tables = deferredTables({
+      nextAttemptAt: "2026-08-21T08:05:00.000Z",
+    });
+    const fixture = createTargetFixture({
+      tables,
+      invalidDeferralWindow: true,
+    });
+    await assert.rejects(executePostgresBotRuntimeDataMigration({
+      plan: createPlan(tables),
+      transactions: fixture.manager,
+      evidenceHmacKey,
+      now: "2026-08-20T10:05:00.000Z",
+    }), (error) => error instanceof PostgresDataMigrationError &&
+      error.code === "target-verification-failed");
+    assert.equal(fixture.committed, false);
+    assert.equal(fixture.rolledBack, true);
+    assert.equal(
+      fixture.calls.some((sql) => (
+        /next_attempt_at\s+>=\s+inbound\.occurred_at\s+\+\s+INTERVAL '24 hours'/i
+          .test(sql)
+      )),
+      true,
+    );
+    assert.equal(
+      fixture.calls.filter((sql) => /ENABLE TRIGGER USER/.test(sql)).length,
+      1,
+    );
   });
 
 test("reads the three current D1 bot runtime tables atomically", () => {
@@ -291,10 +410,11 @@ test("reads the three current D1 bot runtime tables atomically", () => {
       `INSERT INTO bot_reply_deliveries (
          delivery_key, tenant_id, conversation_key, inbound_message_key,
          bot_flow_key, bot_flow_version_key, reply_index,
-         recipient_phone_e164, reply_json, status, attempt_count,
-         provider_message_id, last_error_code, accepted_at, created_at,
-         updated_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         sender_phone_number_id, recipient_phone_e164, reply_json, status,
+         attempt_count, claim_version, next_attempt_at, deferred_at,
+         last_deferral_reason_code, provider_message_id, last_error_code,
+         accepted_at, created_at, updated_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(...Object.values(source.bot_reply_deliveries[0]));
     const snapshot = readD1BotRuntimeSnapshot(database);
     assert.equal(snapshot.tables.bot_flows.length, 1);

@@ -31,6 +31,9 @@ const times = Object.freeze({
   created: "2026-08-20T08:00:00.000Z",
   inbound: "2026-08-20T08:05:00.000Z",
   published: "2026-08-20T08:10:00.000Z",
+  deferredClaimed: "2026-08-20T08:20:00.000Z",
+  deferred: "2026-08-20T08:21:00.000Z",
+  deferredRetry: "2026-08-20T08:30:00.000Z",
   changed: "2026-08-20T09:00:00.000Z",
   accepted: "2026-08-20T09:05:00.000Z",
 });
@@ -46,6 +49,7 @@ const keys = Object.freeze({
   newVersion: `bot_flow_version_v1_${"9".repeat(64)}`,
   firstDelivery: `bot_reply_delivery_v1_${"a".repeat(64)}`,
   secondDelivery: `bot_reply_delivery_v1_${"b".repeat(64)}`,
+  deferredDelivery: `bot_reply_delivery_v1_${"c".repeat(64)}`,
 });
 
 function botBlockKey(character) {
@@ -204,17 +208,45 @@ function seedD1Slice(database) {
        bot_flow_key, bot_flow_version_key, reply_index,
        recipient_phone_e164, reply_json, status, attempt_count,
        provider_message_id, last_error_code, accepted_at, created_at,
-       updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       updated_at, sender_phone_number_id, claim_version,
+       next_attempt_at, deferred_at, last_deferral_reason_code
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   delivery.run(keys.firstDelivery, 1, keys.firstConversation,
-    keys.firstInbound, keys.firstFlow, keys.firstVersion, "+972501111111",
+    keys.firstInbound, keys.firstFlow, keys.firstVersion, 1, "+972501111111",
     JSON.stringify({ kind: "text", text: "הפנייה התקבלה" }), "pending", 0,
-    null, null, null, times.inbound, times.inbound);
+    null, null, null, times.inbound, times.inbound, "phone-bot-primary", 0,
+    null, null, null);
   delivery.run(keys.secondDelivery, 2, keys.secondConversation,
-    keys.secondInbound, keys.secondFlow, keys.secondVersion, "+972502222222",
+    keys.secondInbound, keys.secondFlow, keys.secondVersion, 1,
+    "+972502222222",
     JSON.stringify({ kind: "text", text: "לא ניתן להשלים" }), "rejected", 1,
-    null, "PROVIDER_REJECTED", null, times.inbound, times.published);
+    null, "PROVIDER_REJECTED", null, times.inbound, times.published,
+    "phone-bot-secondary", 1, null, null, null);
+  delivery.run(keys.deferredDelivery, 1, keys.firstConversation,
+    keys.firstInbound, keys.firstFlow, keys.firstVersion, 2,
+    "+972501111111",
+    JSON.stringify({ kind: "text", text: "ננסה שוב לאחר ההשהיה" }),
+    "pending", 0, null, null, null, times.inbound, times.inbound,
+    "phone-bot-primary", 0, null, null, null);
+  database.prepare(
+    `UPDATE bot_reply_deliveries
+     SET status = 'sending', attempt_count = 1,
+         claim_version = claim_version + 1, updated_at = ?
+     WHERE delivery_key = ? AND status = 'pending'`,
+  ).run(times.deferredClaimed, keys.deferredDelivery);
+  database.prepare(
+    `UPDATE bot_reply_deliveries
+     SET status = 'pending', attempt_count = 0, next_attempt_at = ?,
+         deferred_at = ?, last_deferral_reason_code = 'PROVIDER_RATE_LIMITED',
+         updated_at = ?
+     WHERE delivery_key = ? AND status = 'sending' AND claim_version = 1`,
+  ).run(
+    times.deferredRetry,
+    times.deferred,
+    times.deferred,
+    keys.deferredDelivery,
+  );
 }
 
 async function seedPostgresDependencies(pool) {
@@ -351,12 +383,14 @@ async function runSemanticParityScenarios(database, pool) {
   await compareOutcome(observations, "claim-pending-delivery", () =>
     database.prepare(
       `UPDATE bot_reply_deliveries
-       SET status = 'sending', attempt_count = 1, updated_at = ?
+       SET status = 'sending', attempt_count = 1,
+           claim_version = claim_version + 1, updated_at = ?
        WHERE tenant_id = 1 AND delivery_key = ? AND status = 'pending'`,
     ).run(times.changed, keys.firstDelivery), () =>
     pool.query(
       `UPDATE bot_reply_deliveries
-       SET status = 'sending', attempt_count = 1, updated_at = $1
+       SET status = 'sending', attempt_count = 1,
+           claim_version = claim_version + 1, updated_at = $1
        WHERE tenant_id = 1 AND delivery_key = $2 AND status = 'pending'`,
       [times.changed, keys.firstDelivery],
     ), "accepted");
@@ -419,8 +453,9 @@ async function requirePostgresIsolationAndShape(pool) {
     `INSERT INTO bot_reply_deliveries (
        delivery_key, tenant_id, conversation_key, inbound_message_key,
        bot_flow_key, bot_flow_version_key, reply_index,
-       recipient_phone_e164, reply_json
-     ) VALUES ($1, 1, $2, $3, $4, $5, 2, '+972501111111', $6::jsonb)`,
+       recipient_phone_e164, reply_json, sender_phone_number_id
+     ) VALUES ($1, 1, $2, $3, $4, $5, 2, '+972501111111', $6::jsonb,
+       'phone-bot-primary')`,
     [`bot_reply_delivery_v1_${"0".repeat(64)}`, keys.firstConversation,
       keys.secondInbound, keys.firstFlow, keys.firstVersion,
       JSON.stringify({ kind: "text", text: "cross tenant" })],
@@ -471,6 +506,90 @@ async function compareFinalState(database, pool) {
   return Object.freeze(evidence);
 }
 
+async function requireDeferredBotDeliveryEvidence(database, pool) {
+  const d1 = database.prepare(
+    `SELECT
+       delivery.status,
+       delivery.attempt_count AS attemptCount,
+       delivery.claim_version AS claimVersion,
+       delivery.next_attempt_at AS nextAttemptAt,
+       delivery.deferred_at AS deferredAt,
+       delivery.last_deferral_reason_code AS reasonCode,
+       delivery.updated_at AS updatedAt,
+       inbound.occurred_at AS inboundOccurredAt
+     FROM bot_reply_deliveries AS delivery
+     INNER JOIN messages AS inbound
+       ON inbound.tenant_id = delivery.tenant_id
+       AND inbound.message_key = delivery.inbound_message_key
+     WHERE delivery.delivery_key = ?`,
+  ).get(keys.deferredDelivery);
+  const postgresResult = await pool.query(
+    `SELECT
+       delivery.status,
+       delivery.attempt_count::integer AS "attemptCount",
+       delivery.claim_version::integer AS "claimVersion",
+       delivery.next_attempt_at AS "nextAttemptAt",
+       delivery.deferred_at AS "deferredAt",
+       delivery.last_deferral_reason_code AS "reasonCode",
+       delivery.updated_at AS "updatedAt",
+       inbound.occurred_at AS "inboundOccurredAt"
+     FROM bot_reply_deliveries AS delivery
+     INNER JOIN messages AS inbound
+       ON inbound.tenant_id = delivery.tenant_id
+       AND inbound.message_key = delivery.inbound_message_key
+     WHERE delivery.delivery_key = $1`,
+    [keys.deferredDelivery],
+  );
+  const normalize = (row) => Object.fromEntries(
+    Object.entries({ ...row }).map(([name, value]) => [
+      name,
+      value instanceof Date ? value.toISOString() : value,
+    ]),
+  );
+  const expected = {
+    status: "pending",
+    attemptCount: 0,
+    claimVersion: 1,
+    nextAttemptAt: times.deferredRetry,
+    deferredAt: times.deferred,
+    reasonCode: "PROVIDER_RATE_LIMITED",
+    updatedAt: times.deferred,
+    inboundOccurredAt: times.inbound,
+  };
+  assert.deepEqual(normalize(d1), expected);
+  assert.deepEqual(normalize(postgresResult.rows[0]), expected);
+  assert.equal(
+    Date.parse(expected.nextAttemptAt) <
+      Date.parse(expected.inboundOccurredAt) + 86_400_000,
+    true,
+  );
+
+  const triggers = await pool.query(
+    `SELECT trigger.tgname AS "triggerName", trigger.tgenabled AS enabled
+     FROM pg_trigger AS trigger
+     INNER JOIN pg_class AS relation ON relation.oid = trigger.tgrelid
+     INNER JOIN pg_namespace AS namespace
+       ON namespace.oid = relation.relnamespace
+     WHERE namespace.nspname = current_schema()
+       AND relation.relname = 'bot_reply_deliveries'
+       AND trigger.tgname IN (
+         'bot_reply_deliveries_insert_contract_guard',
+         'bot_reply_deliveries_transition_guard'
+       )
+     ORDER BY trigger.tgname`,
+  );
+  assert.deepEqual(triggers.rows, [
+    {
+      triggerName: "bot_reply_deliveries_insert_contract_guard",
+      enabled: "O",
+    },
+    {
+      triggerName: "bot_reply_deliveries_transition_guard",
+      enabled: "O",
+    },
+  ]);
+}
+
 export async function verifyPostgresBotRuntimeDataMigration(connectionString) {
   const checkedUrl = requireLocalBotRuntimeDataMigrationUrl(connectionString);
   const { Pool } = pg;
@@ -505,11 +624,12 @@ export async function verifyPostgresBotRuntimeDataMigration(connectionString) {
       now: "2026-08-20T10:05:00.000Z",
     });
     assert.equal(migrationEvidence.tableCount, 3);
-    assert.equal(migrationEvidence.totalRowCount, 6);
+    assert.equal(migrationEvidence.totalRowCount, 7);
     assert.equal(migrationEvidence.tables.every(
       ({ sourceDigest, targetDigest }) => sourceDigest === targetDigest), true);
     assert.doesNotMatch(JSON.stringify(migrationEvidence),
       /מענה שירות|מענה תמיכה|הפנייה התקבלה|לא ניתן להשלים|wamid|PROVIDER_REJECTED|97250/);
+    await requireDeferredBotDeliveryEvidence(database, pool);
     await requirePostgresIsolationAndShape(pool);
     const semanticObservations = await runSemanticParityScenarios(database, pool);
     const finalState = await compareFinalState(database, pool);
@@ -528,6 +648,8 @@ export async function verifyPostgresBotRuntimeDataMigration(connectionString) {
       rowCount: migrationEvidence.totalRowCount,
       replayRejected: true,
       tenantIsolationVerified: true,
+      deferredDeliveryVerified: true,
+      deliveryTriggersRestored: true,
       botPayloadPrivate: true,
       semanticScenarioCount: semanticObservations.length,
       semanticScenarioDigest: digest(semanticObservations),
@@ -548,7 +670,8 @@ async function main() {
     `${result.d1MigrationCount} D1 migrations, ` +
     `${result.postgresMigrationCount} PostgreSQL migrations, ` +
     `${result.tableCount} tables, ${result.rowCount} rows, ` +
-    `replay rejected, tenant isolation verified, bot payload private, ` +
+    `replay rejected, tenant isolation verified, deferred retry verified, ` +
+    `delivery triggers restored, bot payload private, ` +
     `${result.semanticScenarioCount} parity scenarios)\n`,
   );
 }

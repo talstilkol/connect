@@ -81,24 +81,24 @@ test("keeps the full snapshot contract aligned with all ten slices", () => {
       (total, slice) => total + slice.tables.length,
       0,
     ),
-    51,
+    55,
   );
   assert.equal(
     new Set(D1_FULL_DATA_MIGRATION_SLICE_CONTRACTS.flatMap(
       ({ tables }) => tables,
     )).size,
-    51,
+    55,
   );
 });
 
-test("reads all 51 current D1 tables under one source transaction", () => {
+test("reads all 55 current D1 tables under one source transaction", () => {
   const database = createCurrentD1Database();
   try {
     const tracked = trackTransactions(database);
     const snapshot = readD1FullDataMigrationSnapshot(tracked.dependency);
 
     assert.equal(snapshot.version, D1_FULL_DATA_MIGRATION_SNAPSHOT_VERSION);
-    assert.equal(snapshot.tableCount, 51);
+    assert.equal(snapshot.tableCount, 55);
     assert.equal(snapshot.totalRowCount, 0);
     assert.equal(snapshot.slices.length, 10);
     assert.deepEqual(
@@ -125,12 +125,12 @@ test("reads all 51 current D1 tables under one source transaction", () => {
     assert.equal(
       tracked.statements.filter((sql) => /^PRAGMA table_info\(/.test(sql))
         .length,
-      51,
+      55,
     );
     assert.equal(
       tracked.statements.filter((sql) => /^SELECT[\s\S]+FROM /m.test(sql))
         .length,
-      51,
+      55,
     );
   } finally {
     database.close();
@@ -206,12 +206,12 @@ test("verifies one immutable SQLite export without exposing its path", () => {
 
     assert.deepEqual(verifyD1FullDataMigrationSnapshot(sourcePath), {
       sliceCount: 10,
-      tableCount: 51,
+      tableCount: 55,
       totalRowCount: 0,
     });
     const snapshot = readVerifiedD1FullDataMigrationSnapshot(sourcePath);
     assert.equal(snapshot.slices.length, 10);
-    assert.equal(snapshot.tableCount, 51);
+    assert.equal(snapshot.tableCount, 55);
     assert.equal(snapshot.totalRowCount, 0);
     const after = lstatSync(sourcePath);
     assert.equal(after.size, before.size);
@@ -234,7 +234,7 @@ test("verifies one immutable SQLite export without exposing its path", () => {
     assert.equal(result.stderr, "");
     assert.equal(
       result.stdout,
-      "D1 full migration source snapshot: PASS (10 slices, 51 tables, 0 rows)\n",
+      "D1 full migration source snapshot: PASS (10 slices, 55 tables, 0 rows)\n",
     );
     assert.equal(result.stdout.includes(sourcePath), false);
   } finally {

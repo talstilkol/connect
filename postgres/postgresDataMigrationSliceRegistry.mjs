@@ -45,6 +45,7 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
       "team_invitations",
       "team_invitation_events",
       "team_invitation_deliveries",
+      "team_invitation_delivery_deferrals",
       "team_invitation_acceptances",
     ],
     d1Migrations: [
@@ -56,10 +57,12 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
       "0027_team_invitation_system_actor.sql",
       "0028_team_invitation_expiration_scan.sql",
       "0029_team_invitation_acceptance.sql",
+      "0036_team_invitation_delivery_deferrals.sql",
     ],
     postgresMigrations: [
       "0003_tenant_membership_events.sql",
       "0004_team_invitation_lifecycle.sql",
+      "0029_team_invitation_delivery_deferrals.sql",
     ],
   }),
   slice({
@@ -136,8 +139,12 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
     d1Migrations: [
       "0013_bot_flow_foundation.sql",
       "0014_neat_kingpin.sql",
+      "0038_bot_reply_delivery_deferrals.sql",
     ],
-    postgresMigrations: ["0007_bot_flows_deliveries.sql"],
+    postgresMigrations: [
+      "0007_bot_flows_deliveries.sql",
+      "0031_bot_reply_delivery_deferrals.sql",
+    ],
   }),
   slice({
     id: "ai-knowledge-runtime",
@@ -194,9 +201,17 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
     id: "whatsapp-delivery-policy",
     order: 10,
     status: "rehearsed",
-    requires: ["core", "meta-connection", "templates-campaigns"],
+    requires: [
+      "core",
+      "meta-connection",
+      "templates-campaigns",
+      "bot-runtime",
+    ],
     tables: [
       "campaign_delivery_provider_links",
+      "bot_reply_delivery_provider_links",
+      "inbound_button_reply_events",
+      "bot_reply_service_window_rejection_events",
       "whatsapp_campaign_delivery_policy_events",
       "whatsapp_rate_limit_reservations",
       "whatsapp_pair_rate_limit_state",
@@ -211,6 +226,10 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
       "0032_whatsapp_provider_cooldowns.sql",
       "0034_whatsapp_campaign_delivery_policy_events.sql",
       "0035_whatsapp_phone_throughput.sql",
+      "0037_whatsapp_service_reply_reservations.sql",
+      "0039_bot_reply_delivery_provider_links.sql",
+      "0040_inbound_button_reply_provenance.sql",
+      "0041_bot_reply_service_window_rejection_provenance.sql",
     ],
     postgresMigrations: [
       "0011_whatsapp_delivery_policy.sql",
@@ -218,6 +237,10 @@ export const POSTGRES_DATA_MIGRATION_SLICES = Object.freeze([
       "0013_whatsapp_phone_throughput.sql",
       "0022_campaign_delivery_provider_links.sql",
       "0024_whatsapp_legacy_reservation_category.sql",
+      "0030_whatsapp_service_reply_reservations.sql",
+      "0032_bot_reply_delivery_provider_links.sql",
+      "0037_inbound_button_reply_provenance.sql",
+      "0038_bot_reply_service_window_rejection_provenance.sql",
     ],
   }),
 ]);

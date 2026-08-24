@@ -64,7 +64,7 @@ test("builds a bounded ten-minute cutover preflight without payload", () => {
   assert.equal(preflight.createdAt, startedAt);
   assert.equal(preflight.expiresAt, "2026-08-20T16:10:00.000Z");
   assert.equal(preflight.sliceCount, 10);
-  assert.equal(preflight.tableCount, 51);
+  assert.equal(preflight.tableCount, 55);
   assert.equal(preflight.totalRowCount, 0);
   assert.equal(preflight.slices.length, 10);
   assert.match(preflight.sourceDigest, /^hmac_sha256_v1_[a-f0-9]{64}$/);
@@ -148,7 +148,7 @@ test("runs a source-only CLI preflight without exposing path, key, or rows", () 
     assert.equal(result.stderr, "");
     const report = JSON.parse(result.stdout);
     assert.equal(report.sliceCount, 10);
-    assert.equal(report.tableCount, 51);
+    assert.equal(report.tableCount, 55);
     assert.equal(report.totalRowCount, 0);
     assert.equal(result.stdout.includes(sourcePath), false);
     assert.equal(result.stdout.includes(evidenceHmacKey), false);
@@ -231,4 +231,10 @@ test("keeps the operator command and runbook aligned with the safety contract", 
   }
   assert.match(runbook, /Plan[\s\S]+בזיכרון התהליך בלבד/);
   assert.match(runbook, /אינו מחליף Point-in-time recovery/);
+  assert.match(runbook, /55 הטבלאות/);
+  assert.match(runbook, /בדיוק 42 ה־Migrations/);
+  assert.match(runbook, /D14 פתוחה/);
+  assert.match(runbook, /Readiness v2 פעיל/);
+  assert.doesNotMatch(runbook, /בדיוק 27 ה־Migrations/);
+  assert.doesNotMatch(runbook, /מספר 51 הטבלאות|אימות 51 הטבלאות/);
 });

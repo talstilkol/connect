@@ -322,7 +322,7 @@ test("rolls back earlier slices when a later slice fails", async () => {
   );
 });
 
-test("binds the production bundle to all ten rehearsed slices and 51 tables", () => {
+test("binds the production bundle to all ten rehearsed slices and 55 tables", () => {
   const database = new DatabaseSync(":memory:");
   try {
     applyCurrentD1Schema(database);
@@ -334,6 +334,26 @@ test("binds the production bundle to all ten rehearsed slices and 51 tables", ()
     });
 
     assert.equal(plan.version, POSTGRES_FULL_DATA_MIGRATION_BUNDLE_VERSION);
+    assert.equal(
+      POSTGRES_FULL_DATA_MIGRATION_BUNDLE_VERSION,
+      "connect_postgres_full_data_migration_bundle_v1",
+    );
+    const childVersions = Object.fromEntries(
+      POSTGRES_FULL_DATA_MIGRATION_BUNDLE_SLICES.map(({ id, version }) =>
+        [id, version]),
+    );
+    assert.equal(
+      childVersions["tenant-access"],
+      "connect_postgres_tenant_access_data_v2",
+    );
+    assert.equal(
+      childVersions["bot-runtime"],
+      "connect_postgres_bot_runtime_data_v2",
+    );
+    assert.equal(
+      childVersions["whatsapp-delivery-policy"],
+      "connect_postgres_whatsapp_delivery_policy_data_v2",
+    );
     assert.deepEqual(
       POSTGRES_FULL_DATA_MIGRATION_BUNDLE_SLICES.map(({ id }) => id),
       POSTGRES_DATA_MIGRATION_SLICES.map(({ id }) => id),
@@ -347,7 +367,7 @@ test("binds the production bundle to all ten rehearsed slices and 51 tables", ()
     assert.equal(plan.manifest.length, 10);
     assert.equal(
       plan.manifest.reduce((total, slice) => total + slice.tableCount, 0),
-      51,
+      55,
     );
     assert.equal(
       plan.manifest.reduce((total, slice) => total + slice.totalRowCount, 0),

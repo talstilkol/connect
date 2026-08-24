@@ -95,6 +95,7 @@ function rawTenantAccessTables() {
       created_at: requestedAt,
       updated_at: requestedAt,
     }],
+    team_invitation_delivery_deferrals: [],
     team_invitation_acceptances: [],
   };
 }
@@ -176,14 +177,14 @@ function createCurrentD1Database() {
   return database;
 }
 
-test("builds a five-table privacy-safe tenant-access plan", () => {
+test("builds a six-table privacy-safe tenant-access plan", () => {
   const plan = createPlan();
 
-  assert.equal(plan.manifest.length, 5);
+  assert.equal(plan.manifest.length, 6);
   assert.equal(plan.manifest.reduce((sum, table) => sum + table.rowCount, 0), 4);
   assert.match(
     plan.planId,
-    /^connect_postgres_tenant_access_data_v1_[0-9a-f]{64}$/,
+    /^connect_postgres_tenant_access_data_v2_[0-9a-f]{64}$/,
   );
   assert.doesNotMatch(
     JSON.stringify(plan.manifest),
@@ -201,15 +202,15 @@ test("loads history with triggers disabled only inside the transaction", async (
   });
   const statements = fixture.calls.map(({ sql }) => sql);
 
-  assert.equal(evidence.tableCount, 5);
+  assert.equal(evidence.tableCount, 6);
   assert.equal(evidence.totalRowCount, 4);
   assert.equal(
     statements.filter((sql) => /DISABLE TRIGGER USER/.test(sql)).length,
-    4,
+    5,
   );
   assert.equal(
     statements.filter((sql) => /ENABLE TRIGGER USER/.test(sql)).length,
-    4,
+    5,
   );
   assert.equal(
     evidence.tables.every(
@@ -260,7 +261,7 @@ test("rejects legacy email data that PostgreSQL cannot accept", () => {
   );
 });
 
-test("reads the five current D1 tables in one checked snapshot", () => {
+test("reads the six current D1 tables in one checked snapshot", () => {
   const database = createCurrentD1Database();
   try {
     database.prepare(
@@ -343,6 +344,10 @@ test("reads the five current D1 tables in one checked snapshot", () => {
     assert.equal(snapshot.tables.team_invitations.length, 1);
     assert.equal(snapshot.tables.team_invitation_events.length, 1);
     assert.equal(snapshot.tables.team_invitation_deliveries.length, 1);
+    assert.equal(
+      snapshot.tables.team_invitation_delivery_deferrals.length,
+      0,
+    );
     assert.equal(snapshot.tables.tenant_membership_events.length, 0);
     assert.equal(snapshot.tables.team_invitation_acceptances.length, 0);
   } finally {

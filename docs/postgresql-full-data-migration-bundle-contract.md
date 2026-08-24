@@ -18,7 +18,7 @@
 שורות. ה־Bundle דורש את עשרת ה־IDs ואת סדר התלויות המדויק.
 
 2.2 ‏`sourceDigest` הוא HMAC יציב הנגזר מגרסאות ה־Plans ומה־Manifest של
-כל 51 הטבלאות. הוא אינו כולל את חלון הזמן ולכן אותו מקור נשאר מזוהה גם אם
+כל 55 הטבלאות. הוא אינו כולל את חלון הזמן ולכן אותו מקור נשאר מזוהה גם אם
 נוצר עבורו Plan חדש.
 
 2.3 ‏`bundleDigest` הוא HMAC הקושר יחד את המקור, כל Child plans וחלון הזמן.
@@ -31,13 +31,13 @@
 
 ```mermaid
 flowchart TD
-  Source["Full D1 snapshot — 10 slices / 51 tables"] --> Plans["10 signed child plans"]
+  Source["Full D1 snapshot — 10 slices / 55 tables"] --> Plans["10 signed child plans"]
   Plans --> Verify["Verify order, dependencies, HMACs and expiry"]
   Verify --> Tx["One PostgreSQL transaction"]
   Tx --> Locks["Acquire all existing slice advisory locks"]
   Locks --> Replay["Check one-time execution scope"]
   Replay --> Execute["Execute slices 1 through 10"]
-  Execute --> Evidence["Verify 51 target digests"]
+  Execute --> Evidence["Verify 55 target digests"]
   Evidence --> Receipt["Insert immutable receipt"]
   Receipt --> Commit["COMMIT"]
   Verify -. "invalid" .-> Reject["Reject before transaction"]
@@ -90,16 +90,19 @@ Transaction נוסף. רק ה־Transaction manager החיצוני רשאי לב�
 4. Receipt נכתב רק לאחר כל ה־Target verification.
 5. אותו מקור שומר `sourceDigest` גם בחלון חדש, אך מקבל `bundleId` חדש.
 
-6.2 חזרה נקייה מול PostgreSQL 16.13 אמיתי עברה עם:
+6.2 ה־Full integration החי האחרון מול PostgreSQL 16.13 עבר עם:
 
-1. 26 PostgreSQL migrations.
-2. עשרה Slices ו־51 טבלאות תחת Transaction יחיד.
+1. 40 PostgreSQL migrations.
+2. עשרה Slices ו־55 טבלאות תחת Transaction יחיד.
 3. Receipt יחיד עם Source ו־Evidence digests.
 4. דחיית Replay.
-5. כל 58 תרחישי ה־Concurrency הקיימים.
+5. 87 תרחישי Concurrency.
 
-6.3 החזרה השתמשה ב־D1 schema אמיתי אך ללא שורות. לכן היא מוכיחה את מנגנון
-ההרכבה, הנעילות, האטומיות וה־Receipt — לא Cutover של נתוני לקוח.
+6.3 ה־baseline הנוכחי כולל 42 PostgreSQL migrations. Migration 0041 עברה
+אימות PostgreSQL ממוקד, אך Full integration של כל 42 ה־migrations עדיין
+לא בוצע. החזרה המלאה האחרונה השתמשה ב־D1 schema אמיתי ללא שורות; היא
+מוכיחה את מנגנון ההרכבה, הנעילות, האטומיות וה־Receipt — לא Cutover של
+נתוני לקוח.
 
 ## 7. מה עדיין חסר
 
@@ -111,8 +114,13 @@ Transaction נוסף. רק ה־Transaction manager החיצוני רשאי לב�
 7.2 אין להעביר לוגים, Plans או Evidence המכילים Payload של המקור. ראיית
 השחרור החיצונית תכיל רק IDs, ‏Digests, Counts ותוצאות מאושרות.
 
-7.3 ה־Bundle המקומי אינו הופך את יכולת Database ל־Production Ready. בחירת
-ספק PostgreSQL, ערכי Pool חיים ו־Staging evidence עדיין פתוחים.
+7.3 ‏D12 בחרה Railway PostgreSQL עבור ה־Pilot. עדיין חסרים Plan, ‏Region,
+Pool, ‏PITR, ‏Budget ו־Staging evidence חיים; לכן ה־Bundle המקומי אינו
+הופך את יכולת Database ל־Production Ready.
 
-7.4 הוראות ההפעלה והכשל מתועדות ב־
+7.4 כל עוד D14 פתוחה ואין Readiness v2 פעיל לאותו Release, אין לבצע
+Production cutover. יכולת הקוד לקבל Environment בשם `production` אינה
+אישור Go-live.
+
+7.5 הוראות ההפעלה והכשל מתועדות ב־
 `docs/postgresql-full-data-migration-cutover-runbook.md`.

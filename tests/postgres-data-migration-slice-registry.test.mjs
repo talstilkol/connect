@@ -61,7 +61,7 @@ test("partitions every D1 table exactly once and matches PostgreSQL", () => {
     .flatMap(({ tables }) => tables);
   const unique = [...new Set(registered)].sort();
 
-  assert.equal(registered.length, 51);
+  assert.equal(registered.length, 55);
   assert.equal(unique.length, registered.length);
   assert.deepEqual(unique, currentD1Tables());
   assert.deepEqual(unique, currentPostgresTables());
@@ -127,7 +127,7 @@ test("marks all ten slices and every D1 table rehearsed", () => {
   ]);
   assert.equal(
     rehearsed.reduce((total, slice) => total + slice.tables.length, 0),
-    51,
+    55,
   );
   assert.deepEqual(next, []);
   assert.equal(remainingCount, 0);
@@ -151,6 +151,16 @@ test("keeps provider delivery evidence with its rate-limit proof", () => {
   );
   assert.equal(
     deliveryPolicy.requires.includes("templates-campaigns"),
+    true,
+  );
+  assert.equal(
+    deliveryPolicy.requires.includes("bot-runtime"),
+    true,
+  );
+  assert.equal(
+    deliveryPolicy.tables.includes(
+      "bot_reply_delivery_provider_links",
+    ),
     true,
   );
   assert.equal(

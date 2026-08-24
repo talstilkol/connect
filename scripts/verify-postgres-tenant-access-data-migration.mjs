@@ -31,6 +31,8 @@ const times = Object.freeze({
   requested: "2026-08-20T08:00:00.000Z",
   revoked: "2026-08-20T09:00:00.000Z",
   rerequested: "2026-08-20T10:00:00.000Z",
+  deferred: "2026-08-20T10:01:00.000Z",
+  retryAfter: "2026-08-20T10:04:00.000Z",
   submitted: "2026-08-20T10:05:00.000Z",
   acceptedRequested: "2026-08-20T08:30:00.000Z",
   accepted: "2026-08-20T09:30:00.000Z",
@@ -386,14 +388,13 @@ function seedD1InvitationHistory(database) {
      WHERE delivery_key = ?`,
   ).run("sending", 1, times.rerequested, keys.invitationSecondDelivery);
   database.prepare(
-    `UPDATE team_invitation_deliveries
-     SET status = ?, submitted_at = ?, updated_at = ?
-     WHERE delivery_key = ?`,
+    `INSERT INTO team_invitation_delivery_deferrals (
+       delivery_key, tenant_id, reason_code, retry_after_at, deferred_at
+     ) VALUES (?, 1, 'PROVIDER_RATE_LIMITED', ?, ?)`,
   ).run(
-    "submitted",
-    times.submitted,
-    times.submitted,
     keys.invitationSecondDelivery,
+    times.retryAfter,
+    times.deferred,
   );
 }
 
@@ -626,7 +627,7 @@ async function runSemanticParityScenarios(database, pool) {
   );
   await compareOutcome(
     observations,
-    "settled-delivery-cannot-regress",
+    "deferred-delivery-cannot-skip-claim",
     () => database.prepare(
       `UPDATE team_invitation_deliveries
        SET status = 'sending', submitted_at = NULL, updated_at = ?
@@ -690,6 +691,16 @@ async function runSemanticParityScenarios(database, pool) {
     "invitation-transition-with-ledger",
     () => executeD1Transaction(database, () => {
       database.prepare(
+        `UPDATE team_invitation_deliveries
+         SET status = 'cancelled', last_error_code = 'INVITATION_REVOKED',
+             updated_at = ?
+         WHERE delivery_key = ?`,
+      ).run(times.invitationRevoked, keys.invitationSecondDelivery);
+      database.prepare(
+        `DELETE FROM team_invitation_delivery_deferrals
+         WHERE delivery_key = ?`,
+      ).run(keys.invitationSecondDelivery);
+      database.prepare(
         `UPDATE team_invitations
          SET status = 'revoked', version = 4,
              last_actor_external_user_id = 'owner-user', updated_at = ?
@@ -713,6 +724,18 @@ async function runSemanticParityScenarios(database, pool) {
       );
     }),
     () => executePostgresTransaction(pool, async (client) => {
+      await client.query(
+        `UPDATE team_invitation_deliveries
+         SET status = 'cancelled', last_error_code = 'INVITATION_REVOKED',
+             updated_at = $1
+         WHERE delivery_key = $2`,
+        [times.invitationRevoked, keys.invitationSecondDelivery],
+      );
+      await client.query(
+        `DELETE FROM team_invitation_delivery_deferrals
+         WHERE delivery_key = $1`,
+        [keys.invitationSecondDelivery],
+      );
       await client.query(
         `UPDATE team_invitations
          SET status = 'revoked', version = 4,
@@ -809,6 +832,63 @@ async function compareTenantAccessFinalState(database, pool) {
   return Object.freeze(tableEvidence);
 }
 
+async function requireDeferredInvitationEvidence(database, pool) {
+  const d1 = database.prepare(
+    `SELECT
+       deferral.delivery_key AS deliveryKey,
+       deferral.reason_code AS reasonCode,
+       deferral.retry_after_at AS retryAfterAt,
+       deferral.deferred_at AS deferredAt,
+       delivery.status,
+       delivery.attempt_count AS attemptCount,
+       delivery.updated_at AS updatedAt
+     FROM team_invitation_delivery_deferrals AS deferral
+     INNER JOIN team_invitation_deliveries AS delivery
+       ON delivery.delivery_key = deferral.delivery_key
+       AND delivery.tenant_id = deferral.tenant_id
+     WHERE deferral.delivery_key = ?`,
+  ).get(keys.invitationSecondDelivery);
+  const postgresResult = await pool.query(
+    `SELECT
+       deferral.delivery_key AS "deliveryKey",
+       deferral.reason_code AS "reasonCode",
+       deferral.retry_after_at AS "retryAfterAt",
+       deferral.deferred_at AS "deferredAt",
+       delivery.status,
+       delivery.attempt_count::integer AS "attemptCount",
+       delivery.updated_at AS "updatedAt"
+     FROM team_invitation_delivery_deferrals AS deferral
+     INNER JOIN team_invitation_deliveries AS delivery
+       ON delivery.delivery_key = deferral.delivery_key
+       AND delivery.tenant_id = deferral.tenant_id
+     WHERE deferral.delivery_key = $1`,
+    [keys.invitationSecondDelivery],
+  );
+  const normalize = (row) => ({
+    ...row,
+    retryAfterAt: row.retryAfterAt instanceof Date
+      ? row.retryAfterAt.toISOString()
+      : row.retryAfterAt,
+    deferredAt: row.deferredAt instanceof Date
+      ? row.deferredAt.toISOString()
+      : row.deferredAt,
+    updatedAt: row.updatedAt instanceof Date
+      ? row.updatedAt.toISOString()
+      : row.updatedAt,
+  });
+  const expected = {
+    deliveryKey: keys.invitationSecondDelivery,
+    reasonCode: "PROVIDER_RATE_LIMITED",
+    retryAfterAt: times.retryAfter,
+    deferredAt: times.deferred,
+    status: "pending",
+    attemptCount: 0,
+    updatedAt: times.deferred,
+  };
+  assert.deepEqual(normalize(d1), expected);
+  assert.deepEqual(normalize(postgresResult.rows[0]), expected);
+}
+
 export async function verifyPostgresTenantAccessDataMigration(
   connectionString,
 ) {
@@ -848,8 +928,8 @@ export async function verifyPostgresTenantAccessDataMigration(
       now: "2026-08-20T12:05:00.000Z",
     });
 
-    assert.equal(evidence.tableCount, 5);
-    assert.equal(evidence.totalRowCount, 11);
+    assert.equal(evidence.tableCount, 6);
+    assert.equal(evidence.totalRowCount, 12);
     assert.equal(
       evidence.tables.every(
         ({ sourceDigest, targetDigest }) => sourceDigest === targetDigest,
@@ -860,6 +940,7 @@ export async function verifyPostgresTenantAccessDataMigration(
       JSON.stringify(evidence),
       /history@example\.com|accepted@example\.com|member-user|accepted-user/,
     );
+    await requireDeferredInvitationEvidence(database, pool);
     await requireTriggersRejectInvalidHistory(pool);
     const semanticObservations = await runSemanticParityScenarios(
       database,

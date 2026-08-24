@@ -75,6 +75,12 @@ test("initial migration contains the tenant foundation without seed data", async
     "0033_large_union_jack.sql",
     "0034_whatsapp_campaign_delivery_policy_events.sql",
     "0035_whatsapp_phone_throughput.sql",
+    "0036_team_invitation_delivery_deferrals.sql",
+    "0037_whatsapp_service_reply_reservations.sql",
+    "0038_bot_reply_delivery_deferrals.sql",
+    "0039_bot_reply_delivery_provider_links.sql",
+    "0040_inbound_button_reply_provenance.sql",
+    "0041_bot_reply_service_window_rejection_provenance.sql",
   ]);
 
   const migration = await readFile(
@@ -298,6 +304,52 @@ test("WhatsApp rate-limit migration stores only opaque keys and immutable lifecy
     /phone_e164|phone_number|message_body|access_token/,
   );
   assert.doesNotMatch(migration, /Math\.random/);
+});
+
+test("WhatsApp service replies share pair admission without occupying portfolio quota", async () => {
+  const migration = await readFile(
+    new URL(
+      "0037_whatsapp_service_reply_reservations.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /ADD COLUMN `reservation_class` text/,
+  );
+  assert.match(
+    migration,
+    /ADD COLUMN `template_category` text/,
+  );
+  assert.match(
+    migration,
+    /WHEN NEW\.`reservation_class` = 'business-initiated'/,
+  );
+  assert.match(
+    migration,
+    /NEW\.`reservation_class` IS NULL[\s\S]*NEW\.`template_category` IS NULL/,
+  );
+  assert.match(
+    migration,
+    /Service replies cannot create portfolio-recipient cooldowns/,
+  );
+});
+
+test("bot reply deferrals are fenced and constrained to the service window", async () => {
+  const migration = await readFile(
+    new URL(
+      "0038_bot_reply_delivery_deferrals.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(migration, /ADD COLUMN `claim_version` integer NOT NULL DEFAULT 0/);
+  assert.match(migration, /ADD COLUMN `next_attempt_at` text/);
+  assert.match(migration, /NEW\.`claim_version` = OLD\.`claim_version` \+ 1/);
+  assert.match(migration, /NEW\.`next_attempt_at` < \([\s\S]*'\+24 hours'/);
 });
 
 test("campaign provider reconciliation migration links one target without retaining message content", async () => {
@@ -944,6 +996,8 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "bot_flow_versions",
     "bot_flows",
     "bot_reply_deliveries",
+    "bot_reply_delivery_provider_links",
+    "bot_reply_service_window_rejection_events",
     "business_profile_admin_events",
     "business_profiles",
     "campaign_delivery_provider_links",
@@ -958,6 +1012,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "contact_tags",
     "contacts",
     "conversations",
+    "inbound_button_reply_events",
     "knowledge_passages",
     "knowledge_sources",
     "message_templates",
@@ -969,6 +1024,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "production_decision_records",
     "team_invitation_acceptances",
     "team_invitation_deliveries",
+    "team_invitation_delivery_deferrals",
     "team_invitation_events",
     "team_invitations",
     "tenant_membership_events",

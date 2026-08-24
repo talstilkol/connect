@@ -46,7 +46,7 @@ import {
 } from "./read-d1-data-migration-snapshot.mjs";
 
 export const D1_FULL_DATA_MIGRATION_SNAPSHOT_VERSION =
-  "connect_d1_full_data_migration_snapshot_v1";
+  "connect_d1_full_data_migration_snapshot_v2";
 
 const sliceConfigurations = Object.freeze([
   Object.freeze({
@@ -122,7 +122,7 @@ function requireExactRegistryCoverage() {
 
   const tableNames = sliceConfigurations.flatMap(({ tableContracts }) =>
     tableContracts.map(({ name }) => name));
-  if (tableNames.length !== 51 || new Set(tableNames).size !== 51) {
+  if (tableNames.length !== 55 || new Set(tableNames).size !== 55) {
     throw new Error("D1 full migration snapshot table coverage is invalid");
   }
 }

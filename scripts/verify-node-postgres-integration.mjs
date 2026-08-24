@@ -232,7 +232,7 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
       targetEnvironment: "staging",
     });
     assert.equal(evidence.sliceCount, 10);
-    assert.equal(evidence.tableCount, 51);
+    assert.equal(evidence.tableCount, 55);
     assert.equal(evidence.totalRowCount, 0);
     assert.match(evidence.evidenceDigest, /^hmac_sha256_v1_[0-9a-f]{64}$/);
 
@@ -265,7 +265,7 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
     assert.equal(receipt.rows[0]?.sourceDigest, preflight.sourceDigest);
     assert.equal(receipt.rows[0]?.evidenceDigest, evidence.evidenceDigest);
     assert.equal(receipt.rows[0]?.sliceCount, 10);
-    assert.equal(receipt.rows[0]?.tableCount, 51);
+    assert.equal(receipt.rows[0]?.tableCount, 55);
     assert.equal(Number(receipt.rows[0]?.totalRowCount), 0);
   } finally {
     sourceDatabase.close();

@@ -85,7 +85,7 @@ const configuration = {
     {
       id: "tenant-access",
       requires: ["core"],
-      version: "connect_postgres_tenant_access_data_v1",
+      version: "connect_postgres_tenant_access_data_v2",
       planKind: "postgres-tenant-access-data-migration-plan",
       evidenceKind: "postgres-tenant-access-data-migration-evidence",
       createPlan: createPostgresTenantAccessDataMigrationPlan,
@@ -132,7 +132,7 @@ const configuration = {
     {
       id: "bot-runtime",
       requires: ["core", "conversations-messages"],
-      version: "connect_postgres_bot_runtime_data_v1",
+      version: "connect_postgres_bot_runtime_data_v2",
       planKind: "postgres-bot-runtime-data-migration-plan",
       evidenceKind: "postgres-bot-runtime-data-migration-evidence",
       createPlan: createPostgresBotRuntimeDataMigrationPlan,
@@ -159,8 +159,13 @@ const configuration = {
     },
     {
       id: "whatsapp-delivery-policy",
-      requires: ["core", "meta-connection", "templates-campaigns"],
-      version: "connect_postgres_whatsapp_delivery_policy_data_v1",
+      requires: [
+        "core",
+        "meta-connection",
+        "templates-campaigns",
+        "bot-runtime",
+      ],
+      version: "connect_postgres_whatsapp_delivery_policy_data_v2",
       planKind: "postgres-whatsapp-delivery-policy-migration-plan",
       evidenceKind: "postgres-whatsapp-delivery-policy-migration-evidence",
       createPlan: createPostgresWhatsappDeliveryPolicyDataMigrationPlan,

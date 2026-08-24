@@ -1,10 +1,10 @@
 # PostgreSQL Data Migration Slices
 
-תאריך מיפוי: 2026-08-20
+תאריך מיפוי ועדכון ראיות: 2026-08-25
 
 ## 1. מטרה
 
-1.1 ה־Schema parity מוכיח שקיימות 51 טבלאות מקבילות, אך אינו אומר באיזה
+1.1 ה־Schema parity מוכיח שקיימות 55 טבלאות מקבילות, אך אינו אומר באיזה
 סדר בטוח להעביר את הנתונים.
 
 1.2 Registry דטרמיניסטי ב־
@@ -20,31 +20,37 @@
 | סדר | Slice | טבלאות | תלות | מצב | אומדן נטו |
 | --- | --- | ---: | --- | --- | ---: |
 | 1 | `core` | 7 | אין | Rehearsal + Semantic parity הושלמו | הושלם |
-| 2 | `tenant-access` | 5 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
+| 2 | `tenant-access` | 6 | `core` | Rehearsal v2 חי: 42/42 migrations, ‏12 שורות | הושלם מקומית |
 | 3 | `contact-organization-import` | 6 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
 | 4 | `meta-connection` | 3 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
 | 5 | `templates-campaigns` | 3 | Core, Contacts, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
 | 6 | `conversations-messages` | 2 | Core, Meta | Rehearsal + Semantic parity הושלמו | הושלם |
-| 7 | `bot-runtime` | 3 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
+| 7 | `bot-runtime` | 3 | Core, Conversations | Rehearsal v2 חי: 42/42 migrations, ‏7 שורות | הושלם מקומית |
 | 8 | `ai-knowledge-runtime` | 9 | Core, Conversations | Rehearsal + Semantic parity הושלמו | הושלם |
 | 9 | `governance-billing` | 5 | `core` | Rehearsal + Semantic parity הושלמו | הושלם |
-| 10 | `whatsapp-delivery-policy` | 8 | Core, Meta, Campaigns | Rehearsal + Semantic parity הושלמו | הושלם |
+| 10 | `whatsapp-delivery-policy` | 11 | Core, Meta, Campaigns, Bot | Rehearsal v2 חי: 42/42 migrations, ‏21 שורות | הושלם מקומית |
 
-2.1 כל 10 ה־Slices וכל 51 הטבלאות עברו Data migration ו־Semantic parity
-מקומיים. עדיין חסרים Export חי, ‏Accounts, המתנה לספקים, ‏Staging,
-‏Load/Recovery ו־Cutover מבוקר.
+2.1 כל 10 ה־Slices וכל 55 הטבלאות מכוסים כעת בחוזי Data migration,
+Unit tests ו־Semantic checks מקומיים. שלושת חוזי v2 הורצו מחדש עם נתונים
+לא־ריקים מול 42 migrations ב־D1 וב־PostgreSQL 16.13. ה־Full integration
+החי האחרון לכל ה־Slices יחד העביר Snapshot ריק בן 55 טבלאות מול 40
+migrations והריץ 87 תרחישי Concurrency. עדיין נדרשים Full integration
+מאוכלס לכל 42 ה־migrations, ‏Export מורשה, ‏Staging, ‏Load/Recovery
+ו־Cutover מבוקר.
 
 2.2 ‏`read-d1-full-data-migration-snapshot.mjs` קורא כעת את כל עשרת
 ה־Slices תחת Transaction מקור יחיד ומוכיח Schema, ‏Integrity ו־Foreign keys
-לכל 51 הטבלאות. החוזה והפקודה ל־Export מורשה מתועדים ב־
+לכל 55 הטבלאות. החוזה והפקודה ל־Export מורשה מתועדים ב־
 `docs/postgresql-full-source-snapshot-contract.md`.
 
 2.3 ‏`postgresFullDataMigrationBundle.ts` יוצר Plan מאוחד וחתום, מאמת את
 עשרת ה־Child plans לפני Transaction, מריץ אותם לפי סדר התלות תחת Transaction
-PostgreSQL יחיד וכותב Receipt בלתי־משתנה. החזרה הריקה עברה מול PostgreSQL
-16.13 עם 26 Migrations; עדיין נדרשת חזרה עם Export מורשה.
+PostgreSQL יחיד וכותב Receipt בלתי־משתנה. החזרה המלאה האחרונה עברה מול
+PostgreSQL 16.13 עם 40 migrations ו־55 טבלאות. ה־baseline הנוכחי הוא 42
+migrations; Migration 0041 קיבלה בדיקה חיה ממוקדת, אך Full integration של
+כל 42 ה־migrations ו־Export מורשה עדיין נדרשים.
 
-## 3. Slice שהושלם — Tenant Access
+## 3. חוזה v2 ו־Rehearsal חי הושלמו — Tenant Access
 
 3.1 הטבלאות:
 
@@ -52,7 +58,8 @@ PostgreSQL יחיד וכותב Receipt בלתי־משתנה. החזרה הריק
 2. `team_invitations`.
 3. `team_invitation_events`.
 4. `team_invitation_deliveries`.
-5. `team_invitation_acceptances`.
+5. `team_invitation_delivery_deferrals`.
+6. `team_invitation_acceptances`.
 
 3.2 למה הוא הבא: כל ה־Foreign keys שלו נסגרים מול `tenants` ו־
 `tenant_memberships` שכבר עברו ב־Core, והוא אינו תלוי בספק Meta, Queue,
@@ -66,16 +73,17 @@ Storage או AI.
 3. ליצור Snapshot עקבי בתוך D1 transaction עם Integrity ו־Foreign-key
    checks.
 4. ליצור Plan קצר־תוקף עם HMAC manifest לכל טבלה.
-5. לנעול את חמש טבלאות היעד, לדרוש שהן ריקות ולטעון לפי סדר Parent-first.
+5. לנעול את שש טבלאות היעד, לדרוש שהן ריקות ולטעון לפי סדר Parent-first.
 6. לקרוא בחזרה Counts ו־Digests לפני Commit.
 7. להריץ Membership mutation, Invitation request/revoke/expire,
    Delivery reconciliation ו־Acceptance parity בשני המנועים.
 8. להוכיח Replay, Conflict, Rollback ושחזור Triggers מול PostgreSQL 16
    אמיתי.
 
-3.4 ההרצה הנקייה עברה עם 36 מיגרציות D1, ‏24 מיגרציות PostgreSQL,
-חמש טבלאות, 11 רשומות ושבעה תרחישי Semantic parity. מצב היעד הושווה
-ל־D1 לאחר המעברים. פרטי הראיה נמצאים ב־
+3.4 ‏Rehearsal v2 מאוכלס עבר מול 42 migrations בכל מנוע: שש טבלאות,
+12 שורות ושבעה תרחישי Semantic parity. הוא כולל Deferral פעיל עם
+`PROVIDER_RATE_LIMITED`, קשר ל־Delivery במצב `pending`, זמני Deferral/Retry
+ואימות שה־Triggers חזרו לפעול. פרטי הראיה נמצאים ב־
 `docs/postgresql-tenant-access-data-migration-rehearsal.md`.
 
 ## 4. Slice שהושלם — Contact Organization & Import
@@ -120,8 +128,8 @@ Semantic parity עברו והמצב הסופי הושווה. פרטי הראיה
 6.3 במהלך ניתוח התלויות `campaign_delivery_provider_links` הועברה מ־Slice
 זה ל־`whatsapp-delivery-policy`: כל Link מחזיק Foreign key אל
 `whatsapp_rate_limit_reservations`, ולכן אסור להעביר אותו לפני ה־Reservation
-וה־Settlement evidence. ה־Slice האחרון מכיל כעת שמונה טבלאות ותלוי גם ב־
-`templates-campaigns`.
+וה־Settlement evidence. ה־Slice האחרון מכיל כעת 11 טבלאות ותלוי גם ב־
+`templates-campaigns` וב־`bot-runtime`.
 
 ## 7. Slice שהושלם — Conversations & Messages
 
@@ -134,7 +142,7 @@ Semantic parity כיסו Delivery status, ‏Read state, שיוך Agent, הוד�
 Text וכפילויות Provider. פרטי הראיה נמצאים ב־
 `docs/postgresql-conversations-messages-data-migration-rehearsal.md`.
 
-## 8. Slice שהושלם — Bot Runtime
+## 8. חוזה v2 ו־Rehearsal חי הושלמו — Bot Runtime
 
 8.1 שלוש הטבלאות הבאות הן `bot_flows`, ‏`bot_flow_versions` ו־
 `bot_reply_deliveries`. הן תלויות ב־Core וב־Conversations, שכבר עברו
@@ -154,6 +162,13 @@ Definition, ‏Reply, טלפון, ‏Provider ID ו־Error code אינם מופ�
 8.4 נמצא פער Hardening: ‏D1 ו־PostgreSQL מאפשרים Name עם רווחים חיצוניים,
 אך חוזה ה־Runtime דורש ערך חתוך. ה־Snapshot חוסם Legacy row כזה לפני טעינה;
 הפער אינו הותר כ־Semantic parity.
+
+8.5 חוזה v2 מוסיף ל־Delivery את זהות השולח, ‏Claim version וראיית Deferral
+תחומה לחלון השירות. ‏Rehearsal מאוכלס עבר מול 42 migrations בכל מנוע:
+שלוש טבלאות ושבע שורות, כולל Delivery דחוי עם
+`PROVIDER_RATE_LIMITED`. הטעינה משביתה זמנית רק את USER triggers של
+`bot_reply_deliveries`, בודקת אותם לפני ואחרי, ודוחה Retry בקצה חלון
+24 השעות או אחריו.
 
 ## 9. Slice שהושלם — AI & Knowledge Runtime
 
@@ -188,20 +203,25 @@ Production, עדכון Profile בידי Admin, כפילויות, Version gaps ו
 בלתי־משתנים. פרטי הראיה והפערים הקיימים ב־D1 מתועדים ב־
 `docs/postgresql-governance-billing-data-migration-rehearsal.md`.
 
-## 11. Slice שהושלם — WhatsApp Delivery Policy
+## 11. חוזה v2 ו־Rehearsal חי הושלמו — WhatsApp Delivery Policy
 
-11.1 שמונה הטבלאות כוללות Provider links, ‏Delivery-policy evidence,
-Reservations, ‏Pair/Portfolio state, ‏Settlements ו־Provider cooldowns.
-ה־Slice תלוי ב־Core, ‏Meta וב־Templates/Campaigns שכבר עברו Rehearsal.
+11.1 אחת־עשרה הטבלאות כוללות Campaign ו־Bot provider links,
+Inbound button provenance, ‏Service-window rejection evidence,
+Delivery-policy evidence, ‏Reservations, ‏Pair/Portfolio state,
+Settlements ו־Provider cooldowns. ה־Slice תלוי ב־Core, ‏Meta,
+Templates/Campaigns וב־Bot runtime.
 
-11.2 ה־Rehearsal העביר 12 רשומות, חסם Replay והוכיח תשעה תרחישי
-Semantic parity. לפני Cutover כל Reservation חייב להיות Settled, וכל
-Policy, ‏Pair/Portfolio projection, ‏Cooldown ו־Provider link נבדקים מול
-הראיה שממנה נגזרו.
+11.2 ‏Rehearsal v2 מאוכלס עבר מול 42 migrations בכל מנוע: 11 טבלאות,
+21 שורות ותשעה תרחישי Semantic parity. הוא מוכיח Bot provider link בתוך
+חלון Reservation, ‏Inbound button provenance ו־Service-window rejection
+עם Meta 131047. הבדיקות גם מאפשרות Provider ID זהה ב־Tenant אחר, בהתאם
+לגבול ה־uniqueness העסקי, ומאמתות Inventory מדויק של 47 USER triggers לפני
+ואחרי הטעינה.
 
-11.3 ‏D1 לא שמר `template_category` היסטורית. לכן PostgreSQL שומר ברשומה
-מיובאת `NULL` מפורש, חוסם Replay עמום, אך מאפשר Settlement. כל Reservation
-חדש עדיין חייב `MARKETING` או `UTILITY`. פרטי הראיה נמצאים ב־
+11.3 ‏D1 לא שמר `template_category` היסטורית. Migration 0037 מוסיפה
+`reservation_class` מפורש ומשאירה Category היסטורי לא־ידוע כ־`NULL`.
+Service reply אינו רשאי לקבל Template category, וכתיבה עסקית חדשה עדיין
+מוגבלת ל־`MARKETING` או `UTILITY`. פרטי הראיה הנוכחית נמצאים ב־
 `docs/postgresql-whatsapp-delivery-policy-data-migration-rehearsal.md`.
 
 ## 12. תנאי בטיחות
