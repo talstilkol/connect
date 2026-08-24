@@ -10,49 +10,35 @@ import {
   deriveProductionReadinessV2ReleaseManifestDigest,
 } from "../server/operations/productionReadinessV2.ts";
 import {
-  createProductionReadinessV2Candidate,
-} from "../server/operations/productionReadinessV2Candidate.ts";
-import {
   createPostgresProductionReadinessV2EvidenceRepository,
   postgresProductionReadinessV2EvidenceRepositoryVersion,
   postgresProductionReadinessV2EvidenceSql,
 } from "../server/platform/postgresProductionReadinessV2EvidenceRepository.ts";
 
 const now = "2026-08-24T12:00:30.000Z";
-const clock = Object.freeze({ now: () => new Date(now) });
 const serviceArtifactDigests = Object.freeze({
   "railway-api": `sha256:${"1".repeat(64)}`,
   "railway-worker": `sha256:${"2".repeat(64)}`,
   "vercel-web": `sha256:${"3".repeat(64)}`,
 });
-const registry = Object.freeze(
-  PRODUCTION_READINESS_REGISTRY_V2.map((definition) =>
-    Object.freeze({
-      ...definition,
-      decisionId: definition.id === "storage.object"
-        ? null
-        : definition.decisionId,
-    })
-  ),
-);
-const release = {
+const release = Object.freeze({
   environment: "staging",
   releaseId: `connect_release_v1_${"4".repeat(64)}`,
   commitSha: "5".repeat(40),
   serviceArtifactDigests,
-};
+});
 const identity = Object.freeze({
   ...release,
   registryVersion: 2,
-  registryDigest: deriveProductionReadinessRegistryV2Digest(registry),
+  registryDigest: deriveProductionReadinessRegistryV2Digest(),
   releaseManifestDigest:
     deriveProductionReadinessV2ReleaseManifestDigest(release),
 });
 
-function buildCandidate() {
-  const evidence = registry.map((definition) => {
+const evidence = Object.freeze(
+  PRODUCTION_READINESS_REGISTRY_V2.map((definition) => {
     const issuer = definition.allowedIssuer[0];
-    return JSON.stringify(createProductionReadinessV2Evidence({
+    return createProductionReadinessV2Evidence({
       checkId: definition.id,
       environment: identity.environment,
       issuer,
@@ -64,12 +50,16 @@ function buildCandidate() {
       expiresAt: "2026-08-24T12:01:00.000Z",
       outcome: "passed",
       evidence: definition.requiredEvidence,
-    }, registry));
-  });
-  return createProductionReadinessV2Candidate({ identity, evidence }, registry, clock);
-}
-
-const candidate = buildCandidate();
+    });
+  }),
+);
+const blockedCandidate = Object.freeze({
+  identity,
+  candidateDigest:
+    `production_readiness_candidate_v2_${"6".repeat(64)}`,
+  evidenceSetJson: JSON.stringify(evidence),
+  validUntil: "2026-08-24T12:01:00.000Z",
+});
 
 function result(rows) {
   return { rows, rowCount: rows.length };
@@ -104,9 +94,10 @@ function headRow(overrides = {}) {
 function candidateRow(overrides = {}) {
   return {
     ...identityRow(),
-    candidateDigest: candidate.candidateDigest,
-    evidenceSetJson: candidate.evidenceSetJson,
-    validUntil: candidate.validUntil,
+    candidateDigest: blockedCandidate.candidateDigest,
+    databaseNow: now,
+    evidenceSetJson: blockedCandidate.evidenceSetJson,
+    validUntil: blockedCandidate.validUntil,
     ...overrides,
   };
 }
@@ -132,15 +123,13 @@ function fixture(results) {
     repository: createPostgresProductionReadinessV2EvidenceRepository(
       transactions,
       identity,
-      clock,
-      registry,
     ),
     calls,
     remaining,
   };
 }
 
-test("initializes and verifies one immutable composite release identity", async () => {
+test("initializes one canonical immutable composite release identity", async () => {
   const current = fixture([
     result([{ releaseId: identity.releaseId }]),
     result([headRow()]),
@@ -151,117 +140,121 @@ test("initializes and verifies one immutable composite release identity", async 
     activeVersion: 0,
     activeCandidateDigest: null,
   });
-  assert.equal(current.calls[0].options.isolationLevel, "repeatable-read");
-  assert.equal(current.calls[1].sql, postgresProductionReadinessV2EvidenceSql.initialize);
-  assert.equal(current.calls[2].sql, postgresProductionReadinessV2EvidenceSql.readHead);
+  assert.equal(current.calls[0].options.isolationLevel, "read-committed");
+  assert.equal(
+    current.calls[1].sql,
+    postgresProductionReadinessV2EvidenceSql.initialize,
+  );
+  assert.equal(
+    current.calls[2].sql,
+    postgresProductionReadinessV2EvidenceSql.readHead,
+  );
+  assert.equal(current.calls[1].parameters.length, 9);
+  assert.equal(current.calls[1].parameters.includes(now), false);
+  assert.deepEqual(current.calls[2].parameters, [
+    identity.environment,
+    identity.releaseId,
+    identity.releaseManifestDigest,
+  ]);
+  assert.match(current.calls[1].sql, /clock_timestamp\(\)/);
   assert.equal(current.remaining.length, 0);
 });
 
-test("stages an immutable candidate and verifies the exact persisted bytes", async () => {
-  const current = fixture([
-    result([{ candidateDigest: candidate.candidateDigest }]),
-    result([candidateRow()]),
-  ]);
+test("refuses to stage evidence while canonical D14 remains open", async () => {
+  const current = fixture([result([{ databaseNow: now }])]);
 
-  assert.deepEqual(await current.repository.stageCandidate(candidate), {
-    status: "stored",
-    replayed: false,
-    candidateDigest: candidate.candidateDigest,
-  });
-  assert.equal(current.calls[1].sql, postgresProductionReadinessV2EvidenceSql.stageCandidate);
-  assert.equal(current.calls[2].sql, postgresProductionReadinessV2EvidenceSql.readCandidate);
-  assert.deepEqual(current.calls[1].parameters, [
-    identity.environment,
-    identity.releaseId,
-    candidate.candidateDigest,
-    candidate.evidenceSetJson,
-    candidate.validUntil,
-    now,
-  ]);
-});
-
-test("classifies an identical candidate replay without changing active state", async () => {
-  const current = fixture([result([]), result([candidateRow()])]);
-
-  assert.deepEqual(await current.repository.stageCandidate(candidate), {
-    status: "stored",
-    replayed: true,
-    candidateDigest: candidate.candidateDigest,
-  });
-  assert.doesNotMatch(
+  await assert.rejects(
+    current.repository.stageCandidate(blockedCandidate),
+    /candidate failed: not-ready/,
+  );
+  assert.equal(
     current.calls[1].sql,
-    /active_candidate_digest\s*=/,
+    postgresProductionReadinessV2EvidenceSql.readDatabaseNow,
+  );
+  assert.equal(
+    current.calls.some(
+      ({ sql }) => sql === postgresProductionReadinessV2EvidenceSql.stageCandidate,
+    ),
+    false,
   );
 });
 
-test("activates only through one CAS statement that also appends the event", async () => {
-  const current = fixture([
-    result([candidateRow()]),
-    result([{ activeVersion: 1 }]),
-  ]);
+test("refuses to read a non-canonical persisted candidate as ready", async () => {
+  const current = fixture([result([candidateRow()])]);
 
-  assert.deepEqual(await current.repository.confirmCandidate({
-    expectedActiveVersion: 0,
-    expectedActiveCandidateDigest: null,
-    candidateDigest: candidate.candidateDigest,
-  }), {
-    status: "activated",
-    activeVersion: 1,
-    candidateDigest: candidate.candidateDigest,
-  });
-  assert.equal(current.calls[2].sql, postgresProductionReadinessV2EvidenceSql.activateCandidate);
-  assert.match(current.calls[2].sql, /WITH activated AS/);
-  assert.match(current.calls[2].sql, /INSERT INTO production_readiness_release_activation_events_v2/);
-  assert.match(current.calls[2].sql, /candidate\.valid_until > \$13::timestamptz/);
-  assert.equal(current.calls[2].parameters.at(-1), now);
+  await assert.rejects(
+    current.repository.readCandidate(blockedCandidate.candidateDigest),
+    /candidate failed: not-ready/,
+  );
+  assert.deepEqual(current.calls[1].parameters, [
+    identity.environment,
+    identity.releaseId,
+    identity.releaseManifestDigest,
+    blockedCandidate.candidateDigest,
+  ]);
 });
 
-test("returns one bounded conflict when another confirmation wins", async () => {
-  const current = fixture([result([candidateRow()]), result([])]);
+test("returns a bounded conflict when another confirmation already won", async () => {
+  const current = fixture([result([{
+    activeVersion: 1,
+    activeCandidateDigest: blockedCandidate.candidateDigest,
+  }])]);
 
   assert.deepEqual(await current.repository.confirmCandidate({
     expectedActiveVersion: 0,
     expectedActiveCandidateDigest: null,
-    candidateDigest: candidate.candidateDigest,
+    candidateDigest: blockedCandidate.candidateDigest,
   }), {
     status: "conflict",
     activeVersion: null,
     candidateDigest: null,
   });
+  assert.match(current.calls[1].sql, /FOR UPDATE/);
+  assert.equal(current.calls.length, 2);
 });
 
-test("leaves activation unavailable when the atomic event write fails", async () => {
+test("keeps a D14-blocked candidate inactive after locking the head", async () => {
   const current = fixture([
+    result([{ activeVersion: 0, activeCandidateDigest: null }]),
     result([candidateRow()]),
-    new Error("event write failed"),
   ]);
 
-  await assert.rejects(
-    current.repository.confirmCandidate({
-      expectedActiveVersion: 0,
-      expectedActiveCandidateDigest: null,
-      candidateDigest: candidate.candidateDigest,
-    }),
-    /event write failed/,
-  );
-  assert.equal(current.calls.filter(({ kind }) => kind === "transaction").length, 1);
-});
-
-test("reads only a candidate joined to the active pointer and event", async () => {
-  const current = fixture([
-    result([{ ...candidateRow(), activeVersion: 1 }]),
-  ]);
-
-  assert.deepEqual(await current.repository.readActive(), {
-    status: "available",
-    activeVersion: 1,
-    candidate,
+  assert.deepEqual(await current.repository.confirmCandidate({
+    expectedActiveVersion: 0,
+    expectedActiveCandidateDigest: null,
+    candidateDigest: blockedCandidate.candidateDigest,
+  }), {
+    status: "conflict",
+    activeVersion: null,
+    candidateDigest: null,
   });
-  assert.match(current.calls[1].sql, /INNER JOIN production_readiness_release_candidates_v2/);
-  assert.match(current.calls[1].sql, /INNER JOIN production_readiness_release_activation_events_v2/);
+  assert.equal(
+    current.calls.some(
+      ({ sql }) => sql === postgresProductionReadinessV2EvidenceSql.activateCandidate,
+    ),
+    false,
+  );
 });
 
-test("fails closed for a missing, expired or tampered active candidate", async () => {
+test("defines one DB-clock CAS statement with an atomic activation event", () => {
+  const sql = postgresProductionReadinessV2EvidenceSql.activateCandidate;
+
+  assert.match(sql, /WITH activation_clock AS/);
+  assert.match(sql, /clock_timestamp\(\)/);
+  assert.match(sql, /UPDATE production_readiness_release_heads_v2/);
+  assert.match(
+    sql,
+    /INSERT INTO production_readiness_release_activation_events_v2/,
+  );
+  assert.match(
+    sql,
+    /candidate\.release_manifest_digest\s*=\s*head\.release_manifest_digest/,
+  );
+  assert.match(sql, /candidate\.valid_until\s*>\s*GREATEST\(/);
+  assert.doesNotMatch(sql, /\$13/);
+});
+
+test("reads only an unexpired active candidate joined to its event", async () => {
   const missing = fixture([result([])]);
   assert.deepEqual(await missing.repository.readActive(), {
     status: "unavailable",
@@ -269,40 +262,73 @@ test("fails closed for a missing, expired or tampered active candidate", async (
     candidate: null,
   });
 
-  const expired = fixture([result([{
-    ...candidateRow({ validUntil: "2026-08-24T12:00:30.000Z" }),
+  const blocked = fixture([result([{
+    ...candidateRow(),
     activeVersion: 1,
   }])]);
-  assert.deepEqual(await expired.repository.readActive(), {
+  assert.deepEqual(await blocked.repository.readActive(), {
     status: "unavailable",
     activeVersion: null,
     candidate: null,
   });
-
-  const tampered = fixture([result([{
-    ...candidateRow({
-      candidateDigest:
-        `production_readiness_candidate_v2_${"6".repeat(64)}`,
-    }),
-    activeVersion: 1,
-  }])]);
-  assert.deepEqual(await tampered.repository.readActive(), {
-    status: "unavailable",
-    activeVersion: null,
-    candidate: null,
-  });
+  assert.match(
+    blocked.calls[1].sql,
+    /INNER JOIN production_readiness_release_activation_events_v2/,
+  );
+  assert.match(
+    blocked.calls[1].sql,
+    /candidate\.valid_until\s*>\s*date_trunc\([\s\S]*clock_timestamp\(\)/,
+  );
 });
 
-test("exports a frozen deterministic repository contract", () => {
+test("threads the manifest through every repository identity predicate", () => {
+  const sql = JSON.stringify(postgresProductionReadinessV2EvidenceSql);
+
+  assert.match(
+    postgresProductionReadinessV2EvidenceSql.readHead,
+    /release_manifest_digest\s*=\s*\$3/,
+  );
+  assert.match(
+    postgresProductionReadinessV2EvidenceSql.readCandidate,
+    /candidate\.release_manifest_digest\s*=\s*\$3/,
+  );
+  assert.match(
+    postgresProductionReadinessV2EvidenceSql.readActive,
+    /head\.release_manifest_digest\s*=\s*\$3/,
+  );
+  assert.doesNotMatch(sql, /ON CONFLICT \(environment, release_id\) DO NOTHING/);
+});
+
+test("exports a frozen deterministic canonical repository contract", () => {
   const current = fixture([]);
   assert.equal(
     postgresProductionReadinessV2EvidenceRepositoryVersion,
-    "connect-postgres-production-readiness-v2-evidence-repository-v1",
+    "connect-postgres-production-readiness-v2-evidence-repository-v2",
   );
   assert.equal(Object.isFrozen(postgresProductionReadinessV2EvidenceSql), true);
   assert.equal(Object.isFrozen(current.repository), true);
   assert.doesNotMatch(
     JSON.stringify(postgresProductionReadinessV2EvidenceSql),
     /random|uuid/i,
+  );
+});
+
+test("canonical factory rejects an altered registry identity", () => {
+  const transactions = {
+    async transaction() {
+      throw new Error("transaction must not run");
+    },
+  };
+
+  assert.throws(
+    () => createPostgresProductionReadinessV2EvidenceRepository(
+      transactions,
+      {
+        ...identity,
+        registryDigest:
+          `production_readiness_registry_v2_${"7".repeat(64)}`,
+      },
+    ),
+    /candidate failed: input-invalid/,
   );
 });

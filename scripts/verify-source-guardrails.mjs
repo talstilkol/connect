@@ -606,6 +606,15 @@ export async function inspectSourceGuardrails(
         });
       }
     }
+
+    if (
+      source.includes("ForTesting")
+    ) {
+      addFinding({
+        code: "TEST_ONLY_READINESS_V2_SEAM_FORBIDDEN",
+        file: path,
+      });
+    }
   }
 
   const clientEntries = files.filter((file) => {

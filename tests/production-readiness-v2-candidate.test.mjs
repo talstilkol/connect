@@ -15,6 +15,7 @@ import {
 import {
   createProductionReadinessV2Candidate,
   inspectProductionReadinessV2Candidate,
+  inspectProductionReadinessV2ReleaseIdentity,
   ProductionReadinessV2CandidateError,
   productionReadinessV2CandidateVersion,
 } from "../server/operations/productionReadinessV2Candidate.ts";
@@ -36,20 +37,9 @@ const baseIdentity = Object.freeze({
   registryVersion: 2,
   serviceArtifactDigests,
 });
-const activationRegistry = Object.freeze(
-  PRODUCTION_READINESS_REGISTRY_V2.map((definition) =>
-    Object.freeze({
-      ...definition,
-      decisionId: definition.id === "storage.object"
-        ? null
-        : definition.decisionId,
-    })
-  ),
-);
 const identity = Object.freeze({
   ...baseIdentity,
-  registryDigest:
-    deriveProductionReadinessRegistryV2Digest(activationRegistry),
+  registryDigest: deriveProductionReadinessRegistryV2Digest(),
   releaseManifestDigest:
     deriveProductionReadinessV2ReleaseManifestDigest({
       environment: baseIdentity.environment,
@@ -60,7 +50,7 @@ const identity = Object.freeze({
 });
 
 function evidenceSet(overrides = {}) {
-  return activationRegistry.map((definition) => {
+  return PRODUCTION_READINESS_REGISTRY_V2.map((definition) => {
     const issuer = definition.allowedIssuer[0];
     const envelope = createProductionReadinessV2Evidence({
       checkId: definition.id,
@@ -75,118 +65,153 @@ function evidenceSet(overrides = {}) {
       outcome: "passed",
       evidence: definition.requiredEvidence,
       ...(overrides[definition.id] ?? {}),
-    }, activationRegistry);
+    });
     return JSON.stringify(envelope);
   });
 }
 
-test("builds one canonical ready candidate from all six checks", () => {
-  const candidate = createProductionReadinessV2Candidate({
-    identity,
-    evidence: evidenceSet().reverse(),
-  }, activationRegistry, clock);
+function assertCandidateError(action, expectedCode) {
+  assert.throws(
+    action,
+    (error) =>
+      error instanceof ProductionReadinessV2CandidateError &&
+      error.code === expectedCode,
+  );
+}
 
-  assert.equal(
-    candidate.candidateDigest,
-    `production_readiness_candidate_v2_${candidate.candidateDigest.slice(-64)}`,
-  );
-  assert.equal(candidate.validUntil, expiresAt);
-  assert.deepEqual(
-    JSON.parse(candidate.evidenceSetJson).map(({ checkId }) => checkId),
-    productionReadinessV2CheckIds,
-  );
-  assert.deepEqual(
-    inspectProductionReadinessV2Candidate(
-      candidate,
-      activationRegistry,
-      clock,
-    ),
-    candidate,
-  );
+test("accepts only the canonical release identity", () => {
+  const inspected = inspectProductionReadinessV2ReleaseIdentity(identity);
+
+  assert.deepEqual(inspected, identity);
+  assert.equal(Object.isFrozen(inspected), true);
+  assert.equal(Object.isFrozen(inspected.serviceArtifactDigests), true);
   assert.equal(
     productionReadinessV2CandidateVersion,
     "connect-production-readiness-candidate-v2",
   );
-});
-
-test("rejects missing, duplicate and failed checks before persistence", () => {
-  const complete = evidenceSet();
-  for (const evidence of [
-    complete.slice(1),
-    [...complete.slice(0, -1), complete[0]],
-    evidenceSet({
-      "runtime.railway-api": { outcome: "failed" },
-    }),
-  ]) {
-    assert.throws(
-      () => createProductionReadinessV2Candidate({
-        identity,
-        evidence,
-      }, activationRegistry, clock),
-      ProductionReadinessV2CandidateError,
-    );
-  }
-});
-
-test("rejects open decisions, release drift and expired evidence", () => {
-  assert.throws(
-    () => createProductionReadinessV2Candidate({
-      identity: {
-        ...identity,
-        registryDigest:
-          deriveProductionReadinessRegistryV2Digest(
-            PRODUCTION_READINESS_REGISTRY_V2,
-          ),
-      },
-      evidence: evidenceSet(),
-    }, PRODUCTION_READINESS_REGISTRY_V2, clock),
-    ProductionReadinessV2CandidateError,
-  );
-  assert.throws(
-    () => createProductionReadinessV2Candidate({
-      identity: {
-        ...identity,
-        commitSha: "f".repeat(40),
-      },
-      evidence: evidenceSet(),
-    }, activationRegistry, clock),
-    ProductionReadinessV2CandidateError,
-  );
-  assert.throws(
-    () => createProductionReadinessV2Candidate({
-      identity,
-      evidence: evidenceSet(),
-    }, activationRegistry, {
-      now: () => new Date(expiresAt),
-    }),
-    ProductionReadinessV2CandidateError,
+  assert.deepEqual(
+    PRODUCTION_READINESS_REGISTRY_V2.map(({ id }) => id),
+    productionReadinessV2CheckIds,
   );
 });
 
-test("rejects byte, digest and validity tampering on read-back", () => {
-  const candidate = createProductionReadinessV2Candidate({
-    identity,
-    evidence: evidenceSet(),
-  }, activationRegistry, clock);
-  const parsed = JSON.parse(candidate.evidenceSetJson);
-  const reorderedJson = JSON.stringify([...parsed].reverse());
-  for (const persisted of [
+test("rejects identity drift, malformed identity and non-canonical registry digests", () => {
+  const invalidIdentities = [
     {
-      ...candidate,
-      candidateDigest:
-        `production_readiness_candidate_v2_${"0".repeat(64)}`,
+      ...identity,
+      registryDigest:
+        `production_readiness_registry_v2_${"0".repeat(64)}`,
     },
-    { ...candidate, evidenceSetJson: reorderedJson },
-    { ...candidate, validUntil: "2026-08-24T12:02:00.000Z" },
-    { ...candidate, extra: true },
-  ]) {
-    assert.throws(
-      () => inspectProductionReadinessV2Candidate(
-        persisted,
-        activationRegistry,
-        clock,
-      ),
-      ProductionReadinessV2CandidateError,
+    { ...identity, releaseManifestDigest: `sha256:${"0".repeat(64)}` },
+    { ...identity, commitSha: "f".repeat(40) },
+    { ...identity, environment: "invalid" },
+    {
+      ...identity,
+      serviceArtifactDigests: {
+        "railway-api": identity.serviceArtifactDigests["railway-api"],
+        "railway-worker": identity.serviceArtifactDigests["railway-worker"],
+      },
+    },
+    { ...identity, extra: true },
+  ];
+
+  for (const invalidIdentity of invalidIdentities) {
+    assertCandidateError(
+      () => inspectProductionReadinessV2ReleaseIdentity(invalidIdentity),
+      "input-invalid",
     );
   }
+});
+
+test("fails closed while canonical D14 remains an open decision", () => {
+  for (const evidence of [evidenceSet(), evidenceSet().reverse()]) {
+    assertCandidateError(
+      () => createProductionReadinessV2Candidate({ identity, evidence }, clock),
+      "not-ready",
+    );
+  }
+});
+
+test("rejects malformed, missing and duplicate evidence before persistence", () => {
+  const complete = evidenceSet();
+  const tamperedEnvelope = JSON.parse(complete[0]);
+  tamperedEnvelope.evidenceDigest =
+    `production_readiness_evidence_v2_${"0".repeat(64)}`;
+
+  const invalidInputs = [
+    { identity, evidence: complete.slice(1) },
+    { identity, evidence: [...complete.slice(0, -1), complete[0]] },
+    {
+      identity,
+      evidence: [JSON.stringify(tamperedEnvelope), ...complete.slice(1)],
+    },
+    { identity, evidence: [42, ...complete.slice(1)] },
+    { identity, evidence: complete, extra: true },
+  ];
+
+  for (const input of invalidInputs) {
+    assertCandidateError(
+      () => createProductionReadinessV2Candidate(input, clock),
+      "input-invalid",
+    );
+  }
+});
+
+test("does not create a candidate from failed or expired canonical evidence", () => {
+  for (const [evidence, candidateClock] of [
+    [
+      evidenceSet({
+        "runtime.railway-api": { outcome: "failed" },
+      }),
+      clock,
+    ],
+    [
+      evidenceSet(),
+      Object.freeze({ now: () => new Date(expiresAt) }),
+    ],
+  ]) {
+    assertCandidateError(
+      () => createProductionReadinessV2Candidate(
+        { identity, evidence },
+        candidateClock,
+      ),
+      "not-ready",
+    );
+  }
+});
+
+test("rejects malformed persisted candidates and never reconstructs one past D14", () => {
+  const evidenceSetJson = JSON.stringify(
+    evidenceSet().map((envelope) => JSON.parse(envelope)),
+  );
+  const plausiblePersistedCandidate = {
+    identity,
+    candidateDigest:
+      `production_readiness_candidate_v2_${"0".repeat(64)}`,
+    evidenceSetJson,
+    validUntil: expiresAt,
+  };
+
+  const malformedCandidates = [
+    null,
+    { ...plausiblePersistedCandidate, candidateDigest: "invalid" },
+    { ...plausiblePersistedCandidate, evidenceSetJson: "{" },
+    { ...plausiblePersistedCandidate, evidenceSetJson: "[]" },
+    { ...plausiblePersistedCandidate, validUntil: "2026-08-24" },
+    { ...plausiblePersistedCandidate, extra: true },
+  ];
+
+  for (const persistedCandidate of malformedCandidates) {
+    assertCandidateError(
+      () => inspectProductionReadinessV2Candidate(persistedCandidate, clock),
+      "input-invalid",
+    );
+  }
+  assertCandidateError(
+    () => inspectProductionReadinessV2Candidate(
+      plausiblePersistedCandidate,
+      clock,
+    ),
+    "not-ready",
+  );
 });

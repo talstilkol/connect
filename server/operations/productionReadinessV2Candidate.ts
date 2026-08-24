@@ -10,7 +10,6 @@ import {
   PRODUCTION_READINESS_V2_REGISTRY_VERSION,
   productionReadinessV2CheckIds,
   productionReadinessV2Issuers,
-  type ProductionReadinessV2Definition,
   type ProductionReadinessV2EvidenceEnvelope,
   type ProductionReadinessV2Issuer,
 } from "../../shared/domain/productionReadinessV2.ts";
@@ -140,8 +139,6 @@ function isServiceArtifactDigests(
 
 export function inspectProductionReadinessV2ReleaseIdentity(
   value: unknown,
-  registry: readonly ProductionReadinessV2Definition[] =
-    PRODUCTION_READINESS_REGISTRY_V2,
 ): Readonly<ProductionReadinessV2ReleaseIdentity> {
   if (
     !exactRecord(value, identityKeys) ||
@@ -176,7 +173,7 @@ export function inspectProductionReadinessV2ReleaseIdentity(
     serviceArtifactDigests,
   });
   const expectedRegistryDigest =
-    deriveProductionReadinessRegistryV2Digest(registry);
+    deriveProductionReadinessRegistryV2Digest();
   const expectedManifestDigest =
     deriveProductionReadinessV2ReleaseManifestDigest({
       environment: identity.environment,
@@ -229,8 +226,6 @@ function candidateDigest(
  */
 export function createProductionReadinessV2Candidate(
   input: Readonly<ProductionReadinessV2CandidateInput>,
-  registry: readonly ProductionReadinessV2Definition[] =
-    PRODUCTION_READINESS_REGISTRY_V2,
   clock: Readonly<ProductionReadinessV2CandidateClock> = systemClock,
 ): Readonly<ProductionReadinessV2Candidate> {
   if (
@@ -242,10 +237,7 @@ export function createProductionReadinessV2Candidate(
   ) {
     throw new ProductionReadinessV2CandidateError("input-invalid");
   }
-  const identity = inspectProductionReadinessV2ReleaseIdentity(
-    input.identity,
-    registry,
-  );
+  const identity = inspectProductionReadinessV2ReleaseIdentity(input.identity);
   let evidence: readonly ProductionReadinessV2EvidenceEnvelope[];
   try {
     evidence = Object.freeze(
@@ -276,7 +268,7 @@ export function createProductionReadinessV2Candidate(
       releaseManifestDigest: identity.releaseManifestDigest,
       serviceArtifactDigests: identity.serviceArtifactDigests,
       evidence: canonicalEvidence,
-    }, registry, clock);
+    }, PRODUCTION_READINESS_REGISTRY_V2, clock);
   } catch {
     throw new ProductionReadinessV2CandidateError("input-invalid");
   }
@@ -304,8 +296,6 @@ export function createProductionReadinessV2Candidate(
 
 export function inspectProductionReadinessV2Candidate(
   value: unknown,
-  registry: readonly ProductionReadinessV2Definition[] =
-    PRODUCTION_READINESS_REGISTRY_V2,
   clock: Readonly<ProductionReadinessV2CandidateClock> = systemClock,
 ): Readonly<ProductionReadinessV2Candidate> {
   if (
@@ -331,10 +321,13 @@ export function inspectProductionReadinessV2Candidate(
   ) {
     throw new ProductionReadinessV2CandidateError("input-invalid");
   }
-  const recreated = createProductionReadinessV2Candidate({
-    identity: value.identity as ProductionReadinessV2ReleaseIdentity,
-    evidence: parsed.map((envelope) => JSON.stringify(envelope)),
-  }, registry, clock);
+  const recreated = createProductionReadinessV2Candidate(
+    {
+      identity: value.identity as ProductionReadinessV2ReleaseIdentity,
+      evidence: parsed.map((envelope) => JSON.stringify(envelope)),
+    },
+    clock,
+  );
   if (
     !safeEqual(recreated.candidateDigest, value.candidateDigest) ||
     !safeEqual(recreated.evidenceSetJson, value.evidenceSetJson) ||

@@ -19,7 +19,7 @@ CREATE TABLE production_readiness_release_heads_v2 (
   active_candidate_digest TEXT,
   initialized_at TIMESTAMPTZ NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL,
-  PRIMARY KEY (environment, release_id),
+  PRIMARY KEY (environment, release_id, release_manifest_digest),
   CONSTRAINT production_readiness_heads_v2_environment_valid
     CHECK (
       environment IN (
@@ -47,9 +47,6 @@ CREATE TABLE production_readiness_release_heads_v2 (
       railway_api_artifact_digest ~ '^sha256:[0-9a-f]{64}$'
       AND railway_worker_artifact_digest ~ '^sha256:[0-9a-f]{64}$'
       AND vercel_web_artifact_digest ~ '^sha256:[0-9a-f]{64}$'
-      AND railway_api_artifact_digest <> railway_worker_artifact_digest
-      AND railway_api_artifact_digest <> vercel_web_artifact_digest
-      AND railway_worker_artifact_digest <> vercel_web_artifact_digest
     ),
   CONSTRAINT production_readiness_heads_v2_active_version
     CHECK (active_version BETWEEN 0 AND 2147483647),
@@ -77,18 +74,27 @@ CREATE TABLE production_readiness_release_heads_v2 (
 CREATE TABLE production_readiness_release_candidates_v2 (
   environment TEXT NOT NULL,
   release_id TEXT NOT NULL,
+  release_manifest_digest TEXT NOT NULL,
   candidate_digest TEXT NOT NULL,
   evidence_set_json TEXT NOT NULL,
   valid_until TIMESTAMPTZ NOT NULL,
   staged_at TIMESTAMPTZ NOT NULL,
-  PRIMARY KEY (environment, release_id, candidate_digest),
+  PRIMARY KEY (
+    environment,
+    release_id,
+    release_manifest_digest,
+    candidate_digest
+  ),
   CONSTRAINT production_readiness_candidates_v2_head_fk
-    FOREIGN KEY (environment, release_id)
+    FOREIGN KEY (environment, release_id, release_manifest_digest)
     REFERENCES production_readiness_release_heads_v2 (
       environment,
-      release_id
+      release_id,
+      release_manifest_digest
     )
     ON DELETE RESTRICT,
+  CONSTRAINT production_readiness_candidates_v2_release_manifest_digest
+    CHECK (release_manifest_digest ~ '^sha256:[0-9a-f]{64}$'),
   CONSTRAINT production_readiness_candidates_v2_digest
     CHECK (
       candidate_digest ~
@@ -113,27 +119,36 @@ CREATE TABLE production_readiness_release_candidates_v2 (
 CREATE TABLE production_readiness_release_activation_events_v2 (
   environment TEXT NOT NULL,
   release_id TEXT NOT NULL,
+  release_manifest_digest TEXT NOT NULL,
   active_version INTEGER NOT NULL,
   previous_candidate_digest TEXT,
   activated_candidate_digest TEXT NOT NULL,
   activated_at TIMESTAMPTZ NOT NULL,
-  PRIMARY KEY (environment, release_id, active_version),
+  PRIMARY KEY (
+    environment,
+    release_id,
+    release_manifest_digest,
+    active_version
+  ),
   CONSTRAINT production_readiness_activation_events_v2_head_fk
-    FOREIGN KEY (environment, release_id)
+    FOREIGN KEY (environment, release_id, release_manifest_digest)
     REFERENCES production_readiness_release_heads_v2 (
       environment,
-      release_id
+      release_id,
+      release_manifest_digest
     )
     ON DELETE RESTRICT,
   CONSTRAINT production_readiness_activation_events_v2_previous_fk
     FOREIGN KEY (
       environment,
       release_id,
+      release_manifest_digest,
       previous_candidate_digest
     )
     REFERENCES production_readiness_release_candidates_v2 (
       environment,
       release_id,
+      release_manifest_digest,
       candidate_digest
     )
     ON DELETE RESTRICT
@@ -142,17 +157,21 @@ CREATE TABLE production_readiness_release_activation_events_v2 (
     FOREIGN KEY (
       environment,
       release_id,
+      release_manifest_digest,
       activated_candidate_digest
     )
     REFERENCES production_readiness_release_candidates_v2 (
       environment,
       release_id,
+      release_manifest_digest,
       candidate_digest
     )
     ON DELETE RESTRICT
     DEFERRABLE INITIALLY DEFERRED,
   CONSTRAINT production_readiness_activation_events_v2_version
     CHECK (active_version BETWEEN 1 AND 2147483647),
+  CONSTRAINT production_readiness_events_v2_release_manifest_digest
+    CHECK (release_manifest_digest ~ '^sha256:[0-9a-f]{64}$'),
   CONSTRAINT production_readiness_activation_events_v2_digest_state
     CHECK (
       activated_candidate_digest ~
@@ -182,11 +201,13 @@ ALTER TABLE production_readiness_release_heads_v2
   FOREIGN KEY (
     environment,
     release_id,
+    release_manifest_digest,
     active_candidate_digest
   )
   REFERENCES production_readiness_release_candidates_v2 (
     environment,
     release_id,
+    release_manifest_digest,
     candidate_digest
   )
   ON DELETE RESTRICT
@@ -197,6 +218,7 @@ CREATE INDEX production_readiness_candidates_v2_expiry_idx
     environment,
     valid_until,
     release_id,
+    release_manifest_digest,
     candidate_digest
   );
 
@@ -205,6 +227,7 @@ CREATE INDEX production_readiness_activation_events_v2_time_idx
     environment,
     activated_at,
     release_id,
+    release_manifest_digest,
     active_version
   );
 
@@ -268,16 +291,12 @@ BEGIN
   FROM production_readiness_release_heads_v2
   WHERE environment = NEW.environment
     AND release_id = NEW.release_id
+    AND release_manifest_digest = NEW.release_manifest_digest
   FOR KEY SHARE;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION
       'Production readiness v2 candidate lacks its release head';
-  END IF;
-
-  IF NEW.staged_at < release_head.initialized_at THEN
-    RAISE EXCEPTION
-      'Production readiness v2 candidate predates its release head';
   END IF;
 
   BEGIN
@@ -454,8 +473,7 @@ BEGIN
           'Production readiness v2 envelope timestamps are invalid';
     END;
 
-    IF envelope_observed_at < release_head.initialized_at
-      OR envelope_observed_at > NEW.staged_at + INTERVAL '30 seconds'
+    IF envelope_observed_at > NEW.staged_at + INTERVAL '30 seconds'
       OR envelope_expires_at <= envelope_observed_at
       OR envelope_expires_at <= NEW.staged_at
       OR envelope_expires_at - envelope_observed_at > (
@@ -534,7 +552,7 @@ BEGIN
     OR NEW.active_candidate_digest IS NULL
     OR NEW.active_candidate_digest IS NOT DISTINCT FROM
       OLD.active_candidate_digest
-    OR NEW.updated_at <= OLD.updated_at
+    OR NEW.updated_at < OLD.updated_at
   THEN
     RAISE EXCEPTION
       'Production readiness v2 activation compare-and-set is invalid';
@@ -545,6 +563,7 @@ BEGIN
   FROM production_readiness_release_candidates_v2
   WHERE environment = NEW.environment
     AND release_id = NEW.release_id
+    AND release_manifest_digest = NEW.release_manifest_digest
     AND candidate_digest = NEW.active_candidate_digest
   FOR KEY SHARE;
 
@@ -575,6 +594,7 @@ BEGIN
     FROM production_readiness_release_activation_events_v2 AS event
     WHERE event.environment = NEW.environment
       AND event.release_id = NEW.release_id
+      AND event.release_manifest_digest = NEW.release_manifest_digest
       AND event.active_version = NEW.active_version
       AND event.previous_candidate_digest IS NOT DISTINCT FROM
         OLD.active_candidate_digest
@@ -610,6 +630,7 @@ BEGIN
   FROM production_readiness_release_heads_v2
   WHERE environment = NEW.environment
     AND release_id = NEW.release_id
+    AND release_manifest_digest = NEW.release_manifest_digest
   FOR KEY SHARE;
 
   IF NOT FOUND
@@ -627,6 +648,7 @@ BEGIN
   FROM production_readiness_release_candidates_v2
   WHERE environment = NEW.environment
     AND release_id = NEW.release_id
+    AND release_manifest_digest = NEW.release_manifest_digest
     AND candidate_digest = NEW.activated_candidate_digest;
 
   IF NOT FOUND
@@ -648,12 +670,13 @@ BEGIN
     FROM production_readiness_release_activation_events_v2
     WHERE environment = NEW.environment
       AND release_id = NEW.release_id
+      AND release_manifest_digest = NEW.release_manifest_digest
       AND active_version = NEW.active_version - 1;
 
     IF NOT FOUND
       OR prior_event.activated_candidate_digest <>
         NEW.previous_candidate_digest
-      OR prior_event.activated_at >= NEW.activated_at
+      OR prior_event.activated_at > NEW.activated_at
     THEN
       RAISE EXCEPTION
         'Production readiness v2 activation event chain is invalid';

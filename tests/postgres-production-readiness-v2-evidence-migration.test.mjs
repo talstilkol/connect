@@ -33,7 +33,7 @@ test("creates an independent candidate-head-activation v2 schema", () => {
 test("binds each head to one exact composite release identity", () => {
   assert.match(
     migration,
-    /PRIMARY KEY \(environment, release_id\)/,
+    /PRIMARY KEY \(environment, release_id, release_manifest_digest\)/,
   );
   assert.match(
     migration,
@@ -48,9 +48,9 @@ test("binds each head to one exact composite release identity", () => {
   assert.match(migration, /railway_api_artifact_digest TEXT NOT NULL/);
   assert.match(migration, /railway_worker_artifact_digest TEXT NOT NULL/);
   assert.match(migration, /vercel_web_artifact_digest TEXT NOT NULL/);
-  assert.match(
+  assert.doesNotMatch(
     migration,
-    /railway_api_artifact_digest <> railway_worker_artifact_digest/,
+    /railway_api_artifact_digest <> railway_worker_artifact_digest|railway_api_artifact_digest <> vercel_web_artifact_digest|railway_worker_artifact_digest <> vercel_web_artifact_digest/,
   );
   assert.match(
     migration,
@@ -61,7 +61,11 @@ test("binds each head to one exact composite release identity", () => {
 test("stages one immutable bounded candidate with exactly six envelopes", () => {
   assert.match(
     migration,
-    /PRIMARY KEY \(environment, release_id, candidate_digest\)/,
+    /PRIMARY KEY \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*candidate_digest\s*\)/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE production_readiness_release_candidates_v2 \([\s\S]*?release_manifest_digest TEXT NOT NULL/,
   );
   assert.match(
     migration,
@@ -142,6 +146,10 @@ test("rejects incomplete, duplicate and cross-release evidence sets", () => {
     /production_readiness_evidence_v2_\[0-9a-f\]\{64\}/,
   );
   assert.match(migration, /envelope ->> 'outcome' <> 'passed'/);
+  assert.doesNotMatch(
+    migration,
+    /envelope_observed_at < release_head\.initialized_at|NEW\.staged_at < release_head\.initialized_at/,
+  );
 });
 
 test("requires every head CAS activation to have one matching event", () => {
@@ -157,6 +165,8 @@ test("requires every head CAS activation to have one matching event", () => {
     migration,
     /active_candidate\.valid_until <= NEW\.updated_at/,
   );
+  assert.match(migration, /NEW\.updated_at < OLD\.updated_at/);
+  assert.doesNotMatch(migration, /NEW\.updated_at <= OLD\.updated_at/);
   assert.match(
     migration,
     /CREATE CONSTRAINT TRIGGER production_readiness_heads_v2_event_guard[\s\S]*DEFERRABLE INITIALLY DEFERRED/,
@@ -174,7 +184,11 @@ test("requires every head CAS activation to have one matching event", () => {
 test("keeps activation history append-only and chained", () => {
   assert.match(
     migration,
-    /PRIMARY KEY \(environment, release_id, active_version\)/,
+    /PRIMARY KEY \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*active_version\s*\)/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE production_readiness_release_activation_events_v2 \([\s\S]*?release_manifest_digest TEXT NOT NULL/,
   );
   assert.match(
     migration,
@@ -204,6 +218,14 @@ test("keeps activation history append-only and chained", () => {
     migration,
     /production_readiness_activation_events_v2_delete_guard/,
   );
+  assert.match(
+    migration,
+    /prior_event\.activated_at > NEW\.activated_at/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /prior_event\.activated_at >= NEW\.activated_at/,
+  );
 });
 
 test("uses a deferred head pointer and never exposes an expired candidate", () => {
@@ -218,5 +240,46 @@ test("uses a deferred head pointer and never exposes an expired candidate", () =
   assert.match(
     migration,
     /release_head\.active_candidate_digest <>\s*NEW\.activated_candidate_digest/,
+  );
+});
+
+test("threads the manifest digest through every relational identity boundary", () => {
+  assert.match(
+    migration,
+    /FOREIGN KEY \(environment, release_id, release_manifest_digest\)\s*REFERENCES production_readiness_release_heads_v2 \(\s*environment,\s*release_id,\s*release_manifest_digest\s*\)/,
+  );
+  assert.match(
+    migration,
+    /FOREIGN KEY \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*previous_candidate_digest\s*\)\s*REFERENCES production_readiness_release_candidates_v2 \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*candidate_digest\s*\)/,
+  );
+  assert.match(
+    migration,
+    /FOREIGN KEY \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*activated_candidate_digest\s*\)\s*REFERENCES production_readiness_release_candidates_v2 \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*candidate_digest\s*\)/,
+  );
+  assert.match(
+    migration,
+    /FOREIGN KEY \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*active_candidate_digest\s*\)\s*REFERENCES production_readiness_release_candidates_v2 \(\s*environment,\s*release_id,\s*release_manifest_digest,\s*candidate_digest\s*\)/,
+  );
+  assert.match(
+    migration,
+    /CREATE INDEX production_readiness_candidates_v2_expiry_idx\s*ON production_readiness_release_candidates_v2 \(\s*environment,\s*valid_until,\s*release_id,\s*release_manifest_digest,\s*candidate_digest\s*\)/,
+  );
+  assert.match(
+    migration,
+    /CREATE INDEX production_readiness_activation_events_v2_time_idx\s*ON production_readiness_release_activation_events_v2 \(\s*environment,\s*activated_at,\s*release_id,\s*release_manifest_digest,\s*active_version\s*\)/,
+  );
+
+  const identityLookups = migration.match(
+    /AND (?:event\.)?release_manifest_digest = NEW\.release_manifest_digest/g,
+  );
+  assert.equal(identityLookups?.length, 6);
+
+  assert.doesNotMatch(
+    migration,
+    /FOREIGN KEY \(environment, release_id\)\s*REFERENCES production_readiness_release_heads_v2/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /PRIMARY KEY \(environment, release_id\)(?!,)/,
   );
 });

@@ -6,13 +6,18 @@ import test from "node:test";
 import {
   POSTGRES_DATA_MIGRATION_SLICES,
 } from "../postgres/postgresDataMigrationSliceRegistry.mjs";
+import {
+  POSTGRES_TARGET_ONLY_MIGRATIONS,
+} from "../postgres/postgresMigrationParityRegistry.mjs";
 
-const railwayOnlyTables = new Set([
-  "api_mutation_rate_limit_buckets",
-  "data_migration_bundle_receipts",
-  "railway_api_mutation_receipts",
-  "worker_scheduler_leases",
-]);
+const postgresTargetOnlyTables = new Set(
+  POSTGRES_TARGET_ONLY_MIGRATIONS.flatMap(({ migration }) => {
+    const sql = readFileSync(`postgres/migrations/${migration}`, "utf8");
+    return [...sql.matchAll(
+      /CREATE TABLE\s+(?:IF NOT EXISTS\s+)?([a-z0-9_]+)/gi,
+    )].map((match) => match[1]);
+  }),
+);
 
 function currentD1Tables() {
   const database = new DatabaseSync(":memory:");
@@ -42,8 +47,10 @@ function currentPostgresTables() {
     .filter((name) => /^\d{4}_[a-z0-9_]+\.sql$/.test(name))
     .sort()) {
     const sql = readFileSync(`postgres/migrations/${fileName}`, "utf8");
-    for (const match of sql.matchAll(/CREATE TABLE\s+([a-z_]+)/g)) {
-      if (!railwayOnlyTables.has(match[1])) names.push(match[1]);
+    for (const match of sql.matchAll(
+      /CREATE TABLE\s+(?:IF NOT EXISTS\s+)?([a-z0-9_]+)/gi,
+    )) {
+      if (!postgresTargetOnlyTables.has(match[1])) names.push(match[1]);
     }
   }
   return names.sort();
@@ -58,6 +65,22 @@ test("partitions every D1 table exactly once and matches PostgreSQL", () => {
   assert.equal(unique.length, registered.length);
   assert.deepEqual(unique, currentD1Tables());
   assert.deepEqual(unique, currentPostgresTables());
+});
+
+test("keeps readiness v2 evidence outside the legacy D1 data slices", () => {
+  const readinessTables = [...postgresTargetOnlyTables]
+    .filter((table) => table.startsWith("production_readiness_release_"))
+    .sort();
+  const registered = new Set(
+    POSTGRES_DATA_MIGRATION_SLICES.flatMap(({ tables }) => tables),
+  );
+
+  assert.deepEqual(readinessTables, [
+    "production_readiness_release_activation_events_v2",
+    "production_readiness_release_candidates_v2",
+    "production_readiness_release_heads_v2",
+  ]);
+  assert.equal(readinessTables.some((table) => registered.has(table)), false);
 });
 
 test("keeps slice dependencies ordered and linked to real migrations", () => {
