@@ -67,6 +67,9 @@ export const teamInvitationDeliveryStatuses = [
   "ambiguous",
   "cancelled",
 ] as const;
+export const teamInvitationDeliveryDeferralReasons = [
+  "PROVIDER_RATE_LIMITED",
+] as const;
 export const interfaceLanguages = ["he", "en", "ar"] as const;
 export const mailingStatuses = ["subscribed", "unsubscribed"] as const;
 export const consentStatuses = ["unknown", "granted", "withdrawn"] as const;
@@ -1120,6 +1123,79 @@ export const teamInvitationDeliveries =
       ).on(
         table.status,
         table.createdAt,
+      ),
+    ],
+  );
+
+export const teamInvitationDeliveryDeferrals =
+  sqliteTable(
+    "team_invitation_delivery_deferrals",
+    {
+      deliveryKey: text(
+        "delivery_key",
+      ).primaryKey(),
+      tenantId: integer(
+        "tenant_id",
+      ).notNull(),
+      reasonCode: text(
+        "reason_code",
+        {
+          enum:
+            teamInvitationDeliveryDeferralReasons,
+        },
+      ).notNull(),
+      retryAfterAt: text(
+        "retry_after_at",
+      ).notNull(),
+      deferredAt: text(
+        "deferred_at",
+      ).notNull(),
+    },
+    (table) => [
+      check(
+        "team_invitation_delivery_deferrals_key_valid",
+        sql`length(${table.deliveryKey}) = 92
+          and ${table.deliveryKey} glob 'team_invitation_delivery_v1_[0-9a-f]*'
+          and substr(${table.deliveryKey}, 29) not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "team_invitation_delivery_deferrals_tenant_valid",
+        sql`${table.tenantId} >= 1`,
+      ),
+      check(
+        "team_invitation_delivery_deferrals_reason_valid",
+        sql`${table.reasonCode} = 'PROVIDER_RATE_LIMITED'`,
+      ),
+      check(
+        "team_invitation_delivery_deferrals_deferred_at_canonical",
+        sql`length(${table.deferredAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.deferredAt})
+            = ${table.deferredAt}`,
+      ),
+      check(
+        "team_invitation_delivery_deferrals_retry_after_at_valid",
+        sql`length(${table.retryAfterAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.retryAfterAt})
+            = ${table.retryAfterAt}
+          and ${table.retryAfterAt} > ${table.deferredAt}
+          and unixepoch(${table.retryAfterAt}) - unixepoch(${table.deferredAt})
+            between 1 and 86400`,
+      ),
+      foreignKey({
+        columns: [
+          table.deliveryKey,
+        ],
+        foreignColumns: [
+          teamInvitationDeliveries.deliveryKey,
+        ],
+        name:
+          "team_invitation_delivery_deferrals_delivery_fk",
+      }).onDelete("cascade"),
+      index(
+        "team_invitation_delivery_deferrals_tenant_retry_idx",
+      ).on(
+        table.tenantId,
+        table.retryAfterAt,
       ),
     ],
   );
@@ -3925,6 +4001,9 @@ export const botReplyDeliveries = sqliteTable(
       "bot_flow_version_key",
     ).notNull(),
     replyIndex: integer("reply_index").notNull(),
+    senderPhoneNumberId: text(
+      "sender_phone_number_id",
+    ),
     recipientPhoneE164: text(
       "recipient_phone_e164",
     ).notNull(),
@@ -3937,6 +4016,14 @@ export const botReplyDeliveries = sqliteTable(
     attemptCount: integer("attempt_count")
       .notNull()
       .default(0),
+    claimVersion: integer("claim_version")
+      .notNull()
+      .default(0),
+    nextAttemptAt: text("next_attempt_at"),
+    deferredAt: text("deferred_at"),
+    lastDeferralReasonCode: text(
+      "last_deferral_reason_code",
+    ),
     providerMessageId: text(
       "provider_message_id",
     ),
@@ -4071,6 +4158,13 @@ export const botReplyDeliveries = sqliteTable(
       table.tenantId,
       table.status,
       table.createdAt,
+    ),
+    index(
+      "bot_reply_deliveries_due_idx",
+    ).on(
+      table.status,
+      table.nextAttemptAt,
+      table.deliveryKey,
     ),
     foreignKey({
       name: "bot_reply_deliveries_conversation_fk",
@@ -4485,6 +4579,12 @@ export const whatsappRateLimitReservations =
     {
       reservationKey: text("reservation_key")
         .primaryKey(),
+      reservationClass: text("reservation_class", {
+        enum: ["business-initiated", "service-reply"],
+      }).notNull(),
+      templateCategory: text("template_category", {
+        enum: ["MARKETING", "UTILITY"],
+      }),
       tenantId: integer("tenant_id")
         .notNull()
         .references(() => tenants.id, {
@@ -5139,6 +5239,295 @@ export const campaignDeliveryProviderLinks =
     ],
   );
 
+export const botReplyDeliveryProviderLinks =
+  sqliteTable(
+    "bot_reply_delivery_provider_links",
+    {
+      deliveryKey: text("delivery_key")
+        .primaryKey()
+        .references(
+          () => botReplyDeliveries.deliveryKey,
+          { onDelete: "restrict" },
+        ),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      providerMessageId: text("provider_message_id").notNull(),
+      reservationKey: text("reservation_key")
+        .notNull()
+        .references(
+          () => whatsappRateLimitReservations.reservationKey,
+          { onDelete: "restrict" },
+        ),
+      providerStatus: text("provider_status", {
+        enum: campaignProviderDeliveryStatuses,
+      })
+        .notNull()
+        .default("accepted"),
+      lastStatusEventKey: text("last_status_event_key"),
+      lastStatusEventAt: text("last_status_event_at"),
+      terminalOutcome: text("terminal_outcome", {
+        enum: campaignProviderTerminalOutcomes,
+      }),
+      terminalSettledAt: text("terminal_settled_at"),
+      acceptedAt: text("accepted_at").notNull(),
+      createdAt: text("created_at").notNull(),
+      updatedAt: text("updated_at").notNull(),
+    },
+    (table) => [
+      check(
+        "bot_reply_provider_links_delivery_key_sha256",
+        sql`length(${table.deliveryKey}) = 86
+          and substr(${table.deliveryKey}, 1, 22)
+            = 'bot_reply_delivery_v1_'
+          and substr(${table.deliveryKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "bot_reply_provider_links_message_id_bounded",
+        sql`length(${table.providerMessageId}) between 1 and 255
+          and trim(${table.providerMessageId}) = ${table.providerMessageId}`,
+      ),
+      check(
+        "bot_reply_provider_links_reservation_key_sha256",
+        sql`length(${table.reservationKey}) = 93
+          and substr(${table.reservationKey}, 1, 29)
+            = 'whatsapp_rate_reservation_v1_'
+          and substr(${table.reservationKey}, 30)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "bot_reply_provider_links_status_valid",
+        sql`${table.providerStatus} in (
+          'accepted', 'sent', 'delivered', 'read', 'failed'
+        )`,
+      ),
+      check(
+        "bot_reply_provider_links_event_consistent",
+        sql`(
+          ${table.providerStatus} = 'accepted'
+          and ${table.lastStatusEventKey} is null
+          and ${table.lastStatusEventAt} is null
+        ) or (
+          ${table.providerStatus} <> 'accepted'
+          and length(${table.lastStatusEventKey}) = 64
+          and ${table.lastStatusEventKey} not glob '*[^0-9a-f]*'
+          and length(${table.lastStatusEventAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.lastStatusEventAt}
+          ) = ${table.lastStatusEventAt}
+        )`,
+      ),
+      check(
+        "bot_reply_provider_links_terminal_consistent",
+        sql`(
+          ${table.providerStatus} in ('accepted', 'sent')
+          and ${table.terminalOutcome} is null
+          and ${table.terminalSettledAt} is null
+        ) or (
+          ${table.providerStatus} in ('delivered', 'read')
+          and ${table.terminalOutcome} = 'delivered'
+          and ${table.terminalSettledAt} = ${table.lastStatusEventAt}
+        ) or (
+          ${table.providerStatus} = 'failed'
+          and ${table.terminalOutcome} = 'provider-failed'
+          and ${table.terminalSettledAt} = ${table.lastStatusEventAt}
+        )`,
+      ),
+      check(
+        "bot_reply_provider_links_time_canonical",
+        sql`length(${table.acceptedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.acceptedAt})
+            = ${table.acceptedAt}
+          and ${table.createdAt} = ${table.acceptedAt}
+          and length(${table.updatedAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.updatedAt})
+            = ${table.updatedAt}
+          and ${table.updatedAt} >= ${table.acceptedAt}`,
+      ),
+      uniqueIndex(
+        "bot_reply_provider_links_tenant_message_uq",
+      ).on(table.tenantId, table.providerMessageId),
+      uniqueIndex(
+        "bot_reply_provider_links_reservation_uq",
+      ).on(table.reservationKey),
+      index(
+        "bot_reply_provider_links_terminal_idx",
+      ).on(
+        table.tenantId,
+        table.terminalOutcome,
+        table.terminalSettledAt,
+      ),
+    ],
+  );
+
+export const inboundButtonReplyEvents =
+  sqliteTable(
+    "inbound_button_reply_events",
+    {
+      messageKey: text("message_key")
+        .primaryKey()
+        .references(() => messages.messageKey, {
+          onDelete: "restrict",
+        }),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      selectedBotOptionKey: text(
+        "selected_bot_option_key",
+      ).notNull(),
+      subjectDeliveryKey: text(
+        "subject_delivery_key",
+      )
+        .notNull()
+        .references(
+          () => botReplyDeliveries.deliveryKey,
+          { onDelete: "restrict" },
+        ),
+      occurredAt: text("occurred_at").notNull(),
+      createdAt: text("created_at").notNull(),
+    },
+    (table) => [
+      check(
+        "inbound_button_reply_message_key_sha256",
+        sql`length(${table.messageKey}) = 75
+          and substr(${table.messageKey}, 1, 11) = 'message_v1_'
+          and substr(${table.messageKey}, 12)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "inbound_button_reply_option_key_sha256",
+        sql`length(${table.selectedBotOptionKey}) = 78
+          and substr(${table.selectedBotOptionKey}, 1, 14)
+            = 'bot_option_v1_'
+          and substr(${table.selectedBotOptionKey}, 15)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "inbound_button_reply_delivery_key_sha256",
+        sql`length(${table.subjectDeliveryKey}) = 86
+          and substr(${table.subjectDeliveryKey}, 1, 22)
+            = 'bot_reply_delivery_v1_'
+          and substr(${table.subjectDeliveryKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "inbound_button_reply_time_canonical",
+        sql`length(${table.occurredAt}) = 24
+          and strftime('%Y-%m-%dT%H:%M:%fZ', ${table.occurredAt})
+            = ${table.occurredAt}
+          and ${table.createdAt} = ${table.occurredAt}`,
+      ),
+      uniqueIndex(
+        "inbound_button_reply_tenant_message_uq",
+      ).on(table.tenantId, table.messageKey),
+      index(
+        "inbound_button_reply_tenant_subject_time_idx",
+      ).on(
+        table.tenantId,
+        table.subjectDeliveryKey,
+        table.occurredAt,
+        table.messageKey,
+      ),
+    ],
+  );
+
+export const botReplyServiceWindowRejectionEvents =
+  sqliteTable(
+    "bot_reply_service_window_rejection_events",
+    {
+      eventKey: text("event_key").primaryKey(),
+      deliveryKey: text("delivery_key")
+        .notNull()
+        .references(
+          () => botReplyDeliveries.deliveryKey,
+          { onDelete: "restrict" },
+        ),
+      tenantId: integer("tenant_id")
+        .notNull()
+        .references(() => tenants.id, {
+          onDelete: "restrict",
+        }),
+      claimVersion: integer("claim_version").notNull(),
+      reservationKey: text("reservation_key")
+        .notNull()
+        .references(
+          () => whatsappRateLimitSettlements.reservationKey,
+          { onDelete: "restrict" },
+        ),
+      providerErrorCode: integer("provider_error_code").notNull(),
+      reasonCode: text("reason_code").notNull(),
+      serviceWindowOpenedAt: text(
+        "service_window_opened_at",
+      ).notNull(),
+      serviceWindowExpiresAt: text(
+        "service_window_expires_at",
+      ).notNull(),
+      attemptedAt: text("attempted_at").notNull(),
+      rejectedAt: text("rejected_at").notNull(),
+      createdAt: text("created_at").notNull(),
+    },
+    (table) => [
+      check(
+        "bot_reply_window_rejection_event_key_sha256",
+        sql`length(${table.eventKey}) = 94
+          and substr(${table.eventKey}, 1, 30)
+            = 'bot_reply_window_rejection_v1_'
+          and substr(${table.eventKey}, 31)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "bot_reply_window_rejection_delivery_key_sha256",
+        sql`length(${table.deliveryKey}) = 86
+          and substr(${table.deliveryKey}, 1, 22)
+            = 'bot_reply_delivery_v1_'
+          and substr(${table.deliveryKey}, 23)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "bot_reply_window_rejection_reservation_key_sha256",
+        sql`length(${table.reservationKey}) = 93
+          and substr(${table.reservationKey}, 1, 29)
+            = 'whatsapp_rate_reservation_v1_'
+          and substr(${table.reservationKey}, 30)
+            not glob '*[^0-9a-f]*'`,
+      ),
+      check(
+        "bot_reply_window_rejection_contract_exact",
+        sql`${table.claimVersion} >= 1
+          and ${table.providerErrorCode} = 131047
+          and ${table.reasonCode} = 'META_SERVICE_WINDOW_CLOSED'
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.serviceWindowOpenedAt},
+            '+24 hours'
+          ) = ${table.serviceWindowExpiresAt}
+          and ${table.attemptedAt} >= ${table.serviceWindowOpenedAt}
+          and ${table.attemptedAt} < ${table.serviceWindowExpiresAt}
+          and ${table.rejectedAt} >= ${table.attemptedAt}
+          and ${table.createdAt} = ${table.rejectedAt}`,
+      ),
+      uniqueIndex(
+        "bot_reply_window_rejection_delivery_claim_uq",
+      ).on(table.deliveryKey, table.claimVersion),
+      uniqueIndex(
+        "bot_reply_window_rejection_reservation_uq",
+      ).on(table.reservationKey),
+      index(
+        "bot_reply_window_rejection_tenant_time_idx",
+      ).on(
+        table.tenantId,
+        table.attemptedAt,
+        table.eventKey,
+      ),
+    ],
+  );
+
 export type TenantRow = typeof tenants.$inferSelect;
 export type NewTenantRow = typeof tenants.$inferInsert;
 export type TenantMembershipRow = typeof tenantMemberships.$inferSelect;
@@ -5237,6 +5626,18 @@ export type BotReplyDeliveryRow =
   typeof botReplyDeliveries.$inferSelect;
 export type NewBotReplyDeliveryRow =
   typeof botReplyDeliveries.$inferInsert;
+export type BotReplyDeliveryProviderLinkRow =
+  typeof botReplyDeliveryProviderLinks.$inferSelect;
+export type NewBotReplyDeliveryProviderLinkRow =
+  typeof botReplyDeliveryProviderLinks.$inferInsert;
+export type InboundButtonReplyEventRow =
+  typeof inboundButtonReplyEvents.$inferSelect;
+export type NewInboundButtonReplyEventRow =
+  typeof inboundButtonReplyEvents.$inferInsert;
+export type BotReplyServiceWindowRejectionEventRow =
+  typeof botReplyServiceWindowRejectionEvents.$inferSelect;
+export type NewBotReplyServiceWindowRejectionEventRow =
+  typeof botReplyServiceWindowRejectionEvents.$inferInsert;
 export type KnowledgeSourceRow =
   typeof knowledgeSources.$inferSelect;
 export type NewKnowledgeSourceRow =
