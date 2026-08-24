@@ -17,6 +17,7 @@ const environmentNames = [
 ];
 const secretNames = [
   "CLERK_SECRET_KEY",
+  "CONNECT_TRACE_CONTEXT_HMAC_KEY",
   "CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS",
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
@@ -85,7 +86,7 @@ test("accepts a complete isolated inventory with owners and rotation", () => {
       code:
         "SECRET_INVENTORY_EVIDENCE_VERIFIED",
       environmentCount: 4,
-      secretCount: 24,
+      secretCount: 28,
     },
   );
 });
