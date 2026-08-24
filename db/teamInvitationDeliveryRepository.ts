@@ -49,6 +49,17 @@ const findDeliverySql = `
   LIMIT 1
 `;
 
+const findActiveDeferralSql = `
+  SELECT
+    retry_after_at AS retryAfterAt,
+    deferred_at AS deferredAt
+  FROM team_invitation_delivery_deferrals
+  WHERE tenant_id = ?1
+    AND delivery_key = ?2
+    AND retry_after_at > ?3
+  LIMIT 1
+`;
+
 const claimDeliverySql = `
   UPDATE team_invitation_deliveries
   SET
@@ -58,6 +69,15 @@ const claimDeliverySql = `
   WHERE tenant_id = ?1
     AND delivery_key = ?2
     AND status = 'pending'
+    AND NOT EXISTS (
+      SELECT 1
+      FROM team_invitation_delivery_deferrals
+      WHERE team_invitation_delivery_deferrals.delivery_key =
+        team_invitation_deliveries.delivery_key
+        AND team_invitation_delivery_deferrals.tenant_id =
+          team_invitation_deliveries.tenant_id
+        AND team_invitation_delivery_deferrals.retry_after_at > ?3
+    )
     AND EXISTS (
       SELECT 1
       FROM team_invitations
@@ -72,6 +92,36 @@ const claimDeliverySql = `
     )
   RETURNING
     ${deliveryColumnsSql}
+`;
+
+const deferDeliverySql = `
+  INSERT INTO team_invitation_delivery_deferrals (
+    delivery_key,
+    tenant_id,
+    reason_code,
+    retry_after_at,
+    deferred_at
+  )
+  SELECT
+    ?2,
+    ?1,
+    'PROVIDER_RATE_LIMITED',
+    ?4,
+    ?3
+  WHERE EXISTS (
+    SELECT 1
+    FROM team_invitation_deliveries
+    WHERE tenant_id = ?1
+      AND delivery_key = ?2
+      AND status = 'sending'
+  )
+  ON CONFLICT(delivery_key) DO UPDATE SET
+    retry_after_at = excluded.retry_after_at,
+    deferred_at = excluded.deferred_at
+  WHERE team_invitation_delivery_deferrals.tenant_id = excluded.tenant_id
+  RETURNING
+    retry_after_at AS retryAfterAt,
+    deferred_at AS deferredAt
 `;
 
 const cancelObsoleteSql = `
@@ -164,6 +214,11 @@ interface PreparedInvitationRow {
   expiresAt: unknown;
 }
 
+interface DeliveryDeferralRow {
+  retryAfterAt: unknown;
+  deferredAt: unknown;
+}
+
 export interface PreparedTeamInvitationDelivery {
   delivery:
     TeamInvitationDelivery;
@@ -179,6 +234,12 @@ export type ClaimTeamInvitationDeliveryResult =
       outcome: "claimed";
       prepared:
         PreparedTeamInvitationDelivery;
+    }
+  | {
+      outcome: "deferred";
+      retryAfterSeconds: number;
+      delivery:
+        TeamInvitationDelivery;
     }
   | {
       outcome:
@@ -202,6 +263,12 @@ export interface TeamInvitationDeliveryRepository {
     deliveryKey: unknown,
     occurredAt: unknown,
   ): Promise<ClaimTeamInvitationDeliveryResult>;
+  defer(
+    tenantId: unknown,
+    deliveryKey: unknown,
+    occurredAt: unknown,
+    retryAfterAt: unknown,
+  ): Promise<TeamInvitationDelivery>;
   markSubmitted(
     tenantId: unknown,
     deliveryKey: unknown,
@@ -254,6 +321,63 @@ function parseNullableTimestamp(
   return value === null
     ? null
     : requireTeamTimestamp(value);
+}
+
+function parseDeferral(
+  row: DeliveryDeferralRow,
+): Readonly<{
+  retryAfterAt: string;
+  deferredAt: string;
+}> {
+  const retryAfterAt =
+    requireTeamTimestamp(
+      row.retryAfterAt,
+    );
+  const deferredAt =
+    requireTeamTimestamp(
+      row.deferredAt,
+    );
+  const delayMilliseconds =
+    Date.parse(retryAfterAt) -
+    Date.parse(deferredAt);
+
+  if (
+    delayMilliseconds < 1_000 ||
+    delayMilliseconds > 86_400_000
+  ) {
+    throw new Error(
+      "D1 returned an invalid invitation delivery deferral",
+    );
+  }
+
+  return Object.freeze({
+    retryAfterAt,
+    deferredAt,
+  });
+}
+
+function retryAfterSeconds(
+  retryAfterAt: string,
+  occurredAt: string,
+): number {
+  const seconds = Math.ceil(
+    (
+      Date.parse(retryAfterAt) -
+      Date.parse(occurredAt)
+    ) / 1_000,
+  );
+
+  if (
+    !Number.isSafeInteger(seconds) ||
+    seconds < 1 ||
+    seconds > 86_400
+  ) {
+    throw new Error(
+      "team invitation delivery retry delay is invalid",
+    );
+  }
+
+  return seconds;
 }
 
 function parseDelivery(
@@ -597,6 +721,85 @@ export function createTeamInvitationDeliveryRepository(
   return {
     find,
 
+    async defer(
+      tenantIdInput,
+      deliveryKeyInput,
+      occurredAtInput,
+      retryAfterAtInput,
+    ) {
+      const tenantId =
+        requireTeamTenantId(
+          tenantIdInput,
+        );
+      const deliveryKey =
+        requireTeamInvitationDeliveryKey(
+          deliveryKeyInput,
+        );
+      const occurredAt =
+        requireTeamTimestamp(
+          occurredAtInput,
+        );
+      const retryAfterAt =
+        requireTeamTimestamp(
+          retryAfterAtInput,
+        );
+
+      retryAfterSeconds(
+        retryAfterAt,
+        occurredAt,
+      );
+
+      const row = await database
+        .prepare(deferDeliverySql)
+        .bind(
+          tenantId,
+          deliveryKey,
+          occurredAt,
+          retryAfterAt,
+        )
+        .first<DeliveryDeferralRow>();
+
+      if (row === null) {
+        throw new Error(
+          "team invitation delivery deferral persistence failed",
+        );
+      }
+
+      const deferral =
+        parseDeferral(row);
+
+      if (
+        deferral.retryAfterAt !==
+          retryAfterAt ||
+        deferral.deferredAt !==
+          occurredAt
+      ) {
+        throw new Error(
+          "D1 returned invalid invitation delivery deferral evidence",
+        );
+      }
+
+      const delivery =
+        await find(
+          tenantId,
+          deliveryKey,
+        );
+
+      if (
+        delivery === null ||
+        delivery.status !==
+          "pending" ||
+        delivery.updatedAt !==
+          occurredAt
+      ) {
+        throw new Error(
+          "team invitation delivery deferral transition failed",
+        );
+      }
+
+      return delivery;
+    },
+
     async claim(
       tenantIdInput,
       deliveryKeyInput,
@@ -685,6 +888,18 @@ export function createTeamInvitationDeliveryRepository(
           };
         }
 
+        const deferralRow =
+          await database
+            .prepare(
+              findActiveDeferralSql,
+            )
+            .bind(
+              tenantId,
+              deliveryKey,
+              occurredAt,
+            )
+            .first<DeliveryDeferralRow>();
+
         const concurrent =
           await find(
             tenantId,
@@ -695,6 +910,28 @@ export function createTeamInvitationDeliveryRepository(
           return {
             outcome:
               "not-found",
+          };
+        }
+
+
+        if (
+          deferralRow !== null &&
+          concurrent.status ===
+            "pending"
+        ) {
+          const deferral =
+            parseDeferral(
+              deferralRow,
+            );
+
+          return {
+            outcome: "deferred",
+            retryAfterSeconds:
+              retryAfterSeconds(
+                deferral.retryAfterAt,
+                occurredAt,
+              ),
+            delivery: concurrent,
           };
         }
 

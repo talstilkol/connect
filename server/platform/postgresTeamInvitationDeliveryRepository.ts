@@ -54,6 +54,10 @@ const preparedRowKeys = Object.freeze([
   "requestedAt",
   "expiresAt",
 ]);
+const deferralRowKeys = Object.freeze([
+  "retryAfterAt",
+  "deferredAt",
+]);
 const deliveryColumnsSql = `
   delivery_key AS "deliveryKey",
   tenant_id AS "tenantId",
@@ -75,6 +79,16 @@ export const postgresTeamInvitationDeliverySql = Object.freeze({
       AND delivery_key = $2
     LIMIT 1
   `,
+  findActiveDeferral: `
+    SELECT
+      retry_after_at AS "retryAfterAt",
+      deferred_at AS "deferredAt"
+    FROM team_invitation_delivery_deferrals
+    WHERE tenant_id = $1
+      AND delivery_key = $2
+      AND retry_after_at > $3::timestamptz
+    LIMIT 1
+  `,
   claim: `
     UPDATE team_invitation_deliveries
     SET
@@ -84,6 +98,16 @@ export const postgresTeamInvitationDeliverySql = Object.freeze({
     WHERE tenant_id = $1
       AND delivery_key = $2
       AND status = 'pending'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM team_invitation_delivery_deferrals
+        WHERE team_invitation_delivery_deferrals.delivery_key =
+          team_invitation_deliveries.delivery_key
+          AND team_invitation_delivery_deferrals.tenant_id =
+            team_invitation_deliveries.tenant_id
+          AND team_invitation_delivery_deferrals.retry_after_at >
+            $3::timestamptz
+      )
       AND EXISTS (
         SELECT 1
         FROM team_invitations
@@ -97,6 +121,35 @@ export const postgresTeamInvitationDeliverySql = Object.freeze({
           AND team_invitations.expires_at > $3::timestamptz
       )
     RETURNING ${deliveryColumnsSql}
+  `,
+  defer: `
+    INSERT INTO team_invitation_delivery_deferrals (
+      delivery_key,
+      tenant_id,
+      reason_code,
+      retry_after_at,
+      deferred_at
+    )
+    SELECT
+      $2,
+      $1,
+      'PROVIDER_RATE_LIMITED',
+      $4::timestamptz,
+      $3::timestamptz
+    WHERE EXISTS (
+      SELECT 1
+      FROM team_invitation_deliveries
+      WHERE tenant_id = $1
+        AND delivery_key = $2
+        AND status = 'sending'
+    )
+    ON CONFLICT (delivery_key) DO UPDATE SET
+      retry_after_at = EXCLUDED.retry_after_at,
+      deferred_at = EXCLUDED.deferred_at
+    WHERE team_invitation_delivery_deferrals.tenant_id = EXCLUDED.tenant_id
+    RETURNING
+      retry_after_at AS "retryAfterAt",
+      deferred_at AS "deferredAt"
   `,
   cancelObsolete: `
     UPDATE team_invitation_deliveries
@@ -186,6 +239,67 @@ function parseNullableTimestamp(value: unknown): string | null {
   return value === null
     ? null
     : requireTeamTimestamp(parsePostgresTimestamp(value));
+}
+
+function parseDeferral(value: unknown): Readonly<{
+  retryAfterAt: string;
+  deferredAt: string;
+}> {
+  const row = requireExactPostgresRow(
+    value,
+    deferralRowKeys,
+  );
+  const retryAfterAt = requireTeamTimestamp(
+    parsePostgresTimestamp(
+      row.retryAfterAt,
+    ),
+  );
+  const deferredAt = requireTeamTimestamp(
+    parsePostgresTimestamp(
+      row.deferredAt,
+    ),
+  );
+  const delayMilliseconds =
+    Date.parse(retryAfterAt) -
+    Date.parse(deferredAt);
+
+  if (
+    delayMilliseconds < 1_000 ||
+    delayMilliseconds > 86_400_000
+  ) {
+    throw new Error(
+      "PostgreSQL returned an invalid invitation delivery deferral",
+    );
+  }
+
+  return Object.freeze({
+    retryAfterAt,
+    deferredAt,
+  });
+}
+
+function retryAfterSeconds(
+  retryAfterAt: string,
+  occurredAt: string,
+): number {
+  const seconds = Math.ceil(
+    (
+      Date.parse(retryAfterAt) -
+      Date.parse(occurredAt)
+    ) / 1_000,
+  );
+
+  if (
+    !Number.isSafeInteger(seconds) ||
+    seconds < 1 ||
+    seconds > 86_400
+  ) {
+    throw new Error(
+      "team invitation delivery retry delay is invalid",
+    );
+  }
+
+  return seconds;
 }
 
 function parseDelivery(value: unknown): Readonly<TeamInvitationDelivery> {
@@ -385,6 +499,70 @@ export function createPostgresTeamInvitationDeliveryRepository(
   return Object.freeze({
     find,
 
+    async defer(
+      tenantIdInput: unknown,
+      deliveryKeyInput: unknown,
+      occurredAtInput: unknown,
+      retryAfterAtInput: unknown,
+    ) {
+      const tenantId = requireTeamTenantId(
+        tenantIdInput,
+      );
+      const deliveryKey = requireTeamInvitationDeliveryKey(
+        deliveryKeyInput,
+      );
+      const occurredAt = requireTeamTimestamp(
+        occurredAtInput,
+      );
+      const retryAfterAt = requireTeamTimestamp(
+        retryAfterAtInput,
+      );
+
+      retryAfterSeconds(
+        retryAfterAt,
+        occurredAt,
+      );
+
+      const deferral = await loadOne(
+        dependencies.queries,
+        postgresTeamInvitationDeliverySql.defer,
+        [
+          tenantId,
+          deliveryKey,
+          occurredAt,
+          retryAfterAt,
+        ],
+        parseDeferral,
+      );
+
+      if (
+        deferral === null ||
+        deferral.retryAfterAt !== retryAfterAt ||
+        deferral.deferredAt !== occurredAt
+      ) {
+        throw new Error(
+          "team invitation delivery deferral persistence failed",
+        );
+      }
+
+      const delivery = await find(
+        tenantId,
+        deliveryKey,
+      );
+
+      if (
+        delivery === null ||
+        delivery.status !== "pending" ||
+        delivery.updatedAt !== occurredAt
+      ) {
+        throw new Error(
+          "team invitation delivery deferral transition failed",
+        );
+      }
+
+      return delivery;
+    },
+
     async claim(
       tenantIdInput: unknown,
       deliveryKeyInput: unknown,
@@ -426,10 +604,32 @@ export function createPostgresTeamInvitationDeliveryRepository(
           return Object.freeze({ outcome: "cancelled", delivery: cancelled });
         }
 
+        const deferral = await loadOne(
+          dependencies.queries,
+          postgresTeamInvitationDeliverySql.findActiveDeferral,
+          [tenantId, deliveryKey, occurredAt],
+          parseDeferral,
+        );
+
         const concurrent = await find(tenantId, deliveryKey);
 
         if (concurrent === null) {
           return Object.freeze({ outcome: "not-found" });
+        }
+
+
+        if (
+          deferral !== null &&
+          concurrent.status === "pending"
+        ) {
+          return Object.freeze({
+            outcome: "deferred",
+            retryAfterSeconds: retryAfterSeconds(
+              deferral.retryAfterAt,
+              occurredAt,
+            ),
+            delivery: concurrent,
+          });
         }
 
         return Object.freeze({

@@ -57,6 +57,7 @@ async function createFixture({
     updatedAt: requestedAt,
   };
   const calls = [];
+  let deferral = null;
 
   const repository = createPostgresTeamInvitationDeliveryRepository({
     queries: {
@@ -81,7 +82,11 @@ async function createFixture({
             invitation.invitationKey === delivery.invitationKey &&
             invitation.version === delivery.invitationVersion &&
             invitation.status === "pending" &&
-            invitation.expiresAt > occurredAt;
+            invitation.expiresAt > occurredAt &&
+            !(
+              deferral !== null &&
+              deferral.retryAfterAt > occurredAt
+            );
 
           if (!eligible) {
             return queryResult([]);
@@ -91,6 +96,36 @@ async function createFixture({
           delivery.attemptCount = 1;
           delivery.updatedAt = occurredAt;
           return queryResult([{ ...delivery }]);
+        }
+
+        if (
+          sql === postgresTeamInvitationDeliverySql.findActiveDeferral
+        ) {
+          return queryResult(
+            deferral !== null &&
+              deferral.retryAfterAt > parameters[2]
+              ? [{ ...deferral }]
+              : [],
+          );
+        }
+
+        if (sql === postgresTeamInvitationDeliverySql.defer) {
+          if (
+            delivery.tenantId !== parameters[0] ||
+            delivery.deliveryKey !== parameters[1] ||
+            delivery.status !== "sending"
+          ) {
+            return queryResult([]);
+          }
+
+          deferral = {
+            retryAfterAt: parameters[3],
+            deferredAt: parameters[2],
+          };
+          delivery.status = "pending";
+          delivery.attemptCount = 0;
+          delivery.updatedAt = parameters[2];
+          return queryResult([{ ...deferral }]);
         }
 
         if (sql === postgresTeamInvitationDeliverySql.cancelObsolete) {
@@ -225,6 +260,53 @@ test("records an ambiguous result and reconciles without a second claim", async 
   assert.equal(
     reconciled.lastErrorCode,
     "PROVIDER_CONFIRMED_NOT_SUBMITTED",
+  );
+});
+
+test("persists a provider deferral, returns the remaining delay, and reclaims only when due", async () => {
+  const fixture = await createFixture();
+  assert.equal(
+    (
+      await fixture.repository.claim(
+        tenantId,
+        fixture.deliveryKey,
+        "2026-08-17T08:01:00.000Z",
+      )
+    ).outcome,
+    "claimed",
+  );
+
+  const released =
+    await fixture.repository.defer(
+      tenantId,
+      fixture.deliveryKey,
+      "2026-08-17T08:02:00.000Z",
+      "2026-08-17T09:02:00.000Z",
+    );
+  assert.equal(released.status, "pending");
+  assert.equal(released.attemptCount, 0);
+
+  assert.deepEqual(
+    await fixture.repository.claim(
+      tenantId,
+      fixture.deliveryKey,
+      "2026-08-17T08:03:00.000Z",
+    ),
+    {
+      outcome: "deferred",
+      retryAfterSeconds: 3_540,
+      delivery: released,
+    },
+  );
+  assert.equal(
+    (
+      await fixture.repository.claim(
+        tenantId,
+        fixture.deliveryKey,
+        "2026-08-17T09:02:00.000Z",
+      )
+    ).outcome,
+    "claimed",
   );
 });
 
