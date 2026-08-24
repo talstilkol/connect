@@ -250,6 +250,16 @@ test("keeps tracked secret files and private key material out of source", async 
       },
     ],
   );
+  for (const secretName of [
+    "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1",
+    "BOT_REPLY_STAGING_OBSERVATION_HMAC_KEY_V1",
+    "BOT_REPLY_STAGING_PRIVATE_CASES_JSON",
+  ]) {
+    assert.deepEqual(
+      inspectSecretText(`${secretName}=private-test-value`),
+      [{ code: "SECRET_ENVIRONMENT_VALUE_TRACKED" }],
+    );
+  }
 
   const report =
     await inspectSecretHygiene({

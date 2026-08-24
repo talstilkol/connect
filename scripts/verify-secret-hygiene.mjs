@@ -18,11 +18,22 @@ const projectRoot = fileURLToPath(
 const maximumScannedFileBytes =
   1_048_576;
 const secretEnvironmentNames = [
+  "DATABASE_URL",
+  "REDIS_URL",
   "CLERK_SECRET_KEY",
+  "CONNECT_TRACE_CONTEXT_HMAC_KEY",
+  "BETTER_STACK_SOURCE_TOKEN",
+  "BETTER_STACK_INCIDENT_API_TOKEN",
+  "RAILWAY_WORKER_SCHEDULER_OWNER_KEY",
+  "CLOUDFLARE_API_TOKEN",
+  "TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN",
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
   "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_OBSERVATION_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_PRIVATE_CASES_JSON",
 ];
 const unsafeFilePatterns = [
   /(^|\/)\.env(?:\.|$)/,
@@ -35,18 +46,29 @@ const contentPatterns = [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
   /\bAKIA[0-9A-Z]{16}\b/,
   /\bgh[pousr]_[A-Za-z0-9]{20,}\b/,
+  /\bgithub_pat_[A-Za-z0-9_]{20,}\b/,
   /\bsk_(?:test|live)_[A-Za-z0-9]{20,}\b/,
   /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/,
   /\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b/,
 ];
+const secretEnvironmentNamePattern =
+  secretEnvironmentNames.join("|");
+const environmentAssignmentPattern =
+  new RegExp(
+    `^[\\t ]*(?:export[\\t ]+)?(?:${secretEnvironmentNamePattern})[\\t ]*=[\\t ]*(?:"[^"\\r\\n]+"|'[^'\\r\\n]+'|[^\\s#'"\\r\\n][^\\r\\n]*)[\\t ]*$`,
+    "m",
+  );
+const historyEnvironmentAssignmentPattern =
+  `^[[:blank:]]*(export[[:blank:]]+)?(${secretEnvironmentNamePattern})[[:blank:]]*=[[:blank:]]*("[^"]+"|'[^']+'|[^[:space:]#'"][^[:cntrl:]]*)[[:blank:]]*$`;
 const historyExtendedPattern = [
   "-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----",
   "AKIA[0-9A-Z]{16}",
   "gh[pousr]_[A-Za-z0-9]{20,}",
+  "github_pat_[A-Za-z0-9_]{20,}",
   "sk_(test|live)_[A-Za-z0-9]{20,}",
   "xox[baprs]-[A-Za-z0-9-]{20,}",
   "sk-(proj-)?[A-Za-z0-9_-]{20,}",
-  `^(${secretEnvironmentNames.join("|")})=.+$`,
+  historyEnvironmentAssignmentPattern,
 ].join("|");
 
 function finding(code) {
@@ -81,12 +103,6 @@ export function inspectSecretText(
       finding("SECRET_CONTENT_DETECTED"),
     ]);
   }
-
-  const environmentAssignmentPattern =
-    new RegExp(
-      `^(?:${secretEnvironmentNames.join("|")})=.+$`,
-      "m",
-    );
 
   return Object.freeze(
     environmentAssignmentPattern.test(text)
