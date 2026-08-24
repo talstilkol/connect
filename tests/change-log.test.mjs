@@ -70,6 +70,18 @@ test("rejects malformed history instead of inventing release notes", () => {
   );
 });
 
+test("accepts the committed database change category", () => {
+  const commits = parseCommitHistory(
+    "add7651b1045ecbde86862959d7a9c2cc90210f8\tdb: complete PostgreSQL migration evidence schema",
+  );
+
+  assert.equal(commits[0].type, "db");
+  assert.match(
+    buildChangeLog(commits),
+    /## Database\n\n- db: complete PostgreSQL migration evidence schema/,
+  );
+});
+
 test("accepts only release artifacts matching the committed source", async () => {
   const expectedManifest =
     await readCommittedReleaseManifest();

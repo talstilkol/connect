@@ -23,7 +23,7 @@ const outputPath = join(
 );
 const commitPattern = /^[a-f0-9]{40}$/;
 const subjectPattern =
-  /^(feat|fix|security|ci|docs|refactor|perf|test|build|chore)(?:\([a-z0-9._/-]+\))?!?: [^\r\n]{1,160}$/;
+  /^(feat|fix|security|ci|docs|refactor|perf|test|build|db|chore)(?:\([a-z0-9._/-]+\))?!?: [^\r\n]{1,160}$/;
 const categoryOrder = Object.freeze([
   "security",
   "fix",
@@ -32,6 +32,7 @@ const categoryOrder = Object.freeze([
   "refactor",
   "ci",
   "build",
+  "db",
   "test",
   "docs",
   "chore",
@@ -44,6 +45,7 @@ const categoryTitles = Object.freeze({
   refactor: "Refactoring",
   ci: "CI and release",
   build: "Build",
+  db: "Database",
   test: "Tests",
   docs: "Documentation",
   chore: "Maintenance",
