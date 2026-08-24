@@ -729,13 +729,14 @@
         <h1>כל השאלות המהותיות לפני ואחרי ה־Pilot</h1>
         <p class="hero-copy">
           השאלון מתרגם החלטות טכניות ועסקיות לשפה פשוטה. החלטה ירוקה
-          מסומנת מראש לפי ברירת המחדל ההנדסית. החלטה אדומה אינה נבחרת
+          יכולה להיות החלטה שכבר נסגרה או המלצה הנדסית ברורה; התג שעל
+          הכרטיס מציין איזה משני המצבים חל. החלטה אדומה אינה נבחרת
           אוטומטית: ההמלצה מודגשת, אך נדרש אישור מודע של הבעלים.
         </p>
         <div class="legend" aria-label="מקרא">
           <div class="legend-item">
-            <strong>✓ ירוק — החלטה ברורה</strong>
-            <span>המלצה מקצועית חד־משמעית; עדיין נדרש אישור פורמלי.</span>
+            <strong>✓ ירוק — החלטה ברורה או סגורה</strong>
+            <span>התג בכרטיס מבדיל בין החלטה שאושרה לבין המלצה שעדיין דורשת אישור.</span>
           </div>
           <div class="legend-item">
             <strong>! אדום — החלטה קשה</strong>
@@ -842,7 +843,7 @@
     <script>
       "use strict";
 
-      const STORAGE_KEY = "connect-decision-questionnaire:v1";
+      const STORAGE_KEY = "connect-decision-questionnaire:v2";
       const STORAGE_PROBE_KEY = "connect-decision-questionnaire:storage-probe";
       const sections = [
         { id: "product-pilot", title: "מוצר, קהל יעד ו־Pilot", description: "מה בונים תחילה, למי, ובאילו גבולות מותר לבדוק עם משתמשים אמיתיים." },
@@ -858,13 +859,13 @@
 
       const decisions = [
         {
-          code: "G01", section: "team-code", phase: "before", status: "clear",
+          code: "G01", section: "team-code", phase: "before", status: "clear", approved: true,
           question: "באיזו טכנולוגיה בונים את הממשק?",
           beginner: "הטכנולוגיה היא בסיס הקוד שעליו נבנים המסכים. החלפת בסיס באמצע דומה להריסת שלד של בניין שכבר עומד: אפשר לעשות זאת, אבל המחיר והסיכון גבוהים.",
-          why: "המערכת הקיימת כבר כתובה כיישום Web ב־React/Next.js. Rewrite יעכב את ה־Pilot בלי יתרון מוכח.",
-          sub: ["האם נשארים עם המערכת הקיימת?", "האם יש צורך עסקי מוכח שמחייב Rewrite?"],
-          owner: "פיתוח", blocker: "אין חסם אם מאשרים את ברירת המחדל.",
-          recommendation: "להמשיך ב־React/Next.js ולא לחזור ל־Windows Forms. זו גם ההבהרה שכבר התקבלה מטל.",
+          why: "טל סגר את ההחלטה: המערכת היא יישום Web המבוסס React/Next.js. אין מסלול Windows Forms ואין Rewrite מתוכנן.",
+          sub: ["האם כל מסך חדש נבנה בתוך אפליקציית React/Next.js הקיימת?", "האם שינוי טכנולוגיה עתידי יחייב ADR ואישור חדש?"],
+          owner: "טל + פיתוח", blocker: "אין חסם טכנולוגי; ההחלטה סגורה.",
+          recommendation: "החלטה סגורה: ממשיכים ב־React/Next.js במערכת הקיימת. שינוי Framework בעתיד ידרוש הצדקה עסקית ו־ADR חדש.",
           options: [
             { value: "react-next", title: "React/Next.js במערכת הקיימת", description: "ממשיכים מהקוד שכבר נבנה ונבדק.", recommended: true },
             { value: "windows-forms", title: "Windows Forms", description: "לא מתאים למוצר Web רב־משתמשים ונוגד את ההחלטה שכבר התקבלה." },
@@ -872,7 +873,7 @@
           ]
         },
         {
-          code: "G02", section: "team-code", phase: "before", status: "clear",
+          code: "G02", section: "team-code", phase: "before", status: "clear", approved: true,
           evidence: {
             checkedAt: "2026-08-16",
             liveStatus: "private after remediation; 4 branches unprotected; no rulesets — governance incomplete",
@@ -881,24 +882,24 @@
           },
           question: "מהו ה־Repository הרשמי והיחיד של הקוד?",
           beginner: "Repository הוא התיקייה המרכזית ששומרת את הקוד ואת היסטוריית השינויים. כשיש שני עותקים שמוגדרים רשמיים, הצוות עלול לפתח שתי גרסאות סותרות.",
-          why: "מקור אמת יחיד מאפשר Review, שחזור, CI/CD ותיעוד ברור של כל שינוי.",
-          sub: ["מי הבעלים החוקי של ה־Repository?", "האם כל הצוות עובד מאותו מקור אמת?", "מי רשאי לנהל Collaborators?", "כיצד מבטלים את מבנה ה־Git המקונן בלי לאבד היסטוריה או ליצור Repository מתחרה?"],
-          owner: "רועי", blocker: "Gate 0, עבודה צוותית ו־GitHub Governance.",
-          recommendation: "להעביר את talstilkol/connect הקיים ל־GitHub Organization של החברה ולהכריז עליו כ־Repository Authority; לא ליצור עותק מתחרה.",
+          why: "טל סגר שמקור האמת נשאר כרגע ה־Repository הפרטי talstilkol/connect שבבעלותו. מקור אמת יחיד מאפשר Review, שחזור, CI/CD ותיעוד ברור.",
+          sub: ["האם כל הצוות עובד רק מול talstilkol/connect?", "מי רשאי לנהל Collaborators?", "מתי בשלות החברה מצדיקה מעבר ל־Organization?", "כיצד מעבירים בעתיד את ה־Repository הקיים בלי ליצור עותק מתחרה?"],
+          owner: "טל — talstilkol", blocker: "ה־Repository נבחר; הגנות Branch והרשאות צוות עדיין דורשות השלמה.",
+          recommendation: "החלטה נוכחית: talstilkol/connect הוא ה־Repository Authority ונשאר בבעלות טל. המלצה עתידית: להעביר את אותו Repository ל־GitHub Organization של Wamit או של החברה, בלי לפתוח עותק חדש.",
           options: [
-            { value: "transfer-existing", title: "העברת ה־Repository הקיים ל־Organization", description: "שומר את כל ההיסטוריה ומעביר בעלות לחברה.", recommended: true },
-            { value: "personal-owner", title: "השארה בבעלות אישית", description: "פשוט זמנית, אך יוצר תלות באדם יחיד וסיכון בעלות." },
+            { value: "personal-owner", title: "talstilkol/connect בבעלות טל — ההחלטה הנוכחית", description: "זהו מקור האמת הפרטי והיחיד בשלב הנוכחי.", recommended: true },
+            { value: "transfer-existing", title: "העברה עתידית של הקיים ל־Organization", description: "ההמלצה לשלב שבו Wamit או החברה מוכנות לבעלות, Billing והתאוששות ארגוניים." },
             { value: "copy-new", title: "פתיחת Repository חדש והעתקת הקוד", description: "יוצר כפילות ואי־ודאות לגבי הגרסה הרשמית." }
           ]
         },
         {
-          code: "G03", section: "team-code", phase: "before", status: "clear",
+          code: "G03", section: "team-code", phase: "before", status: "clear", approved: true,
           question: "איך חברי הצוות משנים קוד ומאשרים אותו?",
           beginner: "Branch הוא מסלול עבודה נפרד; Pull Request הוא בקשה מסודרת להכניס שינוי לענף הראשי לאחר Review ובדיקות. 2FA מוסיף שכבת אימות לחשבון.",
           why: "זהות אישית ו־Review מאפשרים לדעת מי שינה מה, לעצור קוד שבור ולבטל גישה לאדם אחד בלבד.",
-          sub: ["האם 2FA חובה?", "כמה Reviews נדרשים?", "מי מוגדר ב־CODEOWNERS?", "אילו בדיקות CI חייבות לעבור?"],
-          owner: "רועי + Release/Security owner שטרם מונה", blocker: "שיתוף פעולה בטוח ו־Production evidence.",
-          recommendation: "חשבונות אישיים בלבד, 2FA, Branch Protection, Pull Request, Review, CODEOWNERS, Secret scanning ו־Checks חובה; אין Push ישיר ל־main.",
+          sub: ["מי הם ה־Reviewers המורשים?", "מי מוגדר ב־CODEOWNERS?", "אילו בדיקות CI חייבות לעבור?", "כיצד מוכיחים שההגנה אכן פעילה ב־GitHub?"],
+          owner: "טל — Repository owner + Release/Security owner שימונה", blocker: "המדיניות אושרה; ההגנה הטכנית ו־Reviewers עדיין חייבים להיות מוגדרים בפועל.",
+          recommendation: "החלטה סגורה: main יהיה מוגן. כל שינוי ייכנס דרך Pull Request, לפחות Approval אחד וכל בדיקות ה־CI הנדרשות; אין Push ישיר ל־main.",
           options: [
             { value: "governed-pr", title: "חשבונות אישיים ותהליך Pull Request מוגן", description: "Audit מלא ובקרה לפני כל שינוי רשמי.", recommended: true },
             { value: "direct-main", title: "חשבונות אישיים עם Push ישיר ל־main", description: "מהיר יותר לכאורה, אך שינוי שגוי נכנס בלי שער בטיחות." },
@@ -1122,16 +1123,16 @@
           ]
         },
         {
-          code: "R01", section: "hosting-security", phase: "before", status: "hard",
+          code: "R01", section: "hosting-security", phase: "before", status: "clear", approved: true,
           question: "באילו שירותי ענן מארחים את המערכת?",
           beginner: "Hosting הוא המקום שבו ה־Frontend, ה־Backend, מסד הנתונים, הקבצים והתורים רצים. מעבר ספק אינו רק שינוי כתובת: לעיתים צריך להחליף Database, Queue, Workers ודרך הפריסה.",
-          why: "הקוד והראיות הקיימים בנויים ל־Cloudflare Workers, D1, R2 ו־Queues, בעוד תוכנית הצוות הזכירה Vercel ו־Railway. הסתירה חייבת הכרעה אחת.",
-          sub: ["האם נשארים ב־Cloudflare?", "אם עוברים — מה מחליף D1, R2, Queues, DLQ ו־Cron?", "מי אחראי לכל חלק ומי משלם?", "האם נכתב ADR ומיזם Migration מלא?"],
-          owner: "רועי + Architecture owner שטרם מונה + ראשה", blocker: "Deployment, Staging, חשבונות Hosting ו־Production topology.",
-          recommendation: "להישאר כעת ב־Cloudflare ולהגיע ל־Pilot עם הארכיטקטורה שכבר נבנתה. אם הנהלה מחייבת Vercel/Railway, לאשר Migration מלא — לא Hybrid זמני.",
+          why: "הצוות סגר את בחירת הספקים: Vercel ו־Railway. מאחר שהקוד והראיות הקיימים בנויים ל־Cloudflare Workers, D1, R2 ו־Queues, היישום הוא Migration מתוכנן ולא רק שינוי כתובת.",
+          sub: ["איזה חלק ירוץ ב־Vercel ואיזה ב־Railway?", "מה מחליף D1, R2, Queues, DLQ ו־Cron?", "מי אחראי לכל שירות ומי משלם?", "האם נכתב ADR עם Staging, Backup, Monitoring ו־Rollback?"],
+          owner: "רועי זלצמן + Architecture owner שימונה + ראשה", blocker: "הספקים נבחרו; Topology, Migration ו־Production evidence עדיין דורשים השלמה.",
+          recommendation: "החלטה סגורה: משתמשים ב־Vercel וב־Railway. ההמלצה היא Migration מלא ומתועד עם חלוקת אחריות מפורשת; אין להפעיל Hybrid לא מתועד מול Cloudflare.",
           options: [
-            { value: "cloudflare-full", title: "Cloudflare מלא", description: "המסלול הקצר והפחות מסוכן לפי הקוד הקיים.", recommended: true },
-            { value: "full-migration", title: "Migration מלא ל־Vercel + Railway", description: "דורש תכנון PostgreSQL, Queue, Storage, Workers, Backups ו־Observability מחדש." },
+            { value: "full-migration", title: "Vercel + Railway — ההחלטה המאושרת", description: "Migration מתוכנן הכולל Database, Queue, Storage, Workers, Backups ו־Observability.", recommended: true },
+            { value: "cloudflare-full", title: "Cloudflare מלא", description: "אינו תואם להחלטה הנוכחית; נשמר רק כחלופת Rollback עד אישור ה־Migration." },
             { value: "temporary-hybrid", title: "Hybrid זמני ללא מפת אחריות מלאה", description: "לא מומלץ — מוסיף רשת, Secrets, עלות ותקלות בין ספקים." }
           ]
         },
@@ -1147,6 +1148,20 @@
             { value: "named-raci", title: "RACI עם אדם ומחליף לכל תפקיד", description: "מבהיר מי מבצע, מי מאשר ומי מקבל עדכון.", recommended: true },
             { value: "role-alias", title: "שם תפקיד ללא אדם", description: "מסמך נראה מלא, אך אין מי שאפשר לפנות אליו בפועל." },
             { value: "everyone", title: "אחריות משותפת לכולם", description: "לא מומלץ — בפועל החלטות נופלות בין הכיסאות." }
+          ]
+        },
+        {
+          code: "R02A", section: "team-code", phase: "before", status: "hard",
+          question: "מי הישות המשפטית שבבעלותה Connect והחשבונות המסחריים?",
+          beginner: "בעלים משפטי הוא האדם או החברה שחותמים על חוזים, משלמים לספקים, מחזיקים בזכויות ובמידע ונושאים באחריות. חשבון GitHub של טל יכול להישאר מקור הקוד גם כאשר הבעלות המשפטית על המוצר שייכת לחברה.",
+          why: "נמסרו שתי אפשרויות: רועי זלצמן אישית או חברת Wamit. חייבים לבחור ישות אחת ולתעד את שמה המשפטי המדויק לפני חוזים, Billing, Meta Production או עיבוד מידע של לקוחות.",
+          sub: ["מהו השם המשפטי ומספר הרישום המדויקים של Wamit?", "מי מורשה חתימה בשם הישות?", "למי שייכים הקוד, הדומיינים, חשבונות הספקים והמידע?", "האם נדרש הסכם העברת זכויות מנכסים אישיים לחברה?"],
+          owner: "רועי זלצמן + Legal/Finance", blocker: "חוזים, Billing, Meta Production, פרטיות ובעלות על נכסים.",
+          recommendation: "מומלץ לבחור ב־Wamit כבעלים המשפטי, לאחר אימות הישות ושמה הרשום, ולהגדיר את רועי זלצמן כמורשה ומנהל חשבונות. אם בוחרים זמנית ברועי אישית, יש לקבוע בכתב מועד ותהליך העברה לחברה.",
+          options: [
+            { value: "wamit-legal-entity", title: "Wamit כבעלים המשפטי", description: "האפשרות המומלצת לאחר אימות השם הרשום, מספר הישות ומורשי החתימה.", recommended: true },
+            { value: "roi-personal-owner", title: "רועי זלצמן כבעלים אישי", description: "אפשרי זמנית, אך יוצר תלות אישית ומחייב תוכנית העברה כתובה לחברה." },
+            { value: "split-ownership", title: "בעלות מפוצלת ולא מתועדת", description: "לא מומלץ — יוצרת אי־בהירות לגבי חוזים, מידע, קניין רוחני ותשלומים." }
           ]
         },
         {
@@ -1197,12 +1212,13 @@
           beginner: "Business Portfolio, WABA, מספר טלפון ו־Templates הם נכסים עסקיים. אם הם שייכים לחשבון אישי יחיד, אובדן הגישה יכול לעצור את כל השירות.",
           why: "בעלות קובעת מי יכול לאשר Templates, להחליף Token, להעביר מספר ולהגיב לחסימה.",
           sub: ["מי הבעלים החוקי של Business Portfolio?", "מי Admin טכני ומי גיבוי?", "למי שייכים WABA, המספר וה־Templates?", "כיצד מבטלים גישה לעובד שעזב?"],
-          owner: "רועי + בעל הנכס + Legal/Security", blocker: "Meta Pilot ו־Production.",
-          recommendation: "ב־Production: נכסים בבעלות החברה עם Admins אישיים. נכס האב יכול לשמש זמנית רק באישור מפורש, Scope מוגבל ותוכנית יציאה.",
+          owner: "רועי זלצמן + Wamit/הישות שתאושר + Legal/Security", blocker: "Meta Pilot ו־Production.",
+          recommendation: "אם Wamit נבחרת כבעלים המשפטי של Connect, גם נכסי Meta ל־Production צריכים להיות בבעלותה עם Admins אישיים. אם רועי נבחר אישית, יש לתעד בעלות ותהליך העברה לחברה. נכס האב מתאים רק לניסוי זמני ומאושר.",
           options: [
-            { value: "company-owned", title: "נכסים בבעלות החברה", description: "בעלות יציבה, Admins אישיים ויכולת התאוששות.", recommended: true },
+            { value: "company-owned", title: "נכסים בבעלות Wamit/הישות החברה שתאושר", description: "בעלות יציבה, Admins אישיים ויכולת התאוששות לאחר אימות הישות.", recommended: true },
+            { value: "roi-temporary", title: "נכסים בבעלות רועי זלצמן זמנית", description: "אפשרי רק עם תיעוד, Admin גיבוי ותוכנית העברה לחברה." },
             { value: "father-temporary", title: "נכס האב באופן זמני ומאושר", description: "מתאים לניסוי מוגבל בלבד עם חוזה אחריות ותאריך סיום." },
-            { value: "developer-personal", title: "נכס אישי של מפתח או Login משותף", description: "לא מומלץ — תלות באדם יחיד וחוסר Audit." }
+            { value: "developer-personal", title: "Login משותף או בעלות לא מתועדת", description: "לא מומלץ — תלות באדם יחיד וחוסר Audit." }
           ]
         },
         {
@@ -1688,7 +1704,11 @@
         titleRow.appendChild(createElement(
           "span",
           `badge ${decision.status}`,
-          decision.status === "clear" ? "✓ החלטה ברורה — מומלץ לאשר" : "! החלטה מהותית — נדרש דיון ואישור"
+          decision.approved === true
+            ? "✓ החלטה סגורה"
+            : decision.status === "clear"
+              ? "✓ החלטה ברורה — מומלץ לאשר"
+              : "! החלטה מהותית — נדרש דיון ואישור"
         ));
         titleRow.appendChild(createElement(
           "span",

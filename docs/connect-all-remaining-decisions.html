@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Connect — כל ההחלטות שנותרו</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5f6b7d;
+      --paper: #ffffff;
+      --canvas: #f3f6fb;
+      --line: #dce3ec;
+      --brand: #3156d3;
+      --brand-soft: #eaf0ff;
+      --green: #176b45;
+      --green-soft: #e8f7ef;
+      --amber: #8a5a00;
+      --amber-soft: #fff6dc;
+      --red: #a32929;
+      --red-soft: #fff0f0;
+      --blue: #245f9c;
+      --blue-soft: #edf6ff;
+      --shadow: 0 12px 32px rgba(31, 48, 82, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 4%, #dfe8ff 0, transparent 27rem),
+        var(--canvas);
+      font-family: Arial, "Noto Sans Hebrew", sans-serif;
+      line-height: 1.62;
+    }
+
+    a { color: var(--brand); }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid #ffbf47;
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: absolute;
+      inset-block-start: -5rem;
+      inset-inline-start: 1rem;
+      z-index: 20;
+      padding: 0.7rem 1rem;
+      color: #fff;
+      background: #111827;
+      border-radius: 0.5rem;
+    }
+
+    .skip-link:focus { inset-block-start: 1rem; }
+
+    .page {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 5rem;
+    }
+
+    .hero,
+    .panel,
+    .decision,
+    .closed-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: clamp(1.4rem, 4vw, 3rem);
+      background: linear-gradient(135deg, #192448, #3156d3);
+      color: #fff;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.7rem;
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      line-height: 1.12;
+    }
+
+    .hero p { max-width: 76ch; margin: 0.5rem 0; }
+
+    .meta-row,
+    .stats,
+    .toolbar,
+    .closed-grid,
+    .time-grid {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .meta-row {
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      margin-top: 1.5rem;
+    }
+
+    .meta-item {
+      padding: 0.85rem 1rem;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 0.75rem;
+    }
+
+    .meta-item strong { display: block; font-size: 1.35rem; }
+
+    .panel { margin-top: 1.25rem; padding: 1.25rem; }
+
+    h2 { margin: 0 0 1rem; font-size: 1.55rem; }
+    h3 { margin: 0; font-size: 1.08rem; }
+    p { margin-block: 0.45rem; }
+
+    .callout {
+      padding: 0.9rem 1rem;
+      border-inline-start: 5px solid var(--brand);
+      background: var(--brand-soft);
+      border-radius: 0.55rem;
+    }
+
+    .time-grid { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+
+    .time-card {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 0.8rem;
+      background: #fbfcff;
+    }
+
+    .time-card strong { display: block; font-size: 1.45rem; color: var(--brand); }
+
+    .stage-list { margin: 0; padding-inline-start: 1.4rem; }
+    .stage-list li { margin: 0.65rem 0; }
+
+    .toolbar {
+      position: sticky;
+      inset-block-start: 0.5rem;
+      z-index: 10;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      margin-top: 1.25rem;
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid var(--line);
+      border-radius: 0.9rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .progress-wrap { min-width: 12rem; }
+    .progress-label { display: flex; justify-content: space-between; gap: 1rem; }
+    progress { width: 100%; height: 0.8rem; accent-color: var(--green); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    button {
+      min-height: 2.65rem;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid #b8c3d4;
+      border-radius: 0.65rem;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary { color: #fff; background: var(--brand); border-color: var(--brand); }
+    button:hover { filter: brightness(0.97); }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .badge.closed { color: var(--green); background: var(--green-soft); }
+    .badge.required { color: var(--amber); background: var(--amber-soft); }
+    .badge.hard { color: var(--red); background: var(--red-soft); }
+    .badge.defer { color: var(--blue); background: var(--blue-soft); }
+
+    .closed-grid { grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+    .closed-card { padding: 1rem; border-color: #abd7c0; background: var(--green-soft); }
+    .closed-card p { color: #315a49; }
+
+    .section-heading { margin-top: 2rem; }
+
+    .decision {
+      margin-top: 0.8rem;
+      overflow: clip;
+      border-inline-start-width: 6px;
+    }
+
+    .decision.required { border-inline-start-color: #d99b1c; }
+    .decision.hard { border-inline-start-color: #cf4d4d; }
+    .decision.defer { border-inline-start-color: #4d8ccb; }
+
+    summary {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.8rem;
+      align-items: center;
+      padding: 1rem;
+      cursor: pointer;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "＋"; font-size: 1.35rem; }
+    details[open] summary::after { content: "−"; }
+
+    .number {
+      display: grid;
+      place-items: center;
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--brand);
+      font-weight: 800;
+    }
+
+    .summary-title small { display: block; color: var(--muted); font-weight: 400; }
+    .decision-body { padding: 0 1rem 1.2rem; border-top: 1px solid var(--line); }
+
+    .beginner {
+      margin: 1rem 0;
+      padding: 0.85rem 1rem;
+      background: #f7f9fc;
+      border-radius: 0.65rem;
+    }
+    .beginner strong { color: var(--brand); }
+
+    .questions { margin: 0.7rem 0 1rem; padding-inline-start: 1.3rem; }
+    .questions li { margin-block: 0.35rem; }
+
+    fieldset { margin: 0; padding: 0; border: 0; }
+    legend { margin-bottom: 0.55rem; font-weight: 800; }
+
+    .options { display: grid; gap: 0.55rem; }
+    .option {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.7rem;
+      padding: 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 0.7rem;
+      cursor: pointer;
+    }
+    .option:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+    .option.recommended { border-color: #8cc8a8; background: var(--green-soft); }
+    .option input { margin-top: 0.35rem; inline-size: 1.1rem; block-size: 1.1rem; }
+    .option strong { display: block; }
+    .option span { display: block; color: var(--muted); font-size: 0.92rem; }
+
+    .recommendation {
+      margin: 0.9rem 0;
+      padding: 0.8rem 1rem;
+      border: 1px solid #9bcdb2;
+      border-radius: 0.65rem;
+      background: var(--green-soft);
+      color: #245b41;
+    }
+
+    .notes { display: grid; gap: 0.35rem; margin-top: 0.9rem; font-weight: 700; }
+    textarea {
+      width: 100%;
+      min-height: 5.5rem;
+      resize: vertical;
+      padding: 0.7rem;
+      border: 1px solid #b8c3d4;
+      border-radius: 0.65rem;
+      font: inherit;
+      background: #fff;
+    }
+
+    .owner { margin-top: 0.8rem; color: var(--muted); font-size: 0.92rem; }
+    .owner strong { color: var(--ink); }
+
+    .source-list { columns: 2 20rem; padding-inline-start: 1.4rem; }
+    .source-list li { margin-block: 0.45rem; break-inside: avoid; }
+
+    .status-message { min-height: 1.5rem; margin-top: 0.5rem; color: var(--green); font-weight: 700; }
+
+    @media (max-width: 720px) {
+      .page { width: min(100% - 1rem, 1180px); padding-top: 0.5rem; }
+      .hero, .panel { border-radius: 0.7rem; }
+      .toolbar { position: static; grid-template-columns: 1fr; }
+      summary { grid-template-columns: auto 1fr; }
+      summary::after { display: none; }
+      .source-list { columns: 1; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; padding: 0; }
+      .hero { color: #000; background: #fff; border: 2px solid #000; }
+      .toolbar, .skip-link { display: none !important; }
+      .decision, .closed-card, .panel, .hero { box-shadow: none; break-inside: avoid; }
+      details:not([open]) .decision-body { display: block; }
+      summary::after { display: none; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#questions">דלג לשאלות</a>
+  <main class="page">
+    <header class="hero">
+      <p>מסמך החלטות מרכזי · גרסה 1 · נבדק ב־21.08.2026</p>
+      <h1>Connect — כל ההחלטות שנותרו</h1>
+      <p>מטרת המסמך: לאפשר לטל ולצוות לענות בצורה מסודרת על כל השאלות שחוסמות Pilot, Production והמשך פיתוח Best-in-class. בחירה כאן היא סיכום לדיון; החלטה הופכת למחייבת רק לאחר אישור הבעלים ועדכון ה־Decision Registry או ה־ADR המתאים.</p>
+      <div class="meta-row" aria-label="סיכום מצב">
+        <div class="meta-item"><strong>15</strong>שלבים מרכזיים קדימה</div>
+        <div class="meta-item"><strong>5 + 10</strong>לפני Pilot + אחרי Pilot</div>
+        <div class="meta-item"><strong>30</strong>קבוצות החלטה פתוחות</div>
+        <div class="meta-item"><strong>120–260</strong>שעות נטו עד Pilot מבוקר</div>
+      </div>
+    </header>
+
+    <section class="panel" aria-labelledby="time-heading">
+      <h2 id="time-heading">1. כמה שלבים וכמה זמן נשאר?</h2>
+      <div class="callout"><strong>תשובה קצרה:</strong> נשארו 15 שלבים ברמת התוכנית: 5 עד Pilot מבוקר ועוד 10 מה־Pilot ועד מוצר Best-in-class. חלק גדול מהקוד בתוך חמשת השלבים הראשונים כבר קיים, אבל שלב נסגר רק לאחר חשבון חי, תצורה, בדיקות Staging וראיה חתומה.</div>
+      <div class="time-grid" style="margin-top: 1rem">
+        <div class="time-card"><strong>120–260 שעות</strong>עבודה נטו משוערת עד Pilot. לא כולל המתנה ל־Meta, ספקים, Legal או פתיחת Accounts.</div>
+        <div class="time-card"><strong>4–10 שבועות</strong>למפתח אחד לפי כ־28 שעות יצרניות בשבוע.</div>
+        <div class="time-card"><strong>3–6 שבועות</strong>טווח קלנדרי סביר לצוות של שלושה, כולל תיאום ו־Review אך לא עיכוב ספקים.</div>
+        <div class="time-card"><strong>1,840–3,560 שעות</strong>האומדן התכנוני הקיים לעשרת שלבי Best-in-class שאחרי ה־Pilot; חובה לכיילו מחדש לפי נתוני ה־Pilot.</div>
+      </div>
+      <ol class="stage-list">
+        <li><strong>שלב 1 — החלטות, בעלות ותקציב: 8–20 שעות.</strong> לענות על המסמך, למנות Approvers ולחתום על Pilot scope.</li>
+        <li><strong>שלב 2 — Accounts, GitHub, Domains וסביבות: 16–32 שעות.</strong> 2FA, הרשאות, Branch protection, Secrets ו־Environment isolation.</li>
+        <li><strong>שלב 3 — Cutover ו־Adapters שנותרו: 36–72 שעות.</strong> Meta connection, Queue/DLQ, Object storage, Scanner וסגירת Runtime paths.</li>
+        <li><strong>שלב 4 — Staging, Meta ו־E2E חיים: 28–60 שעות.</strong> Test WABA, Webhook, שליחה/קבלה, Templates, עומס ו־Browser E2E.</li>
+        <li><strong>שלב 5 — Operations, Security ו־Pilot gate: 32–76 שעות.</strong> Monitoring, Backup/Restore, Retention, Incident drill, Rollback ו־Go/No-Go.</li>
+        <li><strong>שלבים 6–15 — אחרי Pilot.</strong> CRM, Campaigns, Inbox, Automation, AI, Analytics, Billing/Agency, Integrations, Enterprise ו־GA.</li>
+      </ol>
+    </section>
+
+    <section class="panel" aria-labelledby="instructions-heading">
+      <h2 id="instructions-heading">2. איך לענות</h2>
+      <ol class="stage-list">
+        <li>פתח כל החלטה ובחר אפשרות אחת. האפשרות המומלצת מסומנת בירוק.</li>
+        <li>בשדה ההערות רשום ערכים מדויקים, בעל החלטה וחריגה מההמלצה.</li>
+        <li>אל תדביק Password, Token, Secret, מספר טלפון של לקוח או מידע אישי.</li>
+        <li>בסיום לחץ „ייצוא תשובות”. שלח לי את קובץ ה־JSON או את סיכום הטקסט.</li>
+      </ol>
+      <div class="legend" aria-label="מקרא">
+        <span class="badge closed">ירוק — כבר הוחלט</span>
+        <span class="badge required">צהוב — החלטה נדרשת</span>
+        <span class="badge hard">אדום — החלטה קשה/חוסמת</span>
+        <span class="badge defer">כחול — אפשר לדחות לאחר Pilot</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="closed-heading">
+      <h2 id="closed-heading">3. החלטות שכבר נסגרו — אין צורך לענות שוב</h2>
+      <div class="closed-grid">
+        <article class="closed-card"><h3>3.1 Frontend</h3><p><strong>React</strong>, ולא Windows Forms.</p></article>
+        <article class="closed-card"><h3>3.2 Repository</h3><p><strong>talstilkol/connect</strong> הוא ה־Repository הפרטי ומקור האמת היחיד כרגע.</p></article>
+        <article class="closed-card"><h3>3.3 Hosting direction</h3><p><strong>Vercel Web/BFF + Railway API ו־Worker</strong>. Cloudflare הוא בסיס Legacy למיגרציה.</p></article>
+        <article class="closed-card"><h3>3.4 WhatsApp</h3><p><strong>Meta Cloud API רשמי דרך Backend בלבד</strong>. Token לעולם לא נשלח לדפדפן.</p></article>
+        <article class="closed-card"><h3>3.5 כלי פיתוח</h3><p>חשבונות אישיים/Claude Team; אין חשבון משותף. AnyDesk רק עם 2FA והרשאה אישית.</p></article>
+        <article class="closed-card"><h3>3.6 בעלות Rate Limits</h3><p><strong>טל</strong> אחראי למחקר ולאימות מגבלות WhatsApp/Meta; דוד למימוש; Product ואבטחה מאשרים Policy.</p></article>
+      </div>
+    </section>
+
+    <div class="toolbar" aria-label="כלי השאלון">
+      <div class="progress-wrap">
+        <div class="progress-label"><strong>התקדמות</strong><span id="progressText">0 מתוך 30</span></div>
+        <progress id="progressBar" max="30" value="0">0 מתוך 30</progress>
+        <div id="saveState" class="status-message" aria-live="polite"></div>
+      </div>
+      <div class="actions">
+        <button type="button" id="recommendAll">בחר את כל ההמלצות</button>
+        <button type="button" id="copyAnswers">העתק סיכום</button>
+        <button type="button" id="exportAnswers" class="primary">ייצוא תשובות JSON</button>
+        <button type="button" id="printDocument">הדפסה / PDF</button>
+        <button type="button" id="clearAnswers">נקה תשובות</button>
+      </div>
+    </div>
+
+    <form id="questions" novalidate>
+      <h2 class="section-heading">4. החלטות שחוסמות Production ונאכפות בקוד</h2>
+
+      <details class="decision required" data-question data-decision-id="D01" open>
+        <summary><span class="number">1</span><span class="summary-title"><strong>מדיניות הזמנות לצוות</strong><small>תפוגה והזמנה מחדש</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> הזמנה היא קישור שמאפשר למשתמש להצטרף לעסק. קישור ארוך־חיים עלול להגיע לאדם הלא נכון; קישור קצר מדי מכביד על הצוות.</div>
+          <ul class="questions"><li>כמה שעות ההזמנה תקפה?</li><li>מתי מותר לשלוח הזמנה חדשה לאותו Email?</li></ul>
+          <fieldset><legend>בחר מדיניות</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D01" value="72-hours-after-terminal" data-recommended><span><strong>72 שעות + הזמנה מחדש רק אחרי מצב סופי — מומלץ</strong><span>איזון טוב בין אבטחה לנוחות; אין הזמנה מקבילה פעילה.</span></span></label>
+            <label class="option"><input type="radio" name="D01" value="24-hours-after-terminal"><span><strong>24 שעות + אחרי מצב סופי</strong><span>בטוח יותר אך יוצר יותר פניות ותפעול.</span></span></label>
+            <label class="option"><input type="radio" name="D01" value="custom"><span><strong>מדיניות אחרת</strong><span>יש לציין TTL וכללי Re-request בהערות.</span></span></label>
+          </div></fieldset>
+          <label class="notes">הערות / ערך מדויק<textarea name="D01_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + אבטחה. <strong>Registry:</strong> identity.team-invitation-policy.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D02">
+        <summary><span class="number">2</span><span class="summary-title"><strong>ספק AI, מודלים ופרטיות</strong><small>ספק, Allowlist, Budget, Timeout ו־Fallback</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> ספק AI מקבל הקשר ומחזיר תשובה מוצעת. Connect עדיין אחראית על Grounding, תקציב, Audit ואישור אנושי; הספק לא שולח WhatsApp בעצמו.</div>
+          <ul class="questions"><li>איזה ספק נבחר?</li><li>אילו שני מודלים ייכנסו ל־Eval?</li><li>מה תקרת העלות, Timeout ו־Fallback?</li><li>האם נדרשת ZDR או שמספיק `store:false` ו־DPA?</li></ul>
+          <fieldset><legend>בחר כיוון</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D02" value="openai-responses-eval" data-recommended><span><strong>OpenAI Responses API מאחורי Adapter — מומלץ</strong><span>לבחור מודל רק לאחר Eval מושחר; `store:false`, ללא מזהי Tenant/טלפון, ו־Canary מוגבל.</span></span></label>
+            <label class="option"><input type="radio" name="D02" value="anthropic-adapter-eval"><span><strong>Anthropic מאחורי אותו Adapter</strong><span>חלופה לגיטימית; עדיין דורשת Eval, DPA, Retention ותקציב.</span></span></label>
+            <label class="option"><input type="radio" name="D02" value="dual-provider"><span><strong>שני ספקים מהיום הראשון</strong><span>משפר גמישות אך מגדיל עלות, מורכבות ובדיקות; לא מומלץ ל־Pilot.</span></span></label>
+          </div></fieldset>
+          <label class="notes">רשום ספק, מועמדי מודל, Budget חודשי, Timeout, אזור עיבוד ודרישת Retention<textarea name="D02_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + פיתוח + Privacy. <strong>Registry:</strong> ai.provider.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D03">
+        <summary><span class="number">3</span><span class="summary-title"><strong>ספק Billing</strong><small>Checkout, מס, חשבוניות, החזרים ו־Dunning</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Merchant of Record הוא ספק שמוכר ללקוח בשם העסק ומטפל בחלק גדול מהמס והחשבוניות. Payment processor גמיש יותר, אך משאיר יותר אחריות על החברה.</div>
+          <ul class="questions"><li>האם החברה צריכה Merchant of Record?</li><li>האם הישות וחשבון הבנק מתקבלים אצל הספק?</li><li>מה מדיניות Refund, Tax, Failed payment ו־Cancellation?</li></ul>
+          <fieldset><legend>בחר ספק/מסלול</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D03" value="paddle-mor" data-recommended><span><strong>Paddle כ־Merchant of Record — מומלץ לצוות קטן</strong><span>מותנה באישור Onboarding, Payouts והישות המשפטית בכתב.</span></span></label>
+            <label class="option"><input type="radio" name="D03" value="stripe"><span><strong>Stripe</strong><span>מומלץ רק אם קיימת תשתית מס/חשבונאות מתאימה או מסלול MoR מאושר.</span></span></label>
+            <label class="option"><input type="radio" name="D03" value="defer-no-paid-pilot"><span><strong>לדחות Billing; Pilot ללא תשלום</strong><span>מפחית סיכון טכני, אך אינו סוגר את החלטת GA.</span></span></label>
+          </div></fieldset>
+          <label class="notes">ישות, מדינות מכירה, מטבעות, Tax owner ומדיניות Lifecycle<textarea name="D03_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> כספים + Product + פיתוח. <strong>Registry:</strong> billing.provider.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D04" open>
+        <summary><span class="number">4</span><span class="summary-title"><strong>WhatsApp ו־Connect Rate Limits</strong><small>מגבלות Meta חיות, מכסות פנימיות, Backoff ו־Kill switch</small></span><span class="badge hard">טל — חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Rate limit הוא בלם שמונע שליחה מהירה מדי. יש שלוש שכבות שונות: מגבלות Meta, קיבולת Webhook/Queue ומכסה פנימית של Connect. אין מספר יחיד שמתאים לכולן.</div>
+          <ul class="questions"><li>מה ה־Messaging limit וה־Throughput שנקראים כעת מהחשבון החי?</li><li>מה תקרת Pilot הפנימית לכל Sender, Campaign ו־Recipient?</li><li>כמה Headroom נשמר ל־Inbound?</li><li>מי מקבל Alert ומי רשאי להפעיל Kill switch?</li></ul>
+          <fieldset><legend>בחר מדיניות אישור</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D04" value="live-derived-layered" data-recommended><span><strong>Limiter רב־שכבתי הנגזר ממצב Meta חי — מומלץ</strong><span>Portfolio quota → Phone throughput → Pair queue → Cooldown/Circuit breaker; ערכים דינמיים אינם מקודדים כעובדה.</span></span></label>
+            <label class="option"><input type="radio" name="D04" value="fixed-conservative"><span><strong>תקרה פנימית קבועה ושמרנית בלבד</strong><span>פשוטה יותר, אך אינה מספיקה לבדה מול שינויי Tier, Quality ו־Pacing.</span></span></label>
+            <label class="option"><input type="radio" name="D04" value="provider-only"><span><strong>להסתמך רק על Meta</strong><span>לא מומלץ: גורם לשגיאות, Burst לא נשלט ופגיעה אפשרית ב־Quality.</span></span></label>
+          </div></fieldset>
+          <div class="recommendation"><strong>המלצה לטל:</strong> לאשר רק לאחר Evidence מתוארך עם Graph version, WABA/Phone state, קודי 429/130429/131048/131049/131056, Retry behavior, Webhook load ותרגיל Kill switch. מספרים פנימיים הם Policy של Connect, לא „מגבלת WhatsApp רשמית”.</div>
+          <label class="notes">רשום ערכי חשבון חיים, תקרות Pilot, Headroom, Alert owner ותאריך בדיקה<textarea name="D04_notes"></textarea></label>
+          <p class="owner"><strong>RACI:</strong> טל Responsible לעובדות; דוד Accountable למימוש; אבטחה ו־Product מאשרים Policy. <strong>Registry:</strong> security.rate-limit-policy.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D05">
+        <summary><span class="number">5</span><span class="summary-title"><strong>ספק סריקת קבצים</strong><small>Malware scanner והתנהגות Fail-closed</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> קובץ ידע עלול להכיל Malware. הוא חייב להישאר בהסגר עד ש־Scanner מחזיר תוצאה ברורה.</div>
+          <ul class="questions"><li>מי מפעיל את ה־Scanner?</li><li>כיצד מעדכנים חתימות?</li><li>מה Timeout ומה קורה כשהשירות לא זמין?</li></ul>
+          <fieldset><legend>בחר מנגנון</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D05" value="private-clamav" data-recommended><span><strong>ClamAV פרטי ומבודד ב־Railway — מומלץ ל־Pilot</strong><span>ללא URL ציבורי; `freshclam`; תוצאה רק clean/infected/unavailable; unavailable נכשל סגור.</span></span></label>
+            <label class="option"><input type="radio" name="D05" value="managed-scanner"><span><strong>Scanner מנוהל חיצוני</strong><span>פחות תפעול, אך דורש DPA ואסור לשלוח Object URL ציבורי או PII.</span></span></label>
+            <label class="option"><input type="radio" name="D05" value="uploads-disabled"><span><strong>להשאיר Uploads כבויים ב־Pilot</strong><span>בטוח ומהיר, אבל דוחה את Knowledge AI.</span></span></label>
+          </div></fieldset>
+          <label class="notes">ספק, משאבים, Timeout, עדכון חתימות ו־Failure owner<textarea name="D05_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> אבטחה + פיתוח. <strong>Registry:</strong> security.file-scanner.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D06">
+        <summary><span class="number">6</span><span class="summary-title"><strong>מדיניות העלאת מקורות ידע</strong><small>סוגים, גודל ותוכן אסור</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Allowlist היא רשימה סגורה של סוגי קבצים מותרים. כל סוג שלא מופיע בה נדחה מראש.</div>
+          <ul class="questions"><li>אילו MIME types מותרים?</li><li>מה גודל הקובץ המרבי?</li><li>האם דוחים קובץ מוצפן, Macro או MIME mismatch?</li></ul>
+          <fieldset><legend>בחר Baseline</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D06" value="10mib-pdf-txt-docx" data-recommended><span><strong>10 MiB; PDF, TXT ו־DOCX בלבד — מומלץ</strong><span>לדחות ZIP, HTML, קוד, Macro, הצפנה וחתימה שאינה תואמת MIME.</span></span></label>
+            <label class="option"><input type="radio" name="D06" value="5mib-pdf-txt"><span><strong>5 MiB; PDF ו־TXT בלבד</strong><span>Surface קטן ובטוח יותר, עם פחות שימושיות.</span></span></label>
+            <label class="option"><input type="radio" name="D06" value="custom"><span><strong>Allowlist אחרת</strong><span>יש לפרט כל MIME וגודל; אין „כל סוג קובץ”.</span></span></label>
+          </div></fieldset>
+          <label class="notes">רשימת MIME, גודל מרבי וכללי דחייה<textarea name="D06_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + אבטחה. <strong>Registry:</strong> security.knowledge-upload-policy.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D07">
+        <summary><span class="number">7</span><span class="summary-title"><strong>שחזור סריקת ידע תקועה</strong><small>גיל, Retries והסלמה</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> אם Worker נפל באמצע סריקה, הקובץ עלול להישאר „scanning”. Recovery מחזיר אותו לתור באופן מבוקר.</div>
+          <ul class="questions"><li>מתי סריקה נחשבת תקועה?</li><li>כמה Retries מותרים?</li><li>מי מקבל Manual review?</li></ul>
+          <fieldset><legend>בחר מדיניות</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D07" value="15m-three-retries" data-recommended><span><strong>15 דקות, עד 3 ניסיונות, ואז Manual review — מומלץ</strong><span>אותו Digest ו־Expected version; אין Source חדש ואין Retry מקביל.</span></span></label>
+            <label class="option"><input type="radio" name="D07" value="30m-two-retries"><span><strong>30 דקות, עד 2 ניסיונות</strong><span>פחות עומס, Recovery איטי יותר.</span></span></label>
+            <label class="option"><input type="radio" name="D07" value="manual-only"><span><strong>Recovery ידני בלבד</strong><span>בטוח אך מגדיל עומס תפעולי וזמן תקלה.</span></span></label>
+          </div></fieldset>
+          <label class="notes">גיל, מספר ניסיונות, Backoff ו־Escalation owner<textarea name="D07_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations + פיתוח. <strong>Registry:</strong> operations.knowledge-scan-recovery.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D08">
+        <summary><span class="number">8</span><span class="summary-title"><strong>Backup, Restore, RPO ו־RTO</strong><small>כמה מידע וזמן מותר לאבד</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> RPO הוא כמה זמן נתונים מותר לאבד; RTO הוא כמה זמן מותר עד שהשירות חוזר. גיבוי שלא נוסה בשחזור אינו ראיית בטיחות.</div>
+          <ul class="questions"><li>תדירות גיבוי ושמירה?</li><li>RPO/RTO ל־Pilot ול־Production?</li><li>אזור וחשבון גיבוי נפרד?</li><li>כמה פעמים מתרגלים Restore מלא?</li></ul>
+          <fieldset><legend>בחר Baseline</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D08" value="daily-90-monthly-pitr" data-recommended><span><strong>PITR + יומי + 90 יום + Restore חודשי — מומלץ</strong><span>Restore לסביבה מבודדת; קישור ל־backupId ול־digests של PostgreSQL והאובייקטים.</span></span></label>
+            <label class="option"><input type="radio" name="D08" value="daily-30-quarterly"><span><strong>יומי + 30 יום + Restore רבעוני</strong><span>זול יותר, אך חלש לנתוני לקוחות ולראיית Recovery.</span></span></label>
+            <label class="option"><input type="radio" name="D08" value="custom"><span><strong>מדיניות אחרת</strong><span>חובה לציין RPO, RTO, Retention ותרגול.</span></span></label>
+          </div></fieldset>
+          <label class="notes">RPO, RTO, תדירות, Retention, Region, חשבון מבודד ו־Restore owner<textarea name="D08_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations + אבטחה. <strong>Registry:</strong> operations.backup-policy.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D09">
+        <summary><span class="number">9</span><span class="summary-title"><strong>מקור מדידת SLO</strong><small>Logs, Metrics, Traces ו־Synthetic checks</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> SLO הוא יעד שירות מדיד, למשל 99.5% זמינות. צריך מקור אמת חיצוני; לוג של האפליקציה לבדו לא מוכיח שהיא זמינה למשתמש.</div>
+          <ul class="questions"><li>איזה Sink מקבל OpenTelemetry?</li><li>מה חלון המדידה והמינימום הסטטיסטי?</li><li>מי מפעיל Synthetic checks מבחוץ?</li><li>כמה זמן שומרים Telemetry וללא איזה PII?</li></ul>
+          <fieldset><legend>בחר כיוון</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D09" value="betterstack-otel" data-recommended><span><strong>OpenTelemetry + Better Stack ל־Pilot — מומלץ</strong><span>Logs, metrics, traces ו־on-call במקום אחד; לשמור Port ניטרלי כדי שניתן יהיה להחליף ספק.</span></span></label>
+            <label class="option"><input type="radio" name="D09" value="grafana-cloud-otel"><span><strong>OpenTelemetry + Grafana Cloud</strong><span>עמוק וגמיש יותר, אך דורש יותר תפעול והגדרה.</span></span></label>
+            <label class="option"><input type="radio" name="D09" value="sentry-plus-metrics"><span><strong>Sentry לשגיאות + ספק Metrics נפרד</strong><span>טוב ל־Errors, אך מפצל את מקור האמת ל־SLO.</span></span></label>
+          </div></fieldset>
+          <div class="recommendation"><strong>Baseline מומלץ:</strong> חלון 30 יום, מינימום 1,000 אירועים תקפים, `insufficient-data` מתחת לסף ו־Synthetic smoke חיצוני.</div>
+          <label class="notes">ספק, Retention, Region, תקציב, SLO window ומקורות Synthetic<textarea name="D09_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations + פיתוח. <strong>Registry:</strong> operations.slo-measurement.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D10">
+        <summary><span class="number">10</span><span class="summary-title"><strong>התראות SLO ו־On-call</strong><small>ספים, בעלים ונתיב הסלמה</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> ניטור בלי אדם שמקבל התראה ומגיב הוא Dashboard, לא תהליך תפעולי.</div>
+          <ul class="questions"><li>מי Primary ומי Backup?</li><li>באילו שעות יש כוננות?</li><li>לאן נשלחת התראה ומה זמן האישור?</li><li>האם insufficient-data פותח Incident?</li></ul>
+          <fieldset><legend>בחר מדיניות</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D10" value="pilot-business-hours-escalation" data-recommended><span><strong>On-call מוגדר ל־Pilot + גיבוי והסלמה — מומלץ</strong><span>Alert גם על breach וגם על insufficient-data; ללא Tenant, טלפון או תוכן הודעה.</span></span></label>
+            <label class="option"><input type="radio" name="D10" value="24x7"><span><strong>כוננות 24/7 מה־Pilot</strong><span>שירות חזק יותר, אך דורש אנשים, תקציב ו־Runbook בשל.</span></span></label>
+            <label class="option"><input type="radio" name="D10" value="dashboard-only"><span><strong>Dashboard בלבד</strong><span>לא מאושר ל־Pilot אמיתי; אין תגובה בזמן לתקלה.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Primary, Backup, שעות, ערוץ, Ack time ו־Escalation path<textarea name="D10_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations. <strong>Registry:</strong> operations.slo-alert-policy.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D11">
+        <summary><span class="number">11</span><span class="summary-title"><strong>Data Retention ו־Legal Hold</strong><small>25 מחלקות מידע, טריגרים ומחיקה</small></span><span class="badge hard">Legal</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Retention קובע כמה זמן שומרים כל סוג מידע. Legal Hold עוצר מחיקה כאשר יש חובה משפטית. אי אפשר להשתמש במספר אחד לכל הנתונים.</div>
+          <ul class="questions"><li>לאשר תקופה ו־Trigger לכל 25 Data classes?</li><li>מי רשאי להפעיל ולשחרר Legal Hold?</li><li>מה תהליך Export/Deletion request?</li><li>איזו תקופה דורשים מס, אבטחה ולקוחות?</li></ul>
+          <fieldset><legend>בחר מסלול</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D11" value="policy-v2-legal-review" data-recommended><span><strong>Policy v2 הקיים כ־Baseline, בכפוף לאישור Legal — מומלץ</strong><span>אין להפעיל Adapter מחיקה לפני Legal Hold test, Dry run, Plan קצר־תוקף ו־Restore מוצלח.</span></span></label>
+            <label class="option"><input type="radio" name="D11" value="minimal-retention-redesign"><span><strong>Redesign לתקופות קצרות יותר</strong><span>טוב לפרטיות, אך דורש מיפוי מס/חוזים ושינויי מוצר.</span></span></label>
+            <label class="option"><input type="radio" name="D11" value="no-deletion"><span><strong>לשמור הכול ללא מחיקה</strong><span>לא מומלץ ועלול לסתור פרטיות, חוזים ועלות.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Legal approver, שינויים בתקופות, Hold owners, Export/Deletion SLA<textarea name="D11_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Legal + אבטחה + Privacy. <strong>Registry:</strong> governance.data-retention-policy.</p>
+        </div>
+      </details>
+
+      <h2 class="section-heading">5. החלטות תשתית ו־Pilot נוספות</h2>
+
+      <details class="decision hard" data-question data-decision-id="D12">
+        <summary><span class="number">12</span><span class="summary-title"><strong>PostgreSQL Provider, Plan ו־Region</strong><small>מקור האמת החי של הנתונים</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> PostgreSQL הוא מסד הנתונים החדש. הקוד מוכן, אך עדיין צריך לבחור שירות חי, אזור, גודל, TLS, Pool ו־Backup.</div>
+          <ul class="questions"><li>Railway Postgres או ספק מנוהל חיצוני?</li><li>באיזה Region?</li><li>איזה Plan, Storage ו־Connection limit?</li><li>האם ה־SLA/Compliance מספיקים ל־GA?</li></ul>
+          <fieldset><legend>בחר מסלול</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D12" value="railway-postgres-pilot" data-recommended><span><strong>Railway PostgreSQL ל־Pilot, עם PITR ו־Restore evidence — מומלץ</strong><span>המסלול הפשוט ביותר לטופולוגיה שנבחרה; לבצע Review מחדש לפני Enterprise/GA.</span></span></label>
+            <label class="option"><input type="radio" name="D12" value="external-managed-postgres"><span><strong>PostgreSQL מנוהל חיצוני מהיום הראשון</strong><span>עשוי לתת SLA/Compliance טובים יותר, במחיר חיבור ותפעול נוסף.</span></span></label>
+            <label class="option"><input type="radio" name="D12" value="self-managed"><span><strong>Self-managed PostgreSQL</strong><span>לא מומלץ לצוות קטן; אחריות מלאה על HA, Patch, Backup ו־Recovery.</span></span></label>
+          </div></fieldset>
+          <label class="notes">ספק, Plan, Region, Pool, Storage, PITR, SLA ותקציב<textarea name="D12_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations + Backend + אבטחה.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D13">
+        <summary><span class="number">13</span><span class="summary-title"><strong>Queue, DLQ ו־Delay Provider</strong><small>Meta webhooks, קמפיינים, הזמנות ו־Templates</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Queue מחזיק עבודה שממתינה לביצוע. DLQ שומר עבודה שנכשלה כדי שלא תלך לאיבוד. PostgreSQL נשאר מקור האמת העסקי; התור הוא מנגנון מסירה.</div>
+          <ul class="questions"><li>איזה Broker מפעיל ארבעה תורים?</li><li>מה Retention, Retry, Delay ו־DLQ?</li><li>האם Redis מנוטר ומגובה?</li><li>מי רשאי לבצע Requeue ידני?</li></ul>
+          <fieldset><legend>בחר ספק/טכנולוגיה</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D13" value="railway-redis-bullmq" data-recommended><span><strong>Redis פרטי ב־Railway + BullMQ — מומלץ ל־Pilot</strong><span>תואם ל־ADR ול־Worker הקבוע; דורש Persistence, Memory alerts, Backup ו־DLQ policy מפורשים.</span></span></label>
+            <label class="option"><input type="radio" name="D13" value="managed-redis"><span><strong>Redis מנוהל חיצוני + BullMQ</strong><span>פחות תפעול, אך דורש Network, Region, DPA ועלות.</span></span></label>
+            <label class="option"><input type="radio" name="D13" value="postgres-queue"><span><strong>PostgreSQL queue</strong><span>פחות ספקים, אך מעמיס על מסד העסק ודורש הערכת Throughput/Isolation מחודשת.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Provider, Region, Persistence, Retention, Attempts, Backoff ו־DLQ owner<textarea name="D13_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Backend + Operations.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D14">
+        <summary><span class="number">14</span><span class="summary-title"><strong>Object Storage</strong><small>קובצי ידע, גיבויים, Versioning ו־Legal Hold</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Object storage שומר קבצים גדולים מחוץ למסד. נדרש Private access, הצפנה, Versioning ו־Lifecycle.</div>
+          <ul class="questions"><li>AWS S3, Vercel Blob או Railway Bucket?</li><li>איזה Region ו־Encryption key?</li><li>האם נדרשים Versioning/Object Lock?</li><li>מה Lifecycle לכל סוג קובץ?</li></ul>
+          <fieldset><legend>בחר ספק</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D14" value="aws-s3" data-recommended><span><strong>AWS S3 פרטי עם Versioning, Lifecycle ו־Object Lock — מומלץ</strong><span>מתאים ל־Legal Hold ולגיבוי בלתי־משתנה; דורש AWS account ו־IAM מצומצם.</span></span></label>
+            <label class="option"><input type="radio" name="D14" value="vercel-private-blob"><span><strong>Vercel Private Blob</strong><span>פשוט יותר, אך יש לבדוק Lifecycle, Lock, Region ו־Recovery מול הדרישות.</span></span></label>
+            <label class="option"><input type="radio" name="D14" value="railway-bucket"><span><strong>Railway Bucket</strong><span>נוח טופולוגית, אך לא לאשר למסמכים רגישים לפני הוכחת Encryption, Versioning, Lock ו־Lifecycle.</span></span></label>
+          </div></fieldset>
+          <label class="notes">ספק, Region, Encryption, Versioning, Object Lock, Lifecycle ותקציב<textarea name="D14_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations + אבטחה + Privacy.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D15">
+        <summary><span class="number">15</span><span class="summary-title"><strong>Secrets ו־Break-glass</strong><small>אחסון, Rotation, Revocation וגישה בחירום</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Secret הוא מפתח שמאפשר גישה למערכת. Break-glass הוא מסלול חירום מוגבל בזמן, עם Audit, כאשר הגישה הרגילה אינה זמינה.</div>
+          <ul class="questions"><li>מי Owner לכל Secret?</li><li>איפה נשמר כל Secret?</li><li>מה מרווח Rotation?</li><li>מי מאשר Break-glass וכמה זמן הוא תקף?</li></ul>
+          <fieldset><legend>בחר מדיניות</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D15" value="platform-vaults-named-owners" data-recommended><span><strong>Vercel/Railway secret stores + Owners אישיים + Rotation — מומלץ ל־Pilot</strong><span>Reference variables בלבד; אין Token בצ'אט, מסמך, GitHub או AnyDesk.</span></span></label>
+            <label class="option"><input type="radio" name="D15" value="external-secret-manager"><span><strong>Secret manager חיצוני מרכזי</strong><span>חזק יותר ל־GA, אך מוסיף Integration והרשאות.</span></span></label>
+            <label class="option"><input type="radio" name="D15" value="shared-tokens"><span><strong>Tokens משותפים</strong><span>לא מאושר: אין Attribution, Revocation אישי או Least privilege.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Secret owners, מיקום, Rotation interval, Approver ו־Break-glass TTL<textarea name="D15_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Security/Secrets owner + Operations.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D16">
+        <summary><span class="number">16</span><span class="summary-title"><strong>Domains, Origins, Regions וסביבות</strong><small>Production, Staging ו־Preview</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Origin הוא הכתובת המדויקת של האתר. המערכת משתמשת בו כדי למנוע מאתר זר להתחזות ל־Connect.</div>
+          <ul class="questions"><li>מה Domain ה־Production וה־Staging?</li><li>מה `APP_PUBLIC_ORIGIN` בכל סביבה?</li><li>אילו Preview origins מורשים?</li><li>באיזה Region נמצאים Web, API, DB, Queue ו־Storage?</li></ul>
+          <fieldset><legend>בחר מבנה</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D16" value="separate-production-staging" data-recommended><span><strong>Domains ומשאבים נפרדים לחלוטין — מומלץ</strong><span>Production ו־Staging לא חולקים DB, Queue, Storage, Secrets, WABA או Clerk instance.</span></span></label>
+            <label class="option"><input type="radio" name="D16" value="shared-provider-separated-resources"><span><strong>אותם Accounts עם Projects/Resources מבודדים</strong><span>אפשרי, בתנאי Evidence שמוכיח שאין Resource reuse.</span></span></label>
+            <label class="option"><input type="radio" name="D16" value="shared-resources"><span><strong>שיתוף משאבים בין סביבות</strong><span>לא מאושר: סיכון לדליפת נתונים ולפריסה הרסנית.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Production domain, Staging domain, Preview policy, Regions ו־Owners<textarea name="D16_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Operations + Release + אבטחה.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D17">
+        <summary><span class="number">17</span><span class="summary-title"><strong>Identity ו־Clerk Policy</strong><small>MFA, Session, Organizations ו־Admin allowlist</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Clerk מוכיח מי המשתמש. Connect עדיין מחליטה לאיזה Tenant הוא שייך ומה מותר לו לעשות.</div>
+          <ul class="questions"><li>האם Clerk מאושר סופית?</li><li>MFA חובה למי?</li><li>מה Session lifetime ו־Revocation?</li><li>Organizations required או optional?</li><li>מי ב־System Admin allowlist?</li></ul>
+          <fieldset><legend>בחר מדיניות</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D17" value="clerk-required-org-mfa-admin" data-recommended><span><strong>Clerk + Organization חובה + MFA לבעלי הרשאות — מומלץ</strong><span>Session קצר יותר ל־Admin; Primary email נבדק בצד Backend; Allowlist מצומצמת.</span></span></label>
+            <label class="option"><input type="radio" name="D17" value="clerk-optional-org"><span><strong>Clerk עם Organization אופציונלי</strong><span>מתאים גם ליחידים, אך מסבך Tenant isolation ו־Billing.</span></span></label>
+            <label class="option"><input type="radio" name="D17" value="alternative-idp"><span><strong>Identity provider אחר</strong><span>דורש החלפת חוזים שכבר נבנו ובדיקות Auth מלאות.</span></span></label>
+          </div></fieldset>
+          <label class="notes">MFA scope, Session TTL, Revocation, Organization policy ו־Admin owners<textarea name="D17_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Security + Product + Backend.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D18">
+        <summary><span class="number">18</span><span class="summary-title"><strong>GitHub Governance ו־CI</strong><small>Organization, Reviews, CODEOWNERS ותשעת ה־Checks</small></span><span class="badge required">נדרשת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Repository פרטי אינו מספיק. Branch protection מונע שינוי ב־main בלי Review ובדיקות.</div>
+          <ul class="questions"><li>להישאר בבעלות טל או להעביר ל־Organization?</li><li>מי Collaborator ובאיזה Role?</li><li>כמה Reviews נדרשים?</li><li>איזה GitHub Plan מאפשר את ההגנות?</li></ul>
+          <fieldset><legend>בחר שלב ניהולי</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D18" value="current-private-protected-then-org" data-recommended><span><strong>להגן על ה־Repo הקיים מיד; מעבר ל־Organization לפני GA — מומלץ</strong><span>אין לפתוח עותק חדש. 2FA, CODEOWNERS, Review ותשעת Checks לפני עבודה משותפת.</span></span></label>
+            <label class="option"><input type="radio" name="D18" value="move-to-org-now"><span><strong>להעביר ל־Organization עכשיו</strong><span>בעלות עסקית טובה יותר; דורש Plan, Roles ותיאום מיידי.</span></span></label>
+            <label class="option"><input type="radio" name="D18" value="owner-repo-unprotected"><span><strong>להישאר ללא הגנות</strong><span>לא מאושר ל־Pilot או לעבודת צוות.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Organization/Plan, Collaborators, Roles, Review count ו־CODEOWNERS<textarea name="D18_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> טל + Release owner.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D19">
+        <summary><span class="number">19</span><span class="summary-title"><strong>בעלי תפקידים ו־RACI</strong><small>מי מחליט, מי מבצע ומי בכוננות</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> RACI מונע מצב שבו כולם „אחראים” ולכן אף אחד לא מוסמך לסגור החלטה.</div>
+          <ul class="questions"><li>מי Product, Security, Operations, Privacy, Billing, Release, Secrets ו־On-call owner?</li><li>מי Backup לכל תפקיד?</li><li>מי יכול לאשר Production ו־Rollback?</li></ul>
+          <fieldset><legend>בחר מודל</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D19" value="named-primary-backup" data-recommended><span><strong>אדם מזוהה + Backup לכל תחום — מומלץ</strong><span>טל נשאר Rate-limit research; דוד Backend; ראשה Deployment. יש להשלים את יתר השמות.</span></span></label>
+            <label class="option"><input type="radio" name="D19" value="team-owned"><span><strong>בעלות לפי „הצוות”</strong><span>לא מספיקה להחלטות חירום ולאישור Release.</span></span></label>
+            <label class="option"><input type="radio" name="D19" value="external-owners"><span><strong>Outsource לחלק מהתחומים</strong><span>אפשרי ל־Legal/Security/Operations, עם SLA וסמכות כתובים.</span></span></label>
+          </div></fieldset>
+          <label class="notes">רשום Primary ו־Backup לכל שמונת התפקידים<textarea name="D19_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> הנהלה / רועי.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D20">
+        <summary><span class="number">20</span><span class="summary-title"><strong>נכסי Meta ו־WordPress קיים</strong><small>בעלות, Sandbox ודו־קיום</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> WABA ומספר טלפון הם נכסים עסקיים. שימוש במספר קיים עלול להשפיע על מערכת WordPress שכבר עובדת.</div>
+          <ul class="questions"><li>מי הבעלים החוקי והטכני של Business Portfolio/WABA/Phone?</li><li>האם המספר משתמש ב־Coexistence?</li><li>מי מאשר Pilot על נכס האב?</li><li>מתי WordPress נשאר פעיל ומה Rollback?</li></ul>
+          <fieldset><legend>בחר מסלול חיבור</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D20" value="test-waba-first-approved-parent-pilot" data-recommended><span><strong>Test WABA תחילה; נכס האב רק ב־Pilot מאושר — מומלץ</strong><span>Sanitize לפרויקט WordPress, Inventory בלבד, נמענים מורשים ו־Kill switch.</span></span></label>
+            <label class="option"><input type="radio" name="D20" value="new-company-number"><span><strong>מספר חברה חדש ונפרד</strong><span>מקטין סיכון למערכת קיימת, אך אינו בודק Migration של המספר הישן.</span></span></label>
+            <label class="option"><input type="radio" name="D20" value="parent-number-immediate"><span><strong>לחבר מיד את מספר האב</strong><span>לא מומלץ ללא Sandbox, Backup, Rate limit ו־Rollback מתורגל.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Asset owner, Approver, Coexistence, WordPress owner ו־Rollback trigger<textarea name="D20_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> בעל הנכס + טל + דוד + אבטחה.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D21">
+        <summary><span class="number">21</span><span class="summary-title"><strong>גבול ה־Pilot</strong><small>Tenants, משתמשים, נמענים, Features ו־Stop conditions</small></span><span class="badge hard">חוסמת</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Pilot הוא ניסוי מבוקר, לא „Production קטן”. גבולות קשיחים מצמצמים נזק אם משהו נכשל.</div>
+          <ul class="questions"><li>כמה Tenants, משתמשים ומספרי WhatsApp?</li><li>מי הנמענים המורשים?</li><li>אילו Features מופעלים?</li><li>מה Success, Stop ו־Rollback condition?</li></ul>
+          <fieldset><legend>בחר היקף</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D21" value="single-tenant-closed-pilot" data-recommended><span><strong>Tenant אחד, מספר בדיקה אחד ורשימת נמענים סגורה — מומלץ</strong><span>AI באישור נציג, קמפיינים ידניים, Caps פנימיים, Kill switch ו־Audit. את המספרים המדויקים יש לאשר לפי החשבון החי.</span></span></label>
+            <label class="option"><input type="radio" name="D21" value="multi-tenant-pilot"><span><strong>Pilot עם מספר עסקים</strong><span>נותן יותר מידע, אך מכפיל תמיכה, פרטיות ותרחישי תקלה.</span></span></label>
+            <label class="option"><input type="radio" name="D21" value="open-beta"><span><strong>Beta פתוחה</strong><span>לא מאושר לפני סגירת Production readiness.</span></span></label>
+          </div></fieldset>
+          <label class="notes">מספרים מדויקים, Features on/off, נמענים, הצלחה, עצירה ו־Rollback<textarea name="D21_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + Security + Operations + בעל נכס Meta.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D22">
+        <summary><span class="number">22</span><span class="summary-title"><strong>ICP, שפות ושווקים ראשונים</strong><small>למי המוצר נבנה תחילה</small></span><span class="badge hard">Product</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> ICP הוא סוג הלקוח הראשון שהמוצר מותאם אליו. בלי ICP קשה להחליט אילו Integrations, חבילות ו־Agency features באמת חשובים.</div>
+          <ul class="questions"><li>עסק ישיר, סוכנות או שניהם?</li><li>איזה ענף וגודל עסק?</li><li>איזו מדינה ושפה ב־Pilot?</li><li>אילו שפות מחויבות ל־GA?</li></ul>
+          <fieldset><legend>בחר נקודת פתיחה</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D22" value="israel-direct-smb-hebrew-first" data-recommended><span><strong>עסק SMB ישיר בישראל, Hebrew-first — מומלץ</strong><span>אנגלית כ־fallback; QA ערבית לפני הפעלתה ללקוחות. Agency mode נדחה עד שיש צורך מוכח.</span></span></label>
+            <label class="option"><input type="radio" name="D22" value="agency-first"><span><strong>סוכנויות תחילה</strong><span>דורש Hierarchy, Multi-client permissions ו־Consolidated billing מוקדם.</span></span></label>
+            <label class="option"><input type="radio" name="D22" value="global-multilingual"><span><strong>גלובלי ורב־לשוני מהיום הראשון</strong><span>מרחיב שוק אך מגדיל Legal, Tax, Support ו־Localization.</span></span></label>
+          </div></fieldset>
+          <label class="notes">ICP, ענף, גודל, מדינות, שפות Pilot ו־GA<textarea name="D22_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> רועי / Product.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D23">
+        <summary><span class="number">23</span><span class="summary-title"><strong>Packages, Quotas ופרטי קשר</strong><small>מה הלקוח מקבל ומה קורה כשנגמרת המכסה</small></span><span class="badge hard">Product</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Package מגדיר זכויות מסחריות. Rate limiter מגן טכנית, אבל אינו חשבונאות ואינו מקור אמת ל־Quota.</div>
+          <ul class="questions"><li>אילו Plans קיימים ואילו Entitlements בכל Plan?</li><li>מה מודדים: Users, Numbers, Contacts, Messages, Bots, AI, Storage?</li><li>Hard limit, Soft alert או Overage?</li><li>מה קורה לעבודות שכבר בתור?</li><li>אילו Billing/Operational/Security contacts נשמרים?</li></ul>
+          <fieldset><legend>בחר שלב מוצר</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D23" value="single-manual-pilot-plan" data-recommended><span><strong>Plan אחד ידני ל־Pilot, עם Caps מאושרים — מומלץ</strong><span>ללא Checkout; מודל Plans בגרסאות ו־Usage ledger נפרד. שלוש חבילות רק אחרי נתוני Pilot.</span></span></label>
+            <label class="option"><input type="radio" name="D23" value="three-paid-plans-now"><span><strong>שלוש חבילות בתשלום לפני Pilot</strong><span>מאפשר ניסוי מסחרי, אך דורש Billing ו־Quota מלאים מוקדם.</span></span></label>
+            <label class="option"><input type="radio" name="D23" value="custom"><span><strong>מודל אחר</strong><span>חובה לפרט Entitlements, מדידה והתנהגות Downgrade.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Plans, יחידות מדידה, Caps, Overage, Queue behavior ופרטי קשר<textarea name="D23_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + Billing + Backend + Legal.</p>
+        </div>
+      </details>
+
+      <details class="decision required" data-question data-decision-id="D24">
+        <summary><span class="number">24</span><span class="summary-title"><strong>Recurring Campaigns</strong><small>מתי לבנות ומה מדיניות הסדרה</small></span><span class="badge required">Scope</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> קמפיין חוזר יוצר שליחות עתידיות אוטומטית. טעות במדיניות יכולה לשלוח הודעות ישנות או בזמן לא מתאים.</div>
+          <ul class="questions"><li>נדרש ל־Pilot, ל־GA או לאחר GA?</li><li>תדירות, Timezone ו־Quiet hours?</li><li>מה קורה כשה־Template משתנה?</li><li>כיצד מבטלים ריצות שכבר נתפסו?</li></ul>
+          <fieldset><legend>בחר מועד</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D24" value="after-pilot" data-recommended><span><strong>אחרי Pilot — מומלץ</strong><span>ב־Pilot משתמשים בקמפיינים חד־פעמיים ומפחיתים סיכון של שליחה אוטומטית.</span></span></label>
+            <label class="option"><input type="radio" name="D24" value="before-pilot"><span><strong>לפני Pilot</strong><span>דורש Policy מלאה, Scheduler, ביטול ו־E2E נוסף.</span></span></label>
+            <label class="option"><input type="radio" name="D24" value="not-planned"><span><strong>לא בתוכנית</strong><span>מפשט את המוצר אך מוותר על Use case חשוב.</span></span></label>
+          </div></fieldset>
+          <label class="notes">מועד, תדירויות, Quiet hours, Template change ו־Cancellation policy<textarea name="D24_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + Backend.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D25">
+        <summary><span class="number">25</span><span class="summary-title"><strong>רמת עצמאות של ה־AI</strong><small>Draft, אישור נציג או שליחה אוטומטית</small></span><span class="badge hard">Safety</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> גם אם מודל AI איכותי, הוא עלול לטעות. אישור נציג שומר אדם בלולאה עד שנצברות ראיות.</div>
+          <ul class="questions"><li>מתי AI רק מציע Draft?</li><li>מתי נדרש אישור נציג?</li><li>האם קיימים נושאים שאסור ל־AI לענות עליהם?</li><li>מה Confidence, Budget ו־Stale approval policy?</li></ul>
+          <fieldset><legend>בחר מצב Pilot</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D25" value="agent-approval-only" data-recommended><span><strong>אישור נציג לכל תשובת AI — מומלץ ל־Pilot</strong><span>Handoff אוטומטי כאשר אין Grounding, Budget או ידע מאושר; אין Auto-send.</span></span></label>
+            <label class="option"><input type="radio" name="D25" value="draft-only"><span><strong>Draft-only ללא יכולת שליחה</strong><span>הכי בטוח, אך בודק פחות את Workflow האמיתי.</span></span></label>
+            <label class="option"><input type="radio" name="D25" value="limited-auto-send"><span><strong>Auto-send מוגבל</strong><span>רק לאחר Eval, Canary, Topic allowlist, Kill switch וראיות איכות.</span></span></label>
+          </div></fieldset>
+          <label class="notes">נושאים חסומים, Approval SLA, Grounding, Budget, Handoff ו־Auto-send exit criteria<textarea name="D25_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + AI owner + Security.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D26">
+        <summary><span class="number">26</span><span class="summary-title"><strong>Legal, Privacy ו־Data residency</strong><small>מסמכים, שווקים וזכויות משתמש</small></span><span class="badge hard">Legal</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> המערכת מחזיקה מספרי טלפון, שיחות וקבצים. השוק שבו מוכרים קובע חובות פרטיות, חוזים ושמירת מידע.</div>
+          <ul class="questions"><li>אילו מדינות ושווקים ב־Pilot וב־GA?</li><li>מי מאשר Terms, Privacy notice, DPA ו־Subprocessors?</li><li>מה ניסוח Consent?</li><li>מה SLA ל־Data subject request?</li><li>האם נדרש Data residency?</li></ul>
+          <fieldset><legend>בחר היקף ראשון</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D26" value="israel-first-legal-review" data-recommended><span><strong>ישראל תחילה, לאחר Review משפטי — מומלץ</strong><span>לפרסם Terms/Privacy, רשימת ספקי משנה ותהליך Export/Delete לפני Pilot עם נתוני לקוחות.</span></span></label>
+            <label class="option"><input type="radio" name="D26" value="israel-eu"><span><strong>ישראל + האיחוד האירופי</strong><span>דורש GDPR, DPA, Transfers, Residency ו־Data subject workflow מלאים.</span></span></label>
+            <label class="option"><input type="radio" name="D26" value="global"><span><strong>גלובלי</strong><span>לא מומלץ לצוות קטן לפני מיפוי Legal, Tax ו־Support לכל שוק.</span></span></label>
+          </div></fieldset>
+          <label class="notes">שווקים, Legal counsel, מסמכים, Consent, DSR SLA ו־Residency<textarea name="D26_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Legal + Privacy + Product.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D27">
+        <summary><span class="number">27</span><span class="summary-title"><strong>Release, Cutover ו־Rollback</strong><small>מי מאשר ואיך חוזרים לאחור</small></span><span class="badge hard">Go/No-Go</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> Cutover הוא הרגע שבו המערכת החדשה הופכת לפעילה. Rollback הוא דרך מתורגלת לחזור למצב בטוח בלי לאבד הודעות או נתונים.</div>
+          <ul class="questions"><li>מי Go/No-Go approver?</li><li>מה סדר Migration, Deploy ו־Traffic switch?</li><li>כמה זמן Canary?</li><li>אילו מדדים מפעילים Rollback?</li><li>מי מוסמך לבצע אותו?</li></ul>
+          <fieldset><legend>בחר אסטרטגיה</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D27" value="staged-canary-rollback" data-recommended><span><strong>Staging → Canary מוגבל → Pilot → הרחבה — מומלץ</strong><span>Commit יחיד, Manifest, Backup, Smoke, Monitoring ו־Rollback rehearsal לפני Traffic.</span></span></label>
+            <label class="option"><input type="radio" name="D27" value="scheduled-big-bang"><span><strong>Big-bang מתוזמן</strong><span>פשוט יותר לניהול, אך Blast radius גדול יותר.</span></span></label>
+            <label class="option"><input type="radio" name="D27" value="deploy-without-rollback"><span><strong>פריסה ללא Rollback מתורגל</strong><span>לא מאושר.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Approvers, Canary duration, מדדי עצירה, Rollback owner ו־Communication plan<textarea name="D27_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> ראשה / Deployment + Release owner + Operations.</p>
+        </div>
+      </details>
+
+      <details class="decision hard" data-question data-decision-id="D28">
+        <summary><span class="number">28</span><span class="summary-title"><strong>תקציבי ספקים ותקרות עלות</strong><small>Infrastructure, AI, Messaging ו־Observability</small></span><span class="badge hard">תקציב</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> בלי תקרה חודשית אי אפשר לבחור Plan, להגדיר Alerts או לעצור שימוש חריג.</div>
+          <ul class="questions"><li>מה התקציב החודשי ל־Pilot?</li><li>מה התקרה לכל ספק?</li><li>באיזה אחוז שימוש נשלחת התראה?</li><li>מה Hard stop ומה רק דורש אישור?</li></ul>
+          <fieldset><legend>בחר מודל שליטה</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D28" value="per-provider-caps" data-recommended><span><strong>תקרה לכל ספק + 50/75/90% Alerts — מומלץ</strong><span>AI ו־Messaging עם Budget ledger נפרד; חריגה דורשת Approver ולא שינוי שקט.</span></span></label>
+            <label class="option"><input type="radio" name="D28" value="single-total-budget"><span><strong>תקציב חודשי כולל בלבד</strong><span>פשוט, אך לא מזהה ספק שיצא משליטה.</span></span></label>
+            <label class="option"><input type="radio" name="D28" value="no-caps"><span><strong>ללא תקרות</strong><span>לא מאושר ל־Pilot עם AI ושליחה חיצונית.</span></span></label>
+          </div></fieldset>
+          <label class="notes">מטבע, תקציב כולל, תקרה לכל ספק, Alert thresholds ו־Approver<textarea name="D28_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> רועי / Budget owner + Billing + Operations.</p>
+        </div>
+      </details>
+
+      <h2 class="section-heading">6. החלטות שאפשר לדחות עד לאחר Pilot</h2>
+
+      <details class="decision defer" data-question data-decision-id="D29">
+        <summary><span class="number">29</span><span class="summary-title"><strong>עדיפות Roadmap אחרי Pilot</strong><small>CRM, Campaigns, Inbox, Automation, AI או Analytics</small></span><span class="badge defer">אחרי Pilot</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> אין צורך לבחור עכשיו את כל Roadmap. צריך רק לקבוע כיצד נתוני Pilot יהפכו לסדר עדיפויות.</div>
+          <ul class="questions"><li>איזה KPI מכריע סדר?</li><li>מי משתתף ב־Roadmap review?</li><li>מה אחוז זמן ל־Reliability מול Features?</li></ul>
+          <fieldset><legend>בחר שיטת החלטה</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D29" value="pilot-evidence-ranked" data-recommended><span><strong>לדרג לפי Evidence מה־Pilot — מומלץ</strong><span>השפעת לקוח × סיכון × מאמץ; Reliability ו־P0/P1 לפני Feature breadth.</span></span></label>
+            <label class="option"><input type="radio" name="D29" value="competitor-parity"><span><strong>Parity מול מתחרה מוביל</strong><span>קל להסביר, אך עלול לבנות Features שלא משרתים את ה־ICP.</span></span></label>
+            <label class="option"><input type="radio" name="D29" value="sales-led"><span><strong>לפי בקשות מכירה</strong><span>טוב להכנסות, אך דורש Product guardrails כדי למנוע פיצול מוצר.</span></span></label>
+          </div></fieldset>
+          <label class="notes">KPI, משתתפים, נוסחת דירוג ו־Reliability allocation<textarea name="D29_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + הנהלה.</p>
+        </div>
+      </details>
+
+      <details class="decision defer" data-question data-decision-id="D30">
+        <summary><span class="number">30</span><span class="summary-title"><strong>Enterprise, Integrations ו־Mobile</strong><small>מה לא נכנס לפני הוכחת צורך</small></span><span class="badge defer">אחרי Pilot</span></summary>
+        <div class="decision-body">
+          <div class="beginner"><strong>למתחילים:</strong> SAML, SCIM, Native mobile והרבה Integrations יקרים מאוד. כדאי לבנות אותם רק כאשר לקוח יעד מוכח דורש אותם.</div>
+          <ul class="questions"><li>אילו Integrations ראשונים לפי ICP?</li><li>האם נדרשים SAML/SCIM/Residency?</li><li>PWA או Native?</li><li>האם Agency mode ו־Omnichannel נדרשים ל־GA?</li></ul>
+          <fieldset><legend>בחר עיקרון</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D30" value="evidence-gated" data-recommended><span><strong>Evidence-gated — מומלץ</strong><span>Public API ו־Webhooks כבסיס; Integration או Enterprise feature רק עם לקוח, הכנסה או דרישת Compliance ברורה.</span></span></label>
+            <label class="option"><input type="radio" name="D30" value="broad-ga"><span><strong>Feature breadth רחב ל־GA</strong><span>מגדיל תחרותיות על הנייר, אך מאריך משמעותית זמן ועלות.</span></span></label>
+            <label class="option"><input type="radio" name="D30" value="enterprise-first"><span><strong>Enterprise-first</strong><span>דורש Security, Sales ו־Support שונים כבר עכשיו.</span></span></label>
+          </div></fieldset>
+          <label class="notes">Integrations, Enterprise requirements, PWA/Native, Agency ו־GA scope<textarea name="D30_notes"></textarea></label>
+          <p class="owner"><strong>בעלים:</strong> Product + Sales + Security.</p>
+        </div>
+      </details>
+    </form>
+
+    <section class="panel" aria-labelledby="execution-heading">
+      <h2 id="execution-heading">7. מה עדיין צריך לבצע גם אחרי שתענה?</h2>
+      <ol class="stage-list">
+        <li>להעביר כל תשובה מאושרת ל־Decision Registry, ‏ADR או Policy עם Owner, Approver ותאריך.</li>
+        <li>לפתוח Accounts ולרכוש Plans שאושרו; זמן הספקים נשאר unknown/unavailable.</li>
+        <li>להגדיר Secrets אמיתיים ב־Vercel/Railway בלי להכניסם ל־Git.</li>
+        <li>להשלים את שלושת Runtime cutovers האחרונים: Meta connection/signup, Template sync ו־Knowledge upload.</li>
+        <li>לחבר PostgreSQL, Queue/DLQ, Storage, Scanner ו־Observability חיים.</li>
+        <li>להריץ Export/Restore, Browser E2E, Load, Webhook ו־Kill-switch ב־Staging מבודד.</li>
+        <li>להפיק Governance, CI, Environment isolation, Deployment provenance ו־Backup evidence לאותו Commit.</li>
+        <li>לקיים Go/No-Go ולפתוח Pilot רק כאשר שער Production עובר ללא חסם מדומה.</li>
+      </ol>
+    </section>
+
+    <section class="panel" aria-labelledby="sources-heading">
+      <h2 id="sources-heading">8. מקורות אמת והמלצות</h2>
+      <ul class="source-list">
+        <li><a href="../shared/domain/productionDecisionRegistry.ts">Production Decision Registry</a></li>
+        <li><a href="external-decisions-recommendations.md">המלצות להחלטות חיצוניות</a></li>
+        <li><a href="hosting-migration-contract-freeze.md">Hosting migration contract</a></li>
+        <li><a href="team-operating-plan.md">תוכנית העבודה הצוותית</a></li>
+        <li><a href="whatsapp-rate-limits.md">מטריצת מגבלות WhatsApp</a></li>
+        <li><a href="https://clerk.com/docs/reference/backend/organization/create-organization-invitation">Clerk — Organization invitations</a></li>
+        <li><a href="https://platform.openai.com/docs/models/default-usage-policies-by-endpoint">OpenAI — Data controls</a></li>
+        <li><a href="https://developer.paddle.com/">Paddle — Merchant of Record</a></li>
+        <li><a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/throughput">Meta — WhatsApp throughput</a></li>
+        <li><a href="https://docs.railway.com/databases">Railway — Databases</a></li>
+        <li><a href="https://docs.railway.com/guides/postgres-backups-restores">Railway — PostgreSQL backup/restore</a></li>
+        <li><a href="https://docs.railway.com/guides/cron-workers-queues">Railway — Workers and queues</a></li>
+        <li><a href="https://docs.bullmq.io/guide/architecture">BullMQ — Architecture</a></li>
+        <li><a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html">AWS S3 — Object Lock</a></li>
+        <li><a href="https://vercel.com/docs/oidc">Vercel — OIDC</a></li>
+        <li><a href="https://betterstack.com/docs/logs/open-telemetry/">Better Stack — OpenTelemetry</a></li>
+        <li><a href="https://docs.clamav.net/manual/Usage/Scanning.html">ClamAV — Scanning</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const storageKey = "connect.remaining-decisions.v1";
+      const form = document.getElementById("questions");
+      const decisions = [...document.querySelectorAll("[data-question]")];
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      const saveState = document.getElementById("saveState");
+
+      function readAnswers() {
+        return decisions.map((decision) => {
+          const id = decision.dataset.decisionId;
+          const selected = decision.querySelector(`input[name="${id}"]:checked`);
+          const notes = decision.querySelector(`textarea[name="${id}_notes"]`);
+          const heading = decision.querySelector(".summary-title strong");
+          return {
+            id,
+            title: heading ? heading.textContent.trim() : id,
+            answer: selected ? selected.value : null,
+            notes: notes ? notes.value.trim() : "",
+          };
+        });
+      }
+
+      function updateProgress(message = "") {
+        const answers = readAnswers();
+        const answered = answers.filter(({ answer }) => answer !== null).length;
+        progressBar.value = answered;
+        progressText.textContent = `${answered} מתוך ${decisions.length}`;
+        saveState.textContent = message;
+      }
+
+      function saveLocally() {
+        const answers = readAnswers();
+        try {
+          localStorage.setItem(storageKey, JSON.stringify({ version: 1, answers }));
+          updateProgress("נשמר מקומית בדפדפן בלבד");
+        } catch {
+          updateProgress("השמירה המקומית אינה זמינה; אפשר עדיין לייצא JSON");
+        }
+      }
+
+      function restoreLocally() {
+        let stored;
+        try {
+          stored = JSON.parse(localStorage.getItem(storageKey) || "null");
+        } catch {
+          stored = null;
+        }
+        if (!stored || stored.version !== 1 || !Array.isArray(stored.answers)) return;
+        for (const answer of stored.answers) {
+          if (!answer || typeof answer.id !== "string") continue;
+          if (typeof answer.answer === "string") {
+            const selected = form.querySelector(`input[name="${answer.id}"][value="${answer.answer}"]`);
+            if (selected) selected.checked = true;
+          }
+          const notes = form.querySelector(`textarea[name="${answer.id}_notes"]`);
+          if (notes && typeof answer.notes === "string") notes.value = answer.notes;
+        }
+      }
+
+      function exportAnswers() {
+        const payload = {
+          document: "connect-all-remaining-decisions",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          warning: "אין לכלול Secrets או מידע אישי. הבחירות דורשות אישור פורמלי.",
+          answers: readAnswers(),
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "connect-decisions-answers.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        updateProgress("קובץ התשובות יוצא");
+      }
+
+      function textSummary() {
+        return readAnswers().map(({ id, title, answer, notes }) =>
+          `${id}. ${title}\nבחירה: ${answer || "לא נבחר"}\nהערות: ${notes || "אין"}`
+        ).join("\n\n");
+      }
+
+      form.addEventListener("change", saveLocally);
+      form.addEventListener("input", saveLocally);
+
+      document.getElementById("recommendAll").addEventListener("click", () => {
+        for (const recommended of form.querySelectorAll("input[data-recommended]")) {
+          recommended.checked = true;
+        }
+        saveLocally();
+        updateProgress("כל ההמלצות נבחרו; מומלץ לעבור עליהן לפני ייצוא");
+      });
+
+      document.getElementById("copyAnswers").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(textSummary());
+          updateProgress("סיכום התשובות הועתק");
+        } catch {
+          updateProgress("הדפדפן חסם העתקה; השתמש בייצוא JSON");
+        }
+      });
+
+      document.getElementById("exportAnswers").addEventListener("click", exportAnswers);
+      document.getElementById("printDocument").addEventListener("click", () => window.print());
+      document.getElementById("clearAnswers").addEventListener("click", () => {
+        if (!window.confirm("לנקות את כל הבחירות וההערות במסמך זה?")) return;
+        form.reset();
+        try { localStorage.removeItem(storageKey); } catch { /* unavailable */ }
+        updateProgress("כל התשובות נוקו");
+      });
+
+      restoreLocally();
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>

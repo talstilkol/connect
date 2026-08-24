@@ -23,28 +23,28 @@ export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
     title:
       "מדיניות תפוגה והזמנה מחדש",
     detail:
-      "יש לקבוע את משך תוקף ההזמנה והאם ניתן להזמין מחדש לאחר מצב סופי.",
+      "טל בחר תפוגה של 72 שעות והזמנה מחדש רק לאחר מצב סופי. ההחלטה נשארת חסומה עד אישור מוצר ואבטחה ושמירת הרשומה המאושרת בסביבה החיה.",
     owner: "מוצר + אבטחה",
   },
   {
     checkId: "ai.provider",
     title: "ספק AI ומודל חיוב",
     detail:
-      "יש לבחור ספק, מודלים, גבולות שימוש ומודל מפתחות לפני הפעלת סוכן AI.",
+      "טל בחר OpenAI Responses API מאחורי Provider port, עם store:false ו-Eval על מידע מושחר. יש לאשר Model allowlist, תקציב, Timeout, מפתחות וראיות איכות לפני הפעלה.",
     owner: "מוצר + פיתוח",
   },
   {
     checkId: "billing.provider",
     title: "ספק סליקה והפקת חשבוניות",
     detail:
-      "יש לבחור ספק שיקבע את תהליך ההרשמה, Webhooks, החזרים וחשבוניות.",
+      "טל ביקש להכין Adapters גם ל-Paddle וגם ל-Stripe. ספק פעיל יחיד, ישות משפטית, מס, Webhooks, החזרים וחשבוניות עדיין דורשים החלטה לפני Production.",
     owner: "כספים + פיתוח",
   },
   {
     checkId: "security.rate-limit-policy",
     title: "מדיניות Rate Limit",
     detail:
-      "טל מאמת מגבלות Meta עדכניות; דוד אחראי למימוש; אבטחה ומוצר מאשרים מכסות Connect, חלונות זמן, Backoff, Alerts ו־Kill switch.",
+      "טל בחר Limiter רב-שכבתי הנגזר ממצב Meta חי. טל מאמת עובדות; דוד אחראי למימוש; אבטחה ומוצר מאשרים מכסות Connect, חלונות, Backoff, Alerts ו-Kill switch.",
     owner: "טל (מחקר ופיתוח) + דוד + אבטחה + מוצר",
   },
   {
@@ -58,42 +58,42 @@ export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
     checkId: "security.knowledge-upload-policy",
     title: "מדיניות העלאת מקורות ידע",
     detail:
-      "יש לקבוע סוגי קבצים מורשים, מגבלת גודל וכללי דחייה לפני העלאה.",
+      "טל בחר עד 10 MiB ורק PDF, TXT ו-DOCX. נדרשים אישור אבטחה, אימות MIME וחתימה, Scanner פעיל ותצורה חיה לפני העלאה.",
     owner: "מוצר + אבטחה",
   },
   {
     checkId: "operations.knowledge-scan-recovery",
     title: "שחזור סריקות ידע תקועות",
     detail:
-      "יש להגדיר מתי סריקה נחשבת תקועה, כמה פעמים מנסים שוב ומתי מסלימים.",
+      "טל בחר סריקה כתקועה לאחר 15 דקות, עד שלושה ניסיונות ולאחריהם Manual review. נדרשים אישור תפעול ותצורה חיה.",
     owner: "תפעול + פיתוח",
   },
   {
     checkId: "operations.backup-policy",
     title: "מדיניות גיבוי ושחזור",
     detail:
-      "יש לאשר תדירות גיבוי, חלון שמירה ותדירות תרגול שחזור מבודד.",
+      "טל בחר גיבוי יומי, שמירה ל-90 יום, PITR ותרגול שחזור מבודד חודשי. נדרשים ספק Storage, חלון PITR מוכח ו-Restore evidence חי.",
     owner: "תפעול + אבטחה",
   },
   {
     checkId: "operations.slo-measurement",
     title: "מקור מדידת SLO",
     detail:
-      "יש לבחור מקור אמת לאירועי זמינות, שגיאות וזמני תגובה.",
+      "טל בחר Better Stack כ-Sink עם OpenTelemetry מ-Vercel ומ-Railway. נדרשים Retention, PII redaction, תקציב וראיות Staging לפני אישור.",
     owner: "תפעול + פיתוח",
   },
   {
     checkId: "operations.slo-alert-policy",
     title: "מדיניות התראות SLO",
     detail:
-      "יש לקבוע חלון מדידה, סף מינימום, בעל התראה ונתיב הסלמה.",
+      "טל בחר Pilot בשעות פעילות עם נתיב הסלמה. יש למנות Primary ו-Backup, לקבוע שעות, ערוצים, זמני תגובה ותרגיל התראה.",
     owner: "תפעול",
   },
   {
     checkId: "governance.data-retention-policy",
     title: "מדיניות שמירת ומחיקת מידע",
     detail:
-      "יש לאשר תקופות שמירה וטריגר מחיקה לכל מחלקת מידע.",
+      "טל בחר Policy v2 בכפוף ל-Legal review. Legal ואבטחה חייבים לאשר כל Data class, Trigger, Legal Hold ותקופה לפני חיבור Adapter מחיקה.",
     owner: "משפטי + אבטחה",
   },
 ] satisfies readonly ProductionDecisionDefinition[]);

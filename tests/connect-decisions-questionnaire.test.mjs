@@ -76,11 +76,11 @@ test("keeps the decision questionnaire self-contained and accessible in Hebrew",
 
 test("keeps every questionnaire decision structurally complete and deterministic", () => {
   assert.equal(sections.length, 9);
-  assert.equal(decisions.length, 48);
+  assert.equal(decisions.length, 49);
   assert.equal(
     decisions.filter(({ status }) => status === "clear")
       .length,
-    18,
+    19,
   );
   assert.equal(
     decisions.filter(({ status }) => status === "hard")
@@ -90,7 +90,7 @@ test("keeps every questionnaire decision structurally complete and deterministic
   assert.equal(
     decisions.filter(({ phase }) => phase === "before")
       .length,
-    39,
+    40,
   );
   assert.equal(
     decisions.filter(({ phase }) => phase === "after")
@@ -140,6 +140,42 @@ test("keeps every questionnaire decision structurally complete and deterministic
       decision.options.length,
     );
   }
+});
+
+test("records Tal's closed platform, repository, approval, and hosting decisions", () => {
+  const expectedDecisions = new Map([
+    ["G01", "react-next"],
+    ["G02", "personal-owner"],
+    ["G03", "governed-pr"],
+    ["R01", "full-migration"],
+  ]);
+
+  for (const [code, expectedValue] of expectedDecisions) {
+    const decision = decisions.find(
+      (candidate) => candidate.code === code,
+    );
+    assert.ok(decision);
+    assert.equal(decision.status, "clear");
+    assert.equal(decision.approved, true);
+    assert.equal(
+      decision.options.find(
+        ({ recommended }) => recommended === true,
+      )?.value,
+      expectedValue,
+    );
+  }
+
+  const legalOwner = decisions.find(
+    ({ code }) => code === "R02A",
+  );
+  assert.ok(legalOwner);
+  assert.equal(legalOwner.status, "hard");
+  assert.equal(
+    legalOwner.options.find(
+      ({ recommended }) => recommended === true,
+    )?.value,
+    "wamit-legal-entity",
+  );
 });
 
 test("covers every production decision registry blocker exactly once", () => {
