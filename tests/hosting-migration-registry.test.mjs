@@ -141,6 +141,29 @@ test("does not invent providers for unresolved shared services", () => {
   );
 });
 
+test("records the parallel Vercel build without claiming cutover", () => {
+  const buildRuntime = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "web.build-runtime",
+  );
+
+  assert.ok(buildRuntime);
+  assert.equal(buildRuntime.targetProvider, "vercel");
+  assert.equal(buildRuntime.nextAction, "configuration-required");
+  for (const path of [
+    "next.config.ts",
+    "app/layout.tsx",
+    "styles/tokens.css",
+    "server/platform/vercelUnavailableCloudflareEnvironment.ts",
+  ]) {
+    assert.equal(buildRuntime.sourceFiles.includes(path), true);
+  }
+  assert.match(buildRuntime.cutoverBlocker, /Next\.js 16 Webpack/);
+  assert.match(buildRuntime.cutoverBlocker, /passes locally/);
+  assert.match(buildRuntime.cutoverBlocker, /fail closed/);
+  assert.match(buildRuntime.cutoverBlocker, /default production command/);
+  assert.match(buildRuntime.cutoverBlocker, /preview deployment/);
+});
+
 test("separates the completed shared PostgreSQL limiter from unresolved live proof", () => {
   const rateLimits = HOSTING_MIGRATION_REGISTRY.find(
     ({ id }) => id === "security.distributed-rate-limits",

@@ -71,7 +71,11 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     ],
     sourceFiles: [
       "vite.config.ts",
+      "next.config.ts",
       "package.json",
+      "app/layout.tsx",
+      "styles/tokens.css",
+      "server/platform/vercelUnavailableCloudflareEnvironment.ts",
       ".openai/hosting.json",
     ],
     targetPlacement: "vercel-web",
@@ -79,9 +83,9 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
       "Vercel-supported React/Next.js build and runtime",
     targetProvider: "vercel",
     decisionState: "selected",
-    nextAction: "adapter-required",
+    nextAction: "configuration-required",
     cutoverBlocker:
-      "The production build still emits a Cloudflare Worker through Vinext.",
+      "A separate Next.js 16 Webpack production build now passes locally without downloading Google Fonts. The Vercel build replaces the Cloudflare-only virtual environment with a frozen empty binding map, so legacy Cloudflare paths fail closed instead of receiving D1, R2, queue or secret bindings. The default production command still emits a Cloudflare Worker through Vinext; Vercel project configuration, environment values, preview deployment, route smoke evidence and remaining legacy-route migration are still unavailable.",
   }),
   capability({
     id: "web.server-api-boundary",
