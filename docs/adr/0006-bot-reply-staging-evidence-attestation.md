@@ -70,6 +70,13 @@ signed payload, כולל Schema,‏ Policy,‏ Audience,‏ Environment, כל ז
 3.5 אין להחזיק Replay state בזיכרון, ב־filesystem של Vercel או ב־Redis.
 PostgreSQL הוא מקור האמת העמיד והרב־מופעי.
 
+3.6 ‏Migration 0047 מוסיפה Ledger רדום, בלתי־משתנה וללא Payload. היא
+קושרת Claim ל־Run שהושלם, לזהות Release קיימת ולגרסת Evidence צפויה, אך
+אינה משווה את `receiptDigest` החתום ל־`receipt_digest` הישן של ה־Run.
+הסיבה היא שה־Runner הישן מחשב Digest של `JSON.stringify`, ואילו החתימה
+החדשה משתמשת ב־Canonical JSON. ‏Commit C חייב לאחד את Domain החישוב או
+להוסיף שדה Attested נפרד לפני שניתן לטעון לקישור Receipt ברמת DB.
+
 ## 4. חלופות שנדחו בהמלצה
 
 4.1 ‏SHA-256 ציבורי בלבד — אינו מוכיח זהות מנפיק.
@@ -86,14 +93,28 @@ PostgreSQL הוא מקור האמת העמיד והרב־מופעי.
 
 5.1 ‏Commit A — primitive, Signer, בדיקות ו־ADR רדומים בלבד.
 
-5.2 ‏Commit B — Migration ו־Repository אטומיים ל־nonce ledger, ללא
-Grant ל־`PUBLIC` וללא Runtime composition.
+5.2 ‏Commit B — הושלם כ־Primitive רדום: Migration 0047 ללא Grant
+ל־`PUBLIC`,‏ Repository
+שאינו פותח Transaction עצמאית, בדיקות מבניות והוכחת PostgreSQL חיה.
+ה־Ledger מחזיר `consumed`,‏ `replayed` או `conflict`; ‏`PUBLIC` אינו מקבל
+גישה לטבלה או לפונקציה ואין Runtime composition.
 
 5.3 ‏Commit C — נשיאת המעטפת בתוך ה־Evidence הסופי, אימות מחדש ב־Inspector,
 חיבור Worker-only של ה־Signer ובדיקות PostgreSQL חיות.
 
-5.4 רק אחרי Commit C, הפרדת DB roles, בדיקת Kill switch ו־Approval פורמלי
-אפשר לשקול שינוי של `botReplyDeliveryAdapter` ל־Ready.
+5.4 ה־Wrapper של Commit C חייב לשמור סדר נעילות קבוע: נעילת/השלמת Run,
+אתחול ונעילת Release, צריכת nonce ופרסום Evidence+Audit. הרשאת `EXECUTE`
+תינתן רק ל־Capability role של רכיב האימות המבוקר, לא ל־API/Worker role
+כללי, ולעולם לא לפונקציית ה־nonce הפנימית. אחרת SQL ישיר יוכל לעקוף את
+אימות חתימת Ed25519 שמתבצע ב־TypeScript.
+
+5.5 רק אחרי Commit C, הפרדת Migration/API/Worker/Verifier DB roles, בדיקת
+Kill switch ו־Approval פורמלי אפשר לשקול שינוי של
+`botReplyDeliveryAdapter` ל־Ready.
+
+5.6 לפני Production יש להוסיף מדיניות Retention ייעודית ל־Ledger. הטבלה
+בלתי־משתנה בכוונה, ולכן מחיקת ראיות שפג תוקפן תדרוש פונקציית Maintenance
+מוגבלת, Legal Hold ו־Audit — לא הרשאת `DELETE` כללית.
 
 ## 6. תנאי קבלה
 
@@ -112,6 +133,13 @@ non-enumerable, עומק חריג ו־Unicode surrogate לא תקין אינם �
 ו־Rollback מלא.
 
 6.6 אין Private key ב־API dependency graph, ב־Evidence, בלוגים או ב־Git.
+
+6.7 הוכחת PostgreSQL המקומית של Commit B החילה 48 מיגרציות ו־90 תרחישי
+תחרות. היא הוכיחה שני Consumers מקבילים מסוג `consumed + replayed`, שינוי
+זמן מסוג `conflict`, תפוגה בזמן המתנה ל־Advisory lock ללא שורת Ledger,
+ותפוגת Replay בזמן המתנה לטבלה שמחזירה `conflict` ומשאירה רק את השורה הקיימת.
+חסימת `UPDATE/DELETE`, ‏Rollback ללא nonce שארי ו־PUBLIC privileges כבויים.
+ראיה זו אינה מחליפה את Wrapper האטומי של Commit C או הפרדת DB roles.
 
 ## 7. מצב החלטה
 

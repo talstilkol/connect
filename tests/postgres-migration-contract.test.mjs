@@ -65,6 +65,7 @@ const productionReadinessV2EvidenceSchema = migrationSources[41];
 const botReplyProviderOutcomeRequestFenceSchema = migrationSources[42];
 const botReplyReleaseEvidenceAtomicPublishSchema = migrationSources[44];
 const botReplyProviderClockDomainsSchema = migrationSources[45];
+const botReplyStagingAttestationNonceSchema = migrationSources[47];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -115,14 +116,42 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
     "0045_bot_reply_provider_clock_domains.sql",
     "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
+    "0047_bot_reply_staging_attestation_nonce_ledger.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 47,
+      migrationCount: 48,
       findings: [],
     },
+  );
+});
+
+test("keeps staging attestation replay evidence payload-free and dormant", () => {
+  assert.match(
+    botReplyStagingAttestationNonceSchema,
+    /CREATE TABLE public\.bot_reply_staging_attestation_nonces/,
+  );
+  assert.match(
+    botReplyStagingAttestationNonceSchema,
+    /CREATE FUNCTION public\.consume_bot_reply_staging_attestation_nonce\(/,
+  );
+  assert.match(
+    botReplyStagingAttestationNonceSchema,
+    /LANGUAGE plpgsql\s+SECURITY DEFINER\s+SET search_path = pg_catalog/,
+  );
+  assert.match(
+    botReplyStagingAttestationNonceSchema,
+    /REVOKE ALL ON FUNCTION public\.consume_bot_reply_staging_attestation_nonce\([\s\S]*\) FROM PUBLIC/,
+  );
+  assert.match(
+    botReplyStagingAttestationNonceSchema,
+    /REVOKE ALL ON TABLE public\.bot_reply_staging_attestation_nonces FROM PUBLIC/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingAttestationNonceSchema,
+    /\bGRANT\b|signature\s+TEXT|private_key|receipt_json|phone_e164|recipient_phone/i,
   );
 });
 

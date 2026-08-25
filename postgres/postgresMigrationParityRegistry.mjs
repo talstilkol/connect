@@ -553,4 +553,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway adds an expand-only, search-path-locked wrapper that initializes a first release and invokes the atomic evidence-plus-audit publisher in one database statement; PUBLIC execution and runtime activation remain blocked.",
   }),
+  Object.freeze({
+    migration:
+      "0047_bot_reply_staging_attestation_nonce_ledger.sql",
+    token:
+      "CREATE TABLE public.bot_reply_staging_attestation_nonces",
+    summary:
+      "Railway adds a dormant, payload-free and immutable PostgreSQL replay ledger for worker-signed Bot reply staging receipt attestations; PUBLIC access and runtime activation remain blocked pending atomic composition and distinct database roles.",
+  }),
 ]);

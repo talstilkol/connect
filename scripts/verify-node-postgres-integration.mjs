@@ -29,6 +29,9 @@ import {
   readD1FullDataMigrationSnapshot,
 } from "./read-d1-full-data-migration-snapshot.mjs";
 import {
+  verifyBotReplyStagingAttestationNoncePostgres,
+} from "./verify-bot-reply-staging-attestation-nonce-postgres.mjs";
+import {
   createRailwayPostgresFoundation,
 } from "../server/platform/railwayPostgresFoundation.ts";
 import {
@@ -130,6 +133,7 @@ const migrationFiles = Object.freeze([
   "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
   "0045_bot_reply_provider_clock_domains.sql",
   "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
+  "0047_bot_reply_staging_attestation_nonce_ledger.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -4794,6 +4798,11 @@ export async function verifyNodePostgresIntegration(
     const transactions = createNodePostgresTransactionManager(pool);
     await verifyFullDataMigrationBundle(pool, transactions);
     const tenantId = await createTenant(pool);
+    await verifyBotReplyStagingAttestationNoncePostgres(
+      pool,
+      transactions,
+      tenantId,
+    );
     const foundation = createRailwayPostgresFoundation({
       environment: postgresEnvironment(checkedConnectionString),
       telemetry: {
@@ -4879,7 +4888,7 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 58,
+      concurrencyScenarios: 61,
     });
   } finally {
     await pool.end();
