@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 
+import {
+  createNodePostgresBotReplyStagingProviderFenceWorkerCapability,
+} from "../server/platform/nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts";
+
 const reserveSql = `SELECT
   outcome,
   "operationKey",
@@ -33,6 +37,15 @@ function hexDigest(value) {
 
 function digest(value) {
   return `sha256:${hexDigest(value)}`;
+}
+
+function providerAuditKey(runKey, requestDigest) {
+  const value = createHash("sha256")
+    .update(runKey, "utf8")
+    .update("\0", "utf8")
+    .update(requestDigest, "utf8")
+    .digest("hex");
+  return `bot_reply_staging_audit_v1_${value}`;
 }
 
 function identity(prefix, tenantId, label) {
@@ -327,11 +340,7 @@ async function createFixture(
   const requestDigest = digest(
     `d31-d1d-a-request:${tenantId}:${label}`,
   );
-  const auditKey = identity(
-    "bot_reply_staging_audit_v1_",
-    tenantId,
-    `${label}:audit`,
-  );
+  const auditKey = providerAuditKey(runKey, requestDigest);
   const releaseId = identity(
     "connect_release_v1_",
     tenantId,
@@ -523,6 +532,41 @@ async function reserve(client, fixture) {
   return result.rows[0];
 }
 
+function providerFenceInput(fixture) {
+  const [
+    runKey,
+    tenantId,
+    requestDigest,
+    auditKey,
+    releaseId,
+    commitSha,
+    artifactDigest,
+    runClaimVersion,
+    runLeaseExpiresAt,
+    operationKey,
+    operationKind,
+    deliveryKey,
+    deliveryClaimVersion,
+    reservationKey,
+  ] = fixture.argumentsList;
+  return Object.freeze({
+    runKey,
+    tenantId,
+    requestDigest,
+    auditKey,
+    releaseId,
+    commitSha,
+    artifactDigest,
+    runClaimVersion,
+    runLeaseExpiresAt,
+    operationKey,
+    operationKind,
+    deliveryKey,
+    deliveryClaimVersion,
+    reservationKey,
+  });
+}
+
 async function finalize(client, fixture) {
   const result = await client.query(finalizeSql, fixture.argumentsList);
   assert.equal(result.rowCount, 1);
@@ -570,41 +614,40 @@ async function verifyConcurrentReserveReplay(pool, tenantId, safety) {
     safety,
     "concurrent-replay",
   );
-  const firstClient = await pool.connect();
-  const secondClient = await pool.connect();
-  try {
-    const results = await Promise.all([
-      reserve(firstClient, fixture),
-      reserve(secondClient, fixture),
-    ]);
-    assert.deepEqual(
-      results.map(({ outcome }) => outcome).sort(),
-      ["authorized", "replay-blocked"],
-    );
-    const authorized = results.find(({ outcome }) => (
-      outcome === "authorized"
-    ));
-    const replayed = results.find(({ outcome }) => (
-      outcome === "replay-blocked"
-    ));
-    assert.match(
-      authorized.providerRequestKey,
-      /^bot_reply_provider_request_v1_[0-9a-f]{64}$/,
-    );
-    assert.equal(authorized.requestedAt instanceof Date, true);
-    assert.equal(replayed.providerRequestKey, null);
-    assert.equal(replayed.requestedAt, null);
-    assert.equal(replayed.state, "reserved");
-    assert.deepEqual(await readFenceCounts(pool, fixture), {
-      operations: 1,
-      requests: 1,
-      outcomes: 0,
-      settlements: 0,
-    });
-  } finally {
-    firstClient.release();
-    secondClient.release();
-  }
+  const capability =
+    createNodePostgresBotReplyStagingProviderFenceWorkerCapability({ pool });
+  const input = providerFenceInput(fixture);
+  const results = await Promise.all([
+    capability.reserve(input),
+    capability.reserve(input),
+  ]);
+  assert.deepEqual(
+    results.map(({ outcome }) => outcome).sort(),
+    ["authorized", "replay-blocked"],
+  );
+  const authorized = results.find(({ outcome }) => (
+    outcome === "authorized"
+  ));
+  const replayed = results.find(({ outcome }) => (
+    outcome === "replay-blocked"
+  ));
+  assert.match(
+    authorized.providerRequestKey,
+    /^bot_reply_provider_request_v1_[0-9a-f]{64}$/,
+  );
+  assert.match(
+    authorized.requestedAt,
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+  );
+  assert.equal("providerRequestKey" in replayed, false);
+  assert.equal("requestedAt" in replayed, false);
+  assert.equal(replayed.state, "reserved");
+  assert.deepEqual(await readFenceCounts(pool, fixture), {
+    operations: 1,
+    requests: 1,
+    outcomes: 0,
+    settlements: 0,
+  });
 }
 
 async function verifyRollbackHasNoDurableToken(pool, tenantId, safety) {
@@ -640,7 +683,9 @@ async function verifyRollbackHasNoDurableToken(pool, tenantId, safety) {
       settlements: 0,
     });
 
-    const committed = await reserve(pool, fixture);
+    const capability =
+      createNodePostgresBotReplyStagingProviderFenceWorkerCapability({ pool });
+    const committed = await capability.reserve(providerFenceInput(fixture));
     assert.equal(committed.outcome, "authorized");
     assert.deepEqual(await readFenceCounts(pool, fixture), {
       operations: 1,
@@ -651,6 +696,169 @@ async function verifyRollbackHasNoDurableToken(pool, tenantId, safety) {
   } finally {
     await rollbackIfOpen(client, transactionOpen);
     client.release();
+  }
+
+  await verifyImplicitCommitFailureExposesNoToken(pool, tenantId, safety);
+}
+
+async function verifyImplicitCommitFailureExposesNoToken(
+  pool,
+  tenantId,
+  safety,
+) {
+  const fixture = await createFixture(
+    pool,
+    tenantId,
+    safety,
+    "implicit-commit-failure",
+  );
+  const capability =
+    createNodePostgresBotReplyStagingProviderFenceWorkerCapability({ pool });
+  let providerRequestKey;
+
+  const proofObjectCount = async () => {
+    const result = await pool.query(`
+      SELECT (
+        (
+          SELECT pg_catalog.count(*)
+          FROM pg_catalog.pg_class AS relation
+          INNER JOIN pg_catalog.pg_namespace AS namespace
+            ON namespace.oid = relation.relnamespace
+          WHERE namespace.nspname = 'public'
+            AND relation.relname IN (
+              'd31d1db_commit_failure_trigger_calls',
+              'd31d1db_commit_failure_targets'
+            )
+            AND relation.relkind IN ('r', 'S')
+        ) + (
+          SELECT pg_catalog.count(*)
+          FROM pg_catalog.pg_proc AS procedure
+          INNER JOIN pg_catalog.pg_namespace AS namespace
+            ON namespace.oid = procedure.pronamespace
+          WHERE namespace.nspname = 'public'
+            AND procedure.proname =
+              'reject_d31d1db_provider_request_at_commit'
+        ) + (
+          SELECT pg_catalog.count(*)
+          FROM pg_catalog.pg_trigger AS trigger
+          WHERE trigger.tgname =
+            'd31d1db_provider_request_commit_guard'
+            AND trigger.tgisinternal = false
+        )
+      )::integer AS count
+    `);
+    assert.equal(result.rowCount, 1);
+    return result.rows[0]?.count;
+  };
+
+  assert.equal(await proofObjectCount(), 0);
+
+  try {
+    await pool.query(`
+      CREATE SEQUENCE public.d31d1db_commit_failure_trigger_calls;
+
+      CREATE TABLE public.d31d1db_commit_failure_targets (
+        delivery_key TEXT PRIMARY KEY
+      );
+
+      CREATE FUNCTION public.reject_d31d1db_provider_request_at_commit()
+      RETURNS trigger
+      LANGUAGE plpgsql
+      SECURITY INVOKER
+      SET search_path = pg_catalog, pg_temp
+      AS $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM public.d31d1db_commit_failure_targets AS target
+          WHERE target.delivery_key = NEW.delivery_key
+        ) THEN
+          PERFORM pg_catalog.nextval(
+            'public.d31d1db_commit_failure_trigger_calls'::pg_catalog.regclass
+          );
+          RAISE EXCEPTION 'D31-D1d-B implicit commit rejected';
+        END IF;
+        RETURN NEW;
+      END;
+      $$;
+
+      CREATE CONSTRAINT TRIGGER d31d1db_provider_request_commit_guard
+      AFTER INSERT ON public.bot_reply_provider_request_claims
+      DEFERRABLE INITIALLY DEFERRED
+      FOR EACH ROW
+      EXECUTE FUNCTION public.reject_d31d1db_provider_request_at_commit();
+    `);
+    assert.equal(await proofObjectCount(), 4);
+    const triggerContract = await pool.query(`
+      SELECT
+        trigger.tgconstraint <> 0 AS "isConstraint",
+        trigger.tgdeferrable AS "isDeferrable",
+        trigger.tginitdeferred AS "isInitiallyDeferred",
+        procedure.proname AS "functionName"
+      FROM pg_catalog.pg_trigger AS trigger
+      INNER JOIN pg_catalog.pg_proc AS procedure
+        ON procedure.oid = trigger.tgfoid
+      WHERE trigger.tgname = 'd31d1db_provider_request_commit_guard'
+        AND trigger.tgisinternal = false
+    `);
+    assert.deepEqual(triggerContract.rows, [{
+      isConstraint: true,
+      isDeferrable: true,
+      isInitiallyDeferred: true,
+      functionName: "reject_d31d1db_provider_request_at_commit",
+    }]);
+
+    await pool.query(
+      `INSERT INTO public.d31d1db_commit_failure_targets (delivery_key)
+       VALUES ($1)`,
+      [fixture.deliveryKey],
+    );
+    await assert.rejects(
+      capability.reserve(providerFenceInput(fixture)).then((result) => {
+        providerRequestKey = result.providerRequestKey;
+        return result;
+      }),
+      /node-postgres staging provider capability failed: committed-query-failed/,
+    );
+    assert.equal(providerRequestKey, undefined);
+    assert.deepEqual(await readFenceCounts(pool, fixture), {
+      operations: 0,
+      requests: 0,
+      outcomes: 0,
+      settlements: 0,
+    });
+    const triggerEvidence = await pool.query(
+      `SELECT last_value AS "lastValue", is_called AS "isCalled"
+       FROM public.d31d1db_commit_failure_trigger_calls`,
+    );
+    assert.equal(triggerEvidence.rowCount, 1);
+    assert.equal(triggerEvidence.rows[0]?.isCalled, true);
+    assert.equal(triggerEvidence.rows[0]?.lastValue, "1");
+
+    await pool.query(
+      `DELETE FROM public.d31d1db_commit_failure_targets
+       WHERE delivery_key = $1`,
+      [fixture.deliveryKey],
+    );
+    const committed = await capability.reserve(providerFenceInput(fixture));
+    assert.equal(committed.outcome, "authorized");
+    assert.deepEqual(await readFenceCounts(pool, fixture), {
+      operations: 1,
+      requests: 1,
+      outcomes: 0,
+      settlements: 0,
+    });
+  } finally {
+    await pool.query(`
+      DROP TRIGGER IF EXISTS d31d1db_provider_request_commit_guard
+        ON public.bot_reply_provider_request_claims;
+      DROP FUNCTION IF EXISTS
+        public.reject_d31d1db_provider_request_at_commit();
+      DROP TABLE IF EXISTS public.d31d1db_commit_failure_targets;
+      DROP SEQUENCE IF EXISTS
+        public.d31d1db_commit_failure_trigger_calls;
+    `);
+    assert.equal(await proofObjectCount(), 0);
   }
 }
 

@@ -161,6 +161,8 @@ const stagingProviderFenceCapabilityPortsPath =
   "server/operations/botReplyStagingProviderFenceCapabilityPorts.ts";
 const stagingProviderFenceCapabilityRepositoryPath =
   "server/platform/postgresBotReplyStagingProviderFenceCapabilityRepository.ts";
+const nodePostgresStagingProviderFenceWorkerCapabilityPath =
+  "server/platform/nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts";
 const stagingCapabilityPortPaths = new Set([
   stagingRunCapabilityPortsPath,
   stagingProviderFenceCapabilityPortsPath,
@@ -177,6 +179,7 @@ const dormantBotReplyStagingAttestedModulePaths =
     stagingRunCapabilityRepositoryPath,
     stagingProviderFenceCapabilityPortsPath,
     stagingProviderFenceCapabilityRepositoryPath,
+    nodePostgresStagingProviderFenceWorkerCapabilityPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -190,6 +193,24 @@ const dormantBotReplyStagingAttestedAllowedImporters =
         [
           "../server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts",
           attestedReadRepositoryPath,
+        ],
+      ]),
+    ],
+    [
+      "scripts/verify-bot-reply-staging-provider-operation-fence-postgres.mjs",
+      new Map([
+        [
+          "../server/platform/nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts",
+          nodePostgresStagingProviderFenceWorkerCapabilityPath,
+        ],
+      ]),
+    ],
+    [
+      nodePostgresStagingProviderFenceWorkerCapabilityPath,
+      new Map([
+        [
+          "./postgresBotReplyStagingProviderFenceCapabilityRepository.ts",
+          stagingProviderFenceCapabilityRepositoryPath,
         ],
       ]),
     ],
@@ -308,6 +329,16 @@ const dormantAttestedAllowedRuntimeDependencies =
         [
           "./postgresResultValidation.ts",
           postgresResultValidationPath,
+        ],
+      ]),
+    ],
+    [
+      nodePostgresStagingProviderFenceWorkerCapabilityPath,
+      new Map([
+        ["node:util", null],
+        [
+          "./postgresBotReplyStagingProviderFenceCapabilityRepository.ts",
+          stagingProviderFenceCapabilityRepositoryPath,
         ],
       ]),
     ],
@@ -1312,6 +1343,34 @@ function stagingProviderFenceCapabilityRepositoryExportsAreExact(
     declarationIsExportedOnly(factory) &&
     factory.name?.text ===
       "createPostgresBotReplyStagingProviderFenceWorkerCapabilityRepository" &&
+    factory.typeParameters === undefined &&
+    factory.parameters.length === 1 &&
+    factory.body !== undefined &&
+    typeReferenceIs(
+      factory.type,
+      "BotReplyStagingProviderFenceWorkerCapabilityPort",
+    );
+}
+
+function nodePostgresStagingProviderFenceWorkerCapabilityExportsAreExact(
+  sourceFile,
+) {
+  const exportedStatements = sourceFile.statements.filter((statement) =>
+    ts.isExportAssignment(statement) ||
+    ts.isExportDeclaration(statement) ||
+    statement.modifiers?.some((modifier) =>
+      modifier.kind === ts.SyntaxKind.ExportKeyword ||
+      modifier.kind === ts.SyntaxKind.DefaultKeyword
+    )
+  );
+  if (exportedStatements.length !== 1) {
+    return false;
+  }
+  const factory = exportedStatements[0];
+  return ts.isFunctionDeclaration(factory) &&
+    declarationIsExportedOnly(factory) &&
+    factory.name?.text ===
+      "createNodePostgresBotReplyStagingProviderFenceWorkerCapability" &&
     factory.typeParameters === undefined &&
     factory.parameters.length === 1 &&
     factory.body !== undefined &&
@@ -2440,6 +2499,17 @@ export async function inspectSourceGuardrails(
       addFinding({
         code:
           "BOT_REPLY_STAGING_CAPABILITY_REPOSITORY_EXPORT_INVALID",
+        file: path,
+      });
+    } else if (
+      path === nodePostgresStagingProviderFenceWorkerCapabilityPath &&
+      !nodePostgresStagingProviderFenceWorkerCapabilityExportsAreExact(
+        sourceFile,
+      )
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CAPABILITY_DRIVER_EXPORT_INVALID",
         file: path,
       });
     }

@@ -17,10 +17,17 @@ const repositoryPath =
   "server/platform/postgresBotReplyStagingProviderFenceCapabilityRepository.ts";
 const portsPath =
   "server/operations/botReplyStagingProviderFenceCapabilityPorts.ts";
+const workerCapabilityPath =
+  "server/platform/nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts";
 
-const [exactPortsSource, exactRepositorySource] = await Promise.all([
+const [
+  exactPortsSource,
+  exactRepositorySource,
+  exactWorkerCapabilitySource,
+] = await Promise.all([
   readFile(new URL(`../${portsPath}`, import.meta.url), "utf8"),
   readFile(new URL(`../${repositoryPath}`, import.meta.url), "utf8"),
+  readFile(new URL(`../${workerCapabilityPath}`, import.meta.url), "utf8"),
 ]);
 
 async function createFixture(prefix) {
@@ -67,6 +74,10 @@ async function createFixture(prefix) {
       ].join("\n"),
     ),
     writeFile(join(root, repositoryPath), exactRepositorySource),
+    writeFile(
+      join(root, workerCapabilityPath),
+      exactWorkerCapabilitySource,
+    ),
   ]);
   return root;
 }
@@ -206,6 +217,61 @@ test("blocks direct and transitive runtime activation of the repository", async 
     {
       code: "BOT_REPLY_STAGING_ATTESTED_RUNTIME_DEPENDENCY_FORBIDDEN",
       file: "worker/index.ts",
+    },
+  ]);
+});
+
+test("blocks direct runtime activation of the committed Worker capability", async () => {
+  const root = await createFixture(
+    "connect-provider-fence-committed-runtime-",
+  );
+  await writeFile(
+    join(root, "worker/index.ts"),
+    [
+      'import { createNodePostgresBotReplyStagingProviderFenceWorkerCapability } from "../server/platform/nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts";',
+      "export const activation = createNodePostgresBotReplyStagingProviderFenceWorkerCapability;",
+      "",
+    ].join("\n"),
+  );
+
+  assert.deepEqual((await inspectSourceGuardrails(root)).findings, [
+    {
+      code: "BOT_REPLY_STAGING_ATTESTED_RUNTIME_DEPENDENCY_FORBIDDEN",
+      file: "worker/index.ts",
+    },
+  ]);
+});
+
+test("pins the committed Worker capability to one composite factory export", async () => {
+  const root = await createFixture(
+    "connect-provider-fence-committed-export-drift-",
+  );
+  await writeFile(
+    join(root, workerCapabilityPath),
+    `${exactWorkerCapabilitySource}\nexport const committedQueries = true;\n`,
+  );
+
+  assert.deepEqual((await inspectSourceGuardrails(root)).findings, [
+    {
+      code: "BOT_REPLY_STAGING_CAPABILITY_DRIVER_EXPORT_INVALID",
+      file: workerCapabilityPath,
+    },
+  ]);
+});
+
+test("blocks unreviewed runtime dependencies inside the committed Worker capability", async () => {
+  const root = await createFixture(
+    "connect-provider-fence-committed-dependency-",
+  );
+  await writeFile(
+    join(root, workerCapabilityPath),
+    `import { readFile } from "node:fs/promises";\n${exactWorkerCapabilitySource}\nvoid readFile;\n`,
+  );
+
+  assert.deepEqual((await inspectSourceGuardrails(root)).findings, [
+    {
+      code: "BOT_REPLY_STAGING_ATTESTED_DEPENDENCY_NOT_ALLOWLISTED",
+      file: workerCapabilityPath,
     },
   ]);
 });
@@ -519,6 +585,10 @@ test("blocks unreviewed runtime dependencies inside the repository", async () =>
   const report = await inspectSourceGuardrails(root);
 
   assert.deepEqual(report.findings, [
+    {
+      code: "BOT_REPLY_STAGING_ATTESTED_DEPENDENCY_NOT_ALLOWLISTED",
+      file: workerCapabilityPath,
+    },
     {
       code: "BOT_REPLY_STAGING_ATTESTED_DEPENDENCY_NOT_ALLOWLISTED",
       file: repositoryPath,

@@ -382,6 +382,43 @@ Bindings של ה־Functions/Triggers ואת היעדר הרשאות `PUBLIC`. א
 `tgtype` או Grant ל־Role מזוהה. חוזים אלה שייכים להקשחת D31-D1e ול־Manifest
 ההרשאות לפני Deployment.
 
+4.7.7.17 ‏D31-D1d-B-A מוסיף Factory רדום ומצומצם בשם
+`nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts`. ה־Factory
+מחזיק את `queryCommitted` בתוך Closure פרטי ומחזיר רק את ה־Worker capability
+הקיים. הוא אינו חושף Pool,‏ Client,‏ SQL,‏ Raw row או Query executor ואינו
+קורא Environment,‏ Credential או Meta transport.
+
+4.7.7.18 בכל Reserve או Finalize ה־Factory מקבל Client ייעודי מה־Pool,
+מבצע `ROLLBACK` קבוע כדי לסגור Transaction שנשארה פתוחה, ואחריו `DISCARD ALL`
+כדי לאפס Role,‏ Session settings ו־GUCs. רק אז הוא מאפשר אחת משתי שאילתות
+ה־SELECT הקבועות בעלות 14 Parameters. אין `BEGIN` או Callback חיצוני. התוצאה
+עוברת Validation מבני ומועתקת רק לאחר שה־Promise של `node-postgres` הושלם
+ב־`ReadyForQuery`; כשל Query,‏ Transport,‏ Validation מבני או Commit מסמן
+את ה־Client להשמדה ואינו מחזיר `providerRequestKey`. גם כשל ב־`release`
+נכשל סגור. Validation סמנטי נוסף של Identity ו־Union branch מתבצע ב־Repository
+לאחר השחרור, אך כשל בו עדיין אינו מוסר מפתח ל־Caller.
+
+4.7.7.19 ההוכחה ההתנהגותית רצה מול PostgreSQL 16 נקי עם כל 54 ה־Migrations.
+Constraint ‏`DEFERRABLE INITIALLY DEFERRED` מכוון גרם ל־SELECT להפיק Row
+אך ל־implicit Commit להיכשל. Sequence לא־טרנזקציוני הוכיח שה־Trigger הדחוי
+אכן הופעל; אותו Fixture הצליח לאחר הסרת Target החסימה. ה־Caller לא קיבל
+מפתח, ולאחר Rollback נמצאו אפס רשומות Operation ואפס Provider request
+claims עבור זהות הניסיון.
+שני Reserve מקבילים דרך
+ה־Factory החזירו Authorization יחיד ו־Replay חסום ללא מפתח, ונשמרו בדיוק
+Operation אחת ו־Request claim אחד. הרצת האינטגרציה המלאה דיווחה PASS עבור
+54 Migrations ו־101 תרחישי Verification ו־Concurrency.
+
+4.7.7.20 זהו GO רק ל־Commit-before-`providerRequestKey` בקוד רדום. ה־Source
+Guard חוסם Import ישיר ועקיף מ־API,‏ Worker,‏ Startup ו־Runtime ומתיר Import
+יחיד מסקריפט האינטגרציה. ה־Activation נשאר NO-GO: מסלול השליחה החי עדיין
+מפענח Access token מוקדם מדי, ואין עדיין Credential revision,‏ tenant submit
+barrier או pre-send permit שבודק לפי Database clock את חלון 24 השעות, ה־Lease,
+ה־Policy, ה־Authorization, ה־Connection, ה־Reservation וה־Kill switch.
+לפני Activation נדרשים גם Pool ייעודי שמקובע ל־`pg` ול־Role המזוהה של D1e,
+חסימת Dynamic code loaders בכל Scripts/Startup,‏ Deadline וראיית Reconciliation
+למקרה שבו Commit הצליח אך `ReadyForQuery` לא הגיע ל־Worker.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

@@ -292,6 +292,25 @@ test("keeps the provider-operation adapter dormant behind explicit blockers", ()
   );
 });
 
+test("documents the dormant committed provider-fence Worker capability", () => {
+  assert.match(
+    decision,
+    /D31-D1d-B-A[\s\S]*nodePostgresBotReplyStagingProviderFenceWorkerCapability\.ts[\s\S]*`queryCommitted`[\s\S]*Closure פרטי/,
+  );
+  assert.match(
+    decision,
+    /`ROLLBACK` קבוע[\s\S]*`DISCARD ALL`[\s\S]*שתי שאילתות[\s\S]*14 Parameters[\s\S]*`ReadyForQuery`/,
+  );
+  assert.match(
+    decision,
+    /`DEFERRABLE INITIALLY DEFERRED`[\s\S]*Sequence לא־טרנזקציוני[\s\S]*אותו Fixture הצליח[\s\S]*אפס רשומות Operation[\s\S]*עבור זהות הניסיון[\s\S]*101 תרחישי Verification/,
+  );
+  assert.match(
+    decision,
+    /GO רק ל־Commit-before-`providerRequestKey`[\s\S]*Activation נשאר NO-GO[\s\S]*Credential revision[\s\S]*pre-send permit[\s\S]*חלון 24 השעות/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,
