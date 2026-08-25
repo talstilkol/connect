@@ -35,7 +35,9 @@ export type BotFlowDefinitionIssue =
   | "invalid-trigger"
   | "invalid-reference"
   | "disconnected-block"
-  | "cycle-detected";
+  | "cycle-detected"
+  | "whatsapp-button-count-exceeded"
+  | "whatsapp-button-label-too-long";
 
 export type BotFlowDefinitionValidation =
   | {
