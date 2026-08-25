@@ -554,14 +554,65 @@ test("contains no randomized identity path and stays dormant", async () => {
   const projectRoot = new URL("../", import.meta.url);
   const moduleFile =
     "server/platform/railwayBotReplyStagingAttestedReleaseEvidence.ts";
-  const allowedDormantImporters = new Set([
-    "scripts/verify-bot-reply-staging-attested-evidence-postgres.mjs",
-    "scripts/verify-node-postgres-integration.mjs",
-    "server/platform/postgresBotReplyStagingAttestedReleaseEvidenceRepository.ts",
+  const allowedProtectedReferenceCounts = new Map([
+    [
+      "scripts/verify-bot-reply-staging-attested-evidence-postgres.mjs",
+      new Map([
+        ["railwayBotReplyStagingAttestedReleaseEvidence", 5],
+        ["postgresBotReplyStagingAttestedReleaseEvidenceRepository", 1],
+        ["postgresBotReplyStagingAttestedReleaseEvidenceReadRepository", 1],
+        ["botReplyStagingAttestedReleaseCutoverReadiness", 1],
+        ["evaluateBotReplyStagingAttestedReleaseCutoverReadiness", 2],
+        ["verifyBotReplyStagingAttestedEvidencePostgres", 1],
+        ["publish_bot_reply_staging_attested_evidence_with_audit", 1],
+      ]),
+    ],
+    [
+      "scripts/verify-node-postgres-integration.mjs",
+      new Map([
+        ["verifyBotReplyStagingAttestedEvidencePostgres", 2],
+        ["verify-bot-reply-staging-attested-evidence-postgres", 1],
+      ]),
+    ],
+    [
+      "scripts/verify-source-guardrails.mjs",
+      new Map([
+        ["postgresBotReplyStagingAttestedReleaseEvidenceReadRepository", 2],
+        ["botReplyStagingAttestedReleaseCutoverReadiness", 2],
+        ["verify-bot-reply-staging-attested-evidence-postgres", 1],
+      ]),
+    ],
+    [
+      "server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts",
+      new Map([
+        ["railwayBotReplyStagingAttestedReleaseEvidence", 5],
+        ["postgresBotReplyStagingAttestedReleaseEvidenceReadRepository", 1],
+        ["botReplyStagingAttestedReleaseCutoverReadiness", 5],
+        ["evaluateBotReplyStagingAttestedReleaseCutoverReadiness", 1],
+      ]),
+    ],
+    [
+      "server/platform/postgresBotReplyStagingAttestedReleaseEvidenceRepository.ts",
+      new Map([
+        ["railwayBotReplyStagingAttestedReleaseEvidence", 3],
+        ["postgresBotReplyStagingAttestedReleaseEvidenceRepository", 1],
+        ["publish_bot_reply_staging_attested_evidence_with_audit", 1],
+      ]),
+    ],
+    [
+      "server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts",
+      new Map([
+        ["railwayBotReplyStagingAttestedReleaseEvidence", 4],
+        ["postgresBotReplyStagingAttestedReleaseEvidenceReadRepository", 1],
+      ]),
+    ],
   ]);
   const protectedDormantReferences = [
     "railwayBotReplyStagingAttestedReleaseEvidence",
     "postgresBotReplyStagingAttestedReleaseEvidenceRepository",
+    "postgresBotReplyStagingAttestedReleaseEvidenceReadRepository",
+    "botReplyStagingAttestedReleaseCutoverReadiness",
+    "evaluateBotReplyStagingAttestedReleaseCutoverReadiness",
     "verifyBotReplyStagingAttestedEvidencePostgres",
     "verify-bot-reply-staging-attested-evidence-postgres",
     "verify-node-postgres-integration",
@@ -641,13 +692,20 @@ test("contains no randomized identity path and stays dormant", async () => {
       "shared/domain/hostingMigrationRegistry.ts",
       ['"scripts/verify-node-postgres-integration.mjs"'],
     ],
+    [
+      "scripts/verify-source-guardrails.mjs",
+      [
+        '"server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts"',
+        '"server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts"',
+      ],
+    ],
   ]);
   const sourceFiles = [...rootRuntimeFiles, ...(await Promise.all(
     sourceRoots.map(listSourceFiles),
   )).flat()];
   const forbiddenReferences = [];
   for (const sourceFile of sourceFiles) {
-    if (sourceFile === moduleFile || allowedDormantImporters.has(sourceFile)) {
+    if (sourceFile === moduleFile) {
       continue;
     }
     const candidate = await readFile(new URL(sourceFile, projectRoot), "utf8");
@@ -659,6 +717,17 @@ test("contains no randomized identity path and stays dormant", async () => {
         `${sourceFile} must contain the allowed inventory literal exactly once`,
       );
       guardedCandidate = guardedCandidate.replace(allowedLiteral, "");
+    }
+    for (const [protectedReference, expectedCount] of
+      allowedProtectedReferenceCounts.get(sourceFile) ?? []) {
+      assert.equal(
+        candidate.split(protectedReference).length - 1,
+        expectedCount,
+        `${sourceFile} protected reference inventory changed`,
+      );
+      guardedCandidate = guardedCandidate
+        .split(protectedReference)
+        .join("");
     }
     for (const protectedReference of protectedDormantReferences) {
       if (guardedCandidate.includes(protectedReference)) {

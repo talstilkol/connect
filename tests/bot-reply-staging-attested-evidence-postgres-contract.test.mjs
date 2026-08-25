@@ -93,6 +93,38 @@ test("pins the existing v1 release evidence upgrade to v2 and replay", async () 
   assert.match(source, /await verifyVersionOneUpgrade/);
 });
 
+test("reads the published v2 PostgreSQL proof and keeps cutover blocked", async () => {
+  const source = await readFile(verifierUrl, "utf8");
+
+  assert.match(source, /nodePostgresAdapter\.ts/);
+  assert.match(
+    source,
+    /postgresBotReplyStagingAttestedReleaseEvidenceReadRepository\.ts/,
+  );
+  assert.match(
+    source,
+    /botReplyStagingAttestedReleaseCutoverReadiness\.ts/,
+  );
+  assert.match(source, /async function verifyReadOnlyCutoverRemainsBlocked/);
+  assert.match(source, /createNodePostgresQueryExecutor\(pool\)/);
+  assert.match(source, /const verifiedEvidence = await readRepository\.readVerified\(\)/);
+  assert.match(
+    source,
+    /status: "verified",[\s\S]*evidenceSchemaVersion: 2,[\s\S]*replayProtected: true/,
+  );
+  assert.match(
+    source,
+    /evaluateBotReplyStagingAttestedReleaseCutoverReadiness\(\s*verifiedEvidence,\s*\)/,
+  );
+  assert.match(source, /readiness\.code, "CAPABILITY_ROLES_REQUIRED"/);
+  assert.match(source, /readiness\.activationAllowed, false/);
+  assert.match(
+    source,
+    /assert\.equal\(replay\.replayProtected, true\);[\s\S]*await verifyReadOnlyCutoverRemainsBlocked\(pool, fixture, issued\)/,
+  );
+  assert.doesNotMatch(source, /activationAllowed, true/);
+});
+
 test("keeps the live verifier outside every production server module", async () => {
   const files = await serverTypeScriptFiles(
     new URL("../server/", import.meta.url),

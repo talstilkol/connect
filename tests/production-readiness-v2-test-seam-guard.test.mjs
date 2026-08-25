@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   mkdir,
   mkdtemp,
+  readFile,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -18,8 +19,31 @@ test("forbids Production Readiness v2 test seams in runtime composition", async 
   );
 
   await Promise.all(
-    ["app", "features", "server", "shared", "db", "worker"].map(
-      (directory) => mkdir(join(root, directory)),
+    [
+      "app",
+      "features",
+      "server/operations",
+      "shared",
+      "db",
+      "worker",
+    ].map(
+      (directory) =>
+        mkdir(join(root, directory), {
+          recursive: true,
+        }),
+    ),
+  );
+  await writeFile(
+    join(
+      root,
+      "server/operations/productionImplementationState.ts",
+    ),
+    await readFile(
+      new URL(
+        "../server/operations/productionImplementationState.ts",
+        import.meta.url,
+      ),
+      "utf8",
     ),
   );
   await writeFile(

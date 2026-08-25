@@ -34,11 +34,23 @@ test("keeps every privileged database credential in one bounded service", () => 
   }
   assert.match(
     decision,
-    /Verifier[\s\S]*`EXECUTE`[\s\S]*Wrapper[\s\S]*0044, 0046 או 0047/,
+    /Verifier[\s\S]*`EXECUTE`[\s\S]*Wrapper[\s\S]*0044, 0046 או\s*0047/,
   );
   assert.match(
     decision,
     /ללא `INSERT`,‏ `UPDATE`,‏ `DELETE` או `TRUNCATE` ישיר/,
+  );
+  assert.match(
+    decision,
+    /API[\s\S]*ללא גישה ישירה לארבע טבלאות הראיות המוגנות/,
+  );
+  assert.match(
+    decision,
+    /Readback function[\s\S]*ללא Grant[\s\S]*ישיר על הטבלאות/,
+  );
+  assert.match(
+    decision,
+    /אסור לחבר אותו ל־`POSTGRES_API_URL` או[\s\S]*`POSTGRES_WORKER_URL`/,
   );
 });
 

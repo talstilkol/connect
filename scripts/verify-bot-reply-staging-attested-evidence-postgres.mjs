@@ -10,6 +10,15 @@ import {
   deriveBotReplyStagingReceiptDigest,
 } from "../server/operations/botReplyStagingReceiptAttestation.ts";
 import {
+  evaluateBotReplyStagingAttestedReleaseCutoverReadiness,
+} from "../server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts";
+import {
+  createNodePostgresQueryExecutor,
+} from "../server/platform/nodePostgresAdapter.ts";
+import {
+  createPostgresBotReplyStagingAttestedReleaseEvidenceReadRepository,
+} from "../server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts";
+import {
   createPostgresBotReplyStagingAttestedReleaseEvidenceRepository,
 } from "../server/platform/postgresBotReplyStagingAttestedReleaseEvidenceRepository.ts";
 import {
@@ -304,6 +313,56 @@ async function releaseMutationCounts(pool, fixture) {
   return result.rows[0];
 }
 
+async function verifyReadOnlyCutoverRemainsBlocked(
+  pool,
+  fixture,
+  issued,
+) {
+  const readRepository =
+    createPostgresBotReplyStagingAttestedReleaseEvidenceReadRepository(
+      createNodePostgresQueryExecutor(pool),
+      {
+        releaseId: fixture.releaseId,
+        commitSha: fixture.commitSha,
+        artifactDigest: fixture.artifactDigest,
+      },
+      keyId,
+      [{
+        keyId,
+        publicKeySpkiBase64Url,
+        validFrom: keyValidFrom,
+        validUntil: keyValidUntil,
+      }],
+    );
+  const verifiedEvidence = await readRepository.readVerified();
+  assert.deepEqual(verifiedEvidence, {
+    status: "verified",
+    storageMode: "postgresql",
+    releaseId: fixture.releaseId,
+    commitSha: fixture.commitSha,
+    artifactDigest: fixture.artifactDigest,
+    evidenceSchemaVersion: 2,
+    evidencePolicyVersion: issued.evidence.policyVersion,
+    evidenceVersion: 1,
+    evidenceDigest: issued.evidence.evidenceDigest,
+    verifiedAt: issued.evidence.core.verifiedAt,
+    expiresAt: issued.evidence.core.expiresAt,
+    replayProtected: true,
+  });
+
+  const readiness =
+    evaluateBotReplyStagingAttestedReleaseCutoverReadiness(
+      verifiedEvidence,
+    );
+  assert.equal(readiness.status, "blocked");
+  assert.equal(readiness.code, "CAPABILITY_ROLES_REQUIRED");
+  assert.equal(readiness.evidenceStatus, "verified");
+  assert.equal(readiness.evidenceDigest, issued.evidence.evidenceDigest);
+  assert.equal(readiness.replayProtected, true);
+  assert.equal(readiness.activationAllowed, false);
+  assert.equal(Object.isFrozen(readiness), true);
+}
+
 async function verifyExactRaceAndConflict(
   pool,
   repository,
@@ -335,6 +394,8 @@ async function verifyExactRaceAndConflict(
   assert.equal(replay.status, "replayed");
   assert.equal(replay.nonceStatus, "replayed");
   assert.equal(replay.replayProtected, true);
+
+  await verifyReadOnlyCutoverRemainsBlocked(pool, fixture, issued);
 
   assert.deepEqual(await releaseMutationCounts(pool, fixture), {
     nonceCount: 1,

@@ -13,15 +13,18 @@
 1.1.1 `migration owner` — Role מסוג `NOLOGIN` שמחזיק את הטבלאות ואת
 פונקציות `SECURITY DEFINER`; Migrator ייעודי ב־CI רשאי לבצע אליו `SET ROLE`.
 
-1.1.2 `api role` — קריאות API בלבד והרשאות `SELECT` מצומצמות; ללא כתיבה
-ישירה לראיות המוגנות.
+1.1.2 `api role` — קריאות API עסקיות בלבד; ללא `SELECT` ישיר על טבלאות
+Release evidence,‏ Receipt,‏ Nonce או Operator events וללא כתיבה ישירה
+לראיות המוגנות.
 
 1.1.3 `worker role` — עבודות Worker בלבד; ללא גישה ל־Release evidence,
 ל־Operator events או ל־Nonce ledger.
 
 1.1.4 `verifier capability role` — שירות Verifier מבודד. מקבל `EXECUTE`
-רק על Wrapper חיצוני אחד שמאמת את כל ה־bindings ומבצע nonce + Evidence +
-Audit באותה Transaction. אין לו `EXECUTE` על פונקציות 0044, 0046 או 0047.
+רק על Wrapper פרסום חיצוני אחד ועל Readback function מצומצמת אחת. פונקציית
+הקריאה מחזירה רק Snapshot עבור זהות Release מפורשת; היא אינה מעניקה ל־Role
+`SELECT` ישיר על ארבע הטבלאות. אין לו `EXECUTE` על פונקציות 0044, 0046 או
+0047.
 
 1.2 עד שכל ארבע היכולות קיימות ומוכחות, Bot Release Evidence נשאר
 Fail-closed ואסור לסמן את Operator כ־Ready.
@@ -40,9 +43,9 @@ Fail-closed ואסור לסמן את Operator כ־Ready.
 ```text
 CI / one-shot migrator ── POSTGRES_MIGRATION_URL ──► Migration owner
                                                         │ owns schema
-API ──────────────── POSTGRES_API_URL ────────────────► │ SELECT only
+API ──────────────── POSTGRES_API_URL ────────────────► │ business data only
 Worker ───────────── POSTGRES_WORKER_URL ─────────────► │ no protected access
-Verifier service ─── POSTGRES_VERIFIER_URL ──────────► │ EXECUTE outer wrapper
+Verifier service ─── POSTGRES_VERIFIER_URL ──────────► │ EXECUTE publish + readback
                                                         ▼
                 Direct protected-table DML: BLOCKED
                 Internal 0044/0046/0047 EXECUTE: BLOCKED
@@ -110,12 +113,14 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 
 4.3 מטריצת Capability:
 
-4.3.1 API — `SELECT` רק על Release evidence ו־Readiness הדרושים לקריאה.
+4.3.1 API — ללא גישה ישירה לארבע טבלאות הראיות המוגנות. הוא רשאי לקבל רק
+תוצאת Readiness מצומצמת משירות Verifier מבודד, לאחר שיוגדר חוזה שירות נפרד.
 
 4.3.2 Worker — ללא הרשאה לשלוש הטבלאות המוגנות וללא פונקציות הפרסום.
 
-4.3.3 Verifier — `SELECT` מצומצם ל־Release/Operator readback ו־`EXECUTE`
-רק על Wrapper Commit C החיצוני.
+4.3.3 Verifier — ללא `SELECT` ישיר על הטבלאות. הוא מקבל `EXECUTE` רק על
+Wrapper הפרסום של Commit C ועל Readback function בעלת SQL קבוע, זהות Release
+מלאה, `LIMIT 2` ופלט עמודות סגור הדרוש לאימות חתימה וקשרים.
 
 4.3.4 כל שלושת ה־Runtime roles — ללא `EXECUTE` על 0044, 0046 ו־0047;
 ללא `INSERT`,‏ `UPDATE`,‏ `DELETE` או `TRUNCATE` ישיר בטבלאות המוגנות.
@@ -128,6 +133,19 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 
 4.4.3 `PUBLIC EXECUTE` מבוטל מיד באותה Transaction שבה נוצרת הפונקציה.
 
+4.4.4 Readback function רצה כ־`SECURITY DEFINER`, אינה מקבלת שם טבלה או SQL
+דינמי, ואינה מחזירה את ה־Snapshot ל־API או ל־Worker. רק הקוד המבודד של
+Verifier ממיר אותו לפלט Readiness המצומצם.
+
+4.5 מצב המימוש הנוכחי:
+
+4.5.1 ה־Read repository של Stage 7 משתמש כרגע ב־`SELECT` ישיר על ארבע
+הטבלאות לצורך הוכחה מקומית בלבד. אסור לחבר אותו ל־`POSTGRES_API_URL` או
+ל־`POSTGRES_WORKER_URL`.
+
+4.5.2 לפני Activation יש להעביר את ה־Repository ל־Readback function
+המצומצמת ולהוכיח את מטריצת ההרשאות על PostgreSQL חי.
+
 ## 5. סדר ביצוע
 
 5.1 Expand:
@@ -135,6 +153,9 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 5.1.1 ליצור פונקציות CAS + Audit אטומיות בלי להפעיל עדיין Trigger חוסם.
 
 5.1.2 להעביר את Repositories לקריאה לפונקציות.
+
+5.1.3 ליצור Readback function מצומצמת עבור Snapshot האימות, ללא Grant
+ישיר על הטבלאות.
 
 5.2 Identity rollout:
 
@@ -158,7 +179,8 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 
 5.4.2 לבטל Direct DML על טבלאות Evidence המוגנות.
 
-5.4.3 להעניק `EXECUTE` על ה־Wrapper החיצוני ל־Verifier capability בלבד.
+5.4.3 להעניק `EXECUTE` על Wrapper הפרסום ועל Readback function ל־Verifier
+capability בלבד.
 
 5.4.4 להפעיל מחדש Worker, אחריו API, ורק אז לפתוח Kill switch.
 
@@ -172,8 +194,11 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 6.3 API, Worker, Verifier, Role זר ו־`PUBLIC` נכשלים ב־`EXECUTE` על
 0044, 0046 ו־0047.
 
-6.4 API מצליח רק ב־`SELECT` שאושר; Worker נכשל בכל גישה לפרוסת הראיות;
-Verifier מצליח רק ב־Wrapper ובקריאות Readback המצומצמות.
+6.4 API ו־Worker נכשלים בכל גישה לארבע טבלאות הראיות וב־`EXECUTE` על
+Readback; Verifier מצליח רק בשני ה־Wrappers ואינו מצליח ב־`SELECT` ישיר.
+
+6.4.1 ה־Readback מחזיר אפס או שורה אחת לזהות Release מדויקת, ושתי התאמות,
+זהות שגויה או Row מורחב נכשלות סגור ב־Repository.
 
 6.5 כשל Audit מבטל את ה־nonce ואת ה־CAS באותה Transaction.
 

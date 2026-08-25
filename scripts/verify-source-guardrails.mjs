@@ -1,15 +1,21 @@
 import {
   readdir,
   readFile,
+  realpath,
 } from "node:fs/promises";
+import { builtinModules } from "node:module";
 import {
   extname,
+  dirname,
   join,
   normalize,
   relative,
   resolve,
 } from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  fileURLToPath,
+  pathToFileURL,
+} from "node:url";
 import ts from "typescript";
 
 const projectRoot = fileURLToPath(
@@ -22,6 +28,7 @@ const sourceRoots = [
   "shared",
   "db",
   "worker",
+  "build",
 ];
 const rootRuntimeFiles = [
   "proxy.ts",
@@ -38,12 +45,22 @@ const rootRuntimeFiles = [
   "scripts/start-railway-bullmq-worker.mjs",
 ];
 const sourceExtensions = new Set([
+  ".cjs",
+  ".cts",
   ".js",
   ".jsx",
   ".ts",
   ".tsx",
   ".mjs",
   ".mts",
+]);
+const ignoredSourceGraphDirectoryNames = new Set([
+  ".git",
+  ".next",
+  ".wrangler",
+  "coverage",
+  "dist",
+  "node_modules",
 ]);
 const bannedPatterns = [
   {
@@ -94,6 +111,14 @@ const serverOnlyIdentifiers = [
   "BETTER_STACK_SOURCE_TOKEN",
   "BETTER_STACK_INCIDENT_API_TOKEN",
 ];
+const serverOnlyImportSpecifiers = new Set([
+  ...builtinModules,
+  ...builtinModules.map((specifier) =>
+    specifier.startsWith("node:")
+      ? specifier
+      : `node:${specifier}`
+  ),
+]);
 const serverOnlyImportPattern =
   /^(?:cloudflare:workers|server-only|next\/headers|next\/server|@clerk\/nextjs\/server)$/;
 const conventionClientEntryPaths = new Set([
@@ -105,6 +130,115 @@ const rootServerOnlyPaths = new Set(
       !conventionClientEntryPaths.has(file),
   ),
 );
+const attestedCutoverReadinessPath =
+  "server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts";
+const attestedReadRepositoryPath =
+  "server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts";
+const attestedEvidenceV2FileName = [
+  "railwayBotReplyStaging",
+  "AttestedReleaseEvidence.ts",
+].join("");
+const attestedEvidenceV2Path =
+  `server/platform/${attestedEvidenceV2FileName}`;
+const receiptAttestationPath =
+  "server/operations/botReplyStagingReceiptAttestation.ts";
+const dormantBotReplyStagingAttestedModulePaths =
+  new Set([
+    attestedCutoverReadinessPath,
+    attestedReadRepositoryPath,
+  ]);
+const dormantBotReplyStagingAttestedAllowedImporters =
+  new Map([
+    [
+      "scripts/verify-bot-reply-staging-attested-evidence-postgres.mjs",
+      new Map([
+        [
+          "../server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts",
+          attestedCutoverReadinessPath,
+        ],
+        [
+          "../server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts",
+          attestedReadRepositoryPath,
+        ],
+      ]),
+    ],
+  ]);
+const legacyBotReplyStagingEvidenceModulePaths =
+  new Set([
+    "server/operations/currentProductionReadinessEvidenceSource.ts",
+    "server/operations/currentRailwayBotReplyStagingReleaseEvidenceReadHandler.ts",
+    "server/operations/railwayBotReplyStagingReleaseEvidenceReadHandler.ts",
+    "server/platform/postgresBotReplyStagingReleaseEvidenceRepository.ts",
+    "server/platform/railwayBotReplyStagingCrossServiceEvidence.ts",
+    "server/platform/railwayBotReplyStagingReleaseEvidenceReadOperation.ts",
+  ]);
+const productionImplementationStatePath =
+  "server/operations/productionImplementationState.ts";
+const productionImplementationStatePropertyNames =
+  new Set([
+    "metaWebhookQueue",
+    "campaignDeliveryQueue",
+    "targetQueueAdapter",
+    "campaignScheduler",
+    "campaignDeliveryAdapter",
+    "botReplyDeliveryAdapter",
+    "aiProvider",
+    "billingProvider",
+    "rateLimitPolicy",
+    "fileScanner",
+    "monitoringAndAlerting",
+    "backupAndRestore",
+    "sloMeasurement",
+    "dataRetentionPolicy",
+  ]);
+const sourceGuardrailSelfPath =
+  "scripts/verify-source-guardrails.mjs";
+const dormantAttestedAllowedRuntimeDependencies =
+  new Map([
+    [
+      attestedCutoverReadinessPath,
+      new Map([
+        ["node:util", null],
+        [
+          `../platform/${attestedEvidenceV2FileName}`,
+          attestedEvidenceV2Path,
+        ],
+      ]),
+    ],
+    [
+      attestedReadRepositoryPath,
+      new Map([
+        ["node:crypto", null],
+        ["node:util", null],
+        [
+          "../operations/botReplyStagingReceiptAttestation.ts",
+          receiptAttestationPath,
+        ],
+        [
+          `./${attestedEvidenceV2FileName}`,
+          attestedEvidenceV2Path,
+        ],
+      ]),
+    ],
+    [
+      attestedEvidenceV2Path,
+      new Map([
+        ["node:crypto", null],
+        ["node:util", null],
+        [
+          "../operations/botReplyStagingReceiptAttestation.ts",
+          receiptAttestationPath,
+        ],
+      ]),
+    ],
+    [
+      receiptAttestationPath,
+      new Map([
+        ["node:crypto", null],
+        ["node:util", null],
+      ]),
+    ],
+  ]);
 
 async function listSourceFiles(directory) {
   let entries;
@@ -148,6 +282,315 @@ async function listSourceFiles(directory) {
   return nested.flat();
 }
 
+async function listImmediateSourceFiles(directory) {
+  const entries = await readdir(directory, {
+    withFileTypes: true,
+  });
+
+  return entries
+    .filter(
+      (entry) =>
+        (entry.isFile() || entry.isSymbolicLink()) &&
+        sourceExtensions.has(extname(entry.name)),
+    )
+    .map((entry) => join(directory, entry.name));
+}
+
+async function listPackageManifests(directory) {
+  let entries;
+
+  try {
+    entries = await readdir(directory, {
+      withFileTypes: true,
+    });
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      return [];
+    }
+    throw error;
+  }
+
+  const nested = await Promise.all(
+    entries.map((entry) => {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        return listPackageManifests(path);
+      }
+      return entry.isFile() && entry.name === "package.json"
+        ? [path]
+        : [];
+    }),
+  );
+  return nested.flat();
+}
+
+async function listSymbolicLinks(directory) {
+  let entries;
+
+  try {
+    entries = await readdir(directory, {
+      withFileTypes: true,
+    });
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      return [];
+    }
+    throw error;
+  }
+
+  const nested = await Promise.all(
+    entries.map((entry) => {
+      const path = join(directory, entry.name);
+      if (entry.isSymbolicLink()) return [path];
+      if (
+        entry.isDirectory() &&
+        !ignoredSourceGraphDirectoryNames.has(
+          entry.name,
+        )
+      ) {
+        return listSymbolicLinks(path);
+      }
+      return [];
+    }),
+  );
+  return nested.flat();
+}
+
+async function canonicalExistingPath(file) {
+  try {
+    return normalize(await realpath(file));
+  } catch (error) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT"
+    ) {
+      return normalize(resolve(file));
+    }
+    throw error;
+  }
+}
+
+function resolvePackageTargetPath(
+  manifestFile,
+  target,
+) {
+  try {
+    const manifestDirectoryUrl = pathToFileURL(
+      `${dirname(manifestFile)}/`,
+    );
+    return fileURLToPath(
+      new URL(target, manifestDirectoryUrl),
+    );
+  } catch {
+    return null;
+  }
+}
+
+function escapeRegularExpression(value) {
+  return value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&",
+  );
+}
+
+function packageTargetPatternMatchesFile(
+  manifestFile,
+  target,
+  file,
+) {
+  let decodedTarget;
+  try {
+    decodedTarget = decodeURIComponent(
+      target.split(/[?#]/, 1)[0],
+    );
+  } catch {
+    return false;
+  }
+  const patternParts = decodedTarget.split("*");
+  if (patternParts.length < 2) return false;
+
+  let pattern = escapeRegularExpression(
+    patternParts[0],
+  );
+  for (
+    let index = 1;
+    index < patternParts.length;
+    index += 1
+  ) {
+    pattern += index === 1 ? "(.*)" : "\\1";
+    pattern += escapeRegularExpression(
+      patternParts[index],
+    );
+  }
+
+  const relativeFile = `./${relative(
+    dirname(manifestFile),
+    file,
+  ).replaceAll("\\", "/")}`;
+  return new RegExp(`^${pattern}$`, "u").test(
+    relativeFile,
+  );
+}
+
+async function packageTargetPatternMatchesCanonicalFile(
+  manifestFile,
+  target,
+  file,
+  canonicalFile,
+  canonicalSymbolicLinkByPath,
+) {
+  if (
+    packageTargetPatternMatchesFile(
+      manifestFile,
+      target,
+      file,
+    )
+  ) {
+    return true;
+  }
+
+  let decodedTarget;
+  try {
+    decodedTarget = decodeURIComponent(
+      stripResourceSuffix(target),
+    );
+  } catch {
+    return false;
+  }
+  const wildcardIndex = decodedTarget.indexOf("*");
+  if (wildcardIndex === -1) return false;
+
+  const targetPathPattern = stripResourceSuffix(
+    decodedTarget,
+  );
+  if (
+    wildcardIndex < targetPathPattern.lastIndexOf("/")
+  ) {
+    return true;
+  }
+
+  const manifestDirectory = normalize(
+    resolve(dirname(manifestFile)),
+  );
+  for (
+    const [symbolicLinkPath, canonicalTarget] of
+      canonicalSymbolicLinkByPath
+  ) {
+    if (
+      symbolicLinkPath !== manifestDirectory &&
+      !symbolicLinkPath.startsWith(
+        `${manifestDirectory}/`,
+      )
+    ) {
+      continue;
+    }
+    const canonicalRelativeFile = relative(
+      canonicalTarget,
+      canonicalFile,
+    );
+    if (
+      canonicalRelativeFile === ".." ||
+      canonicalRelativeFile.startsWith("../")
+    ) {
+      continue;
+    }
+    const aliasCandidate = canonicalRelativeFile === ""
+      ? symbolicLinkPath
+      : resolve(
+        symbolicLinkPath,
+        canonicalRelativeFile,
+      );
+    if (
+      packageTargetPatternMatchesFile(
+        manifestFile,
+        target,
+        aliasCandidate,
+      )
+    ) {
+      return true;
+    }
+  }
+
+  const staticPrefix = decodedTarget.slice(
+    0,
+    wildcardIndex,
+  );
+  const staticPrefixPath = resolve(
+    dirname(manifestFile),
+    staticPrefix,
+  );
+  const aliasDirectory = staticPrefix.endsWith("/")
+    ? staticPrefixPath
+    : dirname(staticPrefixPath);
+  for (const symbolicLinkPath of
+    canonicalSymbolicLinkByPath.keys()) {
+    if (
+      aliasDirectory === symbolicLinkPath ||
+      aliasDirectory.startsWith(
+        `${symbolicLinkPath}/`,
+      )
+    ) {
+      return true;
+    }
+  }
+  const canonicalAliasDirectory =
+    await canonicalExistingPath(aliasDirectory);
+  const canonicalRelativeFile = relative(
+    canonicalAliasDirectory,
+    canonicalFile,
+  );
+  if (
+    canonicalRelativeFile === "" ||
+    canonicalRelativeFile === ".." ||
+    canonicalRelativeFile.startsWith(`..${"/"}`) ||
+    resolve(
+      canonicalAliasDirectory,
+      canonicalRelativeFile,
+    ) !== canonicalFile
+  ) {
+    return false;
+  }
+
+  return packageTargetPatternMatchesFile(
+    manifestFile,
+    target,
+    resolve(aliasDirectory, canonicalRelativeFile),
+  );
+}
+
+function collectPackageRuntimeTargets(value, targets) {
+  if (typeof value === "string") {
+    targets.add(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectPackageRuntimeTargets(item, targets);
+    }
+    return;
+  }
+  if (
+    typeof value === "object" &&
+    value !== null
+  ) {
+    for (const item of Object.values(value)) {
+      collectPackageRuntimeTargets(item, targets);
+    }
+  }
+}
+
 function scriptKind(file) {
   const extension = extname(file);
 
@@ -159,7 +602,8 @@ function scriptKind(file) {
   }
   if (
     extension === ".js" ||
-    extension === ".mjs"
+    extension === ".mjs" ||
+    extension === ".cjs"
   ) {
     return ts.ScriptKind.JS;
   }
@@ -191,6 +635,18 @@ function hasDirective(sourceFile, directive) {
   }
 
   return false;
+}
+
+function isRuntimeEntry(root, file, sourceFile) {
+  const path = relativePath(root, file);
+
+  return rootServerOnlyPaths.has(path) ||
+    path.startsWith("worker/") ||
+    (
+      path.startsWith("app/") &&
+      !hasDirective(sourceFile, "use client")
+    ) ||
+    hasDirective(sourceFile, "use server");
 }
 
 function importDeclarationIsTypeOnly(node) {
@@ -234,6 +690,15 @@ function exportDeclarationIsTypeOnly(node) {
 function analyzeRuntimeDependencies(sourceFile) {
   const specifiers = new Set();
   let hasNonLiteralRuntimeImport = false;
+  let hasServerOnlyRuntimeCapability = false;
+  const nodes = [];
+  const createRequireFactoryAliases = new Set();
+  const moduleObjectAliases = new Set([
+    "module",
+  ]);
+  const returnedRequireAliases = new Set([
+    "require",
+  ]);
   const addStringLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) {
       specifiers.add(node.text);
@@ -242,6 +707,219 @@ function analyzeRuntimeDependencies(sourceFile) {
 
     return false;
   };
+  const collect = (node) => {
+    nodes.push(node);
+    ts.forEachChild(node, collect);
+  };
+  const moduleLoaderSpecifier = (node) =>
+    node && ts.isStringLiteralLike(node) &&
+      (node.text === "node:module" || node.text === "module");
+  const directRequireCall = (node) =>
+    node !== undefined &&
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === "require";
+  const directModuleLoaderCall = (node) =>
+    directRequireCall(node) &&
+    node.arguments.length === 1 &&
+    moduleLoaderSpecifier(node.arguments[0]);
+  const bindingIdentifier = (node) =>
+    ts.isIdentifier(node) ? node.text : null;
+  const moduleCreateRequireExpression = (node) =>
+    (
+      node !== undefined &&
+      ts.isIdentifier(node) &&
+      createRequireFactoryAliases.has(node.text)
+    ) || (
+      node !== undefined &&
+      ts.isPropertyAccessExpression(node) &&
+      node.name.text === "createRequire" &&
+      (
+        (
+          ts.isIdentifier(node.expression) &&
+          moduleObjectAliases.has(node.expression.text)
+        ) || directModuleLoaderCall(node.expression)
+      )
+    ) || (
+      node !== undefined &&
+      ts.isElementAccessExpression(node) &&
+      node.argumentExpression &&
+      ts.isStringLiteralLike(node.argumentExpression) &&
+      node.argumentExpression.text === "createRequire" &&
+      (
+        (
+          ts.isIdentifier(node.expression) &&
+          moduleObjectAliases.has(node.expression.text)
+        ) || directModuleLoaderCall(node.expression)
+      )
+    );
+  const returnedRequireExpression = (node) =>
+    node !== undefined &&
+    ts.isCallExpression(node) &&
+    moduleCreateRequireExpression(node.expression);
+  const createRequireBaseIsSafe = (node) =>
+    node.arguments.length === 1 && (
+      (
+        ts.isIdentifier(node.arguments[0]) &&
+        node.arguments[0].text === "__filename"
+      ) || (
+        ts.isPropertyAccessExpression(
+          node.arguments[0],
+        ) &&
+        node.arguments[0].name.text === "url" &&
+        ts.isMetaProperty(
+          node.arguments[0].expression,
+        ) &&
+        node.arguments[0].expression.keywordToken ===
+          ts.SyntaxKind.ImportKeyword &&
+        node.arguments[0].expression.name.text === "meta"
+      )
+    );
+  const moduleRequireExpression = (node) =>
+    (
+      node !== undefined &&
+      ts.isPropertyAccessExpression(node) &&
+      node.name.text === "require" &&
+      ts.isIdentifier(node.expression) &&
+      (
+        node.expression.text === "module" ||
+        moduleObjectAliases.has(node.expression.text)
+      )
+    ) || (
+      node !== undefined &&
+      ts.isElementAccessExpression(node) &&
+      node.argumentExpression &&
+      ts.isStringLiteralLike(node.argumentExpression) &&
+      node.argumentExpression.text === "require" &&
+      ts.isIdentifier(node.expression) &&
+      (
+        node.expression.text === "module" ||
+        moduleObjectAliases.has(node.expression.text)
+      )
+    );
+  const addBindingAlias = (name, initializer) => {
+    if (!name || !initializer) return false;
+    let changed = false;
+    if (
+      ts.isIdentifier(initializer) &&
+      moduleObjectAliases.has(initializer.text) &&
+      !moduleObjectAliases.has(name)
+    ) {
+      moduleObjectAliases.add(name);
+      changed = true;
+    }
+    if (
+      (
+        moduleCreateRequireExpression(initializer) ||
+        (
+          ts.isIdentifier(initializer) &&
+          createRequireFactoryAliases.has(initializer.text)
+        )
+      ) && !createRequireFactoryAliases.has(name)
+    ) {
+      createRequireFactoryAliases.add(name);
+      changed = true;
+    }
+    if (
+      (
+        returnedRequireExpression(initializer) ||
+        moduleRequireExpression(initializer) ||
+        (
+          ts.isIdentifier(initializer) &&
+          returnedRequireAliases.has(initializer.text)
+        )
+      ) && !returnedRequireAliases.has(name)
+    ) {
+      returnedRequireAliases.add(name);
+      changed = true;
+    }
+    return changed;
+  };
+
+  collect(sourceFile);
+
+  for (const node of nodes) {
+    if (
+      ts.isImportDeclaration(node) &&
+      moduleLoaderSpecifier(node.moduleSpecifier) &&
+      node.importClause
+    ) {
+      if (node.importClause.name) {
+        moduleObjectAliases.add(node.importClause.name.text);
+      }
+      const bindings = node.importClause.namedBindings;
+      if (bindings && ts.isNamespaceImport(bindings)) {
+        moduleObjectAliases.add(bindings.name.text);
+      } else if (bindings && ts.isNamedImports(bindings)) {
+        for (const element of bindings.elements) {
+          if (
+            (element.propertyName ?? element.name).text ===
+              "createRequire"
+          ) {
+            createRequireFactoryAliases.add(element.name.text);
+          }
+        }
+      }
+    }
+
+    if (
+      ts.isVariableDeclaration(node) &&
+      directModuleLoaderCall(node.initializer)
+    ) {
+      if (ts.isIdentifier(node.name)) {
+        moduleObjectAliases.add(node.name.text);
+      } else if (ts.isObjectBindingPattern(node.name)) {
+        for (const element of node.name.elements) {
+          if (
+            bindingIdentifier(element.name) !== null &&
+            staticPropertyName(
+              element.propertyName ?? element.name,
+            ) === "createRequire"
+          ) {
+            createRequireFactoryAliases.add(
+              bindingIdentifier(element.name),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  let aliasesChanged = true;
+  while (aliasesChanged) {
+    aliasesChanged = false;
+    for (const node of nodes) {
+      if (
+        ts.isVariableDeclaration(node) &&
+        ts.isIdentifier(node.name)
+      ) {
+        aliasesChanged = addBindingAlias(
+          node.name.text,
+          node.initializer,
+        ) || aliasesChanged;
+      } else if (
+        ts.isBinaryExpression(node) &&
+        node.operatorToken.kind ===
+          ts.SyntaxKind.EqualsToken &&
+        ts.isIdentifier(node.left)
+      ) {
+        aliasesChanged = addBindingAlias(
+          node.left.text,
+          node.right,
+        ) || aliasesChanged;
+      }
+    }
+  }
+
+  const runtimeRequireCall = (node) =>
+    ts.isCallExpression(node) && (
+      (
+        ts.isIdentifier(node.expression) &&
+        returnedRequireAliases.has(node.expression.text)
+      ) ||
+      moduleRequireExpression(node.expression) ||
+      returnedRequireExpression(node.expression)
+    );
   const visit = (node) => {
     if (
       ts.isImportDeclaration(node) &&
@@ -268,9 +946,7 @@ function analyzeRuntimeDependencies(sourceFile) {
       const isDynamicImport =
         node.expression.kind ===
         ts.SyntaxKind.ImportKeyword;
-      const isRequireCall =
-        ts.isIdentifier(node.expression) &&
-        node.expression.text === "require";
+      const isRequireCall = runtimeRequireCall(node);
 
       if (
         (isDynamicImport || isRequireCall) &&
@@ -280,16 +956,277 @@ function analyzeRuntimeDependencies(sourceFile) {
       ) {
         hasNonLiteralRuntimeImport = true;
       }
+      if (
+        returnedRequireExpression(node) &&
+        !createRequireBaseIsSafe(node)
+      ) {
+        hasNonLiteralRuntimeImport = true;
+      }
     }
 
     ts.forEachChild(node, visit);
   };
 
   visit(sourceFile);
+  const forbiddenLoaderNames = new Set([
+    "require",
+    "createRequire",
+    "getBuiltinModule",
+  ]);
+  const inspectLoaderCapability = (node) => {
+    if (
+      ts.isInterfaceDeclaration(node) ||
+      ts.isTypeAliasDeclaration(node) ||
+      (
+        ts.isImportDeclaration(node) &&
+        importDeclarationIsTypeOnly(node)
+      ) ||
+      (
+        ts.isExportDeclaration(node) &&
+        exportDeclarationIsTypeOnly(node)
+      ) ||
+      (
+        ts.isImportEqualsDeclaration(node) &&
+        node.isTypeOnly
+      )
+    ) {
+      return;
+    }
+
+    if (
+      ts.isElementAccessExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      moduleObjectAliases.has(node.expression.text)
+    ) {
+      hasNonLiteralRuntimeImport = true;
+      return;
+    }
+
+    if (
+      (
+        ts.isIdentifier(node) &&
+        forbiddenLoaderNames.has(node.text)
+      ) ||
+      (
+        ts.isStringLiteralLike(node) &&
+        forbiddenLoaderNames.has(node.text)
+      )
+    ) {
+      hasNonLiteralRuntimeImport = true;
+      hasServerOnlyRuntimeCapability = true;
+      return;
+    }
+
+    if (
+      ts.isIdentifier(node) &&
+      (
+        node.text === "Buffer" ||
+        node.text === "__filename" ||
+        node.text === "__dirname"
+      )
+    ) {
+      hasServerOnlyRuntimeCapability = true;
+    }
+
+    ts.forEachChild(node, inspectLoaderCapability);
+  };
+  inspectLoaderCapability(sourceFile);
+  if (
+    specifiers.has("node:module") ||
+    specifiers.has("module") ||
+    nodes.some((node) =>
+      moduleRequireExpression(node),
+    )
+  ) {
+    hasNonLiteralRuntimeImport = true;
+  }
   return {
     specifiers: [...specifiers],
     hasNonLiteralRuntimeImport,
+    hasServerOnlyRuntimeCapability,
   };
+}
+
+function staticPropertyName(node) {
+  if (
+    ts.isIdentifier(node) ||
+    ts.isStringLiteralLike(node)
+  ) {
+    return node.text;
+  }
+
+  return null;
+}
+
+function frozenObjectLiteral(node) {
+  if (
+    !node || !ts.isCallExpression(node) ||
+    node.arguments.length !== 1 ||
+    !ts.isPropertyAccessExpression(node.expression) ||
+    !ts.isIdentifier(node.expression.expression) ||
+    node.expression.expression.text !== "Object" ||
+    node.expression.name.text !== "freeze" ||
+    !ts.isObjectLiteralExpression(node.arguments[0])
+  ) {
+    return null;
+  }
+
+  return {
+    objectIdentifier:
+      node.expression.expression,
+    objectLiteral: node.arguments[0],
+  };
+}
+
+function botReplyDeliveryAdapterIsLiteralFalse(
+  sourceFile,
+) {
+  const declarations = [];
+  const stateInterfaces = [];
+
+  for (const statement of sourceFile.statements) {
+    if (
+      ts.isInterfaceDeclaration(statement) &&
+      statement.name.text ===
+        "ProductionImplementationState"
+    ) {
+      stateInterfaces.push(statement);
+      continue;
+    }
+    if (
+      ts.isInterfaceDeclaration(statement) ||
+      ts.isTypeAliasDeclaration(statement) ||
+      (
+        ts.isImportDeclaration(statement) &&
+        importDeclarationIsTypeOnly(statement)
+      ) ||
+      (
+        ts.isExportDeclaration(statement) &&
+        exportDeclarationIsTypeOnly(statement)
+      )
+    ) {
+      continue;
+    }
+
+    if (
+      !ts.isVariableStatement(statement) ||
+      statement.modifiers?.length !== 1 ||
+      !statement.modifiers?.some(
+        (modifier) =>
+          modifier.kind === ts.SyntaxKind.ExportKeyword,
+      ) ||
+      statement.declarationList.flags !==
+        ts.NodeFlags.Const ||
+      statement.declarationList.declarations.length !== 1
+    ) {
+      return false;
+    }
+
+    const declaration =
+      statement.declarationList.declarations[0];
+    if (
+      !ts.isIdentifier(declaration.name) ||
+      declaration.name.text !==
+        "currentProductionImplementationState"
+    ) {
+      return false;
+    }
+    declarations.push(declaration);
+  }
+
+  if (declarations.length !== 1) {
+    return false;
+  }
+  if (stateInterfaces.length !== 1) {
+    return false;
+  }
+  const stateInterface = stateInterfaces[0];
+  if (
+    stateInterface.modifiers?.length !== 1 ||
+    stateInterface.modifiers[0].kind !==
+      ts.SyntaxKind.ExportKeyword ||
+    stateInterface.typeParameters !== undefined ||
+    stateInterface.heritageClauses !== undefined ||
+    stateInterface.members.length !==
+      productionImplementationStatePropertyNames.size
+  ) {
+    return false;
+  }
+  const interfacePropertyNames = new Set();
+  for (const member of stateInterface.members) {
+    if (
+      !ts.isPropertySignature(member) ||
+      member.questionToken !== undefined ||
+      member.initializer !== undefined ||
+      member.modifiers !== undefined ||
+      member.type?.kind !==
+        ts.SyntaxKind.BooleanKeyword
+    ) {
+      return false;
+    }
+    const name = staticPropertyName(member.name);
+    if (
+      name === null ||
+      !productionImplementationStatePropertyNames.has(
+        name,
+      ) ||
+      interfacePropertyNames.has(name)
+    ) {
+      return false;
+    }
+    interfacePropertyNames.add(name);
+  }
+
+  const declaration = declarations[0];
+  if (
+    !declaration.type ||
+    !ts.isTypeReferenceNode(declaration.type) ||
+    !ts.isIdentifier(declaration.type.typeName) ||
+    declaration.type.typeName.text !==
+      "ProductionImplementationState" ||
+    declaration.type.typeArguments !== undefined
+  ) {
+    return false;
+  }
+  const frozenValue = frozenObjectLiteral(
+    declaration.initializer,
+  );
+  if (frozenValue === null) return false;
+
+  const properties = new Map();
+  for (
+    const property of
+      frozenValue.objectLiteral.properties
+  ) {
+    if (!ts.isPropertyAssignment(property)) {
+      return false;
+    }
+    const name = staticPropertyName(property.name);
+    if (
+      name === null ||
+      properties.has(name) ||
+      (
+        property.initializer.kind !==
+          ts.SyntaxKind.TrueKeyword &&
+        property.initializer.kind !==
+          ts.SyntaxKind.FalseKeyword
+      )
+    ) {
+      return false;
+    }
+    properties.set(name, property.initializer);
+  }
+
+  const adapter = properties.get(
+    "botReplyDeliveryAdapter",
+  );
+  return (
+    properties.size ===
+      productionImplementationStatePropertyNames.size &&
+    [...productionImplementationStatePropertyNames]
+      .every((name) => properties.has(name)) &&
+    adapter?.kind === ts.SyntaxKind.FalseKeyword
+  );
 }
 
 async function readCompilerOptions(root) {
@@ -362,11 +1299,55 @@ function resolveLocalImport(
   importer,
   specifier,
   compilerOptions,
-  availableFiles,
+  availableFileByCanonicalPath,
   moduleResolutionCache,
 ) {
-  const resolvedModule = ts.resolveModuleName(
+  const hasFileUrlScheme = /^file:/iu.test(
     specifier,
+  );
+  let literalLocalTarget = null;
+  if (
+    specifier.startsWith(".") ||
+    specifier.startsWith("/") ||
+    hasFileUrlScheme
+  ) {
+    try {
+      const targetUrl = new URL(
+        specifier,
+        pathToFileURL(importer),
+      );
+      if (targetUrl.protocol === "file:") {
+        literalLocalTarget = normalize(
+          resolve(fileURLToPath(targetUrl)),
+        );
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  const canonicalAvailableFile = (file) => {
+    const canonicalFile = normalize(
+      typeof ts.sys.realpath === "function"
+        ? ts.sys.realpath(file)
+        : file,
+    );
+    return availableFileByCanonicalPath.get(
+      canonicalFile,
+    ) ?? null;
+  };
+
+  if (literalLocalTarget !== null) {
+    const exactTarget = canonicalAvailableFile(
+      literalLocalTarget,
+    );
+    if (exactTarget !== null) return exactTarget;
+  }
+
+  const resolutionSpecifier =
+    stripResourceSuffix(specifier);
+  const resolvedModule = ts.resolveModuleName(
+    resolutionSpecifier,
     importer,
     compilerOptions,
     ts.sys,
@@ -380,15 +1361,15 @@ function resolveLocalImport(
   const resolvedFile = normalize(
     resolve(resolvedModule.resolvedFileName),
   );
+  const availableFile = canonicalAvailableFile(
+    resolvedFile,
+  );
 
-  if (!availableFiles.has(resolvedFile)) {
-    return null;
-  }
-
-  return resolvedFile.startsWith(
-    `${normalize(resolve(root))}/`,
-  )
-    ? resolvedFile
+  return availableFile !== null &&
+      availableFile.startsWith(
+        `${normalize(resolve(root))}/`,
+      )
+    ? availableFile
     : null;
 }
 
@@ -413,23 +1394,49 @@ function isProjectLocalSpecifier(
   specifier,
   compilerOptions,
 ) {
+  const resourcePath = stripResourceSuffix(
+    specifier,
+  );
   return (
-    specifier.startsWith(".") ||
+    resourcePath.startsWith(".") ||
+    resourcePath.startsWith("/") ||
+    /^file:/iu.test(resourcePath) ||
     Object.keys(
       compilerOptions.paths ?? {},
     ).some((pattern) =>
-      matchesPathAlias(specifier, pattern),
+      matchesPathAlias(resourcePath, pattern),
     )
   );
 }
 
 function isSourceLikeSpecifier(specifier) {
-  const extension = extname(specifier);
+  const extension = extname(
+    stripResourceSuffix(specifier),
+  );
 
   return (
     extension.length === 0 ||
     sourceExtensions.has(extension)
   );
+}
+
+function stripResourceSuffix(specifier) {
+  const queryIndex = specifier.indexOf("?");
+  const fragmentIndex = specifier.startsWith("#")
+    ? -1
+    : specifier.indexOf("#");
+  const suffixIndexes = [
+    queryIndex,
+    fragmentIndex,
+  ].filter((index) => index >= 0);
+
+  return suffixIndexes.length === 0
+    ? specifier
+    : specifier.slice(0, Math.min(...suffixIndexes));
+}
+
+function isInlineRuntimeModuleSpecifier(specifier) {
+  return /^data:/iu.test(specifier);
 }
 
 function relativePath(root, file) {
@@ -443,6 +1450,7 @@ function isServerOnlyModule(
   root,
   file,
   runtimeSpecifiers,
+  hasServerOnlyRuntimeCapability,
 ) {
   const path = relativePath(root, file);
 
@@ -451,8 +1459,11 @@ function isServerOnlyModule(
     path.startsWith("db/") ||
     path.startsWith("worker/") ||
     rootServerOnlyPaths.has(path) ||
+    hasServerOnlyRuntimeCapability ||
     /(^|\/)route\.(?:[cm]?[jt]sx?)$/.test(path) ||
     runtimeSpecifiers.some((specifier) =>
+      specifier.startsWith("node:") ||
+      serverOnlyImportSpecifiers.has(specifier) ||
       serverOnlyImportPattern.test(specifier),
     )
   );
@@ -461,23 +1472,49 @@ function isServerOnlyModule(
 export async function inspectSourceGuardrails(
   root = projectRoot,
 ) {
-  const nestedFiles = (
-    await Promise.all(
+  const [
+    nestedFiles,
+    nestedPackageManifests,
+    symbolicLinkPaths,
+  ] =
+    await Promise.all([
+      Promise.all(
       sourceRoots.map((sourceRoot) =>
         listSourceFiles(join(root, sourceRoot)),
       ),
-    )
-  ).flat();
+      ).then((groups) => groups.flat()),
+      Promise.all(
+        [...sourceRoots, "scripts"].map(
+          (sourceRoot) =>
+            listPackageManifests(
+              join(root, sourceRoot),
+            ),
+        ),
+      ).then((groups) => groups.flat()),
+      listSymbolicLinks(root),
+    ]);
+  const packageManifestFiles = [...new Set([
+    join(root, "package.json"),
+    ...nestedPackageManifests,
+  ])].sort();
   const rootFiles = rootRuntimeFiles
     .map((file) => join(root, file))
     .filter((file) =>
       sourceExtensions.has(extname(file)),
     );
-  const candidateFiles = [
+  const candidateFiles = [...new Set([
     ...nestedFiles,
     ...rootFiles,
-  ];
+  ])];
+  const candidateFileSet = new Set(candidateFiles);
+  const dormantImporterCandidateFiles = [
+    ...await listSourceFiles(join(root, "scripts")),
+    ...await listImmediateSourceFiles(root),
+  ]
+    .filter((file) => !candidateFileSet.has(file))
+    .sort();
   const sources = new Map();
+  const dormantImporterSources = new Map();
 
   for (const file of candidateFiles) {
     try {
@@ -494,8 +1531,65 @@ export async function inspectSourceGuardrails(
     }
   }
 
+  for (const file of dormantImporterCandidateFiles) {
+    try {
+      dormantImporterSources.set(
+        file,
+        await readFile(file, "utf8"),
+      );
+    } catch (error) {
+      if (
+        typeof error !== "object" ||
+        error === null ||
+        !("code" in error) ||
+        error.code !== "ENOENT"
+      ) {
+        throw error;
+      }
+    }
+  }
+
   const files = [...sources.keys()].sort();
-  const availableFiles = new Set(files);
+  const graphIdentityFiles = [...new Set([
+    ...files,
+    ...dormantImporterSources.keys(),
+  ])];
+  const canonicalFileByFile = new Map(
+    await Promise.all(
+      graphIdentityFiles.map(async (file) => [
+        file,
+        await canonicalExistingPath(file),
+      ]),
+    ),
+  );
+  const canonicalSymbolicLinkByPath = new Map(
+    await Promise.all(
+      symbolicLinkPaths.map(async (file) => [
+        normalize(resolve(file)),
+        await canonicalExistingPath(file),
+      ]),
+    ),
+  );
+  const availableFileByCanonicalPath = new Map(
+    files.map((file) => [
+      canonicalFileByFile.get(file),
+      file,
+    ]),
+  );
+  const dormantCanonicalFiles = new Set(
+    files
+      .filter((file) =>
+        dormantBotReplyStagingAttestedModulePaths.has(
+          relativePath(root, file),
+        ),
+      )
+      .map((file) => canonicalFileByFile.get(file)),
+  );
+  const fileIsDormantAttestedModule = (file) =>
+    dormantCanonicalFiles.has(
+      canonicalFileByFile.get(file) ??
+        normalize(resolve(file)),
+    );
   const findings = [];
   const findingKeys = new Set();
   const addFinding = (finding) => {
@@ -508,6 +1602,128 @@ export async function inspectSourceGuardrails(
   };
   const compilerConfiguration =
     await readCompilerOptions(root);
+
+  for (const manifestFile of packageManifestFiles) {
+    let manifestSource;
+    try {
+      manifestSource = await readFile(
+        manifestFile,
+        "utf8",
+      );
+    } catch (error) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        continue;
+      }
+      throw error;
+    }
+
+    let manifest;
+    try {
+      manifest = JSON.parse(manifestSource);
+    } catch {
+      addFinding({
+        code: "SOURCE_GRAPH_CONFIGURATION_FAILED",
+        file: relativePath(root, manifestFile),
+      });
+      continue;
+    }
+    if (
+      typeof manifest !== "object" ||
+      manifest === null ||
+      Array.isArray(manifest)
+    ) {
+      addFinding({
+        code: "SOURCE_GRAPH_CONFIGURATION_FAILED",
+        file: relativePath(root, manifestFile),
+      });
+      continue;
+    }
+
+    const targets = new Set();
+    collectPackageRuntimeTargets(
+      manifest.imports,
+      targets,
+    );
+    collectPackageRuntimeTargets(
+      manifest.exports,
+      targets,
+    );
+    for (const target of targets) {
+      if (isInlineRuntimeModuleSpecifier(target)) {
+        addFinding({
+          code:
+            "INLINE_RUNTIME_MODULE_IMPORT_FORBIDDEN",
+          file: relativePath(root, manifestFile),
+        });
+        continue;
+      }
+      if (!target.startsWith(".")) continue;
+      const targetPathPattern =
+        target.split(/[?#]/, 1)[0];
+      if (targetPathPattern.includes("*")) {
+        let matchesDormantFile = false;
+        for (
+          const [file, canonicalFile] of
+            canonicalFileByFile
+        ) {
+          if (
+            !dormantCanonicalFiles.has(
+              canonicalFile,
+            )
+          ) {
+            continue;
+          }
+          if (
+            await packageTargetPatternMatchesCanonicalFile(
+              manifestFile,
+              target,
+              file,
+              canonicalFile,
+              canonicalSymbolicLinkByPath,
+            )
+          ) {
+            matchesDormantFile = true;
+            break;
+          }
+        }
+        if (matchesDormantFile) {
+          addFinding({
+            code:
+              "BOT_REPLY_STAGING_ATTESTED_IMPORTER_FORBIDDEN",
+            file: relativePath(root, manifestFile),
+          });
+        }
+        continue;
+      }
+      const targetPath = resolvePackageTargetPath(
+        manifestFile,
+        target,
+      );
+      if (targetPath === null) {
+        addFinding({
+          code: "SOURCE_GRAPH_CONFIGURATION_FAILED",
+          file: relativePath(root, manifestFile),
+        });
+        continue;
+      }
+      const canonicalTarget =
+        await canonicalExistingPath(
+          targetPath,
+        );
+      if (dormantCanonicalFiles.has(canonicalTarget)) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_ATTESTED_IMPORTER_FORBIDDEN",
+          file: relativePath(root, manifestFile),
+        });
+      }
+    }
+  }
 
   if (
     compilerConfiguration.diagnostics.length > 0
@@ -527,6 +1743,8 @@ export async function inspectSourceGuardrails(
   const runtimeSpecifiersByFile = new Map();
   const nonLiteralRuntimeImportsByFile =
     new Map();
+  const serverOnlyRuntimeCapabilitiesByFile =
+    new Map();
 
   for (const file of files) {
     const sourceFile = parsedSources.get(file);
@@ -541,6 +1759,18 @@ export async function inspectSourceGuardrails(
     const dependencyAnalysis =
       analyzeRuntimeDependencies(sourceFile);
 
+    if (
+      dependencyAnalysis.specifiers.some(
+        isInlineRuntimeModuleSpecifier,
+      )
+    ) {
+      addFinding({
+        code:
+          "INLINE_RUNTIME_MODULE_IMPORT_FORBIDDEN",
+        file: relativePath(root, file),
+      });
+    }
+
     runtimeSpecifiersByFile.set(
       file,
       dependencyAnalysis.specifiers,
@@ -548,6 +1778,10 @@ export async function inspectSourceGuardrails(
     nonLiteralRuntimeImportsByFile.set(
       file,
       dependencyAnalysis.hasNonLiteralRuntimeImport,
+    );
+    serverOnlyRuntimeCapabilitiesByFile.set(
+      file,
+      dependencyAnalysis.hasServerOnlyRuntimeCapability,
     );
   }
 
@@ -575,7 +1809,7 @@ export async function inspectSourceGuardrails(
                 file,
                 specifier,
                 compilerConfiguration.options,
-                availableFiles,
+                availableFileByCanonicalPath,
                 moduleResolutionCache,
               ),
             ]),
@@ -617,6 +1851,24 @@ export async function inspectSourceGuardrails(
     }
   }
 
+  const implementationStateFile = files.find(
+    (file) =>
+      relativePath(root, file) ===
+        productionImplementationStatePath,
+  );
+  if (
+    !implementationStateFile ||
+    !botReplyDeliveryAdapterIsLiteralFalse(
+      parsedSources.get(implementationStateFile),
+    )
+  ) {
+    addFinding({
+      code:
+        "BOT_REPLY_DELIVERY_ADAPTER_LITERAL_FALSE_REQUIRED",
+      file: productionImplementationStatePath,
+    });
+  }
+
   const clientEntries = files.filter((file) => {
     const path = relativePath(root, file);
 
@@ -628,6 +1880,7 @@ export async function inspectSourceGuardrails(
       )
     );
   });
+  const clientReachableFiles = new Set();
 
   for (const clientEntry of clientEntries) {
     const pending = [clientEntry];
@@ -641,6 +1894,7 @@ export async function inspectSourceGuardrails(
       }
 
       visited.add(file);
+      clientReachableFiles.add(file);
       const source = sources.get(file);
       const sourceFile = parsedSources.get(file);
 
@@ -656,6 +1910,7 @@ export async function inspectSourceGuardrails(
           root,
           file,
           runtimeSpecifiersByFile.get(file),
+          serverOnlyRuntimeCapabilitiesByFile.get(file),
         )
       ) {
         addFinding({
@@ -714,6 +1969,286 @@ export async function inspectSourceGuardrails(
     }
   }
 
+  const runtimeEntries = files.filter((file) =>
+    isRuntimeEntry(
+      root,
+      file,
+      parsedSources.get(file),
+    )
+  );
+  const runtimeReachableFiles = new Set();
+
+  for (const runtimeEntry of runtimeEntries) {
+    const pending = [runtimeEntry];
+    const visited = new Set();
+
+    while (pending.length > 0) {
+      const file = pending.shift();
+      if (!file || visited.has(file)) continue;
+      visited.add(file);
+      runtimeReachableFiles.add(file);
+
+      if (
+        fileIsDormantAttestedModule(file)
+      ) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_ATTESTED_RUNTIME_DEPENDENCY_FORBIDDEN",
+          file: relativePath(root, runtimeEntry),
+        });
+      }
+
+      if (nonLiteralRuntimeImportsByFile.get(file)) {
+        addFinding({
+          code:
+            "RUNTIME_NON_LITERAL_IMPORT_FORBIDDEN",
+          file: relativePath(root, runtimeEntry),
+        });
+      }
+
+      for (
+        const specifier of
+          runtimeSpecifiersByFile.get(file) ?? []
+      ) {
+        if (
+          isProjectLocalSpecifier(
+            specifier,
+            compilerConfiguration.options,
+          ) &&
+          isSourceLikeSpecifier(specifier) &&
+          resolvedDependenciesBySpecifier
+            .get(file)
+            .get(specifier) === null
+        ) {
+          addFinding({
+            code:
+              "RUNTIME_LOCAL_IMPORT_UNRESOLVED",
+            file: relativePath(root, runtimeEntry),
+          });
+        }
+      }
+
+      for (const dependency of graph.get(file) ?? []) {
+        pending.push(dependency);
+      }
+    }
+  }
+
+  const dormantImporterIsAllowed = (
+    importerPath,
+    specifier,
+    dependencyPath,
+  ) =>
+    dormantBotReplyStagingAttestedAllowedImporters
+      .get(importerPath)
+      ?.get(specifier) === dependencyPath;
+
+  for (
+    const [importer, dependenciesBySpecifier] of
+      resolvedDependenciesBySpecifier
+  ) {
+    if (runtimeReachableFiles.has(importer)) {
+      continue;
+    }
+
+    for (
+      const [specifier, dependency] of
+        dependenciesBySpecifier
+    ) {
+      if (!dependency) continue;
+      const importerPath = relativePath(root, importer);
+      const dependencyPath = relativePath(
+        root,
+        dependency,
+      );
+      if (
+        fileIsDormantAttestedModule(dependency) &&
+        !dormantImporterIsAllowed(
+          importerPath,
+          specifier,
+          dependencyPath,
+        )
+      ) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_ATTESTED_IMPORTER_FORBIDDEN",
+          file: importerPath,
+        });
+      }
+    }
+  }
+
+  for (
+    const [importer, source] of
+      dormantImporterSources
+  ) {
+    const importerPath = relativePath(root, importer);
+    const sourceFile = parseSourceFile(importer, source);
+    if (sourceFile.parseDiagnostics.length > 0) {
+      addFinding({
+        code: "SOURCE_PARSE_FAILED",
+        file: importerPath,
+      });
+      continue;
+    }
+
+    const dependencyAnalysis =
+      analyzeRuntimeDependencies(sourceFile);
+    if (
+      dependencyAnalysis.specifiers.some(
+        isInlineRuntimeModuleSpecifier,
+      )
+    ) {
+      addFinding({
+        code:
+          "INLINE_RUNTIME_MODULE_IMPORT_FORBIDDEN",
+        file: importerPath,
+      });
+    }
+    if (
+      dependencyAnalysis.hasNonLiteralRuntimeImport &&
+      importerPath !== sourceGuardrailSelfPath
+    ) {
+      addFinding({
+        code: "RUNTIME_NON_LITERAL_IMPORT_FORBIDDEN",
+        file: importerPath,
+      });
+    }
+
+    for (const specifier of dependencyAnalysis.specifiers) {
+      const dependency = resolveLocalImport(
+        root,
+        importer,
+        specifier,
+        compilerConfiguration.options,
+        availableFileByCanonicalPath,
+        moduleResolutionCache,
+      );
+      if (!dependency) continue;
+      const dependencyPath = relativePath(
+        root,
+        dependency,
+      );
+
+      if (
+        fileIsDormantAttestedModule(dependency) &&
+        !dormantImporterIsAllowed(
+          importerPath,
+          specifier,
+          dependencyPath,
+        )
+      ) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_ATTESTED_IMPORTER_FORBIDDEN",
+          file: importerPath,
+        });
+      }
+    }
+  }
+
+  const dormantAttestedModules = files.filter(
+    (file) =>
+      dormantBotReplyStagingAttestedModulePaths.has(
+        relativePath(root, file),
+      ),
+  );
+  const dormantAttestedClosureFiles = new Set();
+
+  for (const dormantModule of dormantAttestedModules) {
+    const pending = [dormantModule];
+    const visited = new Set();
+
+    while (pending.length > 0) {
+      const file = pending.shift();
+      if (!file || visited.has(file)) continue;
+      visited.add(file);
+      dormantAttestedClosureFiles.add(file);
+
+      const path = relativePath(root, file);
+      const allowedDependencies =
+        dormantAttestedAllowedRuntimeDependencies.get(
+          path,
+        );
+      if (!allowedDependencies) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_ATTESTED_DEPENDENCY_NOT_ALLOWLISTED",
+          file: relativePath(root, dormantModule),
+        });
+        continue;
+      }
+
+      if (nonLiteralRuntimeImportsByFile.get(file)) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_ATTESTED_DEPENDENCY_NOT_ALLOWLISTED",
+          file: relativePath(root, dormantModule),
+        });
+      }
+
+      for (
+        const specifier of
+          runtimeSpecifiersByFile.get(file) ?? []
+      ) {
+        const dependency =
+          resolvedDependenciesBySpecifier
+            .get(file)
+            .get(specifier);
+        const dependencyPath = dependency
+          ? relativePath(root, dependency)
+          : null;
+        const allowedTarget =
+          allowedDependencies.get(specifier);
+        const hasAllowedSpecifier =
+          allowedDependencies.has(specifier);
+        const externalAllowed =
+          hasAllowedSpecifier &&
+          allowedTarget === null &&
+          dependency === null &&
+          !isProjectLocalSpecifier(
+            specifier,
+            compilerConfiguration.options,
+          );
+        const localAllowed =
+          hasAllowedSpecifier &&
+          allowedTarget !== null &&
+          dependencyPath === allowedTarget;
+
+        if (!externalAllowed && !localAllowed) {
+          addFinding({
+            code:
+              dependencyPath !== null &&
+              legacyBotReplyStagingEvidenceModulePaths
+                .has(dependencyPath)
+                ? "BOT_REPLY_STAGING_ATTESTED_V1_DEPENDENCY_FORBIDDEN"
+                : "BOT_REPLY_STAGING_ATTESTED_DEPENDENCY_NOT_ALLOWLISTED",
+            file: relativePath(root, dormantModule),
+          });
+          continue;
+        }
+
+        if (dependency) {
+          pending.push(dependency);
+        }
+      }
+    }
+  }
+
+  for (const file of files) {
+    if (
+      !runtimeReachableFiles.has(file) &&
+      !clientReachableFiles.has(file) &&
+      !dormantAttestedClosureFiles.has(file) &&
+      nonLiteralRuntimeImportsByFile.get(file)
+    ) {
+      addFinding({
+        code: "RUNTIME_NON_LITERAL_IMPORT_FORBIDDEN",
+        file: relativePath(root, file),
+      });
+    }
+  }
+
   const dependencyEdgesInspected = [
     ...graph.values(),
   ].reduce(
@@ -730,6 +2265,12 @@ export async function inspectSourceGuardrails(
     filesInspected: files.length,
     clientEntriesInspected:
       clientEntries.length,
+    runtimeEntriesInspected:
+      runtimeEntries.length,
+    dormantAttestedModulesInspected:
+      dormantAttestedModules.length,
+    dormantImporterFilesInspected:
+      files.length + dormantImporterSources.size,
     dependencyEdgesInspected,
     graphEngine: "typescript-compiler-api",
     findings: Object.freeze(findings),
