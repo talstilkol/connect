@@ -190,6 +190,11 @@ test("detects every protected server secret identifier in client modules", async
     [
       ["bot.tsx", "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1"],
       ["database.tsx", "DATABASE_URL"],
+      ["postgres-api.tsx", "POSTGRES_API_URL"],
+      ["postgres-worker.tsx", "POSTGRES_WORKER_URL"],
+      ["postgres-verifier.tsx", "POSTGRES_VERIFIER_URL"],
+      ["postgres-migration.tsx", "POSTGRES_MIGRATION_URL"],
+      ["postgres-owner.tsx", "POSTGRES_OWNER_URL"],
       ["monitoring.tsx", "BETTER_STACK_INCIDENT_API_TOKEN"],
     ].map(([file, identifier]) =>
       writeFile(
@@ -221,6 +226,31 @@ test("detects every protected server secret identifier in client modules", async
       code:
         "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
       file: "features/monitoring.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/postgres-api.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/postgres-migration.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/postgres-owner.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/postgres-verifier.tsx",
+    },
+    {
+      code:
+        "CLIENT_SECRET_IDENTIFIER_FORBIDDEN",
+      file: "features/postgres-worker.tsx",
     },
   ]);
 });

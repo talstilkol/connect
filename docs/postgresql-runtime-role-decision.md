@@ -8,25 +8,29 @@
 
 ## 1. תשובה קצרה
 
-1.1 ההמלצה המעודכנת היא לבחור בארבע יכולות PostgreSQL נפרדות:
+1.1 ההמלצה המעודכנת היא לבחור בחמישה Principals נפרדים, שמתוכם ארבעה
+מחזיקים ב־Login capability:
 
-1.1.1 `migration owner` — Role מסוג `NOLOGIN` שמחזיק את הטבלאות ואת
+1.1.1 `connect_migration_owner` — Role מסוג `NOLOGIN` שמחזיק את הטבלאות ואת
 פונקציות `SECURITY DEFINER`; Migrator ייעודי ב־CI רשאי לבצע אליו `SET ROLE`.
 
-1.1.2 `api role` — קריאות API עסקיות בלבד; ללא `SELECT` ישיר על טבלאות
+1.1.2 `connect_migrator_login` — Login ייעודי ל־CI או one-shot migration. הוא
+אינו Owner ואינו מקבל הרשאות Owner בירושה; מותר לו `SET ROLE` מפורש בלבד.
+
+1.1.3 `connect_api_runtime` — קריאות API עסקיות בלבד; ללא `SELECT` ישיר על טבלאות
 Release evidence,‏ Receipt,‏ Nonce או Operator events וללא כתיבה ישירה
 לראיות המוגנות.
 
-1.1.3 `worker role` — עבודות Worker בלבד; ללא גישה ל־Release evidence,
+1.1.4 `connect_worker_runtime` — עבודות Worker בלבד; ללא גישה ל־Release evidence,
 ל־Operator events או ל־Nonce ledger.
 
-1.1.4 `verifier capability role` — שירות Verifier מבודד. מקבל `EXECUTE`
+1.1.5 `connect_verifier_runtime` — שירות Verifier מבודד. מקבל `EXECUTE`
 רק על Wrapper פרסום חיצוני אחד ועל Readback function מצומצמת אחת. פונקציית
 הקריאה מחזירה רק Snapshot עבור זהות Release מפורשת; היא אינה מעניקה ל־Role
 `SELECT` ישיר על ארבע הטבלאות. אין לו `EXECUTE` על פונקציות 0044, 0046 או
 0047.
 
-1.2 עד שכל ארבע היכולות קיימות ומוכחות, Bot Release Evidence נשאר
+1.2 עד שכל חמשת ה־Principals וארבע יכולות ה־Login קיימים ומוכחים, Bot Release Evidence נשאר
 Fail-closed ואסור לסמן את Operator כ־Ready.
 
 ## 2. הסבר למתחילים
@@ -41,7 +45,10 @@ Fail-closed ואסור לסמן את Operator כ־Ready.
 2.3 ההפרדה יוצרת את הגבול הבא:
 
 ```text
-CI / one-shot migrator ── POSTGRES_MIGRATION_URL ──► Migration owner
+CI / one-shot migrator ── POSTGRES_MIGRATION_URL ──► connect_migrator_login
+                                                        │ explicit SET ROLE
+                                                        ▼
+                                             connect_migration_owner NOLOGIN
                                                         │ owns schema
 API ──────────────── POSTGRES_API_URL ────────────────► │ business data only
 Worker ───────────── POSTGRES_WORKER_URL ─────────────► │ no protected access
@@ -103,6 +110,9 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 4.1.4 `POSTGRES_MIGRATION_URL` — CI או one-shot migrator בלבד; אסור לחשוף
 לאף Runtime service.
 
+4.1.5 אין `POSTGRES_OWNER_URL`: ‏`connect_migration_owner` הוא `NOLOGIN`
+ואסור ליצור עבורו Credential שניתן לחיבור.
+
 4.2 הרשאות משותפות לשלושת Runtime roles:
 
 4.2.1 ללא `SUPERUSER`,‏ `BYPASSRLS`,‏ `CREATEROLE` או בעלות על הטבלאות.
@@ -116,7 +126,9 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 4.3.1 API — ללא גישה ישירה לארבע טבלאות הראיות המוגנות. הוא רשאי לקבל רק
 תוצאת Readiness מצומצמת משירות Verifier מבודד, לאחר שיוגדר חוזה שירות נפרד.
 
-4.3.2 Worker — ללא הרשאה לשלוש הטבלאות המוגנות וללא פונקציות הפרסום.
+4.3.2 Worker — ללא הרשאה לארבע הטבלאות המוגנות וללא פונקציות הפרסום ב־D31-A.
+ה־Worker הנוכחי תלוי ב־`bot_reply_staging_runs`; לפני Activation נדרש לבחור
+Wrapper מצומצם או לפצל בין נתוני תזמון לבין Receipt מוגן. עד אז אין Grant.
 
 4.3.3 Verifier — ללא `SELECT` ישיר על הטבלאות. הוא מקבל `EXECUTE` רק על
 Wrapper הפרסום של Commit C ועל Readback function בעלת SQL קבוע, זהות Release
@@ -139,12 +151,31 @@ Verifier ממיר אותו לפלט Readiness המצומצם.
 
 4.5 מצב המימוש הנוכחי:
 
-4.5.1 ה־Read repository של Stage 7 משתמש כרגע ב־`SELECT` ישיר על ארבע
-הטבלאות לצורך הוכחה מקומית בלבד. אסור לחבר אותו ל־`POSTGRES_API_URL` או
-ל־`POSTGRES_WORKER_URL`.
+4.5.1 Migration 0049 וה־Read repository משתמשים כעת ב־Readback function
+מצומצמת במקום `SELECT` ישיר. הפונקציה נשארת `SECURITY INVOKER`, ללא Grant
+ל־Runtime, ולכן היא Dormant ואינה עוקפת הרשאות Table.
 
-4.5.2 לפני Activation יש להעביר את ה־Repository ל־Readback function
-המצומצמת ולהוכיח את מטריצת ההרשאות על PostgreSQL חי.
+4.5.2 לפני Activation יש להעביר את בעלות הפונקציה ל־`connect_migration_owner`, להפוך
+אותה ל־`SECURITY DEFINER` רק באותה Transaction שבה נבדק ה־ACL המלא, ולהעניק
+`EXECUTE` רק ל־`connect_verifier_runtime`.
+
+4.6 חוזה Configuration מקומי:
+
+4.6.1 `postgresRuntimeCapabilityConfiguration.ts` מגדיר ארבעה URL keys
+וארבעה Login roles קנוניים. כל Service configuration חייב להעביר Environment
+מצומצם ומפורש ולקבל URL אחד בלבד; אין קריאת `process.env` מרומזת.
+
+4.6.2 ה־Inspector נכשל סגור אם קיים `DATABASE_URL`, אם Secret של Capability
+אחר נמצא ב־Environment snapshot שסופק, אם ה־Username אינו תואם ל־Role הצפוי או אם Runtime
+של Railway משתמש ב־Loopback/Public host. ‏Migration מרוחק מוגבל ל־Railway
+private hostname או ל־Railway TCP proxy.
+
+4.6.3 החוזה Dormant ואינו מחובר ל־Startup. ‏Development/Test/Integration
+הקיימים יכולים להמשיך להשתמש זמנית ב־`DATABASE_URL` דרך ה־Pool הישן, אך אין
+Fallback כזה בתוך חוזה ה־Capability החדש.
+
+4.6.4 מצב Configured מחזיר Metadata לא־רגיש בלבד. URL,‏ Password
+ו־Connection string אינם נכללים בתוצאה הניתנת ל־Serialization.
 
 ## 5. סדר ביצוע
 

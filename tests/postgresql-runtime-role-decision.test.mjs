@@ -7,19 +7,20 @@ const decision = readFileSync(
   "utf8",
 );
 
-test("requires four isolated PostgreSQL capabilities before activation", () => {
+test("requires five principals and four isolated login capabilities before activation", () => {
   assert.match(decision, /סטטוס: החלטה חיצונית חוסמת Activation/);
-  for (const capability of [
-    "migration owner",
-    "api role",
-    "worker role",
-    "verifier capability role",
+  for (const principal of [
+    "connect_migration_owner",
+    "connect_migrator_login",
+    "connect_api_runtime",
+    "connect_worker_runtime",
+    "connect_verifier_runtime",
   ]) {
-    assert.match(decision, new RegExp(`\\b${capability}\\b`, "i"));
+    assert.match(decision, new RegExp(`\\b${principal}\\b`, "i"));
   }
   assert.match(
     decision,
-    /כל ארבע היכולות קיימות ומוכחות[\s\S]*Fail-closed/,
+    /כל חמשת ה־Principals וארבע יכולות ה־Login קיימים ומוכחים[\s\S]*Fail-closed/,
   );
 });
 
@@ -46,12 +47,18 @@ test("keeps every privileged database credential in one bounded service", () => 
   );
   assert.match(
     decision,
+    /Worker — ללא הרשאה לארבע הטבלאות המוגנות[\s\S]*עד אז אין Grant/,
+  );
+  assert.match(
+    decision,
     /Readback function[\s\S]*ללא Grant[\s\S]*ישיר על הטבלאות/,
   );
   assert.match(
     decision,
-    /אסור לחבר אותו ל־`POSTGRES_API_URL` או[\s\S]*`POSTGRES_WORKER_URL`/,
+    /כל Service configuration חייב להעביר Environment[\s\S]*URL אחד בלבד/,
   );
+  assert.match(decision, /הפונקציה נשארת `SECURITY INVOKER`/);
+  assert.match(decision, /החוזה Dormant ואינו מחובר ל־Startup/);
 });
 
 test("leaves real role creation and ownership as an explicit external decision", () => {
