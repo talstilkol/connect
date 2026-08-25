@@ -53,3 +53,7 @@ UTC לפני שהיא פותחת Gate.
 4.4 [ADR-0004 — Detailed Vercel and Railway target topology](0004-target-service-topology.md)
 — `proposed`; מפרט את המלצת השירותים, OIDC, ‏PostgreSQL, ‏Redis,
 Scheduler, ‏Storage, ‏Recovery ו־Observability בלי להמציא אישור.
+
+4.5 [ADR-0005 — Bot-reply Release Evidence Storage](0005-bot-reply-release-evidence-storage.md)
+— `proposed`; ממליץ על PostgreSQL transactional row במקום Railway
+Variables עבור Evidence קצר־חיים, וממתין לאישור פורמלי ול־Adapter חי.
