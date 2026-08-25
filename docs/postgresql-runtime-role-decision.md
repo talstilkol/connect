@@ -218,11 +218,21 @@ Triggers מול Manifest דטרמיניסטי שנוצר ממסד נקי לאח�
 `system_identifier`,‏ Password או הודעת Database גולמית. כשל Query או מבנה
 שורה לא מדויק מחזיר `blocked` בלבד.
 
-4.7.7 קיימים שני Blockers לפני הקשחת `search_path`: קוד ה־API וה־Worker עדיין
-ניגש ישירות ל־`bot_reply_staging_runs`, וחלק מפונקציות ה־Trigger ב־Migration
-0033 פונות ל־`audit_logs` בשם לא־מלא. לפני Activation יש להעביר Claim,
-Reclaim,‏ Poll ו־Complete ל־Wrappers מצומצמים, להסיר Direct table grants,
-ולשנות את ההפניה ל־`public.audit_logs` לפני נעילה ל־`pg_catalog, pg_temp`.
+4.7.7 Migration ‏`0050_bot_reply_staging_trigger_hardening.sql` פתר את תת־החסם
+של Migration ‏0033: שתי כתיבות ה־Audit משתמשות כעת ב־`public.audit_logs`, כל
+חמש פונקציות ה־Trigger נעולות ל־`pg_catalog, pg_temp`, נשארות
+`SECURITY INVOKER`, ו־`PUBLIC EXECUTE` מבוטל. Rehearsal מקומי מבודד מול
+PostgreSQL 16.13 הוכיח שגם תחת `search_path` עוין שני אירועי ה־Audit נכתבים
+רק לטבלה המלאה. זו הוכחה מקומית ולא Evidence של Railway או Production.
+ההקשחה חלה בדיוק על חמש פונקציות ה־Trigger של Migration ‏0033 בלבד; היא
+אינה טענה שכל פונקציות ה־Trigger במסד כבר מוקשחות. הקשחת הפונקציות של
+Migrations ‏0034 ו־0035, ושאר Inventory ה־Triggers, נשארת שלב נפרד ופתוח.
+
+4.7.7.1 ה־Blocker הרחב עדיין פתוח: קוד ה־API וה־Worker ניגש ישירות
+ל־`bot_reply_staging_runs`. לפני Activation יש להעביר Claim,‏ Reclaim,‏ Poll
+ו־Complete ל־Wrappers מצומצמים, להסיר Direct table grants, ולצרף Manifest
+חתום עם Digests מלאים של Function bodies ו־Trigger inventory. ‏Migration
+0050 אינה יוצרת Wrapper, Role,‏ Grant או חיבור Runtime.
 
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.

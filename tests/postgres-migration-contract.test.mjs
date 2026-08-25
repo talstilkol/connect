@@ -70,6 +70,8 @@ const botReplyStagingAttestedEvidenceAtomicPublishSchema =
   migrationSources[48];
 const botReplyStagingAttestedEvidenceReadbackSchema =
   migrationSources[49];
+const botReplyStagingTriggerHardeningSchema =
+  migrationSources[50];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -123,14 +125,48 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0047_bot_reply_staging_attestation_nonce_ledger.sql",
     "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
     "0049_bot_reply_staging_attested_evidence_readback.sql",
+    "0050_bot_reply_staging_trigger_hardening.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 50,
+      migrationCount: 51,
       findings: [],
     },
+  );
+});
+
+test("hardens Bot reply staging triggers without granting runtime access", () => {
+  assert.equal(
+    (botReplyStagingTriggerHardeningSchema.match(
+      /INSERT INTO public\.audit_logs\s*\(/g,
+    ) ?? []).length,
+    2,
+  );
+  assert.equal(
+    (botReplyStagingTriggerHardeningSchema.match(
+      /SET search_path = pg_catalog, pg_temp/g,
+    ) ?? []).length,
+    5,
+  );
+  assert.equal(
+    (botReplyStagingTriggerHardeningSchema.match(
+      /REVOKE ALL ON FUNCTION public\.[a-z0-9_]+\(\)\s+FROM PUBLIC/g,
+    ) ?? []).length,
+    5,
+  );
+  assert.match(
+    botReplyStagingTriggerHardeningSchema,
+    /CREATE OR REPLACE FUNCTION public\.audit_bot_reply_staging_run_start\(\)[\s\S]*SECURITY INVOKER/,
+  );
+  assert.match(
+    botReplyStagingTriggerHardeningSchema,
+    /CREATE OR REPLACE FUNCTION public\.audit_bot_reply_staging_run_completion\(\)[\s\S]*SECURITY INVOKER/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingTriggerHardeningSchema,
+    /INSERT INTO audit_logs|\bSECURITY DEFINER\b|\bGRANT\b|\bCREATE ROLE\b|\bALTER ROLE\b/i,
   );
 });
 

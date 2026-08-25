@@ -108,9 +108,38 @@ test("records the remaining database and transport proof gaps", () => {
     decision,
     /הרשאת `CREATE`[\s\S]*`PUBLIC`[\s\S]*Role[\s\S]*אחר/,
   );
-  assert.match(decision, /ניגש ישירות ל־`bot_reply_staging_runs`/);
-  assert.match(decision, /Migration[\s\S]*0033[\s\S]*`public\.audit_logs`/);
-  assert.match(decision, /`pg_catalog, pg_temp`/);
+  assert.match(
+    decision,
+    /ניגש ישירות[\s\S]*?ל־`bot_reply_staging_runs`/,
+  );
+  assert.match(
+    decision,
+    /Migration ‏`0050_bot_reply_staging_trigger_hardening\.sql`[\s\S]*Migration ‏0033/,
+  );
+  assert.match(
+    decision,
+    /`public\.audit_logs`[\s\S]*חמש פונקציות[\s\S]*`pg_catalog, pg_temp`/,
+  );
+  assert.match(
+    decision,
+    /Rehearsal מקומי מבודד[\s\S]*PostgreSQL 16\.13[\s\S]*`search_path` עוין/,
+  );
+  assert.match(
+    decision,
+    /בדיוק על חמש פונקציות[\s\S]*Migration ‏0033 בלבד[\s\S]*אינה טענה שכל פונקציות/,
+  );
+  assert.match(
+    decision,
+    /Migrations ‏0034 ו־0035[\s\S]*שלב נפרד ופתוח/,
+  );
+  assert.match(
+    decision,
+    /ה־Blocker הרחב עדיין פתוח[\s\S]*Wrappers מצומצמים[\s\S]*Trigger inventory/,
+  );
+  assert.match(
+    decision,
+    /Migration[\s\S]*0050 אינה יוצרת Wrapper, Role,‏ Grant או חיבור Runtime/,
+  );
 });
 
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {

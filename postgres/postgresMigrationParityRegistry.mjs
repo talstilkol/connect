@@ -577,4 +577,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway prepares one release-bound, invoker-rights readback while keeping definer rights, named runtime grants, and activation blocked for the later verifier-role migration.",
   }),
+  Object.freeze({
+    migration:
+      "0050_bot_reply_staging_trigger_hardening.sql",
+    token:
+      "REVOKE ALL ON FUNCTION public.audit_bot_reply_staging_run_start() FROM PUBLIC",
+    summary:
+      "Railway locks the five existing Bot reply staging trigger functions to the canonical safe catalog path, qualifies audit writes, preserves invoker rights, and removes PUBLIC execution without granting or activating a runtime capability.",
+  }),
 ]);
