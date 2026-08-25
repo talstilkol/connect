@@ -57,3 +57,7 @@ Scheduler, ‏Storage, ‏Recovery ו־Observability בלי להמציא איש�
 4.5 [ADR-0005 — Bot-reply Release Evidence Storage](0005-bot-reply-release-evidence-storage.md)
 — `proposed`; ממליץ על PostgreSQL transactional row במקום Railway
 Variables עבור Evidence קצר־חיים, וממתין לאישור פורמלי ול־Adapter חי.
+
+4.6 [ADR-0006 — Bot-reply Staging Evidence Attestation](0006-bot-reply-staging-evidence-attestation.md)
+— `proposed`; ממליץ על חתימת Ed25519 ב־Railway Worker ועל צריכת nonce
+אטומית ב־PostgreSQL. ה־primitive נשאר רדום ואינו פותח Gate.
