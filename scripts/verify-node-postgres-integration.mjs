@@ -140,6 +140,7 @@ const migrationFiles = Object.freeze([
   "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
   "0049_bot_reply_staging_attested_evidence_readback.sql",
   "0050_bot_reply_staging_trigger_hardening.sql",
+  "0051_bot_reply_staging_run_capability_wrappers.sql",
 ]);
 
 function postgresEnvironment(connectionString) {

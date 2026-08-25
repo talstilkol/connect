@@ -142,6 +142,49 @@ test("records the remaining database and transport proof gaps", () => {
   );
 });
 
+test("keeps the 0051 staging-run capabilities database-clocked and dormant", () => {
+  assert.match(
+    decision,
+    /0051_bot_reply_staging_run_capability_wrappers\.sql[\s\S]*Claim\/Reclaim[\s\S]*Read\/Poll[\s\S]*Complete\/Replay/,
+  );
+  assert.match(
+    decision,
+    /`SECURITY INVOKER`[\s\S]*Database clock/,
+  );
+  assert.match(
+    decision,
+    /60–3,600 שניות[\s\S]*`database_now < lease_expires_at`/,
+  );
+  assert.match(
+    decision,
+    /0051 אינה Activation[\s\S]*אין בה[\s\S]*`SECURITY DEFINER`[\s\S]*Role[\s\S]*Grant[\s\S]*Startup/,
+  );
+  assert.match(
+    decision,
+    /הקשחת שש פונקציות 0034\/0035[\s\S]*Provider[\s\S]*`requestedAt`[\s\S]*Audit insert[\s\S]*Legacy direct/,
+  );
+  assert.match(
+    decision,
+    /API[\s\S]*Claim ו־Read[\s\S]*Worker[\s\S]*Complete[\s\S]*Fence/,
+  );
+  assert.match(
+    decision,
+    /Digest קנוני זהה[\s\S]*אותם bytes[\s\S]*JSON שקול סמנטית[\s\S]*Conflict/,
+  );
+  assert.match(
+    decision,
+    /serializeCanonicalBotReplyStagingReceipt\(\)[\s\S]*לא באמצעות `JSON\.stringify\(\)`/,
+  );
+  assert.match(
+    decision,
+    /Adapter[\s\S]*bytes של JSON קנוני[\s\S]*SHA-256[\s\S]*UTF-8 המדויק/,
+  );
+  assert.match(
+    decision,
+    /ה־API[\s\S]*`complete\(\)`[\s\S]*double-complete[\s\S]*Replay נפרד/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,

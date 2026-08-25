@@ -480,7 +480,9 @@ function canonicalJson(
   return fragments.join("");
 }
 
-export function deriveBotReplyStagingReceiptDigest(receipt: unknown): string {
+export function serializeCanonicalBotReplyStagingReceipt(
+  receipt: unknown,
+): string {
   const canonicalReceipt = canonicalJson(receipt, new Set());
   if (
     canonicalReceipt.length === 0 ||
@@ -488,6 +490,11 @@ export function deriveBotReplyStagingReceiptDigest(receipt: unknown): string {
   ) {
     throw new TypeError("receipt is outside the attestation size boundary");
   }
+  return canonicalReceipt;
+}
+
+export function deriveBotReplyStagingReceiptDigest(receipt: unknown): string {
+  const canonicalReceipt = serializeCanonicalBotReplyStagingReceipt(receipt);
   return `sha256:${createHash("sha256")
     .update(canonicalReceipt, "utf8")
     .digest("hex")}`;

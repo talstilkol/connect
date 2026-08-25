@@ -142,6 +142,46 @@ const dataInsertion = /\bINSERT\s+INTO\b/i;
 const functionDefinition =
   /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\b[\s\S]*?\bAS\s+\$\$([\s\S]*?)\$\$\s*;/gi;
 const triggerRowReference = /\b(?:NEW|OLD)\.[a-z][a-z0-9_]*/i;
+const stagingRunCapabilityInsert =
+  /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_runs\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*ON\s+CONFLICT\s+DO\s+NOTHING\s+RETURNING\s+\*\s+INTO\s+stored_run\s*$/i;
+const stagingRunCapabilityColumns = Object.freeze([
+  "run_key",
+  "tenant_id",
+  "request_digest",
+  "actor_external_user_id",
+  "connection_version",
+  "policy_version",
+  "release_id",
+  "commit_sha",
+  "artifact_digest",
+  "graph_api_version",
+  "recipient_fingerprint",
+  "rate_limit_method_fingerprint",
+  "lease_expires_at",
+  "audit_key",
+  "started_at",
+  "created_at",
+  "updated_at",
+]);
+const stagingRunCapabilityValues = Object.freeze([
+  "requested_run_key",
+  "requested_tenant_id",
+  "requested_request_digest",
+  "requested_actor_external_user_id",
+  "requested_connection_version",
+  "requested_policy_version",
+  "requested_release_id",
+  "requested_commit_sha",
+  "requested_artifact_digest",
+  "requested_graph_api_version",
+  "requested_recipient_fingerprint",
+  "requested_rate_limit_method_fingerprint",
+  "database_lease_expires_at",
+  "requested_audit_key",
+  "database_now",
+  "database_now",
+  "database_now",
+]);
 
 function rootUrl(root) {
   return pathToFileURL(
@@ -166,7 +206,29 @@ function extractCreatedTables(source) {
   );
 }
 
-function containsSeedData(source) {
+function commaSeparatedIdentifiers(value) {
+  return value
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter((entry) => entry.length > 0);
+}
+
+function isReviewedStagingRunCapabilityInsert(statement) {
+  const match = stagingRunCapabilityInsert.exec(statement);
+  if (!match) return false;
+  const columns = commaSeparatedIdentifiers(match[1]);
+  const values = commaSeparatedIdentifiers(match[2]);
+  return columns.length === stagingRunCapabilityColumns.length &&
+    values.length === stagingRunCapabilityValues.length &&
+    columns.every(
+      (column, index) => column === stagingRunCapabilityColumns[index],
+    ) &&
+    values.every(
+      (value, index) => value === stagingRunCapabilityValues[index],
+    );
+}
+
+function containsSeedData(source, fileName) {
   for (const match of source.matchAll(functionDefinition)) {
     const body = match[1];
     const statements = body.split(";");
@@ -175,7 +237,12 @@ function containsSeedData(source) {
       statements.some(
         (statement) =>
           dataInsertion.test(statement) &&
-          !triggerRowReference.test(statement),
+          !triggerRowReference.test(statement) &&
+          !(
+            fileName ===
+              "0051_bot_reply_staging_run_capability_wrappers.sql" &&
+            isReviewedStagingRunCapabilityInsert(statement)
+          ),
       )
     ) {
       return true;
@@ -279,7 +346,7 @@ export function validatePostgresMigrationSources({
       );
     }
 
-    if (containsSeedData(source)) {
+    if (containsSeedData(source, fileName)) {
       findings.push(
         finding(
           "POSTGRES_SEED_DATA_PRESENT",

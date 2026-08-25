@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  createHash,
   createPrivateKey,
   createPublicKey,
   sign,
@@ -12,6 +13,7 @@ import {
   deriveBotReplyStagingReceiptAttestationNonce,
   deriveBotReplyStagingReceiptAttestationPayloadDigest,
   deriveBotReplyStagingReceiptDigest,
+  serializeCanonicalBotReplyStagingReceipt,
   serializeBotReplyStagingReceiptAttestationPayload,
   verifyAndConsumeBotReplyStagingReceiptAttestation,
   verifyBotReplyStagingReceiptAttestation,
@@ -237,9 +239,21 @@ test("canonical receipt digest is order-independent and rejects non-JSON input",
     runnerVersion: original.runnerVersion,
     schemaVersion: 1,
   };
+  const canonicalReceipt = serializeCanonicalBotReplyStagingReceipt(original);
+  assert.equal(
+    serializeCanonicalBotReplyStagingReceipt(reordered),
+    canonicalReceipt,
+  );
+  assert.notEqual(JSON.stringify(original), canonicalReceipt);
   assert.equal(
     deriveBotReplyStagingReceiptDigest(reordered),
     deriveBotReplyStagingReceiptDigest(original),
+  );
+  assert.equal(
+    deriveBotReplyStagingReceiptDigest(original),
+    `sha256:${createHash("sha256")
+      .update(canonicalReceipt, "utf8")
+      .digest("hex")}`,
   );
   assert.throws(
     () => deriveBotReplyStagingReceiptDigest({ value: undefined }),

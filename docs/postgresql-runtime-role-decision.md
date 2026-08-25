@@ -123,12 +123,14 @@ Verifier service ─── POSTGRES_VERIFIER_URL ──────────�
 
 4.3 מטריצת Capability:
 
-4.3.1 API — ללא גישה ישירה לארבע טבלאות הראיות המוגנות. הוא רשאי לקבל רק
-תוצאת Readiness מצומצמת משירות Verifier מבודד, לאחר שיוגדר חוזה שירות נפרד.
+4.3.1 API — ללא גישה ישירה לארבע טבלאות הראיות המוגנות. עבור תיאום Run עתידי
+הוא יוכל לקבל `EXECUTE` רק על Claim ו־Read המצומצמים; עבור Release evidence
+הוא רשאי לקבל רק תוצאת Readiness מצומצמת משירות Verifier מבודד. כרגע אין
+Grant לאף אחת מהיכולות.
 
 4.3.2 Worker — ללא הרשאה לארבע הטבלאות המוגנות וללא פונקציות הפרסום ב־D31-A.
-ה־Worker הנוכחי תלוי ב־`bot_reply_staging_runs`; לפני Activation נדרש לבחור
-Wrapper מצומצם או לפצל בין נתוני תזמון לבין Receipt מוגן. עד אז אין Grant.
+עבור תיאום Run עתידי הוא יוכל לקבל `EXECUTE` רק על Complete ועל Fence נפרד
+לפעולת Provider/Observation. הוא אינו מקבל Claim או Read. עד אז אין Grant.
 
 4.3.3 Verifier — ללא `SELECT` ישיר על הטבלאות. הוא מקבל `EXECUTE` רק על
 Wrapper הפרסום של Commit C ועל Readback function בעלת SQL קבוע, זהות Release
@@ -233,6 +235,33 @@ Migrations ‏0034 ו־0035, ושאר Inventory ה־Triggers, נשארת שלב 
 ו־Complete ל־Wrappers מצומצמים, להסיר Direct table grants, ולצרף Manifest
 חתום עם Digests מלאים של Function bodies ו־Trigger inventory. ‏Migration
 0050 אינה יוצרת Wrapper, Role,‏ Grant או חיבור Runtime.
+
+4.7.7.2 Migration ‏`0051_bot_reply_staging_run_capability_wrappers.sql`
+מכינה שלוש יכולות Lifecycle רדומות: Claim/Reclaim אטומי, Read/Poll מצומצם
+ו־Complete/Replay אטומי. כל שלוש הפונקציות משתמשות בשמות `public.*` מלאים,
+ב־`pg_catalog, pg_temp`, ב־`ROWS 1`, ב־`SECURITY INVOKER` וב־Database clock.
+Lease מחושב במסד למשך 60–3,600 שניות; Complete מותר רק בטווח חצי־פתוח
+`database_now < lease_expires_at`, בעוד Reclaim מותר החל מנקודת התפוגה.
+הפונקציות מחזירות פלט סגור ונכשלות ללא Row oracle מול Tenant,‏ Request,
+Audit,‏ Release,‏ Commit,‏ Artifact,‏ Claim version ו־Lease שונים.
+Replay של Completion דורש גם Digest קנוני זהה וגם את אותם bytes של
+`receipt_json`; שינוי ייצוג, גם אם ה־JSON שקול סמנטית, נכשל סגור כ־Conflict.
+ה־bytes נוצרים רק באמצעות
+`serializeCanonicalBotReplyStagingReceipt()` — לא באמצעות `JSON.stringify()`
+של ה־Repository הישן.
+
+4.7.7.3 ‏0051 אינה Activation ואינה סוגרת עדיין את חסם Direct DML. אין בה
+`SECURITY DEFINER`,‏ Role,‏ Grant,‏ שינוי Startup או Importer. לפני שימוש חי
+נדרשים לכל הפחות: הקשחת שש פונקציות 0034/0035; Wrapper אטומי ששומר Provider
+operation reservation ו־Observation תחת אותו Claim fence; Request identity
+חדש שקושר גם `requestedAt`; מניעת Audit insert מזויף; מעבר Repositories
+מה־SQL הישיר; Adapter שמוסר ל־Complete רק bytes של JSON קנוני כך שה־Digest
+שנגזר באפליקציה זהה ל־SHA-256 שהמסד גוזר מה־UTF-8 המדויק; Owner/Role
+transaction אטומית; ו־Manifest חתום. Legacy direct
+release-evidence repository חייב לצאת מה־API לפני Activation. בנוסף, ה־API
+המקומי עדיין קורא `complete()` פעם נוספת אחרי השלמת Worker; לפני Grants יש
+להסיר את ה־double-complete או לעצב חוזה Replay נפרד שאינו נותן ל־API הרשאת
+Complete של Worker.
 
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.

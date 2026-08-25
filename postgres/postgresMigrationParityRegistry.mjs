@@ -585,4 +585,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway locks the five existing Bot reply staging trigger functions to the canonical safe catalog path, qualifies audit writes, preserves invoker rights, and removes PUBLIC execution without granting or activating a runtime capability.",
   }),
+  Object.freeze({
+    migration:
+      "0051_bot_reply_staging_run_capability_wrappers.sql",
+    token:
+      "claim_bot_reply_staging_run_v1",
+    summary:
+      "Railway prepares three database-clocked, half-open and invoker-rights staging-run lifecycle wrappers while keeping direct-table denial, definer conversion, runtime grants and activation blocked for a later reviewed role migration.",
+  }),
 ]);

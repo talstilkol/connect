@@ -72,6 +72,8 @@ const botReplyStagingAttestedEvidenceReadbackSchema =
   migrationSources[49];
 const botReplyStagingTriggerHardeningSchema =
   migrationSources[50];
+const botReplyStagingRunCapabilityWrappersSchema =
+  migrationSources[51];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -126,14 +128,52 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
     "0049_bot_reply_staging_attested_evidence_readback.sql",
     "0050_bot_reply_staging_trigger_hardening.sql",
+    "0051_bot_reply_staging_run_capability_wrappers.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 51,
+      migrationCount: 52,
       findings: [],
     },
+  );
+});
+
+test("prepares dormant database-clocked staging-run capabilities", () => {
+  assert.equal(
+    (botReplyStagingRunCapabilityWrappersSchema.match(
+      /CREATE FUNCTION public\.(?:claim|read|complete)_bot_reply_staging_run_v1\(/g,
+    ) ?? []).length,
+    3,
+  );
+  assert.equal(
+    (botReplyStagingRunCapabilityWrappersSchema.match(
+      /SET search_path = pg_catalog, pg_temp/g,
+    ) ?? []).length,
+    3,
+  );
+  assert.equal(
+    (botReplyStagingRunCapabilityWrappersSchema.match(
+      /\nSECURITY INVOKER\n/g,
+    ) ?? []).length,
+    3,
+  );
+  assert.match(
+    botReplyStagingRunCapabilityWrappersSchema,
+    /requested_lease_duration_seconds NOT BETWEEN 60 AND 3600/,
+  );
+  assert.match(
+    botReplyStagingRunCapabilityWrappersSchema,
+    /database_now >= stored_run\.lease_expires_at/,
+  );
+  assert.match(
+    botReplyStagingRunCapabilityWrappersSchema,
+    /database_now < staging_run\.lease_expires_at/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingRunCapabilityWrappersSchema,
+    /\nSECURITY DEFINER\n|^\s*GRANT\b|^\s*(?:CREATE|ALTER) ROLE\b/gm,
   );
 });
 
@@ -1406,6 +1446,54 @@ test("rejects seed data hidden inside a PostgreSQL function body", () => {
     END;
     $$;
   `;
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+});
+
+test("rejects a literal hidden inside the reviewed staging-run insert", () => {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[51] = tamperedSources[51].replace(
+    "    database_now,\n    database_now,\n    database_now\n  )\n  ON CONFLICT",
+    "    database_now,\n    database_now,\n    'forbidden-seed'\n  )\n  ON CONFLICT",
+  );
+  assert.notEqual(tamperedSources[51], migrationSources[51]);
+
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+});
+
+test("does not allow the reviewed staging-run insert in another migration", () => {
+  const reviewedInsert = migrationSources[51].match(
+    /INSERT INTO public\.bot_reply_staging_runs\s*\([\s\S]*?RETURNING \* INTO stored_run;/,
+  )?.[0];
+  assert.equal(typeof reviewedInsert, "string");
+
+  const tamperedSources = [...migrationSources];
+  tamperedSources[50] += `
+CREATE FUNCTION public.unreviewed_staging_run_insert()
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN;
+${reviewedInsert}
+END;
+$$;
+`;
+
   const findings = validatePostgresMigrationSources({
     migrationFiles,
     sources: tamperedSources,
