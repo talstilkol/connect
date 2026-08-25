@@ -80,6 +80,8 @@ const botReplyStagingProviderOperationFenceSchema =
   migrationSources[53];
 const metaCredentialRevisionLedgerSchema =
   migrationSources[54];
+const botReplyCredentialBoundPreSendPermitSchema =
+  migrationSources[55];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -138,12 +140,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0052_bot_reply_staging_authorization_observation_hardening.sql",
     "0053_bot_reply_staging_provider_operation_fence.sql",
     "0054_meta_credential_revision_ledger.sql",
+    "0055_bot_reply_staging_credential_bound_pre_send_permit.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 55,
+      migrationCount: 56,
       findings: [],
     },
   );
@@ -182,6 +185,21 @@ test("keeps the staging provider side effect behind one dormant operation fence"
   assert.match(
     botReplyStagingProviderOperationFenceSchema,
     /'replay-blocked'::TEXT,[\s\S]*NULL::TEXT/,
+  );
+});
+
+test("keeps credential-bound pre-send admission dormant", () => {
+  assert.match(
+    botReplyCredentialBoundPreSendPermitSchema,
+    /claim_bot_reply_staging_run_v2/,
+  );
+  assert.match(
+    botReplyCredentialBoundPreSendPermitSchema,
+    /reserve_bot_reply_staging_credential_bound_pre_send_permit_v2/,
+  );
+  assert.doesNotMatch(
+    botReplyCredentialBoundPreSendPermitSchema,
+    /INSERT INTO public\.bot_reply_provider_request_claims|\bSECURITY DEFINER\b|^\s*GRANT\b/gm,
   );
 });
 
@@ -1685,6 +1703,217 @@ test("rejects an additional insert inside the reviewed provider reserve function
       "    'authorized'::TEXT,",
     ].join("\n"),
   ));
+});
+
+function assertCredentialBoundPreSendInsertMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[55] = mutator(tamperedSources[55]);
+  assert.notEqual(tamperedSources[55], migrationSources[55]);
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+}
+
+function assertCredentialBoundAdmissionRunScopeMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[55] = mutator(tamperedSources[55]);
+  assert.notEqual(tamperedSources[55], migrationSources[55]);
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(
+      ({ code }) =>
+        code ===
+          "POSTGRES_CREDENTIAL_BOUND_ADMISSION_RUN_SCOPE_INVALID",
+    ),
+    true,
+  );
+}
+
+function assertCredentialBoundPermitLookupScopeMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[55] = mutator(tamperedSources[55]);
+  assert.notEqual(tamperedSources[55], migrationSources[55]);
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(
+      ({ code }) =>
+        code ===
+          "POSTGRES_CREDENTIAL_BOUND_PERMIT_LOOKUP_SCOPE_INVALID",
+    ),
+    true,
+  );
+}
+
+test("rejects a different run-binding value in the reviewed credential claim", () => {
+  assertCredentialBoundPreSendInsertMutationRejected((source) =>
+    source.replace(
+      "      active_run.tenant_id,\n      active_run.claim_version,",
+      "      'forbidden-seed',\n      active_run.claim_version,",
+    ));
+});
+
+test("rejects a different permit table in the reviewed credential reserve", () => {
+  assertCredentialBoundPreSendInsertMutationRejected((source) =>
+    source.replace(
+      "INSERT INTO public.bot_reply_staging_credential_bound_pre_send_permits (",
+      "INSERT INTO public.bot_reply_staging_credential_bound_pre_send_permits_copy (",
+    ));
+});
+
+test("rejects a different admission identity in the reviewed credential reserve", () => {
+  assertCredentialBoundPreSendInsertMutationRejected((source) =>
+    source.replace(
+      "    locked_admission.admission_binding_key,\n    requested_operation_key,",
+      "    'forbidden-seed',\n    requested_operation_key,",
+    ));
+});
+
+test("rejects an admission binding that omits the exact run identity", () => {
+  assertCredentialBoundAdmissionRunScopeMutationRejected((source) =>
+    source.replace(
+      [
+        "ADD CONSTRAINT bot_reply_staging_pre_send_admission_run_binding_fk",
+        "  FOREIGN KEY (",
+        "    run_binding_key,",
+      ].join("\n"),
+      [
+        "ADD CONSTRAINT bot_reply_staging_pre_send_admission_run_binding_fk",
+        "  FOREIGN KEY (",
+        "    run_identity_key,",
+      ].join("\n"),
+    ));
+});
+
+test("rejects a permit admission FK that omits the run binding", () => {
+  assertCredentialBoundAdmissionRunScopeMutationRejected((source) =>
+    source.replace(
+      [
+        "CONSTRAINT bot_reply_staging_pre_send_permits_admission_fk",
+        "    FOREIGN KEY (",
+        "      admission_binding_key,",
+        "      run_binding_key,",
+      ].join("\n"),
+      [
+        "CONSTRAINT bot_reply_staging_pre_send_permits_admission_fk",
+        "    FOREIGN KEY (",
+        "      admission_binding_key,",
+        "      run_identity_key,",
+      ].join("\n"),
+    ));
+});
+
+test("rejects reserve without the full admission-to-run comparison", () => {
+  assertCredentialBoundAdmissionRunScopeMutationRejected((source) =>
+    source.replace(
+      "locked_admission.credential_event_key IS DISTINCT FROM\n      locked_binding.credential_event_key",
+      "locked_admission.credential_event_key IS DISTINCT FROM\n      active_authorization.credential_event_key",
+    ));
+});
+
+test("rejects reserve without the pre-lock run-binding comparison", () => {
+  assertCredentialBoundPermitLookupScopeMutationRejected((source) =>
+    source.replace(
+      "IF initial_binding.run_key <> requested_run_key",
+      "IF requested_run_key <> requested_run_key",
+    ));
+});
+
+test("rejects removal of tenant scope from the first permit lookup", () => {
+  assertCredentialBoundPermitLookupScopeMutationRejected((source) =>
+    source.replace(
+      "WHERE permit.tenant_id = persisted_tenant_id\n    AND (",
+      "WHERE (",
+    ));
+});
+
+test("rejects removal of tenant scope from the conflict permit lookup", () => {
+  assertCredentialBoundPermitLookupScopeMutationRejected((source) => {
+    const needle =
+      "WHERE permit.tenant_id = persisted_tenant_id\n      AND (";
+    const index = source.lastIndexOf(needle);
+    assert.equal(index >= 0, true);
+    return source.slice(0, index) +
+      "WHERE (" +
+      source.slice(index + needle.length);
+  });
+});
+
+test("rejects any writer for the inert pre-send admission binding", () => {
+  assertCredentialBoundPreSendInsertMutationRejected((source) =>
+    source.replace(
+      "  RETURN QUERY SELECT stored_permit.permit_key;",
+      [
+        "  INSERT INTO public.bot_reply_staging_pre_send_admission_bindings (",
+        "    admission_binding_key",
+        "  ) VALUES ('forbidden-seed');",
+        "  RETURN QUERY SELECT stored_permit.permit_key;",
+      ].join("\n"),
+    ));
+});
+
+test("rejects any inert-ledger insert in the reviewed credential reserve", () => {
+  assertCredentialBoundPreSendInsertMutationRejected((source) =>
+    source.replace(
+      "  RETURN QUERY SELECT stored_permit.permit_key;",
+      [
+        "  INSERT INTO public.bot_reply_staging_credential_bound_pre_send_permit_consumptions (",
+        "    consumption_key",
+        "  ) VALUES ('forbidden-seed');",
+        "  RETURN QUERY SELECT stored_permit.permit_key;",
+      ].join("\n"),
+    ));
+});
+
+test("allows only the five exact pre-send truncate guards", () => {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[55] += `
+TRUNCATE public.bot_reply_staging_run_credential_bindings;
+`;
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+
+  const reboundSources = [...migrationSources];
+  reboundSources[55] = reboundSources[55].replace(
+    [
+      "CREATE TRIGGER bot_reply_staging_run_bindings_truncate_guard",
+      "BEFORE TRUNCATE ON public.bot_reply_staging_run_credential_bindings",
+    ].join("\n"),
+    [
+      "CREATE TRIGGER bot_reply_staging_run_bindings_truncate_guard",
+      "BEFORE TRUNCATE",
+      "ON public.bot_reply_staging_credential_bound_pre_send_permits",
+    ].join("\n"),
+  );
+  assert.notEqual(reboundSources[55], migrationSources[55]);
+  const reboundFindings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: reboundSources,
+  });
+  assert.equal(
+    reboundFindings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
 });
 
 function assertMetaCredentialBackfillMutationRejected(mutator) {

@@ -307,3 +307,18 @@ test("limits destructive repeatability cleanup to a validated empty database", (
     /DROP SCHEMA public CASCADE[\s\S]*CREATE SCHEMA public/,
   );
 });
+
+test("keeps ledger truncate evidence valid after credential-bound foreign keys", () => {
+  assert.match(
+    verifier,
+    /TRUNCATE public\.meta_credential_revision_events"\),[\s\S]*error\?\.code === "0A000"[\s\S]*cannot truncate a table referenced in a foreign key constraint/,
+  );
+  assert.match(
+    verifier,
+    /TRUNCATE public\.meta_credential_revision_events CASCADE"\),[\s\S]*\/events are append-only\//,
+  );
+  assert.match(
+    verifier,
+    /meta_credential_revision_events_exact_identity_uq/,
+  );
+});

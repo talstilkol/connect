@@ -338,6 +338,49 @@ test("documents the dormant credential revision ledger without activation", () =
   );
 });
 
+test("documents the dormant credential-bound pre-send permit without activation", () => {
+  assert.match(
+    decision,
+    /0055_bot_reply_staging_credential_bound_pre_send_permit\.sql[\s\S]*B2a1[\s\S]*READ COMMITTED[\s\S]*Revision[\s\S]*Envelope digest/,
+  );
+  assert.match(
+    decision,
+    /Digest-only[\s\S]*`completedAt`[\s\S]*`receiptDigest`[\s\S]*אינה מחזירה את[\s\S]*`receiptJson`/,
+  );
+  assert.match(
+    decision,
+    /Admission binding בלתי־משתנה[\s\S]*Run binding[\s\S]*Authorization[\s\S]*Credential identity[\s\S]*Rate-limit reservation[\s\S]*Composite foreign key[\s\S]*אין Backfill[\s\S]*נכשל סגור/,
+  );
+  assert.match(
+    decision,
+    /Authorization\/Run של נמען[\s\S]*Delivery\/Reservation\/Admission מלאה[\s\S]*אותו Tenant/,
+  );
+  assert.match(
+    decision,
+    /`reserve_bot_reply_staging_credential_bound_pre_send_permit_v2`/,
+  );
+  assert.doesNotMatch(
+    decision,
+    /`reserve_bot_reply_staging_pre_send_permit_v2`/,
+  );
+  assert.match(
+    decision,
+    /מפתח ה־One-shot permit אינו קלט[\s\S]*Database clock[\s\S]*Replay[\s\S]*Conflict שאינו זהה נכשל סגור/,
+  );
+  assert.match(
+    decision,
+    /Composite foreign keys[\s\S]*Resolution מסוג[\s\S]*`released`[\s\S]*Provider request שכבר נצרך/,
+  );
+  assert.match(
+    decision,
+    /B2a1 אינו Activation[\s\S]*אין ב־0055 `GRANT`[\s\S]*Consume\/Release\/Finalize\/Reconcile[\s\S]*Session advisory-lock[\s\S]*Commit אינו ודאי[\s\S]*Activation נשאר NO-GO/,
+  );
+  assert.match(
+    decision,
+    /D1e[\s\S]*`messages\.occurred_at` לבלתי־משתנה[\s\S]*Provider[\s\S]*cooldown[\s\S]*Admission writer/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,

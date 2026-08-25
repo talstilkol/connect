@@ -617,4 +617,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway derives Meta credential revision identity inside PostgreSQL and records an immutable secret-free envelope digest ledger; exact replay is stable, old digest reuse is blocked, and no runtime capability is granted.",
   }),
+  Object.freeze({
+    migration:
+      "0055_bot_reply_staging_credential_bound_pre_send_permit.sql",
+    token:
+      "reserve_bot_reply_staging_credential_bound_pre_send_permit_v2",
+    summary:
+      "Railway binds new staging authorization and run-claim evidence to one exact Meta credential revision, requires a separately admitted delivery/reservation/policy identity that is composite-bound to that same run, authorization and credential, and may reserve one DB-clocked immutable pre-send permit; the admission writer, consumption, provider capability release, named grants and runtime activation remain blocked for the later session-barrier migration.",
+  }),
 ]);

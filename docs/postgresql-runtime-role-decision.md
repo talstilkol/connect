@@ -484,6 +484,43 @@ Migration executor מוכח להריץ את כל 0054 ב־Transaction אחת. ל
 One-shot pre-send permit,‏ Pinned client,‏ Tenant advisory-lock barrier
 ו־Reconciliation למצב `indeterminate`. לכן Activation נשאר NO-GO.
 
+4.7.7.26 Migration
+‏`0055_bot_reply_staging_credential_bound_pre_send_permit.sql` מוסיפה את חוזה
+B2a1 הרדום. `claim_bot_reply_staging_run_v2` פועל רק ב־`READ COMMITTED`, נועל
+את זהות ה־Authorization וה־Credential הפעילה, וקושר את ה־Run ל־Revision,
+ל־Envelope digest ולאירוע ה־Ledger המדויקים. תוצאת ה־Claim היא Digest-only:
+היא יכולה להחזיר `completedAt` ו־`receiptDigest`, אך אינה מחזירה את
+`receiptJson` הגולמי.
+
+4.7.7.27 טבלת Admission binding בלתי־משתנה קושרת במדויק Tenant,‏ Run binding,
+Run claim,‏ Authorization,‏ Credential identity,‏ Delivery,‏ Delivery claim,
+Rate-limit reservation,‏ Sender,‏ Recipient,‏ Policy event,‏ Throughput וזמני
+ה־Database. Composite foreign key קושר אותה לאותה רשומת Run credential
+binding, ולא רק לאותו Tenant. אין ב־0055 פונקציית כתיבה לטבלה זו ואין Backfill.
+לכן `reserve_bot_reply_staging_credential_bound_pre_send_permit_v2` נכשל סגור
+ללא Binding שכבר
+נוצר במסלול Admission מורשה עתידי; אין אפשרות להרכיב Authorization/Run של נמען
+אחד עם חבילת Delivery/Reservation/Admission מלאה של נמען אחר, גם כאשר כולם
+שייכים לאותו Tenant.
+
+4.7.7.28 מפתח ה־One-shot permit אינו קלט של הקורא. הוא נגזר רק לאחר הנעילות
+ומ־Database clock, וכולל Tenant, זהות Credential שמורה ו־`reserved_at`
+שבבעלות מסד הנתונים. Replay מאותר לפי ה־Scopes הייחודיים, קורא מחדש את הרשומה
+ומחשב את המפתח מתוך הזהות השמורה; Conflict שאינו זהה נכשל סגור. טבלאות
+Consumption ו־Resolution נשארות ללא פונקציות כתיבה. Composite foreign keys
+קושרים Consumption לאותו Permit ולאותו Provider request, ו־Resolution מסוג
+`released` מחייב את זוג ה־Permit וה־Provider request שכבר נצרך.
+
+4.7.7.29 ‏B2a1 אינו Activation. אין ב־0055 `GRANT`,‏ `SECURITY DEFINER`,
+Provider I/O,‏ Runtime importer, פונקציות Consume/Release/Finalize/Reconcile או
+Admission writer. ‏B2a2 חייב להוסיף Session advisory-lock שמקורו ב־DB על Client
+מוצמד אחד, להחזיק אותו לאורך Consume, אישור Commit, קריאת Meta ו־Finalize, ולא
+לשלוח כאשר אישור ה־Commit אינו ודאי. D1e חייב להוכיח Writer barrier לכל שינוי
+רלוונטי, להפוך את `messages.occurred_at` לבלתי־משתנה, לבצע Recheck ל־Provider
+cooldown ולספק Admission writer מצומצם. המסלול הישן
+`reserve_bot_reply_staging_provider_operation_v1` נשאר ללא הרשאת Runtime.
+עד להשלמת כל אלה Activation נשאר NO-GO.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

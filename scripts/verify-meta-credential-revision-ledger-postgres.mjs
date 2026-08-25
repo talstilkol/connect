@@ -658,6 +658,14 @@ async function verifyDirectLedgerMutationDenial(pool, tenantId) {
   );
   await assert.rejects(
     pool.query("TRUNCATE public.meta_credential_revision_events"),
+    (error) =>
+      error?.code === "0A000" &&
+      /cannot truncate a table referenced in a foreign key constraint/.test(
+        error.message,
+      ),
+  );
+  await assert.rejects(
+    pool.query("TRUNCATE public.meta_credential_revision_events CASCADE"),
     /events are append-only/,
   );
 }
@@ -718,6 +726,7 @@ async function verifyLedgerCatalogAndRedaction(pool, tenantId) {
   assert.deepEqual(constraints.rows, [
     { name: "meta_credential_revision_events_digest_sha256", type: "c" },
     { name: "meta_credential_revision_events_event_key_sha256", type: "c" },
+    { name: "meta_credential_revision_events_exact_identity_uq", type: "u" },
     { name: "meta_credential_revision_events_key_version_valid", type: "c" },
     { name: "meta_credential_revision_events_pkey", type: "p" },
     { name: "meta_credential_revision_events_revision_positive", type: "c" },
