@@ -63,6 +63,7 @@ const providerRequestFenceSchema = migrationSources[39];
 const releaseEvidenceSchema = migrationSources[40];
 const productionReadinessV2EvidenceSchema = migrationSources[41];
 const botReplyProviderOutcomeRequestFenceSchema = migrationSources[42];
+const botReplyReleaseEvidenceAtomicPublishSchema = migrationSources[44];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -110,12 +111,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0041_production_readiness_release_evidence_v2.sql",
     "0042_bot_reply_provider_outcome_request_fence.sql",
     "0043_bot_reply_staging_release_evidence_operator_audit.sql",
+    "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 44,
+      migrationCount: 45,
       findings: [],
     },
   );
@@ -177,6 +179,33 @@ test("stores release evidence behind one versioned compare-and-set row", () => {
   assert.match(releaseEvidenceSchema, /INTERVAL '60 seconds'/);
   assert.match(releaseEvidenceSchema, /INTERVAL '900 seconds'/);
   assert.doesNotMatch(releaseEvidenceSchema, /random|uuid/i);
+});
+
+test("adds one dormant atomic release-evidence CAS and operator-audit boundary", () => {
+  assert.match(
+    botReplyReleaseEvidenceAtomicPublishSchema,
+    /CREATE FUNCTION public\.publish_bot_reply_staging_release_evidence_with_operator_audit\(/,
+  );
+  assert.match(
+    botReplyReleaseEvidenceAtomicPublishSchema,
+    /LANGUAGE plpgsql\s+SECURITY DEFINER\s+SET search_path = pg_catalog/,
+  );
+  assert.match(
+    botReplyReleaseEvidenceAtomicPublishSchema,
+    /UPDATE public\.bot_reply_staging_release_evidence AS evidence[\s\S]*MERGE INTO public\.bot_reply_staging_release_evidence_operator_events/,
+  );
+  assert.match(
+    botReplyReleaseEvidenceAtomicPublishSchema,
+    /REVOKE ALL ON FUNCTION public\.publish_bot_reply_staging_release_evidence_with_operator_audit\([\s\S]*\) FROM PUBLIC/,
+  );
+  assert.match(
+    botReplyReleaseEvidenceAtomicPublishSchema,
+    /EXPAND-ONLY[\s\S]*does not claim that direct table DML is[\s\S]*blocked/,
+  );
+  assert.doesNotMatch(
+    botReplyReleaseEvidenceAtomicPublishSchema,
+    /\bEXECUTE\s+(?:format\s*\(|["'])|\bGRANT\b|production_readiness_release_(?:heads|activation_events)_v2/i,
+  );
 });
 
 test("binds provider cooldown deferrals to exact durable Bot reply facts", () => {

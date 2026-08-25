@@ -518,4 +518,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway adds immutable system-admin actor and deterministic operator-request evidence for audited Bot reply staging release-evidence publications; runtime activation remains separately fail-closed.",
   }),
+  Object.freeze({
+    migration:
+      "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
+    token:
+      "publish_bot_reply_staging_release_evidence_with_operator_audit",
+    summary:
+      "Railway adds an expand-only, search-path-locked PostgreSQL function that keeps one release-evidence compare-and-set and its immutable operator event in the same database statement; activation remains blocked pending a reviewed migration-owner/runtime-role split.",
+  }),
 ]);
