@@ -111,78 +111,12 @@ const rowKeys = Object.freeze([
 export const postgresBotReplyStagingAttestedReleaseEvidenceReadSql =
   Object.freeze({
     readVerified: `
-      SELECT
-        release_evidence.release_id AS "releaseId",
-        release_evidence.commit_sha AS "commitSha",
-        release_evidence.artifact_digest AS "artifactDigest",
-        release_evidence.evidence_version AS "evidenceVersion",
-        release_evidence.evidence_digest AS "evidenceDigest",
-        release_evidence.evidence_json AS "evidenceJson",
-        release_evidence.verified_at AS "evidenceVerifiedAt",
-        release_evidence.expires_at AS "evidenceExpiresAt",
-        staging_run.status AS "runStatus",
-        staging_run.run_key AS "runRunKey",
-        staging_run.claim_version AS "runClaimVersion",
-        staging_run.request_digest AS "runRequestDigest",
-        staging_run.release_id AS "runReleaseId",
-        staging_run.commit_sha AS "runCommitSha",
-        staging_run.artifact_digest AS "runArtifactDigest",
-        staging_run.receipt_json AS "runReceiptJson",
-        staging_run.receipt_digest AS "runReceiptDigest",
-        staging_run.completed_at AS "runCompletedAt",
-        nonce_claim.policy_version AS "noncePolicyVersion",
-        nonce_claim.key_id AS "nonceKeyId",
-        nonce_claim.run_key AS "nonceRunKey",
-        nonce_claim.claim_version AS "nonceClaimVersion",
-        nonce_claim.request_digest AS "nonceRequestDigest",
-        nonce_claim.release_id AS "nonceReleaseId",
-        nonce_claim.commit_sha AS "nonceCommitSha",
-        nonce_claim.artifact_digest AS "nonceArtifactDigest",
-        nonce_claim.expected_evidence_version AS "nonceExpectedEvidenceVersion",
-        nonce_claim.receipt_digest AS "nonceReceiptDigest",
-        nonce_claim.evidence_core_digest AS "nonceEvidenceCoreDigest",
-        nonce_claim.audit_key AS "nonceAuditKey",
-        nonce_claim.nonce AS "nonceNonce",
-        nonce_claim.nonce_sequence AS "nonceSequence",
-        nonce_claim.issued_at AS "nonceIssuedAt",
-        nonce_claim.signed_at AS "nonceSignedAt",
-        nonce_claim.expires_at AS "nonceExpiresAt",
-        nonce_claim.attestation_payload_digest AS "nonceAttestationPayloadDigest",
-        nonce_claim.consumed_at AS "nonceConsumedAt",
-        operator_event.event_key AS "eventKey",
-        operator_event.release_id AS "eventReleaseId",
-        operator_event.commit_sha AS "eventCommitSha",
-        operator_event.artifact_digest AS "eventArtifactDigest",
-        operator_event.operation_id AS "eventOperationId",
-        operator_event.idempotency_key AS "eventIdempotencyKey",
-        operator_event.actor_external_user_id AS "eventActorExternalUserId",
-        operator_event.expected_version AS "eventExpectedVersion",
-        operator_event.expected_evidence_digest AS "eventExpectedEvidenceDigest",
-        operator_event.published_version AS "eventPublishedVersion",
-        operator_event.evidence_digest AS "eventEvidenceDigest",
-        operator_event.evidence_expires_at AS "eventEvidenceExpiresAt",
-        operator_event.occurred_at AS "eventOccurredAt",
-        pg_catalog.date_trunc(
-          'milliseconds',
-          pg_catalog.clock_timestamp()
-        ) AS "databaseNow"
-      FROM public.bot_reply_staging_release_evidence AS release_evidence
-      INNER JOIN public.bot_reply_staging_runs AS staging_run
-        ON staging_run.run_key =
-          release_evidence.evidence_json::JSONB #>> '{core,runKey}'
-      INNER JOIN public.bot_reply_staging_attestation_nonces AS nonce_claim
-        ON nonce_claim.nonce =
-          release_evidence.evidence_json::JSONB #>> '{attestation,nonce}'
-      INNER JOIN public.bot_reply_staging_release_evidence_operator_events
-        AS operator_event
-        ON operator_event.release_id = release_evidence.release_id
-       AND operator_event.published_version =
-          release_evidence.evidence_version
-       AND operator_event.evidence_digest =
-          release_evidence.evidence_digest
-      WHERE release_evidence.release_id = $1
-        AND release_evidence.commit_sha = $2
-        AND release_evidence.artifact_digest = $3
+      SELECT readback.*
+      FROM public.read_bot_reply_staging_attested_release_evidence_v1(
+        $1::TEXT,
+        $2::TEXT,
+        $3::TEXT
+      ) AS readback
       LIMIT 2
     `,
   });

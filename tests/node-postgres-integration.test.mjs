@@ -133,6 +133,10 @@ test("keeps the real integration proof explicit and outside the default gate", a
     source,
     /0048_bot_reply_staging_attested_evidence_atomic_publish\.sql/,
   );
+  assert.match(
+    source,
+    /0049_bot_reply_staging_attested_evidence_readback\.sql/,
+  );
   assert.match(source, /verifyFullDataMigrationBundle/);
   assert.match(source, /verifyBotReplyStagingAttestationNoncePostgres/);
   assert.match(

@@ -604,6 +604,56 @@ async function verifyVersionOneUpgrade(pool, repository, tenantId) {
 }
 
 async function verifyPublicCannotExecute(pool) {
+  const functionContract = await pool.query(
+    `SELECT
+       function_catalog.prosecdef AS "securityDefiner",
+       function_catalog.provolatile = 'v' AS "volatile",
+       function_catalog.proisstrict AS "strict",
+       function_catalog.proparallel = 'u' AS "parallelUnsafe",
+       function_catalog.prorows = 2 AS "rowsTwo",
+       function_catalog.proconfig =
+         ARRAY['search_path=pg_catalog, pg_temp']::TEXT[]
+         AS "lockedSearchPath",
+       NOT EXISTS (
+         SELECT 1
+         FROM pg_catalog.aclexplode(function_catalog.proacl)
+           AS function_acl
+         WHERE function_acl.grantee <> function_catalog.proowner
+           AND function_acl.privilege_type = 'EXECUTE'
+       ) AS "ownerOnlyExecute",
+       pg_catalog.pg_get_function_result(function_catalog.oid)
+         AS "resultContract"
+     FROM pg_catalog.pg_proc AS function_catalog
+     WHERE function_catalog.oid =
+       'public.read_bot_reply_staging_attested_release_evidence_v1(text,text,text)'::pg_catalog.regprocedure`,
+  );
+  assert.equal(functionContract.rowCount, 1);
+  assert.deepEqual(
+    {
+      securityDefiner: functionContract.rows[0]?.securityDefiner,
+      volatile: functionContract.rows[0]?.volatile,
+      strict: functionContract.rows[0]?.strict,
+      parallelUnsafe: functionContract.rows[0]?.parallelUnsafe,
+      rowsTwo: functionContract.rows[0]?.rowsTwo,
+      lockedSearchPath: functionContract.rows[0]?.lockedSearchPath,
+      ownerOnlyExecute: functionContract.rows[0]?.ownerOnlyExecute,
+    },
+    {
+      securityDefiner: false,
+      volatile: true,
+      strict: true,
+      parallelUnsafe: true,
+      rowsTwo: true,
+      lockedSearchPath: true,
+      ownerOnlyExecute: true,
+    },
+  );
+  assert.match(functionContract.rows[0]?.resultContract, /^TABLE\(/);
+  assert.equal(
+    (functionContract.rows[0]?.resultContract.match(/"/g) ?? []).length,
+    102,
+  );
+
   const result = await pool.query(
     `SELECT
        has_function_privilege(
@@ -621,7 +671,16 @@ async function verifyPublicCannotExecute(pool) {
          'public.publish_bot_reply_staging_release_evidence_with_operator_audit(text,text,text,text,text,text,integer,text,text,text,timestamptz,timestamptz)',
          'EXECUTE'
        ) AS "publisherExecute",
+       has_function_privilege(
+         'public',
+         'public.read_bot_reply_staging_attested_release_evidence_v1(text,text,text)',
+         'EXECUTE'
+       ) AS "readbackExecute",
        has_table_privilege(
+         'public',
+         'public.bot_reply_staging_runs',
+         'SELECT,INSERT,UPDATE,DELETE,TRUNCATE'
+       ) OR has_table_privilege(
          'public',
          'public.bot_reply_staging_attestation_nonces',
          'SELECT,INSERT,UPDATE,DELETE,TRUNCATE'
@@ -639,6 +698,7 @@ async function verifyPublicCannotExecute(pool) {
     outerExecute: false,
     nonceExecute: false,
     publisherExecute: false,
+    readbackExecute: false,
     protectedTableAccess: false,
   }]);
 }

@@ -68,6 +68,8 @@ const botReplyProviderClockDomainsSchema = migrationSources[45];
 const botReplyStagingAttestationNonceSchema = migrationSources[47];
 const botReplyStagingAttestedEvidenceAtomicPublishSchema =
   migrationSources[48];
+const botReplyStagingAttestedEvidenceReadbackSchema =
+  migrationSources[49];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -120,12 +122,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
     "0047_bot_reply_staging_attestation_nonce_ledger.sql",
     "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
+    "0049_bot_reply_staging_attested_evidence_readback.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 49,
+      migrationCount: 50,
       findings: [],
     },
   );
@@ -155,6 +158,33 @@ test("composes attested v2 evidence and audit in one dormant boundary", () => {
   assert.doesNotMatch(
     botReplyStagingAttestedEvidenceAtomicPublishSchema,
     /\bGRANT\b|WHEN OTHERS|private_key|phone_e164|recipient_phone/i,
+  );
+});
+
+test("defines a dormant release-bound attested evidence readback", () => {
+  assert.match(
+    botReplyStagingAttestedEvidenceReadbackSchema,
+    /CREATE FUNCTION public\.read_bot_reply_staging_attested_release_evidence_v1\(/,
+  );
+  assert.match(
+    botReplyStagingAttestedEvidenceReadbackSchema,
+    /LANGUAGE sql\s+VOLATILE\s+STRICT\s+PARALLEL UNSAFE\s+ROWS 2\s+SECURITY INVOKER\s+SET search_path = pg_catalog, pg_temp/,
+  );
+  assert.match(
+    botReplyStagingAttestedEvidenceReadbackSchema,
+    /WHERE release_evidence\.release_id = requested_release_id[\s\S]*release_evidence\.commit_sha = requested_commit_sha[\s\S]*release_evidence\.artifact_digest = requested_artifact_digest[\s\S]*LIMIT 2/,
+  );
+  assert.match(
+    botReplyStagingAttestedEvidenceReadbackSchema,
+    /REVOKE ALL ON FUNCTION[\s\S]*read_bot_reply_staging_attested_release_evidence_v1\([\s\S]*FROM PUBLIC/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingAttestedEvidenceReadbackSchema,
+    /\bSECURITY DEFINER\b|\bALTER FUNCTION\b/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingAttestedEvidenceReadbackSchema,
+    /\b(?:CREATE ROLE|GRANT|INSERT|UPDATE|DELETE|MERGE|CALL)\b/i,
   );
 });
 

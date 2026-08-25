@@ -58,9 +58,18 @@ test("pins concurrency, replay, conflict, rollback, and PUBLIC denial", async ()
   assert.match(source, /RETURN NULL/);
   assert.match(source, /nonceCount: 0,[\s\S]*releaseCount: 0,[\s\S]*eventCount: 0/);
   assert.match(source, /has_function_privilege\(/);
+  assert.match(source, /pg_catalog\.pg_get_function_result/);
+  assert.match(source, /pg_catalog\.aclexplode/);
+  assert.match(source, /securityDefiner: false/);
+  assert.match(source, /parallelUnsafe: true/);
+  assert.match(source, /rowsTwo: true/);
+  assert.match(source, /lockedSearchPath: true/);
+  assert.match(source, /ownerOnlyExecute: true/);
   assert.match(source, /outerExecute: false/);
   assert.match(source, /nonceExecute: false/);
   assert.match(source, /publisherExecute: false/);
+  assert.match(source, /readbackExecute: false/);
+  assert.match(source, /public\.bot_reply_staging_runs/);
   assert.match(source, /protectedTableAccess: false/);
 });
 

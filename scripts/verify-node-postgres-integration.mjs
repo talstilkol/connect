@@ -138,6 +138,7 @@ const migrationFiles = Object.freeze([
   "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
   "0047_bot_reply_staging_attestation_nonce_ledger.sql",
   "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
+  "0049_bot_reply_staging_attested_evidence_readback.sql",
 ]);
 
 function postgresEnvironment(connectionString) {

@@ -389,14 +389,14 @@ test("returns one bounded v2 replay-protected proof from one read-only SELECT", 
 
   const sql = fixture.calls[0].sql;
   assert.match(sql, /^\s*SELECT\b/i);
-  assert.match(sql, /public\.bot_reply_staging_release_evidence\b/);
-  assert.match(sql, /public\.bot_reply_staging_runs\b/);
-  assert.match(sql, /public\.bot_reply_staging_attestation_nonces\b/);
   assert.match(
     sql,
-    /public\.bot_reply_staging_release_evidence_operator_events\b/,
+    /public\.read_bot_reply_staging_attested_release_evidence_v1\(/,
   );
-  assert.match(sql, /pg_catalog\.clock_timestamp\(\)/);
+  assert.doesNotMatch(
+    sql,
+    /public\.bot_reply_staging_(?:runs|attestation_nonces|release_evidence(?:_operator_events)?)\b/,
+  );
   assert.doesNotMatch(sql, /\b(?:INSERT|UPDATE|DELETE|CALL)\b/i);
   assert.doesNotMatch(
     sql,
@@ -643,7 +643,14 @@ test("remains a dormant read boundary with no mutation or runtime wiring", async
     /inspectRailwayBotReplyStagingAttestedReleaseEvidence/,
   );
   assert.match(source, /trustedKeyId/);
-  assert.match(source, /pg_catalog\.clock_timestamp\(\)/);
+  assert.match(
+    source,
+    /public\.read_bot_reply_staging_attested_release_evidence_v1\(/,
+  );
+  assert.doesNotMatch(
+    source,
+    /public\.bot_reply_staging_(?:runs|attestation_nonces|release_evidence(?:_operator_events)?)\b/,
+  );
   assert.equal((source.match(/\bSELECT\b/g) ?? []).length, 1);
   assert.doesNotMatch(source, /\b(?:INSERT|UPDATE|DELETE|CALL)\b/);
 });

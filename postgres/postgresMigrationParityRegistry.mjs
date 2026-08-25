@@ -569,4 +569,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway atomically composes one completed-run receipt, one attestation nonce, one v2 release-evidence compare-and-set, and one immutable operator event; the SECURITY DEFINER capability remains dormant with no runtime grant.",
   }),
+  Object.freeze({
+    migration:
+      "0049_bot_reply_staging_attested_evidence_readback.sql",
+    token:
+      "read_bot_reply_staging_attested_release_evidence_v1",
+    summary:
+      "Railway prepares one release-bound, invoker-rights readback while keeping definer rights, named runtime grants, and activation blocked for the later verifier-role migration.",
+  }),
 ]);
