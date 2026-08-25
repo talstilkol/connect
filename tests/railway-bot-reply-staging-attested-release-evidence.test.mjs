@@ -606,6 +606,12 @@ test("contains no randomized identity path and stays dormant", async () => {
         ["postgresBotReplyStagingAttestedReleaseEvidenceReadRepository", 1],
       ]),
     ],
+    [
+      "server/platform/postgresRuntimeCapabilityEvidence.ts",
+      new Map([
+        ["publish_bot_reply_staging_attested_evidence_with_audit", 1],
+      ]),
+    ],
   ]);
   const protectedDormantReferences = [
     "railwayBotReplyStagingAttestedReleaseEvidence",
@@ -627,6 +633,20 @@ test("contains no randomized identity path and stays dormant", async () => {
   assert.doesNotMatch(
     source,
     /railwayBotReplyStagingCrossServiceActivation|botReplyStagingEvidenceBuilder/,
+  );
+  const candidateProbeSource = await readFile(
+    new URL(
+      "server/platform/postgresRuntimeCapabilityEvidence.ts",
+      projectRoot,
+    ),
+    "utf8",
+  );
+  assert.match(candidateProbeSource, /readonly activationAllowed: false/);
+  assert.match(candidateProbeSource, /activationAllowed: false/);
+  assert.match(candidateProbeSource, /status: "candidate" \| "blocked"/);
+  assert.doesNotMatch(
+    candidateProbeSource,
+    /(?:SELECT|PERFORM)\s+public\.publish_bot_reply_staging_attested_evidence_with_audit/i,
   );
 
   const packageManifest = JSON.parse(

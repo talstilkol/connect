@@ -70,3 +70,45 @@ test("leaves real role creation and ownership as an explicit external decision",
   assert.match(decision, /חלון Maintenance\/Drain ראשון ל־Staging/);
   assert.doesNotMatch(decision, /postgres(?:ql)?:\/\//i);
 });
+
+test("keeps D31-B candidate evidence dormant and unable to activate", () => {
+  assert.match(decision, /postgresRuntimeCapabilityEvidence\.ts/);
+  assert.match(decision, /`status: "candidate"`/);
+  assert.match(decision, /`activationAllowed` נשאר תמיד `false`/);
+  assert.match(
+    decision,
+    /אינו[\s\S]*Live verifier[\s\S]*אסור לחבר אותו[\s\S]*Production readiness/,
+  );
+  assert.match(
+    decision,
+    /Source Guard[\s\S]*Dormant ללא Importer מורשה[\s\S]*להפיל את שער הקוד/,
+  );
+});
+
+test("requires one trusted aggregate across four isolated live connections", () => {
+  assert.match(decision, /ה־`query` המוזרק[\s\S]*Dependency לא־מהימן/);
+  assert.match(decision, /בדיוק[\s\S]*ארבעה חיבורים/);
+  assert.match(decision, /Pinned connection[\s\S]*`REPEATABLE READ READ ONLY`/);
+  assert.match(decision, /`search_path` בטוח[\s\S]*בפקודה נפרדת/);
+  assert.match(decision, /PostgreSQL field OIDs/);
+  assert.match(decision, /`\{ rowCount, rows \}`[\s\S]*`QueryResult` גולמי/);
+  assert.match(decision, /Release SHA מדויק[\s\S]*TTL קצר/);
+  assert.match(decision, /`system_identifier`[\s\S]*Out-of-band[\s\S]*חתום/);
+});
+
+test("records the remaining database and transport proof gaps", () => {
+  assert.match(decision, /`pg_stat_ssl` מוכיח רק[\s\S]*`rejectUnauthorized=true`/);
+  assert.match(decision, /SHA-256 של `pg_get_functiondef\(\)`/);
+  assert.match(decision, /Inventory מלא של[\s\S]*Triggers/);
+  assert.match(
+    decision,
+    /Schema[\s\S]*`public`[\s\S]*`connect_migration_owner`/,
+  );
+  assert.match(
+    decision,
+    /הרשאת `CREATE`[\s\S]*`PUBLIC`[\s\S]*Role[\s\S]*אחר/,
+  );
+  assert.match(decision, /ניגש ישירות ל־`bot_reply_staging_runs`/);
+  assert.match(decision, /Migration[\s\S]*0033[\s\S]*`public\.audit_logs`/);
+  assert.match(decision, /`pg_catalog, pg_temp`/);
+});

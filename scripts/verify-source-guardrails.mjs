@@ -139,6 +139,10 @@ const attestedCutoverReadinessPath =
   "server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts";
 const attestedReadRepositoryPath =
   "server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts";
+const postgresRuntimeCapabilityConfigurationPath =
+  "server/platform/postgresRuntimeCapabilityConfiguration.ts";
+const postgresRuntimeCapabilityEvidencePath =
+  "server/platform/postgresRuntimeCapabilityEvidence.ts";
 const attestedEvidenceV2FileName = [
   "railwayBotReplyStaging",
   "AttestedReleaseEvidence.ts",
@@ -151,6 +155,7 @@ const dormantBotReplyStagingAttestedModulePaths =
   new Set([
     attestedCutoverReadinessPath,
     attestedReadRepositoryPath,
+    postgresRuntimeCapabilityEvidencePath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -241,6 +246,22 @@ const dormantAttestedAllowedRuntimeDependencies =
       new Map([
         ["node:crypto", null],
         ["node:util", null],
+      ]),
+    ],
+    [
+      postgresRuntimeCapabilityEvidencePath,
+      new Map([
+        ["node:util", null],
+        [
+          "./postgresRuntimeCapabilityConfiguration.ts",
+          postgresRuntimeCapabilityConfigurationPath,
+        ],
+      ]),
+    ],
+    [
+      postgresRuntimeCapabilityConfigurationPath,
+      new Map([
+        ["node:net", null],
       ]),
     ],
   ]);

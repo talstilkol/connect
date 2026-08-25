@@ -177,6 +177,55 @@ Fallback כזה בתוך חוזה ה־Capability החדש.
 4.6.4 מצב Configured מחזיר Metadata לא־רגיש בלבד. URL,‏ Password
 ו־Connection string אינם נכללים בתוצאה הניתנת ל־Serialization.
 
+4.7 חוזה Candidate evidence רדום — D31-B:
+
+4.7.1 `postgresRuntimeCapabilityEvidence.ts` מכיל שאילתת Catalog סטטית,
+Read-only ובעלת Statement יחיד. תוצאה שעוברת את כל הבדיקות מקבלת רק
+`status: "candidate"`; השדה `activationAllowed` נשאר תמיד `false`. זה אינו
+Live verifier, אינו Evidence מאושר ואסור לחבר אותו ל־Runtime, ל־Startup,
+ל־Release gate או ל־Production readiness.
+
+4.7.2 ה־`query` המוזרק ל־Probe הוא Dependency לא־מהימן ויכול להחזיר שורה
+מזויפת. Driver חי עתידי חייב להיות רכיב פנימי בבעלות Connect, לפתוח בדיוק
+ארבעה חיבורים שנלקחו בנפרד מארבעת Secrets של היכולות, ולהריץ כל Probe על
+Pinned connection בתוך `REPEATABLE READ READ ONLY`. לפני השאילתה עליו להגדיר
+ולאמת `search_path` בטוח בפקודה נפרדת. עליו לאמת גם את שמות העמודות ואת
+PostgreSQL field OIDs, ולנרמל את תוצאת `pg` במפורש ל־`{ rowCount, rows }`;
+`QueryResult` גולמי עם שדות נוספים נכשל סגור. רק לאחר מכן מותר לאגד את ארבע
+התוצאות ל־Evidence אטומי אחד; Probe בודד לעולם אינו מספיק ל־Activation.
+
+4.7.3 ה־Evidence החי חייב להיקשר ל־Release SHA מדויק, ל־Policy version,
+לזמן מסד שנצפה ול־TTL קצר, ולכלול Digests של כל ארבע תוצאות היכולת. ערך
+`system_identifier` הצפוי חייב להגיע Out-of-band כשהוא חתום בידי בעל
+ה־Deployment; ערך שה־Database עצמו סיפק אינו מקור אמון לעצמו.
+
+4.7.4 `pg_stat_ssl` מוכיח רק שה־Session בצד השרת מוצפן. לפני Activation נדרש
+Evidence חיצוני נפרד עבור CA ו־Hostname verification עם
+`rejectUnauthorized=true`, וכן עבור Railway project, environment, region,
+network policy ובידוד כל Secret לשירות היחיד שמורשה להחזיק אותו.
+
+4.7.5 בדיקת Metadata של פונקציה אינה מוכיחה שה־Body או ה־Triggers לא הוחלפו.
+Driver חי חייב להשוות SHA-256 של `pg_get_functiondef()` ושל Inventory מלא של
+Triggers מול Manifest דטרמיניסטי שנוצר ממסד נקי לאחר Migrations מאושרות.
+
+4.7.5.1 ה־Probe דורש שבעלות Schema ‏`public` תהיה של
+`connect_migration_owner`, ושלא תהיה הרשאת `CREATE` ל־`PUBLIC` או לשום Role
+אחר. בדיקת הרשאת ה־Session לבדה אינה מספיקה, משום ש־Role זר בעל `CREATE`
+יכול להפוך את ה־Schema ללא־מהימן.
+
+4.7.6 הפלט הרדום מסונן: אין בו URL,‏ Host,‏ Database name,
+`system_identifier`,‏ Password או הודעת Database גולמית. כשל Query או מבנה
+שורה לא מדויק מחזיר `blocked` בלבד.
+
+4.7.7 קיימים שני Blockers לפני הקשחת `search_path`: קוד ה־API וה־Worker עדיין
+ניגש ישירות ל־`bot_reply_staging_runs`, וחלק מפונקציות ה־Trigger ב־Migration
+0033 פונות ל־`audit_logs` בשם לא־מלא. לפני Activation יש להעביר Claim,
+Reclaim,‏ Poll ו־Complete ל־Wrappers מצומצמים, להסיר Direct table grants,
+ולשנות את ההפניה ל־`public.audit_logs` לפני נעילה ל־`pg_catalog, pg_temp`.
+
+4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
+עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
+
 ## 5. סדר ביצוע
 
 5.1 Expand:

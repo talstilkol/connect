@@ -116,7 +116,22 @@ test("keeps the nonce primitive immutable, dormant and inaccessible", () => {
     "scripts/verify-bot-reply-staging-attestation-nonce-postgres.mjs",
     "scripts/verify-bot-reply-staging-attested-evidence-postgres.mjs",
     "server/platform/postgresBotReplyStagingAttestationNonceRepository.ts",
+    "server/platform/postgresRuntimeCapabilityEvidence.ts",
   ]);
+  const candidateProbe = readFileSync(
+    resolve(
+      repositoryRoot,
+      "server/platform/postgresRuntimeCapabilityEvidence.ts",
+    ),
+    "utf8",
+  );
+  assert.match(candidateProbe, /readonly activationAllowed: false/);
+  assert.match(candidateProbe, /activationAllowed: false/);
+  assert.match(candidateProbe, /status: "candidate" \| "blocked"/);
+  assert.doesNotMatch(
+    candidateProbe,
+    /(?:SELECT|PERFORM)\s+public\.consume_bot_reply_staging_attestation_nonce/i,
+  );
   const runtimeRoots = [
     "app",
     "db",
