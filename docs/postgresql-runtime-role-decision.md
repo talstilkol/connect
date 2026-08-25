@@ -319,6 +319,69 @@ augmentation` חיצוני שמרחיב את סמכויותיהם. הוא ממש
 אבטחה מספק בפני עצמו. אין לחברו לפני ביטול API double-complete, קשירת
 `requestedAt`, השלמת Provider fence והפרדת Roles/Credentials בפועל.
 
+4.7.7.11 Migration
+`0053_bot_reply_staging_provider_operation_fence.sql` מוסיפה גבול Two-phase
+רדום לפני פעולת Provider. היא יוצרת שני Ledgers מצומצמים, PII-free
+ו־Append-only: Reservation של Operation תחת זהות מדויקת של Run,‏ Release,
+Claim,‏ Delivery ו־Rate-limit reservation; ו־Outcome יחיד לאותה Operation.
+`reserve_bot_reply_staging_provider_operation_v1` שומר את ה־Operation ואת
+`bot_reply_provider_request_claims` באותה Transaction ובזמן Database clock.
+רק Insert חדש מחזיר `authorized`,‏ `providerRequestKey` ו־`requestedAt`;
+Replay תואם מחזיר `replay-blocked` ללא Token וללא Timestamp, ו־Replay בזהות
+שונה נכשל סגור. הפונקציה דורשת `READ COMMITTED`, נועלת לפי הסדר Run,‏ Meta
+connection,‏ Delivery ו־Rate-limit reservation, ורק לאחר כל המתנה ל־Lock
+דוגמת מחדש את שעון המסד ובודקת את ה־Lease, ה־Policy וה־Authorization
+האחרונים. Settlement מסוג `cancelled-before-submit` ו־Reserve מתחרים על אותה
+Reservation: הראשון שמתחייב מנצח, והפעולה הסותרת נכשלת סגור.
+
+4.7.7.12
+`finalize_bot_reply_staging_provider_operation_v1` אינו מקבל Verdict,‏ זמן,
+Provider message id או שגיאת Provider מה־Caller. הוא נועל את ה־Operation,
+ואחריו את ה־Delivery, ה־Rate-limit reservation ואת Request fence. גם כותבי
+עובדות ה־Provider נועלים Delivery,‏ Reservation ו־Request באותו סדר, והשעון
+נדגם רק לאחר הנעילות. כך Finalize גוזר תוצאה רק מעובדות Durable ומקושרות:
+Acceptance,‏ Sender/Pair deferral,‏ שגיאת חלון שירות 131047 או Delivery
+`ambiguous`. לפני תפוגת ה־Lease, היעדר עובדה מחזיר `pending`; לאחר התפוגה הוא
+נסגר כ־`lease-expired-without-outcome` במצב `indeterminate`, ולכן אינו יוצר
+Retry אוטומטי. הכנסת Outcome PII-free והחזרת Finalization הן פעולה אטומית.
+Guard נוסף חוסם Reclaim או Complete של Run כל עוד אין Outcome במצב
+`completed`; גם Outcome מסוג `indeterminate` מחייב Reconciliation ידני.
+
+4.7.7.13 ה־Candidate Adapter של D31-D1d-A הוא Worker-only ומפרסם רק
+`reserve` ו־`finalize` מעל שתי שאילתות `SELECT` קבועות. הוא דורש Dependency
+מדויק בשם `committedQueries.queryCommitted`, מאמת את 14 שדות הזהות ואת
+`providerRequestKey` הדטרמיניסטי, ודוחה Result shape,‏ Null matrix או
+Timestamp עוינים. ה־Source Guard נועל גם את Union branches של תוצאות
+Reserve/Finalize, כך ש־Token ב־Replay או ערבוב בין `completed` ל־
+`indeterminate` מפילים את השער. אין ב־0053 או ב־Adapter Role,‏ Grant,
+`SECURITY DEFINER`,‏ Startup wiring,‏ Meta transport או Provider I/O.
+
+4.7.7.14 ‏D31-D1d-A אינו Activation והחלטת ה־NO-GO נשארת. השם
+`queryCommitted` הוא Misuse fence ברמת האפליקציה בלבד; הוא אינו הוכחה
+קריפטוגרפית או תפעולית שה־Transaction בוצעה לפני שה־Token הגיע ל־Worker.
+לפני חיבור חי נדרש Trusted autocommit driver או Outbox/Commit acknowledgment
+שמוכיחים Commit-before-token. בנוסף נדרשים Recheck מיידי לפי Database clock
+של חלון השירות בן 24 השעות, ה־Lease וה־Credential לפני `sender.send`, הכללת
+ה־Functions וה־Digests ב־Manifest, חיבור Runtime מבוקר, הפרדת Roles/Grants
+ומסלול Audit מבוקר ליישוב `indeterminate` ועובדות Provider מאוחרות. עד שכל
+אלה נבדקים ב־Staging, אסור ל־Adapter או ל־Migration החדשים לאשר קריאת Meta
+אמיתית.
+
+4.7.7.15 ההוכחה ההתנהגותית של D31-D1d-A רצה על PostgreSQL 16 נקי והחילה
+את כל 54 ה־Migrations. היא הוסיפה תשע קבוצות בדיקה: Reserve/Replay מקבילים,
+Rollback, דחיית Isolation שאינו `READ COMMITTED`, תפוגת Run ו־Reservation
+בזמן המתנה ל־Lock, שני סדרי המרוץ מול Cancellation,‏ Provider acceptance
+שמתחייב לאחר תפוגת ה־Lease, ו־Finalize ללא עובדה עם חסימת ראיה מאוחרת,
+Settlement ו־Reclaim. ההרצה הסתיימה ב־101 תרחישי Concurrency שעברו. זו הוכחת
+Database ל־Migration הרדומה בלבד; היא אינה מוכיחה Commit-before-token,
+חלון שירות בן 24 שעות ברגע השליחה או Least privilege של Runtime.
+
+4.7.7.16 ה־Postcondition של 0053 מאמת את שמות וטיפוסי 29 העמודות, את
+Bindings של ה־Functions/Triggers ואת היעדר הרשאות `PUBLIC`. אין לכנותו
+הוכחת Catalog מלאה: הוא עדיין אינו מקבע כל `NOT NULL`,‏ Constraint,‏ Index,
+`tgtype` או Grant ל־Role מזוהה. חוזים אלה שייכים להקשחת D31-D1e ול־Manifest
+ההרשאות לפני Deployment.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

@@ -76,6 +76,8 @@ const botReplyStagingRunCapabilityWrappersSchema =
   migrationSources[51];
 const botReplyStagingAuthorizationObservationHardeningSchema =
   migrationSources[52];
+const botReplyStagingProviderOperationFenceSchema =
+  migrationSources[53];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -132,12 +134,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0050_bot_reply_staging_trigger_hardening.sql",
     "0051_bot_reply_staging_run_capability_wrappers.sql",
     "0052_bot_reply_staging_authorization_observation_hardening.sql",
+    "0053_bot_reply_staging_provider_operation_fence.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 53,
+      migrationCount: 54,
       findings: [],
     },
   );
@@ -161,6 +164,21 @@ test("hardens staging authorization and observation boundaries", () => {
   assert.doesNotMatch(
     botReplyStagingAuthorizationObservationHardeningSchema,
     /\bSECURITY DEFINER\b|\bGRANT\b|\bCREATE ROLE\b|\bALTER ROLE\b/i,
+  );
+});
+
+test("keeps the staging provider side effect behind one dormant operation fence", () => {
+  assert.match(
+    botReplyStagingProviderOperationFenceSchema,
+    /reserve_bot_reply_staging_provider_operation_v1/,
+  );
+  assert.match(
+    botReplyStagingProviderOperationFenceSchema,
+    /finalize_bot_reply_staging_provider_operation_v1/,
+  );
+  assert.match(
+    botReplyStagingProviderOperationFenceSchema,
+    /'replay-blocked'::TEXT,[\s\S]*NULL::TEXT/,
   );
 });
 
@@ -1481,6 +1499,79 @@ test("rejects seed data hidden inside a PostgreSQL function body", () => {
   );
 });
 
+function assertTriggerReferenceBypassRejected(functionSource) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[11] = `${tamperedSources[11]}\n${functionSource}`;
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+}
+
+test("does not trust NEW references inside a non-trigger function", () => {
+  assertTriggerReferenceBypassRejected(`
+CREATE FUNCTION public.non_trigger_new_reference_bypass()
+RETURNS void
+LANGUAGE plpgsql
+-- RETURNS trigger is a comment, not the declared return type.
+AS $$
+BEGIN
+  INSERT INTO whatsapp_campaign_delivery_policy_events (event_key)
+  VALUES (NEW.event_key);
+END;
+$$;
+  `);
+});
+
+test("does not trust NEW references inside SQL comments", () => {
+  assertTriggerReferenceBypassRejected(`
+CREATE FUNCTION public.comment_new_reference_bypass()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO whatsapp_campaign_delivery_policy_events (event_key)
+  VALUES ('forbidden-seed') /* NEW.event_key */;
+  RETURN NEW;
+END;
+$$;
+  `);
+});
+
+test("does not trust quoted NEW references", () => {
+  assertTriggerReferenceBypassRejected(`
+CREATE FUNCTION public.quoted_new_reference_bypass()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO whatsapp_campaign_delivery_policy_events (event_key)
+  VALUES ('NEW.event_key');
+  RETURN NEW;
+END;
+$$;
+  `);
+});
+
+test("does not trust dollar-quoted NEW references", () => {
+  assertTriggerReferenceBypassRejected(`
+CREATE FUNCTION public.dollar_quoted_new_reference_bypass()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO whatsapp_campaign_delivery_policy_events (event_key)
+  VALUES ($quoted$NEW.event_key$quoted$);
+  RETURN NEW;
+END;
+$$;
+  `);
+});
+
 test("rejects a literal hidden inside the reviewed staging-run insert", () => {
   const tamperedSources = [...migrationSources];
   tamperedSources[51] = tamperedSources[51].replace(
@@ -1527,4 +1618,68 @@ $$;
     findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
     true,
   );
+});
+
+function assertProviderFenceInsertMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[53] = mutator(tamperedSources[53]);
+  assert.notEqual(tamperedSources[53], migrationSources[53]);
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+}
+
+test("rejects a different table in the reviewed provider-operation insert", () => {
+  assertProviderFenceInsertMutationRejected((source) => source.replace(
+    "INSERT INTO public.bot_reply_staging_provider_operations (",
+    "INSERT INTO public.bot_reply_staging_provider_operations_copy (",
+  ));
+});
+
+test("rejects a different column in the reviewed provider-operation insert", () => {
+  assertProviderFenceInsertMutationRejected((source) => source.replace(
+    [
+      "INSERT INTO public.bot_reply_staging_provider_operations (",
+      "    operation_key,",
+      "    run_key,",
+    ].join("\n"),
+    [
+      "INSERT INTO public.bot_reply_staging_provider_operations (",
+      "    operation_key,",
+      "    run_identity,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a different value in the reviewed provider-operation insert", () => {
+  assertProviderFenceInsertMutationRejected((source) => source.replace(
+    [
+      "  ) VALUES (",
+      "    requested_operation_key,",
+      "    requested_run_key,",
+    ].join("\n"),
+    [
+      "  ) VALUES (",
+      "    requested_operation_key,",
+      "    'forbidden-seed',",
+    ].join("\n"),
+  ));
+});
+
+test("rejects an additional insert inside the reviewed provider reserve function", () => {
+  assertProviderFenceInsertMutationRejected((source) => source.replace(
+    "  RETURN QUERY SELECT\n    'authorized'::TEXT,",
+    [
+      "  INSERT INTO public.bot_reply_staging_provider_operation_outcomes (",
+      "    observation_key",
+      "  ) VALUES ('forbidden-seed');",
+      "  RETURN QUERY SELECT",
+      "    'authorized'::TEXT,",
+    ].join("\n"),
+  ));
 });

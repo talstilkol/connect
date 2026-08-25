@@ -44,11 +44,18 @@ test("rejects remote, reusable, credential-bearing, and extended URLs", () => {
 });
 
 test("keeps the real integration proof explicit and outside the default gate", async () => {
-  const [packageJson, source] = await Promise.all([
+  const [packageJson, source, providerOperationFenceSource] = await Promise.all([
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(
       new URL(
         "../scripts/verify-node-postgres-integration.mjs",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+    readFile(
+      new URL(
+        "../scripts/verify-bot-reply-staging-provider-operation-fence-postgres.mjs",
         import.meta.url,
       ),
       "utf8",
@@ -149,11 +156,19 @@ test("keeps the real integration proof explicit and outside the default gate", a
     source,
     /0052_bot_reply_staging_authorization_observation_hardening\.sql/,
   );
+  assert.match(
+    source,
+    /0053_bot_reply_staging_provider_operation_fence\.sql/,
+  );
   assert.match(source, /verifyFullDataMigrationBundle/);
   assert.match(source, /verifyBotReplyStagingAttestationNoncePostgres/);
   assert.match(
     source,
     /verifyBotReplyStagingAttestedEvidencePostgres/,
+  );
+  assert.match(
+    source,
+    /verifyBotReplyStagingProviderOperationFencePostgres/,
   );
   assert.match(source, /executePostgresFullDataMigrationCutover/);
   assert.match(source, /target-already-cut-over/);
@@ -222,7 +237,26 @@ test("keeps the real integration proof explicit and outside the default gate", a
   );
   assert.match(source, /foundation\.campaignProviderDeliveries\.recordAccepted/);
   assert.match(source, /foundation\.campaignProviderDeliveries\.applyProviderStatus/);
-  assert.match(source, /concurrencyScenarios:\s*61 \+ attestedEvidenceConcurrencyScenarios/);
+  assert.match(
+    source,
+    /61 \+ attestedEvidenceConcurrencyScenarios \+[\s\S]*providerOperationFenceConcurrencyScenarios/,
+  );
+  assert.match(
+    providerOperationFenceSource,
+    /providerOperationFencePostgresScenarioCount = 9/,
+  );
+  assert.match(
+    providerOperationFenceSource,
+    /verifyCancellationWinsBeforeReserve[\s\S]*verifyReserveWinsBeforeCancellation/,
+  );
+  assert.match(
+    providerOperationFenceSource,
+    /BEGIN ISOLATION LEVEL REPEATABLE READ/,
+  );
+  assert.match(
+    providerOperationFenceSource,
+    /BEGIN ISOLATION LEVEL SERIALIZABLE/,
+  );
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,
@@ -233,4 +267,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /messages_direction_status_consistent|23514/);
   assert.match(source, /createRailwayPostgresFoundation/);
   assert.doesNotMatch(source, /Math\.random|randomUUID/);
+  assert.doesNotMatch(
+    providerOperationFenceSource,
+    /Math\.random|randomUUID/,
+  );
 });

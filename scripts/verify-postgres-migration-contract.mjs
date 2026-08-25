@@ -182,6 +182,90 @@ const stagingRunCapabilityValues = Object.freeze([
   "database_now",
   "database_now",
 ]);
+const providerOperationReservationColumns = Object.freeze([
+  "operation_key",
+  "run_key",
+  "tenant_id",
+  "request_digest",
+  "audit_key",
+  "release_id",
+  "commit_sha",
+  "artifact_digest",
+  "run_claim_version",
+  "run_lease_expires_at",
+  "operation_kind",
+  "delivery_key",
+  "delivery_claim_version",
+  "reservation_key",
+  "provider_request_key",
+  "requested_at",
+  "created_at",
+]);
+const providerOperationReservationValues = Object.freeze([
+  "requested_operation_key",
+  "requested_run_key",
+  "requested_tenant_id",
+  "requested_request_digest",
+  "requested_audit_key",
+  "requested_release_id",
+  "requested_commit_sha",
+  "requested_artifact_digest",
+  "requested_run_claim_version",
+  "requested_run_lease_expires_at",
+  "requested_operation_kind",
+  "requested_delivery_key",
+  "requested_delivery_claim_version",
+  "requested_reservation_key",
+  "provider_request_key",
+  "database_now",
+  "database_now",
+]);
+const providerRequestFenceColumns = Object.freeze([
+  "request_key",
+  "delivery_key",
+  "tenant_id",
+  "claim_version",
+  "reservation_key",
+  "requested_at",
+  "created_at",
+]);
+const providerRequestFenceValues = Object.freeze([
+  "provider_request_key",
+  "requested_delivery_key",
+  "requested_tenant_id",
+  "requested_delivery_claim_version",
+  "requested_reservation_key",
+  "database_now",
+  "database_now",
+]);
+const providerOperationOutcomeColumns = Object.freeze([
+  "observation_key",
+  "operation_key",
+  "run_key",
+  "tenant_id",
+  "provider_request_key",
+  "operation_kind",
+  "state",
+  "provider_outcome_kind",
+  "evidence_key",
+  "observed_at",
+  "finalized_at",
+  "created_at",
+]);
+const providerOperationOutcomeValues = Object.freeze([
+  "derived_observation_key",
+  "stored_operation.operation_key",
+  "stored_operation.run_key",
+  "stored_operation.tenant_id",
+  "stored_operation.provider_request_key",
+  "stored_operation.operation_kind",
+  "derived_state",
+  "derived_outcome_kind",
+  "derived_evidence_key",
+  "derived_observed_at",
+  "database_now",
+  "database_now",
+]);
 
 function rootUrl(root) {
   return pathToFileURL(
@@ -228,21 +312,176 @@ function isReviewedStagingRunCapabilityInsert(statement) {
     );
 }
 
+function exactSqlLists(match, columns, values) {
+  if (!match) return false;
+  const actualColumns = commaSeparatedIdentifiers(match[1]);
+  const actualValues = commaSeparatedIdentifiers(match[2]);
+  return actualColumns.length === columns.length &&
+    actualValues.length === values.length &&
+    actualColumns.every((column, index) => column === columns[index]) &&
+    actualValues.every((value, index) => value === values[index]);
+}
+
+function stripSqlCommentsAndQuotedLiterals(value) {
+  let result = "";
+  let index = 0;
+
+  const blank = (character) => character === "\n" ? "\n" : " ";
+
+  while (index < value.length) {
+    if (value.startsWith("--", index)) {
+      while (index < value.length && value[index] !== "\n") {
+        result += " ";
+        index += 1;
+      }
+      continue;
+    }
+
+    if (value.startsWith("/*", index)) {
+      let depth = 1;
+      result += "  ";
+      index += 2;
+      while (index < value.length && depth > 0) {
+        if (value.startsWith("/*", index)) {
+          depth += 1;
+          result += "  ";
+          index += 2;
+        } else if (value.startsWith("*/", index)) {
+          depth -= 1;
+          result += "  ";
+          index += 2;
+        } else {
+          result += blank(value[index]);
+          index += 1;
+        }
+      }
+      continue;
+    }
+
+    if (value[index] === "'" || value[index] === '"') {
+      const quote = value[index];
+      result += " ";
+      index += 1;
+      while (index < value.length) {
+        result += blank(value[index]);
+        if (value[index] === quote) {
+          if (value[index + 1] === quote) {
+            result += " ";
+            index += 2;
+            continue;
+          }
+          index += 1;
+          break;
+        }
+        index += 1;
+      }
+      continue;
+    }
+
+    if (value[index] === "$") {
+      const tag = value.slice(index).match(
+        /^\$(?:[a-z_][a-z0-9_]*)?\$/i,
+      )?.[0];
+      if (tag) {
+        const closingIndex = value.indexOf(tag, index + tag.length);
+        const literalEnd = closingIndex < 0
+          ? value.length
+          : closingIndex + tag.length;
+        while (index < literalEnd) {
+          result += blank(value[index]);
+          index += 1;
+        }
+        continue;
+      }
+    }
+
+    result += value[index];
+    index += 1;
+  }
+
+  return result;
+}
+
+function reviewedProviderOperationInsert(functionName, statement) {
+  if (
+    functionName === "reserve_bot_reply_staging_provider_operation_v1"
+  ) {
+    const reservation = statement.match(
+      /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_provider_operations\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*ON\s+CONFLICT\s+DO\s+NOTHING\s+RETURNING\s+\*\s+INTO\s+inserted_operation\s*$/i,
+    );
+    if (
+      exactSqlLists(
+        reservation,
+        providerOperationReservationColumns,
+        providerOperationReservationValues,
+      )
+    ) {
+      return true;
+    }
+
+    const requestFence = statement.match(
+      /^\s*WITH\s+inserted_request\s+AS\s*\(\s*INSERT\s+INTO\s+public\.bot_reply_provider_request_claims\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*ON\s+CONFLICT\s+DO\s+NOTHING\s+RETURNING\s+request_key\s*\)\s*SELECT\s+EXISTS\s*\(\s*SELECT\s+1\s+FROM\s+inserted_request\s*\)\s+INTO\s+provider_request_inserted\s*$/i,
+    );
+    return exactSqlLists(
+      requestFence,
+      providerRequestFenceColumns,
+      providerRequestFenceValues,
+    );
+  }
+
+  if (
+    functionName === "finalize_bot_reply_staging_provider_operation_v1"
+  ) {
+    return exactSqlLists(
+      statement.match(
+        /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_provider_operation_outcomes\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*RETURNING\s+\*\s+INTO\s+stored_outcome\s*$/i,
+      ),
+      providerOperationOutcomeColumns,
+      providerOperationOutcomeValues,
+    );
+  }
+
+  return false;
+}
+
 function containsSeedData(source, fileName) {
   for (const match of source.matchAll(functionDefinition)) {
     const body = match[1];
     const statements = body.split(";");
+    const bodyDelimiterIndex = match[0].search(/\bAS\s+\$\$/i);
+    const functionHeader = bodyDelimiterIndex < 0
+      ? ""
+      : match[0].slice(0, bodyDelimiterIndex);
+    const sanitizedFunctionHeader =
+      stripSqlCommentsAndQuotedLiterals(functionHeader);
+    const isTriggerFunction =
+      /\bRETURNS\s+(?:pg_catalog\.)?trigger\b/i.test(
+        sanitizedFunctionHeader,
+      );
+    const functionName = match[0].match(
+      /^CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z][a-z0-9_]*)/i,
+    )?.[1]?.toLowerCase() ?? null;
 
     if (
       statements.some(
-        (statement) =>
-          dataInsertion.test(statement) &&
-          !triggerRowReference.test(statement) &&
+        (statement) => {
+          const hasLiveTriggerRowReference =
+            isTriggerFunction && triggerRowReference.test(
+              stripSqlCommentsAndQuotedLiterals(statement),
+            );
+          return dataInsertion.test(statement) &&
+          !hasLiveTriggerRowReference &&
           !(
             fileName ===
               "0051_bot_reply_staging_run_capability_wrappers.sql" &&
             isReviewedStagingRunCapabilityInsert(statement)
-          ),
+          ) &&
+          !(
+            fileName ===
+              "0053_bot_reply_staging_provider_operation_fence.sql" &&
+            reviewedProviderOperationInsert(functionName, statement)
+          );
+        },
       )
     ) {
       return true;

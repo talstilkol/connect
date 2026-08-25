@@ -242,6 +242,56 @@ test("documents the dormant API and Worker capability split", () => {
   );
 });
 
+test("documents the dormant two-phase provider-operation fence", () => {
+  assert.match(
+    decision,
+    /0053_bot_reply_staging_provider_operation_fence\.sql[\s\S]*Two-phase[\s\S]*PII-free[\s\S]*Append-only/,
+  );
+  assert.match(
+    decision,
+    /reserve_bot_reply_staging_provider_operation_v1[\s\S]*Database clock[\s\S]*`authorized`[\s\S]*`replay-blocked`[\s\S]*ללא Token[\s\S]*`READ COMMITTED`[\s\S]*Run[\s\S]*Meta[\s\S]*Delivery[\s\S]*Rate-limit reservation/,
+  );
+  assert.match(
+    decision,
+    /finalize_bot_reply_staging_provider_operation_v1[\s\S]*אינו מקבל Verdict[\s\S]*`pending`[\s\S]*`lease-expired-without-outcome`[\s\S]*`indeterminate`/,
+  );
+  assert.match(
+    decision,
+    /Outcome PII-free[\s\S]*אטומית[\s\S]*חוסם Reclaim או Complete[\s\S]*`completed`[\s\S]*`indeterminate`[\s\S]*Reconciliation/,
+  );
+  assert.match(
+    decision,
+    /Settlement מסוג `cancelled-before-submit`[\s\S]*הראשון שמתחייב מנצח/,
+  );
+});
+
+test("keeps the provider-operation adapter dormant behind explicit blockers", () => {
+  assert.match(
+    decision,
+    /Worker-only[\s\S]*`committedQueries\.queryCommitted`[\s\S]*14 שדות[\s\S]*Union branches/,
+  );
+  assert.match(
+    decision,
+    /אין ב־0053[\s\S]*Role[\s\S]*Grant[\s\S]*Startup wiring[\s\S]*Provider I\/O/,
+  );
+  assert.match(
+    decision,
+    /Misuse fence[\s\S]*אינו הוכחה[\s\S]*Trusted autocommit driver[\s\S]*Commit-before-token/,
+  );
+  assert.match(
+    decision,
+    /Recheck מיידי[\s\S]*Database clock[\s\S]*24 השעות[\s\S]*`sender\.send`[\s\S]*Manifest[\s\S]*NO-GO/,
+  );
+  assert.match(
+    decision,
+    /PostgreSQL 16[\s\S]*54 ה־Migrations[\s\S]*תשע קבוצות[\s\S]*101 תרחישי Concurrency[\s\S]*אינה מוכיחה Commit-before-token/,
+  );
+  assert.match(
+    decision,
+    /29 העמודות[\s\S]*היעדר הרשאות `PUBLIC`[\s\S]*אינו מקבע[\s\S]*Grant ל־Role/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,

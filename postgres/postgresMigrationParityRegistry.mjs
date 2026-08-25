@@ -601,4 +601,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway locks the six authorization and observation trigger functions to fully qualified invoker-rights bodies, closes the observation lease boundary against stale writes, and rejects direct spoofing of trigger-owned staging audit actions without adding a runtime grant or activation.",
   }),
+  Object.freeze({
+    migration:
+      "0053_bot_reply_staging_provider_operation_fence.sql",
+    token:
+      "reserve_bot_reply_staging_provider_operation_v1",
+    summary:
+      "Railway adds a dormant two-phase, database-clocked provider-operation fence: only a newly committed reservation exposes one request capability, while exact durable outcomes or lease-expiry uncertainty close an immutable PII-free observation and block automatic replay.",
+  }),
 ]);

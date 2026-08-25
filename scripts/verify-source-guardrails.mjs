@@ -157,6 +157,14 @@ const stagingRunCapabilityPortsPath =
   "server/operations/botReplyStagingRunCapabilityPorts.ts";
 const stagingRunCapabilityRepositoryPath =
   "server/platform/postgresBotReplyStagingRunCapabilityRepository.ts";
+const stagingProviderFenceCapabilityPortsPath =
+  "server/operations/botReplyStagingProviderFenceCapabilityPorts.ts";
+const stagingProviderFenceCapabilityRepositoryPath =
+  "server/platform/postgresBotReplyStagingProviderFenceCapabilityRepository.ts";
+const stagingCapabilityPortPaths = new Set([
+  stagingRunCapabilityPortsPath,
+  stagingProviderFenceCapabilityPortsPath,
+]);
 const postgresResultValidationPath =
   "server/platform/postgresResultValidation.ts";
 const dormantBotReplyStagingAttestedModulePaths =
@@ -167,6 +175,8 @@ const dormantBotReplyStagingAttestedModulePaths =
     postgresRuntimeCapabilityTrustedDriverContractPath,
     stagingRunCapabilityPortsPath,
     stagingRunCapabilityRepositoryPath,
+    stagingProviderFenceCapabilityPortsPath,
+    stagingProviderFenceCapabilityRepositoryPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -289,6 +299,18 @@ const dormantAttestedAllowedRuntimeDependencies =
     ],
     [postgresResultValidationPath, new Map()],
     [stagingRunCapabilityPortsPath, new Map()],
+    [stagingProviderFenceCapabilityPortsPath, new Map()],
+    [
+      stagingProviderFenceCapabilityRepositoryPath,
+      new Map([
+        ["node:crypto", null],
+        ["node:util", null],
+        [
+          "./postgresResultValidation.ts",
+          postgresResultValidationPath,
+        ],
+      ]),
+    ],
     [
       postgresRuntimeCapabilityEvidencePath,
       new Map([
@@ -800,6 +822,15 @@ const stagingRunCapabilityPortDeclarationNames = new Set([
   "BotReplyStagingRunReadResult",
   "BotReplyStagingRunWorkerCapabilityPort",
 ]);
+const stagingProviderFenceCapabilityPortDeclarationNames = new Set([
+  "BotReplyStagingProviderFenceFinalizeCapabilityPort",
+  "BotReplyStagingProviderFenceFinalizeInput",
+  "BotReplyStagingProviderFenceFinalizeResult",
+  "BotReplyStagingProviderFenceReserveCapabilityPort",
+  "BotReplyStagingProviderFenceReserveInput",
+  "BotReplyStagingProviderFenceReserveResult",
+  "BotReplyStagingProviderFenceWorkerCapabilityPort",
+]);
 
 function declarationIsExportedOnly(node) {
   return node.modifiers?.length === 1 &&
@@ -865,7 +896,10 @@ function capabilityAliasIsExact(
   inputName,
   resultName,
 ) {
-  if (!ts.isTypeAliasDeclaration(node)) {
+  if (
+    !ts.isTypeAliasDeclaration(node) ||
+    node.typeParameters !== undefined
+  ) {
     return false;
   }
   const typeLiteral = readonlyTypeLiteral(node.type);
@@ -902,6 +936,185 @@ function intersectionTypeReferencesAreExact(node, expectedNames) {
     node.types.length === expectedNames.length &&
     node.types.every((current, index) =>
       typeReferenceIs(current, expectedNames[index])
+    );
+}
+
+function readonlyPropertySignatureIsExact(
+  member,
+  expectedName,
+  expectedType,
+) {
+  if (
+    !ts.isPropertySignature(member) ||
+    staticPropertyName(member.name) !== expectedName ||
+    member.questionToken !== undefined ||
+    member.type === undefined ||
+    member.modifiers?.length !== 1 ||
+    member.modifiers[0].kind !== ts.SyntaxKind.ReadonlyKeyword
+  ) {
+    return false;
+  }
+  if (expectedType === "string") {
+    return member.type.kind === ts.SyntaxKind.StringKeyword;
+  }
+  if (expectedType === "number") {
+    return member.type.kind === ts.SyntaxKind.NumberKeyword;
+  }
+  return ts.isUnionTypeNode(member.type) &&
+    member.type.types.length === expectedType.length &&
+    member.type.types.every((current, index) =>
+      ts.isLiteralTypeNode(current) &&
+      ts.isStringLiteral(current.literal) &&
+      current.literal.text === expectedType[index]
+    );
+}
+
+function readonlyInterfacePropertiesAreExact(node, expectedProperties) {
+  return node.members.length === expectedProperties.length &&
+    node.members.every((member, index) =>
+      readonlyPropertySignatureIsExact(
+        member,
+        expectedProperties[index][0],
+        expectedProperties[index][1],
+      )
+    );
+}
+
+const stagingProviderFenceReserveInputProperties = Object.freeze([
+  Object.freeze(["runKey", "string"]),
+  Object.freeze(["tenantId", "number"]),
+  Object.freeze(["requestDigest", "string"]),
+  Object.freeze(["auditKey", "string"]),
+  Object.freeze(["releaseId", "string"]),
+  Object.freeze(["commitSha", "string"]),
+  Object.freeze(["artifactDigest", "string"]),
+  Object.freeze(["runClaimVersion", "number"]),
+  Object.freeze(["runLeaseExpiresAt", "string"]),
+  Object.freeze(["operationKey", "string"]),
+  Object.freeze([
+    "operationKind",
+    Object.freeze([
+      "text-send",
+      "button-send",
+      "customer-window-expired",
+      "provider-retry",
+      "pair-limit",
+      "duplicate-safety",
+    ]),
+  ]),
+  Object.freeze(["deliveryKey", "string"]),
+  Object.freeze(["deliveryClaimVersion", "number"]),
+  Object.freeze(["reservationKey", "string"]),
+]);
+
+const stagingProviderFenceReserveResultBranches = Object.freeze([
+  Object.freeze([
+    Object.freeze(["outcome", Object.freeze(["authorized"])]),
+    Object.freeze(["operationKey", "string"]),
+    Object.freeze(["providerRequestKey", "string"]),
+    Object.freeze(["state", Object.freeze(["reserved"])]),
+    Object.freeze(["requestedAt", "string"]),
+  ]),
+  Object.freeze([
+    Object.freeze(["outcome", Object.freeze(["replay-blocked"])]),
+    Object.freeze(["operationKey", "string"]),
+    Object.freeze([
+      "state",
+      Object.freeze(["reserved", "completed", "indeterminate"]),
+    ]),
+  ]),
+]);
+
+const stagingProviderFenceFinalizeResultBranches = Object.freeze([
+  Object.freeze([
+    Object.freeze(["outcome", Object.freeze(["pending"])]),
+    Object.freeze(["operationKey", "string"]),
+    Object.freeze(["state", Object.freeze(["reserved"])]),
+  ]),
+  Object.freeze([
+    Object.freeze([
+      "outcome",
+      Object.freeze(["finalized", "replayed"]),
+    ]),
+    Object.freeze(["operationKey", "string"]),
+    Object.freeze(["state", Object.freeze(["completed"])]),
+    Object.freeze([
+      "providerOutcomeKind",
+      Object.freeze([
+        "accepted",
+        "sender-deferred",
+        "pair-deferred",
+        "service-window-rejected",
+      ]),
+    ]),
+    Object.freeze(["observationKey", "string"]),
+    Object.freeze(["finalizedAt", "string"]),
+  ]),
+  Object.freeze([
+    Object.freeze([
+      "outcome",
+      Object.freeze(["finalized", "replayed"]),
+    ]),
+    Object.freeze(["operationKey", "string"]),
+    Object.freeze(["state", Object.freeze(["indeterminate"])]),
+    Object.freeze([
+      "providerOutcomeKind",
+      Object.freeze(["ambiguous", "lease-expired-without-outcome"]),
+    ]),
+    Object.freeze(["observationKey", "string"]),
+    Object.freeze(["finalizedAt", "string"]),
+  ]),
+]);
+
+function resultPropertyTypeIsExact(node, expectedType) {
+  if (expectedType === "string") {
+    return node.kind === ts.SyntaxKind.StringKeyword;
+  }
+  if (expectedType.length === 1) {
+    return ts.isLiteralTypeNode(node) &&
+      ts.isStringLiteral(node.literal) &&
+      node.literal.text === expectedType[0];
+  }
+  return ts.isUnionTypeNode(node) &&
+    node.types.length === expectedType.length &&
+    node.types.every((current, index) =>
+      ts.isLiteralTypeNode(current) &&
+      ts.isStringLiteral(current.literal) &&
+      current.literal.text === expectedType[index]
+    );
+}
+
+function resultBranchIsExact(node, expectedProperties) {
+  return ts.isTypeLiteralNode(node) &&
+    node.members.length === expectedProperties.length &&
+    node.members.every((member, index) => {
+      const [expectedName, expectedType] = expectedProperties[index];
+      return ts.isPropertySignature(member) &&
+        staticPropertyName(member.name) === expectedName &&
+        member.modifiers === undefined &&
+        member.questionToken === undefined &&
+        member.initializer === undefined &&
+        member.type !== undefined &&
+        resultPropertyTypeIsExact(member.type, expectedType);
+    });
+}
+
+function readonlyResultUnionAliasIsExact(node, expectedBranches) {
+  if (
+    !ts.isTypeAliasDeclaration(node) ||
+    node.typeParameters !== undefined ||
+    !ts.isTypeReferenceNode(node.type) ||
+    !ts.isIdentifier(node.type.typeName) ||
+    node.type.typeName.text !== "Readonly" ||
+    node.type.typeArguments?.length !== 1
+  ) {
+    return false;
+  }
+  const union = node.type.typeArguments[0];
+  return ts.isUnionTypeNode(union) &&
+    union.types.length === expectedBranches.length &&
+    union.types.every((branch, index) =>
+      resultBranchIsExact(branch, expectedBranches[index])
     );
 }
 
@@ -989,6 +1202,122 @@ function stagingRunCapabilityPortsAreExact(sourceFile) {
     typeReferenceIs(
       workerPort.type,
       "BotReplyStagingRunCompleteCapabilityPort",
+    );
+}
+
+function stagingProviderFenceCapabilityPortsAreExact(sourceFile) {
+  if (
+    sourceFile.statements.length !==
+      stagingProviderFenceCapabilityPortDeclarationNames.size
+  ) {
+    return false;
+  }
+  const declarations = new Map();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isInterfaceDeclaration(statement) &&
+      !ts.isTypeAliasDeclaration(statement)
+    ) {
+      return false;
+    }
+    const name = statement.name.text;
+    if (
+      !declarationIsExportedOnly(statement) ||
+      !stagingProviderFenceCapabilityPortDeclarationNames.has(name) ||
+      declarations.has(name)
+    ) {
+      return false;
+    }
+    declarations.set(name, statement);
+  }
+
+  const reserveInput = declarations.get(
+    "BotReplyStagingProviderFenceReserveInput",
+  );
+  const finalizeInput = declarations.get(
+    "BotReplyStagingProviderFenceFinalizeInput",
+  );
+  const reserveResult = declarations.get(
+    "BotReplyStagingProviderFenceReserveResult",
+  );
+  const finalizeResult = declarations.get(
+    "BotReplyStagingProviderFenceFinalizeResult",
+  );
+  const reservePort = declarations.get(
+    "BotReplyStagingProviderFenceReserveCapabilityPort",
+  );
+  const finalizePort = declarations.get(
+    "BotReplyStagingProviderFenceFinalizeCapabilityPort",
+  );
+  const workerPort = declarations.get(
+    "BotReplyStagingProviderFenceWorkerCapabilityPort",
+  );
+
+  return ts.isInterfaceDeclaration(reserveInput) &&
+    reserveInput.typeParameters === undefined &&
+    interfaceExtendsExactly(reserveInput, []) &&
+    readonlyInterfacePropertiesAreExact(
+      reserveInput,
+      stagingProviderFenceReserveInputProperties,
+    ) &&
+    ts.isTypeAliasDeclaration(finalizeInput) &&
+    finalizeInput.typeParameters === undefined &&
+    typeReferenceIs(finalizeInput.type,
+      "BotReplyStagingProviderFenceReserveInput",
+    ) &&
+    readonlyResultUnionAliasIsExact(
+      reserveResult,
+      stagingProviderFenceReserveResultBranches,
+    ) &&
+    readonlyResultUnionAliasIsExact(
+      finalizeResult,
+      stagingProviderFenceFinalizeResultBranches,
+    ) &&
+    capabilityAliasIsExact(
+      reservePort,
+      "reserve",
+      "BotReplyStagingProviderFenceReserveInput",
+      "BotReplyStagingProviderFenceReserveResult",
+    ) &&
+    capabilityAliasIsExact(
+      finalizePort,
+      "finalize",
+      "BotReplyStagingProviderFenceFinalizeInput",
+      "BotReplyStagingProviderFenceFinalizeResult",
+    ) &&
+    ts.isTypeAliasDeclaration(workerPort) &&
+    workerPort.typeParameters === undefined &&
+    intersectionTypeReferencesAreExact(workerPort.type, [
+      "BotReplyStagingProviderFenceReserveCapabilityPort",
+      "BotReplyStagingProviderFenceFinalizeCapabilityPort",
+    ]);
+}
+
+function stagingProviderFenceCapabilityRepositoryExportsAreExact(
+  sourceFile,
+) {
+  const exportedStatements = sourceFile.statements.filter((statement) =>
+    ts.isExportAssignment(statement) ||
+    ts.isExportDeclaration(statement) ||
+    statement.modifiers?.some((modifier) =>
+      modifier.kind === ts.SyntaxKind.ExportKeyword ||
+      modifier.kind === ts.SyntaxKind.DefaultKeyword
+    )
+  );
+  if (exportedStatements.length !== 1) {
+    return false;
+  }
+  const factory = exportedStatements[0];
+  return ts.isFunctionDeclaration(factory) &&
+    declarationIsExportedOnly(factory) &&
+    factory.name?.text ===
+      "createPostgresBotReplyStagingProviderFenceWorkerCapabilityRepository" &&
+    factory.typeParameters === undefined &&
+    factory.parameters.length === 1 &&
+    factory.body !== undefined &&
+    typeReferenceIs(
+      factory.type,
+      "BotReplyStagingProviderFenceWorkerCapabilityPort",
     );
 }
 
@@ -2078,7 +2407,7 @@ export async function inspectSourceGuardrails(
     }
 
     if (
-      path === stagingRunCapabilityPortsPath &&
+      stagingCapabilityPortPaths.has(path) &&
       !sourceFileIsTypeOnlyContract(sourceFile)
     ) {
       addFinding({
@@ -2093,6 +2422,24 @@ export async function inspectSourceGuardrails(
       addFinding({
         code:
           "BOT_REPLY_STAGING_CAPABILITY_PORT_CONTRACT_INVALID",
+        file: path,
+      });
+    } else if (
+      path === stagingProviderFenceCapabilityPortsPath &&
+      !stagingProviderFenceCapabilityPortsAreExact(sourceFile)
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CAPABILITY_PORT_CONTRACT_INVALID",
+        file: path,
+      });
+    } else if (
+      path === stagingProviderFenceCapabilityRepositoryPath &&
+      !stagingProviderFenceCapabilityRepositoryExportsAreExact(sourceFile)
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CAPABILITY_REPOSITORY_EXPORT_INVALID",
         file: path,
       });
     }
@@ -2184,8 +2531,9 @@ export async function inspectSourceGuardrails(
       );
       if (
         dependency !== null &&
-        relativePath(root, dependency) ===
-          stagingRunCapabilityPortsPath
+        stagingCapabilityPortPaths.has(
+          relativePath(root, dependency),
+        )
       ) {
         addFinding({
           code:

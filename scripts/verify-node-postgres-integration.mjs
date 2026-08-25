@@ -35,6 +35,9 @@ import {
   verifyBotReplyStagingAttestedEvidencePostgres,
 } from "./verify-bot-reply-staging-attested-evidence-postgres.mjs";
 import {
+  verifyBotReplyStagingProviderOperationFencePostgres,
+} from "./verify-bot-reply-staging-provider-operation-fence-postgres.mjs";
+import {
   createRailwayPostgresFoundation,
 } from "../server/platform/railwayPostgresFoundation.ts";
 import {
@@ -142,6 +145,7 @@ const migrationFiles = Object.freeze([
   "0050_bot_reply_staging_trigger_hardening.sql",
   "0051_bot_reply_staging_run_capability_wrappers.sql",
   "0052_bot_reply_staging_authorization_observation_hardening.sql",
+  "0053_bot_reply_staging_provider_operation_fence.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -4817,6 +4821,7 @@ export async function verifyNodePostgresIntegration(
         transactions,
         tenantId,
       );
+    let providerOperationFenceConcurrencyScenarios = 0;
     const foundation = createRailwayPostgresFoundation({
       environment: postgresEnvironment(checkedConnectionString),
       telemetry: {
@@ -4895,6 +4900,11 @@ export async function verifyNodePostgresIntegration(
         provisionedTenantId,
       );
       await verifyProductionDecisionLifecycle(pool, foundation);
+      providerOperationFenceConcurrencyScenarios =
+        await verifyBotReplyStagingProviderOperationFencePostgres(
+          pool,
+          tenantId,
+        );
     } finally {
       await foundation.close();
     }
@@ -4903,7 +4913,8 @@ export async function verifyNodePostgresIntegration(
       status: "passed",
       migrationCount: migrationFiles.length,
       concurrencyScenarios:
-        61 + attestedEvidenceConcurrencyScenarios,
+        61 + attestedEvidenceConcurrencyScenarios +
+          providerOperationFenceConcurrencyScenarios,
     });
   } finally {
     await pool.end();
