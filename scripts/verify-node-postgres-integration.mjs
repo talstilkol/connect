@@ -129,6 +129,7 @@ const migrationFiles = Object.freeze([
   "0043_bot_reply_staging_release_evidence_operator_audit.sql",
   "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
   "0045_bot_reply_provider_clock_domains.sql",
+  "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
 ]);
 
 function postgresEnvironment(connectionString) {

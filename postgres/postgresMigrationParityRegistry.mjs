@@ -545,4 +545,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway adds an expand-only, search-path-locked PostgreSQL function that keeps one release-evidence compare-and-set and its immutable operator event in the same database statement; activation remains blocked pending a reviewed migration-owner/runtime-role split.",
   }),
+  Object.freeze({
+    migration:
+      "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
+    token:
+      "initialize_publish_bot_reply_staging_evidence_with_audit",
+    summary:
+      "Railway adds an expand-only, search-path-locked wrapper that initializes a first release and invokes the atomic evidence-plus-audit publisher in one database statement; PUBLIC execution and runtime activation remain blocked.",
+  }),
 ]);
