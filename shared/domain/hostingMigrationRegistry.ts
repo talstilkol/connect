@@ -475,12 +475,12 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     ],
     targetPlacement: "shared-managed-service",
     targetContract:
-      "RateLimitBinding plus atomic WhatsApp reservation ledger",
-    targetProvider: "unknown/unavailable",
-    decisionState: "decision-required",
-    nextAction: "provider-decision-required",
+      "Live-Meta-derived layered limits using Railway PostgreSQL and Redis",
+    targetProvider: "railway",
+    decisionState: "selected",
+    nextAction: "configuration-required",
     cutoverBlocker:
-      "PostgreSQL now provides one atomic shared token-bucket contract with isolated, versioned tenant-mutation, system-admin-mutation and Meta-webhook policies; the existing PostgreSQL ledger covers WhatsApp reservations. Tenant mutations and the optional Meta webhook route have local Railway composition. System-admin route wiring, approved live policy values, telemetry and load evidence still lack a complete distributed target proof.",
+      "The live-derived layered policy is selected. PostgreSQL provides one atomic shared token-bucket contract with isolated, versioned tenant-mutation, system-admin-mutation and Meta-webhook policies; the existing PostgreSQL ledger covers WhatsApp reservations. Tenant mutations and the optional Meta webhook route have local Railway composition. Current WABA and phone values, approved Connect quotas, system-admin route wiring, telemetry, kill-switch rehearsal and load evidence still lack a complete distributed target proof.",
   }),
   capability({
     id: "security.secret-management",

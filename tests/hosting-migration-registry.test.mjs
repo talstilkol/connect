@@ -120,8 +120,8 @@ test("does not invent providers for unresolved shared services", () => {
     ({ decisionState }) => decisionState === "selected",
   );
 
-  assert.equal(unresolved.length, 9);
-  assert.equal(selected.length, 9);
+  assert.equal(unresolved.length, 8);
+  assert.equal(selected.length, 10);
   assert.ok(
     unresolved.every(
       ({ targetProvider }) =>
@@ -164,13 +164,15 @@ test("records the parallel Vercel build without claiming cutover", () => {
   assert.match(buildRuntime.cutoverBlocker, /preview deployment/);
 });
 
-test("separates the completed shared PostgreSQL limiter from unresolved live proof", () => {
+test("records the selected layered limiter without claiming live proof", () => {
   const rateLimits = HOSTING_MIGRATION_REGISTRY.find(
     ({ id }) => id === "security.distributed-rate-limits",
   );
 
   assert.ok(rateLimits);
-  assert.equal(rateLimits.decisionState, "decision-required");
+  assert.equal(rateLimits.decisionState, "selected");
+  assert.equal(rateLimits.targetProvider, "railway");
+  assert.equal(rateLimits.nextAction, "configuration-required");
   for (const path of [
     "postgres/migrations/0023_api_mutation_rate_limits.sql",
     "postgres/migrations/0024_whatsapp_legacy_reservation_category.sql",
@@ -187,8 +189,9 @@ test("separates the completed shared PostgreSQL limiter from unresolved live pro
   );
   assert.match(rateLimits.cutoverBlocker, /system-admin-mutation/);
   assert.match(rateLimits.cutoverBlocker, /Meta-webhook/);
-  assert.match(rateLimits.cutoverBlocker, /System-admin route wiring/);
-  assert.match(rateLimits.cutoverBlocker, /approved live policy values/);
+  assert.match(rateLimits.cutoverBlocker, /live-derived layered policy is selected/);
+  assert.match(rateLimits.cutoverBlocker, /system-admin route wiring/);
+  assert.match(rateLimits.cutoverBlocker, /Current WABA and phone values/);
 });
 
 test("records the bounded Railway Meta webhook route without selecting a queue provider", () => {
