@@ -78,6 +78,8 @@ const botReplyStagingAuthorizationObservationHardeningSchema =
   migrationSources[52];
 const botReplyStagingProviderOperationFenceSchema =
   migrationSources[53];
+const metaCredentialRevisionLedgerSchema =
+  migrationSources[54];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -135,12 +137,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0051_bot_reply_staging_run_capability_wrappers.sql",
     "0052_bot_reply_staging_authorization_observation_hardening.sql",
     "0053_bot_reply_staging_provider_operation_fence.sql",
+    "0054_meta_credential_revision_ledger.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 54,
+      migrationCount: 55,
       findings: [],
     },
   );
@@ -1682,4 +1685,85 @@ test("rejects an additional insert inside the reviewed provider reserve function
       "    'authorized'::TEXT,",
     ].join("\n"),
   ));
+});
+
+function assertMetaCredentialBackfillMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[54] = mutator(tamperedSources[54]);
+  assert.notEqual(tamperedSources[54], migrationSources[54]);
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+}
+
+test("allows only the exact reviewed Meta credential revision backfill", () => {
+  assert.match(
+    metaCredentialRevisionLedgerSchema,
+    /INSERT INTO public\.meta_credential_revision_events \([\s\S]*?ORDER BY credential\.tenant_id;/,
+  );
+  assert.deepEqual(
+    validatePostgresMigrationSources({
+      migrationFiles,
+      sources: migrationSources,
+    }),
+    [],
+  );
+});
+
+test("rejects a different table in the Meta credential revision backfill", () => {
+  assertMetaCredentialBackfillMutationRejected((source) => source.replace(
+    "INSERT INTO public.meta_credential_revision_events (",
+    "INSERT INTO public.meta_credential_revision_events_copy (",
+  ));
+});
+
+test("rejects a different column in the Meta credential revision backfill", () => {
+  assertMetaCredentialBackfillMutationRejected((source) => source.replace(
+    [
+      "INSERT INTO public.meta_credential_revision_events (",
+      "  event_key,",
+      "  tenant_id,",
+    ].join("\n"),
+    [
+      "INSERT INTO public.meta_credential_revision_events (",
+      "  event_identity,",
+      "  tenant_id,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a different source in the Meta credential revision backfill", () => {
+  assertMetaCredentialBackfillMutationRejected((source) => source.replace(
+    "FROM public.meta_credential_envelopes AS credential\nORDER BY credential.tenant_id;",
+    "FROM public.meta_credential_envelopes_copy AS credential\nORDER BY credential.tenant_id;",
+  ));
+});
+
+test("rejects a literal in the Meta credential revision backfill", () => {
+  assertMetaCredentialBackfillMutationRejected((source) => source.replace(
+    "  credential.updated_at,\n  credential.updated_at\nFROM public.meta_credential_envelopes",
+    "  credential.updated_at,\n  'forbidden-seed'\nFROM public.meta_credential_envelopes",
+  ));
+});
+
+test("allows the exact immutable-ledger truncate trigger but rejects SQL truncation", () => {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[54] += `
+TRUNCATE public.meta_credential_revision_events;
+`;
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
 });

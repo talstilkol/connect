@@ -27,6 +27,13 @@ const processedAt = "2026-08-20T08:05:00.000Z";
 const eventKey = "a".repeat(64);
 const initializationVector = "AQIDBAUGBwgJCgsM";
 const ciphertext = "AQIDBAUGBwgJCgsMDQ4PEA==";
+const rehearsalSource = readFileSync(
+  new URL(
+    "../scripts/verify-postgres-meta-connection-data-migration.mjs",
+    import.meta.url,
+  ),
+  "utf8",
+);
 
 function rawTables() {
   return {
@@ -287,23 +294,51 @@ test("rejects a D1 schema outside the exact three-table source contract", () => 
   }
 });
 
-test("limits the Meta rehearsal URL to its passwordless local database", () => {
+test("limits the Meta rehearsal URL to its userinfo-free local database", () => {
   const valid =
-    "postgresql://tal@127.0.0.1:55432/" +
+    "postgresql://127.0.0.1:55432/" +
     "connect_meta_connection_data_migration_rehearsal";
   assert.equal(requireLocalMetaConnectionDataMigrationUrl(valid), valid);
 
   for (const unsafe of [
+    "postgresql://tal@127.0.0.1:55432/" +
+      "connect_meta_connection_data_migration_rehearsal",
     "postgresql://tal:secret@127.0.0.1:55432/" +
       "connect_meta_connection_data_migration_rehearsal",
-    "postgresql://tal@database.example.com:55432/" +
+    "postgresql://database.example.com:55432/" +
       "connect_meta_connection_data_migration_rehearsal",
-    "postgresql://tal@127.0.0.1:55432/connect",
+    "postgresql://127.0.0.1:55432/connect",
     valid + "?ssl=true",
+    valid + "?host=%2Ftmp%2Fpostgres",
+    valid + "?options=-csearch_path%3Dpg_catalog",
+    valid + "#connection-override",
   ]) {
     assert.throws(
       () => requireLocalMetaConnectionDataMigrationUrl(unsafe),
       /POSTGRES_META_CONNECTION_DATA_URL_INVALID/,
     );
   }
+});
+
+test("rehearses the eight-column credential upgrade after the legacy copy", () => {
+  assert.match(
+    rehearsalSource,
+    /credentialRevisionMigrationName =[\s\S]*0054_meta_credential_revision_ledger\.sql/,
+  );
+  assert.match(
+    rehearsalSource,
+    /files\.slice\(0, revisionMigrationIndex\)[\s\S]*revisionMigrationSource/,
+  );
+  assert.match(
+    rehearsalSource,
+    /executePostgresMetaConnectionDataMigration\([\s\S]*await pool\.query\(postgresMigrations\.revisionMigrationSource\)/,
+  );
+  assert.match(
+    rehearsalSource,
+    /"created_at",\n    "updated_at",\n    "credential_revision",\n    "envelope_digest"/,
+  );
+  assert.match(
+    rehearsalSource,
+    /requireCredentialRevisionBackfill[\s\S]*verifyFirstCredentialInsertUsesDatabaseClock[\s\S]*requireCredentialRotationDatabaseClock/,
+  );
 });

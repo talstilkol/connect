@@ -136,12 +136,41 @@ const forbiddenSyntax = Object.freeze([
 ]);
 const destructiveStatement =
   /\b(?:DROP\s+(?:TABLE|INDEX|SCHEMA)|TRUNCATE|DELETE\s+FROM)\b/i;
+const reviewedMetaCredentialTruncateTrigger =
+  /CREATE\s+TRIGGER\s+meta_credential_revision_events_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.meta_credential_revision_events\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_meta_credential_revision_event_mutation\(\)\s*;/gi;
 const randomIdentity =
   /\b(?:random|gen_random_uuid|uuid_generate_v[1-5])\s*\(/i;
 const dataInsertion = /\bINSERT\s+INTO\b/i;
 const functionDefinition =
   /CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\b[\s\S]*?\bAS\s+\$\$([\s\S]*?)\$\$\s*;/gi;
 const triggerRowReference = /\b(?:NEW|OLD)\.[a-z][a-z0-9_]*/i;
+const reviewedMetaCredentialRevisionBackfill = `
+INSERT INTO public.meta_credential_revision_events (
+  event_key,
+  tenant_id,
+  credential_revision,
+  envelope_digest,
+  key_version,
+  recorded_at,
+  created_at
+)
+SELECT
+  public.derive_meta_credential_revision_event_key_v1(
+    credential.tenant_id,
+    credential.credential_revision,
+    credential.envelope_digest
+  ),
+  credential.tenant_id,
+  credential.credential_revision,
+  credential.envelope_digest,
+  credential.key_version,
+  credential.updated_at,
+  credential.updated_at
+FROM public.meta_credential_envelopes AS credential
+ORDER BY credential.tenant_id;
+`;
+const metaCredentialRevisionBackfillCandidate =
+  /INSERT\s+INTO\s+public\.meta_credential_revision_events\b[\s\S]*?ORDER\s+BY\s+credential\.tenant_id\s*;/gi;
 const stagingRunCapabilityInsert =
   /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_runs\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*ON\s+CONFLICT\s+DO\s+NOTHING\s+RETURNING\s+\*\s+INTO\s+stored_run\s*$/i;
 const stagingRunCapabilityColumns = Object.freeze([
@@ -488,11 +517,59 @@ function containsSeedData(source, fileName) {
     }
   }
 
-  const sourceWithoutFunctionBodies = source.replace(
+  let sourceWithoutFunctionBodies = source.replace(
     functionDefinition,
     "",
   );
+
+  if (
+    fileName ===
+      "0054_meta_credential_revision_ledger.sql"
+  ) {
+    const candidates = Array.from(
+      sourceWithoutFunctionBodies.matchAll(
+        metaCredentialRevisionBackfillCandidate,
+      ),
+    );
+    const normalizeReviewedSql = (value) =>
+      value.replace(/\s+/g, " ").trim();
+
+    if (
+      candidates.length === 1 &&
+      normalizeReviewedSql(candidates[0][0]) ===
+        normalizeReviewedSql(
+          reviewedMetaCredentialRevisionBackfill,
+        )
+    ) {
+      sourceWithoutFunctionBodies =
+        sourceWithoutFunctionBodies.replace(
+          candidates[0][0],
+          "",
+        );
+    }
+  }
+
   return dataInsertion.test(sourceWithoutFunctionBodies);
+}
+
+function containsDestructiveStatement(source, fileName) {
+  let reviewedSource = source;
+
+  if (
+    fileName ===
+      "0054_meta_credential_revision_ledger.sql"
+  ) {
+    const reviewedTriggers =
+      source.match(reviewedMetaCredentialTruncateTrigger) ?? [];
+    if (reviewedTriggers.length === 1) {
+      reviewedSource = reviewedSource.replace(
+        reviewedTriggers[0],
+        "",
+      );
+    }
+  }
+
+  return destructiveStatement.test(reviewedSource);
 }
 
 export function validatePostgresMigrationSources({
@@ -565,7 +642,7 @@ export function validatePostgresMigrationSources({
       }
     }
 
-    if (destructiveStatement.test(source)) {
+    if (containsDestructiveStatement(source, fileName)) {
       findings.push(
         finding(
           "POSTGRES_DESTRUCTIVE_STATEMENT",

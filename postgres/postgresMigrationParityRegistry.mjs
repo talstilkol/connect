@@ -609,4 +609,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway adds a dormant two-phase, database-clocked provider-operation fence: only a newly committed reservation exposes one request capability, while exact durable outcomes or lease-expiry uncertainty close an immutable PII-free observation and block automatic replay.",
   }),
+  Object.freeze({
+    migration:
+      "0054_meta_credential_revision_ledger.sql",
+    token:
+      "CREATE TABLE public.meta_credential_revision_events",
+    summary:
+      "Railway derives Meta credential revision identity inside PostgreSQL and records an immutable secret-free envelope digest ledger; exact replay is stable, old digest reuse is blocked, and no runtime capability is granted.",
+  }),
 ]);

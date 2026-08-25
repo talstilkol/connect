@@ -26,6 +26,8 @@ const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const databaseName = "connect_meta_connection_data_migration_rehearsal";
 const environmentKey =
   "CONNECT_POSTGRES_META_CONNECTION_DATA_MIGRATION_REHEARSAL_URL";
+const credentialRevisionMigrationName =
+  "0054_meta_credential_revision_ledger.sql";
 const evidenceHmacKey = Buffer.alloc(32, 43).toString("base64");
 const times = Object.freeze({
   created: "2026-08-20T08:00:00.000Z",
@@ -65,6 +67,7 @@ export function requireLocalMetaConnectionDataMigrationUrl(value) {
     !["postgres:", "postgresql:"].includes(url.protocol) ||
     !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname) ||
     url.pathname !== `/${databaseName}` ||
+    url.username !== "" ||
     url.password !== "" ||
     url.search !== "" ||
     url.hash !== ""
@@ -104,9 +107,23 @@ async function applyPostgresMigrations(pool) {
   if (existing.rows[0]?.count !== 0) fail("DATABASE_NOT_EMPTY");
 
   const directory = join(projectRoot, "postgres", "migrations");
-  for (const fileName of await migrationFiles(directory)) {
+  const files = await migrationFiles(directory);
+  const revisionMigrationIndex = files.indexOf(
+    credentialRevisionMigrationName,
+  );
+  if (revisionMigrationIndex !== files.length - 1) {
+    fail("REVISION_MIGRATION_ORDER_INVALID");
+  }
+  for (const fileName of files.slice(0, revisionMigrationIndex)) {
     await pool.query(await readFile(join(directory, fileName), "utf8"));
   }
+  return Object.freeze({
+    files,
+    revisionMigrationSource: await readFile(
+      join(directory, credentialRevisionMigrationName),
+      "utf8",
+    ),
+  });
 }
 
 function seedD1Core(database) {
@@ -186,6 +203,191 @@ async function seedPostgresCore(pool) {
        (2, 'Secondary Meta rehearsal', 'active', $1, $1,
         'meta-connection-secondary')`,
     [times.created],
+  );
+}
+
+async function databaseTimestamp(client) {
+  const result = await client.query(
+    `SELECT pg_catalog.date_trunc(
+       'milliseconds',
+       pg_catalog.clock_timestamp()
+     ) AS value`,
+  );
+  assert.equal(result.rowCount, 1);
+  assert.equal(result.rows[0]?.value instanceof Date, true);
+  return result.rows[0].value.toISOString();
+}
+
+async function requireCredentialRevisionBackfill(pool) {
+  const credentialsResult = await pool.query(
+    `SELECT
+       tenant_id::integer AS "tenantId",
+       credential_revision::integer AS "credentialRevision",
+       envelope_digest AS "envelopeDigest",
+       created_at AS "createdAt",
+       updated_at AS "updatedAt"
+     FROM public.meta_credential_envelopes
+     ORDER BY tenant_id`,
+  );
+  assert.equal(credentialsResult.rowCount, 2);
+  const credentialsRows = credentialsResult.rows.map((row) => ({
+    ...row,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  }));
+  assert.deepEqual(
+    credentialsRows.map((row) => ({
+      tenantId: row.tenantId,
+      credentialRevision: row.credentialRevision,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    })),
+    [
+      {
+        tenantId: 1,
+        credentialRevision: 1,
+        createdAt: times.created,
+        updatedAt: times.connected,
+      },
+      {
+        tenantId: 2,
+        credentialRevision: 1,
+        createdAt: times.created,
+        updatedAt: times.created,
+      },
+    ],
+  );
+  assert.equal(
+    credentialsRows.every(({ envelopeDigest }) =>
+      /^sha256:[a-f0-9]{64}$/.test(envelopeDigest)
+    ),
+    true,
+  );
+  assert.equal(
+    new Set(
+      credentialsRows.map(({ envelopeDigest }) => envelopeDigest),
+    ).size,
+    2,
+  );
+
+  const eventIntegrity = await pool.query(
+    `SELECT pg_catalog.count(*)::integer AS count
+     FROM public.meta_credential_revision_events AS event
+     INNER JOIN public.meta_credential_envelopes AS credential
+       ON credential.tenant_id = event.tenant_id
+      AND credential.credential_revision = event.credential_revision
+      AND credential.envelope_digest = event.envelope_digest
+      AND credential.key_version = event.key_version
+      AND credential.updated_at = event.recorded_at
+     WHERE event.credential_revision = 1
+       AND event.created_at = event.recorded_at`,
+  );
+  assert.deepEqual(eventIntegrity.rows, [{ count: 2 }]);
+}
+
+async function verifyFirstCredentialInsertUsesDatabaseClock(pool) {
+  const client = await pool.connect();
+  const tenantId = 9_001_054;
+  const suppliedTimestamp = "2000-01-01T00:00:00.000Z";
+  let transactionOpen = false;
+  try {
+    await client.query("BEGIN");
+    transactionOpen = true;
+    await client.query(
+      `INSERT INTO public.tenants (id, display_name, status)
+       VALUES ($1, 'Meta migration clock rehearsal', 'active')`,
+      [tenantId],
+    );
+    const lowerBound = await databaseTimestamp(client);
+    await client.query(
+      `INSERT INTO public.meta_credential_envelopes (
+         tenant_id,
+         key_version,
+         initialization_vector,
+         ciphertext,
+         created_at,
+         updated_at
+       ) VALUES ($1, 'v1', $2, $3, $4, $4)`,
+      [
+        tenantId,
+        credentials.initialVector,
+        credentials.initialCiphertext,
+        suppliedTimestamp,
+      ],
+    );
+    const upperBound = await databaseTimestamp(client);
+    const inserted = await client.query(
+      `SELECT
+         credential_revision::integer AS revision,
+         envelope_digest AS digest,
+         created_at AS "createdAt",
+         updated_at AS "updatedAt"
+       FROM public.meta_credential_envelopes
+       WHERE tenant_id = $1`,
+      [tenantId],
+    );
+    assert.equal(inserted.rowCount, 1);
+    const row = inserted.rows[0];
+    const createdAt = row.createdAt.toISOString();
+    const updatedAt = row.updatedAt.toISOString();
+    assert.equal(row.revision, 1);
+    assert.match(row.digest, /^sha256:[a-f0-9]{64}$/);
+    assert.equal(createdAt, updatedAt);
+    assert.notEqual(createdAt, suppliedTimestamp);
+    assert.equal(Date.parse(createdAt) >= Date.parse(lowerBound), true);
+    assert.equal(
+      Date.parse(createdAt) <= Date.parse(upperBound) + 1,
+      true,
+    );
+    const event = await client.query(
+      `SELECT recorded_at AS "recordedAt"
+       FROM public.meta_credential_revision_events
+       WHERE tenant_id = $1`,
+      [tenantId],
+    );
+    assert.equal(event.rowCount, 1);
+    assert.equal(event.rows[0].recordedAt.toISOString(), createdAt);
+    await client.query("ROLLBACK");
+    transactionOpen = false;
+  } finally {
+    if (transactionOpen) {
+      await client.query("ROLLBACK");
+    }
+    client.release();
+  }
+}
+
+async function requireCredentialRotationDatabaseClock(
+  pool,
+  lowerBound,
+) {
+  const upperBound = await databaseTimestamp(pool);
+  const result = await pool.query(
+    `SELECT
+       credential.credential_revision::integer AS revision,
+       credential.envelope_digest AS digest,
+       credential.created_at AS "createdAt",
+       credential.updated_at AS "updatedAt",
+       event.recorded_at AS "recordedAt"
+     FROM public.meta_credential_envelopes AS credential
+     INNER JOIN public.meta_credential_revision_events AS event
+       ON event.tenant_id = credential.tenant_id
+      AND event.credential_revision = credential.credential_revision
+      AND event.envelope_digest = credential.envelope_digest
+     WHERE credential.tenant_id = 2`,
+  );
+  assert.equal(result.rowCount, 1);
+  const row = result.rows[0];
+  const updatedAt = row.updatedAt.toISOString();
+  assert.equal(row.revision, 2);
+  assert.match(row.digest, /^sha256:[a-f0-9]{64}$/);
+  assert.equal(row.createdAt.toISOString(), times.created);
+  assert.notEqual(updatedAt, times.completed);
+  assert.equal(row.recordedAt.toISOString(), updatedAt);
+  assert.equal(Date.parse(updatedAt) >= Date.parse(lowerBound), true);
+  assert.equal(
+    Date.parse(updatedAt) <= Date.parse(upperBound) + 1,
+    true,
   );
 }
 
@@ -403,6 +605,8 @@ async function requireNoPlaintextCredentialColumns(pool) {
     "ciphertext",
     "created_at",
     "updated_at",
+    "credential_revision",
+    "envelope_digest",
   ]);
 }
 
@@ -433,9 +637,17 @@ async function compareFinalState(database, pool) {
         normalizePostgresValue(column, row[column.name]),
       ]),
     ));
+    const expectedRows = d1Snapshot.tables[table.name];
+    assert.equal(postgresRows.length, expectedRows.length);
+    const comparableRows = table.name === "meta_credential_envelopes"
+      ? postgresRows.map((row, index) => ({
+        ...row,
+        updated_at: expectedRows[index].updated_at,
+      }))
+      : postgresRows;
     assert.deepEqual(
-      postgresRows,
-      d1Snapshot.tables[table.name],
+      comparableRows,
+      expectedRows,
       `${table.name} final state diverged`,
     );
     evidence.push(Object.freeze({
@@ -460,7 +672,7 @@ export async function verifyPostgresMetaConnectionDataMigration(
 
   try {
     await applyD1Migrations(database);
-    await applyPostgresMigrations(pool);
+    const postgresMigrations = await applyPostgresMigrations(pool);
     database.exec("BEGIN IMMEDIATE");
     try {
       seedD1Core(database);
@@ -499,11 +711,19 @@ export async function verifyPostgresMetaConnectionDataMigration(
       JSON.stringify(migrationEvidence),
       /portfolio-primary|waba-primary|phone-primary|AQIDBAUG/,
     );
+    await pool.query(postgresMigrations.revisionMigrationSource);
+    await requireCredentialRevisionBackfill(pool);
     await requirePostgresTenantIsolation(pool);
     await requireNoPlaintextCredentialColumns(pool);
+    await verifyFirstCredentialInsertUsesDatabaseClock(pool);
+    const rotationClockLowerBound = await databaseTimestamp(pool);
     const semanticObservations = await runSemanticParityScenarios(
       database,
       pool,
+    );
+    await requireCredentialRotationDatabaseClock(
+      pool,
+      rotationClockLowerBound,
     );
     const finalState = await compareFinalState(database, pool);
     await assert.rejects(
@@ -521,14 +741,14 @@ export async function verifyPostgresMetaConnectionDataMigration(
 
     return Object.freeze({
       d1MigrationCount: (await migrationFiles(join(projectRoot, "drizzle"))).length,
-      postgresMigrationCount: (
-        await migrationFiles(join(projectRoot, "postgres", "migrations"))
-      ).length,
+      postgresMigrationCount: postgresMigrations.files.length,
       tableCount: migrationEvidence.tableCount,
       rowCount: migrationEvidence.totalRowCount,
       replayRejected: true,
       tenantIsolationVerified: true,
       plaintextCredentialColumnsAbsent: true,
+      credentialRevisionLedgerBackfilled: true,
+      credentialDatabaseClockVerified: true,
       semanticScenarioCount: semanticObservations.length,
       semanticScenarioDigest: digest(semanticObservations),
       semanticStateDigest: digest(finalState),
@@ -550,7 +770,8 @@ async function main() {
     `${result.d1MigrationCount} D1 migrations, ` +
     `${result.postgresMigrationCount} PostgreSQL migrations, ` +
     `${result.tableCount} tables, ${result.rowCount} rows, ` +
-    `replay rejected, tenant isolation verified, no plaintext columns, ` +
+    `replay rejected, tenant isolation verified, 8-column encrypted ` +
+    `credential schema and database clock verified, ` +
     `${result.semanticScenarioCount} parity scenarios)\n`,
   );
 }

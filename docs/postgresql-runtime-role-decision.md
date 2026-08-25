@@ -450,6 +450,40 @@ Shell commands,‏ `package.json.scripts`,‏ Directory symlinks תחת `scripts
 | `declare` ללא Runtime binding | אינו נחשב Shadow ואינו עוקף חסימה |
 | Child process,‏ Node flags,‏ Shell,‏ Directory symlink או Package/script execution edge | A2 — עדיין חוסם Activation, ללא טענת כיסוי ב־A1 |
 
+4.7.7.22 Migration
+‏`0054_meta_credential_revision_ledger.sql` מוסיפה חוזה B1 רדום וזהות Revision
+ל־Meta credentials. PostgreSQL מוסיף ל־`meta_credential_envelopes` את
+`credential_revision` ואת `envelope_digest`, וגוזר את שניהם בעצמו. Insert ראשון
+מקבל Revision ‏1; Replay של אותם Bytes אינו משנה Revision, Digest או Timestamp;
+Rotation אמיתי מגדיל Revision בדיוק באחד; וכל ניסיון לחזור ל־Digest היסטורי של
+אותו Tenant נכשל סגור. גם `created_at` וגם `updated_at` נגזרים מ־Database clock
+ברזולוציית Millisecond ואינם מתקבלים מהקורא כראיית Audit מהימנה.
+
+4.7.7.23 הטבלה `meta_credential_revision_events` היא Ledger מצומצם ו־Append-only.
+היא שומרת רק Event key דטרמיניסטי, Tenant,‏ Revision,‏ Digest,‏ Key format וזמן
+מסד; היא אינה שומרת IV,‏ Ciphertext,‏ Access token,‏ Provider identifier או PII.
+Insert מותר רק מתוך Trigger העומק המדויק שמקליט את גרסת ה־Envelope הפעילה;
+`UPDATE`,‏ `DELETE` ו־`TRUNCATE` ישירים נחסמים. ה־Postcondition וה־Verifier
+מקבעים לכל שבעת ה־Triggers גם את `tgfoid` ואת Function ה־`pg_proc` המדויק, ולא
+רק את שם ה־Trigger או `tgtype`.
+
+4.7.7.24 ה־Verifier של B1 מקבל רק URL ללא Userinfo,‏ Query או Fragment אל מסד
+מקומי ייעודי בשם `connect_meta_credential_revision_ledger`, עם Loopback ו־Port
+מפורש. הוא החיל את כל 55 ה־Migrations על PostgreSQL 16.13, הוכיח Backfill,
+Replay,‏ Rotation מקביל,‏ Rollback,‏ Atomic failure,‏ Spoofing,‏ Digest reuse,
+Redaction ו־Catalog, ונבדק בשתי הרצות רצופות לאחר Cleanup שמוגבל למסד המקומי
+הריק הזה. Rehearsal ה־Meta הקיים העתיק תחילה את חוזה Legacy בן שש העמודות,
+החיל לאחר מכן את 0054, ואימת שמונה עמודות, Revision ‏1, Ledger ו־Database clock.
+
+4.7.7.25 ‏B1 אינו Activation. Migration ‏0054 אינה מוסיפה `GRANT`, אינה משתמשת
+ב־`SECURITY DEFINER` ואינה מחברת Repository,‏ Startup או Meta I/O. Runtime role
+מוגבל אינו יכול עדיין להשתמש בשרשרת בלי Wrapper והרשאות Least-privilege
+נפרדות; אסור לפתור זאת באמצעות גישה גולמית ל־Ledger. לפני Deployment חייב
+Migration executor מוכח להריץ את כל 0054 ב־Transaction אחת. לפני שליחה נדרשים
+גם B2 שקושר Authorization,‏ Run ו־Operation ל־Revision ול־Digest המדויקים,
+One-shot pre-send permit,‏ Pinned client,‏ Tenant advisory-lock barrier
+ו־Reconciliation למצב `indeterminate`. לכן Activation נשאר NO-GO.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

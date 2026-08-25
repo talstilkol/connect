@@ -311,6 +311,33 @@ test("documents the dormant committed provider-fence Worker capability", () => {
   );
 });
 
+test("documents the dormant credential revision ledger without activation", () => {
+  assert.match(
+    decision,
+    /0054_meta_credential_revision_ledger\.sql[\s\S]*`credential_revision`[\s\S]*`envelope_digest`[\s\S]*Database clock/,
+  );
+  assert.match(
+    decision,
+    /Replay[\s\S]*אינו משנה Revision, Digest או Timestamp[\s\S]*Rotation[\s\S]*בדיוק באחד[\s\S]*Digest היסטורי/,
+  );
+  assert.match(
+    decision,
+    /meta_credential_revision_events[\s\S]*Append-only[\s\S]*אינה שומרת IV[\s\S]*Ciphertext[\s\S]*Access token[\s\S]*PII/,
+  );
+  assert.match(
+    decision,
+    /שבעת ה־Triggers[\s\S]*`tgfoid`[\s\S]*`pg_proc`/,
+  );
+  assert.match(
+    decision,
+    /55 ה־Migrations[\s\S]*PostgreSQL 16\.13[\s\S]*שתי הרצות רצופות[\s\S]*שמונה עמודות/,
+  );
+  assert.match(
+    decision,
+    /B1 אינו Activation[\s\S]*אינה מוסיפה `GRANT`[\s\S]*אינה משתמשת[\s\S]*`SECURITY DEFINER`[\s\S]*Transaction אחת[\s\S]*One-shot pre-send permit[\s\S]*Activation נשאר NO-GO/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,
