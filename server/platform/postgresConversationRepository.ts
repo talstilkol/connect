@@ -1,5 +1,6 @@
 import {
   MessageIdentityConflictError,
+  normalizeInboundButtonReplyProvenance,
   type ApplyMessageDeliveryStatusInput,
   type ApplyMessageDeliveryStatusResult,
   type ChangeConversationAssignmentResult,
@@ -7,6 +8,7 @@ import {
   type ConversationReadState,
   type ConversationRepository,
   type InboxConversationListFilter,
+  type InboundButtonReplyProvenance,
   type InboundContactIdentity,
   type MarkConversationReadResult,
   type PersistedInboxConversation,
@@ -44,6 +46,8 @@ import type {
 
 const conversationKeyPattern = /^conversation_v1_[0-9a-f]{64}$/;
 const messageKeyPattern = /^message_v1_[0-9a-f]{64}$/;
+const botReplyDeliveryKeyPattern =
+  /^bot_reply_delivery_v1_[0-9a-f]{64}$/;
 const statusEventKeyPattern = /^[0-9a-f]{64}$/;
 const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
 
@@ -98,6 +102,14 @@ const assignmentStateRowKeys = Object.freeze([
   "conversationKey",
   "tenantId",
   "version",
+]);
+const inboundButtonReplyEventRowKeys = Object.freeze([
+  "messageKey",
+  "occurredAt",
+  "replyToProviderMessageId",
+  "selectedBotOptionKey",
+  "subjectDeliveryKey",
+  "tenantId",
 ]);
 
 const messageColumns = `
@@ -248,6 +260,50 @@ export const postgresConversationSql = Object.freeze({
       AND conversations.contact_id = $8
     ON CONFLICT DO NOTHING
     RETURNING ${messageColumns}
+  `,
+  insertInboundButtonReplyEvent: `
+    INSERT INTO inbound_button_reply_events (
+      message_key,
+      tenant_id,
+      selected_bot_option_key,
+      subject_delivery_key,
+      occurred_at,
+      created_at
+    )
+    SELECT
+      $1,
+      $2,
+      $3,
+      provider_link.delivery_key,
+      $5::timestamptz,
+      $5::timestamptz
+    FROM bot_reply_delivery_provider_links AS provider_link
+    WHERE provider_link.tenant_id = $2
+      AND provider_link.provider_message_id = $4
+    ON CONFLICT (message_key) DO NOTHING
+    RETURNING
+      message_key AS "messageKey",
+      tenant_id AS "tenantId",
+      selected_bot_option_key AS "selectedBotOptionKey",
+      subject_delivery_key AS "subjectDeliveryKey",
+      occurred_at AS "occurredAt",
+      $4::text AS "replyToProviderMessageId"
+  `,
+  findInboundButtonReplyEvent: `
+    SELECT
+      event.message_key AS "messageKey",
+      event.tenant_id AS "tenantId",
+      event.selected_bot_option_key AS "selectedBotOptionKey",
+      event.subject_delivery_key AS "subjectDeliveryKey",
+      event.occurred_at AS "occurredAt",
+      provider_link.provider_message_id AS "replyToProviderMessageId"
+    FROM inbound_button_reply_events AS event
+    INNER JOIN bot_reply_delivery_provider_links AS provider_link
+      ON provider_link.tenant_id = event.tenant_id
+      AND provider_link.delivery_key = event.subject_delivery_key
+    WHERE event.tenant_id = $1
+      AND event.message_key = $2
+    FOR UPDATE OF event
   `,
   applyDeliveryStatus: `
     UPDATE messages
@@ -578,6 +634,61 @@ function parseMessage(value: unknown): PersistedMessage {
     createdAt,
     updatedAt,
   });
+}
+
+interface ParsedInboundButtonReplyEvent {
+  messageKey: string;
+  tenantId: number;
+  selectedBotOptionKey: string;
+  subjectDeliveryKey: string;
+  occurredAt: string;
+  replyToProviderMessageId: string;
+}
+
+function parseInboundButtonReplyEvent(
+  value: unknown,
+): ParsedInboundButtonReplyEvent {
+  const row = requireExactPostgresRow(
+    value,
+    inboundButtonReplyEventRowKeys,
+  );
+
+  return Object.freeze({
+    messageKey: requireMessageKey(row.messageKey),
+    tenantId: parsePostgresPositiveInteger(row.tenantId),
+    selectedBotOptionKey: requirePattern(
+      row.selectedBotOptionKey,
+      /^bot_option_v1_[0-9a-f]{64}$/,
+      "PostgreSQL selected Bot option key",
+    ),
+    subjectDeliveryKey: requirePattern(
+      row.subjectDeliveryKey,
+      botReplyDeliveryKeyPattern,
+      "PostgreSQL subject Bot delivery key",
+    ),
+    occurredAt: parsePostgresTimestamp(row.occurredAt),
+    replyToProviderMessageId: requireBoundedIdentity(
+      row.replyToProviderMessageId,
+      "PostgreSQL reply-to provider message ID",
+    ),
+  });
+}
+
+function isSameInboundButtonReplyProvenance(
+  stored: ParsedInboundButtonReplyEvent | null,
+  input: RecordInboundMessageInput,
+  provenance: InboundButtonReplyProvenance | null,
+): boolean {
+  return provenance === null
+    ? stored === null
+    : stored !== null &&
+        stored.messageKey === input.messageKey &&
+        stored.tenantId === input.tenantId &&
+        stored.selectedBotOptionKey ===
+          provenance.selectedBotOptionKey &&
+        stored.replyToProviderMessageId ===
+          provenance.replyToProviderMessageId &&
+        stored.occurredAt === input.occurredAt;
 }
 
 function parseConversationReadState(
@@ -913,6 +1024,8 @@ export function createPostgresConversationRepository(
       if (!validation.success) {
         throw new Error("inbound message is invalid");
       }
+      const buttonReplyProvenance =
+        normalizeInboundButtonReplyProvenance(input);
       const normalized: RecordInboundMessageInput = {
         tenantId,
         conversationKey,
@@ -960,6 +1073,64 @@ export function createPostgresConversationRepository(
               validation.value.contactId,
             ],
           );
+
+          let buttonReplyEvent: ParsedInboundButtonReplyEvent | null = null;
+          if (buttonReplyProvenance !== null) {
+            const eventRow = await loadOne(
+              transaction,
+              postgresConversationSql.insertInboundButtonReplyEvent,
+              [
+                messageKey,
+                tenantId,
+                buttonReplyProvenance.selectedBotOptionKey,
+                buttonReplyProvenance.replyToProviderMessageId,
+                validation.value.occurredAt,
+              ],
+            );
+            if (eventRow !== null) {
+              buttonReplyEvent =
+                parseInboundButtonReplyEvent(eventRow);
+            }
+          }
+
+          if (
+            buttonReplyProvenance !== null &&
+            buttonReplyEvent === null
+          ) {
+            const eventRow = await loadOne(
+              transaction,
+              postgresConversationSql.findInboundButtonReplyEvent,
+              [tenantId, messageKey],
+            );
+            buttonReplyEvent = eventRow === null
+              ? null
+              : parseInboundButtonReplyEvent(eventRow);
+          }
+
+          if (
+            insertedRow === null &&
+            buttonReplyProvenance === null
+          ) {
+            const eventRow = await loadOne(
+              transaction,
+              postgresConversationSql.findInboundButtonReplyEvent,
+              [tenantId, messageKey],
+            );
+            buttonReplyEvent = eventRow === null
+              ? null
+              : parseInboundButtonReplyEvent(eventRow);
+          }
+
+          if (
+            !isSameInboundButtonReplyProvenance(
+              buttonReplyEvent,
+              normalized,
+              buttonReplyProvenance,
+            )
+          ) {
+            throw new MessageIdentityConflictError();
+          }
+
           if (insertedRow !== null) {
             const message = parseMessage(insertedRow);
             if (!isSameInboundIdentity(message, normalized)) {

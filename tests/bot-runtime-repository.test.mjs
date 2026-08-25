@@ -464,8 +464,8 @@ test("derives a bounded continuation only from the accepted button reply to the 
   database
     .prepare(
       `INSERT INTO bot_reply_deliveries
-        (delivery_key, tenant_id, conversation_key, inbound_message_key, bot_flow_key, bot_flow_version_key, reply_index, recipient_phone_e164, reply_json, status, attempt_count, provider_message_id, accepted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', 1, ?, ?)`,
+        (delivery_key, tenant_id, conversation_key, inbound_message_key, bot_flow_key, bot_flow_version_key, reply_index, sender_phone_number_id, recipient_phone_e164, reply_json, status, attempt_count, claim_version, provider_message_id, accepted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', 1, 1, ?, ?)`,
     )
     .run(
       `bot_reply_delivery_v1_${"2".repeat(64)}`,
@@ -475,6 +475,7 @@ test("derives a bounded continuation only from the accepted button reply to the 
       botFlowKey,
       botFlowVersionKey,
       1,
+      "phone-number-id",
       "+972501234567",
       replyJson,
       "wamid.button-reply",
@@ -489,6 +490,7 @@ test("derives a bounded continuation only from the accepted button reply to the 
       1,
       conversationKey,
       currentInboundMessageKey,
+      "wamid.button-reply",
     ),
     {
       outcome: "found",
@@ -499,12 +501,21 @@ test("derives a bounded continuation only from the accepted button reply to the 
       },
     },
   );
+  assert.deepEqual(
+    await repository.findAcceptedButtonContinuation(
+      1,
+      conversationKey,
+      currentInboundMessageKey,
+      "wamid.another-button-prompt",
+    ),
+    { outcome: "none" },
+  );
 
   database
     .prepare(
       `INSERT INTO bot_reply_deliveries
-        (delivery_key, tenant_id, conversation_key, inbound_message_key, bot_flow_key, bot_flow_version_key, reply_index, recipient_phone_e164, reply_json, status, attempt_count, provider_message_id, accepted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', 1, ?, ?)`,
+        (delivery_key, tenant_id, conversation_key, inbound_message_key, bot_flow_key, bot_flow_version_key, reply_index, sender_phone_number_id, recipient_phone_e164, reply_json, status, attempt_count, claim_version, provider_message_id, accepted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'accepted', 1, 1, ?, ?)`,
     )
     .run(
       `bot_reply_delivery_v1_${"3".repeat(64)}`,
@@ -514,6 +525,7 @@ test("derives a bounded continuation only from the accepted button reply to the 
       botFlowKey,
       botFlowVersionKey,
       2,
+      "phone-number-id",
       "+972501234567",
       replyJson,
       "wamid.second-button-reply",
@@ -529,26 +541,20 @@ test("derives a bounded continuation only from the accepted button reply to the 
     { outcome: "ambiguous" },
   );
 
-  database
-    .prepare(
-      `UPDATE bot_reply_deliveries
-       SET accepted_at = ?
-       WHERE tenant_id = ?
-         AND inbound_message_key = ?`,
-    )
-    .run(
-      "2000-01-01T00:00:00.000Z",
-      1,
-      previousInboundMessageKey,
-    );
-
-  assert.deepEqual(
-    await repository.findAcceptedButtonContinuation(
-      1,
-      conversationKey,
-      currentInboundMessageKey,
-    ),
-    { outcome: "none" },
+  assert.throws(
+    () => database
+      .prepare(
+        `UPDATE bot_reply_deliveries
+         SET accepted_at = ?
+         WHERE tenant_id = ?
+           AND inbound_message_key = ?`,
+      )
+      .run(
+        "2000-01-01T00:00:00.000Z",
+        1,
+        previousInboundMessageKey,
+      ),
+    /bot reply delivery transition is invalid/,
   );
 
   insertInbound.run(

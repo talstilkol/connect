@@ -98,6 +98,10 @@ export const postgresBotRuntimeSql = Object.freeze({
       AND delivery.inbound_message_key = previous_inbound."previousMessageKey"
       AND delivery.status = 'accepted'
       AND delivery.accepted_at IS NOT NULL
+      AND (
+        $4::text IS NULL OR
+        delivery.provider_message_id = $4
+      )
       AND delivery.accepted_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
       AND delivery.reply_json ->> 'kind' = 'buttons'
     ORDER BY delivery.reply_index DESC, delivery.delivery_key ASC
@@ -145,6 +149,27 @@ function requirePattern(
   if (typeof value !== "string" || !pattern.test(value)) {
     throw new Error(`${fieldName} is invalid`);
   }
+  return value;
+}
+
+function requireOptionalProviderMessageId(
+  value: unknown,
+): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (
+    typeof value !== "string" ||
+    value.trim() !== value ||
+    value.length === 0 ||
+    value.length > 255
+  ) {
+    throw new Error(
+      "replyToProviderMessageId is invalid",
+    );
+  }
+
   return value;
 }
 
@@ -293,6 +318,7 @@ export function createPostgresBotRuntimeRepository(
       tenantIdInput: number,
       conversationKeyInput: string,
       currentInboundMessageKeyInput: string,
+      replyToProviderMessageIdInput?: string | null,
     ) {
       const tenantId = requirePositiveInteger(tenantIdInput, "tenantId");
       const conversationKey = requirePattern(
@@ -305,10 +331,19 @@ export function createPostgresBotRuntimeRepository(
         messageKeyPattern,
         "currentInboundMessageKey",
       );
+      const replyToProviderMessageId =
+        requireOptionalProviderMessageId(
+          replyToProviderMessageIdInput,
+        );
       const rows = await loadRows(
         dependencies.queries,
         postgresBotRuntimeSql.findAcceptedButtonContinuation,
-        [tenantId, conversationKey, currentInboundMessageKey],
+        [
+          tenantId,
+          conversationKey,
+          currentInboundMessageKey,
+          replyToProviderMessageId,
+        ],
         2,
       );
       if (rows.length === 0) {

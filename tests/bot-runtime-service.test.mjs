@@ -379,6 +379,7 @@ function fixture(active, options = {}) {
       tenantId,
       currentConversationKey,
       currentInboundMessageKey,
+      replyToProviderMessageId,
     ) {
       calls.continuations.push({
         tenantId,
@@ -386,6 +387,7 @@ function fixture(active, options = {}) {
           currentConversationKey,
         inboundMessageKey:
           currentInboundMessageKey,
+        replyToProviderMessageId,
       });
 
       if (options.continuationError) {
@@ -563,6 +565,10 @@ test("resumes only from an accepted button delivery tied to the current active v
     );
 
   assert.ok(buttons);
+  const serviceOption = buttons.options.find(
+    (option) => option.label === "שירות",
+  );
+  assert.ok(serviceOption);
   const testFixture = fixture(active, {
     continuation: {
       outcome: "found",
@@ -590,7 +596,9 @@ test("resumes only from an accepted button delivery tied to the current active v
       7,
       conversationKey,
       inboundMessageKey,
-      "שירות",
+      "כותרת לא תואמת",
+      serviceOption.optionKey,
+      "wamid.button-reply",
     );
 
   assert.equal(result.outcome, "planned");
@@ -608,8 +616,42 @@ test("resumes only from an accepted button delivery tied to the current active v
         tenantId: 7,
         conversationKey,
         inboundMessageKey,
+        replyToProviderMessageId:
+          "wamid.button-reply",
       },
     ],
+  );
+});
+
+test("ignores an interactive option key without matching accepted delivery evidence", async () => {
+  const active = await activeButtonMenuFixture();
+  const buttons =
+    active.version.definition.blocks.find(
+      (block) => block.type === "buttons",
+    );
+  assert.ok(buttons);
+  const testFixture = fixture(active, {
+    continuation: { outcome: "none" },
+  });
+
+  const result =
+    await testFixture.service.processInbound(
+      7,
+      conversationKey,
+      inboundMessageKey,
+      "עזרה",
+      buttons.options[1].optionKey,
+      "wamid.unmatched-button-prompt",
+    );
+
+  assert.equal(result.outcome, "planned");
+  assert.equal(
+    result.plan.outcome,
+    "awaiting-input",
+  );
+  assert.equal(
+    result.plan.replies.at(-1).kind,
+    "buttons",
   );
 });
 

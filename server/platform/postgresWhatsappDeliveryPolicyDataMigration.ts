@@ -366,9 +366,11 @@ function validateProviderLink(row: PostgresDataMigrationRow): void {
     (["accepted", "sent"].includes(status) && outcome === null &&
       settledAt === null) ||
     (["delivered", "read"].includes(status) && outcome === "delivered" &&
-      settledAt !== null) ||
+      settledAt !== null && settledAt >= acceptedAt &&
+      settledAt <= updatedAt) ||
     (status === "failed" && outcome === "provider-failed" &&
-      settledAt !== null);
+      settledAt !== null && settledAt >= acceptedAt &&
+      settledAt <= updatedAt);
   if (
     !deliveryKeyPattern.test(text(row, "delivery_key")) ||
     !reservationKeyPattern.test(text(row, "reservation_key")) ||
@@ -379,8 +381,7 @@ function validateProviderLink(row: PostgresDataMigrationRow): void {
       eventKey !== null || eventAt !== null || updatedAt !== acceptedAt
     )) ||
     (status !== "accepted" && (
-      eventKey === null || eventAt === null ||
-      updatedAt !== (eventAt > acceptedAt ? eventAt : acceptedAt)
+      eventKey === null || eventAt === null
     )) ||
     !terminalValid || timestamp(row, "created_at") !== acceptedAt ||
     updatedAt < acceptedAt
@@ -405,9 +406,11 @@ function validateBotReplyProviderLink(
     (["accepted", "sent"].includes(status) && outcome === null &&
       settledAt === null) ||
     (["delivered", "read"].includes(status) && outcome === "delivered" &&
-      settledAt !== null) ||
+      settledAt !== null && settledAt >= acceptedAt &&
+      settledAt <= updatedAt) ||
     (status === "failed" && outcome === "provider-failed" &&
-      settledAt !== null);
+      settledAt !== null && settledAt >= acceptedAt &&
+      settledAt <= updatedAt);
   if (
     !botReplyDeliveryKeyPattern.test(text(row, "delivery_key")) ||
     !reservationKeyPattern.test(text(row, "reservation_key")) ||
@@ -418,8 +421,7 @@ function validateBotReplyProviderLink(
       eventKey !== null || eventAt !== null || updatedAt !== acceptedAt
     )) ||
     (status !== "accepted" && (
-      eventKey === null || eventAt === null || eventAt < acceptedAt ||
-      updatedAt !== eventAt
+      eventKey === null || eventAt === null
     )) ||
     !terminalValid || timestamp(row, "created_at") !== acceptedAt ||
     updatedAt < acceptedAt
@@ -1296,8 +1298,9 @@ async function verifyLoadedState(
         AND (
           link.last_status_event_key IS NULL
           OR link.last_status_event_at IS NULL
-          OR link.last_status_event_at < link.accepted_at
-          OR link.updated_at IS DISTINCT FROM link.last_status_event_at
+          OR link.updated_at < link.accepted_at
+          OR link.terminal_settled_at < link.accepted_at
+          OR link.terminal_settled_at > link.updated_at
         )
       )
       OR delivery.status <> 'accepted'

@@ -64,6 +64,9 @@ import {
   VERCEL_OIDC_HEADER,
 } from "../server/platform/railwayApiContract.ts";
 import {
+  deriveRailwayApiDeterministicIdempotencyKey,
+} from "../server/platform/railwayApiMutationExecutor.ts";
+import {
   deriveTeamInvitationDeliveryKey,
 } from "../server/team/teamInvitationKey.ts";
 import {
@@ -122,6 +125,10 @@ const migrationFiles = Object.freeze([
   "0039_bot_reply_provider_request_fence.sql",
   "0040_bot_reply_staging_release_evidence.sql",
   "0041_production_readiness_release_evidence_v2.sql",
+  "0042_bot_reply_provider_outcome_request_fence.sql",
+  "0043_bot_reply_staging_release_evidence_operator_audit.sql",
+  "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
+  "0045_bot_reply_provider_clock_domains.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -2175,11 +2182,33 @@ async function verifyCampaignProviderReconciliation(
   const reservationKey =
     `whatsapp_rate_reservation_v1_${"e".repeat(64)}`;
   const providerMessageId = "wamid.postgres-campaign-reconciliation";
-  const createdAt = "2026-08-17T12:30:00.000Z";
-  const reservedAt = "2026-08-17T13:00:00.000Z";
-  const acceptedAt = "2026-08-17T13:00:01.000Z";
-  const deliveredAt = "2026-08-17T13:00:03.000Z";
-  const readAt = "2026-08-17T13:00:04.000Z";
+  const policy = await pool.query(
+    `SELECT recorded_at AS "recordedAt"
+     FROM whatsapp_campaign_delivery_policy_events
+     WHERE event_key = $1`,
+    [policyEventKey],
+  );
+  assert.equal(policy.rowCount, 1);
+  const policyRecordedAt = policy.rows[0].recordedAt.toISOString();
+  const createdAt = policyRecordedAt;
+  const reservedAt = new Date(
+    Date.parse(policyRecordedAt) + 60_000,
+  ).toISOString();
+  const acceptedAt = new Date(
+    Date.parse(reservedAt) + 1_000,
+  ).toISOString();
+  const deliveredAt = new Date(
+    Date.parse(reservedAt) + 3_000,
+  ).toISOString();
+  const deliveredReconciledAt = new Date(
+    Date.parse(deliveredAt) + 500,
+  ).toISOString();
+  const readAt = new Date(
+    Date.parse(reservedAt) + 4_000,
+  ).toISOString();
+  const readReconciledAt = new Date(
+    Date.parse(readAt) + 500,
+  ).toISOString();
   const contact = await pool.query(
     `SELECT id, phone_e164 AS "phoneNumber", version
      FROM contacts
@@ -2293,7 +2322,9 @@ async function verifyCampaignProviderReconciliation(
         maximumOutboundMessagesPerSecond: 2,
       }),
       reservedAt,
-      reservationExpiresAt: "2026-08-17T13:05:00.000Z",
+      reservationExpiresAt: new Date(
+        Date.parse(reservedAt) + 300_000,
+      ).toISOString(),
     });
   assert.equal(reservation.outcome, "reserved");
 
@@ -2319,6 +2350,7 @@ async function verifyCampaignProviderReconciliation(
     status: "delivered",
     statusEventKey: "2".repeat(64),
     statusEventAt: deliveredAt,
+    reconciledAt: deliveredReconciledAt,
   });
   const reconciled = await Promise.all([
     foundation.campaignProviderDeliveries.applyProviderStatus(delivered),
@@ -2334,7 +2366,7 @@ async function verifyCampaignProviderReconciliation(
         "settlement" in result &&
         result.settlement?.reservationKey === reservationKey &&
         result.settlement?.outcome === "delivered" &&
-        result.settlement?.settledAt === deliveredAt,
+        result.settlement?.settledAt === deliveredReconciledAt,
     ),
     true,
   );
@@ -2369,6 +2401,7 @@ async function verifyCampaignProviderReconciliation(
     status: "read",
     statusEventKey: "5".repeat(64),
     statusEventAt: readAt,
+    reconciledAt: readReconciledAt,
   });
   assert.equal(read.outcome, "applied");
   assert.equal("link" in read ? read.link.recipientStatus : null, "read");
@@ -2401,12 +2434,12 @@ async function verifyCampaignProviderReconciliation(
   assert.deepEqual(evidence.rows, [{
     providerStatus: "read",
     terminalOutcome: "delivered",
-    terminalSettledAt: new Date(deliveredAt),
+    terminalSettledAt: new Date(deliveredReconciledAt),
     recipientStatus: "read",
     settlementOutcome: "delivered",
-    settlementAt: new Date(deliveredAt),
+    settlementAt: new Date(deliveredReconciledAt),
     activeReservationKey: null,
-    lastDeliveredAt: new Date(deliveredAt),
+    lastDeliveredAt: new Date(deliveredReconciledAt),
   }]);
 
   await assert.rejects(
@@ -2541,6 +2574,7 @@ async function verifyBotDeliverySchema(pool, tenantId) {
        inbound_message_key,
        bot_flow_key,
        bot_flow_version_key,
+       sender_phone_number_id,
        reply_index,
        recipient_phone_e164,
        reply_json,
@@ -2556,6 +2590,7 @@ async function verifyBotDeliverySchema(pool, tenantId) {
        $4,
        $5,
        $6,
+       '155512345678901',
        1,
        '+972501234567',
        $7::jsonb,
@@ -2742,6 +2777,7 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     inboundMessageKey,
     botFlowKey,
     botFlowVersionKey: first.botFlowVersionKey,
+    senderPhoneNumberId: "155512345678901",
     replyIndex: 1,
     recipientPhoneNumber: phone.rows[0].phoneNumber,
     reply,
@@ -2757,6 +2793,36 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
   const createdDelivery = staged.find(({ outcome }) => outcome === "created")
     ?.delivery;
   assert.ok(createdDelivery);
+  const latestPolicyVersion = await pool.query(
+    `SELECT max(policy_version)::integer AS version
+     FROM whatsapp_campaign_delivery_policy_events
+     WHERE tenant_id = $1`,
+    [tenantId],
+  );
+  const currentPolicyRecordedAt = createdDelivery.createdAt;
+  const currentPolicy =
+    await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
+      tenantId,
+      connectionVersion: 2,
+      expectedPolicyVersion: latestPolicyVersion.rows[0].version,
+      deliveryState: "enabled",
+      portfolioLimitKind: "bounded",
+      portfolioLimitValue: 250,
+      phoneThroughputMessagesPerSecond: 20,
+      maximumOutboundMessagesPerSecond: 2,
+      reservationDurationSeconds: 300,
+      metaGraphApiVersion: "v21.0",
+      evidenceDigest: "b".repeat(64),
+      evidenceCheckedAt: new Date(
+        Date.parse(currentPolicyRecordedAt) - 60_000,
+      ).toISOString(),
+      evidenceExpiresAt: new Date(
+        Date.parse(currentPolicyRecordedAt) + 86_400_000,
+      ).toISOString(),
+      actorExternalUserId: "tal-rate-limit-research",
+      recordedAt: currentPolicyRecordedAt,
+    });
+  assert.notEqual(currentPolicy.outcome, "unchanged");
   const claimAt = new Date(
     Date.parse(createdDelivery.createdAt) + 1_000,
   ).toISOString();
@@ -2768,11 +2834,50 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     claims.map(({ outcome }) => outcome).sort(),
     ["claimed", "uncertain"],
   );
+  const claimedDelivery = claims.find(
+    ({ outcome }) => outcome === "claimed",
+  )?.delivery;
+  assert.ok(claimedDelivery);
   const acceptedAt = new Date(Date.parse(claimAt) + 1_000).toISOString();
+  const botReservationKey =
+    `whatsapp_rate_reservation_v1_${"b".repeat(64)}`;
+  const botReservation =
+    await foundation.whatsappRateLimits.reserveServiceReply({
+      reservationKey: botReservationKey,
+      tenantId,
+      portfolioKey: `whatsapp_portfolio_v1_${"a".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"b".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"c".repeat(64)}`,
+      policyEventKey: currentPolicy.record.eventKey,
+      portfolioCapacity: Object.freeze({
+        kind: "bounded",
+        maximumUniqueRecipients: 250,
+      }),
+      phoneThroughput: Object.freeze({
+        maximumMessagesPerSecond: 20,
+        maximumOutboundMessagesPerSecond: 2,
+      }),
+      reservedAt: claimAt,
+      reservationExpiresAt: new Date(
+        Date.parse(claimAt) + 300_000,
+      ).toISOString(),
+    });
+  assert.equal(botReservation.outcome, "reserved");
+  const providerRequest =
+    await foundation.botReplyDeliveries.claimProviderRequest({
+      tenantId,
+      deliveryKey,
+      expectedClaimVersion: claimedDelivery.claimVersion,
+      reservationKey: botReservationKey,
+      requestedAt: claimAt,
+    });
+  assert.equal(providerRequest.outcome, "created");
   const accepted = await foundation.botReplyDeliveries.markAccepted(
     tenantId,
     deliveryKey,
+    claimedDelivery.claimVersion,
     "wamid.bot-integration-1",
+    botReservationKey,
     acceptedAt,
   );
   assert.equal(accepted.status, "accepted");
@@ -2817,6 +2922,7 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     inboundMessageKey: previousInboundMessageKey,
     botFlowKey,
     botFlowVersionKey: first.botFlowVersionKey,
+    senderPhoneNumberId: "155512345678901",
     replyIndex: 1,
     recipientPhoneNumber: continuationPhoneNumber,
     reply: buttonReply,
@@ -2825,21 +2931,54 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
   const buttonClaimAt = new Date(
     Date.parse(buttonStage.delivery.createdAt) + 1_000,
   ).toISOString();
-  assert.equal(
-    (await foundation.botReplyDeliveries.claim(
-      tenantId,
-      buttonDeliveryKey,
-      buttonClaimAt,
-    )).outcome,
-    "claimed",
+  const buttonClaim = await foundation.botReplyDeliveries.claim(
+    tenantId,
+    buttonDeliveryKey,
+    buttonClaimAt,
   );
+  assert.equal(buttonClaim.outcome, "claimed");
   const buttonAcceptedAt = new Date(
     Date.parse(buttonClaimAt) + 1_000,
   ).toISOString();
+  const buttonReservationKey =
+    `whatsapp_rate_reservation_v1_${"c".repeat(64)}`;
+  const buttonReservation =
+    await foundation.whatsappRateLimits.reserveServiceReply({
+      reservationKey: buttonReservationKey,
+      tenantId,
+      portfolioKey: `whatsapp_portfolio_v1_${"6".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"7".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"8".repeat(64)}`,
+      policyEventKey: currentPolicy.record.eventKey,
+      portfolioCapacity: Object.freeze({
+        kind: "bounded",
+        maximumUniqueRecipients: 250,
+      }),
+      phoneThroughput: Object.freeze({
+        maximumMessagesPerSecond: 20,
+        maximumOutboundMessagesPerSecond: 2,
+      }),
+      reservedAt: buttonClaimAt,
+      reservationExpiresAt: new Date(
+        Date.parse(buttonClaimAt) + 300_000,
+      ).toISOString(),
+    });
+  assert.equal(buttonReservation.outcome, "reserved");
+  const buttonProviderRequest =
+    await foundation.botReplyDeliveries.claimProviderRequest({
+      tenantId,
+      deliveryKey: buttonDeliveryKey,
+      expectedClaimVersion: buttonClaim.delivery.claimVersion,
+      reservationKey: buttonReservationKey,
+      requestedAt: buttonClaimAt,
+    });
+  assert.equal(buttonProviderRequest.outcome, "created");
   await foundation.botReplyDeliveries.markAccepted(
     tenantId,
     buttonDeliveryKey,
+    buttonClaim.delivery.claimVersion,
     "wamid.bot-integration-buttons",
+    buttonReservationKey,
     buttonAcceptedAt,
   );
   await foundation.conversations.recordInboundMessage(Object.freeze({
@@ -2848,9 +2987,11 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     messageKey: currentInboundMessageKey,
     contactId: continuationContact.contactId,
     providerMessageId: "driver-bot-continuation-current",
-    contentKind: "text",
-    textContent: "שירות",
-    occurredAt: new Date(Date.parse(previousOccurredAt) + 60_000).toISOString(),
+    contentKind: "interactive",
+    textContent: null,
+    occurredAt: new Date(Date.parse(buttonAcceptedAt) + 1_000).toISOString(),
+    selectedBotOptionKey: buttonReply.options[0].optionKey,
+    replyToProviderMessageId: "wamid.bot-integration-buttons",
   }));
   const continuation = await foundation.botRuntime
     .findAcceptedButtonContinuation(
@@ -2924,6 +3065,7 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     version_count: 2,
     delivery_status: "accepted",
   }]);
+  return currentPolicy.record.eventKey;
 }
 
 async function verifyTenantSubscriptionLifecycle(pool, foundation) {
@@ -4245,17 +4387,31 @@ async function verifyPostgresHttpRuntime(connectionString) {
       startDate: "2026-08-17",
       endDate: "2026-08-17",
     });
-    assert.equal(body.data.snapshot.campaigns.total, 1);
-    assert.equal(body.data.snapshot.messages.total, 1);
-    assert.equal(body.data.snapshot.conversations.active, 1);
-    assert.equal(body.data.snapshot.bot.total, 1);
-    assert.equal(body.data.snapshot.ai.totalTurns, 1);
-    assert.equal(body.data.snapshot.aiUsage[0]?.requestCount, 1);
+    assert.equal(body.data.campaigns.total, 1);
+    assert.equal(body.data.messages.total, 1);
+    assert.equal(body.data.conversations.active, 1);
+    assert.equal(body.data.bot.total, 1);
+    assert.equal(body.data.ai.totalTurns, 1);
+    assert.equal(body.data.aiUsage[0]?.requestCount, 1);
     assert.doesNotMatch(
       JSON.stringify(body),
       /tenantId|externalUserId|driver-integration-owner/,
     );
 
+    const mutationPayload = Object.freeze({
+      phoneNumber: "+972501234580",
+      firstName: "Runtime",
+      lastName: null,
+      email: null,
+      company: "Connect",
+      submissionOccurredAt:
+        "2026-08-17T10:30:00.000Z",
+    });
+    const mutationIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "contacts.save",
+        mutationPayload,
+      );
     const mutationResponse = await runtime.handler.handle(
       new Request(
         new URL(
@@ -4273,14 +4429,8 @@ async function verifyPostgresHttpRuntime(connectionString) {
             contractVersion: RAILWAY_API_CONTRACT_VERSION,
             operation: "contacts.save",
             requestKind: "mutation",
-            idempotencyKey: `connect_idempotency_v1_${"9".repeat(64)}`,
-            payload: {
-              phoneNumber: "+972501234580",
-              firstName: "Runtime",
-              lastName: null,
-              email: null,
-              company: "Connect",
-            },
+            idempotencyKey: mutationIdempotencyKey,
+            payload: mutationPayload,
           }),
         },
       ),
@@ -4689,7 +4839,8 @@ export async function verifyNodePostgresIntegration(
       await verifyApiMutationRateLimit(pool, foundation);
       await verifyPostgresHttpRuntime(checkedConnectionString);
       await verifyConversationLifecycle(pool, foundation, tenantId);
-      await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
+      const botPolicyEventKey =
+        await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
       const sourceKey = await verifyKnowledgeLifecycle(
         pool,
         foundation,
@@ -4709,7 +4860,7 @@ export async function verifyNodePostgresIntegration(
         pool,
         foundation,
         tenantId,
-        whatsappPolicyEventKey,
+        botPolicyEventKey,
       );
       await verifyTenantSubscriptionLifecycle(pool, foundation);
       const provisionedTenantId =

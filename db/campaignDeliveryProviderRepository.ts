@@ -99,13 +99,10 @@ const APPLY_PROVIDER_STATUS_SQL = `
     terminal_settled_at = CASE
       WHEN terminal_outcome IS NULL
         AND ?6 IS NOT NULL
-      THEN ?5
+      THEN max(updated_at, ?7)
       ELSE terminal_settled_at
     END,
-    updated_at = CASE
-      WHEN updated_at < ?5 THEN ?5
-      ELSE updated_at
-    END
+    updated_at = max(updated_at, ?7)
   WHERE tenant_id = ?1
     AND provider_message_id = ?2
     AND last_status_event_key IS NOT ?4
@@ -192,6 +189,7 @@ export interface ApplyCampaignProviderStatus {
   status: CampaignProviderWebhookStatus;
   statusEventKey: string;
   statusEventAt: string;
+  reconciledAt: string;
 }
 
 export interface CampaignRateLimitSettlementInstruction {
@@ -570,6 +568,10 @@ export function createCampaignDeliveryProviderRepository(
       );
       const intendedTerminal =
         terminalOutcomeFor(status);
+      const reconciledAt = requireTimestamp(
+        input.reconciledAt,
+        "reconciledAt",
+      );
       const updateResult = await database
         .prepare(APPLY_PROVIDER_STATUS_SQL)
         .bind(
@@ -579,6 +581,7 @@ export function createCampaignDeliveryProviderRepository(
           statusEventKey,
           statusEventAt,
           intendedTerminal,
+          reconciledAt,
         )
         .run();
 

@@ -417,6 +417,25 @@ export const POSTGRES_MIGRATION_PARITY_REGISTRY = Object.freeze([
     ],
     "Meta 131047 rejections are bound immutably to one service-reply reservation, settlement, delivery claim and local service window in both databases.",
   ),
+  covered(
+    "0042_bot_reply_provider_clock_domains.sql",
+    ["0045_bot_reply_provider_clock_domains.sql"],
+    [
+      target(
+        "0045_bot_reply_provider_clock_domains.sql",
+        "trusted local reconciliation and settlement time",
+      ),
+      target(
+        "0045_bot_reply_provider_clock_domains.sql",
+        "NEW.terminal_settled_at IS DISTINCT FROM NEW.updated_at",
+      ),
+      target(
+        "0045_bot_reply_provider_clock_domains.sql",
+        "guard_campaign_delivery_provider_link_update",
+      ),
+    ],
+    "Raw Meta provider occurrence orders Bot and Campaign webhook events, while a separate trusted local reconciliation time settles each reservation in both databases.",
+  ),
 ]);
 
 export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([

@@ -188,6 +188,65 @@ test("resumes a compiled button menu at its evidenced awaiting block", async () 
   ]);
 });
 
+test("routes an interactive button by its domain option key instead of trusting its title", async () => {
+  const compiled =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב לפי מזהה כפתור",
+        keywords: ["עזרה"],
+        matchMode: "exact",
+        introTexts: ["בחרו מחלקה."],
+        buttonText: "באיזו מחלקה לבחור?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "נעביר למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "נעביר לשירות.",
+          },
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+  assert.equal(compiled.success, true);
+  const prompt = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(prompt.outcome, "awaiting-input");
+  const buttonReply = prompt.replies.find(
+    (reply) => reply.kind === "buttons",
+  );
+  assert.ok(buttonReply);
+
+  const selection = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "כותרת לא תואמת",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        prompt.awaitingBlockKey,
+      selectedOptionKey:
+        buttonReply.options[1].optionKey,
+    },
+  );
+
+  assert.equal(selection.outcome, "completed");
+  assert.deepEqual(selection.replies, [
+    {
+      kind: "text",
+      text: "נעביר לשירות.",
+    },
+  ]);
+});
+
 test("resumes two sequential button questions from their exact awaiting blocks", () => {
   const definition = {
     name: "בירור דו שלבי",
@@ -734,6 +793,17 @@ test("rejects invalid definitions and unbounded turn input", () => {
       executeBotFlowTurn(definition, {
         lastInboundText: "a".repeat(4_097),
         conversationStatus: "new",
+      }),
+    (error) =>
+      error instanceof BotFlowRuntimeError &&
+      error.code === "INVALID_INPUT",
+  );
+  assert.throws(
+    () =>
+      executeBotFlowTurn(definition, {
+        lastInboundText: "סיום",
+        conversationStatus: "new",
+        selectedOptionKey: "provider-option-id",
       }),
     (error) =>
       error instanceof BotFlowRuntimeError &&

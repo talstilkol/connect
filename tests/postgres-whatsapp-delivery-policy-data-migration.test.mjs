@@ -533,9 +533,10 @@ test("enforces provider-link timing states reachable through runtime guards",
       terminal_settled_at: null,
       updated_at: thirdReservedAt,
     });
-    requireInvalidProviderRow(
-      earlyBotEvent,
-      "bot_reply_delivery_provider_links",
+    assert.doesNotThrow(
+      () => createPostgresWhatsappDeliveryPolicyDataSnapshot(
+        earlyBotEvent,
+      ),
     );
 
     const staleBotProjection = rawTables();
@@ -607,10 +608,17 @@ test("rolls back when bot acceptance is outside its reservation window",
       proof,
       /link\.accepted_at > reservation\.reservation_expires_at/,
     );
-    assert.match(proof, /link\.last_status_event_at < link\.accepted_at/);
+    assert.doesNotMatch(
+      proof,
+      /link\.last_status_event_at < link\.accepted_at/,
+    );
     assert.match(
       proof,
-      /link\.updated_at IS DISTINCT FROM link\.last_status_event_at/,
+      /link\.terminal_settled_at < link\.accepted_at/,
+    );
+    assert.match(
+      proof,
+      /link\.terminal_settled_at > link\.updated_at/,
     );
   });
 

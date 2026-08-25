@@ -24,6 +24,8 @@ const CONVERSATION_KEY_PATTERN =
   /^conversation_v1_[0-9a-f]{64}$/;
 const MESSAGE_KEY_PATTERN =
   /^message_v1_[0-9a-f]{64}$/;
+const BOT_OPTION_KEY_PATTERN =
+  /^bot_option_v1_[0-9a-f]{64}$/;
 
 export type BotRuntimeServiceErrorCode =
   | "INVALID_INPUT"
@@ -86,6 +88,8 @@ export interface BotRuntimeService {
     conversationKey: string,
     inboundMessageKey: string,
     lastInboundText: string | null,
+    selectedOptionKey?: string | null,
+    replyToProviderMessageId?: string | null,
   ): Promise<ProcessBotRuntimeResult>;
 }
 
@@ -100,6 +104,8 @@ function assertInput(
   conversationKey: string,
   inboundMessageKey: string,
   lastInboundText: string | null,
+  selectedOptionKey: string | null,
+  replyToProviderMessageId: string | null,
 ): void {
   if (
     !Number.isSafeInteger(tenantId) ||
@@ -114,7 +120,20 @@ function assertInput(
       (typeof lastInboundText !== "string" ||
         lastInboundText.trim().length ===
           0 ||
-        lastInboundText.length > 4_096))
+        lastInboundText.length > 4_096)) ||
+    (selectedOptionKey !== null &&
+      (typeof selectedOptionKey !== "string" ||
+        !BOT_OPTION_KEY_PATTERN.test(
+          selectedOptionKey,
+        ))) ||
+    (replyToProviderMessageId !== null &&
+      (typeof replyToProviderMessageId !== "string" ||
+        replyToProviderMessageId.trim() !==
+          replyToProviderMessageId ||
+        replyToProviderMessageId.length === 0 ||
+        replyToProviderMessageId.length > 255)) ||
+    ((selectedOptionKey === null) !==
+      (replyToProviderMessageId === null))
   ) {
     throw serviceError("INVALID_INPUT");
   }
@@ -231,12 +250,16 @@ export function createBotRuntimeService(
       conversationKey,
       inboundMessageKey,
       lastInboundText,
+      selectedOptionKey = null,
+      replyToProviderMessageId = null,
     ) {
       assertInput(
         tenantId,
         conversationKey,
         inboundMessageKey,
         lastInboundText,
+        selectedOptionKey,
+        replyToProviderMessageId,
       );
 
       let conversation:
@@ -353,6 +376,7 @@ export function createBotRuntimeService(
             tenantId,
             conversationKey,
             inboundMessageKey,
+            replyToProviderMessageId,
           );
       } catch {
         throw serviceError(
@@ -396,6 +420,10 @@ export function createBotRuntimeService(
             conversationStatus:
               conversation.status,
             resumeFromBlockKey,
+            selectedOptionKey:
+              resumeFromBlockKey === null
+                ? null
+                : selectedOptionKey,
           },
         );
       } catch (error) {

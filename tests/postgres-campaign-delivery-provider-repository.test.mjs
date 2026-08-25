@@ -12,6 +12,7 @@ const reservationKey =
 const providerMessageId = "wamid.campaign-provider-17";
 const acceptedAt = "2026-08-19T10:00:01.000Z";
 const deliveredAt = "2026-08-19T10:00:03.000Z";
+const reconciledAt = "2026-08-19T10:00:05.000Z";
 
 function result(rows, rowCount = rows.length) {
   return { rows, rowCount };
@@ -81,6 +82,7 @@ function providerStatus(overrides = {}) {
     status: "delivered",
     statusEventKey: "c".repeat(64),
     statusEventAt: deliveredAt,
+    reconciledAt,
     ...overrides,
   };
 }
@@ -91,8 +93,8 @@ function deliveredRow(overrides = {}) {
     lastStatusEventKey: "c".repeat(64),
     lastStatusEventAt: new Date(deliveredAt),
     terminalOutcome: "delivered",
-    terminalSettledAt: new Date(deliveredAt),
-    updatedAt: new Date(deliveredAt),
+    terminalSettledAt: new Date(reconciledAt),
+    updatedAt: new Date(reconciledAt),
     recipientStatus: "delivered",
     ...overrides,
   });
@@ -154,7 +156,7 @@ test("applies a terminal event and returns its exact settlement", async () => {
   assert.deepEqual(saved.settlement, {
     reservationKey,
     outcome: "delivered",
-    settledAt: deliveredAt,
+    settledAt: reconciledAt,
   });
   assert.deepEqual(database.calls.map(({ sql }) => sql), [
     postgresCampaignDeliveryProviderSql.findByProviderMessageForUpdate,
@@ -168,6 +170,7 @@ test("applies a terminal event and returns its exact settlement", async () => {
     "c".repeat(64),
     deliveredAt,
     "delivered",
+    reconciledAt,
   ]);
   database.assertConsumed();
 });

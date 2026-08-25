@@ -14,6 +14,9 @@ const messageKey = `message_v1_${"b".repeat(64)}`;
 const providerMessageId = "wamid.inbound-1";
 const occurredAt = "2026-08-17T08:00:00.000Z";
 const createdAt = new Date(occurredAt);
+const selectedBotOptionKey = `bot_option_v1_${"e".repeat(64)}`;
+const subjectDeliveryKey = `bot_reply_delivery_v1_${"f".repeat(64)}`;
+const replyToProviderMessageId = "wamid.bot-buttons-1";
 
 function messageRow(overrides = {}) {
   return {
@@ -185,8 +188,87 @@ test("records a new inbound message atomically and advances unread state once", 
   fixture.transactions.assertConsumed();
 });
 
+test("records an inbound button reply with exact accepted-delivery provenance", async () => {
+  const eventRow = {
+    messageKey,
+    tenantId: "7",
+    selectedBotOptionKey,
+    subjectDeliveryKey,
+    occurredAt: createdAt,
+    replyToProviderMessageId,
+  };
+  const fixture = repositoryFixture([
+    { rows: [{ conversationKey }], rowCount: 1 },
+    { rows: [{ conversationKey }], rowCount: 1 },
+    {
+      rows: [messageRow({
+        contentKind: "interactive",
+        textContent: null,
+      })],
+      rowCount: 1,
+    },
+    { rows: [eventRow], rowCount: 1 },
+  ]);
+
+  const result = await fixture.repository.recordInboundMessage(
+    inboundInput({
+      contentKind: "interactive",
+      textContent: null,
+      selectedBotOptionKey,
+      replyToProviderMessageId,
+    }),
+  );
+
+  assert.equal(result.outcome, "created");
+  assert.deepEqual(
+    fixture.transactions.calls[3].parameters,
+    [
+      messageKey,
+      7,
+      selectedBotOptionKey,
+      replyToProviderMessageId,
+      occurredAt,
+    ],
+  );
+  assert.match(
+    fixture.transactions.calls[3].sql,
+    /FROM bot_reply_delivery_provider_links/,
+  );
+  fixture.transactions.assertConsumed();
+});
+
+test("rolls back a button reply without accepted-delivery provenance", async () => {
+  const fixture = repositoryFixture([
+    { rows: [{ conversationKey }], rowCount: 1 },
+    { rows: [{ conversationKey }], rowCount: 1 },
+    {
+      rows: [messageRow({
+        contentKind: "interactive",
+        textContent: null,
+      })],
+      rowCount: 1,
+    },
+    { rows: [], rowCount: 0 },
+    { rows: [], rowCount: 0 },
+  ]);
+
+  await assert.rejects(
+    fixture.repository.recordInboundMessage(
+      inboundInput({
+        contentKind: "interactive",
+        textContent: null,
+        selectedBotOptionKey,
+        replyToProviderMessageId,
+      }),
+    ),
+    (error) => error instanceof MessageIdentityConflictError,
+  );
+  fixture.transactions.assertConsumed();
+});
+
 test("returns an exact duplicate without a second unread increment", async () => {
   const fixture = repositoryFixture([
+    { rows: [], rowCount: 0 },
     { rows: [], rowCount: 0 },
     { rows: [], rowCount: 0 },
     { rows: [], rowCount: 0 },
@@ -203,8 +285,39 @@ test("returns an exact duplicate without a second unread increment", async () =>
   fixture.transactions.assertConsumed();
 });
 
+test("rejects a duplicate that omits stored button-reply provenance", async () => {
+  const fixture = repositoryFixture([
+    { rows: [], rowCount: 0 },
+    { rows: [], rowCount: 0 },
+    { rows: [], rowCount: 0 },
+    {
+      rows: [{
+        messageKey,
+        tenantId: "7",
+        selectedBotOptionKey,
+        subjectDeliveryKey,
+        occurredAt: createdAt,
+        replyToProviderMessageId,
+      }],
+      rowCount: 1,
+    },
+  ]);
+
+  await assert.rejects(
+    fixture.repository.recordInboundMessage(
+      inboundInput({
+        contentKind: "interactive",
+        textContent: null,
+      }),
+    ),
+    (error) => error instanceof MessageIdentityConflictError,
+  );
+  fixture.transactions.assertConsumed();
+});
+
 test("rejects a provider identity conflict inside the transaction", async () => {
   const fixture = repositoryFixture([
+    { rows: [], rowCount: 0 },
     { rows: [], rowCount: 0 },
     { rows: [], rowCount: 0 },
     { rows: [], rowCount: 0 },

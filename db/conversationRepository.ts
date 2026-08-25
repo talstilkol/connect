@@ -313,6 +313,55 @@ const INSERT_INBOUND_MESSAGE_SQL = `
     ${MESSAGE_COLUMNS_SQL}
 `;
 
+const INSERT_INBOUND_BUTTON_REPLY_EVENT_SQL = `
+  INSERT INTO inbound_button_reply_events (
+    message_key,
+    tenant_id,
+    selected_bot_option_key,
+    subject_delivery_key,
+    occurred_at,
+    created_at
+  )
+  VALUES (
+    ?1,
+    ?2,
+    ?3,
+    (
+      SELECT delivery_key
+      FROM bot_reply_delivery_provider_links
+      WHERE tenant_id = ?2
+        AND provider_message_id = ?4
+      LIMIT 1
+    ),
+    ?5,
+    ?5
+  )
+  ON CONFLICT (message_key) DO NOTHING
+  RETURNING
+    message_key AS messageKey,
+    tenant_id AS tenantId,
+    selected_bot_option_key AS selectedBotOptionKey,
+    subject_delivery_key AS subjectDeliveryKey,
+    occurred_at AS occurredAt
+`;
+
+const SELECT_INBOUND_BUTTON_REPLY_EVENT_SQL = `
+  SELECT
+    event.message_key AS messageKey,
+    event.tenant_id AS tenantId,
+    event.selected_bot_option_key AS selectedBotOptionKey,
+    event.subject_delivery_key AS subjectDeliveryKey,
+    event.occurred_at AS occurredAt,
+    provider_link.provider_message_id AS replyToProviderMessageId
+  FROM inbound_button_reply_events AS event
+  INNER JOIN bot_reply_delivery_provider_links AS provider_link
+    ON provider_link.tenant_id = event.tenant_id
+    AND provider_link.delivery_key = event.subject_delivery_key
+  WHERE event.tenant_id = ?1
+    AND event.message_key = ?2
+  LIMIT 1
+`;
+
 const APPLY_DELIVERY_STATUS_SQL = `
   UPDATE messages
   SET
@@ -384,6 +433,15 @@ interface MessageRow {
   updatedAt: string;
 }
 
+interface InboundButtonReplyEventRow {
+  messageKey: string;
+  tenantId: number;
+  selectedBotOptionKey: string;
+  subjectDeliveryKey: string;
+  occurredAt: string;
+  replyToProviderMessageId?: string;
+}
+
 interface InboxConversationRow {
   conversationKey: string;
   tenantId: number;
@@ -429,6 +487,8 @@ export interface RecordInboundMessageInput
   tenantId: number;
   conversationKey: string;
   messageKey: string;
+  selectedBotOptionKey?: string | null;
+  replyToProviderMessageId?: string | null;
 }
 
 export type RecordInboundMessageResult = {
@@ -935,7 +995,7 @@ function parseInboxConversationRow(
 }
 
 function assertBatchSucceeded(
-  results: readonly D1Result<MessageRow>[],
+  results: readonly D1Result<unknown>[],
   expectedLength: number,
 ): void {
   if (
@@ -951,6 +1011,65 @@ function assertBatchSucceeded(
         "D1 conversation batch failed",
     );
   }
+}
+
+export interface InboundButtonReplyProvenance {
+  selectedBotOptionKey: string;
+  replyToProviderMessageId: string;
+}
+
+const botOptionKeyPattern = /^bot_option_v1_[0-9a-f]{64}$/;
+
+export function normalizeInboundButtonReplyProvenance(
+  input: RecordInboundMessageInput,
+): InboundButtonReplyProvenance | null {
+  const selectedBotOptionKey =
+    input.selectedBotOptionKey ?? null;
+  const replyToProviderMessageId =
+    input.replyToProviderMessageId ?? null;
+
+  if (
+    (selectedBotOptionKey === null) !==
+      (replyToProviderMessageId === null) ||
+    (selectedBotOptionKey !== null &&
+      !botOptionKeyPattern.test(selectedBotOptionKey)) ||
+    (replyToProviderMessageId !== null &&
+      (replyToProviderMessageId.trim() !==
+        replyToProviderMessageId ||
+        replyToProviderMessageId.length === 0 ||
+        replyToProviderMessageId.length > 255)) ||
+    (selectedBotOptionKey !== null &&
+      input.contentKind !== "interactive")
+  ) {
+    throw new Error(
+      "inbound button reply provenance is invalid",
+    );
+  }
+
+  return selectedBotOptionKey === null ||
+    replyToProviderMessageId === null
+    ? null
+    : {
+        selectedBotOptionKey,
+        replyToProviderMessageId,
+      };
+}
+
+function isSameInboundButtonReplyProvenance(
+  row: InboundButtonReplyEventRow | null,
+  input: RecordInboundMessageInput,
+  provenance: InboundButtonReplyProvenance | null,
+): boolean {
+  return provenance === null
+    ? row === null
+    : row !== null &&
+        row.messageKey === input.messageKey &&
+        row.tenantId === input.tenantId &&
+        row.selectedBotOptionKey ===
+          provenance.selectedBotOptionKey &&
+        row.replyToProviderMessageId ===
+          provenance.replyToProviderMessageId &&
+        row.occurredAt === input.occurredAt;
 }
 
 function isSameInboundIdentity(
@@ -985,6 +1104,15 @@ export function createConversationRepository(
 
     return row ? parseMessageRow(row) : null;
   };
+
+  const findButtonReplyEvent = async (
+    tenantId: number,
+    messageKey: string,
+  ): Promise<InboundButtonReplyEventRow | null> =>
+    database
+      .prepare(SELECT_INBOUND_BUTTON_REPLY_EVENT_SQL)
+      .bind(tenantId, messageKey)
+      .first<InboundButtonReplyEventRow>();
 
   const listFilteredByTenant: ConversationRepository["listFilteredByTenant"] =
     async (tenantId, filter, limit) => {
@@ -1073,7 +1201,10 @@ export function createConversationRepository(
         throw new Error("inbound message is invalid");
       }
 
-      const results = await database.batch<MessageRow>([
+      const buttonReplyProvenance =
+        normalizeInboundButtonReplyProvenance(input);
+
+      const statements = [
         database
           .prepare(INSERT_CONVERSATION_SQL)
           .bind(
@@ -1101,16 +1232,55 @@ export function createConversationRepository(
             validation.value.textContent,
             validation.value.occurredAt,
           ),
-      ]);
+      ];
 
-      assertBatchSucceeded(results, 3);
+      if (buttonReplyProvenance !== null) {
+        statements.push(
+          database
+            .prepare(
+              INSERT_INBOUND_BUTTON_REPLY_EVENT_SQL,
+            )
+            .bind(
+              input.messageKey,
+              input.tenantId,
+              buttonReplyProvenance.selectedBotOptionKey,
+              buttonReplyProvenance.replyToProviderMessageId,
+              validation.value.occurredAt,
+            ),
+        );
+      }
+
+      const results = await database.batch<
+        MessageRow | InboundButtonReplyEventRow
+      >(statements);
+
+      assertBatchSucceeded(results, statements.length);
 
       const insertedRow = results[2].results?.[0];
 
       if (insertedRow) {
+        const buttonReplyEvent = buttonReplyProvenance
+          ? await findButtonReplyEvent(
+              input.tenantId,
+              input.messageKey,
+            )
+          : null;
+
+        if (
+          !isSameInboundButtonReplyProvenance(
+            buttonReplyEvent,
+            input,
+            buttonReplyProvenance,
+          )
+        ) {
+          throw new MessageIdentityConflictError();
+        }
+
         return {
           outcome: "created",
-          message: parseMessageRow(insertedRow),
+          message: parseMessageRow(
+            insertedRow as MessageRow,
+          ),
         };
       }
 
@@ -1130,7 +1300,15 @@ export function createConversationRepository(
         !isSameInboundIdentity(existing, {
           ...input,
           ...validation.value,
-        })
+        }) ||
+        !isSameInboundButtonReplyProvenance(
+          await findButtonReplyEvent(
+            input.tenantId,
+            input.messageKey,
+          ),
+          input,
+          buttonReplyProvenance,
+        )
       ) {
         throw new MessageIdentityConflictError();
       }

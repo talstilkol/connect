@@ -64,6 +64,7 @@ const releaseEvidenceSchema = migrationSources[40];
 const productionReadinessV2EvidenceSchema = migrationSources[41];
 const botReplyProviderOutcomeRequestFenceSchema = migrationSources[42];
 const botReplyReleaseEvidenceAtomicPublishSchema = migrationSources[44];
+const botReplyProviderClockDomainsSchema = migrationSources[45];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -112,14 +113,38 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0042_bot_reply_provider_outcome_request_fence.sql",
     "0043_bot_reply_staging_release_evidence_operator_audit.sql",
     "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
+    "0045_bot_reply_provider_clock_domains.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 45,
+      migrationCount: 46,
       findings: [],
     },
+  );
+});
+
+test("separates raw Meta occurrence from local bot settlement time", () => {
+  assert.match(
+    botReplyProviderClockDomainsSchema,
+    /CREATE OR REPLACE FUNCTION public\.guard_bot_reply_provider_link_update\(\)/,
+  );
+  assert.match(
+    botReplyProviderClockDomainsSchema,
+    /OLD\.last_status_event_at[\s\S]*NEW\.last_status_event_at < OLD\.last_status_event_at/,
+  );
+  assert.match(
+    botReplyProviderClockDomainsSchema,
+    /NEW\.terminal_settled_at IS DISTINCT FROM NEW\.updated_at/,
+  );
+  assert.match(
+    botReplyProviderClockDomainsSchema,
+    /CREATE OR REPLACE FUNCTION public\.guard_campaign_delivery_provider_link_update\(\)/,
+  );
+  assert.doesNotMatch(
+    botReplyProviderClockDomainsSchema,
+    /NEW\.last_status_event_at < NEW\.accepted_at/,
   );
 });
 

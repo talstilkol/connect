@@ -19,6 +19,8 @@ import {
 const INBOUND_TEXT_MAXIMUM_LENGTH = 4_096;
 const BOT_FLOW_BLOCK_KEY_PATTERN =
   /^bot_block_v1_[0-9a-f]{64}$/;
+const BOT_FLOW_OPTION_KEY_PATTERN =
+  /^bot_option_v1_[0-9a-f]{64}$/;
 const UNSAFE_CONTROL_CHARACTERS =
   /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 
@@ -75,6 +77,7 @@ export interface BotFlowTurnInput {
   lastInboundText: string | null;
   conversationStatus: ConversationStatus;
   resumeFromBlockKey?: string | null;
+  selectedOptionKey?: string | null;
 }
 
 function normalizeComparableText(
@@ -104,9 +107,22 @@ function parseTurnInput(
       record,
       "resumeFromBlockKey",
     );
+  const hasSelectedOptionKey =
+    Object.hasOwn(
+      record,
+      "selectedOptionKey",
+    );
+  const allowedKeys = new Set([
+    "lastInboundText",
+    "conversationStatus",
+    "resumeFromBlockKey",
+    "selectedOptionKey",
+  ]);
 
   if (
-    (keys.length !== 2 && keys.length !== 3) ||
+    keys.length < 2 ||
+    keys.length > 4 ||
+    keys.some((key) => !allowedKeys.has(key)) ||
     !Object.hasOwn(record, "lastInboundText") ||
     !Object.hasOwn(
       record,
@@ -116,14 +132,19 @@ function parseTurnInput(
       (status) =>
         status === record.conversationStatus,
     ) ||
-    (keys.length === 3 &&
-      !hasResumeFromBlockKey) ||
     (hasResumeFromBlockKey &&
       record.resumeFromBlockKey !== null &&
       (typeof record.resumeFromBlockKey !==
         "string" ||
         !BOT_FLOW_BLOCK_KEY_PATTERN.test(
           record.resumeFromBlockKey,
+        ))) ||
+    (hasSelectedOptionKey &&
+      record.selectedOptionKey !== null &&
+      (typeof record.selectedOptionKey !==
+        "string" ||
+        !BOT_FLOW_OPTION_KEY_PATTERN.test(
+          record.selectedOptionKey,
         ))) ||
     (record.lastInboundText !== null &&
       (typeof record.lastInboundText !==
@@ -152,6 +173,14 @@ function parseTurnInput(
       ? {
           resumeFromBlockKey:
             record.resumeFromBlockKey as
+              | string
+              | null,
+        }
+      : {}),
+    ...(hasSelectedOptionKey
+      ? {
+          selectedOptionKey:
+            record.selectedOptionKey as
               | string
               | null,
         }
@@ -276,15 +305,22 @@ export function executeBotFlowTurn(
 
     if (block.type === "buttons") {
       const matchingOption =
-        input.lastInboundText === null
-          ? undefined
-          : block.options.find((option) =>
-              textMatches(
-                input.lastInboundText,
-                option.label,
-                "equals",
-              ),
-            );
+        input.selectedOptionKey !== undefined &&
+        input.selectedOptionKey !== null
+          ? block.options.find(
+              (option) =>
+                option.optionKey ===
+                input.selectedOptionKey,
+            )
+          : input.lastInboundText === null
+            ? undefined
+            : block.options.find((option) =>
+                textMatches(
+                  input.lastInboundText,
+                  option.label,
+                  "equals",
+                ),
+              );
 
       if (matchingOption) {
         currentBlockKey =

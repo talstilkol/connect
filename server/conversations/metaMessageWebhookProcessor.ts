@@ -27,9 +27,17 @@ import type {
 import type {
   CampaignDeliveryStatusReconciler,
 } from "../campaigns/campaignDeliveryStatusReconciler.ts";
+import type {
+  BotReplyDeliveryStatusReconciler,
+} from "../bot/botReplyDeliveryStatusReconciler.ts";
 
 const MAXIMUM_ITEMS_PER_EVENT = 100;
 const MAXIMUM_MESSAGE_TEXT_LENGTH = 16_384;
+const MAXIMUM_REPLY_BUTTON_TITLE_LENGTH = 20;
+const BOT_OPTION_KEY_PATTERN =
+  /^bot_option_v1_[0-9a-f]{64}$/;
+const UNSAFE_CONTROL_CHARACTERS =
+  /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 
 const knownContentKinds = new Set<MessageContentKind>([
   "text",
@@ -52,12 +60,15 @@ export interface ParsedMetaInboundMessage {
   providerMessageId: string;
   contentKind: MessageContentKind;
   textContent: string | null;
+  selectedBotOptionKey: string | null;
+  replyToProviderMessageId: string | null;
   occurredAt: string;
 }
 
 export interface ParsedMetaDeliveryStatus {
   providerMessageId: string;
   status: Exclude<MessageStatus, "received">;
+  providerErrorCode: number | null;
   statusEventAt: string;
   statusIndex: number;
 }
@@ -144,6 +155,8 @@ function readContent(
 ): {
   contentKind: MessageContentKind;
   textContent: string | null;
+  selectedBotOptionKey: string | null;
+  replyToProviderMessageId: string | null;
 } {
   if (
     typeof message.type !== "string" ||
@@ -167,6 +180,60 @@ function readContent(
     return {
       contentKind: "text",
       textContent: message.text.body,
+      selectedBotOptionKey: null,
+      replyToProviderMessageId: null,
+    };
+  }
+
+  if (message.type === "interactive") {
+    if (
+      !isRecord(message.interactive) ||
+      typeof message.interactive.type !== "string" ||
+      message.interactive.type.length === 0 ||
+      message.interactive.type.length > 100
+    ) {
+      return processorError("INVALID_MESSAGE_CONTENT");
+    }
+
+    if (
+      message.interactive.type !== "button_reply"
+    ) {
+      return {
+        contentKind: "interactive",
+        textContent: null,
+        selectedBotOptionKey: null,
+        replyToProviderMessageId: null,
+      };
+    }
+
+    const buttonReply =
+      message.interactive.button_reply;
+
+    if (
+      !isRecord(buttonReply) ||
+      !isRecord(message.context) ||
+      typeof buttonReply.id !== "string" ||
+      !BOT_OPTION_KEY_PATTERN.test(buttonReply.id) ||
+      typeof buttonReply.title !== "string" ||
+      buttonReply.title.trim() !== buttonReply.title ||
+      buttonReply.title.length === 0 ||
+      buttonReply.title.length >
+        MAXIMUM_REPLY_BUTTON_TITLE_LENGTH ||
+      UNSAFE_CONTROL_CHARACTERS.test(
+        buttonReply.title,
+      )
+    ) {
+      return processorError("INVALID_MESSAGE_CONTENT");
+    }
+
+    return {
+      contentKind: "interactive",
+      textContent: buttonReply.title,
+      selectedBotOptionKey: buttonReply.id,
+      replyToProviderMessageId:
+        readProviderMessageId(
+          message.context.id,
+        ),
     };
   }
 
@@ -179,6 +246,8 @@ function readContent(
   return {
     contentKind,
     textContent: null,
+    selectedBotOptionKey: null,
+    replyToProviderMessageId: null,
   };
 }
 
@@ -238,6 +307,58 @@ function readDeliveryStatus(
   return value as Exclude<MessageStatus, "received">;
 }
 
+function readDeliveryFailureCode(
+  candidate: Readonly<Record<string, unknown>>,
+  status: Exclude<MessageStatus, "received">,
+): number | null {
+  if (status !== "failed") {
+    if (candidate.errors !== undefined) {
+      return processorError(
+        "INVALID_MESSAGE_STATUS_ERRORS",
+      );
+    }
+
+    return null;
+  }
+
+  if (
+    !Array.isArray(candidate.errors) ||
+    candidate.errors.length === 0 ||
+    candidate.errors.length > 10
+  ) {
+    return processorError(
+      "INVALID_MESSAGE_STATUS_ERRORS",
+    );
+  }
+
+  const codes = candidate.errors.map((error) => {
+    if (
+      !isRecord(error) ||
+      !Number.isSafeInteger(error.code) ||
+      Number(error.code) < 1 ||
+      Number(error.code) > 999_999
+    ) {
+      return processorError(
+        "INVALID_MESSAGE_STATUS_ERRORS",
+      );
+    }
+
+    return Number(error.code);
+  });
+  const firstCode = codes[0];
+
+  if (
+    firstCode === undefined ||
+    codes.some((code) => code !== firstCode)
+  ) {
+    return processorError(
+      "AMBIGUOUS_MESSAGE_STATUS_ERRORS",
+    );
+  }
+
+  return firstCode;
+}
+
 export function parseMetaDeliveryStatusesEvent(
   event: MetaDeliveryStatusesWebhookEvent,
   expectedPhoneNumberId: string,
@@ -253,11 +374,19 @@ export function parseMetaDeliveryStatusesEvent(
       return processorError("INVALID_MESSAGE_STATUS_EVENT");
     }
 
+    const status = readDeliveryStatus(
+      candidate.status,
+    );
+
     return {
       providerMessageId: readProviderMessageId(
         candidate.id,
       ),
-      status: readDeliveryStatus(candidate.status),
+      status,
+      providerErrorCode: readDeliveryFailureCode(
+        candidate,
+        status,
+      ),
       statusEventAt: readProviderTimestamp(
         candidate.timestamp,
       ),
@@ -307,6 +436,8 @@ export function createMetaMessageWebhookEventProcessor(
     InboundAutomationProcessor,
   campaignStatuses?:
     CampaignDeliveryStatusReconciler,
+  botReplyStatuses?:
+    BotReplyDeliveryStatusReconciler,
 ): (
   event:
     | MetaInboundMessagesWebhookEvent
@@ -357,6 +488,10 @@ export function createMetaMessageWebhookEventProcessor(
             conversationKey,
             messageKey,
             ...derived.message,
+            selectedBotOptionKey:
+              parsed.selectedBotOptionKey,
+            replyToProviderMessageId:
+              parsed.replyToProviderMessageId,
           });
         } catch (error) {
           if (error instanceof MessageIdentityConflictError) {
@@ -380,6 +515,12 @@ export function createMetaMessageWebhookEventProcessor(
                 batch.connection.phoneNumberId,
               textContent:
                 parsed.textContent,
+              selectedBotOptionKey:
+                parsed.selectedBotOptionKey,
+              replyToProviderMessageId:
+                parsed.replyToProviderMessageId,
+              inboundMessageOccurredAt:
+                parsed.occurredAt,
             });
           } catch {
             return processorError(
@@ -422,6 +563,9 @@ export function createMetaMessageWebhookEventProcessor(
       let campaignResult: {
         outcome: "not-found" | "reconciled";
       } = { outcome: "not-found" };
+      let botReplyResult: {
+        outcome: "not-found" | "reconciled";
+      } = { outcome: "not-found" };
 
       if (campaignStatuses) {
         try {
@@ -431,6 +575,8 @@ export function createMetaMessageWebhookEventProcessor(
               providerMessageId:
                 parsed.providerMessageId,
               status: parsed.status,
+              providerErrorCode:
+                parsed.providerErrorCode,
               statusEventKey,
               statusEventAt:
                 parsed.statusEventAt,
@@ -442,9 +588,30 @@ export function createMetaMessageWebhookEventProcessor(
         }
       }
 
+      if (botReplyStatuses) {
+        try {
+          botReplyResult =
+            await botReplyStatuses.reconcile({
+              tenantId: batch.tenantId,
+              providerMessageId:
+                parsed.providerMessageId,
+              status: parsed.status,
+              providerErrorCode:
+                parsed.providerErrorCode,
+              statusEventKey,
+              statusEventAt: parsed.statusEventAt,
+            });
+        } catch {
+          return processorError(
+            "BOT_REPLY_STATUS_RECONCILIATION_FAILED",
+          );
+        }
+      }
+
       if (
         result.outcome === "not-found" &&
-        campaignResult.outcome === "not-found"
+        campaignResult.outcome === "not-found" &&
+        botReplyResult.outcome === "not-found"
       ) {
         return processorError(
           "MESSAGE_STATUS_TARGET_NOT_FOUND",

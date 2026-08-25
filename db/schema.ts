@@ -5330,11 +5330,19 @@ export const botReplyDeliveryProviderLinks =
         ) or (
           ${table.providerStatus} in ('delivered', 'read')
           and ${table.terminalOutcome} = 'delivered'
-          and ${table.terminalSettledAt} = ${table.lastStatusEventAt}
+          and length(${table.terminalSettledAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.terminalSettledAt}
+          ) = ${table.terminalSettledAt}
         ) or (
           ${table.providerStatus} = 'failed'
           and ${table.terminalOutcome} = 'provider-failed'
-          and ${table.terminalSettledAt} = ${table.lastStatusEventAt}
+          and length(${table.terminalSettledAt}) = 24
+          and strftime(
+            '%Y-%m-%dT%H:%M:%fZ',
+            ${table.terminalSettledAt}
+          ) = ${table.terminalSettledAt}
         )`,
       ),
       check(

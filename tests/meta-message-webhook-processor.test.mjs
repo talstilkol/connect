@@ -14,6 +14,8 @@ import {
 } from "../server/meta/metaWebhookIngress.ts";
 
 const receiptEventKey = "a".repeat(64);
+const selectedOptionKey =
+  `bot_option_v1_${"b".repeat(64)}`;
 
 function connection() {
   return {
@@ -113,6 +115,8 @@ test("parses bounded inbound text without retaining the provider payload", () =>
       providerMessageId: "wamid.inbound-17",
       contentKind: "text",
       textContent: "שלום, אשמח לקבל פרטים",
+      selectedBotOptionKey: null,
+      replyToProviderMessageId: null,
       occurredAt: new Date(
         1785054600 * 1_000,
       ).toISOString(),
@@ -155,15 +159,85 @@ test("keeps supported media metadata-free and marks unknown content safely", () 
     parsed.map((message) => ({
       contentKind: message.contentKind,
       textContent: message.textContent,
+      selectedBotOptionKey:
+        message.selectedBotOptionKey,
+      replyToProviderMessageId:
+        message.replyToProviderMessageId,
     })),
     [
-      { contentKind: "image", textContent: null },
-      { contentKind: "unsupported", textContent: null },
+      {
+        contentKind: "image",
+        textContent: null,
+        selectedBotOptionKey: null,
+        replyToProviderMessageId: null,
+      },
+      {
+        contentKind: "unsupported",
+        textContent: null,
+        selectedBotOptionKey: null,
+        replyToProviderMessageId: null,
+      },
     ],
   );
   assert.doesNotMatch(
     JSON.stringify(parsed),
     /provider-media-id|private caption|provider_private_data/,
+  );
+});
+
+test("parses an official interactive reply button into its bounded domain option key", () => {
+  const currentEvent = inboundEvent();
+  currentEvent.messages = [
+    {
+      from: "972501234567",
+      id: "wamid.button-17",
+      timestamp: "1785054600",
+      type: "interactive",
+      context: {
+        id: "wamid.button-prompt-16",
+      },
+      interactive: {
+        type: "button_reply",
+        button_reply: {
+          id: selectedOptionKey,
+          title: "שירות",
+        },
+      },
+    },
+  ];
+
+  assert.deepEqual(
+    parseMetaInboundMessagesEvent(
+      currentEvent,
+      "phone-number-id",
+    )[0],
+    {
+      phoneNumber: "+972501234567",
+      providerMessageId: "wamid.button-17",
+      contentKind: "interactive",
+      textContent: "שירות",
+      selectedBotOptionKey:
+        selectedOptionKey,
+      replyToProviderMessageId:
+        "wamid.button-prompt-16",
+      occurredAt: new Date(
+        1785054600 * 1_000,
+      ).toISOString(),
+    },
+  );
+
+  currentEvent.messages[0].interactive
+    .button_reply.id = "provider-controlled-id";
+
+  assert.throws(
+    () =>
+      parseMetaInboundMessagesEvent(
+        currentEvent,
+        "phone-number-id",
+      ),
+    (error) =>
+      error instanceof MetaWebhookProcessorError &&
+      error.safeCode === "INVALID_MESSAGE_CONTENT",
   );
 });
 
@@ -177,12 +251,52 @@ test("parses only the four supported outbound delivery states", () => {
     {
       providerMessageId: "wamid.outbound-17",
       status: "delivered",
+      providerErrorCode: null,
       statusEventAt: new Date(
         1785054660 * 1_000,
       ).toISOString(),
       statusIndex: 0,
     },
   ]);
+
+  const failed = deliveryEvent();
+  failed.statuses = [{
+    ...failed.statuses[0],
+    status: "failed",
+    errors: [{
+      code: 130429,
+      title: "private provider title",
+      message: "private provider message",
+      error_data: {
+        details: "private provider details",
+      },
+    }],
+  }];
+
+  assert.deepEqual(
+    parseMetaDeliveryStatusesEvent(
+      failed,
+      "phone-number-id",
+    )[0],
+    {
+      providerMessageId: "wamid.outbound-17",
+      status: "failed",
+      providerErrorCode: 130429,
+      statusEventAt: new Date(
+        1785054660 * 1_000,
+      ).toISOString(),
+      statusIndex: 0,
+    },
+  );
+  assert.doesNotMatch(
+    JSON.stringify(
+      parseMetaDeliveryStatusesEvent(
+        failed,
+        "phone-number-id",
+      ),
+    ),
+    /private provider/,
+  );
 
   const unsupported = deliveryEvent();
   unsupported.statuses = [
@@ -202,6 +316,53 @@ test("parses only the four supported outbound delivery states", () => {
       error instanceof MetaWebhookProcessorError &&
       error.safeCode === "UNSUPPORTED_MESSAGE_STATUS",
   );
+});
+
+test("fails closed for missing, conflicting, or misplaced status errors", () => {
+  const cases = [
+    {
+      status: "failed",
+    },
+    {
+      status: "delivered",
+      errors: [{ code: 130429 }],
+    },
+    {
+      status: "failed",
+      errors: [
+        { code: 130429 },
+        { code: 131056 },
+      ],
+    },
+    {
+      status: "failed",
+      errors: [{ code: "130429" }],
+    },
+  ];
+
+  for (const value of cases) {
+    const current = deliveryEvent();
+    current.statuses = [{
+      ...current.statuses[0],
+      ...value,
+    }];
+
+    assert.throws(
+      () =>
+        parseMetaDeliveryStatusesEvent(
+          current,
+          "phone-number-id",
+        ),
+      (error) =>
+        error instanceof MetaWebhookProcessorError &&
+        (
+          error.safeCode ===
+            "INVALID_MESSAGE_STATUS_ERRORS" ||
+          error.safeCode ===
+            "AMBIGUOUS_MESSAGE_STATUS_ERRORS"
+        ),
+    );
+  }
 });
 
 test("rejects wrong phone metadata and malformed provider time before storage", () => {
@@ -303,6 +464,8 @@ test("resolves the contact and records deterministic inbound identities", async 
     "messageKey",
     "occurredAt",
     "providerMessageId",
+    "replyToProviderMessageId",
+    "selectedBotOptionKey",
     "tenantId",
     "textContent",
   ]);
@@ -373,6 +536,18 @@ test("runs the bot runtime after durable inbound storage, including an idempoten
   assert.equal(
     calls[2].input.recipientPhoneNumber,
     "+972501234567",
+  );
+  assert.equal(
+    calls[2].input.inboundMessageOccurredAt,
+    new Date(1785054600 * 1_000).toISOString(),
+  );
+  assert.equal(
+    calls[2].input.selectedBotOptionKey,
+    null,
+  );
+  assert.equal(
+    calls[2].input.replyToProviderMessageId,
+    null,
   );
 });
 
@@ -502,6 +677,7 @@ test("reconciles a campaign status when the provider message is not a conversati
   assert.deepEqual(
     Object.keys(campaignWrites[0]).sort(),
     [
+      "providerErrorCode",
       "providerMessageId",
       "status",
       "statusEventAt",
@@ -551,6 +727,94 @@ test("maps campaign reconciliation failure to one bounded webhook retry code", a
       error instanceof MetaWebhookProcessorError &&
       error.safeCode ===
         "CAMPAIGN_STATUS_RECONCILIATION_FAILED" &&
+      !error.message.includes("private"),
+  );
+});
+
+test("reconciles a bot reply status when no conversation or campaign target exists", async () => {
+  const botWrites = [];
+  const processEvent =
+    createMetaMessageWebhookEventProcessor(
+      {
+        async resolveInboundContact() {
+          throw new Error("not used");
+        },
+        async recordInboundMessage() {
+          throw new Error("not used");
+        },
+        async applyDeliveryStatus() {
+          return { outcome: "not-found" };
+        },
+      },
+      undefined,
+      undefined,
+      {
+        async reconcile(input) {
+          botWrites.push(input);
+          return { outcome: "reconciled" };
+        },
+      },
+    );
+
+  await processEvent(
+    deliveryEvent(),
+    batch([deliveryEvent()]),
+  );
+
+  assert.equal(botWrites.length, 1);
+  assert.deepEqual(
+    Object.keys(botWrites[0]).sort(),
+    [
+      "providerErrorCode",
+      "providerMessageId",
+      "status",
+      "statusEventAt",
+      "statusEventKey",
+      "tenantId",
+    ],
+  );
+  assert.equal(
+    botWrites[0].providerMessageId,
+    "wamid.outbound-17",
+  );
+  assert.match(
+    botWrites[0].statusEventKey,
+    /^[0-9a-f]{64}$/,
+  );
+});
+
+test("maps bot reply reconciliation failure to one bounded webhook retry code", async () => {
+  const processEvent =
+    createMetaMessageWebhookEventProcessor(
+      {
+        async resolveInboundContact() {
+          throw new Error("not used");
+        },
+        async recordInboundMessage() {
+          throw new Error("not used");
+        },
+        async applyDeliveryStatus() {
+          return { outcome: "not-found" };
+        },
+      },
+      undefined,
+      undefined,
+      {
+        async reconcile() {
+          throw new Error("private bot settlement failure");
+        },
+      },
+    );
+
+  await assert.rejects(
+    processEvent(
+      deliveryEvent(),
+      batch([deliveryEvent()]),
+    ),
+    (error) =>
+      error instanceof MetaWebhookProcessorError &&
+      error.safeCode ===
+        "BOT_REPLY_STATUS_RECONCILIATION_FAILED" &&
       !error.message.includes("private"),
   );
 });

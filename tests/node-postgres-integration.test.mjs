@@ -105,6 +105,22 @@ test("keeps the real integration proof explicit and outside the default gate", a
     source,
     /0041_production_readiness_release_evidence_v2\.sql/,
   );
+  assert.match(
+    source,
+    /0042_bot_reply_provider_outcome_request_fence\.sql/,
+  );
+  assert.match(
+    source,
+    /0043_bot_reply_staging_release_evidence_operator_audit\.sql/,
+  );
+  assert.match(
+    source,
+    /0044_bot_reply_staging_release_evidence_atomic_publish\.sql/,
+  );
+  assert.match(
+    source,
+    /0045_bot_reply_provider_clock_domains\.sql/,
+  );
   assert.match(source, /verifyFullDataMigrationBundle/);
   assert.match(source, /executePostgresFullDataMigrationCutover/);
   assert.match(source, /target-already-cut-over/);
@@ -138,6 +154,15 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.conversations\.recordInboundMessage/);
   assert.match(source, /foundation\.botFlows\.saveDraft/);
   assert.match(source, /foundation\.botReplyDeliveries\.stage/);
+  assert.match(
+    source,
+    /foundation\.botReplyDeliveries\.claimProviderRequest/,
+  );
+  assert.match(
+    source,
+    /foundation\.whatsappRateLimits\.reserveServiceReply/,
+  );
+  assert.match(source, /senderPhoneNumberId/);
   assert.match(
     source,
     /foundation\.botRuntime[\s\S]*\.findAcceptedButtonContinuation/,

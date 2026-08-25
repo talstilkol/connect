@@ -43,6 +43,7 @@ const acceptedAt = "2026-08-16T10:00:01.000Z";
 const sentAt = "2026-08-16T10:00:02.000Z";
 const deliveredAt = "2026-08-16T10:00:03.000Z";
 const readAt = "2026-08-16T10:00:04.000Z";
+const reconciledAt = "2026-08-16T10:00:10.000Z";
 
 class SqliteD1Statement {
   constructor(statement) {
@@ -319,6 +320,9 @@ async function createFixture() {
       createCampaignDeliveryStatusReconciler(
         deliveries,
         rateLimits,
+        Object.freeze({
+          now: () => new Date(reconciledAt),
+        }),
       ),
   };
 }
@@ -345,6 +349,7 @@ function providerStatus(
     status,
     statusEventAt,
     statusEventKey,
+    reconciledAt,
   };
 }
 
@@ -495,7 +500,7 @@ test("reconciles delivered and read once while rejecting a conflicting terminal 
   assert.deepEqual(applied.settlement, {
     reservationKey,
     outcome: "delivered",
-    settledAt: deliveredAt,
+    settledAt: reconciledAt,
   });
   assert.equal(
     fixture.database.prepare(`
@@ -504,7 +509,7 @@ test("reconciles delivered and read once while rejecting a conflicting terminal 
       WHERE reservation_key = ?1
         AND outcome = 'delivered'
         AND settled_at = ?2
-    `).get(reservationKey, deliveredAt).count,
+    `).get(reservationKey, reconciledAt).count,
     1,
   );
   await fixture.reconciler.reconcile(delivered);
@@ -531,7 +536,7 @@ test("reconciles delivered and read once while rejecting a conflicting terminal 
     },
     {
       outcome: "delivered",
-      settledAt: deliveredAt,
+      settledAt: reconciledAt,
     },
   );
   assert.deepEqual(
@@ -568,6 +573,34 @@ test("reconciles delivered and read once while rejecting a conflicting terminal 
     "delivered",
   );
 
+  fixture.database.close();
+});
+
+test("settles a campaign status with local time despite Meta clock skew", async () => {
+  const fixture = await createFixture();
+  const localAcceptedAt = "2026-08-16T10:00:01.900Z";
+  const providerOccurredAt = "2026-08-16T10:00:01.000Z";
+  const localReconciledAt = "2026-08-16T10:00:02.100Z";
+
+  await fixture.deliveries.recordAccepted(
+    acceptance({ acceptedAt: localAcceptedAt }),
+  );
+  const result = await fixture.deliveries.applyProviderStatus({
+    ...providerStatus(
+      "delivered",
+      providerOccurredAt,
+      "7".repeat(64),
+    ),
+    reconciledAt: localReconciledAt,
+  });
+
+  assert.equal(result.outcome, "applied");
+  assert.equal(result.link.lastStatusEventAt, providerOccurredAt);
+  assert.deepEqual(result.settlement, {
+    reservationKey,
+    outcome: "delivered",
+    settledAt: localReconciledAt,
+  });
   fixture.database.close();
 });
 

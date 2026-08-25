@@ -10,6 +10,7 @@ export interface CampaignDeliveryStatusInput {
   tenantId: number;
   providerMessageId: string;
   status: CampaignProviderWebhookStatus;
+  providerErrorCode: number | null;
   statusEventKey: string;
   statusEventAt: string;
 }
@@ -22,17 +23,48 @@ export interface CampaignDeliveryStatusReconciler {
   }>;
 }
 
+export interface CampaignDeliveryStatusReconcilerClock {
+  now(): Date;
+}
+
+const systemClock: Readonly<CampaignDeliveryStatusReconcilerClock> =
+  Object.freeze({ now: () => new Date() });
+
+function reconciledTimestamp(
+  clock: Readonly<CampaignDeliveryStatusReconcilerClock> = systemClock,
+): string {
+  const value = clock.now();
+  if (
+    !(value instanceof Date) ||
+    !Number.isFinite(value.getTime())
+  ) {
+    throw new Error("Campaign reconciliation clock is invalid");
+  }
+  return value.toISOString();
+}
+
 export function createCampaignDeliveryStatusReconciler(
   deliveries: CampaignDeliveryProviderRepository,
   rateLimits: Pick<
     WhatsappRateLimitRepository,
     "settle"
   >,
+  clock: Readonly<CampaignDeliveryStatusReconcilerClock> = systemClock,
 ): CampaignDeliveryStatusReconciler {
+  if (typeof clock?.now !== "function") {
+    throw new Error("Campaign reconciliation clock is invalid");
+  }
   return {
     async reconcile(input) {
       const result =
-        await deliveries.applyProviderStatus(input);
+        await deliveries.applyProviderStatus({
+          tenantId: input.tenantId,
+          providerMessageId: input.providerMessageId,
+          status: input.status,
+          statusEventKey: input.statusEventKey,
+          statusEventAt: input.statusEventAt,
+          reconciledAt: reconciledTimestamp(clock),
+        });
 
       if (result.outcome === "not-found") {
         return { outcome: "not-found" };

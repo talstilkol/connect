@@ -86,6 +86,10 @@ const SELECT_ACCEPTED_BUTTON_CONTINUATION_SQL = `
       previous_inbound.previousMessageKey
     AND delivery.status = 'accepted'
     AND delivery.accepted_at IS NOT NULL
+    AND (
+      ?4 IS NULL OR
+      delivery.provider_message_id = ?4
+    )
     AND unixepoch(delivery.accepted_at) >=
       unixepoch('now', '-24 hours')
     AND json_extract(delivery.reply_json, '$.kind') =
@@ -159,6 +163,7 @@ export interface BotRuntimeRepository {
     tenantId: number,
     conversationKey: string,
     currentInboundMessageKey: string,
+    replyToProviderMessageId?: string | null,
   ): Promise<FindBotRuntimeContinuationResult>;
   applyHandoff(
     tenantId: number,
@@ -194,6 +199,22 @@ function assertConversationKey(
 function assertMessageKey(value: string): void {
   if (!MESSAGE_KEY_PATTERN.test(value)) {
     throw new Error("messageKey is invalid");
+  }
+}
+
+function assertProviderMessageId(
+  value: string | null,
+): void {
+  if (
+    value !== null &&
+    (typeof value !== "string" ||
+      value.trim() !== value ||
+      value.length === 0 ||
+      value.length > 255)
+  ) {
+    throw new Error(
+      "replyToProviderMessageId is invalid",
+    );
   }
 }
 
@@ -311,10 +332,14 @@ export function createBotRuntimeRepository(
       tenantId,
       conversationKey,
       currentInboundMessageKey,
+      replyToProviderMessageId = null,
     ) {
       assertPositiveInteger(tenantId, "tenantId");
       assertConversationKey(conversationKey);
       assertMessageKey(currentInboundMessageKey);
+      assertProviderMessageId(
+        replyToProviderMessageId,
+      );
 
       const result = await database
         .prepare(
@@ -324,6 +349,7 @@ export function createBotRuntimeRepository(
           tenantId,
           conversationKey,
           currentInboundMessageKey,
+          replyToProviderMessageId,
         )
         .all<BotRuntimeContinuationEvidenceRow>();
 

@@ -28,8 +28,8 @@ test("maps every D1 migration and table to the PostgreSQL inventory", async () =
     await inspectPostgresMigrationParityContract(),
     {
       status: "passed",
-      d1MigrationCount: 42,
-      postgresMigrationCount: 45,
+      d1MigrationCount: 43,
+      postgresMigrationCount: 46,
       coveredD1TableCount: 55,
       targetOnlyMigrationCount: 17,
     },

@@ -113,6 +113,7 @@ test("finds only recent accepted button evidence for the immediate previous inbo
     tenantId,
     conversationKey,
     currentInboundMessageKey,
+    "wamid.button-reply",
   );
 
   assert.deepEqual(result, {
@@ -135,6 +136,19 @@ test("finds only recent accepted button evidence for the immediate previous inbo
     postgresBotRuntimeSql.findAcceptedButtonContinuation,
     /delivery\.reply_json ->> 'kind' = 'buttons'/,
   );
+  assert.match(
+    postgresBotRuntimeSql.findAcceptedButtonContinuation,
+    /delivery\.provider_message_id = \$4/,
+  );
+  assert.deepEqual(database.queryCalls, [{
+    sql: postgresBotRuntimeSql.findAcceptedButtonContinuation,
+    parameters: [
+      tenantId,
+      conversationKey,
+      currentInboundMessageKey,
+      "wamid.button-reply",
+    ],
+  }]);
   database.assertConsumed();
 });
 

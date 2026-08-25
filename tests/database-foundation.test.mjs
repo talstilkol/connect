@@ -81,6 +81,7 @@ test("initial migration contains the tenant foundation without seed data", async
     "0039_bot_reply_delivery_provider_links.sql",
     "0040_inbound_button_reply_provenance.sql",
     "0041_bot_reply_service_window_rejection_provenance.sql",
+    "0042_bot_reply_provider_clock_domains.sql",
   ]);
 
   const migration = await readFile(

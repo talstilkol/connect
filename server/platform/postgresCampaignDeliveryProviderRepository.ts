@@ -119,10 +119,10 @@ export const postgresCampaignDeliveryProviderSql = Object.freeze({
       END,
       terminal_settled_at = CASE
         WHEN terminal_outcome IS NULL AND $6 IS NOT NULL
-        THEN $5::timestamptz
+        THEN greatest(updated_at, $7::timestamptz)
         ELSE terminal_settled_at
       END,
-      updated_at = greatest(updated_at, $5::timestamptz)
+      updated_at = greatest(updated_at, $7::timestamptz)
     WHERE tenant_id = $1
       AND provider_message_id = $2
     RETURNING delivery_key AS "deliveryKey"
@@ -351,6 +351,7 @@ function normalizeStatus(
       "statusEventKey",
     ),
     statusEventAt: requireTimestamp(input?.statusEventAt, "statusEventAt"),
+    reconciledAt: requireTimestamp(input?.reconciledAt, "reconciledAt"),
   });
 }
 
@@ -487,6 +488,7 @@ export function createPostgresCampaignDeliveryProviderRepository(
                 input.statusEventKey,
                 input.statusEventAt,
                 intendedTerminal,
+                input.reconciledAt,
               ],
             ),
             1,
