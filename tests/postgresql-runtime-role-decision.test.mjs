@@ -185,6 +185,25 @@ test("keeps the 0051 staging-run capabilities database-clocked and dormant", () 
   );
 });
 
+test("documents dormant 0052 hardening and its activation blockers", () => {
+  assert.match(
+    decision,
+    /0052_bot_reply_staging_authorization_observation_hardening\.sql[\s\S]*שש פונקציות[\s\S]*SECURITY INVOKER[\s\S]*חצי־פתוח/,
+  );
+  assert.match(
+    decision,
+    /ארבע פעולות[\s\S]*Insert ישיר[\s\S]*Trigger זר[\s\S]*Update[\s\S]*53[\s\S]*92/,
+  );
+  assert.match(
+    decision,
+    /Authorization[\s\S]*recordedAt[\s\S]*Provider side effect[\s\S]*requestedAt[\s\S]*double-complete[\s\S]*Two-phase[\s\S]*indeterminate/,
+  );
+  assert.doesNotMatch(
+    decision,
+    /0052[\s\S]{0,500}(?:Production Ready|Activation Allowed|מוכן ל־Production)/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,

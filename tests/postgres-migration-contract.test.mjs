@@ -74,6 +74,8 @@ const botReplyStagingTriggerHardeningSchema =
   migrationSources[50];
 const botReplyStagingRunCapabilityWrappersSchema =
   migrationSources[51];
+const botReplyStagingAuthorizationObservationHardeningSchema =
+  migrationSources[52];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -129,14 +131,36 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0049_bot_reply_staging_attested_evidence_readback.sql",
     "0050_bot_reply_staging_trigger_hardening.sql",
     "0051_bot_reply_staging_run_capability_wrappers.sql",
+    "0052_bot_reply_staging_authorization_observation_hardening.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 52,
+      migrationCount: 53,
       findings: [],
     },
+  );
+});
+
+test("hardens staging authorization and observation boundaries", () => {
+  assert.equal(
+    (botReplyStagingAuthorizationObservationHardeningSchema.match(
+      /SET search_path = pg_catalog, pg_temp/g,
+    ) ?? []).length,
+    8,
+  );
+  assert.match(
+    botReplyStagingAuthorizationObservationHardeningSchema,
+    /NEW\.observed_at >= active_run\.lease_expires_at[\s\S]*database_now >= active_run\.lease_expires_at/,
+  );
+  assert.match(
+    botReplyStagingAuthorizationObservationHardeningSchema,
+    /CREATE FUNCTION public\.guard_bot_reply_staging_audit_insert\(\)[\s\S]*pg_catalog\.pg_trigger_depth\(\) < 2/,
+  );
+  assert.doesNotMatch(
+    botReplyStagingAuthorizationObservationHardeningSchema,
+    /\bSECURITY DEFINER\b|\bGRANT\b|\bCREATE ROLE\b|\bALTER ROLE\b/i,
   );
 });
 

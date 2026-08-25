@@ -263,6 +263,34 @@ release-evidence repository חייב לצאת מה־API לפני Activation. ב�
 להסיר את ה־double-complete או לעצב חוזה Replay נפרד שאינו נותן ל־API הרשאת
 Complete של Worker.
 
+4.7.7.4 Migration
+`0052_bot_reply_staging_authorization_observation_hardening.sql` מקשיחה את
+שש פונקציות ה־Trigger של 0034/0035, ומקשיחה מחדש גם את Guard שינוי ה־Audit
+של Run. כל הפונקציות נשארות `SECURITY INVOKER`, ננעלות ל־
+`pg_catalog, pg_temp`, משתמשות בשמות `public.*` מלאים ומאבדות
+`PUBLIC EXECUTE`. ‏Observation מתקבל רק כאשר זמן המסד עדיין בתוך Lease
+חצי־פתוח, ורק כאשר `observedAt` אינו בעתיד ואינו שווה לנקודת התפוגה.
+
+4.7.7.5 ‏0052 מוסיפה Guard רדום ל־`audit_logs`. ארבע פעולות ה־Audit שבבעלות
+Triggers נדחות ב־Insert ישיר, ב־Trigger זר וב־Update מפעולה רגילה לפעולה
+שמורה. Insert חוקי חייב להגיע כ־Trigger מקונן וגם להתאים בדיוק ל־Run או
+ל־Authorization המקוריים לפי Tenant,‏ Actor,‏ Target,‏ Idempotency key,
+Timestamp ו־Metadata. הוכחת ה־Commit המבודד מול PostgreSQL 16.13 עברה עם
+53 Migrations ו־63 תרחישי מקביליות. הוכחת Working Tree רחבה יותר עברה עם
+אותן 53 Migrations ו־92 תרחישים, כולל `search_path` עוין, Source spoof
+ו־ACL/Trigger drift. אף אחת מהן אינה הוכחת Railway או Production.
+
+4.7.7.6 גם 0052 אינה Activation. היא אינה מוסיפה Role,‏ Grant,
+`SECURITY DEFINER`, Repository importer או Provider call. לפני כל Grant
+נותרו חסומים: Authorization שמסתמך עדיין על `recordedAt` של ה־Caller במקום
+על שעון המסד; Provider side effect שאינו שמור לפני Meta תחת Staging claim;
+Observation ישיר שאינו נגזר אטומית מרשומות Provider;‏ `requestedAt` שאינו
+קשור ל־Claim attempt; ה־Repository הישיר; API double-complete; ומעבר
+Owner/Role עם Manifest חתום. גבול Provider בטוח חייב להיות Two-phase:
+Reservation יחידה לפני Meta, ולאחר התוצאה Completion/Observation אטומי.
+Crash אחרי Meta ולפני Completion מסומן `indeterminate` ואסור לבצע לו Retry
+אוטומטי.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

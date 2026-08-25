@@ -593,4 +593,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway prepares three database-clocked, half-open and invoker-rights staging-run lifecycle wrappers while keeping direct-table denial, definer conversion, runtime grants and activation blocked for a later reviewed role migration.",
   }),
+  Object.freeze({
+    migration:
+      "0052_bot_reply_staging_authorization_observation_hardening.sql",
+    token:
+      "guard_bot_reply_staging_audit_insert",
+    summary:
+      "Railway locks the six authorization and observation trigger functions to fully qualified invoker-rights bodies, closes the observation lease boundary against stale writes, and rejects direct spoofing of trigger-owned staging audit actions without adding a runtime grant or activation.",
+  }),
 ]);

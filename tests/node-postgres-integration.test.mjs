@@ -145,6 +145,10 @@ test("keeps the real integration proof explicit and outside the default gate", a
     source,
     /0051_bot_reply_staging_run_capability_wrappers\.sql/,
   );
+  assert.match(
+    source,
+    /0052_bot_reply_staging_authorization_observation_hardening\.sql/,
+  );
   assert.match(source, /verifyFullDataMigrationBundle/);
   assert.match(source, /verifyBotReplyStagingAttestationNoncePostgres/);
   assert.match(
