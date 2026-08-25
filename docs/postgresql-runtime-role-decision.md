@@ -305,6 +305,20 @@ orchestration, Startup wiring ו־Runtime importer.
 מתקן עדיין API double-complete,‏ `requestedAt`, Provider fence או Roles/
 Grants, ולכן אינו משנה את החלטת ה־NO-GO להפעלה.
 
+4.7.7.9 ‏D31-D1c-B מפריד את חוזי היכולת לפי Least privilege. קובץ ה־Domain
+`botReplyStagingRunCapabilityPorts.ts` הוא Type-only: ל־API מותרות רק פעולות
+`claim` ו־`read`, ול־Worker מותרת רק `complete`. אין חוזה ציבורי משולב עם
+שלוש הפעולות. ה־PostgreSQL Adapter מפיק שני אובייקטים קפואים בעלי מפתחות
+מדויקים, וכל Factory מאמת ותופס את פונקציית ה־Query בנפרד. מפת ה־SQL נשארת
+פרטית למודול ואינה Runtime API.
+
+4.7.7.10 גם שני ה־Ports וה־Factories נשארים Dormant. ה־Source Guard מתיר
+רק `import type` של ה־Ports, אוסר בהם הצהרת Runtime ואוסר `module
+augmentation` חיצוני שמרחיב את סמכויותיהם. הוא ממשיך לחסום כל Import פעיל
+של ה־Adapter מתוך API,‏ Worker או Startup. הפיצול אינו Grant במסד ואינו גבול
+אבטחה מספק בפני עצמו. אין לחברו לפני ביטול API double-complete, קשירת
+`requestedAt`, השלמת Provider fence והפרדת Roles/Credentials בפועל.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

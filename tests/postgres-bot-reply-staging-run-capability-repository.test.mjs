@@ -8,8 +8,8 @@ import {
   serializeCanonicalBotReplyStagingReceipt,
 } from "../server/operations/botReplyStagingReceiptAttestation.ts";
 import {
-  createPostgresBotReplyStagingRunCapabilityRepository,
-  postgresBotReplyStagingRunCapabilitySql,
+  createPostgresBotReplyStagingRunApiCapabilityRepository,
+  createPostgresBotReplyStagingRunWorkerCapabilityRepository,
 } from "../server/platform/postgresBotReplyStagingRunCapabilityRepository.ts";
 
 const runKey = `bot_reply_staging_run_v1_${"1".repeat(64)}`;
@@ -142,9 +142,19 @@ function fixture(results) {
       return remaining.shift();
     },
   };
+  const api = createPostgresBotReplyStagingRunApiCapabilityRepository({
+    queries,
+  });
+  const worker = createPostgresBotReplyStagingRunWorkerCapabilityRepository({
+    queries,
+  });
   return {
-    repository: createPostgresBotReplyStagingRunCapabilityRepository({
-      queries,
+    api,
+    worker,
+    repository: Object.freeze({
+      claim: api.claim,
+      read: api.read,
+      complete: worker.complete,
     }),
     calls,
     remaining,
@@ -169,14 +179,27 @@ function accessorClone(value, key) {
   return clone;
 }
 
-test("exposes only three bounded SELECT calls to the 0051 wrappers", async () => {
-  assert.deepEqual(
-    Object.keys(postgresBotReplyStagingRunCapabilitySql).sort(),
-    ["claim", "complete", "read"],
-  );
-  const combined = Object.values(
-    postgresBotReplyStagingRunCapabilitySql,
-  ).join("\n");
+test("exposes exact frozen API and Worker capability objects", () => {
+  const testFixture = fixture([]);
+
+  assertFrozenExact(testFixture.api, ["claim", "read"]);
+  assert.equal("complete" in testFixture.api, false);
+  assertFrozenExact(testFixture.worker, ["complete"]);
+  assert.equal("claim" in testFixture.worker, false);
+  assert.equal("read" in testFixture.worker, false);
+});
+
+test("executes only three bounded SELECT calls to the 0051 wrappers", async () => {
+  const testFixture = fixture([
+    queryResult([capabilityRow()]),
+    queryResult([capabilityRow({ outcome: "running" })]),
+    queryResult([terminalRow("completed")]),
+  ]);
+  await testFixture.api.claim(claimInput());
+  await testFixture.api.read(readInput());
+  await testFixture.worker.complete(completionInput());
+
+  const combined = testFixture.calls.map(({ sql }) => sql).join("\n");
   assert.equal((combined.match(/\bSELECT\b/g) ?? []).length, 3);
   assert.equal((combined.match(/\bLIMIT 2\b/g) ?? []).length, 3);
   assert.match(combined, /public\.claim_bot_reply_staging_run_v1\(/);
@@ -197,6 +220,10 @@ test("exposes only three bounded SELECT calls to the 0051 wrappers", async () =>
   assert.doesNotMatch(
     source,
     /process\.env|DATABASE_URL|new Pool|createPool|BullMQ|Math\.random|crypto\.randomUUID|start(?:up|Server)|listen\s*\(/,
+  );
+  assert.doesNotMatch(
+    source,
+    /export\s+(?:const|interface|type|function)\s+PostgresBotReplyStagingRunCapability(?:Sql|Repository)/,
   );
 });
 
@@ -220,9 +247,9 @@ test("claims through one wrapper call with all 14 parameters", async () => {
     "leaseExpiresAt",
   ]);
   assert.equal(testFixture.calls.length, 1);
-  assert.equal(
+  assert.match(
     testFixture.calls[0].sql,
-    postgresBotReplyStagingRunCapabilitySql.claim,
+    /public\.claim_bot_reply_staging_run_v1\(/,
   );
   assert.deepEqual(testFixture.calls[0].parameters, [
     input.runKey,
@@ -298,6 +325,10 @@ test("reads running, completed, expired, and hidden-conflict outcomes", async ()
     input.artifactDigest,
     input.claimVersion,
   ]);
+  assert.match(
+    running.calls[0].sql,
+    /public\.read_bot_reply_staging_run_v1\(/,
+  );
 
   const completed = fixture([queryResult([terminalRow("completed", {
     claimVersion: 2,
@@ -352,9 +383,9 @@ test("completes with adapter-derived canonical bytes and digest", async () => {
     "receipt",
   ]);
   assert.equal(testFixture.calls.length, 1);
-  assert.equal(
+  assert.match(
     testFixture.calls[0].sql,
-    postgresBotReplyStagingRunCapabilitySql.complete,
+    /public\.complete_bot_reply_staging_run_v1\(/,
   );
   assert.deepEqual(testFixture.calls[0].parameters, [
     input.tenantId,
@@ -485,22 +516,42 @@ test("rejects hostile result containers but accepts node-postgres-style extras",
 });
 
 test("captures the reviewed query function at factory creation", async () => {
-  const calls = [];
-  const queries = {
+  const apiCalls = [];
+  const workerCalls = [];
+  const apiQueries = {
     async query(sql, parameters) {
-      calls.push({ sql, parameters });
+      apiCalls.push({ sql, parameters });
       return queryResult([capabilityRow()]);
     },
   };
-  const repository = createPostgresBotReplyStagingRunCapabilityRepository({
-    queries,
+  const workerQueries = {
+    async query(sql, parameters) {
+      workerCalls.push({ sql, parameters });
+      return queryResult([terminalRow("completed")]);
+    },
+  };
+  const api = createPostgresBotReplyStagingRunApiCapabilityRepository({
+    queries: apiQueries,
   });
-  queries.query = async () => {
-    throw new Error("mutated query must not execute");
+  const worker = createPostgresBotReplyStagingRunWorkerCapabilityRepository({
+    queries: workerQueries,
+  });
+  apiQueries.query = async () => {
+    throw new Error("mutated API query must not execute");
+  };
+  workerQueries.query = async () => {
+    throw new Error("mutated Worker query must not execute");
   };
 
-  assert.equal((await repository.claim(claimInput())).outcome, "claimed");
-  assert.equal(calls.length, 1);
+  assert.equal((await api.claim(claimInput())).outcome, "claimed");
+  assert.equal(
+    (await worker.complete(completionInput())).outcome,
+    "completed",
+  );
+  assert.equal(apiCalls.length, 1);
+  assert.match(apiCalls[0].sql, /claim_bot_reply_staging_run_v1/);
+  assert.equal(workerCalls.length, 1);
+  assert.match(workerCalls[0].sql, /complete_bot_reply_staging_run_v1/);
 });
 
 test("rejects unknown outcomes, crossed identities, and crossed claim fences", async () => {
@@ -742,33 +793,31 @@ test("rejects claim versions outside the PostgreSQL INTEGER range", async () => 
 
 test("rejects proxy, accessor, missing, and extra factory dependencies", () => {
   const queries = { async query() {} };
-  assert.throws(
-    () => createPostgresBotReplyStagingRunCapabilityRepository(
-      new Proxy({ queries }, {}),
-    ),
-    /staging capability dependencies is invalid/,
-  );
-  assert.throws(
-    () => createPostgresBotReplyStagingRunCapabilityRepository({}),
-    /staging capability dependencies is invalid/,
-  );
-  assert.throws(
-    () => createPostgresBotReplyStagingRunCapabilityRepository({
-      queries,
-      unexpected: true,
-    }),
-    /staging capability dependencies is invalid/,
-  );
-  assert.throws(
-    () => createPostgresBotReplyStagingRunCapabilityRepository(
-      accessorClone({ queries }, "queries"),
-    ),
-    /staging capability dependencies is invalid/,
-  );
-  assert.throws(
-    () => createPostgresBotReplyStagingRunCapabilityRepository({
-      queries: accessorClone(queries, "query"),
-    }),
-    /staging capability queries is invalid/,
-  );
+  for (const createRepository of [
+    createPostgresBotReplyStagingRunApiCapabilityRepository,
+    createPostgresBotReplyStagingRunWorkerCapabilityRepository,
+  ]) {
+    assert.throws(
+      () => createRepository(new Proxy({ queries }, {})),
+      /staging capability dependencies is invalid/,
+    );
+    assert.throws(
+      () => createRepository({}),
+      /staging capability dependencies is invalid/,
+    );
+    assert.throws(
+      () => createRepository({ queries, unexpected: true }),
+      /staging capability dependencies is invalid/,
+    );
+    assert.throws(
+      () => createRepository(accessorClone({ queries }, "queries")),
+      /staging capability dependencies is invalid/,
+    );
+    assert.throws(
+      () => createRepository({
+        queries: accessorClone(queries, "query"),
+      }),
+      /staging capability queries is invalid/,
+    );
+  }
 });

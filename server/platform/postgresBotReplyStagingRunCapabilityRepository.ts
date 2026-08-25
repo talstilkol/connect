@@ -5,6 +5,16 @@ import {
   deriveBotReplyStagingReceiptDigest,
   serializeCanonicalBotReplyStagingReceipt,
 } from "../operations/botReplyStagingReceiptAttestation.ts";
+import type {
+  BotReplyStagingRunApiCapabilityPort,
+  BotReplyStagingRunClaimInput,
+  BotReplyStagingRunClaimResult,
+  BotReplyStagingRunCompleteInput,
+  BotReplyStagingRunCompleteResult,
+  BotReplyStagingRunReadInput,
+  BotReplyStagingRunReadResult,
+  BotReplyStagingRunWorkerCapabilityPort,
+} from "../operations/botReplyStagingRunCapabilityPorts.ts";
 import {
   parsePostgresPositiveInteger,
   parsePostgresTimestamp,
@@ -70,7 +80,7 @@ const rowKeys = Object.freeze([
   "runKey",
 ]);
 
-export const postgresBotReplyStagingRunCapabilitySql = Object.freeze({
+const postgresBotReplyStagingRunCapabilitySql = Object.freeze({
   claim: `
     SELECT capability.*
     FROM public.claim_bot_reply_staging_run_v1(
@@ -123,109 +133,6 @@ export const postgresBotReplyStagingRunCapabilitySql = Object.freeze({
     LIMIT 2
   `,
 });
-
-export interface PostgresBotReplyStagingRunCapabilityClaimInput {
-  readonly runKey: string;
-  readonly tenantId: number;
-  readonly requestDigest: string;
-  readonly actorExternalUserId: string;
-  readonly connectionVersion: number;
-  readonly policyVersion: number;
-  readonly releaseId: string;
-  readonly commitSha: string;
-  readonly artifactDigest: string;
-  readonly graphApiVersion: string;
-  readonly recipientFingerprint: string;
-  readonly rateLimitMethodFingerprint: string;
-  readonly leaseDurationSeconds: number;
-  readonly auditKey: string;
-}
-
-export interface PostgresBotReplyStagingRunCapabilityReadInput {
-  readonly tenantId: number;
-  readonly runKey: string;
-  readonly requestDigest: string;
-  readonly auditKey: string;
-  readonly releaseId: string;
-  readonly commitSha: string;
-  readonly artifactDigest: string;
-  readonly claimVersion: number;
-}
-
-export interface PostgresBotReplyStagingRunCapabilityCompleteInput
-  extends PostgresBotReplyStagingRunCapabilityReadInput {
-  readonly leaseExpiresAt: string;
-  readonly receipt: unknown;
-}
-
-export type PostgresBotReplyStagingRunCapabilityClaimResult = Readonly<
-  | {
-      outcome: "claimed";
-      runKey: string;
-      auditKey: string;
-      claimVersion: number;
-      leaseExpiresAt: string;
-    }
-  | {
-      outcome: "replayed";
-      runKey: string;
-      auditKey: string;
-      completedAt: string;
-      receipt: unknown;
-    }
-  | {
-      outcome: "conflict" | "in-progress";
-      runKey: string;
-    }
->;
-
-export type PostgresBotReplyStagingRunCapabilityReadResult = Readonly<
-  | {
-      outcome: "running";
-      runKey: string;
-      auditKey: string;
-      claimVersion: number;
-      leaseExpiresAt: string;
-    }
-  | {
-      outcome: "completed";
-      runKey: string;
-      auditKey: string;
-      claimVersion: number;
-      completedAt: string;
-      receipt: unknown;
-    }
-  | {
-      outcome: "expired" | "missing-or-conflict";
-      runKey: string;
-    }
->;
-
-export type PostgresBotReplyStagingRunCapabilityCompleteResult = Readonly<
-  | {
-      outcome: "completed" | "replayed";
-      runKey: string;
-      auditKey: string;
-      completedAt: string;
-      receipt: unknown;
-    }
-  | {
-      outcome: "conflict" | "lease-expired";
-      runKey: string;
-    }
->;
-
-export interface PostgresBotReplyStagingRunCapabilityRepository {
-  claim(
-    input: Readonly<PostgresBotReplyStagingRunCapabilityClaimInput>,
-  ): Promise<PostgresBotReplyStagingRunCapabilityClaimResult>;
-  read(
-    input: Readonly<PostgresBotReplyStagingRunCapabilityReadInput>,
-  ): Promise<PostgresBotReplyStagingRunCapabilityReadResult>;
-  complete(
-    input: Readonly<PostgresBotReplyStagingRunCapabilityCompleteInput>,
-  ): Promise<PostgresBotReplyStagingRunCapabilityCompleteResult>;
-}
 
 interface NormalizedIdentity {
   readonly tenantId: number;
@@ -381,7 +288,7 @@ function deriveAuditKey(runKey: string, requestDigest: string): string {
 
 function normalizeClaimInput(
   value: unknown,
-): Readonly<PostgresBotReplyStagingRunCapabilityClaimInput> {
+): Readonly<BotReplyStagingRunClaimInput> {
   const input = requireExactDataRecord(value, claimInputKeys, "claim input");
   const normalized = Object.freeze({
     runKey: requirePattern(input.runKey, runKeyPattern, "runKey"),
@@ -488,7 +395,7 @@ function requireReceiptObject(value: unknown): unknown {
 
 function normalizeCompleteInput(
   value: unknown,
-): Readonly<PostgresBotReplyStagingRunCapabilityCompleteInput> {
+): Readonly<BotReplyStagingRunCompleteInput> {
   const input = requireExactDataRecord(
     value,
     completeInputKeys,
@@ -698,8 +605,8 @@ async function queryExactlyOneRow(
 
 function parseClaimResult(
   row: ExactRecord,
-  input: Readonly<PostgresBotReplyStagingRunCapabilityClaimInput>,
-): PostgresBotReplyStagingRunCapabilityClaimResult {
+  input: Readonly<BotReplyStagingRunClaimInput>,
+): BotReplyStagingRunClaimResult {
   requireRowIdentity(row, input.runKey, input.requestDigest);
   if (row.outcome === "claimed") {
     requireAuditIdentity(row, input.auditKey);
@@ -752,7 +659,7 @@ function parseClaimResult(
 function parseReadResult(
   row: ExactRecord,
   input: Readonly<NormalizedIdentity>,
-): PostgresBotReplyStagingRunCapabilityReadResult {
+): BotReplyStagingRunReadResult {
   requireRowIdentity(row, input.runKey, input.requestDigest);
   if (row.outcome === "running") {
     requireAuditIdentity(row, input.auditKey);
@@ -812,10 +719,10 @@ function parseReadResult(
 
 function parseCompleteResult(
   row: ExactRecord,
-  input: Readonly<PostgresBotReplyStagingRunCapabilityCompleteInput>,
+  input: Readonly<BotReplyStagingRunCompleteInput>,
   canonicalReceiptJson: string,
   receiptDigest: string,
-): PostgresBotReplyStagingRunCapabilityCompleteResult {
+): BotReplyStagingRunCompleteResult {
   requireRowIdentity(row, input.runKey, input.requestDigest);
   if (row.outcome === "completed" || row.outcome === "replayed") {
     requireAuditIdentity(row, input.auditKey);
@@ -860,9 +767,9 @@ function parseCompleteResult(
   throw new Error("PostgreSQL returned invalid staging completion outcome");
 }
 
-export function createPostgresBotReplyStagingRunCapabilityRepository(
+function createCheckedQueries(
   dependencies: Readonly<{ queries: PostgresQueryExecutor }>,
-): PostgresBotReplyStagingRunCapabilityRepository {
+): PostgresQueryExecutor {
   const checkedDependencies = requireExactDataRecord(
     dependencies,
     dependencyKeys,
@@ -878,7 +785,7 @@ export function createPostgresBotReplyStagingRunCapabilityRepository(
     throw new Error("staging capability queries are invalid");
   }
   const capturedQuery = queryRecord.query as PostgresQueryExecutor["query"];
-  const checkedQueries: PostgresQueryExecutor = Object.freeze({
+  return Object.freeze({
     query<TRow>(sql: string, parameters: readonly PostgresParameter[]) {
       return Reflect.apply(capturedQuery, queries, [
         sql,
@@ -886,9 +793,15 @@ export function createPostgresBotReplyStagingRunCapabilityRepository(
       ]) as Promise<Readonly<PostgresQueryResult<TRow>>>;
     },
   });
+}
+
+export function createPostgresBotReplyStagingRunApiCapabilityRepository(
+  dependencies: Readonly<{ queries: PostgresQueryExecutor }>,
+): BotReplyStagingRunApiCapabilityPort {
+  const checkedQueries = createCheckedQueries(dependencies);
 
   return Object.freeze({
-    async claim(rawInput: Readonly<PostgresBotReplyStagingRunCapabilityClaimInput>) {
+    async claim(rawInput: Readonly<BotReplyStagingRunClaimInput>) {
       const input = normalizeClaimInput(rawInput);
       const row = await queryExactlyOneRow(
         checkedQueries,
@@ -913,7 +826,7 @@ export function createPostgresBotReplyStagingRunCapabilityRepository(
       return parseClaimResult(row, input);
     },
 
-    async read(rawInput: Readonly<PostgresBotReplyStagingRunCapabilityReadInput>) {
+    async read(rawInput: Readonly<BotReplyStagingRunReadInput>) {
       const input = normalizeIdentity(rawInput, "read input");
       const row = await queryExactlyOneRow(
         checkedQueries,
@@ -931,9 +844,17 @@ export function createPostgresBotReplyStagingRunCapabilityRepository(
       );
       return parseReadResult(row, input);
     },
+  });
+}
 
+export function createPostgresBotReplyStagingRunWorkerCapabilityRepository(
+  dependencies: Readonly<{ queries: PostgresQueryExecutor }>,
+): BotReplyStagingRunWorkerCapabilityPort {
+  const checkedQueries = createCheckedQueries(dependencies);
+
+  return Object.freeze({
     async complete(
-      rawInput: Readonly<PostgresBotReplyStagingRunCapabilityCompleteInput>,
+      rawInput: Readonly<BotReplyStagingRunCompleteInput>,
     ) {
       const input = normalizeCompleteInput(rawInput);
       const canonicalReceiptJson = serializeCanonicalBotReplyStagingReceipt(

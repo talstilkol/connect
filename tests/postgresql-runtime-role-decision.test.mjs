@@ -223,6 +223,25 @@ test("documents the dormant staging-run capability adapter without activation", 
   );
 });
 
+test("documents the dormant API and Worker capability split", () => {
+  assert.match(
+    decision,
+    /D31-D1c-B[\s\S]*botReplyStagingRunCapabilityPorts\.ts[\s\S]*Type-only/,
+  );
+  assert.match(
+    decision,
+    /API[\s\S]*`claim`[\s\S]*`read`[\s\S]*Worker[\s\S]*`complete`/,
+  );
+  assert.match(
+    decision,
+    /אין חוזה ציבורי משולב[\s\S]*שני אובייקטים קפואים[\s\S]*Query[\s\S]*בנפרד/,
+  );
+  assert.match(
+    decision,
+    /Source Guard[\s\S]*`import type`[\s\S]*אוסר בהם הצהרת Runtime[\s\S]*module[\s\S]*augmentation[\s\S]*Roles\/Credentials/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,

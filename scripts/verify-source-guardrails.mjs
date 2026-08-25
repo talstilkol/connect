@@ -153,6 +153,8 @@ const attestedEvidenceV2Path =
   `server/platform/${attestedEvidenceV2FileName}`;
 const receiptAttestationPath =
   "server/operations/botReplyStagingReceiptAttestation.ts";
+const stagingRunCapabilityPortsPath =
+  "server/operations/botReplyStagingRunCapabilityPorts.ts";
 const stagingRunCapabilityRepositoryPath =
   "server/platform/postgresBotReplyStagingRunCapabilityRepository.ts";
 const postgresResultValidationPath =
@@ -163,6 +165,7 @@ const dormantBotReplyStagingAttestedModulePaths =
     attestedReadRepositoryPath,
     postgresRuntimeCapabilityEvidencePath,
     postgresRuntimeCapabilityTrustedDriverContractPath,
+    stagingRunCapabilityPortsPath,
     stagingRunCapabilityRepositoryPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
@@ -285,6 +288,7 @@ const dormantAttestedAllowedRuntimeDependencies =
       ]),
     ],
     [postgresResultValidationPath, new Map()],
+    [stagingRunCapabilityPortsPath, new Map()],
     [
       postgresRuntimeCapabilityEvidencePath,
       new Map([
@@ -761,6 +765,246 @@ function exportDeclarationIsTypeOnly(node) {
       (element) => element.isTypeOnly,
     )
   );
+}
+
+function sourceFileIsTypeOnlyContract(sourceFile) {
+  return sourceFile.statements.length > 0 &&
+    sourceFile.statements.every((statement) =>
+      ts.isInterfaceDeclaration(statement) ||
+      ts.isTypeAliasDeclaration(statement) ||
+      (
+        ts.isImportDeclaration(statement) &&
+        importDeclarationIsTypeOnly(statement)
+      ) ||
+      (
+        ts.isExportDeclaration(statement) &&
+        exportDeclarationIsTypeOnly(statement)
+      ) ||
+      (
+        ts.isImportEqualsDeclaration(statement) &&
+        statement.isTypeOnly
+      )
+    );
+}
+
+const stagingRunCapabilityPortDeclarationNames = new Set([
+  "BotReplyStagingRunApiCapabilityPort",
+  "BotReplyStagingRunClaimCapabilityPort",
+  "BotReplyStagingRunClaimInput",
+  "BotReplyStagingRunClaimResult",
+  "BotReplyStagingRunCompleteCapabilityPort",
+  "BotReplyStagingRunCompleteInput",
+  "BotReplyStagingRunCompleteResult",
+  "BotReplyStagingRunReadCapabilityPort",
+  "BotReplyStagingRunReadInput",
+  "BotReplyStagingRunReadResult",
+  "BotReplyStagingRunWorkerCapabilityPort",
+]);
+
+function declarationIsExportedOnly(node) {
+  return node.modifiers?.length === 1 &&
+    node.modifiers[0].kind === ts.SyntaxKind.ExportKeyword;
+}
+
+function typeReferenceIs(node, expectedName) {
+  return node !== undefined &&
+    ts.isTypeReferenceNode(node) &&
+    ts.isIdentifier(node.typeName) &&
+    node.typeName.text === expectedName &&
+    node.typeArguments === undefined;
+}
+
+function wrappedTypeReferenceIs(
+  node,
+  wrapperName,
+  expectedName,
+) {
+  return node !== undefined &&
+    ts.isTypeReferenceNode(node) &&
+    ts.isIdentifier(node.typeName) &&
+    node.typeName.text === wrapperName &&
+    node.typeArguments?.length === 1 &&
+    typeReferenceIs(node.typeArguments[0], expectedName);
+}
+
+function interfaceExtendsExactly(node, expectedNames) {
+  if (expectedNames.length === 0) {
+    return node.heritageClauses === undefined;
+  }
+  const clauses = node.heritageClauses;
+  if (
+    clauses?.length !== 1 ||
+    clauses[0].token !== ts.SyntaxKind.ExtendsKeyword ||
+    clauses[0].types.length !== expectedNames.length
+  ) {
+    return false;
+  }
+  return clauses[0].types.every((current, index) =>
+    ts.isIdentifier(current.expression) &&
+    current.expression.text === expectedNames[index] &&
+    current.typeArguments === undefined
+  );
+}
+
+function readonlyTypeLiteral(node) {
+  if (
+    !ts.isTypeReferenceNode(node) ||
+    !ts.isIdentifier(node.typeName) ||
+    node.typeName.text !== "Readonly" ||
+    node.typeArguments?.length !== 1 ||
+    !ts.isTypeLiteralNode(node.typeArguments[0])
+  ) {
+    return null;
+  }
+  return node.typeArguments[0];
+}
+
+function capabilityAliasIsExact(
+  node,
+  methodName,
+  inputName,
+  resultName,
+) {
+  if (!ts.isTypeAliasDeclaration(node)) {
+    return false;
+  }
+  const typeLiteral = readonlyTypeLiteral(node.type);
+  if (
+    typeLiteral === null ||
+    typeLiteral.members.length !== 1
+  ) {
+    return false;
+  }
+  const member = typeLiteral.members[0];
+  if (
+    !ts.isMethodSignature(member) ||
+    staticPropertyName(member.name) !== methodName ||
+    member.modifiers !== undefined ||
+    member.questionToken !== undefined ||
+    member.typeParameters !== undefined ||
+    member.parameters.length !== 1 ||
+    !wrappedTypeReferenceIs(member.type, "Promise", resultName)
+  ) {
+    return false;
+  }
+  const parameter = member.parameters[0];
+  return ts.isIdentifier(parameter.name) &&
+    parameter.name.text === "input" &&
+    parameter.modifiers === undefined &&
+    parameter.dotDotDotToken === undefined &&
+    parameter.questionToken === undefined &&
+    parameter.initializer === undefined &&
+    wrappedTypeReferenceIs(parameter.type, "Readonly", inputName);
+}
+
+function intersectionTypeReferencesAreExact(node, expectedNames) {
+  return ts.isIntersectionTypeNode(node) &&
+    node.types.length === expectedNames.length &&
+    node.types.every((current, index) =>
+      typeReferenceIs(current, expectedNames[index])
+    );
+}
+
+function stagingRunCapabilityPortsAreExact(sourceFile) {
+  if (
+    sourceFile.statements.length !==
+      stagingRunCapabilityPortDeclarationNames.size
+  ) {
+    return false;
+  }
+  const declarations = new Map();
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isInterfaceDeclaration(statement) &&
+      !ts.isTypeAliasDeclaration(statement)
+    ) {
+      return false;
+    }
+    const name = statement.name.text;
+    if (
+      !declarationIsExportedOnly(statement) ||
+      !stagingRunCapabilityPortDeclarationNames.has(name) ||
+      declarations.has(name)
+    ) {
+      return false;
+    }
+    declarations.set(name, statement);
+  }
+
+  const claimInput = declarations.get("BotReplyStagingRunClaimInput");
+  const readInput = declarations.get("BotReplyStagingRunReadInput");
+  const completeInput = declarations.get("BotReplyStagingRunCompleteInput");
+  const claimResult = declarations.get("BotReplyStagingRunClaimResult");
+  const readResult = declarations.get("BotReplyStagingRunReadResult");
+  const completeResult = declarations.get("BotReplyStagingRunCompleteResult");
+  const claimPort = declarations.get(
+    "BotReplyStagingRunClaimCapabilityPort",
+  );
+  const readPort = declarations.get(
+    "BotReplyStagingRunReadCapabilityPort",
+  );
+  const completePort = declarations.get(
+    "BotReplyStagingRunCompleteCapabilityPort",
+  );
+  const apiPort = declarations.get("BotReplyStagingRunApiCapabilityPort");
+  const workerPort = declarations.get(
+    "BotReplyStagingRunWorkerCapabilityPort",
+  );
+
+  return ts.isInterfaceDeclaration(claimInput) &&
+    interfaceExtendsExactly(claimInput, []) &&
+    ts.isInterfaceDeclaration(readInput) &&
+    interfaceExtendsExactly(readInput, []) &&
+    ts.isInterfaceDeclaration(completeInput) &&
+    interfaceExtendsExactly(completeInput, [
+      "BotReplyStagingRunReadInput",
+    ]) &&
+    ts.isTypeAliasDeclaration(claimResult) &&
+    ts.isTypeAliasDeclaration(readResult) &&
+    ts.isTypeAliasDeclaration(completeResult) &&
+    capabilityAliasIsExact(
+      claimPort,
+      "claim",
+      "BotReplyStagingRunClaimInput",
+      "BotReplyStagingRunClaimResult",
+    ) &&
+    capabilityAliasIsExact(
+      readPort,
+      "read",
+      "BotReplyStagingRunReadInput",
+      "BotReplyStagingRunReadResult",
+    ) &&
+    capabilityAliasIsExact(
+      completePort,
+      "complete",
+      "BotReplyStagingRunCompleteInput",
+      "BotReplyStagingRunCompleteResult",
+    ) &&
+    ts.isTypeAliasDeclaration(apiPort) &&
+    intersectionTypeReferencesAreExact(apiPort.type, [
+      "BotReplyStagingRunClaimCapabilityPort",
+      "BotReplyStagingRunReadCapabilityPort",
+    ]) &&
+    ts.isTypeAliasDeclaration(workerPort) &&
+    typeReferenceIs(
+      workerPort.type,
+      "BotReplyStagingRunCompleteCapabilityPort",
+    );
+}
+
+function declaredModuleSpecifiers(sourceFile) {
+  const specifiers = new Set();
+  const visit = (node) => {
+    if (
+      ts.isModuleDeclaration(node) &&
+      ts.isStringLiteralLike(node.name)
+    ) {
+      specifiers.add(node.name.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return [...specifiers];
 }
 
 function analyzeRuntimeDependencies(sourceFile) {
@@ -1824,11 +2068,32 @@ export async function inspectSourceGuardrails(
 
   for (const file of files) {
     const sourceFile = parsedSources.get(file);
+    const path = relativePath(root, file);
 
     if (sourceFile.parseDiagnostics.length > 0) {
       addFinding({
         code: "SOURCE_PARSE_FAILED",
-        file: relativePath(root, file),
+        file: path,
+      });
+    }
+
+    if (
+      path === stagingRunCapabilityPortsPath &&
+      !sourceFileIsTypeOnlyContract(sourceFile)
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CAPABILITY_PORT_RUNTIME_FORBIDDEN",
+        file: path,
+      });
+    } else if (
+      path === stagingRunCapabilityPortsPath &&
+      !stagingRunCapabilityPortsAreExact(sourceFile)
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CAPABILITY_PORT_CONTRACT_INVALID",
+        file: path,
       });
     }
 
@@ -1903,6 +2168,43 @@ export async function inspectSourceGuardrails(
         .filter(Boolean),
     ]),
   );
+
+  const inspectCapabilityPortAugmentations = (
+    file,
+    sourceFile,
+  ) => {
+    for (const specifier of declaredModuleSpecifiers(sourceFile)) {
+      const dependency = resolveLocalImport(
+        root,
+        file,
+        specifier,
+        compilerConfiguration.options,
+        availableFileByCanonicalPath,
+        moduleResolutionCache,
+      );
+      if (
+        dependency !== null &&
+        relativePath(root, dependency) ===
+          stagingRunCapabilityPortsPath
+      ) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_CAPABILITY_PORT_AUGMENTATION_FORBIDDEN",
+          file: relativePath(root, file),
+        });
+      }
+    }
+  };
+
+  for (const [file, sourceFile] of parsedSources) {
+    inspectCapabilityPortAugmentations(file, sourceFile);
+  }
+  for (const [file, source] of dormantImporterSources) {
+    inspectCapabilityPortAugmentations(
+      file,
+      parseSourceFile(file, source),
+    );
+  }
 
   for (const file of files) {
     const source = sources.get(file);
