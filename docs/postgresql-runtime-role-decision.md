@@ -192,7 +192,8 @@ Pinned connection בתוך `REPEATABLE READ READ ONLY`. לפני השאילתה 
 ולאמת `search_path` בטוח בפקודה נפרדת. עליו לאמת גם את שמות העמודות ואת
 PostgreSQL field OIDs, ולנרמל את תוצאת `pg` במפורש ל־`{ rowCount, rows }`;
 `QueryResult` גולמי עם שדות נוספים נכשל סגור. רק לאחר מכן מותר לאגד את ארבע
-התוצאות ל־Evidence אטומי אחד; Probe בודד לעולם אינו מספיק ל־Activation.
+התוצאות ל־Aggregate קנוני מסוג all-or-nothing. ארבע Transactions נפרדות אינן
+Snapshot אטומי של PostgreSQL; Probe בודד לעולם אינו מספיק ל־Activation.
 
 4.7.3 ה־Evidence החי חייב להיקשר ל־Release SHA מדויק, ל־Policy version,
 לזמן מסד שנצפה ול־TTL קצר, ולכלול Digests של כל ארבע תוצאות היכולת. ערך
@@ -225,6 +226,68 @@ Reclaim,‏ Poll ו־Complete ל־Wrappers מצומצמים, להסיר Direct t
 
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
+
+4.8 חוזה Trusted driver רדום — D31-C1:
+
+4.8.1 `postgresRuntimeCapabilityTrustedDriverContract.ts` מקבע Contract בלבד.
+הוא אינו מייבא `pg`, אינו קורא Environment או Secret, אינו פותח Connection
+ואינו מחובר ל־Runtime. גם הוא מוגדר Dormant וללא Importer מורשה.
+
+4.8.2 סדר ה־Session המחייב הוא:
+
+```text
+connect
+→ BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY
+→ SET LOCAL search_path TO pg_catalog, pg_temp
+→ verify transaction + search_path
+→ fixed catalog query with rowMode=array
+→ ROLLBACK
+→ close
+```
+
+4.8.3 ה־Probe עצמו מצפה מעתה ל־`pg_catalog, pg_temp`; ‏`public` אינו חלק
+מ־`search_path`. כל גישה ל־Schema ‏`public` משתמשת בשם מלא או ב־Catalog
+מפורש ולכן אינה תלויה ב־Name resolution של `public`. אותה שאילתת Read-only
+בודקת גם שה־Schema בבעלות `connect_migration_owner` ושאין `CREATE` ל־Role זר;
+רק תוצאה שבה הבדיקה עוברת יכולה לקבל `candidate`.
+
+4.8.4 חוזה Field קנוני מקבע 35 עמודות Boolean בדיוק, בסדר ה־SELECT, עם
+`dataTypeID=16`,‏ `format=text`,‏ `tableID=0` ו־`columnID=0`. Driver עתידי
+חייב להשתמש ב־`rowMode: "array"`, לדחות Field חסר, נוסף או מוחלף, וליצור
+אובייקט חדש ומצומצם במקום להעביר `QueryResult` גולמי.
+
+4.8.4.1 שורת ה־Preflight היחידה חייבת להיות בדיוק
+`[true, true, true, true]`. סדר שלושת פרמטרי ה־Catalog קבוע:
+`$1=expectedDatabaseName`,‏ `$2=expectedSystemIdentifier` שמגיע מ־Binding
+חתום Out-of-band, ו־`$3=expectedLoginRole` שנגזר מ־Capability registry.
+
+4.8.5 Timeout אינו נחשב ביטול עד שה־Driver משמיד את ה־Client שבבעלותו. החוזה
+דורש `destroy-client` ב־Timeout או Abort, ‏late cleanup לחיבור שהושלם לאחר
+Deadline, ‏Cleanup deadline, והשמדת Client גם בכשל Close. בכל Query failure
+נדרשים Rollback ולאחריו השמדה. ‏`Promise.race` לבדו אינו עומד בחוזה.
+
+4.8.6 בדיוק ארבע היכולות נדרשות בסדר `api`,‏ `worker`,‏ `verifier`,‏
+`migration`. תוצאה חלקית אסורה. גם אם כולן עוברות, הסטטוס נשאר `candidate`
+ו־`activationAllowed:false`; אין לטעון ל־Snapshot אטומי בין ארבעה Sessions.
+
+4.8.7 נותרה החלטה תפעולית חיצונית: Job מבודד וחד־פעמי שמקבל ארבעה Secrets
+קצרי־חיים, או ארבע Attestations חתומות שכל שירות מפיק בנפרד. אסור לשירות
+Runtime קבוע להחזיק את כל ארבעת Secrets, וה־Contract אינו בוחר אפשרות בשם טל.
+
+4.8.8 D31-C2 יוכל לממש Client פנימי ובדיקת PostgreSQL 16 חיה רק לאחר בחירת
+הטופולוגיה. D31-C3 יוסיף Release binding, זמן מסד, TTL, ארבעה Digests,
+חתימת `system_identifier` ממקור Out-of-band וראיות TLS חיצוניות. עד אז
+Activation נשאר NO-GO.
+
+4.8.9 חוזה C2 העתידי מחייב כבר ב־Startup את
+`default_transaction_read_only=on`, מגבלת `idle_in_transaction_session_timeout`,
+אימות TLS מסוג CA + Hostname בסביבות Staging/Production ו־Extended protocol
+עם שלושת הפרמטרים הקבועים. ערכים אלה הם תנאי מימוש, לא הוכחה שהם פעילים כעת.
+
+4.8.10 Rehearsal מקומי ב־2026-08-25 מול PostgreSQL 16.13 הריץ את הסדר הקבוע
+כ־`connect_api_runtime`: ארבעת שדות ה־Preflight וכל 35 שדות ה־Catalog תאמו
+בשם, סדר, OID ופורמט; ה־Probe החזיר 35/35 ו־`activationAllowed:false`.
+זו הוכחת תאימות מקומית בלבד, לא Evidence של Railway או אישור Production.
 
 ## 5. סדר ביצוע
 

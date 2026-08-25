@@ -143,6 +143,8 @@ const postgresRuntimeCapabilityConfigurationPath =
   "server/platform/postgresRuntimeCapabilityConfiguration.ts";
 const postgresRuntimeCapabilityEvidencePath =
   "server/platform/postgresRuntimeCapabilityEvidence.ts";
+const postgresRuntimeCapabilityTrustedDriverContractPath =
+  "server/platform/postgresRuntimeCapabilityTrustedDriverContract.ts";
 const attestedEvidenceV2FileName = [
   "railwayBotReplyStaging",
   "AttestedReleaseEvidence.ts",
@@ -156,6 +158,7 @@ const dormantBotReplyStagingAttestedModulePaths =
     attestedCutoverReadinessPath,
     attestedReadRepositoryPath,
     postgresRuntimeCapabilityEvidencePath,
+    postgresRuntimeCapabilityTrustedDriverContractPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -169,6 +172,19 @@ const dormantBotReplyStagingAttestedAllowedImporters =
         [
           "../server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts",
           attestedReadRepositoryPath,
+        ],
+      ]),
+    ],
+    [
+      postgresRuntimeCapabilityTrustedDriverContractPath,
+      new Map([
+        [
+          "./postgresRuntimeCapabilityConfiguration.ts",
+          postgresRuntimeCapabilityConfigurationPath,
+        ],
+        [
+          "./postgresRuntimeCapabilityEvidence.ts",
+          postgresRuntimeCapabilityEvidencePath,
         ],
       ]),
     ],
@@ -255,6 +271,19 @@ const dormantAttestedAllowedRuntimeDependencies =
         [
           "./postgresRuntimeCapabilityConfiguration.ts",
           postgresRuntimeCapabilityConfigurationPath,
+        ],
+      ]),
+    ],
+    [
+      postgresRuntimeCapabilityTrustedDriverContractPath,
+      new Map([
+        [
+          "./postgresRuntimeCapabilityConfiguration.ts",
+          postgresRuntimeCapabilityConfigurationPath,
+        ],
+        [
+          "./postgresRuntimeCapabilityEvidence.ts",
+          postgresRuntimeCapabilityEvidencePath,
         ],
       ]),
     ],

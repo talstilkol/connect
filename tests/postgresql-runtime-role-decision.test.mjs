@@ -112,3 +112,54 @@ test("records the remaining database and transport proof gaps", () => {
   assert.match(decision, /Migration[\s\S]*0033[\s\S]*`public\.audit_logs`/);
   assert.match(decision, /`pg_catalog, pg_temp`/);
 });
+
+test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
+  assert.match(
+    decision,
+    /postgresRuntimeCapabilityTrustedDriverContract\.ts[\s\S]*Contract בלבד/,
+  );
+  assert.match(
+    decision,
+    /BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY/,
+  );
+  assert.match(
+    decision,
+    /SET LOCAL search_path TO pg_catalog, pg_temp/,
+  );
+  assert.match(decision, /`public` אינו חלק[\s\S]*`search_path`/);
+  assert.match(
+    decision,
+    /35 עמודות Boolean[\s\S]*`dataTypeID=16`[\s\S]*`rowMode: "array"`/,
+  );
+  assert.match(decision, /`\[true, true, true, true\]`/);
+  assert.match(
+    decision,
+    /`\$1=expectedDatabaseName`[\s\S]*`\$2=expectedSystemIdentifier`[\s\S]*`\$3=expectedLoginRole`/,
+  );
+  assert.match(
+    decision,
+    /`destroy-client`[\s\S]*`Promise\.race` לבדו[\s\S]*אינו עומד בחוזה/,
+  );
+  assert.match(
+    decision,
+    /Cleanup deadline[\s\S]*השמדת Client גם בכשל Close/,
+  );
+  assert.match(
+    decision,
+    /ארבע היכולות[\s\S]*תוצאה חלקית אסורה[\s\S]*`activationAllowed:false`/,
+  );
+  assert.match(
+    decision,
+    /Job מבודד וחד־פעמי[\s\S]*ארבע Attestations חתומות/,
+  );
+  assert.match(decision, /D31-C2[\s\S]*D31-C3[\s\S]*NO-GO/);
+  assert.match(
+    decision,
+    /`default_transaction_read_only=on`[\s\S]*Extended protocol/,
+  );
+  assert.match(
+    decision,
+    /PostgreSQL 16\.13[\s\S]*35\/35[\s\S]*`activationAllowed:false`/,
+  );
+  assert.match(decision, /הוכחת תאימות מקומית בלבד/);
+});

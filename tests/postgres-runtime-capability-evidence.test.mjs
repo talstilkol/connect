@@ -6,6 +6,7 @@ import {
   postgresRuntimeCapabilityEvidenceCheckCodes,
   postgresRuntimeCapabilityEvidenceMigrationOwnerRole,
   postgresRuntimeCapabilityEvidencePolicyVersion,
+  postgresRuntimeCapabilityEvidenceResultFieldNames,
   postgresRuntimeCapabilityEvidenceSql,
 } from "../server/platform/postgresRuntimeCapabilityEvidence.ts";
 import {
@@ -137,6 +138,86 @@ test("publishes one complete immutable check catalog", () => {
   assert.equal(
     postgresRuntimeCapabilityEvidencePolicyVersion,
     "connect-postgres-runtime-capability-evidence-v1",
+  );
+  assert.equal(postgresRuntimeCapabilityEvidenceResultFieldNames.length, 35);
+  assert.equal(
+    new Set(postgresRuntimeCapabilityEvidenceResultFieldNames).size,
+    postgresRuntimeCapabilityEvidenceResultFieldNames.length,
+  );
+  assert.equal(
+    Object.isFrozen(postgresRuntimeCapabilityEvidenceResultFieldNames),
+    true,
+  );
+  assert.deepEqual(postgresRuntimeCapabilityEvidenceResultFieldNames, [
+    "postgres16",
+    "primaryServer",
+    "databaseNameMatches",
+    "systemIdentifierMatches",
+    "tlsSessionApproved",
+    "sessionRoleMatches",
+    "currentRoleMatches",
+    "loginRoleLeastPrivilege",
+    "migrationOwnerLeastPrivilege",
+    "migrationOwnerMember",
+    "migrationOwnerSettable",
+    "migrationOwnerInherited",
+    "protectedRoleTopologyLocked",
+    "migrationOwnerDefaultAclLocked",
+    "databaseConnect",
+    "databaseCreateBlocked",
+    "databaseTemporaryBlocked",
+    "publicSchemaUsage",
+    "publicSchemaCreateBlocked",
+    "searchPathLocked",
+    "protectedTablesExist",
+    "protectedTablesOwnedByMigrationOwner",
+    "protectedTableAclLocked",
+    "protectedTableAccess",
+    "protectedFunctionsExist",
+    "protectedFunctionsOwnedByMigrationOwner",
+    "protectedFunctionAclLocked",
+    "internalFunctionExecute",
+    "attestedPublishExecute",
+    "readbackExecute",
+    "publicProtectedFunctionExecute",
+    "attestedPublishSecurityDefiner",
+    "readbackSecurityDefiner",
+    "functionSearchPathLocked",
+    "readbackShapeLocked",
+  ]);
+
+  const finalSelectStart = postgresRuntimeCapabilityEvidenceSql.lastIndexOf(
+    "\n  SELECT\n    pg_catalog.current_setting('server_version_num')",
+  );
+  const finalSelectEnd = postgresRuntimeCapabilityEvidenceSql.indexOf(
+    "\n  FROM expected",
+    finalSelectStart,
+  );
+  assert.notEqual(finalSelectStart, -1);
+  assert.notEqual(finalSelectEnd, -1);
+  const selectedAliases = [
+    ...postgresRuntimeCapabilityEvidenceSql
+      .slice(finalSelectStart, finalSelectEnd)
+      .matchAll(/AS "([A-Za-z][A-Za-z0-9]*)"/g),
+  ].map((match) => match[1]);
+  assert.deepEqual(
+    selectedAliases,
+    postgresRuntimeCapabilityEvidenceResultFieldNames,
+  );
+});
+
+test("requires the trusted-driver search path without public", () => {
+  assert.match(
+    postgresRuntimeCapabilityEvidenceSql,
+    /current_setting\('search_path'\)[\s\S]*'pg_catalog, pg_temp'/,
+  );
+  assert.match(
+    postgresRuntimeCapabilityEvidenceSql,
+    /current_schemas\(TRUE\)[\s\S]*ARRAY\['pg_catalog'\]::NAME\[\]/,
+  );
+  assert.doesNotMatch(
+    postgresRuntimeCapabilityEvidenceSql,
+    /'pg_catalog, public, pg_temp'/,
   );
 });
 

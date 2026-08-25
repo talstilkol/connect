@@ -103,43 +103,45 @@ const policyKeys = Object.freeze([
 ]);
 const dependencyKeys = Object.freeze(["query"]);
 const resultKeys = Object.freeze(["rowCount", "rows"]);
-const resultRowKeys = Object.freeze([
-  "attestedPublishExecute",
-  "attestedPublishSecurityDefiner",
-  "currentRoleMatches",
-  "databaseConnect",
-  "databaseCreateBlocked",
+export const postgresRuntimeCapabilityEvidenceResultFieldNames = Object.freeze([
+  "postgres16",
+  "primaryServer",
   "databaseNameMatches",
-  "databaseTemporaryBlocked",
-  "functionSearchPathLocked",
-  "internalFunctionExecute",
+  "systemIdentifierMatches",
+  "tlsSessionApproved",
+  "sessionRoleMatches",
+  "currentRoleMatches",
   "loginRoleLeastPrivilege",
   "migrationOwnerLeastPrivilege",
   "migrationOwnerMember",
   "migrationOwnerSettable",
   "migrationOwnerInherited",
-  "migrationOwnerDefaultAclLocked",
-  "postgres16",
-  "primaryServer",
-  "protectedFunctionsExist",
-  "protectedFunctionsOwnedByMigrationOwner",
-  "protectedFunctionAclLocked",
   "protectedRoleTopologyLocked",
-  "protectedTableAccess",
+  "migrationOwnerDefaultAclLocked",
+  "databaseConnect",
+  "databaseCreateBlocked",
+  "databaseTemporaryBlocked",
+  "publicSchemaUsage",
+  "publicSchemaCreateBlocked",
+  "searchPathLocked",
   "protectedTablesExist",
   "protectedTablesOwnedByMigrationOwner",
   "protectedTableAclLocked",
-  "publicProtectedFunctionExecute",
-  "publicSchemaCreateBlocked",
-  "publicSchemaUsage",
+  "protectedTableAccess",
+  "protectedFunctionsExist",
+  "protectedFunctionsOwnedByMigrationOwner",
+  "protectedFunctionAclLocked",
+  "internalFunctionExecute",
+  "attestedPublishExecute",
   "readbackExecute",
+  "publicProtectedFunctionExecute",
+  "attestedPublishSecurityDefiner",
   "readbackSecurityDefiner",
+  "functionSearchPathLocked",
   "readbackShapeLocked",
-  "searchPathLocked",
-  "sessionRoleMatches",
-  "systemIdentifierMatches",
-  "tlsSessionApproved",
-]);
+] as const);
+const resultRowKeys: readonly string[] =
+  postgresRuntimeCapabilityEvidenceResultFieldNames;
 const runtimeEnvironments: readonly RuntimeEnvironment[] = Object.freeze([
   "development",
   "test",
@@ -618,9 +620,9 @@ export const postgresRuntimeCapabilityEvidenceSql = `
           )
       ) AS "publicSchemaCreateBlocked",
     pg_catalog.current_setting('search_path') =
-      'pg_catalog, public, pg_temp'
+      'pg_catalog, pg_temp'
       AND pg_catalog.current_schemas(TRUE) =
-        ARRAY['pg_catalog', 'public']::NAME[] AS "searchPathLocked",
+        ARRAY['pg_catalog']::NAME[] AS "searchPathLocked",
     protected_table_contract.protected_tables_exist
       AS "protectedTablesExist",
     protected_table_contract.protected_tables_owned_by_migration_owner
