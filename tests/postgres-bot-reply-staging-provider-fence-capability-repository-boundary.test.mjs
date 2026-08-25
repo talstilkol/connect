@@ -300,6 +300,73 @@ test("blocks dynamic runtime activation of the repository", async () => {
   ]);
 });
 
+test("blocks code-generation, vm, and module-loader escapes around the committed provider fence", async () => {
+  const root = await createFixture(
+    "connect-provider-fence-execution-escapes-",
+  );
+  const driverPath = [
+    "../server/platform/",
+    "nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts",
+  ].join("");
+  await Promise.all([
+    writeFile(
+      join(root, "scripts/provider-eval.mjs"),
+      [
+        "const execute = (0, eval);",
+        `export const activate = () => execute('import("${driverPath}")');`,
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/provider-function.mjs"),
+      [
+        'const Constructor = globalThis["Function"];',
+        `export const activate = Constructor('return import("${driverPath}")');`,
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/provider-module.mjs"),
+      [
+        'import { createRequire } from "node:module";',
+        "const load = createRequire(import.meta.url);",
+        `const target = ["../server/platform/", "${driverPath.split("/").at(-1)}"].join("");`,
+        "export const activate = () => load(target);",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/provider-vm.mjs"),
+      [
+        'import { runInThisContext as execute } from "node:vm";',
+        `export const activate = () => execute('import("${driverPath}")');`,
+        "",
+      ].join("\n"),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code: "DYNAMIC_CODE_EXECUTION_FORBIDDEN",
+      file: "scripts/provider-eval.mjs",
+    },
+    {
+      code: "DYNAMIC_CODE_EXECUTION_FORBIDDEN",
+      file: "scripts/provider-function.mjs",
+    },
+    {
+      code: "RUNTIME_NON_LITERAL_IMPORT_FORBIDDEN",
+      file: "scripts/provider-module.mjs",
+    },
+    {
+      code: "VM_RUNTIME_EXECUTION_FORBIDDEN",
+      file: "scripts/provider-vm.mjs",
+    },
+  ]);
+});
+
 test("blocks runtime declarations inside the provider-fence ports", async () => {
   const root = await createFixture(
     "connect-provider-fence-port-declaration-",

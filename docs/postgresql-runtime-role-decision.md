@@ -1,6 +1,6 @@
 # D31 — הפרדת זהויות PostgreSQL ל־Migration, API, Worker ו־Verifier
 
-תאריך: 2026-08-25
+תאריך: 2026-08-26
 
 סטטוס: החלטה חיצונית חוסמת Activation
 
@@ -416,8 +416,39 @@ Guard חוסם Import ישיר ועקיף מ־API,‏ Worker,‏ Startup ו־Run
 barrier או pre-send permit שבודק לפי Database clock את חלון 24 השעות, ה־Lease,
 ה־Policy, ה־Authorization, ה־Connection, ה־Reservation וה־Kill switch.
 לפני Activation נדרשים גם Pool ייעודי שמקובע ל־`pg` ול־Role המזוהה של D1e,
-חסימת Dynamic code loaders בכל Scripts/Startup,‏ Deadline וראיית Reconciliation
-למקרה שבו Commit הצליח אך `ReadyForQuery` לא הגיע ל־Worker.
+חסימת A2 של Child processes ושל Package execution graph בכל Scripts/Startup,
+‏Deadline וראיית Reconciliation למקרה שבו Commit הצליח אך `ReadyForQuery`
+לא הגיע ל־Worker.
+
+4.7.7.21 ‏D31-D1d-B-A1 מקשיח את ה־Source Guard באמצעות ניתוח AST מודע
+ל־Lexical scope בכל קובצי המקור ובכל קובצי `scripts/**` שהתגלו ישירות. הוא
+חוסם רכישת יכולת `eval` או `Function`, לרבות Alias דרך Declaration או
+Assignment,‏ Indirect eval,‏ שרשרת או Comma expression של `globalThis`,
+‏`Reflect.get` בעל מפתח סטטי, מפתח Computed שניתן לקיפול סטטי ו־Function
+constructor הנרכש מ־Callable מזוהה, מ־Bound callable או משרשרת default
+`constructor` מזוהה; הוא חוסם Runtime acquisition של
+`node:vm`, לרבות Alias או שרשרת של `process`; והוא חוסם
+`createRequire`,‏ `register`,‏ `registerHooks`,‏ `runMain`,‏ Namespace/default
+של `node:module`, כל רכישה של אובייקט CommonJS `module` או `require`,
+‏`module.require` ו־`process.getBuiltinModule`. שמות מקומיים שמסתירים
+`eval`,‏ `Function`,‏ `Reflect`,‏ `process`,‏ `require` או `module`, מאפייני
+Object בעלי שם דומה, Type-only references וה־Import המצומצם `builtinModules`
+אינם מסווגים כיכולת הרצה. Contract test מקבע גם את Runtime self-binding של
+Named function/class expressions שעליו נשען ה־Binder. בדיקות שליליות ייעודיות
+מקבעות גבולות אלה גם סביב ה־Provider fence הרדום. A1 אינו Sandbox ואינו סוגר
+את A2: ‏`spawn`,‏ `execFile`,‏ `fork`, Node loader flags,‏ `NODE_OPTIONS`,‏
+Shell commands,‏ `package.json.scripts`,‏ Directory symlinks תחת `scripts`
+ו־Script-to-Script execution edges טרם נכנסו ל־Execution graph. לכן
+ה־Activation נשאר NO-GO.
+
+| A1 acceptance case | תוצאה נדרשת |
+| --- | --- |
+| `eval`,‏ `Function`,‏ Assignment alias,‏ Global chain,‏ Comma,‏ `Reflect.get`, מפתח סטטי מקופל, Bound callable או שרשרת `.constructor` מזוהה | חסימה באמצעות `DYNAMIC_CODE_EXECUTION_FORBIDDEN` |
+| `node:vm` דרך ESM,‏ CommonJS,‏ Process alias/chain או `process.getBuiltinModule` | חסימה באמצעות `VM_RUNTIME_EXECUTION_FORBIDDEN` |
+| `createRequire`,‏ Module hooks,‏ Global `require`, כל אובייקט CommonJS `module` או `module.require` | חסימה באמצעות `RUNTIME_NON_LITERAL_IMPORT_FORBIDDEN` |
+| Lexical shadow מקומי, Object property דומה או Type-only reference | מותר, ללא False positive |
+| `declare` ללא Runtime binding | אינו נחשב Shadow ואינו עוקף חסימה |
+| Child process,‏ Node flags,‏ Shell,‏ Directory symlink או Package/script execution edge | A2 — עדיין חוסם Activation, ללא טענת כיסוי ב־A1 |
 
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.

@@ -69,11 +69,6 @@ const bannedPatterns = [
       /\b(?:Math\.random|crypto\.randomUUID)\s*\(/,
   },
   {
-    code: "DYNAMIC_CODE_EXECUTION_FORBIDDEN",
-    pattern:
-      /\b(?:eval|Function)\s*\(|new\s+Function\s*\(/,
-  },
-  {
     code: "UNSAFE_HTML_INJECTION_FORBIDDEN",
     pattern: /\bdangerouslySetInnerHTML\b/,
   },
@@ -256,8 +251,6 @@ const productionImplementationStatePropertyNames =
     "sloMeasurement",
     "dataRetentionPolicy",
   ]);
-const sourceGuardrailSelfPath =
-  "scripts/verify-source-guardrails.mjs";
 const dormantAttestedAllowedRuntimeDependencies =
   new Map([
     [
@@ -1395,18 +1388,869 @@ function declaredModuleSpecifiers(sourceFile) {
   return [...specifiers];
 }
 
+const dynamicCodeExecutionGlobalNames = new Set([
+  "eval",
+  "Function",
+]);
+const runtimeGlobalObjectNames = new Set([
+  "globalThis",
+  "global",
+  "self",
+  "window",
+]);
+const runtimeProcessGlobalNames = new Set([
+  "process",
+]);
+const runtimeReflectGlobalNames = new Set([
+  "Reflect",
+]);
+const runtimeModuleLoaderExportNames = new Set([
+  "Module",
+  "createRequire",
+  "default",
+  "register",
+  "registerHooks",
+  "runMain",
+]);
+const runtimeModuleLoaderGlobalNames = new Set([
+  "module",
+  "require",
+]);
+
+function importAliasIsTypeOnly(declaration) {
+  let current = declaration;
+  while (current && !ts.isImportDeclaration(current)) {
+    if (
+      (ts.isImportSpecifier(current) &&
+        current.isTypeOnly) ||
+      (ts.isImportEqualsDeclaration(current) &&
+        current.isTypeOnly) ||
+      (ts.isImportClause(current) &&
+        current.isTypeOnly)
+    ) {
+      return true;
+    }
+    current = current.parent;
+  }
+  return current?.importClause?.isTypeOnly === true;
+}
+
+function symbolProvidesRuntimeBinding(symbol) {
+  if (
+    (symbol.flags & ts.SymbolFlags.ModuleExports) !== 0
+  ) {
+    return false;
+  }
+  const declarations = symbol.declarations ?? [];
+  const declarationProvidesRuntimeBinding =
+    (declaration) =>
+      (
+        ts.getCombinedModifierFlags(declaration) &
+        ts.ModifierFlags.Ambient
+      ) === 0 &&
+      !importAliasIsTypeOnly(declaration);
+  return (
+    (
+      (symbol.flags & ts.SymbolFlags.Value) !== 0 ||
+      (symbol.flags & ts.SymbolFlags.Alias) !== 0
+    ) &&
+    declarations.some(
+      declarationProvidesRuntimeBinding,
+    )
+  );
+}
+
+function runtimeBindingSymbolAtIdentifier(node) {
+  const escapedName = ts.escapeLeadingUnderscores(
+    node.text,
+  );
+  let current = node.parent;
+  while (current) {
+    if (
+      (
+        ts.isFunctionExpression(current) ||
+        ts.isClassExpression(current)
+      ) &&
+      current.name?.text === node.text &&
+      current.symbol &&
+      symbolProvidesRuntimeBinding(current.symbol)
+    ) {
+      return current.symbol;
+    }
+    const symbol = current.locals?.get(escapedName);
+    if (
+      symbol &&
+      symbolProvidesRuntimeBinding(symbol)
+    ) {
+      return symbol;
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
+function identifierIsShadowedAtRuntime(node) {
+  return runtimeBindingSymbolAtIdentifier(node) !== null;
+}
+
+function identifierIsRuntimeValueReference(
+  node,
+  parent,
+) {
+  if (!parent) return true;
+  if (
+    (
+      "name" in parent &&
+      parent.name === node &&
+      !ts.isShorthandPropertyAssignment(parent)
+    ) ||
+    (
+      "propertyName" in parent &&
+      parent.propertyName === node
+    ) ||
+    (
+      "label" in parent &&
+      parent.label === node
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function unwrapRuntimeExpression(node) {
+  let current = node;
+  while (current) {
+    if (
+      ts.isParenthesizedExpression(current) ||
+      ts.isAsExpression(current) ||
+      ts.isNonNullExpression(current) ||
+      ts.isSatisfiesExpression(current) ||
+      ts.isTypeAssertionExpression(current)
+    ) {
+      current = current.expression;
+      continue;
+    }
+    if (
+      ts.isBinaryExpression(current) &&
+      current.operatorToken.kind ===
+        ts.SyntaxKind.CommaToken
+    ) {
+      current = current.right;
+      continue;
+    }
+    if (
+      ts.isCommaListExpression(current) &&
+      current.elements.length > 0
+    ) {
+      current = current.elements.at(-1);
+      continue;
+    }
+    break;
+  }
+  return current;
+}
+
+function runtimeStaticString(node) {
+  const expression = unwrapRuntimeExpression(node);
+  if (!expression) return null;
+  if (ts.isStringLiteralLike(expression)) {
+    return expression.text;
+  }
+  if (
+    ts.isBinaryExpression(expression) &&
+    expression.operatorToken.kind ===
+      ts.SyntaxKind.PlusToken
+  ) {
+    const left = runtimeStaticString(expression.left);
+    const right = runtimeStaticString(expression.right);
+    return left === null || right === null
+      ? null
+      : `${left}${right}`;
+  }
+  if (ts.isTemplateExpression(expression)) {
+    let value = expression.head.text;
+    for (const span of expression.templateSpans) {
+      const expressionValue = runtimeStaticString(
+        span.expression,
+      );
+      if (expressionValue === null) return null;
+      value += expressionValue;
+      value += span.literal.text;
+    }
+    return value;
+  }
+  return null;
+}
+
+function runtimeMemberName(node) {
+  if (ts.isPropertyAccessExpression(node)) {
+    return node.name.text;
+  }
+  if (
+    ts.isElementAccessExpression(node) &&
+    node.argumentExpression
+  ) {
+    return runtimeStaticString(
+      node.argumentExpression,
+    );
+  }
+  return null;
+}
+
+function runtimeMemberBase(node) {
+  if (
+    ts.isPropertyAccessExpression(node) ||
+    ts.isElementAccessExpression(node)
+  ) {
+    return unwrapRuntimeExpression(node.expression);
+  }
+  return null;
+}
+
+function isUnshadowedRuntimeIdentifier(
+  node,
+  names,
+) {
+  const expression = unwrapRuntimeExpression(node);
+  return expression !== undefined &&
+    ts.isIdentifier(expression) &&
+    names.has(expression.text) &&
+    !identifierIsShadowedAtRuntime(expression);
+}
+
+function isRuntimeGlobalObject(node) {
+  return isUnshadowedRuntimeIdentifier(
+    node,
+    runtimeGlobalObjectNames,
+  );
+}
+
+function runtimeModuleSpecifierText(node) {
+  return runtimeStaticString(node);
+}
+
+function runtimeStaticName(node) {
+  if (node && ts.isIdentifier(node)) {
+    return node.text;
+  }
+  return runtimeStaticString(node);
+}
+
+function moduleSpecifierIsVm(specifier) {
+  return specifier === "node:vm" ||
+    specifier === "vm";
+}
+
+function moduleSpecifierIsNodeModule(specifier) {
+  return specifier === "node:module" ||
+    specifier === "module";
+}
+
+function importClauseAcquiresModuleLoader(clause) {
+  if (!clause || clause.isTypeOnly) return false;
+  if (clause.name) return true;
+  const namedBindings = clause.namedBindings;
+  if (!namedBindings) return false;
+  if (ts.isNamespaceImport(namedBindings)) {
+    return true;
+  }
+  return namedBindings.elements.some((element) =>
+    !element.isTypeOnly &&
+    runtimeModuleLoaderExportNames.has(
+      (element.propertyName ?? element.name).text,
+    )
+  );
+}
+
+function exportClauseAcquiresModuleLoader(clause) {
+  if (!clause || ts.isNamespaceExport(clause)) {
+    return true;
+  }
+  return clause.elements.some((element) =>
+    !element.isTypeOnly &&
+    runtimeModuleLoaderExportNames.has(
+      (element.propertyName ?? element.name).text,
+    )
+  );
+}
+
+function objectBindingAcquiresGlobalCapability(
+  name,
+  capabilityNames,
+) {
+  return ts.isObjectBindingPattern(name) &&
+    name.elements.some((element) => {
+      const propertyName = runtimeStaticName(
+        element.propertyName ?? element.name,
+      );
+      return propertyName !== null &&
+        capabilityNames.has(propertyName);
+    });
+}
+
+function analyzeForbiddenRuntimeExecutionCapabilities(
+  sourceFile,
+) {
+  ts.bindSourceFile(sourceFile, {
+    target: ts.ScriptTarget.Latest,
+  });
+  let hasDynamicCodeExecution = false;
+  let hasRuntimeModuleLoader = false;
+  let hasServerOnlyRuntimeCapability = false;
+  let hasVmRuntimeExecution = false;
+  const runtimeGlobalObjectAliasSymbols = new Set();
+  const runtimeProcessAliasSymbols = new Set();
+  const runtimeCallableAliasSymbols = new Set();
+  const unshadowedModuleReferences = new WeakSet();
+  const unshadowedRequireReferences = new WeakSet();
+
+  const runtimeCapabilityMemberAccess = (node) => {
+    const expression = unwrapRuntimeExpression(node);
+    if (!expression) return null;
+    if (
+      ts.isPropertyAccessExpression(expression) ||
+      ts.isElementAccessExpression(expression)
+    ) {
+      return {
+        base: runtimeMemberBase(expression),
+        name: runtimeMemberName(expression),
+      };
+    }
+    if (
+      ts.isCallExpression(expression) &&
+      expression.arguments.length >= 2 &&
+      (
+        ts.isPropertyAccessExpression(
+          expression.expression,
+        ) ||
+        ts.isElementAccessExpression(
+          expression.expression,
+        )
+      ) &&
+      runtimeMemberName(expression.expression) ===
+        "get" &&
+      isUnshadowedRuntimeIdentifier(
+        runtimeMemberBase(expression.expression),
+        runtimeReflectGlobalNames,
+      )
+    ) {
+      return {
+        base: expression.arguments[0],
+        name: runtimeStaticString(
+          expression.arguments[1],
+        ),
+      };
+    }
+    return null;
+  };
+
+  const expressionIsRuntimeGlobalObjectOrAlias =
+    (node) => {
+      const expression = unwrapRuntimeExpression(node);
+      if (!expression) return false;
+      if (isRuntimeGlobalObject(expression)) {
+        return true;
+      }
+      if (ts.isIdentifier(expression)) {
+        return runtimeGlobalObjectAliasSymbols.has(
+          runtimeBindingSymbolAtIdentifier(expression),
+        );
+      }
+      const access =
+        runtimeCapabilityMemberAccess(expression);
+      return access !== null &&
+        access.name !== null &&
+        runtimeGlobalObjectNames.has(access.name) &&
+        expressionIsRuntimeGlobalObjectOrAlias(
+          access.base,
+        );
+    };
+
+  const expressionIsRuntimeProcessOrAlias =
+    (node) => {
+      const expression = unwrapRuntimeExpression(node);
+      if (!expression) return false;
+      if (
+        isUnshadowedRuntimeIdentifier(
+          expression,
+          runtimeProcessGlobalNames,
+        )
+      ) {
+        return true;
+      }
+      if (ts.isIdentifier(expression)) {
+        return runtimeProcessAliasSymbols.has(
+          runtimeBindingSymbolAtIdentifier(expression),
+        );
+      }
+      const access =
+        runtimeCapabilityMemberAccess(expression);
+      return access !== null &&
+        access.name === "process" &&
+        expressionIsRuntimeGlobalObjectOrAlias(
+          access.base,
+        );
+    };
+
+  const expressionHasDefaultCallableConstructor = (
+    node,
+    visitedSymbols = new Set(),
+  ) => {
+    const expression = unwrapRuntimeExpression(node);
+    if (!expression) return false;
+    if (ts.isArrayLiteralExpression(expression)) {
+      return true;
+    }
+    if (ts.isObjectLiteralExpression(expression)) {
+      return expression.properties.every(
+        (property) => {
+          if (
+            ts.isSpreadAssignment(property) ||
+            !("name" in property)
+          ) {
+            return false;
+          }
+          const name = runtimeStaticName(
+            property.name,
+          );
+          return name !== null &&
+            name !== "constructor" &&
+            name !== "__proto__";
+        },
+      );
+    }
+    if (!ts.isIdentifier(expression)) return false;
+    const symbol = runtimeBindingSymbolAtIdentifier(
+      expression,
+    );
+    if (!symbol || visitedSymbols.has(symbol)) {
+      return false;
+    }
+    visitedSymbols.add(symbol);
+    return (symbol.declarations ?? []).some(
+      (declaration) =>
+        (
+          ts.isVariableDeclaration(declaration) ||
+          ts.isParameter(declaration) ||
+          ts.isBindingElement(declaration)
+        ) &&
+        declaration.initializer !== undefined &&
+        expressionHasDefaultCallableConstructor(
+          declaration.initializer,
+          visitedSymbols,
+        ),
+    );
+  };
+
+  const expressionIsKnownCallable = (
+    node,
+    visitedSymbols = new Set(),
+  ) => {
+    const expression = unwrapRuntimeExpression(node);
+    if (!expression) return false;
+    if (
+      ts.isArrowFunction(expression) ||
+      ts.isFunctionExpression(expression) ||
+      ts.isClassExpression(expression)
+    ) {
+      return true;
+    }
+    if (ts.isCallExpression(expression)) {
+      const boundAccess =
+        runtimeCapabilityMemberAccess(
+          expression.expression,
+        );
+      if (
+        boundAccess?.name === "bind" &&
+        boundAccess.base &&
+        expressionIsKnownCallable(
+          boundAccess.base,
+          visitedSymbols,
+        )
+      ) {
+        return true;
+      }
+    }
+    const constructorAccess =
+      runtimeCapabilityMemberAccess(expression);
+    if (
+      constructorAccess?.name === "constructor" &&
+      constructorAccess.base &&
+      (
+        expressionIsKnownCallable(
+          constructorAccess.base,
+          visitedSymbols,
+        ) ||
+        expressionHasDefaultCallableConstructor(
+          constructorAccess.base,
+        )
+      )
+    ) {
+      return true;
+    }
+    if (!ts.isIdentifier(expression)) return false;
+    const symbol = runtimeBindingSymbolAtIdentifier(
+      expression,
+    );
+    if (!symbol || visitedSymbols.has(symbol)) {
+      return false;
+    }
+    if (runtimeCallableAliasSymbols.has(symbol)) {
+      return true;
+    }
+    visitedSymbols.add(symbol);
+    return (symbol.declarations ?? []).some(
+      (declaration) => {
+        if (
+          ts.isFunctionDeclaration(declaration) ||
+          ts.isClassDeclaration(declaration) ||
+          ts.isFunctionExpression(declaration) ||
+          ts.isClassExpression(declaration)
+        ) {
+          return true;
+        }
+        if (
+          (
+            ts.isVariableDeclaration(declaration) ||
+            ts.isParameter(declaration) ||
+            ts.isBindingElement(declaration)
+          ) &&
+          declaration.initializer
+        ) {
+          return expressionIsKnownCallable(
+            declaration.initializer,
+            visitedSymbols,
+          );
+        }
+        return false;
+      },
+    );
+  };
+
+  const pendingCapabilityAliases = [];
+  const addPendingCapabilityAlias = (
+    identifier,
+    initializer,
+  ) => {
+    if (!identifier || !initializer) return;
+    pendingCapabilityAliases.push({
+      initializer,
+      symbol: runtimeBindingSymbolAtIdentifier(
+        identifier,
+      ),
+    });
+  };
+  const collectCapabilityAliases = (node) => {
+    if (
+      (
+        ts.isVariableDeclaration(node) ||
+        ts.isParameter(node) ||
+        ts.isBindingElement(node)
+      ) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer
+    ) {
+      addPendingCapabilityAlias(
+        node.name,
+        node.initializer,
+      );
+    } else if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind ===
+        ts.SyntaxKind.EqualsToken &&
+      ts.isIdentifier(node.left)
+    ) {
+      addPendingCapabilityAlias(
+        node.left,
+        node.right,
+      );
+    }
+    ts.forEachChild(
+      node,
+      collectCapabilityAliases,
+    );
+  };
+  collectCapabilityAliases(sourceFile);
+  let aliasesChanged = true;
+  while (aliasesChanged) {
+    aliasesChanged = false;
+    for (const alias of pendingCapabilityAliases) {
+      if (
+        alias.symbol &&
+        !runtimeGlobalObjectAliasSymbols.has(
+          alias.symbol,
+        ) &&
+        expressionIsRuntimeGlobalObjectOrAlias(
+          alias.initializer,
+        )
+      ) {
+        runtimeGlobalObjectAliasSymbols.add(
+          alias.symbol,
+        );
+        aliasesChanged = true;
+      }
+      if (
+        alias.symbol &&
+        !runtimeProcessAliasSymbols.has(
+          alias.symbol,
+        ) &&
+        expressionIsRuntimeProcessOrAlias(
+          alias.initializer,
+        )
+      ) {
+        runtimeProcessAliasSymbols.add(
+          alias.symbol,
+        );
+        aliasesChanged = true;
+      }
+      if (
+        alias.symbol &&
+        !runtimeCallableAliasSymbols.has(
+          alias.symbol,
+        ) &&
+        expressionIsKnownCallable(
+          alias.initializer,
+        )
+      ) {
+        runtimeCallableAliasSymbols.add(
+          alias.symbol,
+        );
+        aliasesChanged = true;
+      }
+    }
+  }
+
+  const visit = (node, parent) => {
+    if (
+      ts.isTypeNode(node) ||
+      ts.isInterfaceDeclaration(node) ||
+      ts.isTypeAliasDeclaration(node)
+    ) {
+      return;
+    }
+    if (
+      ts.isImportDeclaration(node) &&
+      !importDeclarationIsTypeOnly(node)
+    ) {
+      const specifier = runtimeModuleSpecifierText(
+        node.moduleSpecifier,
+      );
+      if (moduleSpecifierIsVm(specifier)) {
+        hasVmRuntimeExecution = true;
+      }
+      if (
+        moduleSpecifierIsNodeModule(specifier) &&
+        importClauseAcquiresModuleLoader(
+          node.importClause,
+        )
+      ) {
+        hasRuntimeModuleLoader = true;
+      }
+    } else if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      !exportDeclarationIsTypeOnly(node)
+    ) {
+      const specifier = runtimeModuleSpecifierText(
+        node.moduleSpecifier,
+      );
+      if (moduleSpecifierIsVm(specifier)) {
+        hasVmRuntimeExecution = true;
+      }
+      if (
+        moduleSpecifierIsNodeModule(specifier) &&
+        exportClauseAcquiresModuleLoader(
+          node.exportClause,
+        )
+      ) {
+        hasRuntimeModuleLoader = true;
+      }
+    } else if (
+      ts.isImportEqualsDeclaration(node) &&
+      !node.isTypeOnly &&
+      ts.isExternalModuleReference(
+        node.moduleReference,
+      )
+    ) {
+      const specifier = runtimeModuleSpecifierText(
+        node.moduleReference.expression,
+      );
+      if (moduleSpecifierIsVm(specifier)) {
+        hasVmRuntimeExecution = true;
+      }
+      if (moduleSpecifierIsNodeModule(specifier)) {
+        hasRuntimeModuleLoader = true;
+      }
+    }
+
+    if (
+      ts.isIdentifier(node) &&
+      identifierIsRuntimeValueReference(
+        node,
+        parent,
+      ) &&
+      !identifierIsShadowedAtRuntime(node)
+    ) {
+      if (
+        dynamicCodeExecutionGlobalNames.has(
+          node.text,
+        )
+      ) {
+        hasDynamicCodeExecution = true;
+      }
+      if (node.text === "require") {
+        unshadowedRequireReferences.add(node);
+        hasRuntimeModuleLoader = true;
+        hasServerOnlyRuntimeCapability = true;
+      } else if (node.text === "module") {
+        unshadowedModuleReferences.add(node);
+        hasRuntimeModuleLoader = true;
+        hasServerOnlyRuntimeCapability = true;
+      } else if (
+        node.text === "Buffer" ||
+        node.text === "__dirname" ||
+        node.text === "__filename"
+      ) {
+        hasServerOnlyRuntimeCapability = true;
+      }
+    }
+
+    const capabilityAccess =
+      runtimeCapabilityMemberAccess(node);
+    if (capabilityAccess) {
+      const memberName = capabilityAccess.name;
+      const base = capabilityAccess.base;
+      if (
+        base &&
+        expressionIsRuntimeGlobalObjectOrAlias(base)
+      ) {
+        if (
+          memberName !== null &&
+          dynamicCodeExecutionGlobalNames.has(
+            memberName,
+          )
+        ) {
+          hasDynamicCodeExecution = true;
+        }
+        if (
+          memberName !== null &&
+          runtimeModuleLoaderGlobalNames.has(
+            memberName,
+          )
+        ) {
+          hasRuntimeModuleLoader = true;
+          hasServerOnlyRuntimeCapability = true;
+        }
+      }
+      if (
+        memberName === "constructor" &&
+        base &&
+        expressionIsKnownCallable(base)
+      ) {
+        hasDynamicCodeExecution = true;
+      }
+      if (
+        memberName === "getBuiltinModule" &&
+        base &&
+        expressionIsRuntimeProcessOrAlias(base)
+      ) {
+        hasRuntimeModuleLoader = true;
+        hasServerOnlyRuntimeCapability = true;
+        if (
+          ts.isCallExpression(parent) &&
+          parent.expression === node &&
+          moduleSpecifierIsVm(
+            runtimeModuleSpecifierText(
+              parent.arguments[0],
+            ),
+          )
+        ) {
+          hasVmRuntimeExecution = true;
+        }
+      }
+    }
+
+    if (
+      ts.isVariableDeclaration(node) &&
+      node.initializer &&
+      expressionIsRuntimeGlobalObjectOrAlias(
+        node.initializer,
+      )
+    ) {
+      if (
+        objectBindingAcquiresGlobalCapability(
+          node.name,
+          dynamicCodeExecutionGlobalNames,
+        )
+      ) {
+        hasDynamicCodeExecution = true;
+      }
+      if (
+        objectBindingAcquiresGlobalCapability(
+          node.name,
+          runtimeModuleLoaderGlobalNames,
+        )
+      ) {
+        hasRuntimeModuleLoader = true;
+        hasServerOnlyRuntimeCapability = true;
+      }
+    }
+
+    if (ts.isCallExpression(node)) {
+      const specifier =
+        node.expression.kind ===
+            ts.SyntaxKind.ImportKeyword ||
+          (
+            ts.isIdentifier(node.expression) &&
+            unshadowedRequireReferences.has(
+              node.expression,
+            )
+          )
+          ? runtimeModuleSpecifierText(
+              node.arguments[0],
+            )
+          : null;
+      if (moduleSpecifierIsVm(specifier)) {
+        hasVmRuntimeExecution = true;
+      }
+      if (
+        moduleSpecifierIsNodeModule(specifier) &&
+        node.expression.kind ===
+          ts.SyntaxKind.ImportKeyword
+      ) {
+        hasRuntimeModuleLoader = true;
+      }
+    }
+
+    ts.forEachChild(node, (child) =>
+      visit(child, node)
+    );
+  };
+
+  visit(sourceFile, null);
+  return {
+    hasDynamicCodeExecution,
+    hasRuntimeModuleLoader,
+    hasServerOnlyRuntimeCapability,
+    hasVmRuntimeExecution,
+    unshadowedModuleReferences,
+    unshadowedRequireReferences,
+  };
+}
+
 function analyzeRuntimeDependencies(sourceFile) {
+  const executionCapabilities =
+    analyzeForbiddenRuntimeExecutionCapabilities(
+      sourceFile,
+    );
   const specifiers = new Set();
   let hasNonLiteralRuntimeImport = false;
   let hasServerOnlyRuntimeCapability = false;
   const nodes = [];
   const createRequireFactoryAliases = new Set();
-  const moduleObjectAliases = new Set([
-    "module",
-  ]);
-  const returnedRequireAliases = new Set([
-    "require",
-  ]);
+  const moduleObjectAliases = new Set();
+  const returnedRequireAliases = new Set();
   const addStringLiteral = (node) => {
     if (node && ts.isStringLiteralLike(node)) {
       specifiers.add(node.text);
@@ -1426,7 +2270,9 @@ function analyzeRuntimeDependencies(sourceFile) {
     node !== undefined &&
     ts.isCallExpression(node) &&
     ts.isIdentifier(node.expression) &&
-    node.expression.text === "require";
+    executionCapabilities
+      .unshadowedRequireReferences
+      .has(node.expression);
   const directModuleLoaderCall = (node) =>
     directRequireCall(node) &&
     node.arguments.length === 1 &&
@@ -1445,7 +2291,14 @@ function analyzeRuntimeDependencies(sourceFile) {
       (
         (
           ts.isIdentifier(node.expression) &&
-          moduleObjectAliases.has(node.expression.text)
+          (
+            moduleObjectAliases.has(
+              node.expression.text,
+            ) ||
+            executionCapabilities
+              .unshadowedModuleReferences
+              .has(node.expression)
+          )
         ) || directModuleLoaderCall(node.expression)
       )
     ) || (
@@ -1457,7 +2310,14 @@ function analyzeRuntimeDependencies(sourceFile) {
       (
         (
           ts.isIdentifier(node.expression) &&
-          moduleObjectAliases.has(node.expression.text)
+          (
+            moduleObjectAliases.has(
+              node.expression.text,
+            ) ||
+            executionCapabilities
+              .unshadowedModuleReferences
+              .has(node.expression)
+          )
         ) || directModuleLoaderCall(node.expression)
       )
     );
@@ -1490,8 +2350,12 @@ function analyzeRuntimeDependencies(sourceFile) {
       node.name.text === "require" &&
       ts.isIdentifier(node.expression) &&
       (
-        node.expression.text === "module" ||
-        moduleObjectAliases.has(node.expression.text)
+        moduleObjectAliases.has(
+          node.expression.text,
+        ) ||
+        executionCapabilities
+          .unshadowedModuleReferences
+          .has(node.expression)
       )
     ) || (
       node !== undefined &&
@@ -1501,8 +2365,12 @@ function analyzeRuntimeDependencies(sourceFile) {
       node.argumentExpression.text === "require" &&
       ts.isIdentifier(node.expression) &&
       (
-        node.expression.text === "module" ||
-        moduleObjectAliases.has(node.expression.text)
+        moduleObjectAliases.has(
+          node.expression.text,
+        ) ||
+        executionCapabilities
+          .unshadowedModuleReferences
+          .has(node.expression)
       )
     );
   const addBindingAlias = (name, initializer) => {
@@ -1510,7 +2378,12 @@ function analyzeRuntimeDependencies(sourceFile) {
     let changed = false;
     if (
       ts.isIdentifier(initializer) &&
-      moduleObjectAliases.has(initializer.text) &&
+      (
+        moduleObjectAliases.has(initializer.text) ||
+        executionCapabilities
+          .unshadowedModuleReferences
+          .has(initializer)
+      ) &&
       !moduleObjectAliases.has(name)
     ) {
       moduleObjectAliases.add(name);
@@ -1534,7 +2407,14 @@ function analyzeRuntimeDependencies(sourceFile) {
         moduleRequireExpression(initializer) ||
         (
           ts.isIdentifier(initializer) &&
-          returnedRequireAliases.has(initializer.text)
+          (
+            returnedRequireAliases.has(
+              initializer.text,
+            ) ||
+            executionCapabilities
+              .unshadowedRequireReferences
+              .has(initializer)
+          )
         )
       ) && !returnedRequireAliases.has(name)
     ) {
@@ -1623,7 +2503,14 @@ function analyzeRuntimeDependencies(sourceFile) {
     ts.isCallExpression(node) && (
       (
         ts.isIdentifier(node.expression) &&
-        returnedRequireAliases.has(node.expression.text)
+        (
+          returnedRequireAliases.has(
+            node.expression.text,
+          ) ||
+          executionCapabilities
+            .unshadowedRequireReferences
+            .has(node.expression)
+        )
       ) ||
       moduleRequireExpression(node.expression) ||
       returnedRequireExpression(node.expression)
@@ -1676,82 +2563,31 @@ function analyzeRuntimeDependencies(sourceFile) {
   };
 
   visit(sourceFile);
-  const forbiddenLoaderNames = new Set([
-    "require",
-    "createRequire",
-    "getBuiltinModule",
-  ]);
-  const inspectLoaderCapability = (node) => {
-    if (
-      ts.isInterfaceDeclaration(node) ||
-      ts.isTypeAliasDeclaration(node) ||
-      (
-        ts.isImportDeclaration(node) &&
-        importDeclarationIsTypeOnly(node)
-      ) ||
-      (
-        ts.isExportDeclaration(node) &&
-        exportDeclarationIsTypeOnly(node)
-      ) ||
-      (
-        ts.isImportEqualsDeclaration(node) &&
-        node.isTypeOnly
-      )
-    ) {
-      return;
-    }
-
-    if (
-      ts.isElementAccessExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      moduleObjectAliases.has(node.expression.text)
-    ) {
-      hasNonLiteralRuntimeImport = true;
-      return;
-    }
-
-    if (
-      (
-        ts.isIdentifier(node) &&
-        forbiddenLoaderNames.has(node.text)
-      ) ||
-      (
-        ts.isStringLiteralLike(node) &&
-        forbiddenLoaderNames.has(node.text)
-      )
-    ) {
-      hasNonLiteralRuntimeImport = true;
-      hasServerOnlyRuntimeCapability = true;
-      return;
-    }
-
-    if (
-      ts.isIdentifier(node) &&
-      (
-        node.text === "Buffer" ||
-        node.text === "__filename" ||
-        node.text === "__dirname"
-      )
-    ) {
-      hasServerOnlyRuntimeCapability = true;
-    }
-
-    ts.forEachChild(node, inspectLoaderCapability);
-  };
-  inspectLoaderCapability(sourceFile);
   if (
-    specifiers.has("node:module") ||
-    specifiers.has("module") ||
+    executionCapabilities.hasRuntimeModuleLoader ||
     nodes.some((node) =>
       moduleRequireExpression(node),
     )
   ) {
     hasNonLiteralRuntimeImport = true;
   }
+  hasServerOnlyRuntimeCapability =
+    hasServerOnlyRuntimeCapability ||
+    executionCapabilities
+      .hasServerOnlyRuntimeCapability;
   return {
     specifiers: [...specifiers],
+    hasDynamicCodeExecution:
+      executionCapabilities
+        .hasDynamicCodeExecution,
     hasNonLiteralRuntimeImport,
     hasServerOnlyRuntimeCapability,
+    hasVmRuntimeExecution:
+      executionCapabilities
+        .hasVmRuntimeExecution ||
+      [...specifiers].some(
+        moduleSpecifierIsVm,
+      ),
   };
 }
 
@@ -2453,6 +3289,8 @@ export async function inspectSourceGuardrails(
     new Map();
   const serverOnlyRuntimeCapabilitiesByFile =
     new Map();
+  const dynamicCodeExecutionByFile = new Map();
+  const vmRuntimeExecutionByFile = new Map();
 
   for (const file of files) {
     const sourceFile = parsedSources.get(file);
@@ -2540,6 +3378,14 @@ export async function inspectSourceGuardrails(
     serverOnlyRuntimeCapabilitiesByFile.set(
       file,
       dependencyAnalysis.hasServerOnlyRuntimeCapability,
+    );
+    dynamicCodeExecutionByFile.set(
+      file,
+      dependencyAnalysis.hasDynamicCodeExecution,
+    );
+    vmRuntimeExecutionByFile.set(
+      file,
+      dependencyAnalysis.hasVmRuntimeExecution,
     );
   }
 
@@ -2635,6 +3481,19 @@ export async function inspectSourceGuardrails(
           file: path,
         });
       }
+    }
+
+    if (dynamicCodeExecutionByFile.get(file)) {
+      addFinding({
+        code: "DYNAMIC_CODE_EXECUTION_FORBIDDEN",
+        file: path,
+      });
+    }
+    if (vmRuntimeExecutionByFile.get(file)) {
+      addFinding({
+        code: "VM_RUNTIME_EXECUTION_FORBIDDEN",
+        file: path,
+      });
     }
 
     if (
@@ -2891,6 +3750,20 @@ export async function inspectSourceGuardrails(
     const dependencyAnalysis =
       analyzeRuntimeDependencies(sourceFile);
     if (
+      dependencyAnalysis.hasDynamicCodeExecution
+    ) {
+      addFinding({
+        code: "DYNAMIC_CODE_EXECUTION_FORBIDDEN",
+        file: importerPath,
+      });
+    }
+    if (dependencyAnalysis.hasVmRuntimeExecution) {
+      addFinding({
+        code: "VM_RUNTIME_EXECUTION_FORBIDDEN",
+        file: importerPath,
+      });
+    }
+    if (
       dependencyAnalysis.specifiers.some(
         isInlineRuntimeModuleSpecifier,
       )
@@ -2902,8 +3775,7 @@ export async function inspectSourceGuardrails(
       });
     }
     if (
-      dependencyAnalysis.hasNonLiteralRuntimeImport &&
-      importerPath !== sourceGuardrailSelfPath
+      dependencyAnalysis.hasNonLiteralRuntimeImport
     ) {
       addFinding({
         code: "RUNTIME_NON_LITERAL_IMPORT_FORBIDDEN",
