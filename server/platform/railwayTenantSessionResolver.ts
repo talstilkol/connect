@@ -14,6 +14,9 @@ export interface RailwayTenantSessionResolver {
   resolve(
     identity: Readonly<AuthenticatedIdentity>,
   ): Promise<Readonly<TenantSession>>;
+  resolveOptional(
+    identity: Readonly<AuthenticatedIdentity>,
+  ): Promise<Readonly<TenantSession> | null>;
 }
 
 export interface RailwayTenantSessionResolverDependencies {
@@ -35,25 +38,49 @@ export function createRailwayTenantSessionResolver(
     );
   }
 
+  async function resolveFromStoredMemberships(
+    identity: Readonly<AuthenticatedIdentity>,
+    memberships: Awaited<
+      ReturnType<
+        TenantMembershipRepository["findActiveByExternalUserId"]
+      >
+    >,
+  ): Promise<Readonly<TenantSession>> {
+    const selection =
+      memberships.length > 1
+        ? await dependencies.selections.findByExternalUserId(
+            identity.externalUserId,
+          )
+        : null;
+
+    return Object.freeze(
+      resolveTenantSessionFromMemberships(
+        identity,
+        memberships,
+        selection?.tenantId,
+      ),
+    );
+  }
+
   return {
     async resolve(identity) {
       const memberships =
         await dependencies.memberships.findActiveByExternalUserId(
           identity.externalUserId,
         );
-      const selection =
-        memberships.length > 1
-          ? await dependencies.selections.findByExternalUserId(
-              identity.externalUserId,
-            )
-          : null;
-
-      return Object.freeze(
-        resolveTenantSessionFromMemberships(
-          identity,
-          memberships,
-          selection?.tenantId,
-        ),
+      return resolveFromStoredMemberships(identity, memberships);
+    },
+    async resolveOptional(identity) {
+      const memberships =
+        await dependencies.memberships.findActiveByExternalUserId(
+          identity.externalUserId,
+        );
+      if (memberships.length === 0) {
+        return null;
+      }
+      return resolveFromStoredMemberships(
+        identity,
+        memberships,
       );
     },
   };

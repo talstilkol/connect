@@ -86,6 +86,68 @@ test("resolves multiple memberships only through the stored selection", async ()
   assert.deepEqual(testFixture.calls.selections, ["verified-user"]);
 });
 
+test("returns null only when optional resolution finds no membership", async () => {
+  const missing = fixture([]);
+  assert.equal(await missing.resolver.resolveOptional(identity), null);
+  assert.deepEqual(missing.calls.memberships, ["verified-user"]);
+  assert.deepEqual(missing.calls.selections, []);
+
+  const eligible = fixture([membership(7, "manager")]);
+  const session = await eligible.resolver.resolveOptional(identity);
+  assert.deepEqual(session, {
+    externalUserId: "verified-user",
+    tenantId: 7,
+    displayName: "workspace-7",
+    status: "active",
+    role: "manager",
+  });
+  assert.equal(Object.isFrozen(session), true);
+  assert.deepEqual(eligible.calls.selections, []);
+});
+
+test("keeps optional selection and tenant isolation fail closed", async () => {
+  const selected = fixture(
+    [membership(7), membership(11, "viewer")],
+    { tenantId: 11, version: 3 },
+  );
+  assert.equal(
+    (await selected.resolver.resolveOptional(identity))?.tenantId,
+    11,
+  );
+
+  for (const fixtureCase of [
+    {
+      memberships: [membership(7), membership(11)],
+      selection: null,
+      code: "TENANT_SELECTION_REQUIRED",
+    },
+    {
+      memberships: [membership(7), membership(11)],
+      selection: { tenantId: 19, version: 2 },
+      code: "TENANT_SELECTION_REQUIRED",
+    },
+    {
+      memberships: [membership(7, "owner", "other-user")],
+      selection: null,
+      code: "TENANT_MEMBERSHIP_REQUIRED",
+    },
+    {
+      memberships: [membership(7, "owner", "verified-user", "blocked")],
+      selection: null,
+      code: "TENANT_MEMBERSHIP_REQUIRED",
+    },
+  ]) {
+    const testFixture = fixture(
+      fixtureCase.memberships,
+      fixtureCase.selection,
+    );
+    await assert.rejects(
+      testFixture.resolver.resolveOptional(identity),
+      (error) => error.code === fixtureCase.code,
+    );
+  }
+});
+
 test("fails closed for missing, stale or cross-user tenant selection", async () => {
   const cases = [
     {
@@ -140,6 +202,27 @@ test("propagates repository outages without replacing tenant state", async () =>
   await assert.rejects(
     resolver.resolve(identity),
     /private membership database failure/,
+  );
+  await assert.rejects(
+    resolver.resolveOptional(identity),
+    /private membership database failure/,
+  );
+
+  const selectionFailure = createRailwayTenantSessionResolver({
+    memberships: {
+      async findActiveByExternalUserId() {
+        return [membership(7), membership(11)];
+      },
+    },
+    selections: {
+      async findByExternalUserId() {
+        throw new Error("private selection database failure");
+      },
+    },
+  });
+  await assert.rejects(
+    selectionFailure.resolveOptional(identity),
+    /private selection database failure/,
   );
 });
 
