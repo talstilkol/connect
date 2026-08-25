@@ -153,12 +153,17 @@ const attestedEvidenceV2Path =
   `server/platform/${attestedEvidenceV2FileName}`;
 const receiptAttestationPath =
   "server/operations/botReplyStagingReceiptAttestation.ts";
+const stagingRunCapabilityRepositoryPath =
+  "server/platform/postgresBotReplyStagingRunCapabilityRepository.ts";
+const postgresResultValidationPath =
+  "server/platform/postgresResultValidation.ts";
 const dormantBotReplyStagingAttestedModulePaths =
   new Set([
     attestedCutoverReadinessPath,
     attestedReadRepositoryPath,
     postgresRuntimeCapabilityEvidencePath,
     postgresRuntimeCapabilityTrustedDriverContractPath,
+    stagingRunCapabilityRepositoryPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -264,6 +269,22 @@ const dormantAttestedAllowedRuntimeDependencies =
         ["node:util", null],
       ]),
     ],
+    [
+      stagingRunCapabilityRepositoryPath,
+      new Map([
+        ["node:crypto", null],
+        ["node:util", null],
+        [
+          "../operations/botReplyStagingReceiptAttestation.ts",
+          receiptAttestationPath,
+        ],
+        [
+          "./postgresResultValidation.ts",
+          postgresResultValidationPath,
+        ],
+      ]),
+    ],
+    [postgresResultValidationPath, new Map()],
     [
       postgresRuntimeCapabilityEvidencePath,
       new Map([

@@ -291,6 +291,20 @@ Reservation יחידה לפני Meta, ולאחר התוצאה Completion/Observa
 Crash אחרי Meta ולפני Completion מסומן `indeterminate` ואסור לבצע לו Retry
 אוטומטי.
 
+4.7.7.7 ‏D31-D1c מוסיף Candidate Adapter רדום בלבד עבור שלוש פונקציות
+0051. הוא רשאי לבצע רק `SELECT` אל
+`claim_bot_reply_staging_run_v1`,‏ `read_bot_reply_staging_run_v1` ו־
+`complete_bot_reply_staging_run_v1`. ה־Adapter בודק קלט ופלט בעלי Shape
+מדויק, דורש שורה יחידה, מנרמל Timestamps ומפיק בעצמו Canonical receipt JSON
+ו־Digest. אסורים בו Direct DML, יצירת Pool, קריאת Environment, Transaction
+orchestration, Startup wiring ו־Runtime importer.
+
+4.7.7.8 ה־Source Guard מחזיק את ה־Adapter ואת ה־Dependency closure המדויק
+שלו במצב Dormant. Import מ־API,‏ Worker,‏ Startup או קובץ Server לא מאושר,
+וכן Dependency נוסף שאינו ב־Allowlist, חייבים להפיל את השער. הסלייס אינו
+מתקן עדיין API double-complete,‏ `requestedAt`, Provider fence או Roles/
+Grants, ולכן אינו משנה את החלטת ה־NO-GO להפעלה.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

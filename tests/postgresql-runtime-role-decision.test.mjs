@@ -204,6 +204,25 @@ test("documents dormant 0052 hardening and its activation blockers", () => {
   );
 });
 
+test("documents the dormant staging-run capability adapter without activation", () => {
+  assert.match(
+    decision,
+    /D31-D1c[\s\S]*Candidate Adapter[\s\S]*claim_bot_reply_staging_run_v1[\s\S]*read_bot_reply_staging_run_v1[\s\S]*complete_bot_reply_staging_run_v1/,
+  );
+  assert.match(
+    decision,
+    /Shape[\s\S]*שורה יחידה[\s\S]*Canonical receipt JSON[\s\S]*Digest/,
+  );
+  assert.match(
+    decision,
+    /Direct DML[\s\S]*Environment[\s\S]*Startup wiring[\s\S]*Runtime importer/,
+  );
+  assert.match(
+    decision,
+    /Source Guard[\s\S]*Dependency closure[\s\S]*Allowlist[\s\S]*NO-GO/,
+  );
+});
+
 test("keeps D31-C1 as a dormant trusted-driver contract only", () => {
   assert.match(
     decision,
