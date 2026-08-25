@@ -561,4 +561,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway adds a dormant, payload-free and immutable PostgreSQL replay ledger for worker-signed Bot reply staging receipt attestations; PUBLIC access and runtime activation remain blocked pending atomic composition and distinct database roles.",
   }),
+  Object.freeze({
+    migration:
+      "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
+    token:
+      "publish_bot_reply_staging_attested_evidence_with_audit",
+    summary:
+      "Railway atomically composes one completed-run receipt, one attestation nonce, one v2 release-evidence compare-and-set, and one immutable operator event; the SECURITY DEFINER capability remains dormant with no runtime grant.",
+  }),
 ]);

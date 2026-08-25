@@ -35,7 +35,7 @@ test("requires the dormant three-commit activation sequence", () => {
   assert.match(adr, /Commit B[\s\S]*Migration[\s\S]*ללא[\s\S]*`PUBLIC`/);
   assert.match(
     adr,
-    /Commit C[\s\S]*Evidence הסופי[\s\S]*PostgreSQL חיות/,
+    /Commit C[\s\S]*המעטפת v2[\s\S]*Migration 0048[\s\S]*הוכחת PostgreSQL חיה/,
   );
   assert.match(
     adr,

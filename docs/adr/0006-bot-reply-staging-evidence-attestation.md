@@ -49,6 +49,10 @@ Base64URL; ה־`keyId` ייגזר מ־SHA-256 של ה־SPKI ויוצמד ל־Rel
 הישן. במקרה פשרה מבטלים מיד את ה־keyId, סוגרים את Gate ומנפיקים מחדש ראיות
 פתוחות; אין לקבל Attestation ישן רק כדי להשלים Cutover.
 
+2.5 ה־Verifier חייב לקבל `trustedKeyId` צפוי ממדיניות ה־Release ולהשוות
+אותו ל־`keyId` החתום לפני כל SQL. אסור לבחור את המפתח הצפוי מתוך
+ה־Attestation עצמו, גם אם אותו מפתח נמצא ברשימת מפתחות מהימנים כללית.
+
 ## 3. Verification ו־Replay
 
 3.1 אימות חתימה חסר־מצב יכול להתבצע בכל שכבה בלי לשנות נתונים, אך יחזיר
@@ -70,12 +74,12 @@ signed payload, כולל Schema,‏ Policy,‏ Audience,‏ Environment, כל ז
 3.5 אין להחזיק Replay state בזיכרון, ב־filesystem של Vercel או ב־Redis.
 PostgreSQL הוא מקור האמת העמיד והרב־מופעי.
 
-3.6 ‏Migration 0047 מוסיפה Ledger רדום, בלתי־משתנה וללא Payload. היא
-קושרת Claim ל־Run שהושלם, לזהות Release קיימת ולגרסת Evidence צפויה, אך
-אינה משווה את `receiptDigest` החתום ל־`receipt_digest` הישן של ה־Run.
-הסיבה היא שה־Runner הישן מחשב Digest של `JSON.stringify`, ואילו החתימה
-החדשה משתמשת ב־Canonical JSON. ‏Commit C חייב לאחד את Domain החישוב או
-להוסיף שדה Attested נפרד לפני שניתן לטעון לקישור Receipt ברמת DB.
+3.6 ‏Migration 0047 מוסיפה Ledger רדום, בלתי־משתנה וללא Payload. ‏0048
+מוסיפה את גבול ההרכבה האטומי ומשווה במפורש את `receiptDigest` החתום אל
+`receipt_digest` של ה־Run שהושלם. מסלולי ה־Runner בעץ העבודה המקומי
+הועברו לחישוב Canonical זהה, אך הם אינם חלק מסלייס זה; חיבור Runtime נשאר
+חסום עד שה־Runner וכל שרשרת התלויות שלו נכנסים ל־Commit נפרד ועוברים Gate
+מלא.
 
 ## 4. חלופות שנדחו בהמלצה
 
@@ -99,11 +103,16 @@ PostgreSQL הוא מקור האמת העמיד והרב־מופעי.
 ה־Ledger מחזיר `consumed`,‏ `replayed` או `conflict`; ‏`PUBLIC` אינו מקבל
 גישה לטבלה או לפונקציה ואין Runtime composition.
 
-5.3 ‏Commit C — נשיאת המעטפת בתוך ה־Evidence הסופי, אימות מחדש ב־Inspector,
-חיבור Worker-only של ה־Signer ובדיקות PostgreSQL חיות.
+5.3 ‏Commit C — המעטפת v2,‏ Inspector עם `trustedKeyId` מוצמד,
+Repository מאמת, Migration 0048 והוכחת PostgreSQL חיה הושלמו כיכולת
+רדומה. אין חיבור Worker/API Runtime ואין Grant. חיבור Worker-only של
+ה־Signer נשאר שלב Activation נפרד לאחר D31.
 
-5.4 ה־Wrapper של Commit C חייב לשמור סדר נעילות קבוע: נעילת/השלמת Run,
-אתחול ונעילת Release, צריכת nonce ופרסום Evidence+Audit. הרשאת `EXECUTE`
+5.4 ה־Wrapper של Commit C שומר חמש נעילות Advisory ממוינות, מאמת Run
+שהושלם, מאתחל Release ראשון, צורך nonce ומפרסם Evidence+Audit. הוא אינו
+מבצע בדיקת גרסה מוקדמת שחוסמת Retry: ה־nonce consumer וה־publisher
+מחזירים יחד רק `consumed + stored` או `replayed + replayed`, וכל צירוף
+אחר מבטל את כל הפעולה. הרשאת `EXECUTE`
 תינתן רק ל־Capability role של רכיב האימות המבוקר, לא ל־API/Worker role
 כללי, ולעולם לא לפונקציית ה־nonce הפנימית. אחרת SQL ישיר יוכל לעקוף את
 אימות חתימת Ed25519 שמתבצע ב־TypeScript.
@@ -140,6 +149,12 @@ non-enumerable, עומק חריג ו־Unicode surrogate לא תקין אינם �
 ותפוגת Replay בזמן המתנה לטבלה שמחזירה `conflict` ומשאירה רק את השורה הקיימת.
 חסימת `UPDATE/DELETE`, ‏Rollback ללא nonce שארי ו־PUBLIC privileges כבויים.
 ראיה זו אינה מחליפה את Wrapper האטומי של Commit C או הפרדת DB roles.
+
+6.8 הוכחת Commit C החילה **49 migrations** על PostgreSQL 16 נקי והוסיפה
+שני תרחישי תחרות: שני Publishes זהים החזירו בדיוק `stored + replayed`,
+ו־Retry נוסף נשאר `replayed`. Payload חתום שונה נחסם ללא nonce חדש;
+כשל Publisher מאולץ ביטל יחד nonce,‏ Release ו־Operator event. ‏PUBLIC
+נשאר ללא Execute וללא DML על שלוש הטבלאות המוגנות.
 
 ## 7. מצב החלטה
 

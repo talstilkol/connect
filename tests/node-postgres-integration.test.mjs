@@ -129,8 +129,16 @@ test("keeps the real integration proof explicit and outside the default gate", a
     source,
     /0047_bot_reply_staging_attestation_nonce_ledger\.sql/,
   );
+  assert.match(
+    source,
+    /0048_bot_reply_staging_attested_evidence_atomic_publish\.sql/,
+  );
   assert.match(source, /verifyFullDataMigrationBundle/);
   assert.match(source, /verifyBotReplyStagingAttestationNoncePostgres/);
+  assert.match(
+    source,
+    /verifyBotReplyStagingAttestedEvidencePostgres/,
+  );
   assert.match(source, /executePostgresFullDataMigrationCutover/);
   assert.match(source, /target-already-cut-over/);
   assert.match(source, /verifyConversationMessageSchema/);
@@ -198,7 +206,7 @@ test("keeps the real integration proof explicit and outside the default gate", a
   );
   assert.match(source, /foundation\.campaignProviderDeliveries\.recordAccepted/);
   assert.match(source, /foundation\.campaignProviderDeliveries\.applyProviderStatus/);
-  assert.match(source, /concurrencyScenarios: 61/);
+  assert.match(source, /concurrencyScenarios:\s*61 \+ attestedEvidenceConcurrencyScenarios/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

@@ -32,6 +32,9 @@ import {
   verifyBotReplyStagingAttestationNoncePostgres,
 } from "./verify-bot-reply-staging-attestation-nonce-postgres.mjs";
 import {
+  verifyBotReplyStagingAttestedEvidencePostgres,
+} from "./verify-bot-reply-staging-attested-evidence-postgres.mjs";
+import {
   createRailwayPostgresFoundation,
 } from "../server/platform/railwayPostgresFoundation.ts";
 import {
@@ -134,6 +137,7 @@ const migrationFiles = Object.freeze([
   "0045_bot_reply_provider_clock_domains.sql",
   "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
   "0047_bot_reply_staging_attestation_nonce_ledger.sql",
+  "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
 ]);
 
 function postgresEnvironment(connectionString) {
@@ -4803,6 +4807,12 @@ export async function verifyNodePostgresIntegration(
       transactions,
       tenantId,
     );
+    const attestedEvidenceConcurrencyScenarios =
+      await verifyBotReplyStagingAttestedEvidencePostgres(
+        pool,
+        transactions,
+        tenantId,
+      );
     const foundation = createRailwayPostgresFoundation({
       environment: postgresEnvironment(checkedConnectionString),
       telemetry: {
@@ -4888,7 +4898,8 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
-      concurrencyScenarios: 61,
+      concurrencyScenarios:
+        61 + attestedEvidenceConcurrencyScenarios,
     });
   } finally {
     await pool.end();

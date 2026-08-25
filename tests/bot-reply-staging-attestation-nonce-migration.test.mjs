@@ -114,6 +114,7 @@ test("keeps the nonce primitive immutable, dormant and inaccessible", () => {
 
   const allowedSources = new Set([
     "scripts/verify-bot-reply-staging-attestation-nonce-postgres.mjs",
+    "scripts/verify-bot-reply-staging-attested-evidence-postgres.mjs",
     "server/platform/postgresBotReplyStagingAttestationNonceRepository.ts",
   ]);
   const runtimeRoots = [
