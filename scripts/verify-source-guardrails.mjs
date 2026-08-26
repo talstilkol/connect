@@ -166,6 +166,8 @@ const nodePostgresBotReplyPinnedSessionTransportPath =
   "server/platform/nodePostgresBotReplyPinnedSessionTransport.ts";
 const railwayBotReplyPinnedBoundaryCompositionPath =
   "server/platform/railwayBotReplyPinnedBoundaryComposition.ts";
+const metaGraphBotReplyPinnedProviderAdapterPath =
+  "server/meta/metaGraphBotReplyPinnedProviderAdapter.ts";
 // These modules can reach the pre-D31/pre-0057 Bot Reply provider path. They
 // remain available to tests and offline evidence tooling, but no production
 // entrypoint or production package script may load them. The replacement
@@ -196,6 +198,11 @@ const nodePostgresBotReplyPinnedSessionTransportExpectedSha256 =
 // review before this digest is updated.
 const railwayBotReplyPinnedBoundaryCompositionExpectedSha256 =
   "f8d7582b6f4e7079cbdca8df5de0b9eb3b71e19bf66be171a2be013226e5337f";
+// This concrete HTTP adapter is deliberately dormant until provider binding,
+// credential revision and acquisition provenance are proven. Any byte change
+// requires a deliberate security review before this digest is updated.
+const metaGraphBotReplyPinnedProviderAdapterExpectedSha256 =
+  "81aba66dcaf4dd501018a8b60af3758180b1a439438b99517b94bf786143558c";
 const stagingCapabilityPortPaths = new Set([
   stagingRunCapabilityPortsPath,
   stagingProviderFenceCapabilityPortsPath,
@@ -216,6 +223,7 @@ const dormantBotReplyStagingAttestedModulePaths =
     railwayBotReplyPinnedBoundaryDriverPath,
     nodePostgresBotReplyPinnedSessionTransportPath,
     railwayBotReplyPinnedBoundaryCompositionPath,
+    metaGraphBotReplyPinnedProviderAdapterPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -646,6 +654,12 @@ const dormantAttestedAllowedRuntimeDependencies =
           "./railwayBotReplyPinnedBoundaryDriver.ts",
           railwayBotReplyPinnedBoundaryDriverPath,
         ],
+      ]),
+    ],
+    [
+      metaGraphBotReplyPinnedProviderAdapterPath,
+      new Map([
+        ["node:util", null],
       ]),
     ],
     [
@@ -1088,6 +1102,7 @@ function packageValueReferencesDormantPinnedBoundary(value) {
     return [
       "nodePostgresBotReplyPinnedSessionTransport",
       "railwayBotReplyPinnedBoundaryComposition",
+      "metaGraphBotReplyPinnedProviderAdapter",
     ].some((identifier) => value.includes(identifier));
   }
   if (Array.isArray(value)) {
@@ -5886,6 +5901,17 @@ function railwayBotReplyPinnedBoundaryCompositionContractIsExact(
       railwayBotReplyPinnedBoundaryCompositionExpectedSha256;
 }
 
+function metaGraphBotReplyPinnedProviderAdapterContractIsExact(
+  sourceFile,
+) {
+  const sourceSha256 = createHash("sha256")
+    .update(sourceFile.text, "utf8")
+    .digest("hex");
+  return sourceFile.parseDiagnostics.length === 0 &&
+    sourceSha256 ===
+      metaGraphBotReplyPinnedProviderAdapterExpectedSha256;
+}
+
 function runtimeMemberName(node) {
   if (ts.isPropertyAccessExpression(node)) {
     return node.name.text;
@@ -7879,6 +7905,18 @@ export async function inspectSourceGuardrails(
       addFinding({
         code:
           "BOT_REPLY_STAGING_PINNED_BOUNDARY_COMPOSITION_CONTRACT_INVALID",
+        file: path,
+      });
+    }
+    if (
+      path === metaGraphBotReplyPinnedProviderAdapterPath &&
+      !metaGraphBotReplyPinnedProviderAdapterContractIsExact(
+        sourceFile,
+      )
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_PINNED_PROVIDER_ADAPTER_CONTRACT_INVALID",
         file: path,
       });
     }
