@@ -2,9 +2,11 @@
 
 תאריך: 2026-08-26
 
-סטטוס: החלטה חיצונית חוסמת Activation
+סטטוס: החלטה טכנית מאושרת; Provisioning וראיות Staging חוסמים Activation
 
-בעל החלטה מומלץ: Tal + Deployment owner + Database owner
+אישור החלטה טכנית: Tal, ‏2026-08-26
+
+בעלי ביצוע נדרשים: Tal + Deployment owner + Database owner
 
 ## 1. תשובה קצרה
 
@@ -32,6 +34,10 @@ Release evidence,‏ Receipt,‏ Nonce או Operator events וללא כתיבה 
 
 1.2 עד שכל חמשת ה־Principals וארבע יכולות ה־Login קיימים ומוכחים, Bot Release Evidence נשאר
 Fail-closed ואסור לסמן את Operator כ־Ready.
+
+1.3 Tal אישר ליישם את אפשרות A לפי מחקר עדכני. האישור מקבע את הארכיטקטורה
+והשמות הקנוניים; הוא אינו יוצר חשבון Railway,‏ Role,‏ Credential,‏ Grant,
+אישור משפטי או Evidence חי, ואינו משנה את `activationAllowed:false`.
 
 ## 2. הסבר למתחילים
 
@@ -594,6 +600,21 @@ Credential-by-revision,‏ Scope binding או Reservation writer מהימן לל
 DML,‏ Writer barriers,‏ Cooldown cooperation ואי־שינוי של
 `messages.occurred_at`. עד אז Activation נשאר NO-GO.
 
+4.7.7.36 Migration
+`0057_bot_reply_staging_writer_barrier_and_late_truth.sql` השלימה את שכבת D1e
+הרדומה: Scope binding בלתי־משתנה, Admission writer מצומצם, Writer barriers,
+אי־שינוי של `messages.occurred_at`, ארבעה מסלולי Late exact truth, מגני
+`TRUNCATE` ו־PUBLIC revokes. היא עברה PostgreSQL 16,‏ Source Guard,‏ Migration
+contract,‏ Parity וביקורת עצמאית, ונשמרה ב־Commit `0da172f`. היא עדיין
+`SECURITY INVOKER`, ללא Named grants וללא Runtime importer.
+
+4.7.7.37 מחקר D1f מצא שהימצאות Lock ב־`pg_locks` אינה מוכיחה את מסלול
+הרכישה שלו. ה־View מציג Object,‏ Mode ו־PID, אך אינו מספק Provenance שמבדיל
+Acquisition מאושר מקריאה ישירה ל־Advisory-lock function. לכן ACL לבדו אינו
+מספיק: לפני Activation נדרש Acquisition capability נוסף שנוצר רק במסלול
+`acquire`, נבדק בכל Writer/Proof/Finalize, ומוכח יחד עם Direct-DML denial
+וזהות Runtime נפרדת. עד לסגירת החסם הזה D1f נשאר NO-GO.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 
@@ -721,11 +742,15 @@ Readback; Verifier מצליח רק בשני ה־Wrappers ואינו מצליח �
 
 6.8 `PUBLIC` אינו מחזיק `EXECUTE`; ה־Function owner וה־`search_path` תואמים לחוזה.
 
-## 7. תשובה נדרשת
+## 7. החלטה וביצוע חיצוני נדרש
 
-7.1 האם מאשרים את אפשרות A — ארבע יכולות PostgreSQL ו־Verifier מבודד?
+7.1 החלטת Tal: אפשרות A — ארבע יכולות PostgreSQL ו־Verifier מבודד — מאושרת
+כארכיטקטורת היעד. אם ה־Worker הכללי אינו יכול לעמוד ב־Direct-DML denial,
+יצורף `connect_bot_reply_provider_runtime` כ־Login principal חמישי וכ־Principal
+שישי בסך הכול, עבור Provider boundary מבודד; אין להחליש את המטריצה כדי
+להימנע מהפרדה זו.
 
-7.2 אם כן, יש למנות:
+7.2 עדיין יש למנות בני אדם מורשים ולבצע מחוץ לקוד:
 
 7.2.1 בעל `POSTGRES_MIGRATION_URL` ראשי וגיבוי.
 
@@ -742,3 +767,11 @@ Readback; Verifier מצליח רק בשני ה־Wrappers ואינו מצליח �
 8.2 Railway PostgreSQL חושפת `PGUSER`,‏ `PGPASSWORD` ו־`DATABASE_URL` וניתנת לניהול כ־PostgreSQL רגיל: <https://docs.railway.com/databases/postgresql>
 
 8.3 PostgreSQL דורשת `search_path` בטוח וביטול `PUBLIC EXECUTE` עבור פונקציות `SECURITY DEFINER`: <https://www.postgresql.org/docs/current/sql-createfunction.html>
+
+8.4 PostgreSQL מבהירה ש־`PUBLIC` מקבל כברירת מחדל `TEMPORARY` על Database
+ו־`EXECUTE` על Functions, ולכן יש לבטל אותם במפורש כחלק מאותה Transaction:
+<https://www.postgresql.org/docs/current/ddl-priv.html>
+
+8.5 ‏`pg_locks` מתעד Object,‏ Mode,‏ PID ו־Lock key, אך לא שדה Provenance של
+פונקציית הרכישה; המסקנה שחייבים Capability נוסף היא הסקת אבטחה מהחוזה
+המתועד: <https://www.postgresql.org/docs/current/view-pg-locks.html>

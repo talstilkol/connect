@@ -5,8 +5,10 @@ import type { Pool, PoolClient } from "pg";
 import type {
   RailwayBotReplyPinnedAcquireResult,
   RailwayBotReplyPinnedConsumeResult,
+  RailwayBotReplyPinnedFactResult,
   RailwayBotReplyPinnedFinalizationResult,
   RailwayBotReplyPinnedProofResult,
+  RailwayBotReplyPinnedProviderFact,
   RailwayBotReplyPinnedReleaseResult,
 } from "./railwayBotReplyPinnedBoundaryDriver.ts";
 
@@ -36,6 +38,8 @@ const sessionKeys = Object.freeze([
   "consume",
   "destroy",
   "finalize",
+  "persistProviderFact",
+  "persistProviderUncertainty",
   "prepare",
   "prove",
   "release",
@@ -78,6 +82,22 @@ const queryStatements = Object.freeze({
     "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
     "FROM public.finalize_bot_reply_staging_credential_bound_pre_send_permit_v1(",
     "$1::TEXT",
+    ") AS capability",
+    "LIMIT 2",
+  ].join(" "),
+  persistProviderFact: [
+    "SELECT capability.outcome, capability.\"providerOutcomeKind\",",
+    "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
+    "FROM public.write_bot_reply_staging_provider_fact_v1(",
+    "$1::TEXT, $2::TEXT, $3::TEXT, $4::INTEGER, $5::INTEGER",
+    ") AS capability",
+    "LIMIT 2",
+  ].join(" "),
+  persistProviderUncertainty: [
+    "SELECT capability.outcome, capability.state,",
+    "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
+    "FROM public.write_bot_reply_staging_provider_uncertainty_v1(",
+    "$1::TEXT, $2::TEXT",
     ") AS capability",
     "LIMIT 2",
   ].join(" "),
@@ -184,6 +204,16 @@ const resultFields = Object.freeze({
   pid: Object.freeze([
     expectedField("backendPid", 23, 4),
   ]),
+  providerFact: Object.freeze([
+    expectedField("outcome", 25, -1),
+    expectedField("providerOutcomeKind", 25, -1),
+    expectedField("ackBackendPid", 23, 4),
+  ]),
+  providerUncertainty: Object.freeze([
+    expectedField("outcome", 25, -1),
+    expectedField("state", 25, -1),
+    expectedField("ackBackendPid", 23, 4),
+  ]),
   prove: Object.freeze([
     expectedField("outcome", 25, -1),
     expectedField("backendPid", 23, 4),
@@ -204,6 +234,8 @@ type SessionPhase =
   | "acquired-lock"
   | "consumed-lock"
   | "proved-lock"
+  | "provider-fact-lock"
+  | "provider-uncertainty-lock"
   | "reconciliation-lock"
   | "finalized-lock"
   | "released"
@@ -275,6 +307,16 @@ export interface NodePostgresBotReplyPinnedSession {
     permitKey: string,
     signal: AbortSignal,
   ): Promise<RailwayBotReplyPinnedProofResult>;
+  persistProviderFact(
+    permitKey: string,
+    fact: RailwayBotReplyPinnedProviderFact,
+    signal: AbortSignal,
+  ): Promise<RailwayBotReplyPinnedFactResult>;
+  persistProviderUncertainty(
+    permitKey: string,
+    reason: "provider-call-threw" | "provider-call-timed-out",
+    signal: AbortSignal,
+  ): Promise<RailwayBotReplyPinnedFactResult>;
   finalize(
     permitKey: string,
     signal: AbortSignal,
@@ -515,6 +557,128 @@ function requirePermitKey(value: unknown): string {
     return fail("invalid-result");
   }
   return value;
+}
+
+type PostgresParameter = string | number | null;
+
+type ProviderFactParameters = Readonly<{
+  outcomeKind: RailwayBotReplyPinnedProviderFact["outcome"];
+  values: readonly PostgresParameter[];
+}>;
+
+function requireProviderMessageId(value: unknown): string {
+  if (
+    typeof value !== "string" ||
+    value.length < 1 ||
+    value.length > 510 ||
+    value !== value.trim() ||
+    /[\u0000-\u001f\u007f-\u009f]/u.test(value) ||
+    [...value].length > 255 ||
+    [...value].some((character) => {
+      const codePoint = character.codePointAt(0);
+      return codePoint !== undefined && codePoint >= 0xd800 && codePoint <= 0xdfff;
+    })
+  ) {
+    return fail("invalid-result");
+  }
+  return value;
+}
+
+function requireRetryAfterSeconds(value: unknown): number {
+  if (
+    !Number.isSafeInteger(value) ||
+    Number(value) < 1 ||
+    Number(value) > 86_400
+  ) {
+    return fail("invalid-result");
+  }
+  return Number(value);
+}
+
+function requireProviderFact(value: unknown): ProviderFactParameters {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value) ||
+    nodeUtilTypes.isProxy(value)
+  ) {
+    return fail("invalid-result");
+  }
+  try {
+    const outcomeDescriptor = Object.getOwnPropertyDescriptor(value, "outcome");
+    if (
+      outcomeDescriptor === undefined ||
+      !("value" in outcomeDescriptor) ||
+      outcomeDescriptor.enumerable !== true
+    ) {
+      return fail("invalid-result");
+    }
+    const outcome = outcomeDescriptor.value;
+    if (outcome === "accepted") {
+      const fact = requireExactDataRecord(
+        value,
+        ["outcome", "providerMessageId"],
+        "invalid-result",
+      );
+      return Object.freeze({
+        outcomeKind: outcome,
+        values: Object.freeze([
+          outcome,
+          requireProviderMessageId(fact.providerMessageId),
+          null,
+          null,
+        ]),
+      });
+    }
+    if (outcome === "sender-deferred" || outcome === "pair-deferred") {
+      const fact = requireExactDataRecord(
+        value,
+        ["outcome", "providerErrorCode", "retryAfterSeconds"],
+        "invalid-result",
+      );
+      const expectedErrorCode = outcome === "sender-deferred" ? 130_429 : 131_056;
+      if (fact.providerErrorCode !== expectedErrorCode) {
+        return fail("invalid-result");
+      }
+      return Object.freeze({
+        outcomeKind: outcome,
+        values: Object.freeze([
+          outcome,
+          null,
+          expectedErrorCode,
+          requireRetryAfterSeconds(fact.retryAfterSeconds),
+        ]),
+      });
+    }
+    if (outcome === "service-window-rejected") {
+      const fact = requireExactDataRecord(
+        value,
+        ["outcome", "providerErrorCode"],
+        "invalid-result",
+      );
+      if (fact.providerErrorCode !== 131_047) {
+        return fail("invalid-result");
+      }
+      return Object.freeze({
+        outcomeKind: outcome,
+        values: Object.freeze([outcome, null, 131_047, null]),
+      });
+    }
+    return fail("invalid-result");
+  } catch (error) {
+    if (error instanceof NodePostgresBotReplyPinnedSessionTransportError) {
+      throw error;
+    }
+    return fail("invalid-result");
+  }
+}
+
+function requireProviderUncertaintyReason(
+  value: unknown,
+): "threw" | "timeout" {
+  if (value === "provider-call-threw") return "threw";
+  if (value === "provider-call-timed-out") return "timeout";
+  return fail("invalid-result");
 }
 
 function isDenialReasonCode(value: unknown): value is string {
@@ -774,10 +938,10 @@ function requireControlResult(value: unknown, expectedCommand: string): void {
 
 function resultConfig(
   text: string,
-  values: readonly string[],
+  values: readonly PostgresParameter[],
 ): Readonly<{
   text: string;
-  values: readonly string[];
+  values: readonly PostgresParameter[];
   rowMode: "array";
 }> {
   return Object.freeze({
@@ -888,7 +1052,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
 
   const runCommittedCapability = async (
     text: string,
-    permitKey: string,
+    values: readonly PostgresParameter[],
     expectedFields: readonly ExpectedField[],
   ): Promise<readonly unknown[]> => {
     requireStatus("I");
@@ -897,7 +1061,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
       "BEGIN",
     );
     requireStatus("T");
-    const rawResult = await query(resultConfig(text, [permitKey]));
+    const rawResult = await query(resultConfig(text, values));
     requireStatus("T");
     const row = requireSelectRow(rawResult, expectedFields);
     requireControlResult(await query(controlStatements.commit), "COMMIT");
@@ -1002,7 +1166,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
         const permitKey = requirePermitKey(rawPermitKey);
         const row = await runCommittedCapability(
           queryStatements.acquire,
-          permitKey,
+          [permitKey],
           resultFields.acquire,
         );
         const outcome = row[0];
@@ -1037,7 +1201,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
         const permitKey = requirePermitKey(rawPermitKey);
         const row = await runCommittedCapability(
           queryStatements.consume,
-          permitKey,
+          [permitKey],
           resultFields.consume,
         );
         const outcome = row[0];
@@ -1070,7 +1234,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
         const permitKey = requirePermitKey(rawPermitKey);
         const row = await runCommittedCapability(
           queryStatements.prove,
-          permitKey,
+          [permitKey],
           resultFields.prove,
         );
         if (row[0] !== "held") return fail("invalid-result");
@@ -1087,10 +1251,64 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
       });
     },
 
+    async persistProviderFact(
+      rawPermitKey: string,
+      rawFact: RailwayBotReplyPinnedProviderFact,
+      signal: AbortSignal,
+    ) {
+      return withExclusive(signal, ["proved-lock"], async () => {
+        const permitKey = requirePermitKey(rawPermitKey);
+        const fact = requireProviderFact(rawFact);
+        const row = await runCommittedCapability(
+          queryStatements.persistProviderFact,
+          [permitKey, ...fact.values],
+          resultFields.providerFact,
+        );
+        if (row[0] !== "recorded" || row[1] !== fact.outcomeKind) {
+          return fail("invalid-result");
+        }
+        const pid = requireCurrentPid(row[2]);
+        phase = "provider-fact-lock";
+        return Object.freeze({
+          ...acknowledgement(pid),
+          outcome: "recorded" as const,
+        });
+      });
+    },
+
+    async persistProviderUncertainty(
+      rawPermitKey: string,
+      rawReason: "provider-call-threw" | "provider-call-timed-out",
+      signal: AbortSignal,
+    ) {
+      return withExclusive(signal, ["proved-lock"], async () => {
+        const permitKey = requirePermitKey(rawPermitKey);
+        const reason = requireProviderUncertaintyReason(rawReason);
+        const row = await runCommittedCapability(
+          queryStatements.persistProviderUncertainty,
+          [permitKey, reason],
+          resultFields.providerUncertainty,
+        );
+        if (row[0] !== "recorded" || row[1] !== "ambiguous") {
+          return fail("invalid-result");
+        }
+        const pid = requireCurrentPid(row[2]);
+        phase = "provider-uncertainty-lock";
+        return Object.freeze({
+          ...acknowledgement(pid),
+          outcome: "recorded" as const,
+        });
+      });
+    },
+
     async finalize(rawPermitKey: string, signal: AbortSignal) {
       return withExclusive(
         signal,
-        ["proved-lock", "reconciliation-lock"],
+        [
+          "provider-fact-lock",
+          "provider-uncertainty-lock",
+          "reconciliation-lock",
+        ],
         async () => {
           const permitKey = requirePermitKey(rawPermitKey);
           const reconciliation = phase === "reconciliation-lock";
@@ -1098,7 +1316,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
             reconciliation
               ? queryStatements.reconcile
               : queryStatements.finalize,
-            permitKey,
+            [permitKey],
             resultFields.finalization,
           );
           const outcome = row[0];
@@ -1205,7 +1423,7 @@ function createSession(checkedClient: CheckedClient): NodePostgresBotReplyPinned
           const releasedCount = expectedReleaseCount;
           const row = await runCommittedCapability(
             queryStatements.release,
-            permitKey,
+            [permitKey],
             resultFields.release,
           );
           const pid = requireCurrentPid(row[2]);

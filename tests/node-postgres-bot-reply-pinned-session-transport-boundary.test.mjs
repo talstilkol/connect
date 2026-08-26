@@ -391,6 +391,205 @@ test("pins every capability query to its exact SELECT shape", async () => {
   );
 });
 
+test("pins both provider writer queries to their exact SQL registry entries", async () => {
+  const mutations = [
+    {
+      name: "provider-fact-parameter-type",
+      search:
+        '    "$1::TEXT, $2::TEXT, $3::TEXT, $4::INTEGER, $5::INTEGER",',
+      replacement:
+        '    "$1::TEXT, $2::TEXT, $3::TEXT, $4::INTEGER, $5::TEXT",',
+    },
+    {
+      name: "provider-uncertainty-parameter-count",
+      search: '    "$1::TEXT, $2::TEXT",',
+      replacement: '    "$1::TEXT",',
+    },
+    {
+      name: "provider-fact-function",
+      search:
+        '    "FROM public.write_bot_reply_staging_provider_fact_v1(",',
+      replacement:
+        '    "FROM public.write_bot_reply_staging_provider_uncertainty_v1(",',
+    },
+    {
+      name: "provider-uncertainty-function",
+      search:
+        '    "FROM public.write_bot_reply_staging_provider_uncertainty_v1(",',
+      replacement:
+        '    "FROM public.write_bot_reply_staging_provider_fact_v1(",',
+    },
+  ];
+
+  for (const mutation of mutations) {
+    const root = await createFixture(
+      `connect-pinned-transport-writer-query-${mutation.name}-`,
+    );
+    await mutateTransport(
+      root,
+      (source) => replaceLast(
+        source,
+        mutation.search,
+        mutation.replacement,
+      ),
+    );
+
+    const report = await inspectSourceGuardrails(root);
+
+    assert.ok(
+      findingCodes(report, transportRelativePath).includes(
+        "BOT_REPLY_STAGING_PINNED_SESSION_TRANSPORT_CONTRACT_INVALID",
+      ),
+      mutation.name,
+    );
+  }
+});
+
+test("pins provider writer parameter arrays and result-field mappings by AST", async () => {
+  const mutations = [
+    {
+      name: "provider-fact-values",
+      search: "          [permitKey, ...fact.values],",
+      replacement: "          [permitKey, fact.outcomeKind],",
+    },
+    {
+      name: "provider-uncertainty-values",
+      search: "          [permitKey, reason],",
+      replacement: "          [reason, permitKey],",
+    },
+    {
+      name: "provider-fact-fields",
+      search: "          resultFields.providerFact,",
+      replacement: "          resultFields.providerUncertainty,",
+    },
+    {
+      name: "provider-uncertainty-fields",
+      search: "          resultFields.providerUncertainty,",
+      replacement: "          resultFields.providerFact,",
+    },
+  ];
+
+  for (const mutation of mutations) {
+    const root = await createFixture(
+      `connect-pinned-transport-writer-call-${mutation.name}-`,
+    );
+    await mutateTransport(
+      root,
+      (source) => replaceLast(
+        source,
+        mutation.search,
+        mutation.replacement,
+      ),
+    );
+
+    const report = await inspectSourceGuardrails(root);
+
+    assert.ok(
+      findingCodes(report, transportRelativePath).includes(
+        "BOT_REPLY_STAGING_PINNED_SESSION_TRANSPORT_CONTRACT_INVALID",
+      ),
+      mutation.name,
+    );
+  }
+});
+
+test("pins the exact provider-writer session surface", async () => {
+  const mutations = [
+    {
+      name: "missing-provider-fact-method",
+      search: '  "persistProviderFact",\n',
+      replacement: "",
+    },
+    {
+      name: "renamed-provider-uncertainty-method",
+      search: '  "persistProviderUncertainty",\n',
+      replacement: '  "persistUncertainty",\n',
+    },
+  ];
+
+  for (const mutation of mutations) {
+    const root = await createFixture(
+      `connect-pinned-transport-writer-surface-${mutation.name}-`,
+    );
+    await mutateTransport(
+      root,
+      (source) => replaceLast(
+        source,
+        mutation.search,
+        mutation.replacement,
+      ),
+    );
+
+    const report = await inspectSourceGuardrails(root);
+
+    assert.ok(
+      findingCodes(report, transportRelativePath).includes(
+        "BOT_REPLY_STAGING_PINNED_SESSION_TRANSPORT_CONTRACT_INVALID",
+      ),
+      mutation.name,
+    );
+  }
+});
+
+test("blocks provider writer SQL aliases outside the fixed query registry", async () => {
+  const mutations = [
+    {
+      name: "literal-fact",
+      suffix:
+        '\nconst forbiddenWriterAlias = "write_bot_reply_staging_provider_fact_v1";\n',
+    },
+    {
+      name: "template-uncertainty",
+      suffix: [
+        '\nconst writerPrefix = "write_bot_reply_staging_provider_";',
+        'const writerSuffix = "uncertainty_v1";',
+        "const forbiddenWriterAlias = `${writerPrefix}${writerSuffix}`;",
+        "",
+      ].join("\n"),
+    },
+    {
+      name: "alias-fact",
+      suffix: [
+        '\nconst writerPrefix = "write_bot_reply_staging_provider_";',
+        'const writerSuffix = "fact_v1";',
+        "const assembledWriter = writerPrefix + writerSuffix;",
+        "const forbiddenWriterAlias = assembledWriter;",
+        "",
+      ].join("\n"),
+    },
+    {
+      name: "indirection-uncertainty",
+      suffix: [
+        "\nconst writerFragments = Object.freeze({",
+        '  prefix: "write_bot_reply_staging_provider_",',
+        '  suffix: "uncertainty_v1",',
+        "});",
+        "const forbiddenWriterAlias =",
+        "  writerFragments.prefix + writerFragments.suffix;",
+        "",
+      ].join("\n"),
+    },
+  ];
+
+  for (const mutation of mutations) {
+    const root = await createFixture(
+      `connect-pinned-transport-writer-alias-${mutation.name}-`,
+    );
+    await mutateTransport(
+      root,
+      (source) => `${source}${mutation.suffix}`,
+    );
+
+    const report = await inspectSourceGuardrails(root);
+
+    assert.deepEqual(
+      findingCodes(report, transportRelativePath),
+      ["BOT_REPLY_STAGING_PINNED_SESSION_TRANSPORT_CONTRACT_INVALID"],
+      mutation.name,
+    );
+  }
+});
+
 test("requires the exact node:util named import", async () => {
   const root = await createFixture("connect-pinned-transport-node-util-");
   await mutateTransport(

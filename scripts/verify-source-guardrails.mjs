@@ -168,7 +168,7 @@ const nodePostgresBotReplyPinnedSessionTransportPath =
 // including a seemingly harmless comment change, must fail the source guard
 // until this digest is deliberately updated as part of a new review.
 const nodePostgresBotReplyPinnedSessionTransportExpectedSha256 =
-  "138d462be842573de963d5f58de324424844d8c2d1da3c3f1b1c043b114f4758";
+  "60e7d01705c4709cf096f2753fe06940625f176eed10bb5f119d0ac53fbbbd4d";
 const stagingCapabilityPortPaths = new Set([
   stagingRunCapabilityPortsPath,
   stagingProviderFenceCapabilityPortsPath,
@@ -258,6 +258,11 @@ const dormantWriterBarrierAndLateTruthSqlIdentifiers =
     "assert_bot_reply_staging_exact_session_barrier_v1",
     "bot_reply_staging_service_reply_scope_bindings",
   ]);
+const dormantPinnedSessionWriterSqlIdentifiers =
+  new Set([
+    "write_bot_reply_staging_provider_fact_v1",
+    "write_bot_reply_staging_provider_uncertainty_v1",
+  ]);
 const dormantBotReplyStagingSqlIdentifiers = new Set([
   ...dormantCredentialBoundPreSendSqlIdentifiers,
   ...dormantWriterBarrierAndLateTruthSqlIdentifiers,
@@ -296,6 +301,18 @@ const dormantWriterBarrierAndLateTruthAllowedSqlIdentifiersByPath =
     [
       "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
       dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      nodePostgresBotReplyPinnedSessionTransportPath,
+      dormantPinnedSessionWriterSqlIdentifiers,
+    ],
+    [
+      "tests/node-postgres-bot-reply-pinned-session-transport.test.mjs",
+      dormantPinnedSessionWriterSqlIdentifiers,
+    ],
+    [
+      "tests/node-postgres-bot-reply-pinned-session-transport-boundary.test.mjs",
+      dormantPinnedSessionWriterSqlIdentifiers,
     ],
     [
       "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs",
@@ -344,6 +361,24 @@ const nodePostgresBotReplyPinnedSessionTransportExpectedRuntimeExports =
     "createNodePostgresBotReplyPinnedSessionTransport",
     "nodePostgresBotReplyPinnedSessionTransportStatus",
   ]);
+const nodePostgresBotReplyPinnedSessionTransportExpectedSessionMethods =
+  Object.freeze([
+    "acquire",
+    "close",
+    "consume",
+    "destroy",
+    "finalize",
+    "persistProviderFact",
+    "persistProviderUncertainty",
+    "prepare",
+    "prove",
+    "release",
+  ]);
+const nodePostgresBotReplyPinnedSessionTransportExpectedSqlFunctionIdentifiers =
+  new Set([
+    ...dormantCredentialBoundPreSendFunctionIdentifiers,
+    ...dormantPinnedSessionWriterSqlIdentifiers,
+  ]);
 const nodePostgresBotReplyPinnedSessionTransportExpectedControlStatements =
   Object.freeze({
     beginReadCommitted:
@@ -377,6 +412,22 @@ const nodePostgresBotReplyPinnedSessionTransportExpectedQueryStatements =
       "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
       "FROM public.finalize_bot_reply_staging_credential_bound_pre_send_permit_v1(",
       "$1::TEXT",
+      ") AS capability",
+      "LIMIT 2",
+    ].join(" "),
+    persistProviderFact: [
+      "SELECT capability.outcome, capability.\"providerOutcomeKind\",",
+      "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
+      "FROM public.write_bot_reply_staging_provider_fact_v1(",
+      "$1::TEXT, $2::TEXT, $3::TEXT, $4::INTEGER, $5::INTEGER",
+      ") AS capability",
+      "LIMIT 2",
+    ].join(" "),
+    persistProviderUncertainty: [
+      "SELECT capability.outcome, capability.state,",
+      "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
+      "FROM public.write_bot_reply_staging_provider_uncertainty_v1(",
+      "$1::TEXT, $2::TEXT",
       ") AS capability",
       "LIMIT 2",
     ].join(" "),
@@ -3676,11 +3727,15 @@ function sourceFileReferencesDormantCredentialBoundPreSendSql(
         node.name.text ===
           "dormantWriterBarrierAndLateTruthSqlIdentifiers" ||
         node.name.text ===
+          "dormantPinnedSessionWriterSqlIdentifiers" ||
+        node.name.text ===
           "dormantBotReplyStagingSqlIdentifiers" ||
         node.name.text ===
           "postgresMigrationParityRegistryAllowedSqlIdentifiers" ||
         node.name.text ===
-          "nodePostgresBotReplyPinnedSessionTransportExpectedQueryStatements"
+          "nodePostgresBotReplyPinnedSessionTransportExpectedQueryStatements" ||
+        node.name.text ===
+          "nodePostgresBotReplyPinnedSessionTransportExpectedSqlFunctionIdentifiers"
       )
     ) {
       return;
@@ -3766,6 +3821,40 @@ function objectFreezeArgument(node) {
     return null;
   }
   return unwrapRuntimeExpression(expression.arguments[0]);
+}
+
+function transportSessionKeysAreExact(sourceFile) {
+  const declarations = [];
+  for (const statement of sourceFile.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === "sessionKeys"
+      ) {
+        declarations.push({ declaration, statement });
+      }
+    }
+  }
+  if (declarations.length !== 1) return false;
+  const { declaration, statement } = declarations[0];
+  const value = objectFreezeArgument(declaration.initializer);
+  return statement.modifiers === undefined &&
+    (statement.declarationList.flags & ts.NodeFlags.Const) !== 0 &&
+    statement.declarationList.declarations.length === 1 &&
+    declaration.type === undefined &&
+    value !== null &&
+    ts.isArrayLiteralExpression(value) &&
+    value.elements.length ===
+      nodePostgresBotReplyPinnedSessionTransportExpectedSessionMethods.length &&
+    value.elements.every(
+      (element, index) =>
+        ts.isStringLiteralLike(element) &&
+        element.text ===
+          nodePostgresBotReplyPinnedSessionTransportExpectedSessionMethods[
+            index
+          ],
+    );
 }
 
 function transportRuntimeImportIsExact(sourceFile) {
@@ -4036,7 +4125,7 @@ function transportSqlCallSitesAreExact(
       (parameter, index) =>
         !ts.isIdentifier(parameter.name) ||
         parameter.name.text !==
-          ["text", "permitKey", "expectedFields"][index],
+          ["text", "values", "expectedFields"][index],
     ) ||
     !ts.isFunctionDeclaration(resultConfigDeclaration) ||
     resultConfigDeclaration.name !== bindings.get("resultConfig")[0] ||
@@ -4128,9 +4217,9 @@ function transportSqlCallSitesAreExact(
     queryProperties === null ||
     queryCalls.length !== 10 ||
     resultConfigCalls.length !== 4 ||
-    runCalls.length !== 5 ||
+    runCalls.length !== 7 ||
     controlProperties.length !== 6 ||
-    queryProperties.length !== 9
+    queryProperties.length !== 11
   ) {
     return false;
   }
@@ -4168,9 +4257,10 @@ function transportSqlCallSitesAreExact(
     if (
       ts.isIdentifier(first) &&
       first.text === "text" &&
-      exactIdentifierArray(node.arguments[1], ["permitKey"])
+      ts.isIdentifier(unwrapRuntimeExpression(node.arguments[1])) &&
+      unwrapRuntimeExpression(node.arguments[1]).text === "values"
     ) {
-      return "text-permit";
+      return "text-values";
     }
     const queryKey = propertyKey(first, "queryStatements");
     if (
@@ -4208,7 +4298,7 @@ function transportSqlCallSitesAreExact(
     ["control:rollback", 2],
     ["result:lockProof", 1],
     ["result:pid", 2],
-    ["result:text-permit", 1],
+    ["result:text-values", 1],
   ]);
   if (
     queryCallCounts.size !== expectedQueryCallCounts.size ||
@@ -4226,14 +4316,39 @@ function transportSqlCallSitesAreExact(
   }
 
   const resultFieldsSymbol = symbols.get("resultFields");
-  const runKey = (call) => {
+  const exactPropertyAccess = (node, baseName, memberName) => {
+    const value = unwrapRuntimeExpression(node);
+    return ts.isPropertyAccessExpression(value) &&
+      value.questionDotToken === undefined &&
+      ts.isIdentifier(value.expression) &&
+      value.expression.text === baseName &&
+      value.name.text === memberName;
+  };
+  const exactRunValues = (node, key) => {
+    const value = unwrapRuntimeExpression(node);
+    if (!ts.isArrayLiteralExpression(value)) return false;
     if (
-      call.arguments.length !== 3 ||
-      !ts.isIdentifier(unwrapRuntimeExpression(call.arguments[1])) ||
-      unwrapRuntimeExpression(call.arguments[1]).text !== "permitKey"
+      key === "persistProviderFact"
     ) {
-      return null;
+      return value.elements.length === 2 &&
+        ts.isIdentifier(value.elements[0]) &&
+        value.elements[0].text === "permitKey" &&
+        ts.isSpreadElement(value.elements[1]) &&
+        exactPropertyAccess(value.elements[1].expression, "fact", "values");
     }
+    if (key === "persistProviderUncertainty") {
+      return value.elements.length === 2 &&
+        ts.isIdentifier(value.elements[0]) &&
+        value.elements[0].text === "permitKey" &&
+        ts.isIdentifier(value.elements[1]) &&
+        value.elements[1].text === "reason";
+    }
+    return value.elements.length === 1 &&
+      ts.isIdentifier(value.elements[0]) &&
+      value.elements[0].text === "permitKey";
+  };
+  const runKey = (call) => {
+    if (call.arguments.length !== 3) return null;
     const fields = unwrapRuntimeExpression(call.arguments[2]);
     if (
       !ts.isPropertyAccessExpression(fields) ||
@@ -4253,18 +4368,25 @@ function transportSqlCallSitesAreExact(
         unwrapRuntimeExpression(first.whenFalse),
         "queryStatements",
       );
-      return ts.isIdentifier(
+      const exactFinalization = ts.isIdentifier(
         unwrapRuntimeExpression(first.condition),
       ) &&
         unwrapRuntimeExpression(first.condition).text === "reconciliation" &&
         whenTrue === "reconcile" &&
         whenFalse === "finalize" &&
-        fields.name.text === "finalization"
-        ? "finalization"
-        : null;
+        fields.name.text === "finalization" &&
+        exactRunValues(call.arguments[1], "finalization");
+      return exactFinalization ? "finalization" : null;
     }
     const statement = propertyKey(first, "queryStatements");
-    return statement !== null && fields.name.text === statement
+    const expectedField = statement === "persistProviderFact"
+      ? "providerFact"
+      : statement === "persistProviderUncertainty"
+        ? "providerUncertainty"
+        : statement;
+    return statement !== null &&
+        fields.name.text === expectedField &&
+        exactRunValues(call.arguments[1], statement)
       ? statement
       : null;
   };
@@ -4272,7 +4394,7 @@ function transportSqlCallSitesAreExact(
   if (
     runKeys.some((key) => key === null) ||
     runKeys.join(",") !==
-      "acquire,consume,finalization,prove,release"
+      "acquire,consume,finalization,persistProviderFact,persistProviderUncertainty,prove,release"
   ) {
     return false;
   }
@@ -4727,16 +4849,9 @@ function transportFactoryAndSessionSuccessSurfaceIsExact(
   const sessionValue = objectFreezeArgument(
     sessionDeclaration.initializer,
   );
-  const expectedSessionMethods = new Set([
-    "acquire",
-    "close",
-    "consume",
-    "destroy",
-    "finalize",
-    "prepare",
-    "prove",
-    "release",
-  ]);
+  const expectedSessionMethods = new Set(
+    nodePostgresBotReplyPinnedSessionTransportExpectedSessionMethods,
+  );
   if (
     !sessionValue ||
     !ts.isObjectLiteralExpression(sessionValue) ||
@@ -5488,9 +5603,11 @@ function transportHasForbiddenRuntimeSurface(
   };
   let forbidden = false;
   const containsFunctionIdentifier = (node) => {
-    const value = runtimeStaticString(node);
+    const value = sourceFileRuntimeStaticString(sourceFile, node);
     return value !== null &&
-      [...dormantCredentialBoundPreSendFunctionIdentifiers]
+      [
+        ...nodePostgresBotReplyPinnedSessionTransportExpectedSqlFunctionIdentifiers,
+      ]
         .some((identifier) => value.includes(identifier));
   };
   const visit = (node, parent) => {
@@ -5682,6 +5799,7 @@ function nodePostgresBotReplyPinnedSessionTransportContractIsExact(
       nodePostgresBotReplyPinnedSessionTransportExpectedSha256 &&
     sourceFile.parseDiagnostics.length === 0 &&
     transportRuntimeImportIsExact(sourceFile) &&
+    transportSessionKeysAreExact(sourceFile) &&
     queryStatementsContract !== null &&
     transportSqlCallSitesAreExact(
       sourceFile,
@@ -7821,6 +7939,7 @@ export async function inspectSourceGuardrails(
     const allowPolicyDeclaration =
       path === "scripts/verify-source-guardrails.mjs";
     if (
+      path !== nodePostgresBotReplyPinnedSessionTransportPath &&
       sourceFileReferencesDormantCredentialBoundPreSendSql(
         sourceFile,
         new Set(),

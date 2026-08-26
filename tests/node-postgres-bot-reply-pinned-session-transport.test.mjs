@@ -14,6 +14,10 @@ const permitKey = `bot_reply_staging_pre_send_permit_v1_${"a".repeat(64)}`;
 const observationKey = `bot_reply_staging_observation_v1_${"b".repeat(64)}`;
 const sendBefore = "2026-08-26T12:00:00.000Z";
 const finalizedAt = "2026-08-26T11:59:00.000Z";
+const acceptedFact = Object.freeze({
+  outcome: "accepted",
+  providerMessageId: "wamid.HBgM972500000000FQIAERgSOTk5OTk5OTk5OTk5OTk5AA==",
+});
 
 const sql = Object.freeze({
   acquire: [
@@ -39,6 +43,22 @@ const sql = Object.freeze({
     "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
     "FROM public.finalize_bot_reply_staging_credential_bound_pre_send_permit_v1(",
     "$1::TEXT",
+    ") AS capability",
+    "LIMIT 2",
+  ].join(" "),
+  persistProviderFact: [
+    "SELECT capability.outcome, capability.\"providerOutcomeKind\",",
+    "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
+    "FROM public.write_bot_reply_staging_provider_fact_v1(",
+    "$1::TEXT, $2::TEXT, $3::TEXT, $4::INTEGER, $5::INTEGER",
+    ") AS capability",
+    "LIMIT 2",
+  ].join(" "),
+  persistProviderUncertainty: [
+    "SELECT capability.outcome, capability.state,",
+    "pg_catalog.pg_backend_pid()::integer AS \"ackBackendPid\"",
+    "FROM public.write_bot_reply_staging_provider_uncertainty_v1(",
+    "$1::TEXT, $2::TEXT",
     ") AS capability",
     "LIMIT 2",
   ].join(" "),
@@ -103,6 +123,16 @@ const fieldContracts = Object.freeze({
     ["ackBackendPid", 23, 4],
   ]),
   pid: Object.freeze([["backendPid", 23, 4]]),
+  providerFact: Object.freeze([
+    ["outcome", 25, -1],
+    ["providerOutcomeKind", 25, -1],
+    ["ackBackendPid", 23, 4],
+  ]),
+  providerUncertainty: Object.freeze([
+    ["outcome", 25, -1],
+    ["state", 25, -1],
+    ["ackBackendPid", 23, 4],
+  ]),
   prove: Object.freeze([
     ["outcome", 25, -1],
     ["backendPid", 23, 4],
@@ -186,6 +216,12 @@ class FakeClient extends EventEmitter {
     this.consumeOutcome = options.consumeOutcome ?? "authorized";
     this.consumeReasonCode = options.consumeReasonCode ?? "CAPABILITY_RELEASED";
     this.finalizeOutcome = options.finalizeOutcome ?? "pending";
+    this.providerFactOutcome = options.providerFactOutcome ?? "recorded";
+    this.providerOutcomeKind = options.providerOutcomeKind ?? "accepted";
+    this.providerUncertaintyOutcome =
+      options.providerUncertaintyOutcome ?? "recorded";
+    this.providerUncertaintyState =
+      options.providerUncertaintyState ?? "ambiguous";
     this.lockCount = options.lockCount ?? 0;
     this.releaseCount = options.releaseCount ?? 1;
     this.emitEndOnDestroy = options.emitEndOnDestroy ?? true;
@@ -241,6 +277,9 @@ class FakeClient extends EventEmitter {
     this.queries.push(input);
     const execute = () => {
       if (this.nextFailures.delete(kind)) throw new Error("query failed");
+      if (kind === "persistProviderFact") {
+        this.providerOutcomeKind = input.values[1];
+      }
       let result = this.resultFor(kind);
       const transform = this.nextOverrides.get(kind);
       if (transform !== undefined) {
@@ -312,14 +351,41 @@ class FakeClient extends EventEmitter {
         this.pid,
       ]);
     }
+    if (kind === "persistProviderFact") {
+      return selectResult(fieldContracts.providerFact, [
+        this.providerFactOutcome,
+        this.providerOutcomeKind,
+        this.pid,
+      ]);
+    }
+    if (kind === "persistProviderUncertainty") {
+      return selectResult(fieldContracts.providerUncertainty, [
+        this.providerUncertaintyOutcome,
+        this.providerUncertaintyState,
+        this.pid,
+      ]);
+    }
     if (kind === "finalize" || kind === "reconcile") {
-      if (this.finalizeOutcome === "replayed") {
+      if (
+        this.finalizeOutcome === "finalized" ||
+        this.finalizeOutcome === "replayed"
+      ) {
         return selectResult(fieldContracts.finalization, [
-          "replayed",
+          this.finalizeOutcome,
           "completed",
-          "accepted",
+          this.providerOutcomeKind,
           observationKey,
           new Date(finalizedAt),
+          this.pid,
+        ]);
+      }
+      if (this.finalizeOutcome === "manual-reconciliation-required") {
+        return selectResult(fieldContracts.finalization, [
+          "manual-reconciliation-required",
+          "ambiguous",
+          null,
+          null,
+          null,
           this.pid,
         ]);
       }
@@ -403,14 +469,35 @@ async function assertCode(promise, code) {
 }
 
 async function completeThrough(session, operation) {
-  if (["consume", "prove", "finalize", "release"].includes(operation)) {
+  if ([
+    "consume",
+    "prove",
+    "persistProviderFact",
+    "persistProviderUncertainty",
+    "finalize",
+    "release",
+  ].includes(operation)) {
     await session.acquire(permitKey, freshSignal());
   }
-  if (["prove", "finalize", "release"].includes(operation)) {
+  if ([
+    "prove",
+    "persistProviderFact",
+    "persistProviderUncertainty",
+    "finalize",
+    "release",
+  ].includes(operation)) {
     await session.consume(permitKey, freshSignal());
   }
-  if (["finalize", "release"].includes(operation)) {
+  if ([
+    "persistProviderFact",
+    "persistProviderUncertainty",
+    "finalize",
+    "release",
+  ].includes(operation)) {
     await session.prove(permitKey, freshSignal());
+  }
+  if (["finalize", "release"].includes(operation)) {
+    await session.persistProviderFact(permitKey, acceptedFact, freshSignal());
   }
   if (operation === "release") {
     await session.finalize(permitKey, freshSignal());
@@ -418,6 +505,16 @@ async function completeThrough(session, operation) {
 }
 
 function invoke(session, operation, signal) {
+  if (operation === "persistProviderFact") {
+    return session.persistProviderFact(permitKey, acceptedFact, signal);
+  }
+  if (operation === "persistProviderUncertainty") {
+    return session.persistProviderUncertainty(
+      permitKey,
+      "provider-call-threw",
+      signal,
+    );
+  }
   return session[operation](permitKey, signal);
 }
 
@@ -441,12 +538,14 @@ test("publishes one immutable dormant transport with a deliberately narrow surfa
     "consume",
     "destroy",
     "finalize",
+    "persistProviderFact",
+    "persistProviderUncertainty",
     "prepare",
     "prove",
     "release",
   ]);
-  assert.equal("persistProviderFact" in session, false);
-  assert.equal("persistProviderUncertainty" in session, false);
+  assert.equal(typeof session.persistProviderFact, "function");
+  assert.equal(typeof session.persistProviderUncertainty, "function");
   await session.destroy(freshSignal());
 
   assert.throws(
@@ -459,11 +558,16 @@ test("publishes one immutable dormant transport with a deliberately narrow surfa
 });
 
 test("runs the exact happy-path SQL, parameters, transaction brackets, and clean close", async () => {
-  const client = new FakeClient();
+  const client = new FakeClient({ finalizeOutcome: "finalized" });
   const { poolState, session } = await preparedSession(client);
   const acquired = await session.acquire(permitKey, freshSignal());
   const consumed = await session.consume(permitKey, freshSignal());
   const proof = await session.prove(permitKey, freshSignal());
+  const persisted = await session.persistProviderFact(
+    permitKey,
+    acceptedFact,
+    freshSignal(),
+  );
   const finalization = await session.finalize(permitKey, freshSignal());
   const released = await session.release(permitKey, freshSignal());
   await session.close(freshSignal());
@@ -488,7 +592,13 @@ test("runs the exact happy-path SQL, parameters, transaction brackets, and clean
     outcome: "held",
     sendBefore,
   });
-  assert.equal(finalization.outcome, "pending");
+  assert.deepEqual(persisted, {
+    backendPid,
+    commitAck: "acknowledged",
+    readyForQuery: "idle",
+    outcome: "recorded",
+  });
+  assert.equal(finalization.outcome, "finalized");
   assert.deepEqual(released, {
     backendPid,
     commitAck: "acknowledged",
@@ -496,7 +606,14 @@ test("runs the exact happy-path SQL, parameters, transaction brackets, and clean
     outcome: "released",
     releasedCount: 1,
   });
-  for (const result of [acquired, consumed, proof, finalization, released]) {
+  for (const result of [
+    acquired,
+    consumed,
+    proof,
+    persisted,
+    finalization,
+    released,
+  ]) {
     assert.equal(Object.isFrozen(result), true);
   }
   assert.equal(poolState.checkoutCount(), 1);
@@ -516,6 +633,9 @@ test("runs the exact happy-path SQL, parameters, transaction brackets, and clean
     "prove",
     "COMMIT",
     "BEGIN ISOLATION LEVEL READ COMMITTED",
+    "persistProviderFact",
+    "COMMIT",
+    "BEGIN ISOLATION LEVEL READ COMMITTED",
     "finalize",
     "COMMIT",
     "BEGIN ISOLATION LEVEL READ COMMITTED",
@@ -532,14 +652,281 @@ test("runs the exact happy-path SQL, parameters, transaction brackets, and clean
     assert.equal(query.rowMode, "array");
     assert.equal(Object.isFrozen(query), true);
     assert.equal(Object.isFrozen(query.values), true);
-    assert.deepEqual(
-      query.values,
-      query.text === sql.pid || query.text === sql.lockProof
-        ? []
-        : [permitKey],
-    );
+    const expectedValues = query.text === sql.pid || query.text === sql.lockProof
+      ? []
+      : query.text === sql.persistProviderFact
+        ? [
+          permitKey,
+          "accepted",
+          acceptedFact.providerMessageId,
+          null,
+          null,
+        ]
+        : [permitKey];
+    assert.deepEqual(query.values, expectedValues);
     assert.equal(Object.hasOwn(query, "name"), false);
   }
+});
+
+test("persists every exact provider-fact union with fixed positional parameters", async () => {
+  const cases = [
+    [
+      acceptedFact,
+      ["accepted", acceptedFact.providerMessageId, null, null],
+    ],
+    [
+      Object.freeze({
+        outcome: "sender-deferred",
+        providerErrorCode: 130_429,
+        retryAfterSeconds: 60,
+      }),
+      ["sender-deferred", null, 130_429, 60],
+    ],
+    [
+      Object.freeze({
+        outcome: "pair-deferred",
+        providerErrorCode: 131_056,
+        retryAfterSeconds: 86_400,
+      }),
+      ["pair-deferred", null, 131_056, 86_400],
+    ],
+    [
+      Object.freeze({
+        outcome: "service-window-rejected",
+        providerErrorCode: 131_047,
+      }),
+      ["service-window-rejected", null, 131_047, null],
+    ],
+  ];
+
+  for (const [fact, expectedTail] of cases) {
+    const client = new FakeClient({ finalizeOutcome: "finalized" });
+    const { session } = await preparedSession(client);
+    await completeThrough(session, "persistProviderFact");
+    const result = await session.persistProviderFact(
+      permitKey,
+      fact,
+      freshSignal(),
+    );
+    assert.deepEqual(result, {
+      backendPid,
+      commitAck: "acknowledged",
+      readyForQuery: "idle",
+      outcome: "recorded",
+    });
+    const write = client.queries.find(
+      (query) => typeof query !== "string" &&
+        query.text === sql.persistProviderFact,
+    );
+    assert.deepEqual(write.values, [permitKey, ...expectedTail]);
+    await session.finalize(permitKey, freshSignal());
+    await session.release(permitKey, freshSignal());
+    await session.close(freshSignal());
+    assert.deepEqual(client.releaseCalls, [true]);
+  }
+});
+
+test("maps only the two public uncertainty reasons to the fixed SQL union", async () => {
+  for (const [reason, databaseReason] of [
+    ["provider-call-threw", "threw"],
+    ["provider-call-timed-out", "timeout"],
+  ]) {
+    const client = new FakeClient({
+      finalizeOutcome: "manual-reconciliation-required",
+    });
+    const { session } = await preparedSession(client);
+    await completeThrough(session, "persistProviderUncertainty");
+    const result = await session.persistProviderUncertainty(
+      permitKey,
+      reason,
+      freshSignal(),
+    );
+    assert.equal(result.outcome, "recorded");
+    const write = client.queries.find(
+      (query) => typeof query !== "string" &&
+        query.text === sql.persistProviderUncertainty,
+    );
+    assert.deepEqual(write.values, [permitKey, databaseReason]);
+    const finalization = await session.finalize(permitKey, freshSignal());
+    assert.equal(finalization.outcome, "manual-reconciliation-required");
+    await session.release(permitKey, freshSignal());
+    await session.close(freshSignal());
+    assert.deepEqual(client.releaseCalls, [true]);
+  }
+});
+
+test("requires exactly one provider persistence after proof and before finalize", async () => {
+  const prematureWriter = await preparedSession(new FakeClient());
+  await assertCode(
+    prematureWriter.session.persistProviderFact(
+      permitKey,
+      acceptedFact,
+      freshSignal(),
+    ),
+    "invalid-phase",
+  );
+  assert.deepEqual(prematureWriter.client.releaseCalls, [true]);
+
+  const missingWriter = await preparedSession(new FakeClient());
+  await completeThrough(missingWriter.session, "persistProviderFact");
+  await assertCode(
+    missingWriter.session.finalize(permitKey, freshSignal()),
+    "invalid-phase",
+  );
+  assert.deepEqual(missingWriter.client.releaseCalls, [true]);
+
+  const duplicateWriter = await preparedSession(new FakeClient());
+  await completeThrough(duplicateWriter.session, "persistProviderFact");
+  await duplicateWriter.session.persistProviderFact(
+    permitKey,
+    acceptedFact,
+    freshSignal(),
+  );
+  await assertCode(
+    duplicateWriter.session.persistProviderUncertainty(
+      permitKey,
+      "provider-call-threw",
+      freshSignal(),
+    ),
+    "invalid-phase",
+  );
+  assert.deepEqual(duplicateWriter.client.releaseCalls, [true]);
+  assert.equal(
+    duplicateWriter.client.queries.map(kindOf)
+      .filter((kind) => kind.startsWith("persistProvider")).length,
+    1,
+  );
+});
+
+test("rejects hostile provider facts without invoking accessors or querying", async () => {
+  let getterCalls = 0;
+  const getterFact = Object.defineProperties({}, {
+    outcome: {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return "accepted";
+      },
+    },
+    providerMessageId: {
+      enumerable: true,
+      value: "must-not-be-read",
+    },
+  });
+  const hostileFacts = [
+    null,
+    new Proxy(acceptedFact, {}),
+    getterFact,
+    { ...acceptedFact, extra: true },
+    { outcome: "accepted", providerMessageId: "" },
+    { outcome: "accepted", providerMessageId: " leading" },
+    { outcome: "accepted", providerMessageId: "control\u0000byte" },
+    { outcome: "accepted", providerMessageId: "x".repeat(256) },
+    {
+      outcome: "sender-deferred",
+      providerErrorCode: 131_056,
+      retryAfterSeconds: 60,
+    },
+    {
+      outcome: "sender-deferred",
+      providerErrorCode: 130_429,
+      retryAfterSeconds: 0,
+    },
+    {
+      outcome: "pair-deferred",
+      providerErrorCode: 131_056,
+      retryAfterSeconds: 1.5,
+    },
+    {
+      outcome: "service-window-rejected",
+      providerErrorCode: 131_047,
+      retryAfterSeconds: 1,
+    },
+  ];
+
+  for (const fact of hostileFacts) {
+    const client = new FakeClient();
+    const { session } = await preparedSession(client);
+    await completeThrough(session, "persistProviderFact");
+    const queryCount = client.queries.length;
+    await assertCode(
+      session.persistProviderFact(permitKey, fact, freshSignal()),
+      "invalid-result",
+    );
+    assert.equal(client.queries.length, queryCount);
+    assert.deepEqual(client.releaseCalls, [true]);
+  }
+  assert.equal(getterCalls, 0);
+});
+
+test("rejects hostile writer results, reason drift, and PID drift", async () => {
+  const factScenarios = [
+    (result) => {
+      result.rows[0][0] = "superseded";
+    },
+    (result) => {
+      result.rows[0][1] = "pair-deferred";
+    },
+    (result) => {
+      result.rows[0][2] = backendPid + 1;
+    },
+    (result) => {
+      result.rows[0].push("extra");
+    },
+  ];
+  for (const mutate of factScenarios) {
+    const client = new FakeClient();
+    const { session } = await preparedSession(client);
+    await completeThrough(session, "persistProviderFact");
+    client.overrideNext("persistProviderFact", (result) => {
+      mutate(result);
+      return result;
+    });
+    await assertCode(
+      session.persistProviderFact(permitKey, acceptedFact, freshSignal()),
+      mutate === factScenarios[2]
+        ? "physical-client-changed"
+        : "invalid-result",
+    );
+    assert.deepEqual(client.releaseCalls, [true]);
+  }
+
+  for (const [column, value, code] of [
+    [0, "replayed", "invalid-result"],
+    [1, "exact-provider-fact", "invalid-result"],
+    [2, backendPid + 1, "physical-client-changed"],
+  ]) {
+    const client = new FakeClient();
+    const { session } = await preparedSession(client);
+    await completeThrough(session, "persistProviderUncertainty");
+    client.overrideNext("persistProviderUncertainty", (result) => {
+      result.rows[0][column] = value;
+      return result;
+    });
+    await assertCode(
+      session.persistProviderUncertainty(
+        permitKey,
+        "provider-call-threw",
+        freshSignal(),
+      ),
+      code,
+    );
+    assert.deepEqual(client.releaseCalls, [true]);
+  }
+
+  const invalidReason = await preparedSession(new FakeClient());
+  await completeThrough(invalidReason.session, "persistProviderUncertainty");
+  const queryCount = invalidReason.client.queries.length;
+  await assertCode(
+    invalidReason.session.persistProviderUncertainty(
+      permitKey,
+      "provider-call-retried",
+      freshSignal(),
+    ),
+    "invalid-result",
+  );
+  assert.equal(invalidReason.client.queries.length, queryCount);
+  assert.deepEqual(invalidReason.client.releaseCalls, [true]);
 });
 
 test("preserves the two-lock reconciliation shape through finalize and release", async () => {
@@ -691,7 +1078,15 @@ test("pre-abort and abort at every prepare query destroy without hanging", async
 });
 
 test("abort at every capability query and COMMIT returns promptly and destroys once", async () => {
-  for (const operation of ["acquire", "consume", "prove", "finalize", "release"]) {
+  for (const operation of [
+    "acquire",
+    "consume",
+    "prove",
+    "persistProviderFact",
+    "persistProviderUncertainty",
+    "finalize",
+    "release",
+  ]) {
     for (const targetKind of [operation, "COMMIT"]) {
       const client = new FakeClient({ rejectHeldOnDestroy: false });
       const { session } = await preparedSession(client);
@@ -985,7 +1380,16 @@ test("source remains dormant, permit-only, allowlisted, and non-multiplexed", as
   );
   assert.doesNotMatch(
     source,
-    /providerRequestKey|persistProviderFact|persistProviderUncertainty|Math\.random|crypto\.randomUUID|query_timeout|client\.cancel|pool\.query|process\.env|console\.|\bcause\b/,
+    /providerRequestKey|Math\.random|crypto\.randomUUID|query_timeout|client\.cancel|pool\.query|process\.env|console\.|\bcause\b/,
+  );
+  assert.equal(
+    (source.match(/write_bot_reply_staging_provider_fact_v1/g) ?? []).length,
+    1,
+  );
+  assert.equal(
+    (source.match(/write_bot_reply_staging_provider_uncertainty_v1/g) ?? [])
+      .length,
+    1,
   );
   assert.match(source, /pipeline !== false/);
   assert.match(source, /release\(true\)/);

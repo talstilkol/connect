@@ -8,7 +8,10 @@ const decision = readFileSync(
 );
 
 test("requires five principals and four isolated login capabilities before activation", () => {
-  assert.match(decision, /סטטוס: החלטה חיצונית חוסמת Activation/);
+  assert.match(
+    decision,
+    /סטטוס: החלטה טכנית מאושרת; Provisioning וראיות Staging חוסמים Activation/,
+  );
   for (const principal of [
     "connect_migration_owner",
     "connect_migrator_login",
@@ -64,11 +67,35 @@ test("keeps every privileged database credential in one bounded service", () => 
 test("leaves real role creation and ownership as an explicit external decision", () => {
   assert.match(
     decision,
-    /האם מאשרים את אפשרות A — ארבע יכולות PostgreSQL ו־Verifier מבודד/,
+    /החלטת Tal: אפשרות A — ארבע יכולות PostgreSQL ו־Verifier מבודד — מאושרת/,
+  );
+  assert.match(
+    decision,
+    /האישור[\s\S]*אינו יוצר חשבון Railway,‏ Role,‏ Credential,‏ Grant[\s\S]*`activationAllowed:false`/,
+  );
+  assert.match(
+    decision,
+    /`connect_bot_reply_provider_runtime` כ־Login principal חמישי וכ־Principal[\s\S]*שישי בסך הכול/,
   );
   assert.match(decision, /בעל ביצוע Role creation ו־Grant\/Revoke/);
   assert.match(decision, /חלון Maintenance\/Drain ראשון ל־Staging/);
   assert.doesNotMatch(decision, /postgres(?:ql)?:\/\//i);
+});
+
+test("records D1e completion without weakening the D1f activation blocker", () => {
+  assert.match(
+    decision,
+    /0057_bot_reply_staging_writer_barrier_and_late_truth\.sql[\s\S]*Scope binding[\s\S]*Admission writer[\s\S]*Late exact truth[\s\S]*`0da172f`/,
+  );
+  assert.match(
+    decision,
+    /`pg_locks`[\s\S]*אינה מוכיחה את מסלול[\s\S]*Acquisition capability[\s\S]*Direct-DML denial/,
+  );
+  assert.match(decision, /D1f נשאר NO-GO/);
+  assert.match(
+    decision,
+    /pg_locks[\s\S]*הסקת אבטחה[\s\S]*view-pg-locks\.html/,
+  );
 });
 
 test("keeps D31-B candidate evidence dormant and unable to activate", () => {

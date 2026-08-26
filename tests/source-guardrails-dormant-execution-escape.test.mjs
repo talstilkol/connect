@@ -970,7 +970,7 @@ test("rejects credential-bound SQL in verifier allowlist path lookalikes", async
   );
 });
 
-test("never allows D1e writer-barrier identifiers in the pinned runtime transport", async () => {
+test("allows only the two reviewed D1e writers in the pinned runtime transport", async () => {
   const root = await createFixture(
     "connect-d1e-pinned-transport-forbidden-",
   );
@@ -981,7 +981,7 @@ test("never allows D1e writer-barrier identifiers in the pinned runtime transpor
     ),
     [
       "export const forbiddenWriter =",
-      '  "write_bot_reply_staging_provider_fact_v1";',
+      '  "write_bot_reply_staging_pre_send_admission_v1";',
       "",
     ].join("\n"),
   );
