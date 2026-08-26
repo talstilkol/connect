@@ -140,6 +140,8 @@ const reviewedMetaCredentialTruncateTrigger =
   /CREATE\s+TRIGGER\s+meta_credential_revision_events_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.meta_credential_revision_events\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_meta_credential_revision_event_mutation\(\)\s*;/gi;
 const reviewedCredentialBoundPreSendTruncateTrigger =
   /(?:CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_admission_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_pre_send_admission_bindings|CREATE\s+TRIGGER\s+bot_reply_staging_run_bindings_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_run_credential_bindings|CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_permits_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_bound_pre_send_permits|CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_consumptions_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_bound_pre_send_permit_consumptions|CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_resolutions_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_bound_pre_send_permit_resolutions)\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_staging_pre_send_ledger_mutation\(\)\s*;/gi;
+const reviewedCredentialBoundSessionBarrierTruncateTrigger =
+  /(?:CREATE\s+TRIGGER\s+bot_reply_staging_request_bindings_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_provider_request_bindings|CREATE\s+TRIGGER\s+bot_reply_staging_uncertainty_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_provider_uncertainty_events|CREATE\s+TRIGGER\s+bot_reply_staging_boundary_claims_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_provider_boundary_claims)\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_staging_pre_send_ledger_mutation\(\)\s*;/gi;
 const reviewedCredentialBoundAdmissionRunBinding =
   /ALTER\s+TABLE\s+public\.bot_reply_staging_pre_send_admission_bindings\s+ADD\s+CONSTRAINT\s+bot_reply_staging_pre_send_admission_run_binding_fk\s+FOREIGN\s+KEY\s*\(\s*run_binding_key,\s*run_key,\s*tenant_id,\s*run_claim_version,\s*authorization_event_key,\s*authorization_version,\s*credential_revision,\s*credential_envelope_digest,\s*credential_event_key\s*\)\s+REFERENCES\s+public\.bot_reply_staging_run_credential_bindings\s*\(\s*binding_key,\s*run_key,\s*tenant_id,\s*run_claim_version,\s*authorization_event_key,\s*authorization_version,\s*credential_revision,\s*credential_envelope_digest,\s*credential_event_key\s*\)\s+ON\s+DELETE\s+RESTRICT\s*;/i;
 const reviewedCredentialBoundPermitAdmissionIdentity =
@@ -409,6 +411,211 @@ const credentialBoundPreSendPermitValues = Object.freeze([
   "database_permit_expires_at",
   "database_now",
 ]);
+const credentialBoundSessionOperationValues = Object.freeze([
+  "locked_permit.operation_key",
+  "locked_permit.run_key",
+  "locked_permit.tenant_id",
+  "locked_permit.request_digest",
+  "locked_permit.audit_key",
+  "locked_permit.release_id",
+  "locked_permit.commit_sha",
+  "locked_permit.artifact_digest",
+  "locked_permit.run_claim_version",
+  "locked_permit.run_lease_expires_at",
+  "locked_permit.operation_kind",
+  "locked_permit.delivery_key",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "provider_request_key",
+  "database_now",
+  "database_now",
+]);
+const credentialBoundSessionRequestValues = Object.freeze([
+  "provider_request_key",
+  "locked_permit.delivery_key",
+  "locked_permit.tenant_id",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "database_now",
+  "database_now",
+]);
+const credentialBoundSessionConsumptionColumns = Object.freeze([
+  "consumption_key",
+  "permit_key",
+  "tenant_id",
+  "credential_revision",
+  "credential_envelope_digest",
+  "credential_event_key",
+  "operation_key",
+  "delivery_key",
+  "delivery_claim_version",
+  "reservation_key",
+  "provider_request_key",
+  "consumed_at",
+  "created_at",
+]);
+const credentialBoundSessionConsumptionValues = Object.freeze([
+  "consumption_key",
+  "locked_permit.permit_key",
+  "locked_permit.tenant_id",
+  "locked_permit.credential_revision",
+  "locked_permit.credential_envelope_digest",
+  "locked_permit.credential_event_key",
+  "locked_permit.operation_key",
+  "locked_permit.delivery_key",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "provider_request_key",
+  "database_now",
+  "database_now",
+]);
+const credentialBoundSessionBindingColumns = Object.freeze([
+  "binding_key",
+  "permit_key",
+  "consumption_key",
+  "run_key",
+  "tenant_id",
+  "run_claim_version",
+  "credential_revision",
+  "credential_envelope_digest",
+  "credential_event_key",
+  "operation_key",
+  "operation_kind",
+  "delivery_key",
+  "delivery_claim_version",
+  "reservation_key",
+  "provider_request_key",
+  "bound_at",
+  "created_at",
+]);
+const credentialBoundSessionBindingValues = Object.freeze([
+  "provider_binding_key",
+  "locked_permit.permit_key",
+  "consumption_key",
+  "locked_permit.run_key",
+  "locked_permit.tenant_id",
+  "locked_permit.run_claim_version",
+  "locked_permit.credential_revision",
+  "locked_permit.credential_envelope_digest",
+  "locked_permit.credential_event_key",
+  "locked_permit.operation_key",
+  "locked_permit.operation_kind",
+  "locked_permit.delivery_key",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "provider_request_key",
+  "database_now",
+  "database_now",
+]);
+const credentialBoundSessionResolutionColumns = Object.freeze([
+  "resolution_key",
+  "permit_key",
+  "tenant_id",
+  "credential_revision",
+  "credential_envelope_digest",
+  "credential_event_key",
+  "operation_key",
+  "delivery_key",
+  "delivery_claim_version",
+  "reservation_key",
+  "outcome",
+  "reason_code",
+  "provider_request_key",
+  "resolved_at",
+  "created_at",
+]);
+const credentialBoundSessionUncertaintyColumns = Object.freeze([
+  "event_key",
+  "permit_key",
+  "operation_key",
+  "run_key",
+  "tenant_id",
+  "delivery_key",
+  "reservation_key",
+  "provider_request_key",
+  "requested_at",
+  "uncertainty_kind",
+  "detected_at",
+  "created_at",
+]);
+const credentialBoundSessionUncertaintyValues = Object.freeze([
+  "uncertainty_event_key",
+  "stored_permit.permit_key",
+  "stored_operation.operation_key",
+  "stored_operation.run_key",
+  "stored_operation.tenant_id",
+  "stored_operation.delivery_key",
+  "stored_operation.reservation_key",
+  "stored_operation.provider_request_key",
+  "stored_operation.requested_at",
+  "uncertainty_kind",
+  "uncertainty_detected_at",
+  "uncertainty_detected_at",
+]);
+const credentialBoundSessionBoundaryClaimColumns = Object.freeze([
+  "claim_key",
+  "permit_key",
+  "operation_key",
+  "run_key",
+  "tenant_id",
+  "delivery_key",
+  "reservation_key",
+  "provider_request_key",
+  "requested_at",
+  "backend_pid",
+  "proved_at",
+  "send_before",
+  "created_at",
+]);
+const credentialBoundSessionBoundaryClaimValues = Object.freeze([
+  "boundary_claim_key",
+  "stored_permit.permit_key",
+  "stored_operation.operation_key",
+  "stored_operation.run_key",
+  "stored_operation.tenant_id",
+  "stored_operation.delivery_key",
+  "stored_operation.reservation_key",
+  "stored_operation.provider_request_key",
+  "stored_operation.requested_at",
+  "pg_catalog.pg_backend_pid()",
+  "database_now",
+  "stored_permit.permit_expires_at - interval '15 seconds'",
+  "database_now",
+]);
+const credentialBoundSessionDeniedResolutionValues = Object.freeze([
+  "resolution_key",
+  "locked_permit.permit_key",
+  "locked_permit.tenant_id",
+  "locked_permit.credential_revision",
+  "locked_permit.credential_envelope_digest",
+  "locked_permit.credential_event_key",
+  "locked_permit.operation_key",
+  "locked_permit.delivery_key",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "'denied'",
+  "denial_reason",
+  "null",
+  "database_now",
+  "database_now",
+]);
+const credentialBoundSessionReleasedResolutionValues = Object.freeze([
+  "resolution_key",
+  "locked_permit.permit_key",
+  "locked_permit.tenant_id",
+  "locked_permit.credential_revision",
+  "locked_permit.credential_envelope_digest",
+  "locked_permit.credential_event_key",
+  "locked_permit.operation_key",
+  "locked_permit.delivery_key",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "'released'",
+  "'capability_released'",
+  "provider_request_key",
+  "database_now",
+  "database_now",
+]);
 
 function rootUrl(root) {
   return pathToFileURL(
@@ -614,6 +821,105 @@ function reviewedCredentialBoundPreSendInsert(functionName, statement) {
   return false;
 }
 
+function reviewedCredentialBoundSessionBarrierInsert(
+  functionName,
+  statement,
+) {
+  if (
+    functionName ===
+      "prove_bot_reply_staging_pre_send_session_barrier_v1"
+  ) {
+    return exactSqlLists(
+      statement.match(
+        /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_provider_boundary_claims\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*ON\s+CONFLICT\s+DO\s+NOTHING\s+RETURNING\s+\*\s+INTO\s+stored_boundary_claim\s*$/i,
+      ),
+      credentialBoundSessionBoundaryClaimColumns,
+      credentialBoundSessionBoundaryClaimValues,
+    );
+  }
+
+  if (
+    functionName ===
+      "finalize_bot_reply_staging_credential_bound_pre_send_permit_v1"
+  ) {
+    const terminalOutcome = exactSqlLists(
+      statement.match(
+        /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_provider_operation_outcomes\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*RETURNING\s+\*\s+INTO\s+stored_outcome\s*$/i,
+      ),
+      providerOperationOutcomeColumns,
+      providerOperationOutcomeValues,
+    );
+    if (terminalOutcome) return true;
+
+    return exactSqlLists(
+      statement.match(
+        /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_provider_uncertainty_events\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*ON\s+CONFLICT\s+ON\s+CONSTRAINT\s+bot_reply_staging_uncertainty_operation_kind_uq\s+DO\s+NOTHING\s*$/i,
+      ),
+      credentialBoundSessionUncertaintyColumns,
+      credentialBoundSessionUncertaintyValues,
+    );
+  }
+
+  if (
+    functionName !==
+      "consume_bot_reply_staging_credential_bound_pre_send_permit_v1"
+  ) {
+    return false;
+  }
+
+  const exactInsert = (tableName, columns, values) =>
+    exactSqlLists(
+      statement.match(
+        new RegExp(
+          `^\\s*INSERT\\s+INTO\\s+public\\.${tableName}` +
+            `\\s*\\(([\\s\\S]*?)\\)\\s*VALUES\\s*` +
+            `\\(([\\s\\S]*?)\\)\\s*$`,
+          "i",
+        ),
+      ),
+      columns,
+      values,
+    );
+
+  if (
+    exactInsert(
+      "bot_reply_staging_provider_operations",
+      providerOperationReservationColumns,
+      credentialBoundSessionOperationValues,
+    ) ||
+    exactInsert(
+      "bot_reply_provider_request_claims",
+      providerRequestFenceColumns,
+      credentialBoundSessionRequestValues,
+    ) ||
+    exactInsert(
+      "bot_reply_staging_credential_bound_pre_send_permit_consumptions",
+      credentialBoundSessionConsumptionColumns,
+      credentialBoundSessionConsumptionValues,
+    ) ||
+    exactInsert(
+      "bot_reply_staging_credential_provider_request_bindings",
+      credentialBoundSessionBindingColumns,
+      credentialBoundSessionBindingValues,
+    )
+  ) {
+    return true;
+  }
+
+  const resolution = statement.match(
+    /^\s*INSERT\s+INTO\s+public\.bot_reply_staging_credential_bound_pre_send_permit_resolutions\s*\(([\s\S]*?)\)\s*VALUES\s*\(([\s\S]*?)\)\s*$/i,
+  );
+  return exactSqlLists(
+    resolution,
+    credentialBoundSessionResolutionColumns,
+    credentialBoundSessionDeniedResolutionValues,
+  ) || exactSqlLists(
+    resolution,
+    credentialBoundSessionResolutionColumns,
+    credentialBoundSessionReleasedResolutionValues,
+  );
+}
+
 function containsSeedData(source, fileName) {
   for (const match of source.matchAll(functionDefinition)) {
     const body = match[1];
@@ -655,6 +961,14 @@ function containsSeedData(source, fileName) {
             fileName ===
               "0055_bot_reply_staging_credential_bound_pre_send_permit.sql" &&
             reviewedCredentialBoundPreSendInsert(
+              functionName,
+              statement,
+            )
+          ) &&
+          !(
+            fileName ===
+              "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql" &&
+            reviewedCredentialBoundSessionBarrierInsert(
               functionName,
               statement,
             )
@@ -735,6 +1049,30 @@ function containsDestructiveStatement(source, fileName) {
     if (
       reviewedTriggers.length === 5 &&
       reviewedTriggerNames.size === 5
+    ) {
+      for (const trigger of reviewedTriggers) {
+        reviewedSource = reviewedSource.replace(trigger, "");
+      }
+    }
+  }
+
+  if (
+    fileName ===
+      "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql"
+  ) {
+    const reviewedTriggers = source.match(
+      reviewedCredentialBoundSessionBarrierTruncateTrigger,
+    ) ?? [];
+    const reviewedTriggerNames = new Set(
+      reviewedTriggers.map(
+        (trigger) => trigger.match(
+          /CREATE\s+TRIGGER\s+([a-z0-9_]+)/i,
+        )?.[1]?.toLowerCase() ?? "",
+      ),
+    );
+    if (
+      reviewedTriggers.length === 3 &&
+      reviewedTriggerNames.size === 3
     ) {
       for (const trigger of reviewedTriggers) {
         reviewedSource = reviewedSource.replace(trigger, "");

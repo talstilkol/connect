@@ -82,6 +82,8 @@ const metaCredentialRevisionLedgerSchema =
   migrationSources[54];
 const botReplyCredentialBoundPreSendPermitSchema =
   migrationSources[55];
+const botReplyCredentialBoundPreSendSessionBarrierSchema =
+  migrationSources[56];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -141,12 +143,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0053_bot_reply_staging_provider_operation_fence.sql",
     "0054_meta_credential_revision_ledger.sql",
     "0055_bot_reply_staging_credential_bound_pre_send_permit.sql",
+    "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 56,
+      migrationCount: 57,
       findings: [],
     },
   );
@@ -200,6 +203,25 @@ test("keeps credential-bound pre-send admission dormant", () => {
   assert.doesNotMatch(
     botReplyCredentialBoundPreSendPermitSchema,
     /INSERT INTO public\.bot_reply_provider_request_claims|\bSECURITY DEFINER\b|^\s*GRANT\b/gm,
+  );
+});
+
+test("keeps the credential-bound session barrier dormant", () => {
+  assert.match(
+    botReplyCredentialBoundPreSendSessionBarrierSchema,
+    /acquire_bot_reply_staging_pre_send_session_barrier_v1/,
+  );
+  assert.match(
+    botReplyCredentialBoundPreSendSessionBarrierSchema,
+    /consume_bot_reply_staging_credential_bound_pre_send_permit_v1/,
+  );
+  assert.match(
+    botReplyCredentialBoundPreSendSessionBarrierSchema,
+    /reconcile_bot_reply_staging_credential_bound_pre_send_permit_v1/,
+  );
+  assert.doesNotMatch(
+    botReplyCredentialBoundPreSendSessionBarrierSchema,
+    /\bSECURITY DEFINER\b|^\s*GRANT\b|^\s*(?:CREATE|ALTER) ROLE\b/gm,
   );
 });
 
@@ -1910,6 +1932,188 @@ TRUNCATE public.bot_reply_staging_run_credential_bindings;
   });
   assert.equal(
     reboundFindings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+});
+
+function assertSessionBarrierInsertMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[56] = mutator(tamperedSources[56]);
+  assert.notEqual(tamperedSources[56], migrationSources[56]);
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+}
+
+test("rejects a different value in the reviewed session-barrier operation", () => {
+  assertSessionBarrierInsertMutationRejected((source) => source.replace(
+    [
+      "  ) VALUES (",
+      "    locked_permit.operation_key,",
+      "    locked_permit.run_key,",
+    ].join("\n"),
+    [
+      "  ) VALUES (",
+      "    'forbidden-seed',",
+      "    locked_permit.run_key,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a different table in the reviewed credential binding", () => {
+  assertSessionBarrierInsertMutationRejected((source) => source.replace(
+    "INSERT INTO public.bot_reply_staging_credential_provider_request_bindings (",
+    "INSERT INTO public.bot_reply_staging_credential_provider_request_bindings_copy (",
+  ));
+});
+
+test("rejects a forged value in the credential-bound provider outcome", () => {
+  assertSessionBarrierInsertMutationRejected((source) => source.replace(
+    [
+      "  ) VALUES (",
+      "    derived_observation_key,",
+      "    stored_operation.operation_key,",
+    ].join("\n"),
+    [
+      "  ) VALUES (",
+      "    'forbidden-seed',",
+      "    stored_operation.operation_key,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a forged value in the nonterminal uncertainty ledger", () => {
+  assertSessionBarrierInsertMutationRejected((source) => source.replace(
+    [
+      "    ) VALUES (",
+      "      uncertainty_event_key,",
+      "      stored_permit.permit_key,",
+    ].join("\n"),
+    [
+      "    ) VALUES (",
+      "      'forbidden-seed',",
+      "      stored_permit.permit_key,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a forged value in the one-shot provider boundary claim", () => {
+  assertSessionBarrierInsertMutationRejected((source) => source.replace(
+    [
+      "  ) VALUES (",
+      "    boundary_claim_key,",
+      "    stored_permit.permit_key,",
+    ].join("\n"),
+    [
+      "  ) VALUES (",
+      "    'forbidden-seed',",
+      "    stored_permit.permit_key,",
+    ].join("\n"),
+  ));
+});
+
+test("allows only the three exact session-barrier truncate guards", () => {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[56] += `
+TRUNCATE public.bot_reply_staging_credential_provider_request_bindings;
+`;
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+
+  const reboundSources = [...migrationSources];
+  reboundSources[56] = reboundSources[56].replace(
+    "BEFORE TRUNCATE ON public.bot_reply_staging_credential_provider_request_bindings",
+    "BEFORE TRUNCATE ON public.bot_reply_staging_provider_operations",
+  );
+  assert.notEqual(reboundSources[56], migrationSources[56]);
+  const reboundFindings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: reboundSources,
+  });
+  assert.equal(
+    reboundFindings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+
+  const uncertaintyTruncateSources = [...migrationSources];
+  uncertaintyTruncateSources[56] += `
+TRUNCATE public.bot_reply_staging_provider_uncertainty_events;
+`;
+  const uncertaintyTruncateFindings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: uncertaintyTruncateSources,
+  });
+  assert.equal(
+    uncertaintyTruncateFindings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+
+  const reboundUncertaintySources = [...migrationSources];
+  reboundUncertaintySources[56] = reboundUncertaintySources[56].replace(
+    "BEFORE TRUNCATE ON public.bot_reply_staging_provider_uncertainty_events",
+    "BEFORE TRUNCATE ON public.bot_reply_staging_provider_operations",
+  );
+  assert.notEqual(
+    reboundUncertaintySources[56],
+    migrationSources[56],
+  );
+  const reboundUncertaintyFindings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: reboundUncertaintySources,
+  });
+  assert.equal(
+    reboundUncertaintyFindings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+
+  const boundaryTruncateSources = [...migrationSources];
+  boundaryTruncateSources[56] += `
+TRUNCATE public.bot_reply_staging_provider_boundary_claims;
+`;
+  const boundaryTruncateFindings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: boundaryTruncateSources,
+  });
+  assert.equal(
+    boundaryTruncateFindings.some(
+      ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
+    ),
+    true,
+  );
+
+  const reboundBoundarySources = [...migrationSources];
+  reboundBoundarySources[56] = reboundBoundarySources[56].replace(
+    "BEFORE TRUNCATE ON public.bot_reply_staging_provider_boundary_claims",
+    "BEFORE TRUNCATE ON public.bot_reply_staging_provider_operations",
+  );
+  assert.notEqual(reboundBoundarySources[56], migrationSources[56]);
+  const reboundBoundaryFindings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: reboundBoundarySources,
+  });
+  assert.equal(
+    reboundBoundaryFindings.some(
       ({ code }) => code === "POSTGRES_DESTRUCTIVE_STATEMENT",
     ),
     true,

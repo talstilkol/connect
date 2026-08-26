@@ -17,6 +17,8 @@ const credentialMigrationName =
   "0054_meta_credential_revision_ledger.sql";
 const permitMigrationName =
   "0055_bot_reply_staging_credential_bound_pre_send_permit.sql";
+const sessionBarrierMigrationName =
+  "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql";
 const graphApiVersion = "v24.0";
 const actorExternalUserId = "credential-bound-permit-verifier";
 
@@ -166,9 +168,10 @@ async function migrationInventory() {
   const files = (await readdir(migrationDirectory))
     .filter((fileName) => fileName.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 56);
-  assert.equal(files.at(-2), credentialMigrationName);
-  assert.equal(files.at(-1), permitMigrationName);
+  assert.equal(files.length, 57);
+  assert.equal(files.at(-3), credentialMigrationName);
+  assert.equal(files.at(-2), permitMigrationName);
+  assert.equal(files.at(-1), sessionBarrierMigrationName);
   files.forEach((fileName, index) => {
     const match = migrationNamePattern.exec(fileName);
     assert.equal(match?.[1], String(index).padStart(4, "0"));

@@ -521,6 +521,79 @@ cooldown ולספק Admission writer מצומצם. המסלול הישן
 `reserve_bot_reply_staging_provider_operation_v1` נשאר ללא הרשאת Runtime.
 עד להשלמת כל אלה Activation נשאר NO-GO.
 
+4.7.7.30 Migration
+`0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql` מוסיפה
+את חוזה B2a2 הרדום. מפתח ה־Session advisory lock נגזר מאותו Tenant hash שכבר
+משמש את מחסומי ה־Transaction ב־0054–0055. פעולת Acquire מקבלת רק `permitKey`,
+מחשבת מחדש את זהות ה־Permit מתוך הרשומה הבלתי־משתנה, ואינה מקבלת או מחזירה
+Tenant או Lock key. ‏Client שנכנס ל־Acquire חייב להיות נקי: Client שכבר מחזיק
+Advisory lock כלשהו נחשב מזוהם ונכשל סגור; Backend אחר
+שתפוס מחזיר `busy` בלי המתנה בלתי־מוגבלת. לאחר רכישת ה־Lock נבדקות גם
+Provider operations לא־סופיות של אותו Tenant, אותו Sender scope או אותו
+Recipient scope. כך גם העברת נכס בין Tenants אינה פותחת מסלול Send חדש מעל
+Operation ישנה. Operation של Permit אחר מחזירה `blocked-unresolved` לאחר
+Unlock מאומת. Operation יחידה של אותו Permit מחזירה
+`reconciliation-required` רק כאשר שרשרת Released מלאה מוכחת, ובמצב זה נרכש
+גם Reconciliation marker דטרמיניסטי נפרד. ה־Marker מבדיל בין חיבור שנרכש
+לשליחה חדשה לבין חיבור שנרכש לפיוס בלבד; Proof ו־Consume דורשים בדיוק את
+ה־Tenant lock היחיד ולכן אינם יכולים להפוך Reconciliation ל־Send. כל חריגה
+לאחר הרכישה מפעילה Cleanup מפורש, משום ש־Session lock אינו מתבטל ב־Rollback.
+
+4.7.7.31 פעולת Consume מקבלת רק `permitKey`, דורשת `READ COMMITTED` ובעלות
+של ה־Backend הנוכחי על ה־Session lock המדויק, ונועלת מחדש את כל שרשרת Run,
+Credential,‏ Authorization,‏ Connection,‏ Policy,‏ Delivery,‏ Message,
+Reservation,‏ Cooldown,‏ Admission ו־Permit לפני דגימת Database clock אחת.
+רק `text-send` ו־`button-send` הם Send-capable; תרחישי
+`customer-window-expired`,‏ `provider-retry`,‏ `pair-limit` ו־
+`duplicate-safety` אינם יכולים לפתוח Meta POST במסלול זה.
+
+4.7.7.32 Consume מורשה מכניס באותה Transaction את ה־Provider operation,
+ה־Provider request claim,‏ Consumption, Binding מדויק ו־Resolution מסוג
+`released`. ה־Binding החדש הוא Append-only, ללא Payload או PII, ומקשר באמצעות
+Composite foreign keys את ה־Permit, ה־Credential revision, ה־Consumption,
+ה־Operation וה־Request לאותו Database timestamp. ‏`providerRequestKey` נגזר
+רק במסד ואינו מוחזר מתוצאת Consume; Replay או Denial אינם מחזירים Capability.
+
+4.7.7.33 `released` פירושו שהמסד התחייב לשחרור Capability חד־פעמי; הוא אינו
+טענה ש־Meta קיבל הודעה. B2b רשאי לחצות את גבול ה־HTTP רק לאחר ACK חיובי ל־
+`COMMIT`,‏ `ReadyForQuery`, וקריאת Proof נפרדת על אותו Client פיזי. ה־Proof
+מאמת שאין Outcome סופי, מאמת את שרשרת Released המלאה ומכניס Claim חד־פעמי
+ל־`bot_reply_staging_provider_boundary_claims`. שלושת ה־Unique constraints
+על Permit,‏ Operation ו־Provider request מונעים Proof חוזר גם באותו Session.
+רק לאחר ACK חד־משמעי ל־Commit של ה־Claim מותר להתקדם; אובדן ACK של ה־Proof
+מחייב לא לשלוח ולסמן פיוס ידני. הפלט מחזיר את `backendPid` השמור להשוואה ל־PID
+שנדגם לפני Acquire ואת `sendBefore` עם מרווח בטיחות של 15 שניות. אם ACK,‏ PID
+או Proof חסרים או לא ודאיים, אסור לבצע Meta POST וה־Client מושמד. Commit שנשמר
+יוצר Durable uncertainty fence; לאחר Crash אין מסלול Acquire חדש שמחזיר
+Capability לשליחה חוזרת.
+
+4.7.7.34 Finalize ו־Reconcile מקבלים רק `permitKey`, דורשים את אותו Session
+barrier ומפיקים מצב רק מעובדות Provider עמידות שכבר קשורות ל־Request של 0053.
+הקורא אינו יכול לספק Verdict,‏ Provider timestamp,‏ Provider ID או Error
+payload. ‏Accepted,‏ 130429,‏ 131056 ו־131047 יוצרים Outcome סופי רק כאשר
+נמצאה עובדה מדויקת. HTTP ambiguity או תפוגת Lease ללא עובדה אינם יוצרים
+Outcome בלתי־הפיך; הם נרשמים באופן Idempotent ב־Append-only nonterminal
+uncertainty ledger ומחזירים `manual-reconciliation-required`. כך Callback
+מאוחר אינו נחסם על ידי Outcome מקומי, ובמקביל Durable uncertainty fence מונע
+Retry אוטומטי ל־Meta. מסלול B2b חייב להשאיר את Delivery במצב `sending` בזמן
+אי־ודאות; מעבר ל־`ambiguous` במסלול הישן עדיין דורש חוזה D2 מוגן לעובדה
+מאוחרת.
+
+4.7.7.35 גם B2a2 אינו Activation. ‏0056 אינה מוסיפה `GRANT`, אינה מחברת
+Runtime או Meta adapter ואינה מוכיחה Client פיזי מוצמד, Commit ACK אמיתי,
+היעדר Multiplexing או Writer cooperation. ‏0056 כן מוסיפה Preflight לפורמט
+המספרי הקנוני של שלושת מזהי Meta ו־Unique ownership ל־Business Portfolio;
+יחד עם ה־Unique הקיימים ל־WABA ול־Phone הדבר מונע משני Tenants תקינים לחלוק
+Scope גלובלי. הוא עדיין אינו מוכיח שמפתחות ה־HMAC ברשומת Reservation נגזרו
+מנכסי ה־Tenant הנכון. ‏B2b עדיין חייב להוכיח את הרצף Acquire → Consume →
+Commit ACK → Proof Claim ו־Commit ACK חד־משמעי → Meta יחיד → Fact/Finalize →
+Release ואת הרס החיבור בכל כשל. חיבור Reconciliation מחזיק Tenant lock יחד
+עם Marker, רשאי לבצע Finalize/Release בלבד ואינו רשאי לבצע Proof או Consume.
+D1e עדיין חייב לסגור את המסלול הישן, להוסיף Admission writer,
+Credential-by-revision,‏ Scope binding או Reservation writer מהימן ללא Direct
+DML,‏ Writer barriers,‏ Cooldown cooperation ואי־שינוי של
+`messages.occurred_at`. עד אז Activation נשאר NO-GO.
+
 4.7.8 ה־Source Guard מסווג את ה־Probe כ־Dormant ללא Importer מורשה. כל Import
 עתידי מתוך API,‏ Worker,‏ Startup או Runtime חייב להפיל את שער הקוד.
 

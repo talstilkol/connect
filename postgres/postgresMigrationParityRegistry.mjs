@@ -625,4 +625,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway binds new staging authorization and run-claim evidence to one exact Meta credential revision, requires a separately admitted delivery/reservation/policy identity that is composite-bound to that same run, authorization and credential, and may reserve one DB-clocked immutable pre-send permit; the admission writer, consumption, provider capability release, named grants and runtime activation remain blocked for the later session-barrier migration.",
   }),
+  Object.freeze({
+    migration:
+      "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql",
+    token:
+      "acquire_bot_reply_staging_pre_send_session_barrier_v1",
+    summary:
+      "Railway adds dormant tenant-session and reconciliation-marker barriers, crash-durable subject fences, exclusive canonical Meta assets, atomic credential-bound request evidence, and a one-shot committed provider-boundary claim. Replay and reconciliation cannot mint send capability; ambiguity and timeout remain nonterminal. Runtime grants, pinned driver, trusted scope writer, cooperating writers and activation remain blocked.",
+  }),
 ]);

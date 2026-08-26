@@ -223,6 +223,23 @@ const dormantBotReplyStagingAttestedAllowedImporters =
       ]),
     ],
   ]);
+const dormantCredentialBoundPreSendSqlIdentifiers =
+  new Set([
+    "acquire_bot_reply_staging_pre_send_session_barrier_v1",
+    "prove_bot_reply_staging_pre_send_session_barrier_v1",
+    "release_bot_reply_staging_pre_send_session_barrier_v1",
+    "consume_bot_reply_staging_credential_bound_pre_send_permit_v1",
+    "finalize_bot_reply_staging_credential_bound_pre_send_permit_v1",
+    "reconcile_bot_reply_staging_credential_bound_pre_send_permit_v1",
+    "bot_reply_staging_credential_provider_request_bindings",
+    "bot_reply_staging_provider_uncertainty_events",
+    "bot_reply_staging_provider_boundary_claims",
+  ]);
+const dormantCredentialBoundPreSendVerifierPaths =
+  new Set([
+    "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs",
+    "scripts/verify-postgres-migration-contract.mjs",
+  ]);
 const legacyBotReplyStagingEvidenceModulePaths =
   new Set([
     "server/operations/currentProductionReadinessEvidenceSource.ts",
@@ -1581,6 +1598,67 @@ function runtimeStaticString(node) {
     return value;
   }
   return null;
+}
+
+function sourceFileReferencesDormantCredentialBoundPreSendSql(
+  sourceFile,
+  allowPolicyDeclaration = false,
+) {
+  let referencesDormantSql = false;
+  const containsDormantIdentifier = (value) => {
+    if (value === null) return false;
+    for (
+      const identifier of
+      dormantCredentialBoundPreSendSqlIdentifiers
+    ) {
+      if (value.includes(identifier)) return true;
+    }
+    return false;
+  };
+  const visit = (node) => {
+    if (referencesDormantSql) return;
+    if (
+      allowPolicyDeclaration &&
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text ===
+        "dormantCredentialBoundPreSendSqlIdentifiers"
+    ) {
+      return;
+    }
+
+    if (
+      ts.isStringLiteralLike(node) ||
+      ts.isTemplateExpression(node) ||
+      (
+        ts.isBinaryExpression(node) &&
+        node.operatorToken.kind ===
+          ts.SyntaxKind.PlusToken
+      )
+    ) {
+      referencesDormantSql = containsDormantIdentifier(
+        runtimeStaticString(node),
+      );
+    }
+
+    if (
+      !referencesDormantSql &&
+      ts.isTemplateExpression(node)
+    ) {
+      referencesDormantSql =
+        containsDormantIdentifier(node.head.text) ||
+        node.templateSpans.some((span) =>
+          containsDormantIdentifier(span.literal.text)
+        );
+    }
+
+    if (!referencesDormantSql) {
+      ts.forEachChild(node, visit);
+    }
+  };
+
+  visit(sourceFile);
+  return referencesDormantSql;
 }
 
 function runtimeMemberName(node) {
@@ -3459,15 +3537,38 @@ export async function inspectSourceGuardrails(
       }
     }
   };
+  const inspectDormantCredentialBoundPreSendSql = (
+    file,
+    sourceFile,
+  ) => {
+    const path = relativePath(root, file);
+
+    if (
+      !dormantCredentialBoundPreSendVerifierPaths.has(path) &&
+      sourceFileReferencesDormantCredentialBoundPreSendSql(
+        sourceFile,
+        path === "scripts/verify-source-guardrails.mjs",
+      )
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file: path,
+      });
+    }
+  };
 
   for (const [file, sourceFile] of parsedSources) {
     inspectCapabilityPortAugmentations(file, sourceFile);
+    inspectDormantCredentialBoundPreSendSql(file, sourceFile);
   }
   for (const [file, source] of dormantImporterSources) {
+    const sourceFile = parseSourceFile(file, source);
     inspectCapabilityPortAugmentations(
       file,
-      parseSourceFile(file, source),
+      sourceFile,
     );
+    inspectDormantCredentialBoundPreSendSql(file, sourceFile);
   }
 
   for (const file of files) {

@@ -439,3 +439,223 @@ test("treats the implicit CommonJS module object as a loader capability", async 
     },
   ]);
 });
+
+test("blocks dormant credential-bound SQL references across every runtime root", async () => {
+  const root = await createFixture(
+    "connect-credential-bound-sql-runtime-",
+  );
+  await Promise.all([
+    writeFile(
+      join(root, "db/acquire-capability.ts"),
+      [
+        "export const acquireSql =",
+        '  "SELECT * FROM public.acquire_bot_reply_staging_pre_send_" +',
+        '  "session_barrier_v1($1)";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "db/prove-capability.ts"),
+      [
+        "export const proveSql =",
+        '  "SELECT * FROM public.prove_bot_reply_staging_pre_send_session_barrier_v1($1)";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "server/operations/template-capability.ts"),
+      [
+        "export const acquireSql =",
+        '  `SELECT * FROM public.${"acquire_bot_reply_staging_pre_send_session_barrier_v1"}($1)`;',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "worker/release-capability.ts"),
+      [
+        "export const releaseSql =",
+        '  "SELECT * FROM public.release_bot_reply_staging_pre_send_session_barrier_v1($1)";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "worker/consume-capability.ts"),
+      [
+        "export const consumeSql =",
+        '  "SELECT * FROM public.consume_bot_reply_staging_credential_bound_pre_send_permit_v1($1)";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "proxy.ts"),
+      [
+        "export const finalizeSql =",
+        '  "SELECT * FROM public.finalize_bot_reply_staging_credential_bound_pre_send_permit_v1($1)";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "middleware.ts"),
+      [
+        "export const reconcileSql =",
+        '  "SELECT * FROM public.reconcile_bot_reply_staging_credential_bound_pre_send_permit_v1($1)";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/start-railway-api.mjs"),
+      [
+        "export const bindingLedger =",
+        '  "bot_reply_staging_credential_provider_request_bindings";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/start-railway-bullmq-api.mjs"),
+      [
+        "export const uncertaintyLedger =",
+        '  "bot_reply_staging_provider_uncertainty_events";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/start-railway-bullmq-worker.mjs"),
+      [
+        "export const boundaryLedger =",
+        '  "bot_reply_staging_provider_boundary_claims";',
+        "",
+      ].join("\n"),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "db/acquire-capability.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "db/prove-capability.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "middleware.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "proxy.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "scripts/start-railway-api.mjs",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "scripts/start-railway-bullmq-api.mjs",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "scripts/start-railway-bullmq-worker.mjs",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "server/operations/template-capability.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "worker/consume-capability.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "worker/release-capability.ts",
+    },
+  ]);
+});
+
+test("allows dormant credential-bound SQL only in exact verifiers", async () => {
+  const root = await createFixture(
+    "connect-credential-bound-sql-verifiers-",
+  );
+  await Promise.all([
+    writeFile(
+      join(
+        root,
+        "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs",
+      ),
+      [
+        "export const capabilitySql = Object.freeze([",
+        '  "acquire_bot_reply_staging_pre_send_session_barrier_v1",',
+        '  "prove_bot_reply_staging_pre_send_session_barrier_v1",',
+        '  "release_bot_reply_staging_pre_send_session_barrier_v1",',
+        '  "consume_bot_reply_staging_credential_bound_pre_send_permit_v1",',
+        '  "finalize_bot_reply_staging_credential_bound_pre_send_permit_v1",',
+        '  "reconcile_bot_reply_staging_credential_bound_pre_send_permit_v1",',
+        "]);",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/verify-postgres-migration-contract.mjs"),
+      [
+        "export const ledgerNames = Object.freeze([",
+        '  "bot_reply_staging_credential_provider_request_bindings",',
+        '  "bot_reply_staging_provider_uncertainty_events",',
+        '  "bot_reply_staging_provider_boundary_claims",',
+        "]);",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "worker/comment-only.ts"),
+      [
+        "// prove_bot_reply_staging_pre_send_session_barrier_v1 is documented here only.",
+        "export const safe = true;",
+        "",
+      ].join("\n"),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, []);
+});
+
+test("rejects credential-bound SQL in verifier allowlist path lookalikes", async () => {
+  const root = await createFixture(
+    "connect-credential-bound-sql-verifier-lookalike-",
+  );
+  await writeFile(
+    join(
+      root,
+      "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-copy.mjs",
+    ),
+    [
+      "export const capabilitySql =",
+      '  "acquire_bot_reply_staging_pre_send_session_barrier_v1";',
+      "",
+    ].join("\n"),
+  );
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file:
+        "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-copy.mjs",
+    },
+  ]);
+});

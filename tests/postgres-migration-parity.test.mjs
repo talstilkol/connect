@@ -29,9 +29,9 @@ test("maps every D1 migration and table to the PostgreSQL inventory", async () =
     {
       status: "passed",
       d1MigrationCount: 43,
-      postgresMigrationCount: 56,
+      postgresMigrationCount: 57,
       coveredD1TableCount: 55,
-      targetOnlyMigrationCount: 27,
+      targetOnlyMigrationCount: 28,
     },
   );
   assert.equal(

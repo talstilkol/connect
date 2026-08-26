@@ -56,13 +56,17 @@ test("accepts only the dedicated parameter-free and userinfo-free local database
   }
 });
 
-test("applies all 56 migrations with one intentional pre-0055 legacy authorization", () => {
-  assert.match(verifier, /assert\.equal\(files\.length, 56\)/);
+test("applies all 57 migrations with one intentional pre-0055 legacy authorization", () => {
+  assert.match(verifier, /assert\.equal\(files\.length, 57\)/);
   assert.match(
     verifier,
-    /files\.at\(-2\), credentialMigrationName/,
+    /files\.at\(-3\), credentialMigrationName/,
   );
-  assert.match(verifier, /files\.at\(-1\), permitMigrationName/);
+  assert.match(verifier, /files\.at\(-2\), permitMigrationName/);
+  assert.match(
+    verifier,
+    /files\.at\(-1\), sessionBarrierMigrationName/,
+  );
   assert.match(
     verifier,
     /if \(fileName === permitMigrationName\) \{\s*safety = await createLegacySafetyScope\(pool\);\s*\}[\s\S]*await pool\.query\(source\)/,
