@@ -158,6 +158,8 @@ const stagingProviderFenceCapabilityRepositoryPath =
   "server/platform/postgresBotReplyStagingProviderFenceCapabilityRepository.ts";
 const nodePostgresStagingProviderFenceWorkerCapabilityPath =
   "server/platform/nodePostgresBotReplyStagingProviderFenceWorkerCapability.ts";
+const railwayBotReplyPinnedBoundaryDriverPath =
+  "server/platform/railwayBotReplyPinnedBoundaryDriver.ts";
 const stagingCapabilityPortPaths = new Set([
   stagingRunCapabilityPortsPath,
   stagingProviderFenceCapabilityPortsPath,
@@ -175,6 +177,7 @@ const dormantBotReplyStagingAttestedModulePaths =
     stagingProviderFenceCapabilityPortsPath,
     stagingProviderFenceCapabilityRepositoryPath,
     nodePostgresStagingProviderFenceWorkerCapabilityPath,
+    railwayBotReplyPinnedBoundaryDriverPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -350,6 +353,12 @@ const dormantAttestedAllowedRuntimeDependencies =
           "./postgresBotReplyStagingProviderFenceCapabilityRepository.ts",
           stagingProviderFenceCapabilityRepositoryPath,
         ],
+      ]),
+    ],
+    [
+      railwayBotReplyPinnedBoundaryDriverPath,
+      new Map([
+        ["node:util", null],
       ]),
     ],
     [
