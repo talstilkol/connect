@@ -43,11 +43,11 @@ test("accepts only the dedicated loopback PostgreSQL verifier database", () => {
   }
 });
 
-test("applies exactly 57 migrations with the legacy fixture before 0055", () => {
-  assert.match(verifier, /assert\.equal\(files\.length, 57\)/);
+test("applies exactly 58 migrations while preserving the legacy fixture before 0055", () => {
+  assert.match(verifier, /assert\.equal\(files\.length, 58\)/);
   assert.match(
     verifier,
-    /files\.at\(-2\)[\s\S]*permitMigrationName[\s\S]*files\.at\(-1\)[\s\S]*sessionBarrierMigrationName/,
+    /files\.at\(-3\)[\s\S]*permitMigrationName[\s\S]*files\.at\(-2\)[\s\S]*sessionBarrierMigrationName[\s\S]*files\.at\(-1\)[\s\S]*writerBarrierMigrationName/,
   );
   const legacyFixtureIndex = verifier.indexOf(
     "legacySafety = await createSafetyScope",
@@ -62,6 +62,72 @@ test("applies exactly 57 migrations with the legacy fixture before 0055", () => 
     verifier,
     /if \(fileName === permitMigrationName\)[\s\S]*legacy-before-0055/,
   );
+  assert.match(
+    verifier,
+    /if \(fileName === writerBarrierMigrationName\)[\s\S]*writerBarrierMigrationSource/,
+  );
+});
+
+test("proves D1e writer barriers, exact-over-uncertainty and late truth", () => {
+  assert.match(verifier, /verifyD1eAdmissionBarrierConcurrency/);
+  assert.match(verifier, /wait_event_type AS "waitEventType"/);
+  assert.match(verifier, /waitEvent === "advisory"/);
+  assert.match(verifier, /d1eAdmissionBarrierConcurrency: true/);
+  assert.match(verifier, /verifyD1eProviderWriterBackendFence/);
+  assert.match(verifier, /pg_advisory_xact_lock/);
+  assert.match(verifier, /d1eProviderWriterBackendFence: true/);
+  assert.match(verifier, /verifyD1eLateTruthAndWriterBoundaries/);
+  assert.match(verifier, /waitUntilD1eLateAcceptanceBoundariesPass/);
+  assert.match(verifier, /"runLeaseExpired"/);
+  assert.match(verifier, /"reservationExpired"/);
+  assert.match(verifier, /"sendBeforeExpired"/);
+  assert.match(
+    verifier,
+    /write_bot_reply_staging_provider_fact_v1/,
+  );
+  assert.match(
+    verifier,
+    /write_bot_reply_staging_provider_uncertainty_v1/,
+  );
+  assert.match(verifier, /lacks exact session barrier/);
+  assert.match(verifier, /tenant writer lacks its barrier/);
+  assert.match(verifier, /occurred_at evidence is immutable/);
+  assert.match(verifier, /state: "ambiguous"/);
+  assert.match(verifier, /outcome: "superseded"/);
+  assert.match(verifier, /providerOutcomeKind: "accepted"/);
+  assert.match(verifier, /service-window-rejected/);
+  assert.match(
+    verifier,
+    /rejection\.attempted_at = boundary_claim\.proved_at/,
+  );
+  assert.match(
+    verifier,
+    /settlement\.settled_at = boundary_claim\.proved_at/,
+  );
+  assert.match(
+    verifier,
+    /TRUNCATE public\.bot_reply_delivery_provider_links/,
+  );
+  assert.match(verifier, /d1eLateTruthAndWriterBarriers: true/);
+  assert.match(verifier, /verifyD1eAdmissionRejectsMixedRecipient/);
+  assert.match(verifier, /service reservation safety evidence is stale/);
+  assert.match(verifier, /d1eMixedRecipientRejectedAtomically: true/);
+  assert.match(verifier, /verifyD1eNullProviderUnionsAreAtomic/);
+  assert.match(verifier, /outcomeKind: null/);
+  assert.match(verifier, /fixture\.permitKey, null/);
+  assert.match(verifier, /verifyD1eExactDeferralAfterUncertainty/);
+  assert.match(verifier, /errorCode: 130429/);
+  assert.match(verifier, /errorCode: 131056/);
+  assert.match(verifier, /d1eExactAfterUncertainty: true/);
+  assert.match(verifier, /verifyD1eSharedAdvisoryLocksRejected/);
+  assert.match(verifier, /pg_advisory_lock_shared/);
+  assert.match(verifier, /pg_advisory_xact_lock_shared/);
+  assert.match(verifier, /d1eSharedAdvisoryLockRejection: true/);
+  assert.match(verifier, /verifyD1eSafetyTruncateClosure/);
+  assert.match(verifier, /whatsapp_pair_state_truncate_guard/);
+  assert.match(verifier, /whatsapp_portfolio_state_truncate_guard/);
+  assert.match(verifier, /\[\{ count: 9 \}\]/);
+  assert.match(verifier, /d1eSafetyTruncateClosure: true/);
 });
 
 test("proves pinned session ownership without reentry or residual locks", () => {

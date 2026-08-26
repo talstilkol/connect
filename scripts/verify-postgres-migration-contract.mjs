@@ -142,6 +142,14 @@ const reviewedCredentialBoundPreSendTruncateTrigger =
   /(?:CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_admission_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_pre_send_admission_bindings|CREATE\s+TRIGGER\s+bot_reply_staging_run_bindings_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_run_credential_bindings|CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_permits_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_bound_pre_send_permits|CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_consumptions_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_bound_pre_send_permit_consumptions|CREATE\s+TRIGGER\s+bot_reply_staging_pre_send_resolutions_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_bound_pre_send_permit_resolutions)\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_staging_pre_send_ledger_mutation\(\)\s*;/gi;
 const reviewedCredentialBoundSessionBarrierTruncateTrigger =
   /(?:CREATE\s+TRIGGER\s+bot_reply_staging_request_bindings_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_credential_provider_request_bindings|CREATE\s+TRIGGER\s+bot_reply_staging_uncertainty_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_provider_uncertainty_events|CREATE\s+TRIGGER\s+bot_reply_staging_boundary_claims_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_provider_boundary_claims)\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_staging_pre_send_ledger_mutation\(\)\s*;/gi;
+const reviewedD1eTruncateTrigger =
+  /(?:CREATE\s+TRIGGER\s+bot_reply_staging_service_scope_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_staging_service_reply_scope_bindings\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_staging_pre_send_ledger_mutation\(\)|CREATE\s+TRIGGER\s+bot_reply_provider_links_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_delivery_provider_links\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_provider_link_delete\(\)|CREATE\s+TRIGGER\s+bot_reply_provider_deferrals_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_provider_deferral_events\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_provider_deferral_mutation\(\)|CREATE\s+TRIGGER\s+bot_reply_window_rejections_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.bot_reply_service_window_rejection_events\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_bot_reply_window_rejection_mutation\(\)|CREATE\s+TRIGGER\s+whatsapp_rate_reservations_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.whatsapp_rate_limit_reservations\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_whatsapp_rate_limit_evidence_mutation\(\)|CREATE\s+TRIGGER\s+whatsapp_rate_settlements_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.whatsapp_rate_limit_settlements\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_whatsapp_rate_limit_evidence_mutation\(\)|CREATE\s+TRIGGER\s+whatsapp_provider_cooldown_events_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.whatsapp_provider_cooldown_events\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_whatsapp_rate_limit_evidence_mutation\(\)|CREATE\s+TRIGGER\s+whatsapp_provider_cooldown_state_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.whatsapp_provider_cooldown_state\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_whatsapp_rate_limit_evidence_mutation\(\)|CREATE\s+TRIGGER\s+whatsapp_pair_state_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.whatsapp_pair_rate_limit_state\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_whatsapp_rate_limit_state_delete\(\)|CREATE\s+TRIGGER\s+whatsapp_portfolio_state_truncate_guard\s+BEFORE\s+TRUNCATE\s+ON\s+public\.whatsapp_portfolio_recipient_rate_limit_state\s+FOR\s+EACH\s+STATEMENT\s+EXECUTE\s+FUNCTION\s+public\.reject_whatsapp_rate_limit_state_delete\(\))\s*;/gi;
+const reviewedD1eInsertCounts = new Map([
+  ["reserve_and_bind_bot_reply_staging_service_reply_v1", 2],
+  ["write_bot_reply_staging_pre_send_admission_v1", 1],
+  ["write_bot_reply_staging_provider_fact_v1", 6],
+  ["write_bot_reply_staging_provider_uncertainty_v1", 1],
+]);
 const reviewedCredentialBoundAdmissionRunBinding =
   /ALTER\s+TABLE\s+public\.bot_reply_staging_pre_send_admission_bindings\s+ADD\s+CONSTRAINT\s+bot_reply_staging_pre_send_admission_run_binding_fk\s+FOREIGN\s+KEY\s*\(\s*run_binding_key,\s*run_key,\s*tenant_id,\s*run_claim_version,\s*authorization_event_key,\s*authorization_version,\s*credential_revision,\s*credential_envelope_digest,\s*credential_event_key\s*\)\s+REFERENCES\s+public\.bot_reply_staging_run_credential_bindings\s*\(\s*binding_key,\s*run_key,\s*tenant_id,\s*run_claim_version,\s*authorization_event_key,\s*authorization_version,\s*credential_revision,\s*credential_envelope_digest,\s*credential_event_key\s*\)\s+ON\s+DELETE\s+RESTRICT\s*;/i;
 const reviewedCredentialBoundPermitAdmissionIdentity =
@@ -616,6 +624,310 @@ const credentialBoundSessionReleasedResolutionValues = Object.freeze([
   "database_now",
   "database_now",
 ]);
+const d1eServiceReservationColumns = Object.freeze([
+  "reservation_key",
+  "tenant_id",
+  "portfolio_key",
+  "sender_key",
+  "recipient_key",
+  "template_category",
+  "portfolio_limit_kind",
+  "portfolio_limit_value",
+  "reserved_at",
+  "pair_reserved_until",
+  "reservation_expires_at",
+  "created_at",
+  "policy_event_key",
+  "phone_throughput_messages_per_second",
+  "maximum_outbound_messages_per_second",
+  "reservation_class",
+]);
+const d1eServiceReservationValues = Object.freeze([
+  "derived_reservation_key",
+  "discovered_tenant_id",
+  "requested_portfolio_key",
+  "requested_sender_key",
+  "requested_recipient_key",
+  "null",
+  "'unlimited'",
+  "null",
+  "database_now",
+  "database_now + interval '6 seconds'",
+  "least(service_window_expires_at",
+  "active_run.lease_expires_at",
+  "database_now + interval '24 hours')",
+  "database_now",
+  "current_policy.event_key",
+  "current_policy.phone_throughput_messages_per_second",
+  "current_policy.maximum_outbound_messages_per_second",
+  "'service-reply'",
+]);
+const d1eServiceScopeColumns = Object.freeze([
+  "scope_binding_key",
+  "run_binding_key",
+  "run_key",
+  "tenant_id",
+  "run_claim_version",
+  "authorization_event_key",
+  "authorization_version",
+  "credential_revision",
+  "credential_envelope_digest",
+  "credential_event_key",
+  "recipient_fingerprint",
+  "rate_limit_method_fingerprint",
+  "authorized_recipient_source_digest",
+  "delivery_key",
+  "delivery_claim_version",
+  "conversation_key",
+  "inbound_message_key",
+  "portfolio_key",
+  "portfolio_source_digest",
+  "sender_key",
+  "sender_source_digest",
+  "recipient_key",
+  "rate_recipient_source_digest",
+  "reservation_key",
+  "policy_event_key",
+  "phone_throughput_messages_per_second",
+  "maximum_outbound_messages_per_second",
+  "reservation_reserved_at",
+  "pair_reserved_until",
+  "reservation_expires_at",
+  "bound_at",
+  "created_at",
+]);
+const d1eServiceScopeValues = Object.freeze([
+  "derived_scope_binding_key",
+  "locked_binding.binding_key",
+  "active_run.run_key",
+  "discovered_tenant_id",
+  "active_run.claim_version",
+  "active_authorization.event_key",
+  "active_authorization.authorization_version",
+  "current_credential.credential_revision",
+  "current_credential.envelope_digest",
+  "current_credential_event.event_key",
+  "active_run.recipient_fingerprint",
+  "active_run.rate_limit_method_fingerprint",
+  "derived_authorized_recipient_source_digest",
+  "locked_delivery.delivery_key",
+  "locked_delivery.claim_version",
+  "locked_delivery.conversation_key",
+  "locked_delivery.inbound_message_key",
+  "requested_portfolio_key",
+  "derived_portfolio_source_digest",
+  "requested_sender_key",
+  "derived_sender_source_digest",
+  "requested_recipient_key",
+  "derived_rate_recipient_source_digest",
+  "derived_reservation_key",
+  "current_policy.event_key",
+  "current_policy.phone_throughput_messages_per_second",
+  "current_policy.maximum_outbound_messages_per_second",
+  "database_now",
+  "database_now + interval '6 seconds'",
+  "least(service_window_expires_at",
+  "active_run.lease_expires_at",
+  "database_now + interval '24 hours')",
+  "database_now",
+  "database_now",
+]);
+const d1eAdmissionColumns = Object.freeze([
+  "admission_binding_key",
+  "scope_binding_key",
+  "run_binding_key",
+  "run_key",
+  "tenant_id",
+  "run_claim_version",
+  "authorization_event_key",
+  "authorization_version",
+  "credential_revision",
+  "credential_envelope_digest",
+  "credential_event_key",
+  "delivery_key",
+  "delivery_claim_version",
+  "reservation_key",
+  "sender_key",
+  "recipient_key",
+  "policy_event_key",
+  "phone_throughput_messages_per_second",
+  "maximum_outbound_messages_per_second",
+  "reservation_reserved_at",
+  "pair_reserved_until",
+  "reservation_expires_at",
+  "bound_at",
+  "created_at",
+]);
+const d1eAdmissionValues = Object.freeze([
+  "derived_admission_key",
+  "locked_scope.scope_binding_key",
+  "locked_binding.binding_key",
+  "active_run.run_key",
+  "discovered_tenant_id",
+  "active_run.claim_version",
+  "active_authorization.event_key",
+  "active_authorization.authorization_version",
+  "current_credential.credential_revision",
+  "current_credential.envelope_digest",
+  "current_credential_event.event_key",
+  "locked_delivery.delivery_key",
+  "locked_delivery.claim_version",
+  "locked_reservation.reservation_key",
+  "locked_reservation.sender_key",
+  "locked_reservation.recipient_key",
+  "current_policy.event_key",
+  "current_policy.phone_throughput_messages_per_second",
+  "current_policy.maximum_outbound_messages_per_second",
+  "locked_reservation.reserved_at",
+  "locked_reservation.pair_reserved_until",
+  "locked_reservation.reservation_expires_at",
+  "database_now",
+  "database_now",
+]);
+const d1eProviderLinkColumns = Object.freeze([
+  "delivery_key",
+  "tenant_id",
+  "provider_message_id",
+  "reservation_key",
+  "provider_status",
+  "last_status_event_key",
+  "last_status_event_at",
+  "terminal_outcome",
+  "terminal_settled_at",
+  "accepted_at",
+  "created_at",
+  "updated_at",
+]);
+const d1eProviderLinkValues = Object.freeze([
+  "locked_permit.delivery_key",
+  "locked_permit.tenant_id",
+  "requested_provider_message_id",
+  "locked_permit.reservation_key",
+  "'accepted'",
+  "null",
+  "null",
+  "null",
+  "null",
+  "database_now",
+  "database_now",
+  "database_now",
+]);
+const d1eSettlementColumns = Object.freeze([
+  "reservation_key",
+  "outcome",
+  "settled_at",
+  "created_at",
+]);
+const d1eSettlementValues = Object.freeze([
+  "locked_permit.reservation_key",
+  "'provider-failed'",
+  "attempted_at",
+  "attempted_at",
+]);
+const d1eCooldownColumns = Object.freeze([
+  "reservation_key",
+  "scope",
+  "provider_error_code",
+  "observed_at",
+  "blocked_until",
+  "created_at",
+]);
+const d1eCooldownValues = Object.freeze([
+  "locked_permit.reservation_key",
+  "cooldown_scope",
+  "requested_error_code",
+  "attempted_at",
+  "retry_at",
+  "attempted_at",
+]);
+const d1eDeferralColumns = Object.freeze([
+  "event_key",
+  "delivery_key",
+  "tenant_id",
+  "claim_version",
+  "reservation_key",
+  "provider_error_code",
+  "cooldown_scope",
+  "retry_after_seconds",
+  "reason_code",
+  "attempted_at",
+  "deferred_at",
+  "retry_at",
+  "created_at",
+]);
+const d1eDeferralValues = Object.freeze([
+  "evidence_key",
+  "locked_permit.delivery_key",
+  "locked_permit.tenant_id",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "requested_error_code",
+  "cooldown_scope",
+  "requested_retry_after_seconds",
+  "reason_code",
+  "attempted_at",
+  "database_now",
+  "retry_at",
+  "database_now",
+]);
+const d1eRejectionColumns = Object.freeze([
+  "event_key",
+  "delivery_key",
+  "tenant_id",
+  "claim_version",
+  "reservation_key",
+  "provider_error_code",
+  "reason_code",
+  "service_window_opened_at",
+  "service_window_expires_at",
+  "attempted_at",
+  "rejected_at",
+  "created_at",
+]);
+const d1eRejectionValues = Object.freeze([
+  "evidence_key",
+  "locked_permit.delivery_key",
+  "locked_permit.tenant_id",
+  "locked_permit.delivery_claim_version",
+  "locked_permit.reservation_key",
+  "131047",
+  "'meta_service_window_closed'",
+  "service_window_opened_at",
+  "service_window_expires_at",
+  "attempted_at",
+  "database_now",
+  "database_now",
+]);
+const d1eUncertaintyColumns = Object.freeze([
+  "event_key",
+  "permit_key",
+  "operation_key",
+  "run_key",
+  "tenant_id",
+  "delivery_key",
+  "reservation_key",
+  "provider_request_key",
+  "requested_at",
+  "uncertainty_kind",
+  "detected_at",
+  "created_at",
+  "source_reason",
+]);
+const d1eUncertaintyValues = Object.freeze([
+  "uncertainty_event_key",
+  "initial_permit.permit_key",
+  "stored_operation.operation_key",
+  "stored_operation.run_key",
+  "stored_operation.tenant_id",
+  "stored_operation.delivery_key",
+  "stored_operation.reservation_key",
+  "stored_operation.provider_request_key",
+  "stored_operation.requested_at",
+  "'provider-response-ambiguous'",
+  "database_now",
+  "database_now",
+  "requested_reason",
+]);
 
 function rootUrl(root) {
   return pathToFileURL(
@@ -920,6 +1232,88 @@ function reviewedCredentialBoundSessionBarrierInsert(
   );
 }
 
+function reviewedD1eInsert(functionName, statement) {
+  const exactInsert = (
+    tableName,
+    columns,
+    values,
+    prefixPattern = "",
+  ) => exactSqlLists(
+    statement.match(
+      new RegExp(
+        `^\\s*${prefixPattern}INSERT\\s+INTO\\s+public\\.${tableName}` +
+          `\\s*\\(([\\s\\S]*?)\\)\\s*VALUES\\s*` +
+          `\\(([\\s\\S]*?)\\)\\s*$`,
+        "i",
+      ),
+    ),
+    columns,
+    values,
+  );
+
+  if (
+    functionName ===
+      "reserve_and_bind_bot_reply_staging_service_reply_v1"
+  ) {
+    return exactInsert(
+      "whatsapp_rate_limit_reservations",
+      d1eServiceReservationColumns,
+      d1eServiceReservationValues,
+    ) || exactInsert(
+      "bot_reply_staging_service_reply_scope_bindings",
+      d1eServiceScopeColumns,
+      d1eServiceScopeValues,
+    );
+  }
+
+  if (
+    functionName === "write_bot_reply_staging_pre_send_admission_v1"
+  ) {
+    return exactInsert(
+      "bot_reply_staging_pre_send_admission_bindings",
+      d1eAdmissionColumns,
+      d1eAdmissionValues,
+    );
+  }
+
+  if (functionName === "write_bot_reply_staging_provider_fact_v1") {
+    return exactInsert(
+      "bot_reply_delivery_provider_links",
+      d1eProviderLinkColumns,
+      d1eProviderLinkValues,
+      "IF\\s+requested_outcome_kind\\s*=\\s*'accepted'\\s+THEN\\s+",
+    ) || exactInsert(
+      "whatsapp_rate_limit_settlements",
+      d1eSettlementColumns,
+      d1eSettlementValues,
+    ) || exactInsert(
+      "whatsapp_provider_cooldown_events",
+      d1eCooldownColumns,
+      d1eCooldownValues,
+    ) || exactInsert(
+      "bot_reply_provider_deferral_events",
+      d1eDeferralColumns,
+      d1eDeferralValues,
+    ) || exactInsert(
+      "bot_reply_service_window_rejection_events",
+      d1eRejectionColumns,
+      d1eRejectionValues,
+    );
+  }
+
+  if (
+    functionName === "write_bot_reply_staging_provider_uncertainty_v1"
+  ) {
+    return exactInsert(
+      "bot_reply_staging_provider_uncertainty_events",
+      d1eUncertaintyColumns,
+      d1eUncertaintyValues,
+    );
+  }
+
+  return false;
+}
+
 function containsSeedData(source, fileName) {
   for (const match of source.matchAll(functionDefinition)) {
     const body = match[1];
@@ -937,6 +1331,23 @@ function containsSeedData(source, fileName) {
     const functionName = match[0].match(
       /^CREATE\s+(?:OR\s+REPLACE\s+)?FUNCTION\s+public\.([a-z][a-z0-9_]*)/i,
     )?.[1]?.toLowerCase() ?? null;
+    const nonTriggerInsertStatements = statements.filter(
+      (statement) => dataInsertion.test(statement) && !(
+        isTriggerFunction && triggerRowReference.test(
+          stripSqlCommentsAndQuotedLiterals(statement),
+        )
+      ),
+    );
+
+    if (
+      fileName ===
+        "0057_bot_reply_staging_writer_barrier_and_late_truth.sql" &&
+      reviewedD1eInsertCounts.has(functionName) &&
+      nonTriggerInsertStatements.length !==
+        reviewedD1eInsertCounts.get(functionName)
+    ) {
+      return true;
+    }
 
     if (
       statements.some(
@@ -972,6 +1383,11 @@ function containsSeedData(source, fileName) {
               functionName,
               statement,
             )
+          ) &&
+          !(
+            fileName ===
+              "0057_bot_reply_staging_writer_barrier_and_late_truth.sql" &&
+            reviewedD1eInsert(functionName, statement)
           );
         },
       )
@@ -1073,6 +1489,30 @@ function containsDestructiveStatement(source, fileName) {
     if (
       reviewedTriggers.length === 3 &&
       reviewedTriggerNames.size === 3
+    ) {
+      for (const trigger of reviewedTriggers) {
+        reviewedSource = reviewedSource.replace(trigger, "");
+      }
+    }
+  }
+
+  if (
+    fileName ===
+      "0057_bot_reply_staging_writer_barrier_and_late_truth.sql"
+  ) {
+    const reviewedTriggers = source.match(
+      reviewedD1eTruncateTrigger,
+    ) ?? [];
+    const reviewedTriggerNames = new Set(
+      reviewedTriggers.map(
+        (trigger) => trigger.match(
+          /CREATE\s+TRIGGER\s+([a-z0-9_]+)/i,
+        )?.[1]?.toLowerCase() ?? "",
+      ),
+    );
+    if (
+      reviewedTriggers.length === 10 &&
+      reviewedTriggerNames.size === 10
     ) {
       for (const trigger of reviewedTriggers) {
         reviewedSource = reviewedSource.replace(trigger, "");

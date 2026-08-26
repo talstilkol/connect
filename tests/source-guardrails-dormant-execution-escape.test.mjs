@@ -33,6 +33,8 @@ async function createFixture(prefix) {
       "db",
       "worker",
       "scripts",
+      "postgres/migrations",
+      "tests",
     ].map((directory) =>
       mkdir(join(root, directory), {
         recursive: true,
@@ -584,6 +586,175 @@ test("blocks dormant credential-bound SQL references across every runtime root",
   ]);
 });
 
+test("blocks every dormant D1e writer-barrier identifier in runtime code", async () => {
+  const root = await createFixture(
+    "connect-d1e-writer-barrier-runtime-",
+  );
+  const fixtures = new Map([
+    [
+      "db/reserve-and-bind.ts",
+      "reserve_and_bind_bot_reply_staging_service_reply_v1",
+    ],
+    [
+      "server/operations/write-admission.ts",
+      "write_bot_reply_staging_pre_send_admission_v1",
+    ],
+    [
+      "server/platform/write-provider-fact.ts",
+      "write_bot_reply_staging_provider_fact_v1",
+    ],
+    [
+      "worker/write-provider-uncertainty.ts",
+      "write_bot_reply_staging_provider_uncertainty_v1",
+    ],
+    [
+      "proxy.ts",
+      "assert_bot_reply_staging_tenant_barrier_owned_v1",
+    ],
+    [
+      "middleware.ts",
+      "assert_bot_reply_staging_exact_session_barrier_v1",
+    ],
+    [
+      "scripts/start-railway-api.mjs",
+      "bot_reply_staging_service_reply_scope_bindings",
+    ],
+  ]);
+  await Promise.all(
+    [...fixtures].map(([file, identifier]) =>
+      writeFile(
+        join(root, file),
+        `export const dormantSql = "${identifier}";\n`,
+      )
+    ),
+  );
+
+  const report = await inspectSourceGuardrails(root);
+  const findings = [...report.findings]
+    .filter(
+      ({ code }) =>
+        code ===
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+    )
+    .sort((left, right) => left.file.localeCompare(right.file));
+
+  assert.deepEqual(
+    findings,
+    [...fixtures.keys()]
+      .sort((left, right) => left.localeCompare(right))
+      .map((file) => ({
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file,
+      })),
+  );
+});
+
+test("blocks D1e literal, template, alias, indirection, and allowed-verifier importer escapes", async () => {
+  const root = await createFixture(
+    "connect-d1e-writer-barrier-escapes-",
+  );
+  await Promise.all([
+    writeFile(
+      join(root, "server/platform/literal.ts"),
+      [
+        "export const capability =",
+        '  "write_bot_reply_staging_provider_fact_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "server/operations/template.ts"),
+      [
+        'const prefix = "write_bot_reply_staging_";',
+        'const suffix = "provider_uncertainty_v1";',
+        "export const capability = `${prefix}${suffix}`;",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "db/alias.ts"),
+      [
+        'const prefix = "reserve_and_bind_bot_reply_staging_";',
+        'const suffix = "service_reply_v1";',
+        "const assembled = prefix + suffix;",
+        "const alias = assembled;",
+        "export const capability = alias;",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "worker/indirection.ts"),
+      [
+        "const fragments = Object.freeze({",
+        '  prefix: "assert_bot_reply_staging_",',
+        '  suffix: "exact_session_barrier_v1",',
+        "});",
+        "export const capability =",
+        "  fragments.prefix + fragments.suffix;",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs",
+      ),
+      [
+        "export const admissionWriter =",
+        '  "write_bot_reply_staging_pre_send_admission_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "server/operations/importer.ts"),
+      [
+        "import { admissionWriter } from",
+        '  "../../scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs";',
+        "export const activatedCapability = admissionWriter;",
+        "",
+      ].join("\n"),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+  const findings = [...report.findings]
+    .filter(
+      ({ code }) =>
+        code ===
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+    )
+    .sort((left, right) => left.file.localeCompare(right.file));
+
+  assert.deepEqual(findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "db/alias.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "server/operations/importer.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "server/operations/template.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "server/platform/literal.ts",
+    },
+    {
+      code:
+        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+      file: "worker/indirection.ts",
+    },
+  ]);
+});
+
 test("allows dormant credential-bound SQL only in exact verifiers", async () => {
   const root = await createFixture(
     "connect-credential-bound-sql-verifiers-",
@@ -602,6 +773,13 @@ test("allows dormant credential-bound SQL only in exact verifiers", async () => 
         '  "consume_bot_reply_staging_credential_bound_pre_send_permit_v1",',
         '  "finalize_bot_reply_staging_credential_bound_pre_send_permit_v1",',
         '  "reconcile_bot_reply_staging_credential_bound_pre_send_permit_v1",',
+        '  "reserve_and_bind_bot_reply_staging_service_reply_v1",',
+        '  "write_bot_reply_staging_pre_send_admission_v1",',
+        '  "write_bot_reply_staging_provider_fact_v1",',
+        '  "write_bot_reply_staging_provider_uncertainty_v1",',
+        '  "assert_bot_reply_staging_tenant_barrier_owned_v1",',
+        '  "assert_bot_reply_staging_exact_session_barrier_v1",',
+        '  "bot_reply_staging_service_reply_scope_bindings",',
         "]);",
         "",
       ].join("\n"),
@@ -613,7 +791,85 @@ test("allows dormant credential-bound SQL only in exact verifiers", async () => 
         '  "bot_reply_staging_credential_provider_request_bindings",',
         '  "bot_reply_staging_provider_uncertainty_events",',
         '  "bot_reply_staging_provider_boundary_claims",',
+        '  "reserve_and_bind_bot_reply_staging_service_reply_v1",',
+        '  "write_bot_reply_staging_pre_send_admission_v1",',
+        '  "write_bot_reply_staging_provider_fact_v1",',
+        '  "write_bot_reply_staging_provider_uncertainty_v1",',
+        '  "assert_bot_reply_staging_tenant_barrier_owned_v1",',
+        '  "assert_bot_reply_staging_exact_session_barrier_v1",',
+        '  "bot_reply_staging_service_reply_scope_bindings",',
         "]);",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
+      ),
+      [
+        "CREATE FUNCTION public.write_bot_reply_staging_provider_fact_v1()",
+        "RETURNS VOID LANGUAGE SQL AS 'SELECT NULL';",
+        "-- bot_reply_staging_service_reply_scope_bindings",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "postgres/postgresMigrationParityRegistry.mjs"),
+      [
+        "export const evidence =",
+        '  "reserve_and_bind_bot_reply_staging_service_reply_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "tests/bot-reply-staging-writer-barrier-and-late-truth-migration.test.mjs",
+      ),
+      [
+        "export const expectedWriter =",
+        '  "write_bot_reply_staging_provider_fact_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "tests/bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-verifier.test.mjs",
+      ),
+      [
+        "export const expectedWriter =",
+        '  "write_bot_reply_staging_provider_uncertainty_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "tests/postgres-migration-contract.test.mjs"),
+      [
+        "export const expectedLedger =",
+        '  "bot_reply_staging_service_reply_scope_bindings";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "tests/postgres-migration-parity.test.mjs"),
+      [
+        "import { evidence } from",
+        '  "../postgres/postgresMigrationParityRegistry.mjs";',
+        "export { evidence };",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "tests/postgres-data-migration-slice-registry.test.mjs",
+      ),
+      [
+        "import { evidence } from",
+        '  "../postgres/postgresMigrationParityRegistry.mjs";',
+        "export { evidence };",
         "",
       ].join("\n"),
     ),
@@ -636,26 +892,110 @@ test("rejects credential-bound SQL in verifier allowlist path lookalikes", async
   const root = await createFixture(
     "connect-credential-bound-sql-verifier-lookalike-",
   );
+  await Promise.all([
+    writeFile(
+      join(
+        root,
+        "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-copy.mjs",
+      ),
+      [
+        "export const capabilitySql =",
+        '  "acquire_bot_reply_staging_pre_send_session_barrier_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth-copy.sql",
+      ),
+      "SELECT public.write_bot_reply_staging_provider_fact_v1();\n",
+    ),
+    writeFile(
+      join(
+        root,
+        "postgres/postgresMigrationParityRegistry-copy.mjs",
+      ),
+      [
+        "export const evidence =",
+        '  "reserve_and_bind_bot_reply_staging_service_reply_v1";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(
+        root,
+        "tests/bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-verifier-copy.test.mjs",
+      ),
+      [
+        "export const capabilitySql =",
+        '  "write_bot_reply_staging_provider_uncertainty_v1";',
+        "",
+      ].join("\n"),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(
+    [...report.findings].sort((left, right) =>
+      left.file.localeCompare(right.file)
+    ),
+    [
+      {
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file:
+          "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth-copy.sql",
+      },
+      {
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file:
+          "postgres/postgresMigrationParityRegistry-copy.mjs",
+      },
+      {
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file:
+          "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-copy.mjs",
+      },
+      {
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file:
+          "tests/bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-verifier-copy.test.mjs",
+      },
+    ],
+  );
+});
+
+test("never allows D1e writer-barrier identifiers in the pinned runtime transport", async () => {
+  const root = await createFixture(
+    "connect-d1e-pinned-transport-forbidden-",
+  );
   await writeFile(
     join(
       root,
-      "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-copy.mjs",
+      "server/platform/nodePostgresBotReplyPinnedSessionTransport.ts",
     ),
     [
-      "export const capabilitySql =",
-      '  "acquire_bot_reply_staging_pre_send_session_barrier_v1";',
+      "export const forbiddenWriter =",
+      '  "write_bot_reply_staging_provider_fact_v1";',
       "",
     ].join("\n"),
   );
 
   const report = await inspectSourceGuardrails(root);
 
-  assert.deepEqual(report.findings, [
-    {
-      code:
-        "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
-      file:
-        "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-copy.mjs",
-    },
-  ]);
+  assert.equal(
+    report.findings.some(
+      ({ code, file }) =>
+        code ===
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN" &&
+        file ===
+          "server/platform/nodePostgresBotReplyPinnedSessionTransport.ts",
+    ),
+    true,
+  );
 });

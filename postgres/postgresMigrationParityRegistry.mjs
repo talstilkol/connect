@@ -633,4 +633,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     summary:
       "Railway adds dormant tenant-session and reconciliation-marker barriers, crash-durable subject fences, exclusive canonical Meta assets, atomic credential-bound request evidence, and a one-shot committed provider-boundary claim. Replay and reconciliation cannot mint send capability; ambiguity and timeout remain nonterminal. Runtime grants, pinned driver, trusted scope writer, cooperating writers and activation remain blocked.",
   }),
+  Object.freeze({
+    migration:
+      "0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
+    token:
+      "reserve_and_bind_bot_reply_staging_service_reply_v1",
+    summary:
+      "Railway keeps activation dormant while binding each service-reply reservation to one immutable run/delivery/inbound/recipient scope, reducing admission to that single scope identity, enforcing immutable message occurrence time and barrier-first provider writers, and preserving exact-fact precedence across accepted, deferred and rejected late truth. Public grants, roles, SECURITY DEFINER functions and Runtime wiring remain absent.",
+  }),
 ]);

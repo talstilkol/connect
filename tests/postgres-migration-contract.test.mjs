@@ -84,6 +84,7 @@ const botReplyCredentialBoundPreSendPermitSchema =
   migrationSources[55];
 const botReplyCredentialBoundPreSendSessionBarrierSchema =
   migrationSources[56];
+const botReplyWriterBarrierLateTruthSchema = migrationSources[57];
 
 test("keeps the PostgreSQL critical-path migration inventory ordered", async () => {
   assert.deepEqual(migrationFiles, [
@@ -144,12 +145,13 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0054_meta_credential_revision_ledger.sql",
     "0055_bot_reply_staging_credential_bound_pre_send_permit.sql",
     "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql",
+    "0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 57,
+      migrationCount: 58,
       findings: [],
     },
   );
@@ -2199,4 +2201,130 @@ TRUNCATE public.meta_credential_revision_events;
     ),
     true,
   );
+});
+
+function assertD1eInsertMutationRejected(mutator) {
+  const tamperedSources = [...migrationSources];
+  tamperedSources[57] = mutator(tamperedSources[57]);
+  assert.notEqual(
+    tamperedSources[57],
+    botReplyWriterBarrierLateTruthSchema,
+  );
+  const findings = validatePostgresMigrationSources({
+    migrationFiles,
+    sources: tamperedSources,
+  });
+  assert.equal(
+    findings.some(({ code }) => code === "POSTGRES_SEED_DATA_PRESENT"),
+    true,
+  );
+}
+
+test("rejects a forged provider identity inside the reviewed D1e fact writer", () => {
+  assertD1eInsertMutationRejected((source) => source.replace(
+    [
+      "      locked_permit.tenant_id,",
+      "      requested_provider_message_id,",
+      "      locked_permit.reservation_key,",
+      "      'accepted',",
+    ].join("\n"),
+    [
+      "      locked_permit.tenant_id,",
+      "      stored_request.request_key,",
+      "      locked_permit.reservation_key,",
+      "      'accepted',",
+    ].join("\n"),
+  ));
+});
+
+test("rejects an additional insert inside the reviewed D1e fact writer", () => {
+  assertD1eInsertMutationRejected((source) => source.replace(
+    [
+      "  RETURN QUERY SELECT 'recorded'::TEXT, requested_outcome_kind;",
+      "END;",
+      "$$;",
+    ].join("\n"),
+    [
+      "  INSERT INTO public.whatsapp_rate_limit_settlements (",
+      "    reservation_key, outcome, settled_at, created_at",
+      "  ) VALUES (",
+      "    locked_permit.reservation_key, 'provider-failed',",
+      "    attempted_at, attempted_at",
+      "  );",
+      "  RETURN QUERY SELECT 'recorded'::TEXT, requested_outcome_kind;",
+      "END;",
+      "$$;",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a forged tenant in the reviewed D1e reservation writer", () => {
+  assertD1eInsertMutationRejected((source) => source.replace(
+    [
+      "    derived_reservation_key,",
+      "    discovered_tenant_id,",
+      "    requested_portfolio_key,",
+    ].join("\n"),
+    [
+      "    derived_reservation_key,",
+      "    active_run.tenant_id,",
+      "    requested_portfolio_key,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a forged delivery in the reviewed D1e scope writer", () => {
+  assertD1eInsertMutationRejected((source) => source.replace(
+    [
+      "    derived_authorized_recipient_source_digest,",
+      "    locked_delivery.delivery_key,",
+      "    locked_delivery.claim_version,",
+    ].join("\n"),
+    [
+      "    derived_authorized_recipient_source_digest,",
+      "    active_run.run_key,",
+      "    locked_delivery.claim_version,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects a forged scope in the reviewed D1e admission writer", () => {
+  assertD1eInsertMutationRejected((source) => source.replace(
+    [
+      "    derived_admission_key,",
+      "    locked_scope.scope_binding_key,",
+      "    locked_binding.binding_key,",
+    ].join("\n"),
+    [
+      "    derived_admission_key,",
+      "    locked_reservation.reservation_key,",
+      "    locked_binding.binding_key,",
+    ].join("\n"),
+  ));
+});
+
+test("rejects an additional insert inside the reviewed D1e scope writer", () => {
+  assertD1eInsertMutationRejected((source) => source.replace(
+    [
+      "  RETURN QUERY SELECT",
+      "    'created'::TEXT,",
+      "    derived_scope_binding_key,",
+      "    derived_reservation_key;",
+      "END;",
+      "$$;",
+    ].join("\n"),
+    [
+      "  INSERT INTO public.whatsapp_rate_limit_settlements (",
+      "    reservation_key, outcome, settled_at, created_at",
+      "  ) VALUES (",
+      "    derived_reservation_key, 'provider-failed', database_now, database_now",
+      "  );",
+      "  RETURN QUERY SELECT",
+      "    'created'::TEXT,",
+      "    derived_scope_binding_key,",
+      "    derived_reservation_key;",
+      "END;",
+      "$$;",
+    ].join("\n"),
+  ));
 });

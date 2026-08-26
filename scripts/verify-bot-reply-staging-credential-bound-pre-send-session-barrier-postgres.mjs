@@ -18,6 +18,8 @@ const permitMigrationName =
   "0055_bot_reply_staging_credential_bound_pre_send_permit.sql";
 const sessionBarrierMigrationName =
   "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql";
+const writerBarrierMigrationName =
+  "0057_bot_reply_staging_writer_barrier_and_late_truth.sql";
 const graphApiVersion = "v24.0";
 const actorExternalUserId = "session-barrier-postgres-verifier";
 const consumeFunctionName =
@@ -176,9 +178,10 @@ async function migrationInventory() {
   const files = (await readdir(migrationDirectory))
     .filter((fileName) => fileName.endsWith(".sql"))
     .sort();
-  assert.equal(files.length, 57);
-  assert.equal(files.at(-2), permitMigrationName);
-  assert.equal(files.at(-1), sessionBarrierMigrationName);
+  assert.equal(files.length, 58);
+  assert.equal(files.at(-3), permitMigrationName);
+  assert.equal(files.at(-2), sessionBarrierMigrationName);
+  assert.equal(files.at(-1), writerBarrierMigrationName);
   files.forEach((fileName, index) => {
     const match = migrationNamePattern.exec(fileName);
     assert.equal(match?.[1], String(index).padStart(4, "0"));
@@ -561,8 +564,16 @@ async function createSafetyScope(pool, label, options = {}) {
 async function applyAllMigrationsWithLegacyFixture(pool) {
   const files = await migrationInventory();
   let legacySafety = null;
+  let writerBarrierMigrationSource = null;
 
   for (const fileName of files) {
+    if (fileName === writerBarrierMigrationName) {
+      writerBarrierMigrationSource = await readFile(
+        join(migrationDirectory, fileName),
+        "utf8",
+      );
+      continue;
+    }
     if (fileName === permitMigrationName) {
       legacySafety = await createSafetyScope(
         pool,
@@ -599,7 +610,12 @@ async function applyAllMigrationsWithLegacyFixture(pool) {
       credentialEventKey: null,
     },
   ]);
-  return Object.freeze({ files, legacySafety });
+  assert.equal(typeof writerBarrierMigrationSource, "string");
+  return Object.freeze({
+    files,
+    legacySafety,
+    writerBarrierMigrationSource,
+  });
 }
 
 function createClaimInput(safety, label, options = {}) {
@@ -665,6 +681,7 @@ async function claim(client, input) {
 
 async function createDeliverySource(pool, safety, label, options = {}) {
   const now = await databaseTimestamp(pool);
+  const recipientPhoneE164 = contactPhoneE164(safety.tenantId, label);
   const contactResult = await pool.query(
     `INSERT INTO public.contacts (
        tenant_id,
@@ -675,7 +692,7 @@ async function createDeliverySource(pool, safety, label, options = {}) {
      RETURNING id::integer AS id`,
     [
       safety.tenantId,
-      contactPhoneE164(safety.tenantId, label),
+      recipientPhoneE164,
     ],
   );
   const contactId = contactResult.rows[0]?.id;
@@ -784,6 +801,7 @@ async function createDeliverySource(pool, safety, label, options = {}) {
     botFlowVersionKey,
     conversationKey,
     inboundMessageKey,
+    recipientPhoneE164,
   });
 }
 
@@ -860,9 +878,9 @@ async function createDeliveryAndReservation(
        deferred_at,
        last_deferral_reason_code
      ) VALUES (
-       $1, $2, $3, $4, $5, $6, 1, '+15550123456',
-       $7::jsonb, 'sending', 1, NULL, NULL, NULL, $8, $8,
-       $9, 1, NULL, NULL, NULL
+       $1, $2, $3, $4, $5, $6, 1, $7,
+       $8::jsonb, 'sending', 1, NULL, NULL, NULL, $9, $9,
+       $10, 1, NULL, NULL, NULL
      )`,
     [
       deliveryKey,
@@ -871,6 +889,7 @@ async function createDeliveryAndReservation(
       source.inboundMessageKey,
       source.botFlowKey,
       source.botFlowVersionKey,
+      source.recipientPhoneE164,
       JSON.stringify({ type: "text", text: "Verifier reply" }),
       databaseNow,
       metaAssetId("phone", safety.tenantId),
@@ -903,6 +922,22 @@ async function createDeliveryAndReservation(
     safety.tenantId,
     `${label}:recipient`,
   );
+
+  if (options.deferReservationAndAdmission === true) {
+    return Object.freeze({
+      admissionBindingKey: null,
+      deliveryClaimVersion: 1,
+      deliveryKey,
+      pairReservedUntil: null,
+      portfolioKey,
+      recipientKey,
+      reservationExpiresAt: null,
+      reservationKey: null,
+      reservedAt: null,
+      runBinding,
+      senderKey,
+    });
+  }
   await pool.query(
     `INSERT INTO public.whatsapp_rate_limit_reservations (
        reservation_key,
@@ -938,11 +973,19 @@ async function createDeliveryAndReservation(
     ],
   );
 
-  const admissionBindingKey = identity(
-    "bot_reply_staging_admission_binding_v1_",
-    safety.tenantId,
-    `${label}:admission-binding`,
-  );
+  const admissionBindingKey = options.canonicalAdmissionBinding
+    ? `bot_reply_staging_admission_binding_v1_${sha256Hex([
+        "connect-bot-reply-staging-admission-binding-v1",
+        runBinding.runBindingKey,
+        deliveryKey,
+        "1",
+        reservationKey,
+      ].join("\0"))}`
+    : identity(
+        "bot_reply_staging_admission_binding_v1_",
+        safety.tenantId,
+        `${label}:admission-binding`,
+      );
   const boundAt = await databaseTimestamp(pool);
   await pool.query(
     `INSERT INTO public.bot_reply_staging_pre_send_admission_bindings (
@@ -1002,6 +1045,7 @@ async function createDeliveryAndReservation(
     deliveryClaimVersion: 1,
     deliveryKey,
     pairReservedUntil,
+    portfolioKey,
     recipientKey,
     reservationExpiresAt,
     reservationKey,
@@ -2004,6 +2048,175 @@ async function expectDurableDenial(
 async function createIsolatedPermit(pool, label, options = {}) {
   const safety = await createSafetyScope(pool, label);
   return createPermitFixture(pool, safety, label, options);
+}
+
+async function createPendingD1eFixture(pool, label, options = {}) {
+  const safety = await createSafetyScope(pool, label);
+  const source = await createDeliverySource(pool, safety, label, options);
+  const claimInput = createClaimInput(safety, label, options);
+  const claimedRun = await claim(pool, claimInput);
+  assert.equal(claimedRun.outcome, "claimed");
+  const delivery = await createDeliveryAndReservation(
+    pool,
+    safety,
+    source,
+    label,
+    claimInput,
+    claimedRun,
+    { ...options, deferReservationAndAdmission: true },
+  );
+  let secondRecipientFixture = null;
+  if (options.includeSecondRecipient === true) {
+    const secondRecipientLabel = `${label}-second-recipient`;
+    const secondRecipientSource = await createDeliverySource(
+      pool,
+      safety,
+      secondRecipientLabel,
+      options,
+    );
+    const secondRecipientDelivery = await createDeliveryAndReservation(
+      pool,
+      safety,
+      secondRecipientSource,
+      secondRecipientLabel,
+      claimInput,
+      claimedRun,
+      { ...options, deferReservationAndAdmission: true },
+    );
+    secondRecipientFixture = Object.freeze({
+      claimInput,
+      claimedRun,
+      delivery: secondRecipientDelivery,
+      label: secondRecipientLabel,
+      options,
+      safety,
+      source: secondRecipientSource,
+    });
+  }
+  return Object.freeze({
+    claimInput,
+    claimedRun,
+    delivery,
+    label,
+    options,
+    safety,
+    secondRecipientFixture,
+    source,
+  });
+}
+
+async function completePendingD1eFixture(pool, pendingFixture) {
+  const createdScope = await reserveAndBindD1eServiceReply(
+    pool,
+    pendingFixture,
+  );
+  assert.equal(createdScope.outcome, "created");
+  assert.match(
+    createdScope.scopeBindingKey,
+    /^bot_reply_staging_service_scope_v1_[a-f0-9]{64}$/,
+  );
+  assert.match(
+    createdScope.reservationKey,
+    /^whatsapp_rate_reservation_v1_[a-f0-9]{64}$/,
+  );
+  assert.deepEqual(
+    await reserveAndBindD1eServiceReply(pool, pendingFixture),
+    { ...createdScope, outcome: "replayed" },
+  );
+
+  const scopedFixture = {
+    ...pendingFixture,
+    delivery: {
+      ...pendingFixture.delivery,
+      reservationKey: createdScope.reservationKey,
+      scopeBindingKey: createdScope.scopeBindingKey,
+    },
+  };
+  const admission = await writeD1eAdmission(pool, scopedFixture);
+  assert.equal(admission.outcome, "created");
+
+  const reservationResult = await pool.query(
+    `SELECT reserved_at AS "reservedAt",
+       pair_reserved_until AS "pairReservedUntil",
+       reservation_expires_at AS "reservationExpiresAt"
+     FROM public.whatsapp_rate_limit_reservations
+     WHERE reservation_key = $1`,
+    [createdScope.reservationKey],
+  );
+  assert.equal(reservationResult.rowCount, 1);
+  const reservation = reservationResult.rows[0];
+  const delivery = Object.freeze({
+    ...scopedFixture.delivery,
+    admissionBindingKey: admission.admissionBindingKey,
+    pairReservedUntil: reservation.pairReservedUntil,
+    reservationExpiresAt: reservation.reservationExpiresAt,
+    reservedAt: reservation.reservedAt,
+  });
+  const reserveInput = createReserveInput(
+    pendingFixture.safety,
+    pendingFixture.label,
+    pendingFixture.claimInput,
+    pendingFixture.claimedRun,
+    delivery,
+    pendingFixture.options.operationKind ?? "text-send",
+  );
+  const permitKey = await reserve(pool, reserveInput);
+  assert.match(
+    permitKey,
+    /^bot_reply_staging_pre_send_permit_v1_[a-f0-9]{64}$/,
+  );
+  assert.equal(await reserve(pool, reserveInput), null);
+  return Object.freeze({
+    ...pendingFixture,
+    delivery,
+    permitKey,
+    reserveInput,
+  });
+}
+
+async function readD1eAdmissionMutationCounts(pool) {
+  const result = await pool.query(
+    `SELECT
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.whatsapp_rate_limit_reservations) AS reservations,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_staging_service_reply_scope_bindings)
+         AS "scopeBindings",
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_staging_pre_send_admission_bindings)
+         AS admissions,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.whatsapp_pair_rate_limit_state) AS "pairStates"`,
+  );
+  assert.equal(result.rowCount, 1);
+  return result.rows[0];
+}
+
+async function verifyD1eAdmissionRejectsMixedRecipient(
+  pool,
+  fixture,
+) {
+  assert.notEqual(fixture.secondRecipientFixture, null);
+  const before = await readD1eAdmissionMutationCounts(pool);
+  await assertDatabaseError(
+    reserveAndBindD1eServiceReply(
+      pool,
+      fixture.secondRecipientFixture,
+    ),
+    /service reservation safety evidence is stale/,
+  );
+  assert.deepEqual(await readD1eAdmissionMutationCounts(pool), before);
+
+  const secondRecipientDelivery = await pool.query(
+    `SELECT status, attempt_count::integer AS "attemptCount"
+     FROM public.bot_reply_deliveries
+     WHERE delivery_key = $1`,
+    [fixture.secondRecipientFixture.delivery.deliveryKey],
+  );
+  assert.deepEqual(secondRecipientDelivery.rows, [{
+    attemptCount: 1,
+    status: "sending",
+  }]);
 }
 
 async function insertKillSwitchFact(pool, fixture) {
@@ -3355,6 +3568,1042 @@ async function verifyBindingCatalog(pool) {
   ]);
 }
 
+async function prepareD1eProviderBoundary(client, fixture) {
+  const pinnedBackendPid = await readBackendPid(client);
+  assert.equal(
+    await acquireBarrier(client, fixture.permitKey),
+    "acquired",
+  );
+  await client.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+  assert.deepEqual(await consumePermit(client, fixture.permitKey), {
+    outcome: "authorized",
+    reasonCode: "CAPABILITY_RELEASED",
+  });
+  await client.query("COMMIT");
+  await assertBarrierProof(
+    client,
+    fixture.permitKey,
+    pinnedBackendPid,
+  );
+}
+
+async function writeD1eProviderFact(client, input) {
+  const result = await client.query(
+    `SELECT outcome, "providerOutcomeKind"
+     FROM public.write_bot_reply_staging_provider_fact_v1(
+       $1, $2, $3, $4, $5
+     )`,
+    [
+      input.permitKey,
+      input.outcomeKind,
+      input.providerMessageId ?? null,
+      input.errorCode ?? null,
+      input.retryAfterSeconds ?? null,
+    ],
+  );
+  assert.equal(result.rowCount, 1);
+  return result.rows[0];
+}
+
+async function writeD1eProviderUncertainty(client, permitKey, reason) {
+  const result = await client.query(
+    `SELECT outcome, state
+     FROM public.write_bot_reply_staging_provider_uncertainty_v1($1, $2)`,
+    [permitKey, reason],
+  );
+  assert.equal(result.rowCount, 1);
+  return result.rows[0];
+}
+
+async function readD1eProviderMutationSnapshot(client, fixture) {
+  const result = await client.query(
+    `SELECT delivery.status,
+       delivery.attempt_count::integer AS "attemptCount",
+       delivery.provider_message_id AS "providerMessageId",
+       delivery.last_error_code AS "lastErrorCode",
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_delivery_provider_links AS link
+        WHERE link.delivery_key = delivery.delivery_key) AS acceptances,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_provider_deferral_events AS deferral
+        WHERE deferral.delivery_key = delivery.delivery_key)
+         AS deferrals,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_service_window_rejection_events AS rejection
+        WHERE rejection.delivery_key = delivery.delivery_key)
+         AS rejections,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_staging_provider_uncertainty_events
+          AS uncertainty
+        WHERE uncertainty.delivery_key = delivery.delivery_key)
+         AS uncertainties,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.whatsapp_rate_limit_settlements AS settlement
+        WHERE settlement.reservation_key = permit.reservation_key)
+         AS settlements,
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.whatsapp_provider_cooldown_events AS cooldown
+        WHERE cooldown.reservation_key = permit.reservation_key)
+         AS "cooldownEvents",
+       (SELECT pg_catalog.count(*)::integer
+        FROM public.bot_reply_staging_provider_operation_outcomes AS outcome
+        WHERE outcome.operation_key = permit.operation_key) AS outcomes
+     FROM public.bot_reply_staging_credential_bound_pre_send_permits AS permit
+     INNER JOIN public.bot_reply_deliveries AS delivery
+       ON delivery.delivery_key = permit.delivery_key
+      AND delivery.tenant_id = permit.tenant_id
+     WHERE permit.permit_key = $1`,
+    [fixture.permitKey],
+  );
+  assert.equal(result.rowCount, 1);
+  return result.rows[0];
+}
+
+async function verifyD1eNullProviderUnionsAreAtomic(client, fixture) {
+  const before = await readD1eProviderMutationSnapshot(client, fixture);
+  const providerMessageId =
+    `wamid.d1e.invalid-union.${fixture.safety.tenantId}`;
+  const invalidFacts = [
+    {
+      errorCode: 130429,
+      outcomeKind: null,
+      permitKey: fixture.permitKey,
+      retryAfterSeconds: 1,
+    },
+    {
+      outcomeKind: "accepted",
+      permitKey: fixture.permitKey,
+      providerMessageId: null,
+    },
+    {
+      errorCode: 131047,
+      outcomeKind: "accepted",
+      permitKey: fixture.permitKey,
+      providerMessageId,
+    },
+    {
+      outcomeKind: "accepted",
+      permitKey: fixture.permitKey,
+      providerMessageId,
+      retryAfterSeconds: 1,
+    },
+    {
+      errorCode: 130429,
+      outcomeKind: "sender-deferred",
+      permitKey: fixture.permitKey,
+      providerMessageId,
+      retryAfterSeconds: 1,
+    },
+    {
+      errorCode: null,
+      outcomeKind: "sender-deferred",
+      permitKey: fixture.permitKey,
+      retryAfterSeconds: 1,
+    },
+    {
+      errorCode: 130429,
+      outcomeKind: "sender-deferred",
+      permitKey: fixture.permitKey,
+      retryAfterSeconds: null,
+    },
+    {
+      errorCode: 131056,
+      outcomeKind: "pair-deferred",
+      permitKey: fixture.permitKey,
+      providerMessageId,
+      retryAfterSeconds: 1,
+    },
+    {
+      errorCode: null,
+      outcomeKind: "pair-deferred",
+      permitKey: fixture.permitKey,
+      retryAfterSeconds: 1,
+    },
+    {
+      errorCode: 131056,
+      outcomeKind: "pair-deferred",
+      permitKey: fixture.permitKey,
+      retryAfterSeconds: null,
+    },
+    {
+      errorCode: 131047,
+      outcomeKind: "service-window-rejected",
+      permitKey: fixture.permitKey,
+      providerMessageId,
+    },
+    {
+      errorCode: null,
+      outcomeKind: "service-window-rejected",
+      permitKey: fixture.permitKey,
+    },
+    {
+      errorCode: 131047,
+      outcomeKind: "service-window-rejected",
+      permitKey: fixture.permitKey,
+      retryAfterSeconds: 1,
+    },
+  ];
+  for (const invalidFact of invalidFacts) {
+    await assertDatabaseError(
+      writeD1eProviderFact(client, invalidFact),
+      /provider fact union is invalid/,
+    );
+  }
+  await assertDatabaseError(
+    writeD1eProviderUncertainty(client, fixture.permitKey, null),
+    /provider uncertainty union is invalid/,
+  );
+  assert.deepEqual(
+    await readD1eProviderMutationSnapshot(client, fixture),
+    before,
+  );
+}
+
+async function reserveAndBindD1eServiceReply(client, fixture) {
+  const result = await client.query(
+    `SELECT outcome, "scopeBindingKey", "reservationKey"
+     FROM public.reserve_and_bind_bot_reply_staging_service_reply_v1(
+       $1, $2, $3, $4, $5
+     )`,
+    [
+      fixture.claimedRun.runBindingKey,
+      fixture.delivery.deliveryKey,
+      fixture.delivery.portfolioKey,
+      fixture.delivery.senderKey,
+      fixture.delivery.recipientKey,
+    ],
+  );
+  assert.equal(result.rowCount, 1);
+  return result.rows[0];
+}
+
+async function writeD1eAdmission(client, fixture) {
+  const result = await client.query(
+    `SELECT outcome, "admissionBindingKey"
+     FROM public.write_bot_reply_staging_pre_send_admission_v1(
+       $1
+     )`,
+    [fixture.delivery.scopeBindingKey],
+  );
+  assert.equal(result.rowCount, 1);
+  return result.rows[0];
+}
+
+async function verifyD1eAdmissionBarrierConcurrency(pool, fixture) {
+  const holder = await pool.connect();
+  const writer = await pool.connect();
+  let writerQuery = null;
+  let holderBarrierReleased = false;
+  try {
+    assert.equal(
+      await acquireBarrier(holder, fixture.permitKey),
+      "acquired",
+    );
+    const writerPid = await readBackendPid(writer);
+    writerQuery = writeD1eAdmission(writer, fixture);
+
+    let observedAdvisoryWait = false;
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      const waitResult = await pool.query(
+        `SELECT wait_event_type AS "waitEventType",
+           wait_event AS "waitEvent"
+         FROM pg_catalog.pg_stat_activity
+         WHERE pid = $1`,
+        [writerPid],
+      );
+      assert.equal(waitResult.rowCount, 1);
+      if (
+        waitResult.rows[0]?.waitEventType === "Lock"
+        && waitResult.rows[0]?.waitEvent === "advisory"
+      ) {
+        observedAdvisoryWait = true;
+        break;
+      }
+      await delay(10);
+    }
+    assert.equal(observedAdvisoryWait, true);
+
+    assert.deepEqual(await releaseBarrier(holder, fixture.permitKey), {
+      outcome: "released",
+      releasedCount: 1,
+    });
+    holderBarrierReleased = true;
+    assert.deepEqual(await writerQuery, {
+      admissionBindingKey: fixture.delivery.admissionBindingKey,
+      outcome: "replayed",
+    });
+    assert.equal(await readAdvisoryLockCount(writer), 0);
+  } finally {
+    if (!holderBarrierReleased) {
+      await holder.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    }
+    if (writerQuery !== null) {
+      await writerQuery.catch(() => undefined);
+    }
+    await writer.query("ROLLBACK").catch(() => undefined);
+    await writer.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    holder.release();
+    writer.release();
+  }
+}
+
+async function verifyD1eProviderWriterBackendFence(pool, fixture) {
+  const boundaryActor = await pool.connect();
+  const forgedBackend = await pool.connect();
+  try {
+    await prepareD1eProviderBoundary(boundaryActor, fixture);
+    assert.deepEqual(
+      await releaseBarrier(boundaryActor, fixture.permitKey),
+      { outcome: "released", releasedCount: 1 },
+    );
+
+    // pg_locks cannot label a same-key advisory hold as session- versus
+    // transaction-scoped. The durable proof therefore also binds provider
+    // writers to the backend that committed the one-shot boundary claim.
+    await forgedBackend.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+    await forgedBackend.query(
+      `SELECT pg_catalog.pg_advisory_xact_lock(
+         public.derive_bot_reply_staging_tenant_barrier_key_v1(
+           permit.tenant_id
+         )
+       )
+       FROM public.bot_reply_staging_credential_bound_pre_send_permits
+         AS permit
+       WHERE permit.permit_key = $1`,
+      [fixture.permitKey],
+    );
+    await assertDatabaseError(
+      writeD1eProviderUncertainty(
+        forgedBackend,
+        fixture.permitKey,
+        "timeout",
+      ),
+      /provider uncertainty chain conflicts/,
+    );
+    await forgedBackend.query("ROLLBACK");
+
+    assert.equal(
+      await acquireBarrier(boundaryActor, fixture.permitKey),
+      "reconciliation-required",
+    );
+    assert.deepEqual(
+      await releaseBarrier(boundaryActor, fixture.permitKey),
+      { outcome: "released", releasedCount: 2 },
+    );
+  } finally {
+    await forgedBackend.query("ROLLBACK").catch(() => undefined);
+    await forgedBackend.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    await boundaryActor.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    forgedBackend.release();
+    boundaryActor.release();
+  }
+}
+
+async function holdD1eSharedSessionBarrier(client, permitKey) {
+  const result = await client.query(
+    `SELECT pg_catalog.pg_advisory_lock_shared(
+       public.derive_bot_reply_staging_tenant_barrier_key_v1(
+         permit.tenant_id
+       )
+     )
+     FROM public.bot_reply_staging_credential_bound_pre_send_permits
+       AS permit
+     WHERE permit.permit_key = $1`,
+    [permitKey],
+  );
+  assert.equal(result.rowCount, 1);
+}
+
+async function releaseD1eSharedSessionBarrier(client, permitKey) {
+  const result = await client.query(
+    `SELECT pg_catalog.pg_advisory_unlock_shared(
+       public.derive_bot_reply_staging_tenant_barrier_key_v1(
+         permit.tenant_id
+       )
+     ) AS released
+     FROM public.bot_reply_staging_credential_bound_pre_send_permits
+       AS permit
+     WHERE permit.permit_key = $1`,
+    [permitKey],
+  );
+  assert.deepEqual(result.rows, [{ released: true }]);
+}
+
+async function holdD1eSharedTransactionBarrier(client, permitKey) {
+  const result = await client.query(
+    `SELECT pg_catalog.pg_advisory_xact_lock_shared(
+       public.derive_bot_reply_staging_tenant_barrier_key_v1(
+         permit.tenant_id
+       )
+     )
+     FROM public.bot_reply_staging_credential_bound_pre_send_permits
+       AS permit
+     WHERE permit.permit_key = $1`,
+    [permitKey],
+  );
+  assert.equal(result.rowCount, 1);
+}
+
+async function verifyD1eSharedAdvisoryLocksRejected(pool, fixture) {
+  const actor = await pool.connect();
+  const providerMessageId =
+    `wamid.d1e.shared-lock.${fixture.safety.tenantId}`;
+  try {
+    await holdD1eSharedSessionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      acquireBarrier(actor, fixture.permitKey),
+      /session barrier client is contaminated/,
+    );
+    await assertDatabaseError(
+      consumePermit(actor, fixture.permitKey),
+      /lacks exact session barrier/,
+    );
+    assert.deepEqual(
+      await readCapabilityCounts(pool, fixture),
+      emptyCapabilityCounts(),
+    );
+    await releaseD1eSharedSessionBarrier(actor, fixture.permitKey);
+
+    await actor.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+    await holdD1eSharedTransactionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      acquireBarrier(actor, fixture.permitKey),
+      /session barrier client is contaminated/,
+    );
+    await actor.query("ROLLBACK");
+
+    await actor.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+    await holdD1eSharedTransactionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      consumePermit(actor, fixture.permitKey),
+      /lacks exact session barrier/,
+    );
+    await actor.query("ROLLBACK");
+    assert.deepEqual(
+      await readCapabilityCounts(pool, fixture),
+      emptyCapabilityCounts(),
+    );
+
+    await prepareD1eProviderBoundary(actor, fixture);
+    const preFactSnapshot = await readD1eProviderMutationSnapshot(
+      actor,
+      fixture,
+    );
+    await holdD1eSharedSessionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      writeD1eProviderUncertainty(actor, fixture.permitKey, "timeout"),
+      /lacks exact session barrier/,
+    );
+    await releaseD1eSharedSessionBarrier(actor, fixture.permitKey);
+
+    await actor.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+    await holdD1eSharedTransactionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      writeD1eProviderUncertainty(actor, fixture.permitKey, "timeout"),
+      /lacks exact session barrier/,
+    );
+    await actor.query("ROLLBACK");
+    assert.deepEqual(
+      await readD1eProviderMutationSnapshot(actor, fixture),
+      preFactSnapshot,
+    );
+    await verifyD1eNullProviderUnionsAreAtomic(actor, fixture);
+    const boundaryCountBefore = await actor.query(
+      `SELECT pg_catalog.count(*)::integer AS count
+       FROM public.bot_reply_staging_provider_boundary_claims
+       WHERE permit_key = $1`,
+      [fixture.permitKey],
+    );
+    assert.deepEqual(boundaryCountBefore.rows, [{ count: 1 }]);
+    assert.deepEqual(await releaseBarrier(actor, fixture.permitKey), {
+      outcome: "released",
+      releasedCount: 1,
+    });
+
+    await holdD1eSharedSessionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      proveBarrier(actor, fixture.permitKey),
+      /lacks exact session barrier/,
+    );
+    await releaseD1eSharedSessionBarrier(actor, fixture.permitKey);
+
+    await actor.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+    await holdD1eSharedTransactionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      proveBarrier(actor, fixture.permitKey),
+      /lacks exact session barrier/,
+    );
+    await actor.query("ROLLBACK");
+    assert.deepEqual(
+      await actor.query(
+        `SELECT pg_catalog.count(*)::integer AS count
+         FROM public.bot_reply_staging_provider_boundary_claims
+         WHERE permit_key = $1`,
+        [fixture.permitKey],
+      ).then((result) => result.rows),
+      [{ count: 1 }],
+    );
+
+    assert.equal(
+      await acquireBarrier(actor, fixture.permitKey),
+      "reconciliation-required",
+    );
+    assert.deepEqual(
+      await writeD1eProviderFact(actor, {
+        outcomeKind: "accepted",
+        permitKey: fixture.permitKey,
+        providerMessageId,
+      }),
+      { outcome: "recorded", providerOutcomeKind: "accepted" },
+    );
+    assert.deepEqual(await releaseBarrier(actor, fixture.permitKey), {
+      outcome: "released",
+      releasedCount: 2,
+    });
+
+    const outcomeCountBefore = await actor.query(
+      `SELECT pg_catalog.count(*)::integer AS count
+       FROM public.bot_reply_staging_provider_operation_outcomes AS outcome
+       INNER JOIN
+         public.bot_reply_staging_credential_bound_pre_send_permits
+           AS permit
+         ON permit.operation_key = outcome.operation_key
+       WHERE permit.permit_key = $1`,
+      [fixture.permitKey],
+    );
+    assert.deepEqual(outcomeCountBefore.rows, [{ count: 0 }]);
+
+    await holdD1eSharedSessionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      finalizePermit(actor, fixture.permitKey),
+      /lacks exact session barrier/,
+    );
+    await releaseD1eSharedSessionBarrier(actor, fixture.permitKey);
+
+    await actor.query("BEGIN ISOLATION LEVEL READ COMMITTED");
+    await holdD1eSharedTransactionBarrier(actor, fixture.permitKey);
+    await assertDatabaseError(
+      finalizePermit(actor, fixture.permitKey),
+      /lacks exact session barrier/,
+    );
+    await actor.query("ROLLBACK");
+    assert.deepEqual(
+      await actor.query(
+        `SELECT pg_catalog.count(*)::integer AS count
+         FROM public.bot_reply_staging_provider_operation_outcomes AS outcome
+         INNER JOIN
+           public.bot_reply_staging_credential_bound_pre_send_permits
+             AS permit
+           ON permit.operation_key = outcome.operation_key
+         WHERE permit.permit_key = $1`,
+        [fixture.permitKey],
+      ).then((result) => result.rows),
+      [{ count: 0 }],
+    );
+
+    assert.equal(
+      await acquireBarrier(actor, fixture.permitKey),
+      "reconciliation-required",
+    );
+    const finalized = await finalizePermit(actor, fixture.permitKey);
+    assert.equal(finalized.outcome, "finalized");
+    assert.equal(finalized.providerOutcomeKind, "accepted");
+    assert.deepEqual(await releaseBarrier(actor, fixture.permitKey), {
+      outcome: "released",
+      releasedCount: 2,
+    });
+  } finally {
+    await actor.query("ROLLBACK").catch(() => undefined);
+    await actor.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    actor.release();
+  }
+}
+
+async function waitUntilD1eLateAcceptanceBoundariesPass(pool, fixture) {
+  for (let attempt = 0; attempt < 700; attempt += 1) {
+    const result = await pool.query(
+      `SELECT
+         pg_catalog.clock_timestamp() >= $2::TIMESTAMPTZ
+           AS "runLeaseExpired",
+         pg_catalog.clock_timestamp() >= $3::TIMESTAMPTZ
+           AS "reservationExpired",
+         pg_catalog.clock_timestamp() >= boundary_claim.send_before
+           AS "sendBeforeExpired"
+       FROM public.bot_reply_staging_provider_boundary_claims
+         AS boundary_claim
+       WHERE boundary_claim.permit_key = $1`,
+      [
+        fixture.permitKey,
+        canonicalTimestamp(fixture.claimedRun.leaseExpiresAt),
+        fixture.delivery.reservationExpiresAt,
+      ],
+    );
+    assert.equal(result.rowCount, 1);
+    const evidence = result.rows[0];
+    if (
+      evidence?.runLeaseExpired === true
+      && evidence?.reservationExpired === true
+      && evidence?.sendBeforeExpired === true
+    ) {
+      return;
+    }
+    await delay(100);
+  }
+  fail("D1E_LATE_ACCEPTANCE_BOUNDARY_TIMEOUT");
+}
+
+async function verifyD1eExactDeferralAfterUncertainty(
+  pool,
+  fixture,
+  expected,
+) {
+  const actor = await pool.connect();
+  try {
+    await prepareD1eProviderBoundary(actor, fixture);
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        actor,
+        fixture.permitKey,
+        expected.uncertaintyReason,
+      ),
+      { outcome: "recorded", state: "ambiguous" },
+    );
+    assert.deepEqual(
+      await writeD1eProviderFact(actor, {
+        errorCode: expected.errorCode,
+        outcomeKind: expected.outcomeKind,
+        permitKey: fixture.permitKey,
+        retryAfterSeconds: 1,
+      }),
+      {
+        outcome: "recorded",
+        providerOutcomeKind: expected.outcomeKind,
+      },
+    );
+    assert.deepEqual(
+      await writeD1eProviderFact(actor, {
+        errorCode: expected.errorCode,
+        outcomeKind: expected.outcomeKind,
+        permitKey: fixture.permitKey,
+        retryAfterSeconds: 1,
+      }),
+      {
+        outcome: "replayed",
+        providerOutcomeKind: expected.outcomeKind,
+      },
+    );
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        actor,
+        fixture.permitKey,
+        expected.uncertaintyReason === "timeout" ? "threw" : "timeout",
+      ),
+      { outcome: "superseded", state: "exact-provider-fact" },
+    );
+
+    const exactProjection = await actor.query(
+      `SELECT delivery.status,
+         delivery.attempt_count::integer AS "attemptCount",
+         delivery.next_attempt_at IS NOT NULL AS "retryScheduled",
+         delivery.last_error_code AS "lastErrorCode",
+         deferral.provider_error_code::integer AS "providerErrorCode",
+         deferral.cooldown_scope AS "cooldownScope",
+         deferral.retry_after_seconds::integer AS "retryAfterSeconds",
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_staging_provider_uncertainty_events
+            AS uncertainty
+          WHERE uncertainty.delivery_key = delivery.delivery_key)
+           AS uncertainties,
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_staging_provider_operations AS operation
+          WHERE operation.delivery_key = delivery.delivery_key)
+           AS operations,
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_provider_request_claims AS request
+          WHERE request.delivery_key = delivery.delivery_key)
+           AS "providerRequests",
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_provider_deferral_events AS all_deferrals
+          WHERE all_deferrals.delivery_key = delivery.delivery_key)
+           AS deferrals
+       FROM public.bot_reply_deliveries AS delivery
+       INNER JOIN public.bot_reply_provider_deferral_events AS deferral
+         ON deferral.delivery_key = delivery.delivery_key
+        AND deferral.tenant_id = delivery.tenant_id
+        AND deferral.claim_version = delivery.claim_version
+       WHERE delivery.delivery_key = $1`,
+      [fixture.delivery.deliveryKey],
+    );
+    assert.deepEqual(exactProjection.rows, [{
+      attemptCount: 0,
+      cooldownScope: expected.cooldownScope,
+      deferrals: 1,
+      lastErrorCode: null,
+      operations: 1,
+      providerErrorCode: expected.errorCode,
+      providerRequests: 1,
+      retryAfterSeconds: 1,
+      retryScheduled: true,
+      status: "pending",
+      uncertainties: 1,
+    }]);
+
+    const finalized = await finalizePermit(actor, fixture.permitKey);
+    assert.equal(finalized.outcome, "finalized");
+    assert.equal(finalized.state, "completed");
+    assert.equal(finalized.providerOutcomeKind, expected.outcomeKind);
+    assert.deepEqual(await releaseBarrier(actor, fixture.permitKey), {
+      outcome: "released",
+      releasedCount: 1,
+    });
+  } finally {
+    await actor.query("ROLLBACK").catch(() => undefined);
+    await actor.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    actor.release();
+  }
+}
+
+async function verifyD1eSafetyTruncateClosure(pool) {
+  const catalogResult = await pool.query(
+    `SELECT relation.relname AS table,
+       pg_catalog.to_json(
+         pg_catalog.array_agg(
+           trigger_record.tgname ORDER BY trigger_record.tgname
+         ) FILTER (
+           WHERE trigger_record.tgname IN (
+             'whatsapp_pair_state_truncate_guard',
+             'whatsapp_portfolio_state_truncate_guard'
+           )
+         )
+       ) AS triggers
+     FROM pg_catalog.pg_class AS relation
+     INNER JOIN pg_catalog.pg_namespace AS namespace
+       ON namespace.oid = relation.relnamespace
+     LEFT JOIN pg_catalog.pg_trigger AS trigger_record
+       ON trigger_record.tgrelid = relation.oid
+      AND NOT trigger_record.tgisinternal
+     WHERE namespace.nspname = 'public'
+       AND relation.relname = ANY($1::TEXT[])
+     GROUP BY relation.relname
+     ORDER BY relation.relname`,
+    [[
+      "whatsapp_pair_rate_limit_state",
+      "whatsapp_portfolio_recipient_rate_limit_state",
+    ]],
+  );
+  assert.deepEqual(catalogResult.rows, [
+    {
+      table: "whatsapp_pair_rate_limit_state",
+      triggers: ["whatsapp_pair_state_truncate_guard"],
+    },
+    {
+      table: "whatsapp_portfolio_recipient_rate_limit_state",
+      triggers: ["whatsapp_portfolio_state_truncate_guard"],
+    },
+  ]);
+
+  const truncateGuardCount = await pool.query(
+    `SELECT pg_catalog.count(*)::integer AS count
+     FROM pg_catalog.pg_trigger AS trigger_record
+     INNER JOIN pg_catalog.pg_class AS relation
+       ON relation.oid = trigger_record.tgrelid
+     INNER JOIN pg_catalog.pg_namespace AS namespace
+       ON namespace.oid = relation.relnamespace
+     WHERE namespace.nspname = 'public'
+       AND NOT trigger_record.tgisinternal
+       AND trigger_record.tgname = ANY($1::TEXT[])`,
+    [[
+      "bot_reply_provider_links_truncate_guard",
+      "bot_reply_provider_deferrals_truncate_guard",
+      "bot_reply_window_rejections_truncate_guard",
+      "whatsapp_rate_reservations_truncate_guard",
+      "whatsapp_rate_settlements_truncate_guard",
+      "whatsapp_provider_cooldown_events_truncate_guard",
+      "whatsapp_provider_cooldown_state_truncate_guard",
+      "whatsapp_pair_state_truncate_guard",
+      "whatsapp_portfolio_state_truncate_guard",
+    ]],
+  );
+  assert.deepEqual(truncateGuardCount.rows, [{ count: 9 }]);
+
+  const actor = await pool.connect();
+  try {
+    const guardedTables = [
+      "whatsapp_pair_rate_limit_state",
+      "whatsapp_portfolio_recipient_rate_limit_state",
+    ];
+    for (const table of guardedTables) {
+      await actor.query("BEGIN");
+      await assertDatabaseError(
+        actor.query(`TRUNCATE public.${table}`),
+        /rate-limit state cannot be deleted/,
+      );
+      await actor.query("ROLLBACK");
+    }
+  } finally {
+    await actor.query("ROLLBACK").catch(() => undefined);
+    actor.release();
+  }
+}
+
+async function verifyD1eLateTruthAndWriterBoundaries(
+  pool,
+  lateTruthFixture,
+  rejectionFixture,
+) {
+  const actor = await pool.connect();
+  const rejectionActor = await pool.connect();
+  try {
+    await assertDatabaseError(
+      pool.query(
+        `SELECT outcome, state
+         FROM public.write_bot_reply_staging_provider_uncertainty_v1($1, $2)`,
+        [lateTruthFixture.permitKey, "timeout"],
+      ),
+      /lacks exact session barrier/,
+    );
+    await assertDatabaseError(
+      pool.query(
+        `UPDATE public.meta_connections
+         SET updated_at = pg_catalog.date_trunc(
+           'milliseconds', pg_catalog.clock_timestamp()
+         )
+         WHERE tenant_id = $1`,
+        [lateTruthFixture.safety.tenantId],
+      ),
+      /tenant writer lacks its barrier/,
+    );
+    await assertDatabaseError(
+      pool.query(
+        `UPDATE public.messages
+         SET occurred_at = occurred_at + INTERVAL '1 millisecond'
+         WHERE message_key = $1`,
+        [lateTruthFixture.source.inboundMessageKey],
+      ),
+      /occurred_at evidence is immutable/,
+    );
+
+    await prepareD1eProviderBoundary(actor, lateTruthFixture);
+    await prepareD1eProviderBoundary(rejectionActor, rejectionFixture);
+    await waitUntilD1eLateAcceptanceBoundariesPass(
+      pool,
+      lateTruthFixture,
+    );
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        actor,
+        lateTruthFixture.permitKey,
+        "timeout",
+      ),
+      { outcome: "recorded", state: "ambiguous" },
+    );
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        actor,
+        lateTruthFixture.permitKey,
+        "timeout",
+      ),
+      { outcome: "replayed", state: "ambiguous" },
+    );
+    await assertDatabaseError(
+      writeD1eProviderUncertainty(
+        actor,
+        lateTruthFixture.permitKey,
+        "threw",
+      ),
+      /uncertainty replay conflicts/,
+    );
+
+    const providerMessageId =
+      `wamid.d1e.${lateTruthFixture.safety.tenantId}`;
+    assert.deepEqual(
+      await writeD1eProviderFact(actor, {
+        outcomeKind: "accepted",
+        permitKey: lateTruthFixture.permitKey,
+        providerMessageId,
+      }),
+      { outcome: "recorded", providerOutcomeKind: "accepted" },
+    );
+    assert.deepEqual(
+      await writeD1eProviderFact(actor, {
+        outcomeKind: "accepted",
+        permitKey: lateTruthFixture.permitKey,
+        providerMessageId,
+      }),
+      { outcome: "replayed", providerOutcomeKind: "accepted" },
+    );
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        actor,
+        lateTruthFixture.permitKey,
+        "threw",
+      ),
+      { outcome: "superseded", state: "exact-provider-fact" },
+    );
+
+    const lateTruthResult = await actor.query(
+      `SELECT delivery.status,
+         delivery.provider_message_id AS "providerMessageId",
+         delivery.last_error_code AS "lastErrorCode",
+         uncertainty.source_reason AS "sourceReason"
+       FROM public.bot_reply_deliveries AS delivery
+       INNER JOIN public.bot_reply_staging_provider_uncertainty_events
+         AS uncertainty
+         ON uncertainty.delivery_key = delivery.delivery_key
+       WHERE delivery.delivery_key = $1`,
+      [lateTruthFixture.delivery.deliveryKey],
+    );
+    assert.deepEqual(lateTruthResult.rows, [{
+      lastErrorCode: null,
+      providerMessageId,
+      sourceReason: "timeout",
+      status: "accepted",
+    }]);
+
+    const finalizedAccepted = await finalizePermit(
+      actor,
+      lateTruthFixture.permitKey,
+    );
+    assert.equal(finalizedAccepted.outcome, "finalized");
+    assert.equal(finalizedAccepted.state, "completed");
+    assert.equal(
+      finalizedAccepted.providerOutcomeKind,
+      "accepted",
+    );
+    assert.deepEqual(
+      await writeD1eProviderFact(actor, {
+        outcomeKind: "accepted",
+        permitKey: lateTruthFixture.permitKey,
+        providerMessageId,
+      }),
+      { outcome: "replayed", providerOutcomeKind: "accepted" },
+    );
+    assert.deepEqual(
+      await releaseBarrier(actor, lateTruthFixture.permitKey),
+      { outcome: "released", releasedCount: 1 },
+    );
+
+    await assertDatabaseError(
+      writeD1eProviderFact(rejectionActor, {
+        errorCode: 131047,
+        outcomeKind: "accepted",
+        permitKey: rejectionFixture.permitKey,
+        providerMessageId: `wamid.invalid.${rejectionFixture.safety.tenantId}`,
+      }),
+      /provider fact union is invalid/,
+    );
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        rejectionActor,
+        rejectionFixture.permitKey,
+        "threw",
+      ),
+      { outcome: "recorded", state: "ambiguous" },
+    );
+    assert.deepEqual(
+      await writeD1eProviderFact(rejectionActor, {
+        errorCode: 131047,
+        outcomeKind: "service-window-rejected",
+        permitKey: rejectionFixture.permitKey,
+      }),
+      {
+        outcome: "recorded",
+        providerOutcomeKind: "service-window-rejected",
+      },
+    );
+    assert.deepEqual(
+      await writeD1eProviderUncertainty(
+        rejectionActor,
+        rejectionFixture.permitKey,
+        "timeout",
+      ),
+      { outcome: "superseded", state: "exact-provider-fact" },
+    );
+
+    const rejectionEvidence = await rejectionActor.query(
+      `SELECT
+         delivery.status,
+         rejection.attempted_at = boundary_claim.proved_at
+           AS "attemptMatchesBoundary",
+         settlement.settled_at = boundary_claim.proved_at
+           AS "settlementMatchesBoundary",
+         rejection.rejected_at >= boundary_claim.proved_at
+           AS "rejectionCausal",
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_staging_provider_uncertainty_events
+            AS uncertainty
+          WHERE uncertainty.delivery_key = rejection.delivery_key)
+           AS uncertainties,
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_staging_provider_operations AS operation
+          WHERE operation.delivery_key = rejection.delivery_key)
+           AS operations,
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_provider_request_claims AS request
+          WHERE request.delivery_key = rejection.delivery_key)
+           AS "providerRequests",
+         (SELECT pg_catalog.count(*)::integer
+          FROM public.bot_reply_service_window_rejection_events
+            AS all_rejections
+          WHERE all_rejections.delivery_key = rejection.delivery_key)
+           AS rejections
+       FROM public.bot_reply_service_window_rejection_events AS rejection
+       INNER JOIN public.bot_reply_deliveries AS delivery
+         ON delivery.delivery_key = rejection.delivery_key
+        AND delivery.tenant_id = rejection.tenant_id
+       INNER JOIN public.bot_reply_staging_provider_boundary_claims
+         AS boundary_claim
+         ON boundary_claim.delivery_key = rejection.delivery_key
+        AND boundary_claim.reservation_key = rejection.reservation_key
+       INNER JOIN public.whatsapp_rate_limit_settlements AS settlement
+         ON settlement.reservation_key = rejection.reservation_key
+       WHERE rejection.delivery_key = $1`,
+      [rejectionFixture.delivery.deliveryKey],
+    );
+    assert.deepEqual(rejectionEvidence.rows, [{
+      attemptMatchesBoundary: true,
+      operations: 1,
+      providerRequests: 1,
+      rejectionCausal: true,
+      rejections: 1,
+      settlementMatchesBoundary: true,
+      status: "rejected",
+      uncertainties: 1,
+    }]);
+
+    const finalizedRejection = await finalizePermit(
+      rejectionActor,
+      rejectionFixture.permitKey,
+    );
+    assert.equal(finalizedRejection.outcome, "finalized");
+    assert.equal(finalizedRejection.state, "completed");
+    assert.equal(
+      finalizedRejection.providerOutcomeKind,
+      "service-window-rejected",
+    );
+    assert.deepEqual(
+      await releaseBarrier(rejectionActor, rejectionFixture.permitKey),
+      { outcome: "released", releasedCount: 1 },
+    );
+
+    await actor.query("BEGIN");
+    await assertDatabaseError(
+      actor.query("TRUNCATE public.bot_reply_delivery_provider_links"),
+      /immutable evidence/,
+    );
+    await actor.query("ROLLBACK");
+  } finally {
+    await rejectionActor.query("ROLLBACK").catch(() => undefined);
+    await rejectionActor.query(
+      "SELECT pg_catalog.pg_advisory_unlock_all()",
+    );
+    await actor.query("ROLLBACK").catch(() => undefined);
+    await actor.query("SELECT pg_catalog.pg_advisory_unlock_all()");
+    actor.release();
+    rejectionActor.release();
+  }
+}
+
 async function verifyNoResidualDatabaseLocks(pool) {
   const result = await pool.query(
     `SELECT pg_catalog.count(*)::integer AS count
@@ -3398,7 +4647,10 @@ export async function verifyBotReplySessionBarrierPostgres(
     await requireEmptyPublicSchema(pool);
     cleanupAuthorized = true;
 
-    const { files } = await applyAllMigrationsWithLegacyFixture(pool);
+    const {
+      files,
+      writerBarrierMigrationSource,
+    } = await applyAllMigrationsWithLegacyFixture(pool);
 
     const barrierFixture = await createIsolatedPermit(
       pool,
@@ -3446,6 +4698,107 @@ export async function verifyBotReplySessionBarrierPostgres(
     await verifyLeaseExpiryUncertainty(pool);
     await verifyNoResidualDatabaseLocks(pool);
 
+    // Build both fixtures before 0057 closes direct safety-table DML. The
+    // migration itself remains dormant; after it is applied, all provider
+    // facts flow only through its permit-key writers while the exact session
+    // barrier is held.
+    const pendingD1eLateTruthFixture = await createPendingD1eFixture(
+      pool,
+      "d1e-late-truth",
+      {
+        includeSecondRecipient: true,
+        leaseDurationSeconds: 60,
+      },
+    );
+    const pendingD1eRejectionFixture = await createPendingD1eFixture(
+      pool,
+      "d1e-window-rejection",
+    );
+    const pendingD1eBackendFenceFixture = await createPendingD1eFixture(
+      pool,
+      "d1e-backend-fence",
+    );
+    const pendingD1eSharedLockFixture = await createPendingD1eFixture(
+      pool,
+      "d1e-shared-lock",
+    );
+    const pendingD1eSenderDeferralFixture = await createPendingD1eFixture(
+      pool,
+      "d1e-sender-deferral-after-uncertainty",
+    );
+    const pendingD1ePairDeferralFixture = await createPendingD1eFixture(
+      pool,
+      "d1e-pair-deferral-after-uncertainty",
+    );
+    await pool.query(writerBarrierMigrationSource);
+    const d1eLateTruthFixture = await completePendingD1eFixture(
+      pool,
+      pendingD1eLateTruthFixture,
+    );
+    const d1eRejectionFixture = await completePendingD1eFixture(
+      pool,
+      pendingD1eRejectionFixture,
+    );
+    const d1eBackendFenceFixture = await completePendingD1eFixture(
+      pool,
+      pendingD1eBackendFenceFixture,
+    );
+    const d1eSharedLockFixture = await completePendingD1eFixture(
+      pool,
+      pendingD1eSharedLockFixture,
+    );
+    const d1eSenderDeferralFixture = await completePendingD1eFixture(
+      pool,
+      pendingD1eSenderDeferralFixture,
+    );
+    const d1ePairDeferralFixture = await completePendingD1eFixture(
+      pool,
+      pendingD1ePairDeferralFixture,
+    );
+    await verifyD1eAdmissionRejectsMixedRecipient(
+      pool,
+      d1eLateTruthFixture,
+    );
+    await verifyD1eAdmissionBarrierConcurrency(
+      pool,
+      d1eLateTruthFixture,
+    );
+    await verifyD1eProviderWriterBackendFence(
+      pool,
+      d1eBackendFenceFixture,
+    );
+    await verifyD1eExactDeferralAfterUncertainty(
+      pool,
+      d1eSenderDeferralFixture,
+      {
+        cooldownScope: "sender",
+        errorCode: 130429,
+        outcomeKind: "sender-deferred",
+        uncertaintyReason: "timeout",
+      },
+    );
+    await verifyD1eExactDeferralAfterUncertainty(
+      pool,
+      d1ePairDeferralFixture,
+      {
+        cooldownScope: "pair",
+        errorCode: 131056,
+        outcomeKind: "pair-deferred",
+        uncertaintyReason: "threw",
+      },
+    );
+    await verifyD1eSharedAdvisoryLocksRejected(
+      pool,
+      d1eSharedLockFixture,
+    );
+    await verifyD1eLateTruthAndWriterBoundaries(
+      pool,
+      d1eLateTruthFixture,
+      d1eRejectionFixture,
+    );
+    await verifyD1eSafetyTruncateClosure(pool);
+    await verifyNoResidualDatabaseLocks(pool);
+
     return Object.freeze({
       activation: "NO-GO",
       aclAndCatalogVerified: true,
@@ -3453,6 +4806,13 @@ export async function verifyBotReplySessionBarrierPostgres(
       barrierSemantics: true,
       durableFinalizationAndReconciliation: true,
       dynamicSafetyDenialCount: 8,
+      d1eAdmissionBarrierConcurrency: true,
+      d1eProviderWriterBackendFence: true,
+      d1eSharedAdvisoryLockRejection: true,
+      d1eLateTruthAndWriterBarriers: true,
+      d1eExactAfterUncertainty: true,
+      d1eMixedRecipientRejectedAtomically: true,
+      d1eSafetyTruncateClosure: true,
       lostAcknowledgementEvidence: "simulated-only",
       migrationCount: files.length,
       nonterminalUncertaintyEvidence: true,

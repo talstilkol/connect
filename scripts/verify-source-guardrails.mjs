@@ -248,6 +248,20 @@ const dormantCredentialBoundPreSendSqlIdentifiers =
     "bot_reply_staging_provider_uncertainty_events",
     "bot_reply_staging_provider_boundary_claims",
   ]);
+const dormantWriterBarrierAndLateTruthSqlIdentifiers =
+  new Set([
+    "reserve_and_bind_bot_reply_staging_service_reply_v1",
+    "write_bot_reply_staging_pre_send_admission_v1",
+    "write_bot_reply_staging_provider_fact_v1",
+    "write_bot_reply_staging_provider_uncertainty_v1",
+    "assert_bot_reply_staging_tenant_barrier_owned_v1",
+    "assert_bot_reply_staging_exact_session_barrier_v1",
+    "bot_reply_staging_service_reply_scope_bindings",
+  ]);
+const dormantBotReplyStagingSqlIdentifiers = new Set([
+  ...dormantCredentialBoundPreSendSqlIdentifiers,
+  ...dormantWriterBarrierAndLateTruthSqlIdentifiers,
+]);
 const dormantCredentialBoundPreSendFunctionIdentifiers =
   new Set(
     [...dormantCredentialBoundPreSendSqlIdentifiers]
@@ -256,6 +270,7 @@ const dormantCredentialBoundPreSendFunctionIdentifiers =
 const postgresMigrationParityRegistryAllowedSqlIdentifiers =
   new Set([
     "acquire_bot_reply_staging_pre_send_session_barrier_v1",
+    "reserve_and_bind_bot_reply_staging_service_reply_v1",
   ]);
 const dormantCredentialBoundPreSendAllowedSqlIdentifiersByPath =
   new Map([
@@ -274,6 +289,53 @@ const dormantCredentialBoundPreSendAllowedSqlIdentifiersByPath =
     [
       nodePostgresBotReplyPinnedSessionTransportPath,
       dormantCredentialBoundPreSendFunctionIdentifiers,
+    ],
+  ]);
+const dormantWriterBarrierAndLateTruthAllowedSqlIdentifiersByPath =
+  new Map([
+    [
+      "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      "scripts/verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      "scripts/verify-postgres-migration-contract.mjs",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      "scripts/verify-postgres-migration-parity.mjs",
+      postgresMigrationParityRegistryAllowedSqlIdentifiers,
+    ],
+    [
+      "postgres/postgresMigrationParityRegistry.mjs",
+      postgresMigrationParityRegistryAllowedSqlIdentifiers,
+    ],
+    [
+      "tests/bot-reply-staging-writer-barrier-and-late-truth-migration.test.mjs",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      "tests/bot-reply-staging-credential-bound-pre-send-session-barrier-postgres-verifier.test.mjs",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      "tests/postgres-migration-contract.test.mjs",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
+    ],
+    [
+      "tests/postgres-migration-parity.test.mjs",
+      postgresMigrationParityRegistryAllowedSqlIdentifiers,
+    ],
+    [
+      "tests/postgres-data-migration-slice-registry.test.mjs",
+      postgresMigrationParityRegistryAllowedSqlIdentifiers,
+    ],
+    [
+      "tests/source-guardrails-dormant-execution-escape.test.mjs",
+      dormantWriterBarrierAndLateTruthSqlIdentifiers,
     ],
   ]);
 const nodePostgresBotReplyPinnedSessionTransportExpectedRuntimeExports =
@@ -3415,17 +3477,183 @@ function runtimeStaticString(node) {
   return null;
 }
 
+function variableDeclarationIsConst(node) {
+  return (
+    ts.isVariableDeclaration(node) &&
+    ts.isVariableDeclarationList(node.parent) &&
+    (node.parent.flags & ts.NodeFlags.Const) !== 0
+  );
+}
+
+function sourceFileRuntimeStaticString(sourceFile, node) {
+  if (!sourceFile.locals) {
+    ts.bindSourceFile(sourceFile, {
+      target: ts.ScriptTarget.Latest,
+    });
+  }
+
+  const evaluate = (candidate, resolvingSymbols) => {
+    const expression = unwrapRuntimeExpression(candidate);
+    if (!expression) return null;
+    if (ts.isStringLiteralLike(expression)) {
+      return expression.text;
+    }
+    if (ts.isIdentifier(expression)) {
+      const symbol = runtimeBindingSymbolAtIdentifier(expression);
+      if (!symbol || resolvingSymbols.has(symbol)) return null;
+      const declaration = symbol.declarations?.find(
+        (current) =>
+          variableDeclarationIsConst(current) &&
+          current.initializer,
+      );
+      if (!declaration?.initializer) return null;
+      const nextResolvingSymbols = new Set(resolvingSymbols);
+      nextResolvingSymbols.add(symbol);
+      return evaluate(
+        declaration.initializer,
+        nextResolvingSymbols,
+      );
+    }
+    if (
+      ts.isBinaryExpression(expression) &&
+      expression.operatorToken.kind ===
+        ts.SyntaxKind.PlusToken
+    ) {
+      const left = evaluate(
+        expression.left,
+        resolvingSymbols,
+      );
+      const right = evaluate(
+        expression.right,
+        resolvingSymbols,
+      );
+      return typeof left === "string" &&
+          typeof right === "string"
+        ? `${left}${right}`
+        : null;
+    }
+    if (ts.isTemplateExpression(expression)) {
+      let value = expression.head.text;
+      for (const span of expression.templateSpans) {
+        const expressionValue = evaluate(
+          span.expression,
+          resolvingSymbols,
+        );
+        if (typeof expressionValue !== "string") return null;
+        value += expressionValue;
+        value += span.literal.text;
+      }
+      return value;
+    }
+    if (ts.isArrayLiteralExpression(expression)) {
+      const values = [];
+      for (const element of expression.elements) {
+        if (ts.isSpreadElement(element)) return null;
+        const value = evaluate(element, resolvingSymbols);
+        if (typeof value !== "string") return null;
+        values.push(value);
+      }
+      return values;
+    }
+    if (ts.isObjectLiteralExpression(expression)) {
+      const values = new Map();
+      for (const property of expression.properties) {
+        if (!ts.isPropertyAssignment(property)) return null;
+        const propertyName = staticPropertyName(property.name);
+        if (propertyName === null) return null;
+        const value = evaluate(
+          property.initializer,
+          resolvingSymbols,
+        );
+        if (value === null) return null;
+        values.set(propertyName, value);
+      }
+      return values;
+    }
+    if (ts.isPropertyAccessExpression(expression)) {
+      const target = evaluate(
+        expression.expression,
+        resolvingSymbols,
+      );
+      return target instanceof Map
+        ? target.get(expression.name.text) ?? null
+        : null;
+    }
+    if (ts.isElementAccessExpression(expression)) {
+      const target = evaluate(
+        expression.expression,
+        resolvingSymbols,
+      );
+      const member = expression.argumentExpression
+        ? evaluate(
+            expression.argumentExpression,
+            resolvingSymbols,
+          )
+        : null;
+      if (typeof member !== "string") return null;
+      if (target instanceof Map) {
+        return target.get(member) ?? null;
+      }
+      if (Array.isArray(target) && /^\d+$/.test(member)) {
+        return target[Number(member)] ?? null;
+      }
+      return null;
+    }
+    if (
+      ts.isCallExpression(expression) &&
+      expression.arguments.length === 1 &&
+      ts.isPropertyAccessExpression(expression.expression) &&
+      ts.isIdentifier(expression.expression.expression) &&
+      expression.expression.expression.text === "Object" &&
+      expression.expression.name.text === "freeze" &&
+      !identifierIsShadowedAtRuntime(
+        expression.expression.expression,
+      )
+    ) {
+      return evaluate(
+        expression.arguments[0],
+        resolvingSymbols,
+      );
+    }
+    if (
+      ts.isCallExpression(expression) &&
+      expression.arguments.length === 1 &&
+      ts.isPropertyAccessExpression(expression.expression) &&
+      expression.expression.name.text === "join"
+    ) {
+      const target = evaluate(
+        expression.expression.expression,
+        resolvingSymbols,
+      );
+      const separator = evaluate(
+        expression.arguments[0],
+        resolvingSymbols,
+      );
+      return Array.isArray(target) &&
+          target.every((value) => typeof value === "string") &&
+          typeof separator === "string"
+        ? target.join(separator)
+        : null;
+    }
+    return null;
+  };
+
+  const value = evaluate(node, new Set());
+  return typeof value === "string" ? value : null;
+}
+
 function sourceFileReferencesDormantCredentialBoundPreSendSql(
   sourceFile,
   allowedIdentifiers = new Set(),
   allowPolicyDeclaration = false,
+  dormantIdentifiers = dormantBotReplyStagingSqlIdentifiers,
 ) {
   let referencesDormantSql = false;
   const containsDormantIdentifier = (value) => {
     if (value === null) return false;
     for (
       const identifier of
-      dormantCredentialBoundPreSendSqlIdentifiers
+      dormantIdentifiers
     ) {
       if (
         value.includes(identifier) &&
@@ -3445,6 +3673,10 @@ function sourceFileReferencesDormantCredentialBoundPreSendSql(
       (
         node.name.text ===
           "dormantCredentialBoundPreSendSqlIdentifiers" ||
+        node.name.text ===
+          "dormantWriterBarrierAndLateTruthSqlIdentifiers" ||
+        node.name.text ===
+          "dormantBotReplyStagingSqlIdentifiers" ||
         node.name.text ===
           "postgresMigrationParityRegistryAllowedSqlIdentifiers" ||
         node.name.text ===
@@ -3469,7 +3701,7 @@ function sourceFileReferencesDormantCredentialBoundPreSendSql(
       )
     ) {
       referencesDormantSql = containsDormantIdentifier(
-        runtimeStaticString(node),
+        sourceFileRuntimeStaticString(sourceFile, node),
       );
     }
 
@@ -3491,6 +3723,33 @@ function sourceFileReferencesDormantCredentialBoundPreSendSql(
 
   visit(sourceFile);
   return referencesDormantSql;
+}
+
+function sourceReferencesDormantSqlIdentifier(
+  source,
+  dormantIdentifiers,
+  allowedIdentifiers = new Set(),
+) {
+  return [...dormantIdentifiers].some(
+    (identifier) =>
+      !allowedIdentifiers.has(identifier) &&
+      source.includes(identifier),
+  );
+}
+
+function allowedDormantSqlIdentifiersForPath(path) {
+  return new Set([
+    ...(
+      dormantCredentialBoundPreSendAllowedSqlIdentifiersByPath.get(
+        path,
+      ) ?? []
+    ),
+    ...(
+      dormantWriterBarrierAndLateTruthAllowedSqlIdentifiersByPath.get(
+        path,
+      ) ?? []
+    ),
+  ]);
 }
 
 function objectFreezeArgument(node) {
@@ -6879,6 +7138,8 @@ export async function inspectSourceGuardrails(
     nestedFiles,
     projectPackageManifests,
     symbolicLinkPaths,
+    dormantWriterPolicySourceFiles,
+    dormantWriterPolicySqlFiles,
   ] =
     await Promise.all([
       Promise.all(
@@ -6888,6 +7149,14 @@ export async function inspectSourceGuardrails(
       ).then((groups) => groups.flat()),
       listProjectPackageManifests(root),
       listSymbolicLinks(root),
+      Promise.all([
+        listSourceFiles(join(root, "postgres"), root),
+        listSourceFiles(join(root, "tests"), root),
+      ]).then((groups) => groups.flat()),
+      listProjectFiles(
+        join(root, "postgres/migrations"),
+        (name) => extname(name) === ".sql",
+      ),
     ]);
   const packageManifestFiles = [...new Set([
     join(root, "package.json"),
@@ -6973,6 +7242,8 @@ export async function inspectSourceGuardrails(
     .sort();
   const sources = new Map();
   const dormantImporterSources = new Map();
+  const dormantWriterPolicySources = new Map();
+  const dormantWriterPolicySqlSources = new Map();
 
   for (const file of candidateFiles) {
     try {
@@ -7007,10 +7278,53 @@ export async function inspectSourceGuardrails(
     }
   }
 
+  for (const file of dormantWriterPolicySourceFiles) {
+    if (
+      sources.has(file) ||
+      dormantImporterSources.has(file)
+    ) {
+      continue;
+    }
+    try {
+      dormantWriterPolicySources.set(
+        file,
+        await readFile(file, "utf8"),
+      );
+    } catch (error) {
+      if (
+        typeof error !== "object" ||
+        error === null ||
+        !("code" in error) ||
+        error.code !== "ENOENT"
+      ) {
+        throw error;
+      }
+    }
+  }
+
+  for (const file of dormantWriterPolicySqlFiles) {
+    try {
+      dormantWriterPolicySqlSources.set(
+        file,
+        await readFile(file, "utf8"),
+      );
+    } catch (error) {
+      if (
+        typeof error !== "object" ||
+        error === null ||
+        !("code" in error) ||
+        error.code !== "ENOENT"
+      ) {
+        throw error;
+      }
+    }
+  }
+
   const files = [...sources.keys()].sort();
   const graphIdentityFiles = [...new Set([
     ...files,
     ...dormantImporterSources.keys(),
+    ...dormantWriterPolicySources.keys(),
   ])];
   const canonicalFileByFile = new Map(
     await Promise.all(
@@ -7034,6 +7348,13 @@ export async function inspectSourceGuardrails(
       file,
     ]),
   );
+  const dormantWriterPolicyAvailableFileByCanonicalPath =
+    new Map(
+      graphIdentityFiles.map((file) => [
+        canonicalFileByFile.get(file),
+        file,
+      ]),
+    );
   const dormantCanonicalFiles = new Set(
     files
       .filter((file) =>
@@ -7450,9 +7771,7 @@ export async function inspectSourceGuardrails(
   ) => {
     const path = relativePath(root, file);
     const allowedIdentifiers =
-      dormantCredentialBoundPreSendAllowedSqlIdentifiersByPath.get(
-        path,
-      ) ?? new Set();
+      allowedDormantSqlIdentifiersForPath(path);
 
     if (
       sourceFileReferencesDormantCredentialBoundPreSendSql(
@@ -7480,6 +7799,126 @@ export async function inspectSourceGuardrails(
       sourceFile,
     );
     inspectDormantCredentialBoundPreSendSql(file, sourceFile);
+  }
+
+  const dormantWriterPolicyParsedSources = new Map(
+    [
+      ...sources,
+      ...dormantImporterSources,
+      ...dormantWriterPolicySources,
+    ].map(([file, source]) => [
+      file,
+      parseSourceFile(file, source),
+    ]),
+  );
+  const directlyReferencedDormantWriterPolicyFiles = new Set();
+
+  for (
+    const [file, sourceFile] of
+      dormantWriterPolicyParsedSources
+  ) {
+    const path = relativePath(root, file);
+    const allowPolicyDeclaration =
+      path === "scripts/verify-source-guardrails.mjs";
+    if (
+      sourceFileReferencesDormantCredentialBoundPreSendSql(
+        sourceFile,
+        new Set(),
+        allowPolicyDeclaration,
+        dormantWriterBarrierAndLateTruthSqlIdentifiers,
+      )
+    ) {
+      directlyReferencedDormantWriterPolicyFiles.add(file);
+    }
+
+    if (
+      dormantWriterPolicySources.has(file) &&
+      sourceFileReferencesDormantCredentialBoundPreSendSql(
+        sourceFile,
+        allowedDormantSqlIdentifiersForPath(path),
+        allowPolicyDeclaration,
+        dormantWriterBarrierAndLateTruthSqlIdentifiers,
+      )
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file: path,
+      });
+    }
+  }
+
+  for (const [file, source] of dormantWriterPolicySqlSources) {
+    const path = relativePath(root, file);
+    if (
+      sourceReferencesDormantSqlIdentifier(
+        source,
+        dormantWriterBarrierAndLateTruthSqlIdentifiers,
+        allowedDormantSqlIdentifiersForPath(path),
+      )
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file: path,
+      });
+    }
+  }
+
+  const dormantWriterPolicyDependencies = new Map(
+    [...dormantWriterPolicyParsedSources].map(
+      ([file, sourceFile]) => [
+        file,
+        analyzeRuntimeDependencies(sourceFile).specifiers
+          .map((specifier) =>
+            resolveLocalImport(
+              root,
+              file,
+              specifier,
+              compilerConfiguration.options,
+              dormantWriterPolicyAvailableFileByCanonicalPath,
+              moduleResolutionCache,
+            )
+          )
+          .filter(Boolean),
+      ],
+    ),
+  );
+  const reachesDormantWriterPolicyReference = (entryFile) => {
+    const pending = [
+      ...(dormantWriterPolicyDependencies.get(entryFile) ?? []),
+    ];
+    const inspected = new Set();
+    while (pending.length > 0) {
+      const file = pending.pop();
+      if (inspected.has(file)) continue;
+      inspected.add(file);
+      if (
+        directlyReferencedDormantWriterPolicyFiles.has(file)
+      ) {
+        return true;
+      }
+      pending.push(
+        ...(dormantWriterPolicyDependencies.get(file) ?? []),
+      );
+    }
+    return false;
+  };
+
+  for (const file of dormantWriterPolicyParsedSources.keys()) {
+    const path = relativePath(root, file);
+    if (
+      !dormantWriterBarrierAndLateTruthAllowedSqlIdentifiersByPath.has(
+        path,
+      ) &&
+      reachesDormantWriterPolicyReference(file)
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_CREDENTIAL_BOUND_SQL_REFERENCE_FORBIDDEN",
+        file: path,
+      });
+    }
   }
 
   for (const file of files) {
