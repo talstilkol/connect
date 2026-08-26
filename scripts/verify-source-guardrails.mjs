@@ -164,6 +164,8 @@ const railwayBotReplyPinnedBoundaryDriverPath =
   "server/platform/railwayBotReplyPinnedBoundaryDriver.ts";
 const nodePostgresBotReplyPinnedSessionTransportPath =
   "server/platform/nodePostgresBotReplyPinnedSessionTransport.ts";
+const railwayBotReplyPinnedBoundaryCompositionPath =
+  "server/platform/railwayBotReplyPinnedBoundaryComposition.ts";
 // These modules can reach the pre-D31/pre-0057 Bot Reply provider path. They
 // remain available to tests and offline evidence tooling, but no production
 // entrypoint or production package script may load them. The replacement
@@ -189,6 +191,11 @@ const legacyBotReplyExecutionModulePaths = new Set([
 // until this digest is deliberately updated as part of a new review.
 const nodePostgresBotReplyPinnedSessionTransportExpectedSha256 =
   "60e7d01705c4709cf096f2753fe06940625f176eed10bb5f119d0ac53fbbbd4d";
+// This dormant composition joins the reviewed SQL transport to the one-shot
+// provider boundary. Any byte change must receive a deliberate security
+// review before this digest is updated.
+const railwayBotReplyPinnedBoundaryCompositionExpectedSha256 =
+  "f8d7582b6f4e7079cbdca8df5de0b9eb3b71e19bf66be171a2be013226e5337f";
 const stagingCapabilityPortPaths = new Set([
   stagingRunCapabilityPortsPath,
   stagingProviderFenceCapabilityPortsPath,
@@ -208,6 +215,7 @@ const dormantBotReplyStagingAttestedModulePaths =
     nodePostgresStagingProviderFenceWorkerCapabilityPath,
     railwayBotReplyPinnedBoundaryDriverPath,
     nodePostgresBotReplyPinnedSessionTransportPath,
+    railwayBotReplyPinnedBoundaryCompositionPath,
   ]);
 const dormantBotReplyStagingAttestedAllowedImporters =
   new Map([
@@ -252,6 +260,19 @@ const dormantBotReplyStagingAttestedAllowedImporters =
         [
           "./postgresRuntimeCapabilityEvidence.ts",
           postgresRuntimeCapabilityEvidencePath,
+        ],
+      ]),
+    ],
+    [
+      railwayBotReplyPinnedBoundaryCompositionPath,
+      new Map([
+        [
+          "./nodePostgresBotReplyPinnedSessionTransport.ts",
+          nodePostgresBotReplyPinnedSessionTransportPath,
+        ],
+        [
+          "./railwayBotReplyPinnedBoundaryDriver.ts",
+          railwayBotReplyPinnedBoundaryDriverPath,
         ],
       ]),
     ],
@@ -611,6 +632,20 @@ const dormantAttestedAllowedRuntimeDependencies =
       nodePostgresBotReplyPinnedSessionTransportPath,
       new Map([
         ["node:util", null],
+      ]),
+    ],
+    [
+      railwayBotReplyPinnedBoundaryCompositionPath,
+      new Map([
+        ["node:util", null],
+        [
+          "./nodePostgresBotReplyPinnedSessionTransport.ts",
+          nodePostgresBotReplyPinnedSessionTransportPath,
+        ],
+        [
+          "./railwayBotReplyPinnedBoundaryDriver.ts",
+          railwayBotReplyPinnedBoundaryDriverPath,
+        ],
       ]),
     ],
     [
@@ -1048,15 +1083,16 @@ function collectPackageRuntimeTargets(value, targets) {
   }
 }
 
-function packageValueReferencesPinnedSessionTransport(value) {
+function packageValueReferencesDormantPinnedBoundary(value) {
   if (typeof value === "string") {
-    return value.includes(
+    return [
       "nodePostgresBotReplyPinnedSessionTransport",
-    );
+      "railwayBotReplyPinnedBoundaryComposition",
+    ].some((identifier) => value.includes(identifier));
   }
   if (Array.isArray(value)) {
     return value.some(
-      packageValueReferencesPinnedSessionTransport,
+      packageValueReferencesDormantPinnedBoundary,
     );
   }
   if (
@@ -1064,7 +1100,7 @@ function packageValueReferencesPinnedSessionTransport(value) {
     value !== null
   ) {
     return Object.values(value).some(
-      packageValueReferencesPinnedSessionTransport,
+      packageValueReferencesDormantPinnedBoundary,
     );
   }
   return false;
@@ -5839,6 +5875,17 @@ function nodePostgresBotReplyPinnedSessionTransportContractIsExact(
     );
 }
 
+function railwayBotReplyPinnedBoundaryCompositionContractIsExact(
+  sourceFile,
+) {
+  const sourceSha256 = createHash("sha256")
+    .update(sourceFile.text, "utf8")
+    .digest("hex");
+  return sourceFile.parseDiagnostics.length === 0 &&
+    sourceSha256 ===
+      railwayBotReplyPinnedBoundaryCompositionExpectedSha256;
+}
+
 function runtimeMemberName(node) {
   if (ts.isPropertyAccessExpression(node)) {
     return node.name.text;
@@ -7617,6 +7664,10 @@ export async function inspectSourceGuardrails(
 
     const targets = new Set();
     collectPackageRuntimeTargets(
+      manifest.browser,
+      targets,
+    );
+    collectPackageRuntimeTargets(
       manifest.imports,
       targets,
     );
@@ -7638,13 +7689,14 @@ export async function inspectSourceGuardrails(
     );
     if (
       [
+        manifest.browser,
         manifest.bin,
         manifest.exports,
         manifest.imports,
         manifest.main,
         manifest.module,
         manifest.scripts,
-      ].some(packageValueReferencesPinnedSessionTransport)
+      ].some(packageValueReferencesDormantPinnedBoundary)
     ) {
       addFinding({
         code:
@@ -7815,6 +7867,18 @@ export async function inspectSourceGuardrails(
       addFinding({
         code:
           "BOT_REPLY_STAGING_PINNED_SESSION_TRANSPORT_CONTRACT_INVALID",
+        file: path,
+      });
+    }
+    if (
+      path === railwayBotReplyPinnedBoundaryCompositionPath &&
+      !railwayBotReplyPinnedBoundaryCompositionContractIsExact(
+        sourceFile,
+      )
+    ) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_PINNED_BOUNDARY_COMPOSITION_CONTRACT_INVALID",
         file: path,
       });
     }

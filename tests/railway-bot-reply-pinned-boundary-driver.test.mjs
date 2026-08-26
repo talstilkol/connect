@@ -1196,6 +1196,8 @@ test("is a dormant contract, not an activation path, with no SQL, Meta adapter, 
   const driverFileName = "railwayBotReplyPinnedBoundaryDriver.ts";
   const transportFileName =
     "nodePostgresBotReplyPinnedSessionTransport.ts";
+  const compositionFileName =
+    "railwayBotReplyPinnedBoundaryComposition.ts";
   const serverFiles = await listTypeScriptFiles(
     new URL("../server/", import.meta.url),
   );
@@ -1209,7 +1211,7 @@ test("is a dormant contract, not an activation path, with no SQL, Meta adapter, 
       false,
       ts.ScriptKind.TS,
     );
-    const allowedTypeImportRanges = [];
+    const allowedDriverImportRanges = [];
     for (const statement of sourceFile.statements) {
       if (
         !ts.isImportDeclaration(statement) ||
@@ -1220,26 +1222,55 @@ test("is a dormant contract, not an activation path, with no SQL, Meta adapter, 
       ) {
         continue;
       }
-      assert.equal(
+      const allowedTransportTypeImport =
         file.pathname.endsWith(`/${transportFileName}`) &&
-          statement.importClause?.isTypeOnly === true,
+        statement.moduleSpecifier.text ===
+          "./railwayBotReplyPinnedBoundaryDriver.ts" &&
+        statement.importClause?.isTypeOnly === true;
+      const compositionImportsFactory =
+        statement.importClause?.namedBindings !== undefined &&
+        ts.isNamedImports(statement.importClause.namedBindings) &&
+        statement.importClause.namedBindings.elements.some(
+          (element) =>
+            element.isTypeOnly === false &&
+            element.propertyName === undefined &&
+            element.name.text ===
+              "createRailwayBotReplyPinnedBoundaryDriver",
+        );
+      const allowedCompositionRuntimeImport =
+        file.pathname.endsWith(`/${compositionFileName}`) &&
+        statement.moduleSpecifier.text ===
+          "./railwayBotReplyPinnedBoundaryDriver.ts" &&
+        statement.importClause !== undefined &&
+        statement.importClause.name === undefined &&
+        statement.importClause.isTypeOnly === false &&
+        compositionImportsFactory;
+      assert.equal(
+        allowedTransportTypeImport || allowedCompositionRuntimeImport,
         true,
-        `only the dormant transport may hold a type-only driver import: ${file.pathname}`,
+        `only the dormant transport/composition may import the driver: ${file.pathname}`,
       );
-      allowedTypeImportRanges.push([
+      allowedDriverImportRanges.push([
         statement.getStart(sourceFile),
         statement.end,
       ]);
     }
     if (file.pathname.endsWith(`/${transportFileName}`)) {
       assert.equal(
-        allowedTypeImportRanges.length,
+        allowedDriverImportRanges.length,
         1,
         "the dormant transport must have exactly one type-only driver import",
       );
     }
+    if (file.pathname.endsWith(`/${compositionFileName}`)) {
+      assert.equal(
+        allowedDriverImportRanges.length,
+        1,
+        "the dormant composition must have exactly one runtime driver import",
+      );
+    }
     let runtimeCandidate = candidateSource;
-    for (const [start, end] of allowedTypeImportRanges.toReversed()) {
+    for (const [start, end] of allowedDriverImportRanges.toReversed()) {
       runtimeCandidate =
         `${runtimeCandidate.slice(0, start)}${" ".repeat(end - start)}` +
         runtimeCandidate.slice(end);
