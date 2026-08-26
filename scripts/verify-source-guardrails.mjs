@@ -164,6 +164,26 @@ const railwayBotReplyPinnedBoundaryDriverPath =
   "server/platform/railwayBotReplyPinnedBoundaryDriver.ts";
 const nodePostgresBotReplyPinnedSessionTransportPath =
   "server/platform/nodePostgresBotReplyPinnedSessionTransport.ts";
+// These modules can reach the pre-D31/pre-0057 Bot Reply provider path. They
+// remain available to tests and offline evidence tooling, but no production
+// entrypoint or production package script may load them. The replacement
+// pinned boundary stays dormant until its separate activation contract is
+// proven.
+const legacyBotReplyExecutionModulePaths = new Set([
+  "server/bot/metaBotReplyAdapter.ts",
+  "server/bot/metaBotReplyProcessor.ts",
+  "server/bot/metaBotReplyRuntime.ts",
+  "server/operations/botReplyStagingDurableRunner.ts",
+  "server/operations/botReplyStagingLiveDriver.ts",
+  "server/operations/botReplyStagingProviderDriver.ts",
+  "server/operations/botReplyStagingQueueConsumer.ts",
+  "server/operations/botReplyStagingQueuedExecutor.ts",
+  "server/operations/botReplyStagingScenarioExecutor.ts",
+  "server/platform/railwayBotReplyRuntime.ts",
+  "server/platform/railwayBotReplyStagingProviderDriverFactory.ts",
+  "server/platform/railwayBullMqBotReplyStagingQueue.ts",
+  "server/platform/railwaySystemAdminBotReplyStagingOperation.ts",
+]);
 // This dormant transport is a reviewed security boundary. Any byte change,
 // including a seemingly harmless comment change, must fail the source guard
 // until this digest is deliberately updated as part of a new review.
@@ -7487,6 +7507,20 @@ export async function inspectSourceGuardrails(
       canonicalFileByFile.get(file) ??
         normalize(resolve(file)),
     );
+  const legacyBotReplyExecutionCanonicalFiles = new Set(
+    files
+      .filter((file) =>
+        legacyBotReplyExecutionModulePaths.has(
+          relativePath(root, file),
+        ),
+      )
+      .map((file) => canonicalFileByFile.get(file)),
+  );
+  const fileIsLegacyBotReplyExecutionModule = (file) =>
+    legacyBotReplyExecutionCanonicalFiles.has(
+      canonicalFileByFile.get(file) ??
+        normalize(resolve(file)),
+    );
   const findings = [];
   const findingKeys = new Set();
   const addFinding = (finding) => {
@@ -7503,6 +7537,15 @@ export async function inspectSourceGuardrails(
         "PRODUCTION_PACKAGE_SCRIPT_SUBPROCESS_CAPABILITY_FORBIDDEN",
       file: relativePath(root, file),
     });
+  }
+  for (const file of runtimePackageScriptClosure) {
+    if (fileIsLegacyBotReplyExecutionModule(file)) {
+      addFinding({
+        code:
+          "BOT_REPLY_STAGING_LEGACY_EXECUTION_PACKAGE_FORBIDDEN",
+        file: relativePath(root, file),
+      });
+    }
   }
   for (const manifestFile of packageManifestFiles) {
     let manifestSource;
@@ -8219,6 +8262,14 @@ export async function inspectSourceGuardrails(
         addFinding({
           code:
             "BOT_REPLY_STAGING_ATTESTED_RUNTIME_DEPENDENCY_FORBIDDEN",
+          file: relativePath(root, runtimeEntry),
+        });
+      }
+
+      if (fileIsLegacyBotReplyExecutionModule(file)) {
+        addFinding({
+          code:
+            "BOT_REPLY_STAGING_LEGACY_EXECUTION_RUNTIME_FORBIDDEN",
           file: relativePath(root, runtimeEntry),
         });
       }

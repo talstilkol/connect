@@ -999,3 +999,170 @@ test("allows only the two reviewed D1e writers in the pinned runtime transport",
     true,
   );
 });
+
+test("quarantines direct legacy Bot Reply execution from every Worker runtime", async () => {
+  const root = await createFixture(
+    "connect-legacy-bot-reply-direct-runtime-",
+  );
+  await Promise.all([
+    writeFile(
+      join(
+        root,
+        "server/platform/railwayBotReplyStagingProviderDriverFactory.ts",
+      ),
+      [
+        "export interface LegacyFactoryContract { readonly enabled: true }",
+        "export function createRailwayBotReplyStagingProviderDriverFactory() {",
+        "  return Object.freeze({ enabled: true });",
+        "}",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "worker/index.ts"),
+      [
+        "import {",
+        "  createRailwayBotReplyStagingProviderDriverFactory,",
+        '} from "../server/platform/railwayBotReplyStagingProviderDriverFactory.ts";',
+        "export const forbiddenRuntime =",
+        "  createRailwayBotReplyStagingProviderDriverFactory();",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "server/type-consumer.ts"),
+      [
+        "import type {",
+        "  LegacyFactoryContract,",
+        '} from "./platform/railwayBotReplyStagingProviderDriverFactory.ts";',
+        "export type SafeTypeOnlyReference = LegacyFactoryContract;",
+        "",
+      ].join("\n"),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_LEGACY_EXECUTION_RUNTIME_FORBIDDEN",
+      file: "worker/index.ts",
+    },
+  ]);
+});
+
+test("quarantines a literal dynamic legacy import from an API runtime", async () => {
+  const root = await createFixture(
+    "connect-legacy-bot-reply-dynamic-api-runtime-",
+  );
+  await Promise.all([
+    writeFile(
+      join(root, "server/platform/railwayBotReplyRuntime.ts"),
+      "export const legacyBotReplyRuntime = Object.freeze({});\n",
+    ),
+    writeFile(
+      join(root, "server/api-legacy-loader.ts"),
+      [
+        "export async function loadLegacyMetaAdapter() {",
+        '  return import("./platform/railwayBotReplyRuntime.ts");',
+        "}",
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "scripts/start-railway-api.mjs"),
+      'import "../server/api-legacy-loader.ts";\n',
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_LEGACY_EXECUTION_RUNTIME_FORBIDDEN",
+      file: "scripts/start-railway-api.mjs",
+    },
+  ]);
+});
+
+test("quarantines a legacy Bot Reply execution path through two runtime bridges", async () => {
+  const root = await createFixture(
+    "connect-legacy-bot-reply-transitive-runtime-",
+  );
+  await Promise.all([
+    writeFile(
+      join(
+        root,
+        "server/operations/botReplyStagingScenarioExecutor.ts",
+      ),
+      "export const legacyScenarioExecutor = Object.freeze({});\n",
+    ),
+    writeFile(
+      join(root, "server/bridge-two.ts"),
+      [
+        "export { legacyScenarioExecutor } from",
+        '  "./operations/botReplyStagingScenarioExecutor.ts";',
+        "",
+      ].join("\n"),
+    ),
+    writeFile(
+      join(root, "server/bridge-one.ts"),
+      'export { legacyScenarioExecutor } from "./bridge-two.ts";\n',
+    ),
+    writeFile(
+      join(root, "scripts/start-railway-bullmq-worker.mjs"),
+      'import "../server/bridge-one.ts";\n',
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_LEGACY_EXECUTION_RUNTIME_FORBIDDEN",
+      file: "scripts/start-railway-bullmq-worker.mjs",
+    },
+  ]);
+});
+
+test("quarantines legacy Bot Reply execution reached only by a production package script", async () => {
+  const root = await createFixture(
+    "connect-legacy-bot-reply-package-runtime-",
+  );
+  await Promise.all([
+    writeFile(
+      join(
+        root,
+        "server/platform/railwayBullMqBotReplyStagingQueue.ts",
+      ),
+      "export const legacyBotReplyQueue = Object.freeze({});\n",
+    ),
+    writeFile(
+      join(root, "scripts/legacy-bot-reply-start.mjs"),
+      'import "../server/platform/railwayBullMqBotReplyStagingQueue.ts";\n',
+    ),
+    writeFile(
+      join(root, "package.json"),
+      JSON.stringify({
+        scripts: {
+          "start:legacy-bot-reply":
+            "node scripts/legacy-bot-reply-start.mjs",
+        },
+      }),
+    ),
+  ]);
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, [
+    {
+      code:
+        "BOT_REPLY_STAGING_LEGACY_EXECUTION_PACKAGE_FORBIDDEN",
+      file:
+        "server/platform/railwayBullMqBotReplyStagingQueue.ts",
+    },
+  ]);
+});
