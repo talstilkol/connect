@@ -52,13 +52,21 @@ function manualFinalization(overrides = {}) {
 
 function fixture(options = {}) {
   const calls = [];
+  const deadlineEvents = [];
+  const shouldHang = (phase) =>
+    options.hangPhase === phase || options.hangPhases?.includes(phase);
+  const shouldTimeout = (phase) =>
+    options.timeoutPhase === phase || options.timeoutPhases?.includes(phase);
   const providerFact = options.providerFact ?? Object.freeze({
     outcome: "accepted",
     providerMessageId: "wamid.durable-provider-fact",
   });
   const session = {
-    async prepare() {
-      calls.push({ kind: "prepare" });
+    async prepare(signal) {
+      calls.push({ kind: "prepare", signal });
+      if (shouldHang("session-prepare")) {
+        return await new Promise(() => undefined);
+      }
       if (options.prepareError) throw options.prepareError;
       if (options.mutateSessionAfterCapture) {
         session.consume = async () => {
@@ -71,16 +79,22 @@ function fixture(options = {}) {
         sessionReset: "acknowledged",
       };
     },
-    async acquire(currentPermitKey) {
-      calls.push({ kind: "acquire", permitKey: currentPermitKey });
+    async acquire(currentPermitKey, signal) {
+      calls.push({ kind: "acquire", permitKey: currentPermitKey, signal });
+      if (shouldHang("session-acquire")) {
+        return await new Promise(() => undefined);
+      }
       if (options.acquireError) throw options.acquireError;
       return options.acquireResult ?? {
         ...ack(),
         outcome: "acquired",
       };
     },
-    async consume(currentPermitKey) {
-      calls.push({ kind: "consume", permitKey: currentPermitKey });
+    async consume(currentPermitKey, signal) {
+      calls.push({ kind: "consume", permitKey: currentPermitKey, signal });
+      if (shouldHang("session-consume")) {
+        return await new Promise(() => undefined);
+      }
       if (options.consumeError) throw options.consumeError;
       return options.consumeResult ?? {
         ...ack(),
@@ -88,8 +102,11 @@ function fixture(options = {}) {
         reasonCode: "CAPABILITY_RELEASED",
       };
     },
-    async prove(currentPermitKey) {
-      calls.push({ kind: "prove", permitKey: currentPermitKey });
+    async prove(currentPermitKey, signal) {
+      calls.push({ kind: "prove", permitKey: currentPermitKey, signal });
+      if (shouldHang("session-prove")) {
+        return await new Promise(() => undefined);
+      }
       if (options.proveError) throw options.proveError;
       return options.proofResult ?? {
         ...ack(),
@@ -97,37 +114,51 @@ function fixture(options = {}) {
         sendBefore,
       };
     },
-    async persistProviderFact(currentPermitKey, fact) {
+    async persistProviderFact(currentPermitKey, fact, signal) {
       calls.push({
         kind: "persist-provider-fact",
         permitKey: currentPermitKey,
         fact,
+        signal,
       });
+      if (shouldHang("provider-fact")) {
+        return await new Promise(() => undefined);
+      }
       if (options.factError) throw options.factError;
       return options.factResult ?? {
         ...ack(),
         outcome: "recorded",
       };
     },
-    async persistProviderUncertainty(currentPermitKey, reason) {
+    async persistProviderUncertainty(currentPermitKey, reason, signal) {
       calls.push({
         kind: "persist-provider-uncertainty",
         permitKey: currentPermitKey,
         reason,
+        signal,
       });
+      if (shouldHang("provider-uncertainty")) {
+        return await new Promise(() => undefined);
+      }
       if (options.uncertaintyError) throw options.uncertaintyError;
       return options.uncertaintyResult ?? {
         ...ack(),
         outcome: "recorded",
       };
     },
-    async finalize(currentPermitKey) {
-      calls.push({ kind: "finalize", permitKey: currentPermitKey });
+    async finalize(currentPermitKey, signal) {
+      calls.push({ kind: "finalize", permitKey: currentPermitKey, signal });
+      if (shouldHang("session-finalize")) {
+        return await new Promise(() => undefined);
+      }
       if (options.finalizeError) throw options.finalizeError;
       return options.finalizationResult ?? finalization();
     },
-    async release(currentPermitKey) {
-      calls.push({ kind: "release", permitKey: currentPermitKey });
+    async release(currentPermitKey, signal) {
+      calls.push({ kind: "release", permitKey: currentPermitKey, signal });
+      if (shouldHang("session-release")) {
+        return await new Promise(() => undefined);
+      }
       if (options.releaseError) throw options.releaseError;
       return options.releaseResult ?? {
         ...ack(),
@@ -135,46 +166,125 @@ function fixture(options = {}) {
         releasedCount: options.reconciliation === true ? 2 : 1,
       };
     },
-    async close() {
-      calls.push({ kind: "close" });
+    async close(signal) {
+      calls.push({ kind: "close", signal });
+      if (shouldHang("session-close")) {
+        return await new Promise(() => undefined);
+      }
       if (options.closeError) throw options.closeError;
     },
-    async destroy() {
-      calls.push({ kind: "destroy" });
+    async destroy(signal) {
+      calls.push({ kind: "destroy", signal });
+      if (shouldHang("session-destroy")) {
+        return await new Promise(() => undefined);
+      }
       if (options.destroyError) throw options.destroyError;
     },
   };
+  let wallClockIndex = 0;
+  const wallClockValues = options.nowValues ?? [options.now ?? now];
   const clockPort = {
-      now() {
-        return new Date(options.now ?? now);
+    now() {
+      const value = wallClockValues[
+        Math.min(wallClockIndex, wallClockValues.length - 1)
+      ];
+      wallClockIndex += 1;
+      return new Date(value);
       },
     };
   const sessionsPort = {
-      async openPinned() {
-        calls.push({ kind: "open-pinned" });
-        if (options.openError) throw options.openError;
-        return options.rawSession ?? session;
-      },
-    };
+    async openPinned(signal) {
+      calls.push({ kind: "open-pinned", signal });
+      if (options.openPromise) return await options.openPromise;
+      if (shouldHang("session-open")) {
+        return await new Promise(() => undefined);
+      }
+      if (options.openError) throw options.openError;
+      return options.rawSession ?? session;
+    },
+  };
   const providerPort = {
-      async sendOnce(input) {
-        calls.push({ kind: "provider", input });
-        if (options.providerError) throw options.providerError;
-        return providerFact;
-      },
-    };
+    async sendOnce(input, signal) {
+      calls.push({ kind: "provider", input, signal });
+      if (options.providerPromise) return await options.providerPromise;
+      if (shouldHang("provider-send")) {
+        return await new Promise(() => undefined);
+      }
+      if (options.providerError) throw options.providerError;
+      return providerFact;
+    },
+  };
+  let monotonicIndex = 0;
+  const monotonicValues = options.monotonicValues ?? [1_000];
+  const schedulerPort = {
+    monotonicNowMilliseconds() {
+      const value = monotonicValues[
+        Math.min(monotonicIndex, monotonicValues.length - 1)
+      ];
+      monotonicIndex += 1;
+      return value;
+    },
+    schedule(input, onExpired) {
+      const event = {
+        canceled: false,
+        expired: false,
+        fire() {
+          event.expired = true;
+          onExpired();
+        },
+        input,
+      };
+      deadlineEvents.push(event);
+      if (options.synchronousTimeoutPhase === input.phase) {
+        event.fire();
+      } else if (options.doubleMicrotaskTimeoutPhase === input.phase) {
+        queueMicrotask(() => {
+          queueMicrotask(() => {
+            if (event.canceled) return;
+            event.fire();
+          });
+        });
+      } else if (shouldTimeout(input.phase)) {
+        queueMicrotask(() => {
+          if (event.canceled) return;
+          event.fire();
+        });
+      }
+      return {
+        cancel() {
+          event.canceled = true;
+          if (options.cancelThrowsPhase === input.phase) {
+            throw new Error("deadline cancellation failed");
+          }
+          if (options.cancelReturnsPhase === input.phase) {
+            return "invalid-async-cancel";
+          }
+        },
+      };
+    },
+  };
+  const deadlinesPort = {
+    cleanupMilliseconds: 500,
+    databaseMilliseconds: 1_000,
+    providerMilliseconds: 1_000,
+    scheduler: schedulerPort,
+  };
   const driver = createRailwayBotReplyPinnedBoundaryDriver({
     clock: clockPort,
+    deadlines: deadlinesPort,
     sessions: sessionsPort,
     provider: providerPort,
   });
   return {
     calls,
     clockPort,
+    deadlineEvents,
+    deadlinesPort,
     driver,
     providerFact,
     providerPort,
     session,
+    schedulerPort,
     sessionsPort,
   };
 }
@@ -233,6 +343,10 @@ test("uses one pinned physical session and performs one provider call", async ()
     calls.filter(({ kind }) => kind === "provider").length,
     1,
   );
+  for (const call of calls) {
+    assert.equal(call.signal instanceof AbortSignal, true, call.kind);
+    assert.equal(call.signal.aborted, false, call.kind);
+  }
   assert.equal(Object.isFrozen(result), true);
 });
 
@@ -319,6 +433,293 @@ test("lost one-shot proof acknowledgement destroys the client and never sends", 
     "prove",
     "destroy",
   ]);
+});
+
+test("a pre-provider database timeout aborts, destroys, and never sends", async () => {
+  const { calls, deadlineEvents, driver } = fixture({
+    hangPhase: "session-consume",
+    timeoutPhase: "session-consume",
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 0,
+    reason: "pre-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls), [
+    "open-pinned",
+    "prepare",
+    "acquire",
+    "consume",
+    "destroy",
+  ]);
+  assert.equal(calls[3].signal.aborted, true);
+  assert.equal(callKinds(calls).includes("provider"), false);
+  const expired = deadlineEvents.filter(({ expired }) => expired);
+  assert.equal(expired.length, 1);
+  assert.equal(expired[0].input.phase, "session-consume");
+  assert.equal(expired[0].canceled, true);
+});
+
+test("a late open session is destroyed after the run already timed out", async () => {
+  let resolveOpen;
+  const openPromise = new Promise((resolve) => {
+    resolveOpen = resolve;
+  });
+  const { calls, driver, session } = fixture({
+    openPromise,
+    timeoutPhase: "session-open",
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 0,
+    reason: "pre-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls), ["open-pinned"]);
+
+  resolveOpen(session);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(callKinds(calls), ["open-pinned", "destroy"]);
+  assert.equal(calls[1].signal instanceof AbortSignal, true);
+});
+
+test("a late open rejection is consumed after timeout", async () => {
+  let rejectOpen;
+  const openPromise = new Promise((resolve, reject) => {
+    void resolve;
+    rejectOpen = reject;
+  });
+  const { calls, driver } = fixture({
+    openPromise,
+    timeoutPhase: "session-open",
+  });
+
+  assert.equal((await driver.run({ permitKey })).providerCallCount, 0);
+  rejectOpen(new Error("late checkout rejection"));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(callKinds(calls), ["open-pinned"]);
+});
+
+test("a fulfilled open session is destroyed when deadline cancellation is invalid", async () => {
+  for (const cancellationFailure of ["throws", "returns-value"]) {
+    const option = cancellationFailure === "throws"
+      ? { cancelThrowsPhase: "session-open" }
+      : { cancelReturnsPhase: "session-open" };
+    const { calls, driver } = fixture(option);
+
+    await assert.rejects(
+      () => driver.run({ permitKey }),
+      (error) =>
+        error instanceof RailwayBotReplyPinnedBoundaryError &&
+        error.code === "invalid-dependencies",
+    );
+    assert.deepEqual(callKinds(calls), ["open-pinned", "destroy"]);
+  }
+});
+
+test("a provider timeout writes durable uncertainty once and ignores a late result", async () => {
+  let resolveProvider;
+  const providerPromise = new Promise((resolve) => {
+    resolveProvider = resolve;
+  });
+  const { calls, deadlineEvents, driver, providerFact } = fixture({
+    providerPromise,
+    timeoutPhase: "provider-send",
+    finalizationResult: manualFinalization(),
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 1,
+    reason: "post-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls), [
+    "open-pinned",
+    "prepare",
+    "acquire",
+    "consume",
+    "prove",
+    "provider",
+    "persist-provider-uncertainty",
+    "finalize",
+    "release",
+    "close",
+  ]);
+  assert.equal(calls[5].signal.aborted, true);
+  assert.equal(calls[6].reason, "provider-call-timed-out");
+  assert.equal(
+    calls.filter(({ kind }) => kind === "persist-provider-uncertainty").length,
+    1,
+  );
+  assert.equal(
+    calls.filter(({ kind }) => kind === "provider").length,
+    1,
+  );
+
+  resolveProvider(providerFact);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(
+    calls.filter(({ kind }) => kind === "provider").length,
+    1,
+  );
+  assert.equal(
+    calls.filter(({ kind }) => kind === "persist-provider-fact").length,
+    0,
+  );
+  assert.equal(
+    deadlineEvents.filter(({ expired }) => expired).length,
+    1,
+  );
+});
+
+test("an already-expired provider deadline prevents provider invocation", async () => {
+  const { calls, driver } = fixture({
+    synchronousTimeoutPhase: "provider-send",
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 0,
+    reason: "pre-provider-timeout",
+  });
+  assert.equal(callKinds(calls).includes("provider"), false);
+  assert.equal(callKinds(calls).at(-1), "destroy");
+});
+
+test("a deadline microtask between fulfillment and race continuation cannot abort success", async () => {
+  const { calls, deadlineEvents, driver } = fixture({
+    doubleMicrotaskTimeoutPhase: "provider-send",
+  });
+
+  assert.equal((await driver.run({ permitKey })).outcome, "completed");
+  const providerCall = calls.find(({ kind }) => kind === "provider");
+  assert.equal(providerCall.signal.aborted, false);
+  assert.equal(
+    deadlineEvents.find(({ input }) => input.phase === "provider-send")
+      .expired,
+    true,
+  );
+});
+
+test("wall or monotonic horizon expiry inside the provider callback prevents send", async () => {
+  const cases = [
+    {
+      name: "wall clock crossed sendBefore",
+      nowValues: [now, now, sendBefore],
+      monotonicValues: [1_000, 1_000, 1_000],
+    },
+    {
+      name: "monotonic scheduler delay consumed the horizon",
+      nowValues: [now, now, now],
+      monotonicValues: [1_000, 1_000, 11_000],
+    },
+  ];
+
+  for (const currentCase of cases) {
+    const { calls, driver } = fixture(currentCase);
+    assert.deepEqual(
+      await driver.run({ permitKey }),
+      {
+        outcome: "manual-reconciliation-required",
+        providerCallCount: 0,
+        reason: "pre-provider-timeout",
+      },
+      currentCase.name,
+    );
+    assert.equal(callKinds(calls).includes("provider"), false);
+    assert.equal(callKinds(calls).at(-1), "destroy");
+  }
+});
+
+test("a post-provider database timeout never repeats the provider call", async () => {
+  const { calls, driver } = fixture({
+    hangPhase: "provider-fact",
+    timeoutPhase: "provider-fact",
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 1,
+    reason: "post-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls).slice(-2), [
+    "persist-provider-fact",
+    "destroy",
+  ]);
+  assert.equal(
+    calls.filter(({ kind }) => kind === "provider").length,
+    1,
+  );
+  assert.equal(calls.at(-2).signal.aborted, true);
+});
+
+test("a post-provider cleanup timeout is bounded and destroys the session", async () => {
+  const { calls, driver } = fixture({
+    hangPhase: "session-close",
+    timeoutPhase: "session-close",
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 1,
+    reason: "post-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls).slice(-3), [
+    "release",
+    "close",
+    "destroy",
+  ]);
+  assert.equal(calls.at(-2).signal.aborted, true);
+});
+
+test("cleanup remains bounded when both close and destroy ignore abort", async () => {
+  const { calls, driver } = fixture({
+    hangPhases: ["session-close", "session-destroy"],
+    timeoutPhases: ["session-close", "session-destroy"],
+  });
+
+  assert.deepEqual(await driver.run({ permitKey }), {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 1,
+    reason: "post-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls).slice(-3), [
+    "release",
+    "close",
+    "destroy",
+  ]);
+  assert.equal(calls.at(-2).signal.aborted, true);
+  assert.equal(calls.at(-1).signal.aborted, true);
+});
+
+test("provider timeout remains the primary manual outcome through later failures", async () => {
+  const cases = [
+    { uncertaintyError: new Error("uncertainty write failed") },
+    { finalizeError: new Error("finalization failed") },
+    { releaseError: new Error("release failed") },
+  ];
+
+  for (const failure of cases) {
+    const { calls, driver } = fixture({
+      ...failure,
+      hangPhase: "provider-send",
+      timeoutPhase: "provider-send",
+    });
+    assert.deepEqual(await driver.run({ permitKey }), {
+      outcome: "manual-reconciliation-required",
+      providerCallCount: 1,
+      reason: "post-provider-timeout",
+    });
+    assert.equal(
+      calls.filter(({ kind }) => kind === "provider").length,
+      1,
+    );
+    assert.equal(
+      calls.filter(({ kind }) => kind === "persist-provider-fact").length,
+      0,
+    );
+  }
 });
 
 test("never retries an ambiguous provider call and persists uncertainty once", async () => {
@@ -472,12 +873,112 @@ test("rejects malformed input and dependency extensions before I/O", async () =>
   assert.throws(
     () => createRailwayBotReplyPinnedBoundaryDriver({
       clock: { now: () => new Date(now) },
+      deadlines: {
+        cleanupMilliseconds: 500,
+        databaseMilliseconds: 1_000,
+        providerMilliseconds: 1_000,
+        scheduler: {
+          monotonicNowMilliseconds: () => 1_000,
+          schedule: () => ({ cancel() {} }),
+        },
+      },
       sessions: { openPinned: async () => ({}) },
       provider: { sendOnce: async () => ({}) },
       retry: true,
     }),
     /invalid-dependencies/,
   );
+});
+
+test("a driver and its provider binding are each claimable exactly once", async () => {
+  const fixtureState = fixture();
+  const {
+    calls,
+    clockPort,
+    deadlinesPort,
+    driver,
+    providerPort,
+    sessionsPort,
+  } = fixtureState;
+
+  assert.equal((await driver.run({ permitKey })).outcome, "completed");
+  await assert.rejects(
+    () => driver.run({ permitKey }),
+    (error) =>
+      error instanceof RailwayBotReplyPinnedBoundaryError &&
+      error.code === "driver-already-used",
+  );
+  assert.equal(
+    calls.filter(({ kind }) => kind === "open-pinned").length,
+    1,
+  );
+
+  assert.throws(
+    () => createRailwayBotReplyPinnedBoundaryDriver({
+      clock: clockPort,
+      deadlines: deadlinesPort,
+      provider: providerPort,
+      sessions: sessionsPort,
+    }),
+    (error) =>
+      error instanceof RailwayBotReplyPinnedBoundaryError &&
+      error.code === "provider-binding-reused",
+  );
+});
+
+test("a concurrent second run fails before any second I/O", async () => {
+  const { calls, driver } = fixture({
+    hangPhase: "session-open",
+    timeoutPhase: "session-open",
+  });
+
+  const firstRun = driver.run({ permitKey });
+  await assert.rejects(
+    () => driver.run({ permitKey }),
+    (error) =>
+      error instanceof RailwayBotReplyPinnedBoundaryError &&
+      error.code === "driver-already-used",
+  );
+  assert.deepEqual(await firstRun, {
+    outcome: "manual-reconciliation-required",
+    providerCallCount: 0,
+    reason: "pre-provider-timeout",
+  });
+  assert.deepEqual(callKinds(calls), ["open-pinned"]);
+});
+
+test("every settled deadline is canceled and exposes only an immutable phase", async () => {
+  const { calls, deadlineEvents, driver } = fixture();
+
+  assert.equal((await driver.run({ permitKey })).outcome, "completed");
+  assert.equal(deadlineEvents.length > 0, true);
+  for (const event of deadlineEvents) {
+    assert.equal(event.canceled, true);
+    assert.equal(event.expired, false);
+    assert.equal(Object.isFrozen(event.input), true);
+    assert.deepEqual(Object.keys(event.input).sort(), [
+      "milliseconds",
+      "phase",
+    ]);
+    assert.equal("permitKey" in event.input, false);
+  }
+  for (const event of deadlineEvents) event.fire();
+  for (const call of calls) assert.equal(call.signal.aborted, false);
+});
+
+test("a backwards monotonic clock fails closed before provider I/O", async () => {
+  const { calls, driver } = fixture({
+    monotonicValues: [1_001, 1_000],
+  });
+
+  await assert.rejects(
+    () => driver.run({ permitKey }),
+    (error) =>
+      error instanceof RailwayBotReplyPinnedBoundaryError &&
+      error.code === "invalid-dependencies",
+  );
+  assert.equal(callKinds(calls).includes("provider"), false);
+  assert.equal(callKinds(calls).at(-1), "destroy");
 });
 
 test("best-effort destroys a malformed raw session after checkout", async () => {
@@ -640,7 +1141,21 @@ test("treats replayed fact acknowledgement as manual and destroys without retry"
 
 test("captures dependency and session methods before later mutation", async () => {
   const options = { mutateSessionAfterCapture: true };
-  const { driver, providerPort, sessionsPort } = fixture(options);
+  const {
+    clockPort,
+    deadlinesPort,
+    driver,
+    providerPort,
+    schedulerPort,
+    sessionsPort,
+  } = fixture(options);
+  clockPort.now = () => {
+    throw new Error("mutated wall clock must not run");
+  };
+  deadlinesPort.providerMilliseconds = 1;
+  schedulerPort.monotonicNowMilliseconds = () => {
+    throw new Error("mutated monotonic clock must not run");
+  };
   providerPort.sendOnce = async () => {
     throw new Error("mutated provider method must not run");
   };
@@ -657,7 +1172,8 @@ test("exports an immutable explicit no-activation status", () => {
   assert.deepEqual(railwayBotReplyPinnedBoundaryStatus, {
     activationAllowed: false,
     concreteAdapterStatus: "missing",
-    timeoutContractStatus: "missing",
+    providerBindingStatus: "wrapper-identity-one-shot-contract",
+    timeoutContractStatus: "contract-only",
   });
   assert.equal(Object.isFrozen(railwayBotReplyPinnedBoundaryStatus), true);
 });

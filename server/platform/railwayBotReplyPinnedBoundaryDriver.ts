@@ -6,9 +6,26 @@ const observationKeyPattern =
   /^bot_reply_staging_observation_v1_[a-f0-9]{64}$/;
 const maximumPostgresProcessId = 2_147_483_647;
 const maximumProviderBoundaryMilliseconds = 15_000;
+const maximumDatabaseDeadlineMilliseconds = 30_000;
+const maximumCleanupDeadlineMilliseconds = 5_000;
 const maximumRetryAfterSeconds = 86_400;
 const inputKeys = Object.freeze(["permitKey"]);
-const dependencyKeys = Object.freeze(["clock", "provider", "sessions"]);
+const dependencyKeys = Object.freeze([
+  "clock",
+  "deadlines",
+  "provider",
+  "sessions",
+]);
+const deadlineKeys = Object.freeze([
+  "cleanupMilliseconds",
+  "databaseMilliseconds",
+  "providerMilliseconds",
+  "scheduler",
+]);
+const schedulerKeys = Object.freeze([
+  "monotonicNowMilliseconds",
+  "schedule",
+]);
 const sessionKeys = Object.freeze([
   "acquire",
   "close",
@@ -23,12 +40,46 @@ const sessionKeys = Object.freeze([
 ]);
 
 type ExactRecord = Readonly<Record<string, unknown>>;
+const claimedProviderBindings = new WeakSet<object>();
 
 export const railwayBotReplyPinnedBoundaryStatus = Object.freeze({
   activationAllowed: false as const,
   concreteAdapterStatus: "missing" as const,
-  timeoutContractStatus: "missing" as const,
+  providerBindingStatus: "wrapper-identity-one-shot-contract" as const,
+  timeoutContractStatus: "contract-only" as const,
 });
+
+export type RailwayBotReplyPinnedDeadlinePhase =
+  | "session-open"
+  | "session-prepare"
+  | "session-acquire"
+  | "session-consume"
+  | "session-prove"
+  | "provider-send"
+  | "provider-fact"
+  | "provider-uncertainty"
+  | "session-finalize"
+  | "session-release"
+  | "session-close"
+  | "session-destroy";
+
+export interface RailwayBotReplyPinnedDeadlineScheduler {
+  monotonicNowMilliseconds(): number;
+  schedule(
+    input: Readonly<{
+      milliseconds: number;
+      phase: RailwayBotReplyPinnedDeadlinePhase;
+    }>,
+    onExpired: () => void,
+  ): Readonly<{ cancel(): void }>;
+}
+
+export interface RailwayBotReplyPinnedDeadlines {
+  readonly cleanupMilliseconds: number;
+  readonly databaseMilliseconds: number;
+  readonly providerMilliseconds: number;
+  readonly scheduler: RailwayBotReplyPinnedDeadlineScheduler;
+}
 
 export type RailwayBotReplyPinnedProviderFact = Readonly<
   | {
@@ -136,41 +187,65 @@ export interface RailwayBotReplyPinnedSession {
    * The Port must ROLLBACK and DISCARD ALL on its one checked-out physical
    * client before returning this acknowledgement.
    */
-  prepare(): Promise<Readonly<{
+  prepare(signal: AbortSignal): Promise<Readonly<{
     backendPid: number;
     readyForQuery: "idle";
     sessionReset: "acknowledged";
   }>>;
-  acquire(permitKey: string): Promise<RailwayBotReplyPinnedAcquireResult>;
-  consume(permitKey: string): Promise<RailwayBotReplyPinnedConsumeResult>;
-  prove(permitKey: string): Promise<RailwayBotReplyPinnedProofResult>;
+  acquire(
+    permitKey: string,
+    signal: AbortSignal,
+  ): Promise<RailwayBotReplyPinnedAcquireResult>;
+  consume(
+    permitKey: string,
+    signal: AbortSignal,
+  ): Promise<RailwayBotReplyPinnedConsumeResult>;
+  prove(
+    permitKey: string,
+    signal: AbortSignal,
+  ): Promise<RailwayBotReplyPinnedProofResult>;
   persistProviderFact(
     permitKey: string,
     fact: RailwayBotReplyPinnedProviderFact,
+    signal: AbortSignal,
   ): Promise<RailwayBotReplyPinnedFactResult>;
   persistProviderUncertainty(
     permitKey: string,
-    reason: "provider-call-threw",
+    reason: "provider-call-threw" | "provider-call-timed-out",
+    signal: AbortSignal,
   ): Promise<RailwayBotReplyPinnedFactResult>;
   finalize(
     permitKey: string,
+    signal: AbortSignal,
   ): Promise<RailwayBotReplyPinnedFinalizationResult>;
-  release(permitKey: string): Promise<RailwayBotReplyPinnedReleaseResult>;
-  close(): Promise<void>;
-  destroy(): Promise<void>;
+  release(
+    permitKey: string,
+    signal: AbortSignal,
+  ): Promise<RailwayBotReplyPinnedReleaseResult>;
+  close(signal: AbortSignal): Promise<void>;
+  destroy(signal: AbortSignal): Promise<void>;
 }
 
 export interface RailwayBotReplyPinnedBoundaryDependencies {
   readonly clock: Readonly<{ now(): Date }>;
+  readonly deadlines: RailwayBotReplyPinnedDeadlines;
   readonly sessions: Readonly<{
-    openPinned(): Promise<RailwayBotReplyPinnedSession>;
+    openPinned(signal: AbortSignal): Promise<RailwayBotReplyPinnedSession>;
   }>;
+  /**
+   * This exact object is a pre-bound, single-run provider capability. A
+   * driver claims it at construction and rejects reuse across driver
+   * instances in this module instance. It never receives the permit key.
+   * A concrete adapter must also enforce sendBefore at its side-effect edge;
+   * wrapper identity and an AbortSignal are not cross-process proof.
+   */
   readonly provider: Readonly<{
     sendOnce(
       input: Readonly<{
         automaticRetryPolicy: "forbidden";
         sendBefore: string;
       }>,
+      signal: AbortSignal,
     ): Promise<RailwayBotReplyPinnedProviderFact>;
   }>;
 }
@@ -209,7 +284,9 @@ export type RailwayBotReplyPinnedBoundaryResult = Readonly<
         | "provider-fact-ack-unknown"
         | "finalization-ack-unknown"
         | "reconciliation-required"
-        | "release-ack-unknown";
+        | "release-ack-unknown"
+        | "pre-provider-timeout"
+        | "post-provider-timeout";
     }
 >;
 
@@ -219,7 +296,9 @@ export type RailwayBotReplyPinnedBoundaryErrorCode =
   | "invalid-session"
   | "invalid-database-result"
   | "invalid-provider-result"
-  | "physical-client-changed";
+  | "physical-client-changed"
+  | "driver-already-used"
+  | "provider-binding-reused";
 
 export class RailwayBotReplyPinnedBoundaryError extends Error {
   readonly code: RailwayBotReplyPinnedBoundaryErrorCode;
@@ -305,9 +384,29 @@ function captureMethod<TMethod>(
     Reflect.apply(method, receiver, args)) as TMethod;
 }
 
+function requireDeadlineMilliseconds(
+  value: unknown,
+  maximum: number,
+): number {
+  if (
+    !Number.isSafeInteger(value) ||
+    Number(value) < 1 ||
+    Number(value) > maximum
+  ) {
+    return fail("invalid-dependencies");
+  }
+  return Number(value);
+}
+
+type CapturedDependencies = Readonly<
+  RailwayBotReplyPinnedBoundaryDependencies & {
+    providerBindingIdentity: object;
+  }
+>;
+
 function requireDependencies(
   value: unknown,
-): Readonly<RailwayBotReplyPinnedBoundaryDependencies> {
+): CapturedDependencies {
   const dependencies = requireExactRecord(
     value,
     dependencyKeys,
@@ -316,6 +415,16 @@ function requireDependencies(
   const clock = requireExactRecord(
     dependencies.clock,
     ["now"],
+    "invalid-dependencies",
+  );
+  const deadlines = requireExactRecord(
+    dependencies.deadlines,
+    deadlineKeys,
+    "invalid-dependencies",
+  );
+  const scheduler = requireExactRecord(
+    deadlines.scheduler,
+    schedulerKeys,
     "invalid-dependencies",
   );
   const sessions = requireExactRecord(
@@ -333,6 +442,38 @@ function requireDependencies(
       now: captureMethod<
         RailwayBotReplyPinnedBoundaryDependencies["clock"]["now"]
       >(clock, "now", dependencies.clock, "invalid-dependencies"),
+    }),
+    deadlines: Object.freeze({
+      cleanupMilliseconds: requireDeadlineMilliseconds(
+        deadlines.cleanupMilliseconds,
+        maximumCleanupDeadlineMilliseconds,
+      ),
+      databaseMilliseconds: requireDeadlineMilliseconds(
+        deadlines.databaseMilliseconds,
+        maximumDatabaseDeadlineMilliseconds,
+      ),
+      providerMilliseconds: requireDeadlineMilliseconds(
+        deadlines.providerMilliseconds,
+        maximumProviderBoundaryMilliseconds,
+      ),
+      scheduler: Object.freeze({
+        monotonicNowMilliseconds: captureMethod<
+          RailwayBotReplyPinnedDeadlineScheduler["monotonicNowMilliseconds"]
+        >(
+          scheduler,
+          "monotonicNowMilliseconds",
+          deadlines.scheduler,
+          "invalid-dependencies",
+        ),
+        schedule: captureMethod<
+          RailwayBotReplyPinnedDeadlineScheduler["schedule"]
+        >(
+          scheduler,
+          "schedule",
+          deadlines.scheduler,
+          "invalid-dependencies",
+        ),
+      }),
     }),
     sessions: Object.freeze({
       openPinned: captureMethod<
@@ -354,6 +495,7 @@ function requireDependencies(
         "invalid-dependencies",
       ),
     }),
+    providerBindingIdentity: dependencies.provider as object,
   });
 }
 
@@ -513,6 +655,140 @@ function requireClockMilliseconds(clock: Readonly<{ now(): Date }>): number {
     return fail("invalid-dependencies");
   }
   return value.getTime();
+}
+
+function requireMonotonicMilliseconds(
+  scheduler: RailwayBotReplyPinnedDeadlineScheduler,
+): number {
+  let value: number;
+  try {
+    value = scheduler.monotonicNowMilliseconds();
+  } catch {
+    return fail("invalid-dependencies");
+  }
+  if (!Number.isFinite(value) || value < 0) {
+    return fail("invalid-dependencies");
+  }
+  return value;
+}
+
+type DeadlineOutcome<TValue> = Readonly<
+  | { status: "fulfilled"; value: TValue }
+  | { status: "rejected"; error: unknown }
+  | { status: "timed-out" }
+>;
+
+async function settleBeforeDeadline<TValue>(
+  deadlines: RailwayBotReplyPinnedDeadlines,
+  phase: RailwayBotReplyPinnedDeadlinePhase,
+  milliseconds: number,
+  operation: (signal: AbortSignal) => Promise<TValue>,
+  onLateFulfilled?: (value: TValue) => Promise<void>,
+): Promise<DeadlineOutcome<TValue>> {
+  if (!Number.isSafeInteger(milliseconds) || milliseconds < 1) {
+    return fail("invalid-dependencies");
+  }
+
+  const abortController = new AbortController();
+  let deadlineWon = false;
+  let operationSettled = false;
+  let expire: (() => void) | undefined;
+  const deadlineOutcome = new Promise<DeadlineOutcome<TValue>>((resolve) => {
+    expire = () => {
+      if (deadlineWon || operationSettled) return;
+      deadlineWon = true;
+      abortController.abort();
+      resolve(Object.freeze({ status: "timed-out" }));
+    };
+  });
+
+  let rawHandle: unknown;
+  try {
+    rawHandle = deadlines.scheduler.schedule(
+      Object.freeze({ milliseconds, phase }),
+      () => expire?.(),
+    );
+  } catch {
+    abortController.abort();
+    return fail("invalid-dependencies");
+  }
+  const handle = requireExactRecord(
+    rawHandle,
+    ["cancel"],
+    "invalid-dependencies",
+  );
+  const cancel = captureMethod<() => void>(
+    handle,
+    "cancel",
+    rawHandle,
+    "invalid-dependencies",
+  );
+
+  if (deadlineWon) {
+    try {
+      const cancellationResult = cancel();
+      if (cancellationResult !== undefined) {
+        return fail("invalid-dependencies");
+      }
+    } catch (error) {
+      if (error instanceof RailwayBotReplyPinnedBoundaryError) throw error;
+      return fail("invalid-dependencies");
+    }
+    return Object.freeze({ status: "timed-out" });
+  }
+
+  let rawOperation: Promise<TValue>;
+  try {
+    rawOperation = Promise.resolve(operation(abortController.signal));
+  } catch (error) {
+    rawOperation = Promise.reject(error);
+  }
+
+  const operationOutcome = rawOperation.then<
+    DeadlineOutcome<TValue>,
+    DeadlineOutcome<TValue>
+  >(
+    (value) => {
+      operationSettled = true;
+      if (deadlineWon && onLateFulfilled !== undefined) {
+        void Promise.resolve()
+          .then(() => onLateFulfilled(value))
+          .catch(() => undefined);
+      }
+      return Object.freeze({ status: "fulfilled", value });
+    },
+    (error: unknown) => {
+      operationSettled = true;
+      return Object.freeze({ status: "rejected", error });
+    },
+  );
+
+  const outcome = await Promise.race([operationOutcome, deadlineOutcome]);
+  let cancellationFailed = false;
+  let cancellationError: unknown;
+  try {
+    const cancellationResult = cancel();
+    if (cancellationResult !== undefined) {
+      cancellationFailed = true;
+    }
+  } catch (error) {
+    cancellationFailed = true;
+    cancellationError = error;
+  }
+  if (cancellationFailed) {
+    if (outcome.status === "fulfilled" && onLateFulfilled !== undefined) {
+      try {
+        await onLateFulfilled(outcome.value);
+      } catch {
+        // The cleanup callback owns its bounded best-effort policy.
+      }
+    }
+    if (cancellationError instanceof RailwayBotReplyPinnedBoundaryError) {
+      throw cancellationError;
+    }
+    return fail("invalid-dependencies");
+  }
+  return outcome;
 }
 
 function requireInitialState(
@@ -808,7 +1084,10 @@ function manualResult(
   });
 }
 
-async function destroyUnknownSession(value: unknown): Promise<void> {
+async function destroyUnknownSession(
+  value: unknown,
+  deadlines: RailwayBotReplyPinnedDeadlines,
+): Promise<void> {
   if (
     typeof value !== "object" ||
     value === null ||
@@ -824,7 +1103,14 @@ async function destroyUnknownSession(value: unknown): Promise<void> {
       "value" in descriptor &&
       typeof descriptor.value === "function"
     ) {
-      await Reflect.apply(descriptor.value, value, []);
+      await settleBeforeDeadline(
+        deadlines,
+        "session-destroy",
+        deadlines.cleanupMilliseconds,
+        async (signal) => {
+          await Reflect.apply(descriptor.value, value, [signal]);
+        },
+      );
     }
   } catch {
     // A malformed session remains unusable even when destroy itself fails.
@@ -833,12 +1119,40 @@ async function destroyUnknownSession(value: unknown): Promise<void> {
 
 async function destroySession(
   session: RailwayBotReplyPinnedSession | undefined,
+  deadlines: RailwayBotReplyPinnedDeadlines,
 ): Promise<void> {
   if (session === undefined) return;
   try {
-    await session.destroy();
+    await settleBeforeDeadline(
+      deadlines,
+      "session-destroy",
+      deadlines.cleanupMilliseconds,
+      (signal) => session.destroy(signal),
+    );
   } catch {
     // A failed destroy cannot authorize reuse or another provider call.
+  }
+}
+
+type SessionCleanupResult = "completed" | "failed" | "timed-out";
+
+async function closeSession(
+  session: RailwayBotReplyPinnedSession,
+  deadlines: RailwayBotReplyPinnedDeadlines,
+): Promise<SessionCleanupResult> {
+  try {
+    const outcome = await settleBeforeDeadline(
+      deadlines,
+      "session-close",
+      deadlines.cleanupMilliseconds,
+      (signal) => session.close(signal),
+    );
+    if (outcome.status === "fulfilled") return "completed";
+    await destroySession(session, deadlines);
+    return outcome.status === "timed-out" ? "timed-out" : "failed";
+  } catch {
+    await destroySession(session, deadlines);
+    return "failed";
   }
 }
 
@@ -847,18 +1161,30 @@ async function releaseAndClose(
   permitKey: string,
   backendPid: number,
   expectedReleasedCount: 1 | 2,
-): Promise<boolean> {
+  deadlines: RailwayBotReplyPinnedDeadlines,
+): Promise<SessionCleanupResult> {
   try {
+    const releaseOutcome = await settleBeforeDeadline(
+      deadlines,
+      "session-release",
+      deadlines.databaseMilliseconds,
+      (signal) => session.release(permitKey, signal),
+    );
+    if (releaseOutcome.status !== "fulfilled") {
+      await destroySession(session, deadlines);
+      return releaseOutcome.status === "timed-out"
+        ? "timed-out"
+        : "failed";
+    }
     requireRelease(
-      await session.release(permitKey),
+      releaseOutcome.value,
       backendPid,
       expectedReleasedCount,
     );
-    await session.close();
-    return true;
+    return await closeSession(session, deadlines);
   } catch {
-    await destroySession(session);
-    return false;
+    await destroySession(session, deadlines);
+    return "failed";
   }
 }
 
@@ -871,23 +1197,64 @@ export function createRailwayBotReplyPinnedBoundaryDriver(
   ): Promise<RailwayBotReplyPinnedBoundaryResult>;
 }> {
   const dependencies = requireDependencies(rawDependencies);
+  if (claimedProviderBindings.has(dependencies.providerBindingIdentity)) {
+    return fail("provider-binding-reused");
+  }
+  claimedProviderBindings.add(dependencies.providerBindingIdentity);
+  let runAlreadyStarted = false;
 
   return Object.freeze({
     async run(rawInput) {
+      if (runAlreadyStarted) return fail("driver-already-used");
+      runAlreadyStarted = true;
       const permitKey = requireInput(rawInput);
       let rawSession: unknown;
       let session: RailwayBotReplyPinnedSession | undefined;
       let backendPid: number;
 
       try {
-        rawSession = await dependencies.sessions.openPinned();
+        const openOutcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "session-open",
+          dependencies.deadlines.databaseMilliseconds,
+          (signal) => dependencies.sessions.openPinned(signal),
+          (lateSession) => destroyUnknownSession(
+            lateSession,
+            dependencies.deadlines,
+          ),
+        );
+        if (openOutcome.status === "timed-out") {
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (openOutcome.status === "rejected") {
+          if (
+            openOutcome.error instanceof RailwayBotReplyPinnedBoundaryError
+          ) {
+            throw openOutcome.error;
+          }
+          return manualResult("session-open-ack-unknown", 0);
+        }
+        rawSession = openOutcome.value;
         session = requireSession(rawSession);
-        backendPid = requireInitialState(await session.prepare()).backendPid;
+        const prepareOutcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "session-prepare",
+          dependencies.deadlines.databaseMilliseconds,
+          (signal) => session!.prepare(signal),
+        );
+        if (prepareOutcome.status === "timed-out") {
+          await destroySession(session, dependencies.deadlines);
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (prepareOutcome.status === "rejected") {
+          throw prepareOutcome.error;
+        }
+        backendPid = requireInitialState(prepareOutcome.value).backendPid;
       } catch (error) {
         if (session === undefined) {
-          await destroyUnknownSession(rawSession);
+          await destroyUnknownSession(rawSession, dependencies.deadlines);
         } else {
-          await destroySession(session);
+          await destroySession(session, dependencies.deadlines);
         }
         if (error instanceof RailwayBotReplyPinnedBoundaryError) throw error;
         return manualResult("session-open-ack-unknown", 0);
@@ -895,12 +1262,20 @@ export function createRailwayBotReplyPinnedBoundaryDriver(
 
       let acquisition: RailwayBotReplyPinnedAcquireResult;
       try {
-        acquisition = requireAcquire(
-          await session.acquire(permitKey),
-          backendPid,
+        const outcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "session-acquire",
+          dependencies.deadlines.databaseMilliseconds,
+          (signal) => session.acquire(permitKey, signal),
         );
+        if (outcome.status === "timed-out") {
+          await destroySession(session, dependencies.deadlines);
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (outcome.status === "rejected") throw outcome.error;
+        acquisition = requireAcquire(outcome.value, backendPid);
       } catch (error) {
-        await destroySession(session);
+        await destroySession(session, dependencies.deadlines);
         if (error instanceof RailwayBotReplyPinnedBoundaryError) throw error;
         return manualResult("acquire-ack-unknown", 0);
       }
@@ -909,10 +1284,9 @@ export function createRailwayBotReplyPinnedBoundaryDriver(
         acquisition.outcome === "busy" ||
         acquisition.outcome === "blocked-unresolved"
       ) {
-        try {
-          await session.close();
-        } catch {
-          await destroySession(session);
+        const cleanup = await closeSession(session, dependencies.deadlines);
+        if (cleanup === "timed-out") {
+          return manualResult("pre-provider-timeout", 0);
         }
         return Object.freeze({
           outcome: "not-sent",
@@ -924,22 +1298,36 @@ export function createRailwayBotReplyPinnedBoundaryDriver(
       if (acquisition.outcome === "reconciliation-required") {
         let finalization: RailwayBotReplyPinnedFinalizationResult;
         try {
-          finalization = requireFinalization(
-            await session.finalize(permitKey),
-            backendPid,
+          const outcome = await settleBeforeDeadline(
+            dependencies.deadlines,
+            "session-finalize",
+            dependencies.deadlines.databaseMilliseconds,
+            (signal) => session.finalize(permitKey, signal),
           );
+          if (outcome.status === "timed-out") {
+            await destroySession(session, dependencies.deadlines);
+            return manualResult("pre-provider-timeout", 0);
+          }
+          if (outcome.status === "rejected") throw outcome.error;
+          finalization = requireFinalization(outcome.value, backendPid);
         } catch (error) {
-          await destroySession(session);
+          await destroySession(session, dependencies.deadlines);
           if (error instanceof RailwayBotReplyPinnedBoundaryError) throw error;
           return manualResult("finalization-ack-unknown", 0);
         }
-        const released = await releaseAndClose(
+        const cleanup = await releaseAndClose(
           session,
           permitKey,
           backendPid,
           2,
+          dependencies.deadlines,
         );
-        if (!released) return manualResult("release-ack-unknown", 0);
+        if (cleanup === "timed-out") {
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (cleanup !== "completed") {
+          return manualResult("release-ack-unknown", 0);
+        }
         if (
           finalization.outcome === "finalized" ||
           finalization.outcome === "replayed"
@@ -951,24 +1339,38 @@ export function createRailwayBotReplyPinnedBoundaryDriver(
 
       let consumption: RailwayBotReplyPinnedConsumeResult;
       try {
-        consumption = requireConsume(
-          await session.consume(permitKey),
-          backendPid,
+        const outcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "session-consume",
+          dependencies.deadlines.databaseMilliseconds,
+          (signal) => session.consume(permitKey, signal),
         );
+        if (outcome.status === "timed-out") {
+          await destroySession(session, dependencies.deadlines);
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (outcome.status === "rejected") throw outcome.error;
+        consumption = requireConsume(outcome.value, backendPid);
       } catch (error) {
-        await destroySession(session);
+        await destroySession(session, dependencies.deadlines);
         if (error instanceof RailwayBotReplyPinnedBoundaryError) throw error;
         return manualResult("consume-ack-unknown", 0);
       }
 
       if (consumption.outcome !== "authorized") {
-        const released = await releaseAndClose(
+        const cleanup = await releaseAndClose(
           session,
           permitKey,
           backendPid,
           1,
+          dependencies.deadlines,
         );
-        if (!released) return manualResult("release-ack-unknown", 0);
+        if (cleanup === "timed-out") {
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (cleanup !== "completed") {
+          return manualResult("release-ack-unknown", 0);
+        }
         return Object.freeze({
           outcome: "not-sent",
           providerCallCount: 0,
@@ -978,90 +1380,244 @@ export function createRailwayBotReplyPinnedBoundaryDriver(
 
       let proof: RailwayBotReplyPinnedProofResult;
       try {
-        proof = requireProof(await session.prove(permitKey), backendPid);
+        const outcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "session-prove",
+          dependencies.deadlines.databaseMilliseconds,
+          (signal) => session.prove(permitKey, signal),
+        );
+        if (outcome.status === "timed-out") {
+          await destroySession(session, dependencies.deadlines);
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (outcome.status === "rejected") throw outcome.error;
+        proof = requireProof(outcome.value, backendPid);
       } catch (error) {
-        await destroySession(session);
+        await destroySession(session, dependencies.deadlines);
         if (error instanceof RailwayBotReplyPinnedBoundaryError) throw error;
         return manualResult("proof-ack-unknown", 0);
       }
 
       let providerBoundaryMilliseconds: number;
+      let proofMonotonicMilliseconds: number;
       try {
+        proofMonotonicMilliseconds = requireMonotonicMilliseconds(
+          dependencies.deadlines.scheduler,
+        );
         providerBoundaryMilliseconds =
           Date.parse(proof.sendBefore) -
           requireClockMilliseconds(dependencies.clock);
       } catch (error) {
-        await destroySession(session);
+        await destroySession(session, dependencies.deadlines);
         throw error;
       }
       if (providerBoundaryMilliseconds <= 0) {
-        const released = await releaseAndClose(
+        const cleanup = await releaseAndClose(
           session,
           permitKey,
           backendPid,
           1,
+          dependencies.deadlines,
         );
-        if (!released) return manualResult("release-ack-unknown", 0);
+        if (cleanup === "timed-out") {
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (cleanup !== "completed") {
+          return manualResult("release-ack-unknown", 0);
+        }
         return manualResult("provider-boundary-expired", 0);
       }
 
       if (
         providerBoundaryMilliseconds > maximumProviderBoundaryMilliseconds
       ) {
-        await destroySession(session);
+        await destroySession(session, dependencies.deadlines);
         return fail("invalid-database-result");
       }
 
-      let providerFact: RailwayBotReplyPinnedProviderFact | null = null;
+      let effectiveProviderDeadlineMilliseconds: number;
       try {
-        providerFact = requireProviderFact(
-          await dependencies.provider.sendOnce(Object.freeze({
-            automaticRetryPolicy: "forbidden",
-            sendBefore: proof.sendBefore,
-          })),
+        const wallRemaining = Date.parse(proof.sendBefore) -
+          requireClockMilliseconds(dependencies.clock);
+        const currentMonotonicMilliseconds = requireMonotonicMilliseconds(
+          dependencies.deadlines.scheduler,
         );
+        if (currentMonotonicMilliseconds < proofMonotonicMilliseconds) {
+          return fail("invalid-dependencies");
+        }
+        const monotonicRemaining = providerBoundaryMilliseconds -
+          (currentMonotonicMilliseconds - proofMonotonicMilliseconds);
+        effectiveProviderDeadlineMilliseconds = Math.floor(Math.min(
+          dependencies.deadlines.providerMilliseconds,
+          monotonicRemaining,
+          wallRemaining,
+        ));
+      } catch (error) {
+        await destroySession(session, dependencies.deadlines);
+        throw error;
+      }
+
+      if (effectiveProviderDeadlineMilliseconds <= 0) {
+        const cleanup = await releaseAndClose(
+          session,
+          permitKey,
+          backendPid,
+          1,
+          dependencies.deadlines,
+        );
+        if (cleanup === "timed-out") {
+          return manualResult("pre-provider-timeout", 0);
+        }
+        if (cleanup !== "completed") {
+          return manualResult("release-ack-unknown", 0);
+        }
+        return manualResult("provider-boundary-expired", 0);
+      }
+
+      let providerFact: RailwayBotReplyPinnedProviderFact | null = null;
+      let providerCallStarted = false;
+      let providerTimedOut = false;
+      try {
+        const providerOutcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "provider-send",
+          effectiveProviderDeadlineMilliseconds,
+          (signal) => {
+            const wallRemainingAtInvocation = Date.parse(proof.sendBefore) -
+              requireClockMilliseconds(dependencies.clock);
+            const monotonicAtInvocation = requireMonotonicMilliseconds(
+              dependencies.deadlines.scheduler,
+            );
+            if (
+              monotonicAtInvocation < proofMonotonicMilliseconds ||
+              wallRemainingAtInvocation <= 0 ||
+              providerBoundaryMilliseconds -
+                (monotonicAtInvocation - proofMonotonicMilliseconds) <= 0
+            ) {
+              return fail("invalid-dependencies");
+            }
+            if (providerCallStarted) return fail("invalid-dependencies");
+            providerCallStarted = true;
+            return dependencies.provider.sendOnce(
+              Object.freeze({
+                automaticRetryPolicy: "forbidden",
+                sendBefore: proof.sendBefore,
+              }),
+              signal,
+            );
+          },
+        );
+        if (providerOutcome.status === "timed-out") {
+          providerTimedOut = providerCallStarted;
+        } else if (providerOutcome.status === "fulfilled") {
+          providerFact = requireProviderFact(providerOutcome.value);
+        }
       } catch {
         // A thrown or malformed provider response is an uncertain side effect.
       }
 
+      if (!providerCallStarted) {
+        await destroySession(session, dependencies.deadlines);
+        return manualResult("pre-provider-timeout", 0);
+      }
+
       try {
+        const persistenceOutcome = providerFact === null
+          ? await settleBeforeDeadline(
+            dependencies.deadlines,
+            "provider-uncertainty",
+            dependencies.deadlines.databaseMilliseconds,
+            (signal) => session.persistProviderUncertainty(
+              permitKey,
+              providerTimedOut
+                ? "provider-call-timed-out"
+                : "provider-call-threw",
+              signal,
+            ),
+          )
+          : await settleBeforeDeadline(
+            dependencies.deadlines,
+            "provider-fact",
+            dependencies.deadlines.databaseMilliseconds,
+            (signal) => session.persistProviderFact(
+              permitKey,
+              providerFact!,
+              signal,
+            ),
+          );
+        if (persistenceOutcome.status === "timed-out") {
+          await destroySession(session, dependencies.deadlines);
+          return manualResult("post-provider-timeout", 1);
+        }
+        if (persistenceOutcome.status === "rejected") {
+          throw persistenceOutcome.error;
+        }
         if (providerFact === null) {
           requireFactResult(
-            await session.persistProviderUncertainty(
-              permitKey,
-              "provider-call-threw",
-            ),
+            persistenceOutcome.value,
             backendPid,
           );
         } else {
           requireFactResult(
-            await session.persistProviderFact(permitKey, providerFact),
+            persistenceOutcome.value,
             backendPid,
           );
         }
       } catch {
-        await destroySession(session);
-        return manualResult("provider-fact-ack-unknown", 1);
+        await destroySession(session, dependencies.deadlines);
+        return manualResult(
+          providerTimedOut
+            ? "post-provider-timeout"
+            : "provider-fact-ack-unknown",
+          1,
+        );
       }
 
       let finalization: RailwayBotReplyPinnedFinalizationResult;
       try {
-        finalization = requireFinalization(
-          await session.finalize(permitKey),
-          backendPid,
+        const outcome = await settleBeforeDeadline(
+          dependencies.deadlines,
+          "session-finalize",
+          dependencies.deadlines.databaseMilliseconds,
+          (signal) => session.finalize(permitKey, signal),
         );
+        if (outcome.status === "timed-out") {
+          await destroySession(session, dependencies.deadlines);
+          return manualResult("post-provider-timeout", 1);
+        }
+        if (outcome.status === "rejected") throw outcome.error;
+        finalization = requireFinalization(outcome.value, backendPid);
       } catch {
-        await destroySession(session);
-        return manualResult("finalization-ack-unknown", 1);
+        await destroySession(session, dependencies.deadlines);
+        return manualResult(
+          providerTimedOut
+            ? "post-provider-timeout"
+            : "finalization-ack-unknown",
+          1,
+        );
       }
 
-      const released = await releaseAndClose(
+      const cleanup = await releaseAndClose(
         session,
         permitKey,
         backendPid,
         1,
+        dependencies.deadlines,
       );
-      if (!released) return manualResult("release-ack-unknown", 1);
+      if (cleanup === "timed-out") {
+        return manualResult("post-provider-timeout", 1);
+      }
+      if (cleanup !== "completed") {
+        return manualResult(
+          providerTimedOut
+            ? "post-provider-timeout"
+            : "release-ack-unknown",
+          1,
+        );
+      }
+      if (providerTimedOut) {
+        return manualResult("post-provider-timeout", 1);
+      }
       if (
         finalization.outcome === "finalized" ||
         finalization.outcome === "replayed"
