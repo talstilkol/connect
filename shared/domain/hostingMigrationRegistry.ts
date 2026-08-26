@@ -19,6 +19,7 @@ export type HostingMigrationNextAction =
 export type HostingMigrationTargetProvider =
   | "vercel"
   | "railway"
+  | "aws-s3"
   | "vercel+railway"
   | "unknown/unavailable";
 
@@ -353,14 +354,16 @@ export const HOSTING_MIGRATION_REGISTRY = Object.freeze([
     sourceFiles: [
       ".openai/hosting.json",
       "server/ai/knowledgeObjectStorage.ts",
+      "docs/researched-decision-approval-2026-08-26.md",
     ],
     targetPlacement: "shared-managed-service",
-    targetContract: "KnowledgeObjectStorage",
-    targetProvider: "unknown/unavailable",
-    decisionState: "decision-required",
-    nextAction: "provider-decision-required",
+    targetContract:
+      "Private AWS S3 KnowledgeObjectStorage in il-central-1 with TLS-only access, version-bound malware verdicts, versioning, lifecycle and separated backup/evidence storage",
+    targetProvider: "aws-s3",
+    decisionState: "selected",
+    nextAction: "configuration-required",
     cutoverBlocker:
-      "Only the R2 adapter and R2-specific evidence exist.",
+      "AWS S3 in il-central-1 is selected, but only the R2 adapter and R2-specific evidence exist. No AWS account, private buckets, Block Public Access policy, IAM roles, encryption configuration, versioning, lifecycle, GuardDuty Malware Protection, EventBridge verdict path, checksum migration rehearsal, budget cap or live residency/security evidence has been approved or configured. Object Lock governance may be enabled only for approved data classes; compliance mode remains prohibited until Legal approves its irreversible retention effect.",
   }),
   capability({
     id: "queue.meta-webhook",

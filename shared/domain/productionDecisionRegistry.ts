@@ -30,14 +30,14 @@ export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
     checkId: "ai.provider",
     title: "ספק AI ומודל חיוב",
     detail:
-      "טל בחר OpenAI Responses API מאחורי Provider port, עם store:false ו-Eval על מידע מושחר. יש לאשר Model allowlist, תקציב, Timeout, מפתחות וראיות איכות לפני הפעלה.",
+      "נבחר OpenAI Responses API מאחורי Provider port: ‏GPT-5.6 Luna כברירת מחדל חסכונית, ו-GPT-5.6 Terra רק לאחר Eval מושחר שמוכיח צורך; Sol אינו ברירת מחדל. כל בקשה משתמשת ב-store:false, אין שליחה אוטונומית ללא אישור אדם, והספק נשאר חסום עד Model allowlist, תקציב, Timeout, מפתחות, אישור פרטיות וראיות איכות חיות.",
     owner: "מוצר + פיתוח",
   },
   {
     checkId: "billing.provider",
     title: "ספק סליקה והפקת חשבוניות",
     detail:
-      "טל ביקש להכין Adapters גם ל-Paddle וגם ל-Stripe. ספק פעיל יחיד, ישות משפטית, מס, Webhooks, החזרים וחשבוניות עדיין דורשים החלטה לפני Production.",
+      "ל-Pilot נבחרה חשבונית מאושרת ותשלום בהעברה בנקאית, או Pilot חינמי אם כספים/מס אינם מאשרים זאת. לאחר Pilot הכיוון המועדף הוא Paddle כ-Merchant of Record בכפוף לאישור חשבון, KYC, מס והתאמת מוצר; Paddle ו-Stripe נשארים Adapters נפרדים, Stripe רדום, ואין Dual-live. Billing נשאר חסום עד אישורי כספים/משפטי, תמחור, Webhooks, החזרים, התאמות וראיות חיות.",
     owner: "כספים + פיתוח",
   },
   {
@@ -51,7 +51,7 @@ export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
     checkId: "security.file-scanner",
     title: "מדיניות וספק סריקת קבצים",
     detail:
-      "יש לבחור מנגנון סריקה ולהגדיר מה קורה לקובץ חשוד, תקוע או לא נתמך.",
+      "נבחר AWS GuardDuty Malware Protection for S3 באותו אזור של אחסון הידע. קובץ נשאר ב-Quarantine עד Verdict נקי הקשור ל-bucket, key ו-versionId; איום, כשל, Timeout, תוצאה חסרה או לא נתמכת נחסמים. אם AWS, תקציב, Legal או D14 אינם מוכנים, העלאות ידע נשארות כבויות. ההחלטה אינה Ready עד תצורת S3/EventBridge/הרשאות, אימות סוג קובץ וראיות Staging חיות.",
     owner: "אבטחה + פיתוח",
   },
   {
