@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
+import ts from "typescript";
 
 import {
   createRailwayBotReplyPinnedBoundaryDriver,
@@ -1193,15 +1194,60 @@ test("is a dormant contract, not an activation path, with no SQL, Meta adapter, 
   assert.doesNotMatch(source, /\bwhile\s*\(|\bfor\s*\(\s*;/);
 
   const driverFileName = "railwayBotReplyPinnedBoundaryDriver.ts";
+  const transportFileName =
+    "nodePostgresBotReplyPinnedSessionTransport.ts";
   const serverFiles = await listTypeScriptFiles(
     new URL("../server/", import.meta.url),
   );
   for (const file of serverFiles) {
     if (file.pathname.endsWith(`/${driverFileName}`)) continue;
+    const candidateSource = await readFile(file, "utf8");
+    const sourceFile = ts.createSourceFile(
+      file.pathname,
+      candidateSource,
+      ts.ScriptTarget.Latest,
+      false,
+      ts.ScriptKind.TS,
+    );
+    const allowedTypeImportRanges = [];
+    for (const statement of sourceFile.statements) {
+      if (
+        !ts.isImportDeclaration(statement) ||
+        !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+        !statement.moduleSpecifier.text.includes(
+          "railwayBotReplyPinnedBoundaryDriver",
+        )
+      ) {
+        continue;
+      }
+      assert.equal(
+        file.pathname.endsWith(`/${transportFileName}`) &&
+          statement.importClause?.isTypeOnly === true,
+        true,
+        `only the dormant transport may hold a type-only driver import: ${file.pathname}`,
+      );
+      allowedTypeImportRanges.push([
+        statement.getStart(sourceFile),
+        statement.end,
+      ]);
+    }
+    if (file.pathname.endsWith(`/${transportFileName}`)) {
+      assert.equal(
+        allowedTypeImportRanges.length,
+        1,
+        "the dormant transport must have exactly one type-only driver import",
+      );
+    }
+    let runtimeCandidate = candidateSource;
+    for (const [start, end] of allowedTypeImportRanges.toReversed()) {
+      runtimeCandidate =
+        `${runtimeCandidate.slice(0, start)}${" ".repeat(end - start)}` +
+        runtimeCandidate.slice(end);
+    }
     assert.doesNotMatch(
-      await readFile(file, "utf8"),
+      runtimeCandidate,
       /railwayBotReplyPinnedBoundaryDriver/u,
-      `dormant B2b driver must not be imported by ${file.pathname}`,
+      `dormant B2b driver must not be runtime-referenced by ${file.pathname}`,
     );
   }
 });
