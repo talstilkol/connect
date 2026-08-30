@@ -13,7 +13,9 @@
 [מדריך הסטטוס הפשוט](docs/connect-project-status-grandma-guide.html) וב־
 [רשימת ההחלטות והצרכים](docs/connect-remaining-decisions-and-needs.html).
 
-1. [תוכנית העבודה הצוותית](docs/team-operating-plan.md).
+מודל האחריות הפעיל הוא [Tal כאחראי יחיד](docs/planning/sole-owner-operating-model-2026-08-30.md). אין כרגע חלוקת Primary/Backup/RACI; הקצאות שמיות במסמכי Evidence ישנים הן היסטוריות בלבד.
+
+1. [תוכנית ההפעלה היחידנית — Tal + Codex](docs/team-operating-plan.md).
 2. [כל ההחלטות שנותרו — שאלון מקיף](docs/connect-all-remaining-decisions.html).
 3. [Architecture Decision Records](docs/adr/README.md).
 4. [GitHub Governance live audit](docs/github-governance-live-audit.md).

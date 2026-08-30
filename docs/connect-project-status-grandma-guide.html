@@ -705,6 +705,11 @@
     </nav>
 
     <main id="main" class="wrap">
+      <div class="callout success" style="margin-block-end: 18px;">
+        <strong>כלל אחריות מעודכן:</strong>
+        Tal הוא האחראי היחיד לכל המחקר, התכנון, הפיתוח, הבדיקות, החיבורים והתיאום. אין כרגע חלוקת Primary/Backup/RACI. אישור מקצועי חיצוני הוא ראיה שטל משיג — לא בעלות של אדם אחר.
+        <a href="connect-remaining-decisions-and-needs.html">למדריך המפורט: מה כל שירות עושה, כמה הוא עולה ואיך מתחברים אליו</a>.
+      </div>
       <section id="part-1" class="section">
         <h2>1. כמה אחוז מהתוכנית המלאה הושלם?</h2>
         <p class="section-lead">
@@ -755,8 +760,8 @@
           <article class="simple-card">
             <h3>1.4 מתי יהיה אחוז אמיתי?</h3>
             <p>
-              לאחר שנסגור Scope, נפרק הכול למשימות אטומיות, נגדיר משקל וקבלה לכל משימה, נמנה בעלים
-              ונקפיא את הרשימה. אז האחוז יהיה סכום משקל המשימות שהתקבלו חלקי המשקל הכולל.
+              לאחר שנסגור Scope, נפרק הכול למשימות אטומיות, נגדיר משקל וקבלה לכל משימה ונקפיא את הרשימה.
+              כל המשימות יהיו בבעלות Tal. אז האחוז יהיה סכום משקל המשימות שהתקבלו חלקי המשקל הכולל.
             </p>
           </article>
           <article class="simple-card">
@@ -838,7 +843,7 @@
               <li><strong>ReviewInput:</strong> הקלסר המדויק שכל המבקרים חייבים לקרוא.</li>
               <li><strong>Program SourceSet:</strong> הרשימה המלאה של כל הקלסרים והמקורות של התוכנית.</li>
               <li><strong>Permit:</strong> אישור מוגבל לפעולה אחת, עבור מטרה, זמן וגרסה מדויקים.</li>
-              <li><strong>RACI:</strong> טבלה שאומרת מי מבצע, מי אחראי סופית, עם מי מתייעצים ואת מי מעדכנים.</li>
+              <li><strong>RACI:</strong> טבלת חלוקת אחריות בין כמה אנשים. היא אינה פעילה כרגע, משום ש־Tal הוא האדם היחיד שעובד על הפרויקט.</li>
               <li><strong>JSON:</strong> קובץ טקסט מסודר שמחשב וגם אדם יכולים לקרוא; כאן הוא משמש לשליחת הבחירות.</li>
             </ul>
           </div>
@@ -885,11 +890,11 @@
               <li><strong>D12.</strong> Railway PostgreSQL ל־Pilot.</li>
               <li><strong>D13.</strong> Railway Redis ו־BullMQ; PostgreSQL נשאר מקור האמת.</li>
               <li><strong>D14.</strong> S3 פרטי ב־il-central-1 עם SSE-KMS, מפתחות בניהול הלקוח ו־Bucket Keys.</li>
-              <li><strong>D15.</strong> Platform vaults עם Primary ו־Backup שמיים.</li>
+              <li><strong>D15.</strong> Secrets נשמרים ב־Platform vaults; Tal הוא האחראי היחיד לניהול הגישה.</li>
               <li><strong>D16.</strong> Staging ו־Production נפרדים.</li>
               <li><strong>D17.</strong> Clerk, Organizations ו־MFA לבעלי הרשאות מנהליות.</li>
               <li><strong>D18.</strong> המאגר הקנוני נשאר Public. אסור להציע Private מחדש בלי הוראה מפורשת חדשה.</li>
-              <li><strong>D19.</strong> Primary ו־Backup שמיים לכל תחום; השמות עצמם עדיין חסרים.</li>
+              <li><strong>D19.</strong> החלטה מאוחרת החליפה את חלוקת התפקידים: Tal הוא האחראי היחיד לכל תחום.</li>
               <li><strong>D20.</strong> Test WABA קודם; נכס האב רק ב־Pilot מאושר.</li>
               <li><strong>D21.</strong> Closed Pilot עם Tenant יחיד.</li>
               <li><strong>D22.</strong> עסקים קטנים ובינוניים בישראל, Hebrew-first.</li>
@@ -910,11 +915,11 @@
           <div class="details-body">
             <ul class="blocker-list">
               <li><strong>AI:</strong> חשבון וספק חיים, מודל ו־profile מורשים, Data controls, Privacy/Legal, Evals וביקורת עצמאית. עד אז AI OFF.</li>
-              <li><strong>Billing:</strong> זכאות ישות משפטית, KYC, Tax/Finance/Legal, חוזים, DPA, Sandbox ובעלי תפקידים. עד אז BILLING OFF.</li>
-              <li><strong>Storage:</strong> חשבון AWS, Region, Buckets, KMS, IAM, GuardDuty, Quotas, תקציב, התראות ובעלי תפקידים. עד אז UPLOADS OFF.</li>
+              <li><strong>Billing:</strong> זכאות ישות משפטית, KYC, בדיקות מס ומשפט, חוזים, DPA ו־Sandbox. Tal אחראי להשיג את הראיות. עד אז BILLING OFF.</li>
+              <li><strong>Storage:</strong> חשבון AWS, Region, Buckets, KMS, IAM, GuardDuty, Quotas, תקציב והתראות. Tal אחראי לכל החיבור. עד אז UPLOADS OFF.</li>
               <li><strong>WhatsApp:</strong> WABA, מספר טלפון, הרשאות, consent, איכות, headers ומגבלות חיות. מספרי קצב שלא הוכחו נשארים unknown/unavailable.</li>
               <li><strong>Legal:</strong> בסיס חוקי, תנאים, Privacy notice, DPA, Retention, Legal Hold, ייצוא/מחיקה ו־Data residency.</li>
-              <li><strong>RACI:</strong> שמות Primary/Backup, On-call, Release commander, Go/No-Go ו־veto לכל Domain.</li>
+              <li><strong>אחריות:</strong> Tal אחראי יחיד. נותר לקבוע רק כמה שעות שבועיות הוא מקצה לפרויקט ואיך מתריעים אליו במקרה תקלה.</li>
               <li><strong>Pilot:</strong> בעלות נכסי Meta, allowlist משתתפים, תאריכים, ערוץ חירום וסמכות עצירה.</li>
               <li><strong>GitHub:</strong> Ruleset, Required checks, CODEOWNERS, scanners ו־readback. המאגר עצמו נשאר Public.</li>
               <li><strong>Rate Limit עתידי:</strong> D04 כבר קבע מינימום רב־שכבתי הנגזר ממצב חי. טל יאשר בעתיד רק את Snapshot המספרים, התוקף והתקרה הפנימית לאחר Evidence; אין הצבעה חוזרת כעת.</li>
@@ -1122,13 +1127,13 @@
           </article>
           <article class="stage blocked">
             <h3>4.3.8 לבנות Atomic Task Registry</h3>
-            <p>לפרק כל דרישה למשימה קטנה עם בעלים, תלות, קלט, פלט, בדיקה, סיכון ומשקל.</p>
+            <p>לפרק כל דרישה למשימה קטנה עם `Owner=Tal`, תלות, קלט, פלט, בדיקה, סיכון ומשקל.</p>
             <div class="stage-footer"><span class="pill">זה יוצר את מכנה האחוז</span><span class="pill">אחוז רשמי: יתאפשר רק כאן</span><span class="pill">זמן: unknown/unavailable</span></div>
           </article>
           <article class="stage blocked">
-            <h3>4.3.9 לקבוע RACI, משאבים ולוח זמנים</h3>
-            <p>למנות Primary/Backup, זמינות שבועית, ספקים חיצוניים ו־critical path. רק אז יהיה ETA אמין.</p>
-            <div class="stage-footer"><span class="pill">דורש שמות וזמינות</span><span class="pill">אחוז רשמי: יחושב</span><span class="pill">זמן: יחושב</span></div>
+            <h3>4.3.9 לקבוע קיבולת Tal ולוח זמנים</h3>
+            <p>לרשום זמינות שבועית של Tal, זמני המתנה חיצוניים ו־critical path. רק אז יהיה ETA אמין.</p>
+            <div class="stage-footer"><span class="pill">דורש זמינות Tal</span><span class="pill">אחוז רשמי: יחושב</span><span class="pill">זמן: יחושב</span></div>
           </article>
           <article class="stage blocked">
             <h3>4.3.10 להרכיב Final Master Plan ולעבור 3 ביקורות</h3>
@@ -1202,7 +1207,7 @@
           acceptedAnswer: "public-no-license-until-legal",
           title: "איזה רישיון לתת למאגר הציבורי?",
           simple: "Public אומר שכל אחד יכול לראות. רישיון אומר מה מותר לו לעשות עם הקוד. בלי רישיון, צפייה אינה אישור להעתיק.",
-          owner: "Tal + Legal",
+          owner: "Tal",
           blocker: "בעלות על הקוד, זכויות Contributors, צדדים שלישיים ואישור משפטי",
           options: [
             {
@@ -1230,7 +1235,7 @@
           acceptedAnswer: "approve-each-security-use",
           title: "איך לאשר אקראיות קריפטוגרפית?",
           simple: "לפעמים מנעול דיגיטלי חייב מספר שאי אפשר לנחש. זה שונה ממספר עסקי רגיל, שאותו נרצה ליצור בצורה קבועה וברורה. Math.random נשאר אסור תמיד, והצבעה זו אינה מאשרת crypto.randomUUID ל־IDs.",
-          owner: "Tal; Security implementer עדיין unknown/unavailable",
+          owner: "Tal",
           blocker: "Threat model, רשימת APIs, בדיקות, שמירת Secrets ומבצע אבטחה שמי",
           options: [
             {
@@ -1385,7 +1390,7 @@
         body.appendChild(notes);
 
         const meta = createElement("div", "decision-meta");
-        meta.appendChild(createElement("span", "", "בעלים: " + decision.owner));
+        meta.appendChild(createElement("span", "", "אחראי נוכחי: " + decision.owner));
         meta.appendChild(createElement("span", "", "חסם: " + decision.blocker));
         body.appendChild(meta);
 

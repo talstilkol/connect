@@ -733,6 +733,13 @@
           הכרטיס מציין איזה משני המצבים חל. החלטה אדומה אינה נבחרת
           אוטומטית: ההמלצה מודגשת, אך נדרש אישור מודע של הבעלים.
         </p>
+        <div class="intro-note">
+          <strong>עדכון מחייב — 30.08.2026:</strong>
+          Tal הוא האחראי היחיד לכל עבודה פעילה. אין כרגע חלוקת
+          Primary/Backup/RACI. שמות והקצאות ישנים בשאלון הם תיעוד
+          היסטורי בלבד; המדריך הפעיל הוא
+          <a href="connect-remaining-decisions-and-needs.html">החלטות פתוחות ומה צריך מ־Tal</a>.
+        </div>
         <div class="legend" aria-label="מקרא">
           <div class="legend-item">
             <strong>✓ ירוק — החלטה ברורה או סגורה</strong>
@@ -1137,17 +1144,16 @@
           ]
         },
         {
-          code: "R02", section: "team-code", phase: "before", status: "hard",
-          question: "מי האנשים שמחזיקים בתפקידי האחריות החסרים?",
-          beginner: "Owner מבצע את העבודה; Accountable הוא האדם היחיד שאחראי שהתוצאה נסגרת. הביטוי ‘הצוות אחראי’ לא אומר מי מחליט או מי קם בלילה בתקלה.",
-          why: "כמעט כל Gate ל־Production דורש שם של מאשר ושל מטפל במקרה כשל.",
-          sub: ["מי Product owner?", "מי Security, Operations, Privacy ו־Billing owner?", "מי Release ו־Secrets owner?", "מי Production on-call ומי המחליף שלו?"],
-          owner: "רועי/הנהלה", blocker: "אישורי Production, טיפול בתקריות ורוב ההחלטות האדומות.",
-          recommendation: "למנות אדם בשם מלא לכל Role, עם מחליף ודרך הסלמה. רועי: Accounts/Approver; דוד: WhatsApp Backend; ראשה: Deployment/UI; טל: Meta limits ו־Rate-limit R&D.",
+          code: "R02", section: "team-code", phase: "before", status: "clear", approved: true,
+          question: "מי אחראי לסגור את העבודה בפרויקט?",
+          beginner: "Owner הוא האדם שמוודא שהמשימה באמת נסגרת. כרגע עובד אדם אחד בלבד, ולכן אין צורך לפצל תפקידים.",
+          why: "Tal קבע שהוא האדם היחיד שעובד עם Codex ואחראי לכל המחקר, ההחלטות, החשבונות, הפיתוח, הבדיקות והחיבורים.",
+          sub: ["כמה שעות שבועיות Tal מקצה לפרויקט?", "באיזה ערוץ Tal רוצה לקבל התראת חירום?", "האם הצטרף אדם נוסף שמחייב החלטה חדשה?"],
+          owner: "Tal", blocker: "אין חסם בעלות; נדרשים רק קיבולת שבועית וערוץ התראה לתכנון לוח זמנים.",
+          recommendation: "החלטה סגורה: Tal הוא האחראי היחיד. חלוקת תפקידים תתווסף רק אם יצטרף אדם נוסף ובהחלטה מפורשת חדשה של Tal.",
           options: [
-            { value: "named-raci", title: "RACI עם אדם ומחליף לכל תפקיד", description: "מבהיר מי מבצע, מי מאשר ומי מקבל עדכון.", recommended: true },
-            { value: "role-alias", title: "שם תפקיד ללא אדם", description: "מסמך נראה מלא, אך אין מי שאפשר לפנות אליו בפועל." },
-            { value: "everyone", title: "אחריות משותפת לכולם", description: "לא מומלץ — בפועל החלטות נופלות בין הכיסאות." }
+            { value: "tal-sole-owner", title: "Tal אחראי יחיד", description: "המודל הפעיל לכל משימה וחיבור.", recommended: true },
+            { value: "future-explicit-change", title: "חלוקה עתידית בהחלטה חדשה", description: "רק לאחר הצטרפות אדם נוסף ואישור מפורש של Tal." }
           ]
         },
         {
@@ -1575,6 +1581,9 @@
           ]
         }
       ];
+      decisions.forEach((decision) => {
+        decision.owner = "Tal";
+      });
       const elements = {
         sections: document.getElementById("sections"),
         toc: document.getElementById("toc-list"),

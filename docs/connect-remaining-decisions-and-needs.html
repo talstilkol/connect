@@ -133,7 +133,26 @@
       .notes-label textarea { width: 100%; min-height: 58px; margin-top: 4px; padding: 8px 10px; border: 1px solid #b7c7bd; border-radius: 8px; resize: vertical; background: #fff; }
       .need-card { padding: 17px; border: 1px solid var(--amber-line); border-inline-start: 6px solid var(--amber); border-radius: 13px; background: var(--amber-soft); }
       .need-card.secret { border-color: var(--red-line); border-inline-start-color: var(--red); background: var(--red-soft); }
+      .need-card.ready { border-color: var(--green-line); border-inline-start-color: var(--green); background: var(--green-soft); }
       .need-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-block: 7px; color: var(--muted); font-size: .86rem; }
+      .need-explainer { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 9px; margin-top: 11px; }
+      .need-explainer > div { padding: 11px 12px; border: 1px solid rgba(91,119,101,.25); border-radius: 9px; background: rgba(255,255,255,.78); }
+      .need-explainer strong { display: block; color: var(--green-dark); }
+      .activation { margin-top: 12px; padding: 13px 15px; border: 1px solid rgba(91,119,101,.3); border-radius: 10px; background: rgba(255,255,255,.86); }
+      .activation h4, .component-box h4 { margin: 0 0 7px; color: var(--green-dark); font-size: 1rem; }
+      .activation-steps { margin: 0; padding-inline-start: 28px; }
+      .activation-steps li { margin-block: 6px; padding-inline-start: 4px; }
+      .component-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+      .component-box { padding: 11px 12px; border: 1px solid rgba(91,119,101,.3); border-radius: 9px; background: rgba(255,255,255,.82); }
+      .component-box p { margin: 4px 0 0; }
+      .money-access-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; margin-top: 10px; }
+      .cost-box, .access-box { padding: 12px 13px; border-radius: 10px; }
+      .cost-box { border: 1px solid var(--amber-line); background: #fff9e8; }
+      .access-box { border: 1px solid #8eb2df; background: var(--blue-soft); }
+      .cost-box strong, .access-box strong { display: block; margin-bottom: 3px; }
+      .source-links { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+      .source-links a { display: inline-block; padding: 5px 8px; border: 1px solid #a8bcb0; border-radius: 7px; background: #fff; font-size: .84rem; font-weight: 800; text-decoration: none; }
+      .source-links a:hover { background: var(--green-soft); }
       .need-controls { display: grid; grid-template-columns: minmax(180px, .45fr) 1fr; gap: 9px; margin-top: 10px; }
       .need-controls label { color: var(--muted); font-size: .84rem; font-weight: 800; }
       .need-controls select, .need-controls input { width: 100%; min-height: 41px; margin-top: 4px; padding: 7px 9px; border: 1px solid #b5c5bb; border-radius: 8px; background: #fff; }
@@ -184,12 +203,12 @@
       footer .wrap { padding-block: 22px 32px; color: var(--muted); }
       .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
       @media (max-width: 850px) {
-        .hero-grid, .grid-2, .section-guide { grid-template-columns: 1fr; }
+        .hero-grid, .grid-2, .section-guide, .need-explainer, .money-access-grid { grid-template-columns: 1fr; }
         .applied-summary { grid-template-columns: repeat(2, minmax(0,1fr)); }
       }
       @media (max-width: 590px) {
         .wrap { width: min(100% - 22px, 1180px); }
-        .summary-grid, .applied-summary, .need-controls, .stage-detail { grid-template-columns: 1fr; }
+        .summary-grid, .applied-summary, .need-controls, .stage-detail, .component-grid { grid-template-columns: 1fr; }
         .panel { padding: 16px; }
         .counter { width: 100%; margin-inline-start: 0; }
       }
@@ -215,7 +234,7 @@
           <div class="summary-grid">
             <div class="summary-card"><strong>38/38</strong><span>תשובות מה־JSON נקלטו</span></div>
             <div class="summary-card"><strong>6/6</strong><span>כל ההחלטות הזכאיות נענו</span></div>
-            <div class="summary-card"><strong>15</strong><span>חיבורים/פרטים שעדיין חסרים</span></div>
+            <div class="summary-card"><strong>14</strong><span>חיבורים/פרטים שעדיין חסרים</span></div>
             <div class="summary-card"><strong>PUBLIC</strong><span>מצב המאגר המחייב</span></div>
           </div>
         </div>
@@ -240,7 +259,7 @@
         <h2>1. האם המחקר הסתיים?</h2>
         <div class="section-guide">
           <div class="guide-item"><strong>מה השלב אומר?</strong> בודקים אם התוכנית מבוססת על עובדות, מסמכים רשמיים ובדיקות — ולא רק על רעיונות.</div>
-          <div class="guide-item"><strong>מה צריך ממך?</strong> כרגע לא נדרש סוד או חיבור. בהמשך נצטרך בעלים לחשבונות ואישור משפטי.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> Tal כבר הוגדר כאחראי היחיד. בהמשך תתחבר בעצמך לחשבונות ותשיג אישורים חיצוניים כשנדרש.</div>
         </div>
         <div class="grid-2">
           <article class="research-card done">
@@ -292,7 +311,7 @@
             <strong>כל 38 התשובות נקלטו.</strong> הן נרשמו במסמך התכנון המשלים. הן קובעות כיוון, אך אינן מחליפות Credential, בדיקה חיה, אישור משפטי או אישור Production.
           </div>
           <div class="callout green" style="margin-top:12px">
-            <strong>נקלטו גם הצבעות V01 ו־V02 מהייצוא האחרון.</strong> כל 6 ההחלטות הזכאיות נענו; כל 15 פריטי החיבור והמידע עדיין מסומנים כחסרים.
+            <strong>נקלטו גם הצבעות V01 ו־V02 והוראת האחריות החדשה.</strong> כל 6 ההחלטות הזכאיות נענו; N01 סגור ו־14 פריטי החיבור והמידע עדיין דורשים Evidence.
           </div>
           <details open>
             <summary>2.1 ארבע ההחלטות האסטרטגיות</summary>
@@ -322,13 +341,13 @@
       </section>
 
       <section id="needs">
-        <h2>4. מה אני צריך ממך או מהצוות?</h2>
+        <h2>4. מה אני צריך ממך, Tal?</h2>
         <div class="section-guide">
-          <div class="guide-item"><strong>מה השלב אומר?</strong> זו רשימת האנשים, החשבונות והמידע שבלעדיהם אי אפשר להוכיח שהמערכת עובדת באמת.</div>
-          <div class="guide-item"><strong>מה צריך ממך?</strong> למסור מידע לא־רגיש ולתאם Membership לחשבונות. אין להעתיק Credentials למסמך.</div>
+          <div class="guide-item"><strong>מה השלב אומר?</strong> זו רשימת השירותים, החשבונות והמידע שבלעדיהם אי אפשר להוכיח שהמערכת עובדת באמת.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> להתחבר בעצמך לשירות המתאים. Codex יכול לעבוד דרך session או CLI שכבר אישרת; אין למסור שם משתמש, סיסמה או Token.</div>
         </div>
         <div class="callout red">
-          <strong>אין להדביק כאן Secrets.</strong> לא Token, לא Password, לא Private key, לא מספר כרטיס ולא מידע לקוח. חיבור נותנים באמצעות Membership או Vault; במסמך מסמנים רק סטטוס.
+          <strong>אין להדביק כאן Secrets.</strong> לא שם משתמש, לא Token, לא Password, לא Private key, לא מספר כרטיס ולא מידע לקוח. Tal מתחבר בעצמו. מפתח שהאפליקציה צריכה נשמר ישירות ב־Vault של Railway/Vercel או הספק; במסמך מסמנים רק סטטוס.
         </div>
         <div id="needs-list" class="needs-list" style="margin-top:14px"></div>
       </section>
@@ -359,15 +378,15 @@
             </li>
             <li>
               <strong>5.5 לבנות Atomic Task Registry</strong>
-              <div class="stage-detail"><span><b>מה זה אומר?</b>מפרקים את העבודה למשימות קטנות, מדידות, עם בעלים ובדיקת הצלחה.</span><span><b>מה צריך ממך?</b>שמות Primary ו־Backup, זמינות ותחומי אחריות.</span></div>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>מפרקים את העבודה למשימות קטנות, מדידות, עם Owner=Tal ובדיקת הצלחה.</span><span><b>מה צריך ממך?</b>כמה שעות שבועיות אתה מקצה לפרויקט ומתי אפשר להתריע אליך על תקלה.</span></div>
             </li>
             <li>
               <strong>5.6 לחשב אחוז, שעות ולוח זמנים</strong>
-              <div class="stage-detail"><span><b>מה זה אומר?</b>רק אחרי שכל המשימות ידועות אפשר לחשב התקדמות אמיתית ולא מספר מנחש.</span><span><b>מה צריך ממך?</b>לאשר זמינות צוות ותקציב; אין צורך לבחור אחוז בעצמך.</span></div>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>רק אחרי שכל המשימות ידועות אפשר לחשב התקדמות אמיתית ולא מספר מנחש.</span><span><b>מה צריך ממך?</b>לאשר את זמינות Tal והתקציב; אין צורך לבחור אחוז בעצמך.</span></div>
             </li>
             <li>
               <strong>5.7 לבצע חיבורי Staging לפי G01–G18</strong>
-              <div class="stage-detail"><span><b>מה זה אומר?</b>מחברים סביבת ניסוי נפרדת ומוכיחים כל מסלול בלי לסכן לקוחות אמיתיים.</span><span><b>מה צריך ממך?</b>Membership לחשבונות והקצאת בעלי תפקידים; לא להעביר Tokens בצ׳אט.</span></div>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>מחברים סביבת ניסוי נפרדת ומוכיחים כל מסלול בלי לסכן לקוחות אמיתיים.</span><span><b>מה צריך ממך?</b>להתחבר לכל חשבון לפי ההוראות שבסעיף 4; לא להעביר Credentials בצ׳אט.</span></div>
             </li>
             <li>
               <strong>5.8 לבצע שלוש ביקורות ולאשר root מדויק</strong>
@@ -406,10 +425,10 @@
     <script>
       (() => {
         "use strict";
-        const STORAGE_KEY = "connect-remaining-decisions-and-needs-v1";
+        const STORAGE_KEY = "connect-remaining-decisions-and-needs-v5";
         const strategicApplied = [
           "O03 · ישראל-first, בכפוף לאימות משפטי וזמינות ספק.",
-          "O11 · Primary + Backup לכל תפקיד; השמות והשעות עדיין חסרים.",
+          "O11 · הוראה מעודכנת: Tal אחראי יחיד; אין כרגע Primary/Backup/RACI.",
           "O12 · אחרי Pilot: קודם אמינות ליבה ו־Inbox.",
           "O13 · קודם Task Registry, ורק אחר כך אחוז וזמן."
         ];
@@ -506,22 +525,470 @@
           }
         ];
         const needs = [
-          ["N01", "שמות Primary ו־Backup", "Tal", "לכל אחריות חשובה צריך אדם מוביל ומחליף שיוכל להיכנס במקומו.", "שמות, תפקיד, שעות שבועיות, שעות on-call ונתיב escalation.", false],
-          ["N02", "Clerk Staging", "Rasha + Security", "Clerk הוא השומר בכניסה: הוא מנהל התחברות, משתמשים וארגונים בסביבת הניסוי.", "Membership/Project + Organizations + MFA policy. לא להדביק Keys כאן.", true],
-          ["N03", "Railway Staging", "Rasha + DevOps", "Railway מפעיל את השרת, מסד הנתונים ותור המשימות בסביבת הניסוי.", "API, Worker, PostgreSQL ו־Redis מבודדים עם Member access.", true],
-          ["N04", "Vercel Staging ו־Production", "Rasha + DevOps", "Vercel מפרסם את אתר React. צריך אתר ניסוי ואתר אמיתי נפרדים.", "Projects נפרדים, domains ו־APP_PUBLIC_ORIGIN בצד השרת.", true],
-          ["N05", "Meta Test WABA", "Tal + Rasha + David", "זהו חשבון WhatsApp Business רשמי לניסוי, בלי לשלוח ללקוחות אמיתיים.", "App, WABA, phone, templates, webhook, permissions, recipients מאושרים ו־live limits.", true],
-          ["N06", "AWS il-central-1", "Rasha + Security", "AWS ישמור קבצים ויסרוק אותם באזור ישראל, עם מנעול הצפנה ותקציב מוגבל.", "Account/Member, private S3, customer KMS, GuardDuty plan ו־budget alarms.", true],
-          ["N07", "Better Stack + OpenTelemetry", "Tal + Rasha + Operations", "כלי הניטור מספרים לנו כשהמערכת איטית, נפלה או מתנהגת באופן חשוד.", "Project, ingestion path, redaction, SLO ו־alert routing.", true],
-          ["N08", "OpenAI company project", "Tal + David + Security", "זהו אזור חברה מבודד להפעלת ה־AI, עם תקציב וכללי מידע משלו.", "Project membership, data controls, model/profile, budget ו־Eval environment. AI נשאר OFF.", true],
-          ["N09", "Stripe/Paddle sandbox", "Tal + Finance + Legal", "Sandbox הוא קופה לתרגול: בודקים תשלום בלי לקחת כסף אמיתי.", "לא נדרש להפעלת Pilot; יידרש לפני בחירת Billing פעיל.", true],
-          ["N10", "GitHub PUBLIC governance", "Tal + Rasha", "מגדירים מי רשאי לשנות את הקוד ואילו בדיקות חייבות לעבור לפני מיזוג.", "Ruleset ל־main, required CI, scanners, CODEOWNERS/collaborators ו־post-readback.", true],
-          ["N11", "Domains ו־Origins", "Tal + Rasha", "אלה הכתובות הרשמיות של האתר והשרתים שמותר להם לדבר זה עם זה.", "שמות Staging/Production וכתובות HTTPS. localhost רק Development.", false],
-          ["N12", "Legal ו־Privacy", "Tal + Counsel", "עורך דין בודק מה מותר לאסוף, לשלוח, לשמור ולמחוק לפי החוק.", "ישות משפטית, Privacy notice, DPA, consent/opt-out, retention, residency ו־incident contacts.", false],
-          ["N13", "תקציב ותקרות", "Tal + Finance", "קובעים מראש כמה כל שירות רשאי לעלות ומי עוצר אותו אם חורג.", "סכום ותקרת עלות לכל ספק, מטבע, owner ו־kill switch. בלי פרטי תשלום.", false],
-          ["N14", "PostgreSQL מבודד לבדיקה", "Rasha + David + QA", "זהו מסד נתונים זמני ונפרד שבו אפשר לתרגל שדרוג ושחזור בלי לסכן מידע אמיתי.", "Database זמני ללא Production data עבור migration/parity/restore Evidence.", true],
-          ["N15", "Pilot charter", "Tal + Product + Security", "זהו דף קצר שמגדיר מי משתתף בניסוי, מתי עוצרים ומה נחשב הצלחה.", "Tenant/עסק מאושר, משתתפים, תאריכים, stop authority וקריטריוני יציאה.", false]
-        ].map(([id, title, owner, simple, asks, secret]) => ({ id, title, owner, simple, asks, secret }));
+          {
+            id: "N01",
+            title: "מודל האחריות של הפרויקט",
+            owner: "Tal",
+            defaultStatus: "ready",
+            secret: false,
+            simple: "זהו הכלל שאומר מי דואג שכל דבר באמת ייסגר.",
+            does: "מונע מצב שבו משימה נופלת בין אנשים או שמישהו חושב שאדם אחר מטפל בה.",
+            why: "כרגע רק Tal עובד עם Codex, ולכן חלוקת Primary, Backup או RACI אינה נכונה ואינה נדרשת.",
+            asks: "ההחלטה כבר התקבלה: Tal אחראי על הכול. בעת חישוב לוח הזמנים יהיה צורך רק במספר שעות העבודה השבועיות שטל מקצה לפרויקט.",
+            steps: [
+              "אין חשבון לפתוח ואין שירות להפעיל.",
+              "כל Task, Gate, חיבור ובדיקה מקבלים Owner=Tal.",
+              "Tal מוסר בהמשך רק את קיבולת השעות השבועית ודרך ההתרעה אליו.",
+              "אם בעתיד יצטרף אדם נוסף, חלוקת אחריות תשתנה רק בהחלטה מפורשת חדשה של Tal."
+            ],
+            components: [
+              { name: "Owner", explanation: "האדם שדואג שהמשימה תיסגר. בפרויקט הזה הערך הוא Tal בלבד." }
+            ],
+            cost: "ללא עלות כספית. נדרש רק זמן עבודה של Tal.",
+            access: "לא נדרשת התחברות ולא נדרשים שם משתמש, סיסמה או Token.",
+            sources: [
+              ["כלל האחריות המחייב", "planning/sole-owner-operating-model-2026-08-30.md"]
+            ]
+          },
+          {
+            id: "N02",
+            title: "Clerk Staging",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "Clerk הוא השומר בכניסה לאפליקציה. הוא מציג מסך התחברות ומזהה מי המשתמש.",
+            does: "מנהל Sign-up, Sign-in, Sessions, משתמשים ו־Organizations, ומאפשר לדרוש MFA ממשתמשים מנהליים.",
+            why: "בלי שומר כניסה אמיתי אי אפשר להוכיח שרק האדם הנכון נכנס לעסק הנכון ושסביבת הניסוי מופרדת מ־Production.",
+            asks: "Tal צריך להתחבר ל־Clerk וליצור אפליקציית Staging. אין לשלוח ל־Codex סיסמה או Keys.",
+            steps: [
+              "Tal נרשם או מתחבר ל־Clerk בעצמו באמצעות חשבון שבשליטתו.",
+              "יוצרים Application נפרדת בשם שמבהיר שזו סביבת Staging.",
+              "מפעילים Organizations ומגדירים את מדיניות החברות וההרשאות הנדרשת ל־Pilot.",
+              "אם נדרש MFA אמיתי למנהלים, עוברים לתוכנית Pro שמכילה MFA; ב־Hobby אין Production MFA.",
+              "מגדירים Redirect URLs, Domains ו־Origins של Staging בלבד.",
+              "יוצרים את מפתחות הסביבה ומכניסים אותם ישירות ל־Vault של Vercel/Railway; לא מעתיקים אותם למסמך או לצ׳אט.",
+              "מריצים בדיקת Sign-in, Organization isolation, הרשאת מנהל ו־MFA, ואז מבצעים account readback."
+            ],
+            components: [
+              { name: "Clerk", explanation: "שירות Authentication שמטפל בכניסה, Session, משתמשים וארגונים." },
+              { name: "Organizations", explanation: "מנגנון שמייצג כל עסק בנפרד ומפריד את המשתמשים וההרשאות שלו." },
+              { name: "MFA", explanation: "אימות נוסף מעבר לסיסמה, למשל קוד מאפליקציית אימות." }
+            ],
+            cost: "אפשר להתחיל ב־Hobby ב־$0. תוכנית Pro מופיעה ב־$20 לחודש בחיוב שנתי, ומחירה החודשי עשוי להיות גבוה יותר. Pro נדרש ל־MFA של Production; יש לאמת מחיר חי לפני רכישה.",
+            access: "לא מוסרים שם משתמש או סיסמה. Tal מתחבר בעצמו; לאחר מכן Codex יכול לפעול רק דרך דפדפן מחובר שאושר במפורש. Codex אינו שולף את הסיסמה ואינו מציג Secret. Keys נשמרים ישירות ב־Vault.",
+            sources: [
+              ["Clerk Pricing", "https://clerk.com/pricing"],
+              ["Clerk Organizations", "https://clerk.com/docs/guides/organizations/overview"]
+            ]
+          },
+          {
+            id: "N03",
+            title: "Railway Staging",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "Railway הוא חדר המכונות בענן שבו השרת, Worker, מסד הנתונים והתור עובדים.",
+            does: "מפרסם את ה־API, מפעיל עבודות רקע, מספק PostgreSQL ו־Redis ושומר Environment Variables.",
+            why: "צריך סביבת Staging אמיתית ומבודדת כדי לבדוק את כל הזרימה לפני שמחברים לקוחות או כסף.",
+            asks: "Tal צריך להתחבר ל־Railway, לפתוח Project של Staging ולאפשר שימוש דרך session או CLI שכבר אושרו.",
+            steps: [
+              "Tal מתחבר ל־Railway בעצמו, רצוי דרך חשבון GitHub שבשליטתו.",
+              "יוצרים Project נפרד ל־Connect Staging ולא משתמשים בפרויקט Production.",
+              "מחברים את מאגר GitHub ואת הענף המאושר ל־Staging.",
+              "מוסיפים שירות API, שירות Worker, מסד PostgreSQL ושירות Redis עבור BullMQ.",
+              "מכניסים Environment Variables ו־Secrets ישירות ל־Railway Variables; לא לצ׳אט ולא ל־GitHub.",
+              "מגדירים Health checks, Private networking, Budget alert ותקרת הוצאה.",
+              "פורסים, קוראים חזרה את ה־deployment והמשאבים, ומריצים Smoke/E2E ללא Production data."
+            ],
+            components: [
+              { name: "Railway", explanation: "ספק הענן שמפעיל את שירותי השרת של Connect." },
+              { name: "PostgreSQL", explanation: "מסד הנתונים המרכזי ששומר רשומות מסודרות." },
+              { name: "Redis", explanation: "מאגר מהיר המשמש לתור עבודות ולמידע קצר־חיים." },
+              { name: "BullMQ", explanation: "מנהל תורים שמעביר עבודות ל־Worker בקצב נשלט." }
+            ],
+            cost: "כן. Hobby הוא מינימום $5 לחודש וכולל $5 שימוש; שימוש מעבר לכך מחויב לפי צריכה. Pro הוא מינימום $20 לחודש. עלות PostgreSQL, Redis, CPU, זיכרון ואחסון נכללת במדידת השימוש.",
+            access: "אין לשלוח סיסמה או Token. Tal מתחבר בדפדפן או מאמת Railway CLI. Codex יכול להשתמש רק ב־session/CLI שכבר אושרו. Secrets נשמרים בשדות Variables של Railway.",
+            sources: [
+              ["Railway Pricing", "https://railway.com/pricing"],
+              ["Railway Pricing Docs", "https://docs.railway.com/pricing"]
+            ]
+          },
+          {
+            id: "N04",
+            title: "Vercel Staging ו־Production",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "Vercel הוא חלון הראווה שמפרסם את ממשק ה־React באינטרנט.",
+            does: "בונה את האתר מכל שינוי מאושר, מפרסם Preview/Staging/Production, מחבר Domains ומספק HTTPS.",
+            why: "צריך להפריד אתר ניסוי מאתר אמיתי, כדי שבדיקה או Secret של Staging לא ישפיעו על לקוחות.",
+            asks: "Tal צריך להתחבר ל־Vercel דרך GitHub, לייבא את המאגר ולהגדיר פרויקטים או Environments נפרדים.",
+            steps: [
+              "Tal מתחבר ל־Vercel בעצמו באמצעות GitHub.",
+              "בגלל שמדובר במוצר עסקי, בוחרים Pro ולא מסתמכים על Hobby שמיועד לשימוש אישי ולא־מסחרי.",
+              "מייבאים את מאגר Connect ומגדירים ענף Staging וענף/Release של Production.",
+              "מפרידים Environment Variables ו־Secrets בין Preview, Staging ו־Production.",
+              "מגדירים Domain ו־APP_PUBLIC_ORIGIN מדויקים לכל סביבה; localhost מותר רק ב־Development.",
+              "מפעילים Spend Management, תקרת הוצאה והגנת Deployment המתאימה לתוכנית.",
+              "מבצעים Preview deploy, בדיקת HTTPS ו־Origin, ואז Production רק לאחר Gate מתאים ו־readback."
+            ],
+            components: [
+              { name: "Vercel", explanation: "שירות פריסה שמארח את ממשק ה־Web ומפעיל בנייה אוטומטית." },
+              { name: "HTTPS", explanation: "חיבור מוצפן בין המשתמש לאתר." },
+              { name: "APP_PUBLIC_ORIGIN", explanation: "הכתובת הציבורית המדויקת שהשרת רשאי לסמוך עליה." }
+            ],
+            cost: "כן למוצר עסקי. Hobby הוא $0 אך מיועד לשימוש אישי ולא־מסחרי. Pro הוא $20 לחודש וכולל $20 Usage credit; שימוש נוסף ותוספים עשויים לעלות יותר.",
+            access: "Tal מתחבר בעצמו. Codex יכול לעבוד דרך session מחובר או Vercel CLI מאומת, אך אינו צריך ואינו מקבל את הסיסמה. Secrets מוכנסים ישירות ל־Environment Variables.",
+            sources: [
+              ["Vercel Pricing", "https://vercel.com/pricing"]
+            ]
+          },
+          {
+            id: "N05",
+            title: "Meta Test WABA ו־WhatsApp Cloud API",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "זהו קו WhatsApp רשמי של Meta שמיועד קודם לניסוי מבוקר.",
+            does: "ה־Cloud API מאפשר לשרת לקבל הודעות דרך Webhook ולשלוח הודעות מאושרות דרך WABA ומספר עסקי.",
+            why: "חיבור לא־רשמי עלול להיחסם ואינו מתאים למוצר. Test WABA מאפשר להוכיח את החיבור בלי לשלוח לקהל אמיתי.",
+            asks: "Tal צריך להתחבר ל־Meta Business ול־Meta for Developers. אין לשלוח סיסמת Facebook, קוד MFA, Access Token או מספר לקוח בצ׳אט.",
+            steps: [
+              "Tal מתחבר בעצמו ל־Meta Business Suite ול־Meta for Developers.",
+              "יוצרים או מאמתים Business Portfolio ויוצרים Meta App ייעודי ל־Connect.",
+              "מוסיפים את מוצר WhatsApp ומשתמשים תחילה ב־Test WABA ובמספר הבדיקה של Meta.",
+              "מוסיפים רק מספר נמען מאושר לניסוי ושולחים Template בדיקה מאושר.",
+              "מגדירים Webhook בכתובת HTTPS של Staging, Verify Token סודי ו־subscriptions לאירועים הדרושים.",
+              "מאמתים את ההרשאות whatsapp_business_management ו־whatsapp_business_messaging ומגבילים אותן למינימום.",
+              "מייצרים Access Token מתאים ומכניסים אותו ישירות ל־Railway Vault; Codex אינו קורא או מציג אותו.",
+              "קוראים מהחשבון את איכות המספר, Templates, Pricing ומגבלות השליחה החיות; אין להמציא מספרי Rate Limit.",
+              "מריצים הודעה נכנסת ויוצאת לנמען המאושר ושומרים Evidence מושחר."
+            ],
+            components: [
+              { name: "Business Portfolio", explanation: "המעטפת העסקית של Meta שמחזיקה Apps ונכסי WhatsApp." },
+              { name: "WABA", explanation: "WhatsApp Business Account שמחזיק מספרים, Templates והגדרות העסק." },
+              { name: "Cloud API", explanation: "הדלת הרשמית שמאפשרת לשרת לדבר עם WhatsApp." },
+              { name: "Webhook", explanation: "כתובת שה־API קורא לה כאשר מתקבלת הודעה או משתנה סטטוס." }
+            ],
+            cost: "פתיחת חשבון הבדיקה אינה בהכרח כרוכה בדמי מנוי, אך שימוש חי ב־WhatsApp Business Platform עשוי להיות מחויב לפי סוג ההודעה ומדינת הנמען. המחירים והכללים משתנים; יש לקרוא את Rate Card החי בחשבון לפני הפעלה.",
+            access: "Tal רק מתחבר בעצמו. Codex יכול לעבוד דרך הדפדפן המחובר אם Tal מבקש זאת במפורש. אין אפשרות בטוחה של שליחת סיסמה; Access Token נשמר ישירות ב־Vault ולא נשלף אוטומטית לצ׳אט.",
+            sources: [
+              ["Meta WhatsApp Cloud API collection", "https://www.postman.com/meta/whatsapp-business-platform/documentation/wlk6lh4/whatsapp-cloud-api"],
+              ["WhatsApp pricing help", "https://faq.whatsapp.com/1022626499062292"]
+            ]
+          },
+          {
+            id: "N06",
+            title: "AWS באזור ישראל il-central-1",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "AWS הוא מחסן מאובטח בענן. כאן הוא מיועד לקבצים, הצפנה וסריקת קבצים באזור ישראל.",
+            does: "S3 שומר קבצים, KMS מנהל מפתחות הצפנה ו־GuardDuty יכול לבדוק קבצים שהועלו ולסמן חשד.",
+            why: "קובץ של לקוח עלול להכיל נוזקה או מידע רגיש. צריך מחסן פרטי, הצפנה, Quarantine וסריקה לפני שימוש.",
+            asks: "Tal צריך לפתוח או להתחבר לחשבון AWS, להגן עליו ב־MFA ולאפשר עבודה דרך Role/CLI מאומת — לעולם לא דרך Root password שנשלח בצ׳אט.",
+            steps: [
+              "Tal מתחבר לחשבון AWS בעצמו, מפעיל MFA על Root ומשתמש ב־Root רק לפעולות חשבון נדירות.",
+              "יוצרים IAM admin role מתאים לעבודה השוטפת ומאמתים AWS CLI דרך פרופיל או session קצר־חיים.",
+              "מפעילים את Region il-central-1, שמסומן כאזור Israel (Tel Aviv).",
+              "מגדירים AWS Budget והתראות על הוצאה לפני יצירת משאבים.",
+              "יוצרים Buckets פרטיים נפרדים ל־Quarantine ולתוכן נקי, עם Block Public Access.",
+              "יוצרים Customer-managed KMS key, מדיניות מינימלית ו־rotation בהתאם למדיניות.",
+              "מפעילים GuardDuty Malware Protection for S3 רק לפי התוכנית וה־Budget, ומגדירים תגיות/מסלול Quarantine.",
+              "מריצים בדיקה עם קובץ בדיקה מאושר וללא מידע לקוח, ומוודאים שהקובץ אינו נצרך לפני תוצאת סריקה.",
+              "מבצעים readback ל־Region, Bucket policy, KMS, GuardDuty ועלויות משוערות."
+            ],
+            components: [
+              { name: "AWS", explanation: "ספק ענן שמארח שירותי אחסון, הצפנה ואבטחה." },
+              { name: "S3", explanation: "מחסן קבצים בענן שמאורגן בתוך Buckets." },
+              { name: "KMS", explanation: "כספת מפתחות הצפנה שמונעת שמירת מפתח בתוך הקוד." },
+              { name: "GuardDuty", explanation: "שירות זיהוי איומים; כאן הוא מתוכנן לסריקת קבצים ב־S3." }
+            ],
+            cost: "כן, Pay-as-you-go. S3 מחויב לפי אחסון/בקשות/תעבורה; KMS כולל בדרך כלל עלות למפתח ולבקשות; GuardDuty מציע לרוב 30 ימי ניסיון וחיוב לפי שימוש. Malware Protection for S3 כולל Free tier מוגבל. המחיר משתנה לפי Region ונפח.",
+            access: "אין לשלוח AWS Root password, Access key או Secret key. Tal מתחבר ומאמת IAM/CLI. Codex משתמש רק ב־session או profile שכבר אושר; Secrets של האפליקציה נשמרים ב־Vault.",
+            sources: [
+              ["AWS Israel Region", "https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html"],
+              ["AWS Pricing", "https://aws.amazon.com/pricing/"],
+              ["GuardDuty Pricing", "https://aws.amazon.com/guardduty/pricing/"],
+              ["KMS Pricing", "https://aws.amazon.com/kms/pricing/"]
+            ]
+          },
+          {
+            id: "N07",
+            title: "Better Stack + OpenTelemetry",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "אלה האוזניים ולוח המחוונים של המערכת: הם אומרים אם משהו איטי, שבור או לא רגיל.",
+            does: "OpenTelemetry אוסף Logs, Metrics ו־Traces בפורמט אחיד; Better Stack שומר, מציג ומתריע.",
+            why: "בלי ניטור אפשר לגלות תקלה רק כשלקוח מתלונן. עם ניטור אפשר לזהות, לחקור ולמדוד SLO.",
+            asks: "Tal צריך להתחבר ל־Better Stack וליצור Project. אין לשלוח Source token; הוא נשמר ישירות ב־Vault.",
+            steps: [
+              "Tal נרשם או מתחבר ל־Better Stack בעצמו ויוצר Workspace/Project של Connect Staging.",
+              "יוצרים Sources ל־Logs, Traces ו־Metrics לפי הצורך.",
+              "מוסיפים OpenTelemetry SDK או Collector ל־API ול־Worker.",
+              "מגדירים redaction לפני היציאה מהאפליקציה כדי שלא יישלחו Tokens, תוכן הודעות או מידע אישי אסור.",
+              "שומרים ingestion token ישירות ב־Railway/Vercel Vault.",
+              "מגדירים Uptime monitor, Heartbeat ל־Worker, SLO והתראות שמגיעות ל־Tal.",
+              "מבצעים תרגיל: יוצרים תקלה מבוקרת ב־Staging, מקבלים Alert ומוודאים שאפשר להגיע מההתראה ל־Trace ול־Log המתאימים."
+            ],
+            components: [
+              { name: "OpenTelemetry", explanation: "תקן פתוח שאוסף ומעביר נתוני ניטור בלי לנעול את הקוד לספק אחד." },
+              { name: "Better Stack", explanation: "שירות שמציג את הנתונים, בודק זמינות ושולח Alerts." },
+              { name: "Logs, Metrics, Traces", explanation: "יומן אירועים, מדידות לאורך זמן ומסלול של בקשה בין שירותים." }
+            ],
+            cost: "OpenTelemetry הוא Open Source וללא דמי רישיון. Better Stack מציע Free tier לפרויקטים אישיים עם מכסות מוגבלות; תוכניות וצריכה מעבר למכסה עולות כסף. יש לבדוק את Usage בפועל לפני Production.",
+            access: "Tal מתחבר ל־Better Stack. Codex יכול להגדיר דרך session מחובר; ingestion token אינו נמסר ידנית אלא נשמר ב־Vault. OpenTelemetry עצמו אינו דורש חשבון.",
+            sources: [
+              ["Better Stack Pricing", "https://betterstack.com/pricing"],
+              ["What is OpenTelemetry", "https://opentelemetry.io/docs/what-is-opentelemetry/"]
+            ]
+          },
+          {
+            id: "N08",
+            title: "OpenAI company project",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "זהו חדר נפרד בפלטפורמת OpenAI שבו ה־AI של Connect מקבל הרשאות ותקציב מוגבלים.",
+            does: "Project מפריד API keys, משתמשים, Rate limits, Spend limits ונתוני שימוש משאר הפעילות.",
+            why: "חשבון ChatGPT אישי אינו תחליף לפרויקט API של החברה. צריך בידוד, חיוב, בקרה ו־Evals לפני שהבוט פעיל.",
+            asks: "Tal צריך להתחבר ל־OpenAI Platform, ליצור Project ולחבר חיוב API נפרד. אין לשלוח API key לצ׳אט.",
+            steps: [
+              "Tal מתחבר בעצמו ל־OpenAI Platform ובודק שהוא פועל בארגון הנכון.",
+              "יוצרים Project נפרד ל־Connect Staging; Project של Production ייפתח רק אחרי Gates.",
+              "מוסיפים אמצעי חיוב ל־API ומגדירים Spend alert/limit ותקציב חודשי. חיוב API נפרד ממנוי ChatGPT.",
+              "מגדירים Data controls, Retention והרשאות Model/Tool לפי המדיניות שאושרה.",
+              "יוצרים Project service account או API key בהרשאה המינימלית הנדרשת.",
+              "מכניסים את ה־key ישירות ל־Railway Vault; אין להדביק אותו בצ׳אט, HTML, GitHub או Frontend.",
+              "מגדירים Model profile ו־Rate limits מתוך Readback חי, לא מתוך ניחוש.",
+              "מריצים Eval environment ובדיקות בטיחות. AI נשאר OFF ואינו שולח הודעה בלי אישור אדם עד Acceptance."
+            ],
+            components: [
+              { name: "OpenAI API Project", explanation: "מיכל שמבודד Keys, שימוש, מגבלות והוצאות של אפליקציה אחת." },
+              { name: "Responses API", explanation: "ממשק השרת המתוכנן להפעלת מודל ה־AI של Connect." },
+              { name: "Evals", explanation: "בדיקות מדידות שמוודאות שהמודל שימושי ובטוח לפני הפעלה." }
+            ],
+            cost: "כן. OpenAI API מחויב לפי המודל, מספר ה־Tokens וכלים נוספים. הוא מחויב בנפרד ממנוי ChatGPT. המחיר המדויק תלוי ב־Model profile ובשימוש, ולכן יש לקבוע תקרה ולבדוק Pricing חי.",
+            access: "Tal מתחבר בעצמו ל־OpenAI Platform. Codex יכול לעבוד דרך session מאושר, אך אינו שולף את הסיסמה או את ה־API key. ה־key נשמר ישירות ב־Vault בצד השרת בלבד.",
+            sources: [
+              ["OpenAI Projects", "https://developers.openai.com/api/reference/resources/admin/subresources/organization/subresources/projects"],
+              ["OpenAI API authentication", "https://developers.openai.com/api/reference/overview"],
+              ["OpenAI model pricing", "https://developers.openai.com/api/docs/models/compare"]
+            ]
+          },
+          {
+            id: "N09",
+            title: "Stripe ו־Paddle Sandbox",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "אלה שתי קופות אפשריות. Sandbox הוא קופה לתרגול שבה אין כסף אמיתי.",
+            does: "Stripe מספק תשלומים ו־Billing; Paddle יכול לשמש Merchant of Record ולטפל גם בגבייה ובמסי מכירה עבור מוצרים דיגיטליים.",
+            why: "לפני גבייה אמיתית צריך להוכיח Checkout, Webhooks, מנוי, ביטול והחזר בלי לסכן כסף או לקוחות.",
+            asks: "לא נדרש ל־Pilot הנוכחי. אחרי Pilot, Tal יפתח Sandbox נפרד בכל ספק וישווה Eligibility, חוזה, מס ועלות.",
+            steps: [
+              "משאירים Billing אוטומטי OFF במשך ה־Pilot.",
+              "כאשר שלב Billing נפתח, Tal יוצר Stripe Sandbox ומתחבר בעצמו.",
+              "Tal יוצר גם Paddle Sandbox נפרד; אין צורך ב־Live account כדי להתחיל בדיקות.",
+              "בכל Sandbox יוצרים Product/Price אמיתיים של התוכנית שנבחרה, בלי נתוני לקוחות אמיתיים.",
+              "מגדירים Webhook חתום ל־Staging ושומרים את ה־secret ישירות ב־Vault.",
+              "בודקים תשלום מוצלח, כשל, חידוש, ביטול, החזר ו־replay באמצעות אמצעי הבדיקה הרשמיים.",
+              "משווים Eligibility בישראל, KYC, מס, DPA, חוזה ועלות כוללת; רק אז Tal בוחר ספק חי.",
+              "Live mode נשאר חסום עד החלטה חדשה, אישור משפטי/חשבונאי ו־Production Gate."
+            ],
+            components: [
+              { name: "Stripe", explanation: "ספק תשלומים ו־Billing; Sandbox מדמה עסקאות בלי להזיז כסף." },
+              { name: "Paddle", explanation: "פלטפורמת Billing שפועלת כ־Merchant of Record ומטפלת גם במסי מכירה ותמיכת חיוב." },
+              { name: "Merchant of Record", explanation: "גורם שמופיע כמוכר ללקוח ונוטל אחריות רחבה יותר על תשלום ומסי מכירה." }
+            ],
+            cost: "Sandbox בשני השירותים אינו מעביר כסף אמיתי ואפשר להתחיל בו ללא דמי עסקה. ב־Live, Stripe מחייב לפי אמצעי תשלום ומדינה; Paddle מפרסם Pay-as-you-go של 5% + $0.50 לעסקת Checkout. יש לאמת זכאות ומחיר חי לפני בחירה.",
+            access: "Tal מתחבר לכל Dashboard בעצמו. Codex יכול לפעול דרך session מאושר; API keys ו־Webhook secrets נשמרים ישירות ב־Vault. אין לשלוח כרטיס, סיסמה או key.",
+            sources: [
+              ["Stripe Testing", "https://docs.stripe.com/testing-use-cases"],
+              ["Stripe Pricing", "https://stripe.com/pricing"],
+              ["Paddle Sandbox", "https://developer.paddle.com/sdks/sandbox/"],
+              ["Paddle Pricing", "https://www.paddle.com/pricing"]
+            ]
+          },
+          {
+            id: "N10",
+            title: "GitHub PUBLIC governance",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "GitHub הוא הארון הציבורי שבו נשמר הקוד; Governance הוא המנעול שמונע שינוי לא־בדוק בקוד הראשי.",
+            does: "Ruleset מגן על main, Required checks מחייבים בדיקות, ו־scanners מחפשים Secret וחבילות פגיעות.",
+            why: "במאגר PUBLIC טעות קטנה יכולה לחשוף Secret מיד. צריך למנוע Force push, מחיקה ומיזוג של קוד שלא עבר CI.",
+            asks: "Tal צריך להתחבר ל־GitHub ולאשר את הגדרות המאגר. אין צורך לשלוח סיסמה אם gh CLI או הדפדפן כבר מחוברים.",
+            steps: [
+              "Tal מוודא שהמאגר connect נשאר PUBLIC וללא רישיון שימוש חדש עד Legal review.",
+              "מוודאים ש־Tal הוא Owner היחיד הפעיל; CODEOWNERS יכול להפנות ל־Tal.",
+              "יוצרים Ruleset ל־main שחוסם Force push ומחיקת ענף.",
+              "מחייבים את בדיקות ה־CI הקיימות לפני merge, בלי לדרוש Reviewer נוסף שאינו קיים.",
+              "מפעילים Secret scanning, Push protection, Dependency review ו־Dependabot ככל שזמין למאגר הציבורי.",
+              "בודקים שה־Actions מקבלים רק הרשאות מינימליות וש־Secrets אינם זמינים ל־Pull Requests לא־מהימנים.",
+              "מבצעים post-readback דרך GitHub/gh ושומרים Evidence של ההגדרות ללא Secret."
+            ],
+            components: [
+              { name: "GitHub", explanation: "שירות שמארח את קוד המקור ואת בדיקות ה־CI." },
+              { name: "Ruleset", explanation: "חוק שמגן על ענף ומחייב תנאים לפני שינוי." },
+              { name: "CODEOWNERS", explanation: "קובץ שמגדיר מי מתבקש לבדוק שינויים; כרגע Tal בלבד." }
+            ],
+            cost: "מאגר PUBLIC והגנת ענפים בסיסית זמינים ב־GitHub Free. יכולות Enterprise או שימושים נוספים עשויים לעלות כסף, אך אינם נדרשים להפעלת ההגנה הבסיסית המתוארת.",
+            access: "אם gh CLI או הדפדפן כבר מחוברים, Tal רק מאשר את הפעולות המבוקשות; אין לשלוח שם משתמש או סיסמה. Codex משתמש בהרשאה הקיימת בלבד ואינו מציג GitHub token.",
+            sources: [
+              ["GitHub protected branches", "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches"]
+            ]
+          },
+          {
+            id: "N11",
+            title: "Domains, DNS ו־Origins",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: false,
+            simple: "Domain הוא שם הבית באינטרנט; DNS הוא ספר הכתובות; Origin אומר מאיזו כתובת מותר לאתר לדבר עם השרת.",
+            does: "מחבר שמות קבועים ל־Vercel ול־Railway, מפעיל HTTPS ומונע מאתר זר לבצע בקשות בשם המשתמש.",
+            why: "בלי שמות מדויקים אי אפשר להגדיר APP_PUBLIC_ORIGIN, Redirect URLs, Webhooks ו־CORS בצורה בטוחה.",
+            asks: "Tal צריך לבחור ולמסור שמות Domain מדויקים ל־Staging ול־Production. אין צורך למסור סיסמת Registrar.",
+            steps: [
+              "Tal בוחר Domain ראשי ל־Production ו־subdomain נפרד ל־Staging.",
+              "Tal רוכש את ה־Domain אצל Registrar שבחר ומתחבר אליו בעצמו.",
+              "מגדירים DNS records שמפנים את ה־Frontend ל־Vercel ואת ה־API/ישויות הנדרשות ל־Railway.",
+              "מפעילים HTTPS ומחכים לאימות Certificate בכל Domain.",
+              "מגדירים APP_PUBLIC_ORIGIN, CORS, Clerk Redirect URLs ו־Meta Webhook לפי הכתובות המדויקות.",
+              "מאמתים שאין localhost ב־Staging/Production ושאין Origin רחב מסוג wildcard.",
+              "שומרים במסמך רק את שמות ה־Domain הציבוריים וראיית האימות, ללא Credentials."
+            ],
+            components: [
+              { name: "Domain", explanation: "השם שאנשים מקלידים בדפדפן." },
+              { name: "DNS", explanation: "המערכת שמתרגמת Domain לכתובת השירות שמארח אותו." },
+              { name: "Origin", explanation: "השילוב המדויק של protocol, domain ו־port שמזהה מקור בקשת Web." }
+            ],
+            cost: "כן, בדרך כלל Domain עולה דמי רישום וחידוש שנתיים המשתנים לפי הסיומת וה־Registrar. DNS בסיסי ו־HTTPS עשויים להיות כלולים בשירותי Vercel/Registrar, אך יש לבדוק לפני רכישה.",
+            access: "Tal מתחבר ל־Registrar בעצמו. Codex יכול להדריך או לפעול דרך session מאושר, אך לא צריך את הסיסמה. שמות Domain ציבוריים אפשר למסור במסמך.",
+            sources: [
+              ["Vercel Pricing and domains", "https://vercel.com/pricing"]
+            ]
+          },
+          {
+            id: "N12",
+            title: "Legal ו־Privacy",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: false,
+            simple: "זו בדיקה של עורך דין שמוודאת שמותר למערכת לאסוף, לשמור, לשלוח ולמחוק מידע.",
+            does: "מגדירה Privacy notice, בסיס חוקי, Consent, opt-out, DPA, Retention, Legal Hold, Data residency וטיפול באירוע.",
+            why: "קוד שעובד טכנית עדיין עלול להיות אסור משפטית. Codex אינו עורך דין ואינו יכול להמציא אישור.",
+            asks: "Tal צריך לבחור יועץ משפטי מתאים ולהשיג אישור כתוב על המדיניות החלה בישראל ועל שיווק ישיר ב־WhatsApp.",
+            steps: [
+              "Tal מגדיר את הישות המשפטית שתפעיל את Connect ואת השוק הראשון.",
+              "מכינים מפת מידע: איזה מידע נאסף, למה, היכן נשמר, עם מי משותף ומתי נמחק.",
+              "יועץ משפטי בודק Privacy notice, Terms, DPA והסכמי ספקים.",
+              "בודקים Consent, Direct marketing, opt-out, Templates ותיעוד מקור ההסכמה.",
+              "מאשרים Retention Policy v2, Legal Hold, Export ו־Erasure לכל Data class.",
+              "בודקים Data residency והעברות מידע בין ישראל לספקים בחו״ל.",
+              "מגדירים תהליך הודעה וטיפול באירוע פרטיות.",
+              "Tal שומר החלטה כתובה וגרסה מאושרת ללא מידע אישי או סוד מסחרי שאסור לפרסם."
+            ],
+            components: [
+              { name: "Privacy notice", explanation: "הודעה ללקוח שמסבירה איזה מידע נאסף ומה נעשה בו." },
+              { name: "DPA", explanation: "הסכם שמסדיר כיצד ספק מעבד מידע אישי עבור העסק." },
+              { name: "Consent ו־opt-out", explanation: "הסכמה מתועדת לקבל הודעות ודרך פשוטה להפסיק אותן." }
+            ],
+            cost: "כנראה כן. אין מחיר קבוע: שכר יועץ משפטי תלוי בהיקף, במדינות ובמסמכים. יש לבקש הצעת מחיר לפני תחילת הבדיקה.",
+            access: "לא נדרש חשבון טכני. Tal מוסר לי רק את ההחלטות והנוסחים שאושרו לפרסום. אין לשתף בצ׳אט מסמכים חסויים או מידע אישי ללא צורך והרשאה.",
+            sources: []
+          },
+          {
+            id: "N13",
+            title: "תקציב ותקרות עלות",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: false,
+            simple: "זהו סכום מקסימלי מראש לכל שירות, כמו מגבלה בכרטיס נטען.",
+            does: "קובע Budget, Alerts, Spend limits ו־kill switch כדי שתקלה או התקפה לא תיצור חשבון בלתי מוגבל.",
+            why: "Railway, Vercel, AWS, OpenAI, Better Stack ו־WhatsApp מחויבים לפי תוכנית או שימוש, ולכן עלות יכולה לגדול.",
+            asks: "Tal צריך להחליט על תקרה חודשית ומטבע לכל ספק ועל סכום שמפעיל Alert ועצירה. אין למסור מספר כרטיס.",
+            steps: [
+              "רושמים את כל הספקים שעשויים לחייב כסף.",
+              "Tal קובע תקרה חודשית לכל ספק ומטבע חשבונאי.",
+              "קובעים Alert מוקדם, Alert חמור ותקרת עצירה.",
+              "מפעילים Spend alerts ו־hard limits בתוך כל ספק כאשר הם זמינים.",
+              "מגדירים kill switch בתוך Connect עבור AI, Uploads, Campaigns ו־Billing.",
+              "אמצעי תשלום מוכנס רק בדף המאובטח של הספק על ידי Tal.",
+              "מבצעים בדיקת Alert ב־Staging ושומרים Evidence ללא פרטי תשלום."
+            ],
+            components: [
+              { name: "Budget", explanation: "סכום מתוכנן שמותר להוציא בתקופה." },
+              { name: "Spend limit", explanation: "תקרה שהספק או המערכת משתמשים בה כדי להתריע או לעצור." },
+              { name: "kill switch", explanation: "מתג חירום שעוצר יכולת שצורכת כסף או יוצרת סיכון." }
+            ],
+            cost: "הגדרת התקציב עצמה אינה עולה כסף. השירותים שעליהם מגינים כן עשויים לעלות; התקרה נקבעת על ידי Tal.",
+            access: "לא צריך למסור Credentials. Tal קובע סכומים לא־רגישים במסמך ומכניס פרטי תשלום רק אצל הספק. Codex יכול להגדיר Alerts דרך session מאושר.",
+            sources: []
+          },
+          {
+            id: "N14",
+            title: "PostgreSQL מבודד לבדיקה",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: true,
+            simple: "זהו עותק ריק וזמני של מסד הנתונים שבו מתרגלים שדרוג ושחזור בלי לגעת במידע אמיתי.",
+            does: "מאפשר להריץ Migrations, בדיקות Tenant isolation, Backup/Restore ו־parity בצורה בטוחה.",
+            why: "הרצת שינוי מבנה או שחזור לראשונה על Production עלולה למחוק או לערבב מידע.",
+            asks: "Tal צריך ליצור PostgreSQL זמני ב־Railway Staging. אין להכניס אליו Production data.",
+            steps: [
+              "Tal מתחבר ל־Railway דרך session המאושר.",
+              "יוצרים PostgreSQL חדש ונפרד שמסומן במפורש כ־isolated-test.",
+              "מכניסים Connection URL ישירות ל־Railway Vault של סביבת הבדיקה.",
+              "מריצים את כל ה־Migrations מהתחלה ומוודאים שה־schema תואם.",
+              "משתמשים רק בנתוני בדיקה דטרמיניסטיים שאושרו; אין להעתיק Production data.",
+              "מריצים negative tests ל־Tenant isolation, הרשאות, rollback ו־idempotency.",
+              "יוצרים Backup, משחזרים למסד מבודד נוסף וקושרים Evidence ל־backupId ול־digests.",
+              "לאחר שמירת Evidence ואישור שאין תלות, Tal מוחק את המשאב דרך ממשק Railway כדי לעצור חיוב."
+            ],
+            components: [
+              { name: "PostgreSQL", explanation: "מסד נתונים יחסי שמחזיק את הרשומות המרכזיות של Connect." },
+              { name: "Migration", explanation: "שינוי גרסאי ומסודר במבנה מסד הנתונים." },
+              { name: "Restore rehearsal", explanation: "תרגיל שמוכיח שאפשר באמת להחזיר מידע מגיבוי." }
+            ],
+            cost: "כן. מסד PostgreSQL ב־Railway מחויב כחלק מצריכת הזיכרון, האחסון וה־CPU. העלות זמנית אך ממשיכה כל עוד המשאב פעיל.",
+            access: "אין לשלוח Database URL או password. Tal יוצר את המשאב דרך Railway; החיבור נשמר ישירות ב־Vault ו־Codex משתמש בשם Environment Variable בלבד.",
+            sources: [
+              ["Railway Pricing", "https://docs.railway.com/pricing"]
+            ]
+          },
+          {
+            id: "N15",
+            title: "Pilot charter",
+            owner: "Tal",
+            defaultStatus: "missing",
+            secret: false,
+            simple: "זהו דף כללים קצר לניסוי הראשון: מי בפנים, מה בודקים ומתי עוצרים.",
+            does: "מגדיר Scope, משתתפים מאושרים, תאריכים, מדדי הצלחה, stop conditions ו־Rollback.",
+            why: "בלי גבול ברור, ניסוי קטן עלול להפוך בטעות ל־Production לפני שהמערכת מוכנה.",
+            asks: "Tal צריך למסור מידע עסקי לא־סודי על ה־Pilot ולאשר את המסמך הסופי. Tal הוא גם stop authority היחיד.",
+            steps: [
+              "Tal בוחר עסק/Tenant יחיד ומאושר ל־Pilot סגור.",
+              "מגדירים אילו משתמשים ונמעני WhatsApp מורשים להשתתף.",
+              "קובעים תאריך התחלה, תאריך סיום וחלונות פעילות.",
+              "מגדירים בדיוק אילו יכולות פעילות ואילו נשארות OFF.",
+              "קובעים מדדי הצלחה: Delivery, זמן תגובה, opt-out, שגיאות, עלות ושביעות רצון.",
+              "קובעים stop conditions, kill switches ו־Rollback; Tal הוא בעל סמכות העצירה.",
+              "מגדירים דרך דיווח ל־Tal בזמן תקלה.",
+              "Tal מאשר את Charter המדויק לפני הפעלת ה־Pilot."
+            ],
+            components: [
+              { name: "Pilot", explanation: "ניסוי מצומצם ומבוקר לפני השקה רחבה." },
+              { name: "Scope", explanation: "הגבול המדויק של מה כלול ומה אסור בניסוי." },
+              { name: "stop authority", explanation: "האדם שמוסמך לעצור מיד את הניסוי; כאן זה Tal." }
+            ],
+            cost: "אין דמי מנוי למסמך עצמו. יש עלות זמן עבודה ועלויות הספקים שבהם משתמש ה־Pilot.",
+            access: "לא נדרשת התחברות. אפשר למסור את פרטי ה־Pilot הלא־סודיים במסמך; אין לכלול מספרי טלפון, מידע לקוח או Secrets.",
+            sources: []
+          }
+        ];
 
         const technicalTerms = new Map([
           ["APP_PUBLIC_ORIGIN", "כתובת האתר הציבורית שהשרת סומך עליה לצורך יצירת קישורים ובדיקת בקשות."],
@@ -610,18 +1077,27 @@
           ["API", "דלת מסודרת שמאפשרת לתוכנות לדבר זו עם זו."],
           ["AWS", "ספק ענן שמספק אחסון, הצפנה, אבטחה ושירותים נוספים."],
           ["S3", "שירות AWS לאחסון קבצים כאובייקטים בתוך Bucket פרטי."],
+          ["Bucket", "מיכל קבצים בתוך S3, עם מדיניות גישה והצפנה משלו."],
           ["KMS", "שירות שמנהל מפתחות הצפנה בלי לשמור אותם בתוך הקוד."],
+          ["IAM", "מערכת ההרשאות של AWS שמגדירה מי רשאי לבצע איזו פעולה."],
+          ["Root", "חשבון העל של AWS. משתמשים בו רק לפעולות נדירות ומגנים עליו ב־MFA."],
           ["WABA", "קיצור של WhatsApp Business Account — החשבון העסקי הרשמי ב־Meta."],
           ["MFA", "כניסה שדורשת הוכחה נוספת מעבר לסיסמה, למשל אפליקציית אימות."],
           ["DPA", "הסכם שמגדיר כיצד ספק מעבד ומגן על מידע אישי עבור העסק."],
           ["SLO", "יעד מדיד לזמינות או למהירות שהמערכת אמורה לעמוד בו."],
-          ["RACI", "טבלה שמבהירה מי מבצע, מי מאשר, עם מי מתייעצים ואת מי מעדכנים."],
+          ["RACI", "טבלת חלוקת אחריות בין כמה אנשים. היא אינה פעילה כרגע כי Tal הוא האחראי היחיד."],
           ["E2E", "בדיקה מקצה לקצה שמדמה תהליך שלם כפי שמשתמש אמיתי מבצע אותו."],
           ["CI", "מערכת אוטומטית שבונה ובודקת כל שינוי בקוד."],
           ["AI", "בינה מלאכותית; כאן היא אינה שולחת הודעה בלי מסלול האישור שנקבע."],
           ["JSON", "מבנה טקסט מסודר להעברת נתונים בין מערכות."],
           ["Token", "מפתח גישה דיגיטלי. מתייחסים אליו כמו לסיסמה ואסור להדביק אותו כאן."],
           ["Tokens", "מפתחות גישה דיגיטליים. מתייחסים אליהם כמו לסיסמה ואסור להדביק אותם כאן."],
+          ["API key", "מפתח סודי שמאפשר לתוכנה להזדהות מול API. שומרים אותו רק ב־Vault בצד השרת."],
+          ["Access Token", "מפתח גישה לשירות. אין להדביק אותו בצ׳אט או במאגר."],
+          ["Password", "סיסמה אישית. Tal מקליד אותה רק במסך הרשמי של הספק."],
+          ["session", "חיבור שכבר אומת בדפדפן או בכלי פקודה ומאפשר לפעול בלי למסור את הסיסמה."],
+          ["CLI", "כלי שורת פקודה שמאפשר לעבוד עם שירות לאחר התחברות מאובטחת."],
+          ["Environment Variables", "שדות הגדרה בסביבת השרת; Secrets נשמרים בהם דרך Vault ולא בתוך הקוד."],
           ["Secret", "מידע סודי שמאפשר גישה או פענוח, כגון Token, סיסמה או מפתח פרטי."],
           ["Secrets", "מידע סודי שמאפשר גישה או פענוח, כגון Tokens, סיסמאות ומפתחות פרטיים."],
           ["Vault", "כספת ייעודית לשמירת Secrets והרשאות גישה אליהם."],
@@ -629,6 +1105,8 @@
           ["localhost", "כתובת שמצביעה רק על המחשב המקומי ומשמשת לפיתוח, לא לאתר אמיתי."],
           ["Origin", "השילוב של פרוטוקול, שם אתר ופורט שמזהה מאין הגיעה בקשת דפדפן."],
           ["Origins", "כתובות המקור שהמערכת מרשה להן לתקשר איתה."],
+          ["DNS", "ספר הכתובות של האינטרנט שמחבר Domain לשירות שמארח אותו."],
+          ["Domain", "שם קבוע של אתר באינטרנט."],
           ["Domains", "שמות האתר שאנשים מקלידים בדפדפן, למשל example.com."],
           ["Tenant", "עסק או ארגון אחד שמידעו חייב להיות מופרד מעסקים אחרים."],
           ["Pilot", "ניסוי מצומצם עם משתמשים ותנאי עצירה מוגדרים לפני השקה רחבה."],
@@ -659,15 +1137,23 @@
           ["Meta", "החברה שמפעילה את WhatsApp ואת ממשקי WhatsApp Business."],
           ["Stripe", "ספק תשלומים אפשרי; אינו פעיל ב־Pilot הנוכחי."],
           ["Paddle", "ספק Billing אפשרי שפועל לעיתים כ־Merchant of Record; אינו פעיל ב־Pilot."],
+          ["Merchant of Record", "הגורם שמוכר רשמית ללקוח ונושא באחריות רחבה לתשלום ולמסי מכירה."],
           ["Clerk", "שירות לניהול התחברות, משתמשים וארגונים."],
+          ["Organizations", "קבוצות משתמשים שמייצגות עסקים נפרדים בתוך Clerk."],
+          ["Business Portfolio", "המעטפת העסקית ב־Meta שמחזיקה Apps ונכסי WhatsApp."],
+          ["Cloud API", "הממשק הרשמי בענן שמאפשר לשרת לשלוח ולקבל WhatsApp."],
+          ["Free tier", "מכסה התחלתית ללא תשלום; מעבר למכסה או יכולות נוספות עשויים לעלות כסף."],
+          ["Pay-as-you-go", "חיוב לפי השימוש בפועל במקום מחיר קבוע בלבד."],
+          ["Usage", "כמות המשאבים או הבקשות שהשירות מדד לצורך מגבלה או חיוב."],
+          ["KYC", "בדיקת זהות ופרטי עסק שספק תשלומים מבצע לפני הפעלה חיה."],
           ["B0 v7", "גרסה של חבילת תכנון בסיסית שנדחתה בביקורת ודורשת תיקון."],
           ["D02-A9", "חבילת התכנון של מסלול ה־AI שנבדקה ונדרשת לתיקון."],
           ["Candidates", "גרסאות מועמדות שעדיין לא התקבלו כמקור אמת סופי."],
           ["Audit", "בדיקה שיטתית שמחפשת טעויות, חוסרים וסיכונים ומצרפת ראיות."],
           ["Evals", "בדיקות מדידות לאיכות ולבטיחות של התנהגות מודל AI."],
           ["Region", "אזור גאוגרפי של ספק ענן שבו שירות ומידע מופעלים."],
-          ["Owner", "האדם שאחראי לוודא שהמשימה או ההחלטה אכן נסגרת."],
-          ["owner", "האדם שאחראי לוודא שהמשימה או ההחלטה אכן נסגרת."]
+          ["Owner", "האדם שאחראי לוודא שהמשימה או ההחלטה אכן נסגרת. כרגע זה Tal בלבד."],
+          ["owner", "האדם שאחראי לוודא שהמשימה או ההחלטה אכן נסגרת. כרגע זה Tal בלבד."]
         ]);
 
         const technicalTermPattern = new RegExp(
@@ -849,20 +1335,84 @@
             head.append(heading, id);
             const meta = document.createElement("div");
             meta.className = "need-meta";
-            meta.textContent = `בעלים: ${need.owner} · ${need.secret ? "חיבור דרך Membership/Vault בלבד" : "אפשר למסור מידע לא־רגיש"}`;
-            const simple = document.createElement("p");
-            simple.className = "plain-explanation";
-            const simpleStrong = document.createElement("strong");
-            simpleStrong.textContent = "מה זה אומר? ";
-            simple.append(simpleStrong, document.createTextNode(need.simple));
+            meta.textContent = "אחראי יחיד: " + need.owner + " · " + (need.secret ? "Tal מתחבר; Secrets נשמרים ב־Vault" : "אין צורך למסור Secret");
             const asks = document.createElement("p");
             asks.className = "plain-explanation";
             const asksStrong = document.createElement("strong");
             asksStrong.textContent = "מה צריך בפועל? ";
             asks.append(asksStrong, document.createTextNode(need.asks));
+
+            const explainer = document.createElement("div");
+            explainer.className = "need-explainer";
+            [
+              ["מה זה?", need.simple],
+              ["מה הוא עושה?", need.does],
+              ["למה צריך אותו?", need.why]
+            ].forEach(([label, value]) => {
+              const box = document.createElement("div");
+              const strong = document.createElement("strong");
+              strong.textContent = label;
+              box.append(strong, document.createTextNode(value));
+              explainer.appendChild(box);
+            });
+            asksStrong.textContent = "מה אני צריך ממך בדיוק? ";
+
+            const components = document.createElement("div");
+            components.className = "component-grid";
+            (need.components || []).forEach((component) => {
+              const box = document.createElement("div");
+              box.className = "component-box";
+              const title = document.createElement("h4");
+              title.textContent = component.name;
+              const copy = document.createElement("p");
+              copy.textContent = component.explanation;
+              box.append(title, copy);
+              components.appendChild(box);
+            });
+
+            const activation = document.createElement("div");
+            activation.className = "activation";
+            const activationTitle = document.createElement("h4");
+            activationTitle.textContent = "איך מפעילים — לפי הסדר";
+            const steps = document.createElement("ol");
+            steps.className = "activation-steps";
+            need.steps.forEach((step) => {
+              const li = document.createElement("li");
+              li.textContent = step;
+              steps.appendChild(li);
+            });
+            activation.append(activationTitle, steps);
+
+            const moneyAccess = document.createElement("div");
+            moneyAccess.className = "money-access-grid";
+            const cost = document.createElement("div");
+            cost.className = "cost-box";
+            const costTitle = document.createElement("strong");
+            costTitle.textContent = "האם זה עולה כסף?";
+            cost.append(costTitle, document.createTextNode(need.cost));
+            const access = document.createElement("div");
+            access.className = "access-box";
+            const accessTitle = document.createElement("strong");
+            accessTitle.textContent = "שם משתמש וסיסמה — או רק להתחבר?";
+            access.append(accessTitle, document.createTextNode(need.access));
+            moneyAccess.append(cost, access);
+
+            const sources = document.createElement("div");
+            sources.className = "source-links";
+            (need.sources || []).forEach(([label, href]) => {
+              const link = document.createElement("a");
+              link.href = href;
+              link.textContent = label;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              sources.appendChild(link);
+            });
             const controls = document.createElement("div");
             controls.className = "need-controls";
             const current = state.needs[need.id] || {};
+            const effectiveStatus = current.status || need.defaultStatus || "missing";
+            card.classList.toggle("ready", effectiveStatus === "ready");
+            id.textContent = need.id + " · " + (effectiveStatus === "ready" ? "נסגר" : "דורש פעולה");
             const statusLabel = document.createElement("label");
             statusLabel.textContent = "סטטוס";
             const select = document.createElement("select");
@@ -872,10 +1422,12 @@
               option.textContent = label;
               select.appendChild(option);
             });
-            select.value = current.status || "missing";
+            select.value = effectiveStatus;
             select.addEventListener("change", () => {
               const existing = state.needs[need.id] || {};
               state.needs[need.id] = { status: select.value, note: existing.note || "" };
+              card.classList.toggle("ready", select.value === "ready");
+              id.textContent = need.id + " · " + (select.value === "ready" ? "נסגר" : "דורש פעולה");
               saveState();
             });
             statusLabel.appendChild(select);
@@ -884,7 +1436,7 @@
             const input = document.createElement("input");
             input.type = "text";
             input.maxLength = 500;
-            input.placeholder = need.secret ? "לדוגמה: Member נוסף; אין לכתוב Token" : "הערה קצרה";
+            input.placeholder = need.secret ? "לדוגמה: Tal התחבר; אין לכתוב Token" : "הערה קצרה";
             input.value = current.note || "";
             input.addEventListener("input", () => {
               const existing = state.needs[need.id] || { status: select.value };
@@ -893,7 +1445,11 @@
             });
             noteLabel.appendChild(input);
             controls.append(statusLabel, noteLabel);
-            card.append(head, meta, simple, asks, controls);
+            card.append(head, meta, explainer, asks);
+            if (components.childElementCount) card.appendChild(components);
+            card.append(activation, moneyAccess);
+            if (sources.childElementCount) card.appendChild(sources);
+            card.appendChild(controls);
             target.appendChild(card);
           });
         }
@@ -914,9 +1470,15 @@
 
         function buildExport() {
           ensureState();
+          const readyNeedIds = needs
+            .filter((need) => (state.needs[need.id]?.status || need.defaultStatus || "missing") === "ready")
+            .map((need) => need.id);
+          const missingNeedIds = needs
+            .filter((need) => (state.needs[need.id]?.status || need.defaultStatus || "missing") !== "ready")
+            .map((need) => need.id);
           return {
             document: "connect-remaining-decisions-and-needs",
-            version: 4,
+            version: 5,
             exportedAt: new Date().toISOString(),
             warning: "אין לכלול Secrets או מידע אישי. בחירות הן Planning בלבד עד Evidence ואישור פורמלי.",
             inheritedDecisionExport: {
@@ -946,6 +1508,18 @@
               developmentFreeze: "ACTIVE",
               officialCompletion: "unknown/unavailable"
             },
+            ownershipModel: {
+              status: "ACTIVE",
+              soleOwner: "Tal",
+              primaryBackupRaciActive: false,
+              supersedesHistoricalAssignmentsForExecution: true
+            },
+            currentNeedsSummary: {
+              readyCount: readyNeedIds.length,
+              missingCount: missingNeedIds.length,
+              readyIds: readyNeedIds,
+              stillRequiresEvidence: missingNeedIds
+            },
             decisions: decisions.map((decision) => {
               const value = effectiveDecisionState(decision);
               return {
@@ -965,8 +1539,15 @@
                 title: need.title,
                 owner: need.owner,
                 simpleExplanation: need.simple,
+                whatItDoes: need.does,
+                whyItIsNeeded: need.why,
                 requestFromUser: need.asks,
-                status: value.status || "missing",
+                activationSteps: need.steps,
+                costExplanation: need.cost,
+                accessExplanation: need.access,
+                components: need.components || [],
+                officialSources: (need.sources || []).map(([label, url]) => ({ label, url })),
+                status: value.status || need.defaultStatus || "missing",
                 note: value.note || "",
                 secretHandling: need.secret ? "MEMBERSHIP_OR_VAULT_ONLY" : "NON_SECRET_INFORMATION_ONLY"
               };
@@ -1019,7 +1600,7 @@
         function updateCounts() {
           ensureState();
           const answered = decisions.filter((decision) => Boolean(effectiveDecisionState(decision).answer)).length;
-          const ready = needs.filter((need) => state.needs[need.id]?.status === "ready").length;
+          const ready = needs.filter((need) => (state.needs[need.id]?.status || need.defaultStatus || "missing") === "ready").length;
           document.getElementById("answered-count").textContent = String(answered);
           document.getElementById("ready-count").textContent = String(ready);
         }

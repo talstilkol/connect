@@ -323,7 +323,7 @@
     <header class="hero">
       <p>מסמך החלטות מרכזי · גרסה 1 · נבדק ב־21.08.2026</p>
       <h1>Connect — כל ההחלטות שנותרו</h1>
-      <p>מטרת המסמך: לאפשר לטל ולצוות לענות בצורה מסודרת על כל השאלות שחוסמות Pilot, Production והמשך פיתוח Best-in-class. בחירה כאן היא סיכום לדיון; החלטה הופכת למחייבת רק לאחר אישור הבעלים ועדכון ה־Decision Registry או ה־ADR המתאים.</p>
+      <p>מטרת המסמך: לאפשר ל־Tal לענות בצורה מסודרת על השאלות שחוסמות Pilot, Production והמשך פיתוח Best-in-class. בחירה כאן היא סיכום לדיון; החלטה הופכת למחייבת רק לאחר Evidence ועדכון ה־Decision Registry או ה־ADR המתאים.</p>
       <div class="meta-row" aria-label="סיכום מצב">
         <div class="meta-item"><strong>15</strong>שלבים מרכזיים קדימה</div>
         <div class="meta-item"><strong>5 + 10</strong>לפני Pilot + אחרי Pilot</div>
@@ -332,13 +332,18 @@
       </div>
     </header>
 
+    <section class="panel" aria-labelledby="ownership-update-heading">
+      <h2 id="ownership-update-heading">0. עדכון אחריות מחייב</h2>
+      <div class="callout"><strong>Tal הוא האחראי היחיד.</strong> אין כרגע חלוקת תפקידים, Primary, Backup או RACI. כל שם או הקצאה ישנים במסמך זה הם היסטוריים ומבוטלים לביצוע. מדריך השירותים והפעולות העדכני נמצא ב־<a href="connect-remaining-decisions-and-needs.html">החלטות פתוחות ומה צריך מ־Tal</a>.</div>
+    </section>
+
     <section class="panel" aria-labelledby="time-heading">
       <h2 id="time-heading">1. כמה שלבים וכמה זמן נשאר?</h2>
       <div class="callout"><strong>תשובה קצרה:</strong> נשארו 15 שלבים ברמת התוכנית: 5 עד Pilot מבוקר ועוד 10 מה־Pilot ועד מוצר Best-in-class. חלק גדול מהקוד בתוך חמשת השלבים הראשונים כבר קיים, אבל שלב נסגר רק לאחר חשבון חי, תצורה, בדיקות Staging וראיה חתומה.</div>
       <div class="time-grid" style="margin-top: 1rem">
         <div class="time-card"><strong>120–260 שעות</strong>עבודה נטו משוערת עד Pilot. לא כולל המתנה ל־Meta, ספקים, Legal או פתיחת Accounts.</div>
         <div class="time-card"><strong>4–10 שבועות</strong>למפתח אחד לפי כ־28 שעות יצרניות בשבוע.</div>
-        <div class="time-card"><strong>3–6 שבועות</strong>טווח קלנדרי סביר לצוות של שלושה, כולל תיאום ו־Review אך לא עיכוב ספקים.</div>
+        <div class="time-card"><strong>תלוי בזמינות Tal</strong>אין עוד אומדן לצוות. הזמן הקלנדרי יחושב רק לאחר ש־Tal ימסור כמה שעות עבודה שבועיות הוא מקצה לפרויקט.</div>
         <div class="time-card"><strong>1,840–3,560 שעות</strong>האומדן התכנוני הקיים לעשרת שלבי Best-in-class שאחרי ה־Pilot; חובה לכיילו מחדש לפי נתוני ה־Pilot.</div>
       </div>
       <ol class="stage-list">
@@ -671,18 +676,17 @@
         </div>
       </details>
 
-      <details class="decision hard" data-question data-decision-id="D19">
-        <summary><span class="number">19</span><span class="summary-title"><strong>בעלי תפקידים ו־RACI</strong><small>מי מחליט, מי מבצע ומי בכוננות</small></span><span class="badge hard">חוסמת</span></summary>
+      <details class="decision required" data-question data-decision-id="D19">
+        <summary><span class="number">19</span><span class="summary-title"><strong>מודל אחריות יחידני</strong><small>Tal אחראי לכל העבודה הפעילה</small></span><span class="badge required">נסגרה</span></summary>
         <div class="decision-body">
-          <div class="beginner"><strong>למתחילים:</strong> RACI מונע מצב שבו כולם „אחראים” ולכן אף אחד לא מוסמך לסגור החלטה.</div>
-          <ul class="questions"><li>מי Product, Security, Operations, Privacy, Billing, Release, Secrets ו־On-call owner?</li><li>מי Backup לכל תפקיד?</li><li>מי יכול לאשר Production ו־Rollback?</li></ul>
-          <fieldset><legend>בחר מודל</legend><div class="options">
-            <label class="option recommended"><input type="radio" name="D19" value="named-primary-backup" data-recommended><span><strong>אדם מזוהה + Backup לכל תחום — מומלץ</strong><span>טל נשאר Rate-limit research; דוד Backend; ראשה Deployment. יש להשלים את יתר השמות.</span></span></label>
-            <label class="option"><input type="radio" name="D19" value="team-owned"><span><strong>בעלות לפי „הצוות”</strong><span>לא מספיקה להחלטות חירום ולאישור Release.</span></span></label>
-            <label class="option"><input type="radio" name="D19" value="external-owners"><span><strong>Outsource לחלק מהתחומים</strong><span>אפשרי ל־Legal/Security/Operations, עם SLA וסמכות כתובים.</span></span></label>
+          <div class="beginner"><strong>למתחילים:</strong> כשאדם אחד עובד על הפרויקט אין טעם בטבלת חלוקת תפקידים. צריך רק אדם אחד שמוודא שהכול נסגר.</div>
+          <ul class="questions"><li>האם Tal ממשיך להיות האחראי היחיד?</li><li>כמה שעות שבועיות Tal מקצה לפרויקט?</li><li>באיזה ערוץ Tal רוצה לקבל התראת חירום?</li></ul>
+          <fieldset><legend>המודל שנבחר</legend><div class="options">
+            <label class="option recommended"><input type="radio" name="D19" value="tal-sole-owner" data-recommended checked><span><strong>Tal אחראי יחיד — מאושר</strong><span>כל משימה, חשבון, בדיקה ותיאום נמצאים באחריות Tal.</span></span></label>
+            <label class="option"><input type="radio" name="D19" value="future-explicit-change"><span><strong>חלוקה עתידית בהחלטה חדשה</strong><span>רק אם יצטרף אדם נוסף ו־Tal יאשר במפורש שינוי חדש.</span></span></label>
           </div></fieldset>
-          <label class="notes">רשום Primary ו־Backup לכל שמונת התפקידים<textarea name="D19_notes"></textarea></label>
-          <p class="owner"><strong>בעלים:</strong> הנהלה / רועי.</p>
+          <label class="notes">שעות שבועיות וערוץ התראה בלבד; אין לכתוב Secrets<textarea name="D19_notes"></textarea></label>
+          <p class="owner"><strong>אחראי יחיד:</strong> Tal.</p>
         </div>
       </details>
 
@@ -902,6 +906,10 @@
       const progressBar = document.getElementById("progressBar");
       const progressText = document.getElementById("progressText");
       const saveState = document.getElementById("saveState");
+
+      document.querySelectorAll(".owner").forEach((owner) => {
+        owner.textContent = "אחראי יחיד: Tal";
+      });
 
       function readAnswers() {
         return decisions.map((decision) => {

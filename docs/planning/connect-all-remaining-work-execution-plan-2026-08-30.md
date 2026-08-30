@@ -10,9 +10,13 @@
 
 1.1.4 המאגר נשאר `PUBLIC`; ‏`Gate29=BLOCKED`; ‏Development freeze=`ACTIVE`; ‏Production Acceptance=`0`.
 
-1.1.5 אחוז ההשלמה המדויק, יתרת השעות ולוח הזמנים נשארים `unknown/unavailable` עד השלמת שלב 11: Atomic Task Registry, RACI וקיבולת צוות.
+1.1.5 אחוז ההשלמה המדויק, יתרת השעות ולוח הזמנים נשארים `unknown/unavailable` עד השלמת שלב 11: Atomic Task Registry, משקלי משימות, תלויות וקיבולת העבודה של Tal.
 
 1.1.6 התוכנית כוללת `23` שלבים עיקריים. זהו סדר עבודה, לא מכנה שממנו מותר לחשב אחוז השלמה.
+
+1.1.7 מודל האחריות הפעיל הוא [Tal כאחראי יחיד](sole-owner-operating-model-2026-08-30.md): כל משימה, Gate, חיבור, בדיקה ותיאום בבעלות Tal בלבד. הקצאות Primary/Backup/RACI ישנות מבוטלות לצורכי ביצוע.
+
+1.1.8 אישור חיצוני שנדרש מ־Legal, ספק או מומחה הוא Evidence שטל אחראי להשיג; הוא אינו חלוקת בעלות לאדם אחר.
 
 ## 1.2 החלטות Tal המחייבות את התוכנית
 
@@ -98,7 +102,7 @@
 
 4.3.2 לתקן Path confinement, Symlink rejection, closed schemas ו־canonical serialization.
 
-4.3.3 להוכיח Appointment נפרד לכל תפקיד ולאסור self-appointment וקריסת תפקידים לאדם אחד.
+4.3.3 להפריד בין סמכויות לוגיות במנגנון הבקרה. Tal נשאר Owner יחיד של העבודה, אך אינו רשאי לטעון שביקורת עצמית היא ביקורת עצמאית; אם Gate דורש Reviewer עצמאי, הוא נשאר חסום עד Evidence חיצוני אמיתי.
 
 4.3.4 להגדיר CAS, replay, response loss, outbox ו־recovery כמעבר מצב אטומי אמיתי ולא כ־Boolean נטען.
 
@@ -108,7 +112,7 @@
 
 ## 4.4 מה צריך מ־Tal
 
-4.4.1 שמות Primary ו־Backup לתפקידי Authority כאשר החבילה תהיה בשלה.
+4.4.1 אין צורך בשמות Primary/Backup. Tal אחראי להכין את החבילה; אם תנאי הקבלה דורש סמכות מקצועית או מבקר עצמאי, Tal יתאם אותו בעתיד וישמור את ה־Evidence.
 
 ## 4.5 תנאי סיום
 
@@ -334,7 +338,7 @@
 
 11.4.1 Planning root Accepted, כל ביקורות היסוד Accepted ו־Gate29 מקבל החלטה מפורשת עם Scope.
 
-# 12. שלב 11 — Atomic Task Registry, RACI וזמן
+# 12. שלב 11 — Atomic Task Registry, קיבולת Tal וזמן
 
 ## 12.1 מה השלב אומר
 
@@ -346,7 +350,7 @@
 
 12.2.2 לסווג כל מימוש קיים: `KEEP`, ‏`VERIFY`, ‏`REFACTOR`, ‏`QUARANTINE` או `REMOVE-WITH-AUTHORITY`.
 
-12.2.3 לכל Task להוסיף Owner role, Primary, Backup, dependency, environment, inputs, outputs, negative tests, Evidence ו־Definition of Done.
+12.2.3 לכל Task להוסיף `Owner=Tal`, ‏dependency, environment, inputs, outputs, negative tests, Evidence ו־Definition of Done.
 
 12.2.4 לאסור Task גדול שאינו ניתן לסיום ולפרק אותו לתת־משימות אטומיות.
 
@@ -356,7 +360,7 @@
 
 ## 12.3 מה צריך מ־Tal
 
-12.3.1 N01: שמות Primary ו־Backup, תפקידים, שעות שבועיות, on-call ונתיב escalation.
+12.3.1 N01 נסגר: `Owner=Tal` לכל העבודה. כדי לחשב זמן נדרשות רק שעות העבודה השבועיות שטל מקצה לפרויקט וחלונות זמן שבהם הוא זמין לטיפול בתקלה.
 
 ## 12.4 תנאי סיום
 
@@ -692,7 +696,7 @@
 
 # 26. מידע חיצוני שעדיין חסר
 
-26.1 שמות RACI, זמינות ו־escalation.
+26.1 שעות העבודה השבועיות של Tal, זמינות לטיפול בתקלות ודרך ההודעה המועדפת אליו; מודל האחריות עצמו כבר נסגר.
 
 26.2 Clerk, Railway, Vercel, Meta, AWS, Better Stack ו־OpenAI Memberships.
 

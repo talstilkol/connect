@@ -32,6 +32,8 @@
 
 1.1.15 כל `2/2` ההצבעות הזכאיות ב־`CONNECT-ELIGIBLE-TAL-VOTES-V2` נענו; מספר ההצבעות הזכאיות הפתוחות כעת=`0`.
 
+1.1.16 הוראת Tal המאוחרת מבטלת את חלוקת התפקידים הקודמת: [Tal הוא האחראי היחיד](sole-owner-operating-model-2026-08-30.md) לכל משימה, Gate, חיבור, בדיקה ותיאום. שמות או תפקידי Primary/Backup/RACI ישנים נשארים היסטוריים בלבד.
+
 ## 1.2 כלל פרשנות
 
 1.2.1 בחירה של Tal סוגרת את שאלת הכיוון התכנוני בלבד.
@@ -52,13 +54,13 @@
 
 2.1.3 חסם שנשאר=`Legal review + live account/service availability readback`.
 
-## 2.2 O11 — בעלי תפקידים ו־RACI
+## 2.2 O11 — מודל אחריות יחיד
 
-2.2.1 בחירה=`Primary + Backup לכל תפקיד`.
+2.2.1 הבחירה הקודמת `Primary + Backup לכל תפקיד` הוחלפה בהוראה מאוחרת ומפורשת: `Tal הוא האחראי היחיד`.
 
-2.2.2 השפעה על התוכנית=`אין Task תפעולי, Gate, Incident path או Release authority ללא שני שמות, זמינות, escalation ותחום סמכות`.
+2.2.2 השפעה על התוכנית=`כל Task, Gate, Incident path, Release coordination וחיבור ספק מקבלים Owner=Tal`.
 
-2.2.3 חסם שנשאר=`השמות, שעות הזמינות ופרטי ההסלמה עצמם טרם נמסרו`.
+2.2.3 חסם שנשאר=`רק קיבולת העבודה השבועית וזמינות Tal לטיפול בתקלות טרם נמסרו; אין חסם של שמות נוספים`.
 
 ## 2.3 O12 — עדיפות אחרי Pilot
 
@@ -72,7 +74,7 @@
 
 2.4.1 בחירה=`Task Registry ואז אומדן`.
 
-2.4.2 אחוז השלמה רשמי, שעות ו־ETA נשארים `unknown/unavailable` עד שקיימים Task denominator, weights, dependencies, RACI ו־capacity מאושרים.
+2.4.2 אחוז השלמה רשמי, שעות ו־ETA נשארים `unknown/unavailable` עד שקיימים Task denominator, weights, dependencies וקיבולת עבודה מאושרת של Tal.
 
 2.4.3 אין לחשב אחוז לפי מספר קבצים, Commits, בדיקות או מסמכים בלבד.
 
@@ -114,26 +116,26 @@
 
 ## 4.1 חסמי חיבור והוכחה
 
-| מזהה | כיוון שנבחר | בעלים כפי שנמסר | מה עדיין חסר |
+| מזהה | כיוון שנבחר | אחראי נוכחי | מה עדיין חסר |
 |---|---|---|---|
-| `G01` | Clerk ב־Staging והוכחה | Rasha + Security | חשבון, Vault config ו־E2E |
-| `G02` | Admins שמיים ב־Staging עם MFA | Tal + Security | שמות ו־MFA readback |
-| `G03` | Invitation E2E ב־Staging | Rasha + QA | סביבת בדיקה ושני actors מבודדים |
-| `G04` | Activation והפרדת Tenant | David + QA | runtime/database Evidence |
-| `G05` | Staging ו־Production נפרדים | Rasha + DevOps | projects, domains ו־secrets נפרדים |
-| `G06` | Deployment קשור ל־CI ול־digest | Rasha + DevOps | provenance ו־readback |
-| `G07` | Meta Test/WABA רשמי | Tal + Rasha | Meta assets והרשאות חיות |
-| `G08` | Webhook חתום ב־Staging | David + Security | endpoint, signature ו־replay tests |
-| `G09` | Queue מבודד והוכחה | David + Rasha | Redis/BullMQ live Evidence |
-| `G10` | Delivery ב־WABA בדיקה | David + Tal | approved recipient/template/limits |
-| `G11` | Bot עם אישור אדם | David + Tal + Security | approval-bound dispatch proof |
-| `G12` | Secret inventory בכספת | Tal + Security + Rasha | בעלים, expiry ו־rotation לכל Secret |
-| `G13` | Rulesets ו־CI למאגר PUBLIC | Tal + Rasha | GitHub mutation + post-readback |
-| `G14` | CI מוגן עם ראיה | Rasha + Tal | required checks על exact Commit |
-| `G15` | Dependency audit חתום | Rasha + Security | CI result bound to release |
-| `G16` | Monitoring ותרגיל Alert | Tal + Rasha + Operations | Better Stack/OTel + on-call |
-| `G17` | Restore מבודד | Rasha + Security | exact backup-to-restore Evidence |
-| `G18` | Policy + safe-delete test | Legal + Security + David | Legal approval + execution proof |
+| `G01` | Clerk ב־Staging והוכחה | Tal | חשבון, Vault config ו־E2E |
+| `G02` | Admins שמיים ב־Staging עם MFA | Tal | MFA readback |
+| `G03` | Invitation E2E ב־Staging | Tal | סביבת בדיקה ושני actors מבודדים |
+| `G04` | Activation והפרדת Tenant | Tal | runtime/database Evidence |
+| `G05` | Staging ו־Production נפרדים | Tal | projects, domains ו־secrets נפרדים |
+| `G06` | Deployment קשור ל־CI ול־digest | Tal | provenance ו־readback |
+| `G07` | Meta Test/WABA רשמי | Tal | Meta assets והרשאות חיות |
+| `G08` | Webhook חתום ב־Staging | Tal | endpoint, signature ו־replay tests |
+| `G09` | Queue מבודד והוכחה | Tal | Redis/BullMQ live Evidence |
+| `G10` | Delivery ב־WABA בדיקה | Tal | approved recipient/template/limits |
+| `G11` | Bot עם אישור אדם | Tal | approval-bound dispatch proof |
+| `G12` | Secret inventory בכספת | Tal | expiry ו־rotation לכל Secret |
+| `G13` | Rulesets ו־CI למאגר PUBLIC | Tal | GitHub mutation + post-readback |
+| `G14` | CI מוגן עם ראיה | Tal | required checks על exact Commit |
+| `G15` | Dependency audit חתום | Tal | CI result bound to release |
+| `G16` | Monitoring ותרגיל Alert | Tal | Better Stack/OTel + alert routing |
+| `G17` | Restore מבודד | Tal | exact backup-to-restore Evidence |
+| `G18` | Policy + safe-delete test | Tal | אישור משפטי חיצוני + execution proof |
 
 ## 4.2 החלטות מוצר ותפעול שנבחרו
 
@@ -215,13 +217,13 @@
 
 ## 7.1 מצב המענה
 
-7.1.1 כל `15` הפריטים `N01–N15` סומנו `missing`; לא נטען שחיבור, הרשאה או Evidence קיימים.
+7.1.1 ‏`N01` נסגר באמצעות מודל האחריות היחיד של Tal. יתר `14` הפריטים `N02–N15` טרם הוכחו כמוכנים.
 
 7.1.2 אין צורך למסור Token כדי להמשיך בתכנון. חיבור עתידי יתבצע ב־Membership או Vault בלבד.
 
 ## 7.2 מידע שאפשר למסור בלי Secrets
 
-7.2.1 שמות Primary/Backup, תפקיד, שעות שבועיות, שעות on-call ונתיב escalation.
+7.2.1 שעות העבודה השבועיות של Tal, חלונות זמינות לטיפול בתקלות ודרך ההודעה המועדפת אליו.
 
 7.2.2 שמות דומיין ל־Staging/Production וכתובות Origin מתוכננות.
 
@@ -229,7 +231,7 @@
 
 7.2.4 תקציב ותקרה כספית לכל ספק; אין להכניס פרטי תשלום למסמך Public.
 
-7.2.5 זהות הישות המשפטית, Counsel ו־Finance/Tax owners.
+7.2.5 זהות הישות המשפטית ופרטי יועץ משפטי/חשבונאי חיצוני כאשר ייבחרו; Tal נשאר האחראי להשגת האישורים.
 
 ## 7.3 חיבורים שצריך לבצע באמצעות Membership או Vault
 
@@ -255,11 +257,11 @@
 
 7.4.1 אין לשלוח Secret, Token, password, private key או customer data ב־JSON, HTML, Chat, Git, Issue או מסמך Public.
 
-7.4.2 הדרך המועדפת=`להוסיף Member מורשה או לשמור Secret ב־Vault של הספק; במסמך מעבירים רק שם לוגי, בעלים, scope, expiry ומצב חיבור`.
+7.4.2 הדרך המועדפת=`Tal מתחבר בעצמו; Codex משתמש רק ב־session/CLI מאומת שכבר אושר, או ב־Membership שניתן דרך הספק. Secret נשמר ב־Vault; במסמך רושמים רק שם לוגי, scope, expiry ומצב חיבור`.
 
 # 8. סדר תוכנית מעודכן
 
-8.1 להחיל את `V01–V06` כאילוצי תכנון; מספר ההצבעות הזכאיות הפתוחות הנוכחי=`0`; להתייחס ל־`N01–N15` כחסרים.
+8.1 להחיל את `V01–V06` כאילוצי תכנון; מספר ההצבעות הזכאיות הפתוחות הנוכחי=`0`; להתייחס ל־`N01` כסגור ול־`N02–N15` כחסרים עד Evidence.
 
 8.2 לשמור את Development freeze ואת המאגר PUBLIC.
 
@@ -269,7 +271,7 @@
 
 8.5 להשלים TRD-2 ו־Master Control Sequence.
 
-8.6 לבנות Atomic Task Registry ולצרף RACI, resources, dependencies ו־acceptance tests.
+8.6 לבנות Atomic Task Registry עם `Owner=Tal`, ‏resources, dependencies ו־acceptance tests.
 
 8.7 רק אז לחשב אחוז, שעות ולוח זמנים.
 
