@@ -1,0 +1,86 @@
+{
+  "artifactClass": "IMMUTABLE-PLANNING-PACKAGE-MANIFEST-NOT-AUTHORITY-NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V8-ATOMIC-PACKAGE-MANIFEST-2026-08-30-G0",
+  "generatedAt": "2026-08-30T18:47:03Z",
+  "maxMemberBytesExclusive": 10485760,
+  "maxTotalBytesInclusive": 26214400,
+  "memberCount": 10,
+  "members": [
+    {
+      "bytes": 5785,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-2026-08-30.md",
+      "ordinal": 1,
+      "role": "B0V8-SUBJECT",
+      "sha256": "5863a33bdab4f403604055884aa1867461764480bc2f4ce77adca25802d1e89e"
+    },
+    {
+      "bytes": 17642,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-normative-registry-2026-08-30.json",
+      "ordinal": 2,
+      "role": "B0V8-NORMATIVE-REGISTRY",
+      "sha256": "ef91478c2540c48fdbcb0c1423938a79fdd466b55f0016c74f7ad2138df6a471"
+    },
+    {
+      "bytes": 2838,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-frozen-source-index-2026-08-30.json",
+      "ordinal": 3,
+      "role": "B0V8-FROZEN-SOURCE-INDEX",
+      "sha256": "37d07a823f9bc76fb85d29c1ea6e845691cbff811d9a63515d47dcb6d0f9ae42"
+    },
+    {
+      "bytes": 5652,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-closure-crosswalk-2026-08-30.json",
+      "ordinal": 4,
+      "role": "B0V8-CLOSURE-CROSSWALK",
+      "sha256": "421a8c98df112e9d11e23d0191d73f735d8fb4eea99dc74ab1b5ef686a55315f"
+    },
+    {
+      "bytes": 4113,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-mutation-corpus-2026-08-30.json",
+      "ordinal": 5,
+      "role": "B0V8-MUTATION-CORPUS",
+      "sha256": "126f558b452ef01d15a1b212205316af4ec1a8c37af1b5eba691e2762b7d7c8b"
+    },
+    {
+      "bytes": 58260,
+      "logicalPath": "scripts/b0-v8-core.mjs",
+      "ordinal": 6,
+      "role": "B0V8-CORE-IMPLEMENTATION",
+      "sha256": "b86b475716450ecaa2b992b4c610ae23bc750191973326ab66f689c97b59a478"
+    },
+    {
+      "bytes": 13283,
+      "logicalPath": "scripts/create-b0-v8-candidate.mjs",
+      "ordinal": 7,
+      "role": "B0V8-CANDIDATE-BUILDER",
+      "sha256": "73496f8b9a580813be40ec69f3a76d9f453c7c7792b1c2c4ee61f691940b5b72"
+    },
+    {
+      "bytes": 11625,
+      "logicalPath": "scripts/verify-b0-v8-candidate.mjs",
+      "ordinal": 8,
+      "role": "B0V8-JAVASCRIPT-VERIFIER",
+      "sha256": "26bd938409daec2871512288ac3a9e8cf89a72a9c9c5f9a845be4c9fecd6fe3c"
+    },
+    {
+      "bytes": 16934,
+      "logicalPath": "scripts/verify-b0-v8-candidate.py",
+      "ordinal": 9,
+      "role": "B0V8-PYTHON-STRUCTURAL-READER",
+      "sha256": "734cad9fb811793d73912e9622941b6976ba3d349fdcac181b4eb97a23b76e3e"
+    },
+    {
+      "bytes": 9366,
+      "logicalPath": "tests/b0-v8-core.test.mjs",
+      "ordinal": 10,
+      "role": "B0V8-UNIT-TESTS",
+      "sha256": "ba2449ec33147cd6d240ff56bdb9951918a1033d5853722f7dc49133296ce453"
+    }
+  ],
+  "packageContentRoot": "5924a37e573bd7b921f319c98f5595b7ee634250e552f458284a163ba9e7653b",
+  "packageId": "CONNECT-B0-V8-IMMUTABLE-CANDIDATE-PACKAGE-2026-08-30-G0",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-B0-V8-PACKAGE-MANIFEST-V1",
+  "sourceCommit": "e458970e81ca5d0cb092fbf590a98631d6358276",
+  "totalBytes": 145498
+}
