@@ -149,6 +149,11 @@ Reader B report root=
 4.1.6 שתי הקריאות הן QA של אותו Producer, גם כאשר הן משתמשות בשתי
 שפות. הן אינן Evidence לביקורת עצמאית ואינן יוצרות Acceptance.
 
+4.1.7 Repeatability repair commit=
+`e30a6c1`; ה־Verifier קורא Source ו־Toolchain blobs מה־Git commit
+הקפוא ובודק Mode, Type, Bytes ו־SHA-256. ‏`--check-existing` עבר אחרי
+שמסמכי התוכנית התקדמו, בלי לשנות את package content root.
+
 ## 4.2 הגנות שמומשו ב־Candidate
 
 4.2.1 Closed schemas ו־canonical JSON עם דחיית שדות לא ידועים,
