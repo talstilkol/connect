@@ -65,6 +65,7 @@ export const TRD2_V6_PASS2_V3_INVARIANT_KINDS = Object.freeze([
 const SAFE_MAX = Number.MAX_SAFE_INTEGER;
 const SHA256_RE = /^[0-9a-f]{64}$/;
 const COMMIT_RE = /^[0-9a-f]{40}([0-9a-f]{24})?$/;
+const BASE64_CHUNK_CHAR_COUNT = 4096;
 const BUILTIN_SCHEMA_IDS = Object.freeze([
   'BUILTIN-CONNECT-TRD2-V6-CANONICAL-ENGINE-REPORT-V3',
   'BUILTIN-CONNECT-TRD2-V6-CLOSED-SCHEMA-REGISTRY-V3',
@@ -410,9 +411,10 @@ function generateFutureSample(schema, schemaById, actualSampleBySchemaId, label 
 
 function fixtureBody({ expectedContentRoot, expectedStatus, expectedTerminal, fixtureClass, mutation, schemaId, sourceFixtureId, sourceFixtureRoot, sourceLocator, value }) {
   const bytes = Buffer.from(canonicalV6(value), 'utf8');
+  const encoded = bytes.toString('base64');
   return {
     byteLength: bytes.length,
-    bytesBase64: bytes.toString('base64'),
+    bytesBase64Chunks: Array.from({ length: Math.ceil(encoded.length / BASE64_CHUNK_CHAR_COUNT) }, (_unused, index) => encoded.slice(index * BASE64_CHUNK_CHAR_COUNT, (index + 1) * BASE64_CHUNK_CHAR_COUNT)),
     expectedContentRoot,
     expectedStatus,
     expectedTerminal,
@@ -442,8 +444,10 @@ export function evaluateV3Value(value, schema, schemaById) {
 export function evaluateV3Fixture(fixture, schema, schemaById) {
   let outcome;
   try {
-    const bytes = Buffer.from(fixture.bytesBase64, 'base64');
-    if (bytes.toString('base64') !== fixture.bytesBase64 || bytes.length !== fixture.byteLength || sha256Bytes(bytes) !== fixture.sha256) fail('FIXTURE-BYTES-INVALID', 'fixture byte binding mismatch');
+    if (!Array.isArray(fixture.bytesBase64Chunks) || fixture.bytesBase64Chunks.length === 0 || fixture.bytesBase64Chunks.some((chunk, index) => typeof chunk !== 'string' || chunk.length === 0 || chunk.length > BASE64_CHUNK_CHAR_COUNT || (index < fixture.bytesBase64Chunks.length - 1 && chunk.length !== BASE64_CHUNK_CHAR_COUNT))) fail('FIXTURE-BYTES-INVALID', 'fixture chunk framing mismatch');
+    const encoded = fixture.bytesBase64Chunks.join('');
+    const bytes = Buffer.from(encoded, 'base64');
+    if (bytes.toString('base64') !== encoded || bytes.length !== fixture.byteLength || sha256Bytes(bytes) !== fixture.sha256) fail('FIXTURE-BYTES-INVALID', 'fixture byte binding mismatch');
     outcome = evaluateV3Value(parseCanonicalJsonBytes(bytes), schema, schemaById);
   } catch (error) {
     if (!(error instanceof V3SchemaValidationError) && !(error instanceof V2SchemaValidationError)) throw error;
@@ -640,7 +644,7 @@ export function validateClosedSchemaRegistryV3(registry) {
   if (registry.fixtures.length !== registry.fixtureCount) throw new Error('closedSchemaRegistryV3: fixture count mismatch');
   const classCounts = { actual: 0, actualMutation: 0, future: 0, futureMutation: 0 };
   for (const fixture of registry.fixtures) {
-    assertClosedObject(fixture, ['byteLength', 'bytesBase64', 'expectedContentRoot', 'expectedStatus', 'expectedTerminal', 'fixtureClass', 'fixtureId', 'fixtureRoot', 'mutation', 'schemaId', 'sha256', 'sourceFixtureId', 'sourceFixtureRoot', 'sourceLocator'], `fixture.${fixture.fixtureId}`);
+    assertClosedObject(fixture, ['byteLength', 'bytesBase64Chunks', 'expectedContentRoot', 'expectedStatus', 'expectedTerminal', 'fixtureClass', 'fixtureId', 'fixtureRoot', 'mutation', 'schemaId', 'sha256', 'sourceFixtureId', 'sourceFixtureRoot', 'sourceLocator'], `fixture.${fixture.fixtureId}`);
     validateContentIdentity(fixture, 'TRD2V6-V3-FIXTURE', 'CANONICAL-SCHEMA-FIXTURE-V3', 'CONNECT-TRD2-V6-CANONICAL-SCHEMA-FIXTURE-V3', 'fixtureId', 'fixtureRoot');
     if (!schemaById.has(fixture.schemaId)) throw new Error(`fixture.${fixture.fixtureId}: unknown schema`);
     const outcome = evaluateV3Fixture(fixture, schemaById.get(fixture.schemaId), schemaById);

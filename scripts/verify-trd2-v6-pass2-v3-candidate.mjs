@@ -163,7 +163,7 @@ function verifyActualSources(registry, v2Registry) {
   if (actual.length !== 391) throw new Error(`actual source denominator ${actual.length}/391`);
   for (const fixture of registry.fixtures.filter(({ sourceFixtureId }) => sourceFixtureId !== null)) {
     const predecessor = v2ById.get(fixture.sourceFixtureId);
-    if (predecessor === undefined || predecessor.fixtureRoot !== fixture.sourceFixtureRoot || predecessor.schemaId !== fixture.schemaId || predecessor.bytesBase64 !== fixture.bytesBase64 || predecessor.sha256 !== fixture.sha256 || canonicalV6(predecessor.sourceLocator) !== canonicalV6(fixture.sourceLocator)) throw new Error(`v2 fixture lineage mismatch: ${fixture.fixtureId}`);
+    if (predecessor === undefined || predecessor.fixtureRoot !== fixture.sourceFixtureRoot || predecessor.schemaId !== fixture.schemaId || predecessor.bytesBase64 !== fixture.bytesBase64Chunks.join('') || predecessor.sha256 !== fixture.sha256 || canonicalV6(predecessor.sourceLocator) !== canonicalV6(fixture.sourceLocator)) throw new Error(`v2 fixture lineage mismatch: ${fixture.fixtureId}`);
   }
   const reconstructed = new Set();
   for (const fixture of actual) {
@@ -182,7 +182,7 @@ function verifyActualSources(registry, v2Registry) {
       value = reconstructRequirement(sourceBytes, locator, schemaById.get(fixture.schemaId).family);
     } else throw new Error(`unknown source capture mode: ${locator.captureMode}`);
     const rebuilt = Buffer.from(canonicalV6(value), 'utf8');
-    if (rebuilt.toString('base64') !== fixture.bytesBase64 || sha256Bytes(rebuilt) !== fixture.sha256) throw new Error(`fixture differs from independently resolved source: ${fixture.fixtureId}`);
+    if (rebuilt.toString('base64') !== fixture.bytesBase64Chunks.join('') || sha256Bytes(rebuilt) !== fixture.sha256) throw new Error(`fixture differs from independently resolved source: ${fixture.fixtureId}`);
     const key = `${fixture.schemaId}\0${locator.sourceCommit}\0${locator.logicalPath}\0${locator.jsonPointer}`;
     if (reconstructed.has(key)) throw new Error(`duplicate actual source locator: ${key}`);
     reconstructed.add(key);

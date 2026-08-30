@@ -16,6 +16,7 @@ REPORT_B_PATH = "docs/planning/trd2-v6-candidate-v3-2026-08-31/canonical-engine-
 SCRIPT_PATH = "scripts/verify-trd2-v6-canonical-v3-engine-b.py"
 SAFE_MAX = 9007199254740991
 PART_COUNT = 8
+BASE64_CHUNK_CHAR_COUNT = 4096
 
 
 class EngineBError(Exception):
@@ -274,8 +275,12 @@ def evaluate_fixture(fixture, schema, schemas):
     observed_terminal = "ACCEPT"
     content_root = None
     try:
-        raw = base64.b64decode(fixture["bytesBase64"], validate=True)
-        if base64.b64encode(raw).decode("ascii") != fixture["bytesBase64"] or len(raw) != fixture["byteLength"] or sha256_bytes(raw) != fixture["sha256"]:
+        chunks = fixture["bytesBase64Chunks"]
+        if not isinstance(chunks, list) or not chunks or any(not isinstance(chunk, str) or len(chunk) == 0 or len(chunk) > BASE64_CHUNK_CHAR_COUNT or (index < len(chunks) - 1 and len(chunk) != BASE64_CHUNK_CHAR_COUNT) for index, chunk in enumerate(chunks)):
+            fail("FIXTURE-BYTES-INVALID", "fixture chunk framing mismatch")
+        encoded = "".join(chunks)
+        raw = base64.b64decode(encoded, validate=True)
+        if base64.b64encode(raw).decode("ascii") != encoded or len(raw) != fixture["byteLength"] or sha256_bytes(raw) != fixture["sha256"]:
             fail("FIXTURE-BYTES-INVALID", "fixture byte binding mismatch")
         content_root = validate_record(parse_canonical_bytes(raw), schema, schemas)
     except EngineBError as error:

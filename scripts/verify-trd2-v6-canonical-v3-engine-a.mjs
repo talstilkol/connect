@@ -17,6 +17,7 @@ const PART_COUNT = 8;
 const SAFE_MAX = Number.MAX_SAFE_INTEGER;
 const SHA256_RE = /^[0-9a-f]{64}$/;
 const COMMIT_RE = /^[0-9a-f]{40}([0-9a-f]{24})?$/;
+const BASE64_CHUNK_CHAR_COUNT = 4096;
 
 class EngineAError extends Error {
   constructor(terminal, message) { super(message); this.terminal = terminal; }
@@ -138,8 +139,10 @@ function outcome(fixture, schema, schemaById) {
   let observedTerminal = 'ACCEPT';
   let contentRoot = null;
   try {
-    const bytes = Buffer.from(fixture.bytesBase64, 'base64');
-    if (bytes.toString('base64') !== fixture.bytesBase64 || bytes.length !== fixture.byteLength || sha256Bytes(bytes) !== fixture.sha256) fail('FIXTURE-BYTES-INVALID', 'fixture byte binding mismatch');
+    if (!Array.isArray(fixture.bytesBase64Chunks) || fixture.bytesBase64Chunks.length === 0 || fixture.bytesBase64Chunks.some((chunk, index) => typeof chunk !== 'string' || chunk.length === 0 || chunk.length > BASE64_CHUNK_CHAR_COUNT || (index < fixture.bytesBase64Chunks.length - 1 && chunk.length !== BASE64_CHUNK_CHAR_COUNT))) fail('FIXTURE-BYTES-INVALID', 'fixture chunk framing mismatch');
+    const encoded = fixture.bytesBase64Chunks.join('');
+    const bytes = Buffer.from(encoded, 'base64');
+    if (bytes.toString('base64') !== encoded || bytes.length !== fixture.byteLength || sha256Bytes(bytes) !== fixture.sha256) fail('FIXTURE-BYTES-INVALID', 'fixture byte binding mismatch');
     contentRoot = validateRecord(parseCanonicalJsonBytes(bytes), schema, schemaById);
   } catch (error) {
     if (!(error instanceof EngineAError) && !(error instanceof V3SchemaValidationError)) throw error;

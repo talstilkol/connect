@@ -85,7 +85,7 @@ test('all 391 actual positives and 124 historical mutations retain exact v2 fixt
   for (const fixture of inherited) {
     const source = predecessor.get(fixture.sourceFixtureId);
     assert.equal(source.fixtureRoot, fixture.sourceFixtureRoot);
-    assert.equal(source.bytesBase64, fixture.bytesBase64);
+    assert.equal(source.bytesBase64, fixture.bytesBase64Chunks.join(''));
     assert.equal(source.schemaId, fixture.schemaId);
   }
 });
