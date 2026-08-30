@@ -16,9 +16,10 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 
 1.2.1 שלב 1 — פרסום בטוח ל־GitHub: `COMPLETED`.
 
-1.2.2 שלב 2 — Discovery Cutoff ומקורות: `IN_PROGRESS`; Cutoff v2
-נבנה ונבדק מקומית אך נעשה stale ל־v4 Generation אחרי Commit Planning
-לא־מוצהר. נדרש v3 טרי; השלמה חיצונית של מקור/זכויות/API עדיין חסומה.
+1.2.2 שלב 2 — Discovery Cutoff ומקורות:
+`COMPLETED-AS-LOCAL-CANDIDATE;EXTERNAL-BLOCKED`; Cutoff v3 נבנה
+מ־Commit קפוא, נקשר ל־remote readback ושימש את Generation A. השלמה
+חיצונית של מקור, זכויות, GitHub API ו־trusted time עדיין חסומה.
 
 1.2.3 שלב 3 — B0 Successor: `IN_PROGRESS`; חבילת v8 מקומית נבנתה
 ונבדקה, אך Closure חיצוני ו־Acceptance עדיין חסומים.
@@ -26,11 +27,12 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 1.2.4 שלב 4 — Three-review Protocol Successor: `IN_PROGRESS`; G1
 נבנה ונבדק מקומית, אך ביקורות חיצוניות ו־Acceptance עדיין חסומים.
 
-1.2.5 שלב 5 — Source Universe v4: `IN_PROGRESS`; נתיבי הפלט הוקפאו
-ב־Cutoff v2 אך ה־Candidate עצמו עדיין absent.
+1.2.5 שלב 5 — Source Universe v4:
+`COMPLETED-AS-LOCAL-CANDIDATE;EXTERNAL-BLOCKED`; ‏23/23 חברי Package
+נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
-1.2.6 שלבים 6–10 — יתר חבילות היסוד ותכנון Accepted: `PENDING`; כל אחת
-מתחילה רק לאחר קודמותיה או Dependency מפורש שמאפשר מקביליות.
+1.2.6 שלב 6 — TRD-2 v6: `IN_PROGRESS-NEXT-LOCAL-WORK`; שלבים 7–10
+נשארים `PENDING` ומתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
 1.2.7 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
 השלמת חבילות היסוד ועד שטל ימסור קיבולת שבועית.
@@ -294,3 +296,64 @@ v4 שמממש את `24` Findings אחד־לאחד בתוך `23` חברי ה־Pac
 6.3.5 סדר התיקון=`freeze complete v4 toolchain -> fresh Cutoff v3 ->
 generate only declared v4 outputs`; אין להכניס Commit תיעוד נוסף בין
 Cutoff v3 לבין Generation v4.
+
+# 7. חבילת ביצוע 6 — Discovery Cutoff v3 ו־Source Universe v4
+
+## 7.1 תוצאה מקומית
+
+7.1.1 Toolchain commits=`73a6360`,`2888bec`,`66f7fbc`,`259bc81`;
+Candidate commit=`45abe51a3ce63a16e60d590ad8ef974baaffeab1`.
+
+7.1.2 Cutoff v3 observed input commit=
+`259bc81a667c2eeb4987d284cc4443b1db2f9e90`; observedAt=
+`2026-08-30T20:30:31Z`; clock authority=`LOCAL-CLOCK-UNTRUSTED`;
+Cutoff package root=
+`d2ac38f3799085f8db46e98f1e3da86a056a86d45b21a09cc890a2607e598930`.
+
+7.1.3 Source Universe v4 registry=`23` Package paths ו־`5`
+Review/Acceptance paths. נוצרו `23/23` חברי Package; חמשת פלטי
+Review/Acceptance נשארו absent במכוון.
+
+7.1.4 package content root=
+`116a3967e01ce5070372988f2e0a796a4349c5a0b225c44f5671b07b74fb24bf`;
+toolchain root=
+`c1263473e5c018d37837f6e2fa4219c928a146c59648887714cd722ecd0922da`;
+verification root=
+`b27d4e996b629354a2120dfbb85defc682ff154a028c9f9d49f6bc94103ce2b1`.
+
+7.1.5 Reader A=`Node.js stdlib`; Reader B=`Python stdlib`; שניהם
+החזירו `PASS-LOCAL-CANDIDATE-NOT-ACCEPTED`, ‏`24/24` checks ואותו
+toolchain/verification root.
+
+7.1.6 local controls=`24/24 PASS`; hostile mutations=`102/102 BLOCK`;
+finding closure=`0/24`; Generation B=`ABSENT`; Acceptance=`0`.
+
+7.1.7 בדיקות סיום=`3928/3928`; TypeScript PASS; ESLint=`0 errors,
+28 historical warnings`; Secret hygiene PASS על `2286` קובצי עבודה;
+Source guardrails PASS; Python compile PASS; Git remote readback תאם
+ל־Candidate commit.
+
+## 7.2 תיקונים שהתגלו בזמן הרצה
+
+7.2.1 כל חמשת Worktree guards עודכנו ל־`--untracked-files=all`, כדי
+ש־Git לא יקפל תיקיית פלט לא־עקובה לרשומה אחת.
+
+7.2.2 נתיב Protocol G1 תוקן מ־`manifest.json` שאינו קיים אל
+`normative-package-manifest.json` הקנוני, עם Regression test לקיום
+הקובץ ב־Git.
+
+7.2.3 חישוב Mutation span תוקן כך שימצא את המזהה בכותרת `##` שלו
+ולא occurrence מוקדם בתוך dependency. Regression עבר על כל `102`
+המזהים האמיתיים.
+
+## 7.3 חסמים והמשך
+
+7.3.1 מצב החבילה=`CANDIDATE-NOT-ACCEPTED`; ‏24/24 Findings נשארים
+פתוחים לביקורת עצמאית ואין Closure credit מבדיקת Producer.
+
+7.3.2 חסרים B0 Accepted, ‏Review Protocol Accepted, ‏Private source
+custody וזכויות, Official-source occurrence frontier, trusted time,
+Generation B, שלוש ביקורות עצמאיות, Reconciliation ו־Acceptance.
+
+7.3.3 העבודה המקומית הבאה לפי סדר התוכנית היא TRD-2 v6 Successor.
+‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`.

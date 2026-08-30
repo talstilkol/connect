@@ -73,7 +73,8 @@
 
 3.1.1 מצלמים במדויק מה קיים בקוד, במסמכים, בענפים ובמקורות החיצוניים כדי שהמשך התוכנית לא יתבסס על רשימה חלקית.
 
-3.1.2 מצב ביצוע=`IN_PROGRESS`; תצפית ה־Preflight נמצאת ב־
+3.1.2 מצב ביצוע=`COMPLETED-AS-LOCAL-CANDIDATE;EXTERNAL-BLOCKED`;
+תצפית ה־Preflight נמצאת ב־
 [Discovery Cutoff preflight](discovery-cutoff-preflight-observation-2026-08-30.md).
 
 3.1.3 Cutoff v1 נשמר כראיה היסטורית על observed commit `0f0b0e9`,
@@ -92,6 +93,11 @@ Commit `77378b0` ששינה שלושה מסמכי Planning מחוץ לנתיבי
 לכן status=`VALID-HISTORICAL-CANDIDATE;STALE-FOR-V4-GENERATION` ונדרש
 Cutoff v3 טרי לאחר הקפאת Toolchain v4 המלא.
 
+3.1.5 Cutoff v3 הופק על observed commit
+`259bc81a667c2eeb4987d284cc4443b1db2f9e90` ושימש בפועל את Source
+Universe v4 Generation A. ‏Candidate commit=`45abe51`; Cutoff package
+root=`d2ac38f3799085f8db46e98f1e3da86a056a86d45b21a09cc890a2607e598930`.
+
 ## 3.2 משימות
 
 3.2.1 להפיק Discovery Cutoff עם HEAD, ‏tracked, modified, staged, untracked, ignored, refs ונתיבי מקור שסופקו.
@@ -104,9 +110,8 @@ Cutoff v3 טרי לאחר הקפאת Toolchain v4 המלא.
 
 3.2.5 לאסור Self-membership: פלט חדש אינו יכול להיות מקור של עצמו.
 
-3.2.6 Status מקומי: `COMPLETED-AS-V2-CANDIDATE`; Toolchain commit=
-`4aab362`; Candidate commit=`d8e56ae`; Verifier checks=`14/14`;
-independent review=`PENDING`.
+3.2.6 Status מקומי: `COMPLETED-AS-V3-CANDIDATE`; observed commit=
+`259bc81`; Candidate commit=`45abe51`; independent review=`PENDING`.
 
 ## 3.3 מה צריך מ־Tal
 
@@ -203,27 +208,33 @@ Evidence חיצוני; QA של אותו Producer לא ייחשב ביקורת ע
 
 6.2.1 Source Universe v3 נדחה עם `24` Findings; v4 קיים כ־Build charter בלבד ואינו Source Universe Accepted.
 
-6.2.2 Output registry סגור מוכן: `23` נתיבי Package ועוד `5` נתיבי
-Review/Acceptance הוקפאו ונמצאו absent ב־HEAD שנצפה ב־Cutoff v2.
-Cutoff v2 נעשה stale ל־Generation לאחר שינוי Planning לא־מוצהר; נדרש
-Cutoff v3 חדש אחרי הקפאת Toolchain v4. ‏Source Universe v4 עצמו עדיין
-absent והשלב `IN_PROGRESS`.
+6.2.2 Output registry סגור: `23` נתיבי Package ועוד `5` נתיבי
+Review/Acceptance. ‏Cutoff v3 הופק אחרי הקפאת Toolchain מלא, ו־Source
+Universe v4 local Candidate נוצר ב־Commit `45abe51`: ‏`23/23` חברי
+Package קיימים, `5/5` פלטי Review/Acceptance חסרים במכוון, והשלב הוא
+`COMPLETED-AS-LOCAL-CANDIDATE;EXTERNAL-BLOCKED`.
 
 ## 6.3 משימות
 
 6.3.1 להקפיא את Toolchain v4, להפיק Discovery Cutoff v3 טרי, ורק ממנו ליצור
 SourceOccurrenceLedger ו־TargetSpanLedger. אין לשנות אף אחד מ־28 נתיבי
-הפלט בלי restart לדור חדש.
+הפלט בלי restart לדור חדש. Status=`COMPLETED-GENERATION-A`.
 
-6.3.2 להקצות Sole producer לכל Object ולבנות Graph של שימושים מפורשים והפוכים.
+6.3.2 להקצות Sole producer לכל Object ולבנות Graph של שימושים מפורשים
+והפוכים. Status=`COMPLETED-LOCAL-CANDIDATE`.
 
 6.3.3 להפריד Public projection מ־Private custody; Unknown נחסם מפרסום.
+Status=`COMPLETED-LOCAL-CONTROL;PRIVATE-CUSTODY-EVIDENCE-PENDING`.
 
-6.3.4 להגדיר Freshness, authenticity, legal basis, retention ו־invalidation לכל מקור.
+6.3.4 להגדיר Freshness, authenticity, legal basis, retention
+ו־invalidation לכל מקור. Status=`COMPLETED-AS-CONTRACT;LIVE-EVIDENCE-PENDING`.
 
-6.3.5 לשמר כל Requirement ו־Finding קודם ברמת clause, בלי Range credit ובלי Merge-by-presence.
+6.3.5 לשמר כל Requirement ו־Finding קודם ברמת clause, בלי Range credit
+ובלי Merge-by-presence. Status=`COMPLETED-LOCAL-CROSSWALK;INDEPENDENT-CLOSURE-0`.
 
-6.3.6 להריץ שתי Generations, שני Readers ושלוש ביקורות לפי Protocol Accepted בלבד.
+6.3.6 להריץ שתי Generations, שני Readers ושלוש ביקורות לפי Protocol
+Accepted בלבד. Status=`GENERATION-A-AND-TWO-LOCAL-READERS-PASS;
+GENERATION-B-AND-THREE-INDEPENDENT-REVIEWS-PENDING`.
 
 ## 6.4 מה צריך מ־Tal
 

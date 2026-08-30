@@ -1861,3 +1861,19 @@
 1.136.5 claim limit=`CANDIDATE-NOT-ACCEPTED`;trusted time,GitHub API surfaces,private source custody,official-source occurrence coverage and independent review remain blocking;Source Universe v4 Subject remains absent;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
 
 1.136.6 post-freeze self-review found that commit `77378b0` changed three Planning documents outside the 32 declared output paths after the v2 observed commit;under Charter v2 clause 3.1.4 this makes Cutoff v2 `VALID-HISTORICAL-CANDIDATE;STALE-FOR-V4-GENERATION`. Required recovery=`freeze complete v4 toolchain;produce fresh Cutoff v3;perform no non-declared change before v4 generation`;no v4 Generation or closure credit was granted.
+
+## 1.137 Discovery Cutoff v3 and Source Universe v4 local candidate
+
+1.137.1 toolchain commits=`73a6360;2888bec;66f7fbc;259bc81`;Cutoff observed commit=`259bc81a667c2eeb4987d284cc4443b1db2f9e90`;Cutoff observedAt=`2026-08-30T20:30:31Z`;Cutoff package root=`d2ac38f3799085f8db46e98f1e3da86a056a86d45b21a09cc890a2607e598930`;Candidate commit=`45abe51a3ce63a16e60d590ad8ef974baaffeab1`.
+
+1.137.2 Source Universe v4 package paths=`23`;materialized=`23/23`;Review/Acceptance paths=`5`;materialized=`0/5`;normative members before manifest/QA=`21`;package content root=`116a3967e01ce5070372988f2e0a796a4349c5a0b225c44f5671b07b74fb24bf`;toolchain root=`c1263473e5c018d37837f6e2fa4219c928a146c59648887714cd722ecd0922da`.
+
+1.137.3 Reader A=`Node.js stdlib`;Reader B=`Python stdlib`;both returned `PASS-LOCAL-CANDIDATE-NOT-ACCEPTED`;both derived `24/24` checks and common verification root=`b27d4e996b629354a2120dfbb85defc682ff154a028c9f9d49f6bc94103ce2b1`;Producer report root=`3a41e5a8e61c7b0aa743b7b9900b4d2532760f41820e2259b3e9cc2733000e70`.
+
+1.137.4 local controls=`24/24 PASS`;hostile mutations=`102/102 BLOCK`;finding closure=`0/24`;Generation B=`ABSENT`;Acceptance=`0`;no Producer QA or local Reader result was credited as independent review.
+
+1.137.5 runtime self-audit closed three tool defects before the final Cutoff:untracked output directories were collapsed without `--untracked-files=all`;Protocol G1 manifest used a nonexistent filename instead of `normative-package-manifest.json`;mutation-span selection used the first token occurrence instead of the exact level-two heading.Regression coverage now enumerates all five worktree guards,the committed manifest path and all 102 mutation identities.
+
+1.137.6 final QA=`3928/3928 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene PASS on 2286 working files including 27 untracked candidate outputs;Source guardrails PASS;Python compile PASS;remote branch readback exact`.
+
+1.137.7 blockers=`B0 not Accepted;Review Protocol not Accepted;Private source custody/rights absent;official-source occurrence frontier incomplete;trusted time absent;Generation B absent;three independent reviews,reconciliation and Acceptance absent`;state=`LOCAL-CANDIDATE-NOT-ACCEPTED`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;next local successor=`TRD-2 v6`.
