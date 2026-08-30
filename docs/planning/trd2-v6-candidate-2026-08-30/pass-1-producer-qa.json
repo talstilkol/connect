@@ -1,0 +1,46 @@
+{
+  "acceptanceState": {
+    "acceptedRequirements": 0,
+    "definitionAcceptance": "ABSENT",
+    "findingClosure": "0/15",
+    "reconciliation": "ABSENT",
+    "reviewGenerations": "0/2"
+  },
+  "artifactClass": "PRODUCER-ONLY; PASS-1-QA; NOT-INDEPENDENT-REVIEW; NOT-ACCEPTANCE",
+  "claimLimit": "PASS-1-LOCAL-MECHANICAL-EVIDENCE-ONLY; PASSES-2-TO-6-AND-EXTERNAL-REVIEW-REMAIN-MANDATORY",
+  "developmentFreeze": "ACTIVE",
+  "f015": {
+    "branch": "INVALIDATE-AND-REDERIVE",
+    "closureCredit": 0,
+    "exactBlobMatches": 0,
+    "rederivationState": "PENDING-PASSES-2-TO-6-AND-INDEPENDENT-REVIEW",
+    "silentSubstitutionCount": 0
+  },
+  "gate29": "BLOCKED",
+  "generationReceiptRoot": "ca5aea07ed491d14a36e5a5bf0f14743c8ff680f6513e3af9bf94f37abb21290",
+  "observedHead": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+  "parserAgreement": {
+    "disagreementCount": 0,
+    "outcomeCount": 18,
+    "outcomeRoot": "0bf678ea864399efa9d12f84ab4ad7d49fc9d33e15f1252e1758df7904369299",
+    "parserAReportRoot": "5a7c56552caab0d855b8aa8715857cf5716973760cd86147f9d730fbd06c8756",
+    "parserBReportRoot": "5200162b5ae502f4eb35063a97f89a2b1f0736c7e7c8471245a4ae78fb50dc76",
+    "status": "PASS-LOCAL-TWO-IMPLEMENTATION-AGREEMENT-NOT-INDEPENDENT-ACCEPTANCE"
+  },
+  "parserCorpusRoot": "25fe15c5fd535df8954ba23973ea17c40115fa28cc300f54d8d6c53f6a5357ce",
+  "passState": {
+    "pass1": "COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED",
+    "pass2": "PENDING",
+    "pass3": "PENDING",
+    "pass4": "PENDING",
+    "pass5": "PENDING",
+    "pass6": "PENDING"
+  },
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-TRD2-V6-PASS1-PRODUCER-QA-V1",
+  "sourceCaptureRoot": "03e2a37b96779674d4a48778eaa31ea11ee1bb96d031e934f8896a3cec77850f",
+  "status": "PASS-1-LOCAL-CANDIDATE-COMPLETE-EXTERNAL-CLOSURE-ZERO",
+  "toolchainRoot": "082e4c8d9c875d3009ce675862060754a568275b71c265d9763e6c18f0627b8e",
+  "artifactId": "TRD2V6-PASS1-QA-becaf99bf109d85d2e3b5c49813c654463ac1ecf5c6532c0297f939242fb7063",
+  "artifactRoot": "becaf99bf109d85d2e3b5c49813c654463ac1ecf5c6532c0297f939242fb7063"
+}
