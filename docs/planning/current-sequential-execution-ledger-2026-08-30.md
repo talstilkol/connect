@@ -32,8 +32,10 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
 1.2.6 שלב 6 — TRD-2 v6:
-`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-NEXT`;
-Passes 3–6, שתי Generations, ביקורות עצמאיות ו־Acceptance נשארים
+`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-COMPLETE-LOCAL;PASS-3-NEXT`;
+Pass 2 v2 קובע ב־commit `b68b80e`, מכסה `391` רשומות אמיתיות ו־
+`124` מוטציות עם `515/515` הסכמה בין שני מנועים. Passes 3–6, שתי
+Generations, ביקורות עצמאיות ו־Acceptance נשארים
 `PENDING`. שלבים 7–10 מתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
 1.2.7 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד

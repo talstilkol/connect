@@ -1919,3 +1919,19 @@
 1.140.4 recovery=`retain v1 bytes and roots;predeclare Output Registry v2;use new successor paths;add exact existing-record inventory and nested closed schemas;require two-engine actual-positive and mutation agreement;block Pass 3 until missing/extra=0`;silent substitution=`FORBIDDEN`.
 
 1.140.5 current state=`PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-NEXT`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
+
+## 1.141 TRD-2 v6 Pass 2 v2 actual-record schema successor
+
+1.141.1 Restart charter commit=`3ddb1cb`;initial v2 toolchain commit=`2a724cd`;source-resolution hardening commit=`3a35101`;frozen observed toolchain commit=`3a35101b3c56eb763d67ec5f30c86e6b67f71da7`;Candidate commit=`b68b80e61f614c05d50093f5f9feec6d98e486d8`.
+
+1.141.2 Registry root=`aa9ac9f3a6a697a13eb6fe3a236c7c7088adb5fbe63313c74a4c386d4b6ecf19`;raw SHA-256=`93ff5dd11fc6c048ff444f8b9fc2a74186a490fff11cb67e37225d487b604f6a`;toolchain root=`c728d06b56e147b600b919330e15433838343bf77d6d3d81729200b194c4ad20`;schema families=`25`.
+
+1.141.3 actual-positive denominator=`391`;all schemas have a committed actual Positive;Requirements=`128/128` with exactly five content fields;separate source bindings=`128/128`;actual-positive inventory root=`0c71d437d10d9981ce025355fa4d48739f6d50aac41c428b7fd1f87664ebee0e`.
+
+1.141.4 hostile mutation denominator=`124/124 BLOCK`;total fixtures=`515`;Engine A and Engine B agreement=`515/515`;mismatch=`0`;common outcome root=`47aa5446ab7f654d9b20dd9c1a5aa8390949c91c7ceddbcd386477f36b883294`.
+
+1.141.5 pre-commit Producer self-review rejected one preliminary uncommitted generation because locators were file-digest-bound but not independently resolved;the bytes were removed before commit;the verifier was frozen again and now resolves every JSON Pointer,reconstructs all `256` Requirement/Binding records from exact Markdown spans,checks exact family denominators and verifies its runtime source hashes;all outputs were regenerated;no preliminary root received credit.
+
+1.141.6 verification=`3960/3960 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene and Source guardrails PASS;post-commit verifier COMMITTED-CLEAN`;local/remote readback=`b68b80e61f614c05d50093f5f9feec6d98e486d8`.
+
+1.141.7 state=`PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-COMPLETE-LOCAL;PASS-3-NEXT`;Pass 3 is authorized only as local Candidate construction;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.

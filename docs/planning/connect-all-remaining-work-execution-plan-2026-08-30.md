@@ -310,6 +310,22 @@ v6 אמיתיות ולכן agreement לא היווה conformance.
 לבנות nested/nullable schemas, לקפוא actual-positive inventory ולהריץ
 שני engines. Pass 3 חסום עד שה־missing/extra denominator יהיה `0`.
 
+7.6.9 Pass 2 v2=`COMPLETED-AS-LOCAL-CANDIDATE`; Candidate commit=
+`b68b80e61f614c05d50093f5f9feec6d98e486d8`; Registry root=
+`aa9ac9f3a6a697a13eb6fe3a236c7c7088adb5fbe63313c74a4c386d4b6ecf19`.
+
+7.6.10 actual positives=`391/391`; Requirements=`128/128`; separate source
+bindings=`128/128`; mutations blocked=`124/124`; two-engine agreement=
+`515/515`; missing/extra=`0`; self-review remediation=`5/5-LOCAL`.
+
+7.6.11 full gates=`3960/3960 tests;TypeScript PASS;ESLint 0 errors/28
+historical warnings;Source guardrails PASS;Secret hygiene PASS`; post-commit
+verifier=`COMMITTED-CLEAN`.
+
+7.6.12 המשימה הפעילה הבאה=`Pass 3`: לבנות Clause AST לכל `128`
+הדרישות, שבע משפחות State machine וכיסוי מלא של כל State/Event/Terminal.
+ה־Candidate עדיין מעניק `0` Closure ו־`0` Acceptance.
+
 # 8. שלב 7 — Master Control Sequence Successor
 
 ## 8.1 מה השלב אומר
