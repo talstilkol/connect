@@ -1,0 +1,14 @@
+{
+  "acceptanceCandidate": null,
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-CONTROLLED-GENERATION-2026-08-30-G0",
+  "generationA": {
+    "cutoffReceiptSha256": "88028f0d36fc498bf4b83486291a3f79cfd15105be567ddb44768f716d8bf302",
+    "observedHead": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+    "outputRegistrySha256": "c4044ff5559d53e1926f2ccab29092354b1545d902657e0e9aab89e402179ea3",
+    "toolchainRegistrySha256": "c0db4d18c748d1e06296dc4d92fae2f5f1799e745bb23a44cbb8f6fd6304fbc7"
+  },
+  "generationB": null,
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-CONTROLLED-GENERATION-V1",
+  "status": "BLOCKED-PENDING-GENERATION-B",
+  "terminal": "STALE-GENERATION-BLOCKED"
+}

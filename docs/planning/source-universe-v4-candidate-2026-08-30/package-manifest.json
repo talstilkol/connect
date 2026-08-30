@@ -1,0 +1,243 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-PACKAGE-MANIFEST-2026-08-30-G0",
+  "developmentFreeze": "ACTIVE",
+  "gate29": "BLOCKED",
+  "manifestMembership": false,
+  "memberCount": 21,
+  "members": [
+    {
+      "byteLength": 9702,
+      "ordinal": 1,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "5cdac8add8fdbfdc0eca06961494d6ef32d540c6dec75b10fbd7c69800ee9dd4"
+    },
+    {
+      "byteLength": 808,
+      "ordinal": 2,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "726b7526926c839aa8e441cef1d100497befe3d926dbe56e3487556b0a5888b6"
+    },
+    {
+      "byteLength": 511,
+      "ordinal": 3,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "6536cf8b53be11db01bc291a7beab0998eda2bdde73faef81968297f44cf05c6"
+    },
+    {
+      "byteLength": 769976,
+      "ordinal": 4,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "8b0d03ca4094f1db549d927a4a9e96a92295a31e3392db9222679d8f79160b35"
+    },
+    {
+      "byteLength": 545928,
+      "ordinal": 5,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "a2e88b01c588b7ed61958395e09d0393891f7502468c7a5645c0c579f9176fba"
+    },
+    {
+      "byteLength": 712,
+      "ordinal": 6,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "0918d0e4a339a4558eb6509205be2cd22881aeb9290b87a382c19e7cdbebcea7"
+    },
+    {
+      "byteLength": 2973,
+      "ordinal": 7,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "851bc0f966031410a0ac684ee6b3fd9e2a18f8444997aa31188c9558e0b5fca7"
+    },
+    {
+      "byteLength": 4726,
+      "ordinal": 8,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "0f3d4f2b8c71bc7f4cda0ca1ec8b82f7fb3f9526cf1064a1c4433671d6ef72a5"
+    },
+    {
+      "byteLength": 8557,
+      "ordinal": 9,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "705bfd3a29d10565e693aaa99f6cf027b2af8ad7f556493e20da3ce9726999a0"
+    },
+    {
+      "byteLength": 3660,
+      "ordinal": 10,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "534a0a70ab1bdceac7ef2c1755a87812337fbd0742d10f47a3746b629e5a5984"
+    },
+    {
+      "byteLength": 3660,
+      "ordinal": 11,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "248cc6888d3dd7d446d2c5c4d79d2430a9397876154f3681e063e63a3d148d82"
+    },
+    {
+      "byteLength": 2682,
+      "ordinal": 12,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "4649f0c45c6ceabc53dc90b12fa7038b1f02eee0284dcb5a755164ab2ad91618"
+    },
+    {
+      "byteLength": 921,
+      "ordinal": 13,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "d7794ab2ba97cf630d19660f28ce0589644d8eeb8a38e8347d3a593253dd66e0"
+    },
+    {
+      "byteLength": 672,
+      "ordinal": 14,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "cd7828839e1f2e7290223c161d2453e765c7872be5a8780a3810f2504df1195d"
+    },
+    {
+      "byteLength": 47314,
+      "ordinal": 15,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "0d82da3754c9906e2810f62f7a2f6def0399b3068ddbcb6054b036ee72c960ed"
+    },
+    {
+      "byteLength": 10761,
+      "ordinal": 16,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "3d06d01452fe28ecc128e2dc9d0cd5ab6256c12c1c54d429ebd6268af5c74ef6"
+    },
+    {
+      "byteLength": 24323,
+      "ordinal": 17,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "29cd82eebaa20689d50d0a307d95bd3846e8abcca1b3a5b1589e9fbdb30568b7"
+    },
+    {
+      "byteLength": 146223,
+      "ordinal": 18,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "6c8d5fe4df675e477f2f6be1473c9d9d643c8d502308484018da15fefd872051"
+    },
+    {
+      "byteLength": 676,
+      "ordinal": 19,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+      "role": "NORMATIVE-CANDIDATE-CONTENT",
+      "sha256": "4a2f21555591360806073ac79ab82f182f839b8f4588b1aa5928056d86188a11"
+    },
+    {
+      "byteLength": 3989,
+      "ordinal": 20,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+      "role": "PRODUCER-CONTROLLED-READER-EVIDENCE",
+      "sha256": "d24239b8a6fef722d73837b7959102e7c22b79197163d669d8f453aed9c337ae"
+    },
+    {
+      "byteLength": 3991,
+      "ordinal": 21,
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+      "role": "PRODUCER-CONTROLLED-READER-EVIDENCE",
+      "sha256": "eca424c54c25ec1cff715e51e59de8284a5b015528c418f4bf5233e512643e5d"
+    }
+  ],
+  "normativeContentRoot": "7c757f384ee383a4e1868495d482db51e4d200832dac3305fcf5cc525f1e1e2e",
+  "observedHead": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+  "packageContentRoot": "116a3967e01ce5070372988f2e0a796a4349c5a0b225c44f5671b07b74fb24bf",
+  "producerQaMembership": false,
+  "readerEvidenceRoot": "daf3855091893c614ac4207f99cd6c9d2affa171b6b2f1633c0b6d6bf601673f",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-PACKAGE-MANIFEST-V1",
+  "toolchain": [
+    {
+      "byteLength": 651,
+      "mode": "100644",
+      "ordinal": 1,
+      "path": "docs/planning/source-universe-v4-toolchain-path-registry-v1-2026-08-30.json",
+      "sha256": "c0db4d18c748d1e06296dc4d92fae2f5f1799e745bb23a44cbb8f6fd6304fbc7"
+    },
+    {
+      "byteLength": 58260,
+      "mode": "100644",
+      "ordinal": 2,
+      "path": "scripts/b0-v8-core.mjs",
+      "sha256": "b86b475716450ecaa2b992b4c610ae23bc750191973326ab66f689c97b59a478"
+    },
+    {
+      "byteLength": 9605,
+      "mode": "100644",
+      "ordinal": 3,
+      "path": "scripts/verify-secret-hygiene.mjs",
+      "sha256": "3f8b45ccef9752ee0b5056fd79ace633c3362367096602750f0ab8caaf5ae303"
+    },
+    {
+      "byteLength": 39656,
+      "mode": "100644",
+      "ordinal": 4,
+      "path": "scripts/source-universe-v4-core.mjs",
+      "sha256": "eacdfc7a7c37db89b76c77ad71d8bb64acd4331bf614cca129d029478e73749f"
+    },
+    {
+      "byteLength": 26537,
+      "mode": "100644",
+      "ordinal": 5,
+      "path": "scripts/create-source-universe-v4-candidate.mjs",
+      "sha256": "2377d415308c8897629fa97232ee893b7d2e5a88a76781f0112c0ad0f6f15b7f"
+    },
+    {
+      "byteLength": 10721,
+      "mode": "100644",
+      "ordinal": 6,
+      "path": "scripts/verify-source-universe-v4-reader-a.mjs",
+      "sha256": "edb229a60e55e00b17d28369895dd8a6e78ccc287107399e7cac9176ddcd9e9f"
+    },
+    {
+      "byteLength": 19143,
+      "mode": "100644",
+      "ordinal": 7,
+      "path": "scripts/verify-source-universe-v4-reader-b.py",
+      "sha256": "c96f7ee5b05215ee53e8a97357aab26783ce23e7ee62f5f11720e264083a0eb3"
+    },
+    {
+      "byteLength": 5939,
+      "mode": "100644",
+      "ordinal": 8,
+      "path": "scripts/finalize-source-universe-v4-candidate.mjs",
+      "sha256": "ed3811b10bbfd1f3fababcc949e0aa94a10e1c647fa48f7485ddc208b0dc97d9"
+    },
+    {
+      "byteLength": 12129,
+      "mode": "100644",
+      "ordinal": 9,
+      "path": "scripts/verify-source-universe-v4-candidate.mjs",
+      "sha256": "8790009308b8148df2ddfadd6f3f3e522f65511b9365244be48ddd1cc28854b8"
+    },
+    {
+      "byteLength": 13950,
+      "mode": "100644",
+      "ordinal": 10,
+      "path": "tests/source-universe-v4-core.test.mjs",
+      "sha256": "11bb54d14f1ded70048aee3b26677b227e8fce301019dd5a089d95392651ba5e"
+    },
+    {
+      "byteLength": 9307,
+      "mode": "100644",
+      "ordinal": 11,
+      "path": "package.json",
+      "sha256": "dafca7cfb5a07df8a41c3073ae45a2b217b84340df879174a898d0cf4f04809a"
+    }
+  ],
+  "toolchainRoot": "c1263473e5c018d37837f6e2fa4219c928a146c59648887714cd722ecd0922da"
+}

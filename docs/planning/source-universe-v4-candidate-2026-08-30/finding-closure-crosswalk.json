@@ -1,0 +1,249 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-FINDING-CROSSWALK-2026-08-30-G0",
+  "closureCount": 0,
+  "crosswalkRoot": "5389a76ebd338c64e09c0c7c1d064f0a0cf1409756cc1e7386c6524b2ce4a444",
+  "findingCount": 24,
+  "rows": [
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-001",
+      "findingId": "SURS3-HR-F001",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-5CB3E8650D51D19A6AE2FB39",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F001",
+      "severity": "P0",
+      "sourceSpanSha256": "0eeea8e4d83cd58c3da372e46950860b3c1387638102eb84b4c1faf37a54ea8f"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-002",
+      "findingId": "SURS3-HR-F002",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-63D421EA2147ECD7B21E9A9A",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F002",
+      "severity": "P1",
+      "sourceSpanSha256": "f10c84513ea2545c61b15210af53ce2e7f78ad53ac34353191c7922c669a4eb7"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-003",
+      "findingId": "SURS3-HR-F003",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-9F2E99A015C5FD14F547C6E8",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F003",
+      "severity": "P1",
+      "sourceSpanSha256": "64e19e316cc3d95cdaa7b2e4cfc08a74bb8465aa62124ced0ba37283fb25dee0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-004",
+      "findingId": "SURS3-HR-F004",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-F1CE3D57E7DE1B9FC5D2314C",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F004",
+      "severity": "P0",
+      "sourceSpanSha256": "ea02b0424c0183c0d6c93a09ea058f149327912a5c3e7d81f33b4e9c7d5aeb8c"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-005",
+      "findingId": "SURS3-HR-F005",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-8EC28282FB8010345437C34B",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F005",
+      "severity": "P0",
+      "sourceSpanSha256": "18831ee7b69ef710d85b6d569b4f7265aa9bfbc500a40500d429a2f12a1305f7"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-006",
+      "findingId": "SURS3-HR-F006",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-9F667647C6DF4EA5C477AAAA",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F006",
+      "severity": "P0",
+      "sourceSpanSha256": "9d28d0e296a3cc7fd1449569eb8188884ebfb7214c90df5a392e7e03226ebfc7"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-007",
+      "findingId": "SURS3-HR-F007",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-4E9B48CFE22269BD541A5786",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F007",
+      "severity": "P0",
+      "sourceSpanSha256": "72298fe88506ca8325f8d9f4c2c34938bbf3c1cd093c92c506b2d2b58605a9cc"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-008",
+      "findingId": "SURS3-HR-F008",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-ED8759678541C1A1E95B40FD",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F008",
+      "severity": "P0",
+      "sourceSpanSha256": "2d421d770018eb31cd011bfa1066ca24d921d85b57f439daa7b85e24ca52ca6f"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-009",
+      "findingId": "SURS3-HR-F009",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-0F53C75BFE0249DF6EEAEDBC",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F009",
+      "severity": "P0",
+      "sourceSpanSha256": "761aac0cd0e6129bfc11e8a6ef708c9b60d6d9d1cdfa4f14342e0685258bddfa"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-010",
+      "findingId": "SURS3-HR-F010",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-4584766B1AAB449B91D36126",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F010",
+      "severity": "P0",
+      "sourceSpanSha256": "eb95c4bbb96e81412a751d0c48140703f4bd1376975ebc70a508c7f33d1880c7"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-011",
+      "findingId": "SURS3-HR-F011",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-B56F1D2D47B767C12E536657",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F011",
+      "severity": "P0",
+      "sourceSpanSha256": "09b59f454d8517f0172cc43b2ec4f026b8ab3ddce63a41e9240270b3dbf52df0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-012",
+      "findingId": "SURS3-HR-F012",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-84F0D5C029F8877209CAAD77",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F012",
+      "severity": "P1",
+      "sourceSpanSha256": "3b8eb9919ac6538686bddec322fdedaf8ec7d0a6d2415321b1f8b3df0e5d4006"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-013",
+      "findingId": "SURS3-HR-F013",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-FED9CB6934D3BEF23BC8C569",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F013",
+      "severity": "P1",
+      "sourceSpanSha256": "5005c31f3ef99bdffde8e3d75ba13aa64e8e770d7a534df8ea985c139bcb0799"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-014",
+      "findingId": "SURS3-HR-F014",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-1442F76344BDFCD1944672CF",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F014",
+      "severity": "P0",
+      "sourceSpanSha256": "074516c61c1fc1a2b3eb07d2c7935057253bd63ef1a96de2cd332a9b24ba1af9"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-015",
+      "findingId": "SURS3-HR-F015",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-B5C249EB0A499B57A0C1749D",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F015",
+      "severity": "P1",
+      "sourceSpanSha256": "7c82c44238f34d150c49b0102020c9bd846fc4d5b55597be69c71fdae612f83e"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-016",
+      "findingId": "SURS3-HR-F016",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-AEDAB01664979DC674777A57",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F016",
+      "severity": "P0",
+      "sourceSpanSha256": "db486447782cd8c52d9c4a92d34818035dc5a91c4d7a23fc376e3313c6b8c3b4"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-017",
+      "findingId": "SURS3-HR-F017",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-0EDD8D8CE1219FD35565B6BE",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F017",
+      "severity": "P1",
+      "sourceSpanSha256": "caf426404c9ba2d73b004d645eef465420780d73193316cabcac12cadb948da1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-018",
+      "findingId": "SURS3-HR-F018",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-11F2AA70D347A03D8347A533",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F018",
+      "severity": "P1",
+      "sourceSpanSha256": "901b830b21fa9ec17619ad1d22e0306026f2d1665831fc517f12f714f1583ac1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-019",
+      "findingId": "SURS3-HR-F019",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-8A570F08580BA3CE41CE9B6E",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F019",
+      "severity": "P1",
+      "sourceSpanSha256": "1717828cf553b484bbebb0ce63840e9453a76cb33b24ab478b3ba8c47aff94c4"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-020",
+      "findingId": "SURS3-HR-F020",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-ACA98EF9B2639BCF7C57E74E",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F020",
+      "severity": "P1",
+      "sourceSpanSha256": "086c332f00412b254f7213c2533392044de17d99f068d86e37edf63c966b8105"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-021",
+      "findingId": "SURS3-HR-F021",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-EE2A174F1CCBCDCDCAD827DD",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F021",
+      "severity": "P1",
+      "sourceSpanSha256": "c320a79932aef7b6e745c3c82acd3e46484050838f51ede5aac7c2aa6b5a0bc1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-022",
+      "findingId": "SURS3-HR-F022",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-93969B241F58ED6AA9C6D322",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F022",
+      "severity": "P1",
+      "sourceSpanSha256": "3300189460283093642d69e5bea46a9dcc5fcddddf0210b7518ca2ea8bd31e8e"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-023",
+      "findingId": "SURS3-HR-F023",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-E2C059FA1AE6FE37D26CE27C",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F023",
+      "severity": "P1",
+      "sourceSpanSha256": "26347416f7d7ed44e9d07b152cbf24042463ecd467419a24826979bdbbb00a20"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-024",
+      "findingId": "SURS3-HR-F024",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "mutationVectorId": "SURS4-MUT-2009A09044E246FEE472C2F1",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F024",
+      "severity": "P0",
+      "sourceSpanSha256": "440436593804b759bf796aa3104da1e33b03b29f422016b81049bb5c45c410ee"
+    }
+  ],
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-FINDING-CROSSWALK-V1"
+}
