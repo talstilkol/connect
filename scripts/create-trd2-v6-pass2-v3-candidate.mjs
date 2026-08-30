@@ -92,11 +92,28 @@ function marker(part, prefixLines) {
   return `__TRD2_V6_PASS2_V3_PART_${String(part).padStart(2, '0')}_PREFIX_SHA256_${sha256Bytes(Buffer.from(`${prefixLines.join('\n')}\n`, 'utf8'))}__`;
 }
 
+function byteBalancedBoundaries(lines) {
+  const offsets = [0];
+  for (const line of lines) offsets.push(offsets.at(-1) + Buffer.byteLength(line, 'utf8') + 1);
+  const totalBytes = offsets.at(-1);
+  const boundaries = [0];
+  let cursor = 0;
+  for (let part = 1; part < PATCH_PART_COUNT; part += 1) {
+    const target = Math.floor((part * totalBytes) / PATCH_PART_COUNT);
+    while (cursor < lines.length && offsets[cursor] < target) cursor += 1;
+    boundaries.push(cursor);
+  }
+  boundaries.push(lines.length);
+  if (boundaries.some((boundary, index) => index > 0 && boundary <= boundaries[index - 1])) throw new Error('byte-balanced patch produced an empty part');
+  return boundaries;
+}
+
 function patchPart(content, part) {
   if (!Number.isSafeInteger(part) || part < 1 || part > PATCH_PART_COUNT) throw new Error(`patch part must be 1..${PATCH_PART_COUNT}`);
   const lines = content.endsWith('\n') ? content.slice(0, -1).split('\n') : content.split('\n');
-  const start = Math.floor(((part - 1) * lines.length) / PATCH_PART_COUNT);
-  const end = Math.floor((part * lines.length) / PATCH_PART_COUNT);
+  const boundaries = byteBalancedBoundaries(lines);
+  const start = boundaries[part - 1];
+  const end = boundaries[part];
   const chunk = lines.slice(start, end);
   if (part === 1) return `*** Begin Patch\n*** Add File: ${REGISTRY_PATH}\n${[...chunk.map((line) => `+${line}`), `+${marker(part, lines.slice(0, end))}`].join('\n')}\n*** End Patch\n`;
   const oldMarker = marker(part - 1, lines.slice(0, start));
