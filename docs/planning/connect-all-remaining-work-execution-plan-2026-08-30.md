@@ -147,21 +147,31 @@ Verifier חוזר עבר, אך המועמד אינו Accepted וחסמי 3.3 נ�
 
 5.2.1 Protocol v1.9 נדחה; `17` Findings קיימים ורק קרדיט מכני יחיד נשמר ללא Acceptance.
 
+5.2.2 v1.10 G0 נבנה אך ביקורת עצמית גילתה שתי חולשות: מחלקות
+הביקורת לא היו סגורות ותלות B0 core לא נכללה ב־Manifest. הוא נשמר
+כ־`SUPERSEDED-BY-G1;NO-CLOSURE-CREDIT`.
+
+5.2.3 v1.10 G1 נבנה כ־Immutable local Candidate: `15/15` Validators
+עוברים במסלול Protocol vector, `17/17` Mutations נחסמות ושני
+Cross-runtime Readers עוברים. independent Closure=`0/17` ו־Acceptance=`0`.
+
 ## 5.3 משימות
 
-5.3.1 לבנות v1.10 בלתי־משתנה עם schema סגור לראיות חיצוניות ולתוצאות Validators.
+5.3.1 לבנות v1.10 בלתי־משתנה עם schema סגור לראיות חיצוניות ולתוצאות Validators. Status=`COMPLETED-AS-G1-CANDIDATE`.
 
-5.3.2 להוכיח שכל Validator חיצוני יכול לקבל Input אמיתי, להצליח במסלול חיובי ולהיחסם בכל Mutation שלילית.
+5.3.2 להוכיח שכל Validator חיצוני יכול לקבל Input אמיתי, להצליח במסלול חיובי ולהיחסם בכל Mutation שלילית. Status=`PROTOCOL-VECTOR-15-OF-15;LIVE-EXTERNAL-EVIDENCE-PENDING`.
 
-5.3.3 להפריד Producer, Reader A, Reader B, Reviewers, Reconciler ו־Acceptance writer.
+5.3.3 להפריד Producer, Reader A, Reader B, Reviewers, Reconciler ו־Acceptance writer. Status=`LOGICAL-SLOTS-COMPLETE;EXTERNAL-APPOINTMENTS-PENDING`.
 
-5.3.4 להוסיף Path safety, canonical JSON, finite denominators, trusted time, expiry, revocation ו־CAS.
+5.3.4 להוסיף Path safety, canonical JSON, finite denominators, trusted time, expiry, revocation ו־CAS. Status=`LOCAL-CONTROLS-COMPLETE;TRUSTED-TIME-AND-DURABLE-ADAPTERS-PENDING`.
 
-5.3.5 להגדיר שלוש ביקורות: Structural, Semantic/Security ו־Estimate/Schedule, עם Findings שאסור למזג.
+5.3.5 להגדיר שלוש ביקורות: Structural, Semantic/Security ו־Estimate/Schedule, עם Findings שאסור למזג. Status=`CLOSED-REVIEW-CLASSES-COMPLETE;ACTUAL-REVIEWS-PENDING`.
 
 ## 5.4 מה צריך מ־Tal
 
-5.4.1 אישור בעלי תפקידי ביקורת כאשר יידרשו שמות; Tal אינו מאשר את עבודתו של אותו Producer במקום Reviewer עצמאי.
+5.4.1 Tal נשאר אחראי יחיד לעבודה. אין חלוקת Primary/Backup ואין
+שמות אחראים נוספים. כאשר Gate ידרוש Reviewer עצמאי בפועל, Tal יתאם
+Evidence חיצוני; QA של אותו Producer לא ייחשב ביקורת עצמאית.
 
 ## 5.5 תנאי סיום
 

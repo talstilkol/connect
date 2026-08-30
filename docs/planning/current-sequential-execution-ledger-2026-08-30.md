@@ -21,13 +21,16 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 1.2.3 שלב 3 — B0 Successor: `IN_PROGRESS`; חבילת v8 מקומית נבנתה
 ונבדקה, אך Closure חיצוני ו־Acceptance עדיין חסומים.
 
-1.2.4 שלבים 4–10 — יתר חבילות היסוד ותכנון Accepted: `PENDING`; כל אחת
+1.2.4 שלב 4 — Three-review Protocol Successor: `IN_PROGRESS`; G1
+נבנה ונבדק מקומית, אך ביקורות חיצוניות ו־Acceptance עדיין חסומים.
+
+1.2.5 שלבים 5–10 — יתר חבילות היסוד ותכנון Accepted: `PENDING`; כל אחת
 מתחילה רק לאחר קודמותיה או Dependency מפורש שמאפשר מקביליות.
 
-1.2.5 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
+1.2.6 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
 השלמת חבילות היסוד ועד שטל ימסור קיבולת שבועית.
 
-1.2.6 שלבים 12–23 — חשבונות, פיתוח, Pilot, Production ושיפור:
+1.2.7 שלבים 12–23 — חשבונות, פיתוח, Pilot, Production ושיפור:
 `BLOCKED_BY_DEVELOPMENT_FREEZE_OR_EXTERNAL_EVIDENCE`.
 
 # 2. חבילת ביצוע 1 — פרסום בטוח
@@ -179,3 +182,54 @@ read-set מדויק ומעבר rotate/revoke/consume/head אחד.
 4.3.2 חסרים Trusted time, Trust anchor וחתימות חיות, Evidence מאומת
 ל־PUBLIC remote, Durable adapters, Appointments נפרדים, Reviewer עצמאי
 ו־Predecessor behavior oracle מלא.
+
+# 5. חבילת ביצוע 4 — Three-review Protocol v1.10 G1
+
+## 5.1 תוצאה מקומית
+
+5.1.1 Toolchain commit=`b857af1`; ביקורת עצמית גילתה ב־G0 שתי
+חולשות: מחלקות Review לא היו סגורות ותלות B0 core לא הייתה ב־Manifest.
+
+5.1.2 G0 package commit=`a67cf7e`; G0 Reader evidence commit=
+`729b9ed`; status=`SUPERSEDED-BY-G1;NO-CLOSURE-CREDIT`.
+
+5.1.3 G1 repair toolchain commit=`cbcf5e6`; G1 package commit=
+`4b17487`; G1 Reader evidence commit=`4c2c749`.
+
+5.1.4 G1 package content root=
+`732ccf720ac3c4ff3ef1d5d224ef6b1d3ceab18f2984c6937dab38f1a6682abd`;
+members=`11/11`; frozen source rows=`11/11`.
+
+5.1.5 Protocol-vector Validators=`15/15`; local controls=`17/17`;
+deterministic hostile mutations blocked=`17/17`; unit tests=`9/9`.
+
+5.1.6 Reader A report root=
+`c32f9f0e080d7f0bb9c112f2c9268307982a7c39233400e88441ccf5fda05eff`;
+Reader B report root=
+`6f5f91a71c3600cb73b23506a34c3c2555924a410b5f60aac6a6fe5c437ef1f1`.
+
+## 5.2 הגנות שמומשו ב־G1
+
+5.2.1 שלוש מחלקות ביקורת סגורות ובסדר מדויק: Structural,
+Semantic/Security, Estimate/Schedule.
+
+5.2.2 כל אחד מ־15 ה־Validators מקבל Evidence typed נפרד; חסר או
+Mutation בכל prerequisite מחזיר BLOCK.
+
+5.2.3 שבעה Role slots לוגיים, שלושה Reviewers, Reconciler, approver
+ו־Permit issuer מופרדים במודל. אין טענה שקיימים Appointments אמיתיים.
+
+5.2.4 כל תלות Toolchain טרנזיטיבית, כולל `b0-v8-core.mjs`, מופיעה
+גם ב־Manifest וגם ב־Source index.
+
+5.2.5 Report writes חסומים עד Adapter descriptor-bound; Artifact
+growth admission חסום עד תקציב גלובלי מאושר.
+
+## 5.3 חסמים שנשמרו
+
+5.3.1 independent closure=`0/17`; ‏B0=`ABSENT`; ‏Acceptance=`0`;
+‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`.
+
+5.3.2 חסרים שבעה Appointments אמיתיים, אלגוריתם ו־Trust store
+מאושרים, Scanners נפרדים, Remote PUBLIC receipt, Durable CAS/Recovery,
+Trusted time, שלוש ביקורות חיצוניות, Reconciliation ו־Human approval.
