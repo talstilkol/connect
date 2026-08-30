@@ -76,9 +76,18 @@
 3.1.2 מצב ביצוע=`IN_PROGRESS`; תצפית ה־Preflight נמצאת ב־
 [Discovery Cutoff preflight](discovery-cutoff-preflight-observation-2026-08-30.md).
 
-3.1.3 Candidate מכני נוצר על observed commit `0f0b0e9`, עם Package
-root `a790725dc20b73094f7317503850641bcfea748d56bea480500c00ee87a97c17`.
-Verifier חוזר עבר, אך המועמד אינו Accepted וחסמי 3.3 נשארים פתוחים.
+3.1.3 Cutoff v1 נשמר כראיה היסטורית על observed commit `0f0b0e9`,
+עם Package root
+`a790725dc20b73094f7317503850641bcfea748d56bea480500c00ee87a97c17`.
+הוא אינו Cutoff עדכני ל־Source Universe v4 מפני שה־Toolchains של B0,
+Protocol ו־v4 נוספו לאחריו.
+
+3.1.4 Cutoff v2 הפעיל נוצר על observed commit
+`4aab362fe162f421eabf3f379a3f4018f7adf516`, עם Package root
+`cbf1c7a6735f3525dc149181e7a85ed635cc45e0f6dd071b63ddb39a740a7e0a`.
+הוא מקפיא מראש `4` פלטי Cutoff ו־`28` פלטי Source Universe v4:
+`23` חברי Candidate ו־`5` פלטי Review/Acceptance. ‏Verifier חוזר עבר,
+אך המועמד אינו Accepted וחסמי 3.3 נשארים פתוחים.
 
 ## 3.2 משימות
 
@@ -91,6 +100,10 @@ Verifier חוזר עבר, אך המועמד אינו Accepted וחסמי 3.3 נ�
 3.2.4 לקבע כל מקור רשמי עם URL, bytes או receipt בטוח, זמן תצפית, גרסה, תחום ותאריך תפוגה.
 
 3.2.5 לאסור Self-membership: פלט חדש אינו יכול להיות מקור של עצמו.
+
+3.2.6 Status מקומי: `COMPLETED-AS-V2-CANDIDATE`; Toolchain commit=
+`4aab362`; Candidate commit=`d8e56ae`; Verifier checks=`14/14`;
+independent review=`PENDING`.
 
 ## 3.3 מה צריך מ־Tal
 
@@ -187,9 +200,15 @@ Evidence חיצוני; QA של אותו Producer לא ייחשב ביקורת ע
 
 6.2.1 Source Universe v3 נדחה עם `24` Findings; v4 קיים כ־Build charter בלבד ואינו Source Universe Accepted.
 
+6.2.2 Discovery Cutoff v2 ו־Output registry סגור מוכנים: `23` נתיבי
+Package ועוד `5` נתיבי Review/Acceptance הוקפאו ונמצאו absent ב־HEAD
+הנצפה. Source Universe v4 עצמו עדיין absent והשלב `IN_PROGRESS`.
+
 ## 6.3 משימות
 
-6.3.1 לבצע את Discovery משלב 2 וליצור SourceOccurrenceLedger ו־TargetSpanLedger.
+6.3.1 להשתמש רק ב־Discovery Cutoff v2 הקפוא וליצור
+SourceOccurrenceLedger ו־TargetSpanLedger. אין לשנות אף אחד מ־28 נתיבי
+הפלט בלי restart לדור חדש.
 
 6.3.2 להקצות Sole producer לכל Object ולבנות Graph של שימושים מפורשים והפוכים.
 

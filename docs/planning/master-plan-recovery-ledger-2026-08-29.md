@@ -1847,3 +1847,15 @@
 1.135.6 independent read-only Review first found=`3 P1+2 P2`;all five were closed one-to-one;one later P2 numbering Finding was closed by exact Part-3 sequence `3.1,3.2,3.3,3.4`;final re-review=`PASS`.
 
 1.135.7 claim limit=`explanation and voting artifact only`;not Acceptance,Permit,Release,legal advice or source of current provider truth;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;Public Push Permit absent;no Product/Git/GitHub/provider/deployment mutation occurred.
+
+## 1.136 Discovery Cutoff v2 freeze for Source Universe v4
+
+1.136.1 Toolchain commit=`4aab362fe162f421eabf3f379a3f4018f7adf516`;Candidate commit=`d8e56ae46919b5e61c640391be913f9dacd7ce32`;observed input commit=`4aab362fe162f421eabf3f379a3f4018f7adf516`;observedAt=`2026-08-30T19:18:23Z`;clock authority=`LOCAL-CLOCK-UNTRUSTED`.
+
+1.136.2 package content root=`cbf1c7a6735f3525dc149181e7a85ed635cc45e0f6dd071b63ddb39a740a7e0a`;Cutoff outputs=`4`;predeclared Source Universe v4 outputs=`28=23 package+5 review/acceptance`;all 32 paths were absent at the observed Git tree.
+
+1.136.3 Producer verifier=`14 checks PASS`;v2 unit tests=`9/9`;combined foundation tests=`34/34`;TypeScript,targeted ESLint,working-tree Secret hygiene and Source guardrails PASS;v1 Cutoff,B0 v8 and Protocol v1.10 G1 repeatability checks remained PASS.
+
+1.136.4 v1 Cutoff remains immutable historical evidence but is superseded as the active Source Universe v4 input because later toolchains postdate its observed commit;no prior root or Acceptance claim was changed.
+
+1.136.5 claim limit=`CANDIDATE-NOT-ACCEPTED`;trusted time,GitHub API surfaces,private source custody,official-source occurrence coverage and independent review remain blocking;Source Universe v4 Subject remains absent;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.

@@ -16,7 +16,8 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 
 1.2.1 שלב 1 — פרסום בטוח ל־GitHub: `COMPLETED`.
 
-1.2.2 שלב 2 — Discovery Cutoff ומקורות: `IN_PROGRESS`.
+1.2.2 שלב 2 — Discovery Cutoff ומקורות: `IN_PROGRESS`; Cutoff v2
+נבנה ונבדק מקומית, והשלמה חיצונית של מקור/זכויות/API עדיין חסומה.
 
 1.2.3 שלב 3 — B0 Successor: `IN_PROGRESS`; חבילת v8 מקומית נבנתה
 ונבדקה, אך Closure חיצוני ו־Acceptance עדיין חסומים.
@@ -24,13 +25,16 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 1.2.4 שלב 4 — Three-review Protocol Successor: `IN_PROGRESS`; G1
 נבנה ונבדק מקומית, אך ביקורות חיצוניות ו־Acceptance עדיין חסומים.
 
-1.2.5 שלבים 5–10 — יתר חבילות היסוד ותכנון Accepted: `PENDING`; כל אחת
+1.2.5 שלב 5 — Source Universe v4: `IN_PROGRESS`; נתיבי הפלט הוקפאו
+ב־Cutoff v2 אך ה־Candidate עצמו עדיין absent.
+
+1.2.6 שלבים 6–10 — יתר חבילות היסוד ותכנון Accepted: `PENDING`; כל אחת
 מתחילה רק לאחר קודמותיה או Dependency מפורש שמאפשר מקביליות.
 
-1.2.6 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
+1.2.7 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
 השלמת חבילות היסוד ועד שטל ימסור קיבולת שבועית.
 
-1.2.7 שלבים 12–23 — חשבונות, פיתוח, Pilot, Production ושיפור:
+1.2.8 שלבים 12–23 — חשבונות, פיתוח, Pilot, Production ושיפור:
 `BLOCKED_BY_DEVELOPMENT_FREEZE_OR_EXTERNAL_EVIDENCE`.
 
 # 2. חבילת ביצוע 1 — פרסום בטוח
@@ -233,3 +237,50 @@ growth admission חסום עד תקציב גלובלי מאושר.
 5.3.2 חסרים שבעה Appointments אמיתיים, אלגוריתם ו־Trust store
 מאושרים, Scanners נפרדים, Remote PUBLIC receipt, Durable CAS/Recovery,
 Trusted time, שלוש ביקורות חיצוניות, Reconciliation ו־Human approval.
+
+# 6. חבילת ביצוע 5 — Discovery Cutoff v2 ל־Source Universe v4
+
+## 6.1 תוצאה מקומית
+
+6.1.1 Toolchain commit=
+`4aab362fe162f421eabf3f379a3f4018f7adf516`; Candidate commit=
+`d8e56ae46919b5e61c640391be913f9dacd7ce32`.
+
+6.1.2 observed input commit=
+`4aab362fe162f421eabf3f379a3f4018f7adf516`; observedAt=
+`2026-08-30T19:18:23Z`; local clock authority=`UNTRUSTED`.
+
+6.1.3 package content root=
+`cbf1c7a6735f3525dc149181e7a85ed635cc45e0f6dd071b63ddb39a740a7e0a`;
+Cutoff output denominator=`4`; Source Universe v4 denominator=`28`:
+`23` Package members ו־`5` Review/Acceptance outputs.
+
+6.1.4 Producer Verifier checks=`14/14`; unit tests for v2=`9/9`;
+combined local foundation tests=`34/34`; TypeScript, targeted ESLint,
+Secret hygiene ו־Source guardrails עברו.
+
+## 6.2 הגנות שמומשו
+
+6.2.1 כל `32` הנתיבים הוצהרו לפני Cutoff והיו absent בעץ Git הנצפה;
+Cutoff ו־successor namespaces נפרדים וללא כפילות.
+
+6.2.2 Receipt מקשר ל־bytes ול־SHA-256 של שני Registries ושל ששת חברי
+ה־Toolchain מתוך observed commit קפוא.
+
+6.2.3 Builder ו־Verifier מפיקים Apply-patch בלבד ואינם כותבים ישירות
+לקבצי המאגר; הכתיבה בוצעה דרך מנגנון patch מבוקר.
+
+6.2.4 אין שימוש ב־Math.random, ב־crypto.randomUUID, במפתח, בחתימה או
+באלגוריתם קריפטוגרפי חדש.
+
+## 6.3 חסמים והמשך
+
+6.3.1 Cutoff v2 הוא `CANDIDATE-NOT-ACCEPTED`; Trusted time, GitHub API
+surfaces, Private source custody, Official-source occurrence frontier
+וביקורת עצמאית נשארים חסומים.
+
+6.3.2 המשימה המקומית הבאה היא Toolchain דטרמיניסטי ל־Source Universe
+v4 שמממש את `24` Findings אחד־לאחד בתוך `23` חברי ה־Package הקפואים.
+
+6.3.3 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר נשאר
+`PUBLIC`; אין מעבר לפיתוח מוצר.
