@@ -1965,3 +1965,21 @@
 1.143.6 verification=`3972/3972 tests;Vinext and Vercel builds PASS;TypeScript PASS;ESLint 0 errors/28 historical warnings;Source guardrails and Secret hygiene PASS;post-commit verifier COMMITTED-CLEAN`.
 
 1.143.7 state=`PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-NEXT`;Pass 3 v1 emitted=`0/3` and is superseded;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
+
+## 1.144 TRD-2 v6 Pass 3 v2 compiled semantics and state machines
+
+1.144.1 toolchain commits=`b3e2398;9933c1d;980f27c`;Candidate commit=`50007de6dd7a28740514fe6070fa804f4bd0e8f5`;remote readback matched.
+
+1.144.2 Subject root=`4f02df67992c3fadbd64bc104cdff1b149889ca912370fa3f2594e4805f95fb8`;Clause AST Registry root=`120cac68a82eca4bb1169cabaf7a591a57ccca8498a6334306806e4bbdf79a7d`;State Machine Registry root=`782fdc11ee64943b174dd0616c0b7c3820537f4f991b68a2c7639db45914e04d`.
+
+1.144.3 denominators=`128 Requirements;128 source bindings;128 programs;44 operators;492 reconstructable virtual Clause Nodes;492 reconstructable Counterexample Obligations;7 state families;17 machines;3554 transitions;7879 expanded transitions;3200 lifecycle tuples`.
+
+1.144.4 independent Engine agreement root=`77b81b0e40749b0edbb1961e0a7cc5b679b8e81921389ef5b9a38fb8f8b96732`;toolchain root=`f85f83270aca2d9d959af33913143d04e5edb1fb92fce04925bc3397316bc2b2`;hostile mutations=`8/8 BLOCK`;mismatch=`0`.
+
+1.144.5 two uncommitted preliminary output sets were rejected with zero credit:the first exposed an Engine B identity defect;the second exposed an unmodelled direct Python package entry in Source Guard.All three outputs were regenerated only after the corrected toolchain was committed.
+
+1.144.6 verification=`3984/3984 tests;Vinext and Vercel builds PASS;TypeScript PASS;ESLint 0 errors/28 historical warnings;Source Guard and Secret hygiene PASS;post-commit verifier COMMITTED-CLEAN`.
+
+1.144.7 state=`PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-COMPLETE-LOCAL;PASS-4-NEXT`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
+
+1.144.8 Pass 4 scope=`causal graph plus dual Graph Engines`;final root overlay is deferred until exact Pass 5/6 roots exist;Atomic Package remains Pass 6;fake or placeholder future roots are forbidden.

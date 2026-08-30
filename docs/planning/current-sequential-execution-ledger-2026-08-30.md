@@ -32,10 +32,12 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
 1.2.6 שלב 6 — TRD-2 v6:
-`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-NEXT`;
+`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-COMPLETE-LOCAL;PASS-4-NEXT`;
 Pass 2 v3 קובע ב־commit `1e33fcd` ומוכיח `82` Schemas,‏ `789/789`
 הסכמת מנועים, `30/30` מיפויי Output→Schema ו־`50/50` Invariants.
-Pass 3 v1 נשאר היסטוריה ללא פלט; Pass 3 v2 הוגדר מול נתיבי v3. Passes 3–6, שתי
+Pass 3 v1 נשאר היסטוריה ללא פלט; Pass 3 v2 קובע ב־commit `50007de`
+ומוכיח Subject, ‏`128` תוכניות Clause AST ושבע משפחות State Machine.
+Passes 4–6, שתי
 Generations, ביקורות עצמאיות ו־Acceptance נשארים
 `PENDING`. שלבים 7–10 מתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
@@ -486,3 +488,50 @@ Findings=`5=4 P0+1 P1`; כולם `OPEN` מקומית עד v2.
 
 9.4.3 שלושת פלטי v1 נשמרים immutable כהיסטוריה שנדחתה. נדרש Output
 Path Registry v2 ונתיבים חדשים; silent substitution=`FORBIDDEN`.
+
+# 10. חבילת ביצוע 9 — TRD-2 v6 Pass 2 v3 ו־Pass 3 v2
+
+## 10.1 Pass 2 v3
+
+10.1.1 Candidate commit=`1e33fcd78f39df9acec4a4483411b1bea8eb8820`;
+Closed Schema Registry root=
+`6374ced141b6a1bafff816e1676a5004dbcb51b4fd8fc0437b1b2eb7be6c83e6`.
+
+10.1.2 Schemas=`82`; fixtures=`789`; Output→Schema=`30/30`;
+Invariants=`50/50`; two-engine mismatch=`0`; final verifier=
+`COMMITTED-CLEAN`.
+
+## 10.2 Pass 3 v2
+
+10.2.1 Candidate commit=`50007de6dd7a28740514fe6070fa804f4bd0e8f5`;
+remote readback matched.
+
+10.2.2 Subject root=
+`4f02df67992c3fadbd64bc104cdff1b149889ca912370fa3f2594e4805f95fb8`;
+Clause AST root=
+`120cac68a82eca4bb1169cabaf7a591a57ccca8498a6334306806e4bbdf79a7d`;
+State Machine root=
+`782fdc11ee64943b174dd0616c0b7c3820537f4f991b68a2c7639db45914e04d`.
+
+10.2.3 Requirements/Bindings/Programs=`128/128/128`; Operators=`44`;
+virtual Clause Nodes=`492`; Counterexample Obligations=`492`; machines=`17`;
+transitions=`3554`; expanded transitions=`7879`; lifecycle tuples=`3200`.
+
+10.2.4 hostile mutations=`8/8 BLOCK`; tests=`3984/3984`; both builds,
+TypeScript, Source Guard and Secret hygiene=`PASS`; ESLint=`0 errors/28
+historical warnings`; final verifier=`COMMITTED-CLEAN`.
+
+10.2.5 two rejected uncommitted generations have zero credit. They were
+removed and regenerated only after independent identity and package-boundary
+defects were corrected in the committed toolchain.
+
+## 10.3 Current boundary
+
+10.3.1 Pass 4 is next: complete causal graph, independent Graph Engines and
+hostile graph mutations.
+
+10.3.2 The final root overlay waits for exact Pass 5/6 roots; Atomic Package is
+Pass 6. Placeholder or invented roots are forbidden.
+
+10.3.3 accepted Requirements=`0/128`; Finding closure=`0/15`; review
+generations=`0/2`; Gate29=`BLOCKED`; development freeze=`ACTIVE`.

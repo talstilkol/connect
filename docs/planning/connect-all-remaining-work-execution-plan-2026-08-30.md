@@ -355,6 +355,33 @@ post-commit verifier=`COMMITTED-CLEAN`; remote readback exact.
 Clause AST programs ולממש שבע משפחות State Machine בנתיבי v3 בלבד.
 ה־Candidate ממשיך להעניק `0` Closure ו־`0` Acceptance.
 
+7.6.20 Pass 3 v2=`COMPLETED-AS-LOCAL-CANDIDATE`; Candidate commit=
+`50007de6dd7a28740514fe6070fa804f4bd0e8f5`; remote readback exact.
+
+7.6.21 roots: Subject=
+`4f02df67992c3fadbd64bc104cdff1b149889ca912370fa3f2594e4805f95fb8`;
+Clause AST=
+`120cac68a82eca4bb1169cabaf7a591a57ccca8498a6334306806e4bbdf79a7d`;
+State Machine=
+`782fdc11ee64943b174dd0616c0b7c3820537f4f991b68a2c7639db45914e04d`.
+
+7.6.22 exact local denominators=`128 Requirements;128 Bindings;128 Programs;
+44 Operators;492 Clause Nodes;492 Counterexample Obligations;7 state families;
+17 machines;3554 transitions;7879 expanded transitions;3200 lifecycle tuples`.
+
+7.6.23 full gates=`3984/3984 tests;two builds PASS;TypeScript PASS;ESLint 0
+errors/28 historical warnings;Source Guard PASS;Secret hygiene PASS`;
+two-engine disagreement=`0`; hostile mutations=`8/8 BLOCK`; post-commit
+verifier=`COMMITTED-CLEAN`.
+
+7.6.24 המשימה הפעילה הבאה=`Pass 4`: להפיק Causal Graph מלא ושני Graph
+Engine reports. מנגנון Overlay/Invalidation ייבנה וייבדק, אך הפלט הסופי
+יידחה עד שקיימים שורשי Pass 5/6 אמיתיים. Atomic Package נשאר Pass 6.
+
+7.6.25 accepted Requirements=`0/128`; Finding closure=`0/15`; review
+generations=`0/2`; Reconciliation ו־Definition Acceptance=`ABSENT`;
+Gate29=`BLOCKED`; development freeze=`ACTIVE`.
+
 # 8. שלב 7 — Master Control Sequence Successor
 
 ## 8.1 מה השלב אומר
