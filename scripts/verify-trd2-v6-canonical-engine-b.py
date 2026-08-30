@@ -402,7 +402,8 @@ def run_git(args):
 def assert_expected_worktree():
     records = [record for record in run_git(["status", "--porcelain=v1", "-z", "--untracked-files=all"]).split(b"\0") if record]
     paths = [record[3:].decode("utf-8") for record in records]
-    if paths != [REGISTRY_PATH, REPORT_A_PATH] or Path(REPORT_B_PATH).exists():
+    expected = {REGISTRY_PATH, REPORT_A_PATH}
+    if len(paths) != len(expected) or set(paths) != expected or Path(REPORT_B_PATH).exists():
         raise RuntimeError("Canonical Engine B requires exactly the registry and Engine A report")
 
 

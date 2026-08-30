@@ -115,6 +115,7 @@ test('Pass 2 worktree guards enumerate individual files inside untracked directo
     'scripts/verify-trd2-v6-canonical-engine-b.py',
     'scripts/verify-trd2-v6-pass2-candidate.mjs',
   ]) assert.match(fs.readFileSync(logicalPath, 'utf8'), /--untracked-files=all/, logicalPath);
+  assert.match(fs.readFileSync('scripts/verify-trd2-v6-canonical-engine-b.py', 'utf8'), /set\(paths\) != expected/);
 });
 
 test('Pass 2 toolchain contains no forbidden random source', () => {
