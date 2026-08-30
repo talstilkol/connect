@@ -19,6 +19,8 @@
     "verify:secret-hygiene": "node scripts/verify-secret-hygiene.mjs --history",
     "planning:discovery-cutoff:create": "node scripts/create-planning-discovery-cutoff.mjs",
     "planning:discovery-cutoff:verify": "node scripts/verify-planning-discovery-cutoff.mjs",
+    "planning:b0-v8:create": "node scripts/create-b0-v8-candidate.mjs",
+    "planning:b0-v8:verify": "node scripts/verify-b0-v8-candidate.mjs",
     "verify:interface-guardrails": "node scripts/verify-interface-guardrails.mjs",
     "verify:dependency-lock": "node scripts/verify-dependency-lock.mjs",
     "verify:dependency-audit:development": "node scripts/verify-development-dependency-audit.mjs",
