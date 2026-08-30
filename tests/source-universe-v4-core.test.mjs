@@ -144,6 +144,25 @@ test('every v4 worktree guard enumerates files inside untracked directories', ()
   }
 });
 
+test('every frozen v4 upstream manifest path exists in the committed tree', () => {
+  const protocolManifestPath =
+    'docs/planning/three-review-protocol-v1-10-g1-package-2026-08-30/normative-package-manifest.json';
+  assert.equal(fs.existsSync(protocolManifestPath), true);
+
+  const builder = fs.readFileSync(
+    'scripts/create-source-universe-v4-candidate.mjs',
+    'utf8',
+  );
+  assert.match(
+    builder,
+    /three-review-protocol-v1-10-g1-package-\$\{SOURCE_UNIVERSE_V4_DATE\}\/normative-package-manifest\.json/,
+  );
+  assert.doesNotMatch(
+    builder,
+    /three-review-protocol-v1-10-g1-package-\$\{SOURCE_UNIVERSE_V4_DATE\}\/manifest\.json/,
+  );
+});
+
 test('Reader reports bind the exact toolchain root', () => {
   const checks = makeReaderChecks();
   const report = {

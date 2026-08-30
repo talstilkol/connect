@@ -51,7 +51,7 @@ const SOURCE_PATHS = Object.freeze({
   v3Subject: 'docs/planning/source-universe-and-custody-successor-requirements-v3-2026-08-29.md',
   v3Findings: 'docs/planning/source-universe-and-custody-successor-requirements-v3-independent-hostile-review-findings-manifest-2026-08-29.md',
   b0Manifest: `docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-atomic-package-manifest-${SOURCE_UNIVERSE_V4_DATE}.json`,
-  protocolManifest: `docs/planning/three-review-protocol-v1-10-g1-package-${SOURCE_UNIVERSE_V4_DATE}/manifest.json`,
+  protocolManifest: `docs/planning/three-review-protocol-v1-10-g1-package-${SOURCE_UNIVERSE_V4_DATE}/normative-package-manifest.json`,
 });
 
 const TOKEN_TARGETS = Object.freeze({
