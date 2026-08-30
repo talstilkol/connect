@@ -14,6 +14,7 @@ import {
   SOURCE_UNIVERSE_V4_TOOLCHAIN_REGISTRY_PATH,
   evaluateLocalControls,
   expectedMutationIdentities,
+  findMarkdownLevelTwoSectionSpan,
   makeByteDeletionMutationVector,
   makeControlRegistry,
   makeFindingControls,
@@ -191,22 +192,6 @@ function parseTreeRows(commit) {
       type,
     };
   });
-}
-
-function findSectionSpan(bytes, identity) {
-  const text = bytes.toString('utf8');
-  if (!Buffer.from(text, 'utf8').equals(bytes)) throw new Error(`invalid UTF-8 source for ${identity}`);
-  const token = `\`${identity}\``;
-  const tokenIndex = text.indexOf(token);
-  if (tokenIndex < 0) throw new Error(`source identity not found: ${identity}`);
-  const startCharacter = text.lastIndexOf('\n', tokenIndex) + 1;
-  if (!text.slice(startCharacter, tokenIndex).startsWith('## ')) throw new Error(`source identity is not in a level-two heading: ${identity}`);
-  const nextHeading = text.indexOf('\n## ', tokenIndex + token.length);
-  const endCharacter = nextHeading < 0 ? text.length : nextHeading + 1;
-  return {
-    endByte: Buffer.byteLength(text.slice(0, endCharacter), 'utf8'),
-    startByte: Buffer.byteLength(text.slice(0, startCharacter), 'utf8'),
-  };
 }
 
 function graphArtifact(artifactId) {
@@ -472,7 +457,10 @@ function build() {
   const mutationVectors = mutationIdentities.map(({ category, sourceIdentity }) => {
     const path = MUTATION_SOURCE_BY_CATEGORY[category];
     const bytes = sourceBytesByPath.get(path);
-    const span = findSectionSpan(bytes, sourceIdentity);
+    const span = findMarkdownLevelTwoSectionSpan(
+      bytes,
+      sourceIdentity,
+    );
     const unaffectedSet = mutationIdentities.filter((row) => row.category === category && row.sourceIdentity !== sourceIdentity).map((row) => row.sourceIdentity);
     return makeByteDeletionMutationVector({
       category,

@@ -150,6 +150,51 @@ function assertExactArray(actual, expected, label) {
   if (canonical(actual) !== canonical(expected)) throw fail(`${label}: exact array mismatch`);
 }
 
+export function findMarkdownLevelTwoSectionSpan(bytes, identity) {
+  if (!Buffer.isBuffer(bytes)) throw fail('sectionSpan: expected Buffer');
+  assertString(identity, 'sectionSpan identity');
+  const text = bytes.toString('utf8');
+  if (!Buffer.from(text, 'utf8').equals(bytes)) {
+    throw fail(`sectionSpan: invalid UTF-8 source for ${identity}`);
+  }
+
+  const token = `\`${identity}\``;
+  let searchFrom = 0;
+  let tokenIndex = -1;
+  let startCharacter = -1;
+  while (searchFrom < text.length) {
+    const candidate = text.indexOf(token, searchFrom);
+    if (candidate < 0) break;
+    const lineStart = text.lastIndexOf('\n', candidate) + 1;
+    if (text.slice(lineStart, candidate).startsWith('## ')) {
+      tokenIndex = candidate;
+      startCharacter = lineStart;
+      break;
+    }
+    searchFrom = candidate + token.length;
+  }
+  if (tokenIndex < 0) {
+    throw fail(`sectionSpan: level-two heading not found for ${identity}`);
+  }
+
+  const nextHeading = text.indexOf(
+    '\n## ',
+    tokenIndex + token.length,
+  );
+  const endCharacter =
+    nextHeading < 0 ? text.length : nextHeading + 1;
+  return Object.freeze({
+    endByte: Buffer.byteLength(
+      text.slice(0, endCharacter),
+      'utf8',
+    ),
+    startByte: Buffer.byteLength(
+      text.slice(0, startCharacter),
+      'utf8',
+    ),
+  });
+}
+
 export function makeFindingControls() {
   return SOURCE_UNIVERSE_V4_FINDINGS.map(([findingId, severity, description], index) => ({
     closureStatus: 'OPEN-INDEPENDENT-CLOSURE-REQUIRED',

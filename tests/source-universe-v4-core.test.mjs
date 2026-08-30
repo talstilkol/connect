@@ -11,6 +11,7 @@ import {
   SOURCE_UNIVERSE_V4_TOOLCHAIN_REGISTRY_PATH,
   evaluateLocalControls,
   expectedMutationIdentities,
+  findMarkdownLevelTwoSectionSpan,
   makeByteDeletionMutationVector,
   makeControlRegistry,
   makeFindingControls,
@@ -161,6 +162,47 @@ test('every frozen v4 upstream manifest path exists in the committed tree', () =
     builder,
     /three-review-protocol-v1-10-g1-package-\$\{SOURCE_UNIVERSE_V4_DATE\}\/manifest\.json/,
   );
+});
+
+test('all 102 mutation identities resolve to their actual level-two source section', () => {
+  const sourcePathByCategory = {
+    'V1-REVIEW-FINDING':
+      'docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md',
+    'V2-REQUIREMENT':
+      'docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md',
+    'V2-REVIEW-FINDING':
+      'docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md',
+    'V3-REVIEW-FINDING':
+      'docs/planning/source-universe-and-custody-successor-requirements-v3-independent-hostile-review-findings-manifest-2026-08-29.md',
+  };
+  const bytesByPath = new Map();
+
+  for (const { category, sourceIdentity } of
+    expectedMutationIdentities()) {
+    const path = sourcePathByCategory[category];
+    let bytes = bytesByPath.get(path);
+    if (bytes === undefined) {
+      bytes = fs.readFileSync(path);
+      bytesByPath.set(path, bytes);
+    }
+    const span = findMarkdownLevelTwoSectionSpan(
+      bytes,
+      sourceIdentity,
+    );
+    assert.ok(span.startByte >= 0);
+    assert.ok(span.endByte > span.startByte);
+    assert.ok(span.endByte <= bytes.length);
+    const section = bytes.subarray(
+      span.startByte,
+      span.endByte,
+    ).toString('utf8');
+    assert.equal(section.startsWith('## '), true);
+    assert.equal(
+      section.split('\n', 1)[0]
+        .includes(`\`${sourceIdentity}\``),
+      true,
+    );
+  }
 });
 
 test('Reader reports bind the exact toolchain root', () => {
