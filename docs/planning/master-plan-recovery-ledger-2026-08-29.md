@@ -1877,3 +1877,17 @@
 1.137.6 final QA=`3928/3928 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene PASS on 2286 working files including 27 untracked candidate outputs;Source guardrails PASS;Python compile PASS;remote branch readback exact`.
 
 1.137.7 blockers=`B0 not Accepted;Review Protocol not Accepted;Private source custody/rights absent;official-source occurrence frontier incomplete;trusted time absent;Generation B absent;three independent reviews,reconciliation and Acceptance absent`;state=`LOCAL-CANDIDATE-NOT-ACCEPTED`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;next local successor=`TRD-2 v6`.
+
+## 1.138 TRD-2 v6 Pass 1 deterministic source/parser foundation
+
+1.138.1 Toolchain commit=`4817c16f8be832392dfeb5d7e94378dbf9b60e61`;Candidate commit=`b4195d86109b45bd42983d54682f1300e9177070`;observed input commit=`4817c16f8be832392dfeb5d7e94378dbf9b60e61`;toolchain files=`13`;toolchain root=`082e4c8d9c875d3009ce675862060754a568275b71c265d9763e6c18f0627b8e`.
+
+1.138.2 six declared Pass 1 outputs were materialized;Source Capture root=`03e2a37b96779674d4a48778eaa31ea11ee1bb96d031e934f8896a3cec77850f`;Parser Grammar/Corpus root=`25fe15c5fd535df8954ba23973ea17c40115fa28cc300f54d8d6c53f6a5357ce`;Generation Receipt root=`ca5aea07ed491d14a36e5a5bf0f14743c8ff680f6513e3af9bf94f37abb21290`;Pass 1 Producer QA root=`becaf99bf109d85d2e3b5c49813c654463ac1ecf5c6532c0297f939242fb7063`.
+
+1.138.3 Source denominator=`12`;F015 exact predecessor blob matches=`0`;direct literal occurrences=`5`;dependent artifacts=`21`;branch=`INVALIDATE-AND-REDERIVE`;silent substitution=`0`;rederivation remains pending through Passes 2–6 and independent review.
+
+1.138.4 closed corpus denominator=`18=3 positive+15 hostile negative`;Parser A=`Node.js recursive-descent`;Parser B=`Python stdlib object-pairs`;both returned `18/18` agreement,`0` mismatches and common outcome root=`0bf678ea864399efa9d12f84ab4ad7d49fc9d33e15f1252e1758df7904369299`;the implementations have distinct source hashes and share the frozen toolchain root.
+
+1.138.5 verification=`3943/3943 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene PASS over 2301 working files and Git history;Source guardrails PASS;post-commit verifier COMMITTED-CLEAN`.
+
+1.138.6 claim limit=`PASS-1-LOCAL-MECHANICAL-EVIDENCE-ONLY`;Passes 2–6=`PENDING`;accepted Requirements=`0/128`;Finding closure=`0/15`;eligible review generations=`0/2`;Reconciliation/Definition Acceptance=`ABSENT`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.

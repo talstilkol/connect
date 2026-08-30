@@ -31,8 +31,9 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 `COMPLETED-AS-LOCAL-CANDIDATE;EXTERNAL-BLOCKED`; ‏23/23 חברי Package
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
-1.2.6 שלב 6 — TRD-2 v6: `IN_PROGRESS-NEXT-LOCAL-WORK`; שלבים 7–10
-נשארים `PENDING` ומתחילים רק לאחר קודמותיהם או Dependency מפורש.
+1.2.6 שלב 6 — TRD-2 v6: `IN_PROGRESS;PASS-1-LOCAL-CANDIDATE-COMPLETE`;
+Passes 2–6, שתי Generations, ביקורות עצמאיות ו־Acceptance נשארים
+`PENDING`. שלבים 7–10 מתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
 1.2.7 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
 השלמת חבילות היסוד ועד שטל ימסור קיבולת שבועית.
@@ -357,3 +358,58 @@ Generation B, שלוש ביקורות עצמאיות, Reconciliation ו־Accepta
 
 7.3.3 העבודה המקומית הבאה לפי סדר התוכנית היא TRD-2 v6 Successor.
 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`.
+
+# 8. חבילת ביצוע 7 — TRD-2 v6 Pass 1
+
+## 8.1 תוצאה מקומית
+
+8.1.1 Toolchain commit=
+`4817c16f8be832392dfeb5d7e94378dbf9b60e61`; Candidate commit=
+`b4195d86109b45bd42983d54682f1300e9177070`.
+
+8.1.2 נוצרו `6/6` פלטי Pass 1 המוצהרים: Source Capture, Parser
+Grammar/Corpus, Generation Receipt, שני Parser Reports ו־Producer QA.
+
+8.1.3 Source Capture root=
+`03e2a37b96779674d4a48778eaa31ea11ee1bb96d031e934f8896a3cec77850f`;
+Corpus root=
+`25fe15c5fd535df8954ba23973ea17c40115fa28cc300f54d8d6c53f6a5357ce`;
+Pass 1 QA root=
+`becaf99bf109d85d2e3b5c49813c654463ac1ecf5c6532c0297f939242fb7063`.
+
+8.1.4 Parser A=`Node.js strict recursive-descent`; Parser B=`Python
+stdlib strict object-pairs`; שניהם עיבדו `18/18` Fixtures, הפיקו אותו
+outcome root=
+`0bf678ea864399efa9d12f84ab4ad7d49fc9d33e15f1252e1758df7904369299`
+ועמדו עם `0` mismatches.
+
+8.1.5 F015 acquisition=`0` blobs בגודל הצפוי ו־`0` התאמות SHA-256;
+נבחר רק הנתיב `INVALIDATE-AND-REDERIVE`; תועדו `5` occurrences ישירים
+ו־`21` artifacts תלויים; silent substitution=`0`; closure credit=`0`.
+
+8.1.6 בדיקות סיום=`3943/3943`; TypeScript PASS; ESLint=`0 errors,
+28 historical warnings`; Secret hygiene PASS על `2301` קובצי עבודה
+כולל היסטוריית Git; Source guardrails PASS; אימות לאחר Commit=
+`COMMITTED-CLEAN`.
+
+## 8.2 גבול הטענה
+
+8.2.1 Pass 1 הוא `COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED` בלבד. הוא
+מוכיח קיבוע מקורות, כללי canonical root, parser corpus והסכמה מקומית
+בין שני מימושים; הוא אינו ביקורת עצמאית ואינו Acceptance.
+
+8.2.2 accepted Requirements=`0/128`; Finding closure=`0/15`;
+eligible review generations=`0/2`; Reconciliation=`ABSENT`;
+Definition Acceptance=`ABSENT`.
+
+## 8.3 המשך מחייב
+
+8.3.1 Passes `2–6` נשארים `PENDING`: schemas ומנועים קנוניים;
+semantic producer graph; Requirement predicates ו־vectors; lifecycle,
+CAS ו־recovery; package assembly ו־Producer QA מלא.
+
+8.3.2 לאחר Pass 6 עדיין נדרשים Generation A ו־Generation B, ביקורות
+עצמאיות לפי Protocol זכאי, Reconciliation ו־Definition Acceptance.
+
+8.3.3 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`;
+אין מעבר לפיתוח מוצר ואין שינוי במוני Acceptance.

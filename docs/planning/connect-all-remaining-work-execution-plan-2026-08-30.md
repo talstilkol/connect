@@ -276,6 +276,28 @@ GENERATION-B-AND-THREE-INDEPENDENT-REVIEWS-PENDING`.
 
 7.5.1 כל `128` Requirements נבדקים, `15/15` Findings נסגרים ו־Task Registry Definition מקבל Acceptance.
 
+## 7.6 עדכון ביצוע — Pass 1
+
+7.6.1 Pass 1 הושלם כמועמד מקומי וקובע ב־Candidate commit
+`b4195d86109b45bd42983d54682f1300e9177070`; Toolchain commit=
+`4817c16f8be832392dfeb5d7e94378dbf9b60e61`.
+
+7.6.2 הושלמו source custody, canonical root profile, closed parser
+fixture schema, `3` positive fixtures, ‏`15` hostile negative fixtures,
+שני מימושי Parser נפרדים ו־Pass 1 Producer QA.
+
+7.6.3 שני המפרשים הסכימו על `18/18` outcomes עם `0` mismatches;
+זהו Mechanical evidence בלבד ואינו סוגר Requirement או Finding.
+
+7.6.4 סטטוס משימות 7.3: רכיב ה־parser וה־canonical foundation של
+7.3.1=`COMPLETE-PASS-1-LOCAL-CANDIDATE`; יתרת 7.3.1 ו־7.3.2–7.3.6=
+`PENDING-PASSES-2-TO-6-AND-EXTERNAL-REVIEW`.
+
+7.6.5 המונים המחייבים לא השתנו: accepted Requirements=`0/128`;
+Finding closure=`0/15`; review generations=`0/2`; Reconciliation ו־
+Definition Acceptance=`ABSENT`; ‏Gate29=`BLOCKED`; development freeze=
+`ACTIVE`.
+
 # 8. שלב 7 — Master Control Sequence Successor
 
 ## 8.1 מה השלב אומר
