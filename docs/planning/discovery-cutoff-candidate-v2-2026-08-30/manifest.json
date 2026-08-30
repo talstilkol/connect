@@ -1,0 +1,31 @@
+{
+  "schema": "CONNECT-DISCOVERY-CUTOFF-MANIFEST-ENVELOPE-V2",
+  "payload": {
+    "schema": "CONNECT-DISCOVERY-CUTOFF-MANIFEST-PAYLOAD-V2",
+    "observedHead": "4aab362fe162f421eabf3f379a3f4018f7adf516",
+    "outputRegistry": {
+      "path": "docs/planning/discovery-cutoff-output-path-registry-v2-2026-08-30.json",
+      "sha256": "6760a99b1a1cfa4050bdad81f88b532bdccd5924ac79d32c02642c9cee933a8f",
+      "successorPath": "docs/planning/source-universe-v4-output-path-registry-v1-2026-08-30.json",
+      "successorSha256": "c4044ff5559d53e1926f2ccab29092354b1545d902657e0e9aab89e402179ea3"
+    },
+    "members": [
+      {
+        "path": "docs/planning/discovery-cutoff-candidate-v2-2026-08-30/receipt.json",
+        "byteLength": 11923,
+        "sha256": "1c3e9848a398d5c7acff8f1ca7c7c71990ce345891e41705fc0b383af7538df1",
+        "payloadSha256": "229546fbdb781294b147e59bb92e09a0621ff159eb6dd66fc84899a7db5b9667"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-candidate-v2-2026-08-30/source-candidates.json",
+        "byteLength": 2063,
+        "sha256": "0198b7ffbfcab121f8c26c5004d804e748853f6eace6d9252a58a3860837d54e",
+        "payloadSha256": "2b4226d07ee834b3a0e165c43c61ed821c8b25749654a55fedac81262107026d"
+      }
+    ],
+    "packageContentRootSha256": "cbf1c7a6735f3525dc149181e7a85ed635cc45e0f6dd071b63ddb39a740a7e0a",
+    "selfMembership": false,
+    "verificationReportMembership": false
+  },
+  "payloadSha256": "385dcf1cd269647414c350bf1c9b3c958ce6caeecd6cd6a4ad0a5444a392c20b"
+}
