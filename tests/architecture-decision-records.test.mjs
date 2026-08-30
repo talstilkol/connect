@@ -26,6 +26,9 @@ const targetTopologyAdr = readProjectFile(
 const releaseEvidenceStorageAdr = readProjectFile(
   "docs/adr/0005-bot-reply-release-evidence-storage.md",
 );
+const publicRepositoryAdr = readProjectFile(
+  "docs/adr/0007-public-repository-authority-and-license.md",
+);
 const projectReadme = readProjectFile("README.md");
 const teamPlan = readProjectFile(
   "docs/team-operating-plan.md",
@@ -83,6 +86,10 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
     /\(0005-bot-reply-release-evidence-storage\.md\)/,
   );
   assert.match(
+    adrIndex,
+    /\(0007-public-repository-authority-and-license\.md\)/,
+  );
+  assert.match(
     projectReadme,
     /\(docs\/adr\/0005-bot-reply-release-evidence-storage\.md\)/,
   );
@@ -97,6 +104,10 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
   assert.match(
     teamPlan,
     /\(adr\/0004-target-service-topology\.md\)/,
+  );
+  assert.match(
+    teamPlan,
+    /\(adr\/0007-public-repository-authority-and-license\.md\)/,
   );
 });
 
@@ -184,21 +195,23 @@ test("requires real approval metadata before an ADR can be accepted", () => {
   );
   assert.match(
     hostingAdr,
-    /רועי — תקציב, Plans וחשבונות: `unknown\/unavailable`/,
+    /טל — תקציב, Plans וחשבונות: `unknown\/unavailable`/,
   );
 });
 
-test("records two accepted Gate 0 directions and keeps unresolved ADRs proposed", () => {
+test("records public authority while unresolved ADRs remain proposed", () => {
   const hostingMetadata = parseFrontMatter(hostingAdr);
   const repositoryMetadata = parseFrontMatter(repositoryAdr);
+  const publicRepositoryMetadata = parseFrontMatter(publicRepositoryAdr);
   const aiMetadata = parseFrontMatter(aiAccountAdr);
   const targetTopologyMetadata = parseFrontMatter(targetTopologyAdr);
 
   assert.equal(hostingMetadata.status, "accepted");
-  assert.equal(repositoryMetadata.status, "accepted");
+  assert.equal(repositoryMetadata.status, "superseded");
+  assert.equal(publicRepositoryMetadata.status, "accepted");
   assert.equal(
-    repositoryMetadata.approved_option,
-    "current-private-personal-authority",
+    publicRepositoryMetadata.approved_option,
+    "public-no-license-until-legal",
   );
   assert.equal(aiMetadata.status, "proposed");
   assert.equal(
@@ -221,7 +234,7 @@ test("records two accepted Gate 0 directions and keeps unresolved ADRs proposed"
 
   assert.match(
     teamPlan,
-    /שני ADRs[\s\S]*`accepted`[\s\S]*שניים ב־`proposed`[\s\S]*Gate 0[\s\S]*`not verified`/,
+    /ADR-0007[\s\S]*`accepted`[\s\S]*ארבעת המסמכים[\s\S]*`proposed`[\s\S]*Gate 0=`not verified`/,
   );
 });
 
@@ -280,22 +293,22 @@ test("keeps object storage unresolved and records the safety gaps of each option
   );
 });
 
-test("keeps one repository authority and rejects a competing copy", () => {
+test("keeps one public repository authority and rejects a competing copy", () => {
   assert.match(
-    repositoryAdr,
-    /אפשרות B — ה־Repository הפרטי `talstilkol\/connect` נשאר/,
+    publicRepositoryAdr,
+    /`talstilkol\/connect` נשאר Repository Authority היחיד/,
   );
   assert.match(
-    repositoryAdr,
-    /Repository\s+Authority היחיד/,
+    publicRepositoryAdr,
+    /Visibility מחייב=`PUBLIC`/,
   );
   assert.match(
-    repositoryAdr,
-    /אפשרות C — פתיחת Repository חדש והעתקת הקוד/,
+    publicRepositoryAdr,
+    /אין ליצור Repository רשמי מתחרה/,
   );
   assert.match(
-    repositoryAdr,
-    /תוכנית GitHub[\s\S]*`unknown\/unavailable`/,
+    publicRepositoryAdr,
+    /אין להוסיף קובץ `LICENSE` לפני Legal review/,
   );
 });
 

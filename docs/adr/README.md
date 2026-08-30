@@ -44,8 +44,7 @@ UTC לפני שהיא פותחת Gate.
 עדיין חסום עד השלמת מפת המחליפים, ה־Adapters וה־Evidence.
 
 4.2 [ADR-0002 — Repository Authority and GitHub governance](0002-repository-authority.md)
-— `accepted`; ‏`talstilkol/connect` הפרטי הוא ה־Authority היחיד.
-ה־Governance עדיין חסום עד הפעלת ההגנות והפקת Evidence.
+— `superseded`; נשמר כתיעוד היסטורי של מצב ה־Private הישן.
 
 4.3 [ADR-0003 — Claude and AI development account model](0003-ai-development-account-model.md)
 — `proposed`.
@@ -61,3 +60,7 @@ Variables עבור Evidence קצר־חיים, וממתין לאישור פורמ
 4.6 [ADR-0006 — Bot-reply Staging Evidence Attestation](0006-bot-reply-staging-evidence-attestation.md)
 — `proposed`; ממליץ על חתימת Ed25519 ב־Railway Worker ועל צריכת nonce
 אטומית ב־PostgreSQL. ה־primitive נשאר רדום ואינו פותח Gate.
+
+4.7 [ADR-0007 — Public repository authority and license hold](0007-public-repository-authority-and-license.md)
+— `accepted`; ‏`talstilkol/connect` הוא ה־Authority הציבורי היחיד,
+ללא רישיון שימוש עד Legal review. ‏Gate29 והפיתוח נשארים חסומים.

@@ -22,15 +22,16 @@ const whatsappLimits = readProjectFile(
   "docs/whatsapp-rate-limits.md",
 );
 
-test("keeps Tal's rate-limit RACI consistent across release documents", () => {
+test("keeps Tal as the sole rate-limit owner across release documents", () => {
   assert.match(
     externalDecisions,
     /טל Responsible למחקר ולאימות עובדות/,
   );
   assert.match(
     teamPlan,
-    /טל מאמת את העובדות; דוד/,
+    /טל אחראי גם למחקר ולאימות עובדות Rate limit/,
   );
+  assert.match(teamPlan, /אין הקצאת עבודה[\s\S]*לאדם נוסף/);
   assert.match(
     whatsappLimits,
     /טל אחראי למחקר ולאימות העובדות/,

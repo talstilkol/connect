@@ -14,9 +14,9 @@ supersedes: none
 
 1.1 סטטוס: `proposed`.
 
-1.2 בעל ההחלטה: טל — כיוון התשתית; רועי מאשר תקציב ו־Plans;
-ראשה מאשרת Deployment ו־Rollback; דוד מאשר API, ‏Queues ו־Workers;
-אבטחה מאשרת Network, ‏Secrets, ‏Storage ו־Recovery.
+1.2 בעל ההחלטה והאחראי היחיד: טל. ביקורת מקצועית חיצונית עשויה
+לספק Evidence על Network, ‏Secrets, ‏Storage ו־Recovery, אך אינה
+מקצה משימה או בעלות לאדם נוסף בפרויקט.
 
 1.3 אפשרות שאושרה: `unknown/unavailable`.
 
@@ -277,24 +277,26 @@ API/Worker + Railway PostgreSQL/Redis + BullMQ, ‏Scheduler תמידי,
 Limiter רב־שכבתי ו־Better Stack/OpenTelemetry. ‏Object storage לא
 נבחר.
 
-10.2 רועי — מאשר Railway/Vercel Plans, ‏PostgreSQL HA, ‏Redis,
+10.2 טל — מכריע Railway/Vercel Plans, ‏PostgreSQL HA, ‏Redis,
 Storage ו־Observability budget: `unknown/unavailable`.
 
-10.3 ראשה — מאשרת Regions, ‏Membership, ‏Environment isolation,
-Deployment, ‏Health checks ו־Rollback: `unknown/unavailable`.
+10.3 טל — משיג Evidence על Regions, ‏Membership, ‏Environment
+isolation, ‏Deployment, ‏Health checks ו־Rollback: `unknown/unavailable`.
 
-10.4 דוד — מאשר BullMQ, ‏PostgreSQL concurrency, ‏OIDC verifier,
+10.4 טל — מאמת BullMQ, ‏PostgreSQL concurrency, ‏OIDC verifier,
 Meta webhook ו־Ambiguous-send contract: `unknown/unavailable`.
 
-10.5 אבטחה/פרטיות — מאשרות OIDC claims, ‏Secrets, ‏AWS/S3 או חלופה,
-Encryption, ‏Retention, ‏DPA ו־Recovery: `unknown/unavailable`.
+10.5 טל — משיג ביקורת מקצועית נדרשת על OIDC claims, ‏Secrets,
+‏AWS/S3 או חלופה, Encryption, ‏Retention, ‏DPA ו־Recovery:
+`unknown/unavailable`.
 
-10.6 Product — מאשר Staleness/Catch-up, ‏RTO, ‏RPO ו־Pilot caps:
+10.6 טל — מכריע Staleness/Catch-up, ‏RTO, ‏RPO ו־Pilot caps:
 `unknown/unavailable`.
 
 ## 11. תנאי קבלה לפני שינוי ל־accepted
 
-11.1 כל בעלי התפקידים בסעיף 10 מזוהים ומאשרים בכתב את החלק שבבעלותם.
+11.1 טל מתעד בכתב את כל ההכרעות בסעיף 10 ואת ה־Evidence המקצועי
+הנדרש. אין תלות בהקצאת בעלי תפקידים נוספים.
 
 11.2 נבחרים Region ו־Plan לכל Environment, כולל תקרת עלות ו־Owner.
 

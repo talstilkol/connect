@@ -2,7 +2,7 @@
 id: ADR-0003
 title: Claude and AI development account model
 status: proposed
-decision_owner: רועי
+decision_owner: טל
 approved_option: unknown/unavailable
 approved_at: unknown/unavailable
 supersedes: none
@@ -14,7 +14,7 @@ supersedes: none
 
 1.1 סטטוס: `proposed`.
 
-1.2 בעל ההחלטה: רועי — רישיונות, Billing והרשאות כלי הפיתוח.
+1.2 בעל ההחלטה: טל — רישיונות, Billing והרשאות כלי הפיתוח.
 
 1.3 אפשרות שאושרה: `unknown/unavailable`.
 
@@ -97,8 +97,8 @@ database dumps, ‏PII או נתוני לקוחות לכלי AI.
 5.4 ‏Claude Code מקבל גישה רק ל־Repository ולפקודות שנדרשים למשימה.
 כתיבה חיצונית, Deployment ופעולה הרסנית עדיין דורשות הרשאה נפרדת.
 
-5.5 ‏Primary Owner, ‏Owners ו־Admins מקבלים הרשאה לפי Least
-privilege. יש לתעד מי יכול לנהל Billing, ‏Members ו־Data exports.
+5.5 טל מחזיק בתפקיד החשבון המזערי שמאפשר לנהל Billing, ‏Members
+ו־Data exports. אין כרגע הקצאת תפקיד לאדם נוסף.
 
 5.6 Offboarding כולל ביטול Member, ביטול Sessions, הסרת גישה למחשב
 ול־GitHub ובדיקה שאין Token אישי שנותר פעיל.
@@ -107,11 +107,12 @@ privilege. יש לתעד מי יכול לנהל Billing, ‏Members ו־Data exp
 
 6.1 החברה מאשרת ש־Claude Team זמין במיקום ובדומיין העבודה שלה.
 
-6.2 רועי בוחר Billing interval, מספר Seats וסוג Seat לכל תפקיד על
+6.2 טל בוחר Billing interval, מספר Seats וסוג Seat לכל שימוש על
 בסיס שימוש ותקציב אמיתיים.
 
-6.3 מתועדים Primary Owner, ‏Owner חלופי, Admins, ‏Members ונתיב
-התאוששות. אין לכתוב Password או Recovery code במסמך.
+6.3 מתועדים תפקיד החשבון של טל ונתיב התאוששות. דרישת ספק לאדם נוסף
+נשארת `unknown/unavailable` ואינה מקצה אחריות. אין לכתוב Password או
+Recovery code במסמך.
 
 6.4 מוגדרים Spend limits ארגוניים ואישיים; Usage credits כבויים או
 מוגבלים בסכום שאושר במפורש.
@@ -123,13 +124,13 @@ privilege. יש לתעד מי יכול לנהל Billing, ‏Members ו־Data exp
 
 ## 7. אישורים
 
-7.1 רועי — `unknown/unavailable`.
+7.1 טל — `unknown/unavailable`.
 
-7.2 אבטחה/פרטיות — `unknown/unavailable`.
+7.2 Evidence מקצועי של אבטחה/פרטיות שטל משיג — `unknown/unavailable`.
 
-7.3 כספים — `unknown/unavailable`.
+7.3 החלטת תקציב של טל — `unknown/unavailable`.
 
-7.4 חברי הצוות שקיבלו Seat — `unknown/unavailable`.
+7.4 Seats נוספים — `not-applicable` כל עוד רק טל עובד בפרויקט.
 
 ## 8. מקורות ו־Evidence
 

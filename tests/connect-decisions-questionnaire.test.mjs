@@ -80,12 +80,12 @@ test("keeps every questionnaire decision structurally complete and deterministic
   assert.equal(
     decisions.filter(({ status }) => status === "clear")
       .length,
-    19,
+    20,
   );
   assert.equal(
     decisions.filter(({ status }) => status === "hard")
       .length,
-    30,
+    29,
   );
   assert.equal(
     decisions.filter(({ phase }) => phase === "before")

@@ -14,6 +14,9 @@ const audit = readProjectFile(
 const repositoryAdr = readProjectFile(
   "docs/adr/0002-repository-authority.md",
 );
+const publicRepositoryAdr = readProjectFile(
+  "docs/adr/0007-public-repository-authority-and-license.md",
+);
 const sourceControl = readProjectFile(
   "docs/source-control-and-release.md",
 );
@@ -44,11 +47,10 @@ test("records the observed public and unprotected repository state without marki
   assert.match(audit, /Gate 1 נשאר `blocked`/);
 });
 
-test("distinguishes the original public snapshot from the remediated private state", () => {
+test("preserves the private remediation as history and enforces the current public policy", () => {
   for (const document of [
     repositoryAdr,
     sourceControl,
-    teamPlan,
   ]) {
     assert.match(
       document,
@@ -67,6 +69,22 @@ test("distinguishes the original public snapshot from the remediated private sta
   assert.match(
     audit,
     /תיקון ה־Visibility[\s\S]*Gate 1 נשאר `blocked`/,
+  );
+
+  assert.match(repositoryAdr, /status: superseded/);
+  for (const document of [
+    publicRepositoryAdr,
+    teamPlan,
+  ]) {
+    assert.match(document, /`PUBLIC`/);
+    assert.match(
+      document,
+      /ללא (?:License|רישיון שימוש)[\s\S]*Legal review/,
+    );
+  }
+  assert.match(
+    sourceControl,
+    /אינו תואם להחלטת PUBLIC/,
   );
 });
 

@@ -1,18 +1,20 @@
 ---
 id: ADR-0002
 title: Repository Authority and GitHub governance
-status: accepted
+status: superseded
 decision_owner: טל
 approved_option: current-private-personal-authority
 approved_at: 2026-08-17T05:17:48Z
 supersedes: none
+superseded_by: ADR-0007
 ---
 
 # ADR-0002 — Repository Authority and GitHub governance
 
 ## 1. מצב ההחלטה
 
-1.1 סטטוס: `accepted`.
+1.1 סטטוס: `superseded` על ידי ADR-0007. מסמך זה נשמר כתיעוד
+היסטורי של החלטת ה־Private הישנה ואינו מקור אמת ל־Visibility הנוכחי.
 
 1.2 בעל ההחלטה: טל — בעל ה־Repository וה־Repository Authority.
 
@@ -94,54 +96,21 @@ Branch Protection, ‏Review, ‏CI, ‏Secret scanning או Push protection;
 4.5 אפשרות C נדחית. אסור ליצור Repository רשמי נוסף או לפרוס מעותק
 שאינו ה־Authority המאושר.
 
-## 5. מטריצת גישה מוצעת
+## 5. הקצאות ו־Gate היסטוריים שבוטלו
 
-5.1 טל — Owner ו־Repository Admin בשלב הנוכחי. רק הוא מנהל
-Collaborators והגנות עד העברה עתידית מאושרת.
+5.1 אין הקצאת Collaborators פעילה במסמך זה. טל הוא האחראי היחיד;
+כל הוספת אדם או הרשאה בעתיד דורשת החלטה חדשה לפי ADR-0007.
 
-5.2 ראשה — `Maintain` וגישת Deployment מצומצמת לאחר הזמנה אישית.
-`Admin` יינתן רק
-אם פעולה נדרשת אינה אפשרית בהרשאה נמוכה יותר.
-
-5.3 דוד — `Write` עבור Backend, ‏API ו־WhatsApp integration.
-
-5.4 טל — `Write` עבור מחקר, מסמכי מדיניות, Rate limiting ובדיקות.
-
-5.5 משתמשים נוספים — `Read`, ‏`Triage` או `Write` לפי אחריות
-מפורשת; אין הרשאת בסיס רחבה לכל הארגון.
-
-## 6. תנאי קבלה ל־Gate 1
-
-6.1 ה־Repository נשאר `private`, כתובת ה־Remote תואמת בדיוק ל־
-`talstilkol/connect` ואין Remote רשמי מתחרה.
-
-6.2 כל Collaborator משתמש בחשבון אישי עם 2FA והרשאת Least
-privilege. אין Login, ‏Token או Session משותפים.
-
-6.3 תוכנית GitHub שנבחרה תומכת ב־Repository פרטי וב־Rulesets,
-Status checks, ‏CODEOWNERS והגנות שנדרשות על ידי ה־Release contract.
-
-6.4 נוצר Inventory של Actions secrets, ‏Variables, ‏Environments,
-Apps, ‏Webhooks, ‏Deploy keys ו־Packages. הערכים הרגישים עצמם אינם
-נכנסים למסמך.
-
-6.5 Pull Request אמיתי עובר Review ואת תשעת ה־Checks הנדרשים ללא
-Push ישיר ל־`main`.
-
-6.6 מופק Governance Evidence קצר־חיים עבור אותו Repository ו־Commit.
+5.2 תנאי ה־Private הישנים אינם Gate פעיל. תנאי העבודה במאגר PUBLIC,
+לרבות Secret hygiene, ‏Rulesets ו־License hold, מוגדרים ב־ADR-0007.
 
 ## 7. אישורים
 
 7.1 טל — Repository Authority ובעלות נוכחית: `approved` ב־
 `2026-08-17T05:17:48Z`.
 
-7.2 רועי — בעלות חברה והעברה עתידית: `unknown/unavailable`.
-
-7.3 ראשה — `unknown/unavailable`.
-
-7.4 דוד — `unknown/unavailable`.
-
-7.5 טל — `unknown/unavailable`.
+7.2 כל אישור או הקצאה היסטוריים לאדם אחר מבוטלים. טל אחראי לכל
+פעולת Governance פעילה לפי ADR-0007.
 
 ## 8. מקורות ו־Evidence
 

@@ -144,3 +144,28 @@ Eval מוגבלת, ללא שליחה אוטומטית של הודעות.
 
 6.5 כל פרט שאינו ידוע נשאר `unknown/unavailable`; אין להשלים אותו
 בהשערה או בנתוני דוגמה.
+
+## 7. החלטות ארכיטקטורה פעילות
+
+7.1 [ADR-0001 — Hosting topology](adr/0001-hosting-topology.md) הוא
+`accepted`: הכיוון הוא Vercel ו־Railway, אך Deployment נשאר חסום עד
+Evidence חי והשלמת כל תנאי הקבלה.
+
+7.2 [ADR-0002 — Repository Authority היסטורי](adr/0002-repository-authority.md)
+הוא `superseded` ואינו קובע עוד שהמאגר Private.
+
+7.3 [ADR-0007 — Public repository and license hold](adr/0007-public-repository-authority-and-license.md)
+הוא `accepted`: המאגר נשאר `PUBLIC`, ללא License עד Legal review.
+
+7.4 ארבעת המסמכים
+[ADR-0003](adr/0003-ai-development-account-model.md),
+[ADR-0004](adr/0004-target-service-topology.md),
+[ADR-0005](adr/0005-bot-reply-release-evidence-storage.md) ו־
+[ADR-0006](adr/0006-bot-reply-staging-evidence-attestation.md) נשארים
+ב־`proposed` ואינם פותחים Gate.
+
+7.5 ‏Gate 0=`not verified`; ‏Gate29=`BLOCKED`; development
+freeze=`ACTIVE`; Production acceptance=`0`.
+
+7.6 טל אחראי גם למחקר ולאימות עובדות Rate limit. אין הקצאת עבודה
+לאדם נוסף; בפרט אין הקצאה לדוד, ראשה או רועי בתוכנית הפעילה.

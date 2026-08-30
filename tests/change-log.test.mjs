@@ -82,6 +82,18 @@ test("accepts the committed database change category", () => {
   );
 });
 
+test("preserves valid legacy subjects without rewriting public history", () => {
+  const commits = parseCommitHistory(
+    "4aab362fe162f421eabf3f379a3f4018f7adf516\tAdd Discovery Cutoff v2 toolchain",
+  );
+
+  assert.equal(commits[0].type, "other");
+  assert.match(
+    buildChangeLog(commits),
+    /## Other committed changes\n\n- Add Discovery Cutoff v2 toolchain/,
+  );
+});
+
 test("accepts only release artifacts matching the committed source", async () => {
   const expectedManifest =
     await readCommittedReleaseManifest();

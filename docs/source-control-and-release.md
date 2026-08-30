@@ -15,6 +15,10 @@
 ובאימות חוזר מ־`2026-08-16T19:47:05Z` ממשק GitHub וה־API המאומת
 דיווחו `private=true` ו־`visibility=private`.
 
+1.3.1 זהו תיעוד היסטורי בלבד. לפי ADR-0007, ההחלטה המחייבת כעת היא
+Repository `PUBLIC` ללא License עד Legal review. מצב ה־Visibility החי
+לאחר ההחלטה הוא `unknown/unavailable` עד קריאה חוזרת מ־GitHub.
+
 1.4 שמונת שערי האיכות המקומיים ו־Dependency Audit מוגדרים כתשעה
 Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארבעת הענפים
 נמצאו לא מוגנים, לא נמצאו Rulesets או `CODEOWNERS`, ולכן ה־Checks
@@ -27,14 +31,12 @@ Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארב
 1.4.1 הראיות, ההיקף וסדר התיקון נמצאים ב־
 `docs/github-governance-live-audit.md`.
 
-1.5 לפי עדכון הצוות מ־2026-08-16, רועי הוא Account owner ו־Approver,
-ראשה היא Deployment owner ודוד הוא WhatsApp backend owner. בעלי
-Security, ‏Operations, ‏Release ו־Secrets עדיין `unknown/unavailable`
-עד למינוי מפורש; התפקידים החדשים אינם ממלאים אותם אוטומטית.
+1.5 לפי מודל האחריות המחייב, Tal הוא האחראי היחיד לכל פעולת GitHub,
+Release, ‏Deployment, ‏Security ו־Secrets. אין בתוכנית הפעילה הקצאה
+לרועי, ראשה, דוד, Primary, ‏Backup או RACI.
 
-1.5.1 לפי ADR-0002 שאושר ב־2026-08-17, טל הוא Owner של
-`talstilkol/connect` ומנהל את ה־Collaborators והגנות ה־Repository
-בשלב הנוכחי.
+1.5.1 ‏ADR-0002 הוא היסטורי ו־`superseded`. ‏ADR-0007 הוא מקור האמת
+ל־Repository PUBLIC ול־License hold.
 
 1.6 אין לפתוח Repository כפול. העברה עתידית ל־Organization תעביר
 את ה־Repository הקיים בלבד. תוכנית העבודה, מודל ההרשאות ותנאי הקבלה נמצאים ב־
@@ -75,10 +77,10 @@ Security, ‏Operations, ‏Release ו־Secrets עדיין `unknown/unavailable`
 2.2.4 `verify:release-gate:local` אינו דורש GitHub, ‏Bundle או Secrets
 חיצוניים ולכן נשאר שער פיתוח מקומי דטרמיניסטי.
 
-2.2.5 ב־Repository פרטי בבעלות משתמש אישי, GitHub אינו מאפשר שמירת
-Artifact Attestation. ‏PR Check של Dependency Audit עדיין דורש Audit
-מוצלח ומעלה Evidence קצר־חיים, אך אינו ממציא חתימה. שער ה־Production
-ממשיך לדרוש Attestation אמיתי ולכן נשאר חסום.
+2.2.5 חוזה Source Control Governance Evidence v3 נבנה עבור Repository
+פרטי ולכן אינו תואם להחלטת PUBLIC הנוכחית. אין לעקוף אותו או להמציא
+Attestation; שער Production נשאר חסום עד חוזה חדש שנבדק מול GitHub
+PUBLIC חי.
 
 2.3 `npm run verify:secret-hygiene` אינו מדפיס Secret, נתיב התאמה,
 Commit פגוע או תוכן קובץ. הוא מחזיר קוד ממצא מוגבל בלבד.
@@ -128,8 +130,10 @@ Backup תקפות.
 4.4 אין Timestamp או מזהה אקראי. אותו מצב מקור מייצר אותו Manifest.
 
 4.5 `npm run release:changelog` יוצר Change Log דטרמיניסטי
-מה־Commit subjects האמיתיים. Subject שאינו עומד בחוזה Conventional
-Commit חוסם את היצירה במקום לייצר תיאור מומצא.
+מה־Commit subjects האמיתיים. Conventional Commits מסווגים לקטגוריה
+המפורשת שלהם; Subject היסטורי תקין שאינו Conventional נשמר כלשונו
+תחת `Other committed changes`. SHA או Subject פגומים עדיין חוסמים
+את היצירה במקום לייצר תיאור מומצא.
 
 4.6 Checklist השחרור המלא נמצא ב־`docs/release-checklist.md`.
 
@@ -226,9 +230,9 @@ namespaces, Secret binding set ו־Scheduler. Queue ההזמנות וה־DLQ ש�
 D1, ‏Queues, ‏DLQs, ‏Cron, ‏Rate limits ו־Deployment evidence בחוזים
 וב־Adapters תואמי ה־Topology המאושרת.
 
-6.13 אין לשתף Platform token עם Deployment owner. הגישה תינתן
-באמצעות Membership אישי ו־Least privilege; Secrets יוזנו רק ל־Secret
-store של סביבת היעד.
+6.13 אין לשתף Platform token. Tal מתחבר באמצעות Membership אישי
+ו־Least privilege; Secrets יוזנו רק ל־Secret store של סביבת היעד
+ולעולם לא לצ׳אט, למסמך או ל־Git.
 
 ## 7. Source Control Governance Evidence
 
@@ -238,10 +242,13 @@ store של סביבת היעד.
 7.2 ה־Evidence דורש תשעה Pull Request Status Checks: שמונת שערי
 האיכות המקומיים ו־Dependency Audit.
 
-7.3 ה־Evidence מאשר שה־Repository הוא Private, וכן Branch Protection,
-‏CODEOWNERS Review, ביטול
+7.3 חוזה v3 ההיסטורי מאשר שה־Repository הוא Private, וכן Branch
+Protection, ‏CODEOWNERS Review, ביטול
 אישורים ישנים, פתרון שיחות Review, חסימת Force Push ומחיקת Branch,
 ‏Secret Scanning ו־Push Protection.
+
+7.3.1 דרישת Private זו אינה מדיניות פעילה לאחר ADR-0007. לכן v3 אינו
+כשיר לפתוח Gate עבור Connect במצב PUBLIC.
 
 7.4 נדרש Reviewer אחד לפחות. `releaseCommitSha` חייב להתאים בדיוק
 ל־`APP_DEPLOYED_COMMIT_SHA`.
@@ -259,7 +266,8 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 הוא שער Release נפרד, משום שהוא דורש ראיות Runtime שנוצרות רק
 לאחר פריסה. הפרדה זו מונעת מעגל תלות שאינו ניתן להשלמה.
 
-7.9 `npm run evidence:github` דורש `GITHUB_REPOSITORY` מפורש ו־Release
+7.9 מחולל v3 הקיים, `npm run evidence:github`, דורש
+`GITHUB_REPOSITORY` מפורש ו־Release
 Manifest הנגזר מ־Worktree נקי. הוא קורא ב־`GET` בלבד את Metadata
 ה־Repository, הגנת Branch ברירת המחדל, Metadata של `CODEOWNERS`
 ו־Check Runs הקשורים ל־Commit המדויק.
@@ -272,6 +280,12 @@ Control חסר נכשל סגור ואינו מפיק Evidence חלקי.
 
 7.11 הפלט נשמר ב־`.artifacts/source-control-governance-evidence.json`
 ואינו כולל שם Repository, ‏Branch, ‏URL או זהות בעלים גלויה.
+
+7.12 לפני הפעלת Production יש לבנות ולאמת חוזה v4 עבור Repository
+PUBLIC. החוזה החדש חייב להוכיח לפחות Visibility ציבורי עקבי, הגנת
+`main`, ‏Required Checks, ‏CODEOWNERS/Review כאשר אפשר, Secret scanning,
+Push protection, היעדר Secrets בהיסטוריה ו־License hold. עד אז המצב
+הוא `unknown/unavailable` ו־Gate נשאר חסום.
 
 ## 8. Deployment Provenance Evidence
 

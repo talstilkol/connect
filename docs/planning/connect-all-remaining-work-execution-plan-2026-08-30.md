@@ -82,12 +82,15 @@
 הוא אינו Cutoff עדכני ל־Source Universe v4 מפני שה־Toolchains של B0,
 Protocol ו־v4 נוספו לאחריו.
 
-3.1.4 Cutoff v2 הפעיל נוצר על observed commit
+3.1.4 Cutoff v2 נוצר על observed commit
 `4aab362fe162f421eabf3f379a3f4018f7adf516`, עם Package root
 `cbf1c7a6735f3525dc149181e7a85ed635cc45e0f6dd071b63ddb39a740a7e0a`.
 הוא מקפיא מראש `4` פלטי Cutoff ו־`28` פלטי Source Universe v4:
 `23` חברי Candidate ו־`5` פלטי Review/Acceptance. ‏Verifier חוזר עבר,
-אך המועמד אינו Accepted וחסמי 3.3 נשארים פתוחים.
+אך המועמד אינו Accepted וחסמי 3.3 נשארים פתוחים. לאחר יצירתו נוסף
+Commit `77378b0` ששינה שלושה מסמכי Planning מחוץ לנתיבי הפלט המוצהרים;
+לכן status=`VALID-HISTORICAL-CANDIDATE;STALE-FOR-V4-GENERATION` ונדרש
+Cutoff v3 טרי לאחר הקפאת Toolchain v4 המלא.
 
 ## 3.2 משימות
 
@@ -200,13 +203,15 @@ Evidence חיצוני; QA של אותו Producer לא ייחשב ביקורת ע
 
 6.2.1 Source Universe v3 נדחה עם `24` Findings; v4 קיים כ־Build charter בלבד ואינו Source Universe Accepted.
 
-6.2.2 Discovery Cutoff v2 ו־Output registry סגור מוכנים: `23` נתיבי
-Package ועוד `5` נתיבי Review/Acceptance הוקפאו ונמצאו absent ב־HEAD
-הנצפה. Source Universe v4 עצמו עדיין absent והשלב `IN_PROGRESS`.
+6.2.2 Output registry סגור מוכן: `23` נתיבי Package ועוד `5` נתיבי
+Review/Acceptance הוקפאו ונמצאו absent ב־HEAD שנצפה ב־Cutoff v2.
+Cutoff v2 נעשה stale ל־Generation לאחר שינוי Planning לא־מוצהר; נדרש
+Cutoff v3 חדש אחרי הקפאת Toolchain v4. ‏Source Universe v4 עצמו עדיין
+absent והשלב `IN_PROGRESS`.
 
 ## 6.3 משימות
 
-6.3.1 להשתמש רק ב־Discovery Cutoff v2 הקפוא וליצור
+6.3.1 להקפיא את Toolchain v4, להפיק Discovery Cutoff v3 טרי, ורק ממנו ליצור
 SourceOccurrenceLedger ו־TargetSpanLedger. אין לשנות אף אחד מ־28 נתיבי
 הפלט בלי restart לדור חדש.
 

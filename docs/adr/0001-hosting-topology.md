@@ -92,18 +92,19 @@ Deployment ו־Failure modes שקשה לשחזר ולנטר לפני Pilot.
 
 ## 5. תנאי קבלה לפני Deployment או Cutover
 
-5.1 רועי מאשר תקציב, Plans ובעלות חשבונות Vercel ו־Railway.
+5.1 טל מתעד תקציב, Plans ובעלות חשבונות Vercel ו־Railway.
 
-5.2 ראשה מאשרת שה־Deployment, ‏Rollback ו־Least-privilege access
-ישימים ב־Topology שנבחרה.
+5.2 טל משיג Evidence שמוכיח כי Deployment, ‏Rollback ו־
+Least-privilege access ישימים ב־Topology שנבחרה.
 
-5.3 דוד מאשר שה־Meta webhook, ‏API, ‏Queues ו־Schedulers נתמכים
-ב־Topology שנבחרה.
+5.3 טל מאמת באמצעות Contract tests כי Meta webhook, ‏API, ‏Queues
+ו־Schedulers נתמכים ב־Topology שנבחרה.
 
-5.4 אבטחה מאשרת הפרדת סביבות, Secret management, ‏Audit,
-Backup/Restore ו־Incident access.
+5.4 טל משיג ביקורת מקצועית נדרשת על הפרדת סביבות, Secret management,
+‏Audit, ‏Backup/Restore ו־Incident access. הבודק החיצוני מספק Evidence
+ואינו מקבל בעלות על משימה בפרויקט.
 
-5.5 Architecture owner מתעד ADR המשך שמכריע PostgreSQL, ‏Queue,
+5.5 טל מתעד ADR המשך שמכריע PostgreSQL, ‏Queue,
 DLQ, ‏Object storage, ‏Cron, ‏Rate limiting, ‏Secrets ו־Observability.
 
 5.6 ‏Release checklist, ‏Runbook ו־Evidence generators תואמים לספק
@@ -114,15 +115,15 @@ Rollback ו־Staging smoke עוברים מול אותו Commit ואותו Artifa
 
 ## 6. השלכות לאחר אישור
 
-6.1 ראשה יכולה להתחיל Provisioning רק לאחר שסעיפים 5.1–5.5 הושלמו.
-היא אינה מקבלת Token משותף; הגישה היא Membership אישי ו־Least
+6.1 טל רשאי להתחיל Provisioning רק לאחר שסעיפים 5.1–5.5 הושלמו.
+אין Token משותף; הגישה מתבצעת ב־Membership האישי של טל וב־Least
 privilege בכל ספק.
 
 6.2 אין לפרוס את הקוד הנוכחי ל־Vercel או ל־Railway כפתרון זמני.
 נדרש למפות כל Binding קיים ל־Port ול־Adapter מאושר לפני Cutover.
 
-6.3 בכל אפשרות, אין לשתף Deployment token. לכל חבר צוות נדרשת זהות
-אישית והרשאת Least privilege.
+6.3 בכל אפשרות, אין לשתף Deployment token. אם יצטרף אדם נוסף בעתיד,
+הוא יקבל זהות אישית והרשאת Least privilege רק לאחר החלטה חדשה.
 
 6.4 תוכנית ה־Migration מחולקת לארבעה שלבים סגורים:
 
@@ -142,13 +143,13 @@ Rollback מתורגל ורק לאחר מכן Pilot מוגבל.
 
 7.1 טל — החלטת הספקים: `approved` ב־`2026-08-17T05:17:48Z`.
 
-7.2 רועי — תקציב, Plans וחשבונות: `unknown/unavailable`.
+7.2 טל — תקציב, Plans וחשבונות: `unknown/unavailable`.
 
-7.3 ראשה — Deployment ו־Rollback: `unknown/unavailable`.
+7.3 טל — Evidence של Deployment ו־Rollback: `unknown/unavailable`.
 
-7.4 דוד — API, ‏Meta, ‏Queues ו־Schedulers: `unknown/unavailable`.
+7.4 טל — אימות API, ‏Meta, ‏Queues ו־Schedulers: `unknown/unavailable`.
 
-7.5 אבטחה — בידוד, Secrets, ‏Backup ו־Incident access:
+7.5 טל — ביקורת מקצועית על בידוד, Secrets, ‏Backup ו־Incident access:
 `unknown/unavailable`.
 
 ## 8. Evidence מקומי

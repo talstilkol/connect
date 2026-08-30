@@ -1859,3 +1859,5 @@
 1.136.4 v1 Cutoff remains immutable historical evidence but is superseded as the active Source Universe v4 input because later toolchains postdate its observed commit;no prior root or Acceptance claim was changed.
 
 1.136.5 claim limit=`CANDIDATE-NOT-ACCEPTED`;trusted time,GitHub API surfaces,private source custody,official-source occurrence coverage and independent review remain blocking;Source Universe v4 Subject remains absent;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
+
+1.136.6 post-freeze self-review found that commit `77378b0` changed three Planning documents outside the 32 declared output paths after the v2 observed commit;under Charter v2 clause 3.1.4 this makes Cutoff v2 `VALID-HISTORICAL-CANDIDATE;STALE-FOR-V4-GENERATION`. Required recovery=`freeze complete v4 toolchain;produce fresh Cutoff v3;perform no non-declared change before v4 generation`;no v4 Generation or closure credit was granted.

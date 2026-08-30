@@ -87,3 +87,25 @@ test("detects fine-grained GitHub personal access tokens without matching short 
     [],
   );
 });
+
+test("secret scan distinguishes risk-management text from a bounded secret token", () => {
+  assert.deepEqual(
+    inspectSecretText(
+      "https://www.nist.gov/artificial-intelligence-risk-management-framework",
+    ),
+    [],
+  );
+
+  const token =
+    ["s", "k"].join("") +
+    "-" +
+    "A".repeat(24);
+  assert.deepEqual(
+    inspectSecretText(token),
+    [
+      {
+        code: "SECRET_CONTENT_DETECTED",
+      },
+    ],
+  );
+});

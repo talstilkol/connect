@@ -17,7 +17,8 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 1.2.1 שלב 1 — פרסום בטוח ל־GitHub: `COMPLETED`.
 
 1.2.2 שלב 2 — Discovery Cutoff ומקורות: `IN_PROGRESS`; Cutoff v2
-נבנה ונבדק מקומית, והשלמה חיצונית של מקור/זכויות/API עדיין חסומה.
+נבנה ונבדק מקומית אך נעשה stale ל־v4 Generation אחרי Commit Planning
+לא־מוצהר. נדרש v3 טרי; השלמה חיצונית של מקור/זכויות/API עדיין חסומה.
 
 1.2.3 שלב 3 — B0 Successor: `IN_PROGRESS`; חבילת v8 מקומית נבנתה
 ונבדקה, אך Closure חיצוני ו־Acceptance עדיין חסומים.
@@ -284,3 +285,12 @@ v4 שמממש את `24` Findings אחד־לאחד בתוך `23` חברי ה־Pac
 
 6.3.3 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר נשאר
 `PUBLIC`; אין מעבר לפיתוח מוצר.
+
+6.3.4 Self-review לאחר Commit `77378b0` מצא שה־Charter מבטל Generation
+כאשר byte שאינו פלט מוצהר משתנה אחרי Cutoff. שלושת מסמכי Planning
+ששונו באותו Commit אינם פלטי Cutoff או v4. לכן Cutoff v2 נשמר כראיה
+היסטורית תקינה אך status ליצירת v4=`STALE`; אין ממנו Generation credit.
+
+6.3.5 סדר התיקון=`freeze complete v4 toolchain -> fresh Cutoff v3 ->
+generate only declared v4 outputs`; אין להכניס Commit תיעוד נוסף בין
+Cutoff v3 לבין Generation v4.

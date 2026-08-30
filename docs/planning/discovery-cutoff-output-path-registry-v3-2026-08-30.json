@@ -1,0 +1,13 @@
+{
+  "schema": "CONNECT-DISCOVERY-CUTOFF-OUTPUT-PATH-REGISTRY-V3",
+  "version": 3,
+  "owner": "Tal",
+  "outputDirectory": "docs/planning/discovery-cutoff-candidate-v3-2026-08-30",
+  "outputPaths": [
+    "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/receipt.json",
+    "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/source-candidates.json",
+    "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/manifest.json",
+    "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/verification-report.json"
+  ],
+  "successorOutputRegistryPath": "docs/planning/source-universe-v4-output-path-registry-v1-2026-08-30.json"
+}
