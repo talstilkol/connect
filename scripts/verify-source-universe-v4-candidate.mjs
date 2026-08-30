@@ -67,7 +67,12 @@ function readCommitBlob(commit, path) {
 }
 
 function assertWorktree(mode, registry) {
-  const observed = parseNull(runGit(['status', '--porcelain=v1', '-z'], null)).map((record) => record.slice(3));
+  const observed = parseNull(runGit([
+    'status',
+    '--porcelain=v1',
+    '-z',
+    '--untracked-files=all',
+  ], null)).map((record) => record.slice(3));
   if (mode === 'check-existing') {
     if (observed.length !== 0) throw new Error('existing v4 verification requires a clean worktree');
     return;

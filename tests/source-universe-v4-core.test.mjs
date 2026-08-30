@@ -127,6 +127,23 @@ test('toolchain registry closes every local runtime dependency and command surfa
   assert.throws(() => validateToolchainPathRegistry(weakened));
 });
 
+test('every v4 worktree guard enumerates files inside untracked directories', () => {
+  for (const path of [
+    'scripts/create-source-universe-v4-candidate.mjs',
+    'scripts/verify-source-universe-v4-reader-a.mjs',
+    'scripts/verify-source-universe-v4-reader-b.py',
+    'scripts/finalize-source-universe-v4-candidate.mjs',
+    'scripts/verify-source-universe-v4-candidate.mjs',
+  ]) {
+    const source = fs.readFileSync(path, 'utf8');
+    assert.match(
+      source,
+      /--untracked-files=all/,
+      `${path} may collapse an untracked output directory`,
+    );
+  }
+});
+
 test('Reader reports bind the exact toolchain root', () => {
   const checks = makeReaderChecks();
   const report = {

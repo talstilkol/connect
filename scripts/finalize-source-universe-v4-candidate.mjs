@@ -56,7 +56,12 @@ function main() {
   );
   validateToolchainPathRegistry(toolchainRegistry);
   const expected = new Set([...CUTOFF_PATHS, ...registry.packageMemberPaths.slice(0, 21)]);
-  const observed = parseNull(runGit(['status', '--porcelain=v1', '-z'], null)).map((record) => record.slice(3));
+  const observed = parseNull(runGit([
+    'status',
+    '--porcelain=v1',
+    '-z',
+    '--untracked-files=all',
+  ], null)).map((record) => record.slice(3));
   if (observed.length !== expected.size || observed.some((path) => !expected.has(path)) || new Set(observed).size !== expected.size) {
     throw new Error('finalizer requires exactly Cutoff v3, 19 normative members and two Reader reports');
   }

@@ -77,7 +77,12 @@ function patchFor(path, content) {
 
 function assertExpectedWorktree(registry) {
   const expected = new Set([...CUTOFF_PATHS, ...registry.packageMemberPaths.slice(0, 19)]);
-  const observed = parseNull(runGit(['status', '--porcelain=v1', '-z'], null)).map((record) => record.slice(3));
+  const observed = parseNull(runGit([
+    'status',
+    '--porcelain=v1',
+    '-z',
+    '--untracked-files=all',
+  ], null)).map((record) => record.slice(3));
   if (observed.length !== expected.size || observed.some((path) => !expected.has(path)) || new Set(observed).size !== expected.size) {
     throw new Error('Reader A requires exactly Cutoff v3 plus the 19 normative v4 outputs');
   }

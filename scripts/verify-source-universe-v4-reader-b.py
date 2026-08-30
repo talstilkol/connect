@@ -122,7 +122,16 @@ def expected_identities() -> list[tuple[str, str]]:
 
 
 def assert_worktree(registry: dict) -> None:
-    records = [row for row in git(["status", "--porcelain=v1", "-z"]).split(b"\0") if row]
+    records = [
+        row
+        for row in git([
+            "status",
+            "--porcelain=v1",
+            "-z",
+            "--untracked-files=all",
+        ]).split(b"\0")
+        if row
+    ]
     observed = [row[3:].decode("utf-8") for row in records]
     expected = {
         *(str(path) for path in CUTOFF_PATHS),

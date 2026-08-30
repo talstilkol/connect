@@ -109,7 +109,12 @@ function emitPatch(files) {
 }
 
 function assertCutoffOnlyWorktree(registry) {
-  const records = parseNull(runGit(['status', '--porcelain=v1', '-z'], null));
+  const records = parseNull(runGit([
+    'status',
+    '--porcelain=v1',
+    '-z',
+    '--untracked-files=all',
+  ], null));
   const allowed = new Set([
     `${CUTOFF_DIRECTORY}/manifest.json`,
     `${CUTOFF_DIRECTORY}/receipt.json`,
