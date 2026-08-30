@@ -40,6 +40,9 @@
 
 2.1.1 שומרים את כל העבודה הבטוחה במאגר הציבורי בלי לפרסם Secret, מידע לקוח, קובץ סביבת עבודה פרטי או תוצר זמני מסוכן.
 
+2.1.2 מצב ביצוע=`COMPLETED` ב־30.08.2026; Evidence מפורט ב־
+[יומן הביצוע הרציף](current-sequential-execution-ledger-2026-08-30.md).
+
 ## 2.2 משימות
 
 2.2.1 למפות כל נתיב Modified, Staged, Untracked ו־Ignored.
@@ -60,11 +63,18 @@
 
 2.4.1 `local HEAD == remote branch HEAD`, ‏Secret scan עבר או שכל Finding סווג ונחסם, והמאגר אומת `PUBLIC`.
 
+2.4.2 תנאי 2.4.1 התקיים עבור commit
+`840a46e68c2b19e32feb4b940d446350ce1f525b`. התאמת היסטוריה רחבה
+נשמרה כ־false-positive candidate קיים ואינה נחשבת אישור להחלשת Scanner.
+
 # 3. שלב 2 — הקפאת תמונת מצב ומקורות
 
 ## 3.1 מה השלב אומר
 
 3.1.1 מצלמים במדויק מה קיים בקוד, במסמכים, בענפים ובמקורות החיצוניים כדי שהמשך התוכנית לא יתבסס על רשימה חלקית.
+
+3.1.2 מצב ביצוע=`IN_PROGRESS`; תצפית ה־Preflight נמצאת ב־
+[Discovery Cutoff preflight](discovery-cutoff-preflight-observation-2026-08-30.md).
 
 ## 3.2 משימות
 

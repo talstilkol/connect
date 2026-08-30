@@ -7,6 +7,8 @@
 
 מקור האמת לסדר העבודה שנותר הוא
 [תוכנית כל העבודה שנותרה — 30.08.2026](docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md).
+מצב הביצוע הרציף הנוכחי מתועד ב־
+[יומן הביצוע הרציף — 30.08.2026](docs/planning/current-sequential-execution-ledger-2026-08-30.md).
 החלטות Tal האחרונות וההתאמה לתוכנית מתועדות ב־
 [קליטת החלטות ועדכון התוכנית — 30.08.2026](docs/planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md).
 מסמכים אינטראקטיביים לקריאה ולייצוא זמינים ב־
