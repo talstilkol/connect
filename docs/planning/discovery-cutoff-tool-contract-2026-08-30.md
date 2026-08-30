@@ -26,6 +26,10 @@ Remote readback נכשל או זמן התצפית אינו RFC3339 מדויק.
 1.2.5 מפעילים את ה־Verifier עם `--verified-at` מפורש. ה־Verifier
 בודק Schemas סגורים, Digests, Package root, נתיבים ו־Mutations.
 
+1.2.5.1 לאחר קיבוע החבילה ב־Git, מריצים `--check-existing`. מצב זה
+דורש Worktree נקי, מאמת את ה־Toolchain מתוך ה־observed commit ואינו
+כותב מחדש את דוח האימות.
+
 1.2.6 רק ארבעת נתיבי הפלט המוצהרים רשאים להופיע אחרי ה־Cutoff.
 שינוי אחר ב־worktree מבטל את ה־Candidate.
 

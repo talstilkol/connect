@@ -24,6 +24,15 @@ import {
 function parseArguments() {
   const argumentsList = process.argv.slice(2);
   if (
+    argumentsList.length === 1 &&
+    argumentsList[0] === "--check-existing"
+  ) {
+    return Object.freeze({
+      mode: "check-existing",
+      verifiedAt: null,
+    });
+  }
+  if (
     argumentsList.length !== 2 ||
     argumentsList[0] !== "--verified-at"
   ) {
@@ -32,6 +41,7 @@ function parseArguments() {
     );
   }
   return Object.freeze({
+    mode: "create-report",
     verifiedAt: assertRfc3339(
       argumentsList[1],
       "verifiedAt",
@@ -64,6 +74,7 @@ function assertNoPrivateLocator(value) {
 
 function assertAllowedWorktreeStatus(
   outputDirectory,
+  allowDeclaredOutputChanges,
 ) {
   const records = parseNullSeparated(
     git([
@@ -72,6 +83,14 @@ function assertAllowedWorktreeStatus(
       "-z",
     ]),
   );
+  if (
+    !allowDeclaredOutputChanges &&
+    records.length > 0
+  ) {
+    throw new Error(
+      "existing package verification requires a clean worktree",
+    );
+  }
   const unexpected = records.filter((record) => {
     const path = record.slice(3);
     return !path.startsWith(
@@ -83,6 +102,107 @@ function assertAllowedWorktreeStatus(
       "worktree changed outside declared output directory",
     );
   }
+}
+
+function assertCommitExists(commit) {
+  try {
+    git([
+      "cat-file",
+      "-e",
+      `${commit}^{commit}`,
+    ]);
+  } catch {
+    throw new Error(
+      "observed input commit is unavailable",
+    );
+  }
+}
+
+function verifyToolchainAtObservedHead(
+  receiptPayload,
+) {
+  if (
+    !Array.isArray(receiptPayload.toolchain) ||
+    receiptPayload.toolchain.length === 0
+  ) {
+    throw new Error(
+      "receipt toolchain is missing",
+    );
+  }
+  for (const row of receiptPayload.toolchain) {
+    assertExactKeys(
+      row,
+      ["path", "byteLength", "sha256"],
+      "receipt toolchain member",
+    );
+    assertSafeRelativePath(row.path);
+    const bytes = git([
+      "show",
+      `${receiptPayload.productRepository.observedHead}:${row.path}`,
+    ]);
+    if (
+      bytes.byteLength !== row.byteLength ||
+      sha256(bytes) !== row.sha256
+    ) {
+      throw new Error(
+        "receipt toolchain does not match observed commit",
+      );
+    }
+  }
+}
+
+function verifyExistingReport({
+  reportEnvelope,
+  observedHead,
+  packageContentRootSha256,
+}) {
+  verifyEnvelope({
+    envelope: reportEnvelope,
+    schema:
+      "CONNECT-DISCOVERY-CUTOFF-VERIFICATION-REPORT-ENVELOPE-V1",
+    domain:
+      "CONNECT.DISCOVERY-CUTOFF-VERIFICATION-REPORT.V1",
+  });
+  assertExactKeys(
+    reportEnvelope.payload,
+    [
+      "schema",
+      "status",
+      "owner",
+      "verifiedAt",
+      "observedHead",
+      "packageContentRootSha256",
+      "checks",
+      "limitations",
+    ],
+    "verification report payload",
+  );
+  if (
+    reportEnvelope.payload.schema !==
+      "CONNECT-DISCOVERY-CUTOFF-VERIFICATION-REPORT-PAYLOAD-V1" ||
+    reportEnvelope.payload.status !==
+      "PASS-CANDIDATE-NOT-ACCEPTED" ||
+    reportEnvelope.payload.owner !== "Tal" ||
+    reportEnvelope.payload.observedHead !==
+      observedHead ||
+    reportEnvelope.payload
+      .packageContentRootSha256 !==
+      packageContentRootSha256 ||
+    !Array.isArray(
+      reportEnvelope.payload.checks,
+    ) ||
+    !Array.isArray(
+      reportEnvelope.payload.limitations,
+    )
+  ) {
+    throw new Error(
+      "existing verification report is inconsistent",
+    );
+  }
+  assertRfc3339(
+    reportEnvelope.payload.verifiedAt,
+    "existing report verifiedAt",
+  );
 }
 
 function assertNegativeMutations(
@@ -158,7 +278,7 @@ function assertNegativeMutations(
 }
 
 async function main() {
-  const { verifiedAt } = parseArguments();
+  const { mode, verifiedAt } = parseArguments();
   const registry = await readOutputRegistry();
   const receiptPath = registry.outputPaths.find(
     (path) => path.endsWith("/receipt.json"),
@@ -187,6 +307,7 @@ async function main() {
 
   assertAllowedWorktreeStatus(
     registry.outputDirectory,
+    mode === "create-report",
   );
   const currentHead = git([
     "rev-parse",
@@ -255,18 +376,27 @@ async function main() {
       "receipt invariants are invalid",
     );
   }
-  if (
+  const observedHead =
     receipt.value.payload.productRepository
-      .observedHead !== currentHead ||
+      .observedHead;
+  assertCommitExists(observedHead);
+  if (
     manifest.value.payload.observedHead !==
-      currentHead ||
+      observedHead ||
     candidates.value.payload.observedHead !==
-      currentHead
+      observedHead ||
+    (
+      mode === "create-report" &&
+      observedHead !== currentHead
+    )
   ) {
     throw new Error(
       "candidate is not bound to the current clean input commit",
     );
   }
+  verifyToolchainAtObservedHead(
+    receipt.value.payload,
+  );
   if (
     receipt.value.payload.declaredOutputRegistry
       .allOutputsAbsentAtCutoff !== true ||
@@ -374,6 +504,37 @@ async function main() {
   );
   assertNegativeMutations(receipt.value);
 
+  if (mode === "check-existing") {
+    const report = await readJson(reportPath);
+    assertNoPrivateLocator(report.value);
+    if (
+      inspectSecretText(
+        report.bytes.toString("utf8"),
+      ).length > 0
+    ) {
+      throw new Error(
+        "existing report contains secret-shaped content",
+      );
+    }
+    verifyExistingReport({
+      reportEnvelope: report.value,
+      observedHead,
+      packageContentRootSha256:
+        expectedPackageRoot,
+    });
+    console.log(JSON.stringify({
+      status:
+        "PASS-EXISTING-CANDIDATE-NOT-ACCEPTED",
+      observedHead,
+      currentHead,
+      packageContentRootSha256:
+        expectedPackageRoot,
+      reportPayloadSha256:
+        report.value.payloadSha256,
+    }));
+    return;
+  }
+
   const reportPayload = Object.freeze({
     schema:
       "CONNECT-DISCOVERY-CUTOFF-VERIFICATION-REPORT-PAYLOAD-V1",
@@ -419,6 +580,7 @@ async function main() {
   );
   assertAllowedWorktreeStatus(
     registry.outputDirectory,
+    true,
   );
 
   console.log(JSON.stringify({

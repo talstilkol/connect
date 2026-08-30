@@ -124,3 +124,21 @@ test("observation time must be explicit UTC RFC3339", () => {
     );
   }
 });
+
+test("an envelope cannot gain a field after its digest was issued", () => {
+  const envelope = createEnvelope({
+    schema: "TEST-CLOSED-ENVELOPE-V1",
+    domain: "CONNECT.TEST-CLOSED-ENVELOPE.V1",
+    payload: { owner: "Tal" },
+  });
+  assert.throws(() =>
+    verifyEnvelope({
+      envelope: {
+        ...envelope,
+        replayed: true,
+      },
+      schema: "TEST-CLOSED-ENVELOPE-V1",
+      domain: "CONNECT.TEST-CLOSED-ENVELOPE.V1",
+    }),
+  );
+});
