@@ -19,6 +19,8 @@
     "verify:secret-hygiene": "node scripts/verify-secret-hygiene.mjs --history",
     "planning:discovery-cutoff:create": "node scripts/create-planning-discovery-cutoff.mjs",
     "planning:discovery-cutoff:verify": "node scripts/verify-planning-discovery-cutoff.mjs",
+    "planning:discovery-cutoff-v2:create": "node scripts/create-planning-discovery-cutoff-v2.mjs",
+    "planning:discovery-cutoff-v2:verify": "node scripts/verify-planning-discovery-cutoff-v2.mjs",
     "planning:b0-v8:create": "node scripts/create-b0-v8-candidate.mjs",
     "planning:b0-v8:verify": "node scripts/verify-b0-v8-candidate.mjs",
     "planning:review-protocol-v1-10:create": "node scripts/create-review-protocol-v1-10-candidate.mjs",
