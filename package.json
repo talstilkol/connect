@@ -46,7 +46,6 @@
     "planning:trd2-v6-pass2-v3:verify": "node scripts/verify-trd2-v6-pass2-v3-candidate.mjs",
     "planning:trd2-v6-pass3-v2:create": "node scripts/create-trd2-v6-pass3-v2-candidate.mjs --artifact=subject --part=1",
     "planning:trd2-v6-pass3-v2:engine-a": "node scripts/verify-trd2-v6-pass3-v2-engine-a.mjs",
-    "planning:trd2-v6-pass3-v2:engine-b": "python3 scripts/verify-trd2-v6-pass3-v2-engine-b.py",
     "planning:trd2-v6-pass3-v2:verify": "node scripts/verify-trd2-v6-pass3-v2-candidate.mjs",
     "verify:interface-guardrails": "node scripts/verify-interface-guardrails.mjs",
     "verify:dependency-lock": "node scripts/verify-dependency-lock.mjs",

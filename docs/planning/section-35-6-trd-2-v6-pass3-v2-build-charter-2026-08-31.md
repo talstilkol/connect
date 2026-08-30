@@ -22,6 +22,12 @@ accepted Requirements=`0/128`; Finding closure=`0/15`; review generations=`0/2`.
 unsupported `null`/`BODY-PATH` predecessor identity mode in its own validator;
 the outputs were removed from the worktree before the verifier fix was frozen.
 
+1.1.7 The three uncommitted outputs generated from toolchain commit `9933c1d`
+are also rejected with zero credit. The repository Source Guard correctly
+blocked an unnecessary direct Python npm shortcut as an unmodelled package
+runtime entry. Engine B remains invoked only by the frozen Pass 3 verifier; all
+repository gates must pass before the next generation commit is frozen.
+
 ## 1.2 Closed output boundary
 
 1.2.1 Pass 3 v2 may emit exactly these three already-predeclared v3 paths:
