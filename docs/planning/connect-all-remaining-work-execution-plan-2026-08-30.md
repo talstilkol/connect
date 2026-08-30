@@ -339,6 +339,22 @@ Package או Acceptance records.
 איחוד `25` ה־Schemas האמיתיים עם קטלוג סגור לכל משפחות Passes 3–6,
 מפת Output→Schema, Construction fixtures, mutations ושני engines.
 
+7.6.16 Pass 2 v3=`COMPLETED-AS-LOCAL-CANDIDATE`; Candidate commit=
+`1e33fcd78f39df9acec4a4483411b1bea8eb8820`; Registry root=
+`6374ced141b6a1bafff816e1676a5004dbcb51b4fd8fc0437b1b2eb7be6c83e6`.
+
+7.6.17 Schemas=`82=25 actual+57 future`; Output→Schema=`30/30`;
+fixtures=`789=391 actual+124 actual mutations+57 constructions+217 future
+mutations`; Invariants=`50/50`; two-engine agreement=`789/789`; mismatch=`0`.
+
+7.6.18 full gates=`3972/3972 tests;two builds PASS;TypeScript PASS;ESLint 0
+errors/28 historical warnings;Source guardrails PASS;Secret hygiene PASS`;
+post-commit verifier=`COMMITTED-CLEAN`; remote readback exact.
+
+7.6.19 המשימה הפעילה הבאה=`Pass 3 v2`: לבנות Subject, לקמפל `128`
+Clause AST programs ולממש שבע משפחות State Machine בנתיבי v3 בלבד.
+ה־Candidate ממשיך להעניק `0` Closure ו־`0` Acceptance.
+
 # 8. שלב 7 — Master Control Sequence Successor
 
 ## 8.1 מה השלב אומר

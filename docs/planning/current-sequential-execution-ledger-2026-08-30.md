@@ -32,10 +32,10 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
 1.2.6 שלב 6 — TRD-2 v6:
-`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-NEXT`;
-Pass 2 v2 קובע ב־commit `b68b80e` ומוכיח `391` רשומות אמיתיות ו־
-`124` מוטציות, אך Self-review מצא `1 P0`: לא הוקפאו Schemas של משפחות
-הפלט העתידיות ולכן Pass 3 נעצר לפני יצירת פלט. Passes 3–6, שתי
+`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-NEXT`;
+Pass 2 v3 קובע ב־commit `1e33fcd` ומוכיח `82` Schemas,‏ `789/789`
+הסכמת מנועים, `30/30` מיפויי Output→Schema ו־`50/50` Invariants.
+Pass 3 v1 נשאר היסטוריה ללא פלט; Pass 3 v2 הוגדר מול נתיבי v3. Passes 3–6, שתי
 Generations, ביקורות עצמאיות ו־Acceptance נשארים
 `PENDING`. שלבים 7–10 מתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
