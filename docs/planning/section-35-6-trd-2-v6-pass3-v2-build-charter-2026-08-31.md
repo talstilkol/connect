@@ -70,6 +70,19 @@ cardinality and cross-Requirement substitution block safely.
 proves compilation only; clause truth remains pending executable vectors,
 external review, reconciliation and Acceptance.
 
+1.4.5 Clause Node and Counterexample Obligation bytes are deterministic virtual
+content-addressed records reconstructed from the exact frozen v5 semantic
+program and Requirement bytes. The Registry persists their ordered semantic
+indices through sorted roots; both independent engines must reconstruct every
+record, validate it against its declared closed schema and reproduce every
+persisted root. A root that cannot be reconstructed byte-for-byte is a blocking
+`CLAUSE-AST-UNRESOLVABLE-ROOT`, not evidence.
+
+1.4.6 This virtual-record rule is bounded to Pass 3 compilation. Pass 4 must
+materialize the referenced vector fixtures, operations and oracles in the
+predeclared executable corpus; it may not treat a hash alone as executable
+evidence.
+
 ## 1.5 State Machine contract
 
 1.5.1 Required families=`7`: `REVIEW`, `MISSING-VALUE`,
