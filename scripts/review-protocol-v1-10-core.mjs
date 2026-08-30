@@ -60,7 +60,8 @@ export const REVIEW_ROLE_SLOTS = Object.freeze([
 
 const RECEIPT_KEYS = ['evidenceClass', 'expiresAt', 'issuedAt', 'issuerAppointmentRoot', 'packageRoot', 'payloadRoot', 'receiptId', 'revocationHeadRoot', 'verificationArtifactRoot', 'verificationReceiptRoot'];
 const APPOINTMENT_KEYS = ['appointmentId', 'controllerRoot', 'packageRoot', 'receipt', 'roleSlotId'];
-const REVIEW_KEYS = ['findingSetRoot', 'receipt', 'resultRoot', 'reviewId', 'reviewerAppointmentId', 'verdict'];
+const REVIEW_KEYS = ['findingSetRoot', 'receipt', 'resultRoot', 'reviewClass', 'reviewId', 'reviewerAppointmentId', 'verdict'];
+const REVIEW_CLASSES = ['STRUCTURAL', 'SEMANTIC-SECURITY', 'ESTIMATE-SCHEDULE'];
 const INPUT_KEYS = ['evidence', 'generation', 'manifestRoot', 'mode', 'packageRoot', 'schemaVersion', 'subjectRoot'];
 const EVIDENCE_KEYS = ['appointments', 'casReceipt', 'causalTraceReceipt', 'closureReceipt', 'frozenSourcesReceipt', 'humanApprovalReceipt', 'packageReceipt', 'predecessorBehaviorReceipt', 'reconciliationReceipt', 'recoveryReceipt', 'remotePublicReceipt', 'reviewReceipts', 'scannerReceipts', 'schemaReceipt', 'semanticEntailmentReceipt', 'signatureReceipts', 'timeRevocationFinalityReceipts'];
 const SHA_RE = /^[0-9a-f]{64}$/;
@@ -167,10 +168,11 @@ function validateReviewSet(input) {
   evidence.reviewReceipts.forEach((review, index) => {
     assertClosedObject(review, REVIEW_KEYS, `review[${index}]`);
     assertId(review.reviewId, `review[${index}].reviewId`);
+    assertId(review.reviewClass, `review[${index}].reviewClass`);
     assertId(review.reviewerAppointmentId, `review[${index}].reviewerAppointmentId`);
     assertSha(review.findingSetRoot, `review[${index}].findingSetRoot`);
     assertSha(review.resultRoot, `review[${index}].resultRoot`);
-    if (review.verdict !== 'PASS' || review.findingSetRoot !== findingSetRoot) throw new Error('reviews: verdict or finding set mismatch');
+    if (review.verdict !== 'PASS' || review.findingSetRoot !== findingSetRoot || review.reviewClass !== REVIEW_CLASSES[index]) throw new Error('reviews: class, verdict or finding set mismatch');
     const appointment = appointmentForSlot(evidence.appointments, expectedSlots[index]);
     if (review.reviewerAppointmentId !== appointment.appointmentId) throw new Error('reviews: wrong reviewer appointment');
     validateReviewEvidenceReceipt(review.receipt, 'INDEPENDENT-REVIEW', packageRoot, `review[${index}].receipt`);
@@ -253,7 +255,7 @@ export function makeReviewProtocolVector() {
   const findingSetRoot = makeRoot('MPRRV110-FINDING-SET-17');
   const reviewReceipts = reviewSlots.map((slot, index) => {
     const appointment = appointmentForSlot(appointments, slot); const resultRoot = makeRoot(`REVIEW-${index + 1}-RESULT`);
-    return { findingSetRoot, receipt: makeReviewEvidenceReceipt('INDEPENDENT-REVIEW', `REVIEW-${index + 1}`, packageRoot, resultRoot, appointment.receipt.verificationReceiptRoot), resultRoot, reviewId: `MPRRV110-REVIEW-${String(index + 1).padStart(2, '0')}`, reviewerAppointmentId: appointment.appointmentId, verdict: 'PASS' };
+    return { findingSetRoot, receipt: makeReviewEvidenceReceipt('INDEPENDENT-REVIEW', `REVIEW-${index + 1}`, packageRoot, resultRoot, appointment.receipt.verificationReceiptRoot), resultRoot, reviewClass: REVIEW_CLASSES[index], reviewId: `MPRRV110-REVIEW-${String(index + 1).padStart(2, '0')}`, reviewerAppointmentId: appointment.appointmentId, verdict: 'PASS' };
   });
   const reconciler = appointmentForSlot(appointments, 'ROLE-RECONCILER-01');
   const approver = appointmentForSlot(appointments, 'ROLE-APPROVER-01');

@@ -18,7 +18,7 @@ import {
 } from './review-protocol-v1-10-core.mjs';
 
 const DATE = '2026-08-30';
-const PACKAGE_DIR = `docs/planning/three-review-protocol-v1-10-package-${DATE}`;
+const PACKAGE_DIR = `docs/planning/three-review-protocol-v1-10-g1-package-${DATE}`;
 const OUTPUTS = Object.freeze({
   subject: `${PACKAGE_DIR}/subject.md`,
   registry: `${PACKAGE_DIR}/normative-registry.json`,
@@ -39,8 +39,10 @@ const SOURCE_PATHS = Object.freeze([
   `docs/planning/three-review-protocol-v1-9-independent-hostile-review-findings-manifest-${DATE}.md`,
   `docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-atomic-package-manifest-${DATE}.json`,
   `docs/planning/connect-all-remaining-work-execution-plan-${DATE}.md`,
+  'scripts/b0-v8-core.mjs',
 ]);
 const TOOL_MEMBERS = Object.freeze([
+  ['MPRRV110-B0-CORE-DEPENDENCY', 'scripts/b0-v8-core.mjs'],
   ['MPRRV110-CORE', 'scripts/review-protocol-v1-10-core.mjs'],
   ['MPRRV110-BUILDER', 'scripts/create-review-protocol-v1-10-candidate.mjs'],
   ['MPRRV110-READER-A', 'scripts/verify-review-protocol-v1-10-candidate.mjs'],
@@ -107,7 +109,7 @@ function buildRegistry() {
   return {
     algorithmPolicy: { approvedAlgorithms: [], keyGenerationPerformed: false, selectionState: 'UNSELECTED-PER-USE-APPROVAL-REQUIRED' },
     artifactClass: 'IMMUTABLE-PLANNING-CANDIDATE-NOT-AUTHORITY-NOT-ACCEPTANCE',
-    artifactId: 'MPRR-V1-10-NORMATIVE-REGISTRY-2026-08-30-G0',
+    artifactId: 'MPRR-V1-10-NORMATIVE-REGISTRY-2026-08-30-G1',
     controlRows,
     currentState: evaluateCurrentReviewProtocolState(),
     externalEvidence: { externalClosureCount: 0, independentReviewerEvidencePresent: false, operationalEvidencePresent: false },
@@ -127,25 +129,25 @@ function buildSourceIndex(repositoryRoot) {
     const fact = readRegularFileNoFollow(repositoryRoot, logicalPath, 50 * 1024 * 1024);
     return { bytes: fact.byteLength, logicalPath, mode: fact.mode, ordinal: index + 1, sha256: fact.sha256 };
   });
-  const base = { artifactClass: 'FROZEN-GIT-SOURCE-INDEX-PLANNING-ONLY', artifactId: 'MPRR-V1-10-SOURCE-INDEX-2026-08-30-G0', repositoryVisibility: 'PUBLIC', rows, schemaVersion: 'MPRR-V1-10-SOURCE-INDEX-V1', sourceCount: rows.length };
+  const base = { artifactClass: 'FROZEN-GIT-SOURCE-INDEX-PLANNING-ONLY', artifactId: 'MPRR-V1-10-SOURCE-INDEX-2026-08-30-G1', repositoryVisibility: 'PUBLIC', rows, schemaVersion: 'MPRR-V1-10-SOURCE-INDEX-V1', sourceCount: rows.length };
   return { ...base, sourceSetRoot: contentRoot('MPRR-V1-10-SOURCE-SET-V1', rows) };
 }
 
 function buildCrosswalk(registry) {
   const rows = registry.controlRows.map((row, index) => ({ ...row, ordinal: index + 1 }));
-  const base = { artifactClass: 'ONE-TO-ONE-FINDING-CONTROL-CROSSWALK', artifactId: 'MPRR-V1-10-CROSSWALK-2026-08-30-G0', closureCount: 0, findingCount: rows.length, inheritedFindingCount: 40, inheritedIndependentMechanicalClosureCount: 1, repositoryVisibility: 'PUBLIC', rows, schemaVersion: 'MPRR-V1-10-CROSSWALK-V1' };
+  const base = { artifactClass: 'ONE-TO-ONE-FINDING-CONTROL-CROSSWALK', artifactId: 'MPRR-V1-10-CROSSWALK-2026-08-30-G1', closureCount: 0, findingCount: rows.length, inheritedFindingCount: 40, inheritedIndependentMechanicalClosureCount: 1, repositoryVisibility: 'PUBLIC', rows, schemaVersion: 'MPRR-V1-10-CROSSWALK-V1' };
   return { ...base, crosswalkRoot: contentRoot('MPRR-V1-10-CROSSWALK-V1', base) };
 }
 
 function buildCorpus() {
   const cases = runReviewProtocolMutationCampaign();
-  const base = { artifactClass: 'DETERMINISTIC-PROTOCOL-MUTATION-CORPUS-NO-BUSINESS-DATA', artifactId: 'MPRR-V1-10-MUTATION-CORPUS-2026-08-30-G0', blockedCount: cases.length, caseCount: cases.length, cases, repositoryVisibility: 'PUBLIC', schemaVersion: 'MPRR-V1-10-MUTATION-CORPUS-V1' };
+  const base = { artifactClass: 'DETERMINISTIC-PROTOCOL-MUTATION-CORPUS-NO-BUSINESS-DATA', artifactId: 'MPRR-V1-10-MUTATION-CORPUS-2026-08-30-G1', blockedCount: cases.length, caseCount: cases.length, cases, repositoryVisibility: 'PUBLIC', schemaVersion: 'MPRR-V1-10-MUTATION-CORPUS-V1' };
   return { ...base, corpusRoot: contentRoot('MPRR-V1-10-MUTATION-CORPUS-V1', base) };
 }
 
 function renderSubject(sourceCommit, registry, sourceIndex, crosswalk, corpus) {
   const rows = registry.controlRows.map((row, index) => `${index + 1}. ${row.findingId} (${row.severity}) — ${REVIEW_PROTOCOL_FINDINGS[index][2]}; local=${row.localStatus}; closure=${row.closureStatus}; external=${row.externalEvidenceRequired.length === 0 ? 'none' : row.externalEvidenceRequired.join(',')}.`);
-  return `# 1. Connect — Three-review Protocol v1.10 immutable Candidate\n\n## 1.1 מצב\n\n1.1.1 Input commit=\`${sourceCommit}\`; repository=\`PUBLIC\`.\n\n1.1.2 זהו Candidate תכנוני, לא Authority, לא Acceptance, לא Permit ולא הרשאה להסיר את Development freeze.\n\n1.1.3 Tal הוא Owner יחיד של העבודה; Primary/Backup הוסרו. דרישת הפרדת שבעה תפקידי בקרה נשארת חסומה עד Appointments חיצוניים אמיתיים.\n\n1.1.4 מצב אמיתי: Acceptance=0; authorityOutputs=0; B0=ABSENT; Gate29=BLOCKED; developmentFreeze=ACTIVE.\n\n## 2. מנגנון מקומי\n\n2.1 מסלול Protocol vector סגור מריץ 15 Validators על Evidence typed. הוא יכול להחזיר רק ELIGIBLE-PLANNING-VECTOR-NOT-AUTHORITY.\n\n2.2 מסלול אמיתי חסום כאשר Appointments, signatures, scanners, remote PUBLIC, durable CAS/Recovery, trusted time, שלוש ביקורות, reconciliation או human approval חסרים.\n\n2.3 לא נבחר אלגוריתם חתימה, לא נוצר Key ולא הופקה אקראיות קריפטוגרפית.\n\n2.4 Report writes חסומים עד Adapter descriptor-bound בטוח; growth admission חסום עד תקציב גלובלי מאושר.\n\n## 3. בקרות 17 הממצאים\n\n${rows.join('\n\n')}\n\n## 4. מונים\n\n4.1 Validators=15/15 במסלול Protocol vector; Mutations blocked=${corpus.blockedCount}/${corpus.caseCount}.\n\n4.2 Sources=${sourceIndex.sourceCount}; sourceSetRoot=\`${sourceIndex.sourceSetRoot}\`.\n\n4.3 Local controls=${crosswalk.findingCount}; independent closure=${crosswalk.closureCount}/${crosswalk.findingCount}; inherited mechanical closure=1/40.\n\n## 5. כלל סיום\n\n5.1 Producer QA ו־Cross-runtime Readers אינם ביקורת עצמאית ואינם יוצרים Acceptance.\n`;
+  return `# 1. Connect — Three-review Protocol v1.10 G1 immutable Candidate\n\n## 1.1 מצב\n\n1.1.1 Input commit=\`${sourceCommit}\`; repository=\`PUBLIC\`.\n\n1.1.2 זהו Candidate תכנוני, לא Authority, לא Acceptance, לא Permit ולא הרשאה להסיר את Development freeze.\n\n1.1.3 Tal הוא Owner יחיד של העבודה; Primary/Backup הוסרו. דרישת הפרדת שבעה תפקידי בקרה נשארת חסומה עד Appointments חיצוניים אמיתיים.\n\n1.1.4 מצב אמיתי: Acceptance=0; authorityOutputs=0; B0=ABSENT; Gate29=BLOCKED; developmentFreeze=ACTIVE.\n\n## 2. מנגנון מקומי\n\n2.1 מסלול Protocol vector סגור מריץ 15 Validators על Evidence typed. הוא יכול להחזיר רק ELIGIBLE-PLANNING-VECTOR-NOT-AUTHORITY.\n\n2.2 שלוש מחלקות ביקורת הן חובה ובסדר סגור: Structural, Semantic/Security, Estimate/Schedule.\n\n2.3 מסלול אמיתי חסום כאשר Appointments, signatures, scanners, remote PUBLIC, durable CAS/Recovery, trusted time, שלוש ביקורות, reconciliation או human approval חסרים.\n\n2.4 לא נבחר אלגוריתם חתימה, לא נוצר Key ולא הופקה אקראיות קריפטוגרפית.\n\n2.5 Report writes חסומים עד Adapter descriptor-bound בטוח; growth admission חסום עד תקציב גלובלי מאושר.\n\n2.6 כל תלות קוד טרנזיטיבית, לרבות b0-v8-core.mjs, מופיעה ב־Manifest וב־Source index.\n\n## 3. בקרות 17 הממצאים\n\n${rows.join('\n\n')}\n\n## 4. מונים\n\n4.1 Validators=15/15 במסלול Protocol vector; Mutations blocked=${corpus.blockedCount}/${corpus.caseCount}.\n\n4.2 Sources=${sourceIndex.sourceCount}; sourceSetRoot=\`${sourceIndex.sourceSetRoot}\`.\n\n4.3 Local controls=${crosswalk.findingCount}; independent closure=${crosswalk.closureCount}/${crosswalk.findingCount}; inherited mechanical closure=1/40.\n\n## 5. כלל סיום\n\n5.1 Producer QA ו־Cross-runtime Readers אינם ביקורת עצמאית ואינם יוצרים Acceptance.\n`;
 }
 
 function member(role, logicalPath, content) {
@@ -173,10 +175,10 @@ function build() {
     ...TOOL_MEMBERS.map(([role, logicalPath]) => { const fact = readRegularFileNoFollow(repositoryRoot, logicalPath, 10 * 1024 * 1024); return { bytes: fact.byteLength, logicalPath, role, sha256: fact.sha256 }; }),
   ];
   const members = memberDrafts.map((row, index) => ({ ...row, ordinal: index + 1 }));
-  const packageId = 'MPRR-V1-10-IMMUTABLE-CANDIDATE-PACKAGE-2026-08-30-G0';
+  const packageId = 'MPRR-V1-10-IMMUTABLE-CANDIDATE-PACKAGE-2026-08-30-G1';
   const projection = { members, packageId, sourceCommit };
-  const manifest = { artifactClass: 'IMMUTABLE-PLANNING-PACKAGE-MANIFEST-NOT-ACCEPTANCE', artifactId: 'MPRR-V1-10-MANIFEST-2026-08-30-G0', generatedAt, maxMemberBytesExclusive: 10 * 1024 * 1024, maxTotalBytesInclusive: 25 * 1024 * 1024, memberCount: members.length, members, packageContentRoot: contentRoot('MPRR-V1-10-PACKAGE-CONTENT-V1', projection), packageId, repositoryVisibility: 'PUBLIC', schemaVersion: 'MPRR-V1-10-PACKAGE-MANIFEST-V1', sourceCommit, totalBytes: members.reduce((sum, row) => sum + row.bytes, 0) };
-  const qaBase = { artifactClass: 'PRODUCER-SELF-QA-NOT-INDEPENDENT-NOT-ACCEPTANCE', artifactId: 'MPRR-V1-10-PRODUCER-QA-2026-08-30-G0', externalClosureCount: 0, generatedAt, localControlCount: 17, mutationBlockedCount: corpus.blockedCount, packageContentRoot: manifest.packageContentRoot, result: 'PASS-LOCAL-CANDIDATE-NOT-ACCEPTED', sourceCommit, validatorCount: 15 };
+  const manifest = { artifactClass: 'IMMUTABLE-PLANNING-PACKAGE-MANIFEST-NOT-ACCEPTANCE', artifactId: 'MPRR-V1-10-MANIFEST-2026-08-30-G1', generatedAt, maxMemberBytesExclusive: 10 * 1024 * 1024, maxTotalBytesInclusive: 25 * 1024 * 1024, memberCount: members.length, members, packageContentRoot: contentRoot('MPRR-V1-10-PACKAGE-CONTENT-V1', projection), packageId, repositoryVisibility: 'PUBLIC', schemaVersion: 'MPRR-V1-10-PACKAGE-MANIFEST-V1', sourceCommit, totalBytes: members.reduce((sum, row) => sum + row.bytes, 0) };
+  const qaBase = { artifactClass: 'PRODUCER-SELF-QA-NOT-INDEPENDENT-NOT-ACCEPTANCE', artifactId: 'MPRR-V1-10-PRODUCER-QA-2026-08-30-G1', externalClosureCount: 0, generatedAt, localControlCount: 17, mutationBlockedCount: corpus.blockedCount, packageContentRoot: manifest.packageContentRoot, result: 'PASS-LOCAL-CANDIDATE-NOT-ACCEPTED', sourceCommit, validatorCount: 15 };
   const producerQa = { ...qaBase, reportRoot: contentRoot('MPRR-V1-10-PRODUCER-QA-V1', qaBase) };
   generated.set(OUTPUTS.manifest, pretty(manifest)); generated.set(OUTPUTS.producerQa, pretty(producerQa));
   emitPatch([...generated.entries()]);

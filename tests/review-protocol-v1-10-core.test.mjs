@@ -92,6 +92,15 @@ test('review quorum rejects duplicate or wrongly appointed reviewers', () => {
   assert.equal(result.results.find((row) => row.validatorId === 'VALIDATOR-THREE-REVIEWS-AND-HUMAN-APPROVAL').status, 'BLOCK');
 });
 
+test('review quorum requires Structural, Semantic/Security and Estimate/Schedule classes', () => {
+  const vector = makeReviewProtocolVector();
+  assert.deepEqual(vector.evidence.reviewReceipts.map((row) => row.reviewClass), ['STRUCTURAL', 'SEMANTIC-SECURITY', 'ESTIMATE-SCHEDULE']);
+  vector.evidence.reviewReceipts[2].reviewClass = 'STRUCTURAL';
+  const result = evaluateReviewProtocolInput(vector);
+  assert.equal(result.status, 'BLOCKED');
+  assert.equal(result.results.find((row) => row.validatorId === 'VALIDATOR-THREE-REVIEWS-AND-HUMAN-APPROVAL').status, 'BLOCK');
+});
+
 test('growth accounting derives duplicate bytes from content roots', () => {
   const rows = [
     { bytes: 10, contentRoot: makeRoot('CONTENT-A'), logicalPath: 'docs/planning/a.json' },

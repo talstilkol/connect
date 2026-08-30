@@ -23,8 +23,8 @@ import {
 } from './review-protocol-v1-10-core.mjs';
 
 const DATE = '2026-08-30';
-const PACKAGE_DIR = `docs/planning/three-review-protocol-v1-10-package-${DATE}`;
-const REPORT_DIR = `docs/planning/three-review-protocol-v1-10-detached-reports-${DATE}`;
+const PACKAGE_DIR = `docs/planning/three-review-protocol-v1-10-g1-package-${DATE}`;
+const REPORT_DIR = `docs/planning/three-review-protocol-v1-10-g1-detached-reports-${DATE}`;
 const PATHS = Object.freeze({
   manifest: `${PACKAGE_DIR}/normative-package-manifest.json`, registry: `${PACKAGE_DIR}/normative-registry.json`, sourceIndex: `${PACKAGE_DIR}/frozen-source-index.json`, crosswalk: `${PACKAGE_DIR}/closure-crosswalk.json`, corpus: `${PACKAGE_DIR}/mutation-corpus.json`,
   reportA: `${REPORT_DIR}/qa-reader-a-report.json`, reportB: `${REPORT_DIR}/qa-reader-b-report.json`,
@@ -55,7 +55,7 @@ function readJson(repositoryRoot, logicalPath, maxBytes = 25 * 1024 * 1024) {
 function validateManifest(repositoryRoot, manifest) {
   const keys = ['artifactClass', 'artifactId', 'generatedAt', 'maxMemberBytesExclusive', 'maxTotalBytesInclusive', 'memberCount', 'members', 'packageContentRoot', 'packageId', 'repositoryVisibility', 'schemaVersion', 'sourceCommit', 'totalBytes'];
   assertClosedObject(manifest, keys, 'manifest');
-  if (manifest.repositoryVisibility !== 'PUBLIC' || manifest.schemaVersion !== 'MPRR-V1-10-PACKAGE-MANIFEST-V1' || !Array.isArray(manifest.members) || manifest.members.length !== 10 || manifest.memberCount !== 10) throw new Error('manifest invariant mismatch');
+  if (manifest.repositoryVisibility !== 'PUBLIC' || manifest.schemaVersion !== 'MPRR-V1-10-PACKAGE-MANIFEST-V1' || !Array.isArray(manifest.members) || manifest.members.length !== 11 || manifest.memberCount !== 11) throw new Error('manifest invariant mismatch');
   const paths = new Set(); const hashes = new Set(); const roles = new Set(); let total = 0;
   manifest.members.forEach((member, index) => {
     assertClosedObject(member, ['bytes', 'logicalPath', 'ordinal', 'role', 'sha256'], `manifest.members[${index}]`);
@@ -65,6 +65,7 @@ function validateManifest(repositoryRoot, manifest) {
     if (fact.sha256 !== member.sha256 || fact.byteLength !== member.bytes) throw new Error(`manifest member drift: ${member.logicalPath}`);
     total += member.bytes;
   });
+  if (!manifest.members.some((member) => member.role === 'MPRRV110-B0-CORE-DEPENDENCY' && member.logicalPath === 'scripts/b0-v8-core.mjs')) throw new Error('manifest missing transitive B0 core dependency');
   if (total !== manifest.totalBytes || total > manifest.maxTotalBytesInclusive) throw new Error('manifest total budget mismatch');
   const projection = { members: manifest.members, packageId: manifest.packageId, sourceCommit: manifest.sourceCommit };
   if (contentRoot('MPRR-V1-10-PACKAGE-CONTENT-V1', projection) !== manifest.packageContentRoot) throw new Error('manifest package root mismatch');
@@ -92,7 +93,7 @@ function validateRegistry(registry) {
 
 function validateSourceIndex(index, sourceCommit) {
   assertClosedObject(index, ['artifactClass', 'artifactId', 'repositoryVisibility', 'rows', 'schemaVersion', 'sourceCount', 'sourceSetRoot'], 'sourceIndex');
-  if (index.repositoryVisibility !== 'PUBLIC' || !Array.isArray(index.rows) || index.rows.length !== 10 || index.sourceCount !== 10) throw new Error('source index denominator mismatch');
+  if (index.repositoryVisibility !== 'PUBLIC' || !Array.isArray(index.rows) || index.rows.length !== 11 || index.sourceCount !== 11) throw new Error('source index denominator mismatch');
   const paths = new Set(); const hashes = new Set();
   index.rows.forEach((row, position) => {
     assertClosedObject(row, ['bytes', 'logicalPath', 'mode', 'ordinal', 'sha256'], `source[${position}]`);
@@ -101,6 +102,7 @@ function validateSourceIndex(index, sourceCommit) {
     const fact = readGitBlob(sourceCommit, row.logicalPath, 50 * 1024 * 1024);
     if (fact.sha256 !== row.sha256 || fact.byteLength !== row.bytes || fact.mode !== row.mode) throw new Error(`source drift: ${row.logicalPath}`);
   });
+  if (!index.rows.some((row) => row.logicalPath === 'scripts/b0-v8-core.mjs')) throw new Error('source index missing transitive B0 core dependency');
   if (contentRoot('MPRR-V1-10-SOURCE-SET-V1', index.rows) !== index.sourceSetRoot) throw new Error('source index root mismatch');
 }
 
@@ -139,7 +141,7 @@ function verifyCandidate() {
   if (evaluateCurrentReviewProtocolState().status !== 'BLOCKED') throw new Error('current state must remain blocked');
   const reader = manifest.members.find((member) => member.role === 'MPRRV110-READER-A');
   if (!reader) throw new Error('Reader A not pinned');
-  const base = { artifactClass: 'CROSS-CHECK-READER-A-NOT-INDEPENDENT-NOT-ACCEPTANCE', artifactId: 'MPRR-V1-10-READER-A-REPORT-2026-08-30-G0', closureCount: 0, corpusRoot: corpus.corpusRoot, findingCount: 17, packageContentRoot: manifest.packageContentRoot, positiveValidatorCount: 15, readerArtifactSha256: reader.sha256, result: 'PASS-CANDIDATE-NOT-ACCEPTED', sourceCommit: manifest.sourceCommit, sourceSetRoot: sourceIndex.sourceSetRoot };
+  const base = { artifactClass: 'CROSS-CHECK-READER-A-NOT-INDEPENDENT-NOT-ACCEPTANCE', artifactId: 'MPRR-V1-10-READER-A-REPORT-2026-08-30-G1', closureCount: 0, corpusRoot: corpus.corpusRoot, findingCount: 17, packageContentRoot: manifest.packageContentRoot, positiveValidatorCount: 15, readerArtifactSha256: reader.sha256, result: 'PASS-CANDIDATE-NOT-ACCEPTED', sourceCommit: manifest.sourceCommit, sourceSetRoot: sourceIndex.sourceSetRoot };
   return { ...base, reportRoot: contentRoot('MPRR-V1-10-READER-A-REPORT-V1', base) };
 }
 

@@ -13,7 +13,7 @@ from typing import Any
 
 
 DATE = "2026-08-30"
-PACKAGE_DIR = f"docs/planning/three-review-protocol-v1-10-package-{DATE}"
+PACKAGE_DIR = f"docs/planning/three-review-protocol-v1-10-g1-package-{DATE}"
 PATHS = {
     "manifest": f"{PACKAGE_DIR}/normative-package-manifest.json",
     "registry": f"{PACKAGE_DIR}/normative-registry.json",
@@ -152,7 +152,7 @@ def load(repository: Path, logical_path: str) -> dict[str, Any]:
 
 def validate_manifest(repository: Path, manifest: dict[str, Any]) -> None:
     exact(manifest, ["artifactClass", "artifactId", "generatedAt", "maxMemberBytesExclusive", "maxTotalBytesInclusive", "memberCount", "members", "packageContentRoot", "packageId", "repositoryVisibility", "schemaVersion", "sourceCommit", "totalBytes"], "manifest")
-    if manifest["repositoryVisibility"] != "PUBLIC" or manifest["schemaVersion"] != "MPRR-V1-10-PACKAGE-MANIFEST-V1" or manifest["memberCount"] != 10 or len(manifest["members"]) != 10:
+    if manifest["repositoryVisibility"] != "PUBLIC" or manifest["schemaVersion"] != "MPRR-V1-10-PACKAGE-MANIFEST-V1" or manifest["memberCount"] != 11 or len(manifest["members"]) != 11:
         fail("manifest invariant mismatch")
     paths: set[str] = set(); hashes: set[str] = set(); roles: set[str] = set(); total = 0
     for index, member in enumerate(manifest["members"]):
@@ -167,6 +167,8 @@ def validate_manifest(repository: Path, manifest: dict[str, Any]) -> None:
         if len(data) != member["bytes"] or sha256_bytes(data) != member["sha256"]:
             fail("manifest member drift")
         total += member["bytes"]
+    if not any(member["role"] == "MPRRV110-B0-CORE-DEPENDENCY" and member["logicalPath"] == "scripts/b0-v8-core.mjs" for member in manifest["members"]):
+        fail("manifest missing transitive B0 core dependency")
     if total != manifest["totalBytes"] or total > manifest["maxTotalBytesInclusive"]:
         fail("manifest byte budget mismatch")
     projection = {"members": manifest["members"], "packageId": manifest["packageId"], "sourceCommit": manifest["sourceCommit"]}
@@ -201,7 +203,7 @@ def validate_registry(registry: dict[str, Any]) -> None:
 
 def validate_source(repository: Path, source: dict[str, Any], commit: str) -> None:
     exact(source, ["artifactClass", "artifactId", "repositoryVisibility", "rows", "schemaVersion", "sourceCount", "sourceSetRoot"], "source")
-    if source["sourceCount"] != 10 or len(source["rows"]) != 10:
+    if source["sourceCount"] != 11 or len(source["rows"]) != 11:
         fail("source denominator mismatch")
     paths: set[str] = set(); hashes: set[str] = set()
     for index, row in enumerate(source["rows"]):
@@ -212,6 +214,8 @@ def validate_source(repository: Path, source: dict[str, Any], commit: str) -> No
         data, mode = read_git(repository, commit, row["logicalPath"], 50 * 1024 * 1024)
         if len(data) != row["bytes"] or sha256_bytes(data) != row["sha256"] or mode != row["mode"]:
             fail("source drift")
+    if not any(row["logicalPath"] == "scripts/b0-v8-core.mjs" for row in source["rows"]):
+        fail("source index missing transitive B0 core dependency")
     if root("MPRR-V1-10-SOURCE-SET-V1", source["rows"]) != source["sourceSetRoot"]:
         fail("source root mismatch")
 
@@ -250,7 +254,7 @@ def main() -> None:
     reader = next((member for member in manifest["members"] if member["role"] == "MPRRV110-READER-B"), None)
     if reader is None:
         fail("Reader B not pinned")
-    base = {"artifactClass": "CROSS-RUNTIME-STRUCTURAL-READER-B-NOT-INDEPENDENT-NOT-ACCEPTANCE", "artifactId": "MPRR-V1-10-READER-B-REPORT-2026-08-30-G0", "closureCount": 0, "corpusRoot": corpus["corpusRoot"], "findingCount": 17, "packageContentRoot": manifest["packageContentRoot"], "positiveValidatorCount": 15, "readerArtifactSha256": reader["sha256"], "result": "PASS-STRUCTURAL-CANDIDATE-NOT-ACCEPTED", "sourceCommit": manifest["sourceCommit"], "sourceSetRoot": source["sourceSetRoot"]}
+    base = {"artifactClass": "CROSS-RUNTIME-STRUCTURAL-READER-B-NOT-INDEPENDENT-NOT-ACCEPTANCE", "artifactId": "MPRR-V1-10-READER-B-REPORT-2026-08-30-G1", "closureCount": 0, "corpusRoot": corpus["corpusRoot"], "findingCount": 17, "packageContentRoot": manifest["packageContentRoot"], "positiveValidatorCount": 15, "readerArtifactSha256": reader["sha256"], "result": "PASS-STRUCTURAL-CANDIDATE-NOT-ACCEPTED", "sourceCommit": manifest["sourceCommit"], "sourceSetRoot": source["sourceSetRoot"]}
     report = {**base, "reportRoot": root("MPRR-V1-10-READER-B-REPORT-V1", base)}
     print(json.dumps(report, ensure_ascii=False, separators=(",", ":"), sort_keys=True))
 
