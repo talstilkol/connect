@@ -12,6 +12,11 @@ import {
   type RailwayApiRequestKind,
   VERCEL_OIDC_HEADER,
 } from "./railwayApiContract.ts";
+import {
+  parseW3cTraceparent,
+  W3C_TRACEPARENT_HEADER,
+  type W3cTraceContext,
+} from "./w3cTraceContext.ts";
 
 const DEFAULT_MAXIMUM_BODY_BYTES = 262_144;
 const DEFAULT_MAXIMUM_RESPONSE_BYTES = 1_048_576;
@@ -63,6 +68,23 @@ export interface EndUserSessionVerifier {
 export interface RailwayApiDispatchContext {
   readonly serviceIdentity: Readonly<VerifiedVercelServiceIdentity>;
   readonly userIdentity: Readonly<AuthenticatedIdentity>;
+  readonly traceContext: W3cTraceContext | null;
+}
+
+export type RailwayApiRequestLogEvent = Readonly<{
+  version: 1;
+  service: "connect-railway-api";
+  kind: "api-request";
+  operation: string | null;
+  requestKind: RailwayApiRequestKind | null;
+  outcome: "ok" | "rejected" | "error";
+  code: "OK" | RailwayApiFailureCode;
+  durationMilliseconds: number;
+  traceContext: W3cTraceContext | null;
+}>;
+
+export interface RailwayApiRequestTelemetry {
+  readonly record: (event: RailwayApiRequestLogEvent) => boolean;
 }
 
 export interface RailwayApiOperation {
@@ -84,12 +106,16 @@ export interface RailwayApiHttpHandlerOptions {
   readonly oidcVerifier: VercelOidcVerifier;
   readonly endUserSessionVerifier: EndUserSessionVerifier;
   readonly operations: readonly Readonly<RailwayApiOperation>[];
+  readonly telemetry?: RailwayApiRequestTelemetry;
+  readonly clock?: () => number;
   readonly maximumBodyBytes?: number;
   readonly maximumResponseBytes?: number;
 }
 
 export type RailwayApiDispatchFailureCode =
   | "INVALID_REQUEST"
+  | "CONFIGURATION_REQUIRED"
+  | "IDENTITY_VERIFICATION_REQUIRED"
   | "AUTHORIZATION_DENIED"
   | "TENANT_MEMBERSHIP_REQUIRED"
   | "TENANT_SELECTION_REQUIRED"
@@ -97,11 +123,15 @@ export type RailwayApiDispatchFailureCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "INVALID_TRANSITION"
+  | "INVITATION_UNAVAILABLE"
+  | "STALE_SESSION"
   | "RATE_LIMITED"
   | "DEPENDENCY_UNAVAILABLE";
 
 const railwayApiDispatchFailureCodes = [
   "INVALID_REQUEST",
+  "CONFIGURATION_REQUIRED",
+  "IDENTITY_VERIFICATION_REQUIRED",
   "AUTHORIZATION_DENIED",
   "TENANT_MEMBERSHIP_REQUIRED",
   "TENANT_SELECTION_REQUIRED",
@@ -109,6 +139,8 @@ const railwayApiDispatchFailureCodes = [
   "NOT_FOUND",
   "CONFLICT",
   "INVALID_TRANSITION",
+  "INVITATION_UNAVAILABLE",
+  "STALE_SESSION",
   "RATE_LIMITED",
   "DEPENDENCY_UNAVAILABLE",
 ] as const satisfies readonly RailwayApiDispatchFailureCode[];
@@ -136,6 +168,30 @@ function requirePositiveInteger(
   }
 
   return value;
+}
+
+function readClock(clock: () => number): number | null {
+  try {
+    const value = clock();
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function boundedDuration(
+  startedAt: number | null,
+  completedAt: number | null,
+): number {
+  if (
+    startedAt === null ||
+    completedAt === null ||
+    completedAt < startedAt
+  ) {
+    return 0;
+  }
+
+  return Math.min(completedAt - startedAt, 300_000);
 }
 
 function requireIdentityValue(
@@ -272,7 +328,10 @@ function validUserIdentity(
     identity !== null &&
     typeof identity.externalUserId === "string" &&
     identity.externalUserId.length > 0 &&
-    identity.externalUserId.length <= 255
+    identity.externalUserId.length <= 255 &&
+    typeof identity.externalOrganizationId === "string" &&
+    identity.externalOrganizationId.length > 0 &&
+    identity.externalOrganizationId.length <= 255
   );
 }
 
@@ -282,15 +341,20 @@ function dispatchFailureStatus(
   switch (code) {
     case "INVALID_REQUEST":
       return 400;
+    case "CONFIGURATION_REQUIRED":
+      return 503;
     case "AUTHORIZATION_DENIED":
+    case "IDENTITY_VERIFICATION_REQUIRED":
     case "TENANT_MEMBERSHIP_REQUIRED":
     case "TENANT_SELECTION_REQUIRED":
     case "PERMISSION_DENIED":
       return 403;
     case "NOT_FOUND":
+    case "INVITATION_UNAVAILABLE":
       return 404;
     case "CONFLICT":
     case "INVALID_TRANSITION":
+    case "STALE_SESSION":
       return 409;
     case "RATE_LIMITED":
       return 429;
@@ -435,10 +499,16 @@ export function createRailwayApiHttpHandler(
     options.maximumResponseBytes ?? DEFAULT_MAXIMUM_RESPONSE_BYTES,
     "maximumResponseBytes",
   );
+  const telemetry = options.telemetry ?? Object.freeze({
+    record: () => true,
+  });
+  const clock = options.clock ?? Date.now;
 
   if (
     typeof options.oidcVerifier?.verify !== "function" ||
-    typeof options.endUserSessionVerifier?.verify !== "function"
+    typeof options.endUserSessionVerifier?.verify !== "function" ||
+    typeof telemetry.record !== "function" ||
+    typeof clock !== "function"
   ) {
     throw new Error("Railway API identity verifiers are invalid");
   }
@@ -507,93 +577,145 @@ export function createRailwayApiHttpHandler(
         );
       }
 
-      const userSessionToken = readUserSessionToken(request);
-
-      if (!userSessionToken) {
-        return jsonResponse(
-          "USER_AUTHENTICATION_REQUIRED",
-          401,
-        );
-      }
-
-      let userIdentity;
+      const startedAt = readClock(clock);
+      let traceContext: W3cTraceContext | null = null;
+      let operationName: string | null = null;
+      let requestKind: RailwayApiRequestKind | null = null;
+      let outcome: RailwayApiRequestLogEvent["outcome"] = "rejected";
+      let code: RailwayApiRequestLogEvent["code"] = "INVALID_REQUEST";
 
       try {
-        userIdentity = await options.endUserSessionVerifier.verify(
-          userSessionToken,
+        const suppliedTraceparent = request.headers.get(
+          W3C_TRACEPARENT_HEADER,
         );
-      } catch {
-        return jsonResponse("DEPENDENCY_UNAVAILABLE", 503);
-      }
-
-      if (!validUserIdentity(userIdentity)) {
-        return jsonResponse(
-          "USER_AUTHENTICATION_REQUIRED",
-          401,
-        );
-      }
-
-      let envelope;
-
-      try {
-        envelope = parseRailwayApiRequestEnvelope(
-          await readJsonBody(request, maximumBodyBytes),
-        );
-      } catch (error) {
-        if (
-          error instanceof RailwayApiRequestBodyError &&
-          error.code === "OVERSIZED"
-        ) {
-          return jsonResponse("INVALID_REQUEST", 413);
+        traceContext = parseW3cTraceparent(suppliedTraceparent);
+        if (suppliedTraceparent !== null && traceContext === null) {
+          return jsonResponse("INVALID_REQUEST", 400);
         }
 
-        return jsonResponse("INVALID_REQUEST", 400);
-      }
+        const userSessionToken = readUserSessionToken(request);
 
-      const operation = operations.get(envelope.operation);
-
-      if (
-        !operation ||
-        operation.requestKind !== envelope.requestKind
-      ) {
-        return jsonResponse("INVALID_REQUEST", 400);
-      }
-
-      const context = Object.freeze({
-        serviceIdentity: Object.freeze({ ...serviceIdentity }),
-        userIdentity: Object.freeze({ ...userIdentity }),
-      });
-
-      try {
-        const result = await operation.execute(
-          context,
-          envelope.payload,
-          envelope,
-        );
-        const responseBody = JSON.stringify(
-          createRailwayApiSuccessEnvelope(result),
-        );
-
-        if (
-          new TextEncoder().encode(responseBody).byteLength >
-          maximumResponseBytes
-        ) {
-          return jsonResponse("SERVER_ERROR", 500);
-        }
-
-        return new Response(responseBody, {
-          status: 200,
-          headers: RESPONSE_HEADERS,
-        });
-      } catch (error) {
-        if (error instanceof RailwayApiDispatchError) {
+        if (!userSessionToken) {
+          code = "USER_AUTHENTICATION_REQUIRED";
           return jsonResponse(
-            error.code,
-            dispatchFailureStatus(error.code),
+            "USER_AUTHENTICATION_REQUIRED",
+            401,
           );
         }
 
-        return jsonResponse("SERVER_ERROR", 500);
+        let userIdentity;
+
+        try {
+          userIdentity = await options.endUserSessionVerifier.verify(
+            userSessionToken,
+          );
+        } catch {
+          outcome = "error";
+          code = "DEPENDENCY_UNAVAILABLE";
+          return jsonResponse("DEPENDENCY_UNAVAILABLE", 503);
+        }
+
+        if (!validUserIdentity(userIdentity)) {
+          code = "USER_AUTHENTICATION_REQUIRED";
+          return jsonResponse(
+            "USER_AUTHENTICATION_REQUIRED",
+            401,
+          );
+        }
+
+        let envelope;
+
+        try {
+          envelope = parseRailwayApiRequestEnvelope(
+            await readJsonBody(request, maximumBodyBytes),
+          );
+        } catch (error) {
+          if (
+            error instanceof RailwayApiRequestBodyError &&
+            error.code === "OVERSIZED"
+          ) {
+            return jsonResponse("INVALID_REQUEST", 413);
+          }
+
+          return jsonResponse("INVALID_REQUEST", 400);
+        }
+
+        operationName = envelope.operation;
+        requestKind = envelope.requestKind;
+
+        const operation = operations.get(envelope.operation);
+
+        if (
+          !operation ||
+          operation.requestKind !== envelope.requestKind
+        ) {
+          return jsonResponse("INVALID_REQUEST", 400);
+        }
+
+        const context = Object.freeze({
+          serviceIdentity: Object.freeze({ ...serviceIdentity }),
+          userIdentity: Object.freeze({ ...userIdentity }),
+          traceContext,
+        });
+
+        try {
+          const result = await operation.execute(
+            context,
+            envelope.payload,
+            envelope,
+          );
+          const responseBody = JSON.stringify(
+            createRailwayApiSuccessEnvelope(result),
+          );
+
+          if (
+            new TextEncoder().encode(responseBody).byteLength >
+            maximumResponseBytes
+          ) {
+            outcome = "error";
+            code = "SERVER_ERROR";
+            return jsonResponse("SERVER_ERROR", 500);
+          }
+
+          outcome = "ok";
+          code = "OK";
+          return new Response(responseBody, {
+            status: 200,
+            headers: RESPONSE_HEADERS,
+          });
+        } catch (error) {
+          if (error instanceof RailwayApiDispatchError) {
+            code = error.code;
+            return jsonResponse(
+              error.code,
+              dispatchFailureStatus(error.code),
+            );
+          }
+
+          outcome = "error";
+          code = "SERVER_ERROR";
+          return jsonResponse("SERVER_ERROR", 500);
+        }
+      } finally {
+        const event = Object.freeze({
+          version: 1,
+          service: "connect-railway-api",
+          kind: "api-request",
+          operation: operationName,
+          requestKind,
+          outcome,
+          code,
+          durationMilliseconds: boundedDuration(
+            startedAt,
+            readClock(clock),
+          ),
+          traceContext,
+        }) satisfies RailwayApiRequestLogEvent;
+        try {
+          telemetry.record(event);
+        } catch {
+          // Telemetry cannot change an API result.
+        }
       }
     },
   };

@@ -206,6 +206,21 @@ test("returns unchanged for an exact event replay without another insert", async
   assert.equal(fixture.transactionCalls.length, 2);
 });
 
+test("returns unchanged for the same committed snapshot when a retry has a later clock", async () => {
+  const fixture = dependenciesFixture({
+    transactionResults: [[connectionLockRow()], [policyRow()]],
+  });
+  const result = await createPostgresWhatsappCampaignDeliveryPolicyRepository(
+    fixture.dependencies,
+  ).recordPolicyEvent(
+    policyCommand({ recordedAt: "2026-08-17T08:31:00.001Z" }),
+  );
+
+  assert.equal(result.outcome, "unchanged");
+  assert.equal(result.record.policyVersion, 1);
+  assert.equal(fixture.transactionCalls.length, 2);
+});
+
 test("returns conflict for stale or invalid kill-switch transitions", async () => {
   const staleFixture = dependenciesFixture({
     transactionResults: [[connectionLockRow()], [policyRow()]],

@@ -3,9 +3,11 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  inspectPostgresClerkInvitationRateLimitConfiguration,
   inspectPostgresMetaWebhookRateLimitConfiguration,
   inspectPostgresSystemAdminMutationRateLimitConfiguration,
   inspectPostgresTenantMutationRateLimitConfiguration,
+  postgresClerkInvitationRateLimitEnvironmentKeys,
   postgresMetaWebhookRateLimitEnvironmentKeys,
   postgresSystemAdminMutationRateLimitEnvironmentKeys,
   postgresTenantMutationRateLimitEnvironmentKeys,
@@ -34,6 +36,15 @@ function configuredMetaWebhook(overrides = {}) {
     META_WEBHOOK_RATE_LIMIT_POLICY_VERSION: "5",
     META_WEBHOOK_RATE_LIMIT_CAPACITY: "960",
     META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS: "1",
+    ...overrides,
+  };
+}
+
+function configuredClerkInvitation(overrides = {}) {
+  return {
+    CLERK_INVITATION_RATE_LIMIT_POLICY_VERSION: "1",
+    CLERK_INVITATION_RATE_LIMIT_CAPACITY: "125",
+    CLERK_INVITATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "3600",
     ...overrides,
   };
 }
@@ -159,6 +170,53 @@ test("keeps system-admin and Meta webhook policies isolated and explicit", () =>
   );
 });
 
+test("bounds the Clerk invitation token bucket below the official hourly endpoint limit", () => {
+  assert.deepEqual(
+    inspectPostgresClerkInvitationRateLimitConfiguration(
+      configuredClerkInvitation(),
+    ),
+    {
+      status: "configured",
+      missingKeys: [],
+      invalidKeys: [],
+      policy: {
+        policyId: "clerk-organization-invitation",
+        policyVersion: 1,
+        capacity: 125,
+        refillPeriodSeconds: 3600,
+      },
+    },
+  );
+
+  assert.deepEqual(
+    inspectPostgresClerkInvitationRateLimitConfiguration(
+      configuredClerkInvitation({
+        CLERK_INVITATION_RATE_LIMIT_CAPACITY: "126",
+        CLERK_INVITATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "3599",
+      }),
+    ),
+    {
+      status: "invalid",
+      missingKeys: [],
+      invalidKeys: [
+        "CLERK_INVITATION_RATE_LIMIT_CAPACITY",
+        "CLERK_INVITATION_RATE_LIMIT_REFILL_PERIOD_SECONDS",
+      ],
+      policy: null,
+    },
+  );
+
+  assert.deepEqual(
+    inspectPostgresClerkInvitationRateLimitConfiguration({}),
+    {
+      status: "disabled",
+      missingKeys: postgresClerkInvitationRateLimitEnvironmentKeys,
+      invalidKeys: [],
+      policy: null,
+    },
+  );
+});
+
 test("documents every Railway rate-limit setting without committing values", async () => {
   const source = await readFile(
     new URL("../.env.example", import.meta.url),
@@ -169,6 +227,7 @@ test("documents every Railway rate-limit setting without committing values", asy
     ...postgresTenantMutationRateLimitEnvironmentKeys,
     ...postgresSystemAdminMutationRateLimitEnvironmentKeys,
     ...postgresMetaWebhookRateLimitEnvironmentKeys,
+    ...postgresClerkInvitationRateLimitEnvironmentKeys,
   ]) {
     assert.match(source, new RegExp(`^${key}=$`, "m"));
   }

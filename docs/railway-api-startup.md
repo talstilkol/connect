@@ -4,24 +4,29 @@
 
 1.1 ה־Startup executable של Railway API הושלם מקומית.
 
-1.2 פקודת ההפעלה היא `npm run start:railway-api`.
+1.2 פקודת ה־Production הקנונית היא `npm run start:railway-api`, והיא
+מפעילה את ה־Composition המלא של PostgreSQL, ‏Redis/BullMQ, ‏Telemetry
+ו־Release Evidence Reader.
 
 1.3 ‏Rehearsal תהליכי עבר ב־2026-08-19 מול PostgreSQL 16 אמיתי עם 24
-מיגרציות, Liveness, ‏Readiness וסגירה נקייה ב־`SIGTERM`.
+מיגרציות, Liveness, ‏Readiness וסגירה נקייה ב־`SIGTERM`. ה־Rehearsal
+ההיסטורי בדק את ה־Composition המצומצם ואינו Evidence למסלול Production
+המלא.
 
 1.4 אין בכך הוכחת Deployment ב־Railway. Project, ‏Service, ‏Region,
 Environment values ו־Production credentials עדיין `unknown/unavailable`.
 
 ## 2. זרימת ההפעלה
 
-2.1 `scripts/start-railway-api.mjs` מפעיל את
-`startRailwayApiExecutable`.
+2.1 `scripts/start-railway-bullmq-api.mjs` מפעיל את
+`startRailwayBullMqApiExecutable`, אשר עוטף את ה־API Runtime המלא.
 
 2.2 ה־Bootstrap מאמת `PORT` לפני יצירת PostgreSQL pool. ערך חסר, Leading
 zero, אפס, Port מעל 65535 או שדה Process נוסף בחוזה גורמים לכשל סגור.
 
-2.3 לאחר מכן נוצר `railwayPostgresApiRuntime` מתוך Environment התהליך,
-כולל Identity, ‏PostgreSQL ו־Tenant mutation rate-limit policy.
+2.3 לאחר מכן נוצר `railwayBullMqPostgresApiRuntime` מתוך Environment
+התהליך, כולל Identity, ‏PostgreSQL, ‏Redis/BullMQ, ‏Telemetry,
+Tenant mutation rate-limit policy ו־Release Evidence Reader.
 
 2.4 `railwayNodeProcess` יוצר Service, פותח Listener ורק לאחר הצלחה מתקין
 `SIGINT` ו־`SIGTERM`.
@@ -49,7 +54,12 @@ zero, אפס, Port מעל 65535 או שדה Process נוסף בחוזה גורמ
 `TENANT_MUTATION_RATE_LIMIT_CAPACITY`,‏
 `TENANT_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS`.
 
-3.5 אין Defaults ל־Production values. ערך חסר, חלקי או לא חוקי מונע Startup.
+3.5 ה־Composition המלא דורש גם את חוזי Redis/BullMQ, ‏Better Stack,
+Meta ואת תצורת Release Evidence המתועדים ב־Runbooks הייעודיים. ערך
+חסר, חלקי או לא חוקי מונע Startup.
+
+3.6 `npm run start:railway-api:postgres-only` שמור ל־Rehearsal מקומי
+מצומצם בלבד ואינו פקודת Production.
 
 ## 4. Health ו־Shutdown
 
@@ -68,7 +78,7 @@ zero, אפס, Port מעל 65535 או שדה Process נוסף בחוזה גורמ
 
 5.1 יש ליצור PostgreSQL 16 מקומי וריק בשם `connect_startup_rehearsal`.
 
-5.2 מריצים:
+5.2 מריצים את Verifier של ה־Composition המצומצם:
 
 ```bash
 CONNECT_POSTGRES_STARTUP_REHEARSAL_URL=postgresql://<local-user>@127.0.0.1:<db-port>/connect_startup_rehearsal CONNECT_RAILWAY_API_REHEARSAL_PORT=<api-port> npm run verify:railway-api-startup
@@ -84,8 +94,9 @@ Routes ה־Health, שולח `SIGTERM` ודורש Exit code `0` ללא stdout/std
 
 6.1 רועי/ראשה צריכים ליצור או לבחור Railway Project ו־API Service מאושרים.
 
-6.2 יש להגדיר Start command מדויק ל־`npm run start:railway-api` ו־Healthcheck
-ל־`/health/ready` דרך הגדרות Railway החיות.
+6.2 יש להגדיר Start command מדויק ל־`npm run start:railway-api`
+ו־Healthcheck ל־`/health/ready` דרך הגדרות Railway החיות. אין להשתמש
+ב־`start:railway-api:postgres-only` בסביבה חיה.
 
 6.3 יש להזין Environment values דרך Railway Secrets/Members, לא בקוד או
 ב־GitHub.

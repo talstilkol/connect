@@ -30,13 +30,13 @@ test("WhatsApp delivery policy mutations stay behind the system-admin server bou
   assert.match(source, /^"use server";/);
   assert.match(
     source,
-    /requireCurrentSystemAdminMutationSession/,
+    /createCurrentRailwaySystemAdminWhatsappDeliveryPolicyHandler/,
   );
-  assert.match(
+  assert.doesNotMatch(
     source,
     /requireRuntimeDatabase/,
   );
-  assert.match(
+  assert.doesNotMatch(
     source,
     /createWhatsappCampaignDeliveryPolicyRepository/,
   );
@@ -59,13 +59,13 @@ test("operator UI reads exact server state and exposes only the bounded system-a
 
   assert.match(
     readerSource,
-    /requireCurrentSystemAdminSession/,
+    /createCurrentRailwaySystemAdminWhatsappDeliveryPolicyHandler/,
   );
-  assert.match(
+  assert.doesNotMatch(
     readerSource,
     /findConnectionByTenantId/,
   );
-  assert.match(
+  assert.doesNotMatch(
     readerSource,
     /findLatestPolicyEvent/,
   );

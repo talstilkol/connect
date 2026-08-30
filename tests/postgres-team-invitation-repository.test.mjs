@@ -356,6 +356,18 @@ test("creates, replays, revokes, re-requests, and expires atomically", async () 
   assert.equal(fixture.state.events.size, 1);
   assert.equal(fixture.state.deliveries.size, 1);
 
+  const clockDriftReplay = await fixture.repository.request(
+    requestCommand({
+      requestedAt: "2026-08-17T08:00:00.001Z",
+      expiresAt: "2026-08-18T08:00:00.001Z",
+    }),
+  );
+  assert.equal(clockDriftReplay.outcome, "unchanged");
+  assert.equal(clockDriftReplay.invitation.requestedAt, requestedAt);
+  assert.equal(clockDriftReplay.invitation.expiresAt, expiresAt);
+  assert.equal(fixture.state.events.size, 1);
+  assert.equal(fixture.state.deliveries.size, 1);
+
   const revoked = await fixture.repository.transition({
     tenantId,
     invitationKey: created.invitation.invitationKey,

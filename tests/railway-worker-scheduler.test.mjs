@@ -70,6 +70,16 @@ test("runs bounded catch-up ticks under exact fenced claims", async () => {
         taskCalls.push("invitations");
       },
     },
+    botReplyDeliveries: {
+      async run() {
+        taskCalls.push("bot-replies");
+      },
+    },
+    messageTemplateSubmissions: {
+      async run() {
+        taskCalls.push("message-templates");
+      },
+    },
     clock: clock(),
   });
 
@@ -91,10 +101,16 @@ test("runs bounded catch-up ticks under exact fenced claims", async () => {
   assert.deepEqual(taskCalls, [
     "campaigns",
     "invitations",
+    "bot-replies",
+    "message-templates",
     "campaigns",
     "invitations",
+    "bot-replies",
+    "message-templates",
     "campaigns",
     "invitations",
+    "bot-replies",
+    "message-templates",
   ]);
   assert.deepEqual(
     completionCalls.map(({ tick, fencingToken }) => ({ tick, fencingToken })),
@@ -176,6 +192,42 @@ test("waits for both tasks and leaves a failed tick uncompleted", async () => {
   assert.equal(completions, 0);
 });
 
+test("fails the leased tick when optional template maintenance fails", async () => {
+  let completions = 0;
+  const scheduler = createRailwayWorkerScheduler({
+    ownerKey,
+    leases: {
+      async claimNext() {
+        return claim("2026-08-17T10:04:00.000Z", 10);
+      },
+      async complete() {
+        completions += 1;
+        return {
+          outcome: "completed",
+          completedTick: "2026-08-17T10:04:00.000Z",
+        };
+      },
+    },
+    campaigns: { async run() {} },
+    invitationExpirations: { async run() {} },
+    messageTemplateSubmissions: {
+      async run() {
+        throw new Error("private template maintenance failure");
+      },
+    },
+    clock: clock(),
+  });
+
+  await assert.rejects(
+    scheduler.run(),
+    (error) =>
+      error instanceof RailwayWorkerSchedulerError &&
+      error.code === "task-failed" &&
+      !error.message.includes("private"),
+  );
+  assert.equal(completions, 0);
+});
+
 test("fails closed for invalid options, clocks, leases, and stale completion", async () => {
   assert.throws(
     () =>
@@ -197,6 +249,23 @@ test("fails closed for invalid options, clocks, leases, and stale completion", a
     invitationExpirations: { async run() {} },
     clock: clock(),
   };
+  assert.throws(
+    () => createRailwayWorkerScheduler({
+      ...base,
+      leases: {
+        async claimNext() {
+          return { outcome: "not-claimed", claim: null };
+        },
+        async complete() {
+          throw new Error("must not complete");
+        },
+      },
+      messageTemplateSubmissions: {},
+    }),
+    (error) =>
+      error instanceof RailwayWorkerSchedulerError &&
+      error.code === "options-invalid",
+  );
   const cases = [
     {
       expected: "clock-invalid",

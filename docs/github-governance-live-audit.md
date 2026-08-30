@@ -301,3 +301,48 @@ npm Registry. שער הפיתוח נשאר Fail-closed, אך כשל Registry מ�
 10.6 האימות שאינו תלוי ברשת עבר: Build, ‏TypeScript, ‏ESLint, ‏Dependency
 Lock, ‏Source Guard, ‏Secret Hygiene וכל 2,116 הבדיקות. אין לפרש תוצאה זו
 כתחליף ל־Audit חי ומאושר מול ה־Registry.
+
+## 11. אימות Governance חוזר — 2026-08-24
+
+11.1 הבדיקה בוצעה בממשק GitHub המאומת ובמצב קריאה בלבד. לא שונו
+Settings, ‏Rulesets, ‏Collaborators, ‏Secrets או הרשאות.
+
+11.2 מסך General מאשר שה־Repository `talstilkol/connect` הוא Private
+ושענף ברירת המחדל הוא `main`.
+
+11.3 מסך Branches מציג במפורש: `Classic branch protections have not
+been configured`.
+
+11.4 מסך Rulesets מציג במפורש: `You haven't created any rulesets`.
+לכן אין כרגע Required reviews, ‏Required checks, חסימת Force push או
+הגנה מפני מחיקת `main` מכוח Branch rule.
+
+11.5 מסך Advanced Security מאשר ש־Dependency graph, ‏Dependabot alerts
+ו־Dependabot security updates פעילים. לא הוצגו בו בקרות פעילות של
+Secret scanning או Push protection, ולכן הן נשארות
+`unknown/unavailable` ואינן יכולות להיחשב Ready.
+
+11.6 בדיקת Collaborators נעצרה לפני כניסה ל־Sudo mode. לא בוצעה
+Re-authentication ולכן מספר המשתמשים והרשאותיהם נשארים
+`unknown/unavailable` בבדיקה זו.
+
+11.7 `gh auth status` עדיין מדווח שה־Token המקומי של `talstilkol`
+אינו תקף. לעומת זאת, Git transport משתמש ב־Credential נפרד ו־`git
+push` הצליח. לכן אפשר לגבות Branches, אך פעולות API כמו יצירת PR דרך
+`gh` נשארות חסומות עד Re-authentication.
+
+11.8 ארבעה Commits אטומיים חדשים נשמרו ונדחפו לענף
+`codex/cloudflare-evidence-builders`:
+
+11.8.1 `e823c99` — TypeScript Source Boundary Guard.
+
+11.8.2 `3de3d6d` — Secret Hygiene expansion.
+
+11.8.3 `c3cca97` — Private Dependency Attestation contract.
+
+11.8.4 `b5dc333` — Production Readiness v2 Domain contracts and
+deterministic composite release manifest.
+
+11.9 Gate 1 נשאר `blocked`: ה־Repository פרטי, אך `main` אינו מוגן,
+Required checks אינם מוגדרים, Collaborators לא אומתו, ואין PR מאושר
+שמכניס את ה־Commits החדשים ל־`main`.

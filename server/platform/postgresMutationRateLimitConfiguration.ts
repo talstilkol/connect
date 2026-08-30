@@ -22,6 +22,12 @@ export const postgresMetaWebhookRateLimitEnvironmentKeys = Object.freeze([
   "META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS",
 ] as const);
 
+export const postgresClerkInvitationRateLimitEnvironmentKeys = Object.freeze([
+  "CLERK_INVITATION_RATE_LIMIT_POLICY_VERSION",
+  "CLERK_INVITATION_RATE_LIMIT_CAPACITY",
+  "CLERK_INVITATION_RATE_LIMIT_REFILL_PERIOD_SECONDS",
+] as const);
+
 export type PostgresTenantMutationRateLimitEnvironmentKey =
   (typeof postgresTenantMutationRateLimitEnvironmentKeys)[number];
 
@@ -31,10 +37,14 @@ export type PostgresSystemAdminMutationRateLimitEnvironmentKey =
 export type PostgresMetaWebhookRateLimitEnvironmentKey =
   (typeof postgresMetaWebhookRateLimitEnvironmentKeys)[number];
 
+export type PostgresClerkInvitationRateLimitEnvironmentKey =
+  (typeof postgresClerkInvitationRateLimitEnvironmentKeys)[number];
+
 export type PostgresRateLimitEnvironmentKey =
   | PostgresTenantMutationRateLimitEnvironmentKey
   | PostgresSystemAdminMutationRateLimitEnvironmentKey
-  | PostgresMetaWebhookRateLimitEnvironmentKey;
+  | PostgresMetaWebhookRateLimitEnvironmentKey
+  | PostgresClerkInvitationRateLimitEnvironmentKey;
 
 export type PostgresRateLimitEnvironment = Partial<
   Record<PostgresRateLimitEnvironmentKey, string | undefined>
@@ -76,6 +86,8 @@ interface PostgresRateLimitPolicyDefinition {
     PostgresRateLimitEnvironmentKey,
     PostgresRateLimitEnvironmentKey,
   ];
+  readonly maximumCapacity?: number;
+  readonly minimumRefillPeriodSeconds?: number;
 }
 
 const emptyKeys: readonly [] = Object.freeze([]);
@@ -92,6 +104,12 @@ const policyDefinitions = Object.freeze({
   metaWebhook: Object.freeze({
     policyId: "meta-webhook",
     environmentKeys: postgresMetaWebhookRateLimitEnvironmentKeys,
+  }),
+  clerkInvitation: Object.freeze({
+    policyId: "clerk-organization-invitation",
+    environmentKeys: postgresClerkInvitationRateLimitEnvironmentKeys,
+    maximumCapacity: 125,
+    minimumRefillPeriodSeconds: 3_600,
   }),
 } as const satisfies Readonly<
   Record<string, Readonly<PostgresRateLimitPolicyDefinition>>
@@ -117,6 +135,12 @@ function readProcessEnvironment(): PostgresRateLimitEnvironment {
       process.env.META_WEBHOOK_RATE_LIMIT_CAPACITY,
     META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS:
       process.env.META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS,
+    CLERK_INVITATION_RATE_LIMIT_POLICY_VERSION:
+      process.env.CLERK_INVITATION_RATE_LIMIT_POLICY_VERSION,
+    CLERK_INVITATION_RATE_LIMIT_CAPACITY:
+      process.env.CLERK_INVITATION_RATE_LIMIT_CAPACITY,
+    CLERK_INVITATION_RATE_LIMIT_REFILL_PERIOD_SECONDS:
+      process.env.CLERK_INVITATION_RATE_LIMIT_REFILL_PERIOD_SECONDS,
   };
 }
 
@@ -179,11 +203,11 @@ function inspectConfiguration(
   const capacity = parseBoundedInteger(
     environment[capacityKey]!,
     1,
-    1_000_000,
+    definition.maximumCapacity ?? 1_000_000,
   );
   const refillPeriodSeconds = parseBoundedInteger(
     environment[refillKey]!,
-    1,
+    definition.minimumRefillPeriodSeconds ?? 1,
     86_400,
   );
   const invalidKeys: PostgresRateLimitEnvironmentKey[] = [];
@@ -239,4 +263,10 @@ export function inspectPostgresMetaWebhookRateLimitConfiguration(
   environment: PostgresRateLimitEnvironment = readProcessEnvironment(),
 ): PostgresRateLimitConfigurationState {
   return inspectConfiguration(policyDefinitions.metaWebhook, environment);
+}
+
+export function inspectPostgresClerkInvitationRateLimitConfiguration(
+  environment: PostgresRateLimitEnvironment = readProcessEnvironment(),
+): PostgresRateLimitConfigurationState {
+  return inspectConfiguration(policyDefinitions.clerkInvitation, environment);
 }

@@ -272,7 +272,9 @@ test("fails closed for provider identity, connection version, policy version, an
     },
     {
       fixtureOverrides: {
-        latestPolicy: policyRecord(),
+        latestPolicy: policyRecord({
+          evidenceDigest: "c".repeat(64),
+        }),
       },
       inputOverrides: {},
       expectedCode: "CONFLICT",
@@ -316,6 +318,28 @@ test("fails closed for provider identity, connection version, policy version, an
       false,
     );
   }
+});
+
+test("approval retry returns the already committed matching snapshot", async () => {
+  const committed = policyRecord();
+  const testFixture = fixture({
+    latestPolicy: committed,
+  });
+  const result = await testFixture.service.approve(
+    session,
+    approvalInput(),
+  );
+
+  assert.deepEqual(result, {
+    outcome: "unchanged",
+    record: committed,
+  });
+  assert.equal(
+    testFixture.calls.some(
+      (call) => call.operation === "recordPolicy",
+    ),
+    false,
+  );
 });
 
 test("kill switch inherits the last approved snapshot and remains available after evidence expiry", async () => {
@@ -389,6 +413,35 @@ test("repeated kill switch is unchanged and cannot create another event", async 
     testFixture.calls.some(
       (call) =>
         call.operation === "recordPolicy",
+    ),
+    false,
+  );
+});
+
+test("stale kill-switch retry accepts the already committed next version", async () => {
+  const disabled = policyRecord({
+    policyVersion: 2,
+    deliveryState: "disabled",
+  });
+  const testFixture = fixture({
+    latestPolicy: disabled,
+  });
+  const result = await testFixture.service.activateKillSwitch(
+    session,
+    {
+      tenantId: 7,
+      expectedConnectionVersion: 3,
+      expectedPolicyVersion: 1,
+    },
+  );
+
+  assert.deepEqual(result, {
+    outcome: "unchanged",
+    record: disabled,
+  });
+  assert.equal(
+    testFixture.calls.some(
+      (call) => call.operation === "recordPolicy",
     ),
     false,
   );

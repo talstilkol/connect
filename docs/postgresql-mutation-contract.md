@@ -11,27 +11,28 @@
 `PostgresTransactionManager`. ה־Adapter ב־`nodePostgresAdapter.ts` מחבר אליו
 `pg@8.23.0` בלי לשנות את כללי ה־Use case.
 
-1.3 התיקייה `postgres/migrations` מכילה כעת 26 Migrations מסודרות עבור
+1.3 התיקייה `postgres/migrations` מכילה כעת 36 Migrations מסודרות עבור
 ה־Critical Path. הן מכסות את יסודות Tenant/Contact, ‏HTTP mutation receipts,
 Access/Membership/Invitation, ‏Conversation, ‏Templates/Campaigns, ‏Bot,
 AI/Knowledge, ‏Contact organization/import, ‏Meta credentials/Webhooks,
 WhatsApp policy/rate limits/provider reconciliation, ‏Scheduler, ‏Subscription,
 Production decisions ו־System Admin. השרשרת הוחלה בהצלחה על PostgreSQL 16
-מקומי ומבודד. Registry דטרמיניסטי ממפה את כל 36 מיגרציות D1 ואת כל 51
+מקומי ומבודד. Registry דטרמיניסטי ממפה את כל 40 מיגרציות D1 ואת כל 53
 טבלאות D1 לשרשרת זו, אך אינו מחליף הוכחת Semantic parity או Migration
 rehearsal בסביבה נשלטת.
 
 1.4 תסריט `verify:node-postgres-integration` מקים את החוזה רק מול Database
-Loopback ייעודי וריק. הוא החיל את 26 ה־Migrations על PostgreSQL 16,
-הפעיל DML אמיתי והוכיח 58 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
+Loopback ייעודי וריק. הוא החיל את כל 36 ה־Migrations על PostgreSQL 16.13,
+הפעיל DML אמיתי והוכיח 82 תרחישי Concurrency. הוא אינו מקבל URL מרוחק,
 Credentials ב־URL או שם Database שאינו `connect_driver_integration`.
 
 1.5 ‏`nodePostgresPoolConfiguration.ts` מקפיא חוזה Production ללא Defaults:
 TLS מאומת, Pool size, שבעה Timeouts/lifetime ו־Application name מפורשים.
 הערכים החיים נשארים `unknown/unavailable` עד בחירת ספק ו־Environment.
 
-1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל 39 ה־Adapters
-שהושלמו. הוא אינו חושף את ה־Pool או ה־Connection string, ואינו יוצר Runtime
+1.6 ‏`railwayPostgresFoundation.ts` מחבר מאותו Pool את כל ה־Adapters
+שהושלמו, כולל Durable staging observation Reader ו־Writer. הוא אינו חושף את ה־Pool
+או את ה־Connection string, ואינו יוצר Runtime
 היברידי בפני עצמו. חיבור ה־Foundation ל־Routes מחייב שכל Operation מחובר
 לקבוצת PostgreSQL מלאה; אין לבצע Fallback שקט ל־D1.
 
@@ -299,6 +300,199 @@ Refill הם Environment חובה ללא Defaults; שינוי ערכים תחת �
 בקשות מתוך שלוש מתקבלות במכסה `2`, שהשלישית נחסמת וש־Refill מאפשר בקשה
 נוספת; הסך עלה ל־58 תרחישי Concurrency.
 
+1.39 ‏Migration מספר `0026_message_template_submission_outbox.sql` מוסיפה
+Outbox אטומי ואירועי מעבר בלתי־ניתנים לשינוי ל־`templates.submit`. ‏Harness
+חי הוכיח שתי בקשות זהות במקביל עם `committed + replayed`, את המעברים
+`pending → submitting → ambiguous → submitted`, את הקרנת התבנית ל־
+`pending_review` ואת חסימת שינוי Audit. במהלך ההרצה תוקן Race Condition:
+ה־Executor עבר מ־`repeatable-read` ל־`read-committed`, כדי שבקשה שהמתינה
+ל־Receipt מקביל תראה את ה־Commit ותטען Replay. אותו תיקון הוחל על
+Contact Organization, ‏Contact Import ו־Message Template Draft, שמשתמשים
+באותו Receipt protocol. הסך עלה ל־59 תרחישים.
+
+1.40 מסלול השיחות המלא משתמש כעת ב־PostgreSQL דרך Railway API:
+`conversations.list`, ‏`conversations.thread.read`, ‏`conversations.mark-read`
+ו־`conversations.assignment.change`. שתי המוטציות משתמשות באותו Receipt
+protocol, ב־Optimistic version, ‏Audit ובתגובה ציבורית שמחליפה External user
+identity ב־`current-user/other-user/unassigned`. ה־Harness החי הוכיח שני
+Races נוספים: בכל אחד שתי בקשות זהות הסתיימו `committed + replayed`, ונשמרו
+Receipt ו־Audit יחידים. הסך עלה ל־61 תרחישי Concurrency.
+
+1.41 מסלול Bot flow המלא משתמש כעת ב־PostgreSQL דרך Railway API:
+`bot.flows.list`, ‏`bot.flows.details.read`, ‏`bot.flows.draft.save`
+ו־`bot.flows.publish`. שתי המוטציות משתמשות במכסת Tenant, ב־Receipt protocol,
+ב־Expected version וב־Audit אטומי. ה־Executor מאמת מחדש את הפקודה ואת תגובת
+ה־Replay לפני החזרת DTO ציבורי. ה־Harness החי הוכיח שני Races נוספים — Draft
+זהה ו־Publish זהה — וכל זוג הסתיים `committed + replayed` עם Receipt ו־Audit
+יחידים. הסך עלה ל־63 תרחישי Concurrency.
+
+1.42 מסלול Campaigns הפעיל משתמש כעת ב־PostgreSQL דרך Railway API:
+`campaigns.directory.read`, ‏`campaigns.snapshot.save` ו־`campaigns.activate`.
+שתי המוטציות דורשות `campaigns.write`, מכסת Tenant, ‏Idempotency key,
+Request digest, ‏Receipt ו־Audit אטומיים. ‏Snapshot נועל את ה־Audience,
+Template ו־Business profile באותה Transaction; ‏Activation נשארת חסומה
+כאשר Queue/Scheduler היעד אינם מוגדרים. ה־Harness החי הוכיח שתי בקשות זהות
+במקביל לכל מוטציה עם `committed + replayed`, והסך עלה ל־65 תרחישי
+Concurrency. כל מסלולי ה־Campaign הפעילים פועלים ללא D1 fallback.
+
+1.43 מסלול אישור תשובות AI הפעיל משתמש כעת ב־PostgreSQL דרך Railway API:
+`ai.reply-approvals.list` ו־`ai.reply-approvals.decide`. הקריאה דורשת
+`conversations.read`; ההחלטה דורשת `conversations.reply`, מכסת Tenant,
+מפתח Idempotency ו־Request digest דטרמיניסטיים. ‏Receipt, שינוי ה־Outbox,
+‏Audit ותגובת Replay נשמרים באותה Transaction ברמת `read-committed`.
+ה־Harness החי הוכיח שתי החלטות זהות במקביל דרך HTTP מאומת: שינוי אחד,
+Receipt אחד, ‏Audit אחד ו־`committed + replayed`. הסך עלה ל־67 תרחישי
+Concurrency, והמסלול הפעיל אינו משתמש עוד ב־D1 fallback.
+
+1.44 מסלול פרופיל העסק של ה־Onboarding משתמש כעת ב־PostgreSQL דרך Railway
+API: ‏`onboarding.business-profile.read` מאפשר למשתמש מאומת ללא Tenant לקבל
+פרופיל ריק, ו־`onboarding.business-profile.save` יוצר בשמירה הראשונה Tenant,
+Owner ו־Profile. עבור משתמש קיים, השמירה דורשת `workspace.manage`. המכסה
+נגזרת מזהות המשתמש עוד לפני Provisioning, ולכן משתמש חדש אינו עוקף את
+`tenant-mutation` rate limit.
+
+1.44.1 ה־Executor עוטף Provisioning, ‏Receipt, ‏Request digest, ‏Audit ותגובת
+Replay ב־Transaction חיצונית אחת מסוג `read-committed`. בקשה זהה שכבר
+הושלמה מוחזרת מיד כ־`replayed` ללא שינוי Profile וללא Audit נוסף. שימוש
+באותו מפתח עם Digest אחר נכשל כ־Conflict וגורם Rollback גם אם Race התחיל
+לפני שה־Tenant הראשון נוצר.
+
+1.44.2 ‏PostgreSQL 16.13 אמיתי הוכיח קריאה לפני Provisioning ושתי שמירות
+ראשונות זהות במקביל דרך HTTP מאומת. נוצרו Tenant, ‏Owner, ‏Profile, ‏Receipt
+ו־Audit יחידים; התשובות היו `committed + replayed`, ושתיהן שמרו
+`createdTenant=true`. ה־Foundation כולל כעת 49 Adapters והסך עלה ל־69
+תרחישי Concurrency. המסלול הפעיל אינו משתמש עוד ב־D1 fallback.
+
+1.44.3 Resolver אופציונלי אינו ממיר עוד כל
+`TENANT_MEMBERSHIP_REQUIRED` למשתמש חדש. הוא מחזיר `null` רק כאשר שאילתת
+ה־Memberships הפעילים החזירה אפס רשומות. אם קיימת Membership פעילה אך
+מצב ה־Tenant אינו כשיר, הפעולה נכשלת ב־`PERMISSION_DENIED` לפני Executor.
+הוכחת PostgreSQL חיה חסמה Read ו־Save עבור Tenant במצב `blocked` ואישרה
+שגרסת הפרופיל, מספר ה־Receipts ומספר רשומות ה־Audit נשארו ללא שינוי.
+
+1.45 מסלול בחירת סביבת העבודה משתמש כעת ב־PostgreSQL דרך Railway API:
+`tenant-selection.directory.read` מחזיר רשימה תחומה עם Selection keys אטומים,
+ו־`tenant-selection.save` מקבל רק Key ו־Expected version. הדפדפן אינו שולח
+Tenant ID או External user ID, וה־Server גוזר את ה־Tenant מתוך Membership
+פעילה של הזהות המאומתת.
+
+1.45.1 השמירה צורכת מכסת `tenant-mutation` לפי זהות המשתמש לפני קריאת
+Membership, ואז נועלת מחדש Membership ו־Tenant כשירים בתוך אותה Transaction.
+בחירה, Receipt, ‏Request digest, ‏Audit ותגובת Replay נכתבים אטומית. Replay
+בודק שוב שה־Membership עדיין כשירה; ביטול הרשאה אינו מאפשר לקבל תוצאה ישנה.
+
+1.45.2 ‏PostgreSQL 16.13 אמיתי הוכיח Directory של שני Tenants ושתי בקשות
+בחירה זהות במקביל דרך HTTP מאומת. נשמרו Selection אחת בגרסה 1, ‏Receipt אחד
+ו־Audit אחד; התשובות היו `committed + replayed` ללא חשיפת Tenant או User
+identity. ה־Foundation כולל כעת 50 Adapters והסך עלה ל־71 תרחישי
+Concurrency. שכבות ה־Current ו־Server Action אינן משתמשות עוד ב־D1 fallback.
+
+1.46 ‏Team Directory הפעיל נקרא כעת דרך Railway/PostgreSQL. הפעולה
+`team.directory.read` פותרת Tenant רק מהזהות המאומתת ומהבחירה השמורה, דורשת
+`team.manage` לפני קריאת חברי הצוות ומחזירה עד 100 Member keys אטומים. Tenant
+ID ו־External user IDs אינם נכללים ב־DTO.
+
+1.46.1 ספק Identity Directory עדיין `unknown/unavailable`; לכן הפעולה
+מחזירה `identityStatus=unavailable` ושומרת Display name ו־Primary email כ־null
+במקום להשלים מידע לא מאומת. Parser ה־BFF דוחה שדות מורחבים, זהויות גולמיות,
+מפתחות כפולים, Reference code שאינו תואם למפתח ומצב Current user עמום.
+
+1.46.2 ‏PostgreSQL 16.13 אמיתי הוכיח את הקריאה דרך HTTP לאחר בחירת Tenant
+אטומית. התגובה כללה Member key ו־Reference code בלבד, ללא Tenant או User
+identity. המסלול הוא Read-only ולכן מספר ה־Adapters ותרחישי ה־Concurrency
+נשאר 50 ו־71 בהתאמה.
+
+1.47 שלוש פעולות Membership פעילות הועברו ל־Railway/PostgreSQL:
+`team.membership.role.change`, ‏`team.membership.status.change`
+ו־`team.membership.owner.transfer`. ה־BFF מקבל רק Member key אטום וגרסאות
+צפויות; Tenant, ‏Actor ו־External user IDs נגזרים בצד השרת ואינם מוחזרים
+לדפדפן. כל פעולה דורשת Owner פעיל, הרשאת `workspace.manage` ומכסת
+`tenant-mutation`.
+
+1.47.1 ה־Idempotency key של ה־HTTP נגזר מה־Payload, וה־PostgreSQL repository
+משתמש ב־Operation key וב־Event keys דטרמיניסטיים. שינוי ה־Membership ורשומת
+ה־Audit הבלתי־משתנה נכתבים באותה Transaction. בקשה זהה במקביל מסתיימת
+כ־`updated + unchanged`; ‏Conflict, מעבר אסור ו־Stale owner session נשארים
+כשלים תחומים.
+
+1.47.2 ‏PostgreSQL 16.13 אמיתי הוכיח שתי בקשות Role זהות במקביל דרך HTTP
+מאומת לאחר בחירת Tenant: גרסת החבר עלתה פעם אחת, נשמר Event אחד ושתי
+התשובות החזירו אותו Member key אטום ללא זהויות Storage. מספר ה־Adapters נשאר
+50, ומספר תרחישי ה־Concurrency עלה ל־73. `teamMembershipActions` אינו משתמש
+עוד ב־D1 fallback.
+
+1.48 מסלול בקשת ההזמנה הפעיל הועבר ל־Railway/PostgreSQL:
+`team.invitation.request`. ה־BFF מקבל רק כתובת Email מנורמלת ותפקיד שאינו
+Owner; ‏Tenant ו־Actor נגזרים מהזהות המאומתת ומהבחירה השמורה. הפעולה דורשת
+`team.manage`, מכסת `tenant-mutation` ו־Idempotency key דטרמיניסטי.
+
+1.48.1 ה־PostgreSQL repository שומר Invitation, ‏Event ו־Delivery באותה
+Transaction. לאחר ה־Commit נשלח ל־Publisher רק Tenant ID ו־Delivery key.
+Retry זהה רשאי לפרסם שוב את אותו Delivery key; ה־Consumer הקיים מסווג אותו
+באופן Idempotent. חסר Policy מחזיר `CONFIGURATION_REQUIRED`, וספק Queue חסר
+מחזיר `DEPENDENCY_UNAVAILABLE` בלי להציג הצלחה מדומה.
+
+1.48.2 ‏PostgreSQL 16.13 אמיתי הוכיח שתי בקשות זהות במקביל דרך HTTP
+מאומת. התוצאות היו `queued + already-pending`; במסד נשמרו Invitation אחת
+בגרסה 1, ‏Event אחד ו־Delivery אחד, ושתי פרסומות Queue נשאו אותו Delivery
+key. ה־Foundation נשאר על 50 Adapters ומספר תרחישי ה־Concurrency עלה ל־75.
+`teamInvitationActions` אינו משתמש עוד ב־D1 fallback. קבלת ההזמנה עדיין
+נשארת על גבול Clerk/D1 עד שיושלם אימות Primary email בצד Railway.
+
+1.49 מסלול קבלת ההזמנה הועבר גם הוא ל־Railway/PostgreSQL באמצעות
+`team.invitation.accept`. ה־Payload כולל `invitationKey` בלבד. זהות המשתמש
+נגזרת מ־Clerk session המאומתת; Railway קורא בעצמו את ה־Primary Email מ־Clerk,
+דורש שהוא מסומן `verified` ודוחה Email או External user ID שמקורם בדפדפן.
+
+1.49.1 מכסת `tenant-mutation` מופעלת לפי זהות המשתמש לפני קריאת Clerk ולפני
+גישה להזמנה. ה־PostgreSQL repository נועל את ההזמנה, בודק התאמת Email ותוקף,
+יוצר Membership ו־Acceptance ומבטל Delivery ממתינה בתוך Transaction אחת.
+מצבי Not found, ‏Email mismatch, ‏Expired, ‏Revoked ו־Conflict מתכנסים לקוד
+החיצוני `INVITATION_UNAVAILABLE`, כדי שלא להפוך את ה־API למנגנון גילוי.
+
+1.49.2 ‏PostgreSQL 16.13 אמיתי הוכיח שתי בקשות קבלה זהות במקביל דרך HTTP.
+התקבלו `accepted + already-accepted`; נשמרו Membership אחת ו־Acceptance אחת,
+גרסת ההזמנה התקדמה פעם אחת וה־Delivery סומנה `cancelled`. מספר ה־Adapters
+נשאר 50 ומספר תרחישי ה־Concurrency עלה ל־77. ה־BFF הפעיל אינו משתמש עוד
+ב־D1 fallback; נותרו ראיות Clerk ו־Browser E2E חיות לפני הפעלת Production.
+
+1.50 מסלול מדיניות שליחת WhatsApp של System Admin מחובר כעת ל־PostgreSQL
+דרך שלוש פעולות Railway. קריאה דורשת Allowlist ואינה צורכת מכסת כתיבה;
+Approve ו־Kill Switch דורשים מכסת `system-admin-mutation`, ‏Idempotency
+דטרמיניסטי, Expected connection/policy versions ו־Event audit בלתי־משתנה.
+אין D1 fallback בשכבות ה־Current או ה־Server Actions.
+
+1.50.1 ה־HTTP contract אינו חושף מזהי Tenant, ‏Actor או שדות Meta בשמות
+הגולמיים. צד Vercel מאמת את מבנה התשובה ואת מלוא Snapshot ה־Evidence לפני
+שהוא מחזיר `saved`. ‏Railway נועל את Meta connection וה־Policy history לפני
+הוספת גרסה, ולכן Approval או Kill Switch מקבילים מייצרים Event יחיד.
+
+1.50.2 ה־Harness החי הוכיח את שני ה־Mutations המקבילים פעמיים ברצף. בנוסף
+תוקן מרוץ ב־Invitation request: Replay אינו תלוי עוד בכך ששני Server clocks
+יחזירו אותה מילישנייה, אלא ב־Invitation, ‏Event ו־Delivery האטומיים שכבר
+נשמרו. ריצה שלישית הוכיחה גם Retry סדרתי ל־Approval ול־Kill Switch מול
+הגרסה שכבר נכתבה, ללא Event נוסף. הסך המעודכן הוא 79 תרחישי Concurrency מול
+PostgreSQL 16.13.
+
+1.51 ארבע פעולות AI Agent פעילות הועברו מ־D1 ל־Railway/PostgreSQL:
+`ai.agents.directory.read`, ‏`ai.agents.details.read`,
+`ai.agents.draft.save` ו־`ai.agents.publish`. שתי הקריאות מחזירות DTO תחום
+בלבד; שתי הכתיבות דורשות מכסת `tenant-mutation`, ‏Idempotency key
+דטרמיניסטי, Receipt ו־Audit אטומיים. שכבות ה־Current וה־Server Actions אינן
+פותחות עוד D1 fallback.
+
+1.51.1 שמירת Draft יוצרת או מעדכנת Agent, גרסה וקישורי Knowledge source
+באותה Transaction שבה נשמרים Receipt ו־Audit. ‏Replay מקביל מחזיר את אותה
+תוצאה ואינו יוצר גרסה נוספת. Agent שכבר פעיל רשאי להישאר `active` בזמן
+שה־Latest version החדשה היא `draft`; נוספה בדיקת Regression מפורשת למצב זה.
+
+1.51.2 פרסום נשאר Fail-closed: כל עוד ספק AI, ‏Billing, ‏Audit sink או יתר
+תנאי ההפעלה אינם מוכנים, ה־Transaction מתבטלת ומוחזרת רשימת חסמים תחומה ללא
+Receipt חלקי. ‏PostgreSQL 16.13 אמיתי הוכיח Draft מקביל, Replay יחיד, קריאת
+Directory ללא שדות פנימיים ו־Publish חסום. הסך המעודכן הוא 80 תרחישי
+Concurrency. במהלך ההרצה תוקן גם Fixture ישן שהכניס Agent בדיקה בעל זהות
+ותצורה לא־קנוניות; כעת גם נתוני Reporting נגזרים מחוזה הזהות של הדומיין.
+
 ## 2. הסבר למתחילים
 
 2.1 Transaction היא קבוצה של פעולות Database שמצליחה כיחידה אחת או מתבטלת
@@ -369,7 +563,7 @@ Receipt פעיל ל־Audit נצחי.
 
 5.5 ערכי משתמש נשלחים רק כ־Parameters; הם אינם משורשרים אל מחרוזות SQL.
 
-5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 54 טבלאות ה־Critical
+5.6 ‏Migration guard עצמאי מאמת את סדר הקבצים ואת 57 טבלאות ה־Critical
 Path, וחוסם תחביר SQLite, ‏Seed data, פעולות הרסניות ויצירת מזהים אקראית.
 
 5.7 סכמת ה־Critical Path משתמשת ב־Identity columns, ‏`TIMESTAMPTZ` ו־`JSONB`.
@@ -384,7 +578,7 @@ Audit idempotency מבודד לפי `(tenant_id, action, idempotency_key)`.
 TLS כבוי, ‏`sslmode` בתוך URL, מספרים מחוץ לטווח, Custom CA פגום,
 Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 
-5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 39 ה־Adapters, ‏Close אידמפוטנטי,
+5.10 ‏3 בדיקות Foundation מוכיחות חיבור כל 50 ה־Adapters, ‏Close אידמפוטנטי,
 היעדר Secret מהפלט וחסימת Options/Configuration/Telemetry לא תקינים. ה־Harness
 האמיתי משתמש ב־Foundation עבור Contact mutation/read ו־Invitation lifecycle.
 
@@ -397,7 +591,7 @@ Configuration מורחב ו־Telemetry שמעביר Error פנימי.
 עדיין חסרים ערכים ואישור Production, ‏Telemetry sink, ‏CA evidence וכלי
 Migration מאושר ב־Railway.
 
-6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 25
+6.3 כיסוי המקור של כל 36 מיגרציות D1 וכל 51 הטבלאות מוכח מקומית מול 27
 מיגרציות PostgreSQL. כל 10 ה־Data migration rehearsals וכל 51 הטבלאות עברו
 עם HMAC, ‏Counts, ‏Sequences, ‏Replay חסום ו־Semantic parity. עדיין חסרים
 Export חי, Dry run עם נתונים מורשים בסביבה נשלטת וראיית Staging חתומה.
@@ -414,8 +608,10 @@ PostgreSQL 16.13 עם מקור ריק; נתוני Staging מורשים עדיי�
 6.4 Contact, ‏Contact organization/import, ‏Conversation/Message,
 ‏Bot Flow/Reply Delivery, ‏Knowledge/AI Agent, ‏Meta connection/webhook/
 credential, ‏WhatsApp delivery policy/rate-limit ledger, ‏Worker scheduler
-lease, ‏Message Template/Campaign, ‏API mutation rate limit ו־Invitation DML נבדקו ב־58 תרחישי
-Concurrency מול PostgreSQL מקומי אמיתי.
+lease, ‏Message Template/Campaign/Submission Outbox, ‏API mutation rate limit,
+‏Tenant selection, ‏Team membership, ‏Invitation, מדיניות WhatsApp ונתיבי
+AI Agent נבדקו ב־80 תרחישי Concurrency מול
+PostgreSQL מקומי אמיתי.
 לא נותר פער Repository ברשימת ה־D1 שמופה. עדיין חסרים Staging evidence,
 ‏Backup/Restore rehearsal, ‏Load test וראיית Cutover/Rollback עם נתונים חיים.
 

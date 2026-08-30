@@ -35,6 +35,7 @@ function signedInState(overrides = {}) {
         isAuthenticated: true,
         tokenType: "session_token",
         userId: "user_from_verified_session",
+        orgId: "org_from_verified_session",
         ...overrides,
       };
     },
@@ -95,6 +96,7 @@ test("accepts only a Clerk session token from the configured party", async () =>
   });
   assert.deepEqual(identity, {
     externalUserId: "user_from_verified_session",
+    externalOrganizationId: "org_from_verified_session",
   });
   assert.equal(Object.isFrozen(identity), true);
 });
@@ -112,6 +114,9 @@ test("rejects signed-out and malformed Clerk identities", async () => {
     signedInState({ userId: null }),
     signedInState({ userId: "" }),
     signedInState({ userId: "u".repeat(256) }),
+    signedInState({ orgId: null }),
+    signedInState({ orgId: "" }),
+    signedInState({ orgId: "o".repeat(256) }),
   ];
 
   for (const state of states) {
@@ -185,7 +190,10 @@ test("allows loopback HTTP only for the development identity", async () => {
 
   assert.deepEqual(
     await testFixture.verifier.verify(sessionToken),
-    { externalUserId: "user_from_verified_session" },
+    {
+      externalUserId: "user_from_verified_session",
+      externalOrganizationId: "org_from_verified_session",
+    },
   );
   assert.equal(
     testFixture.calls.requests[0].request.url,

@@ -106,8 +106,9 @@ test("returns the database token decision for an existing policy version", async
   }
 });
 
-test("isolates tenant, system-admin, and Meta webhook buckets by policy", async () => {
+test("isolates every API and provider bucket by policy", async () => {
   for (const policyId of [
+    "clerk-organization-invitation",
     "tenant-mutation",
     "system-admin-mutation",
     "meta-webhook",

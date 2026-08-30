@@ -201,6 +201,13 @@ export function createBotFlowActionHandler(
             ),
         };
       } catch (error) {
+        if (error instanceof BotFlowInputError) {
+          return {
+            status: "validation-error",
+            issues: error.issues,
+          };
+        }
+
         if (error instanceof TenantSessionError) {
           return mapTenantSessionError(error);
         }

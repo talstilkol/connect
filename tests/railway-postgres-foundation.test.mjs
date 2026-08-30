@@ -43,6 +43,15 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "aiRuntime",
     "botFlows",
     "botReplyDeliveries",
+    "botReplyProviderLinks",
+    "botReplyStagingObservationWriter",
+    "botReplyStagingObservations",
+    "botReplyStagingProviderDeferralObservations",
+    "botReplyStagingRuns",
+    "botReplyStagingSafety",
+    "botReplyStagingSendObservations",
+    "botReplyStagingServiceWindows",
+    "botReplyStagingWebhookObservations",
     "botRuntime",
     "businessProfiles",
     "campaignAudiences",
@@ -55,7 +64,11 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "contactOrganization",
     "contacts",
     "conversations",
+    "createBotReplyStagingReleaseEvidenceRepository",
     "createMutationRateLimitBinding",
+    "createRailwayCampaignMutationExecutor",
+    "createRailwayMessageTemplateSubmissionMutationExecutor",
+    "identityOrganizations",
     "invitationAcceptances",
     "invitationDeliveries",
     "invitationExpirations",
@@ -64,14 +77,23 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "knowledgeSources",
     "membershipMutations",
     "memberships",
+    "messageTemplateSubmissionOutbox",
     "messageTemplates",
     "metaConnections",
     "metaCredentialEnvelopes",
     "metaWebhooks",
     "productionDecisions",
     "provisioning",
+    "railwayAiAgentMutations",
+    "railwayAiReplyApprovalMutations",
     "railwayApiMutations",
+    "railwayBotFlowMutations",
+    "railwayContactImportMutations",
     "railwayContactOrganizationMutations",
+    "railwayConversationMutations",
+    "railwayMessageTemplateDraftMutations",
+    "railwayOnboardingBusinessProfileMutations",
+    "railwayTenantSelectionMutations",
     "readiness",
     "reports",
     "selections",
@@ -79,6 +101,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "systemAdminBusinessProfiles",
     "systemAdminTenantDirectory",
     "whatsappDeliveryPolicies",
+    "whatsappDeliveryPolicyMetaConnections",
     "whatsappRateLimits",
     "workerSchedulerLeases",
   ]);
@@ -86,7 +109,12 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     typeof foundation.memberships.findActiveByExternalUserId,
     "function",
   );
+  assert.equal(
+    typeof foundation.identityOrganizations.findByTenantId,
+    "function",
+  );
   assert.equal(typeof foundation.aiAgents.saveDraft, "function");
+  assert.equal(typeof foundation.railwayAiAgentMutations.execute, "function");
   assert.equal(typeof foundation.aiReplyOutbox.stage, "function");
   assert.equal(typeof foundation.aiReplyOutbox.decide, "function");
   assert.equal(typeof foundation.aiRuntime.costGate.authorize, "function");
@@ -102,12 +130,99 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   );
   assert.equal(typeof foundation.contactOrganization.createTag, "function");
   assert.equal(typeof foundation.contactImports.start, "function");
+  assert.equal(
+    typeof foundation.railwayContactImportMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.railwayConversationMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.railwayBotFlowMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.railwayAiReplyApprovalMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.railwayOnboardingBusinessProfileMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.railwayTenantSelectionMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.createRailwayCampaignMutationExecutor(
+      () => false,
+    ).execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.railwayMessageTemplateDraftMutations.execute,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.createRailwayMessageTemplateSubmissionMutationExecutor,
+    "function",
+  );
+  assert.equal(
+    typeof foundation
+      .createRailwayMessageTemplateSubmissionMutationExecutor("v23.0")
+      .execute,
+    "function",
+  );
   assert.equal(typeof foundation.metaConnections.read, "function");
   assert.equal(
     typeof foundation.metaCredentialEnvelopes.findByTenantId,
     "function",
   );
   assert.equal(typeof foundation.messageTemplates.saveDraft, "function");
+  assert.equal(
+    typeof foundation.messageTemplateSubmissionOutbox.claim,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.messageTemplateSubmissionOutbox.reconcileSubmitted,
+    "function",
+  );
+  assert.equal(typeof foundation.botReplyStagingRuns.claim, "function");
+  assert.equal(typeof foundation.botReplyStagingRuns.complete, "function");
+  assert.equal(typeof foundation.botReplyStagingRuns.read, "function");
+  assert.equal(typeof foundation.botReplyStagingSafety.record, "function");
+  assert.equal(typeof foundation.botReplyStagingSafety.read, "function");
+  assert.equal(typeof foundation.botReplyStagingSafety.findLatest, "function");
+  assert.equal(
+    typeof foundation.createBotReplyStagingReleaseEvidenceRepository,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.botReplyStagingObservations.readScenario,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.botReplyStagingObservationWriter.record,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.botReplyStagingWebhookObservations.recordStatus,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.botReplyStagingProviderDeferralObservations
+      .recordDeferral,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.botReplyStagingSendObservations.recordAcceptedSend,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.botReplyStagingServiceWindows.read,
+    "function",
+  );
   assert.equal(
     typeof foundation.knowledgeSources.registerUploaded,
     "function",
@@ -119,6 +234,11 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
   assert.equal(typeof foundation.metaWebhooks.claimWebhookReceipt, "function");
   assert.equal(
     typeof foundation.whatsappDeliveryPolicies.recordPolicyEvent,
+    "function",
+  );
+  assert.equal(
+    typeof foundation.whatsappDeliveryPolicyMetaConnections
+      .findConnectionByTenantId,
     "function",
   );
   assert.equal(

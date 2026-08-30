@@ -1,0 +1,129 @@
+{
+  "acceptanceCredit": 0,
+  "artifactClass": "DETACHED-PRODUCER-MECHANICAL-QA;NOT-INDEPENDENT-REVIEW;NOT-ACCEPTANCE;NOT-PERMIT",
+  "artifactId": "CONNECT-PRCV5-PRODUCER-QA-2026-08-30",
+  "counters": {
+    "aliases": 32,
+    "findings": 116,
+    "graphEdges": 7417,
+    "graphNodes": 6969,
+    "inheritedFindings": 93,
+    "lateDecisionClauses": 48,
+    "membersAtOrAbove50MiB": 0,
+    "nestedTypes": 70,
+    "newFindings": 23,
+    "outputFamilies": 42,
+    "packageMembers": 28,
+    "permitCrossClassDenials": 12,
+    "permitMatrixCells": 16,
+    "permitTypes": 4,
+    "primitiveTypes": 9,
+    "readers": 2,
+    "remediationControls": 23,
+    "requirementEdges": 227,
+    "schemaInstances": 112,
+    "shards": 13,
+    "sourceByteDuplicates": 0,
+    "sourceReferences": 14,
+    "vectors": 3152
+  },
+  "currentDisposition": {
+    "DeploymentPermit": "ABSENT",
+    "GitHubControlPlanePermit": "ABSENT",
+    "PublicPushPermit": "ABSENT",
+    "ReleasePermit": "ABSENT",
+    "acceptance": 0,
+    "acceptedFindings": 0,
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "repositoryVisibility": "PUBLIC",
+    "totalFindings": 116
+  },
+  "detachedMechanicalEnvelope": {
+    "expectedAcceptanceHead": null,
+    "manifestSha256": "2478e12103c568b8a68183c4974a0cb0cf47f2d8fb43671732c5a809c00ae949",
+    "packageContentRoot": "19be4c773af62a79945c01c1d3a71d2c7d650b1cbda0b99ca1ef815e82b8a31b",
+    "reportRoots": [
+      "51c462e0542bb1a452bd36fb8d67e9f7252ee68fefd9407c3abd1b0914e53c2c",
+      "3ab20bd9fecb620e8130530bab7a65d50bae5eedd41cb4402d43c76dcdc1e43a"
+    ],
+    "state": "MECHANICAL-CANDIDATE-ONLY"
+  },
+  "generatorByteIdentityVerification": {
+    "denominators": {
+      "aliases": 32,
+      "findings": 116,
+      "graphEdges": 7417,
+      "graphNodes": 6969,
+      "inheritedFindings": 93,
+      "lateDecisionClauses": 48,
+      "membersAtOrAbove50MiB": 0,
+      "nestedTypes": 70,
+      "newFindings": 23,
+      "outputFamilies": 42,
+      "packageMembers": 28,
+      "permitCrossClassDenials": 12,
+      "permitMatrixCells": 16,
+      "permitTypes": 4,
+      "primitiveTypes": 9,
+      "readers": 2,
+      "remediationControls": 23,
+      "requirementEdges": 227,
+      "schemaInstances": 112,
+      "shards": 13,
+      "sourceByteDuplicates": 0,
+      "sourceReferences": 14,
+      "vectors": 3152
+    },
+    "generatedArtifactCount": 26,
+    "mismatches": [],
+    "packageContentRoot": "19be4c773af62a79945c01c1d3a71d2c7d650b1cbda0b99ca1ef815e82b8a31b",
+    "verdict": "PASS"
+  },
+  "independentReviewState": "REQUIRED-NOT-PERFORMED-BY-PRODUCER",
+  "manifest": {
+    "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-atomic-package-manifest-2026-08-30.json",
+    "packageContentRoot": "19be4c773af62a79945c01c1d3a71d2c7d650b1cbda0b99ca1ef815e82b8a31b",
+    "rawSha256Checksum": "2478e12103c568b8a68183c4974a0cb0cf47f2d8fb43671732c5a809c00ae949"
+  },
+  "mechanicalVerdict": "PASS",
+  "predecessorVerification": {
+    "findingsSha256": "23df19ec6dffb1933489eabf49a78c4ef3c88657d840408284267a8f18c0a760",
+    "lateDecisionSha256": "508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+    "reviewSha256": "f656b182f617c67ec7d56c37b45a467c70e681863a48487be2d42408cb36b79f",
+    "terminal": "PASS",
+    "v4ManifestSha256": "43bd110cd8b59c0a3ea6086203d804df7b0dc6dd3441ec443d7ec740c4e65ed5",
+    "v4PackageRoot": "f799c154c695034935c480a57b6a0047d8e2b67d318e42b0d9b88a0ea78f92cf",
+    "v4SubjectSha256": "0f1f5cc9fb349f999b0bbff3f6f683c47c951b793ce3ef847388530717ff7257"
+  },
+  "producerQaRoot": "50c04d4332d339e220790e96afab287cfb2efcdbeb37b5099a65127ecd5e08fd",
+  "readerReports": [
+    {
+      "bytes": 13256,
+      "contentId": "sha256:1cd0af2c17629d0e7eefb76db061f2b6de0983d8aa0fcb73304835423ada88ec",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-reader-a-report-2026-08-30.json",
+      "readerId": "PRCV5-READER-A",
+      "reportRoot": "51c462e0542bb1a452bd36fb8d67e9f7252ee68fefd9407c3abd1b0914e53c2c",
+      "verdict": "PASS"
+    },
+    {
+      "bytes": 13065,
+      "contentId": "sha256:6659a8ada592c8d4a3718531eb13ffa2764fde0721767582bf5ea78732a604e1",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-reader-b-report-2026-08-30.json",
+      "readerId": "PRCV5-READER-B",
+      "reportRoot": "3ab20bd9fecb620e8130530bab7a65d50bae5eedd41cb4402d43c76dcdc1e43a",
+      "verdict": "PASS"
+    }
+  ],
+  "residualLimits": [
+    "B0-AND-TAL-AUTHORITY",
+    "TRUSTED-TIME",
+    "OPERATIONAL-SCANNER-RECEIPTS",
+    "PRE-POST-TRUSTED-VISIBILITY-RECEIPTS",
+    "REPOSITORY-TOTAL-GROWTH-CLONE-BUDGETS",
+    "SELECTED-EXTERNAL-STORE-CONTRACT",
+    "FRESH-INDEPENDENT-HOSTILE-REVIEW",
+    "DETACHED-ACCEPTANCE"
+  ],
+  "schemaVersion": "PRCV5-PRODUCER-QA-V1"
+}

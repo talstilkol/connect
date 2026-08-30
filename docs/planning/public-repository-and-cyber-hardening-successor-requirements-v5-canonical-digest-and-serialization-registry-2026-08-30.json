@@ -1,0 +1,298 @@
+{
+  "artifactClass": "PLANNING-CANONICAL-IDENTITY-REGISTRY;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-CANONICAL-DIGEST-AND-SERIALIZATION-REGISTRY-2026-08-30",
+  "boundaryFacts": {
+    "distinctIdentityRootCount": 6,
+    "payloadRawChecksum": "b10d1d91aeb9032586892cb01b60218e63f33b2b76e70c1e4f1a28d4698ac5ad",
+    "rawChecksumEqualsAnyTypedIdentity": false,
+    "testedClassCount": 6
+  },
+  "canonicalProfile": {
+    "arrayOrder": "SCHEMA-DECLARED-PRESERVED",
+    "duplicateKeys": "REJECT",
+    "encoding": "UTF-8",
+    "negativeZero": "REJECT",
+    "nonFinite": "REJECT",
+    "numbers": "SAFE-INTEGER-ONLY",
+    "objectKeyOrder": "UNICODE-CODEPOINT-ASCENDING",
+    "profileId": "PRCV5-CANONICAL-JSON-V1",
+    "stringNormalization": "NFC-REQUIRED",
+    "unknownValueType": "BLOCK"
+  },
+  "checksumType": {
+    "domainPrefix": null,
+    "input": "EXACT-FILE-BYTES",
+    "substitutionForTypedIdentity": "BLOCK",
+    "typeName": "RawSha256Checksum",
+    "use": "TRANSPORT-INTEGRITY-ONLY"
+  },
+  "classBoundaryControls": [
+    {
+      "domain": "PRCV5-FROZEN-INPUT-MANIFEST-V1",
+      "identityClass": "FROZEN-INPUT-MANIFEST",
+      "identityRoot": "452230068c31b87d30647b0117b9816bba68dba8931da9e05d200f2ced9871f3"
+    },
+    {
+      "domain": "PRCV5-FINDING-RECORD-V1",
+      "identityClass": "FINDING-RECORD",
+      "identityRoot": "69a5e4561adcfdbac4f301a11129c12d9aaa040192f18655623972a1831fc35c"
+    },
+    {
+      "domain": "PRCV5-CLOSURE-REGISTRY-V1",
+      "identityClass": "CLOSURE-REGISTRY",
+      "identityRoot": "511efaed6d63e51afc7dac49e82cefcdf1051fc9ebce9a41fa8fb16b2d286e4f"
+    },
+    {
+      "domain": "PRCV5-SCHEMA-V1",
+      "identityClass": "SCHEMA",
+      "identityRoot": "cc2a41d767018edd5085ee0fc8fe14fdf6841be29671d7b620aee78aac06f601"
+    },
+    {
+      "domain": "PRCV5-SCHEMA-REGISTRY-V1",
+      "identityClass": "SCHEMA-REGISTRY",
+      "identityRoot": "3bcd5ee2b7455bcc661de41945907e71bff658f243009a973f898dccefdee49d"
+    },
+    {
+      "domain": "PRCV5-DIGEST-REGISTRY-V1",
+      "identityClass": "DIGEST-REGISTRY",
+      "identityRoot": "4e8227cd4e5e5d81b213a3043503c715ffd69c562ae3dbea4decf59660adb315"
+    }
+  ],
+  "digestRegistryRoot": "814dda15046b8bf7ec1e630c981e2ccb5664dc4695137eb890f696d9456b254f",
+  "identityClasses": [
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-FROZEN-INPUT-MANIFEST-V1",
+      "identityClass": "FROZEN-INPUT-MANIFEST",
+      "ordinal": 1,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-FINDING-RECORD-V1",
+      "identityClass": "FINDING-RECORD",
+      "ordinal": 2,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-CLOSURE-REGISTRY-V1",
+      "identityClass": "CLOSURE-REGISTRY",
+      "ordinal": 3,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-SCHEMA-V1",
+      "identityClass": "SCHEMA",
+      "ordinal": 4,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-SCHEMA-REGISTRY-V1",
+      "identityClass": "SCHEMA-REGISTRY",
+      "ordinal": 5,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-DIGEST-REGISTRY-V1",
+      "identityClass": "DIGEST-REGISTRY",
+      "ordinal": 6,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-GENESIS-V1",
+      "identityClass": "GENESIS",
+      "ordinal": 7,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-APPOINTMENT-V1",
+      "identityClass": "APPOINTMENT",
+      "ordinal": 8,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-RECOVERY-V1",
+      "identityClass": "RECOVERY",
+      "ordinal": 9,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-AUTHORITY-GRAPH-V1",
+      "identityClass": "AUTHORITY-GRAPH",
+      "ordinal": 10,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-LIFECYCLE-V1",
+      "identityClass": "LIFECYCLE",
+      "ordinal": 11,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PERMIT-CONTROL-V1",
+      "identityClass": "PERMIT-CONTROL",
+      "ordinal": 12,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PERMIT-PUSH-V1",
+      "identityClass": "PERMIT-PUSH",
+      "ordinal": 13,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PERMIT-DEPLOY-V1",
+      "identityClass": "PERMIT-DEPLOY",
+      "ordinal": 14,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PERMIT-RELEASE-V1",
+      "identityClass": "PERMIT-RELEASE",
+      "ordinal": 15,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PUBLIC-FLOW-V1",
+      "identityClass": "PUBLIC-FLOW",
+      "ordinal": 16,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-SCANNER-RECEIPT-V1",
+      "identityClass": "SCANNER-RECEIPT",
+      "ordinal": 17,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PUBLICATION-V1",
+      "identityClass": "PUBLICATION",
+      "ordinal": 18,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-EXTERNAL-ARTIFACT-V1",
+      "identityClass": "EXTERNAL-ARTIFACT",
+      "ordinal": 19,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-VECTOR-V1",
+      "identityClass": "VECTOR",
+      "ordinal": 20,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-VECTOR-SHARD-V1",
+      "identityClass": "VECTOR-SHARD",
+      "ordinal": 21,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-VECTOR-CORPUS-V1",
+      "identityClass": "VECTOR-CORPUS",
+      "ordinal": 22,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-CAUSAL-GRAPH-V1",
+      "identityClass": "CAUSAL-GRAPH",
+      "ordinal": 23,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PACKAGE-CONTENT-V1",
+      "identityClass": "PACKAGE-CONTENT",
+      "ordinal": 24,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-READER-REPORT-V1",
+      "identityClass": "READER-REPORT",
+      "ordinal": 25,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-PRODUCER-QA-V1",
+      "identityClass": "PRODUCER-QA",
+      "ordinal": 26,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    },
+    {
+      "digest": "SHA-256",
+      "domain": "PRCV5-DETACHED-ACCEPTANCE-V1",
+      "identityClass": "DETACHED-ACCEPTANCE",
+      "ordinal": 27,
+      "outputType": "TypedIdentityRoot",
+      "preimage": "UTF8(DOMAIN)||LF||CANONICAL-JSON-BYTES"
+    }
+  ],
+  "identityType": {
+    "domainRequired": true,
+    "input": "DOMAIN-LF-CANONICAL-OBJECT",
+    "substitutionByRawChecksum": "BLOCK",
+    "typeName": "TypedIdentityRoot",
+    "use": "SEMANTIC-IDENTITY-AND-CAS"
+  },
+  "locatorProfile": {
+    "absolute": false,
+    "backslash": false,
+    "contentAddressedExternalReferenceRequired": true,
+    "parentTraversal": false,
+    "privateCoordinates": false,
+    "profileId": "PRCV5-REPO-RELATIVE-PUBLIC-LOCATOR-V1",
+    "repositoryFolderPrefix": false,
+    "requiredPrefix": "docs/"
+  },
+  "schemaVersion": "PRCV5-DIGEST-SERIALIZATION-REGISTRY-V1"
+}

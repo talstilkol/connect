@@ -1,0 +1,1344 @@
+{
+  "artifactId": "CONNECT-D02-A9-FULL-ONE-TO-ONE-MUTATION-CORPUS-2026-08-30",
+  "corpusVersion": "1.0.0",
+  "expectedToActualFlow": 0,
+  "vectorCount": 94,
+  "innerVectorCount": 82,
+  "outerVectorCount": 12,
+  "findingDenominator": 7,
+  "vectors": [
+    {
+      "vectorId": "D02A9-MV-0001",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "artifactId"
+      ],
+      "description": "delete snapshot required artifactId"
+    },
+    {
+      "vectorId": "D02A9-MV-0002",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "schemaVersion"
+      ],
+      "description": "delete snapshot required schemaVersion"
+    },
+    {
+      "vectorId": "D02A9-MV-0003",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "snapshotId"
+      ],
+      "description": "delete snapshot required snapshotId"
+    },
+    {
+      "vectorId": "D02A9-MV-0004",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "snapshotClass"
+      ],
+      "description": "delete snapshot required snapshotClass"
+    },
+    {
+      "vectorId": "D02A9-MV-0005",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "generatedAt"
+      ],
+      "description": "delete snapshot required generatedAt"
+    },
+    {
+      "vectorId": "D02A9-MV-0006",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "safeState"
+      ],
+      "description": "delete snapshot required safeState"
+    },
+    {
+      "vectorId": "D02A9-MV-0007",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "rootStates"
+      ],
+      "description": "delete snapshot required rootStates"
+    },
+    {
+      "vectorId": "D02A9-MV-0008",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "evidenceStates"
+      ],
+      "description": "delete snapshot required evidenceStates"
+    },
+    {
+      "vectorId": "D02A9-MV-0009",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "DELETE",
+      "pointer": [
+        "currentTerminal"
+      ],
+      "description": "delete snapshot required currentTerminal"
+    },
+    {
+      "vectorId": "D02A9-MV-0010",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "transitionId"
+      ],
+      "description": "delete transition required transitionId"
+    },
+    {
+      "vectorId": "D02A9-MV-0011",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "schemaVersion"
+      ],
+      "description": "delete transition required schemaVersion"
+    },
+    {
+      "vectorId": "D02A9-MV-0012",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "recordClass"
+      ],
+      "description": "delete transition required recordClass"
+    },
+    {
+      "vectorId": "D02A9-MV-0013",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "rootId"
+      ],
+      "description": "delete transition required rootId"
+    },
+    {
+      "vectorId": "D02A9-MV-0014",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "rootClass"
+      ],
+      "description": "delete transition required rootClass"
+    },
+    {
+      "vectorId": "D02A9-MV-0015",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "fromState"
+      ],
+      "description": "delete transition required fromState"
+    },
+    {
+      "vectorId": "D02A9-MV-0016",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "toState"
+      ],
+      "description": "delete transition required toState"
+    },
+    {
+      "vectorId": "D02A9-MV-0017",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "event"
+      ],
+      "description": "delete transition required event"
+    },
+    {
+      "vectorId": "D02A9-MV-0018",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "previousVersion"
+      ],
+      "description": "delete transition required previousVersion"
+    },
+    {
+      "vectorId": "D02A9-MV-0019",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "nextVersion"
+      ],
+      "description": "delete transition required nextVersion"
+    },
+    {
+      "vectorId": "D02A9-MV-0020",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "expectedPreviousRoot"
+      ],
+      "description": "delete transition required expectedPreviousRoot"
+    },
+    {
+      "vectorId": "D02A9-MV-0021",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "evidenceRoot"
+      ],
+      "description": "delete transition required evidenceRoot"
+    },
+    {
+      "vectorId": "D02A9-MV-0022",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "authorityReceiptRoot"
+      ],
+      "description": "delete transition required authorityReceiptRoot"
+    },
+    {
+      "vectorId": "D02A9-MV-0023",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "trustedTime"
+      ],
+      "description": "delete transition required trustedTime"
+    },
+    {
+      "vectorId": "D02A9-MV-0024",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "expiresAt"
+      ],
+      "description": "delete transition required expiresAt"
+    },
+    {
+      "vectorId": "D02A9-MV-0025",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "revocationCutRoot"
+      ],
+      "description": "delete transition required revocationCutRoot"
+    },
+    {
+      "vectorId": "D02A9-MV-0026",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "operationKey"
+      ],
+      "description": "delete transition required operationKey"
+    },
+    {
+      "vectorId": "D02A9-MV-0027",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "casResult"
+      ],
+      "description": "delete transition required casResult"
+    },
+    {
+      "vectorId": "D02A9-MV-0028",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "consumptionCount"
+      ],
+      "description": "delete transition required consumptionCount"
+    },
+    {
+      "vectorId": "D02A9-MV-0029",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "postReadback"
+      ],
+      "description": "delete transition required postReadback"
+    },
+    {
+      "vectorId": "D02A9-MV-0030",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "controlOnly"
+      ],
+      "description": "delete transition required controlOnly"
+    },
+    {
+      "vectorId": "D02A9-MV-0031",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "acceptanceCredit"
+      ],
+      "description": "delete transition required acceptanceCredit"
+    },
+    {
+      "vectorId": "D02A9-MV-0032",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "snapshotId"
+      ],
+      "value": 7,
+      "description": "snapshot type"
+    },
+    {
+      "vectorId": "D02A9-MV-0033",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "generatedAt"
+      ],
+      "value": "invalid-time",
+      "description": "snapshot pattern"
+    },
+    {
+      "vectorId": "D02A9-MV-0034",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "safeState",
+        "gate29"
+      ],
+      "value": "OPEN",
+      "description": "snapshot const"
+    },
+    {
+      "vectorId": "D02A9-MV-0035",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "rootStates",
+        0,
+        "state"
+      ],
+      "value": "UNKNOWN",
+      "description": "snapshot enum"
+    },
+    {
+      "vectorId": "D02A9-MV-0036",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "rootStates",
+        0,
+        "rootSha256"
+      ],
+      "value": "bad",
+      "description": "snapshot pattern nested"
+    },
+    {
+      "vectorId": "D02A9-MV-0037",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "rootStates",
+        0,
+        "ordinal"
+      ],
+      "value": 0,
+      "description": "snapshot lower bound"
+    },
+    {
+      "vectorId": "D02A9-MV-0038",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "rootStates",
+        0,
+        "version"
+      ],
+      "value": 2147483648,
+      "description": "snapshot upper bound"
+    },
+    {
+      "vectorId": "D02A9-MV-0039",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshot",
+      "operation": "SET",
+      "pointer": [
+        "unexpected"
+      ],
+      "value": true,
+      "description": "snapshot unknown field"
+    },
+    {
+      "vectorId": "D02A9-MV-0040",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "event"
+      ],
+      "value": "UNKNOWN",
+      "description": "transition enum"
+    },
+    {
+      "vectorId": "D02A9-MV-0041",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "operationKey"
+      ],
+      "value": "bad",
+      "description": "transition pattern"
+    },
+    {
+      "vectorId": "D02A9-MV-0042",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "consumptionCount"
+      ],
+      "value": 2,
+      "description": "transition maximum"
+    },
+    {
+      "vectorId": "D02A9-MV-0043",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "unexpected"
+      ],
+      "value": true,
+      "description": "transition unknown field"
+    },
+    {
+      "vectorId": "D02A9-MV-0044",
+      "findingId": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001",
+      "phase": "INNER",
+      "artifact": "snapshotSchema",
+      "operation": "SET",
+      "pointer": [
+        "properties",
+        "safeState",
+        "$ref"
+      ],
+      "value": "#/$defs/missing",
+      "description": "broken ref"
+    },
+    {
+      "vectorId": "D02A9-MV-0045",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "DELETE",
+      "pointer": [
+        "controls",
+        1
+      ],
+      "description": "missing planning positive control"
+    },
+    {
+      "vectorId": "D02A9-MV-0046",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "controlOnly"
+      ],
+      "value": false,
+      "description": "control claims authority"
+    },
+    {
+      "vectorId": "D02A9-MV-0047",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "authorityCredit"
+      ],
+      "value": 1,
+      "description": "control grants credit"
+    },
+    {
+      "vectorId": "D02A9-MV-0048",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "nextVersion"
+      ],
+      "value": 9,
+      "description": "illegal version transition"
+    },
+    {
+      "vectorId": "D02A9-MV-0049",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        1,
+        "transition",
+        "casResult"
+      ],
+      "value": "MISMATCH",
+      "description": "accept CAS mismatch"
+    },
+    {
+      "vectorId": "D02A9-MV-0050",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        6,
+        "transition",
+        "toState"
+      ],
+      "value": "ACCEPTED",
+      "description": "replay to success"
+    },
+    {
+      "vectorId": "D02A9-MV-0051",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "positiveControls",
+      "operation": "SET",
+      "pointer": [
+        "controls",
+        4,
+        "predicates",
+        23,
+        "value"
+      ],
+      "value": false,
+      "description": "expiry control removed"
+    },
+    {
+      "vectorId": "D02A9-MV-0052",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "transitionMachine",
+      "operation": "DELETE",
+      "pointer": [
+        "allowedTransitions",
+        6
+      ],
+      "description": "remove replay rule"
+    },
+    {
+      "vectorId": "D02A9-MV-0053",
+      "findingId": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002",
+      "phase": "INNER",
+      "artifact": "transitionMachine",
+      "operation": "SET",
+      "pointer": [
+        "terminalPrecedence",
+        0
+      ],
+      "value": "CONTROL-SATISFIABLE-NON-AUTHORIZING",
+      "description": "negative precedence weakened"
+    },
+    {
+      "vectorId": "D02A9-MV-0054",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "omit member"
+      ],
+      "description": "omit member"
+    },
+    {
+      "vectorId": "D02A9-MV-0055",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "substitute member hash"
+      ],
+      "description": "substitute member hash"
+    },
+    {
+      "vectorId": "D02A9-MV-0056",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "add member"
+      ],
+      "description": "add member"
+    },
+    {
+      "vectorId": "D02A9-MV-0057",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "reorder member"
+      ],
+      "description": "reorder member"
+    },
+    {
+      "vectorId": "D02A9-MV-0058",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate reader A"
+      ],
+      "description": "mutate reader A"
+    },
+    {
+      "vectorId": "D02A9-MV-0059",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate reader B"
+      ],
+      "description": "mutate reader B"
+    },
+    {
+      "vectorId": "D02A9-MV-0060",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate toolchain"
+      ],
+      "description": "mutate toolchain"
+    },
+    {
+      "vectorId": "D02A9-MV-0061",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate report A"
+      ],
+      "description": "mutate report A"
+    },
+    {
+      "vectorId": "D02A9-MV-0062",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate report B"
+      ],
+      "description": "mutate report B"
+    },
+    {
+      "vectorId": "D02A9-MV-0063",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate Subject"
+      ],
+      "description": "mutate Subject"
+    },
+    {
+      "vectorId": "D02A9-MV-0064",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate crosswalk"
+      ],
+      "description": "mutate crosswalk"
+    },
+    {
+      "vectorId": "D02A9-MV-0065",
+      "findingId": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003",
+      "phase": "OUTER",
+      "artifact": "packageEnvelope",
+      "operation": "SYNTHETIC",
+      "pointer": [
+        "mutate Producer QA"
+      ],
+      "description": "mutate Producer QA"
+    },
+    {
+      "vectorId": "D02A9-MV-0066",
+      "findingId": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004",
+      "phase": "INNER",
+      "artifact": "semanticShards",
+      "operation": "DELETE",
+      "pointer": [
+        0,
+        "members",
+        0
+      ],
+      "description": "omit semantic member"
+    },
+    {
+      "vectorId": "D02A9-MV-0067",
+      "findingId": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004",
+      "phase": "INNER",
+      "artifact": "semanticShards",
+      "operation": "SWAP",
+      "pointer": [
+        0,
+        "members",
+        0
+      ],
+      "description": "reorder semantic members"
+    },
+    {
+      "vectorId": "D02A9-MV-0068",
+      "findingId": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004",
+      "phase": "INNER",
+      "artifact": "semanticShards",
+      "operation": "SET",
+      "pointer": [
+        0,
+        "members",
+        0,
+        "exactLineSha256"
+      ],
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "change exact line digest"
+    },
+    {
+      "vectorId": "D02A9-MV-0069",
+      "findingId": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004",
+      "phase": "INNER",
+      "artifact": "semanticShards",
+      "operation": "SET",
+      "pointer": [
+        0,
+        "members",
+        0,
+        "disposition"
+      ],
+      "value": "",
+      "description": "undisposition member"
+    },
+    {
+      "vectorId": "D02A9-MV-0070",
+      "findingId": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004",
+      "phase": "INNER",
+      "artifact": "semanticShards",
+      "operation": "DELETE",
+      "pointer": [
+        0,
+        "members",
+        35
+      ],
+      "description": "omit table row"
+    },
+    {
+      "vectorId": "D02A9-MV-0071",
+      "findingId": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004",
+      "phase": "INNER",
+      "artifact": "semanticUniverse",
+      "operation": "SET",
+      "pointer": [
+        "tableRowCount"
+      ],
+      "value": 294,
+      "description": "wrong table denominator"
+    },
+    {
+      "vectorId": "D02A9-MV-0072",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "DELETE",
+      "pointer": [
+        "receipts",
+        0
+      ],
+      "description": "omit source receipt"
+    },
+    {
+      "vectorId": "D02A9-MV-0073",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "SET",
+      "pointer": [
+        "receipts",
+        0,
+        "response",
+        "rawResponseSha256"
+      ],
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "raw source digest change"
+    },
+    {
+      "vectorId": "D02A9-MV-0074",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "SET",
+      "pointer": [
+        "receipts",
+        0,
+        "observation",
+        "normalizedTextSha256"
+      ],
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "normalized digest change"
+    },
+    {
+      "vectorId": "D02A9-MV-0075",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "SET",
+      "pointer": [
+        "receipts",
+        0,
+        "response",
+        "status"
+      ],
+      "value": 404,
+      "description": "unavailable source"
+    },
+    {
+      "vectorId": "D02A9-MV-0076",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "SET",
+      "pointer": [
+        "receipts",
+        0,
+        "observation",
+        "extractorId"
+      ],
+      "value": "UNKNOWN",
+      "description": "extractor substitution"
+    },
+    {
+      "vectorId": "D02A9-MV-0077",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "SET",
+      "pointer": [
+        "receipts",
+        0,
+        "observation",
+        "claimLocators",
+        0
+      ],
+      "value": "changed",
+      "description": "locator change"
+    },
+    {
+      "vectorId": "D02A9-MV-0078",
+      "findingId": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005",
+      "phase": "INNER",
+      "artifact": "sourceReceipts",
+      "operation": "SET",
+      "pointer": [
+        "receipts",
+        0,
+        "acceptance",
+        "accepted"
+      ],
+      "value": true,
+      "description": "observation to acceptance"
+    },
+    {
+      "vectorId": "D02A9-MV-0079",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "dag",
+      "operation": "DELETE",
+      "pointer": [
+        "edges",
+        0
+      ],
+      "description": "delete exact edge"
+    },
+    {
+      "vectorId": "D02A9-MV-0080",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "dag",
+      "operation": "SWAP",
+      "pointer": [
+        "edges",
+        0
+      ],
+      "description": "reorder exact edge"
+    },
+    {
+      "vectorId": "D02A9-MV-0081",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "dag",
+      "operation": "SET",
+      "pointer": [
+        "edges",
+        0,
+        "edgeType"
+      ],
+      "value": "OPTIONAL",
+      "description": "edge type mutation"
+    },
+    {
+      "vectorId": "D02A9-MV-0082",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "dag",
+      "operation": "SET",
+      "pointer": [
+        "edges",
+        0,
+        "from"
+      ],
+      "value": "D02A9-ROOT-RUNTIME-PERMIT",
+      "description": "edge endpoint mutation"
+    },
+    {
+      "vectorId": "D02A9-MV-0083",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "appointments",
+      "operation": "DELETE",
+      "pointer": [
+        "appointments",
+        0
+      ],
+      "description": "delete appointment"
+    },
+    {
+      "vectorId": "D02A9-MV-0084",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "appointments",
+      "operation": "SET",
+      "pointer": [
+        "appointments",
+        0,
+        "producerId"
+      ],
+      "value": "UNAPPOINTED",
+      "description": "producer substitution"
+    },
+    {
+      "vectorId": "D02A9-MV-0085",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "appointments",
+      "operation": "SET",
+      "pointer": [
+        "appointments",
+        0,
+        "authoritySourceId"
+      ],
+      "value": "D02A9-PRODUCER-001",
+      "description": "self authority"
+    },
+    {
+      "vectorId": "D02A9-MV-0086",
+      "findingId": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006",
+      "phase": "INNER",
+      "artifact": "appointments",
+      "operation": "SET",
+      "pointer": [
+        "appointments",
+        0,
+        "allowedOutputRootIds"
+      ],
+      "value": [],
+      "description": "output scope removal"
+    },
+    {
+      "vectorId": "D02A9-MV-0087",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "DELETE",
+      "pointer": [
+        "entries",
+        0
+      ],
+      "description": "omit input"
+    },
+    {
+      "vectorId": "D02A9-MV-0088",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "SWAP",
+      "pointer": [
+        "entries",
+        0
+      ],
+      "description": "reorder inputs"
+    },
+    {
+      "vectorId": "D02A9-MV-0089",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "SET",
+      "pointer": [
+        "entries",
+        0,
+        "logicalPath"
+      ],
+      "value": "docs/researched-decision-approval-2026-08-26.md",
+      "description": "substitute path"
+    },
+    {
+      "vectorId": "D02A9-MV-0090",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "SET",
+      "pointer": [
+        "entries",
+        0,
+        "sha256"
+      ],
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "substitute bytes root"
+    },
+    {
+      "vectorId": "D02A9-MV-0091",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "SET",
+      "pointer": [
+        "entries",
+        0,
+        "inputId"
+      ],
+      "value": "D02A9-IN-002",
+      "description": "duplicate id"
+    },
+    {
+      "vectorId": "D02A9-MV-0092",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "SET",
+      "pointer": [
+        "entries",
+        0,
+        "requiredConsumerRootIds"
+      ],
+      "value": [],
+      "description": "orphan input"
+    },
+    {
+      "vectorId": "D02A9-MV-0093",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "inputManifest",
+      "operation": "SET",
+      "pointer": [
+        "entryCount"
+      ],
+      "value": 12,
+      "description": "wrong input denominator"
+    },
+    {
+      "vectorId": "D02A9-MV-0094",
+      "findingId": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007",
+      "phase": "INNER",
+      "artifact": "semanticRegistry",
+      "operation": "SET",
+      "pointer": [
+        "admittedInputManifest",
+        "admittedManifestRoot"
+      ],
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "detached admitted root mismatch"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ import type {
 
 const MAXIMUM_CONFIGURATION_VALUE_LENGTH = 8_192;
 const MAXIMUM_EXTERNAL_USER_ID_LENGTH = 255;
+const MAXIMUM_EXTERNAL_ORGANIZATION_ID_LENGTH = 255;
 
 export type ClerkAuthenticationClient = Pick<
   ClerkClient,
@@ -104,6 +105,14 @@ function validExternalUserId(value: unknown): value is string {
   );
 }
 
+function validExternalOrganizationId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    value.length <= MAXIMUM_EXTERNAL_ORGANIZATION_ID_LENGTH
+  );
+}
+
 export function createClerkEndUserSessionVerifier(
   configuration: Readonly<RailwayApiIdentityConfiguration>,
   clientFactory: Readonly<ClerkAuthenticationClientFactory> =
@@ -163,13 +172,15 @@ export function createClerkEndUserSessionVerifier(
       if (
         !auth.isAuthenticated ||
         auth.tokenType !== "session_token" ||
-        !validExternalUserId(auth.userId)
+        !validExternalUserId(auth.userId) ||
+        !validExternalOrganizationId(auth.orgId)
       ) {
         return null;
       }
 
       return Object.freeze({
         externalUserId: auth.userId as UserId,
+        externalOrganizationId: auth.orgId,
       });
     },
   };

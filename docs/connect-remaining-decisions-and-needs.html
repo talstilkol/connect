@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    >
+    <title>Connect — החלטות פתוחות ומה צריך מטל</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17231d;
+        --muted: #5a6860;
+        --page: #f3f7f4;
+        --panel: #fff;
+        --line: #d6e2da;
+        --green: #0e6b42;
+        --green-dark: #08472d;
+        --green-soft: #eaf8ef;
+        --green-line: #78c792;
+        --amber: #795000;
+        --amber-soft: #fff7d8;
+        --amber-line: #e1c86a;
+        --red: #9d2d28;
+        --red-soft: #fff1f0;
+        --red-line: #e2a19c;
+        --blue: #1b5fb6;
+        --blue-soft: #eef6ff;
+        --focus: #155eef;
+        --shadow: 0 14px 34px rgba(24, 52, 37, .09);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family: Arial, "Noto Sans Hebrew", system-ui, sans-serif;
+        line-height: 1.65;
+      }
+      button, input, select, textarea { font: inherit; }
+      a { color: var(--green-dark); }
+      :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+      .skip {
+        position: fixed;
+        inset-block-start: 8px;
+        inset-inline-start: 8px;
+        z-index: 30;
+        padding: 9px 13px;
+        border-radius: 8px;
+        color: #fff;
+        background: var(--focus);
+        transform: translateY(-180%);
+      }
+      .skip:focus { transform: translateY(0); }
+      .hero {
+        color: #fff;
+        background:
+          radial-gradient(circle at 12% 12%, rgba(104, 226, 157, .25), transparent 30%),
+          linear-gradient(135deg, #063b25, #0c7248 65%, #0a4f35);
+      }
+      .wrap { width: min(1180px, calc(100% - 32px)); margin-inline: auto; }
+      .hero .wrap { padding-block: 42px 34px; }
+      .eyebrow { margin: 0 0 7px; color: #c8f2d8; font-size: .86rem; font-weight: 900; }
+      h1 { max-width: 920px; margin: 0; font-size: clamp(2rem, 5vw, 4rem); line-height: 1.08; }
+      .hero-copy { max-width: 880px; margin: 16px 0 0; color: #ddf7e7; font-size: 1.05rem; }
+      .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; margin-top: 22px; }
+      .status-card { padding: 18px; border: 1px solid rgba(255,255,255,.3); border-radius: 15px; background: rgba(0,0,0,.15); }
+      .status-card strong, .status-card span { display: block; }
+      .status-card strong { font-size: clamp(1.4rem, 3vw, 2.3rem); }
+      .status-card span { color: #d9f5e3; }
+      .summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+      .summary-card { padding: 13px; border-radius: 12px; color: var(--ink); background: #fff; }
+      .summary-card strong, .summary-card span { display: block; }
+      .summary-card strong { font-size: 1.35rem; }
+      .summary-card span { color: var(--muted); font-size: .84rem; }
+      .toolbar { position: sticky; inset-block-start: 0; z-index: 15; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.97); backdrop-filter: blur(8px); }
+      .toolbar .wrap { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-block: 10px; }
+      .toolbar a { padding: 7px 10px; border-radius: 8px; text-decoration: none; font-weight: 800; }
+      .toolbar a:hover { background: var(--green-soft); }
+      main.wrap { padding-block: 30px 64px; }
+      section { margin-bottom: 38px; scroll-margin-top: 72px; }
+      h2 { margin: 0 0 14px; font-size: clamp(1.55rem, 3vw, 2.25rem); line-height: 1.2; }
+      h3 { margin: 0 0 7px; line-height: 1.3; }
+      p { margin-block: 8px; }
+      .panel { padding: 21px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); box-shadow: var(--shadow); }
+      .callout { padding: 14px 16px; border-inline-start: 5px solid var(--amber); border-radius: 9px; background: var(--amber-soft); }
+      .callout.green { border-inline-start-color: var(--green); background: var(--green-soft); }
+      .callout.red { border-inline-start-color: var(--red); background: var(--red-soft); }
+      .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+      .research-card { padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+      .research-card.done { border-color: var(--green-line); background: var(--green-soft); }
+      .research-card.open { border-color: var(--red-line); background: var(--red-soft); }
+      .research-card ul { margin: 8px 0 0; padding-inline-start: 22px; }
+      .research-card li { margin: 4px 0; }
+      .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; color: #fff; background: var(--red); font-size: .76rem; font-weight: 900; }
+      .badge.green { background: var(--green); }
+      .badge.amber { color: #5b3d00; background: #edd06c; }
+      .applied-summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+      .metric { padding: 13px; border: 1px solid var(--green-line); border-radius: 11px; background: var(--green-soft); }
+      .metric strong, .metric span { display: block; }
+      .metric strong { font-size: 1.45rem; }
+      .metric span { color: var(--muted); font-size: .86rem; }
+      details { border: 1px solid var(--line); border-radius: 12px; background: #fbfdfb; }
+      details + details { margin-top: 10px; }
+      summary { padding: 12px 14px; cursor: pointer; color: var(--green-dark); font-weight: 900; }
+      details > div { padding: 0 14px 14px; }
+      .compact-list { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+      .compact-list li { padding: 9px 11px; border-radius: 8px; background: #f1f6f2; }
+      .decision-list, .needs-list { display: grid; gap: 14px; }
+      .decision-card { padding: 18px; border: 1px solid var(--red-line); border-inline-start: 6px solid var(--red); border-radius: 13px; background: var(--red-soft); }
+      .decision-card.future { border-color: var(--amber-line); border-inline-start-color: var(--amber); background: var(--amber-soft); }
+      .decision-card.accepted { border-color: var(--green-line); border-inline-start-color: var(--green); background: var(--green-soft); }
+      .section-guide { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin: 0 0 14px; }
+      .guide-item { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+      .guide-item strong { display: block; color: var(--green-dark); }
+      .plain-explanation { margin-block: 9px; padding: 10px 12px; border-radius: 9px; background: rgba(255,255,255,.72); }
+      .plain-explanation strong { color: var(--green-dark); }
+      .decision-head, .need-head { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+      .decision-id, .need-id { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; direction: ltr; }
+      .simple { color: var(--muted); }
+      fieldset { margin: 12px 0 0; padding: 0; border: 0; }
+      legend { margin-bottom: 7px; font-weight: 900; }
+      .option { display: block; margin: 8px 0; padding: 10px 12px; border: 1px solid #d1dcd5; border-radius: 10px; background: #fff; cursor: pointer; }
+      .option.recommended { border-color: var(--green-line); background: #f2fff6; }
+      .option input { margin-inline-end: 7px; }
+      .option strong { display: inline; }
+      .option small { display: block; margin: 3px 27px 0 0; color: var(--muted); }
+      .recommendation { padding: 10px 12px; border-radius: 9px; color: #0d5835; background: #dff5e6; }
+      .notes-label { display: block; margin-top: 10px; color: var(--muted); font-size: .86rem; font-weight: 800; }
+      .notes-label textarea { width: 100%; min-height: 58px; margin-top: 4px; padding: 8px 10px; border: 1px solid #b7c7bd; border-radius: 8px; resize: vertical; background: #fff; }
+      .need-card { padding: 17px; border: 1px solid var(--amber-line); border-inline-start: 6px solid var(--amber); border-radius: 13px; background: var(--amber-soft); }
+      .need-card.secret { border-color: var(--red-line); border-inline-start-color: var(--red); background: var(--red-soft); }
+      .need-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-block: 7px; color: var(--muted); font-size: .86rem; }
+      .need-controls { display: grid; grid-template-columns: minmax(180px, .45fr) 1fr; gap: 9px; margin-top: 10px; }
+      .need-controls label { color: var(--muted); font-size: .84rem; font-weight: 800; }
+      .need-controls select, .need-controls input { width: 100%; min-height: 41px; margin-top: 4px; padding: 7px 9px; border: 1px solid #b5c5bb; border-radius: 8px; background: #fff; }
+      .actions { position: sticky; inset-block-end: 0; z-index: 10; display: flex; gap: 9px; flex-wrap: wrap; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 13px 13px 0 0; background: rgba(255,255,255,.98); box-shadow: 0 -8px 24px rgba(28,54,39,.08); }
+      button { min-height: 43px; padding: 8px 14px; border: 1px solid #9caf9f; border-radius: 9px; cursor: pointer; background: #fff; font-weight: 900; }
+      button.primary { border-color: var(--green); color: #fff; background: var(--green); }
+      button.danger { color: var(--red); border-color: var(--red-line); }
+      .counter { margin-inline-start: auto; color: var(--muted); }
+      .json-preview { max-height: 420px; overflow: auto; padding: 14px; border-radius: 10px; color: #dff8e8; background: #10221a; direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-word; }
+      .next-list { counter-reset: next; display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+      .next-list li { padding: 13px 15px; border: 1px solid var(--line); border-radius: 11px; background: #fff; }
+      .next-list li > strong { display: block; color: var(--green-dark); font-size: 1.02rem; }
+      .stage-detail { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
+      .stage-detail span { display: block; padding: 9px 10px; border-radius: 8px; background: #f3f7f4; }
+      .stage-detail b { display: block; color: var(--green-dark); }
+      .term { position: relative; display: inline; border-bottom: 2px dotted var(--blue); color: inherit; cursor: help; outline-offset: 3px; }
+      .term::after {
+        content: attr(data-explain);
+        position: absolute;
+        inset-inline-start: 50%;
+        inset-block-end: calc(100% + 9px);
+        z-index: 50;
+        width: min(320px, 82vw);
+        padding: 10px 12px;
+        border: 1px solid #8eb2df;
+        border-radius: 9px;
+        color: #10233d;
+        background: #eef6ff;
+        box-shadow: 0 10px 24px rgba(25, 61, 105, .2);
+        direction: rtl;
+        text-align: right;
+        font-size: .88rem;
+        font-weight: 500;
+        line-height: 1.45;
+        white-space: normal;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateX(50%) translateY(4px);
+        transition: opacity .15s ease, transform .15s ease;
+      }
+      .term:hover::after, .term:focus::after, .term:focus-visible::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(50%) translateY(0);
+      }
+      footer { border-top: 1px solid var(--line); background: #eaf1ec; }
+      footer .wrap { padding-block: 22px 32px; color: var(--muted); }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+      @media (max-width: 850px) {
+        .hero-grid, .grid-2, .section-guide { grid-template-columns: 1fr; }
+        .applied-summary { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      }
+      @media (max-width: 590px) {
+        .wrap { width: min(100% - 22px, 1180px); }
+        .summary-grid, .applied-summary, .need-controls, .stage-detail { grid-template-columns: 1fr; }
+        .panel { padding: 16px; }
+        .counter { width: 100%; margin-inline-start: 0; }
+      }
+      @media print {
+        .term { border-bottom: 0; }
+        .term::after { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">דלג לתוכן</a>
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">CONNECT · תשובות Tal נקלטו · 30.08.2026</p>
+        <h1>מה עוד פתוח, ומה צריך ממך — בלי מילים מסובכות</h1>
+        <p class="hero-copy">המסמך מפריד בין שלושה דברים: החלטה שעדיין צריך לקבל, חיבור אמיתי שצריך לבצע, והוכחה שצריך להראות. אלה אינם אותו דבר.</p>
+        <div class="hero-grid">
+          <div class="status-card">
+            <span>האם המחקר הסתיים?</span>
+            <strong>לא — המחקר הרחב התקדם, אך טרם נסגר</strong>
+            <span>ארבע חבילות תכנון מרכזיות נכשלו בביקורת עצמאית ודורשות Successor. בנוסף חסרים נתוני חשבונות, אישור משפטי ומקורות חיים.</span>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-card"><strong>38/38</strong><span>תשובות מה־JSON נקלטו</span></div>
+            <div class="summary-card"><strong>6/6</strong><span>כל ההחלטות הזכאיות נענו</span></div>
+            <div class="summary-card"><strong>15</strong><span>חיבורים/פרטים שעדיין חסרים</span></div>
+            <div class="summary-card"><strong>PUBLIC</strong><span>מצב המאגר המחייב</span></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="toolbar" aria-label="ניווט במסמך">
+      <div class="wrap">
+        <a href="#research">1. המחקר</a>
+        <a href="#applied">2. מה נקלט</a>
+        <a href="#decisions">3. החלטות</a>
+        <a href="#needs">4. מה צריך ממך</a>
+        <a href="#next">5. מה עושים אחר כך</a>
+      </div>
+    </nav>
+
+    <main id="main" class="wrap">
+      <div class="callout green" style="margin-bottom:24px">
+        <strong>איך קוראים את המסמך?</strong> מילה עם קו כחול מנוקד היא מושג טכני. העבר עליה את העכבר, הקש עליה או התמקד בה באמצעות Tab כדי לקבל הסבר פשוט.
+      </div>
+      <section id="research">
+        <h2>1. האם המחקר הסתיים?</h2>
+        <div class="section-guide">
+          <div class="guide-item"><strong>מה השלב אומר?</strong> בודקים אם התוכנית מבוססת על עובדות, מסמכים רשמיים ובדיקות — ולא רק על רעיונות.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> כרגע לא נדרש סוד או חיבור. בהמשך נצטרך בעלים לחשבונות ואישור משפטי.</div>
+        </div>
+        <div class="grid-2">
+          <article class="research-card done">
+            <span class="badge green">1.1 בוצע</span>
+            <h3>נחקרו הכיוונים המרכזיים</h3>
+            <ul>
+              <li>WhatsApp רשמי, Consent, Templates ו־Rate limiting.</li>
+              <li>OpenAI, אישור אדם, Evals וגבולות פרטיות.</li>
+              <li>Railway, Vercel, PostgreSQL, Redis/BullMQ.</li>
+              <li>AWS S3, KMS, GuardDuty, Backup ו־Restore.</li>
+              <li>GitHub PUBLIC, CI, Supply chain ואבטחת קוד.</li>
+              <li>Stripe/Paddle, Monitoring, Retention ו־Legal Hold.</li>
+            </ul>
+          </article>
+          <article class="research-card open">
+            <span class="badge">1.2 עדיין פתוח</span>
+            <h3>המחקר עדיין אינו מקור אמת סופי</h3>
+            <ul>
+              <li>מקורות רשמיים טרם נקלטו כולם כ־Source Universe מאושר.</li>
+              <li>מספרי WhatsApp החיים חסרים מהחשבון עצמו.</li>
+              <li>חוקיות, Privacy ו־Direct marketing דורשים Counsel.</li>
+              <li>יכולות ומחירים של ספקים דורשים account readback.</li>
+              <li>B0 v7 נדחה עם 14 ממצאים.</li>
+              <li>Review Protocol v1.9 נדחה עם 17 ממצאים.</li>
+              <li>D02-A9 נדחה עם 8 ממצאים.</li>
+              <li>Public/Cyber v5 נדחה עם 18 ממצאים.</li>
+            </ul>
+          </article>
+        </div>
+        <div class="callout red" style="margin-top:14px">
+          <strong>במילים של סבתא:</strong> קראנו הרבה ספרי הוראות ובנינו תוכנית, אבל ארבעה בודקים מצאו חורים בתוכנית. לכן לא מפעילים עדיין את המכונה האמיתית.
+        </div>
+      </section>
+
+      <section id="applied">
+        <h2>2. מה עשיתי עם ה־JSON שלך?</h2>
+        <div class="section-guide">
+          <div class="guide-item"><strong>מה השלב אומר?</strong> הפכנו את התשובות שלך לכללים שמכוונים את המשך התכנון.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> לבדוק שהבחירות המוצגות נכונות. אין לשלוח כאן סיסמה או Token.</div>
+        </div>
+        <div class="panel">
+          <div class="applied-summary">
+            <div class="metric"><strong>4</strong><span>החלטות אסטרטגיות</span></div>
+            <div class="metric"><strong>5</strong><span>בחירות Audit</span></div>
+            <div class="metric"><strong>18</strong><span>מסלולי חסם</span></div>
+            <div class="metric"><strong>11</strong><span>החלטות Gate</span></div>
+          </div>
+          <div class="callout green">
+            <strong>כל 38 התשובות נקלטו.</strong> הן נרשמו במסמך התכנון המשלים. הן קובעות כיוון, אך אינן מחליפות Credential, בדיקה חיה, אישור משפטי או אישור Production.
+          </div>
+          <div class="callout green" style="margin-top:12px">
+            <strong>נקלטו גם הצבעות V01 ו־V02 מהייצוא האחרון.</strong> כל 6 ההחלטות הזכאיות נענו; כל 15 פריטי החיבור והמידע עדיין מסומנים כחסרים.
+          </div>
+          <details open>
+            <summary>2.1 ארבע ההחלטות האסטרטגיות</summary>
+            <div><ul id="strategic-applied" class="compact-list"></ul></div>
+          </details>
+          <details>
+            <summary>2.2 חמש החלטות ה־Audit</summary>
+            <div><ul id="audit-applied" class="compact-list"></ul></div>
+          </details>
+          <details>
+            <summary>2.3 עשרים ותשע החלטות Gate</summary>
+            <div><ul id="gate-applied" class="compact-list"></ul></div>
+          </details>
+        </div>
+      </section>
+
+      <section id="decisions">
+        <h2>3. כל שש ההחלטות הזכאיות נענו</h2>
+        <div class="section-guide">
+          <div class="guide-item"><strong>מה השלב אומר?</strong> כאן בוחרים כיוון עסקי או בטיחותי לפני שמיישמים אותו במערכת.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> אין כרגע הצבעה זכאית נוספת. בעתיד תידרש החלטה חדשה רק לאחר Evidence מתאים.</div>
+        </div>
+        <div class="callout">
+          <strong>המצב החדש:</strong> כל הבחירות שסיפקת נטענות כברירת המחדל הירוקה. V01 משאירה את המאגר PUBLIC ללא רישיון שימוש עד Legal review.
+        </div>
+        <div id="decision-list" class="decision-list" style="margin-top:14px"></div>
+      </section>
+
+      <section id="needs">
+        <h2>4. מה אני צריך ממך או מהצוות?</h2>
+        <div class="section-guide">
+          <div class="guide-item"><strong>מה השלב אומר?</strong> זו רשימת האנשים, החשבונות והמידע שבלעדיהם אי אפשר להוכיח שהמערכת עובדת באמת.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> למסור מידע לא־רגיש ולתאם Membership לחשבונות. אין להעתיק Credentials למסמך.</div>
+        </div>
+        <div class="callout red">
+          <strong>אין להדביק כאן Secrets.</strong> לא Token, לא Password, לא Private key, לא מספר כרטיס ולא מידע לקוח. חיבור נותנים באמצעות Membership או Vault; במסמך מסמנים רק סטטוס.
+        </div>
+        <div id="needs-list" class="needs-list" style="margin-top:14px"></div>
+      </section>
+
+      <section id="next">
+        <h2>5. סדר העבודה אחרי קבלת המידע</h2>
+        <div class="section-guide">
+          <div class="guide-item"><strong>מה השלב אומר?</strong> זה סדר הפעולות שמונע מאיתנו לדלג על בדיקות חשובות.</div>
+          <div class="guide-item"><strong>מה צריך ממך?</strong> לעזור בחיבורים לפי הסדר ולא לאשר מעבר ל־Production לפני שכל השערים עברו.</div>
+        </div>
+        <div class="panel">
+          <ol class="next-list">
+            <li>
+              <strong>5.1 לשמור את המאגר PUBLIC ואת ההקפאה ACTIVE</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>הקוד נשאר גלוי, אבל לא ממשיכים לפתח חלקים מסוכנים עד שהתכנון בטוח.</span><span><b>מה צריך ממך?</b>לא לשנות כרגע את נראות המאגר ולא לבקש הסרה כללית של ההקפאה.</span></div>
+            </li>
+            <li>
+              <strong>5.2 לתקן את ארבע חבילות התכנון שנדחו</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>מתקנים כל חור שמצאו הבודקים ומגישים גרסה חדשה לבדיקה.</span><span><b>מה צריך ממך?</b>אין חיבור טכני; רק לענות אם מתגלה החלטה עסקית שאין לנו סמכות לקבל.</span></div>
+            </li>
+            <li>
+              <strong>5.3 לסגור Source Universe</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>יוצרים רשימה סגורה של המקורות הרשמיים שעליהם מותר לבסס את התוכנית.</span><span><b>מה צריך ממך?</b>גישה לקריאה בחשבונות הרלוונטיים או צילום Evidence שאינו מכיל Secret.</span></div>
+            </li>
+            <li>
+              <strong>5.4 להשלים TRD-2 ואת Master Control Sequence</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>כותבים איך כל חלק במערכת מתחבר ובאיזה סדר בטוח מפעילים אותו.</span><span><b>מה צריך ממך?</b>לאשר רק החלטות עסקיות חדשות שיעלו; אין צורך לכתוב קוד.</span></div>
+            </li>
+            <li>
+              <strong>5.5 לבנות Atomic Task Registry</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>מפרקים את העבודה למשימות קטנות, מדידות, עם בעלים ובדיקת הצלחה.</span><span><b>מה צריך ממך?</b>שמות Primary ו־Backup, זמינות ותחומי אחריות.</span></div>
+            </li>
+            <li>
+              <strong>5.6 לחשב אחוז, שעות ולוח זמנים</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>רק אחרי שכל המשימות ידועות אפשר לחשב התקדמות אמיתית ולא מספר מנחש.</span><span><b>מה צריך ממך?</b>לאשר זמינות צוות ותקציב; אין צורך לבחור אחוז בעצמך.</span></div>
+            </li>
+            <li>
+              <strong>5.7 לבצע חיבורי Staging לפי G01–G18</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>מחברים סביבת ניסוי נפרדת ומוכיחים כל מסלול בלי לסכן לקוחות אמיתיים.</span><span><b>מה צריך ממך?</b>Membership לחשבונות והקצאת בעלי תפקידים; לא להעביר Tokens בצ׳אט.</span></div>
+            </li>
+            <li>
+              <strong>5.8 לבצע שלוש ביקורות ולאשר root מדויק</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>שלושה סוגי בדיקה מאמתים שהתוכנית שלמה, עקבית ומוגנת.</span><span><b>מה צריך ממך?</b>לאשר או לדחות את החבילה המדויקת רק לאחר הצגת תוצאות הביקורת.</span></div>
+            </li>
+            <li>
+              <strong>5.9 להעריך מחדש את Gate29</strong>
+              <div class="stage-detail"><span><b>מה זה אומר?</b>זה השער האחרון שקובע אם מותר להתקדם; מעבר אינו אוטומטי.</span><span><b>מה צריך ממך?</b>אישור מפורש רק אם כל התנאים עברו. עד אז Production נשאר חסום.</span></div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <div class="actions" aria-label="פעולות מסמך">
+        <button id="export" class="primary" type="button">ייצא תשובות ל־JSON</button>
+        <button id="show-json" type="button">הצג JSON</button>
+        <button id="copy-json" type="button">העתק JSON</button>
+        <button id="reset" class="danger" type="button">נקה שינויים מקומיים</button>
+        <span class="counter">החלטות שנענו: <strong id="answered-count">0</strong>/6 · פריטים שסומנו מוכנים: <strong id="ready-count">0</strong>/15</span>
+      </div>
+      <section id="json-section" hidden>
+        <h2>6. תצוגת JSON</h2>
+        <pre id="json-preview" class="json-preview"></pre>
+      </section>
+      <p id="live" class="sr-only" aria-live="polite"></p>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <strong>גבול המסמך</strong>
+        <p>מסמך Planning מקומי. הוא אינו מכיל Secrets, אינו אישור Legal/Production ואינו משנה ספק, Git או GitHub. המאגר נשאר PUBLIC.</p>
+        <p><a href="planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md">מסמך קליטת ההחלטות המלא</a> · <a href="connect-project-status-grandma-guide.html">מסמך הסטטוס הרחב</a></p>
+      </div>
+    </footer>
+
+    <script>
+      (() => {
+        "use strict";
+        const STORAGE_KEY = "connect-remaining-decisions-and-needs-v1";
+        const strategicApplied = [
+          "O03 · ישראל-first, בכפוף לאימות משפטי וזמינות ספק.",
+          "O11 · Primary + Backup לכל תפקיד; השמות והשעות עדיין חסרים.",
+          "O12 · אחרי Pilot: קודם אמינות ליבה ו־Inbox.",
+          "O13 · קודם Task Registry, ורק אחר כך אחוז וזמן."
+        ];
+        const auditApplied = [
+          "A01 · להקפיא את עץ העבודה ולבדוק אותו בקבוצות.",
+          "A03 · להקים PostgreSQL מבודד ולייצר Evidence.",
+          "A08 · לנקות warnings לפני baseline.",
+          "A09 · לקבוע runtime ראשי ולבדוק parity.",
+          "A11 · להשאיר את Clerk fail-closed עם בדיקות."
+        ];
+        const gateApplied = [
+          "G01 · Clerk ב־Staging", "G02 · Admins שמיים + MFA", "G03 · Invitation E2E", "G04 · Activation + Tenant isolation",
+          "G05 · הפרדת Staging/Production", "G06 · Deployment provenance", "G07 · Meta Test WABA", "G08 · Webhook חתום",
+          "G09 · Queue מבודד", "G10 · Delivery ב־WABA בדיקה", "G11 · Bot עם אישור אדם", "G12 · Secret inventory ב־Vault",
+          "G13 · Rulesets ו־CI במאגר PUBLIC", "G14 · CI evidence", "G15 · Dependency audit", "G16 · Monitoring drill",
+          "G17 · Restore מבודד", "G18 · Retention + safe delete",
+          "D01 · 72 שעות להזמנה", "D02 · OpenAI Responses + אישור אדם", "D03 · להכין Stripe/Paddle ללא חיוב Pilot",
+          "D04 · Limiter חי ורב־שכבתי", "D05 · GuardDuty + Quarantine", "D06 · 10 MiB PDF/TXT/DOCX",
+          "D07 · 15 דקות/3 ניסיונות", "D08 · Daily/90/PITR/Monthly restore", "D09 · Better Stack + OTel",
+          "D10 · שעות עסקים + escalation", "D11 · Retention Policy v2 + Legal"
+        ];
+        const decisions = [
+          {
+            id: "V01", title: "רישיון למאגר PUBLIC", future: false, acceptedAnswer: "public-no-license-until-legal",
+            simple: "אפשר לראות את הקוד, אבל עדיין צריך להחליט מה מותר לאחרים לעשות איתו.",
+            why: "רישיון מעניק זכויות שקשה לקחת בחזרה. קודם צריך להוכיח בעלות על כל הקוד והנכסים.",
+            recommendation: "להישאר זמנית ללא רישיון חדש וללא Contributions חיצוניים עד Legal/ownership review.",
+            ask: "לא לבחור רישיון סופי לפני בדיקה משפטית. כרגע אפשר לבחור באפשרות הבטוחה: להמתין.",
+            options: [
+              ["public-no-license-until-legal", "PUBLIC ללא רישיון עד Legal review", "הבחירה שאושרה: צפייה מותרת, אך אין הענקת זכות שימוש רחבה.", true],
+              ["mit-after-rights-review", "MIT לאחר בדיקת זכויות", "רישיון מתירני רק לאחר הוכחת בעלות ואישור משפטי.", false],
+              ["apache-2-after-patent-review", "Apache-2.0 לאחר Patent/NOTICE review", "רישיון מתירני עם סעיפי פטנטים והודעות, רק לאחר בדיקה.", false]
+            ]
+          },
+          {
+            id: "V02", title: "אישור אקראיות קריפטוגרפית", future: true, acceptedAnswer: "approve-each-security-use",
+            simple: "לפעמים מנעול דיגיטלי צריך מספר שאי אפשר לנחש. זה שונה ממספר מזהה רגיל.",
+            why: "אקראיות לא נכונה שוברת אבטחה; אקראיות מיותרת שוברת שחזור ובדיקות.",
+            recommendation: "אישור נפרד לכל שימוש ביטחוני מדויק. Math.random אסור תמיד; business IDs דטרמיניסטיים.",
+            ask: "אין פעולה עכשיו. אם יופיע צורך ביטחוני אמיתי, אציג לך שימוש מדויק לאישור נפרד.",
+            options: [
+              ["approve-each-security-use", "אישור נפרד לכל שימוש", "הבחירה שאושרה: scope קטן ואפשר לבדוק כל שימוש.", true],
+              ["closed-security-bundle", "Bundle סגור למנעולים בלבד", "אפשרי רק עם רשימת APIs, Threat model ובדיקות.", false],
+              ["approve-none-yet", "לא לאשר עדיין", "יכולות שתלויות בכך נשארות כבויות.", false]
+            ]
+          },
+          {
+            id: "V03", title: "אישור מספרי Rate Limit חיים", future: true, acceptedAnswer: "wait-live",
+            simple: "החלטנו לבנות ברז חכם; עוד לא יודעים מה המספר המדויק שכתוב על הברז של חשבון Meta.",
+            why: "מספר מומצא יכול לגרום לחסימה או לשליחת יתר.",
+            recommendation: "Capacity אפס עד Evidence; אחר כך לאשר את המינימום בין Meta, החשבון, Connect, Tenant, נמען, Queue ועלות.",
+            ask: "בהמשך נצטרך גישת Member ל־Meta Test WABA או Evidence בטוח מהחשבון. אין לשלוח Token.",
+            options: [
+              ["wait-live", "להמתין ל־Evidence חי", "המלצה כרגע.", true],
+              ["approve-minimum", "לאשר את המינימום המוכח", "מתאים רק אחרי readback מלא ו־expiry.", false],
+              ["stricter-connect", "תקרת Connect מחמירה יותר", "מתאים אם רוצים להגן על איכות ועלות מעבר למגבלת Meta.", false]
+            ]
+          },
+          {
+            id: "V04", title: "ספק Billing פעיל אחרי Pilot", future: true, acceptedAnswer: "defer",
+            simple: "בפיילוט לא גובים אוטומטית. בהמשך צריך לבחור איזו קופה תעבוד באמת.",
+            why: "Stripe ו־Paddle שונים בחוזה, מס, זכאות, מחיר ואחריות.",
+            recommendation: "להשאיר את שני ה־adapters כבויים; לבחור ספק רק אחרי eligibility, Legal, Tax, Cost ו־sandbox.",
+            ask: "אין צורך לפתוח Billing עבור ה־Pilot. אחרי ה־Pilot נצטרך Finance, Legal וחשבונות Sandbox.",
+            options: [
+              ["defer", "לדחות עד אחרי Pilot", "המלצה: הפיילוט נשאר ידני.", true],
+              ["stripe", "להפעיל Stripe בעתיד", "רק לאחר כל הראיות והחוזים.", false],
+              ["paddle", "להפעיל Paddle בעתיד", "רק לאחר כל הראיות והחוזים.", false]
+            ]
+          },
+          {
+            id: "V05", title: "אישור ה־Planning root המדויק", future: true, acceptedAnswer: "wait-eligible",
+            simple: "בסוף נארוז את התוכנית בקופסה עם חותמת. צריך לאשר את הקופסה המדויקת, לא רק להגיד 'נראה טוב'.",
+            why: "המסמכים הנוכחיים עדיין נדחו בביקורת, ולכן אין root זכאי להצבעה.",
+            recommendation: "להמתין; כשהחבילה תעבור ביקורות, לאשר או לדחות את ה־hash המדויק עם ממצאים ממוספרים.",
+            ask: "אין פעולה עכשיו. כשהחבילה תהיה זכאית, אציג לך hash מדויק ותוצאות ביקורת לאישור.",
+            options: [
+              ["wait-eligible", "להמתין לחבילה זכאית", "המלצה כרגע.", true],
+              ["approve-exact-root", "לאשר root מדויק", "אפשרי רק לאחר closure וביקורות תקינות.", false],
+              ["reject-findings", "לדחות עם Findings", "מחזיר את החבילה לתיקון בלי אישור חלקי.", false]
+            ]
+          },
+          {
+            id: "V06", title: "הסרת הקפאת הפיתוח", future: true, acceptedAnswer: "keep-active",
+            simple: "המתג הראשי עדיין כבוי כדי שלא נחבר מכונה חיה לתוכנית עם חורים.",
+            why: "Gate29 חסום וכל ארבעת ה־Candidates המרכזיים נדחו.",
+            recommendation: "להשאיר ACTIVE. בעתיד להסיר רק עבור Work package מדויק לאחר Gate29.",
+            ask: "לא להסיר את ההקפאה כרגע. בעתיד תתבקש לאשר רק Slice מוגדר שעבר את כל השערים.",
+            options: [
+              ["keep-active", "להשאיר את ההקפאה ACTIVE", "המלצה מחייבת כרגע.", true],
+              ["scoped-lift", "להסיר ל־Slice מדויק", "רק לאחר Gate29 וסמכות התחום.", false],
+              ["reject", "לא להסיר ולהחזיר לתיקון", "מתאים אם נותר Finding חוסם.", false]
+            ]
+          }
+        ];
+        const needs = [
+          ["N01", "שמות Primary ו־Backup", "Tal", "לכל אחריות חשובה צריך אדם מוביל ומחליף שיוכל להיכנס במקומו.", "שמות, תפקיד, שעות שבועיות, שעות on-call ונתיב escalation.", false],
+          ["N02", "Clerk Staging", "Rasha + Security", "Clerk הוא השומר בכניסה: הוא מנהל התחברות, משתמשים וארגונים בסביבת הניסוי.", "Membership/Project + Organizations + MFA policy. לא להדביק Keys כאן.", true],
+          ["N03", "Railway Staging", "Rasha + DevOps", "Railway מפעיל את השרת, מסד הנתונים ותור המשימות בסביבת הניסוי.", "API, Worker, PostgreSQL ו־Redis מבודדים עם Member access.", true],
+          ["N04", "Vercel Staging ו־Production", "Rasha + DevOps", "Vercel מפרסם את אתר React. צריך אתר ניסוי ואתר אמיתי נפרדים.", "Projects נפרדים, domains ו־APP_PUBLIC_ORIGIN בצד השרת.", true],
+          ["N05", "Meta Test WABA", "Tal + Rasha + David", "זהו חשבון WhatsApp Business רשמי לניסוי, בלי לשלוח ללקוחות אמיתיים.", "App, WABA, phone, templates, webhook, permissions, recipients מאושרים ו־live limits.", true],
+          ["N06", "AWS il-central-1", "Rasha + Security", "AWS ישמור קבצים ויסרוק אותם באזור ישראל, עם מנעול הצפנה ותקציב מוגבל.", "Account/Member, private S3, customer KMS, GuardDuty plan ו־budget alarms.", true],
+          ["N07", "Better Stack + OpenTelemetry", "Tal + Rasha + Operations", "כלי הניטור מספרים לנו כשהמערכת איטית, נפלה או מתנהגת באופן חשוד.", "Project, ingestion path, redaction, SLO ו־alert routing.", true],
+          ["N08", "OpenAI company project", "Tal + David + Security", "זהו אזור חברה מבודד להפעלת ה־AI, עם תקציב וכללי מידע משלו.", "Project membership, data controls, model/profile, budget ו־Eval environment. AI נשאר OFF.", true],
+          ["N09", "Stripe/Paddle sandbox", "Tal + Finance + Legal", "Sandbox הוא קופה לתרגול: בודקים תשלום בלי לקחת כסף אמיתי.", "לא נדרש להפעלת Pilot; יידרש לפני בחירת Billing פעיל.", true],
+          ["N10", "GitHub PUBLIC governance", "Tal + Rasha", "מגדירים מי רשאי לשנות את הקוד ואילו בדיקות חייבות לעבור לפני מיזוג.", "Ruleset ל־main, required CI, scanners, CODEOWNERS/collaborators ו־post-readback.", true],
+          ["N11", "Domains ו־Origins", "Tal + Rasha", "אלה הכתובות הרשמיות של האתר והשרתים שמותר להם לדבר זה עם זה.", "שמות Staging/Production וכתובות HTTPS. localhost רק Development.", false],
+          ["N12", "Legal ו־Privacy", "Tal + Counsel", "עורך דין בודק מה מותר לאסוף, לשלוח, לשמור ולמחוק לפי החוק.", "ישות משפטית, Privacy notice, DPA, consent/opt-out, retention, residency ו־incident contacts.", false],
+          ["N13", "תקציב ותקרות", "Tal + Finance", "קובעים מראש כמה כל שירות רשאי לעלות ומי עוצר אותו אם חורג.", "סכום ותקרת עלות לכל ספק, מטבע, owner ו־kill switch. בלי פרטי תשלום.", false],
+          ["N14", "PostgreSQL מבודד לבדיקה", "Rasha + David + QA", "זהו מסד נתונים זמני ונפרד שבו אפשר לתרגל שדרוג ושחזור בלי לסכן מידע אמיתי.", "Database זמני ללא Production data עבור migration/parity/restore Evidence.", true],
+          ["N15", "Pilot charter", "Tal + Product + Security", "זהו דף קצר שמגדיר מי משתתף בניסוי, מתי עוצרים ומה נחשב הצלחה.", "Tenant/עסק מאושר, משתתפים, תאריכים, stop authority וקריטריוני יציאה.", false]
+        ].map(([id, title, owner, simple, asks, secret]) => ({ id, title, owner, simple, asks, secret }));
+
+        const technicalTerms = new Map([
+          ["APP_PUBLIC_ORIGIN", "כתובת האתר הציבורית שהשרת סומך עליה לצורך יצירת קישורים ובדיקת בקשות."],
+          ["Master Control Sequence", "הסדר הראשי שמגדיר מה מפעילים קודם ומה מותר להפעיל רק לאחר הצלחה."],
+          ["Atomic Task Registry", "רשימת משימות קטנות מספיק כדי שלכל אחת יהיו בעלים, תלות ותוצאת הצלחה ברורה."],
+          ["Source Universe", "הרשימה הסגורה של המסמכים והמקורות הרשמיים שעליהם מותר לבסס החלטות."],
+          ["Development freeze", "עצירה מכוונת של פיתוח מסוכן עד שהתכנון והביקורות עוברים."],
+          ["Meta Test WABA", "חשבון WhatsApp Business רשמי שמיועד לניסויים מבוקרים לפני שימוש עם לקוחות."],
+          ["WhatsApp Business", "המערכת הרשמית של Meta שמאפשרת לעסק לשלוח ולקבל הודעות WhatsApp דרך API."],
+          ["Direct marketing", "פנייה שיווקית ישירה לאדם; בדרך כלל דורשת כללי הסכמה, זיהוי והסרה."],
+          ["Legal Hold", "הוראה משפטית שעוצרת מחיקה רגילה של מידע מסוים עד לסיום צורך משפטי."],
+          ["Privacy notice", "מסמך שמסביר לאנשים איזה מידע נאסף, למה, לכמה זמן ועם מי הוא משותף."],
+          ["account readback", "קריאה חוזרת מהחשבון האמיתי שמוכיחה מה הוגדר בו בפועל."],
+          ["post-readback", "בדיקה חוזרת לאחר שינוי שמוודאת שהשינוי באמת נשמר אצל הספק."],
+          ["Threat model", "רשימה מסודרת של מי עלול לתקוף, מה הוא עלול לנסות ואילו הגנות נדרשות."],
+          ["Rate limiting", "ברז תוכנתי שמגביל כמה פעולות מותר לבצע בפרק זמן כדי למנוע חסימה או עומס."],
+          ["OpenTelemetry", "תקן להעברת מדדי ביצועים, לוגים ועקבות בין המערכת לכלי הניטור."],
+          ["Better Stack", "שירות ניטור והתראות שמרכז תקלות ומודיע לאנשים המתאימים."],
+          ["Supply chain", "כל החבילות, כלי הבנייה והשירותים החיצוניים שנכנסים בדרך אל התוכנה."],
+          ["dependency audit", "בדיקה שמחפשת חולשות בספריות ובחבילות שהתוכנה תלויה בהן."],
+          ["required CI", "בדיקות אוטומטיות שחייבות לעבור לפני שמותר למזג שינוי לקוד הראשי."],
+          ["Cryptographic randomness", "אקראיות חזקה שקשה לנחש ומשמשת רק לצרכים ביטחוניים מוגדרים."],
+          ["cryptographic randomness", "אקראיות חזקה שקשה לנחש ומשמשת רק לצרכים ביטחוניים מוגדרים."],
+          ["Private key", "מפתח סודי שמוכיח זהות או מפענח מידע; אסור להעתיק אותו למסמך או לצ׳אט."],
+          ["Membership", "הוספת אדם מורשה לחשבון דרך מנגנון המשתמשים של הספק, בלי למסור לו סיסמה."],
+          ["Credentials", "פרטי גישה כמו סיסמה, Token או מפתח. שומרים אותם בכספת ולא במסמך."],
+          ["Credential", "פרט גישה כמו סיסמה, Token או מפתח. שומרים אותו בכספת ולא במסמך."],
+          ["OpenAI Responses", "ממשק OpenAI להפעלת מודלים וכלים דרך בקשות מתועדות ומבוקרות."],
+          ["OpenAI", "שירות ה־AI המתוכנן עבור יכולות הבוט, בכפוף לאישור אדם ובדיקות."],
+          ["PostgreSQL", "מסד נתונים ששומר מידע מסודר כמו משתמשים, שיחות והרשאות."],
+          ["GuardDuty", "שירות AWS שמזהה פעילות חשודה ויכול להשתתף במסלול סריקת קבצים."],
+          ["CODEOWNERS", "קובץ GitHub שמגדיר מי חייב לבדוק שינויים באזורים מסוימים בקוד."],
+          ["Gate29", "שער ההחלטה האחרון בתוכנית: כל עוד הוא חסום אין אישור להתקדם אוטומטית."],
+          ["Review Protocol", "כללים קבועים שמסבירים כיצד מבקרים מסמך ומה נחשב אישור או דחייה."],
+          ["Public/Cyber", "חבילת תכנון שמתמקדת בסיכוני מאגר ציבורי ובהגנות סייבר."],
+          ["TRD-2", "מסמך תכנון טכני שמגדיר את מבנה המערכת, הגבולות והזרימות שלה."],
+          ["Task Registry", "רשימה מרכזית של כל המשימות, הבעלים, התלויות ומבחני ההצלחה."],
+          ["Work package", "חבילת עבודה מוגדרת שאפשר לבדוק ולאשר בנפרד."],
+          ["live limits", "המגבלות המספריות שהספק והחשבון מציגים עכשיו, ולא מספר מהשערה."],
+          ["alert routing", "הכללים שקובעים מי יקבל התראה ובאיזה ערוץ כאשר מתרחשת תקלה."],
+          ["ingestion path", "המסלול שבו לוגים ומדדים נכנסים מכל חלקי המערכת לכלי הניטור."],
+          ["data controls", "הגדרות שקובעות איך ספק רשאי לשמור, לעבד או להשתמש במידע."],
+          ["Eval environment", "סביבת בדיקה שבה מודדים את איכות ובטיחות ה־AI לפני הפעלה אמיתית."],
+          ["kill switch", "מתג חירום שעוצר במהירות שירות, שליחה או הוצאה כספית."],
+          ["incident contacts", "האנשים שאליהם פונים בזמן אירוע אבטחה או תקלה משמעותית."],
+          ["on-call", "אדם שמוגדר כזמין לטיפול בתקלות בזמן שנקבע מראש."],
+          ["escalation", "מסלול העברת בעיה לאדם בכיר או מתאים יותר כאשר היא לא נפתרת."],
+          ["fail-closed", "מצב בטוח שבו חוסר ודאות או תקלה גורמים לחסימה ולא למתן גישה."],
+          ["Evidence", "ראיה שאפשר לבדוק, כמו תוצאת בדיקה או צילום הגדרה ללא Secret."],
+          ["Runtime", "הסביבה שמפעילה את הקוד בפועל."],
+          ["runtime", "הסביבה שמפעילה את הקוד בפועל."],
+          ["parity", "הוכחה ששתי סביבות מתנהגות באותה צורה במקרים החשובים."],
+          ["baseline", "נקודת מוצא מוסכמת שממנה מודדים שינויים ותקלות."],
+          ["Migrations", "שינויים מסודרים במבנה מסד הנתונים בין גרסאות."],
+          ["migration", "שינוי מסודר במבנה מסד הנתונים בין גרסאות."],
+          ["Rulesets", "כללי GitHub שמגנים על ענפים ודורשים אישורים ובדיקות."],
+          ["Ruleset", "כלל GitHub שמגן על ענף ודורש אישורים ובדיקות."],
+          ["Webhook", "כתובת שהספק קורא לה אוטומטית כאשר מתרחש אירוע, למשל הודעה חדשה."],
+          ["webhook", "כתובת שהספק קורא לה אוטומטית כאשר מתרחש אירוע, למשל הודעה חדשה."],
+          ["Templates", "נוסחי הודעות ש־WhatsApp מאשר מראש לשימוש מחוץ לחלון שיחה פתוח."],
+          ["templates", "נוסחי הודעות ש־WhatsApp מאשר מראש לשימוש מחוץ לחלון שיחה פתוח."],
+          ["Consent", "הסכמה מתועדת של אדם לקבל סוג מסוים של הודעות."],
+          ["consent", "הסכמה מתועדת של אדם לקבל סוג מסוים של הודעות."],
+          ["opt-out", "דרך פשוטה וברורה שבה אדם מבקש להפסיק לקבל הודעות."],
+          ["Retention", "הכללים שקובעים כמה זמן שומרים כל סוג מידע ומתי מוחקים אותו."],
+          ["retention", "הכללים שקובעים כמה זמן שומרים כל סוג מידע ומתי מוחקים אותו."],
+          ["Backup", "עותק שמור של מידע שנועד לאפשר התאוששות מאובדן או תקלה."],
+          ["Restore", "פעולת החזרת המידע מתוך גיבוי ובדיקה שהוא באמת שמיש."],
+          ["restore", "פעולת החזרת המידע מתוך גיבוי ובדיקה שהוא באמת שמיש."],
+          ["Monitoring", "מעקב קבוע אחר זמינות, מהירות, שגיאות ואירועים חשודים."],
+          ["Billing", "מערכת החיוב והגבייה מלקוחות."],
+          ["Sandbox", "סביבת תרגול של ספק שבה פעולות אינן אמורות להשפיע על כסף או לקוחות אמיתיים."],
+          ["sandbox", "סביבת תרגול של ספק שבה פעולות אינן אמורות להשפיע על כסף או לקוחות אמיתיים."],
+          ["Production", "הסביבה האמיתית שבה משתמשים ולקוחות עובדים."],
+          ["Staging", "סביבת ניסוי שדומה לסביבה האמיתית אך מבודדת מלקוחות."],
+          ["Development", "סביבת העבודה המקומית שבה מפתחים ובודקים שינויים."],
+          ["PUBLIC", "מאגר שכל אדם באינטרנט יכול לראות; הוא אינו בהכרח נותן רשות להשתמש בקוד."],
+          ["GitHub", "שירות שמארח את קוד המקור, ביקורות קוד ובדיקות אוטומטיות."],
+          ["Railway", "שירות ענן שמפעיל שרתים, Workers, מסדי נתונים ותורים."],
+          ["Vercel", "שירות שמפרסם ומפעיל את ממשק ה־React באינטרנט."],
+          ["React", "ספריית JavaScript לבניית מסכי אתר אינטראקטיביים."],
+          ["Redis", "מאגר מהיר שמשמש כאן לתורים, נעילות ומידע קצר־חיים."],
+          ["BullMQ", "ספרייה שמנהלת תורי משימות על גבי Redis."],
+          ["Queue", "תור שמחזיק עבודות לביצוע ומעביר אותן לעובד בקצב בטוח."],
+          ["Worker", "תהליך שרץ ברקע ומבצע עבודות מהתור."],
+          ["API", "דלת מסודרת שמאפשרת לתוכנות לדבר זו עם זו."],
+          ["AWS", "ספק ענן שמספק אחסון, הצפנה, אבטחה ושירותים נוספים."],
+          ["S3", "שירות AWS לאחסון קבצים כאובייקטים בתוך Bucket פרטי."],
+          ["KMS", "שירות שמנהל מפתחות הצפנה בלי לשמור אותם בתוך הקוד."],
+          ["WABA", "קיצור של WhatsApp Business Account — החשבון העסקי הרשמי ב־Meta."],
+          ["MFA", "כניסה שדורשת הוכחה נוספת מעבר לסיסמה, למשל אפליקציית אימות."],
+          ["DPA", "הסכם שמגדיר כיצד ספק מעבד ומגן על מידע אישי עבור העסק."],
+          ["SLO", "יעד מדיד לזמינות או למהירות שהמערכת אמורה לעמוד בו."],
+          ["RACI", "טבלה שמבהירה מי מבצע, מי מאשר, עם מי מתייעצים ואת מי מעדכנים."],
+          ["E2E", "בדיקה מקצה לקצה שמדמה תהליך שלם כפי שמשתמש אמיתי מבצע אותו."],
+          ["CI", "מערכת אוטומטית שבונה ובודקת כל שינוי בקוד."],
+          ["AI", "בינה מלאכותית; כאן היא אינה שולחת הודעה בלי מסלול האישור שנקבע."],
+          ["JSON", "מבנה טקסט מסודר להעברת נתונים בין מערכות."],
+          ["Token", "מפתח גישה דיגיטלי. מתייחסים אליו כמו לסיסמה ואסור להדביק אותו כאן."],
+          ["Tokens", "מפתחות גישה דיגיטליים. מתייחסים אליהם כמו לסיסמה ואסור להדביק אותם כאן."],
+          ["Secret", "מידע סודי שמאפשר גישה או פענוח, כגון Token, סיסמה או מפתח פרטי."],
+          ["Secrets", "מידע סודי שמאפשר גישה או פענוח, כגון Tokens, סיסמאות ומפתחות פרטיים."],
+          ["Vault", "כספת ייעודית לשמירת Secrets והרשאות גישה אליהם."],
+          ["HTTPS", "חיבור אינטרנט מוצפן שמגן על המידע בדרך בין הדפדפן לשרת."],
+          ["localhost", "כתובת שמצביעה רק על המחשב המקומי ומשמשת לפיתוח, לא לאתר אמיתי."],
+          ["Origin", "השילוב של פרוטוקול, שם אתר ופורט שמזהה מאין הגיעה בקשת דפדפן."],
+          ["Origins", "כתובות המקור שהמערכת מרשה להן לתקשר איתה."],
+          ["Domains", "שמות האתר שאנשים מקלידים בדפדפן, למשל example.com."],
+          ["Tenant", "עסק או ארגון אחד שמידעו חייב להיות מופרד מעסקים אחרים."],
+          ["Pilot", "ניסוי מצומצם עם משתמשים ותנאי עצירה מוגדרים לפני השקה רחבה."],
+          ["root", "החותמת הראשית שמייצגת אוסף מדויק של מסמכים וגרסאות."],
+          ["hash", "טביעת אצבע דיגיטלית שמשתנה אם תוכן הקובץ משתנה."],
+          ["Gate", "שער בדיקה: לא עוברים לשלב הבא עד שהתנאים שלו מתקיימים."],
+          ["Slice", "חלק קטן ומוגדר מהמערכת שאפשר לפתח, לבדוק ולאשר בנפרד."],
+          ["Counsel", "עורך דין או יועץ משפטי מוסמך."],
+          ["Legal", "בדיקה או החלטה משפטית שאינה ניתנת לאישור על ידי קוד בלבד."],
+          ["Privacy", "כללים להגנה על מידע אישי ועל זכויות האנשים שהמידע שייך להם."],
+          ["Finance", "האחראים לתקציב, תשלום, מס ובקרה כספית."],
+          ["DevOps", "האחריות על פריסה, תשתיות, סביבות וניטור המערכת."],
+          ["QA", "בדיקות איכות שמוודאות שהמערכת פועלת לפי הדרישות."],
+          ["Security", "האחריות על הגנה מפני גישה, שינוי או דליפה לא מורשים."],
+          ["redaction", "הסרה או הסתרה של מידע רגיש לפני שליחתו ללוג או לספק."],
+          ["residency", "המדינה או האזור שבהם המידע נשמר ומעובד."],
+          ["scope", "הגבול המדויק של הרשאה, שינוי או בדיקה."],
+          ["expiry", "מועד שבו הרשאה, הזמנה או ראיה מפסיקות להיות תקפות."],
+          ["adapters", "שכבות קוד נפרדות שמאפשרות להחליף ספק בלי לשנות את כל המערכת."],
+          ["Adapter", "שכבת קוד שמתרגמת בין המערכת לבין ספק חיצוני."],
+          ["Fork", "עותק עצמאי של מאגר קוד שאדם אחר יכול להמשיך לפתח בנפרד."],
+          ["AGPL", "רישיון קוד פתוח שמחייב בדרך כלל שיתוף קוד גם כאשר מפעילים אותו כשירות רשת."],
+          ["Apache-2.0", "רישיון פתוח ומתירני שמאפשר שימוש רחב, כולל מסחרי, בתנאים מוגדרים."],
+          ["Math.random", "פונקציית אקראיות שאסורה בפרויקט ואינה מתאימה לצורכי אבטחה."],
+          ["business IDs", "מזהים של רשומות עסקיות; בפרויקט הם צריכים להיות דטרמיניסטיים כשאפשר."],
+          ["Capacity", "הכמות המרבית שהמערכת מרשה לעבד או לשלוח כרגע."],
+          ["Connect", "שם המערכת הנבנית לניהול WhatsApp, דיוור ובוט AI."],
+          ["Meta", "החברה שמפעילה את WhatsApp ואת ממשקי WhatsApp Business."],
+          ["Stripe", "ספק תשלומים אפשרי; אינו פעיל ב־Pilot הנוכחי."],
+          ["Paddle", "ספק Billing אפשרי שפועל לעיתים כ־Merchant of Record; אינו פעיל ב־Pilot."],
+          ["Clerk", "שירות לניהול התחברות, משתמשים וארגונים."],
+          ["B0 v7", "גרסה של חבילת תכנון בסיסית שנדחתה בביקורת ודורשת תיקון."],
+          ["D02-A9", "חבילת התכנון של מסלול ה־AI שנבדקה ונדרשת לתיקון."],
+          ["Candidates", "גרסאות מועמדות שעדיין לא התקבלו כמקור אמת סופי."],
+          ["Audit", "בדיקה שיטתית שמחפשת טעויות, חוסרים וסיכונים ומצרפת ראיות."],
+          ["Evals", "בדיקות מדידות לאיכות ולבטיחות של התנהגות מודל AI."],
+          ["Region", "אזור גאוגרפי של ספק ענן שבו שירות ומידע מופעלים."],
+          ["Owner", "האדם שאחראי לוודא שהמשימה או ההחלטה אכן נסגרת."],
+          ["owner", "האדם שאחראי לוודא שהמשימה או ההחלטה אכן נסגרת."]
+        ]);
+
+        const technicalTermPattern = new RegExp(
+          [...technicalTerms.keys()]
+            .sort((left, right) => right.length - left.length)
+            .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+            .join("|"),
+          "g"
+        );
+
+        const state = loadState();
+
+        function loadState() {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+            return parsed && typeof parsed === "object" ? parsed : { decisions: {}, needs: {} };
+          } catch {
+            return { decisions: {}, needs: {} };
+          }
+        }
+
+        function ensureState() {
+          if (!state.decisions || typeof state.decisions !== "object") state.decisions = {};
+          if (!state.needs || typeof state.needs !== "object") state.needs = {};
+        }
+
+        function decorateTechnicalTerms(root) {
+          const textNodes = [];
+          const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              const parent = node.parentElement;
+              if (!parent || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+              if (parent.closest("script, style, noscript, pre, code, textarea, input, select, button, a, label, summary, .term")) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              technicalTermPattern.lastIndex = 0;
+              return technicalTermPattern.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+            }
+          });
+          while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+          textNodes.forEach((node) => {
+            const text = node.nodeValue;
+            const fragment = document.createDocumentFragment();
+            let cursor = 0;
+            technicalTermPattern.lastIndex = 0;
+            let match = technicalTermPattern.exec(text);
+            while (match) {
+              if (match.index > cursor) fragment.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+              const explanation = technicalTerms.get(match[0]);
+              const term = document.createElement("span");
+              term.className = "term";
+              term.tabIndex = 0;
+              term.textContent = match[0];
+              term.dataset.explain = explanation;
+              term.title = explanation;
+              term.setAttribute("role", "note");
+              term.setAttribute("aria-label", `${match[0]}: ${explanation}`);
+              fragment.appendChild(term);
+              cursor = match.index + match[0].length;
+              match = technicalTermPattern.exec(text);
+            }
+            if (cursor < text.length) fragment.appendChild(document.createTextNode(text.slice(cursor)));
+            node.replaceWith(fragment);
+          });
+        }
+
+        function saveState() {
+          ensureState();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          updateCounts();
+        }
+
+        function renderApplied() {
+          renderList("strategic-applied", strategicApplied);
+          renderList("audit-applied", auditApplied);
+          renderList("gate-applied", gateApplied);
+        }
+
+        function renderList(id, items) {
+          const target = document.getElementById(id);
+          target.replaceChildren();
+          items.forEach((item) => {
+            const li = document.createElement("li");
+            li.textContent = item;
+            target.appendChild(li);
+          });
+        }
+
+        function renderDecisions() {
+          ensureState();
+          const target = document.getElementById("decision-list");
+          target.replaceChildren();
+          decisions.forEach((decision, index) => {
+            const card = document.createElement("article");
+            card.className = `decision-card${decision.acceptedAnswer ? " accepted" : decision.future ? " future" : ""}`;
+            const head = document.createElement("div");
+            head.className = "decision-head";
+            const heading = document.createElement("h3");
+            heading.textContent = `3.${index + 1} ${decision.title}`;
+            const id = document.createElement("span");
+            id.className = "decision-id";
+            id.textContent = `${decision.id} · ${decision.acceptedAnswer ? "נענה" : "פתוח"}`;
+            head.append(heading, id);
+            const simple = document.createElement("p");
+            simple.className = "plain-explanation";
+            const simpleStrong = document.createElement("strong");
+            simpleStrong.textContent = "מה זה אומר? ";
+            simple.append(simpleStrong, document.createTextNode(decision.simple));
+            const why = document.createElement("p");
+            const whyStrong = document.createElement("strong");
+            whyStrong.textContent = "למה זה חשוב? ";
+            why.append(whyStrong, document.createTextNode(decision.why));
+            const recommendation = document.createElement("p");
+            recommendation.className = "recommendation";
+            recommendation.textContent = `ההמלצה שלי: ${decision.recommendation}`;
+            const ask = document.createElement("p");
+            ask.className = "plain-explanation";
+            const askStrong = document.createElement("strong");
+            askStrong.textContent = "מה אני צריך ממך? ";
+            ask.append(askStrong, document.createTextNode(decision.ask));
+            const fieldset = document.createElement("fieldset");
+            const legend = document.createElement("legend");
+            legend.textContent = "בחירה";
+            fieldset.appendChild(legend);
+            const current = effectiveDecisionState(decision);
+            decision.options.forEach(([value, label, description, recommended], optionIndex) => {
+              const option = document.createElement("label");
+              option.className = `option${recommended ? " recommended" : ""}`;
+              const radio = document.createElement("input");
+              radio.type = "radio";
+              radio.name = `decision-${decision.id}`;
+              radio.value = value;
+              radio.id = `decision-${decision.id}-${optionIndex + 1}`;
+              radio.checked = current.answer === value;
+              radio.addEventListener("change", () => {
+                if (!radio.checked) return;
+                state.decisions[decision.id] = { answer: value, notes: current.notes || "" };
+                saveState();
+              });
+              const strong = document.createElement("strong");
+              strong.textContent = `${label}${recommended ? " — מומלץ" : ""}`;
+              const small = document.createElement("small");
+              small.textContent = description;
+              option.append(radio, strong, small);
+              fieldset.appendChild(option);
+            });
+            const notesLabel = document.createElement("label");
+            notesLabel.className = "notes-label";
+            notesLabel.textContent = "הערה בלי Secrets או מידע אישי";
+            const textarea = document.createElement("textarea");
+            textarea.maxLength = 1000;
+            textarea.value = current.notes || "";
+            textarea.addEventListener("input", () => {
+              const existing = state.decisions[decision.id] || { answer: null };
+              state.decisions[decision.id] = { answer: existing.answer || null, notes: textarea.value };
+              saveState();
+            });
+            notesLabel.appendChild(textarea);
+            card.append(head, simple, why, recommendation, ask, fieldset, notesLabel);
+            target.appendChild(card);
+          });
+        }
+
+        function renderNeeds() {
+          ensureState();
+          const target = document.getElementById("needs-list");
+          target.replaceChildren();
+          needs.forEach((need, index) => {
+            const card = document.createElement("article");
+            card.className = `need-card${need.secret ? " secret" : ""}`;
+            const head = document.createElement("div");
+            head.className = "need-head";
+            const heading = document.createElement("h3");
+            heading.textContent = `4.${index + 1} ${need.title}`;
+            const id = document.createElement("span");
+            id.className = "need-id";
+            id.textContent = need.id;
+            head.append(heading, id);
+            const meta = document.createElement("div");
+            meta.className = "need-meta";
+            meta.textContent = `בעלים: ${need.owner} · ${need.secret ? "חיבור דרך Membership/Vault בלבד" : "אפשר למסור מידע לא־רגיש"}`;
+            const simple = document.createElement("p");
+            simple.className = "plain-explanation";
+            const simpleStrong = document.createElement("strong");
+            simpleStrong.textContent = "מה זה אומר? ";
+            simple.append(simpleStrong, document.createTextNode(need.simple));
+            const asks = document.createElement("p");
+            asks.className = "plain-explanation";
+            const asksStrong = document.createElement("strong");
+            asksStrong.textContent = "מה צריך בפועל? ";
+            asks.append(asksStrong, document.createTextNode(need.asks));
+            const controls = document.createElement("div");
+            controls.className = "need-controls";
+            const current = state.needs[need.id] || {};
+            const statusLabel = document.createElement("label");
+            statusLabel.textContent = "סטטוס";
+            const select = document.createElement("select");
+            [["missing", "טרם נמסר"], ["in-progress", "בתהליך"], ["ready", "מוכן עם ראיה"], ["not-applicable", "לא רלוונטי"]].forEach(([value, label]) => {
+              const option = document.createElement("option");
+              option.value = value;
+              option.textContent = label;
+              select.appendChild(option);
+            });
+            select.value = current.status || "missing";
+            select.addEventListener("change", () => {
+              const existing = state.needs[need.id] || {};
+              state.needs[need.id] = { status: select.value, note: existing.note || "" };
+              saveState();
+            });
+            statusLabel.appendChild(select);
+            const noteLabel = document.createElement("label");
+            noteLabel.textContent = "הערת תיאום בלבד";
+            const input = document.createElement("input");
+            input.type = "text";
+            input.maxLength = 500;
+            input.placeholder = need.secret ? "לדוגמה: Member נוסף; אין לכתוב Token" : "הערה קצרה";
+            input.value = current.note || "";
+            input.addEventListener("input", () => {
+              const existing = state.needs[need.id] || { status: select.value };
+              state.needs[need.id] = { status: existing.status || select.value, note: input.value };
+              saveState();
+            });
+            noteLabel.appendChild(input);
+            controls.append(statusLabel, noteLabel);
+            card.append(head, meta, simple, asks, controls);
+            target.appendChild(card);
+          });
+        }
+
+        function optionLabel(decision, value) {
+          const found = decision.options.find((option) => option[0] === value);
+          return found ? found[1] : null;
+        }
+
+        function effectiveDecisionState(decision) {
+          const current = state.decisions[decision.id] || {};
+          const currentAnswerIsValid = decision.options.some((option) => option[0] === current.answer);
+          return {
+            answer: currentAnswerIsValid ? current.answer : decision.acceptedAnswer || null,
+            notes: current.notes || ""
+          };
+        }
+
+        function buildExport() {
+          ensureState();
+          return {
+            document: "connect-remaining-decisions-and-needs",
+            version: 4,
+            exportedAt: new Date().toISOString(),
+            warning: "אין לכלול Secrets או מידע אישי. בחירות הן Planning בלבד עד Evidence ואישור פורמלי.",
+            inheritedDecisionExport: {
+              sha256: "5aece466c4c3c1bf6fe3bbb0ec4b7525028c65ac2dd39d396ca4d339e7828af4",
+              answersApplied: 38
+            },
+            latestPartialDecisionIntake: {
+              source: "user-supplied JSON in conversation",
+              exportedAt: "2026-08-30T16:27:50.794Z",
+              answersApplied: 5,
+              openDecisionIds: ["V01"],
+              needsReady: 0
+            },
+            latestEligibleVoteIntake: {
+              source: "user-supplied CONNECT-ELIGIBLE-TAL-VOTES-V2 export in conversation",
+              exportedAt: "2026-08-30T16:37:24.883Z",
+              observedAt: "2026-08-30T19:28:56+03:00",
+              statusSnapshotSha256: "3fd7ec06f9201200ebaa608ad39a48659ab84f4efc7c42535b82034549b230b1",
+              choiceUniverseSha256: "95feab1238fafbd03154583325188549ebab2f91578e478f4ca92b79e1faf5ee",
+              votesApplied: 2,
+              eligibleVotesAnswered: 2,
+              eligibleVotesOpen: 0
+            },
+            invariant: {
+              repositoryVisibility: "PUBLIC",
+              Gate29: "BLOCKED",
+              developmentFreeze: "ACTIVE",
+              officialCompletion: "unknown/unavailable"
+            },
+            decisions: decisions.map((decision) => {
+              const value = effectiveDecisionState(decision);
+              return {
+                id: decision.id,
+                title: decision.title,
+                answer: value.answer || null,
+                answerLabel: optionLabel(decision, value.answer),
+                simpleExplanation: decision.simple,
+                requestFromUser: decision.ask,
+                notes: value.notes || ""
+              };
+            }),
+            needs: needs.map((need) => {
+              const value = state.needs[need.id] || {};
+              return {
+                id: need.id,
+                title: need.title,
+                owner: need.owner,
+                simpleExplanation: need.simple,
+                requestFromUser: need.asks,
+                status: value.status || "missing",
+                note: value.note || "",
+                secretHandling: need.secret ? "MEMBERSHIP_OR_VAULT_ONLY" : "NON_SECRET_INFORMATION_ONLY"
+              };
+            })
+          };
+        }
+
+        function exportJson() {
+          const content = JSON.stringify(buildExport(), null, 2);
+          const blob = new Blob([content], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "connect-remaining-decisions-and-needs.json";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 0);
+          announce("קובץ JSON נוצר להורדה.");
+        }
+
+        function showJson() {
+          const section = document.getElementById("json-section");
+          const preview = document.getElementById("json-preview");
+          preview.textContent = JSON.stringify(buildExport(), null, 2);
+          section.hidden = false;
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          announce("תצוגת JSON נפתחה.");
+        }
+
+        async function copyJson() {
+          const content = JSON.stringify(buildExport(), null, 2);
+          try {
+            await navigator.clipboard.writeText(content);
+            announce("ה־JSON הועתק.");
+          } catch {
+            const textarea = document.createElement("textarea");
+            textarea.value = content;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.select();
+            const copied = document.execCommand("copy");
+            textarea.remove();
+            announce(copied ? "ה־JSON הועתק." : "העתקה אוטומטית נכשלה; השתמש בתצוגת JSON.");
+          }
+        }
+
+        function updateCounts() {
+          ensureState();
+          const answered = decisions.filter((decision) => Boolean(effectiveDecisionState(decision).answer)).length;
+          const ready = needs.filter((need) => state.needs[need.id]?.status === "ready").length;
+          document.getElementById("answered-count").textContent = String(answered);
+          document.getElementById("ready-count").textContent = String(ready);
+        }
+
+        function announce(message) {
+          document.getElementById("live").textContent = message;
+        }
+
+        document.getElementById("export").addEventListener("click", exportJson);
+        document.getElementById("show-json").addEventListener("click", showJson);
+        document.getElementById("copy-json").addEventListener("click", copyJson);
+        document.getElementById("reset").addEventListener("click", () => {
+          const approved = window.confirm("למחוק רק שינויים מקומיים? שש תשובות Tal שנקלטו יישארו כברירת מחדל.");
+          if (!approved) return;
+          localStorage.removeItem(STORAGE_KEY);
+          state.decisions = {};
+          state.needs = {};
+          renderDecisions();
+          renderNeeds();
+          updateCounts();
+          decorateTechnicalTerms(document.body);
+          document.getElementById("json-section").hidden = true;
+          announce("השינויים המקומיים נוקו. 38 התשובות המקוריות וכל שש תשובות ההמשך נשארו רשומות בתכנון.");
+        });
+
+        renderApplied();
+        renderDecisions();
+        renderNeeds();
+        updateCounts();
+        decorateTechnicalTerms(document.body);
+      })();
+    </script>
+  </body>
+</html>

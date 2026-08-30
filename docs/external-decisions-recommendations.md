@@ -1,6 +1,18 @@
 # המלצות להחלטות החיצוניות
 
-תאריך בדיקה: 2026-08-17
+תאריך בדיקה: 2026-08-21
+
+## 0. קליטת החלטות טל
+
+0.1 תשובות השאלון מ־21.08.2026 נקלטו ב־
+[קליטת החלטות Connect](decision-intake-2026-08-21.md).
+
+0.2 נבחרו 25 אפשרויות, ניתנה הנחיה חלקית נוספת ל־Billing וארבע
+קבוצות נשארו ללא תשובה. הכיוונים שנבחרו עודכנו ב־Registry וב־ADR,
+אך אינם משנים Production readiness ללא Approver, תצורה חיה ו־Evidence.
+
+0.3 ספק Billing פעיל, File scanner, ‏Object storage, ‏Roadmap אחרי
+Pilot ו־Enterprise/Integrations/Mobile נשארו החלטות פתוחות.
 
 ## 1. עקרונות החלטה
 
@@ -209,6 +221,12 @@ Railway API/Worker, יחד עם אירועי Telemetry המצומצמים שכב
 11.3 יעד הזמינות נשאר 99.5%. לאחר צבירת נתונים יש להוסיף מדיניות
 Burn-rate רב־חלונית, אך לא לשנות יעד ללא נתוני Production.
 
+11.4 ה־Incident adapter המקומי מוכן ונכשל סגור. כדי להפעילו יש למסור
+Team-scoped API token, ‏Requester email, ‏Escalation policy ID, בחירה
+מפורשת של Call/SMS/Email/Push/Critical ו־`team_wait` בשניות. אין Defaults
+לערוצים או לזמן ההסלמה, וה־Business-hours schedule חייב להיות מוגדר
+ולהיבדק בתוך Better Stack.
+
 ## 12. החלטה 11 — Data Retention ו־Legal Hold
 
 12.1 המלצה: לאשר Policy v2 עם כל 25 מחלקות המידע ועם ה־Trigger
@@ -277,6 +295,12 @@ AnyDesk, צ'אט, GitHub או מסמך.
 
 15.3 Branch Protection, ‏CODEOWNERS, Review חובה, תשעת ה־Checks,
 Secret scanning ו־Push protection יופעלו לפני עבודה משותפת.
+
+15.4 החלטה חיצונית נוספת: Artifact Attestations עבור Repository פרטי
+דורשים כיום GitHub Enterprise Cloud. ההמלצה היא לא לעקוף את החתימה:
+לפני Pilot יש לבחור בין שדרוג ל־Enterprise Cloud לבין מנגנון חתימה
+חלופי שעובר Security review. עד להחלטה, Workflow ה־Production נכשל
+סגור במכוון. מקור: [GitHub Artifact attestations](https://docs.github.com/en/enterprise-cloud@latest/actions/concepts/security/artifact-attestations).
 
 ## 16. החלטה 14 — Hosting
 
@@ -384,37 +408,58 @@ Billing owner מאשר התאמה לספק שייבחר.
 המודל המצומצם. Checkout, ‏Webhooks, חשבוניות ו־Provider metering הם
 Workstream חיצוני נפרד וזמנם `unknown/unavailable`.
 
-## 19. מקורות רשמיים
+## 19. החלטה 17 — Identity ו־Clerk Organizations
 
-19.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+19.1 החלטת טל: Clerk חובה, Organization חובה ו־MFA לבעלי הרשאות Admin.
 
-19.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+19.2 המימוש המקומי דורש כעת `orgId` מתוך Clerk Session חתום, מקשר אותו
+אטומית ל־Tenant ב־PostgreSQL ודוחה Session שה־Organization שלו אינו תואם
+ל־Tenant. Connect אינה יוצרת Organization ישירות מתוך Transaction.
 
-19.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+19.3 המלצה תפעולית: להפעיל ב־Clerk את יצירת ה־Organization הראשון
+אוטומטית. כך נמנע Timeout לא ודאי סביב `createOrganization()` שאין עבורו
+Idempotency key מתועד.
 
-19.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+19.4 עדיין נדרשים: Clerk Plan, ‏Organizations/MFA/Session/Revocation
+settings, ‏Authorized parties, ‏Admin allowlist, Backfill מאושר ל־Tenants
+קיימים ו־Browser E2E חי. המימוש המלא מתועד ב־
+`docs/clerk-organization-tenant-binding.md`.
 
-19.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+## 20. מקורות רשמיים
 
-19.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+20.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
 
-19.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+20.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
 
-19.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+20.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
 
-19.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+20.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
 
-19.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+20.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
 
-19.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+20.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
 
-19.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+20.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
 
-19.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+20.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
 
-19.14 [GitHub — Managing repository access](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository?apiVersion=2022-11-28).
+20.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
 
-19.15 [Railway — Pricing plans](https://docs.railway.com/pricing/plans).
+20.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+
+20.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+
+20.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+
+20.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+
+20.14 [GitHub — Managing repository access](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository?apiVersion=2022-11-28).
+
+20.15 [Railway — Pricing plans](https://docs.railway.com/pricing/plans).
+
+20.16 [Clerk — Configure Organizations](https://clerk.com/docs/guides/organizations/configure).
+
+20.17 [Clerk — Create Organization](https://clerk.com/docs/reference/backend/organization/create-organization).
 
 19.16 [Vercel — Managing team members](https://vercel.com/docs/rbac/managing-team-members).
 

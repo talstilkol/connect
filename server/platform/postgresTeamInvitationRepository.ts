@@ -848,13 +848,12 @@ async function requestTransaction(
   if (
     current !== null &&
     current.version === command.expectedVersion + 1 &&
+    current.normalizedEmail === command.normalizedEmail &&
     current.role === command.role &&
     current.status === "pending" &&
     current.lastActor.kind === "user" &&
     current.lastActor.id === command.actorExternalUserId &&
-    current.requestedAt === command.requestedAt &&
-    current.expiresAt === command.expiresAt &&
-    current.updatedAt === command.requestedAt
+    current.updatedAt === current.requestedAt
   ) {
     const existingEvent = await loadEventByVersion(
       transaction,
@@ -876,8 +875,8 @@ async function requestTransaction(
       existingEvent.toStatus !== "pending" ||
       existingEvent.fromVersion !== command.expectedVersion ||
       existingEvent.toVersion !== current.version ||
-      existingEvent.occurredAt !== command.requestedAt ||
-      existingEvent.expiresAt !== command.expiresAt
+      existingEvent.occurredAt !== current.requestedAt ||
+      existingEvent.expiresAt !== current.expiresAt
     ) {
       throw new Error("PostgreSQL invitation replay event is incomplete");
     }
@@ -890,8 +889,8 @@ async function requestTransaction(
       role: command.role,
       fromStatus: existingEvent.fromStatus,
       actorExternalUserId: command.actorExternalUserId,
-      occurredAt: command.requestedAt,
-      expiresAt: command.expiresAt,
+      occurredAt: current.requestedAt,
+      expiresAt: current.expiresAt,
     });
     const expectedEventKey = await deriveTeamInvitationEventKey({
       operationKey: expectedOperationKey,

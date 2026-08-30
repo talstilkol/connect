@@ -3,10 +3,19 @@ import test from "node:test";
 
 import {
   createProductionReadinessPayload,
+  readProductionReadinessFromCliSources,
   readProductionReadinessCliMode,
   renderProductionReadinessHuman,
   renderProductionReadinessJson,
+  resolveProductionReadinessCliEvidenceJson,
 } from "../scripts/verify-production-readiness.mjs";
+import {
+  railwayBotReplyStagingCrossServiceActivationVersion,
+  railwayBotReplyStagingCrossServiceCheckIds,
+} from "../server/platform/railwayBotReplyStagingCrossServiceActivation.ts";
+import {
+  createRailwayBotReplyStagingCrossServiceEvidence,
+} from "../server/platform/railwayBotReplyStagingCrossServiceEvidence.ts";
 
 function blockedReport() {
   return {
@@ -39,6 +48,89 @@ function blockedReport() {
     extra: "must-not-appear",
   };
 }
+
+function legacyEvidenceEnvironment() {
+  const releaseId =
+    `connect_release_v1_${"a".repeat(64)}`;
+  const commitSha = "b".repeat(40);
+  const artifactDigest =
+    `sha256:${"c".repeat(64)}`;
+  const evidence =
+    createRailwayBotReplyStagingCrossServiceEvidence({
+      report: {
+        schemaVersion: 1,
+        activationVersion:
+          railwayBotReplyStagingCrossServiceActivationVersion,
+        status: "ready",
+        code: "BOT_REPLY_STAGING_CROSS_SERVICE_VERIFIED",
+        passedCheckCount: 4,
+        requiredCheckCount: 4,
+        checks:
+          railwayBotReplyStagingCrossServiceCheckIds.map(
+            (id) => ({ id, status: "passed" }),
+          ),
+      },
+      releaseId,
+      commitSha,
+      artifactDigest,
+      lifetimeSeconds: 600,
+    }, {
+      now: () =>
+        new Date("2026-08-24T12:00:00.000Z"),
+    });
+
+  return {
+    APP_RELEASE_ID: releaseId,
+    APP_DEPLOYED_COMMIT_SHA: commitSha,
+    APP_DEPLOYMENT_ARTIFACT_DIGEST: artifactDigest,
+    BOT_REPLY_STAGING_CROSS_SERVICE_EVIDENCE_JSON:
+      JSON.stringify(evidence),
+  };
+}
+
+test("never accepts legacy cross-service evidence in the CLI source", async () => {
+  const legacyEnvironment = legacyEvidenceEnvironment();
+
+  assert.equal(
+    await resolveProductionReadinessCliEvidenceJson(
+      legacyEnvironment,
+    ),
+    undefined,
+  );
+  assert.equal(
+    await resolveProductionReadinessCliEvidenceJson({
+      ...legacyEnvironment,
+      BOT_REPLY_STAGING_RELEASE_EVIDENCE_STORE:
+        "postgresql",
+    }),
+    undefined,
+  );
+
+  const report =
+    await readProductionReadinessFromCliSources(
+      legacyEnvironment,
+      {},
+    );
+  assert.equal(report.readyForProduction, false);
+  assert.deepEqual(
+    report.checks.find(
+      (check) =>
+        check.id === "automation.bot-reply-adapter",
+    ),
+    {
+      id: "automation.bot-reply-adapter",
+      category: "automation",
+      status: "blocked",
+      code: "BOT_REPLY_DELIVERY_ADAPTER_REQUIRED",
+    },
+  );
+  assert.equal(
+    legacyEnvironment
+      .BOT_REPLY_STAGING_CROSS_SERVICE_EVIDENCE_JSON
+      .length > 0,
+    true,
+  );
+});
 
 test("accepts only human or json CLI modes", () => {
   assert.equal(

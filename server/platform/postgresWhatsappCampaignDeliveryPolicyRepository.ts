@@ -558,6 +558,16 @@ export function createPostgresWhatsappCampaignDeliveryPolicyRepository(
           }
 
           if (
+            current !== null &&
+            current.policyVersion === normalized.expectedPolicyVersion + 1 &&
+            current.deliveryState === normalized.deliveryState &&
+            current.actorExternalUserId === normalized.actorExternalUserId &&
+            samePolicySnapshot(current, normalized)
+          ) {
+            return Object.freeze({ outcome: "unchanged" as const, record: current });
+          }
+
+          if (
             (current?.policyVersion ?? 0) !==
               normalized.expectedPolicyVersion ||
             (normalized.deliveryState === "disabled" &&

@@ -1,0 +1,295 @@
+{
+  "artifactClass": "PLANNING-CONTENT-ADDRESSED-SOURCE-REFERENCE-INDEX;NO-SOURCE-BYTE-DUPLICATION;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-FROZEN-INPUT-MANIFEST-2026-08-30",
+  "currentVisibilityObservation": {
+    "isPrivate": false,
+    "observedDate": "2026-08-30",
+    "receiptClass": "POINT-IN-TIME-OBSERVATION-NOT-CONTINUOUS-RECEIPT",
+    "repositoryLogicalId": "github.com/talstilkol/connect",
+    "visibility": "PUBLIC"
+  },
+  "inputManifestRoot": "b3772017bb3d10f08d591602cf62e5f3b4e19c1edcae50682b40708d5d6a255f",
+  "lateDecisionVerification": {
+    "contentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+    "disposition": "ADMITTED-MANDATORY-LATE-INPUT"
+  },
+  "schemaVersion": "PRCV5-FROZEN-INPUT-MANIFEST-V1",
+  "sourceBytesPhysicallyDuplicated": 0,
+  "sourceRecordCount": 14,
+  "sourceRecords": [
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 20129,
+      "contentId": "sha256:fc0577a54917abe81030d9543b3478d1dc0d72627fb7ea37d0ebab78d6b077c4",
+      "lines": 373,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-v5-successor-build-charter-2026-08-30.md",
+      "ordinal": 1,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "fc0577a54917abe81030d9543b3478d1dc0d72627fb7ea37d0ebab78d6b077c4",
+      "regularFile": true,
+      "role": "BUILDER-INSTRUCTION",
+      "sourceId": "V5-BUILD-CHARTER",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 32906,
+      "contentId": "sha256:0f1f5cc9fb349f999b0bbff3f6f683c47c951b793ce3ef847388530717ff7257",
+      "lines": 469,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-2026-08-30.md",
+      "ordinal": 2,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "0f1f5cc9fb349f999b0bbff3f6f683c47c951b793ce3ef847388530717ff7257",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-SUBJECT",
+      "sourceId": "V4-SUBJECT",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 11045,
+      "contentId": "sha256:43bd110cd8b59c0a3ea6086203d804df7b0dc6dd3441ec443d7ec740c4e65ed5",
+      "lines": 290,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-atomic-package-manifest-2026-08-30.json",
+      "ordinal": 3,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "43bd110cd8b59c0a3ea6086203d804df7b0dc6dd3441ec443d7ec740c4e65ed5",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-MANIFEST",
+      "sourceId": "V4-MANIFEST",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 109243,
+      "contentId": "sha256:69f2f5ecde68c4223f90f64347fcb0c992620c05220a1a0789714439d4e7a10b",
+      "lines": 3625,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-schema-and-typed-registries-2026-08-30.json",
+      "ordinal": 4,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "69f2f5ecde68c4223f90f64347fcb0c992620c05220a1a0789714439d4e7a10b",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-MEMBER",
+      "sourceId": "V4-SCHEMA-REGISTRY",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 126049,
+      "contentId": "sha256:727c6d6e3d53e86a05eb0c09e581488b32546b1ac3fe8d15ed046c7d5240bff2",
+      "lines": 4635,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-producer-dependency-graph-2026-08-30.json",
+      "ordinal": 5,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "727c6d6e3d53e86a05eb0c09e581488b32546b1ac3fe8d15ed046c7d5240bff2",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-MEMBER",
+      "sourceId": "V4-GRAPH",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 94575,
+      "contentId": "sha256:e387da4f5775cddfe24b3d5a196fce66408416e1be129e474c3ce37dc32989ca",
+      "lines": 1,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-operation-oracle-vector-pack-2026-08-30.json",
+      "ordinal": 6,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "e387da4f5775cddfe24b3d5a196fce66408416e1be129e474c3ce37dc32989ca",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-MEMBER",
+      "sourceId": "V4-VECTORS",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 126109,
+      "contentId": "sha256:32e9828a9ededb7ff2b3f809f5c53a0af94ed870a5ba1c5627ff01a93dadb068",
+      "lines": 1,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-finding-closure-registry-2026-08-30.json",
+      "ordinal": 7,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "32e9828a9ededb7ff2b3f809f5c53a0af94ed870a5ba1c5627ff01a93dadb068",
+      "regularFile": true,
+      "role": "FROZEN-93-FINDING-UNIVERSE",
+      "sourceId": "V4-CLOSURES",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 30014,
+      "contentId": "sha256:cbfe723307cb16ed3415e4205d01fb62fd13d360fc4c9a9adf9a45e01fefbe6c",
+      "lines": 606,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-reader-a-2026-08-30.mjs",
+      "ordinal": 8,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "cbfe723307cb16ed3415e4205d01fb62fd13d360fc4c9a9adf9a45e01fefbe6c",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-MEMBER",
+      "sourceId": "V4-READER-A",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 26820,
+      "contentId": "sha256:dffdaba8b674b535b601e5cd13b3736c6ee8ad72a1b90b466beacdde127b2b46",
+      "lines": 536,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-reader-b-2026-08-30.rb",
+      "ordinal": 9,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "dffdaba8b674b535b601e5cd13b3736c6ee8ad72a1b90b466beacdde127b2b46",
+      "regularFile": true,
+      "role": "FROZEN-PREDECESSOR-MEMBER",
+      "sourceId": "V4-READER-B",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 22176,
+      "contentId": "sha256:f656b182f617c67ec7d56c37b45a467c70e681863a48487be2d42408cb36b79f",
+      "lines": 327,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-independent-hostile-review-2026-08-30.md",
+      "ordinal": 10,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "f656b182f617c67ec7d56c37b45a467c70e681863a48487be2d42408cb36b79f",
+      "regularFile": true,
+      "role": "FROZEN-INDEPENDENT-REVIEW",
+      "sourceId": "V4-INDEPENDENT-REVIEW",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 29246,
+      "contentId": "sha256:23df19ec6dffb1933489eabf49a78c4ef3c88657d840408284267a8f18c0a760",
+      "lines": 277,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "ordinal": 11,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "23df19ec6dffb1933489eabf49a78c4ef3c88657d840408284267a8f18c0a760",
+      "regularFile": true,
+      "role": "FROZEN-23-FINDING-UNIVERSE",
+      "sourceId": "V4-FINDINGS-MANIFEST",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 8254,
+      "contentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "lines": 129,
+      "logicalPath": "docs/planning/github-public-repository-large-generated-artifact-storage-decision-2026-08-30.md",
+      "ordinal": 12,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "regularFile": true,
+      "role": "MANDATORY-LATE-DECISION",
+      "sourceId": "LATE-STORAGE-DECISION",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 61755,
+      "contentId": "sha256:f049b4b681d1c03bed1b4856a61a064383faa3b3bab58a2baca85bf546f81c16",
+      "lines": 609,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "ordinal": 13,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "f049b4b681d1c03bed1b4856a61a064383faa3b3bab58a2baca85bf546f81c16",
+      "regularFile": true,
+      "role": "ALIAS-PROJECTION-SOURCE",
+      "sourceId": "V2-FINDINGS-MANIFEST",
+      "symlink": false
+    },
+    {
+      "acquisitionRule": "READ-EXACT-REPOSITORY-RELATIVE-REGULAR-FILE-BYTES",
+      "admissionDisposition": "ADMITTED-CONTENT-ADDRESSED-REFERENCE-ONLY",
+      "bytes": 41555,
+      "contentId": "sha256:a84a26bd0439e4da5bed5a941b8956e041268fc33ba40e2d89d095b55dec51e4",
+      "lines": 573,
+      "logicalPath": "docs/planning/public-repository-and-cyber-source-hostile-review-findings-manifest-2026-08-29.md",
+      "ordinal": 14,
+      "physicalSourceBytesDuplicatedInV5": false,
+      "rawSha256Checksum": "a84a26bd0439e4da5bed5a941b8956e041268fc33ba40e2d89d095b55dec51e4",
+      "regularFile": true,
+      "role": "ALIAS-PROJECTION-SOURCE",
+      "sourceId": "PREDECESSOR-FINDINGS-MANIFEST",
+      "symlink": false
+    }
+  ],
+  "sourceReferenceRoot": "85bba2ddb20912535e1239d2885dbea77aadbb9a04da753762cebf668e062c8e",
+  "typedMissingExternalInputs": [
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "B0",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "TAL-MANDATE",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "TRUSTED-TIME",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "SELECTED-EXTERNAL-STORE-CONTRACT",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "REPOSITORY-TOTAL-BUDGET",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "REPOSITORY-GROWTH-BUDGET",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "CLONE-TIME-BUDGET",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "OPERATIONAL-SCANNER-RECEIPTS",
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "inputId": "PRE-POST-VISIBILITY-RECEIPTS",
+      "state": "MISSING-BLOCKING"
+    }
+  ],
+  "v4PackageVerification": {
+    "declaredPackageRoot": "f799c154c695034935c480a57b6a0047d8e2b67d318e42b0d9b88a0ea78f92cf",
+    "independentlyRecomputedPackageRoot": "f799c154c695034935c480a57b6a0047d8e2b67d318e42b0d9b88a0ea78f92cf",
+    "manifestContentId": "sha256:43bd110cd8b59c0a3ea6086203d804df7b0dc6dd3441ec443d7ec740c4e65ed5",
+    "memberCount": 7,
+    "terminal": "PASS"
+  }
+}

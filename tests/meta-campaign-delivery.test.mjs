@@ -23,6 +23,12 @@ import {
   createMetaCampaignTemplateAdapter,
   MetaCampaignTemplateContractError,
 } from "../server/campaigns/metaCampaignTemplateAdapter.ts";
+import {
+  observeCampaignDeliveryProcessor,
+} from "../server/operations/campaignDeliveryTelemetry.ts";
+import {
+  createProviderRequestTelemetryScope,
+} from "../server/operations/providerRequestTelemetry.ts";
 
 const tenantId = 7;
 const campaignKey = `campaign_v1_${"a".repeat(64)}`;
@@ -255,6 +261,83 @@ test("builds one official template send request and returns only the wamid", asy
       },
     },
   });
+});
+
+test("links the actual Meta campaign POST to one bounded delivery parent", async () => {
+  const events = [];
+  const timestamps = [
+    "2026-08-21T10:00:00.000Z",
+    "2026-08-21T10:00:00.010Z",
+    "2026-08-21T10:00:00.030Z",
+    "2026-08-21T10:00:00.040Z",
+  ].map((value) => new Date(value));
+  const telemetryClock = {
+    now() {
+      const value = timestamps.shift();
+      if (value === undefined) throw new Error("test clock exhausted");
+      return value;
+    },
+  };
+  const scope = createProviderRequestTelemetryScope();
+  const adapter = createMetaCampaignTemplateAdapter(
+    {
+      async requestJson() {
+        return {
+          messaging_product: "whatsapp",
+          messages: [{ id: providerMessageId }],
+        };
+      },
+    },
+    { scope, clock: telemetryClock },
+  );
+  const observed = observeCampaignDeliveryProcessor(
+    {
+      isConfigured() {
+        return true;
+      },
+      async process() {
+        return {
+          outcome: "accepted",
+          ...(await adapter.send(senderInput())),
+        };
+      },
+    },
+    {
+      async record(event) {
+        events.push(event);
+        return { outcome: "recorded" };
+      },
+    },
+    telemetryClock,
+    scope,
+  );
+
+  assert.equal(observed.isConfigured(), true);
+  assert.deepEqual(await observed.process(preparedDelivery()), {
+    outcome: "accepted",
+    providerMessageId,
+  });
+  assert.deepEqual(events, [{
+    version: 1,
+    kind: "delivery-attempt",
+    queue: "campaign-delivery",
+    outcome: "accepted",
+    startedAt: "2026-08-21T10:00:00.000Z",
+    completedAt: "2026-08-21T10:00:00.040Z",
+    durationMilliseconds: 40,
+    providerRequests: [{
+      provider: "meta",
+      operation: "campaign-message.send",
+      outcome: "completed",
+      startedAt: "2026-08-21T10:00:00.010Z",
+      completedAt: "2026-08-21T10:00:00.030Z",
+      durationMilliseconds: 20,
+    }],
+  }]);
+  assert.doesNotMatch(
+    JSON.stringify(events),
+    /tenant|phone|deliveryKey|templateKey|waba|token|payload|url/i,
+  );
 });
 
 test("derives bounded quick-reply payloads from the opaque delivery key", async () => {

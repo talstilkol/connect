@@ -1,0 +1,224 @@
+{
+  "artifactId": "CONNECT-D02-A9-EXACT-ADMITTED-13-INPUT-MANIFEST-2026-08-30",
+  "manifestVersion": "1.0.0",
+  "canonicalization": "RFC8785-JCS-INTEGER-SUBSET",
+  "rootDomain": "CONNECT-D02-A9:ADMITTED-INPUT-MANIFEST-V1",
+  "entryCount": 13,
+  "admittedManifestRoot": "d4d0a384b05897522ab9a3e96dd626cede14c9e4e0351906acd3201fd6dfd630",
+  "exactOrderedInputIds": [
+    "D02A9-IN-001",
+    "D02A9-IN-002",
+    "D02A9-IN-003",
+    "D02A9-IN-004",
+    "D02A9-IN-005",
+    "D02A9-IN-006",
+    "D02A9-IN-007",
+    "D02A9-IN-008",
+    "D02A9-IN-009",
+    "D02A9-IN-010",
+    "D02A9-IN-011",
+    "D02A9-IN-012",
+    "D02A9-IN-013"
+  ],
+  "entries": [
+    {
+      "ordinal": 1,
+      "inputId": "D02A9-IN-001",
+      "inheritedInputId": "D02A8-IN-001",
+      "logicalPath": "docs/decision-intake-2026-08-21.md",
+      "role": "USER-D02-DIRECTIVE",
+      "sha256": "052297f38f63d6e525641a5e1d044267cf7d553fd3e7a9d2d469669eca090937",
+      "lines": 151,
+      "words": 1283,
+      "bytes": 10996,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ]
+    },
+    {
+      "ordinal": 2,
+      "inputId": "D02A9-IN-002",
+      "inheritedInputId": "D02A8-IN-002",
+      "logicalPath": "docs/researched-decision-approval-2026-08-26.md",
+      "role": "RESEARCHED-DECISION",
+      "sha256": "f981cf9313e08fe0cfbd0603717af1a999fd1a367b5521d4191d0cfc3b27128b",
+      "lines": 324,
+      "words": 1615,
+      "bytes": 16633,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ]
+    },
+    {
+      "ordinal": 3,
+      "inputId": "D02A9-IN-003",
+      "inheritedInputId": "D02A8-IN-003",
+      "logicalPath": "docs/planning/d02-a4-openai-model-routing-reconciliation-2026-08-29.md",
+      "role": "ENGINEERING-RECONCILIATION",
+      "sha256": "221af06420bd0d5680ae708c997e9f22b7b48eecc9278dbe740cb66346c68d54",
+      "lines": 165,
+      "words": 1612,
+      "bytes": 12368,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ]
+    },
+    {
+      "ordinal": 4,
+      "inputId": "D02A9-IN-004",
+      "inheritedInputId": "D02A8-IN-004",
+      "logicalPath": "docs/planning/d02-a5-openai-responses-data-control-and-model-selection-reconciliation-2026-08-29.md",
+      "role": "SEMANTIC-SUCCESSOR",
+      "sha256": "1981729d8a0001d38f439508cdf668cbbd18b8bda0c70cde2152e19ff93281e5",
+      "lines": 115,
+      "words": 1134,
+      "bytes": 9302,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ]
+    },
+    {
+      "ordinal": 5,
+      "inputId": "D02A9-IN-005",
+      "inheritedInputId": "D02A8-IN-005",
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-2026-08-30.md",
+      "role": "SEMANTIC-SUCCESSOR",
+      "sha256": "3788b73457a3bb25a679dc42875b641a21156f3b93e3b29676a3489e826ad3db",
+      "lines": 465,
+      "words": 3493,
+      "bytes": 30592,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A6-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 6,
+      "inputId": "D02A9-IN-006",
+      "inheritedInputId": "D02A8-IN-006",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-semantic-successor-2026-08-30.md",
+      "role": "SEMANTIC-SUCCESSOR",
+      "sha256": "f1246bc52124a59645a2446d4c83075358c9f6214f84bc6ee7e7ce6b8208b446",
+      "lines": 360,
+      "words": 4042,
+      "bytes": 36482,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A7-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 7,
+      "inputId": "D02A9-IN-007",
+      "inheritedInputId": "D02A8-IN-007",
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-2026-08-30.md",
+      "role": "INDEPENDENT-REVIEW",
+      "sha256": "344c42bcdbf60eed1332bfaa7e20d9725e80cad5e0f2d05863c3cbef6ba5f16d",
+      "lines": 209,
+      "words": 2091,
+      "bytes": 18279,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A6-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 8,
+      "inputId": "D02A9-IN-008",
+      "inheritedInputId": "D02A8-IN-008",
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "FINDINGS-MANIFEST",
+      "sha256": "55f985944dae7684af73f3214e966650a3949ae52b1b28dc54ef198a886dceca",
+      "lines": 49,
+      "words": 918,
+      "bytes": 7724,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A6-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 9,
+      "inputId": "D02A9-IN-009",
+      "inheritedInputId": "D02A8-IN-009",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "role": "CLOSURE-CROSSWALK",
+      "sha256": "3f2b6689b638453872c019b96ed451a6096d3d771935d73dde82ff116b3b3cbc",
+      "lines": 47,
+      "words": 540,
+      "bytes": 5195,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A7-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 10,
+      "inputId": "D02A9-IN-010",
+      "inheritedInputId": "D02A8-IN-010",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "role": "PRODUCER-QA",
+      "sha256": "4ef56a1332504d04fad5176eba41a4dc40ae5a82f611e8208e0e51ff6cb8a21e",
+      "lines": 82,
+      "words": 743,
+      "bytes": 7204,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A7-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 11,
+      "inputId": "D02A9-IN-011",
+      "inheritedInputId": "D02A8-IN-011",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+      "role": "INDEPENDENT-REVIEW",
+      "sha256": "15d8f46c32b09301e58bf9e1867d0bab7e2c40b17634a3aa12c903e6dc99be62",
+      "lines": 179,
+      "words": 1823,
+      "bytes": 15589,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A7-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 12,
+      "inputId": "D02A9-IN-012",
+      "inheritedInputId": "D02A8-IN-012",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "FINDINGS-MANIFEST",
+      "sha256": "d488c9f36d88797bf74b6db60e422c4bd9d55443eff032fa38aff490fd813c9b",
+      "lines": 41,
+      "words": 934,
+      "bytes": 7465,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A7-FINDING-CARRY"
+      ]
+    },
+    {
+      "ordinal": 13,
+      "inputId": "D02A9-IN-013",
+      "inheritedInputId": "D02A8-IN-013",
+      "logicalPath": "docs/planning/d18-a2-public-repository-security-decision-2026-08-29.md",
+      "role": "DURABLE-USER-PUBLIC-DIRECTIVE",
+      "sha256": "448cf2a7596f3544966b1e992c33ea6bc569305d5a2af2a00378cf60bf1eeaa9",
+      "lines": 131,
+      "words": 1106,
+      "bytes": 9090,
+      "requiredConsumerRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-PUBLIC-DIRECTIVE"
+      ]
+    }
+  ],
+  "unconsumedInputCount": 0,
+  "substitutionPolicy": "SUBSTITUTE-DUPLICATE-OMIT-REORDER-PATH-CHANGE-OR-ORPHAN-BLOCKS"
+}

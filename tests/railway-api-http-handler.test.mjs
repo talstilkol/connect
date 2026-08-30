@@ -9,6 +9,9 @@ import {
   createRailwayApiHttpHandler,
   RailwayApiDispatchError,
 } from "../server/platform/railwayApiHttpHandler.ts";
+import {
+  W3C_TRACEPARENT_HEADER,
+} from "../server/platform/w3cTraceContext.ts";
 
 const compactJwt = "header.payload.signature";
 const expectedServiceIdentity = Object.freeze({
@@ -24,6 +27,7 @@ const verifiedServiceIdentity = Object.freeze({
 });
 const userIdentity = Object.freeze({
   externalUserId: "user_fixture_123",
+  externalOrganizationId: "org_fixture_123",
 });
 
 function queryBody(payload = {}) {
@@ -53,6 +57,7 @@ function createFixture(execute = async () => ({ items: [] })) {
   const oidcCalls = [];
   const sessionCalls = [];
   const dispatchCalls = [];
+  const telemetryEvents = [];
 
   const operation = {
     id: "contacts.list",
@@ -76,6 +81,12 @@ function createFixture(execute = async () => ({ items: [] })) {
         return userIdentity;
       },
     },
+    telemetry: {
+      record(event) {
+        telemetryEvents.push(event);
+        return true;
+      },
+    },
     operations: [operation],
   };
 
@@ -85,6 +96,7 @@ function createFixture(execute = async () => ({ items: [] })) {
     operation,
     options,
     sessionCalls,
+    telemetryEvents,
   };
 }
 
@@ -126,7 +138,61 @@ test("authenticates the Vercel service and end user before dispatch", async () =
     fixture.dispatchCalls[0].context.userIdentity,
     userIdentity,
   );
+  assert.equal(fixture.dispatchCalls[0].context.traceContext, null);
   assert.doesNotMatch(JSON.stringify(body), /externalUserId|teamSlug/);
+});
+
+test("accepts correlation only after service authentication and records one bounded event", async () => {
+  const fixture = createFixture();
+  const clockValues = [1_000, 1_025];
+  fixture.options.clock = () => clockValues.shift();
+  const traceparent =
+    "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+  const handler = createRailwayApiHttpHandler(fixture.options);
+  const response = await handler.handle(postRequest(queryBody(), {
+    [W3C_TRACEPARENT_HEADER]: traceparent,
+  }));
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(fixture.dispatchCalls[0].context.traceContext, {
+    traceparent,
+    traceId: "4bf92f3577b34da6a3ce929d0e0e4736",
+    parentSpanId: "00f067aa0ba902b7",
+    traceFlags: 1,
+  });
+  assert.deepEqual(fixture.telemetryEvents, [{
+    version: 1,
+    service: "connect-railway-api",
+    kind: "api-request",
+    operation: "contacts.list",
+    requestKind: "query",
+    outcome: "ok",
+    code: "OK",
+    durationMilliseconds: 25,
+    traceContext: fixture.dispatchCalls[0].context.traceContext,
+  }]);
+  assert.doesNotMatch(
+    JSON.stringify(fixture.telemetryEvents),
+    /externalUserId|organization|payload|authorization|compactJwt/i,
+  );
+});
+
+test("rejects malformed trace context after OIDC but before user verification", async () => {
+  const fixture = createFixture();
+  const handler = createRailwayApiHttpHandler(fixture.options);
+  const response = await handler.handle(postRequest(queryBody(), {
+    [W3C_TRACEPARENT_HEADER]:
+      "00-4BF92F3577B34DA6A3CE929D0E0E4736-00f067aa0ba902b7-01",
+  }));
+
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).code, "INVALID_REQUEST");
+  assert.equal(fixture.oidcCalls.length, 1);
+  assert.deepEqual(fixture.sessionCalls, []);
+  assert.deepEqual(fixture.dispatchCalls, []);
+  assert.equal(fixture.telemetryEvents.length, 1);
+  assert.equal(fixture.telemetryEvents[0].code, "INVALID_REQUEST");
+  assert.equal(fixture.telemetryEvents[0].traceContext, null);
 });
 
 test("rejects invalid service proof before user verification or dispatch", async (context) => {
@@ -172,6 +238,7 @@ test("rejects invalid service proof before user verification or dispatch", async
       );
       assert.deepEqual(fixture.sessionCalls, []);
       assert.deepEqual(fixture.dispatchCalls, []);
+      assert.deepEqual(fixture.telemetryEvents, []);
     });
   }
 });
@@ -338,6 +405,8 @@ test("rejects unknown operations and request-kind mismatches", async (context) =
 test("maps only approved operation failure codes", async (context) => {
   const cases = [
     ["INVALID_REQUEST", 400],
+    ["CONFIGURATION_REQUIRED", 503],
+    ["IDENTITY_VERIFICATION_REQUIRED", 403],
     ["AUTHORIZATION_DENIED", 403],
     ["TENANT_MEMBERSHIP_REQUIRED", 403],
     ["TENANT_SELECTION_REQUIRED", 403],
@@ -345,6 +414,8 @@ test("maps only approved operation failure codes", async (context) => {
     ["NOT_FOUND", 404],
     ["CONFLICT", 409],
     ["INVALID_TRANSITION", 409],
+    ["INVITATION_UNAVAILABLE", 404],
+    ["STALE_SESSION", 409],
     ["RATE_LIMITED", 429],
     ["DEPENDENCY_UNAVAILABLE", 503],
   ];

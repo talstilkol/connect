@@ -8,6 +8,11 @@ import {
   isMetaMessageTemplateProviderStatus,
   type MetaMessageTemplateProviderStatus,
 } from "./metaMessageTemplateStatus.ts";
+import {
+  observeProviderRequest,
+  type ProviderRequestTelemetryClock,
+  type ProviderRequestTelemetryScope,
+} from "../operations/providerRequestTelemetry.ts";
 
 const PAGE_SIZE = 100;
 const MAXIMUM_PAGES = 20;
@@ -44,6 +49,11 @@ export interface MetaMessageTemplateLister {
     wabaId: string;
     accessToken: SensitiveMetaAccessToken;
   }): Promise<readonly MetaMessageTemplateSnapshot[]>;
+}
+
+export interface MetaMessageTemplateListAdapterTelemetry {
+  readonly scope: ProviderRequestTelemetryScope;
+  readonly clock: ProviderRequestTelemetryClock;
 }
 
 interface MetaMessageTemplatePage {
@@ -212,7 +222,21 @@ function readPage(value: unknown): MetaMessageTemplatePage {
 
 export function createMetaMessageTemplateListAdapter(
   transport: MetaGraphTransport,
+  telemetry?: Readonly<MetaMessageTemplateListAdapterTelemetry>,
 ): MetaMessageTemplateLister {
+  if (
+    telemetry !== undefined &&
+    (
+      typeof telemetry.scope?.record !== "function" ||
+      typeof telemetry.clock?.now !== "function"
+    )
+  ) {
+    throw new MetaMessageTemplateListError(
+      "INVALID_RESPONSE",
+      "Meta message template telemetry is invalid",
+    );
+  }
+
   return {
     async list(input) {
       const wabaId = requireWabaId(input.wabaId);
@@ -235,13 +259,24 @@ export function createMetaMessageTemplateListAdapter(
           query.after = afterCursor;
         }
 
-        const page = readPage(
-          await transport.requestJson<unknown>({
+        const request = () => transport.requestJson<unknown>({
             method: "GET",
             pathSegments: [wabaId, "message_templates"],
             accessToken: input.accessToken,
             query,
-          }),
+          });
+        const page = readPage(
+          telemetry === undefined
+            ? await request()
+            : await observeProviderRequest(
+                telemetry.scope,
+                telemetry.clock,
+                Object.freeze({
+                  provider: "meta",
+                  operation: "message-template.list",
+                }),
+                request,
+              ),
         );
 
         for (const template of page.templates) {

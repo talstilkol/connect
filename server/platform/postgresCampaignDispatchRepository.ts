@@ -172,6 +172,7 @@ export const postgresCampaignDispatchSql = Object.freeze({
       updated_at = $1::timestamptz
     FROM selected
     WHERE campaigns.campaign_key = selected.campaign_key
+      AND campaigns.status = 'scheduled'
     RETURNING ${dispatchStateColumns}
   `,
   claimPendingRecipients: `

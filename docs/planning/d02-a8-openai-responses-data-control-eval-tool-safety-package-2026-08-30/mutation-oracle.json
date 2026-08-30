@@ -1,0 +1,726 @@
+{
+  "artifactId": "CONNECT-D02-A8-DETACHED-MUTATION-ORACLE-2026-08-30",
+  "oracleVersion": "D02-A8-ORACLE-1",
+  "readByReaders": false,
+  "comparisonAuthority": "PRODUCER-QA-MECHANICAL-ONLY",
+  "semanticAcceptance": 0,
+  "vectorCount": 179,
+  "entries": [
+    {
+      "vectorId": "D02A8-MV-001",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-002",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-003",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-004",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-005",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-006",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-007",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-008",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-009",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-010",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-011",
+      "expectedTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-012",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-013",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-014",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-015",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-016",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-017",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-018",
+      "expectedTerminal": "MODEL-SELECTION-AUTHORITY-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-019",
+      "expectedTerminal": "MODEL-SELECTION-AUTHORITY-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-020",
+      "expectedTerminal": "MODEL-SELECTION-AUTHORITY-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-021",
+      "expectedTerminal": "APPROVAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-022",
+      "expectedTerminal": "APPROVAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-023",
+      "expectedTerminal": "APPROVAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-024",
+      "expectedTerminal": "APPROVAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-025",
+      "expectedTerminal": "APPROVAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-026",
+      "expectedTerminal": "APPROVAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-027",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-028",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-029",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-030",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-031",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-032",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-033",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-034",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-035",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-036",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-037",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-038",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-039",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-040",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-041",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-042",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-043",
+      "expectedTerminal": "AI-PROFILE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-044",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-045",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-046",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-047",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-048",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-049",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-050",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-051",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-052",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-053",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-054",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-055",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-056",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-057",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-058",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-059",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-060",
+      "expectedTerminal": "AI-PROFILE-MEMBER-MUTATED"
+    },
+    {
+      "vectorId": "D02A8-MV-061",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-062",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-063",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-064",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-065",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-066",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-067",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-068",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-069",
+      "expectedTerminal": "ACCOUNT-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-070",
+      "expectedTerminal": "ACCOUNT-CHILD-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-071",
+      "expectedTerminal": "ACCOUNT-CHILD-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-072",
+      "expectedTerminal": "ACCOUNT-CHILD-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-073",
+      "expectedTerminal": "ACCOUNT-CHILD-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-074",
+      "expectedTerminal": "ACCOUNT-CHILD-AUTHORITY-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-075",
+      "expectedTerminal": "ACCOUNT-CHILD-AUTHORITY-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-076",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-077",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-078",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-079",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-080",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-081",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-082",
+      "expectedTerminal": "LEGAL-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-083",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-084",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-085",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-086",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-087",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-088",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-089",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-090",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-091",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-092",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-093",
+      "expectedTerminal": "SOURCE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-094",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-095",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-096",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-097",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-098",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-099",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-100",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-101",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-102",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-103",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-104",
+      "expectedTerminal": "SOURCE-CHANGED"
+    },
+    {
+      "vectorId": "D02A8-MV-105",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-106",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-107",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-108",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-109",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-110",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-111",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-112",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-113",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-114",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-115",
+      "expectedTerminal": "SOURCE-STALE"
+    },
+    {
+      "vectorId": "D02A8-MV-116",
+      "expectedTerminal": "SOURCE-ACCEPTANCE-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-117",
+      "expectedTerminal": "PROVIDER-PROMPT-FORBIDDEN"
+    },
+    {
+      "vectorId": "D02A8-MV-118",
+      "expectedTerminal": "PROVIDER-PROMPT-FORBIDDEN"
+    },
+    {
+      "vectorId": "D02A8-MV-119",
+      "expectedTerminal": "PROVIDER-PROMPT-FORBIDDEN"
+    },
+    {
+      "vectorId": "D02A8-MV-120",
+      "expectedTerminal": "PROMPT-OWNERSHIP-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-121",
+      "expectedTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-122",
+      "expectedTerminal": "PUBLIC-AUTHORITY-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-123",
+      "expectedTerminal": "PUBLIC-AUTHORITY-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-124",
+      "expectedTerminal": "PUBLIC-AUTHORITY-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-125",
+      "expectedTerminal": "DAG-CYCLE"
+    },
+    {
+      "vectorId": "D02A8-MV-126",
+      "expectedTerminal": "DAG-DANGLING-REFERENCE"
+    },
+    {
+      "vectorId": "D02A8-MV-127",
+      "expectedTerminal": "DAG-NODE-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-128",
+      "expectedTerminal": "ROOT-CLASS-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-129",
+      "expectedTerminal": "ROOT-CLASS-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-130",
+      "expectedTerminal": "ROOT-CLASS-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-131",
+      "expectedTerminal": "ROOT-CLASS-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-132",
+      "expectedTerminal": "ROOT-CLASS-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-133",
+      "expectedTerminal": "ROOT-CLASS-MISMATCH"
+    },
+    {
+      "vectorId": "D02A8-MV-134",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-135",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-136",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-137",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-138",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-139",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-140",
+      "expectedTerminal": "A7-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-141",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-142",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-143",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-144",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-145",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-146",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-147",
+      "expectedTerminal": "FINDING-NO-MERGE-VIOLATION"
+    },
+    {
+      "vectorId": "D02A8-MV-148",
+      "expectedTerminal": "A6-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-149",
+      "expectedTerminal": "A6-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-150",
+      "expectedTerminal": "A6-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-151",
+      "expectedTerminal": "A6-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-152",
+      "expectedTerminal": "A6-FINDING-DENOMINATOR-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-153",
+      "expectedTerminal": "SAFE-STATE-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-154",
+      "expectedTerminal": "SAFE-STATE-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-155",
+      "expectedTerminal": "SAFE-STATE-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-156",
+      "expectedTerminal": "SAFE-STATE-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-157",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-158",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-159",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-160",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-161",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-162",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-163",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-164",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-165",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-166",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-167",
+      "expectedTerminal": "SOURCE-COMMITMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-168",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-169",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-170",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-171",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-172",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-173",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-174",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-175",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-176",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-177",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-178",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "vectorId": "D02A8-MV-179",
+      "expectedTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    }
+  ]
+}

@@ -1,0 +1,1074 @@
+{
+  "artifactId": "CONNECT-D02-A9-SEMANTIC-REGISTRY-2026-08-30",
+  "registryVersion": "1.0.0",
+  "canonicalization": "RFC8785-JCS-INTEGER-SUBSET",
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "planningAcceptance": "MISSING",
+    "aiAdmission": "MISSING",
+    "runtimePermit": "MISSING",
+    "acceptanceCount": 0
+  },
+  "admittedInputManifest": {
+    "artifactId": "CONNECT-D02-A9-EXACT-ADMITTED-13-INPUT-MANIFEST-2026-08-30",
+    "admittedManifestRoot": "d4d0a384b05897522ab9a3e96dd626cede14c9e4e0351906acd3201fd6dfd630",
+    "exactCount": 13
+  },
+  "predecessorSemanticUniverse": {
+    "artifactId": "CONNECT-D02-A9-TOTAL-PREDECESSOR-SEMANTIC-UNIVERSE-2026-08-30",
+    "semanticUniverseRoot": "1a7e0f90fca63f87e0a243a9738d2e2a1a17334a61bf2cabedf9a34070f186e4",
+    "exactMemberCount": 2864,
+    "exactTableRowCount": 295
+  },
+  "sourceReceiptSet": {
+    "artifactId": "CONNECT-D02-A9-DETACHED-OFFICIAL-SOURCE-RECEIPTS-2026-08-30",
+    "sourceObservationRoot": "5d2ced7611fb4975715037a0e7261bedfd0454b8b8c882f3e48b638f0dc81ef2",
+    "exactCount": 11,
+    "acceptedCount": 0
+  },
+  "authorityChain": [
+    {
+      "nodeId": "D02A9-AUTH-001",
+      "sequence": 1,
+      "inputId": "D02A9-IN-001",
+      "scope": "D02",
+      "authorityClass": "USER-DIRECTIVE",
+      "predecessorId": null,
+      "d02Disposition": "PRESERVE-OPENAI-RESPONSES-AND-EVAL",
+      "modelDisposition": "NO-MODEL-SELECTED",
+      "state": "AUTHORITATIVE-DIRECTIVE"
+    },
+    {
+      "nodeId": "D02A9-AUTH-002",
+      "sequence": 2,
+      "inputId": "D02A9-IN-002",
+      "scope": "D02",
+      "authorityClass": "RESEARCHED-DECISION",
+      "predecessorId": "D02A9-AUTH-001",
+      "d02Disposition": "PRESERVE-OPENAI-RESPONSES-AND-EVAL",
+      "modelDisposition": "LUNA-FIRST-RESEARCH-CANDIDATE",
+      "state": "HISTORICAL-SUPERSEDED-IN-MODEL-ORDER"
+    },
+    {
+      "nodeId": "D02A9-AUTH-003",
+      "sequence": 3,
+      "inputId": "D02A9-IN-003",
+      "scope": "D02",
+      "authorityClass": "ENGINEERING-RECONCILIATION",
+      "predecessorId": "D02A9-AUTH-002",
+      "d02Disposition": "SUPERSEDE-MODEL-ORDER-ONLY",
+      "modelDisposition": "TERRA-FIRST-UNACCEPTED-CANDIDATE",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A9-AUTH-004",
+      "sequence": 4,
+      "inputId": "D02A9-IN-004",
+      "scope": "D02",
+      "authorityClass": "SEMANTIC-SUCCESSOR",
+      "predecessorId": "D02A9-AUTH-003",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A9-AUTH-005",
+      "sequence": 5,
+      "inputId": "D02A9-IN-005",
+      "scope": "D02",
+      "authorityClass": "SEMANTIC-SUCCESSOR",
+      "predecessorId": "D02A9-AUTH-004",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A9-AUTH-006",
+      "sequence": 6,
+      "inputId": "D02A9-IN-006",
+      "scope": "D02",
+      "authorityClass": "SEMANTIC-SUCCESSOR",
+      "predecessorId": "D02A9-AUTH-005",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A9-AUTH-007",
+      "sequence": 7,
+      "inputId": "D02A9-A8-SUBJECT",
+      "scope": "D02",
+      "authorityClass": "IMMUTABLE-EXECUTABLE-SUCCESSOR",
+      "predecessorId": "D02A9-AUTH-006",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    }
+  ],
+  "authorityConflict": {
+    "conflictId": "D02A9-CONFLICT-001",
+    "olderNodeId": "D02A9-AUTH-002",
+    "newerNodeId": "D02A9-AUTH-003",
+    "deterministicCurrentPolicy": "NO-OPERATIONAL-MODEL-SELECTED",
+    "resolutionRule": "CURRENT-TYPED-MODEL-SELECTION-AUTHORITY-ALL-OF",
+    "unresolvedAmbiguityCount": 0
+  },
+  "modelSelectionAuthority": {
+    "receiptId": "D02A9-MSA-001",
+    "authorityType": "MODEL-SELECTION-AUTHORITY",
+    "issuerClass": "PRODUCT-PLUS-AI-ENGINEERING-PLUS-FINANCE",
+    "scope": "D02-PILOT-EXACT-PROFILE",
+    "candidateRecommendation": "gpt-5.6-terra",
+    "acceptedSelection": null,
+    "issuedAt": null,
+    "expiresAt": null,
+    "revocationRoot": null,
+    "state": "MISSING",
+    "terminal": "MODEL-SELECTION-AUTHORITY-MISSING"
+  },
+  "approvalRegistry": [
+    {
+      "approvalId": "D02A9-APR-001",
+      "domain": "PRODUCT",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A9-APR-002",
+      "domain": "AI-ENGINEERING",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A9-APR-003",
+      "domain": "SECURITY",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A9-APR-004",
+      "domain": "PRIVACY-LEGAL",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A9-APR-005",
+      "domain": "FINANCE-COST",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A9-APR-006",
+      "domain": "WHATSAPP-META-POLICY",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    }
+  ],
+  "aiProfileMembers": [
+    {
+      "memberId": "D02A9-AIP-001",
+      "semanticKey": "RUNTIME-IDENTITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-002",
+      "semanticKey": "ENDPOINT-TRANSPORT",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-003",
+      "semanticKey": "REQUEST-SCHEMA-STATE",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-004",
+      "semanticKey": "EXACT-MODEL-IDENTITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-005",
+      "semanticKey": "REASONING-SAMPLING-SERVICE-TIER",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-006",
+      "semanticKey": "CONNECT-OWNED-PROMPT-BYTES",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-007",
+      "semanticKey": "CONTEXT-RETRIEVAL",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-008",
+      "semanticKey": "OUTPUT-TERMINAL-SCHEMA",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-009",
+      "semanticKey": "TOOL-SET-AUTHORITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-010",
+      "semanticKey": "SIDE-EFFECT-AUTHORITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-011",
+      "semanticKey": "ACCOUNT-SNAPSHOT",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-012",
+      "semanticKey": "DATA-CONTROL-RETENTION-CACHE",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-013",
+      "semanticKey": "RESIDENCY-CAPABILITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-014",
+      "semanticKey": "PRIVACY-MINIMIZATION-LOGGING",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-015",
+      "semanticKey": "OPERATIONAL-SECURITY-POLICY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-016",
+      "semanticKey": "EVAL-REQUIREMENT-CONFIG",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A9-AIP-017",
+      "semanticKey": "OFFICIAL-SOURCE-LIFECYCLE",
+      "required": true,
+      "rootState": "MISSING"
+    }
+  ],
+  "promptPolicy": {
+    "owner": "CONNECT",
+    "contentMode": "APPLICATION-OWNED-EXACT-BYTES",
+    "artifactPath": null,
+    "contentSha256": null,
+    "providerReusablePromptObjects": false,
+    "providerPromptEndpoint": "FORBIDDEN:/v1/prompts",
+    "responsesPromptObjectField": "FORBIDDEN",
+    "deprecationAnnounced": "2026-06-03",
+    "shutdownScheduled": "2026-11-30",
+    "sourceReceiptId": "D02A9-SRC-009",
+    "state": "MISSING-CONNECT-PROMPT-BYTES",
+    "terminal": "PROMPT-BYTES-MISSING"
+  },
+  "accountParentRows": [
+    {
+      "rowId": "D02A9-AR-001",
+      "semanticKey": "ORGANIZATION-IDENTITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-002",
+      "semanticKey": "PROJECT-ENVIRONMENT-REGION",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-003",
+      "semanticKey": "RETENTION-CONTROL-ELIGIBILITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-004",
+      "semanticKey": "PROJECT-RETENTION-OVERRIDE",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-005",
+      "semanticKey": "MODEL-INVENTORY-ENTITLEMENT",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-006",
+      "semanticKey": "RATE-AND-BUDGET-ALL-OF",
+      "required": true,
+      "childIds": [
+        "D02A9-AR-006-P",
+        "D02A9-AR-006-F"
+      ],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-007",
+      "semanticKey": "REGIONAL-CAPABILITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-008",
+      "semanticKey": "RBAC-AND-SERVICE-IDENTITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A9-AR-009",
+      "semanticKey": "TRAINING-DATA-SHARING",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    }
+  ],
+  "accountChildren": [
+    {
+      "childId": "D02A9-AR-006-P",
+      "parentId": "D02A9-AR-006",
+      "semanticKey": "PROVIDER-RATE-SPEND-LIMITS",
+      "sourceAuthority": "OPENAI-AUTHENTICATED-ORG-PROJECT-READBACK",
+      "issuerClass": "OPENAI-ACCOUNT-AUTHORITY",
+      "scope": "EXACT-ORGANIZATION-PROJECT-ENVIRONMENT-MODEL-PROFILE",
+      "observedAt": null,
+      "expiresAt": null,
+      "freshnessPolicy": "AUTHENTICATED-READBACK-TTL-REQUIRED-NO-DEFAULT",
+      "revocationRoot": null,
+      "state": "ABSENT"
+    },
+    {
+      "childId": "D02A9-AR-006-F",
+      "parentId": "D02A9-AR-006",
+      "semanticKey": "CONNECT-FINANCE-BUDGET",
+      "sourceAuthority": "CONNECT-FINANCE-DECISION-RECEIPT",
+      "issuerClass": "CONNECT-FINANCE-COST-AUTHORITY",
+      "scope": "EXACT-ORGANIZATION-PROJECT-ENVIRONMENT-MODEL-PROFILE-CURRENCY-PERIOD",
+      "observedAt": null,
+      "expiresAt": null,
+      "freshnessPolicy": "FINANCE-APPROVAL-EXPIRY-REQUIRED-NO-DEFAULT",
+      "revocationRoot": null,
+      "state": "ABSENT"
+    }
+  ],
+  "legalPrivacyMembers": [
+    {
+      "memberId": "D02A9-LP-001",
+      "domain": "DATA-PROCESSING-AGREEMENT",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A9-LP-002",
+      "domain": "PRIVACY-NOTICE-AND-LAWFUL-BASIS",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A9-LP-003",
+      "domain": "DPIA-AND-RISK-DISPOSITION",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A9-LP-004",
+      "domain": "RETENTION-DELETION-AND-LEGAL-HOLD",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A9-LP-005",
+      "domain": "DATA-RESIDENCY-AND-TRANSFER",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A9-LP-006",
+      "domain": "META-WHATSAPP-PURPOSE-AND-SUBPROCESSOR",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A9-LP-007",
+      "domain": "EVAL-CORPUS-PROVENANCE-CONSENT",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    }
+  ],
+  "a6FindingCarry": [
+    {
+      "findingId": "D02-A6-IHR-F001",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F001"
+    },
+    {
+      "findingId": "D02-A6-IHR-F002",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F002"
+    },
+    {
+      "findingId": "D02-A6-IHR-F003",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F003"
+    },
+    {
+      "findingId": "D02-A6-IHR-F004",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F004"
+    },
+    {
+      "findingId": "D02-A6-IHR-F005",
+      "severity": "P2",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F005"
+    }
+  ],
+  "a7FindingCarry": [
+    {
+      "findingId": "D02-A7-IHR-F001",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F001"
+    },
+    {
+      "findingId": "D02-A7-IHR-F002",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F002"
+    },
+    {
+      "findingId": "D02-A7-IHR-F003",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F003"
+    },
+    {
+      "findingId": "D02-A7-IHR-F004",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F004"
+    },
+    {
+      "findingId": "D02-A7-IHR-F005",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F005"
+    },
+    {
+      "findingId": "D02-A7-IHR-F006",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F006"
+    },
+    {
+      "findingId": "D02-A7-IHR-F007",
+      "severity": "P2",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A8-PROPOSAL-NO-INDEPENDENT-CREDIT",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F007"
+    }
+  ],
+  "a8FindingClosureCandidates": [
+    {
+      "ordinal": 1,
+      "findingId": "D02-A8-IHR-F001",
+      "severity": "P1",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F001",
+      "mutationGroupId": "D02A9-MG-F001"
+    },
+    {
+      "ordinal": 2,
+      "findingId": "D02-A8-IHR-F002",
+      "severity": "P1",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F002",
+      "mutationGroupId": "D02A9-MG-F002"
+    },
+    {
+      "ordinal": 3,
+      "findingId": "D02-A8-IHR-F003",
+      "severity": "P1",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F003",
+      "mutationGroupId": "D02A9-MG-F003"
+    },
+    {
+      "ordinal": 4,
+      "findingId": "D02-A8-IHR-F004",
+      "severity": "P1",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F004",
+      "mutationGroupId": "D02A9-MG-F004"
+    },
+    {
+      "ordinal": 5,
+      "findingId": "D02-A8-IHR-F005",
+      "severity": "P2",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F005",
+      "mutationGroupId": "D02A9-MG-F005"
+    },
+    {
+      "ordinal": 6,
+      "findingId": "D02-A8-IHR-F006",
+      "severity": "P1",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F006",
+      "mutationGroupId": "D02A9-MG-F006"
+    },
+    {
+      "ordinal": 7,
+      "findingId": "D02-A8-IHR-F007",
+      "severity": "P1",
+      "state": "OPEN",
+      "candidateDisposition": "A9-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": "MISSING",
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A8-IHR-F007",
+      "mutationGroupId": "D02A9-MG-F007"
+    }
+  ],
+  "rootDefinitions": [
+    {
+      "ordinal": 1,
+      "rootId": "D02A9-ROOT-INPUT-MANIFEST",
+      "rootClass": "EXACT-ADMITTED-INPUT-MANIFEST",
+      "producerId": "D02A9-PRODUCER-001",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "INPUT-MANIFEST-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 2,
+      "rootId": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "rootClass": "TOTAL-PREDECESSOR-SEMANTIC-UNIVERSE",
+      "producerId": "D02A9-PRODUCER-002",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-INPUT-MANIFEST"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "PREDECESSOR-SEMANTICS-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 3,
+      "rootId": "D02A9-ROOT-AUTHORITY-CHAIN",
+      "rootClass": "D02-AUTHORITY-CHAIN",
+      "producerId": "D02A9-PRODUCER-003",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-INPUT-MANIFEST"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "AUTHORITY-CHAIN-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 4,
+      "rootId": "D02A9-ROOT-PUBLIC-DIRECTIVE",
+      "rootClass": "DURABLE-PUBLIC-DIRECTIVE",
+      "producerId": "D02A9-PRODUCER-004",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-INPUT-MANIFEST"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "PUBLIC-DIRECTIVE-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 5,
+      "rootId": "D02A9-ROOT-A6-FINDING-CARRY",
+      "rootClass": "A6-FINDING-CARRY",
+      "producerId": "D02A9-PRODUCER-002",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "A6-FINDING-CARRY-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 6,
+      "rootId": "D02A9-ROOT-A7-FINDING-CARRY",
+      "rootClass": "A7-FINDING-CARRY",
+      "producerId": "D02A9-PRODUCER-002",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "A7-FINDING-CARRY-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 7,
+      "rootId": "D02A9-ROOT-A8-FINDING-CLOSURE-CANDIDATES",
+      "rootClass": "A8-FINDING-CANDIDATE-CLOSURE",
+      "producerId": "D02A9-PRODUCER-005",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "A8-FINDING-CLOSURE-CANDIDATES-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 8,
+      "rootId": "D02A9-ROOT-SOURCE-OBSERVATION",
+      "rootClass": "OFFICIAL-SOURCE-OBSERVATION",
+      "producerId": "D02A9-PRODUCER-006",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "SOURCE-OBSERVATION-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 9,
+      "rootId": "D02A9-ROOT-SOURCE-ACCEPTED",
+      "rootClass": "OFFICIAL-SOURCE-ACCEPTANCE",
+      "producerId": "D02A9-PRODUCER-007",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-SOURCE-OBSERVATION"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "SOURCE-ACCEPTED-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 10,
+      "rootId": "D02A9-ROOT-MODEL-SELECTION-AUTHORITY",
+      "rootClass": "MODEL-SELECTION-AUTHORITY",
+      "producerId": "D02A9-PRODUCER-008",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "MODEL-SELECTION-AUTHORITY-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 11,
+      "rootId": "D02A9-ROOT-PROMPT-ARTIFACT",
+      "rootClass": "CONNECT-PROMPT-BYTES",
+      "producerId": "D02A9-PRODUCER-009",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "PROMPT-ARTIFACT-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 12,
+      "rootId": "D02A9-ROOT-AI-PROFILE",
+      "rootClass": "AI-PROFILE",
+      "producerId": "D02A9-PRODUCER-010",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "AI-PROFILE-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 13,
+      "rootId": "D02A9-ROOT-ACCOUNT",
+      "rootClass": "ACCOUNT-SNAPSHOT",
+      "producerId": "D02A9-PRODUCER-011",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "ACCOUNT-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 14,
+      "rootId": "D02A9-ROOT-LEGAL",
+      "rootClass": "LEGAL-PRIVACY-BUNDLE",
+      "producerId": "D02A9-PRODUCER-012",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "LEGAL-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 15,
+      "rootId": "D02A9-ROOT-APPROVAL-SET",
+      "rootClass": "SIX-DOMAIN-APPROVAL-SET",
+      "producerId": "D02A9-PRODUCER-013",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "APPROVAL-SET-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 16,
+      "rootId": "D02A9-ROOT-EVAL",
+      "rootClass": "DETACHED-EVAL-EVIDENCE",
+      "producerId": "D02A9-PRODUCER-014",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "EVAL-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 17,
+      "rootId": "D02A9-ROOT-PACKAGE-ENVELOPE",
+      "rootClass": "ATOMIC-PACKAGE-ENVELOPE",
+      "producerId": "D02A9-PRODUCER-015",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "PACKAGE-ENVELOPE-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 18,
+      "rootId": "D02A9-ROOT-INDEPENDENT-A9-REVIEW",
+      "rootClass": "INDEPENDENT-REVIEW-DISPOSITION",
+      "producerId": "D02A9-PRODUCER-016",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "INDEPENDENT-A9-REVIEW-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 19,
+      "rootId": "D02A9-ROOT-PROGRAM-ACCEPTANCE",
+      "rootClass": "PROGRAM-ACCEPTANCE",
+      "producerId": "D02A9-PRODUCER-017",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "PROGRAM-ACCEPTANCE-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 20,
+      "rootId": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "producerId": "D02A9-PRODUCER-017",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-PACKAGE-ENVELOPE",
+        "D02A9-ROOT-AUTHORITY-CHAIN",
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-PUBLIC-DIRECTIVE",
+        "D02A9-ROOT-INDEPENDENT-A9-REVIEW",
+        "D02A9-ROOT-A8-FINDING-CLOSURE-CANDIDATES",
+        "D02A9-ROOT-PROGRAM-ACCEPTANCE"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "PLANNING-ACCEPTANCE-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 21,
+      "rootId": "D02A9-ROOT-AI-ADMISSION",
+      "rootClass": "AI-PROFILE-ADMISSION",
+      "producerId": "D02A9-PRODUCER-018",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-PLANNING-ACCEPTANCE",
+        "D02A9-ROOT-MODEL-SELECTION-AUTHORITY",
+        "D02A9-ROOT-PROMPT-ARTIFACT",
+        "D02A9-ROOT-AI-PROFILE",
+        "D02A9-ROOT-ACCOUNT",
+        "D02A9-ROOT-LEGAL",
+        "D02A9-ROOT-SOURCE-ACCEPTED",
+        "D02A9-ROOT-APPROVAL-SET",
+        "D02A9-ROOT-EVAL"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "AI-ADMISSION-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 22,
+      "rootId": "D02A9-ROOT-GATE29",
+      "rootClass": "GATE29-PERMIT",
+      "producerId": "D02A9-PRODUCER-019",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-PUBLIC-DIRECTIVE"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "GATE29-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 23,
+      "rootId": "D02A9-ROOT-FREEZE-LIFT",
+      "rootClass": "FREEZE-LIFT-AUTHORITY",
+      "producerId": "D02A9-PRODUCER-020",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "FREEZE-LIFT-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 24,
+      "rootId": "D02A9-ROOT-RUNTIME-ACCOUNT",
+      "rootClass": "RUNTIME-ACCOUNT-READBACK",
+      "producerId": "D02A9-PRODUCER-011",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "RUNTIME-ACCOUNT-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 25,
+      "rootId": "D02A9-ROOT-TRUSTED-TIME",
+      "rootClass": "TRUSTED-TIME-CUT",
+      "producerId": "D02A9-PRODUCER-021",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "TRUSTED-TIME-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 26,
+      "rootId": "D02A9-ROOT-REVOCATION-CUT",
+      "rootClass": "REVOCATION-CUT",
+      "producerId": "D02A9-PRODUCER-021",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "REVOCATION-CUT-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 27,
+      "rootId": "D02A9-ROOT-CAS",
+      "rootClass": "COMPARE-AND-SWAP",
+      "producerId": "D02A9-PRODUCER-022",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "CAS-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 28,
+      "rootId": "D02A9-ROOT-SINGLE-USE",
+      "rootClass": "SINGLE-USE-CONSUME",
+      "producerId": "D02A9-PRODUCER-022",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-CAS"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "SINGLE-USE-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 29,
+      "rootId": "D02A9-ROOT-POST-READBACK",
+      "rootClass": "POST-READBACK",
+      "producerId": "D02A9-PRODUCER-023",
+      "orderedDependencyIds": [],
+      "successMode": "ALL-OF",
+      "failureTerminal": "POST-READBACK-MISSING-OR-INVALID"
+    },
+    {
+      "ordinal": 30,
+      "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+      "rootClass": "AI-RUNTIME-PERMIT",
+      "producerId": "D02A9-PRODUCER-024",
+      "orderedDependencyIds": [
+        "D02A9-ROOT-AI-ADMISSION",
+        "D02A9-ROOT-GATE29",
+        "D02A9-ROOT-FREEZE-LIFT",
+        "D02A9-ROOT-RUNTIME-ACCOUNT",
+        "D02A9-ROOT-TRUSTED-TIME",
+        "D02A9-ROOT-REVOCATION-CUT",
+        "D02A9-ROOT-CAS",
+        "D02A9-ROOT-SINGLE-USE",
+        "D02A9-ROOT-POST-READBACK"
+      ],
+      "successMode": "ALL-OF",
+      "failureTerminal": "RUNTIME-PERMIT-MISSING-OR-INVALID"
+    }
+  ],
+  "currentRootStates": [
+    {
+      "ordinal": 1,
+      "rootId": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "version": 0,
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "rootId": "D02A9-ROOT-AI-ADMISSION",
+      "rootClass": "AI-PROFILE-ADMISSION",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "version": 0,
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 3,
+      "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+      "rootClass": "AI-RUNTIME-PERMIT",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "version": 0,
+      "acceptanceCredit": 0
+    }
+  ],
+  "stateMachine": {
+    "artifactId": "CONNECT-D02-A9-CLOSED-TRANSITION-MACHINE-2026-08-30",
+    "planningPredicates": [
+      "PACKAGE-ENVELOPE",
+      "AUTHORITY-CHAIN",
+      "PREDECESSOR-SEMANTICS",
+      "PUBLIC-DIRECTIVE",
+      "INDEPENDENT-A9-REVIEW",
+      "A9-SEVEN-FINDING-CLOSURE",
+      "PROGRAM-ACCEPTANCE"
+    ],
+    "aiPredicates": [
+      "MODEL-SELECTION",
+      "CONNECT-PROMPT",
+      "AI-PROFILE",
+      "ACCOUNT",
+      "LEGAL-PRIVACY",
+      "SOURCE-ACCEPTANCE",
+      "APPROVALS",
+      "EVAL"
+    ],
+    "runtimePredicates": [
+      "GATE29",
+      "FREEZE-LIFT",
+      "RUNTIME-ACCOUNT",
+      "TRUSTED-TIME",
+      "REVOCATION-CLEAR",
+      "CAS-MATCH",
+      "SINGLE-USE",
+      "POST-READBACK"
+    ],
+    "invalidationPredicates": [
+      "EXPIRED",
+      "REVOKED",
+      "REPLAY",
+      "CAS-MISMATCH",
+      "POST-READBACK-MISMATCH"
+    ]
+  },
+  "producerAppointments": {
+    "artifactId": "CONNECT-D02-A9-EXACT-PRODUCER-APPOINTMENTS-2026-08-30",
+    "appointmentsRoot": "aa3a873c798fdbd6dfe17c737fc099d370f600b4109700e19a3aea475bfd7bbf",
+    "exactCount": 24
+  },
+  "dependencyDag": {
+    "artifactId": "CONNECT-D02-A9-EXACT-DEPENDENCY-DAG-2026-08-30",
+    "exactNodeRoot": "f6fe5da0fc9757b0f53727174ec0f8e9f7a578512336632076af997b10baa87c",
+    "exactEdgeRoot": "4602168466169a1904824a748f8f0f78ae00db57a0638322581f6f1455c5bbd2",
+    "nodeCount": 30,
+    "edgeCount": 34
+  },
+  "officialSourceIds": [
+    "OPENAI-DATA-CONTROLS",
+    "OPENAI-RESPONSES-CREATE",
+    "OPENAI-FUNCTION-CALLING",
+    "OPENAI-MCP-CONNECTORS",
+    "OPENAI-SAFETY-BEST-PRACTICES",
+    "OPENAI-RED-TEAMING",
+    "OPENAI-RBAC",
+    "OPENAI-EVALUATION-BEST-PRACTICES",
+    "OPENAI-DEPRECATIONS",
+    "OPENAI-MODEL-CATALOG",
+    "OPENAI-RETRIEVE-MODEL"
+  ],
+  "publicDirective": {
+    "inputId": "D02A9-IN-013",
+    "locator": "D18-A2:1.1.4",
+    "policy": "PUBLIC",
+    "liveReadbackState": "UNKNOWN-NOT-RUN",
+    "acceptanceCredit": 0
+  },
+  "immutableState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "acceptanceCount": 0,
+    "selfAcceptance": 0,
+    "productMutationCount": 0,
+    "gitMutationCount": 0,
+    "githubMutationCount": 0,
+    "providerMutationCount": 0
+  }
+}

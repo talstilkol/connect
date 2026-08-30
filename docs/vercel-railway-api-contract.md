@@ -1,6 +1,6 @@
 # חוזה API בין Vercel ל־Railway
 
-תאריך הקפאה: 2026-08-17
+תאריך הקפאה: 2026-08-21
 
 ## 1. מטרה
 
@@ -45,6 +45,32 @@ Vercel Functions. שני הערכים רגישים וחייבים Redaction מל
 נבדק מול JWKS קבוע של Vercel ו־`issuer`, ‏`audience` ו־`subject`
 מדויקים. Clerk מקבל רק `session_token` ורק מ־`APP_PUBLIC_ORIGIN`
 שאושר באמצעות `authorizedParties`.
+
+2.6 ‏Correlation משתמש רק ב־W3C `traceparent` מגרסה `00`. הוא אינו
+מתקבל מה־Browser ואינו חלק מה־Payload. ‏Vercel גוזר Trace ID ו־Span ID
+אטומים באמצעות HMAC-SHA256 מ־`x-vercel-id` שהפלטפורמה מוסיפה לבקשה.
+
+2.7 ‏`CONNECT_TRACE_CONTEXT_HMAC_KEY` הוא מפתח Base64URL קנוני של 32
+בתים, נשמר רק ב־Vercel Vault ואינו מועבר ל־Railway. המימוש אינו משתמש
+ב־`Math.random()`, ב־`randomUUID()` או בנתון Tenant/User/Recipient.
+
+2.8 ‏Preview ו־Production נכשלים סגור כאשר המפתח או `x-vercel-id`
+חסרים או פגומים. ‏Development ללא מפתח משמיט Correlation ואינו ממציא
+מזהה. ה־Client מעביר רק `traceparent`; הוא אינו מעביר `tracestate` או
+`baggage`.
+
+2.9 ‏Railway קורא ומאמת `traceparent` רק לאחר ש־Vercel OIDC עבר אימות.
+Context פגום מחזיר `INVALID_REQUEST` לפני אימות המשתמש ולפני Dispatch.
+ה־Operation מקבל Context אטום בלבד; ה־HTTP response אינו חושף אותו.
+
+2.10 ‏Vercel מפיק Root Client Span בעל ה־Trace ID וה־Span ID האטומים,
+ו־Railway מפיק Server Span שהוא Child דטרמיניסטי שלו. לוגי OTLP בכל שירות
+מקושרים ל־Span המקומי. Attributes אינם כוללים את ה־IDs, את `x-vercel-id`,
+‏Headers, ‏Tokens, ‏Payload או Identity.
+
+2.11 שני השירותים מפיקים מונה בקשות והיסטוגרמת משך בעלות Cardinality
+תחומה. המימוש המקומי מכסה את נתיב ה־API בלבד ואינו מוכיח Ingestion חי,
+Waterfall ב־Better Stack או כיסוי מלא לתורי Worker ולפעולות ספק אחרות.
 
 ## 3. חוזה הבקשה
 
@@ -114,6 +140,9 @@ Path, ‏Query או Fragment.
 
 5.4 בקשה לא חוקית נעצרת לפני קריאת Tokens ולפני Network call.
 
+5.5 Correlation חסר או פגום ב־Hosted environment נעצר לפני קריאת
+Tokens ולפני Network call עם `CORRELATION_UNAVAILABLE` תחום.
+
 ## 6. גבולות Handler
 
 6.1 ה־Handler מקבל `POST` ו־JSON לא דחוס בלבד.
@@ -128,6 +157,10 @@ Path, ‏Query או Fragment.
 
 6.5 לכל Operation ננעל מראש `id` ו־`requestKind`. Caller אינו יכול
 להציג Mutation כ־Query כדי לעקוף Idempotency.
+
+6.6 ‏Railway אינו סומך על `traceparent` לפני אימות זהות השירות. לאחר
+האימות הוא מקבל רק Version `00`, תווי Hex קטנים ו־Trace/Span שאינם אפס.
+‏Version עתידי, Uppercase, מזהה אפס או Suffix נוסף נדחים.
 
 ## 7. מה הושלם ומה עדיין חסר
 
@@ -480,7 +513,7 @@ Source coverage; הוא אינו מוכיח Data conversion או Semantic parity
 גם ב־Policies מבודדים עבור System Admin mutations ו־Meta webhook ingress.
 כל Policy דורש Version, ‏Capacity וחלון Refill מפורשים; ערך חסר, חלקי או
 לא חוקי נכשל סגור. ה־DB שומר רק מפתח SHA-256 אטום, נועל כל Scope ומחשב
-Refill לפי זמן PostgreSQL. ‏Harness אמיתי עדכני עבר עם 26 Migrations ו־58
+Refill לפי זמן PostgreSQL. ‏Harness אמיתי עדכני עבר עם 27 Migrations ו־61
 תרחישי Concurrency, כולל שתי הצלחות וחסימה אחת תחת שלוש בקשות מקבילות
 במכסה `2`. ‏Tenant mutation ו־System Admin mutation מחוברים ל־Railway API,
 ו־Meta webhook מחובר כאופציה חתומה ב־Node dispatcher עם PostgreSQL WABA
@@ -620,11 +653,464 @@ Tenant ו־Actor נגזרים בצד Railway ואינם חוצים את ה־Payl
 7.1.67 כל פעולה מחשבת מחדש מפתח Idempotency לפני צריכת מכסת
 `tenant-mutation`. ‏Receipt claim, כתיבת Tag/List או Relationship, קריאת
 Snapshot, ‏Audit בלתי־משתנה ושמירת Replay response מבוצעים באותה PostgreSQL
-Transaction ברמת `repeatable-read`. ‏Conflict, יעד חסר ותלות לא זמינה
+Transaction ברמת `read-committed`. ‏Conflict, יעד חסר ותלות לא זמינה
 נשמרים כמצבים נפרדים. ה־BFF מקבל רק Replay flag בוליאני ו־Snapshot קנוני
 ב־Scope ריק ליצירת Group או ב־Scope של Contact יחיד לשינוי Relationship;
 אין D1 fallback. עדיין נדרשים ערכי Policy, ‏Origin, ‏OIDC, Clerk,
 PostgreSQL וראיית Staging חיים לפני Cutover.
+
+7.1.68 ‏Contact Import הועבר מקומית מ־D1 לשתי Operations:
+`contacts.import.start` ו־`contacts.import.chunk`. ה־BFF מאמת File metadata,
+Digest, ‏Mapping ו־Rows ללא Tenant או Actor, ומחשב מפתח Idempotency
+דטרמיניסטי מה־Payload הקנוני. Railway פותר Session והרשאת `contacts.write`
+וצורך מכסת `tenant-mutation` לפני כתיבה.
+
+7.1.69 ‏Chunk נועל את Import Job לפני עיבוד כדי לסדר בקשות מקבילות. פתיחת
+Job או עיבוד Chunk, עדכון Contact/Row/counters, כתיבת Audit, שמירת Response
+והשלמת Receipt מתבצעים באותה PostgreSQL Transaction ברמת
+`read-committed`. ‏Replay מחזיר את אותה תגובה, Digest סותר מחזיר Conflict,
+ו־Job חסר נבדל מתלות לא זמינה. תגובת ה־BFF כוללת רק Job summary ועד שישה
+Contact records קנוניים ללא Evidence פנימי; אין D1 fallback. עדיין נדרשים
+ערכי Policy, ‏Origin, ‏OIDC, Clerk, ‏PostgreSQL וראיית Staging חיים לפני
+Cutover.
+
+7.1.70 ‏Message Template Directory ו־Draft Save הועברו יחד כדי למנוע
+Split-brain. ‏`templates.list` קוראת עד 100 תבניות Tenant-scoped מ־PostgreSQL
+ומחזירה רק DTO קנוני והרשאת כתיבה נגזרת. ‏`templates.draft.save` מקבלת Draft
+במבנה מדויק ללא Tenant, ‏Actor, ‏Meta ID או שדות Lifecycle.
+
+7.1.71 שמירת Draft דורשת `templates.write`, מכסת `tenant-mutation` ומפתח
+Idempotency דטרמיניסטי הנבדק מחדש. ‏Receipt claim, יצירה/עדכון של Draft,
+Audit בלתי־משתנה ושמירת Replay response מתבצעים באותה PostgreSQL Transaction
+ברמת `read-committed`. ‏Draft נעול, Digest סותר ותלות לא זמינה נשמרים
+כמצבים נפרדים. ה־BFF של List ושל Save דוחים שדות עודפים, Lifecycle לא עקבי,
+כפילויות וסדר שגוי; לשניהם אין D1 fallback. ‏Sync הישן נשמר בקוד לצורך
+המעבר ונכשל סגור. ‏Submit מחובר כעת ל־BFF ול־Operation
+`templates.submit`, אך דגל ה־UI נשאר כבוי עד השלמת ראיות חיות.
+
+7.1.72 ‏`templates.submit` אינו פונה ל־Meta מתוך בקשת המשתמש. Railway
+מאמת `templates.write`, צורך מכסת `tenant-mutation`, נועל Receipt, חיבור
+Meta ותבנית, ואז שומר Template claim, ‏Outbox במצב `pending`, אירוע
+`staged`, ‏Audit ו־Replay response באותה Transaction ברמת
+`read-committed`. כך בקשה זהה שממתינה ל־Receipt מקביל רואה את ה־Commit
+ומחזירה `replayed`; ‏Template version ו־row locks מגנים בנפרד על מצב העסק.
+ה־Outbox מקבע Template version, ‏Meta connection version,
+‏WABA, ‏Graph API version ומפתח הבקשה. אין D1 fallback ואין Secret בתגובה.
+
+7.1.73 ‏Worker נפרד נועל את הרשומה ומבצע לכל היותר Meta `POST` אחד.
+Success או Rejection ידוע נכתבים יחד עם שינוי התבנית ו־Event בלתי־משתנה.
+Timeout, ‏Network failure, תגובה לא תקינה או קריסה לאחר Claim מסומנים
+`ambiguous`; הם אינם נשלחים אוטומטית פעם נוספת. Reconciliation משתמש רק
+ב־`GET /{waba-id}/message_templates`, דורש התאמה יחידה של
+`name+language+category`, וממתין חלון חסד תחום לפני שחרור התבנית כשאין
+התאמה. התאמות מרובות או כשל קריאה נשארים `deferred`.
+
+7.1.74 ‏Migration `0026_message_template_submission_outbox.sql` מוסיפה
+Outbox ו־Transition events עם Constraints, ‏Triggers ו־Audit linkage.
+נוספו Candidate scans תחומים ל־`pending` ול־`ambiguous`, ‏Queue consumer
+של עד 10 הודעות ו־Maintenance cycle ספק־נייטרלי. פרסום הוא At-least-once;
+נעילת ה־Claim היא גבול ה־Idempotency שמונע POST כפול. ה־Registry כולל כעת
+27 Migrations, מהן חמש Railway-only, וה־Foundation כולל 45 Adapters.
+ה־Migration והזרימות עברו Contract/Mock tests וגם Harness חי מול
+PostgreSQL 16.13. עדיין אין ספק Queue/DLQ, ‏Publisher adapter, ‏Credentials
+חיים או ראיית Railway Staging; לכן ה־UI נשאר מושבת ואין טענת Provider
+readiness או Cutover.
+
+7.1.75 ‏Maintenance cycle של `templates.submit` מחובר כעת ל־Railway
+Worker scheduler תחת אותו Lease ו־Fencing של יתר המשימות הדקתיות. ה־Service
+מרכיב אותו מאותו PostgreSQL Foundation רק כאשר מוזנים Environment מלא
+ו־Queue publisher מפורש. כשל תחזוקה מונע השלמת Tick, אך אינו גורם ל־POST
+נוסף לרשומה `ambiguous`; התאוששות ממנה נשארת GET-only. החיבור אינו מממש
+Queue adapter ואינו משנה את מצב ה־Cutover: ספק Queue/DLQ, ‏Telemetry sink חי,
+Credentials וראיית Staging עדיין חסרים.
+
+7.1.76 ‏Maintenance telemetry כוללת רק Outcome, זמן ותשעה מונים תחומים;
+אין בה Tenant, ‏WABA, ‏Template/Submission identity, ‏Payload או Credential.
+ה־Worker composition דורש Sink מפורש כאשר המשימה מופעלת. כשל Sink אינו
+משנה את תוצאת העבודה, אך כשל Runner נרשם כ־Failed ומונע השלמת Tick. זהו
+חוזה מקומי בלבד: לא נבחרו Monitoring sink, ‏Alert policy או Dashboard חיים.
+
+7.1.77 נוסף Bootstrap ספק־נייטרלי ל־Railway Worker. הוא מקבל רק
+`RAILWAY_WORKER_SCHEDULER_OWNER_KEY` במבנה דטרמיניסטי, יוצר Service לפני
+Process, מבודד כשלים של Telemetry ומנקה את ה־Service אם בניית ה־Process או
+הפעלתו נכשלות. שגיאות Environment, ‏Service ו־Process ממופות לקודים תחומים
+ללא פרטים פנימיים. ה־Bootstrap אינו בוחר Queue או Sink; לכן עדיין אין
+Executable entry point אמיתי עד שה־Adapters המאושרים מוזרקים ל־Factory.
+
+7.1.78 נוסף `railwayWorkerExecutable` כ־Composition root אחרון לפני
+Adapter הספק. הוא מעביר ל־Bootstrap רק Owner key, ומחזיק את PostgreSQL
+Environment, ‏Campaign queue, ‏Template publisher ו־Telemetry sink בתוך
+Service factory. אין Fallback: Campaign queue חסר, Publisher/Sink חלקיים,
+Clock לא תקין או אפשרות מורחבת נדחים לפני Start. כאשר Template maintenance
+אינה מוגדרת היא נשארת כבויה במפורש. עדיין חסרים Entry module ו־Package
+script שמייבאים Adapters של ספק שנבחר בפועל.
+
+7.1.79 נוסף חוזה קבלה גרסה 1 לכל ארבעת ה־Queues. הוא מקבע At-least-once,
+Batch של 10, עשרה Retries, ‏DLQ, ‏Ack מפורש, שימור Payload וחמש הוכחות
+התנהגות ב־Staging. ‏Campaign דורש Delay מוגדר של 24 שעות;
+Invitation ו־Template submission דורשים 30 שניות. ראיה קשורה ל־Commit
+ול־Artifact, תקפה עד 24 שעות ואינה כוללת זהויות משאב או חשבון. זהו Connect
+policy לשימור התנהגות, לא מגבלת Meta או הבטחת יכולת של ספק שטרם נבחר.
+
+7.1.80 נוסף CLI שנכשל סגור לאימות קובץ Queue evidence. הוא קורא קובץ
+רגיל ובבעלות המשתמש בלבד, חוסם Symlink, הרשאות כתיבה משותפות, שינוי בזמן
+קריאה וגודל מעל 48,000 Bytes. לאחר מכן הוא דורש התאמה מלאה ל־Commit של
+Release נקי, ל־Artifact digest מפורש ולחלון התוקף, ומדפיס רק תוצאה תחומה.
+ה־CLI אינו מייצר Evidence ולכן אינו משנה את מצב הספק: עדיין נדרשים Adapter
+וראיית Staging אמיתיים.
+
+7.1.81 ‏Production Readiness כולל כעת שער נפרד ל־Target Queue Adapter.
+בדיקות ה־Queue הישנות נשארות Ready רק כראיה שה־Cloudflare baseline קיים;
+הן אינן מוכיחות את יעד Vercel/Railway. השער החדש נשאר חסום בקוד
+`TARGET_QUEUE_ADAPTER_REQUIRED` עד חיבור Adapter אמיתי, בלי להסיק שבחירת
+Redis/BullMQ המוצעת כבר אושרה.
+
+7.1.82 ‏Harness האינטגרציה החי מחיל כעת את כל 27 ה־Migrations ומוכיח
+61 תרחישי Concurrency. עבור `templates.submit` הוא מוכיח שתי בקשות זהות
+במקביל שמסתיימות `committed + replayed`, את מחזור
+`pending → submitting → ambiguous → submitted`, את הקרנת התבנית ל־
+`pending_review` ואת חסימת שינוי אירועי ה־Audit. במהלך ההוכחה אותר ותוקן
+Race Condition: ‏`repeatable-read` הסתיר מהבקשה הממתינה Receipt שהושלם;
+כל ארבעת ה־Executors המבוססים על Receipt משתמשים כעת ב־`read-committed`,
+בהתאם לחוזה ה־Receipt. ‏Receipt uniqueness, ‏row locks ו־version guards
+ממשיכים להגן על הכתיבות העסקיות.
+
+7.1.83 כל מסלול השיחות הועבר מקומית כיחידה אחת כדי למנוע Split-brain:
+`conversations.list`, ‏`conversations.thread.read`, ‏`conversations.mark-read`
+ו־`conversations.assignment.change`. שתי הקריאות דורשות
+`conversations.read`; שתי המוטציות דורשות `conversations.reply`, מכסת
+`tenant-mutation`, מפתח Idempotency דטרמיניסטי, Receipt, שינוי מצב, Audit
+ותגובת Replay באותה Transaction ברמת `read-committed`.
+
+7.1.83.1 ה־Vercel BFF מאמת Filters, מפתחות, גרסאות וכל DTO שחוזר מ־Railway,
+ומסיר Tenant, ‏Contact, ‏Provider ו־External-user identities. ‏Current inbox,
+Refresh, ‏Thread, ‏Mark-read ו־Assignment אינם משתמשים עוד ב־D1 fallback.
+ה־Harness החי הוכיח את ארבע פעולות ה־HTTP מול PostgreSQL 16.13, כולל שני
+Races נפרדים שהחזירו `committed + replayed`, שני Receipts, שני Audit records
+ומצב סופי עקבי. בכך עלה הסך ל־61 תרחישי Concurrency.
+
+7.1.84 קריאות Bot flow הועברו ל־Railway/PostgreSQL בשתי פעולות תחומות:
+`bot.flows.list` ו־`bot.flows.details.read`. שתיהן דורשות `bot.read` ומחזירות
+רק Summary/Version/Definition ציבוריים; ‏Tenant ו־External-user identities
+אינם עוברים ל־BFF. ה־BFF מאמת מפתחות, סטטוסים, timestamps, סדר גרסאות,
+Latest/Active version consistency והגדרת Flow לפני הצגה. ‏Current directory
+ו־Load details אינם משתמשים עוד ב־D1 fallback. כתיבות Draft/Publish עדיין
+נשארות מחוץ ל־Cutover עד שיושלם עבורן חוזה Mutation אטומי עם Receipt ו־Audit.
+
+7.1.85 כתיבות Bot flow הועברו גם הן ל־Railway/PostgreSQL. הפעולות
+`bot.flows.draft.save` ו־`bot.flows.publish` דורשות `bot.write`, מכסת
+`tenant-mutation`, מפתח Idempotency ו־Request digest דטרמיניסטיים. ‏Receipt,
+שינוי ה־Draft או ה־Publication, ‏Audit ותגובת Replay נשמרים באותה Transaction
+ברמת `read-committed`. ה־BFF דוחה Tenant, ‏Actor ושדות Lifecycle מהדפדפן,
+ומאמת תשובה ציבורית תחומה. יחד עם List ו־Details, כל ארבע פעולות ה־Feature
+פועלות כעת ללא D1 fallback. ה־Foundation כולל 46 Adapters; ה־Harness החי
+הוכיח Draft ו־Publish מקבילים דרך HTTP והעלה את הסך ל־63 תרחישי Concurrency.
+
+7.1.86 ‏Campaign directory, ‏Snapshot ו־Activation הועברו יחד
+ל־Railway/PostgreSQL כדי למנוע Split-brain. הקריאה דורשת `campaigns.read`;
+המוטציות דורשות `campaigns.write`, מכסת `tenant-mutation`, מפתח Idempotency
+ו־Request digest דטרמיניסטיים. ‏Receipt, ‏Snapshot/Activation, ‏Audit ותגובת
+Replay נשמרים באותה Transaction ברמת `read-committed`. ‏Activation נכשלת
+סגור כל עוד Queue/Scheduler היעד אינם מוגדרים. ה־BFF מאמת קלט ופלט תחומים
+ואינו חושף Tenant או מזהי ספק. כל שלוש הפעולות פועלות ללא D1 fallback.
+ה־Foundation כולל 47 Adapters; ‏PostgreSQL 16.13 חי הוכיח Snapshot ו־Activation
+מקבילים דרך HTTP והעלה את הסך ל־65 תרחישי Concurrency.
+
+7.1.87 ‏AI reply approval list ו־decide הועברו יחד ל־Railway/PostgreSQL כדי
+למנוע Split-brain בין רשימת ההמתנה לבין החלטת הסוכן. הקריאה דורשת
+`conversations.read`; ההחלטה דורשת `conversations.reply`, מכסת
+`tenant-mutation`, מפתח Idempotency ו־Request digest דטרמיניסטיים. ‏Receipt,
+שינוי ה־Outbox, ‏Audit ותגובת Replay נשמרים באותה Transaction ברמת
+`read-committed`. ה־BFF דוחה Tenant, ‏Actor ושדות פנימיים, ומחזיר DTO ציבורי
+תחום. שתי הפעולות פועלות ללא D1 fallback. ה־Foundation כולל 48 Adapters;
+‏PostgreSQL 16.13 חי הוכיח שתי החלטות זהות במקביל דרך HTTP עם שינוי,
+Receipt ו־Audit יחידים והעלה את הסך ל־67 תרחישי Concurrency.
+
+7.1.88 ‏Onboarding business profile read ו־save הועברו יחד
+ל־Railway/PostgreSQL. הקריאה מאפשרת למשתמש מאומת שטרם קיבל Tenant לקבל
+`profile:null`; השמירה הראשונה יוצרת Tenant, ‏Owner ו־Profile אטומיים.
+משתמש קיים נדרש ל־`workspace.manage`. המכסה נצרכת לפי זהות המשתמש לפני
+פתרון Tenant, ולאחר מכן Receipt, ‏Request digest, ‏Provisioning/Update,
+‏Audit ותגובת Replay נשמרים ב־Transaction אחת מסוג `read-committed`.
+
+7.1.88.1 ה־BFF מנרמל את שלושת שדות הפרופיל בלבד, דוחה שדות מורחבים ומאמת
+פלט ציבורי שאינו כולל Tenant, ‏Actor, ‏Receipt או Digest. שכבות
+`currentBusinessProfile` ו־`saveBusinessProfileAction` אינן משתמשות עוד
+ב־D1 fallback. ‏PostgreSQL 16.13 חי הוכיח שתי שמירות ראשונות זהות במקביל:
+Tenant, ‏Owner, ‏Profile, ‏Receipt ו־Audit יחידים ו־`committed + replayed`.
+ה־Foundation כולל 49 Adapters והסך עלה ל־69 תרחישי Concurrency.
+
+7.1.88.2 ‏Optional tenant resolution מבדיל כעת בין שני מצבים: רק אפס
+Memberships פעילים הוא משתמש חדש ומחזיר `profile:null`; Membership קיים
+ששייך ל־Tenant במצב לא כשיר נכשל ב־`PERMISSION_DENIED`. לכן Workspace
+`suspended`, ‏`cancelled`, ‏`expired` או `blocked` אינו יכול לעקוף את חסימת
+הגישה דרך מסלול Onboarding. ה־Harness החי הוכיח `403` לקריאה ולשמירה לאחר
+חסימת ה־Tenant, וכן הוכיח שלא נוצרו Profile update, ‏Receipt או Audit נוספים.
+
+7.1.89 מסלול בחירת סביבת העבודה הפעיל הועבר במלואו ל־Railway/PostgreSQL:
+`tenant-selection.directory.read` מחזיר עד 100 אפשרויות עם Selection key
+אטום, Display name, ‏Role ומצב בחירה בלבד. `tenant-selection.save` מקבל רק
+Selection key ו־Expected version; Tenant ו־Actor נגזרים בצד השרת מזהות Clerk
+ומ־Membership כשירה, ולא מקלט הדפדפן.
+
+7.1.89.1 השמירה משתמשת במכסת Tenant mutation לפי זהות המשתמש, במפתח
+Idempotency וב־Request digest דטרמיניסטיים. ה־Executor נועל Membership
+ו־Tenant, ושומר Selection, ‏Receipt, ‏Audit ותגובת Replay באותה Transaction.
+הוא בודק שוב את ההרשאה גם לפני Replay כדי למנוע החזרת תוצאה לאחר ביטול גישה.
+
+7.1.89.2 ‏PostgreSQL 16.13 אמיתי הוכיח Directory של שני Tenants ושתי
+בחירות זהות במקביל: Selection אחת בגרסה 1, ‏Receipt אחד, ‏Audit אחד ותשובות
+`committed + replayed`. הפלט לא כלל Tenant ID, ‏External user ID או Digest.
+ה־Foundation כולל 50 Adapters והסך עומד על 71 תרחישי Concurrency. שכבות
+`tenantSelectionActions` ו־Current handler אינן משתמשות עוד ב־D1 fallback.
+
+7.1.90 ‏Team Directory הפעיל הועבר לקריאה דרך Railway/PostgreSQL:
+`team.directory.read` מקבלת Payload ריק בלבד, פותרת את סביבת העבודה דרך
+Vercel OIDC, ‏Clerk session ו־Tenant selection מאומתת, ודורשת `team.manage`
+לפני גישה ל־Membership repository.
+
+7.1.90.1 התגובה מחזירה עד 100 חברים באמצעות Member key ו־Reference code
+אטומים, Role, ‏Version וסימון Current user. היא אינה כוללת Tenant ID או
+External user ID. ‏BFF נכשלת סגור מול שדות מורחבים, מפתחות כפולים, Reference
+code סותר, Current user חסר או יותר מאחד ונתוני Identity חלקיים.
+
+7.1.90.2 ספק Identity Directory טרם נבחר. לכן המסלול מחזיר במפורש
+`identityStatus=unavailable` ו־`displayName/primaryEmail=null`; הוא אינו
+ממציא פרופילים. ‏PostgreSQL 16.13 אמיתי הוכיח את הקריאה דרך HTTP לאחר בחירת
+Tenant. שכבת `currentTeamDirectory` אינה משתמשת עוד ב־D1 fallback.
+
+7.1.91 פעולות Membership הפעילות הועברו במלואן ל־Railway/PostgreSQL:
+`team.membership.role.change`, ‏`team.membership.status.change`
+ו־`team.membership.owner.transfer`. כל Payload כולל רק Member key אטום,
+Expected versions והמצב המבוקש. Tenant, ‏Actor ו־External user IDs נגזרים
+מ־Vercel OIDC, ‏Clerk session ו־Tenant selection מאומתת.
+
+7.1.91.1 כל פעולה דורשת Owner פעיל, `workspace.manage`, מכסת
+`tenant-mutation` ו־Idempotency key דטרמיניסטי התואם ל־Payload. שינוי הנתונים
+ו־Membership event בלתי־משתנה נכתבים באותה PostgreSQL Transaction. החוזה
+מוסיף `STALE_SESSION` ככשל 409 תחום כאשר סמכות ה־Owner השתנתה בין אימות
+ה־Session לנעילת ה־Membership.
+
+7.1.91.2 ‏BFF מחזיר רק Member key, ‏Role, ‏Status ו־Version. Parsers
+נכשלים־סגור מול שדות מורחבים, תפקיד Owner בפעולת Role רגילה, גרסה שאינה
+הגרסה הצפויה או הבאה וזהויות גולמיות. PostgreSQL 16.13 אמיתי הוכיח שתי
+בקשות Role זהות במקביל: שינוי אחד, Event אחד ותוצאות `updated + unchanged`.
+ה־Foundation נשאר על 50 Adapters והסך עלה ל־73 תרחישי Concurrency.
+
+7.1.92 בקשת הזמנה פעילה הועברה ל־Railway/PostgreSQL באמצעות
+`team.invitation.request`. ה־BFF מנרמל Email ותפקיד, גוזר Idempotency key
+מה־Payload ואינו מקבל או מחזיר Tenant, ‏Actor, ‏Invitation key או Delivery
+key. Railway פותר Session נבחר, דורש `team.manage` ומכסת
+`tenant-mutation`, ואז מפעיל את חוזה Invitation הקיים.
+
+7.1.92.1 ‏Invitation, ‏Event ו־Delivery נשמרים אטומית לפני Publication.
+ה־Publisher מוזרק ואינו קשור לספק; בהיעדר Policy מתקבל
+`CONFIGURATION_REQUIRED`, ובהיעדר Queue מתקבל `DEPENDENCY_UNAVAILABLE`.
+אין Adapter מדומה שמסמן הצלחה. Retry רשאי לפרסם שוב אותו Delivery key כדי
+לאפשר Recovery, וה־Consumer נשאר Idempotent.
+
+7.1.92.2 ‏PostgreSQL 16.13 אמיתי הוכיח שתי בקשות זהות במקביל: תוצאות
+`queued + already-pending`, ‏Invitation אחת, ‏Event אחד ו־Delivery אחד.
+שתי פרסומות נשאו אותו Delivery key ולא חשפו זהויות בתגובה. הסך עלה ל־75
+תרחישי Concurrency. קבלת ההזמנה אינה חלק מה־Cutover הזה: היא דורשת Resolver
+מאומת ל־Primary email בצד Railway וראיות Activation חיות של Clerk.
+
+7.1.93 קבלת הזמנה פעילה הועברה ל־Railway/PostgreSQL באמצעות
+`team.invitation.accept`. ‏Vercel BFF שולחת רק Invitation key מנורמל ומפתח
+Idempotency דטרמיניסטי. היא אינה שולחת Email, ‏Tenant ID או External user ID.
+
+7.1.93.1 Railway מאמת תחילה Vercel OIDC ו־Clerk session, מפעיל מכסה לפי
+המשתמש, ואז קורא ישירות מ־Clerk את ה־Primary Email של אותו User ID ודורש
+`verification.status=verified`. אימייל שהדפדפן מנסה להוסיף ל־Payload נדחה
+לפני Clerk ולפני PostgreSQL. כשל אימות מקבל `IDENTITY_VERIFICATION_REQUIRED`;
+מצבי הזמנה שונים מקבלים כולם `INVITATION_UNAVAILABLE` ללא דליפת מצב פנימי.
+
+7.1.93.2 ה־Repository האטומי הקיים יוצר Membership ו־Acceptance, מקדם את
+גרסת ההזמנה ומבטל Delivery ממתינה באותה Transaction. ‏PostgreSQL 16.13
+אמיתי הוכיח שתי קבלות מקביליות: `accepted + already-accepted`, Membership
+אחת, Acceptance אחת ו־Delivery אחת במצב `cancelled`. הסך עלה ל־77 תרחישי
+Concurrency. הפעלת Staging/Production עדיין דורשת Clerk keys ו־Browser E2E
+evidence אמיתיים; הקוד המקומי אינו מסמן אותם כמוכנים.
+
+7.1.94 ניהול מדיניות שליחת WhatsApp הועבר ל־Railway/PostgreSQL בשלוש
+פעולות System Admin: קריאה, אישור Evidence והפעלת Kill Switch. ה־BFF מאמת
+Input לפני Identity access, גוזר Idempotency key דטרמיניסטי לכתיבות ומעביר
+OIDC ו־Clerk session בלבד. Railway דורש Allowlist ומכסת
+`system-admin-mutation`, וקורא את Meta connection ואת Policy repository
+מאותו PostgreSQL Foundation.
+
+7.1.94.1 החוזה אינו מחזיר שדות בשם `tenantId`, ‏`businessPortfolioId`,
+`wabaId`, ‏`phoneNumberId` או `externalUserId`. מזהי הספק נשלחים בשמות
+Expected ייעודיים ונבדקים מול הרשומה הנעולה; Vercel משחזר רק את ההקשר
+המקומי ומוודא שהתוצאה תואמת במדויק למכסה, Throughput, ‏Evidence digest,
+Graph version, תוקף, Connection version ו־Policy version שנשלחו.
+
+7.1.94.2 ‏PostgreSQL 16.13 אמיתי הוכיח שתי פעולות Approve זהות ושתי פעולות
+Kill Switch זהות במקביל דרך HTTP מאומת. בכל זוג התקבלו
+`updated + unchanged`, בלי Event כפול. באותה הרצה תוקן Replay של בקשת
+Invitation כאשר שני Clocks שונים במילישנייה: ה־Event וה־Delivery השמורים הם
+מקור האמת ל־Replay. אותה הגנה חלה על Approval ו־Kill Switch: ‏Retry זהה
+שכבר יצר את הגרסה הבאה חוזר כ־`unchanged` גם אם Timestamp השרת השתנה.
+הסך נשאר 79 תרחישי Concurrency בשלוש ההרצות המתועדות בסעיף זה; האחרונה אימתה גם
+Retry סדרתי לאחר שני המרוצים.
+
+7.1.95 ספריית AI Agents, קריאת פרטים, שמירת Draft ופרסום Draft הועברו
+ל־Railway/PostgreSQL. ה־Vercel BFF משתמש ב־Vercel OIDC וב־Clerk session,
+שולח DTO קנוני ומוגבל, וגוזר Idempotency key דטרמיניסטי לשתי הכתיבות. אין
+D1 fallback באף אחד מארבעת המסלולים.
+
+7.1.95.1 Railway גוזר Tenant ו־Role מהזהות המאומתת, דורש `ai.read` או
+`ai.write`, ומחזיר רק Agent keys, גרסאות, תצורת Agent תחומה ומקורות ידע ללא
+Tenant ID, ‏External user ID, ‏Storage object key או Content digest. שמירת
+Draft, ‏Receipt ו־Audit מתבצעת ב־Transaction אחת; Retry זהה מחזיר Replay של
+התוצאה שכבר נשמרה.
+
+7.1.95.2 פרסום נשאר חסום־בטוח עד שקיימות החלטות ותצורות AI תפעוליות.
+Activation blockers מוחזרים כרשימה סגורה, וה־Transaction מתבטלת בלי Receipt
+חלקי. PostgreSQL 16.13 אמיתי הוכיח שתי שמירות Draft מקבילות, קריאת Directory
+ופרסום חסום; הסך עלה ל־80 תרחישי Concurrency. במהלך האימות נחשף ותוקן Fixture
+Reporting ישן בעל זהות AI Agent לא־קנונית.
+
+7.1.96 עובדות Staging עבור Deferral של Bot reply מחוברות כעת ל־PostgreSQL
+Provenance העמיד. ‏Railway Foundation חושף Producer שמאמת את ה־Delivery
+הפעיל, Claim, ‏Reservation-derived event digest, ‏Code/Scope, ‏Retry וזמני
+Run לפני כתיבה ל־Observation ledger. ‏130429 ו־131056 אינם נגזרים משם
+תרחיש או מ־Expected result; חסר או Drift נכשלים סגור. הרצה חיה ב־Railway
+עם WABA מורשה עדיין חסרה ואינה נרמזת מן ההוכחה המקומית.
+
+7.1.97 תרחישי `text-send` ו־`button-send` מחוברים כעת ל־Provider
+acceptance העמיד. ‏Producer חדש דורש Delivery במצב `accepted`, ‏Provider
+link תואם, זמן Acceptance זהה וסוג Payload מתאים לפני כתיבת Observation.
+‏Replay מסוג `duplicate` אינו ראיה בפני עצמו; הוא מתקבל רק כאשר אותה
+Acceptance כבר קיימת. ‏Button reply עדיין חסום בכוונה עד לשמירת
+`selectedBotOptionKey` והקישור להודעת המקור כ־Provenance עמיד.
+
+7.1.98 תרחיש `button-reply` מחובר כעת ל־Provenance עמיד במקום להיסק
+מ־Webhook זמני. ‏D1 ו־PostgreSQL שומרים באופן אטומי ובלתי־משתנה את מפתח
+האפשרות שנבחרה ואת הקישור ל־Delivery היוצא, ורק לאחר אימות Provider link,
+Tenant, סוג Payload והאפשרות המקורית. ‏Producer ייעודי קורא מן ה־Ledger
+רק מזהים פנימיים, מפתח אפשרות וזמן; הוא אינו קורא או מעביר מספר טלפון,
+תוכן הודעה, Provider message ID או Credentials. ‏Button reply חסר, חלקי
+או סותר נכשל סגור לפני יצירת Observation.
+
+7.1.99 תרחיש `customer-window-expired` מחובר כעת לדחיית Meta עמידה בקוד
+131047. ‏D1 ו־PostgreSQL כותבים באופן אטומי ובלתי־משתנה את דחיית ה־Delivery
+ואת ה־Provenance רק לאחר התאמת Inbound source, חלון 24 שעות, Claim,
+`service-reply` reservation ו־`provider-failed` settlement. ‏Producer
+ייעודי מפיק Observation רק מן ה־Ledger הזה ומתוצאת Dispatch תואמת; הוא
+אינו קורא מספר טלפון, תוכן, Provider payload, ‏Provider message ID או
+Credential. קוד חסר, מומצא, ישן או סותר נכשל סגור.
+
+7.1.100 תרחיש `duplicate-safety` מחובר כעת ל־Provider-request fence עמיד
+לפני גבול ה־Meta POST. ‏Railway PostgreSQL מאפשר Fence יחיד לכל
+Delivery/Claim ו־Reservation מסוג `service-reply`; ה־Processor אינו קורא
+לספק כאשר אותו Fence כבר קיים. ‏Producer דורש Fence יחיד, Acceptance יחידה
+ושתי תוצאות Dispatch בפועל כשהשנייה `duplicate`, ורק אז כותב ספירה של שתי
+הפעלות ובקשת Provider אחת. השאילתה אינה קוראת Provider message ID, מספר
+טלפון, תוכן הודעה, Reply JSON, ‏Token או Credential.
+
+7.1.101 תרחיש `kill-switch` מפיק Observation רק אחרי הצלבה עמידה של
+Policy גרסה N במצב `enabled`, גרסה N+1 במצב `disabled`, Audit יחיד,
+Delivery שנדחה עם `WHATSAPP_ADMISSION_UNAVAILABLE`, זמן Retry זהה לתוצאת
+ה־Worker, אפס `bot_reply_provider_request_claims` ואפס Provider
+acceptances. כל Policy מאוחר שהיה פעיל בזמן הדחייה מבטל את הראיה. השאילתה
+אינה בוחרת מספר טלפון, Reply JSON, תוכן או Provider message ID.
+
+7.1.102 ‏Railway bot-reply staging worker יוצר כעת Graph reader חי מאותו
+PostgreSQL Meta connection ומאותו Credential envelope שמשמשים את ה־Worker.
+ה־Reader מאמת App דרך `debug_token`, קשר Portfolio→WABA→Phone דרך Graph,
+וקורא מן המספר את `throughput`, ‏`is_on_biz_app` ו־`platform_type`.
+המיפוי היחיד שמתקבל הוא 20 ל־Coexistence STANDARD, ‏80 ל־STANDARD רגיל
+ו־1,000 ל־HIGH רגיל; ערך חסר, חדש או סותר נכשל סגור. גרסת ה־Graph,
+Connection version, ‏Run, ‏Operation, ‏Release, ‏Commit, ‏Artifact ו־Lease
+נכללים ב־Digest הקנוני. אין Token, ‏App secret או מזהה Provider גולמי
+בתוצאת ה־Evidence.
+
+7.1.103 ‏Security/Telemetry reader קונקרטי מחובר כעת לאותו Railway
+PostgreSQL worker. גבול ה־Credential דורש מעטפת מוצפנת Exact-key ומבצע
+פענוח רק בתוך callback של ה־Vault; ה־Access token אינו נכתב ל־Fact או
+ל־Digest. גבול ה־Redaction מקבל רק Better Stack evidence מאומת, בתוקף
+ותואם ל־Release/Commit/Artifact, ודורש `verifiedAt` בתוך חלון ה־Run וה־
+Lease. ה־Factory אינו יכול עוד לקבל Security reader סטטי שאינו קשור לאותו
+Runtime.
+
+7.1.104 ‏Bot-reply staging מחובר כעת אל Railway BullMQ Worker Main
+מאחורי Opt-in מפורש. ‏Kill-switch אטומי דורש Tenant, ‏Connection version
+ו־Policy version מדויקים, מעתיק את Snapshot המדיניות לגרסת `disabled`
+עוקבת ומאפשר Replay רק לאותו Actor. כל Readers, ‏Producers וה־Kill-switch
+מגיעים מאותו PostgreSQL Foundation. ארבעת ה־Queues הבסיסיים אינם משתנים;
+Queue חמישי נפתח רק כאשר `BOT_REPLY_STAGING_ENABLED=true` וכל Configuration
+הפרטי, ה־Telemetry וגבולות הבטיחות תקינים לפני Worker startup.
+
+7.1.105 נוסף Activation preflight משותף לפקודת CLI ול־Worker Main. הוא
+בודק שבעה גבולות Staging ללא חיבור ל־PostgreSQL/Redis וללא פנייה ל־Meta:
+Environment, מלאי פרטי, שני מפתחות HMAC, ‏Meta Graph configuration,
+Credential encryption ו־Better Stack evidence. הפלט תחום למזהי בדיקה
+וסטטוסים ואינו חושף ערכים. ‏Worker Main דוחה Opt-in חלקי לפני פתיחת
+Connections גם אם המפעיל דילג על פקודת ה־Preflight הידנית.
+
+7.1.106 נוסף `system-admin.bot-reply-staging.authorization` כחוזה Mutation
+ייעודי. רק זהות Tal המוגדרת במפורש רשאית לכתוב אישור `approved`; כל System
+Admin מורשה רשאי לכתוב ביטול עוקב בלבד. הביטול קורא את האירוע המאושר
+האחרון מאותו PostgreSQL Foundation ומעתיק את ראיות ה־Connection, ‏Policy,
+Opt-in ו־Rate-limit במדויק לאירוע Append-only חדש. Confirmation, צורת
+Payload, זמן קצר־חיים, גרסה עוקבת, Idempotency ו־Rate limit נבדקים לפני
+Replay או כתיבה. הפלט תחום ואינו מחזיר פרטי נמען, Meta IDs, ‏Token או
+Evidence גולמי. החוזה מחובר ל־Railway API Runtime ול־PostgreSQL/BullMQ
+composition, אך עדיין אינו מופעל אוטומטית ב־API executable ללא תצורה חיה.
+
+7.1.107 ‏Railway BullMQ API executable מחבר כעת את ה־Staging publisher
+ואת שני ה־Operations רק מאחורי Opt-in מדויק. Inspector ייעודי דורש סביבת
+`staging`, ‏Tenant, זהות Clerk של Tal הנמצאת ב־System Admin allowlist,
+‏Lease ו־Polling בעלי גבולות מפורשים. מצב כבוי אינו יוצר Queue נוסף;
+תצורה חלקית, מורחבת או לא מורשית נכשלת לפני Telemetry ולפני פתיחת Redis
+או PostgreSQL. ה־API אינו קורא את Meta credentials, מספר הנמען, HMACs או
+מלאי המקרים הפרטי של ה־Worker.
+
+7.1.108 נוסף Cross-service activation contract המפעיל את שני ה־Inspectors
+על Snapshots מבודדים בזיכרון. הוא דורש API configured, ‏Worker preflight
+ready, שתי סביבות `staging` ואותו Tenant. ‏Disabled סימטרי נשמר כמצב
+נפרד; הפעלה של שירות אחד בלבד או Tenant drift נחסמים. הפלט כולל רק ארבעה
+מזהי Check וסטטוסים ואינו חושף Tenant, ‏Clerk ID, ‏Meta IDs, מספר נמען,
+Credentials או Inventory. חיבור ה־Contract ל־Railway deployment
+orchestration נשאר חסום עד קבלת גישה לחשבונות.
+
+7.1.109 נוסף Cross-service Evidence contract קצר־חיים. הוא נוצר רק מדוח
+`ready` מלא, נקשר ל־Release ID, ‏Commit SHA ו־Artifact digest, ותקף
+60–900 שניות. ה־Verifier דוחה Schema מורחב, שינוי Digest, זמן עתידי או
+פג ותלות ב־Release אחר. ‏Production readiness דורש אותו לצד ה־Evidence
+החי של ספק ה־WhatsApp באותה שורת Bot-reply adapter; אין בכך אישור Cutover
+או תחליף ל־Railway orchestration מורשה.
+
+7.1.110 נוסף Release evidence issuer דו־שלבי. הוא קורא זהות Release
+תחומה לפני ואחרי Cross-service activation ומנפיק Evidence רק כאשר
+Release ID, ‏Commit SHA ו־Artifact digest נשארו זהים לערכים הצפויים.
+ה־Issuer אינו מקבל את Secrets או Environment snapshots של השירותים,
+אינו כותב ל־Railway ומחזיר כשל תחום במקרה של Drift, ‏Activation חסום,
+Dependency כושלת או Clock לא תקין. כתיבה אטומית ואימות לאחר כתיבה נשארים
+באחריות Railway deployment orchestration החי.
+
+7.1.111 נוסף Release evidence publisher ספק־נייטרלי. הוא מאמת את
+ה־Evidence לפני Storage access, דורש Compare-and-set אטומי על Release,
+גרסה ו־Digest קודם, ואז מבצע Read-after-write והשוואת JSON byte-for-byte
+לפני הרצת Verifier נוספת. Retry זהה אינו כותב שוב. ‏Conflict, State קודם
+פגום, כשל כתיבה ו־Read-back mismatch נחסמים בנפרד. עדיין אין טענה שקיים
+Railway adapter חי או ש־Environment variable שונה בפועל.
+
+7.1.112 בדיקת Railway הרשמית הראתה ש־Variable upsert אינו חוזה CAS
+מתועד וששינוי Variable דורש Deployment כדי להיכנס ל־Runtime. ‏ADR-0005
+נוסף במצב `proposed` וממליץ על PostgreSQL transactional row באותה Railway
+Environment. ‏Configuration inspector מקבל רק Storage mode קנוני
+`postgresql` ואוסר Environment-variable publication. ‏Migration,
+Repository, אישור ADR וחיבור Runtime read עדיין חסרים ולכן אין שינוי
+ב־Production readiness.
+
+7.1.113 ‏Migration ו־Repository הושלמו מקומית לאחר ניסוח 7.1.112.
+מיגרציה 0040 יוצרת State נפרד לכל Release, ו־Repository גרסה 1 מספק
+אתחול Idempotent, קריאה נכשלת־סגור ו־CAS יחיד עם
+`UPDATE ... WHERE ... RETURNING`. בדיקת Executor תחרותית הוכיחה Winner
+יחיד, אך PostgreSQL Loopback חי, חיבור Runtime read ואישור ADR-0005 עדיין
+חסרים; לכן Production readiness אינו משתנה.
 
 7.2 עדיין חסר:
 
@@ -635,7 +1121,7 @@ PostgreSQL וראיית Staging חיים לפני Cutover.
 Production ו־Preview origins המאושרים.
 
 7.2.3 הרחבת ה־Registry לשאר פעולות המוצר ולשאר ה־Mutations. עבור
-`contacts.save`, פעולות Consent ופעולות Contact organization כבר כוללים
+`contacts.save`, פעולות Consent, ‏Contact organization ו־Bot flow כבר כוללים
 Idempotency, ‏Rate limiting, ‏Audit ו־Transaction לפי מנגנון ה־Persistence
 המתאים לכל אחד; לשמירת Contact ול־Organization קיימים גם Executors
 אטומיים ו־Node driver adapter. עדיין חסרים
@@ -647,7 +1133,9 @@ Replay. עדיין חסרים Export חי, טעינה ו־Recovery ב־Staging �
 למסלולים שאינם כלולים ב־Harness.
 
 7.2.4 Routes נפרדים ל־Vercel ול־Railway ו־Repository adapters עבור
-PostgreSQL במקום D1.
+PostgreSQL במקום D1. עבור Template submission נותרו גם בחירת Queue/DLQ,
+מימוש Publisher וראיית Scheduler/Provider אמיתית ב־Staging; ‏Migration 0026
+ומחזור ה־Outbox כבר הוכחו מול PostgreSQL מקומי חי.
 
 7.2.5 Live accounts, ‏Secrets, ‏Staging, ‏Load test ו־Deployment
 evidence.
@@ -673,6 +1161,12 @@ evidence.
 8.6.1 `RAILWAY_API_ORIGIN` — Origin קנוני של Railway API ללא Path, ‏Query,
 Fragment או Credentials. נדרש HTTPS; רק `development` מאפשר HTTP אל
 `localhost`, ‏`127.0.0.1` או `::1`.
+
+8.6.2 `CONNECT_TRACE_CONTEXT_HMAC_KEY` — Secret שרתי שנשמר רק ב־Vercel
+ומקודד כ־Base64URL קנוני של 32 בתים. הוא גוזר הקשר Trace אטום מ־
+`x-vercel-id`; אין להעתיק אותו ל־Railway, ל־Browser, ל־Logs או ל־Evidence.
+ב־Preview וב־Production ערך חסר או פגום חוסם את הקריאה לפני קריאת אסימוני
+זהות או פנייה לרשת.
 
 8.7 `DATABASE_URL` — Secret שרתי בלבד. אסור להעביר אותו ל־Vercel Web,
 Browser, ‏Logs או Evidence.
@@ -702,6 +1196,15 @@ Browser, ‏Logs או Evidence.
 `META_WEBHOOK_RATE_LIMIT_REFILL_PERIOD_SECONDS` — Policy נפרדת ל־Meta
 webhook ingress. הערכים צריכים להיגזר מה־Throughput החי ולא מתקרה קשיחה
 שמסתכנת בדחיית Webhooks תקינים.
+
+8.10.3 ‏`BOT_REPLY_STAGING_ENABLED` נשאר `false` כברירת מחדל. להפעלה
+ב־Railway API נדרשים במפורש `BOT_REPLY_STAGING_TENANT_ID`,
+`BOT_REPLY_STAGING_TAL_EXTERNAL_USER_ID`,
+`BOT_REPLY_STAGING_LEASE_DURATION_SECONDS` ו־
+`BOT_REPLY_STAGING_POLL_INTERVAL_MILLISECONDS`. סביבת Runtime חייבת להיות
+`staging`, וזהות טל חייבת להופיע גם ב־
+`CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS`. אין Defaults סמויים ל־Tenant,
+זהות או זמני ההרצה.
 
 8.11 כל הערכים נשארים `unknown/unavailable` עד להגדרת החשבונות. ערך
 חסר, חלקי או לא חוקי מונע יצירת Verifier.

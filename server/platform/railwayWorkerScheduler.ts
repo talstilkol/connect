@@ -20,6 +20,8 @@ export interface RailwayWorkerSchedulerOptions {
   readonly leases: WorkerSchedulerLeaseRepository;
   readonly campaigns: RailwayWorkerScheduledTask;
   readonly invitationExpirations: RailwayWorkerScheduledTask;
+  readonly botReplyDeliveries?: RailwayWorkerScheduledTask;
+  readonly messageTemplateSubmissions?: RailwayWorkerScheduledTask;
   readonly clock: RailwayWorkerSchedulerClock;
   readonly leaseSeconds?: number;
   readonly maximumCatchUpTicks?: number;
@@ -49,12 +51,14 @@ export class RailwayWorkerSchedulerError extends Error {
 }
 
 const optionKeys = Object.freeze([
+  "botReplyDeliveries",
   "campaigns",
   "clock",
   "invitationExpirations",
   "leases",
   "leaseSeconds",
   "maximumCatchUpTicks",
+  "messageTemplateSubmissions",
   "ownerKey",
 ]);
 
@@ -84,6 +88,10 @@ function requireOptions(options: Readonly<RailwayWorkerSchedulerOptions>): {
     typeof options.leases?.complete !== "function" ||
     typeof options.campaigns?.run !== "function" ||
     typeof options.invitationExpirations?.run !== "function" ||
+    (options.botReplyDeliveries !== undefined &&
+      typeof options.botReplyDeliveries?.run !== "function") ||
+    (options.messageTemplateSubmissions !== undefined &&
+      typeof options.messageTemplateSubmissions?.run !== "function") ||
     typeof options.clock?.now !== "function"
   ) {
     throw new RailwayWorkerSchedulerError("options-invalid");
@@ -163,10 +171,19 @@ export function createRailwayWorkerScheduler(
           throw new RailwayWorkerSchedulerError("lease-unavailable");
         }
 
-        const taskResults = await Promise.allSettled([
-          Promise.resolve().then(() => options.campaigns.run()),
-          Promise.resolve().then(() => options.invitationExpirations.run()),
-        ]);
+        const tasks: RailwayWorkerScheduledTask[] = [
+          options.campaigns,
+          options.invitationExpirations,
+        ];
+        if (options.botReplyDeliveries !== undefined) {
+          tasks.push(options.botReplyDeliveries);
+        }
+        if (options.messageTemplateSubmissions !== undefined) {
+          tasks.push(options.messageTemplateSubmissions);
+        }
+        const taskResults = await Promise.allSettled(
+          tasks.map((task) => Promise.resolve().then(() => task.run())),
+        );
 
         if (taskResults.some((result) => result.status === "rejected")) {
           throw new RailwayWorkerSchedulerError("task-failed");

@@ -73,7 +73,7 @@ export interface SystemAdminWhatsappDeliveryPolicyService {
 
 type Clock = () => string;
 
-interface NormalizedApprovalInput {
+export interface NormalizedSystemAdminWhatsappDeliveryPolicyApprovalInput {
   tenantId: number;
   expectedConnectionVersion: number;
   expectedPolicyVersion: number;
@@ -90,7 +90,7 @@ interface NormalizedApprovalInput {
   evidenceExpiresAt: string;
 }
 
-interface NormalizedKillSwitchInput {
+export interface NormalizedSystemAdminWhatsappDeliveryPolicyKillSwitchInput {
   tenantId: number;
   expectedConnectionVersion: number;
   expectedPolicyVersion: number;
@@ -124,9 +124,9 @@ function isExactRecord(
   );
 }
 
-function normalizeApprovalInput(
+export function normalizeSystemAdminWhatsappDeliveryPolicyApprovalInput(
   input: unknown,
-): NormalizedApprovalInput {
+): NormalizedSystemAdminWhatsappDeliveryPolicyApprovalInput {
   if (
     !isExactRecord(input, [
       "tenantId",
@@ -219,9 +219,9 @@ function normalizeApprovalInput(
   }
 }
 
-function normalizeKillSwitchInput(
+export function normalizeSystemAdminWhatsappDeliveryPolicyKillSwitchInput(
   input: unknown,
-): NormalizedKillSwitchInput {
+): NormalizedSystemAdminWhatsappDeliveryPolicyKillSwitchInput {
   if (
     !isExactRecord(input, [
       "tenantId",
@@ -327,6 +327,48 @@ function unchanged(
   };
 }
 
+function samePortfolioCapacity(
+  left: WhatsappPortfolioCapacity,
+  right: WhatsappPortfolioCapacity,
+): boolean {
+  return (
+    left.kind === right.kind &&
+    (left.kind === "unlimited" ||
+      (right.kind === "bounded" &&
+        left.maximumUniqueRecipients ===
+          right.maximumUniqueRecipients))
+  );
+}
+
+function sameApprovalSnapshot(
+  record: WhatsappCampaignDeliveryPolicyRecord,
+  input: Readonly<
+    NormalizedSystemAdminWhatsappDeliveryPolicyApprovalInput
+  >,
+  actorExternalUserId: string,
+): boolean {
+  return (
+    record.connectionVersion === input.expectedConnectionVersion &&
+    record.deliveryState === "enabled" &&
+    samePortfolioCapacity(
+      record.portfolioCapacity,
+      input.portfolioCapacity,
+    ) &&
+    record.phoneThroughput !== null &&
+    record.phoneThroughput.maximumMessagesPerSecond ===
+      input.phoneThroughput.maximumMessagesPerSecond &&
+    record.phoneThroughput.maximumOutboundMessagesPerSecond ===
+      input.phoneThroughput.maximumOutboundMessagesPerSecond &&
+    record.reservationDurationSeconds ===
+      input.reservationDurationSeconds &&
+    record.metaGraphApiVersion === input.metaGraphApiVersion &&
+    record.evidenceDigest === input.evidenceDigest &&
+    record.evidenceCheckedAt === input.evidenceCheckedAt &&
+    record.evidenceExpiresAt === input.evidenceExpiresAt &&
+    record.actorExternalUserId === actorExternalUserId
+  );
+}
+
 export function createSystemAdminWhatsappDeliveryPolicyService(
   dependencies: {
     metaRepository: Pick<
@@ -399,7 +441,7 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
       const actorExternalUserId =
         requireSessionActor(session);
       const normalized =
-        normalizeApprovalInput(input);
+        normalizeSystemAdminWhatsappDeliveryPolicyApprovalInput(input);
       const recordedAt =
         currentTimestamp(clock);
       const {
@@ -423,9 +465,7 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
         connection.wabaId !==
           normalized.wabaId ||
         connection.phoneNumberId !==
-          normalized.phoneNumberId ||
-        (latestPolicy?.policyVersion ?? 0) !==
-          normalized.expectedPolicyVersion
+          normalized.phoneNumberId
       ) {
         throw new SystemAdminWhatsappDeliveryPolicyError(
           "CONFLICT",
@@ -435,6 +475,28 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
       if (connection.status !== "connected") {
         throw new SystemAdminWhatsappDeliveryPolicyError(
           "CONNECTION_NOT_READY",
+        );
+      }
+
+      if (
+        latestPolicy !== null &&
+        latestPolicy.policyVersion ===
+          normalized.expectedPolicyVersion + 1 &&
+        sameApprovalSnapshot(
+          latestPolicy,
+          normalized,
+          actorExternalUserId,
+        )
+      ) {
+        return unchanged(latestPolicy);
+      }
+
+      if (
+        (latestPolicy?.policyVersion ?? 0) !==
+          normalized.expectedPolicyVersion
+      ) {
+        throw new SystemAdminWhatsappDeliveryPolicyError(
+          "CONFLICT",
         );
       }
 
@@ -496,7 +558,7 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
       const actorExternalUserId =
         requireSessionActor(session);
       const normalized =
-        normalizeKillSwitchInput(input);
+        normalizeSystemAdminWhatsappDeliveryPolicyKillSwitchInput(input);
       const recordedAt =
         currentTimestamp(clock);
       const {
@@ -514,7 +576,22 @@ export function createSystemAdminWhatsappDeliveryPolicyService(
 
       if (
         connection.version !==
-          normalized.expectedConnectionVersion ||
+          normalized.expectedConnectionVersion
+      ) {
+        throw new SystemAdminWhatsappDeliveryPolicyError(
+          "CONFLICT",
+        );
+      }
+
+      if (
+        latestPolicy.policyVersion ===
+          normalized.expectedPolicyVersion + 1 &&
+        latestPolicy.deliveryState === "disabled"
+      ) {
+        return unchanged(latestPolicy);
+      }
+
+      if (
         latestPolicy.policyVersion !==
           normalized.expectedPolicyVersion
       ) {

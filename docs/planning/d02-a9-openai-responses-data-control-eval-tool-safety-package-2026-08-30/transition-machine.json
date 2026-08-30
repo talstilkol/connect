@@ -1,0 +1,114 @@
+{
+  "artifactId": "CONNECT-D02-A9-CLOSED-TRANSITION-MACHINE-2026-08-30",
+  "machineVersion": "1.0.0",
+  "states": [
+    "MISSING",
+    "PRESENT-UNACCEPTED",
+    "ACCEPTED",
+    "EXPIRED",
+    "REVOKED",
+    "CONSUMED",
+    "BLOCKED"
+  ],
+  "terminalPrecedence": [
+    "REPLAY",
+    "CAS-MISMATCH",
+    "REVOKED",
+    "EXPIRED",
+    "POST-READBACK-MISMATCH",
+    "MISSING-CONJUNCT",
+    "CONTROL-SATISFIABLE-NON-AUTHORIZING"
+  ],
+  "allowedTransitions": [
+    {
+      "ordinal": 1,
+      "transitionRuleId": "D02A9-TRULE-001",
+      "fromState": "MISSING",
+      "toState": "MISSING",
+      "event": "NOOP"
+    },
+    {
+      "ordinal": 2,
+      "transitionRuleId": "D02A9-TRULE-002",
+      "fromState": "MISSING",
+      "toState": "PRESENT-UNACCEPTED",
+      "event": "SUBMIT"
+    },
+    {
+      "ordinal": 3,
+      "transitionRuleId": "D02A9-TRULE-003",
+      "fromState": "PRESENT-UNACCEPTED",
+      "toState": "ACCEPTED",
+      "event": "ACCEPT"
+    },
+    {
+      "ordinal": 4,
+      "transitionRuleId": "D02A9-TRULE-004",
+      "fromState": "ACCEPTED",
+      "toState": "EXPIRED",
+      "event": "EXPIRE"
+    },
+    {
+      "ordinal": 5,
+      "transitionRuleId": "D02A9-TRULE-005",
+      "fromState": "ACCEPTED",
+      "toState": "REVOKED",
+      "event": "REVOKE"
+    },
+    {
+      "ordinal": 6,
+      "transitionRuleId": "D02A9-TRULE-006",
+      "fromState": "ACCEPTED",
+      "toState": "CONSUMED",
+      "event": "CONSUME"
+    },
+    {
+      "ordinal": 7,
+      "transitionRuleId": "D02A9-TRULE-007",
+      "fromState": "CONSUMED",
+      "toState": "BLOCKED",
+      "event": "REPLAY"
+    },
+    {
+      "ordinal": 8,
+      "transitionRuleId": "D02A9-TRULE-008",
+      "fromState": "PRESENT-UNACCEPTED",
+      "toState": "BLOCKED",
+      "event": "CAS-MISMATCH"
+    },
+    {
+      "ordinal": 9,
+      "transitionRuleId": "D02A9-TRULE-009",
+      "fromState": "ACCEPTED",
+      "toState": "BLOCKED",
+      "event": "POST-READBACK-MISMATCH"
+    },
+    {
+      "ordinal": 10,
+      "transitionRuleId": "D02A9-TRULE-010",
+      "fromState": "EXPIRED",
+      "toState": "PRESENT-UNACCEPTED",
+      "event": "REPLACE"
+    },
+    {
+      "ordinal": 11,
+      "transitionRuleId": "D02A9-TRULE-011",
+      "fromState": "REVOKED",
+      "toState": "PRESENT-UNACCEPTED",
+      "event": "REPLACE"
+    },
+    {
+      "ordinal": 12,
+      "transitionRuleId": "D02A9-TRULE-012",
+      "fromState": "BLOCKED",
+      "toState": "PRESENT-UNACCEPTED",
+      "event": "REPLACE"
+    }
+  ],
+  "versionRule": "NOOP-KEEPS-VERSION-ALL-OTHER-TRANSITIONS-INCREMENT-BY-ONE",
+  "casRule": "ACCEPT-AND-CONSUME-REQUIRE-MATCH-CAS-MISMATCH-REQUIRES-MISMATCH",
+  "replayRule": "CONSUMED-TO-BLOCKED-ONLY-NEVER-SUCCESS",
+  "recoveryRule": "EXPIRED-REVOKED-OR-BLOCKED-MAY-REPLACE-TO-PRESENT-UNACCEPTED-ONLY",
+  "positiveControlArtifactId": "CONNECT-D02-A9-NON-AUTHORIZING-POSITIVE-CONTROLS-2026-08-30",
+  "detachedOracleArtifactId": "CONNECT-D02-A9-DETACHED-POSITIVE-CONTROL-ORACLE-2026-08-30"
+}

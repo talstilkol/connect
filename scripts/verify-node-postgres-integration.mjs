@@ -17,8 +17,12 @@ import { DatabaseSync } from "node:sqlite";
 import pg from "pg";
 
 import {
+  createNodePostgresQueryExecutor,
   createNodePostgresTransactionManager,
 } from "../server/platform/nodePostgresAdapter.ts";
+import {
+  createPostgresBotReplyStagingSafetyRepository,
+} from "../server/platform/postgresBotReplyStagingSafetyRepository.ts";
 import {
   POSTGRES_FULL_DATA_MIGRATION_CONFIRMATION,
   PostgresFullDataMigrationCutoverError,
@@ -52,6 +56,28 @@ import {
   deriveBotReplyDeliveryKey,
 } from "../server/bot/botReplyDeliveryKey.ts";
 import {
+  createBotReplyAdmission,
+} from "../server/bot/botReplyAdmission.ts";
+import {
+  createBotReplyDeliveryWorker,
+} from "../server/bot/botReplyDeliveryWorker.ts";
+import {
+  createMetaBotReplyProcessor,
+} from "../server/bot/metaBotReplyProcessor.ts";
+import {
+  createCampaignDeliveryRateLimitPolicySource,
+} from "../server/campaigns/d1CampaignDeliveryRateLimitPolicySource.ts";
+import {
+  createWhatsappRateLimitKeyDeriver,
+} from "../server/campaigns/whatsappRateLimitKeyDeriver.ts";
+import {
+  deriveBotReplyStagingDurableAuditKey,
+  deriveBotReplyStagingDurableRequestDigest,
+} from "../server/operations/botReplyStagingDurableRunner.ts";
+import {
+  deriveBotReplyStagingReceiptDigest,
+} from "../server/operations/botReplyStagingReceiptAttestation.ts";
+import {
   deriveAiAgentKey,
   deriveAiAgentVersionKey,
   deriveKnowledgePassageKey,
@@ -74,10 +100,17 @@ import {
 } from "../server/platform/railwayApiContract.ts";
 import {
   deriveRailwayApiDeterministicIdempotencyKey,
+  deriveRailwayApiMutationRequestDigest,
 } from "../server/platform/railwayApiMutationExecutor.ts";
+import {
+  RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION,
+} from "../server/platform/railwayMessageTemplateSubmissionMutationExecutor.ts";
 import {
   deriveTeamInvitationDeliveryKey,
 } from "../server/team/teamInvitationKey.ts";
+import {
+  deriveTeamMemberKey,
+} from "../server/team/teamMemberKey.ts";
 import {
   deriveContactConsentEventKey,
 } from "../server/contacts/contactConsentEventKey.ts";
@@ -149,9 +182,10 @@ const migrationFiles = Object.freeze([
 ]);
 
 function postgresEnvironment(connectionString) {
+  const runtimeUrl = new URL(connectionString);
   return {
     APP_RUNTIME_ENVIRONMENT: "test",
-    DATABASE_URL: connectionString,
+    DATABASE_URL: runtimeUrl.toString(),
     POSTGRES_APPLICATION_NAME: "connect-integration",
     POSTGRES_MAX_CONNECTIONS: "4",
     POSTGRES_CONNECTION_TIMEOUT_MS: "2000",
@@ -296,7 +330,11 @@ async function verifyFullDataMigrationBundle(pool, transactions) {
   }
 }
 
-async function createTenant(pool) {
+async function createTenant(
+  pool,
+  externalUserId = "driver-integration-owner",
+  displayName = "Driver integration tenant",
+) {
   const occurredAt = "2026-08-17T08:00:00.000Z";
   const result = await pool.query(
     `INSERT INTO tenants (
@@ -305,7 +343,7 @@ async function createTenant(pool) {
      VALUES ($1, 'active', $2::timestamptz, $2::timestamptz)
      RETURNING id`,
     [
-      "Driver integration tenant",
+      displayName,
       occurredAt,
     ],
   );
@@ -325,8 +363,8 @@ async function createTenant(pool) {
        created_at,
        updated_at
      )
-     VALUES ($1, 'driver-integration-owner', 'owner', 'active', 1, $2, $2)`,
-    [tenantId, occurredAt],
+     VALUES ($1, $2, 'owner', 'active', 1, $3, $3)`,
+    [tenantId, externalUserId, occurredAt],
   );
 
   return tenantId;
@@ -953,7 +991,7 @@ async function verifyMetaConnectionCredentials(
     {
       businessPortfolioId: "integration-business-portfolio",
       wabaId: "integration-waba",
-      phoneNumberId: "integration-phone-number",
+      phoneNumberId: "155512345678901",
     },
   );
 
@@ -1104,7 +1142,7 @@ async function verifyWhatsappDeliveryPolicy(
       tenantId,
       businessPortfolioId: "integration-business-portfolio",
       wabaId: "integration-waba",
-      phoneNumberId: "integration-phone-number",
+      phoneNumberId: "155512345678901",
       checkedAt: "2026-08-17T08:33:00.000Z",
     });
   assert.equal(current?.policyVersion, 1);
@@ -1131,7 +1169,7 @@ async function verifyWhatsappDeliveryPolicy(
       tenantId,
       businessPortfolioId: "integration-business-portfolio",
       wabaId: "integration-waba",
-      phoneNumberId: "integration-phone-number",
+      phoneNumberId: "155512345678901",
       checkedAt: "2026-08-17T08:35:00.000Z",
     }),
     null,
@@ -1868,6 +1906,209 @@ async function verifyTemplateCampaignSchema(pool, tenantId) {
   );
 }
 
+async function currentPostgresTimestamp(pool) {
+  const result = await pool.query(
+    `SELECT date_trunc('milliseconds', clock_timestamp()) AS "occurredAt"`,
+  );
+  const occurredAt = result.rows[0]?.occurredAt;
+
+  if (!(occurredAt instanceof Date)) {
+    fail("POSTGRES_CLOCK_INVALID");
+  }
+
+  return occurredAt.toISOString();
+}
+
+async function verifyMessageTemplateSubmissionOutboxLifecycle(
+  pool,
+  foundation,
+) {
+  const externalUserId = "template-submission-integration-owner";
+  const displayName = "Template submission integration tenant";
+  const tenantId = await createTenant(pool, externalUserId, displayName);
+  const session = Object.freeze({
+    tenantId,
+    externalUserId,
+    displayName,
+    status: "active",
+    role: "owner",
+  });
+  const templateKey = `template_v1_${"a".repeat(64)}`;
+
+  await foundation.metaConnections.captureVerifiedAssets(session, {
+    businessPortfolioId: "123456789012340",
+    wabaId: "123456789012341",
+    phoneNumberId: "123456789012342",
+  });
+  const connection = await foundation.metaConnections.confirmWebhookSubscription(
+    session,
+  );
+  assert.equal(connection.status, "connected");
+  assert.equal(connection.version, 2);
+
+  const draft = await foundation.messageTemplates.saveDraft({
+    tenantId,
+    templateKey,
+    name: "submission_integration_template",
+    language: "he",
+    category: "UTILITY",
+    header: "",
+    body: "Integration submission template",
+    footer: "",
+    variableExamples: {},
+    buttonMode: "none",
+    quickReplies: [],
+    urlButton: {
+      enabled: false,
+      mode: "static",
+      text: "",
+      value: "",
+      example: "",
+    },
+    phoneButton: {
+      enabled: false,
+      text: "",
+      value: "",
+    },
+  });
+  assert.equal(draft.status, "draft");
+
+  const payload = Object.freeze({ templateKey });
+  const [idempotencyKey, requestDigest] = await Promise.all([
+    deriveRailwayApiDeterministicIdempotencyKey(
+      RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION,
+      payload,
+    ),
+    deriveRailwayApiMutationRequestDigest(
+      RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION,
+      payload,
+    ),
+  ]);
+  const stagedAt = await currentPostgresTimestamp(pool);
+  const executor =
+    foundation.createRailwayMessageTemplateSubmissionMutationExecutor(
+      "v23.0",
+      () => stagedAt,
+    );
+  const command = Object.freeze({
+    session,
+    operation: RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION,
+    idempotencyKey,
+    requestDigest,
+    payload,
+  });
+  const staged = await Promise.all([
+    executor.execute(command),
+    executor.execute(command),
+  ]);
+
+  assert.deepEqual(
+    staged.map(({ outcome }) => outcome).sort(),
+    ["committed", "replayed"],
+  );
+  assert.equal(staged.every(({ tenantId: resultTenantId }) => (
+    resultTenantId === tenantId
+  )), true);
+  const submissionKey = staged[0].queueMessage?.submissionKey;
+  assert.equal(
+    staged.every(({ queueMessage }) => (
+      queueMessage?.submissionKey === submissionKey
+    )),
+    true,
+  );
+  assert.match(
+    submissionKey,
+    /^template_submission_v1_[0-9a-f]{64}$/,
+  );
+
+  const pendingCutoff = await currentPostgresTimestamp(pool);
+  const pending = await foundation.messageTemplateSubmissionOutbox
+    .listPendingBefore(pendingCutoff, 10);
+  assert.equal(
+    pending.some((candidate) => candidate.submissionKey === submissionKey),
+    true,
+  );
+
+  const claimedAt = await currentPostgresTimestamp(pool);
+  const claimed = await foundation.messageTemplateSubmissionOutbox.claim(
+    tenantId,
+    submissionKey,
+    "v23.0",
+    claimedAt,
+  );
+  assert.equal(claimed.outcome, "claimed");
+  assert.equal(claimed.prepared.outbox.status, "submitting");
+
+  const ambiguousAt = await currentPostgresTimestamp(pool);
+  const ambiguous = await foundation.messageTemplateSubmissionOutbox.claim(
+    tenantId,
+    submissionKey,
+    "v23.0",
+    ambiguousAt,
+  );
+  assert.equal(ambiguous.outcome, "ambiguous");
+  assert.equal(ambiguous.outbox.lastErrorCode, "PROVIDER_OUTCOME_UNKNOWN");
+
+  const ambiguousCutoff = await currentPostgresTimestamp(pool);
+  const ambiguousCandidates = await foundation.messageTemplateSubmissionOutbox
+    .listAmbiguousBefore(ambiguousCutoff, 10);
+  assert.equal(
+    ambiguousCandidates.some((candidate) => (
+      candidate.submissionKey === submissionKey
+    )),
+    true,
+  );
+
+  const reconciledAt = await currentPostgresTimestamp(pool);
+  const reconciled = await foundation.messageTemplateSubmissionOutbox
+    .reconcileSubmitted(
+      tenantId,
+      submissionKey,
+      "123456789012343",
+      reconciledAt,
+    );
+  assert.equal(reconciled.status, "submitted");
+  assert.equal(reconciled.stateVersion, 4);
+  assert.equal(reconciled.metaTemplateId, "123456789012343");
+
+  const persistedTemplate = await foundation.messageTemplates.findByKey(
+    tenantId,
+    templateKey,
+  );
+  assert.equal(persistedTemplate?.status, "pending_review");
+  assert.equal(persistedTemplate?.submissionKey, submissionKey);
+  assert.equal(persistedTemplate?.metaTemplateId, "123456789012343");
+
+  const events = await pool.query(
+    `SELECT event_type AS "eventType", to_version AS "toVersion"
+     FROM message_template_submission_events
+     WHERE tenant_id = $1
+       AND submission_key = $2
+     ORDER BY to_version ASC`,
+    [tenantId, submissionKey],
+  );
+  assert.deepEqual(events.rows, [
+    { eventType: "staged", toVersion: 1 },
+    { eventType: "claimed", toVersion: 2 },
+    { eventType: "ambiguous", toVersion: 3 },
+    { eventType: "reconciled-submitted", toVersion: 4 },
+  ]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE message_template_submission_events
+       SET actor_external_user_id = actor_external_user_id || '-changed'
+       WHERE tenant_id = $1
+         AND submission_key = $2
+         AND to_version = 1`,
+      [tenantId, submissionKey],
+    ),
+    (error) => (
+      error?.code === "23514" &&
+      /message template submission events are immutable/.test(error.message)
+    ),
+  );
+}
+
 async function verifyCampaignDispatch(pool, foundation, tenantId) {
   const templateKey = `template_v1_${"4".repeat(64)}`;
   const campaignKey = `campaign_v1_${"5".repeat(64)}`;
@@ -2085,8 +2326,8 @@ async function verifyCampaignDispatch(pool, foundation, tenantId) {
     foundation.campaignDispatch.promoteDueCampaigns(runningAt, 1),
   ]);
   assert.deepEqual(
-    promotion.map((states) => states.length).sort(),
-    [0, 1],
+    promotion.flat().map(({ campaignKey: promotedKey }) => promotedKey),
+    [campaignKey],
   );
 
   const claims = await Promise.all([
@@ -2327,7 +2568,7 @@ async function verifyCampaignProviderReconciliation(
       tenantId,
       portfolioKey: `whatsapp_portfolio_v1_${"c".repeat(64)}`,
       senderKey: `whatsapp_sender_v1_${"d".repeat(64)}`,
-      recipientKey: `whatsapp_recipient_v1_${"e".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"0".repeat(64)}`,
       policyEventKey,
       templateCategory: "UTILITY",
       portfolioCapacity: Object.freeze({
@@ -2821,7 +3062,8 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
       tenantId,
       connectionVersion: 2,
-      expectedPolicyVersion: latestPolicyVersion.rows[0].version,
+      expectedPolicyVersion:
+        latestPolicyVersion.rows[0].version,
       deliveryState: "enabled",
       portfolioLimitKind: "bounded",
       portfolioLimitValue: 250,
@@ -2851,10 +3093,6 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     claims.map(({ outcome }) => outcome).sort(),
     ["claimed", "uncertain"],
   );
-  const claimedDelivery = claims.find(
-    ({ outcome }) => outcome === "claimed",
-  )?.delivery;
-  assert.ok(claimedDelivery);
   const acceptedAt = new Date(Date.parse(claimAt) + 1_000).toISOString();
   const botReservationKey =
     `whatsapp_rate_reservation_v1_${"b".repeat(64)}`;
@@ -2862,9 +3100,9 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     await foundation.whatsappRateLimits.reserveServiceReply({
       reservationKey: botReservationKey,
       tenantId,
-      portfolioKey: `whatsapp_portfolio_v1_${"a".repeat(64)}`,
-      senderKey: `whatsapp_sender_v1_${"b".repeat(64)}`,
-      recipientKey: `whatsapp_recipient_v1_${"c".repeat(64)}`,
+      portfolioKey: `whatsapp_portfolio_v1_${"c".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"d".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"e".repeat(64)}`,
       policyEventKey: currentPolicy.record.eventKey,
       portfolioCapacity: Object.freeze({
         kind: "bounded",
@@ -2880,15 +3118,28 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
       ).toISOString(),
     });
   assert.equal(botReservation.outcome, "reserved");
-  const providerRequest =
-    await foundation.botReplyDeliveries.claimProviderRequest({
-      tenantId,
-      deliveryKey,
-      expectedClaimVersion: claimedDelivery.claimVersion,
-      reservationKey: botReservationKey,
-      requestedAt: claimAt,
-    });
-  assert.equal(providerRequest.outcome, "created");
+  const claimedDelivery = claims.find(
+    ({ outcome }) => outcome === "claimed",
+  ).delivery;
+  const providerRequestInput = Object.freeze({
+    tenantId,
+    deliveryKey,
+    expectedClaimVersion: claimedDelivery.claimVersion,
+    reservationKey: botReservationKey,
+    requestedAt: claimAt,
+  });
+  const providerRequestClaims = await Promise.all([
+    foundation.botReplyDeliveries.claimProviderRequest(providerRequestInput),
+    foundation.botReplyDeliveries.claimProviderRequest(providerRequestInput),
+  ]);
+  assert.deepEqual(
+    providerRequestClaims.map(({ outcome }) => outcome).sort(),
+    ["created", "duplicate"],
+  );
+  assert.equal(
+    providerRequestClaims[0].requestKey,
+    providerRequestClaims[1].requestKey,
+  );
   const accepted = await foundation.botReplyDeliveries.markAccepted(
     tenantId,
     deliveryKey,
@@ -2899,6 +3150,324 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
   );
   assert.equal(accepted.status, "accepted");
   assert.equal(accepted.attemptCount, 1);
+  const deliveredAt = new Date(
+    Date.parse(acceptedAt) + 1_000,
+  ).toISOString();
+  const reconciledAt = new Date(
+    Date.parse(deliveredAt) + 1_000,
+  ).toISOString();
+  const providerStatus =
+    await foundation.botReplyProviderLinks.applyProviderStatus({
+      tenantId,
+      providerMessageId: "wamid.bot-integration-1",
+      status: "delivered",
+      statusEventKey: "f".repeat(64),
+      statusEventAt: deliveredAt,
+      reconciledAt,
+    });
+  assert.equal(providerStatus.outcome, "applied");
+  assert.deepEqual(providerStatus.settlement, {
+    reservationKey: botReservationKey,
+    outcome: "delivered",
+    settledAt: reconciledAt,
+  });
+  assert.equal(
+    (await foundation.whatsappRateLimits.settle(
+      providerStatus.settlement,
+    )).outcome,
+    "settled",
+  );
+
+  const providerDeferredReply = Object.freeze({
+    kind: "text",
+    text: "Integration provider deferral",
+  });
+  const providerDeferredInboundMessageKey =
+    `message_v1_${"0".repeat(64)}`;
+  const providerDeferredContact =
+    await foundation.conversations.resolveInboundContact(
+      tenantId,
+      phone.rows[0].phoneNumber,
+    );
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey,
+    messageKey: providerDeferredInboundMessageKey,
+    contactId: providerDeferredContact.contactId,
+    providerMessageId: "driver-bot-provider-deferral-inbound",
+    contentKind: "text",
+    textContent: "Provider deferral integration",
+    occurredAt: currentPolicyRecordedAt,
+  }));
+  const providerDeferredDeliveryKey =
+    await deriveBotReplyDeliveryKey(tenantId, {
+      conversationKey,
+      inboundMessageKey: providerDeferredInboundMessageKey,
+      botFlowVersionKey: first.botFlowVersionKey,
+      replyIndex: 2,
+      reply: providerDeferredReply,
+    });
+  const providerDeferredStage =
+    await foundation.botReplyDeliveries.stage(Object.freeze({
+      ...deliveryInput,
+      deliveryKey: providerDeferredDeliveryKey,
+      inboundMessageKey: providerDeferredInboundMessageKey,
+      replyIndex: 2,
+      reply: providerDeferredReply,
+    }));
+  assert.equal(providerDeferredStage.outcome, "created");
+  const providerDeferredClaimAt = new Date(
+    Date.parse(providerDeferredStage.delivery.createdAt) + 1_000,
+  ).toISOString();
+  const providerDeferredClaim =
+    await foundation.botReplyDeliveries.claim(
+      tenantId,
+      providerDeferredDeliveryKey,
+      providerDeferredClaimAt,
+    );
+  assert.equal(providerDeferredClaim.outcome, "claimed");
+  const providerDeferredReservationKey =
+    `whatsapp_rate_reservation_v1_${"4".repeat(64)}`;
+  const providerDeferredReservation =
+    await foundation.whatsappRateLimits.reserveServiceReply({
+      reservationKey: providerDeferredReservationKey,
+      tenantId,
+      portfolioKey: `whatsapp_portfolio_v1_${"9".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"7".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"8".repeat(64)}`,
+      policyEventKey: currentPolicy.record.eventKey,
+      portfolioCapacity: Object.freeze({
+        kind: "bounded",
+        maximumUniqueRecipients: 250,
+      }),
+      phoneThroughput: Object.freeze({
+        maximumMessagesPerSecond: 20,
+        maximumOutboundMessagesPerSecond: 2,
+      }),
+      reservedAt: providerDeferredClaimAt,
+      reservationExpiresAt: new Date(
+        Date.parse(providerDeferredClaimAt) + 300_000,
+      ).toISOString(),
+    });
+  assert.equal(providerDeferredReservation.outcome, "reserved");
+  const providerDeferredRequest =
+    await foundation.botReplyDeliveries.claimProviderRequest({
+      tenantId,
+      deliveryKey: providerDeferredDeliveryKey,
+      expectedClaimVersion:
+        providerDeferredClaim.delivery.claimVersion,
+      reservationKey: providerDeferredReservationKey,
+      requestedAt: providerDeferredClaimAt,
+    });
+  assert.equal(providerDeferredRequest.outcome, "created");
+  const providerAttemptedAt = new Date(
+    Date.parse(providerDeferredClaimAt) + 1_000,
+  ).toISOString();
+  const providerDeferredAt = new Date(
+    Date.parse(providerAttemptedAt) + 1_000,
+  ).toISOString();
+  const providerRetryAt = new Date(
+    Date.parse(providerAttemptedAt) + 900_000,
+  ).toISOString();
+  const cooldown =
+    await foundation.whatsappRateLimits.applyProviderCooldown({
+      reservationKey: providerDeferredReservationKey,
+      scope: "sender",
+      providerErrorCode: 130429,
+      observedAt: providerAttemptedAt,
+      blockedUntil: providerRetryAt,
+    });
+  assert.equal(cooldown.outcome, "applied");
+  const providerDeferralCommand = Object.freeze({
+    tenantId,
+    deliveryKey: providerDeferredDeliveryKey,
+    expectedClaimVersion:
+      providerDeferredClaim.delivery.claimVersion,
+    attemptedAt: providerAttemptedAt,
+    deferredAt: providerDeferredAt,
+    retryAt: providerRetryAt,
+    reasonCode: "META_PHONE_THROUGHPUT_LIMITED",
+    reservationKey: providerDeferredReservationKey,
+    providerErrorCode: 130429,
+    cooldownScope: "sender",
+    retryAfterSeconds: 900,
+  });
+  const providerDeferrals = await Promise.all([
+    foundation.botReplyDeliveries.deferProviderRejection(
+      providerDeferralCommand,
+    ),
+    foundation.botReplyDeliveries.deferProviderRejection(
+      providerDeferralCommand,
+    ),
+  ]);
+  assert.equal(
+    providerDeferrals.every(
+      (delivery) =>
+        delivery.status === "pending" &&
+        delivery.nextAttemptAt === providerRetryAt,
+    ),
+    true,
+  );
+  const persistedProviderDeferral = await pool.query(
+    `SELECT
+       count(*)::integer AS count,
+       max(reservation_key) AS "reservationKey"
+     FROM bot_reply_provider_deferral_events
+     WHERE tenant_id = $1
+       AND delivery_key = $2`,
+    [tenantId, providerDeferredDeliveryKey],
+  );
+  assert.deepEqual(persistedProviderDeferral.rows, [{
+    count: 1,
+    reservationKey: providerDeferredReservationKey,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE bot_reply_provider_deferral_events
+       SET retry_after_seconds = 18
+       WHERE delivery_key = $1`,
+      [providerDeferredDeliveryKey],
+    ),
+    /provider deferral evidence is immutable/,
+  );
+
+  const windowInboundMessageKey = `message_v1_${"a1".repeat(32)}`;
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey,
+    messageKey: windowInboundMessageKey,
+    contactId: providerDeferredContact.contactId,
+    providerMessageId: "driver-bot-window-rejection-inbound",
+    contentKind: "text",
+    textContent: "Window rejection integration",
+    occurredAt: currentPolicyRecordedAt,
+  }));
+  const windowReply = Object.freeze({
+    kind: "text",
+    text: "Integration service-window rejection",
+  });
+  const windowDeliveryKey = await deriveBotReplyDeliveryKey(tenantId, {
+    conversationKey,
+    inboundMessageKey: windowInboundMessageKey,
+    botFlowVersionKey: first.botFlowVersionKey,
+    replyIndex: 3,
+    reply: windowReply,
+  });
+  const windowStage = await foundation.botReplyDeliveries.stage(
+    Object.freeze({
+      ...deliveryInput,
+      deliveryKey: windowDeliveryKey,
+      inboundMessageKey: windowInboundMessageKey,
+      replyIndex: 3,
+      reply: windowReply,
+    }),
+  );
+  assert.equal(windowStage.outcome, "created");
+  const windowAttemptedAt = new Date(
+    Date.parse(windowStage.delivery.createdAt) + 1_000,
+  ).toISOString();
+  const windowClaim = await foundation.botReplyDeliveries.claim(
+    tenantId,
+    windowDeliveryKey,
+    windowAttemptedAt,
+  );
+  assert.equal(windowClaim.outcome, "claimed");
+  const windowReservationKey =
+    `whatsapp_rate_reservation_v1_${"a".repeat(64)}`;
+  const windowReservation =
+    await foundation.whatsappRateLimits.reserveServiceReply({
+      reservationKey: windowReservationKey,
+      tenantId,
+      portfolioKey: `whatsapp_portfolio_v1_${"a".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"a".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"b".repeat(64)}`,
+      policyEventKey: currentPolicy.record.eventKey,
+      portfolioCapacity: Object.freeze({
+        kind: "bounded",
+        maximumUniqueRecipients: 250,
+      }),
+      phoneThroughput: Object.freeze({
+        maximumMessagesPerSecond: 20,
+        maximumOutboundMessagesPerSecond: 2,
+      }),
+      reservedAt: windowAttemptedAt,
+      reservationExpiresAt: new Date(
+        Date.parse(windowAttemptedAt) + 300_000,
+      ).toISOString(),
+    });
+  assert.equal(windowReservation.outcome, "reserved");
+  const windowProviderRequest =
+    await foundation.botReplyDeliveries.claimProviderRequest({
+      tenantId,
+      deliveryKey: windowDeliveryKey,
+      expectedClaimVersion: windowClaim.delivery.claimVersion,
+      reservationKey: windowReservationKey,
+      requestedAt: windowAttemptedAt,
+    });
+  assert.equal(windowProviderRequest.outcome, "created");
+  assert.equal(
+    (await foundation.whatsappRateLimits.settle({
+      reservationKey: windowReservationKey,
+      outcome: "provider-failed",
+      settledAt: windowAttemptedAt,
+    })).outcome,
+    "settled",
+  );
+  const windowRejectedAt = new Date(
+    Date.parse(windowAttemptedAt) + 1,
+  ).toISOString();
+  const windowRejectionCommand = Object.freeze({
+    tenantId,
+    deliveryKey: windowDeliveryKey,
+    expectedClaimVersion: windowClaim.delivery.claimVersion,
+    reservationKey: windowReservationKey,
+    providerErrorCode: 131047,
+    reasonCode: "META_SERVICE_WINDOW_CLOSED",
+    serviceWindowOpenedAt: currentPolicyRecordedAt,
+    serviceWindowExpiresAt: new Date(
+      Date.parse(currentPolicyRecordedAt) + 86_400_000,
+    ).toISOString(),
+    attemptedAt: windowAttemptedAt,
+    rejectedAt: windowRejectedAt,
+  });
+  const windowRejections = await Promise.all([
+    foundation.botReplyDeliveries.rejectProviderServiceWindow(
+      windowRejectionCommand,
+    ),
+    foundation.botReplyDeliveries.rejectProviderServiceWindow(
+      windowRejectionCommand,
+    ),
+  ]);
+  assert.equal(
+    windowRejections.every(
+      (delivery) =>
+        delivery.status === "rejected" &&
+        delivery.lastErrorCode === "META_SERVICE_WINDOW_CLOSED",
+    ),
+    true,
+  );
+  const persistedWindowRejection = await pool.query(
+    `SELECT
+       count(*)::integer AS count,
+       max(provider_error_code)::integer AS "providerErrorCode"
+     FROM bot_reply_service_window_rejection_events
+     WHERE tenant_id = $1
+       AND delivery_key = $2`,
+    [tenantId, windowDeliveryKey],
+  );
+  assert.deepEqual(persistedWindowRejection.rows, [{
+    count: 1,
+    providerErrorCode: 131047,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE bot_reply_service_window_rejection_events
+       SET reason_code = 'META_BOT_REPLY_REJECTED'
+       WHERE delivery_key = $1`,
+      [windowDeliveryKey],
+    ),
+    /service-window rejection evidence is immutable/,
+  );
 
   const continuationPhoneNumber = "+972509876542";
   const continuationContact = await foundation.conversations
@@ -2963,9 +3532,9 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     await foundation.whatsappRateLimits.reserveServiceReply({
       reservationKey: buttonReservationKey,
       tenantId,
-      portfolioKey: `whatsapp_portfolio_v1_${"6".repeat(64)}`,
-      senderKey: `whatsapp_sender_v1_${"7".repeat(64)}`,
-      recipientKey: `whatsapp_recipient_v1_${"8".repeat(64)}`,
+      portfolioKey: `whatsapp_portfolio_v1_${"c".repeat(64)}`,
+      senderKey: `whatsapp_sender_v1_${"d".repeat(64)}`,
+      recipientKey: `whatsapp_recipient_v1_${"1".repeat(64)}`,
       policyEventKey: currentPolicy.record.eventKey,
       portfolioCapacity: Object.freeze({
         kind: "bounded",
@@ -3010,6 +3579,37 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     selectedBotOptionKey: buttonReply.options[0].optionKey,
     replyToProviderMessageId: "wamid.bot-integration-buttons",
   }));
+  const persistedButtonReply = await pool.query(
+    `SELECT
+       event.selected_bot_option_key AS "selectedBotOptionKey",
+       event.subject_delivery_key AS "subjectDeliveryKey"
+     FROM inbound_button_reply_events AS event
+     WHERE event.tenant_id = $1
+       AND event.message_key = $2`,
+    [tenantId, currentInboundMessageKey],
+  );
+  assert.deepEqual(persistedButtonReply.rows, [{
+    selectedBotOptionKey: buttonReply.options[0].optionKey,
+    subjectDeliveryKey: buttonDeliveryKey,
+  }]);
+  await assert.rejects(
+    pool.query(
+      `UPDATE bot_reply_provider_request_claims
+       SET requested_at = requested_at + interval '1 millisecond'
+       WHERE request_key = $1`,
+      [buttonProviderRequest.requestKey],
+    ),
+    /provider request evidence is immutable/,
+  );
+  await assert.rejects(
+    pool.query(
+      `UPDATE inbound_button_reply_events
+       SET selected_bot_option_key = $2
+       WHERE message_key = $1`,
+      [currentInboundMessageKey, `bot_option_v1_${"8".repeat(64)}`],
+    ),
+    /button reply evidence is immutable/,
+  );
   const continuation = await foundation.botRuntime
     .findAcceptedButtonContinuation(
       tenantId,
@@ -3071,10 +3671,11 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
      LEFT JOIN bot_reply_deliveries AS delivery
        ON delivery.tenant_id = flow.tenant_id
       AND delivery.bot_flow_key = flow.bot_flow_key
+      AND delivery.delivery_key = $3
      WHERE flow.tenant_id = $1
        AND flow.bot_flow_key = $2
      GROUP BY flow.status, flow.version`,
-    [tenantId, botFlowKey],
+    [tenantId, botFlowKey, deliveryKey],
   );
   assert.deepEqual(persisted.rows, [{
     flow_status: "active",
@@ -3828,6 +4429,153 @@ async function verifyAiAgentLifecycle(
   });
 }
 
+async function verifyPostgresAiAgentHttpRuntime(
+  connectionString,
+  pool,
+  tenantId,
+  sourceKey,
+) {
+  const runtime = await createPostgresIntegrationApiRuntime(connectionString);
+  const compactJwt = "header.payload.signature";
+  const createRequest = (operation, requestKind, payload, idempotencyKey) =>
+    new Request(
+      new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${compactJwt}`,
+          "content-type": "application/json",
+          [VERCEL_OIDC_HEADER]: compactJwt,
+        },
+        body: JSON.stringify({
+          contractVersion: RAILWAY_API_CONTRACT_VERSION,
+          operation,
+          requestKind,
+          idempotencyKey,
+          payload,
+        }),
+      },
+    );
+  const definition = Object.freeze({
+    name: "Railway HTTP AI agent",
+    systemPrompt: "Answer only from approved knowledge sources.",
+    handoffMessage: "Approved knowledge is unavailable. Escalating.",
+    responseMode: "agent-approval",
+    minimumGroundingScoreBasisPoints: 8_000,
+    monthlyCostLimitMinorUnits: 50_000,
+    billingCurrency: "ILS",
+    knowledgeSourceKeys: Object.freeze([sourceKey]),
+  });
+  const draftPayload = Object.freeze({
+    definition,
+    expectedAgentVersion: null,
+  });
+  const draftOperation = "ai.agents.draft.save";
+  const draftIdempotencyKey =
+    await deriveRailwayApiDeterministicIdempotencyKey(
+      draftOperation,
+      draftPayload,
+    );
+
+  try {
+    const responses = await Promise.all([
+      runtime.handler.handle(createRequest(
+        draftOperation,
+        "mutation",
+        draftPayload,
+        draftIdempotencyKey,
+      )),
+      runtime.handler.handle(createRequest(
+        draftOperation,
+        "mutation",
+        draftPayload,
+        draftIdempotencyKey,
+      )),
+    ]);
+    const bodies = await Promise.all(
+      responses.map((response) => response.json()),
+    );
+    assert.deepEqual(responses.map(({ status }) => status), [200, 200]);
+    assert.deepEqual(
+      bodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      bodies.map(({ data }) => data.outcome),
+      ["created", "created"],
+    );
+    const createdAgentKey = bodies[0].data.agent.aiAgentKey;
+    const createdVersionKey =
+      bodies[0].data.draftVersion.aiAgentVersionKey;
+    const publishPayload = Object.freeze({
+      aiAgentKey: createdAgentKey,
+      aiAgentVersionKey: createdVersionKey,
+      expectedAgentVersion: 1,
+    });
+    const publishOperation = "ai.agents.publish";
+    const publishIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        publishOperation,
+        publishPayload,
+      );
+    const publishResponse = await runtime.handler.handle(createRequest(
+      publishOperation,
+      "mutation",
+      publishPayload,
+      publishIdempotencyKey,
+    ));
+    const publishBody = await publishResponse.json();
+    assert.equal(publishResponse.status, 200);
+    assert.equal(publishBody.data.outcome, "activation-blocked");
+    assert.equal(publishBody.data.replayed, false);
+    assert.ok(publishBody.data.issues.includes("provider-required"));
+
+    const directoryResponse = await runtime.handler.handle(createRequest(
+      "ai.agents.directory.read",
+      "query",
+      Object.freeze({}),
+      null,
+    ));
+    const directoryBody = await directoryResponse.json();
+    assert.equal(directoryResponse.status, 200);
+    assert.equal(
+      directoryBody.data.agents.some(
+        ({ aiAgentKey }) => aiAgentKey === createdAgentKey,
+      ),
+      true,
+    );
+    assert.doesNotMatch(
+      JSON.stringify({ bodies, publishBody, directoryBody }),
+      /"tenantId"|externalUserId|storageObjectKey|contentSha256/,
+    );
+
+    const evidence = await pool.query(
+      `SELECT
+         count(*) FILTER (
+           WHERE operation = $2 AND idempotency_key = $3
+         )::integer AS "draftReceiptCount",
+         count(*) FILTER (
+           WHERE operation = $4 AND idempotency_key = $5
+         )::integer AS "publishReceiptCount"
+       FROM railway_api_mutation_receipts
+       WHERE tenant_id = $1`,
+      [
+        tenantId,
+        draftOperation,
+        draftIdempotencyKey,
+        publishOperation,
+        publishIdempotencyKey,
+      ],
+    );
+    assert.deepEqual(evidence.rows, [{
+      draftReceiptCount: 1,
+      publishReceiptCount: 0,
+    }]);
+  } finally {
+    await runtime.close();
+  }
+}
+
 async function verifyAiRuntimePersistence(
   pool,
   foundation,
@@ -3835,7 +4583,7 @@ async function verifyAiRuntimePersistence(
   aiAgent,
 ) {
   const identityInputs = await Promise.all(
-    ["7", "8", "9"].map(async (hexDigit, index) => {
+    ["7", "8", "9", "e"].map(async (hexDigit, index) => {
       const contact = await foundation.conversations.resolveInboundContact(
         tenantId,
         `+9725098700${index + 1}`,
@@ -3916,7 +4664,11 @@ async function verifyAiRuntimePersistence(
         foundation.aiRuntime.costGate.authorize(authorization(identity)),
       ),
     ),
-    [{ outcome: "authorized" }, { outcome: "authorized" }],
+    [
+      { outcome: "authorized" },
+      { outcome: "authorized" },
+      { outcome: "authorized" },
+    ],
   );
   const budgetRace = await Promise.all(
     identityInputs.slice(1).map((identity) =>
@@ -3925,7 +4677,7 @@ async function verifyAiRuntimePersistence(
   );
   assert.deepEqual(
     budgetRace.map(({ withinLimit }) => withinLimit).sort(),
-    [false, true],
+    [false, false, true],
   );
 
   const replyAuditEvent = Object.freeze({
@@ -4004,6 +4756,57 @@ async function verifyAiRuntimePersistence(
     ["unchanged", "updated"],
   );
 
+  const httpReplyAuditEvent = Object.freeze({
+    auditKey: identityInputs[3].auditKey,
+    requestKey: identityInputs[3].requestKey,
+    tenantId,
+    conversationKey: identityInputs[3].conversationKey,
+    inboundMessageKey: identityInputs[3].inboundMessageKey,
+    expectedConversationVersion: 2,
+    aiAgentKey: aiAgent.aiAgentKey,
+    aiAgentVersionKey: aiAgent.aiAgentVersionKey,
+    outcome: "reply-planned",
+    reason: null,
+    responseMode: "agent-approval",
+    groundingScoreBasisPoints: 9_100,
+    inputTokens: 120,
+    outputTokens: 24,
+    costMinorUnits: 2,
+    currency: "ILS",
+  });
+  assert.deepEqual(
+    await foundation.aiRuntime.auditSink.record(httpReplyAuditEvent),
+    { outcome: "recorded" },
+  );
+  const httpReplyOutboxKey = await deriveAiReplyOutboxKey(
+    tenantId,
+    identityInputs[3].requestKey,
+  );
+  const httpStageInput = Object.freeze({
+    outboxKey: httpReplyOutboxKey,
+    requestKey: identityInputs[3].requestKey,
+    auditKey: identityInputs[3].auditKey,
+    tenantId,
+    conversationKey: identityInputs[3].conversationKey,
+    inboundMessageKey: identityInputs[3].inboundMessageKey,
+    aiAgentKey: aiAgent.aiAgentKey,
+    aiAgentVersionKey: aiAgent.aiAgentVersionKey,
+    expectedConversationVersion: 2,
+    recipientPhoneNumber: "+97250987004",
+    responseMode: "agent-approval",
+    replyText: "Railway approval preserves the bounded response.",
+    groundedSourceKeys: Object.freeze([aiAgent.sourceKey]),
+    groundingScoreBasisPoints: 9_100,
+  });
+  const httpStagedReplies = await Promise.all([
+    foundation.aiReplyOutbox.stage(httpStageInput),
+    foundation.aiReplyOutbox.stage(httpStageInput),
+  ]);
+  assert.deepEqual(
+    httpStagedReplies.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+
   const handoffEvent = Object.freeze({
     auditKey: identityInputs[2].auditKey,
     requestKey: identityInputs[2].requestKey,
@@ -4074,9 +4877,9 @@ async function verifyAiRuntimePersistence(
     ],
   );
   assert.deepEqual(persisted.rows, [{
-    authorization_count: 3,
-    usage_count: 3,
-    total_cost: 11,
+    authorization_count: 4,
+    usage_count: 4,
+    total_cost: 13,
     audit_count: 1,
     outbox_count: 1,
     outbox_status: "ready-for-delivery",
@@ -4088,17 +4891,171 @@ async function verifyAiRuntimePersistence(
     foundation.aiRuntime.costGate.recordUsage(usage(identityInputs[0], 8)),
     /conflicting AI usage/,
   );
+
+  return Object.freeze({
+    httpReplyOutboxKey,
+  });
+}
+
+async function verifyPostgresAiReplyApprovalHttpRuntime(
+  connectionString,
+  pool,
+  httpReplyOutboxKey,
+) {
+  const runtime = await createPostgresIntegrationApiRuntime(connectionString);
+  const compactJwt = "header.payload.signature";
+  const createApiRequest = (operation, requestKind, payload, idempotencyKey) =>
+    new Request(
+      new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${compactJwt}`,
+          "content-type": "application/json",
+          [VERCEL_OIDC_HEADER]: compactJwt,
+        },
+        body: JSON.stringify({
+          contractVersion: RAILWAY_API_CONTRACT_VERSION,
+          operation,
+          requestKind,
+          idempotencyKey,
+          payload,
+        }),
+      },
+    );
+
+  try {
+    const directoryResponse = await runtime.handler.handle(
+      createApiRequest(
+        "ai.reply-approvals.list",
+        "query",
+        {},
+        null,
+      ),
+    );
+    const directoryBody = await directoryResponse.json();
+    assert.equal(directoryResponse.status, 200);
+    assert.equal(directoryBody.outcome, "ok");
+    assert.equal(directoryBody.data.canDecide, true);
+    const approval = directoryBody.data.approvals.find(
+      ({ outboxKey }) => outboxKey === httpReplyOutboxKey,
+    );
+    assert.deepEqual(approval, {
+      outboxKey: httpReplyOutboxKey,
+      conversationKey: `conversation_v1_${"e".repeat(64)}`,
+      replyText: "Railway approval preserves the bounded response.",
+      groundedSourceCount: 1,
+      groundingScoreBasisPoints: 9_100,
+      version: 1,
+      createdAt: approval.createdAt,
+    });
+    assert.doesNotMatch(
+      JSON.stringify(directoryBody),
+      /tenantId|externalUserId|requestKey|auditKey|driver-integration-owner/,
+    );
+
+    const decisionPayload = Object.freeze({
+      outboxKey: httpReplyOutboxKey,
+      expectedVersion: 1,
+      decision: "approve",
+    });
+    const decisionIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "ai.reply-approvals.decide",
+        decisionPayload,
+      );
+    const decisionResponses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        "ai.reply-approvals.decide",
+        "mutation",
+        decisionPayload,
+        decisionIdempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        "ai.reply-approvals.decide",
+        "mutation",
+        decisionPayload,
+        decisionIdempotencyKey,
+      )),
+    ]);
+    const decisionBodies = await Promise.all(
+      decisionResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      decisionResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      decisionBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      decisionBodies.map(({ data }) => data.outcome),
+      ["updated", "updated"],
+    );
+    assert.deepEqual(decisionBodies[0].data.approval, {
+      outboxKey: httpReplyOutboxKey,
+      status: "ready-for-delivery",
+      version: 2,
+    });
+    assert.doesNotMatch(
+      JSON.stringify(decisionBodies),
+      /tenantId|externalUserId|requestKey|auditKey|driver-integration-owner/,
+    );
+
+    const evidence = await pool.query(
+      `SELECT
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts
+          WHERE operation = 'ai.reply-approvals.decide') AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs
+          WHERE action = 'ai.reply-approvals.decide') AS audits,
+         outbox.status,
+         outbox.version,
+         outbox.decided_by_external_user_id AS "decidedByExternalUserId"
+       FROM ai_reply_outbox AS outbox
+       WHERE outbox.tenant_id = 1
+         AND outbox.outbox_key = $1`,
+      [httpReplyOutboxKey],
+    );
+    assert.deepEqual(evidence.rows, [{
+      receipts: 1,
+      audits: 1,
+      status: "ready-for-delivery",
+      version: 2,
+      decidedByExternalUserId: "driver-integration-owner",
+    }]);
+  } finally {
+    await runtime.close();
+  }
 }
 
 async function verifyAiReportingSchema(pool, foundation, tenantId) {
   const conversationKey = `conversation_v1_${"a".repeat(64)}`;
   const inboundMessageKey = `message_v1_${"b".repeat(64)}`;
-  const aiAgentKey = `ai_agent_v1_${"3".repeat(64)}`;
-  const aiAgentVersionKey = `ai_agent_version_v1_${"4".repeat(64)}`;
   const requestKey = `ai_provider_request_v1_${"5".repeat(64)}`;
   const auditKey = `ai_runtime_audit_v1_${"6".repeat(64)}`;
   const occurredAt = "2026-08-17T12:00:00.000Z";
-  const definition = JSON.stringify({ responseMode: "automatic" });
+  const agentName = "Integration AI agent";
+  const definitionValue = Object.freeze({
+    name: agentName,
+    systemPrompt: "Answer only from approved operational context.",
+    handoffMessage: "Operational context is unavailable. Escalating.",
+    responseMode: "automatic",
+    minimumGroundingScoreBasisPoints: 8_000,
+    monthlyCostLimitMinorUnits: 100,
+    billingCurrency: "USD",
+    knowledgeSourceKeys: Object.freeze([]),
+  });
+  const aiAgentKey = await deriveAiAgentKey(tenantId, agentName);
+  const aiAgentVersionKey = await deriveAiAgentVersionKey(
+    tenantId,
+    aiAgentKey,
+    1,
+    definitionValue,
+  );
+  const definition = JSON.stringify(definitionValue);
 
   await pool.query(
     `INSERT INTO ai_agents (
@@ -4116,7 +5073,7 @@ async function verifyAiReportingSchema(pool, foundation, tenantId) {
      VALUES (
        $1,
        $2,
-       'Integration AI agent',
+       $5,
        'draft',
        $3,
        1,
@@ -4125,7 +5082,7 @@ async function verifyAiReportingSchema(pool, foundation, tenantId) {
        $4::timestamptz,
        $4::timestamptz
      )`,
-    [aiAgentKey, tenantId, aiAgentVersionKey, occurredAt],
+    [aiAgentKey, tenantId, aiAgentVersionKey, occurredAt, agentName],
   );
   await pool.query(
     `INSERT INTO ai_agent_versions (
@@ -4315,8 +5272,15 @@ async function verifyAiReportingSchema(pool, foundation, tenantId) {
   );
 }
 
-async function verifyPostgresHttpRuntime(connectionString) {
-  const runtime = await createRailwayPostgresApiRuntime({
+async function createPostgresIntegrationApiRuntime(
+  connectionString,
+  externalUserId = "driver-integration-owner",
+  teamInvitationPublications = [],
+  verifiedInvitationEmail = "driver-integration-owner@example.com",
+  enableSystemAdmin = false,
+  externalOrganizationId = "org_driver_integration",
+) {
+  return createRailwayPostgresApiRuntime({
     identityEnvironment: {
       APP_PUBLIC_ORIGIN: "https://connect.example.com",
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
@@ -4345,7 +5309,8 @@ async function verifyPostgresHttpRuntime(connectionString) {
                   return {
                     isAuthenticated: true,
                     tokenType: "session_token",
-                    userId: "driver-integration-owner",
+                    userId: externalUserId,
+                    orgId: externalOrganizationId,
                   };
                 },
               };
@@ -4362,7 +5327,266 @@ async function verifyPostgresHttpRuntime(connectionString) {
       TENANT_MUTATION_RATE_LIMIT_CAPACITY: "120",
       TENANT_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "60",
     },
+    ...(enableSystemAdmin
+      ? {
+          systemAdminEnvironment: {
+            CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS:
+              JSON.stringify([externalUserId]),
+            SYSTEM_ADMIN_MUTATION_RATE_LIMIT_POLICY_VERSION: "1",
+            SYSTEM_ADMIN_MUTATION_RATE_LIMIT_CAPACITY: "120",
+            SYSTEM_ADMIN_MUTATION_RATE_LIMIT_REFILL_PERIOD_SECONDS: "60",
+          },
+        }
+      : {}),
+    campaignDeliveryConfigured: () => true,
+    teamInvitationPolicyEnvironment: {
+      TEAM_INVITATION_TTL_HOURS: "72",
+      TEAM_INVITATION_REREQUEST_POLICY: "after-terminal",
+    },
+    teamInvitationPublisher: {
+      async publish(tenantId, deliveryKey) {
+        teamInvitationPublications.push({ tenantId, deliveryKey });
+        return { outcome: "queued" };
+      },
+    },
+    teamInvitationAcceptanceIdentityResolver: {
+      async resolve(receivedExternalUserId) {
+        assert.equal(receivedExternalUserId, externalUserId);
+        return {
+          status: "verified",
+          verifiedEmail: verifiedInvitationEmail,
+        };
+      },
+    },
   });
+}
+
+async function verifyPostgresSystemAdminWhatsappDeliveryPolicyHttpRuntime(
+  connectionString,
+  pool,
+  tenantId,
+) {
+  const externalUserId = "driver-system-admin-whatsapp-policy";
+  const runtime = await createPostgresIntegrationApiRuntime(
+    connectionString,
+    externalUserId,
+    [],
+    "driver-system-admin-whatsapp-policy@example.com",
+    true,
+  );
+  const compactJwt = "header.payload.signature";
+  const createApiRequest = (
+    operation,
+    requestKind,
+    payload,
+    idempotencyKey,
+  ) => new Request(
+    new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${compactJwt}`,
+        "content-type": "application/json",
+        [VERCEL_OIDC_HEADER]: compactJwt,
+      },
+      body: JSON.stringify({
+        contractVersion: RAILWAY_API_CONTRACT_VERSION,
+        operation,
+        requestKind,
+        idempotencyKey,
+        payload,
+      }),
+    },
+  );
+
+  try {
+    const readPayload = Object.freeze({ targetTenantId: tenantId });
+    const initialRead = await runtime.handler.handle(
+      createApiRequest(
+        "system-admin.whatsapp-delivery-policy.read",
+        "query",
+        readPayload,
+        null,
+      ),
+    );
+    const initialBody = await initialRead.json();
+    assert.equal(initialRead.status, 200);
+    assert.equal(initialBody.data.connection.status, "connected");
+    const initialPolicyVersion = initialBody.data.record.policyVersion;
+    assert.equal(
+      Number.isSafeInteger(initialPolicyVersion) && initialPolicyVersion >= 1,
+      true,
+    );
+    assert.equal(initialBody.data.record.deliveryState, "enabled");
+
+    const observedAt = new Date();
+    const evidenceCheckedAt = new Date(
+      observedAt.getTime() - 60_000,
+    ).toISOString();
+    const evidenceExpiresAt = new Date(
+      observedAt.getTime() + 60 * 60 * 1_000,
+    ).toISOString();
+    const approvalPayload = Object.freeze({
+      targetTenantId: tenantId,
+      expectedConnectionVersion: 2,
+      expectedPolicyVersion: initialPolicyVersion,
+      expectedBusinessPortfolioIdentifier:
+        "integration-business-portfolio",
+      expectedWabaIdentifier: "integration-waba",
+      expectedPhoneNumberIdentifier: "155512345678901",
+      portfolioLimitKind: "bounded",
+      portfolioLimitValue: 250,
+      phoneThroughputMessagesPerSecond: 20,
+      maximumOutboundMessagesPerSecond: 2,
+      reservationDurationSeconds: 300,
+      metaGraphApiVersion: "v21.0",
+      evidenceDigest: "9".repeat(64),
+      evidenceCheckedAt,
+      evidenceExpiresAt,
+    });
+    const approvalOperation =
+      "system-admin.whatsapp-delivery-policy.approve";
+    const approvalIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        approvalOperation,
+        approvalPayload,
+      );
+    const approvalResponses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        approvalOperation,
+        "mutation",
+        approvalPayload,
+        approvalIdempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        approvalOperation,
+        "mutation",
+        approvalPayload,
+        approvalIdempotencyKey,
+      )),
+    ]);
+    const approvalBodies = await Promise.all(
+      approvalResponses.map((response) => response.json()),
+    );
+    assert.deepEqual(
+      approvalResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      approvalBodies.map(({ data }) => data.outcome).sort(),
+      ["unchanged", "updated"],
+    );
+    assert.deepEqual(
+      approvalBodies.map(({ data }) => data.record.policyVersion),
+      [initialPolicyVersion + 1, initialPolicyVersion + 1],
+    );
+    const approvalReplayResponse = await runtime.handler.handle(
+      createApiRequest(
+        approvalOperation,
+        "mutation",
+        approvalPayload,
+        approvalIdempotencyKey,
+      ),
+    );
+    const approvalReplayBody = await approvalReplayResponse.json();
+    assert.equal(approvalReplayResponse.status, 200);
+    assert.equal(approvalReplayBody.data.outcome, "unchanged");
+    assert.equal(
+      approvalReplayBody.data.record.policyVersion,
+      initialPolicyVersion + 1,
+    );
+
+    const killSwitchPayload = Object.freeze({
+      targetTenantId: tenantId,
+      expectedConnectionVersion: 2,
+      expectedPolicyVersion: initialPolicyVersion + 1,
+    });
+    const killSwitchOperation =
+      "system-admin.whatsapp-delivery-policy.kill-switch";
+    const killSwitchIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        killSwitchOperation,
+        killSwitchPayload,
+      );
+    const killSwitchResponses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        killSwitchOperation,
+        "mutation",
+        killSwitchPayload,
+        killSwitchIdempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        killSwitchOperation,
+        "mutation",
+        killSwitchPayload,
+        killSwitchIdempotencyKey,
+      )),
+    ]);
+    const killSwitchBodies = await Promise.all(
+      killSwitchResponses.map((response) => response.json()),
+    );
+    assert.deepEqual(
+      killSwitchResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      killSwitchBodies.map(({ data }) => data.outcome).sort(),
+      ["unchanged", "updated"],
+    );
+    assert.deepEqual(
+      killSwitchBodies.map(({ data }) => data.record.deliveryState),
+      ["disabled", "disabled"],
+    );
+    const killSwitchReplayResponse = await runtime.handler.handle(
+      createApiRequest(
+        killSwitchOperation,
+        "mutation",
+        killSwitchPayload,
+        killSwitchIdempotencyKey,
+      ),
+    );
+    const killSwitchReplayBody = await killSwitchReplayResponse.json();
+    assert.equal(killSwitchReplayResponse.status, 200);
+    assert.equal(killSwitchReplayBody.data.outcome, "unchanged");
+    assert.equal(
+      killSwitchReplayBody.data.record.policyVersion,
+      initialPolicyVersion + 2,
+    );
+    assert.doesNotMatch(
+      JSON.stringify({
+        initialBody,
+        approvalBodies,
+        approvalReplayBody,
+        killSwitchBodies,
+        killSwitchReplayBody,
+      }),
+      /"tenantId"|"businessPortfolioId"|"wabaId"|"phoneNumberId"|externalUserId|driver-system-admin-whatsapp-policy/,
+    );
+
+    const evidence = await pool.query(
+      `SELECT
+         max(policy_version)::integer AS "latestVersion",
+         (array_agg(delivery_state ORDER BY policy_version DESC))[1]
+           AS "latestState",
+         count(*) FILTER (
+           WHERE actor_external_user_id = $2
+         )::integer AS "httpEventCount"
+       FROM whatsapp_campaign_delivery_policy_events
+       WHERE tenant_id = $1`,
+      [tenantId, externalUserId],
+    );
+    assert.deepEqual(evidence.rows, [{
+      latestVersion: initialPolicyVersion + 2,
+      latestState: "disabled",
+      httpEventCount: 2,
+    }]);
+  } finally {
+    await runtime.close();
+  }
+}
+
+async function verifyPostgresHttpRuntime(connectionString, pool) {
+  const runtime = await createPostgresIntegrationApiRuntime(connectionString);
 
   try {
     assert.deepEqual(await runtime.readiness.check(), {
@@ -4465,6 +5689,1280 @@ async function verifyPostgresHttpRuntime(connectionString) {
       JSON.stringify(mutationBody),
       /tenantId|externalUserId|driver-integration-owner/,
     );
+
+    const conversationListResponse = await runtime.handler.handle(
+      new Request(
+        new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${compactJwt}`,
+            "content-type": "application/json",
+            [VERCEL_OIDC_HEADER]: compactJwt,
+          },
+          body: JSON.stringify({
+            contractVersion: RAILWAY_API_CONTRACT_VERSION,
+            operation: "conversations.list",
+            requestKind: "query",
+            idempotencyKey: null,
+            payload: {
+              searchTerm: "",
+              status: "all",
+              assignment: "all",
+            },
+          }),
+        },
+      ),
+    );
+    const conversationListBody = await conversationListResponse.json();
+    assert.equal(conversationListResponse.status, 200);
+    assert.equal(conversationListBody.data.conversations.length, 1);
+    assert.equal(conversationListBody.data.canReply, true);
+    const conversationKey =
+      conversationListBody.data.conversations[0]?.conversationKey;
+    assert.equal(conversationKey, `conversation_v1_${"a".repeat(64)}`);
+
+    const threadResponse = await runtime.handler.handle(
+      new Request(
+        new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${compactJwt}`,
+            "content-type": "application/json",
+            [VERCEL_OIDC_HEADER]: compactJwt,
+          },
+          body: JSON.stringify({
+            contractVersion: RAILWAY_API_CONTRACT_VERSION,
+            operation: "conversations.thread.read",
+            requestKind: "query",
+            idempotencyKey: null,
+            payload: { conversationKey },
+          }),
+        },
+      ),
+    );
+    const threadBody = await threadResponse.json();
+    assert.equal(threadResponse.status, 200);
+    assert.equal(threadBody.data.thread.messages.length, 1);
+    assert.doesNotMatch(
+      JSON.stringify({ conversationListBody, threadBody }),
+      /tenantId|externalUserId|assignedExternalUserId|providerMessageId|driver-integration-owner/,
+    );
+
+    const markReadPayload = Object.freeze({
+      conversationKey,
+      expectedVersion: 2,
+    });
+    const markReadIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "conversations.mark-read",
+        markReadPayload,
+      );
+    const createConversationMutationRequest = (operation, payload, key) =>
+      new Request(
+        new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${compactJwt}`,
+            "content-type": "application/json",
+            [VERCEL_OIDC_HEADER]: compactJwt,
+          },
+          body: JSON.stringify({
+            contractVersion: RAILWAY_API_CONTRACT_VERSION,
+            operation,
+            requestKind: "mutation",
+            idempotencyKey: key,
+            payload,
+          }),
+        },
+      );
+    const markReadResponses = await Promise.all([
+      runtime.handler.handle(createConversationMutationRequest(
+        "conversations.mark-read",
+        markReadPayload,
+        markReadIdempotencyKey,
+      )),
+      runtime.handler.handle(createConversationMutationRequest(
+        "conversations.mark-read",
+        markReadPayload,
+        markReadIdempotencyKey,
+      )),
+    ]);
+    const markReadBodies = await Promise.all(
+      markReadResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      markReadResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      markReadBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(markReadBodies[0].data.conversation, {
+      conversationKey,
+      unreadCount: 0,
+      version: 3,
+    });
+
+    const assignmentPayload = Object.freeze({
+      conversationKey,
+      expectedVersion: 3,
+      action: "assign-self",
+    });
+    const assignmentIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "conversations.assignment.change",
+        assignmentPayload,
+      );
+    const assignmentResponses = await Promise.all([
+      runtime.handler.handle(createConversationMutationRequest(
+        "conversations.assignment.change",
+        assignmentPayload,
+        assignmentIdempotencyKey,
+      )),
+      runtime.handler.handle(createConversationMutationRequest(
+        "conversations.assignment.change",
+        assignmentPayload,
+        assignmentIdempotencyKey,
+      )),
+    ]);
+    const assignmentBodies = await Promise.all(
+      assignmentResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      assignmentResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      assignmentBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(assignmentBodies[0].data.conversation, {
+      conversationKey,
+      assignment: "current-user",
+      version: 4,
+    });
+
+    const conversationEvidence = await pool.query(
+      `SELECT
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts
+          WHERE operation IN (
+            'conversations.mark-read',
+            'conversations.assignment.change'
+          )) AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs
+          WHERE action IN (
+            'conversations.mark-read',
+            'conversations.assignment.change'
+          )) AS audits,
+         conversation.unread_count AS "unreadCount",
+         conversation.version,
+         conversation.assigned_external_user_id AS "assignedExternalUserId"
+       FROM conversations AS conversation
+       WHERE conversation.conversation_key = $1`,
+      [conversationKey],
+    );
+    assert.deepEqual(conversationEvidence.rows, [{
+      receipts: 2,
+      audits: 2,
+      unreadCount: 0,
+      version: 4,
+      assignedExternalUserId: "driver-integration-owner",
+    }]);
+
+    const runtimeBotFlowKey = await deriveBotFlowKey(
+      1,
+      "HTTP runtime flow",
+    );
+    const botTriggerKey = await deriveBotFlowBlockKey(
+      runtimeBotFlowKey,
+      1,
+    );
+    const botEndKey = await deriveBotFlowBlockKey(
+      runtimeBotFlowKey,
+      2,
+    );
+    const botDefinition = Object.freeze({
+      name: "HTTP runtime flow",
+      entryBlockKey: botTriggerKey,
+      blocks: Object.freeze([
+        Object.freeze({
+          blockKey: botTriggerKey,
+          type: "trigger",
+          nextBlockKey: botEndKey,
+        }),
+        Object.freeze({
+          blockKey: botEndKey,
+          type: "end",
+        }),
+      ]),
+    });
+    const botDraftPayload = Object.freeze({
+      definition: botDefinition,
+      expectedFlowVersion: null,
+    });
+    const botDraftIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "bot.flows.draft.save",
+        botDraftPayload,
+      );
+    const botDraftResponses = await Promise.all([
+      runtime.handler.handle(createConversationMutationRequest(
+        "bot.flows.draft.save",
+        botDraftPayload,
+        botDraftIdempotencyKey,
+      )),
+      runtime.handler.handle(createConversationMutationRequest(
+        "bot.flows.draft.save",
+        botDraftPayload,
+        botDraftIdempotencyKey,
+      )),
+    ]);
+    const botDraftBodies = await Promise.all(
+      botDraftResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      botDraftResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      botDraftBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      botDraftBodies.map(({ data }) => data.outcome),
+      ["created", "created"],
+    );
+    const runtimeBotFlowVersionKey = await deriveBotFlowVersionKey(
+      1,
+      runtimeBotFlowKey,
+      1,
+      botDefinition,
+    );
+    assert.equal(
+      botDraftBodies[0].data.flow.botFlowKey,
+      runtimeBotFlowKey,
+    );
+
+    const botPublishPayload = Object.freeze({
+      botFlowKey: runtimeBotFlowKey,
+      botFlowVersionKey: runtimeBotFlowVersionKey,
+      expectedFlowVersion: 1,
+    });
+    const botPublishIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "bot.flows.publish",
+        botPublishPayload,
+      );
+    const botPublishResponses = await Promise.all([
+      runtime.handler.handle(createConversationMutationRequest(
+        "bot.flows.publish",
+        botPublishPayload,
+        botPublishIdempotencyKey,
+      )),
+      runtime.handler.handle(createConversationMutationRequest(
+        "bot.flows.publish",
+        botPublishPayload,
+        botPublishIdempotencyKey,
+      )),
+    ]);
+    const botPublishBodies = await Promise.all(
+      botPublishResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      botPublishResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      botPublishBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      botPublishBodies.map(({ data }) => data.outcome),
+      ["updated", "updated"],
+    );
+    assert.equal(botPublishBodies[0].data.flow.status, "active");
+
+    const botMutationEvidence = await pool.query(
+      `SELECT
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts
+          WHERE operation IN (
+            'bot.flows.draft.save',
+            'bot.flows.publish'
+          )) AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs
+          WHERE action IN (
+            'bot.flows.draft.save',
+            'bot.flows.publish'
+          )) AS audits,
+         flow.status,
+         flow.version,
+         flow.latest_version_key AS "latestVersionKey",
+         flow.active_version_key AS "activeVersionKey",
+         version.status AS "versionStatus"
+       FROM bot_flows AS flow
+       INNER JOIN bot_flow_versions AS version
+         ON version.tenant_id = flow.tenant_id
+        AND version.bot_flow_key = flow.bot_flow_key
+        AND version.bot_flow_version_key = flow.active_version_key
+       WHERE flow.tenant_id = 1
+         AND flow.bot_flow_key = $1`,
+      [runtimeBotFlowKey],
+    );
+    assert.deepEqual(botMutationEvidence.rows, [{
+      receipts: 2,
+      audits: 2,
+      status: "active",
+      version: 2,
+      latestVersionKey: runtimeBotFlowVersionKey,
+      activeVersionKey: runtimeBotFlowVersionKey,
+      versionStatus: "published",
+    }]);
+
+    const campaignTemplateKey = `template_v1_${"d".repeat(64)}`;
+    const campaignLifecycleAt = "2026-08-17T10:20:00.000Z";
+    await pool.query(
+      `INSERT INTO business_profiles (
+         tenant_id,
+         business_name,
+         timezone,
+         interface_language,
+         created_at,
+         updated_at
+       )
+       VALUES ($1, 'Connect integration', 'UTC', 'he', $2, $2)
+       ON CONFLICT (tenant_id) DO NOTHING`,
+      [1, campaignLifecycleAt],
+    );
+    await pool.query(
+      `UPDATE message_templates
+       SET
+         meta_template_id = '445566778899',
+         status = 'approved',
+         submission_key = $2,
+         submission_started_at = $3,
+         last_submission_error_code = NULL,
+         last_status_event_key = $4,
+         last_status_event_at = $3,
+         submitted_at = $3,
+         reviewed_at = $3,
+         version = version + 1,
+         updated_at = $3
+       WHERE tenant_id = $1
+         AND template_key = $5`,
+      [
+        1,
+        `template_submission_v1_${"6".repeat(64)}`,
+        campaignLifecycleAt,
+        "7".repeat(64),
+        campaignTemplateKey,
+      ],
+    );
+
+    const campaignDirectoryResponse = await runtime.handler.handle(
+      new Request(
+        new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${compactJwt}`,
+            "content-type": "application/json",
+            [VERCEL_OIDC_HEADER]: compactJwt,
+          },
+          body: JSON.stringify({
+            contractVersion: RAILWAY_API_CONTRACT_VERSION,
+            operation: "campaigns.directory.read",
+            requestKind: "query",
+            idempotencyKey: null,
+            payload: {},
+          }),
+        },
+      ),
+    );
+    const campaignDirectoryBody = await campaignDirectoryResponse.json();
+    assert.equal(campaignDirectoryResponse.status, 200);
+    assert.equal(campaignDirectoryBody.data.deliveryStatus, "ready");
+    assert.equal(
+      campaignDirectoryBody.data.templates.some(
+        ({ templateKey }) => templateKey === campaignTemplateKey,
+      ),
+      true,
+    );
+
+    const campaignSnapshotPayload = Object.freeze({
+      name: "HTTP campaign",
+      deliveryMode: "scheduled",
+      scheduledAt: new Date(
+        Date.parse(await currentPostgresTimestamp(pool)) + 86_400_000,
+      ).toISOString(),
+      templateKey: campaignTemplateKey,
+      audienceSource: Object.freeze({ kind: "all" }),
+      personalizationMapping: Object.freeze({}),
+    });
+    const campaignSnapshotIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "campaigns.snapshot.save",
+        campaignSnapshotPayload,
+      );
+    const campaignSnapshotResponses = await Promise.all([
+      runtime.handler.handle(createConversationMutationRequest(
+        "campaigns.snapshot.save",
+        campaignSnapshotPayload,
+        campaignSnapshotIdempotencyKey,
+      )),
+      runtime.handler.handle(createConversationMutationRequest(
+        "campaigns.snapshot.save",
+        campaignSnapshotPayload,
+        campaignSnapshotIdempotencyKey,
+      )),
+    ]);
+    const campaignSnapshotBodies = await Promise.all(
+      campaignSnapshotResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      campaignSnapshotResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      campaignSnapshotBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    const runtimeCampaignKey =
+      campaignSnapshotBodies[0].data.campaign.campaignKey;
+    assert.match(runtimeCampaignKey, /^campaign_v1_[0-9a-f]{64}$/);
+    assert.equal(
+      campaignSnapshotBodies[0].data.campaign.recipientCount > 0,
+      true,
+    );
+
+    const campaignActivationPayload = Object.freeze({
+      campaignKey: runtimeCampaignKey,
+      expectedVersion: 1,
+    });
+    const campaignActivationIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "campaigns.activate",
+        campaignActivationPayload,
+      );
+    const campaignActivationResponses = await Promise.all([
+      runtime.handler.handle(createConversationMutationRequest(
+        "campaigns.activate",
+        campaignActivationPayload,
+        campaignActivationIdempotencyKey,
+      )),
+      runtime.handler.handle(createConversationMutationRequest(
+        "campaigns.activate",
+        campaignActivationPayload,
+        campaignActivationIdempotencyKey,
+      )),
+    ]);
+    const campaignActivationBodies = await Promise.all(
+      campaignActivationResponses.map((candidate) => candidate.json()),
+    );
+    assert.deepEqual(
+      campaignActivationResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      campaignActivationBodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.equal(
+      campaignActivationBodies[0].data.campaign.status,
+      "scheduled",
+    );
+
+    const campaignMutationEvidence = await pool.query(
+      `SELECT
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts
+          WHERE operation IN (
+            'campaigns.snapshot.save',
+            'campaigns.activate'
+          )) AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs
+          WHERE action IN (
+            'campaigns.snapshot.save',
+            'campaigns.activate'
+          )) AS audits,
+         campaign.status,
+         campaign.version,
+         campaign.recipient_count AS "recipientCount"
+       FROM campaigns AS campaign
+       WHERE campaign.tenant_id = 1
+         AND campaign.campaign_key = $1`,
+      [runtimeCampaignKey],
+    );
+    assert.deepEqual(campaignMutationEvidence.rows, [{
+      receipts: 2,
+      audits: 2,
+      status: "scheduled",
+      version: 2,
+      recipientCount:
+        campaignSnapshotBodies[0].data.campaign.recipientCount,
+    }]);
+    assert.doesNotMatch(
+      JSON.stringify({
+        campaignDirectoryBody,
+        campaignSnapshotBodies,
+        campaignActivationBodies,
+      }),
+      /tenantId|externalUserId|metaTemplateId|driver-integration-owner/,
+    );
+  } finally {
+    await runtime.close();
+  }
+}
+
+async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
+  connectionString,
+  pool,
+) {
+  const externalUserId = "driver-onboarding-owner";
+  const runtime = await createPostgresIntegrationApiRuntime(
+    connectionString,
+    externalUserId,
+    [],
+    "driver-onboarding-owner@example.com",
+    false,
+    "org_driver_onboarding",
+  );
+  const compactJwt = "header.payload.signature";
+  const createApiRequest = (
+    operation,
+    requestKind,
+    payload,
+    idempotencyKey,
+  ) => new Request(
+    new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${compactJwt}`,
+        "content-type": "application/json",
+        [VERCEL_OIDC_HEADER]: compactJwt,
+      },
+      body: JSON.stringify({
+        contractVersion: RAILWAY_API_CONTRACT_VERSION,
+        operation,
+        requestKind,
+        idempotencyKey,
+        payload,
+      }),
+    },
+  );
+
+  try {
+    const initialResponse = await runtime.handler.handle(
+      createApiRequest(
+        "onboarding.business-profile.read",
+        "query",
+        {},
+        null,
+      ),
+    );
+    assert.equal(initialResponse.status, 200);
+    assert.deepEqual((await initialResponse.json()).data, {
+      profile: null,
+    });
+
+    const profilePayload = Object.freeze({
+      businessName: "Onboarding integration",
+      timezone: "Asia/Jerusalem",
+      interfaceLanguage: "he",
+    });
+    const idempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "onboarding.business-profile.save",
+        profilePayload,
+      );
+    const responses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        "onboarding.business-profile.save",
+        "mutation",
+        profilePayload,
+        idempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        "onboarding.business-profile.save",
+        "mutation",
+        profilePayload,
+        idempotencyKey,
+      )),
+    ]);
+    const bodies = await Promise.all(
+      responses.map((response) => response.json()),
+    );
+    assert.deepEqual(
+      responses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      bodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      bodies.map(({ data }) => data.createdTenant),
+      [true, true],
+    );
+    assert.deepEqual(bodies[0].data.profile, {
+      ...profilePayload,
+      version: 1,
+    });
+    assert.doesNotMatch(
+      JSON.stringify(bodies),
+      /tenantId|externalUserId|requestDigest|idempotencyKey|driver-onboarding-owner/,
+    );
+
+    const readResponse = await runtime.handler.handle(
+      createApiRequest(
+        "onboarding.business-profile.read",
+        "query",
+        {},
+        null,
+      ),
+    );
+    assert.equal(readResponse.status, 200);
+    assert.deepEqual((await readResponse.json()).data, {
+      profile: { ...profilePayload, version: 1 },
+    });
+
+    const evidence = await pool.query(
+      `SELECT
+         tenant.id AS "tenantId",
+         tenant.display_name AS "displayName",
+         profile.business_name AS "businessName",
+         profile.timezone,
+         profile.interface_language AS "interfaceLanguage",
+         profile.version AS "profileVersion",
+         (SELECT count(*)::integer
+          FROM tenant_memberships AS owner
+          WHERE owner.tenant_id = tenant.id
+            AND owner.external_user_id = $1
+            AND owner.role = 'owner'
+            AND owner.status = 'active') AS owners,
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts AS receipt
+          WHERE receipt.tenant_id = tenant.id
+            AND receipt.operation = 'onboarding.business-profile.save'
+            AND receipt.status = 'completed') AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs AS audit
+          WHERE audit.tenant_id = tenant.id
+            AND audit.action = 'onboarding.business-profile.save') AS audits,
+         (SELECT count(*)::integer
+          FROM audit_logs AS audit
+          WHERE audit.tenant_id = tenant.id
+            AND audit.action = 'tenant.provisioned') AS "provisioningAudits"
+       FROM tenants AS tenant
+       INNER JOIN tenant_memberships AS membership
+         ON membership.tenant_id = tenant.id
+       INNER JOIN business_profiles AS profile
+         ON profile.tenant_id = tenant.id
+       WHERE membership.external_user_id = $1`,
+      [externalUserId],
+    );
+    assert.deepEqual(evidence.rows, [{
+      tenantId: evidence.rows[0]?.tenantId,
+      displayName: profilePayload.businessName,
+      businessName: profilePayload.businessName,
+      timezone: profilePayload.timezone,
+      interfaceLanguage: profilePayload.interfaceLanguage,
+      profileVersion: 1,
+      owners: 1,
+      receipts: 1,
+      audits: 1,
+      provisioningAudits: 1,
+    }]);
+    const evidenceTenantId = Number(evidence.rows[0]?.tenantId);
+    assert.equal(
+      Number.isSafeInteger(evidenceTenantId) && evidenceTenantId > 0,
+      true,
+    );
+
+    await pool.query(
+      `UPDATE tenants
+       SET status = 'blocked', updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1`,
+      [evidenceTenantId],
+    );
+    const blockedReadResponse = await runtime.handler.handle(
+      createApiRequest(
+        "onboarding.business-profile.read",
+        "query",
+        {},
+        null,
+      ),
+    );
+    assert.equal(blockedReadResponse.status, 403);
+    assert.equal(
+      (await blockedReadResponse.json()).code,
+      "PERMISSION_DENIED",
+    );
+
+    const blockedPayload = Object.freeze({
+      ...profilePayload,
+      businessName: "Blocked onboarding update",
+    });
+    const blockedSaveResponse = await runtime.handler.handle(
+      createApiRequest(
+        "onboarding.business-profile.save",
+        "mutation",
+        blockedPayload,
+        await deriveRailwayApiDeterministicIdempotencyKey(
+          "onboarding.business-profile.save",
+          blockedPayload,
+        ),
+      ),
+    );
+    assert.equal(blockedSaveResponse.status, 403);
+    assert.equal(
+      (await blockedSaveResponse.json()).code,
+      "PERMISSION_DENIED",
+    );
+    const blockedEvidence = await pool.query(
+      `SELECT
+         profile.business_name AS "businessName",
+         profile.version,
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts AS receipt
+          WHERE receipt.tenant_id = profile.tenant_id
+            AND receipt.operation = 'onboarding.business-profile.save')
+           AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs AS audit
+          WHERE audit.tenant_id = profile.tenant_id
+            AND audit.action = 'onboarding.business-profile.save')
+           AS audits
+       FROM business_profiles AS profile
+       WHERE profile.tenant_id = $1`,
+      [evidenceTenantId],
+    );
+    assert.deepEqual(blockedEvidence.rows, [{
+      businessName: profilePayload.businessName,
+      version: 1,
+      receipts: 1,
+      audits: 1,
+    }]);
+  } finally {
+    await runtime.close();
+  }
+}
+
+async function verifyPostgresTenantSelectionHttpRuntime(
+  connectionString,
+  pool,
+) {
+  const externalUserId = "driver-tenant-selection-user";
+  const firstTenantId = await createTenant(
+    pool,
+    externalUserId,
+    "Tenant selection A",
+  );
+  const targetTenantId = await createTenant(
+    pool,
+    externalUserId,
+    "Tenant selection B",
+  );
+  const teamTargetExternalUserId = "driver-team-target";
+  const teamInvitationPublications = [];
+  await pool.query(
+    `INSERT INTO tenant_memberships (
+       tenant_id,
+       external_user_id,
+       role,
+       status,
+       version,
+       created_at,
+       updated_at
+     )
+     VALUES (
+       $1, $2, 'agent', 'active', 1,
+       '2026-08-17T08:00:00.000Z'::timestamptz,
+       '2026-08-17T08:00:00.000Z'::timestamptz
+     )`,
+    [targetTenantId, teamTargetExternalUserId],
+  );
+  await pool.query(
+    `UPDATE tenants
+     SET clerk_organization_id = 'org_driver_selection_target'
+     WHERE id = $1`,
+    [targetTenantId],
+  );
+  const runtime = await createPostgresIntegrationApiRuntime(
+    connectionString,
+    externalUserId,
+    teamInvitationPublications,
+    "driver-integration-owner@example.com",
+    false,
+    "org_driver_selection_target",
+  );
+  const compactJwt = "header.payload.signature";
+  const createApiRequest = (
+    operation,
+    requestKind,
+    payload,
+    idempotencyKey,
+  ) => new Request(
+    new URL(RAILWAY_API_ENDPOINT_PATH, "https://railway.example.com"),
+    {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${compactJwt}`,
+        "content-type": "application/json",
+        [VERCEL_OIDC_HEADER]: compactJwt,
+      },
+      body: JSON.stringify({
+        contractVersion: RAILWAY_API_CONTRACT_VERSION,
+        operation,
+        requestKind,
+        idempotencyKey,
+        payload,
+      }),
+    },
+  );
+
+  try {
+    const initialResponse = await runtime.handler.handle(
+      createApiRequest(
+        "tenant-selection.directory.read",
+        "query",
+        {},
+        null,
+      ),
+    );
+    assert.equal(initialResponse.status, 200);
+    const initialBody = await initialResponse.json();
+    assert.equal(initialBody.data.directory.version, 0);
+    assert.equal(initialBody.data.directory.selectionRequired, true);
+    assert.equal(initialBody.data.directory.options.length, 2);
+    assert.deepEqual(
+      initialBody.data.directory.options.map(({ displayName }) => displayName),
+      ["Tenant selection A", "Tenant selection B"],
+    );
+    assert.deepEqual(
+      initialBody.data.directory.options.map(({ selected }) => selected),
+      [false, false],
+    );
+    assert.doesNotMatch(
+      JSON.stringify(initialBody),
+      /tenantId|externalUserId|driver-tenant-selection-user/,
+    );
+
+    const targetOption = initialBody.data.directory.options.find(
+      ({ displayName }) => displayName === "Tenant selection B",
+    );
+    assert.match(
+      targetOption?.selectionKey ?? "",
+      /^tenant_selection_option_v1_[a-f0-9]{64}$/,
+    );
+    const payload = Object.freeze({
+      selectionKey: targetOption.selectionKey,
+      expectedVersion: 0,
+    });
+    const idempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "tenant-selection.save",
+        payload,
+      );
+    const responses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        "tenant-selection.save",
+        "mutation",
+        payload,
+        idempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        "tenant-selection.save",
+        "mutation",
+        payload,
+        idempotencyKey,
+      )),
+    ]);
+    const bodies = await Promise.all(
+      responses.map((response) => response.json()),
+    );
+    assert.deepEqual(
+      responses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      bodies.map(({ data }) => data.replayed).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      bodies.map(({ data }) => data.unchanged).sort(),
+      [false, true],
+    );
+    assert.deepEqual(
+      bodies.map(({ data }) => data.version),
+      [1, 1],
+    );
+    assert.doesNotMatch(
+      JSON.stringify(bodies),
+      /tenantId|externalUserId|requestDigest|driver-tenant-selection-user/,
+    );
+
+    const selectedResponse = await runtime.handler.handle(
+      createApiRequest(
+        "tenant-selection.directory.read",
+        "query",
+        {},
+        null,
+      ),
+    );
+    assert.equal(selectedResponse.status, 200);
+    const selectedBody = await selectedResponse.json();
+    assert.equal(selectedBody.data.directory.version, 1);
+    assert.equal(selectedBody.data.directory.selectionRequired, false);
+    assert.deepEqual(
+      selectedBody.data.directory.options.map(
+        ({ displayName, selected }) => ({ displayName, selected }),
+      ),
+      [
+        { displayName: "Tenant selection A", selected: false },
+        { displayName: "Tenant selection B", selected: true },
+      ],
+    );
+
+    const teamResponse = await runtime.handler.handle(
+      createApiRequest(
+        "team.directory.read",
+        "query",
+        {},
+        null,
+      ),
+    );
+    assert.equal(teamResponse.status, 200);
+    const teamBody = await teamResponse.json();
+    assert.equal(teamBody.data.directory.identityStatus, "unavailable");
+    assert.equal(teamBody.data.directory.members.length, 2);
+    assert.deepEqual(
+      teamBody.data.directory.members.map(
+        ({ role, currentUser, displayName, primaryEmail }) => ({
+          role,
+          currentUser,
+          displayName,
+          primaryEmail,
+        }),
+      ),
+      [{
+        role: "owner",
+        currentUser: true,
+        displayName: null,
+        primaryEmail: null,
+      }, {
+        role: "agent",
+        currentUser: false,
+        displayName: null,
+        primaryEmail: null,
+      }],
+    );
+    assert.match(
+      teamBody.data.directory.members[0].memberKey,
+      /^team_member_v1_[a-f0-9]{64}$/,
+    );
+    assert.doesNotMatch(
+      JSON.stringify(teamBody),
+      /tenantId|externalUserId|driver-tenant-selection-user/,
+    );
+
+    const membershipPayload = Object.freeze({
+      memberKey: deriveTeamMemberKey(
+        targetTenantId,
+        teamTargetExternalUserId,
+      ),
+      expectedVersion: 1,
+      role: "manager",
+    });
+    const membershipIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "team.membership.role.change",
+        membershipPayload,
+      );
+    const membershipResponses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        "team.membership.role.change",
+        "mutation",
+        membershipPayload,
+        membershipIdempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        "team.membership.role.change",
+        "mutation",
+        membershipPayload,
+        membershipIdempotencyKey,
+      )),
+    ]);
+    const membershipBodies = await Promise.all(
+      membershipResponses.map((response) => response.json()),
+    );
+    assert.deepEqual(
+      membershipResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      membershipBodies.map(({ data }) => data.outcome).sort(),
+      ["unchanged", "updated"],
+    );
+    assert.deepEqual(
+      membershipBodies.map(({ data }) => data.membership),
+      [
+        {
+          memberKey: membershipPayload.memberKey,
+          role: "manager",
+          status: "active",
+          version: 2,
+        },
+        {
+          memberKey: membershipPayload.memberKey,
+          role: "manager",
+          status: "active",
+          version: 2,
+        },
+      ],
+    );
+    assert.doesNotMatch(
+      JSON.stringify(membershipBodies),
+      /tenantId|externalUserId|driver-team-target|operationKey|eventKey/,
+    );
+    const membershipEvidence = await pool.query(
+      `SELECT
+         membership.role,
+         membership.version,
+         (SELECT count(*)::integer
+          FROM tenant_membership_events AS event
+          WHERE event.tenant_id = membership.tenant_id
+            AND event.target_external_user_id = membership.external_user_id
+            AND event.event_type = 'role-changed') AS events
+       FROM tenant_memberships AS membership
+       WHERE membership.tenant_id = $1
+         AND membership.external_user_id = $2`,
+      [targetTenantId, teamTargetExternalUserId],
+    );
+    assert.deepEqual(membershipEvidence.rows, [{
+      role: "manager",
+      version: 2,
+      events: 1,
+    }]);
+
+    const invitationPayload = Object.freeze({
+      email: "driver-invited-member@example.com",
+      role: "agent",
+    });
+    const invitationIdempotencyKey =
+      await deriveRailwayApiDeterministicIdempotencyKey(
+        "team.invitation.request",
+        invitationPayload,
+      );
+    const invitationResponses = await Promise.all([
+      runtime.handler.handle(createApiRequest(
+        "team.invitation.request",
+        "mutation",
+        invitationPayload,
+        invitationIdempotencyKey,
+      )),
+      runtime.handler.handle(createApiRequest(
+        "team.invitation.request",
+        "mutation",
+        invitationPayload,
+        invitationIdempotencyKey,
+      )),
+    ]);
+    const invitationBodies = await Promise.all(
+      invitationResponses.map((response) => response.json()),
+    );
+    assert.deepEqual(
+      invitationResponses.map(({ status }) => status),
+      [200, 200],
+    );
+    assert.deepEqual(
+      invitationBodies.map(({ data }) => data.status).sort(),
+      ["already-pending", "queued"],
+    );
+    assert.equal(teamInvitationPublications.length, 2);
+    assert.equal(
+      new Set(
+        teamInvitationPublications.map(({ deliveryKey }) => deliveryKey),
+      ).size,
+      1,
+    );
+    assert.equal(
+      teamInvitationPublications.every(
+        ({ tenantId }) => tenantId === targetTenantId,
+      ),
+      true,
+    );
+    assert.doesNotMatch(
+      JSON.stringify(invitationBodies),
+      /tenantId|externalUserId|email|invitationKey|deliveryKey|eventKey/,
+    );
+    const invitationEvidence = await pool.query(
+      `SELECT
+         invitation.status,
+         invitation.version,
+         (SELECT count(*)::integer
+          FROM team_invitation_events AS event
+          WHERE event.tenant_id = invitation.tenant_id
+            AND event.invitation_key = invitation.invitation_key
+            AND event.event_type = 'requested') AS events,
+         (SELECT count(*)::integer
+          FROM team_invitation_deliveries AS delivery
+          WHERE delivery.tenant_id = invitation.tenant_id
+            AND delivery.invitation_key = invitation.invitation_key) AS deliveries
+       FROM team_invitations AS invitation
+       WHERE invitation.tenant_id = $1
+         AND invitation.normalized_email = $2`,
+      [targetTenantId, invitationPayload.email],
+    );
+    assert.deepEqual(invitationEvidence.rows, [{
+      status: "pending",
+      version: 1,
+      events: 1,
+      deliveries: 1,
+    }]);
+
+    const invitationKeyEvidence = await pool.query(
+      `SELECT invitation_key AS "invitationKey"
+       FROM team_invitations
+       WHERE tenant_id = $1
+         AND normalized_email = $2`,
+      [targetTenantId, invitationPayload.email],
+    );
+    const acceptedInvitationKey =
+      invitationKeyEvidence.rows[0]?.invitationKey;
+    assert.match(
+      acceptedInvitationKey ?? "",
+      /^team_invitation_v1_[a-f0-9]{64}$/,
+    );
+    const inviteeExternalUserId = "driver-invited-member-user";
+    const acceptanceRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString,
+      inviteeExternalUserId,
+      [],
+      invitationPayload.email,
+    );
+
+    try {
+      const acceptancePayload = Object.freeze({
+        invitationKey: acceptedInvitationKey,
+      });
+      const acceptanceIdempotencyKey =
+        await deriveRailwayApiDeterministicIdempotencyKey(
+          "team.invitation.accept",
+          acceptancePayload,
+        );
+      const acceptanceResponses = await Promise.all([
+        acceptanceRuntime.handler.handle(createApiRequest(
+          "team.invitation.accept",
+          "mutation",
+          acceptancePayload,
+          acceptanceIdempotencyKey,
+        )),
+        acceptanceRuntime.handler.handle(createApiRequest(
+          "team.invitation.accept",
+          "mutation",
+          acceptancePayload,
+          acceptanceIdempotencyKey,
+        )),
+      ]);
+      const acceptanceBodies = await Promise.all(
+        acceptanceResponses.map((response) => response.json()),
+      );
+      assert.deepEqual(
+        acceptanceResponses.map(({ status }) => status),
+        [200, 200],
+      );
+      assert.deepEqual(
+        acceptanceBodies.map(({ data }) => data.status).sort(),
+        ["accepted", "already-accepted"],
+      );
+      assert.doesNotMatch(
+        JSON.stringify(acceptanceBodies),
+        /tenantId|externalUserId|verifiedEmail|invitationKey|acceptanceKey/,
+      );
+
+      const acceptanceEvidence = await pool.query(
+        `SELECT
+           invitation.status,
+           invitation.version,
+           membership.role,
+           membership.status AS "membershipStatus",
+           membership.version AS "membershipVersion",
+           delivery.status AS "deliveryStatus",
+           (SELECT count(*)::integer
+            FROM team_invitation_acceptances AS acceptance
+            WHERE acceptance.invitation_key = invitation.invitation_key)
+             AS acceptances,
+           (SELECT count(*)::integer
+            FROM tenant_memberships AS persisted_membership
+            WHERE persisted_membership.tenant_id = invitation.tenant_id
+              AND persisted_membership.external_user_id = $3)
+             AS memberships
+         FROM team_invitations AS invitation
+         INNER JOIN tenant_memberships AS membership
+           ON membership.tenant_id = invitation.tenant_id
+          AND membership.external_user_id = $3
+         INNER JOIN team_invitation_deliveries AS delivery
+           ON delivery.tenant_id = invitation.tenant_id
+          AND delivery.invitation_key = invitation.invitation_key
+         WHERE invitation.tenant_id = $1
+           AND invitation.invitation_key = $2`,
+        [targetTenantId, acceptedInvitationKey, inviteeExternalUserId],
+      );
+      assert.deepEqual(acceptanceEvidence.rows, [{
+        status: "pending",
+        version: 2,
+        role: "agent",
+        membershipStatus: "active",
+        membershipVersion: 1,
+        deliveryStatus: "cancelled",
+        acceptances: 1,
+        memberships: 1,
+      }]);
+    } finally {
+      await acceptanceRuntime.close();
+    }
+
+    const evidence = await pool.query(
+      `SELECT
+         selection.tenant_id AS "tenantId",
+         selection.version,
+         (SELECT count(*)::integer
+          FROM railway_api_mutation_receipts AS receipt
+          WHERE receipt.tenant_id = selection.tenant_id
+            AND receipt.operation = 'tenant-selection.save'
+            AND receipt.status = 'completed') AS receipts,
+         (SELECT count(*)::integer
+          FROM audit_logs AS audit
+          WHERE audit.tenant_id = selection.tenant_id
+            AND audit.action = 'tenant-selection.save'
+            AND audit.target_type = 'tenant_selection') AS audits
+       FROM tenant_selections AS selection
+       WHERE selection.external_user_id = $1`,
+      [externalUserId],
+    );
+    assert.deepEqual(
+      evidence.rows.map(({ tenantId, ...row }) => ({
+        tenantId: Number(tenantId),
+        ...row,
+      })),
+      [{
+        tenantId: targetTenantId,
+        version: 1,
+        receipts: 1,
+        audits: 1,
+      }],
+    );
+    assert.notEqual(firstTenantId, targetTenantId);
   } finally {
     await runtime.close();
   }
@@ -4783,6 +7281,1088 @@ async function verifyWorkerSchedulerLease(pool, foundation) {
   );
 }
 
+async function verifyBotReplyStagingSafetyEvidence(
+  pool,
+  foundation,
+  tenantId,
+) {
+  const approvedAt = "2026-08-17T08:37:00.000Z";
+  const authorization = Object.freeze({
+    tenantId,
+    authorizationVersion: 1,
+    status: "approved",
+    connectionVersion: 2,
+    policyVersion: 3,
+    recipientFingerprint: `sha256:${"3".repeat(64)}`,
+    recipientOptInRecordedAt: "2026-08-17T08:30:00.000Z",
+    recipientExpiresAt: "2026-08-18T08:30:00.000Z",
+    rateLimitApprovedAt: "2026-08-17T08:35:00.000Z",
+    rateLimitExpiresAt: "2026-08-18T08:35:00.000Z",
+    rateLimitMethodFingerprint: `sha256:${"2".repeat(64)}`,
+    actorExternalUserId: "driver-integration-owner",
+    recordedAt: approvedAt,
+  });
+  const concurrent = await Promise.all([
+    foundation.botReplyStagingSafety.record(authorization),
+    foundation.botReplyStagingSafety.record(authorization),
+  ]);
+  assert.equal(concurrent[0].eventKey, concurrent[1].eventKey);
+  assert.equal(concurrent[0].authorizationVersion, 1);
+
+  const deterministicSafety =
+    createPostgresBotReplyStagingSafetyRepository({
+      queries: createNodePostgresQueryExecutor(pool),
+      clock: {
+        now: () => new Date("2026-08-17T08:38:00.000Z"),
+      },
+    });
+  assert.deepEqual(await deterministicSafety.read(tenantId), {
+    environment: "staging",
+    connectionMode: "approved-staging-waba",
+    connectionStatus: "connected",
+    connectionVersion: 2,
+    policyVersion: 3,
+    deliveryState: "enabled",
+    policyEvidenceExpiresAt: "2026-08-18T08:31:00.000Z",
+    graphApiVersion: "v21.0",
+    credentialSource: "encrypted-vault",
+    executionBoundary: "railway-bullmq-bot-reply-worker",
+    evidenceSource: "durable-postgres",
+    recipientAuthorization: {
+      status: "approved",
+      optInRecorded: true,
+      expiresAt: authorization.recipientExpiresAt,
+      recipientFingerprint: authorization.recipientFingerprint,
+    },
+    rateLimitTestApproval: {
+      status: "approved",
+      approvedBy: "tal",
+      approvedAt: authorization.rateLimitApprovedAt,
+      expiresAt: authorization.rateLimitExpiresAt,
+      methodFingerprint: authorization.rateLimitMethodFingerprint,
+    },
+  });
+
+  const revoked = await foundation.botReplyStagingSafety.record({
+    ...authorization,
+    authorizationVersion: 2,
+    status: "revoked",
+    recordedAt: "2026-08-17T08:39:00.000Z",
+  });
+  assert.equal(revoked.status, "revoked");
+  assert.equal(await deterministicSafety.read(tenantId), null);
+
+  const persisted = await pool.query(
+    `SELECT
+       count(*)::integer AS count,
+       max(authorization_version)::integer AS latest_version
+     FROM bot_reply_staging_authorization_events
+     WHERE tenant_id = $1`,
+    [tenantId],
+  );
+  assert.deepEqual(persisted.rows, [{ count: 2, latest_version: 2 }]);
+
+  const audits = await pool.query(
+    `SELECT action, metadata_json AS metadata
+     FROM audit_logs
+     WHERE tenant_id = $1
+       AND target_type = 'bot-reply-staging-authorization'
+     ORDER BY created_at`,
+    [tenantId],
+  );
+  assert.deepEqual(audits.rows.map(({ action }) => action), [
+    "bot-reply-staging.authorization-approved",
+    "bot-reply-staging.authorization-revoked",
+  ]);
+  assert.deepEqual(audits.rows.map(({ metadata }) => metadata.status), [
+    "approved",
+    "revoked",
+  ]);
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE bot_reply_staging_authorization_events
+       SET actor_external_user_id = 'tampered'
+       WHERE event_key = $1`,
+      [revoked.eventKey],
+    ),
+    /authorization events are immutable/,
+  );
+  await assert.rejects(
+    pool.query(
+      `DELETE FROM audit_logs
+       WHERE tenant_id = $1
+         AND action = 'bot-reply-staging.authorization-approved'`,
+      [tenantId],
+    ),
+    /authorization audit is immutable/,
+  );
+}
+
+async function verifyBotReplyStagingRunLedger(
+  pool,
+  foundation,
+  tenantId,
+) {
+  const stagingPolicy =
+    await foundation.whatsappDeliveryPolicies.findLatestPolicyEvent(tenantId);
+  assert.equal(stagingPolicy?.deliveryState, "enabled");
+  const buttonReplyProjection = await pool.query(
+    `SELECT
+       message_key AS "messageKey",
+       subject_delivery_key AS "subjectDeliveryKey",
+       occurred_at AS "occurredAt"
+     FROM inbound_button_reply_events
+     WHERE tenant_id = $1
+     ORDER BY occurred_at DESC, message_key
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(buttonReplyProjection.rowCount, 1);
+  const buttonReplySubject = buttonReplyProjection.rows[0];
+  const buttonReplyObservedAt = new Date(
+    buttonReplySubject.occurredAt,
+  ).toISOString();
+  const webhookProjection = await pool.query(
+    `SELECT
+       delivery_key AS "deliveryKey",
+       provider_status AS "providerStatus",
+       last_status_event_at AS "lastStatusEventAt",
+       updated_at AS "updatedAt"
+     FROM bot_reply_delivery_provider_links
+     WHERE tenant_id = $1
+       AND provider_status IN ('sent', 'delivered', 'read')
+       AND last_status_event_key IS NOT NULL
+     ORDER BY last_status_event_at DESC, delivery_key
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(webhookProjection.rowCount, 1);
+  const webhookSubject = webhookProjection.rows[0];
+  const webhookObservedAt = new Date(
+    webhookSubject.lastStatusEventAt,
+  ).toISOString();
+  const webhookStoredAt = new Date(
+    webhookSubject.updatedAt,
+  ).toISOString();
+  const providerDeferralProjection = await pool.query(
+    `SELECT
+       delivery_key AS "deliveryKey",
+       provider_error_code AS "providerErrorCode",
+       cooldown_scope AS "cooldownScope",
+       retry_after_seconds AS "retryAfterSeconds",
+       attempted_at AS "attemptedAt",
+       retry_at AS "retryAt"
+     FROM bot_reply_provider_deferral_events
+     WHERE tenant_id = $1
+     ORDER BY attempted_at DESC, event_key
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(providerDeferralProjection.rowCount, 1);
+  const providerDeferralSubject = providerDeferralProjection.rows[0];
+  const providerAttemptedAt = new Date(
+    providerDeferralSubject.attemptedAt,
+  ).toISOString();
+  const providerRetryAt = new Date(
+    providerDeferralSubject.retryAt,
+  ).toISOString();
+  const windowRejectionProjection = await pool.query(
+    `SELECT
+       delivery_key AS "deliveryKey",
+       attempted_at AS "attemptedAt"
+     FROM bot_reply_service_window_rejection_events
+     WHERE tenant_id = $1
+     ORDER BY attempted_at DESC, event_key
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(windowRejectionProjection.rowCount, 1);
+  const windowRejectionSubject = windowRejectionProjection.rows[0];
+  const windowRejectionObservedAt = new Date(
+    windowRejectionSubject.attemptedAt,
+  ).toISOString();
+  const latestObservedAt = new Date(Math.max(
+    Date.parse(webhookObservedAt),
+    Date.parse(providerAttemptedAt),
+    Date.parse(buttonReplyObservedAt),
+    Date.parse(windowRejectionObservedAt),
+    Date.parse(webhookStoredAt),
+  )).toISOString();
+  const webhookClockDelayMilliseconds =
+    Date.parse(latestObservedAt) - Date.now();
+  assert.equal(webhookClockDelayMilliseconds <= 5_000, true);
+  if (webhookClockDelayMilliseconds >= 0) {
+    await new Promise((resolve) =>
+      setTimeout(resolve, webhookClockDelayMilliseconds + 1)
+    );
+  }
+  const requestedAt = new Date(
+    Math.min(
+      Date.parse(webhookObservedAt),
+      Date.parse(providerAttemptedAt),
+      Date.parse(buttonReplyObservedAt),
+      Date.parse(windowRejectionObservedAt),
+    ) -
+      120_000,
+  ).toISOString();
+  const runKey = `bot_reply_staging_run_v1_${"9".repeat(64)}`;
+  const claimedAt = new Date(
+    Date.parse(webhookObservedAt) - 60_000,
+  ).toISOString();
+  const leaseExpiresAt = new Date(
+    Date.parse(latestObservedAt) + 1_800_000,
+  ).toISOString();
+  const completedAt = new Date(
+    Date.parse(latestObservedAt) + 60_000,
+  ).toISOString();
+  const run = Object.freeze({
+    runKey,
+    targetTenantId: tenantId,
+    expectedConnectionVersion: stagingPolicy.connectionVersion,
+    expectedPolicyVersion: stagingPolicy.policyVersion,
+    releaseId: `connect_release_v1_${"8".repeat(64)}`,
+    commitSha: "7".repeat(40),
+    artifactDigest: `sha256:${"6".repeat(64)}`,
+    graphApiVersion: "v24.0",
+    requestedAt,
+    recipientFingerprint: `sha256:${"5".repeat(64)}`,
+    rateLimitMethodFingerprint: `sha256:${"4".repeat(64)}`,
+    actorExternalUserId: "driver-integration-owner",
+  });
+  const requestDigest = deriveBotReplyStagingDurableRequestDigest(run);
+  const auditKey = deriveBotReplyStagingDurableAuditKey(
+    runKey,
+    requestDigest,
+  );
+  const claimInput = Object.freeze({
+    run,
+    requestDigest,
+    auditKey,
+    claimedAt,
+    leaseExpiresAt,
+  });
+
+  const claims = await Promise.all([
+    foundation.botReplyStagingRuns.claim(claimInput),
+    foundation.botReplyStagingRuns.claim(claimInput),
+  ]);
+  assert.deepEqual(
+    claims.map(({ outcome }) => outcome).sort(),
+    ["claimed", "in-progress"],
+  );
+  const claimed = claims.find(({ outcome }) => outcome === "claimed");
+  assert.equal(claimed?.claimVersion, 1);
+  assert.equal(claimed?.auditKey, auditKey);
+  assert.deepEqual(
+    await foundation.botReplyStagingRuns.read({ runKey, requestDigest }),
+    {
+      outcome: "running",
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    },
+  );
+
+  const subject = await pool.query(
+    `SELECT
+       delivery.delivery_key AS "deliveryKey",
+       delivery.accepted_at AS "acceptedAt"
+     FROM bot_reply_deliveries AS delivery
+     INNER JOIN bot_reply_delivery_provider_links AS link
+       ON link.delivery_key = delivery.delivery_key
+      AND link.tenant_id = delivery.tenant_id
+     WHERE delivery.tenant_id = $1
+       AND delivery.status = 'accepted'
+       AND delivery.reply_json ->> 'kind' = 'text'
+     ORDER BY delivery.accepted_at DESC, delivery.delivery_key
+     LIMIT 1`,
+    [tenantId],
+  );
+  assert.equal(subject.rowCount, 1);
+  const deliveryKey = subject.rows[0]?.deliveryKey;
+  assert.match(deliveryKey, /^bot_reply_delivery_v1_[0-9a-f]{64}$/);
+  const operationKey = `bot_reply_staging_step_v1_${"3".repeat(64)}`;
+  const observedAt = new Date(subject.rows[0]?.acceptedAt).toISOString();
+  const scenarioContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey,
+    deliveryKey,
+    scenario: "text-send",
+    expectedProviderErrorCode: null,
+  });
+  const scenarioCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: "text-send",
+    runKey,
+    operationKey,
+    deliveryKey,
+    subjectDeliveryKey: deliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "dispatch",
+    serviceWindowOpenedAt: "2026-08-16T10:11:00.000Z",
+    serviceWindowExpiresAt: "2026-08-17T10:11:00.000Z",
+    caseFingerprint: `sha256:${"1".repeat(64)}`,
+  });
+  const observationRecord = Object.freeze({
+    runKey,
+    claimVersion: 1,
+    operationKey,
+    deliveryKey,
+    subjectDeliveryKey: deliveryKey,
+    recipientFingerprint: run.recipientFingerprint,
+    observedAt,
+    factKind: "scenario",
+    caseName: "text-send",
+    scenario: "text-send",
+    providerErrorCode: null,
+    dispatchOutcome: "accepted",
+  });
+  const observationWrite =
+    await foundation.botReplyStagingSendObservations.recordAcceptedSend(
+      scenarioContext,
+      scenarioCase,
+      { outcome: "accepted" },
+    );
+  assert.equal(observationWrite.outcome, "created");
+  const observationKey = observationWrite.eventKey;
+  assert.deepEqual(
+    await foundation.botReplyStagingSendObservations.recordAcceptedSend(
+      scenarioContext,
+      scenarioCase,
+      { outcome: "accepted" },
+    ),
+    { outcome: "unchanged", eventKey: observationKey },
+  );
+  await assert.rejects(
+    foundation.botReplyStagingObservationWriter.record({
+      ...observationRecord,
+      observedAt: new Date(Date.parse(observedAt) + 1_000).toISOString(),
+    }),
+    /conflicting staging observation/,
+  );
+  const scenarioFact = await foundation.botReplyStagingObservations.readScenario(
+    scenarioContext,
+    scenarioCase,
+  );
+  assert.equal(scenarioFact.dispatchOutcome, "accepted");
+  assert.equal(scenarioFact.observedAt, observedAt);
+  assert.match(scenarioFact.recordDigest, /^sha256:[0-9a-f]{64}$/);
+
+  const duplicateContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey: `bot_reply_staging_step_v1_${"a".repeat(64)}`,
+    deliveryKey: buttonReplySubject.subjectDeliveryKey,
+  });
+  const duplicateCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: "duplicate-safety",
+    runKey,
+    operationKey: duplicateContext.operationKey,
+    deliveryKey: duplicateContext.deliveryKey,
+    subjectDeliveryKey: duplicateContext.deliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "dispatch",
+    serviceWindowOpenedAt: null,
+    serviceWindowExpiresAt: null,
+    caseFingerprint: `sha256:${"a".repeat(64)}`,
+  });
+  const duplicateDispatches = Object.freeze([
+    Object.freeze({ outcome: "accepted" }),
+    Object.freeze({ outcome: "duplicate" }),
+  ]);
+  const duplicateWrites = await Promise.all([
+    foundation.botReplyStagingSendObservations.recordDuplicateSafety(
+      duplicateContext,
+      duplicateCase,
+      duplicateDispatches,
+    ),
+    foundation.botReplyStagingSendObservations.recordDuplicateSafety(
+      duplicateContext,
+      duplicateCase,
+      duplicateDispatches,
+    ),
+  ]);
+  assert.deepEqual(
+    duplicateWrites.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+  const duplicateFact =
+    await foundation.botReplyStagingObservations.readDuplicateSafety(
+      duplicateContext,
+      duplicateCase,
+    );
+  assert.equal(duplicateFact.queueDeliveryCount, 2);
+  assert.equal(duplicateFact.providerRequestCount, 1);
+  assert.deepEqual(
+    duplicateFact.dispatchOutcomes,
+    ["accepted", "duplicate"],
+  );
+
+  const buttonReplyContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey: `bot_reply_staging_step_v1_${"0".repeat(64)}`,
+    deliveryKey: `bot_reply_delivery_v1_${"0".repeat(64)}`,
+    scenario: "button-reply",
+    expectedProviderErrorCode: null,
+  });
+  const buttonReplyCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: "button-reply",
+    runKey,
+    operationKey: buttonReplyContext.operationKey,
+    deliveryKey: buttonReplyContext.deliveryKey,
+    subjectDeliveryKey: buttonReplySubject.subjectDeliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "observe-only",
+    serviceWindowOpenedAt: null,
+    serviceWindowExpiresAt: null,
+    caseFingerprint: `sha256:${"0".repeat(64)}`,
+  });
+  const buttonReplyWrites = await Promise.all([
+    foundation.botReplyStagingSendObservations.recordButtonReply(
+      buttonReplyContext,
+      buttonReplyCase,
+    ),
+    foundation.botReplyStagingSendObservations.recordButtonReply(
+      buttonReplyContext,
+      buttonReplyCase,
+    ),
+  ]);
+  assert.deepEqual(
+    buttonReplyWrites.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+  const buttonReplyFact =
+    await foundation.botReplyStagingObservations.readScenario(
+      buttonReplyContext,
+      buttonReplyCase,
+    );
+  assert.equal(buttonReplyFact.scenario, "button-reply");
+  assert.equal(buttonReplyFact.dispatchOutcome, null);
+  assert.equal(buttonReplyFact.observedAt, buttonReplyObservedAt);
+
+  const windowRejectionContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey: `bot_reply_staging_step_v1_${"b".repeat(64)}`,
+    deliveryKey: windowRejectionSubject.deliveryKey,
+    scenario: "customer-window-expired",
+    expectedProviderErrorCode: 131047,
+  });
+  const windowRejectionCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: "customer-window-expired",
+    runKey,
+    operationKey: windowRejectionContext.operationKey,
+    deliveryKey: windowRejectionSubject.deliveryKey,
+    subjectDeliveryKey: windowRejectionSubject.deliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "dispatch",
+    serviceWindowOpenedAt: null,
+    serviceWindowExpiresAt: null,
+    caseFingerprint: `sha256:${"b".repeat(64)}`,
+  });
+  const windowObservationWrites = await Promise.all([
+    foundation.botReplyStagingSendObservations
+      .recordServiceWindowRejection(
+        windowRejectionContext,
+        windowRejectionCase,
+        { outcome: "rejected" },
+      ),
+    foundation.botReplyStagingSendObservations
+      .recordServiceWindowRejection(
+        windowRejectionContext,
+        windowRejectionCase,
+        { outcome: "rejected" },
+      ),
+  ]);
+  assert.deepEqual(
+    windowObservationWrites.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+  const windowRejectionFact =
+    await foundation.botReplyStagingObservations.readScenario(
+      windowRejectionContext,
+      windowRejectionCase,
+    );
+  assert.equal(windowRejectionFact.providerErrorCode, 131047);
+  assert.equal(windowRejectionFact.dispatchOutcome, "rejected");
+  assert.equal(
+    windowRejectionFact.observedAt,
+    windowRejectionObservedAt,
+  );
+
+  const webhookScenario = webhookSubject.providerStatus === "sent"
+    ? "status-sent"
+    : webhookSubject.providerStatus === "delivered"
+      ? "status-delivered"
+      : "status-read";
+  const webhookContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey: `bot_reply_staging_step_v1_${"4".repeat(64)}`,
+    deliveryKey: `bot_reply_delivery_v1_${"2".repeat(64)}`,
+    scenario: webhookScenario,
+    expectedProviderErrorCode: null,
+  });
+  const webhookCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: webhookScenario,
+    runKey,
+    operationKey: webhookContext.operationKey,
+    deliveryKey: webhookContext.deliveryKey,
+    subjectDeliveryKey: webhookSubject.deliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "observe-only",
+    serviceWindowOpenedAt: null,
+    serviceWindowExpiresAt: null,
+    caseFingerprint: `sha256:${"0".repeat(64)}`,
+  });
+  const webhookWrite =
+    await foundation.botReplyStagingWebhookObservations.recordStatus(
+      webhookContext,
+      webhookCase,
+    );
+  assert.equal(webhookWrite.outcome, "created");
+  assert.deepEqual(
+    await foundation.botReplyStagingWebhookObservations.recordStatus(
+      webhookContext,
+      webhookCase,
+    ),
+    { outcome: "unchanged", eventKey: webhookWrite.eventKey },
+  );
+  const webhookFact =
+    await foundation.botReplyStagingObservations.readScenario(
+      webhookContext,
+      webhookCase,
+    );
+  assert.equal(webhookFact.scenario, webhookScenario);
+  assert.equal(webhookFact.observedAt, webhookStoredAt);
+  assert.equal(webhookFact.dispatchOutcome, null);
+  assert.match(webhookFact.recordDigest, /^sha256:[0-9a-f]{64}$/);
+  const providerCaseName = providerDeferralSubject.providerErrorCode === 130429
+    ? "provider-retry"
+    : "pair-limit";
+  assert.equal(
+    providerCaseName === "provider-retry"
+      ? providerDeferralSubject.cooldownScope === "sender"
+      : providerDeferralSubject.cooldownScope === "pair",
+    true,
+  );
+  const providerContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey: `bot_reply_staging_step_v1_${"5".repeat(64)}`,
+    deliveryKey: providerDeferralSubject.deliveryKey,
+  });
+  const providerCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: providerCaseName,
+    runKey,
+    operationKey: providerContext.operationKey,
+    deliveryKey: providerContext.deliveryKey,
+    subjectDeliveryKey: providerContext.deliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "dispatch",
+    serviceWindowOpenedAt: new Date(
+      Date.parse(providerAttemptedAt) - 3_600_000,
+    ).toISOString(),
+    serviceWindowExpiresAt: new Date(
+      Date.parse(providerAttemptedAt) + 82_800_000,
+    ).toISOString(),
+    caseFingerprint: `sha256:${"8".repeat(64)}`,
+  });
+  const providerDispatch = Object.freeze({
+    outcome: "deferred",
+    retryAt: providerRetryAt,
+  });
+  const providerWrite = await foundation
+    .botReplyStagingProviderDeferralObservations.recordDeferral(
+      providerContext,
+      providerCase,
+      providerDispatch,
+    );
+  assert.equal(providerWrite.outcome, "created");
+  assert.deepEqual(
+    await foundation.botReplyStagingProviderDeferralObservations.recordDeferral(
+      providerContext,
+      providerCase,
+      providerDispatch,
+    ),
+    { outcome: "unchanged", eventKey: providerWrite.eventKey },
+  );
+  const providerFact = providerCaseName === "provider-retry"
+    ? await foundation.botReplyStagingObservations.readProviderRetry(
+      providerContext,
+      providerCase,
+    )
+    : await foundation.botReplyStagingObservations.readPairLimit(
+      providerContext,
+      providerCase,
+    );
+  assert.equal(
+    providerFact.providerErrorCode,
+    providerDeferralSubject.providerErrorCode,
+  );
+  assert.equal(providerFact.observedAt, providerAttemptedAt);
+  if (providerCaseName === "provider-retry") {
+    assert.equal(
+      providerFact.retryAfterSeconds,
+      providerDeferralSubject.retryAfterSeconds,
+    );
+  }
+  assert.match(providerFact.recordDigest, /^sha256:[0-9a-f]{64}$/);
+
+  const killSwitchSource = await pool.query(
+    `SELECT
+       delivery.conversation_key AS "conversationKey",
+       delivery.bot_flow_key AS "botFlowKey",
+       delivery.bot_flow_version_key AS "botFlowVersionKey",
+       delivery.sender_phone_number_id AS "senderPhoneNumberId",
+       delivery.recipient_phone_e164 AS "recipientPhoneNumber",
+       delivery.reply_index AS "replyIndex"
+     FROM bot_reply_deliveries AS delivery
+     WHERE delivery.tenant_id = $1
+       AND delivery.delivery_key = $2
+     LIMIT 1`,
+    [tenantId, deliveryKey],
+  );
+  assert.equal(killSwitchSource.rowCount, 1);
+  const killSource = killSwitchSource.rows[0];
+  const killInboundAt = new Date().toISOString();
+  const killInboundMessageKey = `message_v1_${"c7".repeat(32)}`;
+  const killContact = await foundation.conversations.resolveInboundContact(
+    tenantId,
+    killSource.recipientPhoneNumber,
+  );
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey: killSource.conversationKey,
+    messageKey: killInboundMessageKey,
+    contactId: killContact.contactId,
+    providerMessageId: "driver-kill-switch-inbound",
+    contentKind: "text",
+    textContent: "Kill switch integration",
+    occurredAt: killInboundAt,
+  }));
+  const killReply = Object.freeze({
+    kind: "text",
+    text: "Kill switch must prevent this provider request",
+  });
+  const killReplyIndex = killSource.replyIndex + 100;
+  const killDeliveryKey = await deriveBotReplyDeliveryKey(tenantId, {
+    conversationKey: killSource.conversationKey,
+    inboundMessageKey: killInboundMessageKey,
+    botFlowVersionKey: killSource.botFlowVersionKey,
+    replyIndex: killReplyIndex,
+    reply: killReply,
+  });
+  const killStage = await foundation.botReplyDeliveries.stage(Object.freeze({
+    deliveryKey: killDeliveryKey,
+    tenantId,
+    conversationKey: killSource.conversationKey,
+    inboundMessageKey: killInboundMessageKey,
+    botFlowKey: killSource.botFlowKey,
+    botFlowVersionKey: killSource.botFlowVersionKey,
+    senderPhoneNumberId: killSource.senderPhoneNumberId,
+    replyIndex: killReplyIndex,
+    recipientPhoneNumber: killSource.recipientPhoneNumber,
+    reply: killReply,
+  }));
+  assert.equal(killStage.outcome, "created");
+  assert.ok(stagingPolicy.phoneThroughput);
+  const killDisabledAt = new Date(
+    Date.parse(killStage.delivery.createdAt) + 1,
+  ).toISOString();
+  const disabledPolicyWrite =
+    await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
+      tenantId,
+      connectionVersion: run.expectedConnectionVersion,
+      expectedPolicyVersion: run.expectedPolicyVersion,
+      deliveryState: "disabled",
+      portfolioLimitKind: stagingPolicy.portfolioCapacity.kind,
+      portfolioLimitValue: stagingPolicy.portfolioCapacity.kind === "bounded"
+        ? stagingPolicy.portfolioCapacity.maximumUniqueRecipients
+        : null,
+      phoneThroughputMessagesPerSecond:
+        stagingPolicy.phoneThroughput.maximumMessagesPerSecond,
+      maximumOutboundMessagesPerSecond:
+        stagingPolicy.phoneThroughput.maximumOutboundMessagesPerSecond,
+      reservationDurationSeconds: stagingPolicy.reservationDurationSeconds,
+      metaGraphApiVersion: stagingPolicy.metaGraphApiVersion,
+      evidenceDigest: stagingPolicy.evidenceDigest,
+      evidenceCheckedAt: stagingPolicy.evidenceCheckedAt,
+      evidenceExpiresAt: stagingPolicy.evidenceExpiresAt,
+      actorExternalUserId: run.actorExternalUserId,
+      recordedAt: killDisabledAt,
+    });
+  assert.equal(disabledPolicyWrite.record.deliveryState, "disabled");
+  assert.equal(
+    disabledPolicyWrite.record.policyVersion,
+    run.expectedPolicyVersion + 1,
+  );
+  const killClockValues = Object.freeze([
+    new Date(Date.parse(killDisabledAt) + 1).toISOString(),
+    new Date(Date.parse(killDisabledAt) + 2).toISOString(),
+    new Date(Date.parse(killDisabledAt) + 3).toISOString(),
+  ]);
+  let killClockIndex = 0;
+  const killClock = Object.freeze({
+    now() {
+      const value = killClockValues[
+        Math.min(killClockIndex, killClockValues.length - 1)
+      ];
+      killClockIndex += 1;
+      return new Date(value);
+    },
+  });
+  let providerRequestCalls = 0;
+  let providerSendCalls = 0;
+  const killAdmission = createBotReplyAdmission(
+    foundation.whatsappRateLimits,
+    createWhatsappRateLimitKeyDeriver({
+      WHATSAPP_RATE_LIMIT_HMAC_KEY_V1:
+        "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+    }),
+    createCampaignDeliveryRateLimitPolicySource(
+      foundation.whatsappDeliveryPolicies,
+    ),
+  );
+  const killProcessor = createMetaBotReplyProcessor({
+    metaConnections: foundation.whatsappDeliveryPolicyMetaConnections,
+    credentialVault: {
+      async withAccessToken(_tenantId, action) {
+        return action("integration-token-never-submitted");
+      },
+    },
+    admission: killAdmission,
+    providerRequests: {
+      async claim(input) {
+        providerRequestCalls += 1;
+        return foundation.botReplyDeliveries.claimProviderRequest(input);
+      },
+    },
+    sender: {
+      async send() {
+        providerSendCalls += 1;
+        throw new Error("Kill switch provider boundary was reached");
+      },
+    },
+  });
+  const killWorker = createBotReplyDeliveryWorker(
+    foundation.botReplyDeliveries,
+    killProcessor,
+    killClock,
+  );
+  const killDispatch = await killWorker.dispatch({
+    tenantId,
+    deliveryKey: killDeliveryKey,
+    serviceWindowOpenedAt: killInboundAt,
+    serviceWindowExpiresAt: new Date(
+      Date.parse(killInboundAt) + 86_400_000,
+    ).toISOString(),
+  });
+  assert.deepEqual(killDispatch, {
+    outcome: "deferred",
+    retryAt: new Date(
+      Date.parse(killClockValues[1]) + 60_000,
+    ).toISOString(),
+  });
+  assert.equal(providerRequestCalls, 0);
+  assert.equal(providerSendCalls, 0);
+  const killContext = Object.freeze({
+    run,
+    claim: Object.freeze({
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      leaseExpiresAt,
+    }),
+    operationKey: `bot_reply_staging_step_v1_${"d".repeat(64)}`,
+    deliveryKey: killDeliveryKey,
+  });
+  const killCase = Object.freeze({
+    schemaVersion: 1,
+    source: "durable-postgres",
+    caseName: "kill-switch",
+    runKey,
+    operationKey: killContext.operationKey,
+    deliveryKey: killDeliveryKey,
+    subjectDeliveryKey: killDeliveryKey,
+    targetTenantId: tenantId,
+    connectionVersion: run.expectedConnectionVersion,
+    policyVersion: run.expectedPolicyVersion,
+    recipientFingerprint: run.recipientFingerprint,
+    claimVersion: 1,
+    leaseExpiresAt,
+    executionMode: "dispatch",
+    serviceWindowOpenedAt: killInboundAt,
+    serviceWindowExpiresAt: new Date(
+      Date.parse(killInboundAt) + 86_400_000,
+    ).toISOString(),
+    caseFingerprint: `sha256:${"d".repeat(64)}`,
+  });
+  const disabledPolicyResult = Object.freeze({
+    operationKey: killContext.operationKey,
+    deliveryKey: killDeliveryKey,
+    targetTenantId: tenantId,
+    previousPolicyVersion: run.expectedPolicyVersion,
+    disabledPolicyVersion: disabledPolicyWrite.record.policyVersion,
+    state: "disabled",
+    recordedAt: disabledPolicyWrite.record.recordedAt,
+    evidenceProof: "durable-policy-integration-proof",
+  });
+  const killWrites = await Promise.all([
+    foundation.botReplyStagingSendObservations.recordKillSwitch(
+      killContext,
+      killCase,
+      disabledPolicyResult,
+      killDispatch,
+    ),
+    foundation.botReplyStagingSendObservations.recordKillSwitch(
+      killContext,
+      killCase,
+      disabledPolicyResult,
+      killDispatch,
+    ),
+  ]);
+  assert.deepEqual(
+    killWrites.map(({ outcome }) => outcome).sort(),
+    ["created", "unchanged"],
+  );
+  const killFact = await foundation.botReplyStagingObservations.readKillSwitch(
+    killContext,
+    killCase,
+  );
+  assert.equal(killFact.policyState, "disabled");
+  assert.equal(killFact.providerRequestCount, 0);
+  assert.equal(killFact.dispatchOutcome, "deferred");
+  assert.match(killFact.recordDigest, /^sha256:[0-9a-f]{64}$/);
+  const reenabledPolicyWrite =
+    await foundation.whatsappDeliveryPolicies.recordPolicyEvent({
+      tenantId,
+      connectionVersion: run.expectedConnectionVersion,
+      expectedPolicyVersion: disabledPolicyWrite.record.policyVersion,
+      deliveryState: "enabled",
+      portfolioLimitKind: stagingPolicy.portfolioCapacity.kind,
+      portfolioLimitValue: stagingPolicy.portfolioCapacity.kind === "bounded"
+        ? stagingPolicy.portfolioCapacity.maximumUniqueRecipients
+        : null,
+      phoneThroughputMessagesPerSecond:
+        stagingPolicy.phoneThroughput.maximumMessagesPerSecond,
+      maximumOutboundMessagesPerSecond:
+        stagingPolicy.phoneThroughput.maximumOutboundMessagesPerSecond,
+      reservationDurationSeconds: stagingPolicy.reservationDurationSeconds,
+      metaGraphApiVersion: stagingPolicy.metaGraphApiVersion,
+      evidenceDigest: stagingPolicy.evidenceDigest,
+      evidenceCheckedAt: stagingPolicy.evidenceCheckedAt,
+      evidenceExpiresAt: stagingPolicy.evidenceExpiresAt,
+      actorExternalUserId: run.actorExternalUserId,
+      recordedAt: new Date(
+        Date.parse(killClockValues[2]) + 1,
+      ).toISOString(),
+    });
+  assert.equal(reenabledPolicyWrite.record.deliveryState, "enabled");
+
+  const mismatchedWebhookScenario = webhookScenario === "status-sent"
+    ? "status-delivered"
+    : "status-sent";
+  await assert.rejects(
+    foundation.botReplyStagingWebhookObservations.recordStatus(
+      { ...webhookContext, scenario: mismatchedWebhookScenario },
+      { ...webhookCase, caseName: mismatchedWebhookScenario },
+    ),
+    /scope is invalid/,
+  );
+  await assert.rejects(
+    pool.query(
+      `UPDATE bot_reply_staging_observation_events
+       SET dispatch_outcome = 'duplicate'
+       WHERE event_key = $1`,
+      [observationKey],
+    ),
+    /observation is immutable/,
+  );
+
+  const receipt = Object.freeze({
+    scenario: "provider-circuit-open",
+    providerSendCount: 0,
+    bounded: true,
+  });
+  const receiptDigest = deriveBotReplyStagingReceiptDigest(receipt);
+  const completion = await foundation.botReplyStagingRuns.complete({
+    runKey,
+    requestDigest,
+    expectedClaimVersion: claimed.claimVersion,
+    receipt,
+    receiptDigest,
+    completedAt,
+  });
+  assert.equal(completion.outcome, "completed");
+  assert.deepEqual(completion.receipt, receipt);
+  assert.deepEqual(
+    await foundation.botReplyStagingRuns.read({ runKey, requestDigest }),
+    {
+      outcome: "completed",
+      runKey,
+      auditKey,
+      claimVersion: 1,
+      completedAt,
+      receipt,
+    },
+  );
+
+  const renewedRun = Object.freeze({
+    ...run,
+    requestedAt: "2026-08-17T10:11:00.000Z",
+  });
+  const replay = await foundation.botReplyStagingRuns.claim({
+    ...claimInput,
+    run: renewedRun,
+  });
+  assert.equal(replay.outcome, "replayed");
+  assert.equal(replay.completedAt, completedAt);
+  assert.deepEqual(replay.receipt, receipt);
+
+  const otherActorRun = Object.freeze({
+    ...run,
+    actorExternalUserId: "driver-integration-backup",
+  });
+  const otherActorDigest =
+    deriveBotReplyStagingDurableRequestDigest(otherActorRun);
+  assert.deepEqual(
+    await foundation.botReplyStagingRuns.claim({
+      run: otherActorRun,
+      requestDigest: otherActorDigest,
+      auditKey: deriveBotReplyStagingDurableAuditKey(
+        runKey,
+        otherActorDigest,
+      ),
+      claimedAt,
+      leaseExpiresAt,
+    }),
+    { outcome: "conflict", runKey },
+  );
+
+  const audits = await pool.query(
+    `SELECT
+       action,
+       actor_external_user_id AS "actorExternalUserId",
+       idempotency_key AS "idempotencyKey",
+       metadata_json AS metadata
+     FROM audit_logs
+     WHERE target_type = 'bot-reply-staging-run'
+       AND target_id = $1
+     ORDER BY created_at, action`,
+    [runKey],
+  );
+  assert.equal(audits.rowCount, 2);
+  assert.deepEqual(
+    audits.rows.map(({ action }) => action),
+    ["bot-reply-staging.started", "bot-reply-staging.completed"],
+  );
+  assert.equal(audits.rows[0]?.actorExternalUserId, run.actorExternalUserId);
+  assert.equal(audits.rows[1]?.actorExternalUserId, run.actorExternalUserId);
+  assert.equal(audits.rows[0]?.idempotencyKey, auditKey);
+  assert.equal(audits.rows[1]?.idempotencyKey, auditKey);
+  assert.deepEqual(audits.rows[1]?.metadata, {
+    claimVersion: 1,
+    receiptDigest,
+    requestDigest,
+  });
+
+  await assert.rejects(
+    pool.query(
+      `UPDATE audit_logs
+       SET metadata_json = '{}'::jsonb
+       WHERE target_type = 'bot-reply-staging-run'
+         AND target_id = $1`,
+      [runKey],
+    ),
+    /Bot reply staging audit is immutable/,
+  );
+  await assert.rejects(
+    pool.query(
+      `DELETE FROM bot_reply_staging_runs
+       WHERE run_key = $1`,
+      [runKey],
+    ),
+    /Bot reply staging run cannot be deleted/,
+  );
+  return reenabledPolicyWrite.record.eventKey;
+}
+
 export async function verifyNodePostgresIntegration(
   connectionString,
 ) {
@@ -4830,6 +8410,10 @@ export async function verifyNodePostgresIntegration(
     });
 
     try {
+      await foundation.identityOrganizations.ensureBinding({
+        tenantId,
+        externalOrganizationId: "org_driver_integration",
+      });
       await verifyContactLifecycle(
         pool,
         transactions,
@@ -4861,19 +8445,30 @@ export async function verifyNodePostgresIntegration(
         tenantId,
         whatsappPolicyEventKey,
       );
+      await verifyBotReplyStagingSafetyEvidence(
+        pool,
+        foundation,
+        tenantId,
+      );
       await verifyConversationMessageSchema(pool, tenantId);
       await verifyTemplateCampaignSchema(pool, tenantId);
+      await verifyMessageTemplateSubmissionOutboxLifecycle(pool, foundation);
       await verifyBotDeliverySchema(pool, tenantId);
       await verifyAiReportingSchema(pool, foundation, tenantId);
       await verifyApiMutationRateLimit(pool, foundation);
-      await verifyPostgresHttpRuntime(checkedConnectionString);
+      await verifyPostgresHttpRuntime(checkedConnectionString, pool);
       await verifyConversationLifecycle(pool, foundation, tenantId);
-      const botPolicyEventKey =
-        await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
+      await verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId);
       const sourceKey = await verifyKnowledgeLifecycle(
         pool,
         foundation,
         tenantId,
+      );
+      await verifyPostgresAiAgentHttpRuntime(
+        checkedConnectionString,
+        pool,
+        tenantId,
+        sourceKey,
       );
       const aiAgent = await verifyAiAgentLifecycle(
         pool,
@@ -4881,15 +8476,27 @@ export async function verifyNodePostgresIntegration(
         tenantId,
         sourceKey,
       );
-      await verifyAiRuntimePersistence(pool, foundation, tenantId, aiAgent);
+      const aiRuntime = await verifyAiRuntimePersistence(
+        pool,
+        foundation,
+        tenantId,
+        aiAgent,
+      );
+      await verifyPostgresAiReplyApprovalHttpRuntime(
+        checkedConnectionString,
+        pool,
+        aiRuntime.httpReplyOutboxKey,
+      );
       await verifyInvitationLifecycle(pool, foundation, tenantId);
       await verifyWorkerSchedulerLease(pool, foundation);
+      const postKillSwitchPolicyEventKey =
+        await verifyBotReplyStagingRunLedger(pool, foundation, tenantId);
       await verifyCampaignDispatch(pool, foundation, tenantId);
       await verifyCampaignProviderReconciliation(
         pool,
         foundation,
         tenantId,
-        botPolicyEventKey,
+        postKillSwitchPolicyEventKey,
       );
       await verifyTenantSubscriptionLifecycle(pool, foundation);
       const provisionedTenantId =
@@ -4900,6 +8507,19 @@ export async function verifyNodePostgresIntegration(
         provisionedTenantId,
       );
       await verifyProductionDecisionLifecycle(pool, foundation);
+      await verifyPostgresSystemAdminWhatsappDeliveryPolicyHttpRuntime(
+        checkedConnectionString,
+        pool,
+        tenantId,
+      );
+      await verifyPostgresOnboardingBusinessProfileHttpRuntime(
+        checkedConnectionString,
+        pool,
+      );
+      await verifyPostgresTenantSelectionHttpRuntime(
+        checkedConnectionString,
+        pool,
+      );
       providerOperationFenceConcurrencyScenarios =
         await verifyBotReplyStagingProviderOperationFencePostgres(
           pool,
@@ -4913,7 +8533,7 @@ export async function verifyNodePostgresIntegration(
       status: "passed",
       migrationCount: migrationFiles.length,
       concurrencyScenarios:
-        61 + attestedEvidenceConcurrencyScenarios +
+        90 + attestedEvidenceConcurrencyScenarios +
           providerOperationFenceConcurrencyScenarios,
     });
   } finally {

@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "CONNECT-TRD2V5-DETACHED-PACKET-CORE-V1",
+  "candidateArtifactId": "CONNECT-SECTION-35-6-TRD-2-V5-IMMUTABLE-SUCCESSOR-REQUIREMENTS-2026-08-29-V1",
+  "candidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be",
+  "candidateBytes": 240666,
+  "candidateLines": 1571,
+  "candidateContentAddress": "sha256:933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be",
+  "candidateCaptureRelativePath": "section-35-6-trd-2-v5-portable-candidate-capture-2026-08-29.bin",
+  "inheritedV4ManifestRoot": "85783c16a14b84d66cdf08220ced97d7d8e89602b1fc2ab1fe6f4e92ae9c7bba",
+  "executableContractRoot": "c30727d07c28697899299af552ac3fbf6ce6e16a22de81a4dce31b703d0c1dc4",
+  "semanticGraphRoot": "92845a0f60b71491538ae9161da08b32730a3a4cf26edd4c6a477f85ca9abfda",
+  "candidateRequirementCollectionRoot": "769475c6bc99e72895afe4ad0cea80ef27f9f9f92fc37dc89070d6d334139bde",
+  "exactRequirementDenominator": 128,
+  "exactCorrectionDenominator": 15,
+  "exactInheritedDenominator": 113,
+  "mandatoryRootFieldNames": [
+    "candidatePacketCoreRoot",
+    "candidateRoot",
+    "candidateRequirementCollectionRoot",
+    "inheritedV4ManifestRoot",
+    "executableContractRoot",
+    "semanticGraphRoot",
+    "requirementBindingRoot",
+    "v4SubjectRoot",
+    "v4InheritedManifestRoot",
+    "v4FieldMapManifestRoot",
+    "v4ControlRegistryRoot",
+    "v4PacketRoot",
+    "v4ReviewRoot",
+    "v4FindingsRoot",
+    "publicCyberSuccessorRoot",
+    "parserGrammarRoot",
+    "canonicalSchemaRoot",
+    "semanticPredicateCollectionRoot",
+    "mainVectorCollectionRoot",
+    "atomicChildCollectionRoot",
+    "atomicPredicateCollectionRoot",
+    "atomicVectorCollectionRoot",
+    "missingValueMachineCollectionRoot",
+    "missingValueVectorCollectionRoot",
+    "publicControlCollectionRoot",
+    "publicGateCollectionRoot",
+    "publicVectorCollectionRoot",
+    "severityBindingCollectionRoot",
+    "severityEventCollectionRoot",
+    "severityVectorCollectionRoot",
+    "dataLifecycleClassCollectionRoot",
+    "dataLifecycleTransitionCollectionRoot",
+    "retentionPlanSchemaRoot",
+    "atomicDeleteSchemaRoot",
+    "backupEvidenceSchemaRoot",
+    "restoreEvidenceSchemaRoot",
+    "invalidationContractRoot",
+    "terminalAcceptanceCriteriaRoot",
+    "b0AcceptanceRoot",
+    "protocolAcceptanceRoot",
+    "sourceUniverseAcceptanceRoot",
+    "authorityEnvelopeRoot",
+    "freezeReceiptRoot",
+    "appointmentSetRoot",
+    "generationPairRoot",
+    "reconciliationRoot"
+  ],
+  "publicInvariant": "PUBLIC",
+  "privatePathCount": 0,
+  "packetCoreRoot": "9fe31c8ca3648ca8e9c340ade6c58fe77533ce71d1dc7cdf1d79ae11a7a1c188",
+  "acquisitionContract": {
+    "absoluteOriginalPathRole": "ADVISORY-ONLY",
+    "resolutionOrder": [
+      "packet-relative-capture",
+      "repository-relative-content-address"
+    ],
+    "symlinkFollowing": false,
+    "hashBeforeParse": true,
+    "missingTerminal": "PORTABLE-PACKET-BLOCKED",
+    "wrongRootTerminal": "PORTABLE-PACKET-BLOCKED"
+  },
+  "acquisitionVectors": [
+    {
+      "vectorId": "ACQ-POSITIVE",
+      "operation": "READ-PACKET-RELATIVE-CAPTURE-AND-HASH",
+      "expectedResult": "PASS",
+      "expectedTerminal": "NONE",
+      "expectedCandidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+    },
+    {
+      "vectorId": "ACQ-MISSING",
+      "operation": "REMOVE-CAPTURE",
+      "expectedResult": "BLOCKED",
+      "expectedTerminal": "PORTABLE-PACKET-BLOCKED",
+      "expectedCandidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+    },
+    {
+      "vectorId": "ACQ-PATH-SUBSTITUTE",
+      "operation": "USE-ABSOLUTE-ADVISORY-PATH",
+      "expectedResult": "BLOCKED",
+      "expectedTerminal": "PORTABLE-PACKET-BLOCKED",
+      "expectedCandidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+    },
+    {
+      "vectorId": "ACQ-SYMLINK",
+      "operation": "REPLACE-CAPTURE-WITH-SYMLINK",
+      "expectedResult": "BLOCKED",
+      "expectedTerminal": "PORTABLE-PACKET-BLOCKED",
+      "expectedCandidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+    },
+    {
+      "vectorId": "ACQ-WRONG-ROOT",
+      "operation": "REPLACE-ONE-CANDIDATE-BYTE",
+      "expectedResult": "BLOCKED",
+      "expectedTerminal": "PORTABLE-PACKET-BLOCKED",
+      "expectedCandidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+    },
+    {
+      "vectorId": "ACQ-POST-FREEZE",
+      "operation": "MUTATE-CAPTURE-AFTER-PACKET",
+      "expectedResult": "BLOCKED",
+      "expectedTerminal": "PORTABLE-PACKET-BLOCKED",
+      "expectedCandidateRoot": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+    }
+  ],
+  "artifactRoots": {
+    "inherited": "85783c16a14b84d66cdf08220ced97d7d8e89602b1fc2ab1fe6f4e92ae9c7bba",
+    "subject": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be",
+    "spec": "c30727d07c28697899299af552ac3fbf6ce6e16a22de81a4dce31b703d0c1dc4",
+    "graph": "92845a0f60b71491538ae9161da08b32730a3a4cf26edd4c6a477f85ca9abfda"
+  },
+  "requirementRootBindings": {
+    "state": "DETACHED-AFTER-PACKET",
+    "expectedDenominator": 128
+  },
+  "externalPrerequisites": {
+    "b0AcceptanceRoot": null,
+    "protocolAcceptanceRoot": null,
+    "sourceUniverseAcceptanceRoot": null,
+    "authorityEnvelopeRoot": null,
+    "freezeReceiptRoot": null,
+    "appointmentSetRoot": null,
+    "evaluatorRoot": null,
+    "runnerARoot": null,
+    "runnerBRoot": null
+  },
+  "currentState": {
+    "acceptedRequirements": 0,
+    "acceptedFindings": 0,
+    "reviewGenerations": 0,
+    "reconciliation": null,
+    "definitionAcceptance": null,
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE"
+  },
+  "privateRemediationAllowed": false
+}

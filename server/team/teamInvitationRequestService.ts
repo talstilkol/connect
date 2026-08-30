@@ -15,9 +15,6 @@ import {
 import type {
   TeamInvitationPolicy,
 } from "./teamInvitationPolicy.ts";
-import type {
-  createTeamInvitationQueuePublisher,
-} from "./teamInvitationQueuePublisher.ts";
 import {
   requireTeamInvitationEmail,
   requireTeamInvitationRole,
@@ -29,10 +26,14 @@ import {
 const MILLISECONDS_PER_HOUR =
   60 * 60 * 1_000;
 
-type QueuePublisher =
-  ReturnType<
-    typeof createTeamInvitationQueuePublisher
-  >;
+export interface TeamInvitationPublisher {
+  publish(
+    tenantId: unknown,
+    deliveryKey: unknown,
+  ): Promise<{
+    outcome: "queued";
+  }>;
+}
 
 export type TeamInvitationRequestErrorCode =
   | "CONFLICT"
@@ -142,7 +143,7 @@ function expiry(
 export function createTeamInvitationRequestService(
   repository:
     TeamInvitationRepository,
-  publisher: QueuePublisher,
+  publisher: TeamInvitationPublisher,
   policy: TeamInvitationPolicy,
   clock: Clock = () =>
     new Date().toISOString(),

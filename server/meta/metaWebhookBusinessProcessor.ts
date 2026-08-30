@@ -27,6 +27,9 @@ import type {
 import type {
   CampaignDeliveryStatusReconciler,
 } from "../campaigns/campaignDeliveryStatusReconciler.ts";
+import type {
+  BotReplyDeliveryStatusReconciler,
+} from "../bot/botReplyDeliveryStatusReconciler.ts";
 
 export interface MetaWebhookBusinessRepositories {
   conversations: ConversationRepository;
@@ -35,6 +38,8 @@ export interface MetaWebhookBusinessRepositories {
     InboundAutomationProcessor;
   campaignStatuses?:
     CampaignDeliveryStatusReconciler;
+  botReplyStatuses?:
+    BotReplyDeliveryStatusReconciler;
 }
 
 function processorError(code: string): never {
@@ -49,6 +54,7 @@ export function createMetaWebhookBusinessBatchProcessor(
       repositories.conversations,
       repositories.inboundRuntime,
       repositories.campaignStatuses,
+      repositories.botReplyStatuses,
     );
   const processTemplate =
     createMessageTemplateStatusEventProcessor(

@@ -1,0 +1,385 @@
+{
+  "artifactId": "CONNECT-D02-A9-DETACHED-MUTATION-ORACLE-2026-08-30",
+  "oracleVersion": "1.0.0",
+  "readByReaders": false,
+  "expectedToActualFlow": 0,
+  "vectorCount": 94,
+  "entries": [
+    {
+      "vectorId": "D02A9-MV-0001",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0002",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0003",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0004",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0005",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0006",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0007",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0008",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0009",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0010",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0011",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0012",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0013",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0014",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0015",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0016",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0017",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0018",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0019",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0020",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0021",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0022",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0023",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0024",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0025",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0026",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0027",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0028",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0029",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0030",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0031",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0032",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0033",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0034",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0035",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0036",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0037",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0038",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0039",
+      "expectedTerminal": "SNAPSHOT-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0040",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0041",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0042",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0043",
+      "expectedTerminal": "TRANSITION-SCHEMA-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0044",
+      "expectedTerminal": "SCHEMA-DEFINITION-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0045",
+      "expectedTerminal": "POSITIVE-CONTROL-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0046",
+      "expectedTerminal": "POSITIVE-CONTROL-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0047",
+      "expectedTerminal": "POSITIVE-CONTROL-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0048",
+      "expectedTerminal": "TRANSITION-SEMANTICS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0049",
+      "expectedTerminal": "TRANSITION-SEMANTICS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0050",
+      "expectedTerminal": "TRANSITION-SEMANTICS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0051",
+      "expectedTerminal": "POSITIVE-CONTROL-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0052",
+      "expectedTerminal": "TRANSITION-MACHINE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0053",
+      "expectedTerminal": "TRANSITION-MACHINE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0054",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0055",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0056",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0057",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0058",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0059",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0060",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0061",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0062",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0063",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0064",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0065",
+      "expectedTerminal": "PACKAGE-ENVELOPE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0066",
+      "expectedTerminal": "SEMANTIC-UNIVERSE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0067",
+      "expectedTerminal": "SEMANTIC-UNIVERSE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0068",
+      "expectedTerminal": "SEMANTIC-UNIVERSE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0069",
+      "expectedTerminal": "SEMANTIC-UNIVERSE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0070",
+      "expectedTerminal": "SEMANTIC-UNIVERSE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0071",
+      "expectedTerminal": "SEMANTIC-UNIVERSE-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0072",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0073",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0074",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0075",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0076",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0077",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0078",
+      "expectedTerminal": "SOURCE-RECEIPTS-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0079",
+      "expectedTerminal": "DAG-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0080",
+      "expectedTerminal": "DAG-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0081",
+      "expectedTerminal": "DAG-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0082",
+      "expectedTerminal": "DAG-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0083",
+      "expectedTerminal": "PRODUCER-APPOINTMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0084",
+      "expectedTerminal": "PRODUCER-APPOINTMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0085",
+      "expectedTerminal": "PRODUCER-APPOINTMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0086",
+      "expectedTerminal": "PRODUCER-APPOINTMENT-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0087",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0088",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0089",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0090",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0091",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0092",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0093",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    },
+    {
+      "vectorId": "D02A9-MV-0094",
+      "expectedTerminal": "INPUT-MANIFEST-INVALID"
+    }
+  ]
+}

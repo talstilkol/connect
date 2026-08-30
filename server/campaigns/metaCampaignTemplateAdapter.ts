@@ -16,6 +16,11 @@ import type {
 import type {
   SensitiveMetaAccessToken,
 } from "../meta/metaPorts.ts";
+import {
+  observeProviderRequest,
+  type ProviderRequestTelemetryClock,
+  type ProviderRequestTelemetryScope,
+} from "../operations/providerRequestTelemetry.ts";
 
 const campaignDeliveryKeyPattern =
   /^campaign_delivery_v1_[0-9a-f]{64}$/;
@@ -59,6 +64,11 @@ export interface MetaCampaignTemplateSender {
   send(
     input: SendMetaCampaignTemplateInput,
   ): Promise<MetaCampaignTemplateAcceptance>;
+}
+
+export interface MetaCampaignTemplateAdapterTelemetry {
+  readonly scope: ProviderRequestTelemetryScope;
+  readonly clock: ProviderRequestTelemetryClock;
 }
 
 interface MetaTextParameter {
@@ -281,7 +291,20 @@ function parseResponse(
 
 export function createMetaCampaignTemplateAdapter(
   transport: MetaGraphTransport,
+  telemetry?: Readonly<MetaCampaignTemplateAdapterTelemetry>,
 ): MetaCampaignTemplateSender {
+  if (
+    telemetry !== undefined &&
+    (
+      typeof telemetry.scope?.record !== "function" ||
+      typeof telemetry.clock?.now !== "function"
+    )
+  ) {
+    throw new MetaCampaignTemplateContractError(
+      "INVALID_DELIVERY_REQUEST",
+    );
+  }
+
   return {
     async send(input) {
       if (
@@ -306,8 +329,8 @@ export function createMetaCampaignTemplateAdapter(
         template,
         personalization,
       );
-      const response =
-        await transport.requestJson<MetaCampaignTemplateResponse>({
+      const request = () =>
+        transport.requestJson<MetaCampaignTemplateResponse>({
           method: "POST",
           pathSegments: [input.phoneNumberId, "messages"],
           accessToken: input.accessToken,
@@ -327,6 +350,17 @@ export function createMetaCampaignTemplateAdapter(
             },
           },
         });
+      const response = telemetry === undefined
+        ? await request()
+        : await observeProviderRequest(
+            telemetry.scope,
+            telemetry.clock,
+            Object.freeze({
+              provider: "meta",
+              operation: "campaign-message.send",
+            }),
+            request,
+          );
 
       return parseResponse(response);
     },

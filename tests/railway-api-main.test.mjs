@@ -173,12 +173,12 @@ test("rejects an extended dependency surface", async () => {
   assert.deepEqual(testFixture.calls, []);
 });
 
-test("keeps the package command connected to the bounded executable", () => {
+test("keeps the PostgreSQL-only command connected to the bounded executable", () => {
   const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
   const source = readFileSync("scripts/start-railway-api.mjs", "utf8");
 
   assert.equal(
-    packageJson.scripts["start:railway-api"],
+    packageJson.scripts["start:railway-api:postgres-only"],
     "node scripts/start-railway-api.mjs",
   );
   assert.equal(

@@ -104,6 +104,22 @@ const steps = [
             ],
           },
           {
+            id:
+              "better-stack-staging-evidence",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-better-stack-staging-evidence.mjs",
+            ],
+          },
+          {
+            id:
+              "bot-reply-staging-evidence",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-bot-reply-staging-evidence.mjs",
+            ],
+          },
+          {
             id: "production-readiness",
             command: "npm",
             arguments: [

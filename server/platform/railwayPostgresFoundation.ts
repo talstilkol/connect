@@ -30,6 +30,9 @@ import {
   createPostgresBusinessProfileRepository,
 } from "./postgresBusinessProfileRepository.ts";
 import {
+  createPostgresClerkOrganizationBindingRepository,
+} from "./postgresClerkOrganizationBindingRepository.ts";
+import {
   createPostgresAiAgentRepository,
 } from "./postgresAiAgentRepository.ts";
 import {
@@ -47,6 +50,42 @@ import {
 import {
   createPostgresBotReplyDeliveryRepository,
 } from "./postgresBotReplyDeliveryRepository.ts";
+import {
+  createPostgresBotReplyDeliveryProviderRepository,
+} from "./postgresBotReplyDeliveryProviderRepository.ts";
+import {
+  createPostgresBotReplyStagingRunRepository,
+} from "./postgresBotReplyStagingRunRepository.ts";
+import {
+  createPostgresBotReplyStagingSafetyRepository,
+} from "./postgresBotReplyStagingSafetyRepository.ts";
+import {
+  createPostgresBotReplyStagingReleaseEvidenceRepository,
+} from "./postgresBotReplyStagingReleaseEvidenceRepository.ts";
+import type {
+  RailwayBotReplyStagingCrossServiceEvidenceClock,
+} from "./railwayBotReplyStagingCrossServiceEvidence.ts";
+import type {
+  RailwayBotReplyStagingReleaseIdentity,
+} from "./railwayBotReplyStagingReleaseEvidenceIssuer.ts";
+import {
+  createPostgresBotReplyStagingServiceWindowSource,
+} from "./postgresBotReplyStagingServiceWindowSource.ts";
+import {
+  createPostgresBotReplyStagingDurableObservationReader,
+} from "./postgresBotReplyStagingDurableObservationReader.ts";
+import {
+  createPostgresBotReplyStagingDurableObservationWriter,
+} from "./postgresBotReplyStagingDurableObservationWriter.ts";
+import {
+  createPostgresBotReplyStagingWebhookObservationProducer,
+} from "./postgresBotReplyStagingWebhookObservationProducer.ts";
+import {
+  createPostgresBotReplyStagingProviderDeferralObservationProducer,
+} from "./postgresBotReplyStagingProviderDeferralObservationProducer.ts";
+import {
+  createPostgresBotReplyStagingSendObservationProducer,
+} from "./postgresBotReplyStagingSendObservationProducer.ts";
 import {
   createPostgresCampaignDispatchRepository,
 } from "./postgresCampaignDispatchRepository.ts";
@@ -84,6 +123,9 @@ import {
   createPostgresMessageTemplateRepository,
 } from "./postgresMessageTemplateRepository.ts";
 import {
+  createPostgresMessageTemplateSubmissionOutboxRepository,
+} from "./postgresMessageTemplateSubmissionOutboxRepository.ts";
+import {
   createPostgresKnowledgePassageRepository,
 } from "./postgresKnowledgePassageRepository.ts";
 import {
@@ -110,6 +152,36 @@ import {
 import {
   createPostgresRailwayContactOrganizationMutationExecutor,
 } from "./postgresRailwayContactOrganizationMutationExecutor.ts";
+import {
+  createPostgresRailwayContactImportMutationExecutor,
+} from "./postgresRailwayContactImportMutationExecutor.ts";
+import {
+  createPostgresRailwayConversationMutationExecutor,
+} from "./postgresRailwayConversationMutationExecutor.ts";
+import {
+  createPostgresRailwayAiAgentMutationExecutor,
+} from "./postgresRailwayAiAgentMutationExecutor.ts";
+import {
+  createPostgresRailwayBotFlowMutationExecutor,
+} from "./postgresRailwayBotFlowMutationExecutor.ts";
+import {
+  createPostgresRailwayCampaignMutationExecutor,
+} from "./postgresRailwayCampaignMutationExecutor.ts";
+import {
+  createPostgresRailwayAiReplyApprovalMutationExecutor,
+} from "./postgresRailwayAiReplyApprovalMutationExecutor.ts";
+import {
+  createPostgresRailwayMessageTemplateDraftMutationExecutor,
+} from "./postgresRailwayMessageTemplateDraftMutationExecutor.ts";
+import {
+  createPostgresRailwayMessageTemplateSubmissionMutationExecutor,
+} from "./postgresRailwayMessageTemplateSubmissionMutationExecutor.ts";
+import {
+  createPostgresRailwayOnboardingBusinessProfileMutationExecutor,
+} from "./postgresRailwayOnboardingBusinessProfileMutationExecutor.ts";
+import {
+  createPostgresRailwayTenantSelectionMutationExecutor,
+} from "./postgresRailwayTenantSelectionMutationExecutor.ts";
 import {
   createPostgresTeamInvitationAcceptanceRepository,
 } from "./postgresTeamInvitationAcceptanceRepository.ts";
@@ -184,6 +256,39 @@ export interface RailwayPostgresFoundation {
   readonly botReplyDeliveries: ReturnType<
     typeof createPostgresBotReplyDeliveryRepository
   >;
+  readonly botReplyProviderLinks: ReturnType<
+    typeof createPostgresBotReplyDeliveryProviderRepository
+  >;
+  readonly botReplyStagingRuns: ReturnType<
+    typeof createPostgresBotReplyStagingRunRepository
+  >;
+  readonly botReplyStagingSafety: ReturnType<
+    typeof createPostgresBotReplyStagingSafetyRepository
+  >;
+  readonly createBotReplyStagingReleaseEvidenceRepository: (
+    release: Readonly<RailwayBotReplyStagingReleaseIdentity>,
+    clock: Readonly<RailwayBotReplyStagingCrossServiceEvidenceClock>,
+  ) => ReturnType<
+    typeof createPostgresBotReplyStagingReleaseEvidenceRepository
+  >;
+  readonly botReplyStagingServiceWindows: ReturnType<
+    typeof createPostgresBotReplyStagingServiceWindowSource
+  >;
+  readonly botReplyStagingObservations: ReturnType<
+    typeof createPostgresBotReplyStagingDurableObservationReader
+  >;
+  readonly botReplyStagingObservationWriter: ReturnType<
+    typeof createPostgresBotReplyStagingDurableObservationWriter
+  >;
+  readonly botReplyStagingWebhookObservations: ReturnType<
+    typeof createPostgresBotReplyStagingWebhookObservationProducer
+  >;
+  readonly botReplyStagingProviderDeferralObservations: ReturnType<
+    typeof createPostgresBotReplyStagingProviderDeferralObservationProducer
+  >;
+  readonly botReplyStagingSendObservations: ReturnType<
+    typeof createPostgresBotReplyStagingSendObservationProducer
+  >;
   readonly contacts: ReturnType<typeof createContactListService>;
   readonly contactConsents: ReturnType<
     typeof createPostgresContactConsentRepository
@@ -203,11 +308,18 @@ export interface RailwayPostgresFoundation {
     | "completeWebhookReceipt"
     | "failWebhookReceipt"
   >;
+  readonly whatsappDeliveryPolicyMetaConnections: Pick<
+    MetaRepository,
+    "findConnectionByTenantId"
+  >;
   readonly metaCredentialEnvelopes: ReturnType<
     typeof createPostgresMetaCredentialRepository
   >;
   readonly messageTemplates: ReturnType<
     typeof createPostgresMessageTemplateRepository
+  >;
+  readonly messageTemplateSubmissionOutbox: ReturnType<
+    typeof createPostgresMessageTemplateSubmissionOutboxRepository
   >;
   readonly knowledgePassages: ReturnType<
     typeof createPostgresKnowledgePassageRepository
@@ -240,6 +352,9 @@ export interface RailwayPostgresFoundation {
   readonly memberships: ReturnType<
     typeof createPostgresTenantMembershipRepository
   >;
+  readonly identityOrganizations: ReturnType<
+    typeof createPostgresClerkOrganizationBindingRepository
+  >;
   readonly membershipMutations: ReturnType<
     typeof createPostgresTenantMembershipMutationRepository
   >;
@@ -269,6 +384,39 @@ export interface RailwayPostgresFoundation {
   >;
   readonly railwayContactOrganizationMutations: ReturnType<
     typeof createPostgresRailwayContactOrganizationMutationExecutor
+  >;
+  readonly railwayContactImportMutations: ReturnType<
+    typeof createPostgresRailwayContactImportMutationExecutor
+  >;
+  readonly railwayConversationMutations: ReturnType<
+    typeof createPostgresRailwayConversationMutationExecutor
+  >;
+  readonly railwayBotFlowMutations: ReturnType<
+    typeof createPostgresRailwayBotFlowMutationExecutor
+  >;
+  readonly railwayAiAgentMutations: ReturnType<
+    typeof createPostgresRailwayAiAgentMutationExecutor
+  >;
+  readonly railwayAiReplyApprovalMutations: ReturnType<
+    typeof createPostgresRailwayAiReplyApprovalMutationExecutor
+  >;
+  readonly railwayOnboardingBusinessProfileMutations: ReturnType<
+    typeof createPostgresRailwayOnboardingBusinessProfileMutationExecutor
+  >;
+  readonly railwayTenantSelectionMutations: ReturnType<
+    typeof createPostgresRailwayTenantSelectionMutationExecutor
+  >;
+  readonly createRailwayCampaignMutationExecutor: (
+    deliveryConfigured: () => boolean,
+  ) => ReturnType<typeof createPostgresRailwayCampaignMutationExecutor>;
+  readonly railwayMessageTemplateDraftMutations: ReturnType<
+    typeof createPostgresRailwayMessageTemplateDraftMutationExecutor
+  >;
+  readonly createRailwayMessageTemplateSubmissionMutationExecutor: (
+    graphApiVersion: string,
+    clock?: () => string,
+  ) => ReturnType<
+    typeof createPostgresRailwayMessageTemplateSubmissionMutationExecutor
   >;
   readonly createMutationRateLimitBinding: (
     policy: Readonly<PostgresMutationRateLimitPolicy>,
@@ -348,6 +496,26 @@ export function createRailwayPostgresFoundation(
     transactions,
   });
   const meta = createPostgresMetaRepository({ queries, transactions });
+  const botReplyStagingObservationWriter =
+    createPostgresBotReplyStagingDurableObservationWriter(transactions);
+  const botReplyStagingWebhookObservations =
+    createPostgresBotReplyStagingWebhookObservationProducer({
+      queries,
+      writer: botReplyStagingObservationWriter,
+      clock: Object.freeze({ now: () => new Date() }),
+    });
+  const botReplyStagingProviderDeferralObservations =
+    createPostgresBotReplyStagingProviderDeferralObservationProducer({
+      queries,
+      writer: botReplyStagingObservationWriter,
+      clock: Object.freeze({ now: () => new Date() }),
+    });
+  const botReplyStagingSendObservations =
+    createPostgresBotReplyStagingSendObservationProducer({
+      queries,
+      writer: botReplyStagingObservationWriter,
+      clock: Object.freeze({ now: () => new Date() }),
+    });
   let closed = false;
 
   return Object.freeze({
@@ -364,6 +532,32 @@ export function createRailwayPostgresFoundation(
       queries,
       transactions,
     }),
+    botReplyProviderLinks:
+      createPostgresBotReplyDeliveryProviderRepository({
+        transactions,
+      }),
+    botReplyStagingRuns:
+      createPostgresBotReplyStagingRunRepository(transactions),
+    botReplyStagingSafety:
+      createPostgresBotReplyStagingSafetyRepository({ queries }),
+    createBotReplyStagingReleaseEvidenceRepository(
+      release: Readonly<RailwayBotReplyStagingReleaseIdentity>,
+      clock: Readonly<RailwayBotReplyStagingCrossServiceEvidenceClock>,
+    ) {
+      return createPostgresBotReplyStagingReleaseEvidenceRepository(
+        transactions,
+        release,
+        clock,
+      );
+    },
+    botReplyStagingServiceWindows:
+      createPostgresBotReplyStagingServiceWindowSource(queries),
+    botReplyStagingObservations:
+      createPostgresBotReplyStagingDurableObservationReader({ query: queries }),
+    botReplyStagingObservationWriter,
+    botReplyStagingWebhookObservations,
+    botReplyStagingProviderDeferralObservations,
+    botReplyStagingSendObservations,
     contacts: createContactListService({ contacts: contactReads }),
     contactConsents: createPostgresContactConsentRepository({
       transactions,
@@ -386,12 +580,20 @@ export function createRailwayPostgresFoundation(
       completeWebhookReceipt: meta.completeWebhookReceipt,
       failWebhookReceipt: meta.failWebhookReceipt,
     }),
+    whatsappDeliveryPolicyMetaConnections: Object.freeze({
+      findConnectionByTenantId: meta.findConnectionByTenantId,
+    }),
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
     messageTemplates: createPostgresMessageTemplateRepository({
       queries,
       transactions,
     }),
+    messageTemplateSubmissionOutbox:
+      createPostgresMessageTemplateSubmissionOutboxRepository({
+        queries,
+        transactions,
+      }),
     knowledgePassages: createPostgresKnowledgePassageRepository({
       queries,
       transactions,
@@ -425,6 +627,8 @@ export function createRailwayPostgresFoundation(
     reports: createOperationalReportService(
       createPostgresOperationalReportRepository(queries),
     ),
+    identityOrganizations:
+      createPostgresClerkOrganizationBindingRepository(queries),
     memberships: createPostgresTenantMembershipRepository(queries),
     membershipMutations:
       createPostgresTenantMembershipMutationRepository({
@@ -464,6 +668,44 @@ export function createRailwayPostgresFoundation(
       createPostgresRailwayContactOrganizationMutationExecutor(
         transactions,
       ),
+    railwayContactImportMutations:
+      createPostgresRailwayContactImportMutationExecutor(transactions),
+    railwayConversationMutations:
+      createPostgresRailwayConversationMutationExecutor(transactions),
+    railwayBotFlowMutations:
+      createPostgresRailwayBotFlowMutationExecutor(transactions),
+    railwayAiAgentMutations:
+      createPostgresRailwayAiAgentMutationExecutor(transactions),
+    railwayAiReplyApprovalMutations:
+      createPostgresRailwayAiReplyApprovalMutationExecutor(transactions),
+    railwayOnboardingBusinessProfileMutations:
+      createPostgresRailwayOnboardingBusinessProfileMutationExecutor(
+        transactions,
+      ),
+    railwayTenantSelectionMutations:
+      createPostgresRailwayTenantSelectionMutationExecutor(transactions),
+    createRailwayCampaignMutationExecutor(
+      deliveryConfigured: () => boolean,
+    ) {
+      return createPostgresRailwayCampaignMutationExecutor(
+        transactions,
+        deliveryConfigured,
+      );
+    },
+    railwayMessageTemplateDraftMutations:
+      createPostgresRailwayMessageTemplateDraftMutationExecutor(
+        transactions,
+      ),
+    createRailwayMessageTemplateSubmissionMutationExecutor(
+      graphApiVersion: string,
+      clock?: () => string,
+    ) {
+      return createPostgresRailwayMessageTemplateSubmissionMutationExecutor(
+        transactions,
+        graphApiVersion,
+        clock,
+      );
+    },
     createMutationRateLimitBinding(
       policy: Readonly<PostgresMutationRateLimitPolicy>,
     ) {

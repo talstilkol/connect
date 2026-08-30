@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "CONNECT-TRD2V5-DUAL-QA-RECONCILIATION-V1",
+  "engineAReceiptRawRoot": "6994e747bd8e333a5e3c0d9b916cec825d178606d13567723ee5b81216cbbc85",
+  "engineBReceiptRawRoot": "5fd77cfbe3563ede96196497f71d09377905f21d8e89405b2fed20551feb6f10",
+  "engineASourceRoot": "956483147262081d3673d4f2e33507a9a67b8d6dfd68317ebba7f5bf99869b33",
+  "engineBSourceRoot": "e910fa5cfd0bd01a3fca740ff646504b0e3c4d9960b44c7bbd4ec1d6dfc2a341",
+  "implementationCount": 2,
+  "languages": [
+    "Node.js",
+    "Python"
+  ],
+  "parserInputs": {
+    "captures": 8,
+    "sourceParts": 128,
+    "envelopes": 84
+  },
+  "parserFieldMapRoot": "bec9b05242ae51d166b819aff63e8b99d7689d809b875552d9d797af6d410e8a",
+  "vectorOutcomeDenominator": 1765,
+  "vectorOutcomeCollectionRoot": "8336d1003fb1adb49b2c1b13a4059f8bc8df2ab270f974a48bc0ce885261e2ed",
+  "disagreements": [],
+  "disagreementCount": 0,
+  "suppressedDisagreements": 0,
+  "currentAcceptance": 0,
+  "currentReviewGenerations": 0,
+  "verdict": "PASS-DUAL-MECHANICAL-CANDIDATE-NOT-ACCEPTANCE",
+  "reconciliationReceiptRoot": "a885898ec76b557595bf73bf37d57300a22f921a392d4da6279fe6a9671855f4"
+}

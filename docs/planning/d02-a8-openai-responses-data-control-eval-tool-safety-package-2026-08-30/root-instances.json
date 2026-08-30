@@ -1,0 +1,112 @@
+{
+  "artifactId": "CONNECT-D02-A8-ROOT-INSTANCES-2026-08-30",
+  "canonicalization": "RFC8785-JCS-SHA256",
+  "domainPrefix": "CONNECT-D02-A8",
+  "producedFrom": [
+    "schema.json",
+    "registry.json",
+    "dependency-dag.json",
+    "mutation-corpus.json"
+  ],
+  "readByReaders": false,
+  "packageCoreRoot": "a1ce88c079503cade993bc11cf8f6f3be7ea13f5db990780030355d4fab8ef53",
+  "rootInstances": {
+    "frozenInputManifestRoot": "e045191b25bd8e1cc840b1b7cee3ec43ce6d7061e9a826b6cfda9d66ec31dec4",
+    "authorityChainRoot": "df945c2b9a4a39f35828f80bcec53df736a3fc5f24dc872e0b1c100bfff36060",
+    "predecessorClauseDispositionRoot": "f41790638619261da3ff71c47008feebd5f16485091f2bb10393f52e6ae11811",
+    "publicDirectiveRoot": "b06aff4c20112596e51659b5ec8eeb688b0b58b9733a81876ef2a64fda27b7d8",
+    "modelSelectionAuthorityRoot": "6c51e3a11bd050607b66b85a29169ac681f6bbf4f7d03cf51ffff2ce2fe9b485",
+    "promptPolicyRoot": "0a5dad570aebe426c2407fbb4f730ff59ffccd9f3721b2ce60e988b701617b4d",
+    "aiProfileRegistryRoot": "40829b09992a1ff2ae8e313f26bc2b7801041bec66bbf5e8f7070f695977af21",
+    "accountRegistryRoot": "b32181c09070f729075396b959cad775ac657a06e1337ec2fb186753396ecc9e",
+    "legalPrivacyRegistryRoot": "fa75d8dd52fd9bc19a63f200655e9ea0b3143f1bc8741ba1bb9d9e6f9dc3bc81",
+    "officialSourceObservationRoot": "b2305d4413492ce9efcf12d252e7e90c9b8f42adf1faff685a4c367671f931d0",
+    "approvalRegistryRoot": "e87bbec5fadb1807e4d009826ba13b0c005c346b935ca43667380f07591ee1e3",
+    "a6FindingCarryRoot": "a43954c03a539d8a3ba5360e6e9f3578d9987a38270108013624395a423aca7d",
+    "a7FindingClosureCandidateRoot": "167f930075a3412772574b66abddabf47a64ab16fc58d0b0ceedc82c4dfc9084",
+    "rootDefinitionRoot": "d1ed325c76fb1b920177f32eb3aa6cc63dd2aa5f84e9936e781a0ac945ff5a1e",
+    "crossProgramDagRoot": "8823b355bd9a75dd72c7cafa67f024f58dd426af13c92f16a4c9b80165639a09"
+  },
+  "sourceReceiptCommitments": [
+    {
+      "receiptId": "D02A8-SRC-001",
+      "observationCommitment": "7b92adb05ab3a08ddfe673bca053706050ac436ace512a76b281981c7a0b5c7c"
+    },
+    {
+      "receiptId": "D02A8-SRC-002",
+      "observationCommitment": "2b1dfca77da457244cc3b2fdf1c0041e7a0d9f0cd95574b62be4b6b84e686e13"
+    },
+    {
+      "receiptId": "D02A8-SRC-003",
+      "observationCommitment": "29c2ecdee27a117838e6202ec1bf4f6b63360d7778a9ec7b6bb6ccf7566eaf0e"
+    },
+    {
+      "receiptId": "D02A8-SRC-004",
+      "observationCommitment": "f3b2a13ae5b07d799fb62b8f86dd063df7323ccbc817042d9503fd30a9a6dedf"
+    },
+    {
+      "receiptId": "D02A8-SRC-005",
+      "observationCommitment": "210367aaba16719f47ad453ebb2c211dc5da68813938c54d1c0d325315e9385a"
+    },
+    {
+      "receiptId": "D02A8-SRC-006",
+      "observationCommitment": "bcb9452c7a8f5f0791ddaf9a783ac75b79891bba5c4436b0ff17dd7d110d9009"
+    },
+    {
+      "receiptId": "D02A8-SRC-007",
+      "observationCommitment": "b2296846e1ac4ab751f1ef23af8ef27ca9ccf1be8c0942e006b389e014a12b80"
+    },
+    {
+      "receiptId": "D02A8-SRC-008",
+      "observationCommitment": "887817c1a8b4141f1169e69f21ea18950314b6e27034bed5de6cf0bbf4c000fb"
+    },
+    {
+      "receiptId": "D02A8-SRC-009",
+      "observationCommitment": "e8aad96ae988d78c840fd5349ae17fefecd84a068f93642e959cb203257c41bc"
+    },
+    {
+      "receiptId": "D02A8-SRC-010",
+      "observationCommitment": "894cca39dd11d03fc40c2e9cd19b7a3e6bc2dc75784c3ccc91f6cb5f1d48220d"
+    },
+    {
+      "receiptId": "D02A8-SRC-011",
+      "observationCommitment": "7a4b13849697a13be69427a4836a77827e7c27d38c09276bc26171dcf09f0126"
+    }
+  ],
+  "predecessorClauseDisposition": {
+    "universes": 6,
+    "members": 473,
+    "root": "f41790638619261da3ff71c47008feebd5f16485091f2bb10393f52e6ae11811"
+  },
+  "disjointAcceptanceRoots": [
+    {
+      "rootId": "D02A8-ROOT-PLANNING-ACCEPTANCE",
+      "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "root": null,
+      "state": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "rootId": "D02A8-ROOT-AI-ADMISSION",
+      "rootClass": "AI-PROFILE-ADMISSION",
+      "root": null,
+      "state": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "rootId": "D02A8-ROOT-RUNTIME-PERMIT",
+      "rootClass": "AI-RUNTIME-PERMIT",
+      "root": null,
+      "state": "MISSING",
+      "acceptanceCredit": 0
+    }
+  ],
+  "readerParityRequired": true,
+  "semanticAcceptance": 0,
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC"
+  }
+}

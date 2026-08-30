@@ -39,6 +39,7 @@ export const templateSaveResultStatuses = [
 ] as const satisfies readonly SaveMessageTemplateDraftActionResult["status"][];
 
 export const templateSubmitResultStatuses = [
+  "submission-staged",
   "submitted",
   "invalid-input",
   "not-found",
@@ -190,6 +191,7 @@ export interface TemplateEditorMessages {
     sync: string;
     newDraft: string;
     readOnly: string;
+    providerActionsUnavailable: string;
     emptyTitle: string;
     emptyDescription: string;
     updated: string;
@@ -334,9 +336,9 @@ const messages = {
         kicker: "תצוגה",
         title: "תצוגה מקדימה",
         persistentNotice:
-          "שמירת הטיוטה מתבצעת ב־D1. לאחר השמירה ניתן לשלוח אותה לאישור מתוך הרשימה שמעל.",
+          "הטיוטה נשמרת ב־PostgreSQL דרך Railway. שליחה ל־Meta תיפתח לאחר השלמת חוזה ה־Outbox, ה־Audit וההתאוששות הבטוח.",
         localNotice:
-          "ללא Clerk ו־D1 הטיוטה נשמרת בזיכרון המסך בלבד ואינה נשלחת ל־Meta.",
+          "ללא Clerk ו־Railway API הטיוטה נשמרת בזיכרון המסך בלבד ואינה נשלחת ל־Meta.",
         unavailableNotice:
           "השמירה אינה זמינה עד לפתרון מצב החשבון או השרת שמופיע מעל.",
       },
@@ -352,9 +354,11 @@ const messages = {
       newDraft: "טיוטה חדשה",
       readOnly:
         "התפקיד הנוכחי מורשה לצפות בתבניות אך אינו מורשה לשמור או לשלוח אותן.",
+      providerActionsUnavailable:
+        "שליחה ל־Meta וסנכרון מושבתים זמנית עד להשלמת חוזה Outbox, Audit והתאוששות בטוח ב־Railway. אפשר להמשיך ליצור ולערוך טיוטות.",
       emptyTitle: "אין תבניות שמורות",
       emptyDescription:
-        "הטיוטה הראשונה תופיע כאן לאחר שמירה מוצלחת ב־D1.",
+        "הטיוטה הראשונה תופיע כאן לאחר שמירה מוצלחת ב־PostgreSQL.",
       updated: "עודכן",
       load: "טעינה לעריכה",
       submitting: "שולח...",
@@ -394,7 +398,7 @@ const messages = {
     feedback: {
       directoryFailures: {
         "configuration-required":
-          "Clerk ו־D1 אינם מוגדרים. אפשר להכין תרגול מקומי, אך הוא יימחק ברענון ולא יישלח ל־Meta.",
+          "Clerk ו־Railway API אינם מוגדרים. אפשר להכין תרגול מקומי, אך הוא יימחק ברענון ולא יישלח ל־Meta.",
         "onboarding-required":
           "יש להשלים תחילה את פרטי העסק כדי ליצור Tenant פעיל.",
         "tenant-selection-required":
@@ -405,12 +409,12 @@ const messages = {
           "לא ניתן היה לטעון את התבניות מהשרת. לא הוצג מידע חלופי.",
       },
       saveResults: {
-        saved: "הטיוטה נשמרה ב־D1 והיא זמינה לאחר רענון.",
+        saved: "הטיוטה נשמרה ב־PostgreSQL והיא זמינה לאחר רענון.",
         "validation-error":
           "השרת דחה את הטיוטה מפני שאחד או יותר מהשדות אינם תקינים.",
         "not-editable":
           "תבנית שכבר נשלחה ל־Meta נעולה ואינה ניתנת לדריסה.",
-        "configuration-required": "Clerk ו־D1 אינם מוגדרים.",
+        "configuration-required": "Clerk ו־Railway API אינם מוגדרים.",
         unauthenticated: "נדרשת התחברות מחדש לפני שמירת התבנית.",
         "onboarding-required": "יש להשלים תחילה את פרטי העסק.",
         "tenant-selection-required": "נדרשת בחירה מפורשת של Tenant.",
@@ -422,6 +426,8 @@ const messages = {
       localRehearsalSaved:
         "התרגול נשמר בזיכרון המסך בלבד ולא בשרת.",
       submitResults: {
+        "submission-staged":
+          "ההגשה נשמרה בתור המאובטח ותישלח ל־Meta על ידי ה־Worker.",
         submitted: "Meta קיבלה את התבנית והיא ממתינה לאישור.",
         "invalid-input": "מזהה התבנית אינו תקין.",
         "not-found": "התבנית לא נמצאה ב־Tenant הנוכחי.",
@@ -440,7 +446,7 @@ const messages = {
           "Meta דחתה את בקשת יצירת התבנית. הטיוטה נשארה זמינה לעריכה.",
         "submission-uncertain":
           "תוצאת ההגשה אינה ידועה. המערכת לא תשלח שוב עד לסנכרון מול Meta.",
-        "configuration-required": "Clerk ו־D1 אינם מוגדרים.",
+        "configuration-required": "Clerk ו־Railway API אינם מוגדרים.",
         unauthenticated: "נדרשת התחברות מחדש לפני השליחה.",
         "onboarding-required": "יש להשלים תחילה את פרטי העסק.",
         "tenant-selection-required": "נדרשת בחירה מפורשת של Tenant.",
@@ -460,8 +466,8 @@ const messages = {
         "identity-conflict":
           "מזהה Template של Meta מתנגש בשם, בשפה או בקטגוריה המקומיים. לא בוצע תיקון אוטומטי.",
         "sync-failed":
-          "Meta או D1 לא השלימו את הסנכרון. לא הוצג סטטוס חלופי.",
-        "configuration-required": "Clerk ו־D1 אינם מוגדרים.",
+          "Runtime ה־Meta ב־Railway לא השלים את הסנכרון. לא הוצג סטטוס חלופי.",
+        "configuration-required": "Clerk ו־Railway API אינם מוגדרים.",
         unauthenticated: "נדרשת התחברות מחדש לפני הסנכרון.",
         "onboarding-required": "יש להשלים תחילה את פרטי העסק.",
         "tenant-selection-required": "נדרשת בחירה מפורשת של Tenant.",
@@ -589,9 +595,9 @@ const messages = {
         kicker: "Preview",
         title: "Message preview",
         persistentNotice:
-          "The draft is stored in D1. After saving, you can submit it for approval from the list above.",
+          "The draft is stored in PostgreSQL through Railway. Meta submission will open after the safe outbox, audit, and recovery contract is complete.",
         localNotice:
-          "Without Clerk and D1, the draft is stored only in this screen's memory and is not sent to Meta.",
+          "Without Clerk and the Railway API, the draft is stored only in this screen's memory and is not sent to Meta.",
         unavailableNotice:
           "Saving remains unavailable until the account or server state shown above is resolved.",
       },
@@ -607,9 +613,11 @@ const messages = {
       newDraft: "New draft",
       readOnly:
         "Your current role may view templates but may not save or submit them.",
+      providerActionsUnavailable:
+        "Meta submission and synchronization are temporarily disabled until the safe Railway outbox, audit, and recovery contract is complete. Draft creation and editing remain available.",
       emptyTitle: "No saved templates",
       emptyDescription:
-        "The first draft will appear here after it is successfully saved in D1.",
+        "The first draft will appear here after it is successfully saved in PostgreSQL.",
       updated: "Updated",
       load: "Load for editing",
       submitting: "Submitting...",
@@ -649,7 +657,7 @@ const messages = {
     feedback: {
       directoryFailures: {
         "configuration-required":
-          "Clerk and D1 are not configured. You can prepare a local rehearsal, but it will be lost on refresh and will not be sent to Meta.",
+          "Clerk and the Railway API are not configured. You can prepare a local rehearsal, but it will be lost on refresh and will not be sent to Meta.",
         "onboarding-required":
           "Complete the business details first to create an active Tenant.",
         "tenant-selection-required":
@@ -660,12 +668,12 @@ const messages = {
           "Templates could not be loaded from the server. No fallback data was shown.",
       },
       saveResults: {
-        saved: "The draft was saved in D1 and is available after refresh.",
+        saved: "The draft was saved in PostgreSQL and is available after refresh.",
         "validation-error":
           "The server rejected the draft because one or more fields are invalid.",
         "not-editable":
           "A template already submitted to Meta is locked and cannot be overwritten.",
-        "configuration-required": "Clerk and D1 are not configured.",
+        "configuration-required": "Clerk and the Railway API are not configured.",
         unauthenticated: "Sign in again before saving the template.",
         "onboarding-required": "Complete the business details first.",
         "tenant-selection-required": "Select a Tenant explicitly.",
@@ -677,6 +685,8 @@ const messages = {
       localRehearsalSaved:
         "The rehearsal was saved only in this screen's memory, not on the server.",
       submitResults: {
+        "submission-staged":
+          "The submission was stored in the secure outbox and will be sent to Meta by the worker.",
         submitted: "Meta received the template and is reviewing it.",
         "invalid-input": "The template identifier is invalid.",
         "not-found": "The template was not found in the current Tenant.",
@@ -695,7 +705,7 @@ const messages = {
           "Meta rejected the template creation request. The draft remains editable.",
         "submission-uncertain":
           "The submission result is unknown. The system will not retry until it syncs with Meta.",
-        "configuration-required": "Clerk and D1 are not configured.",
+        "configuration-required": "Clerk and the Railway API are not configured.",
         unauthenticated: "Sign in again before submitting.",
         "onboarding-required": "Complete the business details first.",
         "tenant-selection-required": "Select a Tenant explicitly.",
@@ -715,8 +725,8 @@ const messages = {
         "identity-conflict":
           "A Meta Template ID conflicts with its local name, language, or category. No automatic correction was made.",
         "sync-failed":
-          "Meta or D1 did not complete the sync. No fallback status was shown.",
-        "configuration-required": "Clerk and D1 are not configured.",
+          "The Railway Meta runtime did not complete the sync. No fallback status was shown.",
+        "configuration-required": "Clerk and the Railway API are not configured.",
         unauthenticated: "Sign in again before syncing.",
         "onboarding-required": "Complete the business details first.",
         "tenant-selection-required": "Select a Tenant explicitly.",
@@ -844,9 +854,9 @@ const messages = {
         kicker: "معاينة",
         title: "معاينة الرسالة",
         persistentNotice:
-          "تُحفظ المسودة في D1. بعد الحفظ يمكن إرسالها للموافقة من القائمة أعلاه.",
+          "تُحفظ المسودة في PostgreSQL عبر Railway. سيتاح الإرسال إلى Meta بعد اكتمال عقد Outbox والتدقيق والاسترداد الآمن.",
         localNotice:
-          "بدون Clerk وD1، تُحفظ المسودة في ذاكرة هذه الشاشة فقط ولا تُرسل إلى Meta.",
+          "بدون Clerk وRailway API، تُحفظ المسودة في ذاكرة هذه الشاشة فقط ولا تُرسل إلى Meta.",
         unavailableNotice:
           "يبقى الحفظ غير متاح حتى تُحل حالة الحساب أو الخادم الموضحة أعلاه.",
       },
@@ -862,9 +872,11 @@ const messages = {
       newDraft: "مسودة جديدة",
       readOnly:
         "يسمح دورك الحالي بعرض القوالب، لكنه لا يسمح بحفظها أو إرسالها.",
+      providerActionsUnavailable:
+        "تم تعطيل الإرسال إلى Meta والمزامنة مؤقتًا حتى يكتمل عقد Outbox والتدقيق والاسترداد الآمن في Railway. ما زال إنشاء المسودات وتحريرها متاحًا.",
       emptyTitle: "لا توجد قوالب محفوظة",
       emptyDescription:
-        "ستظهر المسودة الأولى هنا بعد حفظها بنجاح في D1.",
+        "ستظهر المسودة الأولى هنا بعد حفظها بنجاح في PostgreSQL.",
       updated: "آخر تحديث",
       load: "تحميل للتحرير",
       submitting: "جارٍ الإرسال...",
@@ -904,7 +916,7 @@ const messages = {
     feedback: {
       directoryFailures: {
         "configuration-required":
-          "لم يتم إعداد Clerk وD1. يمكنك تجهيز تجربة محلية، لكنها ستُحذف عند التحديث ولن تُرسل إلى Meta.",
+          "لم يتم إعداد Clerk وRailway API. يمكنك تجهيز تجربة محلية، لكنها ستُحذف عند التحديث ولن تُرسل إلى Meta.",
         "onboarding-required":
           "أكمل بيانات النشاط التجاري أولًا لإنشاء Tenant نشط.",
         "tenant-selection-required":
@@ -915,12 +927,12 @@ const messages = {
           "تعذر تحميل القوالب من الخادم. لم تُعرض بيانات بديلة.",
       },
       saveResults: {
-        saved: "حُفظت المسودة في D1 وأصبحت متاحة بعد التحديث.",
+        saved: "حُفظت المسودة في PostgreSQL وأصبحت متاحة بعد التحديث.",
         "validation-error":
           "رفض الخادم المسودة لأن حقلًا واحدًا أو أكثر غير صالح.",
         "not-editable":
           "القالب الذي أُرسل إلى Meta مقفل ولا يمكن استبداله.",
-        "configuration-required": "لم يتم إعداد Clerk وD1.",
+        "configuration-required": "لم يتم إعداد Clerk وRailway API.",
         unauthenticated: "سجّل الدخول مجددًا قبل حفظ القالب.",
         "onboarding-required": "أكمل بيانات النشاط التجاري أولًا.",
         "tenant-selection-required": "اختر Tenant صراحةً.",
@@ -931,6 +943,8 @@ const messages = {
       localRehearsalSaved:
         "حُفظت التجربة في ذاكرة هذه الشاشة فقط، وليس على الخادم.",
       submitResults: {
+        "submission-staged":
+          "تم حفظ الإرسال في صندوق الصادر الآمن وسيقوم الـWorker بإرساله إلى Meta.",
         submitted: "استلمت Meta القالب وهو قيد المراجعة.",
         "invalid-input": "معرّف القالب غير صالح.",
         "not-found": "لم يُعثر على القالب في الـTenant الحالي.",
@@ -949,7 +963,7 @@ const messages = {
           "رفضت Meta طلب إنشاء القالب. بقيت المسودة متاحة للتحرير.",
         "submission-uncertain":
           "نتيجة الإرسال غير معروفة. لن تعيد المنظومة المحاولة قبل المزامنة مع Meta.",
-        "configuration-required": "لم يتم إعداد Clerk وD1.",
+        "configuration-required": "لم يتم إعداد Clerk وRailway API.",
         unauthenticated: "سجّل الدخول مجددًا قبل الإرسال.",
         "onboarding-required": "أكمل بيانات النشاط التجاري أولًا.",
         "tenant-selection-required": "اختر Tenant صراحةً.",
@@ -968,8 +982,8 @@ const messages = {
         "identity-conflict":
           "يتعارض معرّف Template لدى Meta مع الاسم أو اللغة أو الفئة المحلية. لم يُجر تصحيح تلقائي.",
         "sync-failed":
-          "لم تُكمل Meta أو D1 المزامنة. لم تُعرض حالة بديلة.",
-        "configuration-required": "لم يتم إعداد Clerk وD1.",
+          "لم يُكمل Runtime الخاص بـMeta في Railway المزامنة. لم تُعرض حالة بديلة.",
+        "configuration-required": "لم يتم إعداد Clerk وRailway API.",
         unauthenticated: "سجّل الدخول مجددًا قبل المزامنة.",
         "onboarding-required": "أكمل بيانات النشاط التجاري أولًا.",
         "tenant-selection-required": "اختر Tenant صراحةً.",

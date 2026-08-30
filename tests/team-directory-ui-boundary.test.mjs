@@ -59,6 +59,21 @@ test("loads team data only for the authenticated team route", async () => {
   );
 });
 
+test("routes the current team directory through Railway without D1 fallback", async () => {
+  const [currentSource, handlerSource] = await Promise.all([
+    readSource("server/team/currentTeamDirectory.ts"),
+    readSource("server/team/currentRailwayTeamDirectoryHandler.ts"),
+  ]);
+
+  assert.match(currentSource, /createCurrentRailwayTeamDirectoryHandler/);
+  assert.match(handlerSource, /resolveCurrentRailwayApiServerIdentity/);
+  assert.match(handlerSource, /createRailwayApiClient/);
+  assert.doesNotMatch(
+    `${currentSource}\n${handlerSource}`,
+    /requireRuntimeDatabase|requireCurrentTenantSession|createTenantMembershipRepository/,
+  );
+});
+
 test("keeps unsupported team mutations disabled with an accessible explanation", async () => {
   const source = await readSource(
     "features/team/TeamDirectory.tsx",

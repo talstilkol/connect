@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   deriveBotFlowBlockKey,
   deriveBotFlowKey,
+  deriveBotFlowOptionKey,
   deriveBotFlowVersionKey,
 } from "../server/bot/botFlowKey.ts";
 import {
@@ -72,6 +73,69 @@ async function definitionFixture(
     botFlowVersionKey,
     definition,
     versionNumber,
+  };
+}
+
+async function buttonDefinitionFixture({
+  optionCount,
+  longLabel = false,
+}) {
+  const name = `WhatsApp buttons ${optionCount} ${longLabel}`;
+  const botFlowKey = await deriveBotFlowKey(7, name);
+  const triggerKey =
+    await deriveBotFlowBlockKey(botFlowKey, 1);
+  const buttonsKey =
+    await deriveBotFlowBlockKey(botFlowKey, 2);
+  const endKeys = await Promise.all(
+    Array.from({ length: optionCount }, (_, index) =>
+      deriveBotFlowBlockKey(botFlowKey, index + 3),
+    ),
+  );
+  const options = await Promise.all(
+    endKeys.map(async (endKey, index) => ({
+      optionKey: await deriveBotFlowOptionKey(
+        buttonsKey,
+        index + 1,
+      ),
+      label: longLabel && index === 0
+        ? "א".repeat(21)
+        : `אפשרות ${index + 1}`,
+      nextBlockKey: endKey,
+    })),
+  );
+  const definition = {
+    name,
+    blocks: [
+      {
+        blockKey: triggerKey,
+        type: "trigger",
+        nextBlockKey: buttonsKey,
+      },
+      {
+        blockKey: buttonsKey,
+        type: "buttons",
+        text: "בחרו אפשרות",
+        options,
+      },
+      ...endKeys.map((blockKey) => ({
+        blockKey,
+        type: "end",
+      })),
+    ],
+  };
+  const botFlowVersionKey =
+    await deriveBotFlowVersionKey(
+      7,
+      botFlowKey,
+      1,
+      definition,
+    );
+
+  return {
+    botFlowKey,
+    botFlowVersionKey,
+    definition,
+    versionNumber: 1,
   };
 }
 
@@ -825,6 +889,49 @@ test("publishes only a stored version whose deterministic identity is valid", as
       },
     ],
   );
+});
+
+test("blocks publishing flows that exceed official reply-button limits", async () => {
+  const cases = [
+    {
+      fixture: await buttonDefinitionFixture({
+        optionCount: 4,
+      }),
+      issue: "whatsapp-button-count-exceeded",
+    },
+    {
+      fixture: await buttonDefinitionFixture({
+        optionCount: 3,
+        longLabel: true,
+      }),
+      issue: "whatsapp-button-label-too-long",
+    },
+  ];
+
+  for (const current of cases) {
+    const repository = repositoryFixture({
+      findVersion: version(current.fixture),
+    });
+
+    await assert.rejects(
+      repository.service.publishDraft(
+        session(),
+        {
+          botFlowKey: current.fixture.botFlowKey,
+          botFlowVersionKey:
+            current.fixture.botFlowVersionKey,
+          expectedFlowVersion: 1,
+        },
+      ),
+      (error) =>
+        error instanceof BotFlowInputError &&
+        error.issues.includes(current.issue),
+    );
+    assert.deepEqual(
+      repository.calls.publications,
+      [],
+    );
+  }
 });
 
 test("maps repository outcomes to bounded service errors", async () => {

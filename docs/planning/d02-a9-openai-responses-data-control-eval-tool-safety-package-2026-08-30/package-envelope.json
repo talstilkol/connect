@@ -1,0 +1,854 @@
+{
+  "artifactId": "CONNECT-D02-A9-EXTERNAL-ATOMIC-PACKAGE-ENVELOPE-2026-08-30",
+  "envelopeVersion": "1.0.0",
+  "namespaceRoot": "web",
+  "logicalPackageRoot": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/",
+  "selfMembership": "EXCLUDED-NON-SELF-REFERENTIAL",
+  "memberCount": 83,
+  "memberOrder": [
+    "docs/decision-intake-2026-08-21.md",
+    "docs/planning/d02-a4-openai-model-routing-reconciliation-2026-08-29.md",
+    "docs/planning/d02-a5-openai-responses-data-control-and-model-selection-reconciliation-2026-08-29.md",
+    "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-2026-08-30.md",
+    "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-2026-08-30.md",
+    "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-findings-manifest-2026-08-30.md",
+    "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+    "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+    "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+    "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+    "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-semantic-successor-2026-08-30.md",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-immutable-successor-2026-08-30.md",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/dependency-dag.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-corpus.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-oracle.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/package-manifest.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a-report.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a.mjs",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b-report.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b.rb",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/registry.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/root-instances.json",
+    "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/schema.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-and-tool-safety-immutable-successor-2026-08-30.md",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/admitted-input-manifest.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/control-oracle.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/dependency-dag.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/envelope.schema.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/execution-receipts.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/generate.mjs",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/generation-report.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-corpus.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-oracle.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/positive-controls.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/predecessor-semantic-universe.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/producer-appointments.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a-report.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a.mjs",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b-report.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b.rb",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-registry.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-001.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-002.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-003.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-004.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-005.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-006.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-007.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-008.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-009.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-010.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-011.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-012.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-013.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-014.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-015.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-016.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-017.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-018.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-019.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-020.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-021.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-022.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-023.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-024.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-025.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-026.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-027.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-028.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-029.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/snapshot.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/snapshot.schema.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/source-receipts.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/transition-machine.json",
+    "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/transition.schema.json",
+    "docs/planning/d18-a2-public-repository-security-decision-2026-08-29.md",
+    "docs/researched-decision-approval-2026-08-26.md"
+  ],
+  "members": [
+    {
+      "ordinal": 1,
+      "logicalPath": "docs/decision-intake-2026-08-21.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "052297f38f63d6e525641a5e1d044267cf7d553fd3e7a9d2d469669eca090937",
+      "lines": 151,
+      "words": 1283,
+      "bytes": 10996
+    },
+    {
+      "ordinal": 2,
+      "logicalPath": "docs/planning/d02-a4-openai-model-routing-reconciliation-2026-08-29.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "221af06420bd0d5680ae708c997e9f22b7b48eecc9278dbe740cb66346c68d54",
+      "lines": 165,
+      "words": 1612,
+      "bytes": 12368
+    },
+    {
+      "ordinal": 3,
+      "logicalPath": "docs/planning/d02-a5-openai-responses-data-control-and-model-selection-reconciliation-2026-08-29.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "1981729d8a0001d38f439508cdf668cbbd18b8bda0c70cde2152e19ff93281e5",
+      "lines": 115,
+      "words": 1134,
+      "bytes": 9302
+    },
+    {
+      "ordinal": 4,
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "3788b73457a3bb25a679dc42875b641a21156f3b93e3b29676a3489e826ad3db",
+      "lines": 465,
+      "words": 3493,
+      "bytes": 30592
+    },
+    {
+      "ordinal": 5,
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "344c42bcdbf60eed1332bfaa7e20d9725e80cad5e0f2d05863c3cbef6ba5f16d",
+      "lines": 209,
+      "words": 2091,
+      "bytes": 18279
+    },
+    {
+      "ordinal": 6,
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "55f985944dae7684af73f3214e966650a3949ae52b1b28dc54ef198a886dceca",
+      "lines": 49,
+      "words": 918,
+      "bytes": 7724
+    },
+    {
+      "ordinal": 7,
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "3f2b6689b638453872c019b96ed451a6096d3d771935d73dde82ff116b3b3cbc",
+      "lines": 47,
+      "words": 540,
+      "bytes": 5195
+    },
+    {
+      "ordinal": 8,
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "15d8f46c32b09301e58bf9e1867d0bab7e2c40b17634a3aa12c903e6dc99be62",
+      "lines": 179,
+      "words": 1823,
+      "bytes": 15589
+    },
+    {
+      "ordinal": 9,
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "d488c9f36d88797bf74b6db60e422c4bd9d55443eff032fa38aff490fd813c9b",
+      "lines": 41,
+      "words": 934,
+      "bytes": 7465
+    },
+    {
+      "ordinal": 10,
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "4ef56a1332504d04fad5176eba41a4dc40ae5a82f611e8208e0e51ff6cb8a21e",
+      "lines": 82,
+      "words": 743,
+      "bytes": 7204
+    },
+    {
+      "ordinal": 11,
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-semantic-successor-2026-08-30.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "f1246bc52124a59645a2446d4c83075358c9f6214f84bc6ee7e7ce6b8208b446",
+      "lines": 360,
+      "words": 4042,
+      "bytes": 36482
+    },
+    {
+      "ordinal": 12,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "role": "IMMEDIATE-A8-PREDECESSOR",
+      "sha256": "859f721f09b7af35bf0810cdae0dd9beebe84f126d6d05ba6b605a23633a06ad",
+      "lines": 37,
+      "words": 557,
+      "bytes": 6223
+    },
+    {
+      "ordinal": 13,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-immutable-successor-2026-08-30.md",
+      "role": "IMMEDIATE-A8-PREDECESSOR",
+      "sha256": "61774fd3f54bf39d727ff7cdc09ef475fff9bd2b2561e5639e1b947dbbcaec0b",
+      "lines": 174,
+      "words": 1675,
+      "bytes": 17302
+    },
+    {
+      "ordinal": 14,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+      "role": "IMMEDIATE-A8-PREDECESSOR",
+      "sha256": "d1ae799f46af8cce25eb447898591d7f3f2151faf7e6491a02440e29a166b2c8",
+      "lines": 207,
+      "words": 2234,
+      "bytes": 19033
+    },
+    {
+      "ordinal": 15,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "IMMEDIATE-A8-PREDECESSOR",
+      "sha256": "455679d450c7b9c20b2cc4358ad580224a439185410574e71bd9e733d281b32d",
+      "lines": 41,
+      "words": 729,
+      "bytes": 6457
+    },
+    {
+      "ordinal": 16,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "role": "IMMEDIATE-A8-PREDECESSOR",
+      "sha256": "d648af6042f8cd8a5a98cf504c567d2a6806cf25f693a2812578897b38978476",
+      "lines": 87,
+      "words": 773,
+      "bytes": 8633
+    },
+    {
+      "ordinal": 17,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/dependency-dag.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "b3a6bb3b341a78946d110b3d7094cd8a5a49a733060ed927a301da21efb670ae",
+      "lines": 362,
+      "words": 622,
+      "bytes": 9794
+    },
+    {
+      "ordinal": 18,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-corpus.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "f6a1a15e35fd43e841296eed8f0ac93f5b4f7dbbbb95ee9af407702eba8566f3",
+      "lines": 1619,
+      "words": 2809,
+      "bytes": 42853
+    },
+    {
+      "ordinal": 19,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-oracle.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "6f166a9cd6661439bd15bd6ff54377e107f6cea6a6042701778a2836a40dcaf0",
+      "lines": 726,
+      "words": 1091,
+      "bytes": 18325
+    },
+    {
+      "ordinal": 20,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/package-manifest.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "d5e60ec07595a5a55db40e029b815805c28a19ecbba9b0d6e1136af762461de6",
+      "lines": 141,
+      "words": 247,
+      "bytes": 5239
+    },
+    {
+      "ordinal": 21,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a-report.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "bde8eb1e5ff0f0d56965302cc0fbbe67f9b6f1a72c032822cec30846c7ba4297",
+      "lines": 911,
+      "words": 1416,
+      "bytes": 25669
+    },
+    {
+      "ordinal": 22,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a.mjs",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "c415af83d535e463b14661aa0270f4049d72669c192d57c449a64932db8ec333",
+      "lines": 511,
+      "words": 2134,
+      "bytes": 23964
+    },
+    {
+      "ordinal": 23,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b-report.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "0db7d37b763e410443f0e153c5a3315f09620f634925318cf71c73480dea506a",
+      "lines": 913,
+      "words": 1417,
+      "bytes": 25709
+    },
+    {
+      "ordinal": 24,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b.rb",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "18e4490b43d2e09b0f4925cab4f1b12cb05787245b6092ad2c7c71d5baa3d982",
+      "lines": 466,
+      "words": 1669,
+      "bytes": 21190
+    },
+    {
+      "ordinal": 25,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/registry.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "751d0b1e702656b1fbaa7ee91a7d14e0966d1d1beb6cbc116ea855391d2c862a",
+      "lines": 1359,
+      "words": 2391,
+      "bytes": 44206
+    },
+    {
+      "ordinal": 26,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/root-instances.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "37a7f70420970de8dd7e1252c8e0c080170d5efd126c2c4c36aa3ee4996c39f2",
+      "lines": 112,
+      "words": 184,
+      "bytes": 4461
+    },
+    {
+      "ordinal": 27,
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-tool-safety-package-2026-08-30/schema.json",
+      "role": "A8-PACKAGE-PREDECESSOR",
+      "sha256": "703a680bc35dbd7cffe1f98f785abe7d103a09bfc4a496bb1ea3412b3c2f505a",
+      "lines": 985,
+      "words": 1515,
+      "bytes": 22542
+    },
+    {
+      "ordinal": 28,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "role": "A9-TOP-LEVEL-PLANNING",
+      "sha256": "dbf5ab4abc8e052001a13880944888619bb722034a6f0e864cfe5cd6c51a8d76",
+      "lines": 37,
+      "words": 570,
+      "bytes": 5837
+    },
+    {
+      "ordinal": 29,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-and-tool-safety-immutable-successor-2026-08-30.md",
+      "role": "A9-TOP-LEVEL-PLANNING",
+      "sha256": "29b2dbd2e89b2aee362659891a9734539714d159b69f5a41a0e6918c0feef5ad",
+      "lines": 135,
+      "words": 1418,
+      "bytes": 14559
+    },
+    {
+      "ordinal": 30,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "role": "A9-TOP-LEVEL-PLANNING",
+      "sha256": "94f5e86f078157bc510f14b73831de25d823d88672d444e94bc739607d5b0c44",
+      "lines": 95,
+      "words": 873,
+      "bytes": 9422
+    },
+    {
+      "ordinal": 31,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/admitted-input-manifest.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "ac0cb55796d8682eed0d87283c806aca226834d055bc5ac696047fc6626a852a",
+      "lines": 224,
+      "words": 364,
+      "bytes": 7819
+    },
+    {
+      "ordinal": 32,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/control-oracle.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "246e262c59755f8790a4b012b11b5bb66d150681dc6c5b5982cf3684708fc81d",
+      "lines": 80,
+      "words": 139,
+      "bytes": 2234
+    },
+    {
+      "ordinal": 33,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/dependency-dag.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "92cd2a3e37e7375fd0d49e32eddd497f2b066a0d7b649cc627c979cb8c309c28",
+      "lines": 391,
+      "words": 641,
+      "bytes": 11041
+    },
+    {
+      "ordinal": 34,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/envelope.schema.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "e02dd823596bf5ac1d16cc117bbdeb9b309a7ac8a9858a5938e9ff23f04f3600",
+      "lines": 163,
+      "words": 266,
+      "bytes": 3619
+    },
+    {
+      "ordinal": 35,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/execution-receipts.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "cdd78396170329e8131147e44a4ae9215becb48a225f43bf8edb509b35966037",
+      "lines": 131,
+      "words": 244,
+      "bytes": 4555
+    },
+    {
+      "ordinal": 36,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/generate.mjs",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "ac59b0f1f731fa70208a4832c778d43cb6deb28c9b13b7592555bb9a4032cbee",
+      "lines": 762,
+      "words": 4515,
+      "bytes": 61914
+    },
+    {
+      "ordinal": 37,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/generation-report.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "b3465d85bc0c3c81947e73179a33f4e88dd1ed248bde839dc420d4e774221347",
+      "lines": 39,
+      "words": 74,
+      "bytes": 1431
+    },
+    {
+      "ordinal": 38,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-corpus.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "db37fd70d4e182fa9284c8768e9ce69ec503b3c5b913b613ce2a0fd635647b92",
+      "lines": 1344,
+      "words": 2359,
+      "bytes": 33935
+    },
+    {
+      "ordinal": 39,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-oracle.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "f54e5195578653c3319fb5a54557f8f4a5a5ee222dbfcbccb89895d80b0e0db3",
+      "lines": 385,
+      "words": 579,
+      "bytes": 9663
+    },
+    {
+      "ordinal": 40,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/positive-controls.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "442090977d7d2062b29eab695fc5aad154b7491655eedfad78cf159bafe8a1d3",
+      "lines": 1345,
+      "words": 2118,
+      "bytes": 34092
+    },
+    {
+      "ordinal": 41,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/predecessor-semantic-universe.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "23fb849590b29601c319d86e323b4129ff7671ad2ce92c2be82cf1da9ba5d770",
+      "lines": 422,
+      "words": 746,
+      "bytes": 18384
+    },
+    {
+      "ordinal": 42,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/producer-appointments.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "63f2cf6f4c6558e61b26611f27396084be0ffeb94dbbd419c042d4ae64754d71",
+      "lines": 423,
+      "words": 741,
+      "bytes": 14422
+    },
+    {
+      "ordinal": 43,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a-report.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "72abce7438bc91a2f88753e6b3864e9039fe1f0d47fa872e735d4593f0104a2d",
+      "lines": 935,
+      "words": 1593,
+      "bytes": 31118
+    },
+    {
+      "ordinal": 44,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a.mjs",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "c38043328d8bfe6b1938d3bb08c30a9a0959da6e2407ce55dcff30a0033428b3",
+      "lines": 299,
+      "words": 3261,
+      "bytes": 35823
+    },
+    {
+      "ordinal": 45,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b-report.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "05a8e1f5b2025aeeeed5c0cb73740fb4b019b4e2a82c7526497c7a095b8c8e0b",
+      "lines": 935,
+      "words": 1593,
+      "bytes": 31114
+    },
+    {
+      "ordinal": 46,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b.rb",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "e4fa82ff8733f0fb1bd2ca3b9b549fa3037ffa6e0f05f07cecf60ee60a63153f",
+      "lines": 467,
+      "words": 2806,
+      "bytes": 34614
+    },
+    {
+      "ordinal": 47,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-registry.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "be8ff1d6509df8c9703cbbef6fb7ec7492e51a81b7eec52941abc873cff1d551",
+      "lines": 1074,
+      "words": 1830,
+      "bytes": 31814
+    },
+    {
+      "ordinal": 48,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-001.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "e7e3881219c6e0b7dcce76d3161d8b46f9bc27117d4d74264ea21687db0e9ea4",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 60174
+    },
+    {
+      "ordinal": 49,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-002.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "3d847ad14e7cdb8ec10ce666e159589d618946b270e9eb762de9830368524daf",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 60753
+    },
+    {
+      "ordinal": 50,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-003.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "cf47023348bd8e0b19691fdf4107749aed0118736ea45111d389c40e1e441dfb",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61198
+    },
+    {
+      "ordinal": 51,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-004.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "c2d546b440069cf65a99b54d379b9ea28684b42dbf8387d575496d2a3e6cd257",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61262
+    },
+    {
+      "ordinal": 52,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-005.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "05f70e75d1ded8781cfdfa43246a856de3c88472d770c154fee02aabe36b2a67",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61669
+    },
+    {
+      "ordinal": 53,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-006.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "f0d715cd078c9215bf13b88e68428042da1373c1b3ca26b75ff77ba9eb7e6134",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 62858
+    },
+    {
+      "ordinal": 54,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-007.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "4bae347ce3d5e1d3034f3fd59daf48b2f93000f8771ec303c0ee5765818f9e47",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 64575
+    },
+    {
+      "ordinal": 55,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-008.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "8377c88d0bc26598914cf0cad60275c958e77bb6081a4027f5d64adb2fe2db87",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65621
+    },
+    {
+      "ordinal": 56,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-009.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "9f52ce6523d17e3c7e51b27f81166a5d4e2f0682baec45f7f93ceedaa712f107",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65793
+    },
+    {
+      "ordinal": 57,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-010.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "44db12e3af71f93838af7a45047b72dc1ff8c2cb744b74e840e43e6ba73f51ea",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65811
+    },
+    {
+      "ordinal": 58,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-011.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "a55588a7d6d572723956602a264397ee7d1df40e1e4c41499ba9d57c9bf42039",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65910
+    },
+    {
+      "ordinal": 59,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-012.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "cfbcb27af86ed20852232172ddc3c5a04df2e7db149df19eb18a7fd22f83b08c",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65897
+    },
+    {
+      "ordinal": 60,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-013.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "a6e3cf764cc1c04377b2a7b013f2a8c6a7a91fda849fde077114786d27cfceb6",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66196
+    },
+    {
+      "ordinal": 61,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-014.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "c83613ec5b7b6a7874683d78d93fa8efae737f8f568720cea5e11e56a35b929e",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 67279
+    },
+    {
+      "ordinal": 62,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-015.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "2c30d49b4740e7bab0faa6251eb50807c57fc60f881550b74ac0cda82286d102",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66918
+    },
+    {
+      "ordinal": 63,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-016.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "8c6fadf8c3ac9f05bbb14c65b21ba24a370e57a3c975a1280f65d6328f8e39db",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66865
+    },
+    {
+      "ordinal": 64,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-017.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "faa4b4b0c3c20b927f15735d7d6cee52c2f8ae3b36dabd883247c777b30cc6b0",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 68301
+    },
+    {
+      "ordinal": 65,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-018.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "fb5358c7b602ff278d97b82edfe5d52d8f8ee90782fe388c1735b6658c7b1b55",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 68401
+    },
+    {
+      "ordinal": 66,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-019.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "b1e85c40981e754386c6987b54d2e155e6256c43772e7ee8b2329ee2fd9c42ef",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 67658
+    },
+    {
+      "ordinal": 67,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-020.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "01d496b81ef6d862a131f2a335012dde5f3bd9ddf69664ce3985919b39505e0a",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65669
+    },
+    {
+      "ordinal": 68,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-021.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "23aae22b53f210c66d974a94abd994c1b0b2558e99d6f478f2f9c5a6a872380f",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66800
+    },
+    {
+      "ordinal": 69,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-022.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "b10bb7ea14792bcfe0bd185dcb27f22f9a179bb4886e37124400c4bccb7b19a1",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66986
+    },
+    {
+      "ordinal": 70,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-023.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "9869a28ea8ff9bf174a8b7131b10d817798486a9caae7afaa3cfe3f743dcd7eb",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61810
+    },
+    {
+      "ordinal": 71,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-024.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "d3064accb2bce5a9b6400d3ea875330b0c7598ca63bb0d6ef02e206da590b15c",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66311
+    },
+    {
+      "ordinal": 72,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-025.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "19996bd9c999a9f5d125eebedd2f19ca7c8da4332a8f8bf8a4cc2652fc28b1f3",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 67018
+    },
+    {
+      "ordinal": 73,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-026.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "982317e90a5d41bf33ca4c4919c34624ce6dd7edbbbef77474eb0f5fbbf6569c",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66406
+    },
+    {
+      "ordinal": 74,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-027.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "1d6b5d6d49027481c6953335c9b994de7bfb0154030984d19284bcdb21d8b5c1",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66378
+    },
+    {
+      "ordinal": 75,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-028.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "1e7e3595f03f94659071ef8e64595936169a26d9d07d02292056abf24151d43a",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66681
+    },
+    {
+      "ordinal": 76,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-029.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "7ff638bcbed39468949e77e218406251982813c6614489058b97dfda7304cad5",
+      "lines": 971,
+      "words": 1811,
+      "bytes": 43747
+    },
+    {
+      "ordinal": 77,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/snapshot.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "353ef2f55a18d95bbcdb99278fa4f33f74d9430cabb05ec6bf6d8385a35c8d0e",
+      "lines": 140,
+      "words": 243,
+      "bytes": 3379
+    },
+    {
+      "ordinal": 78,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/snapshot.schema.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "d390fefa99e3ad139e4d76901b312622503793324198ec8d557f646b5666e823",
+      "lines": 209,
+      "words": 324,
+      "bytes": 4719
+    },
+    {
+      "ordinal": 79,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/source-receipts.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "879e4a056ec0887cf21f95f371226a1d8d28b343cab9597aa0f50e4461576d4d",
+      "lines": 622,
+      "words": 1125,
+      "bytes": 23204
+    },
+    {
+      "ordinal": 80,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/transition-machine.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "190fa57756ce98507352b95753a6e587eb90eec8043161205b345977cfe3c021",
+      "lines": 114,
+      "words": 185,
+      "bytes": 2969
+    },
+    {
+      "ordinal": 81,
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/transition.schema.json",
+      "role": "A9-PACKAGE-MEMBER",
+      "sha256": "3710d1939ace56bb8090cf14075c87d19acf95b0fce46019c7506401b29fdeb5",
+      "lines": 170,
+      "words": 249,
+      "bytes": 3686
+    },
+    {
+      "ordinal": 82,
+      "logicalPath": "docs/planning/d18-a2-public-repository-security-decision-2026-08-29.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "448cf2a7596f3544966b1e992c33ea6bc569305d5a2af2a00378cf60bf1eeaa9",
+      "lines": 131,
+      "words": 1106,
+      "bytes": 9090
+    },
+    {
+      "ordinal": 83,
+      "logicalPath": "docs/researched-decision-approval-2026-08-26.md",
+      "role": "FROZEN-ADMITTED-INPUT",
+      "sha256": "f981cf9313e08fe0cfbd0603717af1a999fd1a367b5521d4191d0cfc3b27128b",
+      "lines": 324,
+      "words": 1615,
+      "bytes": 16633
+    }
+  ],
+  "contentRootAlgorithm": "SHA256-DOMAIN-SEPARATED-JCS-ORDERED-MEMBER-EXTENTS",
+  "contentRoot": "21ff424bbc24c8b1fd7cdced4223a1c95853c6399495cdb24b1dbf4a0cd6a856",
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "planningAcceptance": "MISSING",
+    "aiAdmission": "MISSING",
+    "runtimePermit": "MISSING",
+    "acceptanceCount": 0
+  }
+}

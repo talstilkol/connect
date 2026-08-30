@@ -24,6 +24,7 @@ import {
 } from "./metaCampaignDeliveryRetryPolicy.ts";
 import {
   createMetaCampaignTemplateAdapter,
+  type MetaCampaignTemplateAdapterTelemetry,
 } from "./metaCampaignTemplateAdapter.ts";
 
 export interface MetaCampaignDeliveryRuntimeInput {
@@ -36,6 +37,7 @@ export interface MetaCampaignDeliveryRuntimeInput {
   retryEvidenceSource:
     MetaCampaignDeliveryRetryEvidenceSource;
   transportOptions?: MetaGraphTransportOptions;
+  providerRequestTelemetry?: MetaCampaignTemplateAdapterTelemetry;
 }
 
 export function createMetaCampaignDeliveryRuntime(
@@ -55,6 +57,9 @@ export function createMetaCampaignDeliveryRuntime(
       createMetaCampaignDeliveryRetryPolicy(
         input.retryEvidenceSource,
       ),
-    sender: createMetaCampaignTemplateAdapter(transport),
+    sender: createMetaCampaignTemplateAdapter(
+      transport,
+      input.providerRequestTelemetry,
+    ),
   });
 }

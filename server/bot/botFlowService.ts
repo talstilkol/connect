@@ -11,6 +11,9 @@ import {
   type BotFlowDefinitionIssue,
 } from "../../shared/validation/botFlowDefinition.ts";
 import {
+  validateWhatsappBotFlowPublication,
+} from "../../shared/validation/whatsappBotFlowPublication.ts";
+import {
   requireTenantPermission,
   type TenantSession,
 } from "../auth/tenantSession.ts";
@@ -83,12 +86,12 @@ export interface PublishedBotFlowDraft {
   publishedVersion: PersistedBotFlowVersion;
 }
 
-interface SaveDraftRequest {
+export interface ParsedBotFlowSaveDraftRequest {
   definition: ValidatedBotFlowDefinition;
   expectedFlowVersion: number | null;
 }
 
-interface PublishDraftRequest {
+export interface ParsedBotFlowPublishDraftRequest {
   botFlowKey: string;
   botFlowVersionKey: string;
   expectedFlowVersion: number;
@@ -146,7 +149,7 @@ function isPositiveInteger(
   );
 }
 
-function parseBotFlowKey(
+export function parseBotFlowKey(
   value: unknown,
 ): string | null {
   return typeof value === "string" &&
@@ -155,10 +158,10 @@ function parseBotFlowKey(
     : null;
 }
 
-async function parseSaveDraftRequest(
+export async function parseBotFlowSaveDraftRequest(
   tenantId: number,
   input: unknown,
-): Promise<SaveDraftRequest> {
+): Promise<ParsedBotFlowSaveDraftRequest> {
   const graphComposerResult =
     await compileKeywordGraphBotFlowComposerDraft(
       tenantId,
@@ -311,9 +314,9 @@ async function parseSaveDraftRequest(
   };
 }
 
-function parsePublishDraftRequest(
+export function parseBotFlowPublishDraftRequest(
   input: unknown,
-): PublishDraftRequest | null {
+): ParsedBotFlowPublishDraftRequest | null {
   if (
     !isRecord(input) ||
     !hasExactKeys(input, [
@@ -524,7 +527,7 @@ export function createBotFlowService(
         "bot.write",
       );
       const request =
-        await parseSaveDraftRequest(
+        await parseBotFlowSaveDraftRequest(
           session.tenantId,
           input,
         );
@@ -616,7 +619,7 @@ export function createBotFlowService(
         "bot.write",
       );
       const request =
-        parsePublishDraftRequest(input);
+        parseBotFlowPublishDraftRequest(input);
 
       if (!request) {
         throw serviceError("INVALID_INPUT");
@@ -638,6 +641,17 @@ export function createBotFlowService(
           session.tenantId,
           targetVersion,
         );
+
+        const whatsappCompatibility =
+          validateWhatsappBotFlowPublication(
+            targetVersion.definition,
+          );
+
+        if (!whatsappCompatibility.success) {
+          throw new BotFlowInputError(
+            whatsappCompatibility.issues,
+          );
+        }
 
         if (
           targetVersion.botFlowKey !==

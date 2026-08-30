@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
@@ -153,6 +154,50 @@ test("composes the optional system-admin route only with complete isolated polic
   await runtime.close();
 });
 
+test("rejects the legacy bot reply staging option without reading it", async () => {
+  const runtimeOptions = options();
+  let legacyOptionReads = 0;
+  Object.defineProperty(runtimeOptions, "botReplyStaging", {
+    enumerable: true,
+    get() {
+      legacyOptionReads += 1;
+      throw new Error("legacy staging option must not be read");
+    },
+  });
+
+  await assert.rejects(
+    createRailwayPostgresApiRuntime(runtimeOptions),
+    /runtime options are invalid/,
+  );
+  assert.equal(legacyOptionReads, 0);
+});
+
+test("composes a release-bound PostgreSQL evidence reader", async () => {
+  const releaseEvidence = {
+    environment: {
+      BOT_REPLY_STAGING_RELEASE_EVIDENCE_STORE: "postgresql",
+      APP_RELEASE_ID: `connect_release_v1_${"a".repeat(64)}`,
+      APP_DEPLOYED_COMMIT_SHA: "b".repeat(40),
+      APP_DEPLOYMENT_ARTIFACT_DIGEST: `sha256:${"c".repeat(64)}`,
+    },
+    clock: {
+      now() {
+        return new Date("2026-08-24T12:05:00.000Z");
+      },
+    },
+  };
+  const runtime = await createRailwayPostgresApiRuntime(
+    options({ botReplyStagingReleaseEvidence: releaseEvidence }),
+  );
+
+  assert.equal(typeof runtime.handler.handle, "function");
+  assert.doesNotMatch(
+    JSON.stringify(runtime),
+    /connect_release_v1_|APP_DEPLOYED_COMMIT_SHA|evidenceJson/,
+  );
+  await runtime.close();
+});
+
 test("fails closed and closes ownership when identity configuration is absent", async () => {
   await assert.rejects(
     createRailwayPostgresApiRuntime(
@@ -192,6 +237,28 @@ test("rejects extended or incomplete composition options", async () => {
   await assert.rejects(
     createRailwayPostgresApiRuntime({
       ...options(),
+      botReplyStagingReleaseEvidence: {
+        environment: {
+          BOT_REPLY_STAGING_RELEASE_EVIDENCE_STORE: "POSTGRESQL",
+        },
+      },
+    }),
+    /release evidence storage is unavailable/,
+  );
+  await assert.rejects(
+    createRailwayPostgresApiRuntime({
+      ...options(),
+      botReplyStagingReleaseEvidence: {
+        environment: {
+          BOT_REPLY_STAGING_RELEASE_EVIDENCE_STORE: "postgresql",
+        },
+      },
+    }),
+    /releaseId is invalid/,
+  );
+  await assert.rejects(
+    createRailwayPostgresApiRuntime({
+      ...options(),
       systemAdminEnvironment: {
         SYSTEM_ADMIN_MUTATION_RATE_LIMIT_POLICY_VERSION: "5",
         SYSTEM_ADMIN_MUTATION_RATE_LIMIT_CAPACITY: "30",
@@ -211,4 +278,16 @@ test("rejects extended or incomplete composition options", async () => {
     }),
     /runtime options are invalid/,
   );
+});
+
+test("has no static import or composition for the legacy staging driver", () => {
+  const source = readFileSync(
+    "server/platform/railwayPostgresApiRuntime.ts",
+    "utf8",
+  );
+  assert.doesNotMatch(
+    source,
+    /botReplyStagingDurableRunner|botReplyStagingLiveDriver|botReplyStagingQueuedExecutor|railwayBullMqBotReplyStagingQueue|createBotReplyStagingDurableRunner|createBotReplyStagingLiveDriver|createBotReplyStagingQueuedExecutor|waitForBotReplyStagingPoll/,
+  );
+  assert.match(source, /botReplyStagingReleaseEvidence/);
 });

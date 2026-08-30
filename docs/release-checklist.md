@@ -155,6 +155,20 @@ Read-only, ושום Row או Identifier לא נכתב ל־Receipt.
 
 6.1 Monitoring, ‏Alerting ו־SLO פעילים.
 
+6.1.1 הקובץ `.artifacts/better-stack-staging-evidence.json` עבר
+`npm run verify:better-stack-staging-evidence`, תואם ל־Release, ל־Commit
+ול־Artifact הנוכחיים וטרם חלפו 24 שעות ממועד האימות. המאמת אישר שלושה
+Services, חמישה Trace scenarios, שישה Metrics, שתי בדיקות Alert, אפס
+ממצאי PII/Secrets, תרגיל Outage ללא השפעה עסקית ו־Digests נפרדים למדיניות
+Retention ולמדיניות תקרת העלות. אין בקובץ Endpoint, ‏Token, מזהה Source,
+Trace ID גולמי, Tenant או Payload.
+
+6.1.2 תצורת Better Stack Incident כוללת Team-scoped API token נפרד,
+Requester מאושר, ‏Escalation policy שמקשרת Primary ו־Backup, ערוצים
+מפורשים ו־`team_wait` מאושר. תרחישי `SLO_BREACH` ו־
+`SLO_INSUFFICIENT_DATA` יצרו Incident והגיעו לנמען הנכון; לוח שעות ה־Pilot
+נבדק מתוך Better Stack. אין להשתמש ב־Ingestion token ליצירת Incidents.
+
 6.2 בעלי Security, ‏Operations ו־On-call מונו.
 
 6.3 Rollback או Forward Fix נבחרו לפי סוג התקלה.
@@ -177,5 +191,82 @@ Read-only, ושום Row או Identifier לא נכתב ל־Receipt.
 החזיר Policy במצב `disabled`, יצר Audit יחיד וחסם Admission חדש גם
 לאחר תפוגת ה־Evidence הקודמת. צילום מסך לבדו אינו Evidence מספק;
 נדרשים גם מזהי Release ו־Digest של הרשומות המאומתות.
+
+6.7.2 `BOT_REPLY_STAGING_EVIDENCE_JSON` עבר את
+`inspectBotReplyStagingEvidence`, נקשר ל־Release, ‏Commit ו־Artifact
+הנוכחיים וטרם חלפו 24 שעות. הראיה כוללת Text/Button/Button reply,
+‏sent/delivered/read, ‏131047, ‏Graph throughput, ‏130429 עם Retry-After,
+‏131056, ‏Kill switch, ‏Duplicate safety, ‏Vault ו־Redaction. אין להפעיל
+`botReplyDeliveryAdapter` על סמך JSON בלבד; Security ו־Product מאשרים
+בנפרד שהתרחישים הורצו מול WABA מורשה ושכל ה־Fingerprints מקורם ב־Runner
+של Staging.
+
+6.7.3 הקובץ `.artifacts/bot-reply-staging-evidence.json` עבר
+`npm run verify:bot-reply-staging-evidence`, שייך למשתמש המריץ, אינו
+Symbolic link, אינו ניתן לכתיבה בידי Group/Others וזהה byte-for-byte
+לערך `BOT_REPLY_STAGING_EVIDENCE_JSON` שב־Runtime. ‏Production Release
+Gate מפעיל את הבדיקה לאחר Better Stack evidence ולפני Production
+Readiness; Local Release Gate אינו טוען לקיומה של ראיה חיצונית.
+
+6.7.4 ה־Evidence נוצר באמצעות
+`npm run evidence:bot-reply-staging -- --receipt <absolute-path>` מתוך
+Receipt מהימן בן פחות משעה. המחולל סירב לשדות מורחבים, Proof כפול,
+Release mismatch ו־Output קיים, כתב קובץ חדש בהרשאות `0600` ולא העתיק
+Proofs גולמיים ל־Evidence. ‏Live driver הפיק את ה־Receipt דרך Railway
+ולא באמצעות Graph POST עוקף.
+
+6.7.5 פעולת `system-admin.bot-reply-staging.run` הופעלה ב־Staging בלבד
+עם Durable runner של PostgreSQL/BullMQ. קיימת ראיית System Admin
+allowlist, ‏Mutation quota, ‏Confirmation, נמען Opt-in מורשה ואישור
+מתודה בתוקף של טל לבדיקות `130429`/`131056`. היעדר Runner משאיר את
+הפעולה לא רשומה; In-memory runner או Graph POST ישיר אינם ראיית שחרור.
+
+6.7.6 ‏Railway API ו־Worker מוגדרים שניהם עם
+`BOT_REPLY_STAGING_ENABLED=true` ורק בסביבת `staging`. ‏API כולל
+`BOT_REPLY_STAGING_TENANT_ID`, ‏`BOT_REPLY_STAGING_TAL_EXTERNAL_USER_ID`,
+`BOT_REPLY_STAGING_LEASE_DURATION_SECONDS` ו־
+`BOT_REPLY_STAGING_POLL_INTERVAL_MILLISECONDS`; זהות טל נמצאת גם ב־
+`CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS`. ה־Tenant תואם ל־Worker ול־WABA
+המאושרים. ערכי Meta, ‏HMAC, נמען ומלאי פרטי נשמרים רק ב־Worker ואינם
+מועתקים ל־API.
+
+6.7.7 ‏Cross-service activation report הוא `ready` וכל ארבע הבדיקות
+עברו: API configuration, ‏Worker activation, ‏Staging environment
+alignment ו־Tenant alignment. הדוח נבנה מ־Snapshots מבודדים בזיכרון ולא
+מקובץ Secrets משותף; ה־Evidence השמור כולל את הדוח התחום בלבד.
+
+6.7.8 ‏`BOT_REPLY_STAGING_CROSS_SERVICE_EVIDENCE_JSON` עבר את
+`inspectRailwayBotReplyStagingCrossServiceEvidence`, נקשר ל־Release,
+Commit ו־Artifact הנוכחיים, וכל ארבע הבדיקות עדיין `passed`. זמן החיים
+הוא 60–900 שניות והראיה טרם פגה. ה־Evidence נוצר ב־Railway deployment
+orchestration המורשה משני השירותים החיים; Digest תקין לבדו אינו מוכיח
+מקור מהימן ואינו מחליף את `BOT_REPLY_STAGING_EVIDENCE_JSON` של ההרצה
+החיה מול ספק ה־WhatsApp.
+
+6.7.9 ה־Evidence הונפק דרך
+`issueRailwayBotReplyStagingReleaseEvidence`: זהות ה־Release נקראה לפני
+ואחרי ה־Cross-service activation ונשארה זהה ל־Release, ‏Commit ו־Artifact
+הצפויים. Railway orchestration שמר את ה־JSON באופן אטומי רק עבור אותו
+Release, ולאחר השמירה ה־Runtime verifier החזיר `configured`. תוצאת Issuer
+מקומית או Digest לבדם אינם מוכיחים שהשמירה החיה בוצעה.
+
+6.7.10 הפרסום עבר דרך
+`publishRailwayBotReplyStagingReleaseEvidence`: ה־Adapter ביצע
+Compare-and-set על Release, גרסה ו־Digest קודם, החזיר גרסה עוקבת, והקריאה
+לאחר הכתיבה הייתה זהה byte-for-byte ל־JSON שהונפק. ה־Verifier לאחר הכתיבה
+החזיר `configured`. ‏Replay זהה לא ביצע כתיבה נוספת; Conflict או Read-back
+שונה חסמו את ה־Release.
+
+6.7.11 ‏ADR-0005 מאושר פורמלית לפני הגדרת
+`BOT_REPLY_STAGING_RELEASE_EVIDENCE_STORE=postgresql`. ה־Evidence נשמר
+ברשומת PostgreSQL גרסתית באותה Railway Environment ולא ב־Railway
+Variables, ‏Redis או Memory. ה־Migration וה־Repository עברו בדיקות CAS
+מקבילות, וה־Runtime reader אינו תלוי עוד ב־
+`BOT_REPLY_STAGING_CROSS_SERVICE_EVIDENCE_JSON` זמני.
+
+6.7.12 מיגרציה 0040 הורצה ב־Staging PostgreSQL אמיתי. שתי כתיבות מקבילות
+עם אותו Release/Version/Digest החזירו Winner יחיד, ‏Read-after-write היה
+זהה byte-for-byte, וכתיבה עם Release, ‏Digest או JSON שונה נכשלה. בדיקה
+מקומית מול Executor מדומה אינה מספיקה כראיית שחרור.
 
 6.8 רק לאחר שכל הסעיפים הוכחו ניתן לאשר Production.

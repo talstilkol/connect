@@ -59,6 +59,8 @@ const languages: readonly TemplateLanguage[] = [
   "ar",
 ];
 
+const railwayMetaTemplateProviderActionsReady = false;
+
 function toTemplateDraft(
   template: MessageTemplateView,
 ): TemplateDraft {
@@ -414,7 +416,10 @@ export function TemplateDraftEditor({
   };
 
   const submitTemplate = (templateKey: string) => {
-    if (isSubmitting) {
+    if (!railwayMetaTemplateProviderActionsReady || isSubmitting) {
+      if (!railwayMetaTemplateProviderActionsReady) {
+        setSubmitResult({ status: "meta-configuration-required" });
+      }
       return;
     }
 
@@ -430,7 +435,8 @@ export function TemplateDraftEditor({
         resetEditor();
         setSubmitResult(result);
       } else if (
-        result.status === "submission-uncertain"
+        result.status === "submission-uncertain" ||
+        result.status === "submission-staged"
       ) {
         setTemplates((current) =>
           current.map((template) =>
@@ -447,7 +453,10 @@ export function TemplateDraftEditor({
   };
 
   const syncTemplates = () => {
-    if (isSyncing) {
+    if (!railwayMetaTemplateProviderActionsReady || isSyncing) {
+      if (!railwayMetaTemplateProviderActionsReady) {
+        setSyncResult({ status: "meta-configuration-required" });
+      }
       return;
     }
 
@@ -1137,7 +1146,9 @@ function MessageTemplateDirectory({
             type="button"
             className="secondary-button"
             onClick={onSync}
+            aria-describedby="message-template-provider-actions-boundary"
             disabled={
+              !railwayMetaTemplateProviderActionsReady ||
               initialStatus !== "ready" ||
               !canWrite ||
               isSyncing
@@ -1160,6 +1171,17 @@ function MessageTemplateDirectory({
           </button>
         </div>
       </div>
+
+      {!railwayMetaTemplateProviderActionsReady ? (
+        <div
+          className="inline-notice warning"
+          id="message-template-provider-actions-boundary"
+          role="status"
+        >
+          <span aria-hidden="true">i</span>
+          <p>{messages.directory.providerActionsUnavailable}</p>
+        </div>
+      ) : null}
 
       {directoryFailure ? (
         <div className="inline-notice warning">
@@ -1228,7 +1250,11 @@ function MessageTemplateDirectory({
                       <button
                         type="button"
                         className="primary-button"
-                        disabled={isSubmitting}
+                        aria-describedby="message-template-provider-actions-boundary"
+                        disabled={
+                          !railwayMetaTemplateProviderActionsReady ||
+                          isSubmitting
+                        }
                         onClick={() =>
                           onSubmit(template.templateKey)
                         }
@@ -1255,7 +1281,8 @@ function MessageTemplateDirectory({
             submitResult.status === "submitted"
               ? "success"
               : submitResult.status ===
-                  "submission-uncertain"
+                  "submission-uncertain" ||
+                  submitResult.status === "submission-staged"
                 ? "warning"
                 : "danger"
           }

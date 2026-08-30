@@ -13,11 +13,7 @@ async function readServerSource(path) {
 
 test("routes tenant-only mutation modules through the mutation session", async () => {
   const paths = [
-    "campaigns/campaignActions.ts",
-    "contacts/contactImportActions.ts",
     "meta/metaEmbeddedSignupActions.ts",
-    "team/teamInvitationActions.ts",
-    "team/teamMembershipActions.ts",
     "templates/messageTemplateActions.ts",
   ];
 
@@ -37,6 +33,92 @@ test("routes tenant-only mutation modules through the mutation session", async (
   }
 });
 
+test("routes team invitation requests through Railway", async () => {
+  const source = await readServerSource(
+    "team/teamInvitationActions.ts",
+  );
+
+  assert.match(
+    source,
+    /createCurrentRailwayTeamInvitationRequestHandler/,
+  );
+  assert.doesNotMatch(
+    source,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createTeamInvitationRepository|requireRuntimeTeamInvitationPublisher/,
+  );
+});
+
+test("routes team invitation acceptance through Railway", async () => {
+  const source = await readServerSource(
+    "team/teamInvitationAcceptanceActions.ts",
+  );
+
+  assert.match(
+    source,
+    /createCurrentRailwayTeamInvitationAcceptanceHandler/,
+  );
+  assert.doesNotMatch(
+    source,
+    /requireRuntimeDatabase|createTeamInvitationAcceptanceRepository|createClerkTeamInvitationIdentityContext|enforceCurrentTenantMutationRateLimit/,
+  );
+});
+
+test("routes team membership mutations through Railway", async () => {
+  const source = await readServerSource(
+    "team/teamMembershipActions.ts",
+  );
+
+  assert.match(source, /createCurrentRailwayTeamMembershipHandler/);
+  assert.doesNotMatch(
+    source,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createTenantMembershipMutationRepository/,
+  );
+});
+
+test("routes campaign reads and mutations through Railway", async () => {
+  const directorySource = await readServerSource(
+    "campaigns/currentCampaigns.ts",
+  );
+  const actionSource = await readServerSource(
+    "campaigns/campaignActions.ts",
+  );
+
+  assert.match(directorySource, /createCurrentRailwayCampaignHandler/);
+  assert.match(actionSource, /createCurrentRailwayCampaignHandler/);
+  assert.doesNotMatch(
+    `${directorySource}\n${actionSource}`,
+    /requireRuntimeDatabase|requireCurrentTenantSession|requireCurrentTenantMutationSession|createCampaignRepository/,
+  );
+});
+
+test("routes tenant selection reads and mutations through Railway", async () => {
+  const source = await readServerSource("auth/tenantSelectionActions.ts");
+
+  assert.match(source, /createCurrentRailwayTenantSelectionHandler/);
+  assert.doesNotMatch(
+    source,
+    /requireRuntimeDatabase|readClerkIdentity|createTenantMembershipRepository|createTenantSelectionRepository|enforceCurrentTenantMutationRateLimit/,
+  );
+});
+
+test("routes AI reply approval reads and decisions through Railway", async () => {
+  const directorySource = await readServerSource(
+    "ai/currentAiReplyApprovals.ts",
+  );
+  const actionSource = await readServerSource(
+    "ai/aiReplyApprovalActions.ts",
+  );
+
+  assert.match(
+    `${directorySource}\n${actionSource}`,
+    /createCurrentRailwayAiReplyApprovalHandler/,
+  );
+  assert.doesNotMatch(
+    `${directorySource}\n${actionSource}`,
+    /requireRuntimeDatabase|requireCurrentTenantSession|requireCurrentTenantMutationSession|createAiReplyOutboxRepository/,
+  );
+});
+
 test("routes contact organization mutations through Railway", async () => {
   const source = await readServerSource(
     "contacts/contactOrganizationActions.ts",
@@ -52,38 +134,105 @@ test("routes contact organization mutations through Railway", async () => {
   );
 });
 
-test("separates reads from mutations in mixed action modules", async () => {
-  const paths = [
-    "ai/aiAgentActions.ts",
-    "ai/aiReplyApprovalActions.ts",
-    "bot/botFlowActions.ts",
+test("routes contact imports through Railway", async () => {
+  const source = await readServerSource(
+    "contacts/contactImportActions.ts",
+  );
+
+  assert.match(source, /createCurrentRailwayContactImportHandler/);
+  assert.doesNotMatch(
+    source,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createContactImportRepository/,
+  );
+});
+
+test("routes message template reads and draft saves through Railway", async () => {
+  const directorySource = await readServerSource(
+    "templates/currentMessageTemplates.ts",
+  );
+  const actionSource = await readServerSource(
+    "templates/messageTemplateActions.ts",
+  );
+  const saveSource = actionSource.match(
+    /export async function saveMessageTemplateDraftAction[\s\S]*?(?=export async function submitMessageTemplateAction)/,
+  )?.[0];
+
+  assert.match(
+    directorySource,
+    /createCurrentRailwayMessageTemplateDirectoryHandler/,
+  );
+  assert.doesNotMatch(
+    directorySource,
+    /requireRuntimeDatabase|requireCurrentTenantSession|createMessageTemplateRepository/,
+  );
+  assert.ok(saveSource);
+  assert.match(
+    saveSource,
+    /createCurrentRailwayMessageTemplateDraftHandler/,
+  );
+  assert.doesNotMatch(
+    saveSource,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createMessageTemplateRepository/,
+  );
+});
+
+test("routes all conversation reads and mutations through Railway", async () => {
+  const actionSource = await readServerSource(
     "conversations/conversationActions.ts",
-  ];
+  );
+  const directorySource = await readServerSource(
+    "conversations/currentInbox.ts",
+  );
 
-  for (const path of paths) {
-    const source = await readServerSource(path);
+  assert.match(
+    actionSource,
+    /createCurrentRailwayConversationHandler/,
+  );
+  assert.match(
+    directorySource,
+    /createCurrentRailwayConversationHandler/,
+  );
+  assert.doesNotMatch(
+    `${actionSource}\n${directorySource}`,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|requireCurrentTenantSession|createConversationRepository/,
+  );
+});
 
-    assert.match(
-      source,
-      /requireCurrentTenantMutationSession/,
-      path,
-    );
-    assert.match(
-      source,
-      /requireCurrentTenantSession/,
-      path,
-    );
-    assert.match(
-      source,
-      /createAction(?:Context|Handler)\(true\)/,
-      path,
-    );
-    assert.match(
-      source,
-      /createAction(?:Context|Handler)\(false\)/,
-      path,
-    );
-  }
+test("routes all AI agent reads and writes through Railway", async () => {
+  const actionSource = await readServerSource("ai/aiAgentActions.ts");
+  const directorySource = await readServerSource("ai/currentAiAgents.ts");
+
+  assert.match(actionSource, /createCurrentRailwayAiAgentHandler/);
+  assert.match(directorySource, /createCurrentRailwayAiAgentHandler/);
+  assert.doesNotMatch(
+    `${actionSource}\n${directorySource}`,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|requireCurrentTenantSession|createAiAgentRepository|createKnowledgeSourceRepository/,
+  );
+});
+
+test("routes all bot flow reads and writes through Railway", async () => {
+  const actionSource = await readServerSource("bot/botFlowActions.ts");
+  const directorySource = await readServerSource("bot/currentBotFlows.ts");
+  const loadSource = actionSource.match(
+    /export async function loadBotFlowDetailsAction[\s\S]*?(?=export async function saveBotFlowDraftAction)/,
+  )?.[0];
+
+  assert.ok(loadSource);
+  assert.match(loadSource, /createCurrentRailwayBotFlowHandler/);
+  assert.doesNotMatch(
+    loadSource,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createBotFlowRepository/,
+  );
+  assert.match(directorySource, /createCurrentRailwayBotFlowHandler/);
+  assert.doesNotMatch(
+    directorySource,
+    /requireRuntimeDatabase|requireCurrentTenantSession|createBotFlowRepository/,
+  );
+  assert.match(actionSource, /createCurrentRailwayBotFlowHandler/);
+  assert.doesNotMatch(
+    `${actionSource}\n${directorySource}`,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|requireCurrentTenantSession|createBotFlowRepository|createMutationActionHandler/,
+  );
 });
 
 test("routes contact reads, profile saves, and consent mutations through Railway", async () => {
@@ -122,21 +271,36 @@ test("routes contact reads, profile saves, and consent mutations through Railway
 });
 
 test("limits initial onboarding by authenticated server identity before persistence", async () => {
-  const source = await readServerSource(
+  const actionSource = await readServerSource(
     "onboarding/saveBusinessProfileAction.ts",
   );
-  const rateLimitIndex = source.indexOf(
-    "await enforceCurrentTenantMutationRateLimit(",
+  const operationSource = await readServerSource(
+    "platform/railwayOnboardingBusinessProfileOperations.ts",
   );
-  const databaseIndex = source.indexOf(
-    "await requireRuntimeDatabase()",
+  const runtimeSource = await readServerSource(
+    "platform/railwayPostgresApiRuntime.ts",
+  );
+  const rateLimitIndex = operationSource.indexOf(
+    "await dependencies.mutationRateLimit.consume(",
+  );
+  const mutationIndex = operationSource.indexOf(
+    "await dependencies.mutations.execute(",
   );
 
+  assert.match(actionSource, /createCurrentRailwayBusinessProfileHandler/);
   assert.ok(rateLimitIndex > 0);
-  assert.ok(databaseIndex > rateLimitIndex);
+  assert.ok(mutationIndex > rateLimitIndex);
   assert.match(
-    source,
-    /identity\.externalUserId/,
+    operationSource,
+    /context\.userIdentity\.externalUserId/,
+  );
+  assert.match(
+    runtimeSource,
+    /foundation\.railwayOnboardingBusinessProfileMutations/,
+  );
+  assert.doesNotMatch(
+    `${actionSource}\n${operationSource}`,
+    /requireRuntimeDatabase|enforceCurrentTenantMutationRateLimit|createTenantProvisioningRepository/,
   );
 });
 

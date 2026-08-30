@@ -94,7 +94,7 @@ function isRecord(
   );
 }
 
-function parseConversationKey(
+export function parseConversationKey(
   value: unknown,
 ): string | null {
   return typeof value === "string" &&
@@ -103,7 +103,7 @@ function parseConversationKey(
     : null;
 }
 
-function parseMarkReadRequest(
+export function parseMarkReadRequest(
   input: unknown,
 ): MarkConversationReadRequest | null {
   if (!isRecord(input)) {
@@ -138,7 +138,7 @@ function hasOnlyKeys(
   );
 }
 
-function parseFilters(
+export function parseInboxFilters(
   input: unknown,
 ): InboxFilters | null {
   if (input === undefined) {
@@ -195,7 +195,7 @@ function parseFilters(
   };
 }
 
-function parseChangeAssignmentRequest(
+export function parseChangeAssignmentRequest(
   input: unknown,
 ): ChangeConversationAssignmentRequest | null {
   if (
@@ -231,7 +231,7 @@ function parseChangeAssignmentRequest(
   };
 }
 
-function parseRefreshRequest(
+export function parseRefreshRequest(
   input: unknown,
 ): {
   filters: InboxFilters;
@@ -247,7 +247,7 @@ function parseRefreshRequest(
     return null;
   }
 
-  const filters = parseFilters(input.filters);
+  const filters = parseInboxFilters(input.filters);
   const selectedConversationKey =
     input.selectedConversationKey === null
       ? null
@@ -288,7 +288,7 @@ export function createConversationService(
       session,
       "conversations.read",
     );
-    const filters = parseFilters(filtersInput);
+    const filters = parseInboxFilters(filtersInput);
 
     if (!filters) {
       throw serviceError("INVALID_INPUT");

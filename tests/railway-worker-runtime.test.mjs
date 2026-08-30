@@ -160,6 +160,75 @@ test("releases PostgreSQL claims when queue publication fails", async () => {
   await runtime.close();
 });
 
+test("runs optional message-template maintenance under the shared lease", async () => {
+  const fixture = runtimeFixture({
+    messageTemplateSubmissions: {
+      async run() {
+        fixture.calls.push(["message-template-maintenance"]);
+      },
+    },
+  });
+  const runtime = createRailwayWorkerRuntime(fixture.options);
+
+  await runtime.scheduler.run();
+
+  const maintenanceIndex = fixture.calls.findIndex(
+    ([name]) => name === "message-template-maintenance",
+  );
+  const completionIndex = fixture.calls.findIndex(
+    ([name]) => name === "complete",
+  );
+  assert.equal(maintenanceIndex >= 0, true);
+  assert.equal(completionIndex > maintenanceIndex, true);
+  await runtime.close();
+});
+
+test("runs due bot replies under the same fenced scheduler lease", async () => {
+  const fixture = runtimeFixture({
+    botReplyDeliveries: {
+      async run() {
+        fixture.calls.push(["bot-reply-deliveries"]);
+      },
+    },
+  });
+  const runtime = createRailwayWorkerRuntime(fixture.options);
+
+  await runtime.scheduler.run();
+
+  const deliveryIndex = fixture.calls.findIndex(
+    ([name]) => name === "bot-reply-deliveries",
+  );
+  const completionIndex = fixture.calls.findIndex(
+    ([name]) => name === "complete",
+  );
+  assert.equal(deliveryIndex >= 0, true);
+  assert.equal(completionIndex > deliveryIndex, true);
+  await runtime.close();
+});
+
+test("runs campaign DLQ maintenance under the same fenced lease", async () => {
+  const fixture = runtimeFixture({
+    campaignDeliveryMaintenance: {
+      async run() {
+        fixture.calls.push(["campaign-delivery-maintenance"]);
+      },
+    },
+  });
+  const runtime = createRailwayWorkerRuntime(fixture.options);
+
+  await runtime.scheduler.run();
+
+  const maintenanceIndex = fixture.calls.findIndex(
+    ([name]) => name === "campaign-delivery-maintenance",
+  );
+  const completionIndex = fixture.calls.findIndex(
+    ([name]) => name === "complete",
+  );
+  assert.equal(maintenanceIndex >= 0, true);
+  assert.equal(completionIndex > maintenanceIndex, true);
+  await runtime.close();
+});
+
 test("propagates one shared close failure without retrying the pool", async () => {
   let closeCount = 0;
   const failure = new Error("pool close failed");

@@ -96,7 +96,7 @@ test("commits a tag, audit, snapshot, and receipt atomically", async () => {
     },
   });
   assert.deepEqual(fixture.calls.options, [
-    { isolationLevel: "repeatable-read" },
+    { isolationLevel: "read-committed" },
   ]);
   assert.equal(fixture.calls.committed, 1);
   assert.equal(fixture.calls.rolledBack, 0);

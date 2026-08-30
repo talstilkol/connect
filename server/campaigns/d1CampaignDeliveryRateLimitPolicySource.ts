@@ -5,7 +5,7 @@ import type {
   CampaignDeliveryRateLimitPolicySource,
 } from "./campaignDeliveryRateLimitContextResolver.ts";
 
-export function createD1CampaignDeliveryRateLimitPolicySource(
+export function createCampaignDeliveryRateLimitPolicySource(
   repository: WhatsappCampaignDeliveryPolicyRepository,
 ): CampaignDeliveryRateLimitPolicySource {
   return {
@@ -35,3 +35,6 @@ export function createD1CampaignDeliveryRateLimitPolicySource(
     },
   };
 }
+
+export const createD1CampaignDeliveryRateLimitPolicySource =
+  createCampaignDeliveryRateLimitPolicySource;

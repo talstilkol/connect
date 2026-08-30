@@ -102,7 +102,7 @@ test("passes the current source, interface, and dependency lock guardrails", asy
   );
 });
 
-test("requires dependency and invitation evidence attestations only in the production release gate", async () => {
+test("requires external evidence only in the production release gate", async () => {
   const source = await readFile(
     new URL(
       "../scripts/verify-release-gate.mjs",
@@ -122,6 +122,12 @@ test("requires dependency and invitation evidence attestations only in the produ
   const readinessStep = source.indexOf(
     'id: "production-readiness"',
   );
+  const betterStackEvidenceStep = source.indexOf(
+    '"better-stack-staging-evidence"',
+  );
+  const botReplyEvidenceStep = source.indexOf(
+    '"bot-reply-staging-evidence"',
+  );
 
   assert.notEqual(conditionalStart, -1);
   assert.ok(
@@ -131,7 +137,11 @@ test("requires dependency and invitation evidence attestations only in the produ
     browserAttestationStep >
       dependencyAttestationStep,
   );
-  assert.ok(readinessStep > browserAttestationStep);
+  assert.ok(
+    betterStackEvidenceStep > browserAttestationStep,
+  );
+  assert.ok(botReplyEvidenceStep > betterStackEvidenceStep);
+  assert.ok(readinessStep > botReplyEvidenceStep);
   assert.match(
     source,
     /scripts\/verify-dependency-audit-evidence-attestation\.mjs/,
@@ -139,6 +149,14 @@ test("requires dependency and invitation evidence attestations only in the produ
   assert.match(
     source,
     /scripts\/verify-team-invitation-browser-evidence-attestation\.mjs/,
+  );
+  assert.match(
+    source,
+    /scripts\/verify-better-stack-staging-evidence\.mjs/,
+  );
+  assert.match(
+    source,
+    /scripts\/verify-bot-reply-staging-evidence\.mjs/,
   );
 });
 

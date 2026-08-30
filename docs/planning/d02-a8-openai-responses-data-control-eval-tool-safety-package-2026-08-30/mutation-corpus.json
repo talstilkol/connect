@@ -1,0 +1,1619 @@
+{
+  "artifactId": "CONNECT-D02-A8-FULL-MUTATION-CORPUS-2026-08-30",
+  "corpusVersion": "D02-A8-MUTATION-1",
+  "baselineInputs": [
+    "schema.json",
+    "registry.json",
+    "dependency-dag.json"
+  ],
+  "oraclePath": "mutation-oracle.json",
+  "oracleReadByReaders": false,
+  "expectedToActualFlow": "PROHIBITED",
+  "vectorCount": 179,
+  "vectors": [
+    {
+      "vectorId": "D02A8-MV-001",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-002",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-003",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-004",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-005",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-006",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-007",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-001",
+      "operation": "SWAP_WITH_NEXT",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-008",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-002",
+      "operation": "SWAP_WITH_NEXT",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-009",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-003",
+      "operation": "SWAP_WITH_NEXT",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-010",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-004",
+      "operation": "SWAP_WITH_NEXT",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-011",
+      "domain": "AUTHORITY",
+      "targetCollection": "authorityChain",
+      "targetId": "D02A8-AUTH-005",
+      "operation": "SWAP_WITH_NEXT",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-012",
+      "domain": "INPUT",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-001",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-013",
+      "domain": "INPUT",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-002",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-014",
+      "domain": "INPUT",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-003",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-015",
+      "domain": "INPUT",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-004",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-016",
+      "domain": "INPUT",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-005",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-017",
+      "domain": "INPUT",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-006",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-018",
+      "domain": "MODEL-AUTHORITY",
+      "targetCollection": "modelSelectionAuthority",
+      "targetId": "D02A8-MSA-001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "acceptedSelection",
+        "value": "gpt-5.6-luna"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-019",
+      "domain": "MODEL-AUTHORITY",
+      "targetCollection": "modelSelectionAuthority",
+      "targetId": "D02A8-MSA-001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "acceptedSelection",
+        "value": "gpt-5.6-terra"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-020",
+      "domain": "MODEL-AUTHORITY",
+      "targetCollection": "modelSelectionAuthority",
+      "targetId": "D02A8-MSA-001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "ACCEPTED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-021",
+      "domain": "APPROVAL",
+      "targetCollection": "approvalRegistry",
+      "targetId": "D02A8-APR-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-022",
+      "domain": "APPROVAL",
+      "targetCollection": "approvalRegistry",
+      "targetId": "D02A8-APR-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-023",
+      "domain": "APPROVAL",
+      "targetCollection": "approvalRegistry",
+      "targetId": "D02A8-APR-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-024",
+      "domain": "APPROVAL",
+      "targetCollection": "approvalRegistry",
+      "targetId": "D02A8-APR-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-025",
+      "domain": "APPROVAL",
+      "targetCollection": "approvalRegistry",
+      "targetId": "D02A8-APR-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-026",
+      "domain": "APPROVAL",
+      "targetCollection": "approvalRegistry",
+      "targetId": "D02A8-APR-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-027",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-028",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-029",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-030",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-031",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-032",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-033",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-007",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-034",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-008",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-035",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-009",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-036",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-010",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-037",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-011",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-038",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-012",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-039",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-013",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-040",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-014",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-041",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-015",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-042",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-016",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-043",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-017",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-044",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-001",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-045",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-002",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-046",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-003",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-047",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-004",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-048",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-005",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-049",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-006",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-050",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-007",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-051",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-008",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-052",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-009",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-053",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-010",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-054",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-011",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-055",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-012",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-056",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-013",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-057",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-014",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-058",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-015",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-059",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-016",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-060",
+      "domain": "AI-PROFILE",
+      "targetCollection": "aiProfileMembers",
+      "targetId": "D02A8-AIP-017",
+      "operation": "MUTATE_SEMANTIC_KEY_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-061",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-062",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-063",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-064",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-065",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-066",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-067",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-007",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-068",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-008",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-069",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountParentRows",
+      "targetId": "D02A8-AR-009",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-070",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountChildren",
+      "targetId": "D02A8-AR-006-P",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-071",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountChildren",
+      "targetId": "D02A8-AR-006-F",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-072",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountChildren",
+      "targetId": "D02A8-AR-006-P",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-073",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountChildren",
+      "targetId": "D02A8-AR-006-F",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-074",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountChildren",
+      "targetId": "D02A8-AR-006-P",
+      "operation": "CROSS_SATISFY",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-075",
+      "domain": "ACCOUNT",
+      "targetCollection": "accountChildren",
+      "targetId": "D02A8-AR-006-F",
+      "operation": "CROSS_SATISFY",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-076",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-077",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-078",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-079",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-080",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-081",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-082",
+      "domain": "LEGAL",
+      "targetCollection": "legalPrivacyMembers",
+      "targetId": "D02A8-LP-007",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-083",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-084",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-085",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-086",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-087",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-088",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-089",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-007",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-090",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-008",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-091",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-009",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-092",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-010",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-093",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-011",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-094",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-001",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-095",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-002",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-096",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-003",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-097",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-004",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-098",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-005",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-099",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-006",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-100",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-007",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-101",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-008",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-102",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-009",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-103",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-010",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-104",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-011",
+      "operation": "MUTATE_CLAIM_ONE_BYTE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-105",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-106",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-002",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-107",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-003",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-108",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-004",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-109",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-005",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-110",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-006",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-111",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-007",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-112",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-008",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-113",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-009",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-114",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-010",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-115",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-011",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "state",
+        "value": "STALE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-116",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "accepted",
+        "value": true
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-117",
+      "domain": "PROMPT",
+      "targetCollection": "promptPolicy",
+      "targetId": "promptPolicy",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "providerReusablePromptObjects",
+        "value": true
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-118",
+      "domain": "PROMPT",
+      "targetCollection": "promptPolicy",
+      "targetId": "promptPolicy",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "providerReusablePromptObjects",
+        "value": null
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-119",
+      "domain": "PROMPT",
+      "targetCollection": "promptPolicy",
+      "targetId": "promptPolicy",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "responsesPromptObjectField",
+        "value": "ALLOWED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-120",
+      "domain": "PROMPT",
+      "targetCollection": "promptPolicy",
+      "targetId": "promptPolicy",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "owner",
+        "value": "OPENAI"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-121",
+      "domain": "PUBLIC",
+      "targetCollection": "frozenInputs",
+      "targetId": "D02A8-IN-013",
+      "operation": "FLIP_LAST_SHA_HEX",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-122",
+      "domain": "PUBLIC",
+      "targetCollection": "rootDefinitions",
+      "targetId": "D02A8-ROOT-PUBLIC-DIRECTIVE",
+      "operation": "ADD_UNROOTED_CONJUNCT",
+      "params": {
+        "dependency": "CURRENT-COMMISSIONING-DIRECTIVE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-123",
+      "domain": "PUBLIC",
+      "targetCollection": "rootDefinitions",
+      "targetId": "D02A8-ROOT-PUBLIC-DIRECTIVE",
+      "operation": "SUBSTITUTE_PUBLIC_EVIDENCE",
+      "params": {
+        "dependencies": [
+          "NO-GIT-GITHUB-MUTATION"
+        ]
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-124",
+      "domain": "PUBLIC",
+      "targetCollection": "rootDefinitions",
+      "targetId": "D02A8-ROOT-PUBLIC-DIRECTIVE",
+      "operation": "SUBSTITUTE_PUBLIC_EVIDENCE",
+      "params": {
+        "dependencies": [
+          "LIVE-GITHUB-VISIBILITY-READBACK"
+        ]
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-125",
+      "domain": "DAG",
+      "targetCollection": "dagEdges",
+      "targetId": "D02A8-DAG-E024",
+      "operation": "ADD_EDGE",
+      "params": {
+        "from": "D02A8-DAG-N022",
+        "to": "D02A8-DAG-N007",
+        "edgeType": "FORBIDDEN-CYCLE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-126",
+      "domain": "DAG",
+      "targetCollection": "dagEdges",
+      "targetId": "D02A8-DAG-E024",
+      "operation": "ADD_EDGE",
+      "params": {
+        "from": "D02A8-DAG-N999",
+        "to": "D02A8-DAG-N022",
+        "edgeType": "DANGLING"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-127",
+      "domain": "DAG",
+      "targetCollection": "dagNodes",
+      "targetId": "D02A8-DAG-N008",
+      "operation": "DELETE_NODE",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-128",
+      "domain": "DAG",
+      "targetCollection": "dagNodes",
+      "targetId": "D02A8-DAG-N007",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "nodeClass",
+        "value": "AI-ADMISSION-ROOT"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-129",
+      "domain": "DAG",
+      "targetCollection": "dagNodes",
+      "targetId": "D02A8-DAG-N019",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "nodeClass",
+        "value": "PLANNING-ROOT"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-130",
+      "domain": "DAG",
+      "targetCollection": "dagNodes",
+      "targetId": "D02A8-DAG-N022",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "nodeClass",
+        "value": "PLANNING-ROOT"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-131",
+      "domain": "ROOT-SEPARATION",
+      "targetCollection": "rootStates",
+      "targetId": "D02A8-ROOT-PLANNING-ACCEPTANCE",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "rootClass",
+        "value": "AI-PROFILE-ADMISSION"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-132",
+      "domain": "ROOT-SEPARATION",
+      "targetCollection": "rootStates",
+      "targetId": "D02A8-ROOT-AI-ADMISSION",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "rootClass",
+        "value": "AI-RUNTIME-PERMIT"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-133",
+      "domain": "ROOT-SEPARATION",
+      "targetCollection": "rootStates",
+      "targetId": "D02A8-ROOT-RUNTIME-PERMIT",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "rootClass",
+        "value": "D02-PLANNING-CONTRACT-ACCEPTANCE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-134",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-135",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-136",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-137",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-138",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-139",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-140",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F007",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-141",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-142",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F002",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-143",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F003",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-144",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F004",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-145",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F005",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-146",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F006",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-147",
+      "domain": "A7-FINDING",
+      "targetCollection": "a7FindingRegistry",
+      "targetId": "D02-A7-IHR-F007",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "noMergeKey",
+        "value": "MERGED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-148",
+      "domain": "A6-FINDING",
+      "targetCollection": "a6FindingRegistry",
+      "targetId": "D02-A6-IHR-F001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-149",
+      "domain": "A6-FINDING",
+      "targetCollection": "a6FindingRegistry",
+      "targetId": "D02-A6-IHR-F002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-150",
+      "domain": "A6-FINDING",
+      "targetCollection": "a6FindingRegistry",
+      "targetId": "D02-A6-IHR-F003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-151",
+      "domain": "A6-FINDING",
+      "targetCollection": "a6FindingRegistry",
+      "targetId": "D02-A6-IHR-F004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-152",
+      "domain": "A6-FINDING",
+      "targetCollection": "a6FindingRegistry",
+      "targetId": "D02-A6-IHR-F005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-153",
+      "domain": "SAFE-STATE",
+      "targetCollection": "safeState",
+      "targetId": "safeState",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "aiRuntime",
+        "value": "ON"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-154",
+      "domain": "SAFE-STATE",
+      "targetCollection": "safeState",
+      "targetId": "safeState",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "gate29",
+        "value": "PASS"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-155",
+      "domain": "SAFE-STATE",
+      "targetCollection": "safeState",
+      "targetId": "safeState",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "developmentFreeze",
+        "value": "LIFTED"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-156",
+      "domain": "SAFE-STATE",
+      "targetCollection": "safeState",
+      "targetId": "safeState",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "repositoryVisibility",
+        "value": "PRIVATE"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-157",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-001",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-158",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-002",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-159",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-003",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-160",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-004",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-161",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-005",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-162",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-006",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-163",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-007",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-164",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-008",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-165",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-009",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-166",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-010",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-167",
+      "domain": "SOURCE",
+      "targetCollection": "officialSourceReceipts",
+      "targetId": "D02A8-SRC-011",
+      "operation": "FLIP_SHA_FIELD",
+      "params": {
+        "field": "observationCommitment"
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-168",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-001",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-169",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-002",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-170",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-003",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-171",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-004",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-172",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-005",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-173",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-006",
+      "operation": "DELETE_MEMBER",
+      "params": {}
+    },
+    {
+      "vectorId": "D02A8-MV-174",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-001",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "expectedMemberCount",
+        "value": 9
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-175",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-002",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "expectedMemberCount",
+        "value": 22
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-176",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-003",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "expectedMemberCount",
+        "value": 68
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-177",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-004",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "expectedMemberCount",
+        "value": 51
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-178",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-005",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "expectedMemberCount",
+        "value": 214
+      }
+    },
+    {
+      "vectorId": "D02A8-MV-179",
+      "domain": "PREDECESSOR-CLAUSE-DISPOSITION",
+      "targetCollection": "predecessorClauseUniverses",
+      "targetId": "D02A8-PCU-006",
+      "operation": "SET_FIELD",
+      "params": {
+        "field": "expectedMemberCount",
+        "value": 115
+      }
+    }
+  ]
+}

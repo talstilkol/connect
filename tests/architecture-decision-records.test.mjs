@@ -23,6 +23,9 @@ const aiAccountAdr = readProjectFile(
 const targetTopologyAdr = readProjectFile(
   "docs/adr/0004-target-service-topology.md",
 );
+const releaseEvidenceStorageAdr = readProjectFile(
+  "docs/adr/0005-bot-reply-release-evidence-storage.md",
+);
 const projectReadme = readProjectFile("README.md");
 const teamPlan = readProjectFile(
   "docs/team-operating-plan.md",
@@ -76,6 +79,14 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
     /\(0004-target-service-topology\.md\)/,
   );
   assert.match(
+    adrIndex,
+    /\(0005-bot-reply-release-evidence-storage\.md\)/,
+  );
+  assert.match(
+    projectReadme,
+    /\(docs\/adr\/0005-bot-reply-release-evidence-storage\.md\)/,
+  );
+  assert.match(
     teamPlan,
     /\(adr\/0002-repository-authority\.md\)/,
   );
@@ -87,6 +98,17 @@ test("keeps the hosting ADR discoverable from the project and Gate 0", () => {
     teamPlan,
     /\(adr\/0004-target-service-topology\.md\)/,
   );
+});
+
+test("keeps the release evidence storage recommendation proposed", () => {
+  const metadata = parseFrontMatter(releaseEvidenceStorageAdr);
+  assert.equal(metadata.id, "ADR-0005");
+  assert.equal(metadata.status, "proposed");
+  assert.equal(metadata.approved_option, "unknown/unavailable");
+  assert.equal(metadata.approved_at, "unknown/unavailable");
+  assert.match(releaseEvidenceStorageAdr, /PostgreSQL/);
+  assert.match(releaseEvidenceStorageAdr, /Railway Variables/);
+  assert.match(releaseEvidenceStorageAdr, /Compare-and-set/);
 });
 
 test("records the accepted hosting direction while deployment remains fail-closed", () => {

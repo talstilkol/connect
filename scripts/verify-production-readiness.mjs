@@ -5,6 +5,9 @@ import {
   inspectCurrentProductionReadiness,
 } from "../server/operations/productionReadiness.ts";
 import {
+  resolveCurrentBotReplyStagingCrossServiceEvidenceJson,
+} from "../server/operations/currentProductionReadinessEvidenceSource.ts";
+import {
   readCurrentRailwayProductionReadinessV2,
 } from "../server/platform/currentRailwayProductionReadinessV2.ts";
 import {
@@ -30,6 +33,19 @@ const allowedV2Statuses = new Set([
   "unavailable",
   "stale",
 ]);
+const unavailableReleaseEvidenceState = Object.freeze({
+  status: "unavailable",
+  evidenceJson: null,
+  evidenceDigest: null,
+  evidenceVersion: null,
+});
+const cliReleaseEvidenceDependencies = Object.freeze({
+  async readReleaseEvidence() {
+    // A standalone CLI has no authenticated Clerk request context. It must not
+    // substitute a legacy environment value for repository-backed evidence.
+    return unavailableReleaseEvidenceState;
+  },
+});
 
 async function readHostingBindings() {
   try {
@@ -64,6 +80,34 @@ function isRecord(value) {
 function fail() {
   throw new Error(
     "PRODUCTION_READINESS_REPORT_INVALID",
+  );
+}
+
+export async function resolveProductionReadinessCliEvidenceJson(
+  environment,
+) {
+  return resolveCurrentBotReplyStagingCrossServiceEvidenceJson(
+    environment,
+    cliReleaseEvidenceDependencies,
+  );
+}
+
+export async function readProductionReadinessFromCliSources(
+  environment,
+  hosting,
+) {
+  const evidenceJson =
+    await resolveProductionReadinessCliEvidenceJson(
+      environment,
+    );
+
+  return inspectCurrentProductionReadiness(
+    {
+      ...environment,
+      BOT_REPLY_STAGING_CROSS_SERVICE_EVIDENCE_JSON:
+        evidenceJson,
+    },
+    hosting,
   );
 }
 
@@ -403,7 +447,7 @@ async function runCli() {
     }
 
     const report =
-      inspectCurrentProductionReadiness(
+      await readProductionReadinessFromCliSources(
         process.env,
         await readHostingBindings(),
       );

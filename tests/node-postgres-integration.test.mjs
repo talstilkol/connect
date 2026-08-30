@@ -68,6 +68,8 @@ test("keeps the real integration proof explicit and outside the default gate", a
     "node scripts/verify-node-postgres-integration.mjs",
   );
   assert.doesNotMatch(scripts.test, /node-postgres-integration/);
+  assert.doesNotMatch(source, /runtimeUrl\.username\s*=/);
+  assert.doesNotMatch(source, /userInfo\(\)\.username/);
   assert.match(source, /DATABASE_NOT_EMPTY/);
   assert.match(source, /Promise\.all/);
   assert.match(source, /0004_team_invitation_lifecycle\.sql/);
@@ -161,25 +163,18 @@ test("keeps the real integration proof explicit and outside the default gate", a
     /0053_bot_reply_staging_provider_operation_fence\.sql/,
   );
   assert.match(source, /verifyFullDataMigrationBundle/);
-  assert.match(source, /verifyBotReplyStagingAttestationNoncePostgres/);
-  assert.match(
-    source,
-    /verifyBotReplyStagingAttestedEvidencePostgres/,
-  );
-  assert.match(
-    source,
-    /verifyBotReplyStagingProviderOperationFencePostgres/,
-  );
   assert.match(source, /executePostgresFullDataMigrationCutover/);
   assert.match(source, /target-already-cut-over/);
   assert.match(source, /verifyConversationMessageSchema/);
   assert.match(source, /verifyConversationLifecycle/);
   assert.match(source, /verifyTemplateCampaignSchema/);
+  assert.match(source, /verifyMessageTemplateSubmissionOutboxLifecycle/);
   assert.match(source, /verifyBotDeliverySchema/);
   assert.match(source, /verifyBotFlowDeliveryLifecycle/);
   assert.match(source, /verifyKnowledgeLifecycle/);
   assert.match(source, /verifyAiAgentLifecycle/);
   assert.match(source, /verifyAiRuntimePersistence/);
+  assert.match(source, /verifyPostgresAiReplyApprovalHttpRuntime/);
   assert.match(source, /verifyAiReportingSchema/);
   assert.match(source, /verifyWhatsappDeliveryPolicy/);
   assert.match(source, /verifyWhatsappRateLimitLedger/);
@@ -193,6 +188,10 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /verifyContactConsentLifecycle/);
   assert.match(source, /verifyCampaignAudienceRead/);
   assert.match(source, /verifyPostgresHttpRuntime/);
+  assert.match(
+    source,
+    /verifyPostgresOnboardingBusinessProfileHttpRuntime/,
+  );
   assert.match(source, /verifyApiMutationRateLimit/);
   assert.match(source, /foundation\.createMutationRateLimitBinding/);
   assert.match(source, /foundation\.reports\.read/);
@@ -202,15 +201,6 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.match(source, /foundation\.conversations\.recordInboundMessage/);
   assert.match(source, /foundation\.botFlows\.saveDraft/);
   assert.match(source, /foundation\.botReplyDeliveries\.stage/);
-  assert.match(
-    source,
-    /foundation\.botReplyDeliveries\.claimProviderRequest/,
-  );
-  assert.match(
-    source,
-    /foundation\.whatsappRateLimits\.reserveServiceReply/,
-  );
-  assert.match(source, /senderPhoneNumberId/);
   assert.match(
     source,
     /foundation\.botRuntime[\s\S]*\.findAcceptedButtonContinuation/,
@@ -237,9 +227,48 @@ test("keeps the real integration proof explicit and outside the default gate", a
   );
   assert.match(source, /foundation\.campaignProviderDeliveries\.recordAccepted/);
   assert.match(source, /foundation\.campaignProviderDeliveries\.applyProviderStatus/);
+  assert.match(source, /verifyBotReplyStagingRunLedger/);
   assert.match(
     source,
-    /61 \+ attestedEvidenceConcurrencyScenarios \+[\s\S]*providerOperationFenceConcurrencyScenarios/,
+    /verifyBotReplyStagingAttestationNoncePostgres/,
+  );
+  assert.match(
+    source,
+    /verifyBotReplyStagingAttestedEvidencePostgres/,
+  );
+  assert.match(
+    source,
+    /verifyBotReplyStagingProviderOperationFencePostgres/,
+  );
+  assert.match(source, /verifyBotReplyStagingSafetyEvidence/);
+  assert.match(source, /foundation\.botReplyStagingRuns\.claim/);
+  assert.match(source, /foundation\.botReplyStagingRuns\.read/);
+  assert.match(source, /foundation\.botReplyStagingSafety\.record/);
+  assert.match(source, /foundation\.botReplyStagingObservations\.readScenario/);
+  assert.match(source, /foundation\.botReplyStagingObservationWriter\.record/);
+  assert.match(
+    source,
+    /foundation\.botReplyStagingWebhookObservations\.recordStatus/,
+  );
+  assert.match(
+    source,
+    /botReplyStagingProviderDeferralObservations\.recordDeferral/,
+  );
+  assert.match(
+    source,
+    /botReplyStagingSendObservations\.recordAcceptedSend/,
+  );
+  assert.match(
+    source,
+    /botReplyStagingSendObservations\.recordKillSwitch/,
+  );
+  assert.match(
+    source,
+    /90 \+ attestedEvidenceConcurrencyScenarios \+/,
+  );
+  assert.match(
+    source,
+    /providerOperationFenceConcurrencyScenarios/,
   );
   assert.match(
     providerOperationFenceSource,
@@ -257,6 +286,17 @@ test("keeps the real integration proof explicit and outside the default gate", a
     providerOperationFenceSource,
     /BEGIN ISOLATION LEVEL SERIALIZABLE/,
   );
+  assert.match(source, /verifyPostgresTenantSelectionHttpRuntime/);
+  assert.match(source, /tenant-selection\.directory\.read/);
+  assert.match(source, /tenant-selection\.save/);
+  assert.match(source, /team\.directory\.read/);
+  assert.match(source, /team\.membership\.role\.change/);
+  assert.match(source, /team\.invitation\.request/);
+  assert.match(source, /team\.invitation\.accept/);
+  assert.match(source, /driver-invited-member-user/);
+  assert.match(source, /deliveryStatus: "cancelled"/);
+  assert.match(source, /conversations\.mark-read/);
+  assert.match(source, /conversations\.assignment\.change/);
   assert.match(
     source,
     /foundation\.knowledgePassages\.storeProcessedAndMarkReady/,

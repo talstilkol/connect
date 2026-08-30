@@ -9,6 +9,19 @@ import {
 import type {
   VercelDeploymentEnvironment,
 } from "./railwayApiHttpHandler.ts";
+import {
+  readCurrentVercelBetterStackTelemetrySink,
+  type VercelWebRailwayApiCallEvent,
+  type VercelWebTelemetrySink,
+} from "./vercelBetterStackTelemetry.ts";
+import {
+  readCurrentVercelOpaqueTraceContext,
+} from "./currentVercelOpaqueTraceContext.ts";
+import {
+  parseW3cTraceparent,
+  W3C_TRACEPARENT_HEADER,
+  type W3cTraceContext,
+} from "./w3cTraceContext.ts";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_MAXIMUM_REQUEST_BYTES = 262_144;
@@ -21,6 +34,7 @@ export type RailwayApiClientErrorCode =
   | "INVALID_CONFIGURATION"
   | "INVALID_REQUEST"
   | "AUTHENTICATION_UNAVAILABLE"
+  | "CORRELATION_UNAVAILABLE"
   | "TIMEOUT"
   | "NETWORK_ERROR"
   | "INVALID_RESPONSE";
@@ -45,6 +59,10 @@ export interface RailwayApiClient {
   ): Promise<Readonly<RailwayApiResponseEnvelope>>;
 }
 
+export interface RailwayApiTraceparentProvider {
+  getTraceparent(): Promise<string | null>;
+}
+
 export interface RailwayApiClientOptions {
   readonly apiOrigin: string;
   readonly deploymentEnvironment: VercelDeploymentEnvironment;
@@ -54,7 +72,17 @@ export interface RailwayApiClientOptions {
   readonly requestTimeoutMs?: number;
   readonly maximumRequestBytes?: number;
   readonly maximumResponseBytes?: number;
+  readonly telemetry?: VercelWebTelemetrySink;
+  readonly traceparentProvider?: RailwayApiTraceparentProvider;
+  readonly clock?: () => number;
 }
+
+const currentTraceparentProvider: RailwayApiTraceparentProvider =
+  Object.freeze({
+    async getTraceparent(): Promise<string | null> {
+      return (await readCurrentVercelOpaqueTraceContext())?.traceparent ?? null;
+    },
+  });
 
 function invalidConfiguration(): never {
   throw new RailwayApiClientError("INVALID_CONFIGURATION");
@@ -68,6 +96,30 @@ function requirePositiveInteger(
   }
 
   return value;
+}
+
+function readClock(clock: () => number): number | null {
+  try {
+    const value = clock();
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function boundedDuration(
+  startedAt: number | null,
+  completedAt: number | null,
+): number {
+  if (
+    startedAt === null ||
+    completedAt === null ||
+    completedAt < startedAt
+  ) {
+    return 0;
+  }
+
+  return Math.min(completedAt - startedAt, 300_000);
 }
 
 function isDevelopmentLoopback(url: URL): boolean {
@@ -138,6 +190,29 @@ async function requireToken(
   }
 
   return token;
+}
+
+async function readTraceContext(
+  provider: RailwayApiTraceparentProvider,
+): Promise<W3cTraceContext | null> {
+  let traceparent: string | null;
+
+  try {
+    traceparent = await provider.getTraceparent();
+  } catch {
+    throw new RailwayApiClientError("CORRELATION_UNAVAILABLE");
+  }
+
+  if (traceparent === null) {
+    return null;
+  }
+
+  const parsed = parseW3cTraceparent(traceparent);
+  if (parsed === null) {
+    throw new RailwayApiClientError("CORRELATION_UNAVAILABLE");
+  }
+
+  return parsed;
 }
 
 function inspectResponseLength(
@@ -259,88 +334,155 @@ export function createRailwayApiClient(
   );
   const fetchImplementation =
     options.fetchImplementation ?? fetch;
+  const clock = options.clock ?? Date.now;
+  const traceparentProvider =
+    options.traceparentProvider ?? currentTraceparentProvider;
+  let telemetry: VercelWebTelemetrySink;
+
+  try {
+    telemetry =
+      options.telemetry ?? readCurrentVercelBetterStackTelemetrySink();
+  } catch {
+    invalidConfiguration();
+  }
 
   if (
     typeof fetchImplementation !== "function" ||
+    typeof clock !== "function" ||
     typeof options.oidcTokenProvider?.getToken !== "function" ||
-    typeof options.userSessionTokenProvider?.getToken !== "function"
+    typeof options.userSessionTokenProvider?.getToken !== "function" ||
+    typeof traceparentProvider.getTraceparent !== "function" ||
+    typeof telemetry.record !== "function" ||
+    typeof telemetry.scheduleFlush !== "function"
   ) {
     invalidConfiguration();
   }
 
   return {
     async call(request) {
-      let envelope;
+      const startedAt = readClock(clock);
+      let operation: string | null = null;
+      let requestKind: RailwayApiRequestEnvelope["requestKind"] | null = null;
+      let outcome: VercelWebRailwayApiCallEvent["outcome"] = "client-error";
+      let code: VercelWebRailwayApiCallEvent["code"] = "INVALID_REQUEST";
+      let traceContext: W3cTraceContext | null = null;
 
       try {
-        envelope = parseRailwayApiRequestEnvelope(request);
-      } catch {
-        throw new RailwayApiClientError("INVALID_REQUEST");
-      }
+        let envelope;
 
-      const requestBody = JSON.stringify(envelope);
+        try {
+          envelope = parseRailwayApiRequestEnvelope(request);
+        } catch {
+          throw new RailwayApiClientError("INVALID_REQUEST");
+        }
+        operation = envelope.operation;
+        requestKind = envelope.requestKind;
 
-      if (
-        new TextEncoder().encode(requestBody).byteLength >
-        maximumRequestBytes
-      ) {
-        throw new RailwayApiClientError("INVALID_REQUEST");
-      }
+        const requestBody = JSON.stringify(envelope);
 
-      const [oidcToken, userSessionToken] = await Promise.all([
-        requireToken(options.oidcTokenProvider),
-        requireToken(options.userSessionTokenProvider),
-      ]);
-      const controller = new AbortController();
-      const timeout = setTimeout(
-        () => controller.abort(),
-        requestTimeoutMs,
-      );
-      let response: Response;
+        if (
+          new TextEncoder().encode(requestBody).byteLength >
+          maximumRequestBytes
+        ) {
+          throw new RailwayApiClientError("INVALID_REQUEST");
+        }
 
-      try {
-        response = await fetchImplementation(endpoint, {
-          method: "POST",
-          headers: {
+        traceContext = await readTraceContext(traceparentProvider);
+
+        const [oidcToken, userSessionToken] = await Promise.all([
+          requireToken(options.oidcTokenProvider),
+          requireToken(options.userSessionTokenProvider),
+        ]);
+        const controller = new AbortController();
+        const timeout = setTimeout(
+          () => controller.abort(),
+          requestTimeoutMs,
+        );
+        let response: Response;
+
+        try {
+          const requestHeaders: Record<string, string> = {
             authorization: `Bearer ${userSessionToken}`,
             "content-type": "application/json; charset=utf-8",
             [VERCEL_OIDC_HEADER]: oidcToken,
-          },
-          body: requestBody,
-          cache: "no-store",
-          credentials: "omit",
-          redirect: "error",
-          signal: controller.signal,
-        });
-      } catch {
-        if (controller.signal.aborted) {
-          throw new RailwayApiClientError("TIMEOUT");
+          };
+          if (traceContext !== null) {
+            requestHeaders[W3C_TRACEPARENT_HEADER] =
+              traceContext.traceparent;
+          }
+
+          response = await fetchImplementation(endpoint, {
+            method: "POST",
+            headers: requestHeaders,
+            body: requestBody,
+            cache: "no-store",
+            credentials: "omit",
+            redirect: "error",
+            signal: controller.signal,
+          });
+        } catch {
+          if (controller.signal.aborted) {
+            throw new RailwayApiClientError("TIMEOUT");
+          }
+
+          throw new RailwayApiClientError("NETWORK_ERROR");
+        } finally {
+          clearTimeout(timeout);
         }
 
-        throw new RailwayApiClientError("NETWORK_ERROR");
+        if (!isJsonContentType(response.headers.get("content-type"))) {
+          throw new RailwayApiClientError("INVALID_RESPONSE");
+        }
+
+        const parsedResponse = parseResponseBody(
+          await readBoundedResponseBody(
+            response,
+            maximumResponseBytes,
+          ),
+        );
+
+        if (
+          (parsedResponse.outcome === "ok" && response.status !== 200) ||
+          (parsedResponse.outcome === "error" && response.status < 400)
+        ) {
+          throw new RailwayApiClientError("INVALID_RESPONSE");
+        }
+
+        outcome = parsedResponse.outcome === "ok" ? "ok" : "remote-error";
+        code = parsedResponse.outcome === "ok" ? "OK" : parsedResponse.code;
+        return parsedResponse;
+      } catch (error) {
+        outcome = "client-error";
+        code = error instanceof RailwayApiClientError
+          ? error.code
+          : "INVALID_RESPONSE";
+        throw error;
       } finally {
-        clearTimeout(timeout);
+        const event = Object.freeze({
+          version: 1,
+          service: "connect-vercel-web",
+          kind: "railway-api-call",
+          operation,
+          requestKind,
+          outcome,
+          code,
+          traceContext,
+          durationMilliseconds: boundedDuration(
+            startedAt,
+            readClock(clock),
+          ),
+        }) satisfies VercelWebRailwayApiCallEvent;
+        try {
+          telemetry.record(event);
+        } catch {
+          // Telemetry cannot change an API result.
+        }
+        try {
+          telemetry.scheduleFlush();
+        } catch {
+          // Telemetry cannot change an API result.
+        }
       }
-
-      if (!isJsonContentType(response.headers.get("content-type"))) {
-        throw new RailwayApiClientError("INVALID_RESPONSE");
-      }
-
-      const parsedResponse = parseResponseBody(
-        await readBoundedResponseBody(
-          response,
-          maximumResponseBytes,
-        ),
-      );
-
-      if (
-        (parsedResponse.outcome === "ok" && response.status !== 200) ||
-        (parsedResponse.outcome === "error" && response.status < 400)
-      ) {
-        throw new RailwayApiClientError("INVALID_RESPONSE");
-      }
-
-      return parsedResponse;
     },
   };
 }

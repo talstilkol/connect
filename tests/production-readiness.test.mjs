@@ -9,6 +9,7 @@ import {
 const readyImplementation = Object.freeze({
   metaWebhookQueue: true,
   campaignDeliveryQueue: true,
+  targetQueueAdapter: true,
   campaignScheduler: true,
   campaignDeliveryAdapter: true,
   botReplyDeliveryAdapter: true,
@@ -48,6 +49,14 @@ test("reports ready only when every production dependency is ready", () => {
       "configured",
     ciExecution: "configured",
     dependencyAudit: "configured",
+    betterStackStagingEvidence:
+      "configured",
+    botReplyStagingEvidence:
+      "configured",
+    botReplyStagingCrossServiceEvidence:
+      "configured",
+    betterStackIncidentAlerting:
+      "configured",
     hosting: {
       d1: "DB",
       r2: "FILES",
@@ -57,7 +66,7 @@ test("reports ready only when every production dependency is ready", () => {
 
   assert.equal(report.readyForProduction, true);
   assert.deepEqual(report.counts, {
-    ready: 33,
+    ready: 34,
     blocked: 0,
     decisionRequired: 0,
   });
@@ -81,7 +90,7 @@ test("fails closed for absent environment and unresolved implementation", () => 
   assert.equal(report.readyForProduction, false);
   assert.deepEqual(report.counts, {
     ready: 5,
-    blocked: 17,
+    blocked: 18,
     decisionRequired: 11,
   });
   assert.equal(
@@ -95,6 +104,25 @@ test("fails closed for absent environment and unresolved implementation", () => 
       (check) => check.id === "billing.provider",
     )?.status,
     "decision-required",
+  );
+  assert.equal(
+    report.checks.find(
+      (check) =>
+        check.id === "messaging.target-queue-adapter",
+    )?.code,
+    "TARGET_QUEUE_ADAPTER_REQUIRED",
+  );
+  assert.equal(
+    report.checks.find(
+      (check) => check.id === "meta.webhook-queue",
+    )?.status,
+    "ready",
+  );
+  assert.equal(
+    report.checks.find(
+      (check) => check.id === "messaging.campaign-queue",
+    )?.status,
+    "ready",
   );
 });
 
@@ -124,6 +152,14 @@ test("rejects renamed or absent hosting bindings", () => {
       "configured",
     ciExecution: "configured",
     dependencyAudit: "configured",
+    betterStackStagingEvidence:
+      "configured",
+    botReplyStagingEvidence:
+      "configured",
+    botReplyStagingCrossServiceEvidence:
+      "configured",
+    betterStackIncidentAlerting:
+      "configured",
     hosting: {
       d1: "DATABASE",
     },

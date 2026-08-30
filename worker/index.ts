@@ -24,6 +24,9 @@ import {
   createBotReplyDeliveryRepository,
 } from "../db/botReplyDeliveryRepository.ts";
 import {
+  createBotReplyDeliveryProviderRepository,
+} from "../db/botReplyDeliveryProviderRepository.ts";
+import {
   createMessageTemplateRepository,
 } from "../db/messageTemplateRepository.ts";
 import {
@@ -79,6 +82,9 @@ import {
 import {
   createUnavailableBotReplyProcessor,
 } from "../server/bot/unavailableBotReplyProcessor.ts";
+import {
+  createBotReplyDeliveryStatusReconciler,
+} from "../server/bot/botReplyDeliveryStatusReconciler.ts";
 import {
   createActiveAiRuntimeAgentLoader,
 } from "../server/ai/activeAiRuntimeAgent.ts";
@@ -189,6 +195,11 @@ const worker = {
     env: Env,
   ): Promise<void> {
     if (batch.queue === META_WEBHOOK_QUEUE_NAME) {
+      const clock = Object.freeze({
+        now() {
+          return new Date();
+        },
+      });
       const botRuntimeRepository =
         createBotRuntimeRepository(env.DB);
       const aiRuntimePersistence =
@@ -204,11 +215,7 @@ const worker = {
               env.DB,
             ),
             createUnavailableBotReplyProcessor(),
-            {
-              now() {
-                return new Date();
-              },
-            },
+            clock,
           ),
           createAiInboundRuntimeProcessor(
             botRuntimeRepository,
@@ -244,6 +251,17 @@ const worker = {
               createWhatsappRateLimitRepository(
                 env.DB,
               ),
+              clock,
+            ),
+          botReplyStatuses:
+            createBotReplyDeliveryStatusReconciler(
+              createBotReplyDeliveryProviderRepository(
+                env.DB,
+              ),
+              createWhatsappRateLimitRepository(
+                env.DB,
+              ),
+              clock,
             ),
           inboundRuntime,
         }),

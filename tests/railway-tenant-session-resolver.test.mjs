@@ -7,6 +7,7 @@ import {
 
 const identity = {
   externalUserId: "verified-user",
+  externalOrganizationId: "org_verified",
 };
 
 function membership(
@@ -29,6 +30,7 @@ function fixture(memberships, selection = null) {
   const calls = {
     memberships: [],
     selections: [],
+    organizations: [],
   };
   const resolver = createRailwayTenantSessionResolver({
     memberships: {
@@ -47,6 +49,15 @@ function fixture(memberships, selection = null) {
       },
       async save() {
         throw new Error("unused selection method");
+      },
+    },
+    identityOrganizations: {
+      async findByTenantId(tenantId) {
+        calls.organizations.push(tenantId);
+        return {
+          tenantId,
+          externalOrganizationId: "org_verified",
+        };
       },
     },
   });
@@ -70,6 +81,7 @@ test("uses the only eligible tenant without reading a stored selection", async (
   });
   assert.deepEqual(testFixture.calls.memberships, ["verified-user"]);
   assert.deepEqual(testFixture.calls.selections, []);
+  assert.deepEqual(testFixture.calls.organizations, [7]);
   assert.equal(Object.isFrozen(session), true);
 });
 
@@ -86,7 +98,7 @@ test("resolves multiple memberships only through the stored selection", async ()
   assert.deepEqual(testFixture.calls.selections, ["verified-user"]);
 });
 
-test("returns null only when optional resolution finds no membership", async () => {
+test("returns null only when optional resolution finds no active membership", async () => {
   const missing = fixture([]);
   assert.equal(await missing.resolver.resolveOptional(identity), null);
   assert.deepEqual(missing.calls.memberships, ["verified-user"]);
@@ -103,6 +115,14 @@ test("returns null only when optional resolution finds no membership", async () 
   });
   assert.equal(Object.isFrozen(session), true);
   assert.deepEqual(eligible.calls.selections, []);
+
+  const blocked = fixture([
+    membership(7, "owner", "verified-user", "blocked"),
+  ]);
+  await assert.rejects(
+    blocked.resolver.resolveOptional(identity),
+    (error) => error?.code === "TENANT_MEMBERSHIP_REQUIRED",
+  );
 });
 
 test("keeps optional selection and tenant isolation fail closed", async () => {
@@ -144,6 +164,35 @@ test("keeps optional selection and tenant isolation fail closed", async () => {
     await assert.rejects(
       testFixture.resolver.resolveOptional(identity),
       (error) => error.code === fixtureCase.code,
+    );
+  }
+});
+
+test("fails closed when the signed Clerk Organization does not own the tenant", async () => {
+  const testFixture = fixture([membership(7)]);
+
+  await assert.rejects(
+    testFixture.resolver.resolve({
+      ...identity,
+      externalOrganizationId: "org_different",
+    }),
+    /organization binding is unavailable/,
+  );
+  await assert.rejects(
+    testFixture.resolver.resolve({ externalUserId: "verified-user" }),
+    /organization identity is unavailable/,
+  );
+  for (const externalOrganizationId of [
+    " org_verified",
+    "org_verified ",
+    "org_verified\u0000",
+  ]) {
+    await assert.rejects(
+      testFixture.resolver.resolveOptional({
+        ...identity,
+        externalOrganizationId,
+      }),
+      /organization identity is unavailable/,
     );
   }
 });
@@ -197,6 +246,11 @@ test("propagates repository outages without replacing tenant state", async () =>
         throw new Error("selection must not run");
       },
     },
+    identityOrganizations: {
+      async findByTenantId() {
+        throw new Error("organization must not run");
+      },
+    },
   });
 
   await assert.rejects(
@@ -219,6 +273,11 @@ test("propagates repository outages without replacing tenant state", async () =>
         throw new Error("private selection database failure");
       },
     },
+    identityOrganizations: {
+      async findByTenantId() {
+        throw new Error("organization must not run");
+      },
+    },
   });
   await assert.rejects(
     selectionFailure.resolveOptional(identity),
@@ -232,6 +291,7 @@ test("rejects incomplete repository dependencies", () => {
       createRailwayTenantSessionResolver({
         memberships: {},
         selections: {},
+        identityOrganizations: {},
       }),
     /dependencies are invalid/,
   );

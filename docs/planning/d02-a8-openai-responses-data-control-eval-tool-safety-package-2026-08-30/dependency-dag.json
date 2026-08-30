@@ -1,0 +1,362 @@
+{
+  "artifactId": "CONNECT-D02-A8-TYPED-CROSS-PROGRAM-DAG-2026-08-30",
+  "graphVersion": "D02-A8-DAG-1",
+  "edgeDirection": "PREREQUISITE-TO-CONSUMER",
+  "nodes": [
+    {
+      "nodeId": "D02A8-DAG-N001",
+      "semanticId": "A8-PACKAGE-CORE",
+      "nodeClass": "PACKAGE",
+      "currentState": "PRESENT",
+      "soleProducer": "D02A8-PRODUCER-001"
+    },
+    {
+      "nodeId": "D02A8-DAG-N002",
+      "semanticId": "D02-AUTHORITY-AND-CLAUSE-DISPOSITION",
+      "nodeClass": "AUTHORITY",
+      "currentState": "PRESENT",
+      "soleProducer": "D02A8-PRODUCER-002"
+    },
+    {
+      "nodeId": "D02A8-DAG-N003",
+      "semanticId": "DURABLE-PUBLIC-DIRECTIVE",
+      "nodeClass": "AUTHORITY",
+      "currentState": "PRESENT",
+      "soleProducer": "D02A8-PRODUCER-003"
+    },
+    {
+      "nodeId": "D02A8-DAG-N004",
+      "semanticId": "INDEPENDENT-A8-REVIEW-DISPOSITION",
+      "nodeClass": "EXTERNAL-PLANNING-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-004"
+    },
+    {
+      "nodeId": "D02A8-DAG-N005",
+      "semanticId": "A8-SEVEN-FINDING-CLOSURE",
+      "nodeClass": "EXTERNAL-PLANNING-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-005"
+    },
+    {
+      "nodeId": "D02A8-DAG-N006",
+      "semanticId": "D02-PROGRAM-ACCEPTANCE-RECEIPT",
+      "nodeClass": "EXTERNAL-PLANNING-AUTHORITY",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-006"
+    },
+    {
+      "nodeId": "D02A8-DAG-N007",
+      "semanticId": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "nodeClass": "PLANNING-ROOT",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-007"
+    },
+    {
+      "nodeId": "D02A8-DAG-N008",
+      "semanticId": "D02-CONTROL-REQUIREMENTS-EXPORT",
+      "nodeClass": "PLANNING-EXPORT",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-008"
+    },
+    {
+      "nodeId": "D02A8-DAG-N009",
+      "semanticId": "PUBLIC-CYBER-ACCEPTANCE",
+      "nodeClass": "CROSS-PROGRAM-ROOT",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-009"
+    },
+    {
+      "nodeId": "D02A8-DAG-N010",
+      "semanticId": "GATE29-CURRENT-PERMIT",
+      "nodeClass": "GLOBAL-GATE-ROOT",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-010"
+    },
+    {
+      "nodeId": "D02A8-DAG-N011",
+      "semanticId": "MODEL-SELECTION-AUTHORITY",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-011"
+    },
+    {
+      "nodeId": "D02A8-DAG-N012",
+      "semanticId": "CONNECT-PROMPT-ARTIFACT",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-012"
+    },
+    {
+      "nodeId": "D02A8-DAG-N013",
+      "semanticId": "AI-PROFILE",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-013"
+    },
+    {
+      "nodeId": "D02A8-DAG-N014",
+      "semanticId": "ACCOUNT-SNAPSHOT",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-014"
+    },
+    {
+      "nodeId": "D02A8-DAG-N015",
+      "semanticId": "LEGAL-PRIVACY-BUNDLE",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-015"
+    },
+    {
+      "nodeId": "D02A8-DAG-N016",
+      "semanticId": "OFFICIAL-SOURCE-ACCEPTANCE",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-016"
+    },
+    {
+      "nodeId": "D02A8-DAG-N017",
+      "semanticId": "SIX-DOMAIN-APPROVAL-SET",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-017"
+    },
+    {
+      "nodeId": "D02A8-DAG-N018",
+      "semanticId": "DETACHED-EVAL-EVIDENCE",
+      "nodeClass": "AI-ADMISSION-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-018"
+    },
+    {
+      "nodeId": "D02A8-DAG-N019",
+      "semanticId": "AI-PROFILE-ADMISSION",
+      "nodeClass": "AI-ADMISSION-ROOT",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-019"
+    },
+    {
+      "nodeId": "D02A8-DAG-N020",
+      "semanticId": "FREEZE-LIFT-AUTHORITY",
+      "nodeClass": "RUNTIME-AUTHORITY",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-020"
+    },
+    {
+      "nodeId": "D02A8-DAG-N021",
+      "semanticId": "RUNTIME-READBACK-TIME-REVOCATION-CAS-BUNDLE",
+      "nodeClass": "RUNTIME-EVIDENCE",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-021"
+    },
+    {
+      "nodeId": "D02A8-DAG-N022",
+      "semanticId": "AI-RUNTIME-PERMIT",
+      "nodeClass": "RUNTIME-ROOT",
+      "currentState": "MISSING",
+      "soleProducer": "D02A8-PRODUCER-022"
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "D02A8-DAG-E001",
+      "from": "D02A8-DAG-N001",
+      "to": "D02A8-DAG-N007",
+      "edgeType": "PLANNING-ACCEPTANCE-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E002",
+      "from": "D02A8-DAG-N002",
+      "to": "D02A8-DAG-N007",
+      "edgeType": "AUTHORITY-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E003",
+      "from": "D02A8-DAG-N003",
+      "to": "D02A8-DAG-N007",
+      "edgeType": "AUTHORITY-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E004",
+      "from": "D02A8-DAG-N004",
+      "to": "D02A8-DAG-N007",
+      "edgeType": "PLANNING-ACCEPTANCE-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E005",
+      "from": "D02A8-DAG-N005",
+      "to": "D02A8-DAG-N007",
+      "edgeType": "PLANNING-ACCEPTANCE-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E006",
+      "from": "D02A8-DAG-N006",
+      "to": "D02A8-DAG-N007",
+      "edgeType": "AUTHORITY-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E007",
+      "from": "D02A8-DAG-N007",
+      "to": "D02A8-DAG-N008",
+      "edgeType": "CONTROL-REQUIREMENT-EXPORT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E008",
+      "from": "D02A8-DAG-N003",
+      "to": "D02A8-DAG-N009",
+      "edgeType": "CROSS-PROGRAM-REQUIREMENT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E009",
+      "from": "D02A8-DAG-N008",
+      "to": "D02A8-DAG-N009",
+      "edgeType": "CROSS-PROGRAM-REQUIREMENT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E010",
+      "from": "D02A8-DAG-N009",
+      "to": "D02A8-DAG-N010",
+      "edgeType": "GATE-FOUNDATION"
+    },
+    {
+      "edgeId": "D02A8-DAG-E011",
+      "from": "D02A8-DAG-N007",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E012",
+      "from": "D02A8-DAG-N011",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E013",
+      "from": "D02A8-DAG-N012",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E014",
+      "from": "D02A8-DAG-N013",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E015",
+      "from": "D02A8-DAG-N014",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E016",
+      "from": "D02A8-DAG-N015",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E017",
+      "from": "D02A8-DAG-N016",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E018",
+      "from": "D02A8-DAG-N017",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E019",
+      "from": "D02A8-DAG-N018",
+      "to": "D02A8-DAG-N019",
+      "edgeType": "AI-ADMISSION-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E020",
+      "from": "D02A8-DAG-N019",
+      "to": "D02A8-DAG-N022",
+      "edgeType": "RUNTIME-AUTHORITY-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E021",
+      "from": "D02A8-DAG-N010",
+      "to": "D02A8-DAG-N022",
+      "edgeType": "RUNTIME-AUTHORITY-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E022",
+      "from": "D02A8-DAG-N020",
+      "to": "D02A8-DAG-N022",
+      "edgeType": "RUNTIME-AUTHORITY-INPUT"
+    },
+    {
+      "edgeId": "D02A8-DAG-E023",
+      "from": "D02A8-DAG-N021",
+      "to": "D02A8-DAG-N022",
+      "edgeType": "RUNTIME-AUTHORITY-INPUT"
+    }
+  ],
+  "rootClassSeparation": [
+    {
+      "rootSemanticId": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "mayAuthorize": [
+        "PLANNING-CONTRACT-ONLY"
+      ],
+      "mustNotAuthorize": [
+        "AI-PROFILE-ADMISSION",
+        "AI-RUNTIME"
+      ]
+    },
+    {
+      "rootSemanticId": "AI-PROFILE-ADMISSION",
+      "mayAuthorize": [
+        "EXACT-AI-PROFILE-ADMISSION-ONLY"
+      ],
+      "mustNotAuthorize": [
+        "PLANNING-ACCEPTANCE",
+        "AI-RUNTIME"
+      ]
+    },
+    {
+      "rootSemanticId": "AI-RUNTIME-PERMIT",
+      "mayAuthorize": [
+        "ONE-EXACT-RUNTIME-CUT"
+      ],
+      "mustNotAuthorize": [
+        "PLANNING-ACCEPTANCE",
+        "PROFILE-REDEFINITION"
+      ]
+    }
+  ],
+  "prohibitedEdges": [
+    {
+      "from": "D02A8-DAG-N010",
+      "to": "D02A8-DAG-N007",
+      "reason": "Gate29 must not be a planning-acceptance prerequisite"
+    },
+    {
+      "from": "D02A8-DAG-N022",
+      "to": "D02A8-DAG-N019",
+      "reason": "runtime permit must not define admission"
+    },
+    {
+      "from": "D02A8-DAG-N019",
+      "to": "D02A8-DAG-N010",
+      "reason": "Gate29 must consume planning controls, not operational admission"
+    },
+    {
+      "from": "D02A8-DAG-N020",
+      "to": "D02A8-DAG-N007",
+      "reason": "freeze lift must not authorize planning semantics"
+    }
+  ],
+  "expectedStructuralState": {
+    "nodeCount": 22,
+    "edgeCount": 23,
+    "cycleCount": 0,
+    "danglingReferenceCount": 0,
+    "rootClassSubstitutionCount": 0
+  }
+}

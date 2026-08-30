@@ -29,8 +29,10 @@ Provisioning, ‏Deployment או שינוי של `productionReadiness` לפני
 ## 2. הבעיה שצריך לפתור
 
 2.1 ‏ADR-0001 בחר Vercel לשכבת ה־Web ו־Railway לשירותי API ו־Worker.
-הוא לא בחר Database, ‏Queue, ‏Object storage, ‏Scheduler, ‏Rate
-limiting, ‏Backup או Observability.
+בקליטת ההחלטות מ־21.08.2026 טל בחר Railway PostgreSQL ל־Pilot,
+Railway Redis + BullMQ לתורים, Limiter רב־שכבתי ו־Better Stack עם
+OpenTelemetry. ‏Object storage נשאר פתוח, וכל הבחירות עדיין דורשות
+את האישורים וה־Evidence שבסעיף 10.
 
 2.2 ‏Vercel אינו חלק מהרשת הפרטית של Railway. לכן קריאה מ־Vercel
 ל־Railway עוברת דרך HTTPS ציבורי ומחייבת זהות שירות קצרת־חיים,
@@ -134,20 +136,33 @@ Worker ו־Migration job מתחברים דרך Railway private networking.
 האמת העסקי.
 
 4.5.2 BullMQ מנהל Delay, ‏Backpressure, ‏Attempts ו־Failed state.
-אחרי מספר ניסיונות מוגבל, עבודה סופית נשארת ב־Failed set ומקבלת
-אירוע Audit/Alert ב־PostgreSQL; אין מחיקה אוטומטית של Failed jobs
-לפני חלון הבדיקה המאושר.
+אחרי מספר Retries מוגבל, ה־Adapter מעתיק עבודה סופית ל־DLQ ייעודי ורק
+לאחר שמירת ה־DLQ מסיים את העבודה הראשית. אם שמירת ה־DLQ נכשלת, העבודה
+נשארת ב־Failed set הראשי ואינה מסומנת כהצלחה. אין מחיקה לפני חלון
+הבדיקה המאושר ובלי נתיב Audit/Alert תפעולי.
 
 4.5.3 Redis חייב AOF persistence, ‏`maxmemory-policy=noeviction`,
 Memory alert, ‏Graceful reconnect ו־Restore test. ללא תנאים אלה
 BullMQ אינו כשיר ל־Production.
 
-4.5.4 Job payload מכיל Reference אטום וגרסת Contract בלבד. תוכן
+4.5.4 Job payload מכיל Tenant identifier פנימי, Reference אטום וגרסת
+Contract בלבד. תוכן
 שיחה, מספר טלפון, Access token או PII אינם נשמרים ב־Redis.
 
 4.5.5 Retry אוטומטי מותר רק לכשל שסווג `safe-to-retry`. תוצאת שליחה
 לא ידועה עוברת ל־`ambiguous` ב־PostgreSQL ול־Reconciliation; היא
 אינה חוזרת לתור השליחה.
+
+4.5.6 ‏Adapter v1 של `message-template-submission` הושלם מקומית עם
+`submissionKey` דטרמיניסטי, עשרה Retries לאחר הניסיון הראשון, Delay קבוע
+של 30 שניות, DLQ ו־Graceful shutdown. הוא עבר Publish/Consume/Dedup מול
+Redis מקומי אמיתי. ‏Provider-bound composition יוצר את ה־Consumer מתוך
+PostgreSQL, מעלה BullMQ לפני ה־Scheduler, מריץ Cleanup תחום ומנקז את ה־Worker
+לפני סגירת PostgreSQL. Start command fail-closed מחבר כעת את כל ארבעת
+התורים, Clerk, ‏shared invitation guard ומדיניות Meta Retry. טיפול Clerk
+‏429/Retry-After הושלם מקומית עם Deferral עמיד ו־Delay תחום. הוא עדיין אינו
+Ready עד ערכי Retention ו־Identity מאושרים, ראיית 429 חיה, Telemetry provider
+חי, ‏AOF/noeviction וראיית Railway Staging חתומה.
 
 ## 5. Scheduler
 
@@ -221,8 +236,20 @@ Fail-closed; Meta webhook מאומת נשמר במסלול Durable שאושר א
 מחלקת המידע. אין לסמן Backup/Restore כ־Ready על בסיס Snapshot קיים.
 
 8.4 כל שלושת שירותי הקוד מפיקים OpenTelemetry עם `release`,
-`environment`, ‏`service` ו־Correlation ID זהים. ספק ה־Sink,
-Retention וערוץ ההתראות נשארים `unknown/unavailable`.
+`environment`, ‏`service` ו־Correlation ID זהים. Better Stack נבחר
+כ־Sink. ה־Railway Worker, ‏Railway API ו־Vercel Web מחוברים מקומית ל־
+OTLP Logs עם `release`, ‏`environment` ו־`service` ועם Redaction מבני;
+Vercel קושר Flush ל־`after()` של Request lifecycle. החוזה האטום המשותף
+נגזר באמצעות HMAC מ־`x-vercel-id`, עובר רק כ־W3C `traceparent` לאחר
+Vercel OIDC ואינו מכיל Tenant/User/Recipient. ‏Vercel ו־Railway API
+מייצאים Root Client Span ו־Child Server Span דטרמיניסטיים, Log context
+מקומי ושני Metrics תחומים; מפתח חסר ב־Hosted environment נכשל סגור.
+ה־Worker מפיק Root Spans לאירועים מדודים וארבעה Metrics תחומים עבור Signals
+של כל ארבעת התורים, משכים, זמני ספק ומוני Outcome. להזמנות צוות ולהגשת
+Templates יש Delivery spans; Meta template POST מקבל `CLIENT` child span
+דטרמיניסטי עם זמן HTTP אמיתי וללא URL, מזהי לקוח או Payload. ‏Child spans
+לקמפיינים, Reconciliation ו־Clerk, ‏Source חי, ‏Retention, תקציב, ערוץ
+ההתראות וראיות Staging עדיין `unknown/unavailable`.
 
 8.5 Railway dashboard מספיק לבריאות Container בסיסית בלבד. לפי
 התיעוד, Retention של Logs תלוי Plan; נדרש Sink חיצוני ל־Application
@@ -245,8 +272,10 @@ WhatsApp וה־Webhook דורשות Headroom, ‏Backpressure ו־Scaling עצמ
 
 ## 10. החלטות ואישורים שחסרים
 
-10.1 טל — מאשר או דוחה את טופולוגיית השירותים וה־Scheduler:
-`unknown/unavailable`.
+10.1 טל — אישר ב־21.08.2026 את כיוון Vercel Web/BFF + Railway
+API/Worker + Railway PostgreSQL/Redis + BullMQ, ‏Scheduler תמידי,
+Limiter רב־שכבתי ו־Better Stack/OpenTelemetry. ‏Object storage לא
+נבחר.
 
 10.2 רועי — מאשר Railway/Vercel Plans, ‏PostgreSQL HA, ‏Redis,
 Storage ו־Observability budget: `unknown/unavailable`.
@@ -321,6 +350,14 @@ PostgreSQL 16; נותרה תצורת Railway Service חיה.
 ‏Railway API מלא נשאר חסום עד השלמת יתר ה־Routes
 וה־Mutations, ‏Parity מלאה, ערכי Pool חיים וראיות Staging, כדי לא ליצור
 Hybrid לא מתועד עם D1.
+
+11.9 ‏Vercel Web קיבל פקודת `build:vercel` נפרדת שמריצה Next.js 16 עם
+Webpack. ה־Build המקומי עבר עבור כל מסלולי App Router ללא הורדת Fonts
+חיצונית. ‏Next מחליף את `cloudflare:workers` ב־Environment ריק וקפוא,
+ולכן מסלול ישן שטרם הועבר ל־Railway נכשל סגור במקום לקבל D1, ‏R2, ‏Queue
+או Secret. ‏Vinext נשאר בינתיים פקודת ברירת המחדל כדי לא לבצע Cutover
+שקט; נדרשים Vercel Project configuration, ערכי Environment, ‏Preview
+deployment ו־Route smoke לפני החלפת ברירת המחדל.
 
 ## 12. מקורות רשמיים שנבדקו
 

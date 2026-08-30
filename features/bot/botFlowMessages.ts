@@ -63,7 +63,7 @@ const hebrewMessages = {
       "יש לבחור סביבת עבודה פעילה.",
     "permission-denied": "אין הרשאה לבצע פעולה זו.",
     "validation-error":
-      "השרת דחה את מבנה התהליך. בדקו שם, מילות מפתח והודעות תשובה.",
+      "השרת דחה את מבנה התהליך. בפרסום ל־WhatsApp מותר עד 3 כפתורי תשובה ועד 20 תווים בכותרת כפתור.",
     "invalid-input": "הבקשה אינה תקינה.",
     "not-found":
       "התהליך או הגרסה כבר אינם קיימים.",
@@ -482,7 +482,7 @@ const englishMessages: BotFlowMessages = {
     "permission-denied":
       "You do not have permission for this action.",
     "validation-error":
-      "The server rejected the flow structure. Check its name, keywords, and replies.",
+      "The server rejected the flow structure. WhatsApp publication allows up to 3 reply buttons and 20 characters per button title.",
     "invalid-input": "The request is invalid.",
     "not-found": "The flow or version no longer exists.",
     "state-conflict":
@@ -866,7 +866,7 @@ const arabicMessages: BotFlowMessages = {
     "tenant-selection-required": "اختر مساحة عمل نشطة.",
     "permission-denied": "لا تملك صلاحية تنفيذ هذا الإجراء.",
     "validation-error":
-      "رفض الخادم بنية المسار. تحقّق من الاسم والكلمات المفتاحية والردود.",
+      "رفض الخادم بنية المسار. يسمح النشر في WhatsApp بثلاثة أزرار رد كحد أقصى و20 حرفًا لعنوان الزر.",
     "invalid-input": "الطلب غير صالح.",
     "not-found": "لم يعد المسار أو الإصدار موجودًا.",
     "state-conflict":

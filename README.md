@@ -5,8 +5,16 @@
 
 ## מסמכי תכנון ותפעול מרכזיים
 
+מקור האמת לסדר העבודה שנותר הוא
+[תוכנית כל העבודה שנותרה — 30.08.2026](docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md).
+החלטות Tal האחרונות וההתאמה לתוכנית מתועדות ב־
+[קליטת החלטות ועדכון התוכנית — 30.08.2026](docs/planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md).
+מסמכים אינטראקטיביים לקריאה ולייצוא זמינים ב־
+[מדריך הסטטוס הפשוט](docs/connect-project-status-grandma-guide.html) וב־
+[רשימת ההחלטות והצרכים](docs/connect-remaining-decisions-and-needs.html).
+
 1. [תוכנית העבודה הצוותית](docs/team-operating-plan.md).
-2. [שאלון ההחלטות המהותיות](docs/connect-decisions-questionnaire.html).
+2. [כל ההחלטות שנותרו — שאלון מקיף](docs/connect-all-remaining-decisions.html).
 3. [Architecture Decision Records](docs/adr/README.md).
 4. [GitHub Governance live audit](docs/github-governance-live-audit.md).
 5. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
@@ -27,6 +35,14 @@
 20. [Railway API Startup and Shutdown](docs/railway-api-startup.md).
 21. [PostgreSQL Full Migration Bundle](docs/postgresql-full-data-migration-bundle-contract.md).
 22. [PostgreSQL Full Migration Cutover Runbook](docs/postgresql-full-data-migration-cutover-runbook.md).
+23. [Railway BullMQ — Message Template Submission Adapter](docs/railway-bullmq-message-template-submission-adapter.md).
+24. [Railway BullMQ — Campaign Delivery Adapter](docs/railway-bullmq-campaign-delivery-adapter.md).
+25. [Railway Redis — Durability and Outage Rehearsal](docs/railway-redis-durability-rehearsal.md).
+26. [Better Stack OpenTelemetry for Railway Worker](docs/better-stack-opentelemetry.md).
+27. [Meta Bot Reply Adapter — חוזה מקומי](docs/meta-bot-reply-adapter.md).
+28. [Bot-reply Release Evidence Storage — ADR-0005](docs/adr/0005-bot-reply-release-evidence-storage.md).
+29. [תוכנית מלאה לכל העבודה שנותרה — מחקר, פיתוח, Pilot ו־Production](docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md).
+30. [קליטת V01/V02 והחלת כל ההחלטות האחרונות](docs/planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md).
 
 ## מצב Master Plan — תשתית Stage 3
 
@@ -789,9 +805,11 @@
 6. ספק AI ומאגר וקטורי.
 7. העלאת קבצים ל־R2.
 8. חיבור Adapter שליחת Campaign אמיתי ל־Meta.
-9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
-   WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
-   מקומית; ה־Adapter נשאר Fail-Closed.
+9. חיבור Adapter תשובות Bot ל־Worker ובדיקת End-to-End מול WABA.
+   ‏Adapter Meta, ‏Vault/Phone scope, חוזה Outbound Idempotent, שני Gates
+   לחלון השירות וקישור Reply Button ל־`context.id` ול־Delivery המדויק
+   הושלמו מקומית. נותרו Admission נפרד ל־Pair/Phone, מדיניות פרסום
+   לתפריטים גדולים, Kill switch, חיבור Worker וראיה חיה.
 10. בדיקת שמירה ופרסום של Bot Graph ב־Staging עם Clerk ו־D1 מורשים.
     עורך ה־Graph המקומי, כל סוגי ה־Nodes, המקלדת, Drag-and-drop,
     החיבורים, Focus וה־Preview עברו Browser E2E מקומי ב־Chromium;

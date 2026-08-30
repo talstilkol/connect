@@ -1,0 +1,3625 @@
+{
+  "artifactId": "CONNECT-PUBLIC-REPOSITORY-CYBER-HARDENING-V4-SCHEMA-AND-TYPED-REGISTRIES-2026-08-30",
+  "schemaVersion": "PRCV4-REGISTRY-1",
+  "artifactClass": "PLANNING-SCHEMA-REGISTRY-NOT-IMPLEMENTED-NOT-ACCEPTED",
+  "repositoryVisibility": "PUBLIC",
+  "repositoryBinding": {
+    "logicalId": "github.com/talstilkol/connect",
+    "originHttps": "https://github.com/talstilkol/connect.git",
+    "platformNodeId": null,
+    "platformNodeIdState": "ABSENT",
+    "gitTopLevelDiscovery": "git-rev-parse-show-toplevel-plus-realpath",
+    "cwdAuthority": false,
+    "wrongRootTerminal": "LOCATOR-REPOSITORY-IDENTITY-BLOCKED"
+  },
+  "canonicalProfile": {
+    "profileId": "PRCV4-CJ-1",
+    "encoding": "UTF-8",
+    "objectKeyOrder": "UNICODE-SCALAR-CODEPOINT-AFTER-NFC",
+    "arrayOrder": "SCHEMA-DECLARED",
+    "duplicateKeys": "REJECT",
+    "stringNormalization": "REQUIRE-NFC",
+    "unpairedSurrogates": "REJECT",
+    "numbers": "SAFE-INTEGER-ONLY",
+    "negativeZero": "REJECT",
+    "nonFinite": "REJECT",
+    "digest": "SHA-256",
+    "digestInput": "UTF8(CONNECT-PRCV4:artifactDomain:)||canonicalBytes",
+    "randomnessAllowed": false
+  },
+  "artifactDomains": [
+    "ACCEPTANCE-HEAD",
+    "CONTROL-PERMIT",
+    "CORE-PACKAGE-ROOT",
+    "DEPLOY-PERMIT",
+    "DOMAIN-VECTOR",
+    "EVIDENCE-RECEIPT",
+    "FINDING-CLOSURE",
+    "INPUT-MANIFEST",
+    "MANIFEST-ENVELOPE",
+    "PACKAGE-ROOT",
+    "PRODUCER-GRAPH",
+    "PRODUCER-QA",
+    "PUSH-PERMIT",
+    "READER-REPORT",
+    "RELEASE-PERMIT",
+    "REVIEW-DISPOSITION",
+    "SCHEMA-REGISTRY"
+  ],
+  "locatorProfiles": {
+    "PlanningArtifactPath": {
+      "requiredPrefix": "docs/planning/",
+      "absolute": false,
+      "parent": false,
+      "nul": false,
+      "backslash": false,
+      "nfc": true,
+      "symlinkEscape": false
+    },
+    "RepositoryContentPath": {
+      "requiredPrefix": null,
+      "absolute": false,
+      "parent": false,
+      "nul": false,
+      "backslash": false,
+      "nfc": true,
+      "gitDirectory": false,
+      "symlinkEscape": false,
+      "rootFilesAllowed": true,
+      "dotFilesAllowed": true
+    },
+    "PrivateEvidenceLocator": {
+      "publicPathAllowed": false,
+      "publicEqualityOracleAllowed": false,
+      "publicCommitmentRequired": true
+    },
+    "ExternalResourceLocator": {
+      "schemes": [
+        "https"
+      ],
+      "fragmentIdentity": "EXPLICIT",
+      "redirectChainRequired": true,
+      "authorityRequired": true
+    }
+  },
+  "primitiveTypes": {
+    "Id": "non-empty NFC ASCII identifier matching ^[A-Z0-9][A-Z0-9._:-]*$",
+    "Hash": "64 lowercase hexadecimal SHA-256 characters",
+    "GitOid": "algorithm-tag plus lowercase hexadecimal object identifier",
+    "SafeInteger": "JSON integer in [-9007199254740991,9007199254740991]",
+    "TrustedTime": "RFC3339 UTC instant plus trusted authority receipt Hash",
+    "State": "closed enum declared by the owning schema",
+    "String": "non-empty NFC UTF-8 string",
+    "Boolean": "JSON true or false",
+    "Array<T>": "ordered JSON array with schema-declared uniqueness and cardinality",
+    "Map<K,V>": "closed JSON object with canonical keys and values",
+    "Nullable<T>": "null or T only when schema state explicitly permits absence"
+  },
+  "physicalInputs": [
+    {
+      "inputId": "V3-SUBJECT",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-2026-08-30.md",
+      "sha256": "a93bc7bde79f6427e69d70bd55280cd7fb7f3e3dc9bd30bb62e3be607dcf2c30",
+      "lines": 820,
+      "bytes": 49169,
+      "claimClass": "FROZEN-PREDECESSOR"
+    },
+    {
+      "inputId": "V3-MANIFEST",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-atomic-package-manifest-2026-08-30.json",
+      "sha256": "623f8a7bc4864d11be9eb398c9d2987388b030c991acccca312b1720cdf6f9c4",
+      "lines": 130,
+      "bytes": 5582,
+      "claimClass": "FROZEN-PREDECESSOR-MANIFEST"
+    },
+    {
+      "inputId": "V3-REGISTRIES",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-typed-registries-2026-08-30.json",
+      "sha256": "b6ac2d2cbb6e0048fba1a36f53be1fa0cc4e96d163c9385b6b90cae3558d4385",
+      "lines": 4391,
+      "bytes": 126824,
+      "claimClass": "FROZEN-PREDECESSOR-MEMBER"
+    },
+    {
+      "inputId": "V3-GRAPH",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-producer-dependency-graph-2026-08-30.json",
+      "sha256": "15ac5c3e515af79e3deedaa4dfb130632a9f0f874e93e2bee0132c33da7681e5",
+      "lines": 3247,
+      "bytes": 91408,
+      "claimClass": "FROZEN-PREDECESSOR-MEMBER"
+    },
+    {
+      "inputId": "V3-VECTORS",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-operation-oracle-vector-pack-2026-08-30.json",
+      "sha256": "1f13d5641ca923ffa84ff5f8c84744ef50f397359373193fdf91ca9104e4048b",
+      "lines": 1764,
+      "bytes": 57078,
+      "claimClass": "FROZEN-PREDECESSOR-MEMBER"
+    },
+    {
+      "inputId": "V3-CLOSURES",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-finding-closure-registry-2026-08-30.json",
+      "sha256": "a19a2771f218883a9ab9ab0678e956dfefdb23970cfdac92fc247c6c87708f5f",
+      "lines": 1395,
+      "bytes": 68374,
+      "claimClass": "FROZEN-59-CLOSURE-UNIVERSE"
+    },
+    {
+      "inputId": "V3-REVIEW",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-independent-hostile-review-2026-08-30.md",
+      "sha256": "12e437f1ff4b8b66e6e5491fb148c46cfe4d263d3186827787c89ba7d8ce0ed1",
+      "lines": 264,
+      "bytes": 20422,
+      "claimClass": "FROZEN-INDEPENDENT-REVIEW"
+    },
+    {
+      "inputId": "V3-FINDINGS",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "sha256": "52d5b987ae710d6946c7f1f495493b6af2a852405fd0ecc295b0037899c79e4b",
+      "lines": 358,
+      "bytes": 38973,
+      "claimClass": "FROZEN-34-FINDING-UNIVERSE"
+    },
+    {
+      "inputId": "V2-FINDINGS",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "sha256": "f049b4b681d1c03bed1b4856a61a064383faa3b3bab58a2baca85bf546f81c16",
+      "lines": 609,
+      "bytes": 61755,
+      "claimClass": "FROZEN-WRAPPER-FINDINGS"
+    },
+    {
+      "inputId": "PREDECESSOR-FINDINGS",
+      "path": "docs/planning/public-repository-and-cyber-source-hostile-review-findings-manifest-2026-08-29.md",
+      "sha256": "a84a26bd0439e4da5bed5a941b8956e041268fc33ba40e2d89d095b55dec51e4",
+      "lines": 573,
+      "bytes": 41555,
+      "claimClass": "FROZEN-PREDECESSOR-FINDINGS"
+    },
+    {
+      "inputId": "GITHUB-LIVE-V3",
+      "path": "docs/planning/github-public-hardening-live-readback-observation-v3-2026-08-30.md",
+      "sha256": "0dea5b462e4bff0d1866a585a585f7e0d0405609ad21ade4e8ecac1210e521cb",
+      "lines": 287,
+      "bytes": 21761,
+      "claimClass": "BOUNDED-OBSERVATION"
+    },
+    {
+      "inputId": "SECRET-SCAN-V2",
+      "path": "docs/planning/public-repository-secret-scan-observation-v2-2026-08-30.md",
+      "sha256": "3e8bb89858b660e8fe923643301c7225cafd622acdca6842a913a1f6d9bb9983",
+      "lines": 205,
+      "bytes": 9083,
+      "claimClass": "BOUNDED-BLOCKING-OBSERVATION"
+    },
+    {
+      "inputId": "LEGACY-QUARANTINE-V2",
+      "path": "docs/planning/legacy-analysis-publication-quarantine-observation-v2-2026-08-30.md",
+      "sha256": "00d8c970eb6f8a747d6353f309bc0c0109df6dd454582447325f123cf512df7c",
+      "lines": 187,
+      "bytes": 10602,
+      "claimClass": "BOUNDED-BLOCKING-OBSERVATION"
+    },
+    {
+      "inputId": "LICENSE-OBSERVATION",
+      "path": "docs/planning/public-repository-license-strategy-observation-2026-08-30.md",
+      "sha256": "d5d8267370435cba5fcaa481f3af8a8d60641e319dfc3237ce3abd7a834b3f96",
+      "lines": 137,
+      "bytes": 10798,
+      "claimClass": "BOUNDED-BLOCKING-OBSERVATION"
+    },
+    {
+      "inputId": "CYBER-SOURCE-REFRESH-V2",
+      "path": "docs/planning/cyber-control-coverage-method-source-refresh-v2-2026-08-30.md",
+      "sha256": "477bf722f238c586c9f960e3886ae193cbbe4068b080a95602324ff4fe4e6784",
+      "lines": 253,
+      "bytes": 15956,
+      "claimClass": "BOUNDED-NON-CUSTODIAL-OBSERVATION"
+    }
+  ],
+  "typedAbsentInputs": [
+    {
+      "inputId": "B0",
+      "claimClass": "AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "TAL-MANDATE",
+      "claimClass": "AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "REVIEW-PROTOCOL",
+      "claimClass": "AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "SOURCE-UNIVERSE",
+      "claimClass": "AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "CONTROL-SEQUENCE",
+      "claimClass": "AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "TRUSTED-TIME",
+      "claimClass": "EVIDENCE-AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "LEGAL-DECISION",
+      "claimClass": "LEGAL-AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "ORG-GOVERNANCE",
+      "claimClass": "GOVERNANCE-AUTHORITY",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "D02",
+      "claimClass": "DECISION",
+      "state": "ABSENT"
+    },
+    {
+      "inputId": "D25",
+      "claimClass": "DECISION",
+      "state": "ABSENT"
+    }
+  ],
+  "lifecycle": {
+    "states": [
+      "PROPOSED",
+      "EVIDENCED",
+      "INDEPENDENTLY-REVIEWED",
+      "ACCEPTED",
+      "BLOCKED",
+      "REVOKED",
+      "EXPIRED"
+    ],
+    "allowedTransitions": [
+      "PROPOSED->EVIDENCED",
+      "EVIDENCED->INDEPENDENTLY-REVIEWED",
+      "INDEPENDENTLY-REVIEWED->ACCEPTED",
+      "PROPOSED->BLOCKED",
+      "EVIDENCED->BLOCKED",
+      "INDEPENDENTLY-REVIEWED->BLOCKED",
+      "ACCEPTED->REVOKED",
+      "PROPOSED->REVOKED",
+      "EVIDENCED->REVOKED",
+      "INDEPENDENTLY-REVIEWED->REVOKED",
+      "PROPOSED->EXPIRED",
+      "EVIDENCED->EXPIRED",
+      "INDEPENDENTLY-REVIEWED->EXPIRED",
+      "ACCEPTED->EXPIRED"
+    ],
+    "transitionRequiredFields": [
+      "objectId",
+      "expectedOldHead",
+      "newHead",
+      "authorityRoot",
+      "eventRoot",
+      "epoch",
+      "trustedTimeReceipt",
+      "expiresAt",
+      "reason"
+    ],
+    "acceptancePreconditions": [
+      "allDependenciesAccepted",
+      "allEvidenceCurrent",
+      "independentDispositionAccepted",
+      "trustedTimeCurrent",
+      "expectedOldHeadMatches",
+      "noVeto",
+      "repositoryVisibilityPublic"
+    ],
+    "terminalOnUnknown": "BLOCKED",
+    "descendantRevocation": "MANDATORY"
+  },
+  "requirementDefinitions": [
+    {
+      "requirementId": "PRCV4-REQ-000",
+      "outputObjectId": "PRCV4-OBJECT-000",
+      "outputType": "FrozenInputByteManifest",
+      "soleProducerId": "PRCV4-PRODUCER-000",
+      "dependencies": [],
+      "failure": "FROZEN-INPUT-BYTE-MANIFEST-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "inputRecords": "Array<InputByteRecord>",
+          "absentRecords": "Array<TypedAbsentInput>",
+          "manifestRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "physical bytes match every locator/hash/lines/bytes",
+          "absence has no locator or digest"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-001",
+      "outputObjectId": "PRCV4-OBJECT-001",
+      "outputType": "CanonicalizationDigestAndSchemaKernel",
+      "soleProducerId": "PRCV4-PRODUCER-001",
+      "dependencies": [
+        "PRCV4-REQ-000"
+      ],
+      "failure": "CANONICAL-SCHEMA-KERNEL-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "canonicalProfile": "CanonicalProfile",
+          "artifactDomains": "Array<Id>",
+          "primitiveTypes": "Map<Id,String>",
+          "schemaCatalogRoot": "Hash",
+          "evaluatorTerminalRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "domain prefixes unique",
+          "all schemas closed",
+          "unknown field rejects"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-002",
+      "outputObjectId": "PRCV4-OBJECT-002",
+      "outputType": "LocatorAndRepositoryIdentityRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-002",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001"
+      ],
+      "failure": "LOCATOR-REPOSITORY-IDENTITY-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "planningPathGrammar": "LocatorProfile",
+          "repositoryPathGrammar": "LocatorProfile",
+          "privateEvidenceGrammar": "LocatorProfile",
+          "externalResourceGrammar": "LocatorProfile",
+          "gitTopLevelRealPathCommitment": "Hash",
+          "originIdentity": "String",
+          "platformNodeId": "Nullable<Id>"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "locator domains disjoint",
+          "cwd is not authority",
+          "symlink escape denies"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-003",
+      "outputObjectId": "PRCV4-OBJECT-003",
+      "outputType": "BootstrapAuthorityEnvelope",
+      "soleProducerId": "PRCV4-PRODUCER-003",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-002"
+      ],
+      "failure": "BOOTSTRAP-AUTHORITY-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "b0Root": "Hash",
+          "talMandateRoot": "Hash",
+          "authorityKeys": "Array<AuthorityKey>",
+          "quorum": "SafeInteger",
+          "conflictRule": "Id",
+          "recoveryRule": "Id",
+          "expiresAt": "TrustedTime",
+          "revocationHead": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "B0 and mandate accepted",
+          "quorum positive",
+          "self-authorization denied"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-004",
+      "outputObjectId": "PRCV4-OBJECT-004",
+      "outputType": "ProducerAuthorityRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-004",
+      "dependencies": [
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-003"
+      ],
+      "failure": "PRODUCER-AUTHORITY-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "producerRecords": "Array<AuthorizedProducer>",
+          "outputCardinalityRoot": "Hash",
+          "conflictRule": "Id",
+          "revocationHead": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "one authorized producer per output",
+          "implementation root non-null for credit",
+          "issuer differs where separation required"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-005",
+      "outputObjectId": "PRCV4-OBJECT-005",
+      "outputType": "LifecycleCasAndTrustedTimeRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-005",
+      "dependencies": [
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-004"
+      ],
+      "failure": "LIFECYCLE-CAS-TIME-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "states": "Array<State>",
+          "transitions": "Array<Transition>",
+          "trustedTimeAuthorityRoot": "Hash",
+          "maximumTtls": "Map<Id,SafeInteger>",
+          "atomicConsumeRule": "Id",
+          "descendantRevocationRule": "Id"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "expected-old CAS mandatory",
+          "one-use consume atomic",
+          "clock rollback denies"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-006",
+      "outputObjectId": "PRCV4-OBJECT-006",
+      "outputType": "EvidenceCustodyAndIndependentReaderRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-006",
+      "dependencies": [
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-005"
+      ],
+      "failure": "EVIDENCE-READER-CUSTODY-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "custodyPolicyRoot": "Hash",
+          "privateStoreAuthorityRoot": "Hash",
+          "publicProjectionRule": "Id",
+          "readerRecords": "Array<ReaderIdentity>",
+          "differentialCorpusRoot": "Hash",
+          "disagreementRule": "Id",
+          "appendOnlyEventHead": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "no public equality oracle",
+          "readers use different languages and roots",
+          "disagreement cannot accept"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-007",
+      "outputObjectId": "PRCV4-OBJECT-007",
+      "outputType": "ExactFindingAndAliasUniverse",
+      "soleProducerId": "PRCV4-PRODUCER-007",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-006"
+      ],
+      "failure": "FINDING-ALIAS-UNIVERSE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "inheritedRecords": "Array<FindingIdentity>",
+          "newRecords": "Array<FindingIdentity>",
+          "aliasRecords": "Array<FindingAlias>",
+          "universeRoot": "Hash",
+          "denominator": "SafeInteger"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "denominator equals 93",
+          "32 aliases field-equivalent",
+          "no merge range suppression"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-008",
+      "outputObjectId": "PRCV4-OBJECT-008",
+      "outputType": "DomainSchemaAndEvaluatorCatalog",
+      "soleProducerId": "PRCV4-PRODUCER-008",
+      "dependencies": [
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-007"
+      ],
+      "failure": "DOMAIN-SCHEMA-EVALUATOR-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "domainSchemas": "Array<ClosedDomainSchema>",
+          "evaluatorRecords": "Array<EvaluatorIdentity>",
+          "positiveCorpusRoot": "Hash",
+          "negativeCorpusRoot": "Hash",
+          "catalogRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "one schema and evaluator per output type",
+          "additional properties false",
+          "prose fallback denied"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-009",
+      "outputObjectId": "PRCV4-OBJECT-009",
+      "outputType": "CyberAssetFlowThreatUniverse",
+      "soleProducerId": "PRCV4-PRODUCER-009",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-008"
+      ],
+      "failure": "CYBER-THREAT-UNIVERSE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "systems": "Array<UniverseItem>",
+          "assets": "Array<UniverseItem>",
+          "data": "Array<UniverseItem>",
+          "actors": "Array<UniverseItem>",
+          "flows": "Array<Flow>",
+          "trustBoundaries": "Array<Boundary>",
+          "entryPoints": "Array<UniverseItem>",
+          "sideEffects": "Array<UniverseItem>",
+          "threats": "Array<Threat>",
+          "abuseCases": "Array<Threat>",
+          "failureModes": "Array<Threat>",
+          "traceabilityRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all arrays finite and identity-unique",
+          "every threat maps control test residual risk",
+          "unknown item blocks completeness"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-010",
+      "outputObjectId": "PRCV4-OBJECT-010",
+      "outputType": "CyberSourceCustodyUniverse",
+      "soleProducerId": "PRCV4-PRODUCER-010",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-009"
+      ],
+      "failure": "CYBER-SOURCE-CUSTODY-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "sourceUniverseRoot": "Hash",
+          "captures": "Array<SourceCapture>",
+          "conflicts": "Array<SourceConflict>",
+          "retrievalCut": "TrustedTime",
+          "supersessionRoot": "Hash",
+          "semanticDeltaRoot": "Hash",
+          "licenseRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "official bytes rooted",
+          "conflict preserved",
+          "stale or fetch failure blocks affected control"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-011",
+      "outputObjectId": "PRCV4-OBJECT-011",
+      "outputType": "LocalGitStateSnapshot",
+      "soleProducerId": "PRCV4-PRODUCER-011",
+      "dependencies": [
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-008"
+      ],
+      "failure": "LOCAL-GIT-SNAPSHOT-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "repositoryIdentityRoot": "Hash",
+          "head": "GitOid",
+          "refs": "Array<GitRef>",
+          "indexEntries": "Array<IndexEntry>",
+          "worktreeEntries": "Array<WorktreeEntry>",
+          "specialStates": "Array<GitSpecialState>",
+          "writerBarrierReceipt": "Hash",
+          "preHead": "GitOid",
+          "postHead": "GitOid",
+          "snapshotRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all path bytes classified",
+          "pre and post heads equal",
+          "no writer during cut",
+          "special Git state explicit"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-012",
+      "outputObjectId": "PRCV4-OBJECT-012",
+      "outputType": "RemoteRefObjectForkCut",
+      "soleProducerId": "PRCV4-PRODUCER-012",
+      "dependencies": [
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-008"
+      ],
+      "failure": "REMOTE-REF-OBJECT-CUT-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "repositoryNodeId": "Id",
+          "cutStart": "TrustedTime",
+          "cutEnd": "TrustedTime",
+          "refs": "Array<GitRef>",
+          "objectFormat": "Id",
+          "reachableObjectRoot": "Hash",
+          "paginationReceipts": "Array<Hash>",
+          "rateLimitState": "State",
+          "forkRecords": "Array<ForkRecord>",
+          "unreachableCapability": "State",
+          "inaccessibleRecords": "Array<InaccessibleState>",
+          "cutRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "ref names and OIDs exact",
+          "all pages bound",
+          "unknown fork or inaccessible state blocks complete"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-013",
+      "outputObjectId": "PRCV4-OBJECT-013",
+      "outputType": "GitHubSurfaceAndControlPlaneUniverse",
+      "soleProducerId": "PRCV4-PRODUCER-013",
+      "dependencies": [
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-008",
+        "PRCV4-REQ-012"
+      ],
+      "failure": "GITHUB-SURFACE-UNIVERSE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "surfaceDefinitions": "Array<GitHubSurfaceDefinition>",
+          "surfaceInstances": "Array<GitHubSurfaceInstance>",
+          "cutStart": "TrustedTime",
+          "cutEnd": "TrustedTime",
+          "paginationRoot": "Hash",
+          "retentionRoot": "Hash",
+          "inaccessibleRoot": "Hash",
+          "universeRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "closed surface enum",
+          "every definition has instance or blocking inaccessible state",
+          "new unclassified surface blocks"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-014",
+      "outputObjectId": "PRCV4-OBJECT-014",
+      "outputType": "UserChangeOwnershipPreservation",
+      "soleProducerId": "PRCV4-PRODUCER-014",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-011"
+      ],
+      "failure": "USER-CHANGE-PRESERVATION-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "entryRecords": "Array<UserChangeRecord>",
+          "ownerAuthorityRoot": "Hash",
+          "overlapRoot": "Hash",
+          "deletionAuthorityRoot": "Hash",
+          "preservationRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "every mutable entry classified",
+          "unknown owner denies",
+          "delete requires exact authority"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-015",
+      "outputObjectId": "PRCV4-OBJECT-015",
+      "outputType": "GeneratedLegacyBuildContextRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-015",
+      "dependencies": [
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-014"
+      ],
+      "failure": "GENERATED-LEGACY-BUILD-CONTEXT-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "generatedRecords": "Array<GeneratedRecord>",
+          "buildContexts": "Array<BuildContext>",
+          "legacyTaintRecords": "Array<LegacyTaint>",
+          "privateCaseCommitment": "Hash",
+          "symlinkEscapeState": "State",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all generated bytes have recipe tool environment",
+          "context include set exact",
+          "legacy taint survives transforms"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-016",
+      "outputObjectId": "PRCV4-OBJECT-016",
+      "outputType": "SensitiveDataLegalRightsMatrix",
+      "soleProducerId": "PRCV4-PRODUCER-016",
+      "dependencies": [
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-013"
+      ],
+      "failure": "SENSITIVE-DATA-LEGAL-RIGHTS-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "dataRecords": "Array<SensitiveDataRecord>",
+          "roleMatrixRoot": "Hash",
+          "jurisdictionRoot": "Hash",
+          "transferRoot": "Hash",
+          "retentionTriggerRoot": "Hash",
+          "rightsRoot": "Hash",
+          "legalDecisionRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "every element has subject tenant purpose role authority",
+          "legal hold and deletion conflict explicit",
+          "unknown legal state blocks public"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-017",
+      "outputObjectId": "PRCV4-OBJECT-017",
+      "outputType": "EveryByteLicenseProvenanceRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-017",
+      "dependencies": [
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-016"
+      ],
+      "failure": "BYTE-LICENSE-PROVENANCE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "byteRecords": "Array<ByteRightsRecord>",
+          "compatibilityRoot": "Hash",
+          "noticeRoot": "Hash",
+          "disputeRoot": "Hash",
+          "legalVetoRoot": "Hash",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "every public byte root has one accepted rights chain",
+          "incompatible or disputed state blocks",
+          "transition legally authorized"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-018",
+      "outputObjectId": "PRCV4-OBJECT-018",
+      "outputType": "SecretCandidateLifecycle",
+      "soleProducerId": "PRCV4-PRODUCER-018",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-016"
+      ],
+      "failure": "SECRET-CANDIDATE-LIFECYCLE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "privateLedgerCommitment": "Hash",
+          "candidateCount": "SafeInteger",
+          "stateCounts": "Map<State,SafeInteger>",
+          "rotationReceipts": "Array<Hash>",
+          "falsePositiveDispositions": "Array<Hash>",
+          "residualCopyRecords": "Array<ResidualCopy>",
+          "publicProjectionRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all candidates owned and triaged",
+          "confirmed credential rotated before rewrite",
+          "no public equality oracle"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-019",
+      "outputObjectId": "PRCV4-OBJECT-019",
+      "outputType": "IndependentSecretScannerCoverage",
+      "soleProducerId": "PRCV4-PRODUCER-019",
+      "dependencies": [
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-018"
+      ],
+      "failure": "SECRET-SCANNER-COVERAGE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "scannerRecords": "Array<ScannerRecord>",
+          "identicalInputCutRoot": "Hash",
+          "secretClassRoot": "Hash",
+          "customPatternRoot": "Hash",
+          "detectorCorpusRoot": "Hash",
+          "executionReceipts": "Array<Hash>",
+          "disagreementRecords": "Array<ScannerDisagreement>",
+          "combinedOutcome": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "exactly two independent scanner roots minimum",
+          "same input cut",
+          "corpus miss or disagreement blocks"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-020",
+      "outputObjectId": "PRCV4-OBJECT-020",
+      "outputType": "DependencySbomExecutableUniverse",
+      "soleProducerId": "PRCV4-PRODUCER-020",
+      "dependencies": [
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-010",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-017"
+      ],
+      "failure": "DEPENDENCY-SBOM-EXECUTABLE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "ecosystemDefinitions": "Array<EcosystemDefinition>",
+          "componentRecords": "Array<ComponentRecord>",
+          "resolutionRoot": "Hash",
+          "installedRoot": "Hash",
+          "sbomRoot": "Hash",
+          "advisoryRoot": "Hash",
+          "riskPolicyRoot": "Hash",
+          "exceptionRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all executable classes included",
+          "zero unexplained installed components",
+          "expired exception blocks"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-021",
+      "outputObjectId": "PRCV4-OBJECT-021",
+      "outputType": "WorkflowTrustAndTaintRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-021",
+      "dependencies": [
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-020"
+      ],
+      "failure": "WORKFLOW-TRUST-TAINT-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "workflowRecords": "Array<WorkflowRecord>",
+          "trustMatrix": "Array<WorkflowTrustDecision>",
+          "taintPaths": "Array<TaintPath>",
+          "privilegeGraphRoot": "Hash",
+          "unknownDecision": "State",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "unknown combination deny",
+          "untrusted to privilege only through digest boundary",
+          "argument schema mandatory"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-022",
+      "outputObjectId": "PRCV4-OBJECT-022",
+      "outputType": "CacheArtifactRunnerTrustRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-022",
+      "dependencies": [
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-021"
+      ],
+      "failure": "CACHE-ARTIFACT-RUNNER-TRUST-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "cacheRecords": "Array<CacheRecord>",
+          "artifactRecords": "Array<ArtifactTrustRecord>",
+          "runnerRecords": "Array<RunnerRecord>",
+          "egressRoot": "Hash",
+          "purgeRoot": "Hash",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "trust domains cannot collide",
+          "artifact producer and digest exact",
+          "runner environment rooted"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-023",
+      "outputObjectId": "PRCV4-OBJECT-023",
+      "outputType": "PrivilegedIdentityAndRepositoryGovernance",
+      "soleProducerId": "PRCV4-PRODUCER-023",
+      "dependencies": [
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-013"
+      ],
+      "failure": "IDENTITY-REPOSITORY-GOVERNANCE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "organizationRoot": "Hash",
+          "repositoryNodeId": "Id",
+          "identityRecords": "Array<PrivilegedIdentity>",
+          "mfaReadbackRoot": "Hash",
+          "destructiveQuorum": "SafeInteger",
+          "successionRoot": "Hash",
+          "breakGlassRoot": "Hash",
+          "revocationRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "organization accepted",
+          "two independent destructive authorities",
+          "one actor cannot weaken governance"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-024",
+      "outputObjectId": "PRCV4-OBJECT-024",
+      "outputType": "GitHubCapabilityAndOperationRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-024",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-008",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-023"
+      ],
+      "failure": "GITHUB-CAPABILITY-OPERATION-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "capabilityReceiptRoot": "Hash",
+          "operationDefinitions": "Array<GitHubOperation>",
+          "readbackDefinitions": "Array<GitHubReadback>",
+          "rollbackDefinitions": "Array<GitHubRollback>",
+          "unsupportedState": "State",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "every mutable surface has operation and readback",
+          "unsupported blocks",
+          "visibility private operation prohibited"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-025",
+      "outputObjectId": "PRCV4-OBJECT-025",
+      "outputType": "GitHubControlPlanePermitTransaction",
+      "soleProducerId": "PRCV4-PRODUCER-025",
+      "dependencies": [
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024"
+      ],
+      "failure": "GITHUB-CONTROL-PLANE-TRANSACTION-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "permitRoot": "Hash",
+          "issuerRoot": "Hash",
+          "executorRoot": "Hash",
+          "readerRoot": "Hash",
+          "beforeRoot": "Hash",
+          "orderedOperations": "Array<GitHubOperationInstance>",
+          "securityFloorRoot": "Hash",
+          "consumeReceipt": "Hash",
+          "afterRoot": "Hash",
+          "readbackRoot": "Hash",
+          "transactionState": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "issuer executor reader distinct",
+          "one-use CAS",
+          "rollback never below security floor",
+          "visibility remains public"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-026",
+      "outputObjectId": "PRCV4-OBJECT-026",
+      "outputType": "RulesetOwnershipBypassContract",
+      "soleProducerId": "PRCV4-PRODUCER-026",
+      "dependencies": [
+        "PRCV4-REQ-017",
+        "PRCV4-REQ-021",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024",
+        "PRCV4-REQ-025"
+      ],
+      "failure": "RULESET-OWNERSHIP-BYPASS-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "branchRulesetRoot": "Hash",
+          "tagRulesetRoot": "Hash",
+          "requiredChecks": "Array<RequiredCheck>",
+          "codeownerRoot": "Hash",
+          "reviewPolicyRoot": "Hash",
+          "signatureDecisionRoot": "Hash",
+          "bypassRecords": "Array<BypassRecord>",
+          "readbackRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "branch and tag separate",
+          "two-person sensitive review",
+          "bypass deny by default and expires"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-027",
+      "outputObjectId": "PRCV4-OBJECT-027",
+      "outputType": "DualWitnessExactChangesetAllowlist",
+      "soleProducerId": "PRCV4-PRODUCER-027",
+      "dependencies": [
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-014",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-016",
+        "PRCV4-REQ-017",
+        "PRCV4-REQ-018",
+        "PRCV4-REQ-019",
+        "PRCV4-REQ-020"
+      ],
+      "failure": "DUAL-WITNESS-PUBLIC-ALLOWLIST-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "repositoryNodeId": "Id",
+          "baseRef": "String",
+          "expectedOldOid": "GitOid",
+          "newCommitOid": "GitOid",
+          "entryRecords": "Array<GitTreeEntryDecision>",
+          "sentObjectRoot": "Hash",
+          "builderARoot": "Hash",
+          "builderBRoot": "Hash",
+          "adjudicatorRoot": "Hash",
+          "allowlistRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "builders disjoint and equal",
+          "all tree semantics exact",
+          "no glob or surplus object"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-028",
+      "outputObjectId": "PRCV4-OBJECT-028",
+      "outputType": "ContinuousPublicInvariantMonitor",
+      "soleProducerId": "PRCV4-PRODUCER-028",
+      "dependencies": [
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024",
+        "PRCV4-REQ-025"
+      ],
+      "failure": "CONTINUOUS-PUBLIC-INVARIANT-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "repositoryNodeId": "Id",
+          "requiredVisibility": "State",
+          "issueReadbackRoot": "Hash",
+          "consumeReadbackRoot": "Hash",
+          "monitorReceiptRoot": "Hash",
+          "maximumFreshnessSeconds": "SafeInteger",
+          "ownerRoot": "Hash",
+          "effectiveControlRoot": "Hash",
+          "descendantRevocationRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "required visibility equals PUBLIC",
+          "stale or mismatch revokes",
+          "private never accepted"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-029",
+      "outputObjectId": "PRCV4-OBJECT-029",
+      "outputType": "AtomicPublicPushPermitTransaction",
+      "soleProducerId": "PRCV4-PRODUCER-029",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-019",
+        "PRCV4-REQ-021",
+        "PRCV4-REQ-022",
+        "PRCV4-REQ-026",
+        "PRCV4-REQ-027",
+        "PRCV4-REQ-028"
+      ],
+      "failure": "ATOMIC-PUBLIC-PUSH-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "permitRoot": "Hash",
+          "issuerRoot": "Hash",
+          "consumerRoot": "Hash",
+          "readerRoot": "Hash",
+          "repositoryNodeId": "Id",
+          "refName": "String",
+          "expectedOldOid": "GitOid",
+          "newOid": "GitOid",
+          "sentObjectRoot": "Hash",
+          "allowlistRoot": "Hash",
+          "issuedAt": "TrustedTime",
+          "expiresAt": "TrustedTime",
+          "consumeReceipt": "Hash",
+          "remoteReceipt": "Hash",
+          "postReadbackRoot": "Hash",
+          "state": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "issuer consumer reader distinct",
+          "one-use expected-old CAS",
+          "accepted objects exact",
+          "visibility public at issue and consume"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-030",
+      "outputObjectId": "PRCV4-OBJECT-030",
+      "outputType": "ProviderOidcEnvironmentPolicy",
+      "soleProducerId": "PRCV4-PRODUCER-030",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-021",
+        "PRCV4-REQ-022",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024",
+        "PRCV4-REQ-028"
+      ],
+      "failure": "PROVIDER-OIDC-ENVIRONMENT-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "providerPolicies": "Array<OidcPolicy>",
+          "environmentRecords": "Array<EnvironmentPolicy>",
+          "dispatchRoot": "Hash",
+          "concurrencyRoot": "Hash",
+          "secretReleaseRoot": "Hash",
+          "readbackRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "exact issuer audience repo workflow ref environment",
+          "wrong claim or replay denies",
+          "staging production separate"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-031",
+      "outputObjectId": "PRCV4-OBJECT-031",
+      "outputType": "DeploymentPermitTransaction",
+      "soleProducerId": "PRCV4-PRODUCER-031",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-022",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-030"
+      ],
+      "failure": "DEPLOYMENT-PERMIT-TRANSACTION-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "permitRoot": "Hash",
+          "issuerRoot": "Hash",
+          "consumerRoot": "Hash",
+          "artifactRoot": "Hash",
+          "targetRoot": "Hash",
+          "environmentRoot": "Hash",
+          "desiredRoot": "Hash",
+          "currentRoot": "Hash",
+          "planRoot": "Hash",
+          "approvalRoot": "Hash",
+          "consumeReceipt": "Hash",
+          "applyReceipt": "Hash",
+          "healthRoot": "Hash",
+          "driftRoot": "Hash",
+          "dataCompatibilityRoot": "Hash",
+          "recoveryRoot": "Hash",
+          "state": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "cannot release",
+          "one-use CAS",
+          "stale plan denies",
+          "digest-preserving rollback allowed without push"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-032",
+      "outputObjectId": "PRCV4-OBJECT-032",
+      "outputType": "ReleasePermitTransaction",
+      "soleProducerId": "PRCV4-PRODUCER-032",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-017",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-026",
+        "PRCV4-REQ-027",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-030"
+      ],
+      "failure": "RELEASE-PERMIT-TRANSACTION-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "permitRoot": "Hash",
+          "issuerRoot": "Hash",
+          "consumerRoot": "Hash",
+          "commitOid": "GitOid",
+          "artifactRoot": "Hash",
+          "tagRef": "String",
+          "releaseRoot": "Hash",
+          "assetRoots": "Array<Hash>",
+          "packageCoordinates": "Array<String>",
+          "publisherRoot": "Hash",
+          "approvalRoot": "Hash",
+          "consumeReceipt": "Hash",
+          "consumerVerificationRoot": "Hash",
+          "incidentActionRoot": "Hash",
+          "state": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "cannot deploy",
+          "tag immutable",
+          "asset and package digests exact",
+          "one-use CAS"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-033",
+      "outputObjectId": "PRCV4-OBJECT-033",
+      "outputType": "ReproducibleBuildAttestationSlsaRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-033",
+      "dependencies": [
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-010",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-022",
+        "PRCV4-REQ-027",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-032"
+      ],
+      "failure": "BUILD-ATTESTATION-SLSA-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "recipeRoot": "Hash",
+          "materialRoot": "Hash",
+          "toolchainRoot": "Hash",
+          "environmentRoot": "Hash",
+          "varianceRoot": "Hash",
+          "independentRebuildRoot": "Hash",
+          "attestationPolicyRoot": "Hash",
+          "consumerPolicyRoot": "Hash",
+          "slsaVersion": "String",
+          "slsaTrack": "String",
+          "slsaLevel": "String",
+          "normativePredicateRoots": "Array<Hash>",
+          "claimState": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all materials bound",
+          "consumer enforces exact subject",
+          "unproved predicate sets claim none"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-034",
+      "outputObjectId": "PRCV4-OBJECT-034",
+      "outputType": "MonitoringAuditBackupRestoreRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-034",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-031",
+        "PRCV4-REQ-032"
+      ],
+      "failure": "MONITORING-AUDIT-RESTORE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "monitorRecords": "Array<MonitorRecord>",
+          "alertRouteRoot": "Hash",
+          "onCallRoot": "Hash",
+          "auditCustodyRoot": "Hash",
+          "backupRecords": "Array<BackupRecord>",
+          "restoreRecords": "Array<RestoreRecord>",
+          "rpoSeconds": "SafeInteger",
+          "rtoSeconds": "SafeInteger",
+          "exerciseRecords": "Array<ExerciseRecord>",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "restore binds backup ID and digests",
+          "alerts have owner",
+          "stale exercise blocks"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-035",
+      "outputObjectId": "PRCV4-OBJECT-035",
+      "outputType": "IncidentDisclosureRecoveryStateMachine",
+      "soleProducerId": "PRCV4-PRODUCER-035",
+      "dependencies": [
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-018",
+        "PRCV4-REQ-019",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-025",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-029",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-031",
+        "PRCV4-REQ-032",
+        "PRCV4-REQ-033",
+        "PRCV4-REQ-034"
+      ],
+      "failure": "INCIDENT-DISCLOSURE-RECOVERY-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "scenarioDefinitions": "Array<IncidentScenario>",
+          "transitionDefinitions": "Array<IncidentTransition>",
+          "roleRoot": "Hash",
+          "independentRecoveryAuthorityRoot": "Hash",
+          "evidenceRerootRoot": "Hash",
+          "notificationRoot": "Hash",
+          "legalDecisionRoot": "Hash",
+          "drillRecords": "Array<ExerciseRecord>",
+          "stateMachineRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "compromised authority cannot approve recovery",
+          "rotation precedes rewrite",
+          "every scenario reaches verified terminal"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-036",
+      "outputObjectId": "PRCV4-OBJECT-036",
+      "outputType": "AISecurityBomAndTevvRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-036",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-010",
+        "PRCV4-REQ-016",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-035"
+      ],
+      "failure": "AI-SECURITY-TEVV-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "aiBomRecords": "Array<AiComponent>",
+          "contextRecords": "Array<AiContext>",
+          "memoryRecords": "Array<AiMemory>",
+          "toolRecords": "Array<AiTool>",
+          "sideEffectRecords": "Array<AiSideEffect>",
+          "threatControlRoot": "Hash",
+          "adversarialCorpusRoot": "Hash",
+          "tevvReceiptRoot": "Hash",
+          "thresholdRoot": "Hash",
+          "driftRoot": "Hash",
+          "decisionRoots": "Array<Hash>",
+          "sideEffectState": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "unknown component tool memory blocks",
+          "tenant crossing denies",
+          "side effects off without D02 D25 and TEVV"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-037",
+      "outputObjectId": "PRCV4-OBJECT-037",
+      "outputType": "DomainOperationOracleRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-037",
+      "dependencies": [
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-008",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-018",
+        "PRCV4-REQ-019",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-025",
+        "PRCV4-REQ-027",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-029",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-031",
+        "PRCV4-REQ-032",
+        "PRCV4-REQ-033",
+        "PRCV4-REQ-034",
+        "PRCV4-REQ-035",
+        "PRCV4-REQ-036"
+      ],
+      "failure": "DOMAIN-OPERATION-ORACLE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "operationDefinitions": "Array<DomainOperation>",
+          "oracleDefinitions": "Array<DomainOracle>",
+          "targetSchemaRoot": "Hash",
+          "evaluatorRoots": "Array<Hash>",
+          "terminalMapRoot": "Hash",
+          "registryRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "operation fields exist in target schema",
+          "terminal evaluator-derived",
+          "expected terminal never selects result"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-038",
+      "outputObjectId": "PRCV4-OBJECT-038",
+      "outputType": "ExactFindingClosureRegistry",
+      "soleProducerId": "PRCV4-PRODUCER-038",
+      "dependencies": [
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-007",
+        "PRCV4-REQ-008",
+        "PRCV4-REQ-037"
+      ],
+      "failure": "EXACT-FINDING-CLOSURE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "closureRecords": "Array<ExactFindingClosure>",
+          "findingUniverseRoot": "Hash",
+          "mappedRequirementEdgeRoot": "Hash",
+          "vectorReceiptRoot": "Hash",
+          "independentDispositionRoot": "Hash",
+          "closureRoot": "Hash"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "exactly 93 unique records",
+          "all mapped requirements accepted for closure",
+          "open or revoked dependency blocks"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-039",
+      "outputObjectId": "PRCV4-OBJECT-039",
+      "outputType": "ReviewReconciliationAndVetoEnvelope",
+      "soleProducerId": "PRCV4-PRODUCER-039",
+      "dependencies": [
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-007",
+        "PRCV4-REQ-038"
+      ],
+      "failure": "REVIEW-RECONCILIATION-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "reviewProtocolRoot": "Hash",
+          "reviewerRecords": "Array<ReviewerIdentity>",
+          "findingUniverseRoot": "Hash",
+          "dispositionRecords": "Array<ReviewDisposition>",
+          "objectionRecords": "Array<ReviewObjection>",
+          "vetoRoot": "Hash",
+          "appealRoot": "Hash",
+          "eventHead": "Hash",
+          "expiresAt": "TrustedTime"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "complete denominator",
+          "self review denied",
+          "veto or disagreement blocks",
+          "event order CAS"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-040",
+      "outputObjectId": "PRCV4-OBJECT-040",
+      "outputType": "PublicCyberAcceptanceEnvelope",
+      "soleProducerId": "PRCV4-PRODUCER-040",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-007",
+        "PRCV4-REQ-008",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-010",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-014",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-016",
+        "PRCV4-REQ-017",
+        "PRCV4-REQ-018",
+        "PRCV4-REQ-019",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-021",
+        "PRCV4-REQ-022",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024",
+        "PRCV4-REQ-025",
+        "PRCV4-REQ-026",
+        "PRCV4-REQ-027",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-029",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-031",
+        "PRCV4-REQ-032",
+        "PRCV4-REQ-033",
+        "PRCV4-REQ-034",
+        "PRCV4-REQ-035",
+        "PRCV4-REQ-036",
+        "PRCV4-REQ-037",
+        "PRCV4-REQ-038",
+        "PRCV4-REQ-039"
+      ],
+      "failure": "PUBLIC-CYBER-ACCEPTANCE-BLOCKED",
+      "outputSchema": {
+        "required": {
+          "subjectRoot": "Hash",
+          "packageRoot": "Hash",
+          "schemaRoot": "Hash",
+          "graphRoot": "Hash",
+          "dependencyHeads": "Array<Hash>",
+          "observationRoots": "Array<Hash>",
+          "implementationRoots": "Array<Hash>",
+          "evidenceRoots": "Array<Hash>",
+          "acceptedRequirementRoots": "Array<Hash>",
+          "findingClosureRoot": "Hash",
+          "reviewRoot": "Hash",
+          "residualRiskRoot": "Hash",
+          "expectedOldHead": "Hash",
+          "newHead": "Hash",
+          "issuedAt": "TrustedTime",
+          "expiresAt": "TrustedTime",
+          "state": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "all 40 dependencies accepted and current",
+          "all 93 findings closed",
+          "public invariant current",
+          "CAS and expiry valid"
+        ]
+      }
+    },
+    {
+      "requirementId": "PRCV4-REQ-041",
+      "outputObjectId": "PRCV4-OBJECT-041",
+      "outputType": "FinalPermitSeparationAndNonAcceptanceAssertion",
+      "soleProducerId": "PRCV4-PRODUCER-041",
+      "dependencies": [
+        "PRCV4-REQ-000",
+        "PRCV4-REQ-001",
+        "PRCV4-REQ-002",
+        "PRCV4-REQ-003",
+        "PRCV4-REQ-004",
+        "PRCV4-REQ-005",
+        "PRCV4-REQ-006",
+        "PRCV4-REQ-007",
+        "PRCV4-REQ-008",
+        "PRCV4-REQ-009",
+        "PRCV4-REQ-010",
+        "PRCV4-REQ-011",
+        "PRCV4-REQ-012",
+        "PRCV4-REQ-013",
+        "PRCV4-REQ-014",
+        "PRCV4-REQ-015",
+        "PRCV4-REQ-016",
+        "PRCV4-REQ-017",
+        "PRCV4-REQ-018",
+        "PRCV4-REQ-019",
+        "PRCV4-REQ-020",
+        "PRCV4-REQ-021",
+        "PRCV4-REQ-022",
+        "PRCV4-REQ-023",
+        "PRCV4-REQ-024",
+        "PRCV4-REQ-025",
+        "PRCV4-REQ-026",
+        "PRCV4-REQ-027",
+        "PRCV4-REQ-028",
+        "PRCV4-REQ-029",
+        "PRCV4-REQ-030",
+        "PRCV4-REQ-031",
+        "PRCV4-REQ-032",
+        "PRCV4-REQ-033",
+        "PRCV4-REQ-034",
+        "PRCV4-REQ-035",
+        "PRCV4-REQ-036",
+        "PRCV4-REQ-037",
+        "PRCV4-REQ-038",
+        "PRCV4-REQ-039",
+        "PRCV4-REQ-040"
+      ],
+      "failure": "PUBLIC-CYBER-V4-NOT-ACCEPTED",
+      "outputSchema": {
+        "required": {
+          "controlPlanePermitState": "State",
+          "publicPushPermitState": "State",
+          "deploymentPermitState": "State",
+          "releasePermitState": "State",
+          "issuerSeparationRoot": "Hash",
+          "consumerSeparationRoot": "Hash",
+          "crossUseDenialRoot": "Hash",
+          "acceptanceState": "State",
+          "gate29State": "State",
+          "developmentFreezeState": "State",
+          "repositoryVisibility": "State"
+        },
+        "additionalProperties": false,
+        "invariants": [
+          "four permit types disjoint",
+          "no cross-use",
+          "all dependencies current",
+          "repository visibility PUBLIC"
+        ]
+      }
+    }
+  ],
+  "producerDefinitions": [
+    {
+      "producerId": "PRCV4-PRODUCER-000",
+      "outputObjectId": "PRCV4-OBJECT-000",
+      "inputObjectIds": [],
+      "bootstrapAuthorityObjectId": null,
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-001",
+      "outputObjectId": "PRCV4-OBJECT-001",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000"
+      ],
+      "bootstrapAuthorityObjectId": null,
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-002",
+      "outputObjectId": "PRCV4-OBJECT-002",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001"
+      ],
+      "bootstrapAuthorityObjectId": null,
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-003",
+      "outputObjectId": "PRCV4-OBJECT-003",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-002"
+      ],
+      "bootstrapAuthorityObjectId": null,
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-004",
+      "outputObjectId": "PRCV4-OBJECT-004",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-003"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-005",
+      "outputObjectId": "PRCV4-OBJECT-005",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-006",
+      "outputObjectId": "PRCV4-OBJECT-006",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-007",
+      "outputObjectId": "PRCV4-OBJECT-007",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-006"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-008",
+      "outputObjectId": "PRCV4-OBJECT-008",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-009",
+      "outputObjectId": "PRCV4-OBJECT-009",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-010",
+      "outputObjectId": "PRCV4-OBJECT-010",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-011",
+      "outputObjectId": "PRCV4-OBJECT-011",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-012",
+      "outputObjectId": "PRCV4-OBJECT-012",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-013",
+      "outputObjectId": "PRCV4-OBJECT-013",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-012"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-014",
+      "outputObjectId": "PRCV4-OBJECT-014",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-011"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-015",
+      "outputObjectId": "PRCV4-OBJECT-015",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-014"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-016",
+      "outputObjectId": "PRCV4-OBJECT-016",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-013"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-017",
+      "outputObjectId": "PRCV4-OBJECT-017",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-018",
+      "outputObjectId": "PRCV4-OBJECT-018",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-019",
+      "outputObjectId": "PRCV4-OBJECT-019",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-018"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-020",
+      "outputObjectId": "PRCV4-OBJECT-020",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-017"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-021",
+      "outputObjectId": "PRCV4-OBJECT-021",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-022",
+      "outputObjectId": "PRCV4-OBJECT-022",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-021"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-023",
+      "outputObjectId": "PRCV4-OBJECT-023",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-013"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-024",
+      "outputObjectId": "PRCV4-OBJECT-024",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-023"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-025",
+      "outputObjectId": "PRCV4-OBJECT-025",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-026",
+      "outputObjectId": "PRCV4-OBJECT-026",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-027",
+      "outputObjectId": "PRCV4-OBJECT-027",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-014",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-020"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-028",
+      "outputObjectId": "PRCV4-OBJECT-028",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-029",
+      "outputObjectId": "PRCV4-OBJECT-029",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-030",
+      "outputObjectId": "PRCV4-OBJECT-030",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-028"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-031",
+      "outputObjectId": "PRCV4-OBJECT-031",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-030"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-032",
+      "outputObjectId": "PRCV4-OBJECT-032",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-030"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-033",
+      "outputObjectId": "PRCV4-OBJECT-033",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-032"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-034",
+      "outputObjectId": "PRCV4-OBJECT-034",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-035",
+      "outputObjectId": "PRCV4-OBJECT-035",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-036",
+      "outputObjectId": "PRCV4-OBJECT-036",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-035"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-037",
+      "outputObjectId": "PRCV4-OBJECT-037",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034",
+        "PRCV4-OBJECT-035",
+        "PRCV4-OBJECT-036"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-038",
+      "outputObjectId": "PRCV4-OBJECT-038",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-037"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-039",
+      "outputObjectId": "PRCV4-OBJECT-039",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-038"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-040",
+      "outputObjectId": "PRCV4-OBJECT-040",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-014",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034",
+        "PRCV4-OBJECT-035",
+        "PRCV4-OBJECT-036",
+        "PRCV4-OBJECT-037",
+        "PRCV4-OBJECT-038",
+        "PRCV4-OBJECT-039"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    },
+    {
+      "producerId": "PRCV4-PRODUCER-041",
+      "outputObjectId": "PRCV4-OBJECT-041",
+      "inputObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-014",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034",
+        "PRCV4-OBJECT-035",
+        "PRCV4-OBJECT-036",
+        "PRCV4-OBJECT-037",
+        "PRCV4-OBJECT-038",
+        "PRCV4-OBJECT-039",
+        "PRCV4-OBJECT-040"
+      ],
+      "bootstrapAuthorityObjectId": "PRCV4-OBJECT-003",
+      "implementationRoot": null,
+      "signerRoot": null,
+      "capabilityRoot": null,
+      "implementationState": "ABSENT",
+      "acceptanceCredit": 0
+    }
+  ],
+  "plannedOutputStates": [
+    {
+      "objectId": "PRCV4-OBJECT-000",
+      "outputType": "FrozenInputByteManifest",
+      "schemaRequirementId": "PRCV4-REQ-000",
+      "producerId": "PRCV4-PRODUCER-000",
+      "dependencyObjectIds": [],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-001",
+      "outputType": "CanonicalizationDigestAndSchemaKernel",
+      "schemaRequirementId": "PRCV4-REQ-001",
+      "producerId": "PRCV4-PRODUCER-001",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-002",
+      "outputType": "LocatorAndRepositoryIdentityRegistry",
+      "schemaRequirementId": "PRCV4-REQ-002",
+      "producerId": "PRCV4-PRODUCER-002",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-003",
+      "outputType": "BootstrapAuthorityEnvelope",
+      "schemaRequirementId": "PRCV4-REQ-003",
+      "producerId": "PRCV4-PRODUCER-003",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-002"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-004",
+      "outputType": "ProducerAuthorityRegistry",
+      "schemaRequirementId": "PRCV4-REQ-004",
+      "producerId": "PRCV4-PRODUCER-004",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-003"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-005",
+      "outputType": "LifecycleCasAndTrustedTimeRegistry",
+      "schemaRequirementId": "PRCV4-REQ-005",
+      "producerId": "PRCV4-PRODUCER-005",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-006",
+      "outputType": "EvidenceCustodyAndIndependentReaderRegistry",
+      "schemaRequirementId": "PRCV4-REQ-006",
+      "producerId": "PRCV4-PRODUCER-006",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-007",
+      "outputType": "ExactFindingAndAliasUniverse",
+      "schemaRequirementId": "PRCV4-REQ-007",
+      "producerId": "PRCV4-PRODUCER-007",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-006"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-008",
+      "outputType": "DomainSchemaAndEvaluatorCatalog",
+      "schemaRequirementId": "PRCV4-REQ-008",
+      "producerId": "PRCV4-PRODUCER-008",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-009",
+      "outputType": "CyberAssetFlowThreatUniverse",
+      "schemaRequirementId": "PRCV4-REQ-009",
+      "producerId": "PRCV4-PRODUCER-009",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-010",
+      "outputType": "CyberSourceCustodyUniverse",
+      "schemaRequirementId": "PRCV4-REQ-010",
+      "producerId": "PRCV4-PRODUCER-010",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-011",
+      "outputType": "LocalGitStateSnapshot",
+      "schemaRequirementId": "PRCV4-REQ-011",
+      "producerId": "PRCV4-PRODUCER-011",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-012",
+      "outputType": "RemoteRefObjectForkCut",
+      "schemaRequirementId": "PRCV4-REQ-012",
+      "producerId": "PRCV4-PRODUCER-012",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-013",
+      "outputType": "GitHubSurfaceAndControlPlaneUniverse",
+      "schemaRequirementId": "PRCV4-REQ-013",
+      "producerId": "PRCV4-PRODUCER-013",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-012"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-014",
+      "outputType": "UserChangeOwnershipPreservation",
+      "schemaRequirementId": "PRCV4-REQ-014",
+      "producerId": "PRCV4-PRODUCER-014",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-011"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-015",
+      "outputType": "GeneratedLegacyBuildContextRegistry",
+      "schemaRequirementId": "PRCV4-REQ-015",
+      "producerId": "PRCV4-PRODUCER-015",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-014"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-016",
+      "outputType": "SensitiveDataLegalRightsMatrix",
+      "schemaRequirementId": "PRCV4-REQ-016",
+      "producerId": "PRCV4-PRODUCER-016",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-013"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-017",
+      "outputType": "EveryByteLicenseProvenanceRegistry",
+      "schemaRequirementId": "PRCV4-REQ-017",
+      "producerId": "PRCV4-PRODUCER-017",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-018",
+      "outputType": "SecretCandidateLifecycle",
+      "schemaRequirementId": "PRCV4-REQ-018",
+      "producerId": "PRCV4-PRODUCER-018",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-019",
+      "outputType": "IndependentSecretScannerCoverage",
+      "schemaRequirementId": "PRCV4-REQ-019",
+      "producerId": "PRCV4-PRODUCER-019",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-018"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-020",
+      "outputType": "DependencySbomExecutableUniverse",
+      "schemaRequirementId": "PRCV4-REQ-020",
+      "producerId": "PRCV4-PRODUCER-020",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-017"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-021",
+      "outputType": "WorkflowTrustAndTaintRegistry",
+      "schemaRequirementId": "PRCV4-REQ-021",
+      "producerId": "PRCV4-PRODUCER-021",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-022",
+      "outputType": "CacheArtifactRunnerTrustRegistry",
+      "schemaRequirementId": "PRCV4-REQ-022",
+      "producerId": "PRCV4-PRODUCER-022",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-021"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-023",
+      "outputType": "PrivilegedIdentityAndRepositoryGovernance",
+      "schemaRequirementId": "PRCV4-REQ-023",
+      "producerId": "PRCV4-PRODUCER-023",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-013"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-024",
+      "outputType": "GitHubCapabilityAndOperationRegistry",
+      "schemaRequirementId": "PRCV4-REQ-024",
+      "producerId": "PRCV4-PRODUCER-024",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-023"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-025",
+      "outputType": "GitHubControlPlanePermitTransaction",
+      "schemaRequirementId": "PRCV4-REQ-025",
+      "producerId": "PRCV4-PRODUCER-025",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-026",
+      "outputType": "RulesetOwnershipBypassContract",
+      "schemaRequirementId": "PRCV4-REQ-026",
+      "producerId": "PRCV4-PRODUCER-026",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-027",
+      "outputType": "DualWitnessExactChangesetAllowlist",
+      "schemaRequirementId": "PRCV4-REQ-027",
+      "producerId": "PRCV4-PRODUCER-027",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-014",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-020"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-028",
+      "outputType": "ContinuousPublicInvariantMonitor",
+      "schemaRequirementId": "PRCV4-REQ-028",
+      "producerId": "PRCV4-PRODUCER-028",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-029",
+      "outputType": "AtomicPublicPushPermitTransaction",
+      "schemaRequirementId": "PRCV4-REQ-029",
+      "producerId": "PRCV4-PRODUCER-029",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-030",
+      "outputType": "ProviderOidcEnvironmentPolicy",
+      "schemaRequirementId": "PRCV4-REQ-030",
+      "producerId": "PRCV4-PRODUCER-030",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-028"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-031",
+      "outputType": "DeploymentPermitTransaction",
+      "schemaRequirementId": "PRCV4-REQ-031",
+      "producerId": "PRCV4-PRODUCER-031",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-030"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-032",
+      "outputType": "ReleasePermitTransaction",
+      "schemaRequirementId": "PRCV4-REQ-032",
+      "producerId": "PRCV4-PRODUCER-032",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-030"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-033",
+      "outputType": "ReproducibleBuildAttestationSlsaRegistry",
+      "schemaRequirementId": "PRCV4-REQ-033",
+      "producerId": "PRCV4-PRODUCER-033",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-032"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-034",
+      "outputType": "MonitoringAuditBackupRestoreRegistry",
+      "schemaRequirementId": "PRCV4-REQ-034",
+      "producerId": "PRCV4-PRODUCER-034",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-035",
+      "outputType": "IncidentDisclosureRecoveryStateMachine",
+      "schemaRequirementId": "PRCV4-REQ-035",
+      "producerId": "PRCV4-PRODUCER-035",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-036",
+      "outputType": "AISecurityBomAndTevvRegistry",
+      "schemaRequirementId": "PRCV4-REQ-036",
+      "producerId": "PRCV4-PRODUCER-036",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-035"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-037",
+      "outputType": "DomainOperationOracleRegistry",
+      "schemaRequirementId": "PRCV4-REQ-037",
+      "producerId": "PRCV4-PRODUCER-037",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034",
+        "PRCV4-OBJECT-035",
+        "PRCV4-OBJECT-036"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-038",
+      "outputType": "ExactFindingClosureRegistry",
+      "schemaRequirementId": "PRCV4-REQ-038",
+      "producerId": "PRCV4-PRODUCER-038",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-037"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-039",
+      "outputType": "ReviewReconciliationAndVetoEnvelope",
+      "schemaRequirementId": "PRCV4-REQ-039",
+      "producerId": "PRCV4-PRODUCER-039",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-038"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-040",
+      "outputType": "PublicCyberAcceptanceEnvelope",
+      "schemaRequirementId": "PRCV4-REQ-040",
+      "producerId": "PRCV4-PRODUCER-040",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-014",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034",
+        "PRCV4-OBJECT-035",
+        "PRCV4-OBJECT-036",
+        "PRCV4-OBJECT-037",
+        "PRCV4-OBJECT-038",
+        "PRCV4-OBJECT-039"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    },
+    {
+      "objectId": "PRCV4-OBJECT-041",
+      "outputType": "FinalPermitSeparationAndNonAcceptanceAssertion",
+      "schemaRequirementId": "PRCV4-REQ-041",
+      "producerId": "PRCV4-PRODUCER-041",
+      "dependencyObjectIds": [
+        "PRCV4-OBJECT-000",
+        "PRCV4-OBJECT-001",
+        "PRCV4-OBJECT-002",
+        "PRCV4-OBJECT-003",
+        "PRCV4-OBJECT-004",
+        "PRCV4-OBJECT-005",
+        "PRCV4-OBJECT-006",
+        "PRCV4-OBJECT-007",
+        "PRCV4-OBJECT-008",
+        "PRCV4-OBJECT-009",
+        "PRCV4-OBJECT-010",
+        "PRCV4-OBJECT-011",
+        "PRCV4-OBJECT-012",
+        "PRCV4-OBJECT-013",
+        "PRCV4-OBJECT-014",
+        "PRCV4-OBJECT-015",
+        "PRCV4-OBJECT-016",
+        "PRCV4-OBJECT-017",
+        "PRCV4-OBJECT-018",
+        "PRCV4-OBJECT-019",
+        "PRCV4-OBJECT-020",
+        "PRCV4-OBJECT-021",
+        "PRCV4-OBJECT-022",
+        "PRCV4-OBJECT-023",
+        "PRCV4-OBJECT-024",
+        "PRCV4-OBJECT-025",
+        "PRCV4-OBJECT-026",
+        "PRCV4-OBJECT-027",
+        "PRCV4-OBJECT-028",
+        "PRCV4-OBJECT-029",
+        "PRCV4-OBJECT-030",
+        "PRCV4-OBJECT-031",
+        "PRCV4-OBJECT-032",
+        "PRCV4-OBJECT-033",
+        "PRCV4-OBJECT-034",
+        "PRCV4-OBJECT-035",
+        "PRCV4-OBJECT-036",
+        "PRCV4-OBJECT-037",
+        "PRCV4-OBJECT-038",
+        "PRCV4-OBJECT-039",
+        "PRCV4-OBJECT-040"
+      ],
+      "state": "DECLARED-UNIMPLEMENTED",
+      "head": null,
+      "epoch": null,
+      "expiresAt": null,
+      "revocationState": "NOT-APPLICABLE-UNIMPLEMENTED",
+      "evidenceRoots": [],
+      "acceptanceCredit": 0
+    }
+  ],
+  "producerDefinitionRule": {
+    "cardinality": "exactly one per requirement",
+    "requiredFields": [
+      "producerId",
+      "outputObjectId",
+      "inputObjectIds",
+      "bootstrapAuthorityObjectId",
+      "implementationRoot",
+      "signerRoot",
+      "capabilityRoot",
+      "implementationState",
+      "acceptanceCredit"
+    ],
+    "currentImplementationRoot": null,
+    "currentState": "ABSENT",
+    "acceptanceCredit": 0
+  },
+  "plannedOutputStateRule": {
+    "cardinality": "exactly one per requirement",
+    "requiredFields": [
+      "objectId",
+      "outputType",
+      "schemaRequirementId",
+      "producerId",
+      "dependencyObjectIds",
+      "state",
+      "head",
+      "epoch",
+      "expiresAt",
+      "revocationState",
+      "evidenceRoots",
+      "acceptanceCredit"
+    ],
+    "currentState": "DECLARED-UNIMPLEMENTED",
+    "head": null,
+    "epoch": null,
+    "expiresAt": null,
+    "evidenceRoots": [],
+    "acceptanceCredit": 0
+  },
+  "currentObservedState": {
+    "repositoryVisibility": "PUBLIC",
+    "mainProtection": "ABSENT-OBSERVED",
+    "rulesetCount": 0,
+    "actionsPolicy": "ALLOW-ALL-OBSERVED",
+    "secretCandidateCoordinates": 6,
+    "clearedSecretCandidates": 0,
+    "writerFrozenLocalCut": "ABSENT",
+    "remoteUnreachableState": "UNKNOWN",
+    "externalForkState": "UNKNOWN",
+    "githubSurfaceCompletion": "INCOMPLETE"
+  },
+  "denominators": {
+    "requirements": 42,
+    "domainSchemas": 42,
+    "producerDefinitions": 42,
+    "plannedOutputStates": 42,
+    "inheritedFindings": 59,
+    "newFindings": 34,
+    "totalFindings": 93,
+    "implementedProducers": 0,
+    "operationalEvidenceRoots": 0,
+    "acceptedRequirements": 0,
+    "acceptedFindingClosures": 0
+  },
+  "currentDisposition": {
+    "acceptance": 0,
+    "controlPlanePermit": "ABSENT",
+    "publicPushPermit": "ABSENT",
+    "deploymentPermit": "ABSENT",
+    "releasePermit": "ABSENT",
+    "repositoryVisibility": "PUBLIC",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE"
+  }
+}

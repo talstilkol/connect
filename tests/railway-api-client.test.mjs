@@ -6,6 +6,9 @@ import {
   VERCEL_OIDC_HEADER,
 } from "../server/platform/railwayApiContract.ts";
 import {
+  W3C_TRACEPARENT_HEADER,
+} from "../server/platform/w3cTraceContext.ts";
+import {
   createRailwayApiClient,
   RailwayApiClientError,
 } from "../server/platform/railwayApiClient.ts";
@@ -55,6 +58,11 @@ function createFixture(response = jsonResponse({
         return userToken;
       },
     },
+    traceparentProvider: {
+      async getTraceparent() {
+        return null;
+      },
+    },
     async fetchImplementation(url, init) {
       fetchCalls.push({ url, init });
       return response;
@@ -92,6 +100,53 @@ test("calls only the fixed Railway endpoint with separated identity proofs", asy
   assert.deepEqual(JSON.parse(call.init.body), request);
   assert.doesNotMatch(call.init.body, /oidcToken|userToken|authorization/i);
   assert.deepEqual(fixture.tokenCalls.sort(), ["oidc", "user"]);
+  assert.equal(call.init.headers[W3C_TRACEPARENT_HEADER], undefined);
+});
+
+test("propagates only a validated opaque traceparent to the fixed Railway origin", async () => {
+  const fixture = createFixture();
+  const traceparent =
+    "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+  fixture.options.traceparentProvider = {
+    async getTraceparent() {
+      return traceparent;
+    },
+  };
+  const client = createRailwayApiClient(fixture.options);
+
+  await client.call(queryEnvelope());
+
+  assert.equal(
+    fixture.fetchCalls[0].init.headers[W3C_TRACEPARENT_HEADER],
+    traceparent,
+  );
+});
+
+test("fails before identity reads when opaque correlation is unavailable or malformed", async (context) => {
+  for (const provider of [
+    { getTraceparent: async () => "browser-controlled" },
+    {
+      async getTraceparent() {
+        throw new Error("private Vercel request state");
+      },
+    },
+  ]) {
+    await context.test("provider", async () => {
+      const fixture = createFixture();
+      fixture.options.traceparentProvider = provider;
+      const client = createRailwayApiClient(fixture.options);
+
+      await assert.rejects(
+        () => client.call(queryEnvelope()),
+        (error) =>
+          error instanceof RailwayApiClientError &&
+          error.code === "CORRELATION_UNAVAILABLE" &&
+          !/private|Vercel|browser/i.test(error.message),
+      );
+      assert.deepEqual(fixture.tokenCalls, []);
+      assert.deepEqual(fixture.fetchCalls, []);
+    });
+  }
 });
 
 test("accepts loopback HTTP only in development", () => {
@@ -207,6 +262,70 @@ test("returns a bounded Railway failure without inventing success", async () => 
     contractVersion: RAILWAY_API_CONTRACT_VERSION,
     outcome: "error",
     code: "RATE_LIMITED",
+  });
+});
+
+test("records only bounded Vercel telemetry and schedules its flush", async () => {
+  const fixture = createFixture();
+  const events = [];
+  let flushes = 0;
+  const clockValues = [1_000, 1_025];
+  const client = createRailwayApiClient({
+    ...fixture.options,
+    telemetry: {
+      record(event) {
+        events.push(event);
+        return true;
+      },
+      scheduleFlush() {
+        flushes += 1;
+        return true;
+      },
+    },
+    clock() {
+      return clockValues.shift();
+    },
+  });
+
+  await client.call(queryEnvelope({ cursor: "cursor_123" }));
+
+  assert.deepEqual(events, [{
+    version: 1,
+    service: "connect-vercel-web",
+    kind: "railway-api-call",
+    operation: "contacts.list",
+    requestKind: "query",
+    outcome: "ok",
+    code: "OK",
+    traceContext: null,
+    durationMilliseconds: 25,
+  }]);
+  assert.equal(flushes, 1);
+  assert.doesNotMatch(
+    JSON.stringify(events),
+    /cursor_123|oidcHeader|userHeader|authorization|payload|tenant/i,
+  );
+});
+
+test("keeps API results independent from telemetry failures", async () => {
+  const fixture = createFixture();
+  const client = createRailwayApiClient({
+    ...fixture.options,
+    telemetry: {
+      record() {
+        throw new Error("private record failure");
+      },
+      scheduleFlush() {
+        throw new Error("private schedule failure");
+      },
+    },
+    clock: () => 1_000,
+  });
+
+  assert.deepEqual(await client.call(queryEnvelope()), {
+    contractVersion: RAILWAY_API_CONTRACT_VERSION,
+    outcome: "ok",
+    data: { items: [] },
   });
 });
 

@@ -1,0 +1,4684 @@
+{
+  "acceptanceCredit": 0,
+  "artifactClass": "PLANNING-ONLY;NON-AUTHORITY;NON-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V7-VECTOR-SHARD-01-OF-02-2026-08-30-G0",
+  "authorityCredit": 0,
+  "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-validator-and-state-machine-corpus-shard-01-of-02-2026-08-30.json",
+  "schemaVersion": "B0V7-VECTOR-SHARD-V1",
+  "shardContentRoot": "8b0cc2db6887cd10b3f3d6e44703092bf79bd9c8f5ccc45fcd508c4049fb5a9a",
+  "shardCount": 2,
+  "shardOrdinal": 1,
+  "vectorCount": 187,
+  "vectorEndOrdinal": 187,
+  "vectorStartOrdinal": 1,
+  "vectors": [
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "NULL",
+        "value": null
+      },
+      "mutationTarget": "NULL",
+      "operational": false,
+      "ordinal": 1,
+      "vectorId": "B0V7-TYPE-NULL-POS",
+      "vectorRoot": "865d1e528d5a638b0c65435a2bec39bce3bdabf3488cbb3023014402ecd95e3d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "NULL",
+        "value": 0
+      },
+      "mutationTarget": "NULL",
+      "operational": false,
+      "ordinal": 2,
+      "vectorId": "B0V7-TYPE-NULL-NEG",
+      "vectorRoot": "810133af28976505c073ef4f18e0cddcd72e3c6764ecaa31c8214cfd109af973"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "BOOLEAN",
+        "value": true
+      },
+      "mutationTarget": "BOOLEAN",
+      "operational": false,
+      "ordinal": 3,
+      "vectorId": "B0V7-TYPE-BOOLEAN-POS",
+      "vectorRoot": "6c3dd3490ef6e8dd296588aa37d793a1d7d2a23e5b42cd35a9f44cb147637add"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "BOOLEAN",
+        "value": "true"
+      },
+      "mutationTarget": "BOOLEAN",
+      "operational": false,
+      "ordinal": 4,
+      "vectorId": "B0V7-TYPE-BOOLEAN-NEG",
+      "vectorRoot": "974a156988dcd2cd16643ed756fed1f585f6ca08c2619255e1d9f2ffc5fc3ef6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "STRING",
+        "value": "x"
+      },
+      "mutationTarget": "STRING",
+      "operational": false,
+      "ordinal": 5,
+      "vectorId": "B0V7-TYPE-STRING-POS",
+      "vectorRoot": "b3831d6b1c185b59f8f7b163a3f90ef1d24ae8605de710206db08c01bd34ae1f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "STRING",
+        "value": 1
+      },
+      "mutationTarget": "STRING",
+      "operational": false,
+      "ordinal": 6,
+      "vectorId": "B0V7-TYPE-STRING-NEG",
+      "vectorRoot": "b0a369173cd5f309b494d544037aac529169d6f25578934e336da4235b228be1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "NONEMPTY_STRING",
+        "value": "x"
+      },
+      "mutationTarget": "NONEMPTY_STRING",
+      "operational": false,
+      "ordinal": 7,
+      "vectorId": "B0V7-TYPE-NONEMPTY_STRING-POS",
+      "vectorRoot": "d3e98c1270d74dc4138e103b4b9ac1a6cbc47462ef7ee76056623143bc423adf"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "NONEMPTY_STRING",
+        "value": ""
+      },
+      "mutationTarget": "NONEMPTY_STRING",
+      "operational": false,
+      "ordinal": 8,
+      "vectorId": "B0V7-TYPE-NONEMPTY_STRING-NEG",
+      "vectorRoot": "0ea12f13341d4f271140fe521151c1d4e6f37317a4c4ac7f70e4f956f0b25524"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "SAFE_INTEGER",
+        "value": 7
+      },
+      "mutationTarget": "SAFE_INTEGER",
+      "operational": false,
+      "ordinal": 9,
+      "vectorId": "B0V7-TYPE-SAFE_INTEGER-POS",
+      "vectorRoot": "a00e5f78f1dcfdd896c884a048d44078d5801e03e957fa6a1ca6a8e189727e0a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "SAFE_INTEGER",
+        "value": "7"
+      },
+      "mutationTarget": "SAFE_INTEGER",
+      "operational": false,
+      "ordinal": 10,
+      "vectorId": "B0V7-TYPE-SAFE_INTEGER-NEG",
+      "vectorRoot": "be4a7cd925e436ea63c2102eed334129dc665928c32f1fa495111a84e4e5a5d0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "NONNEGATIVE_INTEGER",
+        "value": 0
+      },
+      "mutationTarget": "NONNEGATIVE_INTEGER",
+      "operational": false,
+      "ordinal": 11,
+      "vectorId": "B0V7-TYPE-NONNEGATIVE_INTEGER-POS",
+      "vectorRoot": "3ed6efdcf215ec6ebe7ab21b85938ed434752076ee50fe2d2239e2d8fbe5474f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "NONNEGATIVE_INTEGER",
+        "value": -1
+      },
+      "mutationTarget": "NONNEGATIVE_INTEGER",
+      "operational": false,
+      "ordinal": 12,
+      "vectorId": "B0V7-TYPE-NONNEGATIVE_INTEGER-NEG",
+      "vectorRoot": "565416daef4374e8e0fba8748ce962b31bc876d4af75e43dc6090e8d6c54e797"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "U64_DECIMAL",
+        "value": "18446744073709551615"
+      },
+      "mutationTarget": "U64_DECIMAL",
+      "operational": false,
+      "ordinal": 13,
+      "vectorId": "B0V7-TYPE-U64_DECIMAL-POS",
+      "vectorRoot": "0d4727aec4ec0ea1257e250ab3ced5116757e69ed0b7050ac4985e2d5dc2237f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "U64_DECIMAL",
+        "value": "18446744073709551616"
+      },
+      "mutationTarget": "U64_DECIMAL",
+      "operational": false,
+      "ordinal": 14,
+      "vectorId": "B0V7-TYPE-U64_DECIMAL-NEG",
+      "vectorRoot": "c9a8b4b0e3204c46a56f927b5bf627ed8744b153fa6b3cdf747193008e68e735"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "SHA256",
+        "value": "c1ba808db67f82f91c430bf4031fb21d62fb1a8bb59f008dd033a86502c77e16"
+      },
+      "mutationTarget": "SHA256",
+      "operational": false,
+      "ordinal": 15,
+      "vectorId": "B0V7-TYPE-SHA256-POS",
+      "vectorRoot": "87003519c8d294742cd658812044bf86e8a8c6b874b9c4f2fb3a8cb9d87674c4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "SHA256",
+        "value": "ABC"
+      },
+      "mutationTarget": "SHA256",
+      "operational": false,
+      "ordinal": 16,
+      "vectorId": "B0V7-TYPE-SHA256-NEG",
+      "vectorRoot": "9e81e6b05ebb1ca59b61990a67265033c0bead1db1a72818958fabc7527fe0fe"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "DETERMINISTIC_ID",
+        "value": "B0V7-ID-001"
+      },
+      "mutationTarget": "DETERMINISTIC_ID",
+      "operational": false,
+      "ordinal": 17,
+      "vectorId": "B0V7-TYPE-DETERMINISTIC_ID-POS",
+      "vectorRoot": "e8ce1bfa3b22bce062158f338e7a4da1bb2e4ccba647a58f477f47e9aaa10f9c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "DETERMINISTIC_ID",
+        "value": "lowercase-id"
+      },
+      "mutationTarget": "DETERMINISTIC_ID",
+      "operational": false,
+      "ordinal": 18,
+      "vectorId": "B0V7-TYPE-DETERMINISTIC_ID-NEG",
+      "vectorRoot": "a8535b402aa94e5c4a21428b0cfede09968863ff2e173b5b6c7fc3bd46d4a714"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "RFC3339_UTC",
+        "value": "2026-08-30T00:00:00Z"
+      },
+      "mutationTarget": "RFC3339_UTC",
+      "operational": false,
+      "ordinal": 19,
+      "vectorId": "B0V7-TYPE-RFC3339_UTC-POS",
+      "vectorRoot": "5eaa465ff1eff46b3f3116d235e43e67e738be7323140e32b2930ce9692137ba"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "RFC3339_UTC",
+        "value": "2026-02-30T00:00:00Z"
+      },
+      "mutationTarget": "RFC3339_UTC",
+      "operational": false,
+      "ordinal": 20,
+      "vectorId": "B0V7-TYPE-RFC3339_UTC-NEG",
+      "vectorRoot": "bc96f0eb93f1164cc47e92e616890ecac685e70a3bcf858f52376224d567290c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "JSON_POINTER",
+        "value": "/store/currentHead"
+      },
+      "mutationTarget": "JSON_POINTER",
+      "operational": false,
+      "ordinal": 21,
+      "vectorId": "B0V7-TYPE-JSON_POINTER-POS",
+      "vectorRoot": "8cbb1100a820a187afaa7c438ca1c0308bfffe79390fe2accd0a4a188a483e2f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "JSON_POINTER",
+        "value": "/bad~2token"
+      },
+      "mutationTarget": "JSON_POINTER",
+      "operational": false,
+      "ordinal": 22,
+      "vectorId": "B0V7-TYPE-JSON_POINTER-NEG",
+      "vectorRoot": "99e0803108d77d5f14bb4aacf3f6e78a5569ad448a98eaa044e8d18c74866350"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "REPO_RELATIVE_PATH",
+        "value": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-2026-08-30.md"
+      },
+      "mutationTarget": "REPO_RELATIVE_PATH",
+      "operational": false,
+      "ordinal": 23,
+      "vectorId": "B0V7-TYPE-REPO_RELATIVE_PATH-POS",
+      "vectorRoot": "1bc7e8b1f330c8ca84fc0cabc94addf8ccedd934d4757a54dbaf5ec84908510b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "REPO_RELATIVE_PATH",
+        "value": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-2026-08-30.md"
+      },
+      "mutationTarget": "REPO_RELATIVE_PATH",
+      "operational": false,
+      "ordinal": 24,
+      "vectorId": "B0V7-TYPE-REPO_RELATIVE_PATH-NEG",
+      "vectorRoot": "955a3414a70764b48c7ab0ef4d9535c392d311dfccb504c2ab55c5db04fa5a3f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "ARRAY",
+        "value": []
+      },
+      "mutationTarget": "ARRAY",
+      "operational": false,
+      "ordinal": 25,
+      "vectorId": "B0V7-TYPE-ARRAY-POS",
+      "vectorRoot": "a2ff6a064961ad224940b116e7794d5fe89f20f7611502902670f967e727da9a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "ARRAY",
+        "value": {}
+      },
+      "mutationTarget": "ARRAY",
+      "operational": false,
+      "ordinal": 26,
+      "vectorId": "B0V7-TYPE-ARRAY-NEG",
+      "vectorRoot": "ea507e9bc95078aee53d056d95aa18325a355600c69cbbae9852b3b49af5f762"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "OBJECT",
+        "value": {}
+      },
+      "mutationTarget": "OBJECT",
+      "operational": false,
+      "ordinal": 27,
+      "vectorId": "B0V7-TYPE-OBJECT-POS",
+      "vectorRoot": "9e4ff5c1f1cfc8826069f8749007366fa137991d6d76cd3bc811790893b482fc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-TYPE",
+      "input": {
+        "type": "OBJECT",
+        "value": []
+      },
+      "mutationTarget": "OBJECT",
+      "operational": false,
+      "ordinal": 28,
+      "vectorId": "B0V7-TYPE-OBJECT-NEG",
+      "vectorRoot": "5c52da8f54d26342d7ce3c09f744c42dfe0e7e40b8457873dc29911f43fd6eeb"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-UNKNOWN-TYPE",
+      "input": {
+        "type": "UNDECLARED-TYPE",
+        "value": "x"
+      },
+      "mutationTarget": "UNKNOWN-TYPE",
+      "operational": false,
+      "ordinal": 29,
+      "vectorId": "B0V7-TYPE-UNKNOWN-NEG",
+      "vectorRoot": "b9ce8e79e54d24eb83d16d6888d800335e866d4e5f47d3e2f02b1d23790200a2"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            true
+          ],
+          "op": "LITERAL"
+        },
+        "data": {},
+        "operator": "LITERAL"
+      },
+      "mutationTarget": "LITERAL",
+      "operational": false,
+      "ordinal": 30,
+      "vectorId": "B0V7-OP-LITERAL-POS",
+      "vectorRoot": "90cfb706550aa669282a48f6c4f6bc82205471e748fa27acae07fa5138e7ffa6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            false
+          ],
+          "op": "LITERAL"
+        },
+        "data": {},
+        "operator": "LITERAL"
+      },
+      "mutationTarget": "LITERAL",
+      "operational": false,
+      "ordinal": 31,
+      "vectorId": "B0V7-OP-LITERAL-NEG",
+      "vectorRoot": "a8e779141def33e3c5ab726f621a256f72647040410ab0d2fbf432975b80ed25"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            "/x"
+          ],
+          "op": "GET"
+        },
+        "data": {
+          "x": true
+        },
+        "operator": "GET"
+      },
+      "mutationTarget": "GET",
+      "operational": false,
+      "ordinal": 32,
+      "vectorId": "B0V7-OP-GET-POS",
+      "vectorRoot": "3d7c9abf8160d8e3701bdef6bd78af57d5cf0187d747491f90d773c3639f1014"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            "/missing"
+          ],
+          "op": "GET"
+        },
+        "data": {
+          "x": true
+        },
+        "operator": "GET"
+      },
+      "mutationTarget": "GET",
+      "operational": false,
+      "ordinal": 33,
+      "vectorId": "B0V7-OP-GET-NEG",
+      "vectorRoot": "8f112b022244a39eb6e9990abbca176a2c71f9491f87f476e9e12bdc56beaac5"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            "/x"
+          ],
+          "op": "PATH_EXISTS"
+        },
+        "data": {
+          "x": 1
+        },
+        "operator": "PATH_EXISTS"
+      },
+      "mutationTarget": "PATH_EXISTS",
+      "operational": false,
+      "ordinal": 34,
+      "vectorId": "B0V7-OP-PATH_EXISTS-POS",
+      "vectorRoot": "870e769c86fc3a64aaf60e9bc15dbede9f40464f2369991efc5846547c68cbad"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            "/y"
+          ],
+          "op": "PATH_EXISTS"
+        },
+        "data": {
+          "x": 1
+        },
+        "operator": "PATH_EXISTS"
+      },
+      "mutationTarget": "PATH_EXISTS",
+      "operational": false,
+      "ordinal": 35,
+      "vectorId": "B0V7-OP-PATH_EXISTS-NEG",
+      "vectorRoot": "7eeb895a53fd0977b92101bebfef3c99257dea385ff3ca01c2c10c86560a3a1f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                true
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                true
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "AND"
+        },
+        "data": {},
+        "operator": "AND"
+      },
+      "mutationTarget": "AND",
+      "operational": false,
+      "ordinal": 36,
+      "vectorId": "B0V7-OP-AND-POS",
+      "vectorRoot": "6cbc04beb31399a73e958badc422de04c3a62bcb6cc24c2fd6799e15daf7e832"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                true
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                false
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "AND"
+        },
+        "data": {},
+        "operator": "AND"
+      },
+      "mutationTarget": "AND",
+      "operational": false,
+      "ordinal": 37,
+      "vectorId": "B0V7-OP-AND-NEG",
+      "vectorRoot": "334d37877f25f5e58d124524b16a7b927136eddf242802e49ddcca4b55c0ebc1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                false
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                true
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "OR"
+        },
+        "data": {},
+        "operator": "OR"
+      },
+      "mutationTarget": "OR",
+      "operational": false,
+      "ordinal": 38,
+      "vectorId": "B0V7-OP-OR-POS",
+      "vectorRoot": "e6639a541176ca2d971baf3a2e339e69fe4ba0dbbda10e52ef5e41c45adafc16"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                false
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                false
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "OR"
+        },
+        "data": {},
+        "operator": "OR"
+      },
+      "mutationTarget": "OR",
+      "operational": false,
+      "ordinal": 39,
+      "vectorId": "B0V7-OP-OR-NEG",
+      "vectorRoot": "758a9f0d6bcb76db5bb0dfdc573f81dc66901f1085bf543d4a62fb3d7100491c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                false
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "NOT"
+        },
+        "data": {},
+        "operator": "NOT"
+      },
+      "mutationTarget": "NOT",
+      "operational": false,
+      "ordinal": 40,
+      "vectorId": "B0V7-OP-NOT-POS",
+      "vectorRoot": "d6d0b8c1b914ef19fd0e8c76a6fb4738bb11b094717a4a92607761dbdb03835a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                true
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "NOT"
+        },
+        "data": {},
+        "operator": "NOT"
+      },
+      "mutationTarget": "NOT",
+      "operational": false,
+      "ordinal": 41,
+      "vectorId": "B0V7-OP-NOT-NEG",
+      "vectorRoot": "f3ad324a3f422743448988c51dc1fa3690314fa9edfa8d04727e71f05b666b56"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        },
+        "data": {},
+        "operator": "EQ"
+      },
+      "mutationTarget": "EQ",
+      "operational": false,
+      "ordinal": 42,
+      "vectorId": "B0V7-OP-EQ-POS",
+      "vectorRoot": "154993923b7cf771afb89d3850cd43367c302e532f43778a1d7596d11b7f5b97"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        },
+        "data": {},
+        "operator": "EQ"
+      },
+      "mutationTarget": "EQ",
+      "operational": false,
+      "ordinal": 43,
+      "vectorId": "B0V7-OP-EQ-NEG",
+      "vectorRoot": "ffc5e8f553cdf21e71c43ffd4e0339757ac36b0c3d6caab45a17bdc960294264"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "NEQ"
+        },
+        "data": {},
+        "operator": "NEQ"
+      },
+      "mutationTarget": "NEQ",
+      "operational": false,
+      "ordinal": 44,
+      "vectorId": "B0V7-OP-NEQ-POS",
+      "vectorRoot": "b93c6a4af8cdf87977053d5f4bf13d9e1ea9881a2de39f5efd0ee4f954b9b345"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "NEQ"
+        },
+        "data": {},
+        "operator": "NEQ"
+      },
+      "mutationTarget": "NEQ",
+      "operational": false,
+      "ordinal": 45,
+      "vectorId": "B0V7-OP-NEQ-NEG",
+      "vectorRoot": "47b1c60635c3561722814c4549fdb292df0c8e2fd2001dcb9523198e97680a21"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LT"
+        },
+        "data": {},
+        "operator": "LT"
+      },
+      "mutationTarget": "LT",
+      "operational": false,
+      "ordinal": 46,
+      "vectorId": "B0V7-OP-LT-POS",
+      "vectorRoot": "c5703ea88a181bf8d3c7bf9b37dd3c832799535f1e5b526007dd602a6138d9d3"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LT"
+        },
+        "data": {},
+        "operator": "LT"
+      },
+      "mutationTarget": "LT",
+      "operational": false,
+      "ordinal": 47,
+      "vectorId": "B0V7-OP-LT-NEG",
+      "vectorRoot": "68810c97ba0ad12983e6bf4e1796752bf7239a7416b1e5341bc9fa96d515d3f0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LTE"
+        },
+        "data": {},
+        "operator": "LTE"
+      },
+      "mutationTarget": "LTE",
+      "operational": false,
+      "ordinal": 48,
+      "vectorId": "B0V7-OP-LTE-POS",
+      "vectorRoot": "6cb1720e4a8426ff561d870459f75cca3cb4c7cf3908f200f4edabe7ad359779"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                3
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LTE"
+        },
+        "data": {},
+        "operator": "LTE"
+      },
+      "mutationTarget": "LTE",
+      "operational": false,
+      "ordinal": 49,
+      "vectorId": "B0V7-OP-LTE-NEG",
+      "vectorRoot": "a465f6c89a2ec3d51d958ffd2dc044be2a5f3e2c95d3e67ef69e40fbf47f43f6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "GT"
+        },
+        "data": {},
+        "operator": "GT"
+      },
+      "mutationTarget": "GT",
+      "operational": false,
+      "ordinal": 50,
+      "vectorId": "B0V7-OP-GT-POS",
+      "vectorRoot": "36fc47dd330dd1a2e7c6f5a5dd23fca325a3d3ac2c5e299ec35d0b6348c3eb7f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "GT"
+        },
+        "data": {},
+        "operator": "GT"
+      },
+      "mutationTarget": "GT",
+      "operational": false,
+      "ordinal": 51,
+      "vectorId": "B0V7-OP-GT-NEG",
+      "vectorRoot": "119564a32eeb5822105224c469256519953528e88c8eb355083dd30e4267e750"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "GTE"
+        },
+        "data": {},
+        "operator": "GTE"
+      },
+      "mutationTarget": "GTE",
+      "operational": false,
+      "ordinal": 52,
+      "vectorId": "B0V7-OP-GTE-POS",
+      "vectorRoot": "78f0ac6d406f849b9c2bf86557ade412dd5b4ab5d0a237fc5aa573e4d557270e"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                1
+              ],
+              "op": "LITERAL"
+            },
+            {
+              "args": [
+                2
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "GTE"
+        },
+        "data": {},
+        "operator": "GTE"
+      },
+      "mutationTarget": "GTE",
+      "operational": false,
+      "ordinal": 53,
+      "vectorId": "B0V7-OP-GTE-NEG",
+      "vectorRoot": "b904e02b22c55297369b2df541d78257c51619c7a7159330512e282a327f8ecf"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            "NONEMPTY_STRING"
+          ],
+          "op": "TYPE_IS"
+        },
+        "data": {
+          "x": "ok"
+        },
+        "operator": "TYPE_IS"
+      },
+      "mutationTarget": "TYPE_IS",
+      "operational": false,
+      "ordinal": 54,
+      "vectorId": "B0V7-OP-TYPE_IS-POS",
+      "vectorRoot": "485449004d0ac258bbc524a3d25d027977926c004affede799589f6f1f7210c1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            "NONEMPTY_STRING"
+          ],
+          "op": "TYPE_IS"
+        },
+        "data": {
+          "x": ""
+        },
+        "operator": "TYPE_IS"
+      },
+      "mutationTarget": "TYPE_IS",
+      "operational": false,
+      "ordinal": 55,
+      "vectorId": "B0V7-OP-TYPE_IS-NEG",
+      "vectorRoot": "7a1aa72545e9460a4a06ff0bf4509b0eeb594a756f103a0cc48f4555d4260067"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            [
+              "a"
+            ]
+          ],
+          "op": "EXACT_KEYS"
+        },
+        "data": {
+          "x": {
+            "a": 1
+          }
+        },
+        "operator": "EXACT_KEYS"
+      },
+      "mutationTarget": "EXACT_KEYS",
+      "operational": false,
+      "ordinal": 56,
+      "vectorId": "B0V7-OP-EXACT_KEYS-POS",
+      "vectorRoot": "e42ebad210fb990f4f7284b46b485d9b4486ca3dd1e6caff9397b83a0c0d9daf"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            [
+              "a"
+            ]
+          ],
+          "op": "EXACT_KEYS"
+        },
+        "data": {
+          "x": {
+            "a": 1,
+            "b": 2
+          }
+        },
+        "operator": "EXACT_KEYS"
+      },
+      "mutationTarget": "EXACT_KEYS",
+      "operational": false,
+      "ordinal": 57,
+      "vectorId": "B0V7-OP-EXACT_KEYS-NEG",
+      "vectorRoot": "8bd21c80167f42d919554ee7b1cab6bad4ca3e142d1cc5a462c5d6defab3238b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            }
+          ],
+          "op": "UNIQUE_VALUES"
+        },
+        "data": {
+          "x": [
+            1,
+            2
+          ]
+        },
+        "operator": "UNIQUE_VALUES"
+      },
+      "mutationTarget": "UNIQUE_VALUES",
+      "operational": false,
+      "ordinal": 58,
+      "vectorId": "B0V7-OP-UNIQUE_VALUES-POS",
+      "vectorRoot": "4deda356453213ec4ce9d8f64b441fc710faeefbaab18c9c6310f6950cb3405b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            }
+          ],
+          "op": "UNIQUE_VALUES"
+        },
+        "data": {
+          "x": [
+            1,
+            1
+          ]
+        },
+        "operator": "UNIQUE_VALUES"
+      },
+      "mutationTarget": "UNIQUE_VALUES",
+      "operational": false,
+      "ordinal": 59,
+      "vectorId": "B0V7-OP-UNIQUE_VALUES-NEG",
+      "vectorRoot": "559e1c59439009e8293f6807128f9fc0d24176bbdc1744dc4691d7e413df6cb9"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            [
+              "A",
+              "B"
+            ]
+          ],
+          "op": "IN_SET"
+        },
+        "data": {
+          "x": "A"
+        },
+        "operator": "IN_SET"
+      },
+      "mutationTarget": "IN_SET",
+      "operational": false,
+      "ordinal": 60,
+      "vectorId": "B0V7-OP-IN_SET-POS",
+      "vectorRoot": "983da78758581f1acc015453bfa40f13de8bd7526ba4a84b80f47d2fae2a2889"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            [
+              "A",
+              "B"
+            ]
+          ],
+          "op": "IN_SET"
+        },
+        "data": {
+          "x": "C"
+        },
+        "operator": "IN_SET"
+      },
+      "mutationTarget": "IN_SET",
+      "operational": false,
+      "ordinal": 61,
+      "vectorId": "B0V7-OP-IN_SET-NEG",
+      "vectorRoot": "92ac49c5e94d9432e1205a56150ed7c44d4cf8a8d47f4525150e823b71bfdd54"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            "^[A-Z]+$"
+          ],
+          "op": "MATCH"
+        },
+        "data": {
+          "x": "ABC"
+        },
+        "operator": "MATCH"
+      },
+      "mutationTarget": "MATCH",
+      "operational": false,
+      "ordinal": 62,
+      "vectorId": "B0V7-OP-MATCH-POS",
+      "vectorRoot": "d488a4b80f29d27084aee6842c3f137dd2a78b7ee67e72cd0b3669677c882b5f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            "^[A-Z]+$"
+          ],
+          "op": "MATCH"
+        },
+        "data": {
+          "x": "abc"
+        },
+        "operator": "MATCH"
+      },
+      "mutationTarget": "MATCH",
+      "operational": false,
+      "ordinal": 63,
+      "vectorId": "B0V7-OP-MATCH-NEG",
+      "vectorRoot": "09c7ec49c6a80d7db9e62191406f778db3b21c333a7a5f734d2091c87ab275bc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            "B0V7-HASH-OP-TEST",
+            "1dac906fb4408e87fab619fb5ccf283880d19255aef6104bc382c9e66c009c8f"
+          ],
+          "op": "HASH_EQ"
+        },
+        "data": {
+          "x": {
+            "x": 1
+          }
+        },
+        "operator": "HASH_EQ"
+      },
+      "mutationTarget": "HASH_EQ",
+      "operational": false,
+      "ordinal": 64,
+      "vectorId": "B0V7-OP-HASH_EQ-POS",
+      "vectorRoot": "b41cf79b00ecf009cf70ee0ef8674bb1c70ee7871d7123c8107fa3be6e06329f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [
+            {
+              "args": [
+                "/x"
+              ],
+              "op": "GET"
+            },
+            "B0V7-HASH-OP-TEST",
+            "0000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "op": "HASH_EQ"
+        },
+        "data": {
+          "x": {
+            "x": 1
+          }
+        },
+        "operator": "HASH_EQ"
+      },
+      "mutationTarget": "HASH_EQ",
+      "operational": false,
+      "ordinal": 65,
+      "vectorId": "B0V7-OP-HASH_EQ-NEG",
+      "vectorRoot": "d96aff0827f3e4077282bf3c9f6c89aae86c92a1fa981f2ca3c061873129813d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "VALIDATOR-UNKNOWN-OPERATOR",
+      "input": {
+        "ast": {
+          "args": [],
+          "op": "UNDECLARED-OP"
+        },
+        "data": {},
+        "operator": "UNDECLARED-OP"
+      },
+      "mutationTarget": "UNKNOWN-OPERATOR",
+      "operational": false,
+      "ordinal": 66,
+      "vectorId": "B0V7-OP-UNKNOWN-NEG",
+      "vectorRoot": "6dcf6336afc427be48a0ca21b9aba6e88833ddedfd1c607b7f5b13877360965e"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "FULL-INSTANCE",
+      "operational": false,
+      "ordinal": 67,
+      "vectorId": "B0V7-DETACHED-POS",
+      "vectorRoot": "fbbeba780054f94714da96b842837fef944c38cd8623f434ce0ea4e8b61c0dbe"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/envelopeSchemaId",
+      "operational": false,
+      "ordinal": 68,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-envelopeSchemaId",
+      "vectorRoot": "39e08e2ac9fa7dd381d0bb60df18e439097e97009b0354c9bebc485ee60a716f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/internalSchemaRoot",
+      "operational": false,
+      "ordinal": 69,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-internalSchemaRoot",
+      "vectorRoot": "7e6ab6c5fd4af2e58bc1c8d1ce2707285f038109fa7191a34ef1c67c3a7ffcf5"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/instanceRoot",
+      "operational": false,
+      "ordinal": 70,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-instanceRoot",
+      "vectorRoot": "ca0a6927141e4d11ea70935580ca0efa2f17b27f29fa59f9848c0a9856390a88"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/planningOnly",
+      "operational": false,
+      "ordinal": 71,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-planningOnly",
+      "vectorRoot": "0d0cb1cda439b6d21febd597bab6181aa9c550a499c854bcd960083f02423b14"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/operational",
+      "operational": false,
+      "ordinal": 72,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-operational",
+      "vectorRoot": "448e84358b219dc2701836e123344990996a7fc22e095bb29cdf522b94370ec6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true
+        }
+      },
+      "mutationTarget": "/external/validationContext",
+      "operational": false,
+      "ordinal": 73,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-validationContext",
+      "vectorRoot": "1472f195c1075ce42ccadb89cae1136f2b599ed26bfcb11de5c049f078ea04a6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/payload",
+      "operational": false,
+      "ordinal": 74,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-payload",
+      "vectorRoot": "023502aef72d5e8535dd2c16f35df3b4095ae9ff79209f6e4b7394f669feb5b0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/authorityCredit",
+      "operational": false,
+      "ordinal": 75,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-authorityCredit",
+      "vectorRoot": "da8345cf255fa2c6d62a7168e4b2ba55d6345e0db26846e9d062a954d097aabd"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/external/acceptanceCredit",
+      "operational": false,
+      "ordinal": 76,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-MISSING-acceptanceCredit",
+      "vectorRoot": "27495d5bc4aab6caa1d2b499738fa352b20954c6252ea5d68654b85df019c854"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734"
+          }
+        }
+      },
+      "mutationTarget": "/validationContext/expectedProducerAppointmentRoot",
+      "operational": false,
+      "ordinal": 77,
+      "vectorId": "B0V7-DETACHED-CONTEXT-MISSING-expectedProducerAppointmentRoot",
+      "vectorRoot": "efd12465f4ab784d4ffac543962a0f8fc950cb083f907f4697569fed86fd6bb6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/validationContext/currentSecurityUniverseTupleRoot",
+      "operational": false,
+      "ordinal": 78,
+      "vectorId": "B0V7-DETACHED-CONTEXT-MISSING-currentSecurityUniverseTupleRoot",
+      "vectorRoot": "8568b9b3b82e5cb2e2d83d999f392624202bbbf50ec0e2903c040bd93601396f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/schemaId",
+      "operational": false,
+      "ordinal": 79,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-schemaId",
+      "vectorRoot": "80886dc55c5494fdd7671daca41707334c2939506d0a1e45b89c80229f4118e7"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/instanceId",
+      "operational": false,
+      "ordinal": 80,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-instanceId",
+      "vectorRoot": "03aaa98509efbc1445378f3e3223b194245b303ffa132df1a4daafbea4544f2c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/producerAppointmentRoot",
+      "operational": false,
+      "ordinal": 81,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-producerAppointmentRoot",
+      "vectorRoot": "9e78d0b0712acefd22c7226aca108d0cfc629f93a5a0927292f76bfd13fa1702"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/freshnessHeadTupleRoot",
+      "operational": false,
+      "ordinal": 82,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-freshnessHeadTupleRoot",
+      "vectorRoot": "514d1eeaf44c50c9d7a3956bf13620e993ba3dca45df60bfe78fb4ad61d95bed"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/requirementClosureRoot",
+      "operational": false,
+      "ordinal": 83,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-requirementClosureRoot",
+      "vectorRoot": "9a244047d5ac6e4f8be012b3b3840604c24fd7925fd0343a1144396c5c80b72f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/outputSetRoot",
+      "operational": false,
+      "ordinal": 84,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-outputSetRoot",
+      "vectorRoot": "3b8dc3162970cf00b8a3ef09447d8bb9ebe3dda6ac404c40ea1288feb620fd03"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/casCommitReceiptRoot",
+      "operational": false,
+      "ordinal": 85,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-casCommitReceiptRoot",
+      "vectorRoot": "54d1ea5c0634f7159c7454d3c90845c25a966eb775d39bb2b49c578bbf8e232e"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/recoveryReceiptRoot",
+      "operational": false,
+      "ordinal": 86,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-recoveryReceiptRoot",
+      "vectorRoot": "091f10cefca32cbdcde762d1773185421ae24796120ce81c319100e2ef19c301"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/witnessIndependenceRoot",
+      "operational": false,
+      "ordinal": 87,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-witnessIndependenceRoot",
+      "vectorRoot": "851610cff35d41753ba80b83374923a9f306340fbc47dce6204666d6b5a15fc4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/workIndependenceRoot",
+      "operational": false,
+      "ordinal": 88,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-workIndependenceRoot",
+      "vectorRoot": "f487054ab8c2bc4ff091f7f480605eac02fe033410367d8415af808f0baf482f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/ledgerIndependenceRoot",
+      "operational": false,
+      "ordinal": 89,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-ledgerIndependenceRoot",
+      "vectorRoot": "af871f83529bac9b09cd22e1301ef20c26c1921db5827e01a3c915671a896749"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "/payload/authorityOwnerIndependenceRoot",
+      "operational": false,
+      "ordinal": 90,
+      "vectorId": "B0V7-DETACHED-INTERNAL-MISSING-authorityOwnerIndependenceRoot",
+      "vectorRoot": "13a52b67c9c8426087a21c88d85e2290e3eb4cc39bdb8b6c7e2da48c594300f0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "undeclared": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "EXTERNAL-UNKNOWN",
+      "operational": false,
+      "ordinal": 91,
+      "vectorId": "B0V7-DETACHED-EXTERNAL-UNKNOWN-NEG",
+      "vectorRoot": "51fb09096f965525a4845edc8f948fedc527dc5926a19c1b80a335ce0f6f300c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "undeclared": true
+          }
+        }
+      },
+      "mutationTarget": "CONTEXT-UNKNOWN",
+      "operational": false,
+      "ordinal": 92,
+      "vectorId": "B0V7-DETACHED-CONTEXT-UNKNOWN-NEG",
+      "vectorRoot": "0056f993923701f0d999776cda136c0906a47d3f3677088da815f3016d4d0f0d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "undeclared": true,
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "INTERNAL-UNKNOWN",
+      "operational": false,
+      "ordinal": 93,
+      "vectorId": "B0V7-DETACHED-INTERNAL-UNKNOWN-NEG",
+      "vectorRoot": "0212e717ad481bd48f0344c23a4fe01bfaf47ba269796103714d4886ec07e23a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "0000000000000000000000000000000000000000000000000000000000000000",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "INSTANCE-ROOT",
+      "operational": false,
+      "ordinal": 94,
+      "vectorId": "B0V7-DETACHED-INSTANCE-ROOT-NEG",
+      "vectorRoot": "344c52a9e78dfd9eda8272b748d5aa9851f662be4a023e3b28b4835979635b69"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      },
+      "mutationTarget": "PRODUCER-COMPARATOR",
+      "operational": false,
+      "ordinal": 95,
+      "vectorId": "B0V7-DETACHED-PRODUCER-COMPARATOR-NEG",
+      "vectorRoot": "c0b7fee9e38fba794305b519f15f2ba3cd2fb4bd07bc0ebd0d95a6165ca028c4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "0000000000000000000000000000000000000000000000000000000000000000",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "FRESHNESS-COMPARATOR",
+      "operational": false,
+      "ordinal": 96,
+      "vectorId": "B0V7-DETACHED-FRESHNESS-COMPARATOR-NEG",
+      "vectorRoot": "89fc10d9de108a5133b96cc8f1ce218e94f095f9ed1b12c53b1d4a22630c6fac"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": false,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "PLANNING-FLAG",
+      "operational": false,
+      "ordinal": 97,
+      "vectorId": "B0V7-DETACHED-PLANNING-FLAG-NEG",
+      "vectorRoot": "376110504227103cbb9ad224f681edb07ee8f7fc53124b9da987f61fefe5d4a5"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": true,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "OPERATIONAL-FLAG",
+      "operational": false,
+      "ordinal": 98,
+      "vectorId": "B0V7-DETACHED-OPERATIONAL-FLAG-NEG",
+      "vectorRoot": "1703f0b4fee5483c036e5335b07579e246cb661bbd17e45d3f6284aad7291795"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 0,
+          "authorityCredit": 1,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "AUTHORITY-CREDIT",
+      "operational": false,
+      "ordinal": 99,
+      "vectorId": "B0V7-DETACHED-AUTHORITY-CREDIT-NEG",
+      "vectorRoot": "920da0edd00976a1f3574b24f96db3d25d983946297ffdc8b4666b829b918307"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "DETACHED-ACCEPTANCE",
+      "input": {
+        "envelope": {
+          "acceptanceCredit": 1,
+          "authorityCredit": 0,
+          "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+          "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+          "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+          "operational": false,
+          "payload": {
+            "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+            "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+            "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+            "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+            "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+            "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+            "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+            "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+            "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+            "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+            "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+          },
+          "planningOnly": true,
+          "validationContext": {
+            "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+            "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+          }
+        }
+      },
+      "mutationTarget": "ACCEPTANCE-CREDIT",
+      "operational": false,
+      "ordinal": 100,
+      "vectorId": "B0V7-DETACHED-ACCEPTANCE-CREDIT-NEG",
+      "vectorRoot": "5aaac9425ae088e21c9b35066614d2d8471639325f6ac7e1dee119b517bae6fb"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "36528adc46aa3ce3e2a17ac2f3ed92b39f0c8b0766da7ae16c08500bfbae6211",
+        "actualValue": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+        "interfaceId": "B0V7-IF-01"
+      },
+      "mutationTarget": "V6-SUBJECT-SHA256",
+      "operational": false,
+      "ordinal": 101,
+      "vectorId": "B0V7-IF-01-POS",
+      "vectorRoot": "89832c54ab6d1603afb47a30bfccad1b57ab505deae4e8e2e48cc39e873eec22"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "b01be6a503804360add4b9680d061a64a84d3f182d6d3d8be4c1b95fcaf9aae5",
+        "actualValue": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+        "interfaceId": "B0V7-IF-01"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 102,
+      "vectorId": "B0V7-IF-01-DIRECT-COPY-NEG",
+      "vectorRoot": "110563b49fd6d0f1de2060c24d498202eb6375683af3d180d24dd43f722277d2"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "36528adc46aa3ce3e2a17ac2f3ed92b39f0c8b0766da7ae16c08500bfbae6211",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-01"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 103,
+      "vectorId": "B0V7-IF-01-NULL-ACTUAL-NEG",
+      "vectorRoot": "b1e7cc1dbb88a3a5b48292a22e6e5f41c52c22f58d6209fd8e86ebc14a3c6891"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "534b4bf7eb9baea542e7e0c11ac477bdfc76c6722e109a0bd6808c86003f9a6d",
+        "actualValue": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+        "interfaceId": "B0V7-IF-02"
+      },
+      "mutationTarget": "V6-MANIFEST-SHA256",
+      "operational": false,
+      "ordinal": 104,
+      "vectorId": "B0V7-IF-02-POS",
+      "vectorRoot": "df41da708973951e7ec5737741b5ec325bc26233e7a5df8ded385de55f5896e0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "b07677c1f779d7942c0cc8d4dc1f0b94eeef281c0e46847957143d09c18357b5",
+        "actualValue": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+        "interfaceId": "B0V7-IF-02"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 105,
+      "vectorId": "B0V7-IF-02-DIRECT-COPY-NEG",
+      "vectorRoot": "4c8ec34a9eab563a81815ba5d8325cc2e4e6d9e9016739c4bf7f71b32f9d9b72"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "534b4bf7eb9baea542e7e0c11ac477bdfc76c6722e109a0bd6808c86003f9a6d",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-02"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 106,
+      "vectorId": "B0V7-IF-02-NULL-ACTUAL-NEG",
+      "vectorRoot": "27cda71c340aba192cf46a5d73575d7cfa4c0a90a8c27f3d44f32c2f15675589"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "756ced9eb993d160c82777f7a3698e8b141433c57a1f21e8e4106d0293a84f91",
+        "actualValue": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+        "interfaceId": "B0V7-IF-03"
+      },
+      "mutationTarget": "V6-PACKAGE-CONTENT-ROOT",
+      "operational": false,
+      "ordinal": 107,
+      "vectorId": "B0V7-IF-03-POS",
+      "vectorRoot": "a9051f982229115a51fa3a40f8e0b006076a8ea1d16ef7885c72b8353d470b6c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "2f33cad41c724312f45aef6d6d404c8e00e8b4a77e1dad5270b70b1d2d3614c0",
+        "actualValue": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+        "interfaceId": "B0V7-IF-03"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 108,
+      "vectorId": "B0V7-IF-03-DIRECT-COPY-NEG",
+      "vectorRoot": "a8d5ab83697f2a313ab7339f4fa3a848ee85c22ec6e675a26800ed292ff377d0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "756ced9eb993d160c82777f7a3698e8b141433c57a1f21e8e4106d0293a84f91",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-03"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 109,
+      "vectorId": "B0V7-IF-03-NULL-ACTUAL-NEG",
+      "vectorRoot": "ccb712f10ef4d1c99034b0e827dc7c3b32ffd1af7420e56fd535e091b21d0d55"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "4023e0f5c7a98e4552c5098a0b70b408aa00d9467ab3429e494a548d36e053be",
+        "actualValue": 24,
+        "interfaceId": "B0V7-IF-04"
+      },
+      "mutationTarget": "V6-PACKAGE-MEMBER-COUNT",
+      "operational": false,
+      "ordinal": 110,
+      "vectorId": "B0V7-IF-04-POS",
+      "vectorRoot": "7c677c8decfaae3360f0bed58a40a8df0b98d83c91d3c188bdfa99cfad464ec0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "1b8a41ae7ccdee633cf67dd1d0a364b92c470418a954071e0b1fb6fbea8a986c",
+        "actualValue": 24,
+        "interfaceId": "B0V7-IF-04"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 111,
+      "vectorId": "B0V7-IF-04-DIRECT-COPY-NEG",
+      "vectorRoot": "f13f0eac2d8b01599297fe002d99c3b38f3c1e0d90a34992329c35c6f24260b4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "4023e0f5c7a98e4552c5098a0b70b408aa00d9467ab3429e494a548d36e053be",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-04"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 112,
+      "vectorId": "B0V7-IF-04-NULL-ACTUAL-NEG",
+      "vectorRoot": "bbe7d12c6057e0c36708cf64f08990eb2c910228bb6e53fc29d82cdba25ba93d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "2b6efb5911d7e75a41c086b7bee71a11459a944b21cf3628453d936ff5decc98",
+        "actualValue": 127,
+        "interfaceId": "B0V7-IF-05"
+      },
+      "mutationTarget": "V6-REQUIREMENT-COUNT",
+      "operational": false,
+      "ordinal": 113,
+      "vectorId": "B0V7-IF-05-POS",
+      "vectorRoot": "fbf4abdbd0da7b9648a53a6416aecda84f1b891640ee4694832f833acac26501"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "1429f9880358cfac7a63f46bc8ead8f4cc0a9301d53ac17266d9e1bddfa8b818",
+        "actualValue": 127,
+        "interfaceId": "B0V7-IF-05"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 114,
+      "vectorId": "B0V7-IF-05-DIRECT-COPY-NEG",
+      "vectorRoot": "c35e75c4f67ce6a768b404121b067327e030a5392d03820da6bba296129ab38a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "2b6efb5911d7e75a41c086b7bee71a11459a944b21cf3628453d936ff5decc98",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-05"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 115,
+      "vectorId": "B0V7-IF-05-NULL-ACTUAL-NEG",
+      "vectorRoot": "d0b315c3a6b010bf5202280efef31378c8ed13a19474ebade5452aff6a03bcf2"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "1a53dcf3f778d85435684f5c94a890c5a0b0021c575996eefef6381fc5a76178",
+        "actualValue": 635,
+        "interfaceId": "B0V7-IF-06"
+      },
+      "mutationTarget": "V6-FIVE-FIELD-COUNT",
+      "operational": false,
+      "ordinal": 116,
+      "vectorId": "B0V7-IF-06-POS",
+      "vectorRoot": "34cfe2657fd66ed03a0b88ca8d880091802eb8421b74b09cb59dfef59c66e76b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "02f98535b57e64cab069626928dd94f2bedef0cd2c899da9075730d33ed3c145",
+        "actualValue": 635,
+        "interfaceId": "B0V7-IF-06"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 117,
+      "vectorId": "B0V7-IF-06-DIRECT-COPY-NEG",
+      "vectorRoot": "173ee5448f71855494fdaf6257bd27b52f62403159d5892dce76230449a30bb0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "1a53dcf3f778d85435684f5c94a890c5a0b0021c575996eefef6381fc5a76178",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-06"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 118,
+      "vectorId": "B0V7-IF-06-NULL-ACTUAL-NEG",
+      "vectorRoot": "82b63500b4f93421f7a0e1074b3dde050e7b2216b30331c516d54e6e4b3444a9"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "fcae3373cde03af5b76ae78e8d44b0756c757b269c9e5eae06a95a06b6180fd4",
+        "actualValue": 31,
+        "interfaceId": "B0V7-IF-07"
+      },
+      "mutationTarget": "V6-ACTIVE-BLOCKER-DENOMINATOR",
+      "operational": false,
+      "ordinal": 119,
+      "vectorId": "B0V7-IF-07-POS",
+      "vectorRoot": "5dbe50c51e5f5c6dfe6deff9097d9da4aed40404a8dc4e6f1fa24cdd7f75eef1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "42c5845f9ffa735448d32f4c4001f006c218706913635ad9624aeaa60c3c3436",
+        "actualValue": 31,
+        "interfaceId": "B0V7-IF-07"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 120,
+      "vectorId": "B0V7-IF-07-DIRECT-COPY-NEG",
+      "vectorRoot": "e513526f649162f5f9523775d1f782f044e1b255ff460bd6e5f595e0e964ac28"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "fcae3373cde03af5b76ae78e8d44b0756c757b269c9e5eae06a95a06b6180fd4",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-07"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 121,
+      "vectorId": "B0V7-IF-07-NULL-ACTUAL-NEG",
+      "vectorRoot": "6f5c655c8fac3af6d01622c4879d2c975fc263a714f3d7bc3fb5e67dce9f97fc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "664b31d635089e96ac3e600afcd0f9bee86e1b9de65b4f6ed13a9f2e5db51e64",
+        "actualValue": 7430,
+        "interfaceId": "B0V7-IF-08"
+      },
+      "mutationTarget": "V6-VECTOR-COUNT",
+      "operational": false,
+      "ordinal": 122,
+      "vectorId": "B0V7-IF-08-POS",
+      "vectorRoot": "019849df2c7ed511cd398ef6dc9bf5ffcd2d7480ed15ec83a9d79b81b225b0d6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "f30a8b9ad4e3bc6defa4f70136702722c8adaa84a3f993e54ebe887900d17ffd",
+        "actualValue": 7430,
+        "interfaceId": "B0V7-IF-08"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 123,
+      "vectorId": "B0V7-IF-08-DIRECT-COPY-NEG",
+      "vectorRoot": "09a243ef06d90a07bfbaee72624af73c702368d58c6888f99e74795785b1f110"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "664b31d635089e96ac3e600afcd0f9bee86e1b9de65b4f6ed13a9f2e5db51e64",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-08"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 124,
+      "vectorId": "B0V7-IF-08-NULL-ACTUAL-NEG",
+      "vectorRoot": "098fe6fa2caf5ed88851ba20282bf2abc1ec6bf0655c49deda621cc6da43befd"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "263cccc1205323e523698df6c129f3d9b42dc0b282ba03a620949382dbc02f72",
+        "actualValue": 16,
+        "interfaceId": "B0V7-IF-09"
+      },
+      "mutationTarget": "V6-VECTOR-SHARD-COUNT",
+      "operational": false,
+      "ordinal": 125,
+      "vectorId": "B0V7-IF-09-POS",
+      "vectorRoot": "2e5087ae956a4e03b3126f93386151c43420b9f3b8c94be21a9f110b3ce1d902"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "e6c74002831a15985abeb9e517bd4338b8e168af7c789ad809680b3636194785",
+        "actualValue": 16,
+        "interfaceId": "B0V7-IF-09"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 126,
+      "vectorId": "B0V7-IF-09-DIRECT-COPY-NEG",
+      "vectorRoot": "d56405be943efef938ade99377c29adf9f0f04c94eb545a8ea0a9f06a2d8cc68"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "263cccc1205323e523698df6c129f3d9b42dc0b282ba03a620949382dbc02f72",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-09"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 127,
+      "vectorId": "B0V7-IF-09-NULL-ACTUAL-NEG",
+      "vectorRoot": "19528f78bb4baad107b873a7af058d4410c419553e54b4258d637b6f690fddce"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "96b2c1041c916d26b94c91b75c713f9c8d9662b87fd27c62b35b8ace6f3b1db3",
+        "actualValue": 20,
+        "interfaceId": "B0V7-IF-10"
+      },
+      "mutationTarget": "V6-SOURCE-ARTIFACT-COUNT",
+      "operational": false,
+      "ordinal": 128,
+      "vectorId": "B0V7-IF-10-POS",
+      "vectorRoot": "79ebc7ff9d223d620b10cf3c269a227c229059cc6d6036eb64e2d4b1f82496cb"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "bfb627500ee9cd314c56588596a300b99a7bb79ca4a11f328aa82c52725bc3ea",
+        "actualValue": 20,
+        "interfaceId": "B0V7-IF-10"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 129,
+      "vectorId": "B0V7-IF-10-DIRECT-COPY-NEG",
+      "vectorRoot": "d5e6b749c8be246930325a727e3b36d21304e53c4f83bc5861de65f38d630f7a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "96b2c1041c916d26b94c91b75c713f9c8d9662b87fd27c62b35b8ace6f3b1db3",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-10"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 130,
+      "vectorId": "B0V7-IF-10-NULL-ACTUAL-NEG",
+      "vectorRoot": "caceb2921837866a07554cc18376423bb0b3b4c0ac6fb4e4aa89e65abf843fd2"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "27fd7edc09780cc3e0f150fa32d6c7743a29347bbece587f1c731606d7fa493c",
+        "actualValue": 2045,
+        "interfaceId": "B0V7-IF-11"
+      },
+      "mutationTarget": "V6-SOURCE-MEMBER-COUNT",
+      "operational": false,
+      "ordinal": 131,
+      "vectorId": "B0V7-IF-11-POS",
+      "vectorRoot": "335368ec63b37c14f51f4312b1a428acd277181da523d3a435f09e02c6fcfe0b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "eb6cc3f16e139a63bac99125720c67caf472f5a92488c944a56399be26cf06e5",
+        "actualValue": 2045,
+        "interfaceId": "B0V7-IF-11"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 132,
+      "vectorId": "B0V7-IF-11-DIRECT-COPY-NEG",
+      "vectorRoot": "aeaa8b576de6d372c313a36b4d57aa86fbab9de93b6c71d805a703847426ddc1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "27fd7edc09780cc3e0f150fa32d6c7743a29347bbece587f1c731606d7fa493c",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-11"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 133,
+      "vectorId": "B0V7-IF-11-NULL-ACTUAL-NEG",
+      "vectorRoot": "7f5247831706e09be46042c284618e070b64e305f7b3d2aabdcfd2756a2e95d3"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "0a3bbb117d1905eb1a516d4198074f9deba466715115318ad96c02fe3f5c1e33",
+        "actualValue": 900,
+        "interfaceId": "B0V7-IF-12"
+      },
+      "mutationTarget": "V6-AUTHORITATIVE-BYTE-ATOM-COUNT",
+      "operational": false,
+      "ordinal": 134,
+      "vectorId": "B0V7-IF-12-POS",
+      "vectorRoot": "76155ee37c49ce14c2d71861ded24ff9210014579c0beaacec3af8f810bdb42c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "6e4d4bef4e68d862d48ace297b7d3afc5d62c1117a352f763bf05a134b2f109d",
+        "actualValue": 900,
+        "interfaceId": "B0V7-IF-12"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 135,
+      "vectorId": "B0V7-IF-12-DIRECT-COPY-NEG",
+      "vectorRoot": "a049a82675003c86eb610de334ba040412e77f657660bee400722967cacfcc65"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "0a3bbb117d1905eb1a516d4198074f9deba466715115318ad96c02fe3f5c1e33",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-12"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 136,
+      "vectorId": "B0V7-IF-12-NULL-ACTUAL-NEG",
+      "vectorRoot": "3e707026426516797ab1727d36b3bdbd1b4792809eb76343274564592e51ff22"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "eb82cf0b982114a1bc622984a49d68bd1451b51ad57dab0d2b865eab3f05a8f8",
+        "actualValue": 10727,
+        "interfaceId": "B0V7-IF-13"
+      },
+      "mutationTarget": "V6-ACTIVE-NAMED-USE-COUNT",
+      "operational": false,
+      "ordinal": 137,
+      "vectorId": "B0V7-IF-13-POS",
+      "vectorRoot": "811e445932d0f4ec20cd2c0cbb77672c325cef1e4d1c54e6d187437b7634762b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "96290be24b3a487ff4686bfa410bc1b45ae1a9437b982868feea0a536c312eba",
+        "actualValue": 10727,
+        "interfaceId": "B0V7-IF-13"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 138,
+      "vectorId": "B0V7-IF-13-DIRECT-COPY-NEG",
+      "vectorRoot": "fa17b6cff82f0baf58581454ba74ef262310202a124304e0bee9f07effe3ec43"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "eb82cf0b982114a1bc622984a49d68bd1451b51ad57dab0d2b865eab3f05a8f8",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-13"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 139,
+      "vectorId": "B0V7-IF-13-NULL-ACTUAL-NEG",
+      "vectorRoot": "e3d5d4b42b325896270dfaebfddab7d88321f724bec5f86193bb276a136d85ae"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "f0a130c8d80d6d7e14f6d7d64987769d3154c54154d4cb0d67c94fa6423f27bd",
+        "actualValue": 21,
+        "interfaceId": "B0V7-IF-14"
+      },
+      "mutationTarget": "V6-ROLE-COUNT",
+      "operational": false,
+      "ordinal": 140,
+      "vectorId": "B0V7-IF-14-POS",
+      "vectorRoot": "955358f08fc8b94a3c01b825274b564960cf7c80df57cd3ce66dff3ffba849af"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "3ff6cdad77cc083fc7363191f22779225fffb1e2c7bec303aee43ca07ae798aa",
+        "actualValue": 21,
+        "interfaceId": "B0V7-IF-14"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 141,
+      "vectorId": "B0V7-IF-14-DIRECT-COPY-NEG",
+      "vectorRoot": "65f66478cad2eafd03a166f2b0d2ab74a362efbf9098804602d0b370fb4b97ae"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "f0a130c8d80d6d7e14f6d7d64987769d3154c54154d4cb0d67c94fa6423f27bd",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-14"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 142,
+      "vectorId": "B0V7-IF-14-NULL-ACTUAL-NEG",
+      "vectorRoot": "7c08d299fee0911598dc8344aa8de1ceea784d06428e598599f921b83fdecce6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "175b7612bbc707da68b55b2234d65da390f9622fc07461acf71385095897fd37",
+        "actualValue": 36,
+        "interfaceId": "B0V7-IF-15"
+      },
+      "mutationTarget": "V6-HEAD-COUNT",
+      "operational": false,
+      "ordinal": 143,
+      "vectorId": "B0V7-IF-15-POS",
+      "vectorRoot": "c733348603a0bbd0092c716b8ab3d97d9f67d4e020b6be6bc988caf9181e2ddc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "aebc3cfec7282971875dba501c1b0905e32f4e5e98ea648fab68abf549ff02a5",
+        "actualValue": 36,
+        "interfaceId": "B0V7-IF-15"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 144,
+      "vectorId": "B0V7-IF-15-DIRECT-COPY-NEG",
+      "vectorRoot": "66cba2415088fb9c5eb56015554381114b4cce1104d5556781939372721c447b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "175b7612bbc707da68b55b2234d65da390f9622fc07461acf71385095897fd37",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-15"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 145,
+      "vectorId": "B0V7-IF-15-NULL-ACTUAL-NEG",
+      "vectorRoot": "9ba5991ea5b64c864a918cdb09ad6200c2f8ad6a997cbbef72cccfacfdca9f7e"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "af7566a9b7f6d49cda6f390b4e70c4892a29773e66e74f25e64e4d1a9efca4ee",
+        "actualValue": 94,
+        "interfaceId": "B0V7-IF-16"
+      },
+      "mutationTarget": "V6-MUTABLE-OBJECT-CLASS-COUNT",
+      "operational": false,
+      "ordinal": 146,
+      "vectorId": "B0V7-IF-16-POS",
+      "vectorRoot": "314ed5c91c80c89aeb28ba99b3a220bb6dec03bf1dd1ae08ddbb74436ca7f984"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "79015e0ddda6df190a7aab546775ada9322049bda6cc440c71e293ecb7dea81b",
+        "actualValue": 94,
+        "interfaceId": "B0V7-IF-16"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 147,
+      "vectorId": "B0V7-IF-16-DIRECT-COPY-NEG",
+      "vectorRoot": "cd5409f0eab46b305e0a9314d9f578c9fd93a7a06b7468086ce0ffe648101c9f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "af7566a9b7f6d49cda6f390b4e70c4892a29773e66e74f25e64e4d1a9efca4ee",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-16"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 148,
+      "vectorId": "B0V7-IF-16-NULL-ACTUAL-NEG",
+      "vectorRoot": "06f37894384d8e5cd39ac0a5226ee0c2435ac6142e93abfc70644e314b887e38"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "2b375d637751a3e7d0053d81ffe09abee54e7d19473fbbd021636612de984ebd",
+        "actualValue": 17,
+        "interfaceId": "B0V7-IF-17"
+      },
+      "mutationTarget": "V6-PRIOR-INTERFACE-COUNT",
+      "operational": false,
+      "ordinal": 149,
+      "vectorId": "B0V7-IF-17-POS",
+      "vectorRoot": "7a53055c897d46df127b0ee94826e141f45ee398d7eb0f26b9b314700e2ae670"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "4e822a7377cecb491c5bdf0f9ab7a30045195302c422b92808ba488771c5d34b",
+        "actualValue": 17,
+        "interfaceId": "B0V7-IF-17"
+      },
+      "mutationTarget": "DIRECT-EXPECTED-ROOT-COPY",
+      "operational": false,
+      "ordinal": 150,
+      "vectorId": "B0V7-IF-17-DIRECT-COPY-NEG",
+      "vectorRoot": "37ffd552ee88046e4ebbe61ee9cbd043f1d5ea22454068c1393cc8bb35aaa422"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "INTERFACE",
+      "input": {
+        "actualObservationRoot": "2b375d637751a3e7d0053d81ffe09abee54e7d19473fbbd021636612de984ebd",
+        "actualValue": null,
+        "interfaceId": "B0V7-IF-17"
+      },
+      "mutationTarget": "NULL-ACTUAL",
+      "operational": false,
+      "ordinal": 151,
+      "vectorId": "B0V7-IF-17-NULL-ACTUAL-NEG",
+      "vectorRoot": "18923732ed1e666fe7700c3cb1f73eb4ca9c2c1d24e7baf41f0cd89ec6e8fc6e"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "CAS-PROOF",
+      "input": {
+        "expectedProof": {
+          "completeScheduleCount": "155117520",
+          "crashCutStateActorCount": 492,
+          "crashViolationCount": 0,
+          "oneCommitScheduleCount": "155117520",
+          "outboxExactlyOnce": true,
+          "reachableStateCount": 279,
+          "responseLossReadback": "COMMITTED",
+          "twoCommitScheduleCount": "0",
+          "zeroCommitScheduleCount": "0"
+        }
+      },
+      "mutationTarget": "ALL-INTERLEAVINGS",
+      "operational": false,
+      "ordinal": 152,
+      "vectorId": "B0V7-CAS-EXHAUSTIVE-PROOF-POS",
+      "vectorRoot": "ea671c63f22a57c6a2f73764dc7c88ac591508266ab31d1eb44426c51e6925c4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "ALL-TYPED-GUARDS",
+      "operational": false,
+      "ordinal": 153,
+      "vectorId": "B0V7-CAS-GUARDS-POS",
+      "vectorRoot": "c7847d5ae4b11b339fe0ce5c5ff87214e3a3898ba03594719ed1b981f6646346"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": false,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "schemaValid",
+      "operational": false,
+      "ordinal": 154,
+      "vectorId": "B0V7-CAS-GUARD-SCHEMA-NEG",
+      "vectorRoot": "8991a2eb44606d7f5215ed884e06e2685fa9bea88806b2f99a8ce2d473a0eba5"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": false,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "authorityCurrent",
+      "operational": false,
+      "ordinal": 155,
+      "vectorId": "B0V7-CAS-GUARD-AUTHORITY-NEG",
+      "vectorRoot": "eb3612eeb6eed4c2ab4e6fe7123170a32415649facbe7a8d13e980ecfc59ddb0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "INVALID",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "validFrom",
+      "operational": false,
+      "ordinal": 156,
+      "vectorId": "B0V7-CAS-GUARD-TIME-TYPE-NEG",
+      "vectorRoot": "bcfb5fe8d6e8290b03b1ac6839f84cbc8cf32aa2b64d633d3da2eccde6997cbc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-30T12:00:00Z"
+        }
+      },
+      "mutationTarget": "validUntil",
+      "operational": false,
+      "ordinal": 157,
+      "vectorId": "B0V7-CAS-GUARD-TIME-UPPER-EQUALITY-NEG",
+      "vectorRoot": "59f90e44c5664325281cbb521bd8e9beda8c1b8a986db592367e1e11b5b950f4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-31T00:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "commitInstant",
+      "operational": false,
+      "ordinal": 158,
+      "vectorId": "B0V7-CAS-GUARD-TIME-EXPIRED-NEG",
+      "vectorRoot": "9823d5db2921d6a2bb4164a963b97d8b99a619eb3e1c9b6f6d4ebed2b948c6e8"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": true,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "revoked",
+      "operational": false,
+      "ordinal": 159,
+      "vectorId": "B0V7-CAS-GUARD-REVOKED-NEG",
+      "vectorRoot": "b12e55df8129d977464333b904eb703bfb6b2fd8141c09e61ea40034470ce1d2"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "0000000000000000000000000000000000000000000000000000000000000000",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "revocationHead",
+      "operational": false,
+      "ordinal": 160,
+      "vectorId": "B0V7-CAS-GUARD-REVOCATION-HEAD-NEG",
+      "vectorRoot": "af6566f299ef0a6da64309289e990764151e0265df50b0785142db92c3c30d77"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-STALE",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "expectedHead",
+      "operational": false,
+      "ordinal": 161,
+      "vectorId": "B0V7-CAS-GUARD-EXPECTED-HEAD-NEG",
+      "vectorRoot": "e420f686daa81a86ae3465d275772db37d75274640dee8a7f27ede3785fe59e0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "lowercase-attempt",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "attemptId",
+      "operational": false,
+      "ordinal": 162,
+      "vectorId": "B0V7-CAS-GUARD-ATTEMPT-ID-NEG",
+      "vectorRoot": "8616dc1906d98d3f7e9e78cef33995b8b1e84743f040d66bd44cf8360a277bef"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 0,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "proposedFence",
+      "operational": false,
+      "ordinal": 163,
+      "vectorId": "B0V7-CAS-GUARD-FENCE-NEG",
+      "vectorRoot": "74e37583dd58aa04120fd7ad388a96f2ba97688af60ab728b5da588d963a7d82"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "7",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "minimumRevision",
+      "operational": false,
+      "ordinal": 164,
+      "vectorId": "B0V7-CAS-GUARD-REVISION-EQUALITY-NEG",
+      "vectorRoot": "64cd0add62d42fc5a68b53168e593d29281e9d489abad38be4e0f7b78ad451c8"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": true,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "replayUsed",
+      "operational": false,
+      "ordinal": 165,
+      "vectorId": "B0V7-CAS-GUARD-REPLAY-NEG",
+      "vectorRoot": "11a8cf27956d803cae8ad7ee9611effd596c4c39f1b657315f8c0f62bf82ac84"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "INVALID",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "outputRoot",
+      "operational": false,
+      "ordinal": 166,
+      "vectorId": "B0V7-CAS-GUARD-OUTPUT-ROOT-NEG",
+      "vectorRoot": "e55b4d2a797a0389635083bacbeb25eabba986503c1e48f077fe3a241c41ff43"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "B0V7-CAS-EFFECT-A",
+          "envelopeValid": false,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "envelopeValid",
+      "operational": false,
+      "ordinal": 167,
+      "vectorId": "B0V7-CAS-GUARD-ENVELOPE-NEG",
+      "vectorRoot": "1aaffef6f81b1afa2615d419dc062ca107c4eb8fe6189ba2fabcd9d13a09f343"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-GUARD",
+      "input": {
+        "attempt": {
+          "attemptId": "B0V7-CAS-ATTEMPT-A",
+          "authorityCurrent": true,
+          "commitInstant": "2026-08-30T12:00:00Z",
+          "effectId": "lowercase-effect",
+          "envelopeValid": true,
+          "expectedHead": "HEAD-0",
+          "minimumRevision": "6",
+          "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+          "proposedFence": 1,
+          "replayUsed": false,
+          "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+          "revoked": false,
+          "schemaValid": true,
+          "validFrom": "2026-08-30T00:00:00Z",
+          "validUntil": "2026-08-31T00:00:00Z"
+        }
+      },
+      "mutationTarget": "effectId",
+      "operational": false,
+      "ordinal": 168,
+      "vectorId": "B0V7-CAS-GUARD-EFFECT-ID-NEG",
+      "vectorRoot": "0300c17623f620cdd091d8b3d1766f1a440f44bd6b8cd7c89473ae5da3e9299b"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "READ_HEAD",
+      "operational": false,
+      "ordinal": 169,
+      "vectorId": "B0V7-CAS-MISSING-STEP-01-NEG",
+      "vectorRoot": "8da169fa25a60e7ad09256e5f534fcb44314d97bb2eaf31d81be110752642c7d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "READ_SECURITY_UNIVERSE",
+      "operational": false,
+      "ordinal": 170,
+      "vectorId": "B0V7-CAS-MISSING-STEP-02-NEG",
+      "vectorRoot": "2fd7577de5f2402055e14e98420b542bb01bb347a0f0abc2f977b37f586a83d9"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "VALIDATE_SCHEMA",
+      "operational": false,
+      "ordinal": 171,
+      "vectorId": "B0V7-CAS-MISSING-STEP-03-NEG",
+      "vectorRoot": "8b96600b4f8de810810cc24faf38b5a713d1425b51e830090e6595ca3cb3936f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "VALIDATE_AUTHORITY",
+      "operational": false,
+      "ordinal": 172,
+      "vectorId": "B0V7-CAS-MISSING-STEP-04-NEG",
+      "vectorRoot": "6f8d3a9a35c0e9a1974b5c27b4a29d3251da0dff0718e7e0df8b8493cf482067"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "VALIDATE_TIME",
+      "operational": false,
+      "ordinal": 173,
+      "vectorId": "B0V7-CAS-MISSING-STEP-05-NEG",
+      "vectorRoot": "3b20b32abbec327eb7a58ac2c64cfedd8cff70f20283cf513cad495d7d6934a6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "VALIDATE_REVOCATION",
+      "operational": false,
+      "ordinal": 174,
+      "vectorId": "B0V7-CAS-MISSING-STEP-06-NEG",
+      "vectorRoot": "8d2c93449426b3c591fd2d1e34657bcc8adc39912f91c7ece0ab2dacd0596821"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "COMPARE_EXPECTED_HEAD",
+      "operational": false,
+      "ordinal": 175,
+      "vectorId": "B0V7-CAS-MISSING-STEP-07-NEG",
+      "vectorRoot": "74e49bb952998c8cfe8b4d9a3cfadb10bcdc999b4bd17b466b780d7c4dda3434"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "RESERVE_ATTEMPT",
+      "operational": false,
+      "ordinal": 176,
+      "vectorId": "B0V7-CAS-MISSING-STEP-08-NEG",
+      "vectorRoot": "8dd72aa711e88d59fd8ca54987a57cc79430bba2123f13f491bc1cb1850437f0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "ADVANCE_FENCE",
+      "operational": false,
+      "ordinal": 177,
+      "vectorId": "B0V7-CAS-MISSING-STEP-09-NEG",
+      "vectorRoot": "566a6184d5b7fe926ff540fd5d7da352514ef17a031b2a10bff595901e82c06c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "CONSUME_PERMIT",
+      "operational": false,
+      "ordinal": 178,
+      "vectorId": "B0V7-CAS-MISSING-STEP-10-NEG",
+      "vectorRoot": "58758c1cafdf29db1d73bfae902e56b0c4a1a384219721c7df3f17ac9ef57a4c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "STAGE_POINTER",
+      "operational": false,
+      "ordinal": 179,
+      "vectorId": "B0V7-CAS-MISSING-STEP-11-NEG",
+      "vectorRoot": "87027a46f03dbafc916937c0529464a914fb503ac28a61bda2665646e5e9bd32"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "STAGE_ACCEPTANCE",
+      "operational": false,
+      "ordinal": 180,
+      "vectorId": "B0V7-CAS-MISSING-STEP-12-NEG",
+      "vectorRoot": "a4770d4044de62ec6a0d461b834a11583e779c54c0ed6e42393a8472f7f47270"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "REVALIDATE_READ_SET",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "STAGE_OUTBOX",
+      "operational": false,
+      "ordinal": 181,
+      "vectorId": "B0V7-CAS-MISSING-STEP-13-NEG",
+      "vectorRoot": "03d4c6219baf052d1a0c492b43a7b77d05ccb9625a590c1ecd4165e8ac32b469"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "ATOMIC_COMMIT"
+        ]
+      },
+      "mutationTarget": "REVALIDATE_READ_SET",
+      "operational": false,
+      "ordinal": 182,
+      "vectorId": "B0V7-CAS-MISSING-STEP-14-NEG",
+      "vectorRoot": "15f4120040430ef3bbbb11c9a659fa03ead4d96d6d81275e4cdfa0c0c178ac28"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-ILLEGAL-TRACE",
+      "input": {
+        "steps": [
+          "READ_HEAD",
+          "READ_SECURITY_UNIVERSE",
+          "VALIDATE_SCHEMA",
+          "VALIDATE_AUTHORITY",
+          "VALIDATE_TIME",
+          "VALIDATE_REVOCATION",
+          "COMPARE_EXPECTED_HEAD",
+          "RESERVE_ATTEMPT",
+          "ADVANCE_FENCE",
+          "CONSUME_PERMIT",
+          "STAGE_POINTER",
+          "STAGE_ACCEPTANCE",
+          "STAGE_OUTBOX",
+          "REVALIDATE_READ_SET"
+        ]
+      },
+      "mutationTarget": "ATOMIC_COMMIT",
+      "operational": false,
+      "ordinal": 183,
+      "vectorId": "B0V7-CAS-MISSING-STEP-15-NEG",
+      "vectorRoot": "a3beb05746fdad4edf577616c073be55057594d7e673a20822508d5b9af77060"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "CAS-CRASH-CUT",
+      "input": {
+        "actor": "A",
+        "cut": 0,
+        "durableWritesByCrashedActor": 0
+      },
+      "mutationTarget": "A:0",
+      "operational": false,
+      "ordinal": 184,
+      "vectorId": "B0V7-CAS-CRASH-A-00-POS",
+      "vectorRoot": "7f473b5806ef2e2cbba95ca7b59fb147d3af1a868be9e1cf4ddc127dfb559034"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-CRASH-CUT",
+      "input": {
+        "actor": "A",
+        "cut": 0,
+        "durableWritesByCrashedActor": 1
+      },
+      "mutationTarget": "A:0:DURABLE-WRITE",
+      "operational": false,
+      "ordinal": 185,
+      "vectorId": "B0V7-CAS-CRASH-A-00-DURABLE-WRITE-NEG",
+      "vectorRoot": "4b14562ef4cd924897c9d6b018b9d30248b677f4de3b85b3c6c7f47d9cd278d6"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "PASS",
+      "family": "CAS-CRASH-CUT",
+      "input": {
+        "actor": "A",
+        "cut": 1,
+        "durableWritesByCrashedActor": 0
+      },
+      "mutationTarget": "A:1",
+      "operational": false,
+      "ordinal": 186,
+      "vectorId": "B0V7-CAS-CRASH-A-01-POS",
+      "vectorRoot": "cae36537dd982816eab95aba250f00427d5397ff112516d10ae2ecdec8ac6dbb"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "expected": "BLOCK",
+      "family": "CAS-CRASH-CUT",
+      "input": {
+        "actor": "A",
+        "cut": 1,
+        "durableWritesByCrashedActor": 1
+      },
+      "mutationTarget": "A:1:DURABLE-WRITE",
+      "operational": false,
+      "ordinal": 187,
+      "vectorId": "B0V7-CAS-CRASH-A-01-DURABLE-WRITE-NEG",
+      "vectorRoot": "c8d9fe6a0562cdf926de02efb8c02a732d07c83ae6a0d8cdf923c1c9ab3526b7"
+    }
+  ]
+}

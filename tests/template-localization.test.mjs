@@ -19,7 +19,7 @@ async function readSource(relativePath) {
 test("keeps every template status and action result localized", () => {
   assert.equal(templateViewStatuses.length, 7);
   assert.equal(templateSaveResultStatuses.length, 9);
-  assert.equal(templateSubmitResultStatuses.length, 17);
+  assert.equal(templateSubmitResultStatuses.length, 18);
   assert.equal(templateSyncResultStatuses.length, 13);
 
   for (const language of ["he", "en", "ar"]) {

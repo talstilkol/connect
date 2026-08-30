@@ -1,6 +1,6 @@
 # מגבלות WhatsApp ו־Rate Limiting
 
-תאריך אימות: 2026-08-16
+תאריך אימות: 2026-08-24
 
 Owner: **טל — מחקר ופיתוח**
 
@@ -561,12 +561,12 @@ Body parameters, ‏Dynamic URL parameter ו־Quick Reply payload אטום
 5xx או תשובת 2xx ללא `wamid` נחשבים תוצאה חיצונית לא ודאית; ה־Queue
 אינה שולחת אותם שוב אוטומטית.
 
-14.10.5 ה־Processor אינו מחובר עדיין ל־Worker. מקור Policy ו־Kill
-switch עמיד מחוברים, אך ללא Evidence חיה הם חוסמים שליחה. מסלול
+14.10.5 ה־Campaign וה־Bot processors מחוברים מקומית למסלול ה־Railway/
+BullMQ Worker. מקור Policy ו־Kill switch עמיד מחוברים, אך ללא Evidence
+חיה הם חוסמים שליחה. מסלול
 Operator מורשה להפעלה ולכיבוי של ה־Policy הושלם מקומית לפי סעיף
-14.12. לפני חיבור ה־Processor נדרשים ערכי Capacity חיים, מקור Retry
-evidence מאושר וראיות Sandbox של WABA. עד אז ה־Worker מזריק Processor
-מושבת ונכשל סגור.
+14.12. לפני הפעלה נדרשים ערכי Capacity חיים, מקור Retry evidence מאושר
+וראיות Sandbox של WABA. עד אז ה־Policy fail-closed חוסמת שליחה.
 
 14.11 ‏Provider Backoff/Cooldown מקומי:
 
@@ -602,10 +602,27 @@ Token או Provider payload.
 מסרב להחזיר כ־Idempotent Reservation שכבר קיבלה Settlement.
 
 14.11.6 ‏`MetaGraphTransport` קולט רק ערך `Retry-After` מספרי ובטווח
-של שנייה עד 24 שעות ואינו שומר את ה־Header הגולמי. עדיין חסרים חיבור
-הערך אל מקור Evidence חי, ‏Pair exponent מתמשך, ערכי Capacity חיים
-ו־WABA Sandbox; אלה נשארים `unknown/unavailable` עד חיבור החשבון
-המורשה.
+של שנייה עד 24 שעות ואינו שומר את ה־Header הגולמי. במסלול Bot,
+`130429` יוצר Sender cooldown רק עם הערך המדויק הזה; `131056` יוצר Pair
+cooldown לפי `4^X`, כאשר `X` נגזר ממספר ניסיון ה־Outbox העמיד. ה־Cooldown
+וה־Settlement נכתבים לפני Durable deferral, ולכן כשל כתיבה אינו חושף
+Retry נוסף.
+
+14.11.7 ‏Status webhook מסוג `failed` מחלץ רק קוד מספרי יחיד מתוך
+`errors`. הוא אינו שומר טקסט ספק ואינו שולח שוב Delivery שכבר התקבל.
+מאחר ש־Status payload אינו מספק בחוזה הנוכחי `Retry-After` מובנה או Pair
+exponent, הוא אינו ממציא Cooldown; ההודעה נסגרת טרמינלית והקוד התחום
+נמסר ל־Reconciler. עדיין חסרים ערכי Capacity חיים, Retry evidence מחשבון
+מורשה ו־WABA Sandbox; אלה נשארים `unknown/unavailable`.
+
+14.11.8 ‏PostgreSQL שומר עבור Bot reply גם Provenance בלתי־ניתן לשינוי
+המקשר את ה־Delivery claim ל־Service-reply reservation, ‏Settlement מסוג
+`provider-failed` ול־Cooldown המדויק. ‏Staging Producer קורא רק Event
+שהוא עדיין מצב ה־Delivery הפעיל, מאמת את ה־Digest ואת יחס
+`attemptedAt + retryAfterSeconds = retryAt`, ואז כותב Observation עבור
+130429/Sender או 131056/Pair. שם התרחיש ותוצאת בדיקה צפויה אינם מקור
+לעובדת ספק. הוכחה זו מקומית בלבד; ערכי החשבון החיים וה־WABA נשארים
+`unknown/unavailable` עד הרצה מורשית.
 
 14.12 מסלול Operator למדיניות שליחה:
 
@@ -649,7 +666,7 @@ Sandbox מורשה, Load test ותרגיל Kill switch.
 
 16.1 Metadata:
 
-16.1.1 `checkedAt`: ‏2026-08-16.
+16.1.1 `checkedAt`: ‏2026-08-24.
 
 16.1.2 `META_GRAPH_API_VERSION`: ‏`unknown/unavailable` עד החלטת
 גרסה והגדרת סביבת היעד.
@@ -711,5 +728,7 @@ Evidence חייב לקשור את המסמך והמצב החי ל־Commit, ‏Ar
 17.15 [WhatsApp Business Solution Terms — Last Modified March 6, 2026; accessed August 16, 2026](https://www.whatsapp.com/legal/business-solution-terms/).
 
 17.16 [Meta Terms for WhatsApp Business — Last Modified October 15, 2025; new terms effective September 23, 2026; accessed August 16, 2026](https://www.whatsapp.com/legal/meta-terms-whatsapp-business).
+
+17.17 [Meta official Postman — Debug Token; accessed August 24, 2026](https://www.postman.com/meta/whatsapp-business-platform/request/i1mz7w8/debug-token).
 
 17.17 [WhatsApp Business Messaging Policy — accessed August 16, 2026](https://whatsappbusiness.com/policy/).

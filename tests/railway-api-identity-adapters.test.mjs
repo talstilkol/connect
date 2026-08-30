@@ -42,6 +42,7 @@ test("builds both verifiers from one fail-closed configuration", async () => {
                     isAuthenticated: true,
                     tokenType: "session_token",
                     userId: "verified-user",
+                    orgId: "org_verified",
                   };
                 },
               };
@@ -70,7 +71,10 @@ test("builds both verifiers from one fail-closed configuration", async () => {
     await adapters.endUserSessionVerifier.verify(
       "header.payload.signature",
     ),
-    { externalUserId: "verified-user" },
+    {
+      externalUserId: "verified-user",
+      externalOrganizationId: "org_verified",
+    },
   );
   assert.deepEqual(calls.map(([name]) => name), [
     "jwks",

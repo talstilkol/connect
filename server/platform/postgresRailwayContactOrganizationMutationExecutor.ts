@@ -424,7 +424,7 @@ export function createPostgresRailwayContactOrganizationMutationExecutor(
         validateCommand(command);
 
         return await transactions.transaction(
-          { isolationLevel: "repeatable-read" },
+          { isolationLevel: "read-committed" },
           (transaction) => executeTransaction(transaction, command),
         );
       } catch (error) {

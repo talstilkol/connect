@@ -39,7 +39,28 @@ Credentials, ‏Tenant IDs או פרטי ספק.
 
 2.6.2 הפקודה מחזירה Exit code שאינו אפס כל עוד שער כלשהו חסום או
 דורש החלטה. אין לפרש יצירת JSON כהוכחת מוכנות; רק `status=ready`
-ויציאה מוצלחת מאשרים שכל 33 הבדיקות עברו.
+ויציאה מוצלחת מאשרים שכל 34 הבדיקות עברו.
+
+2.6.3 לפני Production Readiness, מפעיל ה־Release מריץ מאותו Environment
+שמכיל את ערך ה־Runtime:
+
+```bash
+npm run verify:bot-reply-staging-evidence
+```
+
+2.6.4 הפקודה קוראת את
+`.artifacts/bot-reply-staging-evidence.json` כקובץ מהימן, דורשת התאמה
+מלאה ל־`BOT_REPLY_STAGING_EVIDENCE_JSON`, ל־Release, ל־Commit ול־Artifact,
+ומדפיסה רק מספר תרחישים, גרסת Graph API, ‏Throughput ו־File digest.
+היא אינה מדפיסה מזהי Meta, תוכן הודעות או Credentials.
+
+2.6.5 לפני האימות, Evidence נוצר מ־Receipt מאושר לפי
+`docs/meta-bot-reply-staging-runner.md`. המחולל דורש נתיב מוחלט וכותב
+קובץ חדש בלבד:
+
+```bash
+npm run evidence:bot-reply-staging -- --receipt /absolute/path/to/receipt.json
+```
 
 2.7 לפני שמסווגים CI כ־Regression בודקים אם ה־Job התחיל בפועל.
 כאשר כל ה־Jobs מסתיימים ללא Step אחד, ללא Logs ובתוך שניות, אין
