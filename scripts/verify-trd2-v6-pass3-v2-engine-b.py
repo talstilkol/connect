@@ -75,12 +75,23 @@ def utf8_sorted(values):
 
 def validate_identity(value, schema):
     identity = schema["contentIdentity"]
+    if identity is None:
+        return
     id_key = identity["idKey"]
     root_key = identity["rootKey"]
-    body = {key: member for key, member in value.items() if key not in (id_key, root_key)}
+    if identity["mode"] == "EXCLUDE-IDENTITY-KEYS":
+        body = {key: member for key, member in value.items() if key not in (id_key, root_key)}
+    elif identity["mode"] == "BODY-PATH":
+        body = value
+        for segment in identity["bodyPath"]:
+            body = body[segment]
+    else:
+        fail(f'Engine B: unknown identity mode for {schema["schemaId"]}')
     expected_root = root_v6(identity["typeTag"], identity["schemaVersion"], body)
-    if value.get(root_key) != expected_root or value.get(id_key) != f'{identity["prefix"]}-{expected_root}':
+    if value.get(root_key) != expected_root:
         fail(f'Engine B: content identity mismatch for {schema["schemaId"]}')
+    if id_key is not None and value.get(id_key) != f'{identity["prefix"]}-{expected_root}':
+        fail(f'Engine B: content id mismatch for {schema["schemaId"]}')
 
 
 def validate_spec(value, spec, schemas, label):

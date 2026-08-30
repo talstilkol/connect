@@ -17,6 +17,11 @@ successor results. Their exact bytes may be read only as defect/source material.
 1.1.5 Repository=`PUBLIC`; development freeze=`ACTIVE`; Gate29=`BLOCKED`;
 accepted Requirements=`0/128`; Finding closure=`0/15`; review generations=`0/2`.
 
+1.1.6 The three uncommitted outputs first generated from toolchain commit
+`b3e2398` are rejected with zero credit. Independent Engine B exposed an
+unsupported `null`/`BODY-PATH` predecessor identity mode in its own validator;
+the outputs were removed from the worktree before the verifier fix was frozen.
+
 ## 1.2 Closed output boundary
 
 1.2.1 Pass 3 v2 may emit exactly these three already-predeclared v3 paths:
