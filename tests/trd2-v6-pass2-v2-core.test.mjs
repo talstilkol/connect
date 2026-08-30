@@ -132,6 +132,10 @@ test('Engine A and Engine B are separate implementations and worktree guards enu
     fs.readFileSync('scripts/create-trd2-v6-pass2-v2-candidate.mjs', 'utf8'), engineA, engineB,
     fs.readFileSync('scripts/verify-trd2-v6-pass2-v2-candidate.mjs', 'utf8'),
   ]) assert.match(source, /--untracked-files=all/);
+  const finalVerifier = fs.readFileSync('scripts/verify-trd2-v6-pass2-v2-candidate.mjs', 'utf8');
+  assert.match(finalVerifier, /decodeJsonPointer/);
+  assert.match(finalVerifier, /reconstructRequirementValue/);
+  assert.match(finalVerifier, /Runtime verifier differs from frozen toolchain/);
 });
 
 test('Pass 2 v2 toolchain uses no forbidden random source', () => {
