@@ -1891,3 +1891,19 @@
 1.138.5 verification=`3943/3943 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene PASS over 2301 working files and Git history;Source guardrails PASS;post-commit verifier COMMITTED-CLEAN`.
 
 1.138.6 claim limit=`PASS-1-LOCAL-MECHANICAL-EVIDENCE-ONLY`;Passes 2–6=`PENDING`;accepted Requirements=`0/128`;Finding closure=`0/15`;eligible review generations=`0/2`;Reconciliation/Definition Acceptance=`ABSENT`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
+
+## 1.139 TRD-2 v6 Pass 2 closed-schema and canonical-engine foundation
+
+1.139.1 Toolchain commits=`0b7bf7c7d8e4575078bc5768f0cba6a14dc2988d;314ff0d977fdadb2f494e50d5d25f5a930c84b24`;observed toolchain commit=`314ff0d977fdadb2f494e50d5d25f5a930c84b24`;Candidate commit=`8a08583b0adb4159a569ca32086769d2450199c7`;toolchain root=`a5f9e5ecf275f946000c4d31981477dc9fc8cb5cde2050f36ab6c745c1f24a43`.
+
+1.139.2 Closed Schema Registry raw SHA-256=`10139c0cef1833af183ca52a7e5c257c2ff9fb0e81952ee537f2348aebf1bd4b`;content root=`0d71281e231c525c6defd79059ec31da630cf4a851e41876331735982ef0ce1e`;physical size=`767522 bytes/12688 lines`;exact schema denominator=`53`.
+
+1.139.3 exact oracle denominator=`318=53 positive+53 unknown-field+53 missing-field+53 type-mismatch+53 const-mismatch+53 content-identity-mismatch`;fixtures bind canonical bytes,capture identity,digest,schema identity,expected terminal and expected record root.
+
+1.139.4 Engine A root=`e292bed9644ad392670bf54d03864b6b0a692da843c28c644525afc3c1f52c91`;Engine B root=`54e20099154d91867d889b15cf720cc7e71d14af1fb296fa7ab8a1f57feb00cc`;both returned `318/318` agreement,`0` mismatches and common outcome root=`d22a7e8ac01d325525732e88f582f889b409101bebbddce450f1f9e74cfc227c`.
+
+1.139.5 pre-freeze runtime audit found an order-sensitive Engine B worktree guard;the uncommitted Registry was discarded;the guard was changed to exact set equality;Regression and full gates passed;all outputs were regenerated from the corrected committed toolchain;no stale root was retained.
+
+1.139.6 verification=`3951/3951 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene and Source guardrails PASS;post-commit verifier COMMITTED-CLEAN`.
+
+1.139.7 claim limit=`PASS-2-LOCAL-SCHEMA/CANONICAL-MECHANICS-ONLY`;F002 independent closure=`0`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Passes 3–6 plus Reconciliation/Definition Acceptance=`PENDING/ABSENT`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.

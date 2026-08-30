@@ -31,8 +31,9 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 `COMPLETED-AS-LOCAL-CANDIDATE;EXTERNAL-BLOCKED`; ‏23/23 חברי Package
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
-1.2.6 שלב 6 — TRD-2 v6: `IN_PROGRESS;PASS-1-LOCAL-CANDIDATE-COMPLETE`;
-Passes 2–6, שתי Generations, ביקורות עצמאיות ו־Acceptance נשארים
+1.2.6 שלב 6 — TRD-2 v6:
+`IN_PROGRESS;PASSES-1-AND-2-LOCAL-CANDIDATES-COMPLETE`; Passes 3–6,
+שתי Generations, ביקורות עצמאיות ו־Acceptance נשארים
 `PENDING`. שלבים 7–10 מתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
 1.2.7 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
@@ -413,3 +414,59 @@ CAS ו־recovery; package assembly ו־Producer QA מלא.
 
 8.3.3 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`;
 אין מעבר לפיתוח מוצר ואין שינוי במוני Acceptance.
+
+# 9. חבילת ביצוע 8 — TRD-2 v6 Pass 2
+
+## 9.1 תוצאה מקומית
+
+9.1.1 Toolchain commits=
+`0b7bf7c7d8e4575078bc5768f0cba6a14dc2988d`,
+`314ff0d977fdadb2f494e50d5d25f5a930c84b24`; Candidate commit=
+`8a08583b0adb4159a569ca32086769d2450199c7`.
+
+9.1.2 Closed Schema Registry root=
+`0d71281e231c525c6defd79059ec31da630cf4a851e41876331735982ef0ce1e`;
+Toolchain root=
+`a5f9e5ecf275f946000c4d31981477dc9fc8cb5cde2050f36ab6c745c1f24a43`.
+
+9.1.3 הוגדרו `53/53` משפחות Record סגורות. לכל אחת schema יחיד,
+שדות וטיפוסים מלאים, additionalProperties=false, ‏ID/root constructors
+שאינם כוללים את שדות הזהות בעצמם ו־collection constructor נפרד.
+
+9.1.4 Corpus=`318=53 positive+265 single-fault mutations`; לכל Schema
+נבדקו unknown field, missing field, type mismatch, const mismatch ו־
+content-identity mismatch באמצעות bytes אמיתיים ו־expected terminal.
+
+9.1.5 Canonical Engine A=`Node.js`; Engine B=`Python stdlib`; שניהם
+החזירו `318/318`, ‏`0` mismatches ואותו outcome root=
+`d22a7e8ac01d325525732e88f582f889b409101bebbddce450f1f9e74cfc227c`.
+
+9.1.6 Engine A report root=
+`e292bed9644ad392670bf54d03864b6b0a692da843c28c644525afc3c1f52c91`;
+Engine B report root=
+`54e20099154d91867d889b15cf720cc7e71d14af1fb296fa7ab8a1f57feb00cc`.
+
+9.1.7 בדיקות סיום=`3951/3951`; TypeScript PASS; ESLint=`0 errors,
+28 historical warnings`; Secret hygiene ו־Source guardrails PASS;
+אימות לאחר Commit=`COMMITTED-CLEAN`.
+
+## 9.2 תיקון שנמצא לפני הקיבוע
+
+9.2.1 Engine B guard הניח תחילה סדר נתיבים מסוים מ־Git. התוצר המקומי
+הלא־מקובע נמחק, ה־guard תוקן להשוואת Set מדויקת, Regression נוסף,
+הכלי קובע מחדש וכל שלושת פלטי Pass 2 הופקו מחדש מה־Commit המתוקן.
+
+## 9.3 גבול הטענה והמשך
+
+9.3.1 Pass 2=`COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED`; זהו מענה מכני
+ל־F002 בלבד, לא closure עצמאי ולא הוכחת הסמנטיקה של הרשומות.
+
+9.3.2 accepted Requirements=`0/128`; Finding closure=`0/15`;
+review generations=`0/2`; Reconciliation ו־Definition Acceptance=
+`ABSENT`.
+
+9.3.3 העבודה המקומית הבאה היא Pass 3: ‏128 Clause ASTs, Review,
+MissingValue, Lifecycle, Retention, Backup/Restore, Public-flow ו־Severity
+state machines, עם transition denominator ו־safe terminals מלאים.
+
+9.3.4 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`.

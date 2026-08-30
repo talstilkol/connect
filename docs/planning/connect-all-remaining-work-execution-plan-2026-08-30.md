@@ -298,6 +298,17 @@ Finding closure=`0/15`; review generations=`0/2`; Reconciliation ו־
 Definition Acceptance=`ABSENT`; ‏Gate29=`BLOCKED`; development freeze=
 `ACTIVE`.
 
+7.6.6 Pass 2=`COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED`: הוגדרו `53`
+closed schemas ו־`318` exact oracle fixtures; שני canonical engines
+נפרדים הסכימו על `318/318` outcomes עם `0` mismatches.
+
+7.6.7 סטטוס 7.3.1=`CANONICAL-AND-CLOSED-SCHEMA-FOUNDATION-COMPLETE`;
+remaining Requirement schemas נשמרו בתוך Registry יחיד ללא short/long
+variants. השלמת F002 עדיין דורשת ביקורת עצמאית ו־Acceptance.
+
+7.6.8 המשימה הפעילה הבאה=`Pass 3`: השלמת 7.3.2–7.3.5 ברמת Clause
+ASTs ומכונות מצב לפני Graph או Vector generation; 7.3.6 נשאר External.
+
 # 8. שלב 7 — Master Control Sequence Successor
 
 ## 8.1 מה השלב אומר
