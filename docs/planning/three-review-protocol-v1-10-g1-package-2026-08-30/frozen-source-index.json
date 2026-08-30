@@ -1,0 +1,87 @@
+{
+  "artifactClass": "FROZEN-GIT-SOURCE-INDEX-PLANNING-ONLY",
+  "artifactId": "MPRR-V1-10-SOURCE-INDEX-2026-08-30-G1",
+  "repositoryVisibility": "PUBLIC",
+  "rows": [
+    {
+      "bytes": 3404,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-package-2026-08-30/subject.md",
+      "mode": 420,
+      "ordinal": 1,
+      "sha256": "35aadffd26dc4b7b19f02078dafec746b70c0ceecffe87a5f9a94a036fd55299"
+    },
+    {
+      "bytes": 4228,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-package-2026-08-30/normative-package-manifest.json",
+      "mode": 420,
+      "ordinal": 2,
+      "sha256": "7c495484acb39238b0906c169fe7b8cad0d728000e2f04a86dec56c66cafc133"
+    },
+    {
+      "bytes": 1885,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-package-2026-08-30/governance.json",
+      "mode": 420,
+      "ordinal": 3,
+      "sha256": "79f2e4dcafe165059059337f3eec681587561deffe0ac3b12b6428a7b7858b68"
+    },
+    {
+      "bytes": 2629,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-package-2026-08-30/external-evidence-contracts.json",
+      "mode": 420,
+      "ordinal": 4,
+      "sha256": "8ee6b404b5fa5ca471703c1b027e101b5a75ca1827e7e9e9fb9f4bb9b339f49c"
+    },
+    {
+      "bytes": 43880,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-package-2026-08-30/cas-recovery-contract.json",
+      "mode": 420,
+      "ordinal": 5,
+      "sha256": "a7ca338ede0af130e71b02ced60e92030a9cecc7444e971b761dddd7e9f0bc4a"
+    },
+    {
+      "bytes": 17818,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-package-2026-08-30/schemas.json",
+      "mode": 420,
+      "ordinal": 6,
+      "sha256": "8e46dea43394919b9f7f7bb7da1b0add9aa5a75e495457fd666e9019a6b08326"
+    },
+    {
+      "bytes": 30198,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-independent-hostile-review-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 7,
+      "sha256": "53236c9990599540f9a89adea30d098618e1ddf830499984f58e93ea53e2a3ca"
+    },
+    {
+      "bytes": 19560,
+      "logicalPath": "docs/planning/three-review-protocol-v1-9-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 8,
+      "sha256": "fd8cf6bebd6006f5fbe632a0b53051083ed2945111a82dd373ddfe07a48f6be4"
+    },
+    {
+      "bytes": 3338,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-atomic-package-manifest-2026-08-30.json",
+      "mode": 420,
+      "ordinal": 9,
+      "sha256": "84238033bf3e603c92f28897ad4c1ea3af883cae4b18ac1192d82d6f21eeae2d"
+    },
+    {
+      "bytes": 35498,
+      "logicalPath": "docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 10,
+      "sha256": "aba0983bb836692bac038fa71633201ae772a07cb4ee7694988121f8f20089ec"
+    },
+    {
+      "bytes": 58260,
+      "logicalPath": "scripts/b0-v8-core.mjs",
+      "mode": 420,
+      "ordinal": 11,
+      "sha256": "b86b475716450ecaa2b992b4c610ae23bc750191973326ab66f689c97b59a478"
+    }
+  ],
+  "schemaVersion": "MPRR-V1-10-SOURCE-INDEX-V1",
+  "sourceCount": 11,
+  "sourceSetRoot": "f9de71055ff476ad1e0ddcc00367bbf524053f6193c58740997ec1c52e64eaa7"
+}
