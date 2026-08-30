@@ -110,19 +110,24 @@ Verifier חוזר עבר, אך המועמד אינו Accepted וחסמי 3.3 נ�
 
 4.2.1 B0 v7 נדחה; `14/14` Findings פתוחים: `P0=10`, ‏`P1=4`; ‏B0=`ABSENT`.
 
+4.2.2 B0 v8 נבנה כ־Immutable local Candidate: `14/14` Controls
+מומשו מקומית, `14/14` Mutations נחסמו ושני Cross-runtime Readers עברו.
+זהו QA של אותו Producer: independent Closure=`0/14`, ‏B0=`ABSENT`,
+‏Acceptance=`0` ו־Gate29=`BLOCKED`.
+
 ## 4.3 משימות
 
-4.3.1 לבנות v8 בלתי־משתנה ולא לערוך את v7.
+4.3.1 לבנות v8 בלתי־משתנה ולא לערוך את v7. Status=`COMPLETED-AS-CANDIDATE`.
 
-4.3.2 לתקן Path confinement, Symlink rejection, closed schemas ו־canonical serialization.
+4.3.2 לתקן Path confinement, Symlink rejection, closed schemas ו־canonical serialization. Status=`COMPLETED-LOCAL-CONTROL`.
 
 4.3.3 להפריד בין סמכויות לוגיות במנגנון הבקרה. Tal נשאר Owner יחיד של העבודה, אך אינו רשאי לטעון שביקורת עצמית היא ביקורת עצמאית; אם Gate דורש Reviewer עצמאי, הוא נשאר חסום עד Evidence חיצוני אמיתי.
 
-4.3.4 להגדיר CAS, replay, response loss, outbox ו־recovery כמעבר מצב אטומי אמיתי ולא כ־Boolean נטען.
+4.3.4 להגדיר CAS, replay, response loss, outbox ו־recovery כמעבר מצב אטומי אמיתי ולא כ־Boolean נטען. Status=`COMPLETED-REFERENCE-REDUCER;DURABLE-ADAPTER-EVIDENCE-PENDING`.
 
-4.3.5 ליצור mutation corpus שמפיל כל החלשה של Visibility, Authority, Recovery, Acceptance או Permit.
+4.3.5 ליצור mutation corpus שמפיל כל החלשה של Visibility, Authority, Recovery, Acceptance או Permit. Status=`COMPLETED-14-OF-14-LOCAL`.
 
-4.3.6 להריץ Producer QA ושני Readers; לאחר מכן ביקורת עצמאית שאינה משתמשת בתוצאות ה־Producer כסמכות.
+4.3.6 להריץ Producer QA ושני Readers; לאחר מכן ביקורת עצמאית שאינה משתמשת בתוצאות ה־Producer כסמכות. Status=`PRODUCER-QA-AND-TWO-CROSS-RUNTIME-READERS-PASS;INDEPENDENT-REVIEW-PENDING`.
 
 ## 4.4 מה צריך מ־Tal
 

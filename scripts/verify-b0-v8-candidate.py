@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import stat
+import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -149,6 +150,34 @@ def read_json(repository_root: Path, logical_path: str, max_bytes_exclusive: int
     return value, data
 
 
+def read_git_blob_at_commit(repository_root: Path, commit_oid: str, logical_path: str, max_bytes_exclusive: int) -> tuple[bytes, int]:
+    assert_repo_path(logical_path)
+    tree = subprocess.run(
+        ["git", "ls-tree", "-z", "--full-tree", commit_oid, "--", logical_path],
+        cwd=repository_root,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    entries = [entry for entry in tree.stdout.split(b"\0") if entry]
+    if len(entries) != 1:
+        fail(f"Git source lookup must resolve exactly one entry: {logical_path}")
+    metadata, observed_path = entries[0].split(b"\t", 1)
+    mode, object_type, object_oid = metadata.decode("ascii").split(" ")
+    if mode not in ("100644", "100755") or object_type != "blob" or observed_path.decode("utf-8") != logical_path:
+        fail(f"Git source is not an exact regular blob: {logical_path}")
+    blob = subprocess.run(
+        ["git", "cat-file", "blob", object_oid],
+        cwd=repository_root,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).stdout
+    if len(blob) >= max_bytes_exclusive:
+        fail(f"Git source exceeds byte limit: {logical_path}")
+    return blob, int(mode[-3:], 8)
+
+
 def validate_manifest(repository_root: Path, manifest: dict[str, Any]) -> None:
     assert_exact_keys(manifest, ["artifactClass", "artifactId", "generatedAt", "maxMemberBytesExclusive", "maxTotalBytesInclusive", "memberCount", "members", "packageContentRoot", "packageId", "repositoryVisibility", "schemaVersion", "sourceCommit", "totalBytes"], "manifest")
     if manifest["repositoryVisibility"] != "PUBLIC" or manifest["schemaVersion"] != "CONNECT-B0-V8-PACKAGE-MANIFEST-V1":
@@ -168,7 +197,10 @@ def validate_manifest(repository_root: Path, manifest: dict[str, Any]) -> None:
         paths.add(member["logicalPath"])
         hashes.add(member["sha256"])
         roles.add(member["role"])
-        data, _ = read_regular_no_follow(repository_root, member["logicalPath"], manifest["maxMemberBytesExclusive"])
+        if member["logicalPath"].startswith(("scripts/", "tests/")):
+            data, _ = read_git_blob_at_commit(repository_root, manifest["sourceCommit"], member["logicalPath"], manifest["maxMemberBytesExclusive"])
+        else:
+            data, _ = read_regular_no_follow(repository_root, member["logicalPath"], manifest["maxMemberBytesExclusive"])
         if len(data) != member["bytes"] or sha256_bytes(data) != member["sha256"]:
             fail(f"manifest member drift: {member['logicalPath']}")
         total += member["bytes"]
@@ -227,7 +259,7 @@ def validate_against_schema(value: dict[str, Any], schemas: dict[str, dict[str, 
             fail(f"{label}: forbidden null")
 
 
-def validate_source_index(repository_root: Path, source_index: dict[str, Any], schemas: dict[str, dict[str, Any]]) -> None:
+def validate_source_index(repository_root: Path, source_index: dict[str, Any], schemas: dict[str, dict[str, Any]], source_commit: str) -> None:
     validate_against_schema(source_index, schemas, "B0V8-SOURCE-INDEX", "sourceIndex")
     rows = source_index["sourceRows"]
     if source_index["repositoryVisibility"] != "PUBLIC" or source_index["sourceCount"] != len(rows) or len(rows) < 9:
@@ -240,8 +272,8 @@ def validate_source_index(repository_root: Path, source_index: dict[str, Any], s
             fail("source row order/uniqueness mismatch")
         paths.add(row["logicalPath"])
         hashes.add(row["sha256"])
-        data, observed = read_regular_no_follow(repository_root, row["logicalPath"], 50 * 1024 * 1024)
-        if len(data) != row["bytes"] or sha256_bytes(data) != row["sha256"] or stat.S_IMODE(observed.st_mode) != row["mode"]:
+        data, observed_mode = read_git_blob_at_commit(repository_root, source_commit, row["logicalPath"], 50 * 1024 * 1024)
+        if len(data) != row["bytes"] or sha256_bytes(data) != row["sha256"] or observed_mode != row["mode"]:
             fail(f"source drift: {row['logicalPath']}")
     if content_root("CONNECT-B0-V8-FROZEN-SOURCE-SET-V1", rows) != source_index["sourceSetRoot"]:
         fail("source set root mismatch")
@@ -287,7 +319,7 @@ def main() -> None:
     source_index, _ = read_json(repository_root, PATHS["source_index"])
     crosswalk, _ = read_json(repository_root, PATHS["crosswalk"])
     corpus, _ = read_json(repository_root, PATHS["corpus"])
-    validate_source_index(repository_root, source_index, schemas)
+    validate_source_index(repository_root, source_index, schemas, manifest["sourceCommit"])
     validate_crosswalk(crosswalk, schemas)
     validate_corpus(corpus, schemas)
     reader_member = next((member for member in manifest["members"] if member["role"] == "B0V8-PYTHON-STRUCTURAL-READER"), None)

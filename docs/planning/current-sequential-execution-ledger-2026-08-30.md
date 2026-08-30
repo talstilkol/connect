@@ -18,13 +18,16 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 
 1.2.2 שלב 2 — Discovery Cutoff ומקורות: `IN_PROGRESS`.
 
-1.2.3 שלבים 3–10 — חבילות יסוד ותכנון Accepted: `PENDING`; כל אחת
+1.2.3 שלב 3 — B0 Successor: `IN_PROGRESS`; חבילת v8 מקומית נבנתה
+ונבדקה, אך Closure חיצוני ו־Acceptance עדיין חסומים.
+
+1.2.4 שלבים 4–10 — יתר חבילות היסוד ותכנון Accepted: `PENDING`; כל אחת
 מתחילה רק לאחר קודמותיה או Dependency מפורש שמאפשר מקביליות.
 
-1.2.4 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
+1.2.5 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
 השלמת חבילות היסוד ועד שטל ימסור קיבולת שבועית.
 
-1.2.5 שלבים 12–23 — חשבונות, פיתוח, Pilot, Production ושיפור:
+1.2.6 שלבים 12–23 — חשבונות, פיתוח, Pilot, Production ושיפור:
 `BLOCKED_BY_DEVELOPMENT_FREEZE_OR_EXTERNAL_EVIDENCE`.
 
 # 2. חבילת ביצוע 1 — פרסום בטוח
@@ -121,3 +124,53 @@ Producer. ה־Candidate אינו Accepted.
 3.3.2 רצף הביצוע נעצר רק אם נדרש Login של Tal, רכישה, אישור משפטי,
 שימוש מדויק באקראיות קריפטוגרפית, שינוי Production, מחיקה, Reviewer
 עצמאי או בחירה עסקית שאינה ניתנת להסקה מן הראיות.
+
+# 4. חבילת ביצוע 3 — B0 v8 Candidate
+
+## 4.1 תוצאה מקומית
+
+4.1.1 Toolchain commit=`e458970e81ca5d0cb092fbf590a98631d6358276`.
+
+4.1.2 Immutable Candidate commit=`047ce7d`; Reader evidence commit=
+`bac1081`.
+
+4.1.3 package content root=
+`5924a37e573bd7b921f319c98f5595b7ee634250e552f458284a163ba9e7653b`;
+members=`10/10`; frozen source rows=`9/9`.
+
+4.1.4 Local controls=`14/14`; deterministic hostile mutations blocked=
+`14/14`; unit tests=`9/9`.
+
+4.1.5 Reader A report root=
+`b6b7db75d8bc2067663d1e28f3b21619106c412d465f7fb58041ec084e339bfb`;
+Reader B report root=
+`9da3249f22478125e10a94db1325caf11c30dd2b7271e92c94d115686fa862af`.
+
+4.1.6 שתי הקריאות הן QA של אותו Producer, גם כאשר הן משתמשות בשתי
+שפות. הן אינן Evidence לביקורת עצמאית ואינן יוצרות Acceptance.
+
+## 4.2 הגנות שמומשו ב־Candidate
+
+4.2.1 Closed schemas ו־canonical JSON עם דחיית שדות לא ידועים,
+מספרים לא בטוחים ו־Unicode שאינו scalar.
+
+4.2.2 Path confinement עם בדיקת כל רכיב, דחיית Symlink ו־hard link,
+פתיחת no-follow, בדיקת inode/device/size ותקציב bytes.
+
+4.2.3 CAS/Permit/Replay/Response-loss/Outbox הוגדרו כמעבר מצב אחד
+עם ledgers לפי זהות, ולא כ־Boolean נטען.
+
+4.2.4 Recovery דורש 3 מתוך 5 Controllers שונים, שני Witnesses נפרדים,
+read-set מדויק ומעבר rotate/revoke/consume/head אחד.
+
+4.2.5 לא נבחר אלגוריתם חתימה, לא נוצר Key ולא הופקה אקראיות
+קריפטוגרפית. אישור נפרד לכל שימוש נשמר.
+
+## 4.3 חסמים שנשמרו
+
+4.3.1 independent closure=`0/14`; ‏B0=`ABSENT`; ‏Acceptance=`0`;
+‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`.
+
+4.3.2 חסרים Trusted time, Trust anchor וחתימות חיות, Evidence מאומת
+ל־PUBLIC remote, Durable adapters, Appointments נפרדים, Reviewer עצמאי
+ו־Predecessor behavior oracle מלא.

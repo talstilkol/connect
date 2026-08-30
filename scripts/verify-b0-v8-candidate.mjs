@@ -8,6 +8,7 @@ import {
   B0_V8_FINDINGS,
   applyPlanningCas,
   applyPlanningRecovery,
+  assertRepoRelativePath,
   canonical,
   contentRoot,
   evaluateAcceptanceGate,
@@ -21,6 +22,7 @@ import {
   readPlanningCasResult,
   readRegularFileNoFollow,
   runB0V8MutationCampaign,
+  sha256Bytes,
   validateB0V8Registry,
   validateClosedSchema,
   validateObjectAgainstClosedSchema,
@@ -48,13 +50,27 @@ function readJson(repositoryRoot, logicalPath, maxBytes = 25 * 1024 * 1024) {
   return { fact, value: JSON.parse(fact.bytes.toString('utf8')) };
 }
 
+function readGitBlobAtCommit(commitOid, logicalPath, maxBytesExclusive) {
+  assertRepoRelativePath(logicalPath);
+  const tree = spawnSync('git', ['ls-tree', '-z', '--full-tree', commitOid, '--', logicalPath], { cwd: process.cwd(), encoding: null, maxBuffer: 4 * 1024 * 1024 });
+  if (tree.status !== 0) throw new Error(`git ls-tree failed for ${logicalPath}: ${tree.stderr.toString('utf8').trim()}`);
+  const entries = tree.stdout.toString('utf8').split('\0').filter(Boolean);
+  if (entries.length !== 1) throw new Error(`Git source lookup must resolve exactly one entry: ${logicalPath}`);
+  const match = /^(100644|100755) blob ([0-9a-f]{40,64})\t(.+)$/.exec(entries[0]);
+  if (!match || match[3] !== logicalPath) throw new Error(`Git source is not an exact regular blob: ${logicalPath}`);
+  const blob = spawnSync('git', ['cat-file', 'blob', match[2]], { cwd: process.cwd(), encoding: null, maxBuffer: maxBytesExclusive });
+  if (blob.status !== 0) throw new Error(`git cat-file failed for ${logicalPath}: ${blob.stderr.toString('utf8').trim()}`);
+  if (blob.stdout.length >= maxBytesExclusive) throw new Error(`Git source exceeds exclusive byte limit: ${logicalPath}`);
+  return { logicalPath, bytes: blob.stdout, byteLength: blob.stdout.length, sha256: sha256Bytes(blob.stdout), mode: Number.parseInt(match[1].slice(-3), 8) };
+}
+
 function schemaById(registry, schemaId) {
   const schema = registry.schemaCatalog.find((candidate) => candidate.schemaId === schemaId);
   if (!schema) throw new Error(`missing schema ${schemaId}`);
   return schema;
 }
 
-function validateSourceIndex(repositoryRoot, registry, index) {
+function validateSourceIndex(registry, index, sourceCommit) {
   validateObjectAgainstClosedSchema(index, schemaById(registry, 'B0V8-SOURCE-INDEX'), 'sourceIndex');
   if (index.repositoryVisibility !== 'PUBLIC' || index.schemaVersion !== 'CONNECT-B0-V8-SOURCE-INDEX-V1') throw new Error('sourceIndex: invariant mismatch');
   if (!Array.isArray(index.sourceRows) || index.sourceRows.length !== index.sourceCount || index.sourceCount < 9) throw new Error('sourceIndex: count mismatch');
@@ -63,7 +79,7 @@ function validateSourceIndex(repositoryRoot, registry, index) {
     validateObjectAgainstClosedSchema(row, schemaById(registry, 'B0V8-SOURCE-ROW'), `sourceIndex.sourceRows[${position}]`);
     if (row.ordinal !== position + 1 || paths.has(row.logicalPath) || hashes.has(row.sha256)) throw new Error('sourceIndex: order or uniqueness failure');
     paths.add(row.logicalPath); hashes.add(row.sha256);
-    const observed = readRegularFileNoFollow(repositoryRoot, row.logicalPath, 50 * 1024 * 1024);
+    const observed = readGitBlobAtCommit(sourceCommit, row.logicalPath, 50 * 1024 * 1024);
     if (observed.sha256 !== row.sha256 || observed.byteLength !== row.bytes || observed.mode !== row.mode) throw new Error(`sourceIndex: source drift ${row.logicalPath}`);
   });
   if (contentRoot('CONNECT-B0-V8-FROZEN-SOURCE-SET-V1', index.sourceRows) !== index.sourceSetRoot) throw new Error('sourceIndex: sourceSetRoot mismatch');
@@ -101,7 +117,9 @@ function verifyCandidate() {
   const { value: manifest } = readJson(repositoryRoot, PATHS.manifest);
   validatePackageManifest(manifest);
   for (const member of manifest.members) {
-    const fact = readRegularFileNoFollow(repositoryRoot, member.logicalPath, manifest.maxMemberBytesExclusive);
+    const fact = member.logicalPath.startsWith('scripts/') || member.logicalPath.startsWith('tests/')
+      ? readGitBlobAtCommit(manifest.sourceCommit, member.logicalPath, manifest.maxMemberBytesExclusive)
+      : readRegularFileNoFollow(repositoryRoot, member.logicalPath, manifest.maxMemberBytesExclusive);
     if (fact.sha256 !== member.sha256 || fact.byteLength !== member.bytes) throw new Error(`manifest member drift: ${member.logicalPath}`);
   }
   const { value: registry } = readJson(repositoryRoot, PATHS.registry);
@@ -111,7 +129,7 @@ function verifyCandidate() {
   const { value: sourceIndex } = readJson(repositoryRoot, PATHS.sourceIndex);
   const { value: crosswalk } = readJson(repositoryRoot, PATHS.crosswalk);
   const { value: corpus } = readJson(repositoryRoot, PATHS.corpus);
-  validateSourceIndex(repositoryRoot, registry, sourceIndex);
+  validateSourceIndex(registry, sourceIndex, manifest.sourceCommit);
   validateCrosswalk(registry, crosswalk);
   validateCorpus(registry, corpus);
 
