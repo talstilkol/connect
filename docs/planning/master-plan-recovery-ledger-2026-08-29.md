@@ -1906,4 +1906,16 @@
 
 1.139.6 verification=`3951/3951 tests;TypeScript PASS;ESLint 0 errors/28 historical warnings;Secret hygiene and Source guardrails PASS;post-commit verifier COMMITTED-CLEAN`.
 
-1.139.7 claim limit=`PASS-2-LOCAL-SCHEMA/CANONICAL-MECHANICS-ONLY`;F002 independent closure=`0`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Passes 3–6 plus Reconciliation/Definition Acceptance=`PENDING/ABSENT`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
+1.139.7 superseded status=`REJECTED-LOCAL-CANDIDATE-AFTER-PRODUCER-SELF-REVIEW`;the roots remain immutable historical evidence but are forbidden as Pass 3 inputs;F002 independent closure=`0`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`.
+
+## 1.140 TRD-2 v6 Pass 2 v1 Producer self-review and restart
+
+1.140.1 Self-review path=`docs/planning/trd2-v6-pass2-v1-producer-self-review-2026-08-31.md`;subject root=`0d71281e231c525c6defd79059ec31da630cf4a851e41876331735982ef0ce1e`;verdict=`REJECT-PASS2-V1-AS-A-COMPLETE-CLOSED-SCHEMA-REGISTRY`.
+
+1.140.2 exact new denominator=`5 Findings=4 P0+1 P1`;seven actual v6 families inspected=`7/7 exact-key mismatch`;actual-positive schema corpus=`0`;Requirement mandatory fields absent=`4/5 content fields`.
+
+1.140.3 decisive defect=`318/318 dual-engine agreement was circular because all fixtures were generated from the simplified schemas;the corpus did not include committed v6 records;nested Object/Nullable/tagged-union schemas were unavailable`.
+
+1.140.4 recovery=`retain v1 bytes and roots;predeclare Output Registry v2;use new successor paths;add exact existing-record inventory and nested closed schemas;require two-engine actual-positive and mutation agreement;block Pass 3 until missing/extra=0`;silent substitution=`FORBIDDEN`.
+
+1.140.5 current state=`PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-NEXT`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.

@@ -32,8 +32,8 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
 1.2.6 שלב 6 — TRD-2 v6:
-`IN_PROGRESS;PASSES-1-AND-2-LOCAL-CANDIDATES-COMPLETE`; Passes 3–6,
-שתי Generations, ביקורות עצמאיות ו־Acceptance נשארים
+`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-NEXT`;
+Passes 3–6, שתי Generations, ביקורות עצמאיות ו־Acceptance נשארים
 `PENDING`. שלבים 7–10 מתחילים רק לאחר קודמותיהם או Dependency מפורש.
 
 1.2.7 שלב 11 — Atomic Task Registry וקיבולת Tal: `BLOCKED` עד
@@ -415,7 +415,7 @@ CAS ו־recovery; package assembly ו־Producer QA מלא.
 8.3.3 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`;
 אין מעבר לפיתוח מוצר ואין שינוי במוני Acceptance.
 
-# 9. חבילת ביצוע 8 — TRD-2 v6 Pass 2
+# 9. חבילת ביצוע 8 — TRD-2 v6 Pass 2 v1 — REJECTED
 
 ## 9.1 תוצאה מקומית
 
@@ -458,15 +458,28 @@ Engine B report root=
 
 ## 9.3 גבול הטענה והמשך
 
-9.3.1 Pass 2=`COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED`; זהו מענה מכני
-ל־F002 בלבד, לא closure עצמאי ולא הוכחת הסמנטיקה של הרשומות.
+9.3.1 ה־status הקודם `COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED` מבוטל
+בעקבות Self-review. המצב הקובע=`REJECTED-LOCAL-CANDIDATE;RESTART-V2`.
 
 9.3.2 accepted Requirements=`0/128`; Finding closure=`0/15`;
 review generations=`0/2`; Reconciliation ו־Definition Acceptance=
 `ABSENT`.
 
-9.3.3 העבודה המקומית הבאה היא Pass 3: ‏128 Clause ASTs, Review,
-MissingValue, Lifecycle, Retention, Backup/Restore, Public-flow ו־Severity
-state machines, עם transition denominator ו־safe terminals מלאים.
+9.3.3 העבודה המקומית הבאה היא Pass 2 v2: התאמה לכל הרשומות האמיתיות,
+Requirement בעל חמשת שדות החובה, nested/nullable DSL ו־actual-positive
+inventory. Pass 3 חסום עד השלמת v2.
 
 9.3.4 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; המאגר `PUBLIC`.
+
+## 9.4 Self-review ו־Restart
+
+9.4.1 Self-review path=
+`docs/planning/trd2-v6-pass2-v1-producer-self-review-2026-08-31.md`;
+Findings=`5=4 P0+1 P1`; כולם `OPEN` מקומית עד v2.
+
+9.4.2 שבע מתוך שבע משפחות v6 אמיתיות שנבדקו אינן תואמות exact-key
+ל־Schema v1; Actual-positive inventory=`0`; ארבעה מחמשת שדות Requirement
+חסרים.
+
+9.4.3 שלושת פלטי v1 נשמרים immutable כהיסטוריה שנדחתה. נדרש Output
+Path Registry v2 ונתיבים חדשים; silent substitution=`FORBIDDEN`.
