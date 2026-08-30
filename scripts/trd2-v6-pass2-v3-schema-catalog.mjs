@@ -26,6 +26,7 @@ const countInvariant = (arrayField, numberField) => ({ arrayField, kind: 'ARRAY-
 const notEqualInvariant = (left, right) => ({ kind: 'NOT-EQUAL-FIELDS', left, right });
 const lteInvariant = (left, right) => ({ kind: 'LTE-FIELDS', left, right });
 const subsetInvariant = (subsetField, supersetField) => ({ kind: 'SUBSET-ARRAY', subsetField, supersetField });
+const disjointInvariant = (left, right) => ({ kind: 'DISJOINT-ARRAYS', left, right });
 
 function define(family, properties, invariants = [], { topLevel = false, source = 'PASS-3-TO-6-OR-EXTERNAL-CONSTRUCTION' } = {}) {
   const idKey = topLevel ? 'artifactId' : 'recordId';
@@ -234,12 +235,18 @@ export const TRD2_V6_PASS2_V3_FUTURE_DEFINITIONS = Object.freeze([
   }),
   define('RETENTION-PLAN-V3', {
     appointmentRoot: s.bytes32(), authorityRoot: s.bytes32(), candidateIdentityRoots: roots(1, 1000000), cutoffInclusive: s.uint(1), dataClassId: s.string(1, 128), excludedActiveRoots: roots(0, 1000000), excludedHoldRoots: roots(0, 1000000), expectedLifecycleHead: s.bytes32(), expectedPolicyHead: s.bytes32(), expiresAt: s.uint(1), fence: s.uint(1), issuedAt: s.uint(1), planDigest: s.bytes32(), policyVersion: s.string(1, 128), providerAuthorizedRoots: roots(1, 1000000), providerConfirmedRoots: roots(1, 1000000),
-  }, [lteInvariant('issuedAt', 'expiresAt'), subsetInvariant('providerConfirmedRoots', 'providerAuthorizedRoots')]),
+  }, [
+    lteInvariant('issuedAt', 'expiresAt'),
+    subsetInvariant('providerAuthorizedRoots', 'candidateIdentityRoots'),
+    subsetInvariant('providerConfirmedRoots', 'providerAuthorizedRoots'),
+    disjointInvariant('candidateIdentityRoots', 'excludedActiveRoots'),
+    disjointInvariant('candidateIdentityRoots', 'excludedHoldRoots'),
+  ]),
   define('RETENTION-DELETE-RECEIPT-V3', {
     auditReadbackRoot: s.bytes32(), candidateIdentityRoots: roots(1, 1000000), commitReceiptRoot: s.bytes32(), expectedHead: s.bytes32(), fence: s.uint(1), planDigest: s.bytes32(), planRoot: s.bytes32(), prepareReceiptRoots: roots(1, 1024), providerConfirmedRoots: roots(1, 1000000), providerOutcomeRoots: roots(1, 1024), terminal: s.enumeration('COMMITTED', 'RETENTION-DELETE-BLOCKED', 'RETENTION-DELETE-PARTIAL-RECONCILIATION-REQUIRED', 'RETENTION-DELETE-UNKNOWN-RECONCILIATION-REQUIRED'),
   }, [subsetInvariant('providerConfirmedRoots', 'candidateIdentityRoots')]),
   define('BACKUP-EVIDENCE-V3', {
-    authorityRoot: s.bytes32(), capturedAt: s.uint(1), databaseSnapshotDigest: s.bytes32(), encryptionKeyVersionRoot: s.bytes32(), objectManifestDigest: s.bytes32(), objectMemberDigestRoots: roots(1, 1000000), providerReceiptRoots: roots(1, 1024), r2ConsistencyProofRoot: s.bytes32(), r2InventoryDigest: s.bytes32(), retentionWindowEnd: s.uint(1), retentionWindowStart: s.uint(1), sourceCohortRoot: s.bytes32(), windowObservationReceiptRoots: roots(2, 16),
+    authorityRoot: s.bytes32(), backupIdRoot: s.bytes32(), capturedAt: s.uint(1), databaseSnapshotDigest: s.bytes32(), encryptionKeyVersionRoot: s.bytes32(), objectManifestDigest: s.bytes32(), objectMemberDigestRoots: roots(1, 1000000), providerReceiptRoots: roots(1, 1024), r2ConsistencyProofRoot: s.bytes32(), r2InventoryDigest: s.bytes32(), retentionWindowEnd: s.uint(1), retentionWindowStart: s.uint(1), sourceCohortRoot: s.bytes32(), windowObservationReceiptRoots: roots(2, 16),
   }, [lteInvariant('retentionWindowStart', 'retentionWindowEnd')]),
   define('RESTORE-EVIDENCE-V3', {
     activationReceiptRoot: s.bytes32(), authorityRoot: s.bytes32(), backupEvidenceRoot: s.bytes32(), backupIdRoot: s.bytes32(), databaseSnapshotDigest: s.bytes32(), newRestoreIdentityRoot: s.bytes32(), objectManifestDigest: s.bytes32(), priorPrivacyObligationRoots: roots(0, 1000000), privacyReplayReceiptRoot: s.bytes32(), quarantineHead: s.bytes32(), r2ConsistencyProofRoot: s.bytes32(), redeletionReceiptRoots: roots(0, 1000000), retentionWindowProofRoot: s.bytes32(), sourceIdentityRoot: s.bytes32(),

@@ -41,8 +41,11 @@ test('Pass 2 v3 declares a complete actual and future schema universe', () => {
   assert.equal(value.schemas.filter(({ familyStatus }) => familyStatus === 'FUTURE-CONSTRUCTION').length, 57);
   assert.equal(value.actualPositiveCount, 391);
   assert.equal(value.futureConstructionCount, 57);
-  assert.equal(value.fixtureCount, 786);
+  assert.equal(value.fixtureCount, 789);
   assert.equal(value.referenceEdgeCount, 25);
+  assert.equal(value.invariantCount, 50);
+  assert.equal(value.invariantMutationCount, 46);
+  assert.equal(value.invariantStaticProofCount, 4);
 });
 
 test('all 30 planned JSON outputs have an exact builtin or declared top-level schema', () => {
@@ -67,7 +70,7 @@ test('future invariant mutations block at the semantic invariant terminal', () =
   const value = registry();
   const schemas = new Map(value.schemas.map((schema) => [schema.schemaId, schema]));
   const mutations = value.fixtures.filter(({ mutation }) => mutation.startsWith('INVARIANT-'));
-  assert.equal(mutations.length, 43);
+  assert.equal(mutations.length, 46);
   for (const fixture of mutations) {
     const outcome = evaluateV3Fixture(fixture, schemas.get(fixture.schemaId), schemas);
     assert.equal(outcome.observedStatus, 'BLOCK');
@@ -88,6 +91,16 @@ test('all 391 actual positives and 124 historical mutations retain exact v2 fixt
     assert.equal(source.bytesBase64, fixture.bytesBase64Chunks.join(''));
     assert.equal(source.schemaId, fixture.schemaId);
   }
+});
+
+test('Retention excludes active and legal-hold roots while Backup exposes an exact backup identity', () => {
+  const value = registry();
+  const retention = value.schemas.find(({ family }) => family === 'RETENTION-PLAN-V3');
+  const backup = value.schemas.find(({ family }) => family === 'BACKUP-EVIDENCE-V3');
+  assert.equal(Object.hasOwn(backup.rootSpec.properties, 'backupIdRoot'), true);
+  assert.equal(retention.invariants.some((invariant) => invariant.kind === 'SUBSET-ARRAY' && invariant.subsetField === 'providerAuthorizedRoots' && invariant.supersetField === 'candidateIdentityRoots'), true);
+  assert.equal(retention.invariants.some((invariant) => invariant.kind === 'DISJOINT-ARRAYS' && invariant.right === 'excludedActiveRoots'), true);
+  assert.equal(retention.invariants.some((invariant) => invariant.kind === 'DISJOINT-ARRAYS' && invariant.right === 'excludedHoldRoots'), true);
 });
 
 test('Ref is closed, typed, and rejects an unknown target', () => {

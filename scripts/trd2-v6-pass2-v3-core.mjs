@@ -59,7 +59,7 @@ export const TRD2_V6_PASS2_V3_DSL_KINDS = Object.freeze([
 ]);
 
 export const TRD2_V6_PASS2_V3_INVARIANT_KINDS = Object.freeze([
-  'ARRAY-LENGTH-EQUALS-FIELD', 'LTE-FIELDS', 'NOT-EQUAL-FIELDS', 'SUBSET-ARRAY',
+  'ARRAY-LENGTH-EQUALS-FIELD', 'DISJOINT-ARRAYS', 'LTE-FIELDS', 'NOT-EQUAL-FIELDS', 'SUBSET-ARRAY',
 ]);
 
 const SAFE_MAX = Number.MAX_SAFE_INTEGER;
@@ -210,6 +210,7 @@ function validateInvariantDefinition(invariant, rootSpec, label) {
   if (!plain(invariant) || !TRD2_V6_PASS2_V3_INVARIANT_KINDS.includes(invariant.kind)) throw new Error(`${label}: unknown invariant`);
   const keys = {
     'ARRAY-LENGTH-EQUALS-FIELD': ['arrayField', 'kind', 'numberField'],
+    'DISJOINT-ARRAYS': ['kind', 'left', 'right'],
     'LTE-FIELDS': ['kind', 'left', 'right'],
     'NOT-EQUAL-FIELDS': ['kind', 'left', 'right'],
     'SUBSET-ARRAY': ['kind', 'subsetField', 'supersetField'],
@@ -219,6 +220,7 @@ function validateInvariantDefinition(invariant, rootSpec, label) {
   for (const field of keys.filter((key) => key !== 'kind')) if (typeof invariant[field] !== 'string' || !Object.hasOwn(rootSpec.properties, invariant[field])) throw new Error(`${label}: missing field ${String(invariant[field])}`);
   if (invariant.kind === 'ARRAY-LENGTH-EQUALS-FIELD' && (rootSpec.properties[invariant.arrayField].kind !== 'Array' || !['UIntSafe', 'Const'].includes(rootSpec.properties[invariant.numberField].kind))) throw new Error(`${label}: incompatible count fields`);
   if (invariant.kind === 'LTE-FIELDS' && ![invariant.left, invariant.right].every((field) => rootSpec.properties[field].kind === 'UIntSafe')) throw new Error(`${label}: LTE requires UIntSafe fields`);
+  if (invariant.kind === 'DISJOINT-ARRAYS' && ![invariant.left, invariant.right].every((field) => rootSpec.properties[field].kind === 'Array')) throw new Error(`${label}: disjoint requires Array fields`);
   if (invariant.kind === 'SUBSET-ARRAY' && ![invariant.subsetField, invariant.supersetField].every((field) => rootSpec.properties[field].kind === 'Array')) throw new Error(`${label}: subset requires Array fields`);
 }
 
@@ -226,6 +228,10 @@ function validateInvariants(value, invariants, label) {
   for (const invariant of invariants) {
     let accepted = false;
     if (invariant.kind === 'ARRAY-LENGTH-EQUALS-FIELD') accepted = value[invariant.arrayField].length === value[invariant.numberField];
+    else if (invariant.kind === 'DISJOINT-ARRAYS') {
+      const right = new Set(value[invariant.right].map(canonicalV6));
+      accepted = value[invariant.left].every((member) => !right.has(canonicalV6(member)));
+    }
     else if (invariant.kind === 'NOT-EQUAL-FIELDS') accepted = canonicalV6(value[invariant.left]) !== canonicalV6(value[invariant.right]);
     else if (invariant.kind === 'LTE-FIELDS') accepted = value[invariant.left] <= value[invariant.right];
     else if (invariant.kind === 'SUBSET-ARRAY') {
@@ -384,6 +390,10 @@ function generateBySpec(spec, schemaById, actualSampleBySchemaId, label, stack) 
 function satisfyInvariants(record, schema, schemaById, actualSampleBySchemaId, label, stack) {
   for (const invariant of schema.invariants) {
     if (invariant.kind === 'ARRAY-LENGTH-EQUALS-FIELD') record[invariant.numberField] = record[invariant.arrayField].length;
+    else if (invariant.kind === 'DISJOINT-ARRAYS') {
+      const left = new Set(record[invariant.left].map(canonicalV6));
+      record[invariant.right] = record[invariant.right].filter((member) => !left.has(canonicalV6(member)));
+    }
     else if (invariant.kind === 'NOT-EQUAL-FIELDS' && canonicalV6(record[invariant.left]) === canonicalV6(record[invariant.right])) record[invariant.right] = generateBySpec(schema.rootSpec.properties[invariant.right], schemaById, actualSampleBySchemaId, `${label}.${invariant.right}.distinct`, stack);
     else if (invariant.kind === 'LTE-FIELDS' && record[invariant.left] > record[invariant.right]) record[invariant.right] = record[invariant.left];
     else if (invariant.kind === 'SUBSET-ARRAY') {
@@ -475,6 +485,13 @@ function mutateRoot(record, rootKey) {
 function invariantMutation(record, schema, invariant, ordinal) {
   const clone = structuredClone(record);
   if (invariant.kind === 'NOT-EQUAL-FIELDS') clone[invariant.right] = structuredClone(clone[invariant.left]);
+  else if (invariant.kind === 'DISJOINT-ARRAYS') {
+    const leftSpec = schema.rootSpec.properties[invariant.left];
+    const rightSpec = schema.rootSpec.properties[invariant.right];
+    if (clone[invariant.left].length > 0 && rightSpec.maxItems > 0) clone[invariant.right] = [structuredClone(clone[invariant.left][0])];
+    else if (clone[invariant.right].length > 0 && leftSpec.maxItems > 0) clone[invariant.left] = [structuredClone(clone[invariant.right][0])];
+    else return null;
+  }
   else if (invariant.kind === 'LTE-FIELDS') {
     const leftSpec = schema.rootSpec.properties[invariant.left];
     const rightSpec = schema.rootSpec.properties[invariant.right];
@@ -522,6 +539,31 @@ function futureFixtures(schemas, v2Registry) {
     }
   }
   return fixtures;
+}
+
+function invariantIsStaticallyImplied(schema, invariant) {
+  if (invariant.kind !== 'ARRAY-LENGTH-EQUALS-FIELD') return false;
+  const arraySpec = schema.rootSpec.properties[invariant.arrayField];
+  const numberSpec = schema.rootSpec.properties[invariant.numberField];
+  if (arraySpec.kind !== 'Array' || arraySpec.minItems !== arraySpec.maxItems) return false;
+  if (numberSpec.kind === 'Const') return numberSpec.value === arraySpec.minItems;
+  return numberSpec.kind === 'UIntSafe' && numberSpec.minimum === arraySpec.minItems && numberSpec.maximum === arraySpec.maxItems;
+}
+
+function invariantCoverage(schemas, fixtures) {
+  return schemas.filter(({ familyStatus }) => familyStatus === 'FUTURE-CONSTRUCTION').flatMap((schema) => schema.invariants.map((invariant, invariantIndex) => {
+    const mutation = `INVARIANT-${invariantIndex}-${invariant.kind}`;
+    const fixture = fixtures.find((candidate) => candidate.schemaId === schema.schemaId && candidate.fixtureClass === 'MUTATION' && candidate.mutation === mutation);
+    if (fixture === undefined && !invariantIsStaticallyImplied(schema, invariant)) throw new Error(`${schema.schemaId}.invariants[${invariantIndex}]: no hostile mutation or static proof`);
+    return {
+      fixtureId: fixture?.fixtureId ?? null,
+      fixtureRoot: fixture?.fixtureRoot ?? null,
+      invariantIndex,
+      invariantKind: invariant.kind,
+      proofMode: fixture === undefined ? 'STATIC-BOUNDS-IMPLY-INVARIANT' : 'HOSTILE-MUTATION-BLOCKED',
+      schemaId: schema.schemaId,
+    };
+  }));
 }
 
 function actualFixtures(v2Registry) {
@@ -578,6 +620,7 @@ export function makeClosedSchemaRegistryV3({ outputRegistry, provenance, v2Regis
   }
   const referenceEdges = validateReferenceGraph(schemas);
   const fixtures = [...actualFixtures(v2Registry), ...futureFixtures(schemas, v2Registry)];
+  const invariantCoverageRows = invariantCoverage(schemas, fixtures);
   const bindings = outputBindings(outputRegistry, schemas);
   const actualPositiveCount = fixtures.filter(({ fixtureClass }) => fixtureClass === 'ACTUAL-POSITIVE').length;
   const futureConstructionCount = fixtures.filter(({ fixtureClass }) => fixtureClass === 'FUTURE-CONSTRUCTION').length;
@@ -589,6 +632,7 @@ export function makeClosedSchemaRegistryV3({ outputRegistry, provenance, v2Regis
     actualPositiveCount,
     artifactClass: 'PLANNING-ONLY;LOCAL-CANDIDATE;NOT-ACCEPTANCE',
     builtinSchemaCount: BUILTIN_SCHEMA_IDS.length,
+    builtinSchemaIds: BUILTIN_SCHEMA_IDS,
     claimLimit: 'LOCAL-COMPLETE-SCHEMA-UNIVERSE-EVIDENCE;FUTURE-CONSTRUCTIONS-NOT-PRODUCTION-EVIDENCE',
     developmentFreeze: 'ACTIVE',
     dslProfile: { additionalProperties: false, canonicalJson: 'CONNECT-TRD2-V6-CANONICAL-JSON-V1', kinds: TRD2_V6_PASS2_V3_DSL_KINDS, recursiveClosedObjects: true, referenceCyclesAllowed: false, unionRule: 'EXACTLY-ONE-BRANCH' },
@@ -599,6 +643,11 @@ export function makeClosedSchemaRegistryV3({ outputRegistry, provenance, v2Regis
     futureConstructionCount,
     futureMutationCount,
     gate29: 'BLOCKED',
+    invariantCount: invariantCoverageRows.length,
+    invariantCoverage: invariantCoverageRows,
+    invariantCoverageRoot: rootV6('SCHEMA-INVARIANT-COVERAGE-COLLECTION-V3', 'CONNECT-TRD2-V6-SCHEMA-INVARIANT-COVERAGE-COLLECTION-V3', invariantCoverageRows),
+    invariantMutationCount: invariantCoverageRows.filter(({ proofMode }) => proofMode === 'HOSTILE-MUTATION-BLOCKED').length,
+    invariantStaticProofCount: invariantCoverageRows.filter(({ proofMode }) => proofMode === 'STATIC-BOUNDS-IMPLY-INVARIANT').length,
     outputBindingCount: bindings.length,
     outputBindingRoot: rootV6('OUTPUT-SCHEMA-BINDING-COLLECTION-V3', 'CONNECT-TRD2-V6-OUTPUT-SCHEMA-BINDING-COLLECTION-V3', bindings),
     outputBindings: bindings,
@@ -619,14 +668,19 @@ export function makeClosedSchemaRegistryV3({ outputRegistry, provenance, v2Regis
 export function validateClosedSchemaRegistryV3(registry) {
   assertClosedObject(registry, [
     'acceptance', 'actualMutationCount', 'actualPositiveCount', 'artifactClass', 'artifactId', 'artifactRoot',
-    'builtinSchemaCount', 'claimLimit', 'developmentFreeze', 'dslProfile', 'findingClosure', 'fixtureCollectionRoot',
-    'fixtureCount', 'fixtures', 'futureConstructionCount', 'futureMutationCount', 'gate29', 'outputBindingCount',
+    'builtinSchemaCount', 'builtinSchemaIds', 'claimLimit', 'developmentFreeze', 'dslProfile', 'findingClosure', 'fixtureCollectionRoot',
+    'fixtureCount', 'fixtures', 'futureConstructionCount', 'futureMutationCount', 'gate29', 'invariantCount',
+    'invariantCoverage', 'invariantCoverageRoot', 'invariantMutationCount', 'invariantStaticProofCount', 'outputBindingCount',
     'outputBindingRoot', 'outputBindings', 'provenance', 'referenceEdgeCount', 'referenceEdgeRoot', 'referenceEdges',
     'repositoryVisibility', 'reviewGenerations', 'schemaCount', 'schemaVersion', 'schemas', 'v2Disposition',
   ], 'closedSchemaRegistryV3');
   validateContentIdentity(registry, 'TRD2V6-CLOSED-SCHEMA-REGISTRY-V3', 'CLOSED-SCHEMA-REGISTRY-V3', registry.schemaVersion);
   if (registry.schemaVersion !== 'CONNECT-TRD2-V6-CLOSED-SCHEMA-REGISTRY-V3' || registry.repositoryVisibility !== 'PUBLIC' || registry.developmentFreeze !== 'ACTIVE' || registry.gate29 !== 'BLOCKED' || registry.acceptance !== 0 || registry.findingClosure !== '0/15' || registry.reviewGenerations !== '0/2') throw new Error('closedSchemaRegistryV3: safety boundary mismatch');
-  if (registry.schemaCount !== 82 || registry.schemas.length !== 82 || registry.actualPositiveCount !== 391 || registry.futureConstructionCount !== 57 || registry.outputBindingCount !== 30 || registry.builtinSchemaCount !== 2) throw new Error('closedSchemaRegistryV3: denominator mismatch');
+  if (registry.schemaCount !== 82 || registry.schemas.length !== 82 || registry.actualPositiveCount !== 391 || registry.actualMutationCount !== 124 || registry.futureConstructionCount !== 57 || registry.futureMutationCount !== 217 || registry.fixtureCount !== 789 || registry.outputBindingCount !== 30 || registry.builtinSchemaCount !== 2 || registry.referenceEdgeCount !== 25 || registry.invariantCount !== 50 || registry.invariantMutationCount !== 46 || registry.invariantStaticProofCount !== 4) throw new Error('closedSchemaRegistryV3: denominator mismatch');
+  assertExactArray(registry.builtinSchemaIds, BUILTIN_SCHEMA_IDS, 'closedSchemaRegistryV3.builtinSchemaIds');
+  assertClosedObject(registry.dslProfile, ['additionalProperties', 'canonicalJson', 'kinds', 'recursiveClosedObjects', 'referenceCyclesAllowed', 'unionRule'], 'closedSchemaRegistryV3.dslProfile');
+  if (registry.dslProfile.additionalProperties !== false || registry.dslProfile.canonicalJson !== 'CONNECT-TRD2-V6-CANONICAL-JSON-V1' || registry.dslProfile.recursiveClosedObjects !== true || registry.dslProfile.referenceCyclesAllowed !== false || registry.dslProfile.unionRule !== 'EXACTLY-ONE-BRANCH') throw new Error('closedSchemaRegistryV3: DSL profile mismatch');
+  assertExactArray(registry.dslProfile.kinds, TRD2_V6_PASS2_V3_DSL_KINDS, 'closedSchemaRegistryV3.dslProfile.kinds');
   const schemaById = new Map(registry.schemas.map((schema) => [schema.schemaId, schema]));
   if (schemaById.size !== registry.schemaCount) throw new Error('closedSchemaRegistryV3: duplicate schema');
   const schemaIds = new Set(schemaById.keys());
@@ -643,20 +697,30 @@ export function validateClosedSchemaRegistryV3(registry) {
   if (registry.referenceEdgeCount !== edges.length || canonicalV6(registry.referenceEdges) !== canonicalV6(edges) || registry.referenceEdgeRoot !== rootV6('SCHEMA-REFERENCE-EDGE-COLLECTION-V3', 'CONNECT-TRD2-V6-SCHEMA-REFERENCE-EDGE-COLLECTION-V3', edges)) throw new Error('closedSchemaRegistryV3: reference graph mismatch');
   if (registry.fixtures.length !== registry.fixtureCount) throw new Error('closedSchemaRegistryV3: fixture count mismatch');
   const classCounts = { actual: 0, actualMutation: 0, future: 0, futureMutation: 0 };
+  const fixtureIds = new Set();
   for (const fixture of registry.fixtures) {
     assertClosedObject(fixture, ['byteLength', 'bytesBase64Chunks', 'expectedContentRoot', 'expectedStatus', 'expectedTerminal', 'fixtureClass', 'fixtureId', 'fixtureRoot', 'mutation', 'schemaId', 'sha256', 'sourceFixtureId', 'sourceFixtureRoot', 'sourceLocator'], `fixture.${fixture.fixtureId}`);
     validateContentIdentity(fixture, 'TRD2V6-V3-FIXTURE', 'CANONICAL-SCHEMA-FIXTURE-V3', 'CONNECT-TRD2-V6-CANONICAL-SCHEMA-FIXTURE-V3', 'fixtureId', 'fixtureRoot');
+    if (fixtureIds.has(fixture.fixtureId)) throw new Error(`fixture.${fixture.fixtureId}: duplicate id`);
+    fixtureIds.add(fixture.fixtureId);
     if (!schemaById.has(fixture.schemaId)) throw new Error(`fixture.${fixture.fixtureId}: unknown schema`);
     const outcome = evaluateV3Fixture(fixture, schemaById.get(fixture.schemaId), schemaById);
     if (!outcome.matchesExpectation) throw new Error(`fixture.${fixture.fixtureId}: producer oracle mismatch; schema=${fixture.schemaId}; class=${fixture.fixtureClass}; mutation=${fixture.mutation}; expected=${fixture.expectedStatus}/${fixture.expectedTerminal}/${fixture.expectedContentRoot}; observed=${outcome.observedStatus}/${outcome.observedTerminal}/${outcome.contentRoot}`);
-    if (fixture.fixtureClass === 'ACTUAL-POSITIVE') classCounts.actual += 1;
-    else if (fixture.fixtureClass === 'FUTURE-CONSTRUCTION') classCounts.future += 1;
-    else if (fixture.fixtureClass === 'MUTATION' && fixture.sourceFixtureId !== null) classCounts.actualMutation += 1;
-    else if (fixture.fixtureClass === 'MUTATION' && fixture.sourceFixtureId === null) classCounts.futureMutation += 1;
+    if (fixture.fixtureClass === 'ACTUAL-POSITIVE' && fixture.mutation === 'NONE' && fixture.expectedStatus === 'PASS' && fixture.expectedTerminal === 'ACCEPT' && fixture.sourceFixtureId !== null && fixture.sourceFixtureRoot !== null && fixture.sourceLocator !== null) classCounts.actual += 1;
+    else if (fixture.fixtureClass === 'FUTURE-CONSTRUCTION' && fixture.mutation === 'NONE' && fixture.expectedStatus === 'PASS' && fixture.expectedTerminal === 'ACCEPT' && fixture.sourceFixtureId === null && fixture.sourceFixtureRoot === null && fixture.sourceLocator === null) classCounts.future += 1;
+    else if (fixture.fixtureClass === 'MUTATION' && fixture.mutation !== 'NONE' && fixture.expectedStatus === 'BLOCK' && fixture.expectedContentRoot === null && fixture.sourceFixtureId !== null && fixture.sourceFixtureRoot !== null && fixture.sourceLocator !== null) classCounts.actualMutation += 1;
+    else if (fixture.fixtureClass === 'MUTATION' && fixture.mutation !== 'NONE' && fixture.expectedStatus === 'BLOCK' && fixture.expectedContentRoot === null && fixture.sourceFixtureId === null && fixture.sourceFixtureRoot === null && fixture.sourceLocator === null) classCounts.futureMutation += 1;
     else throw new Error(`fixture.${fixture.fixtureId}: invalid class`);
   }
   if (classCounts.actual !== registry.actualPositiveCount || classCounts.actualMutation !== registry.actualMutationCount || classCounts.future !== registry.futureConstructionCount || classCounts.futureMutation !== registry.futureMutationCount) throw new Error('closedSchemaRegistryV3: fixture class mismatch');
   if (registry.fixtureCollectionRoot !== rootV6('CANONICAL-SCHEMA-FIXTURE-COLLECTION-V3', 'CONNECT-TRD2-V6-CANONICAL-SCHEMA-FIXTURE-COLLECTION-V3', registry.fixtures.map(({ fixtureRoot }) => fixtureRoot))) throw new Error('closedSchemaRegistryV3: fixture root mismatch');
+  for (const schema of registry.schemas) {
+    const positives = registry.fixtures.filter((fixture) => fixture.schemaId === schema.schemaId && fixture.fixtureClass === 'ACTUAL-POSITIVE').length;
+    const constructions = registry.fixtures.filter((fixture) => fixture.schemaId === schema.schemaId && fixture.fixtureClass === 'FUTURE-CONSTRUCTION').length;
+    if (positives !== schema.actualPositiveCount || constructions !== schema.constructionFixtureCount) throw new Error(`schema.${schema.schemaId}: per-schema fixture count mismatch`);
+  }
+  const expectedInvariantCoverage = invariantCoverage(registry.schemas, registry.fixtures);
+  if (registry.invariantCoverage.length !== registry.invariantCount || canonicalV6(registry.invariantCoverage) !== canonicalV6(expectedInvariantCoverage) || registry.invariantCoverageRoot !== rootV6('SCHEMA-INVARIANT-COVERAGE-COLLECTION-V3', 'CONNECT-TRD2-V6-SCHEMA-INVARIANT-COVERAGE-COLLECTION-V3', expectedInvariantCoverage)) throw new Error('closedSchemaRegistryV3: invariant coverage mismatch');
   if (registry.outputBindings.length !== registry.outputBindingCount || registry.outputBindingRoot !== rootV6('OUTPUT-SCHEMA-BINDING-COLLECTION-V3', 'CONNECT-TRD2-V6-OUTPUT-SCHEMA-BINDING-COLLECTION-V3', registry.outputBindings)) throw new Error('closedSchemaRegistryV3: output binding mismatch');
   const boundPaths = new Set();
   for (const row of registry.outputBindings) {
@@ -666,7 +730,9 @@ export function validateClosedSchemaRegistryV3(registry) {
     boundPaths.add(row.logicalPath);
     if (row.builtin !== BUILTIN_SCHEMA_IDS.includes(row.schemaId) || (!row.builtin && schemaById.get(row.schemaId)?.schemaRoot !== row.schemaRoot) || (row.builtin && row.schemaRoot !== null)) throw new Error(`outputBinding invalid: ${row.logicalPath}`);
   }
+  assertClosedObject(registry.v2Disposition, ['reusableForPass3', 'status', 'supersededPaths'], 'closedSchemaRegistryV3.v2Disposition');
   if (registry.v2Disposition.reusableForPass3 !== false || !registry.v2Disposition.status.startsWith('REJECTED-AS-COMPLETE-REGISTRY')) throw new Error('closedSchemaRegistryV3: v2 disposition');
+  assertExactArray(registry.v2Disposition.supersededPaths, TRD2_V6_PASS2_V2_PATHS, 'closedSchemaRegistryV3.v2Disposition.supersededPaths');
   return registry;
 }
 
@@ -697,7 +763,11 @@ export function validateCanonicalV3Report(report, registry) {
   assertClosedObject(report, ['actualMutationCount', 'actualPositiveCount', 'artifactId', 'artifactRoot', 'claimLimit', 'engineId', 'fixtureCollectionRoot', 'futureConstructionCount', 'futureMutationCount', 'implementation', 'mismatchCount', 'outcomeCount', 'outcomeRoot', 'outcomes', 'registryRoot', 'schemaVersion', 'sourceSha256', 'status'], `canonicalV3Report.${report.engineId}`);
   validateContentIdentity(report, 'TRD2V6-CANONICAL-V3-REPORT', 'CANONICAL-ENGINE-REPORT-V3', report.schemaVersion);
   if (report.schemaVersion !== 'CONNECT-TRD2-V6-CANONICAL-ENGINE-REPORT-V3' || report.registryRoot !== registry.artifactRoot || report.fixtureCollectionRoot !== registry.fixtureCollectionRoot || report.actualPositiveCount !== registry.actualPositiveCount || report.actualMutationCount !== registry.actualMutationCount || report.futureConstructionCount !== registry.futureConstructionCount || report.futureMutationCount !== registry.futureMutationCount || report.outcomeCount !== registry.fixtureCount || report.outcomes.length !== report.outcomeCount || !SHA256_RE.test(report.sourceSha256)) throw new Error(`canonicalV3Report.${report.engineId}: binding mismatch`);
-  for (const outcome of report.outcomes) assertClosedObject(outcome, ['contentRoot', 'expectedStatus', 'expectedTerminal', 'fixtureId', 'fixtureSha256', 'matchesExpectation', 'observedStatus', 'observedTerminal', 'schemaId'], `outcome.${outcome.fixtureId}`);
+  report.outcomes.forEach((outcome, index) => {
+    assertClosedObject(outcome, ['contentRoot', 'expectedStatus', 'expectedTerminal', 'fixtureId', 'fixtureSha256', 'matchesExpectation', 'observedStatus', 'observedTerminal', 'schemaId'], `outcome.${outcome.fixtureId}`);
+    const fixture = registry.fixtures[index];
+    if (outcome.fixtureId !== fixture.fixtureId || outcome.fixtureSha256 !== fixture.sha256 || outcome.schemaId !== fixture.schemaId || outcome.expectedStatus !== fixture.expectedStatus || outcome.expectedTerminal !== fixture.expectedTerminal || typeof outcome.matchesExpectation !== 'boolean') throw new Error(`outcome.${outcome.fixtureId}: fixture binding mismatch`);
+  });
   const mismatchCount = report.outcomes.filter(({ matchesExpectation }) => !matchesExpectation).length;
   if (mismatchCount !== report.mismatchCount || report.outcomeRoot !== rootV6('CANONICAL-V3-OUTCOME-COLLECTION', 'CONNECT-TRD2-V6-CANONICAL-V3-OUTCOME-COLLECTION-V1', report.outcomes) || report.status !== (mismatchCount === 0 ? 'PASS' : 'BLOCKED')) throw new Error(`canonicalV3Report.${report.engineId}: outcome mismatch`);
   return report;

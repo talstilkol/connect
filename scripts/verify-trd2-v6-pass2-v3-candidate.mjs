@@ -161,7 +161,9 @@ function verifyActualSources(registry, v2Registry) {
   const parsedCache = new Map();
   const actual = registry.fixtures.filter(({ fixtureClass }) => fixtureClass === 'ACTUAL-POSITIVE');
   if (actual.length !== 391) throw new Error(`actual source denominator ${actual.length}/391`);
-  for (const fixture of registry.fixtures.filter(({ sourceFixtureId }) => sourceFixtureId !== null)) {
+  const inherited = registry.fixtures.filter(({ sourceFixtureId }) => sourceFixtureId !== null);
+  if (inherited.length !== 515 || canonicalV6(inherited.map(({ sourceFixtureId }) => sourceFixtureId).sort()) !== canonicalV6([...v2ById.keys()].sort())) throw new Error(`v2 fixture lineage denominator/coverage mismatch: ${inherited.length}/515`);
+  for (const fixture of inherited) {
     const predecessor = v2ById.get(fixture.sourceFixtureId);
     if (predecessor === undefined || predecessor.fixtureRoot !== fixture.sourceFixtureRoot || predecessor.schemaId !== fixture.schemaId || predecessor.bytesBase64 !== fixture.bytesBase64Chunks.join('') || predecessor.sha256 !== fixture.sha256 || canonicalV6(predecessor.sourceLocator) !== canonicalV6(fixture.sourceLocator)) throw new Error(`v2 fixture lineage mismatch: ${fixture.fixtureId}`);
   }

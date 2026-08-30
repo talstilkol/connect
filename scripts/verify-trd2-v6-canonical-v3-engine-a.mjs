@@ -113,6 +113,10 @@ function invariants(record, schema) {
   for (const invariant of schema.invariants) {
     let accepted = false;
     if (invariant.kind === 'ARRAY-LENGTH-EQUALS-FIELD') accepted = record[invariant.arrayField].length === record[invariant.numberField];
+    else if (invariant.kind === 'DISJOINT-ARRAYS') {
+      const right = new Set(record[invariant.right].map(canonicalV6));
+      accepted = record[invariant.left].every((member) => !right.has(canonicalV6(member)));
+    }
     else if (invariant.kind === 'NOT-EQUAL-FIELDS') accepted = canonicalV6(record[invariant.left]) !== canonicalV6(record[invariant.right]);
     else if (invariant.kind === 'LTE-FIELDS') accepted = record[invariant.left] <= record[invariant.right];
     else if (invariant.kind === 'SUBSET-ARRAY') {

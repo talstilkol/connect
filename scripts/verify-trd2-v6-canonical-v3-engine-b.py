@@ -245,6 +245,9 @@ def validate_invariants(record, schema):
         accepted = False
         if kind == "ARRAY-LENGTH-EQUALS-FIELD":
             accepted = len(record[invariant["arrayField"]]) == record[invariant["numberField"]]
+        elif kind == "DISJOINT-ARRAYS":
+            right = {canonical(member) for member in record[invariant["right"]]}
+            accepted = all(canonical(member) not in right for member in record[invariant["left"]])
         elif kind == "NOT-EQUAL-FIELDS":
             accepted = canonical(record[invariant["left"]]) != canonical(record[invariant["right"]])
         elif kind == "LTE-FIELDS":
@@ -356,7 +359,7 @@ def main():
     part = int(argument.split("=", 1)[1])
     assert_worktree(part)
     registry = json.loads(Path(REGISTRY_PATH).read_text(encoding="utf-8"), object_pairs_hook=pairs_object)
-    if registry["schemaCount"] != 82 or registry["actualPositiveCount"] != 391 or registry["futureConstructionCount"] != 57 or registry["outputBindingCount"] != 30:
+    if registry["schemaCount"] != 82 or registry["actualPositiveCount"] != 391 or registry["actualMutationCount"] != 124 or registry["futureConstructionCount"] != 57 or registry["futureMutationCount"] != 217 or registry["fixtureCount"] != 789 or registry["invariantCount"] != 50 or registry["invariantMutationCount"] != 46 or registry["invariantStaticProofCount"] != 4 or registry["outputBindingCount"] != 30:
         raise RuntimeError("Engine B v3 registry denominator mismatch")
     source_sha256 = sha256_bytes(Path(SCRIPT_PATH).read_bytes())
     frozen = next((row for row in registry["provenance"]["toolchain"] if row["logicalPath"] == SCRIPT_PATH), None)
