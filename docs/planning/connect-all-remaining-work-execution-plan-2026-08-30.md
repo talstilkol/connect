@@ -76,6 +76,10 @@
 3.1.2 מצב ביצוע=`IN_PROGRESS`; תצפית ה־Preflight נמצאת ב־
 [Discovery Cutoff preflight](discovery-cutoff-preflight-observation-2026-08-30.md).
 
+3.1.3 Candidate מכני נוצר על observed commit `0f0b0e9`, עם Package
+root `a790725dc20b73094f7317503850641bcfea748d56bea480500c00ee87a97c17`.
+Verifier חוזר עבר, אך המועמד אינו Accepted וחסמי 3.3 נשארים פתוחים.
+
 ## 3.2 משימות
 
 3.2.1 להפיק Discovery Cutoff עם HEAD, ‏tracked, modified, staged, untracked, ignored, refs ונתיבי מקור שסופקו.
