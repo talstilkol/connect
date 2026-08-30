@@ -326,6 +326,19 @@ verifier=`COMMITTED-CLEAN`.
 הדרישות, שבע משפחות State machine וכיסוי מלא של כל State/Event/Terminal.
 ה־Candidate עדיין מעניק `0` Closure ו־`0` Acceptance.
 
+7.6.13 Producer self-review מאוחר של Pass 2 v2 מצא `1 P0`: ‏`25`
+ה־Schemas מכסים היטב רשומות קיימות, אך `FUTURE-CONSTRUCTION schemas=0`.
+לכן אין Schema קפוא ל־Subject, Clause AST, State machine, Graph, Vector,
+Package או Acceptance records.
+
+7.6.14 Pass 2 v2=`REJECTED-AS-COMPLETE-REGISTRY`; ה־bytes נשמרים
+כהיסטוריה, `515/515` נשאר Evidence לתחום הקיים בלבד, ו־Pass 3 נעצר
+לפני יצירת כל אחד משלושת הפלטים שלו.
+
+7.6.15 המשימה הפעילה=`Pass 2 v3`: Output Registry successor חדש,
+איחוד `25` ה־Schemas האמיתיים עם קטלוג סגור לכל משפחות Passes 3–6,
+מפת Output→Schema, Construction fixtures, mutations ושני engines.
+
 # 8. שלב 7 — Master Control Sequence Successor
 
 ## 8.1 מה השלב אומר
