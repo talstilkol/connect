@@ -101,6 +101,12 @@ to the stale head/result it invalidates.
 declared sole or external producer boundary. Missing paths remain blocking and
 cannot be converted to PASS by a count alone.
 
+1.5.7 The graph cannot contain a `PRODUCED` node bound to its own final
+`artifactRoot`, because that would make the artifact identity self-referential.
+Its family is represented inside the graph by the exact frozen Schema
+declaration and a typed blocked construction node. Pass 6 binds the final raw
+graph root from outside the graph in the non-self-referential Package Manifest.
+
 ## 1.6 Cycle and reachability rules
 
 1.6.1 The causal dependency subgraph must be acyclic after excluding the
