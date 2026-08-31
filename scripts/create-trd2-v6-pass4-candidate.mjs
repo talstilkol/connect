@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'node:fs';
+import readline from 'node:readline';
 import { spawnSync } from 'node:child_process';
 
 import { canonicalV6, prettyV6, sha256Bytes } from './trd2-v6-core.mjs';
@@ -117,6 +118,22 @@ function patchPart(content, part) {
 }
 
 function main() {
+  if (process.argv.includes('--interactive-patch-server')) {
+    assertWorktree(1);
+    const content = prettyV6(buildGraph());
+    const input = readline.createInterface({ input: process.stdin, crlfDelay: Infinity, terminal: false });
+    process.stdout.write('PASS4_PATCH_SERVER_READY\n');
+    input.on('line', (line) => {
+      if (line === 'END') {
+        input.close();
+        return;
+      }
+      const part = Number(line);
+      assertWorktree(part);
+      process.stdout.write(`${patchPart(content, part)}__PASS4_PATCH_RESPONSE_END_${String(part).padStart(3, '0')}__\n`);
+    });
+    return;
+  }
   const argument = process.argv.find((value) => value.startsWith('--emit-patch-part='));
   if (argument === undefined) throw new Error(`use --emit-patch-part=N where N is 1..${PATCH_PART_COUNT}; the builder never writes repository files directly`);
   const part = Number(argument.split('=')[1]);
