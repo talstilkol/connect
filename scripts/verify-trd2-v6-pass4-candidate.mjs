@@ -90,11 +90,22 @@ function rebuild(commit, toolchainRoot) {
   const sourceCapture = readJsonBlob(commit, TRD2_V6_PASS4_INPUT_PATHS[4]);
   const parserCorpus = readJsonBlob(commit, TRD2_V6_PASS4_INPUT_PATHS[5]);
   const contract = readJsonBlob(commit, TRD2_V6_PASS4_INPUT_PATHS[6]);
+  const subject = readJsonBlob(commit, TRD2_V6_PASS4_INPUT_PATHS[1]);
+  const pass3Heads = new Set(subject.provenance.map(({ observedCommit }) => observedCommit));
+  if (pass3Heads.size !== 1) throw new Error('Pass 3 Subject must bind exactly one frozen source/toolchain commit');
+  const pass3Head = [...pass3Heads][0];
   const inputRows = TRD2_V6_PASS3_V2_INPUT_PATHS.map((logicalPath) => {
-    const bytes = readCommitBlob(commit, logicalPath);
-    return { byteLength: bytes.length, logicalPath, observedCommit: commit, sha256: sha256Bytes(bytes) };
+    const bytes = readCommitBlob(pass3Head, logicalPath);
+    return { byteLength: bytes.length, logicalPath, observedCommit: pass3Head, sha256: sha256Bytes(bytes) };
   });
-  const pass3 = buildPass3V2Artifacts({ contract, inputRows, observedHead: commit, parserCorpus, registry, sourceCapture });
+  const pass3 = buildPass3V2Artifacts({
+    contract: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[4]),
+    inputRows,
+    observedHead: pass3Head,
+    parserCorpus: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[2]),
+    registry: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[0]),
+    sourceCapture: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[1]),
+  });
   for (const path of TRD2_V6_PASS3_V2_OUTPUTS) if (canonicalV6(pass3.artifacts[path]) !== canonicalV6(readJsonBlob(commit, path))) throw new Error(`Pass 3 reconstruction mismatch at ${path}`);
   return {
     graph: buildPass4Graph({
@@ -106,7 +117,7 @@ function rebuild(commit, toolchainRoot) {
       registry,
       sourceCapture,
       state: readJsonBlob(commit, TRD2_V6_PASS4_INPUT_PATHS[3]),
-      subject: readJsonBlob(commit, TRD2_V6_PASS4_INPUT_PATHS[1]),
+      subject,
       toolchainRoot,
       virtualClauseNodes: pass3.clauseNodes,
       virtualObligations: pass3.obligations,

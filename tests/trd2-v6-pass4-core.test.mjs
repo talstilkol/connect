@@ -39,10 +39,26 @@ function fixture() {
     return { byteLength: bytes.length, logicalPath, observedCommit: observedHead, sha256: sha256Bytes(bytes) };
   };
   const registry = read(TRD2_V6_PASS4_INPUT_PATHS[0]);
+  const subject = read(TRD2_V6_PASS4_INPUT_PATHS[1]);
   const sourceCapture = read(TRD2_V6_PASS4_INPUT_PATHS[4]);
   const parserCorpus = read(TRD2_V6_PASS4_INPUT_PATHS[5]);
   const contract = read(TRD2_V6_PASS4_INPUT_PATHS[6]);
-  const pass3 = buildPass3V2Artifacts({ contract, inputRows: TRD2_V6_PASS3_V2_INPUT_PATHS.map(row), observedHead, parserCorpus, registry, sourceCapture });
+  const pass3Heads = new Set(subject.provenance.map(({ observedCommit }) => observedCommit));
+  assert.equal(pass3Heads.size, 1);
+  const pass3Head = [...pass3Heads][0];
+  const readPass3 = (logicalPath) => JSON.parse(git(['show', `${pass3Head}:${logicalPath}`]));
+  const pass3Row = (logicalPath) => {
+    const bytes = git(['show', `${pass3Head}:${logicalPath}`], null);
+    return { byteLength: bytes.length, logicalPath, observedCommit: pass3Head, sha256: sha256Bytes(bytes) };
+  };
+  const pass3 = buildPass3V2Artifacts({
+    contract: readPass3(TRD2_V6_PASS3_V2_INPUT_PATHS[4]),
+    inputRows: TRD2_V6_PASS3_V2_INPUT_PATHS.map(pass3Row),
+    observedHead: pass3Head,
+    parserCorpus: readPass3(TRD2_V6_PASS3_V2_INPUT_PATHS[2]),
+    registry: readPass3(TRD2_V6_PASS3_V2_INPUT_PATHS[0]),
+    sourceCapture: readPass3(TRD2_V6_PASS3_V2_INPUT_PATHS[1]),
+  });
   const toolRows = TRD2_V6_PASS4_TOOLCHAIN_PATHS.map(row);
   const toolchainRoot = rootV6('TRD2V6-PASS4-TEST-TOOLCHAIN', 'CONNECT-TRD2-V6-PASS4-TEST-TOOLCHAIN-V1', toolRows);
   const graph = buildPass4Graph({
@@ -54,7 +70,7 @@ function fixture() {
     registry,
     sourceCapture,
     state: read(TRD2_V6_PASS4_INPUT_PATHS[3]),
-    subject: read(TRD2_V6_PASS4_INPUT_PATHS[1]),
+    subject,
     toolchainRoot,
     virtualClauseNodes: pass3.clauseNodes,
     virtualObligations: pass3.obligations,

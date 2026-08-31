@@ -59,11 +59,22 @@ function buildGraph() {
   validatePass4ToolchainRegistry(toolchainRegistry, TRD2_V6_PASS4_TOOLCHAIN_PATHS);
   const toolchainRows = TRD2_V6_PASS4_TOOLCHAIN_PATHS.map((logicalPath) => rowFor(observedHead, logicalPath));
   const registry = readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[0]);
+  const subject = readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[1]);
   const sourceCapture = readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[4]);
   const parserCorpus = readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[5]);
   const contract = readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[6]);
-  const pass3InputRows = TRD2_V6_PASS3_V2_INPUT_PATHS.map((logicalPath) => rowFor(observedHead, logicalPath));
-  const pass3 = buildPass3V2Artifacts({ contract, inputRows: pass3InputRows, observedHead, parserCorpus, registry, sourceCapture });
+  const pass3Heads = new Set(subject.provenance.map(({ observedCommit }) => observedCommit));
+  if (pass3Heads.size !== 1) throw new Error('Pass 3 Subject must bind exactly one frozen source/toolchain commit');
+  const pass3Head = [...pass3Heads][0];
+  const pass3InputRows = TRD2_V6_PASS3_V2_INPUT_PATHS.map((logicalPath) => rowFor(pass3Head, logicalPath));
+  const pass3 = buildPass3V2Artifacts({
+    contract: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[4]),
+    inputRows: pass3InputRows,
+    observedHead: pass3Head,
+    parserCorpus: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[2]),
+    registry: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[0]),
+    sourceCapture: readJsonBlob(pass3Head, TRD2_V6_PASS3_V2_INPUT_PATHS[1]),
+  });
   for (const path of TRD2_V6_PASS3_V2_OUTPUTS) {
     const frozen = readJsonBlob(observedHead, path);
     if (canonicalV6(frozen) !== canonicalV6(pass3.artifacts[path])) throw new Error(`Pass 3 input differs from deterministic reconstruction: ${path}`);
@@ -77,7 +88,7 @@ function buildGraph() {
     registry,
     sourceCapture,
     state: readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[3]),
-    subject: readJsonBlob(observedHead, TRD2_V6_PASS4_INPUT_PATHS[1]),
+    subject,
     toolchainRoot: pass4ToolchainRoot(toolchainRows),
     virtualClauseNodes: pass3.clauseNodes,
     virtualObligations: pass3.obligations,
