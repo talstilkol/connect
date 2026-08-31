@@ -1,0 +1,24 @@
+{
+  "schema": "CONNECT-TRD2-V6-PASS2-TOOLCHAIN-PATH-REGISTRY-V1",
+  "version": 1,
+  "passTwoEmittedPaths": [
+    "docs/planning/trd2-v6-candidate-2026-08-30/closed-schema-registry.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/canonical-engine-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/canonical-engine-b-report.json"
+  ],
+  "toolchainPaths": [
+    "docs/planning/trd2-v6-output-path-registry-v1-2026-08-30.json",
+    "docs/planning/trd2-v6-pass2-toolchain-path-registry-v1-2026-08-30.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/source-capture-manifest.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-grammar-and-corpus.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/pass-1-producer-qa.json",
+    "package.json",
+    "scripts/trd2-v6-core.mjs",
+    "scripts/trd2-v6-pass2-core.mjs",
+    "scripts/create-trd2-v6-pass2-candidate.mjs",
+    "scripts/verify-trd2-v6-canonical-engine-a.mjs",
+    "scripts/verify-trd2-v6-canonical-engine-b.py",
+    "scripts/verify-trd2-v6-pass2-candidate.mjs",
+    "tests/trd2-v6-pass2-core.test.mjs"
+  ]
+}

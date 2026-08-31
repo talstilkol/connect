@@ -1,0 +1,293 @@
+{
+  "schema": "CONNECT-DISCOVERY-CUTOFF-RECEIPT-ENVELOPE-V3",
+  "payload": {
+    "schema": "CONNECT-DISCOVERY-CUTOFF-RECEIPT-PAYLOAD-V3",
+    "artifactId": "CONNECT-DISCOVERY-CUTOFF-CANDIDATE-V3-2026-08-30",
+    "status": "CANDIDATE-NOT-ACCEPTED-NOT-SOURCE-UNIVERSE",
+    "owner": "Tal",
+    "observedAt": "2026-08-30T20:30:31Z",
+    "clockAuthority": "LOCAL-CLOCK-UNTRUSTED",
+    "repositoryVisibilityInvariant": "PUBLIC",
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "declaredOutputRegistry": {
+      "path": "docs/planning/discovery-cutoff-output-path-registry-v3-2026-08-30.json",
+      "sha256": "5cecb7402048a2c6561a451d9c5777e55fbb772f1a6039eddb93a45748555ad9",
+      "outputDirectory": "docs/planning/discovery-cutoff-candidate-v3-2026-08-30",
+      "outputPaths": [
+        "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/receipt.json",
+        "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/source-candidates.json",
+        "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/manifest.json",
+        "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/verification-report.json"
+      ],
+      "allOutputsAbsentAtCutoff": true,
+      "successorOutputRegistry": {
+        "path": "docs/planning/source-universe-v4-output-path-registry-v1-2026-08-30.json",
+        "sha256": "c4044ff5559d53e1926f2ccab29092354b1545d902657e0e9aab89e402179ea3",
+        "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-CANDIDATE-2026-08-30",
+        "outputDirectory": "docs/planning/source-universe-v4-candidate-2026-08-30",
+        "packageMemberPaths": [
+          "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/package-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/producer-qa.json"
+        ],
+        "reviewAndAcceptancePaths": [
+          "docs/planning/source-universe-v4-candidate-2026-08-30/structural-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-security-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/estimate-schedule-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/review-reconciliation.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/acceptance-envelope.json"
+        ],
+        "outputPaths": [
+          "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/package-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/producer-qa.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/structural-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-security-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/estimate-schedule-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/review-reconciliation.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/acceptance-envelope.json"
+        ],
+        "allOutputsAbsentAtCutoff": true
+      }
+    },
+    "productRepository": {
+      "identity": "talstilkol/connect",
+      "branch": "codex/cloudflare-evidence-builders",
+      "observedHead": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "cleanAtCutoff": true,
+      "headTree": {
+        "entryCount": 2259,
+        "rawSha256": "12a8b2ccc16a08f394514a8c8acc4c61378c4d64ad57fce19c362928586f401c"
+      },
+      "index": {
+        "entryCount": 2259,
+        "rawSha256": "241a999e725624ac4984168953f5c9dfe3446758b6c94da826fa349903d31ef2"
+      },
+      "worktreeStatus": {
+        "entryCount": 0,
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "untracked": {
+        "entryCount": 0,
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ignored": {
+        "entryCount": 40636,
+        "rawSha256": "31e67a575ad7a35f30b7b2ac604dc9ab0e6c06544a6e4653d3fad98462352e0d"
+      },
+      "trackedSymlinkCount": 0,
+      "submoduleCount": 0,
+      "allFilesystemSymlinks": {
+        "entryCount": 49,
+        "pathSetSha256": "8c6a4830937911d77baac424c2d7d1050981d3c5291a6c1e186f2fd8a0f8b361"
+      },
+      "workingSecretHygiene": {
+        "status": "passed",
+        "workingFileCount": 2259,
+        "trackedFileCount": 2259,
+        "untrackedFileCount": 0,
+        "historyIncluded": false
+      }
+    },
+    "workspaceContainer": {
+      "authority": "DISCOVERY-CONTAINER-NOT-PUBLIC-GIT-AUTHORITY",
+      "status": {
+        "entryCount": 5,
+        "rawSha256": "9daec4a802660b36ee188feb8453d791107e99556de6f433a571cef8d19c899d"
+      },
+      "nestedGitIdentities": {
+        "entryCount": 2,
+        "labels": [
+          "product-repository",
+          "workspace-container"
+        ],
+        "labelSetSha256": "4328abdeb004ec3f41abb58f84a7a377a13764d12661015c462cb224cd880c39"
+      }
+    },
+    "remoteObservation": {
+      "transport": "GIT-LS-REMOTE-READ-ONLY",
+      "remote": "origin",
+      "defaultBranch": "main",
+      "defaultBranchHead": "aabaee803a0c00569806195ddf51995f873b27f0",
+      "refs": [
+        {
+          "commit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+          "ref": "refs/heads/codex/cloudflare-evidence-builders"
+        },
+        {
+          "commit": "d1b15c24c75671dd6bace1619ac0f39a875bdef5",
+          "ref": "refs/heads/codex/github-evidence-builders"
+        },
+        {
+          "commit": "3a070bab7a5ec6e221b36bff61fbb3303fb7c5b2",
+          "ref": "refs/heads/codex/pr-quality-gates"
+        },
+        {
+          "commit": "04a9e8b11141e5ef0576cc6e162c6a3157025498",
+          "ref": "refs/heads/fix/node-test-load-ts"
+        },
+        {
+          "commit": "aabaee803a0c00569806195ddf51995f873b27f0",
+          "ref": "refs/heads/main"
+        }
+      ],
+      "refSet": {
+        "entryCount": 5,
+        "rawSha256": "d3ca6ff95a5b3675c43473f3cf0f70f86be19e91d8c472201c68d3a0b57f48e1"
+      },
+      "limitations": [
+        "PULL-REQUEST-REFS-NOT-OBSERVED",
+        "GITHUB-RULESETS-NOT-OBSERVED",
+        "GITHUB-SECURITY-SETTINGS-NOT-OBSERVED",
+        "GITHUB-API-PAGINATION-NOT-OBSERVED"
+      ]
+    },
+    "toolchain": [
+      {
+        "path": "scripts/planning-discovery-cutoff-v3-lib.mjs",
+        "byteLength": 9310,
+        "sha256": "5f263ba0c9c30dfc067c05eccced5849e5b2cd9c457ea90b9ad0ca82d1ba7ae5"
+      },
+      {
+        "path": "scripts/create-planning-discovery-cutoff-v3.mjs",
+        "byteLength": 15781,
+        "sha256": "411554fb2168280195f298aa6e1cc04f0d15a17c05e8fa29c96997b0e61efb28"
+      },
+      {
+        "path": "scripts/verify-planning-discovery-cutoff-v3.mjs",
+        "byteLength": 21896,
+        "sha256": "dc0256bb14080c0e0b7a67754c35e29ae10324b3e99f3801d300e6791aff9552"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-output-path-registry-v3-2026-08-30.json",
+        "byteLength": 635,
+        "sha256": "5cecb7402048a2c6561a451d9c5777e55fbb772f1a6039eddb93a45748555ad9"
+      },
+      {
+        "path": "docs/planning/source-universe-v4-output-path-registry-v1-2026-08-30.json",
+        "byteLength": 2855,
+        "sha256": "c4044ff5559d53e1926f2ccab29092354b1545d902657e0e9aab89e402179ea3"
+      },
+      {
+        "path": "docs/planning/source-universe-v4-toolchain-path-registry-v1-2026-08-30.json",
+        "byteLength": 651,
+        "sha256": "c0db4d18c748d1e06296dc4d92fae2f5f1799e745bb23a44cbb8f6fd6304fbc7"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-v3-tool-contract-2026-08-30.md",
+        "byteLength": 1999,
+        "sha256": "a46bbe2c68c2841744ece917fce92c9546629a223a71d9ce7c47a48830b2df68"
+      },
+      {
+        "path": "scripts/b0-v8-core.mjs",
+        "byteLength": 58260,
+        "sha256": "b86b475716450ecaa2b992b4c610ae23bc750191973326ab66f689c97b59a478"
+      },
+      {
+        "path": "scripts/verify-secret-hygiene.mjs",
+        "byteLength": 9605,
+        "sha256": "3f8b45ccef9752ee0b5056fd79ace633c3362367096602750f0ab8caaf5ae303"
+      },
+      {
+        "path": "scripts/source-universe-v4-core.mjs",
+        "byteLength": 39656,
+        "sha256": "eacdfc7a7c37db89b76c77ad71d8bb64acd4331bf614cca129d029478e73749f"
+      },
+      {
+        "path": "scripts/create-source-universe-v4-candidate.mjs",
+        "byteLength": 26537,
+        "sha256": "2377d415308c8897629fa97232ee893b7d2e5a88a76781f0112c0ad0f6f15b7f"
+      },
+      {
+        "path": "scripts/verify-source-universe-v4-reader-a.mjs",
+        "byteLength": 10721,
+        "sha256": "edb229a60e55e00b17d28369895dd8a6e78ccc287107399e7cac9176ddcd9e9f"
+      },
+      {
+        "path": "scripts/verify-source-universe-v4-reader-b.py",
+        "byteLength": 19143,
+        "sha256": "c96f7ee5b05215ee53e8a97357aab26783ce23e7ee62f5f11720e264083a0eb3"
+      },
+      {
+        "path": "scripts/finalize-source-universe-v4-candidate.mjs",
+        "byteLength": 5939,
+        "sha256": "ed3811b10bbfd1f3fababcc949e0aa94a10e1c647fa48f7485ddc208b0dc97d9"
+      },
+      {
+        "path": "scripts/verify-source-universe-v4-candidate.mjs",
+        "byteLength": 12129,
+        "sha256": "8790009308b8148df2ddfadd6f3f3e522f65511b9365244be48ddd1cc28854b8"
+      },
+      {
+        "path": "tests/planning-discovery-cutoff-v3.test.mjs",
+        "byteLength": 4097,
+        "sha256": "bc8d9d6341f2a3365c9b716724898ab062ef5b7e6877d45fb9f082a7b50c69d0"
+      },
+      {
+        "path": "tests/secret-hygiene.test.mjs",
+        "byteLength": 2750,
+        "sha256": "b46b82ee53136a8e45ffc428b47101a438ed241d0bc9e21e7dcd96b6f6a9409e"
+      },
+      {
+        "path": "tests/source-universe-v4-core.test.mjs",
+        "byteLength": 13950,
+        "sha256": "11bb54d14f1ded70048aee3b26677b227e8fce301019dd5a089d95392651ba5e"
+      },
+      {
+        "path": "package.json",
+        "byteLength": 9307,
+        "sha256": "dafca7cfb5a07df8a41c3073ae45a2b217b84340df879174a898d0cf4f04809a"
+      }
+    ],
+    "blockers": [
+      "TRUSTED-TIME-ABSENT",
+      "GITHUB-API-AND-PR-COVERAGE-ABSENT",
+      "PRIVATE-SOURCE-CUSTODY-AND-RIGHTS-UNAPPROVED",
+      "OFFICIAL-SOURCE-CAPTURE-FRONTIER-INCOMPLETE",
+      "B0-AND-REVIEW-PROTOCOL-NOT-ACCEPTED",
+      "INDEPENDENT-REVIEW-ABSENT"
+    ]
+  },
+  "payloadSha256": "f55ef363a6e9d126d3971df71eb144f9746124ca9de69a5814ba97183921bd21"
+}

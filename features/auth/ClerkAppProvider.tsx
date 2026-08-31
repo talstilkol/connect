@@ -1,7 +1,6 @@
-import { ClerkProvider } from "@clerk/nextjs";
-import { heIL } from "@clerk/localizations";
 import type { ReactNode } from "react";
 import { inspectClerkConfiguration } from "../../server/auth/clerkConfiguration";
+import { LocalizedClerkProvider } from "./LocalizedClerkProvider";
 
 export default function ClerkAppProvider({
   children,
@@ -17,28 +16,10 @@ export default function ClerkAppProvider({
   }
 
   return (
-    <ClerkProvider
+    <LocalizedClerkProvider
       publishableKey={publishableKey}
-      signInUrl="/login"
-      signUpUrl="/register"
-      signInFallbackRedirectUrl="/workspace"
-      signUpFallbackRedirectUrl="/workspace/onboarding"
-      localization={heIL}
-      appearance={{
-        variables: {
-          colorPrimary: "#2f825f",
-          colorForeground: "#18322d",
-          colorBackground: "#ffffff",
-          borderRadius: "0.75rem",
-        },
-        elements: {
-          rootBox: "clerk-auth-root",
-          cardBox: "clerk-auth-card-box",
-          card: "clerk-auth-card",
-        },
-      }}
     >
       {children}
-    </ClerkProvider>
+    </LocalizedClerkProvider>
   );
 }

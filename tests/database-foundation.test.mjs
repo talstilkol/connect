@@ -69,6 +69,19 @@ test("initial migration contains the tenant foundation without seed data", async
     "0027_team_invitation_system_actor.sql",
     "0028_team_invitation_expiration_scan.sql",
     "0029_team_invitation_acceptance.sql",
+    "0030_whatsapp_rate_limit_reservations.sql",
+    "0031_campaign_delivery_provider_links.sql",
+    "0032_whatsapp_provider_cooldowns.sql",
+    "0033_large_union_jack.sql",
+    "0034_whatsapp_campaign_delivery_policy_events.sql",
+    "0035_whatsapp_phone_throughput.sql",
+    "0036_team_invitation_delivery_deferrals.sql",
+    "0037_whatsapp_service_reply_reservations.sql",
+    "0038_bot_reply_delivery_deferrals.sql",
+    "0039_bot_reply_delivery_provider_links.sql",
+    "0040_inbound_button_reply_provenance.sql",
+    "0041_bot_reply_service_window_rejection_provenance.sql",
+    "0042_bot_reply_provider_clock_domains.sql",
   ]);
 
   const migration = await readFile(
@@ -233,6 +246,280 @@ test("Meta credential migration stores only tenant-bound encrypted envelopes", a
     /access_token|plaintext|provider_payload/,
   );
   assert.doesNotMatch(migration, /\bINSERT\s+INTO\b/i);
+});
+
+test("WhatsApp rate-limit migration stores only opaque keys and immutable lifecycle evidence", async () => {
+  const migration = await readFile(
+    new URL(
+      "0030_whatsapp_rate_limit_reservations.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_rate_limit_reservations`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_pair_rate_limit_state`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_portfolio_recipient_rate_limit_state`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_rate_limit_settlements`/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_rate_reservations_update_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_rate_settlements_state_update/,
+  );
+  const pairStateDefinition = migration.slice(
+    migration.indexOf(
+      "CREATE TABLE `whatsapp_pair_rate_limit_state`",
+    ),
+    migration.indexOf(
+      "CREATE TABLE `whatsapp_portfolio_recipient_rate_limit_state`",
+    ),
+  );
+  const portfolioStateDefinition = migration.slice(
+    migration.indexOf(
+      "CREATE TABLE `whatsapp_portfolio_recipient_rate_limit_state`",
+    ),
+    migration.indexOf(
+      "CREATE TRIGGER\n  `whatsapp_pair_state_insert_proof_guard`",
+    ),
+  );
+
+  assert.doesNotMatch(pairStateDefinition, /tenant_id/);
+  assert.doesNotMatch(portfolioStateDefinition, /tenant_id/);
+  assert.doesNotMatch(
+    migration,
+    /phone_e164|phone_number|message_body|access_token/,
+  );
+  assert.doesNotMatch(migration, /Math\.random/);
+});
+
+test("WhatsApp service replies share pair admission without occupying portfolio quota", async () => {
+  const migration = await readFile(
+    new URL(
+      "0037_whatsapp_service_reply_reservations.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /ADD COLUMN `reservation_class` text/,
+  );
+  assert.match(
+    migration,
+    /ADD COLUMN `template_category` text/,
+  );
+  assert.match(
+    migration,
+    /WHEN NEW\.`reservation_class` = 'business-initiated'/,
+  );
+  assert.match(
+    migration,
+    /NEW\.`reservation_class` IS NULL[\s\S]*NEW\.`template_category` IS NULL/,
+  );
+  assert.match(
+    migration,
+    /Service replies cannot create portfolio-recipient cooldowns/,
+  );
+});
+
+test("bot reply deferrals are fenced and constrained to the service window", async () => {
+  const migration = await readFile(
+    new URL(
+      "0038_bot_reply_delivery_deferrals.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(migration, /ADD COLUMN `claim_version` integer NOT NULL DEFAULT 0/);
+  assert.match(migration, /ADD COLUMN `next_attempt_at` text/);
+  assert.match(migration, /NEW\.`claim_version` = OLD\.`claim_version` \+ 1/);
+  assert.match(migration, /NEW\.`next_attempt_at` < \([\s\S]*'\+24 hours'/);
+});
+
+test("campaign provider reconciliation migration links one target without retaining message content", async () => {
+  const migration = await readFile(
+    new URL(
+      "0031_campaign_delivery_provider_links.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `campaign_delivery_provider_links`/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_insert_proof_guard/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_terminal_guard/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_settle_rate_limit/,
+  );
+  assert.match(
+    migration,
+    /messages_campaign_delivery_target_guard/,
+  );
+  assert.match(
+    migration,
+    /campaign_delivery_provider_links_delete_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /phone_e164|message_body|text_content|provider_payload|webhook_payload|access_token/,
+  );
+  assert.equal(
+    migration.match(/\bINSERT\s+INTO\b/gi)?.length,
+    1,
+  );
+  assert.match(
+    migration,
+    /INSERT INTO `whatsapp_rate_limit_settlements`/,
+  );
+});
+
+test("provider cooldown migration derives opaque blocking state from immutable rejection evidence", async () => {
+  const migration = await readFile(
+    new URL(
+      "0032_whatsapp_provider_cooldowns.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_provider_cooldown_events`/,
+  );
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_provider_cooldown_state`/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_provider_cooldown_events_proof_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_provider_cooldown_events_state_insert/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_provider_cooldown_state_monotonic_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /tenant_id|phone_e164|phone_number|message_body|access_token|provider_payload/,
+  );
+  assert.doesNotMatch(migration, /Math\.random/);
+});
+
+test("business profile admin migration stores digest-only immutable audit evidence", async () => {
+  const migration = await readFile(
+    new URL(
+      "0033_large_union_jack.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `business_profile_admin_events`/,
+  );
+  assert.match(
+    migration,
+    /previous_profile_digest/,
+  );
+  assert.match(
+    migration,
+    /new_profile_digest/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_proof_guard/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_insert_audit/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_update_guard/,
+  );
+  assert.match(
+    migration,
+    /business_profile_admin_events_delete_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /business_name|interface_language|Math\.random/,
+  );
+});
+
+test("WhatsApp delivery policy migration stores expiring immutable evidence and a kill switch", async () => {
+  const migration = await readFile(
+    new URL(
+      "0034_whatsapp_campaign_delivery_policy_events.sql",
+      migrationsUrl,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /CREATE TABLE `whatsapp_campaign_delivery_policy_events`/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_connection_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_sequence_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_disable_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_insert_audit/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_update_guard/,
+  );
+  assert.match(
+    migration,
+    /whatsapp_delivery_policy_events_delete_guard/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /phone_e164|message_body|access_token|provider_payload|Math\.random/,
+  );
 });
 
 test("AI persistence migration stores immutable definitions and source metadata without file bytes or secrets", async () => {
@@ -710,7 +997,11 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "bot_flow_versions",
     "bot_flows",
     "bot_reply_deliveries",
+    "bot_reply_delivery_provider_links",
+    "bot_reply_service_window_rejection_events",
+    "business_profile_admin_events",
     "business_profiles",
+    "campaign_delivery_provider_links",
     "campaign_recipients",
     "campaigns",
     "contact_consent_events",
@@ -722,6 +1013,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "contact_tags",
     "contacts",
     "conversations",
+    "inbound_button_reply_events",
     "knowledge_passages",
     "knowledge_sources",
     "message_templates",
@@ -733,6 +1025,7 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "production_decision_records",
     "team_invitation_acceptances",
     "team_invitation_deliveries",
+    "team_invitation_delivery_deferrals",
     "team_invitation_events",
     "team_invitations",
     "tenant_membership_events",
@@ -741,6 +1034,13 @@ test("all migrations are accepted by SQLite with foreign keys enabled", async ()
     "tenant_subscription_events",
     "tenant_subscriptions",
     "tenants",
+    "whatsapp_campaign_delivery_policy_events",
+    "whatsapp_pair_rate_limit_state",
+    "whatsapp_portfolio_recipient_rate_limit_state",
+    "whatsapp_provider_cooldown_events",
+    "whatsapp_provider_cooldown_state",
+    "whatsapp_rate_limit_reservations",
+    "whatsapp_rate_limit_settlements",
   ]);
 });
 

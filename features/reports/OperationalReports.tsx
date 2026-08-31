@@ -15,61 +15,26 @@ import {
 import type {
   OperationalReportActionFailure,
 } from "../../server/reports/operationalReportActionResult";
-
-const statusMessages: Record<
-  Exclude<OperationalReportStatus, "ready">,
-  string
-> = {
-  "configuration-required":
-    "נדרשת הגדרת Clerk ו־D1 כדי לטעון דוחות.",
-  unauthenticated:
-    "יש להתחבר לפני צפייה בדוחות.",
-  "onboarding-required":
-    "יש להשלים יצירת סביבת עבודה לפני טעינת דוחות.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה לפני טעינת דוחות.",
-  "permission-denied":
-    "אין לחשבון הנוכחי הרשאה לצפות בדוחות.",
-  "server-error":
-    "לא ניתן לטעון כרגע את הדוחות.",
-};
-
-const actionFailureMessages: Record<
-  OperationalReportActionFailure["status"],
-  string
-> = {
-  "configuration-required":
-    statusMessages["configuration-required"],
-  unauthenticated:
-    statusMessages.unauthenticated,
-  "onboarding-required":
-    statusMessages["onboarding-required"],
-  "tenant-selection-required":
-    statusMessages[
-      "tenant-selection-required"
-    ],
-  "permission-denied":
-    statusMessages["permission-denied"],
-  "invalid-input":
-    "טווח התאריכים אינו תקין. ניתן לבחור עד 366 ימים.",
-  "server-error":
-    statusMessages["server-error"],
-};
-
-const numberFormatter =
-  new Intl.NumberFormat("he-IL");
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import {
+  readOperationalReportMessages,
+} from "./operationalReportMessages";
 
 function formatNumber(
   value: number,
+  locale: string,
 ): string {
-  return numberFormatter.format(value);
+  return new Intl.NumberFormat(locale).format(value);
 }
 
 function formatDate(
   value: string,
+  locale: string,
 ): string {
   return new Intl.DateTimeFormat(
-    "he-IL",
+    locale,
     {
       day: "2-digit",
       month: "2-digit",
@@ -83,9 +48,10 @@ function formatDate(
 
 function formatGeneratedAt(
   value: string,
+  locale: string,
 ): string {
   return new Intl.DateTimeFormat(
-    "he-IL",
+    locale,
     {
       dateStyle: "short",
       timeStyle: "short",
@@ -108,27 +74,32 @@ function hasEvents(
 }
 
 function ReportMetric({
+  locale,
   label,
   value,
 }: {
+  locale: string;
   label: string;
   value: number;
 }) {
   return (
     <div className="report-metric">
       <span>{label}</span>
-      <strong>{formatNumber(value)}</strong>
+      <strong>{formatNumber(value, locale)}</strong>
     </div>
   );
 }
 
 export function OperationalReports({
+  language,
   initialStatus,
   initialReport,
 }: {
+  language: InterfaceLanguage;
   initialStatus: OperationalReportStatus;
   initialReport: OperationalReportView | null;
 }) {
+  const messages = readOperationalReportMessages(language);
   const [report, setReport] =
     useState(initialReport);
   const [startDate, setStartDate] =
@@ -190,10 +161,10 @@ export function OperationalReports({
         >
           ↗
         </span>
-        <h2>הדוח אינו זמין</h2>
+        <h2>{messages.unavailableTitle}</h2>
         <p>
           {
-            statusMessages[
+            messages.statuses[
               initialStatus === "ready"
                 ? "server-error"
                 : initialStatus
@@ -211,13 +182,13 @@ export function OperationalReports({
         onSubmit={submit}
       >
         <div>
-          <strong>טווח הדוח</strong>
+          <strong>{messages.toolbar.title}</strong>
           <small>
-            כל התאריכים מחושבים לפי UTC.
+            {messages.toolbar.utcHelp}
           </small>
         </div>
         <label>
-          <span>מתאריך</span>
+          <span>{messages.toolbar.from}</span>
           <input
             type="date"
             value={startDate}
@@ -229,7 +200,7 @@ export function OperationalReports({
           />
         </label>
         <label>
-          <span>עד תאריך</span>
+          <span>{messages.toolbar.to}</span>
           <input
             type="date"
             value={endDate}
@@ -246,8 +217,8 @@ export function OperationalReports({
           disabled={isPending}
         >
           {isPending
-            ? "טוען דוח…"
-            : "הצגת דוח"}
+            ? messages.toolbar.loading
+            : messages.toolbar.show}
         </button>
       </form>
 
@@ -256,7 +227,7 @@ export function OperationalReports({
           className="report-feedback"
           role="alert"
         >
-          {actionFailureMessages[failure]}
+          {messages.actionFailures[failure]}
         </p>
       ) : null}
 
@@ -264,16 +235,21 @@ export function OperationalReports({
         <span>
           {formatDate(
             report.period.startDate,
+            messages.locale,
           )}
           {" — "}
-          {formatDate(report.period.endDate)}
+          {formatDate(
+            report.period.endDate,
+            messages.locale,
+          )}
         </span>
         <small>
-          הופק ב־
-          {formatGeneratedAt(
-            report.generatedAt,
+          {messages.generatedAt(
+            formatGeneratedAt(
+              report.generatedAt,
+              messages.locale,
+            ),
           )}
-          {" UTC"}
         </small>
       </div>
 
@@ -283,11 +259,10 @@ export function OperationalReports({
           role="status"
         >
           <h2>
-            לא נמצאו אירועים בטווח שנבחר
+            {messages.empty.title}
           </h2>
           <p>
-            זהו דוח אמיתי עם ערכי אפס; לא
-            נוספו נתוני תצוגה חלופיים.
+            {messages.empty.description}
           </p>
         </section>
       ) : null}
@@ -300,39 +275,44 @@ export function OperationalReports({
           >
             ↗
           </span>
-          <h2>קמפיינים והודעות</h2>
+          <h2>{messages.campaigns.title}</h2>
           <p>
-            פעילות שנוצרה או התרחשה בטווח
-            שנבחר.
+            {messages.campaigns.description}
           </p>
           <div className="report-metrics">
             <ReportMetric
-              label="קמפיינים"
+              locale={messages.locale}
+              label={messages.campaigns.total}
               value={report.campaigns.total}
             />
             <ReportMetric
-              label="נמענים מתוכננים"
+              locale={messages.locale}
+              label={messages.campaigns.recipients}
               value={
                 report.campaigns
                   .recipientCount
               }
             />
             <ReportMetric
-              label="הודעות יוצאות"
+              locale={messages.locale}
+              label={messages.campaigns.outbound}
               value={report.messages.outbound}
             />
             <ReportMetric
-              label="נמסרו"
+              locale={messages.locale}
+              label={messages.campaigns.delivered}
               value={
                 report.messages.delivered
               }
             />
             <ReportMetric
-              label="נקראו"
+              locale={messages.locale}
+              label={messages.campaigns.read}
               value={report.messages.read}
             />
             <ReportMetric
-              label="נכשלו"
+              locale={messages.locale}
+              label={messages.campaigns.failed}
               value={report.messages.failed}
             />
           </div>
@@ -345,47 +325,52 @@ export function OperationalReports({
           >
             ◌
           </span>
-          <h2>שיחות</h2>
+          <h2>{messages.conversations.title}</h2>
           <p>
-            שיחות שההודעה האחרונה שלהן
-            נמצאת בטווח.
+            {messages.conversations.description}
           </p>
           <div className="report-metrics">
             <ReportMetric
-              label="שיחות פעילות בטווח"
+              locale={messages.locale}
+              label={messages.conversations.active}
               value={
                 report.conversations.active
               }
             />
             <ReportMetric
-              label="הודעות שלא נקראו"
+              locale={messages.locale}
+              label={messages.conversations.unread}
               value={
                 report.conversations
                   .unreadCount
               }
             />
             <ReportMetric
-              label="ממתינות לנציג"
+              locale={messages.locale}
+              label={messages.conversations.waitingForAgent}
               value={
                 report.conversations
                   .waitingForAgent
               }
             />
             <ReportMetric
-              label="בטיפול נציג"
+              locale={messages.locale}
+              label={messages.conversations.agentActive}
               value={
                 report.conversations
                   .agentActive
               }
             />
             <ReportMetric
-              label="בוט פעיל"
+              locale={messages.locale}
+              label={messages.conversations.botActive}
               value={
                 report.conversations.botActive
               }
             />
             <ReportMetric
-              label="סגורות"
+              locale={messages.locale}
+              label={messages.conversations.closed}
               value={
                 report.conversations.closed
               }
@@ -400,62 +385,70 @@ export function OperationalReports({
           >
             ✦
           </span>
-          <h2>Bot ו־AI</h2>
+          <h2>{messages.automation.title}</h2>
           <p>
-            תוצאות Runtime ועלויות לפי
-            המטבע שבו נרשמו.
+            {messages.automation.description}
           </p>
           <div className="report-metrics">
             <ReportMetric
-              label="תגובות Bot"
+              locale={messages.locale}
+              label={messages.automation.botReplies}
               value={report.bot.total}
             />
             <ReportMetric
-              label="Bot התקבל למסירה"
+              locale={messages.locale}
+              label={messages.automation.botAccepted}
               value={report.bot.accepted}
             />
             <ReportMetric
-              label="החלטות AI"
+              locale={messages.locale}
+              label={messages.automation.aiDecisions}
               value={report.ai.totalTurns}
             />
             <ReportMetric
-              label="תשובות AI מתוכננות"
+              locale={messages.locale}
+              label={messages.automation.aiPlanned}
               value={report.ai.replyPlanned}
             />
             <ReportMetric
-              label="העברות לנציג"
+              locale={messages.locale}
+              label={messages.automation.handoffs}
               value={report.ai.handoff}
             />
           </div>
 
           <div className="report-costs">
             <strong>
-              שימוש ועלות לפי מטבע
+              {messages.automation.usageTitle}
             </strong>
             {report.aiUsage.length === 0 ? (
               <small>
-                לא נרשם שימוש AI בטווח.
+                {messages.automation.noUsage}
               </small>
             ) : (
               report.aiUsage.map((usage) => (
                 <div key={usage.currency}>
                   <span>{usage.currency}</span>
                   <b>
-                    {formatNumber(
-                      usage.costMinorUnits,
-                    )}{" "}
-                    יחידות משנה
+                    {messages.automation.minorUnits(
+                      formatNumber(
+                        usage.costMinorUnits,
+                        messages.locale,
+                      ),
+                    )}
                   </b>
                   <small>
-                    {formatNumber(
-                      usage.requestCount,
-                    )}{" "}
-                    בקשות ·{" "}
-                    {formatNumber(
-                      usage.inputTokens +
-                        usage.outputTokens,
-                    )}{" "}
-                    Tokens
+                    {messages.automation.requestsAndTokens(
+                      formatNumber(
+                        usage.requestCount,
+                        messages.locale,
+                      ),
+                      formatNumber(
+                        usage.inputTokens +
+                          usage.outputTokens,
+                        messages.locale,
+                      ),
+                    )}
                   </small>
                 </div>
               ))

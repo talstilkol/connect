@@ -1,11 +1,15 @@
 "use client";
 
 import {
+  useRef,
   useState,
   useTransition,
   type FormEvent,
 } from "react";
 import type { ContactRecord } from "../../shared/domain/contactRecord";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import type {
   ContactOrganizationSnapshot,
 } from "../../shared/domain/contactOrganization";
@@ -20,6 +24,10 @@ import {
 } from "../../server/contacts/contactActions";
 import { ContactImport } from "./ContactImport";
 import { ContactOrganization } from "./ContactOrganization";
+import {
+  readContactDirectoryMessages,
+  type ContactDirectoryMessages,
+} from "./contactDirectoryMessages";
 
 export type ContactDirectoryStatus =
   | "ready"
@@ -35,17 +43,20 @@ type ConsentEditorState = {
 
 export function ContactDirectory({
   authEnabled,
+  language,
   initialContacts,
   initialNextCursor,
   initialOrganization,
   initialStatus,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialContacts: readonly ContactRecord[];
   initialNextCursor: number | null;
   initialOrganization: ContactOrganizationSnapshot;
   initialStatus: ContactDirectoryStatus;
 }) {
+  const messages = readContactDirectoryMessages(language);
   const [contacts, setContacts] = useState<readonly ContactRecord[]>(
     initialContacts,
   );
@@ -69,6 +80,7 @@ export function ContactDirectory({
   const [evidenceReference, setEvidenceReference] = useState("");
   const [isPending, startTransition] = useTransition();
   const [isLoadingMore, startLoadingMore] = useTransition();
+  const lastContactSubmissionMilliseconds = useRef(0);
   const [loadMoreResult, setLoadMoreResult] =
     useState<LoadMoreContactsActionResult | null>(null);
 
@@ -107,6 +119,11 @@ export function ContactDirectory({
   const submitContact = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaveResult(null);
+    const submissionMilliseconds = Math.max(
+      Date.now(),
+      lastContactSubmissionMilliseconds.current + 1,
+    );
+    lastContactSubmissionMilliseconds.current = submissionMilliseconds;
 
     startTransition(async () => {
       const result = await saveContactAction({
@@ -115,6 +132,9 @@ export function ContactDirectory({
         lastName,
         email,
         company,
+        submissionOccurredAt: new Date(
+          submissionMilliseconds,
+        ).toISOString(),
       });
       setSaveResult(result);
 
@@ -206,11 +226,11 @@ export function ContactDirectory({
 
   const directoryError =
     initialStatus === "onboarding-required"
-      ? "יש להשלים תחילה את פרטי העסק כדי ליצור Tenant פעיל."
+      ? messages.directory.errors["onboarding-required"]
       : initialStatus === "tenant-selection-required"
-        ? "המשתמש שייך למספר Tenants ונדרשת בחירה מפורשת."
+        ? messages.directory.errors["tenant-selection-required"]
         : initialStatus === "server-error"
-          ? "לא ניתן היה לטעון את אנשי הקשר מהשרת."
+          ? messages.directory.errors["server-error"]
           : null;
 
   return (
@@ -218,8 +238,10 @@ export function ContactDirectory({
       <section className="card contact-management-card">
         <div className="card-header">
           <div>
-            <span className="card-kicker">Persistent contacts</span>
-            <h2>ניהול אנשי קשר קבוע</h2>
+            <span className="card-kicker">
+              {messages.directory.kicker}
+            </span>
+            <h2>{messages.directory.title}</h2>
           </div>
           <span
             className={`status-pill ${
@@ -227,18 +249,15 @@ export function ContactDirectory({
             }`}
           >
             {initialStatus === "ready"
-              ? `${contacts.length} נטענו מהשרת`
-              : "השרת אינו פעיל"}
+              ? messages.directory.loaded(contacts.length)
+              : messages.directory.serverInactive}
           </span>
         </div>
 
         {!authEnabled || initialStatus === "configuration-required" ? (
           <div className="inline-notice warning" role="status">
             <span aria-hidden="true">i</span>
-            <p>
-              Clerk אינו מוגדר. ניתן לבדוק את מסלול ה־CSV המקומי, אך אי
-              אפשר ליצור אנשי קשר קבועים.
-            </p>
+            <p>{messages.directory.configurationNotice}</p>
           </div>
         ) : directoryError ? (
           <div className="inline-notice danger" role="alert">
@@ -248,15 +267,14 @@ export function ContactDirectory({
         ) : (
           <>
             <p className="form-explanation">
-              מספר הטלפון חייב להגיע בפורמט בינלאומי מפורש. איש קשר חדש
-              נשמר כחסום לדיוור עד לתיעוד הסכמה נפרד.
+              {messages.directory.explanation}
             </p>
             <form
               className="contact-profile-form"
               onSubmit={submitContact}
             >
               <label>
-                <span>מספר טלפון בינלאומי</span>
+                <span>{messages.directory.fields.phoneNumber}</span>
                 <input
                   value={phoneNumber}
                   onChange={(event) => setPhoneNumber(event.target.value)}
@@ -266,7 +284,7 @@ export function ContactDirectory({
                 />
               </label>
               <label>
-                <span>שם פרטי — רשות</span>
+                <span>{messages.directory.fields.firstName}</span>
                 <input
                   value={firstName}
                   onChange={(event) => setFirstName(event.target.value)}
@@ -274,7 +292,7 @@ export function ContactDirectory({
                 />
               </label>
               <label>
-                <span>שם משפחה — רשות</span>
+                <span>{messages.directory.fields.lastName}</span>
                 <input
                   value={lastName}
                   onChange={(event) => setLastName(event.target.value)}
@@ -282,7 +300,7 @@ export function ContactDirectory({
                 />
               </label>
               <label>
-                <span>אימייל — רשות</span>
+                <span>{messages.directory.fields.email}</span>
                 <input
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -291,7 +309,7 @@ export function ContactDirectory({
                 />
               </label>
               <label>
-                <span>חברה — רשות</span>
+                <span>{messages.directory.fields.company}</span>
                 <input
                   value={company}
                   onChange={(event) => setCompany(event.target.value)}
@@ -303,28 +321,33 @@ export function ContactDirectory({
                 className="primary-button"
                 disabled={isPending || !phoneNumber.trim()}
               >
-                {isPending ? "שומר..." : "שמירת איש קשר"}
+                {isPending
+                  ? messages.directory.saving
+                  : messages.directory.save}
               </button>
             </form>
 
-            <ContactActionFeedback result={saveResult} />
+            <ContactActionFeedback
+              messages={messages.directory.feedback}
+              result={saveResult}
+            />
 
             <div className="contact-records">
               <div className="contact-records-heading">
-                <strong>אנשי קשר שנשמרו</strong>
+                <strong>{messages.directory.recordsTitle}</strong>
                 <span>
-                  נטענו {contacts.length} רשומות
-                  {nextCursor !== null ? " · קיימות רשומות נוספות" : ""}
+                  {messages.directory.recordsSummary(
+                    contacts.length,
+                    nextCursor !== null,
+                  )}
                 </span>
               </div>
 
               {contacts.length === 0 ? (
                 <div className="mini-empty">
                   <span>◌</span>
-                  <strong>אין אנשי קשר קבועים</strong>
-                  <small>
-                    הרשומה הראשונה תופיע לאחר שמירה מוצלחת בשרת.
-                  </small>
+                  <strong>{messages.directory.emptyTitle}</strong>
+                  <small>{messages.directory.emptyDescription}</small>
                 </div>
               ) : (
                 <div className="contact-record-list">
@@ -347,11 +370,14 @@ export function ContactDirectory({
                           }`}
                         >
                           {contact.mailingStatus === "subscribed"
-                            ? "מורשה לדיוור"
-                            : "חסום לדיוור"}
+                            ? messages.directory.subscribed
+                            : messages.directory.blocked}
                         </span>
                         <small>
-                          {consentDescription(contact)}
+                          {consentDescription(
+                            contact,
+                            messages.directory.consent,
+                          )}
                         </small>
                       </div>
                       <div className="contact-record-actions">
@@ -363,7 +389,7 @@ export function ContactDirectory({
                               openConsentEditor(contact.id, "grant")
                             }
                           >
-                            תיעוד הסכמה
+                            {messages.directory.documentConsent}
                           </button>
                         ) : null}
                         {contact.mailingStatus === "subscribed" ? (
@@ -377,7 +403,7 @@ export function ContactDirectory({
                               )
                             }
                           >
-                            סימון הסרה
+                            {messages.directory.documentUnsubscribe}
                           </button>
                         ) : null}
                       </div>
@@ -394,12 +420,12 @@ export function ContactDirectory({
                   onClick={loadMoreContacts}
                 >
                   {isLoadingMore
-                    ? "טוען אנשי קשר נוספים..."
-                    : "טעינת 50 רשומות נוספות"}
+                    ? messages.directory.loadingMore
+                    : messages.directory.loadMore}
                 </button>
               ) : contacts.length > 0 ? (
                 <p className="contact-list-end" role="status">
-                  כל אנשי הקשר הזמינים נטענו.
+                  {messages.directory.allLoaded}
                 </p>
               ) : null}
 
@@ -407,7 +433,12 @@ export function ContactDirectory({
               loadMoreResult.status !== "loaded" ? (
                 <div className="inline-notice danger" role="alert">
                   <span aria-hidden="true">!</span>
-                  <p>{contactLoadFailureMessage(loadMoreResult)}</p>
+                  <p>
+                    {contactLoadFailureMessage(
+                      loadMoreResult,
+                      messages.directory.feedback.loadFailures,
+                    )}
+                  </p>
                 </div>
               ) : null}
             </div>
@@ -417,6 +448,7 @@ export function ContactDirectory({
 
       <ContactOrganization
         enabled={authEnabled && initialStatus === "ready"}
+        language={language}
         contacts={contacts}
         organization={organization}
         onSnapshot={mergeOrganization}
@@ -426,17 +458,19 @@ export function ContactDirectory({
         <section className="card consent-editor-card">
           <div className="card-header">
             <div>
-              <span className="card-kicker">Consent event</span>
+              <span className="card-kicker">
+                {messages.consentEditor.kicker}
+              </span>
               <h2>
                 {consentEditor.action === "grant"
-                  ? "תיעוד הסכמה"
-                  : "תיעוד הסרה מדיוור"}
+                  ? messages.consentEditor.grantTitle
+                  : messages.consentEditor.unsubscribeTitle}
               </h2>
             </div>
             <button
               type="button"
               className="close-button"
-              aria-label="סגירת טופס הסכמה"
+              aria-label={messages.consentEditor.closeAriaLabel}
               onClick={() => setConsentEditor(null)}
             >
               ×
@@ -444,7 +478,7 @@ export function ContactDirectory({
           </div>
           <form className="consent-event-form" onSubmit={submitConsent}>
             <label>
-              <span>מקור התיעוד</span>
+              <span>{messages.consentEditor.source}</span>
               <input
                 value={consentSource}
                 onChange={(event) => setConsentSource(event.target.value)}
@@ -452,7 +486,7 @@ export function ContactDirectory({
               />
             </label>
             <label>
-              <span>מועד האירוע</span>
+              <span>{messages.consentEditor.occurredAt}</span>
               <input
                 type="datetime-local"
                 value={consentOccurredAt}
@@ -463,7 +497,7 @@ export function ContactDirectory({
               />
             </label>
             <label>
-              <span>הפניה לראיה — רשות</span>
+              <span>{messages.consentEditor.evidenceReference}</span>
               <input
                 value={evidenceReference}
                 onChange={(event) =>
@@ -481,28 +515,33 @@ export function ContactDirectory({
               }
             >
               {isPending
-                ? "שומר..."
+                ? messages.consentEditor.saving
                 : consentEditor.action === "grant"
-                  ? "שמירת ההסכמה"
-                  : "שמירת ההסרה"}
+                  ? messages.consentEditor.saveGrant
+                  : messages.consentEditor.saveUnsubscribe}
             </button>
           </form>
-          <ContactActionFeedback result={consentResult} />
+          <ContactActionFeedback
+            messages={messages.directory.feedback}
+            result={consentResult}
+          />
         </section>
       ) : null}
 
       <section className="contact-import-section">
         <div className="section-divider-heading">
           <div>
-            <span className="card-kicker">Import rehearsal</span>
-            <h2>בדיקת קובץ לפני ייבוא</h2>
+            <span className="card-kicker">
+              {messages.importSection.kicker}
+            </span>
+            <h2>{messages.importSection.title}</h2>
           </div>
           <p>
-            בדיקת הקובץ נעשית מקומית; לאחר אישור מפורש הפרופילים נשמרים
-            בשרת בלי לייבא הרשאת דיוור.
+            {messages.importSection.description}
           </p>
         </div>
         <ContactImport
+          language={language}
           serverImportEnabled={
             authEnabled && initialStatus === "ready"
           }
@@ -521,25 +560,30 @@ function contactDisplayName(contact: ContactRecord): string {
   return displayName || contact.phoneNumber;
 }
 
-function consentDescription(contact: ContactRecord): string {
+function consentDescription(
+  contact: ContactRecord,
+  messages: ContactDirectoryMessages["directory"]["consent"],
+): string {
   if (contact.consentStatus === "unknown") {
-    return "לא תועדה הסכמה";
+    return messages.unknown;
   }
 
   if (contact.consentStatus === "withdrawn") {
     return contact.consentSource
-      ? `הסרה תועדה דרך ${contact.consentSource}`
-      : "הסרה תועדה";
+      ? messages.withdrawnWithSource(contact.consentSource)
+      : messages.withdrawn;
   }
 
   return contact.consentSource
-    ? `הסכמה תועדה דרך ${contact.consentSource}`
-    : "הסכמה תועדה";
+    ? messages.grantedWithSource(contact.consentSource)
+    : messages.granted;
 }
 
 function ContactActionFeedback({
+  messages,
   result,
 }: {
+  messages: ContactDirectoryMessages["directory"]["feedback"];
   result: SaveContactActionResult | ContactConsentActionResult | null;
 }) {
   if (!result) {
@@ -550,27 +594,12 @@ function ContactActionFeedback({
     return (
       <div className="inline-notice success" role="status">
         <span aria-hidden="true">✓</span>
-        <p>הפעולה נשמרה בשרת עבור ה־Tenant המאומת.</p>
+        <p>{messages.saved}</p>
       </div>
     );
   }
 
-  const message =
-    result.status === "validation-error"
-      ? "אחד או יותר מהשדות אינו תקין."
-      : result.status === "configuration-required"
-        ? "חיבור Clerk אינו מוגדר."
-        : result.status === "unauthenticated"
-          ? "ה-Session אינו פעיל. יש להתחבר מחדש."
-          : result.status === "onboarding-required"
-            ? "יש להשלים תחילה את יצירת סביבת העבודה."
-            : result.status === "tenant-selection-required"
-              ? "נדרשת בחירת Tenant מפורשת."
-              : result.status === "permission-denied"
-                ? "לתפקיד הנוכחי אין הרשאה לבצע את הפעולה."
-                : result.status === "not-found"
-                  ? "איש הקשר לא נמצא ב-Tenant הנוכחי."
-                  : "הפעולה נכשלה בשרת ולא נשמרה מקומית.";
+  const message = messages.failures[result.status];
 
   return (
     <div className="inline-notice danger" role="alert">
@@ -585,32 +614,9 @@ function contactLoadFailureMessage(
     LoadMoreContactsActionResult,
     { status: "loaded" }
   >,
+  messages: ContactDirectoryMessages["directory"]["feedback"]["loadFailures"],
 ): string {
-  if (result.status === "validation-error") {
-    return "סמן ההמשך של הרשימה אינו תקין.";
-  }
-
-  if (result.status === "configuration-required") {
-    return "חיבור Clerk אינו מוגדר.";
-  }
-
-  if (result.status === "unauthenticated") {
-    return "ה־Session אינו פעיל. יש להתחבר מחדש.";
-  }
-
-  if (result.status === "onboarding-required") {
-    return "יש להשלים תחילה את יצירת סביבת העבודה.";
-  }
-
-  if (result.status === "tenant-selection-required") {
-    return "נדרשת בחירת Tenant מפורשת.";
-  }
-
-  if (result.status === "permission-denied") {
-    return "לתפקיד הנוכחי אין הרשאה לקרוא אנשי קשר.";
-  }
-
-  return "טעינת הרשומות הנוספות נכשלה. הרשומות שכבר נטענו נשארו במסך.";
+  return messages[result.status];
 }
 
 function mergeContactOrganization(

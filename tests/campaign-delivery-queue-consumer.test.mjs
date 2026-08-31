@@ -11,6 +11,10 @@ const firstDeliveryKey =
   `campaign_delivery_v1_${"b".repeat(64)}`;
 const secondDeliveryKey =
   `campaign_delivery_v1_${"c".repeat(64)}`;
+const firstReservationKey =
+  `whatsapp_rate_reservation_v1_${"1".repeat(64)}`;
+const secondReservationKey =
+  `whatsapp_rate_reservation_v1_${"2".repeat(64)}`;
 const now = "2026-07-26T10:00:00.000Z";
 
 function recipient(deliveryKey = firstDeliveryKey) {
@@ -97,15 +101,19 @@ function queueBody(deliveryKey = firstDeliveryKey) {
   };
 }
 
-function delivery(body = queueBody()) {
+function delivery(
+  body = queueBody(),
+  attempts = 1,
+  id = "queue-message-id",
+) {
   const actions = [];
 
   return {
     actions,
     message: {
-      id: "queue-message-id",
+      id,
       timestamp: new Date(now),
-      attempts: 1,
+      attempts,
       body,
       ack() {
         actions.push({ action: "ack" });
@@ -132,8 +140,14 @@ function fixture(options = {}) {
   ];
   const processorResults = [
     ...(options.processorResults ?? [
-      { outcome: "accepted" },
+      {
+        outcome: "accepted",
+        providerMessageId: "wamid.campaign-17",
+      },
     ]),
+  ];
+  const admissionResults = [
+    ...(options.admissionResults ?? []),
   ];
   const consumer =
     createCampaignDeliveryQueueConsumer(
@@ -154,6 +168,10 @@ function fixture(options = {}) {
             ? {
                 campaignKey,
                 tenantId: 7,
+                recipientPhoneNumber:
+                  "+972501234567",
+                nextDeliveryAttemptNumber:
+                  options.nextDeliveryAttemptNumber ?? 1,
               }
             : options.currentContext;
         },
@@ -175,20 +193,6 @@ function fixture(options = {}) {
             outcome: "duplicate",
           };
         },
-        async markAccepted(
-          deliveryKey,
-          timestamp,
-        ) {
-          calls.push({
-            operation: "accepted",
-            deliveryKey,
-            timestamp,
-          });
-
-          if (options.transitionError) {
-            throw options.transitionError;
-          }
-        },
         async markRejected(
           deliveryKey,
           errorCode,
@@ -200,6 +204,22 @@ function fixture(options = {}) {
             errorCode,
             timestamp,
           });
+        },
+        async markDeferred(
+          deliveryKey,
+          errorCode,
+          timestamp,
+        ) {
+          calls.push({
+            operation: "mark-deferred",
+            deliveryKey,
+            errorCode,
+            timestamp,
+          });
+
+          if (options.markDeferredError) {
+            throw options.markDeferredError;
+          }
         },
         async markAmbiguous(
           deliveryKey,
@@ -232,6 +252,90 @@ function fixture(options = {}) {
         },
       },
       {
+        async recordAccepted(input) {
+          calls.push({
+            operation: "accepted",
+            ...input,
+          });
+
+          if (options.transitionError) {
+            throw options.transitionError;
+          }
+
+          return {
+            outcome: "recorded",
+            link: {},
+          };
+        },
+      },
+      {
+        isConfigured() {
+          return options.admissionConfigured !== false;
+        },
+        async reserve(request) {
+          calls.push({
+            operation: "reserve",
+            deliveryKey: request.deliveryKey,
+            recipientPhoneNumber:
+              request.recipientPhoneNumber,
+            deliveryAttemptNumber:
+              request.deliveryAttemptNumber,
+            queueAttemptNumber:
+              request.queueAttemptNumber,
+            queueMessageId: request.queueMessageId,
+            reservedAt: request.reservedAt,
+          });
+
+          if (options.admissionError) {
+            throw options.admissionError;
+          }
+
+          return admissionResults.shift() ?? {
+            outcome: "reserved",
+            reservationKey:
+              request.deliveryKey === firstDeliveryKey
+                ? firstReservationKey
+                : secondReservationKey,
+          };
+        },
+        async settle(
+          reservationKey,
+          outcome,
+          timestamp,
+        ) {
+          calls.push({
+            operation: "settle",
+            reservationKey,
+            outcome,
+            timestamp,
+          });
+
+          if (options.settlementError) {
+            throw options.settlementError;
+          }
+        },
+        async deferProviderRejection(
+          reservationKey,
+          scope,
+          providerErrorCode,
+          retryAfterSeconds,
+          observedAt,
+        ) {
+          calls.push({
+            operation: "provider-cooldown",
+            reservationKey,
+            scope,
+            providerErrorCode,
+            retryAfterSeconds,
+            observedAt,
+          });
+
+          if (options.providerCooldownError) {
+            throw options.providerCooldownError;
+          }
+        },
+      },
+      {
         isConfigured() {
           return options.configured !== false;
         },
@@ -240,6 +344,12 @@ function fixture(options = {}) {
             operation: "process",
             deliveryKey:
               prepared.recipient.deliveryKey,
+            reservationKey:
+              prepared.rateLimitReservationKey,
+            deliveryAttemptNumber:
+              prepared.deliveryAttemptNumber,
+            queueAttemptNumber:
+              prepared.queueAttemptNumber,
           });
 
           if (options.processorError) {
@@ -263,6 +373,7 @@ function emptyResult(overrides = {}) {
   return {
     accepted: 0,
     rejected: 0,
+    deferred: 0,
     skipped: 0,
     duplicates: 0,
     ambiguous: 0,
@@ -292,6 +403,128 @@ test("retries before D1 claim when the delivery processor is unavailable", async
     },
   ]);
   assert.deepEqual(testFixture.calls, []);
+});
+
+test("discards an invalid queue attempt before reservation identity derivation", async () => {
+  const invalidAttempt = delivery(queueBody(), 0);
+  const invalidId = delivery(queueBody(), 1, "\n");
+  const testFixture = fixture();
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [invalidAttempt.message, invalidId.message],
+    }),
+    emptyResult({ discarded: 2 }),
+  );
+  assert.deepEqual(invalidAttempt.actions, [
+    { action: "ack" },
+  ]);
+  assert.deepEqual(invalidId.actions, [
+    { action: "ack" },
+  ]);
+  assert.deepEqual(testFixture.calls, []);
+});
+
+test("retries before D1 access when rate-limit admission is unavailable", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    admissionConfigured: false,
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 60 },
+    },
+  ]);
+  assert.deepEqual(testFixture.calls, []);
+});
+
+test("defers a rate-limited delivery before claiming or contacting Meta", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    admissionResults: [
+      {
+        outcome: "deferred",
+        errorCode: "WHATSAPP_PAIR_LIMITED",
+        retryAfterSeconds: 6,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ deferred: 1, retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 6 },
+    },
+  ]);
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "prepare" ||
+        call.operation === "process",
+    ),
+    false,
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "reserve" &&
+        call.reservedAt === now &&
+        call.deliveryAttemptNumber === 1 &&
+        call.queueAttemptNumber === 1 &&
+        call.queueMessageId === "queue-message-id",
+    ),
+    true,
+  );
+});
+
+test("rejects an admission delay beyond the Cloudflare Queue limit", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    admissionResults: [
+      {
+        outcome: "deferred",
+        errorCode: "WHATSAPP_MARKETING_COOLDOWN",
+        retryAfterSeconds: 86_401,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 30 },
+    },
+  ]);
+  assert.equal(
+    testFixture.calls.some(
+      (call) => call.operation === "prepare",
+    ),
+    false,
+  );
 });
 
 test("acknowledges malformed, skipped, and duplicate jobs without Meta", async () => {
@@ -340,6 +573,14 @@ test("acknowledges malformed, skipped, and duplicate jobs without Meta", async (
     ),
     false,
   );
+  assert.equal(
+    testFixture.calls.filter(
+      (call) =>
+        call.operation === "settle" &&
+        call.outcome === "cancelled-before-submit",
+    ).length,
+    2,
+  );
 });
 
 test("records explicit accepted and rejected provider outcomes", async () => {
@@ -359,7 +600,10 @@ test("records explicit accepted and rejected provider outcomes", async () => {
       },
     ],
     processorResults: [
-      { outcome: "accepted" },
+      {
+        outcome: "accepted",
+        providerMessageId: "wamid.campaign-17",
+      },
       {
         outcome: "rejected",
         errorCode: "PROVIDER_REJECTED",
@@ -391,6 +635,203 @@ test("records explicit accepted and rejected provider outcomes", async () => {
     ),
     true,
   );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "accepted" &&
+        call.providerMessageId ===
+          "wamid.campaign-17" &&
+        call.reservationKey === firstReservationKey,
+    ),
+    true,
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "process" &&
+        call.deliveryKey === firstDeliveryKey &&
+        call.reservationKey === firstReservationKey &&
+        call.deliveryAttemptNumber === 1 &&
+        call.queueAttemptNumber === 1,
+    ),
+    true,
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "settle" &&
+        call.reservationKey ===
+          secondReservationKey &&
+        call.outcome === "provider-failed",
+    ),
+    true,
+  );
+});
+
+test("persists a scoped provider cooldown before returning an explicitly rejected delivery to the queue", async () => {
+  const testDelivery = delivery();
+  const testFixture = fixture({
+    processorResults: [
+      {
+        outcome: "deferred",
+        errorCode: "META_PAIR_RATE_LIMITED",
+        providerErrorCode: 131056,
+        cooldownScope: "pair",
+        retryAfterSeconds: 6,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    }),
+    emptyResult({ deferred: 1, retried: 1 }),
+  );
+  assert.deepEqual(testDelivery.actions, [
+    {
+      action: "retry",
+      options: { delaySeconds: 6 },
+    },
+  ]);
+  assert.deepEqual(
+    testFixture.calls
+      .filter((call) =>
+        [
+          "process",
+          "provider-cooldown",
+          "mark-deferred",
+        ].includes(call.operation),
+      )
+      .map((call) => call.operation),
+    ["process", "provider-cooldown", "mark-deferred"],
+  );
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "provider-cooldown" &&
+        call.reservationKey === firstReservationKey &&
+        call.scope === "pair" &&
+        call.providerErrorCode === 131056 &&
+        call.retryAfterSeconds === 6 &&
+        call.observedAt === now,
+    ),
+    true,
+  );
+});
+
+test("keeps a provider rejection fail-closed when cooldown evidence or queue state cannot be persisted", async () => {
+  const cases = [
+    fixture({
+      providerCooldownError: new Error(
+        "private cooldown failure",
+      ),
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_PHONE_THROUGHPUT_LIMITED",
+          providerErrorCode: 130429,
+          cooldownScope: "sender",
+          retryAfterSeconds: 12,
+        },
+      ],
+    }),
+    fixture({
+      markDeferredError: new Error(
+        "private queue state failure",
+      ),
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_PAIR_RATE_LIMITED",
+          providerErrorCode: 131056,
+          cooldownScope: "pair",
+          retryAfterSeconds: 6,
+        },
+      ],
+    }),
+  ];
+
+  for (const testFixture of cases) {
+    const testDelivery = delivery();
+
+    assert.deepEqual(
+      await testFixture.consumer.handle({
+        queue: "connect-campaign-deliveries",
+        messages: [testDelivery.message],
+      }),
+      emptyResult({ ambiguous: 1 }),
+    );
+    assert.deepEqual(testDelivery.actions, [
+      { action: "ack" },
+    ]);
+    assert.equal(
+      testFixture.calls.some(
+        (call) =>
+          call.operation === "ambiguous" &&
+          call.errorCode ===
+            "PROVIDER_RETRY_STATE_UNKNOWN",
+      ),
+      true,
+    );
+  }
+});
+
+test("rejects a processor cooldown with a mismatched scope or message category", async () => {
+  const marketingTemplate = {
+    ...campaign().template,
+    category: "MARKETING",
+  };
+  const cases = [
+    fixture({
+      currentCampaign: campaign({
+        template: marketingTemplate,
+      }),
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_PAIR_RATE_LIMITED",
+          providerErrorCode: 131056,
+          cooldownScope: "sender",
+          retryAfterSeconds: 6,
+        },
+      ],
+    }),
+    fixture({
+      processorResults: [
+        {
+          outcome: "deferred",
+          errorCode: "META_MARKETING_RECIPIENT_LIMITED",
+          providerErrorCode: 131049,
+          cooldownScope: "portfolio-recipient",
+          retryAfterSeconds: 86_400,
+        },
+      ],
+    }),
+  ];
+
+  for (const testFixture of cases) {
+    const testDelivery = delivery();
+
+    assert.deepEqual(
+      await testFixture.consumer.handle({
+        queue: "connect-campaign-deliveries",
+        messages: [testDelivery.message],
+      }),
+      emptyResult({ ambiguous: 1 }),
+    );
+    assert.deepEqual(testDelivery.actions, [
+      { action: "ack" },
+    ]);
+    assert.equal(
+      testFixture.calls.some(
+        (call) =>
+          call.operation === "provider-cooldown",
+      ),
+      false,
+    );
+  }
 });
 
 test("keeps an unknown external outcome in sending without automatic retry", async () => {
@@ -420,6 +861,49 @@ test("keeps an unknown external outcome in sending without automatic retry", asy
     ),
     true,
   );
+  assert.equal(
+    testFixture.calls.some(
+      (call) => call.operation === "settle",
+    ),
+    false,
+  );
+});
+
+test("keeps provider acceptance ambiguous when its durable identity cannot be linked", async () => {
+  const cases = [
+    fixture({
+      transitionError: new Error(
+        "private acceptance storage failure",
+      ),
+    }),
+    fixture({
+      processorResults: [
+        { outcome: "accepted" },
+      ],
+    }),
+  ];
+
+  for (const testFixture of cases) {
+    const testDelivery = delivery();
+    const result = await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries",
+      messages: [testDelivery.message],
+    });
+
+    assert.deepEqual(
+      result,
+      emptyResult({ ambiguous: 1 }),
+    );
+    assert.deepEqual(testDelivery.actions, [
+      { action: "ack" },
+    ]);
+    assert.equal(
+      testFixture.calls.some(
+        (call) => call.operation === "settle",
+      ),
+      false,
+    );
+  }
 });
 
 test("retries a D1 failure before the delivery is claimed", async () => {
@@ -441,6 +925,14 @@ test("retries a D1 failure before the delivery is claimed", async () => {
       options: { delaySeconds: 30 },
     },
   ]);
+  assert.equal(
+    testFixture.calls.some(
+      (call) =>
+        call.operation === "settle" &&
+        call.outcome === "cancelled-before-submit",
+    ),
+    true,
+  );
 });
 
 test("retries a missing campaign before claiming the delivery", async () => {

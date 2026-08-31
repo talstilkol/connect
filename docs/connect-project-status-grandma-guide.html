@@ -1,0 +1,1569 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    >
+    <title>Connect — מה עשינו, מה נשאר ומה צריך להחליט</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --page: #f4f7f5;
+        --panel: #ffffff;
+        --ink: #17221d;
+        --muted: #5b6861;
+        --line: #d6dfd9;
+        --brand: #086b45;
+        --brand-dark: #06492f;
+        --green: #176b3a;
+        --green-bg: #edf8f1;
+        --green-line: #83c89a;
+        --amber: #795400;
+        --amber-bg: #fff8df;
+        --amber-line: #dfbd54;
+        --red: #982f2a;
+        --red-bg: #fff1f0;
+        --red-line: #e29a95;
+        --blue: #1858a8;
+        --blue-bg: #eef5ff;
+        --focus: #155eef;
+        --shadow: 0 12px 32px rgba(30, 55, 42, 0.09);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--page);
+        font-family: Arial, "Noto Sans Hebrew", system-ui, sans-serif;
+        line-height: 1.65;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      a {
+        color: var(--brand-dark);
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 3px;
+      }
+
+      .skip-link {
+        position: fixed;
+        inset-block-start: 8px;
+        inset-inline-start: 8px;
+        z-index: 100;
+        padding: 10px 14px;
+        border-radius: 8px;
+        color: #fff;
+        background: var(--focus);
+        transform: translateY(-180%);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .wrap {
+        width: min(1180px, calc(100% - 32px));
+        margin-inline: auto;
+      }
+
+      .hero {
+        color: #fff;
+        background:
+          radial-gradient(circle at 12% 20%, rgba(61, 220, 142, 0.28), transparent 30%),
+          linear-gradient(135deg, #053924, #086c46 62%, #064735);
+      }
+
+      .hero .wrap {
+        padding-block: 46px 38px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        font-size: 0.88rem;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.22;
+      }
+
+      h1 {
+        max-width: 920px;
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 4.25rem);
+      }
+
+      .hero-copy {
+        max-width: 870px;
+        margin: 16px 0 0;
+        color: #dff5e8;
+        font-size: 1.04rem;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.35fr repeat(3, minmax(0, 0.7fr));
+        gap: 12px;
+        margin-block-start: 28px;
+      }
+
+      .hero-card {
+        min-height: 122px;
+        padding: 17px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 14px;
+        background: rgba(0, 0, 0, 0.16);
+      }
+
+      .hero-card strong,
+      .hero-card span {
+        display: block;
+      }
+
+      .hero-card strong {
+        font-size: 1.35rem;
+      }
+
+      .hero-card.primary strong {
+        font-size: clamp(2rem, 5vw, 3.9rem);
+        line-height: 1;
+      }
+
+      .hero-card span {
+        margin-block-start: 7px;
+        color: #dff5e8;
+        font-size: 0.88rem;
+      }
+
+      .sticky-nav {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 30;
+        border-block-end: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(10px);
+      }
+
+      .sticky-nav .wrap {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-block: 10px;
+      }
+
+      .sticky-nav a {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--ink);
+        background: #fff;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      main {
+        padding-block: 28px 70px;
+      }
+
+      .section {
+        margin-block-end: 28px;
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .section > h2 {
+        margin: 0 0 8px;
+        font-size: clamp(1.45rem, 3vw, 2.15rem);
+      }
+
+      .section-lead {
+        max-width: 900px;
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+
+      .callout {
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-inline-start-width: 6px;
+        border-radius: 12px;
+        background: #fafcfb;
+      }
+
+      .callout strong {
+        display: block;
+        margin-block-end: 4px;
+      }
+
+      .callout.warning {
+        border-color: var(--amber-line);
+        color: #533c00;
+        background: var(--amber-bg);
+      }
+
+      .callout.danger {
+        border-color: var(--red-line);
+        color: #69211e;
+        background: var(--red-bg);
+      }
+
+      .callout.info {
+        border-color: #9abcea;
+        background: var(--blue-bg);
+      }
+
+      .metric-grid,
+      .simple-grid,
+      .flow,
+      .stage-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-block: 18px;
+      }
+
+      .metric,
+      .simple-card {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: #fff;
+      }
+
+      .metric strong,
+      .metric span {
+        display: block;
+      }
+
+      .metric strong {
+        color: var(--brand-dark);
+        font-size: 1.55rem;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .simple-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .simple-card h3 {
+        margin: 0 0 7px;
+        font-size: 1.08rem;
+      }
+
+      .simple-card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .flow {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        align-items: stretch;
+        margin-block: 20px;
+      }
+
+      .flow-step {
+        position: relative;
+        padding: 16px 13px;
+        border: 1px solid #a8c6b6;
+        border-radius: 13px;
+        text-align: center;
+        background: #f2faf5;
+      }
+
+      .flow-step:not(:last-child)::after {
+        content: "←";
+        position: absolute;
+        inset-inline-end: calc(100% + 2px);
+        inset-block-start: 42%;
+        color: var(--brand);
+        font-size: 1.4rem;
+        font-weight: 900;
+      }
+
+      .flow-step strong,
+      .flow-step span {
+        display: block;
+      }
+
+      .flow-step span {
+        margin-block-start: 5px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .decision-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-block: 18px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: #f7faf8;
+      }
+
+      .button {
+        min-height: 42px;
+        padding: 8px 14px;
+        border: 1px solid #9baaa2;
+        border-radius: 9px;
+        color: var(--ink);
+        background: #fff;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .button.primary {
+        border-color: var(--brand);
+        color: #fff;
+        background: var(--brand);
+      }
+
+      .button.danger {
+        border-color: var(--red-line);
+        color: var(--red);
+        background: var(--red-bg);
+      }
+
+      .decision-summary {
+        margin-inline-start: auto;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .decision-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .decision-card {
+        margin: 0;
+        padding: 0;
+        border: 2px solid var(--red-line);
+        border-radius: 15px;
+        overflow: hidden;
+        background: var(--red-bg);
+      }
+
+      .decision-card.answered {
+        border-color: var(--green-line);
+        background: var(--green-bg);
+      }
+
+      .decision-card legend {
+        width: 100%;
+        padding: 17px 18px 8px;
+        font-size: 1.08rem;
+        font-weight: 800;
+      }
+
+      .decision-body {
+        padding: 0 18px 18px;
+      }
+
+      .plain-language {
+        margin: 0 0 12px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .option-list {
+        display: grid;
+        gap: 9px;
+      }
+
+      .option {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      .option.recommended {
+        border: 2px solid var(--brand);
+        background: #f0fbf5;
+      }
+
+      .option input {
+        margin-block-start: 5px;
+      }
+
+      .option strong,
+      .option small {
+        display: block;
+      }
+
+      .option small {
+        margin-block-start: 3px;
+        color: var(--muted);
+      }
+
+      .recommended-tag {
+        display: inline-block;
+        margin-inline-start: 6px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        color: #fff;
+        background: var(--green);
+        font-size: 0.72rem;
+      }
+
+      .notes-label {
+        display: block;
+        margin-block-start: 12px;
+        font-weight: 700;
+      }
+
+      .notes {
+        width: 100%;
+        min-height: 76px;
+        margin-block-start: 5px;
+        padding: 10px;
+        border: 1px solid #9baaa2;
+        border-radius: 9px;
+        color: var(--ink);
+        background: #fff;
+        resize: vertical;
+      }
+
+      .decision-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-block-start: 11px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .decision-meta span {
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .export-preview {
+        max-height: 360px;
+        overflow: auto;
+        margin-block-start: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        direction: ltr;
+        text-align: left;
+        white-space: pre-wrap;
+        background: #101a15;
+        color: #dff5e8;
+      }
+
+      .selected-decisions,
+      .blocker-list {
+        display: grid;
+        gap: 9px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .selected-decisions li,
+      .blocker-list li {
+        padding: 12px 14px;
+        border-radius: 10px;
+      }
+
+      .selected-decisions li {
+        border: 1px solid var(--green-line);
+        background: var(--green-bg);
+      }
+
+      .blocker-list li {
+        border: 1px solid var(--amber-line);
+        background: var(--amber-bg);
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: #fff;
+      }
+
+      details + details {
+        margin-block-start: 9px;
+      }
+
+      summary {
+        padding: 13px 15px;
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .details-body {
+        padding: 0 15px 15px;
+      }
+
+      .details-body p,
+      .details-body ul {
+        margin-block: 8px 0;
+      }
+
+      .timeline details {
+        border-color: var(--green-line);
+        background: var(--green-bg);
+      }
+
+      .stage-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stage {
+        padding: 15px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+      }
+
+      .stage.done {
+        border-color: var(--green-line);
+        background: var(--green-bg);
+      }
+
+      .stage.current {
+        border-color: var(--amber-line);
+        background: var(--amber-bg);
+      }
+
+      .stage.blocked {
+        border-color: var(--red-line);
+        background: var(--red-bg);
+      }
+
+      .stage h3 {
+        margin: 0 0 7px;
+        font-size: 1.02rem;
+      }
+
+      .stage p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .stage-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-block-start: 11px;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.78);
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .footer {
+        padding-block: 24px 38px;
+        border-block-start: 1px solid var(--line);
+        color: var(--muted);
+        background: #fff;
+      }
+
+      .footer p {
+        margin: 4px 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      @media (max-width: 900px) {
+        .hero-grid,
+        .metric-grid,
+        .flow,
+        .stage-grid,
+        .simple-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .flow-step:not(:last-child)::after {
+          display: none;
+        }
+
+        .decision-summary {
+          width: 100%;
+          margin-inline-start: 0;
+        }
+      }
+
+      @media print {
+        .sticky-nav,
+        .decision-toolbar,
+        .skip-link,
+        .notes-label,
+        .notes {
+          display: none !important;
+        }
+
+        body {
+          background: #fff;
+        }
+
+        .section {
+          break-inside: avoid;
+          box-shadow: none;
+        }
+
+        details > .details-body {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">דלג לתוכן</a>
+
+    <header class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Connect · תמונת מצב פשוטה · 30 באוגוסט 2026</p>
+        <h1>מה בנינו, למה עצרנו, ומה נשאר עד מוצר בטוח</h1>
+        <p class="hero-copy">
+          המסמך הזה מסביר את הפרויקט בלי צורך להבין קוד. הוא גם מפריד בין עבודה שכבר נעשתה,
+          החלטות שכבר התקבלו, דברים שעדיין צריך להוכיח, ושתי ההצבעות האחרונות שטל כבר הכריע.
+        </p>
+
+        <div class="hero-grid" aria-label="תמונת מצב קצרה">
+          <div class="hero-card primary">
+            <strong>?%</strong>
+            <span>אחוז ההשלמה המדויק של התוכנית המלאה: unknown/unavailable — עדיין אין מכנה משימות מאושר.</span>
+          </div>
+          <div class="hero-card">
+            <strong>PUBLIC</strong>
+            <span>המאגר הקנוני חייב להישאר ציבורי. מעבר ל־Private אסור.</span>
+          </div>
+          <div class="hero-card">
+            <strong>BLOCKED</strong>
+            <span>Gate 29 עדיין חסום. אין אישור ל־Production.</span>
+          </div>
+          <div class="hero-card">
+            <strong>ACTIVE</strong>
+            <span>הקפאת הפיתוח פעילה עד להשלמת ואישור ה־Master Plan.</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="sticky-nav" aria-label="חלקי המסמך">
+      <div class="wrap">
+        <a href="#part-1">1. אחוז התקדמות</a>
+        <a href="#part-2">2. מהו Connect</a>
+        <a href="#part-3">3. החלטות והצבעה</a>
+        <a href="#part-4">4. מה עברנו ומה נשאר</a>
+        <a href="#part-5">5. איך שולחים תשובות</a>
+      </div>
+    </nav>
+
+    <main id="main" class="wrap">
+      <div class="callout success" style="margin-block-end: 18px;">
+        <strong>כלל אחריות מעודכן:</strong>
+        Tal הוא האחראי היחיד לכל המחקר, התכנון, הפיתוח, הבדיקות, החיבורים והתיאום. אין כרגע חלוקת Primary/Backup/RACI. אישור מקצועי חיצוני הוא ראיה שטל משיג — לא בעלות של אדם אחר.
+        <a href="connect-remaining-decisions-and-needs.html">למדריך המפורט: מה כל שירות עושה, כמה הוא עולה ואיך מתחברים אליו</a>.
+      </div>
+      <section id="part-1" class="section">
+        <h2>1. כמה אחוז מהתוכנית המלאה הושלם?</h2>
+        <p class="section-lead">
+          התשובה הכנה היא: עדיין אי אפשר לחשב מספר מדויק. זה לא אומר שלא נעשתה עבודה;
+          זה אומר שעדיין לא קבענו רשימה סופית ומאושרת של כל המשימות והמשקל של כל אחת.
+        </p>
+
+        <div class="callout warning">
+          <strong>1.1 למה אסור לכתוב עכשיו 70% או 90%?</strong>
+          אם ספרנו רק קבצים או מסכים, משימה קטנה הייתה שווה למשימת אבטחה של שבוע. זה כמו לומר שבניית בית
+          הושלמה לפי מספר הברגים, בלי לבדוק אם יש יסודות, חשמל ואישור אכלוס.
+        </div>
+
+        <div class="metric-grid" aria-label="עובדות מדידות">
+          <div class="metric">
+            <strong>298</strong>
+            <span>Commits קיימים בהיסטוריית Git שנבדקה.</span>
+          </div>
+          <div class="metric">
+            <strong>13</strong>
+            <span>ימי Implementation מתועדים בהיסטוריית Git.</span>
+          </div>
+          <div class="metric">
+            <strong>419</strong>
+            <span>נתיבים עם שינויים מקומיים בתצפית הקפואה 19:28:56: 128 modified ו־291 untracked.</span>
+          </div>
+          <div class="metric">
+            <strong>0</strong>
+            <span>אישורי Production תקפים כרגע. Gate 29 נשאר חסום.</span>
+          </div>
+        </div>
+
+        <div class="simple-grid">
+          <article class="simple-card">
+            <h3>1.2 מה כבר מוכח?</h3>
+            <p>
+              יש בסיס React רחב, היסטוריית פיתוח גדולה, תכנון אבטחה עמוק, החלטות מוצר רבות ומועמדי
+              בדיקה דטרמיניסטיים. המאגר נצפה כ־Public.
+            </p>
+          </article>
+          <article class="simple-card">
+            <h3>1.3 מה עדיין לא מוכח?</h3>
+            <p>
+              אין עדיין Master Plan בעל root מאושר, אין Atomic Task Registry מלא, אין לוח משאבים,
+              ואין Evidence חי מכל הספקים. לכן אין מכנה אמיתי לאחוז או לזמן.
+            </p>
+          </article>
+          <article class="simple-card">
+            <h3>1.4 מתי יהיה אחוז אמיתי?</h3>
+            <p>
+              לאחר שנסגור Scope, נפרק הכול למשימות אטומיות, נגדיר משקל וקבלה לכל משימה ונקפיא את הרשימה.
+              כל המשימות יהיו בבעלות Tal. אז האחוז יהיה סכום משקל המשימות שהתקבלו חלקי המשקל הכולל.
+            </p>
+          </article>
+          <article class="simple-card">
+            <h3>1.5 האם הכול כבר ב־GitHub?</h3>
+            <p>
+              לא. ה־branch המקומי מצביע על commit מסונכרן, אך קיימים מאות שינויים מקומיים. אין כרגע
+              Public Push Permit, ולכן המסמך אינו טוען שהעבודה המקומית הועלתה.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="part-2" class="section">
+        <h2>2. מהו פרויקט Connect — ברמת סבתא</h2>
+        <p class="section-lead">
+          Connect אמור להיות משרד דיגיטלי לעסק שמדבר עם לקוחות דרך WhatsApp הרשמי.
+        </p>
+
+        <div class="flow" role="img" aria-label="לקוח שולח הודעת WhatsApp, Connect מקבל, מסדר, מסייע ומעביר לאדם">
+          <div class="flow-step">
+            <strong>1. לקוח כותב</strong>
+            <span>הודעה נשלחת ל־WhatsApp הרשמי של העסק.</span>
+          </div>
+          <div class="flow-step">
+            <strong>2. Connect מקבל</strong>
+            <span>ההודעה נכנסת לתיבה משותפת ומזוהה עם העסק הנכון.</span>
+          </div>
+          <div class="flow-step">
+            <strong>3. Connect מסדר</strong>
+            <span>שומר שיחה, איש קשר, הרשאה, תבנית וסטטוס.</span>
+          </div>
+          <div class="flow-step">
+            <strong>4. AI או Bot מציע</strong>
+            <span>המערכת יכולה להציע תשובה, אבל כרגע אדם חייב לאשר.</span>
+          </div>
+          <div class="flow-step">
+            <strong>5. אדם שולח</strong>
+            <span>ההודעה נשלחת רק אם ההרשאות, ההסכמה והקצב בטוחים.</span>
+          </div>
+        </div>
+
+        <div class="simple-grid">
+          <article class="simple-card">
+            <h3>2.1 תיבת הודעות משותפת</h3>
+            <p>כמה עובדים רואים את אותן שיחות, מחלקים אחריות ויודעים מי ענה.</p>
+          </article>
+          <article class="simple-card">
+            <h3>2.2 אנשי קשר וקמפיינים</h3>
+            <p>העסק מנהל אנשי קשר ושולח הודעות מאושרות, רק עם הסכמה ויכולת הסרה.</p>
+          </article>
+          <article class="simple-card">
+            <h3>2.3 Bot ו־AI</h3>
+            <p>המערכת יכולה לבצע מסלול שאלות ולהציע תשובות מתוך ידע העסק, עם מעבר לאדם.</p>
+          </article>
+          <article class="simple-card">
+            <h3>2.4 בטיחות וניהול</h3>
+            <p>יש צוותים, הרשאות, Audit, הגבלות קצב, גיבוי, דיווח ותוכנית לעצירת פעולה מסוכנת.</p>
+          </article>
+        </div>
+
+        <div class="callout danger" style="margin-block-start: 18px;">
+          <strong>2.5 למה עצרנו לפני שממשיכים לתכנת?</strong>
+          מפני שקוד רב אינו שווה מוצר מוכן. הביקורות מצאו שחלק ממסמכי הבקרה ידעו לומר “PASS”
+          גם כאשר חסרו סמכות, ראיה חיה או מסלול בדיקה אמיתי. לכן עצרנו כדי לבנות תוכנית שאי אפשר
+          לעקוף בעזרת סימון ירוק בלבד.
+        </div>
+
+        <details style="margin-block-start: 18px;">
+          <summary>2.6 מילון קצר למילים הטכניות במסמך</summary>
+          <div class="details-body">
+            <ul class="selected-decisions">
+              <li><strong>Root:</strong> טביעת אצבע דיגיטלית של אוסף מסמכים. שינוי של אות אחת יוצר טביעה אחרת.</li>
+              <li><strong>B0:</strong> ספר החוקים שקובע מי רשאי לאשר תוכנית, מה בדיוק הוא מאשר ואיך מונעים אישור מזויף או ישן.</li>
+              <li><strong>Review Protocol:</strong> מתכון קבוע לביקורת, כדי שכל מבקר יבדוק את אותם דברים ולא רק יגיד “נראה טוב”.</li>
+              <li><strong>Gate29:</strong> שער הבטיחות האחרון לפני שמותר להחזיר פיתוח או פעולה חיה. כרגע השער סגור.</li>
+              <li><strong>Source Universe:</strong> מדף ספרים סגור וממוספר של כל מקורות האמת, עם גרסה וטביעת אצבע לכל מקור.</li>
+              <li><strong>TRD-2:</strong> תוכנית הבנייה הטכנית המפורטת: נתונים, מסכים, APIs, הרשאות, כשלים ובדיקות.</li>
+              <li><strong>CAS:</strong> שינוי שמתבצע רק אם המצב לא השתנה מאז שקראנו אותו; אחרת עוצרים ומנסים לפי כלל מוגדר.</li>
+              <li><strong>ReviewInput:</strong> הקלסר המדויק שכל המבקרים חייבים לקרוא.</li>
+              <li><strong>Program SourceSet:</strong> הרשימה המלאה של כל הקלסרים והמקורות של התוכנית.</li>
+              <li><strong>Permit:</strong> אישור מוגבל לפעולה אחת, עבור מטרה, זמן וגרסה מדויקים.</li>
+              <li><strong>RACI:</strong> טבלת חלוקת אחריות בין כמה אנשים. היא אינה פעילה כרגע, משום ש־Tal הוא האדם היחיד שעובד על הפרויקט.</li>
+              <li><strong>JSON:</strong> קובץ טקסט מסודר שמחשב וגם אדם יכולים לקרוא; כאן הוא משמש לשליחת הבחירות.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section id="part-3" class="section">
+        <h2>3. החלטות שהתקבלו ואפשרות לייצוא</h2>
+        <p class="section-lead">
+          שתי ההחלטות הזכאיות V01 ו־V02 כבר נענו. ההחלטות D01–D30 כבר קיבלו כיוון תכנוני ואינן נשאלות
+          מחדש. שינוי מקומי כאן אינו מחליף את ההחלטה המתועדת עד ייצוא ואישור חדש.
+        </p>
+
+        <div class="decision-toolbar" aria-label="פעולות להצבעה">
+          <button id="export-file" class="button primary" type="button">ייצוא תשובות לקובץ JSON</button>
+          <button id="show-json" class="button" type="button">הצג JSON להעתקה</button>
+          <button id="copy-json" class="button" type="button">העתק JSON</button>
+          <button id="reset-votes" class="button danger" type="button">נקה שינויים מקומיים</button>
+          <span id="decision-summary" class="decision-summary">2 מתוך 2 החלטות נענו</span>
+        </div>
+
+        <div id="decision-list" class="decision-list"></div>
+        <pre id="export-preview" class="export-preview" tabindex="0" hidden></pre>
+        <p id="live-status" role="status" aria-live="polite"></p>
+
+        <details style="margin-block-start: 22px;">
+          <summary>3.3 ההחלטות שכבר נבחרו — D01 עד D30</summary>
+          <div class="details-body">
+            <p>
+              כל אלה הם כיווני Planning. הם אינם הוכחת Production ואינם פותחים יכולת שכרגע כבויה.
+            </p>
+            <ol class="selected-decisions">
+              <li><strong>D01.</strong> הזמנה תקפה 72 שעות; הזמנה חדשה רק לאחר מצב סופי.</li>
+              <li><strong>D02.</strong> OpenAI Responses API מאחורי Adapter; ה־AI מציע ואדם מאשר; מודל חי עדיין לא הוסמך.</li>
+              <li><strong>D03.</strong> Billing core ניטרלי; Stripe ו־Paddle מוכנים כ־Adapters כבויים; ב־Pilot אין חיוב אוטומטי.</li>
+              <li><strong>D04.</strong> Rate limit רב־שכבתי נגזר ממצב Meta חי; מצב לא ידוע נותן קיבולת אפס.</li>
+              <li><strong>D05.</strong> GuardDuty Malware Protection for S3; העלאות נשארות כבויות עד הוכחה חיה.</li>
+              <li><strong>D06.</strong> קובצי ידע עד 10 MiB ורק PDF, TXT ו־DOCX.</li>
+              <li><strong>D07.</strong> סריקה תקועה: 15 דקות, עד שלושה ניסיונות, ואז בדיקה ידנית או מחיקה לפי Policy.</li>
+              <li><strong>D08.</strong> גיבוי יומי, שמירה 90 יום, PITR ותרגיל Restore חודשי.</li>
+              <li><strong>D09.</strong> OpenTelemetry עם Better Stack.</li>
+              <li><strong>D10.</strong> On-call בשעות הפעילות ב־Pilot עם גיבוי והסלמה.</li>
+              <li><strong>D11.</strong> Retention Policy v2 בכפוף ל־Legal; מחיקה אוטומטית מנותקת עד אישור.</li>
+              <li><strong>D12.</strong> Railway PostgreSQL ל־Pilot.</li>
+              <li><strong>D13.</strong> Railway Redis ו־BullMQ; PostgreSQL נשאר מקור האמת.</li>
+              <li><strong>D14.</strong> S3 פרטי ב־il-central-1 עם SSE-KMS, מפתחות בניהול הלקוח ו־Bucket Keys.</li>
+              <li><strong>D15.</strong> Secrets נשמרים ב־Platform vaults; Tal הוא האחראי היחיד לניהול הגישה.</li>
+              <li><strong>D16.</strong> Staging ו־Production נפרדים.</li>
+              <li><strong>D17.</strong> Clerk, Organizations ו־MFA לבעלי הרשאות מנהליות.</li>
+              <li><strong>D18.</strong> המאגר הקנוני נשאר Public. אסור להציע Private מחדש בלי הוראה מפורשת חדשה.</li>
+              <li><strong>D19.</strong> החלטה מאוחרת החליפה את חלוקת התפקידים: Tal הוא האחראי היחיד לכל תחום.</li>
+              <li><strong>D20.</strong> Test WABA קודם; נכס האב רק ב־Pilot מאושר.</li>
+              <li><strong>D21.</strong> Closed Pilot עם Tenant יחיד.</li>
+              <li><strong>D22.</strong> עסקים קטנים ובינוניים בישראל, Hebrew-first.</li>
+              <li><strong>D23.</strong> Plan ידני יחיד ב־Pilot וללא Checkout אוטומטי.</li>
+              <li><strong>D24.</strong> קמפיינים חוזרים רק אחרי Pilot.</li>
+              <li><strong>D25.</strong> אדם מאשר כל תשובה או פעולה של AI; אין Auto-send.</li>
+              <li><strong>D26.</strong> Israel-first בכפוף לבדיקת Legal ו־Privacy.</li>
+              <li><strong>D27.</strong> Staging, אחריו Canary, אחריו Pilot, ורק אז הרחבה; Rollback מתורגל.</li>
+              <li><strong>D28.</strong> תקרה נפרדת לכל ספק ו־kill switch.</li>
+              <li><strong>D29.</strong> סדר Roadmap ייקבע לפי ראיות מה־Pilot, לא לפי ניחוש מוקדם.</li>
+              <li><strong>D30.</strong> Responsive Web ב־Pilot; Native, Public API, Marketplace, Enterprise ויכולות PWA נשארים כבויים עד ספי יציאה.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details>
+          <summary>3.4 דברים שצריך להביא או להוכיח — אינם הצבעה</summary>
+          <div class="details-body">
+            <ul class="blocker-list">
+              <li><strong>AI:</strong> חשבון וספק חיים, מודל ו־profile מורשים, Data controls, Privacy/Legal, Evals וביקורת עצמאית. עד אז AI OFF.</li>
+              <li><strong>Billing:</strong> זכאות ישות משפטית, KYC, בדיקות מס ומשפט, חוזים, DPA ו־Sandbox. Tal אחראי להשיג את הראיות. עד אז BILLING OFF.</li>
+              <li><strong>Storage:</strong> חשבון AWS, Region, Buckets, KMS, IAM, GuardDuty, Quotas, תקציב והתראות. Tal אחראי לכל החיבור. עד אז UPLOADS OFF.</li>
+              <li><strong>WhatsApp:</strong> WABA, מספר טלפון, הרשאות, consent, איכות, headers ומגבלות חיות. מספרי קצב שלא הוכחו נשארים unknown/unavailable.</li>
+              <li><strong>Legal:</strong> בסיס חוקי, תנאים, Privacy notice, DPA, Retention, Legal Hold, ייצוא/מחיקה ו־Data residency.</li>
+              <li><strong>אחריות:</strong> Tal אחראי יחיד. נותר לקבוע רק כמה שעות שבועיות הוא מקצה לפרויקט ואיך מתריעים אליו במקרה תקלה.</li>
+              <li><strong>Pilot:</strong> בעלות נכסי Meta, allowlist משתתפים, תאריכים, ערוץ חירום וסמכות עצירה.</li>
+              <li><strong>GitHub:</strong> Ruleset, Required checks, CODEOWNERS, scanners ו־readback. המאגר עצמו נשאר Public.</li>
+              <li><strong>Rate Limit עתידי:</strong> D04 כבר קבע מינימום רב־שכבתי הנגזר ממצב חי. טל יאשר בעתיד רק את Snapshot המספרים, התוקף והתקרה הפנימית לאחר Evidence; אין הצבעה חוזרת כעת.</li>
+              <li><strong>Planning Root עתידי:</strong> אין root זכאי להצבעה כל עוד B0 ו־Review Protocol נדחו. כשתהיה חבילה זכאית, טל יוכל לאשר או לדחות את טביעת האצבע המדויקת שלה.</li>
+              <li><strong>הסרת הקפאה עתידית:</strong> ההקפאה נשארת ACTIVE. אפשר לבקש הסרה רק עבור Work Package מדויק אחרי Gate29, מינוי סמכויות ו־readback.</li>
+            </ul>
+          </div>
+        </details>
+      </section>
+
+      <section id="part-4" class="section">
+        <h2>4. השלבים שעברנו ומה נשאר קדימה</h2>
+        <p class="section-lead">
+          ירוק פירושו “העבודה המתוארת אכן קרתה”, לא “המוצר קיבל אישור Production”.
+          ליד כל שלב מופיע אחוז מצטבר רשמי כלא זמין, משום שהמכנה המלא עדיין לא הוקפא.
+        </p>
+
+        <h3>4.1 יומן עבודה לפי ימים שבהם קיימת ראיה</h3>
+        <div class="timeline">
+          <details>
+            <summary>4.1.1 · 25.07.2026 · הוקם בסיס Connect</summary>
+            <div class="details-body">
+              <p>נבנתה תשתית SaaS ראשונית ל־WhatsApp ב־React ובשרתים הנלווים.</p>
+              <p><strong>ראיה:</strong> Commit אחד. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.2 · 27.07.2026 · Tenant, צוות, Governance ו־Release</summary>
+            <div class="details-body">
+              <p>נוספו הפרדת לקוחות, בחירת Workspace, צוות, Audit, החלטות Production ושערי Release.</p>
+              <p><strong>ראיה:</strong> 15 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.3 · 05.08.2026 · הזמנות צוות בטוחות</summary>
+            <div class="details-body">
+              <p>נבנה מחזור חיים להזמנה: יצירה, שמירה, Queue, תפוגה, קבלה ו־Audit.</p>
+              <p><strong>ראיה:</strong> 12 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.4 · 09.08.2026 · הוכחות דפדפן ו־CI</summary>
+            <div class="details-body">
+              <p>נוספו בדיקות Browser להזמנות, Attestations, סריקת תלויות ושערי CI.</p>
+              <p><strong>ראיה:</strong> 33 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.5 · 14.08.2026 · ראיות Release ופיצול UI</summary>
+            <div class="details-body">
+              <p>נבנו Evidence ל־GitHub ולפריסה, ופוצלו מסכים וסגנונות גדולים לרכיבים ברורים יותר.</p>
+              <p><strong>ראיה:</strong> 17 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.6 · 16.08.2026 · Rate limiting, Campaigns, Bots והחלטות</summary>
+            <div class="details-body">
+              <p>טל מונה לבעלות מחקר Rate Limits; נבנו הגנות קצב, שליחת Campaign, Bot flows ושאלון החלטות.</p>
+              <p><strong>ראיה:</strong> 33 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.7 · 17.08.2026 · עברית, אבטחה ומעבר PostgreSQL/Railway</summary>
+            <div class="details-body">
+              <p>לוקליזציה רחבה, הקשחת Clerk, Import בטוח, Policy WhatsApp, ותשתית PostgreSQL/Railway לרוב תחומי המוצר.</p>
+              <p><strong>ראיה:</strong> 71 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.8 · 19.08.2026 · השלמת שכבות Persistence</summary>
+            <div class="details-body">
+              <p>נוספה שמירה ל־AI, Bot, Billing, Admin, Consent ומנגנוני Migration ו־Rate limit ב־PostgreSQL.</p>
+              <p><strong>ראיה:</strong> 17 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.9 · 20.08.2026 · חזרות Migration ו־Railway API</summary>
+            <div class="details-body">
+              <p>בוצעו חזרות מעבר לכל קבוצות הנתונים, Cutover מוגן וחיבור פעולות רבות דרך Railway API.</p>
+              <p><strong>ראיה:</strong> 23 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.10 · 21.08.2026 · פעולות אנשי קשר</summary>
+            <div class="details-body">
+              <p>חוברו שמירת איש קשר, Consent וארגון אנשי קשר דרך Railway.</p>
+              <p><strong>ראיה:</strong> 3 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.11 · 24.08.2026 · גבולות Source, Secrets ו־Readiness v2</summary>
+            <div class="details-body">
+              <p>הוקשחו גבולות Client/Server, סריקות Secret, Attestations ותשתית Evidence ל־Production Readiness.</p>
+              <p><strong>ראיה:</strong> 6 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.12 · 25.08.2026 · Queue, Telemetry ו־Provider fences</summary>
+            <div class="details-body">
+              <p>נוספו BullMQ/Redis, OpenTelemetry, Delivery evidence, Staging guards ויכולות Provider כבויות ומוגנות.</p>
+              <p><strong>ראיה:</strong> 54 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.13 · 26.08.2026 · Adapter רשמי ל־Meta במצב כבוי</summary>
+            <div class="details-body">
+              <p>נבנו גבולות Credential, Session ו־Provider וה־Adapter הרשמי נשאר dormant עד Evidence והרשאה.</p>
+              <p><strong>ראיה:</strong> 13 Commits. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details>
+            <summary>4.1.14 · 29.08.2026 · מעבר ל־Master Planning וביקורת עוינת</summary>
+            <div class="details-body">
+              <p>הפיתוח הוקפא, נבנה Recovery Ledger, הופרדו החלטות מראיות, ונפתחו ביקורות פורמליות על כללי הקבלה.</p>
+              <p><strong>ראיה:</strong> מסמכי Planning מקומיים מתוארכים. <strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+          <details open>
+            <summary>4.1.15 · 30.08.2026 · מחקר סייבר וחבילות בקרה חדשות</summary>
+            <div class="details-body">
+              <p>
+                נבנו מועמדים חדשים ל־B0, Review Protocol, AI ו־Public/Cyber, וכן בסיס מקורות עדכני ל־NIST,
+                OWASP, GitHub, WhatsApp, Legal, Backup, Billing ו־AI.
+              </p>
+              <p>
+                הביקורות העצמאיות כבר דחו את B0 v7 עם 14 ממצאים, את Protocol v1.9 עם 17 ממצאים,
+                את D02-A9 של ה־AI עם 8 ממצאים ואת Public/Cyber v5 עם 18 ממצאים.
+                זהו גילוי מועיל: המערכת נשארה חסומה במקום לקבל PASS שגוי.
+              </p>
+              <p><strong>אחוז מצטבר רשמי:</strong> unknown/unavailable.</p>
+            </div>
+          </details>
+        </div>
+
+        <h3 style="margin-block-start: 26px;">4.2 שלבים שכבר עברנו — ירוק</h3>
+        <div class="stage-grid">
+          <article class="stage done">
+            <h3>4.2.1 קבלת האפיון ובחירת React</h3>
+            <p>האפיון התקבל והוחלט על Web ב־React במקום Windows Forms.</p>
+            <div class="stage-footer"><span class="pill">נעשה</span><span class="pill">אחוז רשמי אחרי השלב: לא זמין</span></div>
+          </article>
+          <article class="stage done">
+            <h3>4.2.2 בניית בסיס מוצר מקומי</h3>
+            <p>נבנו מסכים, צוותים, שיחות, אנשי קשר, Campaigns, Bots, AI surfaces ו־Admin.</p>
+            <div class="stage-footer"><span class="pill">נעשה מקומית</span><span class="pill">לא Production-ready</span><span class="pill">אחוז רשמי: לא זמין</span></div>
+          </article>
+          <article class="stage done">
+            <h3>4.2.3 שכבות נתונים ותפעול</h3>
+            <p>נבנו יסודות PostgreSQL, Railway API, Queue, Telemetry ו־Migration rehearsals.</p>
+            <div class="stage-footer"><span class="pill">נעשה מקומית</span><span class="pill">Evidence חי חסר</span><span class="pill">אחוז רשמי: לא זמין</span></div>
+          </article>
+          <article class="stage done">
+            <h3>4.2.4 החלטות D01–D30</h3>
+            <p>כל שלושים הכיוונים קיבלו החלטת Planning; אין לשאול אותם מחדש במסמכים הישנים.</p>
+            <div class="stage-footer"><span class="pill">כיוון נבחר</span><span class="pill">Acceptance עדיין 0</span><span class="pill">אחוז רשמי: לא זמין</span></div>
+          </article>
+          <article class="stage done">
+            <h3>4.2.5 Audit והקפאת פיתוח</h3>
+            <p>זוהו פערים בין “קיים קוד” לבין “יש הוכחה”, ולכן Gate 29 נחסם.</p>
+            <div class="stage-footer"><span class="pill">נעשה</span><span class="pill">מנגנון בטיחות פעיל</span><span class="pill">אחוז רשמי: לא זמין</span></div>
+          </article>
+          <article class="stage done">
+            <h3>4.2.6 בסיס מחקר Cyber ו־WhatsApp</h3>
+            <p>נאספו מקורות רשמיים עדכניים, עם גבולות ברורים למה נצפה ומה עדיין לא הוכח.</p>
+            <div class="stage-footer"><span class="pill">Research candidate</span><span class="pill">עדיין לא Source-admitted</span><span class="pill">אחוז רשמי: לא זמין</span></div>
+          </article>
+        </div>
+
+        <h3 style="margin-block-start: 26px;">4.3 השלבים שנותרו קדימה — לפי הסדר</h3>
+        <div class="stage-grid">
+          <article class="stage current">
+            <h3>4.3.1 לתקן ולקבל את B0</h3>
+            <p>לסגור 14 ממצאי B0 v7 ולהוכיח מי מוסמך לאשר, באיזה root, באיזה זמן ובלי Replay.</p>
+            <div class="stage-footer"><span class="pill">נוכחי</span><span class="pill">אחוז רשמי אחרי השלב: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage current">
+            <h3>4.3.2 לתקן ולקבל את Review Protocol</h3>
+            <p>לסגור 17 ממצאי v1.9 ולהוכיח שביקורת באמת מריצה את הכללים ולא רק בודקת שקיימת שורה.</p>
+            <div class="stage-footer"><span class="pill">נוכחי</span><span class="pill">אחוז רשמי: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage current">
+            <h3>4.3.3 לבנות AI A10 ו־Public/Cyber v6</h3>
+            <p>הביקורות הסתיימו ודחו את המועמדים. כעת צריך לסגור 8 ממצאי AI ו־18 ממצאי Public/Cyber אחד־לאחד ולבקר שוב.</p>
+            <div class="stage-footer"><span class="pill">Successors נדרשים</span><span class="pill">אחוז רשמי: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.4 להקפיא Discovery Cutoff ו־Source Universe</h3>
+            <p>לרשום בדיוק אילו מקורות, גרסאות ובתים נחשבים מקור סמכות ולבדוק אותם בשני Readers.</p>
+            <div class="stage-footer"><span class="pill">ממתין ל־B0/Protocol</span><span class="pill">אחוז רשמי: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.5 לבנות TRD-2 v6</h3>
+            <p>להפוך את האפיון והמחקר לדרישות טכניות מלאות: נתונים, APIs, הרשאות, כשלים וקבלה.</p>
+            <div class="stage-footer"><span class="pill">ממתין ל־Sources</span><span class="pill">אחוז רשמי: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.6 לבנות Master Control Sequence v3</h3>
+            <p>לקבוע מה חייב לקרות לפני מה, מי עוצר, ומה נבדק שוב בכל מעבר בין שלבים.</p>
+            <div class="stage-footer"><span class="pill">ממתין ל־TRD</span><span class="pill">אחוז רשמי: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.7 להקפיא ReviewInput ו־Program SourceSet</h3>
+            <p>להבטיח שכל מבקר קורא בדיוק את אותו חומר ושאין מסמך סמוי או גרסה משתנה.</p>
+            <div class="stage-footer"><span class="pill">ממתין</span><span class="pill">אחוז רשמי: לא זמין</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.8 לבנות Atomic Task Registry</h3>
+            <p>לפרק כל דרישה למשימה קטנה עם `Owner=Tal`, תלות, קלט, פלט, בדיקה, סיכון ומשקל.</p>
+            <div class="stage-footer"><span class="pill">זה יוצר את מכנה האחוז</span><span class="pill">אחוז רשמי: יתאפשר רק כאן</span><span class="pill">זמן: unknown/unavailable</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.9 לקבוע קיבולת Tal ולוח זמנים</h3>
+            <p>לרשום זמינות שבועית של Tal, זמני המתנה חיצוניים ו־critical path. רק אז יהיה ETA אמין.</p>
+            <div class="stage-footer"><span class="pill">דורש זמינות Tal</span><span class="pill">אחוז רשמי: יחושב</span><span class="pill">זמן: יחושב</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.10 להרכיב Final Master Plan ולעבור 3 ביקורות</h3>
+            <p>שלושה מבקרים עצמאיים, Reconciliation מלא ואפס Finding חוסם שלא הוכרע.</p>
+            <div class="stage-footer"><span class="pill">ממתין</span><span class="pill">אחוז רשמי אחרי השלב: יחושב</span><span class="pill">זמן: יחושב</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.11 אישור root מדויק על ידי טל</h3>
+            <p>טל מאשר את ה־hash המדויק של התוכנית, לא רק משפט כללי כמו “מאשר הכול”.</p>
+            <div class="stage-footer"><span class="pill">הצבעה עתידית</span><span class="pill">אחוז רשמי: יחושב</span><span class="pill">זמן: תלוי Review</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.12 הערכה מחדש של Gate 29</h3>
+            <p>אם כל הסמכויות והראיות קיימות, ניתן לאשר Work Package מדויק ולהחזיר פיתוח בהדרגה.</p>
+            <div class="stage-footer"><span class="pill">אין אישור כרגע</span><span class="pill">אחוז רשמי: יחושב</span><span class="pill">זמן: תלוי חסמים חיצוניים</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.13 ביצוע המוצר לפי Slices</h3>
+            <p>מימוש, בדיקות, Security review, Staging, Canary, Pilot ו־Rollback לכל Slice מאושר.</p>
+            <div class="stage-footer"><span class="pill">אחרי Gate 29 בלבד</span><span class="pill">אחוז רשמי: יחושב מה־Registry</span><span class="pill">זמן: יחושב</span></div>
+          </article>
+          <article class="stage blocked">
+            <h3>4.3.14 Pilot והרחבה</h3>
+            <p>Tenant יחיד, WABA ניסיוני, נתונים אמיתיים מאושרים, מדדים, תיקונים ורק אז הרחבה.</p>
+            <div class="stage-footer"><span class="pill">חסם חיצוני עתידי</span><span class="pill">אחוז רשמי: יחושב</span><span class="pill">זמן: תלוי Meta ולקוחות</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="part-5" class="section">
+        <h2>5. איך עונים ושולחים את ההצבעה</h2>
+        <ol>
+          <li>שתי הבחירות שאושרו כבר מסומנות. שנה אותן רק אם ברצונך להגיש תיקון חדש.</li>
+          <li>אם צריך, הוסף הערה בלי Secret, Token, מספר טלפון, מידע אישי או נתוני לקוח.</li>
+          <li>לחץ “ייצוא תשובות לקובץ JSON”.</li>
+          <li>גרור את הקובץ שנוצר לשיחה, או לחץ “הצג JSON” והעתק את התוכן.</li>
+          <li>שינויים נשמרים מקומית בדפדפן בלבד; “נקה שינויים מקומיים” מחזיר לבחירות שאושרו.</li>
+        </ol>
+        <div class="callout info">
+          <strong>5.1 פרטיות</strong>
+          המסמך אינו שולח דבר לאינטרנט. ה־CSP חוסם חיבורי רשת, והייצוא נוצר מקומית במחשב.
+          אין להכניס לשדות ההערה Secrets או מידע אישי.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">
+        <p><strong>Connect status guide v3 · תצפית קפואה 30.08.2026 19:28:56 +03:00 · הצבעות Tal נקלטו</strong></p>
+        <p>Repository invariant: PUBLIC · Gate29: BLOCKED · Development freeze: ACTIVE.</p>
+        <p>המסמך הוא כלי הסבר והצבעה. הוא אינו Acceptance, Permit, Release או טענה משפטית.</p>
+      </div>
+    </footer>
+
+    <script>
+      "use strict";
+
+      const DOCUMENT_ID = "connect-project-status-grandma-guide";
+      const DOCUMENT_VERSION = 3;
+      const DOCUMENT_SNAPSHOT_ID = "CONNECT-STATUS-GUIDE-V3-2026-08-30";
+      const OBSERVED_AT = "2026-08-30T19:28:56+03:00";
+      const STATUS_SNAPSHOT_SHA256 = "3fd7ec06f9201200ebaa608ad39a48659ab84f4efc7c42535b82034549b230b1";
+      const DECISION_SET_ID = "CONNECT-ELIGIBLE-TAL-VOTES-V2";
+      const DECISION_SET_SHA256 = "95feab1238fafbd03154583325188549ebab2f91578e478f4ca92b79e1faf5ee";
+      const STORAGE_KEY = "connect-project-status-grandma-guide-v3";
+      const MAX_NOTES_LENGTH = 1500;
+
+      const decisions = [
+        {
+          id: "V01",
+          acceptedAnswer: "public-no-license-until-legal",
+          title: "איזה רישיון לתת למאגר הציבורי?",
+          simple: "Public אומר שכל אחד יכול לראות. רישיון אומר מה מותר לו לעשות עם הקוד. בלי רישיון, צפייה אינה אישור להעתיק.",
+          owner: "Tal",
+          blocker: "בעלות על הקוד, זכויות Contributors, צדדים שלישיים ואישור משפטי",
+          options: [
+            {
+              id: "public-no-license-until-legal",
+              title: "Public ללא רישיון שימוש עד Legal review",
+              description: "המאגר נשאר גלוי, אבל איננו מעניקים כרגע רשות שימוש רחבה.",
+              recommended: true
+            },
+            {
+              id: "mit-after-rights-review",
+              title: "MIT לאחר בדיקת זכויות",
+              description: "רישיון קצר ומתירני, רק לאחר שמוכח שיש לנו זכות לתת אותו.",
+              recommended: false
+            },
+            {
+              id: "apache-2-after-patent-review",
+              title: "Apache-2.0 לאחר Patent/NOTICE review",
+              description: "רישיון מפורט יותר עם סעיפי פטנטים והודעות, לאחר בדיקה משפטית.",
+              recommended: false
+            }
+          ]
+        },
+        {
+          id: "V02",
+          acceptedAnswer: "approve-each-security-use",
+          title: "איך לאשר אקראיות קריפטוגרפית?",
+          simple: "לפעמים מנעול דיגיטלי חייב מספר שאי אפשר לנחש. זה שונה ממספר עסקי רגיל, שאותו נרצה ליצור בצורה קבועה וברורה. Math.random נשאר אסור תמיד, והצבעה זו אינה מאשרת crypto.randomUUID ל־IDs.",
+          owner: "Tal",
+          blocker: "Threat model, רשימת APIs, בדיקות, שמירת Secrets ומבצע אבטחה שמי",
+          options: [
+            {
+              id: "approve-each-security-use",
+              title: "אישור נפרד לכל שימוש ביטחוני מדויק",
+              description: "כל Nonce, OAuth state או Token יקבל מטרה, בעלים ובדיקה לפני שימוש.",
+              recommended: true
+            },
+            {
+              id: "closed-security-bundle",
+              title: "Bundle סגור ל־Nonce, OAuth state, Token ו־ephemeral key",
+              description: "מאשרים מראש רשימה קטנה וסגורה בלבד; IDs עסקיים נשארים deterministic.",
+              recommended: false
+            },
+            {
+              id: "approve-none-yet",
+              title: "לא לאשר עדיין",
+              description: "כל יכולת שתלויה באקראיות ביטחונית נשארת כבויה.",
+              recommended: false
+            }
+          ]
+        }
+      ];
+
+      const state = loadState();
+      const decisionList = document.getElementById("decision-list");
+      const decisionSummary = document.getElementById("decision-summary");
+      const exportPreview = document.getElementById("export-preview");
+      const liveStatus = document.getElementById("live-status");
+
+      function allowedOption(decision, optionId) {
+        return decision.options.some(function (option) {
+          return option.id === optionId;
+        });
+      }
+
+      function cleanNotes(value) {
+        return String(value || "").slice(0, MAX_NOTES_LENGTH);
+      }
+
+      function loadState() {
+        const defaults = {};
+        decisions.forEach(function (decision) {
+          defaults[decision.id] = { choice: decision.acceptedAnswer, notes: "" };
+        });
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return defaults;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return defaults;
+          const clean = defaults;
+          decisions.forEach(function (decision) {
+            const candidate = parsed[decision.id];
+            if (!candidate || typeof candidate !== "object") return;
+            clean[decision.id] = {
+              choice: allowedOption(decision, candidate.choice) ? candidate.choice : decision.acceptedAnswer,
+              notes: cleanNotes(candidate.notes)
+            };
+          });
+          return clean;
+        } catch (error) {
+          return defaults;
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function createElement(tagName, className, textValue) {
+        const element = document.createElement(tagName);
+        if (className) element.className = className;
+        if (textValue !== undefined) element.textContent = textValue;
+        return element;
+      }
+
+      function announce(message) {
+        liveStatus.textContent = "";
+        window.setTimeout(function () {
+          liveStatus.textContent = message;
+        }, 0);
+      }
+
+      function renderDecision(decision, index) {
+        const fieldset = createElement("fieldset", "decision-card");
+        fieldset.dataset.decisionId = decision.id;
+
+        const legend = createElement(
+          "legend",
+          "",
+          "3." + (index + 1) + " · " + decision.id + " · " + decision.title
+        );
+        fieldset.appendChild(legend);
+
+        const body = createElement("div", "decision-body");
+        body.appendChild(createElement("p", "plain-language", "הסבר פשוט: " + decision.simple));
+
+        const options = createElement("div", "option-list");
+        decision.options.forEach(function (option, optionIndex) {
+          const label = createElement("label", "option" + (option.recommended ? " recommended" : ""));
+          const radio = createElement("input");
+          radio.type = "radio";
+          radio.name = "vote-" + decision.id;
+          radio.value = option.id;
+          radio.id = "vote-" + decision.id.toLowerCase() + "-" + (optionIndex + 1);
+          radio.checked = Boolean(state[decision.id] && state[decision.id].choice === option.id);
+
+          const copy = createElement("span");
+          const title = createElement("strong", "", option.title);
+          if (option.recommended) {
+            title.appendChild(createElement("span", "recommended-tag", "המלצה"));
+          }
+          copy.appendChild(title);
+          copy.appendChild(createElement("small", "", option.description));
+          label.appendChild(radio);
+          label.appendChild(copy);
+          options.appendChild(label);
+
+          radio.addEventListener("change", function () {
+            if (!radio.checked) return;
+            const currentNotes = state[decision.id] ? state[decision.id].notes : "";
+            state[decision.id] = { choice: option.id, notes: currentNotes };
+            const persisted = saveState();
+            updateStatus();
+            announce(
+              persisted
+                ? "נשמרה בחירה עבור " + decision.id + "."
+                : "הבחירה הוחלה בעמוד הפתוח, אך אחסון הדפדפן חסום. יש לייצא לפני סגירת העמוד."
+            );
+          });
+        });
+        body.appendChild(options);
+
+        const notesLabel = createElement("label", "notes-label", "הערה אופציונלית — בלי Secrets או מידע אישי");
+        notesLabel.htmlFor = "notes-" + decision.id.toLowerCase();
+        body.appendChild(notesLabel);
+
+        const notes = createElement("textarea", "notes");
+        notes.id = "notes-" + decision.id.toLowerCase();
+        notes.maxLength = MAX_NOTES_LENGTH;
+        notes.value = state[decision.id] ? state[decision.id].notes : "";
+        notes.addEventListener("input", function () {
+          const currentChoice = state[decision.id] ? state[decision.id].choice : null;
+          state[decision.id] = { choice: currentChoice, notes: cleanNotes(notes.value) };
+          saveState();
+        });
+        body.appendChild(notes);
+
+        const meta = createElement("div", "decision-meta");
+        meta.appendChild(createElement("span", "", "אחראי נוכחי: " + decision.owner));
+        meta.appendChild(createElement("span", "", "חסם: " + decision.blocker));
+        body.appendChild(meta);
+
+        fieldset.appendChild(body);
+        decisionList.appendChild(fieldset);
+      }
+
+      function selectedOption(decision) {
+        const choice = state[decision.id] ? state[decision.id].choice : null;
+        return decision.options.find(function (option) {
+          return option.id === choice;
+        }) || null;
+      }
+
+      function updateStatus() {
+        let answered = 0;
+        decisions.forEach(function (decision) {
+          const card = document.querySelector('[data-decision-id="' + decision.id + '"]');
+          const isAnswered = Boolean(selectedOption(decision));
+          if (isAnswered) answered += 1;
+          if (card) card.classList.toggle("answered", isAnswered);
+        });
+        decisionSummary.textContent = answered + " מתוך " + decisions.length + " החלטות נענו";
+      }
+
+      function buildExportData() {
+        const programState = {
+          schema: "CONNECT-STATUS-SNAPSHOT-V2",
+          observedAt: OBSERVED_AT,
+          exactCompletionPercent: "unknown/unavailable",
+          repositoryVisibilityInvariant: "PUBLIC",
+          gate29: "BLOCKED",
+          developmentFreeze: "ACTIVE",
+          productionAcceptance: 0,
+          gitAllRefsCommitCount: 298,
+          gitImplementationDayCount: 13,
+          localChangedPathCount: 419,
+          localModifiedPathCount: 128,
+          localUntrackedPathCount: 291
+        };
+        const canonicalChoiceUniverse = {
+          schema: DECISION_SET_ID,
+          decisions: decisions.map(function (decision) {
+            const recommended = decision.options.find(function (option) {
+              return option.recommended;
+            });
+            return {
+              id: decision.id,
+              options: decision.options.map(function (option) {
+                return option.id;
+              }),
+              recommended: recommended ? recommended.id : null
+            };
+          })
+        };
+        return {
+          document: DOCUMENT_ID,
+          version: DOCUMENT_VERSION,
+          exportedAt: new Date().toISOString(),
+          observedAt: OBSERVED_AT,
+          snapshot: {
+            id: DOCUMENT_SNAPSHOT_ID,
+            statusSnapshotSha256: STATUS_SNAPSHOT_SHA256,
+            statusSnapshotDigestBasis: "SHA-256 of UTF-8 JSON.stringify(programState)",
+            sourceFileRawSha256: "not-self-embedded; verify the local source file externally"
+          },
+          decisionSet: {
+            id: DECISION_SET_ID,
+            eligibleVoteCount: decisions.length,
+            choiceUniverseSha256: DECISION_SET_SHA256,
+            digestBasis: "SHA-256 of UTF-8 JSON.stringify(canonicalChoiceUniverse)",
+            canonicalChoiceUniverse: canonicalChoiceUniverse
+          },
+          authority: "DETACHED-NON-AUTHORITATIVE-PLANNING-VOTE-EXPORT",
+          warning: "אין לכלול Secrets או מידע אישי. זהו ייצוא מנותק ולא סמכותי; הבחירות הן Planning בלבד ודורשות את הראיות והסמכויות המצוינות.",
+          programState: programState,
+          votes: decisions.map(function (decision) {
+            const option = selectedOption(decision);
+            return {
+              id: decision.id,
+              title: decision.title,
+              answer: option ? option.id : null,
+              selectedLabel: option ? option.title : null,
+              recommended: option ? option.recommended : null,
+              notes: state[decision.id] ? cleanNotes(state[decision.id].notes) : ""
+            };
+          })
+        };
+      }
+
+      function exportJsonText() {
+        return JSON.stringify(buildExportData(), null, 2);
+      }
+
+      function showJson() {
+        exportPreview.textContent = exportJsonText();
+        exportPreview.hidden = false;
+        exportPreview.focus();
+        announce("ה־JSON מוצג וניתן להעתיק אותו.");
+      }
+
+      function downloadJson() {
+        const blob = new Blob([exportJsonText()], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "connect-project-status-votes.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 0);
+        announce("קובץ ההצבעה נוצר מקומית.");
+      }
+
+      async function copyJson() {
+        const text = exportJsonText();
+        exportPreview.textContent = text;
+        exportPreview.hidden = false;
+        try {
+          if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error("Clipboard API unavailable");
+          await navigator.clipboard.writeText(text);
+          announce("ה־JSON הועתק ללוח.");
+        } catch (error) {
+          exportPreview.focus();
+          const selection = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(exportPreview);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          announce("העתקה אוטומטית אינה זמינה. הטקסט סומן — לחץ Command+C.");
+        }
+      }
+
+      function resetVotes() {
+        const approved = window.confirm("למחוק שינויים מקומיים ולהחזיר את שתי הבחירות שאושרו?");
+        if (!approved) return;
+        Object.keys(state).forEach(function (key) {
+          delete state[key];
+        });
+        decisions.forEach(function (decision) {
+          state[decision.id] = { choice: decision.acceptedAnswer, notes: "" };
+        });
+        let storageCleared = true;
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+          storageCleared = false;
+        }
+        document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+          const decisionId = radio.name.replace("vote-", "");
+          radio.checked = Boolean(state[decisionId] && state[decisionId].choice === radio.value);
+        });
+        document.querySelectorAll(".notes").forEach(function (notes) {
+          notes.value = "";
+        });
+        exportPreview.hidden = true;
+        updateStatus();
+        announce(
+          storageCleared
+            ? "השינויים המקומיים נוקו ושתי הבחירות שאושרו הוחזרו."
+            : "העמוד אופס, אך אחסון הדפדפן חסום ולכן לא ניתן לאשר שנמחק מחוץ לעמוד הפתוח."
+        );
+      }
+
+      decisions.forEach(renderDecision);
+      updateStatus();
+
+      document.getElementById("export-file").addEventListener("click", downloadJson);
+      document.getElementById("show-json").addEventListener("click", showJson);
+      document.getElementById("copy-json").addEventListener("click", copyJson);
+      document.getElementById("reset-votes").addEventListener("click", resetVotes);
+    </script>
+  </body>
+</html>

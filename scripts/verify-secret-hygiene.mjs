@@ -1,6 +1,5 @@
 import {
   execFileSync,
-  spawnSync,
 } from "node:child_process";
 import {
   readFile,
@@ -18,10 +17,27 @@ const projectRoot = fileURLToPath(
 const maximumScannedFileBytes =
   1_048_576;
 const secretEnvironmentNames = [
+  "DATABASE_URL",
+  "POSTGRES_API_URL",
+  "POSTGRES_WORKER_URL",
+  "POSTGRES_VERIFIER_URL",
+  "POSTGRES_MIGRATION_URL",
+  "POSTGRES_OWNER_URL",
+  "REDIS_URL",
   "CLERK_SECRET_KEY",
+  "CONNECT_TRACE_CONTEXT_HMAC_KEY",
+  "BETTER_STACK_SOURCE_TOKEN",
+  "BETTER_STACK_INCIDENT_API_TOKEN",
+  "RAILWAY_WORKER_SCHEDULER_OWNER_KEY",
+  "CLOUDFLARE_API_TOKEN",
+  "TEAM_INVITATION_BROWSER_CLOUDFLARE_D1_READ_TOKEN",
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
+  "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_OBSERVATION_HMAC_KEY_V1",
+  "BOT_REPLY_STAGING_PRIVATE_CASES_JSON",
 ];
 const unsafeFilePatterns = [
   /(^|\/)\.env(?:\.|$)/,
@@ -34,19 +50,19 @@ const contentPatterns = [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
   /\bAKIA[0-9A-Z]{16}\b/,
   /\bgh[pousr]_[A-Za-z0-9]{20,}\b/,
+  /\bgithub_pat_[A-Za-z0-9_]{20,}\b/,
   /\bsk_(?:test|live)_[A-Za-z0-9]{20,}\b/,
   /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/,
   /\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b/,
 ];
-const historyExtendedPattern = [
-  "-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----",
-  "AKIA[0-9A-Z]{16}",
-  "gh[pousr]_[A-Za-z0-9]{20,}",
-  "sk_(test|live)_[A-Za-z0-9]{20,}",
-  "xox[baprs]-[A-Za-z0-9-]{20,}",
-  "sk-(proj-)?[A-Za-z0-9_-]{20,}",
-  `^(${secretEnvironmentNames.join("|")})=.+$`,
-].join("|");
+const secretEnvironmentNamePattern =
+  secretEnvironmentNames.join("|");
+const environmentAssignmentPattern =
+  new RegExp(
+    `^[\\t ]*(?:export[\\t ]+)?(?:${secretEnvironmentNamePattern})[\\t ]*=[\\t ]*(?:"[^"\\r\\n]+"|'[^'\\r\\n]+'|[^\\s#'"\\r\\n][^\\r\\n]*)[\\t ]*$`,
+    "m",
+  );
+const historicalBlobBatchSize = 128;
 
 function finding(code) {
   return Object.freeze({ code });
@@ -81,12 +97,6 @@ export function inspectSecretText(
     ]);
   }
 
-  const environmentAssignmentPattern =
-    new RegExp(
-      `^(?:${secretEnvironmentNames.join("|")})=.+$`,
-      "m",
-    );
-
   return Object.freeze(
     environmentAssignmentPattern.test(text)
       ? [
@@ -105,6 +115,7 @@ function git(argumentsList) {
     {
       cwd: projectRoot,
       encoding: "utf8",
+      maxBuffer: 67_108_864,
       stdio: [
         "ignore",
         "pipe",
@@ -114,72 +125,240 @@ function git(argumentsList) {
   );
 }
 
+function gitWithInput(
+  argumentsList,
+  input,
+  encoding,
+  maxBuffer,
+) {
+  return execFileSync(
+    "git",
+    argumentsList,
+    {
+      cwd: projectRoot,
+      encoding,
+      input,
+      maxBuffer,
+      stdio: [
+        "pipe",
+        "pipe",
+        "ignore",
+      ],
+    },
+  );
+}
+
+function parseNullSeparatedFileNames(
+  output,
+) {
+  return output
+    .split("\0")
+    .filter(Boolean);
+}
+
+export function buildWorkingFileInventory({
+  trackedFiles,
+  untrackedFiles,
+}) {
+  const workingFiles = [
+    ...new Set([
+      ...trackedFiles,
+      ...untrackedFiles,
+    ]),
+  ].sort();
+
+  return Object.freeze({
+    trackedFileCount:
+      trackedFiles.length,
+    untrackedFileCount:
+      untrackedFiles.length,
+    workingFiles: Object.freeze(
+      workingFiles,
+    ),
+  });
+}
+
+function listWorkingFileInventory() {
+  const trackedFiles =
+    parseNullSeparatedFileNames(
+      git([
+        "ls-files",
+        "-z",
+      ]),
+    );
+  const untrackedFiles =
+    parseNullSeparatedFileNames(
+      git([
+        "ls-files",
+        "--others",
+        "--exclude-standard",
+        "-z",
+      ]),
+    );
+
+  return buildWorkingFileInventory({
+    trackedFiles,
+    untrackedFiles,
+  });
+}
+
+function listHistoricalFileNames() {
+  return parseNullSeparatedFileNames(
+    git([
+      "log",
+      "--all",
+      "--name-only",
+      "--format=",
+      "--no-renames",
+      "-z",
+    ]),
+  );
+}
+
+function listHistoricalBlobIds() {
+  const objectIds = [
+    ...new Set(
+      git([
+        "rev-list",
+        "--objects",
+        "--all",
+      ])
+        .split("\n")
+        .filter(Boolean)
+        .map((line) =>
+          line.split(" ", 1)[0]
+        ),
+    ),
+  ];
+  const metadata = gitWithInput(
+    [
+      "cat-file",
+      "--batch-check=%(objectname) %(objecttype) %(objectsize)",
+    ],
+    `${objectIds.join("\n")}\n`,
+    "utf8",
+    67_108_864,
+  );
+
+  return metadata
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => line.split(" "))
+    .filter(([, type, size]) =>
+      type === "blob" &&
+      Number.isSafeInteger(Number(size)) &&
+      Number(size) <= maximumScannedFileBytes
+    )
+    .map(([objectId]) => objectId);
+}
+
+function inspectHistoricalBlobBatch(
+  objectIds,
+) {
+  const output = gitWithInput(
+    [
+      "cat-file",
+      "--batch",
+    ],
+    `${objectIds.join("\n")}\n`,
+    null,
+    objectIds.length *
+      (maximumScannedFileBytes + 128),
+  );
+  let offset = 0;
+
+  for (const expectedObjectId of objectIds) {
+    const headerEnd = output.indexOf(10, offset);
+    if (headerEnd === -1) {
+      throw new Error(
+        "Historical blob header is truncated.",
+      );
+    }
+    const header = output
+      .subarray(offset, headerEnd)
+      .toString("utf8")
+      .split(" ");
+    const [objectId, type, sizeText] = header;
+    const size = Number(sizeText);
+    if (
+      header.length !== 3 ||
+      objectId !== expectedObjectId ||
+      type !== "blob" ||
+      !Number.isSafeInteger(size) ||
+      size < 0 ||
+      size > maximumScannedFileBytes
+    ) {
+      throw new Error(
+        "Historical blob header is invalid.",
+      );
+    }
+    const contentStart = headerEnd + 1;
+    const contentEnd = contentStart + size;
+    if (
+      contentEnd >= output.length ||
+      output[contentEnd] !== 10
+    ) {
+      throw new Error(
+        "Historical blob content is truncated.",
+      );
+    }
+    const content = output.subarray(
+      contentStart,
+      contentEnd,
+    );
+    offset = contentEnd + 1;
+    if (
+      !content.includes(0) &&
+      inspectSecretText(
+        content.toString("utf8"),
+      ).length > 0
+    ) {
+      return true;
+    }
+  }
+
+  if (offset !== output.length) {
+    throw new Error(
+      "Historical blob batch has trailing bytes.",
+    );
+  }
+  return false;
+}
+
 function inspectHistory() {
   const findings = [];
-  const commits = git([
-    "rev-list",
-    "--all",
-  ])
-    .split("\n")
-    .filter(Boolean);
 
-  for (const commit of commits) {
-    const fileNames = git([
-      "ls-tree",
-      "-r",
-      "--name-only",
-      commit,
-    ])
-      .split("\n")
-      .filter(Boolean);
+  if (
+    listHistoricalFileNames().some(
+      (fileName) =>
+        inspectTrackedFileName(fileName)
+          .length > 0,
+    )
+  ) {
+    findings.push(
+      finding(
+        "SECRET_FILE_IN_HISTORY",
+      ),
+    );
+  }
 
+  const objectIds = listHistoricalBlobIds();
+  for (
+    let index = 0;
+    index < objectIds.length;
+    index += historicalBlobBatchSize
+  ) {
     if (
-      fileNames.some(
-        (fileName) =>
-          inspectTrackedFileName(fileName)
-            .length > 0,
+      inspectHistoricalBlobBatch(
+        objectIds.slice(
+          index,
+          index + historicalBlobBatchSize,
+        ),
       )
     ) {
       findings.push(
         finding(
-          "SECRET_FILE_IN_HISTORY",
-        ),
-      );
-      break;
-    }
-  }
-
-  for (const commit of commits) {
-    const result = spawnSync(
-      "git",
-      [
-        "grep",
-        "-I",
-        "-E",
-        "-q",
-        "-e",
-        historyExtendedPattern,
-        commit,
-      ],
-      {
-        cwd: projectRoot,
-        stdio: "ignore",
-      },
-    );
-
-    if (result.status === 0) {
-      findings.push(
-        finding(
           "SECRET_CONTENT_IN_HISTORY",
-        ),
-      );
-      break;
-    }
-
-    if (result.status !== 1) {
-      findings.push(
-        finding(
-          "SECRET_HISTORY_SCAN_FAILED",
         ),
       );
       break;
@@ -193,14 +372,13 @@ export async function inspectSecretHygiene({
   includeHistory = false,
 } = {}) {
   const findings = [];
-  const trackedFiles = git([
-    "ls-files",
-    "-z",
-  ])
-    .split("\0")
-    .filter(Boolean);
+  const inventory =
+    listWorkingFileInventory();
 
-  for (const fileName of trackedFiles) {
+  for (
+    const fileName of
+      inventory.workingFiles
+  ) {
     findings.push(
       ...inspectTrackedFileName(fileName),
     );
@@ -247,7 +425,12 @@ export async function inspectSecretHygiene({
       findings.length === 0
         ? "passed"
         : "failed",
-    trackedFileCount: trackedFiles.length,
+    workingFileCount:
+      inventory.workingFiles.length,
+    trackedFileCount:
+      inventory.trackedFileCount,
+    untrackedFileCount:
+      inventory.untrackedFileCount,
     historyIncluded: includeHistory,
     findings: Object.freeze(findings),
   });
@@ -276,7 +459,7 @@ async function runCli() {
 
   if (report.status === "passed") {
     console.log(
-      `Secret hygiene: PASS (${report.trackedFileCount} tracked files${
+      `Secret hygiene: PASS (${report.workingFileCount} working files; ${report.trackedFileCount} tracked, ${report.untrackedFileCount} untracked${
         report.historyIncluded
           ? ", history included"
           : ""

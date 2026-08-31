@@ -2,10 +2,20 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  readKeywordButtonMenuBotFlowComposerDraft,
   readKeywordBotFlowComposerDraft,
+  readKeywordConditionBotFlowComposerDraft,
+  readKeywordHandoffBotFlowComposerDraft,
+  readKeywordSequenceBotFlowComposerDraft,
+  readKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "../shared/domain/botFlowComposer.ts";
 import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
+  compileKeywordSequenceBotFlowComposerDraft,
+  compileKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "../server/bot/botFlowComposer.ts";
 import {
   deriveBotFlowBlockKey,
@@ -18,6 +28,126 @@ function composerInput(overrides = {}) {
     keywords: ["עזרה", "שירות"],
     matchMode: "exact",
     replyText: "קיבלנו את פנייתך.",
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function sequenceComposerInput(overrides = {}) {
+  return {
+    name: "מענה לפניות שירות",
+    keywords: ["עזרה", "שירות"],
+    matchMode: "exact",
+    replyTexts: [
+      "קיבלנו את פנייתך.",
+      "נציג יחזור אליך בהקדם.",
+      "אין צורך לשלוח הודעה נוספת.",
+    ],
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function buttonMenuComposerInput(overrides = {}) {
+  return {
+    name: "מענה לפניות שירות",
+    keywords: ["עזרה", "שירות"],
+    matchMode: "exact",
+    introTexts: [
+      "קיבלנו את פנייתך.",
+      "בחרו את המחלקה המתאימה.",
+    ],
+    buttonText: "לאיזו מחלקה לפנות?",
+    options: [
+      {
+        label: "מכירות",
+        replyText: "מחלקת מכירות תחזור אליך.",
+      },
+      {
+        label: "שירות",
+        replyText: "מחלקת שירות תחזור אליך.",
+      },
+      {
+        label: "כספים",
+        replyText: "מחלקת כספים תחזור אליך.",
+      },
+    ],
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function twoStepButtonMenuComposerInput(overrides = {}) {
+  return {
+    name: "בירור רב שלבי",
+    keywords: ["בירור"],
+    matchMode: "exact",
+    introTexts: ["נאסוף שני פרטים."],
+    firstButtonText: "האם זו פנייה קיימת?",
+    branches: [
+      {
+        label: "כן",
+        buttonText: "לאיזו מחלקה לפנות?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "הפנייה נותבה למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "הפנייה נותבה לשירות.",
+          },
+        ],
+      },
+      {
+        label: "לא",
+        buttonText: "מהו נושא הפנייה?",
+        options: [
+          {
+            label: "רכישה",
+            replyText: "נציג רכישה יחזור אליך.",
+          },
+          {
+            label: "מידע",
+            replyText: "נציג מידע יחזור אליך.",
+          },
+        ],
+      },
+    ],
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function conditionComposerInput(overrides = {}) {
+  return {
+    name: "מענה לפניות שירות",
+    keywords: ["עזרה", "שירות"],
+    matchMode: "exact",
+    introTexts: [
+      "קיבלנו את פנייתך.",
+      "נבדוק מהו מסלול המענה המתאים.",
+    ],
+    condition: {
+      fact: "last-inbound-text",
+      operator: "contains",
+      value: "נציג",
+      matchedReplyText:
+        "הפנייה תועבר לטיפול נציג.",
+      unmatchedReplyText:
+        "הבוט ימשיך לטפל בפנייה.",
+    },
+    expectedFlowVersion: null,
+    ...overrides,
+  };
+}
+
+function handoffComposerInput(overrides = {}) {
+  return {
+    name: "העברה לנציג לפי בקשה",
+    keywords: ["נציג", "אדם"],
+    matchMode: "contains",
+    handoffReason: "customer-request",
     expectedFlowVersion: null,
     ...overrides,
   };
@@ -144,6 +274,707 @@ test("does not project advanced graphs into the bounded composer", async () => {
     readKeywordBotFlowComposerDraft(
       advancedDefinition,
     ),
+    null,
+  );
+});
+
+test("compiles an ordered text sequence into one deterministic acyclic graph", async () => {
+  const result =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      sequenceComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 7);
+  assert.deepEqual(
+    readKeywordSequenceBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      replyTexts: [
+        "קיבלנו את פנייתך.",
+        "נציג יחזור אליך בהקדם.",
+        "אין צורך לשלוח הודעה נוספת.",
+      ],
+    },
+  );
+  assert.equal(
+    readKeywordBotFlowComposerDraft(
+      result.definition,
+    ),
+    null,
+  );
+
+  const blocksByKey = new Map(
+    result.definition.blocks.map((block) => [
+      block.blockKey,
+      block,
+    ]),
+  );
+  const trigger = blocksByKey.get(
+    result.definition.entryBlockKey,
+  );
+  const keyword = blocksByKey.get(
+    trigger.nextBlockKey,
+  );
+  const firstReply = blocksByKey.get(
+    keyword.matchedBlockKey,
+  );
+  const secondReply = blocksByKey.get(
+    firstReply.nextBlockKey,
+  );
+  const thirdReply = blocksByKey.get(
+    secondReply.nextBlockKey,
+  );
+  const end = blocksByKey.get(
+    thirdReply.nextBlockKey,
+  );
+
+  assert.deepEqual(
+    [
+      firstReply.text,
+      secondReply.text,
+      thirdReply.text,
+    ],
+    sequenceComposerInput().replyTexts,
+  );
+  assert.equal(end.type, "end");
+});
+
+test("keeps single-reply graph identities compatible with the original composer", async () => {
+  const legacy =
+    await compileKeywordBotFlowComposerDraft(
+      7,
+      composerInput(),
+    );
+  const sequence =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      sequenceComposerInput({
+        replyTexts: ["קיבלנו את פנייתך."],
+      }),
+    );
+
+  assert.equal(legacy.success, true);
+  assert.equal(sequence.success, true);
+  assert.deepEqual(
+    sequence.definition,
+    legacy.definition,
+  );
+});
+
+test("rejects empty, oversized, and extended reply sequences", async () => {
+  const empty =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      sequenceComposerInput({ replyTexts: [] }),
+    );
+  const oversized =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      sequenceComposerInput({
+        replyTexts: Array.from(
+          { length: 97 },
+          (_, index) => `הודעה ${index + 1}`,
+        ),
+      }),
+    );
+  const extended =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      {
+        ...sequenceComposerInput(),
+        tenantId: 8,
+      },
+    );
+
+  assert.deepEqual(empty, {
+    success: false,
+    issues: ["invalid-input"],
+  });
+  assert.deepEqual(oversized, {
+    success: false,
+    issues: ["invalid-input"],
+  });
+  assert.deepEqual(extended, {
+    success: false,
+    issues: ["invalid-input"],
+  });
+});
+
+test("compiles a deterministic button menu with one response branch per option", async () => {
+  const result =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      buttonMenuComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 10);
+  assert.deepEqual(
+    readKeywordButtonMenuBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [
+        "קיבלנו את פנייתך.",
+        "בחרו את המחלקה המתאימה.",
+      ],
+      buttonText: "לאיזו מחלקה לפנות?",
+      options: [
+        {
+          label: "מכירות",
+          replyText:
+            "מחלקת מכירות תחזור אליך.",
+        },
+        {
+          label: "שירות",
+          replyText:
+            "מחלקת שירות תחזור אליך.",
+        },
+        {
+          label: "כספים",
+          replyText:
+            "מחלקת כספים תחזור אליך.",
+        },
+      ],
+    },
+  );
+
+  const buttonBlock =
+    result.definition.blocks.find(
+      (block) => block.type === "buttons",
+    );
+
+  assert.ok(buttonBlock);
+  assert.equal(
+    new Set(
+      buttonBlock.options.map(
+        (option) => option.optionKey,
+      ),
+    ).size,
+    3,
+  );
+  assert.ok(
+    buttonBlock.options.every((option) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        option.optionKey,
+      ),
+    ),
+  );
+});
+
+test("rejects incomplete, oversized, or extended button-menu drafts", async () => {
+  const cases = [
+    buttonMenuComposerInput({ introTexts: [] }),
+    buttonMenuComposerInput({ options: [] }),
+    buttonMenuComposerInput({
+      options: Array.from(
+        { length: 11 },
+        (_, index) => ({
+          label: `אפשרות ${index + 1}`,
+          replyText: `תשובה ${index + 1}`,
+        }),
+      ),
+    }),
+    buttonMenuComposerInput({
+      introTexts: Array.from(
+        { length: 94 },
+        (_, index) => `הודעה ${index + 1}`,
+      ),
+      options: [
+        {
+          label: "ראשונה",
+          replyText: "תשובה ראשונה",
+        },
+        {
+          label: "שנייה",
+          replyText: "תשובה שנייה",
+        },
+      ],
+    }),
+    buttonMenuComposerInput({
+      options: [
+        {
+          label: "שירות",
+          replyText: "נציג יחזור אליך.",
+          optionKey:
+            `bot_option_v1_${"a".repeat(64)}`,
+        },
+      ],
+    }),
+  ];
+
+  for (const input of cases) {
+    assert.deepEqual(
+      await compileKeywordButtonMenuBotFlowComposerDraft(
+        7,
+        input,
+      ),
+      {
+        success: false,
+        issues: ["invalid-input"],
+      },
+    );
+  }
+});
+
+test("compiles and reads two button questions without browser graph identities", async () => {
+  const input = twoStepButtonMenuComposerInput();
+  const result =
+    await compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      7,
+      input,
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 12);
+  assert.deepEqual(
+    readKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: input.name,
+      keywords: input.keywords,
+      matchMode: input.matchMode,
+      introTexts: input.introTexts,
+      firstButtonText: input.firstButtonText,
+      branches: input.branches,
+    },
+  );
+
+  const buttonBlocks =
+    result.definition.blocks.filter(
+      (block) => block.type === "buttons",
+    );
+  const optionKeys = buttonBlocks.flatMap(
+    (block) =>
+      block.options.map(
+        (option) => option.optionKey,
+      ),
+  );
+
+  assert.equal(buttonBlocks.length, 3);
+  assert.equal(optionKeys.length, 6);
+  assert.equal(
+    new Set(optionKeys).size,
+    optionKeys.length,
+  );
+  assert.ok(
+    optionKeys.every((key) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        key,
+      ),
+    ),
+  );
+});
+
+test("rejects incomplete, excessive, and identity-bearing two-step button drafts", async () => {
+  const cases = [
+    twoStepButtonMenuComposerInput({
+      introTexts: [],
+    }),
+    twoStepButtonMenuComposerInput({
+      branches: [],
+    }),
+    twoStepButtonMenuComposerInput({
+      branches: [
+        {
+          label: "כן",
+          buttonText: "לאיזו מחלקה לפנות?",
+          options: [],
+        },
+      ],
+    }),
+    twoStepButtonMenuComposerInput({
+      branches: Array.from(
+        { length: 11 },
+        (_, index) => ({
+          label: `ענף ${index + 1}`,
+          buttonText: `שאלה ${index + 1}`,
+          options: [
+            {
+              label: "המשך",
+              replyText: "הפעולה הסתיימה.",
+            },
+          ],
+        }),
+      ),
+    }),
+    twoStepButtonMenuComposerInput({
+      introTexts: Array.from(
+        { length: 85 },
+        (_, index) => `הודעה ${index + 1}`,
+      ),
+      branches: [
+        {
+          label: "המשך",
+          buttonText: "בחרו אפשרות",
+          options: Array.from(
+            { length: 10 },
+            (_, index) => ({
+              label: `אפשרות ${index + 1}`,
+              replyText: `תשובה ${index + 1}`,
+            }),
+          ),
+        },
+      ],
+    }),
+    {
+      ...twoStepButtonMenuComposerInput(),
+      firstButtonKey:
+        `bot_block_v1_${"a".repeat(64)}`,
+    },
+    twoStepButtonMenuComposerInput({
+      branches: [
+        {
+          ...twoStepButtonMenuComposerInput()
+            .branches[0],
+          buttonKey:
+            `bot_block_v1_${"b".repeat(64)}`,
+        },
+      ],
+    }),
+  ];
+
+  for (const input of cases) {
+    assert.deepEqual(
+      await compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
+        7,
+        input,
+      ),
+      {
+        success: false,
+        issues: ["invalid-input"],
+      },
+    );
+  }
+});
+
+test("compiles and reads one deterministic condition with two reply branches", async () => {
+  const result =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      conditionComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 9);
+  assert.deepEqual(
+    readKeywordConditionBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [
+        "קיבלנו את פנייתך.",
+        "נבדוק מהו מסלול המענה המתאים.",
+      ],
+      condition: {
+        fact: "last-inbound-text",
+        operator: "contains",
+        value: "נציג",
+        matchedReplyText:
+          "הפנייה תועבר לטיפול נציג.",
+        unmatchedReplyText:
+          "הבוט ימשיך לטפל בפנייה.",
+      },
+    },
+  );
+
+  const condition = result.definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+  const replies = result.definition.blocks.filter(
+    (block) =>
+      block.type === "text" &&
+      (block.blockKey === condition.matchedBlockKey ||
+        block.blockKey === condition.unmatchedBlockKey),
+  );
+
+  assert.equal(replies.length, 2);
+  assert.equal(
+    new Set(
+      replies.map((reply) => reply.nextBlockKey),
+    ).size,
+    1,
+  );
+});
+
+test("rejects unsafe or extended condition drafts before graph persistence", async () => {
+  const cases = [
+    conditionComposerInput({
+      introTexts: Array.from(
+        { length: 94 },
+        (_, index) => `הודעה ${index + 1}`,
+      ),
+    }),
+    conditionComposerInput({
+      condition: {
+        ...conditionComposerInput().condition,
+        fact: "conversation-status",
+        operator: "contains",
+        value: "new",
+      },
+    }),
+    conditionComposerInput({
+      condition: {
+        ...conditionComposerInput().condition,
+        blockKey:
+          `bot_block_v1_${"a".repeat(64)}`,
+      },
+    }),
+    conditionComposerInput({
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedHandoffReason: "flow-rule",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "תוכן נסתר אסור",
+        matchedHandoffReason: "flow-rule",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "",
+        matchedHandoffReason: "no-match",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "",
+        matchedHandoffReason: "",
+        unmatchedHandoffReason: null,
+      },
+    }),
+    conditionComposerInput({
+      introTexts: [],
+      condition: {
+        ...conditionComposerInput().condition,
+        matchedReplyText: "",
+        matchedHandoffReason: "flow-rule",
+      },
+    }),
+    {
+      ...conditionComposerInput(),
+      tenantId: 8,
+    },
+  ];
+
+  for (const input of cases) {
+    const result =
+      await compileKeywordConditionBotFlowComposerDraft(
+        7,
+        input,
+      );
+
+    assert.equal(result.success, false);
+  }
+});
+
+test("compiles an internal condition branch handoff without a bot reply in the same turn", async () => {
+  const input = conditionComposerInput({
+    introTexts: [],
+    condition: {
+      ...conditionComposerInput().condition,
+      matchedReplyText: "",
+      matchedHandoffReason: "customer-request",
+      unmatchedHandoffReason: null,
+    },
+  });
+  const result =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      input,
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 7);
+  assert.deepEqual(
+    readKeywordConditionBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "מענה לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [],
+      condition: {
+        fact: "last-inbound-text",
+        operator: "contains",
+        value: "נציג",
+        matchedReplyText: "",
+        unmatchedReplyText:
+          "הבוט ימשיך לטפל בפנייה.",
+        matchedHandoffReason:
+          "customer-request",
+        unmatchedHandoffReason: null,
+      },
+    },
+  );
+
+  const condition = result.definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+  assert.equal(
+    result.definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        condition.matchedBlockKey,
+    ).type,
+    "handoff",
+  );
+  assert.equal(
+    result.definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        condition.unmatchedBlockKey,
+    ).type,
+    "text",
+  );
+});
+
+test("fails closed when a condition graph does not retain the exact editable topology", async () => {
+  const result =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      conditionComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  const condition = result.definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+  const corrupted = {
+    ...result.definition,
+    blocks: result.definition.blocks.map((block) =>
+      block.blockKey === condition.unmatchedBlockKey
+        ? {
+            ...block,
+            nextBlockKey:
+              result.definition.entryBlockKey,
+          }
+        : block,
+    ),
+  };
+
+  assert.equal(
+    readKeywordConditionBotFlowComposerDraft(
+      corrupted,
+    ),
+    null,
+  );
+});
+
+test("compiles and reads a keyword-triggered handoff without a bot reply", async () => {
+  const result =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      handoffComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  assert.equal(result.definition.blocks.length, 4);
+  assert.deepEqual(
+    readKeywordHandoffBotFlowComposerDraft(
+      result.definition,
+    ),
+    {
+      name: "העברה לנציג לפי בקשה",
+      keywords: ["אדם", "נציג"],
+      matchMode: "contains",
+      handoffReason: "customer-request",
+    },
+  );
+  assert.deepEqual(
+    result.definition.blocks.map(
+      (block) => block.type,
+    ).sort(),
+    ["end", "handoff", "keyword", "trigger"],
+  );
+});
+
+test("rejects unsupported reasons and browser-supplied handoff graph fields", async () => {
+  const cases = [
+    handoffComposerInput({
+      handoffReason: "no-match",
+    }),
+    handoffComposerInput({
+      handoffReason: "unknown-reason",
+    }),
+    {
+      ...handoffComposerInput(),
+      replyText: "טקסט שאסור לשלוח לפני העברה",
+    },
+    {
+      ...handoffComposerInput(),
+      blockKey:
+        `bot_block_v1_${"a".repeat(64)}`,
+    },
+  ];
+
+  for (const input of cases) {
+    assert.deepEqual(
+      await compileKeywordHandoffBotFlowComposerDraft(
+        7,
+        input,
+      ),
+      {
+        success: false,
+        issues: ["invalid-input"],
+      },
+    );
+  }
+});
+
+test("does not project a handoff graph whose unmatched branch can mutate the conversation", async () => {
+  const result =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      handoffComposerInput(),
+    );
+
+  assert.equal(result.success, true);
+  const handoff = result.definition.blocks.find(
+    (block) => block.type === "handoff",
+  );
+  const keyword = result.definition.blocks.find(
+    (block) => block.type === "keyword",
+  );
+  const unsafe = {
+    ...result.definition,
+    blocks: result.definition.blocks.map((block) =>
+      block.blockKey === keyword.unmatchedBlockKey
+        ? {
+            ...handoff,
+            blockKey: block.blockKey,
+          }
+        : block,
+    ),
+  };
+
+  assert.equal(
+    readKeywordHandoffBotFlowComposerDraft(unsafe),
     null,
   );
 });

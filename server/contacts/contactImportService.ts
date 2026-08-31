@@ -13,6 +13,12 @@ import {
   type ContactImportProfileMapping,
 } from "../../shared/domain/contactImportJob.ts";
 import {
+  CONTACT_IMPORT_MAX_COLUMNS,
+  CONTACT_IMPORT_MAX_DATA_ROWS,
+  CONTACT_IMPORT_MAX_FILE_NAME_CHARACTERS,
+  isSupportedContactImportFileName,
+} from "../../shared/contactImport/sourcePolicy.ts";
+import {
   validatePersistedContact,
   type PersistedContactProfile,
 } from "../../shared/validation/persistedContact.ts";
@@ -85,7 +91,7 @@ export interface ContactImportService {
 }
 
 export interface ContactImportServiceDependencies {
-  contacts: ContactRepository;
+  contacts: Pick<ContactRepository, "findByTenantAndPhone">;
   imports: ContactImportRepository;
 }
 
@@ -93,8 +99,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function hasExactKeys(
+  value: Readonly<Record<string, unknown>>,
+  expectedKeys: readonly string[],
+): boolean {
+  const actualKeys = Object.keys(value).sort();
+  const expected = [...expectedKeys].sort();
+
+  return actualKeys.length === expected.length &&
+    actualKeys.every((key, index) => key === expected[index]);
+}
+
 function isColumnIndex(value: unknown): value is number {
-  return Number.isSafeInteger(value) && Number(value) >= 0;
+  return (
+    Number.isSafeInteger(value) &&
+    Number(value) >= 0 &&
+    Number(value) < CONTACT_IMPORT_MAX_COLUMNS
+  );
 }
 
 function isOptionalColumnIndex(
@@ -103,15 +124,21 @@ function isOptionalColumnIndex(
   return value === null || isColumnIndex(value);
 }
 
-function parseStartInput(input: unknown): StartContactImportRequest {
+export function parseStartContactImportInput(
+  input: unknown,
+): StartContactImportRequest {
   if (
     !isRecord(input) ||
+    !hasExactKeys(input, ["fileName", "mapping", "sourceDigest", "totalRows"]) ||
     typeof input.fileName !== "string" ||
     !input.fileName.trim() ||
+    input.fileName.trim().length > CONTACT_IMPORT_MAX_FILE_NAME_CHARACTERS ||
+    !isSupportedContactImportFileName(input.fileName) ||
     typeof input.sourceDigest !== "string" ||
     !/^[0-9a-f]{64}$/.test(input.sourceDigest) ||
     !Number.isSafeInteger(input.totalRows) ||
     Number(input.totalRows) <= 0 ||
+    Number(input.totalRows) > CONTACT_IMPORT_MAX_DATA_ROWS ||
     !isRecord(input.mapping)
   ) {
     throw new ContactImportInputError("invalid-start-input");
@@ -120,6 +147,13 @@ function parseStartInput(input: unknown): StartContactImportRequest {
   const mapping = input.mapping;
 
   if (
+    !hasExactKeys(mapping, [
+      "company",
+      "email",
+      "firstName",
+      "lastName",
+      "phoneNumber",
+    ]) ||
     !isColumnIndex(mapping.phoneNumber) ||
     !isOptionalColumnIndex(mapping.firstName) ||
     !isOptionalColumnIndex(mapping.lastName) ||
@@ -155,11 +189,12 @@ function parseStartInput(input: unknown): StartContactImportRequest {
   };
 }
 
-function parseChunkInput(
+export function parseContactImportChunkInput(
   input: unknown,
 ): ProcessContactImportChunkRequest {
   if (
     !isRecord(input) ||
+    !hasExactKeys(input, ["jobId", "rows"]) ||
     !Number.isSafeInteger(input.jobId) ||
     Number(input.jobId) <= 0 ||
     !Array.isArray(input.rows) ||
@@ -177,6 +212,14 @@ function parseChunkInput(
   for (const row of input.rows) {
     if (
       !isRecord(row) ||
+      !hasExactKeys(row, [
+        "company",
+        "email",
+        "firstName",
+        "lastName",
+        "phoneNumber",
+        "sourceRowNumber",
+      ]) ||
       !Number.isSafeInteger(row.sourceRowNumber) ||
       typeof row.phoneNumber !== "string" ||
       typeof row.firstName !== "string" ||
@@ -239,7 +282,7 @@ export function createContactImportService(
   return {
     async start(session, input) {
       requireTenantPermission(session, "contacts.write");
-      const request = parseStartInput(input);
+      const request = parseStartContactImportInput(input);
       const idempotencyKey = deriveContactImportJobKey({
         tenantId: session.tenantId,
         sourceDigest: request.sourceDigest,
@@ -262,7 +305,7 @@ export function createContactImportService(
 
     async processChunk(session, input) {
       requireTenantPermission(session, "contacts.write");
-      const request = parseChunkInput(input);
+      const request = parseContactImportChunkInput(input);
       const job = await dependencies.imports.findJob(
         session.tenantId,
         request.jobId,
@@ -366,7 +409,7 @@ export function createContactImportService(
           );
 
         if (!savedContact) {
-          throw new Error("Imported contact was not returned by D1");
+          throw new Error("Imported contact was not returned by persistence");
         }
 
         savedContacts.push(savedContact);

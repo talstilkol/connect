@@ -1,0 +1,4273 @@
+{
+  "artifactClass": "DERIVED-EXECUTABLE-PLANNING-VECTOR-SHARD;NOT-SOURCE;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-VECTOR-SHARD-13-OF-13-2026-08-30",
+  "canonicalPayloadBytes": 88852,
+  "contentRoot": "0bae907de0c0c9c355f0519c5dbd09c42806f29261e8e09766157b7386707082",
+  "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-008",
+  "lastCanonicalKey": "PRCV5-VECTOR-VISIBILITY-PUBLIC-PUBLIC",
+  "ordinal": 13,
+  "schemaVersion": "PRCV5-VECTOR-SHARD-V1",
+  "totalShards": 13,
+  "vectorCount": 91,
+  "vectors": [
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/schemaRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "schemaRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-008",
+      "vectorRoot": "ad6972c10701777e40a6517d95d1dc78d90d1144b2d5f003a7a1f946bb8fcc04"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/graphRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "graphRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-009",
+      "vectorRoot": "9a61af9cb7019e7e37b4bf3d1c933b6242b2431b275e0bcda25561943427f043"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/dependencyHeads"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "dependencyHeads",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-010",
+      "vectorRoot": "903af9a61f12c6ca17dc0832bb1f90a529430acbedc525a1d0ad667db1d5934c"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/observationRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "observationRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-011",
+      "vectorRoot": "db6d3fc7409b957f2bb2608a32f6e251efd14a713cd9e34f78e91053125c5d51"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/implementationRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "implementationRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-012",
+      "vectorRoot": "fb1bbe3bb717065c0ff3f972dee3b00a88085e491a9a482f98037cf8d88c3eb0"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/evidenceRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "evidenceRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-013",
+      "vectorRoot": "1201b74a90db7621e124662541dfa3a7f3cebefe7895c1b7a9f8a622a1417fb6"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/acceptedRequirementRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "acceptedRequirementRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-014",
+      "vectorRoot": "6aa9d047e6aaa9282555b95c0c92c391c9c53515104590bc57dc6bfbd6cffe5f"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/findingClosureRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "findingClosureRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-015",
+      "vectorRoot": "5222830ceb0266ed200f5f0330f02fb8c05a4f38134406d2df0611bb9473ba95"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/reviewRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "reviewRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-016",
+      "vectorRoot": "2dba280553d469a4fa9e448bb27ea38244a86317adeb68721a67bcc8d4d2d779"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/residualRiskRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "residualRiskRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-017",
+      "vectorRoot": "8f3362c67a01d2bfece51bae7edc969b33f09b254d326e2b0666cd27cd64857b"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/expectedOldHead"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "expectedOldHead",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-018",
+      "vectorRoot": "c2fe05805db1627759c7f4e68f7534f8a44a5edc6b90c05ef7ac13302cafc94e"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/newHead"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "newHead",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-019",
+      "vectorRoot": "49f791d008fde7d80e134ccd243f14f2ca8a902bc0858dfc5064a2a87926cd5c"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/issuedAt"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "issuedAt",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-020",
+      "vectorRoot": "962342c6171787efe09754e01a4376e5bc2cc6a7a64e49f485bc47856df97a57"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/expiresAt"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "expiresAt",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-021",
+      "vectorRoot": "b822000fb6fb3b3a2a447e45b40d6288ae653acec48f8aaa134e2d2edb6bf94d"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/state"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "state",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-022",
+      "vectorRoot": "bea3c0fbe069e6eb23d6a7c7ba4a6f8c70586122b251853a2e55fd3fe3de16e1"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/v5SchemaId"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "v5SchemaId",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-001",
+      "vectorRoot": "d33c1504902f1b9d819cd7288c8837c27b79f842b5f0adffc98a24173614c8a4"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/v5RecordId"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "v5RecordId",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-002",
+      "vectorRoot": "bde70d6b34fb80214dc25993d177aacd9051880718e1499d8d2c4d1b35f0838f"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "INVALID-BOOLEAN",
+        "pointer": "/v5PlanningOnly"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "v5PlanningOnly",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-003",
+      "vectorRoot": "52133c11a3ddcb73b70c016c8cc5ecf900e8dbee1e632538468bce788a7a13ab"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "INVALID-INTEGER",
+        "pointer": "/v5OperationalCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "v5OperationalCredit",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-004",
+      "vectorRoot": "c45a5242e91bc73914ebb3a6a6f4e191e0dfb6a18ae1fc6cf7abe2727f4a1c93"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "INVALID-INTEGER",
+        "pointer": "/v5AcceptanceCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "v5AcceptanceCredit",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-005",
+      "vectorRoot": "20dc14f7aa11512c4a086901cc298c601e96314f27bda1131c2ace47dd22f9c7"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/subjectRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "subjectRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-006",
+      "vectorRoot": "43a7113f37c8f8effd0c740b1e1b2e5597050dbba148fa240a7c553ebfe7d9ec"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/packageRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "packageRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-007",
+      "vectorRoot": "7b1ee2fe42ebfbf49d88320ba0f1a8e68c39d615c4e42f4fc47605f5cdfee4eb"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/schemaRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "schemaRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-008",
+      "vectorRoot": "1b33253ea98a5ed7a9ef06b26a7f2d96a08f8f2f4fdea036b95b301539d63c13"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/graphRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "graphRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-009",
+      "vectorRoot": "da498870cf48e7371c0f11d235f5c78ef52e6b1dddca1608e079c32dfd08d459"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/dependencyHeads"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "dependencyHeads",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-010",
+      "vectorRoot": "2128f43eb7a0af6589ce7886e0eafb634c59c717165e97a9268dd486810ef178"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/observationRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "observationRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-011",
+      "vectorRoot": "44fb11b5a84f90cde5d9de81b25c2b0876aed92017c4e98011d1bef852428b74"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/implementationRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "implementationRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-012",
+      "vectorRoot": "8b620860c7c54bda090d4a9882556244c2a7be7a1c7fbb20317cab21eed5c324"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/evidenceRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "evidenceRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-013",
+      "vectorRoot": "d0618b058a8a4596fb4a78efc778b93c6d813569e3a939ce31fded36e8616343"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/acceptedRequirementRoots"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "acceptedRequirementRoots",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-014",
+      "vectorRoot": "891e8d4cca6f6ae99eb3cc808548e334d48213da346daa549ca8bb60a16925e9"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/findingClosureRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "findingClosureRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-015",
+      "vectorRoot": "96a75174a66975337dc203c20710a810427985c1eb006ee8ff7d5ae708d4154b"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/reviewRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "reviewRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-016",
+      "vectorRoot": "734674f99ee61f053ca86b624f21fd3599f5360dbe9c258145679a437a580275"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/residualRiskRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "residualRiskRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-017",
+      "vectorRoot": "a120772927765c7bd31af5585e04fa720929b83beac37d0cc3a344bd86a6bad2"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/expectedOldHead"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "expectedOldHead",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-018",
+      "vectorRoot": "647fe373533565e90ad7b245b0fbcbf2bfaf4848ab864c1c55a77c116a6b017a"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/newHead"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "newHead",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-019",
+      "vectorRoot": "6bd4abc75b427fe68f00e986d3d9c1eba4ef27b858ac6c61cffc5199b42f5cfc"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/issuedAt"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "issuedAt",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-020",
+      "vectorRoot": "67a8be5fa8dd059cc1e1b0a5d4194c50b7a7322d2b37e96ee6368fb18174def3"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/expiresAt"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "expiresAt",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-021",
+      "vectorRoot": "6bcdf0ccd0575ebaf650c73123572641aece1cc8d520327c912026ce3c7d7aa2"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/state"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetField": "state",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-TYPE-022",
+      "vectorRoot": "039bb52486864105b6e57451e86c63b500d005ca9027c032cbc90c031a645788"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "ADD",
+        "operand": true,
+        "pointer": "/unknownField"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-UNKNOWN-FIELD-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-UNKNOWN",
+      "vectorRoot": "5067f5892eaecfa3fa998059c5f4db0df93e01f070852f9d24467df8c24c6b87"
+    },
+    {
+      "actualTerminal": "PASS",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-040",
+        "schemaRoot": "95ae84500f95269f393c7dc3e6a7269b2400d6b6a4c12ca6edf3e96114bb3115",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "PASS",
+      "operation": {
+        "op": "NONE"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-040-INSTANCE",
+        "instanceRoot": "5367e174424517f7e204e46be26c08b6598d36121208824f1c8a308021048414"
+      },
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-040",
+      "vectorClass": "SCHEMA-ADMITTED-INSTANCE-POSITIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-POS",
+      "vectorRoot": "cfd525caaff06fbc9939d53c320d21356fd5662cd9acf316400e7eec9bd30118"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": 1,
+        "pointer": "/v5AcceptanceCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-CROSS-FIELD-INVARIANT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-INVARIANT",
+      "vectorRoot": "187d95a580bc1546900005a58e74d99397a02c7f394ac5acf21a5060c22c96a2"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/v5SchemaId"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5SchemaId",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-001",
+      "vectorRoot": "3b6d8da686abc154c8a4e646228f3da86c82d53aeec8523d3aa47439e737f0cf"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/v5RecordId"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5RecordId",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-002",
+      "vectorRoot": "4656aec5321748dff2c986de603cf11e324eafe0f26aaa2fa0b2270c52493b0a"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/v5PlanningOnly"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5PlanningOnly",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-003",
+      "vectorRoot": "d22b8dcd83ddce20a561741b7138fee7e193857366375afe7ac17d0a263245dd"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/v5OperationalCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5OperationalCredit",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-004",
+      "vectorRoot": "4f1e7ebbf62babf95eda7a64562d587c14b0f51a79fc1e96cefeb0a9a86e1a89"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/v5AcceptanceCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5AcceptanceCredit",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-005",
+      "vectorRoot": "afbc377707e32514a21f79b466defbcc0531fda8f70a3511e2502789018e28eb"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/controlPlanePermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "controlPlanePermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-006",
+      "vectorRoot": "475d37263085968c3148b919a03e4dfd1d119a9708f744dbb8522b5ee7967ab3"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/publicPushPermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "publicPushPermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-007",
+      "vectorRoot": "e2ee7c405e7cf1a72af6a35bc81dab22b5945b0b0ebad1b1d6a7635c349dea80"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/deploymentPermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "deploymentPermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-008",
+      "vectorRoot": "ebb68821cbaf3ad847cb4e50d90ce6f5fdacdbb564f56c4b9e29798065a33457"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/releasePermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "releasePermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-009",
+      "vectorRoot": "8f3af6a5eef4e0b4358a499748e61e0e531b68edf4ccffc4f24186c1017bd973"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/issuerSeparationRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "issuerSeparationRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-010",
+      "vectorRoot": "c7653a174857910f0fca5668534ea7a2848a0f8264911585e7f219ddab6e7582"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/consumerSeparationRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "consumerSeparationRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-011",
+      "vectorRoot": "949ba858db3c282b8298cd797b6695a97e31f8e246e52bcf0c9bff5f727584d5"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/crossUseDenialRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "crossUseDenialRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-012",
+      "vectorRoot": "04b2d678c8003975d9d211422f6408281c562392fa686a9a3ca7e4140252fb8c"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/acceptanceState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "acceptanceState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-013",
+      "vectorRoot": "a04ec0e18ab12e6ab56958b8a1a6417f5ca4e9d119b944caf0f0931d37627b28"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/gate29State"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "gate29State",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-014",
+      "vectorRoot": "931f4eb2bcf1c95940a92c45077386f045e8d4efcf64daa72af81f52433ab9fd"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/developmentFreezeState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "developmentFreezeState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-015",
+      "vectorRoot": "da22d045c606f5df4e5f274923177ff52604a0c0ca8e04afc110820adb517786"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "DELETE",
+        "pointer": "/repositoryVisibility"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "repositoryVisibility",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-MISSING-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-MISSING-016",
+      "vectorRoot": "d365ee87ed7487605e5b292297d62a1bab7a15392876d71fd39b7b72c9222252"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/v5SchemaId"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5SchemaId",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-001",
+      "vectorRoot": "6709cfb127aa13bae046c7f5484edf43f6c8d2badd3c1594e233a124030aaeee"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/v5RecordId"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5RecordId",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-002",
+      "vectorRoot": "6e5bea984c60ab37f11b657ff780f1da299b5df8cd26adc63fc73ed620edd3b6"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "INVALID-BOOLEAN",
+        "pointer": "/v5PlanningOnly"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5PlanningOnly",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-003",
+      "vectorRoot": "9e2086e319da6847028801d6dd7842867a5c05c05d3ea847270b6e2fba676a7a"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "INVALID-INTEGER",
+        "pointer": "/v5OperationalCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5OperationalCredit",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-004",
+      "vectorRoot": "725796861564d7aaa69e49e44e273b7bf1d5e710c44b7255999fc538c7405e46"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "INVALID-INTEGER",
+        "pointer": "/v5AcceptanceCredit"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "v5AcceptanceCredit",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-005",
+      "vectorRoot": "33ab86f27fee59a1a0a1a6d80c52a091a2ff808d17916a7dbe98f0841fa84b32"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/controlPlanePermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "controlPlanePermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-006",
+      "vectorRoot": "6ed4b481adca61ea34fa45f43de56e24fa7454a053eddca7f76869198354fd0c"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/publicPushPermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "publicPushPermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-007",
+      "vectorRoot": "9b814f6dba7d9eb6bcb8d69792025bc2208118a4169f8e8370e0c07c0244ffd2"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/deploymentPermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "deploymentPermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-008",
+      "vectorRoot": "8ccc7bb6cb6520bf8a47b5ac389dc4439d29568845d82b2f5ab50bb0067635d2"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/releasePermitState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "releasePermitState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-009",
+      "vectorRoot": "6035129f2dc0a1edf3751ad2955311f13416c4b4c26ec1055f371fcb2f380712"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/issuerSeparationRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "issuerSeparationRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-010",
+      "vectorRoot": "f7875c75954df0bd171e573e61a8672d97c27d8dbe02f8ef9a2658db85178fa2"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/consumerSeparationRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "consumerSeparationRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-011",
+      "vectorRoot": "cafae191b430d130c9aba61aa71d9c7bf00924f4da4a591429c3d97160c09748"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/crossUseDenialRoot"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "crossUseDenialRoot",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-012",
+      "vectorRoot": "d608abbf7f1e32da206863dcd990e43166fa9721477a503c54161eea89345d81"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/acceptanceState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "acceptanceState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-013",
+      "vectorRoot": "ec10e522e1b5f63a41eeb198ca2e967ec356f45d53449bfe75aa23045725ff32"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/gate29State"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "gate29State",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-014",
+      "vectorRoot": "dfe728e711dbdd624bd5bb14610b1775db2482e3fcbf0567c7e23cd4c0adc348"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/developmentFreezeState"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "developmentFreezeState",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-015",
+      "vectorRoot": "26bab3a8bebf3f9c3fe9ebd9d3bf9c768d7d51d9b96a219cd7f24b6c0f0e7627"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": false,
+        "pointer": "/repositoryVisibility"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetField": "repositoryVisibility",
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-SINGLE-FIELD-TYPE-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-TYPE-016",
+      "vectorRoot": "2d4cba6e8df43e2175f6c405536aaa21a7840f11c5db7cb0a6329a13fe51de16"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "ADD",
+        "operand": true,
+        "pointer": "/unknownField"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-UNKNOWN-FIELD-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-NEG-UNKNOWN",
+      "vectorRoot": "1708f7de5f3d5cb5b440f2c3d06f0a9177e84f79b738715973af54f3d2392b34"
+    },
+    {
+      "actualTerminal": "PASS",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "SCHEMA",
+        "schemaId": "PRCV5-OUTPUT-SCHEMA-041",
+        "schemaRoot": "c4607c5c538721fad5cb003e2b83b33570db7390294dfbac23bb6bb0bf780e6e",
+        "validatorLanguageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "validatorLanguageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+      },
+      "expectedTerminal": "PASS",
+      "operation": {
+        "op": "NONE"
+      },
+      "preStateRef": {
+        "instanceId": "PRCV5-OUTPUT-SCHEMA-041-INSTANCE",
+        "instanceRoot": "b3686e099103cd11db0a599c4c38588ea44f3666bcbf87d83e51bc331208f80e"
+      },
+      "targetSchemaId": "PRCV5-OUTPUT-SCHEMA-041",
+      "vectorClass": "SCHEMA-ADMITTED-INSTANCE-POSITIVE",
+      "vectorId": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-041-POS",
+      "vectorRoot": "ce07f5c9fa7294c7494d8cf6c61fc5d7bdb852fb9929ead3eda7fa627908731c"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "STRICTLY-ORDERED-UNIQUE-MUTATED",
+        "pointer": "/canonicalKeys"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-canonicalKeys"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-01",
+      "vectorRoot": "63dbb3694ecdbf02a94568c9082ee543d98ff88362ccfb46b6b6abb1bcba3ad8"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "MATCH-MUTATED",
+        "pointer": "/contentRoots"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-contentRoots"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-02",
+      "vectorRoot": "fc33d58edaa6ab23272bdeef385996784f84506157841517891bb9a07624059d"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "MATCH-MUTATED",
+        "pointer": "/corpusRoot"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-corpusRoot"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-03",
+      "vectorRoot": "03677bbc78a03d5808d5e8ba4b37cf884ef53ddd4c2b6aa49157ae1b16925575"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "MATCH-MUTATED",
+        "pointer": "/counts"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-counts"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-04",
+      "vectorRoot": "0e97afaac19e8aaac8327cde65a1b06b88adf6072c2ab83f56b2c0c690f8f7c4"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "MATCH-MUTATED",
+        "pointer": "/generatorRoot"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-generatorRoot"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-05",
+      "vectorRoot": "4166a77f47ba190b8af09c91da722c828e41514549a4f093a665d0f67a198f20"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "BELOW-52428800-MUTATED",
+        "pointer": "/memberSize"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-memberSize"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-06",
+      "vectorRoot": "1ec63fbd870bdebdcd4ae99a783ff47ba68e963c57397b539be9fc07cd3db50d"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "CONTIGUOUS-MUTATED",
+        "pointer": "/ordinals"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-ordinals"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-07",
+      "vectorRoot": "8bac4dcb1fde7a92afd96a1e1099e255a1af3696c86680c8915c27ef0c137827"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "GAP-FREE-NON-OVERLAPPING-MUTATED",
+        "pointer": "/ranges"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-ranges"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-08",
+      "vectorRoot": "6caa94a68c50fc57e54f6cdd47ee51bbd37073b27d92b8905ff9278587bde63a"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "SET",
+        "operand": "MATCH-MUTATED",
+        "pointer": "/rawBytes"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-rawBytes"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-SINGLE-CONJUNCT-NEGATIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-NEG-09",
+      "vectorRoot": "2c580c460ccf411466730ee7a180d9beb08663867bf8dfea12f51e2631262c1d"
+    },
+    {
+      "actualTerminal": "PASS",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/canonicalKeys"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "STRICTLY-ORDERED-UNIQUE"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/contentRoots"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/corpusRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/counts"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/generatorRoot"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/memberSize"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "BELOW-52428800"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ordinals"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "CONTIGUOUS"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/ranges"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "GAP-FREE-NON-OVERLAPPING"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/rawBytes"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "MATCH"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-SHARD-RECONSTRUCTION"
+      },
+      "expectedTerminal": "PASS",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "canonicalKeys": "STRICTLY-ORDERED-UNIQUE",
+        "contentRoots": "MATCH",
+        "corpusRoot": "MATCH",
+        "counts": "MATCH",
+        "generatorRoot": "MATCH",
+        "memberSize": "BELOW-52428800",
+        "ordinals": "CONTIGUOUS",
+        "ranges": "GAP-FREE-NON-OVERLAPPING",
+        "rawBytes": "MATCH"
+      },
+      "preStateRoot": "d7469a8b44dba2718eea1f94dd2481fd38cc6e3e2eab9b009ca84bcdd4f9ceb6",
+      "targetPredicateIds": [
+        "PRCV5-SHARD-RECONSTRUCTION-canonicalKeys",
+        "PRCV5-SHARD-RECONSTRUCTION-contentRoots",
+        "PRCV5-SHARD-RECONSTRUCTION-corpusRoot",
+        "PRCV5-SHARD-RECONSTRUCTION-counts",
+        "PRCV5-SHARD-RECONSTRUCTION-generatorRoot",
+        "PRCV5-SHARD-RECONSTRUCTION-memberSize",
+        "PRCV5-SHARD-RECONSTRUCTION-ordinals",
+        "PRCV5-SHARD-RECONSTRUCTION-ranges",
+        "PRCV5-SHARD-RECONSTRUCTION-rawBytes"
+      ],
+      "vectorClass": "DETERMINISTIC-SHARD-RECONSTRUCTION-POSITIVE",
+      "vectorId": "PRCV5-VECTOR-SHARD-MATRIX-POS",
+      "vectorRoot": "b3b3a1cb964ce2ca7f12c12c3f0d510b1d4f56c813443ac074d658d2e80abb73"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                "/bytes"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                52428800
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LT"
+        },
+        "predicateId": "PRCV5-SIZE-STRICT-PREDICATE"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "bytes": 52428801
+      },
+      "preStateRoot": "bdabb8bdf50b71236c62e0403b2f38d2b6f3763e683d90ed4986118a6ad4b3bf",
+      "vectorClass": "PUBLICATION-SIZE-BOUNDARY",
+      "vectorId": "PRCV5-VECTOR-SIZE-ABOVE-BLOCK",
+      "vectorRoot": "0f9248b750919eb3d171886bf34b10ac5fc9dfb8194e09717cb11caf1a04088e"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                "/bytes"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                52428800
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LT"
+        },
+        "predicateId": "PRCV5-SIZE-STRICT-PREDICATE"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "bytes": 52428800
+      },
+      "preStateRoot": "394d731123c739ea18b3a63c8cf56294320439031c086920c2f219e2619cb228",
+      "vectorClass": "PUBLICATION-SIZE-BOUNDARY",
+      "vectorId": "PRCV5-VECTOR-SIZE-BOUNDARY-BLOCK",
+      "vectorRoot": "86f27df66af760b9049b4be4cf50631bc10d3440964148e0e72a69dbc9f86e5e"
+    },
+    {
+      "actualTerminal": "PASS",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                "/bytes"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                52428800
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "LT"
+        },
+        "predicateId": "PRCV5-SIZE-STRICT-PREDICATE"
+      },
+      "expectedTerminal": "PASS",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "bytes": 52428799
+      },
+      "preStateRoot": "ca9566e9aec6d0845ca55a1ccbebc695fe0d9ba68cc593c11fb44800bb8bfd24",
+      "vectorClass": "PUBLICATION-SIZE-BOUNDARY",
+      "vectorId": "PRCV5-VECTOR-SIZE-BOUNDARY-PASS",
+      "vectorRoot": "30f415484dcfece61d15f32919b018ac794dc64057dcf2b2d99592693323e30b"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/pre"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/post"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-PRE-POST-PUBLIC"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "post": "MISSING-BLOCKING",
+        "pre": "PUBLIC"
+      },
+      "preStateRoot": "ce77eabb655a983bcc5c5c08a0565597c956d3b758e647ea4826908673925080",
+      "vectorClass": "CONTINUOUS-PUBLIC-INVARIANT",
+      "vectorId": "PRCV5-VECTOR-VISIBILITY-MISSING-POST",
+      "vectorRoot": "6933ca0ce2b8d4051477a4cdfd2f2d5c046ab40203d0f1e81120acff0f224c77"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/pre"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/post"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-PRE-POST-PUBLIC"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "post": "PRIVATE",
+        "pre": "PUBLIC"
+      },
+      "preStateRoot": "ef0670b8da416b6f0aa0903188fb15f4494e70e13336fcc10c01da13041bce1d",
+      "vectorClass": "CONTINUOUS-PUBLIC-INVARIANT",
+      "vectorId": "PRCV5-VECTOR-VISIBILITY-PRIVATE-POST",
+      "vectorRoot": "08c200083005126d542bbfda65bf29512b873c47aaa401e54c4724b9d883795e"
+    },
+    {
+      "actualTerminal": "BLOCK",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/pre"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/post"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-PRE-POST-PUBLIC"
+      },
+      "expectedTerminal": "BLOCK",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "post": "PUBLIC",
+        "pre": "PRIVATE"
+      },
+      "preStateRoot": "d5b7880e7ca5809482280f0f0dc797932c2d644439e63d83b9113db41a031d57",
+      "vectorClass": "CONTINUOUS-PUBLIC-INVARIANT",
+      "vectorId": "PRCV5-VECTOR-VISIBILITY-PRIVATE-PRE",
+      "vectorRoot": "5482714547fef81289aef8fc8734b61f5eb52b2a93a038e0eefc6f1e741b25eb"
+    },
+    {
+      "actualTerminal": "PASS",
+      "comparisonTerminal": "PASS",
+      "effectSet": [],
+      "evaluator": {
+        "kind": "AST",
+        "languageId": "PRCV5-VALIDATOR-LANGUAGE-V1",
+        "languageRoot": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b",
+        "predicate": {
+          "args": [
+            {
+              "args": [
+                {
+                  "args": [
+                    "/pre"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            },
+            {
+              "args": [
+                {
+                  "args": [
+                    "/post"
+                  ],
+                  "op": "GET"
+                },
+                {
+                  "args": [
+                    "PUBLIC"
+                  ],
+                  "op": "LITERAL"
+                }
+              ],
+              "op": "EQ"
+            }
+          ],
+          "op": "AND"
+        },
+        "predicateId": "PRCV5-PRE-POST-PUBLIC"
+      },
+      "expectedTerminal": "PASS",
+      "operation": {
+        "op": "NONE"
+      },
+      "preState": {
+        "post": "PUBLIC",
+        "pre": "PUBLIC"
+      },
+      "preStateRoot": "050dd63907f406aac54b6e4aa3a90806cae5732050dcd1e5f4d78554bb9c8e39",
+      "vectorClass": "CONTINUOUS-PUBLIC-INVARIANT",
+      "vectorId": "PRCV5-VECTOR-VISIBILITY-PUBLIC-PUBLIC",
+      "vectorRoot": "9e436b9589a7793b1321cca9c87e00f6ecc62e362482b576335537ce48e148bd"
+    }
+  ]
+}

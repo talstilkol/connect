@@ -5,6 +5,7 @@ import {
 import test from "node:test";
 
 import {
+  buildEnvironmentIsolationEvidence,
   deriveEnvironmentIsolationEvidenceDigest,
   inspectEnvironmentIsolationEvidence,
 } from "../server/operations/environmentIsolationEvidence.ts";
@@ -22,6 +23,8 @@ const resourceClasses = [
   "metaWebhookDeadLetterQueue",
   "campaignDeliveryQueue",
   "campaignDeliveryDeadLetterQueue",
+  "teamInvitationQueue",
+  "teamInvitationDeadLetterQueue",
   "metaWebhookRateLimiter",
   "tenantMutationRateLimiter",
   "systemAdminMutationRateLimiter",
@@ -39,7 +42,7 @@ function fingerprint(value) {
 
 function createEvidence() {
   const evidence = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     verifiedAt:
       "2026-07-27T11:00:00.000Z",
     expiresAt:
@@ -73,7 +76,7 @@ function createEvidence() {
   };
 }
 
-test("accepts complete expiring evidence with 44 isolated resource fingerprints", () => {
+test("accepts complete expiring evidence with 52 isolated resource fingerprints", () => {
   const report =
     inspectEnvironmentIsolationEvidence(
       {
@@ -90,8 +93,70 @@ test("accepts complete expiring evidence with 44 isolated resource fingerprints"
     code:
       "ENVIRONMENT_ISOLATION_EVIDENCE_VERIFIED",
     environmentCount: 4,
-    resourceFingerprintCount: 44,
+    resourceFingerprintCount: 52,
   });
+});
+
+test("builds v2 evidence from unique provider resource identities", () => {
+  const evidence =
+    buildEnvironmentIsolationEvidence({
+      verifiedAt:
+        "2026-07-27T11:00:00.000Z",
+      environments:
+        environmentNames.map((name) => ({
+          name,
+          resources: Object.fromEntries(
+            resourceClasses.map(
+              (resourceClass) => [
+                resourceClass,
+                `${name}:${resourceClass}`,
+              ],
+            ),
+          ),
+        })),
+    });
+
+  assert.equal(evidence.schemaVersion, 2);
+  assert.equal(
+    evidence.expiresAt,
+    "2026-07-28T11:00:00.000Z",
+  );
+  assert.equal(
+    inspectEnvironmentIsolationEvidence(
+      {
+        ENVIRONMENT_ISOLATION_EVIDENCE_JSON:
+          JSON.stringify(evidence),
+      },
+      now,
+    ).status,
+    "configured",
+  );
+
+  const reused = environmentNames.map(
+    (name) => ({
+      name,
+      resources: Object.fromEntries(
+        resourceClasses.map(
+          (resourceClass) => [
+            resourceClass,
+            `${name}:${resourceClass}`,
+          ],
+        ),
+      ),
+    }),
+  );
+  reused[1].resources.d1 =
+    reused[0].resources.d1;
+
+  assert.throws(
+    () =>
+      buildEnvironmentIsolationEvidence({
+        verifiedAt:
+          "2026-07-27T11:00:00.000Z",
+        environments: reused,
+      }),
+    /ENVIRONMENT_ISOLATION_SNAPSHOT_INVALID/,
+  );
 });
 
 test("rejects one resource reused across environments", () => {
@@ -145,6 +210,15 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     deriveEnvironmentIsolationEvidenceDigest(
       future,
     );
+  const extended = {
+    ...evidence,
+    expiresAt:
+      "2026-07-28T11:00:00.001Z",
+  };
+  extended.evidenceDigest =
+    deriveEnvironmentIsolationEvidenceDigest(
+      extended,
+    );
 
   assert.equal(
     inspectEnvironmentIsolationEvidence(
@@ -170,6 +244,16 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     inspectEnvironmentIsolationEvidence(
       {
         ENVIRONMENT_ISOLATION_EVIDENCE_JSON:
+          JSON.stringify(extended),
+      },
+      now,
+    ).status,
+    "invalid",
+  );
+  assert.equal(
+    inspectEnvironmentIsolationEvidence(
+      {
+        ENVIRONMENT_ISOLATION_EVIDENCE_JSON:
           JSON.stringify({
             ...evidence,
             untrusted: true,
@@ -186,7 +270,7 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
           JSON.stringify({
             ...evidence,
             evidenceDigest:
-              "environment_isolation_evidence_v1_" +
+              "environment_isolation_evidence_v2_" +
               "0".repeat(64),
           }),
       },

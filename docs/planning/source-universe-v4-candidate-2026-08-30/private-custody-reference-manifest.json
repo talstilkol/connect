@@ -1,0 +1,25 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-PRIVATE-CUSTODY-REFERENCES-2026-08-30-G0",
+  "custodyRoot": "f2ece3ab25e6dd6e0e40224a40a7dc284e0e8f4207f6888675b8c12e5ea30d4b",
+  "forbiddenFields": [
+    "ABSOLUTE-PATH",
+    "TOKEN",
+    "PASSWORD",
+    "PRIVATE-KEY",
+    "PERSONAL-DATA",
+    "LOW-ENTROPY-DIGEST"
+  ],
+  "rows": [
+    {
+      "admissionEnabled": false,
+      "custodyStatus": "PRIVATE-CUSTODY-ABSENT-BLOCKING",
+      "sourceId": "OPAQUE-SPEC-DETAILED-TEXT"
+    },
+    {
+      "admissionEnabled": false,
+      "custodyStatus": "PRIVATE-CUSTODY-ABSENT-BLOCKING",
+      "sourceId": "OPAQUE-SPEC-WHATSAPP-PDF"
+    }
+  ],
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-PRIVATE-CUSTODY-REFERENCES-V1"
+}

@@ -66,6 +66,30 @@ export interface SystemAdminSubscriptionService {
   ): Promise<TenantSubscriptionMutationResult>;
 }
 
+export interface NormalizedSystemAdminSubscriptionCreateInput {
+  readonly tenantId: number;
+  readonly status: "trial" | "active";
+  readonly startsAt: string;
+  readonly endsAt: string;
+}
+
+export interface NormalizedSystemAdminSubscriptionExtendInput {
+  readonly tenantId: number;
+  readonly expectedVersion: number;
+  readonly newEndsAt: string;
+}
+
+export interface NormalizedSystemAdminSubscriptionStatusInput {
+  readonly tenantId: number;
+  readonly expectedVersion: number;
+  readonly status: "active" | "suspended" | "blocked";
+}
+
+export interface NormalizedSystemAdminSubscriptionCancelInput {
+  readonly tenantId: number;
+  readonly expectedVersion: number;
+}
+
 type Clock = () => string;
 
 function isExactRecord(
@@ -138,6 +162,111 @@ function canonicalTimestamp(
   } catch {
     return inputError();
   }
+}
+
+export function normalizeSystemAdminSubscriptionCreateInput(
+  input: unknown,
+): Readonly<NormalizedSystemAdminSubscriptionCreateInput> {
+  if (
+    !isExactRecord(input, [
+      "tenantId",
+      "status",
+      "startsAt",
+      "endsAt",
+    ]) ||
+    typeof input.status !== "string" ||
+    typeof input.startsAt !== "string" ||
+    typeof input.endsAt !== "string"
+  ) {
+    return inputError();
+  }
+
+  try {
+    const period = requireSubscriptionWindow(
+      input.startsAt,
+      input.endsAt,
+    );
+
+    return Object.freeze({
+      tenantId: positiveTenantId(input.tenantId),
+      status: requireManualInitialStatus(input.status),
+      startsAt: period.startsAt,
+      endsAt: period.endsAt,
+    });
+  } catch (error) {
+    if (error instanceof SystemAdminSubscriptionInputError) {
+      throw error;
+    }
+
+    return inputError();
+  }
+}
+
+export function normalizeSystemAdminSubscriptionExtendInput(
+  input: unknown,
+): Readonly<NormalizedSystemAdminSubscriptionExtendInput> {
+  if (
+    !isExactRecord(input, [
+      "tenantId",
+      "expectedVersion",
+      "newEndsAt",
+    ])
+  ) {
+    return inputError();
+  }
+
+  return Object.freeze({
+    tenantId: positiveTenantId(input.tenantId),
+    expectedVersion: positiveVersion(input.expectedVersion),
+    newEndsAt: canonicalTimestamp(input.newEndsAt),
+  });
+}
+
+export function normalizeSystemAdminSubscriptionStatusInput(
+  input: unknown,
+): Readonly<NormalizedSystemAdminSubscriptionStatusInput> {
+  if (
+    !isExactRecord(input, [
+      "tenantId",
+      "expectedVersion",
+      "status",
+    ]) ||
+    typeof input.status !== "string"
+  ) {
+    return inputError();
+  }
+
+  try {
+    return Object.freeze({
+      tenantId: positiveTenantId(input.tenantId),
+      expectedVersion: positiveVersion(input.expectedVersion),
+      status: requireManualOperationalStatus(input.status),
+    });
+  } catch (error) {
+    if (error instanceof SystemAdminSubscriptionInputError) {
+      throw error;
+    }
+
+    return inputError();
+  }
+}
+
+export function normalizeSystemAdminSubscriptionCancelInput(
+  input: unknown,
+): Readonly<NormalizedSystemAdminSubscriptionCancelInput> {
+  if (
+    !isExactRecord(input, [
+      "tenantId",
+      "expectedVersion",
+    ])
+  ) {
+    return inputError();
+  }
+
+  return Object.freeze({
+    tenantId: positiveTenantId(input.tenantId),
+    expectedVersion: positiveVersion(input.expectedVersion),
+  });
 }
 
 function currentTimestamp(
@@ -245,43 +374,8 @@ export function createSystemAdminSubscriptionService(
   return {
     async create(session, input) {
       assertSession(session);
-
-      if (
-        !isExactRecord(input, [
-          "tenantId",
-          "status",
-          "startsAt",
-          "endsAt",
-        ])
-      ) {
-        return inputError();
-      }
-
-      const tenantId = positiveTenantId(
-        input.tenantId,
-      );
-      let status;
-      let period;
-
-      try {
-        if (
-          typeof input.status !== "string" ||
-          typeof input.startsAt !== "string" ||
-          typeof input.endsAt !== "string"
-        ) {
-          return inputError();
-        }
-
-        status = requireManualInitialStatus(
-          input.status,
-        );
-        period = requireSubscriptionWindow(
-          input.startsAt,
-          input.endsAt,
-        );
-      } catch {
-        return inputError();
-      }
+      const normalized =
+        normalizeSystemAdminSubscriptionCreateInput(input);
 
       const occurredAt =
         currentTimestamp(clock);
@@ -289,56 +383,31 @@ export function createSystemAdminSubscriptionService(
       return runMutation(
         () =>
           repository.create({
-            tenantId,
-            status,
-            startsAt: period.startsAt,
-            endsAt: period.endsAt,
+            ...normalized,
             actorExternalUserId:
               session.externalUserId,
             occurredAt,
           }),
-        tenantId,
+        normalized.tenantId,
       );
     },
 
     async extend(session, input) {
       assertSession(session);
-
-      if (
-        !isExactRecord(input, [
-          "tenantId",
-          "expectedVersion",
-          "newEndsAt",
-        ])
-      ) {
-        return inputError();
-      }
-
-      const tenantId = positiveTenantId(
-        input.tenantId,
-      );
-      const expectedVersion =
-        positiveVersion(
-          input.expectedVersion,
-        );
-      const newEndsAt =
-        canonicalTimestamp(
-          input.newEndsAt,
-        );
+      const normalized =
+        normalizeSystemAdminSubscriptionExtendInput(input);
       const occurredAt =
         currentTimestamp(clock);
 
       return runMutation(
         () =>
           repository.extend({
-            tenantId,
-            expectedVersion,
-            newEndsAt,
+            ...normalized,
             actorExternalUserId:
               session.externalUserId,
             occurredAt,
           }),
-        tenantId,
+        normalized.tenantId,
       );
     },
 
@@ -347,40 +416,8 @@ export function createSystemAdminSubscriptionService(
       input,
     ) {
       assertSession(session);
-
-      if (
-        !isExactRecord(input, [
-          "tenantId",
-          "expectedVersion",
-          "status",
-        ])
-      ) {
-        return inputError();
-      }
-
-      const tenantId = positiveTenantId(
-        input.tenantId,
-      );
-      const expectedVersion =
-        positiveVersion(
-          input.expectedVersion,
-        );
-      let status;
-
-      try {
-        if (
-          typeof input.status !== "string"
-        ) {
-          return inputError();
-        }
-
-        status =
-          requireManualOperationalStatus(
-            input.status,
-          );
-      } catch {
-        return inputError();
-      }
+      const normalized =
+        normalizeSystemAdminSubscriptionStatusInput(input);
 
       const occurredAt =
         currentTimestamp(clock);
@@ -388,49 +425,31 @@ export function createSystemAdminSubscriptionService(
       return runMutation(
         () =>
           repository.changeStatus({
-            tenantId,
-            expectedVersion,
-            status,
+            ...normalized,
             actorExternalUserId:
               session.externalUserId,
             occurredAt,
           }),
-        tenantId,
+        normalized.tenantId,
       );
     },
 
     async cancel(session, input) {
       assertSession(session);
-
-      if (
-        !isExactRecord(input, [
-          "tenantId",
-          "expectedVersion",
-        ])
-      ) {
-        return inputError();
-      }
-
-      const tenantId = positiveTenantId(
-        input.tenantId,
-      );
-      const expectedVersion =
-        positiveVersion(
-          input.expectedVersion,
-        );
+      const normalized =
+        normalizeSystemAdminSubscriptionCancelInput(input);
       const occurredAt =
         currentTimestamp(clock);
 
       return runMutation(
         () =>
           repository.cancel({
-            tenantId,
-            expectedVersion,
+            ...normalized,
             actorExternalUserId:
               session.externalUserId,
             occurredAt,
           }),
-        tenantId,
+        normalized.tenantId,
       );
     },
   };

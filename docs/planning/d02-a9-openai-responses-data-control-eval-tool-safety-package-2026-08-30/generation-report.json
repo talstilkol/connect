@@ -1,0 +1,39 @@
+{
+  "artifactId": "CONNECT-D02-A9-DETERMINISTIC-GENERATION-REPORT-2026-08-30",
+  "generatorVersion": "1.0.0",
+  "generatedAt": "2026-08-30T02:15:04Z",
+  "outputCount": 45,
+  "admittedInputCount": 13,
+  "semanticSourceCount": 18,
+  "semanticMemberCount": 2864,
+  "semanticShardCount": 29,
+  "tableRowCount": 295,
+  "sourceReceiptCount": 11,
+  "rootDefinitionCount": 30,
+  "dagNodeCount": 30,
+  "dagEdgeCount": 34,
+  "appointmentCount": 24,
+  "positiveControlCount": 9,
+  "mutationVectorCount": 94,
+  "innerMutationVectorCount": 82,
+  "outerMutationVectorCount": 12,
+  "roots": {
+    "admittedManifestRoot": "d4d0a384b05897522ab9a3e96dd626cede14c9e4e0351906acd3201fd6dfd630",
+    "semanticUniverseRoot": "1a7e0f90fca63f87e0a243a9738d2e2a1a17334a61bf2cabedf9a34070f186e4",
+    "sourceObservationRoot": "5d2ced7611fb4975715037a0e7261bedfd0454b8b8c882f3e48b638f0dc81ef2",
+    "appointmentsRoot": "aa3a873c798fdbd6dfe17c737fc099d370f600b4109700e19a3aea475bfd7bbf",
+    "dagNodeRoot": "f6fe5da0fc9757b0f53727174ec0f8e9f7a578512336632076af997b10baa87c",
+    "dagEdgeRoot": "4602168466169a1904824a748f8f0f78ae00db57a0638322581f6f1455c5bbd2"
+  },
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "planningAcceptance": "MISSING",
+    "aiAdmission": "MISSING",
+    "runtimePermit": "MISSING",
+    "acceptanceCount": 0
+  },
+  "acceptanceCredit": 0
+}

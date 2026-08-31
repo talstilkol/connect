@@ -19,10 +19,17 @@ test("accepts sequential variables and rejects a missing first variable", () => 
     error: null,
   });
 
-  assert.match(
-    inspectTemplateVariables("{{2}}").error ?? "",
-    /המשתנה הבא צריך להיות \{\{1\}\}/,
-  );
+  assert.deepEqual(inspectTemplateVariables("{{2}}").error, {
+    code: "missing-sequence",
+    expected: 1,
+  });
+});
+
+test("returns a language-neutral error code for malformed syntax", () => {
+  assert.deepEqual(inspectTemplateVariables("{{name}}"), {
+    numbers: [],
+    error: { code: "invalid-syntax" },
+  });
 });
 
 test("replaces only variables with a supplied non-empty value", () => {

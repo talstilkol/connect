@@ -1,0 +1,73 @@
+{
+  "artifactClass": "FROZEN-LOCAL-SOURCE-INDEX-PLANNING-ONLY",
+  "artifactId": "CONNECT-B0-V8-FROZEN-SOURCE-INDEX-2026-08-30-G0",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-B0-V8-SOURCE-INDEX-V1",
+  "sourceCount": 9,
+  "sourceRows": [
+    {
+      "bytes": 33884,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 1,
+      "sha256": "2bc67251748cde019ffeeaf00da80f4f8f8e8d077c36ffee2c1744fab945a7c9"
+    },
+    {
+      "bytes": 6577,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-atomic-package-manifest-2026-08-30.json",
+      "mode": 420,
+      "ordinal": 2,
+      "sha256": "3492e8a0947a3c16d9a16eb5d064139a1e19109da8d3d64a5e20a9b9f9aa47ac"
+    },
+    {
+      "bytes": 81523,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-normative-registry-2026-08-30.json",
+      "mode": 420,
+      "ordinal": 3,
+      "sha256": "30022cabd3590005524d4f75ec5ce35a09cd3947dc77e1a6bcdb070a239483f9"
+    },
+    {
+      "bytes": 101096,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-closure-crosswalk-2026-08-30.json",
+      "mode": 420,
+      "ordinal": 4,
+      "sha256": "3a28e688df883e5fb79fa9cfb630492b6ebd6e70f1f6dc6627f9e4a9f5daccf8"
+    },
+    {
+      "bytes": 25671,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-hostile-review-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 5,
+      "sha256": "88a8f23e6c0bb9a65719264c76e2c9c80def9f784fb913d4d80762bc34821190"
+    },
+    {
+      "bytes": 28810,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 6,
+      "sha256": "48a3e50368b1beb24686ffb6156ba9ac542525a7a7058a092bf540bc19f38372"
+    },
+    {
+      "bytes": 5642,
+      "logicalPath": "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/receipt.json",
+      "mode": 420,
+      "ordinal": 7,
+      "sha256": "c9fad635995afb8ee77c32e55bc8ce49dda673c3b1999c79f8126e4c424e641f"
+    },
+    {
+      "bytes": 1323,
+      "logicalPath": "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/manifest.json",
+      "mode": 420,
+      "ordinal": 8,
+      "sha256": "b8d61e9da473f4f93bf3150b2c47aba90e3f64a14514846c703bf1c0e17831c0"
+    },
+    {
+      "bytes": 34958,
+      "logicalPath": "docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md",
+      "mode": 420,
+      "ordinal": 9,
+      "sha256": "f890c292860a6c2c9cae6ff707c53478fee9a1ef55a8a698f82cbe423e7781b3"
+    }
+  ],
+  "sourceSetRoot": "c221c71d96fa38f3485430fc9f2296f3dcb8bda625c50463add4a75f6ed34daa"
+}

@@ -1,0 +1,153 @@
+{
+  "schema": "CONNECT-DISCOVERY-CUTOFF-RECEIPT-ENVELOPE-V1",
+  "payload": {
+    "schema": "CONNECT-DISCOVERY-CUTOFF-RECEIPT-PAYLOAD-V1",
+    "artifactId": "CONNECT-DISCOVERY-CUTOFF-CANDIDATE-V1-2026-08-30",
+    "status": "CANDIDATE-NOT-ACCEPTED-NOT-SOURCE-UNIVERSE",
+    "owner": "Tal",
+    "observedAt": "2026-08-30T18:26:15Z",
+    "clockAuthority": "LOCAL-CLOCK-UNTRUSTED",
+    "repositoryVisibilityInvariant": "PUBLIC",
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "declaredOutputRegistry": {
+      "path": "docs/planning/discovery-cutoff-output-path-registry-v1-2026-08-30.json",
+      "outputDirectory": "docs/planning/discovery-cutoff-candidate-v1-2026-08-30",
+      "outputPaths": [
+        "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/receipt.json",
+        "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/source-candidates.json",
+        "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/manifest.json",
+        "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/verification-report.json"
+      ],
+      "allOutputsAbsentAtCutoff": true
+    },
+    "productRepository": {
+      "identity": "talstilkol/connect",
+      "branch": "codex/cloudflare-evidence-builders",
+      "observedHead": "0f0b0e9a1bbd8b0234054793394a8a948b94246d",
+      "cleanAtCutoff": true,
+      "headTree": {
+        "entryCount": 2192,
+        "rawSha256": "a85d083833d835c5ce8efd420208f10ca93525a8d3e677ca08e2651d77f5c25c"
+      },
+      "index": {
+        "entryCount": 2192,
+        "rawSha256": "bf279f95d851aeee6c47a8480a822f9124c8902dcd25a41b89160f845a5f88ce"
+      },
+      "worktreeStatus": {
+        "entryCount": 0,
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "untracked": {
+        "entryCount": 0,
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ignored": {
+        "entryCount": 40630,
+        "rawSha256": "5ce0fc5483bf2bf572861e841d8989b885bfccb09bed121eda4dad267bec5e94"
+      },
+      "trackedSymlinkCount": 0,
+      "submoduleCount": 0,
+      "allFilesystemSymlinks": {
+        "entryCount": 49,
+        "pathSetSha256": "443a77f679d8c4e3fdac8bc4d7f1c850f052574556275334c37debe9f6ee7191"
+      },
+      "workingSecretHygiene": {
+        "status": "passed",
+        "workingFileCount": 2192,
+        "trackedFileCount": 2192,
+        "untrackedFileCount": 0,
+        "historyIncluded": false
+      }
+    },
+    "workspaceContainer": {
+      "authority": "DISCOVERY-CONTAINER-NOT-PUBLIC-GIT-AUTHORITY",
+      "status": {
+        "entryCount": 5,
+        "rawSha256": "9daec4a802660b36ee188feb8453d791107e99556de6f433a571cef8d19c899d"
+      },
+      "nestedGitIdentities": {
+        "entryCount": 2,
+        "labels": [
+          "product-repository",
+          "workspace-container"
+        ],
+        "labelSetSha256": "544e0a85af0bbdf4a7ef352e39499ed1a20b973ce613520f35b5c6e693a8e534"
+      }
+    },
+    "remoteObservation": {
+      "transport": "GIT-LS-REMOTE-READ-ONLY",
+      "remote": "origin",
+      "defaultBranch": "main",
+      "defaultBranchHead": "aabaee803a0c00569806195ddf51995f873b27f0",
+      "refs": [
+        {
+          "commit": "0f0b0e9a1bbd8b0234054793394a8a948b94246d",
+          "ref": "refs/heads/codex/cloudflare-evidence-builders"
+        },
+        {
+          "commit": "d1b15c24c75671dd6bace1619ac0f39a875bdef5",
+          "ref": "refs/heads/codex/github-evidence-builders"
+        },
+        {
+          "commit": "3a070bab7a5ec6e221b36bff61fbb3303fb7c5b2",
+          "ref": "refs/heads/codex/pr-quality-gates"
+        },
+        {
+          "commit": "04a9e8b11141e5ef0576cc6e162c6a3157025498",
+          "ref": "refs/heads/fix/node-test-load-ts"
+        },
+        {
+          "commit": "aabaee803a0c00569806195ddf51995f873b27f0",
+          "ref": "refs/heads/main"
+        }
+      ],
+      "refSet": {
+        "entryCount": 5,
+        "rawSha256": "ac38f382e89d644ff857721a163d18cb97de194decd10c2e9182365ef7574582"
+      },
+      "limitations": [
+        "PULL-REQUEST-REFS-NOT-OBSERVED",
+        "GITHUB-RULESETS-NOT-OBSERVED",
+        "GITHUB-SECURITY-SETTINGS-NOT-OBSERVED",
+        "GITHUB-API-PAGINATION-NOT-OBSERVED"
+      ]
+    },
+    "toolchain": [
+      {
+        "path": "scripts/planning-discovery-cutoff-lib.mjs",
+        "byteLength": 6534,
+        "sha256": "353cca4b28c79542f1755f5e051b57d88300b9eae6fefae71afe2238c2753446"
+      },
+      {
+        "path": "scripts/create-planning-discovery-cutoff.mjs",
+        "byteLength": 14033,
+        "sha256": "4ed889bfa2683746bc25c50a11ffaa70b9834c36bb949ee4a6650424713a028d"
+      },
+      {
+        "path": "scripts/verify-planning-discovery-cutoff.mjs",
+        "byteLength": 10251,
+        "sha256": "5af6f636eafcf379d02f79549cbe8da83e04c6abd5e0ad2563902297fe2528c2"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-output-path-registry-v1-2026-08-30.json",
+        "byteLength": 526,
+        "sha256": "42ea8832908ba8836fefe20bf05ac2afd5d2afd500f6917f451931aa9a510f10"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-tool-contract-2026-08-30.md",
+        "byteLength": 2615,
+        "sha256": "4ba6c232cfc610a1ab58e651c1c3eb80ca9edc0065b82ef4e93d4aa3a4ffc4ad"
+      }
+    ],
+    "blockers": [
+      "TRUSTED-TIME-ABSENT",
+      "GITHUB-API-AND-PR-COVERAGE-ABSENT",
+      "PRIVATE-SOURCE-CUSTODY-AND-RIGHTS-UNAPPROVED",
+      "OFFICIAL-SOURCE-CAPTURE-FRONTIER-INCOMPLETE",
+      "B0-AND-REVIEW-PROTOCOL-NOT-ACCEPTED",
+      "INDEPENDENT-REVIEW-ABSENT"
+    ]
+  },
+  "payloadSha256": "cbb0ffecddd1cdc3461ac5884d7eb8e4d1b9fba39344243b996b152c5180afda"
+}

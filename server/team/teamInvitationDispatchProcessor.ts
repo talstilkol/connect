@@ -21,10 +21,15 @@ export type TeamInvitationDispatchOutcome =
   | "cancelled"
   | "not-found";
 
-export interface TeamInvitationDispatchResult {
-  outcome:
-    TeamInvitationDispatchOutcome;
-}
+export type TeamInvitationDispatchResult =
+  | {
+      outcome:
+        TeamInvitationDispatchOutcome;
+    }
+  | {
+      outcome: "deferred";
+      retryAfterSeconds: number;
+    };
 
 export class TeamInvitationDispatchError
   extends Error {
@@ -53,21 +58,42 @@ function parseProviderResult(
   const record =
     value as Record<string, unknown>;
 
-  if (
-    Object.keys(record).length !== 1 ||
+  const statusOnly =
+    Object.keys(record).length === 1 &&
     (
-      record.status !== "submitted" &&
-      record.status !==
-        "already-pending" &&
-      record.status !== "unavailable"
-    )
-  ) {
+      record.status === "submitted" ||
+      record.status ===
+        "already-pending" ||
+      record.status === "unavailable"
+    );
+  const deferred =
+    Object.keys(record).sort().join(",") ===
+      "retryAfterSeconds,status" &&
+    record.status === "deferred" &&
+    Number.isSafeInteger(
+      record.retryAfterSeconds,
+    ) &&
+    Number(record.retryAfterSeconds) >= 1 &&
+    Number(record.retryAfterSeconds) <= 86_400;
+
+  if (!statusOnly && !deferred) {
     return null;
   }
 
-  return {
-    status: record.status,
-  };
+  return deferred
+    ? {
+        status: "deferred",
+        retryAfterSeconds:
+          Number(
+            record.retryAfterSeconds,
+          ),
+      }
+    : {
+        status: record.status as
+          | "submitted"
+          | "already-pending"
+          | "unavailable",
+      };
 }
 
 export function createTeamInvitationDispatchProcessor(
@@ -170,6 +196,17 @@ export function createTeamInvitationDispatchProcessor(
 
       if (
         claimed.outcome ===
+        "deferred"
+      ) {
+        return {
+          outcome: "deferred",
+          retryAfterSeconds:
+            claimed.retryAfterSeconds,
+        };
+      }
+
+      if (
+        claimed.outcome ===
         "uncertain"
       ) {
         return markAmbiguous(
@@ -206,6 +243,9 @@ export function createTeamInvitationDispatchProcessor(
               requestedAt:
                 claimed.prepared
                   .requestedAt,
+              expiresAt:
+                claimed.prepared
+                  .expiresAt,
             }),
           );
       } catch {
@@ -236,6 +276,41 @@ export function createTeamInvitationDispatchProcessor(
 
           return {
             outcome: "blocked",
+          };
+        } catch {
+          throw new TeamInvitationDispatchError();
+        }
+      }
+
+      if (
+        providerResult.status ===
+        "deferred"
+      ) {
+        try {
+          const occurredAt =
+            timestamp();
+          const retryAfterAt =
+            new Date(
+              Date.parse(
+                occurredAt,
+              ) +
+                providerResult
+                  .retryAfterSeconds *
+                  1_000,
+            ).toISOString();
+
+          await deliveries.defer(
+            tenantId,
+            deliveryKey,
+            occurredAt,
+            retryAfterAt,
+          );
+
+          return {
+            outcome: "deferred",
+            retryAfterSeconds:
+              providerResult
+                .retryAfterSeconds,
           };
         } catch {
           throw new TeamInvitationDispatchError();

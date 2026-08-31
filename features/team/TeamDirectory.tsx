@@ -1,5 +1,4 @@
 import {
-  roleLabels,
   rolePermissions,
   type TenantRole,
 } from "../../shared/domain/model.ts";
@@ -7,53 +6,36 @@ import type {
   TeamDirectoryStatus,
   TeamDirectoryView,
 } from "../../shared/domain/teamDirectoryView.ts";
-
-const statusMessages: Record<
-  Exclude<
-    TeamDirectoryStatus,
-    "ready"
-  >,
-  string
-> = {
-  "configuration-required":
-    "נדרשת הגדרת Clerk ו־D1 כדי לטעון את צוות סביבת העבודה.",
-  unauthenticated:
-    "יש להתחבר מחדש כדי לצפות בצוות.",
-  "onboarding-required":
-    "יש ליצור סביבת עבודה לפני ניהול צוות.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה לפני ניהול צוות.",
-  "permission-denied":
-    "לתפקיד הנוכחי אין הרשאה לצפות בצוות ובהרשאות.",
-  "server-error":
-    "לא ניתן לטעון כרגע את צוות סביבת העבודה.",
-};
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { readTeamDirectoryMessages } from "./teamDirectoryMessages";
 
 const roles =
   Object.keys(
-    roleLabels,
+    rolePermissions,
   ) as TenantRole[];
 
 export function TeamDirectory({
+  language,
   directory,
   status,
 }: {
+  language: InterfaceLanguage;
   directory: TeamDirectoryView;
   status: TeamDirectoryStatus;
 }) {
+  const messages = readTeamDirectoryMessages(language);
   return (
     <>
       <div className="page-heading compact">
         <div>
           <p className="eyebrow">
-            RBAC
+            {messages.eyebrow}
           </p>
-          <h1>צוות והרשאות</h1>
+          <h1>{messages.title}</h1>
           <p>
-            Clerk מזהה את המשתמש,
-            Membership בצד השרת קובע את
-            ה־Tenant, ומטריצת RBAC קובעת
-            את הפעולות המותרות.
+            {messages.description}
           </p>
         </div>
         <div className="heading-actions">
@@ -61,10 +43,10 @@ export function TeamDirectory({
             aria-describedby="team-invitation-unavailable"
             className="primary-button"
             disabled
-            title="הזמנות יופעלו לאחר חיבור ספק, Acceptance מאומת ובדיקת E2E חיה"
+            title={messages.inviteTitle}
             type="button"
           >
-            הזמנת משתמש
+            {messages.invite}
           </button>
         </div>
       </div>
@@ -74,11 +56,7 @@ export function TeamDirectory({
         id="team-invitation-unavailable"
         role="status"
       >
-        הזמנה ושינוי משתמשים נשארים
-        חסומים עד חיבור ספק הזמנות,
-        Acceptance ופרטי זהות מאומתים
-        ובדיקת E2E מול Clerk ו־D1
-        חיים.
+        {messages.inviteUnavailable}
       </p>
 
       {status === "ready" ? (
@@ -93,26 +71,19 @@ export function TeamDirectory({
                   D1
                 </span>
                 <h2 id="team-members-title">
-                  חברי הצוות הפעילים
+                  {messages.membersTitle}
                 </h2>
               </div>
               <span className="status-pill healthy">
-                {
-                  directory.members
-                    .length
-                }{" "}
-                פעילים
+                {messages.activeCount(
+                  directory.members.length,
+                )}
               </span>
             </div>
             {directory.identityStatus ===
             "unavailable" ? (
               <p className="team-directory-note">
-                שמות ואימיילים אינם
-                מוצגים עד חיבור Clerk
-                User Directory. חברים
-                אחרים מזוהים באמצעות
-                Reference Code מוגן
-                הנגזר בשרת.
+                {messages.identityUnavailable}
               </p>
             ) : null}
             <ul className="team-member-list">
@@ -129,24 +100,24 @@ export function TeamDirectory({
                       className="team-member-avatar"
                     >
                       {member.currentUser
-                        ? "אני"
-                        : "צ"}
+                        ? messages.meInitials
+                        : messages.teamInitials}
                     </div>
                     <div>
                       <strong>
                         {member.displayName ??
                           (member.currentUser
-                            ? "המשתמש הנוכחי"
-                            : "חבר צוות מוגן")}
+                            ? messages.currentUser
+                            : messages.protectedMember)}
                       </strong>
                       <small>
                         {member.primaryEmail ??
-                          `Reference: ${member.referenceCode}`}
+                          messages.reference(member.referenceCode)}
                       </small>
                     </div>
                     <span className="status-pill neutral">
                       {
-                        roleLabels[
+                        messages.roles[
                           member.role
                         ]
                       }
@@ -158,7 +129,7 @@ export function TeamDirectory({
           </section>
 
           <section
-            aria-label="מטריצת הרשאות"
+            aria-label={messages.permissionsAriaLabel}
             className="role-grid"
           >
             {roles.map((role) => (
@@ -187,7 +158,7 @@ export function TeamDirectory({
                     </span>
                     <h2>
                       {
-                        roleLabels[
+                        messages.roles[
                           role
                         ]
                       }
@@ -195,12 +166,9 @@ export function TeamDirectory({
                   </div>
                 </div>
                 <strong className="permission-count">
-                  {
-                    rolePermissions[
-                      role
-                    ].length
-                  }{" "}
-                  הרשאות מוגדרות
+                  {messages.permissionCount(
+                    rolePermissions[role].length,
+                  )}
                 </strong>
                 <ul>
                   {rolePermissions[
@@ -212,7 +180,11 @@ export function TeamDirectory({
                           permission
                         }
                       >
-                        {permission}
+                        {
+                          messages.permissions[
+                            permission
+                          ]
+                        }
                       </li>
                     ),
                   )}
@@ -227,7 +199,7 @@ export function TeamDirectory({
           role="alert"
         >
           {
-            statusMessages[
+            messages.statuses[
               status
             ]
           }

@@ -16,6 +16,8 @@ const botFlowVersionKey =
   `bot_flow_version_v1_${"d".repeat(64)}`;
 const currentTimestamp =
   "2026-07-26T15:00:00.000Z";
+const reservationKey =
+  `whatsapp_rate_reservation_v1_${"e".repeat(64)}`;
 
 function input() {
   return {
@@ -25,6 +27,10 @@ function input() {
     recipientPhoneNumber: "+972501234567",
     phoneNumberId: "phone-number-id",
     textContent: "שירות",
+    selectedBotOptionKey: null,
+    replyToProviderMessageId: null,
+    inboundMessageOccurredAt:
+      currentTimestamp,
   };
 }
 
@@ -55,6 +61,10 @@ function deliveryFromInput(
     ...stageInput,
     status: "pending",
     attemptCount: 0,
+    claimVersion: 0,
+    nextAttemptAt: null,
+    deferredAt: null,
+    lastDeferralReasonCode: null,
     providerMessageId: null,
     lastErrorCode: null,
     acceptedAt: null,
@@ -71,6 +81,7 @@ function fixture(options = {}) {
     claims: [],
     accepted: [],
     rejected: [],
+    deferred: [],
     ambiguous: [],
     provider: [],
   };
@@ -80,22 +91,35 @@ function fixture(options = {}) {
         outcome: "accepted",
         providerMessageId:
           "wamid.bot-reply-1",
+        reservationKey,
       },
     ]),
   ];
+  const clockTimes = [
+    ...(options.clockTimes ?? []),
+  ];
+  let lastClockTimestamp =
+    currentTimestamp;
   const service =
     createBotInboundRuntimeProcessor(
       {
         async processInbound(
           tenantId,
           currentConversationKey,
+          currentInboundMessageKey,
           textContent,
+          selectedBotOptionKey,
+          replyToProviderMessageId,
         ) {
           calls.runtime.push({
             tenantId,
             conversationKey:
               currentConversationKey,
+            inboundMessageKey:
+              currentInboundMessageKey,
             textContent,
+            selectedBotOptionKey,
+            replyToProviderMessageId,
           });
 
           if (options.runtimeError) {
@@ -154,6 +178,7 @@ function fixture(options = {}) {
             deliveryFromInput(staged, {
               status: "sending",
               attemptCount: 1,
+              claimVersion: 1,
             });
 
           return (
@@ -166,23 +191,48 @@ function fixture(options = {}) {
         async markAccepted(
           tenantId,
           deliveryKey,
+          expectedClaimVersion,
           providerMessageId,
+          acceptedReservationKey,
           timestamp,
         ) {
+          assert.equal(expectedClaimVersion, 1);
           calls.accepted.push({
             tenantId,
             deliveryKey,
             providerMessageId,
+            reservationKey:
+              acceptedReservationKey,
             timestamp,
+          });
+          return {};
+        },
+        async defer(
+          tenantId,
+          deliveryKey,
+          expectedClaimVersion,
+          timestamp,
+          retryAt,
+          reasonCode,
+        ) {
+          assert.equal(expectedClaimVersion, 1);
+          calls.deferred.push({
+            tenantId,
+            deliveryKey,
+            timestamp,
+            retryAt,
+            reasonCode,
           });
           return {};
         },
         async markRejected(
           tenantId,
           deliveryKey,
+          expectedClaimVersion,
           errorCode,
           timestamp,
         ) {
+          assert.equal(expectedClaimVersion, 1);
           calls.rejected.push({
             tenantId,
             deliveryKey,
@@ -194,9 +244,11 @@ function fixture(options = {}) {
         async markAmbiguous(
           tenantId,
           deliveryKey,
+          expectedClaimVersion,
           errorCode,
           timestamp,
         ) {
+          assert.equal(expectedClaimVersion, 1);
           calls.ambiguous.push({
             tenantId,
             deliveryKey,
@@ -222,7 +274,12 @@ function fixture(options = {}) {
       },
       {
         now() {
-          return new Date(currentTimestamp);
+          lastClockTimestamp =
+            clockTimes.shift() ??
+            lastClockTimestamp;
+          return new Date(
+            lastClockTimestamp,
+          );
         },
       },
     );
@@ -302,7 +359,7 @@ test("claims and records explicit provider acceptance or rejection", async () =>
   );
 });
 
-test("does not send a settled duplicate and converts an uncertain claim to ambiguity", async () => {
+test("does not send a settled duplicate or overwrite another worker's active claim", async () => {
   const settled = fixture({
     stageOutcome: "duplicate",
     stagedDeliveryOverrides: {
@@ -324,6 +381,8 @@ test("does not send a settled duplicate and converts an uncertain claim to ambig
         botFlowKey,
         botFlowVersionKey,
         replyIndex: 1,
+        senderPhoneNumberId:
+          "phone-number-id",
         recipientPhoneNumber:
           "+972501234567",
         reply: {
@@ -334,6 +393,7 @@ test("does not send a settled duplicate and converts an uncertain claim to ambig
       {
         status: "sending",
         attemptCount: 1,
+        claimVersion: 1,
       },
     );
   const uncertain = fixture({
@@ -350,11 +410,9 @@ test("does not send a settled duplicate and converts an uncertain claim to ambig
 
   assert.equal(settledResult.duplicates, 1);
   assert.deepEqual(settled.calls.provider, []);
-  assert.equal(uncertainResult.ambiguous, 1);
-  assert.equal(
-    uncertain.calls.ambiguous[0].errorCode,
-    "DELIVERY_OUTCOME_UNKNOWN",
-  );
+  assert.equal(uncertainResult.duplicates, 1);
+  assert.equal(uncertainResult.ambiguous, 0);
+  assert.deepEqual(uncertain.calls.ambiguous, []);
   assert.deepEqual(uncertain.calls.provider, []);
 });
 
@@ -379,6 +437,27 @@ test("records an unknown external outcome as ambiguous without automatic resend"
   );
 });
 
+test("persists admission deferral without treating it as rejection or ambiguity", async () => {
+  const testFixture = fixture({
+    processorResults: [{
+      outcome: "deferred",
+      errorCode: "WHATSAPP_PAIR_LIMITED",
+      retryAt: "2026-07-26T15:00:06.000Z",
+    }],
+  });
+
+  const result = await testFixture.service.process(input());
+
+  assert.equal(result.deferred, 1);
+  assert.equal(testFixture.calls.deferred.length, 1);
+  assert.equal(
+    testFixture.calls.deferred[0].reasonCode,
+    "WHATSAPP_PAIR_LIMITED",
+  );
+  assert.deepEqual(testFixture.calls.rejected, []);
+  assert.deepEqual(testFixture.calls.ambiguous, []);
+});
+
 test("skips persistence when runtime finds no eligible flow", async () => {
   const testFixture = fixture({
     runtimeResult: {
@@ -398,5 +477,79 @@ test("skips persistence when runtime finds no eligible flow", async () => {
   assert.deepEqual(
     testFixture.calls.stages,
     [],
+  );
+});
+
+test("enforces the inbound 24-hour service window at both exact boundaries", async () => {
+  const justInside = fixture();
+  const exactlyClosed = fixture();
+  const notOpen = fixture();
+
+  const accepted =
+    await justInside.service.process({
+      ...input(),
+      inboundMessageOccurredAt:
+        "2026-07-25T15:00:00.001Z",
+    });
+  const closed =
+    await exactlyClosed.service.process({
+      ...input(),
+      inboundMessageOccurredAt:
+        "2026-07-25T15:00:00.000Z",
+    });
+  const future =
+    await notOpen.service.process({
+      ...input(),
+      inboundMessageOccurredAt:
+        "2026-07-26T15:00:00.001Z",
+    });
+
+  assert.equal(accepted.accepted, 1);
+  assert.deepEqual(closed, {
+    runtimeOutcome: "policy-skipped",
+    runtimeSkipReason:
+      "service-window-closed",
+    staged: 0,
+    accepted: 0,
+    rejected: 0,
+    deferred: 0,
+    duplicates: 0,
+    ambiguous: 0,
+  });
+  assert.equal(
+    future.runtimeSkipReason,
+    "service-window-not-open",
+  );
+  assert.deepEqual(
+    exactlyClosed.calls.runtime,
+    [],
+  );
+  assert.deepEqual(notOpen.calls.stages, []);
+});
+
+test("rejects locally when the service window closes after claim and before provider I/O", async () => {
+  const testFixture = fixture({
+    clockTimes: [
+      "2026-07-26T15:00:00.000Z",
+      "2026-07-26T15:00:00.000Z",
+      "2026-07-26T15:00:00.001Z",
+    ],
+  });
+
+  const result =
+    await testFixture.service.process({
+      ...input(),
+      inboundMessageOccurredAt:
+        "2026-07-25T15:00:00.001Z",
+    });
+
+  assert.equal(result.rejected, 1);
+  assert.deepEqual(
+    testFixture.calls.provider,
+    [],
+  );
+  assert.equal(
+    testFixture.calls.rejected[0].errorCode,
+    "META_SERVICE_WINDOW_CLOSED_LOCAL",
   );
 });

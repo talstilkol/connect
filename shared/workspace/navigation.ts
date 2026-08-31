@@ -14,24 +14,28 @@ export type SectionId =
 
 export interface WorkspaceNavigationItem {
   id: SectionId;
-  label: string;
   icon: string;
-  group?: string;
+  group?: WorkspaceNavigationGroupId;
 }
 
+export type WorkspaceNavigationGroupId =
+  | "workspace"
+  | "automation"
+  | "account";
+
 export const workspaceNavigation: readonly WorkspaceNavigationItem[] = [
-  { id: "dashboard", label: "סקירה כללית", icon: "⌂", group: "מרחב עבודה" },
-  { id: "onboarding", label: "אשף הקמה", icon: "→" },
-  { id: "contacts", label: "אנשי קשר", icon: "♙" },
-  { id: "templates", label: "תבניות הודעה", icon: "▤" },
-  { id: "campaigns", label: "קמפיינים", icon: "◒" },
-  { id: "inbox", label: "תיבת שיחות", icon: "◌" },
-  { id: "bot", label: "תהליכי בוט", icon: "⌘", group: "אוטומציה ונתונים" },
-  { id: "ai", label: "סוכן AI", icon: "✦" },
-  { id: "reports", label: "דוחות", icon: "↗" },
-  { id: "billing", label: "מנוי וחיוב", icon: "◇", group: "חשבון" },
-  { id: "team", label: "צוות והרשאות", icon: "◎" },
-  { id: "decisions", label: "מרכז החלטות", icon: "✓" },
+  { id: "dashboard", icon: "⌂", group: "workspace" },
+  { id: "onboarding", icon: "→" },
+  { id: "contacts", icon: "♙" },
+  { id: "templates", icon: "▤" },
+  { id: "campaigns", icon: "◒" },
+  { id: "inbox", icon: "◌" },
+  { id: "bot", icon: "⌘", group: "automation" },
+  { id: "ai", icon: "✦" },
+  { id: "reports", icon: "↗" },
+  { id: "billing", icon: "◇", group: "account" },
+  { id: "team", icon: "◎" },
+  { id: "decisions", icon: "✓" },
 ];
 
 const sectionIds = new Set<SectionId>(
@@ -42,6 +46,16 @@ export function isSectionId(value: string): value is SectionId {
   return sectionIds.has(value as SectionId);
 }
 
-export function workspaceSectionPath(section: SectionId): string {
-  return section === "dashboard" ? "/workspace" : `/workspace/${section}`;
+export function workspaceSectionPath(
+  section: SectionId,
+  language: "he" | "en" | "ar" = "he",
+): string {
+  const path =
+    section === "dashboard"
+      ? "/workspace"
+      : `/workspace/${section}`;
+
+  return language === "he"
+    ? path
+    : `${path}?lang=${language}`;
 }

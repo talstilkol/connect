@@ -1,0 +1,130 @@
+{
+  "artifactId": "CONNECT-PUBLIC-REPOSITORY-CYBER-HARDENING-V3-ATOMIC-PACKAGE-MANIFEST-2026-08-30",
+  "schemaVersion": "PRCV3-PACKAGE-1",
+  "artifactClass": "ATOMIC-PLANNING-PACKAGE-NOT-IMPLEMENTED-NOT-ACCEPTED",
+  "repositoryVisibility": "PUBLIC",
+  "subject": {
+    "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-2026-08-30.md",
+    "sha256": "a93bc7bde79f6427e69d70bd55280cd7fb7f3e3dc9bd30bb62e3be607dcf2c30",
+    "bytes": 49169,
+    "lines": 820
+  },
+  "memberOrderRule": "EXACT-ARRAY-ORDER",
+  "packageContentRootAlgorithm": "SHA256 over UTF-8 concatenation of path,NUL,sha256,NUL,decimal bytes,LF for each member in exact array order",
+  "packageContentRoot": "9755380dc62dcc2149fe0aba8c6f885d7d875407a753e9d6c05b5f41f5b5e431",
+  "coreContentRoot": "3c89fdee750784e12c1776728fb0551c2dfa9dc7b0a4efe94288d74d39c7af51",
+  "members": [
+    {
+      "role": "SUBJECT",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-2026-08-30.md",
+      "sha256": "a93bc7bde79f6427e69d70bd55280cd7fb7f3e3dc9bd30bb62e3be607dcf2c30",
+      "bytes": 49169,
+      "lines": 820
+    },
+    {
+      "role": "TYPED-REGISTRIES",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-typed-registries-2026-08-30.json",
+      "sha256": "b6ac2d2cbb6e0048fba1a36f53be1fa0cc4e96d163c9385b6b90cae3558d4385",
+      "bytes": 126824,
+      "lines": 4391
+    },
+    {
+      "role": "PRODUCER-DEPENDENCY-GRAPH",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-producer-dependency-graph-2026-08-30.json",
+      "sha256": "15ac5c3e515af79e3deedaa4dfb130632a9f0f874e93e2bee0132c33da7681e5",
+      "bytes": 91408,
+      "lines": 3247
+    },
+    {
+      "role": "OPERATION-ORACLE-VECTOR-PACK",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-operation-oracle-vector-pack-2026-08-30.json",
+      "sha256": "1f13d5641ca923ffa84ff5f8c84744ef50f397359373193fdf91ca9104e4048b",
+      "bytes": 57078,
+      "lines": 1764
+    },
+    {
+      "role": "FINDING-CLOSURE-REGISTRY",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-finding-closure-registry-2026-08-30.json",
+      "sha256": "a19a2771f218883a9ab9ab0678e956dfefdb23970cfdac92fc247c6c87708f5f",
+      "bytes": 68374,
+      "lines": 1395
+    },
+    {
+      "role": "INDEPENDENT-READER-A",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-a-2026-08-30.mjs",
+      "sha256": "04f0d38705dd6d6c98594ee1bef2dc2101626b6bcb2fb0b87269ff28dac0cbca",
+      "bytes": 10581,
+      "lines": 170
+    },
+    {
+      "role": "INDEPENDENT-READER-B",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-b-2026-08-30.mjs",
+      "sha256": "31ca4f4724a88b3a5780a306136a3a5d224fa610f489564e1dc9a691f45e9901",
+      "bytes": 10688,
+      "lines": 184
+    },
+    {
+      "role": "READER-A-REPORT",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-a-report-2026-08-30.json",
+      "sha256": "98158f708651c08c9ff68a246a20e69e22e8b0eafc83ed617b0b6825306c130b",
+      "bytes": 2507,
+      "lines": 66
+    },
+    {
+      "role": "READER-B-REPORT",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-b-report-2026-08-30.json",
+      "sha256": "6161dade9d25e6cb0086b9ba1373b51a121e12f7620f8413c052bb06ffc2d856",
+      "bytes": 2509,
+      "lines": 66
+    }
+  ],
+  "readerAgreement": {
+    "readerA": {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-a-2026-08-30.mjs",
+      "sha256": "04f0d38705dd6d6c98594ee1bef2dc2101626b6bcb2fb0b87269ff28dac0cbca",
+      "reportPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-a-report-2026-08-30.json",
+      "result": "PASS-PLANNING-PACKAGE",
+      "errors": 0
+    },
+    "readerB": {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-b-2026-08-30.mjs",
+      "sha256": "31ca4f4724a88b3a5780a306136a3a5d224fa610f489564e1dc9a691f45e9901",
+      "reportPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-b-report-2026-08-30.json",
+      "result": "PASS-PLANNING-PACKAGE",
+      "errors": 0
+    },
+    "distinctReaderRoots": true,
+    "sharedLocalModules": 0,
+    "agreedCoreContentRoot": true,
+    "agreedDenominators": true
+  },
+  "denominators": {
+    "packageMembers": 9,
+    "requirements": 56,
+    "outputs": 56,
+    "soleProducers": 56,
+    "graphNodes": 187,
+    "graphEdges": 349,
+    "admittedFindings": 59,
+    "predecessorFindings": 32,
+    "newFindings": 27,
+    "closureRecords": 59,
+    "negativeVectors": 59,
+    "vectorTerminalMatchesPerReader": 59,
+    "implementedProducers": 0,
+    "operationalEvidenceRoots": 0,
+    "acceptedRequirements": 0,
+    "acceptedFindingClosures": 0
+  },
+  "producerQACompanion": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-producer-qa-2026-08-30.md",
+  "mutationBoundary": "No Product, Git, GitHub, provider, credential, build, Push, deploy or release mutation is authorized or evidenced.",
+  "currentDisposition": {
+    "acceptance": 0,
+    "publicPushPermit": "ABSENT",
+    "deployPermit": "ABSENT",
+    "releasePermit": "ABSENT",
+    "repositoryVisibility": "PUBLIC",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE"
+  }
+}

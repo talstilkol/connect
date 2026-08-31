@@ -1,0 +1,164 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-READER-A-REPORT-2026-08-30-G0",
+  "checks": [
+    {
+      "checkId": "SURS4-READ-001",
+      "evidence": "OUTPUT-REGISTRY",
+      "ordinal": 1,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-002",
+      "evidence": "SUBJECT-INVARIANTS",
+      "ordinal": 2,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-003",
+      "evidence": "CUTOFF-BINDING",
+      "ordinal": 3,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-004",
+      "evidence": "DISCOVERY-MANIFEST",
+      "ordinal": 4,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-005",
+      "evidence": "CANDIDATE-INVENTORY",
+      "ordinal": 5,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-006",
+      "evidence": "PUBLIC-METADATA-PROJECTION",
+      "ordinal": 6,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-007",
+      "evidence": "PRIVATE-CUSTODY-FAIL-CLOSED",
+      "ordinal": 7,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-008",
+      "evidence": "SOURCE-OCCURRENCES",
+      "ordinal": 8,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-009",
+      "evidence": "TARGET-SPANS",
+      "ordinal": 9,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-010",
+      "evidence": "OBJECT-CLASS-SOLE-PRODUCER",
+      "ordinal": 10,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-011",
+      "evidence": "EXPLICIT-SEMANTIC-GRAPH-IDENTITY",
+      "ordinal": 11,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-012",
+      "evidence": "CONTROL-REGISTRIES",
+      "ordinal": 12,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-013",
+      "evidence": "PUBLIC-CONTRACTS",
+      "ordinal": 13,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-014",
+      "evidence": "LIFECYCLE-CONTRACTS",
+      "ordinal": 14,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-015",
+      "evidence": "CLAUSE-PRESERVATION-78",
+      "ordinal": 15,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-016",
+      "evidence": "FINDING-CROSSWALK-24",
+      "ordinal": 16,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-017",
+      "evidence": "CONFORMANCE-VECTORS-24",
+      "ordinal": 17,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-018",
+      "evidence": "MUTATION-VECTORS-102",
+      "ordinal": 18,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-019",
+      "evidence": "CONTROLLED-GENERATION-FAIL-CLOSED",
+      "ordinal": 19,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-020",
+      "evidence": "NO-RANDOM-TOOLCHAIN-SCAN",
+      "ordinal": 20,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-021",
+      "evidence": "LOCAL-CONTROLS-24",
+      "ordinal": 21,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-022",
+      "evidence": "NO-PRIVATE-LOCATOR",
+      "ordinal": 22,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-023",
+      "evidence": "NO-SECRET-SHAPED-CONTENT",
+      "ordinal": 23,
+      "result": "PASS"
+    },
+    {
+      "checkId": "SURS4-READ-024",
+      "evidence": "PUBLIC-FREEZE-GATE-INVARIANTS",
+      "ordinal": 24,
+      "result": "PASS"
+    }
+  ],
+  "limitations": [
+    "PRODUCER-CONTROLLED-READER-NOT-INDEPENDENT-REVIEW",
+    "GENERATION-B-ABSENT",
+    "B0-AND-REVIEW-PROTOCOL-NOT-ACCEPTED",
+    "TRUSTED-TIME-ABSENT",
+    "PRIVATE-CUSTODY-ABSENT"
+  ],
+  "normativeMemberCount": 19,
+  "observedHead": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+  "readerId": "READER-A",
+  "readerImplementation": "NODE-STDLIB",
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-READER-REPORT-V1",
+  "status": "PASS-LOCAL-CANDIDATE-NOT-ACCEPTED",
+  "toolchainRoot": "c1263473e5c018d37837f6e2fa4219c928a146c59648887714cd722ecd0922da",
+  "verificationRoot": "b27d4e996b629354a2120dfbb85defc682ff154a028c9f9d49f6bc94103ce2b1"
+}

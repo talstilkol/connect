@@ -22,7 +22,7 @@ const evidenceDigestPattern =
 type PullRequestStatusCheck =
   (typeof requiredPullRequestStatusChecks)[number];
 
-interface CiCheckEvidence {
+export interface CiCheckEvidence {
   name: PullRequestStatusCheck;
   status: "success";
   completedAt: string;
@@ -30,7 +30,7 @@ interface CiCheckEvidence {
   outputDigest: string;
 }
 
-interface CiExecutionEvidence {
+export interface CiExecutionEvidence {
   schemaVersion: 1;
   verifiedAt: string;
   expiresAt: string;
@@ -38,6 +38,21 @@ interface CiExecutionEvidence {
   commitSha: string;
   checks: readonly CiCheckEvidence[];
   evidenceDigest: string;
+}
+
+export interface CiExecutionCheckSnapshot {
+  name: string;
+  conclusion: "success";
+  completedAt: string;
+  runIdentity: string;
+  outputIdentity: string;
+}
+
+export interface CiExecutionSnapshot {
+  verifiedAt: string;
+  releaseId: string;
+  commitSha: string;
+  checks: readonly CiExecutionCheckSnapshot[];
 }
 
 export interface CiExecutionEnvironment {
@@ -118,6 +133,15 @@ function sha256(value: string): string {
   return createHash("sha256")
     .update(value)
     .digest("hex");
+}
+
+function fingerprint(
+  scope: string,
+  value: string,
+): string {
+  return `sha256:${sha256(
+    `${scope}:${value}`,
+  )}`;
 }
 
 function canonicalEvidenceIdentity(
@@ -324,6 +348,174 @@ function parseEvidence(
     evidenceDigest:
       value.evidenceDigest,
   };
+}
+
+export function buildCiExecutionEvidence(
+  rawSnapshot: unknown,
+): Readonly<CiExecutionEvidence> {
+  if (
+    !isPlainObject(rawSnapshot) ||
+    !hasExactKeys(rawSnapshot, [
+      "verifiedAt",
+      "releaseId",
+      "commitSha",
+      "checks",
+    ]) ||
+    !isCanonicalTimestamp(
+      rawSnapshot.verifiedAt,
+    ) ||
+    typeof rawSnapshot.releaseId !==
+      "string" ||
+    !releaseIdPattern.test(
+      rawSnapshot.releaseId,
+    ) ||
+    typeof rawSnapshot.commitSha !==
+      "string" ||
+    !commitPattern.test(
+      rawSnapshot.commitSha,
+    ) ||
+    !Array.isArray(rawSnapshot.checks) ||
+    rawSnapshot.checks.length !==
+      requiredPullRequestStatusChecks.length
+  ) {
+    throw new Error(
+      "CI_EXECUTION_SNAPSHOT_INVALID",
+    );
+  }
+
+  const snapshots =
+    rawSnapshot.checks;
+  const names: string[] = [];
+  const runIdentities: string[] = [];
+
+  for (const snapshot of snapshots) {
+    if (
+      !isPlainObject(snapshot) ||
+      !hasExactKeys(snapshot, [
+        "name",
+        "conclusion",
+        "completedAt",
+        "runIdentity",
+        "outputIdentity",
+      ]) ||
+      typeof snapshot.name !== "string" ||
+      !requiredPullRequestStatusChecks.includes(
+        snapshot.name as PullRequestStatusCheck,
+      ) ||
+      snapshot.conclusion !== "success" ||
+      !isCanonicalTimestamp(
+        snapshot.completedAt,
+      ) ||
+      typeof snapshot.runIdentity !==
+        "string" ||
+      snapshot.runIdentity.length < 1 ||
+      snapshot.runIdentity.length > 2_048 ||
+      typeof snapshot.outputIdentity !==
+        "string" ||
+      snapshot.outputIdentity.length < 1 ||
+      snapshot.outputIdentity.length > 4_096 ||
+      snapshot.runIdentity ===
+        snapshot.outputIdentity
+    ) {
+      throw new Error(
+        "CI_EXECUTION_SNAPSHOT_INVALID",
+      );
+    }
+
+    names.push(snapshot.name);
+    runIdentities.push(
+      snapshot.runIdentity,
+    );
+  }
+
+  if (
+    new Set(names).size !==
+      requiredPullRequestStatusChecks.length ||
+    requiredPullRequestStatusChecks.some(
+      (name) => !names.includes(name),
+    ) ||
+    new Set(runIdentities).size !==
+      requiredPullRequestStatusChecks.length
+  ) {
+    throw new Error(
+      "CI_EXECUTION_SNAPSHOT_INVALID",
+    );
+  }
+
+  const orderedSnapshots =
+    requiredPullRequestStatusChecks.map(
+      (name) =>
+        snapshots.find(
+          (snapshot) =>
+            snapshot.name === name,
+        )!,
+    );
+  const verifiedAt =
+    rawSnapshot.verifiedAt;
+  const evidence = {
+    schemaVersion: 1 as const,
+    verifiedAt,
+    expiresAt: new Date(
+      Date.parse(verifiedAt) +
+        maximumEvidenceLifetimeMilliseconds,
+    ).toISOString(),
+    releaseId: rawSnapshot.releaseId,
+    commitSha: rawSnapshot.commitSha,
+    checks: orderedSnapshots.map(
+      (snapshot) => ({
+        name:
+          snapshot.name as PullRequestStatusCheck,
+        status: "success" as const,
+        completedAt: snapshot.completedAt,
+        runFingerprint: fingerprint(
+          `ci-run:${snapshot.name}`,
+          snapshot.runIdentity,
+        ),
+        outputDigest: fingerprint(
+          `ci-output:${snapshot.name}`,
+          snapshot.outputIdentity,
+        ),
+      }),
+    ),
+  };
+  const completeEvidence = {
+    ...evidence,
+    evidenceDigest:
+      deriveCiExecutionEvidenceDigest(
+        evidence,
+      ),
+  };
+  const parsed = parseEvidence(
+    JSON.stringify(completeEvidence),
+  );
+
+  if (
+    parsed === null ||
+    inspectCiExecutionEvidence(
+      {
+        APP_DEPLOYED_COMMIT_SHA:
+          parsed.commitSha,
+        APP_RELEASE_ID:
+          parsed.releaseId,
+        CI_EXECUTION_EVIDENCE_JSON:
+          JSON.stringify(parsed),
+      },
+      new Date(parsed.verifiedAt),
+    ).status !== "configured"
+  ) {
+    throw new Error(
+      "CI_EXECUTION_SNAPSHOT_INVALID",
+    );
+  }
+
+  return Object.freeze({
+    ...parsed,
+    checks: Object.freeze(
+      parsed.checks.map((check) =>
+        Object.freeze({ ...check }),
+      ),
+    ),
+  });
 }
 
 export function inspectCiExecutionEvidence(

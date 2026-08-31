@@ -255,6 +255,14 @@ interface AcceptanceState {
     | null;
 }
 
+type CompletedAcceptanceState =
+  AcceptanceState & {
+    acceptance: Exclude<
+      AcceptanceState["acceptance"],
+      null
+    >;
+  };
+
 export type TeamInvitationAcceptanceOutcome =
   | "created"
   | "unchanged"
@@ -491,6 +499,37 @@ function parseStandaloneMembership(
   };
 }
 
+function hasExactAcceptance(
+  state: AcceptanceState,
+  acceptanceKey: string,
+  externalUserId: string,
+  verifiedEmail: string,
+): state is CompletedAcceptanceState {
+  const acceptance = state.acceptance;
+
+  return (
+    acceptance !== null &&
+    acceptance.acceptanceKey ===
+      acceptanceKey &&
+    acceptance.externalUserId ===
+      externalUserId &&
+    acceptance.normalizedEmail ===
+      verifiedEmail &&
+    acceptance.role === state.role &&
+    acceptance.toVersion ===
+      state.version &&
+    acceptance.membership.tenantId ===
+      state.tenantId &&
+    acceptance.membership.externalUserId ===
+      externalUserId &&
+    acceptance.membership.role ===
+      state.role &&
+    acceptance.membership.status ===
+      "active" &&
+    acceptance.membership.version === 1
+  );
+}
+
 function batchSucceeded(
   results:
     readonly D1Result[],
@@ -648,35 +687,12 @@ export function createTeamInvitationAcceptanceRepository(
         current.acceptance !== null
       ) {
         const exact =
-          current.acceptance
-            .acceptanceKey ===
-            acceptanceKey &&
-          current.acceptance
-            .externalUserId ===
-            externalUserId &&
-          current.acceptance
-            .normalizedEmail ===
-            verifiedEmail &&
-          current.acceptance.role ===
-            current.role &&
-          current.acceptance
-            .toVersion ===
-            current.version &&
-          current.acceptance
-            .membership.tenantId ===
-            current.tenantId &&
-          current.acceptance
-            .membership
-            .externalUserId ===
-            externalUserId &&
-          current.acceptance
-            .membership.role ===
-            current.role &&
-          current.acceptance
-            .membership.status ===
-            "active" &&
-          current.acceptance
-            .membership.version === 1;
+          hasExactAcceptance(
+            current,
+            acceptanceKey,
+            externalUserId,
+            verifiedEmail,
+          );
 
         return {
           outcome: exact
@@ -712,20 +728,38 @@ export function createTeamInvitationAcceptanceRepository(
         };
       }
 
-      if (
+      const existingMembership =
         await findMembership(
           current.tenantId,
           externalUserId,
-        ) !== null
-      ) {
+        );
+
+      if (existingMembership !== null) {
+        const latest = await findState(
+          invitationKey,
+        );
+        const exact =
+          latest !== null &&
+          hasExactAcceptance(
+            latest,
+            acceptanceKey,
+            externalUserId,
+            verifiedEmail,
+          );
+
         return {
-          outcome: "conflict",
+          outcome: exact
+            ? "unchanged"
+            : "conflict",
           invitation:
             await invitationRepository.find(
               current.tenantId,
               invitationKey,
             ),
-          membership: null,
+          membership: exact
+            ? latest.acceptance
+                .membership
+            : null,
         };
       }
 

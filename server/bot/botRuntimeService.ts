@@ -8,6 +8,7 @@ import type {
 import type {
   PersistedBotFlow,
   PersistedBotFlowVersion,
+  ValidatedBotFlowDefinition,
 } from "../../shared/domain/botFlow.ts";
 import {
   deriveBotFlowKey,
@@ -21,6 +22,10 @@ import {
 
 const CONVERSATION_KEY_PATTERN =
   /^conversation_v1_[0-9a-f]{64}$/;
+const MESSAGE_KEY_PATTERN =
+  /^message_v1_[0-9a-f]{64}$/;
+const BOT_OPTION_KEY_PATTERN =
+  /^bot_option_v1_[0-9a-f]{64}$/;
 
 export type BotRuntimeServiceErrorCode =
   | "INVALID_INPUT"
@@ -81,7 +86,10 @@ export interface BotRuntimeService {
   processInbound(
     tenantId: number,
     conversationKey: string,
+    inboundMessageKey: string,
     lastInboundText: string | null,
+    selectedOptionKey?: string | null,
+    replyToProviderMessageId?: string | null,
   ): Promise<ProcessBotRuntimeResult>;
 }
 
@@ -94,7 +102,10 @@ function serviceError(
 function assertInput(
   tenantId: number,
   conversationKey: string,
+  inboundMessageKey: string,
   lastInboundText: string | null,
+  selectedOptionKey: string | null,
+  replyToProviderMessageId: string | null,
 ): void {
   if (
     !Number.isSafeInteger(tenantId) ||
@@ -102,14 +113,75 @@ function assertInput(
     !CONVERSATION_KEY_PATTERN.test(
       conversationKey,
     ) ||
+    !MESSAGE_KEY_PATTERN.test(
+      inboundMessageKey,
+    ) ||
     (lastInboundText !== null &&
       (typeof lastInboundText !== "string" ||
         lastInboundText.trim().length ===
           0 ||
-        lastInboundText.length > 4_096))
+        lastInboundText.length > 4_096)) ||
+    (selectedOptionKey !== null &&
+      (typeof selectedOptionKey !== "string" ||
+        !BOT_OPTION_KEY_PATTERN.test(
+          selectedOptionKey,
+        ))) ||
+    (replyToProviderMessageId !== null &&
+      (typeof replyToProviderMessageId !== "string" ||
+        replyToProviderMessageId.trim() !==
+          replyToProviderMessageId ||
+        replyToProviderMessageId.length === 0 ||
+        replyToProviderMessageId.length > 255)) ||
+    ((selectedOptionKey === null) !==
+      (replyToProviderMessageId === null))
   ) {
     throw serviceError("INVALID_INPUT");
   }
+}
+
+function resolveContinuationBlockKey(
+  definition: ValidatedBotFlowDefinition,
+  replyJson: string,
+): string {
+  let parsedReply: unknown;
+
+  try {
+    parsedReply = JSON.parse(replyJson);
+  } catch {
+    throw serviceError(
+      "FLOW_CONFIGURATION_INVALID",
+    );
+  }
+
+  const canonicalReply =
+    JSON.stringify(parsedReply);
+  const candidates =
+    definition.blocks.filter((block) => {
+      if (block.type !== "buttons") {
+        return false;
+      }
+
+      return (
+        JSON.stringify({
+          kind: "buttons",
+          text: block.text,
+          options: block.options.map(
+            (option) => ({
+              optionKey: option.optionKey,
+              label: option.label,
+            }),
+          ),
+        }) === canonicalReply
+      );
+    });
+
+  if (candidates.length !== 1) {
+    throw serviceError(
+      "FLOW_CONFIGURATION_INVALID",
+    );
+  }
+
+  return candidates[0].blockKey;
 }
 
 async function assertActiveRuntimeIdentity(
@@ -176,12 +248,18 @@ export function createBotRuntimeService(
     async processInbound(
       tenantId,
       conversationKey,
+      inboundMessageKey,
       lastInboundText,
+      selectedOptionKey = null,
+      replyToProviderMessageId = null,
     ) {
       assertInput(
         tenantId,
         conversationKey,
+        inboundMessageKey,
         lastInboundText,
+        selectedOptionKey,
+        replyToProviderMessageId,
       );
 
       let conversation:
@@ -290,6 +368,48 @@ export function createBotRuntimeService(
         version,
       );
 
+      let continuation;
+
+      try {
+        continuation =
+          await runtime.findAcceptedButtonContinuation(
+            tenantId,
+            conversationKey,
+            inboundMessageKey,
+            replyToProviderMessageId,
+          );
+      } catch {
+        throw serviceError(
+          "PERSISTENCE_FAILED",
+        );
+      }
+
+      if (
+        continuation.outcome ===
+        "current-message-not-found"
+      ) {
+        throw serviceError(
+          "PERSISTENCE_FAILED",
+        );
+      }
+
+      if (continuation.outcome === "ambiguous") {
+        throw serviceError(
+          "FLOW_CONFIGURATION_INVALID",
+        );
+      }
+
+      const resumeFromBlockKey =
+        continuation.outcome === "found" &&
+        continuation.evidence
+          .botFlowVersionKey ===
+          version.botFlowVersionKey
+          ? resolveContinuationBlockKey(
+              version.definition,
+              continuation.evidence.replyJson,
+            )
+          : null;
+
       let plan: BotFlowExecutionPlan;
 
       try {
@@ -299,6 +419,11 @@ export function createBotRuntimeService(
             lastInboundText,
             conversationStatus:
               conversation.status,
+            resumeFromBlockKey,
+            selectedOptionKey:
+              resumeFromBlockKey === null
+                ? null
+                : selectedOptionKey,
           },
         );
       } catch (error) {

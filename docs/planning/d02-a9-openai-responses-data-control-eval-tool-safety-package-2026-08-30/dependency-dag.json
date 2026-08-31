@@ -1,0 +1,391 @@
+{
+  "artifactId": "CONNECT-D02-A9-EXACT-DEPENDENCY-DAG-2026-08-30",
+  "graphVersion": "1.0.0",
+  "edgeDirection": "DEPENDENCY-TO-CONSUMER",
+  "nodeCount": 30,
+  "edgeCount": 34,
+  "nodes": [
+    {
+      "nodeId": "D02A9-ROOT-INPUT-MANIFEST",
+      "nodeClass": "EXACT-ADMITTED-INPUT-MANIFEST",
+      "producerId": "D02A9-PRODUCER-001"
+    },
+    {
+      "nodeId": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "nodeClass": "TOTAL-PREDECESSOR-SEMANTIC-UNIVERSE",
+      "producerId": "D02A9-PRODUCER-002"
+    },
+    {
+      "nodeId": "D02A9-ROOT-AUTHORITY-CHAIN",
+      "nodeClass": "D02-AUTHORITY-CHAIN",
+      "producerId": "D02A9-PRODUCER-003"
+    },
+    {
+      "nodeId": "D02A9-ROOT-PUBLIC-DIRECTIVE",
+      "nodeClass": "DURABLE-PUBLIC-DIRECTIVE",
+      "producerId": "D02A9-PRODUCER-004"
+    },
+    {
+      "nodeId": "D02A9-ROOT-A6-FINDING-CARRY",
+      "nodeClass": "A6-FINDING-CARRY",
+      "producerId": "D02A9-PRODUCER-002"
+    },
+    {
+      "nodeId": "D02A9-ROOT-A7-FINDING-CARRY",
+      "nodeClass": "A7-FINDING-CARRY",
+      "producerId": "D02A9-PRODUCER-002"
+    },
+    {
+      "nodeId": "D02A9-ROOT-A8-FINDING-CLOSURE-CANDIDATES",
+      "nodeClass": "A8-FINDING-CANDIDATE-CLOSURE",
+      "producerId": "D02A9-PRODUCER-005"
+    },
+    {
+      "nodeId": "D02A9-ROOT-SOURCE-OBSERVATION",
+      "nodeClass": "OFFICIAL-SOURCE-OBSERVATION",
+      "producerId": "D02A9-PRODUCER-006"
+    },
+    {
+      "nodeId": "D02A9-ROOT-SOURCE-ACCEPTED",
+      "nodeClass": "OFFICIAL-SOURCE-ACCEPTANCE",
+      "producerId": "D02A9-PRODUCER-007"
+    },
+    {
+      "nodeId": "D02A9-ROOT-MODEL-SELECTION-AUTHORITY",
+      "nodeClass": "MODEL-SELECTION-AUTHORITY",
+      "producerId": "D02A9-PRODUCER-008"
+    },
+    {
+      "nodeId": "D02A9-ROOT-PROMPT-ARTIFACT",
+      "nodeClass": "CONNECT-PROMPT-BYTES",
+      "producerId": "D02A9-PRODUCER-009"
+    },
+    {
+      "nodeId": "D02A9-ROOT-AI-PROFILE",
+      "nodeClass": "AI-PROFILE",
+      "producerId": "D02A9-PRODUCER-010"
+    },
+    {
+      "nodeId": "D02A9-ROOT-ACCOUNT",
+      "nodeClass": "ACCOUNT-SNAPSHOT",
+      "producerId": "D02A9-PRODUCER-011"
+    },
+    {
+      "nodeId": "D02A9-ROOT-LEGAL",
+      "nodeClass": "LEGAL-PRIVACY-BUNDLE",
+      "producerId": "D02A9-PRODUCER-012"
+    },
+    {
+      "nodeId": "D02A9-ROOT-APPROVAL-SET",
+      "nodeClass": "SIX-DOMAIN-APPROVAL-SET",
+      "producerId": "D02A9-PRODUCER-013"
+    },
+    {
+      "nodeId": "D02A9-ROOT-EVAL",
+      "nodeClass": "DETACHED-EVAL-EVIDENCE",
+      "producerId": "D02A9-PRODUCER-014"
+    },
+    {
+      "nodeId": "D02A9-ROOT-PACKAGE-ENVELOPE",
+      "nodeClass": "ATOMIC-PACKAGE-ENVELOPE",
+      "producerId": "D02A9-PRODUCER-015"
+    },
+    {
+      "nodeId": "D02A9-ROOT-INDEPENDENT-A9-REVIEW",
+      "nodeClass": "INDEPENDENT-REVIEW-DISPOSITION",
+      "producerId": "D02A9-PRODUCER-016"
+    },
+    {
+      "nodeId": "D02A9-ROOT-PROGRAM-ACCEPTANCE",
+      "nodeClass": "PROGRAM-ACCEPTANCE",
+      "producerId": "D02A9-PRODUCER-017"
+    },
+    {
+      "nodeId": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "nodeClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "producerId": "D02A9-PRODUCER-017"
+    },
+    {
+      "nodeId": "D02A9-ROOT-AI-ADMISSION",
+      "nodeClass": "AI-PROFILE-ADMISSION",
+      "producerId": "D02A9-PRODUCER-018"
+    },
+    {
+      "nodeId": "D02A9-ROOT-GATE29",
+      "nodeClass": "GATE29-PERMIT",
+      "producerId": "D02A9-PRODUCER-019"
+    },
+    {
+      "nodeId": "D02A9-ROOT-FREEZE-LIFT",
+      "nodeClass": "FREEZE-LIFT-AUTHORITY",
+      "producerId": "D02A9-PRODUCER-020"
+    },
+    {
+      "nodeId": "D02A9-ROOT-RUNTIME-ACCOUNT",
+      "nodeClass": "RUNTIME-ACCOUNT-READBACK",
+      "producerId": "D02A9-PRODUCER-011"
+    },
+    {
+      "nodeId": "D02A9-ROOT-TRUSTED-TIME",
+      "nodeClass": "TRUSTED-TIME-CUT",
+      "producerId": "D02A9-PRODUCER-021"
+    },
+    {
+      "nodeId": "D02A9-ROOT-REVOCATION-CUT",
+      "nodeClass": "REVOCATION-CUT",
+      "producerId": "D02A9-PRODUCER-021"
+    },
+    {
+      "nodeId": "D02A9-ROOT-CAS",
+      "nodeClass": "COMPARE-AND-SWAP",
+      "producerId": "D02A9-PRODUCER-022"
+    },
+    {
+      "nodeId": "D02A9-ROOT-SINGLE-USE",
+      "nodeClass": "SINGLE-USE-CONSUME",
+      "producerId": "D02A9-PRODUCER-022"
+    },
+    {
+      "nodeId": "D02A9-ROOT-POST-READBACK",
+      "nodeClass": "POST-READBACK",
+      "producerId": "D02A9-PRODUCER-023"
+    },
+    {
+      "nodeId": "D02A9-ROOT-RUNTIME-PERMIT",
+      "nodeClass": "AI-RUNTIME-PERMIT",
+      "producerId": "D02A9-PRODUCER-024"
+    }
+  ],
+  "edges": [
+    {
+      "edgeId": "D02A9-EDGE-001",
+      "from": "D02A9-ROOT-INPUT-MANIFEST",
+      "to": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-002",
+      "from": "D02A9-ROOT-INPUT-MANIFEST",
+      "to": "D02A9-ROOT-AUTHORITY-CHAIN",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-003",
+      "from": "D02A9-ROOT-INPUT-MANIFEST",
+      "to": "D02A9-ROOT-PUBLIC-DIRECTIVE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-004",
+      "from": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "to": "D02A9-ROOT-A6-FINDING-CARRY",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-005",
+      "from": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "to": "D02A9-ROOT-A7-FINDING-CARRY",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-006",
+      "from": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "to": "D02A9-ROOT-A8-FINDING-CLOSURE-CANDIDATES",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-007",
+      "from": "D02A9-ROOT-SOURCE-OBSERVATION",
+      "to": "D02A9-ROOT-SOURCE-ACCEPTED",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-008",
+      "from": "D02A9-ROOT-PACKAGE-ENVELOPE",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-009",
+      "from": "D02A9-ROOT-AUTHORITY-CHAIN",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-010",
+      "from": "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-011",
+      "from": "D02A9-ROOT-PUBLIC-DIRECTIVE",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-012",
+      "from": "D02A9-ROOT-INDEPENDENT-A9-REVIEW",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-013",
+      "from": "D02A9-ROOT-A8-FINDING-CLOSURE-CANDIDATES",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-014",
+      "from": "D02A9-ROOT-PROGRAM-ACCEPTANCE",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-015",
+      "from": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-016",
+      "from": "D02A9-ROOT-MODEL-SELECTION-AUTHORITY",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-017",
+      "from": "D02A9-ROOT-PROMPT-ARTIFACT",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-018",
+      "from": "D02A9-ROOT-AI-PROFILE",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-019",
+      "from": "D02A9-ROOT-ACCOUNT",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-020",
+      "from": "D02A9-ROOT-LEGAL",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-021",
+      "from": "D02A9-ROOT-SOURCE-ACCEPTED",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-022",
+      "from": "D02A9-ROOT-APPROVAL-SET",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-023",
+      "from": "D02A9-ROOT-EVAL",
+      "to": "D02A9-ROOT-AI-ADMISSION",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-024",
+      "from": "D02A9-ROOT-PUBLIC-DIRECTIVE",
+      "to": "D02A9-ROOT-GATE29",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-025",
+      "from": "D02A9-ROOT-CAS",
+      "to": "D02A9-ROOT-SINGLE-USE",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-026",
+      "from": "D02A9-ROOT-AI-ADMISSION",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-027",
+      "from": "D02A9-ROOT-GATE29",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-028",
+      "from": "D02A9-ROOT-FREEZE-LIFT",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-029",
+      "from": "D02A9-ROOT-RUNTIME-ACCOUNT",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-030",
+      "from": "D02A9-ROOT-TRUSTED-TIME",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-031",
+      "from": "D02A9-ROOT-REVOCATION-CUT",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-032",
+      "from": "D02A9-ROOT-CAS",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-033",
+      "from": "D02A9-ROOT-SINGLE-USE",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    },
+    {
+      "edgeId": "D02A9-EDGE-034",
+      "from": "D02A9-ROOT-POST-READBACK",
+      "to": "D02A9-ROOT-RUNTIME-PERMIT",
+      "edgeType": "REQUIRED-ALL-OF"
+    }
+  ],
+  "prohibitedEdges": [
+    {
+      "prohibitionId": "D02A9-PEDGE-001",
+      "from": "D02A9-ROOT-GATE29",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE"
+    },
+    {
+      "prohibitionId": "D02A9-PEDGE-002",
+      "from": "D02A9-ROOT-FREEZE-LIFT",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE"
+    },
+    {
+      "prohibitionId": "D02A9-PEDGE-003",
+      "from": "D02A9-ROOT-RUNTIME-PERMIT",
+      "to": "D02A9-ROOT-AI-ADMISSION"
+    },
+    {
+      "prohibitionId": "D02A9-PEDGE-004",
+      "from": "D02A9-ROOT-RUNTIME-PERMIT",
+      "to": "D02A9-ROOT-PLANNING-ACCEPTANCE"
+    }
+  ],
+  "exactNodeRoot": "f6fe5da0fc9757b0f53727174ec0f8e9f7a578512336632076af997b10baa87c",
+  "exactEdgeRoot": "4602168466169a1904824a748f8f0f78ae00db57a0638322581f6f1455c5bbd2",
+  "expectedCycleCount": 0,
+  "expectedDanglingCount": 0
+}

@@ -1,58 +1,61 @@
 "use server";
 
 import {
-  createTenantSubscriptionRepository,
-} from "../../db/tenantSubscriptionRepository.ts";
-import {
-  requireRuntimeDatabase,
-} from "../../db/runtimeDatabase.ts";
-import {
   inspectClerkConfiguration,
 } from "../auth/clerkConfiguration.ts";
-import {
-  requireCurrentSystemAdminMutationSession,
-} from "../auth/currentSystemAdminMutationSession.ts";
 import {
   inspectSystemAdminConfiguration,
 } from "../auth/systemAdminConfiguration.ts";
 import {
-  createSystemAdminSubscriptionActionHandler,
-} from "./systemAdminSubscriptionActionHandler.ts";
+  createRailwayApiClient,
+} from "../platform/railwayApiClient.ts";
+import {
+  inspectRailwayApiClientConfiguration,
+} from "../platform/railwayApiClientConfiguration.ts";
+import {
+  resolveCurrentRailwayApiServerIdentity,
+} from "../platform/currentRailwayApiServerIdentity.ts";
+import {
+  createRailwaySystemAdminSubscriptionActionHandler,
+} from "./railwaySystemAdminSubscriptionActionHandler.ts";
 import type {
   SystemAdminSubscriptionActionResult,
 } from "./systemAdminSubscriptionActionResult.ts";
-import {
-  createSystemAdminSubscriptionService,
-} from "./systemAdminSubscriptionService.ts";
 
 function applicationConfigured(): boolean {
   return (
     inspectClerkConfiguration().status ===
       "configured" &&
     inspectSystemAdminConfiguration().status ===
+      "configured" &&
+    inspectRailwayApiClientConfiguration().status ===
       "configured"
   );
 }
 
 function createActionHandler() {
-  return createSystemAdminSubscriptionActionHandler({
+  return createRailwaySystemAdminSubscriptionActionHandler({
     applicationConfigured,
-    async createContext() {
-      const session =
-        await requireCurrentSystemAdminMutationSession();
-      const database =
-        await requireRuntimeDatabase();
-      const service =
-        createSystemAdminSubscriptionService(
-          createTenantSubscriptionRepository(
-            database,
-          ),
-        );
-
-      return {
-        session,
-        service,
-      };
+    inspectConfiguration:
+      inspectRailwayApiClientConfiguration,
+    resolveIdentity:
+      resolveCurrentRailwayApiServerIdentity,
+    createClient(configuration) {
+      return createRailwayApiClient({
+        apiOrigin: configuration.apiOrigin,
+        deploymentEnvironment:
+          configuration.deploymentEnvironment,
+        oidcTokenProvider: {
+          async getToken() {
+            return configuration.oidcToken;
+          },
+        },
+        userSessionTokenProvider: {
+          async getToken() {
+            return configuration.userSessionToken;
+          },
+        },
+      });
     },
   });
 }

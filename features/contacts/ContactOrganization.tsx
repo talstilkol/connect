@@ -9,6 +9,9 @@ import type {
   ContactOrganizationSnapshot,
 } from "../../shared/domain/contactOrganization";
 import type { ContactRecord } from "../../shared/domain/contactRecord";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import {
   createContactListAction,
   createContactTagAction,
@@ -16,18 +19,25 @@ import {
   setContactTagAssignmentAction,
   type ContactOrganizationActionResult,
 } from "../../server/contacts/contactOrganizationActions";
+import {
+  readContactDirectoryMessages,
+  type ContactDirectoryMessages,
+} from "./contactDirectoryMessages";
 
 export function ContactOrganization({
   enabled,
+  language,
   contacts,
   organization,
   onSnapshot,
 }: {
   enabled: boolean;
+  language: InterfaceLanguage;
   contacts: readonly ContactRecord[];
   organization: ContactOrganizationSnapshot;
   onSnapshot: (snapshot: ContactOrganizationSnapshot) => void;
 }) {
+  const messages = readContactDirectoryMessages(language).organization;
   const [tagName, setTagName] = useState("");
   const [listName, setListName] = useState("");
   const [selectedContactId, setSelectedContactId] = useState("");
@@ -113,28 +123,29 @@ export function ContactOrganization({
     <section className="card contact-organization-card">
       <div className="card-header">
         <div>
-          <span className="card-kicker">Tags and lists</span>
-          <h2>ארגון אנשי קשר</h2>
+          <span className="card-kicker">{messages.kicker}</span>
+          <h2>{messages.title}</h2>
         </div>
-        <span className="status-pill success">הסרה גלובלית</span>
+        <span className="status-pill success">
+          {messages.globalUnsubscribe}
+        </span>
       </div>
 
       <p className="form-explanation">
-        תגיות ורשימות מארגנות קהלים בלבד. הן אינן יכולות לעקוף הסרה:
-        איש קשר חסום נשאר חסום בכל הרשימות.
+        {messages.explanation}
       </p>
 
       {!enabled ? (
         <div className="inline-notice warning" role="status">
           <span aria-hidden="true">i</span>
-          <p>נדרשים Clerk ו־Tenant פעיל כדי לשמור תגיות ורשימות.</p>
+          <p>{messages.disabledNotice}</p>
         </div>
       ) : (
         <>
           <div className="contact-group-create-grid">
             <form onSubmit={createTag}>
               <label>
-                <span>שם תגית</span>
+                <span>{messages.tagName}</span>
                 <input
                   value={tagName}
                   onChange={(event) => setTagName(event.target.value)}
@@ -145,13 +156,13 @@ export function ContactOrganization({
                 className="secondary-button"
                 disabled={isPending || !tagName.trim()}
               >
-                יצירת תגית
+                {messages.createTag}
               </button>
             </form>
 
             <form onSubmit={createList}>
               <label>
-                <span>שם רשימה</span>
+                <span>{messages.listName}</span>
                 <input
                   value={listName}
                   onChange={(event) => setListName(event.target.value)}
@@ -162,20 +173,20 @@ export function ContactOrganization({
                 className="secondary-button"
                 disabled={isPending || !listName.trim()}
               >
-                יצירת רשימה
+                {messages.createList}
               </button>
             </form>
           </div>
 
           <label className="contact-group-contact-picker">
-            <span>איש קשר לניהול שיוכים</span>
+            <span>{messages.contactPicker}</span>
             <select
               value={selectedContactId}
               onChange={(event) =>
                 setSelectedContactId(event.target.value)
               }
             >
-              <option value="">בחירת איש קשר</option>
+              <option value="">{messages.chooseContact}</option>
               {contacts.map((contact) => (
                 <option key={contact.id} value={String(contact.id)}>
                   {contactOptionLabel(contact)}
@@ -186,8 +197,11 @@ export function ContactOrganization({
 
           <div className="contact-group-columns">
             <ContactGroupColumn
-              title="תגיות"
-              emptyMessage="לא נוצרו תגיות."
+              title={messages.tags}
+              emptyMessage={messages.noTags}
+              contactCount={messages.contactCount}
+              assignedLabel={messages.assigned}
+              assignLabel={messages.assign}
               groups={organization.tags}
               disabled={numericContactId === null || isPending}
               isAssigned={(groupId) =>
@@ -201,8 +215,11 @@ export function ContactOrganization({
               onToggle={toggleTag}
             />
             <ContactGroupColumn
-              title="רשימות"
-              emptyMessage="לא נוצרו רשימות."
+              title={messages.lists}
+              emptyMessage={messages.noLists}
+              contactCount={messages.contactCount}
+              assignedLabel={messages.assigned}
+              assignLabel={messages.assign}
               groups={organization.lists}
               disabled={numericContactId === null || isPending}
               isAssigned={(groupId) =>
@@ -217,7 +234,10 @@ export function ContactOrganization({
             />
           </div>
 
-          <ContactOrganizationFeedback result={result} />
+          <ContactOrganizationFeedback
+            messages={messages}
+            result={result}
+          />
         </>
       )}
     </section>
@@ -227,6 +247,9 @@ export function ContactOrganization({
 function ContactGroupColumn({
   title,
   emptyMessage,
+  contactCount,
+  assignedLabel,
+  assignLabel,
   groups,
   disabled,
   isAssigned,
@@ -234,6 +257,9 @@ function ContactGroupColumn({
 }: {
   title: string;
   emptyMessage: string;
+  contactCount: (count: number) => string;
+  assignedLabel: string;
+  assignLabel: string;
   groups: ContactOrganizationSnapshot["tags"];
   disabled: boolean;
   isAssigned: (groupId: number) => boolean;
@@ -258,8 +284,8 @@ function ContactGroupColumn({
                 key={group.id}
               >
                 <span>{group.name}</span>
-                <small>{group.contactCount} אנשי קשר</small>
-                <b>{assigned ? "משויך" : "שיוך"}</b>
+                <small>{contactCount(group.contactCount)}</small>
+                <b>{assigned ? assignedLabel : assignLabel}</b>
               </button>
             );
           })}
@@ -270,8 +296,10 @@ function ContactGroupColumn({
 }
 
 function ContactOrganizationFeedback({
+  messages,
   result,
 }: {
+  messages: ContactDirectoryMessages["organization"];
   result: ContactOrganizationActionResult | null;
 }) {
   if (!result) {
@@ -282,27 +310,12 @@ function ContactOrganizationFeedback({
     return (
       <div className="inline-notice success" role="status">
         <span aria-hidden="true">✓</span>
-        <p>השינוי נשמר עבור ה־Tenant המאומת.</p>
+        <p>{messages.saved}</p>
       </div>
     );
   }
 
-  const message =
-    result.status === "validation-error"
-      ? "שם הקבוצה או השיוך אינם תקינים."
-      : result.status === "configuration-required"
-        ? "חיבור Clerk אינו מוגדר."
-        : result.status === "unauthenticated"
-          ? "ה־Session אינו פעיל. יש להתחבר מחדש."
-          : result.status === "onboarding-required"
-            ? "יש להשלים תחילה את יצירת סביבת העבודה."
-            : result.status === "tenant-selection-required"
-              ? "נדרשת בחירת Tenant מפורשת."
-              : result.status === "permission-denied"
-                ? "לתפקיד הנוכחי אין הרשאה לשנות קבוצות."
-                : result.status === "not-found"
-                  ? "איש הקשר או הקבוצה אינם שייכים ל־Tenant."
-                  : "השינוי נכשל בשרת.";
+  const message = messages.failures[result.status];
 
   return (
     <div className="inline-notice danger" role="alert">

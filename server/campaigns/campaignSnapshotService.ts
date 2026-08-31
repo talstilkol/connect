@@ -68,7 +68,7 @@ export class CampaignSnapshotError extends Error {
   }
 }
 
-export interface SaveCampaignSnapshotRequest {
+export interface ParsedCampaignSnapshotRequest {
   name: string;
   deliveryMode: ValidatedCampaignDefinition["deliveryMode"];
   scheduledAt: string | null;
@@ -107,11 +107,20 @@ function isRecord(
   );
 }
 
-function parseRequest(
+export function parseCampaignSnapshotRequest(
   input: unknown,
-): SaveCampaignSnapshotRequest | null {
+): ParsedCampaignSnapshotRequest | null {
   if (
     !isRecord(input) ||
+    Object.keys(input).sort().join(",") !==
+      [
+        "audienceSource",
+        "deliveryMode",
+        "name",
+        "personalizationMapping",
+        "scheduledAt",
+        "templateKey",
+      ].join(",") ||
     typeof input.name !== "string" ||
     input.name.trim().length === 0 ||
     input.name.trim().length > 160 ||
@@ -254,7 +263,7 @@ export function createCampaignSnapshotService(
         "campaigns.write",
       );
 
-      const request = parseRequest(input);
+      const request = parseCampaignSnapshotRequest(input);
 
       if (!request) {
         throw snapshotError("INVALID_INPUT");

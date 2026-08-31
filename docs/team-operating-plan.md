@@ -1,0 +1,171 @@
+# תוכנית הפעלה יחידנית — Tal + Codex
+
+תאריך עדכון: 2026-08-30
+
+## 1. מצב המסמך
+
+1.1 מסמך זה מחליף את תוכנית העבודה הצוותית הישנה.
+
+1.2 כרגע רק **Tal** עובד עם Codex על Connect. לכן Tal הוא האחראי
+היחיד לכל מחקר, החלטה, חשבון, חיבור, פיתוח, בדיקה, פריסה ותיאום.
+
+1.3 אין כרגע חלוקת `Primary`, ‏`Backup`, ‏`RACI`, שמות תפקידים או
+הקצאות לאנשים אחרים.
+
+1.4 מסמכי Evidence היסטוריים אינם נכתבים מחדש, משום ששינוי שלהם
+ישבור Digests ושרשרת ביקורת. כל הקצאה שמית ישנה בהם מבוטלת לביצוע
+שוטף ומוחלפת על ידי
+[מודל האחריות המחייב](planning/sole-owner-operating-model-2026-08-30.md).
+
+1.5 עורך דין, ספק, רואה חשבון או בודק אבטחה עשויים להידרש כדי להפיק
+Evidence מקצועי. הם אינם בעלי משימה בפרויקט; Tal אחראי להזמין את
+הבדיקה, לקבל את התוצאה ולתעד אותה.
+
+## 2. כלל גישה לחשבונות
+
+2.1 Tal אינו שולח ל־Codex שם משתמש, סיסמה, קוד MFA, ‏Token,
+‏Private key, פרטי כרטיס או מידע אישי של לקוח.
+
+2.2 Tal מתחבר בעצמו במסך הרשמי של כל ספק.
+
+2.3 לאחר התחברות, Codex רשאי לפעול רק דרך Session מחובר או CLI
+מאומת שטל אישר במפורש לאותה פעולה.
+
+2.4 Codex אינו “שולף” סיסמה או Secret מן החשבון. כאשר אפליקציה
+צריכה Secret, Tal או Codex דרך ממשק מאושר יוצרים אותו ומכניסים אותו
+ישירות ל־Vault של הספק בלי להעתיק אותו לצ׳אט, למסמך או ל־GitHub.
+
+2.5 כל פעולה עם עלות, הרשאת Production, מחיקה או שינוי בלתי הפיך
+דורשת אישור נקודתי של Tal לפני הביצוע.
+
+## 3. השירותים שטל מפעיל
+
+3.1 ההסבר הקנוני לכל שירות נמצא ב־
+[מדריך ההחלטות והצרכים](connect-remaining-decisions-and-needs.html).
+
+3.2 המדריך כולל לכל שירות:
+
+3.2.1 מהו השירות בשפה פשוטה.
+
+3.2.2 מה השירות עושה עבור Connect.
+
+3.2.3 למה הוא נדרש ומאיזה סיכון הוא מגן.
+
+3.2.4 רשימת הפעלה ממוספרת לפי סדר.
+
+3.2.5 האם קיימת עלות ומה גורם לה לגדול.
+
+3.2.6 האם נדרשת רק התחברות של Tal או גם Secret של האפליקציה.
+
+3.2.7 קישורים למקור הרשמי של הספק.
+
+3.3 רשימת השירותים והצרכים הפעילה היא:
+
+3.3.1 Clerk Staging — כניסה, משתמשים, Organizations ו־MFA.
+
+3.3.2 Railway Staging — API, ‏Worker, ‏PostgreSQL ו־Redis/BullMQ.
+
+3.3.3 Vercel Staging/Production — פריסת ממשק React, ‏Domains ו־HTTPS.
+
+3.3.4 Meta Test WABA — WhatsApp Cloud API, ‏Webhook ושליחת ניסוי.
+
+3.3.5 AWS `il-central-1` — S3, ‏KMS ו־GuardDuty.
+
+3.3.6 Better Stack + OpenTelemetry — ניטור, לוגים והתראות.
+
+3.3.7 OpenAI company project — מודלים, Evals, Budget ו־Data controls.
+
+3.3.8 Stripe/Paddle sandbox — הכנה עתידית ל־Billing לאחר Pilot.
+
+3.3.9 GitHub PUBLIC governance — הגנת `main`, בדיקות ו־Secret scanning.
+
+3.3.10 Domains, DNS ו־Origins — כתובות נפרדות לכל סביבה.
+
+3.3.11 Legal ו־Privacy — מסמכים ואישורים מקצועיים שטל מרכז.
+
+3.3.12 תקציב ותקרות — סכום מרבי והתראות לכל ספק.
+
+3.3.13 PostgreSQL מבודד — חזרה על Migration ו־Restore ללא מידע לקוח.
+
+3.3.14 Pilot charter — גבול ניסוי, הצלחה ותנאי עצירה.
+
+## 4. סדר הפעלה בטוח
+
+4.1 קודם סוגרים עובדות שאינן דורשות חשבון: Domains, תקציב, Pilot
+charter והיקף Legal/Privacy.
+
+4.2 אחר כך Tal מתחבר ל־GitHub, Clerk, Railway ו־Vercel ומקים Staging
+מבודד בלבד.
+
+4.3 לאחר שה־Staging בריא, Tal מחבר Meta Test WABA ומריץ הודעה אחת
+נכנסת ואחת יוצאת לנמען בדיקה מאושר.
+
+4.4 לאחר מכן מחברים Better Stack/OpenTelemetry ואת OpenAI בסביבת
+Eval מוגבלת, ללא שליחה אוטומטית של הודעות.
+
+4.5 AWS וקבצים מופעלים רק לאחר Bucket פרטי, הצפנה, Quarantine,
+סריקה ובדיקת כשל בטוחה.
+
+4.6 Billing נשאר כבוי ב־Pilot. Stripe ו־Paddle מקבלים Sandbox רק
+לאחר שה־Pilot מוכיח צורך והישות המשפטית/המס הוכרעו.
+
+4.7 Production נשאר חסום עד שכל Gate נדרש קיבל Evidence חי ולא רק
+הגדרה כתובה.
+
+## 5. תנאי השלמה לכל שירות
+
+5.1 Tal התחבר לחשבון הנכון והפעיל MFA כאשר השירות מאפשר זאת.
+
+5.2 סביבת Staging נפרדת מ־Production.
+
+5.3 Secrets נמצאים רק ב־Vault של הספק.
+
+5.4 קיימת תקרת הוצאה או התראה לפני חיוב חריג.
+
+5.5 בוצעה קריאה חוזרת מן השירות שמוכיחה שההגדרה נשמרה.
+
+5.6 עברה בדיקה חיובית, בדיקה שלילית ובדיקת כשל בטוח.
+
+5.7 נשמר Evidence מושחר שאינו כולל Secret או מידע לקוח.
+
+5.8 קיים Rollback או Kill switch לפני חיבור משתמש או נכס אמיתי.
+
+## 6. מה Tal צריך למסור ל־Codex
+
+6.1 החלטות עסקיות שאי אפשר להסיק מן הקוד, כגון Domain, תקציב מרבי
+ושעות עבודה שבועיות.
+
+6.2 אישור נקודתי לפתיחת שירות בתשלום או לשינוי סביבת Production.
+
+6.3 הודעה קצרה “התחברתי” לאחר שטל נכנס לחשבון הנדרש. אין למסור את
+פרטי הכניסה עצמם.
+
+6.4 מסמך מקצועי מושחר כאשר נדרשת חוות דעת משפטית, מס או אבטחה.
+
+6.5 כל פרט שאינו ידוע נשאר `unknown/unavailable`; אין להשלים אותו
+בהשערה או בנתוני דוגמה.
+
+## 7. החלטות ארכיטקטורה פעילות
+
+7.1 [ADR-0001 — Hosting topology](adr/0001-hosting-topology.md) הוא
+`accepted`: הכיוון הוא Vercel ו־Railway, אך Deployment נשאר חסום עד
+Evidence חי והשלמת כל תנאי הקבלה.
+
+7.2 [ADR-0002 — Repository Authority היסטורי](adr/0002-repository-authority.md)
+הוא `superseded` ואינו קובע עוד שהמאגר Private.
+
+7.3 [ADR-0007 — Public repository and license hold](adr/0007-public-repository-authority-and-license.md)
+הוא `accepted`: המאגר נשאר `PUBLIC`, ללא License עד Legal review.
+
+7.4 ארבעת המסמכים
+[ADR-0003](adr/0003-ai-development-account-model.md),
+[ADR-0004](adr/0004-target-service-topology.md),
+[ADR-0005](adr/0005-bot-reply-release-evidence-storage.md) ו־
+[ADR-0006](adr/0006-bot-reply-staging-evidence-attestation.md) נשארים
+ב־`proposed` ואינם פותחים Gate.
+
+7.5 ‏Gate 0=`not verified`; ‏Gate29=`BLOCKED`; development
+freeze=`ACTIVE`; Production acceptance=`0`.
+
+7.6 טל אחראי גם למחקר ולאימות עובדות Rate limit. אין הקצאת עבודה
+לאדם נוסף; בפרט אין הקצאה לדוד, ראשה או רועי בתוכנית הפעילה.

@@ -380,6 +380,140 @@ test("claims and submits one provider-accepted delivery exactly once", async () 
   );
 });
 
+test("persists provider Retry-After before releasing the claim and blocks early replay", async () => {
+  const fixture =
+    await createFixture();
+  const staged =
+    await stage(fixture);
+  let providerCalls = 0;
+  const processor =
+    createTeamInvitationDispatchProcessor(
+      fixture.deliveries,
+      {
+        async invite() {
+          providerCalls += 1;
+          return {
+            status: "deferred",
+            retryAfterSeconds: 3_600,
+          };
+        },
+      },
+      clock(
+        "2026-08-05T10:01:00.000Z",
+        "2026-08-05T10:02:00.000Z",
+        "2026-08-05T10:02:30.000Z",
+      ),
+    );
+
+  assert.deepEqual(
+    await processor.process(
+      7,
+      staged.deliveryKey,
+    ),
+    {
+      outcome: "deferred",
+      retryAfterSeconds: 3_600,
+    },
+  );
+  assert.deepEqual(
+    await processor.process(
+      7,
+      staged.deliveryKey,
+    ),
+    {
+      outcome: "deferred",
+      retryAfterSeconds: 3_570,
+    },
+  );
+  assert.equal(providerCalls, 1);
+
+  const evidence =
+    fixture.database.prepare(`
+      SELECT
+        delivery.status,
+        delivery.attempt_count AS attemptCount,
+        deferral.reason_code AS reasonCode,
+        deferral.retry_after_at AS retryAfterAt,
+        deferral.deferred_at AS deferredAt
+      FROM team_invitation_deliveries AS delivery
+      INNER JOIN team_invitation_delivery_deferrals AS deferral
+        ON deferral.delivery_key = delivery.delivery_key
+      WHERE delivery.delivery_key = ?
+    `).get(staged.deliveryKey);
+
+  assert.deepEqual({ ...evidence }, {
+    status: "pending",
+    attemptCount: 0,
+    reasonCode: "PROVIDER_RATE_LIMITED",
+    retryAfterAt: "2026-08-05T11:02:00.000Z",
+    deferredAt: "2026-08-05T10:02:00.000Z",
+  });
+
+  const eligible =
+    await fixture.deliveries.claim(
+      7,
+      staged.deliveryKey,
+      "2026-08-05T11:02:00.000Z",
+    );
+  assert.equal(
+    eligible.outcome,
+    "claimed",
+  );
+});
+
+test("rejects a direct sending-to-pending update without matching deferral evidence", async () => {
+  const fixture =
+    await createFixture();
+  const staged =
+    await stage(fixture);
+
+  assert.equal(
+    (
+      await fixture.deliveries.claim(
+        7,
+        staged.deliveryKey,
+        "2026-08-05T10:01:00.000Z",
+      )
+    ).outcome,
+    "claimed",
+  );
+  assert.throws(
+    () => fixture.database.prepare(`
+      UPDATE team_invitation_deliveries
+      SET
+        status = 'pending',
+        attempt_count = 0,
+        updated_at = ?
+      WHERE delivery_key = ?
+    `).run(
+      "2026-08-05T10:02:00.000Z",
+      staged.deliveryKey,
+    ),
+    /transition is invalid/,
+  );
+  assert.equal(
+    (
+      await fixture.deliveries.find(
+        7,
+        staged.deliveryKey,
+      )
+    ).status,
+    "sending",
+  );
+
+  assert.equal(
+    (
+      await fixture.deliveries.defer(
+        7,
+        staged.deliveryKey,
+        "2026-08-05T10:02:00.000Z",
+        "2026-08-05T10:03:00.000Z",
+      )
+    ).status,
+    "pending",
+  );
+});
+
 test("records explicit provider unavailability as blocked without retry", async () => {
   const fixture =
     await createFixture();

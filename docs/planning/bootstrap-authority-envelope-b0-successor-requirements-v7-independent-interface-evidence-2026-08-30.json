@@ -1,0 +1,253 @@
+{
+  "acceptanceCredit": 0,
+  "artifactClass": "PLANNING-ONLY;NON-AUTHORITATIVE;NON-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V7-INDEPENDENT-ACTUAL-INTERFACE-EVIDENCE-2026-08-30-G0",
+  "authorityCredit": 0,
+  "evidenceContentRoot": "d486179d7f6003b4c4cce84bce574f8bc90444f0322a55b51850779b0f3f07a1",
+  "expectedValueDependency": "NONE",
+  "futureProviderDependency": "NONE",
+  "interfaceCount": 17,
+  "observations": [
+    {
+      "actualObservationRoot": "36528adc46aa3ce3e2a17ac2f3ed92b39f0c8b0766da7ae16c08500bfbae6211",
+      "actualValue": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-01",
+      "measurementKind": "V6-SUBJECT-SHA256",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-2026-08-30.md"
+      ],
+      "sourceSha256": [
+        "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9"
+      ]
+    },
+    {
+      "actualObservationRoot": "534b4bf7eb9baea542e7e0c11ac477bdfc76c6722e109a0bd6808c86003f9a6d",
+      "actualValue": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-02",
+      "measurementKind": "V6-MANIFEST-SHA256",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-atomic-package-manifest-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518"
+      ]
+    },
+    {
+      "actualObservationRoot": "756ced9eb993d160c82777f7a3698e8b141433c57a1f21e8e4106d0293a84f91",
+      "actualValue": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-03",
+      "measurementKind": "V6-PACKAGE-CONTENT-ROOT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-atomic-package-manifest-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518"
+      ]
+    },
+    {
+      "actualObservationRoot": "4023e0f5c7a98e4552c5098a0b70b408aa00d9467ab3429e494a548d36e053be",
+      "actualValue": 24,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-04",
+      "measurementKind": "V6-PACKAGE-MEMBER-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-atomic-package-manifest-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518"
+      ]
+    },
+    {
+      "actualObservationRoot": "2b6efb5911d7e75a41c086b7bee71a11459a944b21cf3628453d936ff5decc98",
+      "actualValue": 127,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-05",
+      "measurementKind": "V6-REQUIREMENT-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141"
+      ]
+    },
+    {
+      "actualObservationRoot": "1a53dcf3f778d85435684f5c94a890c5a0b0021c575996eefef6381fc5a76178",
+      "actualValue": 635,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-06",
+      "measurementKind": "V6-FIVE-FIELD-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141"
+      ]
+    },
+    {
+      "actualObservationRoot": "fcae3373cde03af5b76ae78e8d44b0756c757b269c9e5eae06a95a06b6180fd4",
+      "actualValue": 31,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-07",
+      "measurementKind": "V6-ACTIVE-BLOCKER-DENOMINATOR",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141"
+      ]
+    },
+    {
+      "actualObservationRoot": "664b31d635089e96ac3e600afcd0f9bee86e1b9de65b4f6ed13a9f2e5db51e64",
+      "actualValue": 7430,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-08",
+      "measurementKind": "V6-VECTOR-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "78f95bb843fe70ebb5c0caa3e113c145ead43508444f529317d01aef909da185"
+      ]
+    },
+    {
+      "actualObservationRoot": "263cccc1205323e523698df6c129f3d9b42dc0b282ba03a620949382dbc02f72",
+      "actualValue": 16,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-09",
+      "measurementKind": "V6-VECTOR-SHARD-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "78f95bb843fe70ebb5c0caa3e113c145ead43508444f529317d01aef909da185"
+      ]
+    },
+    {
+      "actualObservationRoot": "96b2c1041c916d26b94c91b75c713f9c8d9662b87fd27c62b35b8ace6f3b1db3",
+      "actualValue": 20,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-10",
+      "measurementKind": "V6-SOURCE-ARTIFACT-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-source-member-span-index-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "70185876e137f9981ab3dbcfa942ecdbbf2ce99e0e32750801db4a7a0791e6b5"
+      ]
+    },
+    {
+      "actualObservationRoot": "27fd7edc09780cc3e0f150fa32d6c7743a29347bbece587f1c731606d7fa493c",
+      "actualValue": 2045,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-11",
+      "measurementKind": "V6-SOURCE-MEMBER-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-source-member-span-index-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "70185876e137f9981ab3dbcfa942ecdbbf2ce99e0e32750801db4a7a0791e6b5"
+      ]
+    },
+    {
+      "actualObservationRoot": "0a3bbb117d1905eb1a516d4198074f9deba466715115318ad96c02fe3f5c1e33",
+      "actualValue": 900,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-12",
+      "measurementKind": "V6-AUTHORITATIVE-BYTE-ATOM-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141"
+      ]
+    },
+    {
+      "actualObservationRoot": "eb82cf0b982114a1bc622984a49d68bd1451b51ad57dab0d2b865eab3f05a8f8",
+      "actualValue": 10727,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-13",
+      "measurementKind": "V6-ACTIVE-NAMED-USE-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141"
+      ]
+    },
+    {
+      "actualObservationRoot": "f0a130c8d80d6d7e14f6d7d64987769d3154c54154d4cb0d67c94fa6423f27bd",
+      "actualValue": 21,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-14",
+      "measurementKind": "V6-ROLE-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4"
+      ]
+    },
+    {
+      "actualObservationRoot": "175b7612bbc707da68b55b2234d65da390f9622fc07461acf71385095897fd37",
+      "actualValue": 36,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-15",
+      "measurementKind": "V6-HEAD-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4"
+      ]
+    },
+    {
+      "actualObservationRoot": "af7566a9b7f6d49cda6f390b4e70c4892a29773e66e74f25e64e4d1a9efca4ee",
+      "actualValue": 94,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-16",
+      "measurementKind": "V6-MUTABLE-OBJECT-CLASS-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4"
+      ]
+    },
+    {
+      "actualObservationRoot": "2b375d637751a3e7d0053d81ffe09abee54e7d19473fbbd021636612de984ebd",
+      "actualValue": 17,
+      "dependencyClass": "FROZEN-V6-BYTES-ONLY",
+      "interfaceId": "B0V7-IF-17",
+      "measurementKind": "V6-PRIOR-INTERFACE-COUNT",
+      "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+      "sourceLocators": [
+        "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json"
+      ],
+      "sourceSha256": [
+        "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4"
+      ]
+    }
+  ],
+  "producerId": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-PRODUCER-PYTHON",
+  "producerLanguage": "PYTHON-STDLIB",
+  "schemaVersion": "B0V7-INDEPENDENT-ACTUAL-INTERFACE-EVIDENCE-V1"
+}

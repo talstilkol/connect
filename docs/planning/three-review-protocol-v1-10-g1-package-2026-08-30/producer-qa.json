@@ -1,0 +1,13 @@
+{
+  "artifactClass": "PRODUCER-SELF-QA-NOT-INDEPENDENT-NOT-ACCEPTANCE",
+  "artifactId": "MPRR-V1-10-PRODUCER-QA-2026-08-30-G1",
+  "externalClosureCount": 0,
+  "generatedAt": "2026-08-30T19:06:51Z",
+  "localControlCount": 17,
+  "mutationBlockedCount": 17,
+  "packageContentRoot": "732ccf720ac3c4ff3ef1d5d224ef6b1d3ceab18f2984c6937dab38f1a6682abd",
+  "reportRoot": "43df1d8aa79cc5823570fd5c088e52e30eab577095b8d4761fd750a2242c7537",
+  "result": "PASS-LOCAL-CANDIDATE-NOT-ACCEPTED",
+  "sourceCommit": "cbcf5e62004c09b5a62dc8c16f89e4647e40d5dc",
+  "validatorCount": 15
+}

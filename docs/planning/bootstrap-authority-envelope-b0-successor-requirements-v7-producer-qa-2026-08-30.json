@@ -1,0 +1,72 @@
+{
+  "acceptanceCredit": 0,
+  "artifactClass": "DETACHED-PRODUCER-QA;PLANNING-ONLY;NOT-IN-PACKAGE-ROOT;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V7-DETACHED-PRODUCER-QA-2026-08-30-G0",
+  "authorityCredit": 0,
+  "checks": {
+    "absolutePublicLocatorCount": 0,
+    "casCrashCutStates": 492,
+    "casSteps": "15/15",
+    "casTwoWriterSchedules": "155117520",
+    "deterministicRegeneration": "PASS",
+    "everyPackageMemberBelow50MiB": true,
+    "extraWebPrefixLocatorCount": 0,
+    "frozenPredecessorBytes": "PASS",
+    "globalConjunctMutations": "29/29",
+    "independentActualInterfaces": "17/17",
+    "inheritedIdentityPreservation": "31/31",
+    "largestShardBytes": 272356,
+    "negativeVectorCount": 252,
+    "newFindingClosureRows": "7/7",
+    "oneToOneClosureRows": "38/38",
+    "packageHashAndRoot": "PASS",
+    "piiEmailCount": 0,
+    "positiveVectorCount": 122,
+    "pycachePackageMemberCount": 0,
+    "randomApiOccurrenceCount": 0,
+    "recoveryHeadChangeCuts": "7/7",
+    "recoveryReadPaths": "17/17",
+    "secretPatternCount": 0,
+    "shardCount": 2,
+    "validatorOperatorCoverage": "18/18",
+    "validatorTypeCoverage": "14/14",
+    "vectorCount": 374
+  },
+  "commonVerificationRoot": "d28002a1aba7f94c06e0973bca2d6da2f0ae5213b2af306f8f68d24b122be2b9",
+  "currentState": {
+    "B0": "ABSENT",
+    "Gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "externalL0Authority": "ABSENT",
+    "repositoryVisibility": "PUBLIC"
+  },
+  "manifestPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-atomic-package-manifest-2026-08-30.json",
+  "manifestSha256": "3492e8a0947a3c16d9a16eb5d064139a1e19109da8d3d64a5e20a9b9f9aa47ac",
+  "memberCount": 12,
+  "operational": false,
+  "packageContentRoot": "f9e634757856863458380ccb27b143086a64d5307b5652e0b5153932252cd098",
+  "producerQaContentRoot": "ef88586698b1899a073364c328bbc109f55564924276f4ac303787424770001c",
+  "readerParity": "PASS",
+  "readerReports": [
+    {
+      "bytes": 1614,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-qa-reader-a-report-2026-08-30.json",
+      "readerId": "B0V7-READER-A",
+      "sha256": "864edaede1468f49a986c18f6afc565f32f39bb412cd4b2a077d6ab045f27ca0",
+      "verdict": "PASS",
+      "verificationRoot": "d28002a1aba7f94c06e0973bca2d6da2f0ae5213b2af306f8f68d24b122be2b9"
+    },
+    {
+      "bytes": 1613,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-qa-reader-b-report-2026-08-30.json",
+      "readerId": "B0V7-READER-B",
+      "sha256": "188d751d361b0d10b46a99d4c48041897d24dda5cebe767586a82a7f7a4a4a09",
+      "verdict": "PASS",
+      "verificationRoot": "d28002a1aba7f94c06e0973bca2d6da2f0ae5213b2af306f8f68d24b122be2b9"
+    }
+  ],
+  "residualLimit": "MECHANICAL-PRODUCER-QA-AND-READER-PARITY-DO-NOT-CLOSE-ANY-FINDING-AND-DO-NOT-GRANT-AUTHORITY-OR-ACCEPTANCE;FRESH-INDEPENDENT-HOSTILE-REVIEW-REQUIRED",
+  "schemaVersion": "B0V7-DETACHED-PRODUCER-QA-V1",
+  "selfAcceptance": false,
+  "verdict": "PASS"
+}

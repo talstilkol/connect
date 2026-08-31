@@ -57,7 +57,8 @@ interface TeamInvitationService {
   ): Promise<
     Exclude<
       TeamInvitationProviderResult,
-      { status: "unavailable" }
+      | { status: "unavailable" }
+      | { status: "deferred" }
     >
   >;
 }
@@ -125,23 +126,44 @@ function parseProviderResult(
   const record =
     value as Record<string, unknown>;
 
-  if (
-    Object.keys(record).length !== 1 ||
+  const statusOnly =
+    Object.keys(record).length === 1 &&
     (
-      record.status !== "submitted" &&
-      record.status !==
-        "already-pending" &&
-      record.status !== "unavailable"
-    )
-  ) {
+      record.status === "submitted" ||
+      record.status ===
+        "already-pending" ||
+      record.status === "unavailable"
+    );
+  const deferred =
+    Object.keys(record).sort().join(",") ===
+      "retryAfterSeconds,status" &&
+    record.status === "deferred" &&
+    Number.isSafeInteger(
+      record.retryAfterSeconds,
+    ) &&
+    Number(record.retryAfterSeconds) >= 1 &&
+    Number(record.retryAfterSeconds) <= 86_400;
+
+  if (!statusOnly && !deferred) {
     throw new TeamInvitationError(
       "PROVIDER_FAILED",
     );
   }
 
-  return {
-    status: record.status,
-  };
+  return deferred
+    ? {
+        status: "deferred",
+        retryAfterSeconds:
+          Number(
+            record.retryAfterSeconds,
+          ),
+      }
+    : {
+        status: record.status as
+          | "submitted"
+          | "already-pending"
+          | "unavailable",
+      };
 }
 
 export function createTeamInvitationService(
@@ -209,7 +231,9 @@ export function createTeamInvitationService(
 
       if (
         result.status ===
-        "unavailable"
+          "unavailable" ||
+        result.status ===
+          "deferred"
       ) {
         throw new TeamInvitationError(
           "PROVIDER_UNAVAILABLE",

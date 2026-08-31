@@ -16,6 +16,7 @@ export interface TeamInvitationProviderCommand {
   email: string;
   role: TeamInvitationRole;
   requestedAt: string;
+  expiresAt?: string;
 }
 
 export type TeamInvitationProviderResult =
@@ -27,6 +28,10 @@ export type TeamInvitationProviderResult =
     }
   | {
       status: "unavailable";
+    }
+  | {
+      status: "deferred";
+      retryAfterSeconds: number;
     };
 
 export interface TeamInvitationProviderLookupCommand {

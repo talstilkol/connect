@@ -1,6 +1,11 @@
 import type {
   SystemAdminTenantDirectoryPage,
+  SystemAdminTenantDirectoryQuery,
   SystemAdminTenantRecord,
+} from "../shared/domain/systemAdminTenantDirectory.ts";
+import {
+  SYSTEM_ADMIN_SUBSCRIPTION_FILTERS,
+  SYSTEM_ADMIN_TENANT_STATUS_FILTERS,
 } from "../shared/domain/systemAdminTenantDirectory.ts";
 import {
   isSubscriptionStatus,
@@ -8,6 +13,9 @@ import {
   requirePositiveTenantId,
   requireSubscriptionWindow,
 } from "../server/billing/tenantSubscriptionValidation.ts";
+import {
+  validatePersistedBusinessProfile,
+} from "../shared/validation/persistedBusinessProfile.ts";
 import type {
   D1DatabaseBinding,
 } from "./d1.ts";
@@ -19,6 +27,13 @@ const LIST_TENANTS_SQL = `
     tenants.id AS tenantId,
     tenants.display_name AS displayName,
     tenants.status AS tenantStatus,
+    business_profiles.tenant_id AS businessProfileTenantId,
+    business_profiles.business_name AS businessName,
+    business_profiles.timezone AS businessTimezone,
+    business_profiles.interface_language AS businessInterfaceLanguage,
+    business_profiles.version AS businessProfileVersion,
+    business_profiles.created_at AS businessProfileCreatedAt,
+    business_profiles.updated_at AS businessProfileUpdatedAt,
     tenant_subscriptions.tenant_id AS subscriptionTenantId,
     tenant_subscriptions.status AS subscriptionStatus,
     tenant_subscriptions.starts_at AS startsAt,
@@ -30,15 +45,41 @@ const LIST_TENANTS_SQL = `
   FROM tenants
   LEFT JOIN tenant_subscriptions
     ON tenant_subscriptions.tenant_id = tenants.id
+  LEFT JOIN business_profiles
+    ON business_profiles.tenant_id = tenants.id
   WHERE (?1 IS NULL OR tenants.id > ?1)
+    AND (
+      ?2 = '' OR
+      INSTR(LOWER(tenants.display_name), ?2) > 0 OR
+      INSTR(CAST(tenants.id AS TEXT), ?2) > 0
+    )
+    AND (?3 = 'all' OR tenants.status = ?3)
+    AND (
+      ?4 = 'all' OR
+      (
+        ?4 = 'with-subscription' AND
+        tenant_subscriptions.tenant_id IS NOT NULL
+      ) OR
+      (
+        ?4 = 'without-subscription' AND
+        tenant_subscriptions.tenant_id IS NULL
+      )
+    )
   ORDER BY tenants.id ASC
-  LIMIT ?2
+  LIMIT ?5
 `;
 
 interface DirectoryRow {
   tenantId: number;
   displayName: string;
   tenantStatus: string;
+  businessProfileTenantId: number | null;
+  businessName: string | null;
+  businessTimezone: string | null;
+  businessInterfaceLanguage: string | null;
+  businessProfileVersion: number | null;
+  businessProfileCreatedAt: string | null;
+  businessProfileUpdatedAt: string | null;
   subscriptionTenantId: number | null;
   subscriptionStatus: string | null;
   startsAt: string | null;
@@ -51,8 +92,58 @@ interface DirectoryRow {
 
 export interface SystemAdminTenantDirectoryRepository {
   listPage(
-    afterTenantId: number | null,
+    query:
+      SystemAdminTenantDirectoryQuery,
   ): Promise<SystemAdminTenantDirectoryPage>;
+}
+
+const tenantStatusFilters = new Set(
+  SYSTEM_ADMIN_TENANT_STATUS_FILTERS,
+);
+
+const subscriptionFilters = new Set(
+  SYSTEM_ADMIN_SUBSCRIPTION_FILTERS,
+);
+
+function validateQuery(
+  query: SystemAdminTenantDirectoryQuery,
+): SystemAdminTenantDirectoryQuery {
+  if (
+    typeof query !== "object" ||
+    query === null ||
+    Array.isArray(query) ||
+    Object.getPrototypeOf(query) !==
+      Object.prototype ||
+    Object.keys(query).length !== 4 ||
+    typeof query.search !== "string" ||
+    query.search !== query.search.trim() ||
+    query.search !==
+      query.search.toLocaleLowerCase("he-IL") ||
+    query.search.length > 80 ||
+    /[\u0000-\u001f\u007f]/.test(
+      query.search,
+    ) ||
+    !tenantStatusFilters.has(
+      query.tenantStatus,
+    ) ||
+    !subscriptionFilters.has(
+      query.subscription,
+    )
+  ) {
+    throw new Error(
+      "System admin tenant directory query is invalid",
+    );
+  }
+
+  return {
+    ...query,
+    afterTenantId:
+      query.afterTenantId === null
+        ? null
+        : requirePositiveTenantId(
+            query.afterTenantId,
+          ),
+  };
 }
 
 function validStoredText(
@@ -87,6 +178,76 @@ function parseRow(
     );
   }
 
+  const profileFields = [
+    row.businessName,
+    row.businessTimezone,
+    row.businessInterfaceLanguage,
+    row.businessProfileVersion,
+    row.businessProfileCreatedAt,
+    row.businessProfileUpdatedAt,
+  ];
+  let businessProfile:
+    SystemAdminTenantRecord["businessProfile"] =
+    null;
+
+  if (row.businessProfileTenantId === null) {
+    if (
+      profileFields.some(
+        (value) => value !== null,
+      )
+    ) {
+      throw new Error(
+        "D1 returned an incomplete system admin business profile",
+      );
+    }
+  } else {
+    const validation =
+      validatePersistedBusinessProfile({
+        businessName: row.businessName,
+        timezone:
+          row.businessTimezone,
+        interfaceLanguage:
+          row.businessInterfaceLanguage,
+      });
+
+    if (
+      row.businessProfileTenantId !==
+        tenantId ||
+      !validation.success ||
+      validation.value.businessName !==
+        row.businessName ||
+      validation.value.businessName !==
+        row.displayName ||
+      validation.value.timezone !==
+        row.businessTimezone ||
+      !Number.isSafeInteger(
+        row.businessProfileVersion,
+      ) ||
+      (row.businessProfileVersion ?? 0) <=
+        0 ||
+      !validStoredText(
+        row.businessProfileCreatedAt,
+      ) ||
+      !validStoredText(
+        row.businessProfileUpdatedAt,
+      )
+    ) {
+      throw new Error(
+        "D1 returned an invalid system admin business profile",
+      );
+    }
+
+    businessProfile = {
+      ...validation.value,
+      version:
+        row.businessProfileVersion as number,
+      createdAt:
+        row.businessProfileCreatedAt,
+      updatedAt:
+        row.businessProfileUpdatedAt,
+    };
+  }
+
   if (row.subscriptionTenantId === null) {
     if (
       row.subscriptionStatus !== null ||
@@ -106,6 +267,7 @@ function parseRow(
       tenantId,
       displayName: row.displayName,
       tenantStatus,
+      businessProfile,
       subscription: null,
     };
   }
@@ -161,6 +323,7 @@ function parseRow(
     tenantId,
     displayName: row.displayName,
     tenantStatus,
+    businessProfile,
     subscription: {
       status: subscriptionStatus,
       startsAt: period.startsAt,
@@ -180,16 +343,17 @@ export function createSystemAdminTenantDirectoryRepository(
   database: D1DatabaseBinding,
 ): SystemAdminTenantDirectoryRepository {
   return {
-    async listPage(afterTenantId) {
-      const cursor =
-        afterTenantId === null
-          ? null
-          : requirePositiveTenantId(
-              afterTenantId,
-            );
+    async listPage(input) {
+      const query = validateQuery(input);
       const result = await database
         .prepare(LIST_TENANTS_SQL)
-        .bind(cursor, PAGE_SIZE + 1)
+        .bind(
+          query.afterTenantId,
+          query.search,
+          query.tenantStatus,
+          query.subscription,
+          PAGE_SIZE + 1,
+        )
         .all<DirectoryRow>();
 
       if (!result.success) {

@@ -1,0 +1,2290 @@
+{
+  "actualInterfaceEvidenceBinding": {
+    "bytes": 11084,
+    "expectedValueDependency": "NONE",
+    "futureProviderDependency": "NONE",
+    "interfaceCount": 17,
+    "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+    "producerProgramPath": "docs/planning/qa/generate-b0-v7-interface-evidence.py",
+    "producerProgramSha256": "e0aba014af4976e4cae25f0342cdbd765d0d110c2d6179e0c0b20ba0d98e3570",
+    "sha256": "1ea411d3a281d0694d8c5f9e75c28188f3c2cee176ab13d074d58d4739d89fb8"
+  },
+  "artifactClass": "PLANNING-ONLY;NON-AUTHORITY;NON-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V7-NORMATIVE-REGISTRY-2026-08-30-G0",
+  "authorityBootstrap": {
+    "bootstrapRule": "ONLY-AN-EXTERNAL-L0-ROOTED-APPOINTMENT-MAY-ADMIT-GENESIS;NO-PACKAGE-BYTE-SELF-BOOTSTRAPS-AUTHORITY",
+    "genesisSchemas": [
+      {
+        "additionalProperties": false,
+        "fields": [
+          {
+            "name": "externalL0Root",
+            "nullable": false,
+            "type": "SHA256"
+          },
+          {
+            "name": "mandateRoot",
+            "nullable": false,
+            "type": "SHA256"
+          },
+          {
+            "name": "revision",
+            "nullable": false,
+            "type": "U64_DECIMAL"
+          }
+        ],
+        "requiredFieldCount": 3,
+        "schemaId": "B0V7-GENESIS-MANDATE-RECEIPT-V1",
+        "schemaRoot": "1d82f3b9b80afe35cfae3367e5254ef16e3833ba0971544b7ecf3ca01959d4cf"
+      },
+      {
+        "additionalProperties": false,
+        "fields": [
+          {
+            "name": "mandateRoot",
+            "nullable": false,
+            "type": "SHA256"
+          },
+          {
+            "name": "membershipRoot",
+            "nullable": false,
+            "type": "SHA256"
+          },
+          {
+            "name": "membershipHead",
+            "nullable": false,
+            "type": "SHA256"
+          }
+        ],
+        "requiredFieldCount": 3,
+        "schemaId": "B0V7-GENESIS-MEMBERSHIP-RECEIPT-V1",
+        "schemaRoot": "cc33efdb8e59f49e81a4e2f92f88be6d4de6b43f1520d5515c046b8a0a486303"
+      },
+      {
+        "additionalProperties": false,
+        "fields": [
+          {
+            "name": "membershipRoot",
+            "nullable": false,
+            "type": "SHA256"
+          },
+          {
+            "name": "permitIssuerAppointmentRoot",
+            "nullable": false,
+            "type": "SHA256"
+          },
+          {
+            "name": "permitHead",
+            "nullable": false,
+            "type": "SHA256"
+          }
+        ],
+        "requiredFieldCount": 3,
+        "schemaId": "B0V7-GENESIS-PERMIT-ROOT-RECEIPT-V1",
+        "schemaRoot": "e1c98d3e63c2ea91eb488344669d37518fe6762915c5eeda9da155cd87a08c8a"
+      }
+    ],
+    "independence": [
+      {
+        "classId": "WITNESS",
+        "commonControllerAllowed": false,
+        "disjoint": true,
+        "ledgerControllerRoot": "93d1474623d4f602bdf2fd8c8c00ee16a62611ba8ebe8a89f53662dab6fef174",
+        "producerControllerRoot": "1d448424628e80ed873c8e4818e9fca20f35f0dca9166e67ee18ca05c1f1f588",
+        "proofRoot": "4a48183b25569821057f8e95c0c19dbc8793dd45325da705b79d0b40cfa31bb0",
+        "verifierControllerRoot": "c79d8c81d6324082babea09456a4590b1c1513aedc2d578d2e8df39c9202e87c"
+      },
+      {
+        "classId": "WORK",
+        "commonControllerAllowed": false,
+        "disjoint": true,
+        "ledgerControllerRoot": "12edb7677f167f9494cd623262f31309a97026976cbdafacf7cc405a076908c8",
+        "producerControllerRoot": "0eaee6da96635ac98101a6d5e8c113533fb451faf299b175d093f0e8a08ce4b8",
+        "proofRoot": "236a82f189d9cbe4909a0e2691009afdf2586ba435ab049baa66a23cd2986250",
+        "verifierControllerRoot": "db49e236ac310b72c30edd79bb5842de4ac74fcae72d4c88b1cb5f1402342ac2"
+      },
+      {
+        "classId": "LEDGER",
+        "commonControllerAllowed": false,
+        "disjoint": true,
+        "ledgerControllerRoot": "8f09df23d0fbd672ca0986fe89d74bc26abb994c77ea750a660f92be51d7a172",
+        "producerControllerRoot": "9a42fbfd9e2b142673ef9748444ddd0c99e0fa035da4eea78ca5cc195f3f5ed7",
+        "proofRoot": "70428534d909b1987e8a2bb198357761f8444a30696a2a10bb2aea5f39db5ef7",
+        "verifierControllerRoot": "7189d2b09115e854aa192dd68623e38a08217cf6ef0ea934b23b47b788b0fce8"
+      },
+      {
+        "classId": "AUTHORITY-OWNER",
+        "commonControllerAllowed": false,
+        "disjoint": true,
+        "ledgerControllerRoot": "6b173da4f2831673a649ddd144d28ef247f35b9c3b5a7891bc966cef7e632f44",
+        "producerControllerRoot": "998a62e136e5c4c55d2396bbd5c222b95e41df8777599cec4406edb6c8ff97b2",
+        "proofRoot": "eb89210ba563f0e31baf8205353d5304d11f226ea3d6b9cf7da47ea20642c04f",
+        "verifierControllerRoot": "113adff1fab39ea90867addeb072b8ee44098073158e3a31e6687accbc3d780d"
+      }
+    ],
+    "operationalGenesisReceiptRoot": null,
+    "operationalRecoveryReceiptRoot": null,
+    "planningAdmittedGenesisInstances": [
+      {
+        "authorityCredit": 0,
+        "instanceId": "B0V7-PLANNING-GENESIS-1",
+        "nonAuthoritative": true,
+        "operational": false,
+        "schemaId": "B0V7-GENESIS-MANDATE-RECEIPT-V1"
+      },
+      {
+        "authorityCredit": 0,
+        "instanceId": "B0V7-PLANNING-GENESIS-2",
+        "nonAuthoritative": true,
+        "operational": false,
+        "schemaId": "B0V7-GENESIS-MEMBERSHIP-RECEIPT-V1"
+      },
+      {
+        "authorityCredit": 0,
+        "instanceId": "B0V7-PLANNING-GENESIS-3",
+        "nonAuthoritative": true,
+        "operational": false,
+        "schemaId": "B0V7-GENESIS-PERMIT-ROOT-RECEIPT-V1"
+      }
+    ],
+    "recoverySchema": {
+      "additionalProperties": false,
+      "fields": [
+        {
+          "name": "attemptId",
+          "nullable": false,
+          "type": "DETERMINISTIC_ID"
+        },
+        {
+          "name": "memberSetRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "witnessSetRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "securityHead",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "recoveryHead",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "newAuthorityRoot",
+          "nullable": false,
+          "type": "SHA256"
+        }
+      ],
+      "requiredFieldCount": 6,
+      "schemaId": "B0V7-RECOVERY-ADMISSION-RECEIPT-V1",
+      "schemaRoot": "6c6447fedc6afbb8d87274ca108dcf3cbd8867aeafcbeb38fec12e22905a054e"
+    },
+    "roles": [
+      {
+        "appointmentAuthority": "EXTERNAL-L0",
+        "controllerId": "B0V7-CONTROLLER-1",
+        "controllerRoot": "d7090913a26e5ea1c8e3ec3cb0804fbbc1b2f9ecf64eb3ceca70dafc7fd79658",
+        "ordinal": 1,
+        "roleId": "EXTERNAL-L0-OWNER"
+      },
+      {
+        "appointmentAuthority": "EXTERNAL-L0-OWNER",
+        "controllerId": "B0V7-CONTROLLER-2",
+        "controllerRoot": "ddac25d9fc63a903541d047f9fe12bb578c81154475db5bdc239b409623b77b0",
+        "ordinal": 2,
+        "roleId": "GENESIS-SOLE-PRODUCER"
+      },
+      {
+        "appointmentAuthority": "EXTERNAL-L0-OWNER",
+        "controllerId": "B0V7-CONTROLLER-3",
+        "controllerRoot": "2bfbc9a9eaa40101cc7c99197fe6f4863b05bf3285b598b05f4777e3b0778c79",
+        "ordinal": 3,
+        "roleId": "RECOVERY-SOLE-PRODUCER"
+      },
+      {
+        "appointmentAuthority": "GENESIS-SOLE-PRODUCER",
+        "controllerId": "B0V7-CONTROLLER-4",
+        "controllerRoot": "a61ab25aaf6998d5128a8ed92e5fccaf5b99111cfcf07e45c44901a871f9932f",
+        "ordinal": 4,
+        "roleId": "PERMIT-SOLE-PRODUCER"
+      },
+      {
+        "appointmentAuthority": "EXTERNAL-L0-OWNER",
+        "controllerId": "B0V7-CONTROLLER-5",
+        "controllerRoot": "4f8775a4bcc7d3e028ef353d620b4287cc35b83c1cc0f40d5e0b6df18dea3c56",
+        "ordinal": 5,
+        "roleId": "ACCEPTANCE-SOLE-PRODUCER"
+      }
+    ],
+    "soleProducerAppointments": [
+      {
+        "appointmentAuthorityRoleId": "EXTERNAL-L0-OWNER",
+        "appointmentRuleRoot": "cff02461af3cec0a758bf197113ded6e0d2906f89e68f07e45a9f1dfaf8b0de8",
+        "classId": "GENESIS-RECEIPT",
+        "delegationAllowed": false,
+        "producerCardinality": 1,
+        "selfAppointmentAllowed": false,
+        "soleProducerRoleId": "GENESIS-SOLE-PRODUCER"
+      },
+      {
+        "appointmentAuthorityRoleId": "EXTERNAL-L0-OWNER",
+        "appointmentRuleRoot": "4037cba3cbfa2528f591e596004178ebd245df8e73e58918ad5fb94d8f6f8326",
+        "classId": "RECOVERY-RECEIPT",
+        "delegationAllowed": false,
+        "producerCardinality": 1,
+        "selfAppointmentAllowed": false,
+        "soleProducerRoleId": "RECOVERY-SOLE-PRODUCER"
+      },
+      {
+        "appointmentAuthorityRoleId": "GENESIS-SOLE-PRODUCER",
+        "appointmentRuleRoot": "477ab762d802a0c6b3fe3b02255b1f09c9ed84b1c03c431f6747a6f7ae6ca431",
+        "classId": "PERMIT",
+        "delegationAllowed": false,
+        "producerCardinality": 1,
+        "selfAppointmentAllowed": false,
+        "soleProducerRoleId": "PERMIT-SOLE-PRODUCER"
+      },
+      {
+        "appointmentAuthorityRoleId": "EXTERNAL-L0-OWNER",
+        "appointmentRuleRoot": "9fd67d9f9f3a98118af2f452dc8a89944ec712ba0a5b16a4613a4078332fbeba",
+        "classId": "ACCEPTANCE-ENVELOPE",
+        "delegationAllowed": false,
+        "producerCardinality": 1,
+        "selfAppointmentAllowed": false,
+        "soleProducerRoleId": "ACCEPTANCE-SOLE-PRODUCER"
+      }
+    ]
+  },
+  "casStateMachine": {
+    "acceptanceCredit": 0,
+    "authorityCredit": 0,
+    "crashModel": "EVERY-REACHABLE-STATE-X-EVERY-NONTERMINAL-ACTOR-PRECOMMIT-CUT;PRIVATE-WRITES-DISCARDED",
+    "currentOperationalExecutionCount": 0,
+    "exactStepSequenceRoot": "ac18996af03d335dc543125ce6cbf3999f5e4f7be726d14877efcbfc345367f1",
+    "exhaustiveProof": {
+      "completeScheduleCount": "155117520",
+      "crashCutStateActorCount": 492,
+      "crashViolationCount": 0,
+      "oneCommitScheduleCount": "155117520",
+      "outboxExactlyOnce": true,
+      "reachableStateCount": 279,
+      "responseLossReadback": "COMMITTED",
+      "twoCommitScheduleCount": "0",
+      "zeroCommitScheduleCount": "0"
+    },
+    "guardMutationMatrix": [
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "schemaValid",
+        "mutatedValue": false,
+        "mutationId": "B0V7-CAS-GUARD-SCHEMA-NEG",
+        "ordinal": 1
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "authorityCurrent",
+        "mutatedValue": false,
+        "mutationId": "B0V7-CAS-GUARD-AUTHORITY-NEG",
+        "ordinal": 2
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "validFrom",
+        "mutatedValue": "INVALID",
+        "mutationId": "B0V7-CAS-GUARD-TIME-TYPE-NEG",
+        "ordinal": 3
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "validUntil",
+        "mutatedValue": "2026-08-30T12:00:00Z",
+        "mutationId": "B0V7-CAS-GUARD-TIME-UPPER-EQUALITY-NEG",
+        "ordinal": 4
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "commitInstant",
+        "mutatedValue": "2026-08-31T00:00:00Z",
+        "mutationId": "B0V7-CAS-GUARD-TIME-EXPIRED-NEG",
+        "ordinal": 5
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "revoked",
+        "mutatedValue": true,
+        "mutationId": "B0V7-CAS-GUARD-REVOKED-NEG",
+        "ordinal": 6
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "revocationHead",
+        "mutatedValue": "0000000000000000000000000000000000000000000000000000000000000000",
+        "mutationId": "B0V7-CAS-GUARD-REVOCATION-HEAD-NEG",
+        "ordinal": 7
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "expectedHead",
+        "mutatedValue": "HEAD-STALE",
+        "mutationId": "B0V7-CAS-GUARD-EXPECTED-HEAD-NEG",
+        "ordinal": 8
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "attemptId",
+        "mutatedValue": "lowercase-attempt",
+        "mutationId": "B0V7-CAS-GUARD-ATTEMPT-ID-NEG",
+        "ordinal": 9
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "proposedFence",
+        "mutatedValue": 0,
+        "mutationId": "B0V7-CAS-GUARD-FENCE-NEG",
+        "ordinal": 10
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "minimumRevision",
+        "mutatedValue": "7",
+        "mutationId": "B0V7-CAS-GUARD-REVISION-EQUALITY-NEG",
+        "ordinal": 11
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "replayUsed",
+        "mutatedValue": true,
+        "mutationId": "B0V7-CAS-GUARD-REPLAY-NEG",
+        "ordinal": 12
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "outputRoot",
+        "mutatedValue": "INVALID",
+        "mutationId": "B0V7-CAS-GUARD-OUTPUT-ROOT-NEG",
+        "ordinal": 13
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "envelopeValid",
+        "mutatedValue": false,
+        "mutationId": "B0V7-CAS-GUARD-ENVELOPE-NEG",
+        "ordinal": 14
+      },
+      {
+        "actor": "A",
+        "expected": "BLOCK",
+        "field": "effectId",
+        "mutatedValue": "lowercase-effect",
+        "mutationId": "B0V7-CAS-GUARD-EFFECT-ID-NEG",
+        "ordinal": 15
+      }
+    ],
+    "interleavingModel": "ALL-TWO-WRITER-ORDER-PRESERVING-NEXT-STEP-CHOICES;MEMOIZED-STATE-DP;NO-SCHEDULE-SAMPLING",
+    "planningAttemptSetRoot": "04f2d45c8acb705070027674afc462ee12e3b6cc78ac584808fba9c509b28d77",
+    "planningAttempts": {
+      "A": {
+        "attemptId": "B0V7-CAS-ATTEMPT-A",
+        "authorityCurrent": true,
+        "commitInstant": "2026-08-30T12:00:00Z",
+        "effectId": "B0V7-CAS-EFFECT-A",
+        "envelopeValid": true,
+        "expectedHead": "HEAD-0",
+        "minimumRevision": "6",
+        "outputRoot": "959071adfd9d896947e6a5f20d5a45aed64bff5e654406817f922c1b40c798a2",
+        "proposedFence": 1,
+        "replayUsed": false,
+        "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+        "revoked": false,
+        "schemaValid": true,
+        "validFrom": "2026-08-30T00:00:00Z",
+        "validUntil": "2026-08-31T00:00:00Z"
+      },
+      "B": {
+        "attemptId": "B0V7-CAS-ATTEMPT-B",
+        "authorityCurrent": true,
+        "commitInstant": "2026-08-30T12:00:00Z",
+        "effectId": "B0V7-CAS-EFFECT-B",
+        "envelopeValid": true,
+        "expectedHead": "HEAD-0",
+        "minimumRevision": "6",
+        "outputRoot": "c52fad367d42e93a5511046300c9da85c32999d1aad9117ee4be32be26ab34a0",
+        "proposedFence": 1,
+        "replayUsed": false,
+        "revocationHead": "75ae27fc963d710e855fd116d53e76b623e3a3aa1f66a070710be81f939698e5",
+        "revoked": false,
+        "schemaValid": true,
+        "validFrom": "2026-08-30T00:00:00Z",
+        "validUntil": "2026-08-31T00:00:00Z"
+      }
+    },
+    "reducerId": "B0V7-CAS-REDUCER-V1",
+    "responseLossRecovery": "AFTER-ATOMIC-COMMIT-READ-CURRENT-HEAD-PERMIT-LEDGER-AND-OUTBOX-BY-DETERMINISTIC-ATTEMPT-ID",
+    "stepCount": 15,
+    "steps": [
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "READ-ONLY",
+        "guard": "read current head and bind immutable attempt snapshot",
+        "ordinal": 1,
+        "reads": [
+          "/store/currentHead"
+        ],
+        "stepId": "READ_HEAD",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "READ-ONLY",
+        "guard": "bind security/revision/revocation read set",
+        "ordinal": 2,
+        "reads": [
+          "/store/securityHead",
+          "/store/revisionHead",
+          "/store/revocationHead"
+        ],
+        "stepId": "READ_SECURITY_UNIVERSE",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "execute every internal and external closed schema",
+        "ordinal": 3,
+        "reads": [
+          "/attempt/envelope"
+        ],
+        "stepId": "VALIDATE_SCHEMA",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "sole producer appointment is current and externally rooted",
+        "ordinal": 4,
+        "reads": [
+          "/attempt/appointmentRoot",
+          "/store/appointmentHead"
+        ],
+        "stepId": "VALIDATE_AUTHORITY",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "typed half-open time interval accepts",
+        "ordinal": 5,
+        "reads": [
+          "/attempt/permit/validFrom",
+          "/attempt/permit/validUntil",
+          "/context/commitInstant"
+        ],
+        "stepId": "VALIDATE_TIME",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "exact current revocation head and no equal-revision revoke",
+        "ordinal": 6,
+        "reads": [
+          "/attempt/permit/revocationHead",
+          "/store/revocationHead"
+        ],
+        "stepId": "VALIDATE_REVOCATION",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "expected head equals step-1 snapshot and current head",
+        "ordinal": 7,
+        "reads": [
+          "/attempt/permit/expectedCurrentHead",
+          "/store/currentHead"
+        ],
+        "stepId": "COMPARE_EXPECTED_HEAD",
+        "writes": []
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "deterministic attempt ID unused",
+        "ordinal": 8,
+        "reads": [
+          "/attempt/attemptId"
+        ],
+        "stepId": "RESERVE_ATTEMPT",
+        "writes": [
+          "/private/reservation"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE",
+        "guard": "next fence is strictly greater",
+        "ordinal": 9,
+        "reads": [
+          "/store/fence"
+        ],
+        "stepId": "ADVANCE_FENCE",
+        "writes": [
+          "/private/nextFence"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE-STAGED",
+        "guard": "permit and replay key both unused",
+        "ordinal": 10,
+        "reads": [
+          "/attempt/permit/permitId",
+          "/store/permitLedger"
+        ],
+        "stepId": "CONSUME_PERMIT",
+        "writes": [
+          "/private/stagedPermitConsume"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE-STAGED",
+        "guard": "output root is typed and bound",
+        "ordinal": 11,
+        "reads": [
+          "/attempt/outputRoot"
+        ],
+        "stepId": "STAGE_POINTER",
+        "writes": [
+          "/private/stagedPointer"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE-STAGED",
+        "guard": "detached envelope validates",
+        "ordinal": 12,
+        "reads": [
+          "/attempt/envelope"
+        ],
+        "stepId": "STAGE_ACCEPTANCE",
+        "writes": [
+          "/private/stagedAcceptance"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE-STAGED",
+        "guard": "one deterministic effect identity",
+        "ordinal": 13,
+        "reads": [
+          "/attempt/effectRoot"
+        ],
+        "stepId": "STAGE_OUTBOX",
+        "writes": [
+          "/private/stagedOutbox"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "PRIVATE-STAGED",
+        "guard": "every authoritative read and head is byte-equal to the bound snapshot",
+        "ordinal": 14,
+        "reads": [
+          "/store/currentHead",
+          "/store/securityHead",
+          "/store/revisionHead",
+          "/store/revocationHead",
+          "/store/appointmentHead",
+          "/store/permitLedger"
+        ],
+        "stepId": "REVALIDATE_READ_SET",
+        "writes": [
+          "/private/revalidationReceipt"
+        ]
+      },
+      {
+        "crashBeforeStepResult": "ZERO-DURABLE-WRITES-BY-CRASHED-ACTOR",
+        "durability": "SOLE-LINEARIZATION-POINT",
+        "guard": "single CAS compare plus all durable writes; failure has zero durable writes",
+        "ordinal": 15,
+        "reads": [
+          "/private/reservation",
+          "/private/stagedPermitConsume",
+          "/private/stagedPointer",
+          "/private/stagedAcceptance",
+          "/private/stagedOutbox",
+          "/private/revalidationReceipt"
+        ],
+        "stepId": "ATOMIC_COMMIT",
+        "writes": [
+          "/store/currentHead",
+          "/store/fence",
+          "/store/permitLedger",
+          "/store/pointer",
+          "/store/acceptance",
+          "/store/outbox"
+        ]
+      }
+    ]
+  },
+  "currentState": {
+    "B0": "ABSENT",
+    "Gate29": "BLOCKED",
+    "acceptanceCredit": 0,
+    "authorityCredit": 0,
+    "developmentFreeze": "ACTIVE",
+    "externalL0Authority": "ABSENT",
+    "independentClosureCount": "0/38",
+    "operationalAcceptanceEnvelopeRoot": null,
+    "operationalGenesisRoot": null,
+    "operationalPermitCount": 0,
+    "operationalRecoveryRoot": null,
+    "repositoryVisibility": "PUBLIC",
+    "selfAcceptance": false
+  },
+  "detachedAcceptance": {
+    "acceptanceCredit": 0,
+    "authorityCredit": 0,
+    "currentOperationalEnvelopeRoot": null,
+    "currentValidationResult": "BLOCK",
+    "externalSchema": {
+      "additionalProperties": false,
+      "fields": [
+        {
+          "name": "envelopeSchemaId",
+          "nullable": false,
+          "type": "DETERMINISTIC_ID"
+        },
+        {
+          "name": "internalSchemaRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "instanceRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "planningOnly",
+          "nullable": false,
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "operational",
+          "nullable": false,
+          "type": "BOOLEAN"
+        },
+        {
+          "name": "validationContext",
+          "nullable": false,
+          "type": "OBJECT"
+        },
+        {
+          "name": "payload",
+          "nullable": false,
+          "type": "OBJECT"
+        },
+        {
+          "name": "authorityCredit",
+          "nullable": false,
+          "type": "NONNEGATIVE_INTEGER"
+        },
+        {
+          "name": "acceptanceCredit",
+          "nullable": false,
+          "type": "NONNEGATIVE_INTEGER"
+        }
+      ],
+      "requiredFieldCount": 9,
+      "schemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+      "schemaRoot": "8b3595b9e82ef3273beb0e4f3e1d18e98fec74f2864d61f4936173b063248c00"
+    },
+    "internalSchema": {
+      "additionalProperties": false,
+      "fields": [
+        {
+          "name": "schemaId",
+          "nullable": false,
+          "type": "DETERMINISTIC_ID"
+        },
+        {
+          "name": "instanceId",
+          "nullable": false,
+          "type": "DETERMINISTIC_ID"
+        },
+        {
+          "name": "producerAppointmentRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "freshnessHeadTupleRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "requirementClosureRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "outputSetRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "casCommitReceiptRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "recoveryReceiptRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "witnessIndependenceRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "workIndependenceRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "ledgerIndependenceRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "authorityOwnerIndependenceRoot",
+          "nullable": false,
+          "type": "SHA256"
+        }
+      ],
+      "requiredFieldCount": 12,
+      "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+      "schemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069"
+    },
+    "planningPositiveEnvelope": {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "envelopeSchemaId": "B0V7-DETACHED-ACCEPTANCE-ENVELOPE-V1",
+      "instanceRoot": "4b2f919a30edc717c7df28fe0de1a1a431c5f276119e7fe304710022583afd10",
+      "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+      "operational": false,
+      "payload": {
+        "authorityOwnerIndependenceRoot": "987dcba32184d543f525c83085cca85f083e6be393cd3df3ac6e9bf7e83dd4a1",
+        "casCommitReceiptRoot": "cc7177325d31626b36b935ec37d084faf4403b4bdda1e534a3209e3bfc042c68",
+        "freshnessHeadTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+        "instanceId": "B0V7-PLANNING-ACCEPTANCE-INSTANCE-001",
+        "ledgerIndependenceRoot": "97ac278add14d267db3697a133fdc93f97dab5856f6c066991ff80025ab4a2d9",
+        "outputSetRoot": "5c9a5a2dc96e6b2ba9a947380b1ea82b545096cb4f821344687210ac055e9030",
+        "producerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab",
+        "recoveryReceiptRoot": "f419f8aa686d82c719583a818ec2cc7b293336b2853b18cab446120c2fe9a5b8",
+        "requirementClosureRoot": "936b968d3dd3b3b9d0ceef565dbd51a5b319a1294918d084297add8f9ada0408",
+        "schemaId": "B0V7-DETACHED-ACCEPTANCE-INTERNAL-V1",
+        "witnessIndependenceRoot": "7462685bbaec5cfa92ba272b37956ef3c45d2b852f23ee8f9a9483923974ffd3",
+        "workIndependenceRoot": "059eb82e73bd0ca6edc64dcd39447385e3568b3ef795d9690498cbf6d4ffab73"
+      },
+      "planningOnly": true,
+      "validationContext": {
+        "currentSecurityUniverseTupleRoot": "95c6cc19002867c9010e412c6262165057a93e490666f30f3834599e198d3734",
+        "expectedProducerAppointmentRoot": "d81cac8e53f90ba0065f76e281cf5e50d718924615cb3b29b4a84458bef3feab"
+      }
+    },
+    "planningPositiveEnvelopeRoot": "944fddd65c6dfafa2cd01e7be205404dcd56baba7bca6535c72015a2c03ed542",
+    "soleProducerRole": "B0V7-ACCEPTANCE-SOLE-PRODUCER",
+    "unknownFieldPolicy": "BLOCK-AT-EVERY-OBJECT-BOUNDARY",
+    "validationContextSchema": {
+      "additionalProperties": false,
+      "fields": [
+        {
+          "name": "expectedProducerAppointmentRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "currentSecurityUniverseTupleRoot",
+          "nullable": false,
+          "type": "SHA256"
+        }
+      ],
+      "requiredFieldCount": 2,
+      "schemaId": "B0V7-DETACHED-ACCEPTANCE-VALIDATION-CONTEXT-V1",
+      "schemaRoot": "0b6a85792a0278fa01fec7aabb2f482c5cc1dbeda125a2530c61ffb9f8a225eb"
+    }
+  },
+  "deterministicIdentityPolicy": "ALL-IDS-ARE-FIXED-DOMAIN-SEPARATED-CONTENT-HASHES-OR-CANONICAL-UPPERCASE-SEQUENCE-IDS;NO-RANDOMNESS",
+  "expectedInterfaces": [
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "b01be6a503804360add4b9680d061a64a84d3f182d6d3d8be4c1b95fcaf9aae5",
+      "expectedValue": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-01",
+      "measurementKind": "V6-SUBJECT-SHA256",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "b07677c1f779d7942c0cc8d4dc1f0b94eeef281c0e46847957143d09c18357b5",
+      "expectedValue": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-02",
+      "measurementKind": "V6-MANIFEST-SHA256",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "2f33cad41c724312f45aef6d6d404c8e00e8b4a77e1dad5270b70b1d2d3614c0",
+      "expectedValue": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-03",
+      "measurementKind": "V6-PACKAGE-CONTENT-ROOT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "1b8a41ae7ccdee633cf67dd1d0a364b92c470418a954071e0b1fb6fbea8a986c",
+      "expectedValue": 24,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-04",
+      "measurementKind": "V6-PACKAGE-MEMBER-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "1429f9880358cfac7a63f46bc8ead8f4cc0a9301d53ac17266d9e1bddfa8b818",
+      "expectedValue": 127,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-05",
+      "measurementKind": "V6-REQUIREMENT-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "02f98535b57e64cab069626928dd94f2bedef0cd2c899da9075730d33ed3c145",
+      "expectedValue": 635,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-06",
+      "measurementKind": "V6-FIVE-FIELD-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "42c5845f9ffa735448d32f4c4001f006c218706913635ad9624aeaa60c3c3436",
+      "expectedValue": 31,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-07",
+      "measurementKind": "V6-ACTIVE-BLOCKER-DENOMINATOR",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "f30a8b9ad4e3bc6defa4f70136702722c8adaa84a3f993e54ebe887900d17ffd",
+      "expectedValue": 7430,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-08",
+      "measurementKind": "V6-VECTOR-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "e6c74002831a15985abeb9e517bd4338b8e168af7c789ad809680b3636194785",
+      "expectedValue": 16,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-09",
+      "measurementKind": "V6-VECTOR-SHARD-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "bfb627500ee9cd314c56588596a300b99a7bb79ca4a11f328aa82c52725bc3ea",
+      "expectedValue": 20,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-10",
+      "measurementKind": "V6-SOURCE-ARTIFACT-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "eb6cc3f16e139a63bac99125720c67caf472f5a92488c944a56399be26cf06e5",
+      "expectedValue": 2045,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-11",
+      "measurementKind": "V6-SOURCE-MEMBER-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "6e4d4bef4e68d862d48ace297b7d3afc5d62c1117a352f763bf05a134b2f109d",
+      "expectedValue": 900,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-12",
+      "measurementKind": "V6-AUTHORITATIVE-BYTE-ATOM-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "96290be24b3a487ff4686bfa410bc1b45ae1a9437b982868feea0a536c312eba",
+      "expectedValue": 10727,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-13",
+      "measurementKind": "V6-ACTIVE-NAMED-USE-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "3ff6cdad77cc083fc7363191f22779225fffb1e2c7bec303aee43ca07ae798aa",
+      "expectedValue": 21,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-14",
+      "measurementKind": "V6-ROLE-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "aebc3cfec7282971875dba501c1b0905e32f4e5e98ea648fab68abf549ff02a5",
+      "expectedValue": 36,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-15",
+      "measurementKind": "V6-HEAD-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "79015e0ddda6df190a7aab546775ada9322049bda6cc440c71e293ecb7dea81b",
+      "expectedValue": 94,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-16",
+      "measurementKind": "V6-MUTABLE-OBJECT-CLASS-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    },
+    {
+      "actualEvidencePath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "commonSourceDerivationAllowed": false,
+      "expectedSpecificationRoot": "4e822a7377cecb491c5bdf0f9ab7a30045195302c422b92808ba488771c5d34b",
+      "expectedValue": 17,
+      "frozenBeforeActualProducer": true,
+      "futureProviderReadAllowed": false,
+      "interfaceId": "B0V7-IF-17",
+      "measurementKind": "V6-PRIOR-INTERFACE-COUNT",
+      "specificationProducerId": "B0V7-EXPECTED-INTERFACE-SPECIFICATION-PRODUCER-NODE"
+    }
+  ],
+  "globalModel": {
+    "conjunctCount": 29,
+    "currentRealStateSeparate": true,
+    "factBindings": [
+      {
+        "factKey": "validatorLanguageRoot",
+        "ordinal": 1,
+        "predicateId": "VALIDATOR-LANGUAGE-ROOTED"
+      },
+      {
+        "factKey": "unknownFailClosedRoot",
+        "ordinal": 2,
+        "predicateId": "VALIDATOR-UNKNOWN-FAIL-CLOSED"
+      },
+      {
+        "factKey": "externalSchemaRoot",
+        "ordinal": 3,
+        "predicateId": "EXTERNAL-SCHEMA-CLOSED"
+      },
+      {
+        "factKey": "internalSchemaRoot",
+        "ordinal": 4,
+        "predicateId": "INTERNAL-SCHEMA-CLOSED"
+      },
+      {
+        "factKey": "validationContextSchemaRoot",
+        "ordinal": 5,
+        "predicateId": "VALIDATION-CONTEXT-CLOSED"
+      },
+      {
+        "factKey": "actualInterfaceFactRoot",
+        "ordinal": 6,
+        "predicateId": "ACTUAL-INTERFACES-INDEPENDENT"
+      },
+      {
+        "factKey": "endToEndPositiveTraceRoot",
+        "ordinal": 7,
+        "predicateId": "END-TO-END-POSITIVE-TRACE"
+      },
+      {
+        "factKey": "casStepSequenceRoot",
+        "ordinal": 8,
+        "predicateId": "CAS-ALL-15-STEPS"
+      },
+      {
+        "factKey": "casInterleavingProofRoot",
+        "ordinal": 9,
+        "predicateId": "CAS-ALL-INTERLEAVINGS"
+      },
+      {
+        "factKey": "casCrashFactRoot",
+        "ordinal": 10,
+        "predicateId": "CAS-ALL-CRASH-CUTS"
+      },
+      {
+        "factKey": "casResponseLossRoot",
+        "ordinal": 11,
+        "predicateId": "CAS-RESPONSE-LOSS-READBACK"
+      },
+      {
+        "factKey": "recoveryReadSetRoot",
+        "ordinal": 12,
+        "predicateId": "RECOVERY-EXACT-READ-SET"
+      },
+      {
+        "factKey": "recoveryHeadRevalidationRoot",
+        "ordinal": 13,
+        "predicateId": "RECOVERY-HEAD-REVALIDATION"
+      },
+      {
+        "factKey": "soleProducerSetRoot",
+        "ordinal": 14,
+        "predicateId": "SOLE-PRODUCERS-APPOINTED"
+      },
+      {
+        "factKey": "genesisBootstrapRoot",
+        "ordinal": 15,
+        "predicateId": "GENESIS-EXTERNAL-L0-ROOTED"
+      },
+      {
+        "factKey": "permitSchemaRoot",
+        "ordinal": 16,
+        "predicateId": "PERMIT-TYPED"
+      },
+      {
+        "factKey": "revisionRuleRoot",
+        "ordinal": 17,
+        "predicateId": "REVISION-STRICT"
+      },
+      {
+        "factKey": "timeRuleRoot",
+        "ordinal": 18,
+        "predicateId": "TIME-HALF-OPEN"
+      },
+      {
+        "factKey": "revocationRuleRoot",
+        "ordinal": 19,
+        "predicateId": "REVOCATION-ATOMIC"
+      },
+      {
+        "factKey": "replayRuleRoot",
+        "ordinal": 20,
+        "predicateId": "REPLAY-EXACTLY-ONCE"
+      },
+      {
+        "factKey": "witnessIndependenceRoot",
+        "ordinal": 21,
+        "predicateId": "TWO-WITNESSES-INDEPENDENT"
+      },
+      {
+        "factKey": "workIndependenceRoot",
+        "ordinal": 22,
+        "predicateId": "WORK-INDEPENDENT"
+      },
+      {
+        "factKey": "ledgerIndependenceRoot",
+        "ordinal": 23,
+        "predicateId": "LEDGER-INDEPENDENT"
+      },
+      {
+        "factKey": "authorityOwnerIndependenceRoot",
+        "ordinal": 24,
+        "predicateId": "AUTHORITY-OWNER-INDEPENDENT"
+      },
+      {
+        "factKey": "closureControlSetRoot",
+        "ordinal": 25,
+        "predicateId": "CLOSURE-ROWS-ONE-TO-ONE"
+      },
+      {
+        "factKey": "readerProfileSetRoot",
+        "ordinal": 26,
+        "predicateId": "READERS-BYTE-BOUND-INDEPENDENT"
+      },
+      {
+        "factKey": "deterministicIdentityPolicyRoot",
+        "ordinal": 27,
+        "predicateId": "DETERMINISTIC-IDENTITIES-ONLY"
+      },
+      {
+        "factKey": "publicLocatorSetRoot",
+        "ordinal": 28,
+        "predicateId": "PUBLIC-LOCATORS-REPO-RELATIVE"
+      },
+      {
+        "factKey": "currentRealStateRoot",
+        "ordinal": 29,
+        "predicateId": "REAL-STATE-SEPARATELY-BLOCKED"
+      }
+    ],
+    "modelId": "B0V7-GLOBAL-PLANNING-MODEL-001",
+    "mutationMatrix": [
+      {
+        "expected": "BLOCK",
+        "factKey": "validatorLanguageRoot",
+        "jsonPointer": "/semanticFacts/validatorLanguageRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-VALIDATOR-LANGUAGE-ROOTED-NEG",
+        "predicateId": "VALIDATOR-LANGUAGE-ROOTED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "unknownFailClosedRoot",
+        "jsonPointer": "/semanticFacts/unknownFailClosedRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-VALIDATOR-UNKNOWN-FAIL-CLOSED-NEG",
+        "predicateId": "VALIDATOR-UNKNOWN-FAIL-CLOSED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "externalSchemaRoot",
+        "jsonPointer": "/semanticFacts/externalSchemaRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-EXTERNAL-SCHEMA-CLOSED-NEG",
+        "predicateId": "EXTERNAL-SCHEMA-CLOSED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "internalSchemaRoot",
+        "jsonPointer": "/semanticFacts/internalSchemaRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-INTERNAL-SCHEMA-CLOSED-NEG",
+        "predicateId": "INTERNAL-SCHEMA-CLOSED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "validationContextSchemaRoot",
+        "jsonPointer": "/semanticFacts/validationContextSchemaRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-VALIDATION-CONTEXT-CLOSED-NEG",
+        "predicateId": "VALIDATION-CONTEXT-CLOSED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "actualInterfaceFactRoot",
+        "jsonPointer": "/semanticFacts/actualInterfaceFactRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-ACTUAL-INTERFACES-INDEPENDENT-NEG",
+        "predicateId": "ACTUAL-INTERFACES-INDEPENDENT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "endToEndPositiveTraceRoot",
+        "jsonPointer": "/semanticFacts/endToEndPositiveTraceRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-END-TO-END-POSITIVE-TRACE-NEG",
+        "predicateId": "END-TO-END-POSITIVE-TRACE"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "casStepSequenceRoot",
+        "jsonPointer": "/semanticFacts/casStepSequenceRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-CAS-ALL-15-STEPS-NEG",
+        "predicateId": "CAS-ALL-15-STEPS"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "casInterleavingProofRoot",
+        "jsonPointer": "/semanticFacts/casInterleavingProofRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-CAS-ALL-INTERLEAVINGS-NEG",
+        "predicateId": "CAS-ALL-INTERLEAVINGS"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "casCrashFactRoot",
+        "jsonPointer": "/semanticFacts/casCrashFactRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-CAS-ALL-CRASH-CUTS-NEG",
+        "predicateId": "CAS-ALL-CRASH-CUTS"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "casResponseLossRoot",
+        "jsonPointer": "/semanticFacts/casResponseLossRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-CAS-RESPONSE-LOSS-READBACK-NEG",
+        "predicateId": "CAS-RESPONSE-LOSS-READBACK"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "recoveryReadSetRoot",
+        "jsonPointer": "/semanticFacts/recoveryReadSetRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-RECOVERY-EXACT-READ-SET-NEG",
+        "predicateId": "RECOVERY-EXACT-READ-SET"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "recoveryHeadRevalidationRoot",
+        "jsonPointer": "/semanticFacts/recoveryHeadRevalidationRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-RECOVERY-HEAD-REVALIDATION-NEG",
+        "predicateId": "RECOVERY-HEAD-REVALIDATION"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "soleProducerSetRoot",
+        "jsonPointer": "/semanticFacts/soleProducerSetRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-SOLE-PRODUCERS-APPOINTED-NEG",
+        "predicateId": "SOLE-PRODUCERS-APPOINTED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "genesisBootstrapRoot",
+        "jsonPointer": "/semanticFacts/genesisBootstrapRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-GENESIS-EXTERNAL-L0-ROOTED-NEG",
+        "predicateId": "GENESIS-EXTERNAL-L0-ROOTED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "permitSchemaRoot",
+        "jsonPointer": "/semanticFacts/permitSchemaRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-PERMIT-TYPED-NEG",
+        "predicateId": "PERMIT-TYPED"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "revisionRuleRoot",
+        "jsonPointer": "/semanticFacts/revisionRuleRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-REVISION-STRICT-NEG",
+        "predicateId": "REVISION-STRICT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "timeRuleRoot",
+        "jsonPointer": "/semanticFacts/timeRuleRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-TIME-HALF-OPEN-NEG",
+        "predicateId": "TIME-HALF-OPEN"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "revocationRuleRoot",
+        "jsonPointer": "/semanticFacts/revocationRuleRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-REVOCATION-ATOMIC-NEG",
+        "predicateId": "REVOCATION-ATOMIC"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "replayRuleRoot",
+        "jsonPointer": "/semanticFacts/replayRuleRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-REPLAY-EXACTLY-ONCE-NEG",
+        "predicateId": "REPLAY-EXACTLY-ONCE"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "witnessIndependenceRoot",
+        "jsonPointer": "/semanticFacts/witnessIndependenceRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-TWO-WITNESSES-INDEPENDENT-NEG",
+        "predicateId": "TWO-WITNESSES-INDEPENDENT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "workIndependenceRoot",
+        "jsonPointer": "/semanticFacts/workIndependenceRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-WORK-INDEPENDENT-NEG",
+        "predicateId": "WORK-INDEPENDENT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "ledgerIndependenceRoot",
+        "jsonPointer": "/semanticFacts/ledgerIndependenceRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-LEDGER-INDEPENDENT-NEG",
+        "predicateId": "LEDGER-INDEPENDENT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "authorityOwnerIndependenceRoot",
+        "jsonPointer": "/semanticFacts/authorityOwnerIndependenceRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-AUTHORITY-OWNER-INDEPENDENT-NEG",
+        "predicateId": "AUTHORITY-OWNER-INDEPENDENT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "closureControlSetRoot",
+        "jsonPointer": "/semanticFacts/closureControlSetRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-CLOSURE-ROWS-ONE-TO-ONE-NEG",
+        "predicateId": "CLOSURE-ROWS-ONE-TO-ONE"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "readerProfileSetRoot",
+        "jsonPointer": "/semanticFacts/readerProfileSetRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-READERS-BYTE-BOUND-INDEPENDENT-NEG",
+        "predicateId": "READERS-BYTE-BOUND-INDEPENDENT"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "deterministicIdentityPolicyRoot",
+        "jsonPointer": "/semanticFacts/deterministicIdentityPolicyRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-DETERMINISTIC-IDENTITIES-ONLY-NEG",
+        "predicateId": "DETERMINISTIC-IDENTITIES-ONLY"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "publicLocatorSetRoot",
+        "jsonPointer": "/semanticFacts/publicLocatorSetRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-PUBLIC-LOCATORS-REPO-RELATIVE-NEG",
+        "predicateId": "PUBLIC-LOCATORS-REPO-RELATIVE"
+      },
+      {
+        "expected": "BLOCK",
+        "factKey": "currentRealStateRoot",
+        "jsonPointer": "/semanticFacts/currentRealStateRoot",
+        "mutatedValue": null,
+        "mutationId": "B0V7-GLOBAL-REAL-STATE-SEPARATELY-BLOCKED-NEG",
+        "predicateId": "REAL-STATE-SEPARATELY-BLOCKED"
+      }
+    ],
+    "mutationRule": "EXACTLY-ONE-UNDERLYING-SEMANTIC-FACT-IS-REMOVED-PER-PREDICATE;READERS-RECOMPUTE-EVERY-FACT-FROM-NORMATIVE-COMPONENTS",
+    "planningPositiveModel": {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "modelId": "B0V7-GLOBAL-PLANNING-MODEL-001",
+      "nonAuthoritative": true,
+      "operational": false,
+      "semanticFactSetRoot": "549e3b2f7c604ada54ae49c5634aaf5018c9f242822b87205dc6e7afbec94075",
+      "semanticFacts": {
+        "actualInterfaceFactRoot": "8d38efcde501c6c3304750c7098bf5e744e181f4cc91e9cde51af284b0036e11",
+        "authorityOwnerIndependenceRoot": "cfa44d55f0238916611cab6f870eec49fc87443a47c0661ad20137897703f2d7",
+        "casCrashFactRoot": "242cd9c74bbba4e3ef9c823698a17b478840fe104edb1da79fa2577d6aa644a5",
+        "casInterleavingProofRoot": "c8bde709036d2276d2d969ccd2860c4c8ab56e6a4cd3830586255f4bc67d4298",
+        "casResponseLossRoot": "10ad29471ca57e2f639521fd66b2a72834c89b1b6c55b5b86dc37f35d91d2a0f",
+        "casStepSequenceRoot": "ac18996af03d335dc543125ce6cbf3999f5e4f7be726d14877efcbfc345367f1",
+        "closureControlSetRoot": "36c87965a90e9eec841109b4830934cf67a2dde24ba4b890bc75143bd69af704",
+        "currentRealStateRoot": "56edb90012cbac0379f99af491c9dfefd326c8f73bfb6b66c98174fcb35d2849",
+        "deterministicIdentityPolicyRoot": "aac58f936542f8f35dfda9c603b6218a23ed94d1f563f039cdba452bea64a107",
+        "endToEndPositiveTraceRoot": "09a341cdf5ca7c023cdf0c4ab5c3a20e74b7748e6f1a42e5dd8ebc56c1eb6a64",
+        "externalSchemaRoot": "8b3595b9e82ef3273beb0e4f3e1d18e98fec74f2864d61f4936173b063248c00",
+        "genesisBootstrapRoot": "2c0a3fc3809a5df88cf1534a689a41c64979e092ee3424c373babb74c2eafccd",
+        "internalSchemaRoot": "475b2cdb0e08e157d894f8eb04626cb0a35118c9fe1e0d27189ca12e951aa069",
+        "ledgerIndependenceRoot": "0d5b72847770419df93002de13b2e2692c8531f641b97d0a43d2076e59b1b688",
+        "permitSchemaRoot": "2019d47c3072cdbcd7098e72f04b6fc65345adf0ddc2f06a96359ef09f92f981",
+        "publicLocatorSetRoot": "7686afc49454676ba492a9077dfe8fca7318d17505ea5647a1d84b4d2374f1ef",
+        "readerProfileSetRoot": "86db6ec96588ea1849449fd5729bfd8d27dc435dd0201e8348896d80340a6bea",
+        "recoveryHeadRevalidationRoot": "dec3713cff601b2f7b1069d0e3a58c1d29ed85c44e28b15aad7a386cf49864fb",
+        "recoveryReadSetRoot": "f7e5bbf71e311b12d6af42b5635f400cfd1654526abad255230d00f57d3945fe",
+        "replayRuleRoot": "c98d619495c534851b63ad419f49f66e08d56ea4268ca19d859e8a59f71c35e7",
+        "revisionRuleRoot": "95c1fd3ae049153e6854fcae40d3e869f4a24ed6b0dff7ddc00224d82eeb01be",
+        "revocationRuleRoot": "2789c68922dc61278d340bbbe9ced01731c3d8f6b652bfc972e9785c0aba5950",
+        "soleProducerSetRoot": "28b408e4177864516e300773ceb79be1ca675a45aacc0951fc0b8d49d83d035f",
+        "timeRuleRoot": "4b6e7570ca2519e001fef2f44cecb193cdfe1056471a162c7d30ffa782baf83a",
+        "unknownFailClosedRoot": "08f4130b8f0c399cd4d4634389a33f004688263ee1fe073d1365e9251d5e8d06",
+        "validationContextSchemaRoot": "0b6a85792a0278fa01fec7aabb2f482c5cc1dbeda125a2530c61ffb9f8a225eb",
+        "validatorLanguageRoot": "a8d49cc0b9386f9fcd4136e03ec4eed43b9106134596e733ef32bf7b25a07988",
+        "witnessIndependenceRoot": "a767d4b53bd5f7197d0686a7f834f69b2c2255d393aefa5c83963fe3e749bcd0",
+        "workIndependenceRoot": "7e3c0fb75eda6f308f1b758eac5a3b4e57276b5e9539382a44e94d571664a552"
+      }
+    },
+    "planningPositiveModelRoot": "4f03439841c0a5a8a73a650de64aaa5c350d006d64662ad243821f374320be2b",
+    "predicateIds": [
+      "VALIDATOR-LANGUAGE-ROOTED",
+      "VALIDATOR-UNKNOWN-FAIL-CLOSED",
+      "EXTERNAL-SCHEMA-CLOSED",
+      "INTERNAL-SCHEMA-CLOSED",
+      "VALIDATION-CONTEXT-CLOSED",
+      "ACTUAL-INTERFACES-INDEPENDENT",
+      "END-TO-END-POSITIVE-TRACE",
+      "CAS-ALL-15-STEPS",
+      "CAS-ALL-INTERLEAVINGS",
+      "CAS-ALL-CRASH-CUTS",
+      "CAS-RESPONSE-LOSS-READBACK",
+      "RECOVERY-EXACT-READ-SET",
+      "RECOVERY-HEAD-REVALIDATION",
+      "SOLE-PRODUCERS-APPOINTED",
+      "GENESIS-EXTERNAL-L0-ROOTED",
+      "PERMIT-TYPED",
+      "REVISION-STRICT",
+      "TIME-HALF-OPEN",
+      "REVOCATION-ATOMIC",
+      "REPLAY-EXACTLY-ONCE",
+      "TWO-WITNESSES-INDEPENDENT",
+      "WORK-INDEPENDENT",
+      "LEDGER-INDEPENDENT",
+      "AUTHORITY-OWNER-INDEPENDENT",
+      "CLOSURE-ROWS-ONE-TO-ONE",
+      "READERS-BYTE-BOUND-INDEPENDENT",
+      "DETERMINISTIC-IDENTITIES-ONLY",
+      "PUBLIC-LOCATORS-REPO-RELATIVE",
+      "REAL-STATE-SEPARATELY-BLOCKED"
+    ]
+  },
+  "noSelfAcceptanceRule": "PRODUCER-QA-AND-READER-PASS-ARE-MECHANICAL-PLANNING-EVIDENCE-ONLY;FRESH-INDEPENDENT-HOSTILE-REVIEW-IS-REQUIRED;PACKAGE-CANNOT-ACCEPT-ITSELF",
+  "permitRevisionTimeRevocationReplay": {
+    "acceptanceCredit": 0,
+    "authorityCredit": 0,
+    "currentOperationalPermitCount": 0,
+    "currentPermitRoot": null,
+    "permitSchema": {
+      "additionalProperties": false,
+      "fields": [
+        {
+          "name": "permitId",
+          "nullable": false,
+          "type": "DETERMINISTIC_ID"
+        },
+        {
+          "name": "subjectRoot",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "expectedCurrentHead",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "minimumRevision",
+          "nullable": false,
+          "type": "U64_DECIMAL"
+        },
+        {
+          "name": "validFrom",
+          "nullable": false,
+          "type": "RFC3339_UTC"
+        },
+        {
+          "name": "validUntil",
+          "nullable": false,
+          "type": "RFC3339_UTC"
+        },
+        {
+          "name": "revocationHead",
+          "nullable": false,
+          "type": "SHA256"
+        },
+        {
+          "name": "replayKey",
+          "nullable": false,
+          "type": "DETERMINISTIC_ID"
+        },
+        {
+          "name": "consumed",
+          "nullable": false,
+          "type": "BOOLEAN"
+        }
+      ],
+      "requiredFieldCount": 9,
+      "schemaId": "B0V7-TYPED-PERMIT-V1",
+      "schemaRoot": "2019d47c3072cdbcd7098e72f04b6fc65345adf0ddc2f06a96359ef09f92f981"
+    },
+    "replayRule": "replayKey and permitId are consumed exactly once in the same atomic CAS as Acceptance; duplicate, response retry, or prior consume BLOCKS and authoritative readback resolves response loss",
+    "revisionRule": "currentRevision must be strictly greater than minimumRevision; equality BLOCKS",
+    "revocationRule": "re-read exact revocationHead at atomic commit; any change or revoked subject BLOCKS",
+    "soleProducerRole": "PERMIT-SOLE-PRODUCER",
+    "timeRule": "validFrom <= commitInstant < validUntil under RFC3339_UTC decoder; equality at validUntil BLOCKS"
+  },
+  "predecessorSemanticNonWeakening": {
+    "activeIdentityCount": 31,
+    "exactByteVerificationRequired": true,
+    "mergeCreditAllowed": false,
+    "predecessorPackageContentRoot": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+    "predecessorPackageMemberCount": 24,
+    "rangeCreditAllowed": false
+  },
+  "readerIndependenceProfiles": [
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "controllerId": "B0V7-READER-A-CONTROLLER",
+      "controllerRoot": "dc8085411add5b04811aee777f1d67f095d4062b440dfa789c43802607466e05",
+      "dependencies": [
+        "node:crypto",
+        "node:fs",
+        "node:path"
+      ],
+      "dependencyRoot": "3038dea36e7404404cc33a0da224d74e8fbab5240701a4f2c40959285dfe9c1a",
+      "disclosureRoot": "8cae15ebf90a0b974f8d3272cd66bacf12d7b5d43b42ea6cda817237f64f8d96",
+      "disclosureRule": "READER-A-RESULT-SEALED-BEFORE-READER-B-RESULT-DISCLOSURE",
+      "executionContext": {
+        "environment": "FRESH-LOCAL-PROCESS-A",
+        "generatorImportsAllowed": false,
+        "peerReaderImportsAllowed": false,
+        "workingDirectoryPolicy": "LOGICAL-PUBLIC-REPOSITORY-ROOT"
+      },
+      "executionContextRoot": "b424174afc98991e7d1c42a0a811c8a60bafbf84d56795c22bdb46373258de64",
+      "language": "NODEJS-STDLIB",
+      "operational": false,
+      "profileRoot": "4877094ed8ea84ca6ff6c33a7b7b56b4d157ea3327891d7c0dd96ef1b3804ce9",
+      "readerId": "B0V7-READER-A",
+      "readerPath": "docs/planning/qa/b0-v7-qa-reader-a.mjs",
+      "readerSha256": "0a2c039da68d21e3dbfb1410da858743cd7660ad4374b7bd50ad640b71f5b2dc",
+      "runtimeContract": {
+        "binary": "node",
+        "standardLibraryOnly": true,
+        "version": "v25.9.0"
+      },
+      "runtimeRoot": "f1ea57d567ddd845cc330328cd57944eab33b32491282335e65c02148b1bbf33"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityCredit": 0,
+      "controllerId": "B0V7-READER-B-CONTROLLER",
+      "controllerRoot": "64ca3227431a2883aec7c2c0b9932b7203ca4d2408dc1bf54cc137e5009f624f",
+      "dependencies": [
+        "copy",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "re",
+        "sys"
+      ],
+      "dependencyRoot": "c62a889b75ecb90a636ee56a3b790d4e8625d1d29312a6ac558bcbdd946f5b2e",
+      "disclosureRoot": "9552c4b2779e23f74a8e3f2a954a9fb1dc67032d2a08f586a7366bf8fefa3758",
+      "disclosureRule": "READER-B-RESULT-SEALED-BEFORE-CROSS-READER-PARITY",
+      "executionContext": {
+        "environment": "FRESH-LOCAL-PROCESS-B",
+        "generatorImportsAllowed": false,
+        "peerReaderImportsAllowed": false,
+        "workingDirectoryPolicy": "LOGICAL-PUBLIC-REPOSITORY-ROOT"
+      },
+      "executionContextRoot": "03cdc95eaa48264eb206b445820cac2771fa24fbbadfd2676129013a897aaca4",
+      "language": "PYTHON-STDLIB",
+      "operational": false,
+      "profileRoot": "677658ea5fee0aa353aac7c7f246f2555c1f4349e2c1eb7fedba95105271cedf",
+      "readerId": "B0V7-READER-B",
+      "readerPath": "docs/planning/qa/b0-v7-qa-reader-b.py",
+      "readerSha256": "916c5aee77d0c6d4b91b20e84b2f957cab5a4a550b8778c04248b01b5a28b7d8",
+      "runtimeContract": {
+        "binary": "python3",
+        "standardLibraryOnly": true,
+        "version": "3.14.4"
+      },
+      "runtimeRoot": "0c0dc9b8b8792154a334caac8b193c8f45c2829f11451110f184dfe0a742b41b"
+    }
+  ],
+  "readerProfileSetRoot": "86db6ec96588ea1849449fd5729bfd8d27dc435dd0201e8348896d80340a6bea",
+  "recoveryReducer": {
+    "acceptanceCredit": 0,
+    "atomicityRule": "ALL-VALIDATION-READS-BOUND-TO-SNAPSHOT;EXACT-READ-SET-AND-BOTH-HEADS-REVALIDATED-AT-STEP-7-AND-STEP-8-CAS;ONLY-STEP-8-DURABLE",
+    "authorityCredit": 0,
+    "canonicalNamespaces": [
+      "/attempt",
+      "/context",
+      "/store"
+    ],
+    "currentOperationalExecutionCount": 0,
+    "currentOperationalRecoveryAttemptRoot": null,
+    "headChangeInjections": [
+      {
+        "afterStepOrdinal": 1,
+        "beforeStepOrdinal": 2,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-01"
+      },
+      {
+        "afterStepOrdinal": 2,
+        "beforeStepOrdinal": 3,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-02"
+      },
+      {
+        "afterStepOrdinal": 3,
+        "beforeStepOrdinal": 4,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-03"
+      },
+      {
+        "afterStepOrdinal": 4,
+        "beforeStepOrdinal": 5,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-04"
+      },
+      {
+        "afterStepOrdinal": 5,
+        "beforeStepOrdinal": 6,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-05"
+      },
+      {
+        "afterStepOrdinal": 6,
+        "beforeStepOrdinal": 7,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-06"
+      },
+      {
+        "afterStepOrdinal": 7,
+        "beforeStepOrdinal": 8,
+        "changedHeadPath": "/store/securityHead",
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-HEAD-CHANGE-AFTER-07"
+      }
+    ],
+    "headPaths": [
+      "/store/securityHead",
+      "/store/recoveryHead"
+    ],
+    "lifecycleSteps": [
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 1,
+        "readPaths": [
+          "/attempt/attemptId",
+          "/attempt/memberIds",
+          "/attempt/acknowledgements",
+          "/attempt/challengeRoot",
+          "/attempt/consumed",
+          "/context/requiredThreshold",
+          "/context/controllerRoot",
+          "/context/nowInstant",
+          "/context/expectedSecurityHead",
+          "/context/expectedRecoveryHead",
+          "/store/members",
+          "/store/witnesses",
+          "/store/challenges",
+          "/store/securityHead",
+          "/store/recoveryHead",
+          "/store/activeAuthorityRoot",
+          "/store/oldAuthorityRevoked"
+        ],
+        "stepId": "READ-CANONICAL-STATE"
+      },
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 2,
+        "readPaths": [
+          "/attempt/memberIds",
+          "/context/nowInstant",
+          "/store/securityHead"
+        ],
+        "stepId": "VALIDATE-CLOSED-SCHEMA"
+      },
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 3,
+        "readPaths": [
+          "/attempt/acknowledgements",
+          "/context/expectedSecurityHead",
+          "/store/recoveryHead"
+        ],
+        "stepId": "VALIDATE-MEMBERS-TIME-REVOCATION"
+      },
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 4,
+        "readPaths": [
+          "/attempt/challengeRoot",
+          "/context/expectedRecoveryHead",
+          "/store/activeAuthorityRoot"
+        ],
+        "stepId": "VALIDATE-TWO-INDEPENDENT-WITNESSES"
+      },
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 5,
+        "readPaths": [
+          "/attempt/consumed",
+          "/store/members",
+          "/store/oldAuthorityRevoked"
+        ],
+        "stepId": "VALIDATE-CHALLENGE-AND-REPLAY"
+      },
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 6,
+        "readPaths": [
+          "/context/requiredThreshold",
+          "/store/witnesses"
+        ],
+        "stepId": "RESERVE-PRIVATE-ATTEMPT"
+      },
+      {
+        "atomicBoundary": false,
+        "durableWrites": [],
+        "ordinal": 7,
+        "readPaths": [
+          "/attempt/attemptId",
+          "/attempt/memberIds",
+          "/attempt/acknowledgements",
+          "/attempt/challengeRoot",
+          "/attempt/consumed",
+          "/context/requiredThreshold",
+          "/context/controllerRoot",
+          "/context/nowInstant",
+          "/context/expectedSecurityHead",
+          "/context/expectedRecoveryHead",
+          "/store/members",
+          "/store/witnesses",
+          "/store/challenges",
+          "/store/securityHead",
+          "/store/recoveryHead",
+          "/store/activeAuthorityRoot",
+          "/store/oldAuthorityRevoked"
+        ],
+        "stepId": "REVALIDATE-EXACT-READ-SET-AND-HEADS"
+      },
+      {
+        "atomicBoundary": true,
+        "durableWrites": [
+          "/store/activeAuthorityRoot",
+          "/store/oldAuthorityRevoked",
+          "/attempt/consumed",
+          "/store/recoveryHead"
+        ],
+        "ordinal": 8,
+        "readPaths": [
+          "/attempt/attemptId",
+          "/attempt/memberIds",
+          "/attempt/acknowledgements",
+          "/attempt/challengeRoot",
+          "/attempt/consumed",
+          "/context/requiredThreshold",
+          "/context/controllerRoot",
+          "/context/nowInstant",
+          "/context/expectedSecurityHead",
+          "/context/expectedRecoveryHead",
+          "/store/members",
+          "/store/witnesses",
+          "/store/challenges",
+          "/store/securityHead",
+          "/store/recoveryHead",
+          "/store/activeAuthorityRoot",
+          "/store/oldAuthorityRevoked"
+        ],
+        "stepId": "ATOMIC-ROTATE-REVOKE-CONSUME"
+      }
+    ],
+    "mutationMatrix": [
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-01",
+        "path": "/attempt/attemptId"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-02",
+        "path": "/attempt/memberIds"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-03",
+        "path": "/attempt/acknowledgements"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-04",
+        "path": "/attempt/challengeRoot"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-05",
+        "path": "/attempt/consumed"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-06",
+        "path": "/context/requiredThreshold"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-07",
+        "path": "/context/controllerRoot"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-08",
+        "path": "/context/nowInstant"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-09",
+        "path": "/context/expectedSecurityHead"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-10",
+        "path": "/context/expectedRecoveryHead"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-11",
+        "path": "/store/members"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-12",
+        "path": "/store/witnesses"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-13",
+        "path": "/store/challenges"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-14",
+        "path": "/store/securityHead"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-15",
+        "path": "/store/recoveryHead"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-16",
+        "path": "/store/activeAuthorityRoot"
+      },
+      {
+        "credit": 0,
+        "expected": "BLOCK",
+        "mutationId": "B0V7-RECOVERY-PATH-MUT-17",
+        "path": "/store/oldAuthorityRevoked"
+      }
+    ],
+    "planningPositiveState": {
+      "attempt": {
+        "acknowledgements": [
+          {
+            "challengeRoot": "f45c1f1f5920f3b1bdf1cdd5fe1fc5f2151962e015df027d95b7d986628631cc",
+            "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+            "memberId": "MEMBER-A"
+          },
+          {
+            "challengeRoot": "f45c1f1f5920f3b1bdf1cdd5fe1fc5f2151962e015df027d95b7d986628631cc",
+            "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+            "memberId": "MEMBER-B"
+          },
+          {
+            "challengeRoot": "f45c1f1f5920f3b1bdf1cdd5fe1fc5f2151962e015df027d95b7d986628631cc",
+            "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+            "memberId": "MEMBER-C"
+          }
+        ],
+        "attemptId": "B0V7-RECOVERY-ATTEMPT-001",
+        "challengeRoot": "f45c1f1f5920f3b1bdf1cdd5fe1fc5f2151962e015df027d95b7d986628631cc",
+        "consumed": false,
+        "memberIds": [
+          "MEMBER-A",
+          "MEMBER-B",
+          "MEMBER-C"
+        ]
+      },
+      "context": {
+        "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+        "expectedRecoveryHead": "0e093e680b736c9e6c453350d2531ccb5926f66c5d96affa225902912f65c8a0",
+        "expectedSecurityHead": "9f2b96ffb4ef7c6990a0ccd9ce83f8363ace52e05f48b1d10d3db602af9b4f16",
+        "nowInstant": "2026-08-30T00:00:00Z",
+        "requiredThreshold": 3
+      },
+      "store": {
+        "activeAuthorityRoot": "a6cde1113cc5e9e87e6e31e6d4bc58d6001ff2b18aa25abe5165d2ef3600e0d0",
+        "challenges": {
+          "B0V7-RECOVERY-ATTEMPT-001": "f45c1f1f5920f3b1bdf1cdd5fe1fc5f2151962e015df027d95b7d986628631cc"
+        },
+        "members": {
+          "MEMBER-A": {
+            "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+            "current": true,
+            "revokedAt": null,
+            "validUntil": "2030-01-01T00:00:00Z"
+          },
+          "MEMBER-B": {
+            "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+            "current": true,
+            "revokedAt": null,
+            "validUntil": "2030-01-01T00:00:00Z"
+          },
+          "MEMBER-C": {
+            "controllerRoot": "9f44c08a1707b78ea1f82377a058e16f5da14aa51953e2dc77082274981967b7",
+            "current": true,
+            "revokedAt": null,
+            "validUntil": "2030-01-01T00:00:00Z"
+          }
+        },
+        "oldAuthorityRevoked": false,
+        "recoveryHead": "0e093e680b736c9e6c453350d2531ccb5926f66c5d96affa225902912f65c8a0",
+        "securityHead": "9f2b96ffb4ef7c6990a0ccd9ce83f8363ace52e05f48b1d10d3db602af9b4f16",
+        "witnesses": {
+          "WITNESS-A": {
+            "controllerRoot": "b31561c875a1b6ddae58e2164f82e6e48c3632c395711b84dd68f13803327d43",
+            "current": true
+          },
+          "WITNESS-B": {
+            "controllerRoot": "ee09aec2ef7fe4f748326e55f7b159cd6a3343c8de4017829221e7218435b0f1",
+            "current": true
+          }
+        }
+      }
+    },
+    "planningPositiveStateRoot": "14e6eea12dcc7cf6a948271eb15a199eba43986b0abbb5a19364afd2f6bdad4c",
+    "readPathCount": 17,
+    "readPaths": [
+      "/attempt/attemptId",
+      "/attempt/memberIds",
+      "/attempt/acknowledgements",
+      "/attempt/challengeRoot",
+      "/attempt/consumed",
+      "/context/requiredThreshold",
+      "/context/controllerRoot",
+      "/context/nowInstant",
+      "/context/expectedSecurityHead",
+      "/context/expectedRecoveryHead",
+      "/store/members",
+      "/store/witnesses",
+      "/store/challenges",
+      "/store/securityHead",
+      "/store/recoveryHead",
+      "/store/activeAuthorityRoot",
+      "/store/oldAuthorityRevoked"
+    ],
+    "reducerId": "B0V7-RECOVERY-REDUCER-V1"
+  },
+  "registryContentRoot": "d71cdd504dbc1e4141a5a2d8d22dab9d659bac3d763a99d64dc9e5fa3acda15d",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "B0V7-NORMATIVE-REGISTRY-V1",
+  "validatorLanguage": {
+    "astSchema": {
+      "argsType": "ARRAY",
+      "exactKeys": [
+        "op",
+        "args"
+      ],
+      "opType": "NONEMPTY_STRING"
+    },
+    "canonicalization": "UTF8;OBJECT-KEYS-LEXICOGRAPHIC;ARRAY-ORDER-PRESERVED;SAFE-INTEGERS-ONLY",
+    "languageId": "B0V7-VALIDATOR-LANGUAGE-V1",
+    "languageRoot": "a8d49cc0b9386f9fcd4136e03ec4eed43b9106134596e733ef32bf7b25a07988",
+    "missingPathPolicy": "MISSING-SENTINEL;BOOLEAN-CONTEXT-BLOCK",
+    "operators": [
+      {
+        "arity": "1",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "LITERAL",
+        "outputType": "JSON-OR-MISSING",
+        "totalSemantics": "return the sole JSON literal argument exactly"
+      },
+      {
+        "arity": "1",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "GET",
+        "outputType": "JSON-OR-MISSING",
+        "totalSemantics": "resolve one RFC6901 JSON pointer; missing yields the MISSING sentinel"
+      },
+      {
+        "arity": "1",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "PATH_EXISTS",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "true iff the JSON pointer resolves"
+      },
+      {
+        "arity": "1..N",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "AND",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "true iff every child evaluates to boolean true"
+      },
+      {
+        "arity": "1..N",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "OR",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "true iff at least one child evaluates to boolean true"
+      },
+      {
+        "arity": "1",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "NOT",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "true iff the child evaluates to boolean false"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "EQ",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "canonical JSON equality; MISSING blocks"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "NEQ",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "canonical JSON inequality; MISSING blocks"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "LT",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "safe-integer strict less-than only"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "LTE",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "safe-integer less-than-or-equal only"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "GT",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "safe-integer strict greater-than only"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "GTE",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "safe-integer greater-than-or-equal only"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "TYPE_IS",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "first child must decode under the closed second-argument type"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "EXACT_KEYS",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "object key set equals the literal string-array key set"
+      },
+      {
+        "arity": "1",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "UNIQUE_VALUES",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "array canonical values are pairwise unique"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "IN_SET",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "first child canonically equals one literal array member"
+      },
+      {
+        "arity": "2",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "MATCH",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "Unicode regular expression search over a string; invalid expression blocks"
+      },
+      {
+        "arity": "3",
+        "inputDomain": "JSON-AST-V1",
+        "invalidInputResult": "BLOCK",
+        "operator": "HASH_EQ",
+        "outputType": "BOOLEAN",
+        "totalSemantics": "domain-separated SHA-256 of first child equals third argument"
+      }
+    ],
+    "types": [
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": true,
+        "totalDecoder": "value is exactly JSON null",
+        "type": "NULL"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "value is exactly JSON true or false",
+        "type": "BOOLEAN"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "value is a JSON string",
+        "type": "STRING"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "string length is at least one Unicode scalar",
+        "type": "NONEMPTY_STRING"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "integer in inclusive IEEE-754 safe range",
+        "type": "SAFE_INTEGER"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "safe integer greater than or equal to zero",
+        "type": "NONNEGATIVE_INTEGER"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "canonical decimal string in 0..18446744073709551615",
+        "type": "U64_DECIMAL"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "exactly 64 lowercase hexadecimal characters",
+        "type": "SHA256"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "3..128 uppercase ASCII letters/digits/hyphens, first alphanumeric",
+        "type": "DETERMINISTIC_ID"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "valid calendar instant exactly YYYY-MM-DDTHH:MM:SSZ",
+        "type": "RFC3339_UTC"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "empty root pointer or RFC6901 slash tokens with only ~0 and ~1 escapes",
+        "type": "JSON_POINTER"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "starts docs/, no leading slash, web/ prefix, backslash, or dot-dot",
+        "type": "REPO_RELATIVE_PATH"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "JSON array",
+        "type": "ARRAY"
+      },
+      {
+        "invalidResult": "BLOCK",
+        "nullAllowed": false,
+        "totalDecoder": "JSON object excluding array and null",
+        "type": "OBJECT"
+      }
+    ],
+    "unknownOperatorPolicy": "BLOCK",
+    "unknownTypePolicy": "BLOCK"
+  }
+}

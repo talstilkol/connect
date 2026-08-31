@@ -1,0 +1,85 @@
+{
+  "artifactId": "CONNECT-B0-V4-ATOMIC-CANDIDATE-PACKAGE-MANIFEST-2026-08-29-G0",
+  "artifactClass": "IMMUTABLE-ATOMIC-CANDIDATE-PACKAGE-MANIFEST;PLANNING-ONLY;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "schemaVersion": 1,
+  "packageSemantics": "ALL-MEMBERS-REQUIRED;ANY-MISSING-OR-CHANGED-MEMBER-BLOCKS-THE-ENTIRE-CANDIDATE;NO-PARTIAL-CREDIT",
+  "memberCount": 8,
+  "members": [
+    {
+      "ordinal": 1,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v4-normative-registry-2026-08-29.json",
+      "sha256": "94a4d151425325e43832e57b2579e78bf7fa1e56bcdfda1ec704137eb53501d2",
+      "bytes": 256828,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v4-2026-08-29.md",
+      "sha256": "4a45fd1b9e2aeefefff28862676f5cfa7c87f5141d81edcf9691a908c7c8f0c9",
+      "bytes": 266839,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 3,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v4-source-member-span-index-2026-08-29.json",
+      "sha256": "641459c7a09b30eb0c5ea48359194b092f0d5d00109c7df3f43a3bf53030ad7a",
+      "bytes": 1120580,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 4,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v4-closure-crosswalk-2026-08-29.json",
+      "sha256": "24d3d90b404847d7a7ca5a457edf8117cca0f12a79cbc552eac8ef47d1763451",
+      "bytes": 1696229,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 5,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v4-executable-vector-programs-2026-08-29.json",
+      "sha256": "a004e0dfed0e7741d5a1f9c02b7fa9a4efef644209ff730041aaf8cb819d9fbd",
+      "bytes": 1651477,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 6,
+      "logicalPath": "web/docs/planning/qa/generate-b0-v4-package.mjs",
+      "sha256": "5ff12f75d3b8144674aadb5e3997e313c622ea2290187432a86f90434ade202d",
+      "bytes": 96758,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 7,
+      "logicalPath": "web/docs/planning/qa/b0-v4-qa-engine-a.mjs",
+      "sha256": "a2afd5ffa852c38469b08dac006291ed4fed0eb08570ee0485a15b9cbfc1bd29",
+      "bytes": 14758,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 8,
+      "logicalPath": "web/docs/planning/qa/b0-v4-qa-engine-b.py",
+      "sha256": "fed4be4256e2ad5a76603183c2a825808234b024935d21da42078c8128c1ee2e",
+      "bytes": 15119,
+      "required": true,
+      "authorityCredit": 0
+    }
+  ],
+  "packageContentRoot": "2b37ec92c5445848b4a9c3d202215f392681242382ac17fc2652fb198f553446",
+  "subjectSha256": "4a45fd1b9e2aeefefff28862676f5cfa7c87f5141d81edcf9691a908c7c8f0c9",
+  "normativeRegistrySha256": "94a4d151425325e43832e57b2579e78bf7fa1e56bcdfda1ec704137eb53501d2",
+  "sourceMemberSpanIndexSha256": "641459c7a09b30eb0c5ea48359194b092f0d5d00109c7df3f43a3bf53030ad7a",
+  "closureCrosswalkSha256": "24d3d90b404847d7a7ca5a457edf8117cca0f12a79cbc552eac8ef47d1763451",
+  "vectorProgramPackSha256": "a004e0dfed0e7741d5a1f9c02b7fa9a4efef644209ff730041aaf8cb819d9fbd",
+  "producerQaMembership": "DETACHED;MUST-REFERENCE-THIS-MANIFEST-ROOT;CANNOT-BE-A-MEMBER-WITHOUT-HASH-CYCLE",
+  "independentReviewMembership": "DETACHED;ABSENT;MUST-REFERENCE-THIS-MANIFEST-ROOT",
+  "repositoryVisibility": "PUBLIC",
+  "authorityCredit": 0,
+  "acceptanceCredit": 0,
+  "currentState": "FROZEN-CANDIDATE-PACKAGE;PRODUCER-QA-PENDING;INDEPENDENT-REVIEW-PENDING;B0-ABSENT;GATE29-BLOCKED;FREEZE-ACTIVE"
+}

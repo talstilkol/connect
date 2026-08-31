@@ -5,14 +5,42 @@
 1.1 ה־Repository שמכיל את האפליקציה הוא תיקיית `web`.
 
 1.2 מעליו קיים Repository נוסף בתיקיית `connect`. המבנה המקונן
-מתועד ואסור להסיר אחד מהם לפני בחירת Repository Authority מפורשת.
+מתועד, אך `web` המחובר ל־`talstilkol/connect` הוא Repository Authority
+היחיד שאושר. אין למחוק את ה־Repository החיצוני בלי Inventory נפרד,
+אך גם אין לפרוס או לפתח ממנו כ־Authority מתחרה.
 
-1.3 ל־Repository של `web` אין Remote מוגדר. לכן Branch Protection,
-Review Rules, ‏CODEOWNERS ו־Secret Scanning של ספק Git עדיין אינם
-פעילים.
+1.3 ה־Repository של `web` מחובר ל־`talstilkol/connect` ב־GitHub,
+ו־`main` הוא Branch ברירת המחדל. בבדיקת Governance חיה מ־
+2026-08-16 ה־Repository נמצא `public`. החשיפה תוקנה באותו יום,
+ובאימות חוזר מ־`2026-08-16T19:47:05Z` ממשק GitHub וה־API המאומת
+דיווחו `private=true` ו־`visibility=private`.
 
-1.4 אין במסמך זה שמות בעלים מומצאים. בעלי Security, ‏Operations,
-Release ו־Secrets הם unknown/unavailable עד למינוי מפורש.
+1.3.1 זהו תיעוד היסטורי בלבד. לפי ADR-0007, ההחלטה המחייבת כעת היא
+Repository `PUBLIC` ללא License עד Legal review. מצב ה־Visibility החי
+לאחר ההחלטה הוא `unknown/unavailable` עד קריאה חוזרת מ־GitHub.
+
+1.4 שמונת שערי האיכות המקומיים ו־Dependency Audit מוגדרים כתשעה
+Pull Request Checks נפרדים, והם עברו ב־PR #1. עם זאת, ארבעת הענפים
+נמצאו לא מוגנים, לא נמצאו Rulesets או `CODEOWNERS`, ולכן ה־Checks
+אינם Required. שינוי ה־Visibility אינו מתקן בקרות אלה. בדיקת המשך
+מצאה `0` Collaborators, ורק בעל החשבון יכול לתרום. ה־API החזיר
+`security_and_analysis: null`, ולכן Secret Scanning ו־Push Protection
+אינם מוכחים ואינם יכולים לספק Governance Evidence תקף. מצב 2FA
+נשאר `unknown/unavailable`.
+
+1.4.1 הראיות, ההיקף וסדר התיקון נמצאים ב־
+`docs/github-governance-live-audit.md`.
+
+1.5 לפי מודל האחריות המחייב, Tal הוא האחראי היחיד לכל פעולת GitHub,
+Release, ‏Deployment, ‏Security ו־Secrets. אין בתוכנית הפעילה הקצאה
+לרועי, ראשה, דוד, Primary, ‏Backup או RACI.
+
+1.5.1 ‏ADR-0002 הוא היסטורי ו־`superseded`. ‏ADR-0007 הוא מקור האמת
+ל־Repository PUBLIC ול־License hold.
+
+1.6 אין לפתוח Repository כפול. העברה עתידית ל־Organization תעביר
+את ה־Repository הקיים בלבד. תוכנית העבודה, מודל ההרשאות ותנאי הקבלה נמצאים ב־
+`docs/team-operating-plan.md`.
 
 ## 2. שער CI מקומי
 
@@ -48,6 +76,11 @@ Release ו־Secrets הם unknown/unavailable עד למינוי מפורש.
 
 2.2.4 `verify:release-gate:local` אינו דורש GitHub, ‏Bundle או Secrets
 חיצוניים ולכן נשאר שער פיתוח מקומי דטרמיניסטי.
+
+2.2.5 חוזה Source Control Governance Evidence v3 נבנה עבור Repository
+פרטי ולכן אינו תואם להחלטת PUBLIC הנוכחית. אין לעקוף אותו או להמציא
+Attestation; שער Production נשאר חסום עד חוזה חדש שנבדק מול GitHub
+PUBLIC חי.
 
 2.3 `npm run verify:secret-hygiene` אינו מדפיס Secret, נתיב התאמה,
 Commit פגוע או תוכן קובץ. הוא מחזיר קוד ממצא מוגבל בלבד.
@@ -97,13 +130,20 @@ Backup תקפות.
 4.4 אין Timestamp או מזהה אקראי. אותו מצב מקור מייצר אותו Manifest.
 
 4.5 `npm run release:changelog` יוצר Change Log דטרמיניסטי
-מה־Commit subjects האמיתיים. Subject שאינו עומד בחוזה Conventional
-Commit חוסם את היצירה במקום לייצר תיאור מומצא.
+מה־Commit subjects האמיתיים. Conventional Commits מסווגים לקטגוריה
+המפורשת שלהם; Subject היסטורי תקין שאינו Conventional נשמר כלשונו
+תחת `Other committed changes`. SHA או Subject פגומים עדיין חוסמים
+את היצירה במקום לייצר תיאור מומצא.
 
 4.6 Checklist השחרור המלא נמצא ב־`docs/release-checklist.md`.
 
 4.7 `npm run release:verify-artifacts` מחשב מחדש את שתי הראיות
 מה־Commit, דורש Worktree נקי ונכשל אם Artifact חסר, פגום או ישן.
+
+4.8 `npm run release:rehearse:local` מריץ את כל המסלול המקומי ומוכיח
+ששער Production נכשל סגור כאשר סמכויות ה־Attestation הוסרו במכוון.
+התוצאה היא `local-only`; סדר העבודה המלא נמצא ב־
+`docs/release-operator-runbook.md`.
 
 ## 5. Secrets
 
@@ -112,6 +152,14 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 5.1.1 `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`.
 
 5.1.2 כתובות Clerk הציבוריות.
+
+5.1.3 `APP_PUBLIC_ORIGIN`.
+
+5.1.4 `VERCEL_OIDC_TEAM_SLUG`.
+
+5.1.5 `VERCEL_OIDC_PROJECT_NAME`.
+
+5.1.6 `VERCEL_OIDC_ENVIRONMENT`.
 
 5.2 שמות Secret המחייבים אחסון שרתי, בעלים ו־Rotation:
 
@@ -123,13 +171,17 @@ Commit חוסם את היצירה במקום לייצר תיאור מומצא.
 
 5.2.4 `META_CREDENTIAL_ENCRYPTION_KEY_V1`.
 
+5.2.5 `WHATSAPP_RATE_LIMIT_HMAC_KEY_V1`.
+
+5.2.6 `CONNECT_TRACE_CONTEXT_HMAC_KEY`.
+
 5.3 ערכים ממשיים אינם נשמרים ב־`.env.example`, בקוד, במסמך זה או
 ב־Release Manifest.
 
-5.4 `SECRET_INVENTORY_EVIDENCE_JSON` מגדיר Inventory v1 עבור חמשת
+5.4 `SECRET_INVENTORY_EVIDENCE_JSON` מגדיר Inventory v1 עבור שבעת
 ערכי השרת הרגישים הקיימים ובכל ארבע הסביבות.
 
-5.5 כל אחת מ־20 הרשומות כוללת Secret Fingerprint, ‏Owner
+5.5 כל אחת מ־28 הרשומות כוללת Secret Fingerprint, ‏Owner
 Fingerprint, מועד Rotation אחרון ומועד Rotation הבא. Fingerprint
 של Secret אינו יכול להופיע ביותר מסביבה אחת.
 
@@ -148,10 +200,10 @@ Fingerprint, מועד Rotation אחרון ומועד Rotation הבא. Fingerprin
 6.4 הגדרת המשאבים תושלם דרך ספק Hosting רק לאחר בחירת Repository
 Authority, אישור הסביבות והרשאה מפורשת לפריסה.
 
-6.5 `ENVIRONMENT_ISOLATION_EVIDENCE_JSON` מקבל Evidence v1 קצר־חיים
+6.5 `ENVIRONMENT_ISOLATION_EVIDENCE_JSON` מקבל Evidence v2 קצר־חיים
 שמופק מ־Inventory אמיתי של ספק התשתית.
 
-6.6 ה־Evidence מכיל רק 44 Fingerprints מסוג SHA-256: אחת לכל מחלקת
+6.6 ה־Evidence מכיל רק 52 Fingerprints מסוג SHA-256: אחת לכל מחלקת
 משאב בכל אחת מארבע הסביבות. הוא אינו מכיל Resource ID או Secret.
 
 6.7 Fingerprint משותף, סביבה חסרה, Data Boundary שגוי, Digest שונה,
@@ -160,17 +212,43 @@ Authority, אישור הסביבות והרשאה מפורשת לפריסה.
 6.8 עצם קיום החוזה אינו הוכחת בידוד. שער Production נשאר חסום עד
 להזרקת Evidence שמופק ממשאבים אמיתיים.
 
+6.9 `npm run evidence:cloudflare` דורש Token מסוג Read בלבד וארבעה
+שמות Worker שונים. הוא קורא את ה־Deployment הפעיל, Version bindings,
+Cron triggers ורשימת Queues דרך Endpoints מסוג `GET` בלבד.
+
+6.10 המחולל דורש Deployment יחיד המשרת 100% מהתעבורה, משאבי D1,
+R2, שלושה Queues ושלושה DLQs שונים בכל סביבה, שלושה Rate Limit
+namespaces, Secret binding set ו־Scheduler. Queue ההזמנות וה־DLQ שלו
+כלולים בחוזה v2 ואינם יכולים להיות משותפים עם סביבה אחרת.
+
+6.11 שמות Worker, ‏Resource IDs, ‏Queue names ושמות Secrets משמשים
+רק בזמן האימות. הפלט כולל Fingerprints בלבד ותוקפו 24 שעות.
+
+6.12 ‏ADR-0001 אישר Migration מלא ל־Vercel ול־Railway. חוזי
+ה־Runtime וה־Evidence הקיימים עדיין Cloudflare-specific ולכן אינם
+מוכיחים את יעד ה־Production החדש. Deployment נשאר חסום עד החלפת
+D1, ‏Queues, ‏DLQs, ‏Cron, ‏Rate limits ו־Deployment evidence בחוזים
+וב־Adapters תואמי ה־Topology המאושרת.
+
+6.13 אין לשתף Platform token. Tal מתחבר באמצעות Membership אישי
+ו־Least privilege; Secrets יוזנו רק ל־Secret store של סביבת היעד
+ולעולם לא לצ׳אט, למסמך או ל־Git.
+
 ## 7. Source Control Governance Evidence
 
-7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v2
+7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v3
 קצר־חיים שמופק מ־Repository אמיתי לאחר הגדרת Remote.
 
 7.2 ה־Evidence דורש תשעה Pull Request Status Checks: שמונת שערי
 האיכות המקומיים ו־Dependency Audit.
 
-7.3 ה־Evidence מאשר Branch Protection, ‏CODEOWNERS Review, ביטול
+7.3 חוזה v3 ההיסטורי מאשר שה־Repository הוא Private, וכן Branch
+Protection, ‏CODEOWNERS Review, ביטול
 אישורים ישנים, פתרון שיחות Review, חסימת Force Push ומחיקת Branch,
 ‏Secret Scanning ו־Push Protection.
+
+7.3.1 דרישת Private זו אינה מדיניות פעילה לאחר ADR-0007. לכן v3 אינו
+כשיר לפתוח Gate עבור Connect במצב PUBLIC.
 
 7.4 נדרש Reviewer אחד לפחות. `releaseCommitSha` חייב להתאים בדיוק
 ל־`APP_DEPLOYED_COMMIT_SHA`.
@@ -188,6 +266,27 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 הוא שער Release נפרד, משום שהוא דורש ראיות Runtime שנוצרות רק
 לאחר פריסה. הפרדה זו מונעת מעגל תלות שאינו ניתן להשלמה.
 
+7.9 מחולל v3 הקיים, `npm run evidence:github`, דורש
+`GITHUB_REPOSITORY` מפורש ו־Release
+Manifest הנגזר מ־Worktree נקי. הוא קורא ב־`GET` בלבד את Metadata
+ה־Repository, הגנת Branch ברירת המחדל, Metadata של `CODEOWNERS`
+ו־Check Runs הקשורים ל־Commit המדויק.
+
+7.10 המחולל דורש Metadata עקבי שבו `private=true` ו־
+`visibility=private`, ‏Status Checks במצב Strict, אכיפה גם למנהלים,
+Review מבעל קוד, ביטול אישורים ישנים, פתרון שיחות, חסימת Force Push
+ומחיקת Branch, ‏Secret Scanning ו־Push Protection. חוסר הרשאה או
+Control חסר נכשל סגור ואינו מפיק Evidence חלקי.
+
+7.11 הפלט נשמר ב־`.artifacts/source-control-governance-evidence.json`
+ואינו כולל שם Repository, ‏Branch, ‏URL או זהות בעלים גלויה.
+
+7.12 לפני הפעלת Production יש לבנות ולאמת חוזה v4 עבור Repository
+PUBLIC. החוזה החדש חייב להוכיח לפחות Visibility ציבורי עקבי, הגנת
+`main`, ‏Required Checks, ‏CODEOWNERS/Review כאשר אפשר, Secret scanning,
+Push protection, היעדר Secrets בהיסטוריה ו־License hold. עד אז המצב
+הוא `unknown/unavailable` ו־Gate נשאר חסום.
+
 ## 8. Deployment Provenance Evidence
 
 8.1 `DEPLOYMENT_PROVENANCE_EVIDENCE_JSON` מקבל Evidence v1
@@ -201,6 +300,11 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 ו־`APP_DEPLOYMENT_ARTIFACT_DIGEST` חייבים להתאים בדיוק לראיה.
 
 8.4 הראיה כוללת Artifact Digest ו־Deployment Fingerprint נפרדים.
+
+8.5 מחולל Cloudflare מחשב את Artifact Digest מכל קובצי `dist`, דורש
+ש־Deployment annotation יקשר בדיוק את Release ID, ‏Commit SHA
+ו־Artifact Digest, ואז קושר אותם ל־Deployment ID, ‏Version ID
+ו־script ETag. חוסר התאמה נכשל סגור ואינו מפיק Evidence חלקי.
 היא אינה כוללת כתובת פריסה, מזהה ספק או Credentials.
 
 8.5 Evidence חסר, פג תוקף, ארוך מ־24 שעות, שאינו עבור Production,
@@ -225,6 +329,14 @@ Digest שונה או Commit שאינו תואם חוסם Production.
 
 9.5 CI Execution Evidence אינו כולל לוגים, שמות Repository,
 כתובות Build או Credentials.
+
+9.6 אותו מחולל קורא את ה־Check Runs האחרונים עבור Commit ה־Release,
+דורש בדיוק ריצה מוצלחת ולא־עמומה לכל אחד מתשעת השמות, ומסרב לקבל
+Run כפול, ישן, חלקי או השייך ל־Commit אחר.
+
+9.7 הפלט נשמר ב־`.artifacts/ci-execution-evidence.json`. מזהי Run,
+Check Suite ו־App משמשים רק ליצירת Fingerprint עם הפרדת תחומים ואינם
+נשמרים בפלט הגלוי.
 
 ## 10. Team Invitation Browser Evidence
 
@@ -280,12 +392,17 @@ Bundle קצר־חיים של שישה Auth states לאחר התחברות ידנ
 
 10.14 `npm run verify:team-invitation-browser-evidence-attestation -- --repo "$GITHUB_REPOSITORY"`
 מפעיל `gh attestation verify` על ה־Evidence וה־Bundle ודורש Repository,
-‏Signer Workflow ו־Commit מדויקים וכן GitHub-hosted runner.
+‏Signer Workflow ו־Commit מדויקים וכן GitHub-hosted runner. באותה
+קריאה הוא דורש התאמה byte-for-byte בין הקובץ שאומת לבין
+`TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON`; חתימה תקינה על קובץ אחר
+נכשלת עם `BROWSER_EVIDENCE_ATTESTATION_RUNTIME_MISMATCH`.
 
 10.15 `npm run verify:team-invitation-browser-evidence-file` מאמת
 שמסמך ה־Evidence שהורד מריצת CI הוא קובץ רגיל בבעלות המפעיל, ללא
 Symlink, ‏Hard link או הרשאת כתיבה זרה, ושהוא קצר־חיים ותואם בדיוק
-ל־Release, ‏Commit, ‏Artifact, ‏Origin ו־Policy הנוכחיים.
+ל־Release, ‏Commit, ‏Artifact, ‏Origin ו־Policy הנוכחיים. גם שער זה
+משווה את מלוא מחרוזת ה־Runtime לקובץ המוגן ואינו מחליף אותה זמנית
+בזיכרון לצורך הבדיקה.
 
 10.16 `npm run remove:team-invitation-browser-secret-files -- --confirm-secret-store-transfer --repo "$GITHUB_REPOSITORY"`
 מורשה רק אחרי אישור ההעברה ואימות ה־Attestation וה־Browser Evidence.
@@ -334,3 +451,43 @@ Commit ו־GitHub-hosted runner מדויקים. הוא קורא מחדש את ש
 11.9 המאמת דורש גם זהות מבנית מלאה בין הקובץ החתום לבין
 `DEPENDENCY_AUDIT_EVIDENCE_JSON`. שער Production מפעיל אותו לפני
 Browser Attestation ולפני Production Readiness.
+
+11.10 בנוסף ל־Production Evidence, כל התראת Development dependency
+עוברת Triage נפרד. ממצא בכלי Build או Migration אינו מסומן כמתוקן
+רק מפני ש־`--omit=dev` נקי; יש לתעד Reachability, גרסה מתוקנת, סיכון
+שינוי ותוצאת Build וכלי הפיתוח הרלוונטי. אין להשתמש ב־Override של
+תלות טרנזיטיבית ללא בדיקת תאימות מלאה.
+
+11.11 ב־2026-08-17 הוסר `image-size@2.0.2` מגרף הפיתוח באמצעות
+שדרוג Vinext לגרסה `1.0.0-beta.6` ו־`@vitejs/plugin-rsc` לגרסה
+`0.5.34`. שתי התראות High של Parser DoS אינן קיימות עוד ב־Lockfile.
+ה־Production audit חזר עם אפס ממצאים. שרשרת Moderate של esbuild
+ישן בתוך Drizzle Kit טופלה ב־Override תחום מ־`esbuild@0.18.20`
+ל־`esbuild@0.25.12`, שהיא גם הגרסה המתוקנת שכבר נמצאת בתלות הישירה
+של `drizzle-kit@0.31.10`. ה־Override אושר רק לאחר בדיקת Migration
+ייעודית המתוארת בסעיף הבא.
+
+11.12 `npm run verify:dependency-audit:development` פונה ל־Registry
+הרשמי ונכשל סגור. מעתה הוא מקבל רק אפס ממצאים; כל Package, ‏Node,
+טווח, Severity, ‏Fix או Advisory נכשלים. ה־Lockfile חייב להוכיח
+ש־`image-size` נעדר, שה־Override המדויק קיים ושעותק esbuild בנתיב
+`@esbuild-kit/core-utils` הוא `0.25.12`. שער ה־Migrations מריץ גם
+`drizzle-kit check` וגם `drizzle-kit generate` מבודד אל נתיב זמני
+דטרמיניסטי תחת `.wrangler`, מאמת שנוצרו SQL ו־Journal ומוחק את
+התוצרים. כך נבדקות בפועל גם קריאת ה־Config, טרנספורמציית TypeScript,
+טעינת ה־Schema ויצירת Migration לפני הפקת Evidence החתום.
+
+11.12.1 גם כשל Registry חוסם את השער, אך מוחזר כ־
+`DEVELOPMENT_DEPENDENCY_AUDIT_REGISTRY_FAILED` ולא כ־Advisory לא
+מאושר. ההפרדה אינה מרככת את מדיניות Fail-closed; היא מונעת מהמפעיל
+לטפל בתקלה ברשת כאילו התגלתה פגיעות חדשה.
+
+11.13 ‏Dependabot version updates מוגדרים ב־`.github/dependabot.yml`
+ל־npm בכל יום שני ול־GitHub Actions בכל יום שלישי, בשעה 06:00 לפי
+`Asia/Jerusalem`. עדכוני Minor/Patch מקובצים בנפרד עבור תלויות
+Production, תלויות Development ו־Actions; עדכוני Major נשארים PR
+נפרד כדי לא לערב שינויים שוברים. אין `ignore`, ‏Registry פרטי,
+Target branch חלופי או External code execution. מספר PRs פתוחים
+מוגבל, וכל Action ב־Workflows נשאר מוצמד ל־Commit SHA מלא. בדיקת
+חוזה מקומית נכשלת אם אחד מהגבולות האלה נחלש. Security updates נשארים
+מחוץ לקבוצות ה־Version כדי שלא לעכב טיפול דחוף.

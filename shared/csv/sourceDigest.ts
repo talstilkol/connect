@@ -4,11 +4,20 @@ function toHex(bytes: Uint8Array): string {
   );
 }
 
+export async function deriveContactImportSourceDigest(
+  sourceBytes: ArrayBuffer,
+): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    sourceBytes,
+  );
+
+  return toHex(new Uint8Array(digest));
+}
+
 export async function deriveCsvSourceDigest(
   csvText: string,
 ): Promise<string> {
   const bytes = new TextEncoder().encode(csvText);
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
-
-  return toHex(new Uint8Array(digest));
+  return deriveContactImportSourceDigest(bytes.buffer);
 }

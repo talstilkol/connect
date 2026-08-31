@@ -1,0 +1,524 @@
+{
+  "adjudicationPlanningInstance": {
+    "acceptanceCredit": 0,
+    "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+    "instance": {
+      "adjudicatorRoot": "5d748e910259aad2176ec46eff9e48d0ed4389da21fa8955d06ade85c26a6d81",
+      "disagreementSetRoot": "072c4e335f8c821488b59d58acb16147a796d3dbc6db9326de1179a5b80ff083",
+      "equalInputCut": true,
+      "scannerAReceiptRoot": "90d518d883374b684a3a809b5f909e2c171b2aab6eb06dcf1fa0759cc8c9b52b",
+      "scannerBReceiptRoot": "e26f4d79686113003efebcef23f2336549ba10c199d68467878cfb6a1c097178",
+      "terminal": "PASS-PLANNING-PROTOCOL-WITNESS"
+    },
+    "instanceId": "PRCV5-SCANNER-ADJUDICATION-PLANNING-INSTANCE",
+    "instanceRoot": "9681ac115428d4ae61220454c9c7f5e5e6a335f1487fa7404ecfadbc31ae93db",
+    "operationalCredit": 0,
+    "schemaId": "PRCV5-SCANNER-ADJUDICATION-V1"
+  },
+  "adjudicationSchema": {
+    "additionalProperties": false,
+    "crossFieldInvariants": [
+      {
+        "args": [
+          {
+            "args": [
+              "/equalInputCut"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              true
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      }
+    ],
+    "disagreementWithoutResolution": "BLOCK",
+    "fields": [
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "scannerAReceiptRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "scannerBReceiptRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "equalInputCut",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Boolean",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "disagreementSetRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "adjudicatorRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "terminal",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "String",
+        "uniqueItems": false
+      }
+    ],
+    "schemaId": "PRCV5-SCANNER-ADJUDICATION-V1",
+    "schemaRoot": "bf1de845f8b8b7b49b54210116127b229df212307d8e3d9237cd38b57c2079ef",
+    "unknownFields": "BLOCK"
+  },
+  "artifactClass": "PLANNING-PUBLIC-INFORMATION-FLOW;NO-SCAN-CLAIM;NO-PERMIT;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-PUBLIC-INFORMATION-FLOW-AND-SCANNER-REGISTRY-2026-08-30",
+  "currentScannerDisposition": "OPERATIONAL-RECEIPTS-MISSING-BLOCKING",
+  "flowEdges": [
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-001",
+      "from": "SOURCE-FROZEN-INPUTS",
+      "ordinal": 1,
+      "relation": "CONTENT-ADDRESSED-REFERENCE",
+      "to": "TRANSFORM-GENERATOR"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-002",
+      "from": "TRANSFORM-GENERATOR",
+      "ordinal": 2,
+      "relation": "EXACT-PACKAGE-BYTE-CUT",
+      "to": "TRANSFORM-SCANNER-A"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-003",
+      "from": "TRANSFORM-GENERATOR",
+      "ordinal": 3,
+      "relation": "EXACT-PACKAGE-BYTE-CUT",
+      "to": "TRANSFORM-SCANNER-B"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-004",
+      "from": "TRANSFORM-SCANNER-A",
+      "ordinal": 4,
+      "relation": "ROOTED-SCAN-RECEIPT",
+      "to": "TRANSFORM-ADJUDICATOR"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-005",
+      "from": "TRANSFORM-SCANNER-B",
+      "ordinal": 5,
+      "relation": "ROOTED-SCAN-RECEIPT",
+      "to": "TRANSFORM-ADJUDICATOR"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-006",
+      "from": "TRANSFORM-ADJUDICATOR",
+      "ordinal": 6,
+      "relation": "PUBLIC-SAFE-ALLOW-ONLY",
+      "to": "STORE-REGULAR-GIT"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-007",
+      "from": "STORE-REGULAR-GIT",
+      "ordinal": 7,
+      "relation": "PUBLIC-PUSH-PERMIT-ONLY",
+      "to": "SINK-PUBLIC-REPOSITORY"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-008",
+      "from": "SOURCE-PRIVATE-EVIDENCE",
+      "ordinal": 8,
+      "relation": "NO-PUBLIC-PROJECTION-WITH-EQUALITY-ORACLE",
+      "to": "SINK-PRIVATE-CUSTODY"
+    },
+    {
+      "edgeId": "PRCV5-FLOW-EDGE-009",
+      "from": "TRANSFORM-GENERATOR",
+      "ordinal": 9,
+      "relation": "SELECTED-CONTRACT-ONLY",
+      "to": "STORE-EXTERNAL"
+    }
+  ],
+  "flowNodes": [
+    {
+      "nodeClass": "SOURCE",
+      "nodeId": "SOURCE-FROZEN-INPUTS",
+      "ordinal": 1,
+      "state": "PUBLIC-SAFE-CLASSIFIED-REFERENCES"
+    },
+    {
+      "nodeClass": "SOURCE",
+      "nodeId": "SOURCE-PRIVATE-EVIDENCE",
+      "ordinal": 2,
+      "state": "PRIVATE-NOT-IN-PUBLIC-GIT"
+    },
+    {
+      "nodeClass": "TRANSFORM",
+      "nodeId": "TRANSFORM-GENERATOR",
+      "ordinal": 3,
+      "state": "DETERMINISTIC"
+    },
+    {
+      "nodeClass": "TRANSFORM",
+      "nodeId": "TRANSFORM-SCANNER-A",
+      "ordinal": 4,
+      "state": "INDEPENDENT-SCANNER"
+    },
+    {
+      "nodeClass": "TRANSFORM",
+      "nodeId": "TRANSFORM-SCANNER-B",
+      "ordinal": 5,
+      "state": "INDEPENDENT-SCANNER"
+    },
+    {
+      "nodeClass": "TRANSFORM",
+      "nodeId": "TRANSFORM-ADJUDICATOR",
+      "ordinal": 6,
+      "state": "INDEPENDENT-ADJUDICATION"
+    },
+    {
+      "nodeClass": "STORE",
+      "nodeId": "STORE-REGULAR-GIT",
+      "ordinal": 7,
+      "state": "PUBLIC"
+    },
+    {
+      "nodeClass": "STORE",
+      "nodeId": "STORE-EXTERNAL",
+      "ordinal": 8,
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "nodeClass": "SINK",
+      "nodeId": "SINK-PUBLIC-REPOSITORY",
+      "ordinal": 9,
+      "state": "PUBLIC"
+    },
+    {
+      "nodeClass": "SINK",
+      "nodeId": "SINK-PRIVATE-CUSTODY",
+      "ordinal": 10,
+      "state": "PRIVATE"
+    }
+  ],
+  "privateEvidencePolicy": {
+    "permittedPublicProjection": "APPROVED-NON-GUESSABLE-AGGREGATE-ONLY",
+    "privateValidationMechanism": "MISSING-SECURITY-DECISION-BLOCKING",
+    "publicCredential": "PROHIBITED",
+    "publicCustomerData": "PROHIBITED",
+    "publicLowEntropyCoordinateDigest": "PROHIBITED",
+    "publicPii": "PROHIBITED",
+    "publicPrivateLocator": "PROHIBITED",
+    "publicSecretValue": "PROHIBITED"
+  },
+  "publicFlowRegistryRoot": "d0e65750d9eef8c90d4f1dfdd71c4ab055608c7b50289a680fe40d29c25dcab6",
+  "publicPermitCredit": 0,
+  "scannerPlanningReceipts": [
+    {
+      "acceptanceCredit": 0,
+      "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+      "instance": {
+        "classCoverageRoot": "846499e3ed2bf8c07bb4c67aacd667e4aebf3637b3d80ab32ac09272b38331e8",
+        "engineRoot": "196a72665034586194a8542abb58f567e19502ad7a390d706c13057be072dea9",
+        "expiresAt": "2026-08-31T00:00:00Z",
+        "findingSetRoot": "34d7dc9397e889a2001aa1cd78c154cdd2cafc8d08549d5246de09c4d1f8df43",
+        "implementationRoot": "de6e1bff608746cd5aac4f07d1d4e28af41a18eefe683d50fcbec5cd2266dbd5",
+        "inputCutRoot": "792aad756fd108b86b205ebcc7e62734b584e2671619876c19ecac43f08f0028",
+        "issuedAt": "2026-08-30T00:00:00Z",
+        "providerPatternCoverageRoot": "ee3f1faf5263a66798d9457921b96f46759513909bba8cfa8b3b5aee2cb98057",
+        "receiptRoot": "966ce0ede73c81de540461fd8934475ac113a1ff5b288b955903a72ab3925aa9",
+        "rulesetRoot": "ce2542a8259f66f3141cc3dee79aa1af7d15813979455b0078b73d58b4de7be8",
+        "scannerId": "PRCV5-SCANNER-A"
+      },
+      "instanceId": "PRCV5-SCANNER-PLANNING-RECEIPT-1",
+      "instanceRoot": "90d518d883374b684a3a809b5f909e2c171b2aab6eb06dcf1fa0759cc8c9b52b",
+      "operationalCredit": 0,
+      "schemaId": "PRCV5-SCANNER-RECEIPT-V1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+      "instance": {
+        "classCoverageRoot": "1ad4447735ea70202d8eaf655ac80ac3a46d76c6c07093a0b2c4853e031408f7",
+        "engineRoot": "70c68e108b77d4a48a6493cd78ad3b9c4612740aaf9d64607d1b9e0b179daeef",
+        "expiresAt": "2026-08-31T00:00:00Z",
+        "findingSetRoot": "d03ba2258d3d8cc3833c2f055a0a70931848ece754d913127ab46277e3648439",
+        "implementationRoot": "7201973b26e7fdcd068190fdbd65df29ba70c6fd17c5ccfd037f5b7f29ac585f",
+        "inputCutRoot": "792aad756fd108b86b205ebcc7e62734b584e2671619876c19ecac43f08f0028",
+        "issuedAt": "2026-08-30T00:00:00Z",
+        "providerPatternCoverageRoot": "0413e5bf690e9d535e8bb9626dbe8cc1ff0f59f4da89f18933be32834ade00e1",
+        "receiptRoot": "596ca4ebde9c915868e3f675f4883587981b8a7884fb333767a0b54174aa6cc2",
+        "rulesetRoot": "432198ce4f66c638b29221065c573a545cfea67c53fda1e672d0678889f2bb0a",
+        "scannerId": "PRCV5-SCANNER-B"
+      },
+      "instanceId": "PRCV5-SCANNER-PLANNING-RECEIPT-2",
+      "instanceRoot": "e26f4d79686113003efebcef23f2336549ba10c199d68467878cfb6a1c097178",
+      "operationalCredit": 0,
+      "schemaId": "PRCV5-SCANNER-RECEIPT-V1"
+    }
+  ],
+  "scannerProfiles": [
+    {
+      "authorityOwnerRoot": "4f48ecb6372d48b9fff105318513fe9bdeec259256c0952d33e4292f301687e4",
+      "engineRoot": "196a72665034586194a8542abb58f567e19502ad7a390d706c13057be072dea9",
+      "exactByteCutBinding": "RESOLVE-PACKAGE-CONTENT-ROOT-FROM-FROZEN-MANIFEST",
+      "implementationRoot": "de6e1bff608746cd5aac4f07d1d4e28af41a18eefe683d50fcbec5cd2266dbd5",
+      "ledgerRoot": "8922d65512c4262cd97ed5fb47276cf5f9209463cea5a88b4987591777d4a567",
+      "operationalCredit": 0,
+      "profileRoot": "d54c2b1d4b142f6382702017d3718d6d0966558a3d0badf9ae103e70e22df5fb",
+      "receiptRoot": null,
+      "receiptState": "MISSING-BLOCKING",
+      "rulesetRoot": "ce2542a8259f66f3141cc3dee79aa1af7d15813979455b0078b73d58b4de7be8",
+      "scannerId": "PRCV5-SCANNER-A",
+      "workReceiptRoot": "44275782a52705943495eb415339e0724cc06e60b3ae6e9c2c517bee16d8382c"
+    },
+    {
+      "authorityOwnerRoot": "31b2edad921c3baec52930de8cb71bd0116654e5ea1da4e1291c8a97d2354334",
+      "engineRoot": "70c68e108b77d4a48a6493cd78ad3b9c4612740aaf9d64607d1b9e0b179daeef",
+      "exactByteCutBinding": "RESOLVE-PACKAGE-CONTENT-ROOT-FROM-FROZEN-MANIFEST",
+      "implementationRoot": "7201973b26e7fdcd068190fdbd65df29ba70c6fd17c5ccfd037f5b7f29ac585f",
+      "ledgerRoot": "e9cd181fe3d99be86a1cd341a0bd2b04b9ced63cf1dcc56dd26cfaa3708e77b9",
+      "operationalCredit": 0,
+      "profileRoot": "b57dce48d422431ef729557b818b314c35cbff1973a4250a8d86691d868ce029",
+      "receiptRoot": null,
+      "receiptState": "MISSING-BLOCKING",
+      "rulesetRoot": "432198ce4f66c638b29221065c573a545cfea67c53fda1e672d0678889f2bb0a",
+      "scannerId": "PRCV5-SCANNER-B",
+      "workReceiptRoot": "922fa2fa85e000ff54b0481b1e51d9f07920101fc85d329f64a888fa3238c43d"
+    },
+    {
+      "authorityOwnerRoot": "5d748e910259aad2176ec46eff9e48d0ed4389da21fa8955d06ade85c26a6d81",
+      "engineRoot": "30a930ec69f5ed4be06a454283572bd5e2a23c05daa3f410f6faaed505009899",
+      "exactByteCutBinding": "RESOLVE-PACKAGE-CONTENT-ROOT-FROM-FROZEN-MANIFEST",
+      "implementationRoot": "6c16a7d29478b520a2e2486631366c187f9e6989effa849c0d6b000674c4c8df",
+      "ledgerRoot": "9d5ac6aed7232bb3f3928f99d596e0402b81cfc52f600977fd49f47bf5afa007",
+      "operationalCredit": 0,
+      "profileRoot": "9af5aba443d626a398661b7dece5eec5c0d5fd3a2ca4a74d4eee0f7521bc1936",
+      "receiptRoot": null,
+      "receiptState": "MISSING-BLOCKING",
+      "rulesetRoot": "9f0fc69463cef28610003e4d373f1be2f44a73ff1f5ead8daacca91b8a8e1023",
+      "scannerId": "PRCV5-SCANNER-ADJUDICATOR",
+      "workReceiptRoot": "ea5f493a3e0b3723c3aaf2270c318dc318293e9e7285ab4bafe92f5ea4365e32"
+    }
+  ],
+  "scannerReceiptSchema": {
+    "additionalProperties": false,
+    "crossFieldInvariants": [],
+    "fields": [
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "scannerId",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Id",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "implementationRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "engineRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "rulesetRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "inputCutRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "classCoverageRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "providerPatternCoverageRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "findingSetRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "issuedAt",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Rfc3339Utc",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "expiresAt",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Rfc3339Utc",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "receiptRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      }
+    ],
+    "schemaId": "PRCV5-SCANNER-RECEIPT-V1",
+    "schemaRoot": "92d6608af796b9f24c19ebe8ce24a46aaeaf6f21654bd5e0ffaf03417ba10276",
+    "unknownFields": "BLOCK"
+  },
+  "scannerSeparation": {
+    "dimensions": [
+      {
+        "dimension": "engineRoot",
+        "distinctCount": 3,
+        "requiredDistinctCount": 3
+      },
+      {
+        "dimension": "rulesetRoot",
+        "distinctCount": 3,
+        "requiredDistinctCount": 3
+      },
+      {
+        "dimension": "implementationRoot",
+        "distinctCount": 3,
+        "requiredDistinctCount": 3
+      },
+      {
+        "dimension": "workReceiptRoot",
+        "distinctCount": 3,
+        "requiredDistinctCount": 3
+      },
+      {
+        "dimension": "ledgerRoot",
+        "distinctCount": 3,
+        "requiredDistinctCount": 3
+      },
+      {
+        "dimension": "authorityOwnerRoot",
+        "distinctCount": 3,
+        "requiredDistinctCount": 3
+      }
+    ],
+    "disagreementTerminal": "BLOCKED-PENDING-INDEPENDENT-ADJUDICATION",
+    "exactInputCut": "IDENTICAL-PACKAGE-CONTENT-ROOT"
+  },
+  "schemaVersion": "PRCV5-PUBLIC-FLOW-SCANNER-V1",
+  "visibilityContract": {
+    "continuousReceiptState": "MISSING-BLOCKING",
+    "frozenObservation": {
+      "isPrivate": false,
+      "observedDate": "2026-08-30",
+      "receiptClass": "POINT-IN-TIME-OBSERVATION-NOT-CONTINUOUS-RECEIPT",
+      "repositoryLogicalId": "github.com/talstilkol/connect",
+      "visibility": "PUBLIC"
+    },
+    "invariant": "PUBLIC-AT-EVERY-STATE",
+    "postOperationTrustedReceipt": "MISSING-BLOCKING",
+    "preOperationTrustedReceipt": "MISSING-BLOCKING",
+    "privateTransitionTerminal": "BLOCK",
+    "repositoryLogicalId": "github.com/talstilkol/connect"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "artifactClass": "DETERMINISTIC-PROTOCOL-MUTATION-CORPUS-NO-BUSINESS-DATA",
+  "artifactId": "CONNECT-B0-V8-MUTATION-CORPUS-2026-08-30-G0",
+  "blockedCount": 14,
+  "caseCount": 14,
+  "cases": [
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F001",
+      "mutationId": "B0V8-MUTATION-001",
+      "ordinal": 1,
+      "target": "CLOSED-SCHEMA-METADATA",
+      "testRoot": "bfeafac722994c31a484ad05423c1304852ea3258da4c7fd13de9f079c460843"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F002",
+      "mutationId": "B0V8-MUTATION-002",
+      "ordinal": 2,
+      "target": "DETACHED-ACCEPTANCE-CONTEXT",
+      "testRoot": "747fb0e4254cd8a67f4d75e318e90e9504384a2627a2f0cd5921d5365cb87f2c"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F003",
+      "mutationId": "B0V8-MUTATION-003",
+      "ordinal": 3,
+      "target": "SIGNATURE-RECEIPT-SCHEMA",
+      "testRoot": "0f0e78480c0872e7b04cc86de2dd4f714734cb2cdf00434dfb10d2841afedb45"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F004",
+      "mutationId": "B0V8-MUTATION-004",
+      "ordinal": 4,
+      "target": "KEYED-REPLAY-LEDGER",
+      "testRoot": "90705ad11e24fbe01dd5df21383a07460eb17d6b9051bd7ab296a15753113e5a"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F005",
+      "mutationId": "B0V8-MUTATION-005",
+      "ordinal": 5,
+      "target": "ATOMIC-CAS-WRITE-SET",
+      "testRoot": "f02bfe1ac468679996f0e712379bd4bef598e4f52e867e790dbb7444b3d6774a"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F006",
+      "mutationId": "B0V8-MUTATION-006",
+      "ordinal": 6,
+      "target": "RECOVERY-CONTROLLER-SEPARATION",
+      "testRoot": "5b65e073fa3e93b5f234c487475ec11882eba53e0635a9452b6a6dd5f1a7484c"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F007",
+      "mutationId": "B0V8-MUTATION-007",
+      "ordinal": 7,
+      "target": "RECOVERY-READ-SET-REVALIDATION",
+      "testRoot": "d798d06001f4c4df2158706a94873386d7bc8c8b00c2a75c378cc9caec23cb2b"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F008",
+      "mutationId": "B0V8-MUTATION-008",
+      "ordinal": 8,
+      "target": "GLOBAL-CAUSAL-CONJUNCTION",
+      "testRoot": "eba63ac2a1d76dee5ad45e0a25b1296008c1148290f7db18cf1bc343d57e1e54"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F009",
+      "mutationId": "B0V8-MUTATION-009",
+      "ordinal": 9,
+      "target": "INTERFACE-PROVENANCE-POLICY",
+      "testRoot": "a6cb30f982013ebbe943d85e34ed8ecd23e044615a23f0c72bffcc8e22c6188a"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F010",
+      "mutationId": "B0V8-MUTATION-010",
+      "ordinal": 10,
+      "target": "READER-CONTROLLER-INDEPENDENCE",
+      "testRoot": "f2917ad50cc5911a49e0145ec4872487aceace79af906b7d51dbbdc5403c83a6"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F011",
+      "mutationId": "B0V8-MUTATION-011",
+      "ordinal": 11,
+      "target": "REPOSITORY-PATH-CONFINEMENT",
+      "testRoot": "33b787479f3677759be0f14e45f065aa3c6400f46ea0fd87f7d7e76a456a73d6"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F012",
+      "mutationId": "B0V8-MUTATION-012",
+      "ordinal": 12,
+      "target": "AUTHENTICATED-PUBLIC-REMOTE-RECEIPT",
+      "testRoot": "c4457967c0ed7c9aca7f7b6722135b7d54d43eda167ff474fe842f0e6c8b3e90"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F013",
+      "mutationId": "B0V8-MUTATION-013",
+      "ordinal": 13,
+      "target": "PACKAGE-INVENTORY-UNIQUENESS",
+      "testRoot": "4555b68e604f2b10d107fbfd12135b441e6463e0cea8f642dea0dd20daeb080b"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "B0V7-IHR-F014",
+      "mutationId": "B0V8-MUTATION-014",
+      "ordinal": 14,
+      "target": "PREDECESSOR-BEHAVIOR-ORACLE",
+      "testRoot": "e2c233f4e2632c12be9451061612bede61094528f451c590a87f6358ee4dfb7b"
+    }
+  ],
+  "corpusRoot": "22e9dc0b37b988cfdf4acff89840251ef2fe1489032424f23132b6027df72bf1",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-B0-V8-MUTATION-CORPUS-V1"
+}

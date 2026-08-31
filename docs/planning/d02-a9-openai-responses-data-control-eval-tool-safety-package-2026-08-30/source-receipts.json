@@ -1,0 +1,622 @@
+{
+  "artifactId": "CONNECT-D02-A9-DETACHED-OFFICIAL-SOURCE-RECEIPTS-2026-08-30",
+  "receiptVersion": "1.0.0",
+  "sourceCut": "2026-08-30T02:15:04Z",
+  "receiptCount": 11,
+  "officialDomainEscapeCount": 0,
+  "publishedPageByteCount": 0,
+  "acceptedCount": 0,
+  "sourceObservationRoot": "5d2ced7611fb4975715037a0e7261bedfd0454b8b8c882f3e48b638f0dc81ef2",
+  "receipts": [
+    {
+      "ordinal": 1,
+      "receiptId": "D02A9-SRC-001",
+      "sourceId": "OPENAI-DATA-CONTROLS",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/your-data",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/your-data",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 578275,
+        "etag": "\"b22de3d01fc4e9fb63e12c878db56dfb\"",
+        "lastModified": "Sat, 29 Aug 2026 10:10:43 GMT",
+        "rawResponseSha256": "55d7042bb6c639a66fa6b25751ccb5ba34d3c8f86f90d36c22e3a4c9d454f0bb"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 55747,
+        "normalizedTextSha256": "d75db424e5b926db3a1fdb60c81a1e49861c6a9adea36aa88c43650ee68681de",
+        "claimCodes": [
+          "TRAINING-OPT-IN-DISTINCT",
+          "DEFAULT-ABUSE-RETENTION",
+          "ZDR-MAM-APPROVAL",
+          "APPLICATION-STATE-EXCEPTIONS",
+          "PROMPT-CACHE-EXCEPTIONS",
+          "RESIDENCY-CAPABILITY-SPECIFIC"
+        ],
+        "claimLocators": [
+          "Types of data stored with the OpenAI API",
+          "Zero Data Retention",
+          "Storage requirements and retention controls per endpoint",
+          "Data residency controls"
+        ],
+        "locatorCommitment": "40c7792ec2479f4769176cdb7820ba8dbd7299ebf7c7f16ba1d9538bfcb4f078",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "21d49d8f56470ea924ca1485264befa183abde5eb3c220ccbec00a8acf3a47ec"
+    },
+    {
+      "ordinal": 2,
+      "receiptId": "D02A9-SRC-002",
+      "sourceId": "OPENAI-RESPONSES-CREATE",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/reference/cli/resources/responses/methods/create",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/reference/cli/resources/responses/methods/create",
+        "contentType": "text/html",
+        "contentLength": 583000,
+        "etag": "UNAVAILABLE",
+        "lastModified": "UNAVAILABLE",
+        "rawResponseSha256": "2a9eb0fc8b15c52a800ecc4c3da264ffef3c00d0ea41b6cdce4110222cdc8751"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 32996,
+        "normalizedTextSha256": "5653f2a85af5b45fd0c3dd0d4d2e0562228a09e42159ce2c043bd322bfb651c0",
+        "claimCodes": [
+          "RESPONSES-STORE-DIMENSION",
+          "TOOLS-DIMENSION",
+          "PROMPT-OBJECT-FIELD-EXISTS",
+          "PROMPT-CACHE-OPTIONS-DIMENSION"
+        ],
+        "claimLocators": [
+          "Create a model response",
+          "tools",
+          "tool_choice",
+          "store"
+        ],
+        "locatorCommitment": "d19bef823904e02c8c9485e759c160ddc4e744663dfd3220219f2830af77fdd2",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "479a27349fee01c28a4149180ea8435752af2b0f82d313aa2513f20cdadf329e"
+    },
+    {
+      "ordinal": 3,
+      "receiptId": "D02A9-SRC-003",
+      "sourceId": "OPENAI-FUNCTION-CALLING",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/function-calling",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/function-calling",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 1396451,
+        "etag": "\"61ddd1738c88d0d2d24b30bc393f26f9\"",
+        "lastModified": "Sat, 29 Aug 2026 10:10:42 GMT",
+        "rawResponseSha256": "fdf927d118c75014aa38eb6a3218c408e35803f05219c97a6415cea047c78f0e"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 108677,
+        "normalizedTextSha256": "4c0acb9215c9244b0f4fe030f4129a1cc0e62ff432859d8d0cdc8f684fd8fdba",
+        "claimCodes": [
+          "TOOL-CAPABILITY-NOT-BUSINESS-AUTHORITY"
+        ],
+        "claimLocators": [
+          "Function calling",
+          "Handling function calls",
+          "Strict mode"
+        ],
+        "locatorCommitment": "e7818caf9e51d1dc7210c19b98720325bef067de2af62c14ca6b0c3127c95909",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "27426ca46a1d773c054580bb3e8f5d09eed40b3966267b3aec8bb7c3644c2bf2"
+    },
+    {
+      "ordinal": 4,
+      "receiptId": "D02A9-SRC-004",
+      "sourceId": "OPENAI-MCP-CONNECTORS",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/tools-connectors-mcp",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/tools-connectors-mcp",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 750877,
+        "etag": "\"45b099e286257979198540dc4516d2b4\"",
+        "lastModified": "Sat, 29 Aug 2026 10:08:11 GMT",
+        "rawResponseSha256": "0d3150a69779294f24b089ff92b99c007394c2783e6ba924abb174c8d671f1cc"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 63649,
+        "normalizedTextSha256": "fd445fd1b8fdfd1989e6a4bf78f4e9bc1a8731b449ef8c00ca7059348d3642cb",
+        "claimCodes": [
+          "THIRD-PARTY-TOOL-DATA-PATH",
+          "APPROVAL-CONTROL-DISTINCT"
+        ],
+        "claimLocators": [
+          "Connectors and MCP servers",
+          "Approvals",
+          "Data sharing"
+        ],
+        "locatorCommitment": "4ac85e52a57e10aa3428af8af5b89749fc912516c303f4de0136d5ebfa4aad52",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "7bbd97604a0a21f86c67321c44930f2f8e6d58d5c8fbe52f358029afc0314afa"
+    },
+    {
+      "ordinal": 5,
+      "receiptId": "D02A9-SRC-005",
+      "sourceId": "OPENAI-SAFETY-BEST-PRACTICES",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/safety-best-practices",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/safety-best-practices",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 381472,
+        "etag": "\"6ca7a527691550fd601e24e54d3e9880\"",
+        "lastModified": "Sat, 29 Aug 2026 10:25:24 GMT",
+        "rawResponseSha256": "5c4232a4334095cc31741d86be33b16003efcee08c71c2a49541604a3fe27427"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 19157,
+        "normalizedTextSha256": "0fa969982e548642d8b0ade4010dd52fe2426975af3efdb3eb00c57a7e083411",
+        "claimCodes": [
+          "MODERATION-ADVERSARIAL-HUMAN-REVIEW-DISTINCT"
+        ],
+        "claimLocators": [
+          "Safety best practices",
+          "Moderation",
+          "Human in the loop"
+        ],
+        "locatorCommitment": "70e58e8b1f6de5987bdc79a5f266758d701d1fbff710125dc8a6c89835adf05d",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "d2c7d226cfa14bbc5e3db7baeda077abab26e26408610dce5b7cc7250794b6ae"
+    },
+    {
+      "ordinal": 6,
+      "receiptId": "D02A9-SRC-006",
+      "sourceId": "OPENAI-RED-TEAMING",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/red-teaming",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/red-teaming",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 326469,
+        "etag": "\"10e3c0ee00787477e611264ad3ed48ee\"",
+        "lastModified": "Sat, 29 Aug 2026 10:36:33 GMT",
+        "rawResponseSha256": "ff2a59a063bf97ae664a50d4277e46e544480708fdda84fa375c604b81c9e0fa"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 12378,
+        "normalizedTextSha256": "979f7287b2685698d1725f70eb26d1a1a3681acad186cbc2df9ab2eb7a5762b7",
+        "claimCodes": [
+          "RED-TEAMING-COMPLEMENTS-EVALS"
+        ],
+        "claimLocators": [
+          "Red teaming",
+          "Test broadly"
+        ],
+        "locatorCommitment": "f8282c5ce2e9a24d61f0934eddd3f8d79323593f3e537ab8f674d8b02f683b72",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "24e600708f29bafe00ed4b21055785b90ec34b269cab0306c969745b44233b7d"
+    },
+    {
+      "ordinal": 7,
+      "receiptId": "D02A9-SRC-007",
+      "sourceId": "OPENAI-RBAC",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/rbac",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/rbac",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 352730,
+        "etag": "\"cfc7b96e3b8c410962a80d197ae34500\"",
+        "lastModified": "Sat, 29 Aug 2026 11:01:43 GMT",
+        "rawResponseSha256": "d5f7b7b79dadef258182f6a417c7d3dcbb8fdb8b0b16b00a18d36f0a19af88b3"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 18956,
+        "normalizedTextSha256": "50f714849456c2ff9ef727afddd4938b647f37634ab68ea02a2290870f7bcb1d",
+        "claimCodes": [
+          "ORGANIZATION-AND-PROJECT-PERMISSIONS-DISTINCT"
+        ],
+        "claimLocators": [
+          "Role-based access control",
+          "Organization roles",
+          "Project roles"
+        ],
+        "locatorCommitment": "3ec564cffc78a7fc26c941d897d81f53d6f1c7f96b34ae4fceba36ed8ef53dab",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "145c854ce5b4f345e5eb52deb22f378b00ba37d095f5f4e4f310d36d417b7625"
+    },
+    {
+      "ordinal": 8,
+      "receiptId": "D02A9-SRC-008",
+      "sourceId": "OPENAI-EVALUATION-BEST-PRACTICES",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 399626,
+        "etag": "\"f5da64b1803521db422ff0751d46a7a0\"",
+        "lastModified": "Sat, 29 Aug 2026 10:44:02 GMT",
+        "rawResponseSha256": "8203ebb773e2da72ebb229c8a0b71bc1874d03587b8c862039cd2e12879454c8"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 30924,
+        "normalizedTextSha256": "ce30ecbee20acbd0bf03bcc53bcf1183a7d57335b44bfb49860b33f2fd37e738",
+        "claimCodes": [
+          "REPRESENTATIVE-CASES",
+          "CALIBRATED-HUMAN-JUDGMENT"
+        ],
+        "claimLocators": [
+          "Evaluation best practices",
+          "Design your eval",
+          "Human feedback"
+        ],
+        "locatorCommitment": "6a9ea22f661a592d29658be7eeaadaef0a3ed3fb56da164c6eae9d3b52e2d585",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "159c7561f66a3f377b746f5ebf91889ef16981d932af99b1953b6bec0dedde30"
+    },
+    {
+      "ordinal": 9,
+      "receiptId": "D02A9-SRC-009",
+      "sourceId": "OPENAI-DEPRECATIONS",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/deprecations",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/deprecations",
+        "contentType": "text/html; charset=utf-8",
+        "contentLength": 449120,
+        "etag": "\"a6b1db10500031e3beba4008cb5f54f2\"",
+        "lastModified": "Sat, 29 Aug 2026 10:06:59 GMT",
+        "rawResponseSha256": "107bd758ea4f64214bab5cfa135c802d5439f89f1451cead155bbd2ffc90c3e5"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 33900,
+        "normalizedTextSha256": "5665136331cc7f9f6349bb067c8705ff88c21c078377871aa78b594d048b90f6",
+        "claimCodes": [
+          "HOSTED-EVALS-2026-SHUTDOWN",
+          "REUSABLE-PROMPTS-2026-SHUTDOWN",
+          "PROMPT-CONTENT-MOVE-TO-APPLICATION"
+        ],
+        "claimLocators": [
+          "Deprecations",
+          "2026-11-30",
+          "Reusable prompts",
+          "Evals"
+        ],
+        "locatorCommitment": "c9a6a2c105a05f9e66240f0d54e51be7c935520433c47cbe1ef3e7724cdd0cf6",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "2ed1bb52d0bf9fdf8d658d7a5bd475318a1db66e331b716f13368e14aec1c9be"
+    },
+    {
+      "ordinal": 10,
+      "receiptId": "D02A9-SRC-010",
+      "sourceId": "OPENAI-MODEL-CATALOG",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/docs/models",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/docs/models",
+        "contentType": "text/html",
+        "contentLength": 353867,
+        "etag": "UNAVAILABLE",
+        "lastModified": "UNAVAILABLE",
+        "rawResponseSha256": "72c9a7c7fe595f2e6dce27744d8c89471b6bdc806994d04fb79304c0f9018072"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 13692,
+        "normalizedTextSha256": "5ad2f9ff78440f430b3cb6cfd72411a556314e0ad1ad9089edf9f87fe7e5d721",
+        "claimCodes": [
+          "MODEL-CATALOG-OBSERVATION-NOT-CONNECT-FITNESS"
+        ],
+        "claimLocators": [
+          "Models",
+          "Featured models"
+        ],
+        "locatorCommitment": "39896ea8b4d31b78464f441da9d95f2c695c776f5db7859670bc8658765e2d73",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "9654e5582104f87572bdbeabddb8a5e62990a3436d670b9ef9a32d97dcfea7e0"
+    },
+    {
+      "ordinal": 11,
+      "receiptId": "D02A9-SRC-011",
+      "sourceId": "OPENAI-RETRIEVE-MODEL",
+      "request": {
+        "method": "GET",
+        "url": "https://developers.openai.com/api/reference/typescript/resources/models/methods/retrieve",
+        "accept": "text/html",
+        "credentialMode": "NONE"
+      },
+      "response": {
+        "status": 200,
+        "resolvedUrl": "https://developers.openai.com/api/reference/typescript/resources/models/methods/retrieve",
+        "contentType": "text/html",
+        "contentLength": 387011,
+        "etag": "UNAVAILABLE",
+        "lastModified": "UNAVAILABLE",
+        "rawResponseSha256": "5869235bb7f54d434436800a0381fec6fee899752534f80f13d91a862520721d"
+      },
+      "observation": {
+        "retrievedAt": "2026-08-30T02:15:04Z",
+        "extractorId": "CONNECT-HTML-TEXT-V1",
+        "normalizedTextBytes": 8992,
+        "normalizedTextSha256": "42f7bcb35aed839e7a706f22b7ba94d8bec90366eb19a1a73efb31bf767956e5",
+        "claimCodes": [
+          "MODEL-ID-OWNER-CREATED-SHUTDOWN-BASIC-READBACK"
+        ],
+        "claimLocators": [
+          "Retrieve model",
+          "id",
+          "owned_by"
+        ],
+        "locatorCommitment": "3b5dacb6e9a049a3f79593bc6a42c7474c5e0728c784eea517b3c807a142c5ec",
+        "pageBytesPublished": false,
+        "disclosureMode": "DIGESTS-METADATA-AND-LOCATORS-ONLY"
+      },
+      "freshness": {
+        "policy": "EXACT-CUT-ONLY-NEW-RETRIEVAL-REQUIRED",
+        "changeDetector": "COMPARE-RAW-AND-NORMALIZED-DIGESTS-USING-CONNECT-HTML-TEXT-V1",
+        "terminals": [
+          "SOURCE-UNAVAILABLE",
+          "SOURCE-STALE",
+          "SOURCE-CHANGED",
+          "SOURCE-CONFLICT"
+        ]
+      },
+      "acceptance": {
+        "state": "OBSERVED-UNACCEPTED",
+        "accepted": false,
+        "acceptanceRoot": "MISSING",
+        "acceptanceCredit": 0
+      },
+      "historicalObservationCommitment": "81cf17fb3b4a62cf9db013e94346351cdaf1c1259f6252e165edeb58c7fd43b2"
+    }
+  ],
+  "offlineReproduction": "RECOMPUTE-EACH-HISTORICAL-COMMITMENT-AND-SET-ROOT-FROM-PUBLISHED-METADATA",
+  "freshRetrievalContract": "FETCH-TO-DETACHED-CAPTURE-THEN-BOTH-READERS-RECOMPUTE-RAW-AND-NORMALIZED-DIGESTS",
+  "residualLimit": "DIGESTS-PROVE-IDENTITY-AND-CHANGE-DETECTION-BUT-NOT-SEMANTIC-TRUTH-OR-ACCEPTANCE"
+}

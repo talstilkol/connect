@@ -3,6 +3,11 @@ import type {
 } from "../../db/systemAdminTenantDirectoryRepository.ts";
 import type {
   SystemAdminTenantDirectoryPage,
+  SystemAdminTenantDirectoryQuery,
+} from "../../shared/domain/systemAdminTenantDirectory.ts";
+import {
+  SYSTEM_ADMIN_SUBSCRIPTION_FILTERS,
+  SYSTEM_ADMIN_TENANT_STATUS_FILTERS,
 } from "../../shared/domain/systemAdminTenantDirectory.ts";
 import type {
   SystemAdminSession,
@@ -32,9 +37,17 @@ function inputError(): never {
   throw new SystemAdminTenantDirectoryInputError();
 }
 
-function parseCursorInput(
+const tenantStatusFilters = new Set<string>(
+  SYSTEM_ADMIN_TENANT_STATUS_FILTERS,
+);
+
+const subscriptionFilters = new Set<string>(
+  SYSTEM_ADMIN_SUBSCRIPTION_FILTERS,
+);
+
+export function normalizeSystemAdminTenantDirectoryInput(
   input: unknown,
-): number | null {
+): SystemAdminTenantDirectoryQuery {
   if (
     typeof input !== "object" ||
     input === null ||
@@ -45,38 +58,74 @@ function parseCursorInput(
     return inputError();
   }
 
-  const keys = Object.keys(input);
+  const keys = Object.keys(input).sort();
 
   if (
-    keys.length !== 1 ||
-    keys[0] !== "afterTenantId"
+    keys.length !== 4 ||
+    keys[0] !== "afterTenantId" ||
+    keys[1] !== "search" ||
+    keys[2] !== "subscription" ||
+    keys[3] !== "tenantStatus"
   ) {
     return inputError();
   }
 
-  const afterTenantId = (
+  const {
+    afterTenantId,
+    search,
+    subscription,
+    tenantStatus,
+  } = (
     input as {
       afterTenantId?: unknown;
+      search?: unknown;
+      subscription?: unknown;
+      tenantStatus?: unknown;
     }
-  ).afterTenantId;
-
-  if (afterTenantId === null) {
-    return null;
-  }
+  );
 
   if (
-    typeof afterTenantId !== "number"
+    typeof search !== "string" ||
+    search.length > 80 ||
+    /[\u0000-\u001f\u007f]/.test(search) ||
+    typeof tenantStatus !== "string" ||
+    !tenantStatusFilters.has(tenantStatus) ||
+    typeof subscription !== "string" ||
+    !subscriptionFilters.has(subscription)
   ) {
     return inputError();
   }
 
-  try {
-    return requirePositiveTenantId(
-      afterTenantId,
-    );
-  } catch {
-    return inputError();
+  let parsedCursor: number | null;
+
+  if (afterTenantId === null) {
+    parsedCursor = null;
+  } else {
+    if (
+      typeof afterTenantId !== "number"
+    ) {
+      return inputError();
+    }
+
+    try {
+      parsedCursor = requirePositiveTenantId(
+        afterTenantId,
+      );
+    } catch {
+      return inputError();
+    }
   }
+
+  return {
+    afterTenantId: parsedCursor,
+    search: search
+      .trim()
+      .toLocaleLowerCase("he-IL"),
+    tenantStatus:
+      tenantStatus as SystemAdminTenantDirectoryQuery["tenantStatus"],
+    subscription:
+      subscription as SystemAdminTenantDirectoryQuery["subscription"],
+  };
 }
 
 export function createSystemAdminTenantDirectoryService(
@@ -101,7 +150,7 @@ export function createSystemAdminTenantDirectoryService(
       }
 
       return repository.listPage(
-        parseCursorInput(input),
+        normalizeSystemAdminTenantDirectoryInput(input),
       );
     },
   };

@@ -1,0 +1,3310 @@
+{
+  "artifactId": "CONNECT-B0-V4-QA-ENGINE-B-REPORT-2026-08-29",
+  "artifactClass": "DETACHED-PRODUCER-MECHANICAL-SEMANTIC-QA-ENGINE-REPORT;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+  "engineSha256": "fed4be4256e2ad5a76603183c2a825808234b024935d21da42078c8128c1ee2e",
+  "inspectedPackageManifestSha256": "8a782b55eb92768288a5f1d64e04f76869c4af739e1e2f997a257c34c65709ad",
+  "status": "PASS-CANDIDATE-MECHANICAL-ONLY",
+  "denominators": {
+    "requirements": "84/84",
+    "fields": "420/420",
+    "outputs": "84/84",
+    "vectorSpecifications": "252/252",
+    "vectorFixtures": "252/252",
+    "planningDslExecutionReceipts": "252/252",
+    "operationalExecutionReceipts": "0/252",
+    "v3FindingsCandidateDeltas": "13/13",
+    "v3FindingsIndependentlyClosed": "0/13",
+    "v3RequirementsPreserved": "70/70",
+    "v2RequirementsPreserved": "49/49",
+    "originalRequirementsPreserved": "27/27",
+    "legacyFindingsPreserved": "22/22",
+    "v2ReviewFindingsPreserved": "21/21",
+    "acceptedRequirements": "0/84",
+    "implementedOutputs": "0/84"
+  },
+  "failures": [],
+  "planningDslReceipts": [
+    {
+      "vectorId": "B0V4-V-000-A",
+      "fixtureRoot": "c5203a6892bda60fa11247666c39cd5c6a2a1a316bba3ce55e67fead921fd841",
+      "programRoot": "8a17ca14a98d9ef5350f1e619b495794ace200fb70a9f35a7f04c74d5b70a161",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FINALIZE-COMMITTED-UNCONFIRMED-THEN-RECONCILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "abd26f7bc08a660f62004e91f91b1ae625505f42a0f4235ab3992b62dfee8fa9"
+    },
+    {
+      "vectorId": "B0V4-V-000-B",
+      "fixtureRoot": "973fecd33d70b58721ac13a33a7a176107eefe89623c7234537f14a9f1d25d8e",
+      "programRoot": "25cafb09244714a7ae7bce8786496385c12875511cd2fe8d5f0b881ed5f5d502",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TREAT-UNCERTAIN-AS-IMMUTABLE-FINALRESULT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e555e759f892754da560b2408a35826140a0d05115db2740d8fa6b40c969acd4"
+    },
+    {
+      "vectorId": "B0V4-V-000-C",
+      "fixtureRoot": "cba67e1bd7a23b2c6609517f4176c393f1b9f2fd5f7d0b64d4ce5784082e4431",
+      "programRoot": "56283fb2f20c4f008378917f37ee43676be25d8ed769cfed5c8be91e29686adb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TWO-REDUCERS-SELECT-OLD-AND-NEW-LIFECYCLE-INTERPRETATIONS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a8ce18d4fc16f22f877c52440905d05095e267da269887f38ff825788de12f9f"
+    },
+    {
+      "vectorId": "B0V4-V-001-A",
+      "fixtureRoot": "2ca77bf00fee9694f650f381f5c6dcbbfdddbbd6841a00873c11cfdfcbb68454",
+      "programRoot": "f2018d7da5dba8daf4fe5f381c5f908d9895ec606c3c286f4c4859362a351607",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AUTHORITATIVE-SOURCE-IDENTITY-USES-ABSOLUTE-MACHINE-LOCAL-PATH-KIND",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e69ef0bf5f93e73d573c2e6114e09ca8dc12ddff659f881ad6e948a60f206702"
+    },
+    {
+      "vectorId": "B0V4-V-001-B",
+      "fixtureRoot": "411069af084191e7d30caf7fefb3ac8e83152dbec7272a44f047c1197a6a86d8",
+      "programRoot": "12f41f2b57eacf3f82596981b4a4bf53885a5cea9df357455ac9e586dc95ea39",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-REPOSITORY-RELATIVE-IDENTITY-RESOLVES-DIFFERENT-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "715d0f27ef163f16133c0890aacb0ff82bed9b4a2cfeba3e3635da281be0b097"
+    },
+    {
+      "vectorId": "B0V4-V-001-C",
+      "fixtureRoot": "616f8a504928ea9a714ae117e0122d603b85259fac502660f9e07570b7b08a92",
+      "programRoot": "28261b24e83d33dfcc8dfbbe6aaf06282ffa2e20c2bf3b8dd6c6d87f7ad91766",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRIVATE-LOCAL-RESOLVER-MAPPING-IS-PROMOTED-TO-AUTHORITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "38589992c86b47c8ea3d6b6b78335343c3bdf5687b9a22ea6a018d00764d4ba7"
+    },
+    {
+      "vectorId": "B0V4-V-002-A",
+      "fixtureRoot": "5ad7acc5f573bc12b8d4495efbdac966b2d29157f4880f401d806db7eb1b4301",
+      "programRoot": "4dfe699cf7438cb45534f1f5219e7c62af6f8a493a90e7094afc9833b8e1189a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G1-INSTANTIATES-OPERATIONALPERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ea237c1e75d460aea08de0205281b88ec40529cc1152e2eceb9417c4c2fc439d"
+    },
+    {
+      "vectorId": "B0V4-V-002-B",
+      "fixtureRoot": "4476afe584e9f81f4061a78449f87de76575a658c38cbfe3a0f6433e803e54c8",
+      "programRoot": "140b51f078226c9f9f1c915d0a16779997c38254e9bdc89996edd6336d3a0de6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G1-SKIPS-THE-PERMIT-REDUCER-BUT-CLAIMS-PARITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "78b6c3b16721af3dee35d75c7255d0a6314f4be7377af43e897989ffb01ae7a5"
+    },
+    {
+      "vectorId": "B0V4-V-002-C",
+      "fixtureRoot": "9a8389ffb2c84cc5456bbfcbd77efa997bbad1e19372978cc1d77640f80cbf97",
+      "programRoot": "abeceb382294d02071336e699a629d9837c654fa17ff0a3742df28989c9171da",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CAPABILITY-SINK-BINDING-IS-REPLACED-BY-EXTERNAL-TARGET-CLASS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ae35fa8aa33121795573f8ec200fc729b508fa0ee75692d291952bc7ca84dce7"
+    },
+    {
+      "vectorId": "B0V4-V-003-A",
+      "fixtureRoot": "2932112d1ac89ad2409464d0f2e1183909735f554f020eb03e17d965788b86e8",
+      "programRoot": "9f72e68c064ebc28779d3308a285a881ac89c126f7eeacb3dbab7ebecbceeec3",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DELETE-ONE-LITERAL-NAMEDUSE-CLASSIFICATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e2c3269259824afd76753b4e4df471f233ecf3a705269a0561a1489c55319fa0"
+    },
+    {
+      "vectorId": "B0V4-V-003-B",
+      "fixtureRoot": "868463ae862239a16e1fa03b514073cb19a8a045c166e20bdf1b2a8c113cd76d",
+      "programRoot": "c42b86ca02a77b9a5532d7a8da833562d2fbeffeeb79d934e826a2f301d7325b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-HIDE-A-FORWARD-NORMATIVE-USE-ONLY-IN-PROSE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "79b40429ba7e0be376f82e08bb06f826d625d92448dc2794ed93cac30fa18607"
+    },
+    {
+      "vectorId": "B0V4-V-003-C",
+      "fixtureRoot": "f13c1d6e25fcc0c371ec1343cbc56ee9639b42005a0196b3e3edf7c1b7f97bc1",
+      "programRoot": "fee42bc849aa2374ac52cbaaba3ac073480ebdcc5e46645cc90add1e53bafb63",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RESTORE-ONE-LEGACY-REVERSE-PAIR-AND-REQUIRE-CYCLE-DETECTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e74ab61aea41723aefb11c94c0f556b9c669e55ceb73067fc1a237f2214c4fcc"
+    },
+    {
+      "vectorId": "B0V4-V-004-A",
+      "fixtureRoot": "48183223cf76830056abeb2a5d6a949218df3c69e301d15c06cb7fe4f01383be",
+      "programRoot": "eb907e7754bb7473fb8fc3436ca9470fd948f4b91b25401abbdeaff3f722b01e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-INITIAL-APPROVER-APPOINTMENT-FROM-GENESISFOUNDATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "00da8eae32385c5f938994466a6ad0f2aee21b88b5720819fe1c3463a31538e5"
+    },
+    {
+      "vectorId": "B0V4-V-004-B",
+      "fixtureRoot": "62cb57da6f757f26540937d0327bb3d6e0405ea09b01cbe4360e0ea32139632d",
+      "programRoot": "881cb8803f12e355e6b49e8d4d370c1fa90fb7003d9ddf86041a23338830471d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-EXPECTED-EMPTY-GENESISLEDGER-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8c9c0bbc19e2508a10cdbd65434e7dd3ea4cf06f9fc9d7374848f8a8d2064f7d"
+    },
+    {
+      "vectorId": "B0V4-V-004-C",
+      "fixtureRoot": "b94f0a63d6608fc87175a7a24a99d45fec89b5748fe9cfadd876be6bf411f6d2",
+      "programRoot": "b3bfea522d3871f7d90a6f42a14a6ea983ac2e3a689ed2b80bada4d562ffd6e8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-USE-LOCAL-DEFAULT-TIME-IN-FIRST-GENESISPERMIT-VALIDATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "11019b5e843db252971a47d9970e03c3f2f38c60f1ba16252e5bfc7edfa845a6"
+    },
+    {
+      "vectorId": "B0V4-V-005-A",
+      "fixtureRoot": "487391474ac3f0c798429071944399933c3e303e52d55268f76cd72f2493f890",
+      "programRoot": "9cae2b2a8546137f6a3aafe24474d6d7082c80d824ed46a5d8de4d45b66f9dbd",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MUTATE-PUBLICDISCLOSUREPOLICY-WITHOUT-ADVANCING-ITS-GENERATED-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d684d1734c503216e0ca1249fbd1f5d99c44743f7d0e4394a6d0e58d8890883f"
+    },
+    {
+      "vectorId": "B0V4-V-005-B",
+      "fixtureRoot": "0327c639f1a287b0c07d430f121b5bc294a881ca1d5ee91e3097b7459f51e5c3",
+      "programRoot": "4dd329394c3b6c1ffc02ff321fef65388fa662571f3542246b4c6cbe5bae2ad8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ROTATE-WITNESSPOLICY-WITHOUT-SECURITYUNIVERSE-ADVANCE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "bbb5945c5457dec4b45b47cd52f9d633c4e3e7acbef6cea4427276ea20bf5f58"
+    },
+    {
+      "vectorId": "B0V4-V-005-C",
+      "fixtureRoot": "849537079746554ebe619c43b966c8a29fb2508ea3f9f6714c8bf10ec5f7dceb",
+      "programRoot": "8d356199867d034cfedbee58f43668186d612afa591c314ddbe46c2d062a0117",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGE-VALIDATORINDEPENDENCEPROFILE-THROUGH-AN-UNMAPPED-CLASS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "54fb4a2ae7db26b7dece31baaa86f6807f94dcc2c75056fb4e8d0160b2b48012"
+    },
+    {
+      "vectorId": "B0V4-V-006-A",
+      "fixtureRoot": "7ac8110a52343c9c04ed901fd8a22214dd7f34237cefa478c0543fe92db73f57",
+      "programRoot": "c99c65a5cadf9656bfbf8aaf2984d40d3b0bd774e6aa04107968b62f383696c4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-APPROVER-FROM-CLOSED-ROLE-UNIVERSE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b2f5eb1f79c87a7d208025feb527dbb95ad24a1bb3dc3288780d8939f71eb320"
+    },
+    {
+      "vectorId": "B0V4-V-006-B",
+      "fixtureRoot": "45e909b13c0311914b8bfa3641853c2e1669a7445e6dbcfbcdbf4c808a0c7757",
+      "programRoot": "1daf1d12b911600fec400902df29e8c3a0c8ce7d027b5105d4584ca6003a1262",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SILENTLY-MAP-AUTHORITYOWNER-TO-APPROVER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "30e8de1ce20a93817eee597b8cb8dc934acbfa4cd16ce36c4813ad27eb184cff"
+    },
+    {
+      "vectorId": "B0V4-V-006-C",
+      "fixtureRoot": "9140ff3d43d967e3c25ca5418da86950b4a3cf623e2eb357e475c3de931639aa",
+      "programRoot": "bdd333e5917d0f96bb4c998b26cdd6f6cfba33531b8fb4d393d07f090911ac19",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHARE-EFFECTIVECONTROLLER-BETWEEN-APPROVER-AND-ACCEPTANCEWRITER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a0fcff53dadbee0215d907cb3c2918edb0cc91069cac1a9d47a73a8c6a0177f7"
+    },
+    {
+      "vectorId": "B0V4-V-007-A",
+      "fixtureRoot": "f82b26f77def2c37aa5c94bf10a854c860eb1b4794f8d43f6bb3a1b8cf2213ed",
+      "programRoot": "d0588cfeacc8af758cc057d17faf2b887e7e50e469efaeff05427835d20ebdb2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ALLOW-TWO-PLAUSIBLE-OPERATIONS-FOR-ONE-VECTOR-IDENTITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "821b688ad39858d2d01dc4ff75c81f397286908b035ff8781caf6f6cd022e128"
+    },
+    {
+      "vectorId": "B0V4-V-007-B",
+      "fixtureRoot": "539ffef15cdfbb5946ecc0729fbbf652bbcf3b74ca767a4994e20a56e995724d",
+      "programRoot": "e51fbc1f99fe1a44e92566c308a191dd5d4fbbbc7f6545a6cd15ad3df2e195c0",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REMOVE-EXACT-PRECONDITION-ROOT-FROM-VECTOR-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "4a7df8234bd05ce48360d3206a13496020f5f677580dff393720b64311469c07"
+    },
+    {
+      "vectorId": "B0V4-V-007-C",
+      "fixtureRoot": "ced84063e1ff80515639b5982897234bee3e8c317501155855b5ceba4a0dd8d7",
+      "programRoot": "60f45e20c6f97b90789232e87a2c98c03be1f941407939612cf38426ff9fc4cf",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REMOVE-ONE-RUNNER-IMPLEMENTATION-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "3a2497765ec716fee4db1dd5de111b80b11a59ee551690529c10cedfe1464ddf"
+    },
+    {
+      "vectorId": "B0V4-V-008-A",
+      "fixtureRoot": "3e9a4f286a3dc886fe59024cec49a39f2c0eb033594aeb297f5a051e48d124df",
+      "programRoot": "bc65bdd3587aeacc653c86df17d8b4681318000864649568a254f9644d776686",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-ONE-LITERAL-ACCEPTANCE-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "7f885611175607d1c1ee498f8c48b6a5a941868acf1dd653a3334fb904f879e4"
+    },
+    {
+      "vectorId": "B0V4-V-008-B",
+      "fixtureRoot": "861a9886333ac837572d08e9fc8194fa97b6264d4c142c94ed7e93a46a9bd456",
+      "programRoot": "1db4f8bcd568bdc213b3306d1e8d67b8ef00477d9c36e3d7a3edbece721b28e4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-APPROVER-EXACT-ROOT-RECEIPT-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "077e79660d9c4e6f8654806ed1694ac45bb35852d1166dced9a053ce5c2c6d6c"
+    },
+    {
+      "vectorId": "B0V4-V-008-C",
+      "fixtureRoot": "4fb0dd03ae22c0b3a7e8d9f1810b29fe848b08985a5cefc287d46c5aa112eab1",
+      "programRoot": "39cda2033dfffd7f681307d2db8bf23957e374ea71abd8a57e40afdfec2391d2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INJECT-UNKNOWN-AUTHORITY-BEARING-EXTENSION-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a716ae89bb9e36da5bba393ec440fde38444de03eb9d11395919854765552d78"
+    },
+    {
+      "vectorId": "B0V4-V-009-A",
+      "fixtureRoot": "14f4ae8056aef84172aeecb04adad3dc9bff7cfaa25a3b59b49063737947f2ef",
+      "programRoot": "8b7e88e0dda7e5b81003567070fe85a67178550a2bfac6781be73149dcc4f7fb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PROJECT-A-RESTRICTED-RUNTIME-INSTANCE-AS-FULL-PUBLIC-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "00c4afd45470bb826e2cd0d5a641947ade5aab374432e22d042e327f22ba9568"
+    },
+    {
+      "vectorId": "B0V4-V-009-B",
+      "fixtureRoot": "ab2b945adb59de1feb76b8add9f03a387c7824b81ae8cafb7fc3aa1c59457fca",
+      "programRoot": "3a37a3935cbf5213d60678d3bf0fdf6d315c8f7f1ae400b09fa8a7938838a39d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PUBLISH-DETERMINISTIC-DIGEST-OF-PRIVATE-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "6b08d32a80e8dec3ab00aaf28fad39be69cd558d5a42cd8129a392dcf6945f06"
+    },
+    {
+      "vectorId": "B0V4-V-009-C",
+      "fixtureRoot": "f05a1c3f0f25184aefb5f2293f6e9df72816ade2f2e0773d23a64e2ce98945a5",
+      "programRoot": "984b79440faaf5941dc50a6cd90b97c80729e5e799ea05215b231ec9cb1ab31f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-VALIDATE-OUTPUT-UNDER-STALE-EGRESS-POLICY-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "97da741caeed0f35c138836cdd42749a71b370bb9c0d0a4951383c5a977f1699"
+    },
+    {
+      "vectorId": "B0V4-V-010-A",
+      "fixtureRoot": "44aacf6ff8fa6c2aed20138113a235912f1ecf37184ac144b4d2d1fbfa27f3d5",
+      "programRoot": "58951512bf38bc80cbaf80e0c2703cc1e47e2685739d94ef5f22f5da915aa3fc",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMMIT-PERMIT-STORE-WHILE-ACCEPTANCE-POINTER-STORE-FAILS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5e3809593d6a3b95c3537452baff17f289dfd148ea8ac8d83e753004d324e3cd"
+    },
+    {
+      "vectorId": "B0V4-V-010-B",
+      "fixtureRoot": "12f1ca8f244774efb28eb7808d740cbfb6137ddf2e206ca93aa6378cf675e10b",
+      "programRoot": "2e473336c425f70b3ec324b46cda4024e01ffd983d8688bb543d61e7e5296f2a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ADVANCE-ONE-SECURITY-HEAD-BETWEEN-VALIDATION-AND-CAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a6750161fad6d93c1bca564c6cd7d99d08f2ca4990313b215f8912e61b8ec202"
+    },
+    {
+      "vectorId": "B0V4-V-010-C",
+      "fixtureRoot": "4db1d0735063e2c244851041371add6919d717a84fb038772a3e7921b2e3176a",
+      "programRoot": "189a2a58e6f10d25e5c44fd540ec96ce7d11c20f4cb4232ff29bb502e49de10f",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-ORDER-REVOCATION-AND-COMMIT-EQUALLY-BUT-LET-COMMIT-WIN",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e6ab66fa7e9bd6e042e8260792c6b2dc99ea28103f1ae5d14fe1c9cdb914460c"
+    },
+    {
+      "vectorId": "B0V4-V-011-A",
+      "fixtureRoot": "da6e6d7f3971f21b87ab901c04aa5862e602b6531ff855e3822679a72719233b",
+      "programRoot": "7c8f0686349fe0fd9ca4e1e9f6a31e1871b6b841d6d0a2af18fbd11c80b9433a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REDUCE-RECOVERY-THRESHOLD-BELOW-THREE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "2b400741ad73b8c3bb4471cfd3e140d25d90c945fad5609140ca5534214a047a"
+    },
+    {
+      "vectorId": "B0V4-V-011-B",
+      "fixtureRoot": "637882acdefcf4e6473f7ff8fd6ec05aee7d33e33b60236d8fd2c1890f7446c8",
+      "programRoot": "0914206af9ca6d03515eb6abfe570ca5f1adebca0aefca68097fe5141bbd93ce",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHARE-EFFECTIVECONTROLLER-BETWEEN-TWO-RECOVERY-CUSTODIANS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "16007a93e313b5292eab900d6b2951e0f838ed2ec20e983b56e2a3ef0a54bcdf"
+    },
+    {
+      "vectorId": "B0V4-V-011-C",
+      "fixtureRoot": "064a77c8d94781e67bfe733adec44083bea21750252c1ffbaaf16ffaba1d2c8a",
+      "programRoot": "829149229db03e70d8c6c6ad2bd82767590f76eed5ec9c7dc3d5253d4862c772",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REPLAY-OLD-RECOVERY-QUORUM-AFTER-ATOMIC-ROTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "90feb8b7ef82c18b8989d6581903e01866463f7351fd4c2b10648edc5400bcce"
+    },
+    {
+      "vectorId": "B0V4-V-012-A",
+      "fixtureRoot": "79a59d99a53c738d8cc0f0860c0eea37f2ba7bb975196502035afe74f2e7ba4d",
+      "programRoot": "dfbbbc87a1edc3ff7588ab45da024cda518defa62c6847fe53002a2440837a2b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-D18-A2-PUBLIC-DECISION-FROM-APPLICABLE-DIRECTIVES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "652a0dcfe84e827a8de9d934545df42b4ef7fadfa87cd4c87816f7d0f210d82e"
+    },
+    {
+      "vectorId": "B0V4-V-012-B",
+      "fixtureRoot": "ea7647672da5d2ca3367bcce2991ef5db3ed5eb76acf112a970a77f8fbac6c3f",
+      "programRoot": "95daa6591c14439ff02ab9ee4bb93b86e1de35803911ebfb8f7b921f12035601",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-STALE-CONTROL-SEQUENCE-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8c9fa03ce21c34a576d5fdf0771f42f7c9715de8cf970af5ec07a26530f28738"
+    },
+    {
+      "vectorId": "B0V4-V-012-C",
+      "fixtureRoot": "cd4f590f55d898ef497e4459aceccf7b189365d0924136d317a7ba121ce2aa12",
+      "programRoot": "c9ed4c458f5773db2f1fa2c8d68830510cc6d0c1725c9fb29d5d544475907707",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-APPLY-PROTOCOL-V1-5-RETROACTIVELY-AS-B0-AUTHORITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "51e7e58c9300d58c6c0d4e1828578a344f4a15b980ffbf0b70c60672f4b41fc0"
+    },
+    {
+      "vectorId": "B0V4-V-013-A",
+      "fixtureRoot": "c87a04ea6d568bf5cef10722a6ccb12b3a2978740213dd9d7205d15e2976664e",
+      "programRoot": "cb5e92f01ad0d0e3eb8f1d12bdeb2bffa456b8628e961af5ac4a8e1cc5f52dee",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REUSE-PRODUCER-QA-FROM-A-PREDECESSOR-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5faf18aa6c1ab4af4fe1be4b7ec3c9d3445e5de8a94c874084797b88015aa0cb"
+    },
+    {
+      "vectorId": "B0V4-V-013-B",
+      "fixtureRoot": "9ddb457c90e776d6b4ea5203dd695477f64b3f6ac7adbdbc8a1514812f162daf",
+      "programRoot": "6fbcae04543ea2d148deb1be33b79b95c0a067c25fd4211fa06b226af4bfe0ff",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DECLARE-SUCCESS-WITH-ONE-UNRESOLVED-P1",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a9efddd8637943af3aa976006c31a32ffb3f7d9e4310b799c4f2258a574017f6"
+    },
+    {
+      "vectorId": "B0V4-V-013-C",
+      "fixtureRoot": "190153cafc20fc6dd7ae284fe7834e82bd4a6dfb5fba36bd721f00391b58eff7",
+      "programRoot": "74c9a75af7e12b9e7e9fce6ff14d7857525fd57fcbebe40e600e544417070d4c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AUTOMATICALLY-CREATE-A-FOURTH-SUCCESSOR-ROUND-AFTER-EPOCH-EXHAUSTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e08f770f7e698a0473efbcb4fa014b82ccc73464f99238190534efaaa70ce512"
+    },
+    {
+      "vectorId": "B0V4-V-014-A",
+      "fixtureRoot": "7cec195670cf6c63cfe373f653f1c987cb01f2dafdf453e39200d7eca88771ad",
+      "programRoot": "7c76ed9d4156592a173751c76af6bf876589d8fbcdccaf7980a36abff5527ded",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-REQUIREMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "41accbdcf33cb617c127f509f9bfc9b07fc175969be96f15505ec1ae5375848a"
+    },
+    {
+      "vectorId": "B0V4-V-014-B",
+      "fixtureRoot": "0dbff4b479104542fe6ae43cd21fe51d454b585b433e7c7fecd97876f81648c2",
+      "programRoot": "5fe592388389a1d0f5d21fd7920933dc12d1426c17275b81be673b94189f6b9f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-REQUIREMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "590c3d3cbce4114f98170c1fd350c16c3e74302fa2c1553d396f497db3e60cd8"
+    },
+    {
+      "vectorId": "B0V4-V-014-C",
+      "fixtureRoot": "5d59f9a1c0c9f9a8137ecde5422d6c6cf2e20da7d4bb82c7c1a502a75c09f7ac",
+      "programRoot": "a3d45acdfba5676dfa97d119cc9179eaa3a83166105b275ab04dffe84ab21c78",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGED-DENOMINATOR-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1fdfabd2f09dfc5e1e4ac4992bc8f49996c203aaa3544a156a9f1983528c8f56"
+    },
+    {
+      "vectorId": "B0V4-V-015-A",
+      "fixtureRoot": "34e8b74075f9658ee7f80f34429c3883fb09144d5e4b0d71174d8b9158300632",
+      "programRoot": "d89092b74e660aa7abba2cf4a70c82707d9588679987540b80da5654fc980b8c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-SELF-APPROVAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "80a527edb36d6ffdc9972e38aa456049ec18f7eceee3a86357b72a9057d0656d"
+    },
+    {
+      "vectorId": "B0V4-V-015-B",
+      "fixtureRoot": "4c6e8be8f62cac5a52fcd86ac7578edf122ca2098246903c7f8402cf433abe61",
+      "programRoot": "5a558883fb3d187dc9aee1394823dc932b8cd92e878a30d891025d0b9ecc6a4c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BLANKET-TAL-MESSAGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "db37338b2d6947ea9726bbbe58945fc398c8d0b16cd897fcf92efb00df18bbf7"
+    },
+    {
+      "vectorId": "B0V4-V-015-C",
+      "fixtureRoot": "30e23b9121c05379d4f49ce13e5557a62c2a9e1de4fe0568b0eeba8db47d1717",
+      "programRoot": "44fd82f7f7a86e9a83beaeea99c74943a215c8f2f82d2c864ccdfecb330e56a9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-EXACT-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "167c3e40d38113d964ad174dfc649be33919db7686e22343ef6948512d78b2f8"
+    },
+    {
+      "vectorId": "B0V4-V-016-A",
+      "fixtureRoot": "cef89a68aa74aec3a4de7aa9e851ad940b1398bbcc937469306e7543e77863a8",
+      "programRoot": "505a07d3803eeb856d1592b55732a0dfd2c3be502cc137326ff30f3ed9f62384",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBJECT-CONTAINS-ENVELOPE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ac72be44220b6a2b5cc4ad6cd9b2ca86d0c7e6c8c2f67557d85b9051639f3c81"
+    },
+    {
+      "vectorId": "B0V4-V-016-B",
+      "fixtureRoot": "40acc052825ee7165c6b97aa9ef99dfaa9a72d92914c649a184750fcd002ba87",
+      "programRoot": "d140786658b041fd82f2aecbde006447c9ce065a900558176c6b87a665b855a0",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-POINTER-IS-MEMBER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "7af73ce4af3ece3f45a73d8150545dbdfc82ec4ecd396e16c72ec5cfaf045229"
+    },
+    {
+      "vectorId": "B0V4-V-016-C",
+      "fixtureRoot": "258b7a0f878b2adc676428a1ca5c7a023833d6cb7c295c4e44ce5d38bdfaff14",
+      "programRoot": "7a124ae1b8e647d6a254fe5b55b9a44e3bf9d9342671d269dcae4b35bbb9838c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AUTHORITY-BACK-EDGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "884db393279907ac98c68ef0ed5ba1922004de688fac0c7b41a0fb0594e9ff3b"
+    },
+    {
+      "vectorId": "B0V4-V-017-A",
+      "fixtureRoot": "ae70496a20e05f013b71bb0ae747be8ab460cf0dd6517864908ca0546b8e6c8f",
+      "programRoot": "f4b9ac3d108baccc96db20eea6ac90a4096b6ff117901e71a6d9cbef8542d065",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGED-MANDATE-BYTE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1f783df3fa0f4ff68cc99abd66fd8e7332fb299fe077e77586c72c0a292bbccc"
+    },
+    {
+      "vectorId": "B0V4-V-017-B",
+      "fixtureRoot": "5fa035cdc28bc9628776d71dc7a92a2f3354532c82616a99b263cd6b7b79e4ff",
+      "programRoot": "b54509990ac3252fbbc4d9534df114c6c49d61a6475a7e3e64e2ee3ef280aae8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-RECEIPT-PURPOSE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "923c3789ac7e2466376f0237feb9428cbea684631329484ecff81c34f577b5af"
+    },
+    {
+      "vectorId": "B0V4-V-017-C",
+      "fixtureRoot": "dcc78f0299dcadfe5ade81852dc1b0735cb63a586d469074dbd43f1a4e23aa02",
+      "programRoot": "f0982443c8ca081b368054caf14e2f2a642cec5a0aff455f1225443c33e4c537",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INVENTED-TRANSCRIPT-ID",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "da331caa3451fa68d34c41420e6dfe3da433af74c53f07139f443af0d9e130c3"
+    },
+    {
+      "vectorId": "B0V4-V-018-A",
+      "fixtureRoot": "36f2536caca48345a54e258c8e0685a666b5e26ad0c7de621df2456000330f7d",
+      "programRoot": "c2a34392a71c004c48cae5ed0a40de9f32515642a6344cb6de928f69efa146c9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-PRIVATE-CLAIM",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "bc15253ca8204ab1675c4917b50a01361b5b1e7a5589085ce6695c70c337c43e"
+    },
+    {
+      "vectorId": "B0V4-V-018-B",
+      "fixtureRoot": "c7a685d9699fc15a3e35e61f09c0fe57d8306b8e676e82047c181e1e97e96e6b",
+      "programRoot": "86cebc358af7cef10baf5f1db091c9e6a65cdf63a0dad7313cc2a559b0409145",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-GENERIC-CONTINUE-AS-DEVELOPMENT-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "03447a24d582bc011d2c101edfd396695ead509f25497401471c313963fbbcbd"
+    },
+    {
+      "vectorId": "B0V4-V-018-C",
+      "fixtureRoot": "2a7775fad9f1e8c5ed7c69381cf83272c7c522b97b7b8f0079b276fb6c5495d2",
+      "programRoot": "237ac39c2625d3750c78aad734511924951c3be90601ced290ad550795783bef",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONFLICTING-AMENDMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "064c669e41b906c2cc840f1c1a1018a6da868bf54995d766586be3a4573986ef"
+    },
+    {
+      "vectorId": "B0V4-V-019-A",
+      "fixtureRoot": "2c2196616a1a6ef8361fad13ef8748dcfa7a339cc01292ecef7506d38e34e1e3",
+      "programRoot": "d4d2b09a9c255cbd448ea82ab4b92fd7883890eb0d158721de41a72d5aba1ae8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WILDCARD-CLASS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ce97086178ae45932e396ea3e4958b3966fefa61e7f43c1138c323d86547f4f0"
+    },
+    {
+      "vectorId": "B0V4-V-019-B",
+      "fixtureRoot": "2f02e78f36b86bb5864c14781720cdca64c7578cc7bf46a803d982eb73dad534",
+      "programRoot": "0a33cdc6793e36673c0cc428175a86addf3cdfe073e818754642fb69568ec72d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PREFIX-MATCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "014bbba99df8501e0f2c60efeab2f82ab5f4f44b2206e6531f09ba8055210b0f"
+    },
+    {
+      "vectorId": "B0V4-V-019-C",
+      "fixtureRoot": "31e8c2d81639456cc64a65fa0bbcf5eb7a6d601ede65e37ff9c32cc9438a2689",
+      "programRoot": "0427e88c5e5968e7308c24a2149d1861f09f0a61585fcebc2790175d00f46388",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-LABEL-WITH-ALTERNATE-SCHEMA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0b019f70081468bfb16aef08c85cbbc56c3c1503b05bca10d9b87fa0f7ff732a"
+    },
+    {
+      "vectorId": "B0V4-V-020-A",
+      "fixtureRoot": "4d53f27065dbba1005fb92ed58d96780db1b41eba4809be8273effc966b767f4",
+      "programRoot": "3f16b38f0e0246e14a784de5e1a554f8e0e16c96bed51f8090fa6d5d7c87aa79",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-HIDDEN-SHELL-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "3eac33b29a6b8a89cb4d0755cb646b4a3be3bc24a582d2829df47be578d81ad2"
+    },
+    {
+      "vectorId": "B0V4-V-020-B",
+      "fixtureRoot": "6d876f6a9795ece5b8b1a113eff4af0bff9e5f331da198d160a7d319c470c72f",
+      "programRoot": "aad4388f79a081d4683aecd3a5a9c6366785b26017bbd57a8b3a43c85291aafb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MULTIPLE-CLASSIFIERS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "17bb7eba2bbab25b65e3f01c855c4db10da4537800efb7f90a485648a9e042b3"
+    },
+    {
+      "vectorId": "B0V4-V-020-C",
+      "fixtureRoot": "3728ef8a4ec835e007bccbbdd96cbcafa0c6a0322befb1fc7405d163709df3da",
+      "programRoot": "10a433716ec5d11cc5ac50bbdf2a93222d9be3f0080c2bbdf02679bfe712e364",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNCLASSIFIED-NETWORK-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d0dbca940140fffc48d15cfccf494ede294681d35e8961900ac42309ce55d9c0"
+    },
+    {
+      "vectorId": "B0V4-V-021-A",
+      "fixtureRoot": "6ca592878773d6c66f0e1c05f9e3bd7aaabf5bee67f4fc738a108f18290f1b08",
+      "programRoot": "52374a16d8693759e3908ce4034a055fe7e433e594e8f20048265ddd5f90c782",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REPLAY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e57557bf8f144fc23a7f57d8dcd945d25b6fb8280b45a5e3dfae3dc24a0f7151"
+    },
+    {
+      "vectorId": "B0V4-V-021-B",
+      "fixtureRoot": "82278b7ff1cf799a50a552a89b8463d561e222095b63002a832bdcee0c529588",
+      "programRoot": "db216f7fa96337405904913cae4b7f6a335e1f61f3f2de448c7aeb3de138bc41",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-EPOCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ffab7350ab4c59cba8c30195af7327f678644f4acf5523eedb38da2a9c9b1bd3"
+    },
+    {
+      "vectorId": "B0V4-V-021-C",
+      "fixtureRoot": "bfc8ac7fa5fc703ace66507362a46261218b6ecdaa908eb429f4cb548a856006",
+      "programRoot": "26114f2f19c9fe7846f1683c7164cbabe94f81cf097c52e13fd2d3f1c350c193",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-ATTEMPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "6f223493c908afece04f743610d8fc50bca480cdb627b5ebb706ec268156334c"
+    },
+    {
+      "vectorId": "B0V4-V-022-A",
+      "fixtureRoot": "cafce0e33c5187e0f3a343aee650dc7970df35de54df6c4a3f53dec2c94d2eb9",
+      "programRoot": "2989bd1b4916d1bf435aea0242ed74462ed0bb29b4f039a6bdd3b946e8e85668",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNSIGNED-APPOINTMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "30a709deade22e553f27c7c2d7b1c23cc91cf10b8dd7d55b9087adae25d1e65f"
+    },
+    {
+      "vectorId": "B0V4-V-022-B",
+      "fixtureRoot": "702f99e391e10f01141f8f838b94c8ee651c203fadb95fb1b28b3c29a426127d",
+      "programRoot": "3e7b70f2a947744b19d0b94a09679037a9e1b651139460053ea8efc194eb876b",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKED-ACTOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "adf6a511249d7e95743e709aced0afef0ff2cfaa27201d8f22c11c738a92902b"
+    },
+    {
+      "vectorId": "B0V4-V-022-C",
+      "fixtureRoot": "b69d0c39c8adb2551d3d8549b56da3e2e762423a74aa20fa65b9d425d481f992",
+      "programRoot": "ebecfc3252a5a3280885c3b367f8c55b7308108d4156f6a1722271a24c5d70a0",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DELEGATION-CYCLE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "6a2975babbcb0d20ba87639d3f918a92fe8b7c3cbb1796e875f96f0789f47715"
+    },
+    {
+      "vectorId": "B0V4-V-023-A",
+      "fixtureRoot": "dffde7f08a60cbc6111c8d8f4ddbbf17ef993dd070a78d6709950eea5c1c81c2",
+      "programRoot": "e68058faf9117078ca75e64d86659112b490c99412df642ccccf7b2a909bbe7d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-REVIEWER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "57a8ea0f8c23c837989babe95d59147a0111801ba583072dc2ad702eff95ad6a"
+    },
+    {
+      "vectorId": "B0V4-V-023-B",
+      "fixtureRoot": "926d939e739a45360c6cfea69b9896f92ef47e5e54b010ce8dc130c04b313251",
+      "programRoot": "ece8acd3807258373c2379f7adeccd11645c571de573e7eb2e369dfc05541255",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RECONCILER-ACCEPTANCEWRITER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "2c880918024472e4bfc2311c4b8fb9a3167be8bf36238a42bf6669f808a03146"
+    },
+    {
+      "vectorId": "B0V4-V-023-C",
+      "fixtureRoot": "029a5639407d45ebbd4ef42050f37bd022a9ff335061ff6ba43e9eaadc28b6b4",
+      "programRoot": "23c78c99943ed9030cd8ab6ce3a6ad04d31de50fb31bccb64a09493eb073fae5",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AMBIGUOUS-BACKUP",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1f2542220c1c9d3d7d02875ca9e14c1b74f26d4b70523cd0a5f7679449743619"
+    },
+    {
+      "vectorId": "B0V4-V-024-A",
+      "fixtureRoot": "031c53a083be16efe973d75e8621128d2a5f112628abdd78af73e0446209336e",
+      "programRoot": "3ed608266863514ff21a0f3eac8d8fd60d363283a8467ba5e49f81bb9aceeb1b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CROSS-DOMAIN-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ccbc3f591c5eab99de140effd064ba2b6ce4119727229afa8814b7f2a0ea938c"
+    },
+    {
+      "vectorId": "B0V4-V-024-B",
+      "fixtureRoot": "8ee457853c36c8a0f3261b221c50d39b581f88b19f47283f21e4b3582c27cbe9",
+      "programRoot": "3c87edacbb61e827b40faa89764cbf4091223e958c630c9b4777fc871caa395c",
+      "observed": {
+        "terminalState": "COLLISION",
+        "reasonCode": "NEG-COLLISION-SIGNAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8f6edbb4434b0b9d0d0d3790b41bf7013ff449cd8f614cd1e26d5e2dfde520ed"
+    },
+    {
+      "vectorId": "B0V4-V-024-C",
+      "fixtureRoot": "d059126fb703a1097fe6969370d993d46e1ac1f4e12d1a972820425b11aacf50",
+      "programRoot": "bfe6885e0b9fceb95e2bd8c6a721ce81d316105c1c8ba21db6341a5b744fc982",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RANDOM-ID-REQUEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "03797ab1438b8ac64c283585f11c4ad37f702241b7db1ea03650993eedc3d07e"
+    },
+    {
+      "vectorId": "B0V4-V-025-A",
+      "fixtureRoot": "2d0fbc845aab9f8e9a0e7392fa7d2bb049ff62af728042f1c6dc16fa3b718ce8",
+      "programRoot": "c20aeebc7b1bca2187753f048dc3f5f30a0f1fe1bd8d2cb53c69ea701cbc9e53",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNICODE-CONFUSABLE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "484ee0eee29dcd313a5b69a5c600ee4be00fae45bbd3ff5aeb53ea221215d0a6"
+    },
+    {
+      "vectorId": "B0V4-V-025-B",
+      "fixtureRoot": "a64d8ab4fbed44584ee859de7105cea3aa9ba2a1f7a7abff12f72faf889b718d",
+      "programRoot": "3b0e41dc02f517504c809d380a04530b087905a5ef3781058757989c728da655",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-NULL-ABSENCE-ALIAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ee3efa5486e86f29d7011d29b1f12594b1e4f6f318a9676ed93352465e2ce4e4"
+    },
+    {
+      "vectorId": "B0V4-V-025-C",
+      "fixtureRoot": "9cb6f30d20e7dd0419b930b9cb52566c8ce644ea0b23a55c92c7a919020eccaf",
+      "programRoot": "95c7bd3daac28a2f72c8afb1233e53143fb50cf330ca44cb72c442562ccc51be",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REORDERED-COLLECTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1bb4a975239dd784e5cbce4ea2665302d456605202714f05f7916714c55a3d8d"
+    },
+    {
+      "vectorId": "B0V4-V-026-A",
+      "fixtureRoot": "2e47d3632a4df71dcfd327da5ad29268c092a492024e097a78d8f7134438170d",
+      "programRoot": "14d80100582d8676a9ba8e6d0a746f375e72d80f754e7536a14aa8e2f644fcde",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-KEY-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5ab7db2c6fb6a3e81c547f48de5b8c0c05c2297e252b6472ecf3911999d82202"
+    },
+    {
+      "vectorId": "B0V4-V-026-B",
+      "fixtureRoot": "fd361fbbb41d8d15f4239b22a4f342f2869260150adc83fe93c9160d7e2fef77",
+      "programRoot": "330697fc5a9a6147ad69ab1f77e223932fae1fe96a32dff86d73895519a45a14",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-CHANGED-REVOCATION-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "7b4eac864a251aa091629fe7ce89e98691ba107a50d10a99238ceab42a2990b2"
+    },
+    {
+      "vectorId": "B0V4-V-026-C",
+      "fixtureRoot": "520ee91b32682e1d6c9d614b3350619d59c7ccc6b6566fc1daf977bfcd920d28",
+      "programRoot": "6af97d709331436d9f8c2df7b44eec22382b52535e0a1cb226c1e5236a9b8556",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-STORE-IDENTITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "41bd51bd08b1f3f6672c8c1ccb7516bd802a1a0bf77af7c86b222443054fc230"
+    },
+    {
+      "vectorId": "B0V4-V-027-A",
+      "fixtureRoot": "830ca72cb25e5590b19ef1672f0d93f37f277a60e84b3d059a5189a0d6f6f05a",
+      "programRoot": "57539235a8417c116317732dc84ea7002de5bcd314ba3cddde304d85872f6891",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PROTOCOL-AUTHORED-BY-SUBJECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a6eb092e54e76a37fd546fbb08d2e48a4e5e2612881c90e06d4c55efb9a925de"
+    },
+    {
+      "vectorId": "B0V4-V-027-B",
+      "fixtureRoot": "8b7a30460178adfcfd534dda4b91a5ac8d59ec03ac97716dc6c1db936ef8f58d",
+      "programRoot": "b202789e67f9a2ef216b0a1a07448bbafedf17a3581aa9db8b67031570408675",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ZERO-REVIEWERS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "2ac625cba03f46b7b43a29c6aa4ba0dca670718c74eec69304d6fdf90268b762"
+    },
+    {
+      "vectorId": "B0V4-V-027-C",
+      "fixtureRoot": "fbde135c36ffef6f1efa2971bd8fc6af324e4171c0fac125a93ffa609f65a00d",
+      "programRoot": "26750d37f2ecec281f2d1afe8a8c866e69c173e8567400816527cbcd09611926",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-POST-REVIEW-RULE-MUTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "17d037e358ab2d1fcadeec6e80be800cd388bf71896aab1304f60fb83fe8a3d1"
+    },
+    {
+      "vectorId": "B0V4-V-028-A",
+      "fixtureRoot": "9468f5afc8d0732064ca9ff9faf3e10c07349e3a83f116adbd88d2cd300b6afc",
+      "programRoot": "e6b3eece89c515549e5b6d97250e48a7defce1cd65a6dc1428670ceba1af78ca",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PII-PLAINTEXT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "574784931f8600d412b2eb543f27f72ad9e594c8a3002d055189ba55736a36a6"
+    },
+    {
+      "vectorId": "B0V4-V-028-B",
+      "fixtureRoot": "62fc502538859308c846d35d9ff1b7ec29df00db680c24b14b5672bc11334352",
+      "programRoot": "f8e7812d8d963e06a680ce2e2f4858602d6f7f1cc65d0da3607d0abda0fa5b4c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LOW-ENTROPY-RAW-DIGEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1b6bc51fa04f5b39d462c3de7f9bf0e1dd2c98c3dceab298e4064be8c715ba88"
+    },
+    {
+      "vectorId": "B0V4-V-028-C",
+      "fixtureRoot": "f3d0f1632412f2e04bd50a000818d2eee46685deef68ae8c6d10b751be6a203f",
+      "programRoot": "19d2e65be293526281aed5c18a57702371f83318512588879d5041596d693b84",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-CLASSIFICATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "05f9c5261df6dae1903eafd7349be3b953db32cd03021b51884721dbcf2694db"
+    },
+    {
+      "vectorId": "B0V4-V-029-A",
+      "fixtureRoot": "1f39039bcf49825346285d6cfb661098bd75895d7367c8fa3e06d147bad73049",
+      "programRoot": "e39ce6e5092e127c5486c0e38735b90765deada75f2fa58d7ef9fa73d295b20c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCT-EDIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "739c7ba4866d5fd6ca7276a620f28f391e3408da7ff4e6738e6f32c5a252d588"
+    },
+    {
+      "vectorId": "B0V4-V-029-B",
+      "fixtureRoot": "da08d6726932d6a0d6dd38f4defbf50cbe8d918291a0d6144da501f265f7a1b1",
+      "programRoot": "45eb80495306445cd331f5a1494d40d01d9a4d760d389e631979e6c3fa40ea40",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-GIT-MUTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d9c7aed227ce8895160b8edb268562430e1dedcf9260267e959b8ace34483b28"
+    },
+    {
+      "vectorId": "B0V4-V-029-C",
+      "fixtureRoot": "f03f069fec2c92aeb5f0a656dffdf0e0bda13af6f9625ead4c7088e2cf8e4504",
+      "programRoot": "d5f49ebd2fcf5f1d1633aad42d021e9ac20ddb7d46aafbcc42ea8eb8b4816cc2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PROVIDER-OR-CREDENTIAL-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "66cd34ea7ae0eb7c4ab7ac66425fa451cefe45e7ce70d4428338fc478ba9549c"
+    },
+    {
+      "vectorId": "B0V4-V-030-A",
+      "fixtureRoot": "1535ee2cfd24fa9d4271100c3e60038456660fc55afd3c4412e360b9d38c5180",
+      "programRoot": "8e8a9c2c680976e332813df68cedca7c9e984c8a18c9a82000e3f5ecff327950",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LOCAL-CLOCK-ONLY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0a792d94f5b57348503a38f50e5122c086b36524498537267b28b5440d0fb733"
+    },
+    {
+      "vectorId": "B0V4-V-030-B",
+      "fixtureRoot": "3f376de9fe2b856156f8c9db7e2df5e0754a04df341fa74a1805fef7cd3f289c",
+      "programRoot": "11f3a7ad109cc5a2f9de59f479fbac4395576a9840be5d49895a1bff0d90cd82",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ROLLBACK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ed89c9e9aeb517ffe102f55fe7cfea07b1cd3329e8f7a2f96c9937b049497779"
+    },
+    {
+      "vectorId": "B0V4-V-030-C",
+      "fixtureRoot": "7f4f9db708f011b1e22b090cf3b14c4e9dff0139f8cd8a2a40a40dbeaf261647",
+      "programRoot": "e93e11dd4e2d71e2475f58346f45ed484c5f71c5a5cd795eef7c27fcec09c909",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONFLICTING-TIME-RECEIPTS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "fb1d76bef09462008e21d1c66f5c4e5b97949e11dc4de442742d87f5ba99f529"
+    },
+    {
+      "vectorId": "B0V4-V-031-A",
+      "fixtureRoot": "b5ee0610a90481b9c16d75838241fd70319c1398496db7046d450aeb930c0e44",
+      "programRoot": "35bf3543462374274a90cbf5609a664a55988e88a792bf00a096ad203a13531b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-EPOCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "2d3201b2a117efbcd786a633232145e2b5849df66a6282d4bfee085879a92ba2"
+    },
+    {
+      "vectorId": "B0V4-V-031-B",
+      "fixtureRoot": "c04273dd0f2551608925d2c8eff7c15d289c839afd5bb84bc0426a09d2c2872f",
+      "programRoot": "391d0ec61921b3d9fe6a284d429e3bba86da0e957c6697e6f156a9d4bede1ddc",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-DURING-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "63224c452c5fafe78f74bf3fd10e4c6918d56a5f219474b35917e5026fa371ee"
+    },
+    {
+      "vectorId": "B0V4-V-031-C",
+      "fixtureRoot": "4a216c5f93b67736755175870a43e9b4c11b950110cdc459f9e3ee20b47f40ad",
+      "programRoot": "c4cc1101ad7bd36a1c15e4d1bbb30c6ab09e48fe9321bc763d42aae92bf501b9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUPERSEDED-MANDATE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "805201364ebea761db4b84e04f560a1985601e1712459860b304eea0dc16e192"
+    },
+    {
+      "vectorId": "B0V4-V-032-A",
+      "fixtureRoot": "7b829a4835512f4b4a08d63229ccf24e78f6bc027202b47eb343860615a31afa",
+      "programRoot": "d60cd861da072269a866979cd8f9db4551041dffd46b2c0306bb64dcef0b9f33",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORKED-PARENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "71b5073970f1bce86e1f030cc48af79d081f1b204213b0c12d6292b6e179299e"
+    },
+    {
+      "vectorId": "B0V4-V-032-B",
+      "fixtureRoot": "2d418e7cfd9a72c485525c2d6599d64245935d3beb5a11aa3bef2110c8761f2f",
+      "programRoot": "499a6c179a38a498d7172ed3bbb6bb4410ae1794e43a529b35674e82a8ff7430",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REORDERED-EVENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "18947370b040c622d170cdfb58e3dd760acf97757d5f8b076151ad59ab25e452"
+    },
+    {
+      "vectorId": "B0V4-V-032-C",
+      "fixtureRoot": "9e31ded0d3b24b07dea95be14855eb7ceb0ce062242649ceac2c8349dd912575",
+      "programRoot": "2a707f290f4d2faaacf7f6475ce8e1508a7854ff50eb5f89480ef1f4b0d43748",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNAUTHORIZED-DISCLOSURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0aca069f0600b045ba74ba6f7d7387c564e72f7a5e80be753274b4cc178aa8ab"
+    },
+    {
+      "vectorId": "B0V4-V-033-A",
+      "fixtureRoot": "177fcd50f2b898e9e87e1827b48407dd57ed87da101e6f48a1956c675ba13aa7",
+      "programRoot": "5a0b598b0922713c912f8172df1c05ece2f512206a7d3722a7e7c588c7655ca8",
+      "observed": {
+        "terminalState": "REJECTED",
+        "reasonCode": "NEG-WRONG-SUBJECT-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "089240dc945d276b0ab6cf3bb12a48ade91bf8a7c1d3ab2ec09f40a747de009b"
+    },
+    {
+      "vectorId": "B0V4-V-033-B",
+      "fixtureRoot": "f977a9c8850aead7125a5221393c41e21997e8bf67fd5eddf925ea73eca4b185",
+      "programRoot": "7c3ac70d02eb8f95d1ff134a1e2452f8160962e6667745806f98f508d188ab70",
+      "observed": {
+        "terminalState": "REJECTED",
+        "reasonCode": "NEG-CHANGED-INSTRUCTIONS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e8f83f1db35e47ab4695ca6565e3c2f2d15a0d406aba45cf84991e35aa24abed"
+    },
+    {
+      "vectorId": "B0V4-V-033-C",
+      "fixtureRoot": "a00562dc66e336999ba9f5a3c46ed178f3e249482117d8b3b5b70c2219ee8b7d",
+      "programRoot": "f72337b774a0bab5be2fdc764fac2f44043fde8ecceb5dbbbbab4577bf261173",
+      "observed": {
+        "terminalState": "REJECTED",
+        "reasonCode": "NEG-REVIEWER-SEES-PEER-FINDINGS-PRESEAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "3a142b3e67593fd87108b803b7d7d082edf69cdd0d445e36a48e53a1367fa634"
+    },
+    {
+      "vectorId": "B0V4-V-034-A",
+      "fixtureRoot": "a69fcdc61eade243bfccaa15b3c9ebac2ce266957d4b47d0a9aabf40c187eb2d",
+      "programRoot": "320ab5d4aeaedbe44a2e2949efc6adb33aca316e6d235f5e3361e53cd2ae70fa",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MERGED-FINDINGS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5c306ca2a4b474a12e628baeb31c42149833ca01dd5bc161421c08fadb227c6d"
+    },
+    {
+      "vectorId": "B0V4-V-034-B",
+      "fixtureRoot": "a1ee077ecd8b2ac57da5ab2c5c3395f0807a9dc6caee42817bbbc6102a75c459",
+      "programRoot": "ff93fe596c654a03c5d92f459cfef0802646787679a5b2d40f378faa8180ccdf",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SEVERITY-DOWNGRADE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "55ae0322de6ed4ae118e13bacd10174f9bdbd6cbf2640de208b936378dc9f033"
+    },
+    {
+      "vectorId": "B0V4-V-034-C",
+      "fixtureRoot": "0676df5ba5bf47a28f19a921585058dd2c5b445a1cdf26ca9dd8a668ddb92288",
+      "programRoot": "0077915027a32a03b1aa874bd01245016a2ddedbe1043664b16dcb204ec3425e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OVERWRITTEN-PREDICATE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0d404daf80106643057c588887bf16e578adac2d4533ccc1453d0fa99d57c1b2"
+    },
+    {
+      "vectorId": "B0V4-V-035-A",
+      "fixtureRoot": "ddf1ce2dc1cd589063baff25a58a2a16f5ccdaf186d9267064d706d3c05abc68",
+      "programRoot": "17de651c9ff31cfa755fff21521e3434fa7e6623045f7bfe44ae6410e5179d2c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-TRUST-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "26d3b4f0f766509575e67c7047579192e9cc76b5bba3b1621405e79b5e799840"
+    },
+    {
+      "vectorId": "B0V4-V-035-B",
+      "fixtureRoot": "3d3ef2ce081ade8d3d050e6417811b9decfc3bed6060d7823eb3f26702591411",
+      "programRoot": "20a23e5822d2d0af638e72c0e596908839ab0af031faff9752bb4da0ddc97bee",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-APPROVAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "65505e6559a85d2c2ecf74bff41a94e7a4cb2508c2ec90b25015cdbe3e8c1cab"
+    },
+    {
+      "vectorId": "B0V4-V-035-C",
+      "fixtureRoot": "e84b8ec8abd4e2b636d9f92269fb0b6c0ba17122c0fbe77d066bd19925d12ebf",
+      "programRoot": "16f73b79b89cf564f77663177a6b54aa7f2b8a936e526bf4fe1ca10894a7ea14",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CATCH-ALL-INPUTS-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "19d12d56d6c8bbbbba45a037997aa0e9f4913498f1ebff23de4ef08c1350a353"
+    },
+    {
+      "vectorId": "B0V4-V-036-A",
+      "fixtureRoot": "ba52897dcdb15bdbcb765e689848b6753eb7b40c24d9278be8c2d7e193174498",
+      "programRoot": "fd2ee24a358a4ea962168b3b5bcf73deee59ee79e744a1b7196b0bd7c2e9734a",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-ABA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b4b7b7eea141c053ae0a458bc4e1289f346e7930bbcfd143f0b6c467abf85869"
+    },
+    {
+      "vectorId": "B0V4-V-036-B",
+      "fixtureRoot": "912eda27fb6abb8946c2bf419ca267bdebac96be0e9fe36b2b06585bd7ba7740",
+      "programRoot": "f3f6337d2924369ecfd871e05db02da0dd65a166c4bd57bf5af5ba396fa798d7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-EXPECTED-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "297331cbb0838a6782e751a4f73baa3efe805cc6f5899eef02444b9e0253fd31"
+    },
+    {
+      "vectorId": "B0V4-V-036-C",
+      "fixtureRoot": "72024534a966759ba97f97488e63669baf106e1ce9edebdda5132b3495c39c49",
+      "programRoot": "c0ac3af2c3e84fd4f66392a716da306eb160eeb67d7f38dafb133f6c2264159a",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-RESPONSE-LOSS-AFTER-COMMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "28138de73b37d0034a3c7deb4051ee56c3eb957d02e261f073dcde106fb48ddc"
+    },
+    {
+      "vectorId": "B0V4-V-037-A",
+      "fixtureRoot": "be90952c848097915d8c19e8018299ee92709ea8afa941e90cca4fd256fef0bd",
+      "programRoot": "0b49b45c91f254a57cf9726d9f54c3b68406c1187786fbc232278ca7ad22cf6a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-CACHE-TWICE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "287e155c17a40b791253db094e8cc0c56acc78ac9821ee217f4362b04e862e55"
+    },
+    {
+      "vectorId": "B0V4-V-037-B",
+      "fixtureRoot": "50eabe7614acb34de1ad2dcb2df2b3841f0c2290d2d659de969ffcf99d0fa090",
+      "programRoot": "278011015ddab85b1deb54bb58d23fc4c10c629ad123719ea9b35550aa86269e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MIXED-REVISION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b4b90aa25f8171daf5cd0c34ed67ef059ec1d474389f1148bb15e70f9bd0f4b4"
+    },
+    {
+      "vectorId": "B0V4-V-037-C",
+      "fixtureRoot": "341626f9a5ba3676edf8d6627f650dede6e1b6009635f62cf62bc21ac7cf938a",
+      "programRoot": "6ceac3a3760534389b76a5fbb54aedaed5c4e08fbde430a49d8dc68bc88ca047",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-CREDENTIAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e075a23ecba00305fca6d08381be14b27e019d464ca90e9c5434e9a03c07895f"
+    },
+    {
+      "vectorId": "B0V4-V-038-A",
+      "fixtureRoot": "c032b7f817fa7646cddbc3d505632e16498b430aa366f0aa148397f372588ac4",
+      "programRoot": "986e75e4edb5665c6c7ae984c296f79ef4895c6351cfc33650d7a313f1677a01",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORGED-CURRENT-OBSERVATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "44b8616e1cd2eb0a171c403899fe3ee09f0011061eb308d42e7c3a4763508979"
+    },
+    {
+      "vectorId": "B0V4-V-038-B",
+      "fixtureRoot": "d666d87df02977f71de607dbdd1e27dbda4b61e05b41b0f81677011cadf5a326",
+      "programRoot": "299dffde0a612e88d928cd12187193d4670ac40e1670212bc528190c12ab9be2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-OBSERVATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8a0a6e893d3e1ffdefb5d718ea2b2cd3a3e219d0e8062dbdf7f23e3f791b0689"
+    },
+    {
+      "vectorId": "B0V4-V-038-C",
+      "fixtureRoot": "8d649d390c7b107751f27d8a102810deb327a94ad7bcd014d152f8a6b47f1843",
+      "programRoot": "14881666c0d3e1924f1a0ae136c8860f23135413d99be39e0fd310ed29f03d2e",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONFLICTING-CUT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5def7fa055ae29f80202ff56be7b5ca4cf885f0d9a225d9bdc9a745044f69a07"
+    },
+    {
+      "vectorId": "B0V4-V-039-A",
+      "fixtureRoot": "77f158d30f8488cd3a74ef5b9acd18606ad837c62d37c616631c1be05e735ca6",
+      "programRoot": "0ba163ba1789023111fd447e9da31ddeb618768ef9ba92de7cde32e68a6bd1bb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G1-ISSUES-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d3d6dab2c94204a70802d710c7ce5cbd77d394a1f501b6fae4c3f2690321657c"
+    },
+    {
+      "vectorId": "B0V4-V-039-B",
+      "fixtureRoot": "e96ab6db28f43745c90b12529ad8e627848992aac2fed347ffb2e4568b2636be",
+      "programRoot": "942e20067e9f886956e374f37e9151295fa96f32731b7fb168f18770a886a6e1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G2-REPLAY-G1",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "dc9a50af3bca16ad47667f9493e83dbbcf90b2300f146614278a22a539f98c51"
+    },
+    {
+      "vectorId": "B0V4-V-039-C",
+      "fixtureRoot": "d896f2074ee22e700f5ddd1e6ee363d6bdc1a170f3b3a7a22d616ec741112e49",
+      "programRoot": "adce6af472af00d362327456933a1d45d2cb5f030df5bdb6d4f3acb7bb826e88",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-BECOMES-CURRENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "35fd5ead45aefce0bf0b435abfa65e0d7a9002ce485571be59475239bc0abc2f"
+    },
+    {
+      "vectorId": "B0V4-V-040-A",
+      "fixtureRoot": "126105793255d7c00247f1451ecc0af6b0a23934077e307bccccb580b2d92fac",
+      "programRoot": "2114d3f79b5bce72f62befcdd9d19e35534814a67fc17f5394b610858fc24c62",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-STATE-EVENT-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "77355b577ef8204c852f2b24634b0865b03342dafe296cdfe36dd7457cf64b1b"
+    },
+    {
+      "vectorId": "B0V4-V-040-B",
+      "fixtureRoot": "a6039e7b8798e2137dc9617ba8e5bc0c0dcd3c6e2dc7b690001d76ed40586644",
+      "programRoot": "5d980332bcd7e0d34c5f4672f58aaa584ef87d0af2b61bd9ff35b90eaed76b0a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TWO-TERMINALS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d22259fc76d91c06d48d5e6f6a0c8445826a61b2e289d52a399f1cc127a13c5b"
+    },
+    {
+      "vectorId": "B0V4-V-040-C",
+      "fixtureRoot": "c5176b4c2f7f758553fb7438607e72d15a30d91f3f99adc919c7045acb34662b",
+      "programRoot": "1664a7fde9ba20d10e7aef7f5f77beda8fa44a1f1f6e574889b83e38f9e8330f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-IMPLICIT-RETRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "850b5f6054df0f7c0e093edae8ca2349d738b8054e36c262f6839b0acc310429"
+    },
+    {
+      "vectorId": "B0V4-V-041-A",
+      "fixtureRoot": "014471e56ec6926f7996cbc0e0478b937257c20cce4fc9f58369a94b7df0f7f2",
+      "programRoot": "734b39e75e823d0fc2ec10f6fda40c11cdebba185beb7435a890f578a4f97f40",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-DIGEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "41576b1e7c07d326438f601d1935b62a36577349ee53609baaf77195cba36d1e"
+    },
+    {
+      "vectorId": "B0V4-V-041-B",
+      "fixtureRoot": "fb31fa13a67c5a0cc862b0b5e7c14ad5681fa60cbfc62856575aa1a548f6253a",
+      "programRoot": "76f3861f86c362f9fdc0f9d0df9ea5377aaa778f803fa47a7fc91696f71efca3",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AMBIGUOUS-ALIAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "63f03a179a452da208f9120081f8cc887e3104693edc53909eb2fd9770e9b834"
+    },
+    {
+      "vectorId": "B0V4-V-041-C",
+      "fixtureRoot": "53d28f7060d5fd8f9bdf33b135485b761e1e9d52855fc02eadf337615133f380",
+      "programRoot": "6e26aa9ee51e09b7a39781f71320b4ab0d82997cd8bb6b2266cba24b24a799e4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RANGE-ONLY-LOCATOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8ca611786ab16d520bba1ace6132d578baa1fb20cb679f6c2fada34c5b174739"
+    },
+    {
+      "vectorId": "B0V4-V-042-A",
+      "fixtureRoot": "cb079ae5c112c41538f2178a7fa0ce2d39cef6a67b3ff937e5cf87800f13182d",
+      "programRoot": "2f87758d0ee0b7d6470d400e548b5f14203d06e07faab0b41db05b3b6f26dd03",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEDGER-PROMOTED-TO-AUTHORITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c98f75ce8c1794b2e6e83f6890941e628278a2ce9a5ec86778a54721e3d265e4"
+    },
+    {
+      "vectorId": "B0V4-V-042-B",
+      "fixtureRoot": "9377d243afaca904a86c7416c515f06f308433592f4b8af2a3a5aa8c50fc936b",
+      "programRoot": "80aa97347feaa21bfb584ebe19108f8813c61031bb705bc5bafcb211f518559d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUMMARY-TREATED-AS-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0b08732d4d84b5285b2b143db58ab3dc82650524361f699060468d6b1bc18085"
+    },
+    {
+      "vectorId": "B0V4-V-042-C",
+      "fixtureRoot": "2f753155f09fe7f0fdeed2893387f5824d59bb3bc78bc570f4af18babea8d00d",
+      "programRoot": "3a2144523aa588600dfc663f96830979c7c4aac5ef9c1c9b8f64525295b09bcc",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNAVAILABLE-TRANSCRIPT-CREDITED",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c3d78c0bc29aae8243da983280404bda793fe5577e65410c42b4be501be0c164"
+    },
+    {
+      "vectorId": "B0V4-V-043-A",
+      "fixtureRoot": "55221a31cb2414b5f7d1cc90db9baa5c37384a953e963d49b8f4371f81eb8ad5",
+      "programRoot": "dad821e8ed30ac4b4e53e505489a7216d43bcb58eaa05feab41ae67d1c7d0241",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORGED-TAL-CHANNEL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "7def61e239e8613858eb6966e13bf0820c502ad0b464a11aae3ce917c6dd11cb"
+    },
+    {
+      "vectorId": "B0V4-V-043-B",
+      "fixtureRoot": "b50d7067e6a1e7c811e170855391a2ad3289a270abb303d8625e9d983632831a",
+      "programRoot": "76629ee3ee1fb38e19fae4dfe98b92bae4e3a409c95c9ca6131610c1f97c2b62",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ROTATED-KEY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "190d3426851276c576014a5b4546a9bf289aed56f4a53bfa242248b22c5d3b2d"
+    },
+    {
+      "vectorId": "B0V4-V-043-C",
+      "fixtureRoot": "67851dc11f9c7d4235fa690a44b97b7b19afbafaeee73e90f8e07f7bf5c7c32c",
+      "programRoot": "4d0ff1aa7e30726469c692acc8ca0701cecf8be67c3404c5a773af7284490c5d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPROMISED-VERIFIER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "dc87a9bf4664cb354c216a90772fe4c699cafc3bdf11c87e24efd5d5fb4d73f3"
+    },
+    {
+      "vectorId": "B0V4-V-044-A",
+      "fixtureRoot": "1b44f7d7417855082a59cdf693dc664589dedab5cc0aca464fae85836c77f508",
+      "programRoot": "04c896f5c31c4a27dcb48ae95b4d5b602f285cd1b5902467090f1574cb975955",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-B0-CREATES-ITSELF",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "64765f809f0833e4835f27020b3f380131edc3a5bd6ca9d58714c6beded3dc04"
+    },
+    {
+      "vectorId": "B0V4-V-044-B",
+      "fixtureRoot": "9ac143cd3b636d91cbf69b69244ce9c1c688fdaf38962963bff6bf4d7bb2c07c",
+      "programRoot": "dc149b68ce6e4439c591b61ae2ed930dbdd50b9d69ce2d701018565a41308ca8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-GENESIS-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "447f2a6a618790fa52b7efa6681c23472a1d1f2688fda6216756d5f95c48b05c"
+    },
+    {
+      "vectorId": "B0V4-V-044-C",
+      "fixtureRoot": "f0982b0348ac8e0d437a8c78ea6e9e54d17f96160ba0a25e8cd11a2c18dd01b0",
+      "programRoot": "17a137822145fa98dd304af0f03c14d1c02539bea03d1d708bef170e4403c111",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BACKWARD-AUTHORITY-EDGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "add48622d3bddd563cec069ad6d616c75918d75de742ad600072903ab5679fca"
+    },
+    {
+      "vectorId": "B0V4-V-045-A",
+      "fixtureRoot": "64469627a2c8f6e4a4c3f527c14bb9249eea518e27c2a145414e6a940336744c",
+      "programRoot": "4ecdbd22f650d3492f663bcf903bdfa2d595b25231999c20dc4cd4c579b666ef",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-SELECTED-RULES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "42631b7582ec2f0193ad67c3c9a51a91daa133786c4fdad44a9630d3ccb348aa"
+    },
+    {
+      "vectorId": "B0V4-V-045-B",
+      "fixtureRoot": "652188d6c442c9bfdc10c0bd149c5d393a3cd2af017c0e430ce4310790fa58f7",
+      "programRoot": "9d20ede7981f576c6d2ed7c6e77bf4aa5fd646e31f51072032c5c841a573d557",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-REVIEWER-CONFLICT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b04f38b24be1e9b95673e7272568e5f582ea528b16b2de74268db8e2defe533b"
+    },
+    {
+      "vectorId": "B0V4-V-045-C",
+      "fixtureRoot": "bdac5868c52a0808e47a1d8734a972c393bce70cb532f02a7375e99ba74055ca",
+      "programRoot": "ce3b0dc028a05d60621f7637546cef54977e371ccd19b8bd7c97edca13576446",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ALTERED-VETO-RULE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "72f9451e499e372345e31f1917b18a3e4b2b7d58471d154b41a885bc4c1c5762"
+    },
+    {
+      "vectorId": "B0V4-V-046-A",
+      "fixtureRoot": "16de85407477d3fff6b9f7dcad6f7849068869f0e428d647d59f10d2ab197e96",
+      "programRoot": "d7136b09f35b36d99d5cddab3cb081b04da8a499d3805f2ee2a58dc15a136aa4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EXTRA-PATH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ebbfbc72c6c38f5888ecbea8eb517c1432f22221ad8a550dad206e4c59bc4f93"
+    },
+    {
+      "vectorId": "B0V4-V-046-B",
+      "fixtureRoot": "67f38a3209346b0674dae8a036bd3893817231ed632b7d84b0aa9259393f6ec2",
+      "programRoot": "8f7ce289e0fe349316589b7f920981ac00f00f98998024e4923d406b7e77ba68",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-HIDDEN-NETWORK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "2928f88f9ce2a809105b754a683d9f8a4f82c9f3b414059faa0fdfbb2fee241e"
+    },
+    {
+      "vectorId": "B0V4-V-046-C",
+      "fixtureRoot": "7ab7689f40eedf1ea05a7e2735724975e55aa25c82dda3cb79c1b121032b41e4",
+      "programRoot": "7dd39a31fb0449d6889900b07263e0e78202f3662d3a9fa3e745c8bf952109d9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EXCEEDED-BYTE-BUDGET",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "26e10abf7dfbd524bfa3a666dbf0e95eb79050f77917ae607d90db66c33b91e6"
+    },
+    {
+      "vectorId": "B0V4-V-047-A",
+      "fixtureRoot": "59d6d89c92e4b96a6813b8a108a7c60ec20c441820e4f3d8bb36eadca4c389f9",
+      "programRoot": "a76c6d727fa6bd1dc95d3471a70a5105db147f0e47b2ce2277d8a4e9ffd2d64a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CONCURRENT-RESERVE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "148e8870054e150867cf1c0528ec9c57bb83583820707269af9b72699b6013b8"
+    },
+    {
+      "vectorId": "B0V4-V-047-B",
+      "fixtureRoot": "9755703ca5cf0e4e18ee64fe507654f227da21b9d1c0d2ed00070608e92ad1c7",
+      "programRoot": "e83b5b4c7763edb40af5324c7941556415d2c6ba2e5077c50deae4a30b4e9647",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EXPIRED-LEASE-TAKEOVER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "928dd769c8740fddefc51ff9d6aab6e880bda93824371f2d72cea3a21e251559"
+    },
+    {
+      "vectorId": "B0V4-V-047-C",
+      "fixtureRoot": "af306e854b4f40630ee29f494273cbdceee069d0aa93bc77a0f46156665c4ac8",
+      "programRoot": "dc8f9b32e169357a21d405b1478dbae2660fd845af645cf636d62aa274252bdc",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-ATTEMPT-RETRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0da8fef0f03cd2eea0f2d9c36ef7b5ab62e1af7b2b5e6361075ce0121a2937e3"
+    },
+    {
+      "vectorId": "B0V4-V-048-A",
+      "fixtureRoot": "99ff8af07ffa1347dba987dd5f1c953d10aa23aebf07fad4cc54e1f63e644b9e",
+      "programRoot": "902a016325b9f09d19d03db6bb810ff2c39dc299fbe746ece8a73c2f80fcee97",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-BEFORE-RESERVE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "bb78eb9d1acffe51a34422e49b9e83ea733ad431787fdc5eeb95d1e1c117b840"
+    },
+    {
+      "vectorId": "B0V4-V-048-B",
+      "fixtureRoot": "62e75eaf2efc76bbcbf85aec267230da9255769cdbc08dac5c2f4894452e1bf8",
+      "programRoot": "cbff82a9df6c3f8822d23fcdfc3013848a7e24615275b17e5815530bea5550f8",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-BEFORE-COMMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "3c8bb2c17eca883c8521e39a62817a8de93e27bd71d9985ffcc7c7f51f264ee6"
+    },
+    {
+      "vectorId": "B0V4-V-048-C",
+      "fixtureRoot": "358c3164511bdd314d96510575e43f902bbb88c68de300a5e0306b4ee9052512",
+      "programRoot": "67994fe5f95d7914d31bcb7dc921c610e4f90c1a72ca71a0a54e8249b8ef950a",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONCURRENT-POINTER-CLEAR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "fe5748beef6008e9f7038fc909430dc3a332e6d93c4cf6d9eaec1a795e583aef"
+    },
+    {
+      "vectorId": "B0V4-V-049-A",
+      "fixtureRoot": "7f8bcd5f717ca73ac9d4fbae0ebd925e712737b9be74025d6054fc2fceae10ae",
+      "programRoot": "a69238432aa7fa2be0c7fe0a7537083dce579c9ab5c8a3ca6e4533b3ed3f9b05",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ISSUER-MISMATCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0021583221c153ca81c8d8e9eaf17cce1c96798aea36ab69a02729fcc0cfa088"
+    },
+    {
+      "vectorId": "B0V4-V-049-B",
+      "fixtureRoot": "a16a9ddf40ddbdaac879ad281f153c9904007b07feca96c3be4acb640b0d4f34",
+      "programRoot": "1bf3e988dab959d28f933c89694ca7c311b9d9bb2c93b431a216a6dfc2713f5c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OVERLAPPING-PRIMARY-BACKUP",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "941574b577bd3e2cd161da40ed04004dafa30aa9fdabc120681a4cc104c4678e"
+    },
+    {
+      "vectorId": "B0V4-V-049-C",
+      "fixtureRoot": "b26d0e94385c41a610fd085ae1d863f4f167e09e8dcee943c27271869a8210d3",
+      "programRoot": "62f06364f3e9e9e00b5cbf5b13f64439f7bf18cab4f1b4ddc495fe5bcc47b767",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INSUFFICIENT-QUORUM",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "6352a2acb479497904561c18313f7c66aa16cc04c36fd2bd70d8a4ac83806d6d"
+    },
+    {
+      "vectorId": "B0V4-V-050-A",
+      "fixtureRoot": "bcf6cb7e504532cb442a7ff2c0641272cba5da14b21a9fc54a65fd7b5653bb56",
+      "programRoot": "252da1c7fd2ac35619364cceefe123dd07bb18fd4a927cd36ca9500c84a2110b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNKNOWN-ALGORITHM",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b8d57776ecc6abddb84b267ec91a98302274f0ad1a0b8c06f505416e336aa8d4"
+    },
+    {
+      "vectorId": "B0V4-V-050-B",
+      "fixtureRoot": "17f57183c324498a206ae1cc7bcbec5529ebc793f5514ef1d5e97a4fef84a302",
+      "programRoot": "c42c31d0b82c9cb55dcbcaa8c5e63340944888f735df592b19891d1c901dc23f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-DOMAIN-SEPARATOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "6a60567a22dd0f6507cc9f56d236bf900cadd9d47ee1f6a1e05e9ba1fac41601"
+    },
+    {
+      "vectorId": "B0V4-V-050-C",
+      "fixtureRoot": "27c1d751c004cb3eedc644fc2edc61467ec6051a4c2845b310f6c57fc62fcdd7",
+      "programRoot": "f6d1480686118699f91f76b7afff4d2a1f0eb064d9355f2b3625473a804e4308",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPROMISED-KEY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1100da240049848f628c2b19ff3b9788d2cb6ff9240ab22ce0e12d9e34f2d33a"
+    },
+    {
+      "vectorId": "B0V4-V-051-A",
+      "fixtureRoot": "43f5d04b78562757e653efd72844bb914a0b02822c7f2b245878c8338d8aac6a",
+      "programRoot": "8536fc9986a681fa9b85163c96b95758e10709962683a4559facf3af5bdb1acd",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PHONE-NUMBER-DIGEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "9fa67c8b4cd0bf54a193517c06e75e4c2207442f84f491302aac52957abbcaa2"
+    },
+    {
+      "vectorId": "B0V4-V-051-B",
+      "fixtureRoot": "a67e7da33cd60a434e391730a91c8f7c6c38b6a8f8ec3a5a902991572e65bc0e",
+      "programRoot": "220985079c09002fe73ee9af517611e4fc5252d415e8e8f1fc0f1af1a99844f8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PUBLIC-HMAC-KEY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "2ff928c2b61ada5eba371721383678e750f3a4c0598048d08d188d97119c140d"
+    },
+    {
+      "vectorId": "B0V4-V-051-C",
+      "fixtureRoot": "6bdda70879240a0de1eb231abb34372ca5481209e272816420083b11c90cb963",
+      "programRoot": "afd2882d675495297385807888c7b28f4c739341028a277c81a52f255ad30566",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNAPPROVED-CORRELATION-METADATA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "113b8c1257ce73a4df3dc4251611e7ac3dcc22a0901f89907c6d1327d0a223ee"
+    },
+    {
+      "vectorId": "B0V4-V-052-A",
+      "fixtureRoot": "a3a4b65b30d018688fd9f91588bec9074d41f03204c6795c601e556d507fce73",
+      "programRoot": "2f7cd31d6d7b0b52a0281b86929fa4f6421b73baec2e8aa0e0921e6fb33e049a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-TIME-PROFILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1b533c9893ea6ede9249ef2cb43268180ea1e595bf2efbc9c6b84a54c4bb8b9f"
+    },
+    {
+      "vectorId": "B0V4-V-052-B",
+      "fixtureRoot": "30579962b1383f5da5d2925283fb4c00a05131dec15cb241300760a95dd5b034",
+      "programRoot": "1db44df4e0013c690e4d613dfe6d9e32233f0a73c9b7dce96c07bac5dd1e79c6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGED-CLASSIFIER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ff99ca7ebb59d93ae96179e1e61c2b40b2c27834c07c72b8cd29dfb86a054fc9"
+    },
+    {
+      "vectorId": "B0V4-V-052-C",
+      "fixtureRoot": "d023fba3ff2c0055cc98f0c6f5e34ffba673dce4c80fb39a709fde20efb0bd11",
+      "programRoot": "5c5421931513905a767293a02c3012e247a46e2aab2f0471dabd9ec795e51a50",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTED-POINTER-STORE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c7c963ecfb16f986a41884e4be9cf8eee70f6e7beb6f530d0076af222aaeee1f"
+    },
+    {
+      "vectorId": "B0V4-V-053-A",
+      "fixtureRoot": "8328fe3691bdbaa85e4984de84ea7af6313cc44ccaf663f6881fc1f4c9f3d834",
+      "programRoot": "d1d1587de0e7afd8a88892859b2a8e23482719c5cf53a127add4e0afbe3ec9b8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-APPROVAL-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ab4a09513e9c8f118aac4ff49deed07df1c4c9352f30bd8ae04a9d835621822e"
+    },
+    {
+      "vectorId": "B0V4-V-053-B",
+      "fixtureRoot": "b3247088a8cca15e4af532b92a7fca54ce4032945ca5a5cc5f951515f5003de8",
+      "programRoot": "d60d127db93c0b209f001362c5c016eb7fa1d44706fff176deb9f093cc2d353a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-VETO",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e026f37f3c1b74640127d62699453708c706c77a20dcc76e91053babdb533fd5"
+    },
+    {
+      "vectorId": "B0V4-V-053-C",
+      "fixtureRoot": "bd4163ef804d97a3ad16b39591d47f62f752375ebcf26c32dad5a8e10eb13947",
+      "programRoot": "92d8e8f4bf615963a699995c824adf68048a675d42da026f371b6dc46d83fd79",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-DEPENDENCY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "68db70a47103edbb5313dac75023c6a874d131b132ad6fb3950975205641405b"
+    },
+    {
+      "vectorId": "B0V4-V-054-A",
+      "fixtureRoot": "171596198311579e457f652660e9ced8252e4a9ce6120bcd0deaa683964249a6",
+      "programRoot": "02f99e71351f2e928508dd30e323517a6ce3a96b2d0ca280603cd331f41c4b30",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-COMMIT-THEN-RESPONSE-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "49912957e27bc363baf6d3d9d1afab1786de438e092402aa8b87b2da868dd671"
+    },
+    {
+      "vectorId": "B0V4-V-054-B",
+      "fixtureRoot": "6fc61dbc13057b11eaca080b7492abb96bcb16e0d2d4cf48028b6355352b988d",
+      "programRoot": "cd07abac08ccba7fa2cf1aedc70785faf60513161cf4376198b7effd939a3a3c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-NO-COMMIT-THEN-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "bb2c4d0d4561b643c50fa7605c0aee68d69b7d84dbb4bdf4b79f6b084de98669"
+    },
+    {
+      "vectorId": "B0V4-V-054-C",
+      "fixtureRoot": "322756349ca7b109471fb6fcdb06c6c5361fe05c8480c41b7821f968b88cdcb2",
+      "programRoot": "b41849fd7b1a00a1ff01fa231c6a40a27554d25ec202a9a72096b74ad7c76fb5",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-PROLONGED-OUTAGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1df80edd449dda3174c2fd7351353e65a7a2500d759e5191b977125f2f107bb1"
+    },
+    {
+      "vectorId": "B0V4-V-055-A",
+      "fixtureRoot": "d3890fd403cddea52631eea050f640a6cd17b657ea5d9133062369e80c45ec14",
+      "programRoot": "b2af72e1a4f925abd1cd4637bf48177c11badeda5dfce0e336ae655955d2915c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-FAILURE-DOMAIN",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c0f5f63d04657ad8edf2439c4954661fb14335b042891cd1f16a04041937f946"
+    },
+    {
+      "vectorId": "B0V4-V-055-B",
+      "fixtureRoot": "2eb6bf0ab0b7b37ec3f1084abcfb910c170586b60c70c746b665fc30f0420c9f",
+      "programRoot": "0fb077266a9d1a57210a4f060412fff9aaa6c119efa7a78db50f216580eeb03a",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-STALE-JOURNAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "81bf5874fa2a11239b763077e111a7b299d31d39d7feb0de7f03c15a0fd0e86a"
+    },
+    {
+      "vectorId": "B0V4-V-055-C",
+      "fixtureRoot": "27bfa096717307a1d3f777b8b80d4c6e17e411940bd5b0447579555ad7cd9525",
+      "programRoot": "51c733a4fd2a5592dc6bec1daf3178a15649c5fb25d833e29ae5facbe2d7d141",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-MIXED-STORE-REVISION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a6820cf6abfa2e4e8d79f197572d3f3a2fe9a2b881293cf296cf973ae3d2b797"
+    },
+    {
+      "vectorId": "B0V4-V-056-A",
+      "fixtureRoot": "09b58032b818464196a201a39c36b7af106d4b1f07cf73eb80acdc9d8510b34f",
+      "programRoot": "5669c919c01fdbdfa533745a64c6bbc822c8e1c351a8a27c83461175651b7021",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OBSERVATION-ONLY-CURRENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5e21fd773a8d500339e8cfcf488936d4e0fad7c5a7e2937be44a26bbc4bca9ff"
+    },
+    {
+      "vectorId": "B0V4-V-056-B",
+      "fixtureRoot": "e7741b0fad4c2501e4dcae28afdc9179f5eba2636ebf3320e89ff113416b3ce2",
+      "programRoot": "82884b79dae933a8c085097f6d0e2cca4c75470eeab167232692f29f5f6a4dc7",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKED-POINTER-WITH-STALE-CURRENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5cf8649ad475aafd778e41af492a095113da613a60ea3d37fd9083d11b0b0abe"
+    },
+    {
+      "vectorId": "B0V4-V-056-C",
+      "fixtureRoot": "4d7e4e6e1d4e01ebf6f81aadbc55d45999188591f1cb04eb0704d7a04d744d87",
+      "programRoot": "caf50b85dc2863f98931c19fd2af6a4e048ed99de1150b104df02fb735f7416e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-CUT-MEMBER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1274386dac4b4d29b3be31750581ae85fd4f2c4bb1922ee7acca7e51ed2becf6"
+    },
+    {
+      "vectorId": "B0V4-V-057-A",
+      "fixtureRoot": "4af58069a1c9c8bd88f6107039b7ab82a57b335d5dcdf1c9f391cdc06c17e7a5",
+      "programRoot": "1314c896e65dcb493389df2f48e708fc2d6c217ce9f41f857a8efca28205f062",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5214823575fc331026eba24c192f887d86b3d9e359fc39041bbe7937e440a316"
+    },
+    {
+      "vectorId": "B0V4-V-057-B",
+      "fixtureRoot": "34b5a1d8998ac2a6f049f1b157662e1b71ee4cffdc51b1ad51a253da8678c852",
+      "programRoot": "8d1cc89bfffa706c60f3cd91bb6470a3b9d71d0ed3d787b2a08316d9ea37e4f6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-CURRENT-POINTER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "dc5267dc76c1fd09e42b033833280cb60ac2fa88f4338897126fd42ace2a10cd"
+    },
+    {
+      "vectorId": "B0V4-V-057-C",
+      "fixtureRoot": "d54b1391ae3c3ed05eb7fd5cdbaf84462f183030a0b47516944159a81608d789",
+      "programRoot": "285a5862fb0a500ea6154821d417fd8e966057df0931add35a26cda61ce2deb8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CROSS-GENERATION-REPLAY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0f01bc311ad506f6ffdb0cedf74294153edd38cddafb08c59ed12e4bf12b2432"
+    },
+    {
+      "vectorId": "B0V4-V-058-A",
+      "fixtureRoot": "025db68ca61261714c15ce0eb959f748a82145a07deec698fbc73732c74fb07d",
+      "programRoot": "2ed035dc1836411969fe48527d117523a1b5990ebf7db82e2d5b72fc376cbbbb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ABSENT-CARTESIAN-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "571a7be2b2730b8d3505d6e60c2299234d67aede0d9bcfcacd7309fd018dd718"
+    },
+    {
+      "vectorId": "B0V4-V-058-B",
+      "fixtureRoot": "f92af084fc72157ae0be37ceb7ea486a677e1cd9470c4cc4e563a544f0e38c0e",
+      "programRoot": "54eed66111fc63e68f33b964ab5dd0b42a9423a8f1dbd3e4183500f0a70ecd89",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AMBIGUOUS-NEXT-STATE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c163b2a51fe17a5220b0b06414d6d91eb77b00e85181df84a8bacf01724f6613"
+    },
+    {
+      "vectorId": "B0V4-V-058-C",
+      "fixtureRoot": "2b21eee7fec7171d5ad6d336fc429b2f3bc13797e699b4caab503bdf9e8b4b16",
+      "programRoot": "76236c87510884650e6a5861446e866638d0be740e2d21667dc5670a1bfc16db",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TERMINAL-OVERWRITE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "104bd3fe8c87d6b9845e55195e7a04a623934c73aee8e79f9a787b93715b4e9f"
+    },
+    {
+      "vectorId": "B0V4-V-059-A",
+      "fixtureRoot": "c94beaf33b8b09615b4255a27c1ba38998e358cd80be7ff25009115679b04bbd",
+      "programRoot": "5b368bb8bb8b50356144d16bc000cc99b3925afc0fb995148eb53f258a35fbba",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEDGER-FORK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d03cb74ce1005c63e21bfe0897ae5c65359a6cf0f46dda9789ba36541445922b"
+    },
+    {
+      "vectorId": "B0V4-V-059-B",
+      "fixtureRoot": "ef991634bd826a51c93954960b9f94e6c14d1fafdf2abc28668b74c2c8ebfa95",
+      "programRoot": "0d21bbfce2298e2ee3c9e04cbe003c5ad8c5233999104f69476395f74b669124",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-IN-PLACE-REDACTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c0cb5d3eeb8fbbff3bde956fc35e2160186b9ad931e14637aefe6482669eed53"
+    },
+    {
+      "vectorId": "B0V4-V-059-C",
+      "fixtureRoot": "e532ced06d8980cc65abd1753b447e31347a08557f280ba5e83a1d9f1dd2fa80",
+      "programRoot": "8c7343dd5804fad348e00e1b60becf370931963525c9316a0a82f478bb797971",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEGAL-HOLD-DELETION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "fce8403d6d51e91104887e8e4f8995fdb4e382e5ae6c572b7b4ff46134ac351f"
+    },
+    {
+      "vectorId": "B0V4-V-060-A",
+      "fixtureRoot": "492b1b2fa5fb41dd48246f999f14f47b8b13539d3beca00fb7175fde5ebb666d",
+      "programRoot": "af55d069fedeb903af18a0eaa07cf442116f6c61b2c8d5c311002ae0c422a36b",
+      "observed": {
+        "terminalState": "EXPIRED",
+        "reasonCode": "NEG-AT-EXPIRY-DISAGREEMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e7a9ce93c9fbe9d4e6acad28709a6b6c1aa7c4477ab74cfd9c17323abd0453cf"
+    },
+    {
+      "vectorId": "B0V4-V-060-B",
+      "fixtureRoot": "dc34407785a47f0fbd65b93de28038bb21f28515c04706e3856098d5a3ea1db7",
+      "programRoot": "95bb281c5cf51fea30f38a10b0b5e93a9aa1768164c1abdd5615703ab0a2bcd7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TIME-ROLLBACK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8dd5b64bc255ef96cfe6cf750f36b20c82ae98f7c0832efb64a0b61ee28749b2"
+    },
+    {
+      "vectorId": "B0V4-V-060-C",
+      "fixtureRoot": "07d0f715a9a3f84d0839b9bacefb128509fd6f8060f662c7794d1a02747bc6b4",
+      "programRoot": "a25860f76a9a035df77acb7c8aca6694671613e2aba06d3f78d153e451009e3e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNDECIDED-VALIDITY-DURATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "f97578d99ce326050f10219a5e10c4a3579d7108e89e2fbdea1e215a3f843192"
+    },
+    {
+      "vectorId": "B0V4-V-061-A",
+      "fixtureRoot": "f4630f4cb80b414138308d0f156905d7a162168f250ffbe5163cc0528c4bd56e",
+      "programRoot": "11c9654be4ffc2aed8b57ef11c2e11838677dcea52c84f34af078bcc04e85676",
+      "observed": {
+        "terminalState": "QUARANTINED",
+        "reasonCode": "NEG-MID-WRITE-CRASH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b531126656b4b29eafe90dc197a66d19c66422a5bf405cee7b697b2d7de8f285"
+    },
+    {
+      "vectorId": "B0V4-V-061-B",
+      "fixtureRoot": "4b09047cf364eaa6d8c3d4d1c4b645869e2dc7f6d8b40346b7fc023428a7b544",
+      "programRoot": "efe42d7d89b6bb09584ae134c7d5cf8b67537eda55dd4dd5faf8708672710971",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-DESTINATION-CONFLICT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "35a0c0734a73d506ea46f9440d8359da27ff06080c6f3d4a04a91d5983b29b25"
+    },
+    {
+      "vectorId": "B0V4-V-061-C",
+      "fixtureRoot": "6c4fb5c010eb9b853e90bae383381cb13d0c7bbccc614286a8c7a5c25dd5c7fb",
+      "programRoot": "3cbb9526d02625ac9b2675baf1b4a894b50827d4eccf332afde1c06d61040306",
+      "observed": {
+        "terminalState": "QUARANTINED",
+        "reasonCode": "NEG-CLEANUP-FAILURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d931a7b9c8fb5aa9767f133695de8169cff96919da59f468e09a220384334935"
+    },
+    {
+      "vectorId": "B0V4-V-062-A",
+      "fixtureRoot": "7f5606fc55ae313fa7a898f2417ddc9f520a4bccf4a386f4e3d12c7e8c15c44d",
+      "programRoot": "cb5b4e598671fc4d4d1978eae3b2e0c61b426608d837a9258e7c33fc01cafdd7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-PREDECESSOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "779b7855f127b87a5bf72207b356885a9c4f609fd82fce52f5382ff07bd62b61"
+    },
+    {
+      "vectorId": "B0V4-V-062-B",
+      "fixtureRoot": "3a96df76da38d1ace1070722e06f6bdb1a49e26821961ee95af44ca28752e94b",
+      "programRoot": "5b4751a5055f0e814e2158d8ddaf4ab9d5f69466bd5ce36bf19168fa771af2c8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MERGED-FINDING",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5f3c09770b5a5a485ed4e3928492fb3b11d434e154fa773b7ef8a63dd506b7e1"
+    },
+    {
+      "vectorId": "B0V4-V-062-C",
+      "fixtureRoot": "c6f5df6e0f6593ba6b0fbd97870d7b1ebc6ce4b5947be3c2732aa85e334fee19",
+      "programRoot": "dc13cc36c293c9901e9a49366107551a9c04321675fb69191d2f50e8006fd9cb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EVIDENCE-FREE-CLOSURE-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "3915ede55c6f1f65015e88554472acd2dd2d0c3964b1003bcbb4989095c6d00a"
+    },
+    {
+      "vectorId": "B0V4-V-063-A",
+      "fixtureRoot": "4e2d21a11ec4e07868bd5546828a9861110f3238ace2ab3f309fb5897ece74f5",
+      "programRoot": "35168c8ccf0c2f2eac3a07eed682ed939f79b610b4f8049409f5890d88aea5a4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SELF-ADMIT-TRUST-PROFILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "17cbf33379f2ddce53d21933328c4a43eda600ed7cb87643ae1fcc31f97dbadf"
+    },
+    {
+      "vectorId": "B0V4-V-063-B",
+      "fixtureRoot": "466ba3e13f3c412813e68968ea40d301f06978f5c3c42d957c467ed1a8fc2f5a",
+      "programRoot": "833c7ea2677b949030759371a694c4ab905cfdc70734bc31ecfda6c28d25df3d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-ATTACKER-KEY-CHANNEL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a8b133028b9bf3b93008449e2cbe3143eaa1487135352e09eb7f608ea0dfdbd1"
+    },
+    {
+      "vectorId": "B0V4-V-063-C",
+      "fixtureRoot": "815ec10a7cf790536b8b70ee3417ae5be90cb06d37382a42354d625980c873f3",
+      "programRoot": "4f811f5455f354e0d9c1aa4e7790b6b8c28f129c4b4004780b8150c127a37570",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RECOVER-USING-COMPROMISED-KEY-ONLY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "42dade5b23a004d1ed2c87526cefc80a47034f3ca7caebe6699c1e7bb4f535bd"
+    },
+    {
+      "vectorId": "B0V4-V-064-A",
+      "fixtureRoot": "bae8568d1a15984c837344361ea44a93d31fa8d557fec05f9f43d61c45043681",
+      "programRoot": "31ebd318de25efc93bf95af30239532aa7dd80f8ce93548a7c62e1d3af6e8078",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REPLAY-GENESISPERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "98feb77a25b886f3d46136aa044dc416dcd1dd22b3eee0c708a8e015fcec3d91"
+    },
+    {
+      "vectorId": "B0V4-V-064-B",
+      "fixtureRoot": "1601282c0564f2b0de8c96fd16206c22feade19685b7616aa99e89218011b277",
+      "programRoot": "fbd64244bc76c778f76036040c0be7481a257171f61dc6246542876b379fff47",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ADD-SUBSTITUTE-PACKAGE-MEMBER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "329c612b01ad5a9703fe16affd738f27fcaa4f0d586c4f694a37ce9d1b40e644"
+    },
+    {
+      "vectorId": "B0V4-V-064-C",
+      "fixtureRoot": "cb2d31e99e41211035d66cec706d2a262dcdcac8d6cbe6ba930850b072bd1b75",
+      "programRoot": "fb39170372137616eec420425a1baae89a510e047b1631fc9a8bc0bbf416217b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CRASH-AFTER-STAGE-BEFORE-LEDGER-CAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "fcb718b6159c235af30be3951a44f970b176cdfc1b03684685b42644aa8d8e8b"
+    },
+    {
+      "vectorId": "B0V4-V-065-A",
+      "fixtureRoot": "3223a98f9ef7f5a2c75fabcc0a2996e1d1167ba77cef71c0b7711b12b0540ee9",
+      "programRoot": "80a3dc2f672c55b75668cc2cc0321e534ea97935ca942f8806ef2e39b6ffd236",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INSERT-UNTYPED-AUTHORITY-PROSE-RELATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0c81f4b69e30a210d9e13ce979a251af1da817a772a0cc09e3fef65c389c5fa8"
+    },
+    {
+      "vectorId": "B0V4-V-065-B",
+      "fixtureRoot": "4a6569aab7e126c7877bb72ed37a56f9048dcbe3173f93cae69e9bce8c633828",
+      "programRoot": "7a12cea5fab6b2d33290631a084e91a24643480c13d37e24cc36cc88e214e1ae",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ADD-AUTHORITY-CYCLE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c904f7eff787b9c852bc4cb73551bae43ee234aac94117de0b695161f1fa2e85"
+    },
+    {
+      "vectorId": "B0V4-V-065-C",
+      "fixtureRoot": "620073577deca0781054c909f4fc6d5345eba4d78a1013037f64097a5a43ba1a",
+      "programRoot": "d008079ef4a7e93ad759f406935dd3b0bac9601b1c741ec3807783e4892e031c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-EXTERNAL-L0-EDGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a5513a1d808adef162c886fa0fbe85b397d1ba50054e678343b81c6d1506ba24"
+    },
+    {
+      "vectorId": "B0V4-V-066-A",
+      "fixtureRoot": "ffbe6eedaa09086aa1de92a29f5670ce1d6c07c3907dba0b861b3e5dee1b5930",
+      "programRoot": "f503e4f879f0f56ebe858825f0690c1c1eaf5a8ccce925bffb96dc4505d88881",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EFFECT-SUCCEEDS-BEFORE-CONSUME-FAILURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "3d0119114bf4ead3fb7894d1938cadecc281d93b55c5900ca36ddea2c942429a"
+    },
+    {
+      "vectorId": "B0V4-V-066-B",
+      "fixtureRoot": "b6b2a4457aa2d588c312637ddca31509006ba2e3265aa7e34ea2d87c62bfbab4",
+      "programRoot": "edab4031aceb0d3c5551f77dc0f3a15f99dd6518f904953b4a9bd1cba0d7bf32",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CONSUME-SUCCEEDS-BEFORE-EFFECT-FAILURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8be769aba7718357e994ab53cb8a300c8da0a79b2d0b176dba57356a41b107ba"
+    },
+    {
+      "vectorId": "B0V4-V-066-C",
+      "fixtureRoot": "8a367ae4fff20248d495e3de26b33afad66cd9a43dee01d452fe1847c45b6e29",
+      "programRoot": "5b5e9993e2ac0e30627e7f89620e6f6d6ee2e45dbcdc3158809076eea9beabad",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TARGET-IGNORES-STALE-FENCE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "29754ef5fd21b7231b31de31da74024e637d9c09fb3a6db5cfed2f815234d092"
+    },
+    {
+      "vectorId": "B0V4-V-067-A",
+      "fixtureRoot": "8d2a440614cc181b85cde2a8578b481b2408b0cf830a926a042fb22309831e5a",
+      "programRoot": "91aca07e684fdc5d75a45eb8cc7f1ab66f12a4403a101460755376ca775b1fcd",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-IMMEDIATELY-BEFORE-TARGET-APPLY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "495abcce8266cc87e295671bb903306b7b58575662ae092590f32ecdc0908796"
+    },
+    {
+      "vectorId": "B0V4-V-067-B",
+      "fixtureRoot": "38dfc9a767ad32ef87c5b54651e405523a9936c38109a1c37bef00c7f22b73a6",
+      "programRoot": "e01b68055a3fc418caf5febae2339f12d2110a49aa3fe761e2b8a6822e472c8a",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-EQUAL-REVISION-REVOKE-COMMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "fab5017506decae27fc55549401b5fd4f92d53e347d72147023b6cb33d264548"
+    },
+    {
+      "vectorId": "B0V4-V-067-C",
+      "fixtureRoot": "741dcddfc4e0437c2074ae1a65a550973f035835e040e15f7cc9b0fad2c1ea17",
+      "programRoot": "aef933157386b32e087357ba378ceb7fda3e742383cdee664a223814da748c78",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPENSATION-ATTEMPTS-AUTHORITY-RESTORE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c63fce0831733ad38a5133f88b0452398a6b8d054204f0f78181e886c6cc8c98"
+    },
+    {
+      "vectorId": "B0V4-V-068-A",
+      "fixtureRoot": "ee244140fcf01d4154c0dc496769b0eb0d500b73be4618e62c6db04eaff2f624",
+      "programRoot": "1c4ee27e8bdb24c7a2b69afabaaa6b3c8687e172c81ea50fb286451325caad1a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MUTATE-ONE-ENUMERATED-HEAD-AFTER-VALIDATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "901d76facdb1d5fb7bc2e131e710bdcc1fd677cb7e89097a88d2d928f7ab7d4f"
+    },
+    {
+      "vectorId": "B0V4-V-068-B",
+      "fixtureRoot": "3ad85cb949a22a9d09f012bdf3846a375bda38d7f2c07cdc6791736a7f6a6b54",
+      "programRoot": "10cdfe9f9349ebbb5f1a0b12fd6bb2b916a37b93c4cf9e69cd7008e137dad77f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-ONE-HEAD-FROM-REGISTRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "80746c1c0883722639a0d817a563e179615e062bebab53f403789b39ab7b2ab3"
+    },
+    {
+      "vectorId": "B0V4-V-068-C",
+      "fixtureRoot": "5b244f3cf6b5af85cd44c096546581fb6db4f82130bda47522874398e6b60c8a",
+      "programRoot": "b58111b7eea2c1135c0c05f091c1c78eb268a1e9331856d48238c56c373b7c0a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MIX-HEADS-FROM-TWO-REVISIONS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "371e356ae918fe94a7b4317d65d97d17630af662d6ec1fc0944709e3c1b11bc5"
+    },
+    {
+      "vectorId": "B0V4-V-069-A",
+      "fixtureRoot": "01348407b5b9c368827a7aad2f2767e357ec0261cdeee11b3309f58dfef9af45",
+      "programRoot": "08eb10b27c5a6956a3f8e6c6780f3df5e2866241a3f6d8e16c5881f9c93b916a",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-COMMIT-THEN-RESPONSE-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "b997988e4857c8797fb1aa7db2f1dee7c5cf01a9fb2f8cd85d21c923d2df4af3"
+    },
+    {
+      "vectorId": "B0V4-V-069-B",
+      "fixtureRoot": "7867c846c5b6d1e7fc8edcdf9201dec3c40b6825f31fa9ecf5f82b87365dcb64",
+      "programRoot": "c52577857dcd35e8b0ee00f500d7f086c926e7f925da5334e51ea4e68a941d5e",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-NO-COMMIT-THEN-RESPONSE-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "4eb5827cfb6c68bc6b2dafca76f436a97cf3fdfef65738697093a216896a968a"
+    },
+    {
+      "vectorId": "B0V4-V-069-C",
+      "fixtureRoot": "812b0dbd75605a0b7b548fcdeeb6068f26cd9c6ebc4a87be94afbe07acec49b3",
+      "programRoot": "8e6fa76123a3d8a00bb110c5798d1f1c76149e06e8faa0ac5df204bbcb65b1ad",
+      "observed": {
+        "terminalState": "QUARANTINED",
+        "reasonCode": "NEG-PARTIAL-EFFECT-THEN-RECOVERY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "4ed7e7ad416e0dcc7fc42e825803279e9bc5506b6a04f8b34e9ef46d86dafd5a"
+    },
+    {
+      "vectorId": "B0V4-V-070-A",
+      "fixtureRoot": "a9c8d0103fa365e4839542a0151be47910273fbe1ea5a8f6a927e88af8830a49",
+      "programRoot": "465bb330f03c2caee6795d07d568890672db0dc5d122764bfb3932b9e6b3477b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OVERLAPPING-GUARDS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d998462e84da39980d42fa012cdac8a23899b0be7d63d1de6a06c07435647781"
+    },
+    {
+      "vectorId": "B0V4-V-070-B",
+      "fixtureRoot": "7bcb21e5c0e745d611c60a41245748c78b1263228682a85e069b93ee0e0f0775",
+      "programRoot": "97f6ea84e8d8a8d57d6e27b130ec2a22743b1272d20cb174c7e94b55db9cb96c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-NO-MATCHING-GUARD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c676839254f96a3d654ac7efd452d893233c3f00fa3053aa548d60178d5b88c5"
+    },
+    {
+      "vectorId": "B0V4-V-070-C",
+      "fixtureRoot": "63ef1ac1be1d587b5f3cbcad446998dd66b4bf941744198955312738a70b601a",
+      "programRoot": "8b2aa47e258cf1f444a556ba0313ad1c5a2918f453c4b7348c14de1670d76651",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INVALID-PAYLOAD-WITH-IMPLICIT-RETRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "86690f71c68f69d5e7924815f6bc7c6011de72539926b3cfae0f63e0c506b55b"
+    },
+    {
+      "vectorId": "B0V4-V-071-A",
+      "fixtureRoot": "38859eb8f824dd06c16a17c3ef8e0e037912c0b20acfcba0558cf99f7ca73c13",
+      "programRoot": "73366df328d9ceff14837a7fdd7c43dc6f57ac5d6144ec46330dcf5db9a951c4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-ONE-MANDATORY-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0396a6eabe631219cdb1606e338c7bdaf973fe454c0e71146c0d611adb129410"
+    },
+    {
+      "vectorId": "B0V4-V-071-B",
+      "fixtureRoot": "2dc30b212bf68503a065593776f36cf6e13fe6faa10d6c3bcb1bd52b1f00778a",
+      "programRoot": "5afac5441fd602628d476fee493947bf85516fa2c71f12b0b7bfd2c95ee44369",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-STALE-DEPENDENCY-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "a9e7cd6fde9d38b5987c493d70727ad2d80623aa517b1dad6cd8aa9c7bf80f72"
+    },
+    {
+      "vectorId": "B0V4-V-071-C",
+      "fixtureRoot": "c913204cde976773a9a0d9a5f25bfe925c2a8c47045953aebceb7a9674ea71f5",
+      "programRoot": "9b636bf3e309b037c8f0f73b83d4c28cd4090b48ae5e873bc057fc96237afc8a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INJECT-AUTHORITY-EXTENSION-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "6a41d2b3937fe35558680bdb04e19f6cd4c6c00544be72fd76f10bc0bf227174"
+    },
+    {
+      "vectorId": "B0V4-V-072-A",
+      "fixtureRoot": "e55f7411fd5787931b1047107dcf762b00e54ffb35b2ad4c973bd901b4df1187",
+      "programRoot": "9d961496f5da0ced9c2b454ec6a64bb476897920994e5024ff37996112bc1116",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LABEL-ONLY-VECTOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "dd1df0061dfcfda3a0363989d9d2f6ce787657428e06fc16a982e0ca5c2fd2fc"
+    },
+    {
+      "vectorId": "B0V4-V-072-B",
+      "fixtureRoot": "353523345496fd4c4b74267f24c29a923c399c67bb7d98c4ea0c8d9953dc6a26",
+      "programRoot": "6b07c31078a4bd4878ab102b6e61c76956898016c4654db1f3cae878652a1adf",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-OBSERVED-EVIDENCE-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "41096a0ad04283e8cfe5b4bb2a6830cbe8b0a87cf85b5aabc6edbc9501acd204"
+    },
+    {
+      "vectorId": "B0V4-V-072-C",
+      "fixtureRoot": "dafbf3cc457c959b4363207e72597dcffc37d92014a4ec27b101ffd545bab67c",
+      "programRoot": "d63d83920be260ce89b28d16c0e7115bbad249ae212a484e9c00a840164c4a16",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-OR-NONDETERMINISTIC-VECTOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c901ac868a3f302c13f7aaede6d825a2ad6c53c303a4e6282d16b86dcf3eb9e8"
+    },
+    {
+      "vectorId": "B0V4-V-073-A",
+      "fixtureRoot": "4eee504efe02dbb9fc94151abba860102d190c5ecd93cd36806dfe66feedf1f0",
+      "programRoot": "18ede5a4dc04e5b2ef9b606d596949b2f84c301ff70fdebe29def2c387ea6e82",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-OUTPUT-CLASS-SCHEMA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c11daa567c72995cf218cfa0978f38135219e7a6570cc35893bb4ea0a9302719"
+    },
+    {
+      "vectorId": "B0V4-V-073-B",
+      "fixtureRoot": "0fbed75591c3eb0382fa13a39d102ee3892770249f02f6300aa391a41d813161",
+      "programRoot": "2eff96bdf2080dd0bd82113a091941b93f7ebb63091dfaf4b11bd9a7977c9eb1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PLACEHOLDER-WITHOUT-EVIDENCE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "ec4e41e6af89b85fe624f629898bd5cf2df3e23abb43ee4d9927181894946a6b"
+    },
+    {
+      "vectorId": "B0V4-V-073-C",
+      "fixtureRoot": "53b9bc33a7fc4a5fb70f993fdb49d9bd102dbce2854c07ffb2669328a5fd8c55",
+      "programRoot": "903c159d9d51cd3238bb4c35d1b31bd1d427be2078871e2a9ab4333cb3dde620",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BORROW-ANOTHER-OUTPUT-S-CLOSURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "99c8bf456fd00f72e507185573fe92977156e198fda4130a75c29e9db55a45e2"
+    },
+    {
+      "vectorId": "B0V4-V-074-A",
+      "fixtureRoot": "22d6d2a0e37859dfb2e045aaef20ca5590926888e484e280b20f9a1e03477b1f",
+      "programRoot": "81aa31c0038b3313207e9df9a73b173f8d2c9f2290b2b218d8128bdf2c289a9e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPARE-SAME-RESTRICTED-VALUE-ACROSS-ARTIFACTS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "590ba77c7eb980703a0d724a8977d54375db2ccf09c7ff8803546cecb31066d7"
+    },
+    {
+      "vectorId": "B0V4-V-074-B",
+      "fixtureRoot": "35a3c51bc64d9cb3ba852528e000e979a0310a0288a3a87ee807b65dcd5c61d0",
+      "programRoot": "50ab63864ecd63955275f60aaf7853bb561312f1d6758d7f6bd793542b596636",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHOSEN-INPUT-MEMBERSHIP-PROBE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "9199a6cd7978ad05b90e7be57c4bb257c3926442f56e75eb3e70cadb1ce3b9f2"
+    },
+    {
+      "vectorId": "B0V4-V-074-C",
+      "fixtureRoot": "d7c375284e3df28d499a011819b2ee447fe1ae638d5bbf7cc04e5ae108e56cf6",
+      "programRoot": "06e254e65b877062126d9818da9c3612923434f87b86aeeb8d11acefb3c2404c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LATER-KEY-MAPPING-COMPROMISE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "48c1fbc8bf9e0da78e1692dc192b1efeca90892576f166f3a196f3c079b0f617"
+    },
+    {
+      "vectorId": "B0V4-V-075-A",
+      "fixtureRoot": "3753ffae1743e723f27c76a2f48d909f5dea7e573f9fa6cff156354874a4bd4b",
+      "programRoot": "8d8833b2eabe23d75c609062fe3cee4642a85a9d148262af5941857ce943775e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ABSOLUTE-HOME-PATH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "5dfadbca4579367eb5cb45f16f745e2ccbacb6716962439f3e464aec6796cb71"
+    },
+    {
+      "vectorId": "B0V4-V-075-B",
+      "fixtureRoot": "82471b8fc1d80b6cafd5afcf4a3b1f98e23f7f3b986c8e5b3520064ee0dcedcb",
+      "programRoot": "f7786ce26f6b3924b65e4831e99fe350290556953b8cff90c0a9ee6e95335663",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-NAME-SUBSTITUTED-FILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e1305d997c7184037537542b553be59584617a54dfe22f00f23872fbee3ec163"
+    },
+    {
+      "vectorId": "B0V4-V-075-C",
+      "fixtureRoot": "2a7df1c9a2bc6453cf24ed41b2f5c2f17ff58a4e3928eb2a726bee996de4469d",
+      "programRoot": "229ae599b9b44b76a0ffa2a23ca93e90720cf4c8e7fb0c44939c2ba142a7dff8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SYMLINK-PHYSICAL-IDENTITY-MUTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "60f329444e61fb9fd2914fd43bbdf999e2025ee1203a3bd4a267ef7d83cf4e03"
+    },
+    {
+      "vectorId": "B0V4-V-076-A",
+      "fixtureRoot": "60b511a9bb1035ef4bfe851e05845b48e1aa5bd73e71ccbb1700cc34b5c2362f",
+      "programRoot": "7e719d7c33800e28cf49431437155d36c9336405db03ca1a806946f2a1a8945a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ONE-CONTROLLER-WITH-TWO-REVIEWER-IDS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "99c024a5e0a53c67c355459646a88d43bee633ff5b40b0b57c09ff1629394027"
+    },
+    {
+      "vectorId": "B0V4-V-076-B",
+      "fixtureRoot": "3264e30cc0beaab29479c192a31f8a3a48d4a806b49312b5a5b405eebf9e598c",
+      "programRoot": "6dca2461a3e819880e29f040a4df4036c6af97c2a61ea2ac3af12625ac6ba7c3",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-CONTROLS-ACCEPTANCEWRITER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e98058ac98cf32fa8de7f3bac86b16ec356e912c6d066443300f859af420e297"
+    },
+    {
+      "vectorId": "B0V4-V-076-C",
+      "fixtureRoot": "00e389e32506dda53ffca2c8fb2eced01625a8ce5eb1e7fac181a983e7375f91",
+      "programRoot": "f973eb8fd6eefbc7efe1f4ca1a0312f5db595f9bc63ca5b377837d5147fa96c1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BACKUP-SHARES-PRIMARY-CONTROLLER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "27494484d08478983226f03d10d171402a926f7f1bcaecfd0de6d3eb6d232b39"
+    },
+    {
+      "vectorId": "B0V4-V-077-A",
+      "fixtureRoot": "65e2a1b19cc2308494dcaca1f02837d8cf92a32d82855d4330f9d35591f8efb3",
+      "programRoot": "f0b2dcf5312c1b7a82a3d5ccfe30ab1f218379d92f66220e2dce055edfaede3b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OLD-PROFILE-DOWNGRADE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "f710fbe34d61d6addaaf0901d6fa2a2f93b562667d9f00bb3a98ce7abf2d3932"
+    },
+    {
+      "vectorId": "B0V4-V-077-B",
+      "fixtureRoot": "4fb7058f9956d8b66e7de04492535774c8a730d35aec58802d693e6a05f2d349",
+      "programRoot": "12656475170416ec6473abda42fd02cc01d18c04e342ccd1c12d91c64360a8a5",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MALFORMED-CROSS-DOMAIN-SIGNATURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "17cc9940277de61b90aa58a73a694e840f3ca7071046237d39dd69a7429aabb5"
+    },
+    {
+      "vectorId": "B0V4-V-077-C",
+      "fixtureRoot": "485bce144849ddad0993a240cd52b5fe3c2ce3a9fe37f373575cc8fdf5715186",
+      "programRoot": "18a00253f2e829735936f1462563f9c829ccd561eabb18e872566bc3ba0c5dd6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPROMISED-KEY-BACKDATED-RECOVERY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "41dd2047affa37f995382e081f9c75cd87a94c6d00b2729b48e67e393696a63d"
+    },
+    {
+      "vectorId": "B0V4-V-078-A",
+      "fixtureRoot": "6fb1003868aba77c5672843ccab24306281220b3f3401ac2072c0d782ea356dc",
+      "programRoot": "6061c1c8b51fb0d968f750b5fcf8fe06520c05e491ae867efc9c5497126bc81c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-USES-DIFFERENT-REDUCER-CODE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "d575e5313be5e8ceaa4aff862ce2096f321eb04942d6650bce7008897c2f6dd5"
+    },
+    {
+      "vectorId": "B0V4-V-078-B",
+      "fixtureRoot": "6f6c9959700bef0e766772a2fb819c1e5e45df921d9ca03ce87e43b6656704ad",
+      "programRoot": "5f369deb10f69151977e473c8159f56800506ac3b5e99894ffff3bc83a6ef603",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CROSS-GENERATION-STALE-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8eb6b1d0a6d1a6b170df2203aabf6e2ebc37ae04236e16b6f2fd43d7473055ec"
+    },
+    {
+      "vectorId": "B0V4-V-078-C",
+      "fixtureRoot": "07f894b989699f48229956ddbdada0ba0ca10852c8a737cb46db560f3a4fa04c",
+      "programRoot": "2efd68d7d2f570595ea3f5a5a0a8c50a0cb15e05131d203336d2ff42d29a7636",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-O1-RESULT-BOOTSTRAPS-DEFINITION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "357d3f599afd2410fa15c54d80b8db28702d99a4c83942acca5f5f4bb0f83b2b"
+    },
+    {
+      "vectorId": "B0V4-V-079-A",
+      "fixtureRoot": "4b7322a21d532ca485a4122183de42c1060c6b8e40a999667e7565d1de94c3e5",
+      "programRoot": "44ccf40200c39b4b1add160456a66ac2324125951072cc987b35032b385de5da",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-JOURNAL-SHOWS-STALE-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "468ad6ea4a368b1b40d45dd66c2be588d4589a51e94a13ef71017a8e8b282980"
+    },
+    {
+      "vectorId": "B0V4-V-079-B",
+      "fixtureRoot": "32945639bb47caad1a7c32e93126f88c31477d8a704dfd15b3b873fa1d692ef1",
+      "programRoot": "93f0e60a101c78bd3cf8b0c6449880dc4ea91b927fe86ee20f0898c2759641ad",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-JOURNAL-LOSES-REORDERS-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "c3a906d0f5164e1efa50c6e6ba420f0c8e6cb6449ec7f565dd297a26467c9024"
+    },
+    {
+      "vectorId": "B0V4-V-079-C",
+      "fixtureRoot": "b6ed89886fe4288252ace62c12f093dfc134740f0dba7384d1cb3b0118991454",
+      "programRoot": "47adabeee55a59e4212f644c33fe42e7a06aa089066632d56b8eb6e6fcc93f0b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORKED-JOURNAL-CHECKPOINT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0fe030ad476fe3366ea0e059fe72f19ca22b884081d7e7b1b84a9698d1b7ee0a"
+    },
+    {
+      "vectorId": "B0V4-V-080-A",
+      "fixtureRoot": "e352cf632ecbe590362da7128ce1eecf84593ea586aaa7f7c2271d5b645e07ca",
+      "programRoot": "c983c29fe8a6e5b0699ab8e6219b485d36103b193a6ee6df987949bfcfc49ca6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SYMLINK-MOUNT-SWAP",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "f4b928769d457bdfaecb344af8c1724016c435333d5f120cf41373b9dee6af94"
+    },
+    {
+      "vectorId": "B0V4-V-080-B",
+      "fixtureRoot": "84600c41da72ece2e2f01eb58873641af55ff9a1d13af10a2acc57625810c5e6",
+      "programRoot": "26ee7f706880776429bcc8e212bde4fc30184b93693964b47d97ed77011c4f58",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DESTINATION-INODE-REPLACEMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "7c953e22b70f9d7b3c88ebb2f411db9107d94f3a7e6ff62f48b92a673b4480b4"
+    },
+    {
+      "vectorId": "B0V4-V-080-C",
+      "fixtureRoot": "cad4680f2861aa01926045975245f71f03d40336841b793da863801eccff2bde",
+      "programRoot": "d41951c57ae4643818fee8d9fc93b5cf6e13e73220ea06399b8c20136963e628",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CRASH-BEFORE-DIRECTORY-FSYNC",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "41e33e556c3865e617761033f21f68c7644aa0a2b057585128584dacc753a0cc"
+    },
+    {
+      "vectorId": "B0V4-V-081-A",
+      "fixtureRoot": "be08d146a61fdd284c57b3a8ad9e2bfc1a18125faf3a9b589016a24dd8ced393",
+      "programRoot": "842468e3a3f2a5d89ec65ae4e85ffe9ab9270c1c59238f3deaf507aeec2f1de5",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEDGER-PRESENTS-TWO-SIGNED-HISTORIES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "1ec9e63130a28f0010616ab252808689e610b935f493d603c18edf5a78d9b056"
+    },
+    {
+      "vectorId": "B0V4-V-081-B",
+      "fixtureRoot": "dd25d0b49d439f344eb45cece899ef43f2a5df3f7026d47c31bc5c925118cd86",
+      "programRoot": "ef5c3db729d3c5dde71785cf5b92008a977e47f49323638fdf3fb50112088ec6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WITHHOLD-ONE-WITNESS-CHECKPOINT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "8adbafc8d2933fb465d621c4ae79d582d39ce7a167879eb5ef5b085dcc3b075c"
+    },
+    {
+      "vectorId": "B0V4-V-081-C",
+      "fixtureRoot": "fbad67897410ffc4d006e6f0cfbe9402f66d1549a6cf4d470bb4441b0bef1524",
+      "programRoot": "df715a734a369bbb0e03b438f72a2f99ecf11d34ea5b424d8dc9777962d48ad7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TWO-WITNESSES-SHARE-CONTROLLER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "e7f2456748908c4067c822088a2754fa15d635442c057dd40f808a70de705dac"
+    },
+    {
+      "vectorId": "B0V4-V-082-A",
+      "fixtureRoot": "d85d4dc86c01c4b9aae39db57ff5c1a73311c2b87c3834c2e02a96e780707832",
+      "programRoot": "301441728aee8e51b2e158439a3421b3481a90e17d05366cb33e73223b5045d1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-CODE-INVOKED-TWICE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "81d20f561307155e9e74d26a16bf974504e3c539542a498ba9db4c6456b76702"
+    },
+    {
+      "vectorId": "B0V4-V-082-B",
+      "fixtureRoot": "d69d04865c83b277d0c4b6544b4d541d199fb30393391e1724b2ca816edb2069",
+      "programRoot": "676ce790dc9336926ae04457e8b9f836fbf156ba0c19cf064fadb87237455954",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DISTINCT-WRAPPERS-SHARE-PARSER-LIBRARY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "4ed933610f1b1439c00060abdea945e6adc3993b484b64f21431243676d40a3d"
+    },
+    {
+      "vectorId": "B0V4-V-082-C",
+      "fixtureRoot": "29d85cc693a51cea6c61bbe7caf808a2f89de250ba38910808808dd957e07c8c",
+      "programRoot": "f815ac3aa5d722e01d8e4a20919bf203cc6ce6474520d462ea18123abf75e2da",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-CONTROLLER-RUNS-BOTH-VALIDATORS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "0fb2db618d541f4387f8bc8aeb77fc3297afc0a5ad4dcf523bcef09a5acb6e1d"
+    },
+    {
+      "vectorId": "B0V4-V-083-A",
+      "fixtureRoot": "868420d9c684caf0d03df489a37fbca13b9df5ff6baa05717336105fb5aeef32",
+      "programRoot": "1449fbd314f142ee4c16d74cc30596cd62b101c421eb74c1f71e22b77c282c8a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WAIVE-L0-CRYPTO-CONTROL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "77a8711ef3721af07c1d1455107874cd2ad3b60e2420295dd2b74a00482028db"
+    },
+    {
+      "vectorId": "B0V4-V-083-B",
+      "fixtureRoot": "ccbca76d78185dfc9eb20ecd39789ce65b310ffa77a7e6b71ffb051ad4845db0",
+      "programRoot": "69c505df9bb9a3e650d94f56032f4ed34665bb9af86191085b813e13bc22d50f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WAIVE-PUBLIC-CONFIDENTIALITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "14768debe3fdcc57a5b14283338826fd2eb8036fbb98a3b27b5a7d0bd05dd7da"
+    },
+    {
+      "vectorId": "B0V4-V-083-C",
+      "fixtureRoot": "337ae19c05629cde94659e6ba82acbafd123e8bb992a098c94a2c80bbc68ed03",
+      "programRoot": "f98f06bed5477f363aff3c37e69b267f8665e81c59fdde28b045142ab8e8501a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OPTIONAL-EXCEPTION-EXPANDS-AUTHORITY-SCOPE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-B-PYTHON-V1",
+      "receiptSha256": "af9003e8a9a9b79ab8994cae97ea448e015963d7eea1432f2069e907a5768b7c"
+    }
+  ],
+  "authorityCredit": 0,
+  "b0State": "ABSENT",
+  "repositoryVisibility": "PUBLIC",
+  "gate29": "BLOCKED",
+  "developmentFreeze": "ACTIVE"
+}

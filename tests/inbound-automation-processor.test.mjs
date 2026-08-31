@@ -14,6 +14,10 @@ const input = {
   recipientPhoneNumber: "+972501234567",
   phoneNumberId: "phone-number-id",
   textContent: "שלום",
+  selectedBotOptionKey: null,
+  replyToProviderMessageId: null,
+  inboundMessageOccurredAt:
+    "2026-08-21T10:00:00.000Z",
 };
 
 function botResult(
@@ -170,6 +174,13 @@ test("fails closed for bot conflicts, ambiguity, assignment, or ineligible state
       botResult(
         "skipped",
         "conversation-ineligible",
+      ),
+      "bot-ineligible",
+    ],
+    [
+      botResult(
+        "policy-skipped",
+        "service-window-closed",
       ),
       "bot-ineligible",
     ],

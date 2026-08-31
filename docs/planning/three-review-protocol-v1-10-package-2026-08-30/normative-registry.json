@@ -1,0 +1,278 @@
+{
+  "algorithmPolicy": {
+    "approvedAlgorithms": [],
+    "keyGenerationPerformed": false,
+    "selectionState": "UNSELECTED-PER-USE-APPROVAL-REQUIRED"
+  },
+  "artifactClass": "IMMUTABLE-PLANNING-CANDIDATE-NOT-AUTHORITY-NOT-ACCEPTANCE",
+  "artifactId": "MPRR-V1-10-NORMATIVE-REGISTRY-2026-08-30-G0",
+  "controlRows": [
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-001",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-CLOSURE-EXECUTION"
+      ],
+      "findingId": "MPRR-V19-IHR-F001",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-001"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-002",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F002",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-002"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-003",
+      "externalEvidenceRequired": [
+        "SEVEN-SIGNED-APPOINTMENTS"
+      ],
+      "findingId": "MPRR-V19-IHR-F003",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-003"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-004",
+      "externalEvidenceRequired": [
+        "APPROVED-SIGNATURE-ADAPTER",
+        "TRUSTED-TIME",
+        "REVOCATION"
+      ],
+      "findingId": "MPRR-V19-IHR-F004",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-004"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-005",
+      "externalEvidenceRequired": [
+        "TWO-INDEPENDENT-SCANNERS"
+      ],
+      "findingId": "MPRR-V19-IHR-F005",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-005"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-006",
+      "externalEvidenceRequired": [
+        "AUTHENTICATED-REMOTE-PUBLIC"
+      ],
+      "findingId": "MPRR-V19-IHR-F006",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-006"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-007",
+      "externalEvidenceRequired": [
+        "DURABLE-CAS-ADAPTER"
+      ],
+      "findingId": "MPRR-V19-IHR-F007",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-007"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-008",
+      "externalEvidenceRequired": [
+        "DURABLE-RECOVERY-ADAPTER"
+      ],
+      "findingId": "MPRR-V19-IHR-F008",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-008"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-009",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-PREDECESSOR-ORACLE"
+      ],
+      "findingId": "MPRR-V19-IHR-F009",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-009"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-010",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-SEMANTIC-RECEIPT"
+      ],
+      "findingId": "MPRR-V19-IHR-F010",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-010"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-011",
+      "externalEvidenceRequired": [
+        "OPERATION-INSTRUMENTATION"
+      ],
+      "findingId": "MPRR-V19-IHR-F011",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-011"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-012",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F012",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-012"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-013",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F013",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-013"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-014",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F014",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-014"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-015",
+      "externalEvidenceRequired": [
+        "SAFE-DESCRIPTOR-BOUND-REPORT-ADAPTER"
+      ],
+      "findingId": "MPRR-V19-IHR-F015",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-015"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-016",
+      "externalEvidenceRequired": [
+        "APPROVED-GLOBAL-ARTIFACT-BUDGET"
+      ],
+      "findingId": "MPRR-V19-IHR-F016",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P2",
+      "testId": "MPRRV110-MUTATION-016"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-017",
+      "externalEvidenceRequired": [
+        "THREE-INDEPENDENT-REVIEWER-APPOINTMENTS"
+      ],
+      "findingId": "MPRR-V19-IHR-F017",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-017"
+    }
+  ],
+  "currentState": {
+    "acceptance": 0,
+    "authorityOutputs": 0,
+    "b0": "ABSENT",
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "missingExternalEvidence": [
+      "SEVEN-APPOINTMENTS",
+      "APPROVED-SIGNATURE-ADAPTER",
+      "TWO-SCANNERS",
+      "AUTHENTICATED-REMOTE-PUBLIC",
+      "DURABLE-CAS",
+      "DURABLE-RECOVERY",
+      "TRUSTED-TIME",
+      "THREE-INDEPENDENT-REVIEWS",
+      "RECONCILIATION",
+      "HUMAN-APPROVAL",
+      "PREDECESSOR-ORACLE"
+    ],
+    "status": "BLOCKED"
+  },
+  "externalEvidence": {
+    "externalClosureCount": 0,
+    "independentReviewerEvidencePresent": false,
+    "operationalEvidencePresent": false
+  },
+  "growthPolicy": {
+    "admission": "DENIED-UNTIL-APPROVED-GLOBAL-BUDGET",
+    "duplicateBytesMustBeDerived": true,
+    "globalBudgetPresent": false
+  },
+  "ownerModel": {
+    "ownerCount": 1,
+    "primaryBackupModel": "REMOVED",
+    "workOwner": "Tal"
+  },
+  "receiptSchema": {
+    "additionalProperties": false,
+    "nullableKeys": [],
+    "requiredKeys": [
+      "evidenceClass",
+      "expiresAt",
+      "issuedAt",
+      "issuerAppointmentRoot",
+      "packageRoot",
+      "payloadRoot",
+      "receiptId",
+      "revocationHeadRoot",
+      "verificationArtifactRoot",
+      "verificationReceiptRoot"
+    ],
+    "schemaId": "MPRRV110-EVIDENCE-RECEIPT-SCHEMA",
+    "schemaRoot": "85fd5e7fc259db85de06b555cf49e1436fa86531d25cc11bb7f72d6ace995d0a"
+  },
+  "reportPolicy": {
+    "safeDescriptorBoundAdapterPresent": false,
+    "writesAllowed": false
+  },
+  "repositoryVisibility": "PUBLIC",
+  "roleSlots": [
+    "ROLE-PRODUCER-01",
+    "ROLE-REVIEWER-01",
+    "ROLE-REVIEWER-02",
+    "ROLE-REVIEWER-03",
+    "ROLE-RECONCILER-01",
+    "ROLE-APPROVER-01",
+    "ROLE-PERMIT-ISSUER-01"
+  ],
+  "schemaVersion": "MPRR-V1-10-NORMATIVE-REGISTRY-V1",
+  "validatorIds": [
+    "VALIDATOR-PACKAGE",
+    "VALIDATOR-FROZEN-SOURCES",
+    "VALIDATOR-SCHEMAS",
+    "VALIDATOR-CLOSURE",
+    "VALIDATOR-SEMANTIC-ENTAILMENT",
+    "VALIDATOR-PREDECESSOR-BEHAVIOR",
+    "VALIDATOR-CAUSAL-TRACE",
+    "VALIDATOR-APPOINTMENTS",
+    "VALIDATOR-EXTERNAL-SIGNATURES",
+    "VALIDATOR-SCANNERS",
+    "VALIDATOR-REMOTE-PUBLIC",
+    "VALIDATOR-CAS",
+    "VALIDATOR-RECOVERY",
+    "VALIDATOR-TIME-REVOCATION-FINALITY",
+    "VALIDATOR-THREE-REVIEWS-AND-HUMAN-APPROVAL"
+  ]
+}

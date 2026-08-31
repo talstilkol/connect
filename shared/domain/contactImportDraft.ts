@@ -1,5 +1,6 @@
 import type { ContactRowQualitySummary } from "../validation/contactRows";
 import type { CsvSchemaAudit } from "../validation/csvSchema";
+import type { ContactImportSourceFormat } from "../contactImport/sourcePolicy";
 
 export type ContactField =
   | "phoneNumber"
@@ -15,6 +16,7 @@ export type ContactColumnMapping = Record<ContactField, number | null>;
 
 export interface ContactImportDraft {
   fileName: string;
+  sourceFormat: ContactImportSourceFormat;
   sourceDigest: string;
   headers: string[];
   rows: string[][];

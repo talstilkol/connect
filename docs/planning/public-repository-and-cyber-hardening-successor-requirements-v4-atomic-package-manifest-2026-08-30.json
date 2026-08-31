@@ -1,0 +1,290 @@
+{
+  "artifactId": "CONNECT-PUBLIC-REPOSITORY-CYBER-HARDENING-V4-ATOMIC-PACKAGE-MANIFEST-2026-08-30",
+  "schemaVersion": "PRCV4-MANIFEST-1",
+  "artifactClass": "EXTERNAL-ATOMIC-PACKAGE-ENVELOPE-NOT-A-MEMBER-NOT-ACCEPTED",
+  "repositoryBinding": {
+    "logicalId": "github.com/talstilkol/connect",
+    "originHttps": "https://github.com/talstilkol/connect.git"
+  },
+  "repositoryVisibility": "PUBLIC",
+  "pathProfile": "PlanningArtifactPath",
+  "rootAlgorithms": {
+    "physicalInputs": {
+      "domain": "INPUT-MANIFEST",
+      "digest": "SHA-256",
+      "orderedRoles": "registry physicalInputs order",
+      "preimage": "UTF8(CONNECT-PRCV4:INPUT-MANIFEST:)||concat(path||NUL||sha256||NUL||decimalBytes||LF)"
+    },
+    "core": {
+      "domain": "CORE-PACKAGE-ROOT",
+      "digest": "SHA-256",
+      "orderedRoles": [
+        "subject",
+        "registries",
+        "graph",
+        "vectors",
+        "closures"
+      ],
+      "preimage": "UTF8(CONNECT-PRCV4:CORE-PACKAGE-ROOT:)||concat(path||NUL||sha256||NUL||decimalBytes||LF)"
+    },
+    "package": {
+      "domain": "PACKAGE-ROOT",
+      "digest": "SHA-256",
+      "orderedRoles": [
+        "subject",
+        "registries",
+        "graph",
+        "vectors",
+        "closures",
+        "readerA",
+        "readerB"
+      ],
+      "preimage": "UTF8(CONNECT-PRCV4:PACKAGE-ROOT:)||concat(path||NUL||sha256||NUL||decimalBytes||LF)"
+    }
+  },
+  "physicalInputMembers": [
+    {
+      "inputId": "V3-SUBJECT",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-2026-08-30.md",
+      "sha256": "a93bc7bde79f6427e69d70bd55280cd7fb7f3e3dc9bd30bb62e3be607dcf2c30",
+      "lines": 820,
+      "bytes": 49169,
+      "claimClass": "FROZEN-PREDECESSOR"
+    },
+    {
+      "inputId": "V3-MANIFEST",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-atomic-package-manifest-2026-08-30.json",
+      "sha256": "623f8a7bc4864d11be9eb398c9d2987388b030c991acccca312b1720cdf6f9c4",
+      "lines": 130,
+      "bytes": 5582,
+      "claimClass": "FROZEN-PREDECESSOR-MANIFEST"
+    },
+    {
+      "inputId": "V3-REGISTRIES",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-typed-registries-2026-08-30.json",
+      "sha256": "b6ac2d2cbb6e0048fba1a36f53be1fa0cc4e96d163c9385b6b90cae3558d4385",
+      "lines": 4391,
+      "bytes": 126824,
+      "claimClass": "FROZEN-PREDECESSOR-MEMBER"
+    },
+    {
+      "inputId": "V3-GRAPH",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-producer-dependency-graph-2026-08-30.json",
+      "sha256": "15ac5c3e515af79e3deedaa4dfb130632a9f0f874e93e2bee0132c33da7681e5",
+      "lines": 3247,
+      "bytes": 91408,
+      "claimClass": "FROZEN-PREDECESSOR-MEMBER"
+    },
+    {
+      "inputId": "V3-VECTORS",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-operation-oracle-vector-pack-2026-08-30.json",
+      "sha256": "1f13d5641ca923ffa84ff5f8c84744ef50f397359373193fdf91ca9104e4048b",
+      "lines": 1764,
+      "bytes": 57078,
+      "claimClass": "FROZEN-PREDECESSOR-MEMBER"
+    },
+    {
+      "inputId": "V3-CLOSURES",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-finding-closure-registry-2026-08-30.json",
+      "sha256": "a19a2771f218883a9ab9ab0678e956dfefdb23970cfdac92fc247c6c87708f5f",
+      "lines": 1395,
+      "bytes": 68374,
+      "claimClass": "FROZEN-59-CLOSURE-UNIVERSE"
+    },
+    {
+      "inputId": "V3-REVIEW",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-independent-hostile-review-2026-08-30.md",
+      "sha256": "12e437f1ff4b8b66e6e5491fb148c46cfe4d263d3186827787c89ba7d8ce0ed1",
+      "lines": 264,
+      "bytes": 20422,
+      "claimClass": "FROZEN-INDEPENDENT-REVIEW"
+    },
+    {
+      "inputId": "V3-FINDINGS",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "sha256": "52d5b987ae710d6946c7f1f495493b6af2a852405fd0ecc295b0037899c79e4b",
+      "lines": 358,
+      "bytes": 38973,
+      "claimClass": "FROZEN-34-FINDING-UNIVERSE"
+    },
+    {
+      "inputId": "V2-FINDINGS",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "sha256": "f049b4b681d1c03bed1b4856a61a064383faa3b3bab58a2baca85bf546f81c16",
+      "lines": 609,
+      "bytes": 61755,
+      "claimClass": "FROZEN-WRAPPER-FINDINGS"
+    },
+    {
+      "inputId": "PREDECESSOR-FINDINGS",
+      "path": "docs/planning/public-repository-and-cyber-source-hostile-review-findings-manifest-2026-08-29.md",
+      "sha256": "a84a26bd0439e4da5bed5a941b8956e041268fc33ba40e2d89d095b55dec51e4",
+      "lines": 573,
+      "bytes": 41555,
+      "claimClass": "FROZEN-PREDECESSOR-FINDINGS"
+    },
+    {
+      "inputId": "GITHUB-LIVE-V3",
+      "path": "docs/planning/github-public-hardening-live-readback-observation-v3-2026-08-30.md",
+      "sha256": "0dea5b462e4bff0d1866a585a585f7e0d0405609ad21ade4e8ecac1210e521cb",
+      "lines": 287,
+      "bytes": 21761,
+      "claimClass": "BOUNDED-OBSERVATION"
+    },
+    {
+      "inputId": "SECRET-SCAN-V2",
+      "path": "docs/planning/public-repository-secret-scan-observation-v2-2026-08-30.md",
+      "sha256": "3e8bb89858b660e8fe923643301c7225cafd622acdca6842a913a1f6d9bb9983",
+      "lines": 205,
+      "bytes": 9083,
+      "claimClass": "BOUNDED-BLOCKING-OBSERVATION"
+    },
+    {
+      "inputId": "LEGACY-QUARANTINE-V2",
+      "path": "docs/planning/legacy-analysis-publication-quarantine-observation-v2-2026-08-30.md",
+      "sha256": "00d8c970eb6f8a747d6353f309bc0c0109df6dd454582447325f123cf512df7c",
+      "lines": 187,
+      "bytes": 10602,
+      "claimClass": "BOUNDED-BLOCKING-OBSERVATION"
+    },
+    {
+      "inputId": "LICENSE-OBSERVATION",
+      "path": "docs/planning/public-repository-license-strategy-observation-2026-08-30.md",
+      "sha256": "d5d8267370435cba5fcaa481f3af8a8d60641e319dfc3237ce3abd7a834b3f96",
+      "lines": 137,
+      "bytes": 10798,
+      "claimClass": "BOUNDED-BLOCKING-OBSERVATION"
+    },
+    {
+      "inputId": "CYBER-SOURCE-REFRESH-V2",
+      "path": "docs/planning/cyber-control-coverage-method-source-refresh-v2-2026-08-30.md",
+      "sha256": "477bf722f238c586c9f960e3886ae193cbbe4068b080a95602324ff4fe4e6784",
+      "lines": 253,
+      "bytes": 15956,
+      "claimClass": "BOUNDED-NON-CUSTODIAL-OBSERVATION"
+    }
+  ],
+  "physicalInputRoot": "0a509984df065b5a8bbf8777d74e0013bf5ab0801a7a2666faa3e3a347ade40a",
+  "typedAbsentInputIds": [
+    "B0",
+    "TAL-MANDATE",
+    "REVIEW-PROTOCOL",
+    "SOURCE-UNIVERSE",
+    "CONTROL-SEQUENCE",
+    "TRUSTED-TIME",
+    "LEGAL-DECISION",
+    "ORG-GOVERNANCE",
+    "D02",
+    "D25"
+  ],
+  "members": [
+    {
+      "role": "subject",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-2026-08-30.md",
+      "sha256": "0f1f5cc9fb349f999b0bbff3f6f683c47c951b793ce3ef847388530717ff7257",
+      "lines": 469,
+      "bytes": 32906
+    },
+    {
+      "role": "registries",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-schema-and-typed-registries-2026-08-30.json",
+      "sha256": "69f2f5ecde68c4223f90f64347fcb0c992620c05220a1a0789714439d4e7a10b",
+      "lines": 3625,
+      "bytes": 109243
+    },
+    {
+      "role": "graph",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-producer-dependency-graph-2026-08-30.json",
+      "sha256": "727c6d6e3d53e86a05eb0c09e581488b32546b1ac3fe8d15ed046c7d5240bff2",
+      "lines": 4635,
+      "bytes": 126049
+    },
+    {
+      "role": "vectors",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-operation-oracle-vector-pack-2026-08-30.json",
+      "sha256": "e387da4f5775cddfe24b3d5a196fce66408416e1be129e474c3ce37dc32989ca",
+      "lines": 1,
+      "bytes": 94575
+    },
+    {
+      "role": "closures",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-finding-closure-registry-2026-08-30.json",
+      "sha256": "32e9828a9ededb7ff2b3f809f5c53a0af94ed870a5ba1c5627ff01a93dadb068",
+      "lines": 1,
+      "bytes": 126109
+    },
+    {
+      "role": "readerA",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-reader-a-2026-08-30.mjs",
+      "sha256": "cbfe723307cb16ed3415e4205d01fb62fd13d360fc4c9a9adf9a45e01fefbe6c",
+      "lines": 606,
+      "bytes": 30014
+    },
+    {
+      "role": "readerB",
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-reader-b-2026-08-30.rb",
+      "sha256": "dffdaba8b674b535b601e5cd13b3736c6ee8ad72a1b90b466beacdde127b2b46",
+      "lines": 536,
+      "bytes": 26820
+    }
+  ],
+  "coreRoot": "d9a5932e7f2448e04e185a5baa59a7295a20d7e5ac6351f3d0fb485138cff2a1",
+  "packageRoot": "f799c154c695034935c480a57b6a0047d8e2b67d318e42b0d9b88a0ea78f92cf",
+  "manifestExcludedFromPackageRoot": true,
+  "reportsExcludedFromRoots": true,
+  "reportCompanions": [
+    "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-reader-a-report-2026-08-30.json",
+    "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-reader-b-report-2026-08-30.json"
+  ],
+  "producerQaCompanion": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v4-producer-qa-2026-08-30.md",
+  "denominators": {
+    "members": 7,
+    "semanticCoreMembers": 5,
+    "physicalInputs": 15,
+    "typedAbsentInputs": 10,
+    "requirements": 42,
+    "producers": 42,
+    "outputStates": 42,
+    "graphNodes": 109,
+    "graphEdges": 619,
+    "closureEdges": 204,
+    "findings": 93,
+    "inheritedFindings": 59,
+    "newFindings": 34,
+    "aliases": 32,
+    "vectors": 93
+  },
+  "currentDisposition": {
+    "acceptance": 0,
+    "controlPlanePermit": "ABSENT",
+    "publicPushPermit": "ABSENT",
+    "deploymentPermit": "ABSENT",
+    "releasePermit": "ABSENT",
+    "repositoryVisibility": "PUBLIC",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE"
+  },
+  "acceptanceCredit": 0,
+  "claimLimits": [
+    "mechanical integrity only",
+    "not semantic acceptance",
+    "not operational evidence",
+    "not a GitHub control-plane receipt",
+    "not a Public Push Permit",
+    "not a deploy Permit",
+    "not a release Permit"
+  ],
+  "continuousPublicInvariant": "repository visibility must remain PUBLIC at every state; PRIVATE is a deny terminal",
+  "unresolvedBlockers": {
+    "repositoryVisibility": "PUBLIC",
+    "mainProtection": "ABSENT-OBSERVED",
+    "rulesetCount": 0,
+    "actionsPolicy": "ALLOW-ALL-OBSERVED",
+    "secretCandidateCoordinates": 6,
+    "clearedSecretCandidates": 0,
+    "writerFrozenLocalCut": "ABSENT",
+    "remoteUnreachableState": "UNKNOWN",
+    "externalForkState": "UNKNOWN",
+    "githubSurfaceCompletion": "INCOMPLETE"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "artifactId": "CONNECT-B0-V5-ATOMIC-CANDIDATE-PACKAGE-MANIFEST-2026-08-30-G0",
+  "artifactClass": "IMMUTABLE-ATOMIC-CANDIDATE-PACKAGE-MANIFEST;PLANNING-ONLY;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "schemaVersion": 1,
+  "packageSemantics": "ALL-EIGHT-CORE-MEMBERS-REQUIRED;ANY-MISSING-CHANGED-REORDERED-OR-DUPLICATED-MEMBER-BLOCKS-ENTIRE-CANDIDATE;NO-PARTIAL-CREDIT",
+  "packageContentRootAlgorithm": {
+    "algorithmId": "B0V5-DOMAIN-SEPARATED-CANONICAL-PACKAGE-ROOT-V1",
+    "hash": "SHA-256",
+    "domainUtf8": "CONNECT-B0-V5-PACKAGE-CONTENT-V1",
+    "preimageEquation": "UTF8(DOMAIN)+0x0A+UTF8(CANONICAL-JSON-V1(PROJECTION(MEMBERS,[ordinal,logicalPath,sha256,bytes,required])))",
+    "canonicalJson": "OBJECT-KEYS-LEXICOGRAPHIC;ARRAY-ORDER-PRESERVED;UTF8;NO-WHITESPACE;JSON-STRING-ESCAPING;INTEGER-DECIMAL;BOOLEAN-LOWERCASE;NULL-LOWERCASE",
+    "memberOrdering": "ASCENDING-ORDINAL;CONTIGUOUS-1..MEMBER-COUNT",
+    "unknownParticipatingFieldPolicy": "BLOCK-UNTIL-ALGORITHM-VERSION-SUCCESSOR"
+  },
+  "memberCount": 8,
+  "members": [
+    {
+      "ordinal": 1,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v5-normative-registry-2026-08-30.json",
+      "sha256": "6c5f9be8d61b684e3239fb30696e480dbc8138600bddd77d51c396c553bc97fc",
+      "bytes": 393514,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v5-2026-08-30.md",
+      "sha256": "bc91a6eee687f1cb9f651572fd84ee1fce9d578b502088a2e3c79fbb8062ff92",
+      "bytes": 167079,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 3,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v5-source-member-span-index-2026-08-30.json",
+      "sha256": "41204bbabfd32521f5ce13fbe8321099fb59e9881a9de64e5d1fcdab9aedb325",
+      "bytes": 2511616,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 4,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v5-closure-crosswalk-2026-08-30.json",
+      "sha256": "89e8846ad28e4b157fd638eef56ebc72a02ab63e2b94e63608ee83be291e3b31",
+      "bytes": 3084549,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 5,
+      "logicalPath": "web/docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v5-executable-vector-corpus-2026-08-30.json",
+      "sha256": "4bb7f44bc175b93fb8f616f75455a55cadd96c002db175857d53229bc6afd7e6",
+      "bytes": 3213227,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 6,
+      "logicalPath": "web/docs/planning/qa/generate-b0-v5-package.mjs",
+      "sha256": "65faf5dc2b2d3ea31ec4b8721b4e5bc1286f5f2cf39e4e67550cff0d75c7c261",
+      "bytes": 111356,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 7,
+      "logicalPath": "web/docs/planning/qa/b0-v5-qa-reader-a.mjs",
+      "sha256": "e30410def5c1b79e8b49ca3c85bbfed3ee8579c223769fbc34da9f6c5781e21b",
+      "bytes": 25215,
+      "required": true,
+      "authorityCredit": 0
+    },
+    {
+      "ordinal": 8,
+      "logicalPath": "web/docs/planning/qa/b0-v5-qa-reader-b.py",
+      "sha256": "ce52df9d637cf27b52848c8586b3ede55d92acd5b4548b3a8c7fab140d20214b",
+      "bytes": 26255,
+      "required": true,
+      "authorityCredit": 0
+    }
+  ],
+  "packageRootPreimageEncoding": "BASE64",
+  "packageRootPreimageBase64": "Q09OTkVDVC1CMC1WNS1QQUNLQUdFLUNPTlRFTlQtVjEKW3siYnl0ZXMiOjM5MzUxNCwibG9naWNhbFBhdGgiOiJ3ZWIvZG9jcy9wbGFubmluZy9ib290c3RyYXAtYXV0aG9yaXR5LWVudmVsb3BlLWIwLXN1Y2Nlc3Nvci1yZXF1aXJlbWVudHMtdjUtbm9ybWF0aXZlLXJlZ2lzdHJ5LTIwMjYtMDgtMzAuanNvbiIsIm9yZGluYWwiOjEsInJlcXVpcmVkIjp0cnVlLCJzaGEyNTYiOiI2YzVmOWJlOGQ2MWI2ODRlMzIzOWZiMzA2OTZlNDgwZGJjODEzODYwMGJkZGQ3N2Q1MWMzOTZjNTUzYmM5N2ZjIn0seyJieXRlcyI6MTY3MDc5LCJsb2dpY2FsUGF0aCI6IndlYi9kb2NzL3BsYW5uaW5nL2Jvb3RzdHJhcC1hdXRob3JpdHktZW52ZWxvcGUtYjAtc3VjY2Vzc29yLXJlcXVpcmVtZW50cy12NS0yMDI2LTA4LTMwLm1kIiwib3JkaW5hbCI6MiwicmVxdWlyZWQiOnRydWUsInNoYTI1NiI6ImJjOTFhNmVlZTY4N2YxY2I5ZjY1MTU3MmZkODRlZTFmY2U5ZDU3OGI1MDIwODhhMmUzYzc5ZmJiODA2MmZmOTIifSx7ImJ5dGVzIjoyNTExNjE2LCJsb2dpY2FsUGF0aCI6IndlYi9kb2NzL3BsYW5uaW5nL2Jvb3RzdHJhcC1hdXRob3JpdHktZW52ZWxvcGUtYjAtc3VjY2Vzc29yLXJlcXVpcmVtZW50cy12NS1zb3VyY2UtbWVtYmVyLXNwYW4taW5kZXgtMjAyNi0wOC0zMC5qc29uIiwib3JkaW5hbCI6MywicmVxdWlyZWQiOnRydWUsInNoYTI1NiI6IjQxMjA0YmJhYmZkMzI1MjFmNWNlMTNmYmU4MzIxMDk5ZmI1OWU5ODgxYTlkZTY0ZTVkMWZjZGFiOWFlZGIzMjUifSx7ImJ5dGVzIjozMDg0NTQ5LCJsb2dpY2FsUGF0aCI6IndlYi9kb2NzL3BsYW5uaW5nL2Jvb3RzdHJhcC1hdXRob3JpdHktZW52ZWxvcGUtYjAtc3VjY2Vzc29yLXJlcXVpcmVtZW50cy12NS1jbG9zdXJlLWNyb3Nzd2Fsay0yMDI2LTA4LTMwLmpzb24iLCJvcmRpbmFsIjo0LCJyZXF1aXJlZCI6dHJ1ZSwic2hhMjU2IjoiODllODg0NmFkMjhlNGIxNTdmZDYzOGVlZjU2ZWJjNzJhMDJhYjYzZTJiOTRlNjM2MDhlZTgzYmUyOTFlM2IzMSJ9LHsiYnl0ZXMiOjMyMTMyMjcsImxvZ2ljYWxQYXRoIjoid2ViL2RvY3MvcGxhbm5pbmcvYm9vdHN0cmFwLWF1dGhvcml0eS1lbnZlbG9wZS1iMC1zdWNjZXNzb3ItcmVxdWlyZW1lbnRzLXY1LWV4ZWN1dGFibGUtdmVjdG9yLWNvcnB1cy0yMDI2LTA4LTMwLmpzb24iLCJvcmRpbmFsIjo1LCJyZXF1aXJlZCI6dHJ1ZSwic2hhMjU2IjoiNGJiN2Y0NGJjMTc1YjkzZmI4ZjYxNmY3NTQ1NWE1NWNhZGQ5NmMwMDJkYjE3NTg1N2Q1MzIyOWJjNmFmZDdlNiJ9LHsiYnl0ZXMiOjExMTM1NiwibG9naWNhbFBhdGgiOiJ3ZWIvZG9jcy9wbGFubmluZy9xYS9nZW5lcmF0ZS1iMC12NS1wYWNrYWdlLm1qcyIsIm9yZGluYWwiOjYsInJlcXVpcmVkIjp0cnVlLCJzaGEyNTYiOiI2NWZhZjVkYzJiMmQzZWEzMWVjNGI4NzIxYjRlNWJjMTI4NmY1ZjJjZjM5ZTRlNjc1NTBjZmYwZDc1YzdjMjYxIn0seyJieXRlcyI6MjUyMTUsImxvZ2ljYWxQYXRoIjoid2ViL2RvY3MvcGxhbm5pbmcvcWEvYjAtdjUtcWEtcmVhZGVyLWEubWpzIiwib3JkaW5hbCI6NywicmVxdWlyZWQiOnRydWUsInNoYTI1NiI6ImUzMDQxMGRlZjVjMWI3OWU4YjQ5Y2EzYzg1YmJmZWQzZWU4NTc5YzIyMzc2OWZiYzM0ZGE5ZjZjNTc4MWUyMWIifSx7ImJ5dGVzIjoyNjI1NSwibG9naWNhbFBhdGgiOiJ3ZWIvZG9jcy9wbGFubmluZy9xYS9iMC12NS1xYS1yZWFkZXItYi5weSIsIm9yZGluYWwiOjgsInJlcXVpcmVkIjp0cnVlLCJzaGEyNTYiOiJjZTUyZGY5ZDYzN2NmMjdiNTI4NDhjODU4NmIzZWRlNTVkOTJhY2Q1YjQ1NDhiM2E4YzdmYWIxNDBkMjAyMTRiIn1d",
+  "packageContentRoot": "666e121d998445e3134f3a1978ee9b7c5962324bd51376e2ebc5bf2646d689f8",
+  "subjectSha256": "bc91a6eee687f1cb9f651572fd84ee1fce9d578b502088a2e3c79fbb8062ff92",
+  "normativeRegistrySha256": "6c5f9be8d61b684e3239fb30696e480dbc8138600bddd77d51c396c553bc97fc",
+  "sourceMemberSpanIndexSha256": "41204bbabfd32521f5ce13fbe8321099fb59e9881a9de64e5d1fcdab9aedb325",
+  "closureCrosswalkSha256": "89e8846ad28e4b157fd638eef56ebc72a02ab63e2b94e63608ee83be291e3b31",
+  "executableVectorCorpusSha256": "4bb7f44bc175b93fb8f616f75455a55cadd96c002db175857d53229bc6afd7e6",
+  "producerQaMembership": "DETACHED;REFERENCES-EXACT-MANIFEST-SHA;ZERO-AUTHORITY",
+  "qaReportMembership": "TWO-DETACHED-REPORTS;EACH-REFERENCES-EXACT-MANIFEST-SHA;ZERO-AUTHORITY",
+  "independentReviewMembership": "DETACHED;ABSENT;FRESH-REVIEW-REQUIRED",
+  "repositoryVisibility": "PUBLIC",
+  "authorityCredit": 0,
+  "acceptanceCredit": 0,
+  "currentState": "FROZEN-CANDIDATE-PACKAGE;PRODUCER-QA-DETACHED;FRESH-INDEPENDENT-REVIEW-PENDING;B0-ABSENT;GATE29-BLOCKED;FREEZE-ACTIVE"
+}

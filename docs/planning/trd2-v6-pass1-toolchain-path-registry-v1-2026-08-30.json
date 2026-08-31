@@ -1,0 +1,19 @@
+{
+  "schema": "CONNECT-TRD2-V6-PASS1-TOOLCHAIN-PATH-REGISTRY-V1",
+  "version": 1,
+  "toolchainPaths": [
+    "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md",
+    "docs/planning/trd2-v6-output-path-registry-v1-2026-08-30.json",
+    "docs/planning/trd2-v6-pass1-toolchain-path-registry-v1-2026-08-30.json",
+    "scripts/b0-v8-core.mjs",
+    "scripts/verify-secret-hygiene.mjs",
+    "scripts/trd2-v6-core.mjs",
+    "scripts/create-trd2-v6-pass1-candidate.mjs",
+    "scripts/verify-trd2-v6-parser-a.mjs",
+    "scripts/verify-trd2-v6-parser-b.py",
+    "scripts/finalize-trd2-v6-pass1-candidate.mjs",
+    "scripts/verify-trd2-v6-pass1-candidate.mjs",
+    "tests/trd2-v6-core.test.mjs",
+    "package.json"
+  ]
+}

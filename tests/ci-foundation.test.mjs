@@ -13,6 +13,7 @@ import {
   validateMigrationInventory,
 } from "../scripts/verify-migrations.mjs";
 import {
+  buildWorkingFileInventory,
   inspectSecretHygiene,
   inspectSecretText,
   inspectTrackedFileName,
@@ -20,6 +21,17 @@ import {
 
 const repositoryRoot =
   new URL("../", import.meta.url);
+
+const localPullRequestChecks = [
+  "source-guardrails",
+  "secret-hygiene",
+  "interface-guardrails",
+  "dependency-lock",
+  "migrations",
+  "typecheck",
+  "lint",
+  "tests-and-build",
+];
 
 async function currentMigrationInput() {
   const migrationFiles = (
@@ -57,7 +69,7 @@ function releaseInput() {
       name: "connect-whatsapp-platform",
       version: "0.1.0",
       engines: {
-        node: ">=22.13.0",
+        node: ">=24.18.1",
       },
     },
     packageLockText:
@@ -79,7 +91,7 @@ test("applies every migration and verifies the current journal", async () => {
 
   assert.deepEqual(report, {
     status: "passed",
-    migrationCount: 30,
+    migrationCount: 43,
     findings: [],
   });
 });
@@ -190,6 +202,27 @@ test("rejects malformed release and migration identities", () => {
 
 test("keeps tracked secret files and private key material out of source", async () => {
   assert.deepEqual(
+    buildWorkingFileInventory({
+      trackedFiles: [
+        "server/existing.ts",
+        "shared/common.ts",
+      ],
+      untrackedFiles: [
+        "server/new.ts",
+        "shared/common.ts",
+      ],
+    }),
+    {
+      trackedFileCount: 2,
+      untrackedFileCount: 2,
+      workingFiles: [
+        "server/existing.ts",
+        "server/new.ts",
+        "shared/common.ts",
+      ],
+    },
+  );
+  assert.deepEqual(
     inspectTrackedFileName(
       "config/.env.production",
     ),
@@ -217,6 +250,16 @@ test("keeps tracked secret files and private key material out of source", async 
       },
     ],
   );
+  for (const secretName of [
+    "BOT_REPLY_STAGING_RECIPIENT_HMAC_KEY_V1",
+    "BOT_REPLY_STAGING_OBSERVATION_HMAC_KEY_V1",
+    "BOT_REPLY_STAGING_PRIVATE_CASES_JSON",
+  ]) {
+    assert.deepEqual(
+      inspectSecretText(`${secretName}=private-test-value`),
+      [{ code: "SECRET_ENVIRONMENT_VALUE_TRACKED" }],
+    );
+  }
 
   const report =
     await inspectSecretHygiene({
@@ -232,5 +275,114 @@ test("keeps tracked secret files and private key material out of source", async 
     report.trackedFileCount > 0,
     true,
   );
+  assert.equal(
+    report.workingFileCount,
+    report.trackedFileCount +
+      report.untrackedFileCount,
+  );
   assert.deepEqual(report.findings, []);
+});
+
+test("runs every local release gate as a separately named pull request check", async () => {
+  const workflowUrls = [
+    "pull-request-quality-gates.yml",
+    "dependency-audit-evidence.yml",
+    "team-invitation-browser-e2e.yml",
+  ].map(
+    (fileName) =>
+      new URL(
+        `../.github/workflows/${fileName}`,
+        import.meta.url,
+      ),
+  );
+  const [workflow, ...supportingWorkflows] =
+    await Promise.all(
+      workflowUrls.map((url) =>
+        readFile(url, "utf8"),
+      ),
+    );
+  const dependencyAuditWorkflow =
+    supportingWorkflows[0];
+  const nodeVersion = (
+    await readFile(
+      new URL(
+        "../.node-version",
+        import.meta.url,
+      ),
+      "utf8",
+    )
+  ).trim();
+
+  assert.equal(nodeVersion, "24.18.1");
+
+  for (const candidate of [
+    workflow,
+    ...supportingWorkflows,
+  ]) {
+    assert.match(
+      candidate,
+      /node-version-file: \.node-version/,
+    );
+    assert.doesNotMatch(
+      candidate,
+      /node-version: /,
+    );
+  }
+
+  assert.match(workflow, /^on:\n  pull_request:\n/m);
+  assert.match(
+    workflow,
+    /^permissions:\n  contents: read$/m,
+  );
+  assert.doesNotMatch(
+    workflow,
+    /uses:\s+[^\s]+@(?![a-f0-9]{40}(?:\s|$))[^\s]+/,
+  );
+
+  for (const check of localPullRequestChecks) {
+    assert.match(
+      workflow,
+      new RegExp(
+        `^  ${check}:\\n    name: ${check}$`,
+        "m",
+      ),
+    );
+  }
+
+  assert.match(
+    workflow,
+    /secret-hygiene:[\s\S]*?fetch-depth: 0[\s\S]*?npm run verify:secret-hygiene/,
+  );
+  assert.match(
+    workflow,
+    /migrations:[\s\S]*?npm run verify:migrations[\s\S]*?npm run verify:postgres-migration-contract[\s\S]*?npm run verify:postgres-migration-parity/,
+  );
+  assert.match(
+    workflow,
+    /tests-and-build:[\s\S]*?fetch-depth: 0[\s\S]*?npm ci[\s\S]*?npm test/,
+  );
+  assert.doesNotMatch(
+    dependencyAuditWorkflow,
+    /github\.event\.repository\.private == false/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /github\.event\.repository\.private == true && vars\.CONNECT_PRIVATE_ARTIFACT_ATTESTATIONS_ENABLED != 'true'/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /DEPENDENCY_AUDIT_ATTESTATION_PRIVATE_REPOSITORY_CAPABILITY_REQUIRED/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /Attest the dependency audit evidence provenance\n        id: attest-dependency-audit/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /Upload the bounded evidence artifacts\n        if: \$\{\{ always\(\) \}\}/,
+  );
+  assert.match(
+    dependencyAuditWorkflow,
+    /path: \.artifacts\/dependency-audit-evidence\*\.json/,
+  );
 });

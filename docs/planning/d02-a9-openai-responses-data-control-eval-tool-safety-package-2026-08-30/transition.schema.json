@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:connect:d02:a9:transition-schema:1",
+  "title": "Connect D02-A9 authority transition record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "transitionId",
+    "schemaVersion",
+    "recordClass",
+    "rootId",
+    "rootClass",
+    "fromState",
+    "toState",
+    "event",
+    "previousVersion",
+    "nextVersion",
+    "expectedPreviousRoot",
+    "evidenceRoot",
+    "authorityReceiptRoot",
+    "trustedTime",
+    "expiresAt",
+    "revocationCutRoot",
+    "operationKey",
+    "casResult",
+    "consumptionCount",
+    "postReadback",
+    "controlOnly",
+    "acceptanceCredit"
+  ],
+  "properties": {
+    "transitionId": {
+      "type": "string",
+      "pattern": "^D02A9-TR-[0-9]{3}$"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "recordClass": {
+      "type": "string",
+      "enum": [
+        "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "EXTERNAL-EVIDENCE-TRANSITION"
+      ]
+    },
+    "rootId": {
+      "type": "string",
+      "enum": [
+        "D02A9-ROOT-PLANNING-ACCEPTANCE",
+        "D02A9-ROOT-AI-ADMISSION",
+        "D02A9-ROOT-RUNTIME-PERMIT"
+      ]
+    },
+    "rootClass": {
+      "type": "string",
+      "enum": [
+        "D02-PLANNING-CONTRACT-ACCEPTANCE",
+        "AI-PROFILE-ADMISSION",
+        "AI-RUNTIME-PERMIT"
+      ]
+    },
+    "fromState": {
+      "type": "string",
+      "enum": [
+        "MISSING",
+        "PRESENT-UNACCEPTED",
+        "ACCEPTED",
+        "EXPIRED",
+        "REVOKED",
+        "CONSUMED",
+        "BLOCKED"
+      ]
+    },
+    "toState": {
+      "type": "string",
+      "enum": [
+        "MISSING",
+        "PRESENT-UNACCEPTED",
+        "ACCEPTED",
+        "EXPIRED",
+        "REVOKED",
+        "CONSUMED",
+        "BLOCKED"
+      ]
+    },
+    "event": {
+      "type": "string",
+      "enum": [
+        "NOOP",
+        "SUBMIT",
+        "ACCEPT",
+        "EXPIRE",
+        "REVOKE",
+        "CONSUME",
+        "REPLAY",
+        "CAS-MISMATCH",
+        "POST-READBACK-MISMATCH",
+        "REPLACE"
+      ]
+    },
+    "previousVersion": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483646
+    },
+    "nextVersion": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "expectedPreviousRoot": {
+      "type": "string",
+      "pattern": "^(?:MISSING|[0-9a-f]{64})$"
+    },
+    "evidenceRoot": {
+      "type": "string",
+      "pattern": "^(?:MISSING|[0-9a-f]{64})$"
+    },
+    "authorityReceiptRoot": {
+      "type": "string",
+      "pattern": "^(?:MISSING|CONTROL-[A-Z0-9-]+|[0-9a-f]{64})$"
+    },
+    "trustedTime": {
+      "type": "string",
+      "pattern": "^(?:CONTROL-NOT-EXTERNAL|[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)$"
+    },
+    "expiresAt": {
+      "type": "string",
+      "pattern": "^(?:NOT-APPLICABLE|CONTROL-NOT-EXTERNAL|[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)$"
+    },
+    "revocationCutRoot": {
+      "type": "string",
+      "pattern": "^(?:MISSING|CONTROL-[A-Z0-9-]+|[0-9a-f]{64})$"
+    },
+    "operationKey": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "casResult": {
+      "type": "string",
+      "enum": [
+        "MATCH",
+        "MISMATCH",
+        "NOT-APPLICABLE"
+      ]
+    },
+    "consumptionCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "postReadback": {
+      "type": "string",
+      "enum": [
+        "MATCH",
+        "MISMATCH",
+        "MISSING",
+        "NOT-APPLICABLE"
+      ]
+    },
+    "controlOnly": {
+      "type": "boolean"
+    },
+    "acceptanceCredit": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

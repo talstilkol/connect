@@ -43,6 +43,29 @@ export interface OperationalReportService {
   ): Promise<OperationalReportResult>;
 }
 
+export function createDefaultOperationalReportPeriod(
+  now: () => Date = () => new Date(),
+): OperationalReportPeriod {
+  const current = requireClockDate(now);
+  const end = new Date(
+    Date.UTC(
+      current.getUTCFullYear(),
+      current.getUTCMonth(),
+      current.getUTCDate(),
+    ),
+  );
+  const start = new Date(
+    end.getTime() -
+      (DEFAULT_PERIOD_DAYS - 1) *
+        DAY_MILLISECONDS,
+  );
+
+  return Object.freeze({
+    startDate: dateOnly(start),
+    endDate: dateOnly(end),
+  });
+}
+
 function isRecord(
   value: unknown,
 ): value is Record<string, unknown> {
@@ -131,6 +154,12 @@ function parsePeriod(
   };
 }
 
+export function validateOperationalReportInput(
+  input: unknown,
+): void {
+  parsePeriod(input);
+}
+
 function requireClockDate(
   now: () => Date,
 ): Date {
@@ -158,25 +187,9 @@ export function createOperationalReportService(
 ): OperationalReportService {
   return {
     defaultPeriod() {
-      const current =
-        requireClockDate(options.now);
-      const end = new Date(
-        Date.UTC(
-          current.getUTCFullYear(),
-          current.getUTCMonth(),
-          current.getUTCDate(),
-        ),
+      return createDefaultOperationalReportPeriod(
+        options.now,
       );
-      const start = new Date(
-        end.getTime() -
-          (DEFAULT_PERIOD_DAYS - 1) *
-            DAY_MILLISECONDS,
-      );
-
-      return {
-        startDate: dateOnly(start),
-        endDate: dateOnly(end),
-      };
     },
 
     async read(session, input) {

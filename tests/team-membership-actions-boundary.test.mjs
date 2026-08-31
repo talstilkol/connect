@@ -14,7 +14,7 @@ async function readSource(path) {
   );
 }
 
-test("composes team mutations through the protected tenant session", async () => {
+test("routes team mutations through Railway without D1 fallback", async () => {
   const source =
     await readSource(
       "server/team/teamMembershipActions.ts",
@@ -26,19 +26,11 @@ test("composes team mutations through the protected tenant session", async () =>
   );
   assert.match(
     source,
-    /requireCurrentTenantMutationSession/,
-  );
-  assert.match(
-    source,
-    /createTenantMembershipMutationRepository/,
-  );
-  assert.match(
-    source,
-    /createTeamMembershipMutationService/,
+    /createCurrentRailwayTeamMembershipHandler/,
   );
   assert.doesNotMatch(
     source,
-    /requireCurrentTenantSession/,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createTenantMembershipMutationRepository|createTeamMembershipMutationService/,
   );
 });
 

@@ -80,7 +80,13 @@ function processorFailureCode(error: unknown): string {
 }
 
 export function createMetaWebhookIngress(
-  repository: MetaRepository,
+  repository: Pick<
+    MetaRepository,
+    | "findConnectionByWabaId"
+    | "claimWebhookReceipt"
+    | "completeWebhookReceipt"
+    | "failWebhookReceipt"
+  >,
   processor: MetaWebhookProcessor,
   appSecret: string,
 ): MetaWebhookIngress {

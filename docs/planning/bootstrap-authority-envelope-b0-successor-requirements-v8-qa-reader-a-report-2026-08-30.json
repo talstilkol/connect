@@ -1,0 +1,17 @@
+{
+  "artifactClass": "CROSS-CHECK-READER-A-NOT-INDEPENDENT-NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V8-QA-READER-A-REPORT-2026-08-30-G0",
+  "b0": "ABSENT",
+  "closureCount": 0,
+  "corpusRoot": "22e9dc0b37b988cfdf4acff89840251ef2fe1489032424f23132b6027df72bf1",
+  "findingCount": 14,
+  "gate29": "BLOCKED",
+  "memberCount": 10,
+  "mutationBlockedCount": 14,
+  "packageContentRoot": "5924a37e573bd7b921f319c98f5595b7ee634250e552f458284a163ba9e7653b",
+  "readerArtifactSha256": "26bd938409daec2871512288ac3a9e8cf89a72a9c9c5f9a845be4c9fecd6fe3c",
+  "reportRoot": "b6b7db75d8bc2067663d1e28f3b21619106c412d465f7fb58041ec084e339bfb",
+  "result": "PASS-REPRODUCIBLE-CANDIDATE-NOT-ACCEPTED",
+  "sourceCommit": "e458970e81ca5d0cb092fbf590a98631d6358276",
+  "sourceSetRoot": "c221c71d96fa38f3485430fc9f2296f3dcb8bda625c50463add4a75f6ed34daa"
+}

@@ -1,0 +1,1764 @@
+{
+  "artifactId": "CONNECT-PUBLIC-REPOSITORY-CYBER-HARDENING-V3-OPERATION-ORACLE-VECTOR-PACK-2026-08-30",
+  "schemaVersion": "PRCV3-VECTOR-1",
+  "artifactClass": "EXECUTABLE-PLANNING-MODEL-NOT-OPERATIONAL-EVIDENCE-NOT-ACCEPTED",
+  "repositoryVisibility": "PUBLIC",
+  "operationDefinitions": [
+    {
+      "operationId": "PRCV3-OP-SET-FIELD",
+      "kind": "SET_FIELD",
+      "algorithm": [
+        "deep-copy preimage",
+        "require existing top-level field",
+        "replace field with canonical scalar value",
+        "emit canonical postimage"
+      ],
+      "unsupportedTerminal": "UNSUPPORTED-OPERATION-BLOCKED"
+    },
+    {
+      "operationId": "PRCV3-OP-DELETE-FIELD",
+      "kind": "DELETE_FIELD",
+      "algorithm": [
+        "deep-copy preimage",
+        "require existing top-level field",
+        "remove exactly that field",
+        "emit canonical postimage"
+      ],
+      "unsupportedTerminal": "UNSUPPORTED-OPERATION-BLOCKED"
+    },
+    {
+      "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+      "kind": "APPEND_SET_MEMBER",
+      "algorithm": [
+        "deep-copy preimage",
+        "require array field",
+        "append one exact scalar member",
+        "sort by byte order",
+        "reject duplicate",
+        "emit canonical postimage"
+      ],
+      "unsupportedTerminal": "UNSUPPORTED-OPERATION-BLOCKED"
+    }
+  ],
+  "oracleDefinitions": [
+    {
+      "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+      "kind": "FIELD_EQUALS",
+      "algorithm": [
+        "compare canonical scalar at field with required scalar",
+        "mismatch returns vector expectedTerminal"
+      ]
+    },
+    {
+      "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+      "kind": "FIELD_PRESENT",
+      "algorithm": [
+        "test own-property presence at field",
+        "absence returns vector expectedTerminal"
+      ]
+    },
+    {
+      "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+      "kind": "SET_EQUALS",
+      "algorithm": [
+        "sort actual and required arrays by byte order",
+        "compare length and each member",
+        "mismatch returns vector expectedTerminal"
+      ]
+    }
+  ],
+  "vectors": [
+    {
+      "vectorId": "PRCV3-VECTOR-001",
+      "findingId": "PRCS-HR-F001",
+      "noMergeKey": "PRCS-HR-F001",
+      "targetObjectId": "PRCV3-OBJECT-033",
+      "targetRequirementId": "PRCV3-REQ-033",
+      "preimage": {
+        "control_001_prcs_hr_f001": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_001_prcs_hr_f001",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_001_prcs_hr_f001": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_001_prcs_hr_f001",
+        "required": "DENY"
+      },
+      "expectedTerminal": "RULESET-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-002",
+      "findingId": "PRCS-HR-F002",
+      "noMergeKey": "PRCS-HR-F002",
+      "targetObjectId": "PRCV3-OBJECT-024",
+      "targetRequirementId": "PRCV3-REQ-024",
+      "preimage": {
+        "control_002_prcs_hr_f002": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_002_prcs_hr_f002"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_002_prcs_hr_f002",
+        "required": true
+      },
+      "expectedTerminal": "ACTIONS-INVENTORY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-003",
+      "findingId": "PRCS-HR-F003",
+      "noMergeKey": "PRCS-HR-F003",
+      "targetObjectId": "PRCV3-OBJECT-027",
+      "targetRequirementId": "PRCV3-REQ-027",
+      "preimage": {
+        "control_003_prcs_hr_f003": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_003_prcs_hr_f003",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_003_prcs_hr_f003": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_003_prcs_hr_f003",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "PRIVILEGE-GRAPH-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-004",
+      "findingId": "PRCS-HR-F004",
+      "noMergeKey": "PRCS-HR-F004",
+      "targetObjectId": "PRCV3-OBJECT-036",
+      "targetRequirementId": "PRCV3-REQ-036",
+      "preimage": {
+        "control_004_prcs_hr_f004": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_004_prcs_hr_f004",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_004_prcs_hr_f004": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_004_prcs_hr_f004",
+        "required": "DENY"
+      },
+      "expectedTerminal": "OIDC-POLICY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-005",
+      "findingId": "PRCS-HR-F005",
+      "noMergeKey": "PRCS-HR-F005",
+      "targetObjectId": "PRCV3-OBJECT-005",
+      "targetRequirementId": "PRCV3-REQ-005",
+      "preimage": {
+        "control_005_prcs_hr_f005": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_005_prcs_hr_f005"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_005_prcs_hr_f005",
+        "required": true
+      },
+      "expectedTerminal": "EVIDENCE-CUSTODY-TIME-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-006",
+      "findingId": "PRCS-HR-F006",
+      "noMergeKey": "PRCS-HR-F006",
+      "targetObjectId": "PRCV3-OBJECT-009",
+      "targetRequirementId": "PRCV3-REQ-009",
+      "preimage": {
+        "control_006_prcs_hr_f006": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_006_prcs_hr_f006",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_006_prcs_hr_f006": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_006_prcs_hr_f006",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "REMOTE-REF-OBJECT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-007",
+      "findingId": "PRCS-HR-F007",
+      "noMergeKey": "PRCS-HR-F007",
+      "targetObjectId": "PRCV3-OBJECT-022",
+      "targetRequirementId": "PRCV3-REQ-022",
+      "preimage": {
+        "control_007_prcs_hr_f007": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_007_prcs_hr_f007",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_007_prcs_hr_f007": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_007_prcs_hr_f007",
+        "required": "DENY"
+      },
+      "expectedTerminal": "DEPENDENCY-SBOM-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-008",
+      "findingId": "PRCS-HR-F008",
+      "noMergeKey": "PRCS-HR-F008",
+      "targetObjectId": "PRCV3-OBJECT-003",
+      "targetRequirementId": "PRCV3-REQ-003",
+      "preimage": {
+        "control_008_prcs_hr_f008": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_008_prcs_hr_f008"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_008_prcs_hr_f008",
+        "required": true
+      },
+      "expectedTerminal": "REPOSITORY-ROOT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-009",
+      "findingId": "PRCS-HR-F009",
+      "noMergeKey": "PRCS-HR-F009",
+      "targetObjectId": "PRCV3-OBJECT-046",
+      "targetRequirementId": "PRCV3-REQ-046",
+      "preimage": {
+        "control_009_prcs_hr_f009": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_009_prcs_hr_f009",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_009_prcs_hr_f009": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_009_prcs_hr_f009",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "CYBER-SOURCE-CUSTODY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-010",
+      "findingId": "PRCS-HR-F010",
+      "noMergeKey": "PRCS-HR-F010",
+      "targetObjectId": "PRCV3-OBJECT-046",
+      "targetRequirementId": "PRCV3-REQ-046",
+      "preimage": {
+        "control_010_prcs_hr_f010": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_010_prcs_hr_f010",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_010_prcs_hr_f010": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_010_prcs_hr_f010",
+        "required": "DENY"
+      },
+      "expectedTerminal": "CYBER-SOURCE-CUSTODY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-011",
+      "findingId": "PRCS-HR-F011",
+      "noMergeKey": "PRCS-HR-F011",
+      "targetObjectId": "PRCV3-OBJECT-046",
+      "targetRequirementId": "PRCV3-REQ-046",
+      "preimage": {
+        "control_011_prcs_hr_f011": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_011_prcs_hr_f011"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_011_prcs_hr_f011",
+        "required": true
+      },
+      "expectedTerminal": "CYBER-SOURCE-CUSTODY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-012",
+      "findingId": "PRCS-HR-F012",
+      "noMergeKey": "PRCS-HR-F012",
+      "targetObjectId": "PRCV3-OBJECT-047",
+      "targetRequirementId": "PRCV3-REQ-047",
+      "preimage": {
+        "control_012_prcs_hr_f012": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_012_prcs_hr_f012",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_012_prcs_hr_f012": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_012_prcs_hr_f012",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "AI-SECURITY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-013",
+      "findingId": "PRCS-HR-F013",
+      "noMergeKey": "PRCS-HR-F013",
+      "targetObjectId": "PRCV3-OBJECT-030",
+      "targetRequirementId": "PRCV3-REQ-030",
+      "preimage": {
+        "control_013_prcs_hr_f013": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_013_prcs_hr_f013",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_013_prcs_hr_f013": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_013_prcs_hr_f013",
+        "required": "DENY"
+      },
+      "expectedTerminal": "REQUIRED-CHECK-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-014",
+      "findingId": "PRCS-HR-F014",
+      "noMergeKey": "PRCS-HR-F014",
+      "targetObjectId": "PRCV3-OBJECT-031",
+      "targetRequirementId": "PRCV3-REQ-031",
+      "preimage": {
+        "control_014_prcs_hr_f014": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_014_prcs_hr_f014"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_014_prcs_hr_f014",
+        "required": true
+      },
+      "expectedTerminal": "CODE-OWNERSHIP-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-015",
+      "findingId": "PRCS-HR-F015",
+      "noMergeKey": "PRCS-HR-F015",
+      "targetObjectId": "PRCV3-OBJECT-032",
+      "targetRequirementId": "PRCV3-REQ-032",
+      "preimage": {
+        "control_015_prcs_hr_f015": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_015_prcs_hr_f015",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_015_prcs_hr_f015": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_015_prcs_hr_f015",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "BYPASS-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-016",
+      "findingId": "PRCS-HR-F016",
+      "noMergeKey": "PRCS-HR-F016",
+      "targetObjectId": "PRCV3-OBJECT-025",
+      "targetRequirementId": "PRCV3-REQ-025",
+      "preimage": {
+        "control_016_prcs_hr_f016": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_016_prcs_hr_f016",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_016_prcs_hr_f016": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_016_prcs_hr_f016",
+        "required": "DENY"
+      },
+      "expectedTerminal": "WORKFLOW-TRUST-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-017",
+      "findingId": "PRCS-HR-F017",
+      "noMergeKey": "PRCS-HR-F017",
+      "targetObjectId": "PRCV3-OBJECT-027",
+      "targetRequirementId": "PRCV3-REQ-027",
+      "preimage": {
+        "control_017_prcs_hr_f017": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_017_prcs_hr_f017"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_017_prcs_hr_f017",
+        "required": true
+      },
+      "expectedTerminal": "PRIVILEGE-GRAPH-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-018",
+      "findingId": "PRCS-HR-F018",
+      "noMergeKey": "PRCS-HR-F018",
+      "targetObjectId": "PRCV3-OBJECT-023",
+      "targetRequirementId": "PRCV3-REQ-023",
+      "preimage": {
+        "control_018_prcs_hr_f018": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_018_prcs_hr_f018",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_018_prcs_hr_f018": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_018_prcs_hr_f018",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "EXECUTABLE-DEPENDENCY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-019",
+      "findingId": "PRCS-HR-F019",
+      "noMergeKey": "PRCS-HR-F019",
+      "targetObjectId": "PRCV3-OBJECT-036",
+      "targetRequirementId": "PRCV3-REQ-036",
+      "preimage": {
+        "control_019_prcs_hr_f019": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_019_prcs_hr_f019",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_019_prcs_hr_f019": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_019_prcs_hr_f019",
+        "required": "DENY"
+      },
+      "expectedTerminal": "OIDC-POLICY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-020",
+      "findingId": "PRCS-HR-F020",
+      "noMergeKey": "PRCS-HR-F020",
+      "targetObjectId": "PRCV3-OBJECT-015",
+      "targetRequirementId": "PRCV3-REQ-015",
+      "preimage": {
+        "control_020_prcs_hr_f020": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_020_prcs_hr_f020"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_020_prcs_hr_f020",
+        "required": true
+      },
+      "expectedTerminal": "GITHUB-SURFACE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-021",
+      "findingId": "PRCS-HR-F021",
+      "noMergeKey": "PRCS-HR-F021",
+      "targetObjectId": "PRCV3-OBJECT-015",
+      "targetRequirementId": "PRCV3-REQ-015",
+      "preimage": {
+        "control_021_prcs_hr_f021": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_021_prcs_hr_f021",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_021_prcs_hr_f021": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_021_prcs_hr_f021",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "GITHUB-SURFACE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-022",
+      "findingId": "PRCS-HR-F022",
+      "noMergeKey": "PRCS-HR-F022",
+      "targetObjectId": "PRCV3-OBJECT-016",
+      "targetRequirementId": "PRCV3-REQ-016",
+      "preimage": {
+        "control_022_prcs_hr_f022": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_022_prcs_hr_f022",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_022_prcs_hr_f022": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_022_prcs_hr_f022",
+        "required": "DENY"
+      },
+      "expectedTerminal": "SENSITIVE-DATA-PII-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-023",
+      "findingId": "PRCS-HR-F023",
+      "noMergeKey": "PRCS-HR-F023",
+      "targetObjectId": "PRCV3-OBJECT-044",
+      "targetRequirementId": "PRCV3-REQ-044",
+      "preimage": {
+        "control_023_prcs_hr_f023": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_023_prcs_hr_f023"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_023_prcs_hr_f023",
+        "required": true
+      },
+      "expectedTerminal": "VULNERABILITY-DISCLOSURE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-024",
+      "findingId": "PRCS-HR-F024",
+      "noMergeKey": "PRCS-HR-F024",
+      "targetObjectId": "PRCV3-OBJECT-019",
+      "targetRequirementId": "PRCV3-REQ-019",
+      "preimage": {
+        "control_024_prcs_hr_f024": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_024_prcs_hr_f024",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_024_prcs_hr_f024": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_024_prcs_hr_f024",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "LICENSE-STATE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-025",
+      "findingId": "PRCS-HR-F025",
+      "noMergeKey": "PRCS-HR-F025",
+      "targetObjectId": "PRCV3-OBJECT-041",
+      "targetRequirementId": "PRCV3-REQ-041",
+      "preimage": {
+        "control_025_prcs_hr_f025": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_025_prcs_hr_f025",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_025_prcs_hr_f025": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_025_prcs_hr_f025",
+        "required": "DENY"
+      },
+      "expectedTerminal": "ATTESTATION-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-026",
+      "findingId": "PRCS-HR-F026",
+      "noMergeKey": "PRCS-HR-F026",
+      "targetObjectId": "PRCV3-OBJECT-005",
+      "targetRequirementId": "PRCV3-REQ-005",
+      "preimage": {
+        "control_026_prcs_hr_f026": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_026_prcs_hr_f026"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_026_prcs_hr_f026",
+        "required": true
+      },
+      "expectedTerminal": "EVIDENCE-CUSTODY-TIME-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-027",
+      "findingId": "PRCS-HR-F027",
+      "noMergeKey": "PRCS-HR-F027",
+      "targetObjectId": "PRCV3-OBJECT-046",
+      "targetRequirementId": "PRCV3-REQ-046",
+      "preimage": {
+        "control_027_prcs_hr_f027": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_027_prcs_hr_f027",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_027_prcs_hr_f027": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_027_prcs_hr_f027",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "CYBER-SOURCE-CUSTODY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-028",
+      "findingId": "PRCS-HR-F028",
+      "noMergeKey": "PRCS-HR-F028",
+      "targetObjectId": "PRCV3-OBJECT-046",
+      "targetRequirementId": "PRCV3-REQ-046",
+      "preimage": {
+        "control_028_prcs_hr_f028": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_028_prcs_hr_f028",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_028_prcs_hr_f028": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_028_prcs_hr_f028",
+        "required": "DENY"
+      },
+      "expectedTerminal": "CYBER-SOURCE-CUSTODY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-029",
+      "findingId": "PRCS-HR-F029",
+      "noMergeKey": "PRCS-HR-F029",
+      "targetObjectId": "PRCV3-OBJECT-047",
+      "targetRequirementId": "PRCV3-REQ-047",
+      "preimage": {
+        "control_029_prcs_hr_f029": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_029_prcs_hr_f029"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_029_prcs_hr_f029",
+        "required": true
+      },
+      "expectedTerminal": "AI-SECURITY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-030",
+      "findingId": "PRCS-HR-F030",
+      "noMergeKey": "PRCS-HR-F030",
+      "targetObjectId": "PRCV3-OBJECT-004",
+      "targetRequirementId": "PRCV3-REQ-004",
+      "preimage": {
+        "control_030_prcs_hr_f030": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_030_prcs_hr_f030",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_030_prcs_hr_f030": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_030_prcs_hr_f030",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "OBSERVATION-CONTINUITY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-031",
+      "findingId": "PRCS-HR-F031",
+      "noMergeKey": "PRCS-HR-F031",
+      "targetObjectId": "PRCV3-OBJECT-023",
+      "targetRequirementId": "PRCV3-REQ-023",
+      "preimage": {
+        "control_031_prcs_hr_f031": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_031_prcs_hr_f031",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_031_prcs_hr_f031": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_031_prcs_hr_f031",
+        "required": "DENY"
+      },
+      "expectedTerminal": "EXECUTABLE-DEPENDENCY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-032",
+      "findingId": "PRCS-HR-F032",
+      "noMergeKey": "PRCS-HR-F032",
+      "targetObjectId": "PRCV3-OBJECT-033",
+      "targetRequirementId": "PRCV3-REQ-033",
+      "preimage": {
+        "control_032_prcs_hr_f032": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_032_prcs_hr_f032"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_032_prcs_hr_f032",
+        "required": true
+      },
+      "expectedTerminal": "RULESET-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-033",
+      "findingId": "PRCH2V2-IHR-F033",
+      "noMergeKey": "PRCH2V2-EXACT-PUBLIC-ALLOWLIST-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-021",
+      "targetRequirementId": "PRCV3-REQ-021",
+      "preimage": {
+        "control_033_prch2v2_exact_public_allowlist_absent": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_033_prch2v2_exact_public_allowlist_absent",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_033_prch2v2_exact_public_allowlist_absent": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_033_prch2v2_exact_public_allowlist_absent",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "PUBLIC-ALLOWLIST-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-034",
+      "findingId": "PRCH2V2-IHR-F034",
+      "noMergeKey": "PRCH2V2-WORKTREE-INDEX-ROOT-PRESERVATION-GATE-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-003",
+      "targetRequirementId": "PRCV3-REQ-003",
+      "preimage": {
+        "control_034_prch2v2_worktree_index_root_preservation_gate_absent": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_034_prch2v2_worktree_index_root_preservation_gate_absent",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_034_prch2v2_worktree_index_root_preservation_gate_absent": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_034_prch2v2_worktree_index_root_preservation_gate_absent",
+        "required": "DENY"
+      },
+      "expectedTerminal": "REPOSITORY-ROOT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-035",
+      "findingId": "PRCH2V2-IHR-F035",
+      "noMergeKey": "PRCH2V2-REMOTE-REF-OBJECT-EXPECTED-OLD-TRANSACTION-GAP",
+      "targetObjectId": "PRCV3-OBJECT-009",
+      "targetRequirementId": "PRCV3-REQ-009",
+      "preimage": {
+        "control_035_prch2v2_remote_ref_object_expected_old_transaction_gap": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_035_prch2v2_remote_ref_object_expected_old_transaction_gap"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_035_prch2v2_remote_ref_object_expected_old_transaction_gap",
+        "required": true
+      },
+      "expectedTerminal": "REMOTE-REF-OBJECT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-036",
+      "findingId": "PRCH2V2-IHR-F036",
+      "noMergeKey": "PRCH2V2-LEGACY-QUARANTINE-IMPORT-TAINT-PRODUCER-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-014",
+      "targetRequirementId": "PRCV3-REQ-014",
+      "preimage": {
+        "control_036_prch2v2_legacy_quarantine_import_taint_producer_absent": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_036_prch2v2_legacy_quarantine_import_taint_producer_absent",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_036_prch2v2_legacy_quarantine_import_taint_producer_absent": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_036_prch2v2_legacy_quarantine_import_taint_producer_absent",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "LEGACY-TAINT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-037",
+      "findingId": "PRCH2V2-IHR-F037",
+      "noMergeKey": "PRCH2V2-GENERATED-OUTPUT-PROVENANCE-CLASSIFICATION-GAP",
+      "targetObjectId": "PRCV3-OBJECT-012",
+      "targetRequirementId": "PRCV3-REQ-012",
+      "preimage": {
+        "control_037_prch2v2_generated_output_provenance_classification_gap": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_037_prch2v2_generated_output_provenance_classification_gap",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_037_prch2v2_generated_output_provenance_classification_gap": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_037_prch2v2_generated_output_provenance_classification_gap",
+        "required": "DENY"
+      },
+      "expectedTerminal": "GENERATED-OUTPUT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-038",
+      "findingId": "PRCH2V2-IHR-F038",
+      "noMergeKey": "PRCH2V2-CURRENT-SECRET-CANDIDATE-AND-COVERAGE-BLOCKERS-UNBOUND",
+      "targetObjectId": "PRCV3-OBJECT-017",
+      "targetRequirementId": "PRCV3-REQ-017",
+      "preimage": {
+        "control_038_prch2v2_current_secret_candidate_and_coverage_blockers_unbound": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_038_prch2v2_current_secret_candidate_and_coverage_blockers_unbound"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_038_prch2v2_current_secret_candidate_and_coverage_blockers_unbound",
+        "required": true
+      },
+      "expectedTerminal": "SECRET-CANDIDATE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-039",
+      "findingId": "PRCH2V2-IHR-F039",
+      "noMergeKey": "PRCH2V2-PII-CUSTOMER-DATA-DENOMINATOR-UNDERDEFINED",
+      "targetObjectId": "PRCV3-OBJECT-016",
+      "targetRequirementId": "PRCV3-REQ-016",
+      "preimage": {
+        "control_039_prch2v2_pii_customer_data_denominator_underdefined": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_039_prch2v2_pii_customer_data_denominator_underdefined",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_039_prch2v2_pii_customer_data_denominator_underdefined": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_039_prch2v2_pii_customer_data_denominator_underdefined",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "SENSITIVE-DATA-PII-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-040",
+      "findingId": "PRCH2V2-IHR-F040",
+      "noMergeKey": "PRCH2V2-INTERIM-NO-LICENSE-CONTRIBUTION-RELEASE-BLOCK-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-019",
+      "targetRequirementId": "PRCV3-REQ-019",
+      "preimage": {
+        "control_040_prch2v2_interim_no_license_contribution_release_block_absent": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_040_prch2v2_interim_no_license_contribution_release_block_absent",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_040_prch2v2_interim_no_license_contribution_release_block_absent": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_040_prch2v2_interim_no_license_contribution_release_block_absent",
+        "required": "DENY"
+      },
+      "expectedTerminal": "LICENSE-STATE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-041",
+      "findingId": "PRCH2V2-IHR-F041",
+      "noMergeKey": "PRCH2V2-EVERY-PUBLIC-BYTE-OWNERSHIP-PROVENANCE-DENOMINATOR-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-020",
+      "targetRequirementId": "PRCV3-REQ-020",
+      "preimage": {
+        "control_041_prch2v2_every_public_byte_ownership_provenance_denominator_absent": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_041_prch2v2_every_public_byte_ownership_provenance_denominator_absent"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_041_prch2v2_every_public_byte_ownership_provenance_denominator_absent",
+        "required": true
+      },
+      "expectedTerminal": "PUBLIC-BYTE-PROVENANCE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-042",
+      "findingId": "PRCH2V2-IHR-F042",
+      "noMergeKey": "PRCH2V2-PRODUCER-REGISTRY-SELF-PRODUCTION-CONTRADICTION",
+      "targetObjectId": "PRCV3-OBJECT-006",
+      "targetRequirementId": "PRCV3-REQ-006",
+      "preimage": {
+        "control_042_prch2v2_producer_registry_self_production_contradiction": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_042_prch2v2_producer_registry_self_production_contradiction",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_042_prch2v2_producer_registry_self_production_contradiction": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_042_prch2v2_producer_registry_self_production_contradiction",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "PRODUCER-DEFINITION-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-043",
+      "findingId": "PRCH2V2-IHR-F043",
+      "noMergeKey": "PRCH2V2-CONFORMANCE-NEGATIVE-VECTOR-SELF-FORWARD-CYCLE",
+      "targetObjectId": "PRCV3-OBJECT-049",
+      "targetRequirementId": "PRCV3-REQ-049",
+      "preimage": {
+        "control_043_prch2v2_conformance_negative_vector_self_forward_cycle": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_043_prch2v2_conformance_negative_vector_self_forward_cycle",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_043_prch2v2_conformance_negative_vector_self_forward_cycle": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_043_prch2v2_conformance_negative_vector_self_forward_cycle",
+        "required": "DENY"
+      },
+      "expectedTerminal": "CONFORMANCE-ORACLE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-044",
+      "findingId": "PRCH2V2-IHR-F044",
+      "noMergeKey": "PRCH2V2-CANONICAL-GRAMMAR-CAUSAL-EVALUATOR-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-001",
+      "targetRequirementId": "PRCV3-REQ-001",
+      "preimage": {
+        "control_044_prch2v2_canonical_grammar_causal_evaluator_absent": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_044_prch2v2_canonical_grammar_causal_evaluator_absent"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_044_prch2v2_canonical_grammar_causal_evaluator_absent",
+        "required": true
+      },
+      "expectedTerminal": "SCHEMA-LOCATOR-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-045",
+      "findingId": "PRCH2V2-IHR-F045",
+      "noMergeKey": "PRCH2V2-TWO-EVALUATOR-INDEPENDENCE-PREDICATE-VACUOUS",
+      "targetObjectId": "PRCV3-OBJECT-006",
+      "targetRequirementId": "PRCV3-REQ-006",
+      "preimage": {
+        "control_045_prch2v2_two_evaluator_independence_predicate_vacuous": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_045_prch2v2_two_evaluator_independence_predicate_vacuous",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_045_prch2v2_two_evaluator_independence_predicate_vacuous": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_045_prch2v2_two_evaluator_independence_predicate_vacuous",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "PRODUCER-DEFINITION-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-046",
+      "findingId": "PRCH2V2-IHR-F046",
+      "noMergeKey": "PRCH2V2-PROVIDER-SPECIFIC-OIDC-POLICY-PRODUCER-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-036",
+      "targetRequirementId": "PRCV3-REQ-036",
+      "preimage": {
+        "control_046_prch2v2_provider_specific_oidc_policy_producer_absent": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_046_prch2v2_provider_specific_oidc_policy_producer_absent",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_046_prch2v2_provider_specific_oidc_policy_producer_absent": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_046_prch2v2_provider_specific_oidc_policy_producer_absent",
+        "required": "DENY"
+      },
+      "expectedTerminal": "OIDC-POLICY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-047",
+      "findingId": "PRCH2V2-IHR-F047",
+      "noMergeKey": "PRCH2V2-UNDECLARED-LEGAL-D02-D25-EXTERNAL-DEPENDENCIES",
+      "targetObjectId": "PRCV3-OBJECT-000",
+      "targetRequirementId": "PRCV3-REQ-000",
+      "preimage": {
+        "control_047_prch2v2_undeclared_legal_d02_d25_external_dependencies": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_047_prch2v2_undeclared_legal_d02_d25_external_dependencies"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_047_prch2v2_undeclared_legal_d02_d25_external_dependencies",
+        "required": true
+      },
+      "expectedTerminal": "FOUNDATION-INPUT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-048",
+      "findingId": "PRCH2V2-IHR-F048",
+      "noMergeKey": "PRCH2V2-THIRTY-TWO-ONLY-FINDING-CLOSURE-CEILING",
+      "targetObjectId": "PRCV3-OBJECT-008",
+      "targetRequirementId": "PRCV3-REQ-008",
+      "preimage": {
+        "control_048_prch2v2_thirty_two_only_finding_closure_ceiling": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_048_prch2v2_thirty_two_only_finding_closure_ceiling",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_048_prch2v2_thirty_two_only_finding_closure_ceiling": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_048_prch2v2_thirty_two_only_finding_closure_ceiling",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "REVIEW-UNIVERSE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-049",
+      "findingId": "PRCH2V2-IHR-F049",
+      "noMergeKey": "PRCH2V2-SCOPED-OPEN-SEVERITY-ZERO-PREDICATE-VACUOUS",
+      "targetObjectId": "PRCV3-OBJECT-008",
+      "targetRequirementId": "PRCV3-REQ-008",
+      "preimage": {
+        "control_049_prch2v2_scoped_open_severity_zero_predicate_vacuous": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_049_prch2v2_scoped_open_severity_zero_predicate_vacuous",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_049_prch2v2_scoped_open_severity_zero_predicate_vacuous": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_049_prch2v2_scoped_open_severity_zero_predicate_vacuous",
+        "required": "DENY"
+      },
+      "expectedTerminal": "REVIEW-UNIVERSE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-050",
+      "findingId": "PRCH2V2-IHR-F050",
+      "noMergeKey": "PRCH2V2-GITHUB-CONTROL-PLANE-CHANGE-PERMIT-ROLLBACK-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-034",
+      "targetRequirementId": "PRCV3-REQ-034",
+      "preimage": {
+        "control_050_prch2v2_github_control_plane_change_permit_rollback_absent": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_050_prch2v2_github_control_plane_change_permit_rollback_absent"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_050_prch2v2_github_control_plane_change_permit_rollback_absent",
+        "required": true
+      },
+      "expectedTerminal": "GITHUB-CONTROL-PLANE-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-051",
+      "findingId": "PRCH2V2-IHR-F051",
+      "noMergeKey": "PRCH2V2-CURRENT-LIVE-OBSERVATION-ROOTS-AND-READBACK-DENOMINATOR-UNBOUND",
+      "targetObjectId": "PRCV3-OBJECT-004",
+      "targetRequirementId": "PRCV3-REQ-004",
+      "preimage": {
+        "control_051_prch2v2_current_live_observation_roots_and_readback_denominator_unbound": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_051_prch2v2_current_live_observation_roots_and_readback_denominator_unbound",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_051_prch2v2_current_live_observation_roots_and_readback_denominator_unbound": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_051_prch2v2_current_live_observation_roots_and_readback_denominator_unbound",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "OBSERVATION-CONTINUITY-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-052",
+      "findingId": "PRCH2V2-IHR-F052",
+      "noMergeKey": "PRCH2V2-DEPLOYMENT-CHANGE-DRIFT-ROLLBACK-STATE-MACHINE-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-038",
+      "targetRequirementId": "PRCV3-REQ-038",
+      "preimage": {
+        "control_052_prch2v2_deployment_change_drift_rollback_state_machine_absent": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_052_prch2v2_deployment_change_drift_rollback_state_machine_absent",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_052_prch2v2_deployment_change_drift_rollback_state_machine_absent": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_052_prch2v2_deployment_change_drift_rollback_state_machine_absent",
+        "required": "DENY"
+      },
+      "expectedTerminal": "DEPLOYMENT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-053",
+      "findingId": "PRCH2V2-IHR-F053",
+      "noMergeKey": "PRCH2V2-RELEASE-ROLLBACK-REVOCATION-CONSUMER-NOTIFICATION-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-043",
+      "targetRequirementId": "PRCV3-REQ-043",
+      "preimage": {
+        "control_053_prch2v2_release_rollback_revocation_consumer_notification_absent": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_053_prch2v2_release_rollback_revocation_consumer_notification_absent"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_053_prch2v2_release_rollback_revocation_consumer_notification_absent",
+        "required": true
+      },
+      "expectedTerminal": "RELEASE-ROLLBACK-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-054",
+      "findingId": "PRCH2V2-IHR-F054",
+      "noMergeKey": "PRCH2V2-GENERAL-CYBER-COMPROMISE-INCIDENT-LIFECYCLE-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-045",
+      "targetRequirementId": "PRCV3-REQ-045",
+      "preimage": {
+        "control_054_prch2v2_general_cyber_compromise_incident_lifecycle_absent": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_054_prch2v2_general_cyber_compromise_incident_lifecycle_absent",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_054_prch2v2_general_cyber_compromise_incident_lifecycle_absent": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_054_prch2v2_general_cyber_compromise_incident_lifecycle_absent",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "CYBER-INCIDENT-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-055",
+      "findingId": "PRCH2V2-IHR-F055",
+      "noMergeKey": "PRCH2V2-DEPENDENCY-SBOM-VULNERABILITY-LIFECYCLE-GAP",
+      "targetObjectId": "PRCV3-OBJECT-022",
+      "targetRequirementId": "PRCV3-REQ-022",
+      "preimage": {
+        "control_055_prch2v2_dependency_sbom_vulnerability_lifecycle_gap": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_055_prch2v2_dependency_sbom_vulnerability_lifecycle_gap",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_055_prch2v2_dependency_sbom_vulnerability_lifecycle_gap": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_055_prch2v2_dependency_sbom_vulnerability_lifecycle_gap",
+        "required": "DENY"
+      },
+      "expectedTerminal": "DEPENDENCY-SBOM-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-056",
+      "findingId": "PRCH2V2-IHR-F056",
+      "noMergeKey": "PRCH2V2-REPOSITORY-RELATIVE-PATH-LOCATOR-GRAMMAR-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-001",
+      "targetRequirementId": "PRCV3-REQ-001",
+      "preimage": {
+        "control_056_prch2v2_repository_relative_path_locator_grammar_absent": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_056_prch2v2_repository_relative_path_locator_grammar_absent"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_056_prch2v2_repository_relative_path_locator_grammar_absent",
+        "required": true
+      },
+      "expectedTerminal": "SCHEMA-LOCATOR-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-057",
+      "findingId": "PRCH2V2-IHR-F057",
+      "noMergeKey": "PRCH2V2-SOURCEBASIS-QUALIFIER-RANGE-GRAMMAR-AMBIGUOUS",
+      "targetObjectId": "PRCV3-OBJECT-001",
+      "targetRequirementId": "PRCV3-REQ-001",
+      "preimage": {
+        "control_057_prch2v2_sourcebasis_qualifier_range_grammar_ambiguous": [
+          "APPROVED"
+        ]
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-APPEND-SET-MEMBER",
+        "kind": "APPEND_SET_MEMBER",
+        "field": "control_057_prch2v2_sourcebasis_qualifier_range_grammar_ambiguous",
+        "value": "UNAPPROVED"
+      },
+      "postimage": {
+        "control_057_prch2v2_sourcebasis_qualifier_range_grammar_ambiguous": [
+          "APPROVED",
+          "UNAPPROVED"
+        ]
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-SET-EQUALS",
+        "kind": "SET_EQUALS",
+        "field": "control_057_prch2v2_sourcebasis_qualifier_range_grammar_ambiguous",
+        "required": [
+          "APPROVED"
+        ]
+      },
+      "expectedTerminal": "SCHEMA-LOCATOR-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-058",
+      "findingId": "PRCH2V2-IHR-F058",
+      "noMergeKey": "PRCH2V2-EVIDENCE-CUSTODY-TRUSTED-TIME-IMMUTABILITY-GAP",
+      "targetObjectId": "PRCV3-OBJECT-005",
+      "targetRequirementId": "PRCV3-REQ-005",
+      "preimage": {
+        "control_058_prch2v2_evidence_custody_trusted_time_immutability_gap": "DENY"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-SET-FIELD",
+        "kind": "SET_FIELD",
+        "field": "control_058_prch2v2_evidence_custody_trusted_time_immutability_gap",
+        "value": "ALLOW"
+      },
+      "postimage": {
+        "control_058_prch2v2_evidence_custody_trusted_time_immutability_gap": "ALLOW"
+      },
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-EQUALS",
+        "kind": "FIELD_EQUALS",
+        "field": "control_058_prch2v2_evidence_custody_trusted_time_immutability_gap",
+        "required": "DENY"
+      },
+      "expectedTerminal": "EVIDENCE-CUSTODY-TIME-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    },
+    {
+      "vectorId": "PRCV3-VECTOR-059",
+      "findingId": "PRCH2V2-IHR-F059",
+      "noMergeKey": "PRCH2V2-REPRODUCIBLE-BUILD-COMPLETE-MATERIAL-PROVENANCE-ABSENT",
+      "targetObjectId": "PRCV3-OBJECT-039",
+      "targetRequirementId": "PRCV3-REQ-039",
+      "preimage": {
+        "control_059_prch2v2_reproducible_build_complete_material_provenance_absent": "BOUND"
+      },
+      "operation": {
+        "operationId": "PRCV3-OP-DELETE-FIELD",
+        "kind": "DELETE_FIELD",
+        "field": "control_059_prch2v2_reproducible_build_complete_material_provenance_absent"
+      },
+      "postimage": {},
+      "oracle": {
+        "oracleId": "PRCV3-ORACLE-FIELD-PRESENT",
+        "kind": "FIELD_PRESENT",
+        "field": "control_059_prch2v2_reproducible_build_complete_material_provenance_absent",
+        "required": true
+      },
+      "expectedTerminal": "REPRODUCIBLE-BUILD-BLOCKED",
+      "bodyState": "EXECUTABLE-PLANNING-MODEL"
+    }
+  ],
+  "denominators": {
+    "admittedFindings": 59,
+    "vectors": 59,
+    "uniqueFindingIds": 59,
+    "uniqueNoMergeKeys": 59,
+    "operationKinds": 3,
+    "oracleKinds": 3,
+    "ranges": 0,
+    "mergedRecords": 0,
+    "presenceOnlyBodies": 0
+  },
+  "executionBoundary": {
+    "modelExecutionAllowed": true,
+    "productExecutionPerformed": false,
+    "githubExecutionPerformed": false,
+    "providerExecutionPerformed": false,
+    "operationalEvidenceCredit": 0
+  },
+  "currentDisposition": {
+    "acceptedVectors": 0,
+    "acceptance": 0,
+    "repositoryVisibility": "PUBLIC",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE"
+  }
+}
+

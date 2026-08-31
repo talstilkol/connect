@@ -1,6 +1,18 @@
 # המלצות להחלטות החיצוניות
 
-תאריך בדיקה: 2026-08-09
+תאריך בדיקה: 2026-08-21
+
+## 0. קליטת החלטות טל
+
+0.1 תשובות השאלון מ־21.08.2026 נקלטו ב־
+[קליטת החלטות Connect](decision-intake-2026-08-21.md).
+
+0.2 נבחרו 25 אפשרויות, ניתנה הנחיה חלקית נוספת ל־Billing וארבע
+קבוצות נשארו ללא תשובה. הכיוונים שנבחרו עודכנו ב־Registry וב־ADR,
+אך אינם משנים Production readiness ללא Approver, תצורה חיה ו־Evidence.
+
+0.3 ספק Billing פעיל, File scanner, ‏Object storage, ‏Roadmap אחרי
+Pilot ו־Enterprise/Integrations/Mobile נשארו החלטות פתוחות.
 
 ## 1. עקרונות החלטה
 
@@ -19,8 +31,10 @@
 
 2.2 המלצה: `TEAM_INVITATION_REREQUEST_POLICY=after-terminal`.
 
-2.3 Clerk יוכיח את זהות המשתמש והאימייל המאומת, אך D1 יישאר מקור
-האמת ל־Invitation state, ‏Role, ‏Audit ו־Idempotency.
+2.3 Clerk יוכיח את זהות המשתמש והאימייל המאומת, אך שכבת ה־Persistence
+של Connect תישאר מקור האמת ל־Invitation state, ‏Role, ‏Audit
+ו־Idempotency. במימוש הקיים זו D1; ביעד Vercel/Railway היא תעבור
+ל־PostgreSQL רק דרך Adapter שעובר את אותם Contract tests.
 
 2.4 הסיבה: 72 שעות מצמצמות חשיפה של קישור ישן בלי להכביד מדי על
 הזמנה עסקית. Re-request מותר רק אחרי Expired, ‏Revoked או Accepted,
@@ -64,28 +78,69 @@ Fraud ו־Customer portal, ולכן מפחית עומס משפטי ותפעול�
 
 ## 5. החלטה 4 — Rate Limit Policy
 
-5.1 המלצה התחלתית:
+5.1 RACI: טל Responsible למחקר ולאימות עובדות; דוד Accountable
+למימוש; אבטחה ומוצר Approvers של המדיניות.
 
-5.1.1 System Admin mutations: ‏10 פעולות לדקה לכל User.
+5.2 ההחלטה מחולקת לשלוש שכבות נפרדות:
 
-5.1.2 Tenant mutations: ‏120 פעולות לדקה לכל User+Tenant.
+5.2.1 מגבלות ספק Meta: ‏Messaging limit, ‏Phone throughput,
+Sender+Recipient pair rate, ‏Templates, ‏Quality, ‏Marketing,
+Management API ו־Policy enforcement.
 
-5.1.3 Meta Webhook ingress: ‏1,500 אירועים לדקה לכל Meta App או
-Phone Number ID, אחרי אימות חתימה ולפני Queue publication.
+5.2.2 קיבולת קליטת Webhook ו־Queue: אימות חתימה, Idempotency,
+Backpressure, ‏Retry ו־DLQ.
 
-5.2 המפתחות יהיו זהויות יציבות ולא כתובת IP. Cloudflare מציינת
-שמגבלת Workers היא מקומית ל־PoP ו־eventually consistent, ולכן היא
-אינה מנגנון Billing או Quota מדויק.
+5.2.3 מכסות אפליקטיביות של Connect: ‏User, ‏Tenant, ‏Campaign,
+Phone number, ‏Recipient, ‏Template ופעולות ניהול.
 
-5.3 לאחר שבועיים של Staging/Production telemetry יש לכייל את
-הספים לפי p95 ועומסי Burst אמיתיים.
+5.3 המספרים הבאים הם **Engineering starting proposal בלבד** ואינם
+מגבלות WhatsApp רשמיות:
+
+5.3.1 System Admin mutations: ‏10 פעולות לדקה לכל User.
+
+5.3.2 Tenant mutations: ‏120 פעולות לדקה לכל User+Tenant.
+
+5.3.3 Meta Webhook ingress: אין תקרה קבועה מראש. הקיבולת נגזרת
+מ־Phone throughput החי, פי שלושה Status events לתעבורה יוצאת,
+התעבורה הנכנסת הצפויה ו־Headroom שנבדק ב־Load test.
+
+5.4 Baseline המגבלות המתוארך, לרבות ערכים שאינם מפורסמים ומצב
+החשבון שעדיין אינו זמין, נמצא ב־`docs/whatsapp-rate-limits.md`. הוא
+אינו Production evidence עד שהוא מקושר למצב החי, Commit ו־Digest.
+
+5.5 המפתחות יהיו זהויות יציבות ולא כתובת IP. מנגנון Rate limit
+תשתיתי מקומי ל־Instance או Region אינו מנגנון Billing או Quota
+מדויק; ה־Migration חייב לשמר מכסות אטומיות ברמת Portfolio/Sender/
+Recipient במאגר משותף.
+
+5.6 לפני אישור טל ימסור Evidence מתוארך הכולל מקור רשמי, גרסת API,
+Scope, חלון, Error/Retry behavior, ‏Telemetry, ‏Alerts, ‏Backoff
+ו־Kill switch. לאחר שבועיים של Staging telemetry יש לכייל את המכסות
+הפנימיות לפי p95 ועומסי Burst אמיתיים.
+
+5.7 מצב מימוש מקומי: חוזה ה־Campaign sender מפנה את החלטות ה־Retry
+ל־`MetaMessageFailurePolicy`, ומיגרציה `0032` שומרת Cooldown אטומי
+לשלושת ה־Scopes שניתנים לזיהוי מדויק. מיגרציה `0034` שומרת Policy
+Evidence מתכלה ובלתי־ניתנת לשינוי, ומאפשרת Event אחרון מסוג
+`disabled` כ־Kill switch עמיד. מיגרציה `0035` וגרסת PostgreSQL `0013`
+אוכפות כעת חלון Phone throughput מתגלגל לפי Policy מאושרת, כולל Headroom
+מפורש בין תקרת Meta לתקרת Outbound. אין בכך אישור מדיניות: מקור
+`Retry-After`/Pair exponent חי, ערכי החשבון, ‏Alerts ותרגיל Kill
+switch עדיין דורשים Evidence ואישור לפי RACI בסעיף 5.1. מסלול
+Operator המקומי הושלם תחת System Admin: הוא קושר את הקלט לזהויות
+ולגרסת Meta connection, גוזר Actor וזמן בשרת, שומר Audit אטומי
+ומאפשר Kill switch ללא שינוי ה־Snapshot שאושר. הוא אינו מחליף את
+האישור העובדתי של טל או את תרגיל ה־WABA החי.
 
 ## 6. החלטה 5 — File Scanner
 
-6.1 המלצה: **ClamAV `clamd` בתוך Cloudflare Container מבודד**.
+6.1 המלצה ל־Topology שנבחרה: **ClamAV `clamd` בשירות Railway פרטי
+ומבודד**, ללא כתובת ציבורית. הבחירה נשארת פתוחה עד בדיקת משאבים,
+עדכוני חתימות, עלות ו־Failure recovery ב־Staging.
 
-6.2 Worker יקרא את האובייקט מ־R2, יזרים את הבתים ל־Scanner ולא
-ישלח קישור ציבורי או Object Key לספק צד שלישי.
+6.2 ‏Worker יקרא את האובייקט דרך ObjectStoragePort, יזרים את הבתים
+ל־Scanner ברשת פרטית ולא ישלח קישור ציבורי או Object Key לספק צד
+שלישי. ספק ה־Storage עדיין `unknown/unavailable`.
 
 6.3 ה־Container יעדכן חתימות באמצעות `freshclam`, ייחסם ל־Egress
 שאושר מראש ויחזיר רק `clean`, ‏`infected` או `unavailable`.
@@ -108,8 +163,8 @@ Phone Number ID, אחרי אימות חתימה ולפני Queue publication.
 7.3 אין לאפשר ZIP, קוד, HTML, Office macros, קובץ מוצפן או MIME
 שאינו תואם לחתימת הקובץ.
 
-7.4 כל Upload יעבור Size check, ‏Digest, ‏R2 write, ‏Read-back,
-Malware scan, Extraction ורק אז Passage publication.
+7.4 כל Upload יעבור Size check, ‏Digest, ‏Object storage write,
+Read-back, ‏Malware scan, ‏Extraction ורק אז Passage publication.
 
 ## 8. החלטה 7 — Knowledge Scan Recovery
 
@@ -131,17 +186,20 @@ Malware scan, Extraction ורק אז Passage publication.
 
 9.1.3 `RESTORE_REHEARSAL_INTERVAL_DAYS=30`.
 
-9.2 D1 Time Travel מספק Point-in-time recovery של עד 30 ימים
-בתוכנית Workers Paid. לצורך 90 יום יש להוסיף Export מוצפן ל־R2
-Backup bucket נפרד.
+9.2 יעד ה־Migration דורש PostgreSQL עם Point-in-time recovery
+והעתקים מוצפנים לחשבון/Project נפרד. ספק PostgreSQL, חלון PITR,
+אזור גיבוי ועלות עדיין `unknown/unavailable` ואסור להסיק אותם מ־D1.
 
-9.3 R2 Lifecycle ינהל תפוגה של 90 יום. Restore rehearsal יתבצע רק
-לסביבה מבודדת ויאמת D1, ‏R2 manifests ו־digests לפני יצירת Evidence.
+9.3 Lifecycle של Backup storage ינהל תפוגה של 90 יום. ‏Restore
+rehearsal יתבצע רק לסביבה מבודדת ויאמת PostgreSQL snapshot, ‏Object
+manifests ו־digests לפני יצירת Evidence.
 
 ## 10. החלטה 9 — מקור מדידת SLO
 
-10.1 המלצה: Cloudflare Workers Logs ו־Traces כמקור התשתיתי, יחד עם
-אירועי Telemetry המצומצמים שכבר קיימים באפליקציה.
+10.1 המלצה ל־Topology שנבחרה: OpenTelemetry עקבי מ־Vercel Web ומ־
+Railway API/Worker, יחד עם אירועי Telemetry המצומצמים שכבר קיימים
+באפליקציה. ספק האחסון וההתראות נשאר `unknown/unavailable` עד החלטה
+והוכחת Retention, ‏PII redaction ועלות.
 
 10.2 תצורה התחלתית:
 
@@ -162,6 +220,12 @@ Backup bucket נפרד.
 
 11.3 יעד הזמינות נשאר 99.5%. לאחר צבירת נתונים יש להוסיף מדיניות
 Burn-rate רב־חלונית, אך לא לשנות יעד ללא נתוני Production.
+
+11.4 ה־Incident adapter המקומי מוכן ונכשל סגור. כדי להפעילו יש למסור
+Team-scoped API token, ‏Requester email, ‏Escalation policy ID, בחירה
+מפורשת של Call/SMS/Email/Push/Critical ו־`team_wait` בשניות. אין Defaults
+לערוצים או לזמן ההסלמה, וה־Business-hours schedule חייב להיות מוגדר
+ולהיבדק בתוך Better Stack.
 
 ## 12. החלטה 11 — Data Retention ו־Legal Hold
 
@@ -205,31 +269,222 @@ Legal Hold, Dry run, Plan קצר־תוקף ותרגיל Restore מוצלח.
 13.3 לכל החלטה יירשמו Owner, ‏Approver, תאריך, חלופה שנדחתה,
 עלות חודשית מקסימלית ותנאי Exit.
 
-## 14. מקורות רשמיים
+## 14. החלטה 12 — זהויות Claude וגישה מרחוק
 
-14.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+14.1 המלצה: Claude Team בבעלות החברה עם Seat אישי לכל מפתח.
+מנוי אישי נפרד יכול לשמש רק אם מדיניות החברה מאשרת אותו; חשבון
+רגיל משותף אינו מאושר.
 
-14.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+14.2 AnyDesk הוא ערוץ גישה למחשב חברה, לא מנגנון לשיתוף Claude.
+אם הוא נדרש, יש להפעיל 2FA, ‏Access Control List, משתמש OS אישי
+ו־Permission Profile מצומצם.
 
-14.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+14.3 אין לשתף Password, ‏Cookie, ‏Session, קוד כניסה או Token דרך
+AnyDesk, צ'אט, GitHub או מסמך.
 
-14.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+## 15. החלטה 13 — GitHub ו־Repository Authority
 
-14.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+15.1 החלטת טל מ־2026-08-17: ה־Repository הפרטי
+`talstilkol/connect` נשאר בבעלותו והוא Repository Authority היחיד
+בשלב הנוכחי. אין לפתוח עותק נוסף. העברה עתידית ל־Organization היא
+שלב התבגרות אפשרי ותעביר את אותו Repository בלבד.
 
-14.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+15.2 כל חבר צוות יעבוד בזהות אישית עם 2FA. טל מנהל Membership
+ו־Roles כל עוד ה־Repository בבעלותו; אין משתמש משותף ואין Push ישיר
+ל־`main`.
 
-14.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+15.3 Branch Protection, ‏CODEOWNERS, Review חובה, תשעת ה־Checks,
+Secret scanning ו־Push protection יופעלו לפני עבודה משותפת.
 
-14.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+15.4 החלטה חיצונית נוספת: Artifact Attestations עבור Repository פרטי
+דורשים כיום GitHub Enterprise Cloud. ההמלצה היא לא לעקוף את החתימה:
+לפני Pilot יש לבחור בין שדרוג ל־Enterprise Cloud לבין מנגנון חתימה
+חלופי שעובר Security review. עד להחלטה, Workflow ה־Production נכשל
+סגור במכוון. מקור: [GitHub Artifact attestations](https://docs.github.com/en/enterprise-cloud@latest/actions/concepts/security/artifact-attestations).
 
-14.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+## 16. החלטה 14 — Hosting
 
-14.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+16.1 החלטת טל מ־2026-08-17: לבצע Migration מלא ל־Vercel ול־Railway.
+Vercel מיועד לשכבת ה־Web ו־Railway לשירותי API ו־Worker נפרדים.
+Cloudflare נשאר בסיס המימוש הקיים בלבד ואינו יעד ה־Production שנבחר.
 
-14.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+16.2 בחירת הספקים אינה בוחרת אוטומטית PostgreSQL, ‏Queue/DLQ,
+Storage, ‏Scheduler, ‏Rate limiting, ‏Secrets, ‏Monitoring או Backup.
+יש לאשר מפת מחליפים ולבנות מחדש את חוזי Auth, ‏Data, ‏Backup,
+Evidence ו־Release לפני Deployment.
 
-14.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+16.3 אין לשתף Deployment Token. יש להזמין את ראשה כ־Member עם
+Least privilege. לפי התיעוד העדכני, שיתוף Members ב־Railway מיועד
+ל־Pro/Enterprise, ולכן תוכנית Hobby של 5 דולר אינה תואמת לבדה למודל
+הגישה שהוצע.
 
-14.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+16.4 אסור Hybrid לא מתועד. ‏Migration מתבצע דרך Contract freeze,
+Adapter parity, ‏Staging מבודד ו־Cutover מבוקר עם Rollback מתורגל.
 
+16.5 ‏[ADR-0004](adr/0004-target-service-topology.md) מרכז את ההמלצה
+המפורטת: Vercel Web/BFF מזדהה ל־Railway API בעזרת OIDC; ‏Railway
+Worker קבוע מפעיל Scheduler של דקה; PostgreSQL הוא מקור האמת;
+Redis + BullMQ מפעילים Queues ו־Backpressure. ה־ADR נשאר `proposed`.
+
+16.6 Object storage נשאר החלטה פתוחה. AWS S3 הוא ההמלצה עבור
+Encryption, ‏Versioning, ‏Lifecycle ו־Legal Hold; ‏Vercel Private
+Blob הוא חלופה. Railway Bucket אינו מומלץ כרגע למסמכים רגישים או
+לגיבויים משום שחסרים בו Server-side encryption, ‏Versioning,
+Object Lock ו־Lifecycle configuration.
+
+## 17. החלטה 15 — WhatsApp Business Platform
+
+17.1 המלצה: Meta Cloud API רשמי מאחורי ה־Backend הקיים. ה־Browser
+לא יקבל Meta Access Token ולא יקרא ישירות ל־Graph API.
+
+17.2 פרויקט ה־WordPress יעבור Sanitization ו־Secret/PII scan לפני
+שיתוף. דוד יחלץ ממנו Integration Inventory וחוזה התנהגות בלבד.
+
+17.3 החיבור הראשון יתבצע עם Test WABA ומספר בדיקה. נכס האב יחובר
+רק ב־Pilot מבודד, באישור מפורש, עם נמענים מורשים, Rate limit,
+Kill switch ו־Audit.
+
+17.4 תוכנית הביצוע, חלוקת האחריות ותנאי הקבלה נמצאים ב־
+`docs/team-operating-plan.md`.
+
+17.5 לפני ה־Pilot טל מאמת את עובדות Meta והמצב החי; דוד מאשר את
+התאמת המימוש; אבטחה ומוצר מאשרים Internal caps, ‏Webhook capacity,
+‏Alerts ו־Kill switch. ערכי החשבון אינם מוסקים מתוכנית או מתעבורה
+קודמת.
+
+## 18. החלטה 16 — Package, ‏Quota ופרטי קשר
+
+18.1 סטטוס: **פתוח**. האפיון דורש יכולת עריכה, אך אינו קובע שמות
+חבילות, מחירים, יחידת זמן, מספר הודעות, מספר נמענים, מספר Bots,
+מספר משתמשים, חריגה מותרת או שדות קשר מחייבים. אין לקודד ערכים
+לפני החלטת Product.
+
+18.2 החלטות שחייבים לסגור:
+
+18.2.1 אילו Entitlements יש לכל Package ומה יחידת המדידה של כל אחד.
+
+18.2.2 האם Quota היא Hard limit, ‏Soft limit עם Alert, או Overage
+בתשלום; ומה קורה לפעולות שכבר נמצאות ב־Queue כאשר המכסה מסתיימת.
+
+18.2.3 האם שינוי חבילה חל מיד או במחזור הבא, וכיצד מטפלים ב־Downgrade
+כאשר שימוש קיים גבוה מהמכסה החדשה.
+
+18.2.4 אילו פרטי קשר נדרשים בנפרד: Billing, ‏Operational ו־Security;
+מי רשאי לערוך אותם, כיצד מאמתים Email/Phone ומהי מדיניות ה־Retention.
+
+18.3 המלצת מודל:
+
+18.3.1 `plans` בגרסאות, עם Code יציב ו־Lifecycle מפורש; אין לשנות
+רטרואקטיבית Entitlements של Tenant שכבר הוקצו לו.
+
+18.3.2 `plan_entitlements` יגדיר גבולות מאושרים, ו־Usage Ledger נפרד
+ימדוד צריכה בפועל. אין להשתמש ב־Rate Limiter כמנגנון Billing או
+כמקור אמת ל־Quota.
+
+18.3.3 `tenant_plan_assignments` יכלול Expected Version, חלון תחולה
+ו־Audit. Override ידני יחייב סיבה, Actor ותפוגה; לא תהיה מכסה נסתרת
+בקוד UI.
+
+18.3.4 פרטי קשר יישמרו בישות ייעודית ומצומצמת, לא בתוך Display Name.
+יש להגדיר PII access, ‏Encryption, ‏Retention ו־Audit לפני הוספת
+Email או Phone.
+
+18.4 התנהגות בטוחה מומלצת:
+
+18.4.1 Downgrade אינו מוחק נתונים קיימים. הוא חוסם יצירה או שליחה
+חדשה לפי Policy מאושרת ומציג למפעיל את הסיבה ואת דרך התיקון.
+
+18.4.2 שינוי Admin דורש Expected Version ו־Audit אטומי. אירוע Audit
+ישמור Digests ושמות שדות, ולא יעתיק PII ללא צורך משפטי מאושר.
+
+18.4.3 עד להחלטה, המימוש הקיים מאפשר רק שינוי שם עסק, אזור זמן ושפת
+ממשק. הוא אינו טוען שהשלים Package, ‏Quota או פרטי קשר.
+
+18.5 בעלות מומלצת: רועי / Product Accountable על הגדרת החבילות;
+דוד Responsible למודל ולאכיפה; אבטחה ו־Legal מאשרים PII ו־Retention;
+Billing owner מאשר התאמה לספק שייבחר.
+
+18.6 אומדן לאחר החלטה חתומה: 8–14 שעות לפיתוח מקומי ולבדיקות של
+המודל המצומצם. Checkout, ‏Webhooks, חשבוניות ו־Provider metering הם
+Workstream חיצוני נפרד וזמנם `unknown/unavailable`.
+
+## 19. החלטה 17 — Identity ו־Clerk Organizations
+
+19.1 החלטת טל: Clerk חובה, Organization חובה ו־MFA לבעלי הרשאות Admin.
+
+19.2 המימוש המקומי דורש כעת `orgId` מתוך Clerk Session חתום, מקשר אותו
+אטומית ל־Tenant ב־PostgreSQL ודוחה Session שה־Organization שלו אינו תואם
+ל־Tenant. Connect אינה יוצרת Organization ישירות מתוך Transaction.
+
+19.3 המלצה תפעולית: להפעיל ב־Clerk את יצירת ה־Organization הראשון
+אוטומטית. כך נמנע Timeout לא ודאי סביב `createOrganization()` שאין עבורו
+Idempotency key מתועד.
+
+19.4 עדיין נדרשים: Clerk Plan, ‏Organizations/MFA/Session/Revocation
+settings, ‏Authorized parties, ‏Admin allowlist, Backfill מאושר ל־Tenants
+קיימים ו־Browser E2E חי. המימוש המלא מתועד ב־
+`docs/clerk-organization-tenant-binding.md`.
+
+## 20. מקורות רשמיים
+
+20.1 [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations).
+
+20.2 [OpenAI — Migrate to the Responses API](https://developers.openai.com/api/docs/guides/migrate-to-responses).
+
+20.3 [Paddle for SaaS](https://developer.paddle.com/get-started/how-paddle-works/saas/).
+
+20.4 [Stripe Managed Payments](https://docs.stripe.com/payments/managed-payments/how-it-works).
+
+20.5 [Cloudflare Workers Rate Limiting](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+
+20.6 [Cloudflare Containers](https://developers.cloudflare.com/containers/).
+
+20.7 [ClamAV scanning](https://docs.clamav.net/manual/Usage/Scanning.html).
+
+20.8 [Cloudflare D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
+
+20.9 [Cloudflare R2 object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
+
+20.10 [Cloudflare Workers Logs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/).
+
+20.11 [Cloudflare Workers Traces](https://developers.cloudflare.com/workers/observability/traces/).
+
+20.12 [רשות הגנת הפרטיות — משך שמירת נתוני אבטחה](https://www.gov.il/he/pages/data_security_guide?chapterIndex=19).
+
+20.13 [רשות הגנת הפרטיות — גיבוי ושחזור](https://www.gov.il/he/pages/data_security_guide?chapterIndex=20).
+
+20.14 [GitHub — Managing repository access](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/managing-teams-and-people-with-access-to-your-repository?apiVersion=2022-11-28).
+
+20.15 [Railway — Pricing plans](https://docs.railway.com/pricing/plans).
+
+20.16 [Clerk — Configure Organizations](https://clerk.com/docs/guides/organizations/configure).
+
+20.17 [Clerk — Create Organization](https://clerk.com/docs/reference/backend/organization/create-organization).
+
+19.16 [Vercel — Managing team members](https://vercel.com/docs/rbac/managing-team-members).
+
+19.17 [Meta — WhatsApp Business Platform](https://www.postman.com/meta/whatsapp-business-platform/overview).
+
+19.18 [Anthropic — Claude Team](https://support.claude.com/en/articles/9267247-get-started-with-the-team-plan).
+
+18.19 [AnyDesk — Two-factor authentication](https://anydesk.com/en/features/2-factor-authentication).
+
+18.20 [Meta — WhatsApp platform rate limits](https://developers.facebook.com/documentation/business-messaging/whatsapp/about-the-platform#rate-limits).
+
+18.21 [Meta — WhatsApp throughput](https://developers.facebook.com/documentation/business-messaging/whatsapp/throughput).
+
+18.22 [Meta — WhatsApp messaging limits](https://developers.facebook.com/documentation/business-messaging/whatsapp/messaging-limits).
+
+18.23 [Meta — WhatsApp template pacing](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/template-pacing).
+
+18.24 [Meta — WhatsApp business portfolio pacing](https://developers.facebook.com/documentation/business-messaging/whatsapp/templates/portfolio-pacing).
+
+18.25 [Meta — WhatsApp policy enforcement](https://developers.facebook.com/documentation/business-messaging/whatsapp/policy-enforcement).
+
+18.26 [Meta — WhatsApp error codes](https://developers.facebook.com/documentation/business-messaging/whatsapp/support/error-codes).
+
+18.27 [WhatsApp Business Solution Terms](https://www.whatsapp.com/legal/business-solution-terms/).
+
+18.28 [WhatsApp Business Messaging Policy](https://whatsappbusiness.com/policy/).
+
+18.29 [Meta Terms for WhatsApp Business](https://www.whatsapp.com/legal/meta-terms-whatsapp-business).

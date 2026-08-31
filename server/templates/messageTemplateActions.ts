@@ -16,28 +16,25 @@ import {
   inspectClerkConfiguration,
 } from "../auth/clerkConfiguration.ts";
 import {
-  requireCurrentTenantMutationSession,
-} from "../auth/currentTenantMutationSession.ts";
-import {
   createMetaCredentialVault,
 } from "../meta/metaCredentialVault.ts";
+import {
+  requireCurrentTenantMutationSession,
+} from "../auth/currentTenantMutationSession.ts";
 import type {
   SaveMessageTemplateDraftActionResult,
   SubmitMessageTemplateActionResult,
   SyncMessageTemplatesActionResult,
 } from "./messageTemplateActionResult.ts";
 import {
-  createMessageTemplateActionHandler,
-} from "./messageTemplateActionHandler.ts";
-import {
-  createMessageTemplateService,
-} from "./messageTemplateService.ts";
+  createCurrentRailwayMessageTemplateDraftHandler,
+} from "./currentRailwayMessageTemplateDraftHandler.ts";
 import {
   inspectMessageTemplateSubmissionReadiness,
 } from "./messageTemplateSubmissionReadiness.ts";
 import {
-  createMessageTemplateSubmissionRuntime,
-} from "./messageTemplateSubmissionRuntime.ts";
+  createCurrentRailwayMessageTemplateSubmissionHandler,
+} from "./currentRailwayMessageTemplateSubmissionHandler.ts";
 import {
   createMessageTemplateSyncActionHandler,
 } from "./messageTemplateSyncActionHandler.ts";
@@ -45,55 +42,7 @@ import {
   createMessageTemplateSyncRuntime,
 } from "./messageTemplateSyncRuntime.ts";
 
-async function createActionHandler() {
-  const { env } = await import("cloudflare:workers");
-
-  return createMessageTemplateActionHandler({
-    applicationConfigured: () =>
-      inspectClerkConfiguration().status === "configured",
-    readSubmissionReadiness: () =>
-      inspectMessageTemplateSubmissionReadiness(env),
-    async createDraftContext() {
-      const database = await requireRuntimeDatabase();
-      const session =
-        await requireCurrentTenantMutationSession(
-          database,
-        );
-      const templates =
-        createMessageTemplateRepository(database);
-
-      return {
-        session,
-        service: createMessageTemplateService(templates),
-      };
-    },
-    async createSubmissionContext() {
-      const database = await requireRuntimeDatabase();
-      const session =
-        await requireCurrentTenantMutationSession(
-          database,
-        );
-      const templates =
-        createMessageTemplateRepository(database);
-      const metaConnections =
-        createMetaRepository(database);
-      const credentialVault = createMetaCredentialVault(
-        createMetaCredentialRepository(database),
-        env,
-      );
-
-      return {
-        session,
-        service: createMessageTemplateSubmissionRuntime({
-          environment: env,
-          templates,
-          metaConnections,
-          credentialVault,
-        }),
-      };
-    },
-  });
-}
+const railwayMetaTemplateProviderActionsReady = false;
 
 async function createSyncActionHandler() {
   const { env } = await import("cloudflare:workers");
@@ -134,34 +83,33 @@ async function createSyncActionHandler() {
 export async function saveMessageTemplateDraftAction(
   input: unknown,
 ): Promise<SaveMessageTemplateDraftActionResult> {
-  if (inspectClerkConfiguration().status !== "configured") {
-    return { status: "configuration-required" };
-  }
-
-  try {
-    const handler = await createActionHandler();
-    return handler.saveDraft(input);
-  } catch {
-    return { status: "server-error" };
-  }
+  return createCurrentRailwayMessageTemplateDraftHandler().save(input);
 }
 
 export async function submitMessageTemplateAction(
   templateKey: unknown,
 ): Promise<SubmitMessageTemplateActionResult> {
+  if (!railwayMetaTemplateProviderActionsReady) {
+    return { status: "meta-configuration-required" };
+  }
+
   if (inspectClerkConfiguration().status !== "configured") {
     return { status: "configuration-required" };
   }
 
   try {
-    const handler = await createActionHandler();
-    return handler.submit(templateKey);
+    return createCurrentRailwayMessageTemplateSubmissionHandler()
+      .submit(templateKey);
   } catch {
     return { status: "server-error" };
   }
 }
 
 export async function syncMessageTemplatesAction(): Promise<SyncMessageTemplatesActionResult> {
+  if (!railwayMetaTemplateProviderActionsReady) {
+    return { status: "meta-configuration-required" };
+  }
+
   if (inspectClerkConfiguration().status !== "configured") {
     return { status: "configuration-required" };
   }

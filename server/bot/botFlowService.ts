@@ -11,6 +11,9 @@ import {
   type BotFlowDefinitionIssue,
 } from "../../shared/validation/botFlowDefinition.ts";
 import {
+  validateWhatsappBotFlowPublication,
+} from "../../shared/validation/whatsappBotFlowPublication.ts";
+import {
   requireTenantPermission,
   type TenantSession,
 } from "../auth/tenantSession.ts";
@@ -19,8 +22,16 @@ import {
   deriveBotFlowVersionKey,
 } from "./botFlowKey.ts";
 import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
   compileKeywordBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
+  compileKeywordSequenceBotFlowComposerDraft,
+  compileKeywordTwoStepButtonMenuBotFlowComposerDraft,
 } from "./botFlowComposer.ts";
+import {
+  compileKeywordGraphBotFlowComposerDraft,
+} from "./botFlowGraphComposer.ts";
 
 const BOT_FLOW_LIST_LIMIT = 100;
 const BOT_FLOW_VERSION_LIST_LIMIT = 100;
@@ -75,12 +86,12 @@ export interface PublishedBotFlowDraft {
   publishedVersion: PersistedBotFlowVersion;
 }
 
-interface SaveDraftRequest {
+export interface ParsedBotFlowSaveDraftRequest {
   definition: ValidatedBotFlowDefinition;
   expectedFlowVersion: number | null;
 }
 
-interface PublishDraftRequest {
+export interface ParsedBotFlowPublishDraftRequest {
   botFlowKey: string;
   botFlowVersionKey: string;
   expectedFlowVersion: number;
@@ -138,7 +149,7 @@ function isPositiveInteger(
   );
 }
 
-function parseBotFlowKey(
+export function parseBotFlowKey(
   value: unknown,
 ): string | null {
   return typeof value === "string" &&
@@ -147,22 +158,110 @@ function parseBotFlowKey(
     : null;
 }
 
-async function parseSaveDraftRequest(
+export async function parseBotFlowSaveDraftRequest(
   tenantId: number,
   input: unknown,
-): Promise<SaveDraftRequest> {
-  const composerResult =
+): Promise<ParsedBotFlowSaveDraftRequest> {
+  const graphComposerResult =
+    await compileKeywordGraphBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (graphComposerResult.success) {
+    return {
+      definition: graphComposerResult.definition,
+      expectedFlowVersion:
+        graphComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const handoffComposerResult =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (handoffComposerResult.success) {
+    return {
+      definition: handoffComposerResult.definition,
+      expectedFlowVersion:
+        handoffComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const conditionComposerResult =
+    await compileKeywordConditionBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (conditionComposerResult.success) {
+    return {
+      definition:
+        conditionComposerResult.definition,
+      expectedFlowVersion:
+        conditionComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const twoStepButtonMenuComposerResult =
+    await compileKeywordTwoStepButtonMenuBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (twoStepButtonMenuComposerResult.success) {
+    return {
+      definition:
+        twoStepButtonMenuComposerResult.definition,
+      expectedFlowVersion:
+        twoStepButtonMenuComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const buttonMenuComposerResult =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (buttonMenuComposerResult.success) {
+    return {
+      definition:
+        buttonMenuComposerResult.definition,
+      expectedFlowVersion:
+        buttonMenuComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const sequenceComposerResult =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      tenantId,
+      input,
+    );
+
+  if (sequenceComposerResult.success) {
+    return {
+      definition:
+        sequenceComposerResult.definition,
+      expectedFlowVersion:
+        sequenceComposerResult.expectedFlowVersion,
+    };
+  }
+
+  const legacyComposerResult =
     await compileKeywordBotFlowComposerDraft(
       tenantId,
       input,
     );
 
-  if (composerResult.success) {
+  if (legacyComposerResult.success) {
     return {
       definition:
-        composerResult.definition,
+        legacyComposerResult.definition,
       expectedFlowVersion:
-        composerResult.expectedFlowVersion,
+        legacyComposerResult.expectedFlowVersion,
     };
   }
 
@@ -177,8 +276,23 @@ async function parseSaveDraftRequest(
         input.expectedFlowVersion,
       ))
   ) {
+    const preferredComposerFailure = [
+      graphComposerResult,
+      handoffComposerResult,
+      conditionComposerResult,
+      twoStepButtonMenuComposerResult,
+      buttonMenuComposerResult,
+      sequenceComposerResult,
+      legacyComposerResult,
+    ].find(
+      (result) =>
+        !result.issues.includes("invalid-input"),
+    );
+
     throw new BotFlowInputError([
-      ...composerResult.issues,
+      ...(preferredComposerFailure?.issues ?? [
+        "invalid-input" as const,
+      ]),
     ]);
   }
 
@@ -200,9 +314,9 @@ async function parseSaveDraftRequest(
   };
 }
 
-function parsePublishDraftRequest(
+export function parseBotFlowPublishDraftRequest(
   input: unknown,
-): PublishDraftRequest | null {
+): ParsedBotFlowPublishDraftRequest | null {
   if (
     !isRecord(input) ||
     !hasExactKeys(input, [
@@ -413,7 +527,7 @@ export function createBotFlowService(
         "bot.write",
       );
       const request =
-        await parseSaveDraftRequest(
+        await parseBotFlowSaveDraftRequest(
           session.tenantId,
           input,
         );
@@ -505,7 +619,7 @@ export function createBotFlowService(
         "bot.write",
       );
       const request =
-        parsePublishDraftRequest(input);
+        parseBotFlowPublishDraftRequest(input);
 
       if (!request) {
         throw serviceError("INVALID_INPUT");
@@ -527,6 +641,17 @@ export function createBotFlowService(
           session.tenantId,
           targetVersion,
         );
+
+        const whatsappCompatibility =
+          validateWhatsappBotFlowPublication(
+            targetVersion.definition,
+          );
+
+        if (!whatsappCompatibility.success) {
+          throw new BotFlowInputError(
+            whatsappCompatibility.issues,
+          );
+        }
 
         if (
           targetVersion.botFlowKey !==

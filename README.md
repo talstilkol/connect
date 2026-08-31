@@ -3,6 +3,51 @@
 ממשק Web ראשוני למערכת ה־SaaS החדשה שמחליפה את חיבור WhatsApp Web הלא־רשמי
 ב־Connect הישן.
 
+## מסמכי תכנון ותפעול מרכזיים
+
+מקור האמת לסדר העבודה שנותר הוא
+[תוכנית כל העבודה שנותרה — 30.08.2026](docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md).
+מצב הביצוע הרציף הנוכחי מתועד ב־
+[יומן הביצוע הרציף — 30.08.2026](docs/planning/current-sequential-execution-ledger-2026-08-30.md).
+החלטות Tal האחרונות וההתאמה לתוכנית מתועדות ב־
+[קליטת החלטות ועדכון התוכנית — 30.08.2026](docs/planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md).
+מסמכים אינטראקטיביים לקריאה ולייצוא זמינים ב־
+[מדריך הסטטוס הפשוט](docs/connect-project-status-grandma-guide.html) וב־
+[רשימת ההחלטות והצרכים](docs/connect-remaining-decisions-and-needs.html).
+
+מודל האחריות הפעיל הוא [Tal כאחראי יחיד](docs/planning/sole-owner-operating-model-2026-08-30.md). אין כרגע חלוקת Primary/Backup/RACI; הקצאות שמיות במסמכי Evidence ישנים הן היסטוריות בלבד.
+
+1. [תוכנית ההפעלה היחידנית — Tal + Codex](docs/team-operating-plan.md).
+2. [כל ההחלטות שנותרו — שאלון מקיף](docs/connect-all-remaining-decisions.html).
+3. [Architecture Decision Records](docs/adr/README.md).
+4. [GitHub Governance live audit](docs/github-governance-live-audit.md).
+5. [Baseline מגבלות WhatsApp ו־Rate Limiting](docs/whatsapp-rate-limits.md).
+6. [עקיבות מלאה לאפיון המוצר](docs/product-specification-traceability.md).
+7. [המלצות להחלטות החיצוניות](docs/external-decisions-recommendations.md).
+8. [Release checklist](docs/release-checklist.md).
+9. [Release operator runbook](docs/release-operator-runbook.md).
+10. [חוזה אבטחה לייבוא אנשי קשר](docs/contact-import-security.md).
+11. [ראיית Browser מקומית לייבוא אנשי קשר](docs/contact-import-browser-acceptance.md).
+12. [חוזה הגנת משאבי Clerk](docs/clerk-resource-auth-protection.md).
+13. [Contract freeze למעבר ל־Vercel ול־Railway](docs/hosting-migration-contract-freeze.md).
+14. [טופולוגיית היעד המפורטת — ADR-0004](docs/adr/0004-target-service-topology.md).
+15. [חוזה API בין Vercel ל־Railway](docs/vercel-railway-api-contract.md).
+16. [חוזה PostgreSQL ל־Railway Mutations](docs/postgresql-mutation-contract.md).
+17. [חוזה PostgreSQL ל־Tenant Access](docs/postgresql-tenant-access-contract.md).
+18. [חוזה PostgreSQL למחזור חיי הזמנת צוות](docs/postgresql-team-invitation-contract.md).
+19. [PostgreSQL Core Data Migration Rehearsal](docs/postgresql-core-data-migration-rehearsal.md).
+20. [Railway API Startup and Shutdown](docs/railway-api-startup.md).
+21. [PostgreSQL Full Migration Bundle](docs/postgresql-full-data-migration-bundle-contract.md).
+22. [PostgreSQL Full Migration Cutover Runbook](docs/postgresql-full-data-migration-cutover-runbook.md).
+23. [Railway BullMQ — Message Template Submission Adapter](docs/railway-bullmq-message-template-submission-adapter.md).
+24. [Railway BullMQ — Campaign Delivery Adapter](docs/railway-bullmq-campaign-delivery-adapter.md).
+25. [Railway Redis — Durability and Outage Rehearsal](docs/railway-redis-durability-rehearsal.md).
+26. [Better Stack OpenTelemetry for Railway Worker](docs/better-stack-opentelemetry.md).
+27. [Meta Bot Reply Adapter — חוזה מקומי](docs/meta-bot-reply-adapter.md).
+28. [Bot-reply Release Evidence Storage — ADR-0005](docs/adr/0005-bot-reply-release-evidence-storage.md).
+29. [תוכנית מלאה לכל העבודה שנותרה — מחקר, פיתוח, Pilot ו־Production](docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md).
+30. [קליטת V01/V02 והחלת כל ההחלטות האחרונות](docs/planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md).
+
 ## מצב Master Plan — תשתית Stage 3
 
 1. בחירת סביבת עבודה למשתמש רב־Tenant נשמרת ב־D1 ולא ב־Cookie
@@ -80,16 +125,43 @@
 30. Focus refs סמנטיים מקבעים את סדר ה־Keyboard בלי לקרוא טקסט מתורגם.
    ה־Launcher מחבר Inventory, ‏Playwright ו־D1 Remote Proof, אך
    Credentials אמיתיים עדיין חסרים ולכן אין Browser Evidence אמיתי.
-31. Local Release Gate עובר עם 1172/1172 בדיקות, 30 Migrations,
-   ‏385 קובצי Source, ‏19 Client dependency graphs, ‏719 קבצים
-   בסריקת Secrets ו־23 Dependencies ישירים נעולים.
+31. Local Release Gate עובר עם 1485/1485 בדיקות, 35 Migrations,
+   ‏453 קובצי Source, ‏35 Client dependency graphs, ‏879 קבצים
+   בסריקת Secrets ו־26 Dependencies ישירים נעולים.
 32. Next, ‏React, ‏Cloudflare Vite Plugin, ‏Vite ו־Wrangler שודרגו
    לגרסאות Stable מקובעות. `npm audit --omit=dev` מדווח אפס
    פגיעויות ידועות בגרף ה־Production.
-33. בגרף הפיתוח נשארו שש התראות ב־`drizzle-kit` וב־`vinext`.
-   הצעת התיקון האוטומטית היא Downgrade שובר ולכן אינה מיושמת.
+33. בגרף הפיתוח נשארו ארבעה ממצאי Moderate מאותו Advisory עקיף
+   ב־`drizzle-kit`. שתי התראות High של `image-size` הוסרו עם שדרוג
+   Vinext. שער CI חי חוסם כל Advisory חדש או חזרה של החבילה; הצעת
+   התיקון האוטומטית ל־Drizzle היא Downgrade שובר ולכן אינה מיושמת.
 34. Vite config משתמש כעת ב־JSON import attributes ובסיומת קובץ
    מפורשת, ללא אזהרת ה־Native config loader החדשה.
+35. שמונת שערי האיכות המקומיים מוגדרים כ־Pull Request Checks
+   נפרדים ב־GitHub Actions; יחד עם Dependency Audit קיימים כל תשעת
+   שמות ה־Checks שחוזה ה־Production דורש.
+36. Node `24.18.1` LTS נעול ב־`.node-version` ומשמש את כל ה־workflows;
+   `engines.node` דוחה גרסאות שאינן תומכות בהרצת קובצי TypeScript
+   הנדרשת על ידי כלי הבדיקות וה־Evidence.
+37. דף הנחיתה הציבורי משתמש כעת ברכיב Server משותף ובמילונים מלאים
+   לעברית, אנגלית וערבית. הנתיבים `/`, ‏`/en` ו־`/ar` מפיקים Metadata
+   מתורגם, כיוון `RTL/LTR` סמנטי ובורר שפה נגיש; Locale שאינו נתמך
+   מחזיר `404`. גם מסכי Login ו־Register זמינים בשלוש השפות, עם
+   נתיבי Auth מקומיים ו־Clerk localization הנבחר לפי הנתיב. מעטפת
+   Connect, ה־Metadata והניווט בששת מסכי Auth אומתו ב־Chromium מקומי;
+   Widget חי של Clerk נשאר תלוי ב־Keys מורשים של Staging. גם מסך
+   קבלת ההזמנה מתורגם בשלוש השפות באמצעות `?lang=` יחסי, כדי לא
+   לשכפל את ה־Invitation Key ב־DOM. כל מצבי התוצאה מתורגמים ומצב
+   קישור לא תקין נשאר חסום ללא Mutation.
+37. בדיקות Release ב־CI מורידות היסטוריית Git מלאה. במאגר פרטי
+   בבעלות משתמש אישי, Dependency Audit נשאר Check מחייב ומעלה Evidence
+   לא־חתום; שער Production אינו מקבל אותו כתחליף ל־Attestation אמיתי.
+38. `npm run evidence:github` קורא ארבעה Endpoints של GitHub במצב
+   Read-only, דורש Repository מפורש ו־Release נקי, ומפיק Governance
+   ו־CI Evidence בני 24 שעות ללא שמות Repository, ‏Branch או Run.
+   `npm run evidence:cloudflare` קורא רק Endpoints מסוג `GET`, מאמת
+   52 משאבים מבודדים ופריסה יחידה המקושרת ל־Release ול־Artifact,
+   ומפיק Evidence בני 24 שעות ללא מזהי משאבי Cloudflare גלויים.
 35. D1 Remote Proof Adapter שולח רק את שתי שאילתות ה־SELECT
    הקנוניות ל־Cloudflare API endpoint קבוע ומחייב D1 Read token.
 36. תגובת D1 מתקבלת רק כאשר ה־API מדווח `changed_db = false`,
@@ -132,7 +204,8 @@
 50. לאחר העברה מאומתת ל־Secret Store וריצת שבעת תרחישי ה־Staging,
    GitHub Actions חותם את Browser Evidence באמצעות Sigstore. כלי
    Cleanup דורש Attestation תקף מאותו Repository, ‏Workflow ו־Commit,
-   ואז Evidence סמנטי לאותו Release. רק לאחר מכן הוא מעביר את שני
+   התאמה byte-for-byte ל־JSON שב־Runtime ואז Evidence סמנטי לאותו
+   Release. רק לאחר מכן הוא מעביר את שני
    הקבצים ל־Quarantine, מאמת אותם שוב ומבצע `unlink`. כשל מוקדם מחזיר
    אותם; הכלי אינו טוען למחיקת SSD, ‏Snapshot או Backup.
 51. Dependency Audit אינו עוד Boolean סטטי. מחולל ייעודי מריץ רק את
@@ -299,7 +372,7 @@
 4. מרכז לתיעוד 10 ההחלטות העסקיות החוסמות.
 5. אינטראקציות מקומיות:
    1. ניווט בין המסכים.
-   2. קריאת CSV מקומית, מיפוי עמודות וייבוא מאומת לאחר אישור מפורש.
+   2. קריאת CSV/XLSX מקומית, מיפוי עמודות וייבוא מאומת לאחר אישור מפורש.
    3. הוספת בלוקים דטרמיניסטית לתהליך בוט.
    4. מרכז ההחלטות ב־Workspace הוא Read-only; שמירה קבועה זמינה
       רק ל־System Admin דרך `/admin/decisions`.
@@ -312,7 +385,8 @@
       העלאה ציבורי או פעולה מול Bucket אמיתי.
 7. תשתית זהות והרשאות:
    1. Clerk מחובר למסכי Login ו־Registration עם ממשק עברי.
-   2. `proxy.ts` מגן על Routes של ה־Workspace כאשר Clerk מוגדר.
+   2. `proxy.ts` מפעיל את Clerk על Routes מפורשים; כל Page ו־Layout
+      רגישים מגינים על עצמם ב־`auth.protect()` לפני קריאת מידע.
    3. Tenant Session נגזר מ־Clerk User ומ־Membership פעיל ב־D1,
       ורק כאשר זהות המשתמש תואמת והרשומה שייכת ל־Tenant נגיש.
    4. מטריצת RBAC נאכפת בצד השרת לפני גישה ל־Repository.
@@ -341,7 +415,7 @@
    9. ה־DTO לדפדפן אינו כולל `tenantId` או Evidence פנימי.
    10. Import Job קבוע שומר התקדמות ותוצאות שורה וניתן להמשך לאחר כשל.
    11. SHA-256 דטרמיניסטי מזהה קובץ, מיפוי ומספרי טלפון בלי Randomness.
-   12. CSV מעובד במנות של שש שורות, עם Created, Updated, Unchanged,
+   12. CSV/XLSX מעובדים במנות של שש שורות, עם Created, Updated, Unchanged,
        Rejected ו־Duplicate.
    13. ערכי Consent גולמיים בקובץ אינם מועברים למסלול הכתיבה ואינם
        מאפשרים דיוור.
@@ -350,6 +424,9 @@
    15. Tags ו־Lists קבועים מאפשרים ארגון ושיוך של אנשי קשר לפי Tenant.
    16. Unsubscribe הוא גלובלי; תגית או רשימה אינן יכולות לעקוף חסימת
        דיוור.
+   17. XLSX מוגבל ל־5 MiB, גיליון גלוי יחיד, 50,000 שורות, 100 עמודות
+       ו־500,000 תאים בטווח. נוסחאות, Macros, External links ותוכן פעיל
+       נחסמים לפני המיפוי.
 10. תשתית Meta ו־Webhook:
    1. Meta Connection שומר Business Portfolio ID, WABA ID ו־Phone Number
       ID בצד השרת בלבד.
@@ -667,8 +744,46 @@
         ואינו עוקף Assignment Lock.
    157. מסך הבוט טוען Flows וגרסאות מ־D1 ומאפשר שמירת Draft ופרסום
         דרך Server Actions ו־Expected Version.
-   158. Composer השרת מרכיב מסלול MVP של Trigger, ‏Keyword, ‏Text,
-        ‏End ו־Handoff וגוזר את כל המפתחות ללא Tenant מהדפדפן.
+   158. Composer השרת מרכיב מסלול של Trigger, ‏Keyword, הודעת Text
+        אחת או רצף הודעות, ‏End ו־Handoff, וגוזר את כל המפתחות ללא
+        Tenant או Block Keys מהדפדפן. החוזה הישן של הודעה יחידה נשמר.
+   158.1 עורך React מאפשר להוסיף, למחוק ולשנות את סדר הודעות ה־Text
+         באמצעות כפתורים נגישים למקלדת. לאחר הוספה או מחיקה ה־Focus
+         חוזר לרצף, ושינויי מבנה מוכרזים ב־Live Region.
+   158.2 כל הודעה נשמרת כ־Text Block אמיתי; Runtime test מוכיח שהרצף
+         מבוצע פעם אחת ובאותו סדר.
+   158.3 אפשר להוסיף בסוף הרצף שאלת Buttons, לערוך עד עשר אפשרויות,
+         להגדיר לכל אפשרות תשובת Text, למחוק ולשנות סדר באמצעות
+         כפתורי מקלדת. ה־Browser שולח רק Label ותשובה; Block ו־Option
+         Keys נגזרים בשרת.
+   158.4 לאחר שליחת התפריט, Runtime ממשיך רק מ־Buttons Block שנמצא
+         באופן חד־משמעי מתוך Outbox Accepted של ההודעה הנכנסת הקודמת,
+         באותה גרסת Flow ובחלון של 24 שעות. אין Cursor זמני בדפדפן.
+   158.4.1 אפשר להגדיר גם שתי שאלות Buttons עוקבות: כל בחירה בשאלה
+           הראשונה פותחת שאלת Buttons שנייה ייעודית, וכל בחירה שנייה
+           שולחת Text ומתכנסת ל־End משותף. ה־Runtime ממשיך מכל אחת
+           מהשאלות לפי ה־Buttons Block המדויק שהתקבל ב־Outbox Accepted.
+   158.5 אפשר להוסיף בסוף רצף ה־Text פיצול Condition יחיד לפי הטקסט
+         הנכנס או מצב השיחה, ולהגדיר תשובת Text נפרדת לענף מתקיים
+         ולענף שאינו מתקיים. שני הענפים מתכנסים ל־End משותף וכל
+         מפתחות ה־Graph נגזרים בשרת.
+   158.6 אפשר להגדיר מסלול Handoff שמופעל רק כאשר הודעה תואמת למילות
+         המפתח. ההתאמה מעבירה אטומית ל־`waiting_for_agent` ללא Reply
+         אוטומטי; אי־התאמה מגיעה ל־End ואינה משנה את השיחה. הסיבה
+         נשמרת כ־`customer-request` או `flow-rule` לצורכי Audit.
+   158.7 ‏Text, ‏Buttons, שתי שאלות Buttons עוקבות, ‏Condition ו־Handoff
+         הם כרגע מבני מסלול בטוחים. רצפים שרירותיים של תנאים או שאלות,
+         חיבורי Canvas ו־Drag-and-drop עדיין אינם מוצגים כעורך Graph
+         מלא.
+   158.8 עורך Graph כללי מאפשר ליצור ולחבר רצפים חופשיים של Text,
+         ‏Buttons, ‏Condition, ‏Handoff ו־End באמצעות References זמניים.
+         Compiler השרת מסדר את ה־Nodes לפי הטופולוגיה וגוזר את כל
+         מפתחות ה־Block וה־Option; Reader מחזיר Graph קיים לעריכה ללא
+         חשיפת הזהויות המתמידות. ה־UI חוסם שמירה של Cycle או Node מנותק,
+         תומך בחיבור יעדים באמצעות מקלדת ובסידור כרטיסים באמצעות כפתורים
+         או Drag-and-drop, ומציג Preview סמנטי של כל Connection.
+         מפת Connections חזותית מציגה גם חצים בין מספרי ה־Nodes ונשארת
+         מוסתרת מקוראי מסך כדי למנוע הקראה כפולה.
    159. מיגרציה חמש־עשרה מוסיפה Outbox בשם
         `bot_reply_deliveries`, עם זהות תשובה דטרמיניסטית ו־Claim אטומי.
    160. Inbound Webhook מפעיל Runtime לאחר אחסון ההודעה. Retry חוזר
@@ -676,14 +791,17 @@
    161. תוצאה חיצונית לא ידועה מסומנת Ambiguous ואינה נשלחת שוב.
         ספק Meta עדיין אינו מחובר ולכן הרשומה נשארת Pending וה־Queue
         מבקש Retry באופן Fail-Closed.
-   162. שלב 11 הושלם בקוד המקומי. Build, ‏TypeScript, ‏ESLint וכל
-        573 הבדיקות עוברים.
+   162. שלב 11 הושלם בקוד המקומי.
+   163. ייבוא XLSX מאובטח הושלם מעל Pipeline ה־CSV הקיים. שער השחרור
+        המקומי, Build, ‏TypeScript, ‏ESLint וכל 1,485 הבדיקות עוברים.
 
 ## מה לא קיים עדיין
 
 1. מפתחות Clerk אמיתיים והפעלת הזרימה מול משתמש אמיתי.
 2. משאבי D1/R2 בענן, החלת המיגרציות או נתוני Production.
-3. ייבוא Excel; מסלול ה־MVP הקבוע תומך כרגע ב־CSV.
+3. Staging acceptance של ייבוא Excel מול קובץ מורשה אמיתי, Tenant
+   מורשה ו־D1 מבודד; ה־Parser, ה־Pipeline ו־Browser acceptance המקומי
+   החיובי/שלילי הושלמו.
 4. WebSocket/Push בזמן אמת, משאבי Queue אמיתיים, החלטת
    Tech Provider/BSP וחיבור End-to-End מול Meta App אמיתי. ה־Inbox
    המקומי כולל חיפוש, סינון, שיוך עצמי ו־Polling מאומת.
@@ -691,9 +809,19 @@
 6. ספק AI ומאגר וקטורי.
 7. העלאת קבצים ל־R2.
 8. חיבור Adapter שליחת Campaign אמיתי ל־Meta.
-9. Adapter אמיתי לשליחת תשובות Bot ל־Meta ובדיקת End-to-End מול
-   WABA. מסך D1, ‏Runtime, ‏Inbound וחוזה Outbound Idempotent הושלמו
-   מקומית; ה־Adapter נשאר Fail-Closed.
+9. חיבור Adapter תשובות Bot ל־Worker ובדיקת End-to-End מול WABA.
+   ‏Adapter Meta, ‏Vault/Phone scope, חוזה Outbound Idempotent, שני Gates
+   לחלון השירות וקישור Reply Button ל־`context.id` ול־Delivery המדויק
+   הושלמו מקומית. נותרו Admission נפרד ל־Pair/Phone, מדיניות פרסום
+   לתפריטים גדולים, Kill switch, חיבור Worker וראיה חיה.
+10. בדיקת שמירה ופרסום של Bot Graph ב־Staging עם Clerk ו־D1 מורשים.
+    עורך ה־Graph המקומי, כל סוגי ה־Nodes, המקלדת, Drag-and-drop,
+    החיבורים, Focus וה־Preview עברו Browser E2E מקומי ב־Chromium;
+    לכן SPEC-18 ו־SPEC-19 הושלמו ברמת הקוד המקומי.
+11. תרגום מלא של סביבת העבודה וה־Admin לעברית, אנגלית וערבית,
+    ולאחריו Browser acceptance לכל שפה. דף הנחיתה, מעטפת
+    Login/Register ומסך קבלת ההזמנה כבר הושלמו ואומתו מקומית.
+    Widget חי של Clerk ותוצאות קבלה חיות דורשים Staging מורשה.
 
 לא נוצרו נתוני דוגמה. מסכים ללא מקור נתונים מוצגים במצב ריק.
 
@@ -702,6 +830,7 @@
 ```bash
 npm install
 npm run dev
+npm run e2e:bot-flow-graph-browser
 ```
 
 ## בדיקות
@@ -755,18 +884,22 @@ npm run db:generate
    מעובדים; Account Update עדיין נכשל סגור.
 7. יש להגדיר `META_CREDENTIAL_ENCRYPTION_KEY_V1` כמפתח AES באורך
    32 bytes המקודד ב־Base64. המפתח נשאר Secret שרתי ואינו נשמר ב־D1.
-8. Adapter ההרשמה מופעל רק לאחר Code Exchange, אימות WABA ומספר
+8. יש להגדיר `WHATSAPP_RATE_LIMIT_HMAC_KEY_V1` כמפתח נפרד באורך
+   32 bytes המקודד ב־Base64. הוא גוזר מפתחות אטומים ל־Rate Limiting
+   ואסור להשתמש עבורו במפתח הצפנת ה־Credentials. מעבר ל־Key version
+   חדש דורש Drain או Migration מתועד של State פעיל.
+9. Adapter ההרשמה מופעל רק לאחר Code Exchange, אימות WABA ומספר
    ושמירת Credential מוצפן; אין בקוד Token או מזהה נכס חלופי.
-9. Code Exchange, Asset Verifier, Credential Vault ו־WABA Subscriber
+10. Code Exchange, Asset Verifier, Credential Vault ו־WABA Subscriber
    מחוברים ב־Runtime דרך Server Action מאומת.
-10. ה־Runtime טרם הורץ מול Access Token ונכסי Meta אמיתיים.
-11. Meta SDK Loader, ‏Launcher, ‏Parser ו־Listener פעילים רק כאשר
+11. ה־Runtime טרם הורץ מול Access Token ונכסי Meta אמיתיים.
+12. Meta SDK Loader, ‏Launcher, ‏Parser ו־Listener פעילים רק כאשר
     תצורת ה־Client והשרת מלאה. תוצאה תקינה נשלחת מיד ל־Server Action.
-12. תצורת הפיתוח המקומית מגדירה Producer בשם `META_WEBHOOK_QUEUE`,
+13. תצורת הפיתוח המקומית מגדירה Producer בשם `META_WEBHOOK_QUEUE`,
     Consumer עם Batch של עד 10 הודעות, עשרה ניסיונות ו־Dead Letter
     Queue בשם `connect-meta-webhooks-dlq`. יצירת המשאבים בענן לא
     מתבצעת אוטומטית.
-13. תצורת Campaign מגדירה `CAMPAIGN_DELIVERY_QUEUE`, ‏Consumer עם
+14. תצורת Campaign מגדירה `CAMPAIGN_DELIVERY_QUEUE`, ‏Consumer עם
     Batch של עד 10 הודעות, עשרה ניסיונות ו־Dead Letter Queue בשם
     `connect-campaign-deliveries-dlq`. Cron מתוזמן פעם בדקה; יצירת
     המשאבים בענן ושליחת Meta אמיתית אינן מתבצעות אוטומטית.
@@ -787,3 +920,16 @@ npm run db:generate
 7. Binding חסר או כושל נכשל סגור. אין Fallback בזיכרון Worker.
 8. שינויי מנוי ב־Admin משתמשים ב־`system-admin-mutation`; קריאת
    Directory אינה צורכת מכסה.
+9. קבלת Campaign אצל Meta נשמרת ב־D1 כקישור אטומי בין Delivery,
+   ‏Provider message ו־Rate-limit reservation. ‏Payload ותוכן הודעה
+   אינם נשמרים בקישור.
+10. Status webhooks מסוג `delivered` ו־`read` סוגרים את ה־Reservation
+    כמסירה; `failed` סוגר אותה ככשל Provider. ‏Retry חוזר לאותה
+    תוצאה טרמינלית ואינו סופר נמען פעמיים.
+11. קמפיין נשאר `running` בזמן שנמען במצב `accepted`; השלמה מותרת רק
+    לאחר תוצאות טרמינליות. Meta sender adapter ו־Processor שרתי
+    קיימים ונבדקים מקומית, כולל Credential Vault ו־`wamid`, אך אינם
+    מחוברים ל־Worker. מקור Policy מבוסס D1 מחובר ל־Worker ודורש
+    Evidence מתכלה הקשורה לחיבור Meta המדויק; Event `disabled` אחרון
+    הוא Kill switch עמיד. ערכי Capacity חיים, Retry evidence מאושר,
+    מסלול Operator וראיות WABA עדיין חסרים ולכן שליחה נשארת חסומה.

@@ -5,6 +5,15 @@ import {
   BotFlowRuntimeError,
   executeBotFlowTurn,
 } from "../server/bot/botFlowRuntime.ts";
+import {
+  compileKeywordButtonMenuBotFlowComposerDraft,
+  compileKeywordConditionBotFlowComposerDraft,
+  compileKeywordHandoffBotFlowComposerDraft,
+  compileKeywordSequenceBotFlowComposerDraft,
+} from "../server/bot/botFlowComposer.ts";
+import {
+  validateBotFlowDefinition,
+} from "../shared/validation/botFlowDefinition.ts";
 
 const blockKey = (character) =>
   `bot_block_v1_${character.repeat(64)}`;
@@ -67,6 +76,487 @@ test("routes an exact keyword through text to End deterministically", () => {
       },
     },
   );
+});
+
+test("executes every compiled reply step once and in editor order", async () => {
+  const compiled =
+    await compileKeywordSequenceBotFlowComposerDraft(
+      7,
+      {
+        name: "עדכון מדורג ללקוח",
+        keywords: ["עדכון"],
+        matchMode: "exact",
+        replyTexts: [
+          "הבקשה התקבלה.",
+          "הצוות בודק את הפרטים.",
+          "נעדכן עם סיום הבדיקה.",
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  assert.deepEqual(
+    executeBotFlowTurn(compiled.definition, {
+      lastInboundText: "עדכון",
+      conversationStatus: "new",
+    }),
+    {
+      outcome: "completed",
+      replies: [
+        {
+          kind: "text",
+          text: "הבקשה התקבלה.",
+        },
+        {
+          kind: "text",
+          text: "הצוות בודק את הפרטים.",
+        },
+        {
+          kind: "text",
+          text: "נעדכן עם סיום הבדיקה.",
+        },
+      ],
+      terminalEffect: {
+        outcome: "end",
+        stopExecution: true,
+        conversationStatus: null,
+        assignmentAction: "none",
+      },
+    },
+  );
+});
+
+test("resumes a compiled button menu at its evidenced awaiting block", async () => {
+  const compiled =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב למחלקה",
+        keywords: ["עזרה"],
+        matchMode: "exact",
+        introTexts: [
+          "קיבלנו את פנייתך.",
+          "בחרו מחלקה.",
+        ],
+        buttonText: "באיזו מחלקה לבחור?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "נעביר למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "נעביר לשירות.",
+          },
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const prompt = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(prompt.outcome, "awaiting-input");
+  assert.deepEqual(
+    prompt.replies.map((reply) => reply.kind),
+    ["text", "text", "buttons"],
+  );
+
+  const selection = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "שירות",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        prompt.awaitingBlockKey,
+    },
+  );
+
+  assert.equal(selection.outcome, "completed");
+  assert.deepEqual(selection.replies, [
+    {
+      kind: "text",
+      text: "נעביר לשירות.",
+    },
+  ]);
+});
+
+test("routes an interactive button by its domain option key instead of trusting its title", async () => {
+  const compiled =
+    await compileKeywordButtonMenuBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב לפי מזהה כפתור",
+        keywords: ["עזרה"],
+        matchMode: "exact",
+        introTexts: ["בחרו מחלקה."],
+        buttonText: "באיזו מחלקה לבחור?",
+        options: [
+          {
+            label: "מכירות",
+            replyText: "נעביר למכירות.",
+          },
+          {
+            label: "שירות",
+            replyText: "נעביר לשירות.",
+          },
+        ],
+        expectedFlowVersion: null,
+      },
+    );
+  assert.equal(compiled.success, true);
+  const prompt = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(prompt.outcome, "awaiting-input");
+  const buttonReply = prompt.replies.find(
+    (reply) => reply.kind === "buttons",
+  );
+  assert.ok(buttonReply);
+
+  const selection = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "כותרת לא תואמת",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        prompt.awaitingBlockKey,
+      selectedOptionKey:
+        buttonReply.options[1].optionKey,
+    },
+  );
+
+  assert.equal(selection.outcome, "completed");
+  assert.deepEqual(selection.replies, [
+    {
+      kind: "text",
+      text: "נעביר לשירות.",
+    },
+  ]);
+});
+
+test("resumes two sequential button questions from their exact awaiting blocks", () => {
+  const definition = {
+    name: "בירור דו שלבי",
+    blocks: [
+      {
+        blockKey: blockKey("a"),
+        type: "trigger",
+        nextBlockKey: blockKey("b"),
+      },
+      {
+        blockKey: blockKey("b"),
+        type: "keyword",
+        keywords: ["בירור"],
+        matchMode: "exact",
+        matchedBlockKey: blockKey("c"),
+        unmatchedBlockKey: blockKey("8"),
+      },
+      {
+        blockKey: blockKey("c"),
+        type: "buttons",
+        text: "האם זו פנייה קיימת?",
+        options: [
+          {
+            optionKey: optionKey("1"),
+            label: "כן",
+            nextBlockKey: blockKey("d"),
+          },
+          {
+            optionKey: optionKey("2"),
+            label: "לא",
+            nextBlockKey: blockKey("d"),
+          },
+        ],
+      },
+      {
+        blockKey: blockKey("d"),
+        type: "buttons",
+        text: "לאיזו מחלקה לפנות?",
+        options: [
+          {
+            optionKey: optionKey("3"),
+            label: "מכירות",
+            nextBlockKey: blockKey("e"),
+          },
+          {
+            optionKey: optionKey("4"),
+            label: "שירות",
+            nextBlockKey: blockKey("f"),
+          },
+        ],
+      },
+      {
+        blockKey: blockKey("e"),
+        type: "text",
+        text: "הפנייה נותבה למכירות.",
+        nextBlockKey: blockKey("7"),
+      },
+      {
+        blockKey: blockKey("f"),
+        type: "text",
+        text: "הפנייה נותבה לשירות.",
+        nextBlockKey: blockKey("7"),
+      },
+      {
+        blockKey: blockKey("7"),
+        type: "end",
+      },
+      {
+        blockKey: blockKey("8"),
+        type: "handoff",
+        reason: "no-match",
+      },
+    ],
+  };
+  const validation =
+    validateBotFlowDefinition(definition);
+
+  assert.equal(
+    validation.success,
+    true,
+    validation.success
+      ? undefined
+      : validation.issues.join(","),
+  );
+  const firstQuestion = executeBotFlowTurn(
+    definition,
+    {
+      lastInboundText: "בירור",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(
+    firstQuestion.outcome,
+    "awaiting-input",
+  );
+  assert.equal(
+    firstQuestion.awaitingBlockKey,
+    blockKey("c"),
+  );
+
+  const secondQuestion = executeBotFlowTurn(
+    definition,
+    {
+      lastInboundText: "כן",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        firstQuestion.awaitingBlockKey,
+    },
+  );
+
+  assert.equal(
+    secondQuestion.outcome,
+    "awaiting-input",
+  );
+  assert.equal(
+    secondQuestion.awaitingBlockKey,
+    blockKey("d"),
+  );
+  assert.deepEqual(secondQuestion.replies, [
+    {
+      kind: "buttons",
+      text: "לאיזו מחלקה לפנות?",
+      options:
+        definition.blocks[3].options,
+    },
+  ]);
+
+  const completed = executeBotFlowTurn(
+    definition,
+    {
+      lastInboundText: "מכירות",
+      conversationStatus: "bot_active",
+      resumeFromBlockKey:
+        secondQuestion.awaitingBlockKey,
+    },
+  );
+
+  assert.equal(completed.outcome, "completed");
+  assert.deepEqual(completed.replies, [
+    {
+      kind: "text",
+      text: "הפנייה נותבה למכירות.",
+    },
+  ]);
+});
+
+test("executes both branches of a compiled condition and converges at End", async () => {
+  const compiled =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      {
+        name: "מענה לפי בקשת נציג",
+        keywords: ["עזרה"],
+        matchMode: "contains",
+        introTexts: ["קיבלנו את הפנייה."],
+        condition: {
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "נציג",
+          matchedReplyText:
+            "הבקשה לנציג התקבלה.",
+          unmatchedReplyText:
+            "הבוט ימשיך בטיפול.",
+        },
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+
+  const matched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה, אבקש נציג",
+      conversationStatus: "bot_active",
+    },
+  );
+  const unmatched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "עזרה בנושא החשבון",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.equal(matched.outcome, "completed");
+  assert.deepEqual(
+    matched.replies.map((reply) => reply.text),
+    [
+      "קיבלנו את הפנייה.",
+      "הבקשה לנציג התקבלה.",
+    ],
+  );
+  assert.equal(unmatched.outcome, "completed");
+  assert.deepEqual(
+    unmatched.replies.map((reply) => reply.text),
+    [
+      "קיבלנו את הפנייה.",
+      "הבוט ימשיך בטיפול.",
+    ],
+  );
+});
+
+test("hands off from an internal condition branch without planning a reply", async () => {
+  const compiled =
+    await compileKeywordConditionBotFlowComposerDraft(
+      7,
+      {
+        name: "ניתוב פנימי לנציג",
+        keywords: ["עזרה"],
+        matchMode: "contains",
+        introTexts: [],
+        condition: {
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "נציג",
+          matchedReplyText: "",
+          unmatchedReplyText:
+            "הבוט ימשיך בטיפול.",
+          matchedHandoffReason:
+            "customer-request",
+          unmatchedHandoffReason: null,
+        },
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  assert.deepEqual(
+    executeBotFlowTurn(compiled.definition, {
+      lastInboundText: "עזרה, אבקש נציג",
+      conversationStatus: "bot_active",
+    }),
+    {
+      outcome: "handoff",
+      replies: [],
+      terminalEffect: {
+        outcome: "handoff",
+        stopExecution: true,
+        conversationStatus: "waiting_for_agent",
+        assignmentAction: "none",
+        reason: "customer-request",
+      },
+    },
+  );
+  assert.deepEqual(
+    executeBotFlowTurn(compiled.definition, {
+      lastInboundText: "עזרה בנושא החשבון",
+      conversationStatus: "bot_active",
+    }).replies,
+    [
+      {
+        kind: "text",
+        text: "הבוט ימשיך בטיפול.",
+      },
+    ],
+  );
+});
+
+test("hands off only a matching keyword and never combines the transfer with a reply", async () => {
+  const compiled =
+    await compileKeywordHandoffBotFlowComposerDraft(
+      7,
+      {
+        name: "בקשת נציג",
+        keywords: ["נציג", "אדם"],
+        matchMode: "contains",
+        handoffReason: "customer-request",
+        expectedFlowVersion: null,
+      },
+    );
+
+  assert.equal(compiled.success, true);
+  const matched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "אני רוצה נציג",
+      conversationStatus: "bot_active",
+    },
+  );
+  const unmatched = executeBotFlowTurn(
+    compiled.definition,
+    {
+      lastInboundText: "מה שעות הפעילות?",
+      conversationStatus: "bot_active",
+    },
+  );
+
+  assert.deepEqual(matched, {
+    outcome: "handoff",
+    replies: [],
+    terminalEffect: {
+      outcome: "handoff",
+      stopExecution: true,
+      conversationStatus: "waiting_for_agent",
+      assignmentAction: "none",
+      reason: "customer-request",
+    },
+  });
+  assert.deepEqual(unmatched, {
+    outcome: "completed",
+    replies: [],
+    terminalEffect: {
+      outcome: "end",
+      stopExecution: true,
+      conversationStatus: null,
+      assignmentAction: "none",
+    },
+  });
 });
 
 test("uses the unmatched keyword branch for non-text input and requests handoff without assignment", () => {
@@ -303,6 +793,17 @@ test("rejects invalid definitions and unbounded turn input", () => {
       executeBotFlowTurn(definition, {
         lastInboundText: "a".repeat(4_097),
         conversationStatus: "new",
+      }),
+    (error) =>
+      error instanceof BotFlowRuntimeError &&
+      error.code === "INVALID_INPUT",
+  );
+  assert.throws(
+    () =>
+      executeBotFlowTurn(definition, {
+        lastInboundText: "סיום",
+        conversationStatus: "new",
+        selectedOptionKey: "provider-option-id",
       }),
     (error) =>
       error instanceof BotFlowRuntimeError &&

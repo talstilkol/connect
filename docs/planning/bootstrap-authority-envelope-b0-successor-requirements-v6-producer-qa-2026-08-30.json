@@ -1,0 +1,777 @@
+{
+  "artifactId": "CONNECT-B0-V6-PRODUCER-QA-2026-08-30-G0",
+  "artifactClass": "DETACHED-PRODUCER-QA;PLANNING-PACKAGE-MECHANICAL-VERIFICATION;NOT-INDEPENDENT-REVIEW;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "schemaVersion": 1,
+  "producerQaRunId": "B0V6-PRODUCER-QA-RUN-0e11286c2461e5d9d9f7b67b",
+  "logicalRepositoryRootClass": "PUBLIC-REPOSITORY-ROOT",
+  "packageManifest": {
+    "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-atomic-package-manifest-2026-08-30.json",
+    "sha256": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+    "packageContentRoot": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+    "memberCount": 24
+  },
+  "packageMembers": [
+    {
+      "ordinal": 1,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json",
+      "sha256": "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4",
+      "bytes": 2722820,
+      "required": true
+    },
+    {
+      "ordinal": 2,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-2026-08-30.md",
+      "sha256": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+      "bytes": 171455,
+      "required": true
+    },
+    {
+      "ordinal": 3,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-source-member-span-index-2026-08-30.json",
+      "sha256": "70185876e137f9981ab3dbcfa942ecdbbf2ce99e0e32750801db4a7a0791e6b5",
+      "bytes": 541149,
+      "required": true
+    },
+    {
+      "ordinal": 4,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json",
+      "sha256": "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141",
+      "bytes": 24936053,
+      "required": true
+    },
+    {
+      "ordinal": 5,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-2026-08-30.json",
+      "sha256": "78f95bb843fe70ebb5c0caa3e113c145ead43508444f529317d01aef909da185",
+      "bytes": 19808,
+      "required": true
+    },
+    {
+      "ordinal": 6,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-01-of-16-2026-08-30.json",
+      "sha256": "2ccac7d352fe331da42d9eec3fa945058b1d00b37ec7ca354bd8e3a7bab85175",
+      "bytes": 1851835,
+      "required": true
+    },
+    {
+      "ordinal": 7,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-02-of-16-2026-08-30.json",
+      "sha256": "3396913e6c3cba86d52c48ca1c6450293741e653000a8e9498f916e465f99f3d",
+      "bytes": 1941353,
+      "required": true
+    },
+    {
+      "ordinal": 8,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-03-of-16-2026-08-30.json",
+      "sha256": "2133d801a5a18ea07adea52485d1526ec82098ed9a558344990045a6bb2a1932",
+      "bytes": 1865873,
+      "required": true
+    },
+    {
+      "ordinal": 9,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-04-of-16-2026-08-30.json",
+      "sha256": "e866bf10e74596ef3e73b86420525ba9f86c631e7bc57589f688575f4b852540",
+      "bytes": 1856860,
+      "required": true
+    },
+    {
+      "ordinal": 10,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-05-of-16-2026-08-30.json",
+      "sha256": "9c7c8e355061877f28aa8de6cbe99ae7fd03a8239eb09d25da8c4ef4da469aad",
+      "bytes": 1852809,
+      "required": true
+    },
+    {
+      "ordinal": 11,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-06-of-16-2026-08-30.json",
+      "sha256": "fc797b86196010a3a78ff49390e65609288808e6db8e6208ab0eb0a40bbeed35",
+      "bytes": 1948505,
+      "required": true
+    },
+    {
+      "ordinal": 12,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-07-of-16-2026-08-30.json",
+      "sha256": "ff65d0a929b51125baf8dd743877e30ea187e02fe94cedcb7376351c37d789e4",
+      "bytes": 11090782,
+      "required": true
+    },
+    {
+      "ordinal": 13,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-08-of-16-2026-08-30.json",
+      "sha256": "80689e37e4e82e2b0deac48deb3181329dcbc6cd8cfe159ce254c07e2e03313f",
+      "bytes": 20528156,
+      "required": true
+    },
+    {
+      "ordinal": 14,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-09-of-16-2026-08-30.json",
+      "sha256": "085d0108f727bf4a91a093c2caba52a33519041e463ef565086caebfb67f7aa1",
+      "bytes": 3919262,
+      "required": true
+    },
+    {
+      "ordinal": 15,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-10-of-16-2026-08-30.json",
+      "sha256": "1dc00d7b518b3ebd62c474783275c434da20626abc802753b7ce70737190f53a",
+      "bytes": 3342259,
+      "required": true
+    },
+    {
+      "ordinal": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-11-of-16-2026-08-30.json",
+      "sha256": "11834600f665d8a394aeddcd8dc0e3990097c1bb402f4f9794bd2586f659bbfa",
+      "bytes": 5983088,
+      "required": true
+    },
+    {
+      "ordinal": 17,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-12-of-16-2026-08-30.json",
+      "sha256": "2998df14881dc2e46c632c2edea404bcb73fbafba949e9bc30396be4f9eb6b20",
+      "bytes": 2976490,
+      "required": true
+    },
+    {
+      "ordinal": 18,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-13-of-16-2026-08-30.json",
+      "sha256": "e3f5689dfb7d664f85375235f79b39667a2a6435d128057d230baf28efb7fbdd",
+      "bytes": 13209971,
+      "required": true
+    },
+    {
+      "ordinal": 19,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-14-of-16-2026-08-30.json",
+      "sha256": "ad72a995d18597f4f6cc1da73993b387256ab8dbcb4dd88cad47a1d79b0d7149",
+      "bytes": 19525972,
+      "required": true
+    },
+    {
+      "ordinal": 20,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-15-of-16-2026-08-30.json",
+      "sha256": "34ca65da181220bc54d57cdc31781a30491dc132d3b578e950390e84bb9fff46",
+      "bytes": 2152670,
+      "required": true
+    },
+    {
+      "ordinal": 21,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-16-of-16-2026-08-30.json",
+      "sha256": "dd2d2bcff0875e6726140ec6ead883fada79dcd20125fc6e52951ad316d8ccca",
+      "bytes": 3342775,
+      "required": true
+    },
+    {
+      "ordinal": 22,
+      "logicalPath": "docs/planning/qa/generate-b0-v6-package.mjs",
+      "sha256": "b2b6514bf3583426187ac4a74efa681588cccda2e4eec4d2068149f7fccdbdeb",
+      "bytes": 232985,
+      "required": true
+    },
+    {
+      "ordinal": 23,
+      "logicalPath": "docs/planning/qa/b0-v6-qa-reader-a.mjs",
+      "sha256": "a78c0935a795d0c9ef03bce5e736f66eeabd35c30fa5dd9c5f54d50b9e08955a",
+      "bytes": 51737,
+      "required": true
+    },
+    {
+      "ordinal": 24,
+      "logicalPath": "docs/planning/qa/b0-v6-qa-reader-b.py",
+      "sha256": "2ecc906d14d15f1ffb1d5eaa431b22ec339d5bf005f19033edd43fd0d3328810",
+      "bytes": 53165,
+      "required": true
+    }
+  ],
+  "packageMemberMetrics": [
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json",
+      "sha256": "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4",
+      "lines": 69199,
+      "words": 115343,
+      "bytes": 2722820
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-2026-08-30.md",
+      "sha256": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+      "lines": 1570,
+      "words": 11888,
+      "bytes": 171455
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-source-member-span-index-2026-08-30.json",
+      "sha256": "70185876e137f9981ab3dbcfa942ecdbbf2ce99e0e32750801db4a7a0791e6b5",
+      "lines": 14595,
+      "words": 25037,
+      "bytes": 541149
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json",
+      "sha256": "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141",
+      "lines": 667153,
+      "words": 1206661,
+      "bytes": 24936053
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-2026-08-30.json",
+      "sha256": "78f95bb843fe70ebb5c0caa3e113c145ead43508444f529317d01aef909da185",
+      "lines": 439,
+      "words": 1013,
+      "bytes": 19808
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-01-of-16-2026-08-30.json",
+      "sha256": "2ccac7d352fe331da42d9eec3fa945058b1d00b37ec7ca354bd8e3a7bab85175",
+      "lines": 26439,
+      "words": 45796,
+      "bytes": 1851835
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-02-of-16-2026-08-30.json",
+      "sha256": "3396913e6c3cba86d52c48ca1c6450293741e653000a8e9498f916e465f99f3d",
+      "lines": 30635,
+      "words": 54354,
+      "bytes": 1941353
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-03-of-16-2026-08-30.json",
+      "sha256": "2133d801a5a18ea07adea52485d1526ec82098ed9a558344990045a6bb2a1932",
+      "lines": 33967,
+      "words": 60489,
+      "bytes": 1865873
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-04-of-16-2026-08-30.json",
+      "sha256": "e866bf10e74596ef3e73b86420525ba9f86c631e7bc57589f688575f4b852540",
+      "lines": 33900,
+      "words": 60371,
+      "bytes": 1856860
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-05-of-16-2026-08-30.json",
+      "sha256": "9c7c8e355061877f28aa8de6cbe99ae7fd03a8239eb09d25da8c4ef4da469aad",
+      "lines": 33884,
+      "words": 60339,
+      "bytes": 1852809
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-06-of-16-2026-08-30.json",
+      "sha256": "fc797b86196010a3a78ff49390e65609288808e6db8e6208ab0eb0a40bbeed35",
+      "lines": 34745,
+      "words": 61873,
+      "bytes": 1948505
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-07-of-16-2026-08-30.json",
+      "sha256": "ff65d0a929b51125baf8dd743877e30ea187e02fe94cedcb7376351c37d789e4",
+      "lines": 158358,
+      "words": 277437,
+      "bytes": 11090782
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-08-of-16-2026-08-30.json",
+      "sha256": "80689e37e4e82e2b0deac48deb3181329dcbc6cd8cfe159ce254c07e2e03313f",
+      "lines": 276648,
+      "words": 484235,
+      "bytes": 20528156
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-09-of-16-2026-08-30.json",
+      "sha256": "085d0108f727bf4a91a093c2caba52a33519041e463ef565086caebfb67f7aa1",
+      "lines": 59516,
+      "words": 104563,
+      "bytes": 3919262
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-10-of-16-2026-08-30.json",
+      "sha256": "1dc00d7b518b3ebd62c474783275c434da20626abc802753b7ce70737190f53a",
+      "lines": 72285,
+      "words": 104694,
+      "bytes": 3342259
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-11-of-16-2026-08-30.json",
+      "sha256": "11834600f665d8a394aeddcd8dc0e3990097c1bb402f4f9794bd2586f659bbfa",
+      "lines": 135695,
+      "words": 162542,
+      "bytes": 5983088
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-12-of-16-2026-08-30.json",
+      "sha256": "2998df14881dc2e46c632c2edea404bcb73fbafba949e9bc30396be4f9eb6b20",
+      "lines": 49514,
+      "words": 86428,
+      "bytes": 2976490
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-13-of-16-2026-08-30.json",
+      "sha256": "e3f5689dfb7d664f85375235f79b39667a2a6435d128057d230baf28efb7fbdd",
+      "lines": 185307,
+      "words": 323712,
+      "bytes": 13209971
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-14-of-16-2026-08-30.json",
+      "sha256": "ad72a995d18597f4f6cc1da73993b387256ab8dbcb4dd88cad47a1d79b0d7149",
+      "lines": 261373,
+      "words": 456762,
+      "bytes": 19525972
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-15-of-16-2026-08-30.json",
+      "sha256": "34ca65da181220bc54d57cdc31781a30491dc132d3b578e950390e84bb9fff46",
+      "lines": 40061,
+      "words": 69847,
+      "bytes": 2152670
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-16-of-16-2026-08-30.json",
+      "sha256": "dd2d2bcff0875e6726140ec6ead883fada79dcd20125fc6e52951ad316d8ccca",
+      "lines": 51747,
+      "words": 84227,
+      "bytes": 3342775
+    },
+    {
+      "logicalPath": "docs/planning/qa/generate-b0-v6-package.mjs",
+      "sha256": "b2b6514bf3583426187ac4a74efa681588cccda2e4eec4d2068149f7fccdbdeb",
+      "lines": 2496,
+      "words": 17568,
+      "bytes": 232985
+    },
+    {
+      "logicalPath": "docs/planning/qa/b0-v6-qa-reader-a.mjs",
+      "sha256": "a78c0935a795d0c9ef03bce5e736f66eeabd35c30fa5dd9c5f54d50b9e08955a",
+      "lines": 417,
+      "words": 3790,
+      "bytes": 51737
+    },
+    {
+      "logicalPath": "docs/planning/qa/b0-v6-qa-reader-b.py",
+      "sha256": "2ecc906d14d15f1ffb1d5eaa431b22ec339d5bf005f19033edd43fd0d3328810",
+      "lines": 657,
+      "words": 3855,
+      "bytes": 53165
+    }
+  ],
+  "packageManifestMetrics": {
+    "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-atomic-package-manifest-2026-08-30.json",
+    "sha256": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+    "lines": 455,
+    "words": 825,
+    "bytes": 28563
+  },
+  "vectorCorpus": {
+    "indexLogicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-2026-08-30.json",
+    "indexSha256": "78f95bb843fe70ebb5c0caa3e113c145ead43508444f529317d01aef909da185",
+    "shardCount": 16,
+    "shardSetRoot": "76abfe35136dcd7f8733a7078d541b2785648679fc3357648a357eb58860118e",
+    "shardDescriptors": [
+      {
+        "shardOrdinal": 1,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-01-of-16-2026-08-30.json",
+        "sha256": "2ccac7d352fe331da42d9eec3fa945058b1d00b37ec7ca354bd8e3a7bab85175",
+        "bytes": 1851835,
+        "startVectorOrdinalInclusive": 1,
+        "endVectorOrdinalInclusive": 464,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 0,
+        "shardContentRoot": "1ccc71409795b9fe67a52692b118491090c3f213d17a06c7612ebebd6d761499",
+        "required": true
+      },
+      {
+        "shardOrdinal": 2,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-02-of-16-2026-08-30.json",
+        "sha256": "3396913e6c3cba86d52c48ca1c6450293741e653000a8e9498f916e465f99f3d",
+        "bytes": 1941353,
+        "startVectorOrdinalInclusive": 465,
+        "endVectorOrdinalInclusive": 928,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 293,
+        "shardContentRoot": "fb83b0cdf1da3bd3bf14a9fa4632f8c7ad21cbfe74dd068a37f504fc7c6c071c",
+        "required": true
+      },
+      {
+        "shardOrdinal": 3,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-03-of-16-2026-08-30.json",
+        "sha256": "2133d801a5a18ea07adea52485d1526ec82098ed9a558344990045a6bb2a1932",
+        "bytes": 1865873,
+        "startVectorOrdinalInclusive": 929,
+        "endVectorOrdinalInclusive": 1393,
+        "fixtureCount": 465,
+        "vectorCount": 465,
+        "domainMutationVectorCount": 465,
+        "shardContentRoot": "c180c33258b47ff1cebec4bfbb0e783e8b379a0db5a9fdb7539130c8573731d4",
+        "required": true
+      },
+      {
+        "shardOrdinal": 4,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-04-of-16-2026-08-30.json",
+        "sha256": "e866bf10e74596ef3e73b86420525ba9f86c631e7bc57589f688575f4b852540",
+        "bytes": 1856860,
+        "startVectorOrdinalInclusive": 1394,
+        "endVectorOrdinalInclusive": 1857,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "c68d6fbf7039965490a3ce42347ff460521a3dca97e51220625482c21014a0e3",
+        "required": true
+      },
+      {
+        "shardOrdinal": 5,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-05-of-16-2026-08-30.json",
+        "sha256": "9c7c8e355061877f28aa8de6cbe99ae7fd03a8239eb09d25da8c4ef4da469aad",
+        "bytes": 1852809,
+        "startVectorOrdinalInclusive": 1858,
+        "endVectorOrdinalInclusive": 2321,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "0a19b79d4ef8dcbe120663717fe3cba6b44464db1b460e7212dc408682c1e3dd",
+        "required": true
+      },
+      {
+        "shardOrdinal": 6,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-06-of-16-2026-08-30.json",
+        "sha256": "fc797b86196010a3a78ff49390e65609288808e6db8e6208ab0eb0a40bbeed35",
+        "bytes": 1948505,
+        "startVectorOrdinalInclusive": 2322,
+        "endVectorOrdinalInclusive": 2786,
+        "fixtureCount": 465,
+        "vectorCount": 465,
+        "domainMutationVectorCount": 465,
+        "shardContentRoot": "c291c864bbfbb9be31bb041bf02843794c0d618cd6af3fa17db068bf51c9d3ac",
+        "required": true
+      },
+      {
+        "shardOrdinal": 7,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-07-of-16-2026-08-30.json",
+        "sha256": "ff65d0a929b51125baf8dd743877e30ea187e02fe94cedcb7376351c37d789e4",
+        "bytes": 11090782,
+        "startVectorOrdinalInclusive": 2787,
+        "endVectorOrdinalInclusive": 3250,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "ca46fa933f373f491c0aa36b40a2ece70f1d5ab090b19617b1a71b4b50d0e874",
+        "required": true
+      },
+      {
+        "shardOrdinal": 8,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-08-of-16-2026-08-30.json",
+        "sha256": "80689e37e4e82e2b0deac48deb3181329dcbc6cd8cfe159ce254c07e2e03313f",
+        "bytes": 20528156,
+        "startVectorOrdinalInclusive": 3251,
+        "endVectorOrdinalInclusive": 3715,
+        "fixtureCount": 465,
+        "vectorCount": 465,
+        "domainMutationVectorCount": 465,
+        "shardContentRoot": "1536ea08f364ddd3c0e1f04a71bd3958f4644142cd0005dfaed366c9630c5368",
+        "required": true
+      },
+      {
+        "shardOrdinal": 9,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-09-of-16-2026-08-30.json",
+        "sha256": "085d0108f727bf4a91a093c2caba52a33519041e463ef565086caebfb67f7aa1",
+        "bytes": 3919262,
+        "startVectorOrdinalInclusive": 3716,
+        "endVectorOrdinalInclusive": 4179,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "cba38e0fb058c5c2542317c0a76eae417cfd724cacb406b6540ffc1b27f5f710",
+        "required": true
+      },
+      {
+        "shardOrdinal": 10,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-10-of-16-2026-08-30.json",
+        "sha256": "1dc00d7b518b3ebd62c474783275c434da20626abc802753b7ce70737190f53a",
+        "bytes": 3342259,
+        "startVectorOrdinalInclusive": 4180,
+        "endVectorOrdinalInclusive": 4643,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "48408390dcb6c24f092d44b90e6e4b4e8c26ad411e9ed15b51b4b3df773fef90",
+        "required": true
+      },
+      {
+        "shardOrdinal": 11,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-11-of-16-2026-08-30.json",
+        "sha256": "11834600f665d8a394aeddcd8dc0e3990097c1bb402f4f9794bd2586f659bbfa",
+        "bytes": 5983088,
+        "startVectorOrdinalInclusive": 4644,
+        "endVectorOrdinalInclusive": 5108,
+        "fixtureCount": 465,
+        "vectorCount": 465,
+        "domainMutationVectorCount": 465,
+        "shardContentRoot": "907031526e8df85e573bd6e5786d19fb90242a9b8e255ff6c16aa43e1fbeb584",
+        "required": true
+      },
+      {
+        "shardOrdinal": 12,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-12-of-16-2026-08-30.json",
+        "sha256": "2998df14881dc2e46c632c2edea404bcb73fbafba949e9bc30396be4f9eb6b20",
+        "bytes": 2976490,
+        "startVectorOrdinalInclusive": 5109,
+        "endVectorOrdinalInclusive": 5572,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "b7f1a346e2c0f192496b23b61541417384a9fe1bec7e910d11a6c9078405d31e",
+        "required": true
+      },
+      {
+        "shardOrdinal": 13,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-13-of-16-2026-08-30.json",
+        "sha256": "e3f5689dfb7d664f85375235f79b39667a2a6435d128057d230baf28efb7fbdd",
+        "bytes": 13209971,
+        "startVectorOrdinalInclusive": 5573,
+        "endVectorOrdinalInclusive": 6036,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "eb78eb7e778d0a39d95b49dd10259c38d4c1f42b4bb94def8b4c9a15bdef1acc",
+        "required": true
+      },
+      {
+        "shardOrdinal": 14,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-14-of-16-2026-08-30.json",
+        "sha256": "ad72a995d18597f4f6cc1da73993b387256ab8dbcb4dd88cad47a1d79b0d7149",
+        "bytes": 19525972,
+        "startVectorOrdinalInclusive": 6037,
+        "endVectorOrdinalInclusive": 6501,
+        "fixtureCount": 465,
+        "vectorCount": 465,
+        "domainMutationVectorCount": 465,
+        "shardContentRoot": "53818c5e781e3b9f1b4cbbf53d3868ce5b707caaff4150e6f1de4ec991d2b2e2",
+        "required": true
+      },
+      {
+        "shardOrdinal": 15,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-15-of-16-2026-08-30.json",
+        "sha256": "34ca65da181220bc54d57cdc31781a30491dc132d3b578e950390e84bb9fff46",
+        "bytes": 2152670,
+        "startVectorOrdinalInclusive": 6502,
+        "endVectorOrdinalInclusive": 6965,
+        "fixtureCount": 464,
+        "vectorCount": 464,
+        "domainMutationVectorCount": 464,
+        "shardContentRoot": "7df3c8d07659dbc54907d685c1ccbf9304cedd5fc92f122285945c13830c9b83",
+        "required": true
+      },
+      {
+        "shardOrdinal": 16,
+        "shardCount": 16,
+        "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-16-of-16-2026-08-30.json",
+        "sha256": "dd2d2bcff0875e6726140ec6ead883fada79dcd20125fc6e52951ad316d8ccca",
+        "bytes": 3342775,
+        "startVectorOrdinalInclusive": 6966,
+        "endVectorOrdinalInclusive": 7430,
+        "fixtureCount": 465,
+        "vectorCount": 465,
+        "domainMutationVectorCount": 465,
+        "shardContentRoot": "cc1e36c0be29093ef132bc959229506d2dc634d3fbf3ce17c14268424bfdd148",
+        "required": true
+      }
+    ],
+    "largestShardBytes": 20528156,
+    "maximumMemberBytesExclusive": 52428800,
+    "everyShardBelowMaximum": true
+  },
+  "detachedReaderReports": [
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-qa-reader-a-report-2026-08-30.json",
+      "sha256": "117adb64d15e8d6e5c9bfd120924e8f9b55529f5940477451081433c94f58be5",
+      "lines": 52,
+      "words": 100,
+      "bytes": 1640
+    },
+    {
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-qa-reader-b-report-2026-08-30.json",
+      "sha256": "02ebdd12e558e075b016175a11961effbef0ea121f72c6a73b8d1c28c76550fd",
+      "lines": 52,
+      "words": 100,
+      "bytes": 1642
+    }
+  ],
+  "readerCommands": [
+    "node docs/planning/qa/b0-v6-qa-reader-a.mjs",
+    "python3 docs/planning/qa/b0-v6-qa-reader-b.py"
+  ],
+  "readerVerdicts": [
+    {
+      "readerId": "B0V6-QA-READER-A-NODE-STDLIB",
+      "pass": true,
+      "errorCount": 0,
+      "checkInvocationCount": 34931,
+      "uniqueCheckClasses": 93
+    },
+    {
+      "readerId": "B0V6-QA-READER-B-PYTHON-STDLIB",
+      "pass": true,
+      "errorCount": 0,
+      "checkInvocationCount": 34931,
+      "uniqueCheckClasses": 93
+    }
+  ],
+  "readerParityProjection": {
+    "checkInvocationCountA": 34931,
+    "checkInvocationCountB": 34931,
+    "uniqueCheckClassesA": 93,
+    "uniqueCheckClassesB": 93,
+    "countsA": {
+      "blockers": 31,
+      "requirements": 127,
+      "fields": 635,
+      "outputs": 127,
+      "sourceArtifacts": 20,
+      "sourceMembers": 2045,
+      "authoritativeAtoms": 900,
+      "activeNamedUses": 10727,
+      "baseVectors": 635,
+      "domainMutationVectors": 6795,
+      "vectors": 7430,
+      "vectorShards": 16,
+      "packageMembers": 24,
+      "largestVectorShardBytes": 20528156,
+      "planningVectorPass": 7430,
+      "operationalVectors": 0,
+      "inheritedSelectors": 128,
+      "selectorBearingFields": 119,
+      "selectorOverlapPairs": 10,
+      "nonWeakeningRows": 10,
+      "genesisSchemas": 33,
+      "recoveryMembers": 5,
+      "recoveryWitnesses": 2,
+      "roles": 21,
+      "rolePairs": 210,
+      "heads": 36,
+      "mutableObjects": 94
+    },
+    "countsB": {
+      "blockers": 31,
+      "requirements": 127,
+      "fields": 635,
+      "outputs": 127,
+      "sourceArtifacts": 20,
+      "sourceMembers": 2045,
+      "authoritativeAtoms": 900,
+      "activeNamedUses": 10727,
+      "baseVectors": 635,
+      "domainMutationVectors": 6795,
+      "vectors": 7430,
+      "vectorShards": 16,
+      "packageMembers": 24,
+      "largestVectorShardBytes": 20528156,
+      "planningVectorPass": 7430,
+      "operationalVectors": 0,
+      "inheritedSelectors": 128,
+      "selectorBearingFields": 119,
+      "selectorOverlapPairs": 10,
+      "nonWeakeningRows": 10,
+      "genesisSchemas": 33,
+      "recoveryMembers": 5,
+      "recoveryWitnesses": 2,
+      "roles": 21,
+      "rolePairs": 210,
+      "heads": 36,
+      "mutableObjects": 94
+    },
+    "stateA": {
+      "authorityCredit": 0,
+      "acceptanceCredit": 0,
+      "B0": "ABSENT",
+      "Gate29": "BLOCKED",
+      "developmentFreeze": "ACTIVE",
+      "repositoryVisibility": "PUBLIC",
+      "freshIndependentHostileReview": "PENDING"
+    },
+    "stateB": {
+      "authorityCredit": 0,
+      "acceptanceCredit": 0,
+      "B0": "ABSENT",
+      "Gate29": "BLOCKED",
+      "developmentFreeze": "ACTIVE",
+      "repositoryVisibility": "PUBLIC",
+      "freshIndependentHostileReview": "PENDING"
+    }
+  },
+  "readerParityRoot": "8c7fa01985ae7203e9c367533304a867977c5b1e62e9437264b75915e45c76b8",
+  "exactCounts": {
+    "activeBlockers": 31,
+    "preservedClosedFindings": 1,
+    "requirements": 127,
+    "fiveFieldAtoms": 635,
+    "outputs": 127,
+    "sourceArtifacts": 20,
+    "sourceMembers": 2045,
+    "authoritativeInheritedAtoms": 900,
+    "activeNamedUses": 10727,
+    "baseVectors": 635,
+    "domainMutationVectors": 6795,
+    "totalPlanningVectors": 7430,
+    "operationalVectors": 0,
+    "vectorShards": 16,
+    "packageMembers": 24
+  },
+  "frozenPredecessorHashes": {
+    "subject": "bc91a6eee687f1cb9f651572fd84ee1fce9d578b502088a2e3c79fbb8062ff92",
+    "manifest": "5a054f5d4a482a0e74a9146dd3aeee865a5f28ee245d76784dbaa03ed3a118c4",
+    "packageContentRoot": "666e121d998445e3134f3a1978ee9b7c5962324bd51376e2ebc5bf2646d689f8",
+    "registry": "6c5f9be8d61b684e3239fb30696e480dbc8138600bddd77d51c396c553bc97fc",
+    "sourceIndex": "41204bbabfd32521f5ce13fbe8321099fb59e9881a9de64e5d1fcdab9aedb325",
+    "crosswalk": "89e8846ad28e4b157fd638eef56ebc72a02ab63e2b94e63608ee83be291e3b31",
+    "vectors": "4bb7f44bc175b93fb8f616f75455a55cadd96c002db175857d53229bc6afd7e6",
+    "review": "91f2b2b44115ad73908092694c9a4800b464775ac523d08a7800bee884b8edc6",
+    "findings": "a89f57955ffa9137cc9d1debaa996ab24e75302dd18e5812bb681ad404fdf031"
+  },
+  "predecessorByteVerification": "ALL-NINE-FROZEN-V5-SUBJECT/PACKAGE/REVIEW-HASHES-RECOMPUTED-BEFORE-GENERATION;UNCHANGED",
+  "pathPolicy": {
+    "publicLocatorPrefix": "docs/",
+    "absolutePathCount": 0,
+    "extraRepositoryPrefixCount": 0,
+    "traversalCount": 0,
+    "symlinkPackageMemberCount": 0
+  },
+  "sizePolicy": {
+    "normalGitHardLimitBytesExclusive": 104857600,
+    "publicPackagePolicyMaximumBytesExclusive": 52428800,
+    "largestPackageMemberBytes": 24936053,
+    "allPackageMembersBelowPublicPackageMaximum": true,
+    "gitPublicationPerformed": false
+  },
+  "mechanicalVerdict": "PASS",
+  "residualLimits": [
+    "PLANNING-ONLY",
+    "NO-OPERATIONAL-IMPLEMENTATION",
+    "NO-OPERATIONAL-EVIDENCE",
+    "NO-AUTHORITY",
+    "NO-ACCEPTANCE",
+    "FRESH-INDEPENDENT-HOSTILE-REVIEW-PENDING",
+    "NO-GIT-OR-GITHUB-PUBLICATION-PERFORMED"
+  ],
+  "currentState": {
+    "authorityCredit": 0,
+    "acceptanceCredit": 0,
+    "independentlyClosedActiveBlockerCount": "0/31",
+    "B0": "ABSENT",
+    "Gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC"
+  },
+  "producerQaContentRoot": "f443a46fb1bface360cb463e6d7c80adfb3a817989baf23917d589dc50b9d39c"
+}
