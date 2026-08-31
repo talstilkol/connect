@@ -21,7 +21,10 @@ import {
 } from './trd2-v6-pass4-core.mjs';
 
 const GRAPH_PATH = TRD2_V6_PASS4_OUTPUTS[0];
-const PATCH_PART_COUNT = 128;
+// Keep each emitted apply_patch payload comfortably below the orchestration
+// transport limit. This changes only the delivery granularity; the assembled
+// artifact remains the exact prettyV6(buildGraph()) byte stream.
+const PATCH_PART_COUNT = 512;
 
 function runGit(args, encoding = 'utf8') {
   const result = spawnSync('git', args, { cwd: process.cwd(), encoding, maxBuffer: 512 * 1024 * 1024 });
