@@ -469,7 +469,8 @@ export function TemplateDraftEditor({
     setSyncResult(null);
     startSyncing(async () => {
       syncRequestTimestamp.current ??= new Date().toISOString();
-      const result = await syncMessageTemplatesAction(syncRequestTimestamp.current);
+      const result = await syncMessageTemplatesAction(syncRequestTimestamp.current)
+        .catch(() => ({ status: "server-error" as const }));
       setSyncResult(result);
 
       if (result.status === "synced") {
