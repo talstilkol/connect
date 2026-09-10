@@ -1,3 +1,4 @@
+import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import { createPostgresRailwayMessageTemplateSyncMutationExecutor } from "./postgresRailwayMessageTemplateSyncMutationExecutor.ts";
 import {createPostgresMetaMediaCleanupRepository} from './postgresMetaMediaCleanupRepository.ts';
 import { createPostgresMetaMediaTaskReader } from "./postgresMetaMediaTaskReader.ts";
@@ -306,6 +307,7 @@ export interface RailwayPostgresFoundation {
   readonly contactConsents: ReturnType<
     typeof createPostgresContactConsentRepository
   >;
+  readonly manualReplies: ReturnType<typeof createPostgresManualReplyRepository>;
   readonly conversations: ReturnType<
     typeof createPostgresConversationRepository
   >;
@@ -592,6 +594,7 @@ export function createRailwayPostgresFoundation(
     contactConsents: createPostgresContactConsentRepository({
       transactions,
     }),
+    manualReplies: createPostgresManualReplyRepository({ queries, transactions }),
     conversations: createPostgresConversationRepository({
       queries,
       transactions,

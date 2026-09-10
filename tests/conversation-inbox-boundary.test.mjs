@@ -117,7 +117,7 @@ test("keeps assignment controls behind their presentation boundary", async () =>
   );
 });
 
-test("keeps the disabled composer contract behind its own boundary", async () => {
+test("keeps the manual composer behind its own boundary", async () => {
   const [messageViewSource, composerSource] =
     await Promise.all([
       readSource(
@@ -142,10 +142,9 @@ test("keeps the disabled composer contract behind its own boundary", async () =>
   );
   assert.match(
     composerSource,
-    /readConversationMessages\(language\)\.composerBoundary/,
+    /readManualReplyMessages\(language\)/,
   );
-  assert.doesNotMatch(
-    composerSource,
-    /<textarea|<input|<button/,
-  );
+  assert.match(composerSource, /sendManualReplyAction\(request\)/);
+  assert.match(composerSource, /draft.request \?\?/);
+  assert.doesNotMatch(composerSource, /fetch\(|accessToken|MetaGraph/);
 });

@@ -45,3 +45,8 @@ export type RefreshInboxActionResult =
       inbox: InboxView;
     }
   | ConversationActionFailure;
+
+export type SendManualReplyActionResult =
+  | { status: "queued"; submission: import("../../shared/domain/manualReply.ts").ManualReplySubmission }
+  | { status: "assignment-required" | "window-closed" | "delivery-unavailable" | "contact-blocked" }
+  | ConversationActionFailure;

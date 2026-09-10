@@ -592,6 +592,15 @@ export function ConversationInbox({
           changeSelectedAssignment
         }
         markSelectedRead={markSelectedRead}
+        refreshSelectedThread={(conversationKey) => {
+          void loadConversationThreadAction(conversationKey).then((result) => {
+            if (result.status !== "loaded") return;
+            setSelectedThread((current) => current?.conversation.conversationKey === conversationKey &&
+              current.conversation.version <= result.thread.conversation.version ? result.thread : current);
+            setConversations((current) => current.map((conversation) => conversation.conversationKey === conversationKey &&
+              conversation.version <= result.thread.conversation.version ? result.thread.conversation : conversation));
+          }).catch(() => { /* The regular inbox poll retries the read without repeating the mutation. */ });
+        }}
         decideAiApproval={decideAiApproval}
       />
 

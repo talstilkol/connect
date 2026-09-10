@@ -1,3 +1,4 @@
+import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
 import { requireMetaGraphConfiguration } from "../meta/metaGraphConfiguration.ts";
 import { createMetaGraphTransport } from "../meta/metaGraphTransport.ts";
@@ -130,6 +131,7 @@ export interface RailwayPostgresApiRuntimeOptions {
   readonly messageTemplateSyncEnvironment?: RailwayMessageTemplateSyncEnvironment;
   readonly metaSignupEnvironment?: MetaEmbeddedSignupServerEnvironment;
   readonly campaignDeliveryConfigured?: () => boolean;
+  readonly manualReplyEnvironment?: RailwayManualReplyEnvironment;
   readonly teamInvitationPolicyEnvironment?: TeamInvitationPolicyEnvironment;
   readonly teamInvitationPublisher?: TeamInvitationPublisher;
   readonly teamInvitationAcceptanceIdentityResolver?:
@@ -156,6 +158,7 @@ const optionKeys = Object.freeze([
   "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",
+  "manualReplyEnvironment",
   "identityDependencies",
   "identityEnvironment",
   "maximumBodyBytes",
@@ -290,6 +293,7 @@ export async function createRailwayPostgresApiRuntime(
   options: Readonly<RailwayPostgresApiRuntimeOptions>,
 ): Promise<Readonly<RailwayPostgresApiRuntime>> {
   requireOptions(options);
+  const manualReplyConfigured = requireRailwayManualReplyConfiguration(options.manualReplyEnvironment);
   const identityConfiguration = inspectRailwayApiIdentityConfiguration(
     options.identityEnvironment,
   );
@@ -462,6 +466,8 @@ export async function createRailwayPostgresApiRuntime(
         foundation.conversations,
       ),
       conversationMutations: foundation.railwayConversationMutations,
+      manualReplies: foundation.manualReplies,
+      manualReplyConfigured: () => manualReplyConfigured,
       botFlows: createBotFlowService(foundation.botFlows),
       botFlowMutations: foundation.railwayBotFlowMutations,
       aiAgents: createAiAgentService({

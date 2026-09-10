@@ -716,4 +716,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE meta_media_cleanup_jobs",
     summary: "Railway records owner-requested removal of one verified quarantine version, withdraws access and retains immutable audits with bounded worker claims.",
   }),
+  Object.freeze({
+    migration: "0073_manual_reply_outbox.sql",
+    token: "CREATE TABLE manual_reply_outbox",
+    summary: "Railway stores agent text replies atomically with receipts and audits, fences send claims against current authorization and retains uncertain outcomes without automatically resending.",
+  }),
 ]);

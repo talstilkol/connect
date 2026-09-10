@@ -1,3 +1,4 @@
+import type { PostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import type { RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
 import type {MetaMediaCleanupRepository} from '../meta/metaMediaCleanup.ts';
 import {createRailwayMetaMediaCleanupOperation} from './railwayMetaMediaCleanupOperation.ts';
@@ -166,6 +167,8 @@ export interface RailwayApiRuntimeOptions {
   >;
   readonly conversations: Pick<ConversationService, "list" | "readThread">;
   readonly conversationMutations: RailwayConversationMutationExecutor;
+  readonly manualReplies?: Pick<PostgresManualReplyRepository, "enqueue" | "list">;
+  readonly manualReplyConfigured?: () => boolean;
   readonly botFlows: Pick<BotFlowService, "list" | "readDetails">;
   readonly botFlowMutations: RailwayBotFlowMutationExecutor;
   readonly aiAgents: Pick<
@@ -249,6 +252,8 @@ export function createRailwayApiRuntime(
     tenantSessions,
     conversations: options.conversations,
     conversationMutations: options.conversationMutations,
+    manualReplies: options.manualReplies,
+    manualReplyConfigured: options.manualReplyConfigured,
     botFlows: options.botFlows,
     botFlowMutations: options.botFlowMutations,
     aiAgents: options.aiAgents,

@@ -1,3 +1,6 @@
+import { parseManualReplyRequest, parseManualReplySubmission } from "../../shared/domain/manualReply.ts";
+import { ManualReplyError } from "./postgresManualReplyRepository.ts";
+import type { PostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import { parseCampaignControlRequest } from "../../shared/domain/campaignControl.ts";
 import { RAILWAY_MESSAGE_TEMPLATE_SYNC_OPERATION, isTemplateSyncTimestamp,
   type RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
@@ -553,12 +556,17 @@ export const railwayApiOperationPolicies = Object.freeze([
     permission: "reports.read" as const,
     mutationSafety: null,
   }),
+  Object.freeze({ id: "conversations.reply.send", requestKind: "mutation" as const, permission: "conversations.reply" as const,
+    mutationSafety: Object.freeze({ rateLimit: "tenant-mutation" as const, idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const, transaction: "required" as const }) }),
 ] as const satisfies readonly Readonly<RailwayApiOperationPolicy>[]);
 
 export interface RailwayApiOperationRegistryDependencies {
   readonly tenantSessions: RailwayTenantSessionResolver;
   readonly conversations: Pick<ConversationService, "list" | "readThread">;
   readonly conversationMutations: RailwayConversationMutationExecutor;
+  readonly manualReplies?: Pick<PostgresManualReplyRepository, "enqueue" | "list">;
+  readonly manualReplyConfigured?: () => boolean;
   readonly botFlows: Pick<BotFlowService, "list" | "readDetails">;
   readonly botFlowMutations: RailwayBotFlowMutationExecutor;
   readonly aiAgents: Pick<
@@ -2094,6 +2102,7 @@ export function createRailwayApiOperationRegistry(
     messageTemplateSubmissionPolicy,
     messageTemplateSyncPolicy,
     reportsPolicy,
+    manualReplyPolicy,
   ] =
     railwayApiOperationPolicies;
   const operations = [
@@ -2137,11 +2146,13 @@ export function createRailwayApiOperationRegistry(
         );
 
         return {
-          thread: toInboxConversationThreadView(
-            thread.conversation,
-            thread.messages,
-            session.externalUserId,
-          ),
+          thread: {
+            ...toInboxConversationThreadView(thread.conversation, thread.messages, session.externalUserId),
+            ...(dependencies.manualReplies === undefined ? {} : {
+              manualReplies: await dependencies.manualReplies.list(session.tenantId, conversationKey),
+              manualReplyEnabled: dependencies.manualReplyConfigured?.() === true,
+            }),
+          },
         };
       },
     ),
@@ -2579,6 +2590,24 @@ export function createRailwayApiOperationRegistry(
           ),
         ),
     ),
+    createOperation(manualReplyPolicy, dependencies, (payload) => {
+      const parsed = parseManualReplyRequest(payload); if (!parsed) invalidRequest(); return parsed;
+    }, async (session, payload, request) => {
+      const mutation = await requireTenantMutationRequest(dependencies, session, "conversations.reply.send", payload, request);
+      if (dependencies.manualReplyConfigured?.() !== true || !dependencies.manualReplies) throw new RailwayApiDispatchError("CONFIGURATION_REQUIRED");
+      try {
+        const result = await dependencies.manualReplies.enqueue({ session, payload, ...mutation });
+        const submission = parseManualReplySubmission(result?.submission, payload);
+        if (!submission || typeof result.replayed !== "boolean") throw new Error("Manual reply receipt is invalid");
+        return { submission, replayed: result.replayed };
+      } catch (error) {
+        if (error instanceof ManualReplyError) {
+          if (error.code === "INVALID_REQUEST" || error.code === "AUTHORIZATION_DENIED" || error.code === "CONFLICT") throw new RailwayApiDispatchError(error.code);
+          return { rejected: error.code };
+        }
+        throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+      }
+    }),
   ];
 
   return Object.freeze({

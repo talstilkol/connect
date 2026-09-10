@@ -248,7 +248,7 @@ API ישן שאינו מפרסם businessAppEnabled משאיר את האפשרו
 החיים של Worker; אינה תלויה בנעילת Scheduler הקמפיינים. סיום העלאה
 ויצירת משימת הבירור אטומיים; גילוי נפרד משחזר מעבר שנקטע אחרי שמירת אישור.
 אין שדות HTTP/DTO חדשים, היתר להגשת Bytes או PUT חוזר לאחר שיגור.
-מצב הסכמה לאחר 0072: **73 מיגרציות PostgreSQL**, מהן **44 ליעד בלבד**;
+מצב הסכמה לאחר 0073: **74 מיגרציות PostgreSQL**, מהן **45 ליעד בלבד**;
 D1 נשאר ללא שינוי. סעיף זה מעדכן את מצב ה־Worker שב־3.20–3.21.
 [הפעלה וגבולות](s3-meta-media-quarantine.md), [Master Plan, סעיף 39](planning/launch-master-plan-2026-09-09.md).
 
@@ -1484,3 +1484,8 @@ Audience, ‏authorized parties ו־Production origin נשארים
 9.6 [node-postgres — SSL](https://node-postgres.com/features/ssl).
 
 9.7 [node-postgres — Pool](https://node-postgres.com/apis/pool).
+
+
+## תשובות נציג — 10.09.2026
+
+`conversations.reply.send` היא פעולת mutation עם הרשאת conversations.reply, Quota של Tenant ו־Receipt/Audit אטומיים. בקשה: conversationKey, expectedVersion, text. התגובה היא submission מוגבל או סיבת דחייה; אין טקסט או Token ב־Audit. Thread יכול לכלול manualReplies ו־manualReplyEnabled. המקור כולל כעת 35 פעולות מרכזיות. מימוש ומגבלות מפורטים ב־[חוזה התשובות הידניות](railway-manual-replies.md); הפעלה וקבלה חיה אינן מוכחות מכוח חוזה זה.

@@ -5,7 +5,7 @@ const providerIdentifierPattern =
 const deliveryKeyPattern =
   /^campaign_delivery_v1_[0-9a-f]{64}$/;
 const botReplyDeliveryKeyPattern =
-  /^bot_reply_delivery_v1_[0-9a-f]{64}$/;
+  /^(?:bot_reply|manual_reply)_delivery_v1_[0-9a-f]{64}$/;
 const phoneNumberPattern = /^\+[1-9][0-9]{0,14}$/;
 type OwnedBytes = Uint8Array<ArrayBuffer>;
 

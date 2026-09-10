@@ -7,10 +7,27 @@ import {
 import {
   deriveRailwayApiDeterministicIdempotencyKey,
 } from "../server/platform/railwayApiMutationExecutor.ts";
+import { createHash } from "node:crypto";
 
 const conversationKey =
   `conversation_v1_${"a".repeat(64)}`;
 const messageKey = `message_v1_${"b".repeat(64)}`;
+
+test("manual reply retains its deterministic intent across a lost response and validates a bounded receipt", async () => {
+  const payload = { conversationKey, expectedVersion: 3, text: "Help" };
+  const deliveryKey = `manual_reply_delivery_v1_${createHash("sha256").update(JSON.stringify(payload)).digest("hex")}`;
+  let count = 0;
+  const testFixture = fixture({ response() {
+    if (count++ === 0) throw new Error("Lost response");
+    return { outcome: "ok", data: { replayed: true, submission: { conversationKey, version: 4, deliveryKey } } };
+  } });
+  assert.equal((await testFixture.handler.sendReply(payload)).status, "server-error");
+  assert.equal((await testFixture.handler.sendReply(payload)).status, "queued");
+  assert.deepEqual(testFixture.calls.requests[0], testFixture.calls.requests[1]);
+  assert.equal(testFixture.calls.requests[0].operation, "conversations.reply.send");
+  assert.equal((await fixture({ response: () => ({ outcome: "ok", data: { replayed: false, submission: { conversationKey, version: 3, deliveryKey } } }) }).handler.sendReply(payload)).status, "server-error");
+  assert.equal((await fixture({ response: () => ({ outcome: "ok", data: { rejected: "SERVICE_WINDOW_CLOSED" } }) }).handler.sendReply(payload)).status, "window-closed");
+});
 
 function conversation(overrides = {}) {
   return {

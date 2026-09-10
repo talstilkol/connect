@@ -64,6 +64,7 @@ const apiOptionKeys = Object.freeze([
   "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",
+  "manualReplyEnvironment",
   "identityDependencies",
   "identityEnvironment",
   "maximumBodyBytes",

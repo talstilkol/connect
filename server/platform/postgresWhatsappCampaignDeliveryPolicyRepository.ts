@@ -1,3 +1,4 @@
+import { postgresMetaTenantBarrierCte } from "./postgresMetaTenantBarrier.ts";
 import type {
   FindWhatsappCampaignDeliveryPolicyInput,
   RecordWhatsappCampaignDeliveryPolicyCommand,
@@ -120,13 +121,14 @@ export const postgresWhatsappCampaignDeliveryPolicySql = Object.freeze({
     LIMIT 1
   `,
   lockMetaConnection: `
+    WITH ${postgresMetaTenantBarrierCte}
     SELECT
-      tenant_id AS "tenantId",
-      status,
-      version
-    FROM meta_connections
-    WHERE tenant_id = $1
-    FOR UPDATE
+      connection.tenant_id AS "tenantId",
+      connection.status,
+      connection.version
+    FROM meta_connections AS connection CROSS JOIN tenant_barrier
+    WHERE connection.tenant_id = $1
+    FOR UPDATE OF connection
   `,
   insertPolicyEvent: `
     INSERT INTO whatsapp_campaign_delivery_policy_events (

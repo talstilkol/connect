@@ -51,3 +51,8 @@ export async function refreshInboxAction(
     return { status: "server-error" };
   }
 }
+
+export async function sendManualReplyAction(input: unknown): Promise<import("./conversationActionResult.ts").SendManualReplyActionResult> {
+  try { return await createCurrentRailwayConversationHandler().sendReply(input); }
+  catch { return { status: "server-error" }; }
+}

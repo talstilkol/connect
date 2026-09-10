@@ -678,3 +678,12 @@
     max-width: 88%;
   }
 }
+
+.manual-reply-composer { padding: 1rem; border-top: 1px solid var(--line); display: grid; gap: .65rem; }
+.manual-reply-composer form, .manual-reply-composer label { display: grid; gap: .5rem; }
+.manual-reply-composer textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 5rem; font: inherit; padding: .65rem; }
+.manual-reply-composer p { margin: 0; }
+.manual-reply-composer small { opacity: .8; }
+.manual-reply-pending { padding: .75rem; border: 1px solid var(--line); border-radius: .65rem; }
+.manual-reply-pending p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.manual-reply-pending.unknown, .manual-reply-pending.failed { border-inline-start: 3px solid #b45309; }

@@ -1,3 +1,4 @@
+import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
 import {
   inspectRailwayCampaignActivationConfiguration,
@@ -48,6 +49,7 @@ interface RailwayBullMqApiMainDependencies {
   readonly createProcess: RailwayApiMainDependencies["createProcess"];
   readonly readNodeEnvironment: () => RailwayNodeProcessEnvironment;
   readonly readBullMqEnvironment: () => RailwayBullMqEnvironment;
+  readonly readManualReplyEnvironment: () => RailwayManualReplyEnvironment;
   readonly readCampaignActivationEnvironment: () => RailwayCampaignActivationEnvironment;
   readonly readMessageTemplateSyncEnvironment: () => RailwayMessageTemplateSyncEnvironment;
   readonly readMessageTemplateSubmissionEnvironment:
@@ -80,6 +82,11 @@ const defaultDependencies = Object.freeze({
       META_GRAPH_API_VERSION: process.env.META_GRAPH_API_VERSION,
       META_CREDENTIAL_ENCRYPTION_KEY_V1: process.env.META_CREDENTIAL_ENCRYPTION_KEY_V1,
     };
+  },
+  readManualReplyEnvironment() {
+    return { MANUAL_REPLY_ENABLED: process.env.MANUAL_REPLY_ENABLED, META_GRAPH_API_VERSION: process.env.META_GRAPH_API_VERSION,
+      META_CREDENTIAL_ENCRYPTION_KEY_V1: process.env.META_CREDENTIAL_ENCRYPTION_KEY_V1,
+      WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: process.env.WHATSAPP_RATE_LIMIT_HMAC_KEY_V1 };
   },
   readCampaignActivationEnvironment() {
     return {
@@ -131,6 +138,7 @@ const defaultDependencies = Object.freeze({
 export type RailwayBullMqApiMainErrorCode =
   | "dependencies-invalid"
   | "campaign-activation-configuration-required"
+  | "manual-reply-configuration-required"
   | "template-submission-configuration-required"
   | "template-sync-configuration-required"
   | "release-evidence-configuration-required"
@@ -152,6 +160,7 @@ const dependencyKeys = Object.freeze([
   "createRuntime",
   "readBullMqEnvironment",
   "readCampaignActivationEnvironment",
+  "readManualReplyEnvironment",
   "readMetaWebhookEnvironment",
   "readMessageTemplateSubmissionEnvironment",
   "readMessageTemplateSyncEnvironment",
@@ -236,6 +245,9 @@ export async function startRailwayBullMqApiExecutable(
   }
   const campaignActivationEnabled = campaignActivationConfiguration.status === "configured";
 
+  let manualReplyEnvironment: RailwayManualReplyEnvironment;
+  try { manualReplyEnvironment = dependencies.readManualReplyEnvironment(); requireRailwayManualReplyConfiguration(manualReplyEnvironment); }
+  catch { throw new RailwayBullMqApiMainError("manual-reply-configuration-required"); }
   let messageTemplateSyncEnvironment: RailwayMessageTemplateSyncEnvironment;
   try {
     messageTemplateSyncEnvironment = dependencies.readMessageTemplateSyncEnvironment();
@@ -319,6 +331,7 @@ export async function startRailwayBullMqApiExecutable(
           postgresTelemetry,
           messageTemplateSubmissionEnvironment,
           messageTemplateSyncEnvironment,
+          manualReplyEnvironment,
           campaignDeliveryConfigured: () => campaignActivationEnabled,
           requestTelemetry: telemetryRuntime.logger,
           bullMqEnvironment: dependencies.readBullMqEnvironment(),

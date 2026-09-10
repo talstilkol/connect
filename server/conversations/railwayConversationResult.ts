@@ -1,3 +1,4 @@
+import { parseManualReplyViews } from "../../shared/domain/manualReply.ts";
 import { inboxContentKinds, isHistoryDeliveryState, type HistoryDeliveryState } from "../../shared/domain/inboxHistory.ts";
 import {
   messageContentKinds,
@@ -221,13 +222,15 @@ export function parseRailwayConversationThread(
 ): Readonly<InboxConversationThreadView> | null {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, ["conversation", "messages"]) ||
+    !hasExactKeys(value, ["conversation", "messages", ...(Object.hasOwn(value, "manualReplies") ? ["manualReplies", "manualReplyEnabled"] : [])]) ||
     !Array.isArray(value.messages) ||
     value.messages.length > 100
   ) {
     return null;
   }
 
+  const manualReplies = Object.hasOwn(value, "manualReplies") ? parseManualReplyViews(value.manualReplies) : undefined;
+  if (manualReplies === null || (manualReplies !== undefined && typeof value.manualReplyEnabled !== "boolean")) return null;
   const conversation = parseRailwayInboxConversationView(value.conversation);
   if (
     conversation === null ||
@@ -259,5 +262,6 @@ export function parseRailwayConversationThread(
   return Object.freeze({
     conversation,
     messages: Object.freeze(messages),
+    ...(manualReplies === undefined ? {} : { manualReplies, manualReplyEnabled: value.manualReplyEnabled as boolean }),
   });
 }

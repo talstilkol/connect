@@ -1,3 +1,4 @@
+import type { RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import type { MetaMediaWorkerEnvironment } from "./railwayMetaMediaWorkerRuntime.ts";
 import type {
   CampaignDeliveryQueueBinding,
@@ -54,7 +55,7 @@ import type {
 } from "./railwayWorkerSchedulerService.ts";
 
 export type RailwayWorkerExecutableEnvironment =
-  NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment &
+  NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment &
     MessageTemplateSubmissionEnvironment &
     MetaWebhookEnvironment &
     MetaEmbeddedSignupServerEnvironment &

@@ -43,6 +43,7 @@ function fixture(overrides = {}) {
       calls.push("redis-environment.read");
       return { REDIS_URL: "redis://127.0.0.1:6379/0" };
     },
+    readManualReplyEnvironment() { return overrides.manualReplyEnvironment ?? {}; },
     readMessageTemplateSyncEnvironment() {
       return overrides.messageTemplateSyncEnvironment ?? {};
     },
@@ -116,6 +117,17 @@ test("campaign activation opt-in is strict and requires an explicit Graph versio
   assert.deepEqual(inspectRailwayCampaignActivationConfiguration({
     CAMPAIGN_ACTIVATION_ENABLED: "true", META_GRAPH_API_VERSION: "v23.0",
   }), { status: "configured", graphApiVersion: "v23.0" });
+});
+
+test("manual reply startup rejects partial credentials before creating runtime and forwards complete opt-in", async () => {
+  const invalid = fixture({ manualReplyEnvironment: { MANUAL_REPLY_ENABLED: "true" } });
+  await assert.rejects(() => startRailwayBullMqApiExecutable(invalid.dependencies), { code: "manual-reply-configuration-required" });
+  assert.equal(invalid.captured.runtime, undefined);
+  const key = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=";
+  const environment = { MANUAL_REPLY_ENABLED: "true", META_GRAPH_API_VERSION: "v23.0", META_CREDENTIAL_ENCRYPTION_KEY_V1: key, WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: key };
+  const ready = fixture({ manualReplyEnvironment: environment });
+  await startRailwayBullMqApiExecutable(ready.dependencies);
+  assert.deepEqual(ready.captured.runtime.manualReplyEnvironment, environment);
 });
 
 test("campaign activation configuration is checked before telemetry and infrastructure startup", async () => {

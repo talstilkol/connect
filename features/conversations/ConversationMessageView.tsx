@@ -44,6 +44,7 @@ type ConversationMessageViewProps = {
   pendingApprovalKey: string | null;
   changeSelectedAssignment: () => void;
   markSelectedRead: () => void;
+  refreshSelectedThread?: (conversationKey: string) => void;
   decideAiApproval: (
     approval: AiReplyApprovalView,
     decision: "approve" | "reject",
@@ -65,6 +66,7 @@ export function ConversationMessageView({
   pendingApprovalKey,
   changeSelectedAssignment,
   markSelectedRead,
+  refreshSelectedThread,
   decideAiApproval,
 }: ConversationMessageViewProps) {
   const messages = readConversationMessages(language);
@@ -294,9 +296,8 @@ export function ConversationMessageView({
               )}
             </div>
 
-            <ConversationComposerBoundary
-              language={language}
-            />
+            <ConversationComposerBoundary language={language} thread={selectedThread} canReply={canReply}
+              isBusy={isBusy} onSubmitted={refreshSelectedThread} />
           </>
         ) : (
           <div className="conversation-stage-empty">

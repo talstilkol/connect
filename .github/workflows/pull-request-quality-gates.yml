@@ -125,6 +125,19 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
+      manual-replies-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: connect_startup_rehearsal
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5435:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d connect_startup_rehearsal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
       campaign-controls-redis:
         image: redis:7-alpine@sha256:8b81dd37ff027bec4e516d41acfbe9fe2460070dc6d4a4570a2ac5b9d59df065
         ports:
@@ -163,6 +176,10 @@ jobs:
         env:
           CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5434/connect_startup_rehearsal
         run: node --test tests/integration/campaign-controls-postgres.test.mjs
+      - name: Rehearse manual reply claims, receipts and crash recovery on PostgreSQL
+        env:
+          CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5435/connect_startup_rehearsal
+        run: node --test tests/integration/manual-replies-postgres.test.mjs
       - name: Verify BullMQ waits and worker restart against Redis
         env:
           CONNECT_BULLMQ_INTEGRATION_REDIS_URL: redis://127.0.0.1:6380/0

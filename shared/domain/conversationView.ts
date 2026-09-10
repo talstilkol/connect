@@ -55,6 +55,8 @@ export interface InboxMessageView {
 }
 
 export interface InboxConversationThreadView {
+  manualReplies?: readonly import("./manualReply.ts").ManualReplyView[];
+  manualReplyEnabled?: boolean;
   conversation: InboxConversationView;
   messages: readonly InboxMessageView[];
 }

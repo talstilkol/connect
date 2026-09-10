@@ -1,3 +1,5 @@
+import { parseManualReplyRequest, parseManualReplySubmission } from "../../shared/domain/manualReply.ts";
+import type { SendManualReplyActionResult } from "./conversationActionResult.ts";
 import {
   defaultInboxFilters,
   type InboxDirectoryStatus,
@@ -364,6 +366,35 @@ export function createRailwayConversationHandler(
       } catch {
         return { status: "server-error" };
       }
+    },
+
+    async sendReply(input: unknown): Promise<SendManualReplyActionResult> {
+      const payload = parseManualReplyRequest(input);
+      if (!payload) return { status: "invalid-input" };
+      const context = await createContext();
+      if (context.status !== "ready") return context;
+      try {
+        const operation = "conversations.reply.send";
+        const idempotencyKey = await deriveRailwayApiDeterministicIdempotencyKey(operation, payload);
+        const response = await context.client.call({ contractVersion: RAILWAY_API_CONTRACT_VERSION, operation,
+          requestKind: "mutation", idempotencyKey, payload: { ...payload } });
+        if (response.outcome !== "ok") {
+          if (response.code === "CONFIGURATION_REQUIRED") return { status: "configuration-required" };
+          return mapFailure(response.code);
+        }
+        const data = response.data;
+        if (isRecord(data) && hasExactKeys(data, ["rejected"])) {
+          switch (data.rejected) {
+            case "ASSIGNMENT_REQUIRED": return { status: "assignment-required" };
+            case "SERVICE_WINDOW_CLOSED": return { status: "window-closed" };
+            case "DELIVERY_UNAVAILABLE": return { status: "delivery-unavailable" };
+            case "CONTACT_BLOCKED": return { status: "contact-blocked" };
+          }
+        }
+        if (!isRecord(data) || !hasExactKeys(data, ["submission", "replayed"]) || typeof data.replayed !== "boolean") return { status: "server-error" };
+        const submission = parseManualReplySubmission(data.submission, payload);
+        return submission ? { status: "queued", submission } : { status: "server-error" };
+      } catch { return { status: "server-error" }; }
     },
 
     async markRead(input: unknown): Promise<MarkConversationReadActionResult> {

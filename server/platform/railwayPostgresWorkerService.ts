@@ -1,3 +1,12 @@
+import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
+import { createManualReplyWorker, createManualReplyWorkerLoop, createMetaManualReplySender } from "../conversations/manualReplyWorker.ts";
+import { createBotReplyAdmission } from "../bot/botReplyAdmission.ts";
+import { createWhatsappRateLimitKeyDeriver } from "../campaigns/whatsappRateLimitKeyDeriver.ts";
+import { createCampaignDeliveryRateLimitPolicySource } from "../campaigns/d1CampaignDeliveryRateLimitPolicySource.ts";
+import { createMetaCredentialVault } from "../meta/metaCredentialVault.ts";
+import { createMetaGraphTransport } from "../meta/metaGraphTransport.ts";
+import { requireMetaGraphConfiguration } from "../meta/metaGraphConfiguration.ts";
+import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import { createRailwayMetaMediaWorkerRuntime, requireMetaMediaWorkerConfiguration, type MetaMediaWorkerEnvironment } from "./railwayMetaMediaWorkerRuntime.ts";
 import { createPostgresMetaAccountLifecycleRepository } from "./postgresMetaAccountLifecycleRepository.ts";
 import { createPostgresMetaCoexistenceSyncJobRepository } from './postgresMetaCoexistenceSyncJobRepository.ts';
@@ -236,7 +245,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -741,6 +750,7 @@ function createRailwayPostgresWorkerFoundation(
         queries,
         transactions,
       }),
+    manualReplies: createPostgresManualReplyRepository({ queries, transactions }),
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
     metaMessageEchoes: createPostgresMetaMessageEchoRepository(transactions),
@@ -797,6 +807,7 @@ export async function createRailwayPostgresWorkerService(
 ): Promise<Readonly<RailwayWorkerSchedulerService>> {
   const clock = requireOptions(options);
   const mediaMode = requireMetaMediaWorkerConfiguration(options.environment);
+  const manualRepliesEnabled = requireRailwayManualReplyConfiguration(options.environment);
   const foundation = createRailwayPostgresWorkerFoundation(
     options.environment,
     options.postgresTelemetry,
@@ -817,6 +828,15 @@ export async function createRailwayPostgresWorkerService(
   try {
     if (mediaMode !== null) {
       queueRuntimes.push(foundation.createMetaMediaWorker(options.environment!, options.schedulerTelemetry.recordRunFailure));
+    }
+    if (manualRepliesEnabled) {
+      const environment = options.environment!;
+      const worker = createManualReplyWorker({ replies: foundation.manualReplies,
+        admission: createBotReplyAdmission(foundation.whatsappRateLimits, createWhatsappRateLimitKeyDeriver(environment),
+          createCampaignDeliveryRateLimitPolicySource(foundation.whatsappDeliveryPolicies)),
+        vault: createMetaCredentialVault(foundation.metaCredentialEnvelopes, environment),
+        sender: createMetaManualReplySender(createMetaGraphTransport(requireMetaGraphConfiguration(environment))), clock });
+      queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
     }
     let campaignQueue = options.campaignQueue;
     if (options.campaignDeliveries !== undefined) {

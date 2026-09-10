@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createHash } from "node:crypto";
 
 import {
   ContactNotFoundError,
@@ -372,6 +373,8 @@ function persistedCampaign(overrides = {}) {
 }
 
 function fixture({
+  manualReplies,
+  manualReplyConfigured,
   messageTemplateSubmissionConfigured = () => true,
   tenantSession = session(),
   tenantError = null,
@@ -417,6 +420,7 @@ function fixture({
     mutationCommands: [],
   };
   const registry = createRailwayApiOperationRegistry({
+    manualReplies, manualReplyConfigured,
     tenantSessions: {
       async resolve(identity) {
         calls.tenantIdentities.push(identity);
@@ -967,6 +971,28 @@ function operation(registry, id) {
   return found;
 }
 
+test("manual reply operation binds verified tenant, quota and deterministic receipt and fails closed", async () => {
+  const payload = { conversationKey, expectedVersion: 3, text: "Help" };
+  const deliveryKey = `manual_reply_delivery_v1_${createHash("sha256").update(JSON.stringify(payload)).digest("hex")}`;
+  const id = "conversations.reply.send";
+  const request = { operation: id, requestKind: "mutation", idempotencyKey: await deriveRailwayApiDeterministicIdempotencyKey(id, payload) };
+  const commands = [];
+  const manualReplies = { list: async () => [], async enqueue(command) { commands.push(command); return {
+    replayed: false, submission: { deliveryKey, conversationKey, version: 4 } }; } };
+  const enabled = fixture({ manualReplies, manualReplyConfigured: () => true });
+  assert.deepEqual(await operation(enabled.registry, id).execute(dispatchContext, payload, request), {
+    replayed: false, submission: { deliveryKey, conversationKey, version: 4 } });
+  assert.deepEqual(commands[0].session, session());
+  assert.deepEqual(enabled.calls.rateLimitSubjects, ["7:verified-user:conversations.reply.send"]);
+  for (const overrides of [{ manualReplyConfigured: () => false }, { tenantSession: session("viewer") }]) {
+    const { registry } = fixture({ manualReplies, manualReplyConfigured: () => true, ...overrides });
+    await assert.rejects(() => operation(registry, id).execute(dispatchContext, payload, request));
+  }
+  await assert.rejects(() => operation(enabled.registry, id).execute(dispatchContext, { ...payload, tenantId: 7 }, request));
+  await assert.rejects(() => operation(enabled.registry, id).execute(dispatchContext, payload, { ...request, idempotencyKey: null }));
+  assert.equal(commands.length, 1);
+});
+
 test("publishes one immutable policy for every concrete operation", () => {
   assert.deepEqual(railwayApiOperationPolicies, [
     {
@@ -1265,6 +1291,8 @@ test("publishes one immutable policy for every concrete operation", () => {
       permission: "reports.read",
       mutationSafety: null,
     },
+    { id: "conversations.reply.send", requestKind: "mutation", permission: "conversations.reply",
+      mutationSafety: { rateLimit: "tenant-mutation", idempotency: "atomic-request-digest-replay", audit: "atomic-immutable-event", transaction: "required" } },
   ]);
   assert.equal(Object.isFrozen(railwayApiOperationPolicies), true);
   assert.equal(
