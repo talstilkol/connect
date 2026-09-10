@@ -8,6 +8,7 @@ import {
 import {
   inspectPostgresMigrationParityContract,
 } from "../scripts/verify-postgres-migration-parity.mjs";
+import { HOSTING_MIGRATION_REGISTRY } from "../shared/domain/hostingMigrationRegistry.ts";
 
 function mutableRegistry() {
   return POSTGRES_MIGRATION_PARITY_REGISTRY.map((entry) => ({
@@ -39,6 +40,16 @@ test("maps every D1 migration and table to the PostgreSQL inventory", async () =
       ({ status }) => status === "covered",
     ),
     true,
+  );
+  const database = HOSTING_MIGRATION_REGISTRY.find(
+    ({ id }) => id === "data.relational-database",
+  );
+  assert.ok(database);
+  assert.ok(
+    database.cutoverBlocker.includes(
+      `${POSTGRES_TARGET_ONLY_MIGRATIONS.length} Railway-only migrations`,
+    ),
+    "Railway-only migration count must match the source-parity registry",
   );
 });
 

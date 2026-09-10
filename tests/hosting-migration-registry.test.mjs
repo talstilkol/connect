@@ -1080,8 +1080,6 @@ test("records Railway PostgreSQL for Pilot without claiming live readiness", () 
   }
 
   assert.match(database.cutoverBlocker, /Railway PostgreSQL is selected/);
-  assert.match(database.cutoverBlocker, /seventy-one ordered PostgreSQL migrations/);
-  assert.match(database.cutoverBlocker, /forty-two Railway-only migrations/);
   assert.match(database.cutoverBlocker, /immutable contact-consent evidence/);
   assert.match(
     database.cutoverBlocker,
@@ -1093,9 +1091,13 @@ test("records Railway PostgreSQL for Pilot without claiming live readiness", () 
   assert.match(database.cutoverBlocker, /webhook claim\/replay\/conflict behavior/);
   assert.match(database.cutoverBlocker, /node-postgres adapter/);
   assert.match(database.cutoverBlocker, /eighty-seven real concurrency scenarios/);
-  assert.match(
-    database.cutoverBlocker,
-    /inventory contains all 72 ordered PostgreSQL migrations through migration 0070/i,
+  const latestMigrationNumber = actualPostgresMigrations
+    .at(-1).split("/").at(-1).split("_")[0];
+  assert.ok(
+    database.cutoverBlocker.includes(
+      `inventory contains all ${migrationInventory.postgresMigrationCount} ordered PostgreSQL migrations through migration ${latestMigrationNumber}`,
+    ),
+    "current migration count and last migration must match the SQL files",
   );
   assert.match(database.cutoverBlocker, /44 migrations through 0043 form the earlier critical-path foundation/);
   assert.match(database.cutoverBlocker, /migrations 0044-0057 are dormant hardening contracts/);
