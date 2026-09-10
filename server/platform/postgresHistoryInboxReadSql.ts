@@ -13,7 +13,10 @@ export const postgresInboxMessageSourceSql = `(
     NULL::text AS status,
     CASE WHEN echo.content_state IN ('deleted', 'conflicted') THEN NULL
       WHEN echo.content_state = 'edited' THEN echo.edit_text
-      WHEN captured.message->>'contentKind' = 'text' THEN captured.message->'content'->>'body' ELSE NULL END AS text_content,
+      WHEN captured.message->>'contentKind' = 'text' THEN captured.message->'content'->>'body'
+      WHEN captured.message->>'contentKind' IN ('image', 'video', 'document')
+        AND jsonb_typeof(captured.message->'content'->'caption') = 'string'
+        THEN captured.message->'content'->>'caption' ELSE NULL END AS text_content,
     history.occurred_at, NULL::timestamptz AS status_updated_at, NULL::text AS last_status_event_key,
     NULL::timestamptz AS last_status_event_at, history.created_at, history.created_at AS updated_at,
     COALESCE(echo.content_state, 'original') AS content_state,

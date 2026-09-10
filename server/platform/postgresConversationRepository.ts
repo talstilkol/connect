@@ -20,6 +20,7 @@ import {
 import {
   messageContentKinds,
   isMessageContentStateConsistent,
+  isCaptionMessageKind,
   messageDirections,
   messageStatuses,
   persistedConversationStatuses,
@@ -581,6 +582,14 @@ function parseInboundContact(value: unknown): InboundContactIdentity {
   });
 }
 
+// Inbox reads may contain original captions from captured history. Live message
+// writes and service-window reads keep their existing validation contract.
+function isInboxReadTextValid(kind: unknown, text: unknown): boolean {
+  if (kind === "text") return typeof text === "string" && text.trim().length > 0 && text.length <= 16_384;
+  if (isCaptionMessageKind(kind) && typeof text === "string") return text.length <= 16_384 && !text.includes("\u0000");
+  return text === null;
+}
+
 function parseInboxReadMessage(value: unknown): PersistedInboxMessage {
   if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("Invalid inbox message row");
   const input = value as Record<string, unknown>;
@@ -594,7 +603,7 @@ function parseInboxReadMessage(value: unknown): PersistedInboxMessage {
   if (row.historySource !== "history" || !isHistoryDeliveryState(row.historyDeliveryState) || !direction || !contentKind ||
     row.status !== null || row.statusUpdatedAt !== null || row.lastStatusEventKey !== null || row.lastStatusEventAt !== null ||
     !isMessageContentStateConsistent(row.contentState, direction, contentKind, row.textContent) ||
-    (row.contentState === "edited" ? false : contentKind === "text" ? typeof row.textContent !== "string" || row.textContent.trim().length === 0 || row.textContent.length > 16_384 : row.textContent !== null)) {
+    (row.contentState !== "edited" && !isInboxReadTextValid(contentKind, row.textContent))) {
     throw new Error("PostgreSQL returned an invalid historical inbox message");
   }
   const createdAt = parsePostgresTimestamp(row.createdAt), updatedAt = parsePostgresTimestamp(row.updatedAt);
@@ -809,12 +818,8 @@ function parseInboxConversation(value: unknown): PersistedInboxConversation {
     : row.lastMessageContentState !== null) {
     throw new Error("PostgreSQL returned an invalid preview content state");
   }
-  const lastMessageTextIsValid = row.lastMessageContentState === "edited" || (
-    lastMessageContentKind === "text"
-      ? typeof lastMessageTextContent === "string" &&
-        lastMessageTextContent.trim().length > 0 &&
-        lastMessageTextContent.length <= 16_384
-      : lastMessageTextContent === null);
+  const lastMessageTextIsValid = row.lastMessageContentState === "edited" ||
+    isInboxReadTextValid(lastMessageContentKind, lastMessageTextContent);
   const createdAt = parsePostgresTimestamp(row.createdAt);
   const updatedAt = parsePostgresTimestamp(row.updatedAt);
 
