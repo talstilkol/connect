@@ -22,7 +22,7 @@ import { quarantineConfig } from "../fixtures/meta-media-quarantine.mjs";
 import { createPostgresMetaMediaUploadJournal, postgresMetaMediaUploadSql } from "../../server/platform/postgresMetaMediaUploadJournal.ts";
 import { quarantineEnvironment, s3Reply } from "../fixtures/meta-media-quarantine.mjs";
 import assert from "node:assert/strict";
-import { before, after, test } from "node:test";
+import { before, after, afterEach, test } from "node:test";
 import { readdir, readFile } from "node:fs/promises";
 import { createHmac, createHash } from "node:crypto";
 import pg from "pg";
@@ -54,7 +54,18 @@ const connectionString = process.env.CONNECT_META_HISTORY_INBOX_TEST_URL;
 if (connectionString !== "postgresql://connect_echo_test@127.0.0.1:55439/connect_meta_inbox_integration") {
   throw new Error("A dedicated local history database is required; DATABASE_URL is never used");
 }
-const pool = new pg.Pool({ connectionString, max: 6, connectionTimeoutMillis: 2000, statement_timeout: 5000, lock_timeout: 3000 });
+const poolOptions = { connectionString, max: 6, connectionTimeoutMillis: 2000, statement_timeout: 5000, lock_timeout: 3000 };
+let activePool = new pg.Pool(poolOptions);
+const pool = {
+  query: (...args) => activePool.query(...args),
+  connect: () => activePool.connect(),
+  end: () => activePool.end(),
+};
+const fixtureAdmin = new pg.Client({
+  connectionString: "postgresql://connect_echo_test@127.0.0.1:55439/postgres",
+  connectionTimeoutMillis: 2000, statement_timeout: 15000,
+});
+let fixtureTemplateCreated = false;
 const transactions = createNodePostgresTransactionManager(pool);
 const meta = createPostgresMetaRepository({ transactions, queries: createNodePostgresQueryExecutor(pool) });
 const requests = createPostgresMetaDataSyncRepository(transactions);
@@ -73,11 +84,34 @@ const windows = createPostgresBotReplyStagingServiceWindowSource(queries);
 const secret = "history-postgres-test-secret";
 let tenantIdCounter = 100;
 before(async () => {
+  const identity = (await pool.query("SELECT current_database() AS database, current_user AS role")).rows[0];
+  assert.deepEqual(identity, { database: "connect_meta_inbox_integration", role: "connect_echo_test" });
   assert.equal((await pool.query("SELECT * FROM pg_tables WHERE schemaname = 'public'")).rowCount, 0, "Refusing to change a non-empty database");
+  await fixtureAdmin.connect();
+  assert.equal((await fixtureAdmin.query("SELECT datname FROM pg_database WHERE datname='connect_meta_inbox_fixture_template'")).rowCount, 0, "Refusing to replace an existing fixture template");
   const directory = new URL("../../postgres/migrations/", import.meta.url);
   for (const filename of (await readdir(directory)).filter((name) => name.endsWith(".sql")).sort()) await pool.query(await readFile(new URL(filename, directory), "utf8"));
+  await pool.end();
+  await fixtureAdmin.query("CREATE DATABASE connect_meta_inbox_fixture_template TEMPLATE connect_meta_inbox_integration");
+  fixtureTemplateCreated = true;
+  activePool = new pg.Pool(poolOptions);
 });
-after(async () => { await pool.end(); });
+afterEach(async () => {
+  // Due-only draining leaves future retries able to enter a later test. Replace
+  // this initially empty, dedicated fixture database with its migrated template.
+  // All production guards and migration seed rows remain intact; no TRUNCATE or
+  // trigger disabling, and no forced disconnection of an unexpected client.
+  if (!fixtureTemplateCreated) return;
+  await pool.end();
+  await fixtureAdmin.query("DROP DATABASE connect_meta_inbox_integration");
+  await fixtureAdmin.query("CREATE DATABASE connect_meta_inbox_integration TEMPLATE connect_meta_inbox_fixture_template");
+  activePool = new pg.Pool(poolOptions);
+});
+after(async () => {
+  await pool.end();
+  try { if (fixtureTemplateCreated) await fixtureAdmin.query("DROP DATABASE connect_meta_inbox_fixture_template"); }
+  finally { await fixtureAdmin.end(); }
+});
 async function newCase({ dispatch = true, withCredential = false } = {}) {
   const tenantId = ++tenantIdCounter;
   const session = { tenantId, externalUserId: `history-test-${tenantId}`, role: "owner", status: "active", displayName: "History integration" };
@@ -1328,7 +1362,8 @@ test('diagnostic media reports conflicting scan versions without exposing storag
   const result=await mediaTaskReader.read(f.session);assert.deepEqual(result.tasks[0].scanResults,['PENDING']);assert.equal(result.tasks[0].multipleScanVersions,true);assert.doesNotMatch(JSON.stringify(result),/scan-version/);
 });
 test('diagnostic media unknown cancellation cause is represented only by its recorded status',async()=>{
-  const f=await diagnosticCase(),task=await mediaTasks.claimNext('upload');await mediaTasks.finish(task,'cancelled');
+  const f=await diagnosticCase(),task=await mediaTasks.claimNext('upload');
+  assert.equal(task.tenantId,f.scope.tenantId);assert.equal(await mediaTasks.finish(task,'cancelled'),true);
   const result=await mediaTaskReader.read(f.session);assert.equal(result.tasks[0].status,'cancelled');assert.equal(result.tasks[0].nextAttemptAt,null);assert.equal(result.tasks[0].leaseExpiresAt,null);
   assert.doesNotMatch(JSON.stringify(result),/owner-revoked|malware|unauthorized/);
 });
