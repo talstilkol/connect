@@ -1,3 +1,4 @@
+import { isCaptionMessageKind } from "../../shared/domain/conversation.ts";
 import type {
   InterfaceLanguage,
 } from "../../shared/domain/businessProfileDraft.ts";
@@ -58,8 +59,9 @@ export function messageBody(
     return message.textContent ?? "";
   }
 
-  return readConversationMessages(language).labels
-    .nonTextContent[message.contentKind];
+  const label = readConversationMessages(language).labels.nonTextContent[message.contentKind];
+  return message.contentState === "edited" && isCaptionMessageKind(message.contentKind) && message.textContent
+    ? `${label}: ${message.textContent}` : label;
 }
 
 export function formatInboxTimestamp(

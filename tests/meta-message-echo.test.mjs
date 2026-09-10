@@ -54,7 +54,7 @@ test("validates scope, sender, recipient, content and time before accepting an e
   }
 });
 
-test("parses text edits and revocations with the original target, while media edits remain blocked", () => {
+test("parses text edits and revocations with the original target, while unsupported edit types remain blocked", () => {
   const edit = parsed(value([message({ type: "edit", edit: { original_message_id: "wamid.original", message: { type: "text", text: { body: "תיקון" } } } })]))[0];
   assert.deepEqual(edit.mutation, { kind: "edit", originalProviderMessageId: "wamid.original" });
   assert.equal(edit.providerMessageId, "wamid.echo-1");
@@ -65,8 +65,30 @@ test("parses text edits and revocations with the original target, while media ed
   assert.equal(revoke.contentKind, "unsupported");
   assert.equal(revoke.mutation.kind, "revoke");
   assert.deepEqual(normalizeMetaMessageEcho(scope, revoke).message, revoke);
-  assert.throws(() => parsed(value([message({ type: "edit", edit: { original_message_id: "wamid.original", message: { type: "image", image: { caption: "תיקון" } } } })])),
+  assert.throws(() => parsed(value([message({ type: "edit", edit: { original_message_id: "wamid.original", message: { type: "audio", audio: { caption: "תיקון" } } } })])),
     (error) => error.safeCode === "UNSUPPORTED_MESSAGE_ECHO_EDIT_CONTENT");
+});
+
+test("caption edits retain their media kind and support clearing a caption", () => {
+  for (const type of ["image", "video", "document"]) {
+    for (const caption of ["תיקון", "", undefined]) {
+      const change = { type, [type]: caption === undefined ? {} : { caption } };
+      const result = parsed(value([message({ type: "edit", edit: { original_message_id: "wamid.original", message: change } })]))[0];
+      assert.equal(result.contentKind, type);
+      assert.equal(result.textContent, caption || null);
+      assert.deepEqual(normalizeMetaMessageEcho(scope, result).message, result);
+    }
+  }
+});
+
+test("caption parsing rejects malformed input and never turns a media URL into a file reference", () => {
+  const change = (image) => value([message({ type: "edit", edit: { original_message_id: "wamid.original", message: { type: "image", image } } })]);
+  for (const caption of [null, 1, {}, "A".repeat(16_385), "\u0000"]) assert.throws(() => parsed(change({ caption })));
+  const result = parsed(change({ caption: "תיקון", url: "https://connect-api.invalid", id: "300003" }))[0];
+  assert.equal(result.textContent, "תיקון");
+  assert.equal(Object.hasOwn(result, "url"), false); assert.equal(Object.hasOwn(result, "media"), false);
+  assert.equal(parsed(value([message({ type: "image", image: { caption: "תיקון" } })]))[0].textContent, null,
+    "Original media keeps its existing receipt digest across the upgrade");
 });
 
 test("rejects malformed echo collections and an inbound/status mixture hidden inside the echo field", () => {

@@ -5,6 +5,7 @@ import pg from "pg";
 export const metaCoexistenceTestUrl = "postgresql://connect_echo_test@127.0.0.1:55439/postgres";
 const root = fileURLToPath(new URL("../", import.meta.url));
 export const metaCoexistenceTestSuites = Object.freeze([
+  { file: "tests/integration/meta-message-echo-postgres.test.mjs", database: "connect_meta_echo_integration", variable: "CONNECT_META_ECHO_TEST_URL" },
   { file: "tests/integration/meta-data-sync-postgres.test.mjs", database: "connect_meta_sync_integration", variable: "CONNECT_META_DATA_SYNC_TEST_URL" },
   { file: "tests/integration/meta-history-postgres.test.mjs", database: "connect_meta_history_integration", variable: "CONNECT_META_HISTORY_TEST_URL" },
   { file: "tests/integration/meta-history-inbox-postgres.test.mjs", database: "connect_meta_inbox_integration", variable: "CONNECT_META_HISTORY_INBOX_TEST_URL", timeoutMs: 600_000 },

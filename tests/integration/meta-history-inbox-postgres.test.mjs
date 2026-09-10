@@ -277,6 +277,28 @@ test('same-time incompatible edits redact historical text and cannot choose an a
   const t = await thread(f); assert.equal(t.rows[0].contentState, 'conflicted'); assert.equal(t.rows[0].textContent, null);
 });
 
+test('media caption revisions are visible in historical threads without granting attachment access', async () => {
+  for (const beforeProjection of [true, false]) {
+    const f = await newCase();
+    const caption = { ...edit(f), contentKind: 'image' };
+    if (beforeProjection) await echoes.record(f.scope, caption);
+    await signed(f, withMessages([message({ type: 'image', text: undefined, image: { caption: 'history fixture' } })]));
+    await drain();
+    if (!beforeProjection) await echoes.record(f.scope, caption);
+    const result = await thread(f);
+    assert.equal(result.rows[0].contentKind, 'image'); assert.equal(result.rows[0].contentState, 'edited');
+    assert.equal(result.rows[0].textContent, caption.textContent);
+    assert.equal(result.conversation.lastMessage.textContent, caption.textContent);
+    assert.equal(result.conversation.unreadCount, 0);
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, result.rows[0].messageKey), null);
+    await echoes.record(f.scope, { ...caption, providerMessageId: 'wamid.history-edit-clear', textContent: null, occurredAt: '2026-09-09T09:01:00.000Z' });
+    assert.equal((await thread(f)).rows[0].textContent, null);
+    await echoes.record(f.scope, revoke(f));
+    const removed = (await thread(f)).rows[0];
+    assert.equal(removed.contentState, 'deleted'); assert.equal(removed.contentKind, 'unsupported'); assert.equal(removed.textContent, null);
+  }
+});
+
 test('refusal after projection immediately removes thread body and preview without a second stored text copy', async () => {
   const f = await newCase(); await capture(f); await drain(); await signed(f, declinedValue());
   const t = await thread(f); assert.equal(t.rows.length, 0); assert.equal(t.view.conversation.lastMessage, null);

@@ -6,8 +6,8 @@ import { toInboxMessageView } from "../server/conversations/conversationView.ts"
 import { messageBody } from "../features/conversations/conversationPresentation.ts";
 import { readConversationMessages } from "../features/conversations/conversationMessages.ts";
 
-const empty = { originalDigest: null, contentState: "original", editAt: null, editText: null };
-const edit = (textContent, occurredAt = "2026-09-09T08:00:00.000Z") => ({ textContent, occurredAt, mutation: { kind: "edit" } });
+const empty = { originalDigest: null, contentState: "original", editAt: null, editText: null, editKind: null };
+const edit = (textContent, occurredAt = "2026-09-09T08:00:00.000Z") => ({ contentKind: "text", textContent, occurredAt, mutation: { kind: "edit" } });
 const revoke = { mutation: { kind: "revoke" } };
 
 test("a revocation wins over every edit ordering, including later edits", () => {
@@ -33,8 +33,39 @@ test("stale edits and equivalent edits cannot roll back the chosen content", () 
   assert.deepEqual(reduceMetaEchoMutation(latest, edit("current", latest.editAt)), latest);
 });
 
+test("media revisions preserve type, clear captions and cannot change an attachment type", () => {
+  const caption = { ...edit("A"), contentKind: "image" };
+  const first = reduceMetaEchoMutation(empty, caption);
+  assert.equal(first.editKind, "image");
+  const cleared = reduceMetaEchoMutation(first, { ...caption, textContent: null, occurredAt: "2026-09-09T08:00:01.000Z" });
+  assert.equal(cleared.contentState, "edited"); assert.equal(cleared.editText, null);
+  assert.deepEqual(reduceMetaEchoMutation(cleared, caption), cleared);
+  const conflict = reduceMetaEchoMutation(first, { ...caption, textContent: "B" });
+  assert.equal(conflict.contentState, "conflicted"); assert.equal(conflict.editKind, "image");
+  assert.equal(reduceMetaEchoMutation(conflict, { ...caption, textContent: null, occurredAt: cleared.editAt }).contentState, "edited");
+  assert.throws(() => reduceMetaEchoMutation(first, { ...caption, contentKind: "text" }));
+  assert.throws(() => reduceMetaEchoMutation(conflict, { ...caption, contentKind: "video", occurredAt: cleared.editAt }));
+  assert.deepEqual(reduceMetaEchoMutation(cleared, revoke), { ...empty, contentState: "deleted" });
+});
+
 const base = { messageKey: `message_v1_${"a".repeat(64)}`, direction: "outbound", contentKind: "text", textContent: "updated",
   status: "read", occurredAt: "2026-09-09T08:00:00.000Z", statusUpdatedAt: "2026-09-09T08:00:00.000Z" };
+
+test("edited captions cross the DTO boundary as media and render in every language", () => {
+  for (const kind of ["image", "video", "document"]) for (const textContent of [base.textContent, null]) {
+    const value = { ...base, contentKind: kind, contentState: "edited", textContent };
+    assert.deepEqual(parseRailwayInboxMessageView(value), value);
+    assert.deepEqual(toInboxMessageView(value), value);
+    for (const language of ["he", "en", "ar"]) {
+      const label = readConversationMessages(language).labels.nonTextContent[kind];
+      assert.equal(messageBody(value, language), textContent ? `${label}: ${textContent}` : label);
+    }
+  }
+  for (const change of [{ contentKind: "audio" }, { direction: "inbound" }, { textContent: "" },
+    { textContent: "\u0000" }, { textContent: "A".repeat(16_385) }, { contentState: "deleted" }]) {
+    assert.equal(parseRailwayInboxMessageView({ ...base, contentKind: "image", contentState: "edited", ...change }), null);
+  }
+});
 
 test("message DTO preserves valid content state and rejects deleted/conflicted text leaks", () => {
   for (const state of ["edited", "deleted", "conflicted"]) {

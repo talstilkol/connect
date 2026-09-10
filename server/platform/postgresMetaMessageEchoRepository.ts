@@ -1,5 +1,5 @@
 import { normalizeMetaMessageEcho, type MetaMessageEchoRepository, type MetaMessageEchoScope, type MetaMessageEcho } from "../conversations/metaMessageEcho.ts";
-import { messageContentStates, type MessageContentState, type MessageContentKind } from "../../shared/domain/conversation.ts";
+import { isEditedMessageTextValid, messageContentStates, type MessageContentState, type MessageContentKind } from "../../shared/domain/conversation.ts";
 import { deriveConversationKey } from "../conversations/conversationKey.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
 import { MetaWebhookProcessorError } from "../meta/metaWebhookIngress.ts";
@@ -24,9 +24,9 @@ export const postgresMetaMessageEchoSql = Object.freeze({
   insertState: `INSERT INTO meta_message_echo_states (tenant_id, provider_message_id, waba_id, phone_number_id, recipient_phone)
     VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING RETURNING provider_message_id AS "providerMessageId"`,
   lockState: `SELECT waba_id AS "wabaId", phone_number_id AS "phoneNumberId", recipient_phone AS "recipientPhoneNumber",
-      original_digest AS "originalDigest", content_state AS "contentState", edit_at AS "editAt", edit_text AS "editText"
+      original_digest AS "originalDigest", content_state AS "contentState", edit_at AS "editAt", edit_text AS "editText", edit_kind AS "editKind"
     FROM meta_message_echo_states WHERE tenant_id = $1 AND provider_message_id = $2 FOR UPDATE`,
-  updateState: `UPDATE meta_message_echo_states SET original_digest = $3, content_state = $4, edit_at = $5::timestamptz, edit_text = $6
+  updateState: `UPDATE meta_message_echo_states SET original_digest = $3, content_state = $4, edit_at = $5::timestamptz, edit_text = $6, edit_kind = $7
     WHERE tenant_id = $1 AND provider_message_id = $2 RETURNING provider_message_id AS "providerMessageId"`,
   claimEvent: `INSERT INTO meta_message_echo_events (tenant_id, event_key, request_digest, provider_message_id)
     VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING event_key AS "eventKey"`,
@@ -69,6 +69,7 @@ interface EchoState {
   contentState: MessageContentState;
   editAt: string | null;
   editText: string | null;
+  editKind: MessageContentKind | null;
 }
 
 function digest(value: unknown) {
@@ -80,33 +81,36 @@ function conflict(): never {
 }
 
 function parseState(value: unknown, scope: MetaMessageEchoScope, recipient: string): EchoState {
-  const row = requireExactPostgresRow(value, ["wabaId", "phoneNumberId", "recipientPhoneNumber", "originalDigest", "contentState", "editAt", "editText"]);
+  const row = requireExactPostgresRow(value, ["wabaId", "phoneNumberId", "recipientPhoneNumber", "originalDigest", "contentState", "editAt", "editText", "editKind"]);
   if (row.wabaId !== scope.wabaId || row.phoneNumberId !== scope.phoneNumberId || row.recipientPhoneNumber !== recipient) return conflict();
   if (!messageContentStates.includes(row.contentState as MessageContentState) ||
     (row.originalDigest !== null && (typeof row.originalDigest !== "string" || !/^[0-9a-f]{64}$/.test(row.originalDigest))) ||
     (row.editText !== null && (typeof row.editText !== "string" || row.editText.trim().length === 0 || row.editText.length > 16_384))) return conflict();
   const state = { originalDigest: row.originalDigest as string | null, contentState: row.contentState as MessageContentState,
-    editAt: row.editAt === null ? null : parsePostgresTimestamp(row.editAt), editText: row.editText as string | null };
-  if ((state.contentState === "edited" && (state.editAt === null || state.editText === null)) ||
-    (state.contentState === "conflicted" && (state.editAt === null || state.editText !== null)) ||
-    (["original", "deleted"].includes(state.contentState) && (state.editAt !== null || state.editText !== null))) return conflict();
+    editAt: row.editAt === null ? null : parsePostgresTimestamp(row.editAt), editText: row.editText as string | null,
+    editKind: row.editKind as MessageContentKind | null };
+  if ((state.contentState === "edited" && (state.editAt === null || !isEditedMessageTextValid(state.editKind, state.editText))) ||
+    (state.contentState === "conflicted" && (state.editAt === null || state.editText !== null || !["text", "image", "video", "document"].includes(String(state.editKind)))) ||
+    (["original", "deleted"].includes(state.contentState) && (state.editAt !== null || state.editText !== null || state.editKind !== null))) return conflict();
   return state;
 }
 
 export function reduceMetaEchoMutation(state: Readonly<EchoState>, message: MetaMessageEcho): EchoState {
   if (state.contentState === "deleted" || message.mutation === undefined) return { ...state };
-  if (message.mutation.kind === "revoke") return { ...state, contentState: "deleted", editAt: null, editText: null };
+  if (message.mutation.kind === "revoke") return { ...state, contentState: "deleted", editAt: null, editText: null, editKind: null };
+  // An edit changes content within a message type, never its attachment type.
+  if (state.editKind !== null && state.editKind !== message.contentKind) return conflict();
   if (state.editAt !== null && state.editAt > message.occurredAt) return { ...state };
   if (state.editAt === message.occurredAt) {
     if (state.contentState === "conflicted" || state.editText === message.textContent) return { ...state };
     return { ...state, contentState: "conflicted", editText: null };
   }
-  return { ...state, contentState: "edited", editAt: message.occurredAt, editText: message.textContent };
+  return { ...state, contentState: "edited", editAt: message.occurredAt, editText: message.textContent, editKind: message.contentKind };
 }
 
 function projection(state: EchoState, original: { contentKind: MessageContentKind; textContent: string | null }) {
   if (state.contentState === "original") return { ...original, contentState: "original" as const };
-  if (state.contentState === "edited") return { contentKind: "text" as const, textContent: state.editText, contentState: state.contentState };
+  if (state.contentState === "edited") return { contentKind: state.editKind!, textContent: state.editText, contentState: state.contentState };
   return { contentKind: "unsupported" as const, textContent: null, contentState: state.contentState };
 }
 
@@ -153,13 +157,14 @@ export function createPostgresMetaMessageEchoRepository(transactions: PostgresTr
         if (message.mutation === undefined) {
           if (state.originalDigest !== null && state.originalDigest !== requestDigest) return conflict();
           state.originalDigest = requestDigest;
-          if ((state.contentState === "edited" || state.contentState === "conflicted") && message.contentKind !== "text") return conflict();
+          if ((state.contentState === "edited" || state.contentState === "conflicted") && message.contentKind !== state.editKind) return conflict();
         } else {
-          if (message.mutation.kind === "edit" && stored !== null && state.contentState !== "deleted" && stored.contentKind !== "text" && stored.contentState !== "conflicted") return conflict();
+          if (message.mutation.kind === "edit" && stored !== null && state.contentState !== "deleted" &&
+            stored.contentKind !== message.contentKind && stored.contentState !== "conflicted") return conflict();
           state = reduceMetaEchoMutation(state, message);
         }
         requireKey(await one(tx, postgresMetaMessageEchoSql.updateState, [scope.tenantId, targetId,
-          state.originalDigest, state.contentState, state.editAt, state.editText]), "providerMessageId", targetId);
+          state.originalDigest, state.contentState, state.editAt, state.editText, state.editKind]), "providerMessageId", targetId);
         if (stored === null && message.mutation !== undefined) return { outcome: "deferred" as const };
         if (stored !== null) {
           const projected = projection(state, { contentKind: stored.contentKind as MessageContentKind, textContent: stored.textContent as string | null });

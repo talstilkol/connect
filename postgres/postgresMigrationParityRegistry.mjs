@@ -721,4 +721,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE manual_reply_outbox",
     summary: "Railway stores agent text replies atomically with receipts and audits, fences send claims against current authorization and retains uncertain outcomes without automatically resending.",
   }),
+  Object.freeze({
+    migration: "0074_meta_message_echo_captions.sql",
+    token: "ALTER TABLE meta_message_echo_states ADD COLUMN edit_kind TEXT",
+    summary: "Railway retains media-caption edit types with ordered revision state, caption removal and immutable event identity while preserving text edits and deletion tombstones.",
+  }),
 ]);

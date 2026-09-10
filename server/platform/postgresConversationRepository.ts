@@ -594,7 +594,7 @@ function parseInboxReadMessage(value: unknown): PersistedInboxMessage {
   if (row.historySource !== "history" || !isHistoryDeliveryState(row.historyDeliveryState) || !direction || !contentKind ||
     row.status !== null || row.statusUpdatedAt !== null || row.lastStatusEventKey !== null || row.lastStatusEventAt !== null ||
     !isMessageContentStateConsistent(row.contentState, direction, contentKind, row.textContent) ||
-    (contentKind === "text" ? typeof row.textContent !== "string" || row.textContent.trim().length === 0 || row.textContent.length > 16_384 : row.textContent !== null)) {
+    (row.contentState === "edited" ? false : contentKind === "text" ? typeof row.textContent !== "string" || row.textContent.trim().length === 0 || row.textContent.length > 16_384 : row.textContent !== null)) {
     throw new Error("PostgreSQL returned an invalid historical inbox message");
   }
   const createdAt = parsePostgresTimestamp(row.createdAt), updatedAt = parsePostgresTimestamp(row.updatedAt);
@@ -618,12 +618,12 @@ function parseMessage(value: unknown): PersistedMessage {
   );
   const status = messageStatuses.find((candidate) => candidate === row.status);
   const textContent = row.textContent;
-  const textIsValid =
+  const textIsValid = row.contentState === "edited" || (
     contentKind === "text"
       ? typeof textContent === "string" &&
         textContent.trim().length > 0 &&
         textContent.length <= 16_384
-      : textContent === null;
+      : textContent === null);
   const occurredAt = parsePostgresTimestamp(row.occurredAt);
   const statusUpdatedAt = parsePostgresTimestamp(row.statusUpdatedAt);
   const lastStatusEventKey = row.lastStatusEventKey === null
@@ -809,12 +809,12 @@ function parseInboxConversation(value: unknown): PersistedInboxConversation {
     : row.lastMessageContentState !== null) {
     throw new Error("PostgreSQL returned an invalid preview content state");
   }
-  const lastMessageTextIsValid =
+  const lastMessageTextIsValid = row.lastMessageContentState === "edited" || (
     lastMessageContentKind === "text"
       ? typeof lastMessageTextContent === "string" &&
         lastMessageTextContent.trim().length > 0 &&
         lastMessageTextContent.length <= 16_384
-      : lastMessageTextContent === null;
+      : lastMessageTextContent === null);
   const createdAt = parsePostgresTimestamp(row.createdAt);
   const updatedAt = parsePostgresTimestamp(row.updatedAt);
 
