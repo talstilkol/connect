@@ -143,3 +143,30 @@ Redis, Telemetry ו־Meta. API כולל מכסות, מדיניות הזמנות 
 מסלול מדיה שהופעל עם תצורה שגויה חוסם את הבדיקה. מתגים אינם משתנים כתוצאה מהרצה.
 
 5.6 [ראיות הבדיקה הנוכחית](../outputs/launch-validation-2026-09-09/pilot-configuration-validation.json).
+
+# 6. אימות קובצי המיגרציות בחבילת השחרור
+
+6.1 לפני פריסה, מתוך מועמד Commit נקי, מריצים לפי הסדר:
+
+```sh
+npm run release:manifest
+npm run release:changelog
+npm run release:verify-artifacts
+```
+
+6.2 יצירת Manifest נוכחי מחייבת גם את תיקיית postgres/migrations. השדה
+postgres מכיל את הנתיב, רשימת הקבצים המסודרת, SHA-256 של כל קובץ ו־Digest
+של הרשימה כולה. במועמד הנוכחי יש 73 מיגרציות PostgreSQL ו־43 מיגרציות D1.
+רשימת PostgreSQL ריקה, רצף שמות שגוי או קובץ SQL שאינו קובץ רגיל נדחים.
+
+6.3 לצורך תאימות עם קוראי הראיות הקיימים, migrations ו־migrationSetSha256
+הראשיים ממשיכים לתאר D1, וחוזה releaseId בגרסה 1 נשמר. Git commit/tree
+קושרים גם את PostgreSQL למקור; ה־Digest הנוסף אינו קלט חדש לנוסחת releaseId.
+לכן אין לאמת חבילת PostgreSQL באמצעות השוואת releaseId או Digest של D1 בלבד:
+release:verify-artifacts משווה את כל ה־Manifest למקור הנוכחי ודוחה גם רשימת
+PostgreSQL חסרה, מקוצרת או שונה כשה־releaseId הישן נשאר זהה.
+
+6.4 בדיקת התוצרים דוחה JSON שאינו אובייקט, לרבות null, false, מספר, מחרוזת
+או מערך. הצלחת הבדיקה מעידה על התאמת קובצי החבילה בלבד; היא אינה מחילה SQL
+ואינה מוכיחה שמיגרציות הוחלו במסד, שהרשאותיו תקינות או שהפיילוט פועל.
+[ראיות התיקון](../outputs/launch-validation-2026-09-09/release-postgres-validation.json).
