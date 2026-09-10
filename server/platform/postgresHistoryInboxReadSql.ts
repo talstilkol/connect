@@ -9,14 +9,14 @@ export const postgresInboxMessageSourceSql = `(
   SELECT history.message_key, history.conversation_key, history.tenant_id, history.provider_message_id,
     captured.message->>'direction' AS direction,
     CASE WHEN echo.content_state IN ('deleted', 'conflicted') THEN 'unsupported'
-      WHEN echo.content_state = 'edited' THEN echo.edit_kind ELSE captured.message->>'contentKind' END AS content_kind,
+      WHEN echo.content_state = 'edited' THEN echo.edit_kind ELSE resolved.content_kind END AS content_kind,
     NULL::text AS status,
     CASE WHEN echo.content_state IN ('deleted', 'conflicted') THEN NULL
       WHEN echo.content_state = 'edited' THEN echo.edit_text
-      WHEN captured.message->>'contentKind' = 'text' THEN captured.message->'content'->>'body'
-      WHEN captured.message->>'contentKind' IN ('image', 'video', 'document')
-        AND jsonb_typeof(captured.message->'content'->'caption') = 'string'
-        THEN captured.message->'content'->>'caption' ELSE NULL END AS text_content,
+      WHEN resolved.content_kind = 'text' THEN resolved.content->>'body'
+      WHEN resolved.content_kind IN ('image', 'video', 'document')
+        AND jsonb_typeof(resolved.content->'caption') = 'string'
+        THEN resolved.content->>'caption' ELSE NULL END AS text_content,
     history.occurred_at, NULL::timestamptz AS status_updated_at, NULL::text AS last_status_event_key,
     NULL::timestamptz AS last_status_event_at, history.created_at, history.created_at AS updated_at,
     COALESCE(echo.content_state, 'original') AS content_state,
@@ -37,13 +37,27 @@ export const postgresInboxMessageSourceSql = `(
   JOIN conversations AS conversation ON conversation.tenant_id = history.tenant_id AND conversation.conversation_key = history.conversation_key
   JOIN contacts AS contact ON contact.tenant_id = conversation.tenant_id AND contact.id = conversation.contact_id
     AND contact.phone_e164 = captured.message->>'threadPhoneNumber'
+  LEFT JOIN meta_history_media_bindings AS binding ON binding.tenant_id = history.tenant_id
+    AND binding.provider_message_id = history.provider_message_id AND binding.message_digest = history.message_digest
+    AND captured.message->>'contentKind' = 'media_placeholder' AND captured.message->'content' = 'null'::jsonb
+  LEFT JOIN meta_history_sync_media AS bound_media ON bound_media.tenant_id = binding.tenant_id
+    AND bound_media.provider_message_id = binding.provider_message_id AND bound_media.content_digest = binding.media_digest
+    AND NOT bound_media.conflicted AND bound_media.payload IS NOT NULL
+    AND bound_media.payload->>'kind' = 'media' AND bound_media.payload->>'providerMessageId' = history.provider_message_id
+    AND bound_media.payload->>'contentKind' IN ('image', 'audio', 'video', 'document', 'sticker')
+    AND jsonb_typeof(bound_media.payload->'content') = 'object'
+  CROSS JOIN LATERAL (SELECT
+    CASE WHEN bound_media.provider_message_id IS NOT NULL THEN bound_media.payload->>'contentKind'
+      ELSE captured.message->>'contentKind' END AS content_kind,
+    CASE WHEN bound_media.provider_message_id IS NOT NULL THEN bound_media.payload->'content'
+      ELSE captured.message->'content' END AS content) AS resolved
   LEFT JOIN meta_message_echo_states AS echo ON echo.tenant_id = history.tenant_id
     AND echo.provider_message_id = history.provider_message_id AND captured.message->>'direction' = 'outbound'
   WHERE history.tenant_id = $1 AND NOT history.conflicted
     AND captured.message->>'providerMessageId' = history.provider_message_id
     AND (echo.tenant_id IS NULL OR (echo.waba_id = session.waba_id AND echo.phone_number_id = session.phone_number_id
       AND echo.recipient_phone = captured.message->>'threadPhoneNumber'))
-    AND (echo.content_state IS NULL OR echo.content_state NOT IN ('edited', 'conflicted') OR captured.message->>'contentKind' = echo.edit_kind)
+    AND (echo.content_state IS NULL OR echo.content_state NOT IN ('edited', 'conflicted') OR resolved.content_kind = echo.edit_kind)
     AND NOT EXISTS (SELECT 1 FROM messages AS live WHERE live.tenant_id = history.tenant_id AND live.provider_message_id = history.provider_message_id)
 )`;
 
