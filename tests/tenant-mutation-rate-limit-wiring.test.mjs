@@ -13,7 +13,7 @@ async function readServerSource(path) {
 
 test("routes template mutations through authenticated Railway and its tenant rate limit", async () => {
   const action = await readServerSource("templates/messageTemplateActions.ts");
-  for (const kind of ["Draft", "Submission"]) {
+  for (const kind of ["Draft", "Submission", "Sync"]) {
     assert.match(action, new RegExp(`createCurrentRailwayMessageTemplate${kind}Handler`));
     const factory = await readServerSource(`templates/currentRailwayMessageTemplate${kind}Handler.ts`);
     assert.match(factory, /resolveIdentity: resolveCurrentRailwayApiServerIdentity/);

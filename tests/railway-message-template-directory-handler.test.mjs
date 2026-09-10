@@ -100,6 +100,7 @@ test("reads an ordered bounded directory through Railway", async () => {
     templates: [template],
     canWrite: true,
     canSubmit: false,
+    canSync: false,
   });
   assert.deepEqual(testFixture.calls.requests, [{
     contractVersion: "connect.railway-api.v1",
@@ -121,12 +122,14 @@ test("maps configuration and identity failures without API access", async () => 
     templates: [],
     canWrite: false,
       canSubmit: false,
+    canSync: false,
   });
   assert.deepEqual(await unauthenticated.handler.read(), {
     status: "server-error",
     templates: [],
     canWrite: false,
       canSubmit: false,
+    canSync: false,
   });
   assert.equal(disabled.calls.configurations, 0);
   assert.equal(unauthenticated.calls.requests.length, 0);
@@ -174,6 +177,7 @@ test("maps bounded API failures", async () => {
       templates: [],
       canWrite: false,
       canSubmit: false,
+    canSync: false,
     });
   }
 });
@@ -203,6 +207,7 @@ test("rejects malformed, duplicate, and incorrectly ordered responses", async ()
       templates: [],
       canWrite: false,
       canSubmit: false,
+    canSync: false,
     });
   }
 });
@@ -215,6 +220,7 @@ test("sanitizes client failures and rejects fallback dependencies", async () => 
     templates: [],
     canWrite: false,
       canSubmit: false,
+    canSync: false,
   });
   assert.throws(
     () => createRailwayMessageTemplateDirectoryHandler({

@@ -1,5 +1,7 @@
 "use server";
 
+import { createCurrentRailwayMessageTemplateSyncHandler } from "./currentRailwayMessageTemplateSyncHandler.ts";
+
 import type {
   SaveMessageTemplateDraftActionResult,
   SubmitMessageTemplateActionResult,
@@ -31,8 +33,10 @@ export async function submitMessageTemplateAction(
   }
 }
 
-export async function syncMessageTemplatesAction(): Promise<SyncMessageTemplatesActionResult> {
-  // The legacy D1 sync cannot run on the Railway/Vercel path. Activation awaits
-  // an atomic PostgreSQL synchronization operation and connection revalidation.
-  return { status: "meta-configuration-required" };
+export async function syncMessageTemplatesAction(requestedAt: unknown): Promise<SyncMessageTemplatesActionResult> {
+  try {
+    return await createCurrentRailwayMessageTemplateSyncHandler().sync(requestedAt);
+  } catch {
+    return { status: "server-error" };
+  }
 }

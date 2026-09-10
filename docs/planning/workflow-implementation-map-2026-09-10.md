@@ -22,9 +22,9 @@
 2.2 נקודת הכניסה העסקית היא `POST /v1/connect`, עם שם Operation במעטפה —
 לפי [חוזה ה־API](../../server/platform/railwayApiContract.ts).
 [מרשם הפעולות הראשי](../../server/platform/railwayApiOperationRegistry.ts)
-מכיל 32 מדיניות־פעולה. פעולות זהות, צוות, Meta ו־System Admin מצורפות
+מכיל כעת 33 מדיניות־פעולה, לאחר הוספת templates.sync. פעולות זהות, צוות, Meta ו־System Admin מצורפות
 בנפרד ב־[Railway API Runtime](../../server/platform/railwayApiRuntime.ts);
-32 אינו מספר כל הפעולות במערכת.
+33 אינו מספר כל הפעולות במערכת.
 
 2.3 [PostgreSQL API Runtime](../../server/platform/railwayPostgresApiRuntime.ts)
 מחבר Services ל־[PostgreSQL Foundation](../../server/platform/railwayPostgresFoundation.ts).
@@ -46,7 +46,7 @@
 | W09 היסטוריה, Echo וניתוק | [Inbox](../../features/conversations/ConversationInbox.tsx) | [סנכרון](../../server/platform/railwayMetaDataSyncRuntime.ts), [Echo](../../server/platform/postgresMetaMessageEchoRepository.ts), [Lifecycle](../../server/platform/postgresMetaAccountLifecycleRepository.ts) | KEEP + VERIFY + REFACTOR: השלמת ייבוא וחידוש אחרי Offboarding עם שיוך לדור הנכון, כמפורט במשימות 4.6–4.8 |
 | W10 מדיה מהיסטוריה | [הצגת הודעה](../../features/conversations/ConversationMessageView.tsx), [אבחון משימות](../../app/workspace/media-tasks/page.tsx) | [קריאת קובץ](../../server/platform/railwayMetaMediaFileReadRuntime.ts), [ניקוי](../../server/platform/postgresMetaMediaCleanupRepository.ts) | KEEP + VERIFY + REFACTOR: S3/סריקה חיים, גרסאות סותרות וניקוי אוטומטי; ההפעלה נשארת מוגבלת |
 | W11 טיוטת Template | [Template editor](../../features/templates/TemplateDraftEditor.tsx), [פעולות](../../server/templates/messageTemplateActions.ts) | `templates.list/draft.save`; [מאגר Templates](../../server/platform/postgresMessageTemplateRepository.ts) | KEEP + VERIFY: כתיבה וקריאה ב־PostgreSQL קיימות; זו אינה הגשה ל־Meta |
-| W12 הגשה וסנכרון Template | אותו Editor ו־Action של W11 | `templates.submit`; [Submission executor](../../server/platform/postgresRailwayMessageTemplateSubmissionMutationExecutor.ts), [Outbox](../../server/platform/postgresMessageTemplateSubmissionOutboxRepository.ts) | REFACTOR + VERIFY: שני הכפתורים ושתי הפעולות חסומים בקבוע false; Sync הישן פונה ל־D1. Adapter/Worker קיימים, אך המסלול מהמשתמש אינו מופעל |
+| W12 הגשה וסנכרון Template | אותו Editor ו־Action של W11 | `templates.submit/sync`; [Submission executor](../../server/platform/postgresRailwayMessageTemplateSubmissionMutationExecutor.ts), [Outbox](../../server/platform/postgresMessageTemplateSubmissionOutboxRepository.ts) | KEEP + VERIFY: הגשה וסנכרון מחוברים ל־Railway; ההפעלה נפרדת וכבויה כברירת מחדל. נדרשים Staging, Meta אמיתי ובדיקת התאוששות |
 | W13 יצירת קמפיין ותזמון | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות](../../server/campaigns/campaignActions.ts) | `campaigns.directory.read/snapshot.save/activate`; [קמפיין](../../server/platform/postgresCampaignRepository.ts), [Dispatch](../../server/platform/postgresCampaignDispatchRepository.ts) | KEEP + REFACTOR + VERIFY: Snapshot ותזמון קיימים; ה־API Executable אינו מעביר campaignDeliveryConfigured, ולכן ברירת המחדל חוסמת הפעלה |
 | W14 השהיית וביטול קמפיין | ב־Campaign manager קיימת הפעלה בלבד | [חוזה Mutations](../../server/platform/railwayCampaignMutationExecutor.ts) מכיל Snapshot ו־Activate בלבד | REFACTOR: אין Operation או Action להשהיה/ביטול; ערכי paused/cancelled ב־Schema אינם מימוש התהליך |
 | W15 קריאה ושיוך Inbox | [Inbox](../../features/conversations/ConversationInbox.tsx), [פעולות שיחה](../../server/conversations/conversationActions.ts) | `conversations.list/thread.read/mark-read/assignment.change`; [מאגר שיחות](../../server/platform/postgresConversationRepository.ts) | KEEP + VERIFY: הרשאות, פילטרים, Unread, שיוך ו־Polling; יש לבדוק עומס ועימוד בשילוב |
@@ -109,9 +109,11 @@ Templates ו־Inbox. הן עברו, ו־ESLint עבר בקובץ Upload ששונ
 מפורשת כבויה כברירת מחדל, דחיית גרסה שהתיישנה ומניעת כפילות לפי גרסה.
 ה־Worker וההתאוששות הקיימים לא הוחלפו. המימוש טרם הופעל מול Meta.
 
-6.2 G01.2 פתוח: Sync ל־PostgreSQL עם Atomic write/Audit ואימות שינוי
-חיבור במהלך GET. נתיב D1 הוסר מהפעולה הנוכחית; היא מחזירה לא זמין.
+6.2 G01.2 הושלם בקוד: Sync ל־PostgreSQL עם כתיבה אטומית, Audit,
+אימות הרשאה וחיבור אחרי GET, ו־Replay ללא GET נוסף. עברו שש בדיקות
+PostgreSQL אמיתי, כולל כשל SQL מאוחר; אין בכך ראיית ספק חי.
 G01.3 פתוח: קבלה חיה של הגשה, Status webhook, כפילות והתאוששות.
 טבלת סעיף 4 מתארת את אומדן הבסיס, ואינה אומדן יתרה לאחר עדכון זה.
 
-6.3 [פירוט ומצב בדיקות](launch-master-plan-2026-09-09.md#60-חיבור-הגשת-תבניות-לפי-גרסה--10092026).
+6.3 [פירוט ומצב בדיקות — סעיפים 60–61](launch-master-plan-2026-09-09.md).
+המשימה הבאה בקוד היא G02; G01.3 נשארת תלויה בסביבה ובספק אמיתי.

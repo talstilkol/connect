@@ -1,3 +1,4 @@
+import type { RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
 import type {MetaMediaCleanupRepository} from '../meta/metaMediaCleanup.ts';
 import {createRailwayMetaMediaCleanupOperation} from './railwayMetaMediaCleanupOperation.ts';
 import { createRailwayMetaMediaTaskReadOperation } from "./railwayMetaMediaTaskReadOperation.ts";
@@ -190,6 +191,8 @@ export interface RailwayApiRuntimeOptions {
   readonly messageTemplateDraftMutations:
     RailwayMessageTemplateDraftMutationExecutor;
   readonly messageTemplateSubmissionConfigured?: () => boolean;
+  readonly messageTemplateSyncConfigured?: () => boolean;
+  readonly messageTemplateSyncMutations?: RailwayMessageTemplateSyncMutationExecutor;
   readonly messageTemplateSubmissionMutations:
     RailwayMessageTemplateSubmissionMutationExecutor;
   readonly reports: Pick<OperationalReportService, "read">;
@@ -265,6 +268,8 @@ export function createRailwayApiRuntime(
     messageTemplateSubmissionMutations:
       options.messageTemplateSubmissionMutations,
     messageTemplateSubmissionConfigured: options.messageTemplateSubmissionConfigured,
+    messageTemplateSyncConfigured: options.messageTemplateSyncConfigured,
+    messageTemplateSyncMutations: options.messageTemplateSyncMutations,
     reports: options.reports,
     mutationRateLimit: options.mutationRateLimit,
     mutations: options.mutations,

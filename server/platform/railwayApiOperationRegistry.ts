@@ -1,3 +1,6 @@
+import { RAILWAY_MESSAGE_TEMPLATE_SYNC_OPERATION, isTemplateSyncTimestamp,
+  type RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
+import { parseRailwayMessageTemplateSyncState } from "../templates/railwayMessageTemplateSyncResult.ts";
 import {
   ContactNotFoundError,
 } from "../../db/contactConsentRepository.ts";
@@ -521,6 +524,17 @@ export const railwayApiOperationPolicies = Object.freeze([
     }),
   }),
   Object.freeze({
+    id: RAILWAY_MESSAGE_TEMPLATE_SYNC_OPERATION,
+    requestKind: "mutation" as const,
+    permission: "templates.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
     id: "reports.read",
     requestKind: "query" as const,
     permission: "reports.read" as const,
@@ -557,6 +571,8 @@ export interface RailwayApiOperationRegistryDependencies {
   readonly messageTemplateDraftMutations:
     RailwayMessageTemplateDraftMutationExecutor;
   readonly messageTemplateSubmissionConfigured?: () => boolean;
+  readonly messageTemplateSyncConfigured?: () => boolean;
+  readonly messageTemplateSyncMutations?: RailwayMessageTemplateSyncMutationExecutor;
   readonly messageTemplateSubmissionMutations:
     RailwayMessageTemplateSubmissionMutationExecutor;
   readonly reports: Pick<OperationalReportService, "read">;
@@ -2060,6 +2076,7 @@ export function createRailwayApiOperationRegistry(
     messageTemplateListPolicy,
     messageTemplateDraftPolicy,
     messageTemplateSubmissionPolicy,
+    messageTemplateSyncPolicy,
     reportsPolicy,
   ] =
     railwayApiOperationPolicies;
@@ -2464,6 +2481,8 @@ export function createRailwayApiOperationRegistry(
         templates: (await dependencies.messageTemplates.list(session))
           .map(toMessageTemplateView),
         canWrite: hasPermission(session.role, "templates.write"),
+        canSync: hasPermission(session.role, "templates.write") &&
+          dependencies.messageTemplateSyncConfigured?.() === true,
         canSubmit: hasPermission(session.role, "templates.write") &&
           dependencies.messageTemplateSubmissionConfigured?.() === true,
       }),
@@ -2491,6 +2510,33 @@ export function createRailwayApiOperationRegistry(
           payload,
           request,
         ),
+    ),
+    createOperation(
+      messageTemplateSyncPolicy,
+      dependencies,
+      (payload) => {
+        if (!hasExactKeys(payload, ["requestedAt"]) || !isTemplateSyncTimestamp(payload.requestedAt)) invalidRequest();
+        return { requestedAt: payload.requestedAt };
+      },
+      async (session, payload, request) => {
+        const mutation = await requireTenantMutationRequest(dependencies, session, RAILWAY_MESSAGE_TEMPLATE_SYNC_OPERATION, payload, request);
+        if (dependencies.messageTemplateSyncConfigured?.() !== true || !dependencies.messageTemplateSyncMutations) {
+          throw new RailwayApiDispatchError("CONFIGURATION_REQUIRED");
+        }
+        const result = await dependencies.messageTemplateSyncMutations.execute({
+          session, operation: RAILWAY_MESSAGE_TEMPLATE_SYNC_OPERATION, payload, ...mutation,
+        });
+        if (!isRecord(result) || !hasExactKeys(result, ["outcome", "tenantId", "state"])) throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+        if (result.outcome !== "committed" && result.outcome !== "replayed") {
+          if (result.state !== null || result.tenantId !== null) throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+          throw new RailwayApiDispatchError(result.outcome === "conflict" ? "CONFLICT" :
+            result.outcome === "authorization-changed" ? "STALE_SESSION" :
+              result.outcome === "meta-not-connected" ? "CONFIGURATION_REQUIRED" : "DEPENDENCY_UNAVAILABLE");
+        }
+        const state = parseRailwayMessageTemplateSyncState(result.state);
+        if (result.tenantId !== session.tenantId || state === null) throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
+        return Object.freeze({ ...state, replayed: result.outcome === "replayed" });
+      },
     ),
     createOperation(
       reportsPolicy,

@@ -99,6 +99,19 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
+      template-sync-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: connect_startup_rehearsal
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5433:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d connect_startup_rehearsal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - name: Check out the audited commit
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -120,6 +133,10 @@ jobs:
         env:
           CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5432/connect_startup_rehearsal
         run: node --test tests/integration/startup-migrations-postgres.test.mjs
+      - name: Verify atomic template sync against a separate empty PostgreSQL database
+        env:
+          CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5433/connect_startup_rehearsal
+        run: node --test tests/integration/message-template-sync-postgres.test.mjs
 
   typecheck:
     name: typecheck

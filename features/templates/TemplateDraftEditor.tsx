@@ -3,6 +3,7 @@
 import {
   FormEvent,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -59,7 +60,6 @@ const languages: readonly TemplateLanguage[] = [
   "ar",
 ];
 
-const railwayMetaTemplateSyncReady = false;
 
 function toTemplateDraft(
   template: MessageTemplateView,
@@ -88,6 +88,7 @@ export function TemplateDraftEditor({
   initialStatus,
   canWrite,
   canSubmit = false,
+  canSync = false,
 }: {
   authEnabled: boolean;
   interfaceLanguage: InterfaceLanguage;
@@ -95,8 +96,10 @@ export function TemplateDraftEditor({
   initialStatus: MessageTemplateDirectoryStatus;
   canWrite: boolean;
   canSubmit?: boolean;
+  canSync?: boolean;
 }) {
   const messages = readTemplateEditorMessages(interfaceLanguage);
+  const syncRequestTimestamp = useRef<string | null>(null);
   const {
     templateDraft,
     saveTemplateDraft,
@@ -456,8 +459,8 @@ export function TemplateDraftEditor({
   };
 
   const syncTemplates = () => {
-    if (!railwayMetaTemplateSyncReady || isSyncing) {
-      if (!railwayMetaTemplateSyncReady) {
+    if (!canSync || isSyncing) {
+      if (!canSync) {
         setSyncResult({ status: "meta-configuration-required" });
       }
       return;
@@ -465,11 +468,15 @@ export function TemplateDraftEditor({
 
     setSyncResult(null);
     startSyncing(async () => {
-      const result = await syncMessageTemplatesAction();
+      syncRequestTimestamp.current ??= new Date().toISOString();
+      const result = await syncMessageTemplatesAction(syncRequestTimestamp.current);
       setSyncResult(result);
 
       if (result.status === "synced") {
+        syncRequestTimestamp.current = null;
         setTemplates(result.templates);
+      } else if (result.status !== "server-error" && result.status !== "sync-failed") {
+        syncRequestTimestamp.current = null;
       }
     });
   };
@@ -481,6 +488,7 @@ export function TemplateDraftEditor({
         authEnabled={authEnabled}
         canWrite={canWrite}
         canSubmit={canSubmit}
+        canSync={canSync}
         initialStatus={initialStatus}
         isSubmitting={isSubmitting}
         isSyncing={isSyncing}
@@ -1087,6 +1095,7 @@ function MessageTemplateDirectory({
   authEnabled,
   canWrite,
   canSubmit = false,
+  canSync = false,
   initialStatus,
   isSubmitting,
   isSyncing,
@@ -1103,6 +1112,7 @@ function MessageTemplateDirectory({
   authEnabled: boolean;
   canWrite: boolean;
   canSubmit?: boolean;
+  canSync?: boolean;
   initialStatus: MessageTemplateDirectoryStatus;
   isSubmitting: boolean;
   isSyncing: boolean;
@@ -1152,9 +1162,9 @@ function MessageTemplateDirectory({
             type="button"
             className="secondary-button"
             onClick={onSync}
-            aria-describedby="message-template-provider-actions-boundary"
+            aria-describedby={!canSubmit || !canSync ? "message-template-provider-actions-boundary" : undefined}
             disabled={
-              !railwayMetaTemplateSyncReady ||
+              !canSync ||
               initialStatus !== "ready" ||
               !canWrite ||
               isSyncing
@@ -1178,7 +1188,7 @@ function MessageTemplateDirectory({
         </div>
       </div>
 
-      {!railwayMetaTemplateSyncReady ? (
+      {!canSync || !canSubmit ? (
         <div
           className="inline-notice warning"
           id="message-template-provider-actions-boundary"
@@ -1187,7 +1197,7 @@ function MessageTemplateDirectory({
           <span aria-hidden="true">i</span>
           <div>
             {!canSubmit ? <p>{messages.directory.providerActionsUnavailable}</p> : null}
-            <p>{messages.directory.syncUnavailable}</p>
+            {!canSync ? <p>{messages.directory.syncUnavailable}</p> : null}
           </div>
         </div>
       ) : null}
@@ -1259,7 +1269,7 @@ function MessageTemplateDirectory({
                       <button
                         type="button"
                         className="primary-button"
-                        aria-describedby="message-template-provider-actions-boundary"
+                        aria-describedby={!canSubmit || !canSync ? "message-template-provider-actions-boundary" : undefined}
                         disabled={
                           !canSubmit ||
                           template.version === undefined ||

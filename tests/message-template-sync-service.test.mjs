@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createPostgresRailwayMessageTemplateSyncMutationExecutor, postgresRailwayMessageTemplateSyncSql as syncSql } from "../server/platform/postgresRailwayMessageTemplateSyncMutationExecutor.ts";
+import { postgresRailwayMessageTemplateDraftMutationSql as receiptSql } from "../server/platform/postgresRailwayMessageTemplateDraftMutationExecutor.ts";
+import { postgresMessageTemplateSql } from "../server/platform/postgresMessageTemplateRepository.ts";
+import { deriveRailwayApiDeterministicIdempotencyKey, deriveRailwayApiMutationRequestDigest } from "../server/platform/railwayApiMutationExecutor.ts";
 
 import {
   MessageTemplateIdentityConflictError,
@@ -18,6 +22,128 @@ import {
 const accessToken = toSensitiveMetaAccessToken(
   "template-sync-access-token",
 );
+
+// Reuse this file's template/session and the existing credential repository test envelope.
+async function postgresSyncFixture(options = {}) {
+  const calls = [];
+  const tenantSession = session();
+  const observedAt = persistedTemplate().updatedAt;
+  const payload = { requestedAt: observedAt };
+  const command = {
+    session: tenantSession, operation: "templates.sync", payload,
+    idempotencyKey: await deriveRailwayApiDeterministicIdempotencyKey("templates.sync", payload),
+    requestDigest: await deriveRailwayApiMutationRequestDigest("templates.sync", payload),
+  };
+  const binding = { wabaId: "200002", version: 2, keyVersion: "v1",
+    initializationVector: "AQIDBAUGBwgJCgsM", ciphertext: "AQIDBAUGBwgJCgsMDQ4PEA==" };
+  let receipt = options.receipt ?? null;
+  let transactionActive = false;
+  let templateWrites = 0;
+  let audits = 0;
+  const counts = () => ({ templateWrites, audits });
+  const queries = {
+    async query(sql, parameters) {
+      calls.push({ sql, parameters });
+      if (sql === options.failAt) throw new Error("private persistence failure");
+      let rows;
+      if (sql === syncSql.findReceipt) rows = receipt === null ? [] : [receipt];
+      else if (sql === syncSql.readBinding) rows = [{ ...binding }];
+      else if (sql === syncSql.lockBinding) rows = options.disconnect ? [] : [{ ...binding, ...(options.changedBinding ?? {}) }];
+      else if (sql === syncSql.tenantBarrier) rows = [];
+      else if (sql === syncSql.lockTenant) rows = [{ id: tenantSession.tenantId }];
+      else if (sql === syncSql.lockMembership) rows = options.revoke ? [] : [{ role: tenantSession.role }];
+      else if (sql === receiptSql.claimReceipt) rows = [{ idempotencyKey: command.idempotencyKey }];
+      else if (sql === receiptSql.completeReceipt) {
+        receipt = { requestDigest: command.requestDigest, status: "completed", responseJson: parameters[4] };
+        rows = [{ idempotencyKey: command.idempotencyKey }];
+      } else if (sql === syncSql.insertAudit) { audits += 1; rows = [{ id: 1 }]; }
+      else if (sql === postgresMessageTemplateSql.applyStatusEvent) {
+        templateWrites += 1;
+        const stored = persistedTemplate();
+        const { header, body, footer, variableExamples, buttonMode, quickReplies, urlButton, phoneButton } = stored;
+        rows = [{ ...stored, definitionJson: { header, body, footer, variableExamples, buttonMode, quickReplies, urlButton, phoneButton } }];
+        for (const key of ["header", "body", "footer", "variableExamples", "buttonMode", "quickReplies", "urlButton", "phoneButton"]) delete rows[0][key];
+      } else if (sql === postgresMessageTemplateSql.listByTenant) rows = [];
+      else throw new Error("Unexpected SQL");
+      return { rows, rowCount: rows.length };
+    },
+  };
+  const executor = createPostgresRailwayMessageTemplateSyncMutationExecutor({
+    queries,
+    transactions: { async transaction(_options, execute) {
+      const before = { receipt, templateWrites, audits };
+      transactionActive = true;
+      try { const result = await execute(queries); calls.push("commit"); return result; }
+      catch (error) {
+        ({ receipt, templateWrites, audits } = before);
+        calls.push("rollback"); throw error;
+      } finally { transactionActive = false; }
+    } },
+    credentialVault: { async withAccessToken(tenantId, execute) {
+      assert.equal(tenantId, tenantSession.tenantId);
+      return execute(accessToken);
+    } },
+    lister: { async list(input) {
+      calls.push("provider-read");
+      assert.equal(transactionActive, false);
+      assert.equal(input.wabaId, binding.wabaId);
+      assert.equal(input.accessToken, accessToken);
+      if (options.providerFailure) throw new Error("private provider failure");
+      return [snapshot()];
+    } },
+    clock: () => observedAt,
+  });
+  return { executor, command, calls, counts };
+}
+
+test("Railway sync writes status, audit and receipt together and replays without another provider read", async () => {
+  const f = await postgresSyncFixture();
+  const first = await f.executor.execute(f.command);
+  assert.equal(first.outcome, "committed");
+  assert.equal(first.state.summary.updated, 1);
+  const replay = await f.executor.execute(f.command);
+  assert.equal(replay.outcome, "replayed");
+  assert.deepEqual(replay.state, first.state);
+  assert.equal(f.calls.filter((call) => call === "provider-read").length, 1);
+  assert.deepEqual(f.counts(), { templateWrites: 1, audits: 1 });
+  assert.doesNotMatch(JSON.stringify(first), /ciphertext|initializationVector|accessToken|wabaId/);
+});
+
+test("Railway sync rejects revoked authorization or changed connection and credentials before writes", async () => {
+  for (const options of [{ revoke: true }, { disconnect: true },
+    { changedBinding: { version: 3 } }, { changedBinding: { ciphertext: "AQIDBAUGBwgJCgsMDQ4PEA==".repeat(2) } }]) {
+    const f = await postgresSyncFixture(options);
+    const result = await f.executor.execute(f.command);
+    assert.ok(["authorization-changed", "meta-not-connected"].includes(result.outcome));
+    assert.equal(result.state, null);
+    assert.deepEqual(f.counts(), { templateWrites: 0, audits: 0 });
+    assert.equal(f.calls.includes("rollback"), true);
+  }
+});
+
+test("Railway sync rolls back status changes when the audit or receipt fails", async () => {
+  for (const failAt of [syncSql.insertAudit, receiptSql.completeReceipt, postgresMessageTemplateSql.listByTenant]) {
+    const f = await postgresSyncFixture({ failAt });
+    assert.equal((await f.executor.execute(f.command)).outcome, "unavailable");
+    assert.deepEqual(f.counts(), { templateWrites: 0, audits: 0 });
+    assert.equal(f.calls.includes("rollback"), true);
+  }
+  const f = await postgresSyncFixture({ providerFailure: true });
+  assert.equal((await f.executor.execute(f.command)).outcome, "unavailable");
+  assert.equal(f.calls.includes("commit") || f.calls.includes("rollback"), false);
+});
+
+test("Railway sync cannot bypass permission or request validation by calling the executor directly", async () => {
+  const f = await postgresSyncFixture();
+  for (const command of [
+    { ...f.command, session: session("viewer") },
+    { ...f.command, payload: { requestedAt: "invalid" } },
+    { ...f.command, payload: { ...f.command.payload, tenantId: 7 } },
+  ]) {
+    assert.equal((await f.executor.execute(command)).outcome, "unavailable");
+  }
+  assert.deepEqual(f.calls, []);
+});
 
 function session(role = "owner") {
   return {

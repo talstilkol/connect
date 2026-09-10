@@ -26,7 +26,7 @@ test("uses server submission capability and keeps legacy synchronization inacces
   assert.match(actionSource, /createCurrentRailwayMessageTemplateSubmissionHandler/);
   assert.doesNotMatch(actionSource, /cloudflare:workers|requireRuntimeDatabase|createMessageTemplateSyncRuntime/);
   const sync = actionSource.slice(actionSource.indexOf("export async function syncMessageTemplatesAction"));
-  assert.match(sync, /return \{ status: "meta-configuration-required" \}/);
+  assert.match(sync, /createCurrentRailwayMessageTemplateSyncHandler/);
 });
 
 test("keeps the Railway credential runtime server-only and provider bounded", () => {
@@ -52,7 +52,7 @@ test("explains both disabled provider actions through one accessible status", ()
   );
   assert.equal(
     editorSource.match(
-      /aria-describedby="message-template-provider-actions-boundary"/g,
+      /aria-describedby=\{!canSubmit \|\| !canSync \? "message-template-provider-actions-boundary" : undefined\}/g,
     )?.length,
     2,
   );
@@ -62,7 +62,7 @@ test("explains both disabled provider actions through one accessible status", ()
   );
   assert.match(
     editorSource,
-    /!railwayMetaTemplateSyncReady \|\|[\s\S]*?isSyncing/,
+    /!canSync \|\|[\s\S]*?isSyncing/,
   );
 });
 

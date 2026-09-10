@@ -1,3 +1,8 @@
+import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
+import { requireMetaGraphConfiguration } from "../meta/metaGraphConfiguration.ts";
+import { createMetaGraphTransport } from "../meta/metaGraphTransport.ts";
+import { createMetaCredentialVault } from "../meta/metaCredentialVault.ts";
+import { createMetaMessageTemplateListAdapter } from "../templates/metaMessageTemplateListAdapter.ts";
 import { createRailwayMetaSignupApiRuntime, readRailwayMetaSignupEnvironment } from "./railwayMetaSignupRuntime.ts";
 import type { MetaEmbeddedSignupServerEnvironment } from "../meta/metaEmbeddedSignupServerReadiness.ts";
 import {
@@ -122,6 +127,7 @@ export interface RailwayPostgresApiRuntimeOptions {
     maximumBodyBytes?: number;
   }>;
   readonly messageTemplateSubmissionEnvironment?: RailwayMessageTemplateSubmissionEnvironment;
+  readonly messageTemplateSyncEnvironment?: RailwayMessageTemplateSyncEnvironment;
   readonly metaSignupEnvironment?: MetaEmbeddedSignupServerEnvironment;
   readonly campaignDeliveryConfigured?: () => boolean;
   readonly teamInvitationPolicyEnvironment?: TeamInvitationPolicyEnvironment;
@@ -157,6 +163,7 @@ const optionKeys = Object.freeze([
   "metaWebhook",
   "metaSignupEnvironment",
   "messageTemplateSubmissionEnvironment",
+  "messageTemplateSyncEnvironment",
   "mutationRateLimitEnvironment",
   "postgresEnvironment",
   "postgresTelemetry",
@@ -252,6 +259,10 @@ function requireOptions(
     (options.messageTemplateSubmissionEnvironment !== undefined &&
       (typeof options.messageTemplateSubmissionEnvironment !== "object" ||
         options.messageTemplateSubmissionEnvironment === null)) ||
+    (options.messageTemplateSyncEnvironment !== undefined &&
+      (typeof options.messageTemplateSyncEnvironment !== "object" ||
+        options.messageTemplateSyncEnvironment === null ||
+        Array.isArray(options.messageTemplateSyncEnvironment))) ||
     (options.campaignDeliveryConfigured !== undefined &&
       typeof options.campaignDeliveryConfigured !== "function") ||
     (options.teamInvitationPolicyEnvironment !== undefined &&
@@ -415,7 +426,18 @@ export async function createRailwayPostgresApiRuntime(
         );
     }
 
+    const syncEnvironment = options.messageTemplateSyncEnvironment ?? {};
+    const syncConfigured = inspectRailwayMessageTemplateSyncConfiguration(syncEnvironment);
+    if (syncConfigured === "invalid") throw new Error("Railway template synchronization configuration is invalid");
+    const messageTemplateSyncMutations = syncConfigured !== "configured" ? undefined :
+      foundation.createRailwayMessageTemplateSyncMutationExecutor({
+        credentialVault: createMetaCredentialVault(foundation.metaCredentialEnvelopes, syncEnvironment),
+        lister: createMetaMessageTemplateListAdapter(createMetaGraphTransport(requireMetaGraphConfiguration(syncEnvironment))),
+      });
+
     const handler = createRailwayApiRuntime({
+      messageTemplateSyncConfigured: () => syncConfigured === "configured",
+      messageTemplateSyncMutations,
       environment: options.identityEnvironment,
       identityDependencies: options.identityDependencies,
       memberships: foundation.memberships,

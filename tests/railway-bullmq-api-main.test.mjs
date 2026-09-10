@@ -42,6 +42,9 @@ function fixture(overrides = {}) {
       calls.push("redis-environment.read");
       return { REDIS_URL: "redis://127.0.0.1:6379/0" };
     },
+    readMessageTemplateSyncEnvironment() {
+      return overrides.messageTemplateSyncEnvironment ?? {};
+    },
     readMessageTemplateSubmissionEnvironment() {
       return overrides.messageTemplateSubmissionEnvironment ?? {};
     },
@@ -239,6 +242,24 @@ test("requires an explicit valid submission opt-in before startup and passes it 
     );
     assert.deepEqual(testFixture.calls, []);
   }
+});
+
+test("sync opt-in requires the encrypted credential configuration before any service starts", async () => {
+  for (const environment of [
+    { MESSAGE_TEMPLATE_SYNC_ENABLED: "true" },
+    { MESSAGE_TEMPLATE_SYNC_ENABLED: "TRUE" },
+    { MESSAGE_TEMPLATE_SYNC_ENABLED: "true", META_GRAPH_API_VERSION: "v23.0" },
+  ]) {
+    const f = fixture({ messageTemplateSyncEnvironment: environment });
+    await assert.rejects(startRailwayBullMqApiExecutable(f.dependencies),
+      (error) => error.code === "template-sync-configuration-required");
+    assert.deepEqual(f.calls, []);
+  }
+  const environment = { MESSAGE_TEMPLATE_SYNC_ENABLED: "true", META_GRAPH_API_VERSION: "v23.0",
+    META_CREDENTIAL_ENCRYPTION_KEY_V1: "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=" };
+  const f = fixture({ messageTemplateSyncEnvironment: environment });
+  await startRailwayBullMqApiExecutable(f.dependencies);
+  assert.deepEqual(f.captured.runtime.messageTemplateSyncEnvironment, environment);
 });
 
 test("fails closed before startup for an invalid release evidence store", async () => {

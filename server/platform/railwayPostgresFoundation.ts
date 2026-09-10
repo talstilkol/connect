@@ -1,3 +1,4 @@
+import { createPostgresRailwayMessageTemplateSyncMutationExecutor } from "./postgresRailwayMessageTemplateSyncMutationExecutor.ts";
 import {createPostgresMetaMediaCleanupRepository} from './postgresMetaMediaCleanupRepository.ts';
 import { createPostgresMetaMediaTaskReader } from "./postgresMetaMediaTaskReader.ts";
 import { createPostgresMetaAccountLifecycleRepository } from "./postgresMetaAccountLifecycleRepository.ts";
@@ -435,6 +436,9 @@ export interface RailwayPostgresFoundation {
   readonly railwayMessageTemplateDraftMutations: ReturnType<
     typeof createPostgresRailwayMessageTemplateDraftMutationExecutor
   >;
+  readonly createRailwayMessageTemplateSyncMutationExecutor: (
+    provider: Pick<Parameters<typeof createPostgresRailwayMessageTemplateSyncMutationExecutor>[0], "lister" | "credentialVault" | "clock">,
+  ) => ReturnType<typeof createPostgresRailwayMessageTemplateSyncMutationExecutor>;
   readonly createRailwayMessageTemplateSubmissionMutationExecutor: (
     graphApiVersion: string,
     clock?: () => string,
@@ -733,6 +737,11 @@ export function createRailwayPostgresFoundation(
       createPostgresRailwayMessageTemplateDraftMutationExecutor(
         transactions,
       ),
+    createRailwayMessageTemplateSyncMutationExecutor(
+      provider: Pick<Parameters<typeof createPostgresRailwayMessageTemplateSyncMutationExecutor>[0], "lister" | "credentialVault" | "clock">,
+    ) {
+      return createPostgresRailwayMessageTemplateSyncMutationExecutor({ queries, transactions, ...provider });
+    },
     createRailwayMessageTemplateSubmissionMutationExecutor(
       graphApiVersion: string,
       clock?: () => string,

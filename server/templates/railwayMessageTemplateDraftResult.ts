@@ -85,6 +85,19 @@ function canonicalDefinition(value: Readonly<Record<string, unknown>>) {
   };
 }
 
+// JSONB preserves values but can reorder object keys. Arrays must retain order.
+function sameJsonValue(left: unknown, right: unknown): boolean {
+  if (left === right) return true;
+  if (Array.isArray(left)) {
+    return Array.isArray(right) && left.length === right.length &&
+      left.every((value, index) => sameJsonValue(value, right[index]));
+  }
+  if (!isRecord(left) || !isRecord(right)) return false;
+  const keys = Object.keys(left);
+  return keys.length === Object.keys(right).length && keys.every((key) =>
+    Object.hasOwn(right, key) && sameJsonValue(left[key], right[key]));
+}
+
 export function parseRailwayMessageTemplateView(
   value: unknown,
 ): Readonly<MessageTemplateView> | null {
@@ -132,8 +145,7 @@ export function parseRailwayMessageTemplateView(
   }
 
   if (
-    JSON.stringify(validation.value) !==
-      JSON.stringify(canonicalDefinition(value)) ||
+    !sameJsonValue(validation.value, canonicalDefinition(value)) ||
     !hasConsistentPublicLifecycle(
       value.status,
       value.submittedAt,

@@ -69,6 +69,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "createMutationRateLimitBinding",
     "createRailwayCampaignMutationExecutor",
     "createRailwayMessageTemplateSubmissionMutationExecutor",
+    "createRailwayMessageTemplateSyncMutationExecutor",
     "identityOrganizations",
     "invitationAcceptances",
     "invitationDeliveries",

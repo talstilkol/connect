@@ -49,6 +49,7 @@ const auditedServerFunctions = new Map([
   ["server/templates/messageTemplateActions.ts", [
     "createCurrentRailwayMessageTemplateDraftHandler",
     "createCurrentRailwayMessageTemplateSubmissionHandler",
+    "createCurrentRailwayMessageTemplateSyncHandler",
   ]],
 ]);
 

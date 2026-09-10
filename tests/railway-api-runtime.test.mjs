@@ -2320,7 +2320,7 @@ test("reads, saves, and stages message templates through the complete boundary",
   const submissionBody = await submissionResponse.json();
 
   assert.equal(listResponse.status, 200);
-  assert.deepEqual(listBody.data, { templates: [], canWrite: true, canSubmit: true });
+  assert.deepEqual(listBody.data, { templates: [], canWrite: true, canSubmit: true, canSync: false });
   assert.equal(saveResponse.status, 200);
   assert.equal(submissionResponse.status, 200);
   assert.equal(saveBody.data.template.status, "draft");
@@ -2336,6 +2336,34 @@ test("reads, saves, and stages message templates through the complete boundary",
     JSON.stringify(saveBody),
     /tenantId|externalUserId|metaTemplateId|createdAt/,
   );
+});
+
+test("synchronizes through service identity, tenant permission and rate limit without leaking internal state", async () => {
+  const requestedAt = new Date().toISOString();
+  const payload = { requestedAt };
+  const idempotencyKey = await deriveRailwayApiDeterministicIdempotencyKey("templates.sync", payload);
+  let executions = 0;
+  const overrides = {
+    messageTemplateSyncConfigured: () => true,
+    messageTemplateSyncMutations: { async execute(command) {
+      executions += 1;
+      return { outcome: "committed", tenantId: command.session.tenantId,
+        state: { templates: [], summary: { received: 0, eligible: 0, updated: 0, unchanged: 0,
+          stale: 0, unmatched: 0, unsupported: 0, observedAt: requestedAt } } };
+    } },
+  };
+  const allowed = fixture("manager", overrides);
+  const response = await allowed.handler.handle(request("templates.sync", payload, "mutation", idempotencyKey));
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).data.summary.received, 0);
+  assert.equal(allowed.calls.mutationSubjects.at(-1), "11:verified-user:templates.sync");
+  const denied = fixture("viewer", overrides);
+  const deniedResponse = await denied.handler.handle(request("templates.sync", payload, "mutation", idempotencyKey));
+  assert.equal((await deniedResponse.json()).code, "PERMISSION_DENIED");
+  const disabled = fixture("manager");
+  const disabledResponse = await disabled.handler.handle(request("templates.sync", payload, "mutation", idempotencyKey));
+  assert.equal((await disabledResponse.json()).code, "CONFIGURATION_REQUIRED");
+  assert.equal(executions, 1);
 });
 
 test("runs a tenant-scoped contact mutation through every security boundary", async () => {

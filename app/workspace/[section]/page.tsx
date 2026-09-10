@@ -88,6 +88,7 @@ export default async function WorkspaceSectionPage({
           templates: [],
           canWrite: false as const,
           canSubmit: false as const,
+          canSync: false as const,
         }),
     section === "campaigns" && authEnabled
       ? readCurrentCampaigns()
@@ -188,6 +189,7 @@ export default async function WorkspaceSectionPage({
         messageTemplatesResult.status
       }
       initialCanSubmitMessageTemplates={messageTemplatesResult.canSubmit}
+      initialCanSyncMessageTemplates={messageTemplatesResult.canSync}
       initialCanWriteMessageTemplates={
         messageTemplatesResult.canWrite
       }

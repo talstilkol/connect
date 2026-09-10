@@ -69,6 +69,7 @@ const apiOptionKeys = Object.freeze([
   "maximumBodyBytes",
   "maximumResponseBytes",
   "messageTemplateSubmissionEnvironment",
+  "messageTemplateSyncEnvironment",
   "metaSignupEnvironment",
   "mutationRateLimitEnvironment",
   "postgresEnvironment",

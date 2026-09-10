@@ -4,6 +4,7 @@ import test from "node:test";
 import { deriveRailwayApiDeterministicIdempotencyKey } from "../server/platform/railwayApiMutationExecutor.ts";
 import { createRailwayMessageTemplateDraftHandler } from "../server/templates/railwayMessageTemplateDraftHandler.ts";
 import { deriveMessageTemplateKey } from "../server/templates/messageTemplateKey.ts";
+import { parseRailwayMessageTemplateView } from "../server/templates/railwayMessageTemplateDraftResult.ts";
 
 const configuredState = Object.freeze({
   status: "configured",
@@ -49,6 +50,19 @@ const template = Object.freeze({
   submittedAt: null,
   reviewedAt: null,
   updatedAt: "2026-08-21T08:00:00.000Z",
+});
+
+test("public templates survive JSONB key reordering while rejecting changed definitions", () => {
+  function reorder(value) {
+    if (Array.isArray(value)) return value.map(reorder);
+    if (value && typeof value === "object") return Object.fromEntries(
+      Object.entries(value).reverse().map(([key, entry]) => [key, reorder(entry)]));
+    return value;
+  }
+  assert.deepEqual(parseRailwayMessageTemplateView(reorder(template)), template);
+  assert.equal(parseRailwayMessageTemplateView({ ...reorder(template),
+    urlButton: { ...reorder(template.urlButton), extra: true } }), null);
+  assert.equal(parseRailwayMessageTemplateView({ ...reorder(template), name: ` ${template.name}` }), null);
 });
 
 function success(responseTemplate = template, replayed = false) {

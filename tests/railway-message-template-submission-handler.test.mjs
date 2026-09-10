@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createRailwayMessageTemplateSyncHandler } from "../server/templates/railwayMessageTemplateSyncHandler.ts";
 
 import {
   deriveRailwayApiDeterministicIdempotencyKey,
@@ -38,6 +39,7 @@ function success(data = {
 }
 
 function fixture({
+  handlerFactory = createRailwayMessageTemplateSubmissionHandler,
   applicationConfigured = true,
   configurationState = configuredState,
   identityState = authenticatedState,
@@ -45,7 +47,7 @@ function fixture({
   clientError = null,
 } = {}) {
   const calls = { configurations: 0, identities: 0, requests: [] };
-  const handler = createRailwayMessageTemplateSubmissionHandler({
+  const handler = handlerFactory({
     applicationConfigured() {
       return applicationConfigured;
     },
@@ -94,6 +96,45 @@ test("stages one deterministic Railway submission request", async () => {
     JSON.stringify(testFixture.calls.requests),
     /tenantId|externalUserId|accessToken|wabaId/,
   );
+});
+
+test("sync handler preserves request identity and parses only a bounded atomic response", async () => {
+  const requestedAt = new Date().toISOString();
+  const state = { templates: [], summary: { received: 0, eligible: 0, updated: 0,
+    unchanged: 0, stale: 0, unmatched: 0, unsupported: 0, observedAt: requestedAt } };
+  const f = fixture({ handlerFactory: createRailwayMessageTemplateSyncHandler,
+    responseFor: () => success({ ...state, replayed: false }) });
+  assert.deepEqual(await f.handler.sync(requestedAt), { status: "synced", ...state });
+  await f.handler.sync(requestedAt);
+  assert.equal(f.calls.requests[0].operation, "templates.sync");
+  assert.equal(f.calls.requests[0].idempotencyKey, f.calls.requests[1].idempotencyKey);
+  assert.deepEqual(f.calls.requests[0].payload, { requestedAt });
+  for (const data of [
+    { ...state, replayed: "false" },
+    { ...state, replayed: false, accessToken: "forbidden" },
+    { ...state, replayed: false, summary: { ...state.summary, updated: 1 } },
+    { ...state, replayed: false, summary: { ...state.summary, observedAt: "invalid" } },
+  ]) {
+    const invalid = fixture({ handlerFactory: createRailwayMessageTemplateSyncHandler, responseFor: () => success(data) });
+    assert.equal((await invalid.handler.sync(requestedAt)).status, "server-error");
+  }
+});
+
+test("sync handler fails closed before API access and maps configuration and authorization failures", async () => {
+  const requestedAt = new Date().toISOString();
+  const unauthenticated = fixture({ handlerFactory: createRailwayMessageTemplateSyncHandler,
+    identityState: { status: "unauthenticated" } });
+  assert.equal((await unauthenticated.handler.sync(requestedAt)).status, "unauthenticated");
+  assert.equal(unauthenticated.calls.requests.length, 0);
+  const invalid = fixture({ handlerFactory: createRailwayMessageTemplateSyncHandler });
+  assert.equal((await invalid.handler.sync("invalid")).status, "sync-failed");
+  assert.equal(invalid.calls.identities, 0);
+  for (const [code, status] of [["CONFIGURATION_REQUIRED", "meta-configuration-required"],
+    ["STALE_SESSION", "permission-denied"], ["RATE_LIMITED", "sync-failed"]]) {
+    const f = fixture({ handlerFactory: createRailwayMessageTemplateSyncHandler,
+      responseFor: () => ({ contractVersion: "connect.railway-api.v1", outcome: "error", code }) });
+    assert.equal((await f.handler.sync(requestedAt)).status, status);
+  }
 });
 
 test("stops invalid input and missing configuration before identity", async () => {
