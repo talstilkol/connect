@@ -143,3 +143,37 @@ npm run test:bullmq-integration
 6.6 ‏Team invitation adapter ופקודת ה־Worker המלאה הושלמו מקומית. יש
 להפעיל `npm run start:railway-worker:bullmq` ב־Staging רק לאחר הזרקת ערכי
 Identity, ‏Rate limit, ‏Redis, ‏PostgreSQL, ‏Meta ו־Retention מאושרים.
+
+
+## 7. הפעלת קמפיינים דרך ה־API — 10.09.2026
+
+7.1 ה־API Executable קורא CAMPAIGN_ACTIVATION_ENABLED. היעדר ערך,
+מחרוזת ריקה או false משאירים הפעלות חדשות כבויות. רק true מדויק יחד
+עם META_GRAPH_API_VERSION תקין מאפשר אותם. ערך אחר, או Graph חסר
+בזמן opt-in, מפילים Startup לפני יצירת Telemetry וחיבור לתשתיות.
+
+7.2 אותו callback של campaignDeliveryConfigured מועבר ל־Directory
+ול־PostgreSQL mutation executor. מצב ready מציין שהמפעיל הפעיל את
+המסלול בתצורה תקינה; אינו מוכיח שה־Worker זמין או ש־Meta יקבל משלוח.
+גם בקשה ישירה עוברת הרשאות, Rate limit, אימות גרסה ו־Receipt.
+ה־Web משתמש במצב השרת הקיים; אין NEXT_PUBLIC חדש או שינוי חוזה API.
+
+7.3 תנאי הפעלה ב־Staging: API ו־Worker מאותה גרסת שחרור, Graph
+version תואם, Worker פועל עם Vault ו־WHATSAPP_RATE_LIMIT_HMAC_KEY_V1
+תקינים, Retry source, מדיניות עסק מאושרת, ארבעת התורים מוכנים,
+ניטור ותרגיל התאוששות שעבר בגרסה הפרוסה. יש לאמת את התנאים בסביבה
+האמיתית לפני שינוי המתג. ההחלטה שמורה לכל חיי תהליך ה־API; שינוי
+תצורת הספק דורש Restart/Redeploy של כל מופעי ה־API ואימות התוצאה.
+
+7.4 אין צורך להעתיק את מפתח HMAC של ה־Worker ל־API עבור המתג.
+ה־API קורא רק את המתג ו־Graph version. המימוש אינו יוצר מפתחות,
+אינו משנה את מדיניות הקצב או ערכיה, ואינו קורא לספק במסגרת האתחול.
+
+7.5 כיבוי חוסם **הפעלות חדשות בלבד**. הוא אינו מבטל Outbox/משלוחים
+שכבר נשמרו, אינו משנה קמפיין קיים ואינו Kill switch. ניסיון חוזר
+של הפעלה שכבר הושלמה מחזיר Receipt ללא הפעלה כפולה גם אחרי כיבוי,
+כפי שהמאגר הקיים אוכף. Pause/Resume/Cancel יושלמו ב־G03.
+
+7.6 פקודת npm run start:railway-api משתמשת ב־BullMQ Executable
+ומחברת את המתג. פקודת postgres-only המשנית נשארת עם ברירת המחדל
+החסומה ואינה מסלול הפעלת הקמפיינים. לא בוצעה הפעלה בחשבון ספק.

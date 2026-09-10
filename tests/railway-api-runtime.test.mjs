@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { inspectRailwayCampaignActivationConfiguration } from "../server/platform/railwayCampaignActivationConfiguration.ts";
+import { createPostgresRailwayCampaignMutationExecutor, postgresRailwayCampaignMutationSql } from "../server/platform/postgresRailwayCampaignMutationExecutor.ts";
 
 import {
   RAILWAY_API_CONTRACT_VERSION,
@@ -2255,6 +2257,58 @@ test("reads and mutates campaigns through the complete boundary", async () => {
     JSON.stringify({ directoryBody, snapshotBody, activationBody }),
     /tenantId|externalUserId|verified-user/,
   );
+});
+
+test("campaign directory reflects the validated server activation decision", async () => {
+  for (const enabled of [undefined, "false", "true"]) {
+    const configuration = inspectRailwayCampaignActivationConfiguration({
+      CAMPAIGN_ACTIVATION_ENABLED: enabled, META_GRAPH_API_VERSION: "v23.0",
+    });
+    const testFixture = fixture("manager", {
+      campaignDeliveryConfigured: () => configuration.status === "configured",
+    });
+    const response = await testFixture.handler.handle(request("campaigns.directory.read", {}));
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.data.deliveryStatus, enabled === "true" ? "ready" : "configuration-required");
+    assert.equal(body.data.canWrite, true, "Draft authoring remains a separate permission");
+    assert.doesNotMatch(JSON.stringify(body), /CAMPAIGN_ACTIVATION|META_GRAPH|HMAC|CREDENTIAL/);
+  }
+});
+
+test("a direct campaign activation respects the PostgreSQL configuration guard and API permissions", async () => {
+  const payload = { campaignKey: `campaign_v1_${"1".repeat(64)}`, expectedVersion: 1 };
+  const mutationKey = await deriveRailwayApiDeterministicIdempotencyKey("campaigns.activate", payload);
+  for (const role of ["manager", "viewer"]) {
+    const statements = [];
+    let transactions = 0;
+    const campaignMutations = createPostgresRailwayCampaignMutationExecutor({
+      async transaction(_options, execute) {
+        transactions += 1;
+        return execute({ async query(sql, parameters) {
+          statements.push(sql);
+          if (sql === postgresRailwayCampaignMutationSql.claimReceipt) {
+            return { rowCount: 1, rows: [{ idempotencyKey: parameters[2] }] };
+          }
+          throw new Error("Disabled activation must not write campaigns or audit records");
+        } });
+      },
+    }, () => false);
+    const testFixture = fixture(role, { campaignDeliveryConfigured: () => false, campaignMutations });
+    const response = await testFixture.handler.handle(request("campaigns.activate", payload, "mutation", mutationKey));
+    const body = await response.json();
+    if (role === "manager") {
+      assert.equal(response.status, 200);
+      assert.deepEqual(body.data, { replayed: false, outcome: "delivery-configuration-required" });
+      assert.equal(transactions, 1);
+      assert.deepEqual(statements, [postgresRailwayCampaignMutationSql.claimReceipt]);
+      assert.deepEqual(testFixture.calls.mutationSubjects, ["11:verified-user:campaigns.activate"]);
+    } else {
+      assert.equal(response.status, 403);
+      assert.equal(transactions, 0);
+      assert.deepEqual(testFixture.calls.mutationSubjects, []);
+    }
+  }
 });
 
 test("reads, saves, and stages message templates through the complete boundary", async () => {

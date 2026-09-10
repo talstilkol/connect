@@ -171,6 +171,20 @@ test("proves Redis ready before exposing the Meta-enabled PostgreSQL API", async
   ]);
 });
 
+test("preserves the campaign activation decision through BullMQ composition", async () => {
+  for (const enabled of [false, true]) {
+    const testFixture = fixture();
+    const campaignDeliveryConfigured = () => enabled;
+    const runtime = await createRailwayBullMqPostgresApiRuntime(
+      options({ campaignDeliveryConfigured }), testFixture.dependencies,
+    );
+    assert.equal(testFixture.captured.api.campaignDeliveryConfigured, campaignDeliveryConfigured);
+    assert.equal(testFixture.captured.api.campaignDeliveryConfigured(), enabled);
+    assert.deepEqual(testFixture.calls, ["meta-publisher.start", "invitation-publisher.start", "api.create"]);
+    await runtime.close();
+  }
+});
+
 test("cleans Redis after API composition failure and bounds private detail", async () => {
   const testFixture = fixture({ apiStartFailure: true });
   await assert.rejects(

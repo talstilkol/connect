@@ -1,5 +1,9 @@
 import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
 import {
+  inspectRailwayCampaignActivationConfiguration,
+  type RailwayCampaignActivationEnvironment,
+} from "./railwayCampaignActivationConfiguration.ts";
+import {
   inspectRailwayMessageTemplateSubmissionConfiguration,
   type RailwayMessageTemplateSubmissionEnvironment,
 } from "./railwayMessageTemplateSubmissionConfiguration.ts";
@@ -44,6 +48,7 @@ interface RailwayBullMqApiMainDependencies {
   readonly createProcess: RailwayApiMainDependencies["createProcess"];
   readonly readNodeEnvironment: () => RailwayNodeProcessEnvironment;
   readonly readBullMqEnvironment: () => RailwayBullMqEnvironment;
+  readonly readCampaignActivationEnvironment: () => RailwayCampaignActivationEnvironment;
   readonly readMessageTemplateSyncEnvironment: () => RailwayMessageTemplateSyncEnvironment;
   readonly readMessageTemplateSubmissionEnvironment:
     () => RailwayMessageTemplateSubmissionEnvironment;
@@ -74,6 +79,12 @@ const defaultDependencies = Object.freeze({
       MESSAGE_TEMPLATE_SYNC_ENABLED: process.env.MESSAGE_TEMPLATE_SYNC_ENABLED,
       META_GRAPH_API_VERSION: process.env.META_GRAPH_API_VERSION,
       META_CREDENTIAL_ENCRYPTION_KEY_V1: process.env.META_CREDENTIAL_ENCRYPTION_KEY_V1,
+    };
+  },
+  readCampaignActivationEnvironment() {
+    return {
+      CAMPAIGN_ACTIVATION_ENABLED: process.env.CAMPAIGN_ACTIVATION_ENABLED,
+      META_GRAPH_API_VERSION: process.env.META_GRAPH_API_VERSION,
     };
   },
   readMessageTemplateSubmissionEnvironment() {
@@ -119,6 +130,7 @@ const defaultDependencies = Object.freeze({
 
 export type RailwayBullMqApiMainErrorCode =
   | "dependencies-invalid"
+  | "campaign-activation-configuration-required"
   | "template-submission-configuration-required"
   | "template-sync-configuration-required"
   | "release-evidence-configuration-required"
@@ -139,6 +151,7 @@ const dependencyKeys = Object.freeze([
   "createProcess",
   "createRuntime",
   "readBullMqEnvironment",
+  "readCampaignActivationEnvironment",
   "readMetaWebhookEnvironment",
   "readMessageTemplateSubmissionEnvironment",
   "readMessageTemplateSyncEnvironment",
@@ -209,6 +222,19 @@ export async function startRailwayBullMqApiExecutable(
     defaultDependencies,
 ) {
   requireDependencies(dependencies);
+
+  let campaignActivationConfiguration: ReturnType<typeof inspectRailwayCampaignActivationConfiguration>;
+  try {
+    campaignActivationConfiguration = inspectRailwayCampaignActivationConfiguration(
+      dependencies.readCampaignActivationEnvironment(),
+    );
+    if (campaignActivationConfiguration.status === "invalid") {
+      throw new Error("Invalid campaign activation configuration");
+    }
+  } catch {
+    throw new RailwayBullMqApiMainError("campaign-activation-configuration-required");
+  }
+  const campaignActivationEnabled = campaignActivationConfiguration.status === "configured";
 
   let messageTemplateSyncEnvironment: RailwayMessageTemplateSyncEnvironment;
   try {
@@ -293,6 +319,7 @@ export async function startRailwayBullMqApiExecutable(
           postgresTelemetry,
           messageTemplateSubmissionEnvironment,
           messageTemplateSyncEnvironment,
+          campaignDeliveryConfigured: () => campaignActivationEnabled,
           requestTelemetry: telemetryRuntime.logger,
           bullMqEnvironment: dependencies.readBullMqEnvironment(),
           metaWebhookEnvironment:

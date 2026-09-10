@@ -6,6 +6,7 @@ import {
   RailwayBullMqApiMainError,
   startRailwayBullMqApiExecutable,
 } from "../server/platform/railwayBullMqApiMain.ts";
+import { inspectRailwayCampaignActivationConfiguration } from "../server/platform/railwayCampaignActivationConfiguration.ts";
 
 function fixture(overrides = {}) {
   const calls = [];
@@ -44,6 +45,10 @@ function fixture(overrides = {}) {
     },
     readMessageTemplateSyncEnvironment() {
       return overrides.messageTemplateSyncEnvironment ?? {};
+    },
+    readCampaignActivationEnvironment() {
+      if (overrides.campaignEnvironmentFailure) throw new Error("private configuration detail");
+      return overrides.campaignActivationEnvironment ?? {};
     },
     readMessageTemplateSubmissionEnvironment() {
       return overrides.messageTemplateSubmissionEnvironment ?? {};
@@ -92,6 +97,56 @@ function fixture(overrides = {}) {
   };
   return { calls, captured, controller, dependencies };
 }
+
+test("campaign activation opt-in is strict and requires an explicit Graph version", () => {
+  for (const value of [undefined, "", "false"]) {
+    assert.deepEqual(inspectRailwayCampaignActivationConfiguration({
+      CAMPAIGN_ACTIVATION_ENABLED: value,
+    }), { status: "disabled" });
+  }
+  for (const environment of [null, [], true,
+    { CAMPAIGN_ACTIVATION_ENABLED: "true" },
+    { CAMPAIGN_ACTIVATION_ENABLED: "true", META_GRAPH_API_VERSION: "latest" },
+    { CAMPAIGN_ACTIVATION_ENABLED: "TRUE", META_GRAPH_API_VERSION: "v23.0" },
+    { CAMPAIGN_ACTIVATION_ENABLED: " true ", META_GRAPH_API_VERSION: "v23.0" },
+    { CAMPAIGN_ACTIVATION_ENABLED: true, META_GRAPH_API_VERSION: "v23.0" },
+  ]) {
+    assert.deepEqual(inspectRailwayCampaignActivationConfiguration(environment), { status: "invalid" });
+  }
+  assert.deepEqual(inspectRailwayCampaignActivationConfiguration({
+    CAMPAIGN_ACTIVATION_ENABLED: "true", META_GRAPH_API_VERSION: "v23.0",
+  }), { status: "configured", graphApiVersion: "v23.0" });
+});
+
+test("campaign activation configuration is checked before telemetry and infrastructure startup", async () => {
+  for (const overrides of [
+    { campaignActivationEnvironment: { CAMPAIGN_ACTIVATION_ENABLED: "true" } },
+    { campaignActivationEnvironment: { CAMPAIGN_ACTIVATION_ENABLED: "TRUE" } },
+    { campaignActivationEnvironment: { CAMPAIGN_ACTIVATION_ENABLED: "true", META_GRAPH_API_VERSION: "latest" } },
+    { campaignEnvironmentFailure: true },
+  ]) {
+    const testFixture = fixture(overrides);
+    await assert.rejects(startRailwayBullMqApiExecutable(testFixture.dependencies), (error) =>
+      error instanceof RailwayBullMqApiMainError && error.code === "campaign-activation-configuration-required" &&
+      !error.message.includes("private"));
+    assert.deepEqual(testFixture.calls, []);
+  }
+});
+
+test("campaign activation binds an immutable readiness decision without worker secrets", async () => {
+  for (const enabled of [undefined, "false", "true"]) {
+    const environment = { CAMPAIGN_ACTIVATION_ENABLED: enabled, META_GRAPH_API_VERSION: "v23.0" };
+    const testFixture = fixture({ campaignActivationEnvironment: environment });
+    const controller = await startRailwayBullMqApiExecutable(testFixture.dependencies);
+    const readiness = testFixture.captured.runtime.campaignDeliveryConfigured;
+    assert.equal(readiness(), enabled === "true");
+    environment.CAMPAIGN_ACTIVATION_ENABLED = enabled === "true" ? "false" : "true";
+    assert.equal(readiness(), enabled === "true", "Changing a captured environment object cannot toggle a running API");
+    assert.equal(Object.hasOwn(testFixture.captured.runtime, "campaignActivationEnvironment"), false);
+    assert.doesNotMatch(JSON.stringify(testFixture.captured.runtime), /WHATSAPP_RATE_LIMIT_HMAC_KEY_V1|CAMPAIGN_ACTIVATION_ENABLED/);
+    await controller.close();
+  }
+});
 
 test("binds bounded process, Redis and Meta configuration to the provider API", async () => {
   const testFixture = fixture();

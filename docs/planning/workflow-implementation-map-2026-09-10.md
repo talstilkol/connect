@@ -47,7 +47,7 @@
 | W10 מדיה מהיסטוריה | [הצגת הודעה](../../features/conversations/ConversationMessageView.tsx), [אבחון משימות](../../app/workspace/media-tasks/page.tsx) | [קריאת קובץ](../../server/platform/railwayMetaMediaFileReadRuntime.ts), [ניקוי](../../server/platform/postgresMetaMediaCleanupRepository.ts) | KEEP + VERIFY + REFACTOR: S3/סריקה חיים, גרסאות סותרות וניקוי אוטומטי; ההפעלה נשארת מוגבלת |
 | W11 טיוטת Template | [Template editor](../../features/templates/TemplateDraftEditor.tsx), [פעולות](../../server/templates/messageTemplateActions.ts) | `templates.list/draft.save`; [מאגר Templates](../../server/platform/postgresMessageTemplateRepository.ts) | KEEP + VERIFY: כתיבה וקריאה ב־PostgreSQL קיימות; זו אינה הגשה ל־Meta |
 | W12 הגשה וסנכרון Template | אותו Editor ו־Action של W11 | `templates.submit/sync`; [Submission executor](../../server/platform/postgresRailwayMessageTemplateSubmissionMutationExecutor.ts), [Outbox](../../server/platform/postgresMessageTemplateSubmissionOutboxRepository.ts) | KEEP + VERIFY: הגשה וסנכרון מחוברים ל־Railway; ההפעלה נפרדת וכבויה כברירת מחדל. נדרשים Staging, Meta אמיתי ובדיקת התאוששות |
-| W13 יצירת קמפיין ותזמון | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות](../../server/campaigns/campaignActions.ts) | `campaigns.directory.read/snapshot.save/activate`; [קמפיין](../../server/platform/postgresCampaignRepository.ts), [Dispatch](../../server/platform/postgresCampaignDispatchRepository.ts) | KEEP + REFACTOR + VERIFY: Snapshot ותזמון קיימים; ה־API Executable אינו מעביר campaignDeliveryConfigured, ולכן ברירת המחדל חוסמת הפעלה |
+| W13 יצירת קמפיין ותזמון | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות](../../server/campaigns/campaignActions.ts) | `campaigns.directory.read/snapshot.save/activate`; [קמפיין](../../server/platform/postgresCampaignRepository.ts), [Dispatch](../../server/platform/postgresCampaignDispatchRepository.ts) | KEEP + VERIFY: ה־API Executable מחבר כעת את CAMPAIGN_ACTIVATION_ENABLED למוכנות ההפעלה; כבוי כברירת מחדל. הפעלה ב־Staging ובדיקת משלוח חי עדיין פתוחות |
 | W14 השהיית וביטול קמפיין | ב־Campaign manager קיימת הפעלה בלבד | [חוזה Mutations](../../server/platform/railwayCampaignMutationExecutor.ts) מכיל Snapshot ו־Activate בלבד | REFACTOR: אין Operation או Action להשהיה/ביטול; ערכי paused/cancelled ב־Schema אינם מימוש התהליך |
 | W15 קריאה ושיוך Inbox | [Inbox](../../features/conversations/ConversationInbox.tsx), [פעולות שיחה](../../server/conversations/conversationActions.ts) | `conversations.list/thread.read/mark-read/assignment.change`; [מאגר שיחות](../../server/platform/postgresConversationRepository.ts) | KEEP + VERIFY: הרשאות, פילטרים, Unread, שיוך ו־Polling; יש לבדוק עומס ועימוד בשילוב |
 | W16 מענה ידני לאחר Handoff | [Composer boundary](../../features/conversations/ConversationComposerBoundary.tsx) מציג הודעה בלבד | אין פעולת שליחה ידנית ב־Actions או במרשם הראשי | REFACTOR: מענה טקסט ידני מתוך Connect נדרש לסיום תהליך נציג; canReply הוא הרשאה ואינו הוכחת Sender |
@@ -116,4 +116,26 @@ G01.3 פתוח: קבלה חיה של הגשה, Status webhook, כפילות וה
 טבלת סעיף 4 מתארת את אומדן הבסיס, ואינה אומדן יתרה לאחר עדכון זה.
 
 6.3 [פירוט ומצב בדיקות — סעיפים 60–61](launch-master-plan-2026-09-09.md).
-המשימה הבאה בקוד היא G02; G01.3 נשארת תלויה בסביבה ובספק אמיתי.
+G01.3 נשארת תלויה בסביבה ובספק אמיתי; מצב G02 מעודכן בסעיף 7.
+
+
+# 7. עדכון מימוש G02 — 10.09.2026
+
+7.1 G02 הושלם בקוד: CAMPAIGN_ACTIVATION_ENABLED נקרא ב־Executable
+ומועבר כהחלטה קבועה לתהליך אל campaignDeliveryConfigured. אותו מקור
+משמש את Directory ואת PostgreSQL mutation executor. רק true מדויק
+עם Graph version מפורש מאפשר הפעלה חדשה; תצורה פגומה עוצרת Startup
+לפני Telemetry/Redis/PostgreSQL. שמירת טיוטות אינה תלויה במתג.
+
+7.2 המתג אינו Health probe ואינו מפסיק תור או Worker. כיבויו חוסם
+הפעלות חדשות, אך Receipt קיים ניתן לשחזור וקמפיין שכבר הופעל ממשיך
+לפי מצבו. Pause/Resume/Cancel נשארים G03. הפעלה אמיתית דורשת Worker,
+אותה גרסת שחרור ו־Graph, Credentials, מדיניות מאושרת ותרגיל התאוששות.
+
+7.3 הבא בקוד: G03 ולאחריו G04. סכום אומדני התכנון של שני הפערים
+שטרם מומשו הוא 28–52 שעות הנדסה, בביטחון נמוך. זהו חיבור של 12–20
+ו־16–32 מסעיף 4; לא מדידת יתרה חדשה ולא אומדן לסיום כל התוכנה.
+בדיקות ספק, תיקוני שילוב ושאר ה־Master Plan אינם נכללים בו.
+
+7.4 [מימוש, בדיקות וגבולות — סעיף 62](launch-master-plan-2026-09-09.md).
+נותרו 12 שלבי־על; זמן הסיום הכולל המעודכן עדיין אינו ידוע.

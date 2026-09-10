@@ -80,21 +80,33 @@ test('media file checks actual bytes independently of advertised SHA-256 and con
     await rejects(f.run(), 'CONTENT_MISMATCH'); assert.equal(f.consumed, false); assert.deepEqual(f.observations, []);
   }
 });
-test('media file fails closed on a stalled body, cancels it and remains reusable', async () => {
-  let cancelled = 0, stall = true;
+test('media file fails closed on a stalled body, cancels it and remains reusable', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let cancelled = 0, stall = true, started;
+  const reading = new Promise(resolve => { started = resolve; });
   const f = await fixture({ timeout: 20, reply: command => mediaFileReply(command, undefined, undefined,
-    stall ? { stream: new ReadableStream({ cancel() { cancelled++; } }) } : {}) });
-  await rejects(f.run(), 'DEPENDENCY_UNAVAILABLE'); assert.equal(cancelled, 1); assert.equal(f.consumed, false);
+    stall ? { stream: new ReadableStream({ pull() { started(); }, cancel() { cancelled++; } }, { highWaterMark: 0 }) } : {}) });
+  const rejected = rejects(f.run(), 'DEPENDENCY_UNAVAILABLE');
+  await reading; // Only advance the deadline once stream.read() has actually begun.
+  assert.equal(cancelled, 0);
+  t.mock.timers.tick(20);
+  await rejected; assert.equal(cancelled, 1); assert.equal(f.consumed, false);
   stall = false; assert.equal(await f.run(), mediaBytes.length);
 });
-test('media file cancels a body whose headers arrive after the request deadline', async () => {
-  let cancelled = 0, release;
+test('media file cancels a body whose headers arrive after the request deadline', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let cancelled = 0, release, entered, onCancelled;
+  const requested = new Promise(resolve => { entered = resolve; });
+  const cancellation = new Promise(resolve => { onCancelled = resolve; });
   const delayed = new Promise(resolve => { release = resolve; });
   const f = await fixture({ timeout: 15, async reply(command) {
-    if (command.constructor.name === 'GetObjectCommand') await delayed;
-    return mediaFileReply(command, undefined, undefined, { stream: new ReadableStream({ cancel() { cancelled++; } }) });
+    if (command.constructor.name === 'GetObjectCommand') { entered(); await delayed; }
+    return mediaFileReply(command, undefined, undefined, { stream: new ReadableStream({ cancel() { cancelled++; onCancelled(); } }) });
   } });
-  await rejects(f.run(), 'DEPENDENCY_UNAVAILABLE'); release(); await new Promise(resolve => setTimeout(resolve, 10));
+  const rejected = rejects(f.run(), 'DEPENDENCY_UNAVAILABLE');
+  await requested;
+  t.mock.timers.tick(15);
+  await rejected; release(); await cancellation;
   assert.equal(cancelled, 1); assert.equal(f.consumed, false); assert.deepEqual(f.observations, []);
 });
 test('media file cannot proceed after closing the reader or with a foreign storage target', async () => {
