@@ -758,6 +758,7 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
         };
       },
     },
+    messageTemplateSubmissionConfigured: () => true,
     messageTemplateSubmissionMutations: {
       async execute(command) {
         calls.messageTemplateSubmissions.push(command);
@@ -2298,6 +2299,7 @@ test("reads, saves, and stages message templates through the complete boundary",
     ),
   );
   const submissionPayload = {
+    expectedVersion: 1,
     templateKey: `template_v1_${"e".repeat(64)}`,
   };
   const submissionIdempotencyKey =
@@ -2318,7 +2320,7 @@ test("reads, saves, and stages message templates through the complete boundary",
   const submissionBody = await submissionResponse.json();
 
   assert.equal(listResponse.status, 200);
-  assert.deepEqual(listBody.data, { templates: [], canWrite: true });
+  assert.deepEqual(listBody.data, { templates: [], canWrite: true, canSubmit: true });
   assert.equal(saveResponse.status, 200);
   assert.equal(submissionResponse.status, 200);
   assert.equal(saveBody.data.template.status, "draft");

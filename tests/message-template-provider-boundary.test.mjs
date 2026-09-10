@@ -20,31 +20,13 @@ const providerRuntimeSource = await readFile(
   "utf8",
 );
 
-test("fails closed until queue, live configuration, and recovery evidence exist", () => {
-  assert.match(
-    editorSource,
-    /const railwayMetaTemplateProviderActionsReady = false/,
-  );
-  assert.match(
-    actionSource,
-    /const railwayMetaTemplateProviderActionsReady = false/,
-  );
-
-  for (const marker of [
-    "export async function submitMessageTemplateAction",
-    "export async function syncMessageTemplatesAction",
-  ]) {
-    const section = actionSource.slice(actionSource.indexOf(marker));
-    const guardIndex = section.indexOf(
-      "if (!railwayMetaTemplateProviderActionsReady)",
-    );
-    const legacyAccessIndex = section.search(
-      /inspectClerkConfiguration|createActionHandler|createSyncActionHandler/,
-    );
-
-    assert.ok(guardIndex > 0);
-    assert.ok(legacyAccessIndex > guardIndex);
-  }
+test("uses server submission capability and keeps legacy synchronization inaccessible", () => {
+  assert.match(editorSource, /canSubmit = false/);
+  assert.match(editorSource, /submitMessageTemplateAction\(templateKey, template.version\)/);
+  assert.match(actionSource, /createCurrentRailwayMessageTemplateSubmissionHandler/);
+  assert.doesNotMatch(actionSource, /cloudflare:workers|requireRuntimeDatabase|createMessageTemplateSyncRuntime/);
+  const sync = actionSource.slice(actionSource.indexOf("export async function syncMessageTemplatesAction"));
+  assert.match(sync, /return \{ status: "meta-configuration-required" \}/);
 });
 
 test("keeps the Railway credential runtime server-only and provider bounded", () => {
@@ -76,11 +58,11 @@ test("explains both disabled provider actions through one accessible status", ()
   );
   assert.match(
     editorSource,
-    /!railwayMetaTemplateProviderActionsReady \|\|[\s\S]*?isSubmitting/,
+    /!canSubmit \|\|[\s\S]*?isSubmitting/,
   );
   assert.match(
     editorSource,
-    /!railwayMetaTemplateProviderActionsReady \|\|[\s\S]*?isSyncing/,
+    /!railwayMetaTemplateSyncReady \|\|[\s\S]*?isSyncing/,
   );
 });
 

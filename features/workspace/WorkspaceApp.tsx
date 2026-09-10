@@ -96,6 +96,7 @@ export default function WorkspaceApp({
   initialMessageTemplateStatus =
     "configuration-required",
   initialCanWriteMessageTemplates = false,
+  initialCanSubmitMessageTemplates = false,
   initialCampaigns = [],
   initialCampaignTemplates = [],
   initialCampaignAudiences = {
@@ -160,6 +161,7 @@ export default function WorkspaceApp({
   initialMessageTemplates?: readonly MessageTemplateView[];
   initialMessageTemplateStatus?: MessageTemplateDirectoryStatus;
   initialCanWriteMessageTemplates?: boolean;
+  initialCanSubmitMessageTemplates?: boolean;
   initialCampaigns?: readonly CampaignView[];
   initialCampaignTemplates?:
     readonly CampaignTemplateOptionView[];
@@ -401,6 +403,7 @@ export default function WorkspaceApp({
           initialMessageTemplates={initialMessageTemplates}
           initialMessageTemplateStatus={initialMessageTemplateStatus}
           initialCanWriteMessageTemplates={initialCanWriteMessageTemplates}
+          initialCanSubmitMessageTemplates={initialCanSubmitMessageTemplates}
           initialCampaigns={initialCampaigns}
           initialCampaignTemplates={initialCampaignTemplates}
           initialCampaignAudiences={initialCampaignAudiences}

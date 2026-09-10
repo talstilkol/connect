@@ -90,7 +90,9 @@ export function parseRailwayMessageTemplateView(
 ): Readonly<MessageTemplateView> | null {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, viewKeys) ||
+    !hasExactKeys(value, "version" in value ? [...viewKeys, "version"] : viewKeys) ||
+    ("version" in value &&
+      (!Number.isSafeInteger(value.version) || Number(value.version) <= 0)) ||
     !isRecord(value.urlButton) ||
     !hasExactKeys(value.urlButton, [
       "enabled",
@@ -145,6 +147,7 @@ export function parseRailwayMessageTemplateView(
 
   return Object.freeze({
     templateKey: value.templateKey,
+    ...("version" in value ? { version: Number(value.version) } : {}),
     ...validation.value,
     status: value.status,
     submittedAt: value.submittedAt,

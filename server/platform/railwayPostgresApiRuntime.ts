@@ -66,9 +66,9 @@ import {
   type PostgresTenantMutationRateLimitEnvironment,
 } from "./postgresMutationRateLimitConfiguration.ts";
 import {
-  requireMetaGraphConfiguration,
-  type MetaGraphEnvironment,
-} from "../meta/metaGraphConfiguration.ts";
+  inspectRailwayMessageTemplateSubmissionConfiguration,
+  type RailwayMessageTemplateSubmissionEnvironment,
+} from "./railwayMessageTemplateSubmissionConfiguration.ts";
 import type {
   RailwayMessageTemplateSubmissionMutationExecutor,
 } from "./railwayMessageTemplateSubmissionMutationExecutor.ts";
@@ -121,7 +121,7 @@ export interface RailwayPostgresApiRuntimeOptions {
     queue: MetaWebhookQueuePort;
     maximumBodyBytes?: number;
   }>;
-  readonly messageTemplateSubmissionEnvironment?: MetaGraphEnvironment;
+  readonly messageTemplateSubmissionEnvironment?: RailwayMessageTemplateSubmissionEnvironment;
   readonly metaSignupEnvironment?: MetaEmbeddedSignupServerEnvironment;
   readonly campaignDeliveryConfigured?: () => boolean;
   readonly teamInvitationPolicyEnvironment?: TeamInvitationPolicyEnvironment;
@@ -391,7 +391,14 @@ export async function createRailwayPostgresApiRuntime(
                 releaseEvidenceOptions.clock ?? systemClock,
               );
           })();
-    if (options.messageTemplateSubmissionEnvironment === undefined) {
+    const templateSubmissionConfiguration =
+      inspectRailwayMessageTemplateSubmissionConfiguration(
+        options.messageTemplateSubmissionEnvironment ?? {},
+      );
+    if (templateSubmissionConfiguration.status === "invalid") {
+      throw new Error("Railway message template submission configuration is invalid");
+    }
+    if (templateSubmissionConfiguration.status === "disabled") {
       messageTemplateSubmissionMutations = Object.freeze({
         async execute() {
           return {
@@ -402,12 +409,9 @@ export async function createRailwayPostgresApiRuntime(
         },
       });
     } else {
-      const graphConfiguration = requireMetaGraphConfiguration(
-        options.messageTemplateSubmissionEnvironment,
-      );
       messageTemplateSubmissionMutations =
         foundation.createRailwayMessageTemplateSubmissionMutationExecutor(
-          graphConfiguration.apiVersion,
+          templateSubmissionConfiguration.graphApiVersion,
         );
     }
 
@@ -476,6 +480,8 @@ export async function createRailwayPostgresApiRuntime(
       messageTemplateDraftMutations:
         foundation.railwayMessageTemplateDraftMutations,
       messageTemplateSubmissionMutations,
+      messageTemplateSubmissionConfigured: () =>
+        templateSubmissionConfiguration.status === "configured",
       reports: foundation.reports,
       mutationRateLimit: createRateLimitGuard(
         foundation.createMutationRateLimitBinding(

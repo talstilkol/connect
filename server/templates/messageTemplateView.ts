@@ -10,6 +10,7 @@ export function toMessageTemplateView(
 ): MessageTemplateView {
   return {
     templateKey: template.templateKey,
+    version: template.version,
     name: template.name,
     category: template.category,
     language: template.language,

@@ -50,6 +50,7 @@ function failure(
     status,
     templates: [] as const,
     canWrite: false,
+    canSubmit: false,
   });
 }
 
@@ -162,8 +163,12 @@ export function createRailwayMessageTemplateDirectoryHandler(
         const data = response.data as Readonly<Record<string, unknown>>;
 
         if (
-          Object.keys(data).sort().join(",") !== "canWrite,templates" ||
-          typeof data.canWrite !== "boolean"
+          !["canWrite,templates", "canSubmit,canWrite,templates"].includes(
+            Object.keys(data).sort().join(","),
+          ) ||
+          typeof data.canWrite !== "boolean" ||
+          ("canSubmit" in data && typeof data.canSubmit !== "boolean") ||
+          (data.canSubmit === true && data.canWrite !== true)
         ) {
           return failure("server-error");
         }
@@ -176,6 +181,7 @@ export function createRailwayMessageTemplateDirectoryHandler(
               status: "ready",
               templates,
               canWrite: data.canWrite,
+              canSubmit: data.canSubmit === true,
             });
       } catch {
         return failure("server-error");

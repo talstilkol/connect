@@ -54,6 +54,10 @@ function mapFailure(code: string): SubmitMessageTemplateActionResult {
       return { status: "not-found" };
     case "INVALID_TRANSITION":
       return { status: "not-editable" };
+    case "CONFIGURATION_REQUIRED":
+      return { status: "meta-configuration-required" };
+    case "CONFLICT":
+      return { status: "state-conflict" };
     default:
       return { status: "server-error" };
   }
@@ -81,10 +85,11 @@ export function createRailwayMessageTemplateSubmissionHandler(
   requireDependencies(dependencies);
 
   return Object.freeze({
-    async submit(templateKeyInput: unknown): Promise<SubmitMessageTemplateActionResult> {
+    async submit(templateKeyInput: unknown, expectedVersion: unknown): Promise<SubmitMessageTemplateActionResult> {
       if (
         typeof templateKeyInput !== "string" ||
-        !templateKeyPattern.test(templateKeyInput)
+        !templateKeyPattern.test(templateKeyInput) ||
+        !Number.isSafeInteger(expectedVersion) || Number(expectedVersion) <= 0
       ) {
         return { status: "invalid-input" };
       }
@@ -114,6 +119,7 @@ export function createRailwayMessageTemplateSubmissionHandler(
 
       const payload = Object.freeze({
         templateKey: templateKeyInput,
+        expectedVersion: Number(expectedVersion),
       }) as RailwayApiJsonObject;
       let idempotencyKey: string;
 

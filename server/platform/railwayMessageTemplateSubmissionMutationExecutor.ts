@@ -10,6 +10,7 @@ export const RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION =
 
 export interface RailwayMessageTemplateSubmissionMutationPayload {
   readonly templateKey: string;
+  readonly expectedVersion: number;
 }
 
 export interface RailwayMessageTemplateSubmissionMutationCommand {

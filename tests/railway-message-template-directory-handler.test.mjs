@@ -99,6 +99,7 @@ test("reads an ordered bounded directory through Railway", async () => {
     status: "ready",
     templates: [template],
     canWrite: true,
+    canSubmit: false,
   });
   assert.deepEqual(testFixture.calls.requests, [{
     contractVersion: "connect.railway-api.v1",
@@ -119,14 +120,38 @@ test("maps configuration and identity failures without API access", async () => 
     status: "configuration-required",
     templates: [],
     canWrite: false,
+      canSubmit: false,
   });
   assert.deepEqual(await unauthenticated.handler.read(), {
     status: "server-error",
     templates: [],
     canWrite: false,
+      canSubmit: false,
   });
   assert.equal(disabled.calls.configurations, 0);
   assert.equal(unauthenticated.calls.requests.length, 0);
+});
+
+test("accepts explicit server capability and rejects inconsistent or malformed capabilities", async () => {
+  const response = success([{ ...template, version: 1 }]);
+  response.data.canSubmit = true;
+  const enabled = await fixture({ responseFor: () => response }).handler.read();
+  assert.equal(enabled.status, "ready");
+  assert.equal(enabled.canSubmit, true);
+  assert.equal(enabled.templates[0].version, 1);
+
+  for (const data of [
+    { ...response.data, canWrite: false },
+    { ...response.data, canSubmit: "true" },
+    { ...response.data, templates: [{ ...template, version: 0 }] },
+    { ...response.data, templates: [{ ...template, version: "1" }] },
+  ]) {
+    const rejected = await fixture({
+      responseFor: () => ({ ...response, data }),
+    }).handler.read();
+    assert.equal(rejected.status, "server-error");
+    assert.equal(rejected.canSubmit, false);
+  }
 });
 
 test("maps bounded API failures", async () => {
@@ -148,6 +173,7 @@ test("maps bounded API failures", async () => {
       status,
       templates: [],
       canWrite: false,
+      canSubmit: false,
     });
   }
 });
@@ -176,6 +202,7 @@ test("rejects malformed, duplicate, and incorrectly ordered responses", async ()
       status: "server-error",
       templates: [],
       canWrite: false,
+      canSubmit: false,
     });
   }
 });
@@ -187,6 +214,7 @@ test("sanitizes client failures and rejects fallback dependencies", async () => 
     status: "server-error",
     templates: [],
     canWrite: false,
+      canSubmit: false,
   });
   assert.throws(
     () => createRailwayMessageTemplateDirectoryHandler({

@@ -59,7 +59,7 @@ const languages: readonly TemplateLanguage[] = [
   "ar",
 ];
 
-const railwayMetaTemplateProviderActionsReady = false;
+const railwayMetaTemplateSyncReady = false;
 
 function toTemplateDraft(
   template: MessageTemplateView,
@@ -87,12 +87,14 @@ export function TemplateDraftEditor({
   initialTemplates,
   initialStatus,
   canWrite,
+  canSubmit = false,
 }: {
   authEnabled: boolean;
   interfaceLanguage: InterfaceLanguage;
   initialTemplates: readonly MessageTemplateView[];
   initialStatus: MessageTemplateDirectoryStatus;
   canWrite: boolean;
+  canSubmit?: boolean;
 }) {
   const messages = readTemplateEditorMessages(interfaceLanguage);
   const {
@@ -415,9 +417,10 @@ export function TemplateDraftEditor({
     });
   };
 
-  const submitTemplate = (templateKey: string) => {
-    if (!railwayMetaTemplateProviderActionsReady || isSubmitting) {
-      if (!railwayMetaTemplateProviderActionsReady) {
+  const submitTemplate = (template: MessageTemplateView) => {
+    const templateKey = template.templateKey;
+    if (!canSubmit || isSubmitting) {
+      if (!canSubmit) {
         setSubmitResult({ status: "meta-configuration-required" });
       }
       return;
@@ -426,7 +429,7 @@ export function TemplateDraftEditor({
     setSubmitResult(null);
     startSubmitting(async () => {
       const result =
-        await submitMessageTemplateAction(templateKey);
+        await submitMessageTemplateAction(templateKey, template.version);
       setSubmitResult(result);
 
       if (result.status === "submitted") {
@@ -453,8 +456,8 @@ export function TemplateDraftEditor({
   };
 
   const syncTemplates = () => {
-    if (!railwayMetaTemplateProviderActionsReady || isSyncing) {
-      if (!railwayMetaTemplateProviderActionsReady) {
+    if (!railwayMetaTemplateSyncReady || isSyncing) {
+      if (!railwayMetaTemplateSyncReady) {
         setSyncResult({ status: "meta-configuration-required" });
       }
       return;
@@ -477,6 +480,7 @@ export function TemplateDraftEditor({
         activeTemplateKey={activeTemplateKey}
         authEnabled={authEnabled}
         canWrite={canWrite}
+        canSubmit={canSubmit}
         initialStatus={initialStatus}
         isSubmitting={isSubmitting}
         isSyncing={isSyncing}
@@ -1082,6 +1086,7 @@ function MessageTemplateDirectory({
   activeTemplateKey,
   authEnabled,
   canWrite,
+  canSubmit = false,
   initialStatus,
   isSubmitting,
   isSyncing,
@@ -1097,13 +1102,14 @@ function MessageTemplateDirectory({
   activeTemplateKey: string | null;
   authEnabled: boolean;
   canWrite: boolean;
+  canSubmit?: boolean;
   initialStatus: MessageTemplateDirectoryStatus;
   isSubmitting: boolean;
   isSyncing: boolean;
   messages: TemplateEditorMessages;
   onLoad: (template: MessageTemplateView) => void;
   onNew: () => void;
-  onSubmit: (templateKey: string) => void;
+  onSubmit: (template: MessageTemplateView) => void;
   onSync: () => void;
   submitResult: SubmitMessageTemplateActionResult | null;
   syncResult: SyncMessageTemplatesActionResult | null;
@@ -1148,7 +1154,7 @@ function MessageTemplateDirectory({
             onClick={onSync}
             aria-describedby="message-template-provider-actions-boundary"
             disabled={
-              !railwayMetaTemplateProviderActionsReady ||
+              !railwayMetaTemplateSyncReady ||
               initialStatus !== "ready" ||
               !canWrite ||
               isSyncing
@@ -1172,14 +1178,17 @@ function MessageTemplateDirectory({
         </div>
       </div>
 
-      {!railwayMetaTemplateProviderActionsReady ? (
+      {!railwayMetaTemplateSyncReady ? (
         <div
           className="inline-notice warning"
           id="message-template-provider-actions-boundary"
           role="status"
         >
           <span aria-hidden="true">i</span>
-          <p>{messages.directory.providerActionsUnavailable}</p>
+          <div>
+            {!canSubmit ? <p>{messages.directory.providerActionsUnavailable}</p> : null}
+            <p>{messages.directory.syncUnavailable}</p>
+          </div>
         </div>
       ) : null}
 
@@ -1252,11 +1261,12 @@ function MessageTemplateDirectory({
                         className="primary-button"
                         aria-describedby="message-template-provider-actions-boundary"
                         disabled={
-                          !railwayMetaTemplateProviderActionsReady ||
+                          !canSubmit ||
+                          template.version === undefined ||
                           isSubmitting
                         }
                         onClick={() =>
-                          onSubmit(template.templateKey)
+                          onSubmit(template)
                         }
                       >
                         {isSubmitting

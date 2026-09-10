@@ -76,10 +76,10 @@ test("stages one deterministic Railway submission request", async () => {
   const expectedIdempotencyKey =
     await deriveRailwayApiDeterministicIdempotencyKey(
       "templates.submit",
-      { templateKey },
+      { templateKey, expectedVersion: 1 },
     );
 
-  assert.deepEqual(await testFixture.handler.submit(templateKey), {
+  assert.deepEqual(await testFixture.handler.submit(templateKey, 1), {
     status: "submission-staged",
     submissionKey,
   });
@@ -88,7 +88,7 @@ test("stages one deterministic Railway submission request", async () => {
     operation: "templates.submit",
     requestKind: "mutation",
     idempotencyKey: expectedIdempotencyKey,
-    payload: { templateKey },
+    payload: { templateKey, expectedVersion: 1 },
   }]);
   assert.doesNotMatch(
     JSON.stringify(testFixture.calls.requests),
@@ -103,11 +103,30 @@ test("stops invalid input and missing configuration before identity", async () =
   assert.deepEqual(await invalid.handler.submit("invalid"), {
     status: "invalid-input",
   });
-  assert.deepEqual(await disabled.handler.submit(templateKey), {
+  assert.deepEqual(await disabled.handler.submit(templateKey, 1), {
     status: "configuration-required",
   });
   assert.equal(invalid.calls.identities, 0);
   assert.equal(disabled.calls.configurations, 0);
+});
+
+test("separates revised drafts while replaying the same version deterministically", async () => {
+  const testFixture = fixture();
+  for (const version of [1, 1, 2]) {
+    await testFixture.handler.submit(templateKey, version);
+  }
+  const keys = testFixture.calls.requests.map((request) => request.idempotencyKey);
+  assert.equal(keys[0], keys[1]);
+  assert.notEqual(keys[0], keys[2]);
+
+  for (const version of [undefined, null, "1", 0, -1, 1.5, Infinity]) {
+    const invalid = fixture();
+    assert.deepEqual(await invalid.handler.submit(templateKey, version), {
+      status: "invalid-input",
+    });
+    assert.equal(invalid.calls.identities, 0);
+    assert.equal(invalid.calls.requests.length, 0);
+  }
 });
 
 test("maps bounded API failures and rejects malformed success payloads", async () => {
@@ -118,7 +137,8 @@ test("maps bounded API failures and rejects malformed success payloads", async (
     ["PERMISSION_DENIED", "permission-denied"],
     ["NOT_FOUND", "not-found"],
     ["INVALID_TRANSITION", "not-editable"],
-    ["CONFLICT", "server-error"],
+    ["CONFLICT", "state-conflict"],
+    ["CONFIGURATION_REQUIRED", "meta-configuration-required"],
     ["RATE_LIMITED", "server-error"],
   ]) {
     const testFixture = fixture({
@@ -128,7 +148,7 @@ test("maps bounded API failures and rejects malformed success payloads", async (
         code,
       }),
     });
-    assert.deepEqual(await testFixture.handler.submit(templateKey), { status });
+    assert.deepEqual(await testFixture.handler.submit(templateKey, 1), { status });
   }
 
   for (const responseFor of [
@@ -138,7 +158,7 @@ test("maps bounded API failures and rejects malformed success payloads", async (
     () => success({ replayed: false, submissionKey, status: "pending", tenantId: 7 }),
   ]) {
     assert.deepEqual(
-      await fixture({ responseFor }).handler.submit(templateKey),
+      await fixture({ responseFor }).handler.submit(templateKey, 1),
       { status: "server-error" },
     );
   }
@@ -146,7 +166,7 @@ test("maps bounded API failures and rejects malformed success payloads", async (
 
 test("sanitizes client failures and rejects fallback dependencies", async () => {
   const failed = fixture({ clientError: new Error("private Railway address") });
-  assert.deepEqual(await failed.handler.submit(templateKey), {
+  assert.deepEqual(await failed.handler.submit(templateKey, 1), {
     status: "server-error",
   });
   assert.throws(

@@ -192,6 +192,7 @@ export interface TemplateEditorMessages {
     newDraft: string;
     readOnly: string;
     providerActionsUnavailable: string;
+    syncUnavailable: string;
     emptyTitle: string;
     emptyDescription: string;
     updated: string;
@@ -355,7 +356,8 @@ const messages = {
       readOnly:
         "התפקיד הנוכחי מורשה לצפות בתבניות אך אינו מורשה לשמור או לשלוח אותן.",
       providerActionsUnavailable:
-        "שליחה ל־Meta וסנכרון מושבתים זמנית עד להשלמת חוזה Outbox, Audit והתאוששות בטוח ב־Railway. אפשר להמשיך ליצור ולערוך טיוטות.",
+        "הגשת תבניות אינה זמינה כעת. אפשר להמשיך ליצור ולערוך טיוטות.",
+      syncUnavailable: "סנכרון מול Meta אינו זמין כעת.",
       emptyTitle: "אין תבניות שמורות",
       emptyDescription:
         "הטיוטה הראשונה תופיע כאן לאחר שמירה מוצלחת ב־PostgreSQL.",
@@ -614,7 +616,8 @@ const messages = {
       readOnly:
         "Your current role may view templates but may not save or submit them.",
       providerActionsUnavailable:
-        "Meta submission and synchronization are temporarily disabled until the safe Railway outbox, audit, and recovery contract is complete. Draft creation and editing remain available.",
+        "Template submission is currently unavailable. Draft creation and editing remain available.",
+      syncUnavailable: "Synchronization with Meta is currently unavailable.",
       emptyTitle: "No saved templates",
       emptyDescription:
         "The first draft will appear here after it is successfully saved in PostgreSQL.",
@@ -873,7 +876,8 @@ const messages = {
       readOnly:
         "يسمح دورك الحالي بعرض القوالب، لكنه لا يسمح بحفظها أو إرسالها.",
       providerActionsUnavailable:
-        "تم تعطيل الإرسال إلى Meta والمزامنة مؤقتًا حتى يكتمل عقد Outbox والتدقيق والاسترداد الآمن في Railway. ما زال إنشاء المسودات وتحريرها متاحًا.",
+        "إرسال القوالب غير متاح حاليًا. ما زال إنشاء المسودات وتحريرها متاحًا.",
+      syncUnavailable: "المزامنة مع Meta غير متاحة حاليًا.",
       emptyTitle: "لا توجد قوالب محفوظة",
       emptyDescription:
         "ستظهر المسودة الأولى هنا بعد حفظها بنجاح في PostgreSQL.",

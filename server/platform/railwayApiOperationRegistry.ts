@@ -556,6 +556,7 @@ export interface RailwayApiOperationRegistryDependencies {
   readonly messageTemplates: Pick<MessageTemplateService, "list">;
   readonly messageTemplateDraftMutations:
     RailwayMessageTemplateDraftMutationExecutor;
+  readonly messageTemplateSubmissionConfigured?: () => boolean;
   readonly messageTemplateSubmissionMutations:
     RailwayMessageTemplateSubmissionMutationExecutor;
   readonly reports: Pick<OperationalReportService, "read">;
@@ -760,16 +761,17 @@ function parseBotFlowDetailsPayload(
 
 function parseMessageTemplateSubmissionPayload(
   payload: RailwayApiJsonObject,
-): Readonly<{ templateKey: string }> {
+): Readonly<{ templateKey: string; expectedVersion: number }> {
   if (
-    !hasExactKeys(payload, ["templateKey"]) ||
+    !hasExactKeys(payload, ["templateKey", "expectedVersion"]) ||
+    !Number.isSafeInteger(payload.expectedVersion) || Number(payload.expectedVersion) <= 0 ||
     typeof payload.templateKey !== "string" ||
     !/^template_v1_[0-9a-f]{64}$/.test(payload.templateKey)
   ) {
     invalidRequest();
   }
 
-  return Object.freeze({ templateKey: payload.templateKey });
+  return Object.freeze({ templateKey: payload.templateKey, expectedVersion: Number(payload.expectedVersion) });
 }
 
 function parseContactListPayload(
@@ -1917,7 +1919,7 @@ async function executeMessageTemplateDraftMutation(
 async function executeMessageTemplateSubmissionMutation(
   dependencies: Readonly<RailwayApiOperationRegistryDependencies>,
   session: Readonly<TenantSession>,
-  payload: Readonly<{ templateKey: string }>,
+  payload: Readonly<{ templateKey: string; expectedVersion: number }>,
   request: Readonly<RailwayApiRequestEnvelope>,
 ): Promise<unknown> {
   const mutationRequest = await requireTenantMutationRequest(
@@ -1927,6 +1929,9 @@ async function executeMessageTemplateSubmissionMutation(
     payload,
     request,
   );
+  if (dependencies.messageTemplateSubmissionConfigured?.() !== true) {
+    throw new RailwayApiDispatchError("CONFIGURATION_REQUIRED");
+  }
   let rawResult: unknown;
 
   try {
@@ -2012,6 +2017,8 @@ export function createRailwayApiOperationRegistry(
     typeof dependencies.messageTemplates?.list !== "function" ||
     typeof dependencies.messageTemplateDraftMutations?.execute !== "function" ||
     typeof dependencies.messageTemplateSubmissionMutations?.execute !== "function" ||
+    (dependencies.messageTemplateSubmissionConfigured !== undefined &&
+      typeof dependencies.messageTemplateSubmissionConfigured !== "function") ||
     typeof dependencies.reports?.read !== "function" ||
     typeof dependencies.mutationRateLimit?.consume !== "function" ||
     typeof dependencies.mutations?.saveContact !== "function"
@@ -2457,6 +2464,8 @@ export function createRailwayApiOperationRegistry(
         templates: (await dependencies.messageTemplates.list(session))
           .map(toMessageTemplateView),
         canWrite: hasPermission(session.role, "templates.write"),
+        canSubmit: hasPermission(session.role, "templates.write") &&
+          dependencies.messageTemplateSubmissionConfigured?.() === true,
       }),
     ),
     createOperation(

@@ -189,6 +189,7 @@ export interface RailwayApiRuntimeOptions {
   readonly messageTemplates: Pick<MessageTemplateService, "list">;
   readonly messageTemplateDraftMutations:
     RailwayMessageTemplateDraftMutationExecutor;
+  readonly messageTemplateSubmissionConfigured?: () => boolean;
   readonly messageTemplateSubmissionMutations:
     RailwayMessageTemplateSubmissionMutationExecutor;
   readonly reports: Pick<OperationalReportService, "read">;
@@ -263,6 +264,7 @@ export function createRailwayApiRuntime(
     messageTemplateDraftMutations: options.messageTemplateDraftMutations,
     messageTemplateSubmissionMutations:
       options.messageTemplateSubmissionMutations,
+    messageTemplateSubmissionConfigured: options.messageTemplateSubmissionConfigured,
     reports: options.reports,
     mutationRateLimit: options.mutationRateLimit,
     mutations: options.mutations,

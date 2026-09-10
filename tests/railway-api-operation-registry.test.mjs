@@ -372,6 +372,7 @@ function persistedCampaign(overrides = {}) {
 }
 
 function fixture({
+  messageTemplateSubmissionConfigured = () => true,
   tenantSession = session(),
   tenantError = null,
   conversationListError = null,
@@ -822,6 +823,7 @@ function fixture({
         };
       },
     },
+    messageTemplateSubmissionConfigured,
     messageTemplateSubmissionMutations: {
       async execute(command) {
         calls.messageTemplateSubmissionMutationCommands.push(command);
@@ -1984,7 +1986,7 @@ test("saves a message template draft through permission, quota, and atomic recei
 
 test("stages a message template submission through the atomic outbox boundary", async () => {
   const { calls, registry } = fixture();
-  const payload = { templateKey: `template_v1_${"e".repeat(64)}` };
+  const payload = { templateKey: `template_v1_${"e".repeat(64)}`, expectedVersion: 1 };
   const request = await organizationMutationRequest(
     "templates.submit",
     payload,
@@ -2036,6 +2038,21 @@ test("lists message templates from the same PostgreSQL service boundary", async 
     JSON.stringify(result),
     /tenantId|metaTemplateId|submissionKey|externalUserId|createdAt/,
   );
+});
+
+test("fails closed for missing submission capability on both reads and direct mutations", async () => {
+  for (const configured of [() => false, () => undefined]) {
+    const { calls, registry } = fixture({ messageTemplateSubmissionConfigured: configured });
+    const directory = await operation(registry, "templates.list").execute(dispatchContext, {}, {});
+    assert.equal(directory.canSubmit, false);
+    const payload = { templateKey: `template_v1_${"e".repeat(64)}`, expectedVersion: 1 };
+    const request = await organizationMutationRequest("templates.submit", payload);
+    await assert.rejects(
+      operation(registry, "templates.submit").execute(dispatchContext, payload, request),
+      (error) => error.code === "CONFIGURATION_REQUIRED",
+    );
+    assert.equal(calls.messageTemplateSubmissionMutationCommands.length, 0);
+  }
 });
 
 test("rejects unsafe organization requests and maps bounded outcomes", async () => {

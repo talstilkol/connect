@@ -170,3 +170,34 @@ isolation ב־Railway Staging ולהפיק Evidence חתום וקצר־תוקף.
 
 7.7 לבצע Evaluation נפרד ל־BullMQ 6 אחרי שכל ארבעת ה־Adapters עוברים את
 אותו Conformance suite. אין לבצע Major upgrade יחד עם Cutover ל־Staging.
+
+
+## 8. חיבור הגשה מהממשק — 10.09.2026
+
+8.1 ה־API Executable מקבל MESSAGE_TEMPLATE_SUBMISSION_ENABLED.
+היעדר ערך, מחרוזת ריקה או false משאירים את ההגשה כבויה. רק true מדויק
+עם META_GRAPH_API_VERSION תקין מאפשר אותה; ערך אחר או Graph חסר בזמן
+הפעלה מפילים Startup לפני יצירת Telemetry או חיבור ל־Redis/PostgreSQL.
+המפתח מוגדר בשרת Railway בלבד, ללא NEXT_PUBLIC וללא Credentials ב־Web.
+
+8.2 לפני שינוי ל־true יש לאמת שה־Worker פועל עם אותה Graph version,
+ש־Meta credentials זמינים, ושתרגיל התור וההתאוששות עבר בגרסה הפרוסה.
+המתג מציין החלטת הפעלה של המפעיל ואינו Health probe. השבתתו מונעת
+בקשות הגשה חדשות; היא אינה מבטלת Outbox שכבר נשמר או בקשה שכבר בטיפול.
+אין בסבב זה שינוי של המשתנה בשום חשבון ספק.
+
+8.3 templates.list מוסיף canSubmit ו־version בכל תבנית. canSubmit
+מחייב גם templates.write. templates.submit דורש templateKey יחד עם
+expectedVersion חיובי ושלם; שניהם נכללים במזהה הדטרמיניסטי. אין UUID.
+בדיקת הגרסה וה־Compare-and-set מונעות הגשת תוכן ששונה לאחר טעינת המסך.
+Receipt replay לאותה גרסה אינו מייצר Outbox נוסף. התשובה pending מעידה
+רק על שמירה בתור, ולא על קבלת התבנית או אישורה ב־Meta.
+
+8.4 סדר שדרוג: API תחילה, Web אחריו. Web חדש מציג גם Directory ישן
+ללא version/canSubmit, אך לא מאפשר הגשה ממנו. API חדש דוחה בקשות
+הגשה ישנות ללא expectedVersion. יש לרענן מסך לאחר השדרוג או עריכה
+מקבילה. אין שינוי בסכמה, במפתחות Outbox קיימים או במדיניות Retry.
+
+8.5 סנכרון Meta ידני נשאר מושבת. הפעולה הנוכחית אינה ניגשת ל־D1;
+חיבור Railway דורש Operation נפרד עם Audit, כתיבה אטומית ובדיקת גרסת
+החיבור לאחר קריאת הספק. אין להסיק מהפעלת הגשה שסנכרון הושלם.

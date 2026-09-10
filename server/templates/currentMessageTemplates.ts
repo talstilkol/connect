@@ -11,6 +11,7 @@ export type CurrentMessageTemplatesResult =
       status: "ready";
       templates: readonly MessageTemplateView[];
       canWrite: boolean;
+      canSubmit: boolean;
     }
   | {
       status: Exclude<
@@ -19,6 +20,7 @@ export type CurrentMessageTemplatesResult =
       >;
       templates: readonly [];
       canWrite: false;
+      canSubmit: false;
     };
 
 export async function readCurrentMessageTemplates():
@@ -30,6 +32,7 @@ Promise<CurrentMessageTemplatesResult> {
       status: "server-error",
       templates: [],
       canWrite: false,
+      canSubmit: false,
     };
   }
 }

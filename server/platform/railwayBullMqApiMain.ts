@@ -1,4 +1,8 @@
 import {
+  inspectRailwayMessageTemplateSubmissionConfiguration,
+  type RailwayMessageTemplateSubmissionEnvironment,
+} from "./railwayMessageTemplateSubmissionConfiguration.ts";
+import {
   startRailwayApiExecutable,
   type RailwayApiMainDependencies,
 } from "./railwayApiMain.ts";
@@ -39,6 +43,8 @@ interface RailwayBullMqApiMainDependencies {
   readonly createProcess: RailwayApiMainDependencies["createProcess"];
   readonly readNodeEnvironment: () => RailwayNodeProcessEnvironment;
   readonly readBullMqEnvironment: () => RailwayBullMqEnvironment;
+  readonly readMessageTemplateSubmissionEnvironment:
+    () => RailwayMessageTemplateSubmissionEnvironment;
   readonly readMetaWebhookEnvironment:
     () => RailwayMetaWebhookRuntimeEnvironment;
   readonly readTelemetryEnvironment:
@@ -60,6 +66,12 @@ const defaultDependencies = Object.freeze({
     return Object.fromEntries(
       railwayBullMqEnvironmentKeys.map((key) => [key, process.env[key]]),
     ) as RailwayBullMqEnvironment;
+  },
+  readMessageTemplateSubmissionEnvironment() {
+    return {
+      MESSAGE_TEMPLATE_SUBMISSION_ENABLED: process.env.MESSAGE_TEMPLATE_SUBMISSION_ENABLED,
+      META_GRAPH_API_VERSION: process.env.META_GRAPH_API_VERSION,
+    };
   },
   readMetaWebhookEnvironment() {
     return {
@@ -98,6 +110,7 @@ const defaultDependencies = Object.freeze({
 
 export type RailwayBullMqApiMainErrorCode =
   | "dependencies-invalid"
+  | "template-submission-configuration-required"
   | "release-evidence-configuration-required"
   | "telemetry-configuration-required"
   | "startup-failed";
@@ -117,6 +130,7 @@ const dependencyKeys = Object.freeze([
   "createRuntime",
   "readBullMqEnvironment",
   "readMetaWebhookEnvironment",
+  "readMessageTemplateSubmissionEnvironment",
   "readNodeEnvironment",
   "readReleaseEvidenceEnvironment",
   "readTelemetryEnvironment",
@@ -185,6 +199,18 @@ export async function startRailwayBullMqApiExecutable(
 ) {
   requireDependencies(dependencies);
 
+  let messageTemplateSubmissionEnvironment: RailwayMessageTemplateSubmissionEnvironment;
+  try {
+    messageTemplateSubmissionEnvironment = dependencies.readMessageTemplateSubmissionEnvironment();
+    if (inspectRailwayMessageTemplateSubmissionConfiguration(
+      messageTemplateSubmissionEnvironment,
+    ).status === "invalid") {
+      throw new Error("Invalid template submission configuration");
+    }
+  } catch {
+    throw new RailwayBullMqApiMainError("template-submission-configuration-required");
+  }
+
   let releaseEvidenceStorageConfiguration: ReturnType<
     typeof inspectRailwayBotReplyStagingReleaseEvidenceStorageConfiguration
   >;
@@ -247,6 +273,7 @@ export async function startRailwayBullMqApiExecutable(
       async createRuntime({ postgresTelemetry }) {
         return dependencies.createRuntime({
           postgresTelemetry,
+          messageTemplateSubmissionEnvironment,
           requestTelemetry: telemetryRuntime.logger,
           bullMqEnvironment: dependencies.readBullMqEnvironment(),
           metaWebhookEnvironment:

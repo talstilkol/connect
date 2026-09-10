@@ -42,6 +42,9 @@ function fixture(overrides = {}) {
       calls.push("redis-environment.read");
       return { REDIS_URL: "redis://127.0.0.1:6379/0" };
     },
+    readMessageTemplateSubmissionEnvironment() {
+      return overrides.messageTemplateSubmissionEnvironment ?? {};
+    },
     readMetaWebhookEnvironment() {
       calls.push("meta-environment.read");
       return { META_APP_SECRET: "secret" };
@@ -210,6 +213,32 @@ test("binds PostgreSQL release evidence identity without publishing JSON variabl
     ),
     false,
   );
+});
+
+test("requires an explicit valid submission opt-in before startup and passes it to PostgreSQL", async () => {
+  for (const environment of [
+    {},
+    { MESSAGE_TEMPLATE_SUBMISSION_ENABLED: "false" },
+    { MESSAGE_TEMPLATE_SUBMISSION_ENABLED: "true", META_GRAPH_API_VERSION: "v23.0" },
+  ]) {
+    const testFixture = fixture({ messageTemplateSubmissionEnvironment: environment });
+    await startRailwayBullMqApiExecutable(testFixture.dependencies);
+    assert.deepEqual(testFixture.captured.runtime.messageTemplateSubmissionEnvironment, environment);
+  }
+  for (const environment of [
+    { MESSAGE_TEMPLATE_SUBMISSION_ENABLED: "true" },
+    { MESSAGE_TEMPLATE_SUBMISSION_ENABLED: "TRUE" },
+    { MESSAGE_TEMPLATE_SUBMISSION_ENABLED: " true " },
+    { MESSAGE_TEMPLATE_SUBMISSION_ENABLED: "true", META_GRAPH_API_VERSION: "latest" },
+  ]) {
+    const testFixture = fixture({ messageTemplateSubmissionEnvironment: environment });
+    await assert.rejects(
+      startRailwayBullMqApiExecutable(testFixture.dependencies),
+      (error) => error instanceof RailwayBullMqApiMainError &&
+        error.code === "template-submission-configuration-required",
+    );
+    assert.deepEqual(testFixture.calls, []);
+  }
 });
 
 test("fails closed before startup for an invalid release evidence store", async () => {

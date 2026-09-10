@@ -132,6 +132,7 @@ export function WorkspaceSectionContent({
   initialMessageTemplates,
   initialMessageTemplateStatus,
   initialCanWriteMessageTemplates,
+  initialCanSubmitMessageTemplates = false,
   initialCampaigns,
   initialCampaignTemplates,
   initialCampaignAudiences,
@@ -165,6 +166,7 @@ export function WorkspaceSectionContent({
   initialMessageTemplates: readonly MessageTemplateView[];
   initialMessageTemplateStatus: MessageTemplateDirectoryStatus;
   initialCanWriteMessageTemplates: boolean;
+  initialCanSubmitMessageTemplates?: boolean;
   initialCampaigns: readonly CampaignView[];
   initialCampaignTemplates:
     readonly CampaignTemplateOptionView[];
@@ -233,6 +235,7 @@ export function WorkspaceSectionContent({
               initialTemplates={initialMessageTemplates}
               initialStatus={initialMessageTemplateStatus}
               canWrite={initialCanWriteMessageTemplates}
+              canSubmit={initialCanSubmitMessageTemplates}
             />
           ) : null}
           {activeSection === "campaigns" ? (
@@ -361,12 +364,14 @@ function Templates({
   initialTemplates,
   initialStatus,
   canWrite,
+  canSubmit,
 }: {
   authEnabled: boolean;
   language: InterfaceLanguage;
   initialTemplates: readonly MessageTemplateView[];
   initialStatus: MessageTemplateDirectoryStatus;
   canWrite: boolean;
+  canSubmit: boolean;
 }) {
   const messages = readTemplateEditorMessages(language);
 
@@ -382,6 +387,7 @@ function Templates({
         initialTemplates={initialTemplates}
         initialStatus={initialStatus}
         canWrite={canWrite}
+        canSubmit={canSubmit}
       />
     </FeaturePage>
   );

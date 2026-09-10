@@ -87,6 +87,7 @@ export default async function WorkspaceSectionPage({
           status: "configuration-required" as const,
           templates: [],
           canWrite: false as const,
+          canSubmit: false as const,
         }),
     section === "campaigns" && authEnabled
       ? readCurrentCampaigns()
@@ -186,6 +187,7 @@ export default async function WorkspaceSectionPage({
       initialMessageTemplateStatus={
         messageTemplatesResult.status
       }
+      initialCanSubmitMessageTemplates={messageTemplatesResult.canSubmit}
       initialCanWriteMessageTemplates={
         messageTemplatesResult.canWrite
       }

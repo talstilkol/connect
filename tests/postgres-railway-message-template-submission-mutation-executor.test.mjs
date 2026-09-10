@@ -77,7 +77,7 @@ function command(overrides = {}) {
     operation: RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION,
     idempotencyKey,
     requestDigest,
-    payload: { templateKey },
+    payload: { templateKey, expectedVersion: 1 },
     ...overrides,
   };
 }
@@ -307,4 +307,28 @@ test("fails closed before SQL for malformed commands and after storage faults", 
     tenantId: null,
     queueMessage: null,
   });
+});
+
+test("rejects a stale draft version before any template, outbox or audit write", async () => {
+  const fixture = executorFixture([
+    { rows: [{ idempotencyKey }], rowCount: 1 },
+    {
+      rows: [{ version: 3, wabaId: "123456789", status: "connected" }],
+      rowCount: 1,
+    },
+    { rows: [templateRow({ version: 2 })], rowCount: 1 },
+  ]);
+  assert.deepEqual(await fixture.executor.execute(command()), {
+    outcome: "not-editable", tenantId: null, queueMessage: null,
+  });
+  fixture.transaction.assertConsumed();
+  assert.equal(fixture.transaction.calls.length, 3);
+
+  for (const expectedVersion of [undefined, "1", 0, -1, 1.5]) {
+    const invalid = executorFixture([]);
+    assert.deepEqual(await invalid.executor.execute(command({
+      payload: { templateKey, expectedVersion },
+    })), { outcome: "unavailable", tenantId: null, queueMessage: null });
+    assert.equal(invalid.transactionCalls.length, 0);
+  }
 });

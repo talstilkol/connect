@@ -191,7 +191,9 @@ function validateCommand(
     !idempotencyKeyPattern.test(command.idempotencyKey) ||
     !requestDigestPattern.test(command.requestDigest) ||
     !command.payload || typeof command.payload !== "object" ||
-    Object.keys(command.payload).length !== 1 ||
+    Object.keys(command.payload).sort().join(",") !== "expectedVersion,templateKey" ||
+    !Number.isSafeInteger(command.payload.expectedVersion) ||
+    command.payload.expectedVersion <= 0 ||
     !templateKeyPattern.test(command.payload.templateKey)
   ) {
     throw new Error("Railway message template submission command is invalid");
@@ -299,7 +301,7 @@ async function stage(
   if (draft === null) {
     throw new StagingFailure("not-found");
   }
-  if (draft.status !== "draft") {
+  if (draft.status !== "draft" || draft.version !== command.payload.expectedVersion) {
     throw new StagingFailure("not-editable");
   }
 
