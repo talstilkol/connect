@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { tmpdir } from 'node:os';
 import test from 'node:test';
 
 import {
@@ -60,8 +61,9 @@ test('mutation campaign blocks one case for every v7 hostile finding', () => {
   assert.ok(rows.every((row) => row.actual === 'BLOCK'));
 });
 
-test('source reader rejects traversal, symlink and hard-link substitution', () => {
-  const testRoot = `/private/tmp/connect-b0-v8-core-test-${process.pid}`;
+test('source reader rejects traversal, symlink and hard-link substitution', (t) => {
+  const testRoot = path.join(tmpdir(), `connect-b0-v8-core-test-${process.pid}`);
+  t.after(() => fs.rmSync(testRoot, { recursive: true, force: true }));
   if (fs.existsSync(testRoot)) fs.rmSync(testRoot, { recursive: true, force: true });
   fs.mkdirSync(path.join(testRoot, 'docs', 'planning'), { recursive: true });
   const source = path.join(testRoot, 'docs', 'planning', 'source.txt');
@@ -73,7 +75,6 @@ test('source reader rejects traversal, symlink and hard-link substitution', () =
   expectBlocked(() => readRegularFileNoFollow(testRoot, 'docs/planning/link.txt'), /symlink rejected/);
   fs.linkSync(source, path.join(testRoot, 'docs', 'planning', 'hard.txt'));
   expectBlocked(() => readRegularFileNoFollow(testRoot, 'docs/planning/source.txt'), /hard-linked file rejected/);
-  fs.rmSync(testRoot, { recursive: true, force: true });
 });
 
 test('CAS commits exact state once and supports authoritative response-loss readback', () => {
