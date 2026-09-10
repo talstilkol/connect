@@ -87,6 +87,8 @@ export interface MetaEmbeddedSignupAttemptCoordinator {
   acceptMessageResult(
     result: MetaEmbeddedSignupMessageResult,
   ): void;
+  // Abandon a closed UI without reporting another result or retaining its code.
+  dispose(): void;
   expire(): void;
   isSettled(): boolean;
 }
@@ -371,6 +373,12 @@ export function createMetaEmbeddedSignupAttemptCoordinator(
   let assets: MetaEmbeddedSignupAssets | null = null;
   let settled = false;
 
+  const dispose = () => {
+    settled = true;
+    authorizationCode = null;
+    assets = null;
+  };
+
   const finish = (
     result: MetaEmbeddedSignupAttemptResult,
   ) => {
@@ -378,9 +386,7 @@ export function createMetaEmbeddedSignupAttemptCoordinator(
       return;
     }
 
-    settled = true;
-    authorizationCode = null;
-    assets = null;
+    dispose();
     onResult(result);
   };
 
@@ -445,6 +451,8 @@ export function createMetaEmbeddedSignupAttemptCoordinator(
 
       finish({ status: "client-error" });
     },
+
+    dispose,
 
     expire() {
       finish({ status: "client-error" });

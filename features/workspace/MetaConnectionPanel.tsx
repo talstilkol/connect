@@ -99,8 +99,15 @@ export function MetaConnectionPanel({
   const activeAttemptRef =
     useRef<ActiveMetaSignupAttempt | null>(null);
   const panelActiveRef = useRef(true);
+  const closePanel = () => {
+    // Cancel before the parent unmounts: an SDK callback may still be pending.
+    panelActiveRef.current = false;
+    activeAttemptRef.current?.cleanup();
+    preparedLaunchRef.current = null;
+    onClose();
+  };
   const dialogRef =
-    useAccessibleDialog(onClose);
+    useAccessibleDialog(closePanel);
 
   useEffect(() => {
     if (
@@ -162,6 +169,7 @@ export function MetaConnectionPanel({
 
   const startMetaEmbeddedSignup = () => {
     if (
+      !panelActiveRef.current ||
       embeddedSignup.status !== "configured" ||
       sdkStatus !== "ready" ||
       sdkRef.current === null ||
@@ -194,10 +202,12 @@ export function MetaConnectionPanel({
     let timeout: ReturnType<typeof setTimeout> | null = null;
     const attempt: ActiveMetaSignupAttempt = {
       cleanup() {
+        coordinator.dispose();
         unsubscribe();
 
         if (timeout !== null) {
           clearTimeout(timeout);
+          timeout = null;
         }
 
         if (activeAttemptRef.current === attempt) {
@@ -208,7 +218,9 @@ export function MetaConnectionPanel({
     const coordinator =
       createMetaEmbeddedSignupAttemptCoordinator(
         (result) => {
+          const current = panelActiveRef.current && activeAttemptRef.current === attempt;
           attempt.cleanup();
+          if (!current) return;
 
           if (result.status !== "ready") {
             if (panelActiveRef.current) {
@@ -262,6 +274,7 @@ export function MetaConnectionPanel({
         sdkRef.current,
         embeddedSignup.configurationId,
         (result) => {
+          if (!panelActiveRef.current || activeAttemptRef.current !== attempt || coordinator.isSettled()) return;
           if (result.status === "authorized") {
             if (timeout !== null) {
               clearTimeout(timeout);
@@ -370,7 +383,7 @@ export function MetaConnectionPanel({
         className="modal-backdrop"
         aria-label={messages.aria.closeBackdrop}
         tabIndex={-1}
-        onClick={onClose}
+        onClick={closePanel}
       />
       <section
         className="connection-panel"
@@ -393,7 +406,7 @@ export function MetaConnectionPanel({
             className="close-button"
             aria-label={messages.aria.closeButton}
             data-dialog-initial-focus
-            onClick={onClose}
+            onClick={closePanel}
           >
             ×
           </button>
@@ -469,7 +482,7 @@ export function MetaConnectionPanel({
           </div>
         ) : null}
         <div className="panel-footer">
-          <button type="button" className="secondary-button" onClick={onClose}>
+          <button type="button" className="secondary-button" onClick={closePanel}>
             {messages.actions.close}
           </button>
           <button
