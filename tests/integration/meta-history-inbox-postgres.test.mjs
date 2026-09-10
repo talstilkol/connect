@@ -445,6 +445,101 @@ async function bindingRows(f) {
   return (await pool.query('SELECT * FROM meta_history_media_bindings WHERE tenant_id=$1', [f.scope.tenantId])).rows;
 }
 
+function captionMedia(kind = 'image', caption = message().text.body) {
+  const media = mediaValue(), previous = media.messages[0].image;
+  delete media.messages[0].image;
+  media.messages[0].type = kind;
+  media.messages[0][kind] = { id: previous.id, sha256: previous.sha256, caption };
+  return media;
+}
+
+test('bound placeholder metadata reaches the thread and preview while preserving original context and immutable references', async () => {
+  for (const kind of ['image', 'audio', 'video', 'document', 'sticker']) {
+    for (const mediaFirst of [true, false]) {
+      const from = mediaFirst ? customerPhone : message().from;
+      const f = await mediaCase({ mediaFirst, original: mediaPlaceholder({ from }), media: captionMedia(kind) });
+      const before = await thread(f);
+      assert.equal(before.rows[0].contentKind, 'media_placeholder'); assert.equal(before.rows[0].textContent, null);
+      const snapshot = (await pool.query('SELECT * FROM meta_history_inbox_messages WHERE tenant_id=$1', [f.scope.tenantId])).rows;
+      assert.equal(await mediaBindings.bindNext(), 'bound');
+      const result = await thread(f), caption = ['image', 'video', 'document'].includes(kind) ? message().text.body : null;
+      assert.deepEqual(result.rows[0], { ...before.rows[0], contentKind: kind, textContent: caption });
+      assert.deepEqual(result.conversation, { ...before.conversation, lastMessage: { ...before.conversation.lastMessage, contentKind: kind, textContent: caption } });
+      assert.equal(result.view.messages[0].contentKind, kind); assert.equal(result.view.messages[0].textContent, caption);
+      assert.deepEqual((await pool.query('SELECT * FROM meta_history_inbox_messages WHERE tenant_id=$1', [f.scope.tenantId])).rows, snapshot);
+      assert.equal((await counts(f)).messages, '0'); assert.equal(result.conversation.unreadCount, 0);
+      assert.equal((await mediaBindings.readBoundMedia(f.scope.tenantId, f.key)).message.contentKind, 'media_placeholder');
+    }
+  }
+});
+
+test('bound placeholder caption revisions and removal override captured media without reauthorizing attachment access', async () => {
+  for (const kind of ['image', 'video', 'document']) {
+    const f = await mediaCase({ media: captionMedia(kind) }); await mediaBindings.bindNext();
+    const before = await thread(f);
+    const change = { ...edit(f), contentKind: kind, mutation: { kind: 'edit', originalProviderMessageId: mediaValue().messages[0].id } };
+    await echoes.record(f.scope, change);
+    const edited = await thread(f);
+    assert.equal(edited.rows.length, 1); assert.equal(edited.rows[0].contentKind, kind);
+    assert.equal(edited.rows[0].textContent, change.textContent); assert.equal(edited.rows[0].contentState, 'edited');
+    assert.equal(edited.rows[0].occurredAt, before.rows[0].occurredAt);
+    assert.equal(edited.conversation.lastMessage.textContent, change.textContent);
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+    await echoes.record(f.scope, { ...change, providerMessageId: 'wamid.edit-conflict', textContent: 'incompatible' });
+    const conflicted = await thread(f);
+    assert.equal(conflicted.rows[0].contentState, 'conflicted'); assert.equal(conflicted.rows[0].textContent, null);
+    assert.equal(conflicted.conversation.lastMessage.textContent, null);
+    await echoes.record(f.scope, { ...change, providerMessageId: 'wamid.history-edit-clear', textContent: null, occurredAt: '2026-09-09T09:01:00.000Z' });
+    assert.equal((await thread(f)).rows[0].textContent, null);
+    await echoes.record(f.scope, { ...revoke(f), mutation: { kind: 'revoke', originalProviderMessageId: change.mutation.originalProviderMessageId } });
+    const removed = await thread(f);
+    assert.equal(removed.rows[0].contentState, 'deleted'); assert.equal(removed.rows[0].textContent, null);
+    assert.equal(removed.rows[0].occurredAt, before.rows[0].occurredAt);
+  }
+});
+
+test('unbound and foreign bindings cannot supply placeholder display metadata and known originals retain their own caption', async () => {
+  const a = await mediaCase({ media: captionMedia('image', 'original caption') }); await mediaBindings.bindNext();
+  const b = await mediaCase({ media: captionMedia('document') });
+  const pending = await thread(b); assert.equal(pending.rows[0].contentKind, 'media_placeholder'); assert.equal(pending.rows[0].textContent, null);
+  await mediaBindings.bindNext();
+  assert.equal((await thread(a)).rows[0].textContent, 'original caption');
+  assert.equal((await thread(b)).rows[0].contentKind, 'document');
+  assert.equal((await thread(b)).rows[0].textContent, message().text.body);
+  const c = await mediaCase({ original: mediaPlaceholder({ type: 'image', image: {} }), media: captionMedia() });
+  await mediaBindings.bindNext();
+  assert.equal((await thread(c)).rows[0].contentKind, 'image'); assert.equal((await thread(c)).rows[0].textContent, null);
+});
+
+test('bound placeholder captions disappear after refusal or conflicting media and remain scoped to the current connection', async () => {
+  for (const change of ['refusal', 'media-conflict', 'revoked', 'version', 'suspended', 'rejected']) {
+    const f = await mediaCase({ media: captionMedia() }); await mediaBindings.bindNext();
+    assert.equal((await thread(f)).rows[0].textContent, message().text.body);
+    if (change === 'refusal') await signed(f, declinedValue());
+    if (change === 'media-conflict') await signed(f, captionMedia('image', 'original caption'));
+    if (change === 'revoked') await meta.revokeConnection(f.scope.tenantId, f.scope.wabaId, f.scope.connectionVersion);
+    if (change === 'version') await meta.saveAssetSnapshot({ tenantId: f.scope.tenantId, businessPortfolioId: f.connection.businessPortfolioId, wabaId: f.scope.wabaId, phoneNumberId: f.scope.phoneNumberId });
+    if (change === 'suspended') await pool.query("UPDATE tenants SET status='suspended' WHERE id=$1", [f.scope.tenantId]);
+    if (change === 'rejected') await requests.finish(await requests.read(f.scope.tenantId, 'history'), { status: 'rejected', requestId: null });
+    const result = await thread(f);
+    assert.equal(result.rows.length, 0); assert.equal(result.conversation.lastMessage, null);
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+    assert.equal((await bindingRows(f)).length, 1);
+  }
+});
+
+test('a placeholder edit without a verified original type or with a contradictory type remains hidden', async () => {
+  for (const bound of [false, true]) {
+    const f = await mediaCase({ media: captionMedia() });
+    if (bound) await mediaBindings.bindNext();
+    await echoes.record(f.scope, { ...edit(f), contentKind: bound ? 'document' : 'image',
+      mutation: { kind: 'edit', originalProviderMessageId: mediaValue().messages[0].id } });
+    const result = await thread(f);
+    assert.equal(result.rows.length, 0); assert.equal(result.conversation.lastMessage, null);
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+  }
+});
+
 test('signed media binds before or after projection, keeps original context and leaves binary availability unclaimed', async () => {
   for (const mediaFirst of [true, false]) {
     const f = await mediaCase({ mediaFirst }); const before = await thread(f);
@@ -455,7 +550,10 @@ test('signed media binds before or after projection, keeps original context and 
     assert.equal(bound.message.direction, 'outbound'); assert.equal(bound.message.deliveryState, 'PLAYED');
     assert.notEqual(bound.message.occurredAt, bound.media.reportedAt);
     assert.equal(bound.media.content.id, mediaValue().messages[0].image.id);
-    assert.deepEqual(await thread(f), before);
+    const after = await thread(f);
+    assert.deepEqual(after.rows[0], { ...before.rows[0], contentKind: 'image' });
+    assert.deepEqual(after.conversation, { ...before.conversation,
+      lastMessage: { ...before.conversation.lastMessage, contentKind: 'image' } });
     assert.equal(before.rows[0].contentKind, 'media_placeholder');
     const rows = await bindingRows(f); assert.equal(rows.length, 1);
     assert.doesNotMatch(JSON.stringify(rows), /mime_type|caption|reportedSender|download|24230790383178626/);
@@ -796,7 +894,7 @@ test('mismatching provider bytes or metadata never change durable bindings or cl
     const runtime = acquisitionRuntime(f, mismatch === 'bytes' ? { binary: () => binaryResponse(changed) } : { metadata: () => metadataResponse({ sha256: '0'.repeat(64) }) });
     await acquisitionRejected(runtime.service.download(f.session, f.key), 'CONTENT_MISMATCH');
     assert.equal(runtime.calls.length, mismatch === 'bytes' ? 2 : 1); assert.deepEqual(await bindingRows(f), before);
-    assert.equal((await state(f)).max_progress, 55); assert.equal((await thread(f)).rows[0].contentKind, 'media_placeholder');
+    assert.equal((await state(f)).max_progress, 55); assert.equal((await thread(f)).rows[0].contentKind, 'image');
   }
 });
 
