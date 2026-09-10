@@ -726,4 +726,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "ALTER TABLE meta_message_echo_states ADD COLUMN edit_kind TEXT",
     summary: "Railway retains media-caption edit types with ordered revision state, caption removal and immutable event identity while preserving text edits and deletion tombstones.",
   }),
+  Object.freeze({
+    migration: "0075_meta_message_echo_original_captions.sql",
+    token: "ALTER TABLE meta_message_echo_states ADD COLUMN original_caption_digest TEXT",
+    summary: "Railway binds newly observed original media captions separately from legacy echo digests and receipts, while revisions and deletion remain authoritative.",
+  }),
 ]);

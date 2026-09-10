@@ -21,6 +21,7 @@ import {
   messageContentKinds,
   isMessageContentStateConsistent,
   isCaptionMessageKind,
+  isEditedMessageTextValid,
   messageDirections,
   messageStatuses,
   persistedConversationStatuses,
@@ -582,8 +583,8 @@ function parseInboundContact(value: unknown): InboundContactIdentity {
   });
 }
 
-// Inbox reads may contain original captions from captured history. Live message
-// writes and service-window reads keep their existing validation contract.
+// Historical captions retain their captured read contract. Live outbound media
+// captions below use the normalized echo contract; inbound writes are unchanged.
 function isInboxReadTextValid(kind: unknown, text: unknown): boolean {
   if (kind === "text") return typeof text === "string" && text.trim().length > 0 && text.length <= 16_384;
   if (isCaptionMessageKind(kind) && typeof text === "string") return text.length <= 16_384 && !text.includes("\u0000");
@@ -627,7 +628,8 @@ function parseMessage(value: unknown): PersistedMessage {
   );
   const status = messageStatuses.find((candidate) => candidate === row.status);
   const textContent = row.textContent;
-  const textIsValid = row.contentState === "edited" || (
+  const textIsValid = row.contentState === "edited" ||
+    (direction === "outbound" && isCaptionMessageKind(contentKind) && isEditedMessageTextValid(contentKind, textContent)) || (
     contentKind === "text"
       ? typeof textContent === "string" &&
         textContent.trim().length > 0 &&

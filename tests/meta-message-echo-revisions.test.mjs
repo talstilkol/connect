@@ -6,7 +6,7 @@ import { toInboxMessageView } from "../server/conversations/conversationView.ts"
 import { messageBody } from "../features/conversations/conversationPresentation.ts";
 import { readConversationMessages } from "../features/conversations/conversationMessages.ts";
 
-const empty = { originalDigest: null, contentState: "original", editAt: null, editText: null, editKind: null };
+const empty = { originalDigest: null, originalCaptionDigest: null, contentState: "original", editAt: null, editText: null, editKind: null };
 const edit = (textContent, occurredAt = "2026-09-09T08:00:00.000Z") => ({ contentKind: "text", textContent, occurredAt, mutation: { kind: "edit" } });
 const revoke = { mutation: { kind: "revoke" } };
 
