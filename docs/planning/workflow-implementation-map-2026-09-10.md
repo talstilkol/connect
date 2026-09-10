@@ -1,0 +1,103 @@
+# 1. Connect — מפת מימוש ופערים בתהליכי המוצר
+
+1.1 נבדק ב־10.09.2026 מול בסיס קוד `801d7d868c6107fe37f3f569d3bcb05491ddc340`.
+המפה משלימה את [עקיבות 27 דרישות האפיון](../product-specification-traceability.md)
+ואת משימה 1.2 ב־[Master Plan](launch-master-plan-2026-09-09.md).
+היא מתארת קוד וחיבורי רכיבים; היא אינה ראיית שימוש ב־Staging.
+
+1.2 **ממצא מרכזי:** חסרות גם פעולות מוצר וחיבורי Runtime. פתיחת החשבונות
+לבד אינה משלימה Templates, הפעלת קמפיינים, השהיה/ביטול או מענה ידני ב־Inbox.
+
+1.3 משמעות הסיווג: **KEEP** — לשמר את המימוש הקיים; **VERIFY** — להוכיח
+את התהליך בשילוב אמיתי; **REFACTOR** — להשלים או להחליף חיבור קוד חסר.
+אותו תהליך יכול לדרוש גם KEEP וגם VERIFY. רכיב שנדחה לאחר הפיילוט נשאר
+בתוכנית, ואינו מסומן כמושלם.
+
+# 2. מסלול הבקשה הקיים
+
+2.1 מסכי Workspace נטענים דרך [עמוד המקטע](../../app/workspace/[section]/page.tsx)
+ומוצגים ב־[WorkspaceSectionContent](../../features/workspace/WorkspaceSectionContent.tsx).
+פעולות המשתמש עוברות ב־Server Actions ל־Railway Handler וללקוח API.
+
+2.2 נקודת הכניסה העסקית היא `POST /v1/connect`, עם שם Operation במעטפה —
+לפי [חוזה ה־API](../../server/platform/railwayApiContract.ts).
+[מרשם הפעולות הראשי](../../server/platform/railwayApiOperationRegistry.ts)
+מכיל 32 מדיניות־פעולה. פעולות זהות, צוות, Meta ו־System Admin מצורפות
+בנפרד ב־[Railway API Runtime](../../server/platform/railwayApiRuntime.ts);
+32 אינו מספר כל הפעולות במערכת.
+
+2.3 [PostgreSQL API Runtime](../../server/platform/railwayPostgresApiRuntime.ts)
+מחבר Services ל־[PostgreSQL Foundation](../../server/platform/railwayPostgresFoundation.ts).
+קיומו של Adapter אינו מוכיח שה־Executable מעביר אליו את התצורה הנדרשת.
+זהו ההבדל שנמצא במסלול הקמפיינים והתבניות.
+
+# 3. מפת תהליכים
+
+| מזהה ותהליך | UI / Server Action | Operation / מאגר יעד | סיווג ופער שנותר |
+|---|---|---|---|
+| W01 הרשמה וכניסה | [Login](../../app/login/page.tsx), [Register](../../app/register/page.tsx) | Clerk; [זהות שרת Railway](../../server/platform/currentRailwayApiServerIdentity.ts) | KEEP + VERIFY: אפליקציית Clerk, Organization ו־MFA אמיתיים; אין ראיית כניסה חיה |
+| W02 הקמת עסק | [Onboarding](../../features/workspace/WorkspaceOnboarding.tsx), [שמירת פרופיל](../../server/onboarding/saveBusinessProfileAction.ts) | `onboarding.business-profile.read/save`; [Profile](../../server/platform/postgresBusinessProfileRepository.ts), [Provisioning](../../server/platform/postgresTenantProvisioningRepository.ts) | KEEP + VERIFY: יצירת בעלים ועסק, Replay ובידוד בשתי כניסות מקבילות |
+| W03 מעבר עסק | [Tenant switcher](../../features/workspace/TenantWorkspaceSwitcher.tsx), [פעולות בחירה](../../server/auth/tenantSelectionActions.ts) | [פעולות Tenant selection](../../server/platform/railwayTenantSelectionOperations.ts), [מאגר הבחירה](../../server/platform/postgresTenantSelectionRepository.ts) | KEEP + VERIFY: Membership עדכני ובקשת מעבר שלא מעבירה נתוני עסק אחר |
+| W04 צוות והזמנות | [Team directory](../../features/team/TeamDirectory.tsx), [עמוד קבלה](../../app/invite/[invitationKey]/page.tsx) | [Directory](../../server/platform/railwayTeamDirectoryOperation.ts), [Membership](../../server/platform/railwayTeamMembershipOperations.ts), [בקשה](../../server/platform/railwayTeamInvitationRequestOperation.ts), [קבלה](../../server/platform/railwayTeamInvitationAcceptanceOperation.ts) | KEEP + VERIFY: הזמנה מול Clerk, תפוגה, ביטול, העברת בעלות ו־429; נדרש ספק אמיתי |
+| W05 אנשי קשר | [Contact directory](../../features/contacts/ContactDirectory.tsx), [פעולות](../../server/contacts/contactActions.ts) | `contacts.list/save`; [קריאה](../../server/platform/postgresContactReadRepository.ts), [Mutation executor](../../server/platform/postgresRailwayApiMutationExecutor.ts) | KEEP + VERIFY: הרשאות, עימוד, שינוי מקביל ושחזור לאחר שגיאה |
+| W06 רשימות, תגיות והסכמה | [Contact organization](../../features/contacts/ContactOrganization.tsx), [פעולות ארגון](../../server/contacts/contactOrganizationActions.ts) | `contacts.organization.*`, `contacts.consent.grant/unsubscribe`; [ארגון](../../server/platform/postgresContactOrganizationRepository.ts), [הסכמה](../../server/platform/postgresContactConsentRepository.ts) | KEEP + VERIFY: הסרה לפני שליחה, Snapshot וקלט מורשה |
+| W07 ייבוא אנשי קשר | [Import](../../features/contacts/ContactImport.tsx), [פעולות ייבוא](../../server/contacts/contactImportActions.ts) | `contacts.import.start/chunk`; [מאגר ייבוא](../../server/platform/postgresContactImportRepository.ts) | KEEP + VERIFY: CSV/XLSX אמיתיים ומורשים, שגיאה באמצע, כפילות והסכמה |
+| W08 חיבור WhatsApp | [Onboarding](../../features/workspace/WorkspaceOnboarding.tsx), [פעולות Embedded Signup](../../server/meta/metaEmbeddedSignupActions.ts) | [פעולות Meta signup](../../server/platform/railwayMetaSignupOperations.ts), [Runtime](../../server/platform/railwayMetaSignupRuntime.ts), [מאגר Meta](../../server/platform/postgresMetaRepository.ts) | KEEP + VERIFY: קוד/QR רשמי, מספר Business זכאי, ביטול ופקיעה; אין הוכחת מכשיר |
+| W09 היסטוריה, Echo וניתוק | [Inbox](../../features/conversations/ConversationInbox.tsx) | [סנכרון](../../server/platform/railwayMetaDataSyncRuntime.ts), [Echo](../../server/platform/postgresMetaMessageEchoRepository.ts), [Lifecycle](../../server/platform/postgresMetaAccountLifecycleRepository.ts) | KEEP + VERIFY + REFACTOR: השלמת ייבוא וחידוש אחרי Offboarding עם שיוך לדור הנכון, כמפורט במשימות 4.6–4.8 |
+| W10 מדיה מהיסטוריה | [הצגת הודעה](../../features/conversations/ConversationMessageView.tsx), [אבחון משימות](../../app/workspace/media-tasks/page.tsx) | [קריאת קובץ](../../server/platform/railwayMetaMediaFileReadRuntime.ts), [ניקוי](../../server/platform/postgresMetaMediaCleanupRepository.ts) | KEEP + VERIFY + REFACTOR: S3/סריקה חיים, גרסאות סותרות וניקוי אוטומטי; ההפעלה נשארת מוגבלת |
+| W11 טיוטת Template | [Template editor](../../features/templates/TemplateDraftEditor.tsx), [פעולות](../../server/templates/messageTemplateActions.ts) | `templates.list/draft.save`; [מאגר Templates](../../server/platform/postgresMessageTemplateRepository.ts) | KEEP + VERIFY: כתיבה וקריאה ב־PostgreSQL קיימות; זו אינה הגשה ל־Meta |
+| W12 הגשה וסנכרון Template | אותו Editor ו־Action של W11 | `templates.submit`; [Submission executor](../../server/platform/postgresRailwayMessageTemplateSubmissionMutationExecutor.ts), [Outbox](../../server/platform/postgresMessageTemplateSubmissionOutboxRepository.ts) | REFACTOR + VERIFY: שני הכפתורים ושתי הפעולות חסומים בקבוע false; Sync הישן פונה ל־D1. Adapter/Worker קיימים, אך המסלול מהמשתמש אינו מופעל |
+| W13 יצירת קמפיין ותזמון | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות](../../server/campaigns/campaignActions.ts) | `campaigns.directory.read/snapshot.save/activate`; [קמפיין](../../server/platform/postgresCampaignRepository.ts), [Dispatch](../../server/platform/postgresCampaignDispatchRepository.ts) | KEEP + REFACTOR + VERIFY: Snapshot ותזמון קיימים; ה־API Executable אינו מעביר campaignDeliveryConfigured, ולכן ברירת המחדל חוסמת הפעלה |
+| W14 השהיית וביטול קמפיין | ב־Campaign manager קיימת הפעלה בלבד | [חוזה Mutations](../../server/platform/railwayCampaignMutationExecutor.ts) מכיל Snapshot ו־Activate בלבד | REFACTOR: אין Operation או Action להשהיה/ביטול; ערכי paused/cancelled ב־Schema אינם מימוש התהליך |
+| W15 קריאה ושיוך Inbox | [Inbox](../../features/conversations/ConversationInbox.tsx), [פעולות שיחה](../../server/conversations/conversationActions.ts) | `conversations.list/thread.read/mark-read/assignment.change`; [מאגר שיחות](../../server/platform/postgresConversationRepository.ts) | KEEP + VERIFY: הרשאות, פילטרים, Unread, שיוך ו־Polling; יש לבדוק עומס ועימוד בשילוב |
+| W16 מענה ידני לאחר Handoff | [Composer boundary](../../features/conversations/ConversationComposerBoundary.tsx) מציג הודעה בלבד | אין פעולת שליחה ידנית ב־Actions או במרשם הראשי | REFACTOR: מענה טקסט ידני מתוך Connect נדרש לסיום תהליך נציג; canReply הוא הרשאה ואינו הוכחת Sender |
+| W17 Bot בסיסי | [Flow builder](../../features/bot/BotFlowBuilder.tsx), [פעולות Bot](../../server/bot/botFlowActions.ts) | `bot.flows.list/details.read/draft.save/publish`; [Flows](../../server/platform/postgresBotFlowRepository.ts), [Runtime](../../server/platform/postgresBotRuntimeRepository.ts) | KEEP + VERIFY: שמירה/פרסום, גרסאות, כפתורים, עצירת Bot ב־Handoff ושליחה אמיתית; W16 נשאר תלות נפרדת |
+| W18 דוחות ו־Dashboard | [Reports](../../features/reports/OperationalReports.tsx), [Dashboard](../../features/workspace/WorkspaceDashboard.tsx) | `reports.read`; [מאגר דוחות](../../server/platform/postgresOperationalReportRepository.ts) | KEEP + VERIFY: התאמה ל־Receipts חיים. ארבעת מדדי Dashboard ללא מקור מוצגים כ־— ואינם מדדים מחושבים |
+| W19 AI ו־Knowledge אחרי פיילוט | [AI editor](../../features/ai/AiAgentEditor.tsx), [Upload action](../../server/ai/knowledgeUploadActions.ts) | `ai.agents.*`, `ai.reply-approvals.*`; [AI agents](../../server/platform/postgresAiAgentRepository.ts), [Reply outbox](../../server/platform/postgresAiReplyOutboxRepository.ts) | KEEP + REFACTOR + VERIFY: Draft/Approval אינם שליחה. Upload הישן D1/R2; נוספה חסימה שרתית מפורשת לפני הגישה אליו. יעד S3 וה־AI Sender נשארים לשלב 10 |
+| W20 Billing וניהול מערכת | [Billing](../../features/workspace/WorkspaceSectionContent.tsx), [Admin](../../app/admin/page.tsx), [פעולות מנוי](../../server/billing/systemAdminSubscriptionActions.ts) | `system-admin.subscription.*`; [מאגר מנויים](../../server/platform/postgresTenantSubscriptionRepository.ts) | KEEP למנוי ידני + REFACTOR/VERIFY ל־Paddle בשלב 11. אין Checkout פעיל במסך Billing; זכאות, Webhooks ו־Dunning טרם הוכחו |
+| W21 בקרות השקה ותפעול | [Decision center](../../features/workspace/DecisionCenter.tsx), [מדיניות WhatsApp](../../app/admin/whatsapp-delivery-policy/[tenantId]/page.tsx) | [Runtime V2](../../server/platform/currentRailwayProductionReadinessV2.ts), [מדיניות](../../server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts) | KEEP + VERIFY: V2 אינו בדיקת מוצר; נדרשים ניטור, Restore, Retention ו־Kill switch חיים בשלבים 6–7 |
+
+3.1 קמפיינים חוזרים, Enterprise, API ציבורי ויישומון Native מחוץ לגרסה
+לפי ההכרעות הקיימות. AI/Knowledge ו־Billing הם שלבים מאוחרים בתוך היעד,
+ולכן אינם נמחקים מהמפה או מהערכת ההשלמה.
+
+# 4. תור מימוש שנגזר מהממצאים
+
+| סדר | משימות קיימות | עבודה קונקרטית | אומדן ראשוני לשעות הנדסה |
+|---|---|---|---|
+| G01 | 4.2, 5.3 | לחבר הגשת Template מה־UI דרך API ל־Outbox/Worker, לחבר Sync ל־Railway ולהחליף חסימה קבועה במצב מוכנות שרתי שנבדק | 8–12 |
+| G02 | 4.4, 5.3 | לחבר מוכנות Campaign delivery ב־API Executable מול תצורת Worker; לבדוק כיבוי ותצורה חלקית | 4–8 |
+| G03 | 5.3 | לממש Pause/Resume/Cancel עם הרשאות, Version, Receipt/Audit ו־Queue; להגדיר תוצאה לבקשה שכבר החלה לצאת לספק | 12–20 |
+| G04 | 5.2, 5.4 | מענה טקסט ידני מתוך Inbox: Composer, הרשאות, חלון שירות, Outbox, מניעת כפילות ותוצאת מסירה | 16–32 |
+
+4.1 **40–72 שעות** הן הערכה ראשונית לקבוצת ארבעת הפערים בלבד, בביטחון
+נמוך. זו אינה הערכת סיום המוצר ואינה תוספת אוטומטית לאומדן הישן, שיש בו
+חפיפה לתהליכים אלה. לא נכללו זמני המתנה לספק או בדיקות מכשיר.
+
+4.2 סדר הביצוע: השלמת המפה וחסימת Upload בפיילוט; אחריה G01, G02, G03
+ו־G04. ניתן להשלים קוד מקומי בזמן המתנה לחשבונות. הפעלה ובדיקות קבלה
+של ספקים דורשות Staging אמיתי. אין להסיר קבועי חסימה בלבד ולכנות זאת
+השלמת האינטגרציה.
+
+4.3 מענה מהטלפון במסגרת Coexistence הוא תרחיש חשוב ל־Echo. הוא אינו
+מוכיח שהנציג יכול לכתוב ולשלוח מתוך Connect. R153 מחייב להציג את שני
+התהליכים בנפרד ולסגור את W16 לפני הכרזה על השלמת Inbox לשחרור הליבה.
+
+# 5. אימות וגבולות הדוח
+
+5.1 נקראו מסכי הכניסה והניתוב הרלוונטיים, Server Actions, מרשם הפעולות,
+Composition roots ומאגרי היעד המצוטטים. רשימת 32 הפעולות חולצה מייצוא
+הקוד עצמו ללא יצירת לקוח API, חיבור למסד או נתוני לקוחות.
+
+5.2 הורצו 19 בדיקות קיימות של Upload policy/service/handler ושל גבולות
+Templates ו־Inbox. הן עברו, ו־ESLint עבר בקובץ Upload ששונה. הצלחת
+בדיקת Composer disabled מאמתת חסימה קיימת; אינה הוכחת Composer פעיל.
+
+5.3 תוצאות הפרסום, אימות המקורות וה־CI נשמרות
+ב־[דוח האימות](../../outputs/launch-validation-2026-09-09/workflow-map-validation.json).
+לא בוצעו פריסה, גישה חוזרת לדפדפן הנעול, שליחה לספק או בדיקת QR.
+
+5.4 נותרו **12 שלבי־על**. מפת התהליכים מקדמת את 1.2, אך אין בכך סגירה
+של כל הממצאים ההיסטוריים ב־1.1, בדיקות המוצר או שלב 1 כולו. אומדן הסיום
+הכולל המעודכן עדיין אינו ידוע; 10–16 שבועות ב־30 שעות בשבוע נשאר אומדן
+התכנון המקורי בלבד.

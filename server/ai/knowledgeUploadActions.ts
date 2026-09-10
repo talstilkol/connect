@@ -32,9 +32,16 @@ import {
   createKnowledgeUploadService,
 } from "./knowledgeUploadService.ts";
 
+// Pilot scope excludes Knowledge uploads until the Railway/S3 path is wired.
+const railwayKnowledgeUploadReady = false;
+
 export async function uploadKnowledgeSourceAction(
   input: unknown,
 ): Promise<UploadKnowledgeSourceActionResult> {
+  if (!railwayKnowledgeUploadReady) {
+    return { status: "configuration-required" };
+  }
+
   if (
     inspectClerkConfiguration().status !==
     "configured"
