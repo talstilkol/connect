@@ -82,6 +82,12 @@ Session שבוטל, Tenant לא ממופה ו־Cross-organization attempt.
 5.5 להפיק Evidence ללא Secrets: Clerk instance/environment, זמן בדיקה,
 הגדרות Organizations/MFA, מזהים שעברו Hash או Redaction, תוצאות ו־Approvers.
 
+5.6 עדכון 10.09.2026: אפליקציית Staging תהיה נפרדת. Development ישמש
+בדיקות פנימיות בלבד; קבלה לשימוש חיצוני מחייבת Production instance ודומיין
+מתאים. ב־Staging תחויב MFA לכל המשתמשים באמצעות Authenticator app וקודי
+גיבוי, כך שגם מנהלים נכללים באכיפה. ההגדרות לא הוחלו עדיין בחשבון.
+[סוג הסביבה, התמחור וסדר האימות](pilot-deployment-runbook.md#7-סביבת-clerk--הכרעה-לפני-יצירת-האפליקציה).
+
 ## 6. הזמנות ותפקידים
 
 6.1 Adapter הזמנות Clerk ממומש ומחובר מקומית ל־Worker composition באמצעות

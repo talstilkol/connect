@@ -79,6 +79,9 @@ export async function applyPostgresMigrations(
   const statements = await Promise.all(
     files.map((entry) => readFile(join(directory, entry.name), "utf8")),
   );
+  if (statements.some((sql) => sql.trim().length === 0)) {
+    fail("MIGRATION_INVENTORY_INVALID");
+  }
   const client = await pool.connect();
   let discardClient = false;
   const onClientError = () => { discardClient = true; };

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { copyFile, mkdir, readdir, rm, symlink } from "node:fs/promises";
+import { copyFile, mkdir, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,4 +35,17 @@ test("startup migration inventory rejects incomplete sources before requesting a
     await assert.rejects(applyPostgresMigrations(undefined, directory),
       /RAILWAY_API_STARTUP_REHEARSAL_MIGRATION_INVENTORY_INVALID/);
   });
+
+  for (const [name, contents] of [["empty-file", ""], ["blank-file", " \n\t\r\n"]]) {
+    await t.test(`${name} migration is rejected before connecting`, async () => {
+      const directory = join(root, name);
+      await mkdir(directory);
+      await copyFile(join(source, files[0]), join(directory, files[0]));
+      await copyFile(join(source, files[1]), join(directory, files[1]));
+      // Damage a copied real migration, leaving the ordered filenames intact.
+      await writeFile(join(directory, files[1]), contents);
+      await assert.rejects(applyPostgresMigrations(undefined, directory),
+        /RAILWAY_API_STARTUP_REHEARSAL_MIGRATION_INVENTORY_INVALID/);
+    });
+  }
 });

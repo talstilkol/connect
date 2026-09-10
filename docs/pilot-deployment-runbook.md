@@ -41,9 +41,11 @@ railway.json משותף שעלול להפעיל את תפקיד ה־API גם ב�
 
 # 3. סדר ההפעלה לאחר אימות חשבונות
 
-3.1 **גישה וזהות:** להשלים Device Login ל־Vercel, לקרוא את רשימת הפרויקטים
-ולבחור את פרויקט Connect לפי המאגר והחשבון. לאמת גישה ל־Railway, Clerk ו־Meta
-ולבחור סביבות Staging בפועל. פתיחת מחשב נעול ואימות חשבון דורשים את Tal;
+3.1 **גישה וזהות:** להמשיך בדשבורדים המאומתים של Vercel ו־Railway ולזהות
+או ליצור פרויקט Connect ייעודי לפי המאגר והחשבון. חיבורי ה־CLI לא הושלמו;
+Device Login אינו תנאי להמשך בממשק. לאמת גישה ל־Clerk ול־Meta ולבחור סביבות
+Staging בפועל. טופסי המנויים נפתחו אך הפעלתם טרם אומתה. פתיחת מחשב נעול
+והשלמת פרטי חיוב אצל הספק דורשות את Tal;
 אין צורך באישור תכנון נוסף ואין להעביר סיסמה או Token בשיחה.
 
 3.2 **תצורה:** להגדיר לכל שירות את החוזה המתאים מהקוד ומה־[env reference](../.env.example).
@@ -170,3 +172,44 @@ PostgreSQL חסרה, מקוצרת או שונה כשה־releaseId הישן נש�
 או מערך. הצלחת הבדיקה מעידה על התאמת קובצי החבילה בלבד; היא אינה מחילה SQL
 ואינה מוכיחה שמיגרציות הוחלו במסד, שהרשאותיו תקינות או שהפיילוט פועל.
 [ראיות התיקון](../outputs/launch-validation-2026-09-09/release-postgres-validation.json).
+
+# 7. סביבת Clerk — הכרעה לפני יצירת האפליקציה
+
+7.1 נבדק מול התיעוד הרשמי ב־10.09.2026. תוקם אפליקציית Clerk נפרדת
+ל־Connect Staging. בדיקות שילוב פנימיות יכולות להתחיל ב־Development ללא
+מנוי בתשלום, כולל ניסוי MFA. ראיית הקבלה לשימוש חיצוני תיאסף מול Production
+instance של אפליקציית ה־Staging, עם דומיין בשליטת Tal. אין העברת משתמשי
+Development ל־Production; פרטי משתמש ומפתחות ייבחרו מהסביבה בפועל.
+[Clerk — Environments](https://clerk.com/docs/guides/development/managing-environments).
+
+7.2 כתובת Preview שהספק מייצר תחת vercel.app יכולה לשמש בדיקות פנימיות
+עם Development keys. Clerk אינה מאפשרת Production keys בדומיין Preview
+זה. שם הדומיין המותאם ובעלות עליו עדיין לא אומתו. APP_RUNTIME_ENVIRONMENT=staging
+ו־VERCEL_OIDC_ENVIRONMENT=preview נשארים ערכי מסלול Connect; הם אינם קובעים
+את סוג ה־instance ב־Clerk.
+[Clerk — Preview environments](https://clerk.com/docs/guides/development/managing-environments#preview-environments).
+
+7.3 בהקמה יופעלו Organizations, ‏Membership required ו־Create first
+organization automatically, בהתאם לחוזה Tenant הקיים. תפקיד מוזמן יישאר
+org:member, והרשאות העסק ימשיכו להיקבע במסד Connect. אין צורך ב־Custom roles
+של Clerk למסלול זה. ההגדרות עדיין לא נשמרו בחשבון.
+[Clerk — Configure Organizations](https://clerk.com/docs/guides/organizations/configure).
+
+7.4 בסביבת ה־Staging תידרש MFA לכל משתמש, באמצעות Authenticator app ו־Backup
+codes. כך נבדקת גם דרישת MFA למנהלים ללא מנגנון נפרד שמסתמך על בחירה ידנית
+של כל מנהל. יש להשלים את Session task מסוג setup-mfa לפני שה־Session פעיל;
+יש לבדוק זאת עם רכיבי ההתחברות הקיימים. המשתמש יגדיר את ה־Authenticator
+וישמור את קודי הגיבוי ישירות אצל Clerk; לא בשיחה או בדוחות.
+[Clerk — MFA](https://clerk.com/docs/guides/configure/auth-strategies/sign-up-sign-in-options#multi-factor-authentication).
+
+7.5 MFA ו־Session lifetime מותאם דורשים Pro בשימוש Production. אם החשבון
+אינו כבר זכאי למסלול זה, המחירון מציג $25 בחיוב חודשי, או $20 לחודש בחיוב
+שנתי. נבחר מסלול חודשי כשיידרש תשלום; לא נרכש מנוי. העלות נוספת להצעת
+Vercel/Railway של $25 ואינה כלולה בה. אין צורך לרכוש B2B Authentication
+Enhanced רק עבור Admin/Member והזמנות בסיסיות.
+[Clerk — Pricing](https://clerk.com/pricing).
+
+7.6 סדר האימות: אפליקציה וסביבה נכונות; הגדרות Organizations/MFA; מפתחות
+מאותו instance; Origin מדויק ב־Web וב־API; משתמש אמיתי עם Session פעיל
+ו־orgId; Onboarding; ביטול Session; ניסיון מעבר ארגון לא מורשה. כל אלה
+נותרו בדיקות חיות, ולא נחשבים מאומתים בעקבות עדכון המסמך.
