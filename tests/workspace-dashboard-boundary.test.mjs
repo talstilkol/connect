@@ -127,8 +127,11 @@ test("keeps Meta signup lifecycle and dialog behavior behind its feature boundar
   );
   assert.match(
     metaPanelSource,
-    /useAccessibleDialog\(onClose\)/,
+    /useAccessibleDialog\(closePanel\)/,
   );
+  // Escape, backdrop and both close buttons must share cancellation handling.
+  assert.equal(metaPanelSource.match(/onClick=\{closePanel\}/g)?.length, 3);
+  assert.doesNotMatch(metaPanelSource, /onClick=\{onClose\}/);
   assert.match(
     metaPanelSource,
     /role="dialog"[\s\S]{0,80}aria-modal="true"/,
