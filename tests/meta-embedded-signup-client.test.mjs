@@ -466,3 +466,80 @@ test("expires an incomplete attempt and ignores every late result", () => {
     { status: "client-error" },
   ]);
 });
+
+test("disposing an incomplete attempt silently rejects both arrival orders and repeated cleanup", () => {
+  for (const first of ["login", "assets", "neither"]) {
+    for (const assets of [
+      { businessPortfolioId: "101", wabaId: "202", phoneNumberId: "303" },
+      { flow: "business-app", wabaId: "202" },
+    ]) {
+      const results = [];
+      const coordinator = createMetaEmbeddedSignupAttemptCoordinator((result) => results.push(result));
+      const login = { status: "authorized", authorizationCode: "authorization-code" };
+      const message = { status: "finished", assets };
+      if (first === "login") coordinator.acceptLoginResult(login);
+      if (first === "assets") coordinator.acceptMessageResult(message);
+      coordinator.dispose();
+      coordinator.dispose();
+      coordinator.acceptLoginResult(login);
+      coordinator.acceptMessageResult(message);
+      coordinator.expire();
+      assert.equal(coordinator.isSettled(), true);
+      assert.deepEqual(results, []);
+    }
+  }
+});
+
+test("a late SDK callback after listener cleanup cannot submit or affect a fresh attempt", () => {
+  const target = new EventTarget();
+  const finish = () => target.dispatchEvent(new MessageEvent("message", metaMessage({
+    type: "WA_EMBEDDED_SIGNUP", event: "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING",
+    data: { waba_id: "202" },
+  })));
+  const prepare = () => {
+    const results = [];
+    let callback;
+    const coordinator = createMetaEmbeddedSignupAttemptCoordinator((result) => results.push(result));
+    const unsubscribe = subscribeToMetaEmbeddedSignupMessages(target,
+      (result) => coordinator.acceptMessageResult(result), "business-app");
+    launchMetaEmbeddedSignup({ login(handler) { callback = handler; } }, "909",
+      (result) => coordinator.acceptLoginResult(result), "business-app");
+    return { results, authorize: () => callback({ authResponse: { code: "authorization-code" } }),
+      cleanup() { coordinator.dispose(); unsubscribe(); } };
+  };
+  const closed = prepare();
+  finish();
+  closed.cleanup();
+  const current = prepare();
+  closed.authorize();
+  assert.deepEqual(closed.results, []);
+  assert.deepEqual(current.results, []);
+  finish();
+  current.authorize();
+  assert.deepEqual(current.results, [{ status: "ready", input: {
+    flow: "business-app", wabaId: "202", authorizationCode: "authorization-code",
+  } }]);
+  current.cleanup();
+  closed.authorize();
+  current.authorize();
+  assert.equal(current.results.length, 1);
+  assert.deepEqual(closed.results, []);
+});
+
+test("completion can dispose synchronously without retracting or repeating its result", () => {
+  const results = [];
+  const coordinator = createMetaEmbeddedSignupAttemptCoordinator((result) => {
+    coordinator.dispose();
+    results.push(result);
+  });
+  const login = { status: "authorized", authorizationCode: "authorization-code" };
+  const message = { status: "finished", assets: { businessPortfolioId: "101", wabaId: "202", phoneNumberId: "303" } };
+  coordinator.acceptLoginResult(login);
+  coordinator.acceptMessageResult(message);
+  coordinator.acceptLoginResult(login);
+  coordinator.acceptMessageResult(message);
+  coordinator.expire();
+  assert.equal(coordinator.isSettled(), true);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].status, "ready");
+});
