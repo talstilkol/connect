@@ -114,12 +114,22 @@ node --test tests/integration/startup-migrations-postgres.test.mjs
 שהופסק ונוקה בסיום. בדיקה זו אינה מפעילה API, אינה מוכיחה פריסה ב־Railway
 ואינה משנה את דרישת PostgreSQL 16 של תרגיל ה־Startup המלא הקיים.
 בדיקות האינטגרציה הללו מופעלות בנפרד מ־npm test; תוצאות CI והבדיקה המקומית
-מפורטות בנפרד ב־[דוח האימות](../outputs/launch-validation-2026-09-09/startup-migration-validation.json).
+של התיקון המקורי מפורטות בנפרד ב־[דוח האימות](../outputs/launch-validation-2026-09-09/startup-migration-validation.json).
+
+5.8.1 **שילוב ב־CI:** Job בשם migrations מריץ כעת את אותה בדיקת אינטגרציה
+אחרי בדיקות החוזה והתאימות. PostgreSQL 17.11-bookworm מקובע ב־SHA-256 של
+התמונה הרשמית. בכל Job נוצר מסד ריק; Port 5432 נקשר ל־127.0.0.1 בלבד,
+ובדיקת הבריאות ממתינה לשרת TCP. GitHub מסיר את השירות בתום ה־Job.
+trust מוגבל למסד הבדיקה הזמני ב־Runner; אינו תצורת אבטחה לסביבה חיה.
+ארבעת התרחישים (חמש בדיקות Node כולל האב) נספרים בנפרד מ־npm test.
+כל כשל מפיל את Job המיגרציות. [תוצאות ההרצה והגרסה המדויקת](../outputs/launch-validation-2026-09-09/postgres-ci-validation.json).
 
 5.9 מקורות רשמיים שנבדקו ב־10.09.2026:
 [node-postgres — אותו Client לכל הטרנזקציה](https://node-postgres.com/features/transactions),
 [PostgreSQL 17 — טרנזקציות](https://www.postgresql.org/docs/17/tutorial-transactions.html),
 [PostgreSQL 17 — ניתוק Session](https://www.postgresql.org/docs/17/functions-admin.html#FUNCTIONS-ADMIN-SIGNAL).
+לשילוב CI: [GitHub — מסדי שירות ומיפוי Ports](https://docs.github.com/en/actions/tutorials/use-containerized-services/use-docker-service-containers),
+[תמונת PostgreSQL הרשמית ומשתני האתחול](https://hub.docker.com/_/postgres).
 
 ## 6. מה עדיין נדרש לפריסה
 

@@ -357,6 +357,15 @@ test("runs every local release gate as a separately named pull request check", a
     workflow,
     /migrations:[\s\S]*?npm run verify:migrations[\s\S]*?npm run verify:postgres-migration-contract[\s\S]*?npm run verify:postgres-migration-parity/,
   );
+  const migrationJob = workflow.split("\n  migrations:\n")[1].split("\n  typecheck:\n")[0];
+  assert.match(migrationJob, /image: postgres:17\.11-bookworm@sha256:[a-f0-9]{64}\n/);
+  assert.match(migrationJob, /POSTGRES_DB: connect_startup_rehearsal\n/);
+  assert.match(migrationJob, /POSTGRES_HOST_AUTH_METHOD: trust\n/);
+  assert.match(migrationJob, /ports:\n          - "127\.0\.0\.1:5432:5432"\n/);
+  assert.match(migrationJob, /--health-cmd "pg_isready -h 127\.0\.0\.1 -U postgres -d connect_startup_rehearsal"/);
+  assert.match(migrationJob, /CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql:\/\/postgres@127\.0\.0\.1:5432\/connect_startup_rehearsal\n/);
+  assert.match(migrationJob, /run: node --test tests\/integration\/startup-migrations-postgres\.test\.mjs\n/);
+  assert.doesNotMatch(migrationJob, /continue-on-error:|^\s+if:|POSTGRES_PASSWORD:|secrets\./m);
   assert.match(
     workflow,
     /tests-and-build:[\s\S]*?fetch-depth: 0[\s\S]*?npm ci[\s\S]*?npm test/,
