@@ -146,6 +146,25 @@ Redis, Telemetry ו־Meta. API כולל מכסות, מדיניות הזמנות 
 
 5.6 [ראיות הבדיקה הנוכחית](../outputs/launch-validation-2026-09-09/pilot-configuration-validation.json).
 
+5.7 בודק הפיילוט משתמש גם בחוזי ההפעלה של תכונות המוצר שנוספו ל־Runtime:
+
+| שירות | בדיקה | תנאים כשהמסלול מופעל |
+|---|---|---|
+| API | template-submission | MESSAGE_TEMPLATE_SUBMISSION_ENABLED וגרסת Graph מפורשת |
+| API | template-sync | MESSAGE_TEMPLATE_SYNC_ENABLED, גרסת Graph ומפתח הצפנת Credentials |
+| API | campaign-activation | CAMPAIGN_ACTIVATION_ENABLED וגרסת Graph מפורשת |
+| API ו־Worker | manual-replies | MANUAL_REPLY_ENABLED, גרסת Graph, מפתח הצפנה ומפתח HMAC של מכסות |
+
+5.8 המתגים נבדקים באותם Validators שה־Runtime משתמש בהם. מצב disabled
+מותר בשלב הכנת התצורה ומוצג במפורש; מצב invalid חוסם את הדוח גם בתכונה
+אופציונלית. במענה ידני ערך ריק אינו שקול למתג חסר ונכשל, בהתאם לחוזה
+ה־Runtime הקיים. אין כאן הפעלת מתגים או בדיקת חשבון, ואין שינוי בחוזי ההפעלה.
+
+5.9 בקבלת המוצר יש לדרוש configured במסלולים שנבחרו להפעלה ולבדוק אותם
+מול הספק. configuration-valid אינו מוכיח שכל התכונות פעילות או שה־Worker
+בריא. הדוח ממשיך לפרסם רק שמות משתנים ומצבים; מפתחות וערכי תצורה אינם
+נכללים בו. [אימות ההרחבה](../outputs/launch-validation-2026-09-09/pilot-feature-preflight-validation.json).
+
 # 6. אימות קובצי המיגרציות בחבילת השחרור
 
 6.1 לפני פריסה, מתוך מועמד Commit נקי, מריצים לפי הסדר:
@@ -172,6 +191,11 @@ PostgreSQL חסרה, מקוצרת או שונה כשה־releaseId הישן נש�
 או מערך. הצלחת הבדיקה מעידה על התאמת קובצי החבילה בלבד; היא אינה מחילה SQL
 ואינה מוכיחה שמיגרציות הוחלו במסד, שהרשאותיו תקינות או שהפיילוט פועל.
 [ראיות התיקון](../outputs/launch-validation-2026-09-09/release-postgres-validation.json).
+
+6.5 עדכון לאחר מיזוג PR #2: ב־main ‏4ee61e0 יש **74 מיגרציות PostgreSQL**,
+עד 0073_manual_reply_outbox.sql. המספר 73 בסעיף 6.2 מתעד את חבילת הגרסה
+הקודמת. בכל פריסה יש להשתמש ברשימה וב־Hashes של ה־Manifest לאותו Commit,
+ולא במספר היסטורי ממדריך זה.
 
 # 7. סביבת Clerk — הכרעה לפני יצירת האפליקציה
 

@@ -65,6 +65,86 @@ test("an enabled media path with absent storage settings blocks instead of being
   }
 });
 
+const productFeatures = [
+  ["api", "MESSAGE_TEMPLATE_SUBMISSION_ENABLED", "template-submission"],
+  ["api", "MESSAGE_TEMPLATE_SYNC_ENABLED", "template-sync"],
+  ["api", "CAMPAIGN_ACTIVATION_ENABLED", "campaign-activation"],
+  ["api", "MANUAL_REPLY_ENABLED", "manual-replies"],
+  ["worker", "MANUAL_REPLY_ENABLED", "manual-replies"],
+];
+
+test("product opt-ins remain disabled and preserve each runtime's empty-value policy", () => {
+  for (const [service, key, id] of productFeatures) {
+    for (const value of [undefined, "false", ""]) {
+      const environment = Object.freeze({ [key]: value });
+      const check = inspectPilotConfiguration(service, environment).checks.find((entry) => entry.id === id);
+      assert.ok(check, `${service} must inspect ${id}`);
+      const disabled = value !== "" || key !== "MANUAL_REPLY_ENABLED";
+      assert.equal(check.status, disabled ? "disabled" : "invalid");
+      assert.equal(check.accepted, disabled);
+      assert.equal(check.required, false);
+      assert.equal(environment[key], value);
+    }
+  }
+});
+
+test("enabled product paths reject missing prerequisites and malformed opt-ins", () => {
+  for (const [service, key, id] of productFeatures) {
+    for (const value of ["true", "TRUE", " true ", true, environmentReference]) {
+      const report = inspectPilotConfiguration(service, { [key]: value });
+      const check = report.checks.find((entry) => entry.id === id);
+      assert.ok(check, `${service} must inspect ${id}`);
+      assert.equal(check.status, "invalid");
+      assert.equal(check.accepted, false);
+      assert.equal(report.status, "blocked");
+    }
+  }
+});
+
+test("complete opt-ins validate only their service and never expose configuration values", () => {
+  // Reuse the existing protocol inputs from railway-bullmq-api-main.test.mjs.
+  // These are local format checks, with no provider request or deployment.
+  const key = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=";
+  const environment = Object.freeze({
+    MESSAGE_TEMPLATE_SUBMISSION_ENABLED: "true", MESSAGE_TEMPLATE_SYNC_ENABLED: "true",
+    CAMPAIGN_ACTIVATION_ENABLED: "true", MANUAL_REPLY_ENABLED: "true",
+    META_GRAPH_API_VERSION: "v23.0", META_CREDENTIAL_ENCRYPTION_KEY_V1: key,
+    WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: key,
+  });
+  for (const [service, , id] of productFeatures) {
+    const report = inspectPilotConfiguration(service, environment);
+    const check = report.checks.find((entry) => entry.id === id);
+    assert.ok(check, `${service} must inspect ${id}`);
+    assert.equal(check.status, "configured");
+    assert.equal(check.accepted, true);
+    assert.equal(report.liveReadinessVerified, false);
+    assert.equal(report.status, "blocked", "feature configuration alone cannot validate the service");
+    assert.ok(!JSON.stringify(report).includes(key));
+    assert.ok(!JSON.stringify(report).includes("v23.0"));
+  }
+  for (const service of ["web", "worker"]) {
+    const ids = inspectPilotConfiguration(service, environment).checks.map((check) => check.id);
+    for (const [owner, , id] of productFeatures) {
+      if (owner === "api" && id !== "manual-replies") assert.ok(!ids.includes(id));
+    }
+    if (service === "web") assert.ok(!ids.includes("manual-replies"));
+  }
+  for (const [service, flag, id] of productFeatures) {
+    const prerequisites = ["META_GRAPH_API_VERSION",
+      ...(["template-sync", "manual-replies"].includes(id) ? ["META_CREDENTIAL_ENCRYPTION_KEY_V1"] : []),
+      ...(id === "manual-replies" ? ["WHATSAPP_RATE_LIMIT_HMAC_KEY_V1"] : []),
+    ];
+    for (const prerequisite of prerequisites) {
+      for (const value of [undefined, environmentReference]) {
+        const report = inspectPilotConfiguration(service, { ...environment, [flag]: "true", [prerequisite]: value });
+        assert.equal(report.checks.find((check) => check.id === id).accepted, false);
+        assert.equal(report.status, "blocked");
+        assert.ok(!JSON.stringify(report).includes(JSON.stringify(environmentReference).slice(1, -1)));
+      }
+    }
+  }
+});
+
 test("reports never echo supplied values or inspector exceptions", () => {
   // Reuse actual repository content as invalid input; no provider data is invented.
   const environment = Object.fromEntries(Object.keys(referenceEnvironment)
