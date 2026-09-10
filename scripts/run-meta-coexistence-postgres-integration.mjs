@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 export const metaCoexistenceTestSuites = Object.freeze([
   { file: "tests/integration/meta-data-sync-postgres.test.mjs", database: "connect_meta_sync_integration", variable: "CONNECT_META_DATA_SYNC_TEST_URL" },
   { file: "tests/integration/meta-history-postgres.test.mjs", database: "connect_meta_history_integration", variable: "CONNECT_META_HISTORY_TEST_URL" },
-  { file: "tests/integration/meta-history-inbox-postgres.test.mjs", database: "connect_meta_inbox_integration", variable: "CONNECT_META_HISTORY_INBOX_TEST_URL" },
+  { file: "tests/integration/meta-history-inbox-postgres.test.mjs", database: "connect_meta_inbox_integration", variable: "CONNECT_META_HISTORY_INBOX_TEST_URL", timeoutMs: 600_000 },
   { file: "tests/integration/meta-sync-lifecycle-postgres.test.mjs", database: "connect_meta_sync_lifecycle_integration", variable: "CONNECT_META_SYNC_LIFECYCLE_TEST_URL" },
   { file: "tests/integration/meta-account-lifecycle-postgres.test.mjs", database: "connect_meta_account_lifecycle_integration", variable: "CONNECT_META_ACCOUNT_LIFECYCLE_TEST_URL" },
 ].map((suite) => Object.freeze(suite)));
@@ -37,13 +37,17 @@ export async function prepareMetaCoexistenceDatabases(client) {
 function runSuite(suite, environment) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, ["--test", "--test-reporter=tap", suite.file], {
-      // The history/Inbox suite includes the full media lifecycle and real lock
-      // races. Keep a bounded test-process budget, independent of runtime limits.
-      cwd: root, stdio: "inherit", timeout: 300_000, killSignal: "SIGKILL",
+      // CI measured roughly twice the local duration for the full Inbox/media
+      // lifecycle. Only that suite gets a larger, still bounded process budget.
+      cwd: root, stdio: "inherit", timeout: suite.timeoutMs ?? 300_000, killSignal: "SIGKILL",
       env: { ...environment, [suite.variable]: metaCoexistenceTestUrl.replace(/postgres$/, suite.database) },
     });
     child.once("error", () => resolve(false));
-    child.once("close", (code, signal) => resolve(code === 0 && signal === null));
+    child.once("close", (code, signal) => {
+      const passed = code === 0 && signal === null;
+      if (!passed) console.error(`Meta Coexistence PostgreSQL: ${suite.file} failed (exit=${code ?? "none"}, signal=${signal ?? "none"})`);
+      resolve(passed);
+    });
   });
 }
 
@@ -51,7 +55,7 @@ export async function runMetaCoexistenceSuites(environment, execute = runSuite) 
   requireMetaCoexistenceTestUrl(environment);
   const failures = [];
   for (const suite of metaCoexistenceTestSuites) {
-    console.log(`Meta Coexistence PostgreSQL: ${suite.file}`);
+    console.log(`Meta Coexistence PostgreSQL: ${suite.file} (timeout=${suite.timeoutMs ?? 300_000}ms)`);
     try { if (!await execute(suite, environment)) failures.push(suite.file); }
     catch { failures.push(suite.file); }
   }
