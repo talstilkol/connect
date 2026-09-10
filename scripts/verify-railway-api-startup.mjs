@@ -60,25 +60,57 @@ export function requireStartupRehearsalPort(value, databaseUrl) {
   return port;
 }
 
-async function applyPostgresMigrations(pool) {
-  const existing = await pool.query(
-    `SELECT count(*)::integer AS count
-     FROM information_schema.tables
-     WHERE table_schema = 'public'
-       AND table_type = 'BASE TABLE'`,
+export async function applyPostgresMigrations(
+  pool,
+  directory = join(projectRoot, "postgres", "migrations"),
+) {
+  const files = (await readdir(directory, { withFileTypes: true }))
+    .filter((entry) => entry.name.endsWith(".sql"))
+    .sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0);
+  if (
+    files.length === 0 ||
+    files.some((entry, index) =>
+      !entry.isFile() ||
+      !/^\d{4}_[a-z0-9_]+\.sql$/.test(entry.name) ||
+      entry.name.slice(0, 4) !== String(index).padStart(4, "0"))
+  ) {
+    fail("MIGRATION_INVENTORY_INVALID");
+  }
+  const statements = await Promise.all(
+    files.map((entry) => readFile(join(directory, entry.name), "utf8")),
   );
-  if (existing.rows[0]?.count !== 0) {
-    fail("DATABASE_NOT_EMPTY");
+  const client = await pool.connect();
+  let discardClient = false;
+  const onClientError = () => { discardClient = true; };
+  client.on("error", onClientError);
+  try {
+    await client.query("BEGIN");
+    const existing = await client.query(
+      `SELECT count(*)::integer AS count
+       FROM information_schema.tables
+       WHERE table_schema = 'public'
+         AND table_type = 'BASE TABLE'`,
+    );
+    if (existing.rows[0]?.count !== 0) {
+      fail("DATABASE_NOT_EMPTY");
+    }
+    for (const sql of statements) {
+      await client.query(sql);
+    }
+    if (discardClient) fail("MIGRATION_CONNECTION_FAILED");
+    await client.query("COMMIT");
+    return statements.length;
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      discardClient = true;
+    }
+    throw error;
+  } finally {
+    client.release(discardClient);
+    client.off("error", onClientError);
   }
-
-  const directory = join(projectRoot, "postgres", "migrations");
-  const files = (await readdir(directory))
-    .filter((name) => /^\d{4}_[a-z0-9_]+\.sql$/.test(name))
-    .sort();
-  for (const fileName of files) {
-    await pool.query(await readFile(join(directory, fileName), "utf8"));
-  }
-  return files.length;
 }
 
 function childEnvironment(databaseUrl, port) {

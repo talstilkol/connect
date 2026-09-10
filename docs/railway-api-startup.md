@@ -87,8 +87,39 @@ CONNECT_POSTGRES_STARTUP_REHEARSAL_URL=postgresql://<local-user>@127.0.0.1:<db-p
 5.3 ה־Verifier מקבל Loopback בלבד, ללא Password/Query/Fragment, ודורש Port
 API שונה מ־Port המסד.
 
-5.4 ה־Verifier טוען את 24 המיגרציות, מפעיל Child process אמיתי, בודק את שני
+5.4 ה־Verifier טוען את קובצי המיגרציות הנוכחיים (73 במועמד שנבדק ב־10.09.2026), מפעיל Child process אמיתי, בודק את שני
 Routes ה־Health, שולח `SIGTERM` ודורש Exit code `0` ללא stdout/stderr.
+
+5.5 **החלה אטומית, עדכון 10.09.2026:** תרגיל האתחול טוען את קובצי SQL
+לאחר בדיקת רצף ושמות קבצים רגילים, ואז בודק מסד ריק ומחיל את המיגרציות
+בטרנזקציה אחת ובאותו Client. כשל SQL גורר ROLLBACK; חיבור שנותק או שלא ניתן
+לבצע בו ROLLBACK מוצא מה־Pool. אירוע error של Client שנלקח מה־Pool מטופל
+בזמן ההחלה ואינו נותר אירוע לא מטופל. אין הרצה אוטומטית מחדש.
+
+5.6 לבדיקת המיגרציות בלבד, יוצרים **מסד בדיקה מקומי חדש וריק** בשם
+connect_startup_rehearsal ומגדירים CONNECT_POSTGRES_STARTUP_REHEARSAL_URL
+לכתובתו האמיתית לפי מגבלות סעיף 5.3. מריצים:
+
+```sh
+node --test tests/integration/startup-migrations-postgres.test.mjs
+```
+
+5.7 הבדיקה משתמשת ב־SQL האמיתי, ומוסיפה בעותק זמני של הקובץ האחרון כשל
+חלוקה באפס או ניתוק של חיבור הבדיקה עצמו. היא מאמתת שאין סכמה חלקית,
+שה־Pool ממשיך לפעול, שניסיון חוזר מצליח ושמסד שכבר אותחל נדחה ללא שינוי.
+התרחיש המצליח משאיר את הסכמה במסד הבדיקה; אין להריץ על מסד קיים או משותף.
+לא נוצרים נתוני לקוחות, אנשי קשר, הודעות או נתוני ספק לדוגמה.
+
+5.8 ארבעת תרחישי המיגרציות עברו מול PostgreSQL 17.9 מקומי באשכול מבודד,
+שהופסק ונוקה בסיום. בדיקה זו אינה מפעילה API, אינה מוכיחה פריסה ב־Railway
+ואינה משנה את דרישת PostgreSQL 16 של תרגיל ה־Startup המלא הקיים.
+בדיקות האינטגרציה הללו מופעלות בנפרד מ־npm test; תוצאות CI והבדיקה המקומית
+מפורטות בנפרד ב־[דוח האימות](../outputs/launch-validation-2026-09-09/startup-migration-validation.json).
+
+5.9 מקורות רשמיים שנבדקו ב־10.09.2026:
+[node-postgres — אותו Client לכל הטרנזקציה](https://node-postgres.com/features/transactions),
+[PostgreSQL 17 — טרנזקציות](https://www.postgresql.org/docs/17/tutorial-transactions.html),
+[PostgreSQL 17 — ניתוק Session](https://www.postgresql.org/docs/17/functions-admin.html#FUNCTIONS-ADMIN-SIGNAL).
 
 ## 6. מה עדיין נדרש לפריסה
 
