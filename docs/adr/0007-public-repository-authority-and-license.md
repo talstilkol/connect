@@ -62,3 +62,19 @@ hygiene, ‏Push protection, ‏Dependency review ו־Rulesets נשארים
 
 4.4 Production acceptance=`0`; החלטה זו מעניקה Governance direction
 בלבד ואינה Evidence לקבלת המוצר.
+
+## 5. הבהרת מסלול בעלים יחיד — 10.09.2026, R177
+
+5.1 אחריותו היחידה של טל כוללת החלטת שחרור דרך PR. דרישת Reviewer נוסף
+שהוכנסה בחוזה Evidence v4 ובהגנת main אינה תואמת לסעיף 1.5 ומוחלפת:
+PR נשאר חובה, אך Approvals, ‏Code Owner approval ו־Last push approval
+אינם דורשים אדם נוסף. CODEOWNERS מצהיר את בעלותו האמיתית של טל.
+
+5.2 נשמרים עשרה Checks מחייבים הקשורים ל־GitHub Actions, Strict,
+אכיפה על מנהלים, פתרון שיחות, ביטול אישורים ישנים, חסימת Force Push
+ומחיקה, Secret scanning ו־Push protection. אין Direct Push או Bypass
+ל־main ואין טענה שנעשתה ביקורת אנושית נוספת.
+
+5.3 Evidence v5 בודק את החשבון האישי, רשימת ההרשאות ותוכן CODEOWNERS
+ואינו מקבל הוכחות v4 ישנות. הוספת בעל הרשאות נוסף מחייבת שינוי מדיניות;
+אין הקצאת אחריות לאדם שלא זוהה. הפריסה והקבלה החיה נשארות דרישות נפרדות.

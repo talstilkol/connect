@@ -84,7 +84,7 @@ test("preserves the private remediation as history and enforces the current publ
   }
   assert.match(
     sourceControl,
-    /Evidence \*\*v4\*\*[\s\S]*repositoryPublic=true/,
+    /Evidence \*\*v5\*\*[\s\S]*repositoryPublic=true/,
   );
 });
 

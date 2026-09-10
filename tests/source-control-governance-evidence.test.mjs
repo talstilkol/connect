@@ -23,7 +23,7 @@ function fingerprint(value) {
 
 function createEvidence() {
   const evidence = {
-    schemaVersion: 4,
+    schemaVersion: 5,
     verifiedAt:
       "2026-07-27T11:00:00.000Z",
     expiresAt:
@@ -34,13 +34,16 @@ function createEvidence() {
       fingerprint("default-branch:talstilkol/connect:main"),
     releaseCommitSha:
       deployedCommitSha,
-    requiredReviewCount: 1,
+    reviewPolicy: "single-owner",
+    requiredReviewCount: 0,
     requiredStatusChecks:
       requiredPullRequestStatusChecks,
     controls: {
       repositoryPublic: true,
       branchProtection: true,
-      codeOwnerReview: true,
+      pullRequestsRequired: true,
+      singleOwner: true,
+      codeOwnershipDeclared: true,
       dismissStaleApprovals: true,
       conversationResolution: true,
       forcePushBlocked: true,
@@ -69,13 +72,16 @@ function createSnapshot() {
       "talstilkol/connect:main",
     releaseCommitSha:
       deployedCommitSha,
-    requiredReviewCount: 1,
+    reviewPolicy: "single-owner",
+    requiredReviewCount: 0,
     requiredStatusChecks:
       requiredPullRequestStatusChecks,
     controls: {
       repositoryPublic: true,
       branchProtection: true,
-      codeOwnerReview: true,
+      pullRequestsRequired: true,
+      singleOwner: true,
+      codeOwnershipDeclared: true,
       dismissStaleApprovals: true,
       conversationResolution: true,
       forcePushBlocked: true,
@@ -187,7 +193,7 @@ test("accepts protected source control linked to the deployed commit", () => {
       code:
         "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
       requiredStatusCheckCount: 10,
-      controlCount: 9,
+      controlCount: 11,
     },
   );
 });
@@ -318,7 +324,7 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     {
       ...evidence,
       evidenceDigest:
-        "source_control_governance_evidence_v4_" +
+        "source_control_governance_evidence_v5_" +
         "0".repeat(64),
     },
     {
@@ -417,4 +423,33 @@ test("fails closed without governance evidence or with an invalid clock", () => 
     ).status,
     "invalid",
   );
+});
+
+test("single-owner evidence rejects another review policy, review counts and every missing control", () => {
+  const snapshot = createSnapshot();
+  const invalid = [
+    ...[undefined, "", "team"].map((reviewPolicy) => ({...snapshot, reviewPolicy})),
+    ...[-1, 1, null, "0"].map((requiredReviewCount) => ({...snapshot, requiredReviewCount})),
+    ...Object.keys(snapshot.controls).map((key) => ({...snapshot, controls: {...snapshot.controls, [key]: false}})),
+  ];
+  for (const value of invalid) {
+    assert.throws(() => buildSourceControlGovernanceEvidence(value), /SOURCE_CONTROL_GOVERNANCE_SNAPSHOT_INVALID/);
+    const current = createEvidence();
+    const changed = {...current, reviewPolicy: value.reviewPolicy, requiredReviewCount: value.requiredReviewCount, controls: value.controls};
+    changed.evidenceDigest = deriveSourceControlGovernanceEvidenceDigest(changed);
+    assert.equal(inspectSourceControlGovernanceEvidence({APP_DEPLOYED_COMMIT_SHA: deployedCommitSha,
+      SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON: JSON.stringify(changed)}, now).status, "invalid");
+  }
+});
+
+test("legacy v4 cannot be relabeled as proof of the single-owner policy", () => {
+  const current = createEvidence();
+  for (const changed of [
+    {...current, schemaVersion: 4},
+    {...current, controls: {...current.controls, codeOwnerReview: true}},
+  ]) {
+    changed.evidenceDigest = deriveSourceControlGovernanceEvidenceDigest(changed);
+    assert.equal(inspectSourceControlGovernanceEvidence({APP_DEPLOYED_COMMIT_SHA: deployedCommitSha,
+      SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON: JSON.stringify(changed)}, now).status, "invalid");
+  }
 });

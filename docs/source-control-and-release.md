@@ -83,11 +83,11 @@ Release, ‏Deployment, ‏Security ו־Secrets. אין בתוכנית הפעי�
 2.2.4 `verify:release-gate:local` אינו דורש GitHub, ‏Bundle או Secrets
 חיצוניים ולכן נשאר שער פיתוח מקומי דטרמיניסטי.
 
-2.2.5 החל מ־09.09.2026 חוזה Source Control Governance Evidence **v4**
+2.2.5 החל מ־10.09.2026 חוזה Source Control Governance Evidence **v5**
 דורש `repositoryPublic=true`, את המאגר `talstilkol/connect` ואת ענף `main`.
 המחולל דורש `private=false` ו־`visibility=public` עקביים מול GitHub;
 ה־consumer בודק fingerprints של המאגר והענף המאושרים לצד SHA, תוקף
-וכל שמונת בקרי האבטחה האחרים. ראיות v3 פרטי או v2 אינן מתקבלות.
+וכל יתר בקרי האבטחה. ראיות v4 והגרסאות הקודמות אינן מתקבלות.
 יש ליצור ראיה טרייה מקריאת GitHub בפועל; תיקון החוזה נבדק מקומית
 ואינו מעיד שבקרות המאגר החי הופעלו. Production נשאר חסום בהיעדר ראיה.
 
@@ -248,58 +248,59 @@ D1, ‏Queues, ‏DLQs, ‏Cron, ‏Rate limits ו־Deployment evidence בחוז
 
 ## 7. Source Control Governance Evidence
 
-7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v4
-קצר־חיים שמופק מ־Repository אמיתי לאחר הגדרת Remote.
+7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v5 קצר־חיים
+למסלול בעלים יחיד לפי ADR-0007 והכרעה R177. `reviewPolicy=single-owner`
+ו־`requiredReviewCount=0` הם שדות מפורשים; זו אינה טענה לביקורת עצמאית.
 
-7.2 ה־Evidence דורש עשרה Pull Request Status Checks: שמונת שערי
-האיכות המקומיים, `meta-coexistence` מול חמישה מסדי PostgreSQL מבודדים
-ו־Dependency Audit. תוצאת תשעת השערים הישנה אינה מספקת לגרסה החדשה.
-גם הגנת הענף חייבת לכלול את השם החדש; קיום Job ב־CI אינו מוכיח הגנה.
+7.2 נדרשים בדיוק עשרה Checks: שמונת שערי האיכות המקומיים,
+`meta-coexistence` ו־Dependency Audit. כל Required Check קשור ל־GitHub Actions
+ב־app_id=15368 שנקרא מהמאגר בפועל. Strict נשאר פעיל; Checks חסרים, כפולים
+או ללא App מחייב אינם מספקים.
 
-7.3 חוזה v4 דורש Repository ציבורי לפי ADR-0007, וכן Branch
-Protection, ‏CODEOWNERS Review, ביטול
-אישורים ישנים, פתרון שיחות Review, חסימת Force Push ומחיקת Branch,
-‏Secret Scanning ו־Push Protection.
+7.3 אחת־עשרה הבקרות הן Repository ציבורי, Branch protection, חובת PR,
+בעל הרשאות יחיד, הצהרת בעלות קוד, ביטול אישורים ישנים, פתרון שיחות,
+חסימת Force Push, חסימת מחיקת הענף, Secret scanning ו־Push protection.
+ההגנה נאכפת גם על מנהלים. אין Bypass ל־PR.
 
-7.3.1 דרישת Private של v3 ההיסטורי אינה מדיניות פעילה לאחר ADR-0007.
-ראיות v3 אינן מתקבלות; נדרשת ראיה חדשה לפי מצב הספק בפועל.
+7.4 האימות מוגבל למאגר האישי `talstilkol/connect` ול־main. הבעלים חייב להיות
+חשבון User של טל, ורשימת Collaborators חייבת להכיל רק אותו עם הרשאות
+Admin ו־Push. הוספת אדם נוסף מחייבת התאמת מדיניות מפורשת; אינה מתקבלת
+בשקט כראיית מסלול בעלים יחיד.
 
-7.4 נדרש Reviewer אחד לפחות. `releaseCommitSha` חייב להתאים בדיוק
-ל־`APP_DEPLOYED_COMMIT_SHA`.
+7.5 `CODEOWNERS` בגרסת המועמד מצהיר `* @talstilkol`. המחולל בודק את הנתיב,
+Base64, גודל הקובץ, Git blob SHA ואת התוכן. קובץ ריק, Metadata בלבד,
+בעלים אחר או כללי Override נוספים נדחים. הקובץ מצהיר אחריות ואינו אישור Review.
 
-7.5 שמות Repository, ‏Branch, ‏Owner או ספק אינם נשמרים בראיה.
-במקומם נשמרים Fingerprints נפרדים מסוג SHA-256.
+7.6 חובת PR נשמרת כאובייקט required_pull_request_reviews פעיל, עם אפס
+Approvals נדרשים, בלי Code Owner approval או Last push approval. ביטול
+אישורים ישנים נשאר פעיל. [GitHub API](https://docs.github.com/en/rest/branches/branch-protection#update-branch-protection)
+מגדיר 0 כמצב ללא חובת Reviewer. חסימת PR באמצעות אדם נוסף אינה תואמת
+לבעלות היחידה שאושרה ב־ADR-0007.
 
-7.6 Evidence חסר, פג תוקף, עם Control כבוי, Status Check חסר,
-Digest שונה או Commit שאינו תואם חוסם Production.
+7.7 ראיות v4 והגרסאות הקודמות אינן ראיות v5. נדרשת הפקה חדשה מהספק
+לגרסה המדויקת; אין שינוי שם או התאמת JSON של ראיה ישנה. הזמן המרבי
+נשאר 24 שעות, וה־SHA חייב להתאים ל־APP_DEPLOYED_COMMIT_SHA.
 
-7.7 החוזה אינו מפעיל הגנות בעצמו. שער Production נשאר חסום עד
-להגדרת Repository Authority והפקת Evidence מהספק שנבחר.
+7.8 המחולל `npm run evidence:github` קורא GET בלבד: Repository,
+Collaborators, הגנת main, CODEOWNERS לפי Commit ו־Check Runs של אותו Commit.
+הוא מתחיל מ־Worktree נקי ו־Release Manifest מחושב. חוסר גישה או תנאי חסר
+נכשל סגור. הפלט ב־`.artifacts/source-control-governance-evidence.json`
+משתמש ב־Fingerprints ואינו כולל שמות Repository, משתמש, Branch או URL.
 
-7.8 Production Readiness אינו Required Check של Pull Request.
-הוא שער Release נפרד, משום שהוא דורש ראיות Runtime שנוצרות רק
-לאחר פריסה. הפרדה זו מונעת מעגל תלות שאינו ניתן להשלמה.
+7.9 ראיית CI נפרדת דורשת הצלחה של כל עשרת Checks מאותו App מאומת
+ומאותו Commit. Review אנושי אינו נוצר או מוגש על ידי המחולל.
 
-7.9 מחולל v4 הקיים, `npm run evidence:github`, דורש
-`GITHUB_REPOSITORY` מפורש ו־Release
-Manifest הנגזר מ־Worktree נקי. הוא קורא ב־`GET` בלבד את Metadata
-ה־Repository, הגנת Branch ברירת המחדל, Metadata של `CODEOWNERS`
-ו־Check Runs הקשורים ל־Commit המדויק.
+7.10 Production Readiness נשאר שער Release נפרד מ־PR: ראיות Runtime,
+זהות, ספק, גיבוי ושחזור נדרשות לפי תחולתן. התאמת Governance אינה אישור
+לפריסה, לפיילוט או ל־QR חי.
 
-7.10 המחולל דורש Metadata עקבי שבו `private=false` ו־
-`visibility=public`, ‏Status Checks במצב Strict, אכיפה גם למנהלים,
-Review מבעל קוד, ביטול אישורים ישנים, פתרון שיחות, חסימת Force Push
-ומחיקת Branch, ‏Secret Scanning ו־Push Protection. חוסר הרשאה או
-Control חסר נכשל סגור ואינו מפיק Evidence חלקי.
+7.11 שחרור ממשיך באמצעות PR, בדיקת Diff ותוצאות CI, עדכון הענף לבסיסו
+במידת הצורך, וקריאת הגנות הענף לפני המיזוג. אין Direct Push ל־main,
+Force Push, ביטול Checks או אישור בשם אדם אחר.
 
-7.11 הפלט נשמר ב־`.artifacts/source-control-governance-evidence.json`
-ואינו כולל שם Repository, ‏Branch, ‏URL או זהות בעלים גלויה.
-
-7.12 חוזה v4 עבור Repository PUBLIC מומש ונבדק מקומית. לפני הפעלת
-Production יש להפיק ולאמת ראיה חדשה מול הספק. החוזה החדש חייב להוכיח לפחות Visibility ציבורי עקבי, הגנת
-`main`, ‏Required Checks, ‏CODEOWNERS/Review כאשר אפשר, Secret scanning,
-Push protection, היעדר Secrets בהיסטוריה ו־License hold. עד אז המצב
-הוא `unknown/unavailable` ו־Gate נשאר חסום.
+7.12 היסטוריית R175 נשמרת; R177 מחליפה רק את דרישת המבקר הנוסף ואת
+חוזה ההוכחה בהתאם למודל הבעלות. [מצב היישום והקריאה החיה](../outputs/launch-validation-2026-09-09/single-owner-validation.json)
+מבחינים בין קוד שנבדק, הגדרה בחשבון, פרסום ו־Governance Evidence שהופק בפועל.
 
 ## 8. Deployment Provenance Evidence
 

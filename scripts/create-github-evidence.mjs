@@ -1,6 +1,7 @@
 import {
   spawnSync,
 } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   mkdir,
   writeFile,
@@ -18,6 +19,8 @@ import {
 import {
   buildSourceControlGovernanceEvidence,
   requiredPullRequestStatusChecks,
+  sourceControlOwnerIdentity,
+  sourceControlChecksAppId,
 } from "../server/operations/sourceControlGovernanceEvidence.ts";
 import {
   createCurrentReleaseManifest,
@@ -171,7 +174,13 @@ function requiredCheckNames(protection) {
 
   if (
     !isObject(requiredStatusChecks) ||
-    requiredStatusChecks.strict !== true
+    requiredStatusChecks.strict !== true ||
+    !Array.isArray(requiredStatusChecks.checks) ||
+    requiredStatusChecks.checks.length !== requiredPullRequestStatusChecks.length ||
+    requiredStatusChecks.checks.some((check) =>
+      !isObject(check) || check.app_id !== sourceControlChecksAppId) ||
+    new Set(requiredStatusChecks.checks.map((check) => check.context)).size !==
+      requiredPullRequestStatusChecks.length
   ) {
     fail("GITHUB_BRANCH_PROTECTION_INVALID");
   }
@@ -215,9 +224,43 @@ function requiredCheckNames(protection) {
   return uniqueNames;
 }
 
+function hasDeclaredOwner(response) {
+  if (!isObject(response) || response.type !== "file" ||
+      response.path !== ".github/CODEOWNERS" || response.encoding !== "base64" ||
+      typeof response.sha !== "string" || !gitObjectPattern.test(response.sha) ||
+      !Number.isSafeInteger(response.size) || response.size < 1 || response.size > 4096 ||
+      typeof response.content !== "string" || response.content.length > 8192) return false;
+  const encoded = response.content.replace(/[\r\n]/g, "");
+  const bytes = Buffer.from(encoded, "base64");
+  if (bytes.toString("base64") !== encoded || bytes.length !== response.size) return false;
+  const objectSha = createHash("sha1").update(`blob ${bytes.length}\0`).update(bytes).digest("hex");
+  const rules = bytes.toString("utf8").split(/\r?\n/)
+    .map((line) => line.trim()).filter((line) => line && !line.startsWith("#"));
+  return objectSha === response.sha && rules.length === 1 &&
+    rules[0] === `* @${sourceControlOwnerIdentity}`;
+}
+
+function hasSoleOwner(repository, collaborators) {
+  return isObject(repository.owner) && repository.owner.type === "User" &&
+    repository.owner.login === sourceControlOwnerIdentity &&
+    Array.isArray(collaborators) && collaborators.length === 1 &&
+    isObject(collaborators[0]) && collaborators[0].login === sourceControlOwnerIdentity &&
+    isObject(collaborators[0].permissions) && collaborators[0].permissions.admin === true &&
+    collaborators[0].permissions.push === true;
+}
+
+function hasNoReviewBypass(reviews) {
+  if (reviews.require_last_push_approval !== false) return false;
+  const allowances = reviews.bypass_pull_request_allowances;
+  if (allowances === undefined) return true; // GitHub omits this when no allowances exist.
+  return isObject(allowances) && ["users", "teams", "apps"].every((key) =>
+    Array.isArray(allowances[key]) && allowances[key].length === 0);
+}
+
 export function createGithubGovernanceEvidence({
   repository,
   repositoryResponse,
+  collaboratorsResponse,
   protectionResponse,
   codeOwnersResponse,
   releaseManifest,
@@ -230,6 +273,7 @@ export function createGithubGovernanceEvidence({
 
   if (
     !isObject(repositoryResponse) ||
+    !hasSoleOwner(repositoryResponse, collaboratorsResponse) ||
     typeof repositoryResponse.full_name !==
       "string" ||
     repositoryResponse.full_name.toLowerCase() !==
@@ -266,15 +310,12 @@ export function createGithubGovernanceEvidence({
     ) ||
     protectionResponse
       .required_pull_request_reviews
-      .require_code_owner_reviews !== true ||
+      .require_code_owner_reviews !== false ||
     protectionResponse
       .required_pull_request_reviews
       .dismiss_stale_reviews !== true ||
-    !Number.isSafeInteger(
-      protectionResponse
-        .required_pull_request_reviews
-        .required_approving_review_count,
-    ) ||
+    protectionResponse.required_pull_request_reviews.required_approving_review_count !== 0 ||
+    !hasNoReviewBypass(protectionResponse.required_pull_request_reviews) ||
     !isObject(
       protectionResponse
         .required_conversation_resolution,
@@ -292,13 +333,7 @@ export function createGithubGovernanceEvidence({
     ) ||
     protectionResponse.allow_deletions.enabled !==
       false ||
-    !isObject(codeOwnersResponse) ||
-    codeOwnersResponse.type !== "file" ||
-    typeof codeOwnersResponse.sha !== "string" ||
-    !gitObjectPattern.test(codeOwnersResponse.sha) ||
-    !Number.isSafeInteger(codeOwnersResponse.size) ||
-    codeOwnersResponse.size < 1 ||
-    codeOwnersResponse.size > 1_048_576
+    !hasDeclaredOwner(codeOwnersResponse)
   ) {
     fail("GITHUB_GOVERNANCE_SNAPSHOT_INVALID");
   }
@@ -311,6 +346,7 @@ export function createGithubGovernanceEvidence({
     defaultBranchIdentity:
       `${repositoryResponse.full_name}:${repositoryResponse.default_branch}`,
     releaseCommitSha: manifest.commitSha,
+    reviewPolicy: "single-owner",
     requiredReviewCount:
       protectionResponse
         .required_pull_request_reviews
@@ -322,7 +358,9 @@ export function createGithubGovernanceEvidence({
     controls: {
       repositoryPublic: true,
       branchProtection: true,
-      codeOwnerReview: true,
+      pullRequestsRequired: true,
+      singleOwner: true,
+      codeOwnershipDeclared: true,
       dismissStaleApprovals: true,
       conversationResolution: true,
       forcePushBlocked: true,
@@ -353,7 +391,7 @@ function requireCheckRun(
     rawCheckRun.check_suite.id < 1 ||
     !isObject(rawCheckRun.app) ||
     !Number.isSafeInteger(rawCheckRun.app.id) ||
-    rawCheckRun.app.id < 1
+    rawCheckRun.app.id !== sourceControlChecksAppId
   ) {
     fail("GITHUB_CHECK_RUN_INVALID");
   }
@@ -464,6 +502,10 @@ export async function createCurrentGithubEvidence({
       baseEndpoint,
       runCommand,
     );
+  const collaboratorsResponse = readGithubApiJson(
+    `${baseEndpoint}/collaborators?affiliation=all&per_page=100`,
+    runCommand,
+  );
   const defaultBranch =
     typeof repositoryResponse?.default_branch ===
       "string"
@@ -494,6 +536,7 @@ export async function createCurrentGithubEvidence({
         repository:
           parsedRepository.nameWithOwner,
         repositoryResponse,
+        collaboratorsResponse,
         protectionResponse,
         codeOwnersResponse,
         releaseManifest: manifest,

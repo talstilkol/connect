@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {createHash} from "node:crypto";
+import {readFileSync} from "node:fs";
 
 import {
   createCurrentGithubEvidence,
@@ -14,6 +16,7 @@ import {
 import {
   inspectSourceControlGovernanceEvidence,
   requiredPullRequestStatusChecks,
+  sourceControlChecksAppId,
 } from "../server/operations/sourceControlGovernanceEvidence.ts";
 
 const repository =
@@ -37,6 +40,7 @@ function releaseManifest() {
 function repositoryResponse() {
   return {
     full_name: repository,
+    owner: {login: "talstilkol", type: "User"},
     private: false,
     visibility: "public",
     default_branch: "main",
@@ -57,15 +61,17 @@ function protectionResponse() {
       strict: true,
       contexts:
         requiredPullRequestStatusChecks,
-      checks: [],
+  sourceControlChecksAppId,
+      checks: requiredPullRequestStatusChecks.map((context) => ({context, app_id: sourceControlChecksAppId})),
     },
     enforce_admins: {
       enabled: true,
     },
     required_pull_request_reviews: {
-      require_code_owner_reviews: true,
+      require_code_owner_reviews: false,
       dismiss_stale_reviews: true,
-      required_approving_review_count: 1,
+      required_approving_review_count: 0,
+      require_last_push_approval: false,
     },
     required_conversation_resolution: {
       enabled: true,
@@ -79,11 +85,15 @@ function protectionResponse() {
   };
 }
 
-function codeOwnersResponse() {
+function collaboratorsResponse() {
+  return [{login: "talstilkol", permissions: {admin: true, push: true}}];
+}
+
+function codeOwnersResponse(bytes = readFileSync(new URL("../.github/CODEOWNERS", import.meta.url))) {
   return {
-    type: "file",
-    sha: "3".repeat(40),
-    size: 42,
+    type: "file", path: ".github/CODEOWNERS", encoding: "base64",
+    sha: createHash("sha1").update(`blob ${bytes.length}\0`).update(bytes).digest("hex"),
+    size: bytes.length, content: bytes.toString("base64"),
   };
 }
 
@@ -107,7 +117,7 @@ function checkRunsResponse() {
             id: index + 101,
           },
           app: {
-            id: 7,
+            id: sourceControlChecksAppId,
           },
         }),
       ),
@@ -172,6 +182,7 @@ test("builds bounded GitHub governance and CI evidence from verified responses",
   const governance =
     createGithubGovernanceEvidence({
       repository,
+      collaboratorsResponse: collaboratorsResponse(),
       repositoryResponse:
         repositoryResponse(),
       protectionResponse:
@@ -247,6 +258,7 @@ test("fails closed for incomplete governance and ambiguous CI checks", () => {
   missingRequiredCheck.required_status_checks
     .contexts =
       requiredPullRequestStatusChecks.slice(1);
+  missingRequiredCheck.required_status_checks.checks = missingRequiredCheck.required_status_checks.checks.slice(1);
   const duplicateCheckRuns =
     checkRunsResponse();
   duplicateCheckRuns.check_runs.push({
@@ -302,12 +314,13 @@ test("fails closed for incomplete governance and ambiguous CI checks", () => {
       () =>
         createGithubGovernanceEvidence({
           repository,
+          collaboratorsResponse: collaboratorsResponse(),
           ...value,
           releaseManifest:
             releaseManifest(),
           verifiedAt,
         }),
-      /GITHUB_(?:GOVERNANCE_SNAPSHOT|REQUIRED_CHECKS)_INVALID/,
+      /GITHUB_(?:GOVERNANCE_SNAPSHOT|REQUIRED_CHECKS|BRANCH_PROTECTION)_INVALID/,
     );
   }
 
@@ -324,11 +337,15 @@ test("fails closed for incomplete governance and ambiguous CI checks", () => {
   );
 });
 
-test("reads the exact four release-bound endpoints before building current evidence", async () => {
+test("reads the exact five endpoints with release-bound files and checks before building current evidence", async () => {
   const responses = new Map([
     [
       "/repos/talstilkol/connect",
       repositoryResponse(),
+    ],
+    [
+      "/repos/talstilkol/connect/collaborators?affiliation=all&per_page=100",
+      collaboratorsResponse(),
     ],
     [
       "/repos/talstilkol/connect/branches/main/protection",
@@ -378,4 +395,70 @@ test("reads the exact four release-bound endpoints before building current evide
     evidence.ciExecution.releaseId,
     releaseId,
   );
+});
+
+function governanceInput() {
+  return {repository, repositoryResponse: repositoryResponse(), collaboratorsResponse: collaboratorsResponse(),
+    protectionResponse: protectionResponse(), codeOwnersResponse: codeOwnersResponse(),
+    releaseManifest: releaseManifest(), verifiedAt};
+}
+
+test("single-owner governance requires the real sole account and write/admin permissions", () => {
+  const input = governanceInput();
+  assert.equal(createGithubGovernanceEvidence(input).reviewPolicy, "single-owner");
+  assert.equal(createGithubGovernanceEvidence(input).requiredReviewCount, 0);
+  for (const collaborators of [undefined, [], [...collaboratorsResponse(), ...collaboratorsResponse()],
+    [{...collaboratorsResponse()[0], permissions: {push: true, admin: false}}],
+    [{...collaboratorsResponse()[0], permissions: {push: false, admin: true}}]]) {
+    assert.throws(() => createGithubGovernanceEvidence({...input, collaboratorsResponse: collaborators}), /GITHUB_GOVERNANCE_SNAPSHOT_INVALID/);
+  }
+  for (const owner of [undefined, {login: "talstilkol", type: "Organization"}, {login: "another-owner", type: "User"}]) {
+    assert.throws(() => createGithubGovernanceEvidence({...input, repositoryResponse: {...input.repositoryResponse, owner}}), /GITHUB_GOVERNANCE_SNAPSHOT_INVALID/);
+  }
+});
+
+test("CODEOWNERS requires checked content and hash, and cannot hide ownership overrides", () => {
+  const input = governanceInput();
+  const bytes = readFileSync(new URL("../.github/CODEOWNERS", import.meta.url));
+  for (const file of [
+    {...input.codeOwnersResponse, content: undefined},
+    {...input.codeOwnersResponse, content: input.codeOwnersResponse.content + "!"},
+    {...input.codeOwnersResponse, sha: "3".repeat(40)},
+    {...input.codeOwnersResponse, size: bytes.length + 1},
+    {...input.codeOwnersResponse, path: "CODEOWNERS"},
+    codeOwnersResponse(Buffer.from("# no ownership rule\n")),
+    codeOwnersResponse(Buffer.from("* @another-owner\n")),
+    codeOwnersResponse(Buffer.concat([bytes, Buffer.from("/server/ @another-owner\n")])),
+  ]) {
+    assert.throws(() => createGithubGovernanceEvidence({...input, codeOwnersResponse: file}), /GITHUB_GOVERNANCE_SNAPSHOT_INVALID/);
+  }
+});
+
+test("zero approving reviews still requires protected PRs without a bypass or second-person gate", () => {
+  const input = governanceInput();
+  const reviews = input.protectionResponse.required_pull_request_reviews;
+  for (const value of [undefined, null, {...reviews, required_approving_review_count: 1},
+    {...reviews, require_code_owner_reviews: true}, {...reviews, require_last_push_approval: true},
+    {...reviews, bypass_pull_request_allowances: null},
+    {...reviews, bypass_pull_request_allowances: {users: [{login: "talstilkol"}], teams: [], apps: []}}]) {
+    assert.throws(() => createGithubGovernanceEvidence({...input, protectionResponse: {...input.protectionResponse,
+      required_pull_request_reviews: value}}), /GITHUB_GOVERNANCE_SNAPSHOT_INVALID/);
+  }
+  const empty = {...reviews, bypass_pull_request_allowances: {users: [], teams: [], apps: []}};
+  assert.equal(createGithubGovernanceEvidence({...input, protectionResponse: {...input.protectionResponse,
+    required_pull_request_reviews: empty}}).controls.pullRequestsRequired, true);
+});
+
+test("required checks and successful CI runs remain bound to the observed GitHub Actions app", () => {
+  const input = governanceInput();
+  const required = input.protectionResponse.required_status_checks;
+  for (const value of [{...required, strict: false}, {...required, checks: []},
+    {...required, checks: required.checks.map((check) => ({...check, app_id: -1}))},
+    {...required, checks: [...required.checks.slice(1), required.checks[1]]}]) {
+    assert.throws(() => createGithubGovernanceEvidence({...input, protectionResponse: {...input.protectionResponse,
+      required_status_checks: value}}), /GITHUB_(?:BRANCH_PROTECTION|REQUIRED_CHECKS)_INVALID/);
+  }
+  const runs = checkRunsResponse();
+  runs.check_runs[0].app.id = 7;
+  assert.throws(() => createGithubCiExecutionEvidence({checkRunsResponse: runs, releaseManifest: releaseManifest(), verifiedAt}), /GITHUB_CHECK_RUN_INVALID/);
 });
