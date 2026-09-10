@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readdir } from "node:fs/promises";
 import { metaCoexistenceTestUrl, metaCoexistenceTestSuites, prepareMetaCoexistenceDatabases,
   requireMetaCoexistenceTestUrl, runMetaCoexistenceSuites } from "../scripts/run-meta-coexistence-postgres-integration.mjs";
+
+test("every Meta PostgreSQL integration suite is required once in the CI runner", async () => {
+  const files = (await readdir(new URL("./integration/", import.meta.url)))
+    .filter((file) => /^meta-.*-postgres\.test\.mjs$/.test(file))
+    .map((file) => `tests/integration/${file}`).sort();
+  assert.deepEqual(metaCoexistenceTestSuites.map((suite) => suite.file).sort(), files);
+  assert.equal(new Set(metaCoexistenceTestSuites.map((suite) => suite.database)).size, files.length);
+  assert.equal(new Set(metaCoexistenceTestSuites.map((suite) => suite.variable)).size, files.length);
+});
 
 test("Coexistence integration requires the exact dedicated loopback URL without a DATABASE_URL fallback", () => {
   assert.equal(requireMetaCoexistenceTestUrl({ CONNECT_META_COEXISTENCE_TEST_URL: metaCoexistenceTestUrl }), metaCoexistenceTestUrl);
@@ -23,7 +33,7 @@ test("no database is created when cluster identity, existing databases or tables
   }
 });
 
-test("empty-cluster preparation creates only the six fixed test databases and never drops data", async () => {
+test("empty-cluster preparation creates only the eight fixed test databases and never drops data", async () => {
   const rows = [[{ database: "postgres", role: "connect_echo_test" }], [], []]; const calls = [];
   await prepareMetaCoexistenceDatabases({ async query(sql) { calls.push(sql); return { rows: rows.shift() ?? [] }; } });
   assert.deepEqual(calls.slice(3), metaCoexistenceTestSuites.map((suite) => `CREATE DATABASE ${suite.database}`));
@@ -38,7 +48,7 @@ test("all suites run sequentially and any failed or crashed suite fails the comp
       if (failure && calls.length === 2) throw new Error("Suite failed");
       return !(failure && calls.length === 4);
     });
-    if (failure) await assert.rejects(run, /META_COEXISTENCE_SUITES_FAILED \(2\/6\)/); else await run;
+    if (failure) await assert.rejects(run, /META_COEXISTENCE_SUITES_FAILED \(2\/8\)/); else await run;
     assert.deepEqual(calls, metaCoexistenceTestSuites.map((suite) => suite.file));
   }
 });
