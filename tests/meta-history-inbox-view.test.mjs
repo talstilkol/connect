@@ -63,3 +63,20 @@ test('history origin, all delivery states, media placeholders and tombstones are
     for (const state of ['deleted', 'conflicted']) assert.equal(messageBody({ contentKind: 'unsupported', textContent: 'private deleted text', contentState: state }, language), labels.contentStates[state]);
   }
 });
+
+test('original historical captions round-trip and appear in all interface languages without an edited marker', () => {
+  for (const contentKind of ['image', 'video', 'document']) {
+    const candidate = { ...history, contentKind };
+    assert.deepEqual(parseRailwayInboxMessageView(candidate), candidate);
+    for (const language of ['he', 'en', 'ar']) {
+      const label = readConversationMessages(language).labels.nonTextContent[contentKind];
+      assert.equal(messageBody(candidate, language), `${label}: ${history.textContent}`);
+      for (const textContent of [null, '', ' \t\n']) {
+        assert.equal(messageBody({ ...candidate, textContent }, language), label);
+      }
+      for (const contentState of ['deleted', 'conflicted']) {
+        assert.equal(messageBody({ ...candidate, contentState }, language), readConversationMessages(language).labels.contentStates[contentState]);
+      }
+    }
+  }
+});

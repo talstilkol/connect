@@ -60,7 +60,7 @@ export function messageBody(
   }
 
   const label = readConversationMessages(language).labels.nonTextContent[message.contentKind];
-  return message.contentState === "edited" && isCaptionMessageKind(message.contentKind) && message.textContent
+  return isCaptionMessageKind(message.contentKind) && message.textContent?.trim()
     ? `${label}: ${message.textContent}` : label;
 }
 

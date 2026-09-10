@@ -277,6 +277,51 @@ test('same-time incompatible edits redact historical text and cannot choose an a
   const t = await thread(f); assert.equal(t.rows[0].contentState, 'conflicted'); assert.equal(t.rows[0].textContent, null);
 });
 
+test('original historical media captions reach thread and preview without changing captured payloads or live messaging', async () => {
+  for (const kind of ['image', 'video', 'document']) {
+    for (const from of [message().from, customerPhone]) {
+      const f = await newCase();
+      const caption = message().text.body;
+      await signed(f, withMessages([message({ from, type: kind, text: undefined, [kind]: { caption } })]));
+      const storedBefore = (await pool.query('SELECT content_digest, payload FROM meta_history_sync_chunks WHERE tenant_id=$1', [f.scope.tenantId])).rows;
+      await drain();
+      const result = await thread(f);
+      assert.equal(result.rows.length, 1);
+      assert.equal(result.rows[0].textContent, caption);
+      assert.equal(result.rows[0].contentKind, kind);
+      assert.equal(result.rows[0].contentState, undefined);
+      assert.equal(result.rows[0].direction, from === customerPhone ? 'inbound' : 'outbound');
+      assert.equal(result.view.messages[0].textContent, caption);
+      assert.equal(result.conversation.lastMessage.textContent, caption);
+      assert.equal(result.conversation.unreadCount, 0);
+      assert.equal((await pool.query('SELECT * FROM messages WHERE tenant_id=$1', [f.scope.tenantId])).rowCount, 0);
+      assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, result.rows[0].messageKey), null);
+      assert.deepEqual((await pool.query('SELECT content_digest, payload FROM meta_history_sync_chunks WHERE tenant_id=$1', [f.scope.tenantId])).rows, storedBefore);
+      await signed(f, declinedValue());
+      const removed = await thread(f);
+      assert.equal(removed.rows.length, 0); assert.equal(removed.conversation.lastMessage, null);
+    }
+  }
+});
+
+test('only string captions on known historical media kinds are projected', async () => {
+  for (const caption of [undefined, null, 1, {}, '', ' \t\n']) {
+    const f = await newCase();
+    await signed(f, withMessages([message({ type: 'image', text: undefined, image: caption === undefined ? {} : { caption } })]));
+    await drain();
+    const result = await thread(f);
+    const expected = typeof caption === 'string' ? caption : null;
+    assert.equal(result.rows[0].textContent, expected);
+    assert.equal(result.conversation.lastMessage.textContent, expected);
+  }
+  for (const kind of ['audio', 'sticker', 'location', 'interactive']) {
+    const f = await newCase();
+    await signed(f, withMessages([message({ type: kind, text: undefined, [kind]: { caption: message().text.body } })]));
+    await drain();
+    assert.equal((await thread(f)).rows[0].textContent, null);
+  }
+});
+
 test('media caption revisions are visible in historical threads without granting attachment access', async () => {
   for (const beforeProjection of [true, false]) {
     const f = await newCase();
