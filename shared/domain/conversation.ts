@@ -46,6 +46,16 @@ export type MessageContentKind =
 export type MessageStatus =
   (typeof messageStatuses)[number];
 
+export const messageContentStates = ["original", "edited", "deleted", "conflicted"] as const;
+export type MessageContentState = (typeof messageContentStates)[number];
+
+export function isMessageContentStateConsistent(state: unknown, direction: unknown, kind: unknown, text: unknown): state is MessageContentState {
+  return state === "original" || (direction === "outbound" && (
+    (state === "edited" && kind === "text" && typeof text === "string" && text.trim().length > 0) ||
+    ((state === "deleted" || state === "conflicted") && kind === "unsupported" && text === null)
+  ));
+}
+
 export interface ValidatedInboundMessage {
   contactId: number;
   providerMessageId: string;
@@ -69,6 +79,7 @@ export interface PersistedConversation {
 }
 
 export interface PersistedMessage {
+  contentState?: Exclude<MessageContentState, "original">;
   messageKey: string;
   conversationKey: string;
   tenantId: number;

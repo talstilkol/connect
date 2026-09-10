@@ -73,6 +73,7 @@ test("composes one authenticated handler over the PostgreSQL foundation", async 
   assert.deepEqual(Object.keys(runtime).sort(), [
     "close",
     "handler",
+    "mediaFileHandler",
     "metaWebhookHandler",
     "readiness",
   ]);
@@ -290,4 +291,15 @@ test("has no static import or composition for the legacy staging driver", () => 
     /botReplyStagingDurableRunner|botReplyStagingLiveDriver|botReplyStagingQueuedExecutor|railwayBullMqBotReplyStagingQueue|createBotReplyStagingDurableRunner|createBotReplyStagingLiveDriver|createBotReplyStagingQueuedExecutor|waitForBotReplyStagingPoll/,
   );
   assert.match(source, /botReplyStagingReleaseEvidence/);
+});
+
+test('binary media runtime requires explicit valid configuration and exposes a separate method-guarded handler',async()=>{
+  const {quarantineEnvironment}=await import('./fixtures/meta-media-quarantine.mjs');
+  await assert.rejects(createRailwayPostgresApiRuntime(options({mediaFileEnvironment:{META_MEDIA_FILE_READ_MODE:'enabled'}})));
+  const runtime=await createRailwayPostgresApiRuntime(options({mediaFileEnvironment:{...quarantineEnvironment,META_MEDIA_FILE_READ_MODE:'enabled'}}));
+  try {
+    assert.equal(typeof runtime.mediaFileHandler.handle,'function');
+    const response=await runtime.mediaFileHandler.handle(new Request(`https://railway.example.com/v1/media-files/message_v1_${'a'.repeat(64)}`,{method:'HEAD',headers:{origin:identityEnvironment.APP_PUBLIC_ORIGIN}}),async()=>assert.fail('No file delivery'));
+    assert.equal(response.status,405);assert.doesNotMatch(JSON.stringify(runtime),/quarantine|secret-key|kms|bucket/);
+  }finally{await runtime.close();await runtime.close();}
 });

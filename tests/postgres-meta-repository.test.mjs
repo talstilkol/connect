@@ -104,7 +104,7 @@ test("reads Meta connections only through exact tenant or WABA scope", async () 
 
 test("stores and confirms one verified asset snapshot transactionally", async () => {
   const fixture = dependenciesFixture({
-    transactionResults: [[{ tenantId: "7" }], [connectionRow()]],
+    transactionResults: [[connectionRow()]],
   });
   const repository = createPostgresMetaRepository(fixture.dependencies);
 
@@ -125,10 +125,8 @@ test("stores and confirms one verified asset snapshot transactionally", async ()
       "phone-number-id",
     ],
   });
-  assert.equal(
-    fixture.transactionCalls[1].sql,
-    postgresMetaSql.findConnectionByTenantId,
-  );
+  assert.equal(fixture.transactionCalls.length, 1);
+  assert.match(fixture.transactionCalls[0].sql, /RETURNING[\s\S]*version/);
 });
 
 test("confirms connection and operational failure states behind transactions", async () => {
@@ -146,7 +144,7 @@ test("confirms connection and operational failure states behind transactions", a
   });
   const connected = await createPostgresMetaRepository(
     connectedFixture.dependencies,
-  ).markConnectionConnected(7);
+  ).markConnectionConnected(7, 1);
 
   assert.equal(connected.status, "connected");
   assert.equal(
@@ -287,4 +285,41 @@ test("fails closed for inconsistent rows and rejected transitions", async () => 
     ).completeWebhookReceipt(7, 31),
     /transition was rejected/,
   );
+});
+
+test("confirmation fences the pending version and rejects a lost update without reading a newer connection", async () => {
+  assert.match(postgresMetaSql.markConnectionConnected, /WHERE tenant_id = \$1\s+AND status = 'pending'\s+AND version = \$2/);
+  const fixture = dependenciesFixture({ transactionResults: [[]] });
+  await assert.rejects(createPostgresMetaRepository(fixture.dependencies).markConnectionConnected(7, 5), /changed before confirmation/);
+  assert.equal(fixture.transactionCalls.length, 1);
+  assert.deepEqual(fixture.transactionCalls[0].parameters, [7, 5]);
+  await assert.rejects(createPostgresMetaRepository(fixture.dependencies).markConnectionConnected(7, undefined));
+  assert.equal(fixture.transactionCalls.length, 1);
+});
+
+test("each signup allocates a generation and returns only its own persisted snapshot", async () => {
+  assert.match(postgresMetaSql.upsertAssetSnapshot, /version = meta_connections.version \+ 1/);
+  assert.doesNotMatch(postgresMetaSql.upsertAssetSnapshot, /ON CONFLICT[\s\S]*\bWHERE\b/);
+  const fixture = dependenciesFixture({ transactionResults: [[connectionRow({ version: 4 })], [connectionRow({ version: 5 })]] });
+  const repository = createPostgresMetaRepository(fixture.dependencies);
+  const assets = { tenantId: 7, businessPortfolioId: "business-portfolio-id", wabaId: "waba-id", phoneNumberId: "phone-number-id" };
+  const records = await Promise.all([repository.saveAssetSnapshot(assets), repository.saveAssetSnapshot(assets)]);
+  assert.deepEqual(records.map((record) => record.version), [4, 5]);
+  assert.equal(fixture.transactionCalls.length, 2);
+  for (const rows of [[], [connectionRow({ tenantId: "8" })], [connectionRow({ phoneNumberId: "changed-phone" })]]) {
+    const rejected = dependenciesFixture({ transactionResults: [rows] });
+    await assert.rejects(createPostgresMetaRepository(rejected.dependencies).saveAssetSnapshot(assets), /not confirmed/);
+    assert.equal(rejected.transactionCalls.length, 1);
+  }
+});
+
+test("webhook revocation is tenant, WABA and version scoped without reactivating stale state", async () => {
+  const fixture = dependenciesFixture({ queryResults: [[{ tenantId: "7" }], []] });
+  const repository = createPostgresMetaRepository(fixture.dependencies);
+  assert.equal(await repository.revokeConnection(7, "waba-id", 2), true);
+  assert.equal(await repository.revokeConnection(7, "waba-id", 2), false);
+  assert.deepEqual(fixture.queryCalls[0].parameters, [7, "waba-id", 2]);
+  assert.match(postgresMetaSql.revokeConnection, /tenant_id = \$1 AND waba_id = \$2 AND version = \$3 AND status <> 'revoked'/);
+  await assert.rejects(repository.revokeConnection(7, "waba-id", undefined));
+  assert.equal(fixture.queryCalls.length, 2);
 });

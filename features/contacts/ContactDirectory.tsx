@@ -1,5 +1,7 @@
 "use client";
 
+import { contactDisplayName } from "../../shared/domain/contactDisplayName.ts";
+
 import {
   useRef,
   useState,
@@ -550,14 +552,6 @@ export function ContactDirectory({
       </section>
     </div>
   );
-}
-
-function contactDisplayName(contact: ContactRecord): string {
-  const displayName = [contact.firstName, contact.lastName]
-    .filter(Boolean)
-    .join(" ");
-
-  return displayName || contact.phoneNumber;
 }
 
 function consentDescription(

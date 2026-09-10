@@ -1,6 +1,8 @@
+import type { MetaMediaWorkerEnvironment } from "./railwayMetaMediaWorkerRuntime.ts";
 import type {
   CampaignDeliveryQueueBinding,
 } from "../campaigns/campaignScheduler.ts";
+import type { MetaEmbeddedSignupServerEnvironment } from '../meta/metaEmbeddedSignupServerReadiness.ts';
 import type {
   MetaCredentialVaultOptions,
 } from "../meta/metaCredentialVault.ts";
@@ -52,9 +54,10 @@ import type {
 } from "./railwayWorkerSchedulerService.ts";
 
 export type RailwayWorkerExecutableEnvironment =
-  NodePostgresPoolEnvironment &
+  NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment &
     MessageTemplateSubmissionEnvironment &
     MetaWebhookEnvironment &
+    MetaEmbeddedSignupServerEnvironment &
     RailwayCampaignDeliveryEnvironment &
     RailwayWorkerMainEnvironment;
 

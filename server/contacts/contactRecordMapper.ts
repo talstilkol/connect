@@ -8,6 +8,7 @@ export function toContactRecord(
     id: contact.id,
     phoneNumber: contact.phoneNumber,
     firstName: contact.firstName,
+    ...(contact.whatsappDisplayName === undefined ? {} : { whatsappDisplayName: contact.whatsappDisplayName }),
     lastName: contact.lastName,
     email: contact.email,
     company: contact.company,

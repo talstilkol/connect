@@ -13,6 +13,28 @@ const accessToken = toSensitiveMetaAccessToken(
   "transport-fixture-access-token",
 );
 
+test("the request deadline also bounds a body read that never settles after headers", async () => {
+  let signal;
+  const transport = createMetaGraphTransport({ apiVersion: "v21.0" }, {
+    requestTimeoutMs: 20,
+    async fetchImplementation(_url, init) {
+      signal = init.signal;
+      return { headers: new Headers(), status: 200, ok: true, text: () => new Promise(() => {}) };
+    },
+  });
+  await assert.rejects(transport.requestJson({ method: "POST", pathSegments: ["300003", "smb_app_data"], accessToken,
+    jsonBody: { messaging_product: "whatsapp", sync_type: "history" } }),
+    (error) => error instanceof MetaGraphError && error.code === "TIMEOUT");
+  assert.equal(signal.aborted, true);
+});
+
+test("the request deadline does not depend on a fetch implementation honoring abort", async () => {
+  const transport = createMetaGraphTransport({ apiVersion: "v21.0" }, { requestTimeoutMs: 20,
+    fetchImplementation: () => new Promise(() => {}) });
+  await assert.rejects(transport.requestJson({ method: "GET", pathSegments: ["300003"], accessToken }),
+    (error) => error instanceof MetaGraphError && error.code === "TIMEOUT");
+});
+
 test("sends Meta credentials only in the authorization header", async () => {
   const calls = [];
   const transport = createMetaGraphTransport(

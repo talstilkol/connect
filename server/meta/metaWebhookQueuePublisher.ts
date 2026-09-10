@@ -1,3 +1,4 @@
+import { isMetaAccountLifecycleEnvelope } from "./metaAccountLifecycle.ts";
 import type {
   MetaRepository,
 } from "../../db/metaRepository.ts";
@@ -16,6 +17,7 @@ import {
 import {
   createMetaWebhookQueueMessage,
   MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
+  isMetaWebhookPayloadLimit,
 } from "./metaWebhookQueueMessage.ts";
 import type {
   MetaWebhookQueuePort,
@@ -59,7 +61,9 @@ export function createMetaWebhookQueuePublisher(
   queue: MetaWebhookQueuePort,
   appSecret: string,
   rateLimitGuard: RateLimitGuard,
+  maximumPayloadBytes = MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
 ): MetaWebhookQueuePublisher {
+  if (!isMetaWebhookPayloadLimit(maximumPayloadBytes)) throw new Error("Meta webhook payload limit is invalid");
   if (
     typeof appSecret !== "string" ||
     appSecret.trim().length === 0
@@ -96,7 +100,7 @@ export function createMetaWebhookQueuePublisher(
 
       if (
         rawPayload.byteLength >
-        MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES
+        maximumPayloadBytes
       ) {
         throw new MetaWebhookQueuePublisherError(
           "PAYLOAD_TOO_LARGE",
@@ -158,7 +162,7 @@ export function createMetaWebhookQueuePublisher(
         envelope.wabaId,
       );
 
-      if (!connection || connection.status !== "connected") {
+      if (!connection || (connection.status !== "connected" && !isMetaAccountLifecycleEnvelope(envelope))) {
         throw new MetaWebhookIngressError(
           "CONNECTION_NOT_FOUND",
           "Meta webhook WABA is not connected to a tenant",

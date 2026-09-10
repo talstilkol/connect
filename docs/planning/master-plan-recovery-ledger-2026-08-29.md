@@ -1,5 +1,12 @@
 # 1. Connect — Master Plan recovery ledger
 
+> 2026-09-09: This historical recovery ledger is retained unchanged below.
+> Tal's new instruction authorizes independent decisions, replanning and implementation.
+> Current execution follows the [launch master plan](launch-master-plan-2026-09-09.md)
+> and [decision record](launch-decisions-2026-09-09.md); historical freeze and
+> planning-only restrictions do not govern that new work. Historical acceptance
+> and finding statuses are not retroactively changed.
+
 ## 1.1 Purpose and authority
 
 1.1.1 `artifactId=CONNECT-MASTER-PLAN-RECOVERY-LEDGER-2026-08-29`.
@@ -1983,3 +1990,71 @@
 1.144.7 state=`PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-COMPLETE-LOCAL;PASS-4-NEXT`;accepted Requirements=`0/128`;Finding closure=`0/15`;review generations=`0/2`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;no Product/provider/deployment mutation occurred.
 
 1.144.8 Pass 4 scope=`causal graph plus dual Graph Engines`;final root overlay is deferred until exact Pass 5/6 roots exist;Atomic Package remains Pass 6;fake or placeholder future roots are forbidden.
+
+## 1.145 Side-chat Git, Candidate and Pass 4 reconciliation
+
+1.145.1 Reconciliation path=`docs/planning/side-chat-reconciliation-2026-08-31.md`;raw SHA-256=`4d970314f664936cc2e5fe704bc90a70e922a7d67470219e5e2a51bcf22e4662`;physical identity=`694 lines/2076 words/20182 bytes`;storage=`LOCAL-UNTRACKED`;snapshot observedAt=`2026-08-31T08:10:18+03:00`.
+
+1.145.2 no separate readable side-thread identity was exposed;the recovered immutable Git range is `93c6b2dfe007..f68cdcf69567` with exactly `59` linear commits and `1093` changed paths;local HEAD and `origin/codex/cloudflare-evidence-builders` matched at `f68cdcf69567a443784f4b12e848fd12c57e8f06`.
+
+1.145.3 GitHub readback=`talstilkol/connect PUBLIC;isPrivate=false;defaultBranch=main`;Draft PR `#2` is `OPEN;UNSTABLE`;the 59 commits remain on the feature branch and were not merged by this reconciliation;their prior push is recorded without retroactive Public Push Permit.
+
+1.145.4 adopted local-only evidence=`B0 v8;Protocol v1.10 G1;Discovery Cutoff v3;Source Universe v4`;canonical Pass status=`Pass 1=COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED;Pass 2 v3=COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED;Pass 3 v2=COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED;Pass 3 current-HEAD Node revalidation=FAIL-TOOLCHAIN-DRIFT;Acceptance=0`;rejected history=`Discovery Cutoff v1/v2;TRD Pass 2 v1/v2`;mixed consolidation commit `5ad1eba` requires dedicated Review.
+
+1.145.5 targeted local verification=`80/80 PASS`;B0 v8 Node/Python Verifiers PASS;Protocol v1.10 Node/Python Verifiers PASS;GitHub CI=`6 PASS;3 FAIL`;definitive first failure=`source-guardrails cannot resolve typescript because its workflow omits dependency installation`;migrations=`LEADING-FIRST-FAILURE-HYPOTHESIS: workflow omits npm ci while verifier expects node_modules/drizzle-kit/bin.cjs;rerun required before root-cause closure`;tests-and-build first failure=`hard-coded /private/tmp B0 test path fails on Ubuntu with EACCES`.
+
+1.145.6 quarantined Pass 4 checkpoint=`LOCAL-UNTRACKED;PART_230/512;14256056 bytes;204325 lines;raw SHA-256 6c687f663d2cb60937ac0c62fa0b45dbbf241aa41a15e8317c0ebba9da353ad7;prefix b753bc33bf22423b2ea4892730c9139c3509a6bfc8542ba1054ce59f0afafdea`;prefix exactly matched the original builder's Part 231 precondition,but the file is incomplete JSON and received zero completion or Acceptance credit.
+
+1.145.7 temporary Resume delivery helper and Part 219→230 advance=`UNAUTHORIZED-HISTORICAL-ACTION;ZERO-AUTHORITY-CREDIT`;the helper was removed;builder path=`scripts/create-trd2-v6-pass4-candidate.mjs`;current builder bytes exactly match HEAD SHA-256 `bfb59c843f13de562997681c08d32281df0136b1bad8dcbc2bd4ddc1d8f2e65d`;charter path=`docs/planning/section-35-6-trd-2-v6-pass4-build-charter-2026-08-31.md`;charter SHA-256=`df4250e1404efa2bba51789f43ae4688f0b4c5c146690acc8f660f2454058fb6`;clause=`1.2.4`;provenance requires a clean frozen-toolchain restart from Part 1 after new explicit Authority,so current Pass 4 remains `QUARANTINE-INCOMPLETE`.
+
+1.145.8 claim limit=`LOCAL-RECONCILIATION-NOT-ACCEPTANCE`;preservation state=`reconciliation/checkpoint LOCAL-UNTRACKED;recovery/sequential ledgers LOCAL-MODIFIED-UNCOMMITTED;no durable Git evidence`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;repository remains `PUBLIC`;Public Push Permit remains `ABSENT`;all Code/Toolchain/Workflow/Test/Git/PR actions remain authority-gated;no Commit,Push,Merge,Visibility,Product,provider,deployment or Production mutation was performed by this reconciliation.
+
+## 1.146 Side-chat adopted Candidate identity freeze v1
+
+1.146.1 manifest path=`docs/planning/side-chat-adopted-candidate-set-v1-2026-08-31.json`;raw SHA-256=`073eb6800742e4fe1b0503bb638176aa332a3b44836dc484d343725894446e1b`;physical identity=`210 lines/341 words/7689 bytes`;observedAt=`2026-08-31T08:31:35+03:00`;clock authority=`LOCAL-CLOCK-UNTRUSTED`;storage=`LOCAL-UNTRACKED`.
+
+1.146.2 canonical Candidate count=`7`: B0 v8,Three-review Protocol v1.10 G1,Discovery Cutoff v3,Source Universe v4 Generation A,TRD-2 v6 Pass 1,Pass 2 v3 and Pass 3 v2;all exact source commits,manifest paths and roots are frozen in the manifest;all remain `COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED` with `Acceptance=0`.
+
+1.146.3 Pass 4 is excluded from the Candidate set and recorded only in `quarantine`: `PART_230/512;44.921875% transport only;QUARANTINE-INCOMPLETE;UNAUTHORIZED-HISTORICAL-ACTION;ZERO-AUTHORITY-CREDIT`;Discovery Cutoff v1/v2 and TRD Pass 2 v1/v2 remain rejected history.
+
+1.146.4 underlying Candidate bytes are committed on the working branch and were observed on the remote branch;this new adoption manifest and its controlling ledger entries remain local/uncommitted,so durable Adoption Decision=`ABSENT` and no Git,Acceptance,closure or Gate29 credit is granted.
+
+1.146.5 allowed effects remain `PLANNING-DOCUMENT-AUTHORING;READ-ONLY-REVIEW;READ-ONLY-OBSERVATION`;Code,Toolchain,Workflow,Test,Git,PR,Deployment,provider and Production actions remain authority-gated;repository remains `PUBLIC`;Public Push Permit=`ABSENT`;Gate29=`BLOCKED`;development freeze=`ACTIVE`.
+
+## 1.147 Dedicated Review of mixed consolidation commit 5ad1eba
+
+1.147.1 Review path=`docs/planning/commit-5ad1eba-dedicated-review-2026-08-31.md`;raw SHA-256=`a175926928df06b14398f900651d14b8f377bd97ea0d896ab6316b2c672fa343`;physical identity=`603 lines/2324 words/23805 bytes`;storage=`LOCAL-UNTRACKED`.
+
+1.147.2 subject=`5ad1eba3a16354a75f28f9fae7ef28dfb10ec3c6`;parent=`93c6b2dfe007f07c43c37389873a8a648a3ff69d`;inventory=`899 paths=770 added+129 modified;3828704 additions;3220 deletions`;tree-weight change=`17712949→344322307 bytes;delta 326609358 bytes`.
+
+1.147.3 verdict=`REJECT-AS-ATOMIC-ADOPTION-UNIT;PRESERVE-FOR-FORENSIC-AND-PATCH-EXTRACTION-ONLY`;governance state=`UNAUTHORIZED-HISTORICAL-ACTION;ZERO-AUTHORITY-CREDIT`;Product bytes default=`QUARANTINE/REQUIRES-DEDICATED-REVIEW`;predecessor Planning packages=`RETAIN-AS-HISTORICAL-EVIDENCE;NOT-CANONICAL`.
+
+1.147.4 blocking findings include direct Railway Cutover without flag/rollback,Clerk Organization bypass in Tenant selection,canonical Railway entrypoint replacement,globally exposed raw Release evidence,viewer-dependent Production readiness,v1 Evidence runtime while v2 Attested remains dormant,non-portable destructive Redis rehearsal,BullMQ integration false-PASS paths,stale README truth claims,uncustodied duplicate Playwright PNGs and inherited CI dependency-install gaps.
+
+1.147.5 negative observations=`no literal secret found in added lines under sampled common signatures;no migration/SQL file added in the commit;no direct user-controlled SQL interpolation found in reviewed slice;bot-reply readiness remains fail-closed`;these are bounded observations,not full Security,Migration or Runtime Acceptance.
+
+1.147.6 no Product/Test/Workflow/Git/GitHub mutation or runtime test was performed;future extraction requires per-feature approved requirement,small frozen diff,negative tests,rollback,independent reviews,Definition Acceptance,Tal exact-root approval and Gate29/new Authority;Gate29 and Tal approval are necessary but not sufficient,and every Patch/Code/Toolchain/Workflow/Test/Git/PR/Push action still requires a separate post-Gate29 Permit bound to the exact source commit,diff/root,target,effect and expiry;repository remains `PUBLIC`;Public Push Permit=`ABSENT`;development freeze=`ACTIVE`.
+
+## 1.148 ReviewInput/Program SourceSet blocker manifest v1
+
+1.148.1 manifest path=`docs/planning/reviewinput-program-sourceset-blocker-manifest-v1-2026-08-31.json`;raw SHA-256=`b4bf49685f453fbe88dfa3d914418126ddcd6c3aa8b154ba58d5458e125047be`;physical identity=`946 lines/1986 words/42619 bytes`;storage=`LOCAL-UNTRACKED`.
+
+1.148.2 status=`BLOCKER-MANIFEST-NOT-SOURCESET-NOT-REVIEWINPUT-FREEZE`;claim credit=`ReviewInput 0;Program SourceSet 0;Program Acceptance 0;Authority 0;Closure 0;Completion 0;Schedule 0`;the artifact records identities and blockers only.
+
+1.148.3 foundational join=`6 required;0 accepted;join BLOCKED`;nodes=`B0 v8;Three-review Protocol v1.10 G1;Source Universe v4 Generation A;TRD-2 v6 multipass;Master Control Sequence v2 rejected/v3 required;Public/Cyber v5 rejected/v6 required`;the ratio is expressly not a completion percentage.
+
+1.148.4 material inherited debt is preserved independently: B0 active predecessor Findings=`38;transfer 0`;Protocol inherited Findings=`40;independent mechanical closure 1/40;acceptance credit 0`;TRD v5=`REJECT;15 open=12 P0+2 P1+1 P2;accepted Requirements 0/128;review generations 0/2`.
+
+1.148.5 TRD v5 binds six frozen inputs totaling `409510 lines/17205316 bytes`;TRD v6 Passes 1-3 bind exact paths,raw hashes and semantic roots;Pass 4 preserves `LOCAL-UNTRACKED;UNAUTHORIZED-HISTORICAL-ACTION;authority credit 0;PART_230/512;44.921875% TRANSPORT-ONLY;14256056 bytes;204325 lines;raw SHA-256 6c687f663d2cb60937ac0c62fa0b45dbbf241aa41a15e8317c0ebba9da353ad7`.
+
+1.148.6 authority model=`default FORBIDDEN;unknown action BLOCKED`;allowed scope is limited to local Planning authoring,local read-only Review and unauthenticated Public-source research;Credentials,Sessions,Secrets,private/customer data,provider/Production reads or mutations,deletion,history rewrite,visibility change,Code,Toolchain,Workflow,Tests,Git,PR,Deployment and Release remain forbidden without new exact Authority.
+
+1.148.7 Review cannot grant Acceptance;Acceptance requires a separate exact-root authorized receipt and current-pointer readback;post-Gate mutation additionally requires an exact class/named-use/issuer/consumer/root/target/effect/trusted-time/revocation/fencing/expected-head/one-use atomic-CAS Permit;the rejected v5 Permit registry grants zero authority and all four observed Permit tokens remain `ABSENT`/normalized `MISSING-BLOCKING`.
+
+1.148.8 execution ownership remains the settled Tal decision: `Owner=Tal;N01=CLOSED`;multi-person RACI is not reopened;missing schedule inputs are Tal weekly capacity,incident availability,task weights,dependencies,external waits and calendar cut.
+
+1.148.9 three independent exact-object reviews=`Authority PASS 0/0/0/0;Structure PASS 0/0/0/0;Fact/Omission PASS 0/0/0/0`;recursive audit=`53 declared path/hash pairs;38 unique;missing 0;mismatch 0`;all four subjectPath/subjectRoot pairs matched.
+
+1.148.10 exact whole-program/Planning/Product completion percentage,remaining hours,calendar ETA and accepted Task denominator remain `unknown/unavailable`;the next legal Planning transition is to freeze ReviewInput eligibility requirements,not to create or accept ReviewInput itself.
+
+1.148.11 repository remains `PUBLIC`;Gate29=`BLOCKED`;development freeze=`ACTIVE`;Public Push Permit normalized state=`MISSING-BLOCKING`;no Product,Test,Workflow,Git,GitHub,provider,deployment or Production mutation and no Test run was performed for this blocker manifest.

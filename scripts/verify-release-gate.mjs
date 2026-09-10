@@ -88,6 +88,14 @@ const steps = [
       ? []
       : [
           {
+            id: "production-infrastructure-readiness-v2",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-production-readiness.mjs",
+              "--v2",
+            ],
+          },
+          {
             id:
               "dependency-audit-attestation",
             command: process.execPath,

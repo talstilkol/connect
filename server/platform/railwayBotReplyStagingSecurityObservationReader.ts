@@ -259,6 +259,7 @@ function requireEnvelope(
   now: Readonly<Date>,
 ): Readonly<EncryptedMetaCredentialEnvelope> {
   if (!isRecord(value) || !hasExactKeys(value, [
+    "authorizationVersion",
     "ciphertext",
     "createdAt",
     "initializationVector",
@@ -272,6 +273,7 @@ function requireEnvelope(
   const updatedAt = canonicalTimestampMilliseconds(value.updatedAt);
   if (
     value.tenantId !== tenantId || value.keyVersion !== "v1" ||
+    !Number.isSafeInteger(value.authorizationVersion) || Number(value.authorizationVersion) <= 0 ||
     typeof value.initializationVector !== "string" ||
     !initializationVectorPattern.test(value.initializationVector) ||
     typeof value.ciphertext !== "string" || value.ciphertext.length < 24 ||
@@ -375,6 +377,9 @@ export function createRailwayBotReplyStagingSecurityObservationReader(
         context.run.targetTenantId,
         now,
       );
+      if (envelope.authorizationVersion !== context.run.expectedConnectionVersion - 1) {
+        fail("BOT_REPLY_STAGING_SECURITY_CREDENTIAL_INVALID");
+      }
       try {
         await credentialVault.withAccessToken(
           context.run.targetTenantId,

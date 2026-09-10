@@ -1,5 +1,7 @@
+import { inboxContentKinds, isHistoryDeliveryState, type HistoryDeliveryState } from "../../shared/domain/inboxHistory.ts";
 import {
   messageContentKinds,
+  isMessageContentStateConsistent,
   messageDirections,
   messageStatuses,
   persistedConversationStatuses,
@@ -65,14 +67,17 @@ function parseLastMessage(
       "direction",
       "occurredAt",
       "textContent",
+      ...(Object.hasOwn(value, "contentState") ? ["contentState"] : []),
     ]) ||
     !messageDirections.includes(
       value.direction as (typeof messageDirections)[number],
     ) ||
-    !messageContentKinds.includes(
-      value.contentKind as (typeof messageContentKinds)[number],
+    !inboxContentKinds.includes(
+      value.contentKind as (typeof inboxContentKinds)[number],
     ) ||
     (value.textContent !== null && typeof value.textContent !== "string") ||
+    !isMessageContentStateConsistent(value.contentState ?? "original", value.direction, value.contentKind, value.textContent) ||
+    (Object.hasOwn(value, "contentState") && !["edited", "deleted", "conflicted"].includes(String(value.contentState))) ||
     !isCanonicalTimestamp(value.occurredAt)
   ) {
     return undefined;
@@ -80,8 +85,9 @@ function parseLastMessage(
 
   return Object.freeze({
     direction: value.direction as (typeof messageDirections)[number],
-    contentKind: value.contentKind as (typeof messageContentKinds)[number],
+    contentKind: value.contentKind as (typeof inboxContentKinds)[number],
     textContent: value.textContent as string | null,
+    ...(value.contentState === undefined ? {} : { contentState: value.contentState as "edited" | "deleted" | "conflicted" }),
     occurredAt: value.occurredAt,
   });
 }
@@ -153,21 +159,24 @@ export function parseRailwayInboxMessageView(
       "status",
       "statusUpdatedAt",
       "textContent",
+      ...(value.source === "history" ? ["source", "historyDeliveryState"] : []),
+      ...(Object.hasOwn(value, "contentState") ? ["contentState"] : []),
     ]) ||
     typeof value.messageKey !== "string" ||
     !messageKeyPattern.test(value.messageKey) ||
     !messageDirections.includes(
       value.direction as (typeof messageDirections)[number],
     ) ||
-    !messageContentKinds.includes(
+    !(value.source === "history" ? inboxContentKinds : messageContentKinds).includes(
       value.contentKind as (typeof messageContentKinds)[number],
     ) ||
-    !messageStatuses.includes(
-      value.status as (typeof messageStatuses)[number],
-    ) ||
+    (value.source === "history"
+      ? value.status !== null || value.statusUpdatedAt !== null || !isHistoryDeliveryState(value.historyDeliveryState)
+      : !messageStatuses.includes(value.status as (typeof messageStatuses)[number]) || !isCanonicalTimestamp(value.statusUpdatedAt)) ||
     (value.textContent !== null && typeof value.textContent !== "string") ||
-    !isCanonicalTimestamp(value.occurredAt) ||
-    !isCanonicalTimestamp(value.statusUpdatedAt)
+    !isMessageContentStateConsistent(value.contentState ?? "original", value.direction, value.contentKind, value.textContent) ||
+    (Object.hasOwn(value, "contentState") && !["edited", "deleted", "conflicted"].includes(String(value.contentState))) ||
+    !isCanonicalTimestamp(value.occurredAt)
   ) {
     return null;
   }
@@ -175,11 +184,13 @@ export function parseRailwayInboxMessageView(
   return Object.freeze({
     messageKey: value.messageKey,
     direction: value.direction as (typeof messageDirections)[number],
-    contentKind: value.contentKind as (typeof messageContentKinds)[number],
-    status: value.status as (typeof messageStatuses)[number],
+    contentKind: value.contentKind as (typeof inboxContentKinds)[number],
+    status: value.status as InboxMessageView["status"],
     textContent: value.textContent as string | null,
+    ...(value.contentState === undefined ? {} : { contentState: value.contentState as "edited" | "deleted" | "conflicted" }),
     occurredAt: value.occurredAt,
-    statusUpdatedAt: value.statusUpdatedAt,
+    statusUpdatedAt: value.statusUpdatedAt as string | null,
+    ...(value.source === "history" ? { source: "history" as const, historyDeliveryState: value.historyDeliveryState as HistoryDeliveryState } : {}),
   });
 }
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { contactDisplayName } from "../../shared/domain/contactDisplayName.ts";
+
 import {
   useState,
   useTransition,
@@ -326,9 +328,6 @@ function ContactOrganizationFeedback({
 }
 
 function contactOptionLabel(contact: ContactRecord): string {
-  const name = [contact.firstName, contact.lastName]
-    .filter(Boolean)
-    .join(" ");
-
-  return name ? `${name} · ${contact.phoneNumber}` : contact.phoneNumber;
+  const name = contactDisplayName(contact);
+  return name === contact.phoneNumber ? name : `${name} · ${contact.phoneNumber}`;
 }

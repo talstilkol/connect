@@ -146,12 +146,27 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0055_bot_reply_staging_credential_bound_pre_send_permit.sql",
     "0056_bot_reply_staging_credential_bound_pre_send_session_barrier.sql",
     "0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
+    "0058_meta_message_echo_revisions.sql",
+    "0059_meta_contact_sync.sql",
+    "0060_meta_data_sync_requests.sql",
+    "0061_meta_history_sync.sql",
+    "0062_meta_history_inbox_projection.sql",
+    "0063_meta_account_lifecycle_evidence.sql",
+    "0064_meta_signup_launches.sql",
+    "0065_meta_data_sync_signup_binding.sql",
+    "0066_meta_coexistence_sync_jobs.sql",
+    "0067_meta_history_media_bindings.sql",
+    "0068_meta_media_upload_journal.sql",
+    "0069_meta_media_scan_observations.sql",
+    "0070_meta_media_worker_tasks.sql",
+    "0071_meta_media_inspection_retry.sql",
+    "0072_meta_media_cleanup.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 58,
+      migrationCount: 73,
       findings: [],
     },
   );

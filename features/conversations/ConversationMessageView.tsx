@@ -1,4 +1,5 @@
 "use client";
+import { MetaMediaDownloadButton } from "./MetaMediaDownloadButton.tsx";
 
 import type {
   InterfaceLanguage,
@@ -26,6 +27,7 @@ import {
 } from "./ConversationComposerBoundary.tsx";
 
 type ConversationMessageViewProps = {
+  authEnabled?: boolean;
   language: InterfaceLanguage;
   selectedThread: InboxConversationThreadView | null;
   conversations: readonly InboxConversationView[];
@@ -49,6 +51,7 @@ type ConversationMessageViewProps = {
 };
 
 export function ConversationMessageView({
+  authEnabled = false,
   language,
   selectedThread,
   conversations,
@@ -266,7 +269,11 @@ export function ConversationMessageView({
                     <p>
                       {messageBody(message, language)}
                     </p>
+                    {authEnabled && message.source === "history" && !message.contentState &&
+                      ["image", "audio", "video", "document", "sticker", "media_placeholder"].includes(message.contentKind)
+                      ? <MetaMediaDownloadButton messageKey={message.messageKey} language={language} /> : null}
                     <footer>
+                      {message.contentState === "edited" ? <span>{messages.labels.contentStates.edited}</span> : null}
                       <time
                         dateTime={message.occurredAt}
                       >
@@ -275,12 +282,11 @@ export function ConversationMessageView({
                           language,
                         )}
                       </time>
+                      {message.source === "history" ? <span>{messages.labels.historySource}</span> : null}
                       <span>
-                        {
-                          messages.labels.messageStatuses[
-                            message.status
-                          ]
-                        }
+                        {message.source === "history" && message.historyDeliveryState
+                          ? messages.labels.historyDeliveryStates[message.historyDeliveryState]
+                          : message.status === null ? "" : messages.labels.messageStatuses[message.status]}
                       </span>
                     </footer>
                   </article>

@@ -1,3 +1,5 @@
+import { postgresInboxMessageSourceSql, postgresInboxLatestMessageJoinSql } from "./postgresHistoryInboxReadSql.ts";
+import { inboxContentKinds, isHistoryDeliveryState, type PersistedInboxMessage } from "../../shared/domain/inboxHistory.ts";
 import {
   MessageIdentityConflictError,
   normalizeInboundButtonReplyProvenance,
@@ -17,12 +19,15 @@ import {
 } from "../../db/conversationRepository.ts";
 import {
   messageContentKinds,
+  isMessageContentStateConsistent,
   messageDirections,
   messageStatuses,
   persistedConversationStatuses,
   type MessageStatus,
   type PersistedMessage,
 } from "../../shared/domain/conversation.ts";
+import { postgresWhatsAppContactNameSql } from "./postgresMetaContactSyncRepository.ts";
+import { isWhatsAppDisplayName } from "../../shared/domain/contactDisplayName.ts";
 import type {
   ConversationStatus,
 } from "../../shared/domain/model.ts";
@@ -57,6 +62,7 @@ const contactRowKeys = Object.freeze([
   "tenantId",
 ]);
 const messageRowKeys = Object.freeze([
+  "contentState",
   "contentKind",
   "conversationKey",
   "createdAt",
@@ -73,6 +79,8 @@ const messageRowKeys = Object.freeze([
   "updatedAt",
 ]);
 const inboxConversationRowKeys = Object.freeze([
+  "whatsappDisplayName",
+  "lastMessageContentState",
   "assignedExternalUserId",
   "contactId",
   "conversationKey",
@@ -119,6 +127,7 @@ const messageColumns = `
   messages.provider_message_id AS "providerMessageId",
   messages.direction,
   messages.content_kind AS "contentKind",
+  messages.content_state AS "contentState",
   messages.status,
   messages.text_content AS "textContent",
   messages.occurred_at AS "occurredAt",
@@ -136,16 +145,18 @@ const inboxConversationColumns = `
   conversations.status,
   conversations.assigned_external_user_id AS "assignedExternalUserId",
   conversations.unread_count AS "unreadCount",
-  conversations.last_message_key AS "lastMessageKey",
-  conversations.last_message_at AS "lastMessageAt",
+  latest_message.message_key AS "lastMessageKey",
+  latest_message.occurred_at AS "lastMessageAt",
   conversations.version,
   conversations.created_at AS "createdAt",
   conversations.updated_at AS "updatedAt",
   contacts.phone_e164 AS "phoneNumber",
   contacts.first_name AS "firstName",
+  (${postgresWhatsAppContactNameSql}) AS "whatsappDisplayName",
   contacts.last_name AS "lastName",
   latest_message.direction AS "lastMessageDirection",
   latest_message.content_kind AS "lastMessageContentKind",
+  latest_message.content_state AS "lastMessageContentState",
   latest_message.text_content AS "lastMessageTextContent"
 `;
 
@@ -355,15 +366,14 @@ export const postgresConversationSql = Object.freeze({
     INNER JOIN contacts
       ON contacts.tenant_id = conversations.tenant_id
       AND contacts.id = conversations.contact_id
-    LEFT JOIN messages AS latest_message
-      ON latest_message.tenant_id = conversations.tenant_id
-      AND latest_message.message_key = conversations.last_message_key
+    ${postgresInboxLatestMessageJoinSql}
     WHERE conversations.tenant_id = $1
       AND (
         $2::text IS NULL
         OR position(lower($2) IN lower(contacts.phone_e164)) > 0
         OR position(lower($2) IN lower(COALESCE(contacts.first_name, ''))) > 0
         OR position(lower($2) IN lower(COALESCE(contacts.last_name, ''))) > 0
+        OR position(lower($2) IN lower(COALESCE((${postgresWhatsAppContactNameSql}), ''))) > 0
         OR position(
           lower($2) IN lower(
             btrim(
@@ -386,8 +396,8 @@ export const postgresConversationSql = Object.freeze({
         )
       )
     ORDER BY
-      (conversations.last_message_at IS NULL) ASC,
-      conversations.last_message_at DESC,
+      (latest_message.occurred_at IS NULL) ASC,
+      latest_message.occurred_at DESC,
       conversations.conversation_key ASC
     LIMIT $6
   `,
@@ -397,16 +407,14 @@ export const postgresConversationSql = Object.freeze({
     INNER JOIN contacts
       ON contacts.tenant_id = conversations.tenant_id
       AND contacts.id = conversations.contact_id
-    LEFT JOIN messages AS latest_message
-      ON latest_message.tenant_id = conversations.tenant_id
-      AND latest_message.message_key = conversations.last_message_key
+    ${postgresInboxLatestMessageJoinSql}
     WHERE conversations.tenant_id = $1
       AND conversations.conversation_key = $2
     LIMIT 1
   `,
   listConversationMessages: `
-    SELECT ${messageColumns}
-    FROM messages
+    SELECT ${messageColumns}, messages.history_source AS "historySource", messages.history_delivery_state AS "historyDeliveryState"
+    FROM ${postgresInboxMessageSourceSql} AS messages
     WHERE messages.tenant_id = $1
       AND messages.conversation_key = $2
     ORDER BY messages.occurred_at DESC, messages.message_key DESC
@@ -573,8 +581,37 @@ function parseInboundContact(value: unknown): InboundContactIdentity {
   });
 }
 
+function parseInboxReadMessage(value: unknown): PersistedInboxMessage {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("Invalid inbox message row");
+  const input = value as Record<string, unknown>;
+  if (!Object.hasOwn(input, "historySource")) return parseMessage(input);
+  const row = requireExactPostgresRow(input, [...messageRowKeys, "historySource", "historyDeliveryState"]);
+  if (row.historySource === null && row.historyDeliveryState === null) {
+    return parseMessage(Object.fromEntries(messageRowKeys.map((key) => [key, row[key]])));
+  }
+  const direction = messageDirections.find((candidate) => candidate === row.direction);
+  const contentKind = inboxContentKinds.find((candidate) => candidate === row.contentKind);
+  if (row.historySource !== "history" || !isHistoryDeliveryState(row.historyDeliveryState) || !direction || !contentKind ||
+    row.status !== null || row.statusUpdatedAt !== null || row.lastStatusEventKey !== null || row.lastStatusEventAt !== null ||
+    !isMessageContentStateConsistent(row.contentState, direction, contentKind, row.textContent) ||
+    (contentKind === "text" ? typeof row.textContent !== "string" || row.textContent.trim().length === 0 || row.textContent.length > 16_384 : row.textContent !== null)) {
+    throw new Error("PostgreSQL returned an invalid historical inbox message");
+  }
+  const createdAt = parsePostgresTimestamp(row.createdAt), updatedAt = parsePostgresTimestamp(row.updatedAt);
+  if (updatedAt < createdAt) throw new Error("Invalid history projection timestamp");
+  return Object.freeze({ messageKey: requireMessageKey(row.messageKey), conversationKey: requireConversationKey(row.conversationKey),
+    tenantId: parsePostgresPositiveInteger(row.tenantId), providerMessageId: requireBoundedIdentity(row.providerMessageId, "provider message ID"),
+    direction, contentKind, textContent: row.textContent as string | null, status: null, statusUpdatedAt: null,
+    source: "history", historyDeliveryState: row.historyDeliveryState,
+    ...(row.contentState === "original" ? {} : { contentState: row.contentState }), occurredAt: parsePostgresTimestamp(row.occurredAt),
+    lastStatusEventKey: null, lastStatusEventAt: null, createdAt, updatedAt });
+}
+
 function parseMessage(value: unknown): PersistedMessage {
   const row = requireExactPostgresRow(value, messageRowKeys);
+  if (!isMessageContentStateConsistent(row.contentState, row.direction, row.contentKind, row.textContent)) {
+    throw new Error("PostgreSQL returned an invalid message content state");
+  }
   const direction = messageDirections.find((candidate) => candidate === row.direction);
   const contentKind = messageContentKinds.find(
     (candidate) => candidate === row.contentKind,
@@ -619,6 +656,7 @@ function parseMessage(value: unknown): PersistedMessage {
     messageKey: requireMessageKey(row.messageKey),
     conversationKey: requireConversationKey(row.conversationKey),
     tenantId: parsePostgresPositiveInteger(row.tenantId),
+    ...(row.contentState === "original" ? {} : { contentState: row.contentState }),
     providerMessageId: requireBoundedIdentity(
       row.providerMessageId,
       "PostgreSQL provider message ID",
@@ -744,6 +782,9 @@ function parseConversationAssignmentState(
 
 function parseInboxConversation(value: unknown): PersistedInboxConversation {
   const row = requireExactPostgresRow(value, inboxConversationRowKeys);
+  if (row.whatsappDisplayName !== null && !isWhatsAppDisplayName(row.whatsappDisplayName)) {
+    throw new Error("PostgreSQL returned an invalid WhatsApp contact name");
+  }
   const status = persistedConversationStatuses.find(
     (candidate) => candidate === row.status,
   );
@@ -759,11 +800,15 @@ function parseInboxConversation(value: unknown): PersistedInboxConversation {
   const lastMessageDirection = messageDirections.find(
     (candidate) => candidate === row.lastMessageDirection,
   );
-  const lastMessageContentKind = messageContentKinds.find(
+  const lastMessageContentKind = inboxContentKinds.find(
     (candidate) => candidate === row.lastMessageContentKind,
   );
   const lastMessageTextContent = row.lastMessageTextContent;
   const hasLastMessage = lastMessageKey !== null && lastMessageAt !== null;
+  if (hasLastMessage ? !isMessageContentStateConsistent(row.lastMessageContentState, lastMessageDirection, lastMessageContentKind, lastMessageTextContent)
+    : row.lastMessageContentState !== null) {
+    throw new Error("PostgreSQL returned an invalid preview content state");
+  }
   const lastMessageTextIsValid =
     lastMessageContentKind === "text"
       ? typeof lastMessageTextContent === "string" &&
@@ -808,12 +853,14 @@ function parseInboxConversation(value: unknown): PersistedInboxConversation {
     contact: Object.freeze({
       phoneNumber: contact.value.phoneNumber,
       firstName: contact.value.firstName,
+      ...(row.whatsappDisplayName === null ? {} : { whatsappDisplayName: row.whatsappDisplayName }),
       lastName: contact.value.lastName,
     }),
     lastMessage:
       hasLastMessage && lastMessageDirection && lastMessageContentKind
         ? Object.freeze({
             direction: lastMessageDirection,
+            ...(row.lastMessageContentState === "original" ? {} : { contentState: row.lastMessageContentState as "edited" | "deleted" | "conflicted" }),
             contentKind: lastMessageContentKind,
             textContent: lastMessageTextContent as string | null,
           })
@@ -1275,7 +1322,7 @@ export function createPostgresConversationRepository(
         limit,
       );
       return Object.freeze(rows.map((row) => {
-        const message = parseMessage(row);
+        const message = parseInboxReadMessage(row);
         if (
           message.tenantId !== tenantId ||
           message.conversationKey !== conversationKey

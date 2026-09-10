@@ -14,6 +14,7 @@ import type {
 } from "../../shared/domain/conversationView.ts";
 import {
   formatInboxTimestamp,
+  messageBody,
   hasActiveInboxFilters,
 } from "./conversationPresentation.ts";
 import {
@@ -247,7 +248,9 @@ export function ConversationThreadList({
                       {isLoading
                         ? listMessages.loadingThread
                         : conversation.lastMessage
-                          ? conversation.lastMessage
+                          ? conversation.lastMessage.contentState
+                            ? messageBody(conversation.lastMessage, language)
+                            : conversation.lastMessage
                               .contentKind === "text"
                             ? conversation.lastMessage
                                 .textContent

@@ -13,7 +13,6 @@ async function readServerSource(path) {
 
 test("routes tenant-only mutation modules through the mutation session", async () => {
   const paths = [
-    "meta/metaEmbeddedSignupActions.ts",
     "templates/messageTemplateActions.ts",
   ];
 
@@ -31,6 +30,21 @@ test("routes tenant-only mutation modules through the mutation session", async (
       path,
     );
   }
+});
+
+test("routes Meta signup through authenticated Railway with a rate limit before the durable claim", async () => {
+  const action = await readServerSource("meta/metaEmbeddedSignupActions.ts");
+  const config = await readServerSource("meta/currentMetaEmbeddedSignup.ts");
+  const factory = await readServerSource("meta/currentRailwayMetaSignupHandler.ts");
+  const operations = await readServerSource("platform/railwayMetaSignupOperations.ts");
+  assert.match(action, /createCurrentRailwayMetaSignupHandler/);
+  assert.match(config, /createCurrentRailwayMetaSignupHandler/);
+  assert.match(factory, /resolveCurrentRailwayApiServerIdentity/);
+  assert.match(operations, /requireTenantPermission\(session, "workspace.manage"\)/);
+  const limit = operations.indexOf("await dependencies.mutationRateLimit.consume(");
+  const completion = operations.indexOf("await dependencies.service.complete(");
+  assert.ok(limit > 0 && completion > limit);
+  assert.doesNotMatch(`${action}\n${config}\n${factory}`, /cloudflare:workers|requireRuntimeDatabase|requireCurrentTenantMutationSession/);
 });
 
 test("routes team invitation requests through Railway", async () => {

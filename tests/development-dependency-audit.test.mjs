@@ -25,6 +25,9 @@ function currentPackageLock() {
         version: "0.31.10",
         dev: true,
       },
+      "node_modules/sharp": {
+        version: "0.35.4",
+      },
       "node_modules/@esbuild-kit/core-utils/node_modules/esbuild": {
         version: "0.25.12",
         dev: true,
@@ -38,6 +41,9 @@ function currentPackageJson() {
     overrides: {
       "@esbuild-kit/core-utils": {
         esbuild: "0.25.12",
+      },
+      miniflare: {
+        sharp: "0.35.4",
       },
     },
   };
@@ -310,6 +316,30 @@ test("runs a full development audit only against the official registry", () => {
         "DEVELOPMENT_DEPENDENCY_AUDIT_OUTPUT_INVALID",
     },
   );
+});
+
+test("rejects missing or vulnerable sharp resolutions even with a clean audit", () => {
+  for (const mutate of [
+    (packages) => { delete packages["node_modules/sharp"]; },
+    (packages) => { packages["node_modules/sharp"].version = "0.35.2"; },
+    (packages) => {
+      packages["node_modules/miniflare/node_modules/sharp"] = {
+        version: "0.35.2",
+        dev: true,
+      };
+    },
+  ]) {
+    const packageLock = currentPackageLock();
+    mutate(packageLock.packages);
+    assert.throws(
+      () => inspectDevelopmentDependencyAudit(
+        cleanAuditReport(),
+        packageLock,
+        currentPackageJson(),
+      ),
+      expectsUnapproved(),
+    );
+  }
 });
 
 test("reports an npm registry failure separately from an unapproved advisory", () => {

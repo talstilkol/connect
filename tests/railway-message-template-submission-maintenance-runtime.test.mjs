@@ -84,6 +84,7 @@ async function credentialRepository() {
     async store(value) {
       envelope = {
         ...value,
+        authorizationVersion: value.expectedConnectionVersion,
         createdAt: "2026-08-21T08:00:00.000Z",
         updatedAt: "2026-08-21T08:00:00.000Z",
       };
@@ -96,7 +97,7 @@ async function credentialRepository() {
     META_CREDENTIAL_ENCRYPTION_KEY_V1: encryptionKey,
   });
 
-  await vault.storeAccessToken(tenantId, "maintenance-access-token");
+  await vault.storeAccessToken(tenantId, "maintenance-access-token", 1);
   return repository;
 }
 

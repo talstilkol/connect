@@ -1,3 +1,8 @@
+import type {MetaMediaCleanupRepository} from '../meta/metaMediaCleanup.ts';
+import {createRailwayMetaMediaCleanupOperation} from './railwayMetaMediaCleanupOperation.ts';
+import { createRailwayMetaMediaTaskReadOperation } from "./railwayMetaMediaTaskReadOperation.ts";
+import type { MetaMediaTaskReader } from "./postgresMetaMediaTaskReader.ts";
+import type { MetaDataSyncLifecycleReader } from "./postgresMetaDataSyncLifecycle.ts";
 import type {
   TenantMembershipRepository,
 } from "../../db/tenantMembershipRepository.ts";
@@ -22,6 +27,10 @@ import type {
 import type {
   RateLimitGuard,
 } from "../security/rateLimit.ts";
+import type { MetaConnectionService } from "../meta/metaConnectionService.ts";
+import type { MetaSignupService } from "../meta/metaSignupService.ts";
+import { createRailwayMetaSignupOperations } from "./railwayMetaSignupOperations.ts";
+import { createRailwayMetaConnectionReadOperation } from "./railwayMetaConnectionReadOperation.ts";
 import {
   createRailwayApiIdentityAdapters,
   type RailwayApiIdentityAdapterDependencies,
@@ -209,6 +218,12 @@ export interface RailwayApiRuntimeOptions {
   readonly botReplyStagingReleaseEvidence?: Readonly<
     RailwayBotReplyStagingReleaseEvidenceReadDependencies
   >;
+  readonly metaMediaTasks?: MetaMediaTaskReader;
+  readonly metaMediaCleanup?: MetaMediaCleanupRepository;
+  readonly metaMediaInspectionRetries?: MetaMediaInspectionRetryRepository;
+  readonly metaConnections?: Pick<MetaConnectionService, "read">;
+  readonly metaSignup?: MetaSignupService;
+  readonly metaDataSyncLifecycle?: MetaDataSyncLifecycleReader;
   readonly maximumBodyBytes?: number;
   readonly maximumResponseBytes?: number;
   readonly requestTelemetry?: RailwayApiRequestTelemetry;
@@ -350,6 +365,14 @@ export function createRailwayApiRuntime(
           ),
         ];
 
+  const metaConnectionOperations = options.metaConnections === undefined
+    ? []
+    : [createRailwayMetaConnectionReadOperation({
+        tenantSessions,
+        connections: options.metaConnections,
+        dataSync: options.metaDataSyncLifecycle,
+      })];
+
   return createRailwayApiHttpHandler({
     expectedServiceIdentity: identity.expectedServiceIdentity,
     oidcVerifier: identity.oidcVerifier,
@@ -361,6 +384,13 @@ export function createRailwayApiRuntime(
       ...teamMembershipOperations,
       ...teamInvitationOperations,
       ...releaseEvidenceOperations,
+      ...metaConnectionOperations,
+      ...(options.metaMediaTasks === undefined ? [] : [createRailwayMetaMediaTaskReadOperation({ tenantSessions, mediaTasks: options.metaMediaTasks })]),
+      ...(options.metaMediaCleanup === undefined ? [] : [createRailwayMetaMediaCleanupOperation({ tenantSessions, cleanup: options.metaMediaCleanup })]),
+      ...(options.metaMediaInspectionRetries === undefined ? [] : [createRailwayMetaMediaInspectionRetryOperation({ tenantSessions, retries: options.metaMediaInspectionRetries })]),
+      ...(options.metaSignup === undefined ? [] : createRailwayMetaSignupOperations({
+        tenantSessions, mutationRateLimit: options.mutationRateLimit, service: options.metaSignup,
+      })),
       ...operations.operations,
       ...systemAdminOperation,
     ],
@@ -369,3 +399,5 @@ export function createRailwayApiRuntime(
     maximumResponseBytes: options.maximumResponseBytes,
   });
 }
+import type { MetaMediaInspectionRetryRepository } from "../meta/metaMediaInspectionRetry.ts";
+import { createRailwayMetaMediaInspectionRetryOperation } from "./railwayMetaMediaInspectionRetryOperation.ts";

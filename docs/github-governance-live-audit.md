@@ -1,3 +1,9 @@
+> עדכון מדיניות ומימוש 09.09.2026: הממצאים והמעבר ל־Private להלן הם
+> היסטוריה. ADR-0007 מחייב PUBLIC. חוזה Evidence v4 והמחולל דורשים כעת
+> public, המאגר talstilkol/connect והענף main, ושומרים את יתר הבקרות.
+> בוצעה בדיקת API חיה חדשה ושתי הגנות הופעלו; פירוט בסעיף 12. ראו
+> [מסלול השחרור הפעיל](planning/launch-master-plan-2026-09-09.md).
+
 # GitHub Governance live audit
 
 ## 1. זהות ה־Snapshot
@@ -346,3 +352,21 @@ deterministic composite release manifest.
 11.9 Gate 1 נשאר `blocked`: ה־Repository פרטי, אך `main` אינו מוגן,
 Required checks אינם מוגדרים, Collaborators לא אומתו, ואין PR מאושר
 שמכניס את ה־Commits החדשים ל־`main`.
+
+## 12. אימות והפעלת הגנות — 09.09.2026
+
+12.1 GET מאומת עבור talstilkol/connect אישר Visibility ציבורי, main
+כענף ברירת המחדל וגישת Admin. הגנת main החזירה 404 עם ההודעה
+Branch not protected; רשימת Rulesets הייתה ריקה. זו תצפית חדשה,
+המחליפה את מצב ה־Visibility ההיסטורי לצורך העבודה הנוכחית.
+
+12.2 Secret Scanning ו־Push Protection היו disabled. בוצע PATCH מוגבל
+שהפעיל את שניהם, וקריאת GET חוזרת אישרה enabled לשתי ההגנות.
+נראות המאגר לא שונתה. אין כאן הודעה שאין סודות בהיסטוריה או שכל
+סריקת ההיסטוריה של GitHub הסתיימה.
+
+12.3 חוזה Evidence v4 הציבורי נבדק מקומית. ראיית GitHub מלאה עדיין
+אינה זמינה: הגנת main, CODEOWNERS/Review והרצת CI על SHA נבחר
+נותרו לביצוע. לא בוצעו Push, יצירת PR או Deployment בסשן זה.
+
+12.4 [קריאה חוזרת מצומצמת ללא סודות](../outputs/launch-validation-2026-09-09/github-protection-readback.json).

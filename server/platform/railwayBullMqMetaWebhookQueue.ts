@@ -5,6 +5,7 @@ import {
 
 import {
   parseMetaWebhookQueueMessage,
+  MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES,
   type MetaWebhookQueueMessage,
 } from "../meta/metaWebhookQueueMessage.ts";
 import type {
@@ -413,7 +414,7 @@ function canonicalTimestamp(clock: RuntimeClock): string {
 function encodeWireMessage(
   message: Readonly<MetaWebhookQueueMessage>,
 ): Readonly<MetaWebhookWireMessage> | null {
-  const parsed = parseMetaWebhookQueueMessage(message);
+  const parsed = parseMetaWebhookQueueMessage(message, MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES);
   if (parsed === null) {
     return null;
   }
@@ -438,7 +439,7 @@ function decodeWireMessage(value: unknown): MetaWebhookQueueMessage | null {
     candidate.version !== 1 ||
     typeof candidate.rawPayloadBase64 !== "string" ||
     candidate.rawPayloadBase64.length === 0 ||
-    candidate.rawPayloadBase64.length > 160_000 ||
+    candidate.rawPayloadBase64.length > Math.ceil(MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES / 3) * 4 ||
     !base64Pattern.test(candidate.rawPayloadBase64) ||
     typeof candidate.signatureHeader !== "string" ||
     !signaturePattern.test(candidate.signatureHeader)
@@ -459,7 +460,7 @@ function decodeWireMessage(value: unknown): MetaWebhookQueueMessage | null {
     version: 1,
     rawPayload,
     signatureHeader: candidate.signatureHeader,
-  });
+  }, MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES);
 }
 
 async function withStartupTimeout(

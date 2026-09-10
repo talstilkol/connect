@@ -14,6 +14,9 @@ import {
   MetaCredentialVaultError,
 } from "../meta/metaCredentialVault.ts";
 import {
+  assertCurrentMetaConnection,
+} from "../meta/metaConnectionAuthorization.ts";
+import {
   MetaGraphError,
 } from "../meta/metaGraphTransport.ts";
 import type {
@@ -337,11 +340,20 @@ export function createMetaCampaignDeliveryProcessor(
         return rejected("META_CONNECTION_UNAVAILABLE");
       }
 
+      connection = Object.freeze({ ...connection });
       try {
         return await dependencies.credentialVault
           .withAccessToken(
             delivery.campaign.tenantId,
             async (accessToken) => {
+              try {
+                await assertCurrentMetaConnection(
+                  dependencies.metaConnections,
+                  connection,
+                );
+              } catch {
+                return rejected("META_CONNECTION_UNAVAILABLE");
+              }
               try {
                 const acceptance =
                   await dependencies.sender.send({

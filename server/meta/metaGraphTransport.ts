@@ -357,72 +357,87 @@ export function createMetaGraphTransport(
         maxRequestBytes,
       );
       const abortController = new AbortController();
-      const timeout = setTimeout(
-        () => abortController.abort(),
-        requestTimeoutMs,
-      );
-      let response: Response;
-      const headers: Record<string, string> = {
-        accept: "application/json",
-        authorization: `Bearer ${accessToken}`,
-      };
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const deadline = new Promise<never>((_resolve, reject) => {
+        timeout = setTimeout(() => {
+          abortController.abort();
+          reject(new MetaGraphError("TIMEOUT", "Meta Graph request timed out"));
+        }, requestTimeoutMs);
+      });
+      const performRequest = async (): Promise<TResult> => {
+        let response: Response;
+        const headers: Record<string, string> = {
+          accept: "application/json",
+          authorization: `Bearer ${accessToken}`,
+        };
 
-      if (requestBody !== undefined) {
-        headers["content-type"] = "application/json";
-      }
+        if (requestBody !== undefined) {
+          headers["content-type"] = "application/json";
+        }
 
-      try {
-        response = await fetchImplementation(requestUrl, {
-          method: request.method,
-          headers,
-          body: requestBody,
-          cache: "no-store",
-          credentials: "omit",
-          redirect: "error",
-          referrerPolicy: "no-referrer",
-          signal: abortController.signal,
-        });
-      } catch {
-        if (abortController.signal.aborted) {
+        try {
+          response = await fetchImplementation(requestUrl, {
+            method: request.method,
+            headers,
+            body: requestBody,
+            cache: "no-store",
+            credentials: "omit",
+            redirect: "error",
+            referrerPolicy: "no-referrer",
+            signal: abortController.signal,
+          });
+        } catch {
+          if (abortController.signal.aborted) {
+            throw new MetaGraphError(
+              "TIMEOUT",
+              "Meta Graph request timed out",
+            );
+          }
+
           throw new MetaGraphError(
-            "TIMEOUT",
-            "Meta Graph request timed out",
+            "NETWORK_ERROR",
+            "Meta Graph request failed",
           );
         }
 
-        throw new MetaGraphError(
-          "NETWORK_ERROR",
-          "Meta Graph request failed",
+        const responsePayload = await readBoundedJson(
+          response,
+          maxResponseBytes,
         );
+        const graphError = graphErrorShape(responsePayload);
+
+        if (!response.ok || graphError) {
+          throw new MetaGraphError(
+            "API_ERROR",
+            "Meta Graph request was rejected",
+            {
+              httpStatus: response.status,
+              graphCode: safeGraphNumber(graphError?.code),
+              graphSubcode: safeGraphNumber(
+                graphError?.error_subcode,
+              ),
+              retryAfterSeconds:
+                safeRetryAfterSeconds(
+                  response.headers.get("retry-after"),
+                ),
+            },
+          );
+        }
+
+        return responsePayload as TResult;
+      };
+      try {
+        // The deadline covers headers AND the body, including a transport
+        // implementation that does not settle its body read after abort.
+        return await Promise.race([performRequest(), deadline]);
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          throw new MetaGraphError("TIMEOUT", "Meta Graph request timed out");
+        }
+        throw error;
       } finally {
         clearTimeout(timeout);
       }
-
-      const responsePayload = await readBoundedJson(
-        response,
-        maxResponseBytes,
-      );
-      const graphError = graphErrorShape(responsePayload);
-
-      if (!response.ok || graphError) {
-        throw new MetaGraphError(
-          "API_ERROR",
-          "Meta Graph request was rejected",
-          {
-            httpStatus: response.status,
-            graphCode: safeGraphNumber(graphError?.code),
-            graphSubcode: safeGraphNumber(
-              graphError?.error_subcode,
-            ),
-            retryAfterSeconds:
-              safeRetryAfterSeconds(
-                response.headers.get("retry-after"),
-              ),
-          },
-        );
-      }
-
-      return responsePayload as TResult;
     },
   };
 }

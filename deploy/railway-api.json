@@ -1,0 +1,15 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "RAILPACK",
+    "railpackVersion": "0.39.0",
+    "buildCommand": "node scripts/verify-railway-runtime-imports.mjs"
+  },
+  "deploy": {
+    "startCommand": "node scripts/start-railway-bullmq-api.mjs",
+    "healthcheckPath": "/health/ready",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}

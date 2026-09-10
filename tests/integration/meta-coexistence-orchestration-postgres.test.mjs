@@ -1,0 +1,551 @@
+import { createRailwayApiHttpHandler } from '../../server/platform/railwayApiHttpHandler.ts';
+import { createRailwayApiClient } from '../../server/platform/railwayApiClient.ts';
+import { createRailwayMetaSignupOperations } from '../../server/platform/railwayMetaSignupOperations.ts';
+import { createRailwayMetaConnectionReadOperation } from '../../server/platform/railwayMetaConnectionReadOperation.ts';
+import { createRailwayMetaSignupHandler } from '../../server/meta/railwayMetaSignupHandler.ts';
+import { createRailwayMetaSignupApiRuntime } from '../../server/platform/railwayMetaSignupRuntime.ts';
+import { createPostgresMetaDataSyncLifecycle } from '../../server/platform/postgresMetaDataSyncLifecycle.ts';
+import { resolveTenantSessionFromMemberships } from '../../server/auth/tenantSession.ts';
+import { deriveRailwayApiDeterministicIdempotencyKey } from '../../server/platform/railwayApiMutationExecutor.ts';
+import { createRailwayPostgresWorkerService } from '../../server/platform/railwayPostgresWorkerService.ts';
+import { createHash } from 'node:crypto';
+import { createPostgresMetaCoexistenceSyncJobRepository, postgresMetaCoexistenceJobSql } from '../../server/platform/postgresMetaCoexistenceSyncJobRepository.ts';
+import { createPostgresTenantMembershipRepository } from '../../server/platform/postgresTenantMembershipRepository.ts';
+import { createRailwayMetaCoexistenceMaintenance } from '../../server/platform/railwayMetaCoexistenceMaintenance.ts';
+import assert from 'node:assert/strict';
+import { before, beforeEach, after, test } from 'node:test';
+import { readdir, readFile } from 'node:fs/promises';
+import pg from 'pg';
+import { createNodePostgresTransactionManager, createNodePostgresQueryExecutor } from '../../server/platform/nodePostgresAdapter.ts';
+import { createPostgresMetaRepository } from '../../server/platform/postgresMetaRepository.ts';
+import { createMetaConnectionService } from '../../server/meta/metaConnectionService.ts';
+import { createPostgresMetaCredentialRepository } from '../../server/platform/postgresMetaCredentialRepository.ts';
+import { createPostgresMetaSignupLaunchRepository } from '../../server/platform/postgresMetaSignupLaunchRepository.ts';
+import { createPostgresMetaSignupAttemptRepository, postgresMetaSignupAttemptSql } from '../../server/platform/postgresMetaSignupAttemptRepository.ts';
+import { createPostgresMetaDataSyncRepository, postgresMetaDataSyncSql } from '../../server/platform/postgresMetaDataSyncRepository.ts';
+import { createRailwayMetaCoexistenceSignupRuntime, createRailwayMetaSignupRuntime } from '../../server/platform/railwayMetaSignupRuntime.ts';
+
+const connectionString = process.env.CONNECT_META_COEXISTENCE_TEST_URL;
+if (connectionString !== 'postgresql://connect_echo_test@127.0.0.1:55439/connect_meta_coexistence_integration') throw new Error('An empty isolated loopback Coexistence database is required');
+const pool = new pg.Pool({ connectionString,max:6,connectionTimeoutMillis:2000,statement_timeout:5000,lock_timeout:3000 });
+const transactions = createNodePostgresTransactionManager(pool), queries = createNodePostgresQueryExecutor(pool);
+const meta = createPostgresMetaRepository({ transactions,queries }), connections = createMetaConnectionService(meta);
+const credentials = createPostgresMetaCredentialRepository(queries);
+const launches = createPostgresMetaSignupLaunchRepository(transactions), attempts = createPostgresMetaSignupAttemptRepository(transactions);
+const requests = createPostgresMetaDataSyncRepository(transactions);
+const environment = { META_APP_ID:'100001',META_EMBEDDED_SIGNUP_CONFIGURATION_ID:'500005',META_GRAPH_API_VERSION:'v23.0',
+  META_APP_SECRET:'local-coexistence-app-secret',META_CREDENTIAL_ENCRYPTION_KEY_V1:Buffer.from(Array.from({ length:32 },(_,i) => i+1)).toString('base64') };
+let tenantCounter = 700;
+before(async () => {
+  assert.equal((await pool.query("SELECT * FROM pg_tables WHERE schemaname='public'")).rowCount,0,'Refusing to change a non-empty database');
+  const directory = new URL('../../postgres/migrations/',import.meta.url);
+  for (const file of (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort()) await pool.query(await readFile(new URL(file,directory),'utf8'));
+});
+beforeEach(async () => {
+  await pool.query("UPDATE meta_coexistence_sync_jobs SET status='recovery-required',version=version+1,lease_expires_at=NULL WHERE status IN ('pending','running')");
+});
+after(async () => { await pool.end(); });
+
+async function fixture(options = {}) {
+  const tenantId = ++tenantCounter;
+  await pool.query("INSERT INTO tenants (id,display_name,status) VALUES ($1,'Coexistence integration','active')",[tenantId]);
+  const session = { tenantId,externalUserId:`coexistence-owner-${tenantId}`,role:'owner',status:'active',displayName:'Coexistence integration' };
+  await pool.query("INSERT INTO tenant_memberships (tenant_id,external_user_id,role,status) VALUES ($1,$2,'owner','active')",[tenantId,session.externalUserId]);
+  await pool.query("INSERT INTO tenant_memberships (tenant_id,external_user_id,role,status) VALUES ($1,$2,'owner','active')",[tenantId,`coexistence-backup-${tenantId}`]);
+  const assets = { tenantId,businessPortfolioId:`1000${tenantId}`,wabaId:`2000${tenantId}`,phoneNumberId:`3000${tenantId}` };
+  const input = { flow:'business-app',wabaId:assets.wabaId,authorizationCode:`coexistence-code-${tenantId}` };
+  const calls = [], syncTypes = [];
+  const token = `local-coexistence-token-${tenantId}`;
+  async function fetchImplementation(rawUrl,init) {
+    const url = new URL(rawUrl); assert.equal(url.hostname,'graph.facebook.com');
+    const path = url.pathname.split('/').slice(2).join('/'); calls.push(`${init.method} ${path}`);
+    const json = (body,status=200) => new Response(JSON.stringify(body),{ status });
+    if (path==='oauth/access_token') {
+      if (options.exchange) await options.exchange();
+      return json({ access_token:token });
+    }
+    assert.equal(init.headers.authorization,`Bearer ${token}`);
+    if (path===assets.wabaId) return json({ id:assets.wabaId,owner_business_info:{ id:assets.businessPortfolioId } });
+    if (path===`${assets.wabaId}/phone_numbers`) return json({ data:options.ambiguous ? [{ id:assets.phoneNumberId },{ id:'999999' }] : [{ id:assets.phoneNumberId }] });
+    if (path===assets.phoneNumberId) {
+      if (options.phone) await options.phone(calls.filter((call) => call===`GET ${assets.phoneNumberId}`).length);
+      return json({ id:assets.phoneNumberId,is_on_biz_app:options.businessApp ?? true,platform_type:'CLOUD_API' });
+    }
+    if (path===`${assets.wabaId}/subscribed_apps`) return json({ success:options.subscription ?? true });
+    if (path===`${assets.phoneNumberId}/smb_app_data`) {
+      const body = JSON.parse(init.body); assert.deepEqual(Object.keys(body).sort(),['messaging_product','sync_type']);
+      assert.equal(body.messaging_product,'whatsapp'); syncTypes.push(body.sync_type);
+      const evidence = (await pool.query(`SELECT launch.status,receipt.status AS receipt_status FROM meta_signup_launches AS launch
+        JOIN railway_api_mutation_receipts AS receipt ON receipt.tenant_id=launch.tenant_id AND receipt.idempotency_key=launch.claim_key
+        WHERE launch.tenant_id=$1`,[tenantId])).rows;
+      assert.ok(evidence.some((row) => row.status==='finished' && row.receipt_status==='completed'));
+      assert.equal((await pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1',[tenantId])).rowCount,2);
+      if (body.sync_type==='history') assert.equal((await requests.read(tenantId,'smb_app_state_sync')).status,'accepted');
+      if (options.post) return options.post(body.sync_type,json);
+      return json({ messaging_product:'whatsapp',request_id:`request-${tenantId}-${body.sync_type}` });
+    }
+    throw new Error(`Unexpected test provider path: ${path}`);
+  }
+  const dependencies = { environment,webhookEnvironment:{ META_APP_SECRET:environment.META_APP_SECRET },connections,credentials,launches,
+    attempts:options.attempts ?? attempts,requests:options.requests ?? requests,transportOptions:{ fetchImplementation,requestTimeoutMs:2000 } };
+  const create = (overrides={}) => createRailwayMetaCoexistenceSignupRuntime({ ...dependencies,...overrides });
+  const service = create();
+  return { session,assets,input,calls,syncTypes,service,create,dependencies,token };
+}
+async function begin(f) { const launch = await f.service.begin(f.session); assert.equal(launch.status,'ready'); return launch; }
+const complete = (f,launch) => f.service.complete(f.session,{ ...f.input,launchId:launch.launchId });
+const exchangeCount = (f) => f.calls.filter((call) => call==='GET oauth/access_token').length;
+const countSyncRows = async (f) => (await pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1',[f.session.tenantId])).rowCount;
+
+test('WABA-only completion resolves real provider fields, encrypts credentials and requests contacts before history', async () => {
+  const f = await fixture(), launch = await begin(f); assert.equal(f.calls.length,0);
+  const result = await complete(f,launch);
+  assert.deepEqual(result,{ registration:{ status:'connected',connection:{ status:'connected' } },synchronization:{ status:'requests-accepted' } });
+  assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']); assert.equal(exchangeCount(f),1);
+  assert.equal(f.calls.filter((call) => call===`POST ${f.assets.wabaId}/subscribed_apps`).length,1);
+  assert.equal((await jobFor(f)).status,'pending');
+  assert.ok(f.calls.every((call) => !call.includes('/register')));
+  const envelope = (await pool.query('SELECT ciphertext FROM meta_credential_envelopes WHERE tenant_id=$1',[f.session.tenantId])).rows[0];
+  assert.ok(envelope); assert.ok(!envelope.ciphertext.includes(f.token)); assert.doesNotMatch(JSON.stringify(result),/request_id|token|phone|waba/);
+  const launchRow = (await pool.query('SELECT started_at FROM meta_signup_launches WHERE id=$1',[launch.launchId])).rows[0];
+  assert.equal((await requests.read(f.session.tenantId,'history')).startedAt,launchRow.started_at.toISOString());
+});
+
+test('completion replay and code-free resume do not repeat code exchange, subscription or synchronization POST', async () => {
+  const f = await fixture(), launch = await begin(f); const result = await complete(f,launch); const before = [...f.calls];
+  assert.deepEqual(await complete(f,launch),result);
+  assert.deepEqual(await f.create().resume(f.session,launch.launchId),{ status:'requests-accepted' });
+  assert.deepEqual(f.calls,before);
+});
+
+test('mutation of caller input while Meta responds cannot change the launch resumed after registration', async () => {
+  let entered, release; const reached = new Promise((resolve) => { entered=resolve; }); const hold = new Promise((resolve) => { release=resolve; });
+  const f = await fixture({ exchange:async () => { entered(); await hold; } }), launch = await begin(f);
+  const input = { ...f.input,launchId:launch.launchId }; const result = f.service.complete(f.session,input); await reached;
+  input.launchId=Number.MAX_SAFE_INTEGER; input.wabaId='999999'; release();
+  assert.equal((await result).synchronization.status,'requests-accepted'); assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']);
+});
+
+test('unknown and rejected contacts responses never authorize history or a second contacts POST', async () => {
+  for (const status of [503,400]) {
+    const f = await fixture({ post:(_type,json) => json({ error:{ code:1,message:'private-provider-error' } },status) }); const launch = await begin(f);
+    assert.equal((await complete(f,launch)).synchronization.status,'recovery-required');
+    assert.equal((await f.create().resume(f.session,launch.launchId)).status,'recovery-required');
+    assert.deepEqual(f.syncTypes,['smb_app_state_sync']); assert.equal(exchangeCount(f),1);
+  }
+});
+
+test('history failure does not repeat accepted contacts or repeat history', async () => {
+  const f = await fixture({ post:(type,json) => type==='history' ? json({ error:{ code:1 } },503) : json({ messaging_product:'whatsapp',request_id:'accepted-contacts' }) }); const launch = await begin(f);
+  assert.equal((await complete(f,launch)).synchronization.status,'recovery-required');
+  await f.service.resume(f.session,launch.launchId); assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']);
+});
+
+test('an interruption after contacts acceptance resumes history from durable state without an authorization code', async () => {
+  let failHistory = true;
+  const f = await fixture({ phone:async (read) => { if (read===3 && failHistory) throw new Error('network interruption before history'); } }); const launch = await begin(f);
+  assert.equal((await complete(f,launch)).synchronization.status,'server-error'); assert.deepEqual(f.syncTypes,['smb_app_state_sync']);
+  failHistory=false;
+  assert.deepEqual(await f.create().resume(f.session,launch.launchId),{ status:'requests-accepted' });
+  assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']); assert.equal(exchangeCount(f),1);
+});
+
+test('concurrent resume waits for a dispatching contacts request instead of sending history early', async () => {
+  let release, entered; const hold = new Promise((resolve) => { release=resolve; }); const reached = new Promise((resolve) => { entered=resolve; });
+  const f = await fixture({ post:async (type,json) => { if (type==='smb_app_state_sync') { entered(); await hold; } return json({ messaging_product:'whatsapp',request_id:`accepted-${type}` }); } });
+  const launch = await begin(f); const first = complete(f,launch); await reached;
+  assert.deepEqual(await f.create().resume(f.session,launch.launchId),{ status:'in-progress' }); assert.deepEqual(f.syncTypes,['smb_app_state_sync']);
+  release(); assert.equal((await first).synchronization.status,'requests-accepted'); assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']);
+});
+
+test('preparation failure occurs after the signup receipt and can resume without consuming its code again', async () => {
+  let fail = true;
+  const wrapped = createPostgresMetaDataSyncRepository({ transaction:(options,work) => transactions.transaction(options,(tx) => work({ query(sql,params) {
+    if (fail && sql===postgresMetaDataSyncSql.audit) throw new Error('preparation audit unavailable'); return tx.query(sql,params);
+  } })) });
+  const f = await fixture({ requests:wrapped }), launch = await begin(f);
+  assert.equal((await complete(f,launch)).synchronization.status,'server-error'); assert.equal(await countSyncRows(f),0); assert.deepEqual(f.syncTypes,[]);
+  fail=false; assert.equal((await f.service.resume(f.session,launch.launchId)).status,'requests-accepted'); assert.equal(exchangeCount(f),1);
+});
+
+test('a lost contacts result acknowledgement retries only storage and then permits history', async () => {
+  let fail = true;
+  const f = await fixture({ requests:{ ...requests,async finish(request,result) {
+    const stored = await requests.finish(request,result);
+    if (fail) { fail=false; throw new Error('lost result acknowledgement'); } return stored;
+  } } }), launch = await begin(f);
+  assert.equal((await complete(f,launch)).synchronization.status,'requests-accepted');
+  await f.service.resume(f.session,launch.launchId); assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']);
+});
+
+test('failure of both contacts result writes leaves dispatching and resume does not resend or request history', async () => {
+  const f = await fixture({ requests:{ ...requests,async finish() { throw new Error('result storage unavailable'); } } }), launch = await begin(f);
+  assert.equal((await complete(f,launch)).synchronization.status,'server-error');
+  assert.equal((await f.create().resume(f.session,launch.launchId)).status,'in-progress');
+  assert.deepEqual(f.syncTypes,['smb_app_state_sync']); assert.equal((await requests.read(f.session.tenantId,'smb_app_state_sync')).status,'dispatching');
+});
+
+test('ambiguous signup completion commit can resume the committed receipt without re-exchanging its code', async () => {
+  const f = await fixture({ attempts:{ ...attempts,async complete(command,result) { await attempts.complete(command,result); throw new Error('lost completion acknowledgement'); } } }); const launch = await begin(f);
+  await assert.rejects(complete(f,launch),/lost completion/); assert.equal(await countSyncRows(f),0); assert.deepEqual(f.syncTypes,[]);
+  assert.equal((await f.create({ attempts }).resume(f.session,launch.launchId)).status,'requests-accepted'); assert.equal(exchangeCount(f),1);
+});
+
+test('an uncommitted signup result cannot start synchronization despite a connected snapshot', async () => {
+  const broken = createPostgresMetaSignupAttemptRepository({ transaction:(options,work) => transactions.transaction(options,(tx) => work({ query(sql,params) {
+    if (sql===postgresMetaSignupAttemptSql.audit && params[2]==='meta.embedded-signup.finished') throw new Error('result audit unavailable'); return tx.query(sql,params);
+  } })) });
+  const f = await fixture({ attempts:broken }), launch = await begin(f); await assert.rejects(complete(f,launch),/result audit/);
+  assert.equal((await connections.read(f.session)).status,'connected');
+  assert.equal(await jobFor(f),undefined);
+  assert.equal((await f.create({ attempts }).resume(f.session,launch.launchId)).status,'recovery-required'); assert.deepEqual(f.syncTypes,[]);
+});
+
+test('ambiguous or inactive Business App assets and subscription failure cannot prepare or request sync', async () => {
+  for (const options of [{ ambiguous:true },{ businessApp:false },{ subscription:false }]) {
+    const f = await fixture(options), launch = await begin(f); const result = await complete(f,launch);
+    assert.notEqual(result.registration.status,'connected'); assert.equal(await jobFor(f),undefined); assert.equal(result.synchronization,null); assert.deepEqual(f.syncTypes,[]); assert.equal(await countSyncRows(f),0);
+  }
+});
+
+test('a delayed asset response cannot overwrite a newer connection or start synchronization', async () => {
+  let release, entered; const hold = new Promise((resolve) => { release=resolve; }); const reached = new Promise((resolve) => { entered=resolve; });
+  const f = await fixture({ phone:async (read) => { if (read===1) { entered(); await hold; } } }), launch = await begin(f);
+  const completing = complete(f,launch); await reached; const changed = await meta.saveAssetSnapshot(f.assets); release();
+  assert.equal((await completing).registration.status,'server-error'); assert.deepEqual(await connections.read(f.session),changed); assert.deepEqual(f.syncTypes,[]);
+});
+
+test('a foreign actor, revoked authorization and changed configuration cannot resume provider work', async () => {
+  const f = await fixture(), launch = await begin(f); await complete(f,launch); const before = [...f.calls];
+  assert.equal((await f.service.resume({ ...f.session,externalUserId:'foreign-owner' },launch.launchId)).status,'recovery-required');
+  await assert.rejects(f.service.resume({ ...f.session,role:'agent' },launch.launchId));
+  assert.equal((await f.create({ environment:{ ...environment,META_EMBEDDED_SIGNUP_CONFIGURATION_ID:'600006' } }).resume(f.session,launch.launchId)).status,'recovery-required');
+  const connection = await connections.read(f.session); await meta.revokeConnection(f.session.tenantId,f.assets.wabaId,connection.version);
+  assert.equal((await f.service.resume(f.session,launch.launchId)).status,'recovery-required'); assert.deepEqual(f.calls,before);
+});
+
+test('a Cloud API launch cannot be repurposed for Business App completion or resume', async () => {
+  const f = await fixture({ businessApp:false }); const cloud = createRailwayMetaSignupRuntime(f.dependencies); const launch = await cloud.begin(f.session);
+  await assert.rejects(complete(f,launch)); assert.equal(f.calls.length,0);
+  assert.equal((await cloud.complete(f.session,{ ...f.assets,tenantId:undefined,authorizationCode:f.input.authorizationCode,launchId:launch.launchId })).status,'validation-error');
+  const cloudInput = { authorizationCode:f.input.authorizationCode,businessPortfolioId:f.assets.businessPortfolioId,wabaId:f.assets.wabaId,phoneNumberId:f.assets.phoneNumberId,launchId:launch.launchId };
+  assert.equal((await cloud.complete(f.session,cloudInput)).status,'connected'); assert.equal(await jobFor(f),undefined); const before = [...f.calls];
+  assert.equal((await f.service.resume(f.session,launch.launchId)).status,'recovery-required'); assert.deepEqual(f.calls,before);
+});
+
+test('the default public runtime remains gated and new composition is unavailable without server prerequisites', async () => {
+  const f = await fixture(); const publicService = createRailwayMetaSignupRuntime(f.dependencies);
+  assert.equal((await publicService.complete(f.session,{ ...f.input,launchId:1 })).status,'synchronization-required');
+  const missing = f.create({ webhookEnvironment:null }); assert.equal((await missing.begin(f.session)).status,'configuration-required');
+  assert.equal((await missing.complete(f.session,{ ...f.input,launchId:1 })).registration.status,'configuration-required');
+  assert.deepEqual(f.calls,[]);
+});
+
+const jobs = createPostgresMetaCoexistenceSyncJobRepository(transactions);
+const memberships = createPostgresTenantMembershipRepository(queries);
+const jobFor = async (f) => (await pool.query('SELECT * FROM meta_coexistence_sync_jobs WHERE tenant_id=$1',[f.session.tenantId])).rows[0];
+const workerFor = (f,overrides={}) => createRailwayMetaCoexistenceMaintenance({
+  jobs,memberships,requests,credentials,environment,transportOptions:f.dependencies.transportOptions,...overrides,
+});
+async function registerWithoutContinuation(options={}) {
+  const f = await fixture({ ...options,attempts:{ ...attempts,async complete(command,result) {
+    await attempts.complete(command,result); throw new Error('process stopped after commit');
+  } } });
+  const launch = await begin(f); await assert.rejects(complete(f,launch),/process stopped/);
+  return { f,launch };
+}
+
+test('a fresh worker resumes a committed signup after the original process stops', async () => {
+  const { f,launch } = await registerWithoutContinuation();
+  assert.equal((await jobFor(f)).status,'pending'); assert.equal(await countSyncRows(f),0);
+  assert.equal(await workerFor(f).runNext(),'processed'); assert.equal((await jobFor(f)).status,'requests-accepted');
+  assert.equal(await workerFor(f).runNext(),'idle'); assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']);
+  assert.equal(exchangeCount(f),1); assert.equal(Number((await jobFor(f)).launch_id),launch.launchId);
+  assert.doesNotMatch(JSON.stringify(await jobFor(f)),/coexistence-code|local-coexistence-token/);
+});
+
+test('enqueue failure rolls back completion receipt and launch without authorizing background work', async () => {
+  const broken = createPostgresMetaSignupAttemptRepository({ transaction:(options,work) => transactions.transaction(options,(tx) => work({ query(sql,params) {
+    if (sql===postgresMetaCoexistenceJobSql.enqueue) throw new Error('queue storage unavailable'); return tx.query(sql,params);
+  } })) });
+  const f = await fixture({ attempts:broken }), launch = await begin(f);
+  await assert.rejects(complete(f,launch),/queue storage/);
+  assert.equal(await jobFor(f),undefined); assert.equal(await workerFor(f).runNext(),'idle');
+  assert.equal((await pool.query('SELECT status FROM railway_api_mutation_receipts WHERE tenant_id=$1',[f.session.tenantId])).rows[0].status,'processing');
+  assert.equal((await pool.query('SELECT status FROM meta_signup_launches WHERE id=$1',[launch.launchId])).rows[0].status,'claimed');
+  assert.deepEqual(f.syncTypes,[]);
+});
+
+test('two workers claim one durable continuation only once', async () => {
+  const { f } = await registerWithoutContinuation();
+  const claims = await Promise.all([jobs.claimNext(),jobs.claimNext()]);
+  assert.equal(claims.filter(Boolean).length,1); assert.equal((await jobFor(f)).status,'running');
+  assert.equal(await jobs.finish(claims.find(Boolean),'retry'),true);
+  assert.equal(await jobs.claimNext(),null,'retry delay must prevent a busy loop');
+});
+
+test('a reclaimed lease fences late completion from the previous worker', async () => {
+  const { f } = await registerWithoutContinuation(); const first = await jobs.claimNext();
+  await pool.query("UPDATE meta_coexistence_sync_jobs SET lease_expires_at=clock_timestamp()-INTERVAL '1 second',version=version+1 WHERE tenant_id=$1",[f.session.tenantId]);
+  const second = await jobs.claimNext(); assert.ok(second.version>first.version);
+  assert.equal(await jobs.finish(first,'requests-accepted'),false);
+  assert.equal((await jobFor(f)).status,'running'); assert.equal(await jobs.finish(second,'retry'),true);
+  assert.equal((await jobFor(f)).status,'pending');
+});
+
+test('the worker continues history after an earlier contacts acceptance without repeating contacts', async () => {
+  const f = await fixture({ phone:async (read) => { if (read===3) throw new Error('history preflight unavailable'); } });
+  const launch = await begin(f); assert.equal((await complete(f,launch)).synchronization.status,'server-error');
+  await workerFor(f).runNext(); assert.equal((await jobFor(f)).status,'requests-accepted');
+  assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']); assert.equal(exchangeCount(f),1);
+});
+
+test('worker permission resolution rejects removed, suspended and demoted membership before any provider call', async () => {
+  for (const mutation of [
+    "DELETE FROM tenant_memberships WHERE tenant_id=$1 AND external_user_id LIKE 'coexistence-owner-%'",
+    "UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id LIKE 'coexistence-owner-%'",
+    "UPDATE tenant_memberships SET role='manager',version=version+1 WHERE tenant_id=$1 AND external_user_id LIKE 'coexistence-owner-%'",
+    "UPDATE tenants SET status='suspended' WHERE id=$1",
+  ]) {
+    const { f } = await registerWithoutContinuation(); const before = [...f.calls];
+    await pool.query(mutation,[f.session.tenantId]); await workerFor(f).runNext();
+    assert.equal((await jobFor(f)).status,'cancelled'); assert.deepEqual(f.calls,before);
+  }
+});
+
+test('membership revocation during Graph preflight cancels the durable POST claim', async () => {
+  let subject;
+  const { f } = await registerWithoutContinuation({ phone:async (read) => {
+    if (read===2) await pool.query("UPDATE tenant_memberships SET role='agent',version=version+1 WHERE tenant_id=$1 AND external_user_id LIKE 'coexistence-owner-%'",[subject.session.tenantId]);
+  } }); subject=f;
+  await workerFor(f).runNext(); assert.deepEqual(f.syncTypes,[]);
+  assert.equal((await jobFor(f)).status,'recovery-required');
+  assert.equal((await requests.read(f.session.tenantId,'smb_app_state_sync')).status,'cancelled');
+});
+
+test('permission removal during contacts POST preserves its accepted result and blocks history POST', async () => {
+  let subject;
+  const { f } = await registerWithoutContinuation({ post:async (type,json) => {
+    assert.equal(type,'smb_app_state_sync');
+    await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id LIKE 'coexistence-owner-%'",[subject.session.tenantId]);
+    return json({ messaging_product:'whatsapp',request_id:'accepted-before-revocation' });
+  } }); subject=f;
+  await workerFor(f).runNext(); assert.deepEqual(f.syncTypes,['smb_app_state_sync']);
+  assert.equal((await requests.read(f.session.tenantId,'smb_app_state_sync')).status,'accepted');
+  assert.equal((await requests.read(f.session.tenantId,'history')).status,'cancelled');
+  assert.equal((await jobFor(f)).status,'recovery-required');
+});
+
+test('a missing Worker configuration retries locally without consuming the original synchronization window', async () => {
+  const { f } = await registerWithoutContinuation(); const original = await jobFor(f), before = [...f.calls];
+  await workerFor(f,{ environment:{} }).runNext(); const deferred = await jobFor(f);
+  assert.equal(deferred.status,'pending'); assert.equal(deferred.started_at.toISOString(),original.started_at.toISOString());
+  assert.ok(deferred.next_attempt_at>original.next_attempt_at); assert.deepEqual(f.calls,before);
+});
+
+test('a failed membership directory read retries rather than inventing authorization or cancelling permanently', async () => {
+  const { f } = await registerWithoutContinuation(); const before = [...f.calls];
+  await workerFor(f,{ memberships:{ async findActiveByExternalUserId() { throw new Error('database unavailable'); } } }).runNext();
+  assert.equal((await jobFor(f)).status,'pending'); assert.deepEqual(f.calls,before);
+});
+
+test('worker replay after an unknown provider outcome never repeats contacts or sends history', async () => {
+  const f = await fixture({ post:(_type,json) => json({ error:{ code:1 } },503) }), launch = await begin(f);
+  await complete(f,launch); const before = [...f.calls]; await workerFor(f).runNext();
+  assert.equal((await jobFor(f)).status,'recovery-required'); assert.deepEqual(f.calls,before);
+  assert.deepEqual(f.syncTypes,['smb_app_state_sync']);
+});
+
+test('accepted durable results survive later membership suspension without new provider calls', async () => {
+  const f = await fixture(), launch = await begin(f); await complete(f,launch); const before = [...f.calls];
+  await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id LIKE 'coexistence-owner-%'",[f.session.tenantId]);
+  await workerFor(f).runNext(); assert.equal((await jobFor(f)).status,'requests-accepted'); assert.deepEqual(f.calls,before);
+});
+
+test('job identity, source window and terminal state cannot be rewritten or deleted', async () => {
+  const { f } = await registerWithoutContinuation();
+  for (const sql of [
+    "UPDATE meta_coexistence_sync_jobs SET actor_external_user_id='another-actor',version=version+1 WHERE tenant_id=$1",
+    "UPDATE meta_coexistence_sync_jobs SET started_at=started_at+INTERVAL '1 minute',version=version+1 WHERE tenant_id=$1",
+    "UPDATE meta_coexistence_sync_jobs SET status='requests-accepted',version=version+1 WHERE tenant_id=$1",
+    "DELETE FROM meta_coexistence_sync_jobs WHERE tenant_id=$1",
+  ]) await assert.rejects(pool.query(sql,[f.session.tenantId]));
+  await workerFor(f).runNext();
+  await assert.rejects(pool.query("UPDATE meta_coexistence_sync_jobs SET status='pending',version=version+1 WHERE tenant_id=$1",[f.session.tenantId]));
+});
+
+test('a job whose original signup window expired becomes terminal without a provider call', async () => {
+  const f = await fixture();
+  const key = 'connect_idempotency_v1_'+createHash('sha256').update(f.input.authorizationCode).digest('hex');
+  const digest = 'railway_mutation_request_v1_'+createHash('sha256').update(JSON.stringify(f.input)).digest('hex');
+  const row = (await pool.query(`WITH stamp AS (SELECT date_trunc('milliseconds',clock_timestamp())-INTERVAL '25 hours' AS started)
+    INSERT INTO meta_signup_launches (tenant_id,actor_external_user_id,configuration_key,started_at,expires_at)
+    SELECT $1,$2,$3,started,started+INTERVAL '20 minutes' FROM stamp RETURNING id`,[f.session.tenantId,f.session.externalUserId,'a'.repeat(64)])).rows[0];
+  await pool.query(postgresMetaSignupAttemptSql.claim,[f.session.tenantId,'meta.embedded-signup.complete',key,digest,f.session.externalUserId]);
+  await pool.query("UPDATE meta_signup_launches SET status='claimed',claim_key=$2,request_digest=$3,claimed_at=started_at+INTERVAL '1 minute' WHERE id=$1",[row.id,key,digest]);
+  const pending = await meta.saveAssetSnapshot(f.assets), connected = await meta.markConnectionConnected(f.session.tenantId,pending.version);
+  await attempts.complete({ session:f.session,claimKey:key,requestDigest:digest,launchId:Number(row.id),launchConfigurationKey:'a'.repeat(64),synchronizeBusinessApp:true },{ status:'connected',connectionVersion:connected.version });
+  await workerFor(f).runNext(); assert.equal((await jobFor(f)).status,'recovery-required');
+  assert.deepEqual(f.calls,[]); assert.equal(await countSyncRows(f),0);
+});
+
+test('job finish failure after accepted provider results recovers from an expired lease without repeating a POST', async () => {
+  const { f } = await registerWithoutContinuation();
+  await assert.rejects(workerFor(f,{ jobs:{ ...jobs,async finish() { throw new Error('worker result write failed'); } } }).runNext(),/worker result write/);
+  assert.equal((await jobFor(f)).status,'running'); const before = [...f.calls];
+  await pool.query("UPDATE meta_coexistence_sync_jobs SET lease_expires_at=clock_timestamp()-INTERVAL '1 second',version=version+1 WHERE tenant_id=$1",[f.session.tenantId]);
+  await workerFor(f).runNext(); assert.equal((await jobFor(f)).status,'requests-accepted'); assert.deepEqual(f.calls,before);
+});
+
+test('restoring an owner does not revive a cancelled continuation through the inline resume path', async () => {
+  const { f,launch } = await registerWithoutContinuation();
+  await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",[f.session.tenantId,f.session.externalUserId]);
+  await workerFor(f).runNext(); assert.equal((await jobFor(f)).status,'cancelled');
+  await pool.query("UPDATE tenant_memberships SET status='active',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",[f.session.tenantId,f.session.externalUserId]);
+  assert.equal((await f.service.resume(f.session,launch.launchId)).status,'recovery-required');
+  assert.deepEqual(f.syncTypes,[]); assert.equal((await jobFor(f)).status,'cancelled');
+});
+
+test('the actual PostgreSQL Worker scheduler runs the persisted Coexistence continuation', async () => {
+  const { f } = await registerWithoutContinuation(); const previousFetch = globalThis.fetch;
+  const events = [], failures = [];
+  globalThis.fetch = f.dependencies.transportOptions.fetchImplementation;
+  let service;
+  try {
+    service = await createRailwayPostgresWorkerService({
+      environment:{ APP_RUNTIME_ENVIRONMENT:'test',DATABASE_URL:connectionString,POSTGRES_APPLICATION_NAME:'connect-coexistence-worker-test',
+        POSTGRES_MAX_CONNECTIONS:'4',POSTGRES_CONNECTION_TIMEOUT_MS:'2000',POSTGRES_IDLE_TIMEOUT_MS:'2000',
+        POSTGRES_STATEMENT_TIMEOUT_MS:'15000',POSTGRES_QUERY_TIMEOUT_MS:'20000',POSTGRES_LOCK_TIMEOUT_MS:'3000',
+        POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS:'10000',POSTGRES_MAX_LIFETIME_SECONDS:'1800',POSTGRES_TLS_MODE:'disabled' },
+      ownerKey:'scheduler_owner_v1_'+createHash('sha256').update('coexistence-worker-integration').digest('hex'),
+      campaignQueue:{ async sendBatch() { throw new Error('No campaigns expected in the isolated database'); } },
+      postgresTelemetry:{ recordIdleClientError() { failures.push('postgres'); } },
+      schedulerTelemetry:{ recordRunFailure() { failures.push('run'); },recordTimerFailure() { failures.push('timer'); },recordOverlapSuppressed() { failures.push('overlap'); } },
+      metaWebhooks:{ environment:{ ...environment,META_WEBHOOK_VERIFY_TOKEN:'local-coexistence-verify-token' },
+        createQueueRuntime() { return {
+          async start() { events.push('start'); }, async cleanExpiredDeadLetters() { events.push('clean'); return 0; }, async close() { events.push('close'); },
+        }; }, telemetrySink:{ async record() { return { outcome:'recorded' }; } },
+      },
+    });
+    await service.start();
+    for (let poll=0; poll<100 && (await jobFor(f)).status!=='requests-accepted'; poll++) {
+      await new Promise((resolve) => setTimeout(resolve,20));
+    }
+    assert.equal((await jobFor(f)).status,'requests-accepted');
+    assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']); assert.equal(exchangeCount(f),1);
+  } finally {
+    if (service) await service.close(); globalThis.fetch=previousFetch;
+  }
+  assert.deepEqual(failures,[]); assert.deepEqual(events,['start','clean','close']);
+});
+
+test('a maintenance batch processes at most ten jobs and leaves the next job durable', async () => {
+  const fixtures=[];
+  for (let index=0; index<11; index++) fixtures.push((await registerWithoutContinuation()).f);
+  const maintenance = workerFor(fixtures[0],{ transportOptions:{ requestTimeoutMs:2000,fetchImplementation(url,init) {
+    const asset = new URL(url).pathname.split('/')[2];
+    const f = fixtures.find((candidate) => candidate.assets.phoneNumberId===asset || candidate.assets.wabaId===asset);
+    assert.ok(f,'The worker must only use assets from a registered test tenant');
+    return f.dependencies.transportOptions.fetchImplementation(url,init);
+  } } });
+  await maintenance.run();
+  for (const f of fixtures.slice(0,10)) {
+    assert.equal((await jobFor(f)).status,'requests-accepted'); assert.deepEqual(f.syncTypes,['smb_app_state_sync','history']);
+  }
+  assert.equal((await jobFor(fixtures[10])).status,'pending'); assert.deepEqual(fixtures[10].syncTypes,[]);
+  await maintenance.run(); assert.equal((await jobFor(fixtures[10])).status,'requests-accepted');
+});
+
+function apiFor(f,options={}) {
+  const oidc='oidc.local.signature',user='user.local.signature';
+  const identity={teamSlug:'connect-team',projectName:'connect-web',environment:'production'};
+  const service=createRailwayMetaSignupApiRuntime({...f.dependencies,environment:{...environment,META_COEXISTENCE_ONBOARDING_MODE:'controlled-pilot',...options.environment}});
+  const tenantSessions={async resolve(actor) {
+    return resolveTenantSessionFromMemberships(actor,await memberships.findActiveByExternalUserId(actor.externalUserId),f.session.tenantId);
+  }};
+  const dataSync=createPostgresMetaDataSyncLifecycle({queries,transactions});
+  const api=createRailwayApiHttpHandler({expectedServiceIdentity:identity,
+    oidcVerifier:{async verify(token) {return token===oidc?{provider:'vercel',...identity,subject:'owner:connect-team:project:connect-web:environment:production'}:null;}},
+    endUserSessionVerifier:{async verify(token) {return token===user?{externalUserId:f.session.externalUserId,externalOrganizationId:'org_verified'}:null;}},
+    operations:[...createRailwayMetaSignupOperations({tenantSessions,service,mutationRateLimit:{async consume(){return {outcome:options.rateLimit??'allowed'};}}}),
+      createRailwayMetaConnectionReadOperation({tenantSessions,connections,dataSync})],
+  });
+  const handler=createRailwayMetaSignupHandler({applicationConfigured:()=>true,
+    inspectConfiguration:()=>({status:'configured',configuration:{apiOrigin:'https://connect-api.invalid',deploymentEnvironment:'production'}}),
+    resolveIdentity:async()=>({status:'authenticated',oidcToken:oidc,userSessionToken:user}),
+    createClient(config){return createRailwayApiClient({apiOrigin:config.apiOrigin,deploymentEnvironment:config.deploymentEnvironment,
+      oidcTokenProvider:{async getToken(){return config.oidcToken;}},userSessionTokenProvider:{async getToken(){return config.userSessionToken;}},
+      traceparentProvider:{async getTraceparent(){return null;}},telemetry:{record(){return true;},scheduleFlush(){}},
+      fetchImplementation:(url,init)=>api.handle(new Request(url,init)),
+    });},
+  });
+  async function raw(operation,payload={},overrides={}) {
+    const query=operation==='meta.connection.read'||operation==='meta.embedded-signup.configuration';
+    return (await api.handle(new Request('https://connect-api.invalid/v1/connect',{
+      method:'POST',headers:{'content-type':'application/json',authorization:`Bearer ${user}`,'x-vercel-oidc-token':oidc},
+      body:JSON.stringify({contractVersion:'connect.railway-api.v1',operation,requestKind:query?'query':'mutation',idempotencyKey:query?null:await deriveRailwayApiDeterministicIdempotencyKey(operation,payload),payload,...overrides}),
+    }))).json();
+  }
+  return {handler,raw,dataSync};
+}
+
+test('the authenticated API queues Business App synchronization and the read path shows its actual progress', async () => {
+  const f=await fixture(), api=apiFor(f);
+  assert.equal((await api.handler.readConfiguration()).businessAppEnabled,true);
+  const launch=await api.handler.begin('business-app'); assert.equal(launch.status,'ready'); assert.deepEqual(f.calls,[]);
+  const input={...f.input,launchId:launch.launchId};
+  assert.deepEqual(await api.handler.complete(input),{status:'connected',connection:{status:'connected'},synchronization:'background'});
+  assert.deepEqual(f.syncTypes,[]); assert.equal((await jobFor(f)).status,'pending'); assert.equal(await countSyncRows(f),0);
+  const queued=await api.raw('meta.connection.read'); assert.equal(queued.outcome,'ok');
+  assert.equal(queued.data.connection.dataSync.stage,'awaiting-worker');
+  assert.equal(queued.data.connection.dataSync.contacts,'not-prepared');
+  assert.doesNotMatch(JSON.stringify(queued),/waba|phoneNumberId|requestId|launchId|token|configurationKey/);
+  await workerFor(f).runNext();
+  const progressed=await api.raw('meta.connection.read'); assert.equal(progressed.data.connection.dataSync.stage,'requesting-history');
+  assert.equal(progressed.data.connection.dataSync.contacts,'accepted'); assert.equal(progressed.data.connection.dataSync.history,'accepted');
+  const calls=[...f.calls]; await api.handler.complete(input); assert.deepEqual(f.calls,calls); assert.equal(exchangeCount(f),1);
+});
+
+test('disabled pilot, rate limiting and invalid begin payloads cannot create a launch or call the provider', async () => {
+  for(const options of [{environment:{META_COEXISTENCE_ONBOARDING_MODE:''}},{rateLimit:'limited'}]) {
+    const f=await fixture(),api=apiFor(f,options); assert.notEqual((await api.handler.begin('business-app')).status,'ready');
+    assert.equal((await pool.query('SELECT * FROM meta_signup_launches WHERE tenant_id=$1',[f.session.tenantId])).rowCount,0);assert.deepEqual(f.calls,[]);
+  }
+  const f=await fixture(),api=apiFor(f);
+  for(const payload of [{flow:'personal'},{flow:'business-app',tenantId:99},{flow:'business-app',authorizationCode:'unexpected'},{flow:'business-app',launchId:1}]) {
+    assert.equal((await api.raw('meta.embedded-signup.begin',payload)).code,'INVALID_REQUEST');
+  }
+  assert.deepEqual(f.calls,[]);
+});
+
+test('Cloud API and Business App launches remain separate even with the pilot enabled', async () => {
+  const f=await fixture(),api=apiFor(f);
+  const cloud=await api.handler.begin();
+  assert.equal((await api.handler.complete({...f.input,launchId:cloud.launchId})).status,'server-error'); assert.deepEqual(f.calls,[]);
+  const business=await api.handler.begin('business-app'); assert.notEqual(business.launchId,cloud.launchId);
+  assert.equal((await api.handler.complete({...f.input,launchId:business.launchId})).status,'connected'); assert.deepEqual(f.syncTypes,[]);
+});
+
+test('the actual membership at API completion overrides an owner session that was valid when begin ran', async () => {
+  const f=await fixture(),api=apiFor(f),launch=await api.handler.begin('business-app');
+  await pool.query("UPDATE tenant_memberships SET role='viewer',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",[f.session.tenantId,f.session.externalUserId]);
+  assert.equal((await api.handler.complete({...f.input,launchId:launch.launchId})).status,'permission-denied');
+  assert.deepEqual(f.calls,[]); assert.equal(await jobFor(f),undefined);
+});
+
+test('durable continuation cancellation is visible before request preparation and contains no fabricated progress', async () => {
+  const f=await fixture(),api=apiFor(f),launch=await api.handler.begin('business-app');
+  await api.handler.complete({...f.input,launchId:launch.launchId});
+  const job=await jobs.claimNext(); await jobs.finish(job,'cancelled');
+  const view=(await api.raw('meta.connection.read')).data.connection.dataSync;
+  assert.deepEqual(view,{stage:'recovery-required',contacts:'not-prepared',history:'not-prepared',providerProgress:null,receivedChunks:0,processedChunks:0,projectedMessages:0});
+});
+
+test('queued synchronization read hides replaced connections and rejects mixed read snapshots', async () => {
+  const f=await fixture(),api=apiFor(f),launch=await api.handler.begin('business-app');
+  await api.handler.complete({...f.input,launchId:launch.launchId}); const previous=await connections.read(f.session);
+  await meta.saveAssetSnapshot({...f.assets,phoneNumberId:'999888777'});
+  assert.equal((await api.raw('meta.connection.read')).data.connection.dataSync.stage,'connection-changed');
+  await assert.rejects(api.dataSync.readView(f.session.tenantId,previous),{code:'SYNC_LIFECYCLE_UNAVAILABLE'});
+  await assert.rejects(api.dataSync.readView(f.session.tenantId,{...previous,tenantId:previous.tenantId+1}),{code:'SYNC_LIFECYCLE_UNAVAILABLE'});
+});

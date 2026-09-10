@@ -13,6 +13,7 @@ const occurredAt = new Date("2026-08-17T08:30:00.000Z");
 function envelopeRow(overrides = {}) {
   return {
     tenantId: "7",
+    authorizationVersion: 1,
     keyVersion: "v1",
     initializationVector,
     ciphertext,
@@ -47,6 +48,7 @@ test("stores only an encrypted tenant-scoped envelope", async () => {
 
   await repository.store({
     tenantId: 7,
+    expectedConnectionVersion: 1,
     keyVersion: "v1",
     initializationVector,
     ciphertext,
@@ -55,7 +57,7 @@ test("stores only an encrypted tenant-scoped envelope", async () => {
   assert.deepEqual(fixture.calls, [
     {
       sql: postgresMetaCredentialSql.store,
-      parameters: [7, "v1", initializationVector, ciphertext],
+      parameters: [7, "v1", initializationVector, ciphertext, 1],
     },
   ]);
   assert.doesNotMatch(
@@ -72,6 +74,7 @@ test("loads and validates one exact tenant envelope", async () => {
 
   assert.deepEqual(await repository.findByTenantId(7), {
     tenantId: 7,
+    authorizationVersion: 1,
     keyVersion: "v1",
     initializationVector,
     ciphertext,
@@ -98,6 +101,7 @@ test("rejects malformed input and cross-tenant driver results", async () => {
   await assert.rejects(
     emptyRepository.store({
       tenantId: 7,
+      expectedConnectionVersion: 1,
       keyVersion: "v1",
       initializationVector: "invalid",
       ciphertext,
@@ -124,10 +128,22 @@ test("fails closed for malformed rows and unconfirmed writes", async () => {
       queryFixture([[]]).queries,
     ).store({
       tenantId: 7,
+      expectedConnectionVersion: 1,
       keyVersion: "v1",
       initializationVector,
       ciphertext,
     }),
     /write was not confirmed/,
   );
+});
+
+test("credential storage locks the matching pending connection and rejects a lost version", async () => {
+  assert.match(postgresMetaCredentialSql.store, /WHERE tenant_id = \$1 AND status = 'pending' AND version = \$5\s+FOR UPDATE/);
+  const fixture = queryFixture([[]]);
+  const repository = createPostgresMetaCredentialRepository(fixture.queries);
+  const input = { tenantId: 7, keyVersion: "v1", initializationVector, ciphertext, expectedConnectionVersion: 3 };
+  await assert.rejects(repository.store(input), /not confirmed/);
+  assert.deepEqual(fixture.calls[0].parameters, [7, "v1", initializationVector, ciphertext, 3]);
+  await assert.rejects(repository.store({ ...input, expectedConnectionVersion: undefined }));
+  assert.equal(fixture.calls.length, 1);
 });

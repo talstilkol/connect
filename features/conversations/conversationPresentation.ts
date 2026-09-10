@@ -43,14 +43,17 @@ export function hasActiveInboxFilters(
 }
 
 export const messageStatusLabels: Record<
-  InboxMessageView["status"],
+  NonNullable<InboxMessageView["status"]>,
   string
 > = hebrewMessages.labels.messageStatuses;
 
 export function messageBody(
-  message: InboxMessageView,
+  message: Pick<InboxMessageView, "contentKind" | "textContent" | "contentState">,
   language: InterfaceLanguage = "he",
 ): string {
+  if (message.contentState === "deleted" || message.contentState === "conflicted") {
+    return readConversationMessages(language).labels.contentStates[message.contentState];
+  }
   if (message.contentKind === "text") {
     return message.textContent ?? "";
   }

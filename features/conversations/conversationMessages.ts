@@ -95,6 +95,9 @@ const hebrewMessages = {
     string
   >,
   labels: {
+    historySource: "מהיסטוריית WhatsApp",
+    historyDeliveryStates: { DELIVERED: "נמסרה", ERROR: "שגיאה", PENDING: "ממתינה", PLAYED: "הושמעה", READ: "נקראה", SENT: "נשלחה" },
+    contentStates: { edited: "נערכה", deleted: "ההודעה נמחקה", conflicted: "תוכן ההודעה ממתין לסנכרון" },
     conversationStatuses: {
       new: "חדשה",
       bot_active: "בוט פעיל",
@@ -117,8 +120,9 @@ const hebrewMessages = {
       delivered: "נמסרה",
       read: "נקראה",
       failed: "נכשלה",
-    } satisfies Record<InboxMessageView["status"], string>,
+    } satisfies Record<NonNullable<InboxMessageView["status"]>, string>,
     nonTextContent: {
+      media_placeholder: "הודעת מדיה מההיסטוריה. הקובץ עדיין אינו זמין.",
       image: "התקבלה תמונה. תוכן המדיה עדיין אינו נשמר.",
       audio: "התקבלה הודעת שמע. תוכן המדיה עדיין אינו נשמר.",
       video: "התקבל סרטון. תוכן המדיה עדיין אינו נשמר.",
@@ -295,6 +299,9 @@ const messages: Record<
         "The AI approval action failed without exposing server details.",
     },
     labels: {
+    historySource: "WhatsApp history",
+    historyDeliveryStates: { DELIVERED: "Delivered", ERROR: "Error", PENDING: "Pending", PLAYED: "Played", READ: "Read", SENT: "Sent" },
+    contentStates: { edited: "Edited", deleted: "This message was deleted", conflicted: "Message content is waiting to sync" },
       conversationStatuses: {
         new: "New",
         bot_active: "Bot active",
@@ -316,6 +323,7 @@ const messages: Record<
         failed: "Failed",
       },
       nonTextContent: {
+        media_placeholder: "Historical media message. The file is not available yet.",
         image: "An image was received. Media content is not stored yet.",
         audio: "An audio message was received. Media content is not stored yet.",
         video: "A video was received. Media content is not stored yet.",
@@ -480,6 +488,9 @@ const messages: Record<
         "فشل إجراء موافقة AI دون كشف تفاصيل الخادم.",
     },
     labels: {
+    historySource: "من سجل WhatsApp",
+    historyDeliveryStates: { DELIVERED: "تم التسليم", ERROR: "خطأ", PENDING: "قيد الانتظار", PLAYED: "تم التشغيل", READ: "تمت القراءة", SENT: "تم الإرسال" },
+    contentStates: { edited: "تم التعديل", deleted: "تم حذف الرسالة", conflicted: "محتوى الرسالة بانتظار المزامنة" },
       conversationStatuses: {
         new: "جديدة",
         bot_active: "البوت نشط",
@@ -501,6 +512,7 @@ const messages: Record<
         failed: "فشلت",
       },
       nonTextContent: {
+        media_placeholder: "رسالة وسائط من السجل. الملف غير متاح بعد.",
         image: "تم استلام صورة. لم يتم حفظ محتوى الوسائط بعد.",
         audio: "تم استلام رسالة صوتية. لم يتم حفظ محتوى الوسائط بعد.",
         video: "تم استلام فيديو. لم يتم حفظ محتوى الوسائط بعد.",

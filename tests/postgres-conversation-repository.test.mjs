@@ -25,6 +25,7 @@ function messageRow(overrides = {}) {
     tenantId: "7",
     providerMessageId,
     direction: "inbound",
+    contentState: "original",
     contentKind: "text",
     status: "received",
     textContent: "שלום",
@@ -56,6 +57,8 @@ function inboxRow(overrides = {}) {
     lastName: null,
     lastMessageDirection: "inbound",
     lastMessageContentKind: "text",
+    lastMessageContentState: "original",
+    whatsappDisplayName: null,
     lastMessageTextContent: "שלום",
     ...overrides,
   };

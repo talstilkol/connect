@@ -61,6 +61,7 @@ const providerOptionKeys = Object.freeze([
 ]);
 
 const apiOptionKeys = Object.freeze([
+  "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",
   "identityDependencies",
@@ -68,6 +69,7 @@ const apiOptionKeys = Object.freeze([
   "maximumBodyBytes",
   "maximumResponseBytes",
   "messageTemplateSubmissionEnvironment",
+  "metaSignupEnvironment",
   "mutationRateLimitEnvironment",
   "postgresEnvironment",
   "postgresTelemetry",
@@ -214,6 +216,7 @@ export async function createRailwayBullMqPostgresApiRuntime(
   return Object.freeze({
     handler: ownedApiRuntime.handler,
     metaWebhookHandler: ownedApiRuntime.metaWebhookHandler,
+    mediaFileHandler: ownedApiRuntime.mediaFileHandler,
     readiness: ownedApiRuntime.readiness,
     async close() {
       if (closed) {

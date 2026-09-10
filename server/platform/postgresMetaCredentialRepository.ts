@@ -1,3 +1,4 @@
+import { postgresMetaTenantBarrierCte } from "./postgresMetaTenantBarrier.ts";
 import type {
   EncryptedMetaCredentialEnvelope,
   MetaCredentialRepository,
@@ -18,6 +19,7 @@ const INITIALIZATION_VECTOR_PATTERN = /^[A-Za-z0-9+/]{16}$/;
 const CIPHERTEXT_PATTERN = /^[A-Za-z0-9+/]{22,11998}={0,2}$/;
 const envelopeRowKeys = Object.freeze([
   "tenantId",
+  "authorizationVersion",
   "keyVersion",
   "initializationVector",
   "ciphertext",
@@ -26,23 +28,31 @@ const envelopeRowKeys = Object.freeze([
 ]);
 
 const envelopeColumns = `
-  tenant_id AS "tenantId",
-  key_version AS "keyVersion",
-  initialization_vector AS "initializationVector",
-  ciphertext,
-  created_at AS "createdAt",
-  updated_at AS "updatedAt"
+  envelope.tenant_id AS "tenantId",
+  envelope.key_version AS "keyVersion",
+  envelope.initialization_vector AS "initializationVector",
+  envelope.ciphertext,
+  envelope.created_at AS "createdAt",
+  envelope.updated_at AS "updatedAt",
+  CASE WHEN connection.status = 'connected' THEN connection.version - 1
+    ELSE connection.version END AS "authorizationVersion"
 `;
 
 export const postgresMetaCredentialSql = Object.freeze({
   store: `
+    WITH ${postgresMetaTenantBarrierCte}, pending_connection AS MATERIALIZED (
+      SELECT tenant_id FROM meta_connections CROSS JOIN tenant_barrier
+      WHERE tenant_id = $1 AND status = 'pending' AND version = $5
+      FOR UPDATE OF meta_connections
+    )
     INSERT INTO meta_credential_envelopes (
       tenant_id,
       key_version,
       initialization_vector,
       ciphertext
     )
-    VALUES ($1, $2, $3, $4)
+    SELECT tenant_id, $2, $3, $4 FROM pending_connection
+    WHERE true
     ON CONFLICT (tenant_id) DO UPDATE SET
       key_version = EXCLUDED.key_version,
       initialization_vector = EXCLUDED.initialization_vector,
@@ -52,8 +62,10 @@ export const postgresMetaCredentialSql = Object.freeze({
   `,
   findByTenantId: `
     SELECT ${envelopeColumns}
-    FROM meta_credential_envelopes
-    WHERE tenant_id = $1
+    FROM meta_credential_envelopes AS envelope
+    INNER JOIN meta_connections AS connection ON connection.tenant_id = envelope.tenant_id
+    WHERE envelope.tenant_id = $1
+      AND connection.status IN ('pending', 'connected')
     LIMIT 1
   `,
 });
@@ -109,6 +121,7 @@ function parseEnvelope(
 
   return Object.freeze({
     tenantId: parsePostgresPositiveInteger(row.tenantId),
+    authorizationVersion: parsePostgresPositiveInteger(row.authorizationVersion),
     keyVersion: requireKeyVersion(row.keyVersion),
     initializationVector: requireInitializationVector(
       row.initializationVector,
@@ -129,6 +142,10 @@ export function createPostgresMetaCredentialRepository(
   return Object.freeze({
     async store(input: StoreEncryptedMetaCredentialInput) {
       const tenantId = requireTenantId(input.tenantId);
+      const expectedVersion = input.expectedConnectionVersion;
+      if (!Number.isSafeInteger(expectedVersion) || expectedVersion <= 0) {
+        throw new Error("Meta credential connection version is invalid");
+      }
       const result = await queries.query<Record<string, unknown>>(
         postgresMetaCredentialSql.store,
         [
@@ -136,6 +153,7 @@ export function createPostgresMetaCredentialRepository(
           requireKeyVersion(input.keyVersion),
           requireInitializationVector(input.initializationVector),
           requireCiphertext(input.ciphertext),
+          expectedVersion,
         ],
       );
       const rows = requirePostgresRows(result, 1);

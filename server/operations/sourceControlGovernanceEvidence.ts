@@ -2,6 +2,9 @@ import {
   createHash,
 } from "node:crypto";
 
+export const sourceControlRepositoryIdentity = "talstilkol/connect";
+export const sourceControlDefaultBranchIdentity = `${sourceControlRepositoryIdentity}:main`;
+
 export const requiredPullRequestStatusChecks =
   Object.freeze([
   "source-guardrails",
@@ -15,7 +18,7 @@ export const requiredPullRequestStatusChecks =
   "dependency-audit",
 ] as const);
 const controlNames = Object.freeze([
-  "repositoryPrivate",
+  "repositoryPublic",
   "branchProtection",
   "codeOwnerReview",
   "dismissStaleApprovals",
@@ -32,13 +35,13 @@ const fingerprintPattern =
   /^sha256:[a-f0-9]{64}$/;
 const commitPattern = /^[a-f0-9]{40}$/;
 const evidenceDigestPattern =
-  /^source_control_governance_evidence_v3_[a-f0-9]{64}$/;
+  /^source_control_governance_evidence_v4_[a-f0-9]{64}$/;
 
 type GovernanceControl =
   (typeof controlNames)[number];
 
 export interface SourceControlGovernanceEvidence {
-  schemaVersion: 3;
+  schemaVersion: 4;
   verifiedAt: string;
   expiresAt: string;
   repositoryFingerprint: string;
@@ -196,7 +199,7 @@ export function deriveSourceControlGovernanceEvidenceDigest(
     "evidenceDigest"
   >,
 ): string {
-  return `source_control_governance_evidence_v3_${sha256(
+  return `source_control_governance_evidence_v4_${sha256(
     canonicalEvidenceIdentity(evidence),
   )}`;
 }
@@ -226,7 +229,7 @@ function parseEvidence(
       "controls",
       "evidenceDigest",
     ]) ||
-    value.schemaVersion !== 3 ||
+    value.schemaVersion !== 4 ||
     !isCanonicalTimestamp(
       value.verifiedAt,
     ) ||
@@ -243,8 +246,8 @@ function parseEvidence(
     !fingerprintPattern.test(
       value.defaultBranchFingerprint,
     ) ||
-    value.repositoryFingerprint ===
-      value.defaultBranchFingerprint ||
+    value.repositoryFingerprint !== fingerprint("repository", sourceControlRepositoryIdentity) ||
+    value.defaultBranchFingerprint !== fingerprint("default-branch", sourceControlDefaultBranchIdentity) ||
     typeof value.releaseCommitSha !==
       "string" ||
     !commitPattern.test(
@@ -299,7 +302,7 @@ function parseEvidence(
   }
 
   const evidence = {
-    schemaVersion: 3 as const,
+    schemaVersion: 4 as const,
     verifiedAt: value.verifiedAt,
     expiresAt: value.expiresAt,
     repositoryFingerprint:
@@ -365,8 +368,8 @@ export function buildSourceControlGovernanceEvidence(
       "string" ||
     rawSnapshot.defaultBranchIdentity.length < 1 ||
     rawSnapshot.defaultBranchIdentity.length > 512 ||
-    rawSnapshot.repositoryIdentity ===
-      rawSnapshot.defaultBranchIdentity ||
+    rawSnapshot.repositoryIdentity !== sourceControlRepositoryIdentity ||
+    rawSnapshot.defaultBranchIdentity !== sourceControlDefaultBranchIdentity ||
     typeof rawSnapshot.releaseCommitSha !==
       "string" ||
     !commitPattern.test(
@@ -418,7 +421,7 @@ export function buildSourceControlGovernanceEvidence(
       maximumEvidenceLifetimeMilliseconds,
   ).toISOString();
   const evidence = {
-    schemaVersion: 3 as const,
+    schemaVersion: 4 as const,
     verifiedAt,
     expiresAt,
     repositoryFingerprint: fingerprint(

@@ -107,6 +107,26 @@ test("rejects tenant, identity, credential, and prototype fields at every depth"
   assert.equal({}.polluted, undefined);
 });
 
+test("permits Meta asset claims only at the root of the signup mutation request", () => {
+  const signup = {
+    ...queryEnvelope(), operation: "meta.embedded-signup.complete", requestKind: "mutation",
+    idempotencyKey: mutationKey,
+    payload: { authorizationCode: "protected-code", businessPortfolioId: "100001", wabaId: "200002", phoneNumberId: "300003" },
+  };
+  assert.deepEqual(parseRailwayApiRequestEnvelope(signup), signup);
+  for (const invalid of [
+    { ...signup, operation: "contacts.list" },
+    { ...signup, requestKind: "query", idempotencyKey: null },
+    { ...signup, payload: { ...signup.payload, tenantId: 7 } },
+    { ...signup, payload: { ...signup.payload, accessToken: "protected-token" } },
+    { ...signup, payload: { nested: { wabaId: "200002" } } },
+    { ...signup, payload: { WABA_ID: "200002" } },
+    { ...signup, payload: { phoneNumberId: { value: "300003" } } },
+    { ...signup, payload: { wabaId: 200002 } },
+  ]) assert.throws(() => parseRailwayApiRequestEnvelope(invalid), RailwayApiContractError);
+  assert.throws(() => createRailwayApiSuccessEnvelope(signup.payload), RailwayApiContractError);
+});
+
 test("rejects non-JSON, cyclic, oversized, and deeply nested payloads", () => {
   const cyclic = {};
   cyclic.self = cyclic;

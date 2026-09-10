@@ -10,6 +10,7 @@ const protectedResources = new Map([
   ["app/workspace/layout.tsx", "loadTenantSelectionAction"],
   ["app/workspace/page.tsx", "readCurrentMetaConnection()"],
   ["app/workspace/[section]/page.tsx", "await params"],
+  ["app/workspace/media-tasks/page.tsx", "await searchParams"],
   ["app/admin/page.tsx", "readCurrentSystemAdminTenantDirectory()"],
   ["app/admin/decisions/page.tsx", "await Promise.all"],
   ["app/admin/whatsapp-delivery-policy/[tenantId]/page.tsx", "await params"],

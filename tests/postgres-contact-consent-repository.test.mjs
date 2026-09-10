@@ -52,6 +52,7 @@ function eventRow(input, overrides = {}) {
 
 function contactRow(overrides = {}) {
   return {
+    whatsappDisplayName: null,
     id: "23",
     tenantId: "7",
     phoneNumber: "+972501234567",
@@ -110,11 +111,12 @@ test("records and projects the latest consent event in one locked transaction", 
     result([eventRow(input)]),
     result([eventRow(input)]),
     result([{ contactId: "23" }]),
-    result([contactRow()]),
+    result([contactRow({ whatsappDisplayName: "Business App name" })]),
   ]);
   const contact = await database.repository.recordEvent(input);
 
   assert.equal(contact.consentStatus, "granted");
+  assert.equal(contact.whatsappDisplayName, "Business App name");
   assert.equal(contact.version, 2);
   assert.deepEqual(database.calls.map(({ sql }) => sql), [
     postgresContactConsentSql.lockContact,

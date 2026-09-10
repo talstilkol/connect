@@ -440,6 +440,11 @@ export const POSTGRES_MIGRATION_PARITY_REGISTRY = Object.freeze([
 
 export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
   Object.freeze({
+    migration: "0058_meta_message_echo_revisions.sql",
+    token: "CREATE TABLE meta_message_echo_states",
+    summary: "Railway persists Business App edit and revocation state plus content-free event receipts, and exposes explicit edited, deleted and conflicted content states without changing message occurrence time.",
+  }),
+  Object.freeze({
     migration: "0001_railway_api_mutation_receipts.sql",
     token: "CREATE TABLE railway_api_mutation_receipts",
     summary:
@@ -640,5 +645,75 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
       "reserve_and_bind_bot_reply_staging_service_reply_v1",
     summary:
       "Railway keeps activation dormant while binding each service-reply reservation to one immutable run/delivery/inbound/recipient scope, reducing admission to that single scope identity, enforcing immutable message occurrence time and barrier-first provider writers, and preserving exact-fact precedence across accepted, deferred and rejected late truth. Public grants, roles, SECURITY DEFINER functions and Runtime wiring remain absent.",
+  }),
+  Object.freeze({
+    migration: "0059_meta_contact_sync.sql",
+    token: "CREATE TABLE meta_contact_sync_states",
+    summary: "Railway stores source-owned WhatsApp address-book state and hashed event receipts without changing local profiles, contact consent or conversations; removal and same-time conflicts clear imported names.",
+  }),
+  Object.freeze({
+    migration: "0060_meta_data_sync_requests.sql",
+    token: "CREATE TABLE meta_data_sync_requests",
+    summary: "Railway stores an immutable before-signup start and one-time contacts/history requests with a database-clocked claim, immutable scope, ordered acceptance and durable unknown outcomes; no automatic resend or Coexistence activation is granted.",
+  }),
+  Object.freeze({
+    migration: "0061_meta_history_sync.sql",
+    token: "CREATE TABLE meta_history_sync_sessions",
+    summary: "Railway captures history chunks, media metadata and refusal durably under one dispatched request, with canonical receipts, conflict redaction and monotonic provider progress; it does not project inbox messages or grant sync completion.",
+  }),
+  Object.freeze({
+    migration: "0062_meta_history_inbox_projection.sql",
+    token: "CREATE TABLE meta_history_inbox_messages",
+    summary: "Railway projects captured history into inbox read references with durable cursors; live messages remain the automation and service-window source.",
+  }),
+  Object.freeze({
+    migration: "0063_meta_account_lifecycle_evidence.sql",
+    token: "CREATE TABLE meta_account_lifecycle_events",
+    summary: "Railway stores signed-receipt-bound lifecycle observations and diagnostic snapshot timing, atomically revokes current authorization, and records old-generation removals without reactivation or synchronization reset.",
+  }),
+  Object.freeze({
+    migration: "0064_meta_signup_launches.sql",
+    token: "CREATE TABLE meta_signup_launches",
+    summary: "Railway records a bounded signup launch before opening Meta, binds a single code claim to its actor, configuration and connection baseline, and retains terminal attempts without resetting data sync.",
+  }),
+  Object.freeze({
+    migration: "0065_meta_data_sync_signup_binding.sql",
+    token: "ADD COLUMN signup_launch_id BIGINT",
+    summary: "Railway binds first synchronization preparation to a completed signup receipt and its current connection, preserves the original server start, and prevents legacy paths from relabelling existing requests as a new signup.",
+  }),
+  Object.freeze({
+    migration: "0066_meta_coexistence_sync_jobs.sql",
+    token: "CREATE TABLE meta_coexistence_sync_jobs",
+    summary: "Railway atomically queues successful Business App signup continuation, fences worker leases and preserves the original actor and onboarding window.",
+  }),
+  Object.freeze({
+    migration: "0067_meta_history_media_bindings.sql",
+    token: "CREATE TABLE meta_history_media_bindings",
+    summary: "Railway binds history media metadata to immutable original message evidence without copying content, granting binary access or asserting synchronization completeness.",
+  }),
+  Object.freeze({
+    migration: "0068_meta_media_upload_journal.sql",
+    token: "CREATE TABLE meta_media_upload_jobs",
+    summary: "Railway persists immutable media upload intent, exclusive versioned claims, one-shot dispatch authorization and quarantined S3 version receipts without replaying ambiguous writes.",
+  }),
+  Object.freeze({
+    migration: "0069_meta_media_scan_observations.sql",
+    token: "CREATE TABLE meta_media_scan_observations",
+    summary: "Railway preserves exact-version S3 scan observations, retains blocking evidence and atomically recovers a verified upload receipt without re-uploading or granting file access.",
+  }),
+  Object.freeze({
+    migration: "0070_meta_media_worker_tasks.sql",
+    token: "CREATE TABLE meta_media_tasks",
+    summary: "Railway schedules media acquisition and inspection with durable claims, original actors, bounded retry delays and atomic handoff without replaying S3 writes.",
+  }),
+  Object.freeze({
+    migration: "0071_meta_media_inspection_retry.sql",
+    token: "CREATE TABLE meta_media_inspection_retry_requests",
+    summary: "Railway grants at most three explicitly requested inspection attempts after automatic exhaustion, retaining source identity, cumulative counts, immutable requests and atomic audit without replaying uploads or clearing blocking evidence.",
+  }),
+  Object.freeze({
+    migration: "0072_meta_media_cleanup.sql",
+    token: "CREATE TABLE meta_media_cleanup_jobs",
+    summary: "Railway records owner-requested removal of one verified quarantine version, withdraws access and retains immutable audits with bounded worker claims.",
   }),
 ]);

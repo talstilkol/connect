@@ -22,6 +22,7 @@ const maximumAuditOutputBytes = 2_097_152;
 const officialRegistryArgument =
   "--registry=https://registry.npmjs.org/";
 const patchedEsbuildVersion = "0.25.12";
+const patchedSharpVersion = "0.35.4";
 
 function isRecord(value) {
   return (
@@ -153,10 +154,20 @@ function assertLockfileBoundary(
     "@esbuild-kit/core-utils": {
       esbuild: patchedEsbuildVersion,
     },
+    miniflare: {
+      sharp: patchedSharpVersion,
+    },
   };
+  const sharpPackages = Object.entries(packageLock.packages).filter(
+    ([path]) => path.endsWith("node_modules/sharp"),
+  );
 
   if (
     !isRecord(packageJson) ||
+    sharpPackages.length === 0 ||
+    sharpPackages.some(([, entry]) =>
+      !isRecord(entry) || entry.version !== patchedSharpVersion,
+    ) ||
     JSON.stringify(packageJson.overrides) !==
       JSON.stringify(expectedOverrides) ||
     !isRecord(rootPackage) ||

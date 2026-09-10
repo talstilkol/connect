@@ -532,8 +532,42 @@ test("loads the connected phone and credential before provider submission", asyn
     },
   );
   assert.equal(calls[0].operation, "connection");
-  assert.equal(calls[1].operation, "send");
-  assert.deepEqual(calls[1].input, senderInput());
+  assert.equal(calls[1].operation, "connection");
+  assert.equal(calls[2].operation, "send");
+  assert.deepEqual(calls[2].input, senderInput());
+});
+
+test("rejects changed campaign connection authorization after credential access", async () => {
+  for (const mutation of ["missing", "revoked", "generation", "tenant", "portfolio", "waba", "phone", "unavailable"]) {
+    let current = connection();
+    let unavailable = false;
+    let reads = 0;
+    const processor = createMetaCampaignDeliveryProcessor({
+      retryPolicy: retryPolicy(),
+      metaConnections: { async findConnectionByTenantId(id) {
+        assert.equal(id, tenantId);
+        reads += 1;
+        if (unavailable) throw new Error("private-storage-detail");
+        return current;
+      } },
+      credentialVault: credentialVault(async (operation) => {
+        if (mutation === "missing") current = null;
+        if (mutation === "revoked") current.status = "revoked";
+        if (mutation === "generation") current.version += 1;
+        if (mutation === "tenant") current.tenantId += 1;
+        if (mutation === "portfolio") current.businessPortfolioId = "100009";
+        if (mutation === "waba") current.wabaId = "200009";
+        if (mutation === "phone") current.phoneNumberId = "300009";
+        if (mutation === "unavailable") unavailable = true;
+        return operation(accessToken);
+      }),
+      sender: { async send() { assert.fail("must not send with replaced authorization"); } },
+    });
+    assert.deepEqual(await processor.process(preparedDelivery()), {
+      outcome: "rejected", errorCode: "META_CONNECTION_UNAVAILABLE",
+    });
+    assert.equal(reads, 2);
+  }
 });
 
 test("rejects a reservation claim that does not match the persisted delivery attempt", async () => {

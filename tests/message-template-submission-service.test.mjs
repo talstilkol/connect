@@ -136,6 +136,7 @@ function fixture(options = {}) {
         submissionStartedAt: "2026-07-25 10:01:00",
         version: expectedVersion + 1,
       });
+      await options.onClaim?.();
       return claimedTemplate;
     },
     async completeSubmission(
@@ -196,6 +197,7 @@ function fixture(options = {}) {
           operation: "find-connection",
           tenantId,
         });
+        if (options.readConnection) return options.readConnection(tenantId);
         return options.connection === undefined
           ? connectedMeta()
           : options.connection;
@@ -261,6 +263,7 @@ test("claims, submits, and completes in a fail-closed order", async () => {
       "find-connection",
       "read-credential",
       "claim",
+      "find-connection",
       "submit",
       "complete",
     ],
@@ -270,7 +273,7 @@ test("claims, submits, and completes in a fail-closed order", async () => {
     /^template_submission_v1_[0-9a-f]{64}$/,
   );
   assert.equal(
-    testFixture.calls[4].input.template.status,
+    testFixture.calls[5].input.template.status,
     "submitting",
   );
 });
@@ -310,6 +313,60 @@ test("requires a connected Meta account before reading credentials", async () =>
   );
 });
 
+test("releases the exact template claim if connection authorization changes before submission", async () => {
+  for (const mutation of ["missing", "revoked", "generation", "tenant", "portfolio", "waba", "phone", "unavailable"]) {
+    let current = connectedMeta();
+    let unavailable = false;
+    const testFixture = fixture({
+      readConnection() {
+        if (unavailable) throw new Error("private-storage-detail");
+        return current;
+      },
+      onClaim() {
+        if (mutation === "missing") current = null;
+        if (mutation === "revoked") current.status = "revoked";
+        if (mutation === "generation") current.version += 1;
+        if (mutation === "tenant") current.tenantId += 1;
+        if (mutation === "portfolio") current.businessPortfolioId = "100009";
+        if (mutation === "waba") current.wabaId = "200009";
+        if (mutation === "phone") current.phoneNumberId = "300009";
+        if (mutation === "unavailable") unavailable = true;
+      },
+    });
+    await assert.rejects(testFixture.service.submit(session(), templateKey), (error) => {
+      assert.equal(error.code, mutation === "unavailable" ? "SERVICE_UNAVAILABLE" : "META_NOT_CONNECTED");
+      assert.doesNotMatch(error.message, /private-storage-detail/);
+      return true;
+    });
+    assert.deepEqual(testFixture.calls.map((call) => call.operation), [
+      "find-template", "find-connection", "read-credential", "claim", "find-connection", "release",
+    ]);
+    const claim = testFixture.calls.find((call) => call.operation === "claim");
+    assert.deepEqual(testFixture.calls.at(-1), {
+      operation: "release", tenantId: 7, templateKey,
+      submissionKey: claim.submissionKey, errorCode: "META_CONNECTION_UNAVAILABLE",
+    });
+  }
+});
+
+test("keeps a blocked template submission locked when releasing its claim fails", async () => {
+  let current = connectedMeta();
+  const testFixture = fixture({
+    readConnection() { return current; },
+    onClaim() { current = connectedMeta({ status: "revoked" }); },
+    releaseError: new Error("private-release-detail"),
+  });
+  await assert.rejects(testFixture.service.submit(session(), templateKey), { code: "SUBMISSION_UNCERTAIN" });
+  assert.equal(testFixture.calls.filter((call) => call.operation === "release").length, 1);
+  assert.equal(testFixture.calls.some((call) => ["submit", "complete"].includes(call.operation)), false);
+});
+
+test("rejects a foreign tenant connection before reading template credentials", async () => {
+  const testFixture = fixture({ connection: connectedMeta({ tenantId: 8 }) });
+  await assert.rejects(testFixture.service.submit(session(), templateKey), { code: "META_NOT_CONNECTED" });
+  assert.deepEqual(testFixture.calls.map((call) => call.operation), ["find-template", "find-connection"]);
+});
+
 test("releases an explicit client rejection back to draft", async () => {
   const testFixture = fixture({
     submitError: new MetaGraphError(
@@ -341,6 +398,7 @@ test("releases an explicit client rejection back to draft", async () => {
       "find-connection",
       "read-credential",
       "claim",
+      "find-connection",
       "submit",
       "release",
     ],
@@ -372,6 +430,7 @@ test("keeps an ambiguous timeout in submitting state", async () => {
       "find-connection",
       "read-credential",
       "claim",
+      "find-connection",
       "submit",
     ],
   );

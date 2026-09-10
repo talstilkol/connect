@@ -576,6 +576,7 @@ export function ConversationInbox({
       />
 
       <ConversationMessageView
+        authEnabled={authEnabled}
         language={language}
         selectedThread={selectedThread}
         conversations={conversations}

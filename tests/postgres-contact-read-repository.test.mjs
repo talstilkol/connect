@@ -8,6 +8,7 @@ import {
 
 function contactRow(overrides = {}) {
   return {
+    whatsappDisplayName: null,
     id: "23",
     tenantId: "7",
     phoneNumber: "+972501234567",

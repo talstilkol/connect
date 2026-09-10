@@ -1,3 +1,4 @@
+import { MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES } from "../meta/metaWebhookQueueMessage.ts";
 import type {
   MetaRepository,
 } from "../../db/metaRepository.ts";
@@ -14,7 +15,6 @@ import type {
 } from "../meta/metaWebhookQueuePort.ts";
 import {
   createMetaWebhookQueuePublisher,
-  MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
 } from "../meta/metaWebhookQueuePublisher.ts";
 import {
   createRateLimitGuard,
@@ -66,7 +66,7 @@ function requireOptions(
       (!Number.isSafeInteger(options.maximumBodyBytes) ||
         options.maximumBodyBytes < 1 ||
         options.maximumBodyBytes >
-          MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES))
+          MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES))
   ) {
     throw new Error("Railway Meta webhook runtime options are invalid");
   }
@@ -117,13 +117,14 @@ export function createRailwayMetaWebhookRuntime(
     options.queue,
     metaConfiguration.appSecret,
     createRateLimitGuard(rateLimitBinding, "meta-webhook"),
+    options.maximumBodyBytes ?? MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES,
   );
 
   return createMetaWebhookHttpHandler(
     publisher,
     metaConfiguration.verifyToken,
     options.maximumBodyBytes === undefined
-      ? { maximumBodyBytes: MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES }
+      ? { maximumBodyBytes: MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES }
       : { maximumBodyBytes: options.maximumBodyBytes },
   );
 }

@@ -3,9 +3,7 @@ import type {
   ConversationReadState,
   PersistedInboxConversation,
 } from "../../db/conversationRepository.ts";
-import type {
-  PersistedMessage,
-} from "../../shared/domain/conversation.ts";
+import type { PersistedInboxMessage } from "../../shared/domain/inboxHistory.ts";
 import type {
   ConversationAssignmentStateView,
   ConversationReadStateView,
@@ -13,6 +11,7 @@ import type {
   InboxConversationView,
   InboxMessageView,
 } from "../../shared/domain/conversationView.ts";
+import { contactDisplayName } from "../../shared/domain/contactDisplayName.ts";
 
 function toAssignmentView(
   assignedExternalUserId: string | null,
@@ -31,23 +30,6 @@ function toAssignmentView(
     : "other-user";
 }
 
-function contactDisplayName(
-  conversation: PersistedInboxConversation,
-): string {
-  const displayName = [
-    conversation.contact.firstName,
-    conversation.contact.lastName,
-  ]
-    .filter(
-      (part): part is string => part !== null,
-    )
-    .join(" ");
-
-  return (
-    displayName || conversation.contact.phoneNumber
-  );
-}
-
 export function toInboxConversationView(
   conversation: PersistedInboxConversation,
   currentExternalUserId: string,
@@ -56,7 +38,7 @@ export function toInboxConversationView(
     conversationKey: conversation.conversationKey,
     status: conversation.status,
     contact: {
-      displayName: contactDisplayName(conversation),
+      displayName: contactDisplayName(conversation.contact),
       phoneNumber: conversation.contact.phoneNumber,
     },
     unreadCount: conversation.unreadCount,
@@ -77,13 +59,15 @@ export function toInboxConversationView(
 }
 
 export function toInboxMessageView(
-  message: PersistedMessage,
+  message: PersistedInboxMessage,
 ): InboxMessageView {
   return {
     messageKey: message.messageKey,
     direction: message.direction,
     contentKind: message.contentKind,
+    ...(message.contentState === undefined ? {} : { contentState: message.contentState }),
     status: message.status,
+    ...("source" in message ? { source: message.source, historyDeliveryState: message.historyDeliveryState } : {}),
     textContent: message.textContent,
     occurredAt: message.occurredAt,
     statusUpdatedAt: message.statusUpdatedAt,
@@ -92,7 +76,7 @@ export function toInboxMessageView(
 
 export function toInboxConversationThreadView(
   conversation: PersistedInboxConversation,
-  messages: readonly PersistedMessage[],
+  messages: readonly PersistedInboxMessage[],
   currentExternalUserId: string,
 ): InboxConversationThreadView {
   return {

@@ -37,6 +37,9 @@ export function isMetaEmbeddedSignupSdkErrorStatus(
 }
 
 export const metaSignupAttemptStatuses = [
+  "preparing",
+  "ready-to-launch",
+  "attempt-in-progress",
   "idle",
   "launching",
   "awaiting-results",
@@ -45,6 +48,7 @@ export const metaSignupAttemptStatuses = [
   "client-error",
   "unsupported-flow",
   "connected",
+  "synchronization-pending",
   "configuration-required",
   "configuration-invalid",
   "unauthenticated",
@@ -55,6 +59,7 @@ export const metaSignupAttemptStatuses = [
   "authorization-failed",
   "verification-failed",
   "subscription-failed",
+  "synchronization-required",
   "server-error",
 ] as const;
 
@@ -62,6 +67,17 @@ export type MetaSignupAttemptStatus =
   (typeof metaSignupAttemptStatuses)[number];
 
 export interface MetaConnectionPanelMessages {
+  businessApp: {
+    flowLabel: string;
+    cloudChoice: string;
+    businessChoice: string;
+    pilotNotice: string;
+    refresh: string;
+    title: string;
+    description: string;
+    steps: readonly string[];
+    unavailable: string;
+  };
   aria: {
     closeBackdrop: string;
     closeButton: string;
@@ -103,6 +119,8 @@ export interface MetaConnectionPanelMessages {
   };
   attemptDetails: Record<MetaSignupAttemptStatus, string | null>;
   actions: {
+    preparing: string;
+    openMeta: string;
     close: string;
     active: string;
     launching: string;
@@ -121,6 +139,21 @@ export interface MetaConnectionPanelMessages {
 
 export const metaConnectionPanelMessages = {
   he: {
+    businessApp: {
+      flowLabel: "סוג חיבור WhatsApp",
+      cloudChoice: "מספר לשימוש דרך Cloud API",
+      businessChoice: "חשבון WhatsApp Business קיים",
+      pilotNotice: "המסלול פתוח לניסוי מבוקר. מצב ההרשמה ומצב סנכרון ההיסטוריה מוצגים בנפרד.",
+      refresh: "רענון מצב",
+      title: "חיבור WhatsApp Business בסריקה",
+      description: "חיבור רשמי שמאפשר להמשיך להשתמש באותו מספר בטלפון וב־Connect. נדרש חשבון WhatsApp Business.",
+      steps: [
+        "בחלון Meta בוחרים לחבר חשבון WhatsApp Business קיים.",
+        "פותחים בטלפון את הודעת החיבור הרשמית ומאשרים את החיבור.",
+        "מזינים קוד אימות או בוחרים סריקת QR, לפי האפשרויות ש־Meta מציגה.",
+      ],
+      unavailable: "המסלול עדיין לא הופעל בסביבת העבודה. נדרש אימות החיבור והסנכרון לפני פתיחתו לציבור.",
+    },
     aria: {
       closeBackdrop: "סגירת חלון חיבור",
       closeButton: "סגירה",
@@ -172,6 +205,10 @@ export const metaConnectionPanelMessages = {
     },
     attemptDetails: {
       idle: null,
+      "synchronization-pending": "ההרשמה נשמרה. הסנכרון ממשיך ברקע, גם אם סוגרים את החלון. יש לבדוק את מצב הייבוא בנפרד.",
+      preparing: "מכין ניסיון חיבור מאובטח",
+      "ready-to-launch": "ההכנה הושלמה. לחצו על פתיחת Meta כדי להמשיך.",
+      "attempt-in-progress": "ניסיון חיבור קודם עדיין בטיפול. רעננו את מצב החיבור לפני ניסיון נוסף.",
       launching: "פותח את חלון Meta",
       "awaiting-results": "ממתין להשלמת החיבור ב־Meta",
       submitting: "מאמת ושומר את החיבור בצד השרת",
@@ -190,17 +227,20 @@ export const metaConnectionPanelMessages = {
       "authorization-failed": "הקוד של Meta נדחה או פג תוקף",
       "verification-failed": "נכסי Meta לא עברו אימות בעלות",
       "subscription-failed": "הרשמת ה־WABA נכשלה וניתן לנסות שוב",
+      "synchronization-required": "חיבור WhatsApp Business בסריקה ממתין להשלמת סנכרון השיחות וההודעות מהטלפון.",
       "server-error": "החיבור לא הושלם באופן בטוח",
     },
     actions: {
       close: "סגירה",
       active: "החיבור פעיל",
+      preparing: "מכין חיבור",
+      openMeta: "פתיחת Meta",
       launching: "פותח את Meta",
       awaitingResults: "ממתין ל־Meta",
       submitting: "מאמת את החיבור",
       connected: "החיבור הושלם",
       sdkLoading: "טוען Meta SDK",
-      connect: "חיבור Meta ו־WhatsApp",
+      connect: "הכנת חיבור Meta ו־WhatsApp",
       retry: "ניסיון חוזר לחיבור Meta",
       sdkWaiting: "טעינת Meta SDK ממתינה",
       sdkFailed: "טעינת Meta SDK נכשלה",
@@ -209,6 +249,21 @@ export const metaConnectionPanelMessages = {
     },
   },
   en: {
+    businessApp: {
+      flowLabel: "WhatsApp connection type",
+      cloudChoice: "Number for Cloud API",
+      businessChoice: "Existing WhatsApp Business account",
+      pilotNotice: "This flow is available for a controlled pilot. Registration and history synchronization have separate statuses.",
+      refresh: "Refresh status",
+      title: "Connect WhatsApp Business by scanning",
+      description: "An official connection that lets you keep using the same number on your phone and in Connect. A WhatsApp Business account is required.",
+      steps: [
+        "In Meta, choose to connect an existing WhatsApp Business account.",
+        "Open the official connection message on your phone and confirm the connection.",
+        "Enter the verification code or choose to scan a QR code, depending on the options Meta displays.",
+      ],
+      unavailable: "This flow is not enabled for this workspace yet. Connection and synchronization must be verified before public rollout.",
+    },
     aria: {
       closeBackdrop: "Close connection dialog",
       closeButton: "Close",
@@ -260,6 +315,10 @@ export const metaConnectionPanelMessages = {
     },
     attemptDetails: {
       idle: null,
+      "synchronization-pending": "Onboarding is saved. Synchronization continues in the background when this window is closed. Check import status separately.",
+      preparing: "Preparing a secure connection attempt",
+      "ready-to-launch": "Preparation is complete. Select Open Meta to continue.",
+      "attempt-in-progress": "A previous connection attempt is still being processed. Refresh the connection status before trying again.",
       launching: "Opening the Meta dialog",
       "awaiting-results": "Waiting for the Meta connection to complete",
       submitting: "Verifying and storing the connection on the server",
@@ -280,17 +339,20 @@ export const metaConnectionPanelMessages = {
       "authorization-failed": "The Meta code was rejected or expired",
       "verification-failed": "Ownership of the Meta assets could not be verified",
       "subscription-failed": "The WABA subscription failed; you can try again",
+      "synchronization-required": "WhatsApp Business scanning is waiting for chat synchronization and messages sent from your phone to be ready.",
       "server-error": "The connection did not complete safely",
     },
     actions: {
       close: "Close",
       active: "Connection active",
+      preparing: "Preparing connection",
+      openMeta: "Open Meta",
       launching: "Opening Meta",
       awaitingResults: "Waiting for Meta",
       submitting: "Verifying connection",
       connected: "Connection complete",
       sdkLoading: "Loading Meta SDK",
-      connect: "Connect Meta and WhatsApp",
+      connect: "Prepare Meta and WhatsApp connection",
       retry: "Retry Meta connection",
       sdkWaiting: "Meta SDK loading is waiting",
       sdkFailed: "Meta SDK loading failed",
@@ -299,6 +361,21 @@ export const metaConnectionPanelMessages = {
     },
   },
   ar: {
+    businessApp: {
+      flowLabel: "نوع اتصال WhatsApp",
+      cloudChoice: "رقم للاستخدام عبر Cloud API",
+      businessChoice: "حساب WhatsApp Business حالي",
+      pilotNotice: "هذا المسار متاح لتجربة محدودة. تُعرض حالة التسجيل ومزامنة السجل بشكل منفصل.",
+      refresh: "تحديث الحالة",
+      title: "ربط WhatsApp Business بالمسح",
+      description: "ربط رسمي يتيح مواصلة استخدام الرقم نفسه على الهاتف وفي Connect. يلزم حساب WhatsApp Business.",
+      steps: [
+        "اختر ربط حساب WhatsApp Business موجود في نافذة Meta.",
+        "افتح رسالة الربط الرسمية على هاتفك وأكّد الربط.",
+        "أدخل رمز التحقق أو اختر مسح رمز QR بحسب الخيارات التي تعرضها Meta.",
+      ],
+      unavailable: "هذا المسار غير مفعّل لمساحة العمل بعد. يجب التحقق من الربط والمزامنة قبل الإتاحة العامة.",
+    },
     aria: {
       closeBackdrop: "إغلاق نافذة الربط",
       closeButton: "إغلاق",
@@ -350,6 +427,10 @@ export const metaConnectionPanelMessages = {
     },
     attemptDetails: {
       idle: null,
+      "synchronization-pending": "تم حفظ التسجيل. تستمر المزامنة في الخلفية حتى عند إغلاق النافذة. تحقق من حالة الاستيراد بشكل منفصل.",
+      preparing: "جارٍ إعداد محاولة ربط آمنة",
+      "ready-to-launch": "اكتمل الإعداد. اختر فتح Meta للمتابعة.",
+      "attempt-in-progress": "ما زالت محاولة ربط سابقة قيد المعالجة. حدّث حالة الربط قبل المحاولة مجددًا.",
       launching: "جارٍ فتح نافذة Meta",
       "awaiting-results": "في انتظار اكتمال الربط في Meta",
       submitting: "جارٍ التحقق من الربط وحفظه على الخادم",
@@ -368,17 +449,20 @@ export const metaConnectionPanelMessages = {
       "authorization-failed": "رُفض رمز Meta أو انتهت صلاحيته",
       "verification-failed": "تعذّر التحقق من ملكية أصول Meta",
       "subscription-failed": "فشل اشتراك WABA ويمكن المحاولة مرة أخرى",
+      "synchronization-required": "ينتظر الربط بالمسح اكتمال مزامنة المحادثات والرسائل المرسلة من الهاتف.",
       "server-error": "لم يكتمل الربط بصورة آمنة",
     },
     actions: {
       close: "إغلاق",
       active: "الربط نشط",
+      preparing: "جارٍ إعداد الربط",
+      openMeta: "فتح Meta",
       launching: "جارٍ فتح Meta",
       awaitingResults: "في انتظار Meta",
       submitting: "جارٍ التحقق من الربط",
       connected: "اكتمل الربط",
       sdkLoading: "جارٍ تحميل Meta SDK",
-      connect: "ربط Meta وWhatsApp",
+      connect: "إعداد ربط Meta وWhatsApp",
       retry: "إعادة محاولة ربط Meta",
       sdkWaiting: "تحميل Meta SDK قيد الانتظار",
       sdkFailed: "فشل تحميل Meta SDK",

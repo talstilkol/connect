@@ -1,3 +1,15 @@
+import {createPostgresMetaMediaCleanupRepository} from './postgresMetaMediaCleanupRepository.ts';
+import { createPostgresMetaMediaTaskReader } from "./postgresMetaMediaTaskReader.ts";
+import { createPostgresMetaAccountLifecycleRepository } from "./postgresMetaAccountLifecycleRepository.ts";
+import { createPostgresMetaDataSyncLifecycle } from "./postgresMetaDataSyncLifecycle.ts";
+import { createPostgresMetaHistoryInboxProjector } from "./postgresMetaHistoryInboxProjector.ts";
+import { createPostgresMetaHistoryMediaRepository } from "./postgresMetaHistoryMediaRepository.ts";
+import { createPostgresMetaHistorySyncRepository } from "./postgresMetaHistorySyncRepository.ts";
+import { createPostgresMetaSignupLaunchRepository } from './postgresMetaSignupLaunchRepository.ts';
+import { createPostgresMetaSignupAttemptRepository } from "./postgresMetaSignupAttemptRepository.ts";
+import { createPostgresMetaMessageEchoRepository } from "./postgresMetaMessageEchoRepository.ts";
+import { createPostgresMetaContactSyncRepository } from "./postgresMetaContactSyncRepository.ts";
+import { createPostgresMetaDataSyncRepository } from "./postgresMetaDataSyncRepository.ts";
 import {
   createNodePostgresPool,
   inspectNodePostgresPoolConfiguration,
@@ -300,7 +312,18 @@ export interface RailwayPostgresFoundation {
     typeof createContactOrganizationService
   >;
   readonly contactImports: ReturnType<typeof createContactImportService>;
+  readonly metaMediaTasks: ReturnType<typeof createPostgresMetaMediaTaskReader>;
   readonly metaConnections: ReturnType<typeof createMetaConnectionService>;
+  readonly metaSignupLaunches: ReturnType<typeof createPostgresMetaSignupLaunchRepository>;
+  readonly metaSignupAttempts: ReturnType<typeof createPostgresMetaSignupAttemptRepository>;
+  readonly metaMessageEchoes: ReturnType<typeof createPostgresMetaMessageEchoRepository>;
+  readonly metaContactSync: ReturnType<typeof createPostgresMetaContactSyncRepository>;
+  readonly metaAccountLifecycle: ReturnType<typeof createPostgresMetaAccountLifecycleRepository>;
+  readonly metaDataSyncLifecycle: ReturnType<typeof createPostgresMetaDataSyncLifecycle>;
+  readonly metaDataSyncRequests: ReturnType<typeof createPostgresMetaDataSyncRepository>;
+  readonly metaHistorySync: ReturnType<typeof createPostgresMetaHistorySyncRepository>;
+  readonly metaHistoryInbox: ReturnType<typeof createPostgresMetaHistoryInboxProjector>;
+  readonly metaHistoryMedia: ReturnType<typeof createPostgresMetaHistoryMediaRepository>;
   readonly metaWebhooks: Pick<
     MetaRepository,
     | "findConnectionByWabaId"
@@ -421,6 +444,9 @@ export interface RailwayPostgresFoundation {
   readonly createMutationRateLimitBinding: (
     policy: Readonly<PostgresMutationRateLimitPolicy>,
   ) => ReturnType<typeof createPostgresMutationRateLimitBinding>;
+  readonly createMediaFileReadRuntime: (environment: S3MetaMediaQuarantineEnvironment) => ReturnType<typeof createRailwayMetaMediaFileReadRuntime>;
+  readonly metaMediaCleanup: ReturnType<typeof createPostgresMetaMediaCleanupRepository>;
+  readonly metaMediaInspectionRetries: ReturnType<typeof createPostgresMetaMediaInspectionRetryRepository>;
   readonly invitations: ReturnType<
     typeof createPostgresTeamInvitationRepository
   >;
@@ -573,7 +599,18 @@ export function createRailwayPostgresFoundation(
       contacts: contactReads,
       imports: contactImports,
     }),
+    metaMediaTasks: createPostgresMetaMediaTaskReader(queries),
     metaConnections: createMetaConnectionService(meta),
+    metaSignupAttempts: createPostgresMetaSignupAttemptRepository(transactions),
+    metaSignupLaunches: createPostgresMetaSignupLaunchRepository(transactions),
+    metaMessageEchoes: createPostgresMetaMessageEchoRepository(transactions),
+    metaContactSync: createPostgresMetaContactSyncRepository(transactions),
+    metaAccountLifecycle: createPostgresMetaAccountLifecycleRepository(transactions),
+    metaDataSyncRequests: createPostgresMetaDataSyncRepository(transactions),
+    metaDataSyncLifecycle: createPostgresMetaDataSyncLifecycle({ queries, transactions }),
+    metaHistorySync: createPostgresMetaHistorySyncRepository(transactions),
+    metaHistoryInbox: createPostgresMetaHistoryInboxProjector(transactions),
+    metaHistoryMedia: createPostgresMetaHistoryMediaRepository(transactions),
     metaWebhooks: Object.freeze({
       findConnectionByWabaId: meta.findConnectionByWabaId,
       claimWebhookReceipt: meta.claimWebhookReceipt,
@@ -711,6 +748,11 @@ export function createRailwayPostgresFoundation(
     ) {
       return createPostgresMutationRateLimitBinding(transactions, policy);
     },
+    createMediaFileReadRuntime(environment: S3MetaMediaQuarantineEnvironment) {
+      return createRailwayMetaMediaFileReadRuntime({ environment, transactions });
+    },
+    metaMediaCleanup: createPostgresMetaMediaCleanupRepository(transactions),
+    metaMediaInspectionRetries: createPostgresMetaMediaInspectionRetryRepository(transactions),
     invitations: createPostgresTeamInvitationRepository({
       queries,
       transactions,
@@ -731,3 +773,6 @@ export function createRailwayPostgresFoundation(
     },
   });
 }
+import { createRailwayMetaMediaFileReadRuntime } from "./railwayMetaMediaFileReadRuntime.ts";
+import type { S3MetaMediaQuarantineEnvironment } from "./s3MetaMediaQuarantineConfiguration.ts";
+import { createPostgresMetaMediaInspectionRetryRepository } from "./postgresMetaMediaInspectionRetryRepository.ts";

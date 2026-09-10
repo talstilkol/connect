@@ -13,6 +13,9 @@ import {
   MetaCredentialVaultError,
 } from "../meta/metaCredentialVault.ts";
 import {
+  assertCurrentMetaConnection,
+} from "../meta/metaConnectionAuthorization.ts";
+import {
   MetaGraphError,
 } from "../meta/metaGraphTransport.ts";
 import type {
@@ -461,6 +464,7 @@ export function createMetaBotReplyProcessor(
         );
       }
 
+      connection = Object.freeze({ ...connection });
       try {
         return await dependencies.credentialVault
           .withAccessToken(
@@ -516,6 +520,19 @@ export function createMetaBotReplyProcessor(
                 throw new Error(
                   "Meta bot reply provider request is already claimed",
                 );
+              }
+
+              try {
+                await assertCurrentMetaConnection(
+                  dependencies.metaConnections,
+                  connection,
+                );
+              } catch {
+                await dependencies.admission.settleBeforeSubmit(
+                  admission.reservationKey,
+                  prepared.attemptedAt,
+                );
+                return rejected("META_CONNECTION_UNAVAILABLE");
               }
 
               try {

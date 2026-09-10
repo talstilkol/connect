@@ -14,6 +14,8 @@ import {
 import type {
   RailwayPostgresApiRuntime,
 } from "./railwayPostgresApiRuntime.ts";
+import { RAILWAY_MEDIA_FILE_PREFIX } from "./railwayMetaMediaFileHttpHandler.ts";
+import { writeRailwayNodeMediaFileResponse } from "./railwayNodeMediaFileResponse.ts";
 
 const INTERNAL_REQUEST_ORIGIN = "http://127.0.0.1";
 const LIVENESS_PATH = "/health/live";
@@ -37,7 +39,7 @@ export type RailwayNodeHttpRuntime = Pick<
   RailwayPostgresApiRuntime,
   "handler" | "readiness"
 > & Partial<
-  Pick<RailwayPostgresApiRuntime, "metaWebhookHandler">
+  Pick<RailwayPostgresApiRuntime, "metaWebhookHandler" | "mediaFileHandler">
 >;
 
 export interface RailwayNodeHttpServer {
@@ -82,6 +84,7 @@ function appendNodeHeaders(
 
 export function createRailwayNodeWebRequest(
   request: IncomingMessage,
+  signal?: AbortSignal,
 ): Request {
   const method = request.method?.toUpperCase() ?? "";
   const target = request.url ?? "";
@@ -102,6 +105,7 @@ export function createRailwayNodeWebRequest(
   const init: RequestInit & { duplex?: "half" } = {
     method,
     headers,
+    signal,
   };
 
   if (hasRequestBody(method)) {
@@ -227,18 +231,41 @@ export function createRailwayNodeHttpServer(
     },
     (request, response) => {
       void (async () => {
+        const controller = new AbortController();
+        const cancel = () => controller.abort();
+        response.once("close", cancel);
+        request.once("aborted", cancel);
         try {
+          if (request.url?.startsWith(RAILWAY_MEDIA_FILE_PREFIX) && options.runtime.mediaFileHandler) {
+            if (!/^\/v1\/media-files\/message_v1_[0-9a-f]{64}$/.test(request.url)) {
+              await writeNodeResponse(jsonResponse(404, "not-found"), response); return;
+            }
+            // Node otherwise discards some duplicate credentials during parsing.
+            const names = request.rawHeaders.filter((_value, index) => index % 2 === 0).map(name => name.toLowerCase());
+            if (["authorization", "origin"].some(name => names.filter(value => value === name).length > 1)) {
+              await writeNodeResponse(new Response("MEDIA_FILE_UNAVAILABLE", { status: 400, headers: RESPONSE_HEADERS }), response);
+              return;
+            }
+            const result = await options.runtime.mediaFileHandler.handle(createRailwayNodeWebRequest(request, controller.signal),
+              (file, headers, signal) => writeRailwayNodeMediaFileResponse(response, file, headers, signal));
+            if (result) {
+              if (response.headersSent || response.destroyed) response.destroy();
+              else await writeNodeResponse(result, response);
+            }
+            return;
+          }
           await writeNodeResponse(
-            await dispatch(createRailwayNodeWebRequest(request)),
+            await dispatch(createRailwayNodeWebRequest(request, controller.signal)),
             response,
           );
         } catch {
+          if (response.destroyed) return;
           if (!response.headersSent) {
             await writeNodeResponse(safeFailureResponse(), response);
           } else {
             response.destroy();
           }
-        }
+        } finally { response.off("close", cancel); request.off("aborted", cancel); }
       })();
     },
   );

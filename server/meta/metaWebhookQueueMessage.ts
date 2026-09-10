@@ -1,6 +1,14 @@
 export const MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES =
   120_000;
 
+// Local Railway/BullMQ admission bound for history batches. The legacy
+// Cloudflare queue retains its smaller default. This is not a Meta quota.
+export const MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES = 2 * 1024 * 1024;
+
+export function isMetaWebhookPayloadLimit(value: number): boolean {
+  return Number.isSafeInteger(value) && value > 0 && value <= MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES;
+}
+
 export interface MetaWebhookQueueMessage {
   version: 1;
   rawPayload: ArrayBuffer;
@@ -51,14 +59,15 @@ export function createMetaWebhookQueueMessage(
 
 export function parseMetaWebhookQueueMessage(
   value: unknown,
+  maximumPayloadBytes = MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
 ): MetaWebhookQueueMessage | null {
   if (
-    !isRecord(value) ||
+    !isMetaWebhookPayloadLimit(maximumPayloadBytes) || !isRecord(value) ||
     value.version !== 1 ||
     !(value.rawPayload instanceof ArrayBuffer) ||
     value.rawPayload.byteLength === 0 ||
     value.rawPayload.byteLength >
-      MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES ||
+      maximumPayloadBytes ||
     typeof value.signatureHeader !== "string" ||
     !/^sha256=[0-9a-f]{64}$/.test(
       value.signatureHeader,

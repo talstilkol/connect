@@ -6,8 +6,11 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import { metaMediaTaskMessages } from "./metaMediaTaskMessages.ts";
+import { MetaDataSyncStatus } from "./MetaDataSyncStatus";
 import type {
   MetaEmbeddedSignupView,
+  MetaEmbeddedSignupFlow,
 } from "../../shared/domain/metaEmbeddedSignupView";
 import type {
   InterfaceLanguage,
@@ -17,6 +20,7 @@ import type {
 } from "../../shared/domain/metaConnectionView";
 import {
   completeMetaEmbeddedSignupAction,
+  beginMetaEmbeddedSignupAction,
 } from "../../server/meta/metaEmbeddedSignupActions";
 import {
   createMetaEmbeddedSignupAttemptCoordinator,
@@ -37,6 +41,8 @@ import {
 } from "./metaConnectionPanelMessages";
 import { useAccessibleDialog } from
   "./useAccessibleDialog";
+
+import type { MetaSignupLaunch } from "../../server/meta/metaSignupLaunch";
 
 interface ActiveMetaSignupAttempt {
   cleanup: () => void;
@@ -72,6 +78,9 @@ export function MetaConnectionPanel({
   ].includes(connection.status);
   const hasEmbeddedSignupConfiguration =
     embeddedSignup.status === "configured";
+  const businessAppEnabled = embeddedSignup.status === "configured" && embeddedSignup.businessAppEnabled === true;
+  const [selectedFlow, setSelectedFlow] = useState<MetaEmbeddedSignupFlow>(() => businessAppEnabled ? "business-app" : "cloud-api");
+  const flow = selectedFlow === "business-app" && businessAppEnabled ? "business-app" : "cloud-api";
   const [sdkStatus, setSdkStatus] =
     useState<MetaEmbeddedSignupSdkStatus>(() =>
     embeddedSignup.status === "configured" &&
@@ -83,6 +92,9 @@ export function MetaConnectionPanel({
     useState<MetaSignupAttemptStatus>(() =>
       presentation.setupComplete ? "connected" : "idle",
     );
+  const preparedLaunchRef = useRef<(MetaSignupLaunch & { flow: MetaEmbeddedSignupFlow }) | null>(null);
+  const preparationPendingRef = useRef(false);
+  const completionPendingRef = useRef(false);
   const sdkRef = useRef<MetaFacebookSdk | null>(null);
   const activeAttemptRef =
     useRef<ActiveMetaSignupAttempt | null>(null);
@@ -153,8 +165,28 @@ export function MetaConnectionPanel({
       embeddedSignup.status !== "configured" ||
       sdkStatus !== "ready" ||
       sdkRef.current === null ||
-      activeAttemptRef.current !== null
+      activeAttemptRef.current !== null ||
+      preparationPendingRef.current || completionPendingRef.current
     ) {
+      return;
+    }
+
+    const prepared = preparedLaunchRef.current;
+    if (prepared === null || prepared.flow !== flow || Date.parse(prepared.expiresAt) <= Date.now()) {
+      preparedLaunchRef.current = null;
+      preparationPendingRef.current = true;
+      setAttemptStatus("preparing");
+      void beginMetaEmbeddedSignupAction(flow).then((result) => {
+        if (!panelActiveRef.current) return;
+        if (result.status === "ready") {
+          preparedLaunchRef.current = { ...result, flow };
+          setAttemptStatus("ready-to-launch");
+        } else setAttemptStatus(result.status);
+      }).catch(() => {
+        if (panelActiveRef.current) setAttemptStatus("server-error");
+      }).finally(() => { preparationPendingRef.current = false; });
+      // FB.login stays on the next explicit click, preserving the browser's
+      // user activation instead of opening a popup after an async server call.
       return;
     }
 
@@ -185,17 +217,19 @@ export function MetaConnectionPanel({
             return;
           }
 
+          preparedLaunchRef.current = null;
+          completionPendingRef.current = true;
           if (panelActiveRef.current) {
             setAttemptStatus("submitting");
           }
 
-          void completeMetaEmbeddedSignupAction(result.input)
+          void completeMetaEmbeddedSignupAction({ ...result.input, launchId: prepared.launchId })
             .then((completionResult) => {
               if (!panelActiveRef.current) {
                 return;
               }
 
-              setAttemptStatus(completionResult.status);
+              setAttemptStatus(completionResult.status === "connected" && completionResult.synchronization === "background" ? "synchronization-pending" : completionResult.status);
 
               if (
                 completionResult.status === "connected"
@@ -207,7 +241,7 @@ export function MetaConnectionPanel({
               if (panelActiveRef.current) {
                 setAttemptStatus("server-error");
               }
-            });
+            }).finally(() => { completionPendingRef.current = false; });
         },
       );
 
@@ -216,6 +250,7 @@ export function MetaConnectionPanel({
     unsubscribe = subscribeToMetaEmbeddedSignupMessages(
       window,
       (result) => coordinator.acceptMessageResult(result),
+      prepared.flow,
     );
     timeout = setTimeout(
       () => coordinator.expire(),
@@ -240,6 +275,7 @@ export function MetaConnectionPanel({
 
           coordinator.acceptLoginResult(result);
         },
+        prepared.flow,
       );
 
       if (!coordinator.isSettled()) {
@@ -249,6 +285,22 @@ export function MetaConnectionPanel({
       coordinator.acceptLoginResult({ status: "invalid" });
     }
   };
+
+  const backgroundPending = attemptStatus === "synchronization-pending";
+  const pollEnabled = connection.dataSync
+    ? ["awaiting-worker", "ready-to-request", "requesting-contacts", "requesting-history", "receiving-history", "projecting-history"].includes(connection.dataSync.stage)
+    : backgroundPending;
+  useEffect(() => {
+    if (!pollEnabled) return;
+    let refreshes = 0;
+    const timer = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      router.refresh();
+      refreshes++;
+      if (refreshes >= 12) clearInterval(timer);
+    }, 5_000);
+    return () => clearInterval(timer);
+  }, [pollEnabled, router]);
 
   const sdkReady =
     presentation.setupComplete || sdkStatus === "ready";
@@ -303,12 +355,13 @@ export function MetaConnectionPanel({
     },
   ];
   const attemptInProgress = [
+    "preparing",
     "launching",
     "awaiting-results",
     "submitting",
   ].includes(attemptStatus);
   const attemptDetail =
-    messages.attemptDetails[attemptStatus];
+    backgroundPending && connection.dataSync ? null : messages.attemptDetails[attemptStatus];
 
   return (
     <div className="modal-layer" role="presentation">
@@ -352,6 +405,19 @@ export function MetaConnectionPanel({
           <span>{presentation.setupComplete ? "✓" : "!"}</span>
           <p>{presentation.panelNotice}</p>
         </div>
+        {hasAssetSnapshot || connection.status === "disconnected" ? <p><a href={`/workspace/media-tasks?lang=${language}`}>{metaMediaTaskMessages[language].title}</a></p> : null}
+        {connection.dataSync ? <MetaDataSyncStatus dataSync={connection.dataSync} language={language} onRefresh={() => router.refresh()} /> : null}
+        {!presentation.setupComplete && !backgroundPending ? (
+          <fieldset className="meta-signup-flow" disabled={attemptInProgress}>
+            <legend>{messages.businessApp.flowLabel}</legend>
+            <label><input type="radio" name="meta-signup-flow" value="business-app" checked={flow === "business-app"}
+              disabled={!businessAppEnabled} onChange={() => { preparedLaunchRef.current = null; setSelectedFlow("business-app"); setAttemptStatus("idle"); }} />
+              {messages.businessApp.businessChoice}</label>
+            <label><input type="radio" name="meta-signup-flow" value="cloud-api" checked={flow === "cloud-api"}
+              onChange={() => { preparedLaunchRef.current = null; setSelectedFlow("cloud-api"); setAttemptStatus("idle"); }} />
+              {messages.businessApp.cloudChoice}</label>
+          </fieldset>
+        ) : null}
         <ol className="connection-steps">
           {steps.map((step, index) => (
             <li className={step.complete ? "ready" : ""} key={step.title}>
@@ -363,10 +429,22 @@ export function MetaConnectionPanel({
             </li>
           ))}
         </ol>
+        {!presentation.setupComplete ? (
+          <details className="business-app-connection" data-business-app-onboarding={businessAppEnabled ? "controlled-pilot" : "unavailable"}>
+            <summary>{messages.businessApp.title}</summary>
+            <p>{messages.businessApp.description}</p>
+            <ol>
+              {messages.businessApp.steps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <p>{businessAppEnabled ? messages.businessApp.pilotNotice : messages.businessApp.unavailable}</p>
+          </details>
+        ) : null}
         {attemptDetail ? (
           <div
             className={`inline-notice ${
-              attemptStatus === "connected"
+              (backgroundPending || attemptStatus === "connected" || attemptStatus === "ready-to-launch")
                 ? "success"
                 : attemptInProgress
                   ? "warning"
@@ -374,19 +452,20 @@ export function MetaConnectionPanel({
             }`}
             role={
               attemptInProgress ||
-              attemptStatus === "connected"
+              (backgroundPending || attemptStatus === "connected" || attemptStatus === "ready-to-launch")
                 ? "status"
                 : "alert"
             }
           >
             <span aria-hidden="true">
-              {attemptStatus === "connected"
+              {backgroundPending || attemptStatus === "connected" || attemptStatus === "ready-to-launch"
                 ? "✓"
                 : attemptInProgress
                   ? "i"
                   : "!"}
             </span>
             <p>{attemptDetail}</p>
+            {backgroundPending && !connection.dataSync ? <button type="button" className="secondary-button" onClick={() => router.refresh()}>{messages.businessApp.refresh}</button> : null}
           </div>
         ) : null}
         <div className="panel-footer">
@@ -397,7 +476,7 @@ export function MetaConnectionPanel({
             type="button"
             className="primary-button"
             disabled={
-              presentation.setupComplete ||
+              presentation.setupComplete || backgroundPending ||
               !hasEmbeddedSignupConfiguration ||
               sdkStatus !== "ready" ||
               attemptInProgress ||
@@ -405,8 +484,14 @@ export function MetaConnectionPanel({
             }
             onClick={startMetaEmbeddedSignup}
           >
-            {presentation.setupComplete
+            {backgroundPending
+              ? messages.actions.connected
+              : presentation.setupComplete
               ? messages.actions.active
+              : attemptStatus === "preparing"
+                ? messages.actions.preparing
+              : attemptStatus === "ready-to-launch"
+                ? messages.actions.openMeta
               : attemptStatus === "launching"
                 ? messages.actions.launching
                 : attemptStatus === "awaiting-results"

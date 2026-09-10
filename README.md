@@ -6,11 +6,12 @@
 ## מסמכי תכנון ותפעול מרכזיים
 
 מקור האמת לסדר העבודה שנותר הוא
-[תוכנית כל העבודה שנותרה — 30.08.2026](docs/planning/connect-all-remaining-work-execution-plan-2026-08-30.md).
-מצב הביצוע הרציף הנוכחי מתועד ב־
-[יומן הביצוע הרציף — 30.08.2026](docs/planning/current-sequential-execution-ledger-2026-08-30.md).
-החלטות Tal האחרונות וההתאמה לתוכנית מתועדות ב־
-[קליטת החלטות ועדכון התוכנית — 30.08.2026](docs/planning/tal-project-status-decisions-intake-and-plan-reconciliation-2026-08-30.md).
+[Master Plan לשחרור — 09.09.2026](docs/planning/launch-master-plan-2026-09-09.md).
+[מסמך ההכרעות — 09.09.2026](docs/planning/launch-decisions-2026-09-09.md)
+מכריע ב־30 החלטות המוצר ובמסלול התכנון מכוח ההנחיה החדשה של Tal.
+מצב הביצוע העדכני נמצא בסעיפי ההמשך של ה־Master Plan, עד סעיף 47. תוכנית
+30.08 ויומן הביצוע הקודם נשמרים כהיסטוריה; הקפאת הפיתוח שבהם
+אינה מגבילה את העבודה החדשה. בדיקות שחרור, אבטחה וראיות ספק נשארות חובה.
 מסמכים אינטראקטיביים לקריאה ולייצוא זמינים ב־
 [מדריך הסטטוס הפשוט](docs/connect-project-status-grandma-guide.html) וב־
 [רשימת ההחלטות והצרכים](docs/connect-remaining-decisions-and-needs.html).
@@ -876,14 +877,33 @@ npm run db:generate
 4. יש להגדיר `META_GRAPH_API_VERSION` לערך מפורש בתבנית
    `v<major>.<minor>` לפי גרסת ה־Meta App המאושרת. הקוד אינו מנחש גרסה.
 5. Embedded Signup דורש גם `META_APP_ID` ו־
-   `META_EMBEDDED_SIGNUP_CONFIGURATION_ID`. שני הערכים נקראים בשרת ורק
+   `META_EMBEDDED_SIGNUP_CONFIGURATION_ID`. שני הערכים נקראים בשרת Railway ורק
    התצורה הציבורית המצומצמת מועברת ל־React.
-6. הנתיב `/webhooks/meta` מחובר ל־Cloudflare Queue. ה־Producer מאשר
-   בקשה רק אחרי כתיבה מוצלחת ל־Queue; ה־Consumer משתמש ב־D1 Receipt,
-   Retry ו־Dead Letter Queue. ‏Template Status, ‏Inbox ו־Delivery Status
-   מעובדים; Account Update עדיין נכשל סגור.
+6. ביעד Railway, הנתיב `/webhooks/meta` מחובר ל־BullMQ ול־PostgreSQL.
+   ה־Producer מאשר בקשה רק אחרי כתיבה מוצלחת ל־Queue. חיבור Signup
+   דורש Webhook publisher ואת אותו App Secret; תהליך PostgreSQL-only
+   אינו מציע הרשמה. מסלול Cloudflare/D1 ההיסטורי עדיין קיים בקוד.
+   ה־Worker של Railway שומר הודעות חדשות מ־`smb_message_echoes`
+   כהודעות יוצאות ללא Unread או Bot, ומעדכן עריכות טקסט ומחיקות גם כשהאירועים
+   מגיעים בסדר הפוך. נדרשת מיגרציית PostgreSQL ‏0058 לפני הפעלת הקוד החדש.
+   מדיה נשמרת כרגע לפי סוג בלבד ועריכת מדיה עדיין חסומה.
+   נוספה גם קליטת `smb_app_state_sync` עם מיגרציה 0059: שמות WhatsApp
+   מוצגים כשאין שם מקומי; הסרה מהטלפון אינה מוחקת את רשומת הלקוח או משנה
+   הסכמות דיוור. מיגרציה 0060 מוסיפה רישום תחילת ניסיון ובקשות סנכרון
+   חד־פעמיות, עם שמירת `request_id` וללא POST חוזר לאחר תוצאה לא ידועה.
+   השירות הפנימי נבדק מקומית; התחלה לפני SDK, הפעלת הבקשות מ־API/תור,
+   חידוש אחרי offboarding מאומת עדיין דורש השלמה. הקרנת ההיסטוריה ל־Inbox
+   נוספה במיגרציה 0062; הורדת מדיה והוכחת השלמות עדיין חסרות.
+   מיגרציה 0061 מוסיפה קליטת history נפרדת: חלקים, מזהי מדיה, קבלות וסירוב
+   לשיתוף. סתירות מבודדות וסירוב מנקה את התוכן שנקלט באזור זה.
+   HTTP, BullMQ וה־Consumer של Railway תומכים בגבול מקומי של 2MiB;
+   התאמת הגודל והעומס בפועל דורשת Staging. אין עדיין הורדת מדיה או Sync complete.
+   מיגרציה 0063 מוסיפה תיעוד עמיד לאירועי מחזור חיי החשבון וביטול הרשאה
+   אטומי ב־Worker. כפילות קנונית אינה מבטלת שוב חיבור חדש; זמן מקומי אינו
+   מוכיח הרשאה אצל Meta, ו־ACCOUNT_RECONNECTED אינו מפעיל חיבור.
+   ראו סעיפים 21–28 ב־[התקדמות הסנכרון](docs/planning/launch-master-plan-2026-09-09.md).
 7. יש להגדיר `META_CREDENTIAL_ENCRYPTION_KEY_V1` כמפתח AES באורך
-   32 bytes המקודד ב־Base64. המפתח נשאר Secret שרתי ואינו נשמר ב־D1.
+   32 bytes המקודד ב־Base64. המפתח נשאר Secret שרתי ואינו נשמר במסד.
 8. יש להגדיר `WHATSAPP_RATE_LIMIT_HMAC_KEY_V1` כמפתח נפרד באורך
    32 bytes המקודד ב־Base64. הוא גוזר מפתחות אטומים ל־Rate Limiting
    ואסור להשתמש עבורו במפתח הצפנת ה־Credentials. מעבר ל־Key version
@@ -891,7 +911,12 @@ npm run db:generate
 9. Adapter ההרשמה מופעל רק לאחר Code Exchange, אימות WABA ומספר
    ושמירת Credential מוצפן; אין בקוד Token או מזהה נכס חלופי.
 10. Code Exchange, Asset Verifier, Credential Vault ו־WABA Subscriber
-   מחוברים ב־Runtime דרך Server Action מאומת.
+   מחוברים ב־Railway Runtime דרך Server Action ו־API מאומתים. לפני
+   פתיחת חלון Meta נשמר ניסיון שרתי עם תוקף וגרסת חיבור. השלמת ההרשמה
+   נושאת את launchId; שמירת הנכסים בודקת שהחיבור לא השתנה בזמן ההמתנה לספק.
+   קוד לא נשלח שוב אוטומטית אחרי
+   תוצאה לא ידועה. מסלול Cloud API אומת מקומית; Coexistence/QR
+   נשאר חסום עד השלמת סנכרון ההיסטוריה, אנשי הקשר והודעות מהטלפון.
 11. ה־Runtime טרם הורץ מול Access Token ונכסי Meta אמיתיים.
 12. Meta SDK Loader, ‏Launcher, ‏Parser ו־Listener פעילים רק כאשר
     תצורת ה־Client והשרת מלאה. תוצאה תקינה נשלחת מיד ל־Server Action.

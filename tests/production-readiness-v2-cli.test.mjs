@@ -11,6 +11,90 @@ import {
   currentProductionReadinessV2SourceVersion,
   readProductionReadinessV2FromCurrentSource,
 } from "../server/operations/currentProductionReadinessV2Source.ts";
+import {
+  PRODUCTION_READINESS_REGISTRY_V2,
+} from "../shared/domain/productionReadinessRegistryV2.ts";
+
+// Contract inputs for the serializer only; these are never release evidence.
+function activeSerializerInput(environment) {
+  const checks = PRODUCTION_READINESS_REGISTRY_V2.map((definition) => ({
+    id: definition.id,
+    status: "ready",
+    code: definition.codes.ready,
+  }));
+  return {
+    schemaVersion: 2,
+    sourceVersion: currentProductionReadinessV2SourceVersion,
+    status: "active",
+    code: "PRODUCTION_READINESS_V2_ACTIVE_EVIDENCE_VERIFIED",
+    source: "postgresql",
+    sourceStatus: "configured",
+    activeVersion: 1,
+    candidateDigest: `production_readiness_candidate_v2_${"7".repeat(64)}`,
+    report: {
+      environment,
+      readyForEnvironment: true,
+      readyForProduction: environment === "production",
+      checks,
+      counts: {
+        ready: checks.length,
+        blocked: 0,
+        decisionRequired: 0,
+        unavailable: 0,
+        stale: 0,
+      },
+    },
+  };
+}
+
+test("accepts complete staging readiness without granting production readiness", () => {
+  for (const environment of ["development", "preview", "staging"]) {
+    const state = activeSerializerInput(environment);
+    const payload = createProductionReadinessV2SourcePayload(state);
+    assert.equal(payload.status, "blocked");
+    assert.equal(payload.counts.ready, PRODUCTION_READINESS_REGISTRY_V2.length);
+    assert.match(renderProductionReadinessV2SourceHuman(state), /BLOCKED/);
+    assert.deepEqual(JSON.parse(renderProductionReadinessV2SourceJson(state)), payload);
+  }
+  assert.equal(
+    createProductionReadinessV2SourcePayload(activeSerializerInput("production")).status,
+    "ready",
+  );
+});
+
+test("rejects empty, incomplete, duplicate and unknown infrastructure checks", () => {
+  for (const mutate of [
+    (checks) => checks.splice(0),
+    (checks) => checks.pop(),
+    (checks) => { checks[1] = checks[0]; },
+    (checks) => { checks[0] = { ...checks[0], id: "storage.d1-binding" }; },
+  ]) {
+    const state = activeSerializerInput("production");
+    mutate(state.report.checks);
+    state.report.counts.ready = state.report.checks.length;
+    assert.throws(
+      () => createProductionReadinessV2SourcePayload(state),
+      /PRODUCTION_READINESS_REPORT_INVALID/,
+    );
+  }
+});
+
+test("rejects mismatched environment, readiness flags and counts", () => {
+  for (const mutate of [
+    (report) => { report.environment = "PRODUCTION"; },
+    (report) => { report.environment = "staging"; },
+    (report) => { report.readyForEnvironment = false; },
+    (report) => { report.readyForProduction = false; },
+    (report) => { report.counts.ready -= 1; },
+  ]) {
+    const state = activeSerializerInput("production");
+    mutate(state.report);
+    assert.throws(
+      () => createProductionReadinessV2SourcePayload(state),
+      /PRODUCTION_READINESS_REPORT_INVALID/,
+    );
+  }
+});
 
 const configuredEnvironment = Object.freeze({
   PRODUCTION_READINESS_V2_SOURCE: "postgresql",

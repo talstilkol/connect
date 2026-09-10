@@ -23,6 +23,7 @@ export type MetaCredentialVaultErrorCode =
   | "ENCRYPTION_FAILED"
   | "STORAGE_FAILED"
   | "CREDENTIAL_NOT_FOUND"
+  | "AUTHORIZATION_CHANGED"
   | "DECRYPTION_FAILED";
 
 export class MetaCredentialVaultError extends Error {
@@ -160,10 +161,11 @@ export function inspectMetaCredentialEncryptionConfiguration(
 
 function credentialAdditionalData(
   tenantId: number,
+  authorizationVersion: number,
 ): OwnedBytes {
   return new Uint8Array(
     new TextEncoder().encode(
-      `connect:meta-access-token:${KEY_VERSION}:tenant:${tenantId}`,
+      `connect:meta-access-token:${KEY_VERSION}:tenant:${tenantId}:authorization:${authorizationVersion}`,
     ),
   );
 }
@@ -196,8 +198,11 @@ export function createMetaCredentialVault(
   };
 
   return {
-    async storeAccessToken(tenantId, accessToken) {
+    async storeAccessToken(tenantId, accessToken, expectedConnectionVersion) {
       const normalizedTenantId = requireTenantId(tenantId);
+      if (!Number.isSafeInteger(expectedConnectionVersion) || expectedConnectionVersion <= 0) {
+        throw new MetaCredentialVaultError("STORAGE_FAILED", "Meta credential connection version is invalid");
+      }
       const plaintext = new Uint8Array(
         new TextEncoder().encode(accessToken),
       );
@@ -213,7 +218,7 @@ export function createMetaCredentialVault(
             name: "AES-GCM",
             iv: initializationVector,
             additionalData:
-              credentialAdditionalData(normalizedTenantId),
+              credentialAdditionalData(normalizedTenantId, expectedConnectionVersion),
             tagLength: AUTHENTICATION_TAG_BITS,
           },
           key,
@@ -223,6 +228,7 @@ export function createMetaCredentialVault(
         try {
           await repository.store({
             tenantId: normalizedTenantId,
+            expectedConnectionVersion,
             keyVersion: KEY_VERSION,
             initializationVector: bytesToBase64(
               initializationVector,
@@ -279,6 +285,8 @@ export function createMetaCredentialVault(
         );
       }
 
+      // Capture immutable input before asynchronous key import/decryption.
+      envelope = Object.freeze({ ...envelope });
       let plaintext: OwnedBytes | null = null;
       let accessToken: SensitiveMetaAccessToken;
 
@@ -293,6 +301,9 @@ export function createMetaCredentialVault(
         );
 
         if (
+          envelope.tenantId !== normalizedTenantId ||
+          !Number.isSafeInteger(envelope.authorizationVersion) ||
+          envelope.authorizationVersion <= 0 ||
           envelope.keyVersion !== KEY_VERSION ||
           initializationVector.byteLength !==
             INITIALIZATION_VECTOR_BYTES
@@ -309,7 +320,7 @@ export function createMetaCredentialVault(
             name: "AES-GCM",
             iv: initializationVector,
             additionalData:
-              credentialAdditionalData(normalizedTenantId),
+              credentialAdditionalData(normalizedTenantId, envelope.authorizationVersion),
             tagLength: AUTHENTICATION_TAG_BITS,
           },
           key,
@@ -338,6 +349,30 @@ export function createMetaCredentialVault(
       }
 
       try {
+        let current;
+        try {
+          current = await repository.findByTenantId(
+            normalizedTenantId,
+          );
+        } catch {
+          throw new MetaCredentialVaultError(
+            "STORAGE_FAILED",
+            "Meta credential authorization could not be checked",
+          );
+        }
+        if (
+          !current ||
+          current.tenantId !== normalizedTenantId ||
+          current.authorizationVersion !== envelope.authorizationVersion ||
+          current.keyVersion !== envelope.keyVersion ||
+          current.initializationVector !== envelope.initializationVector ||
+          current.ciphertext !== envelope.ciphertext
+        ) {
+          throw new MetaCredentialVaultError(
+            "AUTHORIZATION_CHANGED",
+            "Meta credential authorization changed",
+          );
+        }
         return await operation(accessToken);
       } finally {
         plaintext?.fill(0);

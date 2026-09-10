@@ -82,6 +82,7 @@ function credentialRepository() {
     async store(input) {
       envelope = {
         ...structuredClone(input),
+        authorizationVersion: input.expectedConnectionVersion,
         createdAt: "2026-08-24T09:00:00.000Z",
         updatedAt: "2026-08-24T09:00:00.000Z",
       };
@@ -120,8 +121,7 @@ async function fixture({
   );
   await vault.storeAccessToken(
     7,
-    toSensitiveMetaAccessToken(accessTokenValue),
-  );
+    toSensitiveMetaAccessToken(accessTokenValue), 1);
   const calls = [];
   const fetchImplementation = async (input, init) => {
     const url = new URL(input);
@@ -206,7 +206,9 @@ test("binds live Graph app, portfolio, WABA, and phone assets to the staging run
     "/v24.0/debug_token",
     "/v24.0/303030303",
     "/v24.0/303030303/phone_numbers",
+    "/v24.0/404040404",
   ]);
+  assert.equal(calls[3].fields, "id,is_on_biz_app");
   assert.equal(calls[0].inputToken, accessTokenValue);
   assert.equal(calls[0].authorization, `Bearer ${appId}|${appSecret}`);
   assert.equal(calls[1].authorization, `Bearer ${accessTokenValue}`);

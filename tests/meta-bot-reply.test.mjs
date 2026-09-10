@@ -486,6 +486,77 @@ test("resolves the current connected phone and tenant credential before sending"
   }]);
 });
 
+test("rechecks authorization after admission and provider claims before sending", async () => {
+  for (const phase of ["reserve", "claim"]) {
+    for (const mutation of ["missing", "revoked", "generation", "tenant", "portfolio", "waba", "phone", "unavailable"]) {
+      let current = connection();
+      let unavailable = false;
+      const calls = [];
+      function change() {
+        if (mutation === "missing") current = null;
+        if (mutation === "revoked") current.status = "revoked";
+        if (mutation === "generation") current.version += 1;
+        if (mutation === "tenant") current.tenantId += 1;
+        if (mutation === "portfolio") current.businessPortfolioId = "100009";
+        if (mutation === "waba") current.wabaId = "200009";
+        if (mutation === "phone") current.phoneNumberId = "300009";
+        if (mutation === "unavailable") unavailable = true;
+      }
+      const processor = createMetaBotReplyProcessor({
+        metaConnections: { async findConnectionByTenantId(id) {
+          assert.equal(id, tenantId);
+          calls.push("read");
+          if (unavailable) throw new Error("private-storage-detail");
+          return current;
+        } },
+        credentialVault: credentialVault(),
+        admission: admission({
+          async reserve() {
+            calls.push("reserve");
+            if (phase === "reserve") change();
+            return { outcome: "reserved", reservationKey };
+          },
+          async settleBeforeSubmit(key) {
+            assert.equal(key, reservationKey);
+            calls.push("cancel");
+          },
+          async settleProviderFailure() { assert.fail("no provider request was sent"); },
+        }),
+        providerRequests: providerRequests({ async claim() {
+          calls.push("claim");
+          if (phase === "claim") change();
+          return { outcome: "created", requestKey: providerRequestKey };
+        } }),
+        sender: { async send() { assert.fail("authorization changed before send"); } },
+      });
+      assert.deepEqual(await processor.process(prepared()), {
+        outcome: "rejected", errorCode: "META_CONNECTION_UNAVAILABLE",
+      });
+      assert.deepEqual(calls, ["read", "reserve", "claim", "read", "cancel"]);
+    }
+  }
+});
+
+test("does not retry a blocked bot reply when local reservation cancellation fails", async () => {
+  let current = connection();
+  let cancellations = 0;
+  const processor = createMetaBotReplyProcessor({
+    metaConnections: { async findConnectionByTenantId() { return current; } },
+    credentialVault: credentialVault(),
+    admission: admission({ async settleBeforeSubmit() {
+      cancellations += 1;
+      throw new Error("local cancellation failed");
+    } }),
+    providerRequests: providerRequests({ async claim() {
+      current = connection({ status: "revoked" });
+      return { outcome: "created", requestKey: providerRequestKey };
+    } }),
+    sender: { async send() { assert.fail("must not send"); } },
+  });
+  await assert.rejects(processor.process(prepared()), /local cancellation failed/);
+  assert.equal(cancellations, 1);
+});
+
 test("does not submit when the exact provider request was already claimed", async () => {
   let sends = 0;
   const processor = createMetaBotReplyProcessor({

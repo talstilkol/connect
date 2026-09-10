@@ -1,3 +1,4 @@
+import type { MetaDataSyncView } from "./metaDataSyncView.ts";
 import type {
   MetaConnectionRecord,
   PersistedMetaConnectionStatus,
@@ -14,6 +15,7 @@ export type MetaConnectionViewStatus =
 
 export interface MetaConnectionView {
   status: MetaConnectionViewStatus;
+  dataSync?: Readonly<MetaDataSyncView>;
 }
 
 export const configurationRequiredMetaConnection: MetaConnectionView = {

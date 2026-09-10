@@ -109,7 +109,7 @@ test("localizes every Meta presentation without changing readiness semantics", (
 test("localizes every Meta connection panel SDK and attempt state", () => {
   assert.equal(metaEmbeddedSignupSdkErrorStatuses.length, 7);
   assert.equal(metaEmbeddedSignupSdkStatuses.length, 10);
-  assert.equal(metaSignupAttemptStatuses.length, 19);
+  assert.equal(metaSignupAttemptStatuses.length, 24);
 
   for (const errorStatus of metaEmbeddedSignupSdkErrorStatuses) {
     assert.equal(

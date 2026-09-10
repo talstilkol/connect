@@ -1,3 +1,17 @@
+import { createRailwayMetaMediaWorkerRuntime, requireMetaMediaWorkerConfiguration, type MetaMediaWorkerEnvironment } from "./railwayMetaMediaWorkerRuntime.ts";
+import { createPostgresMetaAccountLifecycleRepository } from "./postgresMetaAccountLifecycleRepository.ts";
+import { createPostgresMetaCoexistenceSyncJobRepository } from './postgresMetaCoexistenceSyncJobRepository.ts';
+import { createPostgresTenantMembershipRepository } from './postgresTenantMembershipRepository.ts';
+import { createRailwayMetaCoexistenceMaintenance } from './railwayMetaCoexistenceMaintenance.ts';
+import type { MetaEmbeddedSignupServerEnvironment } from '../meta/metaEmbeddedSignupServerReadiness.ts';
+import { createPostgresMetaDataSyncLifecycle } from "./postgresMetaDataSyncLifecycle.ts";
+import { createPostgresMetaHistoryInboxProjector } from "./postgresMetaHistoryInboxProjector.ts";
+import { createPostgresMetaHistoryMediaRepository } from "./postgresMetaHistoryMediaRepository.ts";
+import { MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES } from "../meta/metaWebhookQueueMessage.ts";
+import { createPostgresMetaHistorySyncRepository } from "./postgresMetaHistorySyncRepository.ts";
+import { createPostgresMetaMessageEchoRepository } from "./postgresMetaMessageEchoRepository.ts";
+import { createPostgresMetaContactSyncRepository } from "./postgresMetaContactSyncRepository.ts";
+import { createPostgresMetaDataSyncRepository } from "./postgresMetaDataSyncRepository.ts";
 import type {
   CampaignDeliveryQueueBinding,
 } from "../campaigns/campaignScheduler.ts";
@@ -222,7 +236,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -234,7 +248,7 @@ export interface RailwayPostgresWorkerServiceOptions {
     credentialVaultOptions?: MetaCredentialVaultOptions;
   }>;
   readonly metaWebhooks?: Readonly<{
-    environment: MetaWebhookEnvironment;
+    environment: MetaWebhookEnvironment & MetaEmbeddedSignupServerEnvironment;
     createQueueRuntime: RailwayMetaWebhookQueueRuntimeFactory;
     telemetrySink: OperationalTelemetrySink;
   }>;
@@ -729,7 +743,18 @@ function createRailwayPostgresWorkerFoundation(
       }),
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
+    metaMessageEchoes: createPostgresMetaMessageEchoRepository(transactions),
+    metaContactSync: createPostgresMetaContactSyncRepository(transactions),
+    metaAccountLifecycle: createPostgresMetaAccountLifecycleRepository(transactions),
+    metaDataSyncRequests: createPostgresMetaDataSyncRepository(transactions),
+    metaCoexistenceSyncJobs: createPostgresMetaCoexistenceSyncJobRepository(transactions),
+    metaCoexistenceMemberships: createPostgresTenantMembershipRepository(queries),
+    metaDataSyncLifecycle: createPostgresMetaDataSyncLifecycle({ queries, transactions }),
+    metaHistorySync: createPostgresMetaHistorySyncRepository(transactions),
+    metaHistoryInbox: createPostgresMetaHistoryInboxProjector(transactions),
+    metaHistoryMedia: createPostgresMetaHistoryMediaRepository(transactions),
     metaWebhooks: Object.freeze({
+      revokeConnection: meta.revokeConnection,
       findConnectionByWabaId: meta.findConnectionByWabaId,
       claimWebhookReceipt: meta.claimWebhookReceipt,
       completeWebhookReceipt: meta.completeWebhookReceipt,
@@ -754,6 +779,9 @@ function createRailwayPostgresWorkerFoundation(
     ) {
       return createPostgresMutationRateLimitBinding(transactions, policy);
     },
+    createMetaMediaWorker(environment: MetaMediaWorkerEnvironment, recordFailure: () => void) {
+      return createRailwayMetaMediaWorkerRuntime({ environment, transactions, queries, recordFailure });
+    },
     async close() {
       if (closed) {
         return;
@@ -768,6 +796,7 @@ export async function createRailwayPostgresWorkerService(
   options: Readonly<RailwayPostgresWorkerServiceOptions>,
 ): Promise<Readonly<RailwayWorkerSchedulerService>> {
   const clock = requireOptions(options);
+  const mediaMode = requireMetaMediaWorkerConfiguration(options.environment);
   const foundation = createRailwayPostgresWorkerFoundation(
     options.environment,
     options.postgresTelemetry,
@@ -786,6 +815,9 @@ export async function createRailwayPostgresWorkerService(
   }>> = [];
 
   try {
+    if (mediaMode !== null) {
+      queueRuntimes.push(foundation.createMetaMediaWorker(options.environment!, options.schedulerTelemetry.recordRunFailure));
+    }
     let campaignQueue = options.campaignQueue;
     if (options.campaignDeliveries !== undefined) {
       const {
@@ -847,7 +879,12 @@ export async function createRailwayPostgresWorkerService(
       );
       const processor = createMetaWebhookEventDispatcher(
         createMetaWebhookBusinessBatchProcessor({
+          accounts: foundation.metaWebhooks,
+          accountLifecycle: foundation.metaAccountLifecycle,
           conversations: foundation.conversations,
+          messageEchoes: foundation.metaMessageEchoes,
+          contactSync: foundation.metaContactSync,
+          historySync: foundation.metaHistorySync,
           templates: foundation.messageTemplates,
           campaignStatuses: createCampaignDeliveryStatusReconciler(
             foundation.campaignProviderDeliveries,
@@ -869,6 +906,7 @@ export async function createRailwayPostgresWorkerService(
             processor,
             metaConfiguration.appSecret,
           ),
+          MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES,
         ),
         options.metaWebhooks.telemetrySink,
         clock,
@@ -879,6 +917,36 @@ export async function createRailwayPostgresWorkerService(
       queueRuntimes.push(metaWebhookQueueRuntime);
       queueMaintenanceTasks.push(Object.freeze({
         run: () => metaWebhookQueueRuntime!.cleanExpiredDeadLetters(),
+      }));
+      queueMaintenanceTasks.push(createRailwayMetaCoexistenceMaintenance({
+        jobs:foundation.metaCoexistenceSyncJobs,
+        memberships:foundation.metaCoexistenceMemberships,
+        requests:foundation.metaDataSyncRequests,
+        credentials:foundation.metaCredentialEnvelopes,
+        environment:options.metaWebhooks.environment,
+      }));
+      queueMaintenanceTasks.push(Object.freeze({
+        async run() {
+          for (let tenant = 0; tenant < 10; tenant++) {
+            if (await foundation.metaDataSyncLifecycle.reconcileNext() === "idle") break;
+          }
+        },
+      }));
+      queueMaintenanceTasks.push(Object.freeze({
+        async run() {
+          for (let page = 0; page < 10; page++) {
+            const result = await foundation.metaHistoryInbox.projectNext();
+            if (result.outcome !== "projected") break;
+          }
+        },
+      }));
+      queueMaintenanceTasks.push(Object.freeze({
+        async run() {
+          for (let item = 0; item < 100; item++) {
+            const result = await foundation.metaHistoryMedia.bindNext();
+            if (result === "idle" || result === "blocked") break;
+          }
+        },
       }));
     }
 

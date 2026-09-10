@@ -1,5 +1,9 @@
 # 1. Connect — יומן ביצוע רציף נוכחי
 
+> עדכון 09.09.2026: המשך הביצוע עבר ל־[Master Plan לשחרור, סעיף 9](launch-master-plan-2026-09-09.md).
+> הוראת Tal החדשה מסירה את הקפאת הפיתוח למסלול החדש ומאשרת הכרעה וביצוע עצמאי.
+> הרשומות להלן נשמרות כהיסטוריה; הן אינן משנות את ההרשאה החדשה.
+
 ## 1.1 מעמד
 
 1.1.1 `artifactId=CONNECT-CURRENT-SEQUENTIAL-EXECUTION-LEDGER-2026-08-30`.
@@ -32,7 +36,7 @@ Acceptance ואינו מתיר פיתוח מוצר שחסום על ידי ההק
 נוצרו ונבדקו, אך שלוש ביקורות עצמאיות, Generation B ו־Acceptance חסרים.
 
 1.2.6 שלב 6 — TRD-2 v6:
-`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-COMPLETE-LOCAL;PASS-4-NEXT`;
+`IN_PROGRESS;PASS-1-COMPLETE;PASS-2-V1-REJECTED;PASS-2-V2-REJECTED;PASS-2-V3-COMPLETE-LOCAL;PASS-3-V2-COMPLETE-LOCAL;PASS-4=QUARANTINE-INCOMPLETE;REBUILD-AUTHORITY-GATED;NOT-AUTHORIZED`;
 Pass 2 v3 קובע ב־commit `1e33fcd` ומוכיח `82` Schemas,‏ `789/789`
 הסכמת מנועים, `30/30` מיפויי Output→Schema ו־`50/50` Invariants.
 Pass 3 v1 נשאר היסטוריה ללא פלט; Pass 3 v2 קובע ב־commit `50007de`
@@ -527,11 +531,256 @@ defects were corrected in the committed toolchain.
 
 ## 10.3 Current boundary
 
-10.3.1 Pass 4 is next: complete causal graph, independent Graph Engines and
-hostile graph mutations.
+10.3.1 המצב הקובע לאחר Reconciliation הוא
+`PASS-4=QUARANTINE-INCOMPLETE;REBUILD-AUTHORITY-GATED;NOT-AUTHORIZED`.
+הניסוח ההיסטורי "Pass 4 is next" בוטל; אין Authority להמשך Generation.
 
-10.3.2 The final root overlay waits for exact Pass 5/6 roots; Atomic Package is
-Pass 6. Placeholder or invented roots are forbidden.
+10.3.2 לאחר Authority חדש בלבד, ה־final root overlay ימתין ל־exact
+Pass 5/6 roots; ‏Atomic Package הוא Pass 6. ‏Placeholder או roots
+מומצאים אסורים.
 
 10.3.3 accepted Requirements=`0/128`; Finding closure=`0/15`; review
 generations=`0/2`; Gate29=`BLOCKED`; development freeze=`ACTIVE`.
+
+# 11. חבילת ביצוע 10 — Reconciliation של שיחת־הצד
+
+## 11.1 מה נמצא
+
+11.1.1 לא נמצא Thread נפרד קריא, ולכן השחזור בוצע מהיסטוריית Git,
+GitHub readback וה־worktree בפועל.
+
+11.1.2 הטווח `93c6b2dfe007..f68cdcf69567` כולל `59` Commits
+שכבר נדחפו לענף `codex/cloudflare-evidence-builders`.
+
+11.1.3 המאגר נשאר `PUBLIC`; Draft PR #2 נשאר `OPEN;UNSTABLE`
+ולא מוזג ל־`main`.
+
+11.1.4 מסמך ה־Reconciliation המלא:
+`docs/planning/side-chat-reconciliation-2026-08-31.md`.
+
+## 11.2 מה אומץ
+
+11.2.1 ‏B0 v8, ‏Protocol v1.10 G1, ‏Discovery Cutoff v3 ו־Source
+Universe v4 נשמרים כ־Local Candidates בלבד. הסטטוס הקנוני של Passes
+הוא:
+`Pass 1=COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED;Pass 2 v3=COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED;Pass 3 v2=COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED;Pass 3 current-HEAD Node revalidation=FAIL-TOOLCHAIN-DRIFT;Acceptance=0`.
+
+11.2.2 ‏Discovery Cutoff v1/v2 ו־TRD Pass 2 v1/v2 נשמרים כהיסטוריה
+שנדחתה עם zero closure credit.
+
+11.2.3 ‏Commit `5ad1eba` ערבב `899` קובצי Product, Tests ו־Planning
+ודורש Review נפרד; הוא אינו מאומץ כיחידה.
+
+## 11.3 מה נכשל
+
+11.3.1 ‏GitHub CI עבר `6` Checks ונכשל ב־`3`.
+
+11.3.2 ‏Source guardrails חסר dependency install.
+
+11.3.3 ‏Migration tooling ללא dependency install הוא
+`LEADING-FIRST-FAILURE-HYPOTHESIS;NOT-CLOSED-ROOT-CAUSE`; רק rerun
+מורשה לאחר התקנת dependencies יכול לחשוף כשלים עוקבים ולסגור סיבה.
+
+11.3.4 ‏Test יחיד מתוך `3991` מקבע `/private/tmp` ואינו portable
+ל־Ubuntu.
+
+11.3.5 התיקונים לא בוצעו משום שהקפאת הפיתוח נשארת `ACTIVE`.
+
+## 11.4 ‏Pass 4
+
+11.4.1 ה־causal graph החלקי נשמר ב־Quarantine ב־`PART_230/512`.
+
+11.4.2 ה־prefix שלו תואם ל־builder המקורי, אך הוא עדיין אינו JSON מלא
+וחסרים שני Graph reports.
+
+11.4.3 helper זמני ל־Resume הוסר וה־builder הוחזר לבייטים של HEAD.
+הוספת ה־helper והתקדמות Part 219→230 בוצעו בזמן ההקפאה ומסומנות
+`UNAUTHORIZED-HISTORICAL-ACTION;ZERO-AUTHORITY-CREDIT`.
+
+11.4.4 לפי
+`docs/planning/section-35-6-trd-2-v6-pass4-build-charter-2026-08-31.md`
+ב־SHA-256
+`df4250e1404efa2bba51789f43ae4688f0b4c5c146690acc8f660f2454058fb6`,
+clause `1.2.4`, ‏Pass 4 חייב להיבנות מחדש מ־Part 1 תחת Toolchain
+קפוא ו־writer יחיד. ה־builder המדובר הוא
+`scripts/create-trd2-v6-pass4-candidate.mjs` ב־SHA-256
+`bfb59c843f13de562997681c08d32281df0136b1bad8dcbc2bd4ddc1d8f2e65d`.
+ה־rebuild הוא `AUTHORITY-GATED;NOT-AUTHORIZED` בזמן ההקפאה.
+
+## 11.5 גבול נוכחי
+
+11.5.1 ‏Acceptance=`0`; ‏Gate29=`BLOCKED`; ‏development
+freeze=`ACTIVE`; ‏Public Push Permit=`ABSENT`.
+
+11.5.2 לא בוצע במסגרת Reconciliation זה Commit, Push, Merge, שינוי
+Visibility, שינוי Product, שינוי ספק, Deployment או Production mutation.
+
+11.5.3 סדר העבודה המותר כעת הוא Planning/Read-only בלבד: Review
+ממוקד ל־`5ad1eba`; ביקורות עצמאיות ל־B0/Protocol/Source/TRD;
+Reconciliation ו־Definition Acceptance; ‏Atomic Task Registry,
+משקלים, RACI, משאבים, תלויות ולוחות שנה; Final Master Plan; אישור
+exact-root של טל; ולבסוף Gate29 reassessment.
+
+11.5.4 כל שינוי Code, ‏Toolchain, ‏Workflow או Test, כל Test run וכל
+פעולת Git/PR הם `AUTHORITY-GATED;NOT-AUTHORIZED`. תיקוני CI ו־Pass 4
+אינם חוליה אוטומטית ברצף. גם לאחר Gate29, ‏Commit/Push/PR update
+דורשים Permit נפרד הקשור ל־exact object.
+
+11.5.5 מצב השמירה הנוכחי: מסמך ה־Reconciliation וה־Pass 4 checkpoint
+הם `LOCAL-UNTRACKED`; שני ה־Ledgers הם
+`LOCAL-MODIFIED-UNCOMMITTED`; אין עדיין ראיית Git durable לשכבת
+Reconciliation זו.
+
+# 12. חבילת ביצוע 11 — קיבוע מועמדים וביקורת `5ad1eba`
+
+## 12.1 קיבוע זהויות מועמדים
+
+12.1.1 ‏Candidate-set v1 נמצא ב־
+`docs/planning/side-chat-adopted-candidate-set-v1-2026-08-31.json`;
+raw SHA-256=
+`073eb6800742e4fe1b0503bb638176aa332a3b44836dc484d343725894446e1b`.
+
+12.1.2 הוא מקבע `7` מועמדים, `14` נתיבי Evidence ו־`12` roots:
+B0 v8, ‏Protocol v1.10 G1, ‏Discovery Cutoff v3, ‏Source Universe v4
+Generation A ו־TRD-2 v6 Passes 1, ‏2 v3 ו־3 v2.
+
+12.1.3 כל השבעה נשארים
+`COMPLETE-LOCAL-CANDIDATE-NOT-ACCEPTED`; ‏Acceptance=`0`. ‏Pass 4
+אינו חבר בסט ונשאר `QUARANTINE-INCOMPLETE`.
+
+12.1.4 ביקורת עצמאית של זהות הסט הסתיימה ב־`PASS`; המניפסט עצמו
+נשאר `LOCAL-UNTRACKED`, ולכן Durable Adoption Decision=`ABSENT`.
+
+## 12.2 ביקורת ייעודית לקומיט המעורב
+
+12.2.1 ‏Review path=
+`docs/planning/commit-5ad1eba-dedicated-review-2026-08-31.md`;
+raw SHA-256=
+`a175926928df06b14398f900651d14b8f377bd97ea0d896ab6316b2c672fa343`;
+physical identity=`603 lines/2324 words/23805 bytes`.
+
+12.2.2 ‏Subject=`5ad1eba3a16354a75f28f9fae7ef28dfb10ec3c6`;
+Parent=`93c6b2dfe007f07c43c37389873a8a648a3ff69d`; ‏inventory=
+`899 paths=770 added+129 modified;3828704 additions;3220 deletions`.
+
+12.2.3 פסק הדין=
+`REJECT-AS-ATOMIC-ADOPTION-UNIT;PRESERVE-FOR-FORENSIC-AND-PATCH-EXTRACTION-ONLY`.
+ה־Commit וה־Push ההיסטוריים נשארים
+`UNAUTHORIZED-HISTORICAL-ACTION;ZERO-AUTHORITY-CREDIT`.
+
+12.2.4 חסמי P1/P2 כוללים Railway Cutover ללא Flag/Rollback, ‏Clerk
+Organization bypass ב־Tenant selection, ‏Railway entrypoint שהוחלף,
+Release Evidence גלובלי, ‏Readiness תלוי viewer, ‏Evidence v1 במקום v2,
+Redis rehearsal לא־portable ולא־ownership-safe, ‏BullMQ target/cleanup
+לא־מבודדים ו־false-green coverage, ‏README לא־עקיב ו־Generated PNGs
+ללא Custody.
+
+12.2.5 דפוסים חיוביים מוגבלים נשמרו רק כ־
+`ADOPT-CANDIDATE-AFTER-SLICING;NOT-ADOPTED`: ‏fail-closed OIDC/Clerk
+patterns, ‏README link integrity, ‏Dependency/lock stability,
+`.artifacts` permission/exclusive-write pattern ו־CI jobs שבהם
+Dependency install אכן קיים.
+
+12.2.6 הביקורת העצמאית הסופית למסמך הסתיימה ב־
+`PASS;P0=0;P1=0;P2=0`; זהו PASS לאיכות ושימור ה־Review, לא PASS של
+ה־Commit או של Product bytes.
+
+## 12.3 גבול סמכות לאחר הביקורת
+
+12.3.1 כל חילוץ עתידי חייב להיות Patch קטן לפי Feature עם requirement,
+root, ‏negative tests, ‏rollback, ‏Reviews ו־Definition Acceptance
+נפרדים.
+
+12.3.2 ‏Gate29 ואישור exact-root של Tal הם הכרחיים אך אינם Permit
+מספיק. כל Patch/Code/Toolchain/Workflow/Test/Git/PR/Push דורש לאחריהם
+Permit נפרד הקשור ל־source commit, ‏diff/root, יעד, effect ותפוגה.
+
+12.3.3 ‏Public Push Permit=`ABSENT`; ‏Gate29=`BLOCKED`; ‏development
+freeze=`ACTIVE`; המאגר נשאר `PUBLIC`.
+
+12.3.4 הצעד החוקי הבא הוא Blocker Manifest מכונה־קריא. הוא אינו
+ReviewInput, אינו Program SourceSet ואינו מעניק Closure, ‏Acceptance,
+Authority, אחוז או ETA.
+
+# 13. חבילת ביצוע 12 — Blocker Manifest ל־ReviewInput ול־Program SourceSet
+
+## 13.1 זהות ומעמד
+
+13.1.1 ‏Manifest path=
+`docs/planning/reviewinput-program-sourceset-blocker-manifest-v1-2026-08-31.json`;
+raw SHA-256=
+`b4bf49685f453fbe88dfa3d914418126ddcd6c3aa8b154ba58d5458e125047be`;
+physical identity=`946 lines/1986 words/42619 bytes`; storage=`LOCAL-UNTRACKED`.
+
+13.1.2 הסטטוס הקנוני הוא
+`BLOCKER-MANIFEST-NOT-SOURCESET-NOT-REVIEWINPUT-FREEZE`. המסמך הוא
+מפת חסמים בלבד: ‏ReviewInput=`0`, ‏Program SourceSet=`0`, ‏Program
+Acceptance=`0`, ‏Authority=`0`, ‏Closure=`0`, ‏Completion=`0`
+ו־Schedule=`0`.
+
+13.1.3 ה־Foundation join כולל `6` Nodes נדרשים ו־`0` Accepted:
+B0 v8, ‏Protocol v1.10 G1, ‏Source Universe v4 Generation A, ‏TRD-2 v6,
+Master Control v3 ו־Public/Cyber v6. היחס `0/6` מתאר מצב קבלה של
+Foundations בלבד ואסור לפרשו כאחוז התקדמות של התוכנית.
+
+## 13.2 חסמים ששומרו במפורש
+
+13.2.1 ‏B0 נושא `38` Findings פעילים מה־predecessor ללא
+closure transfer; ‏Protocol נושא `40` Findings עם independent mechanical
+closure של `1/40` ו־Acceptance credit=`0`.
+
+13.2.2 ‏TRD v5 נשאר `REJECT` עם `15` Findings פתוחים
+(`12 P0+2 P1+1 P2`), ‏accepted Requirements=`0/128` ו־review
+generations=`0/2`. ‏Passes 1–3 של v6 הם Local Candidates בלבד.
+
+13.2.3 ‏Pass 4 נשמר ב־Quarantine כ־
+`PART_230/512;44.921875% TRANSPORT-ONLY`; הוא אינו JSON שלם, נוצר
+בפעולה היסטורית לא־מורשית, מקבל zero Authority/Acceptance credit ודורש
+Rebuild נקי מ־Part 1 רק לאחר Authority חדש ומפורש.
+
+13.2.4 ‏Master Control v2 ו־Public/Cyber v5 נשארים Rejected;
+successors v3/v6 אינם קיימים. ארבעת ה־Permit tokens שנצפו הם
+`ABSENT`, ומנורמלים ל־`MISSING-BLOCKING`.
+
+## 13.3 מודל סמכות וביקורת
+
+13.3.1 ברירת המחדל היא `FORBIDDEN`; פעולה לא־מוכרת היא `BLOCKED`.
+מותרות רק כתיבת מסמכי Planning מקומיים, Review מקומי Read-only ומחקר
+Public unauthenticated. פעולות Credentials, ‏Sessions, ‏Secrets,
+private/customer data, ‏provider/Production, ‏Code, ‏Toolchain,
+Workflow, ‏Tests, ‏Git, ‏PR, ‏Deployment ו־Release נשארות אסורות ללא
+Authority חדש הקשור במדויק לפעולה.
+
+13.3.2 Review אינו Acceptance. ‏Acceptance דורש Receipt מורשה ונפרד
+הקשור ל־exact root, וכן current-pointer readback. כל Mutation עתידי
+דורש לאחר Gate29 גם Permit חד־פעמי עם class, named use, issuer,
+consumer, exact root, target, effect, trusted time, expiry, revocation,
+fencing, expected head ו־atomic CAS consumption key.
+
+13.3.3 החלטת הבעלות הקובעת נשמרת: `Owner=Tal;N01=CLOSED`.
+Multi-person RACI אינו נפתח מחדש. נתוני Schedule שעדיין חסרים הם קיבולת
+שבועית של טל, זמינות לאירועים, Task weights, dependencies, external
+waits ו־calendar cut.
+
+13.3.4 שלוש ביקורות עצמאיות לאובייקט המדויק הסתיימו ב־PASS:
+Authority=`P0/P1/P2/P3 0/0/0/0`; Structure=`0/0/0/0`;
+Fact/Omission=`0/0/0/0`. ביקורת רקורסיבית אימתה `53` הצהרות
+path/hash, ‏`38` נתיבים ייחודיים, `0` חסרים ו־`0` mismatches; כל ארבעת
+זוגות `subjectPath/subjectRoot` התאימו.
+
+## 13.4 גבול נוכחי והמשך חוקי
+
+13.4.1 אחוז התקדמות מדויק לכל התוכנית, שעות שנותרו, ETA לוח־שנה
+ו־accepted atomic-task denominator נשארים `unknown/unavailable`.
+
+13.4.2 ‏Gate29=`BLOCKED`; ‏development freeze=`ACTIVE`; ‏Public Push
+Permit=`MISSING-BLOCKING`; המאגר נשאר `PUBLIC`.
+
+13.4.3 הצעד החוקי הבא הוא לנסח ולהקפיא את דרישות ה־Eligibility של
+ReviewInput. הדרישות אינן ReviewInput, אינן Program SourceSet, אינן
+Acceptance ואינן Permit. יצירת ReviewInput בפועל נשארת חסומה כל עוד
+ה־Foundation join הוא `0/6` ואין roots Accepted ו־current.
+
+13.4.4 לא בוצעו במסגרת החבילה Product, ‏Test, ‏Workflow, ‏Git,
+GitHub, ‏provider, ‏deployment או Production mutation, ולא הורצה
+בדיקת Runtime או Build.

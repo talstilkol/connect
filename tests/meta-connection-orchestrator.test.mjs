@@ -99,10 +99,11 @@ function createFixture(options = {}) {
         });
         return pendingConnection;
       },
-      async confirmWebhookSubscription(currentSession) {
+      async confirmWebhookSubscription(currentSession, expectedVersion) {
         calls.push({
           operation: "confirm-connection",
           session: currentSession,
+          expectedVersion,
         });
         return connectedConnection;
       },
@@ -132,6 +133,7 @@ test("completes Meta signup in a fail-closed order", async () => {
     );
 
   assert.equal(result.status, "connected");
+  assert.equal(testFixture.calls.at(-1).expectedVersion, 1);
   assert.deepEqual(
     testFixture.calls.map((call) => call.operation),
     [
@@ -139,6 +141,7 @@ test("completes Meta signup in a fail-closed order", async () => {
       "verify",
       "capture-assets",
       "store-token",
+      "read-connection",
       "subscribe",
       "confirm-connection",
     ],
@@ -246,7 +249,7 @@ test("keeps the connection pending when WABA subscription fails", async () => {
   );
   assert.deepEqual(
     testFixture.calls.map((call) => call.operation),
-    ["exchange", "verify", "capture-assets", "store-token"],
+    ["exchange", "verify", "capture-assets", "store-token", "read-connection"],
   );
 });
 
@@ -264,11 +267,13 @@ test("retries WABA subscription with the stored credential", async () => {
     [
       "read-connection",
       "read-token",
+      "verify",
+      "read-connection",
       "subscribe",
       "confirm-connection",
     ],
   );
-  assert.equal(testFixture.calls[2].wabaId, "waba-id");
+  assert.equal(testFixture.calls[4].wabaId, "waba-id");
 });
 
 test("does not resubscribe an already connected WABA", async () => {
@@ -300,4 +305,75 @@ test("does not resubscribe an already connected WABA", async () => {
   assert.equal(result, connectedConnection);
   assert.deepEqual(calls, [{ operation: "read-connection" }]);
   assert.deepEqual(testFixture.calls, []);
+});
+
+test("retry checks permission before reading the connection or credential", async () => {
+  const fixture = createFixture();
+  await assert.rejects(fixture.orchestrator.retryWabaSubscription(session("viewer")), { code: "PERMISSION_DENIED" });
+  assert.deepEqual(fixture.calls, []);
+});
+
+test("retry cannot reactivate revoked or restricted connections or cross tenant boundaries", async () => {
+  for (const record of [
+    connection("revoked"), connection("restricted"), connection("error"),
+    connection("verification_required"), { ...connection("pending"), tenantId: 8 },
+    { ...connection("connected"), tenantId: 8 },
+  ]) {
+    const fixture = createFixture({ connectionService: { read: async () => record } });
+    await assert.rejects(fixture.orchestrator.retryWabaSubscription(session()), {
+      code: record.tenantId === 7 ? "INVALID_CONNECTION_STATE" : "ASSET_MISMATCH",
+    });
+    assert.deepEqual(fixture.calls, []);
+  }
+});
+
+test("retry verifies current asset ownership before subscription or activation", async () => {
+  for (const failVerification of [true, false]) {
+    const fixture = createFixture({ assetVerifier: {
+      async verifyAssets(input) {
+        if (failVerification) throw new Error("private-provider-detail");
+        return { ...input, phoneNumberId: "different-phone-number-id" };
+      },
+    } });
+    await assert.rejects(fixture.orchestrator.retryWabaSubscription(session()), {
+      code: "WABA_SUBSCRIPTION_FAILED",
+    });
+    assert.deepEqual(fixture.calls.map((call) => call.operation), ["read-connection", "read-token"]);
+  }
+});
+
+test("rejects a replaced or cross-tenant persisted snapshot before credential storage", async () => {
+  for (const replacement of [{ phoneNumberId: "replacement-phone-id" }, { tenantId: 8 }]) {
+    const fixture = createFixture({ connectionService: {
+      async captureVerifiedAssets() { return { ...connection(), ...replacement }; },
+    } });
+    await assert.rejects(fixture.orchestrator.completeEmbeddedSignup(session(), signupInput), { code: "ASSET_MISMATCH" });
+    assert.equal(fixture.calls.some((call) => call.operation === "store-token" || call.operation === "subscribe"), false);
+  }
+});
+
+test("signup and retry recheck the pending snapshot before subscribing to Meta", async () => {
+  for (const mode of ["signup", "retry"]) {
+    for (const changed of [null, connection("revoked"), { ...connection(), version: 3 }, { ...connection(), tenantId: 8 }, { ...connection(), phoneNumberId: "changed-phone" }, "unavailable"]) {
+      let reads = 0;
+      let confirmed = false;
+      const fixture = createFixture({ connectionService: {
+        async captureVerifiedAssets() { return connection(); },
+        async read() {
+          reads += 1;
+          if (mode === "retry" && reads === 1) return connection();
+          if (changed === "unavailable") throw new Error("private-storage-detail");
+          return changed;
+        },
+        async confirmWebhookSubscription() { confirmed = true; return connection("connected"); },
+      } });
+      const operation = mode === "signup"
+        ? fixture.orchestrator.completeEmbeddedSignup(session(), signupInput)
+        : fixture.orchestrator.retryWabaSubscription(session());
+      await assert.rejects(operation, { code: "WABA_SUBSCRIPTION_FAILED" });
+      assert.equal(confirmed, false);
+      assert.equal(fixture.calls.some((call) => call.operation === "subscribe"), false);
+      assert.equal(reads, mode === "signup" ? 1 : 2);
+    }
+  }
 });

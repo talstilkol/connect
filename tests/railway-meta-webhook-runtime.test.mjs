@@ -210,3 +210,22 @@ test("fails closed before dependencies for missing policy or extended options", 
     /runtime options are invalid/,
   );
 });
+
+test("Railway accepts signed history over 120KB and rejects beyond its 2MiB local bound", async () => {
+  const f = fixture();
+  const document = JSON.parse(new TextDecoder().decode(payload));
+  document.entry[0].changes = [{ field: "history", value: { history: [{ threads: Array.from({ length: 1200 }, (_, index) => ({ id: String(index), messages: [{ text: { body: "history transport fixture".repeat(6) } }] })) }] } }];
+  const raw = new TextEncoder().encode(JSON.stringify(document));
+  assert.ok(raw.byteLength > 120000 && raw.byteLength < 2 * 1024 * 1024);
+  const signature = await createMetaWebhookSignature(raw, appSecret);
+  const response = await f.runtime.handle(new Request("https://railway.example.com/webhooks/meta", { method: "POST", headers: { "content-type": "application/json", "x-hub-signature-256": signature }, body: raw }));
+  assert.equal(response.status, 200);
+  const queued = f.calls.find((call) => call[0] === "queue")[1];
+  assert.deepEqual(new Uint8Array(queued.rawPayload), raw);
+  const before = f.calls.length;
+  for (const headers of [{}, { "content-length": String(2 * 1024 * 1024 + 1) }]) {
+    const rejected = await f.runtime.handle(new Request("https://railway.example.com/webhooks/meta", { method: "POST", headers: { "content-type": "application/json", "x-hub-signature-256": signature, ...headers }, body: new Uint8Array(2 * 1024 * 1024 + 1) }));
+    assert.equal(rejected.status, 413);
+  }
+  assert.equal(f.calls.length, before);
+});

@@ -1,3 +1,4 @@
+import type { PersistedInboxMessage } from "../../shared/domain/inboxHistory.ts";
 import type {
   ConversationAssignmentState,
   ConversationReadState,
@@ -5,7 +6,6 @@ import type {
   PersistedInboxConversation,
 } from "../../db/conversationRepository.ts";
 import type {
-  PersistedMessage,
 } from "../../shared/domain/conversation.ts";
 import {
   defaultInboxFilters,
@@ -40,7 +40,7 @@ export class ConversationServiceError extends Error {
 
 export interface ConversationThread {
   conversation: PersistedInboxConversation;
-  messages: readonly PersistedMessage[];
+  messages: readonly PersistedInboxMessage[];
 }
 
 export interface MarkConversationReadRequest {

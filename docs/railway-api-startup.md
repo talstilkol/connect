@@ -92,7 +92,9 @@ Routes ה־Health, שולח `SIGTERM` ודורש Exit code `0` ללא stdout/std
 
 ## 6. מה עדיין נדרש לפריסה
 
-6.1 רועי/ראשה צריכים ליצור או לבחור Railway Project ו־API Service מאושרים.
+6.1 Tal הוא בעל האחריות לבחירת Railway Project ו־API Service. לפי הרשאתו
+להמשיך עצמאית, יש למפות את החשבונות ולבחור את שירותי Connect בפועל. קובצי
+ההפעלה וסדר הביצוע העדכניים נמצאים ב־[מדריך פריסת הפיילוט](pilot-deployment-runbook.md).
 
 6.2 יש להגדיר Start command מדויק ל־`npm run start:railway-api`
 ו־Healthcheck ל־`/health/ready` דרך הגדרות Railway החיות. אין להשתמש

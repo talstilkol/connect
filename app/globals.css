@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../features/workspace/media-diagnostics.css";
 @import "../features/workspace/decision-center.css";
 @import "../styles/tokens.css";
 @import "../styles/foundations.css";
@@ -1280,6 +1281,8 @@ label.file-button:focus-within {
 .connection-panel {
   width: min(470px, 92vw);
   height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -1287,6 +1290,10 @@ label.file-button:focus-within {
   background: white;
   box-shadow: 18px 0 60px rgba(9, 30, 27, 0.24);
   animation: panel-in 180ms ease-out;
+}
+
+.connection-panel > * {
+  flex-shrink: 0;
 }
 
 @keyframes panel-in {
@@ -1376,6 +1383,26 @@ label.file-button:focus-within {
   color: #98584f;
   font-size: 10px;
   line-height: 1.65;
+}
+
+.business-app-connection {
+  margin: 20px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.business-app-connection summary {
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.business-app-connection ol {
+  padding-inline-start: 20px;
 }
 
 .connection-steps {
@@ -3417,4 +3444,28 @@ label.file-button:focus-within {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.meta-signup-flow {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+.meta-signup-flow label { display: flex; align-items: center; gap: 0.5rem; }
+.meta-signup-flow input { flex: 0 0 auto; }
+.meta-signup-flow:disabled, .meta-signup-flow label:has(input:disabled) { opacity: 0.6; }
+.media-download-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block: 8px;
+}
+
+.media-download-control [role="status"] {
+  flex-basis: 100%;
+  font-size: 12px;
 }

@@ -29,9 +29,11 @@ export interface MetaConnectionService {
   captureVerifiedAssets(
     session: TenantSession,
     snapshot: VerifiedMetaAssetSnapshot,
+    expectedConnectionVersion?: number | null,
   ): Promise<MetaConnectionRecord>;
   confirmWebhookSubscription(
     session: TenantSession,
+    expectedVersion: number,
   ): Promise<MetaConnectionRecord>;
   recordConnectionProblem(
     session: TenantSession,
@@ -49,7 +51,7 @@ export function createMetaConnectionService(
       return repository.findConnectionByTenantId(session.tenantId);
     },
 
-    async captureVerifiedAssets(session, snapshot) {
+    async captureVerifiedAssets(session, snapshot, expectedConnectionVersion) {
       requireTenantPermission(session, "workspace.manage");
 
       const input: SaveMetaAssetSnapshotInput = {
@@ -57,15 +59,16 @@ export function createMetaConnectionService(
         businessPortfolioId: snapshot.businessPortfolioId,
         wabaId: snapshot.wabaId,
         phoneNumberId: snapshot.phoneNumberId,
+        ...(expectedConnectionVersion === undefined ? {} : { expectedConnectionVersion }),
       };
 
       return repository.saveAssetSnapshot(input);
     },
 
-    async confirmWebhookSubscription(session) {
+    async confirmWebhookSubscription(session, expectedVersion) {
       requireTenantPermission(session, "workspace.manage");
 
-      return repository.markConnectionConnected(session.tenantId);
+      return repository.markConnectionConnected(session.tenantId, expectedVersion);
     },
 
     async recordConnectionProblem(session, status) {

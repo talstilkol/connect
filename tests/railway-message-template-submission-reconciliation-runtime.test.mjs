@@ -85,6 +85,7 @@ async function encryptedCredentialRepository() {
     async store(value) {
       envelope = {
         ...value,
+        authorizationVersion: value.expectedConnectionVersion,
         createdAt: "2026-08-21T08:00:00.000Z",
         updatedAt: "2026-08-21T08:00:00.000Z",
       };
@@ -100,8 +101,7 @@ async function encryptedCredentialRepository() {
 
   await vault.storeAccessToken(
     tenantId,
-    "railway-reconciliation-access-token",
-  );
+    "railway-reconciliation-access-token", 1);
   return repository;
 }
 

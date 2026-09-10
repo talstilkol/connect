@@ -65,6 +65,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "contacts",
     "conversations",
     "createBotReplyStagingReleaseEvidenceRepository",
+    "createMediaFileReadRuntime",
     "createMutationRateLimitBinding",
     "createRailwayCampaignMutationExecutor",
     "createRailwayMessageTemplateSubmissionMutationExecutor",
@@ -79,8 +80,21 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "memberships",
     "messageTemplateSubmissionOutbox",
     "messageTemplates",
+    "metaAccountLifecycle",
     "metaConnections",
+    "metaContactSync",
     "metaCredentialEnvelopes",
+    "metaDataSyncLifecycle",
+    "metaDataSyncRequests",
+    "metaHistoryInbox",
+    "metaHistoryMedia",
+    "metaHistorySync",
+    "metaMediaCleanup",
+    "metaMediaInspectionRetries",
+    "metaMediaTasks",
+    "metaMessageEchoes",
+    "metaSignupAttempts",
+    "metaSignupLaunches",
     "metaWebhooks",
     "productionDecisions",
     "provisioning",
@@ -175,6 +189,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "function",
   );
   assert.equal(typeof foundation.metaConnections.read, "function");
+  assert.equal(typeof foundation.metaMediaTasks.read, "function");
   assert.equal(
     typeof foundation.metaCredentialEnvelopes.findByTenantId,
     "function",

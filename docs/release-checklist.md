@@ -1,5 +1,9 @@
 # Release Checklist
 
+סדר העבודה הפעיל והחלטות Scope מפורטים ב־
+[Master Plan לשחרור — 09.09.2026](planning/launch-master-plan-2026-09-09.md).
+אין להשתמש בראיות Cloudflare כתחליף לתשתית Railway/Vercel.
+
 סדר הביצוע, נקודות העצירה ותרשים Rollback/Forward Fix נמצאים ב־
 `docs/release-operator-runbook.md`.
 
@@ -7,7 +11,8 @@
 
 1.1 Repository Authority נבחר ומתועד.
 
-1.2 ה־Repository המאושר מדווח `private=true` ו־`visibility=private`.
+1.2 ה־Repository המאושר הוא `talstilkol/connect`, ציבורי לפי ADR-0007.
+Visibility ובקרות הגישה נבדקות מול הספק; דרישת Private הישנה הוחלפה בהחלטה זו.
 
 1.3 ה־Commit נמצא ב־Remote המאושר.
 
@@ -33,7 +38,10 @@
 2.2.3 `DEPENDENCY_AUDIT_EVIDENCE_JSON` זהה מבחינה מבנית לקובץ
 החתום. אין לקבל JSON מקומי אחר גם אם ה־Digest הפנימי שלו תקין.
 
-2.3 Production Readiness מחזיר Ready עבור כל הבדיקות.
+2.3 Production Readiness מחזיר Ready עבור כל הבדיקות החלות.
+`npm run verify:production-readiness:v2` בודק בנפרד את שש בדיקות
+התשתית של Railway/Vercel/PostgreSQL/Redis/Object storage. הוא נוסף
+ל־Release Gate ואינו מחליף את בדיקות המוצר, Identity, Meta או Restore.
 
 2.4 Secret Scanning ו־Push Protection של ספק ה־Repository עברו.
 
@@ -41,7 +49,9 @@
 
 2.6 Source Control Governance Evidence תקף, מקושר ל־Commit הנפרס
 ומוכיח שכל תשעת ה־PR Status Checks ותשעת בקרי ה־Repository פעילים,
-כולל Visibility מסוג Private.
+כולל Visibility התואם ל־ADR-0007 הציבורי. נדרשת ראיית v4 טרייה למאגר
+talstilkol/connect ולענף main; מחולל ו־consumer תוקנו ונבדקו מקומית.
+ראיית v3 פרטית אינה תקפה ואין להמיר אותה ל־v4 בלי קריאה חוזרת מהספק.
 
 2.7 CI Execution Evidence תקף ומוכיח שכל תשעת ה־PR Checks הסתיימו
 בהצלחה עבור אותו Commit ואותו Release ID.
@@ -270,3 +280,9 @@ Variables, ‏Redis או Memory. ה־Migration וה־Repository עברו בדי�
 מקומית מול Executor מדומה אינה מספיקה כראיית שחרור.
 
 6.8 רק לאחר שכל הסעיפים הוכחו ניתן לאשר Production.
+
+
+## Meta credential authorization binding — 2026-09-09
+
+- Before activating existing or migrated Meta connections, repeat authorized Embedded Signup to replace legacy tenant-only AAD credentials; legacy ciphertext deliberately cannot decrypt with the new authorization-bound AAD. Do not backfill an inferred authorization version.
+- Verify pending → connected decryption, asset replacement rejection and revocation denial on the deployed PostgreSQL runtime. A successful ciphertext data copy is not proof that a credential is usable. See the active launch plan, section 14.

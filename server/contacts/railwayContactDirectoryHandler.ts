@@ -1,4 +1,5 @@
 import type { ContactRecord } from "../../shared/domain/contactRecord.ts";
+import { isWhatsAppDisplayName } from "../../shared/domain/contactDisplayName.ts";
 import { CONTACT_PAGE_SIZE } from "../../shared/domain/contactRecord.ts";
 import {
   emptyContactOrganizationSnapshot,
@@ -158,7 +159,9 @@ function isCanonicalTimestampOrNull(value: unknown): value is string | null {
 export function parseRailwayContactRecord(
   value: unknown,
 ): Readonly<ContactRecord> | null {
-  if (!isExactRecord(value, contactKeys)) {
+  const hasWhatsAppName = typeof value === "object" && value !== null && Object.hasOwn(value, "whatsappDisplayName");
+  if (!isExactRecord(value, hasWhatsAppName ? [...contactKeys, "whatsappDisplayName"] : contactKeys) ||
+    (hasWhatsAppName && !isWhatsAppDisplayName(value.whatsappDisplayName))) {
     return null;
   }
 
@@ -217,6 +220,7 @@ export function parseRailwayContactRecord(
     email,
     company,
     mailingStatus: value.mailingStatus,
+    ...(hasWhatsAppName ? { whatsappDisplayName: value.whatsappDisplayName as string } : {}),
     consentStatus: value.consentStatus,
     consentSource,
     consentRecordedAt: value.consentRecordedAt,

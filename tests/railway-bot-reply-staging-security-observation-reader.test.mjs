@@ -126,8 +126,11 @@ function credentialRepository() {
   let envelope = null;
   return {
     async store(input) {
+      const { expectedConnectionVersion, ...storedFields } = input;
+      assert.equal(expectedConnectionVersion, 2);
       envelope = {
-        ...structuredClone(input),
+        ...structuredClone(storedFields),
+        authorizationVersion: expectedConnectionVersion,
         createdAt: "2026-08-24T09:00:00.000Z",
         updatedAt: "2026-08-24T09:00:00.000Z",
       };
@@ -167,8 +170,7 @@ async function fixture({
   );
   await vault.storeAccessToken(
     7,
-    toSensitiveMetaAccessToken(accessTokenValue),
-  );
+    toSensitiveMetaAccessToken(accessTokenValue), 2);
   const reader = createRailwayBotReplyStagingSecurityObservationReader({
     environment,
     credentials,
@@ -309,4 +311,10 @@ test("rejects a context outside the lease and invalid encryption configuration",
       error instanceof RailwayBotReplyStagingSecurityObservationError &&
       error.code === "BOT_REPLY_STAGING_SECURITY_CONFIGURATION_INVALID",
   );
+});
+
+
+test("rejects a credential observation for a different connection generation", async () => {
+  const { reader } = await fixture();
+  await assert.rejects(reader.readCredentialBoundary(context({ run: { expectedConnectionVersion: 4 } })), { code: "BOT_REPLY_STAGING_SECURITY_CREDENTIAL_INVALID" });
 });

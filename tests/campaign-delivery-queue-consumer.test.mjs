@@ -668,6 +668,26 @@ test("records explicit accepted and rejected provider outcomes", async () => {
   );
 });
 
+test("cancels a connection-blocked campaign reservation without provider failure or retry", async () => {
+  for (const settlementError of [undefined, new Error("private-settlement-detail")]) {
+    const testDelivery = delivery();
+    const testFixture = fixture({
+      processorResults: [{ outcome: "rejected", errorCode: "META_CONNECTION_UNAVAILABLE" }],
+      settlementError,
+    });
+    assert.deepEqual(await testFixture.consumer.handle({
+      queue: "connect-campaign-deliveries", messages: [testDelivery.message],
+    }), emptyResult({ rejected: 1 }));
+    assert.deepEqual(testDelivery.actions, [{ action: "ack" }]);
+    assert.deepEqual(testFixture.calls.filter((call) => call.operation === "settle"), [{
+      operation: "settle", reservationKey: firstReservationKey,
+      outcome: "cancelled-before-submit", timestamp: now,
+    }]);
+    assert.equal(testFixture.calls.some((call) => ["provider-cooldown", "mark-deferred", "accepted"].includes(call.operation)), false);
+    assert.equal(testFixture.calls.filter((call) => call.operation === "process").length, 1);
+  }
+});
+
 test("persists a scoped provider cooldown before returning an explicitly rejected delivery to the queue", async () => {
   const testDelivery = delivery();
   const testFixture = fixture({

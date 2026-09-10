@@ -18,6 +18,9 @@ export type MetaGraphAssetVerificationErrorCode =
   | "BUSINESS_PORTFOLIO_MISMATCH"
   | "INVALID_PHONE_RESPONSE"
   | "PHONE_NUMBER_NOT_FOUND"
+  | "AMBIGUOUS_COEXISTENCE_PHONE"
+  | "COEXISTENCE_NOT_ACTIVE"
+  | "COEXISTENCE_SYNCHRONIZATION_REQUIRED"
   | "PAGINATION_ERROR";
 
 export class MetaGraphAssetVerificationError extends Error {
@@ -288,12 +291,137 @@ export function createMetaGraphAssetVerifier(
         normalizedInput.accessToken,
       );
 
+      // The browser's flow label is not an authority. Check the actual number
+      // before any caller can persist or activate a standard Cloud API signup.
+      const phone = await transport.requestJson<unknown>({
+        method: "GET",
+        pathSegments: [normalizedInput.phoneNumberId],
+        accessToken: normalizedInput.accessToken,
+        query: { fields: "id,is_on_biz_app" },
+      });
+      if (
+        !isRecord(phone) ||
+        phone.id !== normalizedInput.phoneNumberId ||
+        typeof phone.is_on_biz_app !== "boolean"
+      ) {
+        throw new MetaGraphAssetVerificationError(
+          "INVALID_PHONE_RESPONSE",
+          "Meta did not confirm the phone's Business app status",
+        );
+      }
+      if (phone.is_on_biz_app) {
+        throw new MetaGraphAssetVerificationError(
+          "COEXISTENCE_SYNCHRONIZATION_REQUIRED",
+          "WhatsApp Business app synchronization is not ready",
+        );
+      }
+
       return {
         businessPortfolioId:
           normalizedInput.businessPortfolioId,
         wabaId: normalizedInput.wabaId,
         phoneNumberId: normalizedInput.phoneNumberId,
       };
+    },
+  };
+}
+
+export interface MetaCoexistenceAssetResolver {
+  resolveAssets(input: {
+    accessToken: SensitiveMetaAccessToken;
+    wabaId: string;
+  }): Promise<VerifiedMetaAssetSnapshot>;
+}
+
+/** Resolve the WABA-only completion documented by Meta. Read-only: this never
+ * registers a phone, subscribes an app, stores credentials, or starts a sync. */
+export function createMetaGraphCoexistenceAssetResolver(
+  transport: MetaGraphTransport,
+): MetaCoexistenceAssetResolver {
+  return {
+    async resolveAssets(input) {
+      const wabaId = requireMetaAssetId(
+        input.wabaId,
+        "INVALID_ASSET_ID",
+        "Meta WABA ID is invalid",
+      );
+      const businessPortfolioId = requireWabaOwner(
+        await transport.requestJson<unknown>({
+          method: "GET",
+          pathSegments: [wabaId],
+          accessToken: input.accessToken,
+          query: { fields: "id,owner_business_info{id}" },
+        }),
+        wabaId,
+      );
+
+      // A WABA-only response must resolve unambiguously. Do not pick the first
+      // phone or ignore later pages, since that could connect a different line.
+      const phoneIds = new Set<string>();
+      const cursors = new Set<string>();
+      let after: string | null = null;
+
+      for (let pageIndex = 0; pageIndex < MAX_PHONE_NUMBER_PAGES; pageIndex += 1) {
+        const page = readPhoneNumberPage(
+          await transport.requestJson<unknown>({
+            method: "GET",
+            pathSegments: [wabaId, "phone_numbers"],
+            accessToken: input.accessToken,
+            query: { fields: "id", ...(after === null ? {} : { after }) },
+          }),
+        );
+        for (const id of page.phoneNumberIds) {
+          phoneIds.add(id);
+        }
+        if (phoneIds.size > 1) {
+          throw new MetaGraphAssetVerificationError(
+            "AMBIGUOUS_COEXISTENCE_PHONE",
+            "Meta returned more than one phone for the shared WABA",
+          );
+        }
+        if (page.nextCursor === null) {
+          break;
+        }
+        if (
+          cursors.has(page.nextCursor) ||
+          pageIndex === MAX_PHONE_NUMBER_PAGES - 1
+        ) {
+          throw new MetaGraphAssetVerificationError(
+            "PAGINATION_ERROR",
+            "Meta phone number pagination could not be completed",
+          );
+        }
+        cursors.add(page.nextCursor);
+        after = page.nextCursor;
+      }
+
+      const [phoneNumberId] = phoneIds;
+      if (phoneNumberId === undefined) {
+        throw new MetaGraphAssetVerificationError(
+          "PHONE_NUMBER_NOT_FOUND",
+          "Meta returned no phone for the shared WABA",
+        );
+      }
+
+      const phone = await transport.requestJson<unknown>({
+        method: "GET",
+        pathSegments: [phoneNumberId],
+        accessToken: input.accessToken,
+        query: { fields: "id,is_on_biz_app,platform_type" },
+      });
+      if (
+        !isRecord(phone) ||
+        phone.id !== phoneNumberId ||
+        phone.is_on_biz_app !== true ||
+        phone.platform_type !== "CLOUD_API"
+      ) {
+        throw new MetaGraphAssetVerificationError(
+          "COEXISTENCE_NOT_ACTIVE",
+          "Meta did not confirm Business app and Cloud API coexistence",
+        );
+      }
+
+      return { businessPortfolioId, wabaId, phoneNumberId };
     },
   };
 }

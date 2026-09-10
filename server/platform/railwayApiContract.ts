@@ -162,6 +162,7 @@ function normalizedSecurityKey(key: string): string {
 interface JsonNormalizationState {
   nodes: number;
   readonly seen: WeakSet<object>;
+  readonly signupAssetClaims?: boolean;
 }
 
 function normalizeJsonValue(
@@ -263,12 +264,19 @@ function normalizeJsonValue(
     const normalized: Record<string, RailwayApiJsonValue> = {};
 
     for (const [key, descriptor] of entries) {
+      // Only Embedded Signup may submit untrusted Meta asset claims. They
+      // never select a tenant and the signup orchestrator verifies ownership
+      // with Meta before persisting them. Other requests/responses still reject
+      // these fields, including nested or differently spelled variants.
+      const signupAssetClaim = state.signupAssetClaims === true && depth === 0 &&
+        (key === "wabaId" || key === "phoneNumberId") &&
+        "value" in descriptor && typeof descriptor.value === "string";
       if (
         key.length === 0 ||
         key.length > MAXIMUM_KEY_LENGTH ||
         /[\u0000-\u001f\u007f]/.test(key) ||
         dangerousObjectKeys.has(key) ||
-        forbiddenPayloadKeys.has(normalizedSecurityKey(key)) ||
+        (forbiddenPayloadKeys.has(normalizedSecurityKey(key)) && !signupAssetClaim) ||
         !("value" in descriptor)
       ) {
         invalidContract();
@@ -332,9 +340,11 @@ export function parseRailwayApiRequestEnvelope(
     invalidContract();
   }
 
-  const normalizedPayload = normalizeRailwayApiJson(
-    value.payload,
-  );
+  const normalizedPayload = normalizeJsonValue(value.payload, 0, {
+    nodes: 0,
+    seen: new WeakSet<object>(),
+    signupAssetClaims: value.operation === "meta.embedded-signup.complete" && requestKind === "mutation",
+  });
 
   if (!isRecord(normalizedPayload)) {
     invalidContract();

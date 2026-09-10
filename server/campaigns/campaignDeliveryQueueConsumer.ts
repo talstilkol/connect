@@ -492,7 +492,10 @@ export function createCampaignDeliveryQueueConsumer(
           await settleSafely(
             admission,
             reservationKey,
-            "provider-failed",
+            // This bounded processor code is emitted only before Sender.
+            processorResult.errorCode === "META_CONNECTION_UNAVAILABLE"
+              ? "cancelled-before-submit"
+              : "provider-failed",
             now,
           );
           delivery.ack();

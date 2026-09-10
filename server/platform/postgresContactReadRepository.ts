@@ -14,9 +14,12 @@ import {
 import type {
   PostgresQueryExecutor,
 } from "./postgresTransaction.ts";
+import { postgresWhatsAppContactNameSql } from "./postgresMetaContactSyncRepository.ts";
+import { isWhatsAppDisplayName } from "../../shared/domain/contactDisplayName.ts";
 
 const maximumPageSize = 100;
 const contactRowKeys = Object.freeze([
+  "whatsappDisplayName",
   "id",
   "tenantId",
   "phoneNumber",
@@ -42,6 +45,7 @@ export const postgresContactReadSql = Object.freeze({
       tenant_id AS "tenantId",
       phone_e164 AS "phoneNumber",
       first_name AS "firstName",
+      (${postgresWhatsAppContactNameSql}) AS "whatsappDisplayName",
       last_name AS "lastName",
       email,
       company,
@@ -65,6 +69,7 @@ export const postgresContactReadSql = Object.freeze({
       tenant_id AS "tenantId",
       phone_e164 AS "phoneNumber",
       first_name AS "firstName",
+      (${postgresWhatsAppContactNameSql}) AS "whatsappDisplayName",
       last_name AS "lastName",
       email,
       company,
@@ -88,6 +93,7 @@ export const postgresContactReadSql = Object.freeze({
       tenant_id AS "tenantId",
       phone_e164 AS "phoneNumber",
       first_name AS "firstName",
+      (${postgresWhatsAppContactNameSql}) AS "whatsappDisplayName",
       last_name AS "lastName",
       email,
       company,
@@ -148,6 +154,9 @@ function parseNullableTimestamp(value: unknown): string | null {
 
 function parseContact(value: unknown): Readonly<PersistedContact> {
   const row = requireExactPostgresRow(value, contactRowKeys);
+  if (row.whatsappDisplayName !== null && !isWhatsAppDisplayName(row.whatsappDisplayName)) {
+    throw new Error("PostgreSQL returned an invalid WhatsApp contact name");
+  }
   const profile = {
     phoneNumber: row.phoneNumber,
     firstName: row.firstName,
@@ -223,6 +232,7 @@ function parseContact(value: unknown): Readonly<PersistedContact> {
     id: parsePostgresPositiveInteger(row.id),
     tenantId: parsePostgresPositiveInteger(row.tenantId),
     ...validation.value,
+    ...(row.whatsappDisplayName === null ? {} : { whatsappDisplayName: row.whatsappDisplayName }),
     mailingStatus: row.mailingStatus,
     consentStatus: row.consentStatus,
     consentSource,

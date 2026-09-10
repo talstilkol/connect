@@ -13,6 +13,9 @@ import {
 import {
   currentProductionReadinessV2SourceVersion,
 } from "../server/operations/currentProductionReadinessV2Source.ts";
+import {
+  productionReadinessV2CheckIds,
+} from "../shared/domain/productionReadinessV2.ts";
 
 const hostingUrl = new URL(
   "../.openai/hosting.json",
@@ -209,7 +212,12 @@ export function createProductionReadinessV2SourcePayload(
     ) ||
     !isRecord(state.report) ||
     !Array.isArray(state.report.checks) ||
+    state.report.checks.length !== productionReadinessV2CheckIds.length ||
     !isRecord(state.report.counts) ||
+    !["development", "preview", "staging", "production"].includes(
+      state.report.environment,
+    ) ||
+    typeof state.report.readyForEnvironment !== "boolean" ||
     typeof state.report.readyForProduction !== "boolean"
   ) {
     fail();
@@ -220,6 +228,7 @@ export function createProductionReadinessV2SourcePayload(
       !isRecord(check) ||
       typeof check.id !== "string" ||
       !safeIdPattern.test(check.id) ||
+      !productionReadinessV2CheckIds.includes(check.id) ||
       typeof check.status !== "string" ||
       !allowedV2Statuses.has(check.status) ||
       typeof check.code !== "string" ||
@@ -249,8 +258,11 @@ export function createProductionReadinessV2SourcePayload(
     Object.entries(counts).some(
       ([key, count]) => state.report.counts[key] !== count,
     ) ||
+    state.report.readyForEnvironment !==
+      (counts.ready === checks.length) ||
     state.report.readyForProduction !==
-      (counts.ready === checks.length)
+      (state.report.environment === "production" &&
+        state.report.readyForEnvironment)
   ) {
     fail();
   }

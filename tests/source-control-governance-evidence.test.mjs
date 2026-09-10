@@ -23,22 +23,22 @@ function fingerprint(value) {
 
 function createEvidence() {
   const evidence = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     verifiedAt:
       "2026-07-27T11:00:00.000Z",
     expiresAt:
       "2026-07-28T11:00:00.000Z",
     repositoryFingerprint:
-      fingerprint("repository"),
+      fingerprint("repository:talstilkol/connect"),
     defaultBranchFingerprint:
-      fingerprint("default-branch"),
+      fingerprint("default-branch:talstilkol/connect:main"),
     releaseCommitSha:
       deployedCommitSha,
     requiredReviewCount: 1,
     requiredStatusChecks:
       requiredPullRequestStatusChecks,
     controls: {
-      repositoryPrivate: true,
+      repositoryPublic: true,
       branchProtection: true,
       codeOwnerReview: true,
       dismissStaleApprovals: true,
@@ -64,16 +64,16 @@ function createSnapshot() {
     verifiedAt:
       "2026-07-27T11:00:00.000Z",
     repositoryIdentity:
-      "repository-owner/repository-name",
+      "talstilkol/connect",
     defaultBranchIdentity:
-      "repository-owner/repository-name:main",
+      "talstilkol/connect:main",
     releaseCommitSha:
       deployedCommitSha,
     requiredReviewCount: 1,
     requiredStatusChecks:
       requiredPullRequestStatusChecks,
     controls: {
-      repositoryPrivate: true,
+      repositoryPublic: true,
       branchProtection: true,
       codeOwnerReview: true,
       dismissStaleApprovals: true,
@@ -145,7 +145,7 @@ test("refuses to build governance evidence from incomplete controls or checks", 
       ...snapshot,
       controls: {
         ...snapshot.controls,
-        repositoryPrivate: false,
+        repositoryPublic: false,
       },
     },
     {
@@ -313,7 +313,7 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
     {
       ...evidence,
       evidenceDigest:
-        "source_control_governance_evidence_v3_" +
+        "source_control_governance_evidence_v4_" +
         "0".repeat(64),
     },
     {
@@ -336,14 +336,14 @@ test("rejects expired, future, extended, and digest-mismatched evidence", () => 
   }
 });
 
-test("rejects legacy v2 evidence that cannot attest private visibility", () => {
+test("rejects legacy v2 evidence that cannot attest public visibility", () => {
   const evidence = createEvidence();
   const legacyEvidence = {
     ...evidence,
     schemaVersion: 2,
     controls: Object.fromEntries(
       Object.entries(evidence.controls).filter(
-        ([name]) => name !== "repositoryPrivate",
+        ([name]) => name !== "repositoryPublic",
       ),
     ),
     evidenceDigest:
@@ -363,6 +363,31 @@ test("rejects legacy v2 evidence that cannot attest private visibility", () => {
     ).status,
     "invalid",
   );
+});
+
+test("rejects v3 private evidence and self-consistent evidence for a different repository or branch", () => {
+  const current = createEvidence();
+  const oldControls = Object.fromEntries(
+    Object.entries(current.controls).filter(([key]) => key !== "repositoryPublic"),
+  );
+  const candidates = [
+    { ...current, schemaVersion: 3, controls: { repositoryPrivate: true, ...oldControls } },
+    { ...current, repositoryFingerprint: fingerprint("repository:another-owner/connect") },
+    { ...current, defaultBranchFingerprint: fingerprint("default-branch:talstilkol/connect:other") },
+  ];
+  for (const candidate of candidates) {
+    const evidence = { ...candidate, evidenceDigest: deriveSourceControlGovernanceEvidenceDigest(candidate) };
+    assert.equal(inspectSourceControlGovernanceEvidence({
+      APP_DEPLOYED_COMMIT_SHA: deployedCommitSha,
+      SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON: JSON.stringify(evidence),
+    }, now).status, "invalid");
+  }
+  for (const snapshot of [
+    { ...createSnapshot(), repositoryIdentity: "another-owner/connect" },
+    { ...createSnapshot(), defaultBranchIdentity: "talstilkol/connect:other" },
+  ]) {
+    assert.throws(() => buildSourceControlGovernanceEvidence(snapshot), /SOURCE_CONTROL_GOVERNANCE_SNAPSHOT_INVALID/);
+  }
 });
 
 test("fails closed without governance evidence or with an invalid clock", () => {

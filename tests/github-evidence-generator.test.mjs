@@ -17,7 +17,7 @@ import {
 } from "../server/operations/sourceControlGovernanceEvidence.ts";
 
 const repository =
-  "repository-owner/repository-name";
+  "talstilkol/connect";
 const commitSha = "1".repeat(40);
 const releaseId =
   `connect_release_v1_${"2".repeat(
@@ -37,8 +37,8 @@ function releaseManifest() {
 function repositoryResponse() {
   return {
     full_name: repository,
-    private: true,
-    visibility: "private",
+    private: false,
+    visibility: "public",
     default_branch: "main",
     security_and_analysis: {
       secret_scanning: {
@@ -118,8 +118,8 @@ test("accepts only one bounded GitHub repository coordinate and read-only API ca
   assert.deepEqual(
     parseGithubRepository(repository),
     {
-      owner: "repository-owner",
-      repository: "repository-name",
+      owner: "talstilkol",
+      repository: "connect",
       nameWithOwner: repository,
     },
   );
@@ -138,7 +138,7 @@ test("accepts only one bounded GitHub repository coordinate and read-only API ca
 
   let invocation;
   const response = readGithubApiJson(
-    "/repos/repository-owner/repository-name",
+    "/repos/talstilkol/connect",
     (command, argumentsList, options) => {
       invocation = {
         command,
@@ -231,13 +231,13 @@ test("builds bounded GitHub governance and CI evidence from verified responses",
 });
 
 test("fails closed for incomplete governance and ambiguous CI checks", () => {
-  const publicRepository =
+  const privateRepository =
     repositoryResponse();
-  publicRepository.private = false;
-  publicRepository.visibility = "public";
+  privateRepository.private = true;
+  privateRepository.visibility = "private";
   const inconsistentVisibility =
     repositoryResponse();
-  inconsistentVisibility.visibility = "public";
+  inconsistentVisibility.visibility = "private";
   const disabledSecurity =
     repositoryResponse();
   disabledSecurity.security_and_analysis
@@ -257,7 +257,7 @@ test("fails closed for incomplete governance and ambiguous CI checks", () => {
   for (const value of [
     {
       repositoryResponse:
-        publicRepository,
+        privateRepository,
       protectionResponse:
         protectionResponse(),
       codeOwnersResponse:
@@ -327,19 +327,19 @@ test("fails closed for incomplete governance and ambiguous CI checks", () => {
 test("reads the exact four release-bound endpoints before building current evidence", async () => {
   const responses = new Map([
     [
-      "/repos/repository-owner/repository-name",
+      "/repos/talstilkol/connect",
       repositoryResponse(),
     ],
     [
-      "/repos/repository-owner/repository-name/branches/main/protection",
+      "/repos/talstilkol/connect/branches/main/protection",
       protectionResponse(),
     ],
     [
-      `/repos/repository-owner/repository-name/contents/.github/CODEOWNERS?ref=${commitSha}`,
+      `/repos/talstilkol/connect/contents/.github/CODEOWNERS?ref=${commitSha}`,
       codeOwnersResponse(),
     ],
     [
-      `/repos/repository-owner/repository-name/commits/${commitSha}/check-runs?filter=latest&per_page=100`,
+      `/repos/talstilkol/connect/commits/${commitSha}/check-runs?filter=latest&per_page=100`,
       checkRunsResponse(),
     ],
   ]);

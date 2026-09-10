@@ -1,3 +1,4 @@
+import { postgresMetaTenantBarrierCte } from "./postgresMetaTenantBarrier.ts";
 import type {
   ClaimedMetaWebhookReceipt,
   ClaimMetaWebhookReceiptInput,
@@ -83,6 +84,8 @@ const operationalFailureStatuses = Object.freeze([
 ] as const satisfies readonly PersistedMetaConnectionStatus[]);
 
 export const postgresMetaSql = Object.freeze({
+  lockSnapshotBaselineBarrier: `WITH ${postgresMetaTenantBarrierCte} SELECT 1 AS locked FROM tenant_barrier`,
+  lockSnapshotBaseline: `SELECT version FROM meta_connections WHERE tenant_id=$1 FOR UPDATE`,
   findConnectionByTenantId: `
     SELECT ${connectionColumns}
     FROM meta_connections
@@ -96,6 +99,7 @@ export const postgresMetaSql = Object.freeze({
     LIMIT 1
   `,
   upsertAssetSnapshot: `
+    WITH ${postgresMetaTenantBarrierCte}
     INSERT INTO meta_connections (
       tenant_id,
       business_portfolio_id,
@@ -103,7 +107,7 @@ export const postgresMetaSql = Object.freeze({
       phone_number_id,
       status
     )
-    VALUES ($1, $2, $3, $4, 'pending')
+    SELECT $1, $2, $3, $4, 'pending' FROM tenant_barrier WHERE true
     ON CONFLICT (tenant_id) DO UPDATE SET
       business_portfolio_id = EXCLUDED.business_portfolio_id,
       waba_id = EXCLUDED.waba_id,
@@ -113,17 +117,10 @@ export const postgresMetaSql = Object.freeze({
       connected_at = NULL,
       version = meta_connections.version + 1,
       updated_at = date_trunc('milliseconds', CURRENT_TIMESTAMP)
-    WHERE meta_connections.business_portfolio_id
-        IS DISTINCT FROM EXCLUDED.business_portfolio_id
-      OR meta_connections.waba_id IS DISTINCT FROM EXCLUDED.waba_id
-      OR meta_connections.phone_number_id
-        IS DISTINCT FROM EXCLUDED.phone_number_id
-      OR meta_connections.status IS DISTINCT FROM 'pending'
-      OR meta_connections.webhook_subscribed_at IS NOT NULL
-      OR meta_connections.connected_at IS NOT NULL
-    RETURNING tenant_id AS "tenantId"
+    RETURNING ${connectionColumns}
   `,
   markConnectionConnected: `
+    WITH ${postgresMetaTenantBarrierCte}
     UPDATE meta_connections
     SET
       status = 'connected',
@@ -135,20 +132,29 @@ export const postgresMetaSql = Object.freeze({
       ),
       version = version + 1,
       updated_at = date_trunc('milliseconds', CURRENT_TIMESTAMP)
+    FROM tenant_barrier
     WHERE tenant_id = $1
-      AND (
-        status IS DISTINCT FROM 'connected'
-        OR webhook_subscribed_at IS NULL
-        OR connected_at IS NULL
-      )
+      AND status = 'pending'
+      AND version = $2
+    RETURNING tenant_id AS "tenantId"
+  `,
+  revokeConnection: `
+    WITH ${postgresMetaTenantBarrierCte}
+    UPDATE meta_connections
+    SET status = 'revoked', version = version + 1,
+      updated_at = date_trunc('milliseconds', CURRENT_TIMESTAMP)
+    FROM tenant_barrier
+    WHERE tenant_id = $1 AND waba_id = $2 AND version = $3 AND status <> 'revoked'
     RETURNING tenant_id AS "tenantId"
   `,
   markConnectionStatus: `
+    WITH ${postgresMetaTenantBarrierCte}
     UPDATE meta_connections
     SET
       status = $2,
       version = version + 1,
       updated_at = date_trunc('milliseconds', CURRENT_TIMESTAMP)
+    FROM tenant_barrier
     WHERE tenant_id = $1
       AND status IS DISTINCT FROM $2
     RETURNING tenant_id AS "tenantId"
@@ -466,6 +472,8 @@ export function createPostgresMetaRepository(
 
     async saveAssetSnapshot(input: SaveMetaAssetSnapshotInput) {
       const tenantId = requirePositiveInteger(input.tenantId, "tenantId");
+      const expectedVersion = input.expectedConnectionVersion;
+      if (expectedVersion !== undefined && expectedVersion !== null) requirePositiveInteger(expectedVersion, 'expectedConnectionVersion');
       const businessPortfolioId = requireTrimmedValue(
         input.businessPortfolioId,
         "businessPortfolioId",
@@ -479,22 +487,25 @@ export function createPostgresMetaRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          if (expectedVersion !== undefined) {
+            await transaction.query(postgresMetaSql.lockSnapshotBaselineBarrier, [tenantId]);
+            const current = requirePostgresRows(await transaction.query(postgresMetaSql.lockSnapshotBaseline, [tenantId]), 1)[0];
+            const version = current === undefined ? null : parsePostgresPositiveInteger(requireExactPostgresRow(current, ['version']).version);
+            if (version !== expectedVersion) throw new Error('Meta connection changed since signup launch');
+          }
           const result = await transaction.query<Record<string, unknown>>(
             postgresMetaSql.upsertAssetSnapshot,
             [tenantId, businessPortfolioId, wabaId, phoneNumberId],
           );
           const rows = requirePostgresRows(result, 1);
 
-          if (rows.length === 1) {
-            validateOptionalTenantWrite(rows[0], tenantId);
+          if (rows.length !== 1) {
+            throw new Error("PostgreSQL Meta asset write was not confirmed");
           }
-
-          const connection = await requireSavedConnection(
-            transaction,
-            tenantId,
-          );
+          const connection = parseConnection(rows[0]);
 
           if (
+            connection.tenantId !== tenantId ||
             connection.businessPortfolioId !== businessPortfolioId ||
             connection.wabaId !== wabaId ||
             connection.phoneNumberId !== phoneNumberId ||
@@ -510,21 +521,24 @@ export function createPostgresMetaRepository(
       );
     },
 
-    async markConnectionConnected(tenantIdInput: number) {
+    async markConnectionConnected(tenantIdInput: number, expectedVersionInput: number) {
       const tenantId = requirePositiveInteger(tenantIdInput, "tenantId");
+
+      const expectedVersion = requirePositiveInteger(expectedVersionInput, "expectedVersion");
 
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
           const result = await transaction.query<Record<string, unknown>>(
             postgresMetaSql.markConnectionConnected,
-            [tenantId],
+            [tenantId, expectedVersion],
           );
           const rows = requirePostgresRows(result, 1);
 
-          if (rows.length === 1) {
-            validateOptionalTenantWrite(rows[0], tenantId);
+          if (rows.length !== 1) {
+            throw new Error("Meta connection changed before confirmation");
           }
+          validateOptionalTenantWrite(rows[0], tenantId);
 
           const connection = await requireSavedConnection(
             transaction,
@@ -533,6 +547,7 @@ export function createPostgresMetaRepository(
 
           if (
             connection.status !== "connected" ||
+            connection.version !== expectedVersion + 1 ||
             connection.webhookSubscribedAt === null ||
             connection.connectedAt === null
           ) {
@@ -542,6 +557,18 @@ export function createPostgresMetaRepository(
           return connection;
         },
       );
+    },
+
+    async revokeConnection(tenantIdInput: number, wabaIdInput: string, expectedVersionInput: number) {
+      const tenantId = requirePositiveInteger(tenantIdInput, "tenantId");
+      const wabaId = requireTrimmedValue(wabaIdInput, "wabaId");
+      const expectedVersion = requirePositiveInteger(expectedVersionInput, "expectedVersion");
+      const result = await dependencies.queries.query<Record<string, unknown>>(
+        postgresMetaSql.revokeConnection, [tenantId, wabaId, expectedVersion],
+      );
+      const rows = requirePostgresRows(result, 1);
+      if (rows.length === 1) validateOptionalTenantWrite(rows[0], tenantId);
+      return rows.length === 1;
     },
 
     async markConnectionStatus(

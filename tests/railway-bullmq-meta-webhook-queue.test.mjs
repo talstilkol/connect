@@ -454,3 +454,29 @@ test("publisher fails closed on Redis errors and both runtimes reject invalid co
       error.code === "dependencies-invalid",
   );
 });
+
+test("the BullMQ wire round-trip retains the full 2MiB boundary and rejects a single extra byte", async () => {
+  const publisherInfrastructure = infrastructure();
+  const publisher = createRailwayBullMqMetaWebhookPublisherRuntime({ environment: environment(), telemetry: { recordConnectionFailure() {}, recordPublisherFailure() {} } }, publisherInfrastructure.dependencies);
+  const bytes = new Uint8Array(2 * 1024 * 1024); bytes[0] = 123; bytes[bytes.length - 1] = 125;
+  const input = createMetaWebhookQueueMessage(bytes, signatureHeader);
+  await publisher.start();
+  await publisher.queue.publish(input);
+  const published = publisherInfrastructure.queue(railwayBullMqMetaWebhookQueueName).added[0];
+  await assert.rejects(publisher.queue.publish(createMetaWebhookQueueMessage(new Uint8Array(bytes.length + 1), signatureHeader)));
+  await publisher.close();
+  const workerInfrastructure = infrastructure();
+  let deliveries = 0;
+  const worker = workerRuntime(workerInfrastructure, { async handle(batch) {
+    deliveries++; assert.deepEqual(new Uint8Array(batch.messages[0].body.rawPayload), bytes); batch.messages[0].ack();
+  } });
+  await worker.start();
+  const job = { id: published.jobOptions.jobId, name: published.jobName, data: published.data, timestamp: fixedJobTimestamp, attemptsMade: 0 };
+  assert.deepEqual(await workerInfrastructure.workerRecord.processor(job), { outcome: "acknowledged" });
+  // 2MiB and 2MiB+1 share the same padded base64 length; decoded length must be checked too.
+  const overflow = new Uint8Array(bytes.length + 1);
+  assert.equal(Buffer.from(overflow).toString("base64").length, published.data.rawPayloadBase64.length);
+  assert.deepEqual(await workerInfrastructure.workerRecord.processor({ ...job, id: await sha256Hex(overflow), data: { ...job.data, rawPayloadBase64: Buffer.from(overflow).toString("base64") } }), { outcome: "dead-lettered" });
+  assert.equal(deliveries, 1);
+  await worker.close();
+});

@@ -527,3 +527,12 @@ test("preserves the bounded PostgreSQL configuration state", async () => {
     (error) => error?.code === "configuration-disabled",
   );
 });
+
+test('media mode rejects incomplete configuration before creating the worker pool',async()=>{
+  await assert.rejects(createRailwayPostgresWorkerService(options({environment:{META_MEDIA_WORKER_MODE:'upload'}})),{code:'CONFIGURATION_INVALID'});
+});
+test('media inspection composes with its separate AWS configuration and closes before starting',async()=>{
+  const {quarantineEnvironment}=await import('./fixtures/meta-media-quarantine.mjs');
+  const service=await createRailwayPostgresWorkerService(options({environment:{...environment(),...quarantineEnvironment,META_MEDIA_WORKER_MODE:'inspect'}}));
+  await service.close();await service.close();
+});

@@ -1233,6 +1233,53 @@ function request(
   });
 }
 
+test("registers the Meta read operation using the selected stored tenant and returns only status", async () => {
+  const tenants = [];
+  const testFixture = fixture("owner", { metaConnections: { async read(session) {
+    tenants.push(session.tenantId);
+    return { tenantId: session.tenantId, status: "revoked", wabaId: "200002", ciphertext: "must-not-escape" };
+  } } });
+  const response = await testFixture.handler.handle(request("meta.connection.read", {}));
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).data, { connection: { status: "revoked" } });
+  assert.deepEqual(tenants, [11]);
+});
+
+test("registers Meta signup configuration and completion using the selected stored tenant", async () => {
+  const calls = [];
+  const configuration = { status: "configured", appId: "100001", configurationId: "500005", apiVersion: "v23.0" };
+  const testFixture = fixture("owner", { metaSignup: {
+    readConfiguration() { return configuration; },
+    async complete(session, input) {
+      calls.push({ tenantId: session.tenantId, input });
+      return { status: "connected", connection: { status: "connected" } };
+    },
+  } });
+  const configResponse = await testFixture.handler.handle(request("meta.embedded-signup.configuration", {}));
+  assert.deepEqual((await configResponse.json()).data, configuration);
+  const payload = { authorizationCode: "protected-code", businessPortfolioId: "100001", wabaId: "200002", phoneNumberId: "300003" };
+  const operation = "meta.embedded-signup.complete";
+  const response = await testFixture.handler.handle(request(operation, payload, "mutation",
+    await deriveRailwayApiDeterministicIdempotencyKey(operation, payload)));
+  assert.equal(response.status, 200);
+  assert.deepEqual(calls, [{ tenantId: 11, input: payload }]);
+});
+
+test("rejects a supplied tenant, mutation kind, unauthorized role and invalid identity before Meta reads", async () => {
+  for (const mode of ["tenant", "mutation", "role", "identity"]) {
+    let reads = 0;
+    const testFixture = fixture(mode === "role" ? "agent" : "owner", { metaConnections: { async read() {
+      reads += 1;
+      return null;
+    } } });
+    const input = request("meta.connection.read", mode === "tenant" ? { tenantId: 7 } : {}, mode === "mutation" ? "mutation" : "query");
+    if (mode === "identity") input.headers.delete(VERCEL_OIDC_HEADER);
+    const response = await testFixture.handler.handle(input);
+    assert.ok(response.status >= 400);
+    assert.equal(reads, 0);
+  }
+});
+
 test("runs a system-admin profile mutation without resolving tenant membership", async () => {
   const testFixture = fixture("agent");
   const adminPayload = {

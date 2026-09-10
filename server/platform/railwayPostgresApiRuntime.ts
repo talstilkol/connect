@@ -1,3 +1,5 @@
+import { createRailwayMetaSignupApiRuntime, readRailwayMetaSignupEnvironment } from "./railwayMetaSignupRuntime.ts";
+import type { MetaEmbeddedSignupServerEnvironment } from "../meta/metaEmbeddedSignupServerReadiness.ts";
 import {
   createRateLimitGuard,
 } from "../security/rateLimit.ts";
@@ -103,6 +105,7 @@ export type RailwaySystemAdminEnvironment =
     PostgresSystemAdminMutationRateLimitEnvironment;
 
 export interface RailwayPostgresApiRuntimeOptions {
+  readonly mediaFileEnvironment?: RailwayMetaMediaFileEnvironment;
   readonly identityEnvironment?: RailwayApiIdentityEnvironment;
   readonly postgresEnvironment?: NodePostgresPoolEnvironment;
   readonly identityDependencies?: Readonly<
@@ -119,6 +122,7 @@ export interface RailwayPostgresApiRuntimeOptions {
     maximumBodyBytes?: number;
   }>;
   readonly messageTemplateSubmissionEnvironment?: MetaGraphEnvironment;
+  readonly metaSignupEnvironment?: MetaEmbeddedSignupServerEnvironment;
   readonly campaignDeliveryConfigured?: () => boolean;
   readonly teamInvitationPolicyEnvironment?: TeamInvitationPolicyEnvironment;
   readonly teamInvitationPublisher?: TeamInvitationPublisher;
@@ -135,6 +139,7 @@ export interface RailwayPostgresApiRuntimeOptions {
 }
 
 export interface RailwayPostgresApiRuntime {
+  readonly mediaFileHandler: RailwayMetaMediaFileHttpHandler | null;
   readonly handler: RailwayApiHttpHandler;
   readonly metaWebhookHandler: MetaWebhookHttpHandler | null;
   readonly readiness: Readonly<PostgresReadinessProbe>;
@@ -142,6 +147,7 @@ export interface RailwayPostgresApiRuntime {
 }
 
 const optionKeys = Object.freeze([
+  "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",
   "identityDependencies",
@@ -149,6 +155,7 @@ const optionKeys = Object.freeze([
   "maximumBodyBytes",
   "maximumResponseBytes",
   "metaWebhook",
+  "metaSignupEnvironment",
   "messageTemplateSubmissionEnvironment",
   "mutationRateLimitEnvironment",
   "postgresEnvironment",
@@ -240,6 +247,8 @@ function requireOptions(
       options.botReplyStagingReleaseEvidence,
     ) ||
     !validMetaWebhookOptions(options.metaWebhook) ||
+    (options.metaSignupEnvironment !== undefined &&
+      (typeof options.metaSignupEnvironment !== "object" || options.metaSignupEnvironment === null)) ||
     (options.messageTemplateSubmissionEnvironment !== undefined &&
       (typeof options.messageTemplateSubmissionEnvironment !== "object" ||
         options.messageTemplateSubmissionEnvironment === null)) ||
@@ -277,6 +286,7 @@ export async function createRailwayPostgresApiRuntime(
   if (identityConfiguration.status !== "configured") {
     throw new Error("Railway API identity configuration is unavailable");
   }
+  const mediaFileEnvironment = requireRailwayMetaMediaFileEnvironment(options.mediaFileEnvironment);
 
   const teamInvitationAcceptanceIdentity =
     options.teamInvitationAcceptanceIdentityResolver ??
@@ -330,7 +340,18 @@ export async function createRailwayPostgresApiRuntime(
     telemetry: options.postgresTelemetry,
   });
 
+  let mediaFileHandler: RailwayMetaMediaFileHttpHandler | null = null;
   try {
+    if (mediaFileEnvironment) {
+      const files = foundation.createMediaFileReadRuntime(mediaFileEnvironment);
+      try {
+        mediaFileHandler = createRailwayMetaMediaFileHttpHandler({
+          origin: identityConfiguration.configuration.appPublicOrigin,
+          verifier: createClerkEndUserSessionVerifier(identityConfiguration.configuration, options.identityDependencies?.clerk),
+          sessions: createRailwayTenantSessionResolver(foundation), files,
+        });
+      } catch (error) { files.close(); throw error; }
+    }
     const unavailableTeamInvitationPublisher: TeamInvitationPublisher =
       Object.freeze({
         async publish(): Promise<{ outcome: "queued" }> {
@@ -394,6 +415,20 @@ export async function createRailwayPostgresApiRuntime(
       environment: options.identityEnvironment,
       identityDependencies: options.identityDependencies,
       memberships: foundation.memberships,
+      metaMediaTasks: foundation.metaMediaTasks,
+      metaMediaCleanup: foundation.metaMediaCleanup,
+      metaMediaInspectionRetries: foundation.metaMediaInspectionRetries,
+      metaConnections: foundation.metaConnections,
+      metaDataSyncLifecycle: foundation.metaDataSyncLifecycle,
+      metaSignup: createRailwayMetaSignupApiRuntime({
+        environment: options.metaSignupEnvironment ?? readRailwayMetaSignupEnvironment(),
+        webhookEnvironment: options.metaWebhook?.environment ?? null,
+        connections: foundation.metaConnections,
+        credentials: foundation.metaCredentialEnvelopes,
+        attempts: foundation.metaSignupAttempts,
+        launches: foundation.metaSignupLaunches,
+        requests: foundation.metaDataSyncRequests,
+      }),
       identityOrganizations: foundation.identityOrganizations,
       membershipMutations: foundation.membershipMutations,
       selections: foundation.selections,
@@ -526,11 +561,17 @@ export async function createRailwayPostgresApiRuntime(
     return Object.freeze({
       handler,
       metaWebhookHandler,
+      mediaFileHandler,
       readiness: foundation.readiness,
-      close: foundation.close,
+      async close() { await mediaFileHandler?.close(); await foundation.close(); },
     });
   } catch (error) {
+    await mediaFileHandler?.close();
     await foundation.close();
     throw error;
   }
 }
+import { createClerkEndUserSessionVerifier } from "./clerkEndUserSessionVerifier.ts";
+import { createRailwayTenantSessionResolver } from "./railwayTenantSessionResolver.ts";
+import { requireRailwayMetaMediaFileEnvironment, type RailwayMetaMediaFileEnvironment } from "./railwayMetaMediaFileConfiguration.ts";
+import { createRailwayMetaMediaFileHttpHandler, type RailwayMetaMediaFileHttpHandler } from "./railwayMetaMediaFileHttpHandler.ts";

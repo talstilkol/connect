@@ -14,7 +14,7 @@ import {
 export type MetaEmbeddedSignupServerEnvironment =
   MetaEmbeddedSignupEnvironment &
     MetaAuthorizationCodeExchangeEnvironment &
-    MetaCredentialEncryptionEnvironment;
+    MetaCredentialEncryptionEnvironment & { META_COEXISTENCE_ONBOARDING_MODE?: string };
 
 export interface MetaEmbeddedSignupServerReadiness {
   status: "configured" | "disabled" | "incomplete";

@@ -3,13 +3,14 @@ import {
   messageDirections,
   messageStatuses,
   persistedConversationStatuses,
-  type MessageContentKind,
   type MessageDirection,
   type MessageStatus,
+  type MessageContentState,
   type PersistedMessage,
   type PersistedConversation,
   type ValidatedInboundMessage,
 } from "../shared/domain/conversation.ts";
+import type { InboxContentKind, PersistedInboxMessage } from "../shared/domain/inboxHistory.ts";
 import type {
   ConversationStatus,
 } from "../shared/domain/model.ts";
@@ -514,14 +515,16 @@ export type ApplyMessageDeliveryStatusResult =
     };
 
 export interface InboxConversationContact {
+  whatsappDisplayName?: string;
   phoneNumber: string;
   firstName: string | null;
   lastName: string | null;
 }
 
 export interface InboxConversationLastMessage {
+  contentState?: Exclude<MessageContentState, "original">;
   direction: MessageDirection;
-  contentKind: MessageContentKind;
+  contentKind: InboxContentKind;
   textContent: string | null;
 }
 
@@ -596,7 +599,7 @@ export interface ConversationRepository {
     tenantId: number,
     conversationKey: string,
     limit: number,
-  ): Promise<readonly PersistedMessage[]>;
+  ): Promise<readonly PersistedInboxMessage[]>;
   markRead(
     tenantId: number,
     conversationKey: string,

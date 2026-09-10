@@ -121,6 +121,7 @@ interface ContactRow {
 }
 
 export interface PersistedContact extends PersistedContactProfile {
+  whatsappDisplayName?: string;
   id: number;
   tenantId: number;
   mailingStatus: MailingStatus;
