@@ -109,3 +109,37 @@ Meta-validation של כל סכמת הספק עבר. Railway schema עבר גם M
 פרטי הקיבוע, רשימת הקבצים וסטטוס ה־PR/CI נשמרים ב־[דוח המועמד](../outputs/launch-validation-2026-09-09/pilot-candidate-validation.json).
 מועמד זה כולל 2,534 קבצים, ללא 624 קובצי תכנון ופלט לא מנוהלים שאינם נדרשים
 לשער האיכות. החשבונות והפריסה נשארים שלב נפרד מהוכחת המועמד.
+
+# 5. בדיקת תצורה לפני פריסה — המשך 10.09.2026
+
+5.1 [סקריפט בדיקת התצורה](../scripts/inspect-pilot-configuration.mjs) קורא את
+משתני התהליך בלבד, ללא טעינת קובצי env, התחברות לספק, יצירת Pool או הפעלת
+Worker. לאחר שהוגדרו הערכים האמיתיים בסביבת השירות, מריצים את התפקיד המתאים:
+
+```sh
+node scripts/inspect-pilot-configuration.mjs --service=web
+node scripts/inspect-pilot-configuration.mjs --service=api
+node scripts/inspect-pilot-configuration.mjs --service=worker
+```
+
+5.2 כל פקודה נבדקת מול סביבת השירות שלה. הכלי מיועד למסלול הפיילוט הנוכחי:
+APP_RUNTIME_ENVIRONMENT=staging ו־VERCEL_OIDC_ENVIRONMENT=preview. תצורת Production
+או Development אינה יכולה לעבור אותו. אין להזין סיסמאות או Tokens כארגומנטים.
+
+5.3 הדוח כולל רק מזהי בדיקות, מצב ושמות משתנים. checkedKeys מציין את תחום
+הבדיקה; missingKeys ו־invalidKeys כוללים רק שמות ידועים, כשיש אבחנה כזו
+בבודק הקיים. רשימה ריקה אינה מבטלת מצב invalid. ערכים, כתובות, Certificates
+והודעות Exception אינם נכללים בפלט. אין עקיפה באמצעות תצורה לדוגמה.
+
+5.4 קוד יציאה 1 מציין חסם או קלט לא תקין. קוד 0 ו־configuration-valid מציינים
+תקינות של **הבדיקות המפורטות בדוח בלבד**. liveReadinessVerified נשאר false;
+הדוח מפרט את מה שעוד לא אומת: חשבונות וזכאות, התאמת זהות וגרסה בין שירותים,
+הרשאות וסכמה במסד, קישוריות התור, תקציב ומדיניות ספק, הרשאות אחסון וסריקה ו־QR חי.
+הכלי אינו מחליף Production Readiness, Startup או בדיקת שימוש מקצה לקצה.
+
+5.5 Web בודק זהות Clerk, Origin ונתיב API. השרתים בודקים גם PostgreSQL,
+Redis, Telemetry ו־Meta. API כולל מכסות, מדיניות הזמנות והפעלת Coexistence
+המבוקרת; Worker כולל מכסת Clerk וזהות Scheduler. מסלולי מדיה כבויים מותרים;
+מסלול מדיה שהופעל עם תצורה שגויה חוסם את הבדיקה. מתגים אינם משתנים כתוצאה מהרצה.
+
+5.6 [ראיות הבדיקה הנוכחית](../outputs/launch-validation-2026-09-09/pilot-configuration-validation.json).
