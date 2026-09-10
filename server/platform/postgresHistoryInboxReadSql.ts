@@ -9,7 +9,7 @@ export const postgresInboxMessageSourceSql = `(
   SELECT history.message_key, history.conversation_key, history.tenant_id, history.provider_message_id,
     captured.message->>'direction' AS direction,
     CASE WHEN echo.content_state IN ('deleted', 'conflicted') THEN 'unsupported'
-      WHEN echo.content_state = 'edited' THEN 'text' ELSE captured.message->>'contentKind' END AS content_kind,
+      WHEN echo.content_state = 'edited' THEN echo.edit_kind ELSE captured.message->>'contentKind' END AS content_kind,
     NULL::text AS status,
     CASE WHEN echo.content_state IN ('deleted', 'conflicted') THEN NULL
       WHEN echo.content_state = 'edited' THEN echo.edit_text
@@ -40,7 +40,7 @@ export const postgresInboxMessageSourceSql = `(
     AND captured.message->>'providerMessageId' = history.provider_message_id
     AND (echo.tenant_id IS NULL OR (echo.waba_id = session.waba_id AND echo.phone_number_id = session.phone_number_id
       AND echo.recipient_phone = captured.message->>'threadPhoneNumber'))
-    AND (echo.content_state IS NULL OR echo.content_state NOT IN ('edited', 'conflicted') OR captured.message->>'contentKind' = 'text')
+    AND (echo.content_state IS NULL OR echo.content_state NOT IN ('edited', 'conflicted') OR captured.message->>'contentKind' = echo.edit_kind)
     AND NOT EXISTS (SELECT 1 FROM messages AS live WHERE live.tenant_id = history.tenant_id AND live.provider_message_id = history.provider_message_id)
 )`;
 

@@ -41,7 +41,29 @@ before(async () => {
   assert.equal(tables.rowCount, 0, "Refusing to change a non-empty database");
   const directory = new URL("../../postgres/migrations/", import.meta.url);
   for (const file of (await readdir(directory)).filter((file) => file.endsWith(".sql")).sort()) {
-    await pool.query(await readFile(new URL(file, directory), "utf8"));
+    const sql = await readFile(new URL(file, directory), "utf8");
+    if (file === "0074_meta_message_echo_captions.sql") {
+      // Rehearse an upgrade over real pre-0074 revision state, then roll back
+      // this isolated rehearsal before the ordinary empty-database migration.
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query("INSERT INTO tenants (id,display_name,status) VALUES (7,'Echo integration','active')");
+        await client.query(`INSERT INTO meta_message_echo_states
+          (tenant_id,provider_message_id,waba_id,phone_number_id,recipient_phone,content_state,edit_at,edit_text)
+          VALUES (7,$1,$2,$3,$4,'edited',$5,$6)`, [message.providerMessageId, scope.wabaId, scope.phoneNumberId, message.recipientPhoneNumber, message.occurredAt, " ".repeat(16_384) + message.textContent]);
+        // The old SQL constraint measured trimmed length. This upgrade must
+        // preserve even that boundary without silently tightening legacy data.
+        await client.query("INSERT INTO meta_message_echo_events (tenant_id,event_key,request_digest,provider_message_id) VALUES (7,$1,$1,$2)", ["a".repeat(64), message.providerMessageId]);
+        const before = (await client.query("SELECT * FROM meta_message_echo_states")).rows[0];
+        const receipts = (await client.query("SELECT * FROM meta_message_echo_events")).rows;
+        await client.query(sql);
+        const after = (await client.query("SELECT * FROM meta_message_echo_states")).rows[0];
+        assert.deepEqual(after, { ...before, edit_kind: "text" });
+        assert.deepEqual((await client.query("SELECT * FROM meta_message_echo_events")).rows, receipts);
+      } finally { await client.query("ROLLBACK"); client.release(); }
+    }
+    await pool.query(sql);
   }
   await pool.query("INSERT INTO tenants (id, display_name, status) VALUES (7, 'Echo integration', 'active'), (8, 'Other integration', 'active')");
   await pool.query(`INSERT INTO meta_connections (tenant_id, business_portfolio_id, waba_id, phone_number_id, status, version, webhook_subscribed_at, connected_at)
@@ -425,6 +447,58 @@ test("contact schema rejects names in removed/conflicted state and foreign recei
   await assert.rejects(pool.query("UPDATE meta_contact_sync_states SET status = 'removed' WHERE tenant_id = 7 AND full_name IS NOT NULL"));
   await assert.rejects(pool.query("UPDATE meta_contact_sync_states SET status = 'conflicted' WHERE tenant_id = 7 AND full_name IS NOT NULL"));
   await assert.rejects(pool.query("INSERT INTO meta_contact_sync_events (tenant_id, event_key, waba_id, phone_number_id, contact_phone) VALUES (8, $1, $2, $3, $4)", ["f".repeat(64), scope.wabaId, scope.phoneNumberId, syncedContact.phoneNumber]));
+});
+
+test("media caption edits reach thread and preview, clear content, and preserve delivery and ordering", async () => {
+  for (const [index, kind] of ["image", "video", "document"].entries()) {
+    const original = { ...message, providerMessageId: `${message.providerMessageId}-${kind}`, contentKind: kind, textContent: null, recipientPhoneNumber: "+16505558888", occurredAt: `2026-09-09T09:00:0${index}.000Z` };
+    await repository.record(scope, original);
+    await pool.query("UPDATE messages SET status='read' WHERE provider_message_id=$1", [original.providerMessageId]);
+    const before = await storedMessage(original.providerMessageId);
+    const change = { ...edited(original, `${original.providerMessageId}-edit`), contentKind: kind };
+    assert.deepEqual(await repository.record(scope, change), { outcome: "updated" });
+    assert.deepEqual(await repository.record(scope, change), { outcome: "duplicate" });
+    const row = await storedMessage(original.providerMessageId);
+    assert.equal(row.content_kind, kind); assert.equal(row.content_state, "edited"); assert.equal(row.text_content, change.textContent);
+    assert.equal(row.status, "read"); assert.deepEqual(row.occurred_at, before.occurred_at);
+    const preview = await conversations.findByKey(7, row.conversation_key);
+    assert.equal(preview.lastMessage.contentKind, kind); assert.equal(preview.lastMessage.textContent, change.textContent);
+    const entries = await conversations.listMessagesByConversation(7, row.conversation_key, 100);
+    assert.equal(entries.find(m => m.providerMessageId === original.providerMessageId).textContent, change.textContent);
+    await assert.rejects(repository.record(scope, { ...change, providerMessageId: `${original.providerMessageId}-wrong`, contentKind: "text" }));
+    await repository.record(scope, { ...change, providerMessageId: `${original.providerMessageId}-clear`, textContent: null, occurredAt: "2026-09-09T09:01:01.000Z" });
+    assert.equal((await storedMessage(original.providerMessageId)).text_content, null);
+    assert.equal((await storedMessage(original.providerMessageId)).content_state, "edited");
+  }
+});
+
+test("every ordering of media original, caption and revoke converges without restoring content", async () => {
+  const orders = [[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]];
+  for (const [index, order] of orders.entries()) {
+    const original = { ...message, providerMessageId: `${message.providerMessageId}-caption-order-${index}`, contentKind: "image", textContent: null };
+    const change = { ...edited(original, `${original.providerMessageId}-edit`), contentKind: "image" };
+    const events = [original, change, deleted(original, `${original.providerMessageId}-delete`)];
+    for (const position of order) await createPostgresMetaMessageEchoRepository(transactions).record(scope, events[position]);
+    await repository.record(scope, original);
+    await repository.record(scope, { ...change, providerMessageId: `${original.providerMessageId}-late`, occurredAt: "2026-09-09T10:00:00.000Z" });
+    const row = await storedMessage(original.providerMessageId);
+    assert.equal(row.content_kind, "unsupported"); assert.equal(row.content_state, "deleted"); assert.equal(row.text_content, null);
+  }
+});
+
+test("a deferred media caption survives restart, rejects a different original kind and resolves equal-time conflicts", async () => {
+  const original = { ...message, providerMessageId: `${message.providerMessageId}-caption-deferred`, contentKind: "image", textContent: null };
+  const change = { ...edited(original, `${original.providerMessageId}-edit`), contentKind: "image" };
+  assert.deepEqual(await repository.record(scope, change), { outcome: "deferred" });
+  await assert.rejects(repository.record(scope, { ...original, contentKind: "video" }));
+  await createPostgresMetaMessageEchoRepository(transactions).record(scope, original);
+  assert.equal((await storedMessage(original.providerMessageId)).text_content, change.textContent);
+  await Promise.all([repository.record(scope, { ...change, providerMessageId: `${original.providerMessageId}-a`, textContent: "A" }),
+    repository.record(scope, { ...change, providerMessageId: `${original.providerMessageId}-b`, textContent: "B" })]);
+  assert.equal((await storedMessage(original.providerMessageId)).content_state, "conflicted");
+  await repository.record(scope, { ...change, providerMessageId: `${original.providerMessageId}-clear`, textContent: null, occurredAt: "2026-09-09T09:01:01.000Z" });
+  const cleared = await storedMessage(original.providerMessageId);
+  assert.equal(cleared.content_kind, "image"); assert.equal(cleared.content_state, "edited"); assert.equal(cleared.text_content, null);
 });
 
 test("a concurrent revocation commits before waiting echo/contact writes and both are rejected", async () => {

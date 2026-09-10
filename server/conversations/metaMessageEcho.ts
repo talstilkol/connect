@@ -1,4 +1,4 @@
-import type { MessageContentKind } from "../../shared/domain/conversation.ts";
+import { isCaptionMessageKind, isEditedMessageTextValid, type MessageContentKind } from "../../shared/domain/conversation.ts";
 import type { MetaMessageEchoesWebhookEvent } from "../meta/metaWebhookEventDispatcher.ts";
 import { MetaWebhookProcessorError } from "../meta/metaWebhookIngress.ts";
 
@@ -64,7 +64,7 @@ export function parseMetaMessageEchoes(event: MetaMessageEchoesWebhookEvent, exp
       if (!record(change)) return fail();
       mutation = Object.freeze({ kind: candidate.type, originalProviderMessageId: providerId(change.original_message_id) });
       if (candidate.type === "edit") {
-        if (!record(change.message) || change.message.type !== "text") return fail("UNSUPPORTED_MESSAGE_ECHO_EDIT_CONTENT");
+        if (!record(change.message) || (change.message.type !== "text" && !isCaptionMessageKind(change.message.type))) return fail("UNSUPPORTED_MESSAGE_ECHO_EDIT_CONTENT");
         source = change.message;
       } else source = { type: "unsupported" };
     }
@@ -77,6 +77,13 @@ export function parseMetaMessageEchoes(event: MetaMessageEchoesWebhookEvent, exp
     if (source.type === "text") {
       if (!record(content) || typeof content.body !== "string" || content.body.trim().length === 0 || content.body.length > 16_384) return fail();
       textContent = content.body;
+    } else if (mutation?.kind === "edit" && isCaptionMessageKind(source.type)) {
+      if (!record(content) || (content.caption !== undefined && typeof content.caption !== "string")) return fail();
+      // Empty or absent caption removes it; URLs and asset identifiers never
+      // become a file reference or authorize replacing an existing attachment.
+      const caption = content.caption as string | undefined;
+      if (caption !== undefined && (caption.length > 16_384 || caption.includes("\u0000"))) return fail();
+      textContent = caption?.trim() ? caption : null;
     }
     const seconds = typeof candidate.timestamp === "string" && /^[0-9]{1,12}$/.test(candidate.timestamp)
       ? Number(candidate.timestamp) : candidate.timestamp;
@@ -95,12 +102,12 @@ export function normalizeMetaMessageEcho(scope: MetaMessageEchoScope, message: M
     message == null || (message.mutation?.kind !== "revoke" && !contentKinds.has(message.contentKind)) ||
     (message.mutation !== undefined && (!record(message.mutation) ||
       !["edit", "revoke"].includes(message.mutation.kind) ||
-      (message.mutation.kind === "edit" && message.contentKind !== "text") ||
+      (message.mutation.kind === "edit" && !isEditedMessageTextValid(message.contentKind, message.textContent)) ||
       (message.mutation.kind === "revoke" && message.contentKind !== "unsupported"))) ||
     typeof message.occurredAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(message.occurredAt) || !Number.isFinite(Date.parse(message.occurredAt)) ||
     new Date(message.occurredAt).toISOString() !== message.occurredAt ||
     Date.parse(message.occurredAt) <= 0 ||
-    (message.contentKind === "text"
+    (message.mutation?.kind === "edit" ? !isEditedMessageTextValid(message.contentKind, message.textContent) : message.contentKind === "text"
       ? typeof message.textContent !== "string" || message.textContent.trim().length === 0 || message.textContent.length > 16_384
       : message.textContent !== null)) return fail();
   return Object.freeze({ scope: Object.freeze({ tenantId: scope.tenantId,

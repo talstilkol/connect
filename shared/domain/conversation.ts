@@ -49,9 +49,19 @@ export type MessageStatus =
 export const messageContentStates = ["original", "edited", "deleted", "conflicted"] as const;
 export type MessageContentState = (typeof messageContentStates)[number];
 
+export function isCaptionMessageKind(kind: unknown): kind is "image" | "video" | "document" {
+  return kind === "image" || kind === "video" || kind === "document";
+}
+
+export function isEditedMessageTextValid(kind: unknown, text: unknown): boolean {
+  if (isCaptionMessageKind(kind) && text === null) return true;
+  return (kind === "text" || isCaptionMessageKind(kind)) && typeof text === "string" &&
+    text.trim().length > 0 && text.length <= 16_384 && !text.includes("\u0000");
+}
+
 export function isMessageContentStateConsistent(state: unknown, direction: unknown, kind: unknown, text: unknown): state is MessageContentState {
   return state === "original" || (direction === "outbound" && (
-    (state === "edited" && kind === "text" && typeof text === "string" && text.trim().length > 0) ||
+    (state === "edited" && isEditedMessageTextValid(kind, text)) ||
     ((state === "deleted" || state === "conflicted") && kind === "unsupported" && text === null)
   ));
 }
