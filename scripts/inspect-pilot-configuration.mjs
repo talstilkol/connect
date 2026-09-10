@@ -20,6 +20,10 @@ import {
 } from "../server/platform/postgresMutationRateLimitConfiguration.ts";
 import { requireRailwayMetaMediaFileEnvironment } from "../server/platform/railwayMetaMediaFileConfiguration.ts";
 import { requireMetaMediaWorkerConfiguration } from "../server/platform/railwayMetaMediaWorkerRuntime.ts";
+import { inspectRailwayMessageTemplateSubmissionConfiguration } from "../server/platform/railwayMessageTemplateSubmissionConfiguration.ts";
+import { inspectRailwayMessageTemplateSyncConfiguration } from "../server/platform/railwayMessageTemplateSyncConfiguration.ts";
+import { inspectRailwayCampaignActivationConfiguration } from "../server/platform/railwayCampaignActivationConfiguration.ts";
+import { requireRailwayManualReplyConfiguration } from "../server/platform/railwayManualReplyConfiguration.ts";
 
 const services = Object.freeze(["web", "api", "worker"]);
 const statuses = new Set([
@@ -102,10 +106,20 @@ export function inspectPilotConfiguration(service, environment) {
       inspectRailwayBetterStackTelemetryConfiguration);
     add("meta-signup", signupKeys, inspectMetaEmbeddedSignupServerReadiness);
     add("meta-webhook", ["META_APP_SECRET", "META_WEBHOOK_VERIFY_TOKEN"], requireGroup(requireMetaWebhookConfiguration));
+    add("manual-replies", ["MANUAL_REPLY_ENABLED", "META_GRAPH_API_VERSION",
+      "META_CREDENTIAL_ENCRYPTION_KEY_V1", "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1"],
+      (env) => ({ status: requireRailwayManualReplyConfiguration(env) ? "configured" : "disabled" }),
+      { optional: true });
     if (service === "api") {
       add("tenant-mutation-limit", postgresTenantMutationRateLimitEnvironmentKeys, inspectPostgresTenantMutationRateLimitConfiguration);
       add("meta-webhook-limit", postgresMetaWebhookRateLimitEnvironmentKeys, inspectPostgresMetaWebhookRateLimitConfiguration);
       add("team-invitation-policy", ["TEAM_INVITATION_TTL_HOURS", "TEAM_INVITATION_REREQUEST_POLICY"], inspectTeamInvitationPolicy);
+      add("template-submission", ["MESSAGE_TEMPLATE_SUBMISSION_ENABLED", "META_GRAPH_API_VERSION"],
+        inspectRailwayMessageTemplateSubmissionConfiguration, { optional: true });
+      add("template-sync", ["MESSAGE_TEMPLATE_SYNC_ENABLED", "META_GRAPH_API_VERSION", "META_CREDENTIAL_ENCRYPTION_KEY_V1"],
+        (env) => ({ status: inspectRailwayMessageTemplateSyncConfiguration(env) }), { optional: true });
+      add("campaign-activation", ["CAMPAIGN_ACTIVATION_ENABLED", "META_GRAPH_API_VERSION"],
+        inspectRailwayCampaignActivationConfiguration, { optional: true });
       add("coexistence-pilot", ["META_COEXISTENCE_ONBOARDING_MODE"], (env) => ({
         status: env.META_COEXISTENCE_ONBOARDING_MODE === "controlled-pilot" ? "configured" : "invalid",
       }));
