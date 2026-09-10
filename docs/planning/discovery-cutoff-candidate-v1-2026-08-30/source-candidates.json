@@ -1,0 +1,59 @@
+{
+  "schema": "CONNECT-DISCOVERY-SOURCE-CANDIDATES-ENVELOPE-V1",
+  "payload": {
+    "schema": "CONNECT-DISCOVERY-SOURCE-CANDIDATES-PAYLOAD-V1",
+    "observedAt": "2026-08-30T18:26:15Z",
+    "observedHead": "0f0b0e9a1bbd8b0234054793394a8a948b94246d",
+    "authority": "CANDIDATE-NOT-ADMITTED-NOT-ACCEPTED",
+    "candidates": [
+      {
+        "sourceId": "SRC-USER-DIRECTIVES",
+        "sourceClass": "USER-DIRECTIVE",
+        "custody": "PUBLIC-PROJECTION-PARTIAL",
+        "status": "DISCOVERED-NOT-ADMITTED"
+      },
+      {
+        "sourceId": "SRC-SPEC-DETAILED-TEXT",
+        "sourceClass": "PROVIDED-SPECIFICATION",
+        "custody": "EXTERNAL-PRIVATE-CANDIDATE",
+        "status": "BYTE-RECHECK-AND-RIGHTS-REVIEW-REQUIRED"
+      },
+      {
+        "sourceId": "SRC-SPEC-WHATSAPP-PDF",
+        "sourceClass": "PROVIDED-SPECIFICATION",
+        "custody": "EXTERNAL-PRIVATE-CANDIDATE",
+        "status": "BYTE-RECHECK-AND-RIGHTS-REVIEW-REQUIRED"
+      },
+      {
+        "sourceId": "SRC-OFFICIAL-EXTERNAL",
+        "sourceClass": "OFFICIAL-EXTERNAL",
+        "custody": "PUBLIC-URL-PLUS-CAPTURE-REQUIRED",
+        "status": "DISCOVERY-INCOMPLETE"
+      },
+      {
+        "sourceId": "SRC-REPOSITORY-HEAD",
+        "sourceClass": "OBSERVED-SYSTEM",
+        "custody": "PUBLIC-SAFE-WORKING-SET",
+        "status": "OBSERVED-NOT-ADMITTED"
+      },
+      {
+        "sourceId": "SRC-PLANNING-DERIVATIVES",
+        "sourceClass": "DERIVED-PLANNING",
+        "custody": "PUBLIC-SAFE-SUBJECT-TO-SCANS",
+        "status": "DISCOVERED-NOT-ADMITTED"
+      },
+      {
+        "sourceId": "SRC-IGNORED-FRONTIER",
+        "sourceClass": "IMPLEMENTATION-BYPRODUCT-OR-PRIVATE",
+        "custody": "PROHIBITED-FROM-PUBLIC-BY-DEFAULT",
+        "status": "ROOT-ONLY-NOT-ADMITTED"
+      }
+    ],
+    "missingSourceTerminals": [
+      "PRIVATE-SOURCE-CUSTODY-ABSENT-BLOCKING",
+      "OFFICIAL-SOURCE-CAPTURE-INCOMPLETE-BLOCKING",
+      "GITHUB-API-SURFACES-UNOBSERVED-BLOCKING"
+    ]
+  },
+  "payloadSha256": "f274f6a28933f8b8eb6f0d7a38cc21a172ba03e9f14d773145909bd557214699"
+}

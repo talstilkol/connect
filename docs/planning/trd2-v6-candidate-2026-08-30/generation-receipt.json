@@ -1,0 +1,115 @@
+{
+  "artifactClass": "PRODUCER-ONLY; PASS-1-GENERATION-RECEIPT; NOT-INDEPENDENT-REVIEW; NOT-ACCEPTANCE",
+  "claimLimit": "PASS-1-BASE-ARTIFACT-GENERATION-ONLY; PARSER-REPORTS-AND-ALL-LATER-PASSES-PENDING",
+  "developmentFreeze": "ACTIVE",
+  "f015Branch": "INVALIDATE-AND-REDERIVE",
+  "gate29": "BLOCKED",
+  "generatedArtifacts": [
+    {
+      "artifactRoot": "03e2a37b96779674d4a48778eaa31ea11ee1bb96d031e934f8896a3cec77850f",
+      "logicalPath": "docs/planning/trd2-v6-candidate-2026-08-30/source-capture-manifest.json",
+      "schemaVersion": "CONNECT-TRD2-V6-SOURCE-CAPTURE-MANIFEST-V1"
+    },
+    {
+      "artifactRoot": "25fe15c5fd535df8954ba23973ea17c40115fa28cc300f54d8d6c53f6a5357ce",
+      "logicalPath": "docs/planning/trd2-v6-candidate-2026-08-30/parser-grammar-and-corpus.json",
+      "schemaVersion": "CONNECT-TRD2-V6-PARSER-GRAMMAR-AND-CORPUS-V1"
+    }
+  ],
+  "observedHead": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+  "outputRegistry": {
+    "logicalPath": "docs/planning/trd2-v6-output-path-registry-v1-2026-08-30.json",
+    "sha256": "02159d2602e834ff414a564f649c5e45b067d82511bbbe5d092a33ae974139ee"
+  },
+  "pass": 1,
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-TRD2-V6-PASS1-GENERATION-RECEIPT-V1",
+  "status": "BASE-GENERATED-PENDING-PARSER-A-AND-PARSER-B",
+  "toolchain": [
+    {
+      "byteLength": 21953,
+      "logicalPath": "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "2f23e658a33cded6e1398e284fa3e5a612fbe007357708ff09f60cb06e0fd17f"
+    },
+    {
+      "byteLength": 3153,
+      "logicalPath": "docs/planning/trd2-v6-output-path-registry-v1-2026-08-30.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "02159d2602e834ff414a564f649c5e45b067d82511bbbe5d092a33ae974139ee"
+    },
+    {
+      "byteLength": 732,
+      "logicalPath": "docs/planning/trd2-v6-pass1-toolchain-path-registry-v1-2026-08-30.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "5cf5e3e959dba679cc5fee8ba6914fb5bbb8fc2f009c1f451d98c60bf702ced9"
+    },
+    {
+      "byteLength": 58260,
+      "logicalPath": "scripts/b0-v8-core.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "b86b475716450ecaa2b992b4c610ae23bc750191973326ab66f689c97b59a478"
+    },
+    {
+      "byteLength": 9605,
+      "logicalPath": "scripts/verify-secret-hygiene.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "3f8b45ccef9752ee0b5056fd79ace633c3362367096602750f0ab8caaf5ae303"
+    },
+    {
+      "byteLength": 53025,
+      "logicalPath": "scripts/trd2-v6-core.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "87d05a963dc8fd657a8f29fa6e95e1af4b8a9dfdfb469ef8efc7f4405ec41b7f"
+    },
+    {
+      "byteLength": 12098,
+      "logicalPath": "scripts/create-trd2-v6-pass1-candidate.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "25b2533adf196b811e0772b181724b97d6ac1a647416b94570a24781c8b3cc4d"
+    },
+    {
+      "byteLength": 2939,
+      "logicalPath": "scripts/verify-trd2-v6-parser-a.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "bbb621764ed004974e417d7a62feda03779f333674dc59c0c662008c40c82f35"
+    },
+    {
+      "byteLength": 16186,
+      "logicalPath": "scripts/verify-trd2-v6-parser-b.py",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "0ce484e60bbbf56714115f945cfbd21ac4840e1c8eb8411ae67cadc62d59691b"
+    },
+    {
+      "byteLength": 4938,
+      "logicalPath": "scripts/finalize-trd2-v6-pass1-candidate.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "b2dcd1a6270729b6ca78a40d439a0a07a656ccec59b7fe1dc3b6f0498a9fb0ee"
+    },
+    {
+      "byteLength": 11379,
+      "logicalPath": "scripts/verify-trd2-v6-pass1-candidate.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "12a7b4dcadee342b012e48c5bc4fca99e91ec4e902c8921eeda924c86768436d"
+    },
+    {
+      "byteLength": 7770,
+      "logicalPath": "tests/trd2-v6-core.test.mjs",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "c4e122a748b0cf7cb8219ced1926770d0ef39d069f44dce923b6f2fd6d5f1ade"
+    },
+    {
+      "byteLength": 9697,
+      "logicalPath": "package.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "6643f10fe1739ae3000c270340551e9a762ccc70875de26964e884e4aa919eca"
+    }
+  ],
+  "toolchainRegistry": {
+    "logicalPath": "docs/planning/trd2-v6-pass1-toolchain-path-registry-v1-2026-08-30.json",
+    "sha256": "5cf5e3e959dba679cc5fee8ba6914fb5bbb8fc2f009c1f451d98c60bf702ced9"
+  },
+  "toolchainRoot": "082e4c8d9c875d3009ce675862060754a568275b71c265d9763e6c18f0627b8e",
+  "artifactId": "TRD2V6-GENERATION-RECEIPT-ca5aea07ed491d14a36e5a5bf0f14743c8ff680f6513e3af9bf94f37abb21290",
+  "artifactRoot": "ca5aea07ed491d14a36e5a5bf0f14743c8ff680f6513e3af9bf94f37abb21290"
+}

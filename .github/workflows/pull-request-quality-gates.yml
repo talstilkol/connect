@@ -1,0 +1,279 @@
+name: Pull request quality gates
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pull-request-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-guardrails:
+    name: source-guardrails
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies for the TypeScript parser
+        run: npm ci --include=dev
+      - name: Verify source boundaries
+        run: npm run verify:source-guardrails
+
+  secret-hygiene:
+    name: secret-hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the complete audited history
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Scan tracked files and Git history
+        run: npm run verify:secret-hygiene
+
+  interface-guardrails:
+    name: interface-guardrails
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Verify interface accessibility boundaries
+        run: npm run verify:interface-guardrails
+
+  dependency-lock:
+    name: dependency-lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+      - name: Verify the dependency lock
+        run: npm run verify:dependency-lock
+
+  migrations:
+    name: migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: connect_startup_rehearsal
+          # Trust is limited to this disposable CI database; the host port binds to loopback.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5432:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d connect_startup_rehearsal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      template-sync-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: connect_startup_rehearsal
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5433:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d connect_startup_rehearsal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      campaign-controls-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: connect_startup_rehearsal
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5434:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d connect_startup_rehearsal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      manual-replies-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: connect_startup_rehearsal
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:5435:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres -d connect_startup_rehearsal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      campaign-controls-redis:
+        image: redis:7-alpine@sha256:8b81dd37ff027bec4e516d41acfbe9fe2460070dc6d4a4570a2ac5b9d59df065
+        ports:
+          - "127.0.0.1:6380:6379"
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies for Drizzle validation
+        run: npm ci --include=dev
+      - name: Apply and verify every migration
+        run: |
+          npm run verify:migrations
+          npm run verify:postgres-migration-contract
+          npm run verify:postgres-migration-parity
+      - name: Verify atomic startup against real PostgreSQL
+        env:
+          CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5432/connect_startup_rehearsal
+        run: node --test tests/integration/startup-migrations-postgres.test.mjs
+      - name: Verify atomic template sync against a separate empty PostgreSQL database
+        env:
+          CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5433/connect_startup_rehearsal
+        run: node --test tests/integration/message-template-sync-postgres.test.mjs
+      - name: Verify campaign controls and send-claim races against PostgreSQL
+        env:
+          CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5434/connect_startup_rehearsal
+        run: node --test tests/integration/campaign-controls-postgres.test.mjs
+      - name: Rehearse manual reply claims, receipts and crash recovery on PostgreSQL
+        env:
+          CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5435/connect_startup_rehearsal
+        run: node --test tests/integration/manual-replies-postgres.test.mjs
+      - name: Verify BullMQ waits and worker restart against Redis
+        env:
+          CONNECT_BULLMQ_INTEGRATION_REDIS_URL: redis://127.0.0.1:6380/0
+        run: npm run test:bullmq-integration
+
+  meta-coexistence:
+    name: meta-coexistence
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: connect_echo_test
+          POSTGRES_DB: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:55439:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U connect_echo_test -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --include=dev
+      - name: Rehearse Coexistence history and revocation on isolated PostgreSQL databases
+        env:
+          CONNECT_META_COEXISTENCE_TEST_URL: postgresql://connect_echo_test@127.0.0.1:55439/postgres
+        run: node scripts/run-meta-coexistence-postgres-integration.mjs
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run TypeScript validation
+        run: npm run typecheck
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+
+  tests-and-build:
+    name: tests-and-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build and run the complete test suite
+        run: npm test

@@ -207,6 +207,8 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
     {
       campaignKey,
       tenantId: 7,
+      recipientPhoneNumber: "+972501234567",
+      attemptCount: 0,
     },
   );
   database.allResults.push(
@@ -268,6 +270,8 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
     {
       campaignKey,
       tenantId: 7,
+      recipientPhoneNumber: "+972501234567",
+      nextDeliveryAttemptNumber: 1,
     },
   );
   assert.equal(
@@ -304,7 +308,7 @@ test("activates, promotes, claims, and releases bounded dispatch rows", async ()
   );
   assert.match(
     database.recordings[4].sql,
-    /status = 'completed'[\s\S]+status IN \([\s\S]+'pending'[\s\S]+'queued'[\s\S]+'sending'/,
+    /status = 'completed'[\s\S]+status IN \([\s\S]+'pending'[\s\S]+'queued'[\s\S]+'sending'[\s\S]+'accepted'/,
   );
   assert.match(
     database.recordings[5].sql,
@@ -357,6 +361,32 @@ test("skips stale consent and claims each valid delivery only once", async () =>
   assert.match(
     database.recordings[1].sql,
     /THEN 'sending'[\s\S]+attempt_count = attempt_count \+ CASE/,
+  );
+});
+
+test("returns only a claimed delivery to queued after an explicit provider deferral", async () => {
+  const database = new RecordingDatabase();
+
+  database.firstResults.push({
+    deliveryKey: firstDeliveryKey,
+  });
+  const repository =
+    createCampaignDispatchRepository(database);
+
+  await repository.markDeferred(
+    firstDeliveryKey,
+    "META_PAIR_RATE_LIMITED",
+    runningAt,
+  );
+
+  assert.deepEqual(database.recordings[0].values, [
+    firstDeliveryKey,
+    "META_PAIR_RATE_LIMITED",
+    runningAt,
+  ]);
+  assert.match(
+    database.recordings[0].sql,
+    /status = 'queued'[\s\S]+status = 'sending'/,
   );
 });
 
@@ -550,6 +580,8 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
     {
       campaignKey,
       tenantId: 1,
+      recipientPhoneNumber: "+972501234567",
+      nextDeliveryAttemptNumber: 1,
     },
   );
 
@@ -589,8 +621,9 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
     { outcome: "duplicate" },
   );
 
-  await dispatch.markAccepted(
+  await dispatch.markRejected(
     secondDeliveryKey,
+    "PROVIDER_REJECTED",
     "2026-07-26T10:03:00.000Z",
   );
   const states = database
@@ -615,9 +648,9 @@ test("runs the full dispatch lifecycle against SQLite", async () => {
     },
     {
       contactId: 2,
-      status: "accepted",
+      status: "failed",
       attemptCount: 1,
-      lastErrorCode: null,
+      lastErrorCode: "PROVIDER_REJECTED",
     },
   ]);
 

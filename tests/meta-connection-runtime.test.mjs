@@ -43,7 +43,7 @@ function connection(status) {
   };
 }
 
-function createRuntimeFixture() {
+function createRuntimeFixture(phoneState = { id: "444444444", is_on_biz_app: false }) {
   const calls = [];
   const storedTokens = new Map();
   const pendingConnection = connection("pending");
@@ -104,6 +104,10 @@ function createRuntimeFixture() {
           return Response.json({
             access_token: "runtime-fixture-access-token",
           });
+        }
+
+        if (url.pathname === "/v21.0/444444444") {
+          return Response.json(phoneState);
         }
 
         if (url.pathname === "/v21.0/222222222") {
@@ -169,6 +173,7 @@ test("wires the concrete Meta adapters into one fail-closed runtime", async () =
       "GET:/v21.0/oauth/access_token",
       "GET:/v21.0/222222222",
       "GET:/v21.0/222222222/phone_numbers",
+      "GET:/v21.0/444444444",
       "capture-assets",
       "store-token",
       "POST:/v21.0/222222222/subscribed_apps",
@@ -256,4 +261,23 @@ test("fails runtime creation before adapters when server configuration is incomp
     /META_APP_SECRET/,
   );
   assert.equal(dependencyCalls, 0);
+});
+
+
+test("cannot bypass the synchronization gate by omitting or forging the client flow", async () => {
+  for (const flow of [undefined, "cloud-api"]) {
+    for (const phoneState of [
+      { id: "444444444", is_on_biz_app: true },
+      { id: "444444444" },
+      { id: "444444444", is_on_biz_app: "false" },
+      { id: "999999999", is_on_biz_app: false },
+    ]) {
+      const fixture = createRuntimeFixture(phoneState);
+      await assert.rejects(fixture.runtime.completeEmbeddedSignup(tenantSession, {
+        ...signupInput, ...(flow === undefined ? {} : { flow }),
+      }), { code: "ASSET_VERIFICATION_FAILED" });
+      assert.ok(fixture.calls.every((call) => call.operation === "fetch" && call.init.method === "GET"));
+      assert.equal(fixture.calls.length, 4);
+    }
+  }
 });

@@ -1,11 +1,12 @@
 import type {
-  MessageContentKind,
   MessageDirection,
   MessageStatus,
+  MessageContentState,
 } from "./conversation.ts";
 import type {
   ConversationStatus,
 } from "./model.ts";
+import type { HistoryDeliveryState, InboxContentKind } from "./inboxHistory.ts";
 
 export type InboxDirectoryStatus =
   | "ready"
@@ -17,8 +18,9 @@ export type InboxDirectoryStatus =
   | "server-error";
 
 export interface InboxConversationLastMessageView {
+  contentState?: Exclude<MessageContentState, "original">;
   direction: MessageDirection;
-  contentKind: MessageContentKind;
+  contentKind: InboxContentKind;
   textContent: string | null;
   occurredAt: string;
 }
@@ -40,16 +42,21 @@ export interface InboxConversationView {
 }
 
 export interface InboxMessageView {
+  source?: "history";
+  historyDeliveryState?: HistoryDeliveryState;
+  contentState?: Exclude<MessageContentState, "original">;
   messageKey: string;
   direction: MessageDirection;
-  contentKind: MessageContentKind;
-  status: MessageStatus;
+  contentKind: InboxContentKind;
+  status: MessageStatus | null;
   textContent: string | null;
   occurredAt: string;
-  statusUpdatedAt: string;
+  statusUpdatedAt: string | null;
 }
 
 export interface InboxConversationThreadView {
+  manualReplies?: readonly import("./manualReply.ts").ManualReplyView[];
+  manualReplyEnabled?: boolean;
   conversation: InboxConversationView;
   messages: readonly InboxMessageView[];
 }

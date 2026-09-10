@@ -99,12 +99,12 @@ export interface PublishedAiAgentDraft {
   publishedVersion: PersistedAiAgentVersion;
 }
 
-interface SaveDraftRequest {
+export interface SaveAiAgentDraftRequest {
   definition: ValidatedAiAgentDefinition;
   expectedAgentVersion: number | null;
 }
 
-interface PublishDraftRequest {
+export interface PublishAiAgentDraftRequest {
   aiAgentKey: string;
   aiAgentVersionKey: string;
   expectedAgentVersion: number;
@@ -172,7 +172,7 @@ function isPositiveInteger(
   );
 }
 
-function parseAiAgentKey(
+export function parseAiAgentKey(
   value: unknown,
 ): string | null {
   return typeof value === "string" &&
@@ -181,9 +181,9 @@ function parseAiAgentKey(
     : null;
 }
 
-function parseSaveDraftRequest(
+export function parseAiAgentSaveDraftRequest(
   input: unknown,
-): SaveDraftRequest {
+): SaveAiAgentDraftRequest {
   if (
     !isRecord(input) ||
     !hasExactKeys(input, [
@@ -218,9 +218,9 @@ function parseSaveDraftRequest(
   };
 }
 
-function parsePublishDraftRequest(
+export function parseAiAgentPublishDraftRequest(
   input: unknown,
-): PublishDraftRequest | null {
+): PublishAiAgentDraftRequest | null {
   if (
     !isRecord(input) ||
     !hasExactKeys(input, [
@@ -554,7 +554,7 @@ export function createAiAgentService(
         "ai.write",
       );
       const request =
-        parseSaveDraftRequest(input);
+        parseAiAgentSaveDraftRequest(input);
 
       try {
         await readSourcesForDefinition(
@@ -658,7 +658,7 @@ export function createAiAgentService(
         "ai.write",
       );
       const request =
-        parsePublishDraftRequest(input);
+        parseAiAgentPublishDraftRequest(input);
 
       if (!request) {
         throw serviceError("INVALID_INPUT");

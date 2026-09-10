@@ -5,6 +5,9 @@ import {
   createCampaignDeliveryQueueMessage,
   type CampaignDeliveryQueueMessage,
 } from "./campaignDeliveryQueueMessage.ts";
+import {
+  QUEUE_BATCH_CAPACITY,
+} from "../../shared/domain/queuePolicy.ts";
 
 const CAMPAIGN_PROMOTION_LIMIT = 50;
 const CAMPAIGN_RECIPIENT_BATCH_SIZE = 50;
@@ -102,20 +105,30 @@ export function createCampaignScheduler(
         };
       }
 
+      const messages = jobs.map((job) => ({
+        body:
+          createCampaignDeliveryQueueMessage(
+            job.deliveryKey,
+          ),
+        contentType: "json" as const,
+      }));
+
+      let publishedCount = 0;
       try {
-        await queue.sendBatch(
-          jobs.map((job) => ({
-            body:
-              createCampaignDeliveryQueueMessage(
-                job.deliveryKey,
-              ),
-            contentType: "json" as const,
-          })),
-        );
+        while (publishedCount < messages.length) {
+          const batch = messages.slice(
+            publishedCount,
+            publishedCount + QUEUE_BATCH_CAPACITY,
+          );
+          await queue.sendBatch(batch);
+          publishedCount += batch.length;
+        }
       } catch {
         try {
           await repository.releaseQueuedRecipients(
-            jobs.map((job) => job.deliveryKey),
+            jobs
+              .slice(publishedCount)
+              .map((job) => job.deliveryKey),
             now,
           );
         } catch {

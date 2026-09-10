@@ -15,55 +15,32 @@ import type {
 import type {
   CampaignPersonalizationField,
 } from "../../shared/domain/campaignAudience";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import {
   activateCampaignAction,
+  controlCampaignAction,
+  refreshCampaignDirectoryAction,
   saveCampaignSnapshotAction,
 } from "../../server/campaigns/campaignActions";
 import type {
   ActivateCampaignActionResult,
+  ControlCampaignActionResult,
   SaveCampaignSnapshotActionResult,
 } from "../../server/campaigns/campaignActionResult";
+import { campaignControlActions, canControlCampaign, type CampaignControlAction } from "../../shared/domain/campaignControl";
+import { campaignControlMessages } from "./campaignControlMessages";
 import { CampaignDraftComposer } from "./CampaignDraftComposer";
+import { readCampaignMessages } from "./campaignMessages";
 
-const personalizationFields: readonly {
-  value: CampaignPersonalizationField;
-  label: string;
-}[] = [
-  { value: "firstName", label: "שם פרטי" },
-  { value: "lastName", label: "שם משפחה" },
-  { value: "email", label: "דוא״ל" },
-  { value: "company", label: "חברה" },
-  { value: "phoneNumber", label: "מספר טלפון" },
+const personalizationFields: readonly CampaignPersonalizationField[] = [
+  "firstName",
+  "lastName",
+  "email",
+  "company",
+  "phoneNumber",
 ];
-
-const campaignStatusLabels: Record<
-  CampaignView["status"],
-  string
-> = {
-  draft: "טיוטה",
-  scheduled: "מתוזמן",
-  running: "בתהליך",
-  paused: "מושהה",
-  completed: "הושלם",
-  cancelled: "בוטל",
-  failed: "נכשל",
-};
-
-const directoryFailureMessages: Record<
-  Exclude<CampaignDirectoryStatus, "ready">,
-  string
-> = {
-  "configuration-required":
-    "Clerk או D1 אינם מוגדרים. מוצג Rehearsal מקומי בלבד, ללא Campaign עסקי.",
-  "onboarding-required":
-    "נדרש להשלים יצירת סביבת עבודה לפני ניהול קמפיינים.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה לפני ניהול קמפיינים.",
-  "permission-denied":
-    "לתפקיד הנוכחי אין הרשאה לקריאת קמפיינים.",
-  "server-error":
-    "לא ניתן לטעון כרגע את הקמפיינים מהשרת.",
-};
 
 function utcTimestamp(
   localValue: string,
@@ -90,80 +67,6 @@ function utcTimestamp(
   return candidate;
 }
 
-function personalizationLabel(key: string): string {
-  if (key === "url:1") {
-    return "משתנה Dynamic URL";
-  }
-
-  const variableNumber = key.replace("body:", "");
-  return `משתנה גוף {{${variableNumber}}}`;
-}
-
-function saveResultMessage(
-  result: SaveCampaignSnapshotActionResult,
-): string {
-  const messages: Record<
-    SaveCampaignSnapshotActionResult["status"],
-    string
-  > = {
-    saved:
-      "ה־Campaign נשמר כטיוטה קבועה עם Snapshot של התבנית והקהל.",
-    "invalid-input":
-      "פרטי הקמפיין אינם תקינים. יש לבדוק שם, מועד ומיפויים.",
-    "profile-required":
-      "נדרש לשמור פרופיל עסק ואזור זמן לפני יצירת קמפיין.",
-    "template-unavailable":
-      "התבנית אינה זמינה עוד או שאיבדה את אישור Meta.",
-    "audience-invalid":
-      "הקהל ריק, אינו כשיר או שחסרים ערכי התאמה אמיתיים.",
-    "configuration-required":
-      "שמירה קבועה דורשת Clerk ו־D1 מוגדרים.",
-    unauthenticated:
-      "נדרשת התחברות לפני שמירת קמפיין.",
-    "onboarding-required":
-      "נדרש להשלים יצירת סביבת עבודה.",
-    "tenant-selection-required":
-      "יש לבחור סביבת עבודה פעילה.",
-    "permission-denied":
-      "אין הרשאה לשמור קמפיין.",
-    "server-error":
-      "שמירת הקמפיין נכשלה בלי לחשוף פרטי שרת.",
-  };
-
-  return messages[result.status];
-}
-
-function activationResultMessage(
-  result: ActivateCampaignActionResult,
-): string {
-  const messages: Record<
-    ActivateCampaignActionResult["status"],
-    string
-  > = {
-    activated:
-      "הקמפיין הופעל ויעבור ל־Scheduler במועד המתאים.",
-    "invalid-input":
-      "זהות הקמפיין או הגרסה אינן תקינות.",
-    "state-conflict":
-      "הקמפיין השתנה או שכבר הופעל. יש לרענן את הרשימה.",
-    "delivery-configuration-required":
-      "ההפעלה חסומה עד חיבור Adapter שליחה אמיתי.",
-    "configuration-required":
-      "ההפעלה דורשת Clerk ו־D1 מוגדרים.",
-    unauthenticated:
-      "נדרשת התחברות לפני הפעלת קמפיין.",
-    "onboarding-required":
-      "נדרש להשלים יצירת סביבת עבודה.",
-    "tenant-selection-required":
-      "יש לבחור סביבת עבודה פעילה.",
-    "permission-denied":
-      "אין הרשאה להפעיל קמפיין.",
-    "server-error":
-      "הפעלת הקמפיין נכשלה בלי לחשוף פרטי שרת.",
-  };
-
-  return messages[result.status];
-}
 
 function resultTone(
   status: string,
@@ -176,6 +79,7 @@ function resultTone(
 
 export function CampaignManager({
   authEnabled,
+  language,
   initialCampaigns,
   initialTemplates,
   initialAudiences,
@@ -184,6 +88,7 @@ export function CampaignManager({
   deliveryStatus,
 }: {
   authEnabled: boolean;
+  language: InterfaceLanguage;
   initialCampaigns: readonly CampaignView[];
   initialTemplates:
     readonly CampaignTemplateOptionView[];
@@ -193,6 +98,9 @@ export function CampaignManager({
   deliveryStatus:
     CampaignDeliveryReadinessStatus;
 }) {
+  const messages = readCampaignMessages(language);
+  const controls = campaignControlMessages[language];
+  const [controlResult, setControlResult] = useState<ControlCampaignActionResult | null>(null);
   const [campaigns, setCampaigns] = useState([
     ...initialCampaigns,
   ]);
@@ -239,13 +147,13 @@ export function CampaignManager({
           <span aria-hidden="true">i</span>
           <p>
             {
-              directoryFailureMessages[
+              messages.manager.directoryFailures[
                 "configuration-required"
               ]
             }
           </p>
         </div>
-        <CampaignDraftComposer />
+        <CampaignDraftComposer language={language} />
       </div>
     );
   }
@@ -254,8 +162,8 @@ export function CampaignManager({
     return (
       <section className="card campaign-directory-empty">
         <span aria-hidden="true">!</span>
-        <strong>הקמפיינים אינם זמינים</strong>
-        <p>{directoryFailureMessages[initialStatus]}</p>
+        <strong>{messages.manager.unavailableTitle}</strong>
+        <p>{messages.manager.directoryFailures[initialStatus]}</p>
       </section>
     );
   }
@@ -398,16 +306,26 @@ export function CampaignManager({
     });
   };
 
+  const controlCampaign = (campaign: CampaignView, action: CampaignControlAction) => {
+    if (!canWrite || isPending || !canControlCampaign(campaign.status, action) ||
+        (action === "resume" && deliveryStatus !== "ready")) return;
+    startTransition(async () => {
+      const result = await controlCampaignAction({ campaignKey: campaign.campaignKey,
+        expectedVersion: campaign.version, action }).catch(() => ({ status: "server-error" as const }));
+      setControlResult(result);
+      setActivationResult(null);
+      if (result.status === "controlled") {
+        setCampaigns((current) => current.map((item) => item.campaignKey === result.campaign.campaignKey ? result.campaign : item));
+      }
+    });
+  };
+
   return (
     <div className="campaign-server-shell">
       {deliveryStatus !== "ready" ? (
         <div className="inline-notice warning">
           <span aria-hidden="true">!</span>
-          <p>
-            ניתן לשמור Campaign אמיתי כטיוטה. ההפעלה
-            חסומה עד חיבור Adapter שליחה אמיתי וקביעת
-            מדיניות הקצב וה־Retry.
-          </p>
+          <p>{messages.manager.deliveryUnavailable}</p>
         </div>
       ) : null}
 
@@ -416,26 +334,25 @@ export function CampaignManager({
           <div className="card-header">
             <div>
               <span className="card-kicker">
-                Server campaign
+                {messages.manager.form.kicker}
               </span>
-              <h2>יצירת טיוטת קמפיין</h2>
+              <h2>{messages.manager.form.title}</h2>
             </div>
             <span
               className={`status-pill ${
                 canWrite ? "success" : "warning"
               }`}
             >
-              {canWrite ? "שמירה ב־D1" : "קריאה בלבד"}
+              {canWrite
+                ? messages.manager.form.writable
+                : messages.manager.form.readOnly}
             </span>
           </div>
 
           {initialTemplates.length === 0 ? (
             <div className="inline-notice warning">
               <span aria-hidden="true">i</span>
-              <p>
-                אין תבנית מאושרת המחוברת לזהות Meta,
-                ולכן לא ניתן ליצור Campaign.
-              </p>
+              <p>{messages.manager.form.noTemplate}</p>
             </div>
           ) : null}
 
@@ -444,7 +361,7 @@ export function CampaignManager({
             onSubmit={saveCampaign}
           >
             <label>
-              <span>שם הקמפיין</span>
+              <span>{messages.manager.form.name}</span>
               <input
                 value={name}
                 maxLength={160}
@@ -457,7 +374,7 @@ export function CampaignManager({
             </label>
 
             <label>
-              <span>תבנית מאושרת</span>
+              <span>{messages.manager.form.approvedTemplate}</span>
               <select
                 value={templateKey}
                 onChange={(event) => {
@@ -483,7 +400,7 @@ export function CampaignManager({
             </label>
 
             <fieldset className="delivery-fieldset">
-              <legend>מקור הקהל</legend>
+              <legend>{messages.manager.form.audienceLegend}</legend>
               <label
                 className={
                   audienceKind === "all"
@@ -500,10 +417,8 @@ export function CampaignManager({
                   }
                 />
                 <span>
-                  <strong>כל אנשי הקשר הכשירים</strong>
-                  <small>
-                    Consent ו־Unsubscribe נבדקים בשרת.
-                  </small>
+                  <strong>{messages.manager.form.allContacts}</strong>
+                  <small>{messages.manager.form.allContactsDetail}</small>
                 </span>
               </label>
               <label
@@ -525,10 +440,8 @@ export function CampaignManager({
                   }
                 />
                 <span>
-                  <strong>רשימה</strong>
-                  <small>
-                    מקור Tenant קבוע מתוך D1.
-                  </small>
+                  <strong>{messages.manager.form.list}</strong>
+                  <small>{messages.manager.form.persistentAudienceDetail}</small>
                 </span>
               </label>
               <label
@@ -550,17 +463,15 @@ export function CampaignManager({
                   }
                 />
                 <span>
-                  <strong>תגית</strong>
-                  <small>
-                    מקור Tenant קבוע מתוך D1.
-                  </small>
+                  <strong>{messages.manager.form.tag}</strong>
+                  <small>{messages.manager.form.persistentAudienceDetail}</small>
                 </span>
               </label>
             </fieldset>
 
             {audienceKind === "list" ? (
               <label>
-                <span>בחירת רשימה</span>
+                <span>{messages.manager.form.chooseList}</span>
                 <select
                   value={listId ?? ""}
                   onChange={(event) =>
@@ -573,8 +484,10 @@ export function CampaignManager({
                 >
                   {initialAudiences.lists.map((list) => (
                     <option value={list.id} key={list.id}>
-                      {list.name} · {list.contactCount} קשרים
-                      לפני בדיקת כשירות
+                      {messages.manager.form.groupOption(
+                        list.name,
+                        list.contactCount,
+                      )}
                     </option>
                   ))}
                 </select>
@@ -583,7 +496,7 @@ export function CampaignManager({
 
             {audienceKind === "tag" ? (
               <label>
-                <span>בחירת תגית</span>
+                <span>{messages.manager.form.chooseTag}</span>
                 <select
                   value={tagId ?? ""}
                   onChange={(event) =>
@@ -596,8 +509,10 @@ export function CampaignManager({
                 >
                   {initialAudiences.tags.map((tag) => (
                     <option value={tag.id} key={tag.id}>
-                      {tag.name} · {tag.contactCount} קשרים
-                      לפני בדיקת כשירות
+                      {messages.manager.form.groupOption(
+                        tag.name,
+                        tag.contactCount,
+                      )}
                     </option>
                   ))}
                 </select>
@@ -607,17 +522,18 @@ export function CampaignManager({
             {requiredKeys.length > 0 ? (
               <fieldset className="campaign-variable-mapping">
                 <legend>
-                  התאמת משתנים לשדות Contact
+                  {messages.manager.form.mappingLegend}
                 </legend>
-                <p>
-                  כל ערך מגיע משדה אמיתי ב־D1. אין
-                  ברירת מחדל ואין המצאת מידע.
-                </p>
+                <p>{messages.manager.form.mappingDescription}</p>
                 <div className="campaign-server-mapping">
                   {requiredKeys.map((key) => (
                     <label key={key}>
                       <span>
-                        {personalizationLabel(key)}
+                        {key === "url:1"
+                          ? messages.manager.dynamicUrlVariable
+                          : messages.manager.bodyVariable(
+                              key.replace("body:", ""),
+                            )}
                       </span>
                       <select
                         value={
@@ -635,15 +551,19 @@ export function CampaignManager({
                         required
                       >
                         <option value="">
-                          בחירת שדה Contact
+                          {messages.manager.form.chooseContactField}
                         </option>
                         {personalizationFields.map(
                           (field) => (
                             <option
-                              value={field.value}
-                              key={field.value}
+                              value={field}
+                              key={field}
                             >
-                              {field.label}
+                              {
+                                messages.manager.personalizationFields[
+                                  field
+                                ]
+                              }
                             </option>
                           ),
                         )}
@@ -655,14 +575,12 @@ export function CampaignManager({
             ) : (
               <div className="inline-notice success">
                 <span aria-hidden="true">✓</span>
-                <p>
-                  התבנית אינה דורשת ערכי התאמה.
-                </p>
+                <p>{messages.manager.form.noMappingRequired}</p>
               </div>
             )}
 
             <fieldset className="delivery-fieldset">
-              <legend>מועד</legend>
+              <legend>{messages.manager.form.timingLegend}</legend>
               <label
                 className={
                   deliveryMode === "immediate"
@@ -681,10 +599,8 @@ export function CampaignManager({
                   }
                 />
                 <span>
-                  <strong>מיידי</strong>
-                  <small>
-                    ירוץ לאחר Activation וה־Cron הבא.
-                  </small>
+                  <strong>{messages.manager.form.immediate}</strong>
+                  <small>{messages.manager.form.immediateDetail}</small>
                 </span>
               </label>
               <label
@@ -705,17 +621,15 @@ export function CampaignManager({
                   }
                 />
                 <span>
-                  <strong>מתוזמן</strong>
-                  <small>
-                    בשלב זה המועד מוזן במפורש ב־UTC.
-                  </small>
+                  <strong>{messages.manager.form.scheduled}</strong>
+                  <small>{messages.manager.form.scheduledDetail}</small>
                 </span>
               </label>
             </fieldset>
 
             {deliveryMode === "scheduled" ? (
               <label>
-                <span>תאריך ושעת UTC</span>
+                <span>{messages.manager.form.utcDateTime}</span>
                 <input
                   type="datetime-local"
                   value={scheduledUtc}
@@ -725,8 +639,7 @@ export function CampaignManager({
                   required
                 />
                 <small className="schedule-boundary-note">
-                  המערכת אינה מנחשת אזור זמן מתוך
-                  הדפדפן.
+                  {messages.manager.form.timezoneBoundary}
                 </small>
               </label>
             ) : null}
@@ -738,8 +651,8 @@ export function CampaignManager({
                 disabled={!canSave}
               >
                 {isPending
-                  ? "שומר…"
-                  : "שמירת Campaign ב־D1"}
+                  ? messages.manager.form.saving
+                  : messages.manager.form.save}
               </button>
             </div>
           </form>
@@ -756,7 +669,7 @@ export function CampaignManager({
                   ? "✓"
                   : "!"}
               </span>
-              <p>{saveResultMessage(saveResult)}</p>
+              <p>{messages.manager.saveResults[saveResult.status]}</p>
             </div>
           ) : null}
         </section>
@@ -765,9 +678,9 @@ export function CampaignManager({
           <div className="card-header">
             <div>
               <span className="card-kicker">
-                D1 source of truth
+                {messages.manager.directory.kicker}
               </span>
-              <h2>קמפיינים שמורים</h2>
+              <h2>{messages.manager.directory.title}</h2>
             </div>
             <span className="status-pill">
               {campaigns.length}
@@ -787,21 +700,30 @@ export function CampaignManager({
                   : "!"}
               </span>
               <p>
-                {activationResultMessage(
-                  activationResult,
-                )}
+                {
+                  messages.manager.activationResults[
+                    activationResult.status
+                  ]
+                }
               </p>
             </div>
           ) : null}
 
+          <p>{controls.notice}</p>
+          <button className="secondary-button" type="button" disabled={isPending}
+            onClick={() => startTransition(async () => {
+              const result = await refreshCampaignDirectoryAction().catch(() => ({ status: "server-error" as const }));
+              if (result.status === "ready") { setCampaigns([...result.campaigns]); setControlResult(null); }
+              else setControlResult({ status: result.status });
+            })}>{controls.refresh}</button>
+          {controlResult ? <p role="status" className={`inline-notice ${controlResult.status === "controlled" ? "success" : "warning"}`}>
+            {controls.results[controlResult.status]}
+          </p> : null}
           {campaigns.length === 0 ? (
             <div className="campaign-directory-empty">
               <span aria-hidden="true">◎</span>
-              <strong>אין קמפיינים שמורים</strong>
-              <p>
-                טיוטה תופיע כאן רק לאחר שמירה מוצלחת
-                בשרת.
-              </p>
+              <strong>{messages.manager.directory.emptyTitle}</strong>
+              <p>{messages.manager.directory.emptyDescription}</p>
             </div>
           ) : (
             <div className="campaign-records">
@@ -817,10 +739,13 @@ export function CampaignManager({
                     </span>
                     <h3>{campaign.name}</h3>
                     <p>
-                      {campaign.recipientCount} נמענים ·{" "}
+                      {messages.manager.directory.recipients(
+                        campaign.recipientCount,
+                      )}{" "}
+                      ·{" "}
                       {campaign.deliveryMode ===
                       "immediate"
-                        ? "מיידי"
+                        ? messages.manager.directory.immediate
                         : `UTC ${campaign.scheduledAt}`}
                     </p>
                   </div>
@@ -837,13 +762,13 @@ export function CampaignManager({
                       }`}
                     >
                       {
-                        campaignStatusLabels[
+                        messages.manager.campaignStatuses[
                           campaign.status
                         ]
                       }
                     </span>
                     <small>
-                      גרסה {campaign.version}
+                      {messages.manager.directory.version(campaign.version)}
                     </small>
                   </div>
                   <button
@@ -861,10 +786,15 @@ export function CampaignManager({
                   >
                     {campaign.status === "draft"
                       ? deliveryStatus === "ready"
-                        ? "הפעלת קמפיין"
-                        : "הפעלה חסומה"
-                      : "כבר הופעל"}
+                        ? messages.manager.directory.activate
+                        : messages.manager.directory.activationBlocked
+                      : messages.manager.directory.alreadyActivated}
                   </button>
+                  {canWrite ? campaignControlActions.filter((action) => canControlCampaign(campaign.status, action)).map((action) => (
+                    <button className="secondary-button" type="button" key={action}
+                      disabled={isPending || (action === "resume" && deliveryStatus !== "ready")}
+                      onClick={() => controlCampaign(campaign, action)}>{controls.actions[action]}</button>
+                  )) : null}
                 </article>
               ))}
             </div>

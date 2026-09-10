@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   deriveBotFlowBlockKey,
   deriveBotFlowKey,
+  deriveBotFlowOptionKey,
   deriveBotFlowVersionKey,
 } from "../server/bot/botFlowKey.ts";
 import {
@@ -72,6 +73,69 @@ async function definitionFixture(
     botFlowVersionKey,
     definition,
     versionNumber,
+  };
+}
+
+async function buttonDefinitionFixture({
+  optionCount,
+  longLabel = false,
+}) {
+  const name = `WhatsApp buttons ${optionCount} ${longLabel}`;
+  const botFlowKey = await deriveBotFlowKey(7, name);
+  const triggerKey =
+    await deriveBotFlowBlockKey(botFlowKey, 1);
+  const buttonsKey =
+    await deriveBotFlowBlockKey(botFlowKey, 2);
+  const endKeys = await Promise.all(
+    Array.from({ length: optionCount }, (_, index) =>
+      deriveBotFlowBlockKey(botFlowKey, index + 3),
+    ),
+  );
+  const options = await Promise.all(
+    endKeys.map(async (endKey, index) => ({
+      optionKey: await deriveBotFlowOptionKey(
+        buttonsKey,
+        index + 1,
+      ),
+      label: longLabel && index === 0
+        ? "א".repeat(21)
+        : `אפשרות ${index + 1}`,
+      nextBlockKey: endKey,
+    })),
+  );
+  const definition = {
+    name,
+    blocks: [
+      {
+        blockKey: triggerKey,
+        type: "trigger",
+        nextBlockKey: buttonsKey,
+      },
+      {
+        blockKey: buttonsKey,
+        type: "buttons",
+        text: "בחרו אפשרות",
+        options,
+      },
+      ...endKeys.map((blockKey) => ({
+        blockKey,
+        type: "end",
+      })),
+    ],
+  };
+  const botFlowVersionKey =
+    await deriveBotFlowVersionKey(
+      7,
+      botFlowKey,
+      1,
+      definition,
+    );
+
+  return {
+    botFlowKey,
+    botFlowVersionKey,
+    definition,
+    versionNumber: 1,
   };
 }
 
@@ -380,6 +444,326 @@ test("accepts the bounded composer request and derives every graph key on the se
   );
 });
 
+test("accepts an ordered reply sequence without accepting browser block keys", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "מענה מדורג לפניות שירות",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "contains",
+      replyTexts: [
+        "קיבלנו את פנייתך.",
+        "נציג יחזור אליך בהקדם.",
+        "אין צורך לשלוח הודעה נוספת.",
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  assert.equal(
+    repository.calls.saves[0]
+      .definition.blocks.length,
+    7,
+  );
+  assert.equal(
+    repository.calls.saves[0]
+      .definition.blocks.filter(
+        (block) => block.type === "text",
+      ).length,
+    3,
+  );
+  assert.ok(
+    repository.calls.saves[0]
+      .definition.blocks.every(
+        (block) =>
+          /^bot_block_v1_[0-9a-f]{64}$/.test(
+            block.blockKey,
+          ),
+      ),
+  );
+});
+
+test("accepts a button menu while deriving block and option identities only on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "ניתוב למחלקה",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: [
+        "קיבלנו את פנייתך.",
+        "בחרו מחלקה.",
+      ],
+      buttonText: "באיזו מחלקה לבחור?",
+      options: [
+        {
+          label: "מכירות",
+          replyText: "נעביר למכירות.",
+        },
+        {
+          label: "שירות",
+          replyText: "נעביר לשירות.",
+        },
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const buttonBlock = definition.blocks.find(
+    (block) => block.type === "buttons",
+  );
+
+  assert.equal(definition.blocks.length, 9);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.ok(buttonBlock);
+  assert.ok(
+    buttonBlock.options.every((option) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        option.optionKey,
+      ),
+    ),
+  );
+});
+
+test("accepts two sequential button questions while deriving every graph identity on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "ניתוב מדורג למחלקה",
+      keywords: ["עזרה", "שירות"],
+      matchMode: "exact",
+      introTexts: ["נמצא יחד את המחלקה המתאימה."],
+      firstButtonText: "באיזה נושא הפנייה?",
+      branches: [
+        {
+          label: "חשבונות",
+          buttonText: "איזו פעולת חשבון נדרשת?",
+          options: [
+            {
+              label: "חשבונית",
+              replyText: "נעביר לטיפול בחשבוניות.",
+            },
+            {
+              label: "זיכוי",
+              replyText: "נעביר לטיפול בזיכויים.",
+            },
+          ],
+        },
+        {
+          label: "תמיכה",
+          buttonText: "באיזה מוצר נדרשת תמיכה?",
+          options: [
+            {
+              label: "אתר",
+              replyText: "נעביר לתמיכת האתר.",
+            },
+          ],
+        },
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const buttonBlocks = definition.blocks.filter(
+    (block) => block.type === "buttons",
+  );
+  const optionKeys = buttonBlocks.flatMap(
+    (block) =>
+      block.options.map(
+        (option) => option.optionKey,
+      ),
+  );
+
+  assert.equal(definition.blocks.length, 11);
+  assert.equal(buttonBlocks.length, 3);
+  assert.equal(optionKeys.length, 5);
+  assert.equal(new Set(optionKeys).size, 5);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.ok(
+    optionKeys.every((optionKey) =>
+      /^bot_option_v1_[0-9a-f]{64}$/.test(
+        optionKey,
+      ),
+    ),
+  );
+});
+
+test("accepts a bounded condition while deriving every branch identity on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "פיצול מענה לפי מצב שיחה",
+      keywords: ["בדיקה"],
+      matchMode: "exact",
+      introTexts: ["הבקשה התקבלה."],
+      condition: {
+        fact: "conversation-status",
+        operator: "equals",
+        value: "bot_active",
+        matchedReplyText: "הבוט ממשיך בטיפול.",
+        unmatchedReplyText: "הטיפול ייבדק מחדש.",
+      },
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const condition = definition.blocks.find(
+    (block) => block.type === "condition",
+  );
+
+  assert.equal(definition.blocks.length, 8);
+  assert.ok(condition);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.notEqual(
+    condition.matchedBlockKey,
+    condition.unmatchedBlockKey,
+  );
+});
+
+test("accepts a keyword handoff that contains no reply block", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "בקשה לדבר עם נציג",
+      keywords: ["נציג", "אדם"],
+      matchMode: "contains",
+      handoffReason: "customer-request",
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+  const keyword = definition.blocks.find(
+    (block) => block.type === "keyword",
+  );
+
+  assert.equal(definition.blocks.length, 4);
+  assert.equal(
+    definition.blocks.some(
+      (block) => block.type === "text",
+    ),
+    false,
+  );
+  assert.equal(
+    definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        keyword.matchedBlockKey,
+    ).type,
+    "handoff",
+  );
+  assert.equal(
+    definition.blocks.find(
+      (block) =>
+        block.blockKey ===
+        keyword.unmatchedBlockKey,
+    ).type,
+    "end",
+  );
+});
+
+test("accepts a free graph draft while deriving every persisted identity on the server", async () => {
+  const repository = repositoryFixture();
+
+  await repository.service.saveDraft(
+    session(),
+    {
+      name: "ניתוב חופשי",
+      keywords: ["ניתוב"],
+      matchMode: "contains",
+      entryDraftNodeKey: "draft_node_v1_1",
+      nodes: [
+        {
+          draftNodeKey: "draft_node_v1_1",
+          type: "condition",
+          fact: "last-inbound-text",
+          operator: "contains",
+          value: "חיוב",
+          matchedDraftNodeKey:
+            "draft_node_v1_2",
+          unmatchedDraftNodeKey:
+            "draft_node_v1_4",
+        },
+        {
+          draftNodeKey: "draft_node_v1_2",
+          type: "text",
+          text: "הפנייה תועבר לבדיקת חיוב.",
+          nextDraftNodeKey: "draft_node_v1_3",
+        },
+        {
+          draftNodeKey: "draft_node_v1_3",
+          type: "end",
+        },
+        {
+          draftNodeKey: "draft_node_v1_4",
+          type: "handoff",
+          reason: "flow-rule",
+        },
+      ],
+      expectedFlowVersion: null,
+    },
+  );
+
+  assert.equal(repository.calls.saves.length, 1);
+  const definition =
+    repository.calls.saves[0].definition;
+
+  assert.equal(definition.blocks.length, 7);
+  assert.ok(
+    definition.blocks.every((block) =>
+      /^bot_block_v1_[0-9a-f]{64}$/.test(
+        block.blockKey,
+      ),
+    ),
+  );
+  assert.equal(
+    JSON.stringify(definition).includes(
+      "draft_node_v1_",
+    ),
+    false,
+  );
+});
+
 test("derives the next version from stored state without accepting a browser ordinal", async () => {
   const first = await definitionFixture(1);
   const second = await definitionFixture(2);
@@ -505,6 +889,49 @@ test("publishes only a stored version whose deterministic identity is valid", as
       },
     ],
   );
+});
+
+test("blocks publishing flows that exceed official reply-button limits", async () => {
+  const cases = [
+    {
+      fixture: await buttonDefinitionFixture({
+        optionCount: 4,
+      }),
+      issue: "whatsapp-button-count-exceeded",
+    },
+    {
+      fixture: await buttonDefinitionFixture({
+        optionCount: 3,
+        longLabel: true,
+      }),
+      issue: "whatsapp-button-label-too-long",
+    },
+  ];
+
+  for (const current of cases) {
+    const repository = repositoryFixture({
+      findVersion: version(current.fixture),
+    });
+
+    await assert.rejects(
+      repository.service.publishDraft(
+        session(),
+        {
+          botFlowKey: current.fixture.botFlowKey,
+          botFlowVersionKey:
+            current.fixture.botFlowVersionKey,
+          expectedFlowVersion: 1,
+        },
+      ),
+      (error) =>
+        error instanceof BotFlowInputError &&
+        error.issues.includes(current.issue),
+    );
+    assert.deepEqual(
+      repository.calls.publications,
+      [],
+    );
+  }
 });
 
 test("maps repository outcomes to bounded service errors", async () => {

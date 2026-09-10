@@ -1,3 +1,4 @@
+import { isMetaAccountLifecycleEnvelope } from "./metaAccountLifecycle.ts";
 import type {
   MetaRepository,
 } from "../../db/metaRepository.ts";
@@ -16,8 +17,11 @@ import {
 import {
   createMetaWebhookQueueMessage,
   MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
-  type MetaWebhookQueueBinding,
+  isMetaWebhookPayloadLimit,
 } from "./metaWebhookQueueMessage.ts";
+import type {
+  MetaWebhookQueuePort,
+} from "./metaWebhookQueuePort.ts";
 
 export {
   MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
@@ -53,11 +57,13 @@ export interface MetaWebhookQueuePublisher {
 }
 
 export function createMetaWebhookQueuePublisher(
-  repository: MetaRepository,
-  queue: MetaWebhookQueueBinding,
+  repository: Pick<MetaRepository, "findConnectionByWabaId">,
+  queue: MetaWebhookQueuePort,
   appSecret: string,
   rateLimitGuard: RateLimitGuard,
+  maximumPayloadBytes = MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
 ): MetaWebhookQueuePublisher {
+  if (!isMetaWebhookPayloadLimit(maximumPayloadBytes)) throw new Error("Meta webhook payload limit is invalid");
   if (
     typeof appSecret !== "string" ||
     appSecret.trim().length === 0
@@ -65,7 +71,7 @@ export function createMetaWebhookQueuePublisher(
     throw new Error("META_APP_SECRET must be configured");
   }
 
-  if (!queue || typeof queue.send !== "function") {
+  if (!queue || typeof queue.publish !== "function") {
     throw new Error(
       "META_WEBHOOK_QUEUE binding must be configured",
     );
@@ -94,7 +100,7 @@ export function createMetaWebhookQueuePublisher(
 
       if (
         rawPayload.byteLength >
-        MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES
+        maximumPayloadBytes
       ) {
         throw new MetaWebhookQueuePublisherError(
           "PAYLOAD_TOO_LARGE",
@@ -156,7 +162,7 @@ export function createMetaWebhookQueuePublisher(
         envelope.wabaId,
       );
 
-      if (!connection || connection.status !== "connected") {
+      if (!connection || (connection.status !== "connected" && !isMetaAccountLifecycleEnvelope(envelope))) {
         throw new MetaWebhookIngressError(
           "CONNECTION_NOT_FOUND",
           "Meta webhook WABA is not connected to a tenant",
@@ -164,14 +170,11 @@ export function createMetaWebhookQueuePublisher(
       }
 
       try {
-        await queue.send(
+        await queue.publish(
           createMetaWebhookQueueMessage(
             rawPayload,
             signatureHeader,
           ),
-          {
-            contentType: "v8",
-          },
         );
       } catch {
         throw new MetaWebhookQueuePublisherError(

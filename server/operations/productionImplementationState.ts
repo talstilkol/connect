@@ -1,6 +1,7 @@
 export interface ProductionImplementationState {
   metaWebhookQueue: boolean;
   campaignDeliveryQueue: boolean;
+  targetQueueAdapter: boolean;
   campaignScheduler: boolean;
   campaignDeliveryAdapter: boolean;
   botReplyDeliveryAdapter: boolean;
@@ -18,6 +19,7 @@ export const currentProductionImplementationState:
   ProductionImplementationState = Object.freeze({
     metaWebhookQueue: true,
     campaignDeliveryQueue: true,
+    targetQueueAdapter: false,
     campaignScheduler: true,
     campaignDeliveryAdapter: false,
     botReplyDeliveryAdapter: false,

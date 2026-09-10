@@ -19,6 +19,7 @@ declare module "cloudflare:workers" {
     META_WEBHOOK_VERIFY_TOKEN?: string;
     META_GRAPH_API_VERSION?: string;
     META_CREDENTIAL_ENCRYPTION_KEY_V1?: string;
+    WHATSAPP_RATE_LIMIT_HMAC_KEY_V1?: string;
     META_WEBHOOK_QUEUE?: MetaWebhookQueueBinding;
     META_WEBHOOK_RATE_LIMITER?: RateLimitBinding;
     TENANT_MUTATION_RATE_LIMITER?: RateLimitBinding;

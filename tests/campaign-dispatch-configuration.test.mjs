@@ -33,6 +33,13 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
     new URL("../worker/index.ts", import.meta.url),
     "utf8",
   );
+  const runtimeSource = await readFile(
+    new URL(
+      "../server/campaigns/campaignDispatchRuntime.ts",
+      import.meta.url,
+    ),
+    "utf8",
+  );
 
   assert.match(
     workerSource,
@@ -48,6 +55,26 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   );
   assert.match(
     workerSource,
+    /createD1CampaignDeliveryRateLimitPolicySource\([\s\S]+createWhatsappCampaignDeliveryPolicyRepository\([\s\S]+env\.DB/,
+  );
+  assert.doesNotMatch(
+    workerSource,
+    /createUnavailableCampaignDeliveryRateLimitPolicySource/,
+  );
+  assert.match(
+    runtimeSource,
+    /createCampaignDeliveryAdmission\([\s\S]+createWhatsappRateLimitRepository\(database\)/,
+  );
+  assert.match(
+    runtimeSource,
+    /createCampaignDeliveryProviderRepository\([\s\S]+database/,
+  );
+  assert.match(
+    runtimeSource,
+    /createCampaignDeliveryRateLimitContextResolver\([\s\S]+createMetaRepository\(database\)[\s\S]+createWhatsappRateLimitKeyDeriver/,
+  );
+  assert.match(
+    workerSource,
     /controller\.cron !== CAMPAIGN_SCHEDULER_CRON/,
   );
   assert.match(
@@ -57,6 +84,10 @@ test("routes campaign cron and queue through fail-closed runtime handlers", asyn
   assert.match(
     workerSource,
     /createTeamInvitationExpirationScheduledHandler/,
+  );
+  assert.match(
+    workerSource,
+    /createCampaignDeliveryStatusReconciler\([\s\S]+createCampaignDeliveryProviderRepository\([\s\S]+createWhatsappRateLimitRepository/,
   );
   assert.match(
     workerSource,

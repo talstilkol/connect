@@ -1,0 +1,439 @@
+{
+  "artifactId": "CONNECT-B0-V6-PORTABLE-CAUSAL-VECTOR-CORPUS-INDEX-2026-08-30-G0",
+  "artifactClass": "IMMUTABLE-PORTABLE-ROOTED-ORACLE-BODY-AND-NEGATIVE-VECTOR-CORPUS-INDEX;SHARDED-PUBLIC-GIT-PUBLISHABLE;PLANNING-ONLY;NOT-OPERATIONAL-EVIDENCE;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "schemaVersion": 1,
+  "subjectSha256": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+  "normativeRegistrySha256": "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4",
+  "sourceMemberSpanIndexSha256": "70185876e137f9981ab3dbcfa942ecdbbf2ce99e0e32750801db4a7a0791e6b5",
+  "closureCrosswalkSha256": "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141",
+  "oracleLanguage": {
+    "languageId": "B0V6-PORTABLE-ORACLE-AST-V1",
+    "version": 1,
+    "valueReferences": [
+      "path",
+      "const"
+    ],
+    "operators": {
+      "ASSERT_TYPED_AXIS": "Evaluate axis.kind using the exact closed semantics in axisKindSemantics.",
+      "EXACT_UTF8_FIELD": "base64Decode(sourceValueBase64) byte-equals base64Decode(candidateValueBase64) and SHA256(candidateBytes) equals sourceSha256.",
+      "EVAL_CONSTRAINT_AST": "Evaluate the embedded closed constraint AST against domainState; no expected-result or planningObserved field is readable.",
+      "FILE_SPAN_SHA256": "Resolve one repo-relative nonsymlink file, verify artifact SHA-256, slice [startByteInclusive,endByteExclusive), and verify exact byteLength and member SHA-256.",
+      "EXACT_SELECTOR_IN_FIELD": "Execute FILE_SPAN_SHA256 for the source field, then verify the exact nested selector interval, base64 bytes and SHA-256.",
+      "SEMANTIC_EXTRACTION_EQ": "Decode exactValueUtf8Base64, independently lex and segment every byte, derive NamedUses and require byte-identical extraction projection.",
+      "PACKAGE_ROOT_EQ": "Strict-base64 decode each legacyFrozenLogicalPathUtf8Base64 to the predecessor logicalPath only inside the oracle, derive UTF8(domain+0x0A+canonical(member projection)), and verify the frozen preimage bytes and SHA-256 root without publishing legacy paths as live locators.",
+      "CAS_SCHEDULE_REDUCE": "Validate ordinal event order and the closed W1/W2 event alphabet; derive exactly one COMMIT and require the other writer to terminate in BLOCK or CRASH-PRECOMMIT.",
+      "RESPONSE_LOSS_CLASSIFY": "Apply the frozen ordered response-loss decision table to readback state and require the class rooted in oracleBody; retry requests always BLOCK.",
+      "TYPED_FIELD_VALID": "Validate a value against the complete rooted field record, including type, constant, enum, scalar cardinality and exact/minimum/maximum array cardinality."
+    },
+    "axisKindSemantics": {
+      "EQUAL": "canonical(actual) == canonical(expected)",
+      "NON_NULL": "actual is neither null nor empty string",
+      "ZERO": "actual == 0",
+      "COUNT_EQUAL": "actual == expected and both are non-negative integers",
+      "UNIQUE_COUNT": "actual is an array, set-size(actual) == expected and length(actual) == expected",
+      "DISTINCT": "canonical(actualLeft) != canonical(actualRight)",
+      "SET_CONTAINS_ALL": "every required canonical element occurs in actual",
+      "PATH_REPO_RELATIVE": "actual matches ^docs/ and contains neither traversal nor absolute-prefix nor leading web/",
+      "BOOLEAN_TRUE": "actual is true"
+    },
+    "operationSemantics": {
+      "SET": "RFC6901 JSON-pointer replacement; missing path blocks"
+    },
+    "constraintAstSemantics": {
+      "AND": "all args true; left-to-right; empty args block",
+      "EQ": "canonical(left)==canonical(right)",
+      "NEQ": "canonical(left)!=canonical(right)",
+      "LT": "left<right",
+      "LTE": "left<=right",
+      "GT": "left>right",
+      "COUNT_EQ": "array length equals nonnegative integer expected",
+      "UNIQUE_COUNT": "array length and canonical set size equal expected",
+      "NON_NULL": "value is neither null nor empty string",
+      "ZERO": "value equals numeric zero",
+      "BOOLEAN_TRUE": "value is true",
+      "SET_CONTAINS_ALL": "every canonical required element occurs in actual",
+      "PATH_REPO_RELATIVE": "value begins docs/, is not absolute, has no traversal or leading web/, and resolves to a nonsymlink file"
+    },
+    "canonicalValueSemantics": "OBJECT-KEYS-LEXICOGRAPHIC;ARRAY-ORDER-PRESERVED;UTF8;NO-WHITESPACE;JSON-STRING-ESCAPING;INTEGER-DECIMAL;BOOLEAN-LOWERCASE;NULL-LOWERCASE",
+    "errorSemantics": "MISSING-PATH,UNKNOWN-OP,TYPE-MISMATCH,INVALID-BASE64,INVALID-UTF8,SYMLINK,OUT-OF-RANGE,STEP-LIMIT=>BLOCK",
+    "evaluationOrder": "LEFT-TO-RIGHT;FAIL-CLOSED;MAX-256-STEPS",
+    "unknownOperatorPolicy": "BLOCK",
+    "expectedValueReadableByOracle": false,
+    "languageRoot": "4b22289e78f40c33d7f690ef83de7568f3e0d7a0a3a162f59d454c4a0da25d32"
+  },
+  "fixtureCount": 7430,
+  "vectorCount": 7430,
+  "requirementCount": 127,
+  "baseFiveFieldVectorCount": 635,
+  "baseVectorsPerRequirement": 5,
+  "domainMutationVectorCount": 6795,
+  "domainMutationUniqueCreditKeyCount": 6795,
+  "requiredDomainVectorFamilies": {
+    "B0V5-IHR-F001": [
+      "PUBLIC-REPO-RELATIVE-PATH"
+    ],
+    "B0V5-IHR-F002": [
+      "INHERITED-EXACT-SELECTOR"
+    ],
+    "B0V5-IHR-F003": [
+      "PREDECESSOR-SEMANTIC-NONWEAKENING"
+    ],
+    "B0V5-IHR-F004": [
+      "ACTIVE-INHERITED-SEMANTIC-NAMEDUSE"
+    ],
+    "B0V5-IHR-F005": [
+      "PRIOR-INTERFACE-PROVIDER-INDEPENDENT-INSTANCE"
+    ],
+    "B0V5-IHR-F006": [
+      "PORTABLE-ROOTED-ORACLE-SEMANTICS"
+    ],
+    "B0V5-IHR-F007": [
+      "EXACT-DOMAIN-COVERAGE-DENOMINATOR"
+    ],
+    "B0V5-IHR-F008": [
+      "HONEST-PLANNING-FIXTURE-PROVENANCE"
+    ],
+    "B0V5-IHR-F009": [
+      "CAUSAL-ORACLE-STATE-READ"
+    ],
+    "B0V5-IHR-F010": [
+      "EXACT-V5-PACKAGE-ROOT-PARTICIPATING-FIELD",
+      "EXACT-V5-PACKAGE-ROOT-DOMAIN",
+      "EXACT-V5-PACKAGE-ROOT-CANONICAL-PREIMAGE"
+    ],
+    "B0V5-IHR-F011": [
+      "EXACT-V6-HEAD-INVALIDATION"
+    ],
+    "B0V5-IHR-F012": [
+      "ALL-127-OUTPUTS-COMPLETE-ORDERED-DENOMINATOR"
+    ],
+    "B0V5-IHR-F013": [
+      "COMPLETE-ROLE-CONTROLLER-EXCLUSION",
+      "SOLE-PRODUCER-ASSIGNMENT"
+    ],
+    "B0V5-IHR-F014": [
+      "PROOF-CLASS-TRANSITIVE-INDEPENDENCE",
+      "TWO-WITNESS-INDEPENDENCE"
+    ],
+    "B0V5-IHR-F015": [
+      "TYPED-PERMIT-FIELD",
+      "PERMIT-TIME-REVISION-REVOCATION-REPLAY-RULE"
+    ],
+    "B0V5-IHR-F016": [
+      "CAS-CRASH-CUT",
+      "CAS-TWO-WRITER-INTERLEAVING-CLASS",
+      "CAS-COMPARE-REPLAY-READBACK-RULE"
+    ],
+    "B0V5-IHR-F017": [
+      "GENESIS-CLASS-SPECIFIC-TYPED-FIELD",
+      "GENESIS-WRONG-CLASS-SUBSTITUTION"
+    ],
+    "B0V5-IHR-F018": [
+      "GENESIS-EXTERNAL-ADMISSION-FIRST-PERMIT-CAUSALITY"
+    ],
+    "B0V5-IHR-F019": [
+      "DETACHED-ACCEPTANCE-TYPED-FIELD"
+    ],
+    "B0V5-IHR-F020": [
+      "RECOVERY-TYPED-PARTICIPANT-FIELD",
+      "RECOVERY-TYPED-ATTEMPT-FIELD",
+      "RECOVERY-ROTATION-COMPROMISE-REDUCER"
+    ],
+    "B0V4-HR-F001": [
+      "EXACT-SOURCE-MEMBER-SPAN"
+    ],
+    "B0V4-HR-F002": [
+      "INHERITED-EXACT-SELECTOR",
+      "PREDECESSOR-SEMANTIC-NONWEAKENING"
+    ],
+    "B0V4-HR-F003": [
+      "PUBLIC-REPO-RELATIVE-PATH"
+    ],
+    "B0V4-HR-F004": [
+      "ACTIVE-INHERITED-SEMANTIC-NAMEDUSE",
+      "PRIOR-INTERFACE-PROVIDER-INDEPENDENT-INSTANCE"
+    ],
+    "B0V4-HR-F005": [
+      "NONCIRCULAR-OBJECT-HEAD-MEMBERSHIP"
+    ],
+    "B0V4-HR-F006": [
+      "PORTABLE-ROOTED-ORACLE-SEMANTICS",
+      "EXACT-DOMAIN-COVERAGE-DENOMINATOR",
+      "HONEST-PLANNING-FIXTURE-PROVENANCE",
+      "CAUSAL-ORACLE-STATE-READ",
+      "EXACT-V5-PACKAGE-ROOT-PARTICIPATING-FIELD",
+      "EXACT-V5-PACKAGE-ROOT-DOMAIN",
+      "EXACT-V5-PACKAGE-ROOT-CANONICAL-PREIMAGE"
+    ],
+    "B0V4-HR-F007": [
+      "EXACT-V6-HEAD-INVALIDATION",
+      "TYPED-PERMIT-FIELD",
+      "PERMIT-TIME-REVISION-REVOCATION-REPLAY-RULE"
+    ],
+    "B0V4-HR-F008": [
+      "COMPLETE-ROLE-CONTROLLER-EXCLUSION",
+      "SOLE-PRODUCER-ASSIGNMENT",
+      "PROOF-CLASS-TRANSITIVE-INDEPENDENCE",
+      "TWO-WITNESS-INDEPENDENCE"
+    ],
+    "B0V4-HR-F009": [
+      "CAS-CRASH-CUT",
+      "CAS-TWO-WRITER-INTERLEAVING-CLASS",
+      "CAS-COMPARE-REPLAY-READBACK-RULE"
+    ],
+    "B0V4-HR-F010": [
+      "GENESIS-CLASS-SPECIFIC-TYPED-FIELD",
+      "GENESIS-WRONG-CLASS-SUBSTITUTION",
+      "GENESIS-EXTERNAL-ADMISSION-FIRST-PERMIT-CAUSALITY",
+      "DETACHED-ACCEPTANCE-TYPED-FIELD"
+    ],
+    "B0V4-HR-F011": [
+      "RECOVERY-TYPED-PARTICIPANT-FIELD",
+      "RECOVERY-TYPED-ATTEMPT-FIELD",
+      "RECOVERY-ROTATION-COMPROMISE-REDUCER"
+    ]
+  },
+  "requiredDomainVectorFamiliesRoot": "ecd51e695a36bac661d4155b33ce34787b03de2aee495453054bdc1b26d40e03",
+  "completeFixtureSequenceRoot": "2d34d3312693bf12f5a4dab8850a4ee9a0d1fad5952143054f45dfe18ab0e0a0",
+  "completeVectorSequenceRoot": "9744911c79ca5fd46477fbece0867dec0f048c7710b389cff37adb9aa6a72707",
+  "completeDomainMutationCoverageMatrixRoot": "bbd07bda43148b3d69f02d946e198da2864e6cc32bb163b70e06d108affb1553",
+  "vectorShardCount": 16,
+  "maximumPublicGitMemberBytesExclusive": 52428800,
+  "largestVectorShardBytes": 20528156,
+  "everyVectorShardBelowMaximum": true,
+  "shardPartitionRule": "CONTIGUOUS-GLOBAL-VECTOR-ORDINAL-RANGES;START=floor(i*7430/16)+1;END=floor((i+1)*7430/16);FIXTURE-AND-VECTOR-ORDINALS-ALIGNED;DOMAIN-ROWS-COLOCATED-BY-VECTOR-ID",
+  "vectorShardDescriptors": [
+    {
+      "shardOrdinal": 1,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-01-of-16-2026-08-30.json",
+      "sha256": "2ccac7d352fe331da42d9eec3fa945058b1d00b37ec7ca354bd8e3a7bab85175",
+      "bytes": 1851835,
+      "startVectorOrdinalInclusive": 1,
+      "endVectorOrdinalInclusive": 464,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 0,
+      "shardContentRoot": "1ccc71409795b9fe67a52692b118491090c3f213d17a06c7612ebebd6d761499",
+      "required": true
+    },
+    {
+      "shardOrdinal": 2,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-02-of-16-2026-08-30.json",
+      "sha256": "3396913e6c3cba86d52c48ca1c6450293741e653000a8e9498f916e465f99f3d",
+      "bytes": 1941353,
+      "startVectorOrdinalInclusive": 465,
+      "endVectorOrdinalInclusive": 928,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 293,
+      "shardContentRoot": "fb83b0cdf1da3bd3bf14a9fa4632f8c7ad21cbfe74dd068a37f504fc7c6c071c",
+      "required": true
+    },
+    {
+      "shardOrdinal": 3,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-03-of-16-2026-08-30.json",
+      "sha256": "2133d801a5a18ea07adea52485d1526ec82098ed9a558344990045a6bb2a1932",
+      "bytes": 1865873,
+      "startVectorOrdinalInclusive": 929,
+      "endVectorOrdinalInclusive": 1393,
+      "fixtureCount": 465,
+      "vectorCount": 465,
+      "domainMutationVectorCount": 465,
+      "shardContentRoot": "c180c33258b47ff1cebec4bfbb0e783e8b379a0db5a9fdb7539130c8573731d4",
+      "required": true
+    },
+    {
+      "shardOrdinal": 4,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-04-of-16-2026-08-30.json",
+      "sha256": "e866bf10e74596ef3e73b86420525ba9f86c631e7bc57589f688575f4b852540",
+      "bytes": 1856860,
+      "startVectorOrdinalInclusive": 1394,
+      "endVectorOrdinalInclusive": 1857,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "c68d6fbf7039965490a3ce42347ff460521a3dca97e51220625482c21014a0e3",
+      "required": true
+    },
+    {
+      "shardOrdinal": 5,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-05-of-16-2026-08-30.json",
+      "sha256": "9c7c8e355061877f28aa8de6cbe99ae7fd03a8239eb09d25da8c4ef4da469aad",
+      "bytes": 1852809,
+      "startVectorOrdinalInclusive": 1858,
+      "endVectorOrdinalInclusive": 2321,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "0a19b79d4ef8dcbe120663717fe3cba6b44464db1b460e7212dc408682c1e3dd",
+      "required": true
+    },
+    {
+      "shardOrdinal": 6,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-06-of-16-2026-08-30.json",
+      "sha256": "fc797b86196010a3a78ff49390e65609288808e6db8e6208ab0eb0a40bbeed35",
+      "bytes": 1948505,
+      "startVectorOrdinalInclusive": 2322,
+      "endVectorOrdinalInclusive": 2786,
+      "fixtureCount": 465,
+      "vectorCount": 465,
+      "domainMutationVectorCount": 465,
+      "shardContentRoot": "c291c864bbfbb9be31bb041bf02843794c0d618cd6af3fa17db068bf51c9d3ac",
+      "required": true
+    },
+    {
+      "shardOrdinal": 7,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-07-of-16-2026-08-30.json",
+      "sha256": "ff65d0a929b51125baf8dd743877e30ea187e02fe94cedcb7376351c37d789e4",
+      "bytes": 11090782,
+      "startVectorOrdinalInclusive": 2787,
+      "endVectorOrdinalInclusive": 3250,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "ca46fa933f373f491c0aa36b40a2ece70f1d5ab090b19617b1a71b4b50d0e874",
+      "required": true
+    },
+    {
+      "shardOrdinal": 8,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-08-of-16-2026-08-30.json",
+      "sha256": "80689e37e4e82e2b0deac48deb3181329dcbc6cd8cfe159ce254c07e2e03313f",
+      "bytes": 20528156,
+      "startVectorOrdinalInclusive": 3251,
+      "endVectorOrdinalInclusive": 3715,
+      "fixtureCount": 465,
+      "vectorCount": 465,
+      "domainMutationVectorCount": 465,
+      "shardContentRoot": "1536ea08f364ddd3c0e1f04a71bd3958f4644142cd0005dfaed366c9630c5368",
+      "required": true
+    },
+    {
+      "shardOrdinal": 9,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-09-of-16-2026-08-30.json",
+      "sha256": "085d0108f727bf4a91a093c2caba52a33519041e463ef565086caebfb67f7aa1",
+      "bytes": 3919262,
+      "startVectorOrdinalInclusive": 3716,
+      "endVectorOrdinalInclusive": 4179,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "cba38e0fb058c5c2542317c0a76eae417cfd724cacb406b6540ffc1b27f5f710",
+      "required": true
+    },
+    {
+      "shardOrdinal": 10,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-10-of-16-2026-08-30.json",
+      "sha256": "1dc00d7b518b3ebd62c474783275c434da20626abc802753b7ce70737190f53a",
+      "bytes": 3342259,
+      "startVectorOrdinalInclusive": 4180,
+      "endVectorOrdinalInclusive": 4643,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "48408390dcb6c24f092d44b90e6e4b4e8c26ad411e9ed15b51b4b3df773fef90",
+      "required": true
+    },
+    {
+      "shardOrdinal": 11,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-11-of-16-2026-08-30.json",
+      "sha256": "11834600f665d8a394aeddcd8dc0e3990097c1bb402f4f9794bd2586f659bbfa",
+      "bytes": 5983088,
+      "startVectorOrdinalInclusive": 4644,
+      "endVectorOrdinalInclusive": 5108,
+      "fixtureCount": 465,
+      "vectorCount": 465,
+      "domainMutationVectorCount": 465,
+      "shardContentRoot": "907031526e8df85e573bd6e5786d19fb90242a9b8e255ff6c16aa43e1fbeb584",
+      "required": true
+    },
+    {
+      "shardOrdinal": 12,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-12-of-16-2026-08-30.json",
+      "sha256": "2998df14881dc2e46c632c2edea404bcb73fbafba949e9bc30396be4f9eb6b20",
+      "bytes": 2976490,
+      "startVectorOrdinalInclusive": 5109,
+      "endVectorOrdinalInclusive": 5572,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "b7f1a346e2c0f192496b23b61541417384a9fe1bec7e910d11a6c9078405d31e",
+      "required": true
+    },
+    {
+      "shardOrdinal": 13,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-13-of-16-2026-08-30.json",
+      "sha256": "e3f5689dfb7d664f85375235f79b39667a2a6435d128057d230baf28efb7fbdd",
+      "bytes": 13209971,
+      "startVectorOrdinalInclusive": 5573,
+      "endVectorOrdinalInclusive": 6036,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "eb78eb7e778d0a39d95b49dd10259c38d4c1f42b4bb94def8b4c9a15bdef1acc",
+      "required": true
+    },
+    {
+      "shardOrdinal": 14,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-14-of-16-2026-08-30.json",
+      "sha256": "ad72a995d18597f4f6cc1da73993b387256ab8dbcb4dd88cad47a1d79b0d7149",
+      "bytes": 19525972,
+      "startVectorOrdinalInclusive": 6037,
+      "endVectorOrdinalInclusive": 6501,
+      "fixtureCount": 465,
+      "vectorCount": 465,
+      "domainMutationVectorCount": 465,
+      "shardContentRoot": "53818c5e781e3b9f1b4cbbf53d3868ce5b707caaff4150e6f1de4ec991d2b2e2",
+      "required": true
+    },
+    {
+      "shardOrdinal": 15,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-15-of-16-2026-08-30.json",
+      "sha256": "34ca65da181220bc54d57cdc31781a30491dc132d3b578e950390e84bb9fff46",
+      "bytes": 2152670,
+      "startVectorOrdinalInclusive": 6502,
+      "endVectorOrdinalInclusive": 6965,
+      "fixtureCount": 464,
+      "vectorCount": 464,
+      "domainMutationVectorCount": 464,
+      "shardContentRoot": "7df3c8d07659dbc54907d685c1ccbf9304cedd5fc92f122285945c13830c9b83",
+      "required": true
+    },
+    {
+      "shardOrdinal": 16,
+      "shardCount": 16,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-16-of-16-2026-08-30.json",
+      "sha256": "dd2d2bcff0875e6726140ec6ead883fada79dcd20125fc6e52951ad316d8ccca",
+      "bytes": 3342775,
+      "startVectorOrdinalInclusive": 6966,
+      "endVectorOrdinalInclusive": 7430,
+      "fixtureCount": 465,
+      "vectorCount": 465,
+      "domainMutationVectorCount": 465,
+      "shardContentRoot": "cc1e36c0be29093ef132bc959229506d2dc634d3fbf3ce17c14268424bfdd148",
+      "required": true
+    }
+  ],
+  "vectorShardSetRoot": "76abfe35136dcd7f8733a7078d541b2785648679fc3357648a357eb58860118e",
+  "mutationCoverageRule": "EXACTLY-ONE-BASE-NEGATIVE-VECTOR-PER-FIVE-FIELD-AXIS-PLUS-ONE-UNIQUELY-ATTRIBUTABLE-DOMAIN-NEGATIVE-VECTOR-PER-DECLARED-MATRIX-ROW;EVERY-CONTROL-MUST-DERIVE-ELIGIBLE;EVERY-MUTATION-MUST-TERMINATE-BLOCKED;NO-DUPLICATE-CREDIT-KEY",
+  "planningExecutionCount": "7430/7430",
+  "operationalVectorExecutionCount": "0/7430",
+  "operationalEvidenceCount": 0,
+  "authorityCredit": 0,
+  "acceptanceCredit": 0,
+  "vectorCorpusContentRoot": "77f5bbfc1c2c82b34c4f04c7de2ce85db33c37c50e8e7064a745d97ec958ccd7"
+}

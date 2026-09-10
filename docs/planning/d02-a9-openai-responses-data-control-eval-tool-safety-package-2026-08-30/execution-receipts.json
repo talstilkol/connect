@@ -1,0 +1,131 @@
+{
+  "artifactId": "CONNECT-D02-A9-DETACHED-EXECUTION-RECEIPTS-2026-08-30",
+  "receiptVersion": "1.0.0",
+  "executedAt": "2026-08-30T02:15:04Z",
+  "readOnly": true,
+  "toolchainIdentityRoot": "a649958c324063b7bd09eab7b98a263f2f00359fcb7a83fe43fd9158a868a6c6",
+  "toolchains": [
+    {
+      "ordinal": 1,
+      "toolchainId": "D02A9-TOOLCHAIN-A",
+      "runtime": "Node.js",
+      "version": "v25.9.0",
+      "versionCommand": "node --version",
+      "networkAuthority": "NONE-FOR-READER",
+      "writeAuthority": "NONE",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "toolchainId": "D02A9-TOOLCHAIN-B",
+      "runtime": "Ruby",
+      "version": "2.6.10p210",
+      "versionCommand": "ruby --version",
+      "networkAuthority": "NONE-FOR-READER",
+      "writeAuthority": "NONE",
+      "acceptanceCredit": 0
+    }
+  ],
+  "executionCount": 2,
+  "executions": [
+    {
+      "ordinal": 1,
+      "receiptId": "D02A9-EXEC-A",
+      "readerId": "D02A9-READER-A-NODE",
+      "algorithmFamily": "RECURSIVE-SCHEMA-KAHN-GRAPH-EXACT-LINE-RECONSTRUCTION",
+      "executionMode": "READ-ONLY-SEMANTIC-PLUS-DETACHED-SOURCE-CAPTURE",
+      "executable": {
+        "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a.mjs",
+        "sha256": "c38043328d8bfe6b1938d3bb08c30a9a0959da6e2407ce55dcff30a0033428b3",
+        "lines": 299,
+        "words": 3261,
+        "bytes": 35823
+      },
+      "toolchainId": "D02A9-TOOLCHAIN-A",
+      "inputSetRoot": "806ded840025047d387f9038c775a90587b6259df534dda201f3682fc78e3721",
+      "inputCount": 42,
+      "sourceCaptureInputClass": "DETACHED-EXTERNAL-BYTES-NOT-PACKAGED",
+      "sourceRefresh": {
+        "mode": "DETACHED-CAPTURE-READ-ONLY",
+        "checked": 11,
+        "changed": 0,
+        "unavailable": 0,
+        "terminal": "SOURCE-CUT-MATCH"
+      },
+      "exitCode": 0,
+      "oracleRead": false,
+      "controlOracleRead": false,
+      "expectedToActualCount": 0,
+      "baselineTerminal": "PASS",
+      "innerVectorsEvaluated": 82,
+      "innerVectorsKilled": 82,
+      "report": {
+        "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-a-report.json",
+        "sha256": "72abce7438bc91a2f88753e6b3864e9039fe1f0d47fa872e735d4593f0104a2d",
+        "lines": 935,
+        "words": 1593,
+        "bytes": 31118
+      },
+      "semanticAcceptance": 0,
+      "selfAcceptance": 0
+    },
+    {
+      "ordinal": 2,
+      "receiptId": "D02A9-EXEC-B",
+      "readerId": "D02A9-READER-B-RUBY",
+      "algorithmFamily": "RECURSIVE-SCHEMA-DFS-GRAPH-BYTE-SLICE-RECONSTRUCTION",
+      "executionMode": "READ-ONLY-SEMANTIC-PLUS-DETACHED-SOURCE-CAPTURE",
+      "executable": {
+        "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b.rb",
+        "sha256": "e4fa82ff8733f0fb1bd2ca3b9b549fa3037ffa6e0f05f07cecf60ee60a63153f",
+        "lines": 467,
+        "words": 2806,
+        "bytes": 34614
+      },
+      "toolchainId": "D02A9-TOOLCHAIN-B",
+      "inputSetRoot": "806ded840025047d387f9038c775a90587b6259df534dda201f3682fc78e3721",
+      "inputCount": 42,
+      "sourceCaptureInputClass": "DETACHED-EXTERNAL-BYTES-NOT-PACKAGED",
+      "sourceRefresh": {
+        "mode": "DETACHED-CAPTURE-READ-ONLY",
+        "checked": 11,
+        "changed": 0,
+        "unavailable": 0,
+        "terminal": "SOURCE-CUT-MATCH"
+      },
+      "exitCode": 0,
+      "oracleRead": false,
+      "controlOracleRead": false,
+      "expectedToActualCount": 0,
+      "baselineTerminal": "PASS",
+      "innerVectorsEvaluated": 82,
+      "innerVectorsKilled": 82,
+      "report": {
+        "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/reader-b-report.json",
+        "sha256": "05a8e1f5b2025aeeeed5c0cb73740fb4b019b4e2a82c7526497c7a095b8c8e0b",
+        "lines": 935,
+        "words": 1593,
+        "bytes": 31114
+      },
+      "semanticAcceptance": 0,
+      "selfAcceptance": 0
+    }
+  ],
+  "readerIndependence": {
+    "differentLanguages": true,
+    "differentGraphAlgorithms": true,
+    "differentLineAlgorithms": true,
+    "sharedExpectedTerminalInput": false,
+    "oracleReadCount": 0
+  },
+  "parity": {
+    "roots": true,
+    "counts": true,
+    "controls": true,
+    "mutationActuals": true,
+    "innerKilled": "82/82-BOTH",
+    "sourceRefresh": "11/11-MATCH-BOTH"
+  },
+  "acceptanceCredit": 0,
+  "executionReceiptRoot": "7331a5855aaa5e1a9a0ab00404066e8654033e05ba920f515d90fb550492ee66"
+}

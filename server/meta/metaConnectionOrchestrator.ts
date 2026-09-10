@@ -14,10 +14,14 @@ import type {
   MetaAuthorizationCodeExchanger,
   MetaCredentialVault,
   MetaWabaSubscriber,
+  SensitiveMetaAccessToken,
 } from "./metaPorts";
+
+import type { MetaCoexistenceAssetResolver } from "./metaGraphAssetVerifier.ts";
 
 export type MetaConnectionOrchestrationErrorCode =
   | "INVALID_INPUT"
+  | "COEXISTENCE_SYNCHRONIZATION_REQUIRED"
   | "CODE_EXCHANGE_FAILED"
   | "ASSET_VERIFICATION_FAILED"
   | "ASSET_MISMATCH"
@@ -48,10 +52,32 @@ export interface CompleteMetaEmbeddedSignupInput {
   phoneNumberId: string;
 }
 
+export interface CompleteMetaBusinessAppSignupInput {
+  flow: "business-app";
+  authorizationCode: string;
+  wabaId: string;
+}
+
+export function normalizeMetaBusinessAppSignupInput(input: unknown): CompleteMetaBusinessAppSignupInput {
+  if (!isRecord(input) || input.flow !== "business-app" ||
+    Object.keys(input).some((key) => !["flow","authorizationCode","wabaId","launchId"].includes(key))) {
+    throw new MetaConnectionOrchestrationError("INVALID_INPUT", "Business app signup input is invalid");
+  }
+  const wabaId = requireBoundedValue(input.wabaId, "wabaId", 64);
+  if (!/^[1-9][0-9]{0,63}$/.test(wabaId)) throw new MetaConnectionOrchestrationError("INVALID_INPUT", "Business app WABA is invalid");
+  return { flow: "business-app", wabaId, authorizationCode: requireBoundedValue(input.authorizationCode, "authorizationCode", 4096) };
+}
+
 export interface MetaConnectionOrchestrator {
+  completeBusinessAppSignup(
+    session: TenantSession,
+    input: unknown,
+    context: { expectedConnectionVersion: number | null },
+  ): Promise<MetaConnectionRecord>;
   completeEmbeddedSignup(
     session: TenantSession,
     input: unknown,
+    context?: { expectedConnectionVersion: number | null },
   ): Promise<MetaConnectionRecord>;
   retryWabaSubscription(
     session: TenantSession,
@@ -61,6 +87,7 @@ export interface MetaConnectionOrchestrator {
 export interface MetaConnectionOrchestratorDependencies {
   authorizationCodeExchanger: MetaAuthorizationCodeExchanger;
   assetVerifier: MetaAssetVerifier;
+  coexistenceAssetResolver?: MetaCoexistenceAssetResolver;
   credentialVault: MetaCredentialVault;
   wabaSubscriber: MetaWabaSubscriber;
   connectionService: MetaConnectionService;
@@ -101,13 +128,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   );
 }
 
-function normalizeSignupInput(
+export function normalizeMetaEmbeddedSignupInput(
   input: unknown,
 ): CompleteMetaEmbeddedSignupInput {
   if (!isRecord(input)) {
     throw new MetaConnectionOrchestrationError(
       "INVALID_INPUT",
       "Meta signup input is invalid",
+    );
+  }
+
+  // Do not register or mark a Coexistence account connected before its
+  // durable contacts/history/echo pipeline is implemented and wired.
+  // This is deliberately a server gate; bypassing the UI cannot enable it.
+  if (input.flow === "business-app") {
+    throw new MetaConnectionOrchestrationError(
+      "COEXISTENCE_SYNCHRONIZATION_REQUIRED",
+      "WhatsApp Business app synchronization is not ready",
+    );
+  }
+
+  if (input.flow !== undefined && input.flow !== "cloud-api") {
+    throw new MetaConnectionOrchestrationError(
+      "INVALID_INPUT",
+      "Meta signup flow is invalid",
     );
   }
 
@@ -161,7 +205,7 @@ function normalizeVerifiedSnapshot(
 }
 
 function assertMatchingAssets(
-  input: CompleteMetaEmbeddedSignupInput,
+  input: VerifiedMetaAssetSnapshot,
   verifiedSnapshot: VerifiedMetaAssetSnapshot,
 ): void {
   if (
@@ -203,13 +247,89 @@ async function runExternalStep<TResult>(
   }
 }
 
+async function assertCurrentPendingConnection(
+  service: MetaConnectionService,
+  session: TenantSession,
+  expected: MetaConnectionRecord,
+): Promise<void> {
+  const current = await service.read(session);
+  if (
+    !current ||
+    current.tenantId !== session.tenantId ||
+    current.status !== "pending" ||
+    current.version !== expected.version
+  ) {
+    throw new MetaConnectionOrchestrationError(
+      "INVALID_CONNECTION_STATE",
+      "Meta connection changed before subscription",
+    );
+  }
+  assertMatchingAssets(expected, current);
+}
+
 export function createMetaConnectionOrchestrator(
   dependencies: MetaConnectionOrchestratorDependencies,
 ): MetaConnectionOrchestrator {
+  async function finishRegistration(session: TenantSession, verifiedSnapshot: VerifiedMetaAssetSnapshot,
+    accessToken: SensitiveMetaAccessToken, context?: { expectedConnectionVersion: number | null }): Promise<MetaConnectionRecord> {
+    const pendingConnection = await runExternalStep(
+      () =>
+        dependencies.connectionService.captureVerifiedAssets(
+          session,
+          verifiedSnapshot,
+          context?.expectedConnectionVersion,
+        ),
+      "ASSET_PERSISTENCE_FAILED",
+      "Verified Meta assets could not be persisted",
+    );
+
+    assertConnectionStatus(pendingConnection, "pending");
+    assertMatchingAssets(verifiedSnapshot, pendingConnection);
+    if (pendingConnection.tenantId !== session.tenantId) {
+      throw new MetaConnectionOrchestrationError("ASSET_MISMATCH", "Persisted Meta connection does not match the workspace");
+    }
+
+    await runExternalStep(
+      () =>
+        dependencies.credentialVault.storeAccessToken(
+          session.tenantId,
+          accessToken,
+          pendingConnection.version,
+        ),
+      "CREDENTIAL_STORAGE_FAILED",
+      "Meta credential could not be stored",
+    );
+    await runExternalStep(
+      async () => {
+        await assertCurrentPendingConnection(
+          dependencies.connectionService,
+          session,
+          pendingConnection,
+        );
+        await dependencies.wabaSubscriber.subscribeWaba(
+          verifiedSnapshot.wabaId,
+          accessToken,
+        );
+      },
+      "WABA_SUBSCRIPTION_FAILED",
+      "Meta WABA subscription failed",
+    );
+
+    return assertConnectionStatus(
+      await runExternalStep(
+        () =>
+          dependencies.connectionService
+            .confirmWebhookSubscription(session, pendingConnection.version),
+        "CONNECTION_CONFIRMATION_FAILED",
+        "Meta connection could not be confirmed",
+      ),
+      "connected",
+    );
+  }
   return {
-    async completeEmbeddedSignup(session, input) {
+    async completeEmbeddedSignup(session, input, context) {
       requireTenantPermission(session, "workspace.manage");
-      const normalizedInput = normalizeSignupInput(input);
+      const normalizedInput = normalizeMetaEmbeddedSignupInput(input);
       const accessToken = await runExternalStep(
         () =>
           dependencies.authorizationCodeExchanger
@@ -219,6 +339,7 @@ export function createMetaConnectionOrchestrator(
         "CODE_EXCHANGE_FAILED",
         "Meta authorization code exchange failed",
       );
+
       const verifiedSnapshot = normalizeVerifiedSnapshot(
         await runExternalStep(
           () =>
@@ -236,50 +357,32 @@ export function createMetaConnectionOrchestrator(
 
       assertMatchingAssets(normalizedInput, verifiedSnapshot);
 
-      const pendingConnection = await runExternalStep(
-        () =>
-          dependencies.connectionService.captureVerifiedAssets(
-            session,
-            verifiedSnapshot,
-          ),
-        "ASSET_PERSISTENCE_FAILED",
-        "Verified Meta assets could not be persisted",
-      );
+      return finishRegistration(session, verifiedSnapshot, accessToken, context);
+    },
 
-      assertConnectionStatus(pendingConnection, "pending");
-
-      await runExternalStep(
-        () =>
-          dependencies.credentialVault.storeAccessToken(
-            session.tenantId,
-            accessToken,
-          ),
-        "CREDENTIAL_STORAGE_FAILED",
-        "Meta credential could not be stored",
+    async completeBusinessAppSignup(session, input, context) {
+      requireTenantPermission(session, "workspace.manage");
+      const normalized = normalizeMetaBusinessAppSignupInput(input);
+      if (!dependencies.coexistenceAssetResolver || !context || typeof context !== "object" ||
+        (context.expectedConnectionVersion !== null && (!Number.isSafeInteger(context.expectedConnectionVersion) || context.expectedConnectionVersion <= 0))) {
+        throw new MetaConnectionOrchestrationError("COEXISTENCE_SYNCHRONIZATION_REQUIRED", "Business app orchestration is unavailable");
+      }
+      const accessToken = await runExternalStep(
+        () => dependencies.authorizationCodeExchanger.exchangeAuthorizationCode(normalized.authorizationCode),
+        "CODE_EXCHANGE_FAILED", "Meta authorization code exchange failed",
       );
-      await runExternalStep(
-        () =>
-          dependencies.wabaSubscriber.subscribeWaba(
-            verifiedSnapshot.wabaId,
-            accessToken,
-          ),
-        "WABA_SUBSCRIPTION_FAILED",
-        "Meta WABA subscription failed",
-      );
-
-      return assertConnectionStatus(
-        await runExternalStep(
-          () =>
-            dependencies.connectionService
-              .confirmWebhookSubscription(session),
-          "CONNECTION_CONFIRMATION_FAILED",
-          "Meta connection could not be confirmed",
-        ),
-        "connected",
-      );
+      const assets = normalizeVerifiedSnapshot(await runExternalStep(
+        () => dependencies.coexistenceAssetResolver!.resolveAssets({ accessToken, wabaId: normalized.wabaId }),
+        "ASSET_VERIFICATION_FAILED", "Business app assets could not be resolved",
+      ));
+      if (assets.wabaId !== normalized.wabaId) throw new MetaConnectionOrchestrationError("ASSET_MISMATCH", "Resolved WABA does not match signup");
+      // The number is already registered. Shared verification, storage and
+      // subscription do not contain a phone registration POST.
+      return finishRegistration(session, assets, accessToken, context);
     },
 
     async retryWabaSubscription(session) {
+      requireTenantPermission(session, "workspace.manage");
       const connection =
         await dependencies.connectionService.read(session);
 
@@ -290,19 +393,45 @@ export function createMetaConnectionOrchestrator(
         );
       }
 
+      if (connection.tenantId !== session.tenantId) {
+        throw new MetaConnectionOrchestrationError(
+          "ASSET_MISMATCH",
+          "Meta connection does not belong to the current workspace",
+        );
+      }
+
       if (connection.status === "connected") {
         return connection;
       }
+
+      // Revoked/restricted connections need fresh authorization, not a retry
+      // using an old credential. Only a failed initial subscription is retried.
+      assertConnectionStatus(connection, "pending");
 
       await runExternalStep(
         () =>
           dependencies.credentialVault.withAccessToken(
             session.tenantId,
-            (accessToken) =>
-              dependencies.wabaSubscriber.subscribeWaba(
+            async (accessToken) => {
+              const verified = normalizeVerifiedSnapshot(
+                await dependencies.assetVerifier.verifyAssets({
+                  accessToken,
+                  businessPortfolioId: connection.businessPortfolioId,
+                  wabaId: connection.wabaId,
+                  phoneNumberId: connection.phoneNumberId,
+                }),
+              );
+              assertMatchingAssets(connection, verified);
+              await assertCurrentPendingConnection(
+                dependencies.connectionService,
+                session,
+                connection,
+              );
+              await dependencies.wabaSubscriber.subscribeWaba(
                 connection.wabaId,
                 accessToken,
-              ),
+              );
+            },
           ),
         "WABA_SUBSCRIPTION_FAILED",
         "Meta WABA subscription failed",
@@ -312,7 +441,7 @@ export function createMetaConnectionOrchestrator(
         await runExternalStep(
           () =>
             dependencies.connectionService
-              .confirmWebhookSubscription(session),
+              .confirmWebhookSubscription(session, connection.version),
           "CONNECTION_CONFIRMATION_FAILED",
           "Meta connection could not be confirmed",
         ),

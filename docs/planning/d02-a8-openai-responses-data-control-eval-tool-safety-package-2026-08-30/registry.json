@@ -1,0 +1,1359 @@
+{
+  "artifactId": "CONNECT-D02-A8-NORMATIVE-REGISTRY-2026-08-30",
+  "schemaVersion": "D02-A8-SCHEMA-1",
+  "canonicalization": {
+    "algorithm": "RFC8785-JCS-SHA256",
+    "domainPrefix": "CONNECT-D02-A8",
+    "idPolicy": "DETERMINISTIC-ONLY-NO-RANDOMNESS"
+  },
+  "sourceCut": "2026-08-30T01:14:43Z",
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "planningAcceptance": "MISSING",
+    "aiAdmission": "MISSING",
+    "runtimePermit": "MISSING"
+  },
+  "frozenInputs": [
+    {
+      "inputId": "D02A8-IN-001",
+      "path": "docs/decision-intake-2026-08-21.md",
+      "sha256": "052297f38f63d6e525641a5e1d044267cf7d553fd3e7a9d2d469669eca090937",
+      "lines": 151,
+      "words": 1377,
+      "bytes": 10996,
+      "authorityClass": "USER-D02-DIRECTIVE"
+    },
+    {
+      "inputId": "D02A8-IN-002",
+      "path": "docs/researched-decision-approval-2026-08-26.md",
+      "sha256": "f981cf9313e08fe0cfbd0603717af1a999fd1a367b5521d4191d0cfc3b27128b",
+      "lines": 324,
+      "words": 1719,
+      "bytes": 16633,
+      "authorityClass": "RESEARCHED-DECISION"
+    },
+    {
+      "inputId": "D02A8-IN-003",
+      "path": "docs/planning/d02-a4-openai-model-routing-reconciliation-2026-08-29.md",
+      "sha256": "221af06420bd0d5680ae708c997e9f22b7b48eecc9278dbe740cb66346c68d54",
+      "lines": 165,
+      "words": 1612,
+      "bytes": 12368,
+      "authorityClass": "ENGINEERING-RECONCILIATION"
+    },
+    {
+      "inputId": "D02A8-IN-004",
+      "path": "docs/planning/d02-a5-openai-responses-data-control-and-model-selection-reconciliation-2026-08-29.md",
+      "sha256": "1981729d8a0001d38f439508cdf668cbbd18b8bda0c70cde2152e19ff93281e5",
+      "lines": 115,
+      "words": 1134,
+      "bytes": 9302,
+      "authorityClass": "SEMANTIC-SUCCESSOR"
+    },
+    {
+      "inputId": "D02A8-IN-005",
+      "path": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-2026-08-30.md",
+      "sha256": "3788b73457a3bb25a679dc42875b641a21156f3b93e3b29676a3489e826ad3db",
+      "lines": 465,
+      "words": 3493,
+      "bytes": 30592,
+      "authorityClass": "SEMANTIC-SUCCESSOR"
+    },
+    {
+      "inputId": "D02A8-IN-006",
+      "path": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-semantic-successor-2026-08-30.md",
+      "sha256": "f1246bc52124a59645a2446d4c83075358c9f6214f84bc6ee7e7ce6b8208b446",
+      "lines": 360,
+      "words": 4042,
+      "bytes": 36482,
+      "authorityClass": "SEMANTIC-SUCCESSOR"
+    },
+    {
+      "inputId": "D02A8-IN-007",
+      "path": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-2026-08-30.md",
+      "sha256": "344c42bcdbf60eed1332bfaa7e20d9725e80cad5e0f2d05863c3cbef6ba5f16d",
+      "lines": 209,
+      "words": 2091,
+      "bytes": 18279,
+      "authorityClass": "INDEPENDENT-REVIEW"
+    },
+    {
+      "inputId": "D02A8-IN-008",
+      "path": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "sha256": "55f985944dae7684af73f3214e966650a3949ae52b1b28dc54ef198a886dceca",
+      "lines": 49,
+      "words": 918,
+      "bytes": 7724,
+      "authorityClass": "FINDINGS-MANIFEST"
+    },
+    {
+      "inputId": "D02A8-IN-009",
+      "path": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "sha256": "3f2b6689b638453872c019b96ed451a6096d3d771935d73dde82ff116b3b3cbc",
+      "lines": 47,
+      "words": 540,
+      "bytes": 5195,
+      "authorityClass": "CLOSURE-CROSSWALK"
+    },
+    {
+      "inputId": "D02A8-IN-010",
+      "path": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "sha256": "4ef56a1332504d04fad5176eba41a4dc40ae5a82f611e8208e0e51ff6cb8a21e",
+      "lines": 82,
+      "words": 743,
+      "bytes": 7204,
+      "authorityClass": "PRODUCER-QA"
+    },
+    {
+      "inputId": "D02A8-IN-011",
+      "path": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+      "sha256": "15d8f46c32b09301e58bf9e1867d0bab7e2c40b17634a3aa12c903e6dc99be62",
+      "lines": 179,
+      "words": 1824,
+      "bytes": 15589,
+      "authorityClass": "INDEPENDENT-REVIEW"
+    },
+    {
+      "inputId": "D02A8-IN-012",
+      "path": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "sha256": "d488c9f36d88797bf74b6db60e422c4bd9d55443eff032fa38aff490fd813c9b",
+      "lines": 41,
+      "words": 934,
+      "bytes": 7465,
+      "authorityClass": "FINDINGS-MANIFEST"
+    },
+    {
+      "inputId": "D02A8-IN-013",
+      "path": "docs/planning/d18-a2-public-repository-security-decision-2026-08-29.md",
+      "sha256": "448cf2a7596f3544966b1e992c33ea6bc569305d5a2af2a00378cf60bf1eeaa9",
+      "lines": 131,
+      "words": 1106,
+      "bytes": 9090,
+      "authorityClass": "DURABLE-USER-PUBLIC-DIRECTIVE"
+    }
+  ],
+  "authorityChain": [
+    {
+      "nodeId": "D02A8-AUTH-001",
+      "sequence": 1,
+      "inputId": "D02A8-IN-001",
+      "scope": "D02",
+      "authorityClass": "USER-DIRECTIVE",
+      "predecessorId": null,
+      "d02Disposition": "PRESERVE-OPENAI-RESPONSES-AND-EVAL",
+      "modelDisposition": "NO-MODEL-SELECTED",
+      "state": "AUTHORITATIVE-DIRECTIVE"
+    },
+    {
+      "nodeId": "D02A8-AUTH-002",
+      "sequence": 2,
+      "inputId": "D02A8-IN-002",
+      "scope": "D02",
+      "authorityClass": "RESEARCHED-DECISION",
+      "predecessorId": "D02A8-AUTH-001",
+      "d02Disposition": "PRESERVE-OPENAI-RESPONSES-AND-EVAL",
+      "modelDisposition": "LUNA-FIRST-RESEARCH-CANDIDATE",
+      "state": "HISTORICAL-SUPERSEDED-IN-MODEL-ORDER"
+    },
+    {
+      "nodeId": "D02A8-AUTH-003",
+      "sequence": 3,
+      "inputId": "D02A8-IN-003",
+      "scope": "D02",
+      "authorityClass": "ENGINEERING-RECONCILIATION",
+      "predecessorId": "D02A8-AUTH-002",
+      "d02Disposition": "SUPERSEDE-MODEL-ORDER-ONLY",
+      "modelDisposition": "TERRA-FIRST-UNACCEPTED-CANDIDATE",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A8-AUTH-004",
+      "sequence": 4,
+      "inputId": "D02A8-IN-004",
+      "scope": "D02",
+      "authorityClass": "SEMANTIC-SUCCESSOR",
+      "predecessorId": "D02A8-AUTH-003",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A8-AUTH-005",
+      "sequence": 5,
+      "inputId": "D02A8-IN-005",
+      "scope": "D02",
+      "authorityClass": "SEMANTIC-SUCCESSOR",
+      "predecessorId": "D02A8-AUTH-004",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    },
+    {
+      "nodeId": "D02A8-AUTH-006",
+      "sequence": 6,
+      "inputId": "D02A8-IN-006",
+      "scope": "D02",
+      "authorityClass": "SEMANTIC-SUCCESSOR",
+      "predecessorId": "D02A8-AUTH-005",
+      "d02Disposition": "PRESERVE-WITH-STRONGER-CONTROLS",
+      "modelDisposition": "INHERIT-TYPED-BLOCKED-SELECTION",
+      "state": "CANDIDATE-NOT-ACCEPTED"
+    }
+  ],
+  "predecessorClauseUniverses": [
+    {
+      "universeId": "D02A8-PCU-001",
+      "nodeId": "D02A8-AUTH-001",
+      "inputId": "D02A8-IN-001",
+      "derivationMode": "EXPLICIT-D02-LOCATORS",
+      "memberSelector": "ordered exact locators",
+      "memberLocators": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "3:D02-TABLE-ROW",
+        "8.1",
+        "8.4",
+        "9.1",
+        "9.2"
+      ],
+      "expectedMemberCount": 8,
+      "defaultDisposition": "PRESERVED-AUTHORITATIVE-D02-DIRECTIVE",
+      "overrideDispositions": [],
+      "coveragePredicate": "every listed locator receives exactly one default or override disposition"
+    },
+    {
+      "universeId": "D02A8-PCU-002",
+      "nodeId": "D02A8-AUTH-002",
+      "inputId": "D02A8-IN-002",
+      "derivationMode": "EXPLICIT-D02-LOCATORS",
+      "memberSelector": "global authority 1.1..1.4 plus D02 table row plus all numbered 3.* clauses",
+      "memberLocators": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4",
+        "2:D02-TABLE-ROW",
+        "3.1",
+        "3.2",
+        "3.2.1",
+        "3.2.2",
+        "3.2.3",
+        "3.3",
+        "3.3.1",
+        "3.3.2",
+        "3.3.3",
+        "3.3.4",
+        "3.4",
+        "3.5",
+        "3.5.1",
+        "3.5.2",
+        "3.5.3",
+        "3.5.4"
+      ],
+      "expectedMemberCount": 21,
+      "defaultDisposition": "PRESERVED-HISTORICAL-RESEARCH",
+      "overrideDispositions": [
+        {
+          "memberId": "3.2.1",
+          "disposition": "HISTORICAL-SUPERSEDED-IN-MODEL-ORDER"
+        },
+        {
+          "memberId": "3.2.2",
+          "disposition": "HISTORICAL-SUPERSEDED-IN-MODEL-ORDER"
+        },
+        {
+          "memberId": "3.2.3",
+          "disposition": "PRESERVED-DORMANT-SOL-ONLY"
+        }
+      ],
+      "coveragePredicate": "universe equals default members disjoint union exact override keys"
+    },
+    {
+      "universeId": "D02A8-PCU-003",
+      "nodeId": "D02A8-AUTH-003",
+      "inputId": "D02A8-IN-003",
+      "derivationMode": "NUMBERED-CLAUSE-REGEX-WHOLE-DOCUMENT",
+      "memberSelector": "^[0-9]+(?:\\.[0-9]+)+ followed by one space",
+      "memberLocators": [],
+      "expectedMemberCount": 67,
+      "defaultDisposition": "PRESERVED-AS-UNACCEPTED-A4-CANDIDATE",
+      "overrideDispositions": [
+        {
+          "memberId": "7.1",
+          "disposition": "CANDIDATE-SUPERSESSION-CLAIM-NOT-OPERATIONAL-AUTHORITY"
+        },
+        {
+          "memberId": "7.5",
+          "disposition": "PRESERVED-ZERO-ACCEPTANCE"
+        }
+      ],
+      "coveragePredicate": "regex-derived universe equals default members disjoint union exact override keys"
+    },
+    {
+      "universeId": "D02A8-PCU-004",
+      "nodeId": "D02A8-AUTH-004",
+      "inputId": "D02A8-IN-004",
+      "derivationMode": "NUMBERED-CLAUSE-REGEX-WHOLE-DOCUMENT",
+      "memberSelector": "^[0-9]+(?:\\.[0-9]+)+ followed by one space",
+      "memberLocators": [],
+      "expectedMemberCount": 50,
+      "defaultDisposition": "PRESERVED-BY-A8-ROOTED-SUCCESSION",
+      "overrideDispositions": [],
+      "coveragePredicate": "regex-derived universe receives exactly one default disposition"
+    },
+    {
+      "universeId": "D02A8-PCU-005",
+      "nodeId": "D02A8-AUTH-005",
+      "inputId": "D02A8-IN-005",
+      "derivationMode": "NUMBERED-CLAUSE-REGEX-WHOLE-DOCUMENT",
+      "memberSelector": "^[0-9]+(?:\\.[0-9]+)+ followed by one space",
+      "memberLocators": [],
+      "expectedMemberCount": 213,
+      "defaultDisposition": "PRESERVED-BY-A8-ROOTED-SUCCESSION",
+      "overrideDispositions": [],
+      "coveragePredicate": "regex-derived universe receives exactly one default disposition"
+    },
+    {
+      "universeId": "D02A8-PCU-006",
+      "nodeId": "D02A8-AUTH-006",
+      "inputId": "D02A8-IN-006",
+      "derivationMode": "NUMBERED-CLAUSE-REGEX-WHOLE-DOCUMENT",
+      "memberSelector": "^[0-9]+(?:\\.[0-9]+)+ followed by one space",
+      "memberLocators": [],
+      "expectedMemberCount": 114,
+      "defaultDisposition": "PRESERVED-UNDER-A8-SEMANTIC-GUARDS",
+      "overrideDispositions": [],
+      "coveragePredicate": "regex-derived universe receives exactly one default disposition; seven Finding closures are separate non-clause records"
+    }
+  ],
+  "authorityConflict": {
+    "conflictId": "D02A8-CONFLICT-001",
+    "olderNodeId": "D02A8-AUTH-002",
+    "newerNodeId": "D02A8-AUTH-003",
+    "scope": "MODEL-ORDER",
+    "deterministicCurrentPolicy": "NO-OPERATIONAL-MODEL-SELECTED",
+    "resolutionRule": "REQUIRE-ACCEPTED-TYPED-MODEL-SELECTION-AUTHORITY",
+    "unresolvedAmbiguityCount": 0
+  },
+  "modelSelectionAuthority": {
+    "receiptId": "D02A8-MSA-001",
+    "authorityType": "MODEL-SELECTION-AUTHORITY",
+    "issuerClass": "PRODUCT-PLUS-AI-ENGINEERING-PLUS-FINANCE",
+    "scope": "D02-PILOT-EXACT-PROFILE",
+    "candidateRecommendation": "gpt-5.6-terra",
+    "acceptedSelection": null,
+    "issuedAt": null,
+    "expiresAt": null,
+    "revocationRoot": null,
+    "state": "MISSING",
+    "terminal": "MODEL-SELECTION-AUTHORITY-MISSING"
+  },
+  "approvalRegistry": [
+    {
+      "approvalId": "D02A8-APR-001",
+      "domain": "PRODUCT",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A8-APR-002",
+      "domain": "AI-ENGINEERING",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A8-APR-003",
+      "domain": "SECURITY",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A8-APR-004",
+      "domain": "PRIVACY-LEGAL",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A8-APR-005",
+      "domain": "FINANCE-COST",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    },
+    {
+      "approvalId": "D02A8-APR-006",
+      "domain": "WHATSAPP-META-POLICY",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-CANDIDATE",
+      "state": "ABSENT"
+    }
+  ],
+  "a6FindingRegistry": [
+    {
+      "findingId": "D02-A6-IHR-F001",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F001"
+    },
+    {
+      "findingId": "D02-A6-IHR-F002",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F002"
+    },
+    {
+      "findingId": "D02-A6-IHR-F003",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F003"
+    },
+    {
+      "findingId": "D02-A6-IHR-F004",
+      "severity": "P1",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F004"
+    },
+    {
+      "findingId": "D02-A6-IHR-F005",
+      "severity": "P2",
+      "source": "A6",
+      "state": "OPEN",
+      "candidateDisposition": "PRESERVED-A7-PROPOSAL",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A6-IHR-F005"
+    }
+  ],
+  "a7FindingRegistry": [
+    {
+      "findingId": "D02-A7-IHR-F001",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F001"
+    },
+    {
+      "findingId": "D02-A7-IHR-F002",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F002"
+    },
+    {
+      "findingId": "D02-A7-IHR-F003",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F003"
+    },
+    {
+      "findingId": "D02-A7-IHR-F004",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F004"
+    },
+    {
+      "findingId": "D02-A7-IHR-F005",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F005"
+    },
+    {
+      "findingId": "D02-A7-IHR-F006",
+      "severity": "P1",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F006"
+    },
+    {
+      "findingId": "D02-A7-IHR-F007",
+      "severity": "P2",
+      "source": "A7",
+      "state": "OPEN",
+      "candidateDisposition": "A8-CANDIDATE-REMEDIATED",
+      "independentClosureRoot": null,
+      "acceptanceCredit": 0,
+      "noMergeKey": "D02-A7-IHR-F007"
+    }
+  ],
+  "aiProfileMembers": [
+    {
+      "memberId": "D02A8-AIP-001",
+      "semanticKey": "RUNTIME-IDENTITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-002",
+      "semanticKey": "ENDPOINT-TRANSPORT",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-003",
+      "semanticKey": "REQUEST-SCHEMA-STATE",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-004",
+      "semanticKey": "EXACT-MODEL-IDENTITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-005",
+      "semanticKey": "REASONING-SAMPLING-SERVICE-TIER",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-006",
+      "semanticKey": "CONNECT-OWNED-PROMPT-BYTES",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-007",
+      "semanticKey": "CONTEXT-RETRIEVAL",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-008",
+      "semanticKey": "OUTPUT-TERMINAL-SCHEMA",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-009",
+      "semanticKey": "TOOL-SET-AUTHORITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-010",
+      "semanticKey": "SIDE-EFFECT-AUTHORITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-011",
+      "semanticKey": "ACCOUNT-SNAPSHOT",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-012",
+      "semanticKey": "DATA-CONTROL-RETENTION-CACHE",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-013",
+      "semanticKey": "RESIDENCY-CAPABILITY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-014",
+      "semanticKey": "PRIVACY-MINIMIZATION-LOGGING",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-015",
+      "semanticKey": "OPERATIONAL-SECURITY-POLICY",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-016",
+      "semanticKey": "EVAL-REQUIREMENT-CONFIG",
+      "required": true,
+      "rootState": "MISSING"
+    },
+    {
+      "memberId": "D02A8-AIP-017",
+      "semanticKey": "OFFICIAL-SOURCE-LIFECYCLE",
+      "required": true,
+      "rootState": "MISSING"
+    }
+  ],
+  "promptPolicy": {
+    "owner": "CONNECT",
+    "contentMode": "APPLICATION-OWNED-EXACT-BYTES",
+    "artifactPath": null,
+    "contentSha256": null,
+    "providerReusablePromptObjects": false,
+    "providerPromptEndpoint": "FORBIDDEN:/v1/prompts",
+    "responsesPromptObjectField": "FORBIDDEN",
+    "deprecationAnnounced": "2026-06-03",
+    "shutdownScheduled": "2026-11-30",
+    "sourceReceiptId": "D02A8-SRC-009",
+    "state": "MISSING-CONNECT-PROMPT-BYTES",
+    "terminal": "PROMPT-BYTES-MISSING"
+  },
+  "accountParentRows": [
+    {
+      "rowId": "D02A8-AR-001",
+      "semanticKey": "ORGANIZATION-IDENTITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-002",
+      "semanticKey": "PROJECT-ENVIRONMENT-REGION",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-003",
+      "semanticKey": "RETENTION-CONTROL-ELIGIBILITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-004",
+      "semanticKey": "PROJECT-RETENTION-OVERRIDE",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-005",
+      "semanticKey": "MODEL-INVENTORY-ENTITLEMENT",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-006",
+      "semanticKey": "RATE-AND-BUDGET-ALL-OF",
+      "required": true,
+      "childIds": [
+        "D02A8-AR-006-P",
+        "D02A8-AR-006-F"
+      ],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-007",
+      "semanticKey": "REGIONAL-CAPABILITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-008",
+      "semanticKey": "RBAC-AND-SERVICE-IDENTITY",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    },
+    {
+      "rowId": "D02A8-AR-009",
+      "semanticKey": "TRAINING-DATA-SHARING",
+      "required": true,
+      "childIds": [],
+      "state": "ABSENT"
+    }
+  ],
+  "accountChildren": [
+    {
+      "childId": "D02A8-AR-006-P",
+      "parentId": "D02A8-AR-006",
+      "semanticKey": "PROVIDER-RATE-SPEND-LIMITS",
+      "sourceAuthority": "OPENAI-AUTHENTICATED-ORG-PROJECT-READBACK",
+      "issuerClass": "OPENAI-ACCOUNT-AUTHORITY",
+      "scope": "EXACT-ORGANIZATION-PROJECT-ENVIRONMENT-MODEL-PROFILE",
+      "observedAt": null,
+      "expiresAt": null,
+      "freshnessPolicy": "AUTHENTICATED-READBACK-TTL-REQUIRED-NO-DEFAULT",
+      "revocationRoot": null,
+      "state": "ABSENT"
+    },
+    {
+      "childId": "D02A8-AR-006-F",
+      "parentId": "D02A8-AR-006",
+      "semanticKey": "CONNECT-FINANCE-BUDGET",
+      "sourceAuthority": "CONNECT-FINANCE-DECISION-RECEIPT",
+      "issuerClass": "CONNECT-FINANCE-COST-AUTHORITY",
+      "scope": "EXACT-ORGANIZATION-PROJECT-ENVIRONMENT-MODEL-PROFILE-CURRENCY-PERIOD",
+      "observedAt": null,
+      "expiresAt": null,
+      "freshnessPolicy": "FINANCE-APPROVAL-EXPIRY-REQUIRED-NO-DEFAULT",
+      "revocationRoot": null,
+      "state": "ABSENT"
+    }
+  ],
+  "legalPrivacyMembers": [
+    {
+      "memberId": "D02A8-LP-001",
+      "domain": "DATA-PROCESSING-AGREEMENT",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A8-LP-002",
+      "domain": "PRIVACY-NOTICE-AND-LAWFUL-BASIS",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A8-LP-003",
+      "domain": "DPIA-AND-RISK-DISPOSITION",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A8-LP-004",
+      "domain": "RETENTION-DELETION-AND-LEGAL-HOLD",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A8-LP-005",
+      "domain": "DATA-RESIDENCY-AND-TRANSFER",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A8-LP-006",
+      "domain": "META-WHATSAPP-PURPOSE-AND-SUBPROCESSOR",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    },
+    {
+      "memberId": "D02A8-LP-007",
+      "domain": "EVAL-CORPUS-PROVENANCE-CONSENT",
+      "required": true,
+      "subjectRootClass": "AI-ADMISSION-SUBJECT",
+      "state": "ABSENT"
+    }
+  ],
+  "officialSourceReceipts": [
+    {
+      "receiptId": "D02A8-SRC-001",
+      "sourceId": "OPENAI-DATA-CONTROLS",
+      "url": "https://developers.openai.com/api/docs/guides/your-data",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "TRAINING-OPT-IN-DISTINCT",
+        "DEFAULT-ABUSE-RETENTION",
+        "ZDR-MAM-APPROVAL",
+        "APPLICATION-STATE-EXCEPTIONS",
+        "PROMPT-CACHE-EXCEPTIONS",
+        "RESIDENCY-CAPABILITY-SPECIFIC"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "7b92adb05ab3a08ddfe673bca053706050ac436ace512a76b281981c7a0b5c7c",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-002",
+      "sourceId": "OPENAI-RESPONSES-CREATE",
+      "url": "https://developers.openai.com/api/reference/cli/resources/responses/methods/create",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "RESPONSES-STORE-DIMENSION",
+        "TOOLS-DIMENSION",
+        "PROMPT-OBJECT-FIELD-EXISTS",
+        "PROMPT-CACHE-OPTIONS-DIMENSION"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "2b1dfca77da457244cc3b2fdf1c0041e7a0d9f0cd95574b62be4b6b84e686e13",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-003",
+      "sourceId": "OPENAI-FUNCTION-CALLING",
+      "url": "https://developers.openai.com/api/docs/guides/function-calling",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "TOOL-CAPABILITY-NOT-BUSINESS-AUTHORITY"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "29c2ecdee27a117838e6202ec1bf4f6b63360d7778a9ec7b6bb6ccf7566eaf0e",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-004",
+      "sourceId": "OPENAI-MCP-CONNECTORS",
+      "url": "https://developers.openai.com/api/docs/guides/tools-connectors-mcp",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "THIRD-PARTY-TOOL-DATA-PATH",
+        "APPROVAL-CONTROL-DISTINCT"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "f3b2a13ae5b07d799fb62b8f86dd063df7323ccbc817042d9503fd30a9a6dedf",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-005",
+      "sourceId": "OPENAI-SAFETY-BEST-PRACTICES",
+      "url": "https://developers.openai.com/api/docs/guides/safety-best-practices",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "MODERATION-ADVERSARIAL-HUMAN-REVIEW-DISTINCT"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "210367aaba16719f47ad453ebb2c211dc5da68813938c54d1c0d325315e9385a",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-006",
+      "sourceId": "OPENAI-RED-TEAMING",
+      "url": "https://developers.openai.com/api/docs/guides/red-teaming",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "RED-TEAMING-COMPLEMENTS-EVALS"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "bcb9452c7a8f5f0791ddaf9a783ac75b79891bba5c4436b0ff17dd7d110d9009",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-007",
+      "sourceId": "OPENAI-RBAC",
+      "url": "https://developers.openai.com/api/docs/guides/rbac",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "ORGANIZATION-AND-PROJECT-PERMISSIONS-DISTINCT"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "b2296846e1ac4ab751f1ef23af8ef27ca9ccf1be8c0942e006b389e014a12b80",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-008",
+      "sourceId": "OPENAI-EVALUATION-BEST-PRACTICES",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "REPRESENTATIVE-CASES",
+        "CALIBRATED-HUMAN-JUDGMENT"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "887817c1a8b4141f1169e69f21ea18950314b6e27034bed5de6cf0bbf4c000fb",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-009",
+      "sourceId": "OPENAI-DEPRECATIONS",
+      "url": "https://developers.openai.com/api/docs/deprecations",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "HOSTED-EVALS-2026-SHUTDOWN",
+        "REUSABLE-PROMPTS-2026-SHUTDOWN",
+        "PROMPT-CONTENT-MOVE-TO-APPLICATION"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "e8aad96ae988d78c840fd5349ae17fefecd84a068f93642e959cb203257c41bc",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-010",
+      "sourceId": "OPENAI-MODEL-CATALOG",
+      "url": "https://developers.openai.com/api/docs/models",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "TERRA-BALANCE-POSITIONING-NOT-CONNECT-FITNESS"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "894cca39dd11d03fc40c2e9cd19b7a3e6bc2dc75784c3ccc91f6cb5f1d48220d",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    },
+    {
+      "receiptId": "D02A8-SRC-011",
+      "sourceId": "OPENAI-RETRIEVE-MODEL",
+      "url": "https://developers.openai.com/api/reference/typescript/resources/models/methods/retrieve",
+      "publisherAuthority": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "retrievedAt": "2026-08-30T01:14:43Z",
+      "freshnessPolicy": "EXACT-CUT-ONLY-RETRIEVE-NEW-RECEIPT-FOR-LATER-USE",
+      "claimCodes": [
+        "MODEL-ID-OWNER-CREATED-SHUTDOWN-BASIC-READBACK"
+      ],
+      "observationCommitmentMode": "JCS-SHA256-OF-RECEIPT-CLAIM-SET-NO-PAGE-BYTES",
+      "observationCommitment": "7a4b13849697a13be69427a4836a77827e7c27d38c09276bc26171dcf09f0126",
+      "pageBytesPublished": false,
+      "accepted": false,
+      "acceptanceRoot": null,
+      "changeDetector": "RETRIEVE-AND-RECOMPUTE-CLAIM-SET-COMMITMENT",
+      "terminals": [
+        "SOURCE-UNAVAILABLE",
+        "SOURCE-STALE",
+        "SOURCE-CHANGED",
+        "SOURCE-CONFLICT"
+      ],
+      "state": "OBSERVED-UNACCEPTED"
+    }
+  ],
+  "rootDefinitions": [
+    {
+      "rootId": "D02A8-ROOT-PACKAGE-CORE",
+      "rootClass": "PACKAGE-CORE",
+      "soleProducer": "D02A8-PRODUCER-PACKAGER",
+      "orderedDependencyIds": [
+        "schema.json",
+        "registry.json",
+        "dependency-dag.json",
+        "mutation-corpus.json"
+      ],
+      "successPredicate": "all exact package member roots current",
+      "failureTerminal": "PACKAGE-CORE-MISMATCH"
+    },
+    {
+      "rootId": "D02A8-ROOT-INPUT-MANIFEST",
+      "rootClass": "FROZEN-INPUT-MANIFEST",
+      "soleProducer": "D02A8-PRODUCER-PACKAGER",
+      "orderedDependencyIds": [
+        "D02A8-IN-001",
+        "D02A8-IN-002",
+        "D02A8-IN-003",
+        "D02A8-IN-004",
+        "D02A8-IN-005",
+        "D02A8-IN-006",
+        "D02A8-IN-007",
+        "D02A8-IN-008",
+        "D02A8-IN-009",
+        "D02A8-IN-010",
+        "D02A8-IN-011",
+        "D02A8-IN-012",
+        "D02A8-IN-013"
+      ],
+      "successPredicate": "all 13 physical bytes match",
+      "failureTerminal": "INPUT-ROOT-MISMATCH"
+    },
+    {
+      "rootId": "D02A8-ROOT-AUTHORITY-CHAIN",
+      "rootClass": "D02-AUTHORITY-CHAIN",
+      "soleProducer": "D02A8-AUTHORITY-CHAIN-BUILDER",
+      "orderedDependencyIds": [
+        "D02A8-AUTH-001",
+        "D02A8-AUTH-002",
+        "D02A8-AUTH-003",
+        "D02A8-AUTH-004",
+        "D02A8-AUTH-005",
+        "D02A8-AUTH-006"
+      ],
+      "successPredicate": "six ordered nodes and no unresolved ambiguity",
+      "failureTerminal": "AUTHORITY-CHAIN-INVALID"
+    },
+    {
+      "rootId": "D02A8-ROOT-PREDECESSOR-CLAUSE-DISPOSITION",
+      "rootClass": "D02-PREDECESSOR-CLAUSE-DISPOSITION",
+      "soleProducer": "D02A8-PREDECESSOR-DISPOSITION-BUILDER",
+      "orderedDependencyIds": [
+        "D02A8-PCU-001",
+        "D02A8-PCU-002",
+        "D02A8-PCU-003",
+        "D02A8-PCU-004",
+        "D02A8-PCU-005",
+        "D02A8-PCU-006"
+      ],
+      "successPredicate": "all six universes derive exact counts and every member receives one disposition",
+      "failureTerminal": "PREDECESSOR-CLAUSE-DISPOSITION-INVALID"
+    },
+    {
+      "rootId": "D02A8-ROOT-PUBLIC-DIRECTIVE",
+      "rootClass": "DURABLE-PUBLIC-DIRECTIVE",
+      "soleProducer": "D02A8-PUBLIC-AUTHORITY-BINDER",
+      "orderedDependencyIds": [
+        "D02A8-IN-013",
+        "D18-A2:1.1.4"
+      ],
+      "successPredicate": "exact D18-A2 root and locator only",
+      "failureTerminal": "PUBLIC-AUTHORITY-INVALID"
+    },
+    {
+      "rootId": "D02A8-ROOT-MODEL-SELECTION-AUTHORITY",
+      "rootClass": "MODEL-SELECTION-AUTHORITY",
+      "soleProducer": "EXTERNAL-PRODUCT-AI-FINANCE-AUTHORITY",
+      "orderedDependencyIds": [
+        "D02A8-MSA-001"
+      ],
+      "successPredicate": "accepted current typed receipt",
+      "failureTerminal": "MODEL-SELECTION-AUTHORITY-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-PROMPT-ARTIFACT",
+      "rootClass": "CONNECT-PROMPT-BYTES",
+      "soleProducer": "CONNECT-PROMPT-OWNER",
+      "orderedDependencyIds": [
+        "promptPolicy.artifactPath",
+        "promptPolicy.contentSha256"
+      ],
+      "successPredicate": "Connect-owned exact bytes and provider prompt objects off",
+      "failureTerminal": "PROMPT-BYTES-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-AI-PROFILE",
+      "rootClass": "AI-PROFILE",
+      "soleProducer": "AI-PROFILE-BUILDER",
+      "orderedDependencyIds": [
+        "D02A8-AIP-001",
+        "D02A8-AIP-002",
+        "D02A8-AIP-003",
+        "D02A8-AIP-004",
+        "D02A8-AIP-005",
+        "D02A8-AIP-006",
+        "D02A8-AIP-007",
+        "D02A8-AIP-008",
+        "D02A8-AIP-009",
+        "D02A8-AIP-010",
+        "D02A8-AIP-011",
+        "D02A8-AIP-012",
+        "D02A8-AIP-013",
+        "D02A8-AIP-014",
+        "D02A8-AIP-015",
+        "D02A8-AIP-016",
+        "D02A8-AIP-017"
+      ],
+      "successPredicate": "all 17 members accepted current",
+      "failureTerminal": "AI-PROFILE-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-ACCOUNT",
+      "rootClass": "ACCOUNT-SNAPSHOT",
+      "soleProducer": "ACCOUNT-READBACK-BUILDER",
+      "orderedDependencyIds": [
+        "D02A8-AR-001",
+        "D02A8-AR-002",
+        "D02A8-AR-003",
+        "D02A8-AR-004",
+        "D02A8-AR-005",
+        "D02A8-AR-006",
+        "D02A8-AR-007",
+        "D02A8-AR-008",
+        "D02A8-AR-009",
+        "D02A8-AR-006-P",
+        "D02A8-AR-006-F"
+      ],
+      "successPredicate": "all nine parents and both independent children accepted current",
+      "failureTerminal": "ACCOUNT-READBACK-BLOCKED"
+    },
+    {
+      "rootId": "D02A8-ROOT-LEGAL",
+      "rootClass": "LEGAL-PRIVACY-BUNDLE",
+      "soleProducer": "LEGAL-PRIVACY-BUILDER",
+      "orderedDependencyIds": [
+        "D02A8-LP-001",
+        "D02A8-LP-002",
+        "D02A8-LP-003",
+        "D02A8-LP-004",
+        "D02A8-LP-005",
+        "D02A8-LP-006",
+        "D02A8-LP-007"
+      ],
+      "successPredicate": "all seven same-subject members accepted current",
+      "failureTerminal": "LEGAL-PRIVACY-BUNDLE-BLOCKED"
+    },
+    {
+      "rootId": "D02A8-ROOT-SOURCE-OBSERVATION",
+      "rootClass": "OFFICIAL-SOURCE-OBSERVATION-CUT",
+      "soleProducer": "SOURCE-RECEIPT-BUILDER",
+      "orderedDependencyIds": [
+        "D02A8-SRC-001",
+        "D02A8-SRC-002",
+        "D02A8-SRC-003",
+        "D02A8-SRC-004",
+        "D02A8-SRC-005",
+        "D02A8-SRC-006",
+        "D02A8-SRC-007",
+        "D02A8-SRC-008",
+        "D02A8-SRC-009",
+        "D02A8-SRC-010",
+        "D02A8-SRC-011"
+      ],
+      "successPredicate": "all eleven detached receipts structurally current at exact cut",
+      "failureTerminal": "SOURCE-OBSERVATION-INVALID"
+    },
+    {
+      "rootId": "D02A8-ROOT-SOURCE-ACCEPTED",
+      "rootClass": "OFFICIAL-SOURCE-ACCEPTANCE",
+      "soleProducer": "EXTERNAL-SOURCE-ADJUDICATOR",
+      "orderedDependencyIds": [
+        "D02A8-ROOT-SOURCE-OBSERVATION"
+      ],
+      "successPredicate": "all eleven receipts independently accepted",
+      "failureTerminal": "SOURCE-ACCEPTANCE-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-APPROVAL-SET",
+      "rootClass": "SIX-DOMAIN-APPROVAL-SET",
+      "soleProducer": "SIX-INDEPENDENT-APPROVERS",
+      "orderedDependencyIds": [
+        "D02A8-APR-001",
+        "D02A8-APR-002",
+        "D02A8-APR-003",
+        "D02A8-APR-004",
+        "D02A8-APR-005",
+        "D02A8-APR-006"
+      ],
+      "successPredicate": "six detached same-candidate approvals accepted current",
+      "failureTerminal": "APPROVAL-SET-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-EVAL",
+      "rootClass": "DETACHED-EVAL-EVIDENCE",
+      "soleProducer": "INDEPENDENT-EVAL-RUNNERS",
+      "orderedDependencyIds": [
+        "EvalRequirementRoot",
+        "EvalCorpusRoot",
+        "EvalRunRoot",
+        "EvalAdjudicationRoot"
+      ],
+      "successPredicate": "authorized real redacted corpus and accepted runs",
+      "failureTerminal": "EVAL-EVIDENCE-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-PLANNING-ACCEPTANCE",
+      "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "soleProducer": "EXTERNAL-D02-PROGRAM-ACCEPTOR",
+      "orderedDependencyIds": [
+        "D02A8-ROOT-PACKAGE-CORE",
+        "D02A8-ROOT-AUTHORITY-CHAIN",
+        "D02A8-ROOT-PREDECESSOR-CLAUSE-DISPOSITION",
+        "D02A8-ROOT-PUBLIC-DIRECTIVE",
+        "IndependentA8ReviewDispositionRoot",
+        "A8SevenFindingClosureRoot",
+        "ProgramAcceptanceReceiptRoot"
+      ],
+      "successPredicate": "all planning-only inputs accepted without runtime gates",
+      "failureTerminal": "PLANNING-ACCEPTANCE-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-AI-ADMISSION",
+      "rootClass": "AI-PROFILE-ADMISSION",
+      "soleProducer": "AI-ADMISSION-AUTHORITY",
+      "orderedDependencyIds": [
+        "D02A8-ROOT-PLANNING-ACCEPTANCE",
+        "D02A8-ROOT-MODEL-SELECTION-AUTHORITY",
+        "D02A8-ROOT-PROMPT-ARTIFACT",
+        "D02A8-ROOT-AI-PROFILE",
+        "D02A8-ROOT-ACCOUNT",
+        "D02A8-ROOT-LEGAL",
+        "D02A8-ROOT-SOURCE-ACCEPTED",
+        "D02A8-ROOT-APPROVAL-SET",
+        "D02A8-ROOT-EVAL"
+      ],
+      "successPredicate": "all operational profile evidence accepted current",
+      "failureTerminal": "AI-ADMISSION-MISSING"
+    },
+    {
+      "rootId": "D02A8-ROOT-RUNTIME-PERMIT",
+      "rootClass": "AI-RUNTIME-PERMIT",
+      "soleProducer": "RUNTIME-PERMIT-AUTHORITY",
+      "orderedDependencyIds": [
+        "D02A8-ROOT-AI-ADMISSION",
+        "Gate29CurrentPermitRoot",
+        "FreezeLiftAuthorityRoot",
+        "RuntimeAccountReadbackRoot",
+        "TrustedTimeCutRoot",
+        "RevocationCutRoot",
+        "SingleUseConsumeReceiptRoot",
+        "PostReadbackRoot"
+      ],
+      "successPredicate": "all runtime authorities current and atomically consumed",
+      "failureTerminal": "RUNTIME-PERMIT-MISSING"
+    }
+  ],
+  "rootStates": [
+    {
+      "rootId": "D02A8-ROOT-PLANNING-ACCEPTANCE",
+      "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "root": null,
+      "state": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "rootId": "D02A8-ROOT-AI-ADMISSION",
+      "rootClass": "AI-PROFILE-ADMISSION",
+      "root": null,
+      "state": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "rootId": "D02A8-ROOT-RUNTIME-PERMIT",
+      "rootClass": "AI-RUNTIME-PERMIT",
+      "root": null,
+      "state": "MISSING",
+      "acceptanceCredit": 0
+    }
+  ]
+}

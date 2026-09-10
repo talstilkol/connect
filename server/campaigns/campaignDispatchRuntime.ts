@@ -2,8 +2,17 @@ import {
   createCampaignRepository,
 } from "../../db/campaignRepository.ts";
 import {
+  createMetaRepository,
+} from "../../db/metaRepository.ts";
+import {
   createCampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
+import {
+  createCampaignDeliveryProviderRepository,
+} from "../../db/campaignDeliveryProviderRepository.ts";
+import {
+  createWhatsappRateLimitRepository,
+} from "../../db/whatsappRateLimitRepository.ts";
 import {
   requireDatabase,
   type DatabaseEnvironment,
@@ -11,6 +20,17 @@ import {
 import type {
   CampaignDeliveryProcessor,
 } from "../../shared/domain/campaignDelivery.ts";
+import {
+  createCampaignDeliveryAdmission,
+} from "./campaignDeliveryAdmission.ts";
+import {
+  createCampaignDeliveryRateLimitContextResolver,
+  type CampaignDeliveryRateLimitPolicySource,
+} from "./campaignDeliveryRateLimitContextResolver.ts";
+import {
+  createWhatsappRateLimitKeyDeriver,
+  type WhatsappRateLimitKeyEnvironment,
+} from "./whatsappRateLimitKeyDeriver.ts";
 import {
   createCampaignDeliveryQueueConsumer,
   type CampaignDeliveryQueueBatch,
@@ -29,7 +49,8 @@ import {
 } from "../operations/queueTelemetry.ts";
 
 export interface CampaignDispatchEnvironment
-  extends DatabaseEnvironment {
+  extends DatabaseEnvironment,
+    WhatsappRateLimitKeyEnvironment {
   CAMPAIGN_DELIVERY_QUEUE?:
     CampaignDeliveryQueueBinding;
 }
@@ -79,6 +100,8 @@ export function createCampaignScheduledHandler(
 
 export function createCampaignDeliveryBatchHandler(
   environment: CampaignDispatchEnvironment,
+  rateLimitPolicy:
+    CampaignDeliveryRateLimitPolicySource,
   processor: CampaignDeliveryProcessor,
 ): {
   handle(
@@ -91,6 +114,19 @@ export function createCampaignDeliveryBatchHandler(
     createCampaignDeliveryQueueConsumer(
       createCampaignDispatchRepository(database),
       createCampaignRepository(database),
+      createCampaignDeliveryProviderRepository(
+        database,
+      ),
+      createCampaignDeliveryAdmission(
+        createWhatsappRateLimitRepository(database),
+        createCampaignDeliveryRateLimitContextResolver(
+          createMetaRepository(database),
+          createWhatsappRateLimitKeyDeriver(
+            environment,
+          ),
+          rateLimitPolicy,
+        ),
+      ),
       processor,
       runtimeClock(),
     ),

@@ -1,6 +1,9 @@
 export type TemplateVariableInspection = {
   numbers: number[];
-  error: string | null;
+  error:
+    | { code: "invalid-syntax" }
+    | { code: "missing-sequence"; expected: number }
+    | null;
 };
 
 export function inspectTemplateVariables(
@@ -15,7 +18,7 @@ export function inspectTemplateVariables(
   ) {
     return {
       numbers: uniqueSortedVariableNumbers(matches),
-      error: "משתנה חייב להיות מספרי ובמבנה מדויק, לדוגמה {{1}}.",
+      error: { code: "invalid-syntax" },
     };
   }
 
@@ -27,7 +30,7 @@ export function inspectTemplateVariables(
     if (numbers[index] !== expected) {
       return {
         numbers,
-        error: `רצף המשתנים אינו תקין. המשתנה הבא צריך להיות {{${expected}}}.`,
+        error: { code: "missing-sequence", expected },
       };
     }
   }

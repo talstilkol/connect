@@ -4,6 +4,7 @@ import type {
 } from "./model";
 
 export interface ContactRecord {
+  whatsappDisplayName?: string;
   id: number;
   phoneNumber: string;
   firstName: string | null;

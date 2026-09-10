@@ -8,13 +8,14 @@ export async function readClerkIdentity(): Promise<AuthenticatedIdentity | null>
     throw new Error("Clerk server configuration is unavailable");
   }
 
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
 
-  if (!userId) {
+  if (!userId || !orgId) {
     return null;
   }
 
   return {
     externalUserId: userId as UserId,
+    externalOrganizationId: orgId,
   };
 }

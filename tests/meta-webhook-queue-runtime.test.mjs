@@ -128,6 +128,9 @@ test("returns success only after a verified event is written to the queue", asyn
   assert.equal(response.status, 200);
   assert.equal(await response.text(), "EVENT_RECEIVED");
   assert.equal(testRuntime.queueCalls.length, 1);
+  assert.deepEqual(testRuntime.queueCalls[0].options, {
+    contentType: "v8",
+  });
   assert.match(
     testRuntime.databaseCalls[0].sql,
     /WHERE waba_id = \?1/,

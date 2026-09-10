@@ -1,4 +1,5 @@
 export const rateLimitPolicyIds = [
+  "clerk-organization-invitation",
   "meta-webhook",
   "tenant-mutation",
   "system-admin-mutation",

@@ -22,8 +22,10 @@ const outputPath = join(
   "CHANGELOG.md",
 );
 const commitPattern = /^[a-f0-9]{40}$/;
-const subjectPattern =
-  /^(feat|fix|security|ci|docs|refactor|perf|test|build|chore)(?:\([a-z0-9._/-]+\))?!?: [^\r\n]{1,160}$/;
+const conventionalSubjectPattern =
+  /^(feat|fix|security|ci|docs|refactor|perf|test|build|db|chore)(?:\([a-z0-9._/-]+\))?!?: [^\r\n]{1,160}$/;
+const genericSubjectPattern =
+  /^[^\r\n\t]{1,160}$/;
 const categoryOrder = Object.freeze([
   "security",
   "fix",
@@ -32,9 +34,11 @@ const categoryOrder = Object.freeze([
   "refactor",
   "ci",
   "build",
+  "db",
   "test",
   "docs",
   "chore",
+  "other",
 ]);
 const categoryTitles = Object.freeze({
   security: "Security",
@@ -44,9 +48,11 @@ const categoryTitles = Object.freeze({
   refactor: "Refactoring",
   ci: "CI and release",
   build: "Build",
+  db: "Database",
   test: "Tests",
   docs: "Documentation",
   chore: "Maintenance",
+  other: "Other committed changes",
 });
 
 function git(argumentsList) {
@@ -93,11 +99,13 @@ export function parseCommitHistory(rawHistory) {
       const subject =
         line.slice(separatorIndex + 1);
       const type =
-        subject.match(subjectPattern)?.[1];
+        subject.match(
+          conventionalSubjectPattern,
+        )?.[1] ?? "other";
 
       if (
         !commitPattern.test(commitSha) ||
-        !type
+        !genericSubjectPattern.test(subject)
       ) {
         throw new Error(
           "CHANGE_LOG_HISTORY_INVALID",
@@ -165,6 +173,7 @@ export function buildChangeLog(commits) {
 export function createCurrentChangeLog() {
   const history = git([
     "log",
+    "--no-merges",
     "--reverse",
     "--format=%H%x09%s",
   ]);

@@ -18,6 +18,8 @@ export type MetaEmbeddedSignupCompletionResult =
   | {
       status: "connected";
       connection: MetaConnectionView;
+      // The durable continuation owns sync; this is not its current status.
+      synchronization?: 'background';
     }
   | {
       status:
@@ -31,6 +33,7 @@ export type MetaEmbeddedSignupCompletionResult =
         | "authorization-failed"
         | "verification-failed"
         | "subscription-failed"
+        | "synchronization-required"
         | "server-error";
     };
 
@@ -74,9 +77,12 @@ function mapTenantSessionError(
   return { status: "permission-denied" };
 }
 
-function mapOrchestrationError(
+export function mapMetaConnectionOrchestrationError(
   error: MetaConnectionOrchestrationError,
 ): MetaEmbeddedSignupCompletionResult {
+  if (error.code === "COEXISTENCE_SYNCHRONIZATION_REQUIRED") {
+    return { status: "synchronization-required" };
+  }
   if (error.code === "INVALID_INPUT") {
     return { status: "validation-error" };
   }
@@ -136,7 +142,7 @@ export function createMetaEmbeddedSignupCompletionHandler(
         if (
           error instanceof MetaConnectionOrchestrationError
         ) {
-          return mapOrchestrationError(error);
+          return mapMetaConnectionOrchestrationError(error);
         }
 
         return { status: "server-error" };

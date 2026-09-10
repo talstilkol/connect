@@ -1,0 +1,147 @@
+{
+  "artifactClass": "DETERMINISTIC-PROTOCOL-MUTATION-CORPUS-NO-BUSINESS-DATA",
+  "artifactId": "MPRR-V1-10-MUTATION-CORPUS-2026-08-30-G0",
+  "blockedCount": 17,
+  "caseCount": 17,
+  "cases": [
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F001",
+      "mutationId": "MPRRV110-MUTATION-001",
+      "ordinal": 1,
+      "target": "CLOSURE-PREDICATE-RECEIPT",
+      "testRoot": "777754aa85d43eaeb2c8e63a1d143c0d86b10e469ec9270d88f3d81efba48e5b"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F002",
+      "mutationId": "MPRRV110-MUTATION-002",
+      "ordinal": 2,
+      "target": "ALL-VALIDATOR-POSITIVE-PATH",
+      "testRoot": "f2dcc9ce1a1f302b96023980cb21e4a3b942f0ddd66137107051125a99f76f97"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F003",
+      "mutationId": "MPRRV110-MUTATION-003",
+      "ordinal": 3,
+      "target": "APPOINTMENT-CONTROLLER-SEPARATION",
+      "testRoot": "919170969ac6dee4d32acb49a803c9e2c6ed71e9b869a06e0fbcfa96598399be"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F004",
+      "mutationId": "MPRRV110-MUTATION-004",
+      "ordinal": 4,
+      "target": "SIGNATURE-VERIFICATION-RECEIPT",
+      "testRoot": "1c2f7ed5ffad1fc3a39a3e71bcf0a829940ca5faffa0525b155d341d7f7163d4"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F005",
+      "mutationId": "MPRRV110-MUTATION-005",
+      "ordinal": 5,
+      "target": "SCANNER-INDEPENDENCE",
+      "testRoot": "0ee89591e3160120b9eb062a8e1f0c7684c9017bf427dbd5bd1e4d6b9fc73305"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F006",
+      "mutationId": "MPRRV110-MUTATION-006",
+      "ordinal": 6,
+      "target": "REMOTE-PUBLIC-RECEIPT",
+      "testRoot": "1be814cd0edcc17412e66d488e48ddb1ebdd2f2ffb9eb7722e31d91096956608"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F007",
+      "mutationId": "MPRRV110-MUTATION-007",
+      "ordinal": 7,
+      "target": "CAS-EVIDENCE",
+      "testRoot": "504f2864b448914770b902c4d8dde03e0730d052cfd5ba4bfbb88946e2b6e905"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F008",
+      "mutationId": "MPRRV110-MUTATION-008",
+      "ordinal": 8,
+      "target": "RECOVERY-EVIDENCE",
+      "testRoot": "a70b9c7eefd61bb14c8a25a34c46c21a98024b0f6343d15d181a73040d6feb8f"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F009",
+      "mutationId": "MPRRV110-MUTATION-009",
+      "ordinal": 9,
+      "target": "PREDECESSOR-BEHAVIOR",
+      "testRoot": "c69a554dd4af0b3de1fafc8d818bb66dc59ecc0ee523d94b64188497bf36b229"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F010",
+      "mutationId": "MPRRV110-MUTATION-010",
+      "ordinal": 10,
+      "target": "SEMANTIC-ENTAILMENT",
+      "testRoot": "a044bc4f40821285d92b81310829e99f8238e0112c56dad2b1903e1f69e3073e"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F011",
+      "mutationId": "MPRRV110-MUTATION-011",
+      "ordinal": 11,
+      "target": "CAUSAL-INSTRUMENTATION",
+      "testRoot": "aa38b3e39d90ffb864ceec3f2804834566b9a1d80d3dc0c900512f5cf8ee2d60"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F012",
+      "mutationId": "MPRRV110-MUTATION-012",
+      "ordinal": 12,
+      "target": "CLOSED-EVIDENCE-SCHEMA",
+      "testRoot": "96cf64a34f3f1f36039c75503d4364fa3ad6eff00cefba19a5ebb0ddf33cb39c"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F013",
+      "mutationId": "MPRRV110-MUTATION-013",
+      "ordinal": 13,
+      "target": "FILESYSTEM-ADMISSION",
+      "testRoot": "25c5320b16c5ec23ba483724657eea7355a5d44064835987f319c27eb8bb904b"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F014",
+      "mutationId": "MPRRV110-MUTATION-014",
+      "ordinal": 14,
+      "target": "DESCRIPTOR-BOUND-READ",
+      "testRoot": "695e347727463ed6043332fd9d26c2e3f15e08bd72547489f514370a70d4c208"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F015",
+      "mutationId": "MPRRV110-MUTATION-015",
+      "ordinal": 15,
+      "target": "DETACHED-REPORT-PARENT",
+      "testRoot": "3d445e6c8a44f4bc978b87325473645f424f6969e18a5076c44a5c7321a0edcc"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F016",
+      "mutationId": "MPRRV110-MUTATION-016",
+      "ordinal": 16,
+      "target": "DERIVED-GROWTH",
+      "testRoot": "991bf2f8d687c3a127724a0513b71c14bcabd02ff84ff9852a878fc0b6d0decb"
+    },
+    {
+      "actual": "BLOCK",
+      "findingId": "MPRR-V19-IHR-F017",
+      "mutationId": "MPRRV110-MUTATION-017",
+      "ordinal": 17,
+      "target": "READER-INDEPENDENCE",
+      "testRoot": "c7b5e2e5dae90957dfe6f3808ac4183029dc6983330d8c18cb2b0234e262def6"
+    }
+  ],
+  "corpusRoot": "e51e699c7369be77c36005551f82475e84940f458f1e8d02abd02fe4d1ce27e6",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "MPRR-V1-10-MUTATION-CORPUS-V1"
+}

@@ -58,12 +58,39 @@ function freezeMigrations(migrations) {
   );
 }
 
+function normalizeMigrations(migrations, errorCode) {
+  if (!Array.isArray(migrations) || migrations.length === 0) {
+    throw new Error(errorCode);
+  }
+
+  return migrations.map((migration, index) => {
+    if (
+      typeof migration?.file !== "string" ||
+      migration.file.slice(0, 4) !== String(index).padStart(4, "0") ||
+      !migrationNamePattern.test(migration.file) ||
+      typeof migration.sha256 !== "string" ||
+      !sha256Pattern.test(migration.sha256)
+    ) {
+      throw new Error(errorCode);
+    }
+
+    return { file: migration.file, sha256: migration.sha256 };
+  });
+}
+
+function migrationSetDigest(migrations) {
+  return sha256(
+    migrations.map(({ file, sha256: digest }) => `${file}:${digest}`).join("\n"),
+  );
+}
+
 export function buildReleaseManifest({
   commitSha,
   treeSha,
   packageJson,
   packageLockText,
   migrations,
+  postgresMigrations,
 }) {
   const validatedCommitSha =
     requireGitObject(commitSha, "commit_sha");
@@ -86,37 +113,16 @@ export function buildReleaseManifest({
     );
   }
 
-  const normalizedMigrations =
-    migrations.map((migration, index) => {
-      if (
-        typeof migration?.file !== "string" ||
-        migration?.file !==
-          `${String(index).padStart(4, "0")}_${migration.file.slice(5)}` ||
-        !migrationNamePattern.test(
-          migration.file,
-        ) ||
-        !sha256Pattern.test(
-          migration.sha256,
-        )
-      ) {
-        throw new Error(
-          "INVALID_MIGRATION_INVENTORY",
-        );
-      }
-
-      return {
-        file: migration.file,
-        sha256: migration.sha256,
-      };
-    });
-  const migrationSetSha256 = sha256(
-    normalizedMigrations
-      .map(
-        (migration) =>
-          `${migration.file}:${migration.sha256}`,
-      )
-      .join("\n"),
+  const normalizedMigrations = normalizeMigrations(
+    migrations,
+    "INVALID_MIGRATION_INVENTORY",
   );
+  // Keep the v1 D1 identity contract used by existing evidence readers.
+  // Current release creation always supplies PostgreSQL; legacy callers may omit it.
+  const normalizedPostgresMigrations = postgresMigrations === undefined
+    ? null
+    : normalizeMigrations(postgresMigrations, "INVALID_POSTGRES_MIGRATION_INVENTORY");
+  const migrationSetSha256 = migrationSetDigest(normalizedMigrations);
   const identity = {
     schemaVersion: 1,
     commitSha: validatedCommitSha,
@@ -148,6 +154,13 @@ export function buildReleaseManifest({
       freezeMigrations(
         normalizedMigrations,
       ),
+    ...(normalizedPostgresMigrations === null ? {} : {
+      postgres: Object.freeze({
+        directory: "postgres/migrations",
+        migrationSetSha256: migrationSetDigest(normalizedPostgresMigrations),
+        migrations: freezeMigrations(normalizedPostgresMigrations),
+      }),
+    }),
   });
 }
 
@@ -172,6 +185,7 @@ export async function readCommittedReleaseManifest() {
     packageText,
     packageLockText,
     migrationFiles,
+    postgresMigrationFiles,
   ] = await Promise.all([
     readFile(
       join(projectRoot, "package.json"),
@@ -187,6 +201,7 @@ export async function readCommittedReleaseManifest() {
     readdir(
       join(projectRoot, "drizzle"),
     ),
+    readdir(join(projectRoot, "postgres", "migrations"), { withFileTypes: true }),
   ]);
   const sortedMigrationFiles =
     migrationFiles
@@ -210,6 +225,20 @@ export async function readCommittedReleaseManifest() {
       }),
     ),
   );
+  const postgresMigrations = await Promise.all(
+    postgresMigrationFiles
+      .filter((entry) => entry.name.endsWith(".sql"))
+      .sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0)
+      .map(async (entry) => {
+        if (!entry.isFile()) {
+          throw new Error("INVALID_POSTGRES_MIGRATION_INVENTORY");
+        }
+        return {
+          file: entry.name,
+          sha256: sha256(await readFile(join(projectRoot, "postgres", "migrations", entry.name))),
+        };
+      }),
+  );
 
   return buildReleaseManifest({
     commitSha: requireGitObject(
@@ -224,6 +253,7 @@ export async function readCommittedReleaseManifest() {
       JSON.parse(packageText),
     packageLockText,
     migrations,
+    postgresMigrations,
   });
 }
 

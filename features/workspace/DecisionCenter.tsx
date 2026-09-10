@@ -4,12 +4,23 @@ import type {
 import {
   listProductionDecisions,
 } from "../../shared/domain/productionDecisionRegistry";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import {
+  readWorkspaceRemainingMessages,
+} from "./workspaceRemainingMessages";
 
 export function DecisionCenter({
+  language,
   report,
 }: {
+  language: InterfaceLanguage;
   report: ProductionReadinessReport;
 }) {
+  const messages = readWorkspaceRemainingMessages(
+    language,
+  ).decisions;
   const decisions = listProductionDecisions(report);
   const unresolvedCount = decisions.filter(
     (decision) =>
@@ -23,16 +34,16 @@ export function DecisionCenter({
       <header className="page-heading">
         <div>
           <span className="page-eyebrow">
-            שער Production
+            {messages.eyebrow}
           </span>
-          <h1>מרכז החלטות</h1>
-          <p>
-            מקור הנתונים זהה לשער המוכנות. המסך
-            לקריאה בלבד ואינו שומר תשובות מקומיות.
-          </p>
+          <h1>{messages.title}</h1>
+          <p>{messages.description}</p>
         </div>
         <span className="decision-progress">
-          {resolvedCount} מתוך {decisions.length} הושלמו
+          {messages.progress(
+            resolvedCount,
+            decisions.length,
+          )}
         </span>
       </header>
 
@@ -42,16 +53,16 @@ export function DecisionCenter({
             {unresolvedCount}
           </span>
           <div>
-            <strong>החלטות עדיין פתוחות</strong>
-            <small>
-              סטטוס משתנה רק לאחר החלטה ותצורת שרת
-              אמיתית.
-            </small>
+            <strong>{messages.openTitle}</strong>
+            <small>{messages.openDescription}</small>
           </div>
         </div>
         <div
           className="summary-progress"
-          aria-label={`${resolvedCount} מתוך ${decisions.length} החלטות הושלמו`}
+          aria-label={messages.progress(
+            resolvedCount,
+            decisions.length,
+          )}
         >
           <span
             style={{
@@ -71,6 +82,8 @@ export function DecisionCenter({
         {decisions.map((decision, index) => {
           const resolved =
             decision.status === "ready";
+          const content =
+            messages.content[decision.checkId];
 
           return (
             <article
@@ -85,8 +98,8 @@ export function DecisionCenter({
               <div className="decision-content">
                 <div className="decision-title-row">
                   <div>
-                    <h2>{decision.title}</h2>
-                    <p>{decision.detail}</p>
+                    <h2>{content.title}</h2>
+                    <p>{content.detail}</p>
                   </div>
                   <span
                     className={`status-pill ${
@@ -94,12 +107,12 @@ export function DecisionCenter({
                     }`}
                   >
                     {resolved
-                      ? "הושלם"
-                      : "דורש החלטה"}
+                      ? messages.complete
+                      : messages.required}
                   </span>
                 </div>
                 <small className="decision-owner">
-                  בעלי החלטה: {decision.owner}
+                  {messages.owner(content.owner)}
                 </small>
                 <code>{decision.code}</code>
               </div>

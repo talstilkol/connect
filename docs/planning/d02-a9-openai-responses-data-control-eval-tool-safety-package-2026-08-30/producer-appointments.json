@@ -1,0 +1,423 @@
+{
+  "artifactId": "CONNECT-D02-A9-EXACT-PRODUCER-APPOINTMENTS-2026-08-30",
+  "appointmentVersion": "1.0.0",
+  "appointmentCount": 24,
+  "appointmentsRoot": "aa3a873c798fdbd6dfe17c737fc099d370f600b4109700e19a3aea475bfd7bbf",
+  "selfAuthorityCount": 0,
+  "appointments": [
+    {
+      "ordinal": 1,
+      "appointmentId": "D02A9-APPOINTMENT-001",
+      "producerId": "D02A9-PRODUCER-001",
+      "producerClass": "MECHANICAL-PACKAGE-BUILDER",
+      "authoritySourceId": "D02A9-IN-001",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-INPUT-MANIFEST"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "appointmentId": "D02A9-APPOINTMENT-002",
+      "producerId": "D02A9-PRODUCER-002",
+      "producerClass": "MECHANICAL-SEMANTIC-EXTRACTOR",
+      "authoritySourceId": "D02A9-IN-001",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-PREDECESSOR-SEMANTICS",
+        "D02A9-ROOT-A6-FINDING-CARRY",
+        "D02A9-ROOT-A7-FINDING-CARRY"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 3,
+      "appointmentId": "D02A9-APPOINTMENT-003",
+      "producerId": "D02A9-PRODUCER-003",
+      "producerClass": "D02-AUTHORITY-BINDER",
+      "authoritySourceId": "D02A9-IN-001",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-AUTHORITY-CHAIN"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 4,
+      "appointmentId": "D02A9-APPOINTMENT-004",
+      "producerId": "D02A9-PRODUCER-004",
+      "producerClass": "PUBLIC-AUTHORITY-BINDER",
+      "authoritySourceId": "D02A9-IN-013",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-PUBLIC-DIRECTIVE"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 5,
+      "appointmentId": "D02A9-APPOINTMENT-005",
+      "producerId": "D02A9-PRODUCER-005",
+      "producerClass": "FINDING-CLOSURE-CANDIDATE-BUILDER",
+      "authoritySourceId": "D02A9-A8-FINDINGS",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-A8-FINDING-CLOSURE-CANDIDATES"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 6,
+      "appointmentId": "D02A9-APPOINTMENT-006",
+      "producerId": "D02A9-PRODUCER-006",
+      "producerClass": "SOURCE-RECEIPT-BUILDER",
+      "authoritySourceId": "OPENAI-OFFICIAL-DOCUMENTATION",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-SOURCE-OBSERVATION"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 7,
+      "appointmentId": "D02A9-APPOINTMENT-007",
+      "producerId": "D02A9-PRODUCER-007",
+      "producerClass": "EXTERNAL-SOURCE-ADJUDICATOR",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-SOURCE-ACCEPTED"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 8,
+      "appointmentId": "D02A9-APPOINTMENT-008",
+      "producerId": "D02A9-PRODUCER-008",
+      "producerClass": "PRODUCT-AI-FINANCE-MODEL-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-MODEL-SELECTION-AUTHORITY"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 9,
+      "appointmentId": "D02A9-APPOINTMENT-009",
+      "producerId": "D02A9-PRODUCER-009",
+      "producerClass": "CONNECT-PROMPT-OWNER",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-PROMPT-ARTIFACT"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 10,
+      "appointmentId": "D02A9-APPOINTMENT-010",
+      "producerId": "D02A9-PRODUCER-010",
+      "producerClass": "AI-PROFILE-BUILDER",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-AI-PROFILE"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 11,
+      "appointmentId": "D02A9-APPOINTMENT-011",
+      "producerId": "D02A9-PRODUCER-011",
+      "producerClass": "AUTHENTICATED-ACCOUNT-READBACK",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-ACCOUNT",
+        "D02A9-ROOT-RUNTIME-ACCOUNT"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 12,
+      "appointmentId": "D02A9-APPOINTMENT-012",
+      "producerId": "D02A9-PRODUCER-012",
+      "producerClass": "LEGAL-PRIVACY-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-LEGAL"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 13,
+      "appointmentId": "D02A9-APPOINTMENT-013",
+      "producerId": "D02A9-PRODUCER-013",
+      "producerClass": "SIX-DOMAIN-APPROVERS",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-APPROVAL-SET"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 14,
+      "appointmentId": "D02A9-APPOINTMENT-014",
+      "producerId": "D02A9-PRODUCER-014",
+      "producerClass": "INDEPENDENT-EVAL-RUNNERS",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-EVAL"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 15,
+      "appointmentId": "D02A9-APPOINTMENT-015",
+      "producerId": "D02A9-PRODUCER-015",
+      "producerClass": "ATOMIC-PACKAGE-SEALER",
+      "authoritySourceId": "D02A9-IN-001",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "2026-08-30T02:15:04Z",
+      "expiresAt": "NOT-APPLICABLE-NON-AUTHORIZING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "ACTIVE-NON-AUTHORIZING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-PACKAGE-ENVELOPE"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 16,
+      "appointmentId": "D02A9-APPOINTMENT-016",
+      "producerId": "D02A9-PRODUCER-016",
+      "producerClass": "INDEPENDENT-A9-REVIEWER",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-INDEPENDENT-A9-REVIEW"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 17,
+      "appointmentId": "D02A9-APPOINTMENT-017",
+      "producerId": "D02A9-PRODUCER-017",
+      "producerClass": "D02-PROGRAM-ACCEPTOR",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-PROGRAM-ACCEPTANCE",
+        "D02A9-ROOT-PLANNING-ACCEPTANCE"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 18,
+      "appointmentId": "D02A9-APPOINTMENT-018",
+      "producerId": "D02A9-PRODUCER-018",
+      "producerClass": "AI-ADMISSION-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-AI-ADMISSION"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 19,
+      "appointmentId": "D02A9-APPOINTMENT-019",
+      "producerId": "D02A9-PRODUCER-019",
+      "producerClass": "GATE29-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-GATE29"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 20,
+      "appointmentId": "D02A9-APPOINTMENT-020",
+      "producerId": "D02A9-PRODUCER-020",
+      "producerClass": "FREEZE-LIFT-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-FREEZE-LIFT"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 21,
+      "appointmentId": "D02A9-APPOINTMENT-021",
+      "producerId": "D02A9-PRODUCER-021",
+      "producerClass": "TRUSTED-TIME-AND-REVOCATION-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-TRUSTED-TIME",
+        "D02A9-ROOT-REVOCATION-CUT"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 22,
+      "appointmentId": "D02A9-APPOINTMENT-022",
+      "producerId": "D02A9-PRODUCER-022",
+      "producerClass": "CAS-AND-SINGLE-USE-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-CAS",
+        "D02A9-ROOT-SINGLE-USE"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 23,
+      "appointmentId": "D02A9-APPOINTMENT-023",
+      "producerId": "D02A9-PRODUCER-023",
+      "producerClass": "POST-READBACK-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-POST-READBACK"
+      ],
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 24,
+      "appointmentId": "D02A9-APPOINTMENT-024",
+      "producerId": "D02A9-PRODUCER-024",
+      "producerClass": "RUNTIME-PERMIT-AUTHORITY",
+      "authoritySourceId": "EXTERNAL-APPOINTMENT-MISSING",
+      "scope": "D02-A9-EXACT-ROOT-OUTPUTS",
+      "subject": "CONNECT-D02-A9-IMMUTABLE-SUCCESSOR",
+      "issuedAt": "MISSING",
+      "expiresAt": "MISSING",
+      "revocationRoot": "MISSING",
+      "appointmentState": "MISSING",
+      "allowedOutputRootIds": [
+        "D02A9-ROOT-RUNTIME-PERMIT"
+      ],
+      "acceptanceCredit": 0
+    }
+  ]
+}

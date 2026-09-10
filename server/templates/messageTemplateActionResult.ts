@@ -27,6 +27,10 @@ export type SaveMessageTemplateDraftActionResult =
 
 export type SubmitMessageTemplateActionResult =
   | {
+      status: "submission-staged";
+      submissionKey: string;
+    }
+  | {
       status: "submitted";
       template: MessageTemplateView;
     }

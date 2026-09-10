@@ -61,12 +61,17 @@ const UPSERT_ASSET_SNAPSHOT_SQL = `
     connected_at = null,
     version = meta_connections.version + 1,
     updated_at = CURRENT_TIMESTAMP
-  WHERE meta_connections.business_portfolio_id IS NOT excluded.business_portfolio_id
-    OR meta_connections.waba_id IS NOT excluded.waba_id
-    OR meta_connections.phone_number_id IS NOT excluded.phone_number_id
-    OR meta_connections.status IS NOT 'pending'
-    OR meta_connections.webhook_subscribed_at IS NOT null
-    OR meta_connections.connected_at IS NOT null
+  RETURNING
+    tenant_id AS tenantId,
+    business_portfolio_id AS businessPortfolioId,
+    waba_id AS wabaId,
+    phone_number_id AS phoneNumberId,
+    status,
+    webhook_subscribed_at AS webhookSubscribedAt,
+    connected_at AS connectedAt,
+    version,
+    created_at AS createdAt,
+    updated_at AS updatedAt
 `;
 
 const MARK_CONNECTION_CONNECTED_SQL = `
@@ -78,11 +83,8 @@ const MARK_CONNECTION_CONNECTED_SQL = `
     version = version + 1,
     updated_at = CURRENT_TIMESTAMP
   WHERE tenant_id = ?1
-    AND (
-      status IS NOT 'connected'
-      OR webhook_subscribed_at IS null
-      OR connected_at IS null
-    )
+    AND status = 'pending'
+    AND version = ?2
 `;
 
 const MARK_CONNECTION_STATUS_SQL = `
@@ -184,6 +186,7 @@ const operationalFailureStatuses = [
 ] as const satisfies readonly PersistedMetaConnectionStatus[];
 
 export interface SaveMetaAssetSnapshotInput {
+  expectedConnectionVersion?: number | null;
   tenantId: number;
   businessPortfolioId: string;
   wabaId: string;
@@ -212,7 +215,8 @@ export interface MetaRepository {
   saveAssetSnapshot(
     input: SaveMetaAssetSnapshotInput,
   ): Promise<MetaConnectionRecord>;
-  markConnectionConnected(tenantId: number): Promise<MetaConnectionRecord>;
+  markConnectionConnected(tenantId: number, expectedVersion: number): Promise<MetaConnectionRecord>;
+  revokeConnection(tenantId: number, wabaId: string, expectedVersion: number): Promise<boolean>;
   markConnectionStatus(
     tenantId: number,
     status: (typeof operationalFailureStatuses)[number],
@@ -368,6 +372,7 @@ export function createMetaRepository(
     },
 
     async saveAssetSnapshot(input) {
+      if (input.expectedConnectionVersion !== undefined) throw new Error("Guarded Meta signup requires PostgreSQL");
       assertPositiveInteger(input.tenantId, "tenantId");
       const businessPortfolioId = requireTrimmedValue(
         input.businessPortfolioId,
@@ -378,7 +383,7 @@ export function createMetaRepository(
         input.phoneNumberId,
         "phoneNumberId",
       );
-      const result = await database
+      const saved = await database
         .prepare(UPSERT_ASSET_SNAPSHOT_SQL)
         .bind(
           input.tenantId,
@@ -386,27 +391,58 @@ export function createMetaRepository(
           wabaId,
           phoneNumberId,
         )
-        .run();
+        .first<MetaConnectionRecord>();
 
-      if (!result.success) {
-        throw new Error(result.error ?? "D1 Meta connection write failed");
+      if (!saved) {
+        throw new Error("D1 Meta asset write was not confirmed");
       }
-
-      return requireSavedConnection(database, input.tenantId);
+      const connection = parseConnection(saved);
+      if (
+        connection.tenantId !== input.tenantId ||
+        connection.businessPortfolioId !== businessPortfolioId ||
+        connection.wabaId !== wabaId ||
+        connection.phoneNumberId !== phoneNumberId ||
+        connection.status !== "pending"
+      ) {
+        throw new Error("D1 Meta asset write was not confirmed");
+      }
+      return connection;
     },
 
-    async markConnectionConnected(tenantId) {
+    async markConnectionConnected(tenantId, expectedVersion) {
       assertPositiveInteger(tenantId, "tenantId");
+      assertPositiveInteger(expectedVersion, "expectedVersion");
       const result = await database
         .prepare(MARK_CONNECTION_CONNECTED_SQL)
-        .bind(tenantId)
+        .bind(tenantId, expectedVersion)
         .run();
 
       if (!result.success) {
         throw new Error(result.error ?? "D1 Meta connection update failed");
       }
 
-      return requireSavedConnection(database, tenantId);
+      if (Number(result.meta?.changes) !== 1) {
+        throw new Error("Meta connection changed before confirmation");
+      }
+      const connection = await requireSavedConnection(database, tenantId);
+      if (connection.status !== "connected" || connection.version !== expectedVersion + 1) {
+        throw new Error("Meta connection changed after confirmation");
+      }
+      return connection;
+    },
+
+    async revokeConnection(tenantId, wabaId, expectedVersion) {
+      assertPositiveInteger(tenantId, "tenantId");
+      assertPositiveInteger(expectedVersion, "expectedVersion");
+      const result = await database.prepare(`
+        UPDATE meta_connections
+        SET status = 'revoked', version = version + 1, updated_at = CURRENT_TIMESTAMP
+        WHERE tenant_id = ?1 AND waba_id = ?2 AND version = ?3 AND status <> 'revoked'
+      `).bind(tenantId, requireTrimmedValue(wabaId, "wabaId"), expectedVersion).run();
+      if (!result.success || (result.meta?.changes !== 0 && result.meta?.changes !== 1)) {
+        throw new Error("Meta revocation write was not confirmed");
+      }
+      return result.meta.changes === 1;
     },
 
     async markConnectionStatus(tenantId, status) {

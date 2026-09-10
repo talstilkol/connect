@@ -339,6 +339,23 @@ test("pins the GitHub dependency audit workflow and retains only bounded evidenc
     source,
     /dependency-audit-evidence-attestation\.json/,
   );
+  assert.match(
+    source,
+    /github\.event\.repository\.private == true && vars\.CONNECT_PRIVATE_ARTIFACT_ATTESTATIONS_ENABLED != 'true'/,
+  );
+  assert.match(
+    source,
+    /DEPENDENCY_AUDIT_ATTESTATION_PRIVATE_REPOSITORY_CAPABILITY_REQUIRED/,
+  );
+  assert.match(
+    source,
+    /GitHub Artifact Attestations for private repositories require GitHub Enterprise Cloud/,
+  );
+  assert.doesNotMatch(
+    source,
+    /github\.event\.repository\.private == false/,
+  );
+  assert.match(source, /if: \$\{\{ always\(\) \}\}/);
   assert.match(source, /retention-days: 1/);
   assert.doesNotMatch(source, /pull_request_target:/);
 });

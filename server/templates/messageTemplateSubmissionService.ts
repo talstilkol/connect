@@ -16,6 +16,10 @@ import {
   MetaCredentialVaultError,
 } from "../meta/metaCredentialVault.ts";
 import {
+  assertCurrentMetaConnection,
+  MetaConnectionAuthorizationError,
+} from "../meta/metaConnectionAuthorization.ts";
+import {
   MetaGraphError,
 } from "../meta/metaGraphTransport.ts";
 import type {
@@ -177,12 +181,14 @@ export function createMessageTemplateSubmissionService(
 
       if (
         !connection ||
+        connection.tenantId !== session.tenantId ||
         connection.status !== "connected" ||
         !/^[1-9][0-9]{0,63}$/.test(connection.wabaId)
       ) {
         throw submissionError("META_NOT_CONNECTED");
       }
 
+      connection = Object.freeze({ ...connection });
       try {
         return await dependencies.credentialVault
           .withAccessToken(
@@ -224,6 +230,30 @@ export function createMessageTemplateSubmissionService(
               }
 
               let submitted;
+
+              try {
+                await assertCurrentMetaConnection(
+                  dependencies.metaConnections,
+                  connection,
+                );
+              } catch (error) {
+                try {
+                  await dependencies.templates.releaseSubmission(
+                    session.tenantId,
+                    templateKey,
+                    submissionKey,
+                    "META_CONNECTION_UNAVAILABLE",
+                  );
+                } catch {
+                  throw submissionError("SUBMISSION_UNCERTAIN");
+                }
+                throw submissionError(
+                  error instanceof MetaConnectionAuthorizationError &&
+                    error.code === "CONNECTION_CHANGED"
+                    ? "META_NOT_CONNECTED"
+                    : "SERVICE_UNAVAILABLE",
+                );
+              }
 
               try {
                 submitted =

@@ -26,6 +26,9 @@ import {
   type MetaWebhookQueueBinding,
 } from "./metaWebhookQueuePublisher.ts";
 import {
+  createCloudflareMetaWebhookQueuePort,
+} from "./metaWebhookQueuePort.ts";
+import {
   createRateLimitGuard,
   type RateLimitBinding,
 } from "../security/rateLimit.ts";
@@ -79,7 +82,9 @@ export function createMetaWebhookQueueHttpHandler(
   );
   const publisher = createMetaWebhookQueuePublisher(
     repository,
-    requireQueue(environment),
+    createCloudflareMetaWebhookQueuePort(
+      requireQueue(environment),
+    ),
     configuration.appSecret,
     createRateLimitGuard(
       environment.META_WEBHOOK_RATE_LIMITER,

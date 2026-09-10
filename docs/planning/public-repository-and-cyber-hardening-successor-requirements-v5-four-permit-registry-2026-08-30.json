@@ -1,0 +1,2274 @@
+{
+  "artifactClass": "TYPED-PLANNING-PERMIT-PROTOCOLS;NO-ISSUED-PERMIT;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-FOUR-PERMIT-REGISTRY-2026-08-30",
+  "commonConsumePreconditions": [
+    "SCHEMA-VALID",
+    "TYPE-TAG-EXACT",
+    "ISSUER-CURRENT",
+    "CONSUMER-NAMEDUSE-EXACT",
+    "INDEPENDENT-READER-DISJOINT",
+    "TRUSTED-TIME-IN-RANGE",
+    "REVOCATION-CLEAR",
+    "EXPECTED-PERMIT-HEAD-CURRENT",
+    "REVISION-EPOCH-FENCE-CURRENT",
+    "ONE-USE-LEDGER-UNUSED",
+    "PRE-VISIBILITY-PUBLIC",
+    "CLASS-SPECIFIC-PREDICATES",
+    "ATOMIC-CAS-COMMIT",
+    "POST-VISIBILITY-PUBLIC"
+  ],
+  "crossAuthorityRule": "NO-PERMIT-AUTHORIZES-ANOTHER-PERMIT-CLASS",
+  "crossUseMatrix": [
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-1-1",
+      "consumerPermitClass": "GITHUB-CONTROL-PLANE",
+      "expectedTerminal": "PASS-PLANNING-PROTOCOL-WITNESS",
+      "namedUse": "consumeGitHubControlPlanePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "GITHUB-CONTROL-PLANE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-1-2",
+      "consumerPermitClass": "PUBLIC-PUSH",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumePublicPushPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "GITHUB-CONTROL-PLANE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-1-3",
+      "consumerPermitClass": "DEPLOYMENT",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeDeploymentPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "GITHUB-CONTROL-PLANE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-1-4",
+      "consumerPermitClass": "RELEASE",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeReleasePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "GITHUB-CONTROL-PLANE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-2-1",
+      "consumerPermitClass": "GITHUB-CONTROL-PLANE",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeGitHubControlPlanePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "PUBLIC-PUSH"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-2-2",
+      "consumerPermitClass": "PUBLIC-PUSH",
+      "expectedTerminal": "PASS-PLANNING-PROTOCOL-WITNESS",
+      "namedUse": "consumePublicPushPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "PUBLIC-PUSH"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-2-3",
+      "consumerPermitClass": "DEPLOYMENT",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeDeploymentPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "PUBLIC-PUSH"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-2-4",
+      "consumerPermitClass": "RELEASE",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeReleasePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "PUBLIC-PUSH"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-3-1",
+      "consumerPermitClass": "GITHUB-CONTROL-PLANE",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeGitHubControlPlanePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "DEPLOYMENT"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-3-2",
+      "consumerPermitClass": "PUBLIC-PUSH",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumePublicPushPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "DEPLOYMENT"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-3-3",
+      "consumerPermitClass": "DEPLOYMENT",
+      "expectedTerminal": "PASS-PLANNING-PROTOCOL-WITNESS",
+      "namedUse": "consumeDeploymentPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "DEPLOYMENT"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-3-4",
+      "consumerPermitClass": "RELEASE",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeReleasePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "DEPLOYMENT"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-4-1",
+      "consumerPermitClass": "GITHUB-CONTROL-PLANE",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeGitHubControlPlanePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "RELEASE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-4-2",
+      "consumerPermitClass": "PUBLIC-PUSH",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumePublicPushPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "RELEASE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-4-3",
+      "consumerPermitClass": "DEPLOYMENT",
+      "expectedTerminal": "BLOCK-PERMIT-CLASS-MISMATCH",
+      "namedUse": "consumeDeploymentPermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "RELEASE"
+    },
+    {
+      "cellId": "PRCV5-PERMIT-MATRIX-4-4",
+      "consumerPermitClass": "RELEASE",
+      "expectedTerminal": "PASS-PLANNING-PROTOCOL-WITNESS",
+      "namedUse": "consumeReleasePermit",
+      "operationalCredit": 0,
+      "presentedPermitClass": "RELEASE"
+    }
+  ],
+  "currentState": {
+    "DeploymentPermit": "ABSENT",
+    "GitHubControlPlanePermit": "ABSENT",
+    "PublicPushPermit": "ABSENT",
+    "ReleasePermit": "ABSENT",
+    "reason": "REQUIRED-EXTERNAL-EVIDENCE-AND-AUTHORITY-MISSING-BLOCKING"
+  },
+  "matrixDenominators": {
+    "cells": 16,
+    "crossClassDenials": 12,
+    "legalPresentations": 4,
+    "permitTypes": 4
+  },
+  "permitRegistryRoot": "3af9fa6086f33bc10fb2dbbf0e19d150f234d11872aa5cdf7280f099531b6abc",
+  "permits": [
+    {
+      "acceptanceCredit": 0,
+      "actualConsumeReceiptRoot": null,
+      "actualIssueReceiptRoot": null,
+      "classFields": [
+        "repositoryIdentityRoot",
+        "orderedStepSetRoot",
+        "securityFloorRoot",
+        "perStepReceiptSetRoot"
+      ],
+      "consumeReducerId": "PRCV5-ATOMIC-PERMIT-CAS-REDUCER-V1",
+      "consumerRole": "PRCV5-CONTROL-PLANE-EXECUTOR",
+      "consumerRoot": "03819edd86f558e8736c64187565bcf4c1c50abe72e60b2db0306f8959a82d2b",
+      "currentState": "ABSENT",
+      "domain": "PRCV5-PERMIT-CONTROL-V1",
+      "independentReaderRoot": "e78313f5b4df09a7b2cf7384695afc7e74a4ae478f43726d2b1a4a4b1a5da83b",
+      "issuerRole": "PRCV5-CONTROL-PERMIT-ISSUER",
+      "issuerRoot": "6a65d0710be0a7d00148dabd66c182e7b93670a854a311e500cc61d29dec0a39",
+      "namedUse": "consumeGitHubControlPlanePermit",
+      "operationalCredit": 0,
+      "ordinal": 1,
+      "permitClass": "GITHUB-CONTROL-PLANE",
+      "permitDefinitionRoot": "6b218e79e88bdfb4c42fca547f64b9ccab5a9909c64a20ac89e76126fb1f959c",
+      "planningInstance": {
+        "acceptanceCredit": 0,
+        "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+        "instance": {
+          "attemptId": "PRCV5-8DA3B7D0663624F9",
+          "consumerRoot": "03819edd86f558e8736c64187565bcf4c1c50abe72e60b2db0306f8959a82d2b",
+          "epoch": 0,
+          "expectedPermitHead": "cfa06b575942c64e0cb29348189a4e4682af22ad1f714a9ff286a5f1b953a974",
+          "expiresAt": "2026-08-31T00:00:00Z",
+          "failureReceiptRoot": "a979fd7c706f2691ad60b9ba55b432ad8949a85118a5e8e25f62a99a671558d3",
+          "fence": 0,
+          "independentReaderRoot": "e78313f5b4df09a7b2cf7384695afc7e74a4ae478f43726d2b1a4a4b1a5da83b",
+          "issuedAt": "2026-08-30T00:00:00Z",
+          "issuerRoot": "6a65d0710be0a7d00148dabd66c182e7b93670a854a311e500cc61d29dec0a39",
+          "newPermitHead": "6fd07b8de94a1d133cb172261046038ea5066b8d0350fb6ecca826138fed64d5",
+          "oneUseLedgerRoot": "bd8b4abf895675087b73c7056bcf269f052789230ef79aa5f3f94739ff2261a0",
+          "orderedStepSetRoot": "4a58b7438bf0ff727828c7faf654b241ddbe4a1a9a32a68a0f5145a525405159",
+          "perStepReceiptSetRoot": "d04263cce0b081f70d337f3ec327e83d375fb31fddca41a030aaaea0783a6cf3",
+          "permitId": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-PLANNING-WITNESS",
+          "postVisibilityReceiptRoot": "f16c31083ced02f35a14121cc519de60871ac35bd41d06fcb070c129cbf387ad",
+          "preVisibilityReceiptRoot": "d1c5385f22981e97f424c204d871dd2127de307dd81ad904d88bf5bfd3f6ef3e",
+          "repositoryIdentityRoot": "78d998d9a4a49f615117d465e86ca713615056c518bb5580b880ad00c36aac99",
+          "responseLossReadbackRoot": "68af82179f66578c3ddef1824f3196a4b4ca76bde835be336bce132e5ed5edac",
+          "revision": 0,
+          "revocationHead": "7b3cf4866058c0d6afdb5ecc542d8e10d6c01fd269e15f670eb3b58803e0a851",
+          "securityFloorRoot": "f3939780130bdfad883aeee11db744a4ddd7e76f2a39e3606dfb7d9700ae104a",
+          "trustedTimeReceiptRoot": "202bd7c378157092433a87570ba5f3e16dd5b719ff539b9288c51103d04afcf0",
+          "typeTag": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1",
+          "v5AcceptanceCredit": 0,
+          "v5OperationalCredit": 0,
+          "v5PlanningOnly": true
+        },
+        "instanceId": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1-PLANNING-INSTANCE",
+        "instanceRoot": "d31046ee3ab1adb4ba74b9c2ba3f09d9301d28e0e744e1575fb1ba13322d65be",
+        "operationalCredit": 0,
+        "schemaId": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1-SCHEMA"
+      },
+      "readerRole": "PRCV5-CONTROL-PLANE-READER",
+      "roleSeparation": {
+        "distinctCount": 3,
+        "requiredDistinctCount": 3,
+        "roots": [
+          "6a65d0710be0a7d00148dabd66c182e7b93670a854a311e500cc61d29dec0a39",
+          "03819edd86f558e8736c64187565bcf4c1c50abe72e60b2db0306f8959a82d2b",
+          "e78313f5b4df09a7b2cf7384695afc7e74a4ae478f43726d2b1a4a4b1a5da83b"
+        ]
+      },
+      "schema": {
+        "additionalProperties": false,
+        "crossFieldInvariants": [
+          {
+            "args": [
+              {
+                "args": [
+                  "/typeTag"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1"
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5PlanningOnly"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  true
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5OperationalCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5AcceptanceCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          }
+        ],
+        "fields": [
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "permitId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "typeTag",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuedAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expiresAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "trustedTimeReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "consumerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "independentReaderRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expectedPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "newPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revision",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "epoch",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "fence",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revocationHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "oneUseLedgerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "attemptId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "failureReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "responseLossReadbackRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "preVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "postVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5PlanningOnly",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Boolean",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5OperationalCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5AcceptanceCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "repositoryIdentityRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "orderedStepSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "securityFloorRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "perStepReceiptSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          }
+        ],
+        "namedUseSignature": "consumeGitHubControlPlanePermit(PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1,PRCV5-CONTROL-PLANE-EXECUTOR)->PERMIT-TERMINAL",
+        "permitClass": "GITHUB-CONTROL-PLANE",
+        "schemaId": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1-SCHEMA",
+        "schemaRoot": "4e871a722a2d909476b81d3209949f794a4ec0602f2d74db32ee95eae4dc53b5",
+        "typeTag": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1",
+        "unknownFields": "BLOCK"
+      },
+      "typeTag": "PRCV5-GITHUB-CONTROL-PLANE-PERMIT-V1",
+      "visibilityInvariant": {
+        "missingReceiptTerminal": "BLOCK",
+        "privateTerminal": "BLOCK",
+        "requiredAfter": "PUBLIC",
+        "requiredBefore": "PUBLIC"
+      }
+    },
+    {
+      "acceptanceCredit": 0,
+      "actualConsumeReceiptRoot": null,
+      "actualIssueReceiptRoot": null,
+      "classFields": [
+        "repositoryIdentityRoot",
+        "refName",
+        "expectedOldOid",
+        "sentObjectSetRoot",
+        "acceptedObjectSetRoot",
+        "quarantinedObjectSetRoot"
+      ],
+      "consumeReducerId": "PRCV5-ATOMIC-PERMIT-CAS-REDUCER-V1",
+      "consumerRole": "PRCV5-PUSH-EXECUTOR",
+      "consumerRoot": "91e1a49cfc95d14a106f37b5d647de9723f6dd9bd3e7b946ed95ef5b25548df1",
+      "currentState": "ABSENT",
+      "domain": "PRCV5-PERMIT-PUSH-V1",
+      "independentReaderRoot": "35767fcca892cdf8dfec720f2ed8ca1b82ed38cab93076ebe6a6ebd6d9490c93",
+      "issuerRole": "PRCV5-PUSH-PERMIT-ISSUER",
+      "issuerRoot": "39014f658d2d72368765a6c3cc06b0cb407e9cdc4f9964e94768df6b0425c171",
+      "namedUse": "consumePublicPushPermit",
+      "operationalCredit": 0,
+      "ordinal": 2,
+      "permitClass": "PUBLIC-PUSH",
+      "permitDefinitionRoot": "7c642f3b4cd11e8f6e1e16643786209f443776792e8f7ad32fdcc2fef0719d6e",
+      "planningInstance": {
+        "acceptanceCredit": 0,
+        "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+        "instance": {
+          "acceptedObjectSetRoot": "d38dac64f5a74e18749b75d443e4d4456b9bf48bdb8b27dab285a21809bac1b4",
+          "attemptId": "PRCV5-1C0E96E3044109B7",
+          "consumerRoot": "91e1a49cfc95d14a106f37b5d647de9723f6dd9bd3e7b946ed95ef5b25548df1",
+          "epoch": 0,
+          "expectedOldOid": "sha256:b942cb2d6b9dbfe2cfa857f85c1972851f5e6d3fa7b862de6db432f9e08c0510",
+          "expectedPermitHead": "16a87b118a9a950ef1cf7ce79714226669291ba988c3de976f96f83e8c117e69",
+          "expiresAt": "2026-08-31T00:00:00Z",
+          "failureReceiptRoot": "d3f0a70b8733dac773427ebcf34b7048a879ad2f34a4deefbf737608f713c279",
+          "fence": 0,
+          "independentReaderRoot": "35767fcca892cdf8dfec720f2ed8ca1b82ed38cab93076ebe6a6ebd6d9490c93",
+          "issuedAt": "2026-08-30T00:00:00Z",
+          "issuerRoot": "39014f658d2d72368765a6c3cc06b0cb407e9cdc4f9964e94768df6b0425c171",
+          "newPermitHead": "8406f6ebefc8c1f2384117a63cf0bfbd90abb484ff58703638de58db7934ee62",
+          "oneUseLedgerRoot": "b63a388baf4049db64f313306ec1986607743aebbdb4b5ce9d35a66e430827da",
+          "permitId": "PRCV5-PUBLIC-PUSH-PERMIT-PLANNING-WITNESS",
+          "postVisibilityReceiptRoot": "f9c60be1a33aadd32cac7d641a8e4bbf156b744995bb9b62479665fd838ffd89",
+          "preVisibilityReceiptRoot": "6ce6293d1fdd6e6927db020b8613c86eb47c650dccde57a7364371c16b7a7af0",
+          "quarantinedObjectSetRoot": "ea36d2aaeb5e2fe2cb62d73e0f066d358b22502e0b28c936d59fe8014d32169f",
+          "refName": "PLANNING-PROTOCOL-WITNESS-34DA3CE6C36E",
+          "repositoryIdentityRoot": "ecb4131b5e9f5593d62b2b7a785b3b1ea8857afa28587811568e8f3f088de135",
+          "responseLossReadbackRoot": "04ee042474ce737f0b64368b331f1ec2450ed917783fe564565520ff27e91ad9",
+          "revision": 0,
+          "revocationHead": "bf46b2585a78cb8b129136cf0807c0184b02954f237cfba0bc029733e15c61bd",
+          "sentObjectSetRoot": "38a0f4146935009b974efbb69f08c90108119ec2e7d916f19c789fcef399e3af",
+          "trustedTimeReceiptRoot": "234a900587849f670ef554ee4722681b9b08c1f33e2a7750b49a236106cd792f",
+          "typeTag": "PRCV5-PUBLIC-PUSH-PERMIT-V1",
+          "v5AcceptanceCredit": 0,
+          "v5OperationalCredit": 0,
+          "v5PlanningOnly": true
+        },
+        "instanceId": "PRCV5-PUBLIC-PUSH-PERMIT-V1-PLANNING-INSTANCE",
+        "instanceRoot": "0e6de3f7455d50ed3b477dd41cc52c2c0d6d9923c6083914fb3e8470b9ae61ed",
+        "operationalCredit": 0,
+        "schemaId": "PRCV5-PUBLIC-PUSH-PERMIT-V1-SCHEMA"
+      },
+      "readerRole": "PRCV5-REMOTE-REF-OBJECT-VISIBILITY-READER",
+      "roleSeparation": {
+        "distinctCount": 3,
+        "requiredDistinctCount": 3,
+        "roots": [
+          "39014f658d2d72368765a6c3cc06b0cb407e9cdc4f9964e94768df6b0425c171",
+          "91e1a49cfc95d14a106f37b5d647de9723f6dd9bd3e7b946ed95ef5b25548df1",
+          "35767fcca892cdf8dfec720f2ed8ca1b82ed38cab93076ebe6a6ebd6d9490c93"
+        ]
+      },
+      "schema": {
+        "additionalProperties": false,
+        "crossFieldInvariants": [
+          {
+            "args": [
+              {
+                "args": [
+                  "/typeTag"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "PRCV5-PUBLIC-PUSH-PERMIT-V1"
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5PlanningOnly"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  true
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5OperationalCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5AcceptanceCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          }
+        ],
+        "fields": [
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "permitId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "typeTag",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuedAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expiresAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "trustedTimeReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "consumerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "independentReaderRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expectedPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "newPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revision",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "epoch",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "fence",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revocationHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "oneUseLedgerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "attemptId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "failureReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "responseLossReadbackRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "preVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "postVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5PlanningOnly",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Boolean",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5OperationalCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5AcceptanceCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "repositoryIdentityRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "refName",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "String",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expectedOldOid",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "GitOid",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "sentObjectSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "acceptedObjectSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "quarantinedObjectSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          }
+        ],
+        "namedUseSignature": "consumePublicPushPermit(PRCV5-PUBLIC-PUSH-PERMIT-V1,PRCV5-PUSH-EXECUTOR)->PERMIT-TERMINAL",
+        "permitClass": "PUBLIC-PUSH",
+        "schemaId": "PRCV5-PUBLIC-PUSH-PERMIT-V1-SCHEMA",
+        "schemaRoot": "6ce610bec2155dc046e7b9236703552dab81f2c13bcafbf5296c14cc9cad26c7",
+        "typeTag": "PRCV5-PUBLIC-PUSH-PERMIT-V1",
+        "unknownFields": "BLOCK"
+      },
+      "typeTag": "PRCV5-PUBLIC-PUSH-PERMIT-V1",
+      "visibilityInvariant": {
+        "missingReceiptTerminal": "BLOCK",
+        "privateTerminal": "BLOCK",
+        "requiredAfter": "PUBLIC",
+        "requiredBefore": "PUBLIC"
+      }
+    },
+    {
+      "acceptanceCredit": 0,
+      "actualConsumeReceiptRoot": null,
+      "actualIssueReceiptRoot": null,
+      "classFields": [
+        "environmentRoot",
+        "targetDigest",
+        "currentDigest",
+        "healthPolicyRoot",
+        "driftPolicyRoot",
+        "applyReceiptRoot"
+      ],
+      "consumeReducerId": "PRCV5-ATOMIC-PERMIT-CAS-REDUCER-V1",
+      "consumerRole": "PRCV5-DEPLOYMENT-APPLIER",
+      "consumerRoot": "5fcd470b71908fc8699d1abc6b3740bfdcc5437d1504e2ed3cd49a8e86f2a919",
+      "currentState": "ABSENT",
+      "domain": "PRCV5-PERMIT-DEPLOY-V1",
+      "independentReaderRoot": "e21dd03de5f2430a2a8150fea78fc67097413d896742ce8c4f3205db39438494",
+      "issuerRole": "PRCV5-DEPLOYMENT-PERMIT-ISSUER",
+      "issuerRoot": "5822bbe51a806a259e6b6d85b06ce4f65fd391c9ce4c9dfe4126f5b3d46add14",
+      "namedUse": "consumeDeploymentPermit",
+      "operationalCredit": 0,
+      "ordinal": 3,
+      "permitClass": "DEPLOYMENT",
+      "permitDefinitionRoot": "d4259209a63c826b674d8ac7ffc5312436d684942bd7c5e0e493a350b1e5754e",
+      "planningInstance": {
+        "acceptanceCredit": 0,
+        "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+        "instance": {
+          "applyReceiptRoot": "7fcfec1104ce9f1467bc11073ea7e181d749e7ed4351dabf9690f476a62f1779",
+          "attemptId": "PRCV5-D7B2DC2752F2F890",
+          "consumerRoot": "5fcd470b71908fc8699d1abc6b3740bfdcc5437d1504e2ed3cd49a8e86f2a919",
+          "currentDigest": "ac21549ed6c0f9420fe2d5bb4c9b1bcb7412461727fbaaa7c9c308af2c36b361",
+          "driftPolicyRoot": "09c3c1a86e28d4fbf0bd8d4e0517f7f8eb82e2ea5acf4f0cbb3efd66504ee53e",
+          "environmentRoot": "ea910c87f6e450a5180ec555f812a0427c0f3047db7950798619784065ad9e7a",
+          "epoch": 0,
+          "expectedPermitHead": "e2ab0fe5a92c709e338dec7110574b43bdde6a4521c7ea90d671381683b0c4e7",
+          "expiresAt": "2026-08-31T00:00:00Z",
+          "failureReceiptRoot": "b22a4493f3d49e569052a9bab31ace212bea1ff28215ee912a9adbbcc5cecc9f",
+          "fence": 0,
+          "healthPolicyRoot": "1bf2d42ad7fd6aa8ddb70a6e6933d7f5b8781e03a9b55a320c41799f77bd89b9",
+          "independentReaderRoot": "e21dd03de5f2430a2a8150fea78fc67097413d896742ce8c4f3205db39438494",
+          "issuedAt": "2026-08-30T00:00:00Z",
+          "issuerRoot": "5822bbe51a806a259e6b6d85b06ce4f65fd391c9ce4c9dfe4126f5b3d46add14",
+          "newPermitHead": "ade6d02b741b8b4712b10f27b569dc4e43bf275f8ae7b376b29be4040e6a1820",
+          "oneUseLedgerRoot": "9b1a800e9c3714a4092e2bb6832b378cb0b8be612f3cd33310882e30be662755",
+          "permitId": "PRCV5-DEPLOYMENT-PERMIT-PLANNING-WITNESS",
+          "postVisibilityReceiptRoot": "18787be9d1dca76f26484e21b1574dd396ecb5e9c511411a7d24f675409675b1",
+          "preVisibilityReceiptRoot": "228439c078f41e693afdc7e708ecab4d4cde05cff50d7a3e76e86328238cf458",
+          "responseLossReadbackRoot": "de658f3f742ec3e56307d667f0e0d7726bbed1b25ab594bb72f7f67ef53dc3dc",
+          "revision": 0,
+          "revocationHead": "9ca594ce3688c16b0b5145367fb2034ea3e7f93b4429321e631e435c77ddb660",
+          "targetDigest": "9fbaacd8985f6d44c1ca3e6655c5124a0aa69941008d1f13101b5b0a4f6ec683",
+          "trustedTimeReceiptRoot": "3e051b5c219473c45fd40c7f25536db4e662f9f5bf502c66ad4b401481af8371",
+          "typeTag": "PRCV5-DEPLOYMENT-PERMIT-V1",
+          "v5AcceptanceCredit": 0,
+          "v5OperationalCredit": 0,
+          "v5PlanningOnly": true
+        },
+        "instanceId": "PRCV5-DEPLOYMENT-PERMIT-V1-PLANNING-INSTANCE",
+        "instanceRoot": "6f330189fc66215a81c3d5a16dd9f87a894b5bcbfa1b25b93bd37970958d8b51",
+        "operationalCredit": 0,
+        "schemaId": "PRCV5-DEPLOYMENT-PERMIT-V1-SCHEMA"
+      },
+      "readerRole": "PRCV5-DEPLOYMENT-TARGET-READER",
+      "roleSeparation": {
+        "distinctCount": 3,
+        "requiredDistinctCount": 3,
+        "roots": [
+          "5822bbe51a806a259e6b6d85b06ce4f65fd391c9ce4c9dfe4126f5b3d46add14",
+          "5fcd470b71908fc8699d1abc6b3740bfdcc5437d1504e2ed3cd49a8e86f2a919",
+          "e21dd03de5f2430a2a8150fea78fc67097413d896742ce8c4f3205db39438494"
+        ]
+      },
+      "schema": {
+        "additionalProperties": false,
+        "crossFieldInvariants": [
+          {
+            "args": [
+              {
+                "args": [
+                  "/typeTag"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "PRCV5-DEPLOYMENT-PERMIT-V1"
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5PlanningOnly"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  true
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5OperationalCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5AcceptanceCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          }
+        ],
+        "fields": [
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "permitId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "typeTag",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuedAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expiresAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "trustedTimeReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "consumerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "independentReaderRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expectedPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "newPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revision",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "epoch",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "fence",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revocationHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "oneUseLedgerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "attemptId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "failureReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "responseLossReadbackRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "preVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "postVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5PlanningOnly",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Boolean",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5OperationalCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5AcceptanceCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "environmentRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "targetDigest",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "currentDigest",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "healthPolicyRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "driftPolicyRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "applyReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          }
+        ],
+        "namedUseSignature": "consumeDeploymentPermit(PRCV5-DEPLOYMENT-PERMIT-V1,PRCV5-DEPLOYMENT-APPLIER)->PERMIT-TERMINAL",
+        "permitClass": "DEPLOYMENT",
+        "schemaId": "PRCV5-DEPLOYMENT-PERMIT-V1-SCHEMA",
+        "schemaRoot": "a0bed12c7524824b3e52fcc915543200877fec86156ea1d280eda8c10b700d09",
+        "typeTag": "PRCV5-DEPLOYMENT-PERMIT-V1",
+        "unknownFields": "BLOCK"
+      },
+      "typeTag": "PRCV5-DEPLOYMENT-PERMIT-V1",
+      "visibilityInvariant": {
+        "missingReceiptTerminal": "BLOCK",
+        "privateTerminal": "BLOCK",
+        "requiredAfter": "PUBLIC",
+        "requiredBefore": "PUBLIC"
+      }
+    },
+    {
+      "acceptanceCredit": 0,
+      "actualConsumeReceiptRoot": null,
+      "actualIssueReceiptRoot": null,
+      "classFields": [
+        "commitOid",
+        "tagIdentityRoot",
+        "assetSetRoot",
+        "packageSetRoot",
+        "coordinateSetRoot",
+        "publicReadbackRoot"
+      ],
+      "consumeReducerId": "PRCV5-ATOMIC-PERMIT-CAS-REDUCER-V1",
+      "consumerRole": "PRCV5-RELEASE-PUBLISHER",
+      "consumerRoot": "664b86fb3736a1d0cfadc7da2c560294e7a258f80ca90be152a68408f0a4cfd6",
+      "currentState": "ABSENT",
+      "domain": "PRCV5-PERMIT-RELEASE-V1",
+      "independentReaderRoot": "83d679161e33cdb8c85807c676a03345d7e6007a1fdcec1a794c3c23ecd0af9e",
+      "issuerRole": "PRCV5-RELEASE-PERMIT-ISSUER",
+      "issuerRoot": "92b688a4a90c829149b6c62ef06ac7aa6e8764dd84f2e651c60163c56396a5b7",
+      "namedUse": "consumeReleasePermit",
+      "operationalCredit": 0,
+      "ordinal": 4,
+      "permitClass": "RELEASE",
+      "permitDefinitionRoot": "ac4199769c6391da9a230b2f7f3bc9be81f4b46a9bb8f030aefa309083f8d78f",
+      "planningInstance": {
+        "acceptanceCredit": 0,
+        "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+        "instance": {
+          "assetSetRoot": "f6d4edab50b3829b8dfa50e7344efd673af3c2363ce5404302043b9f92e2c0cd",
+          "attemptId": "PRCV5-99031D2AE7032CD5",
+          "commitOid": "sha256:84d4d74b09ff9f3886a37766c8c818d491e04c601f290cd6d5dc80f6f2d74f8a",
+          "consumerRoot": "664b86fb3736a1d0cfadc7da2c560294e7a258f80ca90be152a68408f0a4cfd6",
+          "coordinateSetRoot": "46083c92efd0e8d8db1a2f840d14435e5926ab31911460341edefdf932d30b82",
+          "epoch": 0,
+          "expectedPermitHead": "f1624cada55d85c0b5265f26c5f365bcc64ef707721d36647ca52c1a80d17b38",
+          "expiresAt": "2026-08-31T00:00:00Z",
+          "failureReceiptRoot": "d362042810f4f72c9df450298394a3425e7fb982a8d599b1e35ca9d8d303401a",
+          "fence": 0,
+          "independentReaderRoot": "83d679161e33cdb8c85807c676a03345d7e6007a1fdcec1a794c3c23ecd0af9e",
+          "issuedAt": "2026-08-30T00:00:00Z",
+          "issuerRoot": "92b688a4a90c829149b6c62ef06ac7aa6e8764dd84f2e651c60163c56396a5b7",
+          "newPermitHead": "386c1f185f900e4d0e09db025eb80855f55c40ae206e31b419a0a1a807b704d9",
+          "oneUseLedgerRoot": "bd62278fadf607bad530f2e0cba4d2e3df2ec7342b3b284138e8f34ae47b62f0",
+          "packageSetRoot": "5fb9349954eebe5617d6754998241ae14b9460d6932df08a8a57d7c50247a578",
+          "permitId": "PRCV5-RELEASE-PERMIT-PLANNING-WITNESS",
+          "postVisibilityReceiptRoot": "9a0378c2064333951ceae9c5e2bad3172938c529b4aad918b98c353346c966cd",
+          "preVisibilityReceiptRoot": "fecf6b831d075a6440c3c46c550ce25f632535c9ba6a088f4545643f6ac5d1f7",
+          "publicReadbackRoot": "1a883026967a94114708c9da682d8368ebfbc74df1b201304f6ca76e34d1f109",
+          "responseLossReadbackRoot": "3cf0481531eb574aaaa292af4f052c8bfbebfffc95c177e02e38267528e5daed",
+          "revision": 0,
+          "revocationHead": "9146ce6d9f58ba300c9c6e92dec6d468b4215d0321be5b87c7ce427057ca9cba",
+          "tagIdentityRoot": "f233334c99c5b0d2b82231a288c869bec5b9c5988c7e875bb5e8d914cf427a81",
+          "trustedTimeReceiptRoot": "6d1bc2481ac0ebc38dfa0315a7347428bf4c523fa7e9a37bff6879aec923a22f",
+          "typeTag": "PRCV5-RELEASE-PERMIT-V1",
+          "v5AcceptanceCredit": 0,
+          "v5OperationalCredit": 0,
+          "v5PlanningOnly": true
+        },
+        "instanceId": "PRCV5-RELEASE-PERMIT-V1-PLANNING-INSTANCE",
+        "instanceRoot": "8845ad966bab9267b7bc214e1fc3d1dd613832062a270899f89474e2fe0c9d12",
+        "operationalCredit": 0,
+        "schemaId": "PRCV5-RELEASE-PERMIT-V1-SCHEMA"
+      },
+      "readerRole": "PRCV5-PUBLIC-RELEASE-READER",
+      "roleSeparation": {
+        "distinctCount": 3,
+        "requiredDistinctCount": 3,
+        "roots": [
+          "92b688a4a90c829149b6c62ef06ac7aa6e8764dd84f2e651c60163c56396a5b7",
+          "664b86fb3736a1d0cfadc7da2c560294e7a258f80ca90be152a68408f0a4cfd6",
+          "83d679161e33cdb8c85807c676a03345d7e6007a1fdcec1a794c3c23ecd0af9e"
+        ]
+      },
+      "schema": {
+        "additionalProperties": false,
+        "crossFieldInvariants": [
+          {
+            "args": [
+              {
+                "args": [
+                  "/typeTag"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "PRCV5-RELEASE-PERMIT-V1"
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5PlanningOnly"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  true
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5OperationalCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/v5AcceptanceCredit"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  0
+                ],
+                "op": "LITERAL"
+              }
+            ],
+            "op": "EQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/issuerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          },
+          {
+            "args": [
+              {
+                "args": [
+                  "/consumerRoot"
+                ],
+                "op": "GET"
+              },
+              {
+                "args": [
+                  "/independentReaderRoot"
+                ],
+                "op": "GET"
+              }
+            ],
+            "op": "NEQ"
+          }
+        ],
+        "fields": [
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "permitId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "typeTag",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuedAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expiresAt",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Rfc3339Utc",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "trustedTimeReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "issuerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "consumerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "independentReaderRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "expectedPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "newPermitHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revision",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "epoch",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "fence",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "revocationHead",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "oneUseLedgerRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "attemptId",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Id",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "failureReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "responseLossReadbackRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "preVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "postVisibilityReceiptRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5PlanningOnly",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Boolean",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5OperationalCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "v5AcceptanceCredit",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "SafeInteger",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "commitOid",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "GitOid",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "tagIdentityRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "assetSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "packageSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "coordinateSetRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          },
+          {
+            "maxItems": null,
+            "minItems": null,
+            "name": "publicReadbackRoot",
+            "nullable": false,
+            "order": "NOT-APPLICABLE",
+            "referenceRule": "PRIMITIVE-OR-COMPOUND",
+            "required": true,
+            "typeExpression": "Hash",
+            "uniqueItems": false
+          }
+        ],
+        "namedUseSignature": "consumeReleasePermit(PRCV5-RELEASE-PERMIT-V1,PRCV5-RELEASE-PUBLISHER)->PERMIT-TERMINAL",
+        "permitClass": "RELEASE",
+        "schemaId": "PRCV5-RELEASE-PERMIT-V1-SCHEMA",
+        "schemaRoot": "13fc2f57af7f14950b856ae49feb6d45f77c027d8e536e0b86b5d7bc0847e585",
+        "typeTag": "PRCV5-RELEASE-PERMIT-V1",
+        "unknownFields": "BLOCK"
+      },
+      "typeTag": "PRCV5-RELEASE-PERMIT-V1",
+      "visibilityInvariant": {
+        "missingReceiptTerminal": "BLOCK",
+        "privateTerminal": "BLOCK",
+        "requiredAfter": "PUBLIC",
+        "requiredBefore": "PUBLIC"
+      }
+    }
+  ],
+  "schemaVersion": "PRCV5-FOUR-PERMIT-REGISTRY-V1"
+}

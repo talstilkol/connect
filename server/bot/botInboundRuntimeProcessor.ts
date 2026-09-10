@@ -3,7 +3,6 @@ import type {
 } from "../../db/botReplyDeliveryRepository.ts";
 import type {
   BotReplyProcessor,
-  BotReplyProcessorResult,
   PersistedBotReplyDelivery,
 } from "../../shared/domain/botReplyDelivery.ts";
 import {
@@ -15,9 +14,16 @@ import type {
   BotRuntimeService,
   ProcessBotRuntimeResult,
 } from "./botRuntimeService.ts";
+import {
+  createBotReplyDeliveryWorker,
+} from "./botReplyDeliveryWorker.ts";
 
-const AMBIGUOUS_ERROR_CODE =
-  "DELIVERY_OUTCOME_UNKNOWN";
+const SERVICE_WINDOW_DURATION_MILLISECONDS =
+  24 * 60 * 60 * 1_000;
+
+export type BotRuntimePolicySkipReason =
+  | "service-window-closed"
+  | "service-window-not-open";
 
 export type BotInboundRuntimeProcessorErrorCode =
   | "INVALID_INPUT"
@@ -46,16 +52,23 @@ export interface ProcessInboundBotRuntimeInput {
   recipientPhoneNumber: string;
   phoneNumberId: string;
   textContent: string | null;
+  selectedBotOptionKey: string | null;
+  replyToProviderMessageId: string | null;
+  inboundMessageOccurredAt: string;
 }
 
 export interface ProcessInboundBotRuntimeResult {
   runtimeOutcome:
-    ProcessBotRuntimeResult["outcome"];
+    | ProcessBotRuntimeResult["outcome"]
+    | "policy-skipped";
   runtimeSkipReason:
-    BotRuntimeSkipReason | null;
+    | BotRuntimeSkipReason
+    | BotRuntimePolicySkipReason
+    | null;
   staged: number;
   accepted: number;
   rejected: number;
+  deferred: number;
   duplicates: number;
   ambiguous: number;
 }
@@ -70,6 +83,17 @@ export interface BotRuntimeClock {
   now(): Date;
 }
 
+interface OpenServiceWindow {
+  outcome: "open";
+  openedAt: string;
+  expiresAt: string;
+}
+
+interface ClosedServiceWindow {
+  outcome: "closed";
+  reason: BotRuntimePolicySkipReason;
+}
+
 function processorError(
   code: BotInboundRuntimeProcessorErrorCode,
 ): BotInboundRuntimeProcessorError {
@@ -81,7 +105,13 @@ function processorError(
 function timestamp(
   clock: BotRuntimeClock,
 ): string {
-  const current = clock.now();
+  let current: Date;
+
+  try {
+    current = clock.now();
+  } catch {
+    throw processorError("RUNTIME_FAILED");
+  }
 
   if (
     !(current instanceof Date) ||
@@ -91,6 +121,80 @@ function timestamp(
   }
 
   return current.toISOString();
+}
+
+function canonicalTimestampMilliseconds(
+  value: unknown,
+): number | null {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.length > 40
+  ) {
+    return null;
+  }
+
+  const milliseconds = Date.parse(value);
+
+  if (
+    !Number.isFinite(milliseconds) ||
+    new Date(milliseconds).toISOString() !== value
+  ) {
+    return null;
+  }
+
+  return milliseconds;
+}
+
+function resolveServiceWindow(
+  occurredAt: string,
+  clock: BotRuntimeClock,
+): OpenServiceWindow | ClosedServiceWindow {
+  const openedAtMilliseconds =
+    canonicalTimestampMilliseconds(occurredAt);
+
+  if (openedAtMilliseconds === null) {
+    throw processorError("INVALID_INPUT");
+  }
+
+  const currentTimestamp = timestamp(clock);
+  const currentMilliseconds =
+    canonicalTimestampMilliseconds(
+      currentTimestamp,
+    );
+  const expiresAtMilliseconds =
+    openedAtMilliseconds +
+    SERVICE_WINDOW_DURATION_MILLISECONDS;
+
+  if (
+    currentMilliseconds === null ||
+    !Number.isFinite(expiresAtMilliseconds) ||
+    expiresAtMilliseconds > 8_640_000_000_000_000
+  ) {
+    throw processorError("RUNTIME_FAILED");
+  }
+
+  if (currentMilliseconds < openedAtMilliseconds) {
+    return {
+      outcome: "closed",
+      reason: "service-window-not-open",
+    };
+  }
+
+  if (currentMilliseconds >= expiresAtMilliseconds) {
+    return {
+      outcome: "closed",
+      reason: "service-window-closed",
+    };
+  }
+
+  return {
+    outcome: "open",
+    openedAt: occurredAt,
+    expiresAt: new Date(
+      expiresAtMilliseconds,
+    ).toISOString(),
+  };
 }
 
 function assertInput(
@@ -112,45 +216,28 @@ function assertInput(
     input.phoneNumberId.trim() !==
       input.phoneNumberId ||
     input.phoneNumberId.length === 0 ||
-    input.phoneNumberId.length > 255
+    input.phoneNumberId.length > 255 ||
+    (input.selectedBotOptionKey !== null &&
+      (typeof input.selectedBotOptionKey !==
+        "string" ||
+        !/^bot_option_v1_[0-9a-f]{64}$/.test(
+          input.selectedBotOptionKey,
+        ))) ||
+    (input.replyToProviderMessageId !== null &&
+      (typeof input.replyToProviderMessageId !==
+        "string" ||
+        input.replyToProviderMessageId.trim() !==
+          input.replyToProviderMessageId ||
+        input.replyToProviderMessageId.length === 0 ||
+        input.replyToProviderMessageId.length > 255)) ||
+    ((input.selectedBotOptionKey === null) !==
+      (input.replyToProviderMessageId === null)) ||
+    canonicalTimestampMilliseconds(
+      input.inboundMessageOccurredAt,
+    ) === null
   ) {
     throw processorError("INVALID_INPUT");
   }
-}
-
-function parseProcessorResult(
-  value: BotReplyProcessorResult,
-): BotReplyProcessorResult | null {
-  if (
-    value?.outcome === "accepted" &&
-    typeof value.providerMessageId ===
-      "string" &&
-    value.providerMessageId.trim() ===
-      value.providerMessageId &&
-    value.providerMessageId.length > 0 &&
-    value.providerMessageId.length <= 255
-  ) {
-    return {
-      outcome: "accepted",
-      providerMessageId:
-        value.providerMessageId,
-    };
-  }
-
-  if (
-    value?.outcome === "rejected" &&
-    typeof value.errorCode === "string" &&
-    /^[A-Z0-9_]{1,100}$/.test(
-      value.errorCode,
-    )
-  ) {
-    return {
-      outcome: "rejected",
-      errorCode: value.errorCode,
-    };
-  }
-
-  return null;
 }
 
 function emptyResult(
@@ -165,22 +252,25 @@ function emptyResult(
     staged: 0,
     accepted: 0,
     rejected: 0,
+    deferred: 0,
     duplicates: 0,
     ambiguous: 0,
   };
 }
 
-async function markAmbiguous(
-  deliveries: BotReplyDeliveryRepository,
-  delivery: PersistedBotReplyDelivery,
-  clock: BotRuntimeClock,
-): Promise<void> {
-  await deliveries.markAmbiguous(
-    delivery.tenantId,
-    delivery.deliveryKey,
-    AMBIGUOUS_ERROR_CODE,
-    timestamp(clock),
-  );
+function policySkipResult(
+  reason: BotRuntimePolicySkipReason,
+): ProcessInboundBotRuntimeResult {
+  return {
+    runtimeOutcome: "policy-skipped",
+    runtimeSkipReason: reason,
+    staged: 0,
+    accepted: 0,
+    rejected: 0,
+    deferred: 0,
+    duplicates: 0,
+    ambiguous: 0,
+  };
 }
 
 export function createBotInboundRuntimeProcessor(
@@ -189,9 +279,28 @@ export function createBotInboundRuntimeProcessor(
   processor: BotReplyProcessor,
   clock: BotRuntimeClock,
 ): BotInboundRuntimeProcessor {
+  const deliveryWorker =
+    createBotReplyDeliveryWorker(
+      deliveries,
+      processor,
+      clock,
+    );
+
   return {
     async process(input) {
       assertInput(input);
+      const serviceWindow =
+        resolveServiceWindow(
+          input.inboundMessageOccurredAt,
+          clock,
+        );
+
+      if (serviceWindow.outcome === "closed") {
+        return policySkipResult(
+          serviceWindow.reason,
+        );
+      }
+
       let runtimeResult:
         ProcessBotRuntimeResult;
 
@@ -200,7 +309,10 @@ export function createBotInboundRuntimeProcessor(
           await runtime.processInbound(
             input.tenantId,
             input.conversationKey,
+            input.inboundMessageKey,
             input.textContent,
+            input.selectedBotOptionKey,
+            input.replyToProviderMessageId,
           );
       } catch {
         throw processorError(
@@ -261,6 +373,8 @@ export function createBotInboundRuntimeProcessor(
               botFlowVersionKey:
                 runtimeResult.botFlowVersionKey,
               replyIndex,
+              senderPhoneNumberId:
+                input.phoneNumberId,
               recipientPhoneNumber:
                 input.recipientPhoneNumber,
               reply,
@@ -282,7 +396,7 @@ export function createBotInboundRuntimeProcessor(
         return result;
       }
 
-      if (!processor.isConfigured()) {
+      if (!deliveryWorker.isConfigured()) {
         throw processorError(
           "PROCESSOR_UNAVAILABLE",
         );
@@ -298,100 +412,38 @@ export function createBotInboundRuntimeProcessor(
           continue;
         }
 
-        let claimed;
-
         try {
-          claimed = await deliveries.claim(
-            delivery.tenantId,
-            delivery.deliveryKey,
-            timestamp(clock),
-          );
-        } catch {
-          throw processorError(
-            "PERSISTENCE_FAILED",
-          );
-        }
+          const dispatched =
+            await deliveryWorker.dispatch({
+              tenantId: delivery.tenantId,
+              deliveryKey: delivery.deliveryKey,
+              serviceWindowOpenedAt:
+                serviceWindow.openedAt,
+              serviceWindowExpiresAt:
+                serviceWindow.expiresAt,
+            });
 
-        if (claimed.outcome === "not-found") {
-          throw processorError(
-            "PERSISTENCE_FAILED",
-          );
-        }
-
-        if (claimed.outcome === "duplicate") {
-          result.duplicates += 1;
-          continue;
-        }
-
-        if (claimed.outcome === "uncertain") {
-          try {
-            await markAmbiguous(
-              deliveries,
-              claimed.delivery,
-              clock,
-            );
-          } catch {
-            throw processorError(
-              "PERSISTENCE_FAILED",
-            );
-          }
-
-          result.ambiguous += 1;
-          continue;
-        }
-
-        try {
-          const processorResult =
-            parseProcessorResult(
-              await processor.process({
-                phoneNumberId:
-                  input.phoneNumberId,
-                delivery:
-                  claimed.delivery,
-              }),
-            );
-
-          if (!processorResult) {
-            throw new Error(
-              "bot reply processor result is invalid",
-            );
-          }
-
-          if (
-            processorResult.outcome ===
-            "accepted"
-          ) {
-            await deliveries.markAccepted(
-              delivery.tenantId,
-              delivery.deliveryKey,
-              processorResult.providerMessageId,
-              timestamp(clock),
-            );
+          if (dispatched.outcome === "accepted") {
             result.accepted += 1;
-            continue;
+          } else if (
+            dispatched.outcome === "rejected"
+          ) {
+            result.rejected += 1;
+          } else if (
+            dispatched.outcome === "deferred"
+          ) {
+            result.deferred += 1;
+          } else if (
+            dispatched.outcome === "ambiguous"
+          ) {
+            result.ambiguous += 1;
+          } else {
+            result.duplicates += 1;
           }
-
-          await deliveries.markRejected(
-            delivery.tenantId,
-            delivery.deliveryKey,
-            processorResult.errorCode,
-            timestamp(clock),
-          );
-          result.rejected += 1;
         } catch {
-          try {
-            await markAmbiguous(
-              deliveries,
-              claimed.delivery,
-              clock,
-            );
-          } catch {
-            throw processorError(
-              "PERSISTENCE_FAILED",
-            );
-          }
-
-          result.ambiguous += 1;
+          throw processorError(
+            "PERSISTENCE_FAILED",
+          );
         }
       }
 

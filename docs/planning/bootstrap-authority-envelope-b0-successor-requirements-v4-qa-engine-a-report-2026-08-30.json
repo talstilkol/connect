@@ -1,0 +1,3310 @@
+{
+  "artifactId": "CONNECT-B0-V4-QA-ENGINE-A-REPORT-2026-08-29",
+  "artifactClass": "DETACHED-PRODUCER-MECHANICAL-SEMANTIC-QA-ENGINE-REPORT;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+  "engineSha256": "a2afd5ffa852c38469b08dac006291ed4fed0eb08570ee0485a15b9cbfc1bd29",
+  "inspectedPackageManifestSha256": "8a782b55eb92768288a5f1d64e04f76869c4af739e1e2f997a257c34c65709ad",
+  "status": "PASS-CANDIDATE-MECHANICAL-ONLY",
+  "denominators": {
+    "requirements": "84/84",
+    "fields": "420/420",
+    "outputs": "84/84",
+    "vectorSpecifications": "252/252",
+    "vectorFixtures": "252/252",
+    "planningDslExecutionReceipts": "252/252",
+    "operationalExecutionReceipts": "0/252",
+    "v3FindingsCandidateDeltas": "13/13",
+    "v3FindingsIndependentlyClosed": "0/13",
+    "v3RequirementsPreserved": "70/70",
+    "v2RequirementsPreserved": "49/49",
+    "originalRequirementsPreserved": "27/27",
+    "legacyFindingsPreserved": "22/22",
+    "v2ReviewFindingsPreserved": "21/21",
+    "acceptedRequirements": "0/84",
+    "implementedOutputs": "0/84"
+  },
+  "failures": [],
+  "planningDslReceipts": [
+    {
+      "vectorId": "B0V4-V-000-A",
+      "fixtureRoot": "c5203a6892bda60fa11247666c39cd5c6a2a1a316bba3ce55e67fead921fd841",
+      "programRoot": "8a17ca14a98d9ef5350f1e619b495794ace200fb70a9f35a7f04c74d5b70a161",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FINALIZE-COMMITTED-UNCONFIRMED-THEN-RECONCILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2f6c0ce917a2e69e2a5312f351679c3ef23a11cefe35364ba40c043721b5dc21"
+    },
+    {
+      "vectorId": "B0V4-V-000-B",
+      "fixtureRoot": "973fecd33d70b58721ac13a33a7a176107eefe89623c7234537f14a9f1d25d8e",
+      "programRoot": "25cafb09244714a7ae7bce8786496385c12875511cd2fe8d5f0b881ed5f5d502",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TREAT-UNCERTAIN-AS-IMMUTABLE-FINALRESULT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b2d1c2174164a76373d24389a931e07cc3a872c360130a64cea0f9d89ffe0be2"
+    },
+    {
+      "vectorId": "B0V4-V-000-C",
+      "fixtureRoot": "cba67e1bd7a23b2c6609517f4176c393f1b9f2fd5f7d0b64d4ce5784082e4431",
+      "programRoot": "56283fb2f20c4f008378917f37ee43676be25d8ed769cfed5c8be91e29686adb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TWO-REDUCERS-SELECT-OLD-AND-NEW-LIFECYCLE-INTERPRETATIONS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "40d982cb6e1f5ce1c167510502f211e9d4dd7b534d38c1bfb3e4adeafa96a00e"
+    },
+    {
+      "vectorId": "B0V4-V-001-A",
+      "fixtureRoot": "2ca77bf00fee9694f650f381f5c6dcbbfdddbbd6841a00873c11cfdfcbb68454",
+      "programRoot": "f2018d7da5dba8daf4fe5f381c5f908d9895ec606c3c286f4c4859362a351607",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AUTHORITATIVE-SOURCE-IDENTITY-USES-ABSOLUTE-MACHINE-LOCAL-PATH-KIND",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8b20dff265c659ffd64ffd34a6166d76e6ec639e361780fa80e81fb11cd7eed5"
+    },
+    {
+      "vectorId": "B0V4-V-001-B",
+      "fixtureRoot": "411069af084191e7d30caf7fefb3ac8e83152dbec7272a44f047c1197a6a86d8",
+      "programRoot": "12f41f2b57eacf3f82596981b4a4bf53885a5cea9df357455ac9e586dc95ea39",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-REPOSITORY-RELATIVE-IDENTITY-RESOLVES-DIFFERENT-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b28d9c645450b8e1e85520f6f9d35e2415e85af69382b3907c668c621a22af11"
+    },
+    {
+      "vectorId": "B0V4-V-001-C",
+      "fixtureRoot": "616f8a504928ea9a714ae117e0122d603b85259fac502660f9e07570b7b08a92",
+      "programRoot": "28261b24e83d33dfcc8dfbbe6aaf06282ffa2e20c2bf3b8dd6c6d87f7ad91766",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRIVATE-LOCAL-RESOLVER-MAPPING-IS-PROMOTED-TO-AUTHORITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5e06adf39b35405ea342cdceeacf9bba13a11288d2433328d3a468647efdd754"
+    },
+    {
+      "vectorId": "B0V4-V-002-A",
+      "fixtureRoot": "5ad7acc5f573bc12b8d4495efbdac966b2d29157f4880f401d806db7eb1b4301",
+      "programRoot": "4dfe699cf7438cb45534f1f5219e7c62af6f8a493a90e7094afc9833b8e1189a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G1-INSTANTIATES-OPERATIONALPERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "1ea95d379ab771b2e59572bba6250ef47daff164274cd498ad07596e3f634338"
+    },
+    {
+      "vectorId": "B0V4-V-002-B",
+      "fixtureRoot": "4476afe584e9f81f4061a78449f87de76575a658c38cbfe3a0f6433e803e54c8",
+      "programRoot": "140b51f078226c9f9f1c915d0a16779997c38254e9bdc89996edd6336d3a0de6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G1-SKIPS-THE-PERMIT-REDUCER-BUT-CLAIMS-PARITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e12a02ecd6c777e5b3ce9e51b9777d4d1f23d773f8545e86b864224ef2ee8a2f"
+    },
+    {
+      "vectorId": "B0V4-V-002-C",
+      "fixtureRoot": "9a8389ffb2c84cc5456bbfcbd77efa997bbad1e19372978cc1d77640f80cbf97",
+      "programRoot": "abeceb382294d02071336e699a629d9837c654fa17ff0a3742df28989c9171da",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CAPABILITY-SINK-BINDING-IS-REPLACED-BY-EXTERNAL-TARGET-CLASS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "748f7145868897274cbff87c39fa53a9f3c673936e789069cb896880b13066f1"
+    },
+    {
+      "vectorId": "B0V4-V-003-A",
+      "fixtureRoot": "2932112d1ac89ad2409464d0f2e1183909735f554f020eb03e17d965788b86e8",
+      "programRoot": "9f72e68c064ebc28779d3308a285a881ac89c126f7eeacb3dbab7ebecbceeec3",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DELETE-ONE-LITERAL-NAMEDUSE-CLASSIFICATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "090b1bba95971d22eb475ce1d0f568e15c15be9fee9d237c0a6dba4c9cf0d158"
+    },
+    {
+      "vectorId": "B0V4-V-003-B",
+      "fixtureRoot": "868463ae862239a16e1fa03b514073cb19a8a045c166e20bdf1b2a8c113cd76d",
+      "programRoot": "c42b86ca02a77b9a5532d7a8da833562d2fbeffeeb79d934e826a2f301d7325b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-HIDE-A-FORWARD-NORMATIVE-USE-ONLY-IN-PROSE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6a2cee2121a6d590db747cb527a25b4ee4468e25259bd277dbc6b134cc903ada"
+    },
+    {
+      "vectorId": "B0V4-V-003-C",
+      "fixtureRoot": "f13c1d6e25fcc0c371ec1343cbc56ee9639b42005a0196b3e3edf7c1b7f97bc1",
+      "programRoot": "fee42bc849aa2374ac52cbaaba3ac073480ebdcc5e46645cc90add1e53bafb63",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RESTORE-ONE-LEGACY-REVERSE-PAIR-AND-REQUIRE-CYCLE-DETECTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8c495528db2abc09ad2d20f19eff5e01d27936ef966d9e75579d069e4eb67450"
+    },
+    {
+      "vectorId": "B0V4-V-004-A",
+      "fixtureRoot": "48183223cf76830056abeb2a5d6a949218df3c69e301d15c06cb7fe4f01383be",
+      "programRoot": "eb907e7754bb7473fb8fc3436ca9470fd948f4b91b25401abbdeaff3f722b01e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-INITIAL-APPROVER-APPOINTMENT-FROM-GENESISFOUNDATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "bae6294b9c69ec18af5e900b7aca4ae7929abad24e9f67dfabaf12738934edbc"
+    },
+    {
+      "vectorId": "B0V4-V-004-B",
+      "fixtureRoot": "62cb57da6f757f26540937d0327bb3d6e0405ea09b01cbe4360e0ea32139632d",
+      "programRoot": "881cb8803f12e355e6b49e8d4d370c1fa90fb7003d9ddf86041a23338830471d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-EXPECTED-EMPTY-GENESISLEDGER-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "1e27f985671736325922a55b9cce7161026a7da5aa48e5cb71fdc1aea5fac560"
+    },
+    {
+      "vectorId": "B0V4-V-004-C",
+      "fixtureRoot": "b94f0a63d6608fc87175a7a24a99d45fec89b5748fe9cfadd876be6bf411f6d2",
+      "programRoot": "b3bfea522d3871f7d90a6f42a14a6ea983ac2e3a689ed2b80bada4d562ffd6e8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-USE-LOCAL-DEFAULT-TIME-IN-FIRST-GENESISPERMIT-VALIDATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5f8249f383bb181e5b183fcf06feef7c3f57da0720c96ad762fb2db871236737"
+    },
+    {
+      "vectorId": "B0V4-V-005-A",
+      "fixtureRoot": "487391474ac3f0c798429071944399933c3e303e52d55268f76cd72f2493f890",
+      "programRoot": "9cae2b2a8546137f6a3aafe24474d6d7082c80d824ed46a5d8de4d45b66f9dbd",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MUTATE-PUBLICDISCLOSUREPOLICY-WITHOUT-ADVANCING-ITS-GENERATED-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b37a9c1c890b73385669b3a887d4b364df3c8e45e98ca369b79891508c874afe"
+    },
+    {
+      "vectorId": "B0V4-V-005-B",
+      "fixtureRoot": "0327c639f1a287b0c07d430f121b5bc294a881ca1d5ee91e3097b7459f51e5c3",
+      "programRoot": "4dd329394c3b6c1ffc02ff321fef65388fa662571f3542246b4c6cbe5bae2ad8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ROTATE-WITNESSPOLICY-WITHOUT-SECURITYUNIVERSE-ADVANCE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "cd05e6fd22002c67b47809d628971e46004c9d78a3e2db61405745408b38539d"
+    },
+    {
+      "vectorId": "B0V4-V-005-C",
+      "fixtureRoot": "849537079746554ebe619c43b966c8a29fb2508ea3f9f6714c8bf10ec5f7dceb",
+      "programRoot": "8d356199867d034cfedbee58f43668186d612afa591c314ddbe46c2d062a0117",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGE-VALIDATORINDEPENDENCEPROFILE-THROUGH-AN-UNMAPPED-CLASS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ec0b9346fd2cf1ec123d73fd6cca91abcf9153391274fe8998ef03e535318003"
+    },
+    {
+      "vectorId": "B0V4-V-006-A",
+      "fixtureRoot": "7ac8110a52343c9c04ed901fd8a22214dd7f34237cefa478c0543fe92db73f57",
+      "programRoot": "c99c65a5cadf9656bfbf8aaf2984d40d3b0bd774e6aa04107968b62f383696c4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-APPROVER-FROM-CLOSED-ROLE-UNIVERSE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9cb570d6c1e887f9454cdcdbcbdf339a58742d5f704862cb907b4e53f036789d"
+    },
+    {
+      "vectorId": "B0V4-V-006-B",
+      "fixtureRoot": "45e909b13c0311914b8bfa3641853c2e1669a7445e6dbcfbcdbf4c808a0c7757",
+      "programRoot": "1daf1d12b911600fec400902df29e8c3a0c8ce7d027b5105d4584ca6003a1262",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SILENTLY-MAP-AUTHORITYOWNER-TO-APPROVER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0af7b21afd57ddc5faf27477d0ca263064c0879b2cb6286356388c2536a8a894"
+    },
+    {
+      "vectorId": "B0V4-V-006-C",
+      "fixtureRoot": "9140ff3d43d967e3c25ca5418da86950b4a3cf623e2eb357e475c3de931639aa",
+      "programRoot": "bdd333e5917d0f96bb4c998b26cdd6f6cfba33531b8fb4d393d07f090911ac19",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHARE-EFFECTIVECONTROLLER-BETWEEN-APPROVER-AND-ACCEPTANCEWRITER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5454cf2f10e4947f5537653bcaafa29233132fd3fe83064a7f46aa40b1230791"
+    },
+    {
+      "vectorId": "B0V4-V-007-A",
+      "fixtureRoot": "f82b26f77def2c37aa5c94bf10a854c860eb1b4794f8d43f6bb3a1b8cf2213ed",
+      "programRoot": "d0588cfeacc8af758cc057d17faf2b887e7e50e469efaeff05427835d20ebdb2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ALLOW-TWO-PLAUSIBLE-OPERATIONS-FOR-ONE-VECTOR-IDENTITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5837822f5ca50f41a09c27ba88c479db4ba240bc9cb9e4cd4b627c3450e626e4"
+    },
+    {
+      "vectorId": "B0V4-V-007-B",
+      "fixtureRoot": "539ffef15cdfbb5946ecc0729fbbf652bbcf3b74ca767a4994e20a56e995724d",
+      "programRoot": "e51fbc1f99fe1a44e92566c308a191dd5d4fbbbc7f6545a6cd15ad3df2e195c0",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REMOVE-EXACT-PRECONDITION-ROOT-FROM-VECTOR-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c8651017102935748c54f6b5039e6f156fccbd7034a3150daa026beebb50ddd2"
+    },
+    {
+      "vectorId": "B0V4-V-007-C",
+      "fixtureRoot": "ced84063e1ff80515639b5982897234bee3e8c317501155855b5ceba4a0dd8d7",
+      "programRoot": "60f45e20c6f97b90789232e87a2c98c03be1f941407939612cf38426ff9fc4cf",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REMOVE-ONE-RUNNER-IMPLEMENTATION-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "25575732f5466551f1ee4960f164d01d6a2ceb8d42d90a04df9ba94dfe1f221d"
+    },
+    {
+      "vectorId": "B0V4-V-008-A",
+      "fixtureRoot": "3e9a4f286a3dc886fe59024cec49a39f2c0eb033594aeb297f5a051e48d124df",
+      "programRoot": "bc65bdd3587aeacc653c86df17d8b4681318000864649568a254f9644d776686",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-ONE-LITERAL-ACCEPTANCE-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "694033007a79050f1202a5840287959f18c74136aec46ead7b2fcd3b5b0f8d64"
+    },
+    {
+      "vectorId": "B0V4-V-008-B",
+      "fixtureRoot": "861a9886333ac837572d08e9fc8194fa97b6264d4c142c94ed7e93a46a9bd456",
+      "programRoot": "1db4f8bcd568bdc213b3306d1e8d67b8ef00477d9c36e3d7a3edbece721b28e4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-APPROVER-EXACT-ROOT-RECEIPT-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "68bc6077f3eec1311a273b6f770bdc6a9fc31b64b87e3bac2b5f50679eaec78b"
+    },
+    {
+      "vectorId": "B0V4-V-008-C",
+      "fixtureRoot": "4fb0dd03ae22c0b3a7e8d9f1810b29fe848b08985a5cefc287d46c5aa112eab1",
+      "programRoot": "39cda2033dfffd7f681307d2db8bf23957e374ea71abd8a57e40afdfec2391d2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INJECT-UNKNOWN-AUTHORITY-BEARING-EXTENSION-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "921fada45ca295dbbb8953cc10223cac6717937055f2e51d8d7aca60754c0be8"
+    },
+    {
+      "vectorId": "B0V4-V-009-A",
+      "fixtureRoot": "14f4ae8056aef84172aeecb04adad3dc9bff7cfaa25a3b59b49063737947f2ef",
+      "programRoot": "8b7e88e0dda7e5b81003567070fe85a67178550a2bfac6781be73149dcc4f7fb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PROJECT-A-RESTRICTED-RUNTIME-INSTANCE-AS-FULL-PUBLIC-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "45f37a23111dbf8e502779abd5198d68a021b96bf69e762c07d0944e24d9b817"
+    },
+    {
+      "vectorId": "B0V4-V-009-B",
+      "fixtureRoot": "ab2b945adb59de1feb76b8add9f03a387c7824b81ae8cafb7fc3aa1c59457fca",
+      "programRoot": "3a37a3935cbf5213d60678d3bf0fdf6d315c8f7f1ae400b09fa8a7938838a39d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PUBLISH-DETERMINISTIC-DIGEST-OF-PRIVATE-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "70d0c7cd23fae55358d40799e19271221b494782b9b64e6ef3283b080ff1204d"
+    },
+    {
+      "vectorId": "B0V4-V-009-C",
+      "fixtureRoot": "f05a1c3f0f25184aefb5f2293f6e9df72816ade2f2e0773d23a64e2ce98945a5",
+      "programRoot": "984b79440faaf5941dc50a6cd90b97c80729e5e799ea05215b231ec9cb1ab31f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-VALIDATE-OUTPUT-UNDER-STALE-EGRESS-POLICY-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7524290e54db880c28558ee739a7481c39230014499b962d2fbc8671747ce983"
+    },
+    {
+      "vectorId": "B0V4-V-010-A",
+      "fixtureRoot": "44aacf6ff8fa6c2aed20138113a235912f1ecf37184ac144b4d2d1fbfa27f3d5",
+      "programRoot": "58951512bf38bc80cbaf80e0c2703cc1e47e2685739d94ef5f22f5da915aa3fc",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMMIT-PERMIT-STORE-WHILE-ACCEPTANCE-POINTER-STORE-FAILS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "997b9dbfa2a64b50195115bafd76bc8a778de93d86ee9154e45ba93b29e3cb39"
+    },
+    {
+      "vectorId": "B0V4-V-010-B",
+      "fixtureRoot": "12f1ca8f244774efb28eb7808d740cbfb6137ddf2e206ca93aa6378cf675e10b",
+      "programRoot": "2e473336c425f70b3ec324b46cda4024e01ffd983d8688bb543d61e7e5296f2a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ADVANCE-ONE-SECURITY-HEAD-BETWEEN-VALIDATION-AND-CAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "775e9b6edca1c96dcb0702bab47049844f4de4d8ba7b0e0b0d727c5d11363fd0"
+    },
+    {
+      "vectorId": "B0V4-V-010-C",
+      "fixtureRoot": "4db1d0735063e2c244851041371add6919d717a84fb038772a3e7921b2e3176a",
+      "programRoot": "189a2a58e6f10d25e5c44fd540ec96ce7d11c20f4cb4232ff29bb502e49de10f",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-ORDER-REVOCATION-AND-COMMIT-EQUALLY-BUT-LET-COMMIT-WIN",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "520da1bd9076d77c1799ebcb5bb72805d2886706941d2e48f658d111ab3e1769"
+    },
+    {
+      "vectorId": "B0V4-V-011-A",
+      "fixtureRoot": "da6e6d7f3971f21b87ab901c04aa5862e602b6531ff855e3822679a72719233b",
+      "programRoot": "7c8f0686349fe0fd9ca4e1e9f6a31e1871b6b841d6d0a2af18fbd11c80b9433a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REDUCE-RECOVERY-THRESHOLD-BELOW-THREE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f2b3eac1875278ddeb991c655a488b25852e05968e171e3fca39d46e536279ff"
+    },
+    {
+      "vectorId": "B0V4-V-011-B",
+      "fixtureRoot": "637882acdefcf4e6473f7ff8fd6ec05aee7d33e33b60236d8fd2c1890f7446c8",
+      "programRoot": "0914206af9ca6d03515eb6abfe570ca5f1adebca0aefca68097fe5141bbd93ce",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHARE-EFFECTIVECONTROLLER-BETWEEN-TWO-RECOVERY-CUSTODIANS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3c5c6a42c7bc17c930672f4f7a0f66479864d149a76ebcb372cfbba153cad110"
+    },
+    {
+      "vectorId": "B0V4-V-011-C",
+      "fixtureRoot": "064a77c8d94781e67bfe733adec44083bea21750252c1ffbaaf16ffaba1d2c8a",
+      "programRoot": "829149229db03e70d8c6c6ad2bd82767590f76eed5ec9c7dc3d5253d4862c772",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REPLAY-OLD-RECOVERY-QUORUM-AFTER-ATOMIC-ROTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d0835190e06d50e5d5fe1a7b72102cd17fb849774891aa39062e84db0056bd06"
+    },
+    {
+      "vectorId": "B0V4-V-012-A",
+      "fixtureRoot": "79a59d99a53c738d8cc0f0860c0eea37f2ba7bb975196502035afe74f2e7ba4d",
+      "programRoot": "dfbbbc87a1edc3ff7588ab45da024cda518defa62c6847fe53002a2440837a2b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-D18-A2-PUBLIC-DECISION-FROM-APPLICABLE-DIRECTIVES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "647a112cf6b4cea183e0451c5a0092f678470f01571deca79d3cc8198f58587f"
+    },
+    {
+      "vectorId": "B0V4-V-012-B",
+      "fixtureRoot": "ea7647672da5d2ca3367bcce2991ef5db3ed5eb76acf112a970a77f8fbac6c3f",
+      "programRoot": "95daa6591c14439ff02ab9ee4bb93b86e1de35803911ebfb8f7b921f12035601",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-STALE-CONTROL-SEQUENCE-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "55dbc9339809d2262dff3f5d2f1f2cad122fef1ef9d67065af31f90c4dfa097e"
+    },
+    {
+      "vectorId": "B0V4-V-012-C",
+      "fixtureRoot": "cd4f590f55d898ef497e4459aceccf7b189365d0924136d317a7ba121ce2aa12",
+      "programRoot": "c9ed4c458f5773db2f1fa2c8d68830510cc6d0c1725c9fb29d5d544475907707",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-APPLY-PROTOCOL-V1-5-RETROACTIVELY-AS-B0-AUTHORITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e9fde88442e5bbd266f02682f521330d764d664fc28204d78c6a42e1d0f6572e"
+    },
+    {
+      "vectorId": "B0V4-V-013-A",
+      "fixtureRoot": "c87a04ea6d568bf5cef10722a6ccb12b3a2978740213dd9d7205d15e2976664e",
+      "programRoot": "cb5e92f01ad0d0e3eb8f1d12bdeb2bffa456b8628e961af5ac4a8e1cc5f52dee",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REUSE-PRODUCER-QA-FROM-A-PREDECESSOR-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d7819e6576dacfdcefac909f7753d795d1e5814ddf03a42b144501929562731e"
+    },
+    {
+      "vectorId": "B0V4-V-013-B",
+      "fixtureRoot": "9ddb457c90e776d6b4ea5203dd695477f64b3f6ac7adbdbc8a1514812f162daf",
+      "programRoot": "6fbcae04543ea2d148deb1be33b79b95c0a067c25fd4211fa06b226af4bfe0ff",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DECLARE-SUCCESS-WITH-ONE-UNRESOLVED-P1",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0b80adac49e3e40f24aa43633966746ec3bb8767db8dcf5d7455fa4bc9765392"
+    },
+    {
+      "vectorId": "B0V4-V-013-C",
+      "fixtureRoot": "190153cafc20fc6dd7ae284fe7834e82bd4a6dfb5fba36bd721f00391b58eff7",
+      "programRoot": "74c9a75af7e12b9e7e9fce6ff14d7857525fd57fcbebe40e600e544417070d4c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AUTOMATICALLY-CREATE-A-FOURTH-SUCCESSOR-ROUND-AFTER-EPOCH-EXHAUSTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "81954ffa6ac0ec5177b552ba82774d0162fbd3441bd2af0912723e350317998c"
+    },
+    {
+      "vectorId": "B0V4-V-014-A",
+      "fixtureRoot": "7cec195670cf6c63cfe373f653f1c987cb01f2dafdf453e39200d7eca88771ad",
+      "programRoot": "7c76ed9d4156592a173751c76af6bf876589d8fbcdccaf7980a36abff5527ded",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-REQUIREMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "817a8c4641b68c744c9f0ac521a17ada2103e6592a658b81e43f73415ec9389b"
+    },
+    {
+      "vectorId": "B0V4-V-014-B",
+      "fixtureRoot": "0dbff4b479104542fe6ae43cd21fe51d454b585b433e7c7fecd97876f81648c2",
+      "programRoot": "5fe592388389a1d0f5d21fd7920933dc12d1426c17275b81be673b94189f6b9f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-REQUIREMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0849ff4b02b4e2b756e246f61342768d7c324e995e4766ed6e88cd31ab3ab8ef"
+    },
+    {
+      "vectorId": "B0V4-V-014-C",
+      "fixtureRoot": "5d59f9a1c0c9f9a8137ecde5422d6c6cf2e20da7d4bb82c7c1a502a75c09f7ac",
+      "programRoot": "a3d45acdfba5676dfa97d119cc9179eaa3a83166105b275ab04dffe84ab21c78",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGED-DENOMINATOR-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8d2adaea747e6a871714acb5d87da446788eb150420937bab0505d63444be926"
+    },
+    {
+      "vectorId": "B0V4-V-015-A",
+      "fixtureRoot": "34e8b74075f9658ee7f80f34429c3883fb09144d5e4b0d71174d8b9158300632",
+      "programRoot": "d89092b74e660aa7abba2cf4a70c82707d9588679987540b80da5654fc980b8c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-SELF-APPROVAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "1730392798821fa3d50275a72ca2a1d6475bf60209c4f1f5cca2347bc7a6b8f4"
+    },
+    {
+      "vectorId": "B0V4-V-015-B",
+      "fixtureRoot": "4c6e8be8f62cac5a52fcd86ac7578edf122ca2098246903c7f8402cf433abe61",
+      "programRoot": "5a558883fb3d187dc9aee1394823dc932b8cd92e878a30d891025d0b9ecc6a4c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BLANKET-TAL-MESSAGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4ed3f97337cc957b553b3798fe9e9d91acead7f740ad4e15557a1096b1ef671a"
+    },
+    {
+      "vectorId": "B0V4-V-015-C",
+      "fixtureRoot": "30e23b9121c05379d4f49ce13e5557a62c2a9e1de4fe0568b0eeba8db47d1717",
+      "programRoot": "44fd82f7f7a86e9a83beaeea99c74943a215c8f2f82d2c864ccdfecb330e56a9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-EXACT-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "29a1b46974246d4403b51beb7f7eb1fb41a996ef81610e6986d1a7edf591920f"
+    },
+    {
+      "vectorId": "B0V4-V-016-A",
+      "fixtureRoot": "cef89a68aa74aec3a4de7aa9e851ad940b1398bbcc937469306e7543e77863a8",
+      "programRoot": "505a07d3803eeb856d1592b55732a0dfd2c3be502cc137326ff30f3ed9f62384",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBJECT-CONTAINS-ENVELOPE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0de71255af091203b0a41ed48f55f20d14503dcd766de715bbc8a1a8556c16fd"
+    },
+    {
+      "vectorId": "B0V4-V-016-B",
+      "fixtureRoot": "40acc052825ee7165c6b97aa9ef99dfaa9a72d92914c649a184750fcd002ba87",
+      "programRoot": "d140786658b041fd82f2aecbde006447c9ce065a900558176c6b87a665b855a0",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-POINTER-IS-MEMBER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "fa27bbf6b5d44c15eca6a01ca2b7874df26b100eebe682883fa92f2857bec1e3"
+    },
+    {
+      "vectorId": "B0V4-V-016-C",
+      "fixtureRoot": "258b7a0f878b2adc676428a1ca5c7a023833d6cb7c295c4e44ce5d38bdfaff14",
+      "programRoot": "7a124ae1b8e647d6a254fe5b55b9a44e3bf9d9342671d269dcae4b35bbb9838c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AUTHORITY-BACK-EDGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "08663135d3fec5935538208c2a7e9aa9df5df1481df1c0cadb02c4ac78646d64"
+    },
+    {
+      "vectorId": "B0V4-V-017-A",
+      "fixtureRoot": "ae70496a20e05f013b71bb0ae747be8ab460cf0dd6517864908ca0546b8e6c8f",
+      "programRoot": "f4b9ac3d108baccc96db20eea6ac90a4096b6ff117901e71a6d9cbef8542d065",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGED-MANDATE-BYTE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "039e20cab75f30fbbe920af27210c2925a1a186ab61ae14ca457176cb19cc8ab"
+    },
+    {
+      "vectorId": "B0V4-V-017-B",
+      "fixtureRoot": "5fa035cdc28bc9628776d71dc7a92a2f3354532c82616a99b263cd6b7b79e4ff",
+      "programRoot": "b54509990ac3252fbbc4d9534df114c6c49d61a6475a7e3e64e2ee3ef280aae8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-RECEIPT-PURPOSE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "bc4310d7a37d9045d3d2625ebe5be16c4bad60a148ec32dc99c023f847505d97"
+    },
+    {
+      "vectorId": "B0V4-V-017-C",
+      "fixtureRoot": "dcc78f0299dcadfe5ade81852dc1b0735cb63a586d469074dbd43f1a4e23aa02",
+      "programRoot": "f0982443c8ca081b368054caf14e2f2a642cec5a0aff455f1225443c33e4c537",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INVENTED-TRANSCRIPT-ID",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5a85b05fe19d6e2e3910ffb38ee078ea5d71385a6191768473af8e35923beb7d"
+    },
+    {
+      "vectorId": "B0V4-V-018-A",
+      "fixtureRoot": "36f2536caca48345a54e258c8e0685a666b5e26ad0c7de621df2456000330f7d",
+      "programRoot": "c2a34392a71c004c48cae5ed0a40de9f32515642a6344cb6de928f69efa146c9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-PRIVATE-CLAIM",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "49366f50c68b000838e71a429efdf887c77b035ce1fc0ce8a1e550156357afad"
+    },
+    {
+      "vectorId": "B0V4-V-018-B",
+      "fixtureRoot": "c7a685d9699fc15a3e35e61f09c0fe57d8306b8e676e82047c181e1e97e96e6b",
+      "programRoot": "86cebc358af7cef10baf5f1db091c9e6a65cdf63a0dad7313cc2a559b0409145",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-GENERIC-CONTINUE-AS-DEVELOPMENT-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "95c31fccbff4d24fc76ab5ec49dc0f4578d7a96ebd285f1d7a2f3baba28adf92"
+    },
+    {
+      "vectorId": "B0V4-V-018-C",
+      "fixtureRoot": "2a7775fad9f1e8c5ed7c69381cf83272c7c522b97b7b8f0079b276fb6c5495d2",
+      "programRoot": "237ac39c2625d3750c78aad734511924951c3be90601ced290ad550795783bef",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONFLICTING-AMENDMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0ad2d466e8eca48894f9733efd75b5272abc40da96cf825a1a760af4dd41287c"
+    },
+    {
+      "vectorId": "B0V4-V-019-A",
+      "fixtureRoot": "2c2196616a1a6ef8361fad13ef8748dcfa7a339cc01292ecef7506d38e34e1e3",
+      "programRoot": "d4d2b09a9c255cbd448ea82ab4b92fd7883890eb0d158721de41a72d5aba1ae8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WILDCARD-CLASS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "37ca67bc9895a85a173f4eac8c4369d38db5639a700269739034a076a45773fb"
+    },
+    {
+      "vectorId": "B0V4-V-019-B",
+      "fixtureRoot": "2f02e78f36b86bb5864c14781720cdca64c7578cc7bf46a803d982eb73dad534",
+      "programRoot": "0a33cdc6793e36673c0cc428175a86addf3cdfe073e818754642fb69568ec72d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PREFIX-MATCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7f0e6d1a86738af7fc57fcbd80300aa9ea8005d334382338217e468056918846"
+    },
+    {
+      "vectorId": "B0V4-V-019-C",
+      "fixtureRoot": "31e8c2d81639456cc64a65fa0bbcf5eb7a6d601ede65e37ff9c32cc9438a2689",
+      "programRoot": "0427e88c5e5968e7308c24a2149d1861f09f0a61585fcebc2790175d00f46388",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-LABEL-WITH-ALTERNATE-SCHEMA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "495cd9aa0d0ada2b9dda7e7acc3477c09b665a0a0b037a389b5ae3ee8d7a54fd"
+    },
+    {
+      "vectorId": "B0V4-V-020-A",
+      "fixtureRoot": "4d53f27065dbba1005fb92ed58d96780db1b41eba4809be8273effc966b767f4",
+      "programRoot": "3f16b38f0e0246e14a784de5e1a554f8e0e16c96bed51f8090fa6d5d7c87aa79",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-HIDDEN-SHELL-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "041feb70d1913d85d0401d2f2c19390014ac7315861bdb7927744a2f80d32a5b"
+    },
+    {
+      "vectorId": "B0V4-V-020-B",
+      "fixtureRoot": "6d876f6a9795ece5b8b1a113eff4af0bff9e5f331da198d160a7d319c470c72f",
+      "programRoot": "aad4388f79a081d4683aecd3a5a9c6366785b26017bbd57a8b3a43c85291aafb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MULTIPLE-CLASSIFIERS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a6ad415b0b3377b5d53c9f14fb9a442ff63c56590e4cf98d2794c80cf20dfa28"
+    },
+    {
+      "vectorId": "B0V4-V-020-C",
+      "fixtureRoot": "3728ef8a4ec835e007bccbbdd96cbcafa0c6a0322befb1fc7405d163709df3da",
+      "programRoot": "10a433716ec5d11cc5ac50bbdf2a93222d9be3f0080c2bbdf02679bfe712e364",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNCLASSIFIED-NETWORK-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3e0128941e8c7efc3cf10b5ed80cb2b34f48a737776c9783c24e0629a9366d68"
+    },
+    {
+      "vectorId": "B0V4-V-021-A",
+      "fixtureRoot": "6ca592878773d6c66f0e1c05f9e3bd7aaabf5bee67f4fc738a108f18290f1b08",
+      "programRoot": "52374a16d8693759e3908ce4034a055fe7e433e594e8f20048265ddd5f90c782",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REPLAY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "264a7110138117e84df5ba232f3197d69fccd531c65da213f6111f3544e25d62"
+    },
+    {
+      "vectorId": "B0V4-V-021-B",
+      "fixtureRoot": "82278b7ff1cf799a50a552a89b8463d561e222095b63002a832bdcee0c529588",
+      "programRoot": "db216f7fa96337405904913cae4b7f6a335e1f61f3f2de448c7aeb3de138bc41",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-EPOCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9fd130751440239228f52d29a1bbbeb1ebae4ea5db98f9ca77f361127bc2d612"
+    },
+    {
+      "vectorId": "B0V4-V-021-C",
+      "fixtureRoot": "bfc8ac7fa5fc703ace66507362a46261218b6ecdaa908eb429f4cb548a856006",
+      "programRoot": "26114f2f19c9fe7846f1683c7164cbabe94f81cf097c52e13fd2d3f1c350c193",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-ATTEMPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "eb8cdf8f88b8ea6ffb501ce15dd7c8f735bfc8974202eb1f21cc5665ea5485cf"
+    },
+    {
+      "vectorId": "B0V4-V-022-A",
+      "fixtureRoot": "cafce0e33c5187e0f3a343aee650dc7970df35de54df6c4a3f53dec2c94d2eb9",
+      "programRoot": "2989bd1b4916d1bf435aea0242ed74462ed0bb29b4f039a6bdd3b946e8e85668",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNSIGNED-APPOINTMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c024259265db0101e8c917f8b97fbe34b2291af660aa3cac8698a3c3d0e56741"
+    },
+    {
+      "vectorId": "B0V4-V-022-B",
+      "fixtureRoot": "702f99e391e10f01141f8f838b94c8ee651c203fadb95fb1b28b3c29a426127d",
+      "programRoot": "3e7b70f2a947744b19d0b94a09679037a9e1b651139460053ea8efc194eb876b",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKED-ACTOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a3d80893a4f240ee383628f12270bf36c1a4ca4ca0e91bb3c8f817900f40d276"
+    },
+    {
+      "vectorId": "B0V4-V-022-C",
+      "fixtureRoot": "b69d0c39c8adb2551d3d8549b56da3e2e762423a74aa20fa65b9d425d481f992",
+      "programRoot": "ebecfc3252a5a3280885c3b367f8c55b7308108d4156f6a1722271a24c5d70a0",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DELEGATION-CYCLE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3f3b0a2954d58d344389caf181e25ce5c7dfb1f856ead1e36e179d17830d4389"
+    },
+    {
+      "vectorId": "B0V4-V-023-A",
+      "fixtureRoot": "dffde7f08a60cbc6111c8d8f4ddbbf17ef993dd070a78d6709950eea5c1c81c2",
+      "programRoot": "e68058faf9117078ca75e64d86659112b490c99412df642ccccf7b2a909bbe7d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-REVIEWER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5b59ade5e55efe6818f782ed35e26148de5872ec2cbaaf614cadb1fde0eedd56"
+    },
+    {
+      "vectorId": "B0V4-V-023-B",
+      "fixtureRoot": "926d939e739a45360c6cfea69b9896f92ef47e5e54b010ce8dc130c04b313251",
+      "programRoot": "ece8acd3807258373c2379f7adeccd11645c571de573e7eb2e369dfc05541255",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RECONCILER-ACCEPTANCEWRITER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e0ce8f9a50b746510a0acf4e71aa9c0b6490e3873f34dcc6fa703b41453dc144"
+    },
+    {
+      "vectorId": "B0V4-V-023-C",
+      "fixtureRoot": "029a5639407d45ebbd4ef42050f37bd022a9ff335061ff6ba43e9eaadc28b6b4",
+      "programRoot": "23c78c99943ed9030cd8ab6ce3a6ad04d31de50fb31bccb64a09493eb073fae5",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AMBIGUOUS-BACKUP",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5b73c2e9e6730b3e5859c10219df42cb1357365352dc5ed7f6d20b6ce9e5c0e5"
+    },
+    {
+      "vectorId": "B0V4-V-024-A",
+      "fixtureRoot": "031c53a083be16efe973d75e8621128d2a5f112628abdd78af73e0446209336e",
+      "programRoot": "3ed608266863514ff21a0f3eac8d8fd60d363283a8467ba5e49f81bb9aceeb1b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CROSS-DOMAIN-BYTES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "01c1f85db3f5849cf0e540d5c0cae7cb87fdc2203e3feca88073b5a18318fd92"
+    },
+    {
+      "vectorId": "B0V4-V-024-B",
+      "fixtureRoot": "8ee457853c36c8a0f3261b221c50d39b581f88b19f47283f21e4b3582c27cbe9",
+      "programRoot": "3c87edacbb61e827b40faa89764cbf4091223e958c630c9b4777fc871caa395c",
+      "observed": {
+        "terminalState": "COLLISION",
+        "reasonCode": "NEG-COLLISION-SIGNAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3835c857c2ec7bf7e65fe6435a4bf162bb13835065e2df057feb8c6a6fab922a"
+    },
+    {
+      "vectorId": "B0V4-V-024-C",
+      "fixtureRoot": "d059126fb703a1097fe6969370d993d46e1ac1f4e12d1a972820425b11aacf50",
+      "programRoot": "bfe6885e0b9fceb95e2bd8c6a721ce81d316105c1c8ba21db6341a5b744fc982",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RANDOM-ID-REQUEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "91456b1ed683a405476245792b924febab87a8ccd2b064471ebacc23fcf9c8b7"
+    },
+    {
+      "vectorId": "B0V4-V-025-A",
+      "fixtureRoot": "2d0fbc845aab9f8e9a0e7392fa7d2bb049ff62af728042f1c6dc16fa3b718ce8",
+      "programRoot": "c20aeebc7b1bca2187753f048dc3f5f30a0f1fe1bd8d2cb53c69ea701cbc9e53",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNICODE-CONFUSABLE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "96a28f1fae7186b8da24e237e83f7034a27669a971f23d6e419de9f2eb445036"
+    },
+    {
+      "vectorId": "B0V4-V-025-B",
+      "fixtureRoot": "a64d8ab4fbed44584ee859de7105cea3aa9ba2a1f7a7abff12f72faf889b718d",
+      "programRoot": "3b0e41dc02f517504c809d380a04530b087905a5ef3781058757989c728da655",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-NULL-ABSENCE-ALIAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "dc2fccedcb270e0ae8a7f5f4235c31614bf52c5096de8cdb2cf44111dcfaa286"
+    },
+    {
+      "vectorId": "B0V4-V-025-C",
+      "fixtureRoot": "9cb6f30d20e7dd0419b930b9cb52566c8ce644ea0b23a55c92c7a919020eccaf",
+      "programRoot": "95c7bd3daac28a2f72c8afb1233e53143fb50cf330ca44cb72c442562ccc51be",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REORDERED-COLLECTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2ba192fccb087a2b1e85629e617497d82d6d1164bc53767123a2e2ee760a96b2"
+    },
+    {
+      "vectorId": "B0V4-V-026-A",
+      "fixtureRoot": "2e47d3632a4df71dcfd327da5ad29268c092a492024e097a78d8f7134438170d",
+      "programRoot": "14d80100582d8676a9ba8e6d0a746f375e72d80f754e7536a14aa8e2f644fcde",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-KEY-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "12abf637068fdacb3efd940a9c0403abb3f4f510e76961d1c173a73f845eb923"
+    },
+    {
+      "vectorId": "B0V4-V-026-B",
+      "fixtureRoot": "fd361fbbb41d8d15f4239b22a4f342f2869260150adc83fe93c9160d7e2fef77",
+      "programRoot": "330697fc5a9a6147ad69ab1f77e223932fae1fe96a32dff86d73895519a45a14",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-CHANGED-REVOCATION-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ff7842665c5dd068a11f35910c8e9dcf68011471500e253a0a3f2ded79a8715f"
+    },
+    {
+      "vectorId": "B0V4-V-026-C",
+      "fixtureRoot": "520ee91b32682e1d6c9d614b3350619d59c7ccc6b6566fc1daf977bfcd920d28",
+      "programRoot": "6af97d709331436d9f8c2df7b44eec22382b52535e0a1cb226c1e5236a9b8556",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-STORE-IDENTITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "83f58b027ee3e313da2acd5294ac3a6d7189a92ede9719894360330f3aeac50c"
+    },
+    {
+      "vectorId": "B0V4-V-027-A",
+      "fixtureRoot": "830ca72cb25e5590b19ef1672f0d93f37f277a60e84b3d059a5189a0d6f6f05a",
+      "programRoot": "57539235a8417c116317732dc84ea7002de5bcd314ba3cddde304d85872f6891",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PROTOCOL-AUTHORED-BY-SUBJECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "687786161c3500ee7bbc8a98894f5b098f1d5105a6d70c98535662cce066ea69"
+    },
+    {
+      "vectorId": "B0V4-V-027-B",
+      "fixtureRoot": "8b7a30460178adfcfd534dda4b91a5ac8d59ec03ac97716dc6c1db936ef8f58d",
+      "programRoot": "b202789e67f9a2ef216b0a1a07448bbafedf17a3581aa9db8b67031570408675",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ZERO-REVIEWERS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d2edbb170357c1e178fa1ba18ad463627444e9fdfeabb7be4ab536ca340d48ad"
+    },
+    {
+      "vectorId": "B0V4-V-027-C",
+      "fixtureRoot": "fbde135c36ffef6f1efa2971bd8fc6af324e4171c0fac125a93ffa609f65a00d",
+      "programRoot": "26750d37f2ecec281f2d1afe8a8c866e69c173e8567400816527cbcd09611926",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-POST-REVIEW-RULE-MUTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c28d4fe7cb5612911ee76b981ed4e5fef7002afeb23f09523f4991d69ba36853"
+    },
+    {
+      "vectorId": "B0V4-V-028-A",
+      "fixtureRoot": "9468f5afc8d0732064ca9ff9faf3e10c07349e3a83f116adbd88d2cd300b6afc",
+      "programRoot": "e6b3eece89c515549e5b6d97250e48a7defce1cd65a6dc1428670ceba1af78ca",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PII-PLAINTEXT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "72053b826b071cee7275e6343db14e2118c6404e9a47077140ad85faaae532d3"
+    },
+    {
+      "vectorId": "B0V4-V-028-B",
+      "fixtureRoot": "62fc502538859308c846d35d9ff1b7ec29df00db680c24b14b5672bc11334352",
+      "programRoot": "f8e7812d8d963e06a680ce2e2f4858602d6f7f1cc65d0da3607d0abda0fa5b4c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LOW-ENTROPY-RAW-DIGEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "069cb2231a60936347e5d4c5128da2c377ecdfa8938d68cbc06fe7699938f73b"
+    },
+    {
+      "vectorId": "B0V4-V-028-C",
+      "fixtureRoot": "f3d0f1632412f2e04bd50a000818d2eee46685deef68ae8c6d10b751be6a203f",
+      "programRoot": "19d2e65be293526281aed5c18a57702371f83318512588879d5041596d693b84",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-CLASSIFICATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "89752e73035763fc9c8e2514b97eb32dc6ab461862483a3733026e81d0faeb31"
+    },
+    {
+      "vectorId": "B0V4-V-029-A",
+      "fixtureRoot": "1f39039bcf49825346285d6cfb661098bd75895d7367c8fa3e06d147bad73049",
+      "programRoot": "e39ce6e5092e127c5486c0e38735b90765deada75f2fa58d7ef9fa73d295b20c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCT-EDIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0e853e796d7e8b8584766f4eca0850c56cb29073c095336ff756754c3a1184e6"
+    },
+    {
+      "vectorId": "B0V4-V-029-B",
+      "fixtureRoot": "da08d6726932d6a0d6dd38f4defbf50cbe8d918291a0d6144da501f265f7a1b1",
+      "programRoot": "45eb80495306445cd331f5a1494d40d01d9a4d760d389e631979e6c3fa40ea40",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-GIT-MUTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9972d3f843742f1e83cbf8f4f5591b8e9ac3ef832811a372e5c1a45ec0183beb"
+    },
+    {
+      "vectorId": "B0V4-V-029-C",
+      "fixtureRoot": "f03f069fec2c92aeb5f0a656dffdf0e0bda13af6f9625ead4c7088e2cf8e4504",
+      "programRoot": "d5f49ebd2fcf5f1d1633aad42d021e9ac20ddb7d46aafbcc42ea8eb8b4816cc2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PROVIDER-OR-CREDENTIAL-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d23457d1b83db1ed6e7df47c631b9fda337f334a90f8ac10e9cb262cb3d4c139"
+    },
+    {
+      "vectorId": "B0V4-V-030-A",
+      "fixtureRoot": "1535ee2cfd24fa9d4271100c3e60038456660fc55afd3c4412e360b9d38c5180",
+      "programRoot": "8e8a9c2c680976e332813df68cedca7c9e984c8a18c9a82000e3f5ecff327950",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LOCAL-CLOCK-ONLY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6f0d3b09133e1d02721163b37077e374f3ae3843005c5d183261b7b701e7ee16"
+    },
+    {
+      "vectorId": "B0V4-V-030-B",
+      "fixtureRoot": "3f376de9fe2b856156f8c9db7e2df5e0754a04df341fa74a1805fef7cd3f289c",
+      "programRoot": "11f3a7ad109cc5a2f9de59f479fbac4395576a9840be5d49895a1bff0d90cd82",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ROLLBACK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "efa3203b76464bdff162f1e3266259f7d8ff24174787de07f73b3e92bd587ae3"
+    },
+    {
+      "vectorId": "B0V4-V-030-C",
+      "fixtureRoot": "7f4f9db708f011b1e22b090cf3b14c4e9dff0139f8cd8a2a40a40dbeaf261647",
+      "programRoot": "e93e11dd4e2d71e2475f58346f45ed484c5f71c5a5cd795eef7c27fcec09c909",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONFLICTING-TIME-RECEIPTS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4528a2fa8c9f618c59a957d3660832867ea5af0fbcc140a802655adae7b98739"
+    },
+    {
+      "vectorId": "B0V4-V-031-A",
+      "fixtureRoot": "b5ee0610a90481b9c16d75838241fd70319c1398496db7046d450aeb930c0e44",
+      "programRoot": "35bf3543462374274a90cbf5609a664a55988e88a792bf00a096ad203a13531b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-EPOCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9db6a7068c9c9908bb841a050c36952443e9edccca81f7d1db4fcb82e7442b5a"
+    },
+    {
+      "vectorId": "B0V4-V-031-B",
+      "fixtureRoot": "c04273dd0f2551608925d2c8eff7c15d289c839afd5bb84bc0426a09d2c2872f",
+      "programRoot": "391d0ec61921b3d9fe6a284d429e3bba86da0e957c6697e6f156a9d4bede1ddc",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-DURING-EFFECT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ddb890e7224aa7b8f8ab101ec66a8836b4b68bd4e952ba878f9ff92e98581f41"
+    },
+    {
+      "vectorId": "B0V4-V-031-C",
+      "fixtureRoot": "4a216c5f93b67736755175870a43e9b4c11b950110cdc459f9e3ee20b47f40ad",
+      "programRoot": "c4cc1101ad7bd36a1c15e4d1bbb30c6ab09e48fe9321bc763d42aae92bf501b9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUPERSEDED-MANDATE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a1f4dd46ce4761039d2e46d29545df86730752fa24b726823bf19dc7d1f5b91f"
+    },
+    {
+      "vectorId": "B0V4-V-032-A",
+      "fixtureRoot": "7b829a4835512f4b4a08d63229ccf24e78f6bc027202b47eb343860615a31afa",
+      "programRoot": "d60cd861da072269a866979cd8f9db4551041dffd46b2c0306bb64dcef0b9f33",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORKED-PARENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0051070548faf8330bd6e70f4f9b0b7af5b565d1a7d407c8b16404614077b38e"
+    },
+    {
+      "vectorId": "B0V4-V-032-B",
+      "fixtureRoot": "2d418e7cfd9a72c485525c2d6599d64245935d3beb5a11aa3bef2110c8761f2f",
+      "programRoot": "499a6c179a38a498d7172ed3bbb6bb4410ae1794e43a529b35674e82a8ff7430",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REORDERED-EVENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7db59d3d532e5070af2a5269a928ad24ba732397b8404f2df6741887bd2c847a"
+    },
+    {
+      "vectorId": "B0V4-V-032-C",
+      "fixtureRoot": "9e31ded0d3b24b07dea95be14855eb7ceb0ce062242649ceac2c8349dd912575",
+      "programRoot": "2a707f290f4d2faaacf7f6475ce8e1508a7854ff50eb5f89480ef1f4b0d43748",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNAUTHORIZED-DISCLOSURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "75f42754255373ec6f6e162256ad0dcfb5dde3695db84c9703297a92bf76d37b"
+    },
+    {
+      "vectorId": "B0V4-V-033-A",
+      "fixtureRoot": "177fcd50f2b898e9e87e1827b48407dd57ed87da101e6f48a1956c675ba13aa7",
+      "programRoot": "5a0b598b0922713c912f8172df1c05ece2f512206a7d3722a7e7c588c7655ca8",
+      "observed": {
+        "terminalState": "REJECTED",
+        "reasonCode": "NEG-WRONG-SUBJECT-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6c1369c988c949742dfc44b20267a3e4e5e9d13bdcb884da656451a867743ff1"
+    },
+    {
+      "vectorId": "B0V4-V-033-B",
+      "fixtureRoot": "f977a9c8850aead7125a5221393c41e21997e8bf67fd5eddf925ea73eca4b185",
+      "programRoot": "7c3ac70d02eb8f95d1ff134a1e2452f8160962e6667745806f98f508d188ab70",
+      "observed": {
+        "terminalState": "REJECTED",
+        "reasonCode": "NEG-CHANGED-INSTRUCTIONS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4fd5582198d3fa9b10abc6165d54b8131c1c988f8fe4bc41c0b7c2cc343f6f47"
+    },
+    {
+      "vectorId": "B0V4-V-033-C",
+      "fixtureRoot": "a00562dc66e336999ba9f5a3c46ed178f3e249482117d8b3b5b70c2219ee8b7d",
+      "programRoot": "f72337b774a0bab5be2fdc764fac2f44043fde8ecceb5dbbbbab4577bf261173",
+      "observed": {
+        "terminalState": "REJECTED",
+        "reasonCode": "NEG-REVIEWER-SEES-PEER-FINDINGS-PRESEAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c91e3067252ff55e44dd55525a96a9dbee4f97ee0dfe5ba51b5aeb5e32e6b4a6"
+    },
+    {
+      "vectorId": "B0V4-V-034-A",
+      "fixtureRoot": "a69fcdc61eade243bfccaa15b3c9ebac2ce266957d4b47d0a9aabf40c187eb2d",
+      "programRoot": "320ab5d4aeaedbe44a2e2949efc6adb33aca316e6d235f5e3361e53cd2ae70fa",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MERGED-FINDINGS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "bb1b89df6fe008c988a55a7265f4bb0a0834f4159c6aee12f4cfb210142d44b2"
+    },
+    {
+      "vectorId": "B0V4-V-034-B",
+      "fixtureRoot": "a1ee077ecd8b2ac57da5ab2c5c3395f0807a9dc6caee42817bbbc6102a75c459",
+      "programRoot": "ff93fe596c654a03c5d92f459cfef0802646787679a5b2d40f378faa8180ccdf",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SEVERITY-DOWNGRADE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a86d661cea2734a8e57a623ed7075f1ff78e07d09ff35d18d3c89774538d0cdc"
+    },
+    {
+      "vectorId": "B0V4-V-034-C",
+      "fixtureRoot": "0676df5ba5bf47a28f19a921585058dd2c5b445a1cdf26ca9dd8a668ddb92288",
+      "programRoot": "0077915027a32a03b1aa874bd01245016a2ddedbe1043664b16dcb204ec3425e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OVERWRITTEN-PREDICATE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "037e80a609b63c7773f6f2cfd77e1ede651b55b43ef94e1737f0627767678316"
+    },
+    {
+      "vectorId": "B0V4-V-035-A",
+      "fixtureRoot": "ddf1ce2dc1cd589063baff25a58a2a16f5ccdaf186d9267064d706d3c05abc68",
+      "programRoot": "17de651c9ff31cfa755fff21521e3434fa7e6623045f7bfe44ae6410e5179d2c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-TRUST-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "985ec0da28ca4ce0f4f67a4c335d337e0fb42514b9a19e01916b1dd9e56102ce"
+    },
+    {
+      "vectorId": "B0V4-V-035-B",
+      "fixtureRoot": "3d3ef2ce081ade8d3d050e6417811b9decfc3bed6060d7823eb3f26702591411",
+      "programRoot": "20a23e5822d2d0af638e72c0e596908839ab0af031faff9752bb4da0ddc97bee",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-APPROVAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6e9412065666ee17f60ecd5366c04eb39230ac251201806f34bdf75210ac875d"
+    },
+    {
+      "vectorId": "B0V4-V-035-C",
+      "fixtureRoot": "e84b8ec8abd4e2b636d9f92269fb0b6c0ba17122c0fbe77d066bd19925d12ebf",
+      "programRoot": "16f73b79b89cf564f77663177a6b54aa7f2b8a936e526bf4fe1ca10894a7ea14",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CATCH-ALL-INPUTS-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8df1a0dcd06c5dbe34633ba697eaf684ac8e9408367bf1a83ac9bd25e424ae8b"
+    },
+    {
+      "vectorId": "B0V4-V-036-A",
+      "fixtureRoot": "ba52897dcdb15bdbcb765e689848b6753eb7b40c24d9278be8c2d7e193174498",
+      "programRoot": "fd2ee24a358a4ea962168b3b5bcf73deee59ee79e744a1b7196b0bd7c2e9734a",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-ABA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e2509d67c1bb39786d9c9a7305f34a0809704f1731c742066101f2a51da87f7f"
+    },
+    {
+      "vectorId": "B0V4-V-036-B",
+      "fixtureRoot": "912eda27fb6abb8946c2bf419ca267bdebac96be0e9fe36b2b06585bd7ba7740",
+      "programRoot": "f3f6337d2924369ecfd871e05db02da0dd65a166c4bd57bf5af5ba396fa798d7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-EXPECTED-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f275fdf5fac6e8e78bcebbefc9c3577e78f16adc168bb6e9c9f37187add66be6"
+    },
+    {
+      "vectorId": "B0V4-V-036-C",
+      "fixtureRoot": "72024534a966759ba97f97488e63669baf106e1ce9edebdda5132b3495c39c49",
+      "programRoot": "c0ac3af2c3e84fd4f66392a716da306eb160eeb67d7f38dafb133f6c2264159a",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-RESPONSE-LOSS-AFTER-COMMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8db91ee4b56c6bd54d36e5c548bf292eb77aa643b8e7237b3206202d56a59920"
+    },
+    {
+      "vectorId": "B0V4-V-037-A",
+      "fixtureRoot": "be90952c848097915d8c19e8018299ee92709ea8afa941e90cca4fd256fef0bd",
+      "programRoot": "0b49b45c91f254a57cf9726d9f54c3b68406c1187786fbc232278ca7ad22cf6a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-CACHE-TWICE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "df1251541d8c1ca9627c0c5f9777cbc3c358fedfdfc08379bd614ccc42730f01"
+    },
+    {
+      "vectorId": "B0V4-V-037-B",
+      "fixtureRoot": "50eabe7614acb34de1ad2dcb2df2b3841f0c2290d2d659de969ffcf99d0fa090",
+      "programRoot": "278011015ddab85b1deb54bb58d23fc4c10c629ad123719ea9b35550aa86269e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MIXED-REVISION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f8f2b655d403438940c2d57f757eaa578f0dc319e307ccde96a8d21ae7d52beb"
+    },
+    {
+      "vectorId": "B0V4-V-037-C",
+      "fixtureRoot": "341626f9a5ba3676edf8d6627f650dede6e1b6009635f62cf62bc21ac7cf938a",
+      "programRoot": "6ceac3a3760534389b76a5fbb54aedaed5c4e08fbde430a49d8dc68bc88ca047",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-CREDENTIAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "605a70c4508ff5ef258af5f5b7f155ee916f71ab30d88c2554ede5e398b361c9"
+    },
+    {
+      "vectorId": "B0V4-V-038-A",
+      "fixtureRoot": "c032b7f817fa7646cddbc3d505632e16498b430aa366f0aa148397f372588ac4",
+      "programRoot": "986e75e4edb5665c6c7ae984c296f79ef4895c6351cfc33650d7a313f1677a01",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORGED-CURRENT-OBSERVATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0545ea641487c6c8a033097926c96f88100d1b245a5d487827042eee326433f8"
+    },
+    {
+      "vectorId": "B0V4-V-038-B",
+      "fixtureRoot": "d666d87df02977f71de607dbdd1e27dbda4b61e05b41b0f81677011cadf5a326",
+      "programRoot": "299dffde0a612e88d928cd12187193d4670ac40e1670212bc528190c12ab9be2",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-OBSERVATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ff28fc31e9168eaaa2a5f3a872adfbcba46d3fe6b7a0832a5cb6ea1eb29b7ce0"
+    },
+    {
+      "vectorId": "B0V4-V-038-C",
+      "fixtureRoot": "8d649d390c7b107751f27d8a102810deb327a94ad7bcd014d152f8a6b47f1843",
+      "programRoot": "14881666c0d3e1924f1a0ae136c8860f23135413d99be39e0fd310ed29f03d2e",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONFLICTING-CUT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3babf57f2ebdafb2e7218f11f1af717bcfebbcd6d8f7331e7eea02593c0e77e4"
+    },
+    {
+      "vectorId": "B0V4-V-039-A",
+      "fixtureRoot": "77f158d30f8488cd3a74ef5b9acd18606ad837c62d37c616631c1be05e735ca6",
+      "programRoot": "0ba163ba1789023111fd447e9da31ddeb618768ef9ba92de7cde32e68a6bd1bb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G1-ISSUES-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c21b8b92f5bfa2bf05f72d25010aabed564a1bc10ee66096b8e9bfe528ad8396"
+    },
+    {
+      "vectorId": "B0V4-V-039-B",
+      "fixtureRoot": "e96ab6db28f43745c90b12529ad8e627848992aac2fed347ffb2e4568b2636be",
+      "programRoot": "942e20067e9f886956e374f37e9151295fa96f32731b7fb168f18770a886a6e1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-G2-REPLAY-G1",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f42c28fa31307fce5ad37b920bde0a4ec09de5b8346a39a0d7f8f55be2173ba7"
+    },
+    {
+      "vectorId": "B0V4-V-039-C",
+      "fixtureRoot": "d896f2074ee22e700f5ddd1e6ee363d6bdc1a170f3b3a7a22d616ec741112e49",
+      "programRoot": "adce6af472af00d362327456933a1d45d2cb5f030df5bdb6d4f3acb7bb826e88",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-BECOMES-CURRENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "96c9d0d89a7786762053c16a54ae24a22a8ab5ac53b6573a2a2f7c4b54efd4d3"
+    },
+    {
+      "vectorId": "B0V4-V-040-A",
+      "fixtureRoot": "126105793255d7c00247f1451ecc0af6b0a23934077e307bccccb580b2d92fac",
+      "programRoot": "2114d3f79b5bce72f62befcdd9d19e35534814a67fc17f5394b610858fc24c62",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-STATE-EVENT-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7fa1f18c77c5014c1e68a35a494c2e27d3a1ea8d775fb21553050b88ece33f4b"
+    },
+    {
+      "vectorId": "B0V4-V-040-B",
+      "fixtureRoot": "a6039e7b8798e2137dc9617ba8e5bc0c0dcd3c6e2dc7b690001d76ed40586644",
+      "programRoot": "5d980332bcd7e0d34c5f4672f58aaa584ef87d0af2b61bd9ff35b90eaed76b0a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TWO-TERMINALS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "58b982c48aabb90c25b717c542e2a08a3a663a7e7392474cf9417ebe1e23042c"
+    },
+    {
+      "vectorId": "B0V4-V-040-C",
+      "fixtureRoot": "c5176b4c2f7f758553fb7438607e72d15a30d91f3f99adc919c7045acb34662b",
+      "programRoot": "1664a7fde9ba20d10e7aef7f5f77beda8fa44a1f1f6e574889b83e38f9e8330f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-IMPLICIT-RETRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6d50129ba58c5bf0b2a5c4e0931cf121ad14575a2456786a284aea012c88af01"
+    },
+    {
+      "vectorId": "B0V4-V-041-A",
+      "fixtureRoot": "014471e56ec6926f7996cbc0e0478b937257c20cce4fc9f58369a94b7df0f7f2",
+      "programRoot": "734b39e75e823d0fc2ec10f6fda40c11cdebba185beb7435a890f578a4f97f40",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-DIGEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7ab134ea027c7bb39f83566cea1ee1ae3a9addababb8efefa11dacdc0fb81961"
+    },
+    {
+      "vectorId": "B0V4-V-041-B",
+      "fixtureRoot": "fb31fa13a67c5a0cc862b0b5e7c14ad5681fa60cbfc62856575aa1a548f6253a",
+      "programRoot": "76f3861f86c362f9fdc0f9d0df9ea5377aaa778f803fa47a7fc91696f71efca3",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AMBIGUOUS-ALIAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "87a000cb5342886c8c657d228b27747c4b67b952007e4dc30fe40ed14d949e7d"
+    },
+    {
+      "vectorId": "B0V4-V-041-C",
+      "fixtureRoot": "53d28f7060d5fd8f9bdf33b135485b761e1e9d52855fc02eadf337615133f380",
+      "programRoot": "6e26aa9ee51e09b7a39781f71320b4ab0d82997cd8bb6b2266cba24b24a799e4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RANGE-ONLY-LOCATOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0636233ea2c1d35feeacf987cde0cdb5d130d818c2d486b0df320c92e576b18f"
+    },
+    {
+      "vectorId": "B0V4-V-042-A",
+      "fixtureRoot": "cb079ae5c112c41538f2178a7fa0ce2d39cef6a67b3ff937e5cf87800f13182d",
+      "programRoot": "2f87758d0ee0b7d6470d400e548b5f14203d06e07faab0b41db05b3b6f26dd03",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEDGER-PROMOTED-TO-AUTHORITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d66745649473c24532bdc2c7aa5a2d6a7f3def2be5c70c3eb7b6381a180529bc"
+    },
+    {
+      "vectorId": "B0V4-V-042-B",
+      "fixtureRoot": "9377d243afaca904a86c7416c515f06f308433592f4b8af2a3a5aa8c50fc936b",
+      "programRoot": "80aa97347feaa21bfb584ebe19108f8813c61031bb705bc5bafcb211f518559d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUMMARY-TREATED-AS-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "456139445cb0204693e42bc2e9c0101fbe54b4c97025db21f7abf5b5f6600ba4"
+    },
+    {
+      "vectorId": "B0V4-V-042-C",
+      "fixtureRoot": "2f753155f09fe7f0fdeed2893387f5824d59bb3bc78bc570f4af18babea8d00d",
+      "programRoot": "3a2144523aa588600dfc663f96830979c7c4aac5ef9c1c9b8f64525295b09bcc",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNAVAILABLE-TRANSCRIPT-CREDITED",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f813c299dd4d4226a114bbb209e6f62a3fd70ad8ad95f9857db448578ed264c7"
+    },
+    {
+      "vectorId": "B0V4-V-043-A",
+      "fixtureRoot": "55221a31cb2414b5f7d1cc90db9baa5c37384a953e963d49b8f4371f81eb8ad5",
+      "programRoot": "dad821e8ed30ac4b4e53e505489a7216d43bcb58eaa05feab41ae67d1c7d0241",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORGED-TAL-CHANNEL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6313c6b4a4b3801f2825c6483f2d15bc8cb4598d2c9eeeb678128a1317ddf93a"
+    },
+    {
+      "vectorId": "B0V4-V-043-B",
+      "fixtureRoot": "b50d7067e6a1e7c811e170855391a2ad3289a270abb303d8625e9d983632831a",
+      "programRoot": "76629ee3ee1fb38e19fae4dfe98b92bae4e3a409c95c9ca6131610c1f97c2b62",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ROTATED-KEY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "cd1e3ea7745f51b312092b46e065de55be19bd8cd967c2fc87862551928b2591"
+    },
+    {
+      "vectorId": "B0V4-V-043-C",
+      "fixtureRoot": "67851dc11f9c7d4235fa690a44b97b7b19afbafaeee73e90f8e07f7bf5c7c32c",
+      "programRoot": "4d0ff1aa7e30726469c692acc8ca0701cecf8be67c3404c5a773af7284490c5d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPROMISED-VERIFIER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "bfc55d75c628266ce799967d168ad7fa8ed696653f5d30d6dc20aaad64413f3d"
+    },
+    {
+      "vectorId": "B0V4-V-044-A",
+      "fixtureRoot": "1b44f7d7417855082a59cdf693dc664589dedab5cc0aca464fae85836c77f508",
+      "programRoot": "04c896f5c31c4a27dcb48ae95b4d5b602f285cd1b5902467090f1574cb975955",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-B0-CREATES-ITSELF",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "586003a59bdfc6ee36130d216176ebe5167b8bb47c51404f781ef09e4adce23b"
+    },
+    {
+      "vectorId": "B0V4-V-044-B",
+      "fixtureRoot": "9ac143cd3b636d91cbf69b69244ce9c1c688fdaf38962963bff6bf4d7bb2c07c",
+      "programRoot": "dc149b68ce6e4439c591b61ae2ed930dbdd50b9d69ce2d701018565a41308ca8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-GENESIS-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "320a44293ee7d5b5e84ff6c4eb484442dd17f76c6244252c29c1a6c016eb1fb7"
+    },
+    {
+      "vectorId": "B0V4-V-044-C",
+      "fixtureRoot": "f0982b0348ac8e0d437a8c78ea6e9e54d17f96160ba0a25e8cd11a2c18dd01b0",
+      "programRoot": "17a137822145fa98dd304af0f03c14d1c02539bea03d1d708bef170e4403c111",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BACKWARD-AUTHORITY-EDGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "97476d1e8f643478f50ba8d0b9abc219a4f3e91f2dcc9f254e06cbce8ab19f18"
+    },
+    {
+      "vectorId": "B0V4-V-045-A",
+      "fixtureRoot": "64469627a2c8f6e4a4c3f527c14bb9249eea518e27c2a145414e6a940336744c",
+      "programRoot": "4ecdbd22f650d3492f663bcf903bdfa2d595b25231999c20dc4cd4c579b666ef",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-SELECTED-RULES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2db46dee17b438e754a27d164bbf8a63ea078f8c13f9ed64a8e67fb317eb3eae"
+    },
+    {
+      "vectorId": "B0V4-V-045-B",
+      "fixtureRoot": "652188d6c442c9bfdc10c0bd149c5d393a3cd2af017c0e430ce4310790fa58f7",
+      "programRoot": "9d20ede7981f576c6d2ed7c6e77bf4aa5fd646e31f51072032c5c841a573d557",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-REVIEWER-CONFLICT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "500c327b9277787e6127c09ce4f0b7a01a21fbbcdcecab574666e1fea93315f2"
+    },
+    {
+      "vectorId": "B0V4-V-045-C",
+      "fixtureRoot": "bdac5868c52a0808e47a1d8734a972c393bce70cb532f02a7375e99ba74055ca",
+      "programRoot": "ce3b0dc028a05d60621f7637546cef54977e371ccd19b8bd7c97edca13576446",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ALTERED-VETO-RULE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "efc1669d11161383112ebc3afced29bcbffb62d97236e4a328794fe7241642a4"
+    },
+    {
+      "vectorId": "B0V4-V-046-A",
+      "fixtureRoot": "16de85407477d3fff6b9f7dcad6f7849068869f0e428d647d59f10d2ab197e96",
+      "programRoot": "d7136b09f35b36d99d5cddab3cb081b04da8a499d3805f2ee2a58dc15a136aa4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EXTRA-PATH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4dae293ec89305881a242d66fa374bf2de9b9ee778cab04ca34aad6763ccdec3"
+    },
+    {
+      "vectorId": "B0V4-V-046-B",
+      "fixtureRoot": "67f38a3209346b0674dae8a036bd3893817231ed632b7d84b0aa9259393f6ec2",
+      "programRoot": "8f7ce289e0fe349316589b7f920981ac00f00f98998024e4923d406b7e77ba68",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-HIDDEN-NETWORK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3f187aafa8d1c1647ff11bdaf242ffc08a629a5ab2a228fa9a70fb57722dec9d"
+    },
+    {
+      "vectorId": "B0V4-V-046-C",
+      "fixtureRoot": "7ab7689f40eedf1ea05a7e2735724975e55aa25c82dda3cb79c1b121032b41e4",
+      "programRoot": "7dd39a31fb0449d6889900b07263e0e78202f3662d3a9fa3e745c8bf952109d9",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EXCEEDED-BYTE-BUDGET",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "cb5e3b87f8b569b81ac419282cb12531b0a4f376afebfe3e8ade1977c07efc39"
+    },
+    {
+      "vectorId": "B0V4-V-047-A",
+      "fixtureRoot": "59d6d89c92e4b96a6813b8a108a7c60ec20c441820e4f3d8bb36eadca4c389f9",
+      "programRoot": "a76c6d727fa6bd1dc95d3471a70a5105db147f0e47b2ce2277d8a4e9ffd2d64a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CONCURRENT-RESERVE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ef792822e2db0b8aa3588211df5a3fd9f91d15e718597122ca8e4dd03bc23277"
+    },
+    {
+      "vectorId": "B0V4-V-047-B",
+      "fixtureRoot": "9755703ca5cf0e4e18ee64fe507654f227da21b9d1c0d2ed00070608e92ad1c7",
+      "programRoot": "e83b5b4c7763edb40af5324c7941556415d2c6ba2e5077c50deae4a30b4e9647",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EXPIRED-LEASE-TAKEOVER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b30c79844df455cdaabc55c5f906a26eeb49c90e264be3aa643fb5c3f9108a2e"
+    },
+    {
+      "vectorId": "B0V4-V-047-C",
+      "fixtureRoot": "af306e854b4f40630ee29f494273cbdceee069d0aa93bc77a0f46156665c4ac8",
+      "programRoot": "dc8f9b32e169357a21d405b1478dbae2660fd845af645cf636d62aa274252bdc",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-ATTEMPT-RETRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a742978cfc32b4ddc4c6d40bf6ecac105ccd7a581a229b4f41d1940554171df4"
+    },
+    {
+      "vectorId": "B0V4-V-048-A",
+      "fixtureRoot": "99ff8af07ffa1347dba987dd5f1c953d10aa23aebf07fad4cc54e1f63e644b9e",
+      "programRoot": "902a016325b9f09d19d03db6bb810ff2c39dc299fbe746ece8a73c2f80fcee97",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-BEFORE-RESERVE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "19b5e5a9e933074c00cae4038b5659099cfca645bdfd9cc40c6da8ecb25ea9ad"
+    },
+    {
+      "vectorId": "B0V4-V-048-B",
+      "fixtureRoot": "62e75eaf2efc76bbcbf85aec267230da9255769cdbc08dac5c2f4894452e1bf8",
+      "programRoot": "cbff82a9df6c3f8822d23fcdfc3013848a7e24615275b17e5815530bea5550f8",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-BEFORE-COMMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d63de417c8f49508bddcd5d8d612c17ee6b4eb606d543b41f6b49a6da85583a0"
+    },
+    {
+      "vectorId": "B0V4-V-048-C",
+      "fixtureRoot": "358c3164511bdd314d96510575e43f902bbb88c68de300a5e0306b4ee9052512",
+      "programRoot": "67994fe5f95d7914d31bcb7dc921c610e4f90c1a72ca71a0a54e8249b8ef950a",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-CONCURRENT-POINTER-CLEAR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a7562d2ad2db82f18314e8ce78b20f3d6b31267fcc3d6e02ce972f5b7fdde247"
+    },
+    {
+      "vectorId": "B0V4-V-049-A",
+      "fixtureRoot": "7f8bcd5f717ca73ac9d4fbae0ebd925e712737b9be74025d6054fc2fceae10ae",
+      "programRoot": "a69238432aa7fa2be0c7fe0a7537083dce579c9ab5c8a3ca6e4533b3ed3f9b05",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ISSUER-MISMATCH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "54fdc0c723469a4a8da6353f42a338d858f389783d9844f3e523a38a5dd8e606"
+    },
+    {
+      "vectorId": "B0V4-V-049-B",
+      "fixtureRoot": "a16a9ddf40ddbdaac879ad281f153c9904007b07feca96c3be4acb640b0d4f34",
+      "programRoot": "1bf3e988dab959d28f933c89694ca7c311b9d9bb2c93b431a216a6dfc2713f5c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OVERLAPPING-PRIMARY-BACKUP",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "fa8848bd1dc7e948acdcdf12dba76c1efb771a137ed9f629e92b80f4ac5c5899"
+    },
+    {
+      "vectorId": "B0V4-V-049-C",
+      "fixtureRoot": "b26d0e94385c41a610fd085ae1d863f4f167e09e8dcee943c27271869a8210d3",
+      "programRoot": "62f06364f3e9e9e00b5cbf5b13f64439f7bf18cab4f1b4ddc495fe5bcc47b767",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INSUFFICIENT-QUORUM",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "1bf842fe1742658f3aaf30797cf01e8f2985e622b1a26c3b7b1a7b23c74f7827"
+    },
+    {
+      "vectorId": "B0V4-V-050-A",
+      "fixtureRoot": "bcf6cb7e504532cb442a7ff2c0641272cba5da14b21a9fc54a65fd7b5653bb56",
+      "programRoot": "252da1c7fd2ac35619364cceefe123dd07bb18fd4a927cd36ca9500c84a2110b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNKNOWN-ALGORITHM",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5a1a595c0ed12e5e4ec55665fc53caafff6ec8fc6ac4da07083887464f0bcd7a"
+    },
+    {
+      "vectorId": "B0V4-V-050-B",
+      "fixtureRoot": "17f57183c324498a206ae1cc7bcbec5529ebc793f5514ef1d5e97a4fef84a302",
+      "programRoot": "c42c31d0b82c9cb55dcbcaa8c5e63340944888f735df592b19891d1c901dc23f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-DOMAIN-SEPARATOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c09b5e1d4d28f802a9d6fe1e8fbf1e0b5116eb0813dc6152612900fba4ad373a"
+    },
+    {
+      "vectorId": "B0V4-V-050-C",
+      "fixtureRoot": "27c1d751c004cb3eedc644fc2edc61467ec6051a4c2845b310f6c57fc62fcdd7",
+      "programRoot": "f6d1480686118699f91f76b7afff4d2a1f0eb064d9355f2b3625473a804e4308",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPROMISED-KEY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0535059c676d97559f1b90908b25d0ce5f44fcb4f0e76a5295c974e6980f4ae6"
+    },
+    {
+      "vectorId": "B0V4-V-051-A",
+      "fixtureRoot": "43f5d04b78562757e653efd72844bb914a0b02822c7f2b245878c8338d8aac6a",
+      "programRoot": "8536fc9986a681fa9b85163c96b95758e10709962683a4559facf3af5bdb1acd",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PHONE-NUMBER-DIGEST",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e37e7998412230878f810a4d3fadd3165a047c102c608ba620ee1aaba85c2294"
+    },
+    {
+      "vectorId": "B0V4-V-051-B",
+      "fixtureRoot": "a67e7da33cd60a434e391730a91c8f7c6c38b6a8f8ec3a5a902991572e65bc0e",
+      "programRoot": "220985079c09002fe73ee9af517611e4fc5252d415e8e8f1fc0f1af1a99844f8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PUBLIC-HMAC-KEY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "a690abbb0f55930d33bb589690b80a973b6d721632bdae16d80a2e301a9f7737"
+    },
+    {
+      "vectorId": "B0V4-V-051-C",
+      "fixtureRoot": "6bdda70879240a0de1eb231abb34372ca5481209e272816420083b11c90cb963",
+      "programRoot": "afd2882d675495297385807888c7b28f4c739341028a277c81a52f255ad30566",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNAPPROVED-CORRELATION-METADATA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "788d210807a0cd97a56788d0f8e2b8aa6d7aa887a89e9b585c317c8863c1930a"
+    },
+    {
+      "vectorId": "B0V4-V-052-A",
+      "fixtureRoot": "a3a4b65b30d018688fd9f91588bec9074d41f03204c6795c601e556d507fce73",
+      "programRoot": "2f7cd31d6d7b0b52a0281b86929fa4f6421b73baec2e8aa0e0921e6fb33e049a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-TIME-PROFILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "430d5104054067c1e86072fccda43a46bfe28d753fc6bbd3a394dd076249a10b"
+    },
+    {
+      "vectorId": "B0V4-V-052-B",
+      "fixtureRoot": "30579962b1383f5da5d2925283fb4c00a05131dec15cb241300760a95dd5b034",
+      "programRoot": "1db44df4e0013c690e4d613dfe6d9e32233f0a73c9b7dce96c07bac5dd1e79c6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHANGED-CLASSIFIER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "df28516f82e43039682e3841a6c0724cd5bed61925218c73d10e1d248741a1bf"
+    },
+    {
+      "vectorId": "B0V4-V-052-C",
+      "fixtureRoot": "d023fba3ff2c0055cc98f0c6f5e34ffba673dce4c80fb39a709fde20efb0bd11",
+      "programRoot": "5c5421931513905a767293a02c3012e247a46e2aab2f0471dabd9ec795e51a50",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTED-POINTER-STORE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5ed9948c0da85606495c1e980aac140c4bf12d3a714a9430c384922ff079e4ef"
+    },
+    {
+      "vectorId": "B0V4-V-053-A",
+      "fixtureRoot": "8328fe3691bdbaa85e4984de84ea7af6313cc44ccaf663f6881fc1f4c9f3d834",
+      "programRoot": "d1d1587de0e7afd8a88892859b2a8e23482719c5cf53a127add4e0afbe3ec9b8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-APPROVAL-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "fcc37bcd11ae36211f9bdf9bb760e1a478da48cea8cf20854b35f498c4599407"
+    },
+    {
+      "vectorId": "B0V4-V-053-B",
+      "fixtureRoot": "b3247088a8cca15e4af532b92a7fca54ce4032945ca5a5cc5f951515f5003de8",
+      "programRoot": "d60d127db93c0b209f001362c5c016eb7fa1d44706fff176deb9f093cc2d353a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-STALE-VETO",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "18bee93d1ca06cd6e227827a39745085966669e20c665caccc3bd2e58a8594b4"
+    },
+    {
+      "vectorId": "B0V4-V-053-C",
+      "fixtureRoot": "bd4163ef804d97a3ad16b39591d47f62f752375ebcf26c32dad5a8e10eb13947",
+      "programRoot": "92d8e8f4bf615963a699995c824adf68048a675d42da026f371b6dc46d83fd79",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-DEPENDENCY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2f3feb8bd2a37835012c96ff5f549260a5394f7f328f534edf0b5e2ffb0bfc50"
+    },
+    {
+      "vectorId": "B0V4-V-054-A",
+      "fixtureRoot": "171596198311579e457f652660e9ced8252e4a9ce6120bcd0deaa683964249a6",
+      "programRoot": "02f99e71351f2e928508dd30e323517a6ce3a96b2d0ca280603cd331f41c4b30",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-COMMIT-THEN-RESPONSE-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9b4d91768b7d094dc095db73883ad7627f66b7872896f4e74c4b7aae5b704319"
+    },
+    {
+      "vectorId": "B0V4-V-054-B",
+      "fixtureRoot": "6fc61dbc13057b11eaca080b7492abb96bcb16e0d2d4cf48028b6355352b988d",
+      "programRoot": "cd07abac08ccba7fa2cf1aedc70785faf60513161cf4376198b7effd939a3a3c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-NO-COMMIT-THEN-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c8e51f5208f1ca98411c4b16b7d5fe20d7f91cb5f911c776ea7610ab0fd3efba"
+    },
+    {
+      "vectorId": "B0V4-V-054-C",
+      "fixtureRoot": "322756349ca7b109471fb6fcdb06c6c5361fe05c8480c41b7821f968b88cdcb2",
+      "programRoot": "b41849fd7b1a00a1ff01fa231c6a40a27554d25ec202a9a72096b74ad7c76fb5",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-PROLONGED-OUTAGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b96917b02fecf8c8b97f423600e4312928a91831eb58e4efc3a4dbe3e33608ab"
+    },
+    {
+      "vectorId": "B0V4-V-055-A",
+      "fixtureRoot": "d3890fd403cddea52631eea050f640a6cd17b657ea5d9133062369e80c45ec14",
+      "programRoot": "b2af72e1a4f925abd1cd4637bf48177c11badeda5dfce0e336ae655955d2915c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-FAILURE-DOMAIN",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5fbb4d8c6a7b1965df8f67d78bec93d9861dff42efc0200b2df977a7a32f05c6"
+    },
+    {
+      "vectorId": "B0V4-V-055-B",
+      "fixtureRoot": "2eb6bf0ab0b7b37ec3f1084abcfb910c170586b60c70c746b665fc30f0420c9f",
+      "programRoot": "0fb077266a9d1a57210a4f060412fff9aaa6c119efa7a78db50f216580eeb03a",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-STALE-JOURNAL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "45992671921bda07f97b98bb67151e2106697b7b0406e2cf1b3148a50a70b9d0"
+    },
+    {
+      "vectorId": "B0V4-V-055-C",
+      "fixtureRoot": "27bfa096717307a1d3f777b8b80d4c6e17e411940bd5b0447579555ad7cd9525",
+      "programRoot": "51c733a4fd2a5592dc6bec1daf3178a15649c5fb25d833e29ae5facbe2d7d141",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-MIXED-STORE-REVISION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "fa4708c779d3f7ca5ccc43188d1ec6bd8c9451199beccde9a65507b09542df33"
+    },
+    {
+      "vectorId": "B0V4-V-056-A",
+      "fixtureRoot": "09b58032b818464196a201a39c36b7af106d4b1f07cf73eb80acdc9d8510b34f",
+      "programRoot": "5669c919c01fdbdfa533745a64c6bbc822c8e1c351a8a27c83461175651b7021",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OBSERVATION-ONLY-CURRENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "82f7bb54b37638f4b75bcb255e85d0b28e5dfc31856f1f493146b7765237808a"
+    },
+    {
+      "vectorId": "B0V4-V-056-B",
+      "fixtureRoot": "e7741b0fad4c2501e4dcae28afdc9179f5eba2636ebf3320e89ff113416b3ce2",
+      "programRoot": "82884b79dae933a8c085097f6d0e2cca4c75470eeab167232692f29f5f6a4dc7",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKED-POINTER-WITH-STALE-CURRENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7145250e3822b84e45229ffde43a87919badfccf9b619b07387570f3d931d545"
+    },
+    {
+      "vectorId": "B0V4-V-056-C",
+      "fixtureRoot": "4d7e4e6e1d4e01ebf6f81aadbc55d45999188591f1cb04eb0704d7a04d744d87",
+      "programRoot": "caf50b85dc2863f98931c19fd2af6a4e048ed99de1150b104df02fb735f7416e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-CUT-MEMBER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d9a025a33ede5a12e3c59d1dcaa81584334808a0d62519918abc987a5c1b8064"
+    },
+    {
+      "vectorId": "B0V4-V-057-A",
+      "fixtureRoot": "4af58069a1c9c8bd88f6107039b7ab82a57b335d5dcdf1c9f391cdc06c17e7a5",
+      "programRoot": "1314c896e65dcb493389df2f48e708fc2d6c217ce9f41f857a8efca28205f062",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "24e23249e6a52550e6def520dda0a15ec3f72172996c847de58fb80bd1ef4efa"
+    },
+    {
+      "vectorId": "B0V4-V-057-B",
+      "fixtureRoot": "34b5a1d8998ac2a6f049f1b157662e1b71ee4cffdc51b1ad51a253da8678c852",
+      "programRoot": "8d1cc89bfffa706c60f3cd91bb6470a3b9d71d0ed3d787b2a08316d9ea37e4f6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-CURRENT-POINTER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c01ae38b989a76636394536d4861924c48d1b69f6ed924ede5d6f559b7f39307"
+    },
+    {
+      "vectorId": "B0V4-V-057-C",
+      "fixtureRoot": "d54b1391ae3c3ed05eb7fd5cdbaf84462f183030a0b47516944159a81608d789",
+      "programRoot": "285a5862fb0a500ea6154821d417fd8e966057df0931add35a26cda61ce2deb8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CROSS-GENERATION-REPLAY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "000e51b57e9bfb14a8afdec9484d03bd5bbcd91cc9031db65a2ac5909baeac0c"
+    },
+    {
+      "vectorId": "B0V4-V-058-A",
+      "fixtureRoot": "025db68ca61261714c15ce0eb959f748a82145a07deec698fbc73732c74fb07d",
+      "programRoot": "2ed035dc1836411969fe48527d117523a1b5990ebf7db82e2d5b72fc376cbbbb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ABSENT-CARTESIAN-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e314e5508385d4fe6bb8491971f7ecc42b48b526ce5dcd427fa19e74d025093e"
+    },
+    {
+      "vectorId": "B0V4-V-058-B",
+      "fixtureRoot": "f92af084fc72157ae0be37ceb7ea486a677e1cd9470c4cc4e563a544f0e38c0e",
+      "programRoot": "54eed66111fc63e68f33b964ab5dd0b42a9423a8f1dbd3e4183500f0a70ecd89",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-AMBIGUOUS-NEXT-STATE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ec4d233a51fc03350224266baa9d68cda0fa1a2576f97dc6137d23b7398024aa"
+    },
+    {
+      "vectorId": "B0V4-V-058-C",
+      "fixtureRoot": "2b21eee7fec7171d5ad6d336fc429b2f3bc13797e699b4caab503bdf9e8b4b16",
+      "programRoot": "76236c87510884650e6a5861446e866638d0be740e2d21667dc5670a1bfc16db",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TERMINAL-OVERWRITE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "91304d4ccb43579b4eb38ac04b0f757e36afe86293209b9afc19c49e8a68d0ca"
+    },
+    {
+      "vectorId": "B0V4-V-059-A",
+      "fixtureRoot": "c94beaf33b8b09615b4255a27c1ba38998e358cd80be7ff25009115679b04bbd",
+      "programRoot": "5b368bb8bb8b50356144d16bc000cc99b3925afc0fb995148eb53f258a35fbba",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEDGER-FORK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5fea461a9f70e0220b56d946a85911c120a6698072fb406c501747d140955da8"
+    },
+    {
+      "vectorId": "B0V4-V-059-B",
+      "fixtureRoot": "ef991634bd826a51c93954960b9f94e6c14d1fafdf2abc28668b74c2c8ebfa95",
+      "programRoot": "0d21bbfce2298e2ee3c9e04cbe003c5ad8c5233999104f69476395f74b669124",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-IN-PLACE-REDACTION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f70e495f38133e65adbb778433b20f2ea92aea545d8c9f2ad9b421f3eb8449f6"
+    },
+    {
+      "vectorId": "B0V4-V-059-C",
+      "fixtureRoot": "e532ced06d8980cc65abd1753b447e31347a08557f280ba5e83a1d9f1dd2fa80",
+      "programRoot": "8c7343dd5804fad348e00e1b60becf370931963525c9316a0a82f478bb797971",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEGAL-HOLD-DELETION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "c95c362623f150ca22bab2030b85110b0abbf20f071f7f4722b335aa8c8089de"
+    },
+    {
+      "vectorId": "B0V4-V-060-A",
+      "fixtureRoot": "492b1b2fa5fb41dd48246f999f14f47b8b13539d3beca00fb7175fde5ebb666d",
+      "programRoot": "af55d069fedeb903af18a0eaa07cf442116f6c61b2c8d5c311002ae0c422a36b",
+      "observed": {
+        "terminalState": "EXPIRED",
+        "reasonCode": "NEG-AT-EXPIRY-DISAGREEMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "96377a4d509db5f4709fb4bf51a433c2b51d7710c0610a02a8bc461356e74cb9"
+    },
+    {
+      "vectorId": "B0V4-V-060-B",
+      "fixtureRoot": "dc34407785a47f0fbd65b93de28038bb21f28515c04706e3856098d5a3ea1db7",
+      "programRoot": "95bb281c5cf51fea30f38a10b0b5e93a9aa1768164c1abdd5615703ab0a2bcd7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TIME-ROLLBACK",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6df5d3cfc5aa1e285bc72bea78d2a37e35024445ac25d94a940e426badec5947"
+    },
+    {
+      "vectorId": "B0V4-V-060-C",
+      "fixtureRoot": "07d0f715a9a3f84d0839b9bacefb128509fd6f8060f662c7794d1a02747bc6b4",
+      "programRoot": "a25860f76a9a035df77acb7c8aca6694671613e2aba06d3f78d153e451009e3e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-UNDECIDED-VALIDITY-DURATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "88cfacdb5e40939121e5865f498a905ba4892ffc2d319564c764c246a49363f0"
+    },
+    {
+      "vectorId": "B0V4-V-061-A",
+      "fixtureRoot": "f4630f4cb80b414138308d0f156905d7a162168f250ffbe5163cc0528c4bd56e",
+      "programRoot": "11c9654be4ffc2aed8b57ef11c2e11838677dcea52c84f34af078bcc04e85676",
+      "observed": {
+        "terminalState": "QUARANTINED",
+        "reasonCode": "NEG-MID-WRITE-CRASH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6dd4849ab733e805d87d2d7a999b2be3c7696536f411c4a3d7994b9d189235a0"
+    },
+    {
+      "vectorId": "B0V4-V-061-B",
+      "fixtureRoot": "4b09047cf364eaa6d8c3d4d1c4b645869e2dc7f6d8b40346b7fc023428a7b544",
+      "programRoot": "efe42d7d89b6bb09584ae134c7d5cf8b67537eda55dd4dd5faf8708672710971",
+      "observed": {
+        "terminalState": "CONFLICT",
+        "reasonCode": "NEG-DESTINATION-CONFLICT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "179374710af1672d45831807465d12c1b7e8f3f07bd68ebad726910fefc8e7b0"
+    },
+    {
+      "vectorId": "B0V4-V-061-C",
+      "fixtureRoot": "6c4fb5c010eb9b853e90bae383381cb13d0c7bbccc614286a8c7a5c25dd5c7fb",
+      "programRoot": "3cbb9526d02625ac9b2675baf1b4a894b50827d4eccf332afde1c06d61040306",
+      "observed": {
+        "terminalState": "QUARANTINED",
+        "reasonCode": "NEG-CLEANUP-FAILURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6520b6e0890ec950038f8787ba547b1d009402d0b06997c71b18785d1e67f58b"
+    },
+    {
+      "vectorId": "B0V4-V-062-A",
+      "fixtureRoot": "7f5606fc55ae313fa7a898f2417ddc9f520a4bccf4a386f4e3d12c7e8c15c44d",
+      "programRoot": "cb5b4e598671fc4d4d1978eae3b2e0c61b426608d837a9258e7c33fc01cafdd7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMITTED-PREDECESSOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5fabd7f248e5f5d841a66a7767fa99b3c01da12e0bed8c4444c1656a046afbb4"
+    },
+    {
+      "vectorId": "B0V4-V-062-B",
+      "fixtureRoot": "3a96df76da38d1ace1070722e06f6bdb1a49e26821961ee95af44ca28752e94b",
+      "programRoot": "5b4751a5055f0e814e2158d8ddaf4ab9d5f69466bd5ce36bf19168fa771af2c8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MERGED-FINDING",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f31750ae5abaf0f64c21f30b4009b3886d71044af4d998434e4294e87126b4f5"
+    },
+    {
+      "vectorId": "B0V4-V-062-C",
+      "fixtureRoot": "c6f5df6e0f6593ba6b0fbd97870d7b1ebc6ce4b5947be3c2732aa85e334fee19",
+      "programRoot": "dc13cc36c293c9901e9a49366107551a9c04321675fb69191d2f50e8006fd9cb",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EVIDENCE-FREE-CLOSURE-ROW",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "655527d196dfe6dab4711d513e89c9e3f01335c901da30d643b87d6fbff3838f"
+    },
+    {
+      "vectorId": "B0V4-V-063-A",
+      "fixtureRoot": "4e2d21a11ec4e07868bd5546828a9861110f3238ace2ab3f309fb5897ece74f5",
+      "programRoot": "35168c8ccf0c2f2eac3a07eed682ed939f79b610b4f8049409f5890d88aea5a4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SELF-ADMIT-TRUST-PROFILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "6f66c089e43d82d83157ac3393f0da22eb94e663d00a35129569c30d69c27933"
+    },
+    {
+      "vectorId": "B0V4-V-063-B",
+      "fixtureRoot": "466ba3e13f3c412813e68968ea40d301f06978f5c3c42d957c467ed1a8fc2f5a",
+      "programRoot": "833c7ea2677b949030759371a694c4ab905cfdc70734bc31ecfda6c28d25df3d",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-ATTACKER-KEY-CHANNEL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5db645bbe7e6adde45051ae8f87abcd3674d939931aa890993181ee03027d95e"
+    },
+    {
+      "vectorId": "B0V4-V-063-C",
+      "fixtureRoot": "815ec10a7cf790536b8b70ee3417ae5be90cb06d37382a42354d625980c873f3",
+      "programRoot": "4f811f5455f354e0d9c1aa4e7790b6b8c28f129c4b4004780b8150c127a37570",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-RECOVER-USING-COMPROMISED-KEY-ONLY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "fba4fefb3f308372ae1dbc9564e5693a24dc6b48a0d99b4ee81f7fc24b5ff91b"
+    },
+    {
+      "vectorId": "B0V4-V-064-A",
+      "fixtureRoot": "bae8568d1a15984c837344361ea44a93d31fa8d557fec05f9f43d61c45043681",
+      "programRoot": "31ebd318de25efc93bf95af30239532aa7dd80f8ce93548a7c62e1d3af6e8078",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-REPLAY-GENESISPERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "1ef1e81748158eb4802ac222a1d85c3846eef138e84db05207c058a6212028a2"
+    },
+    {
+      "vectorId": "B0V4-V-064-B",
+      "fixtureRoot": "1601282c0564f2b0de8c96fd16206c22feade19685b7616aa99e89218011b277",
+      "programRoot": "fbd64244bc76c778f76036040c0be7481a257171f61dc6246542876b379fff47",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ADD-SUBSTITUTE-PACKAGE-MEMBER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9a07b4e48c7dedad7abf94c752eed54ef1e78019b8ff146c121915186f3689a3"
+    },
+    {
+      "vectorId": "B0V4-V-064-C",
+      "fixtureRoot": "cb2d31e99e41211035d66cec706d2a262dcdcac8d6cbe6ba930850b072bd1b75",
+      "programRoot": "fb39170372137616eec420425a1baae89a510e047b1631fc9a8bc0bbf416217b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CRASH-AFTER-STAGE-BEFORE-LEDGER-CAS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "074eac45c1a05e16575606ff03e188eda46534d59094cc4b45fcb6be92d8ffa8"
+    },
+    {
+      "vectorId": "B0V4-V-065-A",
+      "fixtureRoot": "3223a98f9ef7f5a2c75fabcc0a2996e1d1167ba77cef71c0b7711b12b0540ee9",
+      "programRoot": "80a3dc2f672c55b75668cc2cc0321e534ea97935ca942f8806ef2e39b6ffd236",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INSERT-UNTYPED-AUTHORITY-PROSE-RELATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "9f609e65879c944a4024749323239588985e1fc3895b6d5b90b5a1c07491ff6a"
+    },
+    {
+      "vectorId": "B0V4-V-065-B",
+      "fixtureRoot": "4a6569aab7e126c7877bb72ed37a56f9048dcbe3173f93cae69e9bce8c633828",
+      "programRoot": "7a12cea5fab6b2d33290631a084e91a24643480c13d37e24cc36cc88e214e1ae",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ADD-AUTHORITY-CYCLE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e034f81c8632d611c76456e9f2a6a5ea52804018f316e39d8572ffda0590f845"
+    },
+    {
+      "vectorId": "B0V4-V-065-C",
+      "fixtureRoot": "620073577deca0781054c909f4fc6d5345eba4d78a1013037f64097a5a43ba1a",
+      "programRoot": "d008079ef4a7e93ad759f406935dd3b0bac9601b1c741ec3807783e4892e031c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-EXTERNAL-L0-EDGE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ff921e2da7818d03ae60221b8cf30b8b1de8555f3bdfd8829d1a0eb3a49e7a4a"
+    },
+    {
+      "vectorId": "B0V4-V-066-A",
+      "fixtureRoot": "ffbe6eedaa09086aa1de92a29f5670ce1d6c07c3907dba0b861b3e5dee1b5930",
+      "programRoot": "f503e4f879f0f56ebe858825f0690c1c1eaf5a8ccce925bffb96dc4505d88881",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-EFFECT-SUCCEEDS-BEFORE-CONSUME-FAILURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "dd73f473c88822ba570d1f8c3a0f5078c03e2250207286c49fb0932442826abb"
+    },
+    {
+      "vectorId": "B0V4-V-066-B",
+      "fixtureRoot": "b6b2a4457aa2d588c312637ddca31509006ba2e3265aa7e34ea2d87c62bfbab4",
+      "programRoot": "edab4031aceb0d3c5551f77dc0f3a15f99dd6518f904953b4a9bd1cba0d7bf32",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CONSUME-SUCCEEDS-BEFORE-EFFECT-FAILURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "afd7faa2f98900df907c0092e89402e0a4bd87c255033873d254d44049c7dcf6"
+    },
+    {
+      "vectorId": "B0V4-V-066-C",
+      "fixtureRoot": "8a367ae4fff20248d495e3de26b33afad66cd9a43dee01d452fe1847c45b6e29",
+      "programRoot": "5b5e9993e2ac0e30627e7f89620e6f6d6ee2e45dbcdc3158809076eea9beabad",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TARGET-IGNORES-STALE-FENCE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0d385846ba961ce19675457b381ca9159270d196a2a94c77c363e9a5f9067233"
+    },
+    {
+      "vectorId": "B0V4-V-067-A",
+      "fixtureRoot": "8d2a440614cc181b85cde2a8578b481b2408b0cf830a926a042fb22309831e5a",
+      "programRoot": "91aca07e684fdc5d75a45eb8cc7f1ab66f12a4403a101460755376ca775b1fcd",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-REVOKE-IMMEDIATELY-BEFORE-TARGET-APPLY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ba09de6231e29dca7290074492914de5a7b71e878f73922dff96115f598675a6"
+    },
+    {
+      "vectorId": "B0V4-V-067-B",
+      "fixtureRoot": "38dfc9a767ad32ef87c5b54651e405523a9936c38109a1c37bef00c7f22b73a6",
+      "programRoot": "e01b68055a3fc418caf5febae2339f12d2110a49aa3fe761e2b8a6822e472c8a",
+      "observed": {
+        "terminalState": "REVOKED",
+        "reasonCode": "NEG-EQUAL-REVISION-REVOKE-COMMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "03268c28b8601c2fc65d31e41c08f9a2223c4ab515c53bdd7dba13a1eff46e98"
+    },
+    {
+      "vectorId": "B0V4-V-067-C",
+      "fixtureRoot": "741dcddfc4e0437c2074ae1a65a550973f035835e040e15f7cc9b0fad2c1ea17",
+      "programRoot": "aef933157386b32e087357ba378ceb7fda3e742383cdee664a223814da748c78",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPENSATION-ATTEMPTS-AUTHORITY-RESTORE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2ddd4e37e1882e6efded187d74bf04b56333e6e24422cba28ee3979704c65188"
+    },
+    {
+      "vectorId": "B0V4-V-068-A",
+      "fixtureRoot": "ee244140fcf01d4154c0dc496769b0eb0d500b73be4618e62c6db04eaff2f624",
+      "programRoot": "1c4ee27e8bdb24c7a2b69afabaaa6b3c8687e172c81ea50fb286451325caad1a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MUTATE-ONE-ENUMERATED-HEAD-AFTER-VALIDATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "cb8aac4171392cfe44ae77eb8f11c7ba50a9858cd1a8a3a2a39a11135265824c"
+    },
+    {
+      "vectorId": "B0V4-V-068-B",
+      "fixtureRoot": "3ad85cb949a22a9d09f012bdf3846a375bda38d7f2c07cdc6791736a7f6a6b54",
+      "programRoot": "10cdfe9f9349ebbb5f1a0b12fd6bb2b916a37b93c4cf9e69cd7008e137dad77f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-ONE-HEAD-FROM-REGISTRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e12b18fd3dbfdae4316aeb52e54f3daf59ba5e8a165778a2a65e472985b8953e"
+    },
+    {
+      "vectorId": "B0V4-V-068-C",
+      "fixtureRoot": "5b244f3cf6b5af85cd44c096546581fb6db4f82130bda47522874398e6b60c8a",
+      "programRoot": "b58111b7eea2c1135c0c05f091c1c78eb268a1e9331856d48238c56c373b7c0a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MIX-HEADS-FROM-TWO-REVISIONS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8151ad77473bfd73cbee7e920ec2793b4f0cecb65bb698fc6c78a582f6459ae5"
+    },
+    {
+      "vectorId": "B0V4-V-069-A",
+      "fixtureRoot": "01348407b5b9c368827a7aad2f2767e357ec0261cdeee11b3309f58dfef9af45",
+      "programRoot": "08eb10b27c5a6956a3f8e6c6780f3df5e2866241a3f6d8e16c5881f9c93b916a",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-COMMIT-THEN-RESPONSE-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "cf1b36439d261ab57653d2d0d77957c31c7ee9cbad54a0744cb3e9a303c28095"
+    },
+    {
+      "vectorId": "B0V4-V-069-B",
+      "fixtureRoot": "7867c846c5b6d1e7fc8edcdf9201dec3c40b6825f31fa9ecf5f82b87365dcb64",
+      "programRoot": "c52577857dcd35e8b0ee00f500d7f086c926e7f925da5334e51ea4e68a941d5e",
+      "observed": {
+        "terminalState": "UNCERTAIN",
+        "reasonCode": "NEG-NO-COMMIT-THEN-RESPONSE-LOSS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "5f66006aba8b714a519340865dc23a066a76a603ccea087630e7eee46de7a7de"
+    },
+    {
+      "vectorId": "B0V4-V-069-C",
+      "fixtureRoot": "812b0dbd75605a0b7b548fcdeeb6068f26cd9c6ebc4a87be94afbe07acec49b3",
+      "programRoot": "8e6fa76123a3d8a00bb110c5798d1f1c76149e06e8faa0ac5df204bbcb65b1ad",
+      "observed": {
+        "terminalState": "QUARANTINED",
+        "reasonCode": "NEG-PARTIAL-EFFECT-THEN-RECOVERY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "59b2c6220ceab1a8f32e78ff8c25f64b2e0cb0ccc1089c5cf6d70272d4711858"
+    },
+    {
+      "vectorId": "B0V4-V-070-A",
+      "fixtureRoot": "a9c8d0103fa365e4839542a0151be47910273fbe1ea5a8f6a927e88af8830a49",
+      "programRoot": "465bb330f03c2caee6795d07d568890672db0dc5d122764bfb3932b9e6b3477b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OVERLAPPING-GUARDS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3de8e6acfd43dccdda115c6e9123e1da0598e4b4ed4bcbf3b4e7effdcde95a64"
+    },
+    {
+      "vectorId": "B0V4-V-070-B",
+      "fixtureRoot": "7bcb21e5c0e745d611c60a41245748c78b1263228682a85e069b93ee0e0f0775",
+      "programRoot": "97f6ea84e8d8a8d57d6e27b130ec2a22743b1272d20cb174c7e94b55db9cb96c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-NO-MATCHING-GUARD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "863fa4b1a2acd8b5b0ce927b72c1231fd3132ff4374edfaaa44abff5c2d2fc1f"
+    },
+    {
+      "vectorId": "B0V4-V-070-C",
+      "fixtureRoot": "63ef1ac1be1d587b5f3cbcad446998dd66b4bf941744198955312738a70b601a",
+      "programRoot": "8b2aa47e258cf1f444a556ba0313ad1c5a2918f453c4b7348c14de1670d76651",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INVALID-PAYLOAD-WITH-IMPLICIT-RETRY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "dea73dc529eb320227f0642c0436a527e4fc889bf46c6329fa8bac6b4c6d370a"
+    },
+    {
+      "vectorId": "B0V4-V-071-A",
+      "fixtureRoot": "38859eb8f824dd06c16a17c3ef8e0e037912c0b20acfcba0558cf99f7ca73c13",
+      "programRoot": "73366df328d9ceff14837a7fdd7c43dc6f57ac5d6144ec46330dcf5db9a951c4",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OMIT-ONE-MANDATORY-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "37d0d4cb98c72d53f9cc912bf22f540acdae4f3c9cfecd23eff3a99345789106"
+    },
+    {
+      "vectorId": "B0V4-V-071-B",
+      "fixtureRoot": "2dc30b212bf68503a065593776f36cf6e13fe6faa10d6c3bcb1bd52b1f00778a",
+      "programRoot": "5afac5441fd602628d476fee493947bf85516fa2c71f12b0b7bfd2c95ee44369",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SUBSTITUTE-STALE-DEPENDENCY-HEAD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "92129850dd65e5a5e1244e7278b58e988aeff4e7d968f682a9cba66eb837b64d"
+    },
+    {
+      "vectorId": "B0V4-V-071-C",
+      "fixtureRoot": "c913204cde976773a9a0d9a5f25bfe925c2a8c47045953aebceb7a9674ea71f5",
+      "programRoot": "9b636bf3e309b037c8f0f73b83d4c28cd4090b48ae5e873bc057fc96237afc8a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-INJECT-AUTHORITY-EXTENSION-FIELD",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "74eb114bd542f3033538e21798f86b076537b86be65ca19e99e5dca13b2aea92"
+    },
+    {
+      "vectorId": "B0V4-V-072-A",
+      "fixtureRoot": "e55f7411fd5787931b1047107dcf762b00e54ffb35b2ad4c973bd901b4df1187",
+      "programRoot": "9d961496f5da0ced9c2b454ec6a64bb476897920994e5024ff37996112bc1116",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LABEL-ONLY-VECTOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3bf532a67409ae1a7bace18514f5b25cbfe0683b17ef07aae359b6cdb203af75"
+    },
+    {
+      "vectorId": "B0V4-V-072-B",
+      "fixtureRoot": "353523345496fd4c4b74267f24c29a923c399c67bb7d98c4ea0c8d9953dc6a26",
+      "programRoot": "6b07c31078a4bd4878ab102b6e61c76956898016c4654db1f3cae878652a1adf",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MISSING-OBSERVED-EVIDENCE-ROOT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d8b1ac6545e59b98fe64ca5c9414adc1b6ac6d71064d962a8c92d80de639de95"
+    },
+    {
+      "vectorId": "B0V4-V-072-C",
+      "fixtureRoot": "dafbf3cc457c959b4363207e72597dcffc37d92014a4ec27b101ffd545bab67c",
+      "programRoot": "d63d83920be260ce89b28d16c0e7115bbad249ae212a484e9c00a840164c4a16",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DUPLICATE-OR-NONDETERMINISTIC-VECTOR",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4eafb8b5e2f0fccf96aade2fe69c33dcc148c774f2a69f863a54bc11bbce36d6"
+    },
+    {
+      "vectorId": "B0V4-V-073-A",
+      "fixtureRoot": "4eee504efe02dbb9fc94151abba860102d190c5ecd93cd36806dfe66feedf1f0",
+      "programRoot": "18ede5a4dc04e5b2ef9b606d596949b2f84c301ff70fdebe29def2c387ea6e82",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WRONG-OUTPUT-CLASS-SCHEMA",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d8e3f068dd31be3b583176ccf57a1713bf72fba835ad4131e9d8d0e322727ca4"
+    },
+    {
+      "vectorId": "B0V4-V-073-B",
+      "fixtureRoot": "0fbed75591c3eb0382fa13a39d102ee3892770249f02f6300aa391a41d813161",
+      "programRoot": "2eff96bdf2080dd0bd82113a091941b93f7ebb63091dfaf4b11bd9a7977c9eb1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PLACEHOLDER-WITHOUT-EVIDENCE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2e98846050533d917c931a462dde2c5e142cce341289e53cdf8a9e8b280caad0"
+    },
+    {
+      "vectorId": "B0V4-V-073-C",
+      "fixtureRoot": "53b9bc33a7fc4a5fb70f993fdb49d9bd102dbce2854c07ffb2669328a5fd8c55",
+      "programRoot": "903c159d9d51cd3238bb4c35d1b31bd1d427be2078871e2a9ab4333cb3dde620",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BORROW-ANOTHER-OUTPUT-S-CLOSURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "1f7480c0930576d94e8002198d010c86637ff835ee8fb51d1e961bdfe070962f"
+    },
+    {
+      "vectorId": "B0V4-V-074-A",
+      "fixtureRoot": "22d6d2a0e37859dfb2e045aaef20ca5590926888e484e280b20f9a1e03477b1f",
+      "programRoot": "81aa31c0038b3313207e9df9a73b173f8d2c9f2290b2b218d8128bdf2c289a9e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPARE-SAME-RESTRICTED-VALUE-ACROSS-ARTIFACTS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7f803d728945ce62c12f4eb64e49634761eff7faa969e4f5abc4d93ec294bb36"
+    },
+    {
+      "vectorId": "B0V4-V-074-B",
+      "fixtureRoot": "35a3c51bc64d9cb3ba852528e000e979a0310a0288a3a87ee807b65dcd5c61d0",
+      "programRoot": "50ab63864ecd63955275f60aaf7853bb561312f1d6758d7f6bd793542b596636",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CHOSEN-INPUT-MEMBERSHIP-PROBE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e94da937dd2e53a1d212f5f458ed09236381d010f781fcb6d8ae49407a5e9d00"
+    },
+    {
+      "vectorId": "B0V4-V-074-C",
+      "fixtureRoot": "d7c375284e3df28d499a011819b2ee447fe1ae638d5bbf7cc04e5ae108e56cf6",
+      "programRoot": "06e254e65b877062126d9818da9c3612923434f87b86aeeb8d11acefb3c2404c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LATER-KEY-MAPPING-COMPROMISE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "eeba96eaff3026abfb0dce4f736826418a3e678d0b9c34e4ff4fa4c623d95a9b"
+    },
+    {
+      "vectorId": "B0V4-V-075-A",
+      "fixtureRoot": "3753ffae1743e723f27c76a2f48d909f5dea7e573f9fa6cff156354874a4bd4b",
+      "programRoot": "8d8833b2eabe23d75c609062fe3cee4642a85a9d148262af5941857ce943775e",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ABSOLUTE-HOME-PATH",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "660c362732871c894ae9d9929c5788c659bc587bb02c8ca7f7f4808fcd1c5acb"
+    },
+    {
+      "vectorId": "B0V4-V-075-B",
+      "fixtureRoot": "82471b8fc1d80b6cafd5afcf4a3b1f98e23f7f3b986c8e5b3520064ee0dcedcb",
+      "programRoot": "f7786ce26f6b3924b65e4831e99fe350290556953b8cff90c0a9ee6e95335663",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-NAME-SUBSTITUTED-FILE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "70ed0c1e2e70d1e75a81642160b628740b596de5a4618aceb685df4fda90eb88"
+    },
+    {
+      "vectorId": "B0V4-V-075-C",
+      "fixtureRoot": "2a7df1c9a2bc6453cf24ed41b2f5c2f17ff58a4e3928eb2a726bee996de4469d",
+      "programRoot": "229ae599b9b44b76a0ffa2a23ca93e90720cf4c8e7fb0c44939c2ba142a7dff8",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SYMLINK-PHYSICAL-IDENTITY-MUTATION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b1dfc6df5ed6a6ee9bd8d12fcf952f2324de5017c8a22eca249ee21968c0930d"
+    },
+    {
+      "vectorId": "B0V4-V-076-A",
+      "fixtureRoot": "60b511a9bb1035ef4bfe851e05845b48e1aa5bd73e71ccbb1700cc34b5c2362f",
+      "programRoot": "7e719d7c33800e28cf49431437155d36c9336405db03ca1a806946f2a1a8945a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-ONE-CONTROLLER-WITH-TWO-REVIEWER-IDS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "adddd8686ea343be69796e4d22d334c71392d06d6147763e09d2b3a191940be4"
+    },
+    {
+      "vectorId": "B0V4-V-076-B",
+      "fixtureRoot": "3264e30cc0beaab29479c192a31f8a3a48d4a806b49312b5a5b405eebf9e598c",
+      "programRoot": "6dca2461a3e819880e29f040a4df4036c6af97c2a61ea2ac3af12625ac6ba7c3",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-PRODUCER-CONTROLS-ACCEPTANCEWRITER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "f6982cb18c90bbe474b68c1e06dd989a14aa4db98f45de1dbe2c5751230a654b"
+    },
+    {
+      "vectorId": "B0V4-V-076-C",
+      "fixtureRoot": "00e389e32506dda53ffca2c8fb2eced01625a8ce5eb1e7fac181a983e7375f91",
+      "programRoot": "f973eb8fd6eefbc7efe1f4ca1a0312f5db595f9bc63ca5b377837d5147fa96c1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-BACKUP-SHARES-PRIMARY-CONTROLLER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "e468492240885c3185e1c5ae6f033a2184f60ab3389b30490d31469aeb5f1746"
+    },
+    {
+      "vectorId": "B0V4-V-077-A",
+      "fixtureRoot": "65e2a1b19cc2308494dcaca1f02837d8cf92a32d82855d4330f9d35591f8efb3",
+      "programRoot": "f0b2dcf5312c1b7a82a3d5ccfe30ab1f218379d92f66220e2dce055edfaede3b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OLD-PROFILE-DOWNGRADE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "15922b18784362e8864cf7edb0b25c4957a68e0281350f2c2d419478c2b8e95f"
+    },
+    {
+      "vectorId": "B0V4-V-077-B",
+      "fixtureRoot": "4fb7058f9956d8b66e7de04492535774c8a730d35aec58802d693e6a05f2d349",
+      "programRoot": "12656475170416ec6473abda42fd02cc01d18c04e342ccd1c12d91c64360a8a5",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-MALFORMED-CROSS-DOMAIN-SIGNATURE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "47c5212717d55fbf64270f07445167f11b3cbe34f52b22413c7a790daac299d7"
+    },
+    {
+      "vectorId": "B0V4-V-077-C",
+      "fixtureRoot": "485bce144849ddad0993a240cd52b5fe3c2ce3a9fe37f373575cc8fdf5715186",
+      "programRoot": "18a00253f2e829735936f1462563f9c829ccd561eabb18e872566bc3ba0c5dd6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-COMPROMISED-KEY-BACKDATED-RECOVERY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "ffdcec3427aed0c0ccc7eabc4b2d19734f68abe40d73590c57efed7ef96dc989"
+    },
+    {
+      "vectorId": "B0V4-V-078-A",
+      "fixtureRoot": "6fb1003868aba77c5672843ccab24306281220b3f3401ac2072c0d782ea356dc",
+      "programRoot": "6061c1c8b51fb0d968f750b5fcf8fe06520c05e491ae867efc9c5497126bc81c",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SHADOW-USES-DIFFERENT-REDUCER-CODE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b06f5c99dbc53bc331061adaa737616b7fb8ce1abf5f43dfd0a112cb6d518beb"
+    },
+    {
+      "vectorId": "B0V4-V-078-B",
+      "fixtureRoot": "6f6c9959700bef0e766772a2fb819c1e5e45df921d9ca03ce87e43b6656704ad",
+      "programRoot": "5f369deb10f69151977e473c8159f56800506ac3b5e99894ffff3bc83a6ef603",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CROSS-GENERATION-STALE-PERMIT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "efbc4d62ace8d052a11ef6290c805d1a05641b3b0e18186899e9bea82e49115d"
+    },
+    {
+      "vectorId": "B0V4-V-078-C",
+      "fixtureRoot": "07f894b989699f48229956ddbdada0ba0ca10852c8a737cb46db560f3a4fa04c",
+      "programRoot": "2efd68d7d2f570595ea3f5a5a0a8c50a0cb15e05131d203336d2ff42d29a7636",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-O1-RESULT-BOOTSTRAPS-DEFINITION",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "8d7f07751edf44ff93ed4926e71c5ad74e694e110a3e003b1fb1c1bfadabda85"
+    },
+    {
+      "vectorId": "B0V4-V-079-A",
+      "fixtureRoot": "4b7322a21d532ca485a4122183de42c1060c6b8e40a999667e7565d1de94c3e5",
+      "programRoot": "44ccf40200c39b4b1add160456a66ac2324125951072cc987b35032b385de5da",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-JOURNAL-SHOWS-STALE-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "70a69951f42201ab0079ca4f949b7e4bedb18644f8adc9824b9f42d5ce1cfe4f"
+    },
+    {
+      "vectorId": "B0V4-V-079-B",
+      "fixtureRoot": "32945639bb47caad1a7c32e93126f88c31477d8a704dfd15b3b873fa1d692ef1",
+      "programRoot": "93f0e60a101c78bd3cf8b0c6449880dc4ea91b927fe86ee20f0898c2759641ad",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-JOURNAL-LOSES-REORDERS-RECEIPT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "0ec0cd3cec94ec29af4223850fd4370dca78bc44fe9b24ba99d0986a07fc71ba"
+    },
+    {
+      "vectorId": "B0V4-V-079-C",
+      "fixtureRoot": "b6ed89886fe4288252ace62c12f093dfc134740f0dba7384d1cb3b0118991454",
+      "programRoot": "47adabeee55a59e4212f644c33fe42e7a06aa089066632d56b8eb6e6fcc93f0b",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-FORKED-JOURNAL-CHECKPOINT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "b8e7a0347a3613f652ef6f6e9d648bc030bf824c9486518b9c9290f723a71d1c"
+    },
+    {
+      "vectorId": "B0V4-V-080-A",
+      "fixtureRoot": "e352cf632ecbe590362da7128ce1eecf84593ea586aaa7f7c2271d5b645e07ca",
+      "programRoot": "c983c29fe8a6e5b0699ab8e6219b485d36103b193a6ee6df987949bfcfc49ca6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SYMLINK-MOUNT-SWAP",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "3ae7b19779db8f665f6111c85bf3b8d36144f2aff13641fad9c8d7c9174ed04e"
+    },
+    {
+      "vectorId": "B0V4-V-080-B",
+      "fixtureRoot": "84600c41da72ece2e2f01eb58873641af55ff9a1d13af10a2acc57625810c5e6",
+      "programRoot": "26ee7f706880776429bcc8e212bde4fc30184b93693964b47d97ed77011c4f58",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DESTINATION-INODE-REPLACEMENT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "d58d52837bcca22f5ee4b7c7f33dd99e91982aba0ca2694838807d6fc704b2be"
+    },
+    {
+      "vectorId": "B0V4-V-080-C",
+      "fixtureRoot": "cad4680f2861aa01926045975245f71f03d40336841b793da863801eccff2bde",
+      "programRoot": "d41951c57ae4643818fee8d9fc93b5cf6e13e73220ea06399b8c20136963e628",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-CRASH-BEFORE-DIRECTORY-FSYNC",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "384830729aaaa504375eb78fd5188c73c5b89c53ac829c49cfdb214065a8940b"
+    },
+    {
+      "vectorId": "B0V4-V-081-A",
+      "fixtureRoot": "be08d146a61fdd284c57b3a8ad9e2bfc1a18125faf3a9b589016a24dd8ced393",
+      "programRoot": "842468e3a3f2a5d89ec65ae4e85ffe9ab9270c1c59238f3deaf507aeec2f1de5",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-LEDGER-PRESENTS-TWO-SIGNED-HISTORIES",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "7584a4be0c741816ed2d1d54731c3a455142c9fabe8fbbbc5ed26447c78b76e7"
+    },
+    {
+      "vectorId": "B0V4-V-081-B",
+      "fixtureRoot": "dd25d0b49d439f344eb45cece899ef43f2a5df3f7026d47c31bc5c925118cd86",
+      "programRoot": "ef5c3db729d3c5dde71785cf5b92008a977e47f49323638fdf3fb50112088ec6",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WITHHOLD-ONE-WITNESS-CHECKPOINT",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "cd4f0e19a2e13cfa93bd935002033c8d219f5272cd392f4af28792fc8deb1b87"
+    },
+    {
+      "vectorId": "B0V4-V-081-C",
+      "fixtureRoot": "fbad67897410ffc4d006e6f0cfbe9402f66d1549a6cf4d470bb4441b0bef1524",
+      "programRoot": "df715a734a369bbb0e03b438f72a2f99ecf11d34ea5b424d8dc9777962d48ad7",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-TWO-WITNESSES-SHARE-CONTROLLER",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "74baef76e3525e5bcb09952c9d838d9e747238f1a8fe991e2717176daa1de390"
+    },
+    {
+      "vectorId": "B0V4-V-082-A",
+      "fixtureRoot": "d85d4dc86c01c4b9aae39db57ff5c1a73311c2b87c3834c2e02a96e780707832",
+      "programRoot": "301441728aee8e51b2e158439a3421b3481a90e17d05366cb33e73223b5045d1",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-CODE-INVOKED-TWICE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "345c32004da63fefafacda17737c6580801ef37b24d84440497767bfcf9cf74e"
+    },
+    {
+      "vectorId": "B0V4-V-082-B",
+      "fixtureRoot": "d69d04865c83b277d0c4b6544b4d541d199fb30393391e1724b2ca816edb2069",
+      "programRoot": "676ce790dc9336926ae04457e8b9f836fbf156ba0c19cf064fadb87237455954",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-DISTINCT-WRAPPERS-SHARE-PARSER-LIBRARY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "aaf4896a81e15c881b6b3f4aced888dc4402419790ae9488b38517d7eacfe32e"
+    },
+    {
+      "vectorId": "B0V4-V-082-C",
+      "fixtureRoot": "29d85cc693a51cea6c61bbe7caf808a2f89de250ba38910808808dd957e07c8c",
+      "programRoot": "f815ac3aa5d722e01d8e4a20919bf203cc6ce6474520d462ea18123abf75e2da",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-SAME-CONTROLLER-RUNS-BOTH-VALIDATORS",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4c7c55de46a24b2fb90db4837bcfc616452cec9c7093f53697324fd1f1633b10"
+    },
+    {
+      "vectorId": "B0V4-V-083-A",
+      "fixtureRoot": "868420d9c684caf0d03df489a37fbca13b9df5ff6baa05717336105fb5aeef32",
+      "programRoot": "1449fbd314f142ee4c16d74cc30596cd62b101c421eb74c1f71e22b77c282c8a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WAIVE-L0-CRYPTO-CONTROL",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "2925785f8ef947736a08cce99e41ce4eca4dff370dded3408ab3faae341ade50"
+    },
+    {
+      "vectorId": "B0V4-V-083-B",
+      "fixtureRoot": "ccbca76d78185dfc9eb20ecd39789ce65b310ffa77a7e6b71ffb051ad4845db0",
+      "programRoot": "69c505df9bb9a3e650d94f56032f4ed34665bb9af86191085b813e13bc22d50f",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-WAIVE-PUBLIC-CONFIDENTIALITY",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "4711f91489a82fc0782b250edbb5560a055435e1d3769d8a5115de7f051fa013"
+    },
+    {
+      "vectorId": "B0V4-V-083-C",
+      "fixtureRoot": "337ae19c05629cde94659e6ba82acbafd123e8bb992a098c94a2c80bbc68ed03",
+      "programRoot": "f98f06bed5477f363aff3c37e69b267f8665e81c59fdde28b045142ab8e8501a",
+      "observed": {
+        "terminalState": "BLOCKED",
+        "reasonCode": "NEG-OPTIONAL-EXCEPTION-EXPANDS-AUTHORITY-SCOPE",
+        "usableAuthority": 0,
+        "postcondition": "NO-CURRENT-POINTER;NO-EXTERNAL-EFFECT;NO-CLOSURE-CREDIT"
+      },
+      "engineId": "B0V4-QA-ENGINE-A-NODE-V1",
+      "receiptSha256": "58c2ea2e9050e6c4c91633ef325398b348b852241160662ea7d1a80953e31d19"
+    }
+  ],
+  "authorityCredit": 0,
+  "b0State": "ABSENT",
+  "repositoryVisibility": "PUBLIC",
+  "gate29": "BLOCKED",
+  "developmentFreeze": "ACTIVE"
+}

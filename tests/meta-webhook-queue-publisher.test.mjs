@@ -81,8 +81,8 @@ function fixture(status = "connected") {
     },
   };
   const queue = {
-    async send(body, options) {
-      queueCalls.push({ body, options });
+    async publish(body) {
+      queueCalls.push({ body });
     },
   };
 
@@ -120,9 +120,6 @@ test("verifies and writes exact webhook bytes to the queue before acknowledging"
     { operation: "find", wabaId: "waba-id" },
   ]);
   assert.equal(testFixture.queueCalls.length, 1);
-  assert.deepEqual(testFixture.queueCalls[0].options, {
-    contentType: "v8",
-  });
   assert.equal(testFixture.queueCalls[0].body.version, 1);
   assert.equal(
     testFixture.queueCalls[0].body.signatureHeader,
@@ -150,8 +147,8 @@ test("rate limits a verified WABA before database and queue access", async () =>
         },
       },
       {
-        async send() {
-          queueCalls.push("send");
+        async publish() {
+          queueCalls.push("publish");
         },
       },
       appSecret,
@@ -192,7 +189,7 @@ test("fails closed when rate limit enforcement is unavailable", async () => {
         },
       },
       {
-        async send() {
+        async publish() {
           throw new Error(
             "queue must not be reached",
           );
@@ -285,7 +282,7 @@ test("enforces the queue payload limit before cryptographic or external access",
 
 test("sanitizes queue write failures without exposing payload or provider details", async () => {
   const testFixture = fixture();
-  testFixture.queue.send = async () => {
+  testFixture.queue.publish = async () => {
     throw new Error(
       "private queue failure containing webhook payload",
     );

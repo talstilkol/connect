@@ -31,3 +31,8 @@ export type ActivateCampaignActionResult =
   | { status: "state-conflict" }
   | { status: "delivery-configuration-required" }
   | CampaignActionFailure;
+
+export type ControlCampaignActionResult =
+  | { status: "controlled"; campaign: CampaignView }
+  | { status: "invalid-input" | "state-conflict" | "delivery-configuration-required" }
+  | CampaignActionFailure;

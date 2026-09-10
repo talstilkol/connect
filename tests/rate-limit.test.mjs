@@ -22,6 +22,10 @@ test("derives stable purpose-separated keys without retaining the subject", asyn
     "system-admin-mutation",
     subject,
   );
+  const providerPolicyKey = await deriveRateLimitKey(
+    "clerk-organization-invitation",
+    subject,
+  );
 
   assert.equal(firstKey, retryKey);
   assert.match(
@@ -29,6 +33,8 @@ test("derives stable purpose-separated keys without retaining the subject", asyn
     /^rate_limit_v1_[0-9a-f]{64}$/,
   );
   assert.notEqual(firstKey, separatePolicyKey);
+  assert.notEqual(firstKey, providerPolicyKey);
+  assert.notEqual(separatePolicyKey, providerPolicyKey);
   assert.doesNotMatch(firstKey, new RegExp(subject));
 });
 

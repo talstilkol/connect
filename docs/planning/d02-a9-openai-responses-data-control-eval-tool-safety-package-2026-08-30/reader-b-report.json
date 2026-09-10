@@ -1,0 +1,935 @@
+{
+  "artifactId": "CONNECT-D02-A9-READER-B-ACTUAL-REPORT-2026-08-30",
+  "readerId": "D02A9-READER-B-RUBY",
+  "implementationLanguage": "Ruby",
+  "algorithmFamily": "RECURSIVE-SCHEMA-DFS-GRAPH-BYTE-SLICE-RECONSTRUCTION",
+  "readOnly": true,
+  "oracleRead": false,
+  "controlOracleRead": false,
+  "expectedToActualCount": 0,
+  "executableSha256": "e4fa82ff8733f0fb1bd2ca3b9b549fa3037ffa6e0f05f07cecf60ee60a63153f",
+  "inputFiles": [
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/snapshot.schema.json",
+      "sha256": "d390fefa99e3ad139e4d76901b312622503793324198ec8d557f646b5666e823",
+      "lines": 209,
+      "words": 324,
+      "bytes": 4719
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/transition.schema.json",
+      "sha256": "3710d1939ace56bb8090cf14075c87d19acf95b0fce46019c7506401b29fdeb5",
+      "lines": 170,
+      "words": 249,
+      "bytes": 3686
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/envelope.schema.json",
+      "sha256": "e02dd823596bf5ac1d16cc117bbdeb9b309a7ac8a9858a5938e9ff23f04f3600",
+      "lines": 163,
+      "words": 266,
+      "bytes": 3619
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/snapshot.json",
+      "sha256": "353ef2f55a18d95bbcdb99278fa4f33f74d9430cabb05ec6bf6d8385a35c8d0e",
+      "lines": 140,
+      "words": 243,
+      "bytes": 3379
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/transition-machine.json",
+      "sha256": "190fa57756ce98507352b95753a6e587eb90eec8043161205b345977cfe3c021",
+      "lines": 114,
+      "words": 185,
+      "bytes": 2969
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/positive-controls.json",
+      "sha256": "442090977d7d2062b29eab695fc5aad154b7491655eedfad78cf159bafe8a1d3",
+      "lines": 1345,
+      "words": 2118,
+      "bytes": 34092
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/admitted-input-manifest.json",
+      "sha256": "ac0cb55796d8682eed0d87283c806aca226834d055bc5ac696047fc6626a852a",
+      "lines": 224,
+      "words": 364,
+      "bytes": 7819
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/predecessor-semantic-universe.json",
+      "sha256": "23fb849590b29601c319d86e323b4129ff7671ad2ce92c2be82cf1da9ba5d770",
+      "lines": 422,
+      "words": 746,
+      "bytes": 18384
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/source-receipts.json",
+      "sha256": "879e4a056ec0887cf21f95f371226a1d8d28b343cab9597aa0f50e4461576d4d",
+      "lines": 622,
+      "words": 1125,
+      "bytes": 23204
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/producer-appointments.json",
+      "sha256": "63f2cf6f4c6558e61b26611f27396084be0ffeb94dbbd419c042d4ae64754d71",
+      "lines": 423,
+      "words": 741,
+      "bytes": 14422
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/dependency-dag.json",
+      "sha256": "92cd2a3e37e7375fd0d49e32eddd497f2b066a0d7b649cc627c979cb8c309c28",
+      "lines": 391,
+      "words": 641,
+      "bytes": 11041
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-registry.json",
+      "sha256": "be8ff1d6509df8c9703cbbef6fb7ec7492e51a81b7eec52941abc873cff1d551",
+      "lines": 1074,
+      "words": 1830,
+      "bytes": 31814
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/mutation-corpus.json",
+      "sha256": "db37fd70d4e182fa9284c8768e9ce69ec503b3c5b913b613ce2a0fd635647b92",
+      "lines": 1344,
+      "words": 2359,
+      "bytes": 33935
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-001.json",
+      "sha256": "e7e3881219c6e0b7dcce76d3161d8b46f9bc27117d4d74264ea21687db0e9ea4",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 60174
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-002.json",
+      "sha256": "3d847ad14e7cdb8ec10ce666e159589d618946b270e9eb762de9830368524daf",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 60753
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-003.json",
+      "sha256": "cf47023348bd8e0b19691fdf4107749aed0118736ea45111d389c40e1e441dfb",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61198
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-004.json",
+      "sha256": "c2d546b440069cf65a99b54d379b9ea28684b42dbf8387d575496d2a3e6cd257",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61262
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-005.json",
+      "sha256": "05f70e75d1ded8781cfdfa43246a856de3c88472d770c154fee02aabe36b2a67",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61669
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-006.json",
+      "sha256": "f0d715cd078c9215bf13b88e68428042da1373c1b3ca26b75ff77ba9eb7e6134",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 62858
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-007.json",
+      "sha256": "4bae347ce3d5e1d3034f3fd59daf48b2f93000f8771ec303c0ee5765818f9e47",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 64575
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-008.json",
+      "sha256": "8377c88d0bc26598914cf0cad60275c958e77bb6081a4027f5d64adb2fe2db87",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65621
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-009.json",
+      "sha256": "9f52ce6523d17e3c7e51b27f81166a5d4e2f0682baec45f7f93ceedaa712f107",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65793
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-010.json",
+      "sha256": "44db12e3af71f93838af7a45047b72dc1ff8c2cb744b74e840e43e6ba73f51ea",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65811
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-011.json",
+      "sha256": "a55588a7d6d572723956602a264397ee7d1df40e1e4c41499ba9d57c9bf42039",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65910
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-012.json",
+      "sha256": "cfbcb27af86ed20852232172ddc3c5a04df2e7db149df19eb18a7fd22f83b08c",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65897
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-013.json",
+      "sha256": "a6e3cf764cc1c04377b2a7b013f2a8c6a7a91fda849fde077114786d27cfceb6",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66196
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-014.json",
+      "sha256": "c83613ec5b7b6a7874683d78d93fa8efae737f8f568720cea5e11e56a35b929e",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 67279
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-015.json",
+      "sha256": "2c30d49b4740e7bab0faa6251eb50807c57fc60f881550b74ac0cda82286d102",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66918
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-016.json",
+      "sha256": "8c6fadf8c3ac9f05bbb14c65b21ba24a370e57a3c975a1280f65d6328f8e39db",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66865
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-017.json",
+      "sha256": "faa4b4b0c3c20b927f15735d7d6cee52c2f8ae3b36dabd883247c777b30cc6b0",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 68301
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-018.json",
+      "sha256": "fb5358c7b602ff278d97b82edfe5d52d8f8ee90782fe388c1735b6658c7b1b55",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 68401
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-019.json",
+      "sha256": "b1e85c40981e754386c6987b54d2e155e6256c43772e7ee8b2329ee2fd9c42ef",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 67658
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-020.json",
+      "sha256": "01d496b81ef6d862a131f2a335012dde5f3bd9ddf69664ce3985919b39505e0a",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 65669
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-021.json",
+      "sha256": "23aae22b53f210c66d974a94abd994c1b0b2558e99d6f478f2f9c5a6a872380f",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66800
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-022.json",
+      "sha256": "b10bb7ea14792bcfe0bd185dcb27f22f9a179bb4886e37124400c4bccb7b19a1",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66986
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-023.json",
+      "sha256": "9869a28ea8ff9bf174a8b7131b10d817798486a9caae7afaa3cfe3f743dcd7eb",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 61810
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-024.json",
+      "sha256": "d3064accb2bce5a9b6400d3ea875330b0c7598ca63bb0d6ef02e206da590b15c",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66311
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-025.json",
+      "sha256": "19996bd9c999a9f5d125eebedd2f19ca7c8da4332a8f8bf8a4cc2652fc28b1f3",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 67018
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-026.json",
+      "sha256": "982317e90a5d41bf33ca4c4919c34624ce6dd7edbbbef77474eb0f5fbbf6569c",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66406
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-027.json",
+      "sha256": "1d6b5d6d49027481c6953335c9b994de7bfb0154030984d19284bcdb21d8b5c1",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66378
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-028.json",
+      "sha256": "1e7e3595f03f94659071ef8e64595936169a26d9d07d02292056abf24151d43a",
+      "lines": 1511,
+      "words": 2819,
+      "bytes": 66681
+    },
+    {
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-029.json",
+      "sha256": "7ff638bcbed39468949e77e218406251982813c6614489058b97dfda7304cad5",
+      "lines": 971,
+      "words": 1811,
+      "bytes": 43747
+    }
+  ],
+  "schemaExecution": {
+    "schemasExecuted": 2,
+    "snapshotErrors": 0,
+    "transitionInstances": 9,
+    "transitionErrors": 0,
+    "resolvedRefCount": 3
+  },
+  "roots": {
+    "admitted": "d4d0a384b05897522ab9a3e96dd626cede14c9e4e0351906acd3201fd6dfd630",
+    "semantics": "1a7e0f90fca63f87e0a243a9738d2e2a1a17334a61bf2cabedf9a34070f186e4",
+    "sources": "5d2ced7611fb4975715037a0e7261bedfd0454b8b8c882f3e48b638f0dc81ef2",
+    "appointments": "aa3a873c798fdbd6dfe17c737fc099d370f600b4109700e19a3aea475bfd7bbf",
+    "dagNodes": "f6fe5da0fc9757b0f53727174ec0f8e9f7a578512336632076af997b10baa87c",
+    "dagEdges": "4602168466169a1904824a748f8f0f78ae00db57a0638322581f6f1455c5bbd2"
+  },
+  "counts": {
+    "admittedInputs": 13,
+    "semanticSources": 18,
+    "semanticMembers": 2864,
+    "semanticShards": 29,
+    "tableRows": 295,
+    "sourceReceipts": 11,
+    "dagNodes": 30,
+    "dagEdges": 34,
+    "appointments": 24,
+    "a6Findings": 5,
+    "a7Findings": 7,
+    "a8Findings": 7,
+    "positiveControls": 9
+  },
+  "actualControls": [
+    {
+      "controlId": "D02A9-PC-001",
+      "planning": "BLOCKED",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "PLANNING-CONJUNCT-MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-002",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "AI-CONJUNCT-MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-003",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "RUNTIME-CONJUNCT-MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-004",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "ACCEPTED-CONTROL",
+      "terminal": "CONTROL-SATISFIABLE-NON-AUTHORIZING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-005",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "EXPIRED-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-006",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "REVOKED-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-007",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "REPLAY-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-008",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "CAS-MISMATCH-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-009",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "POST-READBACK-MISMATCH-BLOCKED",
+      "acceptanceCredit": 0
+    }
+  ],
+  "sourceRefresh": {
+    "mode": "DETACHED-CAPTURE-READ-ONLY",
+    "checked": 11,
+    "changed": 0,
+    "unavailable": 0,
+    "terminal": "SOURCE-CUT-MATCH"
+  },
+  "mutations": {
+    "denominator": 94,
+    "innerDenominator": 82,
+    "outerDeferred": 12,
+    "evaluated": 82,
+    "killed": 82,
+    "survived": 0,
+    "actuals": [
+      {
+        "vectorId": "D02A9-MV-0001",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0002",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0003",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0004",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0005",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0006",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0007",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0008",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0009",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0010",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0011",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0012",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0013",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0014",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0015",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0016",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0017",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0018",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0019",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0020",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0021",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0022",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0023",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0024",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0025",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0026",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0027",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0028",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0029",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0030",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0031",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0032",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0033",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0034",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0035",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0036",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0037",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0038",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0039",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SNAPSHOT-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0040",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0041",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0042",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0043",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "TRANSITION-SCHEMA-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0044",
+        "findingId": "D02-A8-IHR-F001",
+        "actualTerminal": "SCHEMA-DEFINITION-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0045",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "POSITIVE-CONTROL-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0046",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "POSITIVE-CONTROL-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0047",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "POSITIVE-CONTROL-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0048",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "TRANSITION-SEMANTICS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0049",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "TRANSITION-SEMANTICS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0050",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "TRANSITION-SEMANTICS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0051",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "POSITIVE-CONTROL-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0052",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "TRANSITION-MACHINE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0053",
+        "findingId": "D02-A8-IHR-F002",
+        "actualTerminal": "TRANSITION-MACHINE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0066",
+        "findingId": "D02-A8-IHR-F004",
+        "actualTerminal": "SEMANTIC-UNIVERSE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0067",
+        "findingId": "D02-A8-IHR-F004",
+        "actualTerminal": "SEMANTIC-UNIVERSE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0068",
+        "findingId": "D02-A8-IHR-F004",
+        "actualTerminal": "SEMANTIC-UNIVERSE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0069",
+        "findingId": "D02-A8-IHR-F004",
+        "actualTerminal": "SEMANTIC-UNIVERSE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0070",
+        "findingId": "D02-A8-IHR-F004",
+        "actualTerminal": "SEMANTIC-UNIVERSE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0071",
+        "findingId": "D02-A8-IHR-F004",
+        "actualTerminal": "SEMANTIC-UNIVERSE-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0072",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0073",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0074",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0075",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0076",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0077",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0078",
+        "findingId": "D02-A8-IHR-F005",
+        "actualTerminal": "SOURCE-RECEIPTS-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0079",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "DAG-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0080",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "DAG-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0081",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "DAG-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0082",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "DAG-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0083",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "PRODUCER-APPOINTMENT-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0084",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "PRODUCER-APPOINTMENT-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0085",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "PRODUCER-APPOINTMENT-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0086",
+        "findingId": "D02-A8-IHR-F006",
+        "actualTerminal": "PRODUCER-APPOINTMENT-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0087",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0088",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0089",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0090",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0091",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0092",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0093",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      },
+      {
+        "vectorId": "D02A9-MV-0094",
+        "findingId": "D02-A8-IHR-F007",
+        "actualTerminal": "INPUT-MANIFEST-INVALID",
+        "killed": true
+      }
+    ]
+  },
+  "baselineTerminal": "PASS",
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "planningAcceptance": "MISSING",
+    "aiAdmission": "MISSING",
+    "runtimePermit": "MISSING",
+    "acceptanceCount": 0
+  },
+  "currentTerminal": "PROFILE-NOT-ADMITTED",
+  "mechanicalVerdict": "PASS",
+  "semanticAcceptance": 0,
+  "selfAcceptance": 0
+}

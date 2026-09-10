@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/.playwright-cli/
+
+# python caches
+__pycache__/
+*.py[cod]
 
 # next.js
 /.next/

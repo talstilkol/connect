@@ -45,8 +45,8 @@ function fixture() {
       calls.push({ operation: "save", input });
       return record;
     },
-    async markConnectionConnected(tenantId) {
-      calls.push({ operation: "connect", tenantId });
+    async markConnectionConnected(tenantId, expectedVersion) {
+      calls.push({ operation: "connect", tenantId, expectedVersion });
       return record;
     },
     async markConnectionStatus(tenantId, status) {
@@ -78,7 +78,7 @@ test("derives Meta connection tenant scope from the server session", async () =>
     wabaId: "waba-id",
     phoneNumberId: "phone-number-id",
   });
-  await testFixture.service.confirmWebhookSubscription(session());
+  await testFixture.service.confirmWebhookSubscription(session(), 1);
   await testFixture.service.recordConnectionProblem(
     session(),
     "verification_required",
@@ -94,7 +94,7 @@ test("derives Meta connection tenant scope from the server session", async () =>
         phoneNumberId: "phone-number-id",
       },
     },
-    { operation: "connect", tenantId: 7 },
+    { operation: "connect", tenantId: 7, expectedVersion: 1 },
     {
       operation: "problem",
       tenantId: 7,

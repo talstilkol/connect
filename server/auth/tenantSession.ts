@@ -31,6 +31,11 @@ export class TenantSessionError extends Error {
 
 export interface AuthenticatedIdentity {
   externalUserId: UserId;
+  /**
+   * Signed Clerk Organization identity. Legacy non-Railway callers may omit
+   * it, but the Railway identity and tenant boundaries require it.
+   */
+  externalOrganizationId?: string;
 }
 
 export interface TenantSession extends TenantContext {

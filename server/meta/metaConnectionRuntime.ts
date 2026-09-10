@@ -15,6 +15,7 @@ import type {
 } from "./metaConnectionService.ts";
 import {
   createMetaGraphAssetVerifier,
+  createMetaGraphCoexistenceAssetResolver,
 } from "./metaGraphAssetVerifier.ts";
 import {
   createMetaGraphTransport,
@@ -57,6 +58,7 @@ export function createMetaConnectionRuntime(
         dependencies.options,
       ),
     assetVerifier: createMetaGraphAssetVerifier(transport),
+    coexistenceAssetResolver: createMetaGraphCoexistenceAssetResolver(transport),
     credentialVault: dependencies.credentialVault,
     wabaSubscriber: createMetaGraphWabaSubscriber(transport),
     connectionService: dependencies.connectionService,

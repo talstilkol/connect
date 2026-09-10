@@ -240,6 +240,22 @@ test("returns bounded validation issues without an internal error", async () => 
       issues: ["invalid-trigger"],
     },
   );
+
+  const publication = fixture({
+    publishError: new BotFlowInputError([
+      "whatsapp-button-count-exceeded",
+    ]),
+  });
+
+  assert.deepEqual(
+    await publication.handler.publishDraft({}),
+    {
+      status: "validation-error",
+      issues: [
+        "whatsapp-button-count-exceeded",
+      ],
+    },
+  );
 });
 
 test("maps every bot flow service failure to a public status", async () => {

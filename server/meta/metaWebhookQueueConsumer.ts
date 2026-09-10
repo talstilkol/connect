@@ -7,6 +7,8 @@ import {
 } from "./metaWebhookIngress.ts";
 import {
   parseMetaWebhookQueueMessage,
+  MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
+  isMetaWebhookPayloadLimit,
 } from "./metaWebhookQueueMessage.ts";
 import {
   assertQueueBatchCapacity,
@@ -47,11 +49,13 @@ function isPermanentFailure(error: unknown): boolean {
 
 export function createMetaWebhookQueueConsumer(
   ingress: MetaWebhookIngress,
+  maximumPayloadBytes = MAXIMUM_META_WEBHOOK_QUEUE_PAYLOAD_BYTES,
 ): {
   handle(
     batch: MetaWebhookQueueBatch,
   ): Promise<MetaWebhookQueueConsumerResult>;
 } {
+  if (!isMetaWebhookPayloadLimit(maximumPayloadBytes)) throw new Error("Meta webhook payload limit is invalid");
   return {
     async handle(batch) {
       assertQueueBatchCapacity(batch.messages);
@@ -64,6 +68,7 @@ export function createMetaWebhookQueueConsumer(
       for (const delivery of batch.messages) {
         const message = parseMetaWebhookQueueMessage(
           delivery.body,
+          maximumPayloadBytes,
         );
 
         if (message === null) {

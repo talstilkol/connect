@@ -43,6 +43,7 @@ export interface MetaCredentialVault {
   storeAccessToken(
     tenantId: number,
     accessToken: SensitiveMetaAccessToken,
+    expectedConnectionVersion: number,
   ): Promise<void>;
   withAccessToken<TResult>(
     tenantId: number,

@@ -1,0 +1,36 @@
+{
+  "schema": "CONNECT-TRD2-V6-PASS3-V2-TOOLCHAIN-PATH-REGISTRY-V1",
+  "version": 1,
+  "passThreeV2EmittedPaths": [
+    "docs/planning/trd2-v6-candidate-v3-2026-08-31/subject.json",
+    "docs/planning/trd2-v6-candidate-v3-2026-08-31/clause-ast-registry.json",
+    "docs/planning/trd2-v6-candidate-v3-2026-08-31/state-machine-registry.json"
+  ],
+  "toolchainPaths": [
+    "docs/planning/section-35-6-trd-2-v6-pass3-v2-build-charter-2026-08-31.md",
+    "docs/planning/trd2-v6-output-path-registry-v3-2026-08-31.json",
+    "docs/planning/trd2-v6-pass3-v2-toolchain-path-registry-v1-2026-08-31.json",
+    "docs/planning/trd2-v6-candidate-v3-2026-08-31/closed-schema-registry-v3.json",
+    "docs/planning/trd2-v6-candidate-v3-2026-08-31/canonical-engine-a-report-v3.json",
+    "docs/planning/trd2-v6-candidate-v3-2026-08-31/canonical-engine-b-report-v3.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/source-capture-manifest.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-grammar-and-corpus.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/generation-receipt.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-engine-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-engine-b-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/pass-1-producer-qa.json",
+    "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-2026-08-29.md",
+    "docs/planning/section-35-6-trd-2-v5-executable-definition-contract-2026-08-29.json",
+    "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-30.md",
+    "package.json",
+    "scripts/trd2-v6-core.mjs",
+    "scripts/trd2-v6-pass2-v2-core.mjs",
+    "scripts/trd2-v6-pass2-v3-core.mjs",
+    "scripts/trd2-v6-pass3-v2-core.mjs",
+    "scripts/create-trd2-v6-pass3-v2-candidate.mjs",
+    "scripts/verify-trd2-v6-pass3-v2-engine-a.mjs",
+    "scripts/verify-trd2-v6-pass3-v2-engine-b.py",
+    "scripts/verify-trd2-v6-pass3-v2-candidate.mjs",
+    "tests/trd2-v6-pass3-v2-core.test.mjs"
+  ]
+}

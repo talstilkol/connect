@@ -25,8 +25,12 @@ import {
 } from "../server/team/teamInvitationKey.ts";
 
 class SqliteD1Statement {
-  constructor(statement) {
+  constructor(
+    statement,
+    beforeFirst,
+  ) {
     this.statement = statement;
+    this.beforeFirst = beforeFirst;
     this.values = [];
   }
 
@@ -36,6 +40,8 @@ class SqliteD1Statement {
   }
 
   async first() {
+    await this.beforeFirst?.();
+
     return (
       this.statement.get(
         ...this.values,
@@ -70,38 +76,62 @@ class SqliteD1Statement {
 }
 
 class SqliteD1Database {
-  constructor(database) {
+  constructor(
+    database,
+    options = {},
+  ) {
     this.database = database;
+    this.beforeFirst =
+      options.beforeFirst;
+    this.batchTail =
+      Promise.resolve();
   }
 
   prepare(sql) {
     return new SqliteD1Statement(
       this.database.prepare(sql),
+      this.beforeFirst
+        ? () =>
+            this.beforeFirst(sql)
+        : undefined,
     );
   }
 
-  async batch(statements) {
-    const results = [];
+  batch(statements) {
+    const execute = async () => {
+      const results = [];
 
-    this.database.exec(
-      "BEGIN IMMEDIATE",
+      this.database.exec(
+        "BEGIN IMMEDIATE",
+      );
+
+      try {
+        for (
+          const statement of statements
+        ) {
+          results.push(
+            await statement.run(),
+          );
+        }
+
+        this.database.exec("COMMIT");
+        return results;
+      } catch (error) {
+        this.database.exec("ROLLBACK");
+        throw error;
+      }
+    };
+    const pending = this.batchTail.then(
+      execute,
+      execute,
     );
 
-    try {
-      for (
-        const statement of statements
-      ) {
-        results.push(
-          await statement.run(),
-        );
-      }
+    this.batchTail = pending.then(
+      () => undefined,
+      () => undefined,
+    );
 
-      this.database.exec("COMMIT");
-      return results;
-    } catch (error) {
-      this.database.exec("ROLLBACK");
-      throw error;
-    }
+    return pending;
   }
 }
 
@@ -1050,6 +1080,80 @@ test("keeps concurrent acceptance exact and single-use", async () => {
       `)
       .get().count,
     1,
+  );
+});
+
+test("reclassifies an identical acceptance completed between state reads", async () => {
+  const fixture =
+    await createFixture();
+  const createdInvitation =
+    await fixture.repository.request(
+      requestCommand,
+    );
+  const command = {
+    invitationKey:
+      createdInvitation.invitation
+        .invitationKey,
+    externalUserId:
+      "accepted-user",
+    verifiedEmail:
+      "team.member@example.com",
+    acceptedAt:
+      "2026-08-06T10:00:00.000Z",
+  };
+  const membershipReadReached =
+    Promise.withResolvers();
+  const continueMembershipRead =
+    Promise.withResolvers();
+  let membershipReadPaused = false;
+  const delayedRepository =
+    createTeamInvitationAcceptanceRepository(
+      new SqliteD1Database(
+        fixture.database,
+        {
+          async beforeFirst(sql) {
+            if (
+              membershipReadPaused ||
+              !/FROM tenant_memberships\s+WHERE tenant_id = \?1/.test(
+                sql,
+              )
+            ) {
+              return;
+            }
+
+            membershipReadPaused = true;
+            membershipReadReached.resolve();
+            await continueMembershipRead.promise;
+          },
+        },
+      ),
+    );
+  const delayedAcceptance =
+    delayedRepository.accept(command);
+
+  await membershipReadReached.promise;
+
+  const firstAcceptance =
+    await fixture.acceptanceRepository.accept(
+      command,
+    );
+
+  continueMembershipRead.resolve();
+
+  const repeatedAcceptance =
+    await delayedAcceptance;
+
+  assert.equal(
+    firstAcceptance.outcome,
+    "created",
+  );
+  assert.equal(
+    repeatedAcceptance.outcome,
+    "unchanged",
+  );
+  assert.deepEqual(
+    repeatedAcceptance.membership,
+    firstAcceptance.membership,
   );
 });
 

@@ -1,0 +1,84 @@
+.public-brand {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.public-brand .brand-mark {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+}
+
+.public-brand .brand-mark i {
+  width: 7px;
+  height: 7px;
+  position: absolute;
+  border-radius: 50%;
+  background: var(--nav);
+}
+
+.public-brand .brand-mark i:nth-child(1) {
+  transform: translateY(-7px);
+}
+
+.public-brand .brand-mark i:nth-child(2) {
+  transform: translate(-7px, 6px);
+}
+
+.public-brand .brand-mark i:nth-child(3) {
+  transform: translate(7px, 6px);
+}
+
+.public-brand > span:last-child {
+  display: block;
+}
+
+.public-brand strong,
+.public-brand small {
+  display: block;
+}
+
+.public-brand strong {
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.public-brand small {
+  margin-top: 2px;
+  color: #72837e;
+  font-size: 8px;
+  direction: ltr;
+}
+
+.hero-badge {
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid rgba(61, 148, 113, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #327b5e;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.hero-badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint-strong);
+  box-shadow: 0 0 0 4px rgba(100, 217, 149, 0.13);
+}
+
+@media (max-width: 560px) {
+  .public-brand small {
+    display: none;
+  }
+}

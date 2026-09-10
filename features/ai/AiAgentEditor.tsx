@@ -6,11 +6,12 @@ import {
   useTransition,
 } from "react";
 import type {
-  AiAgentActivationIssue,
   AiResponseMode,
-  KnowledgeSourceStatus,
   ValidatedAiAgentDefinition,
 } from "../../shared/domain/aiAgent";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
 import type {
   AiAgentDetailsView,
   AiAgentDirectoryStatus,
@@ -25,104 +26,10 @@ import {
   publishAiAgentDraftAction,
   saveAiAgentDraftAction,
 } from "../../server/ai/aiAgentActions";
-
-const directoryStatusMessages: Record<
-  Exclude<AiAgentDirectoryStatus, "ready">,
-  string
-> = {
-  "configuration-required":
-    "נדרשת הגדרת Clerk ו־D1 כדי לטעון ולשמור סוכני AI.",
-  unauthenticated:
-    "יש להתחבר לפני צפייה בסוכני AI.",
-  "onboarding-required":
-    "יש להשלים יצירת סביבת עבודה לפני שמירת סוכן.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה לפני שמירת סוכן.",
-  "permission-denied":
-    "אין לחשבון הנוכחי הרשאה לצפות בסוכני AI.",
-  "server-error":
-    "לא ניתן לטעון כרגע את סוכני ה־AI.",
-};
-
-const actionStatusMessages: Record<
-  Exclude<
-    AiAgentActionFailure["status"],
-    "activation-blocked"
-  >,
-  string
-> = {
-  "configuration-required":
-    "החיבור ל־Clerk או ל־D1 אינו מוגדר.",
-  unauthenticated:
-    "החיבור פג. יש להתחבר מחדש.",
-  "onboarding-required":
-    "יש להשלים יצירת סביבת עבודה.",
-  "tenant-selection-required":
-    "יש לבחור סביבת עבודה פעילה.",
-  "permission-denied":
-    "אין הרשאה לבצע פעולה זו.",
-  "validation-error":
-    "השרת דחה את הגדרת הסוכן. בדקו את שדות הטיוטה.",
-  "invalid-input":
-    "הבקשה אינה תקינה.",
-  "not-found":
-    "הסוכן, הגרסה או מקור הידע כבר אינם קיימים.",
-  "state-conflict":
-    "הסוכן השתנה בחלון אחר. טענו אותו מחדש לפני שמירה.",
-  "invalid-state":
-    "אי אפשר לפרסם את הגרסה במצבה הנוכחי.",
-  "server-error":
-    "הפעולה נכשלה בשרת. לא בוצע שינוי חלקי.",
-};
-
-const activationIssueLabels: Record<
-  AiAgentActivationIssue,
-  string
-> = {
-  "provider-required":
-    "לא הוגדר Provider פעיל",
-  "billing-policy-required":
-    "מדיניות החיוב טרם אושרה",
-  "handoff-policy-required":
-    "מדיניות המעבר לנציג טרם אושרה",
-  "audit-sink-required":
-    "יעד Audit טרם הוגדר",
-  "response-mode-required":
-    "לא נבחר אופן אישור תשובות",
-  "grounding-threshold-required":
-    "לא הוגדר סף Grounding",
-  "cost-limit-required":
-    "לא הוגדרה מגבלת עלות ומטבע",
-  "knowledge-source-required":
-    "לא נבחר מקור ידע",
-  "knowledge-source-not-ready":
-    "מקור ידע שנבחר עדיין אינו מוכן",
-};
-
-const agentStatusLabels = {
-  draft: "טיוטה",
-  active: "פעיל",
-  inactive: "לא פעיל",
-} as const;
-
-const versionStatusLabels = {
-  draft: "טיוטה",
-  published: "פורסמה",
-  archived: "בארכיון",
-} as const;
-
-const sourceStatusLabels: Record<
-  KnowledgeSourceStatus,
-  string
-> = {
-  "pending-upload": "ממתין להעלאה",
-  "pending-validation": "ממתין לאימות",
-  "pending-scan": "ממתין לסריקה",
-  scanning: "בסריקה",
-  ready: "מוכן",
-  rejected: "נדחה",
-  archived: "בארכיון",
-};
+import {
+  readAiAgentMessages,
+  type AiAgentMessages,
+} from "./aiAgentMessages";
 
 function replaceAgent(
   agents: readonly AiAgentSummaryView[],
@@ -194,22 +101,32 @@ function validOptionalInteger(
   );
 }
 
-function formatBytes(sizeBytes: number): string {
+function formatBytes(
+  sizeBytes: number,
+  language: InterfaceLanguage,
+): string {
+  const wholeNumber = new Intl.NumberFormat(language, {
+    maximumFractionDigits: 0,
+  });
+  const decimalNumber = new Intl.NumberFormat(language, {
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 1,
+  });
+
   if (sizeBytes < 1_024) {
-    return `${sizeBytes} B`;
+    return `${wholeNumber.format(sizeBytes)} B`;
   }
 
   if (sizeBytes < 1_048_576) {
-    return `${(sizeBytes / 1_024).toFixed(1)} KB`;
+    return `${decimalNumber.format(sizeBytes / 1_024)} KB`;
   }
 
-  return `${(
-    sizeBytes / 1_048_576
-  ).toFixed(1)} MB`;
+  return `${decimalNumber.format(sizeBytes / 1_048_576)} MB`;
 }
 
 function failureMessage(
   failure: AiAgentActionFailure,
+  messages: AiAgentMessages,
 ): string {
   if (
     failure.status === "activation-blocked"
@@ -217,21 +134,24 @@ function failureMessage(
     return failure.issues
       .map(
         (issue) =>
-          activationIssueLabels[issue],
+          messages.activationIssues[issue],
       )
       .join(" · ");
   }
 
-  return actionStatusMessages[failure.status];
+  return messages.actionStatuses[failure.status];
 }
 
 export function AiAgentEditor({
+  language,
   initialStatus,
   initialDirectory,
 }: {
+  language: InterfaceLanguage;
   initialStatus: AiAgentDirectoryStatus;
   initialDirectory: AiAgentDirectoryView;
 }) {
+  const messages = readAiAgentMessages(language);
   const [agents, setAgents] = useState(
     initialDirectory.agents,
   );
@@ -417,7 +337,7 @@ export function AiAgentEditor({
 
       setNotice({
         tone: "danger",
-        message: failureMessage(result),
+        message: failureMessage(result, messages),
       });
     });
   };
@@ -515,17 +435,17 @@ export function AiAgentEditor({
             : "warning",
           message:
             !reloaded
-              ? "הטיוטה נשמרה, אך מצב ההפעלה לא נטען מחדש. יש לבחור את הסוכן מהרשימה לפני פרסום."
+              ? messages.feedback.savedReloadFailed
               : result.outcome === "unchanged"
-                ? "הטיוטה כבר הייתה שמורה ללא שינוי."
-                : "הטיוטה נשמרה ב־D1 כגרסה חדשה.",
+                ? messages.feedback.draftUnchanged
+                : messages.feedback.draftSaved,
         });
         return;
       }
 
       setNotice({
         tone: "danger",
-        message: failureMessage(result),
+        message: failureMessage(result, messages),
       });
     });
   };
@@ -603,17 +523,19 @@ export function AiAgentEditor({
             : "warning",
           message:
             !reloaded
-              ? "הגרסה פורסמה, אך ההיסטוריה המלאה לא נטענה מחדש."
+              ? messages.feedback
+                  .publishedReloadFailed
               : result.outcome === "unchanged"
-                ? "הגרסה כבר הייתה פעילה."
-                : "הגרסה פורסמה והסוכן פעיל.",
+                ? messages.feedback
+                    .publishedUnchanged
+                : messages.feedback.published,
         });
         return;
       }
 
       setNotice({
         tone: "danger",
-        message: failureMessage(result),
+        message: failureMessage(result, messages),
       });
     });
   };
@@ -624,9 +546,9 @@ export function AiAgentEditor({
         <div className="card-header">
           <div>
             <span className="card-kicker">
-              סוכנים שמורים
+              {messages.directory.kicker}
             </span>
-            <h2>ספריית סוכני AI</h2>
+            <h2>{messages.directory.title}</h2>
           </div>
           <button
             type="button"
@@ -634,14 +556,14 @@ export function AiAgentEditor({
             onClick={beginNewAgent}
             disabled={!canWrite}
           >
-            סוכן חדש
+            {messages.directory.newAgent}
           </button>
         </div>
 
         {initialStatus !== "ready" ? (
           <div className="inline-notice warning">
             {
-              directoryStatusMessages[
+              messages.directoryStatuses[
                 initialStatus
               ]
             }
@@ -651,17 +573,14 @@ export function AiAgentEditor({
         {initialStatus === "ready" &&
         !initialDirectory.canWrite ? (
           <div className="inline-notice warning">
-            החשבון הנוכחי נמצא במצב צפייה בלבד.
+            {messages.directory.readOnly}
           </div>
         ) : null}
 
         {agents.length === 0 ? (
           <div className="ai-agent-empty">
-            <strong>עדיין אין סוכנים</strong>
-            <p>
-              אפשר להגדיר ולשמור טיוטה ללא
-              הפעלת Provider.
-            </p>
+            <strong>{messages.directory.emptyTitle}</strong>
+            <p>{messages.directory.emptyDescription}</p>
           </div>
         ) : (
           <div className="ai-agent-record-list">
@@ -685,8 +604,9 @@ export function AiAgentEditor({
                 <span>
                   <strong>{agent.name}</strong>
                   <small>
-                    גרסה{" "}
-                    {agent.latestVersionNumber}
+                    {messages.directory.version(
+                      agent.latestVersionNumber,
+                    )}
                   </small>
                 </span>
                 <span
@@ -697,7 +617,7 @@ export function AiAgentEditor({
                   }`}
                 >
                   {
-                    agentStatusLabels[
+                    messages.labels.agentStatuses[
                       agent.status
                     ]
                   }
@@ -714,22 +634,20 @@ export function AiAgentEditor({
           onSubmit={saveDraft}
         >
           <span className="card-kicker">
-            Agent Definition
+            {messages.editor.kicker}
           </span>
           <h2>
             {details
-              ? "עריכת סוכן"
-              : "סוכן חדש"}
+              ? messages.editor.editTitle
+              : messages.editor.newTitle}
           </h2>
           <p>
-            הטיוטה מגדירה גבולות בלבד. מפתח
-            ספק, Tenant ומספר גרסה אינם מתקבלים
-            מהדפדפן.
+            {messages.editor.boundary}
           </p>
 
           <div className="ai-agent-fields">
             <label>
-              <span>שם הסוכן</span>
+              <span>{messages.editor.name}</span>
               <input
                 value={name}
                 onChange={(event) => {
@@ -744,14 +662,13 @@ export function AiAgentEditor({
               />
               {details ? (
                 <small>
-                  השם הוא הזהות הדטרמיניסטית
-                  ולכן אינו משתנה אחרי השמירה.
+                  {messages.editor.immutableName}
                 </small>
               ) : null}
             </label>
 
             <label>
-              <span>System Prompt</span>
+              <span>{messages.editor.systemPrompt}</span>
               <textarea
                 rows={7}
                 value={systemPrompt}
@@ -766,14 +683,12 @@ export function AiAgentEditor({
                 required
               />
               <small>
-                הוראות התפקיד והגבולות של
-                הסוכן. אין להזין Secret או API
-                Key.
+                {messages.editor.systemPromptHelp}
               </small>
             </label>
 
             <label>
-              <span>הודעת מעבר לנציג</span>
+              <span>{messages.editor.handoffMessage}</span>
               <textarea
                 rows={4}
                 value={handoffMessage}
@@ -791,7 +706,7 @@ export function AiAgentEditor({
 
             <div className="ai-agent-policy-grid">
               <label>
-                <span>אופן אישור תשובה</span>
+                <span>{messages.editor.responseMode}</span>
                 <select
                   value={responseMode}
                   onChange={(event) => {
@@ -806,20 +721,20 @@ export function AiAgentEditor({
                   disabled={!canWrite}
                 >
                   <option value="">
-                    טרם הוחלט
+                    {messages.editor.responseModes.undecided}
                   </option>
                   <option value="automatic">
-                    אוטומטי
+                    {messages.editor.responseModes.automatic}
                   </option>
                   <option value="agent-approval">
-                    אישור נציג
+                    {messages.editor.responseModes.agentApproval}
                   </option>
                 </select>
               </label>
 
               <label>
                 <span>
-                  סף Grounding — Basis Points
+                  {messages.editor.groundingThreshold}
                 </span>
                 <input
                   type="number"
@@ -836,14 +751,13 @@ export function AiAgentEditor({
                   disabled={!canWrite}
                 />
                 <small>
-                  10,000 הם 100%. אפשר להשאיר
-                  ריק בטיוטה.
+                  {messages.editor.groundingHelp}
                 </small>
               </label>
 
               <label>
                 <span>
-                  מגבלת עלות ביחידות מטבע קטנות
+                  {messages.editor.costLimit}
                 </span>
                 <input
                   type="number"
@@ -861,7 +775,7 @@ export function AiAgentEditor({
               </label>
 
               <label>
-                <span>מטבע — ISO 4217</span>
+                <span>{messages.editor.currency}</span>
                 <input
                   value={billingCurrency}
                   onChange={(event) => {
@@ -875,8 +789,7 @@ export function AiAgentEditor({
                   inputMode="text"
                 />
                 <small>
-                  המגבלה והמטבע נשמרים יחד או
-                  נשארים ריקים.
+                  {messages.editor.costHelp}
                 </small>
               </label>
             </div>
@@ -889,8 +802,8 @@ export function AiAgentEditor({
               disabled={!canSave}
             >
               {isSaving
-                ? "שומר טיוטה…"
-                : "שמירת טיוטה"}
+                ? messages.editor.saving
+                : messages.editor.save}
             </button>
             <button
               type="button"
@@ -899,8 +812,8 @@ export function AiAgentEditor({
               disabled={!canPublish}
             >
               {isPublishing
-                ? "מפרסם…"
-                : "פרסום והפעלה"}
+                ? messages.editor.publishing
+                : messages.editor.publish}
             </button>
           </div>
 
@@ -926,19 +839,17 @@ export function AiAgentEditor({
             }`}
           >
             {details?.activationReadiness.ready
-              ? "מוכן להפעלה"
-              : "הפעלה חסומה"}
+              ? messages.readiness.ready
+              : messages.readiness.blocked}
           </span>
-          <h2>בדיקת מוכנות שרתית</h2>
+          <h2>{messages.readiness.title}</h2>
           <p>
-            הרשאת כתיבה אינה מספיקה. כל התנאים
-            הבאים נבדקים שוב בשרת לפני פרסום.
+            {messages.readiness.description}
           </p>
 
           {!details ? (
             <div className="ai-readiness-empty">
-              שמרו טיוטה כדי לקבל בדיקת מוכנות
-              מלאה.
+              {messages.readiness.empty}
             </div>
           ) : details.activationReadiness
               .issues.length > 0 ? (
@@ -949,21 +860,21 @@ export function AiAgentEditor({
                     <span aria-hidden="true">
                       !
                     </span>
-                    {activationIssueLabels[issue]}
+                    {messages.activationIssues[issue]}
                   </li>
                 ),
               )}
             </ul>
           ) : (
             <div className="inline-notice success">
-              כל תנאי ההפעלה אושרו בצד השרת.
+              {messages.readiness.success}
             </div>
           )}
 
           {details ? (
             <div className="ai-version-history">
               <span className="card-kicker">
-                היסטוריית גרסאות
+                {messages.readiness.history}
               </span>
               {details.versions.map(
                 (version) => (
@@ -973,11 +884,13 @@ export function AiAgentEditor({
                     }
                   >
                     <strong>
-                      גרסה {version.versionNumber}
+                      {messages.readiness.version(
+                        version.versionNumber,
+                      )}
                     </strong>
                     <span>
                       {
-                        versionStatusLabels[
+                        messages.labels.versionStatuses[
                           version.status
                         ]
                       }
@@ -994,33 +907,36 @@ export function AiAgentEditor({
         <div className="card-header">
           <div>
             <span className="card-kicker">
-              מאגר ידע
+              {messages.knowledge.kicker}
             </span>
-            <h2>מקורות השייכים לסביבה</h2>
+            <h2>{messages.knowledge.title}</h2>
           </div>
           <button
             type="button"
             className="secondary-button"
+            aria-describedby="ai-knowledge-upload-boundary"
             disabled
           >
-            העלאת מקור
+            {messages.knowledge.upload}
           </button>
+          <small
+            className="sr-only"
+            id="ai-knowledge-upload-boundary"
+          >
+            {messages.knowledge.uploadBoundary}
+          </small>
         </div>
-        <p>
-          הבחירה נשמרת בתוך גרסת הסוכן. רק מקור
-          במצב Ready יוכל לעבור את שער ההפעלה.
-        </p>
+        <p>{messages.knowledge.description}</p>
 
         {initialDirectory.knowledgeSources
           .length === 0 ? (
           <div className="knowledge-dropzone">
             <span>⇧</span>
             <strong>
-              אין מקורות ידע שמורים
+              {messages.knowledge.emptyTitle}
             </strong>
             <small>
-              העלאה תופעל רק לאחר הגדרת R2,
-              סוגי קובץ, מגבלת גודל וסריקה.
+              {messages.knowledge.emptyDescription}
             </small>
           </div>
         ) : (
@@ -1061,6 +977,7 @@ export function AiAgentEditor({
                       {source.mediaType} ·{" "}
                       {formatBytes(
                         source.sizeBytes,
+                        language,
                       )}
                     </small>
                   </span>
@@ -1075,7 +992,7 @@ export function AiAgentEditor({
                     }`}
                   >
                     {
-                      sourceStatusLabels[
+                      messages.labels.sourceStatuses[
                         source.status
                       ]
                     }

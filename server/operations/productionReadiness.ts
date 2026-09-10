@@ -47,6 +47,18 @@ import {
   inspectTeamInvitationBrowserEvidence,
 } from "./teamInvitationBrowserEvidence.ts";
 import {
+  inspectBetterStackStagingEvidence,
+} from "./betterStackStagingEvidence.ts";
+import {
+  inspectBotReplyStagingEvidence,
+} from "./botReplyStagingEvidence.ts";
+import {
+  inspectRailwayBotReplyStagingCrossServiceEvidence,
+} from "../platform/railwayBotReplyStagingCrossServiceEvidence.ts";
+import {
+  inspectBetterStackIncidentAlertConfiguration,
+} from "../platform/betterStackIncidentAlertSink.ts";
+import {
   inspectTeamInvitationAcceptanceActivation,
 } from "../team/teamInvitationAcceptanceActivation.ts";
 import {
@@ -96,6 +108,14 @@ export interface ProductionReadinessInput {
   deploymentProvenance: ConfigurationState;
   ciExecution: ConfigurationState;
   dependencyAudit: ConfigurationState;
+  betterStackStagingEvidence:
+    ConfigurationState;
+  botReplyStagingEvidence:
+    ConfigurationState;
+  botReplyStagingCrossServiceEvidence:
+    ConfigurationState;
+  betterStackIncidentAlerting:
+    ConfigurationState;
   hosting: ProductionHostingBindings;
   implementation: ProductionImplementationState;
 }
@@ -118,6 +138,7 @@ export interface ProductionReadinessEnvironment {
   META_WEBHOOK_VERIFY_TOKEN?: string;
   META_GRAPH_API_VERSION?: string;
   META_CREDENTIAL_ENCRYPTION_KEY_V1?: string;
+  WHATSAPP_RATE_LIMIT_HMAC_KEY_V1?: string;
   KNOWLEDGE_UPLOAD_MAX_BYTES?: string;
   KNOWLEDGE_UPLOAD_ALLOWED_MEDIA_TYPES_JSON?: string;
   KNOWLEDGE_SCAN_RETRY_MIN_AGE_SECONDS?: string;
@@ -138,6 +159,18 @@ export interface ProductionReadinessEnvironment {
   DEPLOYMENT_PROVENANCE_EVIDENCE_JSON?: string;
   CI_EXECUTION_EVIDENCE_JSON?: string;
   DEPENDENCY_AUDIT_EVIDENCE_JSON?: string;
+  BETTER_STACK_STAGING_EVIDENCE_JSON?: string;
+  BOT_REPLY_STAGING_EVIDENCE_JSON?: string;
+  BOT_REPLY_STAGING_CROSS_SERVICE_EVIDENCE_JSON?: string;
+  BETTER_STACK_INCIDENT_API_TOKEN?: string;
+  BETTER_STACK_INCIDENT_REQUESTER_EMAIL?: string;
+  BETTER_STACK_INCIDENT_ESCALATION_POLICY_ID?: string;
+  BETTER_STACK_INCIDENT_NOTIFY_CALL?: string;
+  BETTER_STACK_INCIDENT_NOTIFY_SMS?: string;
+  BETTER_STACK_INCIDENT_NOTIFY_EMAIL?: string;
+  BETTER_STACK_INCIDENT_NOTIFY_PUSH?: string;
+  BETTER_STACK_INCIDENT_NOTIFY_CRITICAL?: string;
+  BETTER_STACK_INCIDENT_TEAM_WAIT_SECONDS?: string;
 }
 
 interface CheckDefinition {
@@ -335,6 +368,13 @@ export function inspectProductionReadiness(
       blockedCode: "CAMPAIGN_DELIVERY_QUEUE_REQUIRED",
     }),
     toCheck({
+      id: "messaging.target-queue-adapter",
+      category: "messaging",
+      ready: implementation.targetQueueAdapter,
+      readyCode: "TARGET_QUEUE_ADAPTER_AVAILABLE",
+      blockedCode: "TARGET_QUEUE_ADAPTER_REQUIRED",
+    }),
+    toCheck({
       id: "messaging.campaign-scheduler",
       category: "messaging",
       ready: implementation.campaignScheduler,
@@ -351,7 +391,10 @@ export function inspectProductionReadiness(
     toCheck({
       id: "automation.bot-reply-adapter",
       category: "automation",
-      ready: implementation.botReplyDeliveryAdapter,
+      ready:
+        implementation.botReplyDeliveryAdapter &&
+        isConfigured(input.botReplyStagingEvidence) &&
+        isConfigured(input.botReplyStagingCrossServiceEvidence),
       readyCode: "BOT_REPLY_DELIVERY_ADAPTER_AVAILABLE",
       blockedCode: "BOT_REPLY_DELIVERY_ADAPTER_REQUIRED",
     }),
@@ -445,7 +488,14 @@ export function inspectProductionReadiness(
     toCheck({
       id: "operations.monitoring-alerting",
       category: "operations",
-      ready: implementation.monitoringAndAlerting,
+      ready:
+        implementation.monitoringAndAlerting &&
+        isConfigured(
+          input.betterStackStagingEvidence,
+        ) &&
+        isConfigured(
+          input.betterStackIncidentAlerting,
+        ),
       readyCode: "MONITORING_AND_ALERTING_AVAILABLE",
       blockedCode: "MONITORING_AND_ALERTING_REQUIRED",
     }),
@@ -483,7 +533,11 @@ export function inspectProductionReadiness(
     toCheck({
       id: "operations.slo-measurement",
       category: "operations",
-      ready: implementation.sloMeasurement,
+      ready:
+        implementation.sloMeasurement &&
+        isConfigured(
+          input.betterStackStagingEvidence,
+        ),
       readyCode: "SLO_MEASUREMENT_AVAILABLE",
       blockedCode: "SLO_DATA_SOURCE_REQUIRED",
       blockedStatus: "decision-required",
@@ -491,7 +545,11 @@ export function inspectProductionReadiness(
     toCheck({
       id: "operations.slo-alert-policy",
       category: "operations",
-      ready: isConfigured(input.sloAlertPolicy),
+      ready:
+        isConfigured(input.sloAlertPolicy) &&
+        isConfigured(
+          input.betterStackIncidentAlerting,
+        ),
       readyCode: "SLO_ALERT_POLICY_CONFIGURED",
       blockedCode: "SLO_ALERT_POLICY_REQUIRED",
       blockedStatus: "decision-required",
@@ -619,6 +677,30 @@ export function inspectCurrentProductionReadiness(
         : "incomplete",
     dependencyAudit:
       inspectDependencyAuditEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    betterStackStagingEvidence:
+      inspectBetterStackStagingEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    botReplyStagingEvidence:
+      inspectBotReplyStagingEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    botReplyStagingCrossServiceEvidence:
+      inspectRailwayBotReplyStagingCrossServiceEvidence(
+        environment,
+      ).status === "configured"
+        ? "configured"
+        : "incomplete",
+    betterStackIncidentAlerting:
+      inspectBetterStackIncidentAlertConfiguration(
         environment,
       ).status === "configured"
         ? "configured"

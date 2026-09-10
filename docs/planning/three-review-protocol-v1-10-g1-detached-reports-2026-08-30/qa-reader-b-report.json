@@ -1,0 +1,14 @@
+{
+  "artifactClass": "CROSS-RUNTIME-STRUCTURAL-READER-B-NOT-INDEPENDENT-NOT-ACCEPTANCE",
+  "artifactId": "MPRR-V1-10-READER-B-REPORT-2026-08-30-G1",
+  "closureCount": 0,
+  "corpusRoot": "c4a7cd2dce8d63567916fa449d64a1c745a183ca3a58d5225a0562db328ee964",
+  "findingCount": 17,
+  "packageContentRoot": "732ccf720ac3c4ff3ef1d5d224ef6b1d3ceab18f2984c6937dab38f1a6682abd",
+  "positiveValidatorCount": 15,
+  "readerArtifactSha256": "21886e32030f62c8d3edf4f540ec173785421e5e6155b78220696321b053d5e3",
+  "reportRoot": "6f5f91a71c3600cb73b23506a34c3c2555924a410b5f60aac6a6fe5c437ef1f1",
+  "result": "PASS-STRUCTURAL-CANDIDATE-NOT-ACCEPTED",
+  "sourceCommit": "cbcf5e62004c09b5a62dc8c16f89e4647e40d5dc",
+  "sourceSetRoot": "f9de71055ff476ad1e0ddcc00367bbf524053f6193c58740997ec1c52e64eaa7"
+}

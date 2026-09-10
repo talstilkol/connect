@@ -26,6 +26,8 @@ import type {
   InboxFilters,
 } from "../../shared/domain/conversationView.ts";
 
+import { acquireInboxRequest } from "./inboxRequestGate.ts";
+
 export type InboxRefreshState =
   | "idle"
   | "refreshing"
@@ -115,7 +117,8 @@ export function useInboxPolling({
         return;
       }
 
-      refreshInFlight.current = true;
+      const release = acquireInboxRequest(refreshInFlight);
+      if (!release) return;
       setRefreshState("refreshing");
 
       try {
@@ -170,7 +173,7 @@ export function useInboxPolling({
           setRefreshState("stale");
         }
       } finally {
-        refreshInFlight.current = false;
+        release();
       }
     };
 

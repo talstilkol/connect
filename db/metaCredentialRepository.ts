@@ -13,7 +13,9 @@ const UPSERT_ENVELOPE_SQL = `
     initialization_vector,
     ciphertext
   )
-  VALUES (?1, ?2, ?3, ?4)
+  SELECT ?1, ?2, ?3, ?4
+  FROM meta_connections
+  WHERE tenant_id = ?1 AND status = 'pending' AND version = ?5
   ON CONFLICT (tenant_id) DO UPDATE SET
     key_version = excluded.key_version,
     initialization_vector = excluded.initialization_vector,
@@ -23,19 +25,24 @@ const UPSERT_ENVELOPE_SQL = `
 
 const SELECT_ENVELOPE_SQL = `
   SELECT
-    tenant_id AS tenantId,
-    key_version AS keyVersion,
-    initialization_vector AS initializationVector,
-    ciphertext,
-    created_at AS createdAt,
-    updated_at AS updatedAt
-  FROM meta_credential_envelopes
-  WHERE tenant_id = ?1
+    envelope.tenant_id AS tenantId,
+    envelope.key_version AS keyVersion,
+    envelope.initialization_vector AS initializationVector,
+    envelope.ciphertext,
+    envelope.created_at AS createdAt,
+    envelope.updated_at AS updatedAt,
+    CASE WHEN connection.status = 'connected' THEN connection.version - 1
+      ELSE connection.version END AS authorizationVersion
+  FROM meta_credential_envelopes AS envelope
+  INNER JOIN meta_connections AS connection ON connection.tenant_id = envelope.tenant_id
+  WHERE envelope.tenant_id = ?1
+    AND connection.status IN ('pending', 'connected')
   LIMIT 1
 `;
 
 export interface EncryptedMetaCredentialEnvelope {
   tenantId: number;
+  authorizationVersion: number;
   keyVersion: typeof KEY_VERSION;
   initializationVector: string;
   ciphertext: string;
@@ -45,6 +52,7 @@ export interface EncryptedMetaCredentialEnvelope {
 
 export interface StoreEncryptedMetaCredentialInput {
   tenantId: number;
+  expectedConnectionVersion: number;
   keyVersion: typeof KEY_VERSION;
   initializationVector: string;
   ciphertext: string;
@@ -103,6 +111,9 @@ function parseEnvelope(
   value: EncryptedMetaCredentialEnvelope,
 ): EncryptedMetaCredentialEnvelope {
   requireTenantId(value.tenantId);
+  if (!Number.isSafeInteger(value.authorizationVersion) || value.authorizationVersion <= 0) {
+    throw new Error("Meta credential authorization version is invalid");
+  }
   requireKeyVersion(value.keyVersion);
   requireInitializationVector(value.initializationVector);
   requireCiphertext(value.ciphertext);
@@ -120,6 +131,10 @@ export function createMetaCredentialRepository(
   return {
     async store(input) {
       const tenantId = requireTenantId(input.tenantId);
+      const expectedVersion = input.expectedConnectionVersion;
+      if (!Number.isSafeInteger(expectedVersion) || expectedVersion <= 0) {
+        throw new Error("Meta credential connection version is invalid");
+      }
       const keyVersion = requireKeyVersion(
         input.keyVersion,
       );
@@ -135,10 +150,11 @@ export function createMetaCredentialRepository(
           keyVersion,
           initializationVector,
           ciphertext,
+          expectedVersion,
         )
         .run();
 
-      if (!result.success) {
+      if (!result.success || result.meta?.changes !== 1) {
         throw new Error(
           result.error ?? "D1 Meta credential write failed",
         );

@@ -1,0 +1,438 @@
+{
+  "artifactClass": "PLANNING-ONLY; PASS-1-NORMATIVE-CANDIDATE-MEMBER; NOT-INDEPENDENT-REVIEW; NOT-ACCEPTANCE",
+  "claimLimit": "EXACT-SOURCE-CUSTODY-AND-F015-BRANCH-ONLY; REDERIVATION-AND-CLOSURE-PENDING",
+  "developmentFreeze": "ACTIVE",
+  "f015Disposition": {
+    "acquisitionScope": "ALL-GIT-BLOBS-REACHABLE-FROM-OBSERVED-HEAD; EXPECTED-SIZE-AND-SHA256-MATCH",
+    "branch": "INVALIDATE-AND-REDERIVE",
+    "candidateBlobCountOfExpectedSize": 0,
+    "closureCredit": 0,
+    "dependentArtifacts": [
+      {
+        "byteLength": 208050,
+        "disposition": "NEW-FROZEN-REPLACEMENT-SOURCE",
+        "logicalPath": "docs/planning/master-plan-recovery-ledger-2026-08-29.md",
+        "observedSha256": "dd6d9c60389d1ef425e8e48a4f6742d87823bda46129fb58eef8ca993fccb961"
+      },
+      {
+        "byteLength": 29444,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-2026-08-29.md",
+        "observedSha256": "cda2c96e1c0e699a237f6b3216ac9307d522829db245a390d8ce7734c9f5c00f"
+      },
+      {
+        "byteLength": 28700,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-29.md",
+        "observedSha256": "0acdc6c8fd5e53875d779fb1b557fd6dc5a09d194fd2fbd2eb282ec8a29dc4ae"
+      },
+      {
+        "byteLength": 240666,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-2026-08-29.md",
+        "observedSha256": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+      },
+      {
+        "byteLength": 278580,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-inherited-v4-requirement-byte-manifest-2026-08-29.json",
+        "observedSha256": "85783c16a14b84d66cdf08220ced97d7d8e89602b1fc2ab1fe6f4e92ae9c7bba"
+      },
+      {
+        "byteLength": 7767922,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-executable-definition-contract-2026-08-29.json",
+        "observedSha256": "c30727d07c28697899299af552ac3fbf6ce6e16a22de81a4dce31b703d0c1dc4"
+      },
+      {
+        "byteLength": 8767491,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-complete-semantic-graph-2026-08-29.json",
+        "observedSha256": "92845a0f60b71491538ae9161da08b32730a3a4cf26edd4c6a477f85ca9abfda"
+      },
+      {
+        "byteLength": 5739,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-detached-candidate-packet-binding-2026-08-29.json",
+        "observedSha256": "d9ce7f0785801062c3711503b8a808c9c25fa523e9fe8e1325a553621bcf3f4e"
+      },
+      {
+        "byteLength": 144918,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-requirement-root-bindings-2026-08-29.json",
+        "observedSha256": "67dd12d206e6c133d9ebdb71f5d2cb0c8a4227e95dd1a27e69f448f421b7d80d"
+      },
+      {
+        "byteLength": 240666,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-portable-candidate-capture-2026-08-29.bin",
+        "observedSha256": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be"
+      },
+      {
+        "byteLength": 480835,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-mechanical-qa-engine-a-2026-08-29.json",
+        "observedSha256": "6994e747bd8e333a5e3c0d9b916cec825d178606d13567723ee5b81216cbbc85"
+      },
+      {
+        "byteLength": 480835,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-mechanical-qa-engine-b-2026-08-29.json",
+        "observedSha256": "5fd77cfbe3563ede96196497f71d09377905f21d8e89405b2fed20551feb6f10"
+      },
+      {
+        "byteLength": 1134,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-dual-qa-reconciliation-2026-08-29.json",
+        "observedSha256": "bfaea21b1c5a1a13af668767ba9bd3120f16a4b54c5e6a8508b5929ed1fd4825"
+      },
+      {
+        "byteLength": 8496,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-producer-qa-2026-08-29.md",
+        "observedSha256": "12bb7c717e35b392c1eadecace5103d658eea8d57255c53424abfdb50c139451"
+      },
+      {
+        "byteLength": 3600,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-support-manifests-2026-08-29.md",
+        "observedSha256": "4c2955442ab8e4e14c43b432a09d965e8e91fbb72d4b952f2bdba18937df93ae"
+      },
+      {
+        "byteLength": 98573,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/trd2-v5-planning-artifact-generator.mjs",
+        "observedSha256": "0e5813816a1168d24e0f889835050c0dee7b4f6e6313eb8879f8f251bb52db94"
+      },
+      {
+        "byteLength": 16262,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/trd2-v5-mechanical-qa-engine-a.mjs",
+        "observedSha256": "956483147262081d3673d4f2e33507a9a67b8d6dfd68317ebba7f5bf99869b33"
+      },
+      {
+        "byteLength": 18085,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/trd2-v5-mechanical-qa-engine-b.py",
+        "observedSha256": "e910fa5cfd0bd01a3fca740ff646504b0e3c4d9960b44c7bbd4ec1d6dfc2a341"
+      },
+      {
+        "byteLength": 39383,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-2026-08-30.md",
+        "observedSha256": "123b3f1a08b9388a0368042ea32a08a3408b813016bc259b4293215dc723547b"
+      },
+      {
+        "byteLength": 28776,
+        "disposition": "INVALIDATED-F015-DEPENDENCY-PENDING-REDERIVATION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-30.md",
+        "observedSha256": "05b752be0bbbb5bdb789df31dcf72b69a69e1da9d55f38d1349b94af0a975ce8"
+      },
+      {
+        "byteLength": 21953,
+        "disposition": "RETAINED-BRANCH-INSTRUCTION",
+        "logicalPath": "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md",
+        "observedSha256": "2f23e658a33cded6e1398e284fa3e5a612fbe007357708ff09f60cb06e0fd17f"
+      }
+    ],
+    "directOccurrenceCount": 5,
+    "directOccurrences": [
+      {
+        "endByte": 8371,
+        "line": 72,
+        "logicalPath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-2026-08-29.md",
+        "matchedSha256Literal": "c0feec2e5c37ca134240c5b164d2014df927dad5abd8df8863e40818fc540755",
+        "sourceSha256": "cda2c96e1c0e699a237f6b3216ac9307d522829db245a390d8ce7734c9f5c00f",
+        "startByte": 8307,
+        "occurrenceId": "TRD2V6-F015-OCCURRENCE-eaa23f0cce20a67f8564b24474afcff2e67e72939f3a330222a8febde6e9d652",
+        "occurrenceRoot": "eaa23f0cce20a67f8564b24474afcff2e67e72939f3a330222a8febde6e9d652"
+      },
+      {
+        "endByte": 5899,
+        "line": 50,
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-2026-08-30.md",
+        "matchedSha256Literal": "c0feec2e5c37ca134240c5b164d2014df927dad5abd8df8863e40818fc540755",
+        "sourceSha256": "123b3f1a08b9388a0368042ea32a08a3408b813016bc259b4293215dc723547b",
+        "startByte": 5835,
+        "occurrenceId": "TRD2V6-F015-OCCURRENCE-48dacaa1ef37391ea08cc5e0ba67833d321fe5cf8ab1cfd9f4a0009b923ed1f6",
+        "occurrenceRoot": "48dacaa1ef37391ea08cc5e0ba67833d321fe5cf8ab1cfd9f4a0009b923ed1f6"
+      },
+      {
+        "endByte": 35264,
+        "line": 334,
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-2026-08-30.md",
+        "matchedSha256Literal": "c0feec2e5c37ca134240c5b164d2014df927dad5abd8df8863e40818fc540755",
+        "sourceSha256": "123b3f1a08b9388a0368042ea32a08a3408b813016bc259b4293215dc723547b",
+        "startByte": 35200,
+        "occurrenceId": "TRD2V6-F015-OCCURRENCE-dfa93b4a04d2dc0c20a6c19f475f008342fc91e7143243effb94462676a2bcb3",
+        "occurrenceRoot": "dfa93b4a04d2dc0c20a6c19f475f008342fc91e7143243effb94462676a2bcb3"
+      },
+      {
+        "endByte": 25878,
+        "line": 303,
+        "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-30.md",
+        "matchedSha256Literal": "c0feec2e5c37ca134240c5b164d2014df927dad5abd8df8863e40818fc540755",
+        "sourceSha256": "05b752be0bbbb5bdb789df31dcf72b69a69e1da9d55f38d1349b94af0a975ce8",
+        "startByte": 25814,
+        "occurrenceId": "TRD2V6-F015-OCCURRENCE-b3d80b906153e953024f19ed607d312b3ed608bf16f6624099ac5b7a482a349d",
+        "occurrenceRoot": "b3d80b906153e953024f19ed607d312b3ed608bf16f6624099ac5b7a482a349d"
+      },
+      {
+        "endByte": 17669,
+        "line": 293,
+        "logicalPath": "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md",
+        "matchedSha256Literal": "c0feec2e5c37ca134240c5b164d2014df927dad5abd8df8863e40818fc540755",
+        "sourceSha256": "2f23e658a33cded6e1398e284fa3e5a612fbe007357708ff09f60cb06e0fd17f",
+        "startByte": 17605,
+        "occurrenceId": "TRD2V6-F015-OCCURRENCE-e6cffa71a456f1464637506b53695b2b73f2772a0832a8c6df4922ab4c200d0c",
+        "occurrenceRoot": "e6cffa71a456f1464637506b53695b2b73f2772a0832a8c6df4922ab4c200d0c"
+      }
+    ],
+    "exactBlobMatchOids": [],
+    "exactBlobMatches": 0,
+    "expectedLedgerByteLength": 98306,
+    "expectedLedgerLineCount": 993,
+    "expectedLedgerSha256": "c0feec2e5c37ca134240c5b164d2014df927dad5abd8df8863e40818fc540755",
+    "observationPaths": [
+      "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-2026-08-29.md",
+      "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-2026-08-30.md",
+      "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md"
+    ],
+    "rederivationState": "PENDING-PASSES-2-TO-6-AND-INDEPENDENT-REVIEW",
+    "replacementLedger": {
+      "byteLength": 208050,
+      "logicalPath": "docs/planning/master-plan-recovery-ledger-2026-08-29.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "sha256": "dd6d9c60389d1ef425e8e48a4f6742d87823bda46129fb58eef8ca993fccb961"
+    },
+    "silentSubstitutionCount": 0
+  },
+  "gate29": "BLOCKED",
+  "observedHead": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+  "observedObjectFormat": "sha1",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-TRD2-V6-SOURCE-CAPTURE-MANIFEST-V1",
+  "sourceCollectionRoot": "8ff10c639b1a2fc5bd3316a279fa02ac840c51de2c01bd20947dc6f913f8116f",
+  "sourceCount": 12,
+  "sources": [
+    {
+      "byteLength": 278580,
+      "capture": {
+        "captureSha256": "85783c16a14b84d66cdf08220ced97d7d8e89602b1fc2ab1fe6f4e92ae9c7bba",
+        "contentAddress": "sha256:85783c16a14b84d66cdf08220ced97d7d8e89602b1fc2ab1fe6f4e92ae9c7bba",
+        "endByte": 278580,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-inherited-v4-requirement-byte-manifest-2026-08-29.json",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-inherited-v4-requirement-byte-manifest-2026-08-29.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-INHERITED-MANIFEST",
+      "sha256": "85783c16a14b84d66cdf08220ced97d7d8e89602b1fc2ab1fe6f4e92ae9c7bba",
+      "sourceId": "TRD2V6-SOURCE-1527b1c788d6df4eb5398705d235eb35b66440d8573f5ddef3260b83c8bffcb2",
+      "sourceRoot": "1527b1c788d6df4eb5398705d235eb35b66440d8573f5ddef3260b83c8bffcb2"
+    },
+    {
+      "byteLength": 29444,
+      "capture": {
+        "captureSha256": "cda2c96e1c0e699a237f6b3216ac9307d522829db245a390d8ce7734c9f5c00f",
+        "contentAddress": "sha256:cda2c96e1c0e699a237f6b3216ac9307d522829db245a390d8ce7734c9f5c00f",
+        "endByte": 29444,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-2026-08-29.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-2026-08-29.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V4-REVIEW-F015-SOURCE",
+      "sha256": "cda2c96e1c0e699a237f6b3216ac9307d522829db245a390d8ce7734c9f5c00f",
+      "sourceId": "TRD2V6-SOURCE-23d7acaee69c38f43f1bf2e392f5a17c09dbcc2fa30d07d8aa893ea07b87a237",
+      "sourceRoot": "23d7acaee69c38f43f1bf2e392f5a17c09dbcc2fa30d07d8aa893ea07b87a237"
+    },
+    {
+      "byteLength": 7767922,
+      "capture": {
+        "captureSha256": "c30727d07c28697899299af552ac3fbf6ce6e16a22de81a4dce31b703d0c1dc4",
+        "contentAddress": "sha256:c30727d07c28697899299af552ac3fbf6ce6e16a22de81a4dce31b703d0c1dc4",
+        "endByte": 7767922,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-executable-definition-contract-2026-08-29.json",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-executable-definition-contract-2026-08-29.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-EXECUTABLE-CONTRACT",
+      "sha256": "c30727d07c28697899299af552ac3fbf6ce6e16a22de81a4dce31b703d0c1dc4",
+      "sourceId": "TRD2V6-SOURCE-6005e5593b287b0b8347f9f608be6b15103cebac18634e50d80ad8df026f384c",
+      "sourceRoot": "6005e5593b287b0b8347f9f608be6b15103cebac18634e50d80ad8df026f384c"
+    },
+    {
+      "byteLength": 39383,
+      "capture": {
+        "captureSha256": "123b3f1a08b9388a0368042ea32a08a3408b813016bc259b4293215dc723547b",
+        "contentAddress": "sha256:123b3f1a08b9388a0368042ea32a08a3408b813016bc259b4293215dc723547b",
+        "endByte": 39383,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-2026-08-30.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-2026-08-30.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-INDEPENDENT-REVIEW",
+      "sha256": "123b3f1a08b9388a0368042ea32a08a3408b813016bc259b4293215dc723547b",
+      "sourceId": "TRD2V6-SOURCE-779050f01555d9f96125c126692b48062e6809890fb7228535b2627b2d60a1fd",
+      "sourceRoot": "779050f01555d9f96125c126692b48062e6809890fb7228535b2627b2d60a1fd"
+    },
+    {
+      "byteLength": 21953,
+      "capture": {
+        "captureSha256": "2f23e658a33cded6e1398e284fa3e5a612fbe007357708ff09f60cb06e0fd17f",
+        "contentAddress": "sha256:2f23e658a33cded6e1398e284fa3e5a612fbe007357708ff09f60cb06e0fd17f",
+        "endByte": 21953,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v6-successor-build-charter-2026-08-30.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V6-CONSTRUCTION-CHARTER",
+      "sha256": "2f23e658a33cded6e1398e284fa3e5a612fbe007357708ff09f60cb06e0fd17f",
+      "sourceId": "TRD2V6-SOURCE-7c396f3d8a151c017632a2085416602b84b46f8084073195d8d727e9eac3a4a7",
+      "sourceRoot": "7c396f3d8a151c017632a2085416602b84b46f8084073195d8d727e9eac3a4a7"
+    },
+    {
+      "byteLength": 144918,
+      "capture": {
+        "captureSha256": "67dd12d206e6c133d9ebdb71f5d2cb0c8a4227e95dd1a27e69f448f421b7d80d",
+        "contentAddress": "sha256:67dd12d206e6c133d9ebdb71f5d2cb0c8a4227e95dd1a27e69f448f421b7d80d",
+        "endByte": 144918,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-requirement-root-bindings-2026-08-29.json",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-requirement-root-bindings-2026-08-29.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-REQUIREMENT-BINDINGS",
+      "sha256": "67dd12d206e6c133d9ebdb71f5d2cb0c8a4227e95dd1a27e69f448f421b7d80d",
+      "sourceId": "TRD2V6-SOURCE-97a0c8b95c19662ef9774ca95ef787d6fc7c9d74cf5f6a0ab87094618c8895f3",
+      "sourceRoot": "97a0c8b95c19662ef9774ca95ef787d6fc7c9d74cf5f6a0ab87094618c8895f3"
+    },
+    {
+      "byteLength": 240666,
+      "capture": {
+        "captureSha256": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be",
+        "contentAddress": "sha256:933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be",
+        "endByte": 240666,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-2026-08-29.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-2026-08-29.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-SUBJECT",
+      "sha256": "933b5d68f765afbe5df792051f8b01441d2e0b6043eb3745aea3f593cadcf2be",
+      "sourceId": "TRD2V6-SOURCE-b2462a0bf96c631b768e9b6f9c4a78b9533c45218fa91299625fde8f3cae7931",
+      "sourceRoot": "b2462a0bf96c631b768e9b6f9c4a78b9533c45218fa91299625fde8f3cae7931"
+    },
+    {
+      "byteLength": 28700,
+      "capture": {
+        "captureSha256": "0acdc6c8fd5e53875d779fb1b557fd6dc5a09d194fd2fbd2eb282ec8a29dc4ae",
+        "contentAddress": "sha256:0acdc6c8fd5e53875d779fb1b557fd6dc5a09d194fd2fbd2eb282ec8a29dc4ae",
+        "endByte": 28700,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-29.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v4-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V4-FINDINGS-F015-SOURCE",
+      "sha256": "0acdc6c8fd5e53875d779fb1b557fd6dc5a09d194fd2fbd2eb282ec8a29dc4ae",
+      "sourceId": "TRD2V6-SOURCE-c5fd637053355db1418cf623a664882cb50cfe94b8f99d8bd40772c45c2442bf",
+      "sourceRoot": "c5fd637053355db1418cf623a664882cb50cfe94b8f99d8bd40772c45c2442bf"
+    },
+    {
+      "byteLength": 28776,
+      "capture": {
+        "captureSha256": "05b752be0bbbb5bdb789df31dcf72b69a69e1da9d55f38d1349b94af0a975ce8",
+        "contentAddress": "sha256:05b752be0bbbb5bdb789df31dcf72b69a69e1da9d55f38d1349b94af0a975ce8",
+        "endByte": 28776,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-30.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-immutable-successor-requirements-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-FINDINGS",
+      "sha256": "05b752be0bbbb5bdb789df31dcf72b69a69e1da9d55f38d1349b94af0a975ce8",
+      "sourceId": "TRD2V6-SOURCE-caf5718859941d077f0d0188051a64de146ce61db6877a099ac3069c6cd83ab8",
+      "sourceRoot": "caf5718859941d077f0d0188051a64de146ce61db6877a099ac3069c6cd83ab8"
+    },
+    {
+      "byteLength": 5739,
+      "capture": {
+        "captureSha256": "d9ce7f0785801062c3711503b8a808c9c25fa523e9fe8e1325a553621bcf3f4e",
+        "contentAddress": "sha256:d9ce7f0785801062c3711503b8a808c9c25fa523e9fe8e1325a553621bcf3f4e",
+        "endByte": 5739,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-detached-candidate-packet-binding-2026-08-29.json",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-detached-candidate-packet-binding-2026-08-29.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-DETACHED-PACKET",
+      "sha256": "d9ce7f0785801062c3711503b8a808c9c25fa523e9fe8e1325a553621bcf3f4e",
+      "sourceId": "TRD2V6-SOURCE-ccdcdc8639cacb5e5cfe9ac6cac68a9d4a3474484fbfe54f4f5b5f84deefd62c",
+      "sourceRoot": "ccdcdc8639cacb5e5cfe9ac6cac68a9d4a3474484fbfe54f4f5b5f84deefd62c"
+    },
+    {
+      "byteLength": 208050,
+      "capture": {
+        "captureSha256": "dd6d9c60389d1ef425e8e48a4f6742d87823bda46129fb58eef8ca993fccb961",
+        "contentAddress": "sha256:dd6d9c60389d1ef425e8e48a4f6742d87823bda46129fb58eef8ca993fccb961",
+        "endByte": 208050,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/master-plan-recovery-ledger-2026-08-29.md",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/master-plan-recovery-ledger-2026-08-29.md",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "CURRENT-RECOVERY-LEDGER",
+      "sha256": "dd6d9c60389d1ef425e8e48a4f6742d87823bda46129fb58eef8ca993fccb961",
+      "sourceId": "TRD2V6-SOURCE-e581ea0fc56590b6abbe710e444c645d83b1796a31fce5aaef8cd928c5b8a26c",
+      "sourceRoot": "e581ea0fc56590b6abbe710e444c645d83b1796a31fce5aaef8cd928c5b8a26c"
+    },
+    {
+      "byteLength": 8767491,
+      "capture": {
+        "captureSha256": "92845a0f60b71491538ae9161da08b32730a3a4cf26edd4c6a477f85ca9abfda",
+        "contentAddress": "sha256:92845a0f60b71491538ae9161da08b32730a3a4cf26edd4c6a477f85ca9abfda",
+        "endByte": 8767491,
+        "kind": "GIT-COMMIT-PATH-FULL-MEMBER",
+        "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+        "repositoryRelativePath": "docs/planning/section-35-6-trd-2-v5-complete-semantic-graph-2026-08-29.json",
+        "startByte": 0
+      },
+      "logicalPath": "docs/planning/section-35-6-trd-2-v5-complete-semantic-graph-2026-08-29.json",
+      "observedCommit": "4817c16f8be832392dfeb5d7e94378dbf9b60e61",
+      "role": "V5-SEMANTIC-GRAPH",
+      "sha256": "92845a0f60b71491538ae9161da08b32730a3a4cf26edd4c6a477f85ca9abfda",
+      "sourceId": "TRD2V6-SOURCE-e89535b53519d7a8180d95ef94f3cfd3e7004c56a5c42f5b20a0356411538995",
+      "sourceRoot": "e89535b53519d7a8180d95ef94f3cfd3e7004c56a5c42f5b20a0356411538995"
+    }
+  ],
+  "artifactId": "TRD2V6-SOURCE-CAPTURE-03e2a37b96779674d4a48778eaa31ea11ee1bb96d031e934f8896a3cec77850f",
+  "artifactRoot": "03e2a37b96779674d4a48778eaa31ea11ee1bb96d031e934f8896a3cec77850f"
+}

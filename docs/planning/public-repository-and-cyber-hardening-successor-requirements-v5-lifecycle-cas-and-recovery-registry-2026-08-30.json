@@ -1,0 +1,1446 @@
+{
+  "artifactClass": "EXECUTABLE-PLANNING-STATE-MACHINE;NOT-OPERATIONAL-EXECUTION;NOT-PERMIT;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-LIFECYCLE-CAS-AND-RECOVERY-REGISTRY-2026-08-30",
+  "currentHeadState": "MISSING-BLOCKING",
+  "currentOperationalCredit": 0,
+  "currentTrustedTimeState": "MISSING-BLOCKING",
+  "exhaustiveTwoActorProof": {
+    "atomicEffectEventOutbox": true,
+    "completeScheduleCount": "155117520",
+    "concurrentWinnerMaximum": 1,
+    "crashCutStateActorCount": 492,
+    "crashMutationCount": 0,
+    "oneCommitScheduleCount": "155117520",
+    "reachableStateCount": 279,
+    "responseLossReadbackTerminal": "COMMITTED-READBACK-NO-RETRY",
+    "twoCommitScheduleCount": "0",
+    "zeroCommitScheduleCount": "0"
+  },
+  "lifecycleRegistryRoot": "6d04f7817c547501213668141bf1349d34d436b6350222b91ffb5b1d934c0d87",
+  "lifecycleSchemas": [
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "ISSUE",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 1,
+      "schemaId": "PRCV5-ISSUE-EVENT-SCHEMA-V1",
+      "schemaRoot": "ae5b5872901a99b1154044cb3ae645e9400d686d7fa53817f7e5e7938130bca6",
+      "unknownFields": "BLOCK"
+    },
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "CONSUME",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 2,
+      "schemaId": "PRCV5-CONSUME-EVENT-SCHEMA-V1",
+      "schemaRoot": "2177c75dda6a34fe03f6d80c3ad1104b37737f7e694db512eebd1d277a1da21f",
+      "unknownFields": "BLOCK"
+    },
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "REVOKE",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 3,
+      "schemaId": "PRCV5-REVOKE-EVENT-SCHEMA-V1",
+      "schemaRoot": "dae417a6a9966a2c91a29ece880d0d28ab147f2484981a62e4dbc355a00d661b",
+      "unknownFields": "BLOCK"
+    },
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "EXPIRE",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 4,
+      "schemaId": "PRCV5-EXPIRE-EVENT-SCHEMA-V1",
+      "schemaRoot": "3b8d8bbe2582be15a7a1de3226b336c2f26fa9c32fab391be18f26b287a00b09",
+      "unknownFields": "BLOCK"
+    },
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "FAILURE",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 5,
+      "schemaId": "PRCV5-FAILURE-EVENT-SCHEMA-V1",
+      "schemaRoot": "6c94bff90817be075416224307cb5cd5a71ad7da79e7728e81faf1125ae4379e",
+      "unknownFields": "BLOCK"
+    },
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "READBACK",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 6,
+      "schemaId": "PRCV5-READBACK-EVENT-SCHEMA-V1",
+      "schemaRoot": "78ca3678191d18da730f351645fdba0202a342e9e4b4b7bb437424986f5b7980",
+      "unknownFields": "BLOCK"
+    },
+    {
+      "additionalProperties": false,
+      "crossFieldInvariants": [
+        {
+          "args": [
+            {
+              "args": [
+                "/permitClass"
+              ],
+              "op": "GET"
+            },
+            {
+              "args": [
+                "PRCV5-PERMIT-CLASS-PLANNING-WITNESS"
+              ],
+              "op": "LITERAL"
+            }
+          ],
+          "op": "EQ"
+        }
+      ],
+      "eventClass": "FORWARD-RECOVERY",
+      "fields": [
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "attemptId",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "permitClass",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Id",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "actorRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "expectedHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "newHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revision",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "epoch",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "fence",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "SafeInteger",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "trustedTimeRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "revocationHead",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "appendOnlyEventRoot",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "Hash",
+          "uniqueItems": false
+        },
+        {
+          "maxItems": null,
+          "minItems": null,
+          "name": "terminal",
+          "nullable": false,
+          "order": "NOT-APPLICABLE",
+          "referenceRule": "PRIMITIVE-OR-COMPOUND",
+          "required": true,
+          "typeExpression": "String",
+          "uniqueItems": false
+        }
+      ],
+      "ordinal": 7,
+      "schemaId": "PRCV5-FORWARD-RECOVERY-EVENT-SCHEMA-V1",
+      "schemaRoot": "d465fe29f55d4d7f1afd58deeeba4985e6a352570d93be677b953dbec11c562e",
+      "unknownFields": "BLOCK"
+    }
+  ],
+  "recoveryRule": {
+    "failureAfterWrite": "READBACK-BEFORE-ANY-RETRY",
+    "failureBeforeWrite": "NO-STORE-MUTATION;SAFE-RETRY-WITH-FRESH-HEAD",
+    "nonWeakening": "SECURITY-UNIVERSE-MUST-BE-EQUAL-OR-STRONGER",
+    "responseLoss": "AUTHORITATIVE-HEAD-AND-EFFECT-READBACK",
+    "rollback": "PROHIBITED"
+  },
+  "reducer": {
+    "commitAtomicSet": [
+      "head",
+      "fence",
+      "permitUsed",
+      "replayUsed",
+      "effectCount",
+      "eventCount",
+      "outboxCount"
+    ],
+    "failureAfterWriteResolution": "AUTHORITATIVE-READBACK",
+    "failureBeforeWriteMutationCount": 0,
+    "reducerId": "PRCV5-ATOMIC-PERMIT-CAS-REDUCER-V1",
+    "stateFields": [
+      "head",
+      "securityHead",
+      "revision",
+      "revocationHead",
+      "fence",
+      "permitUsed",
+      "replayUsed",
+      "effectCount",
+      "eventCount",
+      "outboxCount"
+    ],
+    "steps": [
+      {
+        "ordinal": 1,
+        "stepId": "READ-HEAD"
+      },
+      {
+        "ordinal": 2,
+        "stepId": "READ-SECURITY-UNIVERSE"
+      },
+      {
+        "ordinal": 3,
+        "stepId": "VALIDATE-SCHEMA"
+      },
+      {
+        "ordinal": 4,
+        "stepId": "VALIDATE-AUTHORITY"
+      },
+      {
+        "ordinal": 5,
+        "stepId": "VALIDATE-TRUSTED-TIME"
+      },
+      {
+        "ordinal": 6,
+        "stepId": "VALIDATE-REVOCATION"
+      },
+      {
+        "ordinal": 7,
+        "stepId": "COMPARE-EXPECTED-HEAD"
+      },
+      {
+        "ordinal": 8,
+        "stepId": "RESERVE-ATTEMPT"
+      },
+      {
+        "ordinal": 9,
+        "stepId": "ADVANCE-FENCE"
+      },
+      {
+        "ordinal": 10,
+        "stepId": "CONSUME-PERMIT"
+      },
+      {
+        "ordinal": 11,
+        "stepId": "STAGE-EFFECT"
+      },
+      {
+        "ordinal": 12,
+        "stepId": "STAGE-EVENT"
+      },
+      {
+        "ordinal": 13,
+        "stepId": "STAGE-OUTBOX"
+      },
+      {
+        "ordinal": 14,
+        "stepId": "REVALIDATE-READ-SET"
+      },
+      {
+        "ordinal": 15,
+        "stepId": "ATOMIC-COMMIT"
+      }
+    ],
+    "unknownTransitionTerminal": "BLOCK"
+  },
+  "revocationRule": {
+    "ancestorRevocationTraversal": "TRANSITIVE-CLOSURE",
+    "currentOperationalRevocationReceipt": "MISSING-BLOCKING",
+    "descendantOmissionTerminal": "BLOCK"
+  },
+  "scenarios": [
+    {
+      "crashMode": null,
+      "overrides": {},
+      "result": {
+        "authoritativeReadback": "HEAD-A",
+        "denialStep": null,
+        "store": {
+          "effectCount": 1,
+          "eventCount": 1,
+          "fence": 1,
+          "head": "HEAD-A",
+          "outboxCount": 1,
+          "permitUsed": true,
+          "replayUsed": true,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "COMMITTED"
+      },
+      "scenarioId": "SUCCESS",
+      "scenarioRoot": "0deafa3600aae202857fc5c8b668cfe106cfd547862808f6ed451a354b30ecf3"
+    },
+    {
+      "crashMode": null,
+      "overrides": {
+        "trustedNow": "2026-09-01T00:00:00Z"
+      },
+      "result": {
+        "authoritativeReadback": "HEAD-0",
+        "denialStep": "VALIDATE-TRUSTED-TIME",
+        "store": {
+          "effectCount": 0,
+          "eventCount": 0,
+          "fence": 0,
+          "head": "HEAD-0",
+          "outboxCount": 0,
+          "permitUsed": false,
+          "replayUsed": false,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "BLOCK"
+      },
+      "scenarioId": "EXPIRED",
+      "scenarioRoot": "d7ae12932e900feb136d4a30fed3309c6d0256fdee004c3bfc9e29d71f7cdae1"
+    },
+    {
+      "crashMode": null,
+      "overrides": {
+        "revoked": true
+      },
+      "result": {
+        "authoritativeReadback": "HEAD-0",
+        "denialStep": "VALIDATE-REVOCATION",
+        "store": {
+          "effectCount": 0,
+          "eventCount": 0,
+          "fence": 0,
+          "head": "HEAD-0",
+          "outboxCount": 0,
+          "permitUsed": false,
+          "replayUsed": false,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "BLOCK"
+      },
+      "scenarioId": "REVOKED",
+      "scenarioRoot": "54cef450f52e94ce9d624638d2e4fa4ff9c1cb5ec12ed5ba65b09ec168020e85"
+    },
+    {
+      "crashMode": null,
+      "overrides": {
+        "expectedHead": "HEAD-STALE"
+      },
+      "result": {
+        "authoritativeReadback": "HEAD-0",
+        "denialStep": "COMPARE-EXPECTED-HEAD",
+        "store": {
+          "effectCount": 0,
+          "eventCount": 0,
+          "fence": 0,
+          "head": "HEAD-0",
+          "outboxCount": 0,
+          "permitUsed": false,
+          "replayUsed": false,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "BLOCK"
+      },
+      "scenarioId": "STALE-HEAD",
+      "scenarioRoot": "a05752da28cfc2fa9b53bfdafac4203bd043465eee5b3f642bbed9c375c00814"
+    },
+    {
+      "crashMode": null,
+      "overrides": {
+        "replayUsed": true
+      },
+      "result": {
+        "authoritativeReadback": "HEAD-0",
+        "denialStep": "CONSUME-PERMIT",
+        "store": {
+          "effectCount": 0,
+          "eventCount": 0,
+          "fence": 0,
+          "head": "HEAD-0",
+          "outboxCount": 0,
+          "permitUsed": false,
+          "replayUsed": false,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "BLOCK"
+      },
+      "scenarioId": "REPLAY",
+      "scenarioRoot": "c2891bfd7e1e1d59a7698410d8aa6efe88e90e22d36eacdc95b6e628f8584abc"
+    },
+    {
+      "crashMode": null,
+      "overrides": {
+        "validFrom": "2026-08-30T13:00:00Z"
+      },
+      "result": {
+        "authoritativeReadback": "HEAD-0",
+        "denialStep": "VALIDATE-TRUSTED-TIME",
+        "store": {
+          "effectCount": 0,
+          "eventCount": 0,
+          "fence": 0,
+          "head": "HEAD-0",
+          "outboxCount": 0,
+          "permitUsed": false,
+          "replayUsed": false,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "BLOCK"
+      },
+      "scenarioId": "TIME-ROLLBACK",
+      "scenarioRoot": "f4292095531f8e0cd8da7e2e122ffa244c44b14df70b53d864614e91ce84d10c"
+    },
+    {
+      "crashMode": "FAIL-BEFORE-WRITE",
+      "overrides": {},
+      "result": {
+        "authoritativeReadback": "HEAD-0",
+        "store": {
+          "effectCount": 0,
+          "eventCount": 0,
+          "fence": 0,
+          "head": "HEAD-0",
+          "outboxCount": 0,
+          "permitUsed": false,
+          "replayUsed": false,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "FAILURE-BEFORE-WRITE"
+      },
+      "scenarioId": "FAILURE-BEFORE-WRITE",
+      "scenarioRoot": "9298fc26df2c360fe27264bc35de34f479dde319bab3bf153e0550b7fa8f736b"
+    },
+    {
+      "crashMode": "RESPONSE-LOSS-AFTER-WRITE",
+      "overrides": {},
+      "result": {
+        "authoritativeReadback": "HEAD-A",
+        "recoveryTerminal": "COMMITTED-READBACK-NO-RETRY",
+        "store": {
+          "effectCount": 1,
+          "eventCount": 1,
+          "fence": 1,
+          "head": "HEAD-A",
+          "outboxCount": 1,
+          "permitUsed": true,
+          "replayUsed": true,
+          "revision": 7,
+          "revocationHead": "f6f2cd52dfbac49a4697c8e4d3c185549d2b11b7732bba59876fbd6b2cf9ccdf",
+          "securityHead": "SECURITY-0"
+        },
+        "terminal": "RESPONSE-LOSS"
+      },
+      "scenarioId": "RESPONSE-LOSS-AFTER-WRITE",
+      "scenarioRoot": "68f72ef8e9c17c95fadd05a10776ea9a18e89e4cb9f6917a843092d9d27ba4fe"
+    }
+  ],
+  "schemaVersion": "PRCV5-LIFECYCLE-CAS-RECOVERY-V1"
+}

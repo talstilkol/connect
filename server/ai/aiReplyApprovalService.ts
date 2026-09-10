@@ -36,7 +36,7 @@ export class AiReplyApprovalServiceError
   }
 }
 
-export interface AiReplyApprovalDecisionRequest {
+export interface ParsedAiReplyApprovalDecisionRequest {
   outboxKey: string;
   expectedVersion: number;
   decision: "approve" | "reject";
@@ -65,9 +65,9 @@ function isRecord(
   );
 }
 
-function parseDecision(
+export function parseAiReplyApprovalDecisionRequest(
   input: unknown,
-): AiReplyApprovalDecisionRequest | null {
+): ParsedAiReplyApprovalDecisionRequest | null {
   if (
     !isRecord(input) ||
     Object.keys(input).length !== 3 ||
@@ -144,7 +144,7 @@ export function createAiReplyApprovalService(
         session,
         "conversations.reply",
       );
-      const request = parseDecision(input);
+      const request = parseAiReplyApprovalDecisionRequest(input);
 
       if (!request) {
         throw new AiReplyApprovalServiceError(

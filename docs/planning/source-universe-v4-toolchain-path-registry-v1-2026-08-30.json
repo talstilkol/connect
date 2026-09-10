@@ -1,0 +1,17 @@
+{
+  "schema": "CONNECT-SOURCE-UNIVERSE-V4-TOOLCHAIN-PATH-REGISTRY-V1",
+  "version": 1,
+  "toolchainPaths": [
+    "docs/planning/source-universe-v4-toolchain-path-registry-v1-2026-08-30.json",
+    "scripts/b0-v8-core.mjs",
+    "scripts/verify-secret-hygiene.mjs",
+    "scripts/source-universe-v4-core.mjs",
+    "scripts/create-source-universe-v4-candidate.mjs",
+    "scripts/verify-source-universe-v4-reader-a.mjs",
+    "scripts/verify-source-universe-v4-reader-b.py",
+    "scripts/finalize-source-universe-v4-candidate.mjs",
+    "scripts/verify-source-universe-v4-candidate.mjs",
+    "tests/source-universe-v4-core.test.mjs",
+    "package.json"
+  ]
+}

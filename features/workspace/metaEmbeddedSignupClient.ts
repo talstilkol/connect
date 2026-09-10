@@ -1,4 +1,6 @@
 import type { MetaFacebookSdk } from "./metaEmbeddedSignupSdk";
+import type { MetaEmbeddedSignupFlow } from
+  "../../shared/domain/metaEmbeddedSignupView";
 
 const MAX_MESSAGE_LENGTH = 65_536;
 const MAX_AUTHORIZATION_CODE_LENGTH = 4_096;
@@ -12,11 +14,20 @@ export type MetaEmbeddedSignupFinishEvent =
   | "FINISH_OBO_MIGRATION"
   | "FINISH_GRANT_ONLY_API_ACCESS";
 
-export interface MetaEmbeddedSignupAssets {
+export interface MetaCloudApiSignupAssets {
   businessPortfolioId: string;
   wabaId: string;
   phoneNumberId: string;
 }
+
+export interface MetaBusinessAppSignupAssets {
+  flow: "business-app";
+  wabaId: string;
+}
+
+export type MetaEmbeddedSignupAssets =
+  | MetaCloudApiSignupAssets
+  | MetaBusinessAppSignupAssets;
 
 export type MetaEmbeddedSignupMessageResult =
   | {
@@ -53,12 +64,9 @@ export type MetaEmbeddedSignupLoginResult =
       status: "invalid";
     };
 
-export interface MetaEmbeddedSignupCompletionInput {
+export type MetaEmbeddedSignupCompletionInput = MetaEmbeddedSignupAssets & {
   authorizationCode: string;
-  businessPortfolioId: string;
-  wabaId: string;
-  phoneNumberId: string;
-}
+};
 
 export type MetaEmbeddedSignupAttemptResult =
   | {
@@ -183,6 +191,7 @@ function parseFinishEvent(
 
 export function parseMetaEmbeddedSignupMessage(
   event: Pick<MessageEvent<unknown>, "origin" | "data">,
+  flow: MetaEmbeddedSignupFlow = "cloud-api",
 ): MetaEmbeddedSignupMessageResult {
   if (!isTrustedMetaOrigin(event.origin)) {
     return { status: "ignored" };
@@ -242,7 +251,26 @@ export function parseMetaEmbeddedSignupMessage(
     return { status: "invalid" };
   }
 
-  if (finishEvent !== "FINISH") {
+  if (
+    finishEvent === "FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING" &&
+    flow === "business-app"
+  ) {
+    if (
+      !isMetaId(payload.data.waba_id) ||
+      payload.data.waba_ids !== undefined
+    ) {
+      return { status: "invalid" };
+    }
+
+    // Meta's documented Coexistence completion can contain only the WABA.
+    // Resolve its owner and phone on the server, never invent missing IDs.
+    return {
+      status: "finished",
+      assets: { flow: "business-app", wabaId: payload.data.waba_id },
+    };
+  }
+
+  if (finishEvent !== "FINISH" || flow !== "cloud-api") {
     return {
       status: "unsupported-finish",
       event: finishEvent,
@@ -317,9 +345,10 @@ export function subscribeToMetaEmbeddedSignupMessages(
       { status: "ignored" }
     >,
   ) => void,
+  flow: MetaEmbeddedSignupFlow = "cloud-api",
 ): () => void {
   const listener = (event: MessageEvent<unknown>) => {
-    const result = parseMetaEmbeddedSignupMessage(event);
+    const result = parseMetaEmbeddedSignupMessage(event, flow);
 
     if (result.status !== "ignored") {
       onResult(result);
@@ -368,9 +397,7 @@ export function createMetaEmbeddedSignupAttemptCoordinator(
       status: "ready",
       input: {
         authorizationCode,
-        businessPortfolioId: assets.businessPortfolioId,
-        wabaId: assets.wabaId,
-        phoneNumberId: assets.phoneNumberId,
+        ...assets,
       },
     });
   };
@@ -433,10 +460,14 @@ export function launchMetaEmbeddedSignup(
   sdk: MetaFacebookSdk,
   configurationId: string,
   onResult: (result: MetaEmbeddedSignupLoginResult) => void,
+  flow: MetaEmbeddedSignupFlow = "cloud-api",
 ): void {
   const normalizedConfigurationId = configurationId.trim();
 
-  if (!META_ID_PATTERN.test(normalizedConfigurationId)) {
+  if (
+    !META_ID_PATTERN.test(normalizedConfigurationId) ||
+    (flow !== "cloud-api" && flow !== "business-app")
+  ) {
     throw new MetaEmbeddedSignupClientError(
       "INVALID_CONFIGURATION",
       "Meta Embedded Signup configuration is invalid",
@@ -463,6 +494,12 @@ export function launchMetaEmbeddedSignup(
         override_default_response_type: true,
         extras: {
           setup: {},
+          ...(flow === "business-app"
+            ? {
+                featureType: "whatsapp_business_app_onboarding" as const,
+                sessionInfoVersion: "3" as const,
+              }
+            : {}),
         },
       },
     );

@@ -1,0 +1,110 @@
+{
+  "admission": {
+    "admissionWithoutIndependentReview": "BLOCK",
+    "candidateFamiliesClosed": true,
+    "independentReviewRequired": true,
+    "selectorMayReviewOwnAdmission": false
+  },
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-CONTROL-REGISTRY-2026-08-30-G0",
+  "authoritativeFields": {
+    "fieldIds": [
+      "SOURCE-BYTES",
+      "SOURCE-AUTHORITY",
+      "SOURCE-CUSTODY",
+      "SOURCE-FRESHNESS",
+      "SOURCE-LOCATOR",
+      "SOURCE-LEGAL-BASIS",
+      "SOURCE-RETENTION"
+    ],
+    "triggerFieldIds": [
+      "SOURCE-BYTES",
+      "SOURCE-AUTHORITY",
+      "SOURCE-CUSTODY",
+      "SOURCE-FRESHNESS",
+      "SOURCE-LOCATOR",
+      "SOURCE-LEGAL-BASIS",
+      "SOURCE-RETENTION"
+    ]
+  },
+  "authorityEventMatrix": {
+    "eventTypes": [
+      "DIRECTIVE",
+      "AMENDMENT",
+      "PROVIDER-OBSERVATION",
+      "REVOCATION",
+      "EXPIRY"
+    ],
+    "missingEffectCount": 0,
+    "unknownEventEffect": "BLOCK"
+  },
+  "dynamicSources": {
+    "authenticityRequired": true,
+    "cachePartitionKeys": [
+      "PROVIDER",
+      "ACCOUNT",
+      "ENVIRONMENT",
+      "ASSET",
+      "GRAPH-VERSION"
+    ],
+    "staleAction": "BLOCK",
+    "unknownPartitionAction": "BLOCK"
+  },
+  "independenceRelations": {
+    "closed": true,
+    "relationIds": [
+      "SELECTOR-REVIEWER",
+      "PRODUCER-READER",
+      "REVIEWER-RECONCILER",
+      "RECONCILER-APPROVER"
+    ],
+    "unknownRelation": "BLOCK"
+  },
+  "noRandomIdentity": {
+    "cryptoRandomRequiresPerUseApproval": true,
+    "deterministicContentIdsRequired": true,
+    "mathRandomForbidden": true,
+    "processLocalCountersForbidden": true
+  },
+  "providerRuntime": {
+    "acquisitionEdgePresent": true,
+    "admissionEnabled": false,
+    "liveEvidenceStatus": "ABSENT-BLOCKING",
+    "producerId": "EXTERNAL-PROVIDER-OBSERVATION-ADAPTER"
+  },
+  "reviewLifecycle": {
+    "acceptanceRequiresExactPackageRoot": true,
+    "currentState": "CANDIDATE",
+    "deterministicTransitions": true,
+    "selfAcceptanceForbidden": true,
+    "states": [
+      "CANDIDATE",
+      "UNDER-REVIEW",
+      "RECONCILING",
+      "AWAITING-TAL-APPROVAL",
+      "ACCEPTED",
+      "REJECTED",
+      "SUPERSEDED"
+    ]
+  },
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-CONTROL-REGISTRY-V1",
+  "stateAxes": [
+    "AUTHENTICITY",
+    "AUTHORITY",
+    "CUSTODY",
+    "FRESHNESS",
+    "SUFFICIENCY",
+    "PUBLIC-SAFETY",
+    "LIFECYCLE"
+  ],
+  "terminals": [
+    "SOURCE-REFERENCE-BLOCKED",
+    "DEPENDENCY-CLOSURE-BLOCKED",
+    "PUBLIC-EGRESS-BLOCKED",
+    "ADMISSION-REVIEW-BLOCKED",
+    "PROVIDER-EVIDENCE-BLOCKED",
+    "STALE-GENERATION-BLOCKED",
+    "CLAUSE-PRESERVATION-BLOCKED",
+    "LIFECYCLE-BLOCKED",
+    "REVIEW-LIFECYCLE-BLOCKED"
+  ]
+}

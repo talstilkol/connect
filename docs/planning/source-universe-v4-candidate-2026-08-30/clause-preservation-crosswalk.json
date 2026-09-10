@@ -1,0 +1,1179 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-PRESERVATION-CROSSWALK-2026-08-30-G0",
+  "crosswalkRoot": "f72e3fe78f26da6985be8c77d45633d5d28e774e39a62cbbaac39c54d21301f1",
+  "fullLocalCount": 78,
+  "rowCount": 78,
+  "rows": [
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-1361AE60D814FC992C36D4FA",
+      "rowId": "SURS4-PRES-001",
+      "sourceIdentity": "SURS-001",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "5053d749a6e846021052fbd2eab08f4f77f741a31707c641b7421abad2235303",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-4A0E8919CE2E5F118EA4CBEF",
+      "rowId": "SURS4-PRES-002",
+      "sourceIdentity": "SURS-002",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "3ac0bff78840a850ec5796b24019215136cd6e33c339dfac3e480a1528c5caae",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-A669D905EE709F56A5AA1AF9",
+      "rowId": "SURS4-PRES-003",
+      "sourceIdentity": "SURS-003",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "93ececda1142c0b4807d805e0a287d73e581f1292a443739c9b641c67e345aaa",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-24E7CEA1CDCEC8A48F667F7D",
+      "rowId": "SURS4-PRES-004",
+      "sourceIdentity": "SURS-004",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "762229e2968e0c48338caa20b6d63dd6476aeb8c9c47765d905da4ab9af821f4",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-38208CDFB55415017A498F69",
+      "rowId": "SURS4-PRES-005",
+      "sourceIdentity": "SURS-005",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "9b155b5d3497aa7688d78f16227b006365d87d4ee8d6ba6e8663637b8103c7f0",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-D17AE7054C876598EA3B9AA9",
+      "rowId": "SURS4-PRES-006",
+      "sourceIdentity": "SURS-006",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "741e9d4fec785a4cf56e7f0ed1ac57f538f4105a19fab486bc1ede04fe793792",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-F8DA6F65EBC78E6D6C9A0BC3",
+      "rowId": "SURS4-PRES-007",
+      "sourceIdentity": "SURS-007",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "360f3eca96b5fe07da2b51821625368b69b08efe39e09d4a4d081fcede1833e2",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-662A2B8CF3C41B69C699EB66",
+      "rowId": "SURS4-PRES-008",
+      "sourceIdentity": "SURS-008",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "5184c681b01947ca963d7b023cb24ce8627ad557dfe0c37f6643d6475a3d9374",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-DF14D5BD1AA5DA0A9FC89009",
+      "rowId": "SURS4-PRES-009",
+      "sourceIdentity": "SURS-009",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "3a905a2e2bf99397e94a6b59881cf48483e030a65bb9414d6499d7afb332cab0",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-F32DCED23E6A0B3E7C59A2C1",
+      "rowId": "SURS4-PRES-010",
+      "sourceIdentity": "SURS-010",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "750005f17f52310a701a4929c9e783b00d4d323d087af7be4973598154804c25",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-BC0DEF150AAE88E2B61E1160",
+      "rowId": "SURS4-PRES-011",
+      "sourceIdentity": "SURS-011",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "22063aad4ca918236ded2390163094c568de04d9502aad52247c64e0ca1b353a",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-323435A0E6FE41664877979C",
+      "rowId": "SURS4-PRES-012",
+      "sourceIdentity": "SURS-012",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "071832f551a0b769984dace71455e069e336e9c93f9542317deba3681d9b3fd4",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-4A5CF500D8B8A02A0EA9EB3F",
+      "rowId": "SURS4-PRES-013",
+      "sourceIdentity": "SURS-013",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "88163405875585b2aee4ff1c28a11ad7a00f7f804548237e57ed074065b3df79",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-4758558FD18A4AD6979013DC",
+      "rowId": "SURS4-PRES-014",
+      "sourceIdentity": "SURS-014",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "51632aa5d9a3ac245c58f9467b5806d0a21a4aa39e69a6ca7270ad1b2807963d",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-EE95511B7CA57B67C3A67301",
+      "rowId": "SURS4-PRES-015",
+      "sourceIdentity": "SURS-015",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "39c5bc8a2a9222322518099e18dbe21036001ee5f97ec0da210e0d6c3a68764b",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-ADAA95FDD6074CB97442F556",
+      "rowId": "SURS4-PRES-016",
+      "sourceIdentity": "SURS-016",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "8184f9227e96363051841a6f3920d4790963f41a2b41cd2cb7412817f43dd421",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-BF0061283852CFFC9C1BFCC6",
+      "rowId": "SURS4-PRES-017",
+      "sourceIdentity": "SURS-017",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "a24fa5a13223a58d08452fa30cd387e7a5aa0c845c17e9242672ac0de1b1a0c5",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-FF2429C1CAFD0967CDAFA15B",
+      "rowId": "SURS4-PRES-018",
+      "sourceIdentity": "SURS-018",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "fddb75484647166ab3fb240e7deab110fe8b176df25bf573a2bc67a68075cc7f",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-521C1183A9A28F1E25E6C1D7",
+      "rowId": "SURS4-PRES-019",
+      "sourceIdentity": "SURS-019",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "c170cdcb37fe3489f1b2103db171dedc2a271bcfb3bbfa71e2cafd6837785106",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-A0480E890F86052A52CF1536",
+      "rowId": "SURS4-PRES-020",
+      "sourceIdentity": "SURS-020",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "f83a9ca25ba064abb2e1063bde34efa0bfea2246207d1cab5a2ec4003374a0b0",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-5F61329E1518082543B351D4",
+      "rowId": "SURS4-PRES-021",
+      "sourceIdentity": "SURS-021",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "685e6f6e5fcca7867a2a12f4970d2678e700eee962e80ce12a1ce4b21ed6a35a",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-202AC30425FAF66FCE29CC4E",
+      "rowId": "SURS4-PRES-022",
+      "sourceIdentity": "SURS-022",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "0150df655b06d02535edcc6bf90a1d89d0167f3b9b63368bbce587ec7093466c",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-1BFEBEEB2CBC49E9B4BAD186",
+      "rowId": "SURS4-PRES-023",
+      "sourceIdentity": "SURS-023",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "0e5b023847c97a307ff8e90537d486e5400b54fc035c739b9392026932d63691",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-0A9C23E51823C8E9F3571753",
+      "rowId": "SURS4-PRES-024",
+      "sourceIdentity": "SURS-024",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "9954b9549c9ac78de8f4bef0adc6b4e61c16022e82985b7442c9b7cd19352fa6",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-798EE0434B3F8669C4204DE7",
+      "rowId": "SURS4-PRES-025",
+      "sourceIdentity": "SURS-025",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "2a3f4684e833da56ef764ce5cda797a6a68c08c255912f5b1baaadcbe5e61d1d",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REQUIREMENT",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-1C6BB75920E826F18A2D4812",
+      "rowId": "SURS4-PRES-026",
+      "sourceIdentity": "SURS-026",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceSpanSha256": "27108e8f65af7a61d4c77339d2497a0f86998bd29b8b37313b13a1fd4189464a",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-86D40D574D517F142CB1D2F9",
+      "rowId": "SURS4-PRES-027",
+      "sourceIdentity": "SURS2-HR-F001",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "ed71e475f8e5951932ed4fd28f1e998a614246fd9adce0fa233a773064254619",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-A7D972A89169922F2B63E379",
+      "rowId": "SURS4-PRES-028",
+      "sourceIdentity": "SURS2-HR-F002",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "15be9a538f840bd367af5e94150f2c00fd442a8f463361bc0e1910ccca6b5a8b",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-6E6B4918DAF9CD1AC4EA6E44",
+      "rowId": "SURS4-PRES-029",
+      "sourceIdentity": "SURS2-HR-F003",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "97c1438c59d8e4f9600d36eba6975c16603349b8b58dc31f9e7af31f3e49250c",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-223CDA16CE7E844A90760C51",
+      "rowId": "SURS4-PRES-030",
+      "sourceIdentity": "SURS2-HR-F004",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "7f7c5cf1d0e3d3d299b83e9d7c7369ce4c7e5c3e58a24db50a99090eb8d43036",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-19D8EB028F674092F473699B",
+      "rowId": "SURS4-PRES-031",
+      "sourceIdentity": "SURS2-HR-F005",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "4dc51850ec96ec02b96ba1a58db0038bb9d07179aa15868d7869fbeedc4135d6",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-8834BCB5C1434438B3F738C0",
+      "rowId": "SURS4-PRES-032",
+      "sourceIdentity": "SURS2-HR-F006",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "15c90d5f958c190ba5614030aee59099300741e78af78dce9c520583d2316560",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-6339648E78A9041A2CEBDB83",
+      "rowId": "SURS4-PRES-033",
+      "sourceIdentity": "SURS2-HR-F007",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "35dcd98dc74e2e1af36a6ab83ed8f69a8ab8b95846a08a04fd7f9427bf8c2572",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-32C577D3FE1CB689141949DE",
+      "rowId": "SURS4-PRES-034",
+      "sourceIdentity": "SURS2-HR-F008",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "a3ef4b072a1798041c60eaf9ba118ce6d3cde72b8e2af4a9e20713d33a747d5e",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-B93A48186026AB4820E080AC",
+      "rowId": "SURS4-PRES-035",
+      "sourceIdentity": "SURS2-HR-F009",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "91a72a475bee96a1348de9f7ce2abff0637b64b4afd33917f22ea6f2a43acb9b",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-0CE3890E3D95911EFD07FE72",
+      "rowId": "SURS4-PRES-036",
+      "sourceIdentity": "SURS2-HR-F010",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "df224b430ff75fa41ba22d3f9372cfe016519fcd7d35704da2967dc7586b5aef",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-C523A4A27D29F55964A52DB2",
+      "rowId": "SURS4-PRES-037",
+      "sourceIdentity": "SURS2-HR-F011",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "4b8e8d63fd7ffb8a0f14906236232c20411b5cf5e2167a6b68ee4800bde6c495",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-01F95C1066BDEAF47587B871",
+      "rowId": "SURS4-PRES-038",
+      "sourceIdentity": "SURS2-HR-F012",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "9cd028fcdd9336af48e329a660fba49ea4c8a1ad19e0cf1c03bdd0419c2fd2dd",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-9356E79AAB0AD3919EFE0630",
+      "rowId": "SURS4-PRES-039",
+      "sourceIdentity": "SURS2-HR-F013",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "99bc794a37d805f4b7001caeba629baf638e3ade602b62d5da870ec6c0f25852",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-426D5A3EC1909CCE0428830C",
+      "rowId": "SURS4-PRES-040",
+      "sourceIdentity": "SURS2-HR-F014",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "8513d46471a1f975157b04c2c174c5b86647e43c5034d61782f8f580d90a9d7a",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-A1D29AC7289F1E76F828E50E",
+      "rowId": "SURS4-PRES-041",
+      "sourceIdentity": "SURS2-HR-F015",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "77fae59bcc589c8f1aaa049693699fad70c9fcd07e6f6d83f970a4eff60df037",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-D1475010A46982325819978E",
+      "rowId": "SURS4-PRES-042",
+      "sourceIdentity": "SURS2-HR-F016",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "fea6bed8a466082d6cc6d0b860859487ba43b6a196d5c2420e9a7d1de2685cb2",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-093EBA69F315E8649B5A8004",
+      "rowId": "SURS4-PRES-043",
+      "sourceIdentity": "SURS2-HR-F017",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "214b3e3ab36f2c9354a6eb6aeb21a8d84f951a4027b8960e4a253b6aeb2e213e",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-4CDBC52A7A3242A2612B23F0",
+      "rowId": "SURS4-PRES-044",
+      "sourceIdentity": "SURS2-HR-F018",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "0210452a24c107d4635a48b0805e81114f88ce765d3fb176554e8a7e9c38e200",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-C2AFAF45DF822E3265272F75",
+      "rowId": "SURS4-PRES-045",
+      "sourceIdentity": "SURS2-HR-F019",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "1e9d8b46171c6694a60cff16dd3372fe887bcb95f1404044ea376be116e0ec4d",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V2-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-9DEB7A3BAE8748BC1565F373",
+      "rowId": "SURS4-PRES-046",
+      "sourceIdentity": "SURS2-HR-F020",
+      "sourcePath": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "d06f36dafbde11ad5f3dd6745d6a09795d7341b53e54ebbaac45e2e74cde0ad0",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-FA0F6BF6279E999B96C7E5A7",
+      "rowId": "SURS4-PRES-047",
+      "sourceIdentity": "SURS-HR-F001",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "11e98f4d1693cfd75542d7dc52ded406e73003bdf27628bc57242fac6a28c039",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-34F1EECE14E40CF4FB029965",
+      "rowId": "SURS4-PRES-048",
+      "sourceIdentity": "SURS-HR-F002",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "9dcb1c4d5fa3a42f53f4de0f43ab774d1e09190e7b069f3c9504fbc738c7bffb",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-C493EC251E7D7B58F9BD20FD",
+      "rowId": "SURS4-PRES-049",
+      "sourceIdentity": "SURS-HR-F003",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "e1b0a6c07142a975578b0314d4cdd09f94d40a710ababf6ee5af6058e09d5e28",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-2F95A98F164A989A89CDED1C",
+      "rowId": "SURS4-PRES-050",
+      "sourceIdentity": "SURS-HR-F004",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "a6b4b2682a9300857535b1817dad409aadd2a407e87fa9147348f60eb2da1134",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-4F9BC2DE66287A89F57B2555",
+      "rowId": "SURS4-PRES-051",
+      "sourceIdentity": "SURS-HR-F005",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "6e0952afd3ea1d8643afc538d68067a57e4a3b5ba2c192a50fa234cb44bf8584",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-2F7177A25C2F27CED2988EDA",
+      "rowId": "SURS4-PRES-052",
+      "sourceIdentity": "SURS-HR-F006",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "bd039b1cb22dfebbabc39e91edc6745eb18bd0966e2c1fd1c4c5ec3eb93b2d91",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-FE2100412D7F146D2540B9F5",
+      "rowId": "SURS4-PRES-053",
+      "sourceIdentity": "SURS-HR-F007",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "15eed8789efe63cbe3e73b286d9da5c88c57610b4cb16ae9872f1090a846f8a3",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-5BB1A4251FA6A2635E32BF1F",
+      "rowId": "SURS4-PRES-054",
+      "sourceIdentity": "SURS-HR-F008",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "2140b5b73b38f66a473b9050a5dd1e6d315a742ea3dc797ddc4886a38ec4cfcf",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-EE7064872E88A7E1EAB3D2B9",
+      "rowId": "SURS4-PRES-055",
+      "sourceIdentity": "SURS-HR-F009",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "7855dc0f635ba5e309c038b8acc8c6a2b8d6b7df95ef0b0f9c8f5ed9ceed4f7b",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-1035BEEA146CBEF9CC6EE277",
+      "rowId": "SURS4-PRES-056",
+      "sourceIdentity": "SURS-HR-F010",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "732fc077cfdde7bcf511ee93bcba19850fe174995c940a72848db73c86f48f91",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-2C4BB014CA927AFCF0289F74",
+      "rowId": "SURS4-PRES-057",
+      "sourceIdentity": "SURS-HR-F011",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "1d2100a7acbd2767d82ca63425a6d0cebe0d4a6a77f4e1d5f314618b90fe6b79",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-73F880C89C58771A7374C37A",
+      "rowId": "SURS4-PRES-058",
+      "sourceIdentity": "SURS-HR-F012",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "85a3448055776e9d0e6a5fe63e52f57241f0080093af59807faec482027f1744",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-8CE16F9795A3BD7B564F66D1",
+      "rowId": "SURS4-PRES-059",
+      "sourceIdentity": "SURS-HR-F013",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "8894f495edc3c7cf77a60da28dea2cda858f7e69b89bc18e9826477d0df921e9",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-CB01B2F215AC96DE32A48B79",
+      "rowId": "SURS4-PRES-060",
+      "sourceIdentity": "SURS-HR-F014",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "71fe3f83ccca2ac4ea631baa146a83294bcd758f81852fc328deeff89a7de842",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-C150E4C16D184B3EFE934C52",
+      "rowId": "SURS4-PRES-061",
+      "sourceIdentity": "SURS-HR-F015",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "47ef2a04a12c312df02aae01ea7025ce75e465359cc7e9529738bf9d90716a7d",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-64688BDBB9CB37F6CF5A54C8",
+      "rowId": "SURS4-PRES-062",
+      "sourceIdentity": "SURS-HR-F016",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "fbc102cbdbee1222ca83b7804effc7a20e9283341c8a249a2b7f2395efbbd252",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-E7D085D47D60E8D827BEDE58",
+      "rowId": "SURS4-PRES-063",
+      "sourceIdentity": "SURS-HR-F017",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "10625ac0a69e398b6c61447cbf2af2f516993f3277b48d5f913440ea977b3eae",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-C4C705D225996F6F936BA346",
+      "rowId": "SURS4-PRES-064",
+      "sourceIdentity": "SURS-HR-F018",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "0be51d66498ea45c83079ef58c6cf223e12bb1bbc9318b98a3f7bb48f8b1b060",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-1690DFA33692D8F8B99A2FF3",
+      "rowId": "SURS4-PRES-065",
+      "sourceIdentity": "SURS-HR-F019",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "652c5bc7f375dd9fb8918af7f22d3220930f57acc16fe5ad6242142b58fec119",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-405EA1F45F6814FC01D33F3F",
+      "rowId": "SURS4-PRES-066",
+      "sourceIdentity": "SURS-HR-F020",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "45d92675fe2917dbc872a17bab18e6eb4cc25b9694e4a62d2d6024296ad9f4dc",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-F199F6E7925F861C77C88A40",
+      "rowId": "SURS4-PRES-067",
+      "sourceIdentity": "SURS-HR-F021",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "15732f5f58f38cab895ca09047aeecccbb1c8208813f5e466b05ed55dd3772a9",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-CB4574DA279CCB95A9E6516D",
+      "rowId": "SURS4-PRES-068",
+      "sourceIdentity": "SURS-HR-F022",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "b4fa335817e6f456ded201d4333c9b81bcdde24e876f085694dfad97c4787acd",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-D0CD3D1AF08326E0EA039241",
+      "rowId": "SURS4-PRES-069",
+      "sourceIdentity": "SURS-HR-F023",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "03e16e611159875e4015eaf7d93639936ce512004f07bf0dd24c454c4e391deb",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-98344E6E7DBD6F9B4EFC80C8",
+      "rowId": "SURS4-PRES-070",
+      "sourceIdentity": "SURS-HR-F024",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "f0ee1f616b9d4ae2151b374a72a1565281909057989540978a17a0d99ec1f337",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-2A4620F88B3D61003145E1FB",
+      "rowId": "SURS4-PRES-071",
+      "sourceIdentity": "SURS-HR-F025",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "0e856b83b3132115449696fa35348a9b29496e82e4a4cc68e7f41650abd953ad",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-BC67A112D35400F06AAE3F09",
+      "rowId": "SURS4-PRES-072",
+      "sourceIdentity": "SURS-HR-F026",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "19e82bbdb81a6d50c9744c4e6b78723d0ada2471dc2ca6f3504213d0e98f1816",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-001",
+        "SURS4-CTL-007",
+        "SURS4-CTL-013",
+        "SURS4-CTL-019"
+      ],
+      "mutationVectorId": "SURS4-MUT-AA8BBC13715F49A0C2F621C3",
+      "rowId": "SURS4-PRES-073",
+      "sourceIdentity": "SURS-HR-F027",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "329c993d4fbeef08cb4ce3933ec5bc450245ecd4e6e123b1b2314ad5bd82ad92",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-002",
+        "SURS4-CTL-008",
+        "SURS4-CTL-014",
+        "SURS4-CTL-020"
+      ],
+      "mutationVectorId": "SURS4-MUT-3CD7DFC57B93C68F23BFF06F",
+      "rowId": "SURS4-PRES-074",
+      "sourceIdentity": "SURS-HR-F028",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "4e0ff65ee0fd0d95a97f3555f4bdea8fe4f857ee89c23cebf0e9519246d81ddc",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-003",
+        "SURS4-CTL-009",
+        "SURS4-CTL-015",
+        "SURS4-CTL-021"
+      ],
+      "mutationVectorId": "SURS4-MUT-A801DD7E9C2FC9D5D799FDBB",
+      "rowId": "SURS4-PRES-075",
+      "sourceIdentity": "SURS-HR-F029",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "cff4d4a65dfe5190d23213ab937927608d80dc3d01b39c5c5adc1f7e99d50c07",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-004",
+        "SURS4-CTL-010",
+        "SURS4-CTL-016",
+        "SURS4-CTL-022"
+      ],
+      "mutationVectorId": "SURS4-MUT-DE858C0C75BAA2203B7C4523",
+      "rowId": "SURS4-PRES-076",
+      "sourceIdentity": "SURS-HR-F030",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "864b2f313f05ad1bbf323b72a4e3479311e6bb99c8ce7da1abb5b90bbf551328",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-005",
+        "SURS4-CTL-011",
+        "SURS4-CTL-017",
+        "SURS4-CTL-023"
+      ],
+      "mutationVectorId": "SURS4-MUT-D1E6CB41E899DB66E3EDB40E",
+      "rowId": "SURS4-PRES-077",
+      "sourceIdentity": "SURS-HR-F031",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "af2a68081653f8818a0e9400fd4a8d4691e685606bcf90605d290cb614197c58",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    },
+    {
+      "category": "V1-REVIEW-FINDING",
+      "destinationControlIds": [
+        "SURS4-CTL-006",
+        "SURS4-CTL-012",
+        "SURS4-CTL-018",
+        "SURS4-CTL-024"
+      ],
+      "mutationVectorId": "SURS4-MUT-BCA12251C92C6A33A97ECEED",
+      "rowId": "SURS4-PRES-078",
+      "sourceIdentity": "SURS-HR-F032",
+      "sourcePath": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceSpanSha256": "3939d57bf330dd805ebea72f6a6d9fee7092ac01db13b71aaff8cc774ea6867c",
+      "status": "FULL-LOCAL-NOT-INDEPENDENTLY-ACCEPTED"
+    }
+  ],
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-PRESERVATION-CROSSWALK-V1"
+}

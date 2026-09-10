@@ -1,0 +1,203 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-OBJECT-REGISTRY-2026-08-30-G0",
+  "dualClassCount": 0,
+  "missingProducerCount": 0,
+  "objectCount": 32,
+  "objects": [
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-B0-V8-MANIFEST#WHOLE-FILE",
+      "path": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-atomic-package-manifest-2026-08-30.json",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-CHARTER-V2#WHOLE-FILE",
+      "path": "docs/planning/source-universe-v4-successor-build-charter-v2-2026-08-30.md",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EVIDENCE",
+      "objectId": "SRC-CUTOFF-V3-RECEIPT#WHOLE-FILE",
+      "path": "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/receipt.json",
+      "producerId": "DISCOVERY-CUTOFF-V3-PRODUCER"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-PROTOCOL-G1-MANIFEST#WHOLE-FILE",
+      "path": "docs/planning/three-review-protocol-v1-10-g1-package-2026-08-30/normative-package-manifest.json",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-SURS1-FINDINGS#WHOLE-FILE",
+      "path": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-SURS2-FINDINGS#WHOLE-FILE",
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-SURS2-SUBJECT#WHOLE-FILE",
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-SURS3-FINDINGS#WHOLE-FILE",
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v3-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "EXTERNAL-INPUT",
+      "objectId": "SRC-SURS3-SUBJECT#WHOLE-FILE",
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v3-2026-08-29.md",
+      "producerId": "EXTERNAL-FROZEN-SOURCE"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-SUBJECT-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-DISCOVERY-INPUT-MANIFEST-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-CUTOFF-DETACHED-ENVELOPE-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-SOURCE-CANDIDATE-INVENTORY-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-PUBLIC-SOURCE-PROJECTION-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-PRIVATE-CUSTODY-REFERENCE-MANIFEST-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-SOURCE-OCCURRENCE-LEDGER-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-TARGET-SPAN-LEDGER-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-OBJECT-CLASS-SOLE-PRODUCER-REGISTRY-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-EXPLICIT-DEPENDENCY-GRAPH-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-SEMANTIC-DEPENDENCY-GRAPH-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-AUTHORITY-ADMISSION-STATE-TERMINAL-FIELD-REGISTRIES-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-PUBLIC-HANDLING-EGRESS-DETECTOR-CONTRACTS-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-LIFECYCLE-CONTRACTS-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-CLAUSE-PRESERVATION-CROSSWALK-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-FINDING-CLOSURE-CROSSWALK-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-CONFORMANCE-VECTORS-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-HOSTILE-MUTATION-VECTORS-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-CONTROLLED-GENERATION-VECTORS-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+      "producerId": "V4-CANDIDATE-BUILDER"
+    },
+    {
+      "objectClass": "EVIDENCE",
+      "objectId": "OUTPUT-READER-A-REPORT-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+      "producerId": "READER-A"
+    },
+    {
+      "objectClass": "EVIDENCE",
+      "objectId": "OUTPUT-READER-B-REPORT-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+      "producerId": "READER-B"
+    },
+    {
+      "objectClass": "NORMATIVE-OUTPUT",
+      "objectId": "OUTPUT-PACKAGE-MANIFEST-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/package-manifest.json",
+      "producerId": "FINALIZER"
+    },
+    {
+      "objectClass": "EVIDENCE",
+      "objectId": "OUTPUT-PRODUCER-QA-JSON",
+      "path": "docs/planning/source-universe-v4-candidate-2026-08-30/producer-qa.json",
+      "producerId": "FINALIZER"
+    }
+  ],
+  "registryRoot": "4800241f00eb1f2936a05ef9884814bc0b46f76571f81519d04308559246d860",
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-OBJECT-REGISTRY-V1",
+  "semanticAtomicityViolationCount": 0
+}

@@ -1,0 +1,31 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-PUBLIC-CONTRACTS-2026-08-30-G0",
+  "detector": {
+    "criticalFalseNegativeMaximum": 0,
+    "evidenceStatus": "ABSENT-BLOCKING",
+    "publicWritesEnabled": false,
+    "thresholdProfileStatus": "DEFINED-NOT-LIVE-VALIDATED"
+  },
+  "egress": {
+    "discoveryFrontier": "DECLARED-SINKS-PLUS-UNKNOWN-BLOCK",
+    "knownSinkClasses": [
+      "PUBLIC-GIT",
+      "LOG",
+      "REPORT",
+      "HTTP-RESPONSE",
+      "PROVIDER-WRITE"
+    ],
+    "unknownSinkAction": "BLOCK"
+  },
+  "opaqueProjection": {
+    "keyLifecycleStatus": "ABSENT-BLOCKING",
+    "publicOpaqueProjectionEnabled": false,
+    "status": "BLOCKED-PENDING-PER-USE-CRYPTO-APPROVAL"
+  },
+  "policy": {
+    "acceptedPolicyRootPresent": false,
+    "policyPrecedesAllPublicAdjacentWrites": true,
+    "prePolicyWriteAction": "BLOCK-WITHOUT-PAYLOAD"
+  },
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-PUBLIC-CONTRACTS-V1"
+}

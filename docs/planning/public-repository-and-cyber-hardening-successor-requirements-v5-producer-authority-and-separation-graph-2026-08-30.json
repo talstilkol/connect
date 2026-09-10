@@ -1,0 +1,2522 @@
+{
+  "actualGenesisState": "MISSING-BLOCKING",
+  "actualRecoveryReceiptState": "MISSING-BLOCKING",
+  "admittedPlanningGenesisInstance": {
+    "acceptanceCredit": 0,
+    "authorityEpoch": 0,
+    "expectedEmptyAppointmentHead": "8baade1a25855882bb32e3cb9ad93bd9c821dd6c2acbb4dfe54069ca388b4c8d",
+    "externalMandateRoot": "44edb52ae166a3dff610496455fc49988b25cbee30b48c457123dafe1aaf649f",
+    "instanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+    "operationalCredit": 0,
+    "planningOnly": true,
+    "repositoryIdentityRoot": "92363aa2d6e407b69401defbd4707530ead53173e40492cded07cb2834551008",
+    "schemaId": "PRCV5-EXTERNAL-GENESIS-SCHEMA-V1"
+  },
+  "admittedPlanningRecoveryInstance": {
+    "attemptId": "PRCV5-RECOVERY-PLANNING-WITNESS-001",
+    "compromisedAuthorityRoot": "d7c2f42a25a932f08f50a2706756d417594913384dd613f44eabdcadecb3ed23",
+    "expectedCurrentHead": "4533a3b35be88b95836c5bb49932a8cbcc7bbb7f339fe6fc89e56baa112fdaaa",
+    "independentRecoveryOwnerRoot": "505e37760a7c6578c879c3391f8115b7cf5e410264b8f2c4c35bf33fddb2ff13",
+    "instanceRoot": "6b03647eb61d39c035c8b6cd7eaef0e9bd3d7c390a6aaf5bb3438c297cfcd044",
+    "newAuthorityRoot": "2cf3290d35a587a17a26f69ffef2c655906f7019cc1afcc8d638f5bdd2555c3a",
+    "operationalCredit": 0,
+    "planningOnly": true,
+    "readbackRoot": "c11661f59b7690230bb8dd9aaae0d00f5db2a2beada292c4928e0ff44d1e9dda",
+    "revocationClosureRoot": "93f1e3e773ed0dc3eb4d05499a83a84739afb9de52ce3e63df66f1abee4160a2"
+  },
+  "appointments": [
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-001",
+      "appointmentRoot": "78b53cf969ac85d85b63d89a963b867a22d9d0ce8157bc9c9aa657b642af3d90",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "8baade1a25855882bb32e3cb9ad93bd9c821dd6c2acbb4dfe54069ca388b4c8d",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "47a1fbca119479ebbe5947c8dfbe864bec8860fcef0713723a45b65f0a1c9217",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-000",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-000",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-002",
+      "appointmentRoot": "6d346022e10f802631f76a740495226fdd264bea4e433964473870a1cf434b70",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "47a1fbca119479ebbe5947c8dfbe864bec8860fcef0713723a45b65f0a1c9217",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "4032644e4a6e6a0d7ac1715ad9158aaf175cb868bf09870b3a8c8e8419743945",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-001",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-001",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-003",
+      "appointmentRoot": "766d9a03a80775e4a6e6050b4ed440a355e04dda3e1dbf4a585b24cadad54dcd",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "4032644e4a6e6a0d7ac1715ad9158aaf175cb868bf09870b3a8c8e8419743945",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "4df2e30b7a90368556f7951e534c7dae56f5310098bf68b01920b808694da473",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-002",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-002",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-004",
+      "appointmentRoot": "83d07c014cb4c5d51d3ed75d9b4567c3117e5c07ae68cab55bc8bce9e7fc9125",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "4df2e30b7a90368556f7951e534c7dae56f5310098bf68b01920b808694da473",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "e877e6c3fdc19f785e5736cb60504ddc81fbec3408462923bfd38f3b034d804d",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-003",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-003",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-005",
+      "appointmentRoot": "1ea6475fe8c34f06af0dcb244ddf669ccb45ee59384d18ea55df9613c7b4a56f",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "e877e6c3fdc19f785e5736cb60504ddc81fbec3408462923bfd38f3b034d804d",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "55f86edd00b6085da2e9504da9374bbb9a8d1fd16944165523827793c5221430",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-004",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-004",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-006",
+      "appointmentRoot": "462a0dcd1d7949295b97632ee63fa96ed5fc143ffb0381fd319b2f0a2f3d6020",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "55f86edd00b6085da2e9504da9374bbb9a8d1fd16944165523827793c5221430",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "fce8cf3666eda1de59ab539adcaa25c9a26bb3b519f97a1c903886fd89fb8f77",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-005",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-005",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-007",
+      "appointmentRoot": "3dc866947e07b59c0a1e72b22066e360d6944a506d932b742270a3b91ed1c69e",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "fce8cf3666eda1de59ab539adcaa25c9a26bb3b519f97a1c903886fd89fb8f77",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "c1b7c02b95a10c385261507f55ad7e719177434691b6fe95c54c3bb75e8211a3",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-006",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-006",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-008",
+      "appointmentRoot": "f6acbb5f67e670db8937b05643bd293b9b9ef491b791070b9fddfc403e7b72a9",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "c1b7c02b95a10c385261507f55ad7e719177434691b6fe95c54c3bb75e8211a3",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "7472e3e6aea9ab4f8cf6fe3e82a57d03512e7ddf1029c10d7f5a80fffe582bb7",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-007",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-007",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-009",
+      "appointmentRoot": "1cc40bad58590cb818d2fca3203e9cb994c133c4c62d8ab6397b329e17f88500",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "7472e3e6aea9ab4f8cf6fe3e82a57d03512e7ddf1029c10d7f5a80fffe582bb7",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "cda5477188f2412347a6ccf8cbdc2c2702b26742f4c8c04fda59702f9549fb01",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-008",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-008",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-010",
+      "appointmentRoot": "a20b450a8e1fd8167df0b933f0a3496f530aec9e0c95b45e6226adedeadb5544",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "cda5477188f2412347a6ccf8cbdc2c2702b26742f4c8c04fda59702f9549fb01",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "d0227e6f5f33e6330c2e7efa2959e99920835c91cbde0f20ef52491771aae035",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-009",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-009",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-011",
+      "appointmentRoot": "448195ed8e55dea9758b53f405918f88271701aafef3772267ec8f2652632d6d",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "d0227e6f5f33e6330c2e7efa2959e99920835c91cbde0f20ef52491771aae035",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "6b2b99e4a7b55a9df826c9de8e153bbe2b4862de173b5e025ac6132d221d1975",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-010",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-010",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-012",
+      "appointmentRoot": "0b25c1ef38f77b3c52ff16f71fe5ae130cfd030788223271962015474487d439",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "6b2b99e4a7b55a9df826c9de8e153bbe2b4862de173b5e025ac6132d221d1975",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "64dfeba7d504088bf8b9cdf396231e3863975c103437b621105bd2e9f6500ade",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-011",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-011",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-013",
+      "appointmentRoot": "e1f1ce7a931bafecb04da21fc45f6018eacee03cc690907ac21e906c377e771e",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "64dfeba7d504088bf8b9cdf396231e3863975c103437b621105bd2e9f6500ade",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "7523ad973124ce1d793b9a4214ce4f3689542ef98aa0d4acede0b6dc6b88c1f6",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-012",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-012",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-014",
+      "appointmentRoot": "d36762e80df7ecb34229c6c55a5a2f90b84f738f10125e7846aba34419f55e45",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "7523ad973124ce1d793b9a4214ce4f3689542ef98aa0d4acede0b6dc6b88c1f6",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "dc716bc67df42cce71517b7c70940884f411a80bd806fccae1cc58b02625ff9d",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-013",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-013",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-015",
+      "appointmentRoot": "9c08d6e197c3effec55242a4a4379ef60039d58d0ba3e213bc8ff916ec7beff9",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "dc716bc67df42cce71517b7c70940884f411a80bd806fccae1cc58b02625ff9d",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "a5e14fad0f10beb2ee0834ffa18b33f1e204845a3faea8155d687d8a6b806f4d",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-014",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-014",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-016",
+      "appointmentRoot": "0d7d19a1a49965c8c5f913ea55fc360dd57ff65aa335bd7f9c048142968b2bc7",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "a5e14fad0f10beb2ee0834ffa18b33f1e204845a3faea8155d687d8a6b806f4d",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "4ab50e5fb9190ba555d1c954f61d925917f14bdceab6025e6bc5482ffd073ff1",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-015",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-015",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-017",
+      "appointmentRoot": "f7311c5b02d98aa9bc19f20b185d52709a98c14b29f87b863bf89e7e80457e06",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "4ab50e5fb9190ba555d1c954f61d925917f14bdceab6025e6bc5482ffd073ff1",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "a7fafe73dceec6818790ef3fe49a7e229eab572a56d88ffe8186971ac50fd5d1",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-016",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-016",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-018",
+      "appointmentRoot": "7bf76ac354bdf1923e1ee9b23e388d125f670a97dbc282ec4fa17a9ad8547a58",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "a7fafe73dceec6818790ef3fe49a7e229eab572a56d88ffe8186971ac50fd5d1",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "07f899b78283c57ee1b99b21986bc8bf0d7dfdedc91acea88c81597d0a253dd8",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-017",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-017",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-019",
+      "appointmentRoot": "cfbbbe56358a72279b6cd28a38b0f0d601dba5920c8c915e7daf7ff878586870",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "07f899b78283c57ee1b99b21986bc8bf0d7dfdedc91acea88c81597d0a253dd8",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "ac7c9d31f4afe6e5abd171556314af0a56c97ffe460501c6e0a1df3c9efa5687",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-018",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-018",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-020",
+      "appointmentRoot": "670accdda213733557062620596ee7bd1a8dd448eab7b178b4ba8276870bc077",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "ac7c9d31f4afe6e5abd171556314af0a56c97ffe460501c6e0a1df3c9efa5687",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "777b00c0453e806eb439069168413f50ea8519f2bdb51f258fb24b368e7d51c8",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-019",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-019",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-021",
+      "appointmentRoot": "29bde89135ac3a73c530fe09d4c5adf5ab42f76e15aef3968dd49654342a7850",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "777b00c0453e806eb439069168413f50ea8519f2bdb51f258fb24b368e7d51c8",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "d723d6b35299c4a6de56219760dc3283b5456794c8db23c47aaef2f190a6b4f3",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-020",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-020",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-022",
+      "appointmentRoot": "63d58485a5953b4dcf7af5330ad5266af0a799a2b0d5a13fd02aab5396d2fec3",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "d723d6b35299c4a6de56219760dc3283b5456794c8db23c47aaef2f190a6b4f3",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "a1a686bf0c19b7a5b0056ce89642264b1d0f00a11f33d2ca306504b3b3efd97d",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-021",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-021",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-023",
+      "appointmentRoot": "4ef3626447d12927fdc49240e07682bd425bdf3f23626de726874813a4121c4c",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "a1a686bf0c19b7a5b0056ce89642264b1d0f00a11f33d2ca306504b3b3efd97d",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "7c58bff261ff69d01e7c5965485865c160f917eb4692a1db57af91fed9b7df88",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-022",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-022",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-024",
+      "appointmentRoot": "414dc50a9b584515d6c459b2d7fe9b28b2cf9424f48fed01b5294a298473f9dd",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "7c58bff261ff69d01e7c5965485865c160f917eb4692a1db57af91fed9b7df88",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "0cf07e01bcc2fe80abc29754da1c30398e64d92e54232f3c850f4c6b325601c7",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-023",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-023",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-025",
+      "appointmentRoot": "a81de18a944eb0f5bd85cd6615ad60faaa1bd42e675fd6def0e5151c35f499b0",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "0cf07e01bcc2fe80abc29754da1c30398e64d92e54232f3c850f4c6b325601c7",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "d1a2dbbd40fac310c985e2b857d83372c8f57b151b22634ee94ac7ace0841e4e",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-024",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-024",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-026",
+      "appointmentRoot": "8a3f1f53f03f4a1d8747aad30c7240985eef1d4fbe955dd8d8c83041cd1b73ba",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "d1a2dbbd40fac310c985e2b857d83372c8f57b151b22634ee94ac7ace0841e4e",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "c1bd85fdb04aaeb00bfc119861e79a73be0093cde298118ec8616c0792836001",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-025",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-025",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-027",
+      "appointmentRoot": "240f9f2de4d4703e68b4d2015edac276cc8547114447b320696cba8f7d8b3c7d",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "c1bd85fdb04aaeb00bfc119861e79a73be0093cde298118ec8616c0792836001",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "01f7dc2b8d408148d6da53d9423377f433db3abd24f496b64c0978813c6cfbfb",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-026",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-026",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-028",
+      "appointmentRoot": "54f3034b3f9d1101f3a5527c9d83c9c7800748944682d2eaedb18f5d5e9a6fae",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "01f7dc2b8d408148d6da53d9423377f433db3abd24f496b64c0978813c6cfbfb",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "0407d6ed28eef1be64f85cf78c696a5b6b4e5503e4ebe7d70cb342870facfe43",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-027",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-027",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-029",
+      "appointmentRoot": "8f697c31f60ac266b699fae385f54186e2bf9b5f20609119d448a5d7a21ee5a6",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "0407d6ed28eef1be64f85cf78c696a5b6b4e5503e4ebe7d70cb342870facfe43",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "52e39231cf06c95e85446ebd28a3a4c2f430918dcb750f5d3865e3401c87766a",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-028",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-028",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-030",
+      "appointmentRoot": "807f6f43436ab6113d5125ab279b25e0085acd11db339a57bd4ba680d304ad9f",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "52e39231cf06c95e85446ebd28a3a4c2f430918dcb750f5d3865e3401c87766a",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "81b92ac1af292e612f08751855b53f4c82e0b06e2d706103b7cbb8d7133b17d5",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-029",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-029",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-031",
+      "appointmentRoot": "82fa5cc63da5ac90ec659bd36207a9b5d64f32cf037667167fad226afb932542",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "81b92ac1af292e612f08751855b53f4c82e0b06e2d706103b7cbb8d7133b17d5",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "70f178ea0f04ca4e270a6af9577a8fd9289024dae549045741cf2f8dfbd3efef",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-030",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-030",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-032",
+      "appointmentRoot": "af49ef99345616dad501de3a1e804dff5d8c2911d71339cecc2213c9c06de93d",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "70f178ea0f04ca4e270a6af9577a8fd9289024dae549045741cf2f8dfbd3efef",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "450795d729ef319cb9bb4b436621e201d6b7dcf395f6b75a12a825a0a1421d9e",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-031",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-031",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-033",
+      "appointmentRoot": "1816a982709e5e582bcba503a3b646bcf97c518169ef95e97dad149b60fbff86",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "450795d729ef319cb9bb4b436621e201d6b7dcf395f6b75a12a825a0a1421d9e",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "f355b2a80f23857a71af0e142c83d6406ec7617d8427ace184008212a30f2a51",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-032",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-032",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-034",
+      "appointmentRoot": "f9b4599b73b6b6d4c5965426483647b5bd3b5c63a1f39fb9e53d397c2d8326b4",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "f355b2a80f23857a71af0e142c83d6406ec7617d8427ace184008212a30f2a51",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "9ddeff3ccbbdb36341c1dfabd1a6d7d50c26cd1563517051bf17fea9637735be",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-033",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-033",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-035",
+      "appointmentRoot": "42f71708dc0de0c628dcef1e450ffe175cc78f00c4d60eb52cf1421eb1e14e45",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "9ddeff3ccbbdb36341c1dfabd1a6d7d50c26cd1563517051bf17fea9637735be",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "4fa3b7fe327ebd58d8e1f06c861a797be2842c508b8a6b65010e75d6c3e30216",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-034",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-034",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-036",
+      "appointmentRoot": "6ef3792d667682cd59cee73d31cb4cdccb3d225bb658c19bec208d6bc246e8f9",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "4fa3b7fe327ebd58d8e1f06c861a797be2842c508b8a6b65010e75d6c3e30216",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "d845f7b8851d58eaf505dcb5fc3cec4cadea66841c76079b6e2e4479dce1f318",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-035",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-035",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-037",
+      "appointmentRoot": "9a0bd8f6149721b89eb55eb7ec87a08ee595d6af4b1c49d36e1c61d3e5a17f47",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "d845f7b8851d58eaf505dcb5fc3cec4cadea66841c76079b6e2e4479dce1f318",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "1d219a78747fc939e474049d2645f52ac91539d1a31c35672dad3f2e615976b2",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-036",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-036",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-038",
+      "appointmentRoot": "cfa8cbadfd7fbdd814003f3541daf7f7b30c1403141d78139200215b023a7481",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "1d219a78747fc939e474049d2645f52ac91539d1a31c35672dad3f2e615976b2",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "d3c15a1e17e7d3f382783a0c70179a190af0e73a5e8dd6904770749f375636d0",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-037",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-037",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-039",
+      "appointmentRoot": "99d4a357a7492be17b61fe50015fb0bfb4a03ee7ffa605533904df813cc0caca",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "d3c15a1e17e7d3f382783a0c70179a190af0e73a5e8dd6904770749f375636d0",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "9b7479007e2aaa8678ec7016bffadc3d4d61fb37e1c0f6d2ac8e8a8bb2b4b7cc",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-038",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-038",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-040",
+      "appointmentRoot": "fbd8da4b292bbc1b3e6176ba0553b85a802355c4d8f7f4b73b2b908770d15925",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "9b7479007e2aaa8678ec7016bffadc3d4d61fb37e1c0f6d2ac8e8a8bb2b4b7cc",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "998ea2d86c47b375e1d95c350369f935e1b1432603851725d658e3e00df8114e",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-039",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-039",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-041",
+      "appointmentRoot": "2936b6e46f80ee2b1574a03649f4e8a2f9270b10f3f1dd0dc45b5788325a343f",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "998ea2d86c47b375e1d95c350369f935e1b1432603851725d658e3e00df8114e",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "87849c8b3a2c5fc9134ff3b7359064f9586072b86a87c44676fb4d30216cb434",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-040",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-040",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-042",
+      "appointmentRoot": "35e300500efd22ea0caf7a9e8db59c49be3d3f5f1d79773c6808353947bafc10",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "87849c8b3a2c5fc9134ff3b7359064f9586072b86a87c44676fb4d30216cb434",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "42e1ef3f538d75c3234de8961333d3d5994b82e4e43d0823774a1eb7cdbf06a8",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-OBJECT-041",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-PRODUCER-041",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-043",
+      "appointmentRoot": "10bae686c869e398f103ff3181bc7294b6850c105e83619c290d39652f75fa92",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "42e1ef3f538d75c3234de8961333d3d5994b82e4e43d0823774a1eb7cdbf06a8",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "b8310a3bf2bf1a52f6b7f5cab5536ca2cfc678c8e3fc3c16a840b64fdb3ca684",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-ALLOWLIST-A-OUTPUT",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-ALLOWLIST-BUILDER-A",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-044",
+      "appointmentRoot": "2818874309aadfe5554c0b03859cb4a7b6092f1c6fd278977325b07f28790f46",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "b8310a3bf2bf1a52f6b7f5cab5536ca2cfc678c8e3fc3c16a840b64fdb3ca684",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "d4f74b88a9cd6151b10094a1f65ff7046f6996b0d3f007a71af0b81d0c449e88",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-ALLOWLIST-B-OUTPUT",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-ALLOWLIST-BUILDER-B",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-045",
+      "appointmentRoot": "e173620f420f9ada0fbc5a52db8f4ed4f70418df0fc44d8a173eaaf0c4a4ec02",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "d4f74b88a9cd6151b10094a1f65ff7046f6996b0d3f007a71af0b81d0c449e88",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "0b8522199d010a593dd07d786505f5a645ec9a1daf6534f4c73bd9a4f7c07687",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-ALLOWLIST-ADJUDICATION",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-ALLOWLIST-ADJUDICATOR",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-046",
+      "appointmentRoot": "f98541a727b5ae3cb86de65ed1bd0db4e01d274b8d9d17801ba2cd1316778624",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "0b8522199d010a593dd07d786505f5a645ec9a1daf6534f4c73bd9a4f7c07687",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "852cc80c28a87cc64fef119a981030e69f2082da6f0a9b08cd5f21f6f4bafd5b",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-SCAN-A-RECEIPT",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-SCANNER-A",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-047",
+      "appointmentRoot": "4445c022cd24a9dbfb793168cdcb51246e240acddf88e7dfb366f7332f83eb6c",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "852cc80c28a87cc64fef119a981030e69f2082da6f0a9b08cd5f21f6f4bafd5b",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "dcdd4682c07ca2ac4f8e3e00f50a3a226d4f663ec7b439905eccce1d92883bbe",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-SCAN-B-RECEIPT",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-SCANNER-B",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-048",
+      "appointmentRoot": "bbeef6d407a161a3788b1baacb4de82f41eb3383bf57fc77cfd0aa8de429710c",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "dcdd4682c07ca2ac4f8e3e00f50a3a226d4f663ec7b439905eccce1d92883bbe",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "544e8d859a27dc07ad04686c71093145f92f78e406faaa13884bcc2a22d1cecc",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-SCAN-ADJUDICATION",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-SCANNER-ADJUDICATOR",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-049",
+      "appointmentRoot": "bfcbb9ce874c97d51fa20d0063cc5ecc3e99ab53f19ef3c2a25dc09ffa3226d4",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "544e8d859a27dc07ad04686c71093145f92f78e406faaa13884bcc2a22d1cecc",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "25c133bba44130b61f8c58503b4347361d13e3c86f87d6f5a53f6b5f679a324e",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-REVIEW-A-DISPOSITION",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-REVIEWER-A",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-050",
+      "appointmentRoot": "7b847ac5fb52cdab7300be547ecadecf6b13268f62167df67877613e2a2a9659",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "25c133bba44130b61f8c58503b4347361d13e3c86f87d6f5a53f6b5f679a324e",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "948202f4e0aac2dcfa3f3be05acdd9647c3bf4509e85e7584a7099f8bd5a2090",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-REVIEW-B-DISPOSITION",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-REVIEWER-B",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-051",
+      "appointmentRoot": "c4e13b36f0da1b81d40f0348ed381199643b047a23f7a97d1df8cc65113f35fb",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "948202f4e0aac2dcfa3f3be05acdd9647c3bf4509e85e7584a7099f8bd5a2090",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "519885b0a123ce2eeeedff3cbc32f51b2b20d5e040128e61ae09d4f17b515baf",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-VETO-DISPOSITION",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-VETO-OWNER",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-052",
+      "appointmentRoot": "e6869d90027389f59fc7af33ffb018a9d88150c1f1e85c3de2f47b0d14f57ead",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "519885b0a123ce2eeeedff3cbc32f51b2b20d5e040128e61ae09d4f17b515baf",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "64a3ce53743ed9e471d7380281a13aad07f77346e73bed8fd97f73c5a32ef547",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-RECONCILIATION",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-RECONCILIATION-PRODUCER",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-053",
+      "appointmentRoot": "e643ae142ba4f1da2273840d907bcb54c0e7ff8e53e6f235f82a6577f05546f6",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "64a3ce53743ed9e471d7380281a13aad07f77346e73bed8fd97f73c5a32ef547",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "abbd3a090a1c625df9881cc7bff39b76f12b9b6419425b7d3640f6c8cebb7fc9",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-DETACHED-ACCEPTANCE",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-ACCEPTANCE-PRODUCER",
+      "selfAppointment": false
+    },
+    {
+      "appointingAuthorityId": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "appointmentId": "PRCV5-APPOINTMENT-054",
+      "appointmentRoot": "5a96dfb1bbe8d634fac3447a3b19188288a5f61ed9b9f937626cb671fb2a239f",
+      "authorityCredit": 0,
+      "expectedOldAppointmentHead": "abbd3a090a1c625df9881cc7bff39b76f12b9b6419425b7d3640f6c8cebb7fc9",
+      "genesisInstanceRoot": "beebfec6d0e50198180955ff9a55eb7cb16263bd0dc2953e360a444be12be50a",
+      "newAppointmentHead": "bd4e09f95a2c1e3bb9dfe67a42fabeab656e7f9cb8e3fbd75c9344e2ea134fa7",
+      "operationalState": "MISSING-BLOCKING",
+      "outputObjectId": "PRCV5-RECOVERY-RECEIPT",
+      "producerCardinality": 1,
+      "producerId": "PRCV5-RECOVERY-PRODUCER",
+      "selfAppointment": false
+    }
+  ],
+  "artifactClass": "PLANNING-AUTHORITY-AND-INDEPENDENCE-MODEL;NOT-AUTHORITY;NOT-APPOINTMENT-EVIDENCE;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-PRODUCER-AUTHORITY-AND-SEPARATION-GRAPH-2026-08-30",
+  "authorityEdges": [
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-000"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-001"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-002"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-003"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-004"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-005"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-006"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-007"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-008"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-009"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-010"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-011"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-012"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-013"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-014"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-015"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-016"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-017"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-018"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-019"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-020"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-021"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-022"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-023"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-024"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-025"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-026"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-027"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-028"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-029"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-030"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-031"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-032"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-033"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-034"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-035"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-036"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-037"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-038"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-039"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-040"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-PRODUCER-041"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-ALLOWLIST-BUILDER-A"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-ALLOWLIST-BUILDER-B"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-ALLOWLIST-ADJUDICATOR"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-SCANNER-A"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-SCANNER-B"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-SCANNER-ADJUDICATOR"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-REVIEWER-A"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-REVIEWER-B"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-VETO-OWNER"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-RECONCILIATION-PRODUCER"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-ACCEPTANCE-PRODUCER"
+    },
+    {
+      "from": "PRCV5-EXTERNAL-GENESIS-AUTHORITY",
+      "relation": "APPOINTS-SOLE-PRODUCER",
+      "to": "PRCV5-RECOVERY-PRODUCER"
+    }
+  ],
+  "authorityRegistryRoot": "18e7ad6a5f18eeb79542b0ea643e4fd3786468642848eff3de9e8bc3fc3e5e34",
+  "authorityRootRoles": [
+    "PRCV5-EXTERNAL-GENESIS-AUTHORITY"
+  ],
+  "currentAcceptanceCredit": 0,
+  "currentAuthorityCredit": 0,
+  "denominators": {
+    "appointments": 54,
+    "independenceGroups": 4,
+    "outputFamilyProducers": 42,
+    "producers": 54,
+    "readerProfiles": 2,
+    "specialProducers": 12
+  },
+  "genesisSchema": {
+    "additionalProperties": false,
+    "fieldTypes": {
+      "acceptanceCredit": "SafeInteger",
+      "authorityEpoch": "SafeInteger",
+      "expectedEmptyAppointmentHead": "Hash",
+      "externalMandateRoot": "Hash",
+      "operationalCredit": "SafeInteger",
+      "planningOnly": "Boolean",
+      "repositoryIdentityRoot": "Hash",
+      "schemaId": "Id"
+    },
+    "requiredFields": [
+      "schemaId",
+      "externalMandateRoot",
+      "repositoryIdentityRoot",
+      "expectedEmptyAppointmentHead",
+      "authorityEpoch",
+      "planningOnly",
+      "operationalCredit",
+      "acceptanceCredit"
+    ],
+    "schemaId": "PRCV5-EXTERNAL-GENESIS-SCHEMA-V1",
+    "schemaRoot": "0cfe01f9ab48b944dacf6d7dcb0ed38231e91aa298de662ca482691af796a6d0",
+    "unknownFields": "BLOCK"
+  },
+  "independenceGroups": [
+    {
+      "commonInputCutRule": "IDENTICAL-FROZEN-PACKAGE-CONTENT-ROOT",
+      "dimensions": [
+        {
+          "dimension": "controllerRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "28918f58c8c0bb04f585982903f11e2a26085b0dac1f785fdc8b86712443474d",
+            "3352fb67cb9497b567294d02a1d9cb4cd9191811d283b31e5da25b1210f910cd",
+            "35ebd7fc4496d576ce133a3e29879e40437c88b5cad9d9a1207af9e04ecf5f9d"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "implementationRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "54e875288ef78dd207e21a6c7030e5d5c0ae19132690ec7db940574e87eb25f2",
+            "079ade15e63f68d348c7f0e8a64ef4cdebaba46fb001b71d7b4426bf3dbbee98",
+            "fbbaf575cbffb591cbfe3bd60c3d58d8c8acf5af0495b9459a53c211fedbebc1"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "workReceiptRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "207ea93638616a6dc578adb56fcd20533c1f1a6e4d46bcae5701fec734f8151c",
+            "053500f5ab4dcf94e243ddd7dd5f20f56b37020f1367210a00fdee0d6caf8b09",
+            "bf10d371045c9aee9177d5a7e2f9237218a6b1f49d36d4164c82b98bda6d202d"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "ledgerRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "d10dd58813fad727bc4eed84e814d54eb20fda66f14de692d6a30de27d488970",
+            "5278524902800fb1a0caa391358774ac8e571300116de0ff57e17b4291776d44",
+            "4df9088ae492119cbac77a7713012a6bda2790f6ffa308f941f9abca60a40ef1"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "authorityOwnerRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "de3aacca54fa5b2f582410ff5bbfa9216ec1bb9ac44b78f26bb188644ed52f3a",
+            "41431268d07d2bc35ec6a86d238dcaa39d92cc83e880056a77b2fa2941592e6e",
+            "0e2f1dabe203c816ea29cd28943a40e346a2a1f8c58263908e32d5ee58c77e8a"
+          ],
+          "terminal": "PASS"
+        }
+      ],
+      "disagreementTerminal": "BLOCKED-PENDING-INDEPENDENT-ADJUDICATION",
+      "groupId": "ALLOWLIST",
+      "groupRoot": "85b2336596824cc4a61241890f40c5543904c0d1d81baf5e4051a1d539b5e2f1",
+      "producerIds": [
+        "PRCV5-ALLOWLIST-BUILDER-A",
+        "PRCV5-ALLOWLIST-BUILDER-B",
+        "PRCV5-ALLOWLIST-ADJUDICATOR"
+      ]
+    },
+    {
+      "commonInputCutRule": "IDENTICAL-FROZEN-PACKAGE-CONTENT-ROOT",
+      "dimensions": [
+        {
+          "dimension": "controllerRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "0fea041dfef92d4fdadefe09697146f6eaa512a31aff442920840c33a76227cf",
+            "f4f0c593fb4d0074f0210c5e2d5137bf3b55285c01c500dee51f71a091dfd349",
+            "642558985a6f8545da16d71061ca4acc5a2a995698118ff234da01fc07390ff3"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "implementationRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "de6e1bff608746cd5aac4f07d1d4e28af41a18eefe683d50fcbec5cd2266dbd5",
+            "7201973b26e7fdcd068190fdbd65df29ba70c6fd17c5ccfd037f5b7f29ac585f",
+            "6c16a7d29478b520a2e2486631366c187f9e6989effa849c0d6b000674c4c8df"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "workReceiptRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "44275782a52705943495eb415339e0724cc06e60b3ae6e9c2c517bee16d8382c",
+            "922fa2fa85e000ff54b0481b1e51d9f07920101fc85d329f64a888fa3238c43d",
+            "ea5f493a3e0b3723c3aaf2270c318dc318293e9e7285ab4bafe92f5ea4365e32"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "ledgerRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "8922d65512c4262cd97ed5fb47276cf5f9209463cea5a88b4987591777d4a567",
+            "e9cd181fe3d99be86a1cd341a0bd2b04b9ced63cf1dcc56dd26cfaa3708e77b9",
+            "9d5ac6aed7232bb3f3928f99d596e0402b81cfc52f600977fd49f47bf5afa007"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "authorityOwnerRoot",
+          "distinctCount": 3,
+          "requiredDistinctCount": 3,
+          "roots": [
+            "4f48ecb6372d48b9fff105318513fe9bdeec259256c0952d33e4292f301687e4",
+            "31b2edad921c3baec52930de8cb71bd0116654e5ea1da4e1291c8a97d2354334",
+            "5d748e910259aad2176ec46eff9e48d0ed4389da21fa8955d06ade85c26a6d81"
+          ],
+          "terminal": "PASS"
+        }
+      ],
+      "disagreementTerminal": "BLOCKED-PENDING-INDEPENDENT-ADJUDICATION",
+      "groupId": "SCANNER",
+      "groupRoot": "6d9b6294f9784c6b41cbd8e9e29b40c728c61915424c3d95fa6d23295923607a",
+      "producerIds": [
+        "PRCV5-SCANNER-A",
+        "PRCV5-SCANNER-B",
+        "PRCV5-SCANNER-ADJUDICATOR"
+      ]
+    },
+    {
+      "commonInputCutRule": "IDENTICAL-FROZEN-PACKAGE-CONTENT-ROOT",
+      "dimensions": [
+        {
+          "dimension": "controllerRoot",
+          "distinctCount": 5,
+          "requiredDistinctCount": 5,
+          "roots": [
+            "bb8e341ec7d9eb0a9ebbb10f12ca5803504438e079c4afdff3325d14d3019eee",
+            "3f7c1cba76dac518dd4ffbe185bf7d384070a95384eea0bfcf9f9b51b66a145f",
+            "2cbae22275a50f1bc50bb16bdd04048d335d692f6df54eed0a62a912b0109053",
+            "81a91fc862191d2713135400c4eb2bc71885ef4724559503d33de97eec8dfc10",
+            "35c73c2ff91a47e8dbd7e046c7184411dec3b8a8b8ccc42f8015c8159fa1dfaf"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "implementationRoot",
+          "distinctCount": 5,
+          "requiredDistinctCount": 5,
+          "roots": [
+            "225bf798a43312cf0414b6e354cadb78e37ee2bef173d1179d771c0c94158f66",
+            "810d9f56670b7912e55e30ee7753d1ea93c870ac111730a4171937179833dc3e",
+            "1d8d3853c58e6792cffef7e59b8f0aa897eb9c9d2865559a67c0af2d55b5c568",
+            "f9afe27f42b5e8ddb772727ea6740c09a381399181446eaefc64854faf8b68e0",
+            "a708e7e817ddf69c7bd5ce45901e1d95ec4a8b77c410cce081e1b36042f78b23"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "workReceiptRoot",
+          "distinctCount": 5,
+          "requiredDistinctCount": 5,
+          "roots": [
+            "96d436832008bdfcb36a1558d9836576231e751a9376191fd9466f007900ac02",
+            "b87e07ba1d0d8f9ee2dec57ff73b0caad76674654bad52bc90e10d4064c76fdc",
+            "88976e4e65fa77cd1993ec1d1e7c925db5a72cf01739047ba300bca02d7155f1",
+            "f97d13466cd6a577513bec0a0209117f84db0c1024e7550acb71f1db1d421873",
+            "44db095f13743da93b0abea99a63e6b193f15967b564ec12492d9a4f664ab854"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "ledgerRoot",
+          "distinctCount": 5,
+          "requiredDistinctCount": 5,
+          "roots": [
+            "69aff44c7131f5029ea22b91b218e4791dc9d6691f216378ada5169ae0b4941e",
+            "3b076aed3af6bf87ce84142679221818daf59d595dcd86a828486aecae18b28e",
+            "84f0240d09e8de9f79c88b611d7bdc218ea68f875c6932a27fd7275856593c25",
+            "30ae5ea2a893ada1d9d83fcf02721e945a98c3d37c01bac1c3dadc8716b37fd2",
+            "6092b8ac5d1c4cf606cda5b7e7e62013be702151afe3d27782439d4d62539c77"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "authorityOwnerRoot",
+          "distinctCount": 5,
+          "requiredDistinctCount": 5,
+          "roots": [
+            "7319ca12b7c57398b5a9b3a2287519962cf659e9c857dfc02dce06d8212300a5",
+            "c959cfec953057434e9bd5f23682ce7379330bb0529c5b8149ed05fdf155f56c",
+            "dfa8542e7df432f878e28ff23cca66e7f7b2bea93205ba6b751d93632726b66c",
+            "6dd5d3ff27ef4e7aeac7f3f5e7061b43258854573368c71ae0ae93791e65b680",
+            "9a2b2729c8286d76db55d78105a15df0a5ab414f3368d8e628943435150a1a9b"
+          ],
+          "terminal": "PASS"
+        }
+      ],
+      "disagreementTerminal": "BLOCKED-PENDING-INDEPENDENT-ADJUDICATION",
+      "groupId": "REVIEW-ACCEPTANCE",
+      "groupRoot": "7bcd7410a9925f3741f16890b6552323b321879b2f97ff0aa9c4e85fb8313247",
+      "producerIds": [
+        "PRCV5-REVIEWER-A",
+        "PRCV5-REVIEWER-B",
+        "PRCV5-VETO-OWNER",
+        "PRCV5-RECONCILIATION-PRODUCER",
+        "PRCV5-ACCEPTANCE-PRODUCER"
+      ]
+    },
+    {
+      "commonInputCutRule": "IDENTICAL-FROZEN-PACKAGE-CONTENT-ROOT",
+      "dimensions": [
+        {
+          "dimension": "controllerRoot",
+          "distinctCount": 4,
+          "requiredDistinctCount": 4,
+          "roots": [
+            "e504f78ab00aa965b7d50a4d8d3971a55ae5219a3c13d7c7bfe061bedbbb194f",
+            "bb8e341ec7d9eb0a9ebbb10f12ca5803504438e079c4afdff3325d14d3019eee",
+            "3f7c1cba76dac518dd4ffbe185bf7d384070a95384eea0bfcf9f9b51b66a145f",
+            "35c73c2ff91a47e8dbd7e046c7184411dec3b8a8b8ccc42f8015c8159fa1dfaf"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "implementationRoot",
+          "distinctCount": 4,
+          "requiredDistinctCount": 4,
+          "roots": [
+            "4f21cb9a20e9eaff686cb2d98dcede0891073e642584ef2d70464ddd1dccef21",
+            "225bf798a43312cf0414b6e354cadb78e37ee2bef173d1179d771c0c94158f66",
+            "810d9f56670b7912e55e30ee7753d1ea93c870ac111730a4171937179833dc3e",
+            "a708e7e817ddf69c7bd5ce45901e1d95ec4a8b77c410cce081e1b36042f78b23"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "workReceiptRoot",
+          "distinctCount": 4,
+          "requiredDistinctCount": 4,
+          "roots": [
+            "6a32d3cc9e5a0ae900b5ec26a3514937ce7aae9dbc2814472793092e8b6a14a9",
+            "96d436832008bdfcb36a1558d9836576231e751a9376191fd9466f007900ac02",
+            "b87e07ba1d0d8f9ee2dec57ff73b0caad76674654bad52bc90e10d4064c76fdc",
+            "44db095f13743da93b0abea99a63e6b193f15967b564ec12492d9a4f664ab854"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "ledgerRoot",
+          "distinctCount": 4,
+          "requiredDistinctCount": 4,
+          "roots": [
+            "25235e6f033bba3e54aa5732629cdad2066793d8eac2e6b2b0ad7e5bfd8637a4",
+            "69aff44c7131f5029ea22b91b218e4791dc9d6691f216378ada5169ae0b4941e",
+            "3b076aed3af6bf87ce84142679221818daf59d595dcd86a828486aecae18b28e",
+            "6092b8ac5d1c4cf606cda5b7e7e62013be702151afe3d27782439d4d62539c77"
+          ],
+          "terminal": "PASS"
+        },
+        {
+          "dimension": "authorityOwnerRoot",
+          "distinctCount": 4,
+          "requiredDistinctCount": 4,
+          "roots": [
+            "f0a5f7542f995c1c4ca593e2bfdb598cca69a54d7fcb22d2f28a3ab8eb0c75e9",
+            "7319ca12b7c57398b5a9b3a2287519962cf659e9c857dfc02dce06d8212300a5",
+            "c959cfec953057434e9bd5f23682ce7379330bb0529c5b8149ed05fdf155f56c",
+            "9a2b2729c8286d76db55d78105a15df0a5ab414f3368d8e628943435150a1a9b"
+          ],
+          "terminal": "PASS"
+        }
+      ],
+      "disagreementTerminal": "BLOCKED-PENDING-INDEPENDENT-ADJUDICATION",
+      "groupId": "IMPLEMENTATION-REVIEW-ACCEPTANCE",
+      "groupRoot": "bcc89cfb0484fbde78a85618590f668d9977b2df633ce4c40276e4c753807b61",
+      "producerIds": [
+        "PRCV5-PRODUCER-040",
+        "PRCV5-REVIEWER-A",
+        "PRCV5-REVIEWER-B",
+        "PRCV5-ACCEPTANCE-PRODUCER"
+      ]
+    }
+  ],
+  "producers": [
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "a23ce76332f81acccafe463a08b045dec088940ec9da78fd94dbc563213c952b",
+      "controllerId": "PRCV5-CONTROLLER-001",
+      "controllerRoot": "4b36674ce330b4d9d45484ebd7bf9fd66f8b67aa898b7af8724640a82e84f18c",
+      "implementationRoot": "45ac2261860912bab6dfd07c8704ffe21d351e97bc28305dc4e530d88cfbdd04",
+      "ledgerRoot": "0b455ce9b1652bf3088501c43a1b3f4ac503eaa627f6ae0911d2553524cc5e07",
+      "operationalCredit": 0,
+      "ordinal": 1,
+      "outputObjectId": "PRCV5-OBJECT-000",
+      "producerId": "PRCV5-PRODUCER-000",
+      "producerRoot": "6a5f7eb6738219e9fba096fcf51e4480a216438ac7c5dda10d9923df89609495",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "c691f07a16aaf43041d4e8a4d69d5c9e28320ea99bd2e4783f176588c4a2d5b0"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "b12191e2523896205aae1b769406f75f9dc3b1223b57c4a9f47583bbd0273f86",
+      "controllerId": "PRCV5-CONTROLLER-002",
+      "controllerRoot": "e737fd402f608000bcf7a6e41fef44e2f8a3465b68ea36cc842ad196b1fb454b",
+      "implementationRoot": "9d2f24512104b4b17094a92eaadbac7630e5f1c7d0346d16f7b854554733be8a",
+      "ledgerRoot": "4adf5e470dc8198a7df810d7e71a247fb9ed6d48f4a0f5b1839c6bdd08d1a421",
+      "operationalCredit": 0,
+      "ordinal": 2,
+      "outputObjectId": "PRCV5-OBJECT-001",
+      "producerId": "PRCV5-PRODUCER-001",
+      "producerRoot": "d683354b3adbe0770950596687b4c4ad141afa23b3e3e0e5130ae8084604fe9d",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "b7e66b0a395d4f228b9f12f8643216428e2fb29553d892935478b6f461e65ebf"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "a10624a87c6fc5c133c2a8bf6e30ffe668322748bd22bc31d370c1035a7cb7eb",
+      "controllerId": "PRCV5-CONTROLLER-003",
+      "controllerRoot": "42865821eadf042239edd7b3c0f0b20b2d2f1f9160fd0ce1f149ba46eb30c023",
+      "implementationRoot": "6aafb4155728df45ce33a3c49aee8ea2c43c233d589511e396d22ecc02a6d36e",
+      "ledgerRoot": "6a3cf2348a698edcb620a0af8917f89037bbe3b70bdefeb250bf678a22b3564a",
+      "operationalCredit": 0,
+      "ordinal": 3,
+      "outputObjectId": "PRCV5-OBJECT-002",
+      "producerId": "PRCV5-PRODUCER-002",
+      "producerRoot": "0aafd7e7e4ca98cf1597c65ebd34fb3d01a494ac799b53048aeb4eb89fdf9a90",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "79ef03f85513ffc83398ff2ec0f9d01c4ef4f7178bbfd2f2040c1dd17731d57a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "b1ca3a34a6d54c99ce15ba13e8a2839bfaa3fb12b63cc06ff0678e62d5cb9ba6",
+      "controllerId": "PRCV5-CONTROLLER-004",
+      "controllerRoot": "ec4592335afd44e520fe0294fb8ac3dc7aec3755d0b6d29f925ac4d42538603d",
+      "implementationRoot": "843b93b77fab41d99dc3fd2fa4a011e1cb4f2848753fd670b07e52f73aac769f",
+      "ledgerRoot": "78a9eb57f4f7f01818a12abb29f3a3c63fdc53bbdbfe6a4e5207e76c358d09f1",
+      "operationalCredit": 0,
+      "ordinal": 4,
+      "outputObjectId": "PRCV5-OBJECT-003",
+      "producerId": "PRCV5-PRODUCER-003",
+      "producerRoot": "0c70a11f98ba2977174e53f8b57621a47739b36f424ca5590998a06aaea783f0",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "824fbf42aa3705f7c42a7aec80bae26fa267bc2a04050b2f50a1123d7d348be8"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "10d17c43797e957e7ff19ab9b770f6ea241071e01a5107c79b425106354b4fb8",
+      "controllerId": "PRCV5-CONTROLLER-005",
+      "controllerRoot": "dd4b2356f7b4185f872e38e47bf57c9b1ae36b06a19a33786613b091aec4583b",
+      "implementationRoot": "0f34fc61f29ae58a061edfef362c7597f25f1f43e3cbfaff5c0e414939192c7c",
+      "ledgerRoot": "79fd2394adb1e455be617f434e792038642fe0e5c456ca8a952e6782d6720223",
+      "operationalCredit": 0,
+      "ordinal": 5,
+      "outputObjectId": "PRCV5-OBJECT-004",
+      "producerId": "PRCV5-PRODUCER-004",
+      "producerRoot": "f106e4a4c8c6a29eecbb6a2d1c9bc8bc4b7f53058684c376fe247bd7196ede71",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "f6809ca9fb8bbaf0f0fc10257006fc3c3a080f99f3f9806bc0876eea5417abdb"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "34534b15dca838afe1ffceee70693b0e85b37c8d068767d231c87108d28b506a",
+      "controllerId": "PRCV5-CONTROLLER-006",
+      "controllerRoot": "534d74ddef86d0e16dd17194d9f7e2fa9f296669e1f96a3e65f6cbcf58925a0f",
+      "implementationRoot": "0155fec43c46eb37fc2de7b6e44d0d1b75da6a2d110ebd0022619ba4a49ab5d7",
+      "ledgerRoot": "968e4afb0f5f1448161e96fde2d7452a530f429a025deb4518785e86c5ac5952",
+      "operationalCredit": 0,
+      "ordinal": 6,
+      "outputObjectId": "PRCV5-OBJECT-005",
+      "producerId": "PRCV5-PRODUCER-005",
+      "producerRoot": "23511bc6efd67e071479bbf1bdb55770ec74cdbb7d9dad6d363c492ff41e45ed",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "5b7bf1f00e28fe4d5cbcf6516e6839dacfcd42606f15109ef4a9c6126dd0e3bd"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "b045c9afeb3ab87b3057f32a80a10461cd5cc3d113af5dcf024e5080ecd9274e",
+      "controllerId": "PRCV5-CONTROLLER-007",
+      "controllerRoot": "d15b1aaf1f4ef704ca6204978e4ffab0caf85985f0b780acbc6f501376588d5a",
+      "implementationRoot": "ebbb79d8b7659d84271851a1f266e9b4651ac6f9784e713f48def624a1a5ca6b",
+      "ledgerRoot": "53f46103f1c772e812f53fd5782d90d0013f2cb0dd46944317575001b5c68fd9",
+      "operationalCredit": 0,
+      "ordinal": 7,
+      "outputObjectId": "PRCV5-OBJECT-006",
+      "producerId": "PRCV5-PRODUCER-006",
+      "producerRoot": "78858a2b3ff3a2d60354bb44952563413dc453d8bab949e5b3c9f2f1a35bba1d",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "f4a2016e7952ee7e32acc1e974c5459249fdd42853ef2bc2cf8af4a53cfbfd6f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "5a766d3107281c46944bc60607e8ad4b10a0b3c253454593fb0e736748cbfb7d",
+      "controllerId": "PRCV5-CONTROLLER-008",
+      "controllerRoot": "8bf70884535dbf2a4416a44493f8fdba5e2df86ec455fdd9c7622268260735a7",
+      "implementationRoot": "95a96853ed14e3c37d7909b40aa1d310e6c2ae6e29ddfc4af9c5dd169763b0fa",
+      "ledgerRoot": "96bce953d429698124d1127759a2ff0dbfa2e66c23aff5e0f734cca4d4b65ebe",
+      "operationalCredit": 0,
+      "ordinal": 8,
+      "outputObjectId": "PRCV5-OBJECT-007",
+      "producerId": "PRCV5-PRODUCER-007",
+      "producerRoot": "bd302a6c538b50aea879c371988bb4e438e195246aabdb847911ea6c5cd77016",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "910242d7b6ed0117401b3d131deb7e02c67253ce1010467d3b9cde2953568ed8"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "8c2757bb773ae0e63f47ca4b37ecb86dcc2e5eefb9ba8b2aba413ab0e66c5ab5",
+      "controllerId": "PRCV5-CONTROLLER-009",
+      "controllerRoot": "fc7aac8f47a6accb24c618a33bdc9a45a3396f9f56bc2ce5046a8913f7a951a7",
+      "implementationRoot": "5ddf243a528b1fa219b01f7225447d98680ce3a7ae3904e3ee239abcc600b61f",
+      "ledgerRoot": "d9ff3943a3b5877a1e2066f208aa3386ee6dead3c6c660fc1e0d649439380ba6",
+      "operationalCredit": 0,
+      "ordinal": 9,
+      "outputObjectId": "PRCV5-OBJECT-008",
+      "producerId": "PRCV5-PRODUCER-008",
+      "producerRoot": "eea1c9f1d224bb907413ed304aaf07a9ba9fb53776839b575782d530a2ce2980",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "3e3bb2e57e075336b42c7cac92155cae92d660ffdf86e7c5d50744d0333fe503"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "f8c408198200567a7496ee725fadaf1c19ca49c7fc109730fd6a9c943f9dfa35",
+      "controllerId": "PRCV5-CONTROLLER-010",
+      "controllerRoot": "f8e99017bf9d3888314fd1694c91c5246de896099da8e39c09ea31a0d2a43852",
+      "implementationRoot": "c73a7f1634664c75f38412d80778f4f19ab1494466701df5d1a77e0c75408733",
+      "ledgerRoot": "cee8ca589bf40ff37d6766ffd5dcb4f815fc3fd85065231309ba167704a1e757",
+      "operationalCredit": 0,
+      "ordinal": 10,
+      "outputObjectId": "PRCV5-OBJECT-009",
+      "producerId": "PRCV5-PRODUCER-009",
+      "producerRoot": "c76bbd006a4466d3e5cd4c5793bd27d1ea25c0a58195843a7ebfd7a9966e04f2",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "44a91c204d0d5de4f6815d543a8144e9f529830b8ec2305286aa18b75a5f50a8"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "663b5797530e59cb9ca9962595975a7eff551812d072656f549eaebf91be28c2",
+      "controllerId": "PRCV5-CONTROLLER-011",
+      "controllerRoot": "305ba2d5d270a3c0a7a06e4c4e921377bb760649127aea37d48fa7a1d11231ca",
+      "implementationRoot": "2d565d0d7800c12d90c22ef3126cc4738c7517e6f3d9c66880d6a9047f178423",
+      "ledgerRoot": "d88bc5781e0c450cd4fa601fb7faf1bf6d2cdcb9860fb38b181a942f7414002d",
+      "operationalCredit": 0,
+      "ordinal": 11,
+      "outputObjectId": "PRCV5-OBJECT-010",
+      "producerId": "PRCV5-PRODUCER-010",
+      "producerRoot": "82e75abbf6ed328cabf661bd45e9350fd7a552019a68b0d1f92a51e922a2ef66",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "7ff42b1818db36b9972be33420eee3fcd4d7dcd5b2e2dec15c6bf8f26cb8d651"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "fab1ec0e4041cbc33f7ce289637059e2655e6d8e43f5049abadd5eda68111787",
+      "controllerId": "PRCV5-CONTROLLER-012",
+      "controllerRoot": "61176829e0faecd35f46611ad9792f55bb8424edf08a688f193f65668150b19c",
+      "implementationRoot": "0a367c49b640274c3790a96193190f80f52dfaf00d50af7f6397074ea72507f5",
+      "ledgerRoot": "8218ccec8ad3f93c1aceceb81b3af5501832379f8d47f11d08b78729eaf9152b",
+      "operationalCredit": 0,
+      "ordinal": 12,
+      "outputObjectId": "PRCV5-OBJECT-011",
+      "producerId": "PRCV5-PRODUCER-011",
+      "producerRoot": "ee893a3413a0c237f41b39baf0e39e511a44b2af0075cde417c3094e94d33ec1",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "1ef600bd58cbd2828eb72ae9f3d91dc8406a7b29b465338fc0c87d7c90308f12"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "d86709def6c7bae7d11fd6e33ea6559520874697f1ebc63185aad5e4e99ad014",
+      "controllerId": "PRCV5-CONTROLLER-013",
+      "controllerRoot": "00dd69d73bf7c88cebe7eaf217581490436ab4215786117becf0eb6e94de681a",
+      "implementationRoot": "456ea09c90d62ef8fa4953835d04c58cbf9e154a229da4dc7d01a10d775b18b9",
+      "ledgerRoot": "4db6e826e5884002cc172c3594a5d1bd8d4032381002789bfc21d4b10cca358b",
+      "operationalCredit": 0,
+      "ordinal": 13,
+      "outputObjectId": "PRCV5-OBJECT-012",
+      "producerId": "PRCV5-PRODUCER-012",
+      "producerRoot": "b8b015d131a577da10c621090a681bc0c2ac3169638f54b20ef4bded5644b5d6",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "dc017680e28f1c25c4bdf5ff4f9aba1b5f3781fbb1dc59668863c2c52294928a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "d6520dc3ff69817541eded8eb6475c5d6b033a6844eb722fb8fa280875f73905",
+      "controllerId": "PRCV5-CONTROLLER-014",
+      "controllerRoot": "162823dfc094c1dd344a2e0ea6acd1c35f11391d02a6383d22e1df518cb21b95",
+      "implementationRoot": "30527ede0e2d1dd180dc9bc3b2958032e5900bdc0162c4f9b2130d2e3f86d40e",
+      "ledgerRoot": "0fd2754516c10f8097285716afbd55f78884d420daf3aa26ee0edd5b3b930aa1",
+      "operationalCredit": 0,
+      "ordinal": 14,
+      "outputObjectId": "PRCV5-OBJECT-013",
+      "producerId": "PRCV5-PRODUCER-013",
+      "producerRoot": "887146ed7b8dd5ebd62d7cbf8fb992eab5b9bd04b4c80e4615184a4a046b9aee",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "5824cd3e2ad7756ee839dde250d922e86318eff8eccc7768801f946d42399173"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "fd0d99673521e549f6734547650c9e5b65b52427177d97c732c4287618453dc7",
+      "controllerId": "PRCV5-CONTROLLER-015",
+      "controllerRoot": "b2bded5e03e86c9ef60f3e86205df208472d90efce60e4ecb016edc9902e1cc4",
+      "implementationRoot": "b3c2fc7724c829de7731555d1cf8e4b2f4c450f43c3b96776d8936c8905b2ac7",
+      "ledgerRoot": "a529ed378f203af41edb1125efd23fa95e0270fe09706b4fe15e62b200c1c672",
+      "operationalCredit": 0,
+      "ordinal": 15,
+      "outputObjectId": "PRCV5-OBJECT-014",
+      "producerId": "PRCV5-PRODUCER-014",
+      "producerRoot": "a9908190482835f06a184f22745f81807978501536143edd131da5a06e141395",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "951c1408b4adda82ef48f2cbf8e1cbe2ce9e98a70bf70bc60c46a7887ed0d966"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "c84ab7300a220ebc5f9bedf7693b56087979fa1817a3ca6d84494ab1db7fb9d0",
+      "controllerId": "PRCV5-CONTROLLER-016",
+      "controllerRoot": "9db767837673003cbbf333f5cb9ae7e71fb2c200480da3af3de6dcd69e1b40c9",
+      "implementationRoot": "75eb44389254e80462807f586ab71e0949517bb3adb47215d49f14d9b99c5651",
+      "ledgerRoot": "80b01f0d0e9d2098a1c1ec4b0cde9cfd42ad9eb4a7fd62bd9af4016263f2ea48",
+      "operationalCredit": 0,
+      "ordinal": 16,
+      "outputObjectId": "PRCV5-OBJECT-015",
+      "producerId": "PRCV5-PRODUCER-015",
+      "producerRoot": "63a94c1974046d246fcd10578f491d00f2c5b7e0ba96946ede022499132bc04e",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "0f6ce21674b9dbef42d48f1c7d753a296b67fb49dc2e443d8101d48fdade6b9f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "938a103c110f4fd15cd65c32ae1e90ce20dfb2aecb42c3006b9195e68e95e5db",
+      "controllerId": "PRCV5-CONTROLLER-017",
+      "controllerRoot": "e09c9a63e4d0fd674dbdc8163328c5787e92fe60fb0a485e607462afff62bbec",
+      "implementationRoot": "93df9c1ecdca83f855a4f2e2597351fa03a25c9eb4dc5c994d7f1b5f3851d781",
+      "ledgerRoot": "ed7bfb7503b19f300a29dad713c8c334492a192171a595f0b98561fd6fd020a8",
+      "operationalCredit": 0,
+      "ordinal": 17,
+      "outputObjectId": "PRCV5-OBJECT-016",
+      "producerId": "PRCV5-PRODUCER-016",
+      "producerRoot": "69bea0078c7d696194222ade8d488f9c2fcd546cac2d84c648cd4b6dce68866f",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "f6074eeadd036222341b249228590268b4d1dc6b30ad0ceb5de26f77caeff408"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "a1c1acbd54da966bf70b4a001d0cbc90adfa152d131ce6541de89d76bdd418b6",
+      "controllerId": "PRCV5-CONTROLLER-018",
+      "controllerRoot": "b0408bd3099932421debdfc323f90c7a628294ceba60ccf160a957d1a57bc99b",
+      "implementationRoot": "3e639cc2a22921ff61ffbceed2ce2cbf812471c347c9378c65ece81392dec676",
+      "ledgerRoot": "8a3e78a9e4f034a0958bfae2df8c2a0ebe7bff08feafc48263f72f4326ba7212",
+      "operationalCredit": 0,
+      "ordinal": 18,
+      "outputObjectId": "PRCV5-OBJECT-017",
+      "producerId": "PRCV5-PRODUCER-017",
+      "producerRoot": "491c7af16edc281f4337f399efdc72e73473258c3f66d6560472f828d819d3cd",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "8755a91b63f0444ed7e2ffd96ff6d9a774b0381d5af408dcd6d3a825cfc53d53"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "2a21dd5f01ef1822d43b30af521933854aa903b1fbe48ce0c58a8e5adbf53e1f",
+      "controllerId": "PRCV5-CONTROLLER-019",
+      "controllerRoot": "96f82c0dd4dcc713c4afd64a87bcce1e7c928fe335bcb464cdcecb0deb029be0",
+      "implementationRoot": "39a54716f5f30372f8787f5b678c2cfc89b9487195310d09ca2ed50349cfa40a",
+      "ledgerRoot": "9caacbcbc44100294797c19451e6d948b2b00a7964ec3df56705273a3bbde674",
+      "operationalCredit": 0,
+      "ordinal": 19,
+      "outputObjectId": "PRCV5-OBJECT-018",
+      "producerId": "PRCV5-PRODUCER-018",
+      "producerRoot": "d3c5c0f0fb3b4f4b427eb1e0a52beaa99c733294de3240a352600a24c46ce247",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "092fd1751e547919932fe3a9825c6e69360f9a95eabdcb8fcd216f9a5eb052a1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "b48ae8d43aa8eb3c5527ffe613a2f1b0422930b10647b846684037c050311c3a",
+      "controllerId": "PRCV5-CONTROLLER-020",
+      "controllerRoot": "e3f7227456a2baae9f32d355977066c3e358c0d4af1f945f2e417734b09c8550",
+      "implementationRoot": "0d63fcc5fb5d0654962e937ae0cc93bc95595b640cc814d0c597f88325a728aa",
+      "ledgerRoot": "94bc172aabd32322f1ae360f4141c0caed275aba7ecc81c87105dd021491b574",
+      "operationalCredit": 0,
+      "ordinal": 20,
+      "outputObjectId": "PRCV5-OBJECT-019",
+      "producerId": "PRCV5-PRODUCER-019",
+      "producerRoot": "20534ae5740439d3e99a7730bf43dedf3518bb6e3e500ecce582f5c9a5d80b86",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "14635c3b8a0df35971e35fbe069d0805529bbec137852ba3dd504be9c8b7ceec"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "6c353e96cd42e9ccdf037731167ff90e94132689fde16bf21d3bcd706e1458fd",
+      "controllerId": "PRCV5-CONTROLLER-021",
+      "controllerRoot": "03ca449618db5224338ad39caccdeab3a01720dbfb2cc5bf9d4155606ebf328a",
+      "implementationRoot": "8ad72c059a6faf55691fbec6e8c2b37e92cf8d92ce020d5dd8256f4c55ff0737",
+      "ledgerRoot": "884198c41724fec7655e2a1838ba0d4e0a241215150d6f1d0807e9247a58464f",
+      "operationalCredit": 0,
+      "ordinal": 21,
+      "outputObjectId": "PRCV5-OBJECT-020",
+      "producerId": "PRCV5-PRODUCER-020",
+      "producerRoot": "0d206cde9a05421729c3aff3df7004ee58c2c313c8fc0114bacc0b9ecc6f5c48",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "2c7ab03c636a4427449e6768622c7a1e5688300940be221bcb142bd519773332"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "cd401e20e8708926c4e1fa2cbf6ea2e1ea1d6180404a0776b3aee8fac99439d4",
+      "controllerId": "PRCV5-CONTROLLER-022",
+      "controllerRoot": "3eb9708c37961a0c0a1490fbfd43887b26d537a6f1da81d74178adb3cfc549d9",
+      "implementationRoot": "ae5c430388961e958d59edaf143ec283f57d758d972a45fc9abf5c046b0952ec",
+      "ledgerRoot": "c1cf8077d0f9a65cc7add1e09e15131da3cfdc5396bf2f708e1f828725ff7f1a",
+      "operationalCredit": 0,
+      "ordinal": 22,
+      "outputObjectId": "PRCV5-OBJECT-021",
+      "producerId": "PRCV5-PRODUCER-021",
+      "producerRoot": "015faef6f00fc99f5a67eadbe547189a999bb13e014f224558d43b7534bbd35a",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "c1c0947406a9cd6941d23cd502fd777e5e51b7ea5a7d270d3727b617a5410545"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "9162ff619b919658bb994949f2814e5bd0c503a7b4eeb56d873b093a1863eb7b",
+      "controllerId": "PRCV5-CONTROLLER-023",
+      "controllerRoot": "19e38f70f9525472b1d487ff735893f9f3c5e7f30029df25ea3eed31e2f0eb02",
+      "implementationRoot": "0aed540f48c90f30107bedcce14a77b641731385388707114aa278af97ac8575",
+      "ledgerRoot": "ffc4d4ca47b58ac31e2737ecd564ad570f6bdf217fc97f91d185eceda9624753",
+      "operationalCredit": 0,
+      "ordinal": 23,
+      "outputObjectId": "PRCV5-OBJECT-022",
+      "producerId": "PRCV5-PRODUCER-022",
+      "producerRoot": "f781a68b74f30997899328b40fb18798589957660a7ced8850a528ae78fa9b4b",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "bfd6a915ba84a26ebd5232623dbe225ca9927ca4c99b4e52d003703bfca6b52c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "8eda46507cea33cd1fdc37dfd8917569231e24fe51af7b7e05b34dd7bbec3482",
+      "controllerId": "PRCV5-CONTROLLER-024",
+      "controllerRoot": "2705ce3c6a689875bd60fbc9023b7e221d02eb3a7f23dd9c93bbbe208e4d8914",
+      "implementationRoot": "dbc826c12ae69d27eaa1bd372f4a9ee1bfa41fb69c9facc4d553534b18b9ea22",
+      "ledgerRoot": "687ac128c283857b724f5487e06cf83dfcf98b62e372c3da51a6d342fbe6f2cd",
+      "operationalCredit": 0,
+      "ordinal": 24,
+      "outputObjectId": "PRCV5-OBJECT-023",
+      "producerId": "PRCV5-PRODUCER-023",
+      "producerRoot": "4f1f2f50907bdba7b1e1f72538436a4350b96a873bbd2b250ca3a8e4b6eb90c8",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "5d60e6d83b79ef831900a69ec85570d55006579d4ea41577ee5395f8a9e689eb"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "441fc27551fcbc4fb67c9f549dcfcb79a6b43733932d06c0f323f2c896e51504",
+      "controllerId": "PRCV5-CONTROLLER-025",
+      "controllerRoot": "8382d6f18175080f8e4fcb5e0e1e90ac8a6da996290e830e8c95f0ae361e3355",
+      "implementationRoot": "0e4c9206b05f829e49b84d87b64f6c6983317db1ec6d33cb99e8c3102746b7c7",
+      "ledgerRoot": "c4996c3e9dfbfbd9fbdea5cf4599ec21d4a10442bc6ee77f27318327f98b1846",
+      "operationalCredit": 0,
+      "ordinal": 25,
+      "outputObjectId": "PRCV5-OBJECT-024",
+      "producerId": "PRCV5-PRODUCER-024",
+      "producerRoot": "d576ff26e1afd21a52a5ab0b9ad542c636b28661134468c6a91b589a4d912577",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "d16df4a2fb8ccaec339edcad6aafa905a4188ec9854cff321f4478e6f6350bb4"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "4c8594d5d7d3cafcaeff4f1b35acd9a934158d0f20a4b22da2a60c1e0fd28c0e",
+      "controllerId": "PRCV5-CONTROLLER-026",
+      "controllerRoot": "b8b0247accb4623fe7ef4e27c7dea7691697e0c9ecc0c63a05274193456b083e",
+      "implementationRoot": "4ebaf549838cbcbbe16d5267000005abafbabe64f71480a925c508d37d3995c2",
+      "ledgerRoot": "49e34c702075ec5a5c16116af087b2d57707ebf2e81dc1c5eaf1d72ab15eed03",
+      "operationalCredit": 0,
+      "ordinal": 26,
+      "outputObjectId": "PRCV5-OBJECT-025",
+      "producerId": "PRCV5-PRODUCER-025",
+      "producerRoot": "52f28dbbbc11d99b5bea3fb52a339f83d3198116e9fe121cd2ebbb707e8eb71f",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "3c41ca3527d73dbf61ec85398e379eb2c0dc841a9b1ebe577124647f5a545ae1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "a71852c0d8675d9c8714e7fca8ab416208fa12b44e1c25686c0a188767b7e616",
+      "controllerId": "PRCV5-CONTROLLER-027",
+      "controllerRoot": "75e15d61060b102320120a4214fbcd36c6befee969596ce59620b2f5d7f97e3f",
+      "implementationRoot": "5f3062234f142e0c09d00bb9b45a55b21c9338ff00519229f2e297b2962a4a15",
+      "ledgerRoot": "ae526d42c89e8c753e68742efdc40ba9afdd10cdc0e6826e5fdb0cf1b39ab5f7",
+      "operationalCredit": 0,
+      "ordinal": 27,
+      "outputObjectId": "PRCV5-OBJECT-026",
+      "producerId": "PRCV5-PRODUCER-026",
+      "producerRoot": "7a30d7e7da5a77e646069a4bd21954ae27abefe5b15306ed7ab62285efda8be3",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "b1d0b3b7b8d7377863688add9b7a855a4eab93d9b7776f4fd0a797aeacf35c34"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "6b239c67a8b85f7bb962227108b0999ef51f7fe4f5161335a39a96545fc8ac11",
+      "controllerId": "PRCV5-CONTROLLER-028",
+      "controllerRoot": "d02bdd5c3a63db1934203bbc7fd3092b3cd957abaffdb7903963863baa44f226",
+      "implementationRoot": "bdd2c5c94c9accef5b37ab6c60f2fa8d00660b27c87c0248079186a85f85b5e3",
+      "ledgerRoot": "3287c4296a3750394e67fc1c78a907292fac1cebff09ccb7ca0c1e84e656cf5c",
+      "operationalCredit": 0,
+      "ordinal": 28,
+      "outputObjectId": "PRCV5-OBJECT-027",
+      "producerId": "PRCV5-PRODUCER-027",
+      "producerRoot": "7123c044838e3f01754e379b43873c42b8ac9e0ff273915962fcfdc14f48a920",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "765a8f8d619ed13cfe400cf837beb61c208349dd2b36f1bf73a9e89b3009568a"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "41d66c6d094a5569a916d6a415b5ba3498ed59f7cfdef68aa6b44e4cfeb2270b",
+      "controllerId": "PRCV5-CONTROLLER-029",
+      "controllerRoot": "7ce5fc0e73634a3c8c10300530205ca3bf9a5b922d9ec83e102f5b49ba198506",
+      "implementationRoot": "10ce41b4eb6c5e9a9c752c711a62670df0d013b8d68a66c4f9084d6266f09e14",
+      "ledgerRoot": "92de14e6daffda3e2109732d175ca7195fc9c5088a7790a6d980f9c501843b3f",
+      "operationalCredit": 0,
+      "ordinal": 29,
+      "outputObjectId": "PRCV5-OBJECT-028",
+      "producerId": "PRCV5-PRODUCER-028",
+      "producerRoot": "e189c9a191766301900d9006d17f6eb8e9dc659df385f9834df2ae6f0036141d",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "55c060566714b2724c2369ff00a404c11911a7539377de0ce49a2aaeb6d8accc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "45d91e4de8df3f5f5f4d78ca655b26b45ae9c15ff73a61c5d69aa62e81b3ee25",
+      "controllerId": "PRCV5-CONTROLLER-030",
+      "controllerRoot": "7bb1d05efae21e6266a4f50555c927e28ef43e98e7435c0a070d24ebb1b80d6e",
+      "implementationRoot": "d060e20f3865a74b9fdee0e06d029d460380f8de86568c0ff36139fa37ad0f8e",
+      "ledgerRoot": "17dc8ed1f7fcd8b0c402165615be7fca035f0d6baab5308370172ef3861f04fe",
+      "operationalCredit": 0,
+      "ordinal": 30,
+      "outputObjectId": "PRCV5-OBJECT-029",
+      "producerId": "PRCV5-PRODUCER-029",
+      "producerRoot": "c16c5670bf4ebc9cda635eeee3bf6232a098308e0811fafafcaac1ae3168506f",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "213f71eccd082b1a266460fd1bb684f36df54f9ecd585a7fa4a7ace64038bb6c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "b55f319b541bcfb281ecf6b3859dc0e5a94fc6caed2bb6c277bea15818853add",
+      "controllerId": "PRCV5-CONTROLLER-031",
+      "controllerRoot": "cc0e617cfd575f2f301557bcac91a222d3bf86dd560677eee50f2d4de5226ee5",
+      "implementationRoot": "2addec9e7e2664b7581b28c5e68d6d2157b3de1ccf0aaee2466078cfa4214ce8",
+      "ledgerRoot": "3bf4e81c5a123b969bd2b53aac78b4020a46ee43501588ab645bddf1541347ef",
+      "operationalCredit": 0,
+      "ordinal": 31,
+      "outputObjectId": "PRCV5-OBJECT-030",
+      "producerId": "PRCV5-PRODUCER-030",
+      "producerRoot": "cdf02e877d264aff6e22aebf02a1ec78cf6608fe86043d8376440c8a487b18e9",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "a35cbf43ae0468b3a17ba477dedda97d3a5b10adcc265278f873e192f23b071e"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "c9a48a2b0ad4e4b134e72b067c36a143c08eacea58d93ba0a2104c14c1393c07",
+      "controllerId": "PRCV5-CONTROLLER-032",
+      "controllerRoot": "aff9fb4ba224c912fc271dad901c4e009883d6bbc1de78745ed1210e3b7f5c1d",
+      "implementationRoot": "2e6f7297b23b613fad116695457a681c605aef25244a8192cda850436393721e",
+      "ledgerRoot": "bc67984028df7ead0396789a466675c4bcfb2a7ade4b1f93286401dcb90e158a",
+      "operationalCredit": 0,
+      "ordinal": 32,
+      "outputObjectId": "PRCV5-OBJECT-031",
+      "producerId": "PRCV5-PRODUCER-031",
+      "producerRoot": "e9dd51d7a20c440957c02edfff2d8d962d4c4ec04b0985e8f16b136e1e65fcd6",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "2da194d88a9f535146c1e9c40a3fdb2e1ea17b92e5da194afa796e538feca7c7"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "463101308f7e60bd4ad6325aca5a7a62a149906137ae962f04a8ac9af433f96f",
+      "controllerId": "PRCV5-CONTROLLER-033",
+      "controllerRoot": "493e3d5622f0b283aeecec2920b3e7bf1448b71beb62e9f242882a867ef95f9f",
+      "implementationRoot": "b5f72e87dd8361f92d849e56458cf83f33fb28466e25a75425d1b3aa340b5803",
+      "ledgerRoot": "ba9cf5a5c5bdce2fe710dbdfa69ed4b25c466bbe3d698303ffe8c173352e8726",
+      "operationalCredit": 0,
+      "ordinal": 33,
+      "outputObjectId": "PRCV5-OBJECT-032",
+      "producerId": "PRCV5-PRODUCER-032",
+      "producerRoot": "8ddcff0ce85c2a68957e9883b8d5a5825d111d050515331b292cfa37df2ecd63",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "774bba5ce2d902ce10444204a60993c995400a3c7a726bc9e784a74459e82ac5"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "2388650907e57fe4d34394bbeb3bcb197f63cefd024b2dc6dab00773692e05f3",
+      "controllerId": "PRCV5-CONTROLLER-034",
+      "controllerRoot": "5fc6e86143d0a4a3aa24347ccf533f8d93a54942572461d4eeb17fa317a7110e",
+      "implementationRoot": "99863bd00f10b40f84b37792001f4fb21e3294e6536b127c9ba7090686ea5d73",
+      "ledgerRoot": "f18c6abda2db631c70c295f94895e0956d8dcb586197c5108cdc9441e54436d2",
+      "operationalCredit": 0,
+      "ordinal": 34,
+      "outputObjectId": "PRCV5-OBJECT-033",
+      "producerId": "PRCV5-PRODUCER-033",
+      "producerRoot": "eec02105f44c95522b56334762fb0ba94f404d5b483944ff2708328f1f940c66",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "7aa255eb0b76d0ffe0b7a339096f645c9a8cb3cc686a65524de4ec773fdb0062"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "009f8decd775118206ec35b779b3150ee12676ba31b66b135d501808e1790262",
+      "controllerId": "PRCV5-CONTROLLER-035",
+      "controllerRoot": "59ebf8a0135bdce89502b1c81f7c43dcdd677005376c9479105f8e2abdc61cbb",
+      "implementationRoot": "63b9b2ea582c944e7a986acafc9aea975600ad1267f7187bdad0d1fb1ff5d369",
+      "ledgerRoot": "ce9f66bc6812012744970bf0e8efa86905cf920722e12aa7cd0dfba9011d6b89",
+      "operationalCredit": 0,
+      "ordinal": 35,
+      "outputObjectId": "PRCV5-OBJECT-034",
+      "producerId": "PRCV5-PRODUCER-034",
+      "producerRoot": "b052f5795be1621524d6ad8c0681aea7cd18bf51575895867cf155c0cc8d7914",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "7a58464463ee1c3d16b4c32dcb0e32f9233fca72be1bae67f8291ddb969173be"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "8f4d79c2771a95257d67d058d5fd0a480dc3dd97f4058ceb320f15a803da9df8",
+      "controllerId": "PRCV5-CONTROLLER-036",
+      "controllerRoot": "12a256975f93e5cdbc385f2aaf7ddc8cc210ff8337024ef6231e68060017d1be",
+      "implementationRoot": "ea3646f7b6a3b2b1e46fb28dde40e8bae87093bb3e1c812a9deec524b65f7a4e",
+      "ledgerRoot": "1a6815b91d0aae61872debc8241359e7097462a9d9d6d29de1e3e471f5d193fc",
+      "operationalCredit": 0,
+      "ordinal": 36,
+      "outputObjectId": "PRCV5-OBJECT-035",
+      "producerId": "PRCV5-PRODUCER-035",
+      "producerRoot": "6877499000df3288ee4ea13a792d133b2fb256217c5c615abbbef94ca8ec94dc",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "a2125132479dc592d4181c12060c9fcf033eb68a0f02f2b86676886ebab70bdc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "535b952b9c8c309efae02be4facef2b9fb8362b7311a76f9de7c62cf046d84e3",
+      "controllerId": "PRCV5-CONTROLLER-037",
+      "controllerRoot": "20212cf51ecc2df9ebb66f9ae23f6661ee8fb01c699875026cd0fb9695fb9572",
+      "implementationRoot": "38033aeb6f6549bf2c7e778c1da56f1e3ee04f812de420ee4eb617178d516514",
+      "ledgerRoot": "08fd96820a5dfc684fbc933dd08bc17fabbd6ebc086c0af01d63836ecea3ab63",
+      "operationalCredit": 0,
+      "ordinal": 37,
+      "outputObjectId": "PRCV5-OBJECT-036",
+      "producerId": "PRCV5-PRODUCER-036",
+      "producerRoot": "615bd476df6716a4fe4da840e2193581d676787e9383f488f85c008da98386a7",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "d8c09dbc5adeb04507443d67f0c3a50ca53564b325f8282647ffc9663a2a117f"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "9944771714fd9ff63c8a8ffea51853e16b6c396b3a7c3fc1ae38ba2b5812c04a",
+      "controllerId": "PRCV5-CONTROLLER-038",
+      "controllerRoot": "954436a4e3f448f6ec5612043085160b57fc2c2115e51bc748c0b3cb167a873e",
+      "implementationRoot": "6e33bdff73ab19c4ddb2b91fe3fc6aecd6b39baa4beff2b43eba143017e9dc6c",
+      "ledgerRoot": "dbe1250023f3d40761aef427ee4633a8b7e0751028e89d9494ce08eee0fe292f",
+      "operationalCredit": 0,
+      "ordinal": 38,
+      "outputObjectId": "PRCV5-OBJECT-037",
+      "producerId": "PRCV5-PRODUCER-037",
+      "producerRoot": "96adeb002892e09ff7a04af35a6c543669940b6c4b7c5ca61db2737f452ebc36",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "3b6f095567e079ca1b20d33ae10f0a62b1f3736cd5bcbb3bffcf76303ed1f565"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "53bc2d3733294ade6172b8374a98516b5e8671e6a6e8a0e40f2036c02ccaee32",
+      "controllerId": "PRCV5-CONTROLLER-039",
+      "controllerRoot": "70d36f1ba54fc1f6cdc46aac7e0f2a9fa9cde4a7364188f2d187ec55f7c1d64b",
+      "implementationRoot": "f9d7693ec21a0a0f5a5746d1a002275b0bb044a9d48e419a20e82f65c981131d",
+      "ledgerRoot": "f7003259c2b6c48fc3281d5f7ff103e60ddbcef6725f7b96714435211c929946",
+      "operationalCredit": 0,
+      "ordinal": 39,
+      "outputObjectId": "PRCV5-OBJECT-038",
+      "producerId": "PRCV5-PRODUCER-038",
+      "producerRoot": "dcb4824ff442ce7eeaee3f3c042efe8b635abcbdb3f095532485199232c9fac0",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "a0efa5bd60ed7f6e3c03e0149563aa99d7e8f8082c1afc581c7a69b3e1f7e63d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "4be7e0cb8ecae6764fa3f94f8f3e030c3727e13523e5d8eb7874394141374b3e",
+      "controllerId": "PRCV5-CONTROLLER-040",
+      "controllerRoot": "5f1a729397171af7b477136527245582dbcf88efdb45b1c9513869cd4f5f4dba",
+      "implementationRoot": "99ba445f42fb1ab8b1260b63eaa4d5be28de72aef97c694d791a93829f55001e",
+      "ledgerRoot": "a96b5856ef54b1202d75bb2359df52ee27ba44494ca5852dca430cd357671185",
+      "operationalCredit": 0,
+      "ordinal": 40,
+      "outputObjectId": "PRCV5-OBJECT-039",
+      "producerId": "PRCV5-PRODUCER-039",
+      "producerRoot": "9e16820659ff75a4ab2746f17f7a6f4005b4c0137bdcc52b7f60f96676bcd014",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "2bfbe7c32782746353e4e5c19a6e72e2d82b43eab0769850d9f95a26332cbe16"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "f0a5f7542f995c1c4ca593e2bfdb598cca69a54d7fcb22d2f28a3ab8eb0c75e9",
+      "controllerId": "PRCV5-CONTROLLER-041",
+      "controllerRoot": "e504f78ab00aa965b7d50a4d8d3971a55ae5219a3c13d7c7bfe061bedbbb194f",
+      "implementationRoot": "4f21cb9a20e9eaff686cb2d98dcede0891073e642584ef2d70464ddd1dccef21",
+      "ledgerRoot": "25235e6f033bba3e54aa5732629cdad2066793d8eac2e6b2b0ad7e5bfd8637a4",
+      "operationalCredit": 0,
+      "ordinal": 41,
+      "outputObjectId": "PRCV5-OBJECT-040",
+      "producerId": "PRCV5-PRODUCER-040",
+      "producerRoot": "8f1c58a65324f39bb1d080ce6a539b6639bb398ca9e230dcb6ba5973c8d0576c",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "6a32d3cc9e5a0ae900b5ec26a3514937ce7aae9dbc2814472793092e8b6a14a9"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "3b3828a3938d5efc9248c4e86641a747817054fdc1a7559e2ea470a8477655a1",
+      "controllerId": "PRCV5-CONTROLLER-042",
+      "controllerRoot": "1ae6192a24271aa5a34e162d533f175dac28882f0733c13bca1a1256100ec498",
+      "implementationRoot": "77ef97639deff6379c12610f9ca805e24b00746a4360ea8889c0900c8e2a3cac",
+      "ledgerRoot": "ab4426f41af7801bab69e7d8d36e99d6aa6b6eb0c8887420cf30faf5e708861e",
+      "operationalCredit": 0,
+      "ordinal": 42,
+      "outputObjectId": "PRCV5-OBJECT-041",
+      "producerId": "PRCV5-PRODUCER-041",
+      "producerRoot": "43bae25c4f190499f47ed13db9251d2abf2fc6e8b7873be71660e2ce2753b608",
+      "roleClass": "OUTPUT-FAMILY-SOLE-PRODUCER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "53c004269910004843f26566da8a58a4112b3c54bcce38ca55a480cc58fb8bc7"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "de3aacca54fa5b2f582410ff5bbfa9216ec1bb9ac44b78f26bb188644ed52f3a",
+      "controllerId": "PRCV5-CONTROLLER-043",
+      "controllerRoot": "28918f58c8c0bb04f585982903f11e2a26085b0dac1f785fdc8b86712443474d",
+      "implementationRoot": "54e875288ef78dd207e21a6c7030e5d5c0ae19132690ec7db940574e87eb25f2",
+      "ledgerRoot": "d10dd58813fad727bc4eed84e814d54eb20fda66f14de692d6a30de27d488970",
+      "operationalCredit": 0,
+      "ordinal": 43,
+      "outputObjectId": "PRCV5-ALLOWLIST-A-OUTPUT",
+      "producerId": "PRCV5-ALLOWLIST-BUILDER-A",
+      "producerRoot": "faa56acd2fc31f8b2b29cf9163b0c64eeb5c50cb6210a425f5ecbbcdc3d1eccd",
+      "roleClass": "ALLOWLIST-BUILDER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "207ea93638616a6dc578adb56fcd20533c1f1a6e4d46bcae5701fec734f8151c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "41431268d07d2bc35ec6a86d238dcaa39d92cc83e880056a77b2fa2941592e6e",
+      "controllerId": "PRCV5-CONTROLLER-044",
+      "controllerRoot": "3352fb67cb9497b567294d02a1d9cb4cd9191811d283b31e5da25b1210f910cd",
+      "implementationRoot": "079ade15e63f68d348c7f0e8a64ef4cdebaba46fb001b71d7b4426bf3dbbee98",
+      "ledgerRoot": "5278524902800fb1a0caa391358774ac8e571300116de0ff57e17b4291776d44",
+      "operationalCredit": 0,
+      "ordinal": 44,
+      "outputObjectId": "PRCV5-ALLOWLIST-B-OUTPUT",
+      "producerId": "PRCV5-ALLOWLIST-BUILDER-B",
+      "producerRoot": "a77e8b55a8f6e9e200c7e86400a170218d43fc4fee93f54a617d046d7811dfc9",
+      "roleClass": "ALLOWLIST-BUILDER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "053500f5ab4dcf94e243ddd7dd5f20f56b37020f1367210a00fdee0d6caf8b09"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "0e2f1dabe203c816ea29cd28943a40e346a2a1f8c58263908e32d5ee58c77e8a",
+      "controllerId": "PRCV5-CONTROLLER-045",
+      "controllerRoot": "35ebd7fc4496d576ce133a3e29879e40437c88b5cad9d9a1207af9e04ecf5f9d",
+      "implementationRoot": "fbbaf575cbffb591cbfe3bd60c3d58d8c8acf5af0495b9459a53c211fedbebc1",
+      "ledgerRoot": "4df9088ae492119cbac77a7713012a6bda2790f6ffa308f941f9abca60a40ef1",
+      "operationalCredit": 0,
+      "ordinal": 45,
+      "outputObjectId": "PRCV5-ALLOWLIST-ADJUDICATION",
+      "producerId": "PRCV5-ALLOWLIST-ADJUDICATOR",
+      "producerRoot": "43fca1da9b8481139a982cae407d145a41b2a8e0348bc6891500fd0a60a75d63",
+      "roleClass": "ALLOWLIST-ADJUDICATOR",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "bf10d371045c9aee9177d5a7e2f9237218a6b1f49d36d4164c82b98bda6d202d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "4f48ecb6372d48b9fff105318513fe9bdeec259256c0952d33e4292f301687e4",
+      "controllerId": "PRCV5-CONTROLLER-046",
+      "controllerRoot": "0fea041dfef92d4fdadefe09697146f6eaa512a31aff442920840c33a76227cf",
+      "implementationRoot": "de6e1bff608746cd5aac4f07d1d4e28af41a18eefe683d50fcbec5cd2266dbd5",
+      "ledgerRoot": "8922d65512c4262cd97ed5fb47276cf5f9209463cea5a88b4987591777d4a567",
+      "operationalCredit": 0,
+      "ordinal": 46,
+      "outputObjectId": "PRCV5-SCAN-A-RECEIPT",
+      "producerId": "PRCV5-SCANNER-A",
+      "producerRoot": "8d6383f90c211e1fe6dcde4b68efdf95ec5524c71dea429b2a2fe5b79cf1c937",
+      "roleClass": "SECRET-SCANNER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "44275782a52705943495eb415339e0724cc06e60b3ae6e9c2c517bee16d8382c"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "31b2edad921c3baec52930de8cb71bd0116654e5ea1da4e1291c8a97d2354334",
+      "controllerId": "PRCV5-CONTROLLER-047",
+      "controllerRoot": "f4f0c593fb4d0074f0210c5e2d5137bf3b55285c01c500dee51f71a091dfd349",
+      "implementationRoot": "7201973b26e7fdcd068190fdbd65df29ba70c6fd17c5ccfd037f5b7f29ac585f",
+      "ledgerRoot": "e9cd181fe3d99be86a1cd341a0bd2b04b9ced63cf1dcc56dd26cfaa3708e77b9",
+      "operationalCredit": 0,
+      "ordinal": 47,
+      "outputObjectId": "PRCV5-SCAN-B-RECEIPT",
+      "producerId": "PRCV5-SCANNER-B",
+      "producerRoot": "f560fdff3055f12c580b47fe84557da402fbf129d1c891580aa23ae0ae09c887",
+      "roleClass": "SECRET-SCANNER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "922fa2fa85e000ff54b0481b1e51d9f07920101fc85d329f64a888fa3238c43d"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "5d748e910259aad2176ec46eff9e48d0ed4389da21fa8955d06ade85c26a6d81",
+      "controllerId": "PRCV5-CONTROLLER-048",
+      "controllerRoot": "642558985a6f8545da16d71061ca4acc5a2a995698118ff234da01fc07390ff3",
+      "implementationRoot": "6c16a7d29478b520a2e2486631366c187f9e6989effa849c0d6b000674c4c8df",
+      "ledgerRoot": "9d5ac6aed7232bb3f3928f99d596e0402b81cfc52f600977fd49f47bf5afa007",
+      "operationalCredit": 0,
+      "ordinal": 48,
+      "outputObjectId": "PRCV5-SCAN-ADJUDICATION",
+      "producerId": "PRCV5-SCANNER-ADJUDICATOR",
+      "producerRoot": "b75cdf64484cc1e7a54d1ef9d717cf7447f27b2734a2ce4e7a451b9e99366fdb",
+      "roleClass": "SCANNER-ADJUDICATOR",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "ea5f493a3e0b3723c3aaf2270c318dc318293e9e7285ab4bafe92f5ea4365e32"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "7319ca12b7c57398b5a9b3a2287519962cf659e9c857dfc02dce06d8212300a5",
+      "controllerId": "PRCV5-CONTROLLER-049",
+      "controllerRoot": "bb8e341ec7d9eb0a9ebbb10f12ca5803504438e079c4afdff3325d14d3019eee",
+      "implementationRoot": "225bf798a43312cf0414b6e354cadb78e37ee2bef173d1179d771c0c94158f66",
+      "ledgerRoot": "69aff44c7131f5029ea22b91b218e4791dc9d6691f216378ada5169ae0b4941e",
+      "operationalCredit": 0,
+      "ordinal": 49,
+      "outputObjectId": "PRCV5-REVIEW-A-DISPOSITION",
+      "producerId": "PRCV5-REVIEWER-A",
+      "producerRoot": "d3d4f4b2bb9d464ff383e21b434756e594f7abe50421c7deee12059e9b731a88",
+      "roleClass": "INDEPENDENT-REVIEWER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "96d436832008bdfcb36a1558d9836576231e751a9376191fd9466f007900ac02"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "c959cfec953057434e9bd5f23682ce7379330bb0529c5b8149ed05fdf155f56c",
+      "controllerId": "PRCV5-CONTROLLER-050",
+      "controllerRoot": "3f7c1cba76dac518dd4ffbe185bf7d384070a95384eea0bfcf9f9b51b66a145f",
+      "implementationRoot": "810d9f56670b7912e55e30ee7753d1ea93c870ac111730a4171937179833dc3e",
+      "ledgerRoot": "3b076aed3af6bf87ce84142679221818daf59d595dcd86a828486aecae18b28e",
+      "operationalCredit": 0,
+      "ordinal": 50,
+      "outputObjectId": "PRCV5-REVIEW-B-DISPOSITION",
+      "producerId": "PRCV5-REVIEWER-B",
+      "producerRoot": "e0fca23e743c5d653deae5fafa07383d8c97462570b331953c98912629ea1245",
+      "roleClass": "INDEPENDENT-REVIEWER",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "b87e07ba1d0d8f9ee2dec57ff73b0caad76674654bad52bc90e10d4064c76fdc"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "dfa8542e7df432f878e28ff23cca66e7f7b2bea93205ba6b751d93632726b66c",
+      "controllerId": "PRCV5-CONTROLLER-051",
+      "controllerRoot": "2cbae22275a50f1bc50bb16bdd04048d335d692f6df54eed0a62a912b0109053",
+      "implementationRoot": "1d8d3853c58e6792cffef7e59b8f0aa897eb9c9d2865559a67c0af2d55b5c568",
+      "ledgerRoot": "84f0240d09e8de9f79c88b611d7bdc218ea68f875c6932a27fd7275856593c25",
+      "operationalCredit": 0,
+      "ordinal": 51,
+      "outputObjectId": "PRCV5-VETO-DISPOSITION",
+      "producerId": "PRCV5-VETO-OWNER",
+      "producerRoot": "17457dee6aaa3b3e1514ae54697c4bf9139484ddcba6597559230a8fd4c32e3b",
+      "roleClass": "VETO",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "88976e4e65fa77cd1993ec1d1e7c925db5a72cf01739047ba300bca02d7155f1"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "6dd5d3ff27ef4e7aeac7f3f5e7061b43258854573368c71ae0ae93791e65b680",
+      "controllerId": "PRCV5-CONTROLLER-052",
+      "controllerRoot": "81a91fc862191d2713135400c4eb2bc71885ef4724559503d33de97eec8dfc10",
+      "implementationRoot": "f9afe27f42b5e8ddb772727ea6740c09a381399181446eaefc64854faf8b68e0",
+      "ledgerRoot": "30ae5ea2a893ada1d9d83fcf02721e945a98c3d37c01bac1c3dadc8716b37fd2",
+      "operationalCredit": 0,
+      "ordinal": 52,
+      "outputObjectId": "PRCV5-RECONCILIATION",
+      "producerId": "PRCV5-RECONCILIATION-PRODUCER",
+      "producerRoot": "c5de61a2b8f09c9845aa95c77a041f663ad7c240056c6e6eaa72669a1e200552",
+      "roleClass": "RECONCILIATION",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "f97d13466cd6a577513bec0a0209117f84db0c1024e7550acb71f1db1d421873"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "9a2b2729c8286d76db55d78105a15df0a5ab414f3368d8e628943435150a1a9b",
+      "controllerId": "PRCV5-CONTROLLER-053",
+      "controllerRoot": "35c73c2ff91a47e8dbd7e046c7184411dec3b8a8b8ccc42f8015c8159fa1dfaf",
+      "implementationRoot": "a708e7e817ddf69c7bd5ce45901e1d95ec4a8b77c410cce081e1b36042f78b23",
+      "ledgerRoot": "6092b8ac5d1c4cf606cda5b7e7e62013be702151afe3d27782439d4d62539c77",
+      "operationalCredit": 0,
+      "ordinal": 53,
+      "outputObjectId": "PRCV5-DETACHED-ACCEPTANCE",
+      "producerId": "PRCV5-ACCEPTANCE-PRODUCER",
+      "producerRoot": "96006c46e561de39db8c3358ef5ccbb004cd7ff372f421ee9a3ea22da3aaf3ce",
+      "roleClass": "ACCEPTANCE",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "44db095f13743da93b0abea99a63e6b193f15967b564ec12492d9a4f664ab854"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorityOwnerRoot": "e92e1b44870fed8d2e350af14026d6b4999ce5df42adec53dac94e4e53a7fa54",
+      "controllerId": "PRCV5-CONTROLLER-054",
+      "controllerRoot": "f36104087c0290e48a1dccc88a0321ff149580365191e373b3ae781df2a3e6ce",
+      "implementationRoot": "196763c035518e6dce148adfc30d822df232266139e6174acc112765b171630b",
+      "ledgerRoot": "afa68cd7720e6a24fba87df3b19a8127e5376feff20d5f1cf68c88ac8f901147",
+      "operationalCredit": 0,
+      "ordinal": 54,
+      "outputObjectId": "PRCV5-RECOVERY-RECEIPT",
+      "producerId": "PRCV5-RECOVERY-PRODUCER",
+      "producerRoot": "cdc7a25ab17fced160aa77e52cc82a711904eda35a33550b3767153030c1b94a",
+      "roleClass": "RECOVERY",
+      "selfAppointmentAllowed": false,
+      "soleProducer": true,
+      "workReceiptRoot": "53fd8323492902d88c544c64afd47d8ecdff18de753515ebf4b6714422b0ef87"
+    }
+  ],
+  "readerProfiles": [
+    {
+      "acceptanceCredit": 0,
+      "authorClass": "MECHANICAL-QA-IMPLEMENTATION-NOT-PRODUCER-REVIEWER-OR-ACCEPTOR",
+      "contextProfile": "DIRECT-BYTES-CANONICAL-JSON-AST-AND-REDUCER",
+      "contextRoot": "18abc0d021a4cb25140ff41e30c69d1f1f8f7f4a1c21534e3393ff97698daf7d",
+      "controllerId": "PRCV5-READER-A-CONTROLLER",
+      "controllerRoot": "faef19aa9c13b5d1c99a5f424197f38dd63d279649e9e2cf1479f6391a2b78c0",
+      "dependencyProfile": [
+        "node:fs",
+        "node:crypto"
+      ],
+      "dependencyRoot": "5d0501574083ceca0e95508236632cb43eb71c544a5ae2228ab8762fd12b70e6",
+      "implementationBytes": 40346,
+      "implementationContentId": "sha256:c05f31014104f978b6061154df3477079a20b921e85dcd58ff2e1ad8efbc91e6",
+      "implementationPath": "docs/planning/qa/public-cyber-v5-reader-a.mjs",
+      "inputCut": "EXACT-V5-PACKAGE-MANIFEST-AND-FROZEN-SOURCE-BYTES",
+      "language": "ECMASCRIPT-ES2023",
+      "profileRoot": "bd7e7cbedab2d7b737f05e9dea6d50d040846670426027b1f8bb14d05116e462",
+      "readerId": "PRCV5-READER-A",
+      "reportWriteAuthority": "STDOUT-ONLY;DETACHED-APPLICATION-BY-PRODUCER",
+      "runtime": "NODE-STANDARD-LIBRARY",
+      "runtimeRoot": "09ffca57cfb1a7971090c0b639a2af5b428b368fdbd47233698a852ee43e0228"
+    },
+    {
+      "acceptanceCredit": 0,
+      "authorClass": "MECHANICAL-QA-IMPLEMENTATION-NOT-PRODUCER-REVIEWER-OR-ACCEPTOR",
+      "contextProfile": "DATACLASS-FREE-DICTIONARY-WALK-AND-SEPARATE-REDUCER",
+      "contextRoot": "433b8b2513d73ad2567c4916ca5d5bdf4dde47277c2017844cdfa5054b79d995",
+      "controllerId": "PRCV5-READER-B-CONTROLLER",
+      "controllerRoot": "53f96b9380c20fb7e0b6179487b2079923cd741145c4ec981b1d1d574ba8222c",
+      "dependencyProfile": [
+        "hashlib",
+        "json",
+        "pathlib",
+        "re"
+      ],
+      "dependencyRoot": "e8c92d669486303be24c0d1ad1c63d3d6f98046161ef3172e94b5f2a43780ce6",
+      "implementationBytes": 41847,
+      "implementationContentId": "sha256:3bc1c549a7285ed6b5feb95ad07e70afe8b2a5d57a775f5edb52d7ab3387a9ae",
+      "implementationPath": "docs/planning/qa/public-cyber-v5-reader-b.py",
+      "inputCut": "EXACT-V5-PACKAGE-MANIFEST-AND-FROZEN-SOURCE-BYTES",
+      "language": "PYTHON-3",
+      "profileRoot": "b3889135c41633e439ff2407ce4a4eead7ff7c3a46111a8aee423fa4b61944b8",
+      "readerId": "PRCV5-READER-B",
+      "reportWriteAuthority": "STDOUT-ONLY;DETACHED-APPLICATION-BY-PRODUCER",
+      "runtime": "PYTHON-STANDARD-LIBRARY",
+      "runtimeRoot": "86036fc59750001bed258d146400d109fa38cfd19a4ae84838eead6899e9a3bc"
+    }
+  ],
+  "recoverySchema": {
+    "additionalProperties": false,
+    "crossFieldInvariants": [
+      {
+        "args": [
+          {
+            "args": [
+              "/planningOnly"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              true
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      },
+      {
+        "args": [
+          {
+            "args": [
+              "/operationalCredit"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              0
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      },
+      {
+        "args": [
+          {
+            "args": [
+              "/compromisedAuthorityRoot"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              "/independentRecoveryOwnerRoot"
+            ],
+            "op": "GET"
+          }
+        ],
+        "op": "NEQ"
+      }
+    ],
+    "fields": [
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "attemptId",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Id",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "compromisedAuthorityRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "independentRecoveryOwnerRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "expectedCurrentHead",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "newAuthorityRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "revocationClosureRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "readbackRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "planningOnly",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Boolean",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "operationalCredit",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "SafeInteger",
+        "uniqueItems": false
+      }
+    ],
+    "schemaId": "PRCV5-AUTHORITY-RECOVERY-SCHEMA-V1",
+    "schemaRoot": "134ea1f6a6d906a161e41ef3a9bafae3b13971183aa0e06975948ff1f2204338",
+    "unknownFields": "BLOCK"
+  },
+  "schemaVersion": "PRCV5-PRODUCER-AUTHORITY-SEPARATION-V1"
+}

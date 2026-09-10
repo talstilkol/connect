@@ -353,7 +353,10 @@ export function validateMessageTemplateDraft(
 
   const variableInspection =
     body === null
-      ? { numbers: [], error: "invalid" }
+      ? {
+          numbers: [],
+          error: { code: "invalid-syntax" as const },
+        }
       : inspectTemplateVariables(body);
 
   if (

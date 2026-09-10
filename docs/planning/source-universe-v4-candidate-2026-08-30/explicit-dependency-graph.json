@@ -1,0 +1,183 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-EXPLICIT-GRAPH-2026-08-30-G0",
+  "cycleCount": 0,
+  "edgeCount": 18,
+  "edges": [
+    {
+      "edgeId": "SURS4-EDGE-001",
+      "edgeType": "REQUIRES",
+      "from": "BOOTSTRAP-TYPES",
+      "to": "CUTOFF"
+    },
+    {
+      "edgeId": "SURS4-EDGE-002",
+      "edgeType": "REQUIRES",
+      "from": "BOOTSTRAP-TYPES",
+      "to": "PUBLIC-POLICY"
+    },
+    {
+      "edgeId": "SURS4-EDGE-003",
+      "edgeType": "REQUIRES",
+      "from": "BOOTSTRAP-TYPES",
+      "to": "ADMISSION"
+    },
+    {
+      "edgeId": "SURS4-EDGE-004",
+      "edgeType": "REQUIRES",
+      "from": "BOOTSTRAP-TYPES",
+      "to": "LIFECYCLE"
+    },
+    {
+      "edgeId": "SURS4-EDGE-005",
+      "edgeType": "REQUIRES",
+      "from": "CUTOFF",
+      "to": "DISCOVERY"
+    },
+    {
+      "edgeId": "SURS4-EDGE-006",
+      "edgeType": "REQUIRES",
+      "from": "PUBLIC-POLICY",
+      "to": "PUBLIC-PROJECTION"
+    },
+    {
+      "edgeId": "SURS4-EDGE-007",
+      "edgeType": "REQUIRES",
+      "from": "DISCOVERY",
+      "to": "LOCATORS"
+    },
+    {
+      "edgeId": "SURS4-EDGE-008",
+      "edgeType": "REQUIRES",
+      "from": "LOCATORS",
+      "to": "OBJECT-REGISTRY"
+    },
+    {
+      "edgeId": "SURS4-EDGE-009",
+      "edgeType": "REQUIRES",
+      "from": "OBJECT-REGISTRY",
+      "to": "GRAPHS"
+    },
+    {
+      "edgeId": "SURS4-EDGE-010",
+      "edgeType": "REQUIRES",
+      "from": "GRAPHS",
+      "to": "ADMISSION"
+    },
+    {
+      "edgeId": "SURS4-EDGE-011",
+      "edgeType": "REQUIRES",
+      "from": "ADMISSION",
+      "to": "PUBLIC-PROJECTION"
+    },
+    {
+      "edgeId": "SURS4-EDGE-012",
+      "edgeType": "REQUIRES",
+      "from": "GRAPHS",
+      "to": "LIFECYCLE"
+    },
+    {
+      "edgeId": "SURS4-EDGE-013",
+      "edgeType": "REQUIRES",
+      "from": "ADMISSION",
+      "to": "PRESERVATION"
+    },
+    {
+      "edgeId": "SURS4-EDGE-014",
+      "edgeType": "REQUIRES",
+      "from": "LIFECYCLE",
+      "to": "PRESERVATION"
+    },
+    {
+      "edgeId": "SURS4-EDGE-015",
+      "edgeType": "REQUIRES",
+      "from": "PRESERVATION",
+      "to": "VECTORS"
+    },
+    {
+      "edgeId": "SURS4-EDGE-016",
+      "edgeType": "REQUIRES",
+      "from": "VECTORS",
+      "to": "READERS"
+    },
+    {
+      "edgeId": "SURS4-EDGE-017",
+      "edgeType": "REQUIRES",
+      "from": "READERS",
+      "to": "MANIFEST"
+    },
+    {
+      "edgeId": "SURS4-EDGE-018",
+      "edgeType": "REQUIRES",
+      "from": "MANIFEST",
+      "to": "QA"
+    }
+  ],
+  "graphRoot": "2febc755f6a262b9eec894b8be97e5184016d7bbd67399de3907ecf1dfaf4b2d",
+  "hiddenEdgeCount": 0,
+  "nodeCount": 15,
+  "nodes": [
+    {
+      "nodeId": "BOOTSTRAP-TYPES",
+      "ordinal": 1
+    },
+    {
+      "nodeId": "CUTOFF",
+      "ordinal": 2
+    },
+    {
+      "nodeId": "PUBLIC-POLICY",
+      "ordinal": 3
+    },
+    {
+      "nodeId": "DISCOVERY",
+      "ordinal": 4
+    },
+    {
+      "nodeId": "LOCATORS",
+      "ordinal": 5
+    },
+    {
+      "nodeId": "OBJECT-REGISTRY",
+      "ordinal": 6
+    },
+    {
+      "nodeId": "GRAPHS",
+      "ordinal": 7
+    },
+    {
+      "nodeId": "ADMISSION",
+      "ordinal": 8
+    },
+    {
+      "nodeId": "PUBLIC-PROJECTION",
+      "ordinal": 9
+    },
+    {
+      "nodeId": "LIFECYCLE",
+      "ordinal": 10
+    },
+    {
+      "nodeId": "PRESERVATION",
+      "ordinal": 11
+    },
+    {
+      "nodeId": "VECTORS",
+      "ordinal": 12
+    },
+    {
+      "nodeId": "READERS",
+      "ordinal": 13
+    },
+    {
+      "nodeId": "MANIFEST",
+      "ordinal": 14
+    },
+    {
+      "nodeId": "QA",
+      "ordinal": 15
+    }
+  ],
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-DEPENDENCY-GRAPH-V1",
+  "selfEdgeCount": 0,
+  "unknownNodeCount": 0
+}

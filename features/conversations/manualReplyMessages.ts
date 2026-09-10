@@ -1,0 +1,40 @@
+import type { InterfaceLanguage } from "../../shared/domain/businessProfileDraft.ts";
+const translations = {
+  he: {
+    label: "תשובה ללקוח", send: "שמירה ושליחה", retry: "בדיקת אותה בקשה שוב", busy: "שומר…",
+    queued: "התשובה נשמרה וממתינה לשליחה. מצב השליחה יתעדכן בשיחה.",
+    uncertain: "לא התקבל אישור שמירה. אפשר לבדוק שוב את אותה בקשה; הטקסט נשמר כאן כדי למנוע שליחה כפולה.",
+    unavailable: "שליחת תשובות ידניות אינה מופעלת כרגע.", assignment: "כדי להשיב, יש לקחת את השיחה לטיפולך.",
+    pending: "יש תשובה שטרם הסתיימה. המתן לעדכון; אם תוצאת השליחה לא ידועה, נדרשת בדיקת מפעיל לפני תשובה נוספת.",
+    window: "אפשר לשלוח טקסט חופשי בתוך 24 שעות מההודעה האחרונה של הלקוח. מחוץ לחלון נדרשת תבנית מאושרת.",
+    rejected: "הבקשה לא נשמרה. יש לרענן ולבדוק את השיוך, ההרשאות וחיבור WhatsApp לפני ניסיון נוסף.",
+    windowClosed: "חלון השירות נסגר. יש להמתין להודעה חדשה מהלקוח או להשתמש בתבנית מאושרת.",
+    blocked: "לא ניתן להשיב לאיש קשר שהסיר את הסכמתו.",
+    states: { queued: "ממתינה לשליחה", preparing: "נבדקת לפני שליחה", sending: "נשלחת", sent: "נשלחה", failed: "השליחה נעצרה", unknown: "תוצאת השליחה לא ידועה — אין לשלוח שוב" },
+  },
+  en: {
+    label: "Reply to contact", send: "Save and send", retry: "Check the same request again", busy: "Saving…",
+    queued: "Reply saved and waiting to send. Its status will update in the conversation.",
+    uncertain: "Save confirmation was not received. Check the same request again; the text is retained here to prevent duplicate sends.",
+    unavailable: "Manual replies are currently disabled.", assignment: "Assign this conversation to yourself before replying.",
+    pending: "A reply is still pending. Wait for an update; an unknown outcome requires operator review before another reply.",
+    window: "Free-form text is available for 24 hours after the contact’s latest message. Outside that window, use an approved template.",
+    rejected: "The request was not saved. Refresh and check assignment, permissions and the WhatsApp connection before trying again.",
+    windowClosed: "The service window has closed. Wait for a new contact message or use an approved template.",
+    blocked: "Replies are blocked for contacts who withdrew consent.",
+    states: { queued: "Waiting to send", preparing: "Checking before send", sending: "Sending", sent: "Sent", failed: "Sending stopped", unknown: "Send outcome unknown — do not resend" },
+  },
+  ar: {
+    label: "الرد على العميل", send: "حفظ وإرسال", retry: "التحقق من الطلب نفسه مجددًا", busy: "جارٍ الحفظ…",
+    queued: "تم حفظ الرد وهو ينتظر الإرسال. ستتحدث حالته في المحادثة.",
+    uncertain: "لم يصل تأكيد الحفظ. تحقق من الطلب نفسه مجددًا؛ يُحتفظ بالنص هنا لمنع الإرسال المكرر.",
+    unavailable: "الردود اليدوية غير مفعّلة حاليًا.", assignment: "أسند المحادثة إلى نفسك قبل الرد.",
+    pending: "يوجد رد لم يكتمل بعد. انتظر التحديث؛ إذا كانت النتيجة غير معروفة، يلزم فحص المشغّل قبل رد آخر.",
+    window: "يمكن إرسال نص حر خلال 24 ساعة من آخر رسالة للعميل. خارج النافذة استخدم قالبًا معتمدًا.",
+    rejected: "لم يُحفظ الطلب. حدّث المحادثة وتحقق من الإسناد والصلاحيات واتصال WhatsApp قبل المحاولة مجددًا.",
+    windowClosed: "انتهت نافذة الخدمة. انتظر رسالة جديدة من العميل أو استخدم قالبًا معتمدًا.",
+    blocked: "الرد محظور للعميل الذي سحب موافقته.",
+    states: { queued: "بانتظار الإرسال", preparing: "فحص قبل الإرسال", sending: "جارٍ الإرسال", sent: "تم الإرسال", failed: "توقف الإرسال", unknown: "نتيجة الإرسال غير معروفة — لا تعد الإرسال" },
+  },
+};
+export function readManualReplyMessages(language: InterfaceLanguage) { return translations[language]; }

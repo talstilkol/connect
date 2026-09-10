@@ -2,19 +2,21 @@ import {
   createHash,
 } from "node:crypto";
 
-const environmentNames = Object.freeze([
+export const environmentIsolationEnvironmentNames = Object.freeze([
   "development",
   "preview",
   "staging",
   "production",
 ] as const);
-const resourceClasses = Object.freeze([
+export const environmentIsolationResourceClasses = Object.freeze([
   "d1",
   "r2",
   "metaWebhookQueue",
   "metaWebhookDeadLetterQueue",
   "campaignDeliveryQueue",
   "campaignDeliveryDeadLetterQueue",
+  "teamInvitationQueue",
+  "teamInvitationDeadLetterQueue",
   "metaWebhookRateLimiter",
   "tenantMutationRateLimiter",
   "systemAdminMutationRateLimiter",
@@ -22,15 +24,17 @@ const resourceClasses = Object.freeze([
   "scheduler",
 ] as const);
 const maximumEvidenceLength = 20_000;
+const maximumEvidenceLifetimeMilliseconds =
+  24 * 60 * 60 * 1_000;
 const fingerprintPattern =
   /^sha256:[a-f0-9]{64}$/;
 const evidenceDigestPattern =
-  /^environment_isolation_evidence_v1_[a-f0-9]{64}$/;
+  /^environment_isolation_evidence_v2_[a-f0-9]{64}$/;
 
 type EnvironmentName =
-  (typeof environmentNames)[number];
+  (typeof environmentIsolationEnvironmentNames)[number];
 type ResourceClass =
-  (typeof resourceClasses)[number];
+  (typeof environmentIsolationResourceClasses)[number];
 
 interface EnvironmentResourceEvidence {
   name: EnvironmentName;
@@ -44,12 +48,23 @@ interface EnvironmentResourceEvidence {
 }
 
 interface EnvironmentIsolationEvidence {
-  schemaVersion: 1;
+  schemaVersion: 2;
   verifiedAt: string;
   expiresAt: string;
   environments:
     readonly EnvironmentResourceEvidence[];
   evidenceDigest: string;
+}
+
+export interface EnvironmentIsolationResourceSnapshot {
+  name: EnvironmentName;
+  resources: Record<ResourceClass, string>;
+}
+
+export interface EnvironmentIsolationSnapshot {
+  verifiedAt: string;
+  environments:
+    readonly EnvironmentIsolationResourceSnapshot[];
 }
 
 export interface EnvironmentIsolationEvidenceEnvironment {
@@ -63,7 +78,7 @@ export type EnvironmentIsolationEvidenceReport =
         code:
           "ENVIRONMENT_ISOLATION_EVIDENCE_VERIFIED";
         environmentCount: 4;
-        resourceFingerprintCount: 44;
+        resourceFingerprintCount: 52;
       }
     | {
         status:
@@ -130,6 +145,34 @@ function sha256(value: string): string {
     .digest("hex");
 }
 
+function fingerprint(
+  scope: string,
+  value: string,
+): string {
+  return `sha256:${sha256(
+    `${scope}:${value}`,
+  )}`;
+}
+
+function resourceIdentityScope(
+  resourceClass: ResourceClass,
+): string {
+  if (
+    resourceClass.endsWith("Queue") ||
+    resourceClass.endsWith(
+      "DeadLetterQueue",
+    )
+  ) {
+    return "queue";
+  }
+
+  if (resourceClass.endsWith("RateLimiter")) {
+    return "rate-limiter";
+  }
+
+  return resourceClass;
+}
+
 function canonicalEvidenceIdentity(
   evidence: Omit<
     EnvironmentIsolationEvidence,
@@ -141,15 +184,15 @@ function canonicalEvidenceIdentity(
   ]
     .sort(
       (left, right) =>
-        environmentNames.indexOf(left.name) -
-        environmentNames.indexOf(right.name),
+        environmentIsolationEnvironmentNames.indexOf(left.name) -
+        environmentIsolationEnvironmentNames.indexOf(right.name),
     )
     .map((environment) => ({
       name: environment.name,
       dataBoundary:
         environment.dataBoundary,
       resources: Object.fromEntries(
-        resourceClasses.map(
+        environmentIsolationResourceClasses.map(
           (resourceClass) => [
             resourceClass,
             environment.resources[
@@ -175,9 +218,156 @@ export function deriveEnvironmentIsolationEvidenceDigest(
     "evidenceDigest"
   >,
 ): string {
-  return `environment_isolation_evidence_v1_${sha256(
+  return `environment_isolation_evidence_v2_${sha256(
     canonicalEvidenceIdentity(evidence),
   )}`;
+}
+
+export function buildEnvironmentIsolationEvidence(
+  rawSnapshot: unknown,
+): Readonly<EnvironmentIsolationEvidence> {
+  if (
+    !isPlainObject(rawSnapshot) ||
+    !hasExactKeys(rawSnapshot, [
+      "verifiedAt",
+      "environments",
+    ]) ||
+    !isCanonicalTimestamp(
+      rawSnapshot.verifiedAt,
+    ) ||
+    !Array.isArray(
+      rawSnapshot.environments,
+    ) ||
+    rawSnapshot.environments.length !==
+      environmentIsolationEnvironmentNames.length
+  ) {
+    throw new Error(
+      "ENVIRONMENT_ISOLATION_SNAPSHOT_INVALID",
+    );
+  }
+
+  const names: string[] = [];
+  const rawResourceIdentities: string[] = [];
+  const environments =
+    rawSnapshot.environments.map(
+      (rawEnvironment) => {
+        if (
+          !isPlainObject(rawEnvironment) ||
+          !hasExactKeys(rawEnvironment, [
+            "name",
+            "resources",
+          ]) ||
+          typeof rawEnvironment.name !==
+            "string" ||
+          !environmentIsolationEnvironmentNames.includes(
+            rawEnvironment.name as EnvironmentName,
+          ) ||
+          !isPlainObject(
+            rawEnvironment.resources,
+          ) ||
+          !hasExactKeys(
+            rawEnvironment.resources,
+            environmentIsolationResourceClasses,
+          )
+        ) {
+          throw new Error(
+            "ENVIRONMENT_ISOLATION_SNAPSHOT_INVALID",
+          );
+        }
+
+        const name =
+          rawEnvironment.name as EnvironmentName;
+        const rawResources =
+          rawEnvironment.resources as
+            Record<string, unknown>;
+        const resources = Object.fromEntries(
+          environmentIsolationResourceClasses.map(
+            (resourceClass) => {
+              const identity =
+                rawResources[
+                  resourceClass
+                ];
+
+              if (
+                typeof identity !== "string" ||
+                identity.length < 1 ||
+                identity.length > 2_048 ||
+                /[\0\r\n]/.test(identity)
+              ) {
+                throw new Error(
+                  "ENVIRONMENT_ISOLATION_SNAPSHOT_INVALID",
+                );
+              }
+
+              const scopedIdentity =
+                `${resourceIdentityScope(
+                  resourceClass,
+                )}:${identity}`;
+              rawResourceIdentities.push(
+                scopedIdentity,
+              );
+
+              return [
+                resourceClass,
+                fingerprint(
+                  resourceIdentityScope(
+                    resourceClass,
+                  ),
+                  identity,
+                ),
+              ];
+            },
+          ),
+        ) as Record<ResourceClass, string>;
+
+        names.push(name);
+
+        return Object.freeze({
+          name,
+          dataBoundary:
+            name === "production"
+              ? "production-only" as const
+              : "non-production-only" as const,
+          resources: Object.freeze(resources),
+        });
+      },
+    );
+
+  if (
+    new Set(names).size !==
+      environmentIsolationEnvironmentNames.length ||
+    environmentIsolationEnvironmentNames.some(
+      (name) => !names.includes(name),
+    ) ||
+    new Set(rawResourceIdentities).size !==
+      rawResourceIdentities.length
+  ) {
+    throw new Error(
+      "ENVIRONMENT_ISOLATION_SNAPSHOT_INVALID",
+    );
+  }
+
+  const verifiedAt =
+    rawSnapshot.verifiedAt;
+  const evidence = {
+    schemaVersion: 2 as const,
+    verifiedAt,
+    expiresAt: new Date(
+      Date.parse(verifiedAt) +
+        maximumEvidenceLifetimeMilliseconds,
+    ).toISOString(),
+    environments: Object.freeze(
+      environments,
+    ),
+  };
+
+  return Object.freeze({
+    ...evidence,
+    evidenceDigest:
+      deriveEnvironmentIsolationEvidenceDigest(
+        evidence,
+      ),
+  });
 }
 
 function parseResourceEvidence(
@@ -187,13 +377,13 @@ function parseResourceEvidence(
     !isPlainObject(value) ||
     !hasExactKeys(
       value,
-      resourceClasses,
+      environmentIsolationResourceClasses,
     )
   ) {
     return null;
   }
 
-  for (const resourceClass of resourceClasses) {
+  for (const resourceClass of environmentIsolationResourceClasses) {
     if (
       typeof value[resourceClass] !==
         "string" ||
@@ -222,7 +412,7 @@ function parseEnvironmentEvidence(
       "resources",
     ]) ||
     typeof value.name !== "string" ||
-    !environmentNames.includes(
+    !environmentIsolationEnvironmentNames.includes(
       value.name as EnvironmentName,
     )
   ) {
@@ -276,7 +466,7 @@ function parseEvidence(
       "environments",
       "evidenceDigest",
     ]) ||
-    value.schemaVersion !== 1 ||
+    value.schemaVersion !== 2 ||
     !isCanonicalTimestamp(
       value.verifiedAt,
     ) ||
@@ -287,7 +477,7 @@ function parseEvidence(
       value.environments,
     ) ||
     value.environments.length !==
-      environmentNames.length ||
+      environmentIsolationEnvironmentNames.length ||
     typeof value.evidenceDigest !==
       "string" ||
     !evidenceDigestPattern.test(
@@ -320,8 +510,8 @@ function parseEvidence(
 
   if (
     new Set(actualEnvironmentNames)
-      .size !== environmentNames.length ||
-    environmentNames.some(
+      .size !== environmentIsolationEnvironmentNames.length ||
+    environmentIsolationEnvironmentNames.some(
       (name) =>
         !actualEnvironmentNames.includes(
           name,
@@ -334,7 +524,7 @@ function parseEvidence(
   const fingerprints =
     parsedEnvironments.flatMap(
       (environment) =>
-        resourceClasses.map(
+        environmentIsolationResourceClasses.map(
           (resourceClass) =>
             environment.resources[
               resourceClass
@@ -350,7 +540,7 @@ function parseEvidence(
   }
 
   const evidence = {
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     verifiedAt: value.verifiedAt,
     expiresAt: value.expiresAt,
     environments:
@@ -416,7 +606,10 @@ export function inspectEnvironmentIsolationEvidence(
     Date.parse(evidence.verifiedAt) >
       now.getTime() ||
     Date.parse(evidence.expiresAt) <=
-      Date.parse(evidence.verifiedAt)
+      Date.parse(evidence.verifiedAt) ||
+    Date.parse(evidence.expiresAt) -
+        Date.parse(evidence.verifiedAt) >
+      maximumEvidenceLifetimeMilliseconds
   ) {
     return {
       status: "invalid",
@@ -445,6 +638,6 @@ export function inspectEnvironmentIsolationEvidence(
     code:
       "ENVIRONMENT_ISOLATION_EVIDENCE_VERIFIED",
     environmentCount: 4,
-    resourceFingerprintCount: 44,
+    resourceFingerprintCount: 52,
   };
 }

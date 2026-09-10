@@ -1,0 +1,1330 @@
+{
+  "artifactClass": "PLANNING-PUBLICATION-AND-STORAGE-GATES;NOT-PUBLICATION-PERMIT;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-PUBLICATION-SIZE-SHARD-AND-STORAGE-REGISTRY-2026-08-30",
+  "externalArtifactCurrentState": {
+    "acceptanceCredit": 0,
+    "contractRoot": null,
+    "lifecycleOwnerRoot": null,
+    "operationalReceiptRoot": null,
+    "publicPushCredit": 0,
+    "reviewCredit": 0,
+    "selectedStore": null,
+    "selectedStoreState": "MISSING-BLOCKING"
+  },
+  "externalArtifactSchema": {
+    "additionalProperties": false,
+    "classificationEnum": [
+      "PUBLIC-SAFE"
+    ],
+    "crossFieldInvariants": [
+      {
+        "args": [
+          {
+            "args": [
+              "/classification"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              "PUBLIC-SAFE"
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      },
+      {
+        "args": [
+          {
+            "args": [
+              "/v5PlanningOnly"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              true
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      },
+      {
+        "args": [
+          {
+            "args": [
+              "/v5OperationalCredit"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              0
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      },
+      {
+        "args": [
+          {
+            "args": [
+              "/v5AcceptanceCredit"
+            ],
+            "op": "GET"
+          },
+          {
+            "args": [
+              0
+            ],
+            "op": "LITERAL"
+          }
+        ],
+        "op": "EQ"
+      }
+    ],
+    "fields": [
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "classification",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "String",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "immutableLocator",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "String",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "identityRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "rawSha256Checksum",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "mediaType",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "String",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "bytes",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "SafeInteger",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "provenanceReceiptRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "costPolicyRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "retentionPolicyRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "deletionPolicyRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "expiresAt",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Rfc3339Utc",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "availabilityPolicyRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "ownerRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "disasterRecoveryRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "restoreReceiptRoot",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Hash",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "v5PlanningOnly",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "Boolean",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "v5OperationalCredit",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "SafeInteger",
+        "uniqueItems": false
+      },
+      {
+        "maxItems": null,
+        "minItems": null,
+        "name": "v5AcceptanceCredit",
+        "nullable": false,
+        "order": "NOT-APPLICABLE",
+        "referenceRule": "PRIMITIVE-OR-COMPOUND",
+        "required": true,
+        "typeExpression": "SafeInteger",
+        "uniqueItems": false
+      }
+    ],
+    "immutableIdentityRequired": true,
+    "privateLocatorAllowed": false,
+    "schemaId": "PRCV5-EXTERNAL-ARTIFACT-CONTRACT-V1",
+    "schemaRoot": "78b13099ff7f0869189759f4b13677af5d70d990bedd1f90efd7b79dee1c389b",
+    "unknownFields": "BLOCK"
+  },
+  "externalPlanningInstance": {
+    "acceptanceCredit": 0,
+    "fixtureClass": "DETERMINISTIC-NON-AUTHORITATIVE-PROTOCOL-WITNESS",
+    "instance": {
+      "availabilityPolicyRoot": "382341036d44ce8d4e9c68491a80645ec4f90d437665401c899c49517c8bb987",
+      "bytes": 630361,
+      "classification": "PUBLIC-SAFE",
+      "costPolicyRoot": "5d89796325a1d3f416305a4c4923acde807e916d4e5f618e2cbbd5a0bdfdf8ef",
+      "deletionPolicyRoot": "49376c7b26f169f8524189039ddf85c12c77f9c719df3f2f5e7bf963e9601f6b",
+      "disasterRecoveryRoot": "87d86c2f1d6638a98b8ba1a3713e76b5670408365418b53936dd1d9ea351e4f8",
+      "expiresAt": "2027-08-30T00:00:00Z",
+      "identityRoot": "e0af64bbc6a5a15b80ad042f4f400a925390d7ad8fae27d5a952e354b7323fff",
+      "immutableLocator": "content-addressed:sha256:0b6817fe29e0ebe10483bd1df0e6a575f4fffac07817cb5796545414e776ed4a",
+      "mediaType": "application/json",
+      "ownerRoot": "ec73288d9c3b9655634c9ad22364d375c94f15c12db777cc84327f1365879f08",
+      "provenanceReceiptRoot": "a871c6142d9e4e470e2e7c94e6d3d89f875ef9937d5212a84558aa9c2a6b9b27",
+      "rawSha256Checksum": "0b6817fe29e0ebe10483bd1df0e6a575f4fffac07817cb5796545414e776ed4a",
+      "restoreReceiptRoot": "81cc3c6ef82b6d86f94503cb9778e2d44c05e3d29509b3a07747625816031cf9",
+      "retentionPolicyRoot": "3e5fee886adfd8b723a9a676620375ae52d475bdb7518453033c0d1fc4059c83",
+      "v5AcceptanceCredit": 0,
+      "v5OperationalCredit": 0,
+      "v5PlanningOnly": true
+    },
+    "instanceId": "PRCV5-EXTERNAL-ARTIFACT-PLANNING-INSTANCE",
+    "instanceRoot": "0e8bd8728a902987b171eed925d6c41f5fe10fdc04c3b6b12271f19657833640",
+    "operationalCredit": 0,
+    "schemaId": "PRCV5-EXTERNAL-ARTIFACT-CONTRACT-V1"
+  },
+  "generatorFirstContract": {
+    "canonicalAlgorithm": "PRCV5-GENERATOR-FIRST-SHARDING-V1",
+    "dependencyRoot": "b1b91c8a539c249c17345be84155fb61eb025814d3f268371fadad118dd91908",
+    "driftTerminal": "BLOCK-PENDING-TYPED-SUPERSESSION-AND-INDEPENDENT-REVIEW",
+    "generatorBytes": 137075,
+    "generatorContentId": "sha256:d4360830c86af1be58caec5e5540b50f167039bd1078974bc62abab1aec13263",
+    "generatorPath": "docs/planning/qa/generate-public-cyber-v5-package.mjs",
+    "independentRegenerators": [
+      "PRCV5-READER-A",
+      "PRCV5-READER-B"
+    ],
+    "inputRootRule": "FROZEN-INPUT-MANIFEST-ROOT-PLUS-CLOSURE-SCHEMA-CONTROL-ROOTS",
+    "outputClass": "DERIVED-EVIDENCE",
+    "runtime": "NODE-ES2023-STANDARD-LIBRARY"
+  },
+  "lateDecisionAdmission": {
+    "clauseCount": 48,
+    "contentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+    "forwardUniqueCount": 48,
+    "inverseUniqueCount": 48,
+    "logicalPath": "docs/planning/github-public-repository-large-generated-artifact-storage-decision-2026-08-30.md",
+    "reconciliationTerminal": "PASS"
+  },
+  "lateDecisionReconciliation": [
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-1.1.1",
+      "clauseTextRoot": "3d6115c148fec42d659964bace400072918b1969e127cef6f05a0cdd57bfde5a",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 1,
+      "reconciliationRoot": "329831d392892d1dbb4bfc104965b99ecee0b67320ef6f0bdc3adece9f5b58be",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 232,
+        "startByteInclusive": 138
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-1.1.2",
+      "clauseTextRoot": "40359c31e5f20dc4cdf10a372eee16df5cbe2783bf8419954620a69a8a3d657b",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 2,
+      "reconciliationRoot": "37a9dde707d91c3d462fb617078c8a4dfbe32b1f5c5f4bbed87d891eaa1f4ae4",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 365,
+        "startByteInclusive": 234
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-1.1.3",
+      "clauseTextRoot": "67a2ece1ce44c3e9f3866f5af903534223d32abbabfbddcae168bafe9842c636",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 3,
+      "reconciliationRoot": "67d50d3cf5cee530006508fce1a0f8ab9692884aebe3fc8a1569b63059f30419",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 479,
+        "startByteInclusive": 367
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-1.1.4",
+      "clauseTextRoot": "5ddf6552f628d5ef9de242c62f2ee1614d33bf2d772360cf2ffae9bbe0d8f642",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 4,
+      "reconciliationRoot": "f810af4c527168b1a05d6898148e62cdd000c557ee4530e1842dce362f117511",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 596,
+        "startByteInclusive": 481
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-1.1.5",
+      "clauseTextRoot": "4388fe28bb110b8d27c05caca58556f90e1682b44c5a2c99cc6d60abd5981039",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 5,
+      "reconciliationRoot": "20fa05ec8c7aa7ed52319acf698a7ff9fa50c75641a71a0af47732ac1fc762e4",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 823,
+        "startByteInclusive": 598
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.1.1",
+      "clauseTextRoot": "36a506c4a0c8f69844dcd53438d7899afa9dc2e2f0f89e3aeb7a8d1b7b2bcfc9",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 6,
+      "reconciliationRoot": "c3b9663ca8b9922d54b5b1b6bdc4e21dae3f0fabfa732022fbdb99d796d13458",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 1141,
+        "startByteInclusive": 901
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.1.2",
+      "clauseTextRoot": "4a7bab91b0bb4dfc099343f2f7d8a6570a212312d86cffaf4e9974a482ed7aa9",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 7,
+      "reconciliationRoot": "a83a133c249161795480027c440af4b4552d4e58fe597d37e2124f404dbe81c6",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 1244,
+        "startByteInclusive": 1143
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.1.3",
+      "clauseTextRoot": "e9265bbc5a8d6848167299734138551d360004b93c92f464260942a843dda985",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 8,
+      "reconciliationRoot": "3652439662f3694e567245d57bbf9a071a5c165fcf0d8225daaa8b4fe7bd1aae",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 1400,
+        "startByteInclusive": 1246
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.1.4",
+      "clauseTextRoot": "488e53c73be84262b91539397c438da7ad565e8d036b0bfc86046d4a5ded82ed",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 9,
+      "reconciliationRoot": "1eae6ec85eddd29056d4083aed2a7537b890278cb6fdf2dacb72071a56bf6166",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 1558,
+        "startByteInclusive": 1402
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.2.1",
+      "clauseTextRoot": "19c676bc4ada78b998aeca2931c5ab6d8c3815fdc1cb3e1dbbc85ba721812c7b",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 10,
+      "reconciliationRoot": "f0bbc2782f0c16eee8e2e21d4f8b4ced67863a739e5bf9ee15959361bf6fc985",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 1875,
+        "startByteInclusive": 1576
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.2.2",
+      "clauseTextRoot": "45535bdabbf70a5d413c0ac3cce1cce33bb8153abc50bba5a1f40e1c408677f1",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 11,
+      "reconciliationRoot": "2f16d598829ba0b8887dd1bcd0586ab398f451c24a7d125acdabc76ece067182",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 2060,
+        "startByteInclusive": 1877
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.2.3",
+      "clauseTextRoot": "35d657d0f9a9f888b0d01849986ca5d8dcef13c8bc84f06886b01b8845c57121",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 12,
+      "reconciliationRoot": "ea4fb6f1ff891bb39d85ddc5ae936a93047326ef31314597df84e4735a29764c",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 2208,
+        "startByteInclusive": 2062
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.3.1",
+      "clauseTextRoot": "17b76b7d8655a2ea4288b691ede36bc14debe6c89b09cbd87b67056aaa612258",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 13,
+      "reconciliationRoot": "be71ab99a7f1fce47c11b60d8a31a9a3496a678ad2177cd2f7695d95256c2508",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 2465,
+        "startByteInclusive": 2253
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.3.2",
+      "clauseTextRoot": "13d456a34e8253819195985c364405189cc274164b6900b133885eb82cf766d7",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 14,
+      "reconciliationRoot": "c3fccca315431ecefa59e2fda5d495282ad91cef44d80b31bd3c562e6a650fc9",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 2844,
+        "startByteInclusive": 2467
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-2.3.3",
+      "clauseTextRoot": "f7a52111ae94061c7996c00651bcb8573f6ad5f93dc584a9a363b8791c5e6f05",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 15,
+      "reconciliationRoot": "6a20534614b1061bd655bbd0028ac0918a58265d6d4c1aaa9a458fe655353cce",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 3022,
+        "startByteInclusive": 2846
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.1.1",
+      "clauseTextRoot": "83ab4351ee2fe375dda8b375ceab8557b756ab3a2c05669f2b9bf63c08509838",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 16,
+      "reconciliationRoot": "957488008e4e6f639e6987b596d7113f3cf9ca54caf1e6d9cd0696481e53c515",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 3152,
+        "startByteInclusive": 3072
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.1.2",
+      "clauseTextRoot": "b41a181cf6f5e9790640ea7314989b3845a5dd9bcea7347ffe836199ee79b6cf",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 17,
+      "reconciliationRoot": "611ec46660c2099da7f61e4f4018b5e78d74c1117d6d4023f1ced9a62278540d",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 3344,
+        "startByteInclusive": 3154
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.1.3",
+      "clauseTextRoot": "ad020fec6dfc785e799d63f4ffd0d31a5e60e472a0090cf6e85b15061d9731c6",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 18,
+      "reconciliationRoot": "942f2bd6c782e61db66597a4a4bd35e8aa664f975cf54522d6ae3a874b4eae2d",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 3507,
+        "startByteInclusive": 3346
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.1.4",
+      "clauseTextRoot": "0d04b55fe5f191d5bb559be2044a1c8131bff2ada1dd3be481e6772f161a42c2",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 19,
+      "reconciliationRoot": "c749fb8524b2daaf6e881a018ac36497acac938991010303aaa373894f1a901b",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 3672,
+        "startByteInclusive": 3509
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.2.1",
+      "clauseTextRoot": "4377e042eaf63f38baf677dd6400e39c8f9abe83e147b66339fe2df6f4f9c677",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 20,
+      "reconciliationRoot": "4d32f13a106fd9771b404e12514ca5d1324aa213a07f61edc6ac15bec18d79cf",
+      "remediationControlId": "PRCV5-CTRL-022",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 3872,
+        "startByteInclusive": 3705
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.2.2",
+      "clauseTextRoot": "18fc5d61ee1183470e8fdb3ff80afbf6348861a5a5ed4890660a87d8a1a1f6c5",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 21,
+      "reconciliationRoot": "f9ddb65770e5dc834057016bb2b5f98d21c484ae84da177862bc6f82f06e1729",
+      "remediationControlId": "PRCV5-CTRL-022",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 4034,
+        "startByteInclusive": 3874
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.2.3",
+      "clauseTextRoot": "0055df15febe55ac08ad2b2b377208a8b8d1d5b79a64c46e85c45838c2e15a1e",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 22,
+      "reconciliationRoot": "0b5756572fa4f323936720cea3da5cbb034606c234187f4f133023d437567537",
+      "remediationControlId": "PRCV5-CTRL-022",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 4157,
+        "startByteInclusive": 4036
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.2.4",
+      "clauseTextRoot": "922493d51d4f7bdfbadb1a1b4702ef29c3ded27bb01c8fcaab630b8be40b22a3",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 23,
+      "reconciliationRoot": "93df62b57f5ecaa199b83f69f77941d5bfe2fc5a0eaf8c4756053d4ab4573e41",
+      "remediationControlId": "PRCV5-CTRL-022",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 4275,
+        "startByteInclusive": 4159
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.2.5",
+      "clauseTextRoot": "ded871830944ad30bb6736cc57b3e058c6dfcb6f7eed94fff53a49f280faddc4",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 24,
+      "reconciliationRoot": "787307561e5f66ece242f6564deaeca526918b4a05effa023ec2bb58975209b4",
+      "remediationControlId": "PRCV5-CTRL-022",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 4473,
+        "startByteInclusive": 4277
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.2.6",
+      "clauseTextRoot": "f922c50622dcfa0fad0a34a265ac9c6d50e048a46a947220601bc47a812f2ccd",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 25,
+      "reconciliationRoot": "31d6046213e54c97a32cbc75ce92261d661e391ea0cf7fdd25394f7feb5697b7",
+      "remediationControlId": "PRCV5-CTRL-022",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 4669,
+        "startByteInclusive": 4475
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.3.1",
+      "clauseTextRoot": "c6005c4eacea4da65b633a1020000e747f90f4b98613575edc64d3231d4b461d",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 26,
+      "reconciliationRoot": "e089537478ad1183ab5fb1f947dd5e2d24e233d61839dbb4a60824c3a4fcf68b",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 4908,
+        "startByteInclusive": 4700
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.3.2",
+      "clauseTextRoot": "9e7c715f3a35eaadfc4ea0ebb0086bfc4fe93f47309f937f8adf76ecf6caa24b",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 27,
+      "reconciliationRoot": "69bd5ad26ed7b4f3fba41a2ea3395b7c0712f85e5d3983c9b3c24b6ad8972189",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 5110,
+        "startByteInclusive": 4910
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.3.3",
+      "clauseTextRoot": "97d1e1d3c6d4761e7e0613b948501a7dbca0f1086736c1381f17d9f90797daf7",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 28,
+      "reconciliationRoot": "716bd69808d49a0e7ced37ce52eea389b1b0c223caf42d31cef47d03c2165df3",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 5327,
+        "startByteInclusive": 5112
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.4.1",
+      "clauseTextRoot": "64954efdccaff24e0793a8be71a99a18ecef2ad8d27719d0ab6b0af3a2ddb550",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 29,
+      "reconciliationRoot": "0dca35e350d287229a3ab806eb5612a568f261d3b88eebbee1b7b74a11f13aa9",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 5590,
+        "startByteInclusive": 5364
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.4.2",
+      "clauseTextRoot": "9b60d83cbf32c60a716668a771d9c419e6c9c1a78fc28c76266cbce240053c36",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 30,
+      "reconciliationRoot": "2f73b8244353e78689ed7375fedc939eb1c6918db809a247ee622270d22fff71",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 5814,
+        "startByteInclusive": 5592
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.4.3",
+      "clauseTextRoot": "4a5c5f7c792982c2104e6cf7ba59065d8f315b6e146d9a0fba7b442ba5cf9c79",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 31,
+      "reconciliationRoot": "caa1abf850452541529b278d948171700fded572fc0d7a1f8ffa651a0476c613",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6026,
+        "startByteInclusive": 5816
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-3.4.4",
+      "clauseTextRoot": "13e4e69ffd164d53a72cd56145a0b45936beaf9bf2f1ddbabb615f29dff39c6c",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 32,
+      "reconciliationRoot": "25c951782226d26e5e5a8eeeda2bf0da06d9b0a52bcc0db17abfa3f05b9e1107",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6169,
+        "startByteInclusive": 6028
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.1.1",
+      "clauseTextRoot": "a50fb6936893da7d01962f5186d52a36d54876d461c8e4141e91176be953a738",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 33,
+      "reconciliationRoot": "03201b10493c3111ae1150dca97446c42531fcde2effc52ad070f3a479d0e74d",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6310,
+        "startByteInclusive": 6246
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.1.2",
+      "clauseTextRoot": "a0bed70e0f4f6d469e671f681d5331ad9f83f7bef44a5ac970f6db112f2a22dd",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 34,
+      "reconciliationRoot": "6903624f0149cae419045bdf681957fffb5adaee9e02c4cd17935620cbc23a65",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6428,
+        "startByteInclusive": 6312
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.1.3",
+      "clauseTextRoot": "0966421bb5890fc5c5021f5a1645974b3429dffe33a36a3098f2cab051a3107b",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 35,
+      "reconciliationRoot": "233c630b43ed091e859a06b1c3486f408153f47a989c39ec02e20af6cff09b5f",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6530,
+        "startByteInclusive": 6430
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.1.4",
+      "clauseTextRoot": "7cfb740c9800e6ca5eb34e25f8d7bc724a34b1cf4454fc2f5f8b532ff12caacc",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 36,
+      "reconciliationRoot": "a1c742e85439827eaef89a03add980de536ace176f807a83082a978c8d8f2378",
+      "remediationControlId": "PRCV5-CTRL-021",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6628,
+        "startByteInclusive": 6532
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.2.1",
+      "clauseTextRoot": "a04e9a7f052481fe77518a3c1b8d43be3d4d8fa3bbdd74364af6292c3a1389de",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 37,
+      "reconciliationRoot": "672757a0d05eb6e097f9bfefd3937a6bb953c3d78b5558542c7aa0e28f6f5f37",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6814,
+        "startByteInclusive": 6666
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.2.2",
+      "clauseTextRoot": "beedcbf3255e6f157a27763a9163d9d3404c7775aa230a7b6c94fb3e71acad51",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 38,
+      "reconciliationRoot": "422020f6c940f72f558871dc0025f3089d89a77ed394456541ac3ecef135123d",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 6933,
+        "startByteInclusive": 6816
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.2.3",
+      "clauseTextRoot": "aa462c08890954b9b5800d880b9329dd1178e2b16d8bd0341d6179b36c90450e",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 39,
+      "reconciliationRoot": "8e9864a3a0ba794f1c0181a79caa91e910e3263c230fb4a7dc2c11a8af16834c",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 7097,
+        "startByteInclusive": 6935
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-4.2.4",
+      "clauseTextRoot": "8586e484acf2f2f17c68fec73efa6c71cb140ec1e15cf1e009eb8a51c58ac0b1",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 40,
+      "reconciliationRoot": "78cd023ea6b70994d6089dfb99cb7b4aed3ada51cb037e813d9d00d8dcbbaecb",
+      "remediationControlId": "PRCV5-CTRL-023",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 7215,
+        "startByteInclusive": 7099
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.1.1",
+      "clauseTextRoot": "c82acc311857c7b61cd73641e3063b44f6856cf60fe6b2deb3a6808d64ea2d60",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 41,
+      "reconciliationRoot": "2ebd4e08ee69a5dfb4af923827cbd0e7daa899ea1037712136bd1e2320dbbe49",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 7458,
+        "startByteInclusive": 7295
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.1.2",
+      "clauseTextRoot": "d0ca6dff54c5b25467115a22389f9ea345707212b4b601ac38f73b662f982a78",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 42,
+      "reconciliationRoot": "afe91ad86ad1190eea7c129df5a99a885783714f1e4bd4d88b44c77cf1391c91",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 7604,
+        "startByteInclusive": 7460
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.1.3",
+      "clauseTextRoot": "fdfd888d79407886ec64ddcf153918b6d8b27b530e2b9ac4a6d88c809beccab3",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 43,
+      "reconciliationRoot": "28d81ff5715802c1686682f6972823fd837fd8890e48645ceef55089f3ba307f",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 7768,
+        "startByteInclusive": 7606
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.1.4",
+      "clauseTextRoot": "e64725aacb77bab88d8601027d255d616a7691d018bb0dde68a153e583f54054",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 44,
+      "reconciliationRoot": "65f2f04abe04628e90854e46a76781d7e204aab7d4d153fc1e59e6f238d08fef",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 7948,
+        "startByteInclusive": 7770
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.2.1",
+      "clauseTextRoot": "8453bc62ce653cc83e46fea5a427bf23c12d6442821bf47c268de263dc3de8cd",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 45,
+      "reconciliationRoot": "5c022c42bde4502e88bf7cc0fb0864e34f5c383eab5d77b39fd8465a34b8053a",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 8018,
+        "startByteInclusive": 7976
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.2.2",
+      "clauseTextRoot": "e6f0006f88481ab794bb71e53aaa7bb7d8c2b8a50c31b213d2820636456c3430",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 46,
+      "reconciliationRoot": "47515683a0b6cec03bc99d5b162f883893ea32e43ba27fd151547f807b6cb218",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 8082,
+        "startByteInclusive": 8020
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.2.3",
+      "clauseTextRoot": "6e086fbebcb59c61a602492083e67dabff605f6373ff85c65765e8a5eba7ad6e",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 47,
+      "reconciliationRoot": "199321565dde0758fcd920393d6589eddfedcb38fdc343d99aba1bb18331b373",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 8172,
+        "startByteInclusive": 8084
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    },
+    {
+      "acceptanceCredit": 0,
+      "clauseId": "LATE-DECISION-5.2.4",
+      "clauseTextRoot": "31e0b2c7557093fbf90c7a9f7b268082acab1d976c9f0d762fc2f0fec0ba559f",
+      "forwardDisposition": "ADMITTED-EXACTLY-ONCE",
+      "inverseDisposition": "ONE-CLAUSE-TO-ONE-ROW",
+      "ordinal": 48,
+      "reconciliationRoot": "88d2691ef49af5ad00f0a6afbd8da9bd9b3dd60b512bcd70fddbd297f1930126",
+      "remediationControlId": "PRCV5-CTRL-020",
+      "sourceContentId": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceSpan": {
+        "endByteExclusive": 8253,
+        "startByteInclusive": 8174
+      },
+      "typedSupersession": "V4-OMISSION-SUPERSEDED-BY-V5-CONTROL;V4-BYTES-UNCHANGED"
+    }
+  ],
+  "publicationDisposition": "BLOCKED-BUDGETS-AND-EXTERNAL-EVIDENCE-MISSING",
+  "publicationRegistryRoot": "aaf0de82300c643add7519b475350511fb1d558bfef11e2dd85010caba34d8f4",
+  "regularGitMemberGate": {
+    "boundaryBlockBytes": 52428800,
+    "boundaryPassBytes": 52428799,
+    "exclusiveMaximumBytes": 52428800,
+    "predicate": "ACTUAL-RAW-BYTES-STRICTLY-LESS-THAN-52428800",
+    "staleMeasurementTerminal": "BLOCK",
+    "unknownMeasurementTerminal": "BLOCK"
+  },
+  "repositoryBudgets": [
+    {
+      "acceptedOwnerRoot": null,
+      "acceptedPolicyRoot": null,
+      "budgetClass": "REPOSITORY-TOTAL-BYTES",
+      "frozenMeasurementRoot": null,
+      "ordinal": 1,
+      "publicPushCredit": 0,
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptedOwnerRoot": null,
+      "acceptedPolicyRoot": null,
+      "budgetClass": "PER-TRANSACTION-GROWTH-BYTES",
+      "frozenMeasurementRoot": null,
+      "ordinal": 2,
+      "publicPushCredit": 0,
+      "state": "MISSING-BLOCKING"
+    },
+    {
+      "acceptedOwnerRoot": null,
+      "acceptedPolicyRoot": null,
+      "budgetClass": "CLEAN-CLONE-TIME",
+      "frozenMeasurementRoot": null,
+      "ordinal": 3,
+      "publicPushCredit": 0,
+      "state": "MISSING-BLOCKING"
+    }
+  ],
+  "schemaVersion": "PRCV5-PUBLICATION-SIZE-SHARD-STORAGE-V1",
+  "shardAlgorithm": {
+    "algorithmId": "PRCV5-GREEDY-CANONICAL-VECTOR-SHARD-V1",
+    "boundaryRule": "ADD-NEXT-RECORD-IFF-CURRENT-CANONICAL-RECORD-BYTES-PLUS-NEXT-RECORD-BYTES-PLUS-SEPARATOR-IS-BELOW-TARGET;OVERSIZE-SINGLE-RECORD-BLOCKS",
+    "canonicalKey": "vectorId",
+    "memberMaximumBytesExclusive": 52428800,
+    "order": "ASCENDING-UNICODE-CODEPOINT",
+    "randomnessAllowed": false,
+    "targetCanonicalPayloadBytesExclusive": 262144
+  },
+  "shardDenominators": {
+    "bytes": 5118767,
+    "largestShardBytes": 674485,
+    "membersAtOrAbove50MiB": 0,
+    "shards": 13,
+    "vectors": 3152
+  },
+  "shardDescriptors": [
+    {
+      "bytes": 630361,
+      "canonicalPayloadBytes": 261230,
+      "contentRoot": "e0af64bbc6a5a15b80ad042f4f400a925390d7ad8fae27d5a952e354b7323fff",
+      "firstCanonicalKey": "PRCV5-VECTOR-ALLOWLIST-MATRIX-NEG-01",
+      "lastCanonicalKey": "PRCV5-VECTOR-CLOSURE-056-POS",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-01-of-13-2026-08-30.json",
+      "ordinal": 1,
+      "rawSha256Checksum": "0b6817fe29e0ebe10483bd1df0e6a575f4fffac07817cb5796545414e776ed4a",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 127
+    },
+    {
+      "bytes": 625014,
+      "canonicalPayloadBytes": 261846,
+      "contentRoot": "0fee179c11b6a5800e8be70c29b20910ddeb9cad0afe8eb0ce826c95532aa6c5",
+      "firstCanonicalKey": "PRCV5-VECTOR-CLOSURE-057-NEG-NOMERGE",
+      "lastCanonicalKey": "PRCV5-VECTOR-CONTROL-002-NEG-01",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-02-of-13-2026-08-30.json",
+      "ordinal": 2,
+      "rawSha256Checksum": "4c8b61a3147643efaafad94d04651206dcb2632178f634fbd1678679b38b8b84",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 126
+    },
+    {
+      "bytes": 674485,
+      "canonicalPayloadBytes": 260863,
+      "contentRoot": "7bd40c8e59a18828cdb1cd566a0868274b10afc422d2409b02b8eeb828b47b05",
+      "firstCanonicalKey": "PRCV5-VECTOR-CONTROL-002-NEG-02",
+      "lastCanonicalKey": "PRCV5-VECTOR-CONTROL-022-POS",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-03-of-13-2026-08-30.json",
+      "ordinal": 3,
+      "rawSha256Checksum": "862f55575456453af00da8a08fcea1b330795a720ce4f7087ad4fd8b35444482",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 130
+    },
+    {
+      "bytes": 394540,
+      "canonicalPayloadBytes": 261801,
+      "contentRoot": "96c221ac0832970ff7587fa856d8fd130da091b0a9ee23ab46df72cb346257c5",
+      "firstCanonicalKey": "PRCV5-VECTOR-CONTROL-023-NEG-01",
+      "lastCanonicalKey": "PRCV5-VECTOR-PERMIT-SCHEMA-4-POS",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-04-of-13-2026-08-30.json",
+      "ordinal": 4,
+      "rawSha256Checksum": "aee712d841d36fcb0e67cd712d028599e6c25c3277dd50657b7f93565c93ad83",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 275
+    },
+    {
+      "bytes": 352601,
+      "canonicalPayloadBytes": 261656,
+      "contentRoot": "29106b397536aa7ab08312be59ec31d0b3e8b0dbf3053f4892cfd3b31f7355c1",
+      "firstCanonicalKey": "PRCV5-VECTOR-PRCV5-PERMIT-MATRIX-1-1",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-016-NEG-TYPE-003",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-05-of-13-2026-08-30.json",
+      "ordinal": 5,
+      "rawSha256Checksum": "9582bd5bf2ed111b81a57ede0e0aa7e541057a0ca03ea833e07a42ee8777baa5",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 293
+    },
+    {
+      "bytes": 328569,
+      "canonicalPayloadBytes": 261489,
+      "contentRoot": "0a16afdd72bc09d9ae9cdbc4763e6fbc74070e554661f45caf968b56e2e52b16",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-016-NEG-TYPE-004",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-034-NEG-MISSING-006",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-06-of-13-2026-08-30.json",
+      "ordinal": 6,
+      "rawSha256Checksum": "a9ab50d2f90a2b9f99bb1b29de11fd1b58b7ac11b63c269440e556b6d1261ac1",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 302
+    },
+    {
+      "bytes": 328599,
+      "canonicalPayloadBytes": 261486,
+      "contentRoot": "e9a5434d48650cfc798b1dd79400060948f9ce0182c1c5bf4ca77cc8b6a29df7",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-034-NEG-MISSING-007",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-052-NEG-MISSING-002",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-07-of-13-2026-08-30.json",
+      "ordinal": 7,
+      "rawSha256Checksum": "c1618a4243fad062c75a61b5093919d4a6035850992a80f00924fa62b3991694",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 302
+    },
+    {
+      "bytes": 328740,
+      "canonicalPayloadBytes": 261615,
+      "contentRoot": "b17e06b35d9c401a91a174cc0ad6ea4c66d96d011f86532d99cd471c7d1a486d",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-052-NEG-MISSING-003",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-069-NEG-UNKNOWN",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-08-of-13-2026-08-30.json",
+      "ordinal": 8,
+      "rawSha256Checksum": "5102c1366bb06cb41b44ad48f8662b72efb56c1cdf38bdf78dd1981130656370",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 302
+    },
+    {
+      "bytes": 328387,
+      "canonicalPayloadBytes": 261364,
+      "contentRoot": "0f059c31e5e8e754cdbfee1611e82d31d24335ebef2ae606b42e4873474e239f",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-NESTED-SCHEMA-069-POS",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-011-NEG-MISSING-001",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-09-of-13-2026-08-30.json",
+      "ordinal": 9,
+      "rawSha256Checksum": "c953572f1faf778f960c8f9b45f446a5a17941a99b510c7998909853309b4329",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 301
+    },
+    {
+      "bytes": 328837,
+      "canonicalPayloadBytes": 261751,
+      "contentRoot": "e1a42d24ab9daf3accec28aa4b7f9474d853ccc9a8e42622f5a305305c06bb75",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-011-NEG-MISSING-002",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-021-NEG-TYPE-007",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-10-of-13-2026-08-30.json",
+      "ordinal": 10,
+      "rawSha256Checksum": "fe4f07f1a180482a91f1f468d34f5fc833c28189894b04fe58ae063e4c2133dd",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 301
+    },
+    {
+      "bytes": 328516,
+      "canonicalPayloadBytes": 261480,
+      "contentRoot": "46f57dc6a437cd2c2f2952a3b1b4524046c77a64b62b7c4234526ceccb4a6885",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-021-NEG-TYPE-008",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-031-NEG-MISSING-017",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-11-of-13-2026-08-30.json",
+      "ordinal": 11,
+      "rawSha256Checksum": "6c5f9c89eea7ce38d43b79da6f41d0a181a4b27ad6fa22f9dd6bda8c1b217f1e",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 301
+    },
+    {
+      "bytes": 328979,
+      "canonicalPayloadBytes": 261796,
+      "contentRoot": "bcb89881d6fb4c73632e54c2f6cdd32deca706dae6a1cdf7891a40d61c5bb2af",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-031-NEG-MISSING-018",
+      "lastCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-007",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-12-of-13-2026-08-30.json",
+      "ordinal": 12,
+      "rawSha256Checksum": "90ad72576e91061565c477e1a984cce10ffb9c4a844a6715f34197244724c3fc",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 301
+    },
+    {
+      "bytes": 141139,
+      "canonicalPayloadBytes": 88852,
+      "contentRoot": "0bae907de0c0c9c355f0519c5dbd09c42806f29261e8e09766157b7386707082",
+      "firstCanonicalKey": "PRCV5-VECTOR-SCHEMA-PRCV5-OUTPUT-SCHEMA-040-NEG-MISSING-008",
+      "lastCanonicalKey": "PRCV5-VECTOR-VISIBILITY-PUBLIC-PUBLIC",
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-13-of-13-2026-08-30.json",
+      "ordinal": 13,
+      "rawSha256Checksum": "fb4087dfe2667ad2b9d113be3376679799383275423d90543249c4ffd45db4fd",
+      "sourceClass": "DERIVED-EVIDENCE",
+      "vectorCount": 91
+    }
+  ]
+}

@@ -1,4 +1,9 @@
-export const QUEUE_BATCH_CAPACITY = 10;
+export {
+  QUEUE_BATCH_CAPACITY,
+} from "../../shared/domain/queuePolicy.ts";
+import {
+  QUEUE_BATCH_CAPACITY,
+} from "../../shared/domain/queuePolicy.ts";
 
 export class QueueBackpressureError extends Error {
   constructor() {

@@ -376,6 +376,8 @@ npm run verify:team-invitation-browser-evidence-attestation -- --repo "$GITHUB_R
 12.15 ה־Verifier דורש חתימת SLSA תקפה, Repository ו־Signer Workflow
 מדויקים, Commit SHA של ה־Release ו־GitHub-hosted runner. הוא משתמש
 ב־Bundle שהורד ואינו מסתמך על Metadata לא חתום מתוך ה־Evidence.
+בנוסף הוא משווה byte-for-byte את הקובץ החתום לערך
+`TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON`; כולל Newline ו־Whitespace.
 
 12.15.1 לפני `npm run verify:release-gate` מגדירים גם
 `TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY` לאותה זהות

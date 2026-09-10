@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import TenantSelectionGate from "../../features/workspace/TenantSelectionGate";
 import {
@@ -17,6 +16,8 @@ import { readCurrentBusinessProfile } from "../../server/onboarding/currentBusin
 
 export const dynamic = "force-dynamic";
 
+// Clerk's experimental lint rule cannot follow the intentional config-disabled rehearsal branch; source-contract tests enforce the conditional direct protection.
+// eslint-disable-next-line @clerk/next/require-auth-protection
 export default async function WorkspaceLayout({
   children,
 }: {
@@ -28,11 +29,7 @@ export default async function WorkspaceLayout({
     null;
 
   if (hasClerkServerConfiguration()) {
-    const { userId } = await auth();
-
-    if (!userId) {
-      redirect("/login");
-    }
+    await auth.protect();
 
     const tenantSelection =
       await loadTenantSelectionAction();

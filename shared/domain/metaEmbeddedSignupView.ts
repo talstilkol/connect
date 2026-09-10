@@ -1,3 +1,5 @@
+export type MetaEmbeddedSignupFlow = "cloud-api" | "business-app";
+
 export type MetaEmbeddedSignupView =
   | {
       status: "configuration-required";
@@ -10,6 +12,8 @@ export type MetaEmbeddedSignupView =
       appId: string;
       configurationId: string;
       apiVersion: string;
+      // Advertised only by the server's explicitly enabled controlled pilot.
+      businessAppEnabled?: true;
     };
 
 export const configurationRequiredMetaEmbeddedSignup:

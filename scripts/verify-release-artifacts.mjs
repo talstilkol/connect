@@ -29,8 +29,15 @@ export function inspectReleaseArtifacts({
   let actualManifest;
 
   try {
-    actualManifest =
-      JSON.parse(actualManifestText);
+    actualManifest = JSON.parse(actualManifestText);
+    if (
+      actualManifest === null ||
+      typeof actualManifest !== "object" ||
+      Array.isArray(actualManifest)
+    ) {
+      actualManifest = undefined;
+      throw new Error("RELEASE_MANIFEST_INVALID");
+    }
   } catch {
     findings.push({
       code:

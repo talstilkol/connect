@@ -28,6 +28,10 @@ export type ContactConsentValidationResult =
       issues: readonly ContactConsentValidationIssue[];
     };
 
+const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
+const maximumSourceLength = 256;
+const maximumEvidenceReferenceLength = 2_048;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -73,12 +77,28 @@ export function validateContactConsentTransition(
 
   if (!source) {
     issues.push({ field: "source", code: "required" });
+  } else if (
+    source.length > maximumSourceLength ||
+    controlCharacterPattern.test(source)
+  ) {
+    issues.push({ field: "source", code: "unsupported" });
   }
 
   if (!occurredAt) {
     issues.push({ field: "occurredAt", code: "required" });
   } else if (!normalizedOccurredAt) {
     issues.push({ field: "occurredAt", code: "unsupported" });
+  }
+
+  if (
+    evidenceReference !== null &&
+    (evidenceReference.length > maximumEvidenceReferenceLength ||
+      controlCharacterPattern.test(evidenceReference))
+  ) {
+    issues.push({
+      field: "evidenceReference",
+      code: "unsupported",
+    });
   }
 
   if (issues.length > 0 || !source || !normalizedOccurredAt) {

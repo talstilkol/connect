@@ -1,0 +1,228 @@
+{
+  "schema": "CONNECT-DISCOVERY-CUTOFF-RECEIPT-ENVELOPE-V2",
+  "payload": {
+    "schema": "CONNECT-DISCOVERY-CUTOFF-RECEIPT-PAYLOAD-V2",
+    "artifactId": "CONNECT-DISCOVERY-CUTOFF-CANDIDATE-V2-2026-08-30",
+    "status": "CANDIDATE-NOT-ACCEPTED-NOT-SOURCE-UNIVERSE",
+    "owner": "Tal",
+    "observedAt": "2026-08-30T19:18:23Z",
+    "clockAuthority": "LOCAL-CLOCK-UNTRUSTED",
+    "repositoryVisibilityInvariant": "PUBLIC",
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "declaredOutputRegistry": {
+      "path": "docs/planning/discovery-cutoff-output-path-registry-v2-2026-08-30.json",
+      "sha256": "6760a99b1a1cfa4050bdad81f88b532bdccd5924ac79d32c02642c9cee933a8f",
+      "outputDirectory": "docs/planning/discovery-cutoff-candidate-v2-2026-08-30",
+      "outputPaths": [
+        "docs/planning/discovery-cutoff-candidate-v2-2026-08-30/receipt.json",
+        "docs/planning/discovery-cutoff-candidate-v2-2026-08-30/source-candidates.json",
+        "docs/planning/discovery-cutoff-candidate-v2-2026-08-30/manifest.json",
+        "docs/planning/discovery-cutoff-candidate-v2-2026-08-30/verification-report.json"
+      ],
+      "allOutputsAbsentAtCutoff": true,
+      "successorOutputRegistry": {
+        "path": "docs/planning/source-universe-v4-output-path-registry-v1-2026-08-30.json",
+        "sha256": "c4044ff5559d53e1926f2ccab29092354b1545d902657e0e9aab89e402179ea3",
+        "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-CANDIDATE-2026-08-30",
+        "outputDirectory": "docs/planning/source-universe-v4-candidate-2026-08-30",
+        "packageMemberPaths": [
+          "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/package-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/producer-qa.json"
+        ],
+        "reviewAndAcceptancePaths": [
+          "docs/planning/source-universe-v4-candidate-2026-08-30/structural-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-security-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/estimate-schedule-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/review-reconciliation.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/acceptance-envelope.json"
+        ],
+        "outputPaths": [
+          "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/package-manifest.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/producer-qa.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/structural-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-security-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/estimate-schedule-review.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/review-reconciliation.json",
+          "docs/planning/source-universe-v4-candidate-2026-08-30/acceptance-envelope.json"
+        ],
+        "allOutputsAbsentAtCutoff": true
+      }
+    },
+    "productRepository": {
+      "identity": "talstilkol/connect",
+      "branch": "codex/cloudflare-evidence-builders",
+      "observedHead": "4aab362fe162f421eabf3f379a3f4018f7adf516",
+      "cleanAtCutoff": true,
+      "headTree": {
+        "entryCount": 2240,
+        "rawSha256": "9d83dcc1a186202d119e11391099d0d2e6676f28eb02e630fcf64b2404c0502a"
+      },
+      "index": {
+        "entryCount": 2240,
+        "rawSha256": "9e67cbf6cf4deec599a3cb0a7d84368c234dcc36248996213ced0193d9d222db"
+      },
+      "worktreeStatus": {
+        "entryCount": 0,
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "untracked": {
+        "entryCount": 0,
+        "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ignored": {
+        "entryCount": 40630,
+        "rawSha256": "5ce0fc5483bf2bf572861e841d8989b885bfccb09bed121eda4dad267bec5e94"
+      },
+      "trackedSymlinkCount": 0,
+      "submoduleCount": 0,
+      "allFilesystemSymlinks": {
+        "entryCount": 49,
+        "pathSetSha256": "c459c1ceb8f3197215bb0fb31356a88060993e8d5255fd66de8ce10db7d9bfba"
+      },
+      "workingSecretHygiene": {
+        "status": "passed",
+        "workingFileCount": 2240,
+        "trackedFileCount": 2240,
+        "untrackedFileCount": 0,
+        "historyIncluded": false
+      }
+    },
+    "workspaceContainer": {
+      "authority": "DISCOVERY-CONTAINER-NOT-PUBLIC-GIT-AUTHORITY",
+      "status": {
+        "entryCount": 5,
+        "rawSha256": "9daec4a802660b36ee188feb8453d791107e99556de6f433a571cef8d19c899d"
+      },
+      "nestedGitIdentities": {
+        "entryCount": 2,
+        "labels": [
+          "product-repository",
+          "workspace-container"
+        ],
+        "labelSetSha256": "2beda0796e5cd7893815f8b7fd5a88710df638c41f2e6e17375272d9bcb629e4"
+      }
+    },
+    "remoteObservation": {
+      "transport": "GIT-LS-REMOTE-READ-ONLY",
+      "remote": "origin",
+      "defaultBranch": "main",
+      "defaultBranchHead": "aabaee803a0c00569806195ddf51995f873b27f0",
+      "refs": [
+        {
+          "commit": "4aab362fe162f421eabf3f379a3f4018f7adf516",
+          "ref": "refs/heads/codex/cloudflare-evidence-builders"
+        },
+        {
+          "commit": "d1b15c24c75671dd6bace1619ac0f39a875bdef5",
+          "ref": "refs/heads/codex/github-evidence-builders"
+        },
+        {
+          "commit": "3a070bab7a5ec6e221b36bff61fbb3303fb7c5b2",
+          "ref": "refs/heads/codex/pr-quality-gates"
+        },
+        {
+          "commit": "04a9e8b11141e5ef0576cc6e162c6a3157025498",
+          "ref": "refs/heads/fix/node-test-load-ts"
+        },
+        {
+          "commit": "aabaee803a0c00569806195ddf51995f873b27f0",
+          "ref": "refs/heads/main"
+        }
+      ],
+      "refSet": {
+        "entryCount": 5,
+        "rawSha256": "614f85a13397a551d8203558ad81474edb3cb3343a7e1e4f927b57f6e3afc492"
+      },
+      "limitations": [
+        "PULL-REQUEST-REFS-NOT-OBSERVED",
+        "GITHUB-RULESETS-NOT-OBSERVED",
+        "GITHUB-SECURITY-SETTINGS-NOT-OBSERVED",
+        "GITHUB-API-PAGINATION-NOT-OBSERVED"
+      ]
+    },
+    "toolchain": [
+      {
+        "path": "scripts/planning-discovery-cutoff-v2-lib.mjs",
+        "byteLength": 9310,
+        "sha256": "03353c26868de2e862ca90063d8f5dbf3d759108e26c597f5b270d92acb81f5c"
+      },
+      {
+        "path": "scripts/create-planning-discovery-cutoff-v2.mjs",
+        "byteLength": 15182,
+        "sha256": "bd5324bf136cac23267c7952551a374aac264e86e35c56bf195169592548433c"
+      },
+      {
+        "path": "scripts/verify-planning-discovery-cutoff-v2.mjs",
+        "byteLength": 21297,
+        "sha256": "f323cb30ef99abb125a13aa0ea759d161deda12fbd0e4df5a285d1bfdd6cb988"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-output-path-registry-v2-2026-08-30.json",
+        "byteLength": 635,
+        "sha256": "6760a99b1a1cfa4050bdad81f88b532bdccd5924ac79d32c02642c9cee933a8f"
+      },
+      {
+        "path": "docs/planning/source-universe-v4-output-path-registry-v1-2026-08-30.json",
+        "byteLength": 2855,
+        "sha256": "c4044ff5559d53e1926f2ccab29092354b1545d902657e0e9aab89e402179ea3"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-v2-tool-contract-2026-08-30.md",
+        "byteLength": 1735,
+        "sha256": "60b34cd1ca0086d8df1f7292a78ed286cb046c05ffca96d6d83d21683631ded8"
+      }
+    ],
+    "blockers": [
+      "TRUSTED-TIME-ABSENT",
+      "GITHUB-API-AND-PR-COVERAGE-ABSENT",
+      "PRIVATE-SOURCE-CUSTODY-AND-RIGHTS-UNAPPROVED",
+      "OFFICIAL-SOURCE-CAPTURE-FRONTIER-INCOMPLETE",
+      "B0-AND-REVIEW-PROTOCOL-NOT-ACCEPTED",
+      "INDEPENDENT-REVIEW-ABSENT"
+    ]
+  },
+  "payloadSha256": "229546fbdb781294b147e59bb92e09a0621ff159eb6dd66fc84899a7db5b9667"
+}

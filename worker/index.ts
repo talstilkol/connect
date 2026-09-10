@@ -24,8 +24,20 @@ import {
   createBotReplyDeliveryRepository,
 } from "../db/botReplyDeliveryRepository.ts";
 import {
+  createBotReplyDeliveryProviderRepository,
+} from "../db/botReplyDeliveryProviderRepository.ts";
+import {
   createMessageTemplateRepository,
 } from "../db/messageTemplateRepository.ts";
+import {
+  createCampaignDeliveryProviderRepository,
+} from "../db/campaignDeliveryProviderRepository.ts";
+import {
+  createWhatsappRateLimitRepository,
+} from "../db/whatsappRateLimitRepository.ts";
+import {
+  createWhatsappCampaignDeliveryPolicyRepository,
+} from "../db/whatsappCampaignDeliveryPolicyRepository.ts";
 import {
   createCampaignDeliveryBatchHandler,
   createCampaignScheduledHandler,
@@ -36,6 +48,12 @@ import {
 import {
   createUnavailableCampaignDeliveryProcessor,
 } from "../server/campaigns/unavailableCampaignDeliveryProcessor.ts";
+import {
+  createD1CampaignDeliveryRateLimitPolicySource,
+} from "../server/campaigns/d1CampaignDeliveryRateLimitPolicySource.ts";
+import {
+  createCampaignDeliveryStatusReconciler,
+} from "../server/campaigns/campaignDeliveryStatusReconciler.ts";
 import {
   createMetaWebhookEventDispatcher,
 } from "../server/meta/metaWebhookEventDispatcher.ts";
@@ -64,6 +82,9 @@ import {
 import {
   createUnavailableBotReplyProcessor,
 } from "../server/bot/unavailableBotReplyProcessor.ts";
+import {
+  createBotReplyDeliveryStatusReconciler,
+} from "../server/bot/botReplyDeliveryStatusReconciler.ts";
 import {
   createActiveAiRuntimeAgentLoader,
 } from "../server/ai/activeAiRuntimeAgent.ts";
@@ -106,6 +127,7 @@ interface Env {
   FILES: R2BucketBinding;
   META_APP_SECRET?: string;
   META_WEBHOOK_VERIFY_TOKEN?: string;
+  WHATSAPP_RATE_LIMIT_HMAC_KEY_V1?: string;
   META_WEBHOOK_QUEUE?: MetaWebhookQueueBinding;
   META_WEBHOOK_RATE_LIMITER?: RateLimitBinding;
   TENANT_MUTATION_RATE_LIMITER?: RateLimitBinding;
@@ -173,6 +195,11 @@ const worker = {
     env: Env,
   ): Promise<void> {
     if (batch.queue === META_WEBHOOK_QUEUE_NAME) {
+      const clock = Object.freeze({
+        now() {
+          return new Date();
+        },
+      });
       const botRuntimeRepository =
         createBotRuntimeRepository(env.DB);
       const aiRuntimePersistence =
@@ -188,11 +215,7 @@ const worker = {
               env.DB,
             ),
             createUnavailableBotReplyProcessor(),
-            {
-              now() {
-                return new Date();
-              },
-            },
+            clock,
           ),
           createAiInboundRuntimeProcessor(
             botRuntimeRepository,
@@ -220,6 +243,26 @@ const worker = {
             createConversationRepository(env.DB),
           templates:
             createMessageTemplateRepository(env.DB),
+          campaignStatuses:
+            createCampaignDeliveryStatusReconciler(
+              createCampaignDeliveryProviderRepository(
+                env.DB,
+              ),
+              createWhatsappRateLimitRepository(
+                env.DB,
+              ),
+              clock,
+            ),
+          botReplyStatuses:
+            createBotReplyDeliveryStatusReconciler(
+              createBotReplyDeliveryProviderRepository(
+                env.DB,
+              ),
+              createWhatsappRateLimitRepository(
+                env.DB,
+              ),
+              clock,
+            ),
           inboundRuntime,
         }),
       );
@@ -238,6 +281,11 @@ const worker = {
       const consumer =
         createCampaignDeliveryBatchHandler(
           env,
+          createD1CampaignDeliveryRateLimitPolicySource(
+            createWhatsappCampaignDeliveryPolicyRepository(
+              env.DB,
+            ),
+          ),
           createUnavailableCampaignDeliveryProcessor(),
         );
 

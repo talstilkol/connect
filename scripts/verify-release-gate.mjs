@@ -55,6 +55,20 @@ const steps = [
     ],
   },
   {
+    id: "postgres-migration-contract",
+    command: process.execPath,
+    arguments: [
+      "scripts/verify-postgres-migration-contract.mjs",
+    ],
+  },
+  {
+    id: "postgres-migration-parity",
+    command: process.execPath,
+    arguments: [
+      "scripts/verify-postgres-migration-parity.mjs",
+    ],
+  },
+  {
     id: "typecheck",
     command: "npm",
     arguments: ["run", "typecheck"],
@@ -74,6 +88,14 @@ const steps = [
       ? []
       : [
           {
+            id: "production-infrastructure-readiness-v2",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-production-readiness.mjs",
+              "--v2",
+            ],
+          },
+          {
             id:
               "dependency-audit-attestation",
             command: process.execPath,
@@ -87,6 +109,22 @@ const steps = [
             command: process.execPath,
             arguments: [
               "scripts/verify-team-invitation-browser-evidence-attestation.mjs",
+            ],
+          },
+          {
+            id:
+              "better-stack-staging-evidence",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-better-stack-staging-evidence.mjs",
+            ],
+          },
+          {
+            id:
+              "bot-reply-staging-evidence",
+            command: process.execPath,
+            arguments: [
+              "scripts/verify-bot-reply-staging-evidence.mjs",
             ],
           },
           {

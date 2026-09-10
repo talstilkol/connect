@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:connect:d02:a9:package-envelope-schema:1",
+  "title": "Connect D02-A9 external atomic package envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactId",
+    "envelopeVersion",
+    "namespaceRoot",
+    "logicalPackageRoot",
+    "selfMembership",
+    "memberCount",
+    "memberOrder",
+    "members",
+    "contentRootAlgorithm",
+    "contentRoot",
+    "safeState"
+  ],
+  "properties": {
+    "artifactId": {
+      "const": "CONNECT-D02-A9-EXTERNAL-ATOMIC-PACKAGE-ENVELOPE-2026-08-30"
+    },
+    "envelopeVersion": {
+      "const": "1.0.0"
+    },
+    "namespaceRoot": {
+      "const": "web"
+    },
+    "logicalPackageRoot": {
+      "const": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/"
+    },
+    "selfMembership": {
+      "const": "EXCLUDED-NON-SELF-REFERENTIAL"
+    },
+    "memberCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 256
+    },
+    "memberOrder": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^docs/"
+      }
+    },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/member"
+      }
+    },
+    "contentRootAlgorithm": {
+      "const": "SHA256-DOMAIN-SEPARATED-JCS-ORDERED-MEMBER-EXTENTS"
+    },
+    "contentRoot": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "safeState": {
+      "$ref": "#/$defs/safeState"
+    }
+  },
+  "$defs": {
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "logicalPath",
+        "role",
+        "sha256",
+        "lines",
+        "words",
+        "bytes"
+      ],
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 256
+        },
+        "logicalPath": {
+          "type": "string",
+          "pattern": "^docs/"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "lines": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "words": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        }
+      }
+    },
+    "safeState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "aiRuntime",
+        "gate29",
+        "developmentFreeze",
+        "repositoryVisibility",
+        "planningAcceptance",
+        "aiAdmission",
+        "runtimePermit",
+        "acceptanceCount"
+      ],
+      "properties": {
+        "aiRuntime": {
+          "const": "OFF"
+        },
+        "gate29": {
+          "const": "BLOCKED"
+        },
+        "developmentFreeze": {
+          "const": "ACTIVE"
+        },
+        "repositoryVisibility": {
+          "const": "PUBLIC"
+        },
+        "planningAcceptance": {
+          "const": "MISSING"
+        },
+        "aiAdmission": {
+          "const": "MISSING"
+        },
+        "runtimePermit": {
+          "const": "MISSING"
+        },
+        "acceptanceCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 0
+        }
+      }
+    }
+  }
+}

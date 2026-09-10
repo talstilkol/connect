@@ -1,0 +1,86 @@
+{
+  "artifactClass": "IMMUTABLE-PLANNING-PACKAGE-MANIFEST-NOT-ACCEPTANCE",
+  "artifactId": "MPRR-V1-10-MANIFEST-2026-08-30-G0",
+  "generatedAt": "2026-08-30T19:03:20Z",
+  "maxMemberBytesExclusive": 10485760,
+  "maxTotalBytesInclusive": 26214400,
+  "memberCount": 10,
+  "members": [
+    {
+      "bytes": 4779,
+      "logicalPath": "docs/planning/three-review-protocol-v1-10-package-2026-08-30/subject.md",
+      "ordinal": 1,
+      "role": "MPRRV110-SUBJECT",
+      "sha256": "c47fa344265a6f046cb146d3f9380566ca6227f0d51fa14056ce19f93bb80a41"
+    },
+    {
+      "bytes": 8446,
+      "logicalPath": "docs/planning/three-review-protocol-v1-10-package-2026-08-30/normative-registry.json",
+      "ordinal": 2,
+      "role": "MPRRV110-REGISTRY",
+      "sha256": "997eaba382efc3a1e9f0350b7935364422e151d3cf59038b4284f5840b5be2e6"
+    },
+    {
+      "bytes": 2991,
+      "logicalPath": "docs/planning/three-review-protocol-v1-10-package-2026-08-30/frozen-source-index.json",
+      "ordinal": 3,
+      "role": "MPRRV110-SOURCE-INDEX",
+      "sha256": "697a945431cd7e21fe2e5e036dff3c72f97aa50e3e9e36e3ef3b397874b46a4d"
+    },
+    {
+      "bytes": 6585,
+      "logicalPath": "docs/planning/three-review-protocol-v1-10-package-2026-08-30/closure-crosswalk.json",
+      "ordinal": 4,
+      "role": "MPRRV110-CROSSWALK",
+      "sha256": "c9664fe6656448d5da99625e3eb1fc399d74b6b4b8bbb52821224146724a537f"
+    },
+    {
+      "bytes": 4959,
+      "logicalPath": "docs/planning/three-review-protocol-v1-10-package-2026-08-30/mutation-corpus.json",
+      "ordinal": 5,
+      "role": "MPRRV110-CORPUS",
+      "sha256": "d49dc0999603884bf0cad33b80dd69fa8afbd5324e07b161f06053f9f00ba8b3"
+    },
+    {
+      "bytes": 23330,
+      "logicalPath": "scripts/review-protocol-v1-10-core.mjs",
+      "ordinal": 6,
+      "role": "MPRRV110-CORE",
+      "sha256": "1d6fe86bdd06c525249e336c62f261f63d323d657ed19edb58e5e7741c29f115"
+    },
+    {
+      "bytes": 13020,
+      "logicalPath": "scripts/create-review-protocol-v1-10-candidate.mjs",
+      "ordinal": 7,
+      "role": "MPRRV110-BUILDER",
+      "sha256": "a8447f3024f4f9da6373bdde3ff84ad5bfa0c0fb7a332fa8f8de5a0c193f0abf"
+    },
+    {
+      "bytes": 14370,
+      "logicalPath": "scripts/verify-review-protocol-v1-10-candidate.mjs",
+      "ordinal": 8,
+      "role": "MPRRV110-READER-A",
+      "sha256": "3a2da230be234939e31ee80a6e0f26ca496749b784e3d98abb89d57ad60caaca"
+    },
+    {
+      "bytes": 14441,
+      "logicalPath": "scripts/verify-review-protocol-v1-10-candidate.py",
+      "ordinal": 9,
+      "role": "MPRRV110-READER-B",
+      "sha256": "dc04f013f4475f703293c0241060ad09fd1f54eb24c91643e04d432dc285ba63"
+    },
+    {
+      "bytes": 5520,
+      "logicalPath": "tests/review-protocol-v1-10-core.test.mjs",
+      "ordinal": 10,
+      "role": "MPRRV110-TESTS",
+      "sha256": "0a216dd23aaa0ceda7d3237f9be7de7a07768d839300ecbb13716d0155824a26"
+    }
+  ],
+  "packageContentRoot": "b4d123bcd68fe8e93c044b548d34abb858c9a1c7b013cfb9fae976026a238987",
+  "packageId": "MPRR-V1-10-IMMUTABLE-CANDIDATE-PACKAGE-2026-08-30-G0",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "MPRR-V1-10-PACKAGE-MANIFEST-V1",
+  "sourceCommit": "b857af1228a5441264848571c55dffe1b58f60bb",
+  "totalBytes": 98441
+}

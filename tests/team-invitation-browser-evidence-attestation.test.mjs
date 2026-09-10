@@ -47,6 +47,7 @@ function configuration(
     attestationBundlePath,
     repository,
     releaseManifest,
+    runtimeEvidenceJson: "trusted-file",
     dependencies,
     ...overrides,
   };
@@ -243,6 +244,25 @@ test("rejects evidence or bundle replacement during cryptographic verification",
   );
 
   assert.equal(reads, 4);
+});
+
+test("rejects a runtime JSON value that is not the exact signed evidence file", async () => {
+  await assert.rejects(
+    () =>
+      verifyTeamInvitationBrowserEvidenceAttestation(
+        configuration(
+          trustedDependencies(async () =>
+            successfulOutput()),
+          {
+            runtimeEvidenceJson:
+              "different-runtime-evidence",
+          },
+        ),
+      ),
+    expectsError(
+      "BROWSER_EVIDENCE_ATTESTATION_RUNTIME_MISMATCH",
+    ),
+  );
 });
 
 test("resolves one production-gate repository without accepting conflicting input", () => {

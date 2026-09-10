@@ -5,6 +5,10 @@ import {
   CONTACT_IMPORT_CHUNK_SIZE,
 } from "../shared/domain/contactImportJob.ts";
 import {
+  CONTACT_IMPORT_MAX_COLUMNS,
+  CONTACT_IMPORT_MAX_DATA_ROWS,
+} from "../shared/contactImport/sourcePolicy.ts";
+import {
   ContactImportInputError,
   createContactImportService,
 } from "../server/contacts/contactImportService.ts";
@@ -319,4 +323,47 @@ test("rejects oversized chunks and viewer writes before repository access", asyn
     }),
     (error) => error.code === "PERMISSION_DENIED",
   );
+});
+
+test("rejects source metadata outside the shared import policy", async () => {
+  const invalidStarts = [
+    {
+      fileName: "contacts.xls",
+      totalRows: 1,
+      phoneNumberColumn: 0,
+    },
+    {
+      fileName: "contacts.xlsx",
+      totalRows: CONTACT_IMPORT_MAX_DATA_ROWS + 1,
+      phoneNumberColumn: 0,
+    },
+    {
+      fileName: "contacts.csv",
+      totalRows: 1,
+      phoneNumberColumn: CONTACT_IMPORT_MAX_COLUMNS,
+    },
+  ];
+
+  for (const invalidStart of invalidStarts) {
+    const testFixture = fixture();
+
+    await assert.rejects(
+      testFixture.service.start(session(), {
+        fileName: invalidStart.fileName,
+        sourceDigest: "a".repeat(64),
+        totalRows: invalidStart.totalRows,
+        mapping: {
+          phoneNumber: invalidStart.phoneNumberColumn,
+          firstName: null,
+          lastName: null,
+          email: null,
+          company: null,
+        },
+      }),
+      (error) =>
+        error instanceof ContactImportInputError &&
+        error.issue === "invalid-start-input",
+    );
+    assert.equal(testFixture.state.startInput, undefined);
+  }
 });

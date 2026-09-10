@@ -2,6 +2,12 @@ import {
   createHash,
 } from "node:crypto";
 
+export const sourceControlOwnerIdentity = "talstilkol";
+export const sourceControlChecksAppId = 15368;
+
+export const sourceControlRepositoryIdentity = "talstilkol/connect";
+export const sourceControlDefaultBranchIdentity = `${sourceControlRepositoryIdentity}:main`;
+
 export const requiredPullRequestStatusChecks =
   Object.freeze([
   "source-guardrails",
@@ -9,14 +15,18 @@ export const requiredPullRequestStatusChecks =
   "interface-guardrails",
   "dependency-lock",
   "migrations",
+  "meta-coexistence",
   "typecheck",
   "lint",
   "tests-and-build",
   "dependency-audit",
 ] as const);
 const controlNames = Object.freeze([
+  "repositoryPublic",
   "branchProtection",
-  "codeOwnerReview",
+  "pullRequestsRequired",
+  "singleOwner",
+  "codeOwnershipDeclared",
   "dismissStaleApprovals",
   "conversationResolution",
   "forcePushBlocked",
@@ -25,22 +35,25 @@ const controlNames = Object.freeze([
   "pushProtection",
 ] as const);
 const maximumEvidenceLength = 12_000;
+const maximumEvidenceLifetimeMilliseconds =
+  24 * 60 * 60 * 1_000;
 const fingerprintPattern =
   /^sha256:[a-f0-9]{64}$/;
 const commitPattern = /^[a-f0-9]{40}$/;
 const evidenceDigestPattern =
-  /^source_control_governance_evidence_v2_[a-f0-9]{64}$/;
+  /^source_control_governance_evidence_v5_[a-f0-9]{64}$/;
 
 type GovernanceControl =
   (typeof controlNames)[number];
 
-interface SourceControlGovernanceEvidence {
-  schemaVersion: 2;
+export interface SourceControlGovernanceEvidence {
+  schemaVersion: 5;
   verifiedAt: string;
   expiresAt: string;
   repositoryFingerprint: string;
   defaultBranchFingerprint: string;
   releaseCommitSha: string;
+  reviewPolicy: "single-owner";
   requiredReviewCount: number;
   requiredStatusChecks:
     readonly string[];
@@ -49,6 +62,21 @@ interface SourceControlGovernanceEvidence {
     true
   >;
   evidenceDigest: string;
+}
+
+export interface SourceControlGovernanceSnapshot {
+  verifiedAt: string;
+  repositoryIdentity: string;
+  defaultBranchIdentity: string;
+  releaseCommitSha: string;
+  reviewPolicy: "single-owner";
+  requiredReviewCount: number;
+  requiredStatusChecks:
+    readonly string[];
+  controls: Record<
+    GovernanceControl,
+    boolean
+  >;
 }
 
 export interface SourceControlGovernanceEnvironment {
@@ -62,8 +90,8 @@ export type SourceControlGovernanceReport =
         status: "configured";
         code:
           "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED";
-        requiredStatusCheckCount: 9;
-        controlCount: 8;
+        requiredStatusCheckCount: 10;
+        controlCount: 11;
       }
     | {
         status:
@@ -132,6 +160,15 @@ function sha256(value: string): string {
     .digest("hex");
 }
 
+function fingerprint(
+  scope: string,
+  value: string,
+): string {
+  return `sha256:${sha256(
+    `${scope}:${value}`,
+  )}`;
+}
+
 function canonicalEvidenceIdentity(
   evidence: Omit<
     SourceControlGovernanceEvidence,
@@ -149,6 +186,7 @@ function canonicalEvidenceIdentity(
       evidence.defaultBranchFingerprint,
     releaseCommitSha:
       evidence.releaseCommitSha,
+    reviewPolicy: evidence.reviewPolicy,
     requiredReviewCount:
       evidence.requiredReviewCount,
     requiredStatusChecks:
@@ -170,7 +208,7 @@ export function deriveSourceControlGovernanceEvidenceDigest(
     "evidenceDigest"
   >,
 ): string {
-  return `source_control_governance_evidence_v2_${sha256(
+  return `source_control_governance_evidence_v5_${sha256(
     canonicalEvidenceIdentity(evidence),
   )}`;
 }
@@ -195,12 +233,13 @@ function parseEvidence(
       "repositoryFingerprint",
       "defaultBranchFingerprint",
       "releaseCommitSha",
+      "reviewPolicy",
       "requiredReviewCount",
       "requiredStatusChecks",
       "controls",
       "evidenceDigest",
     ]) ||
-    value.schemaVersion !== 2 ||
+    value.schemaVersion !== 5 ||
     !isCanonicalTimestamp(
       value.verifiedAt,
     ) ||
@@ -217,18 +256,15 @@ function parseEvidence(
     !fingerprintPattern.test(
       value.defaultBranchFingerprint,
     ) ||
-    value.repositoryFingerprint ===
-      value.defaultBranchFingerprint ||
+    value.repositoryFingerprint !== fingerprint("repository", sourceControlRepositoryIdentity) ||
+    value.defaultBranchFingerprint !== fingerprint("default-branch", sourceControlDefaultBranchIdentity) ||
     typeof value.releaseCommitSha !==
       "string" ||
     !commitPattern.test(
       value.releaseCommitSha,
     ) ||
-    !Number.isSafeInteger(
-      value.requiredReviewCount,
-    ) ||
-    Number(value.requiredReviewCount) < 1 ||
-    Number(value.requiredReviewCount) > 10 ||
+    value.reviewPolicy !== "single-owner" ||
+    value.requiredReviewCount !== 0 ||
     typeof value.evidenceDigest !==
       "string" ||
     !evidenceDigestPattern.test(
@@ -273,7 +309,7 @@ function parseEvidence(
   }
 
   const evidence = {
-    schemaVersion: 2 as const,
+    schemaVersion: 5 as const,
     verifiedAt: value.verifiedAt,
     expiresAt: value.expiresAt,
     repositoryFingerprint:
@@ -282,6 +318,7 @@ function parseEvidence(
       value.defaultBranchFingerprint,
     releaseCommitSha:
       value.releaseCommitSha,
+    reviewPolicy: "single-owner" as const,
     requiredReviewCount:
       value.requiredReviewCount as number,
     requiredStatusChecks:
@@ -312,6 +349,140 @@ function parseEvidence(
     evidenceDigest:
       value.evidenceDigest,
   };
+}
+
+export function buildSourceControlGovernanceEvidence(
+  rawSnapshot: unknown,
+): Readonly<SourceControlGovernanceEvidence> {
+  if (
+    !isPlainObject(rawSnapshot) ||
+    !hasExactKeys(rawSnapshot, [
+      "verifiedAt",
+      "repositoryIdentity",
+      "defaultBranchIdentity",
+      "releaseCommitSha",
+      "reviewPolicy",
+      "requiredReviewCount",
+      "requiredStatusChecks",
+      "controls",
+    ]) ||
+    !isCanonicalTimestamp(
+      rawSnapshot.verifiedAt,
+    ) ||
+    typeof rawSnapshot.repositoryIdentity !==
+      "string" ||
+    rawSnapshot.repositoryIdentity.length < 1 ||
+    rawSnapshot.repositoryIdentity.length > 512 ||
+    typeof rawSnapshot.defaultBranchIdentity !==
+      "string" ||
+    rawSnapshot.defaultBranchIdentity.length < 1 ||
+    rawSnapshot.defaultBranchIdentity.length > 512 ||
+    rawSnapshot.repositoryIdentity !== sourceControlRepositoryIdentity ||
+    rawSnapshot.defaultBranchIdentity !== sourceControlDefaultBranchIdentity ||
+    typeof rawSnapshot.releaseCommitSha !==
+      "string" ||
+    !commitPattern.test(
+      rawSnapshot.releaseCommitSha,
+    ) ||
+    rawSnapshot.reviewPolicy !== "single-owner" ||
+    rawSnapshot.requiredReviewCount !== 0 ||
+    !Array.isArray(
+      rawSnapshot.requiredStatusChecks,
+    ) ||
+    rawSnapshot.requiredStatusChecks.length !==
+      requiredPullRequestStatusChecks.length ||
+    new Set(
+      rawSnapshot.requiredStatusChecks,
+    ).size !==
+      requiredPullRequestStatusChecks.length ||
+    requiredPullRequestStatusChecks.some(
+      (check) =>
+        !(
+          rawSnapshot.requiredStatusChecks as
+            unknown[]
+        ).includes(check),
+    ) ||
+    !isPlainObject(rawSnapshot.controls) ||
+    !hasExactKeys(
+      rawSnapshot.controls,
+      controlNames,
+    ) ||
+    controlNames.some(
+      (control) =>
+        (
+          rawSnapshot.controls as
+            Record<string, unknown>
+        )[control] !== true,
+    )
+  ) {
+    throw new Error(
+      "SOURCE_CONTROL_GOVERNANCE_SNAPSHOT_INVALID",
+    );
+  }
+
+  const verifiedAt =
+    rawSnapshot.verifiedAt;
+  const expiresAt = new Date(
+    Date.parse(verifiedAt) +
+      maximumEvidenceLifetimeMilliseconds,
+  ).toISOString();
+  const evidence = {
+    schemaVersion: 5 as const,
+    verifiedAt,
+    expiresAt,
+    repositoryFingerprint: fingerprint(
+      "repository",
+      rawSnapshot.repositoryIdentity,
+    ),
+    defaultBranchFingerprint: fingerprint(
+      "default-branch",
+      rawSnapshot.defaultBranchIdentity,
+    ),
+    releaseCommitSha:
+      rawSnapshot.releaseCommitSha,
+    reviewPolicy: "single-owner" as const,
+    requiredReviewCount:
+      rawSnapshot.requiredReviewCount as number,
+    requiredStatusChecks:
+      requiredPullRequestStatusChecks.map(
+        (check) => check,
+      ),
+    controls: Object.fromEntries(
+      controlNames.map((control) => [
+        control,
+        true,
+      ]),
+    ) as Record<
+      GovernanceControl,
+      true
+    >,
+  };
+  const completeEvidence = {
+    ...evidence,
+    evidenceDigest:
+      deriveSourceControlGovernanceEvidenceDigest(
+        evidence,
+      ),
+  };
+  const parsed = parseEvidence(
+    JSON.stringify(completeEvidence),
+  );
+
+  if (parsed === null) {
+    throw new Error(
+      "SOURCE_CONTROL_GOVERNANCE_SNAPSHOT_INVALID",
+    );
+  }
+
+  return Object.freeze({
+    ...parsed,
+    requiredStatusChecks: Object.freeze(
+      [...parsed.requiredStatusChecks],
+    ),
+    controls: Object.freeze({
+      ...parsed.controls,
+    }),
+  });
 }
 
 export function inspectSourceControlGovernanceEvidence(
@@ -358,7 +529,10 @@ export function inspectSourceControlGovernanceEvidence(
     Date.parse(evidence.verifiedAt) >
       now.getTime() ||
     Date.parse(evidence.expiresAt) <=
-      Date.parse(evidence.verifiedAt)
+      Date.parse(evidence.verifiedAt) ||
+    Date.parse(evidence.expiresAt) -
+      Date.parse(evidence.verifiedAt) >
+        maximumEvidenceLifetimeMilliseconds
   ) {
     return {
       status: "invalid",
@@ -406,7 +580,7 @@ export function inspectSourceControlGovernanceEvidence(
     status: "configured",
     code:
       "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
-    requiredStatusCheckCount: 9,
-    controlCount: 8,
+    requiredStatusCheckCount: 10,
+    controlCount: 11,
   };
 }

@@ -173,6 +173,52 @@ test("acknowledges every bounded terminal dispatch outcome", async () => {
   }
 });
 
+test("retries a durable provider deferral with the exact bounded delay", async () => {
+  const item = delivery(
+    createTeamInvitationQueueMessage(
+      7,
+      deliveryKey,
+    ),
+  );
+  const consumer =
+    createTeamInvitationQueueConsumer(
+      {
+        async process() {
+          return {
+            outcome: "deferred",
+            retryAfterSeconds: 3_600,
+          };
+        },
+      },
+      {
+        isConfigured() {
+          return true;
+        },
+      },
+    );
+
+  assert.deepEqual(
+    await consumer.handle({
+      queue:
+        "connect-team-invitations",
+      messages: [item.value],
+    }),
+    {
+      ...emptyResult(),
+      retried: 1,
+    },
+  );
+  assert.deepEqual(
+    item.calls,
+    [{
+      operation: "retry",
+      options: {
+        delaySeconds: 3_600,
+      },
+    }],
+  );
+});
+
 test("discards malformed messages and retries bounded processing failures", async () => {
   const malformed =
     delivery({

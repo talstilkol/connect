@@ -1,0 +1,90 @@
+{
+  "engineId": "CONNECT-TRD2V4-MECHANICAL-QA-ENGINE-A-NODE-V1",
+  "implementation": "Node.js independent read-only verifier",
+  "inputRoots": {
+    "inherited": "a6fffd28d1d07a8fb1aba97c2ccbb2c6394e5d4f912043f7d5097e24d1fa24b5",
+    "fieldMap": "8c79211f49c3786726bed6b4a9327f6624fa4772a8da5f0db138977f09d45994",
+    "controls": "a932972321fb9d93be9277f1b732d0e4eb35a38477e863cd03ceb5f9bfc9ffdf",
+    "subject": "72c92fce01d3fd9996965469b0fbd23c32c1e43f38740ef9be6fa7bf4235d394",
+    "binding": "30bfcf42bef95586592bf8f3d0ad8113dc2ac979117bfc05d6a0ad1cbb30405d"
+  },
+  "verdict": "PASS-MECHANICAL-CANDIDATE-NOT-ACCEPTANCE",
+  "checks": [
+    {
+      "label": "raw roots",
+      "result": "PASS"
+    },
+    {
+      "label": "v3 one-to-one byte manifest",
+      "result": "PASS"
+    },
+    {
+      "label": "field maps and canonical observation envelope",
+      "result": "PASS"
+    },
+    {
+      "label": "portable captures and 213 locators",
+      "result": "PASS"
+    },
+    {
+      "label": "Bidi exact preservation",
+      "result": "PASS"
+    },
+    {
+      "label": "subject 113x5, sole output and backward dependencies",
+      "result": "PASS"
+    },
+    {
+      "label": "predicate, vector and result-schema closure",
+      "result": "PASS"
+    },
+    {
+      "label": "typed graph shape, reachability and exact input edges",
+      "result": "PASS"
+    },
+    {
+      "label": "non-vacuous AtomicClause and total DataLifecycle",
+      "result": "PASS"
+    },
+    {
+      "label": "Public successor and no Private path",
+      "result": "PASS"
+    },
+    {
+      "label": "detached packet and zero acceptance",
+      "result": "PASS"
+    }
+  ],
+  "counters": {
+    "checks": 11,
+    "requirements": 113,
+    "inheritedV3": 101,
+    "observations": 84,
+    "sourceParts": 128,
+    "v2Locators": 85,
+    "bidiU200F": 13,
+    "predicates": 113,
+    "vectors": 565,
+    "graphNodes": 1207,
+    "graphEdges": 7356,
+    "atomicChildren": 59,
+    "lifecycleRows": 320,
+    "publicControls": 52,
+    "accepted": 0
+  },
+  "externalBlockers": [
+    "B0",
+    "accepted Protocol",
+    "accepted Source Universe",
+    "Authority/Freeze",
+    "appointments",
+    "evaluator",
+    "runner A",
+    "runner B",
+    "two review generations",
+    "Reconciliation",
+    "Definition Acceptance"
+  ],
+  "publicInvariant": "PUBLIC",
+  "privateRemediationAllowed": false
+}

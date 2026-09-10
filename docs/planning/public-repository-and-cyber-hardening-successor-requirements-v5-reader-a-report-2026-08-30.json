@@ -1,0 +1,344 @@
+{
+  "artifactId": "CONNECT-PRCV5-READER-A-REPORT-2026-08-30",
+  "schemaVersion": "PRCV5-READER-REPORT-V1",
+  "artifactClass": "DETACHED-READ-ONLY-MECHANICAL-QA-REPORT;NOT-INDEPENDENT-REVIEW;NOT-ACCEPTANCE;NOT-PERMIT",
+  "readerId": "PRCV5-READER-A",
+  "readerProfileRoot": "bd7e7cbedab2d7b737f05e9dea6d50d040846670426027b1f8bb14d05116e462",
+  "manifestPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-atomic-package-manifest-2026-08-30.json",
+  "manifestSha256": "2478e12103c568b8a68183c4974a0cb0cf47f2d8fb43671732c5a809c00ae949",
+  "packageContentRoot": "19be4c773af62a79945c01c1d3a71d2c7d650b1cbda0b99ca1ef815e82b8a31b",
+  "sourceReferenceRoot": "85bba2ddb20912535e1239d2885dbea77aadbb9a04da753762cebf668e062c8e",
+  "vectorCorpusRoot": "b413728a0ca577f11e750b11a3ef8bfaadc455d84b69732fc35e3d854f4e20e6",
+  "graphRoot": "5197de7303e43f6751719c4f64153f8e07ba2ce273a72d71f960e92ff6debf61",
+  "checks": [
+    {
+      "checkId": "MEMBER-1",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-2026-08-30.md"
+    },
+    {
+      "checkId": "MEMBER-2",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-frozen-input-manifest-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-3",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-finding-identity-and-closure-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-4",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-closed-schema-and-type-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-5",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-canonical-digest-and-serialization-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-6",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-producer-authority-and-separation-graph-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-7",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-lifecycle-cas-and-recovery-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-8",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-four-permit-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-9",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-public-information-flow-and-scanner-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-10",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-publication-size-shard-and-storage-registry-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-11",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-12",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-01-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-13",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-02-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-14",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-03-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-15",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-04-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-16",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-05-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-17",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-06-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-18",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-07-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-19",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-08-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-20",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-09-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-21",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-10-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-22",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-11-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-23",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-12-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-24",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-13-of-13-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-25",
+      "terminal": "PASS",
+      "evidence": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-causal-graph-2026-08-30.json"
+    },
+    {
+      "checkId": "MEMBER-26",
+      "terminal": "PASS",
+      "evidence": "docs/planning/qa/generate-public-cyber-v5-package.mjs"
+    },
+    {
+      "checkId": "MEMBER-27",
+      "terminal": "PASS",
+      "evidence": "docs/planning/qa/public-cyber-v5-reader-a.mjs"
+    },
+    {
+      "checkId": "MEMBER-28",
+      "terminal": "PASS",
+      "evidence": "docs/planning/qa/public-cyber-v5-reader-b.py"
+    },
+    {
+      "checkId": "PACKAGE-ROOT",
+      "terminal": "PASS",
+      "evidence": "19be4c773af62a79945c01c1d3a71d2c7d650b1cbda0b99ca1ef815e82b8a31b"
+    },
+    {
+      "checkId": "MANIFEST-DISPOSITION",
+      "terminal": "PASS",
+      "evidence": "{\"DeploymentPermit\":\"ABSENT\",\"GitHubControlPlanePermit\":\"ABSENT\",\"PublicPushPermit\":\"ABSENT\",\"ReleasePermit\":\"ABSENT\",\"acceptance\":0,\"acceptedFindings\":0,\"developmentFreeze\":\"ACTIVE\",\"gate29\":\"BLOCKED\",\"repositoryVisibility\":\"PUBLIC\",\"totalFindings\":116}"
+    },
+    {
+      "checkId": "FROZEN-SOURCES",
+      "terminal": "PASS",
+      "evidence": "85bba2ddb20912535e1239d2885dbea77aadbb9a04da753762cebf668e062c8e"
+    },
+    {
+      "checkId": "V4-PACKAGE-ROOT",
+      "terminal": "PASS",
+      "evidence": "f799c154c695034935c480a57b6a0047d8e2b67d318e42b0d9b88a0ea78f92cf"
+    },
+    {
+      "checkId": "LATE-DECISION",
+      "terminal": "PASS",
+      "evidence": "sha256:508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84"
+    },
+    {
+      "checkId": "CLOSURE-DENOMINATOR",
+      "terminal": "PASS",
+      "evidence": "{\"acceptanceCredit\":0,\"aliases\":32,\"closureCredit\":0,\"findings\":116,\"inheritedFindings\":93,\"inheritedRequirementEdges\":204,\"newFindings\":23,\"remediationControls\":23,\"requirementEdges\":227,\"uniqueNoMergeKeys\":116}"
+    },
+    {
+      "checkId": "INHERITED-IDENTITIES",
+      "terminal": "PASS",
+      "evidence": "93 ordered field-rooted rows"
+    },
+    {
+      "checkId": "NEW-FINDING-EXTRACTION",
+      "terminal": "PASS",
+      "evidence": "23"
+    },
+    {
+      "checkId": "ALIASES",
+      "terminal": "PASS",
+      "evidence": "32 identity-only source projections"
+    },
+    {
+      "checkId": "SCHEMA-CLOSURE",
+      "terminal": "PASS",
+      "evidence": "{\"admittedInstances\":112,\"nestedTypes\":70,\"outputFamilies\":42,\"primitiveTypes\":9,\"unresolvedTypeReferences\":0}"
+    },
+    {
+      "checkId": "SCHEMA-ADMITTED-INSTANCES",
+      "terminal": "PASS",
+      "evidence": "112/112"
+    },
+    {
+      "checkId": "VALIDATOR-UNKNOWN-FAIL-CLOSED",
+      "terminal": "PASS",
+      "evidence": "95ba9d5429fff30b3a04b69a30128ae6876bc8c5e85041687a7b00df8194af4b"
+    },
+    {
+      "checkId": "DIGEST-SEPARATION",
+      "terminal": "PASS",
+      "evidence": "{\"distinctIdentityRootCount\":6,\"payloadRawChecksum\":\"b10d1d91aeb9032586892cb01b60218e63f33b2b76e70c1e4f1a28d4698ac5ad\",\"rawChecksumEqualsAnyTypedIdentity\":false,\"testedClassCount\":6}"
+    },
+    {
+      "checkId": "AUTHORITY-SOLE-PRODUCERS",
+      "terminal": "PASS",
+      "evidence": "{\"appointments\":54,\"independenceGroups\":4,\"outputFamilyProducers\":42,\"producers\":54,\"readerProfiles\":2,\"specialProducers\":12}"
+    },
+    {
+      "checkId": "AUTHORITY-INDEPENDENCE",
+      "terminal": "PASS",
+      "evidence": "4"
+    },
+    {
+      "checkId": "READER-PROFILES",
+      "terminal": "PASS",
+      "evidence": "bd7e7cbedab2d7b737f05e9dea6d50d040846670426027b1f8bb14d05116e462,b3889135c41633e439ff2407ce4a4eead7ff7c3a46111a8aee423fa4b61944b8"
+    },
+    {
+      "checkId": "CAS-EXHAUSTIVE",
+      "terminal": "PASS",
+      "evidence": "{\"atomicEffectEventOutbox\":true,\"completeScheduleCount\":\"155117520\",\"concurrentWinnerMaximum\":1,\"crashCutStateActorCount\":492,\"crashMutationCount\":0,\"oneCommitScheduleCount\":\"155117520\",\"reachableStateCount\":279,\"responseLossReadbackTerminal\":\"COMMITTED-READBACK-NO-RETRY\",\"twoCommitScheduleCount\":\"0\",\"zeroCommitScheduleCount\":\"0\"}"
+    },
+    {
+      "checkId": "PERMIT-MATRIX",
+      "terminal": "PASS",
+      "evidence": "{\"cells\":16,\"crossClassDenials\":12,\"legalPresentations\":4,\"permitTypes\":4}"
+    },
+    {
+      "checkId": "PUBLIC-FLOW",
+      "terminal": "PASS",
+      "evidence": "d0e65750d9eef8c90d4f1dfdd71c4ab055608c7b50289a680fe40d29c25dcab6"
+    },
+    {
+      "checkId": "STORAGE-BLOCKS",
+      "terminal": "PASS",
+      "evidence": "BLOCKED-BUDGETS-AND-EXTERNAL-EVIDENCE-MISSING"
+    },
+    {
+      "checkId": "AUXILIARY-TYPED-SCHEMAS",
+      "terminal": "PASS",
+      "evidence": "lifecycle/recovery/scanner/adjudication/external"
+    },
+    {
+      "checkId": "SHARDS",
+      "terminal": "PASS",
+      "evidence": "13/3152"
+    },
+    {
+      "checkId": "CORPUS-ROOT",
+      "terminal": "PASS",
+      "evidence": "b413728a0ca577f11e750b11a3ef8bfaadc455d84b69732fc35e3d854f4e20e6"
+    },
+    {
+      "checkId": "VECTOR-EXECUTION",
+      "terminal": "PASS",
+      "evidence": "3152/2873/1"
+    },
+    {
+      "checkId": "CLOSURE-VECTOR-COVERAGE",
+      "terminal": "PASS",
+      "evidence": "116"
+    },
+    {
+      "checkId": "SCHEMA-VECTOR-COVERAGE",
+      "terminal": "PASS",
+      "evidence": "112"
+    },
+    {
+      "checkId": "PERMIT-SCHEMA-VECTOR-COVERAGE",
+      "terminal": "PASS",
+      "evidence": "4"
+    },
+    {
+      "checkId": "GRAPH-DERIVATION",
+      "terminal": "PASS",
+      "evidence": "6969/7417"
+    },
+    {
+      "checkId": "PUBLIC-SAFE-BYTES",
+      "terminal": "PASS",
+      "evidence": "no absolute locator/repository-folder-prefix/forbidden-random-call"
+    },
+    {
+      "checkId": "NO-SELF-ACCEPTANCE",
+      "terminal": "PASS",
+      "evidence": "Acceptance=0"
+    }
+  ],
+  "counters": {
+    "checks": 58,
+    "errors": 0,
+    "packageMembers": 28,
+    "sourceReferences": 14,
+    "findings": 116,
+    "inheritedFindings": 93,
+    "newFindings": 23,
+    "remediationControls": 23,
+    "outputFamilies": 42,
+    "nestedTypes": 70,
+    "schemaInstances": 112,
+    "vectors": 3152,
+    "vectorActualBlocks": 2873,
+    "vectorComparisonBlocks": 1,
+    "shards": 13,
+    "graphNodes": 6969,
+    "graphEdges": 7417,
+    "permits": 4,
+    "permitMatrixCells": 16,
+    "lateDecisionClauses": 48
+  },
+  "verdict": "PASS",
+  "errors": [],
+  "claimLimit": "MECHANICAL-CANDIDATE-INTEGRITY-ONLY;NO-REVIEW-CLOSURE-OPERATIONAL-EVIDENCE-PERMIT-OR-ACCEPTANCE-CREDIT",
+  "currentDisposition": {
+    "DeploymentPermit": "ABSENT",
+    "GitHubControlPlanePermit": "ABSENT",
+    "PublicPushPermit": "ABSENT",
+    "ReleasePermit": "ABSENT",
+    "acceptance": 0,
+    "acceptedFindings": 0,
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "repositoryVisibility": "PUBLIC",
+    "totalFindings": 116
+  },
+  "acceptanceCredit": 0,
+  "reportRoot": "51c462e0542bb1a452bd36fb8d67e9f7252ee68fefd9407c3abd1b0914e53c2c"
+}

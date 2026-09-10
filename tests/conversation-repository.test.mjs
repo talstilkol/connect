@@ -26,6 +26,11 @@ const outboundMessageKey =
 const firstStatusEventKey = "d".repeat(64);
 const secondStatusEventKey = "e".repeat(64);
 const occurredAt = "2026-07-26T08:30:00.000Z";
+const selectedBotOptionKey =
+  `bot_option_v1_${"f".repeat(64)}`;
+const subjectDeliveryKey =
+  `bot_reply_delivery_v1_${"1".repeat(64)}`;
+const replyToProviderMessageId = "wamid.bot-buttons-17";
 
 function inboundRow(overrides = {}) {
   return {
@@ -330,6 +335,58 @@ test("writes conversation, unread state, and inbound message in one batch", asyn
   );
 });
 
+test("writes button-reply provenance in the same D1 batch", async () => {
+  const database = new RecordingDatabase();
+  database.batchResults.push([
+    { success: true },
+    { success: true },
+    {
+      success: true,
+      results: [inboundRow({
+        contentKind: "interactive",
+        textContent: null,
+      })],
+    },
+    { success: true, results: [] },
+  ]);
+  database.firstResults.push({
+    messageKey: inboundMessageKey,
+    tenantId: 7,
+    selectedBotOptionKey,
+    subjectDeliveryKey,
+    occurredAt,
+    replyToProviderMessageId,
+  });
+  const repository = createConversationRepository(database);
+
+  const result = await repository.recordInboundMessage(
+    recordInput({
+      contentKind: "interactive",
+      textContent: null,
+      selectedBotOptionKey,
+      replyToProviderMessageId,
+    }),
+  );
+
+  assert.equal(result.outcome, "created");
+  assert.equal(database.recordings.length, 5);
+  assert.match(
+    database.recordings[3].sql,
+    /INSERT INTO inbound_button_reply_events/,
+  );
+  assert.deepEqual(database.recordings[3].values, [
+    inboundMessageKey,
+    7,
+    selectedBotOptionKey,
+    replyToProviderMessageId,
+    occurredAt,
+  ]);
+  assert.match(
+    database.recordings[4].sql,
+    /INNER JOIN bot_reply_delivery_provider_links/,
+  );
+});
+
 test("returns an exact inbound retry without incrementing it again", async () => {
   const database = new RecordingDatabase();
   database.firstResults.push(inboundRow());
@@ -348,6 +405,35 @@ test("returns an exact inbound retry without incrementing it again", async () =>
   assert.deepEqual(
     database.recordings[3].values,
     [7, "wamid.inbound-17", "inbound"],
+  );
+});
+
+test("rejects an inbound retry that omits stored button-reply provenance", async () => {
+  const database = new RecordingDatabase();
+  database.firstResults.push(
+    inboundRow({
+      contentKind: "interactive",
+      textContent: null,
+    }),
+    {
+      messageKey: inboundMessageKey,
+      tenantId: 7,
+      selectedBotOptionKey,
+      subjectDeliveryKey,
+      occurredAt,
+      replyToProviderMessageId,
+    },
+  );
+  const repository = createConversationRepository(database);
+
+  await assert.rejects(
+    repository.recordInboundMessage(
+      recordInput({
+        contentKind: "interactive",
+        textContent: null,
+      }),
+    ),
+    (error) => error instanceof MessageIdentityConflictError,
   );
 });
 

@@ -38,6 +38,7 @@ function createMemoryRepository() {
     async store(input) {
       envelopes.set(input.tenantId, {
         ...input,
+        authorizationVersion: input.expectedConnectionVersion,
         createdAt: "2026-07-25 10:00:00",
         updatedAt: "2026-07-25 10:00:00",
       });
@@ -63,7 +64,7 @@ test("encrypts a Meta token before storage and decrypts it only inside a callbac
     "sensitive-meta-access-token",
   );
 
-  await vault.storeAccessToken(7, accessToken);
+  await vault.storeAccessToken(7, accessToken, 1);
 
   const stored = repository.envelopes.get(7);
   assert.equal(stored.keyVersion, "v1");
@@ -101,8 +102,7 @@ test("binds ciphertext authentication to the tenant ID", async () => {
 
   await vault.storeAccessToken(
     7,
-    toSensitiveMetaAccessToken("tenant-seven-token"),
-  );
+    toSensitiveMetaAccessToken("tenant-seven-token"), 1);
   repository.envelopes.set(8, {
     ...repository.envelopes.get(7),
     tenantId: 8,
@@ -130,8 +130,7 @@ test("rejects tampered ciphertext and a different encryption key", async () => {
 
   await vault.storeAccessToken(
     7,
-    toSensitiveMetaAccessToken("protected-token"),
-  );
+    toSensitiveMetaAccessToken("protected-token"), 1);
   const originalEnvelope = repository.envelopes.get(7);
   const firstCharacter =
     originalEnvelope.ciphertext[0] === "A" ? "B" : "A";
@@ -212,8 +211,7 @@ test("reports missing credentials and repository failures with bounded codes", a
   await assert.rejects(
     failingVault.storeAccessToken(
       7,
-      toSensitiveMetaAccessToken("protected-token"),
-    ),
+      toSensitiveMetaAccessToken("protected-token"), 1),
     (error) => {
       assert.equal(error.code, "STORAGE_FAILED");
       assert.doesNotMatch(
@@ -291,8 +289,7 @@ test("preserves callback failures after successful decryption", async () => {
 
   await vault.storeAccessToken(
     7,
-    toSensitiveMetaAccessToken("protected-token"),
-  );
+    toSensitiveMetaAccessToken("protected-token"), 1);
 
   await assert.rejects(
     vault.withAccessToken(7, async () => {
@@ -300,4 +297,60 @@ test("preserves callback failures after successful decryption", async () => {
     }),
     /subscriber failure/,
   );
+});
+
+test("rejects a missing connection version before encryption or storage", async () => {
+  const repository = createMemoryRepository();
+  const vault = createMetaCredentialVault(repository, { META_CREDENTIAL_ENCRYPTION_KEY_V1: encryptionKey }, { crypto: deterministicCrypto() });
+  await assert.rejects(vault.storeAccessToken(7, toSensitiveMetaAccessToken("protected-token"), undefined), { code: "STORAGE_FAILED" });
+  assert.equal(repository.envelopes.size, 0);
+});
+
+test("rejects authorization metadata substitution without invoking the credential callback", async () => {
+  const repository = createMemoryRepository();
+  const vault = createMetaCredentialVault(repository, { META_CREDENTIAL_ENCRYPTION_KEY_V1: encryptionKey }, { crypto: deterministicCrypto() });
+  await vault.storeAccessToken(7, toSensitiveMetaAccessToken("protected-token"), 1);
+  const original = { ...repository.envelopes.get(7) };
+  for (const authorizationVersion of [2, undefined, 0, "1"]) {
+    repository.envelopes.set(7, { ...original, authorizationVersion });
+    let called = false;
+    await assert.rejects(vault.withAccessToken(7, async () => { called = true; }), { code: "DECRYPTION_FAILED" });
+    assert.equal(called, false);
+  }
+});
+
+test("rechecks authorization after asynchronous decryption before invoking the callback", async () => {
+  for (const mutation of ["revoked", "generation", "replaced", "unavailable"]) {
+    const repository = createMemoryRepository();
+    let unavailable = false;
+    const read = repository.findByTenantId;
+    repository.findByTenantId = async (tenantId) => {
+      if (unavailable) throw new Error("private-storage-detail");
+      return read(tenantId);
+    };
+    const testCrypto = deterministicCrypto();
+    const vault = createMetaCredentialVault(repository, { META_CREDENTIAL_ENCRYPTION_KEY_V1: encryptionKey }, {
+      crypto: { ...testCrypto, subtle: {
+        importKey: (...args) => crypto.subtle.importKey(...args),
+        encrypt: (...args) => crypto.subtle.encrypt(...args),
+        async decrypt(...args) {
+          const result = await crypto.subtle.decrypt(...args);
+          const current = repository.envelopes.get(7);
+          if (mutation === "revoked") repository.envelopes.delete(7);
+          if (mutation === "generation") current.authorizationVersion += 1;
+          if (mutation === "replaced") current.ciphertext = "AQIDBAUGBwgJCgsMDQ4PEA==";
+          if (mutation === "unavailable") unavailable = true;
+          return result;
+        },
+      } },
+    });
+    await vault.storeAccessToken(7, toSensitiveMetaAccessToken("protected-token"), 1);
+    let invoked = false;
+    await assert.rejects(vault.withAccessToken(7, async () => { invoked = true; }), (error) => {
+      assert.equal(error.code, mutation === "unavailable" ? "STORAGE_FAILED" : "AUTHORIZATION_CHANGED");
+      assert.doesNotMatch(JSON.stringify(error), /private-storage-detail|protected-token/);
+      return true;
+    });
+    assert.equal(invoked, false);
+  }
 });

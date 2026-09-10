@@ -1,0 +1,263 @@
+{
+  "absolutePathCount": 0,
+  "acceptanceCredit": 0,
+  "artifactClass": "PLANNING-ONLY;FROZEN-BYTE-INDEX;NON-AUTHORITATIVE",
+  "artifactId": "CONNECT-B0-V7-FROZEN-SOURCE-INDEX-2026-08-30-G0",
+  "authorityCredit": 0,
+  "extraRepositoryPrefixCount": 0,
+  "indexContentRoot": "6153876d666f9a8d67001415fb003380f4efd7c3c9d0b6ab6eefe2d612154e7f",
+  "locatorPolicy": "EVERY-PUBLIC-LOCATOR-STARTS-docs/;NO-web/-PREFIX;NO-ABSOLUTE-PATH",
+  "predecessorManifestSha256": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+  "predecessorPackageContentRoot": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+  "predecessorPackageMemberByteCoverage": "24/24",
+  "predecessorPackageMemberCount": 24,
+  "predecessorSubjectSha256": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+  "repositoryRootDefinition": "LOGICAL-PUBLIC-REPOSITORY-ROOT",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "B0V7-FROZEN-SOURCE-INDEX-V1",
+  "sourceCount": 31,
+  "sourceSetRoot": "703d32905b4a8e55d1a436d2ffdaef3eba260a55514d4c71f4a388bb9ed79a02",
+  "sources": [
+    {
+      "bytes": 171455,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-2026-08-30.md",
+      "ordinal": 1,
+      "predecessorOrdinal": 2,
+      "sha256": "61af4c45d394c952a58346723da408b663acd38522b5c706678a11ad323001c9",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 28563,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-atomic-package-manifest-2026-08-30.json",
+      "ordinal": 2,
+      "sha256": "ef6020643d6eccf1b656fd9d6aec845b80cc8b9bd2f81e8d426a2d8d1422a518",
+      "sourceClass": "FROZEN-V6-MANIFEST"
+    },
+    {
+      "bytes": 24936053,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-closure-crosswalk-2026-08-30.json",
+      "ordinal": 3,
+      "predecessorOrdinal": 4,
+      "sha256": "a31533ded7b7f960802a6b83849df44e5dfa15b2fe03313748389c787cc22141",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 27224,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-independent-hostile-review-2026-08-30.md",
+      "ordinal": 4,
+      "sha256": "ee254140535c57ffb03d852fa5d0d3f4eb01687a39eca500eb9f04de4b5f415b",
+      "sourceClass": "FROZEN-V6-INDEPENDENT-REVIEW"
+    },
+    {
+      "bytes": 19689,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "ordinal": 5,
+      "sha256": "ca0142fcea3e8e8a16209c71f5b2ce5a14888f3b85b79f0b9390de468fa35282",
+      "sourceClass": "FROZEN-V6-INDEPENDENT-FINDINGS"
+    },
+    {
+      "bytes": 2722820,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-normative-registry-2026-08-30.json",
+      "ordinal": 6,
+      "predecessorOrdinal": 1,
+      "sha256": "330dfacd62c5b6980e3d0a1be9ace4d87bb543ba5d7c28e822a2e4367feb63d4",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 19808,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-2026-08-30.json",
+      "ordinal": 7,
+      "predecessorOrdinal": 5,
+      "sha256": "78f95bb843fe70ebb5c0caa3e113c145ead43508444f529317d01aef909da185",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 1851835,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-01-of-16-2026-08-30.json",
+      "ordinal": 8,
+      "predecessorOrdinal": 6,
+      "sha256": "2ccac7d352fe331da42d9eec3fa945058b1d00b37ec7ca354bd8e3a7bab85175",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 1941353,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-02-of-16-2026-08-30.json",
+      "ordinal": 9,
+      "predecessorOrdinal": 7,
+      "sha256": "3396913e6c3cba86d52c48ca1c6450293741e653000a8e9498f916e465f99f3d",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 1865873,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-03-of-16-2026-08-30.json",
+      "ordinal": 10,
+      "predecessorOrdinal": 8,
+      "sha256": "2133d801a5a18ea07adea52485d1526ec82098ed9a558344990045a6bb2a1932",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 1856860,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-04-of-16-2026-08-30.json",
+      "ordinal": 11,
+      "predecessorOrdinal": 9,
+      "sha256": "e866bf10e74596ef3e73b86420525ba9f86c631e7bc57589f688575f4b852540",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 1852809,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-05-of-16-2026-08-30.json",
+      "ordinal": 12,
+      "predecessorOrdinal": 10,
+      "sha256": "9c7c8e355061877f28aa8de6cbe99ae7fd03a8239eb09d25da8c4ef4da469aad",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 1948505,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-06-of-16-2026-08-30.json",
+      "ordinal": 13,
+      "predecessorOrdinal": 11,
+      "sha256": "fc797b86196010a3a78ff49390e65609288808e6db8e6208ab0eb0a40bbeed35",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 11090782,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-07-of-16-2026-08-30.json",
+      "ordinal": 14,
+      "predecessorOrdinal": 12,
+      "sha256": "ff65d0a929b51125baf8dd743877e30ea187e02fe94cedcb7376351c37d789e4",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 20528156,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-08-of-16-2026-08-30.json",
+      "ordinal": 15,
+      "predecessorOrdinal": 13,
+      "sha256": "80689e37e4e82e2b0deac48deb3181329dcbc6cd8cfe159ce254c07e2e03313f",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 3919262,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-09-of-16-2026-08-30.json",
+      "ordinal": 16,
+      "predecessorOrdinal": 14,
+      "sha256": "085d0108f727bf4a91a093c2caba52a33519041e463ef565086caebfb67f7aa1",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 3342259,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-10-of-16-2026-08-30.json",
+      "ordinal": 17,
+      "predecessorOrdinal": 15,
+      "sha256": "1dc00d7b518b3ebd62c474783275c434da20626abc802753b7ce70737190f53a",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 5983088,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-11-of-16-2026-08-30.json",
+      "ordinal": 18,
+      "predecessorOrdinal": 16,
+      "sha256": "11834600f665d8a394aeddcd8dc0e3990097c1bb402f4f9794bd2586f659bbfa",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 2976490,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-12-of-16-2026-08-30.json",
+      "ordinal": 19,
+      "predecessorOrdinal": 17,
+      "sha256": "2998df14881dc2e46c632c2edea404bcb73fbafba949e9bc30396be4f9eb6b20",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 13209971,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-13-of-16-2026-08-30.json",
+      "ordinal": 20,
+      "predecessorOrdinal": 18,
+      "sha256": "e3f5689dfb7d664f85375235f79b39667a2a6435d128057d230baf28efb7fbdd",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 19525972,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-14-of-16-2026-08-30.json",
+      "ordinal": 21,
+      "predecessorOrdinal": 19,
+      "sha256": "ad72a995d18597f4f6cc1da73993b387256ab8dbcb4dd88cad47a1d79b0d7149",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 2152670,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-15-of-16-2026-08-30.json",
+      "ordinal": 22,
+      "predecessorOrdinal": 20,
+      "sha256": "34ca65da181220bc54d57cdc31781a30491dc132d3b578e950390e84bb9fff46",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 3342775,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-portable-causal-vector-corpus-shard-16-of-16-2026-08-30.json",
+      "ordinal": 23,
+      "predecessorOrdinal": 21,
+      "sha256": "dd2d2bcff0875e6726140ec6ead883fada79dcd20125fc6e52951ad316d8ccca",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 32489,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-producer-qa-2026-08-30.json",
+      "ordinal": 24,
+      "sha256": "92d3cacf600ec8e1b75c4a6a084e5033381c33b68a092ff810fc831ef63d846c",
+      "sourceClass": "FROZEN-V6-PRODUCER-QA"
+    },
+    {
+      "bytes": 1640,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-qa-reader-a-report-2026-08-30.json",
+      "ordinal": 25,
+      "sha256": "117adb64d15e8d6e5c9bfd120924e8f9b55529f5940477451081433c94f58be5",
+      "sourceClass": "FROZEN-V6-DETACHED-READER-REPORT"
+    },
+    {
+      "bytes": 1642,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-qa-reader-b-report-2026-08-30.json",
+      "ordinal": 26,
+      "sha256": "02ebdd12e558e075b016175a11961effbef0ea121f72c6a73b8d1c28c76550fd",
+      "sourceClass": "FROZEN-V6-DETACHED-READER-REPORT"
+    },
+    {
+      "bytes": 541149,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v6-source-member-span-index-2026-08-30.json",
+      "ordinal": 27,
+      "predecessorOrdinal": 3,
+      "sha256": "70185876e137f9981ab3dbcfa942ecdbbf2ce99e0e32750801db4a7a0791e6b5",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 8254,
+      "logicalPath": "docs/planning/github-public-repository-large-generated-artifact-storage-decision-2026-08-30.md",
+      "ordinal": 28,
+      "sha256": "508b702087bc2c4011975af87c30bea1208bf5720ec263409d287acb5eb15a84",
+      "sourceClass": "FROZEN-PUBLIC-STORAGE-DECISION"
+    },
+    {
+      "bytes": 51737,
+      "logicalPath": "docs/planning/qa/b0-v6-qa-reader-a.mjs",
+      "ordinal": 29,
+      "predecessorOrdinal": 23,
+      "sha256": "a78c0935a795d0c9ef03bce5e736f66eeabd35c30fa5dd9c5f54d50b9e08955a",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 53165,
+      "logicalPath": "docs/planning/qa/b0-v6-qa-reader-b.py",
+      "ordinal": 30,
+      "predecessorOrdinal": 24,
+      "sha256": "2ecc906d14d15f1ffb1d5eaa431b22ec339d5bf005f19033edd43fd0d3328810",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    },
+    {
+      "bytes": 232985,
+      "logicalPath": "docs/planning/qa/generate-b0-v6-package.mjs",
+      "ordinal": 31,
+      "predecessorOrdinal": 22,
+      "sha256": "b2b6514bf3583426187ac4a74efa681588cccda2e4eec4d2068149f7fccdbdeb",
+      "sourceClass": "FROZEN-V6-PACKAGE-MEMBER"
+    }
+  ]
+}

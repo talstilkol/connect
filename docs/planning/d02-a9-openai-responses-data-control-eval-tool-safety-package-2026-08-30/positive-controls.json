@@ -1,0 +1,1345 @@
+{
+  "artifactId": "CONNECT-D02-A9-NON-AUTHORIZING-POSITIVE-CONTROLS-2026-08-30",
+  "controlVersion": "1.0.0",
+  "predicateOrder": [
+    "PACKAGE-ENVELOPE",
+    "AUTHORITY-CHAIN",
+    "PREDECESSOR-SEMANTICS",
+    "PUBLIC-DIRECTIVE",
+    "INDEPENDENT-A9-REVIEW",
+    "A9-SEVEN-FINDING-CLOSURE",
+    "PROGRAM-ACCEPTANCE",
+    "MODEL-SELECTION",
+    "CONNECT-PROMPT",
+    "AI-PROFILE",
+    "ACCOUNT",
+    "LEGAL-PRIVACY",
+    "SOURCE-ACCEPTANCE",
+    "APPROVALS",
+    "EVAL",
+    "GATE29",
+    "FREEZE-LIFT",
+    "RUNTIME-ACCOUNT",
+    "TRUSTED-TIME",
+    "REVOCATION-CLEAR",
+    "CAS-MATCH",
+    "SINGLE-USE",
+    "POST-READBACK",
+    "EXPIRED",
+    "REVOKED",
+    "REPLAY",
+    "CAS-MISMATCH",
+    "POST-READBACK-MISMATCH"
+  ],
+  "controlCount": 9,
+  "externalFactCount": 0,
+  "acceptanceCredit": 0,
+  "controls": [
+    {
+      "ordinal": 1,
+      "controlId": "D02A9-PC-001",
+      "purpose": "ALL-MISSING-CURRENT-SAFE-STATE",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": false
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": false
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": false
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": false
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": false
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": false
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": false
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": false
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": false
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": false
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": false
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": false
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": false
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": false
+        },
+        {
+          "predicateId": "EVAL",
+          "value": false
+        },
+        {
+          "predicateId": "GATE29",
+          "value": false
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": false
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": false
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": false
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": false
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": false
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-001",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+        "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+        "fromState": "MISSING",
+        "toState": "MISSING",
+        "event": "NOOP",
+        "previousVersion": 0,
+        "nextVersion": 0,
+        "expectedPreviousRoot": "MISSING",
+        "evidenceRoot": "MISSING",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "8cfd12ae812f8d591bf243709bd0021ee7886af16100df09abe858f8d52904a1",
+        "casResult": "NOT-APPLICABLE",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 2,
+      "controlId": "D02A9-PC-002",
+      "purpose": "PLANNING-SATISFIABLE-HIGHER-ROOTS-BLOCKED",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": false
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": false
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": false
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": false
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": false
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": false
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": false
+        },
+        {
+          "predicateId": "EVAL",
+          "value": false
+        },
+        {
+          "predicateId": "GATE29",
+          "value": false
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": false
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": false
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": false
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": false
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": false
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-002",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+        "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+        "fromState": "PRESENT-UNACCEPTED",
+        "toState": "ACCEPTED",
+        "event": "ACCEPT",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "9cf17ef530ea724676a0d52159a5e9405a1985a422f393f47fa576d85daba86b",
+        "evidenceRoot": "55ba61da51439a92db0d5ad6a7154cea0a1c64128a09694dfd0f74149dedcd95",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "301f223a01a94a4b3dd5ce8bbd1ba8e499b8c07a1c5d36e48d002ee6addfd527",
+        "casResult": "MATCH",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 3,
+      "controlId": "D02A9-PC-003",
+      "purpose": "AI-ADMISSION-SATISFIABLE-RUNTIME-BLOCKED",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": false
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": false
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": false
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": false
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": false
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": false
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-003",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-AI-ADMISSION",
+        "rootClass": "AI-PROFILE-ADMISSION",
+        "fromState": "PRESENT-UNACCEPTED",
+        "toState": "ACCEPTED",
+        "event": "ACCEPT",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "7d29516c01947a9563e90cccafe7fc717a171d478cdaee066d92416622fe5901",
+        "evidenceRoot": "a2192395166058a968b241e4cd580753d611e44e160553daa340dc1d8a1aebfd",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "0a6d116744504473b169db632aae54705bd9db860b9f1cc60d53e1068bdf657c",
+        "casResult": "MATCH",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 4,
+      "controlId": "D02A9-PC-004",
+      "purpose": "RUNTIME-PERMIT-MATHEMATICALLY-SATISFIABLE",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": true
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": true
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": true
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": true
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": true
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-004",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+        "rootClass": "AI-RUNTIME-PERMIT",
+        "fromState": "PRESENT-UNACCEPTED",
+        "toState": "ACCEPTED",
+        "event": "ACCEPT",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "3378e27450c923b0b46a158f8f72cb5f6a50b80c9ab0fbc5cb11f476aaa98a31",
+        "evidenceRoot": "6017207fc2f863299d722114e69860805f1cac4e52989857e11b7a1ebdeb3f1e",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "9e5dc9af55767925da78abbd7e0e481bfdd11ed6f6c18488643e2df2e3de74e7",
+        "casResult": "MATCH",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 5,
+      "controlId": "D02A9-PC-005",
+      "purpose": "EXPIRY-RETURNS-SAFE-BLOCK",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": true
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": true
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": true
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": true
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": true
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": true
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-005",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-AI-ADMISSION",
+        "rootClass": "AI-PROFILE-ADMISSION",
+        "fromState": "ACCEPTED",
+        "toState": "EXPIRED",
+        "event": "EXPIRE",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "e90901831817ba87657589d65aa26285a6e7ce3f24f1b1f914b35e5c4db1fd74",
+        "evidenceRoot": "83ef777b2361db012a3b8e408dec55a708a5e3c99d8d8e21445f1b8678dc853e",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "e0c6bbb8e83287642b8cb08192aabab37158ec98b9dfec62f60f0ad29821cd63",
+        "casResult": "NOT-APPLICABLE",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 6,
+      "controlId": "D02A9-PC-006",
+      "purpose": "REVOCATION-RETURNS-SAFE-BLOCK",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": true
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": true
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": true
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": true
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": true
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": true
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-006",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-AI-ADMISSION",
+        "rootClass": "AI-PROFILE-ADMISSION",
+        "fromState": "ACCEPTED",
+        "toState": "REVOKED",
+        "event": "REVOKE",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "b7eb48c5be17ecce330fa74dd34fb85171e02c5ae50d444282958cb9d84e54f8",
+        "evidenceRoot": "8ad3551ebaa5a74bd15bec42155365c4a51d86e90c6b574d73f4aace25796d61",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "5a4088f7f52348965c00f4783efd08eaf5fdd4df513500119dfe762cd03566ff",
+        "casResult": "NOT-APPLICABLE",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 7,
+      "controlId": "D02A9-PC-007",
+      "purpose": "REPLAY-RETURNS-SAFE-BLOCK",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": true
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": true
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": true
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": true
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": true
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-007",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+        "rootClass": "AI-RUNTIME-PERMIT",
+        "fromState": "CONSUMED",
+        "toState": "BLOCKED",
+        "event": "REPLAY",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "6a9f9f4578c922252de2c8e1a0d87f012e709935d99cbb357b7774b7db573dcb",
+        "evidenceRoot": "MISSING",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "fdec9b86943fa9f7cdc10c18a84ca51ae75656ca12e657221ac3fc4c3340acac",
+        "casResult": "NOT-APPLICABLE",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 8,
+      "controlId": "D02A9-PC-008",
+      "purpose": "CAS-MISMATCH-RETURNS-SAFE-BLOCK",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": true
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": true
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": true
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": false
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": true
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": false
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-008",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+        "rootClass": "AI-RUNTIME-PERMIT",
+        "fromState": "PRESENT-UNACCEPTED",
+        "toState": "BLOCKED",
+        "event": "CAS-MISMATCH",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "f5c90de724ef15b3d538f783a65e5de9923104308b490c56d0aba793ea368567",
+        "evidenceRoot": "MISSING",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "a1132806aec631f5ac4ac0850d8e7d02dbc7545fbcb1b89f6873f6b3b72f73ee",
+        "casResult": "MISMATCH",
+        "consumptionCount": 0,
+        "postReadback": "NOT-APPLICABLE",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    },
+    {
+      "ordinal": 9,
+      "controlId": "D02A9-PC-009",
+      "purpose": "POST-READBACK-MISMATCH-RETURNS-SAFE-BLOCK",
+      "controlOnly": true,
+      "authorityCredit": 0,
+      "predicates": [
+        {
+          "predicateId": "PACKAGE-ENVELOPE",
+          "value": true
+        },
+        {
+          "predicateId": "AUTHORITY-CHAIN",
+          "value": true
+        },
+        {
+          "predicateId": "PREDECESSOR-SEMANTICS",
+          "value": true
+        },
+        {
+          "predicateId": "PUBLIC-DIRECTIVE",
+          "value": true
+        },
+        {
+          "predicateId": "INDEPENDENT-A9-REVIEW",
+          "value": true
+        },
+        {
+          "predicateId": "A9-SEVEN-FINDING-CLOSURE",
+          "value": true
+        },
+        {
+          "predicateId": "PROGRAM-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "MODEL-SELECTION",
+          "value": true
+        },
+        {
+          "predicateId": "CONNECT-PROMPT",
+          "value": true
+        },
+        {
+          "predicateId": "AI-PROFILE",
+          "value": true
+        },
+        {
+          "predicateId": "ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "LEGAL-PRIVACY",
+          "value": true
+        },
+        {
+          "predicateId": "SOURCE-ACCEPTANCE",
+          "value": true
+        },
+        {
+          "predicateId": "APPROVALS",
+          "value": true
+        },
+        {
+          "predicateId": "EVAL",
+          "value": true
+        },
+        {
+          "predicateId": "GATE29",
+          "value": true
+        },
+        {
+          "predicateId": "FREEZE-LIFT",
+          "value": true
+        },
+        {
+          "predicateId": "RUNTIME-ACCOUNT",
+          "value": true
+        },
+        {
+          "predicateId": "TRUSTED-TIME",
+          "value": true
+        },
+        {
+          "predicateId": "REVOCATION-CLEAR",
+          "value": true
+        },
+        {
+          "predicateId": "CAS-MATCH",
+          "value": true
+        },
+        {
+          "predicateId": "SINGLE-USE",
+          "value": true
+        },
+        {
+          "predicateId": "POST-READBACK",
+          "value": false
+        },
+        {
+          "predicateId": "EXPIRED",
+          "value": false
+        },
+        {
+          "predicateId": "REVOKED",
+          "value": false
+        },
+        {
+          "predicateId": "REPLAY",
+          "value": false
+        },
+        {
+          "predicateId": "CAS-MISMATCH",
+          "value": false
+        },
+        {
+          "predicateId": "POST-READBACK-MISMATCH",
+          "value": true
+        }
+      ],
+      "transition": {
+        "transitionId": "D02A9-TR-009",
+        "schemaVersion": "1.0.0",
+        "recordClass": "NON-AUTHORIZING-POSITIVE-CONTROL",
+        "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+        "rootClass": "AI-RUNTIME-PERMIT",
+        "fromState": "ACCEPTED",
+        "toState": "BLOCKED",
+        "event": "POST-READBACK-MISMATCH",
+        "previousVersion": 1,
+        "nextVersion": 2,
+        "expectedPreviousRoot": "302d03d4aea2d422f7a14debbd1dddf6c37fefc50f25410d8b9fb9928744c3d6",
+        "evidenceRoot": "MISSING",
+        "authorityReceiptRoot": "CONTROL-NOT-AUTHORITY",
+        "trustedTime": "CONTROL-NOT-EXTERNAL",
+        "expiresAt": "CONTROL-NOT-EXTERNAL",
+        "revocationCutRoot": "CONTROL-NOT-AUTHORITY",
+        "operationKey": "e9cbc540663dcc2d02701a9c31a7e1e356e7477e5cf5e1c7615990eb3794e62c",
+        "casResult": "NOT-APPLICABLE",
+        "consumptionCount": 0,
+        "postReadback": "MISMATCH",
+        "controlOnly": true,
+        "acceptanceCredit": 0
+      }
+    }
+  ],
+  "interpretation": "BOOLEAN-SATISFIABILITY-WITNESSES-ONLY-NOT-FAKE-EXTERNAL-EVIDENCE"
+}

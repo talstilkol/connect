@@ -100,6 +100,7 @@ function requireConfiguration(value) {
       "attestationBundlePath",
       "repository",
       "releaseManifest",
+      "runtimeEvidenceJson",
       "dependencies",
     ]) ||
     typeof value.evidencePath !== "string" ||
@@ -129,6 +130,9 @@ function requireConfiguration(value) {
     !commitShaPattern.test(
       value.releaseManifest.commitSha,
     ) ||
+    typeof value.runtimeEvidenceJson !== "string" ||
+    value.runtimeEvidenceJson.length === 0 ||
+    value.runtimeEvidenceJson.length > 24_000 ||
     !isObject(value.dependencies) ||
     !hasExactKeys(value.dependencies, [
       "readTrustedEvidenceFile",
@@ -275,6 +279,15 @@ export async function verifyTeamInvitationBrowserEvidenceAttestation(
   const verifiedAttestationCount =
     requireVerificationOutput(result.stdout);
 
+  if (
+    trustedFilesAfter[0] !==
+      configuration.runtimeEvidenceJson
+  ) {
+    fail(
+      "BROWSER_EVIDENCE_ATTESTATION_RUNTIME_MISMATCH",
+    );
+  }
+
   return Object.freeze({
     repository: configuration.repository,
     releaseId:
@@ -336,6 +349,9 @@ async function runCli() {
       attestationBundlePath,
       repository,
       releaseManifest,
+      runtimeEvidenceJson:
+        process.env
+          .TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON,
       dependencies: productionDependencies,
     });
 

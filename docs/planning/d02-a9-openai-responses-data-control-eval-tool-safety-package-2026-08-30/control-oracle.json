@@ -1,0 +1,80 @@
+{
+  "artifactId": "CONNECT-D02-A9-DETACHED-POSITIVE-CONTROL-ORACLE-2026-08-30",
+  "readByReaders": false,
+  "expectedToActualFlow": 0,
+  "entryCount": 9,
+  "entries": [
+    {
+      "controlId": "D02A9-PC-001",
+      "planning": "BLOCKED",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "PLANNING-CONJUNCT-MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-002",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "AI-CONJUNCT-MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-003",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "RUNTIME-CONJUNCT-MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-004",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "ACCEPTED-CONTROL",
+      "terminal": "CONTROL-SATISFIABLE-NON-AUTHORIZING",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-005",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "EXPIRED-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-006",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "BLOCKED",
+      "runtimePermit": "BLOCKED",
+      "terminal": "REVOKED-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-007",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "REPLAY-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-008",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "CAS-MISMATCH-BLOCKED",
+      "acceptanceCredit": 0
+    },
+    {
+      "controlId": "D02A9-PC-009",
+      "planning": "ACCEPTED-CONTROL",
+      "aiAdmission": "ACCEPTED-CONTROL",
+      "runtimePermit": "BLOCKED",
+      "terminal": "POST-READBACK-MISMATCH-BLOCKED",
+      "acceptanceCredit": 0
+    }
+  ]
+}

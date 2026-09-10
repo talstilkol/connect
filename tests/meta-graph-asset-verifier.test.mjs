@@ -26,6 +26,10 @@ test("verifies the WABA owner and phone number membership", async () => {
     async requestJson(request) {
       requests.push(request);
 
+      if (request.pathSegments[0] === "345678912") {
+        return { id: "345678912", is_on_biz_app: false };
+      }
+
       if (request.pathSegments.length === 1) {
         return {
           id: "234567891",
@@ -66,6 +70,12 @@ test("verifies the WABA owner and phone number membership", async () => {
         fields: "id",
       },
     },
+    {
+      method: "GET",
+      pathSegments: ["345678912"],
+      accessToken,
+      query: { fields: "id,is_on_biz_app" },
+    },
   ]);
 });
 
@@ -98,6 +108,10 @@ test("uses only a bounded cursor for Meta phone pagination", async () => {
     async requestJson(request) {
       requests.push(request);
 
+      if (request.pathSegments[0] === "345678912") {
+        return { id: "345678912", is_on_biz_app: false };
+      }
+
       if (request.pathSegments.length === 1) {
         return {
           id: "234567891",
@@ -128,7 +142,7 @@ test("uses only a bounded cursor for Meta phone pagination", async () => {
 
   await verifier.verifyAssets(verificationInput);
 
-  assert.equal(requests.length, 3);
+  assert.equal(requests.length, 4);
   assert.deepEqual(requests[2], {
     method: "GET",
     pathSegments: ["234567891", "phone_numbers"],
@@ -147,6 +161,10 @@ test("uses only a bounded cursor for Meta phone pagination", async () => {
 test("reports a phone number that is absent from every page", async () => {
   const verifier = createMetaGraphAssetVerifier({
     async requestJson(request) {
+      if (request.pathSegments[0] === "345678912") {
+        return { id: "345678912", is_on_biz_app: false };
+      }
+
       if (request.pathSegments.length === 1) {
         return {
           id: "234567891",
@@ -174,6 +192,10 @@ test("rejects malformed and repeated Meta pagination", async (context) => {
   await context.test("missing cursor", async () => {
     const verifier = createMetaGraphAssetVerifier({
       async requestJson(request) {
+        if (request.pathSegments[0] === "345678912") {
+          return { id: "345678912", is_on_biz_app: false };
+        }
+
         if (request.pathSegments.length === 1) {
           return {
             id: "234567891",
@@ -203,6 +225,10 @@ test("rejects malformed and repeated Meta pagination", async (context) => {
   await context.test("repeated cursor", async () => {
     const verifier = createMetaGraphAssetVerifier({
       async requestJson(request) {
+        if (request.pathSegments[0] === "345678912") {
+          return { id: "345678912", is_on_biz_app: false };
+        }
+
         if (request.pathSegments.length === 1) {
           return {
             id: "234567891",

@@ -18,6 +18,7 @@ export class MetaGraphError extends Error {
   readonly httpStatus: number | null;
   readonly graphCode: number | null;
   readonly graphSubcode: number | null;
+  readonly retryAfterSeconds: number | null;
 
   constructor(
     code: MetaGraphErrorCode,
@@ -26,6 +27,7 @@ export class MetaGraphError extends Error {
       httpStatus?: number | null;
       graphCode?: number | null;
       graphSubcode?: number | null;
+      retryAfterSeconds?: number | null;
     } = {},
   ) {
     super(message);
@@ -34,6 +36,8 @@ export class MetaGraphError extends Error {
     this.httpStatus = details.httpStatus ?? null;
     this.graphCode = details.graphCode ?? null;
     this.graphSubcode = details.graphSubcode ?? null;
+    this.retryAfterSeconds =
+      details.retryAfterSeconds ?? null;
   }
 }
 
@@ -253,6 +257,21 @@ function safeGraphNumber(value: unknown): number | null {
   return Number.isSafeInteger(value) ? (value as number) : null;
 }
 
+function safeRetryAfterSeconds(
+  value: string | null,
+): number | null {
+  if (!value || !/^[1-9][0-9]{0,5}$/.test(value)) {
+    return null;
+  }
+
+  const seconds = Number(value);
+
+  return Number.isSafeInteger(seconds) &&
+    seconds <= 24 * 60 * 60
+    ? seconds
+    : null;
+}
+
 async function readBoundedJson(
   response: Response,
   maximumBytes: number,
@@ -338,68 +357,87 @@ export function createMetaGraphTransport(
         maxRequestBytes,
       );
       const abortController = new AbortController();
-      const timeout = setTimeout(
-        () => abortController.abort(),
-        requestTimeoutMs,
-      );
-      let response: Response;
-      const headers: Record<string, string> = {
-        accept: "application/json",
-        authorization: `Bearer ${accessToken}`,
-      };
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+      const deadline = new Promise<never>((_resolve, reject) => {
+        timeout = setTimeout(() => {
+          abortController.abort();
+          reject(new MetaGraphError("TIMEOUT", "Meta Graph request timed out"));
+        }, requestTimeoutMs);
+      });
+      const performRequest = async (): Promise<TResult> => {
+        let response: Response;
+        const headers: Record<string, string> = {
+          accept: "application/json",
+          authorization: `Bearer ${accessToken}`,
+        };
 
-      if (requestBody !== undefined) {
-        headers["content-type"] = "application/json";
-      }
+        if (requestBody !== undefined) {
+          headers["content-type"] = "application/json";
+        }
 
-      try {
-        response = await fetchImplementation(requestUrl, {
-          method: request.method,
-          headers,
-          body: requestBody,
-          cache: "no-store",
-          credentials: "omit",
-          redirect: "error",
-          referrerPolicy: "no-referrer",
-          signal: abortController.signal,
-        });
-      } catch {
-        if (abortController.signal.aborted) {
+        try {
+          response = await fetchImplementation(requestUrl, {
+            method: request.method,
+            headers,
+            body: requestBody,
+            cache: "no-store",
+            credentials: "omit",
+            redirect: "error",
+            referrerPolicy: "no-referrer",
+            signal: abortController.signal,
+          });
+        } catch {
+          if (abortController.signal.aborted) {
+            throw new MetaGraphError(
+              "TIMEOUT",
+              "Meta Graph request timed out",
+            );
+          }
+
           throw new MetaGraphError(
-            "TIMEOUT",
-            "Meta Graph request timed out",
+            "NETWORK_ERROR",
+            "Meta Graph request failed",
           );
         }
 
-        throw new MetaGraphError(
-          "NETWORK_ERROR",
-          "Meta Graph request failed",
+        const responsePayload = await readBoundedJson(
+          response,
+          maxResponseBytes,
         );
+        const graphError = graphErrorShape(responsePayload);
+
+        if (!response.ok || graphError) {
+          throw new MetaGraphError(
+            "API_ERROR",
+            "Meta Graph request was rejected",
+            {
+              httpStatus: response.status,
+              graphCode: safeGraphNumber(graphError?.code),
+              graphSubcode: safeGraphNumber(
+                graphError?.error_subcode,
+              ),
+              retryAfterSeconds:
+                safeRetryAfterSeconds(
+                  response.headers.get("retry-after"),
+                ),
+            },
+          );
+        }
+
+        return responsePayload as TResult;
+      };
+      try {
+        // The deadline covers headers AND the body, including a transport
+        // implementation that does not settle its body read after abort.
+        return await Promise.race([performRequest(), deadline]);
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          throw new MetaGraphError("TIMEOUT", "Meta Graph request timed out");
+        }
+        throw error;
       } finally {
         clearTimeout(timeout);
       }
-
-      const responsePayload = await readBoundedJson(
-        response,
-        maxResponseBytes,
-      );
-      const graphError = graphErrorShape(responsePayload);
-
-      if (!response.ok || graphError) {
-        throw new MetaGraphError(
-          "API_ERROR",
-          "Meta Graph request was rejected",
-          {
-            httpStatus: response.status,
-            graphCode: safeGraphNumber(graphError?.code),
-            graphSubcode: safeGraphNumber(
-              graphError?.error_subcode,
-            ),
-          },
-        );
-      }
-
-      return responsePayload as TResult;
     },
   };
 }

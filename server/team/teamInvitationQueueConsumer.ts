@@ -150,6 +150,31 @@ export function createTeamInvitationQueueConsumer(
             );
 
           if (
+            dispatchResult?.outcome ===
+              "deferred" &&
+            Object.keys(
+              dispatchResult,
+            ).sort().join(",") ===
+              "outcome,retryAfterSeconds" &&
+            Number.isSafeInteger(
+              dispatchResult
+                .retryAfterSeconds,
+            ) &&
+            dispatchResult
+                .retryAfterSeconds >= 1 &&
+            dispatchResult
+                .retryAfterSeconds <= 86_400
+          ) {
+            delivery.retry({
+              delaySeconds:
+                dispatchResult
+                  .retryAfterSeconds,
+            });
+            result.retried += 1;
+            continue;
+          }
+
+          if (
             !incrementOutcome(
               result,
               dispatchResult?.outcome,

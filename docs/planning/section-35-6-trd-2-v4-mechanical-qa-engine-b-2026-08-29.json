@@ -1,0 +1,226 @@
+{
+  "engineId": "CONNECT-TRD2V4-MECHANICAL-QA-ENGINE-B-PYTHON-V1",
+  "implementation": "Python independent read-only verifier with independent canonical-root implementation",
+  "inputRoots": {
+    "inherited": "a6fffd28d1d07a8fb1aba97c2ccbb2c6394e5d4f912043f7d5097e24d1fa24b5",
+    "fieldMap": "8c79211f49c3786726bed6b4a9327f6624fa4772a8da5f0db138977f09d45994",
+    "controls": "a932972321fb9d93be9277f1b732d0e4eb35a38477e863cd03ceb5f9bfc9ffdf",
+    "subject": "72c92fce01d3fd9996965469b0fbd23c32c1e43f38740ef9be6fa7bf4235d394",
+    "binding": "30bfcf42bef95586592bf8f3d0ad8113dc2ac979117bfc05d6a0ad1cbb30405d"
+  },
+  "verdict": "PASS-MECHANICAL-CANDIDATE-NOT-ACCEPTANCE",
+  "checks": [
+    {
+      "label": "raw-root-inherited",
+      "result": "PASS"
+    },
+    {
+      "label": "raw-root-fieldMap",
+      "result": "PASS"
+    },
+    {
+      "label": "raw-root-controls",
+      "result": "PASS"
+    },
+    {
+      "label": "raw-root-subject",
+      "result": "PASS"
+    },
+    {
+      "label": "raw-root-binding",
+      "result": "PASS"
+    },
+    {
+      "label": "inherited-101",
+      "result": "PASS"
+    },
+    {
+      "label": "inherited-collection-root",
+      "result": "PASS"
+    },
+    {
+      "label": "inherited-101-exact-slices",
+      "result": "PASS"
+    },
+    {
+      "label": "fieldmaps-84",
+      "result": "PASS"
+    },
+    {
+      "label": "fieldmap-collection-root",
+      "result": "PASS"
+    },
+    {
+      "label": "observation-collection-root",
+      "result": "PASS"
+    },
+    {
+      "label": "fieldmap-total-dispositions",
+      "result": "PASS"
+    },
+    {
+      "label": "portable-locator-213",
+      "result": "PASS"
+    },
+    {
+      "label": "portable-captures-and-locators",
+      "result": "PASS"
+    },
+    {
+      "label": "bidi-registry-13-u200f",
+      "result": "PASS"
+    },
+    {
+      "label": "bidi-source-count-13",
+      "result": "PASS"
+    },
+    {
+      "label": "subject-113-unique",
+      "result": "PASS"
+    },
+    {
+      "label": "subject-113x5-sole-output-backward-dag",
+      "result": "PASS"
+    },
+    {
+      "label": "vectors-565",
+      "result": "PASS"
+    },
+    {
+      "label": "vector-collection-root",
+      "result": "PASS"
+    },
+    {
+      "label": "predicates-113",
+      "result": "PASS"
+    },
+    {
+      "label": "predicate-collection-root",
+      "result": "PASS"
+    },
+    {
+      "label": "result-schemas-nonvacuous",
+      "result": "PASS"
+    },
+    {
+      "label": "graph-node-root",
+      "result": "PASS"
+    },
+    {
+      "label": "graph-edge-root",
+      "result": "PASS"
+    },
+    {
+      "label": "typed-graph-root",
+      "result": "PASS"
+    },
+    {
+      "label": "typed-graph-acyclic",
+      "result": "PASS"
+    },
+    {
+      "label": "freeze-reaches-113",
+      "result": "PASS"
+    },
+    {
+      "label": "typed-dependency-projection-exact",
+      "result": "PASS"
+    },
+    {
+      "label": "predicate-input-and-invalidation-edges",
+      "result": "PASS"
+    },
+    {
+      "label": "missing-value-27-lifecycle",
+      "result": "PASS"
+    },
+    {
+      "label": "atomic-denominator",
+      "result": "PASS"
+    },
+    {
+      "label": "atomic-nonempty-children",
+      "result": "PASS"
+    },
+    {
+      "label": "lifecycle-total-matrix",
+      "result": "PASS"
+    },
+    {
+      "label": "lifecycle-unique-pairs",
+      "result": "PASS"
+    },
+    {
+      "label": "lifecycle-external-nonvacuity",
+      "result": "PASS"
+    },
+    {
+      "label": "public-successor-root",
+      "result": "PASS"
+    },
+    {
+      "label": "public-control-mapping-52",
+      "result": "PASS"
+    },
+    {
+      "label": "public-no-private-path",
+      "result": "PASS"
+    },
+    {
+      "label": "requirement-collection-root",
+      "result": "PASS"
+    },
+    {
+      "label": "finding-crosswalk-12-distinct",
+      "result": "PASS"
+    },
+    {
+      "label": "v3-crosswalk-101-distinct",
+      "result": "PASS"
+    },
+    {
+      "label": "mandatory-root-set-root",
+      "result": "PASS"
+    },
+    {
+      "label": "packet-binding-payload-root",
+      "result": "PASS"
+    },
+    {
+      "label": "zero-acceptance",
+      "result": "PASS"
+    }
+  ],
+  "counters": {
+    "checks": 45,
+    "requirements": 113,
+    "inheritedV3": 101,
+    "observations": 84,
+    "sourceParts": 128,
+    "v2Locators": 85,
+    "bidiU200F": 13,
+    "predicates": 113,
+    "vectors": 565,
+    "graphNodes": 1207,
+    "graphEdges": 7356,
+    "atomicChildren": 59,
+    "lifecycleRows": 320,
+    "publicControls": 52,
+    "accepted": 0
+  },
+  "externalBlockers": [
+    "B0",
+    "accepted Protocol",
+    "accepted Source Universe",
+    "Authority/Freeze",
+    "appointments",
+    "evaluator",
+    "runner A",
+    "runner B",
+    "two review generations",
+    "Reconciliation",
+    "Definition Acceptance"
+  ],
+  "publicInvariant": "PUBLIC",
+  "privateRemediationAllowed": false
+}

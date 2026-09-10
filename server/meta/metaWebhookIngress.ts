@@ -1,3 +1,4 @@
+import { isMetaAccountLifecycleEnvelope } from "./metaAccountLifecycle.ts";
 import type { MetaRepository } from "../../db/metaRepository";
 import type { MetaConnectionRecord } from "../../shared/domain/metaConnection";
 import {
@@ -80,7 +81,13 @@ function processorFailureCode(error: unknown): string {
 }
 
 export function createMetaWebhookIngress(
-  repository: MetaRepository,
+  repository: Pick<
+    MetaRepository,
+    | "findConnectionByWabaId"
+    | "claimWebhookReceipt"
+    | "completeWebhookReceipt"
+    | "failWebhookReceipt"
+  >,
   processor: MetaWebhookProcessor,
   appSecret: string,
 ): MetaWebhookIngress {
@@ -104,7 +111,7 @@ export function createMetaWebhookIngress(
         envelope.wabaId,
       );
 
-      if (!connection || connection.status !== "connected") {
+      if (!connection || (connection.status !== "connected" && !isMetaAccountLifecycleEnvelope(envelope))) {
         throw new MetaWebhookIngressError(
           "CONNECTION_NOT_FOUND",
           "Meta webhook WABA is not connected to a tenant",

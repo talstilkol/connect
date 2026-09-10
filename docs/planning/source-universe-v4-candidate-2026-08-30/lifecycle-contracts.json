@@ -1,0 +1,30 @@
+{
+  "archiveRestoreSeparation": true,
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-LIFECYCLE-CONTRACTS-2026-08-30-G0",
+  "atomicStateTransitionRequired": true,
+  "copyClasses": [
+    "PRIMARY",
+    "BACKUP",
+    "RESTORE",
+    "ARCHIVE",
+    "CACHE",
+    "LOG",
+    "DERIVATIVE",
+    "KEY-MATERIAL"
+  ],
+  "erasureRequiresEveryCopyClass": [
+    "PRIMARY",
+    "BACKUP",
+    "RESTORE",
+    "ARCHIVE",
+    "CACHE",
+    "LOG",
+    "DERIVATIVE",
+    "KEY-MATERIAL"
+  ],
+  "keyLineageClosureRequired": true,
+  "legalHoldBlocksDeletion": true,
+  "resurrectionAction": "BLOCK",
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-LIFECYCLE-CONTRACTS-V1",
+  "tombstoneRequired": true
+}

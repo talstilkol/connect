@@ -20,53 +20,23 @@ import type {
 import {
   saveSystemAdminProductionDecisionAction,
 } from "../../server/operations/systemAdminProductionDecisionActions.ts";
-
-const statusMessages: Record<
-  Exclude<
-    SystemAdminProductionDecisionStatus,
-    "ready"
-  >,
-  {
-    title: string;
-    description: string;
-  }
-> = {
-  "configuration-required": {
-    title: "סביבת Admin אינה מוגדרת",
-    description:
-      "נדרשות תצורות Clerk, ‏System Admin ו־D1 מלאות לפני ניהול החלטות.",
-  },
-  unauthenticated: {
-    title: "נדרשת התחברות",
-    description:
-      "יש להתחבר עם זהות Clerk מורשית לפני ניהול החלטות Production.",
-  },
-  "permission-denied": {
-    title: "אין הרשאת System Admin",
-    description:
-      "רק זהות שנמצאת ב־Allowlist השרת רשאית לשמור החלטות.",
-  },
-  "server-error": {
-    title: "לא ניתן לטעון את ההחלטות",
-    description:
-      "הקריאה מ־D1 נכשלה באופן חסום. לא מוצגים נתונים חלופיים.",
-  },
-};
-
-const actionMessages = {
-  "configuration-required":
-    "תצורת System Admin אינה מלאה.",
-  unauthenticated:
-    "ה־Session הסתיים. יש להתחבר מחדש.",
-  "permission-denied":
-    "אין לזהות הנוכחית הרשאת System Admin.",
-  "invalid-input":
-    "הבחירה או הנימוק אינם תקינים.",
-  conflict:
-    "ההחלטה השתנתה מאז הטעינה. יש לרענן לפני שמירה נוספת.",
-  "server-error":
-    "השמירה נכשלה ולא נוצר שינוי חלקי.",
-} as const;
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft.ts";
+import {
+  adminHomePath,
+  adminPath,
+} from "../../shared/i18n/admin.ts";
+import {
+  readWorkspaceRemainingMessages,
+} from "../workspace/workspaceRemainingMessages.ts";
+import { AdminLanguageSelector } from "./AdminLanguageSelector.tsx";
+import {
+  readSystemAdminDecisionMessages,
+} from "./systemAdminDecisionMessages.ts";
+import {
+  useAdminDocumentLocale,
+} from "./useAdminDocumentLocale.ts";
 
 type Feedback = {
   tone: "success" | "danger";
@@ -76,6 +46,7 @@ type Feedback = {
 
 function formatTimestamp(
   value: string,
+  locale: string,
 ): string {
   const parsed = new Date(value);
 
@@ -84,7 +55,7 @@ function formatTimestamp(
   }
 
   return new Intl.DateTimeFormat(
-    "he-IL",
+    locale,
     {
       dateStyle: "medium",
       timeStyle: "short",
@@ -94,17 +65,27 @@ function formatTimestamp(
 }
 
 function DecisionAdminState({
+  language,
+  direction,
   status,
 }: {
+  language: InterfaceLanguage;
+  direction: "ltr" | "rtl";
   status: Exclude<
     SystemAdminProductionDecisionStatus,
     "ready"
   >;
 }) {
-  const content = statusMessages[status];
+  const messages =
+    readSystemAdminDecisionMessages(language);
+  const content = messages.states[status];
 
   return (
-    <main className="admin-state-shell">
+    <main
+      className="admin-state-shell"
+      dir={direction}
+      lang={language}
+    >
       <section
         className="admin-state-card"
         role={
@@ -117,11 +98,15 @@ function DecisionAdminState({
         <p>Connect System Admin</p>
         <h1>{content.title}</h1>
         <p>{content.description}</p>
+        <AdminLanguageSelector
+          language={language}
+          pathname="/admin/decisions"
+        />
         <Link
-          href="/admin"
+          href={adminPath("/admin", language)}
           className="secondary-button"
         >
-          חזרה לניהול המערכת
+          {messages.backToAdmin}
         </Link>
       </section>
     </main>
@@ -129,10 +114,12 @@ function DecisionAdminState({
 }
 
 export function SystemAdminDecisionPanel({
+  language,
   initialStatus,
   initialRecords,
   readinessReport,
 }: {
+  language: InterfaceLanguage;
   initialStatus:
     SystemAdminProductionDecisionStatus;
   initialRecords:
@@ -140,6 +127,14 @@ export function SystemAdminDecisionPanel({
   readinessReport:
     ProductionReadinessReport;
 }) {
+  const messages =
+    readSystemAdminDecisionMessages(language);
+  const decisionContent =
+    readWorkspaceRemainingMessages(
+      language,
+    ).decisions.content;
+  const direction =
+    useAdminDocumentLocale(language);
   const [records, setRecords] =
     useState([...initialRecords]);
   const [feedback, setFeedback] =
@@ -172,6 +167,8 @@ export function SystemAdminDecisionPanel({
   if (initialStatus !== "ready") {
     return (
       <DecisionAdminState
+        language={language}
+        direction={direction}
         status={initialStatus}
       />
     );
@@ -201,7 +198,7 @@ export function SystemAdminDecisionPanel({
         tone: "danger",
         checkId,
         message:
-          "יש להזין בחירה ונימוק לפני השמירה.",
+          messages.invalidForm,
       });
       return;
     }
@@ -224,7 +221,7 @@ export function SystemAdminDecisionPanel({
           tone: "danger",
           checkId,
           message:
-            actionMessages[result.status],
+            messages.actionFailures[result.status],
         });
         return;
       }
@@ -242,19 +239,23 @@ export function SystemAdminDecisionPanel({
         checkId,
         message:
           result.outcome === "unchanged"
-            ? "ההחלטה כבר שמורה באותה גרסה."
-            : "ההחלטה נשמרה ונוסף אירוע Audit אטומי.",
+            ? messages.unchanged
+            : messages.saved,
       });
     });
   }
 
   return (
-    <main className="admin-shell">
+    <main
+      className="admin-shell"
+      dir={direction}
+      lang={language}
+    >
       <header className="admin-header">
         <Link
-          href="/"
+          href={adminHomePath(language)}
           className="admin-brand"
-          aria-label="Connect — עמוד ראשי"
+          aria-label={messages.homeAriaLabel}
         >
           <span aria-hidden="true">
             <i />
@@ -267,14 +268,18 @@ export function SystemAdminDecisionPanel({
           </div>
         </Link>
         <div className="admin-header-actions">
+          <AdminLanguageSelector
+            language={language}
+            pathname="/admin/decisions"
+          />
           <span className="admin-security-badge">
-            שמירה מאומתת בשרת
+            {messages.verifiedSave}
           </span>
           <Link
-            href="/admin"
+            href={adminPath("/admin", language)}
             className="secondary-button"
           >
-            Tenants ומנויים
+            {messages.tenantsLink}
           </Link>
         </div>
       </header>
@@ -282,28 +287,23 @@ export function SystemAdminDecisionPanel({
       <div className="admin-content">
         <section className="admin-hero">
           <div>
-            <span>Production Governance</span>
-            <h1>ניהול החלטות</h1>
-            <p>
-              ההחלטה העסקית נשמרת בנפרד
-              ממצב ה־Runtime. שמירה אינה מסמנת
-              אינטגרציה כ־Ready עד ששער
-              Production מאמת אותה בפועל.
-            </p>
+            <span>{messages.eyebrow}</span>
+            <h1>{messages.title}</h1>
+            <p>{messages.description}</p>
           </div>
           <div className="admin-stat-grid">
             <article>
-              <small>החלטות ב־Registry</small>
+              <small>{messages.registryCount}</small>
               <strong>
                 {decisions.length}
               </strong>
             </article>
             <article>
-              <small>רשומות שמורות</small>
+              <small>{messages.savedCount}</small>
               <strong>{records.length}</strong>
             </article>
             <article>
-              <small>Runtime Ready</small>
+              <small>{messages.runtimeReadyCount}</small>
               <strong>
                 {runtimeReadyCount}
               </strong>
@@ -316,18 +316,16 @@ export function SystemAdminDecisionPanel({
           role="note"
         >
           <strong>
-            אין להזין Secrets, Tokens או מפתחות.
+            {messages.secretWarning}
           </strong>
           <p>
-            יש לשמור רק את הבחירה המאושרת
-            והנימוק. Credentials נשמרים במנגנוני
-            התצורה הייעודיים בלבד.
+            {messages.secretDescription}
           </p>
         </section>
 
         <section
           className="admin-decision-list"
-          aria-label="החלטות Production"
+          aria-label={messages.decisionsAriaLabel}
         >
           {decisions.map(
             (decision, index) => {
@@ -340,6 +338,10 @@ export function SystemAdminDecisionPanel({
                 decision.checkId
                   ? feedback
                   : null;
+              const content =
+                decisionContent[
+                  decision.checkId
+                ];
 
               return (
                 <article
@@ -357,45 +359,48 @@ export function SystemAdminDecisionPanel({
                       <small>
                         {decision.checkId}
                       </small>
-                      <h2>{decision.title}</h2>
-                      <p>{decision.detail}</p>
+                      <h2>{content.title}</h2>
+                      <p>{content.detail}</p>
                     </div>
                     <span
                       className={`admin-decision-runtime ${decision.status}`}
                     >
-                      {decision.status ===
-                      "ready"
-                        ? "Runtime מוכן"
-                        : decision.status ===
-                            "blocked"
-                          ? "Runtime חסום"
-                          : "Runtime דורש החלטה"}
+                      {
+                        messages.runtime[
+                          decision.status
+                        ]
+                      }
                     </span>
                   </header>
 
                   <div className="admin-decision-meta">
                     <span>
-                      בעלות: {decision.owner}
+                      {messages.owner(
+                        content.owner,
+                      )}
                     </span>
                     <span>
-                      קוד: {decision.code}
+                      {messages.code(decision.code)}
                     </span>
                     {record ? (
                       <>
                         <span>
-                          גרסה {record.version}
+                          {messages.version(
+                            record.version,
+                          )}
                         </span>
                         <span>
-                          עודכן{" "}
-                          {formatTimestamp(
-                            record.updatedAt,
-                          )}{" "}
-                          UTC
+                          {messages.updatedAt(
+                            formatTimestamp(
+                              record.updatedAt,
+                              messages.locale,
+                            ),
+                          )}
                         </span>
                       </>
                     ) : (
                       <span>
-                        טרם נשמרה החלטה
+                        {messages.notSaved}
                       </span>
                     )}
                   </div>
@@ -413,7 +418,7 @@ export function SystemAdminDecisionPanel({
                   >
                     <label>
                       <span>
-                        הבחירה המאושרת
+                        {messages.selection}
                       </span>
                       <input
                         name="selection"
@@ -428,7 +433,7 @@ export function SystemAdminDecisionPanel({
                     </label>
                     <label>
                       <span>
-                        נימוק והשלכות
+                        {messages.rationale}
                       </span>
                       <textarea
                         name="rationale"
@@ -446,15 +451,13 @@ export function SystemAdminDecisionPanel({
                         disabled={isPending}
                       >
                         {isPending
-                          ? "שומר…"
+                          ? messages.saving
                           : record
-                            ? "שמירת גרסה חדשה"
-                            : "שמירת החלטה"}
+                            ? messages.saveNewVersion
+                            : messages.saveDecision}
                       </button>
                       <small>
-                        השמירה משתמשת בגרסה
-                        צפויה ומונעת דריסת שינוי
-                        מקביל.
+                        {messages.concurrencyHelp}
                       </small>
                     </div>
                   </form>

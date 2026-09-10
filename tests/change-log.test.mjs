@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  readFile,
+} from "node:fs/promises";
+import {
   buildChangeLog,
   createCurrentChangeLog,
   parseCommitHistory,
@@ -34,6 +37,21 @@ test("builds a deterministic change log from the real repository history", () =>
   );
 });
 
+test("excludes synthetic merge commits from the repository history", async () => {
+  const source = await readFile(
+    new URL(
+      "../scripts/create-change-log.mjs",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    source,
+    /"log",\s*"--no-merges",\s*"--reverse",/,
+  );
+});
+
 test("rejects malformed history instead of inventing release notes", () => {
   assert.throws(
     () => parseCommitHistory(""),
@@ -49,6 +67,30 @@ test("rejects malformed history instead of inventing release notes", () => {
   assert.throws(
     () => buildChangeLog([]),
     /CHANGE_LOG_COMMITS_REQUIRED/,
+  );
+});
+
+test("accepts the committed database change category", () => {
+  const commits = parseCommitHistory(
+    "add7651b1045ecbde86862959d7a9c2cc90210f8\tdb: complete PostgreSQL migration evidence schema",
+  );
+
+  assert.equal(commits[0].type, "db");
+  assert.match(
+    buildChangeLog(commits),
+    /## Database\n\n- db: complete PostgreSQL migration evidence schema/,
+  );
+});
+
+test("preserves valid legacy subjects without rewriting public history", () => {
+  const commits = parseCommitHistory(
+    "4aab362fe162f421eabf3f379a3f4018f7adf516\tAdd Discovery Cutoff v2 toolchain",
+  );
+
+  assert.equal(commits[0].type, "other");
+  assert.match(
+    buildChangeLog(commits),
+    /## Other committed changes\n\n- Add Discovery Cutoff v2 toolchain/,
   );
 });
 

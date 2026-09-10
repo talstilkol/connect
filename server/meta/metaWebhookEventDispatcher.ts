@@ -13,6 +13,9 @@ export type MetaWebhookEventKind =
   | "inbound_messages"
   | "delivery_statuses"
   | "template_status"
+  | "smb_message_echoes"
+  | "smb_app_state_sync"
+  | "history"
   | "account_update";
 
 interface MetaWebhookDispatchedEventBase {
@@ -46,11 +49,34 @@ export interface MetaAccountUpdateWebhookEvent
   kind: "account_update";
 }
 
+export interface MetaMessageEchoesWebhookEvent
+  extends Omit<MetaWebhookDispatchedEventBase, "kind" | "occurredAt"> {
+  kind: "smb_message_echoes";
+  occurredAt: number | null;
+  messageEchoes: readonly unknown[];
+}
+
+export interface MetaContactSyncWebhookEvent
+  extends Omit<MetaWebhookDispatchedEventBase, "kind" | "occurredAt"> {
+  kind: "smb_app_state_sync";
+  occurredAt: number | null;
+  stateSync: readonly unknown[];
+}
+
+export interface MetaHistoryWebhookEvent
+  extends Omit<MetaWebhookDispatchedEventBase, "kind" | "occurredAt"> {
+  kind: "history";
+  occurredAt: number | null;
+}
+
 export type MetaWebhookDispatchedEvent =
   | MetaInboundMessagesWebhookEvent
   | MetaDeliveryStatusesWebhookEvent
   | MetaTemplateStatusWebhookEvent
-  | MetaAccountUpdateWebhookEvent;
+  | MetaAccountUpdateWebhookEvent
+  | MetaContactSyncWebhookEvent
+  | MetaHistoryWebhookEvent
+  | MetaMessageEchoesWebhookEvent;
 
 export interface MetaWebhookDispatchBatch {
   tenantId: number;
@@ -164,7 +190,7 @@ function classifyChange(
   eventKey: string,
   entryIndex: number,
   changeIndex: number,
-  occurredAt: number,
+  occurredAt: number | null,
   change: unknown,
 ): MetaWebhookDispatchedEvent[] {
   if (
@@ -176,6 +202,39 @@ function classifyChange(
       "INVALID_WEBHOOK_CHANGE",
     );
   }
+
+  if (change.field === "history") {
+    const value = change.value;
+    if ((value.history === undefined) === (value.messages === undefined) ||
+      ["statuses", "state_sync", "message_echoes"].some((key) => value[key] !== undefined)) {
+      throw new MetaWebhookProcessorError("INVALID_HISTORY_SYNC_CHANGE");
+    }
+    return [{ dispatchKey: dispatchKey(eventKey, entryIndex, changeIndex, "history"),
+      kind: "history", entryIndex, changeIndex, occurredAt, value }];
+  }
+
+  if (change.field === "smb_app_state_sync") {
+    const value = change.value;
+    if (!Array.isArray(value.state_sync) || value.state_sync.length === 0 ||
+      ["messages", "statuses", "history", "message_echoes"].some((key) => value[key] !== undefined)) {
+      throw new MetaWebhookProcessorError("INVALID_CONTACT_SYNC_CHANGE");
+    }
+    return [{ dispatchKey: dispatchKey(eventKey, entryIndex, changeIndex, "smb_app_state_sync"),
+      kind: "smb_app_state_sync", entryIndex, changeIndex, occurredAt,
+      value, stateSync: value.state_sync }];
+  }
+
+  if (change.field === "smb_message_echoes") {
+    if (!Array.isArray(change.value.message_echoes) || change.value.message_echoes.length === 0 ||
+      change.value.messages !== undefined || change.value.statuses !== undefined) {
+      throw new MetaWebhookProcessorError("INVALID_MESSAGE_ECHOES_CHANGE");
+    }
+    return [{ dispatchKey: dispatchKey(eventKey, entryIndex, changeIndex, "smb_message_echoes"),
+      kind: "smb_message_echoes", entryIndex, changeIndex, occurredAt,
+      value: change.value, messageEchoes: change.value.message_echoes }];
+  }
+
+  if (occurredAt === null) throw new MetaWebhookProcessorError("INVALID_WEBHOOK_TIMESTAMP");
 
   if (change.field === "messages") {
     return classifyMessagesChange(
@@ -257,7 +316,11 @@ export function classifyMetaWebhookEvents(
         "INVALID_WEBHOOK_CHANGES",
       );
     }
-    const occurredAt = requireEntryTimestamp(entry);
+    // Meta's echo/contact/history examples omit entry.time. Message time is
+    // validated per item; history progress/refusal does not invent a timestamp.
+    const occurredAt = entry.time === undefined && entry.changes.every(
+      (change) => isRecord(change) && ["smb_message_echoes", "smb_app_state_sync", "history"].includes(String(change.field)),
+    ) ? null : requireEntryTimestamp(entry);
 
     for (
       let changeIndex = 0;

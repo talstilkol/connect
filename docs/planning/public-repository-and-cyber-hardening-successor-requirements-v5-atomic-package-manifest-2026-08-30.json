@@ -1,0 +1,331 @@
+{
+  "acceptanceCredit": 0,
+  "artifactClass": "EXTERNAL-CYCLE-FREE-PACKAGE-ENVELOPE;NOT-A-MEMBER;NOT-REVIEW;NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-PRCV5-ATOMIC-PACKAGE-MANIFEST-2026-08-30",
+  "currentDisposition": {
+    "DeploymentPermit": "ABSENT",
+    "GitHubControlPlanePermit": "ABSENT",
+    "PublicPushPermit": "ABSENT",
+    "ReleasePermit": "ABSENT",
+    "acceptance": 0,
+    "acceptedFindings": 0,
+    "developmentFreeze": "ACTIVE",
+    "gate29": "BLOCKED",
+    "repositoryVisibility": "PUBLIC",
+    "totalFindings": 116
+  },
+  "denominators": {
+    "aliases": 32,
+    "findings": 116,
+    "graphEdges": 7417,
+    "graphNodes": 6969,
+    "inheritedFindings": 93,
+    "lateDecisionClauses": 48,
+    "membersAtOrAbove50MiB": 0,
+    "nestedTypes": 70,
+    "newFindings": 23,
+    "outputFamilies": 42,
+    "packageMembers": 28,
+    "permitCrossClassDenials": 12,
+    "permitMatrixCells": 16,
+    "permitTypes": 4,
+    "primitiveTypes": 9,
+    "readers": 2,
+    "remediationControls": 23,
+    "requirementEdges": 227,
+    "schemaInstances": 112,
+    "shards": 13,
+    "sourceByteDuplicates": 0,
+    "sourceReferences": 14,
+    "vectors": 3152
+  },
+  "detachedCompanions": {
+    "acceptance": "ABSENT",
+    "independentReview": "REQUIRED-NOT-YET-MATERIALIZED",
+    "producerQa": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-producer-qa-2026-08-30.json",
+    "readerAReport": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-reader-a-report-2026-08-30.json",
+    "readerBReport": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-reader-b-report-2026-08-30.json"
+  },
+  "members": [
+    {
+      "bytes": 4164,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-2026-08-30.md",
+      "ordinal": 1,
+      "rawSha256Checksum": "2ac2fb4f46d4277081f6cf763c8b24bba4a2610e8fd1679dd43c0990a82ae140",
+      "required": true,
+      "role": "V5-SUBJECT"
+    },
+    {
+      "bytes": 12947,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-frozen-input-manifest-2026-08-30.json",
+      "ordinal": 2,
+      "rawSha256Checksum": "e4d5ed213e72b0a676fa1239cc5cfe243d99f5ae17ea9926a9efe8f6c8d16eef",
+      "required": true,
+      "role": "V5-FROZEN-INPUT-MANIFEST"
+    },
+    {
+      "bytes": 329172,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-finding-identity-and-closure-registry-2026-08-30.json",
+      "ordinal": 3,
+      "rawSha256Checksum": "742e5cc04965a0deb9f6b5c6ba94e06bd6b1bc114471bf8628e77bbf8bbd18c3",
+      "required": true,
+      "role": "V5-FINDING-IDENTITY-AND-CLOSURE-REGISTRY"
+    },
+    {
+      "bytes": 688488,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-closed-schema-and-type-registry-2026-08-30.json",
+      "ordinal": 4,
+      "rawSha256Checksum": "a3e0e4a19a40a38aa2466ebd6215d113a95be7b558b4023a750547a2ad6c1723",
+      "required": true,
+      "role": "V5-CLOSED-SCHEMA-AND-TYPE-REGISTRY"
+    },
+    {
+      "bytes": 9400,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-canonical-digest-and-serialization-registry-2026-08-30.json",
+      "ordinal": 5,
+      "rawSha256Checksum": "e1e709d60a51366cf772a6854a3d04874d53a92a9f5644bef7f4b1ba967495c3",
+      "required": true,
+      "role": "V5-CANONICAL-DIGEST-AND-SERIALIZATION-REGISTRY"
+    },
+    {
+      "bytes": 117449,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-producer-authority-and-separation-graph-2026-08-30.json",
+      "ordinal": 6,
+      "rawSha256Checksum": "8b6a88ec2248bc2bf6b9f52a2c985e4d179a650d8a266b66e9df7cee6d8c44c5",
+      "required": true,
+      "role": "V5-PRODUCER-AUTHORITY-AND-SEPARATION-GRAPH"
+    },
+    {
+      "bytes": 41191,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-lifecycle-cas-and-recovery-registry-2026-08-30.json",
+      "ordinal": 7,
+      "rawSha256Checksum": "c23e0340fccd783ea861f8fee1aea7832b1073d99f32df923a42a8ffa88ff239",
+      "required": true,
+      "role": "V5-LIFECYCLE-CAS-AND-RECOVERY-REGISTRY"
+    },
+    {
+      "bytes": 75305,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-four-permit-registry-2026-08-30.json",
+      "ordinal": 8,
+      "rawSha256Checksum": "dc3d5156addf77057263596ea2a83c1c4611e4b12a58b0b30d6ca01c196667bf",
+      "required": true,
+      "role": "V5-FOUR-PERMIT-REGISTRY"
+    },
+    {
+      "bytes": 17600,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-public-information-flow-and-scanner-registry-2026-08-30.json",
+      "ordinal": 9,
+      "rawSha256Checksum": "11f25ab7f0a72486ab7cdb0ad0ef320a3e7cf1dcbb69cf0e32bf32d636eec655",
+      "required": true,
+      "role": "V5-PUBLIC-INFORMATION-FLOW-AND-SCANNER-REGISTRY"
+    },
+    {
+      "bytes": 56107,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-publication-size-shard-and-storage-registry-2026-08-30.json",
+      "ordinal": 10,
+      "rawSha256Checksum": "ed4d48888c5cbf6a4f234524850376bc0a3f5523358af094f8d3add159a3018b",
+      "required": true,
+      "role": "V5-PUBLICATION-SIZE-SHARD-AND-STORAGE-REGISTRY"
+    },
+    {
+      "bytes": 11283,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-2026-08-30.json",
+      "ordinal": 11,
+      "rawSha256Checksum": "87e7ed899e20510d44f38bf2e38f4bb467d3c79c04e3aed37ae1bf827f9c241d",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-CORPUS-INDEX"
+    },
+    {
+      "bytes": 630361,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-01-of-13-2026-08-30.json",
+      "ordinal": 12,
+      "rawSha256Checksum": "0b6817fe29e0ebe10483bd1df0e6a575f4fffac07817cb5796545414e776ed4a",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 625014,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-02-of-13-2026-08-30.json",
+      "ordinal": 13,
+      "rawSha256Checksum": "4c8b61a3147643efaafad94d04651206dcb2632178f634fbd1678679b38b8b84",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 674485,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-03-of-13-2026-08-30.json",
+      "ordinal": 14,
+      "rawSha256Checksum": "862f55575456453af00da8a08fcea1b330795a720ce4f7087ad4fd8b35444482",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 394540,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-04-of-13-2026-08-30.json",
+      "ordinal": 15,
+      "rawSha256Checksum": "aee712d841d36fcb0e67cd712d028599e6c25c3277dd50657b7f93565c93ad83",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 352601,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-05-of-13-2026-08-30.json",
+      "ordinal": 16,
+      "rawSha256Checksum": "9582bd5bf2ed111b81a57ede0e0aa7e541057a0ca03ea833e07a42ee8777baa5",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328569,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-06-of-13-2026-08-30.json",
+      "ordinal": 17,
+      "rawSha256Checksum": "a9ab50d2f90a2b9f99bb1b29de11fd1b58b7ac11b63c269440e556b6d1261ac1",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328599,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-07-of-13-2026-08-30.json",
+      "ordinal": 18,
+      "rawSha256Checksum": "c1618a4243fad062c75a61b5093919d4a6035850992a80f00924fa62b3991694",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328740,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-08-of-13-2026-08-30.json",
+      "ordinal": 19,
+      "rawSha256Checksum": "5102c1366bb06cb41b44ad48f8662b72efb56c1cdf38bdf78dd1981130656370",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328387,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-09-of-13-2026-08-30.json",
+      "ordinal": 20,
+      "rawSha256Checksum": "c953572f1faf778f960c8f9b45f446a5a17941a99b510c7998909853309b4329",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328837,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-10-of-13-2026-08-30.json",
+      "ordinal": 21,
+      "rawSha256Checksum": "fe4f07f1a180482a91f1f468d34f5fc833c28189894b04fe58ae063e4c2133dd",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328516,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-11-of-13-2026-08-30.json",
+      "ordinal": 22,
+      "rawSha256Checksum": "6c5f9c89eea7ce38d43b79da6f41d0a181a4b27ad6fa22f9dd6bda8c1b217f1e",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 328979,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-12-of-13-2026-08-30.json",
+      "ordinal": 23,
+      "rawSha256Checksum": "90ad72576e91061565c477e1a984cce10ffb9c4a844a6715f34197244724c3fc",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 141139,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-executable-causal-vector-corpus-shard-13-of-13-2026-08-30.json",
+      "ordinal": 24,
+      "rawSha256Checksum": "fb4087dfe2667ad2b9d113be3376679799383275423d90543249c4ffd45db4fd",
+      "required": true,
+      "role": "V5-EXECUTABLE-CAUSAL-VECTOR-SHARD"
+    },
+    {
+      "bytes": 2528353,
+      "logicalPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v5-causal-graph-2026-08-30.json",
+      "ordinal": 25,
+      "rawSha256Checksum": "73f238546f95568905a78a45d2900a2fcc4bbb4ee52d37ec04f648ff001b3ddb",
+      "required": true,
+      "role": "V5-CAUSAL-GRAPH"
+    },
+    {
+      "bytes": 137075,
+      "logicalPath": "docs/planning/qa/generate-public-cyber-v5-package.mjs",
+      "ordinal": 26,
+      "rawSha256Checksum": "d4360830c86af1be58caec5e5540b50f167039bd1078974bc62abab1aec13263",
+      "required": true,
+      "role": "V5-DETERMINISTIC-GENERATOR"
+    },
+    {
+      "bytes": 40346,
+      "logicalPath": "docs/planning/qa/public-cyber-v5-reader-a.mjs",
+      "ordinal": 27,
+      "rawSha256Checksum": "c05f31014104f978b6061154df3477079a20b921e85dcd58ff2e1ad8efbc91e6",
+      "required": true,
+      "role": "V5-READ-ONLY-READER-A"
+    },
+    {
+      "bytes": 41847,
+      "logicalPath": "docs/planning/qa/public-cyber-v5-reader-b.py",
+      "ordinal": 28,
+      "rawSha256Checksum": "3bc1c549a7285ed6b5feb95ad07e70afe8b2a5d57a775f5edb52d7ab3387a9ae",
+      "required": true,
+      "role": "V5-READ-ONLY-READER-B"
+    }
+  ],
+  "noSelfAcceptance": true,
+  "packageContentRoot": "19be4c773af62a79945c01c1d3a71d2c7d650b1cbda0b99ca1ef815e82b8a31b",
+  "packageMemberCount": 28,
+  "repositoryBinding": {
+    "logicalId": "github.com/talstilkol/connect",
+    "logicalRepositoryRoot": "PUBLIC-REPOSITORY-ROOT;ALL-PUBLIC-LOCATORS-REPO-RELATIVE",
+    "visibility": "PUBLIC"
+  },
+  "rootAlgorithm": {
+    "digest": "SHA-256",
+    "domain": "PRCV5-PACKAGE-CONTENT-ROOT-V1",
+    "excludedFields": [
+      "manifest bytes",
+      "detached reports",
+      "Producer QA",
+      "independent Review",
+      "Acceptance"
+    ],
+    "includedFields": [
+      "ordinal",
+      "role",
+      "logicalPath",
+      "rawSha256Checksum",
+      "bytes",
+      "required"
+    ],
+    "normalization": "NONE-FOR-RAW-FILE-CHECKSUMS",
+    "ordering": "MEMBER-ORDINAL-ASCENDING",
+    "separator": "DOMAIN-LF-CANONICAL-JSON",
+    "serialization": "CANONICAL-JSON-OBJECT-KEYS-ASCENDING-ARRAY-ORDER-PRESERVED-SAFE-INTEGERS"
+  },
+  "schemaVersion": "PRCV5-ATOMIC-PACKAGE-MANIFEST-V1",
+  "semanticRoots": {
+    "authorityRegistryRoot": "18e7ad6a5f18eeb79542b0ea643e4fd3786468642848eff3de9e8bc3fc3e5e34",
+    "closureRegistryRoot": "2f5da2e293d8e9a2e02b6c81a7e5172ec31b79c1a666216a4deb407bf16ebfb3",
+    "digestRegistryRoot": "814dda15046b8bf7ec1e630c981e2ccb5664dc4695137eb890f696d9456b254f",
+    "graphRoot": "5197de7303e43f6751719c4f64153f8e07ba2ce273a72d71f960e92ff6debf61",
+    "inputManifestRoot": "b3772017bb3d10f08d591602cf62e5f3b4e19c1edcae50682b40708d5d6a255f",
+    "lifecycleRegistryRoot": "6d04f7817c547501213668141bf1349d34d436b6350222b91ffb5b1d934c0d87",
+    "permitRegistryRoot": "3af9fa6086f33bc10fb2dbbf0e19d150f234d11872aa5cdf7280f099531b6abc",
+    "publicFlowRegistryRoot": "d0e65750d9eef8c90d4f1dfdd71c4ab055608c7b50289a680fe40d29c25dcab6",
+    "publicationRegistryRoot": "aaf0de82300c643add7519b475350511fb1d558bfef11e2dd85010caba34d8f4",
+    "schemaRegistryRoot": "73b33871f764b6b86aa0ed62cd59a43aec6613989a15f685859a7e2716d17a9a",
+    "vectorCorpusRoot": "b413728a0ca577f11e750b11a3ef8bfaadc455d84b69732fc35e3d854f4e20e6",
+    "vectorIndexRoot": "32312fdc37a7ec0adc9f5c3413d9b5cc32fbb562eef6dd571195ffe6286baedf"
+  },
+  "unresolvedBlocking": [
+    "B0-AND-TAL-AUTHORITY",
+    "TRUSTED-TIME",
+    "OPERATIONAL-SCANNER-RECEIPTS",
+    "PRE-POST-TRUSTED-VISIBILITY-RECEIPTS",
+    "REPOSITORY-TOTAL-GROWTH-CLONE-BUDGETS",
+    "SELECTED-EXTERNAL-STORE-CONTRACT",
+    "FRESH-INDEPENDENT-HOSTILE-REVIEW",
+    "DETACHED-ACCEPTANCE"
+  ]
+}

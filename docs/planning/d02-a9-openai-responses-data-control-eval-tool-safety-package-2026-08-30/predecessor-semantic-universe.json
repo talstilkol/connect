@@ -1,0 +1,422 @@
+{
+  "artifactId": "CONNECT-D02-A9-TOTAL-PREDECESSOR-SEMANTIC-UNIVERSE-2026-08-30",
+  "universeVersion": "1.0.0",
+  "extractionAlgorithm": "EXACT-PHYSICAL-LINE-V1-LF-PRESERVING",
+  "sourceCount": 18,
+  "sources": [
+    {
+      "sourceId": "D02A9-IN-001",
+      "logicalPath": "docs/decision-intake-2026-08-21.md",
+      "role": "USER-D02-DIRECTIVE",
+      "sha256": "052297f38f63d6e525641a5e1d044267cf7d553fd3e7a9d2d469669eca090937",
+      "lines": 151,
+      "bytes": 10996
+    },
+    {
+      "sourceId": "D02A9-IN-002",
+      "logicalPath": "docs/researched-decision-approval-2026-08-26.md",
+      "role": "RESEARCHED-DECISION",
+      "sha256": "f981cf9313e08fe0cfbd0603717af1a999fd1a367b5521d4191d0cfc3b27128b",
+      "lines": 324,
+      "bytes": 16633
+    },
+    {
+      "sourceId": "D02A9-IN-003",
+      "logicalPath": "docs/planning/d02-a4-openai-model-routing-reconciliation-2026-08-29.md",
+      "role": "ENGINEERING-RECONCILIATION",
+      "sha256": "221af06420bd0d5680ae708c997e9f22b7b48eecc9278dbe740cb66346c68d54",
+      "lines": 165,
+      "bytes": 12368
+    },
+    {
+      "sourceId": "D02A9-IN-004",
+      "logicalPath": "docs/planning/d02-a5-openai-responses-data-control-and-model-selection-reconciliation-2026-08-29.md",
+      "role": "SEMANTIC-SUCCESSOR",
+      "sha256": "1981729d8a0001d38f439508cdf668cbbd18b8bda0c70cde2152e19ff93281e5",
+      "lines": 115,
+      "bytes": 9302
+    },
+    {
+      "sourceId": "D02A9-IN-005",
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-2026-08-30.md",
+      "role": "SEMANTIC-SUCCESSOR",
+      "sha256": "3788b73457a3bb25a679dc42875b641a21156f3b93e3b29676a3489e826ad3db",
+      "lines": 465,
+      "bytes": 30592
+    },
+    {
+      "sourceId": "D02A9-IN-006",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-semantic-successor-2026-08-30.md",
+      "role": "SEMANTIC-SUCCESSOR",
+      "sha256": "f1246bc52124a59645a2446d4c83075358c9f6214f84bc6ee7e7ce6b8208b446",
+      "lines": 360,
+      "bytes": 36482
+    },
+    {
+      "sourceId": "D02A9-IN-007",
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-2026-08-30.md",
+      "role": "INDEPENDENT-REVIEW",
+      "sha256": "344c42bcdbf60eed1332bfaa7e20d9725e80cad5e0f2d05863c3cbef6ba5f16d",
+      "lines": 209,
+      "bytes": 18279
+    },
+    {
+      "sourceId": "D02A9-IN-008",
+      "logicalPath": "docs/planning/d02-a6-openai-responses-data-control-eval-and-tool-safety-reconciliation-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "FINDINGS-MANIFEST",
+      "sha256": "55f985944dae7684af73f3214e966650a3949ae52b1b28dc54ef198a886dceca",
+      "lines": 49,
+      "bytes": 7724
+    },
+    {
+      "sourceId": "D02A9-IN-009",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "role": "CLOSURE-CROSSWALK",
+      "sha256": "3f2b6689b638453872c019b96ed451a6096d3d771935d73dde82ff116b3b3cbc",
+      "lines": 47,
+      "bytes": 5195
+    },
+    {
+      "sourceId": "D02A9-IN-010",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "role": "PRODUCER-QA",
+      "sha256": "4ef56a1332504d04fad5176eba41a4dc40ae5a82f611e8208e0e51ff6cb8a21e",
+      "lines": 82,
+      "bytes": 7204
+    },
+    {
+      "sourceId": "D02A9-IN-011",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+      "role": "INDEPENDENT-REVIEW",
+      "sha256": "15d8f46c32b09301e58bf9e1867d0bab7e2c40b17634a3aa12c903e6dc99be62",
+      "lines": 179,
+      "bytes": 15589
+    },
+    {
+      "sourceId": "D02A9-IN-012",
+      "logicalPath": "docs/planning/d02-a7-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "FINDINGS-MANIFEST",
+      "sha256": "d488c9f36d88797bf74b6db60e422c4bd9d55443eff032fa38aff490fd813c9b",
+      "lines": 41,
+      "bytes": 7465
+    },
+    {
+      "sourceId": "D02A9-IN-013",
+      "logicalPath": "docs/planning/d18-a2-public-repository-security-decision-2026-08-29.md",
+      "role": "DURABLE-USER-PUBLIC-DIRECTIVE",
+      "sha256": "448cf2a7596f3544966b1e992c33ea6bc569305d5a2af2a00378cf60bf1eeaa9",
+      "lines": 131,
+      "bytes": 9090
+    },
+    {
+      "sourceId": "D02A9-A8-SUBJECT",
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-immutable-successor-2026-08-30.md",
+      "role": "IMMEDIATE-PREDECESSOR-SUBJECT",
+      "sha256": "61774fd3f54bf39d727ff7cdc09ef475fff9bd2b2561e5639e1b947dbbcaec0b",
+      "lines": 174,
+      "bytes": 17302
+    },
+    {
+      "sourceId": "D02A9-A8-CROSSWALK",
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-finding-closure-crosswalk-2026-08-30.md",
+      "role": "PREDECESSOR-CROSSWALK",
+      "sha256": "859f721f09b7af35bf0810cdae0dd9beebe84f126d6d05ba6b605a23633a06ad",
+      "lines": 37,
+      "bytes": 6223
+    },
+    {
+      "sourceId": "D02A9-A8-QA",
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-producer-qa-2026-08-30.md",
+      "role": "PREDECESSOR-PRODUCER-QA",
+      "sha256": "d648af6042f8cd8a5a98cf504c567d2a6806cf25f693a2812578897b38978476",
+      "lines": 87,
+      "bytes": 8633
+    },
+    {
+      "sourceId": "D02A9-A8-REVIEW",
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-2026-08-30.md",
+      "role": "REMEDIATION-AUTHORITY",
+      "sha256": "d1ae799f46af8cce25eb447898591d7f3f2151faf7e6491a02440e29a166b2c8",
+      "lines": 207,
+      "bytes": 19033
+    },
+    {
+      "sourceId": "D02A9-A8-FINDINGS",
+      "logicalPath": "docs/planning/d02-a8-openai-responses-data-control-eval-and-tool-safety-independent-hostile-review-findings-manifest-2026-08-30.md",
+      "role": "REMEDIATION-FINDINGS-MANIFEST",
+      "sha256": "455679d450c7b9c20b2cc4358ad580224a439185410574e71bd9e733d281b32d",
+      "lines": 41,
+      "bytes": 6457
+    }
+  ],
+  "memberCount": 2864,
+  "tableRowCount": 295,
+  "numberedClauseCount": 1001,
+  "blankMemberCount": 1225,
+  "undispositionedCount": 0,
+  "semanticUniverseRoot": "1a7e0f90fca63f87e0a243a9738d2e2a1a17334a61bf2cabedf9a34070f186e4",
+  "shardCount": 29,
+  "shards": [
+    {
+      "ordinal": 1,
+      "shardId": "D02A9-SEMANTIC-SHARD-001",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-001.json",
+      "firstMemberOrdinal": 1,
+      "lastMemberOrdinal": 100,
+      "memberCount": 100,
+      "memberRoot": "1f8a00ee3bb71b232a598d7e6d96d4f0ec0a977dbc229b76dde5b70a328a6a5a"
+    },
+    {
+      "ordinal": 2,
+      "shardId": "D02A9-SEMANTIC-SHARD-002",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-002.json",
+      "firstMemberOrdinal": 101,
+      "lastMemberOrdinal": 200,
+      "memberCount": 100,
+      "memberRoot": "a5a54f0c07e732ad0d36024ec6af07408c804adead1020f3101d2ebf822c8c6e"
+    },
+    {
+      "ordinal": 3,
+      "shardId": "D02A9-SEMANTIC-SHARD-003",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-003.json",
+      "firstMemberOrdinal": 201,
+      "lastMemberOrdinal": 300,
+      "memberCount": 100,
+      "memberRoot": "1d8181f56a9c59c6affa38e216847c58270e534af3b9c863b2167be77bd9fdc7"
+    },
+    {
+      "ordinal": 4,
+      "shardId": "D02A9-SEMANTIC-SHARD-004",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-004.json",
+      "firstMemberOrdinal": 301,
+      "lastMemberOrdinal": 400,
+      "memberCount": 100,
+      "memberRoot": "83806531d909e64ccecf94f6fe7131d10946b24bb5c13e0ad1390c9cfef31fc0"
+    },
+    {
+      "ordinal": 5,
+      "shardId": "D02A9-SEMANTIC-SHARD-005",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-005.json",
+      "firstMemberOrdinal": 401,
+      "lastMemberOrdinal": 500,
+      "memberCount": 100,
+      "memberRoot": "00e0373ca88a5b417ca5ec9f9868fdc0fbe8b0c0e5df6687d604082a4265a9c6"
+    },
+    {
+      "ordinal": 6,
+      "shardId": "D02A9-SEMANTIC-SHARD-006",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-006.json",
+      "firstMemberOrdinal": 501,
+      "lastMemberOrdinal": 600,
+      "memberCount": 100,
+      "memberRoot": "ff425e154d84aa3dd48ecf490016ecf9382232dbc2f78ebeaf40da07ada59fcb"
+    },
+    {
+      "ordinal": 7,
+      "shardId": "D02A9-SEMANTIC-SHARD-007",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-007.json",
+      "firstMemberOrdinal": 601,
+      "lastMemberOrdinal": 700,
+      "memberCount": 100,
+      "memberRoot": "c03633032c28a783acbaa12e54ac91cfa3b4e3568a78392f20014ff63e20c931"
+    },
+    {
+      "ordinal": 8,
+      "shardId": "D02A9-SEMANTIC-SHARD-008",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-008.json",
+      "firstMemberOrdinal": 701,
+      "lastMemberOrdinal": 800,
+      "memberCount": 100,
+      "memberRoot": "21c1d9afb4c23b2bda055edd9de2a99874cb55f3e8cba45b0f17f8bf5f492c29"
+    },
+    {
+      "ordinal": 9,
+      "shardId": "D02A9-SEMANTIC-SHARD-009",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-009.json",
+      "firstMemberOrdinal": 801,
+      "lastMemberOrdinal": 900,
+      "memberCount": 100,
+      "memberRoot": "55e0ee744196b20f349060c22be8465992e00697bbf9293d6caae63b749dfcb5"
+    },
+    {
+      "ordinal": 10,
+      "shardId": "D02A9-SEMANTIC-SHARD-010",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-010.json",
+      "firstMemberOrdinal": 901,
+      "lastMemberOrdinal": 1000,
+      "memberCount": 100,
+      "memberRoot": "c92b76a9d67c1827989742c87e4f8a73403d6b55c3e52c5d65a1c0941f3de00b"
+    },
+    {
+      "ordinal": 11,
+      "shardId": "D02A9-SEMANTIC-SHARD-011",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-011.json",
+      "firstMemberOrdinal": 1001,
+      "lastMemberOrdinal": 1100,
+      "memberCount": 100,
+      "memberRoot": "18ad09074a6a7a983fafb564efb9c9a2d28b6bff61068aecb5b3408abe941714"
+    },
+    {
+      "ordinal": 12,
+      "shardId": "D02A9-SEMANTIC-SHARD-012",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-012.json",
+      "firstMemberOrdinal": 1101,
+      "lastMemberOrdinal": 1200,
+      "memberCount": 100,
+      "memberRoot": "a5df74185a2686d126ac1e9a98630d84ca7927151ae64adae141eb0630d85d54"
+    },
+    {
+      "ordinal": 13,
+      "shardId": "D02A9-SEMANTIC-SHARD-013",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-013.json",
+      "firstMemberOrdinal": 1201,
+      "lastMemberOrdinal": 1300,
+      "memberCount": 100,
+      "memberRoot": "092fe74939f879195d4ba4fd9878c34a3ef6806805f014f93ce996a6297162ac"
+    },
+    {
+      "ordinal": 14,
+      "shardId": "D02A9-SEMANTIC-SHARD-014",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-014.json",
+      "firstMemberOrdinal": 1301,
+      "lastMemberOrdinal": 1400,
+      "memberCount": 100,
+      "memberRoot": "656f4d5597fb7d4b94c16687f4ad6c6e3d59427bc29abe011ccef23d986eb0b1"
+    },
+    {
+      "ordinal": 15,
+      "shardId": "D02A9-SEMANTIC-SHARD-015",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-015.json",
+      "firstMemberOrdinal": 1401,
+      "lastMemberOrdinal": 1500,
+      "memberCount": 100,
+      "memberRoot": "927334b3e7a78f4a3c3aa1d87613ea544be9d0635bf1560d013d3ba0bb9f04dd"
+    },
+    {
+      "ordinal": 16,
+      "shardId": "D02A9-SEMANTIC-SHARD-016",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-016.json",
+      "firstMemberOrdinal": 1501,
+      "lastMemberOrdinal": 1600,
+      "memberCount": 100,
+      "memberRoot": "cc056838d6fc9c662d4169c12456a7cac4a94132a3d994c5e3d15f4a280433e0"
+    },
+    {
+      "ordinal": 17,
+      "shardId": "D02A9-SEMANTIC-SHARD-017",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-017.json",
+      "firstMemberOrdinal": 1601,
+      "lastMemberOrdinal": 1700,
+      "memberCount": 100,
+      "memberRoot": "7e64d2aa3fcb98f2594a501d81644095d32fdd9fe6159c57a029a4f6faae5007"
+    },
+    {
+      "ordinal": 18,
+      "shardId": "D02A9-SEMANTIC-SHARD-018",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-018.json",
+      "firstMemberOrdinal": 1701,
+      "lastMemberOrdinal": 1800,
+      "memberCount": 100,
+      "memberRoot": "7a992c4eb89b30b6b9c689587ce9633fdff799e97c993fe38671232d14a47760"
+    },
+    {
+      "ordinal": 19,
+      "shardId": "D02A9-SEMANTIC-SHARD-019",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-019.json",
+      "firstMemberOrdinal": 1801,
+      "lastMemberOrdinal": 1900,
+      "memberCount": 100,
+      "memberRoot": "5700099a2f1e7cc42502ecabed68e4c8c0928a2932ee509369929f3dccf88c8d"
+    },
+    {
+      "ordinal": 20,
+      "shardId": "D02A9-SEMANTIC-SHARD-020",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-020.json",
+      "firstMemberOrdinal": 1901,
+      "lastMemberOrdinal": 2000,
+      "memberCount": 100,
+      "memberRoot": "8c88a3ccfd066158833cd2fa1042d5888829bd55b68101a3966cdac8c755f226"
+    },
+    {
+      "ordinal": 21,
+      "shardId": "D02A9-SEMANTIC-SHARD-021",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-021.json",
+      "firstMemberOrdinal": 2001,
+      "lastMemberOrdinal": 2100,
+      "memberCount": 100,
+      "memberRoot": "3f4c865d96a4d732d9b01bf80964721998be72af0b9cbdb0e5c333d53f7ca944"
+    },
+    {
+      "ordinal": 22,
+      "shardId": "D02A9-SEMANTIC-SHARD-022",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-022.json",
+      "firstMemberOrdinal": 2101,
+      "lastMemberOrdinal": 2200,
+      "memberCount": 100,
+      "memberRoot": "3f5cec05bcf9131cac829224337712c63c3b63e4b2f51db243a28c3301e9cd74"
+    },
+    {
+      "ordinal": 23,
+      "shardId": "D02A9-SEMANTIC-SHARD-023",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-023.json",
+      "firstMemberOrdinal": 2201,
+      "lastMemberOrdinal": 2300,
+      "memberCount": 100,
+      "memberRoot": "f982f459f04ba65b73be031482d929c0237b34f1afa652f446c14cf941049f5b"
+    },
+    {
+      "ordinal": 24,
+      "shardId": "D02A9-SEMANTIC-SHARD-024",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-024.json",
+      "firstMemberOrdinal": 2301,
+      "lastMemberOrdinal": 2400,
+      "memberCount": 100,
+      "memberRoot": "94faa46866085941758b5f9d3e3e82118164e5eabd85676887db69221aa625e6"
+    },
+    {
+      "ordinal": 25,
+      "shardId": "D02A9-SEMANTIC-SHARD-025",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-025.json",
+      "firstMemberOrdinal": 2401,
+      "lastMemberOrdinal": 2500,
+      "memberCount": 100,
+      "memberRoot": "afe6688c028be970c196f150f3a632dc47d4689ddb1f0f5ecff1898e53896a8b"
+    },
+    {
+      "ordinal": 26,
+      "shardId": "D02A9-SEMANTIC-SHARD-026",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-026.json",
+      "firstMemberOrdinal": 2501,
+      "lastMemberOrdinal": 2600,
+      "memberCount": 100,
+      "memberRoot": "6383d9c9de1a881d2f1de47242df1c08c7ea49eaf98e8cd8ecd392798f91f7e6"
+    },
+    {
+      "ordinal": 27,
+      "shardId": "D02A9-SEMANTIC-SHARD-027",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-027.json",
+      "firstMemberOrdinal": 2601,
+      "lastMemberOrdinal": 2700,
+      "memberCount": 100,
+      "memberRoot": "6f077254b9cfca5850499eea3aa171dc50411447d2cce6bd6e730649aab78c1f"
+    },
+    {
+      "ordinal": 28,
+      "shardId": "D02A9-SEMANTIC-SHARD-028",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-028.json",
+      "firstMemberOrdinal": 2701,
+      "lastMemberOrdinal": 2800,
+      "memberCount": 100,
+      "memberRoot": "5a133faad570544b5f7b0beed008d1456c55e007f4978c7f43b643f9a55cc3ef"
+    },
+    {
+      "ordinal": 29,
+      "shardId": "D02A9-SEMANTIC-SHARD-029",
+      "logicalPath": "docs/planning/d02-a9-openai-responses-data-control-eval-tool-safety-package-2026-08-30/semantic-shards/semantic-shard-029.json",
+      "firstMemberOrdinal": 2801,
+      "lastMemberOrdinal": 2864,
+      "memberCount": 64,
+      "memberRoot": "2552df1d28a9e63ae79e6e4958f24581a4f895e3cc55bc534f41c59e5a834464"
+    }
+  ]
+}

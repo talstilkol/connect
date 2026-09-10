@@ -13,19 +13,47 @@ import {
   requireTeamInvitationKey,
 } from "../../../server/team/teamInvitationValidation.ts";
 import {
+  readInvitationDirection,
+  readInvitationLanguage,
+  readInvitationLocaleLinks,
+  readInvitationMessages,
+} from "../../../shared/i18n/invitation.ts";
+import {
   InvitationAcceptanceForm,
 } from "./InvitationAcceptanceForm.tsx";
 
-export const metadata: Metadata = {
-  title: "הזמנה לצוות | Connect",
-  description:
-    "מסלול מאובטח לקבלת הזמנה לצוות Connect.",
-  referrer: "no-referrer",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+interface TeamInvitationPageProps {
+  params: Promise<{
+    invitationKey: string;
+  }>;
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
+}
+
+async function readPageLanguage(
+  searchParams: TeamInvitationPageProps["searchParams"],
+) {
+  const { lang } = await searchParams;
+
+  return readInvitationLanguage(lang);
+}
+
+export async function generateMetadata({
+  searchParams,
+}: TeamInvitationPageProps): Promise<Metadata> {
+  const language = await readPageLanguage(searchParams);
+  const messages = readInvitationMessages(language);
+
+  return {
+    ...messages.metadata,
+    referrer: "no-referrer",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 function isValidInvitationKey(
   value: unknown,
@@ -42,14 +70,15 @@ function isValidInvitationKey(
 
 export default async function TeamInvitationPage({
   params,
-}: {
-  params: Promise<{
-    invitationKey: string;
-  }>;
-}) {
+  searchParams,
+}: TeamInvitationPageProps) {
   const {
     invitationKey,
   } = await params;
+  const language = await readPageLanguage(searchParams);
+  const messages = readInvitationMessages(language);
+  const direction = readInvitationDirection(language);
+  const homeHref = language === "he" ? "/" : `/${language}`;
   const validKey =
     isValidInvitationKey(
       invitationKey,
@@ -69,14 +98,15 @@ export default async function TeamInvitationPage({
   return (
     <main
       className="invitation-shell"
-      dir="rtl"
+      lang={language}
+      dir={direction}
     >
       <a
         className="skip-link"
         data-e2e-focus-ref="skip-link"
         href="#invitation-content"
       >
-        דילוג לתוכן הראשי
+        {messages.skipLink}
       </a>
 
       <section
@@ -86,10 +116,10 @@ export default async function TeamInvitationPage({
         tabIndex={-1}
       >
         <Link
-          aria-label="Connect - עמוד הבית"
+          aria-label={messages.homeAriaLabel}
           className="public-brand invitation-brand"
           data-e2e-focus-ref="brand-link"
-          href="/"
+          href={homeHref}
         >
           <span
             aria-hidden="true"
@@ -101,29 +131,45 @@ export default async function TeamInvitationPage({
           </span>
           <span>
             <strong>Connect</strong>
-            <small>
-              Team invitation
-            </small>
+            <small>{messages.brandSubtitle}</small>
           </span>
         </Link>
 
+        <div
+          className="public-language-switcher invitation-language-switcher"
+          role="group"
+          aria-label={messages.languageSelectorAriaLabel}
+        >
+          {readInvitationLocaleLinks().map((locale) => (
+            <Link
+              key={locale.language}
+              href={locale.href}
+              hrefLang={locale.language}
+              lang={locale.language}
+              dir={locale.direction}
+              aria-current={
+                locale.language === language
+                  ? "page"
+                  : undefined
+              }
+            >
+              {locale.nativeName}
+            </Link>
+          ))}
+        </div>
+
         <div className="invitation-heading">
           <span className="invitation-kicker">
-            מסלול מאובטח
+            {messages.heading.kicker}
           </span>
           <h1 id="invitation-title">
-            הזמנה להצטרף לצוות
+            {messages.heading.title}
           </h1>
-          <p>
-            הקבלה תתבצע רק לאחר אימות
-            משתמש ואימייל בשרת. פרטי
-            סביבת העבודה אינם נחשפים
-            לפני האימות.
-          </p>
+          <p>{messages.heading.description}</p>
         </div>
 
         <ol
-          aria-label="שלבי קבלת ההזמנה"
+          aria-label={messages.stepsAriaLabel}
           className="invitation-steps"
         >
           <li
@@ -138,12 +184,12 @@ export default async function TeamInvitationPage({
             </span>
             <div>
               <strong>
-                בדיקת הקישור
+                {messages.steps.linkTitle}
               </strong>
               <small>
                 {validKey
-                  ? "מבנה הקישור תקין"
-                  : "הקישור אינו תקין"}
+                  ? messages.steps.validLink
+                  : messages.steps.invalidLink}
               </small>
             </div>
           </li>
@@ -159,11 +205,10 @@ export default async function TeamInvitationPage({
             </span>
             <div>
               <strong>
-                אימות זהות
+                {messages.steps.identityTitle}
               </strong>
               <small>
-                אימות Clerk ואימייל
-                ראשי
+                {messages.steps.identityDescription}
               </small>
             </div>
           </li>
@@ -179,10 +224,10 @@ export default async function TeamInvitationPage({
             </span>
             <div>
               <strong>
-                יצירת חברות
+                {messages.steps.membershipTitle}
               </strong>
               <small>
-                D1 ו־Audit אטומי
+                {messages.steps.membershipDescription}
               </small>
             </div>
           </li>
@@ -191,6 +236,7 @@ export default async function TeamInvitationPage({
         {routeReady ? (
           <InvitationAcceptanceForm
             action={acceptanceAction}
+            language={language}
           />
         ) : (
           <>
@@ -206,14 +252,13 @@ export default async function TeamInvitationPage({
               <div>
                 <strong>
                   {validKey
-                    ? "קבלת ההזמנה עדיין אינה זמינה"
-                    : "לא ניתן להמשיך עם הקישור הזה"}
+                    ? messages.blocked.configurationTitle
+                    : messages.blocked.invalidTitle}
                 </strong>
                 <p>
-                  המסלול נשאר חסום עד
-                  השלמת תצורת הזהות,
-                  סביבת ההפעלה ובדיקת E2E
-                  מאומתת.
+                  {validKey
+                    ? messages.blocked.configurationDescription
+                    : messages.blocked.invalidDescription}
                 </p>
               </div>
             </div>
@@ -226,23 +271,21 @@ export default async function TeamInvitationPage({
                 disabled
                 type="button"
               >
-                קבלת ההזמנה
+                {messages.actions.accept}
               </button>
               <Link
                 className="secondary-button"
                 data-e2e-focus-ref="home-link"
-                href="/"
+                href={homeHref}
               >
-                חזרה לעמוד הבית
+                {messages.actions.backHome}
               </Link>
             </div>
           </>
         )}
 
         <p className="invitation-privacy-note">
-          Connect אינו מציג בקישור
-          פרטי Tenant, כתובת אימייל או
-          מזהה משתמש.
+          {messages.privacyNote}
         </p>
       </section>
     </main>

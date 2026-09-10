@@ -83,6 +83,9 @@ test("passes the system admin session and bounded input to the service", async (
   const testFixture = fixture();
   const input = {
     afterTenantId: 50,
+    search: "tenant",
+    tenantStatus: "active",
+    subscription: "with-subscription",
   };
   const result =
     await testFixture.handler.load(input);

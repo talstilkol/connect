@@ -103,10 +103,8 @@ test("stores a server-verified Meta asset snapshot in tenant scope", async () =>
     "waba-id",
     "phone-number-id",
   ]);
-  assert.match(
-    database.recordings[1].sql,
-    /WHERE tenant_id = \?1/,
-  );
+  assert.equal(database.recordings.length, 1);
+  assert.match(database.recordings[0].sql, /RETURNING/);
 });
 
 test("resolves a webhook tenant only through the unique WABA ID", async () => {
@@ -220,4 +218,45 @@ test("rejects malformed external IDs and event keys before D1 access", async () 
     /eventKey/,
   );
   assert.deepEqual(database.recordings, []);
+});
+
+test("atomic confirmation rejects revocation, replacement, duplicate and stale attempts", async () => {
+  const { DatabaseSync } = await import("node:sqlite");
+  const { readFile } = await import("node:fs/promises");
+  const database = new DatabaseSync(":memory:");
+  try {
+    database.exec(await readFile(new URL("../drizzle/0000_connect_foundation.sql", import.meta.url), "utf8"));
+    database.exec(await readFile(new URL("../drizzle/0006_meta_connection_webhooks.sql", import.meta.url), "utf8"));
+    database.prepare("INSERT INTO tenants (id, display_name) VALUES (?, ?)").run(7, "tenant-name");
+    const repository = createMetaRepository({
+      prepare(sql) {
+        const statement = database.prepare(sql);
+        let values = [];
+        return {
+          bind(...input) { values = input; return this; },
+          async run() { return { success: true, meta: { changes: Number(statement.run(...values).changes) } }; },
+          async first() { return statement.get(...values) ?? null; },
+        };
+      },
+    });
+    const assets = { tenantId: 7, businessPortfolioId: "business-portfolio-id", wabaId: "waba-id", phoneNumberId: "phone-number-id" };
+    const initial = await repository.saveAssetSnapshot(assets);
+    const revoked = await repository.markConnectionStatus(7, "revoked");
+    await assert.rejects(repository.markConnectionConnected(7, revoked.version));
+    await assert.rejects(repository.markConnectionConnected(7, initial.version));
+    assert.equal((await repository.findConnectionByTenantId(7)).status, "revoked");
+    const renewed = await repository.saveAssetSnapshot(assets);
+    await assert.rejects(repository.markConnectionConnected(7, initial.version));
+    const replaced = await repository.saveAssetSnapshot({ ...assets, phoneNumberId: "replacement-phone-id" });
+    await assert.rejects(repository.markConnectionConnected(7, renewed.version));
+    assert.equal((await repository.findConnectionByTenantId(7)).status, "pending");
+    const connected = await repository.markConnectionConnected(7, replaced.version);
+    assert.equal(connected.status, "connected");
+    assert.equal(connected.version, replaced.version + 1);
+    await assert.rejects(repository.markConnectionConnected(7, replaced.version));
+    assert.equal((await repository.findConnectionByTenantId(7)).version, connected.version);
+    await assert.rejects(repository.markConnectionConnected(7, undefined));
+  } finally {
+    database.close();
+  }
 });

@@ -1,0 +1,38 @@
+import type { InterfaceLanguage } from "../../shared/domain/businessProfileDraft.ts";
+export const metaMediaTaskMessages = {
+  he: {
+    operatorRequests: "בקשות בדיקה נוספות",
+    title: "אבחון סנכרון מדיה", intro: "מעקב אחר העלאה ובדיקה של קבצים מהיסטוריית WhatsApp.",
+    notice: "מוצגים מצב המשימות וראיות סריקה שנשמרו. המידע אינו אישור שהקובץ זמין או בטוח כעת.",
+    back: "חזרה להגדרת WhatsApp", refresh: "רענון המצב", first: "לעמוד הראשון", next: "למשימות הבאות", empty: "אין משימות מדיה בעמוד זה.",
+    emptyDetail: "היעדר משימות אינו מוכיח שהסנכרון הושלם או שהעיבוד פעיל.",
+    upload: "העלאה להסגר", inspect: "בדיקת הקובץ", attempts: "ניסיונות", updated: "עדכון אחרון (UTC)", nextAt: "ניסיון נוסף — לא לפני (UTC)",
+    id: "מזהה משימה לתפעול", evidence: "תוצאות סריקה שנשמרו", noEvidence: "לא נשמרה תוצאת סריקה", pageCount: "משימות בעמוד זה",
+    states: { pending: "ממתינה", running: "בעיבוד", done: "השלב הסתיים", blocked: "נעצרה", "recovery-required": "דורשת טיפול", cancelled: "בוטלה" },
+    attention: { none: "", "scan-conflict": "נשמרו ראיות לכמה גרסאות קובץ. נדרשת בדיקה תפעולית.", "scan-blocked": "נשמרה תוצאת סריקה חוסמת. נדרשת בדיקת האחסון והסריקה.", "attempt-limit": "מכסת הניסיונות מוצתה. נדרשת בדיקה תפעולית.", "review-required": "נדרשת בדיקה. סיבת העצירה המדויקת אינה זמינה ברישום זה.", cancelled: "המשימה בוטלה. סיבת הביטול המדויקת אינה זמינה ברישום זה.", "lease-expired": "זמן העבודה שהוקצה פג. ממתינה להתאוששות של העיבוד." },
+    scans: { ACCESS_DENIED: "גישה לסריקה נדחתה", FAILED: "הסריקה נכשלה", NO_THREATS_FOUND: "לא נמצאו איומים בסריקה שנשמרה", PENDING: "תוצאת הסריקה הייתה בהמתנה", THREATS_FOUND: "נמצאו איומים", UNSUPPORTED: "הסריקה אינה נתמכת" },
+    failures: { "configuration-required": "אבחון המדיה אינו זמין עד להשלמת הגדרת השירות.", "onboarding-required": "נדרשת סביבת עבודה פעילה.", "tenant-selection-required": "יש לבחור סביבת עבודה.", "permission-denied": "הצפייה באבחון זמינה לבעלים של סביבת העבודה בלבד.", "invalid-request": "קישור העמוד אינו תקין או אינו שייך לסביבת העבודה הנוכחית. חזרו לעמוד הראשון.", "server-error": "לא ניתן לקרוא את מצב המשימות כעת. אפשר לנסות לרענן." },
+  },
+  en: {
+    operatorRequests: "Additional check requests",
+    title: "Media sync diagnostics", intro: "Track upload and inspection of files from WhatsApp history.",
+    notice: "This shows task progress and saved scan evidence. It does not confirm that a file is currently available or safe.",
+    back: "Back to WhatsApp setup", refresh: "Refresh status", first: "First page", next: "Next tasks", empty: "No media tasks on this page.", emptyDetail: "An empty page does not confirm that sync is complete or processing is enabled.",
+    upload: "Upload to quarantine", inspect: "File inspection", attempts: "Attempts", updated: "Last update (UTC)", nextAt: "Next attempt — not before (UTC)", id: "Task reference", evidence: "Saved scan results", noEvidence: "No scan result recorded", pageCount: "Tasks on this page",
+    states: { pending: "Waiting", running: "Processing", done: "Step finished", blocked: "Stopped", "recovery-required": "Needs attention", cancelled: "Cancelled" },
+    attention: { none: "", "scan-conflict": "Evidence refers to multiple file versions. Operational review is required.", "scan-blocked": "A blocking scan result was recorded. Review storage and scanning.", "attempt-limit": "The attempt limit was reached. Operational review is required.", "review-required": "Review is required. The exact cause is unavailable in this record.", cancelled: "The task was cancelled. The exact cause is unavailable in this record.", "lease-expired": "The allotted processing time expired. Waiting for worker recovery." },
+    scans: { ACCESS_DENIED: "Scan access denied", FAILED: "Scan failed", NO_THREATS_FOUND: "No threats found in the saved scan", PENDING: "Scan result was pending", THREATS_FOUND: "Threats found", UNSUPPORTED: "Scan unsupported" },
+    failures: { "configuration-required": "Media diagnostics require service configuration.", "onboarding-required": "An active workspace is required.", "tenant-selection-required": "Select a workspace.", "permission-denied": "Only the workspace owner can view diagnostics.", "invalid-request": "This page link is invalid or belongs to another workspace. Return to the first page.", "server-error": "Task status is temporarily unavailable. Try refreshing." },
+  },
+  ar: {
+    operatorRequests: "طلبات تحقق إضافية",
+    title: "تشخيص مزامنة الوسائط", intro: "متابعة رفع وفحص الملفات من سجل WhatsApp.",
+    notice: "تُعرض حالة المهام ونتائج الفحص المحفوظة. لا يؤكد ذلك أن الملف متاح أو آمن الآن.",
+    back: "العودة إلى إعداد WhatsApp", refresh: "تحديث الحالة", first: "الصفحة الأولى", next: "المهام التالية", empty: "لا توجد مهام وسائط في هذه الصفحة.", emptyDetail: "الصفحة الفارغة لا تؤكد اكتمال المزامنة أو تفعيل المعالجة.",
+    upload: "الرفع إلى الحجر", inspect: "فحص الملف", attempts: "المحاولات", updated: "آخر تحديث (UTC)", nextAt: "المحاولة التالية — ليس قبل (UTC)", id: "مرجع المهمة", evidence: "نتائج الفحص المحفوظة", noEvidence: "لم تُحفظ نتيجة فحص", pageCount: "المهام في هذه الصفحة",
+    states: { pending: "بانتظار المعالجة", running: "قيد المعالجة", done: "انتهت المرحلة", blocked: "متوقفة", "recovery-required": "تحتاج إلى معالجة", cancelled: "ملغاة" },
+    attention: { none: "", "scan-conflict": "تشير الأدلة إلى إصدارات متعددة للملف. تلزم مراجعة تشغيلية.", "scan-blocked": "حُفظت نتيجة فحص تمنع المتابعة. راجع التخزين والفحص.", "attempt-limit": "بلغ عدد المحاولات الحد المسموح. تلزم مراجعة تشغيلية.", "review-required": "تلزم مراجعة. السبب الدقيق غير متاح في هذا السجل.", cancelled: "أُلغيت المهمة. السبب الدقيق غير متاح في هذا السجل.", "lease-expired": "انتهى الوقت المخصص للمعالجة. بانتظار استعادة المعالجة." },
+    scans: { ACCESS_DENIED: "رُفض الوصول للفحص", FAILED: "فشل الفحص", NO_THREATS_FOUND: "لم يُعثر على تهديدات في الفحص المحفوظ", PENDING: "كانت نتيجة الفحص قيد الانتظار", THREATS_FOUND: "عُثر على تهديدات", UNSUPPORTED: "الفحص غير مدعوم" },
+    failures: { "configuration-required": "يتطلب تشخيص الوسائط إكمال إعداد الخدمة.", "onboarding-required": "يلزم وجود مساحة عمل نشطة.", "tenant-selection-required": "اختر مساحة عمل.", "permission-denied": "يمكن لمالك مساحة العمل فقط عرض التشخيص.", "invalid-request": "رابط الصفحة غير صالح أو يخص مساحة عمل أخرى. ارجع إلى الصفحة الأولى.", "server-error": "حالة المهام غير متاحة مؤقتًا. حاول التحديث." },
+  },
+} as const satisfies Record<InterfaceLanguage, unknown>;

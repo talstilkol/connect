@@ -1,0 +1,154 @@
+{
+  "acceptanceCredit": 0,
+  "artifactClass": "PLANNING-ONLY;NON-AUTHORITY;NON-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V7-ATOMIC-PACKAGE-MANIFEST-2026-08-30-G0",
+  "authorityCredit": 0,
+  "closureCrosswalkPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-closure-crosswalk-2026-08-30.json",
+  "closureCrosswalkSha256": "3a28e688df883e5fb79fa9cfb630492b6ebd6e70f1f6dc6627f9e4a9f5daccf8",
+  "currentState": {
+    "B0": "ABSENT",
+    "Gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC"
+  },
+  "everyMemberBelowMaximum": true,
+  "largestMemberBytes": 272356,
+  "manifestProjectionRoot": "4904f13797a57a3bf9098e576b60cf1c0fa789216af05f641e19f1c36f1f7ec6",
+  "maximumPublicGitMemberBytesExclusive": 52428800,
+  "memberCount": 12,
+  "members": [
+    {
+      "bytes": 81523,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-normative-registry-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 1,
+      "required": true,
+      "role": "NORMATIVE-REGISTRY",
+      "sha256": "30022cabd3590005524d4f75ec5ce35a09cd3947dc77e1a6bcdb070a239483f9"
+    },
+    {
+      "bytes": 33884,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-2026-08-30.md",
+      "mediaType": "text/markdown",
+      "ordinal": 2,
+      "required": true,
+      "role": "SUBJECT",
+      "sha256": "2bc67251748cde019ffeeaf00da80f4f8f8e8d077c36ffee2c1744fab945a7c9"
+    },
+    {
+      "bytes": 12027,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-frozen-source-index-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 3,
+      "required": true,
+      "role": "FROZEN-SOURCE-INDEX",
+      "sha256": "206be84f7664abcee907a3aa6bf0ede3ee2f05497c0ca5bf870f0561fbb85c4f"
+    },
+    {
+      "bytes": 101096,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-closure-crosswalk-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 4,
+      "required": true,
+      "role": "CLOSURE-CROSSWALK",
+      "sha256": "3a28e688df883e5fb79fa9cfb630492b6ebd6e70f1f6dc6627f9e4a9f5daccf8"
+    },
+    {
+      "bytes": 3167,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-validator-and-state-machine-corpus-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 5,
+      "required": true,
+      "role": "VECTOR-CORPUS-INDEX",
+      "sha256": "85ae17da25a06f6a448e82e59bc5f3ab9ef449389de36f786989af34be82a1fb"
+    },
+    {
+      "bytes": 175657,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-validator-and-state-machine-corpus-shard-01-of-02-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 6,
+      "required": true,
+      "role": "VECTOR-SHARD",
+      "sha256": "d5d2a32d92c74b786b183d201e5d5a3820b7ad99d212f226d50e25883ee6bc94"
+    },
+    {
+      "bytes": 272356,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-validator-and-state-machine-corpus-shard-02-of-02-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 7,
+      "required": true,
+      "role": "VECTOR-SHARD",
+      "sha256": "42aafb6e5188baf0539e300843732bcf065e385cb590da6af6cd8334a3facd9b"
+    },
+    {
+      "bytes": 11084,
+      "logicalPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-independent-interface-evidence-2026-08-30.json",
+      "mediaType": "application/json",
+      "ordinal": 8,
+      "required": true,
+      "role": "INDEPENDENT-ACTUAL-INTERFACE-EVIDENCE",
+      "sha256": "1ea411d3a281d0694d8c5f9e75c28188f3c2cee176ab13d074d58d4739d89fb8"
+    },
+    {
+      "bytes": 6226,
+      "logicalPath": "docs/planning/qa/generate-b0-v7-interface-evidence.py",
+      "mediaType": "text/x-python",
+      "ordinal": 9,
+      "required": true,
+      "role": "INDEPENDENT-ACTUAL-INTERFACE-PRODUCER",
+      "sha256": "e0aba014af4976e4cae25f0342cdbd765d0d110c2d6179e0c0b20ba0d98e3570"
+    },
+    {
+      "bytes": 88171,
+      "logicalPath": "docs/planning/qa/generate-b0-v7-package.mjs",
+      "mediaType": "text/javascript",
+      "ordinal": 10,
+      "required": true,
+      "role": "PACKAGE-PRODUCER",
+      "sha256": "d1457009fc98a9062618b81c9d79ec26c5737fdffb8bcfa294086ee5fac8aa88"
+    },
+    {
+      "bytes": 39898,
+      "logicalPath": "docs/planning/qa/b0-v7-qa-reader-a.mjs",
+      "mediaType": "text/javascript",
+      "ordinal": 11,
+      "required": true,
+      "role": "INDEPENDENT-QA-READER-A",
+      "sha256": "0a2c039da68d21e3dbfb1410da858743cd7660ad4374b7bd50ad640b71f5b2dc"
+    },
+    {
+      "bytes": 44591,
+      "logicalPath": "docs/planning/qa/b0-v7-qa-reader-b.py",
+      "mediaType": "text/x-python",
+      "ordinal": 12,
+      "required": true,
+      "role": "INDEPENDENT-QA-READER-B",
+      "sha256": "916c5aee77d0c6d4b91b20e84b2f957cab5a4a550b8778c04248b01b5a28b7d8"
+    }
+  ],
+  "normativeRegistryPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-normative-registry-2026-08-30.json",
+  "normativeRegistrySha256": "30022cabd3590005524d4f75ec5ce35a09cd3947dc77e1a6bcdb070a239483f9",
+  "packageContentRoot": "f9e634757856863458380ccb27b143086a64d5307b5652e0b5153932252cd098",
+  "predecessorPackageContentRoot": "ed00ecb49e5053ca85ff7cccacc7378b36efe5cdb78f1aa6ca00550026372c2f",
+  "requiredMemberCount": 12,
+  "rootAlgorithm": {
+    "algorithm": "SHA-256",
+    "canonicalization": "UTF8;OBJECT-KEYS-LEXICOGRAPHIC;ARRAY-ORDER-PRESERVED;SAFE-INTEGERS-ONLY",
+    "domain": "B0V7-PACKAGE-CONTENT-ROOT-V1",
+    "projectionFields": [
+      "ordinal",
+      "logicalPath",
+      "sha256",
+      "bytes",
+      "required"
+    ]
+  },
+  "schemaVersion": "B0V7-ATOMIC-PACKAGE-MANIFEST-V1",
+  "selfAcceptance": false,
+  "sourceIndexPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-frozen-source-index-2026-08-30.json",
+  "sourceIndexSha256": "206be84f7664abcee907a3aa6bf0ede3ee2f05497c0ca5bf870f0561fbb85c4f",
+  "subjectPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-2026-08-30.md",
+  "subjectSha256": "2bc67251748cde019ffeeaf00da80f4f8f8e8d077c36ffee2c1744fab945a7c9",
+  "vectorCorpusPath": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v7-validator-and-state-machine-corpus-2026-08-30.json",
+  "vectorCorpusSha256": "85ae17da25a06f6a448e82e59bc5f3ab9ef449389de36f786989af34be82a1fb"
+}

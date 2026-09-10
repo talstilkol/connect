@@ -1,0 +1,29 @@
+{
+  "schema": "CONNECT-DISCOVERY-CUTOFF-MANIFEST-ENVELOPE-V1",
+  "payload": {
+    "schema": "CONNECT-DISCOVERY-CUTOFF-MANIFEST-PAYLOAD-V1",
+    "observedHead": "0f0b0e9a1bbd8b0234054793394a8a948b94246d",
+    "outputRegistry": {
+      "path": "docs/planning/discovery-cutoff-output-path-registry-v1-2026-08-30.json",
+      "sha256": "42ea8832908ba8836fefe20bf05ac2afd5d2afd500f6917f451931aa9a510f10"
+    },
+    "members": [
+      {
+        "path": "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/receipt.json",
+        "byteLength": 5642,
+        "sha256": "c9fad635995afb8ee77c32e55bc8ce49dda673c3b1999c79f8126e4c424e641f",
+        "payloadSha256": "cbb0ffecddd1cdc3461ac5884d7eb8e4d1b9fba39344243b996b152c5180afda"
+      },
+      {
+        "path": "docs/planning/discovery-cutoff-candidate-v1-2026-08-30/source-candidates.json",
+        "byteLength": 2063,
+        "sha256": "1eb02a2fbd8d3ac3f399c63d2fe50ed1b4eaab5f1f6284ff94a2d968851166bd",
+        "payloadSha256": "f274f6a28933f8b8eb6f0d7a38cc21a172ba03e9f14d773145909bd557214699"
+      }
+    ],
+    "packageContentRootSha256": "a790725dc20b73094f7317503850641bcfea748d56bea480500c00ee87a97c17",
+    "selfMembership": false,
+    "verificationReportMembership": false
+  },
+  "payloadSha256": "870a3d1a8437ba049aa4a6d3c4d064dcc44f7ec4f3f9a35947baae7d02f191f5"
+}

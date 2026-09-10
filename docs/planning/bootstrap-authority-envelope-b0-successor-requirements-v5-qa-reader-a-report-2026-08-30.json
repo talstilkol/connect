@@ -1,0 +1,120 @@
+{
+  "artifactId": "CONNECT-B0-V5-INDEPENDENTLY-IMPLEMENTED-QA-READER-A-REPORT-2026-08-30-G0",
+  "artifactClass": "DETACHED-PRODUCER-QA-READER-REPORT;PLANNING-MECHANICAL-EVIDENCE-ONLY;NOT-INDEPENDENT-HOSTILE-REVIEW;NOT-AUTHORITY;NOT-ACCEPTANCE",
+  "readerLanguage": "JAVASCRIPT-NODE-BUILTINS-ONLY",
+  "atomicPackageManifestSha256": "5a054f5d4a482a0e74a9146dd3aeee865a5f28ee245d76784dbaa03ed3a118c4",
+  "packageContentRoot": "666e121d998445e3134f3a1978ee9b7c5962324bd51376e2ebc5bf2646d689f8",
+  "checkCount": 20,
+  "passedCheckCount": 20,
+  "failedCheckCount": 0,
+  "planningDslVectorPassCount": 288,
+  "operationalVectorExecutionCount": 0,
+  "independentlyClosedFindingCount": "0/12",
+  "acceptedRequirementCount": "0/96",
+  "Gate29": "BLOCKED",
+  "verdict": "MECHANICAL-PASS",
+  "checks": [
+    {
+      "name": "frozen-input-roots",
+      "state": "PASS",
+      "detail": "8/8"
+    },
+    {
+      "name": "atomic-member-hashes-and-package-root",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "cross-root-bindings",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "requirements-and-five-fields",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "non-merged-finding-replacements",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "literal-atom-supersessions",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "source-index-artifacts-and-member-spans",
+      "state": "PASS",
+      "detail": "7973/7973"
+    },
+    {
+      "name": "inherited-v4-requirements-and-fields",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "all-inherited-source-references-resolve",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "named-use-and-interface-instances",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "closed-mutable-head-map",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "acceptance-permit-field-closure",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "witness-and-nine-class-independence",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "genesis-schema-and-first-permit",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "acceptance-cas-compare-order-and-recovery",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "recovery-quorum-and-role-separation",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "directive-head-and-bounded-convergence",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "public-output-and-zero-state",
+      "state": "PASS",
+      "detail": "verified"
+    },
+    {
+      "name": "causal-vector-corpus",
+      "state": "PASS",
+      "detail": "288/288"
+    },
+    {
+      "name": "public-package-path-and-sensitive-projection-scan",
+      "state": "PASS",
+      "detail": "no-machine-local-public-paths"
+    }
+  ],
+  "authorityCredit": 0,
+  "acceptanceCredit": 0
+}

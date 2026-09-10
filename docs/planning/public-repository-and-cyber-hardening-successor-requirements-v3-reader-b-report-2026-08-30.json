@@ -1,0 +1,66 @@
+{
+  "artifactId": "CONNECT-PUBLIC-REPOSITORY-CYBER-HARDENING-V3-READER-B-REPORT-2026-08-30",
+  "readerId": "PRCV3-READER-B",
+  "readerPath": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-reader-b-2026-08-30.mjs",
+  "readerSha256": "31ca4f4724a88b3a5780a306136a3a5d224fa610f489564e1dc9a691f45e9901",
+  "profile": "INDEX-MEMBERSHIP-PLUS-KAHN-TOPOLOGY-PLUS-REDUCER-MUTATION",
+  "stdlibModules": [
+    "node:fs",
+    "node:path",
+    "node:crypto"
+  ],
+  "sharedLocalModules": 0,
+  "memberRoots": [
+    {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-2026-08-30.md",
+      "sha256": "a93bc7bde79f6427e69d70bd55280cd7fb7f3e3dc9bd30bb62e3be607dcf2c30",
+      "bytes": 49169,
+      "lines": 820
+    },
+    {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-typed-registries-2026-08-30.json",
+      "sha256": "b6ac2d2cbb6e0048fba1a36f53be1fa0cc4e96d163c9385b6b90cae3558d4385",
+      "bytes": 126824,
+      "lines": 4391
+    },
+    {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-producer-dependency-graph-2026-08-30.json",
+      "sha256": "15ac5c3e515af79e3deedaa4dfb130632a9f0f874e93e2bee0132c33da7681e5",
+      "bytes": 91408,
+      "lines": 3247
+    },
+    {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-operation-oracle-vector-pack-2026-08-30.json",
+      "sha256": "1f13d5641ca923ffa84ff5f8c84744ef50f397359373193fdf91ca9104e4048b",
+      "bytes": 57078,
+      "lines": 1764
+    },
+    {
+      "path": "docs/planning/public-repository-and-cyber-hardening-successor-requirements-v3-finding-closure-registry-2026-08-30.json",
+      "sha256": "a19a2771f218883a9ab9ab0678e956dfefdb23970cfdac92fc247c6c87708f5f",
+      "bytes": 68374,
+      "lines": 1395
+    }
+  ],
+  "coreContentRoot": "3c89fdee750784e12c1776728fb0551c2dfa9dc7b0a4efe94288d74d39c7af51",
+  "checks": {
+    "requirements": 56,
+    "outputs": 56,
+    "producers": 56,
+    "graphNodes": 187,
+    "graphEdges": 349,
+    "closures": 59,
+    "vectors": 59,
+    "vectorTerminalMatches": 59,
+    "forbiddenLocatorMatches": 0
+  },
+  "errors": [],
+  "result": "PASS-PLANNING-PACKAGE",
+  "claimLimit": "No operational, GitHub, provider, Product, Push, deploy, release or Acceptance credit.",
+  "currentDisposition": {
+    "acceptance": 0,
+    "repositoryVisibility": "PUBLIC",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE"
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "artifactClass": "ONE-TO-ONE-FINDING-CONTROL-CROSSWALK",
+  "artifactId": "MPRR-V1-10-CROSSWALK-2026-08-30-G1",
+  "closureCount": 0,
+  "crosswalkRoot": "8c3c00d2eb1ec4fbe631b6bd27820266d3ee86b8e062af75e1f137060a692196",
+  "findingCount": 17,
+  "inheritedFindingCount": 40,
+  "inheritedIndependentMechanicalClosureCount": 1,
+  "repositoryVisibility": "PUBLIC",
+  "rows": [
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-001",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-CLOSURE-EXECUTION"
+      ],
+      "findingId": "MPRR-V19-IHR-F001",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 1,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-001"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-002",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F002",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 2,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-002"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-003",
+      "externalEvidenceRequired": [
+        "SEVEN-SIGNED-APPOINTMENTS"
+      ],
+      "findingId": "MPRR-V19-IHR-F003",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 3,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-003"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-004",
+      "externalEvidenceRequired": [
+        "APPROVED-SIGNATURE-ADAPTER",
+        "TRUSTED-TIME",
+        "REVOCATION"
+      ],
+      "findingId": "MPRR-V19-IHR-F004",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 4,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-004"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-005",
+      "externalEvidenceRequired": [
+        "TWO-INDEPENDENT-SCANNERS"
+      ],
+      "findingId": "MPRR-V19-IHR-F005",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 5,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-005"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-006",
+      "externalEvidenceRequired": [
+        "AUTHENTICATED-REMOTE-PUBLIC"
+      ],
+      "findingId": "MPRR-V19-IHR-F006",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 6,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-006"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-007",
+      "externalEvidenceRequired": [
+        "DURABLE-CAS-ADAPTER"
+      ],
+      "findingId": "MPRR-V19-IHR-F007",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 7,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-007"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-008",
+      "externalEvidenceRequired": [
+        "DURABLE-RECOVERY-ADAPTER"
+      ],
+      "findingId": "MPRR-V19-IHR-F008",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 8,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-008"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-009",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-PREDECESSOR-ORACLE"
+      ],
+      "findingId": "MPRR-V19-IHR-F009",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 9,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-009"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-010",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-SEMANTIC-RECEIPT"
+      ],
+      "findingId": "MPRR-V19-IHR-F010",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 10,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-010"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-011",
+      "externalEvidenceRequired": [
+        "OPERATION-INSTRUMENTATION"
+      ],
+      "findingId": "MPRR-V19-IHR-F011",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 11,
+      "severity": "P0",
+      "testId": "MPRRV110-MUTATION-011"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-012",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F012",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 12,
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-012"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-013",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F013",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 13,
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-013"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-014",
+      "externalEvidenceRequired": [],
+      "findingId": "MPRR-V19-IHR-F014",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 14,
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-014"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-015",
+      "externalEvidenceRequired": [
+        "SAFE-DESCRIPTOR-BOUND-REPORT-ADAPTER"
+      ],
+      "findingId": "MPRR-V19-IHR-F015",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 15,
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-015"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-016",
+      "externalEvidenceRequired": [
+        "APPROVED-GLOBAL-ARTIFACT-BUDGET"
+      ],
+      "findingId": "MPRR-V19-IHR-F016",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 16,
+      "severity": "P2",
+      "testId": "MPRRV110-MUTATION-016"
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "MPRRV110-CONTROL-017",
+      "externalEvidenceRequired": [
+        "THREE-INDEPENDENT-REVIEWER-APPOINTMENTS"
+      ],
+      "findingId": "MPRR-V19-IHR-F017",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 17,
+      "severity": "P1",
+      "testId": "MPRRV110-MUTATION-017"
+    }
+  ],
+  "schemaVersion": "MPRR-V1-10-CROSSWALK-V1"
+}

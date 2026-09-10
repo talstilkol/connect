@@ -5,6 +5,7 @@ import {
 import test from "node:test";
 
 import {
+  buildDeploymentProvenanceEvidence,
   deriveDeploymentProvenanceEvidenceDigest,
   inspectDeploymentProvenanceEvidence,
 } from "../server/operations/deploymentProvenanceEvidence.ts";
@@ -114,6 +115,60 @@ test("accepts production deployment provenance linked to one release", () => {
         "DEPLOYMENT_PROVENANCE_EVIDENCE_VERIFIED",
       verifiedAssetCount: 6,
     },
+  );
+});
+
+test("builds release-bound deployment provenance from a verified provider identity", () => {
+  const manifest = createReleaseManifest();
+  const evidence =
+    buildDeploymentProvenanceEvidence({
+      verifiedAt:
+        "2026-07-27T11:00:00.000Z",
+      releaseManifest: {
+        releaseId: manifest.releaseId,
+        commitSha: manifest.commitSha,
+        treeSha: manifest.treeSha,
+        packageLockSha256:
+          manifest.packageLockSha256,
+        migrationSetSha256:
+          manifest.migrationSetSha256,
+      },
+      artifactDigest:
+        fingerprint("artifact"),
+      deploymentIdentity:
+        "production:deployment:version:etag",
+    });
+
+  assert.equal(
+    inspectDeploymentProvenanceEvidence(
+      createEnvironment(evidence),
+      now,
+    ).status,
+    "configured",
+  );
+  assert.throws(
+    () =>
+      buildDeploymentProvenanceEvidence({
+        verifiedAt:
+          "2026-07-27T11:00:00.000Z",
+        releaseManifest: {
+          releaseId:
+            `connect_release_v1_${"9".repeat(
+              64,
+            )}`,
+          commitSha: manifest.commitSha,
+          treeSha: manifest.treeSha,
+          packageLockSha256:
+            manifest.packageLockSha256,
+          migrationSetSha256:
+            manifest.migrationSetSha256,
+        },
+        artifactDigest:
+          fingerprint("artifact"),
+        deploymentIdentity:
+          "production:deployment:version:etag",
+      }),
+    /DEPLOYMENT_PROVENANCE_SNAPSHOT_INVALID/,
   );
 });
 

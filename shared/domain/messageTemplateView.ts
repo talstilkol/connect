@@ -14,6 +14,8 @@ export type MessageTemplateDirectoryStatus =
 export interface MessageTemplateView
   extends MessageTemplateDefinition {
   templateKey: string;
+  /** Absent on older API responses; those responses cannot be submitted. */
+  version?: number;
   name: PersistedMessageTemplate["name"];
   category: PersistedMessageTemplate["category"];
   language: PersistedMessageTemplate["language"];

@@ -192,6 +192,7 @@ export function observeCampaignDeliveryQueueHandler(
                 counts: {
                   accepted: 0,
                   rejected: 0,
+                  deferred: 0,
                   skipped: 0,
                   duplicates: 0,
                   ambiguous: 0,

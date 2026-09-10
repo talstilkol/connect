@@ -1,0 +1,14 @@
+{
+  "artifactClass": "PRODUCER-SELF-QA-NOT-INDEPENDENT-NOT-ACCEPTANCE",
+  "artifactId": "CONNECT-B0-V8-PRODUCER-QA-2026-08-30-G0",
+  "b0": "ABSENT",
+  "externalClosureCount": 0,
+  "findingControlCount": 14,
+  "gate29": "BLOCKED",
+  "generatedAt": "2026-08-30T18:47:03Z",
+  "mutationBlockedCount": 14,
+  "packageContentRoot": "5924a37e573bd7b921f319c98f5595b7ee634250e552f458284a163ba9e7653b",
+  "reportRoot": "2581c3de8c760c8e1580da1e2d156af06284e4f2bab918a4cc42a1c541046d45",
+  "result": "PASS-LOCAL-CANDIDATE-NOT-ACCEPTED",
+  "sourceCommit": "e458970e81ca5d0cb092fbf590a98631d6358276"
+}

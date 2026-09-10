@@ -14,7 +14,7 @@ async function readSource(path) {
   );
 }
 
-test("composes invitations through a protected fail-closed server action", async () => {
+test("routes invitation requests through the protected Railway boundary", async () => {
   const source =
     await readSource(
       "server/team/teamInvitationActions.ts",
@@ -26,31 +26,15 @@ test("composes invitations through a protected fail-closed server action", async
   );
   assert.match(
     source,
-    /requireCurrentTenantMutationSession/,
-  );
-  assert.match(
-    source,
-    /createTeamInvitationRepository/,
-  );
-  assert.match(
-    source,
-    /createTeamInvitationRequestService/,
-  );
-  assert.match(
-    source,
-    /requireRuntimeTeamInvitationPublisher/,
-  );
-  assert.match(
-    source,
-    /requireTeamInvitationPolicy/,
+    /createCurrentRailwayTeamInvitationRequestHandler/,
   );
   assert.doesNotMatch(
     source,
-    /createUnavailableTeamInvitationProvider|createTeamInvitationService/,
+    /requireRuntimeDatabase|requireCurrentTenantMutationSession|createTeamInvitationRepository|requireRuntimeTeamInvitationPublisher|requireTeamInvitationPolicy/,
   );
   assert.doesNotMatch(
     source,
-    /requireCurrentTenantSession/,
+    /requireCurrentTenantSession|createUnavailableTeamInvitationProvider/,
   );
 });
 
@@ -77,7 +61,7 @@ test("keeps invitation actions and sensitive identities outside React", async ()
   );
 });
 
-test("accepts invitations only through the verified Clerk server boundary", async () => {
+test("accepts invitations only through the protected Railway boundary", async () => {
   const [
     action,
     identity,
@@ -86,7 +70,7 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
       "server/team/teamInvitationAcceptanceActions.ts",
     ),
     readSource(
-      "server/team/clerkTeamInvitationIdentityVerifier.ts",
+      "server/platform/clerkRailwayTeamInvitationIdentityResolver.ts",
     ),
   ]);
 
@@ -96,19 +80,7 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
   );
   assert.match(
     action,
-    /createTeamInvitationAcceptanceRepository/,
-  );
-  assert.match(
-    action,
-    /createTeamInvitationAcceptanceService/,
-  );
-  assert.match(
-    action,
-    /createClerkTeamInvitationIdentityContext/,
-  );
-  assert.match(
-    action,
-    /inspectTeamInvitationAcceptanceActivation/,
+    /createCurrentRailwayTeamInvitationAcceptanceHandler/,
   );
   assert.match(
     action,
@@ -116,7 +88,7 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
   );
   assert.doesNotMatch(
     action,
-    /requireCurrentTenantSession|requireCurrentTenantMutationSession/,
+    /requireRuntimeDatabase|createTeamInvitationAcceptanceRepository|createTeamInvitationAcceptanceService|createClerkTeamInvitationIdentityContext|requireCurrentTenantSession|requireCurrentTenantMutationSession/,
   );
   assert.match(
     identity,
@@ -124,18 +96,21 @@ test("accepts invitations only through the verified Clerk server boundary", asyn
   );
   assert.match(
     identity,
-    /enforceCurrentTenantMutationRateLimit/,
+    /client\.users\.getUser/,
   );
 });
 
 test("keeps the invitation landing route private and activation-gated", async () => {
-  const [source, form] =
+  const [source, form, presentation] =
     await Promise.all([
       readSource(
         "app/invite/[invitationKey]/page.tsx",
       ),
       readSource(
         "app/invite/[invitationKey]/InvitationAcceptanceForm.tsx",
+      ),
+      readSource(
+        "shared/i18n/invitation.ts",
       ),
     ]);
 
@@ -177,8 +152,24 @@ test("keeps the invitation landing route private and activation-gated", async ()
   );
   assert.match(
     form,
-    /case "sign-in-required"/,
+    /readInvitationResultMessage\(language, result\)/,
   );
+  for (const status of [
+    "accepted",
+    "already-accepted",
+    "sign-in-required",
+    "identity-verification-required",
+    "invitation-unavailable",
+    "invalid-input",
+    "temporarily-unavailable",
+    "configuration-required",
+    "server-error",
+  ]) {
+    assert.match(
+      presentation,
+      new RegExp(`(?:"${status}"|${status}):`),
+    );
+  }
   for (const focusReference of [
     "skip-link",
     "brand-link",

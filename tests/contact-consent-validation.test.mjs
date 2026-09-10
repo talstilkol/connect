@@ -36,3 +36,17 @@ test("requires a real source and timestamp", () => {
     { field: "occurredAt", code: "unsupported" },
   ]);
 });
+
+test("rejects oversized or controlled consent evidence before persistence", () => {
+  const result = validateContactConsentTransition({
+    source: `source-${"a".repeat(250)}`,
+    occurredAt: "2026-07-25T09:34:56.000Z",
+    evidenceReference: "evidence\nreference",
+  });
+
+  assert.equal(result.success, false);
+  assert.deepEqual(result.issues, [
+    { field: "source", code: "unsupported" },
+    { field: "evidenceReference", code: "unsupported" },
+  ]);
+});

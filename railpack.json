@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "packages": {
+    "node": "24"
+  },
+  "steps": {
+    "install": {
+      "commands": ["npm ci --include=dev"]
+    }
+  }
+}

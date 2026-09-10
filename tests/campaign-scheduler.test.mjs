@@ -14,6 +14,7 @@ const secondDeliveryKey =
 
 function fixture(options = {}) {
   const calls = [];
+  let queueCalls = 0;
   const repository = {
     async completeSettledCampaigns(timestamp, limit) {
       calls.push({
@@ -70,12 +71,16 @@ function fixture(options = {}) {
   };
   const queue = {
     async sendBatch(messages) {
+      queueCalls += 1;
       calls.push({
         operation: "send-batch",
         messages,
       });
 
-      if (options.queueError) {
+      if (
+        options.queueError ||
+        options.queueErrorAt === queueCalls
+      ) {
         throw options.queueError;
       }
     },
@@ -128,6 +133,53 @@ test("promotes due campaigns and publishes one bounded JSON batch", async () => 
         contentType: "json",
       },
     ],
+  );
+});
+
+test("splits claimed recipients into queue batches of at most ten", async () => {
+  const jobs = Array.from({ length: 25 }, (_unused, index) => ({
+    deliveryKey:
+      `campaign_delivery_v1_${index.toString(16).padStart(64, "0")}`,
+  }));
+  const testFixture = fixture({ jobs });
+
+  assert.deepEqual(
+    await testFixture.scheduler.run(),
+    {
+      completedCampaigns: 1,
+      promotedCampaigns: 1,
+      queuedRecipients: 25,
+    },
+  );
+  const batches = testFixture.calls.filter(
+    (call) => call.operation === "send-batch",
+  );
+  assert.deepEqual(
+    batches.map((batch) => batch.messages.length),
+    [10, 10, 5],
+  );
+});
+
+test("releases only unpublished recipients after a later batch fails", async () => {
+  const jobs = Array.from({ length: 25 }, (_unused, index) => ({
+    deliveryKey:
+      `campaign_delivery_v1_${index.toString(16).padStart(64, "0")}`,
+  }));
+  const testFixture = fixture({
+    jobs,
+    queueErrorAt: 2,
+  });
+
+  await assert.rejects(
+    testFixture.scheduler.run(),
+    CampaignSchedulerError,
+  );
+  const release = testFixture.calls.find(
+    (call) => call.operation === "release",
+  );
+  assert.deepEqual(
+    release.deliveryKeys,
+    jobs.slice(10).map((job) => job.deliveryKey),
   );
 });
 

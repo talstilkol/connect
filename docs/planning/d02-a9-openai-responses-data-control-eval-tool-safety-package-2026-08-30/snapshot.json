@@ -1,0 +1,140 @@
+{
+  "artifactId": "CONNECT-D02-A9-CURRENT-BLOCKED-SNAPSHOT-2026-08-30",
+  "schemaVersion": "1.0.0",
+  "snapshotId": "D02A9-SNAPSHOT-001",
+  "snapshotClass": "CURRENT-NON-AUTHORIZING-PLANNING-SNAPSHOT",
+  "generatedAt": "2026-08-30T02:15:04Z",
+  "safeState": {
+    "aiRuntime": "OFF",
+    "gate29": "BLOCKED",
+    "developmentFreeze": "ACTIVE",
+    "repositoryVisibility": "PUBLIC",
+    "planningAcceptance": "MISSING",
+    "aiAdmission": "MISSING",
+    "runtimePermit": "MISSING",
+    "acceptanceCount": 0
+  },
+  "rootStates": [
+    {
+      "ordinal": 1,
+      "rootId": "D02A9-ROOT-PLANNING-ACCEPTANCE",
+      "rootClass": "D02-PLANNING-CONTRACT-ACCEPTANCE",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "version": 0,
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "rootId": "D02A9-ROOT-AI-ADMISSION",
+      "rootClass": "AI-PROFILE-ADMISSION",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "version": 0,
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 3,
+      "rootId": "D02A9-ROOT-RUNTIME-PERMIT",
+      "rootClass": "AI-RUNTIME-PERMIT",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "version": 0,
+      "acceptanceCredit": 0
+    }
+  ],
+  "evidenceStates": [
+    {
+      "ordinal": 1,
+      "evidenceId": "D02A9-EVIDENCE-001",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 2,
+      "evidenceId": "D02A9-EVIDENCE-002",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 3,
+      "evidenceId": "D02A9-EVIDENCE-003",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 4,
+      "evidenceId": "D02A9-EVIDENCE-004",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 5,
+      "evidenceId": "D02A9-EVIDENCE-005",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 6,
+      "evidenceId": "D02A9-EVIDENCE-006",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 7,
+      "evidenceId": "D02A9-EVIDENCE-007",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 8,
+      "evidenceId": "D02A9-EVIDENCE-008",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 9,
+      "evidenceId": "D02A9-EVIDENCE-009",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 10,
+      "evidenceId": "D02A9-EVIDENCE-010",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 11,
+      "evidenceId": "D02A9-EVIDENCE-011",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 12,
+      "evidenceId": "D02A9-EVIDENCE-012",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    },
+    {
+      "ordinal": 13,
+      "evidenceId": "D02A9-EVIDENCE-013",
+      "state": "MISSING",
+      "rootSha256": "MISSING",
+      "acceptanceCredit": 0
+    }
+  ],
+  "currentTerminal": "PROFILE-NOT-ADMITTED"
+}

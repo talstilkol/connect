@@ -61,3 +61,21 @@ test("fails closed when the readiness report omits a registered decision", () =>
     /Production readiness check is missing/,
   );
 });
+
+test("assigns WhatsApp and Connect rate-limit research to Tal", () => {
+  const decision =
+    PRODUCTION_DECISION_REGISTRY.find(
+      ({ checkId }) =>
+        checkId ===
+        "security.rate-limit-policy",
+    );
+
+  assert.ok(decision);
+  assert.match(
+    decision.owner,
+    /טל \(מחקר ופיתוח\)/,
+  );
+  assert.match(decision.detail, /Meta/);
+  assert.match(decision.detail, /Backoff/);
+  assert.match(decision.detail, /Kill switch/);
+});

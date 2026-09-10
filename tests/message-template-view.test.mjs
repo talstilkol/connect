@@ -48,10 +48,11 @@ test("removes tenant, Meta, submission, and event internals from the browser DTO
   });
   const serialized = JSON.stringify(view);
 
+  assert.equal(view.version, 4);
   assert.equal(view.status, "pending_review");
   assert.equal(view.body, "שלום {{1}}");
   assert.doesNotMatch(
     serialized,
-    /tenantId|metaTemplateId|submissionKey|submissionStartedAt|lastSubmissionErrorCode|lastStatusEventKey|lastStatusEventAt|createdAt|version/,
+    /tenantId|metaTemplateId|submissionKey|submissionStartedAt|lastSubmissionErrorCode|lastStatusEventKey|lastStatusEventAt|createdAt/,
   );
 });

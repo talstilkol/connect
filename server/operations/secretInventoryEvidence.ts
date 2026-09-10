@@ -10,10 +10,12 @@ const environmentNames = Object.freeze([
 ] as const);
 const secretNames = Object.freeze([
   "CLERK_SECRET_KEY",
+  "CONNECT_TRACE_CONTEXT_HMAC_KEY",
   "CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS",
   "META_APP_SECRET",
   "META_WEBHOOK_VERIFY_TOKEN",
   "META_CREDENTIAL_ENCRYPTION_KEY_V1",
+  "WHATSAPP_RATE_LIMIT_HMAC_KEY_V1",
 ] as const);
 const maximumEvidenceLength = 20_000;
 const fingerprintPattern =
@@ -54,7 +56,7 @@ export type SecretInventoryEvidenceReport =
         code:
           "SECRET_INVENTORY_EVIDENCE_VERIFIED";
         environmentCount: 4;
-        secretCount: 20;
+        secretCount: 28;
       }
     | {
         status:
@@ -440,6 +442,6 @@ export function inspectSecretInventoryEvidence(
     code:
       "SECRET_INVENTORY_EVIDENCE_VERIFIED",
     environmentCount: 4,
-    secretCount: 20,
+    secretCount: 28,
   };
 }

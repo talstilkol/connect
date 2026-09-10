@@ -1,0 +1,90 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-OCCURRENCE-LEDGER-2026-08-30-G0",
+  "occurrenceCount": 9,
+  "occurrenceRoot": "3d5f3f7ef6dbe391febfe44472b535c8d74224d09a66126e18b0a5e5c12b0576",
+  "rows": [
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9357,
+      "occurrenceId": "SURS4-OCC-EC21CF177F64463C849E1C00",
+      "ordinal": 1,
+      "startByte": 9328,
+      "targetId": "SRC-B0-V8-MANIFEST#WHOLE-FILE",
+      "token": "SRC-B0-V8-MANIFEST#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9390,
+      "occurrenceId": "SURS4-OCC-C83720D53939BD8B4B52D709",
+      "ordinal": 2,
+      "startByte": 9365,
+      "targetId": "SRC-CHARTER-V2#WHOLE-FILE",
+      "token": "SRC-CHARTER-V2#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9430,
+      "occurrenceId": "SURS4-OCC-25C9961E09783BC6C4E119FD",
+      "ordinal": 3,
+      "startByte": 9398,
+      "targetId": "SRC-CUTOFF-V3-RECEIPT#WHOLE-FILE",
+      "token": "SRC-CUTOFF-V3-RECEIPT#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9473,
+      "occurrenceId": "SURS4-OCC-CD3EA456E993EEB90864683F",
+      "ordinal": 4,
+      "startByte": 9438,
+      "targetId": "SRC-PROTOCOL-G1-MANIFEST#WHOLE-FILE",
+      "token": "SRC-PROTOCOL-G1-MANIFEST#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9510,
+      "occurrenceId": "SURS4-OCC-D2433A4CC9F5F3F3133922B6",
+      "ordinal": 5,
+      "startByte": 9481,
+      "targetId": "SRC-SURS1-FINDINGS#WHOLE-FILE",
+      "token": "SRC-SURS1-FINDINGS#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9547,
+      "occurrenceId": "SURS4-OCC-493BA133A6B3C2A466C44602",
+      "ordinal": 6,
+      "startByte": 9518,
+      "targetId": "SRC-SURS2-FINDINGS#WHOLE-FILE",
+      "token": "SRC-SURS2-FINDINGS#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9583,
+      "occurrenceId": "SURS4-OCC-856F8FD9C8A6968AA90D26DB",
+      "ordinal": 7,
+      "startByte": 9555,
+      "targetId": "SRC-SURS2-SUBJECT#WHOLE-FILE",
+      "token": "SRC-SURS2-SUBJECT#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9620,
+      "occurrenceId": "SURS4-OCC-FC2EF488F7B13483B5411B0D",
+      "ordinal": 8,
+      "startByte": 9591,
+      "targetId": "SRC-SURS3-FINDINGS#WHOLE-FILE",
+      "token": "SRC-SURS3-FINDINGS#WHOLE-FILE"
+    },
+    {
+      "consumerId": "SOURCE-UNIVERSE-V4-SUBJECT",
+      "endByte": 9656,
+      "occurrenceId": "SURS4-OCC-85E67F71F321F32819231520",
+      "ordinal": 9,
+      "startByte": 9628,
+      "targetId": "SRC-SURS3-SUBJECT#WHOLE-FILE",
+      "token": "SRC-SURS3-SUBJECT#WHOLE-FILE"
+    }
+  ],
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-OCCURRENCE-LEDGER-V1",
+  "subjectSha256": "5cdac8add8fdbfdc0eca06961494d6ef32d540c6dec75b10fbd7c69800ee9dd4"
+}

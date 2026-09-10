@@ -1,0 +1,276 @@
+{
+  "acceptance": 0,
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-SUBJECT-2026-08-30-G0",
+  "blockers": [
+    "B0-NOT-ACCEPTED",
+    "REVIEW-PROTOCOL-NOT-ACCEPTED",
+    "PRIVATE-SOURCE-CUSTODY-ABSENT",
+    "OFFICIAL-SOURCE-OCCURRENCE-FRONTIER-INCOMPLETE",
+    "TRUSTED-TIME-ABSENT",
+    "INDEPENDENT-REVIEWS-ABSENT",
+    "GENERATION-B-ABSENT"
+  ],
+  "developmentFreeze": "ACTIVE",
+  "findingControls": [
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-001",
+      "description": "literal source occurrence identity",
+      "findingId": "SURS3-HR-F001",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F001",
+      "ordinal": 1,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-002",
+      "description": "byte-executable target locators",
+      "findingId": "SURS3-HR-F002",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F002",
+      "ordinal": 2,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-003",
+      "description": "external input and normative output separation",
+      "findingId": "SURS3-HR-F003",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F003",
+      "ordinal": 3,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-004",
+      "description": "public policy before public-adjacent output",
+      "findingId": "SURS3-HR-F004",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F004",
+      "ordinal": 4,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-005",
+      "description": "admission dependency acyclicity",
+      "findingId": "SURS3-HR-F005",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F005",
+      "ordinal": 5,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-006",
+      "description": "archive and invalidation dependency acyclicity",
+      "findingId": "SURS3-HR-F006",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F006",
+      "ordinal": 6,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-007",
+      "description": "executable conformance envelopes",
+      "findingId": "SURS3-HR-F007",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F007",
+      "ordinal": 7,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-008",
+      "description": "one-to-one predecessor mutation identities",
+      "findingId": "SURS3-HR-F008",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F008",
+      "ordinal": 8,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-009",
+      "description": "controlled generation pair",
+      "findingId": "SURS3-HR-F009",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F009",
+      "ordinal": 9,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-010",
+      "description": "finite terminal and cause registry",
+      "findingId": "SURS3-HR-F010",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F010",
+      "ordinal": 10,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-011",
+      "description": "clause-lossless preservation",
+      "findingId": "SURS3-HR-F011",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F011",
+      "ordinal": 11,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-012",
+      "description": "independent source-admission review",
+      "findingId": "SURS3-HR-F012",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F012",
+      "ordinal": 12,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-013",
+      "description": "explicit no-random identity rule",
+      "findingId": "SURS3-HR-F013",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F013",
+      "ordinal": 13,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-014",
+      "description": "public detector thresholds",
+      "findingId": "SURS3-HR-F014",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F014",
+      "ordinal": 14,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-015",
+      "description": "opaque projection and key lifecycle",
+      "findingId": "SURS3-HR-F015",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F015",
+      "ordinal": 15,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-016",
+      "description": "finite public-egress discovery frontier",
+      "findingId": "SURS3-HR-F016",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F016",
+      "ordinal": 16,
+      "severity": "P0"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-017",
+      "description": "decision-event authority-effect matrix",
+      "findingId": "SURS3-HR-F017",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F017",
+      "ordinal": 17,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-018",
+      "description": "provider runtime evidence producer",
+      "findingId": "SURS3-HR-F018",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F018",
+      "ordinal": 18,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-019",
+      "description": "dynamic authenticity and cache partitions",
+      "findingId": "SURS3-HR-F019",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F019",
+      "ordinal": 19,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-020",
+      "description": "erasure copy and key lineage",
+      "findingId": "SURS3-HR-F020",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F020",
+      "ordinal": 20,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-021",
+      "description": "authoritative-field trigger denominator",
+      "findingId": "SURS3-HR-F021",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F021",
+      "ordinal": 21,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-022",
+      "description": "closed independence relations",
+      "findingId": "SURS3-HR-F022",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F022",
+      "ordinal": 22,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-023",
+      "description": "semantic atomicity",
+      "findingId": "SURS3-HR-F023",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F023",
+      "ordinal": 23,
+      "severity": "P1"
+    },
+    {
+      "closureStatus": "OPEN-INDEPENDENT-CLOSURE-REQUIRED",
+      "controlId": "SURS4-CTL-024",
+      "description": "deterministic review and acceptance lifecycle",
+      "findingId": "SURS3-HR-F024",
+      "localStatus": "PASS-FAIL-CLOSED-CANDIDATE-CONTROL",
+      "noMergeKey": "SURS4-NOMERGE-SURS3-HR-F024",
+      "ordinal": 24,
+      "severity": "P0"
+    }
+  ],
+  "gate29": "BLOCKED",
+  "generatedAt": "2026-08-30T20:29:31Z",
+  "independentClosureCount": 0,
+  "localControlCount": 24,
+  "owner": "Tal",
+  "repositoryVisibility": "PUBLIC",
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-SUBJECT-V1",
+  "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+  "sourceRefs": [
+    "SRC-B0-V8-MANIFEST#WHOLE-FILE",
+    "SRC-CHARTER-V2#WHOLE-FILE",
+    "SRC-CUTOFF-V3-RECEIPT#WHOLE-FILE",
+    "SRC-PROTOCOL-G1-MANIFEST#WHOLE-FILE",
+    "SRC-SURS1-FINDINGS#WHOLE-FILE",
+    "SRC-SURS2-FINDINGS#WHOLE-FILE",
+    "SRC-SURS2-SUBJECT#WHOLE-FILE",
+    "SRC-SURS3-FINDINGS#WHOLE-FILE",
+    "SRC-SURS3-SUBJECT#WHOLE-FILE"
+  ],
+  "status": "CANDIDATE-NOT-ACCEPTED"
+}

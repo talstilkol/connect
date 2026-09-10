@@ -1,0 +1,98 @@
+{
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-TARGET-SPAN-LEDGER-2026-08-30-G0",
+  "rowCount": 9,
+  "rows": [
+    {
+      "byteLength": 3338,
+      "endByte": 3338,
+      "path": "docs/planning/bootstrap-authority-envelope-b0-successor-requirements-v8-atomic-package-manifest-2026-08-30.json",
+      "sourceBlobSha256": "84238033bf3e603c92f28897ad4c1ea3af883cae4b18ac1192d82d6f21eeae2d",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "84238033bf3e603c92f28897ad4c1ea3af883cae4b18ac1192d82d6f21eeae2d",
+      "startByte": 0,
+      "targetId": "SRC-B0-V8-MANIFEST#WHOLE-FILE"
+    },
+    {
+      "byteLength": 18364,
+      "endByte": 18364,
+      "path": "docs/planning/source-universe-v4-successor-build-charter-v2-2026-08-30.md",
+      "sourceBlobSha256": "1c409683259529bfa5c9e54c403e0b2830ab4c6ebcf0adc313a707cd0e26ecd6",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "1c409683259529bfa5c9e54c403e0b2830ab4c6ebcf0adc313a707cd0e26ecd6",
+      "startByte": 0,
+      "targetId": "SRC-CHARTER-V2#WHOLE-FILE"
+    },
+    {
+      "byteLength": 14400,
+      "endByte": 14400,
+      "path": "docs/planning/discovery-cutoff-candidate-v3-2026-08-30/receipt.json",
+      "sourceBlobSha256": "88028f0d36fc498bf4b83486291a3f79cfd15105be567ddb44768f716d8bf302",
+      "sourceCommit": "DETACHED-CUTOFF-V3",
+      "spanSha256": "88028f0d36fc498bf4b83486291a3f79cfd15105be567ddb44768f716d8bf302",
+      "startByte": 0,
+      "targetId": "SRC-CUTOFF-V3-RECEIPT#WHOLE-FILE"
+    },
+    {
+      "byteLength": 3472,
+      "endByte": 3472,
+      "path": "docs/planning/three-review-protocol-v1-10-g1-package-2026-08-30/normative-package-manifest.json",
+      "sourceBlobSha256": "1086306eaf0fd65afae3247556e1bcfc6c4f90700587b8c35082c60902050880",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "1086306eaf0fd65afae3247556e1bcfc6c4f90700587b8c35082c60902050880",
+      "startByte": 0,
+      "targetId": "SRC-PROTOCOL-G1-MANIFEST#WHOLE-FILE"
+    },
+    {
+      "byteLength": 32716,
+      "endByte": 32716,
+      "path": "docs/planning/source-universe-and-custody-requirements-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceBlobSha256": "a5933db4817fe7acaf9385347fcfb9059eef5cdd3d97bdb18b92fe81c9ee0a5b",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "a5933db4817fe7acaf9385347fcfb9059eef5cdd3d97bdb18b92fe81c9ee0a5b",
+      "startByte": 0,
+      "targetId": "SRC-SURS1-FINDINGS#WHOLE-FILE"
+    },
+    {
+      "byteLength": 36200,
+      "endByte": 36200,
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v2-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceBlobSha256": "4c013fa9f72177b0081c6563101d20a48c278205e13f129c7b3205985a4530ea",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "4c013fa9f72177b0081c6563101d20a48c278205e13f129c7b3205985a4530ea",
+      "startByte": 0,
+      "targetId": "SRC-SURS2-FINDINGS#WHOLE-FILE"
+    },
+    {
+      "byteLength": 36330,
+      "endByte": 36330,
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v2-2026-08-29.md",
+      "sourceBlobSha256": "5eb769c734690f4cde2885c798c3275d711791b9c1ea6d1a71d0badd0dea25fe",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "5eb769c734690f4cde2885c798c3275d711791b9c1ea6d1a71d0badd0dea25fe",
+      "startByte": 0,
+      "targetId": "SRC-SURS2-SUBJECT#WHOLE-FILE"
+    },
+    {
+      "byteLength": 40515,
+      "endByte": 40515,
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v3-independent-hostile-review-findings-manifest-2026-08-29.md",
+      "sourceBlobSha256": "e94273e22a07f498b40de34e2a5dc406b94b28bbef5e5ca9e2735b7302a14b1b",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "e94273e22a07f498b40de34e2a5dc406b94b28bbef5e5ca9e2735b7302a14b1b",
+      "startByte": 0,
+      "targetId": "SRC-SURS3-FINDINGS#WHOLE-FILE"
+    },
+    {
+      "byteLength": 72652,
+      "endByte": 72652,
+      "path": "docs/planning/source-universe-and-custody-successor-requirements-v3-2026-08-29.md",
+      "sourceBlobSha256": "6cb64b3877f194302a25fd25f5fa73c76a4d06d208f0e62a124e5591e5247092",
+      "sourceCommit": "259bc81a667c2eeb4987d284cc4443b1db2f9e90",
+      "spanSha256": "6cb64b3877f194302a25fd25f5fa73c76a4d06d208f0e62a124e5591e5247092",
+      "startByte": 0,
+      "targetId": "SRC-SURS3-SUBJECT#WHOLE-FILE"
+    }
+  ],
+  "schemaVersion": "CONNECT-SOURCE-UNIVERSE-V4-TARGET-SPAN-LEDGER-V1",
+  "targetRoot": "17f6f7833b438bf2c30eb5866e9c1fe65879705872fcd0845721f6dd59d7a574"
+}

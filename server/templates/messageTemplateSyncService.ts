@@ -180,84 +180,10 @@ export function createMessageTemplateSyncService(
                   accessToken,
                 });
               const observedAt = requireObservedAt(clock);
-              const eligibleSnapshots =
-                snapshots.filter(isEligibleSnapshot);
-              const summary: MessageTemplateSyncSummary = {
-                received: snapshots.length,
-                eligible: eligibleSnapshots.length,
-                updated: 0,
-                unchanged: 0,
-                stale: 0,
-                unmatched: 0,
-                unsupported:
-                  snapshots.length -
-                  eligibleSnapshots.length,
-                observedAt,
-              };
-
-              for (const snapshot of eligibleSnapshots) {
-                let result;
-
-                try {
-                  result =
-                    await dependencies.templates
-                      .applyStatusEvent({
-                        tenantId: session.tenantId,
-                        metaTemplateId:
-                          snapshot.metaTemplateId,
-                        name: snapshot.name,
-                        language: snapshot.language,
-                        category: snapshot.category,
-                        status: toMessageTemplateStatus(
-                          snapshot.providerStatus,
-                        ),
-                        statusEventKey:
-                          await deriveSnapshotKey(
-                            session.tenantId,
-                            connection.wabaId,
-                            snapshot,
-                          ),
-                        statusEventAt: observedAt,
-                      });
-                } catch (error) {
-                  if (
-                    error instanceof
-                    MessageTemplateIdentityConflictError
-                  ) {
-                    throw syncError(
-                      "IDENTITY_CONFLICT",
-                    );
-                  }
-
-                  throw syncError("SYNC_FAILED");
-                }
-
-                if (result.outcome === "applied") {
-                  summary.updated += 1;
-                } else if (
-                  result.outcome === "duplicate"
-                ) {
-                  summary.unchanged += 1;
-                } else if (result.outcome === "stale") {
-                  summary.stale += 1;
-                } else {
-                  summary.unmatched += 1;
-                }
-              }
-
-              let templates: readonly PersistedMessageTemplate[];
-
-              try {
-                templates =
-                  await dependencies.templates.listByTenant(
-                    session.tenantId,
-                    100,
-                  );
-              } catch {
-                throw syncError("SYNC_FAILED");
-              }
-
-              return { summary, templates };
+              return applyMessageTemplateSyncSnapshots(
+                dependencies.templates, session.tenantId, connection.wabaId,
+                snapshots, observedAt,
+              );
             },
           );
       } catch (error) {
@@ -273,4 +199,92 @@ export function createMessageTemplateSyncService(
       }
     },
   };
+}
+
+/** The caller owns atomicity; Railway applies the entire batch in one transaction. */
+export async function applyMessageTemplateSyncSnapshots(
+  templatesRepository: Pick<MessageTemplateRepository, "applyStatusEvent" | "listByTenant">,
+  tenantId: number,
+  wabaId: string,
+  snapshots: readonly MetaMessageTemplateSnapshot[],
+  observedAt: string,
+): Promise<MessageTemplateSyncResult> {
+  const eligibleSnapshots =
+    snapshots.filter(isEligibleSnapshot);
+  const summary: MessageTemplateSyncSummary = {
+    received: snapshots.length,
+    eligible: eligibleSnapshots.length,
+    updated: 0,
+    unchanged: 0,
+    stale: 0,
+    unmatched: 0,
+    unsupported:
+      snapshots.length -
+      eligibleSnapshots.length,
+    observedAt,
+  };
+
+  for (const snapshot of eligibleSnapshots) {
+    let result;
+
+    try {
+      result =
+        await templatesRepository
+          .applyStatusEvent({
+            tenantId,
+            metaTemplateId:
+              snapshot.metaTemplateId,
+            name: snapshot.name,
+            language: snapshot.language,
+            category: snapshot.category,
+            status: toMessageTemplateStatus(
+              snapshot.providerStatus,
+            ),
+            statusEventKey:
+              await deriveSnapshotKey(
+                tenantId,
+                wabaId,
+                snapshot,
+              ),
+            statusEventAt: observedAt,
+          });
+    } catch (error) {
+      if (
+        error instanceof
+        MessageTemplateIdentityConflictError
+      ) {
+        throw syncError(
+          "IDENTITY_CONFLICT",
+        );
+      }
+
+      throw syncError("SYNC_FAILED");
+    }
+
+    if (result.outcome === "applied") {
+      summary.updated += 1;
+    } else if (
+      result.outcome === "duplicate"
+    ) {
+      summary.unchanged += 1;
+    } else if (result.outcome === "stale") {
+      summary.stale += 1;
+    } else {
+      summary.unmatched += 1;
+    }
+  }
+
+  let templates: readonly PersistedMessageTemplate[];
+
+  try {
+    templates =
+      await templatesRepository.listByTenant(
+        tenantId,
+        100,
+      );
+  } catch {
+    throw syncError("SYNC_FAILED");
+  }
+
+  return { summary, templates };
 }

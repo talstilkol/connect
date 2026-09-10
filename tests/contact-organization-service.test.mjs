@@ -169,3 +169,30 @@ test("rejects invalid input and viewer writes before repository access", async (
   assert.deepEqual(testFixture.state.lists, []);
   assert.deepEqual(testFixture.state.tagAssignments, []);
 });
+
+test("rejects oversized, control-character, and extended organization input", async () => {
+  const testFixture = fixture();
+
+  for (const name of ["A".repeat(129), "Priority\u0000Hidden"]) {
+    await assert.rejects(
+      testFixture.service.createTag(session(), name),
+      (error) =>
+        error instanceof ContactOrganizationInputError &&
+        error.issue === "invalid-name",
+    );
+  }
+  await assert.rejects(
+    testFixture.service.setListMembership(session(), {
+      contactId: 23,
+      groupId: 12,
+      assigned: true,
+      tenantId: 7,
+    }),
+    (error) =>
+      error instanceof ContactOrganizationInputError &&
+      error.issue === "invalid-assignment",
+  );
+
+  assert.deepEqual(testFixture.state.tags, []);
+  assert.deepEqual(testFixture.state.listMemberships, []);
+});

@@ -147,6 +147,14 @@ export async function verifyTeamInvitationBrowserEvidenceFile(
     fail("BROWSER_EVIDENCE_FILE_CONFIGURATION_INVALID");
   }
 
+  if (
+    configuration.environment
+      .TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON !==
+      rawEvidence
+  ) {
+    fail("BROWSER_EVIDENCE_FILE_RUNTIME_MISMATCH");
+  }
+
   const report =
     inspectTeamInvitationBrowserEvidence(
       {
@@ -155,8 +163,6 @@ export async function verifyTeamInvitationBrowserEvidenceFile(
           configuration.releaseManifest.commitSha,
         APP_RELEASE_ID:
           configuration.releaseManifest.releaseId,
-        TEAM_INVITATION_BROWSER_E2E_EVIDENCE_JSON:
-          rawEvidence,
       },
       now,
     );

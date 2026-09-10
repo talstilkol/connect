@@ -1,0 +1,51 @@
+{
+  "schema": "CONNECT-TRD2-V6-OUTPUT-PATH-REGISTRY-V1",
+  "version": 1,
+  "owner": "Tal",
+  "artifactId": "CONNECT-TRD2-V6-CANDIDATE-2026-08-30",
+  "candidateDirectory": "docs/planning/trd2-v6-candidate-2026-08-30",
+  "normativePackageMemberPaths": [
+    "docs/planning/trd2-v6-candidate-2026-08-30/subject.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/source-capture-manifest.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/closed-schema-registry.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-grammar-and-corpus.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/clause-ast-registry.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/causal-graph.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/state-machine-registry.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/executable-vector-corpus.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/raw-root-overlay-and-invalidation.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/detached-acceptance-packet.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/finding-closure-crosswalk.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/atomic-package-manifest.json"
+  ],
+  "producerOnlyPaths": [
+    "docs/planning/trd2-v6-candidate-2026-08-30/generation-receipt.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-engine-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-engine-b-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/canonical-engine-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/canonical-engine-b-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/graph-engine-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/graph-engine-b-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/vector-runner-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/vector-runner-b-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/pass-1-producer-qa.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/producer-qa.json"
+  ],
+  "externalReviewAndAcceptancePaths": [
+    "docs/planning/trd2-v6-candidate-2026-08-30/reviewer-appointment-set.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/evidence-custody-receipt.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/fresh-independent-hostile-review.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/review-generation-a.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/review-generation-b.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/review-reconciliation.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/definition-acceptance.json"
+  ],
+  "passOneEmittedPaths": [
+    "docs/planning/trd2-v6-candidate-2026-08-30/source-capture-manifest.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-grammar-and-corpus.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/generation-receipt.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-engine-a-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/parser-engine-b-report.json",
+    "docs/planning/trd2-v6-candidate-2026-08-30/pass-1-producer-qa.json"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "CONNECT-SOURCE-UNIVERSE-V4-OUTPUT-PATH-REGISTRY-V1",
+  "version": 1,
+  "owner": "Tal",
+  "artifactId": "CONNECT-SOURCE-UNIVERSE-V4-CANDIDATE-2026-08-30",
+  "outputDirectory": "docs/planning/source-universe-v4-candidate-2026-08-30",
+  "packageMemberPaths": [
+    "docs/planning/source-universe-v4-candidate-2026-08-30/subject.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/discovery-input-manifest.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/cutoff-detached-envelope.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/source-candidate-inventory.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/public-source-projection.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/private-custody-reference-manifest.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/source-occurrence-ledger.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/target-span-ledger.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/object-class-sole-producer-registry.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/explicit-dependency-graph.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-dependency-graph.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/authority-admission-state-terminal-field-registries.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/public-handling-egress-detector-contracts.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/lifecycle-contracts.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/clause-preservation-crosswalk.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/finding-closure-crosswalk.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/conformance-vectors.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/hostile-mutation-vectors.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/controlled-generation-vectors.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/reader-a-report.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/reader-b-report.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/package-manifest.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/producer-qa.json"
+  ],
+  "reviewAndAcceptancePaths": [
+    "docs/planning/source-universe-v4-candidate-2026-08-30/structural-review.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/semantic-security-review.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/estimate-schedule-review.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/review-reconciliation.json",
+    "docs/planning/source-universe-v4-candidate-2026-08-30/acceptance-envelope.json"
+  ]
+}

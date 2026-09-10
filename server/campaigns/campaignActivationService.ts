@@ -31,7 +31,7 @@ export interface CampaignActivationClock {
   now(): Date;
 }
 
-export interface ActivateCampaignRequest {
+export interface ParsedActivateCampaignRequest {
   campaignKey: string;
   expectedVersion: number;
 }
@@ -53,9 +53,9 @@ function isRecord(
   );
 }
 
-function parseRequest(
+export function parseActivateCampaignRequest(
   input: unknown,
-): ActivateCampaignRequest | null {
+): ParsedActivateCampaignRequest | null {
   if (
     !isRecord(input) ||
     Object.keys(input).length !== 2 ||
@@ -103,7 +103,7 @@ export function createCampaignActivationService(
         "campaigns.write",
       );
 
-      const request = parseRequest(input);
+      const request = parseActivateCampaignRequest(input);
 
       if (!request) {
         throw new CampaignActivationError(

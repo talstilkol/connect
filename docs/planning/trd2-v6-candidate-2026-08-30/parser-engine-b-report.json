@@ -1,0 +1,181 @@
+{
+  "artifactClass": "PRODUCER-ONLY; LOCAL-PARSER-REPORT; NOT-INDEPENDENT-REVIEW; NOT-ACCEPTANCE",
+  "claimLimit": "MECHANICAL-PARSER-AGREEMENT-ONLY; EXTERNAL-CLOSURE-CREDIT-ZERO",
+  "corpusRoot": "25fe15c5fd535df8954ba23973ea17c40115fa28cc300f54d8d6c53f6a5357ce",
+  "fixtureCollectionRoot": "92b7e14860500b5829ec69a9cf8729ba392c19941bc689c12380a64f00a172a2",
+  "implementation": "PYTHON-STDLIB-OBJECT-PAIRS-STRICT-CANONICAL-V1",
+  "mismatchCount": 0,
+  "outcomeCount": 18,
+  "outcomeRoot": "0bf678ea864399efa9d12f84ab4ad7d49fc9d33e15f1252e1758df7904369299",
+  "outcomes": [
+    {
+      "decodedRoot": "5cdb5f30becc505763060983b65b243bc0c56a79985fc0051b82f49a678784b1",
+      "expectedStatus": "PASS",
+      "expectedTerminal": "NONE",
+      "fixtureId": "TRD2V6-FIXTURE-0f205c8305437f8c465e13a5b054c70e75eaeeaafbc517e624ca034ca79c9387",
+      "fixtureSha256": "e92f6339aea2b4e59a87052b0c9aae5fa31c381d071a95561a62cc22ce50d39b",
+      "observedStatus": "PASS",
+      "observedTerminal": "NONE"
+    },
+    {
+      "decodedRoot": "6701ea40e97d52a4912a09b8b05dcedc47aacf4a58e72d7120bb2bcb7270ef27",
+      "expectedStatus": "PASS",
+      "expectedTerminal": "NONE",
+      "fixtureId": "TRD2V6-FIXTURE-a9535d5239fc283500fafb42654e2f2d0e000569e203a6505b609c03ee454103",
+      "fixtureSha256": "2e4838c51fc44a44a13f63dd9b6b903c5031ebd39faff211f30570c6fc2fdc2f",
+      "observedStatus": "PASS",
+      "observedTerminal": "NONE"
+    },
+    {
+      "decodedRoot": "994156e62ccabf237788ac78e6be0df8ece679ecc009cf78b17f452aad09cb02",
+      "expectedStatus": "PASS",
+      "expectedTerminal": "NONE",
+      "fixtureId": "TRD2V6-FIXTURE-6e133dac0276676401988494161ac10228bd8579ea9c9c4e1ad1c003570566c2",
+      "fixtureSha256": "561b13ae0e121b460fd8bd99f6427c28949165e314ccf8838d5c08330bb38b8e",
+      "observedStatus": "PASS",
+      "observedTerminal": "NONE"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "DUPLICATE-KEY",
+      "fixtureId": "TRD2V6-FIXTURE-e32c11a68fbe606a123ba68a3b510dd6a51488af205e94818a9a307c76b3ecbd",
+      "fixtureSha256": "8321f8e0055a422fe8c30416f7498c241b2da5625c83885a3de21915990e172b",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "DUPLICATE-KEY"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "UNKNOWN-FIELD",
+      "fixtureId": "TRD2V6-FIXTURE-6ddc225d9a547be4adf4c269cec830cd2c569b50b1d1399db2a94c1607ee7297",
+      "fixtureSha256": "7a2cf0171036382ee88a4612a66f6a3763b05bc2fdea83d4a7bee4b606be0572",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "UNKNOWN-FIELD"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "MISSING-FIELD",
+      "fixtureId": "TRD2V6-FIXTURE-bc63a821d4ee00b409c49be8cb436716f74d5783c1829c0ec8ddce982ce28e89",
+      "fixtureSha256": "7b306e6273b600db773c1fa4d9237349b370282d8b8bb04c854419723ae2d861",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "MISSING-FIELD"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "UTF8-INVALID",
+      "fixtureId": "TRD2V6-FIXTURE-1ba832bd623a50954127978ee0e407c675d9f347b14efe72524c988dc4591d66",
+      "fixtureSha256": "5b3430ee8e5c7490d0e154755cdae0c9a7791be87e77b1f91a52f77676bed0c7",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "UTF8-INVALID"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "JSON-SYNTAX-ERROR",
+      "fixtureId": "TRD2V6-FIXTURE-ec30f966bde7787047e80d7e82657f3e272ca287712daec45d44b4accedb7d71",
+      "fixtureSha256": "4d507d195e7b5a5003849c9ee6dd5d725dbd01e760861900396051a5a76c6bfc",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "JSON-SYNTAX-ERROR"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "JSON-SYNTAX-ERROR",
+      "fixtureId": "TRD2V6-FIXTURE-6cfba857c5dc61dbfa7aed3476423c5f4115cd5ca789327d2845a4eaa4b3416c",
+      "fixtureSha256": "072cb0e5964c1ed9d80b7d33f7d3da0ca5325554535e40f3f7a1775b6d1e730e",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "JSON-SYNTAX-ERROR"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "JSON-SYNTAX-ERROR",
+      "fixtureId": "TRD2V6-FIXTURE-b03668d88f31a818916d749f487359fb0bdf0ac331371ec92305600460b6db4b",
+      "fixtureSha256": "1d621b5f63f253f5b9e62e80482eec473bd54a2913025c741285c61ffcc3eff8",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "JSON-SYNTAX-ERROR"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "NON-CANONICAL-ENCODING",
+      "fixtureId": "TRD2V6-FIXTURE-c84601936dd35c1b2e5a5523f7093f506b75c56c9e1ba42ac7b81705b341bce0",
+      "fixtureSha256": "4739da25781b1fea7d03747d78a210cec28508a718c9d84eba069ff20c2ca586",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "NON-CANONICAL-ENCODING"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "JSON-SYNTAX-ERROR",
+      "fixtureId": "TRD2V6-FIXTURE-5a6fe1335b4bee464d99e0d877be70ae4d0be7901cafc690a2d1fe358116c63b",
+      "fixtureSha256": "366d28bfd67a7468bf9580660e7dc05e033605550af4f3e820761c4c4943d321",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "JSON-SYNTAX-ERROR"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "NON-CANONICAL-ENCODING",
+      "fixtureId": "TRD2V6-FIXTURE-a848231a5625b05010901c40387893dcf8c04bd05ca7d110b9aea1fe13e4134f",
+      "fixtureSha256": "23d3bc75f7d849b8a29935b84a15d8d792142e4abbf539e046006bdc7b502047",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "NON-CANONICAL-ENCODING"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "UNICODE-NORMALIZATION-INVALID",
+      "fixtureId": "TRD2V6-FIXTURE-5f6f745be6ddf033e3bd123ccffb9cd0d5aafadabb5a9c991955bc78e146f452",
+      "fixtureSha256": "39e0243cf0c6317a22c0a8ea49beb1e178d3d7376bdf6af7d7174b918ee6f312",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "UNICODE-NORMALIZATION-INVALID"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "UNICODE-SCALAR-INVALID",
+      "fixtureId": "TRD2V6-FIXTURE-eada174592b26bfd4c47e4a981928537b06f2bdf79b8d762a0103116f7153a1c",
+      "fixtureSha256": "e60d4d7f763b97f738d8294a53302c7a8790724313cfd945606793d4b072ca68",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "UNICODE-SCALAR-INVALID"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "NON-CANONICAL-ENCODING",
+      "fixtureId": "TRD2V6-FIXTURE-a6204845dad8668799fffc4482054b890ffa9c205d9e7105922325e171147118",
+      "fixtureSha256": "3b728eb8ff427a234c88848289bb099db962b1ae7f181ec21ee5c9a78b08d19f",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "NON-CANONICAL-ENCODING"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "UNKNOWN-FIELD",
+      "fixtureId": "TRD2V6-FIXTURE-427e7c26cd61c53ced95906ba5be5c34dc989c15d65ecd237f1a63bb9ad9cb11",
+      "fixtureSha256": "d750e5381d2dcbcdb8ca006904574ebb80ac92c9d2743443f1feeecb08d0de28",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "UNKNOWN-FIELD"
+    },
+    {
+      "decodedRoot": null,
+      "expectedStatus": "BLOCKED",
+      "expectedTerminal": "SCHEMA-INVARIANT-ERROR",
+      "fixtureId": "TRD2V6-FIXTURE-24128ec7d15da2f44aaf630a0f76b89614b3b06df20c583eb586569708883912",
+      "fixtureSha256": "3dafd7d020e7b93f2b8559f2857b013483f9a6347121c9e367875a4237338b8f",
+      "observedStatus": "BLOCKED",
+      "observedTerminal": "SCHEMA-INVARIANT-ERROR"
+    }
+  ],
+  "parserId": "PARSER-B",
+  "schemaVersion": "CONNECT-TRD2-V6-PARSER-REPORT-V1",
+  "sourceSha256": "0ce484e60bbbf56714115f945cfbd21ac4840e1c8eb8411ae67cadc62d59691b",
+  "status": "PASS-LOCAL-CANDIDATE-NOT-ACCEPTED",
+  "toolchainRoot": "082e4c8d9c875d3009ce675862060754a568275b71c265d9763e6c18f0627b8e",
+  "artifactId": "TRD2V6-PARSER-REPORT-5200162b5ae502f4eb35063a97f89a2b1f0736c7e7c8471245a4ae78fb50dc76",
+  "artifactRoot": "5200162b5ae502f4eb35063a97f89a2b1f0736c7e7c8471245a4ae78fb50dc76"
+}

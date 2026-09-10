@@ -107,15 +107,245 @@ test("server-renders the production decision admin route in a fail-closed state"
   );
 });
 
+test("server-renders every Admin boundary in English and Arabic", async () => {
+  const responses = await Promise.all([
+    render("/admin?lang=en"),
+    render("/admin?lang=ar"),
+    render("/admin/decisions?lang=en"),
+    render("/admin/decisions?lang=ar"),
+    render("/admin/whatsapp-delivery-policy/1?lang=en"),
+    render("/admin/whatsapp-delivery-policy/1?lang=ar"),
+  ]);
+
+  for (const response of responses) {
+    assert.equal(response.status, 200);
+  }
+
+  const [
+    englishTenants,
+    arabicTenants,
+    englishDecisions,
+    arabicDecisions,
+    englishPolicy,
+    arabicPolicy,
+  ] = await Promise.all(
+    responses.map((response) => response.text()),
+  );
+
+  assert.match(englishTenants, /Admin environment is not configured/);
+  assert.match(arabicTenants, /بيئة Admin غير معدّة/);
+  assert.match(englishDecisions, /before managing decisions/);
+  assert.match(arabicDecisions, /قبل إدارة القرارات/);
+  assert.match(englishPolicy, /before managing delivery policy/);
+  assert.match(arabicPolicy, /قبل إدارة سياسة الإرسال/);
+
+  for (const html of [englishTenants, englishDecisions, englishPolicy]) {
+    assert.match(html, /class="admin-state-shell" dir="ltr" lang="en"/);
+    assert.doesNotMatch(html, /סביבת Admin אינה מוגדרת/);
+  }
+
+  for (const html of [arabicTenants, arabicDecisions, arabicPolicy]) {
+    assert.match(html, /class="admin-state-shell" dir="rtl" lang="ar"/);
+    assert.doesNotMatch(html, /סביבת Admin אינה מוגדרת/);
+  }
+});
+
 test("server-renders local business profile completeness boundaries", async () => {
   const response = await render("/workspace/onboarding");
   assert.equal(response.status, 200);
 
   const html = await response.text();
-  assert.match(html, /Business profile completeness/);
+  assert.match(html, /שלמות פרופיל העסק/);
   assert.match(html, /שלמות פרטי העסק/);
   assert.match(html, /שמירת פרטי העסק מקומית/);
   assert.match(html, /לא נוצר Tenant/);
+});
+
+test("server-renders localized Dashboard and Onboarding content", async () => {
+  const [englishDashboard, arabicOnboarding] =
+    await Promise.all([
+      render("/workspace?lang=en"),
+      render("/workspace/onboarding?lang=ar"),
+    ]);
+
+  assert.equal(englishDashboard.status, 200);
+  assert.equal(arabicOnboarding.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishDashboard.text(),
+    arabicOnboarding.text(),
+  ]);
+
+  assert.match(englishHtml, /Control center/);
+  assert.match(englishHtml, /10 steps to the first message/);
+  assert.match(englishHtml, /Server-side Meta configuration required/);
+  assert.match(arabicHtml, /إعداد مساحة العمل/);
+  assert.match(arabicHtml, /الخطوة 1 من 10/);
+  assert.match(arabicHtml, /مسار الإعداد/);
+});
+
+test("server-renders the complete bot-flow workspace in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/bot?lang=en"),
+    render("/workspace/bot?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Bot flow builder/);
+  assert.match(englishHtml, /Flow library/);
+  assert.match(englishHtml, /Keywords — one per line/);
+  assert.doesNotMatch(englishHtml, /ספריית תהליכים/);
+
+  assert.match(arabicHtml, /منشئ مسارات البوت/);
+  assert.match(arabicHtml, /مكتبة المسارات/);
+  assert.match(arabicHtml, /الكلمات المفتاحية — واحدة في كل سطر/);
+  assert.doesNotMatch(arabicHtml, /ספריית תהליכים/);
+});
+
+test("server-renders the complete contacts surface in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/contacts?lang=en"),
+    render("/workspace/contacts?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Persistent contact management/);
+  assert.match(englishHtml, /Review a file before importing/);
+  assert.match(englishHtml, /Choose a contact file/);
+  assert.match(englishHtml, /Current implementation boundary/);
+  assert.doesNotMatch(englishHtml, /ניהול אנשי קשר קבוע/);
+
+  assert.match(arabicHtml, /إدارة جهات الاتصال الدائمة/);
+  assert.match(arabicHtml, /فحص ملف قبل الاستيراد/);
+  assert.match(arabicHtml, /اختيار ملف جهات اتصال/);
+  assert.match(arabicHtml, /حد التنفيذ الحالي/);
+  assert.doesNotMatch(arabicHtml, /ניהול אנשי קשר קבוע/);
+});
+
+test("server-renders the complete template surface in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/templates?lang=en"),
+    render("/workspace/templates?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Persistent templates/);
+  assert.match(englishHtml, /Template setup/);
+  assert.match(englishHtml, /Save local rehearsal/);
+  assert.match(englishHtml, /Message preview/);
+  assert.doesNotMatch(englishHtml, /תבניות שמורות/);
+
+  assert.match(arabicHtml, /قوالب دائمة/);
+  assert.match(arabicHtml, /إعداد القالب/);
+  assert.match(arabicHtml, /حفظ التجربة محليًا/);
+  assert.match(arabicHtml, /معاينة الرسالة/);
+  assert.doesNotMatch(arabicHtml, /תבניות שמורות/);
+});
+
+test("server-renders both campaign flows in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/campaigns?lang=en"),
+    render("/workspace/campaigns?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Campaign draft/);
+  assert.match(englishHtml, /Local draft completeness/);
+  assert.match(englishHtml, /No approved templates/);
+  assert.match(englishHtml, /Delivery blocked/);
+  assert.doesNotMatch(englishHtml, /שלמות הטיוטה המקומית/);
+
+  assert.match(arabicHtml, /مسودة حملة/);
+  assert.match(arabicHtml, /اكتمال المسودة المحلية/);
+  assert.match(arabicHtml, /لا توجد قوالب معتمدة/);
+  assert.match(arabicHtml, /الإرسال محظور/);
+  assert.doesNotMatch(arabicHtml, /שלמות הטיוטה המקומית/);
+});
+
+test("server-renders the conversation inbox boundary in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/inbox?lang=en"),
+    render("/workspace/inbox?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /Conversation inbox/);
+  assert.match(englishHtml, /Inbox unavailable/);
+  assert.match(
+    englishHtml,
+    /Conversations are not loaded and no fallback display data is created/,
+  );
+  assert.doesNotMatch(englishHtml, /תיבת השיחות אינה זמינה/);
+
+  assert.match(arabicHtml, /صندوق المحادثات/);
+  assert.match(arabicHtml, /صندوق المحادثات غير متاح/);
+  assert.match(arabicHtml, /لا يتم تحميل المحادثات/);
+  assert.doesNotMatch(arabicHtml, /תיבת השיחות אינה זמינה/);
+});
+
+test("server-renders the AI agent boundary in English and Arabic", async () => {
+  const [englishResponse, arabicResponse] = await Promise.all([
+    render("/workspace/ai?lang=en"),
+    render("/workspace/ai?lang=ar"),
+  ]);
+
+  assert.equal(englishResponse.status, 200);
+  assert.equal(arabicResponse.status, 200);
+
+  const [englishHtml, arabicHtml] = await Promise.all([
+    englishResponse.text(),
+    arabicResponse.text(),
+  ]);
+
+  assert.match(englishHtml, /AI agent library/);
+  assert.match(
+    englishHtml,
+    /Configure Clerk and D1 before loading or saving AI agents/,
+  );
+  assert.match(englishHtml, /Server readiness check/);
+  assert.match(englishHtml, /No saved knowledge sources/);
+  assert.doesNotMatch(englishHtml, /ספריית סוכני AI/);
+
+  assert.match(arabicHtml, /مكتبة وكلاء AI/);
+  assert.match(arabicHtml, /يجب إعداد Clerk وD1/);
+  assert.match(arabicHtml, /فحص الجاهزية على الخادم/);
+  assert.match(arabicHtml, /لا توجد مصادر معرفة محفوظة/);
+  assert.doesNotMatch(arabicHtml, /ספריית סוכני AI/);
 });
 
 test("server-renders auth and workspace feature routes", async () => {
@@ -173,14 +403,14 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.match(templateHtml, /תבניות הודעה/);
   assert.match(templateHtml, /תבניות שמורות/);
   assert.match(templateHtml, /סנכרון מול Meta/);
-  assert.match(templateHtml, /Local rehearsal/);
+  assert.match(templateHtml, /תרגול מקומי/);
   assert.match(
     templateHtml,
-    /שמירת Rehearsal מקומית/,
+    /שמירת תרגול מקומי/,
   );
   assert.match(
     templateHtml,
-    /תימחק ברענון ולא תישלח ל־Meta/,
+    /יימחק ברענון ולא יישלח ל־Meta/,
   );
   assert.match(templateHtml, /Footer — רשות/);
   assert.match(templateHtml, /Quick Reply/);
@@ -191,8 +421,8 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.match(contactsHtml, /ניהול אנשי קשר קבוע/);
   assert.match(contactsHtml, /Clerk אינו מוגדר/);
   assert.doesNotMatch(contactsHtml, /שמירת איש קשר/);
-  assert.match(campaignsHtml, /Campaign draft/);
-  assert.match(campaignsHtml, /Planning completeness/);
+  assert.match(campaignsHtml, /טיוטת קמפיין/);
+  assert.match(campaignsHtml, /שלמות תכנון/);
   assert.match(campaignsHtml, /שלמות הטיוטה המקומית/);
   assert.match(campaignsHtml, /אין תבניות מאושרות/);
   assert.match(campaignsHtml, /אין טיוטת Template מקומית/);
@@ -317,4 +547,55 @@ test("server-renders a private read-only invitation landing route", async () => 
     invalidHtml,
     /disabled=""/,
   );
+});
+
+test("server-renders localized invitation views without copying the key into visible HTML", async () => {
+  const invitationKey =
+    `team_invitation_v1_${"b".repeat(64)}`;
+  const englishResponse = await render(
+    `/invite/${invitationKey}?lang=en`,
+  );
+  const englishHtml = await englishResponse.text();
+
+  assert.equal(englishResponse.status, 200);
+  assert.match(
+    englishHtml,
+    /<title>Team invitation \| Connect<\/title>/,
+  );
+  assert.match(
+    englishHtml,
+    /<main[^>]*lang="en"[^>]*dir="ltr"/,
+  );
+  assert.match(englishHtml, /Invitation to join the team/);
+  assert.match(englishHtml, /href="\?lang=ar"/);
+
+  const englishVisibleHtml = englishHtml.replace(
+    /<script\b[\s\S]*?<\/script>/gi,
+    "",
+  );
+  assert.doesNotMatch(
+    englishVisibleHtml,
+    new RegExp(invitationKey),
+  );
+
+  const arabicResponse = await render(
+    `/invite/${invitationKey}?lang=ar`,
+  );
+  const arabicHtml = await arabicResponse.text();
+
+  assert.equal(arabicResponse.status, 200);
+  assert.match(
+    arabicHtml,
+    /<main[^>]*lang="ar"[^>]*dir="rtl"/,
+  );
+  assert.match(arabicHtml, /دعوة للانضمام إلى الفريق/);
+  assert.match(arabicHtml, /href="\?lang=en"/);
+
+  const ambiguousResponse = await render(
+    `/invite/${invitationKey}?lang=en&lang=ar`,
+  );
+  const ambiguousHtml = await ambiguousResponse.text();
+
+  assert.equal(ambiguousResponse.status, 200);
+  assert.match(ambiguousHtml, /הזמנה להצטרף לצוות/);
 });

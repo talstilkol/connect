@@ -1,0 +1,205 @@
+{
+  "artifactClass": "ONE-TO-ONE-FINDING-CONTROL-CROSSWALK-PLANNING-ONLY",
+  "artifactId": "CONNECT-B0-V8-CLOSURE-CROSSWALK-2026-08-30-G0",
+  "closureCount": 0,
+  "crosswalkRoot": "63b2dc79c8e7a40c5a4038ae511c0814ba9b3588fd63d61952bdd799e61d972d",
+  "findingCount": 14,
+  "repositoryVisibility": "PUBLIC",
+  "rows": [
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-001",
+      "externalEvidenceRequired": [],
+      "findingId": "B0V7-IHR-F001",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 1,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-001"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-002",
+      "externalEvidenceRequired": [
+        "DETACHED-ACCEPTANCE-CONTEXT"
+      ],
+      "findingId": "B0V7-IHR-F002",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 2,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-002"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-003",
+      "externalEvidenceRequired": [
+        "GENESIS-APPOINTMENT-SIGNATURE",
+        "TRUST-ANCHOR"
+      ],
+      "findingId": "B0V7-IHR-F003",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 3,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-003"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-004",
+      "externalEvidenceRequired": [
+        "TRUSTED-TIME",
+        "PERMIT-SIGNATURE",
+        "REVOCATION-RECEIPT"
+      ],
+      "findingId": "B0V7-IHR-F004",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 4,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-004"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-005",
+      "externalEvidenceRequired": [
+        "DURABLE-TRANSACTION-ADAPTER"
+      ],
+      "findingId": "B0V7-IHR-F005",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 5,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-005"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-006",
+      "externalEvidenceRequired": [
+        "FIVE-CONTROLLER-APPOINTMENTS",
+        "TWO-WITNESS-APPOINTMENTS"
+      ],
+      "findingId": "B0V7-IHR-F006",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 6,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-006"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-007",
+      "externalEvidenceRequired": [
+        "DURABLE-RECOVERY-ADAPTER"
+      ],
+      "findingId": "B0V7-IHR-F007",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 7,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-007"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-008",
+      "externalEvidenceRequired": [
+        "EXTERNAL-ADMISSION-TRACE"
+      ],
+      "findingId": "B0V7-IHR-F008",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 8,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-008"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-009",
+      "externalEvidenceRequired": [
+        "DETACHED-INTERFACE-PROVENANCE-RECEIPT"
+      ],
+      "findingId": "B0V7-IHR-F009",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 9,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-009"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-010",
+      "externalEvidenceRequired": [
+        "TWO-INDEPENDENT-READER-APPOINTMENTS"
+      ],
+      "findingId": "B0V7-IHR-F010",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 10,
+      "severity": "P1",
+      "testIds": [
+        "B0V8-MUTATION-010"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-011",
+      "externalEvidenceRequired": [],
+      "findingId": "B0V7-IHR-F011",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 11,
+      "severity": "P1",
+      "testIds": [
+        "B0V8-MUTATION-011"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-012",
+      "externalEvidenceRequired": [
+        "AUTHENTICATED-PUBLIC-REMOTE-RECEIPT"
+      ],
+      "findingId": "B0V7-IHR-F012",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 12,
+      "severity": "P1",
+      "testIds": [
+        "B0V8-MUTATION-012"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-013",
+      "externalEvidenceRequired": [],
+      "findingId": "B0V7-IHR-F013",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 13,
+      "severity": "P1",
+      "testIds": [
+        "B0V8-MUTATION-013"
+      ]
+    },
+    {
+      "closureStatus": "OPEN-PENDING-INDEPENDENT-EVIDENCE",
+      "controlId": "B0V8-CONTROL-014",
+      "externalEvidenceRequired": [
+        "INDEPENDENT-PREDECESSOR-BEHAVIOR-ORACLE"
+      ],
+      "findingId": "B0V7-IHR-F014",
+      "localStatus": "IMPLEMENTED-CANDIDATE",
+      "ordinal": 14,
+      "severity": "P0",
+      "testIds": [
+        "B0V8-MUTATION-014"
+      ]
+    }
+  ],
+  "schemaVersion": "CONNECT-B0-V8-CLOSURE-CROSSWALK-V1"
+}
