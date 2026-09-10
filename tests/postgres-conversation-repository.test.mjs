@@ -455,6 +455,21 @@ test("finds one conversation and returns messages in chronological order", async
   ]);
 });
 
+test("live original captions require outbound supported media and normalized text at the read boundary", async () => {
+  for (const contentKind of ["image", "video", "document"]) for (const textContent of ["שלום", null]) {
+    const row = messageRow({ direction: "outbound", status: "sent", contentKind, textContent });
+    const fixture = repositoryFixture([], [{ rows: [row], rowCount: 1 }]);
+    assert.equal((await fixture.repository.listMessagesByConversation(7, conversationKey, 50))[0].textContent, textContent);
+    fixture.queries.assertConsumed();
+  }
+  for (const change of [{ direction: "inbound", status: "received" }, { contentKind: "audio" }, { contentKind: "sticker" },
+    { textContent: "" }, { textContent: " \n " }, { textContent: "A".repeat(16_385) }, { textContent: "\u0000" }]) {
+    const row = messageRow({ direction: "outbound", status: "sent", contentKind: "image", textContent: "שלום", ...change });
+    const fixture = repositoryFixture([], [{ rows: [row], rowCount: 1 }]);
+    await assert.rejects(fixture.repository.listMessagesByConversation(7, conversationKey, 50));
+  }
+});
+
 test("classifies read updates using versioned row locks", async () => {
   const updated = repositoryFixture([
     {

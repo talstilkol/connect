@@ -91,6 +91,43 @@ test("caption parsing rejects malformed input and never turns a media URL into a
     "Original media keeps its existing receipt digest across the upgrade");
 });
 
+test("original media captions are separate from the legacy echo identity and survive normalization", () => {
+  for (const type of ["image", "video", "document"]) for (const caption of ["שלום", "", " \n ", undefined]) {
+    const result = parsed(value([message({ type, [type]: { caption, url: "https://connect-api.invalid", id: "300003" } })]))[0];
+    assert.equal(result.textContent, null);
+    assert.equal(result.originalCaption, caption?.trim() ? caption : null);
+    assert.deepEqual(normalizeMetaMessageEcho(scope, result).message, result);
+    assert.equal(Object.hasOwn(result, "url"), false);
+    const candidate = { ...result };
+    const snapshot = normalizeMetaMessageEcho(scope, candidate).message;
+    candidate.originalCaption = "changed";
+    assert.equal(snapshot.originalCaption, result.originalCaption);
+    assert.ok(Object.isFrozen(snapshot));
+  }
+});
+
+test("original captions reject malformed text and cannot enter edits, revocations or other media types", () => {
+  for (const type of ["image", "video", "document"]) for (const caption of [null, 1, {}, "A".repeat(16_385), "\u0000"]) {
+    assert.throws(() => parsed(value([message({ type, [type]: { caption } })])));
+  }
+  const original = { ...parsed()[0], contentKind: "image", textContent: null, originalCaption: "שלום" };
+  for (const originalCaption of [undefined, "", " ", 1, {}, "A".repeat(16_385), "\u0000"]) {
+    assert.throws(() => normalizeMetaMessageEcho(scope, { ...original, originalCaption }));
+  }
+  for (const contentKind of ["audio", "sticker", "location", "contacts", "interactive"]) {
+    assert.throws(() => normalizeMetaMessageEcho(scope, { ...original, contentKind }));
+  }
+  for (const kind of ["edit", "revoke"]) {
+    assert.throws(() => normalizeMetaMessageEcho(scope, { ...original, contentKind: kind === "revoke" ? "unsupported" : "image",
+      mutation: { kind, originalProviderMessageId: "wamid.original" } }));
+  }
+  const { originalCaption, ...legacy } = original;
+  assert.equal(originalCaption, "שלום");
+  assert.equal(Object.hasOwn(normalizeMetaMessageEcho(scope, legacy).message, "originalCaption"), false);
+  assert.equal(normalizeMetaMessageEcho(scope, { ...original, originalCaption: null }).message.originalCaption, null);
+  assert.equal(normalizeMetaMessageEcho(scope, { ...original, originalCaption: "A".repeat(16_384) }).message.originalCaption.length, 16_384);
+});
+
 test("rejects malformed echo collections and an inbound/status mixture hidden inside the echo field", () => {
   for (const bad of [{ ...value(), message_echoes: [] }, { ...value(), message_echoes: {} },
     { ...value(), messages: [message()] }, { ...value(), statuses: [] }]) {

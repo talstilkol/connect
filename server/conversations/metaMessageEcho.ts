@@ -8,6 +8,9 @@ export interface MetaMessageEcho {
   readonly contentKind: MessageContentKind;
   readonly textContent: string | null;
   readonly occurredAt: string;
+  // Optional for legacy callers. Present (including null) only on newly parsed
+  // original caption media; excluded from the v1 event/message identity.
+  readonly originalCaption?: string | null;
   readonly mutation?: Readonly<{ kind: "edit" | "revoke"; originalProviderMessageId: string }>;
 }
 
@@ -74,22 +77,26 @@ export function parseMetaMessageEchoes(event: MetaMessageEchoesWebhookEvent, exp
     const content = source[source.type];
     if (mutation?.kind !== "revoke" && (source.type === "contacts" ? !Array.isArray(content) || content.length === 0 : !record(content))) return fail();
     let textContent: string | null = null;
+    let originalCaption: string | null | undefined;
     if (source.type === "text") {
       if (!record(content) || typeof content.body !== "string" || content.body.trim().length === 0 || content.body.length > 16_384) return fail();
       textContent = content.body;
-    } else if (mutation?.kind === "edit" && isCaptionMessageKind(source.type)) {
+    } else if (isCaptionMessageKind(source.type)) {
       if (!record(content) || (content.caption !== undefined && typeof content.caption !== "string")) return fail();
       // Empty or absent caption removes it; URLs and asset identifiers never
       // become a file reference or authorize replacing an existing attachment.
       const caption = content.caption as string | undefined;
       if (caption !== undefined && (caption.length > 16_384 || caption.includes("\u0000"))) return fail();
-      textContent = caption?.trim() ? caption : null;
+      const normalizedCaption = caption?.trim() ? caption : null;
+      if (mutation?.kind === "edit") textContent = normalizedCaption;
+      else originalCaption = normalizedCaption;
     }
     const seconds = typeof candidate.timestamp === "string" && /^[0-9]{1,12}$/.test(candidate.timestamp)
       ? Number(candidate.timestamp) : candidate.timestamp;
     if (typeof seconds !== "number" || !Number.isSafeInteger(seconds) || seconds <= 0 || seconds > 253_402_300_799) return fail();
     return Object.freeze({ recipientPhoneNumber, providerMessageId: providerId(candidate.id),
       occurredAt: new Date(seconds * 1_000).toISOString(), contentKind: source.type as MessageContentKind, textContent,
+      ...(originalCaption === undefined ? {} : { originalCaption }),
       ...(mutation === undefined ? {} : { mutation }) });
   });
 }
@@ -109,11 +116,14 @@ export function normalizeMetaMessageEcho(scope: MetaMessageEchoScope, message: M
     Date.parse(message.occurredAt) <= 0 ||
     (message.mutation?.kind === "edit" ? !isEditedMessageTextValid(message.contentKind, message.textContent) : message.contentKind === "text"
       ? typeof message.textContent !== "string" || message.textContent.trim().length === 0 || message.textContent.length > 16_384
-      : message.textContent !== null)) return fail();
+      : message.textContent !== null) ||
+    (Object.hasOwn(message, "originalCaption") && (message.mutation !== undefined || !isCaptionMessageKind(message.contentKind) ||
+      !isEditedMessageTextValid(message.contentKind, message.originalCaption)))) return fail();
   return Object.freeze({ scope: Object.freeze({ tenantId: scope.tenantId,
     wabaId: providerId(scope.wabaId), phoneNumberId: providerId(scope.phoneNumberId), connectionVersion: scope.connectionVersion }),
     message: Object.freeze({ recipientPhoneNumber: phone(message.recipientPhoneNumber), providerMessageId: providerId(message.providerMessageId),
       contentKind: message.contentKind, textContent: message.textContent, occurredAt: message.occurredAt,
+      ...(Object.hasOwn(message, "originalCaption") ? { originalCaption: message.originalCaption as string | null } : {}),
       ...(message.mutation === undefined ? {} : { mutation: Object.freeze({ kind: message.mutation.kind,
         originalProviderMessageId: providerId(message.mutation.originalProviderMessageId) }) }) }) });
 }

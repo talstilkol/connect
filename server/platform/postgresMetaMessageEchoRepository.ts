@@ -24,9 +24,11 @@ export const postgresMetaMessageEchoSql = Object.freeze({
   insertState: `INSERT INTO meta_message_echo_states (tenant_id, provider_message_id, waba_id, phone_number_id, recipient_phone)
     VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING RETURNING provider_message_id AS "providerMessageId"`,
   lockState: `SELECT waba_id AS "wabaId", phone_number_id AS "phoneNumberId", recipient_phone AS "recipientPhoneNumber",
-      original_digest AS "originalDigest", content_state AS "contentState", edit_at AS "editAt", edit_text AS "editText", edit_kind AS "editKind"
+      original_digest AS "originalDigest", original_caption_digest AS "originalCaptionDigest",
+      content_state AS "contentState", edit_at AS "editAt", edit_text AS "editText", edit_kind AS "editKind"
     FROM meta_message_echo_states WHERE tenant_id = $1 AND provider_message_id = $2 FOR UPDATE`,
-  updateState: `UPDATE meta_message_echo_states SET original_digest = $3, content_state = $4, edit_at = $5::timestamptz, edit_text = $6, edit_kind = $7
+  updateState: `UPDATE meta_message_echo_states SET original_digest = $3, content_state = $4, edit_at = $5::timestamptz, edit_text = $6, edit_kind = $7,
+      original_caption_digest = $8
     WHERE tenant_id = $1 AND provider_message_id = $2 RETURNING provider_message_id AS "providerMessageId"`,
   claimEvent: `INSERT INTO meta_message_echo_events (tenant_id, event_key, request_digest, provider_message_id)
     VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING event_key AS "eventKey"`,
@@ -66,6 +68,7 @@ function requireKey(value: unknown, name: string, expected: string) {
 
 interface EchoState {
   originalDigest: string | null;
+  originalCaptionDigest: string | null;
   contentState: MessageContentState;
   editAt: string | null;
   editText: string | null;
@@ -81,12 +84,14 @@ function conflict(): never {
 }
 
 function parseState(value: unknown, scope: MetaMessageEchoScope, recipient: string): EchoState {
-  const row = requireExactPostgresRow(value, ["wabaId", "phoneNumberId", "recipientPhoneNumber", "originalDigest", "contentState", "editAt", "editText", "editKind"]);
+  const row = requireExactPostgresRow(value, ["wabaId", "phoneNumberId", "recipientPhoneNumber", "originalDigest", "originalCaptionDigest", "contentState", "editAt", "editText", "editKind"]);
   if (row.wabaId !== scope.wabaId || row.phoneNumberId !== scope.phoneNumberId || row.recipientPhoneNumber !== recipient) return conflict();
   if (!messageContentStates.includes(row.contentState as MessageContentState) ||
     (row.originalDigest !== null && (typeof row.originalDigest !== "string" || !/^[0-9a-f]{64}$/.test(row.originalDigest))) ||
+    (row.originalCaptionDigest !== null && (row.originalDigest === null || typeof row.originalCaptionDigest !== "string" || !/^[0-9a-f]{64}$/.test(row.originalCaptionDigest))) ||
     (row.editText !== null && (typeof row.editText !== "string" || row.editText.trim().length === 0 || row.editText.length > 16_384))) return conflict();
-  const state = { originalDigest: row.originalDigest as string | null, contentState: row.contentState as MessageContentState,
+  const state = { originalDigest: row.originalDigest as string | null, originalCaptionDigest: row.originalCaptionDigest as string | null,
+    contentState: row.contentState as MessageContentState,
     editAt: row.editAt === null ? null : parsePostgresTimestamp(row.editAt), editText: row.editText as string | null,
     editKind: row.editKind as MessageContentKind | null };
   if ((state.contentState === "edited" && (state.editAt === null || !isEditedMessageTextValid(state.editKind, state.editText))) ||
@@ -120,7 +125,10 @@ export function createPostgresMetaMessageEchoRepository(transactions: PostgresTr
       const { scope, message } = normalizeMetaMessageEcho(rawScope, rawMessage);
       const targetId = message.mutation?.originalProviderMessageId ?? message.providerMessageId;
       const messageKey = `message_v1_${await digest({ namespace: "whatsapp_business_app_message_v1", tenantId: scope.tenantId, providerMessageId: targetId })}`;
-      const requestDigest = await digest(message);
+      const { originalCaption, ...legacyIdentity } = message;
+      const requestDigest = await digest(legacyIdentity);
+      const originalCaptionDigest = originalCaption === undefined ? null :
+        await digest({ namespace: "message_echo_original_caption_v1", caption: originalCaption });
       const eventKey = await digest({ namespace: "message_echo_event_v1", kind: message.mutation?.kind ?? "original", providerMessageId: message.providerMessageId });
       return transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
         const connection = await one(tx, postgresMetaMessageEchoSql.lockConnection,
@@ -132,6 +140,9 @@ export function createPostgresMetaMessageEchoRepository(transactions: PostgresTr
           [scope.tenantId, targetId, scope.wabaId, scope.phoneNumberId, message.recipientPhoneNumber]);
         if (insertedState !== null) requireKey(insertedState, "providerMessageId", targetId);
         let state = parseState(await one(tx, postgresMetaMessageEchoSql.lockState, [scope.tenantId, targetId]), scope, message.recipientPhoneNumber);
+        // New originals bind caption identity separately, including an explicitly
+        // absent caption. Legacy receipts did not observe it and stay unchanged.
+        if (message.mutation === undefined && state.originalCaptionDigest !== null && state.originalCaptionDigest !== originalCaptionDigest) return conflict();
         const claimed = await one(tx, postgresMetaMessageEchoSql.claimEvent, [scope.tenantId, eventKey, requestDigest, targetId]);
         if (claimed === null) {
           const stored = requireExactPostgresRow(await one(tx, postgresMetaMessageEchoSql.readEvent, [scope.tenantId, eventKey]), ["requestDigest", "providerMessageId"]);
@@ -156,6 +167,7 @@ export function createPostgresMetaMessageEchoRepository(transactions: PostgresTr
         }
         if (message.mutation === undefined) {
           if (state.originalDigest !== null && state.originalDigest !== requestDigest) return conflict();
+          if (state.originalDigest === null && stored === null) state.originalCaptionDigest = originalCaptionDigest;
           state.originalDigest = requestDigest;
           if ((state.contentState === "edited" || state.contentState === "conflicted") && message.contentKind !== state.editKind) return conflict();
         } else {
@@ -164,7 +176,7 @@ export function createPostgresMetaMessageEchoRepository(transactions: PostgresTr
           state = reduceMetaEchoMutation(state, message);
         }
         requireKey(await one(tx, postgresMetaMessageEchoSql.updateState, [scope.tenantId, targetId,
-          state.originalDigest, state.contentState, state.editAt, state.editText, state.editKind]), "providerMessageId", targetId);
+          state.originalDigest, state.contentState, state.editAt, state.editText, state.editKind, state.originalCaptionDigest]), "providerMessageId", targetId);
         if (stored === null && message.mutation !== undefined) return { outcome: "deferred" as const };
         if (stored !== null) {
           const projected = projection(state, { contentKind: stored.contentKind as MessageContentKind, textContent: stored.textContent as string | null });
@@ -181,7 +193,7 @@ export function createPostgresMetaMessageEchoRepository(transactions: PostgresTr
         const insertedConversation = await one(tx, postgresMetaMessageEchoSql.insertConversation, [conversationKey, scope.tenantId, contactId]);
         if (insertedConversation !== null) requireKey(insertedConversation, "conversationKey", conversationKey);
         requireKey(await one(tx, postgresMetaMessageEchoSql.lockConversation, [scope.tenantId, conversationKey, contactId]), "conversationKey", conversationKey);
-        const projected = projection(state, message);
+        const projected = projection(state, { contentKind: message.contentKind, textContent: originalCaption ?? message.textContent });
         const inserted = await one(tx, postgresMetaMessageEchoSql.insertMessage, [messageKey, conversationKey, scope.tenantId,
           targetId, projected.contentKind, projected.textContent, message.occurredAt, projected.contentState]);
         if (inserted === null) return conflict();
