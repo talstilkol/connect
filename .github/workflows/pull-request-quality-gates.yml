@@ -215,7 +215,7 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --include=dev
-      - name: Rehearse Coexistence history and revocation on isolated PostgreSQL databases
+      - name: Rehearse signup, Coexistence, history and revocation on isolated PostgreSQL databases
         env:
           CONNECT_META_COEXISTENCE_TEST_URL: postgresql://connect_echo_test@127.0.0.1:55439/postgres
         run: node scripts/run-meta-coexistence-postgres-integration.mjs
