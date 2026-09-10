@@ -2055,6 +2055,17 @@ test("fails closed for missing submission capability on both reads and direct mu
   }
 });
 
+test("rejects a viewer submission even when the server capability is enabled", async () => {
+  const { calls, registry } = fixture({ tenantSession: session("viewer") });
+  const payload = { templateKey: `template_v1_${"e".repeat(64)}`, expectedVersion: 1 };
+  const request = await organizationMutationRequest("templates.submit", payload);
+  await assert.rejects(
+    operation(registry, "templates.submit").execute(dispatchContext, payload, request),
+    (error) => error.code === "PERMISSION_DENIED",
+  );
+  assert.equal(calls.messageTemplateSubmissionMutationCommands.length, 0);
+});
+
 test("rejects unsafe organization requests and maps bounded outcomes", async () => {
   const payload = { name: "Priority" };
   const request = await organizationMutationRequest(

@@ -11,25 +11,21 @@ async function readServerSource(path) {
   );
 }
 
-test("routes tenant-only mutation modules through the mutation session", async () => {
-  const paths = [
-    "templates/messageTemplateActions.ts",
-  ];
-
-  for (const path of paths) {
-    const source = await readServerSource(path);
-
-    assert.match(
-      source,
-      /requireCurrentTenantMutationSession/,
-      path,
-    );
-    assert.doesNotMatch(
-      source,
-      /from "\.\.\/auth\/currentTenantSession/,
-      path,
-    );
+test("routes template mutations through authenticated Railway and its tenant rate limit", async () => {
+  const action = await readServerSource("templates/messageTemplateActions.ts");
+  for (const kind of ["Draft", "Submission"]) {
+    assert.match(action, new RegExp(`createCurrentRailwayMessageTemplate${kind}Handler`));
+    const factory = await readServerSource(`templates/currentRailwayMessageTemplate${kind}Handler.ts`);
+    assert.match(factory, /resolveIdentity: resolveCurrentRailwayApiServerIdentity/);
+    assert.match(factory, /oidcTokenProvider/);
+    assert.match(factory, /userSessionTokenProvider/);
   }
+  assert.doesNotMatch(action, /requireRuntimeDatabase|requireCurrentTenantMutationSession|cloudflare:workers/);
+  const registry = await readServerSource("platform/railwayApiOperationRegistry.ts");
+  const submission = registry.slice(registry.indexOf("async function executeMessageTemplateSubmissionMutation"));
+  const gateIndex = submission.indexOf("await requireTenantMutationRequest(");
+  const writeIndex = submission.indexOf("await dependencies.messageTemplateSubmissionMutations.execute(");
+  assert.ok(gateIndex >= 0 && writeIndex > gateIndex);
 });
 
 test("routes Meta signup through authenticated Railway with a rate limit before the durable claim", async () => {

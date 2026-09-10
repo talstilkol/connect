@@ -98,6 +98,7 @@ function templateRow(overrides = {}) {
 function templateView() {
   return {
     templateKey,
+    version: 1,
     ...draft,
     status: "draft",
     submittedAt: null,

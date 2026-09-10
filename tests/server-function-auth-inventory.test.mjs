@@ -46,7 +46,10 @@ const auditedServerFunctions = new Map([
   ["server/team/teamInvitationAcceptanceActions.ts", ["createCurrentRailwayTeamInvitationAcceptanceHandler"]],
   ["server/team/teamInvitationActions.ts", ["createCurrentRailwayTeamInvitationRequestHandler"]],
   ["server/team/teamMembershipActions.ts", ["createCurrentRailwayTeamMembershipHandler"]],
-  ["server/templates/messageTemplateActions.ts", ["requireCurrentTenantMutationSession"]],
+  ["server/templates/messageTemplateActions.ts", [
+    "createCurrentRailwayMessageTemplateDraftHandler",
+    "createCurrentRailwayMessageTemplateSubmissionHandler",
+  ]],
 ]);
 
 async function collectTypescriptFiles(directory) {

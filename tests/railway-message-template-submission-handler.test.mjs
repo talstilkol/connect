@@ -180,3 +180,11 @@ test("sanitizes client failures and rejects fallback dependencies", async () => 
     /dependencies are invalid/,
   );
 });
+
+test("blocks an unauthenticated submission before any API request", async () => {
+  const testFixture = fixture({ identityState: { status: "unauthenticated" } });
+  assert.deepEqual(await testFixture.handler.submit(templateKey, 1), {
+    status: "unauthenticated",
+  });
+  assert.equal(testFixture.calls.requests.length, 0);
+});
