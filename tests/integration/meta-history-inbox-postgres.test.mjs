@@ -453,6 +453,124 @@ function captionMedia(kind = 'image', caption = message().text.body) {
   return media;
 }
 
+function mediaCaptionEdit(f, kind = 'image', textContent = edit(f).textContent) {
+  return { ...edit(f), contentKind: kind, textContent,
+    mutation: { kind: 'edit', originalProviderMessageId: mediaValue().messages[0].id } };
+}
+
+test('caption edits arriving before binding resolve all source orders without granting acquisition access', async () => {
+  const orders = [['history', 'media', 'edit'], ['history', 'edit', 'media'], ['media', 'history', 'edit'],
+    ['media', 'edit', 'history'], ['edit', 'history', 'media'], ['edit', 'media', 'history']];
+  for (const kind of ['image', 'video', 'document']) {
+    for (const order of orders) {
+      const f = await newCase({ withCredential: true });
+      for (const event of order) {
+        if (event === 'history') { await signed(f, withMessages([mediaPlaceholder()])); await drain(); }
+        if (event === 'media') await signed(f, captionMedia(kind));
+        if (event === 'edit') await echoes.record(f.scope, mediaCaptionEdit(f, kind));
+      }
+      const source = (await pool.query('SELECT * FROM meta_history_inbox_messages WHERE tenant_id=$1', [f.scope.tenantId])).rows[0];
+      f.key = source.message_key;
+      assert.equal((await thread(f)).rows.length, 0);
+      assert.equal(await mediaBindings.bindNext(), 'bound');
+      const result = await thread(f);
+      assert.equal(result.rows.length, 1); assert.equal(result.rows[0].contentKind, kind);
+      assert.equal(result.rows[0].contentState, 'edited'); assert.equal(result.rows[0].textContent, edit(f).textContent);
+      assert.equal(result.rows[0].occurredAt, source.occurred_at.toISOString());
+      assert.equal(result.conversation.lastMessage.textContent, edit(f).textContent);
+      assert.equal(result.conversation.unreadCount, 0); assert.equal((await counts(f)).messages, '0');
+      assert.deepEqual((await pool.query('SELECT * FROM meta_history_inbox_messages WHERE tenant_id=$1', [f.scope.tenantId])).rows, [source]);
+      assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+      const runtime = acquisitionRuntime(f);
+      await acquisitionRejected(runtime.service.download(f.session, f.key)); assert.deepEqual(runtime.calls, []);
+      assert.equal(await mediaBindings.bindNext(), 'idle'); assert.equal((await bindingRows(f)).length, 1);
+    }
+  }
+});
+
+test('pre-binding caption removal and conflicts preserve the revision until a later matching edit', async () => {
+  for (const kind of ['image', 'video', 'document']) {
+    for (const conflicted of [false, true]) {
+      const f = await mediaCase({ media: captionMedia(kind) });
+      const change = mediaCaptionEdit(f, kind, conflicted ? edit(f).textContent : null);
+      await echoes.record(f.scope, change);
+      if (conflicted) await echoes.record(f.scope, { ...change, providerMessageId: 'wamid.edit-conflict', textContent: 'incompatible' });
+      assert.equal(await mediaBindings.bindNext(), 'bound');
+      const result = await thread(f);
+      assert.equal(result.rows[0].contentState, conflicted ? 'conflicted' : 'edited');
+      assert.equal(result.rows[0].textContent, null); assert.equal(result.conversation.lastMessage.textContent, null);
+      assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+      await echoes.record(f.scope, { ...change, providerMessageId: 'wamid.history-edit-clear', textContent: edit(f).textContent, occurredAt: '2026-09-09T09:01:00.000Z' });
+      assert.equal((await thread(f)).rows[0].textContent, edit(f).textContent);
+    }
+  }
+});
+
+test('pre-binding edits cannot authorize a different media type, recipient or revoked session', async () => {
+  for (const change of ['type', 'recipient', 'deleted', 'refusal', 'revoked', 'version', 'suspended', 'rejected', 'media-conflict']) {
+    const f = await mediaCase({ media: captionMedia() });
+    await echoes.record(f.scope, { ...mediaCaptionEdit(f, change === 'type' ? 'document' : 'image'),
+      ...(change === 'recipient' ? { recipientPhoneNumber: `+${message().from}` } : {}) });
+    if (change === 'deleted') await echoes.record(f.scope, { ...revoke(f), mutation: { kind: 'revoke', originalProviderMessageId: mediaValue().messages[0].id } });
+    if (change === 'refusal') await signed(f, declinedValue());
+    if (change === 'revoked') await meta.revokeConnection(f.scope.tenantId, f.scope.wabaId, f.scope.connectionVersion);
+    if (change === 'version') await meta.saveAssetSnapshot({ tenantId: f.scope.tenantId, businessPortfolioId: f.connection.businessPortfolioId, wabaId: f.scope.wabaId, phoneNumberId: f.scope.phoneNumberId });
+    if (change === 'suspended') await pool.query("UPDATE tenants SET status='suspended' WHERE id=$1", [f.scope.tenantId]);
+    if (change === 'rejected') await requests.finish(await requests.read(f.scope.tenantId, 'history'), { status: 'rejected', requestId: null });
+    if (change === 'media-conflict') await signed(f, captionMedia('image', 'original caption'));
+    assert.equal(await mediaBindings.bindNext(), 'idle'); assert.equal((await bindingRows(f)).length, 0);
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+    const result = await thread(f);
+    if (change === 'deleted') assert.equal(result.rows[0].contentState, 'deleted');
+    else assert.equal(result.rows.length, 0);
+  }
+});
+
+test('edited binding failure rolls back and concurrent retries preserve one immutable association', async () => {
+  const f = await mediaCase({ media: captionMedia() }); await echoes.record(f.scope, mediaCaptionEdit(f));
+  const broken = createPostgresMetaHistoryMediaRepository({ transaction: (options, work) => transactions.transaction(options, (tx) => work({ query(sql, params) {
+    if (sql === postgresMetaHistoryMediaSql.audit) throw new Error('binding audit unavailable'); return tx.query(sql, params);
+  } })) });
+  await assert.rejects(broken.bindNext(), /binding audit unavailable/); assert.equal((await bindingRows(f)).length, 0);
+  const results = await Promise.all(Array.from({ length: 5 }, () => createPostgresMetaHistoryMediaRepository(transactions).bindNext()));
+  assert.equal(results.filter(result => result === 'bound').length, 1);
+  assert.ok(results.every(result => ['bound', 'duplicate', 'idle'].includes(result)));
+  assert.equal((await bindingRows(f)).length, 1);
+  assert.equal((await pool.query("SELECT count(*) FROM audit_logs WHERE tenant_id=$1 AND action='meta.history.media-bound'", [f.scope.tenantId])).rows[0].count, '1');
+  assert.equal((await thread(f)).rows[0].textContent, edit(f).textContent);
+  assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+});
+
+test('edited binding rechecks deletion after waiting for the history session lock', async () => {
+  const f = await mediaCase({ media: captionMedia() }); await echoes.record(f.scope, mediaCaptionEdit(f));
+  const blocker = await pool.connect();
+  try {
+    await blocker.query('BEGIN'); await blocker.query(postgresMetaHistorySyncSql.lock, [f.scope.tenantId]);
+    let reached; const atLock = new Promise(resolve => { reached = resolve; });
+    const observed = createPostgresMetaHistoryMediaRepository({ transaction: (options, work) => transactions.transaction(options, (tx) => work({ query(sql, params) {
+      const pending = tx.query(sql, params); if (sql === postgresMetaHistorySyncSql.lock) reached(); return pending;
+    } })) });
+    const pending = observed.bindNext();
+    await Promise.race([atLock, pending.then(() => assert.fail('Edited candidate did not reach the session lock'))]);
+    await echoes.record(f.scope, { ...revoke(f), mutation: { kind: 'revoke', originalProviderMessageId: mediaValue().messages[0].id } });
+    await blocker.query('COMMIT'); assert.equal(await pending, 'blocked');
+    assert.equal((await bindingRows(f)).length, 0); assert.equal((await thread(f)).rows[0].contentState, 'deleted');
+  } finally { await blocker.query('ROLLBACK'); blocker.release(); }
+});
+
+test('edited binding revalidates canonical media digests before persisting an association', async () => {
+  const f = await mediaCase({ media: captionMedia() }); await echoes.record(f.scope, mediaCaptionEdit(f));
+  const corrupted = createPostgresMetaHistoryMediaRepository({ transaction: (options, work) => transactions.transaction(options, (tx) => work({ async query(sql, params) {
+    const result = await tx.query(sql, params);
+    if (sql === postgresMetaHistoryMediaSql.bindingSources && result.rows.length > 0) return { ...result, rows: result.rows.map(row => ({ ...row,
+      media: { ...row.media, content: { ...row.media.content, id: 'corrupted' } } })) };
+    return result;
+  } })) });
+  await assert.rejects(corrupted.bindNext(), error => error.safeCode === 'HISTORY_MEDIA_BINDING_FAILED');
+  assert.equal((await bindingRows(f)).length, 0); assert.equal((await thread(f)).rows.length, 0);
+  assert.equal(await mediaBindings.bindNext(), 'bound'); assert.equal((await thread(f)).rows[0].textContent, edit(f).textContent);
+});
+
 test('bound placeholder metadata reaches the thread and preview while preserving original context and immutable references', async () => {
   for (const kind of ['image', 'audio', 'video', 'document', 'sticker']) {
     for (const mediaFirst of [true, false]) {
