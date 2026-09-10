@@ -958,10 +958,8 @@ export async function createRailwayPostgresWorkerService(
             const result = await foundation.metaHistoryInbox.projectNext();
             if (result.outcome !== "projected") break;
           }
-        },
-      }));
-      queueMaintenanceTasks.push(Object.freeze({
-        async run() {
+          // Bind only after projection commits: media needs the original Inbox
+          // message. Separate maintenance tasks run concurrently in this service.
           for (let item = 0; item < 100; item++) {
             const result = await foundation.metaHistoryMedia.bindNext();
             if (result === "idle" || result === "blocked") break;

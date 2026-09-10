@@ -12,6 +12,7 @@ export const requiredPullRequestStatusChecks =
   "interface-guardrails",
   "dependency-lock",
   "migrations",
+  "meta-coexistence",
   "typecheck",
   "lint",
   "tests-and-build",
@@ -82,7 +83,7 @@ export type SourceControlGovernanceReport =
         status: "configured";
         code:
           "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED";
-        requiredStatusCheckCount: 9;
+        requiredStatusCheckCount: 10;
         controlCount: 9;
       }
     | {
@@ -573,7 +574,7 @@ export function inspectSourceControlGovernanceEvidence(
     status: "configured",
     code:
       "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
-    requiredStatusCheckCount: 9,
+    requiredStatusCheckCount: 10,
     controlCount: 9,
   };
 }

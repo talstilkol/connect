@@ -132,6 +132,11 @@ test("refuses to build governance evidence from incomplete controls or checks", 
     {
       ...snapshot,
       requiredStatusChecks:
+        snapshot.requiredStatusChecks.filter((check) => check !== "meta-coexistence"),
+    },
+    {
+      ...snapshot,
+      requiredStatusChecks:
         snapshot.requiredStatusChecks.slice(1),
     },
     {
@@ -181,7 +186,7 @@ test("accepts protected source control linked to the deployed commit", () => {
       status: "configured",
       code:
         "SOURCE_CONTROL_GOVERNANCE_EVIDENCE_VERIFIED",
-      requiredStatusCheckCount: 9,
+      requiredStatusCheckCount: 10,
       controlCount: 9,
     },
   );

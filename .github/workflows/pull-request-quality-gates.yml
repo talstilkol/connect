@@ -185,6 +185,41 @@ jobs:
           CONNECT_BULLMQ_INTEGRATION_REDIS_URL: redis://127.0.0.1:6380/0
         run: npm run test:bullmq-integration
 
+  meta-coexistence:
+    name: meta-coexistence
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: connect_echo_test
+          POSTGRES_DB: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:55439:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U connect_echo_test -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Check out the audited commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Use the governed Node.js version
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --include=dev
+      - name: Rehearse Coexistence history and revocation on isolated PostgreSQL databases
+        env:
+          CONNECT_META_COEXISTENCE_TEST_URL: postgresql://connect_echo_test@127.0.0.1:55439/postgres
+        run: node scripts/run-meta-coexistence-postgres-integration.mjs
+
   typecheck:
     name: typecheck
     runs-on: ubuntu-latest

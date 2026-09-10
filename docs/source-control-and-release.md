@@ -251,8 +251,10 @@ D1, ‏Queues, ‏DLQs, ‏Cron, ‏Rate limits ו־Deployment evidence בחוז
 7.1 `SOURCE_CONTROL_GOVERNANCE_EVIDENCE_JSON` מקבל Evidence v4
 קצר־חיים שמופק מ־Repository אמיתי לאחר הגדרת Remote.
 
-7.2 ה־Evidence דורש תשעה Pull Request Status Checks: שמונת שערי
-האיכות המקומיים ו־Dependency Audit.
+7.2 ה־Evidence דורש עשרה Pull Request Status Checks: שמונת שערי
+האיכות המקומיים, `meta-coexistence` מול חמישה מסדי PostgreSQL מבודדים
+ו־Dependency Audit. תוצאת תשעת השערים הישנה אינה מספקת לגרסה החדשה.
+גם הגנת הענף חייבת לכלול את השם החדש; קיום Job ב־CI אינו מוכיח הגנה.
 
 7.3 חוזה v4 דורש Repository ציבורי לפי ADR-0007, וכן Branch
 Protection, ‏CODEOWNERS Review, ביטול
@@ -330,7 +332,7 @@ Push protection, היעדר Secrets בהיסטוריה ו־License hold. עד א
 9.1 `CI_EXECUTION_EVIDENCE_JSON` מקבל Evidence v1 קצר־חיים עבור
 תוצאות CI אמיתיות.
 
-9.2 נדרשת תוצאת `success` עבור כל תשעת ה־Pull Request Checks,
+9.2 נדרשת תוצאת `success` עבור כל עשרת ה־Pull Request Checks,
 המקושרת לאותו Commit ולאותו Release ID.
 
 9.3 לכל Check נדרשים Completed At קנוני, Run Fingerprint ייחודי
@@ -343,7 +345,7 @@ Push protection, היעדר Secrets בהיסטוריה ו־License hold. עד א
 כתובות Build או Credentials.
 
 9.6 אותו מחולל קורא את ה־Check Runs האחרונים עבור Commit ה־Release,
-דורש בדיוק ריצה מוצלחת ולא־עמומה לכל אחד מתשעת השמות, ומסרב לקבל
+דורש בדיוק ריצה מוצלחת ולא־עמומה לכל אחד מעשרת השמות, ומסרב לקבל
 Run כפול, ישן, חלקי או השייך ל־Commit אחר.
 
 9.7 הפלט נשמר ב־`.artifacts/ci-execution-evidence.json`. מזהי Run,

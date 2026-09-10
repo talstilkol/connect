@@ -67,7 +67,7 @@ export type CiExecutionReport =
         status: "configured";
         code:
           "CI_EXECUTION_EVIDENCE_VERIFIED";
-        verifiedStatusCheckCount: 9;
+        verifiedStatusCheckCount: 10;
       }
     | {
         status:
@@ -622,6 +622,6 @@ export function inspectCiExecutionEvidence(
     status: "configured",
     code:
       "CI_EXECUTION_EVIDENCE_VERIFIED",
-    verifiedStatusCheckCount: 9,
+    verifiedStatusCheckCount: 10,
   };
 }

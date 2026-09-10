@@ -145,6 +145,10 @@ test("refuses failed, duplicate, stale, or extended CI snapshots", () => {
   const variants = [
     {
       ...snapshot,
+      checks: snapshot.checks.filter((check) => check.name !== "meta-coexistence"),
+    },
+    {
+      ...snapshot,
       checks: snapshot.checks.slice(1),
     },
     {
@@ -196,7 +200,7 @@ test("accepts all nine successful pull request checks for the deployed release",
       status: "configured",
       code:
         "CI_EXECUTION_EVIDENCE_VERIFIED",
-      verifiedStatusCheckCount: 9,
+      verifiedStatusCheckCount: 10,
     },
   );
 });
