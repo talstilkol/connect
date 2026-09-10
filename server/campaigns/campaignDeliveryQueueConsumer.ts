@@ -37,6 +37,8 @@ export interface CampaignDeliveryQueueDelivery {
   readonly attempts: number;
   body: unknown;
   ack(): void;
+  /** A deliberate wait that preserves the failure budget (BullMQ runtime). */
+  defer?(options: { delaySeconds: number }): void;
   retry(options?: {
     delaySeconds: number;
   }): void;
@@ -200,6 +202,12 @@ async function settleSafely(
   }
 }
 
+function deferCampaignDelivery(delivery: CampaignDeliveryQueueDelivery): void {
+  const options = { delaySeconds: 30 };
+  if (delivery.defer) delivery.defer(options);
+  else delivery.retry(options); // Legacy queue runtimes expose no campaign controls.
+}
+
 export function createCampaignDeliveryQueueConsumer(
   dispatch: CampaignDispatchRepository,
   campaigns: Pick<CampaignRepository, "findByKey">,
@@ -253,18 +261,6 @@ export function createCampaignDeliveryQueueConsumer(
           continue;
         }
 
-        if (
-          !admission.isConfigured() ||
-          !processor.isConfigured()
-        ) {
-          delivery.retry({
-            delaySeconds:
-              UNAVAILABLE_RETRY_DELAY_SECONDS,
-          });
-          result.retried += 1;
-          continue;
-        }
-
         const now = currentTimestamp(clock);
         let campaign;
         let recipientPhoneNumber: string;
@@ -287,6 +283,17 @@ export function createCampaignDeliveryQueueConsumer(
             context.campaignKey,
           );
 
+          if (campaign?.status === "paused" || campaign?.status === "scheduled") {
+            deferCampaignDelivery(delivery);
+            result.deferred += 1;
+            continue;
+          }
+          if (campaign?.status === "cancelled") {
+            delivery.ack();
+            result.skipped += 1;
+            continue;
+          }
+
           if (
             !campaign ||
             campaign.status !== "running"
@@ -304,6 +311,18 @@ export function createCampaignDeliveryQueueConsumer(
           delivery.retry({
             delaySeconds:
               STORAGE_RETRY_DELAY_SECONDS,
+          });
+          result.retried += 1;
+          continue;
+        }
+
+        if (
+          !admission.isConfigured() ||
+          !processor.isConfigured()
+        ) {
+          delivery.retry({
+            delaySeconds:
+              UNAVAILABLE_RETRY_DELAY_SECONDS,
           });
           result.retried += 1;
           continue;
@@ -393,8 +412,20 @@ export function createCampaignDeliveryQueueConsumer(
             "cancelled-before-submit",
             now,
           );
-          delivery.ack();
-          result.duplicates += 1;
+          // Pause may win after admission but before the database send claim.
+          // Retain a still-queued job, including a concurrent resume, instead of ACKing it.
+          try {
+            if (await dispatch.findQueuedDeliveryContext(message.deliveryKey)) {
+              deferCampaignDelivery(delivery);
+              result.deferred += 1;
+            } else {
+              delivery.ack();
+              result.duplicates += 1;
+            }
+          } catch {
+            delivery.retry({ delaySeconds: STORAGE_RETRY_DELAY_SECONDS });
+            result.retried += 1;
+          }
           continue;
         }
 

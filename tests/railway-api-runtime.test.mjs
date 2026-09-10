@@ -2613,3 +2613,32 @@ test("rejects invalid operation payload before tenant lookup", async () => {
   assert.equal(testFixture.calls.memberships, 0);
   assert.deepEqual(testFixture.calls.contacts, []);
 });
+
+test("all campaign controls require permission and deterministic keys through the HTTP boundary", async () => {
+  for (const action of ["pause", "resume", "cancel"]) {
+    const payload = { campaignKey: `campaign_v1_${"1".repeat(64)}`, expectedVersion: 1, action };
+    const key = await deriveRailwayApiDeterministicIdempotencyKey("campaigns.control", payload);
+    for (const role of ["manager", "viewer"]) {
+      const commands = [];
+      const f = fixture(role, { campaignDeliveryConfigured: () => false, campaignMutations: {
+        async execute(command) { commands.push(command); return { outcome: "state-conflict", tenantId: null, state: null }; },
+      } });
+      const response = await f.handler.handle(request("campaigns.control", payload, "mutation", key));
+      const body = await response.json();
+      if (role === "viewer") { assert.equal(response.status, 403); assert.equal(commands.length, 0); }
+      else {
+        assert.equal(response.status, 200);
+        assert.deepEqual(body.data, { replayed: false, outcome: "state-conflict" });
+        assert.equal(commands[0].session.tenantId, 11);
+        assert.deepEqual(commands[0].payload, payload);
+        assert.deepEqual(f.calls.mutationSubjects, ["11:verified-user:campaigns.control"]);
+      }
+      assert.doesNotMatch(JSON.stringify(body), /tenantId|externalUserId|verified-user/);
+    }
+    const f = fixture("manager");
+    const mismatchedKey = await deriveRailwayApiDeterministicIdempotencyKey("campaigns.activate", { campaignKey: payload.campaignKey, expectedVersion: 1 });
+    const forged = await f.handler.handle(request("campaigns.control", payload, "mutation", mismatchedKey));
+    assert.equal(forged.status, 400);
+    assert.deepEqual(f.calls.campaignMutations, []);
+  }
+});

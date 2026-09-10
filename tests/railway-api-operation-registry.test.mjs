@@ -1112,6 +1112,17 @@ test("publishes one immutable policy for every concrete operation", () => {
       },
     },
     {
+      id: "campaigns.control",
+      requestKind: "mutation",
+      permission: "campaigns.write",
+      mutationSafety: {
+        rateLimit: "tenant-mutation",
+        idempotency: "atomic-request-digest-replay",
+        audit: "atomic-immutable-event",
+        transaction: "required",
+      },
+    },
+    {
       id: "contacts.list",
       requestKind: "query",
       permission: "contacts.read",

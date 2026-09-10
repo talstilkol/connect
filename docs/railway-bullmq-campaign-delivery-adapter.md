@@ -177,3 +177,62 @@ version תואם, Worker פועל עם Vault ו־WHATSAPP_RATE_LIMIT_HMAC_KEY_V1
 7.6 פקודת npm run start:railway-api משתמשת ב־BullMQ Executable
 ומחברת את המתג. פקודת postgres-only המשנית נשארת עם ברירת המחדל
 החסומה ואינה מסלול הפעלת הקמפיינים. לא בוצעה הפעלה בחשבון ספק.
+
+## 8. Pause/Resume/Cancel — 10.09.2026
+
+8.1 `campaigns.control` accepts exactly `campaignKey`, `expectedVersion` and
+`action` (`pause`, `resume`, `cancel`). It requires `campaigns.write`, the tenant
+mutation quota and a deterministic request key. The PostgreSQL executor locks
+and rechecks tenant/membership before every mutation or receipt replay, then
+locks the campaign, checks its version, updates state, and writes Audit/Receipt
+in the same transaction. No provider request occurs inside that transaction.
+
+| Action | Source | Result |
+|---|---|---|
+| pause | scheduled, running | paused; recipients and queued job IDs retained |
+| resume | paused | scheduled if never started; otherwise running |
+| cancel | draft, scheduled, running, paused | cancelled; pending/queued recipients cancelled |
+
+8.2 Cancel is terminal. Resume preserves the original schedule and template
+snapshot; the existing scheduler promotes a due scheduled campaign. Resume
+requires `CAMPAIGN_ACTIVATION_ENABLED=true` and validated Graph configuration.
+Pause/cancel and authorized receipt replay remain available when that flag is
+false. This flag now governs new activations **and new resumes**; it still does
+not stop already active campaigns by itself.
+
+8.3 PostgreSQL `prepareDelivery` locks the campaign before claiming a recipient
+as `sending`. Pause/cancel uses that same row lock. A send claim committed before
+the control is in flight and may finish; cancellation cannot recall a provider
+request. `sending`/`accepted`/delivered states are preserved. A definite provider
+rejection returned to the queue after cancellation becomes `cancelled`, using
+the same campaign lock. Unknown provider outcomes retain existing recovery rules.
+
+8.4 A paused queued recipient remains visible to the consumer. BullMQ uses
+`job.moveToDelayed(timestamp, token)` followed by `DelayedError`, keeping the same
+job ID and not incrementing `attemptsMade`. A 30-second recheck interval is an
+internal polling choice, not a Meta limit or a delivery SLA. Existing provider
+cooldowns and queue backlog can delay resume further. `attemptsStarted` identifies
+each consumer invocation for reservation derivation; `attemptsMade` still bounds
+actual failures to the existing eleven attempts. No global queue pause, new
+random ID, job removal, rate-limit change, or extra delivery generation is used.
+If pause wins after admission but before claim, the reservation is settled and
+a still-queued job is delayed rather than acknowledged as a duplicate.
+
+8.5 Deploy the matching **Worker first, API second, Web third**. Do not expose
+controls while old workers remain: the older context filter can acknowledge a
+paused job prematurely. No schema migration is required. Postgres-only and D1
+runtimes remain outside this enabled delivery path. The optional consumer `defer`
+method preserves compatibility for legacy queue adapters; only the BullMQ adapter
+guarantees waits outside its failure budget. Rollback must keep the compatible
+Worker until paused campaigns have been resumed or cancelled and queued work
+has been reconciled. Never restore the older Worker against paused campaigns.
+
+8.6 Local and CI acceptance includes real PostgreSQL row-lock waits and late SQL
+rollback, plus real Redis with twelve intentional delays, a worker restart and
+one final completion. These tests use the existing integration fixtures and do
+not prove a live Meta send or an end-user browser journey.
+
+8.7 Verified against installed BullMQ 5.81.3 source and the official
+[delayed processing pattern](https://docs.bullmq.io/patterns/process-step-jobs)
+on 10.09.2026. Local PostgreSQL 17.11 and the pinned Redis image are disposable
+loopback instances, separate from customer infrastructure.

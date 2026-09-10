@@ -455,3 +455,58 @@ test("delivers an invitation once across separate publisher and worker runtimes"
     }
   }
 });
+
+test("campaign waiting survives worker restart beyond eleven starts without consuming failure attempts", {
+  skip: typeof redisUrl !== "string" || redisUrl.length === 0,
+  timeout: 35_000,
+}, async () => {
+  const message = createCampaignDeliveryQueueMessage(`campaign_delivery_v1_${"d".repeat(64)}`);
+  const starts = [];
+  const failures = [];
+  const inspection = new Queue(railwayBullMqCampaignDeliveryQueueName, {
+    connection: { url: redisUrl, maxRetriesPerRequest: 1 }, prefix: "connect-test-v1",
+  });
+  inspection.on("error", () => {});
+  const options = {
+    environment: { APP_RUNTIME_ENVIRONMENT: "test", REDIS_URL: redisUrl,
+      BULLMQ_COMPLETED_RETENTION_SECONDS: "86400", BULLMQ_COMPLETED_RETENTION_COUNT: "1000",
+      BULLMQ_FAILED_RETENTION_SECONDS: "604800", BULLMQ_FAILED_RETENTION_COUNT: "2000",
+      BULLMQ_DLQ_RETENTION_SECONDS: "2592000", BULLMQ_DLQ_CLEAN_BATCH_SIZE: "100" },
+    consumer: { async handle(batch) {
+      const delivery = batch.messages[0];
+      starts.push(delivery.attempts);
+      if (starts.length <= 12) delivery.defer({ delaySeconds: 1 });
+      else delivery.ack();
+    } },
+    telemetry: { recordConnectionFailure() { failures.push("connection"); },
+      recordWorkerFailure() { failures.push("worker"); }, recordWorkerRuntimeFailure() { failures.push("runtime"); },
+      recordPublisherFailure() { failures.push("publisher"); }, recordDeadLetter() { failures.push("dead-letter"); }, recordDeadLetterCleanup() {} },
+  };
+  let runtime = createRailwayBullMqCampaignDeliveryQueueRuntime(options);
+  async function waitForState(target, minimumStarts) {
+    const deadline = Date.now() + 20_000;
+    while (Date.now() < deadline) {
+      const job = await inspection.getJob(message.deliveryKey);
+      if (job && starts.length >= minimumStarts && await job.getState() === target) return job;
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    throw new Error("Campaign durable wait did not reach expected state");
+  }
+  try {
+    await runtime.start();
+    await runtime.queue.sendBatch([{ body: message, contentType: "json" }]);
+    const parked = await waitForState("delayed", 6);
+    assert.equal(parked.attemptsMade, 0);
+    await runtime.close();
+    runtime = createRailwayBullMqCampaignDeliveryQueueRuntime(options);
+    await runtime.start();
+    const completed = await waitForState("completed", 13);
+    assert.equal(completed.attemptsMade, 1); // Only the final ACK completes a processing attempt.
+    assert.equal(completed.attemptsStarted, 13);
+    assert.deepEqual(starts, Array.from({ length: 13 }, (_, index) => index + 1));
+    assert.deepEqual(failures, []);
+  } finally {
+    await runtime.close();
+    try { await inspection.remove(message.deliveryKey); } finally { await inspection.close(); }
+  }
+});

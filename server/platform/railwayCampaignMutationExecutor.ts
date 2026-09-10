@@ -1,3 +1,4 @@
+import type { CampaignControlRequest } from "../../shared/domain/campaignControl.ts";
 import type {
   CampaignActivationView,
   CampaignView,
@@ -19,9 +20,12 @@ export const RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION =
 export const RAILWAY_CAMPAIGN_ACTIVATE_OPERATION =
   "campaigns.activate" as const;
 
+export const RAILWAY_CAMPAIGN_CONTROL_OPERATION = "campaigns.control" as const;
+
 export const railwayCampaignMutationOperations = Object.freeze([
   RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION,
   RAILWAY_CAMPAIGN_ACTIVATE_OPERATION,
+  RAILWAY_CAMPAIGN_CONTROL_OPERATION,
 ] as const);
 
 export type RailwayCampaignMutationOperation =
@@ -29,7 +33,8 @@ export type RailwayCampaignMutationOperation =
 
 export type RailwayCampaignMutationPayload =
   | Readonly<ParsedCampaignSnapshotRequest>
-  | Readonly<ParsedActivateCampaignRequest>;
+  | Readonly<ParsedActivateCampaignRequest>
+  | Readonly<CampaignControlRequest>;
 
 export type RailwayCampaignSnapshotState = Readonly<{
   outcome: "saved";
@@ -43,7 +48,8 @@ export type RailwayCampaignActivationState = Readonly<{
 
 export type RailwayCampaignMutationState =
   | RailwayCampaignSnapshotState
-  | RailwayCampaignActivationState;
+  | RailwayCampaignActivationState
+  | Readonly<{ outcome: "controlled"; campaign: Readonly<CampaignView> }>;
 
 export interface RailwayCampaignMutationCommand {
   readonly session: Readonly<TenantSession>;
@@ -90,6 +96,17 @@ export function parseRailwayCampaignMutationState(
 ): RailwayCampaignMutationState | null {
   if (!isRecord(value)) {
     return null;
+  }
+
+  if (operation === RAILWAY_CAMPAIGN_CONTROL_OPERATION) {
+    if (!hasExactKeys(value, ["campaign", "outcome"]) || value.outcome !== "controlled" || !("action" in payload)) return null;
+    const campaign = parseRailwayCampaignView(value.campaign);
+    if (campaign === null || campaign.campaignKey !== payload.campaignKey || campaign.version !== payload.expectedVersion + 1 ||
+        (payload.action !== "cancel" && (campaign.activatedAt === null || campaign.completedAt !== null)) ||
+        (payload.action === "pause" && campaign.status !== "paused") ||
+        (payload.action === "cancel" && (campaign.status !== "cancelled" || campaign.completedAt === null)) ||
+        (payload.action === "resume" && campaign.status !== (campaign.startedAt === null ? "scheduled" : "running"))) return null;
+    return Object.freeze({ outcome: "controlled" as const, campaign });
   }
 
   if (operation === RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION) {

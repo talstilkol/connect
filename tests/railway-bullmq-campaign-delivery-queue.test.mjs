@@ -551,3 +551,36 @@ test("rejects invalid configuration, options and dependency extensions", () => {
       error.code === "dependencies-invalid",
   );
 });
+
+test("deliberate campaign waits retain the same job beyond the failure budget", async () => {
+  const infra = infrastructure();
+  const starts = [];
+  const waiting = [];
+  const rt = runtime(infra, { async handle(batch) {
+    starts.push(batch.messages[0].attempts);
+    batch.messages[0].defer({ delaySeconds: 30 });
+  } });
+  await rt.start();
+  const message = createCampaignDeliveryQueueMessage(firstDeliveryKey);
+  for (let started = 11; started <= 24; started += 1) {
+    const job = workerJob(message, { attemptsMade: 10, attemptsStarted: started,
+      async moveToDelayed(timestamp, token) { waiting.push({ timestamp, token }); } });
+    await assert.rejects(infra.workerRecord.processor(job, "held-job-lock"), { name: "DelayedError" });
+  }
+  assert.equal(waiting.length, 14);
+  assert.equal(waiting.every(({ timestamp, token }) => timestamp === Date.parse(fixedNow) + 30_000 && token === "held-job-lock"), true);
+  assert.deepEqual(starts, Array.from({ length: 14 }, (_, index) => index + 11));
+  assert.equal(infra.queue(railwayBullMqCampaignDeliveryDeadLetterQueueName).added.length, 0);
+  await rt.close();
+});
+
+test("a campaign cannot be marked delayed without its current lock or after a Redis failure", async () => {
+  const infra = infrastructure();
+  const rt = runtime(infra, { async handle(batch) { batch.messages[0].defer({ delaySeconds: 30 }); } });
+  await rt.start();
+  const job = workerJob(createCampaignDeliveryQueueMessage(firstDeliveryKey));
+  await assert.rejects(infra.workerRecord.processor(job), { name: "CampaignDeliveryRetryError" });
+  job.moveToDelayed = async () => { throw new Error("Redis unavailable"); };
+  await assert.rejects(infra.workerRecord.processor(job, "held-job-lock"), /Redis unavailable/);
+  await rt.close();
+});

@@ -17,7 +17,7 @@ function options(overrides = {}) {
     },
     dispatch: {
       async findQueuedDeliveryContext() {
-        throw new Error("must not load delivery context");
+        throw new Error("delivery lifecycle lookup unavailable");
       },
       async prepareDelivery() {
         throw new Error("must not prepare delivery");
@@ -83,7 +83,7 @@ function options(overrides = {}) {
   };
 }
 
-test("composes the PostgreSQL campaign consumer and fails closed before data access", async () => {
+test("composes the PostgreSQL campaign consumer and fails closed when lifecycle lookup fails", async () => {
   const consumer = createRailwayCampaignDeliveryConsumerRuntime(options());
   const actions = [];
   const result = await consumer.handle({
@@ -115,7 +115,7 @@ test("composes the PostgreSQL campaign consumer and fails closed before data acc
     discarded: 0,
     retried: 1,
   });
-  assert.deepEqual(actions, [["retry", 60]]);
+  assert.deepEqual(actions, [["retry", 30]]);
 });
 
 test("rejects an incomplete consumer composition before provider access", () => {

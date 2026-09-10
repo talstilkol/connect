@@ -1,3 +1,5 @@
+import { parseCampaignControlRequest } from "../../shared/domain/campaignControl.ts";
+import { CampaignControlConflict, controlPostgresCampaign, lockCampaignControlAuthorization } from "./postgresCampaignControlMutation.ts";
 import {
   CampaignActivationError,
   createCampaignActivationService,
@@ -24,6 +26,7 @@ import type {
 } from "./postgresTransaction.ts";
 import {
   RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION,
+  RAILWAY_CAMPAIGN_CONTROL_OPERATION,
   parseRailwayCampaignMutationState,
   railwayCampaignMutationOperations,
   type RailwayCampaignMutationCommand,
@@ -142,7 +145,9 @@ function validateCommand(
 
   const parsed = command.operation === RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION
     ? parseCampaignSnapshotRequest(command.payload)
-    : parseActivateCampaignRequest(command.payload);
+    : command.operation === RAILWAY_CAMPAIGN_CONTROL_OPERATION
+      ? parseCampaignControlRequest(command.payload)
+      : parseActivateCampaignRequest(command.payload);
   if (
     parsed === null ||
     JSON.stringify(parsed) !== JSON.stringify(command.payload)
@@ -242,6 +247,13 @@ async function executeDomainMutation(
     }, command);
   }
 
+  if (command.operation === RAILWAY_CAMPAIGN_CONTROL_OPERATION) {
+    const input = parseCampaignControlRequest(command.payload);
+    if (input === null) throw new Error("Invalid campaign control");
+    if (input.action === "resume" && !deliveryConfigured()) throw new CampaignDeliveryConfigurationError();
+    return parseStoredState(await controlPostgresCampaign(transaction, command.session, input), command);
+  }
+
   if (!deliveryConfigured()) {
     throw new CampaignDeliveryConfigurationError();
   }
@@ -312,6 +324,9 @@ async function executeTransaction(
   command: Readonly<RailwayCampaignMutationCommand>,
   deliveryConfigured: () => boolean,
 ): Promise<RailwayCampaignMutationResult> {
+  if (command.operation === RAILWAY_CAMPAIGN_CONTROL_OPERATION) {
+    await lockCampaignControlAuthorization(transaction, command.session);
+  }
   const claimed = await transaction.query<{ idempotencyKey: string }>(
     postgresRailwayCampaignMutationSql.claimReceipt,
     [
@@ -374,6 +389,7 @@ export function createPostgresRailwayCampaignMutationExecutor(
           ),
         );
       } catch (error) {
+        if (error instanceof CampaignControlConflict) return { outcome: "state-conflict", tenantId: null, state: null };
         if (error instanceof CampaignSnapshotError) {
           return mapSnapshotError(error);
         }

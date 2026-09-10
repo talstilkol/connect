@@ -242,3 +242,40 @@ test("rejects malformed campaign responses and handles configuration safely", as
   });
   assert.equal((await malformed.handler.readCurrent()).status, "server-error");
 });
+
+test("campaign controls preserve action/version identity across a lost response and retry", async () => {
+  const payload = { campaignKey, expectedVersion: 1, action: "pause" };
+  let responseNumber = 0;
+  const f = fixture({ response() {
+    responseNumber += 1;
+    if (responseNumber === 1) throw new Error("response lost");
+    return { outcome: "ok", data: { outcome: "controlled", replayed: true,
+      campaign: campaign({ status: "paused", version: 2, activatedAt: "2026-08-21T10:00:00.000Z" }) } };
+  } });
+  assert.deepEqual(await f.handler.control(payload), { status: "server-error" });
+  assert.equal((await f.handler.control(payload)).status, "controlled");
+  assert.deepEqual(f.calls.requests[0], f.calls.requests[1]);
+  assert.equal(f.calls.requests[0].idempotencyKey, await deriveRailwayApiDeterministicIdempotencyKey("campaigns.control", payload));
+});
+
+test("rejects forged controls and mismatched successful control responses", async () => {
+  for (const payload of [null, { campaignKey, expectedVersion: 1, action: "restart" },
+    { campaignKey, expectedVersion: 1, action: "pause", tenantId: 7 },
+    { campaignKey, expectedVersion: Number.MAX_SAFE_INTEGER, action: "cancel" }]) {
+    const f = fixture();
+    assert.deepEqual(await f.handler.control(payload), { status: "invalid-input" });
+    assert.equal(f.calls.requests.length, 0);
+  }
+  for (const changed of [{ version: 3 }, { status: "running" }, { campaignKey: `campaign_v1_${"b".repeat(64)}` }]) {
+    const f = fixture({ response() { return { outcome: "ok", data: { outcome: "controlled", replayed: false,
+      campaign: campaign({ status: "paused", version: 2, activatedAt: "2026-08-21T10:00:00.000Z", ...changed }) } }; } });
+    assert.deepEqual(await f.handler.control({ campaignKey, expectedVersion: 1, action: "pause" }), { status: "server-error" });
+  }
+});
+
+test("maps control conflict and resume configuration without exposing server details", async () => {
+  for (const outcome of ["state-conflict", "delivery-configuration-required"]) {
+    const f = fixture({ response() { return { outcome: "ok", data: { replayed: false, outcome } }; } });
+    assert.deepEqual(await f.handler.control({ campaignKey, expectedVersion: 1, action: "resume" }), { status: outcome });
+  }
+});

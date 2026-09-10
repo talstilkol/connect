@@ -1,4 +1,5 @@
 import {
+  DelayedError,
   Queue,
   Worker,
 } from "bullmq";
@@ -186,6 +187,8 @@ interface WorkerJob {
   readonly data: unknown;
   readonly timestamp: number;
   readonly attemptsMade: number;
+  readonly attemptsStarted?: number;
+  readonly moveToDelayed?: (timestamp: number, token: string) => Promise<void>;
 }
 
 interface WorkerPort {
@@ -203,7 +206,7 @@ export interface RailwayBullMqCampaignDeliveryQueueDependencies {
   ) => QueuePort;
   readonly createWorker: (
     name: string,
-    processor: (job: WorkerJob) => Promise<unknown>,
+    processor: (job: WorkerJob, token?: string) => Promise<unknown>,
     options: WorkerCreateOptions,
   ) => WorkerPort;
 }
@@ -255,7 +258,7 @@ const defaultDependencies = Object.freeze({
   },
   createWorker(
     name: string,
-    processor: (job: WorkerJob) => Promise<unknown>,
+    processor: (job: WorkerJob, token?: string) => Promise<unknown>,
     options: WorkerCreateOptions,
   ): WorkerPort {
     const worker = new Worker(name, processor, options);
@@ -558,7 +561,7 @@ export function createRailwayBullMqCampaignDeliveryQueueRuntime(
     recordSafely(() => options.telemetry.recordDeadLetter(reason));
   }
 
-  async function processJob(job: WorkerJob): Promise<Readonly<{
+  async function processJob(job: WorkerJob, token?: string): Promise<Readonly<{
     outcome: "acknowledged" | "dead-lettered";
   }>> {
     const attempt = deliveryAttempt(job);
@@ -573,25 +576,37 @@ export function createRailwayBullMqCampaignDeliveryQueueRuntime(
     }
 
     const deliveryState: {
-      action: "ack" | "retry" | null;
+      action: "ack" | "retry" | "defer" | null;
       requestedDelaySeconds: number | null;
     } = {
       action: null,
       requestedDelaySeconds: null,
     };
-    const chooseAction = (next: "ack" | "retry"): void => {
+    const chooseAction = (next: "ack" | "retry" | "defer"): void => {
       if (deliveryState.action !== null) {
         throw new Error("BullMQ campaign delivery action is not isolated");
       }
       deliveryState.action = next;
     };
+    // Starts increase on deliberate delays, while attemptsMade is the failure budget.
+    const queueAttempt = job.attemptsStarted ?? attempt;
+    if (!Number.isSafeInteger(queueAttempt) || queueAttempt < attempt) {
+      throw new Error("BullMQ campaign start counter is invalid");
+    }
     const delivery = Object.freeze({
       id: job.id,
       timestamp: new Date(job.timestamp),
-      attempts: attempt,
+      attempts: queueAttempt,
       body: job.data,
       ack() {
         chooseAction("ack");
+      },
+      defer(deferOptions: Readonly<{ delaySeconds: number }>) {
+        if (!deferOptions || !retryDelayIsValid(deferOptions.delaySeconds)) {
+          throw new Error("BullMQ campaign deferral delay is invalid");
+        }
+        chooseAction("defer");
+        deliveryState.requestedDelaySeconds = deferOptions.delaySeconds;
       },
       retry(retryOptions: Readonly<{ delaySeconds: number }>) {
         chooseAction("retry");
@@ -618,6 +633,19 @@ export function createRailwayBullMqCampaignDeliveryQueueRuntime(
 
     if (deliveryState.action === "ack") {
       return Object.freeze({ outcome: "acknowledged" });
+    }
+
+    if (deliveryState.action === "defer") {
+      if (typeof token !== "string" || token.length === 0 ||
+          typeof job.moveToDelayed !== "function" ||
+          deliveryState.requestedDelaySeconds === null) {
+        throw new CampaignDeliveryRetryError(FALLBACK_RETRY_DELAY_SECONDS);
+      }
+      await job.moveToDelayed(
+        Date.parse(canonicalTimestamp(clock)) + deliveryState.requestedDelaySeconds * 1_000,
+        token,
+      );
+      throw new DelayedError();
     }
 
     const retryDelaySeconds =

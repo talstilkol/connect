@@ -1,3 +1,4 @@
+import { parseCampaignControlRequest } from "../../shared/domain/campaignControl.ts";
 import { RAILWAY_MESSAGE_TEMPLATE_SYNC_OPERATION, isTemplateSyncTimestamp,
   type RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
 import { parseRailwayMessageTemplateSyncState } from "../templates/railwayMessageTemplateSyncResult.ts";
@@ -174,6 +175,7 @@ import {
 } from "../campaigns/campaignView.ts";
 import {
   RAILWAY_CAMPAIGN_ACTIVATE_OPERATION,
+  RAILWAY_CAMPAIGN_CONTROL_OPERATION,
   RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION,
   parseRailwayCampaignMutationState,
   type RailwayCampaignMutationExecutor,
@@ -381,6 +383,17 @@ export const railwayApiOperationPolicies = Object.freeze([
   }),
   Object.freeze({
     id: RAILWAY_CAMPAIGN_ACTIVATE_OPERATION,
+    requestKind: "mutation" as const,
+    permission: "campaigns.write" as const,
+    mutationSafety: Object.freeze({
+      rateLimit: "tenant-mutation" as const,
+      idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const,
+      transaction: "required" as const,
+    }),
+  }),
+  Object.freeze({
+    id: RAILWAY_CAMPAIGN_CONTROL_OPERATION,
     requestKind: "mutation" as const,
     permission: "campaigns.write" as const,
     mutationSafety: Object.freeze({
@@ -1482,7 +1495,9 @@ async function executeCampaignMutation(
   const payload: Readonly<RailwayCampaignMutationPayload> | null =
     operation === RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION
       ? parseCampaignSnapshotRequest(rawPayload)
-      : parseActivateCampaignRequest(rawPayload);
+      : operation === RAILWAY_CAMPAIGN_CONTROL_OPERATION
+        ? parseCampaignControlRequest(rawPayload)
+        : parseActivateCampaignRequest(rawPayload);
   if (payload === null) {
     invalidRequest();
   }
@@ -2063,6 +2078,7 @@ export function createRailwayApiOperationRegistry(
     campaignDirectoryPolicy,
     campaignSnapshotPolicy,
     campaignActivatePolicy,
+    campaignControlPolicy,
     contactsPolicy,
     contactSavePolicy,
     contactConsentGrantPolicy,
@@ -2331,6 +2347,19 @@ export function createRailwayApiOperationRegistry(
           dependencies,
           session,
           RAILWAY_CAMPAIGN_ACTIVATE_OPERATION,
+          payload,
+          request,
+        ),
+    ),
+    createOperation(
+      campaignControlPolicy,
+      dependencies,
+      (payload) => payload,
+      (session, payload, request) =>
+        executeCampaignMutation(
+          dependencies,
+          session,
+          RAILWAY_CAMPAIGN_CONTROL_OPERATION,
           payload,
           request,
         ),

@@ -1,3 +1,4 @@
+import { parseCampaignControlRequest } from "../../shared/domain/campaignControl.ts";
 import type {
   CampaignAudienceOptionsView,
   CampaignDeliveryReadinessStatus,
@@ -19,11 +20,14 @@ import {
 import type { RailwayApiServerIdentityState } from "../platform/railwayApiServerIdentity.ts";
 import {
   RAILWAY_CAMPAIGN_ACTIVATE_OPERATION,
+  RAILWAY_CAMPAIGN_CONTROL_OPERATION,
+  parseRailwayCampaignMutationState,
   RAILWAY_CAMPAIGN_SNAPSHOT_OPERATION,
   type RailwayCampaignMutationOperation,
 } from "../platform/railwayCampaignMutationExecutor.ts";
 import type {
   ActivateCampaignActionResult,
+  ControlCampaignActionResult,
   CampaignActionFailure,
   SaveCampaignSnapshotActionResult,
 } from "./campaignActionResult.ts";
@@ -335,6 +339,26 @@ export function createRailwayCampaignHandler(
       return campaign === null
         ? { status: "server-error" }
         : Object.freeze({ status: "saved" as const, campaign });
+    },
+
+    async control(input: unknown): Promise<ControlCampaignActionResult> {
+      const context = await createContext();
+      if (context.status !== "ready") return context;
+      const payload = normalizeMutationPayload(input);
+      const parsed = parseCampaignControlRequest(payload);
+      if (payload === null || parsed === null) return { status: "invalid-input" };
+      const result = await executeMutation(context.client, RAILWAY_CAMPAIGN_CONTROL_OPERATION, payload);
+      if (result.kind === "failure") return result.failure;
+      if (hasExactKeys(result.data, ["outcome", "replayed"]) && result.data.replayed === false &&
+          (result.data.outcome === "state-conflict" || result.data.outcome === "delivery-configuration-required")) {
+        return { status: result.data.outcome };
+      }
+      if (!hasExactKeys(result.data, ["campaign", "outcome", "replayed"]) || typeof result.data.replayed !== "boolean") {
+        return { status: "server-error" };
+      }
+      const state = parseRailwayCampaignMutationState(RAILWAY_CAMPAIGN_CONTROL_OPERATION, parsed,
+        { outcome: result.data.outcome, campaign: result.data.campaign });
+      return state?.outcome === "controlled" ? { status: "controlled", campaign: state.campaign } : { status: "server-error" };
     },
 
     async activate(input: unknown): Promise<ActivateCampaignActionResult> {

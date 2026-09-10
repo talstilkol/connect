@@ -260,10 +260,18 @@ export const postgresCampaignDispatchSql = Object.freeze({
       AND campaigns.campaign_key = recipients.campaign_key
     WHERE recipients.delivery_key = $1
       AND recipients.status = 'queued'
-      AND campaigns.status = 'running'
     LIMIT 1
   `,
   prepareDelivery: `
+    WITH running_campaign AS MATERIALIZED (
+      SELECT campaigns.tenant_id, campaigns.campaign_key
+      FROM campaigns
+      JOIN campaign_recipients AS candidate
+        ON candidate.tenant_id = campaigns.tenant_id
+        AND candidate.campaign_key = campaigns.campaign_key
+      WHERE candidate.delivery_key = $1 AND campaigns.status = 'running'
+      FOR UPDATE OF campaigns
+    )
     UPDATE campaign_recipients AS recipients
     SET
       status = CASE
@@ -290,10 +298,9 @@ export const postgresCampaignDispatchSql = Object.freeze({
       AND recipients.status = 'queued'
       AND EXISTS (
         SELECT 1
-        FROM campaigns
-        WHERE campaigns.tenant_id = recipients.tenant_id
-          AND campaigns.campaign_key = recipients.campaign_key
-          AND campaigns.status = 'running'
+        FROM running_campaign
+        WHERE running_campaign.tenant_id = recipients.tenant_id
+          AND running_campaign.campaign_key = recipients.campaign_key
       )
     RETURNING ${recipientColumns}
   `,
@@ -308,9 +315,18 @@ export const postgresCampaignDispatchSql = Object.freeze({
     RETURNING recipients.delivery_key AS "deliveryKey"
   `,
   markDeferred: `
+    WITH current_campaign AS MATERIALIZED (
+      SELECT campaigns.status
+      FROM campaigns JOIN campaign_recipients AS candidate
+        ON candidate.tenant_id = campaigns.tenant_id
+        AND candidate.campaign_key = campaigns.campaign_key
+      WHERE candidate.delivery_key = $1
+      FOR UPDATE OF campaigns
+    )
     UPDATE campaign_recipients AS recipients
     SET
-      status = 'queued',
+      status = CASE WHEN (SELECT status FROM current_campaign) = 'cancelled'
+        THEN 'cancelled' ELSE 'queued' END,
       last_error_code = $2,
       updated_at = $3::timestamptz
     WHERE recipients.delivery_key = $1

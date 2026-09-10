@@ -20,12 +20,17 @@ import type {
 } from "../../shared/domain/businessProfileDraft";
 import {
   activateCampaignAction,
+  controlCampaignAction,
+  refreshCampaignDirectoryAction,
   saveCampaignSnapshotAction,
 } from "../../server/campaigns/campaignActions";
 import type {
   ActivateCampaignActionResult,
+  ControlCampaignActionResult,
   SaveCampaignSnapshotActionResult,
 } from "../../server/campaigns/campaignActionResult";
+import { campaignControlActions, canControlCampaign, type CampaignControlAction } from "../../shared/domain/campaignControl";
+import { campaignControlMessages } from "./campaignControlMessages";
 import { CampaignDraftComposer } from "./CampaignDraftComposer";
 import { readCampaignMessages } from "./campaignMessages";
 
@@ -94,6 +99,8 @@ export function CampaignManager({
     CampaignDeliveryReadinessStatus;
 }) {
   const messages = readCampaignMessages(language);
+  const controls = campaignControlMessages[language];
+  const [controlResult, setControlResult] = useState<ControlCampaignActionResult | null>(null);
   const [campaigns, setCampaigns] = useState([
     ...initialCampaigns,
   ]);
@@ -295,6 +302,20 @@ export function CampaignManager({
               : currentCampaign,
           ),
         );
+      }
+    });
+  };
+
+  const controlCampaign = (campaign: CampaignView, action: CampaignControlAction) => {
+    if (!canWrite || isPending || !canControlCampaign(campaign.status, action) ||
+        (action === "resume" && deliveryStatus !== "ready")) return;
+    startTransition(async () => {
+      const result = await controlCampaignAction({ campaignKey: campaign.campaignKey,
+        expectedVersion: campaign.version, action }).catch(() => ({ status: "server-error" as const }));
+      setControlResult(result);
+      setActivationResult(null);
+      if (result.status === "controlled") {
+        setCampaigns((current) => current.map((item) => item.campaignKey === result.campaign.campaignKey ? result.campaign : item));
       }
     });
   };
@@ -688,6 +709,16 @@ export function CampaignManager({
             </div>
           ) : null}
 
+          <p>{controls.notice}</p>
+          <button className="secondary-button" type="button" disabled={isPending}
+            onClick={() => startTransition(async () => {
+              const result = await refreshCampaignDirectoryAction().catch(() => ({ status: "server-error" as const }));
+              if (result.status === "ready") { setCampaigns([...result.campaigns]); setControlResult(null); }
+              else setControlResult({ status: result.status });
+            })}>{controls.refresh}</button>
+          {controlResult ? <p role="status" className={`inline-notice ${controlResult.status === "controlled" ? "success" : "warning"}`}>
+            {controls.results[controlResult.status]}
+          </p> : null}
           {campaigns.length === 0 ? (
             <div className="campaign-directory-empty">
               <span aria-hidden="true">◎</span>
@@ -759,6 +790,11 @@ export function CampaignManager({
                         : messages.manager.directory.activationBlocked
                       : messages.manager.directory.alreadyActivated}
                   </button>
+                  {canWrite ? campaignControlActions.filter((action) => canControlCampaign(campaign.status, action)).map((action) => (
+                    <button className="secondary-button" type="button" key={action}
+                      disabled={isPending || (action === "resume" && deliveryStatus !== "ready")}
+                      onClick={() => controlCampaign(campaign, action)}>{controls.actions[action]}</button>
+                  )) : null}
                 </article>
               ))}
             </div>

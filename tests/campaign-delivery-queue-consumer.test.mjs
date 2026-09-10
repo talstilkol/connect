@@ -130,6 +130,7 @@ function delivery(
 
 function fixture(options = {}) {
   const calls = [];
+  const contexts = [...(options.contexts ?? [])];
   const preparations = [
     ...(options.preparations ?? [
       {
@@ -164,6 +165,10 @@ function fixture(options = {}) {
             throw options.contextError;
           }
 
+          if (contexts.length > 0) {
+            const context = contexts.shift();
+            if (context === null) return null;
+          }
           return options.currentContext === undefined
             ? {
                 campaignKey,
@@ -402,7 +407,7 @@ test("retries before D1 claim when the delivery processor is unavailable", async
       options: { delaySeconds: 60 },
     },
   ]);
-  assert.deepEqual(testFixture.calls, []);
+  assert.deepEqual(testFixture.calls.map(({ operation }) => operation), ["find-context", "find-campaign"]);
 });
 
 test("discards an invalid queue attempt before reservation identity derivation", async () => {
@@ -426,7 +431,7 @@ test("discards an invalid queue attempt before reservation identity derivation",
   assert.deepEqual(testFixture.calls, []);
 });
 
-test("retries before D1 access when rate-limit admission is unavailable", async () => {
+test("reads lifecycle but does not claim when rate-limit admission is unavailable", async () => {
   const testDelivery = delivery();
   const testFixture = fixture({
     admissionConfigured: false,
@@ -445,7 +450,7 @@ test("retries before D1 access when rate-limit admission is unavailable", async 
       options: { delaySeconds: 60 },
     },
   ]);
-  assert.deepEqual(testFixture.calls, []);
+  assert.deepEqual(testFixture.calls.map(({ operation }) => operation), ["find-context", "find-campaign"]);
 });
 
 test("defers a rate-limited delivery before claiming or contacting Meta", async () => {
@@ -537,6 +542,7 @@ test("acknowledges malformed, skipped, and duplicate jobs without Meta", async (
     queueBody(secondDeliveryKey),
   );
   const testFixture = fixture({
+    contexts: [undefined, undefined, null],
     preparations: [
       { outcome: "skipped" },
       { outcome: "duplicate" },
@@ -980,4 +986,35 @@ test("retries a missing campaign before claiming the delivery", async () => {
     ),
     false,
   );
+});
+
+for (const status of ["paused", "scheduled"]) {
+  test(`parks ${status} campaigns without spending retry or reservation budget even when provider is disabled`, async () => {
+    const item = delivery();
+    item.message.defer = (options) => item.actions.push({ action: "defer", options });
+    const f = fixture({ currentCampaign: campaign({ status }), configured: false, admissionConfigured: false });
+    assert.deepEqual(await f.consumer.handle({ queue: "connect-campaign-deliveries", messages: [item.message] }), emptyResult({ deferred: 1 }));
+    assert.deepEqual(item.actions, [{ action: "defer", options: { delaySeconds: 30 } }]);
+    assert.deepEqual(f.calls.map(({ operation }) => operation), ["find-context", "find-campaign"]);
+  });
+}
+
+test("retains a queued delivery when pause wins after admission but before the send claim", async () => {
+  const item = delivery();
+  item.message.defer = (options) => item.actions.push({ action: "defer", options });
+  const f = fixture({ preparations: [{ outcome: "duplicate" }] });
+  const result = await f.consumer.handle({ queue: "connect-campaign-deliveries", messages: [item.message] });
+  assert.equal(result.deferred, 1);
+  assert.deepEqual(item.actions, [{ action: "defer", options: { delaySeconds: 30 } }]);
+  assert.equal(f.calls.filter(({ operation }) => operation === "find-context").length, 2);
+  assert.equal(f.calls.some(({ operation }) => operation === "process"), false);
+  assert.ok(f.calls.some((call) => call.outcome === "cancelled-before-submit"));
+});
+
+test("acknowledges cancelled work without provider access or a reservation", async () => {
+  const item = delivery();
+  const f = fixture({ currentCampaign: campaign({ status: "cancelled" }), configured: false });
+  assert.deepEqual(await f.consumer.handle({ queue: "connect-campaign-deliveries", messages: [item.message] }), emptyResult({ skipped: 1 }));
+  assert.deepEqual(item.actions, [{ action: "ack" }]);
+  assert.deepEqual(f.calls.map(({ operation }) => operation), ["find-context", "find-campaign"]);
 });
