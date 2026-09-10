@@ -22,9 +22,9 @@
 2.2 נקודת הכניסה העסקית היא `POST /v1/connect`, עם שם Operation במעטפה —
 לפי [חוזה ה־API](../../server/platform/railwayApiContract.ts).
 [מרשם הפעולות הראשי](../../server/platform/railwayApiOperationRegistry.ts)
-מכיל כעת 33 מדיניות־פעולה, לאחר הוספת templates.sync. פעולות זהות, צוות, Meta ו־System Admin מצורפות
+מכיל כעת 35 מדיניות־פעולה, לאחר הוספת סנכרון תבניות, בקרות קמפיין ומענה ידני. פעולות זהות, צוות, Meta ו־System Admin מצורפות
 בנפרד ב־[Railway API Runtime](../../server/platform/railwayApiRuntime.ts);
-33 אינו מספר כל הפעולות במערכת.
+35 אינו מספר כל הפעולות במערכת.
 
 2.3 [PostgreSQL API Runtime](../../server/platform/railwayPostgresApiRuntime.ts)
 מחבר Services ל־[PostgreSQL Foundation](../../server/platform/railwayPostgresFoundation.ts).
@@ -48,9 +48,9 @@
 | W11 טיוטת Template | [Template editor](../../features/templates/TemplateDraftEditor.tsx), [פעולות](../../server/templates/messageTemplateActions.ts) | `templates.list/draft.save`; [מאגר Templates](../../server/platform/postgresMessageTemplateRepository.ts) | KEEP + VERIFY: כתיבה וקריאה ב־PostgreSQL קיימות; זו אינה הגשה ל־Meta |
 | W12 הגשה וסנכרון Template | אותו Editor ו־Action של W11 | `templates.submit/sync`; [Submission executor](../../server/platform/postgresRailwayMessageTemplateSubmissionMutationExecutor.ts), [Outbox](../../server/platform/postgresMessageTemplateSubmissionOutboxRepository.ts) | KEEP + VERIFY: הגשה וסנכרון מחוברים ל־Railway; ההפעלה נפרדת וכבויה כברירת מחדל. נדרשים Staging, Meta אמיתי ובדיקת התאוששות |
 | W13 יצירת קמפיין ותזמון | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות](../../server/campaigns/campaignActions.ts) | `campaigns.directory.read/snapshot.save/activate`; [קמפיין](../../server/platform/postgresCampaignRepository.ts), [Dispatch](../../server/platform/postgresCampaignDispatchRepository.ts) | KEEP + VERIFY: ה־API Executable מחבר כעת את CAMPAIGN_ACTIVATION_ENABLED למוכנות ההפעלה; כבוי כברירת מחדל. הפעלה ב־Staging ובדיקת משלוח חי עדיין פתוחות |
-| W14 השהיית וביטול קמפיין | ב־Campaign manager קיימת הפעלה בלבד | [חוזה Mutations](../../server/platform/railwayCampaignMutationExecutor.ts) מכיל Snapshot ו־Activate בלבד | REFACTOR: אין Operation או Action להשהיה/ביטול; ערכי paused/cancelled ב־Schema אינם מימוש התהליך |
+| W14 השהיית וביטול קמפיין | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות קמפיין](../../server/campaigns/campaignActions.ts) | `campaigns.control`; [Mutation executor](../../server/platform/railwayCampaignMutationExecutor.ts) | KEEP + VERIFY: Pause/Resume/Cancel מומשו עם Receipt, הרשאות ותיאום לתור; נותרו קבלת Staging וספק חי, כמפורט בסעיף 8 |
 | W15 קריאה ושיוך Inbox | [Inbox](../../features/conversations/ConversationInbox.tsx), [פעולות שיחה](../../server/conversations/conversationActions.ts) | `conversations.list/thread.read/mark-read/assignment.change`; [מאגר שיחות](../../server/platform/postgresConversationRepository.ts) | KEEP + VERIFY: הרשאות, פילטרים, Unread, שיוך ו־Polling; יש לבדוק עומס ועימוד בשילוב |
-| W16 מענה ידני לאחר Handoff | [Composer boundary](../../features/conversations/ConversationComposerBoundary.tsx) מציג הודעה בלבד | אין פעולת שליחה ידנית ב־Actions או במרשם הראשי | REFACTOR: מענה טקסט ידני מתוך Connect נדרש לסיום תהליך נציג; canReply הוא הרשאה ואינו הוכחת Sender |
+| W16 מענה ידני לאחר Handoff | [Composer](../../features/conversations/ConversationComposerBoundary.tsx), [מצב בקשה](../../features/conversations/manualReplyDraft.ts) | `conversations.reply.send`; [Outbox](../../server/platform/postgresManualReplyRepository.ts), [Worker](../../server/conversations/manualReplyWorker.ts) | KEEP + VERIFY: מענה ידני מומש; בקשות שלא אושרו נשמרות גם כשהסינון מסתיר את השיחה. קבלת UI וספק חי נשארת פתוחה, כמפורט בסעיפים 9–10 |
 | W17 Bot בסיסי | [Flow builder](../../features/bot/BotFlowBuilder.tsx), [פעולות Bot](../../server/bot/botFlowActions.ts) | `bot.flows.list/details.read/draft.save/publish`; [Flows](../../server/platform/postgresBotFlowRepository.ts), [Runtime](../../server/platform/postgresBotRuntimeRepository.ts) | KEEP + VERIFY: שמירה/פרסום, גרסאות, כפתורים, עצירת Bot ב־Handoff ושליחה אמיתית; W16 נשאר תלות נפרדת |
 | W18 דוחות ו־Dashboard | [Reports](../../features/reports/OperationalReports.tsx), [Dashboard](../../features/workspace/WorkspaceDashboard.tsx) | `reports.read`; [מאגר דוחות](../../server/platform/postgresOperationalReportRepository.ts) | KEEP + VERIFY: התאמה ל־Receipts חיים. ארבעת מדדי Dashboard ללא מקור מוצגים כ־— ואינם מדדים מחושבים |
 | W19 AI ו־Knowledge אחרי פיילוט | [AI editor](../../features/ai/AiAgentEditor.tsx), [Upload action](../../server/ai/knowledgeUploadActions.ts) | `ai.agents.*`, `ai.reply-approvals.*`; [AI agents](../../server/platform/postgresAiAgentRepository.ts), [Reply outbox](../../server/platform/postgresAiReplyOutboxRepository.ts) | KEEP + REFACTOR + VERIFY: Draft/Approval אינם שליחה. Upload הישן D1/R2; נוספה חסימה שרתית מפורשת לפני הגישה אליו. יעד S3 וה־AI Sender נשארים לשלב 10 |
@@ -162,3 +162,11 @@ G01/G02/G03 עדיין ממתינים לקבלה חיה. אין בכך סגיר�
 9.2 G01–G04 כוללים מימוש מקומי. עדיין נדרשת קבלה חיה לכולם, כולל התאוששות כשהתגובה מ־Meta אבדה, QA של הדפדפן ופריסה מתואמת. יתר תתי־השלבים ב־Master Plan אינם נסגרים מכוח מימוש ארבעת הפערים.
 
 9.3 נותרו 12 שלבי־על. 16–32 שעות הוא אומדן התכנון ההיסטורי של G04 ואינו יתרת עבודה חדשה או זמן סיום כולל. השלב הבא הוא תנאי הקבלה והמוכנות בסעיפים 3–5; משך ההמתנה לחשבונות/ספקים והיקף תיקוני השילוב אינם ידועים.
+
+# 10. תיקון שילוב Inbox — 10.09.2026
+
+10.1 נמצאו ותוקנו שני פערים אחרי מימוש G04: מחיקת בקשה לא מאושרת כאשר סינון מסיר את ה־Composer מעץ הרכיבים, וחפיפה בין Polling לפעולות שינוי שיוך/קריאה/מענה. טיוטות ובקשות שייכות כעת ל־Inbox, ומנגנון תפיסה משותף מתאם את הבקשות לפני התחלתן.
+
+10.2 נעילת המענה נשמרת עד סיום קריאת האישור; כשל בקריאה אינו הופך שמירה שאושרה לתוצאה לא ידועה. הטקסט נשמר בזיכרון המסך בלבד. אין הבטחת שימור לאחר טעינת עמוד מחדש או יציאה מה־Inbox, ואין שמירה ב־localStorage.
+
+10.3 שורות W14/W16 ומספר פעולות המרשם עודכנו כדי להסיר סתירות עם המימוש. סעיפי 6–9 והאומדנים בסעיף 4 נשמרים כתיעוד היסטורי. ההמשך הוא קבלת UI וספק חי, ושאר פערי שלבים 3–5. נותרו 12 שלבי־על; אומדן סיום כולל לא זמין. [פירוט ובדיקות — סעיף 65](launch-master-plan-2026-09-09.md#65-תיקון-שילוב-inbox--10092026).

@@ -52,6 +52,9 @@ import {
   ConversationMessageView,
 } from "./ConversationMessageView.tsx";
 
+import { acquireInboxRequest } from "./inboxRequestGate.ts";
+import { emptyManualReplyDraft, updateManualReplyDrafts, type ManualReplyDrafts, type UpdateManualReplyDraft } from "./manualReplyDraft.ts";
+
 type Feedback = {
   tone: "success" | "warning";
   message: string;
@@ -128,6 +131,11 @@ export function ConversationInbox({
   const [isPending, startTransition] =
     useTransition();
   const refreshInFlight = useRef(false);
+  const [manualReplyDrafts, setManualReplyDrafts] = useState<ManualReplyDrafts>({});
+  const updateManualReplyDraft: UpdateManualReplyDraft = (key, changes) => {
+    setManualReplyDrafts((current) => updateManualReplyDrafts(current, key, changes));
+  };
+  const manualReplyBusy = Object.values(manualReplyDrafts).some((draft) => draft.busy);
   const selectedConversationKey =
     selectedThread?.conversation.conversationKey ??
     null;
@@ -190,8 +198,10 @@ export function ConversationInbox({
     }
 
     setFeedback(null);
-    refreshInFlight.current = true;
     setRefreshState("refreshing");
+
+    const release = acquireInboxRequest(refreshInFlight);
+    if (!release) return;
 
     startTransition(async () => {
       try {
@@ -220,7 +230,7 @@ export function ConversationInbox({
         });
         setRefreshState("stale");
       } finally {
-        refreshInFlight.current = false;
+        release();
       }
     });
   };
@@ -253,6 +263,9 @@ export function ConversationInbox({
       conversation.conversationKey,
     );
 
+    const release = acquireInboxRequest(refreshInFlight);
+    if (!release) return;
+
     startTransition(async () => {
       try {
         const result =
@@ -283,6 +296,7 @@ export function ConversationInbox({
             messages.actionFailures["server-error"],
         });
       } finally {
+        release();
         setPendingConversationKey(null);
       }
     });
@@ -305,6 +319,9 @@ export function ConversationInbox({
     setPendingConversationKey(
       selectedConversation.conversationKey,
     );
+
+    const release = acquireInboxRequest(refreshInFlight);
+    if (!release) return;
 
     startTransition(async () => {
       try {
@@ -359,6 +376,7 @@ export function ConversationInbox({
             messages.actionFailures["server-error"],
         });
       } finally {
+        release();
         setPendingConversationKey(null);
       }
     });
@@ -389,6 +407,9 @@ export function ConversationInbox({
     setPendingConversationKey(
       selectedConversation.conversationKey,
     );
+
+    const release = acquireInboxRequest(refreshInFlight);
+    if (!release) return;
 
     startTransition(async () => {
       try {
@@ -451,6 +472,7 @@ export function ConversationInbox({
             messages.actionFailures["server-error"],
         });
       } finally {
+        release();
         setPendingConversationKey(null);
       }
     });
@@ -472,6 +494,9 @@ export function ConversationInbox({
     setPendingApprovalKey(
       approval.outboxKey,
     );
+
+    const release = acquireInboxRequest(refreshInFlight);
+    if (!release) return;
 
     startTransition(async () => {
       try {
@@ -517,6 +542,7 @@ export function ConversationInbox({
             ],
         });
       } finally {
+        release();
         setPendingApprovalKey(null);
       }
     });
@@ -556,7 +582,7 @@ export function ConversationInbox({
         )
       : [];
   const isBusy =
-    isPending || refreshState === "refreshing";
+    isPending || manualReplyBusy || refreshState === "refreshing";
 
   return (
     <div className="inbox-shell card">
@@ -592,8 +618,11 @@ export function ConversationInbox({
           changeSelectedAssignment
         }
         markSelectedRead={markSelectedRead}
-        refreshSelectedThread={(conversationKey) => {
-          void loadConversationThreadAction(conversationKey).then((result) => {
+        manualReplyDraft={manualReplyDrafts[selectedConversationKey ?? ""] ?? emptyManualReplyDraft}
+        updateManualReplyDraft={updateManualReplyDraft}
+        requestGate={refreshInFlight}
+        refreshSelectedThread={async (conversationKey) => {
+          await loadConversationThreadAction(conversationKey).then((result) => {
             if (result.status !== "loaded") return;
             setSelectedThread((current) => current?.conversation.conversationKey === conversationKey &&
               current.conversation.version <= result.thread.conversation.version ? result.thread : current);

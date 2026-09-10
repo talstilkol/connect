@@ -26,6 +26,9 @@ import {
   ConversationComposerBoundary,
 } from "./ConversationComposerBoundary.tsx";
 
+import type { ManualReplyDraft, UpdateManualReplyDraft } from "./manualReplyDraft.ts";
+import type { InboxRequestGate } from "./inboxRequestGate.ts";
+
 type ConversationMessageViewProps = {
   authEnabled?: boolean;
   language: InterfaceLanguage;
@@ -44,7 +47,10 @@ type ConversationMessageViewProps = {
   pendingApprovalKey: string | null;
   changeSelectedAssignment: () => void;
   markSelectedRead: () => void;
-  refreshSelectedThread?: (conversationKey: string) => void;
+  refreshSelectedThread?: (conversationKey: string) => Promise<void>;
+  manualReplyDraft: ManualReplyDraft;
+  updateManualReplyDraft: UpdateManualReplyDraft;
+  requestGate: InboxRequestGate;
   decideAiApproval: (
     approval: AiReplyApprovalView,
     decision: "approve" | "reject",
@@ -67,6 +73,9 @@ export function ConversationMessageView({
   changeSelectedAssignment,
   markSelectedRead,
   refreshSelectedThread,
+  manualReplyDraft,
+  updateManualReplyDraft,
+  requestGate,
   decideAiApproval,
 }: ConversationMessageViewProps) {
   const messages = readConversationMessages(language);
@@ -297,7 +306,8 @@ export function ConversationMessageView({
             </div>
 
             <ConversationComposerBoundary language={language} thread={selectedThread} canReply={canReply}
-              isBusy={isBusy} onSubmitted={refreshSelectedThread} />
+              isBusy={isBusy} onSubmitted={refreshSelectedThread} draft={manualReplyDraft}
+              updateDraft={updateManualReplyDraft} requestGate={requestGate} />
           </>
         ) : (
           <div className="conversation-stage-empty">

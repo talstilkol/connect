@@ -144,7 +144,8 @@ test("keeps the manual composer behind its own boundary", async () => {
     composerSource,
     /readManualReplyMessages\(language\)/,
   );
-  assert.match(composerSource, /sendManualReplyAction\(request\)/);
-  assert.match(composerSource, /draft.request \?\?/);
+  assert.match(composerSource, /send: sendManualReplyAction/);
+  assert.match(composerSource, /submitManualReplyDraft/);
+  assert.doesNotMatch(composerSource, /useState/);
   assert.doesNotMatch(composerSource, /fetch\(|accessToken|MetaGraph/);
 });
