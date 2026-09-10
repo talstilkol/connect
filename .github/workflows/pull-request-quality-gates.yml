@@ -93,6 +93,9 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version-file: .node-version
+          cache: npm
+      - name: Install locked dependencies for Drizzle validation
+        run: npm ci --include=dev
       - name: Apply and verify every migration
         run: |
           npm run verify:migrations
