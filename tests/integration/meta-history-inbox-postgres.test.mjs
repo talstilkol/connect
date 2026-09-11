@@ -2165,3 +2165,101 @@ test('cleanup PostgreSQL HTTP resolves the verified owner and records explicit v
   const response=await handler.handle(new Request('https://connect-api.invalid/v1/connect',{method:'POST',headers:{'content-type':'application/json','x-vercel-oidc-token':'oidc.payload.signature',authorization:'Bearer user.payload.signature'},body:JSON.stringify({contractVersion:'connect.railway-api.v1',operation:'meta.media-cleanup.request',requestKind:'mutation',idempotencyKey:await metaMediaCleanupKey(f.cleanupInput),payload:f.cleanupInput})}));
   assert.equal(response.status,200);assert.deepEqual((await response.json()).data,{status:'queued'});assert.equal(response.headers.get('cache-control'),'no-store');assert.equal((await cleanupRows(f)).length,1);
 });
+
+
+test('file read PostgreSQL preserves verified bytes after a matching caption edit without reopening acquisition', async () => {
+  for (const caption of [edit({}).textContent, null]) {
+    const f = await readableFileCase(), beforeUploads = await uploadRows(f), beforeBindings = await bindingRows(f);
+    await echoes.record(f.scope, mediaCaptionEdit(f, 'image', caption));
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+    const r = fileReadRuntime(f);
+    try {
+      assert.equal(await r.run(), mediaBytes.length);
+      assert.equal(r.calls.filter(name => name === 'GetObjectCommand').length, 1);
+      assert.deepEqual(await uploadRows(f), beforeUploads);
+      assert.deepEqual(await bindingRows(f), beforeBindings);
+    } finally { r.runtime.close(); }
+  }
+});
+
+
+async function changeCaptionFileAuthorization(f, change) {
+  if (change === 'delete') await echoes.record(f.scope, { ...revoke(f), mutation: { kind: 'revoke', originalProviderMessageId: mediaValue().messages[0].id } });
+  if (change === 'conflict') await echoes.record(f.scope, { ...mediaCaptionEdit(f, 'image', message().text.body), providerMessageId: 'wamid.history-edit-clear' });
+  if (change === 'membership') await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2", [f.scope.tenantId, f.session.externalUserId]);
+  if (change === 'sharing') await signed(f, declinedValue());
+  if (change === 'connection') await meta.revokeConnection(f.scope.tenantId, f.scope.wabaId, f.scope.connectionVersion);
+}
+
+test('file read PostgreSQL keeps revision and authorization failures blocked after a caption edit', async () => {
+  for (const change of ['delete', 'conflict', 'membership', 'sharing', 'connection']) {
+    const f = await readableFileCase();
+    await echoes.record(f.scope, mediaCaptionEdit(f));
+    await changeCaptionFileAuthorization(f, change);
+    const r = fileReadRuntime(f);
+    try {
+      await assert.rejects(r.run(), { code: 'ACCESS_DENIED' });
+      assert.deepEqual(r.calls, []);
+    } finally { r.runtime.close(); }
+  }
+});
+
+test('file read PostgreSQL caption edits cannot create an upload or use an unconfirmed receipt', async () => {
+  const unuploaded = await acquisitionCase();
+  const unconfirmed = await scanCase();
+  for (const f of [unuploaded, unconfirmed]) {
+    await echoes.record(f.scope, mediaCaptionEdit(f));
+    await assert.rejects(fileAuthorization.authorize(f.session, f.key), { code: 'NOT_READY' });
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+  }
+});
+
+test('file read PostgreSQL rechecks caption edit eligibility after an in-flight body transfer', async () => {
+  for (const change of ['delete', 'conflict', 'sharing', 'membership', 'connection']) {
+    const f = await readableFileCase(); await echoes.record(f.scope, mediaCaptionEdit(f));
+    let changed = false, consumed = false;
+    const r = fileReadRuntime(f, { async reply(command) {
+      if (command.constructor.name === 'GetObjectCommand') { changed = true; await changeCaptionFileAuthorization(f, change); }
+      return mediaFileReply(command, f.intent, f.receipt.versionId);
+    } });
+    try {
+      await assert.rejects(r.run(f.session, async () => { consumed = true; }), { code: 'ACCESS_DENIED' });
+      assert.equal(changed, true); assert.equal(consumed, false);
+    } finally { r.runtime.close(); }
+  }
+});
+
+test('file read PostgreSQL permits a matching caption edit during transfer of the same verified object', async () => {
+  const f = await readableFileCase(), uploads = await uploadRows(f);
+  let changed = false;
+  const r = fileReadRuntime(f, { async reply(command) {
+    if (command.constructor.name === 'GetObjectCommand') { changed = true; await echoes.record(f.scope, mediaCaptionEdit(f)); }
+    return mediaFileReply(command, f.intent, f.receipt.versionId);
+  } });
+  try {
+    assert.equal(await r.run(), mediaBytes.length); assert.equal(changed, true);
+    assert.deepEqual(await uploadRows(f), uploads);
+    assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+  } finally { r.runtime.close(); }
+});
+
+test('file read PostgreSQL caption edits do not override a blocking scan or tenant boundary', async () => {
+  const f = await readableFileCase(), other = await newCase();
+  await echoes.record(f.scope, mediaCaptionEdit(f));
+  await assert.rejects(fileAuthorization.authorize(other.session, f.key), { code: 'ACCESS_DENIED' });
+  await scans.record(f.job, scanObservation(f, 'THREATS_FOUND'));
+  const r = fileReadRuntime(f);
+  try { await assert.rejects(r.run(), { code: 'NOT_READY' }); assert.deepEqual(r.calls, []); }
+  finally { r.runtime.close(); }
+});
+
+
+test('file read PostgreSQL rejects an edit kind that disagrees with the stored attachment', async () => {
+  for (const kind of ['text', 'video', 'document']) {
+    const f = await readableFileCase();
+    await echoes.record(f.scope, mediaCaptionEdit(f, kind));
+    const r = fileReadRuntime(f);
+    try { await assert.rejects(r.run(), { code: 'ACCESS_DENIED' }); assert.deepEqual(r.calls, []); }
+    finally { r.runtime.close(); }
+  }
+});

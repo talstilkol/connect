@@ -48,6 +48,17 @@ export const messageStatusLabels: Record<
   string
 > = hebrewMessages.labels.messageStatuses;
 
+// Offers a request, not a claim that the file exists or is authorized. The
+// server rechecks the original object, receipt, scan and current reader.
+export function canRequestHistoryMediaFile(
+  message: Pick<InboxMessageView, "source" | "contentKind" | "contentState">,
+): boolean {
+  if (message.source !== "history") return false;
+  if (message.contentState === "edited") return isCaptionMessageKind(message.contentKind);
+  return !message.contentState &&
+    ["image", "audio", "video", "document", "sticker", "media_placeholder"].includes(message.contentKind);
+}
+
 export function messageBody(
   message: Pick<InboxMessageView, "contentKind" | "textContent" | "contentState">,
   language: InterfaceLanguage = "he",

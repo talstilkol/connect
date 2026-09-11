@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  canRequestHistoryMediaFile,
   canMarkConversationRead,
   conversationStatusLabels,
   formatInboxTimestamp,
@@ -12,6 +13,22 @@ import {
 } from "../features/conversations/conversationPresentation.ts";
 
 const occurredAt = "2026-07-26T08:30:00.000Z";
+
+test("offers history file requests after caption edits without exposing deleted, conflicted or live media", () => {
+  for (const contentKind of ["image", "video", "document"]) {
+    assert.equal(canRequestHistoryMediaFile(message({ source: "history", contentKind, contentState: "edited" })), true);
+    for (const contentState of ["deleted", "conflicted"]) {
+      assert.equal(canRequestHistoryMediaFile(message({ source: "history", contentKind, contentState })), false);
+    }
+    assert.equal(canRequestHistoryMediaFile(message({ contentKind, contentState: "edited" })), false);
+  }
+  for (const contentKind of ["text", "audio", "sticker", "media_placeholder", "unsupported"]) {
+    assert.equal(canRequestHistoryMediaFile(message({ source: "history", contentKind, contentState: "edited" })), false);
+  }
+  for (const contentKind of ["image", "video", "document", "audio", "sticker", "media_placeholder"]) {
+    assert.equal(canRequestHistoryMediaFile(message({ source: "history", contentKind })), true);
+  }
+});
 
 function message(overrides = {}) {
   return {

@@ -2,7 +2,7 @@ import { rolePermissions, type TenantRole } from "../../shared/domain/model.ts";
 import { MetaMediaFileReadError, requireMetaMediaFileReadSession, type MetaMediaFileAuthorization } from "../meta/metaMediaFileRead.ts";
 import { deriveMetaMediaUploadJobKey } from "../meta/metaMediaUploadJournal.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
-import { readPostgresBoundMetaHistoryMedia } from "./postgresMetaHistoryMediaRepository.ts";
+import { readPostgresBoundMetaHistoryMediaForFile } from "./postgresMetaHistoryMediaRepository.ts";
 import { parsePostgresMetaMediaUploadJob, postgresMetaMediaUploadSql } from "./postgresMetaMediaUploadJournal.ts";
 import { parsePostgresPositiveInteger, requireExactPostgresRow, requirePostgresRows } from "./postgresResultValidation.ts";
 import type { PostgresTransactionManager } from "./postgresTransaction.ts";
@@ -25,7 +25,7 @@ export function createPostgresMetaMediaFileAuthorization(transactions: PostgresT
       const session = requireMetaMediaFileReadSession(rawSession, messageKey);
       try {
         return await transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
-          const bound = await readPostgresBoundMetaHistoryMedia(tx, session.tenantId, messageKey);
+          const bound = await readPostgresBoundMetaHistoryMediaForFile(tx, session.tenantId, messageKey);
           if (!bound) throw new MetaMediaFileReadError("ACCESS_DENIED");
           const membership = requirePostgresRows(await tx.query(postgresMetaMediaFileAuthorizationSql.member,
             [session.tenantId, session.externalUserId]), 1)[0];
@@ -52,7 +52,7 @@ export function createPostgresMetaMediaFileAuthorization(transactions: PostgresT
           // Echo edits/revocations do not take the history-session lock. Read
           // the source again after waits for member/job locks, so a committed
           // deletion cannot be hidden by our earlier source snapshot.
-          const current = await readPostgresBoundMetaHistoryMedia(tx, session.tenantId, messageKey);
+          const current = await readPostgresBoundMetaHistoryMediaForFile(tx, session.tenantId, messageKey);
           if (!current || await sha256Hex(new TextEncoder().encode(JSON.stringify(current))) !== sourceSha256) {
             throw new MetaMediaFileReadError("ACCESS_DENIED");
           }
