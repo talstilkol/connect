@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier, paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import {
   createHash,
 } from "node:crypto";
@@ -1453,6 +1454,8 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [request.tenantId]);
+          if (!await loadOne(transaction, paidAccessTenantSql, [request.tenantId])) throw new Error("Paid execution is unavailable");
           const inserted = await loadOne(
             transaction,
             postgresBotReplyDeliverySql.insertProviderRequest,

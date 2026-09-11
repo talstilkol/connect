@@ -83,14 +83,14 @@ test('Paddle reads validate requested identity and preserve scheduled cancellati
   const scheduled=parsePaddleSubscription({...f.sub,scheduled_change:{action:'cancel',effective_at:f.sub.current_billing_period.ends_at}},f.config);
   assert.equal(scheduled.status,'active');assert.equal(scheduled.scheduledChange.action,'cancel');
 });
-const view={environment:'sandbox',clientToken:f.config.clientToken,canManage:true,checkout:{state:'ready',transactionId:f.receipt.id,url:f.receipt.checkoutUrl},subscription:null};
+const view={paidAccessReason:'manual-pilot',environment:'sandbox',clientToken:f.config.clientToken,canManage:true,checkout:{state:'ready',transactionId:f.receipt.id,url:f.receipt.checkoutUrl},subscription:null};
 test('Paddle BFF data rejects unwanted secrets and invalid checkout identity',()=>{
   assert.deepEqual(parsePaddleBillingView(view),view);assert.equal(parsePaddleBillingView({...view,apiKey:f.config.apiKey}),null);
   assert.equal(parsePaddleBillingView({...view,canManage:false}),null);
   assert.equal(parsePaddleBillingView({...view,checkout:{...view.checkout,transactionId:billingId('txn','foreign')}}),null);
 });
 test('Paddle authenticated operations restrict creation to owner and fixed empty payload, with a durable domain replay key',async()=>{
-  let enqueued=0,limited=false,session=f.session;const dependencies={tenantSessions:{async resolve(){return session}},mutationRateLimit:{async consume(){return{outcome:limited?'limited':'allowed'}}},billing:{plan:f.config,clientToken:f.config.clientToken,journal:{async enqueue(s,p){assert.equal(s.tenantId,7);assert.equal(p.priceId,f.config.priceId);enqueued++},async read(){return{environment:view.environment,canManage:view.canManage,checkout:view.checkout,subscription:view.subscription}}}}};
+  let enqueued=0,limited=false,session=f.session;const dependencies={tenantSessions:{async resolve(){return session}},mutationRateLimit:{async consume(){return{outcome:limited?'limited':'allowed'}}},billing:{plan:f.config,clientToken:f.config.clientToken,journal:{async enqueue(s,p){assert.equal(s.tenantId,7);assert.equal(p.priceId,f.config.priceId);enqueued++},async read(){return{paidAccessReason:view.paidAccessReason,environment:view.environment,canManage:view.canManage,checkout:view.checkout,subscription:view.subscription}}}}};
   const [read,create]=createRailwayPaddleOperations(dependencies),context={userIdentity:{externalUserId:session.externalUserId}},req={operation:create.id,requestKind:'mutation',idempotencyKey:await deriveRailwayApiDeterministicIdempotencyKey(create.id,{}),payload:{}};
   assert.deepEqual(await create.execute(context,{},req),view);assert.equal(enqueued,1);
   await assert.rejects(create.execute(context,{priceId:f.config.priceId},req),{code:'INVALID_REQUEST'});

@@ -1,3 +1,4 @@
+import { createPostgresPaidAccess } from "./postgresPaidAccess.ts";
 import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
 import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
 import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
@@ -352,6 +353,7 @@ export interface RailwayPostgresFoundation {
   readonly knowledgePassages: ReturnType<
     typeof createPostgresKnowledgePassageRepository
   >;
+  readonly paidAccess: ReturnType<typeof createPostgresPaidAccess>;
   readonly paddleBilling: ReturnType<typeof createPostgresPaddleRepository>;
   readonly knowledgeIngestion: ReturnType<typeof createPostgresKnowledgeIngestionRepository>;
   readonly knowledgeSources: ReturnType<
@@ -556,6 +558,7 @@ export function createRailwayPostgresFoundation(
 
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
+    paidAccess: createPostgresPaidAccess({ transactions }),
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
       queries,
@@ -667,7 +670,7 @@ export function createRailwayPostgresFoundation(
     campaignAudiences:
       createPostgresCampaignAudienceRepository(queries),
     campaignDispatch:
-      createPostgresCampaignDispatchRepository(queries),
+      createPostgresCampaignDispatchRepository(queries, transactions),
     campaignProviderDeliveries:
       createPostgresCampaignDeliveryProviderRepository({ transactions }),
     campaigns: createPostgresCampaignRepository({

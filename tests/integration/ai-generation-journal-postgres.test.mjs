@@ -1,3 +1,4 @@
+import { bindPaidFixture } from '../fixtures/paid-access-postgres.mjs';
 import assert from 'node:assert/strict';
 import { before, after, test } from 'node:test';
 import { readdir, readFile } from 'node:fs/promises';
@@ -113,7 +114,7 @@ test('settled usage still consumes the budget after the reservation is replaced'
 test('lost commit acknowledgement for the claim never permits a provider request', async () => {
   const f = await newCase(), wire = transport(f);
   const lost = createPostgresAiGenerationJournal({ queries, transactions: { async transaction(options, work) {
-    await transactions.transaction(options, work); throw new Error('lost claim acknowledgement');
+    let claimed=false;const result=await transactions.transaction(options,tx=>work({query(statement,parameters){if(statement===sql.insert)claimed=true;return tx.query(statement,parameters);}}));if(claimed)throw new Error('lost claim acknowledgement');return result;
   } } });
   await assert.rejects(provider(f, wire, lost).generate(f.request), AiResponseDeferredError);
   assert.equal((await rows(f))[0].status, 'claimed'); assert.equal(wire.calls.generate, 0);
@@ -121,9 +122,9 @@ test('lost commit acknowledgement for the claim never permits a provider request
 });
 
 test('lost settlement acknowledgement replays both stored result and usage without another dispatch', async () => {
-  const f = await newCase(), wire = transport(f); let transactionsRun = 0;
+  const f = await newCase(), wire = transport(f);
   const lost = createPostgresAiGenerationJournal({ queries, transactions: { async transaction(options, work) {
-    const result = await transactions.transaction(options, work); if (++transactionsRun === 2) throw new Error('lost settlement acknowledgement'); return result;
+    let settled=false;const result=await transactions.transaction(options,tx=>work({query(statement,parameters){if(statement===sql.settle)settled=true;return tx.query(statement,parameters);}}));if(settled)throw new Error('lost settlement acknowledgement');return result;
   } } });
   await assert.rejects(provider(f, wire, lost).generate(f.request), AiResponseDeferredError);
   assert.equal((await provider(f, wire).generate(f.request)).outcome, 'generated');
@@ -464,4 +465,25 @@ test('AI provider throttling settles the real shared ledger and imposes sender o
     const cooldowns = (await pool.query('SELECT * FROM whatsapp_provider_cooldown_events WHERE reservation_key=$1', [scoped.reservationKey])).rows;
     assert.equal(cooldowns.length, 1); assert.equal(cooldowns[0].scope, graphCode === 130429 ? "sender" : "pair");
   }
+});
+
+test('canceled paid entitlement stops both input counting and generation without creating a charge reservation',async()=>{
+  const f=await newCase(),wire=transport(f);await bindPaidFixture(pool,f.request.tenantId,'user_knowledge_owner','canceled');
+  assert.deepEqual(await provider(f,wire).generate(f.request),{outcome:'unavailable'});assert.deepEqual(wire.calls,{count:0,generate:0});assert.deepEqual(await rows(f),[]);
+});
+test('revocation during input counting is checked again before the durable generation claim',async()=>{
+  const f=await newCase(),paid=await bindPaidFixture(pool,f.request.tenantId,'user_knowledge_owner'),wire=transport(f);
+  const guarded={fetch:async(url,options)=>{const response=await wire.fetch(url,options);if(url.endsWith('/input_tokens'))await paid.cancel();return response;}};
+  assert.deepEqual(await provider(f,guarded).generate(f.request),{outcome:'unavailable'});assert.deepEqual(wire.calls,{count:1,generate:0});assert.deepEqual(await rows(f),[]);
+});
+test('accepted generation usage settles after paid access is revoked during the provider call',async()=>{
+  const f=await newCase(),paid=await bindPaidFixture(pool,f.request.tenantId,'user_knowledge_owner');
+  const wire=transport(f,async()=>{await paid.cancel();return Response.json(f.result);});
+  assert.equal((await provider(f,wire).generate(f.request)).outcome,'generated');assert.equal((await usageRows(f)).length,1);assert.equal((await rows(f))[0].status,'settled');
+});
+
+test('AI reply cancellation between queue admission and final seal prevents a provider request',async()=>{
+  const f=await deliveryCase();const paid=await bindPaidFixture(pool,f.request.tenantId,f.command.session.externalUserId);
+  await deliveries.recover();const d=deliveryWorker(deliveries,async()=>{assert.fail('No provider request after cancellation');},async()=>paid.cancel());
+  await d.worker.run();assert.equal(d.calls.length,0);assert.equal((await deliveryRows(f))[0].state,'failed');
 });

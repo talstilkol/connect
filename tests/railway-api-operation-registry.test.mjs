@@ -373,6 +373,7 @@ function persistedCampaign(overrides = {}) {
 }
 
 function fixture({
+  paidAccess,
   knowledgeUpload,
   manualReplies,
   manualReplyConfigured,
@@ -421,7 +422,7 @@ function fixture({
     mutationCommands: [],
   };
   const registry = createRailwayApiOperationRegistry({
-    knowledgeUpload, manualReplies, manualReplyConfigured,
+    paidAccess, knowledgeUpload, manualReplies, manualReplyConfigured,
     tenantSessions: {
       async resolve(identity) {
         calls.tenantIdentities.push(identity);
@@ -2572,4 +2573,15 @@ test('Knowledge upload API binds session, rate limit and deterministic receipt; 
   }
   await assert.rejects(operation(enabled.registry,id).execute(dispatchContext,{...payload,tenantId:7},request),{code:'INVALID_REQUEST'});
   await assert.rejects(operation(enabled.registry,id).execute(dispatchContext,payload,{...request,idempotencyKey:null}));assert.equal(calls.length,1);
+});
+
+test('paid API gate blocks mutations while allowing reads and revocation, and never trusts payload tenant identity', async()=>{
+  const seen=[];const {registry,calls}=fixture({paidAccess:{async allowed(tenantId){seen.push(tenantId);return false;}}});
+  await assert.rejects(operation(registry,'contacts.save').execute(dispatchContext,contactSavePayload,mutationRequest()),{code:'AUTHORIZATION_DENIED'});
+  assert.deepEqual(seen,[session().tenantId]);assert.deepEqual(calls.mutationCommands,[]);
+  // Use the registry's existing workspace read operation and request shape.
+  const read=registry.operations.find(o=>o.requestKind==='query' && o.id.startsWith('workspace.'));
+  assert.ok(read);await read.execute(dispatchContext,{}, {operation:read.id,requestKind:'query',idempotencyKey:null});
+  const unsub='contacts.consent.unsubscribe';await operation(registry,unsub).execute(dispatchContext,contactConsentPayload,await consentMutationRequest(unsub));
+  assert.equal(seen.length,1);assert.equal(calls.consentInputs.length,1);
 });

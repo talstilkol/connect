@@ -1,3 +1,4 @@
+import { requiresPaidAccess } from "./postgresPaidAccess.ts";
 import { KNOWLEDGE_UPLOAD_OPERATION, parseKnowledgeUploadPayload, KnowledgeIngestionError } from "../ai/knowledgeUploadRequest.ts";
 import type { KnowledgeUploadExecutor } from "./railwayKnowledgeUploadExecutor.ts";
 import { parseManualReplyRequest, parseManualReplySubmission } from "../../shared/domain/manualReply.ts";
@@ -567,6 +568,7 @@ export const railwayApiOperationPolicies = Object.freeze([
 ] as const satisfies readonly Readonly<RailwayApiOperationPolicy>[]);
 
 export interface RailwayApiOperationRegistryDependencies {
+  readonly paidAccess?: Readonly<{ allowed(tenantId: number): Promise<boolean> }>;
   readonly tenantSessions: RailwayTenantSessionResolver;
   readonly conversations: Pick<ConversationService, "list" | "readThread">;
   readonly conversationMutations: RailwayConversationMutationExecutor;
@@ -1190,6 +1192,8 @@ function createOperation<TPayload>(
           requireTenantPermission(session, policy.permission);
         }
 
+        if (dependencies.paidAccess && requiresPaidAccess(policy.id, policy.requestKind, payload) &&
+            !await dependencies.paidAccess.allowed(session.tenantId)) throw new RailwayApiDispatchError("AUTHORIZATION_DENIED");
         return await execute(session, parsedPayload, request);
       } catch (error) {
         mapOperationError(error);

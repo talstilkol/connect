@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier, paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import type { AiResponseGenerationResult, AiUsageRecord } from "../../shared/domain/aiRuntime.ts";
 import { validateAiAgentDefinition } from "../../shared/validation/aiAgentDefinition.ts";
 import { deriveAiAgentVersionKey } from "../ai/aiAgentKey.ts";
@@ -70,6 +71,15 @@ export function createPostgresAiGenerationJournal(
       const binding = bindingSnapshot(input);
       return observeRow(await one(dependencies.queries, sql.observe, [binding.tenantId, binding.requestKey]), binding);
     },
+    async admit(input: AiGenerationBinding) {
+      const binding = bindingSnapshot(input);
+      return dependencies.transactions.transaction({ isolationLevel: "read-committed" }, async tx => {
+        await tx.query(paidAccessTenantBarrier, [binding.tenantId]);
+        if (!await one(tx, paidAccessTenantSql, [binding.tenantId])) return false;
+        const agent = await one(tx, sql.lockAgent, [binding.tenantId, binding.aiAgentVersionKey]);
+        return !!agent && agent.status === "active" && agent.versionStatus === "published" && agent.activeVersionKey === binding.aiAgentVersionKey;
+      });
+    },
     async claim(input: AiGenerationClaim) {
       const binding = bindingSnapshot(input?.binding);
       const request = structuredClone(input.request);
@@ -80,6 +90,8 @@ export function createPostgresAiGenerationJournal(
         !validInteger(countedInputTokens, 1, 1_000_000) || !validInteger(reservedMinorUnits, 1, Number.MAX_SAFE_INTEGER) ||
         !validInteger(timeoutMs, 1000, 60_000)) throw failure();
       return dependencies.transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await tx.query(paidAccessTenantBarrier, [binding.tenantId]);
+        if (!await one(tx, paidAccessTenantSql, [binding.tenantId])) return { status: "denied" as const };
         const agent = await one(tx, sql.lockAgent, [binding.tenantId, binding.aiAgentVersionKey]);
         if (!agent) return { status: "denied" as const };
         const existing = observeRow(await one(tx, sql.observe, [binding.tenantId, binding.requestKey]), binding);
@@ -112,6 +124,7 @@ export function createPostgresAiGenerationJournal(
       const binding = bindingSnapshot(input);
       const captured = resultSnapshot(generated);
       return dependencies.transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await tx.query(paidAccessTenantBarrier, [binding.tenantId]);
         // All claims and settlements share the agent lock, including version
         // changes. Incurred usage is recorded even if the agent was disabled.
         const agent = await one(tx, sql.lockAgent, [binding.tenantId, binding.aiAgentVersionKey]);

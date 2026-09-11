@@ -1,3 +1,4 @@
+import { createPostgresPaidAccess, paidAccessTenantSql, paidAccessTenantBarrier } from "../../server/platform/postgresPaidAccess.ts";
 import assert from 'node:assert/strict';
 import {before,after,test} from 'node:test';
 import {readdir,readFile} from 'node:fs/promises';
@@ -90,4 +91,57 @@ test('a payment/subscription/customer mismatch cannot bind another tenant and te
   const f=await fixture();await confirmed(f);const work=await journal.claimReconciliation('sandbox');await assert.rejects(journal.applyReconciliation(work,f.payment,{...f.subscription,customerId:billingId('ctm','foreign')}),{code:'CONFLICT'});
   assert.equal(await account(f),undefined);assert.equal((await pool.query('SELECT status FROM tenants WHERE id=$1',[f.session.tenantId])).rows[0].status,'active');
   await assert.rejects(journal.enqueue({...f.session,role:'manager'},f.config),{code:'AUTHORIZATION_DENIED'});
+});
+
+// Extend the existing protocol fixture; database time anchors the paid period.
+async function productionAccount(overrides={}) {
+  const f=await fixture();f.config={...f.config,environment:'production'};
+  const period=(await pool.query("SELECT clock_timestamp()-interval '1 hour' AS starts, clock_timestamp()+interval '1 hour' AS ends")).rows[0];
+  f.subscription={...f.subscription,startsAt:period.starts.toISOString(),endsAt:period.ends.toISOString(),...overrides};
+  await journal.enqueue(f.session,f.config);const creation=await journal.claimCreation('production');assert.equal(creation.tenantId,f.session.tenantId);
+  await journal.confirmCreation(creation,f.receipt);const work=await journal.claimReconciliation('production');
+  assert.equal(await journal.applyReconciliation(work,f.payment,f.subscription),'applied');return f;
+}
+const access=createPostgresPaidAccess({transactions:createNodePostgresTransactionManager(pool)});
+const reason=async f=>(await pool.query('SELECT public.tenant_paid_access_reason_v1($1) AS reason',[f.session.tenantId])).rows[0].reason;
+test('manual pilots stay administrative, sandbox never grants paid production access, production checkout adopts it durably',async()=>{
+  const f=await fixture();assert.equal(await reason(f),'manual-pilot');await confirmed(f);await createPaddleWorker(journal,provider(f),'sandbox').run();
+  assert.equal(await reason(f),'manual-pilot');await journal.enqueue(f.session,{...f.config,environment:'production'});
+  assert.equal(await reason(f),'payment-pending');assert.equal(await access.allowed(f.session.tenantId),false);
+  await assert.rejects(pool.query("DELETE FROM paddle_checkout_intents WHERE tenant_id=$1 AND environment='production'",[f.session.tenantId]));
+  // Retire the unsent attempt using current authority so subsequent tests do not claim it.
+  await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",[f.session.tenantId,f.session.externalUserId]);
+  assert.equal(await journal.claimCreation('production'),null);
+});
+test('only active production subscriptions with a current period enable paid execution',async()=>{
+  const f=await productionAccount();assert.equal(await reason(f),'paid-active');assert.equal(await access.allowed(f.session.tenantId),true);
+  for(const status of ['trialing','past_due','paused','canceled']){
+    const f=await productionAccount({status});assert.equal(await reason(f),'subscription-inactive');assert.equal(await access.allowed(f.session.tenantId),false);
+    // Billing status still reads even when paid execution is denied.
+    assert.equal((await journal.read(f.session,'production')).subscription.status,status);
+  }
+});
+test('future/expired periods and scheduled cancel/pause boundaries stop paid execution using database time',async()=>{
+  const times=(await pool.query("SELECT clock_timestamp()-interval '2 hours' AS past,clock_timestamp()-interval '1 hour' AS ended,clock_timestamp()+interval '2 hours' AS future,clock_timestamp()+interval '3 hours' AS later")).rows[0];
+  assert.equal(await reason(await productionAccount({startsAt:times.past.toISOString(),endsAt:times.ended.toISOString()})),'period-inactive');
+  assert.equal(await reason(await productionAccount({startsAt:times.future.toISOString(),endsAt:times.later.toISOString()})),'period-inactive');
+  for(const action of ['cancel','pause']){
+    assert.equal(await reason(await productionAccount({scheduledChange:{action,effectiveAt:times.ended.toISOString()}})),'scheduled-stop');
+    assert.equal(await reason(await productionAccount({scheduledChange:{action,effectiveAt:times.future.toISOString()}})),'paid-active');
+  }
+});
+test('stale, future-dated and conflicted verification cannot grant access; older projections cannot refresh it',async()=>{
+  const f=await productionAccount();await pool.query("UPDATE paddle_accounts SET verified_at=clock_timestamp()-interval '16 minutes' WHERE tenant_id=$1",[f.session.tenantId]);
+  assert.equal(await reason(f),'verification-stale');await due(f);const work=await journal.claimReconciliation('production');
+  assert.equal(await journal.applyReconciliation(work,f.payment,{...f.subscription,updatedAt:'2026-07-25T09:00:00.000000Z'}),'stale');assert.equal(await reason(f),'verification-stale');
+  await pool.query("UPDATE paddle_accounts SET verified_at=clock_timestamp()+interval '1 minute' WHERE tenant_id=$1",[f.session.tenantId]);assert.equal(await reason(f),'verification-stale');
+  await pool.query("UPDATE paddle_accounts SET verified_at=clock_timestamp(),needs_review=TRUE WHERE tenant_id=$1",[f.session.tenantId]);assert.equal(await reason(f),'review-required');
+  await assert.rejects(pool.query('DELETE FROM paddle_accounts WHERE tenant_id=$1',[f.session.tenantId]));
+});
+test('entitlement admission waits for the tenant barrier and reads the committed revocation, with billing still accessible',async()=>{
+  const f=await productionAccount();const tx=await pool.connect();await tx.query('BEGIN');await tx.query(paidAccessTenantBarrier,[f.session.tenantId]);
+  let settled=false;const pending=access.allowed(f.session.tenantId).then(x=>{settled=true;return x});
+  await tx.query("UPDATE paddle_accounts SET needs_review=TRUE WHERE tenant_id=$1",[f.session.tenantId]);assert.equal(settled,false);
+  await tx.query('COMMIT');tx.release();assert.equal(await pending,false);assert.equal((await journal.read(f.session,'production')).canManage,true);
+  assert.equal((await pool.query(paidAccessTenantSql,[f.session.tenantId])).rowCount,0);
 });

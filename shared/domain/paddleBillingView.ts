@@ -1,7 +1,9 @@
+export const paidAccessReasons = ["manual-pilot", "paid-active", "tenant-inactive", "payment-pending", "review-required", "subscription-inactive", "period-inactive", "scheduled-stop", "verification-stale"] as const;
 export interface PaddleBillingView {
   readonly environment: "sandbox" | "production";
   readonly clientToken: string;
   readonly canManage: boolean;
+  readonly paidAccessReason: typeof paidAccessReasons[number];
   readonly checkout: Readonly<{ state: "queued" | "creating" | "unknown" | "ready" | "rejected" | "completed"; transactionId: string | null; url: string | null }> | null;
   readonly subscription: Readonly<{ status: "active" | "trialing" | "past_due" | "paused" | "canceled"; endsAt: string | null; needsReview: boolean }> | null;
 }
@@ -9,7 +11,8 @@ export type PaddleBillingResult = Readonly<{ status: "ready"; billing: PaddleBil
 export function parsePaddleBillingView(value: unknown): PaddleBillingView | null {
   const record = (input: unknown): input is Record<string, unknown> => !!input && typeof input === "object" && !Array.isArray(input);
   const exact = (input: Record<string, unknown>, keys: string[]) => Object.keys(input).sort().join(",") === keys.sort().join(",");
-  if (!record(value) || !exact(value, ["environment", "clientToken", "canManage", "checkout", "subscription"]) ||
+  if (!record(value) || !exact(value, ["environment", "clientToken", "canManage", "checkout", "subscription", "paidAccessReason"]) ||
+    !paidAccessReasons.includes(value.paidAccessReason as typeof paidAccessReasons[number]) ||
     !["sandbox", "production"].includes(String(value.environment)) || typeof value.canManage !== "boolean" ||
     typeof value.clientToken !== "string" || !new RegExp(`^${value.environment === "sandbox" ? "test" : "live"}_[a-zA-Z0-9]{27}$`).test(value.clientToken)) return null;
   const checkout = value.checkout;

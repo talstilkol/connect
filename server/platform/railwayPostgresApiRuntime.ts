@@ -450,6 +450,7 @@ export async function createRailwayPostgresApiRuntime(
       });
 
     const handler = createRailwayApiRuntime({
+      paidAccess: foundation.paidAccess,
       paddleBilling: paddleConfig ? { journal: foundation.paddleBilling, plan: paddleConfig, clientToken: paddleConfig.clientToken } : null,
       messageTemplateSyncConfigured: () => syncConfigured === "configured",
       messageTemplateSyncMutations,

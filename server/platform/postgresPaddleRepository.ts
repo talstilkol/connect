@@ -50,7 +50,9 @@ export function createPostgresPaddleRepository({ queries, transactions }: { quer
           AND EXISTS(SELECT 1 FROM tenant_memberships m JOIN tenants t ON t.id=m.tenant_id WHERE m.tenant_id=c.tenant_id AND m.external_user_id=$3
             AND m.status='active' AND m.role=$4 AND t.status IN ('trial','active','payment_failed'))`, [session.tenantId, environment, session.externalUserId, session.role]);
       const row = rows.rows[0];
-      return { canManage: session.role === "owner", environment, checkout: row ? { state: row.state, transactionId: session.role === "owner" && row.state === "ready" ? row.transaction_id : null,
+      const paidAccess = (await queries.query<{ reason: string }>("SELECT public.tenant_paid_access_reason_v1($1) AS reason", [session.tenantId])).rows[0];
+      if (!paidAccess) throw new PaddleError("DEPENDENCY_UNAVAILABLE");
+      return { paidAccessReason: paidAccess.reason, canManage: session.role === "owner", environment, checkout: row ? { state: row.state, transactionId: session.role === "owner" && row.state === "ready" ? row.transaction_id : null,
         url: session.role === "owner" && row.state === "ready" ? row.checkout_url : null } : null,
         subscription: row?.provider_status ? { status: row.provider_status, endsAt: row.period_ends_at ? new Date(row.period_ends_at).toISOString() : null, needsReview: row.needs_review } : null };
     },

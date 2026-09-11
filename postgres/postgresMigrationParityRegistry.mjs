@@ -751,4 +751,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE paddle_checkout_intents",
     summary: "Railway journals single-attempt Paddle checkout creation, immutable signed-event receipts and exact server-transaction subscription bindings without granting entitlements from redirects.",
   }),
+  Object.freeze({
+    migration: "0080_paddle_paid_access.sql",
+    token: "CREATE FUNCTION tenant_paid_access_reason_v1",
+    summary: "Production subscription bindings durably adopt paid execution policy with database-clock period, scheduled-stop and verification-freshness checks while billing recovery remains accessible.",
+  }),
 ]);

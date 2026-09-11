@@ -1,3 +1,4 @@
+import { paidAccessTenantSql, paidAccessTenantBarrier } from "../server/platform/postgresPaidAccess.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -178,6 +179,9 @@ function queryFixture(responses) {
   return {
     calls,
     async query(sql, parameters) {
+      // The common authority boundary is covered by the paid-access integration suite.
+      if (sql === paidAccessTenantBarrier) return { rows: [], rowCount: 1 };
+      if (sql === paidAccessTenantSql) return { rows: [{ id: parameters[0] }], rowCount: 1 };
       calls.push({ sql, parameters });
       const response = remaining.shift();
 

@@ -100,6 +100,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "metaSignupLaunches",
     "metaWebhooks",
     "paddleBilling",
+    "paidAccess",
     "productionDecisions",
     "provisioning",
     "railwayAiAgentMutations",

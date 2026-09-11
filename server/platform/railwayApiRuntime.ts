@@ -158,6 +158,7 @@ import {
 } from "./railwayBotReplyStagingReleaseEvidenceReadOperation.ts";
 
 export interface RailwayApiRuntimeOptions {
+  readonly paidAccess?: Readonly<{ allowed(tenantId: number): Promise<boolean> }>;
   readonly environment?: RailwayApiIdentityEnvironment;
   readonly identityDependencies?: Readonly<RailwayApiIdentityAdapterDependencies>;
   readonly memberships: TenantMembershipRepository;
@@ -253,6 +254,7 @@ export function createRailwayApiRuntime(
     identityOrganizations: options.identityOrganizations,
   });
   const operations = createRailwayApiOperationRegistry({
+    paidAccess: options.paidAccess,
     tenantSessions,
     conversations: options.conversations,
     conversationMutations: options.conversationMutations,

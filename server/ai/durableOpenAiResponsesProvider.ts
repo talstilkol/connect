@@ -25,7 +25,7 @@ export function createDurableOpenAiResponsesProvider(
     OPENAI_TIMEOUT_MS: String(candidate?.timeoutMs),
   }, now());
   if (checked.status !== "configured" || typeof transport !== "function" ||
-    typeof journal?.observe !== "function" || typeof journal?.claim !== "function" || typeof journal?.settle !== "function") {
+    typeof journal?.admit !== "function" || typeof journal?.observe !== "function" || typeof journal?.claim !== "function" || typeof journal?.settle !== "function") {
     throw new Error("AI durable provider configuration is invalid");
   }
   const configuration = checked.configuration;
@@ -53,6 +53,7 @@ export function createDurableOpenAiResponsesProvider(
         if (existing) return existing;
         const time = now().getTime();
         if (!Number.isFinite(time) || time >= Date.parse(configuration.rateCard.validUntil)) return { outcome: "unavailable" };
+        if (!await journal.admit(binding)) return { outcome: "unavailable" };
         const count = await countOpenAiInputTokens(body, configuration, transport);
         if (count === null) throw new AiResponseDeferredError();
         const reservedMinorUnits = reserveOpenAiCost(count, configuration);

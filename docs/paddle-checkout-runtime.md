@@ -69,3 +69,7 @@
 6.6 Only an environment-matched public client token is sent to Paddle.js. [Client-side tokens](https://developer.paddle.com/paddle-js/about/client-side-tokens/)
 
 6.7 Client-supplied custom data can reach subscriptions and is not sufficient tenant authority. [Custom data](https://developer.paddle.com/build/transactions/custom-data/)
+
+# 7. R213 update — paid execution
+
+7.1 Production checkout now durably adopts paid execution policy, enforced in API and Worker boundaries with database guards. Earlier statements that no entitlement gate exists describe R212 only. C3.2 remains incomplete for management, repurchase and operational recovery. [Current policy and tests](paddle-paid-access-runtime.md).

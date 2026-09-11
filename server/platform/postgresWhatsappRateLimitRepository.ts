@@ -179,7 +179,7 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
     )
     SELECT
       EXISTS (
-        SELECT 1 FROM tenants WHERE id = $1
+        SELECT 1 FROM tenants WHERE id = $1 AND public.tenant_paid_access_allowed_v1(id)
       ) AS "tenantFound",
       (SELECT blocked_until FROM provider) AS "providerBlockedUntil",
       (SELECT scope FROM provider) AS "providerCooldownScope",
@@ -253,7 +253,7 @@ export const postgresWhatsappRateLimitSql = Object.freeze({
     )
     SELECT
       EXISTS (
-        SELECT 1 FROM tenants WHERE id = $1
+        SELECT 1 FROM tenants WHERE id = $1 AND public.tenant_paid_access_allowed_v1(id)
       ) AS "tenantFound",
       (SELECT blocked_until FROM provider) AS "providerBlockedUntil",
       (SELECT scope FROM provider) AS "providerCooldownScope",

@@ -1,3 +1,4 @@
+import { bindPaidFixture } from '../fixtures/paid-access-postgres.mjs';
 import assert from 'node:assert/strict';
 import { before,after,test } from 'node:test';
 import { readdir,readFile } from 'node:fs/promises';
@@ -90,4 +91,10 @@ test('database guards reject premature readiness, body replacement and changing 
 test('same content in two businesses has distinct keys and tenant-bound worker source records',async()=>{
   const a=await fixture(),b=await fixture();const ra=await a.enqueue(),rb=await b.enqueue();assert.notEqual(ra.source.sourceKey,rb.source.sourceKey);
   await createKnowledgeIngestionWorker(jobs,storage(a)).run();await createKnowledgeIngestionWorker(jobs,storage(b)).run();assert.equal((await source(a)).status,'ready');assert.equal((await source(b)).status,'ready');
+});
+
+test('a paid subscription canceled after enqueue prevents S3 upload and retains a rejected source',async()=>{
+  const f=await fixture(),paid=await bindPaidFixture(pool,f.intent.tenantId,f.session.externalUserId);await f.enqueue();await paid.cancel();const s=storage(f);
+  await createKnowledgeIngestionWorker(jobs,s).run();assert.equal(s.puts,0);assert.equal(s.reads,0);assert.equal((await row(f)).state,'rejected');assert.equal((await source(f)).status,'rejected');
+  await assert.rejects(f.enqueue(),{code:'AUTHORIZATION_DENIED'});
 });

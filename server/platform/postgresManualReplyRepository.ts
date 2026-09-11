@@ -1,3 +1,4 @@
+import { paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import { hasPermission, type TenantRole } from "../../shared/domain/model.ts";
 import { parseManualReplyRequest, parseManualReplySubmission, parseManualReplyViews, type ManualReplyRequest, type ManualReplySubmission, type ManualReplyView } from "../../shared/domain/manualReply.ts";
 import { requireTenantPermission, type TenantSession } from "../auth/tenantSession.ts";
@@ -34,7 +35,7 @@ export interface ManualReplyCommand {
 
 export const postgresManualReplySql = Object.freeze({
   barrier: "SELECT pg_advisory_xact_lock(public.derive_bot_reply_staging_tenant_barrier_key_v1($1))",
-  tenant: "SELECT id FROM tenants WHERE id = $1 AND status IN ('trial', 'active', 'payment_failed') FOR SHARE",
+  tenant: paidAccessTenantSql,
   membership: "SELECT role FROM tenant_memberships WHERE tenant_id = $1 AND external_user_id = $2 AND status = 'active' FOR SHARE",
   connection: `SELECT business_portfolio_id, waba_id, phone_number_id, version FROM meta_connections WHERE tenant_id = $1 AND status = 'connected' FOR SHARE`,
   credential: "SELECT credential_revision, envelope_digest FROM meta_credential_envelopes WHERE tenant_id = $1 FOR SHARE",

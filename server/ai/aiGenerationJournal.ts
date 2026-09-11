@@ -28,6 +28,7 @@ export interface AiGenerationClaim {
 }
 
 export interface AiGenerationJournal {
+  admit(binding: AiGenerationBinding): Promise<boolean>;
   observe(binding: AiGenerationBinding): Promise<AiGenerationObservation>;
   claim(input: AiGenerationClaim): Promise<AiGenerationObservation | Readonly<{ status: "acquired" }> | Readonly<{ status: "denied" }>>;
   settle(binding: AiGenerationBinding, result: AiResponseGenerationResult): Promise<AiResponseGenerationResult>;

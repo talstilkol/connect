@@ -48,7 +48,7 @@ test('reservation uses the highest possible input rate and maximum output, with 
 test('a count outage defers without a generation claim or handoff result', async () => {
   const f = await openAiFixture(); let requests = 0;
   const provider = createDurableOpenAiResponsesProvider(f.configuration, {
-    async observe() { return { status: 'missing' }; }, async claim() { assert.fail('No claim'); }, async settle() { assert.fail('No settlement'); },
+    async admit() { return true; }, async observe() { return { status: 'missing' }; }, async claim() { assert.fail('No claim'); }, async settle() { assert.fail('No settlement'); },
   }, { now: () => f.now, fetch: async (url) => { assert.ok(url.endsWith('/input_tokens')); requests++; throw new Error('offline'); } });
   await assert.rejects(provider.generate(f.request), AiResponseDeferredError); assert.equal(requests, 1);
 });
@@ -57,7 +57,7 @@ test('a stored claim, including an expired one, never invokes OpenAI again', asy
   const f = await openAiFixture();
   for (const expired of [false, true]) {
     const provider = createDurableOpenAiResponsesProvider(f.configuration, {
-      async observe() { return { status: 'claimed', expired }; }, async claim() { assert.fail('No reclaim'); }, async settle() { assert.fail('No settlement'); },
+      async admit() { return true; }, async observe() { return { status: 'claimed', expired }; }, async claim() { assert.fail('No reclaim'); }, async settle() { assert.fail('No settlement'); },
     }, { now: () => f.now, fetch: async () => { assert.fail('No HTTP'); } });
     await assert.rejects(provider.generate(f.request), AiResponseDeferredError);
   }

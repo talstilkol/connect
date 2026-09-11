@@ -1,0 +1,70 @@
+{
+  "status": "verified-local",
+  "decision": "R213",
+  "checkedAt": "2026-09-11T18:11:39.985258+00:00",
+  "completedSubtasks": [
+    "C3.2.1",
+    "C3.2.2"
+  ],
+  "unitTests": {
+    "passed": 4571,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "16.13": {
+      "paddle": 17,
+      "aiGenerationAndDelivery": 31,
+      "knowledge": 11,
+      "manualReply": 14,
+      "totalPassed": 73,
+      "failed": 0,
+      "migrations": 81
+    },
+    "17.11": {
+      "paddle": 17,
+      "aiGenerationAndDelivery": 31,
+      "knowledge": 11,
+      "manualReply": 14,
+      "totalPassed": 73,
+      "failed": 0,
+      "migrations": 81
+    }
+  },
+  "builds": {
+    "vinext": "passed",
+    "nextWebpack": "passed"
+  },
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": "passed",
+  "sourceFiles": 112,
+  "originalUntrackedPreserved": 624,
+  "deployed": false,
+  "liveProviderRequests": false,
+  "remaining": {
+    "codingPackages": [
+      "C3.2",
+      "C4.1"
+    ],
+    "subtasks": 8,
+    "mainStages": 12,
+    "historicalBaselineEngineeringHours": [
+      16,
+      32
+    ],
+    "confidence": "low"
+  },
+  "limitations": [
+    "C3.2 management, shared-payer privacy, repurchase and operational reconciliation remain unfinished",
+    "Billing must not be enabled for customers yet",
+    "C4.1 readiness, operational recovery, S3 retention and historical core verifier remain open",
+    "Provider cancellation can remain cached until the earliest period, scheduled-stop or 15-minute verification boundary",
+    "Admission cannot recall already dispatched provider requests; settlement remains permitted",
+    "Existing manual pilot exception is not commercial public onboarding approval",
+    "No visual end-to-end live payment journey was exercised"
+  ]
+}
