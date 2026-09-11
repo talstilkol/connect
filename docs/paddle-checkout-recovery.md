@@ -1,6 +1,6 @@
 # 1. Checkout recovery — R215, 11.09.2026
 
-1.1 Recovery now distinguishes a durable dispatch seal, an original POST response observation, and a provider-confirmed canceled transaction. No public API accepts a transaction ID or response observation as recovery evidence. C3.2.5 still has two operator cases to complete: an entire response lost without a stored identity, and resolution of conflicting subscription facts. Neither case is silently cleared.
+1.1 Recovery now distinguishes a durable dispatch seal, an original POST response observation, and a provider-confirmed canceled transaction. No public API accepts a transaction ID or response observation as recovery evidence. R217 completes the private operator path for an entire response lost without a stored identity and resolution of conflicting subscription facts. Neither case is silently cleared. See [operator recovery](paddle-operator-recovery.md) for authority, evidence and acceptance.
 
 # 2. Dispatch and outcome decisions
 
@@ -32,7 +32,7 @@
 
 5.1 Inspect the exact intent in the private operational database: its tenant/environment/generation, dispatch seal, reconciliation revision, saved observation, checkout closure and subscription review flag. Use a read-only session and bound query parameters. Keep customer data, API credentials and raw provider replies out of public issues and repository reports.
 
-5.2 For unknown creation without an original response identity, retain the hold and investigate through Paddle support using any saved request ID, the recorded attempt window and the approved account. No new transaction is automatically created. For a subscription conflict, retain `needs_review`; a later successful GET alone does not authorize clearing it. An audited operator-resolution path remains required before customer billing is enabled.
+5.2 For unknown creation without an original response identity, retain the hold and investigate through Paddle support using any saved request ID, the recorded attempt window and the approved account. No new transaction is automatically created. For a subscription conflict, retain `needs_review`; a later successful GET alone does not authorize clearing it. R217 provides the [audited operator-resolution path](paddle-operator-recovery.md); provisioning and live acceptance remain required before customer billing is enabled.
 
 5.3 Deploy the same Web/API/Worker contract and migration 0082 while Paddle is disabled. Then validate in Sandbox: normal creation, pre-seal failure, lost seal acknowledgment, lost observation acknowledgment, GET-only recovery, canceled checkout, old browser replay and a notice racing reconciliation. Local fixtures cannot establish live Paddle acceptance.
 

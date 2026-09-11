@@ -1434,6 +1434,13 @@ function containsSeedData(source, fileName) {
 function containsDestructiveStatement(source, fileName) {
   let reviewedSource = source;
 
+  if (fileName === "0084_paddle_operator_recovery.sql") {
+    reviewedSource = reviewedSource.replace(
+      "CREATE TRIGGER paddle_operator_recovery_no_truncate BEFORE TRUNCATE ON paddle_operator_recoveries FOR EACH STATEMENT EXECUTE FUNCTION reject_paddle_receipt_mutation();",
+      "",
+    );
+  }
+
   if (fileName === "0082_paddle_checkout_recovery.sql") {
     // These exact statements prohibit deletion; they do not truncate data.
     for (const trigger of [

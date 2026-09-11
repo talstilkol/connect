@@ -9,6 +9,9 @@ import {createNodePostgresQueryExecutor,createNodePostgresTransactionManager} fr
 import {createPostgresPaddleRepository} from '../../server/platform/postgresPaddleRepository.ts';
 import {createPaddleProvider} from '../../server/billing/paddleProvider.ts';
 import {createPaddleWorker} from '../../server/billing/paddleWorker.ts';
+import {createPaddleOperatorRecovery} from '../../server/billing/paddleOperatorRecovery.ts';
+import {runPaddleOperatorRecovery} from '../../scripts/paddle-operator-recovery.mjs';
+import {writeFile,mkdir,chmod,unlink} from 'node:fs/promises';
 const connectionString=process.env.CONNECT_PADDLE_TEST_URL;
 if(connectionString!=='postgresql://connect_paddle_test@127.0.0.1:55448/connect_paddle_integration')throw Error('Dedicated loopback Paddle database required');
 const pool=new pg.Pool({connectionString,max:8,statement_timeout:10000,lock_timeout:5000});
@@ -336,4 +339,146 @@ test('recovered cancellation from the original response closes without a subscri
   const p=createPaddleProvider(f.config,async(url,options)=>{if(options.method==='POST'){posts++;return Response.json({data:f.transaction});}return Response.json({data:{...f.transaction,status:'canceled',checkout:null}});});
   await assert.rejects(createPaddleWorker({...journal,async confirmCreation(){throw Error('projection failed')}},p,'sandbox').run());
   await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal((await row(f)).state,'closed');assert.equal(await account(f),undefined);
+});
+
+const recoveryEvidence=paddleDigest({source:'existing-paddle-protocol-fixture',purpose:'operator-recovery'});
+const recoveryService=(f,overrides={},transactions=createNodePostgresTransactionManager(pool))=>createPaddleOperatorRecovery({transactions,provider:provider(f,overrides)});
+async function unknownAttempt(){
+  const f=await fixture();await journal.enqueue(f.session,f.config);f.work=await journal.claimCreation('sandbox');
+  assert.equal(await journal.authorizeCreation(f.work),true);await journal.creationUnknown(f.work);return f;
+}
+const recoveryRequest=(f,action='bind-transaction')=>({tenantId:f.session.tenantId,environment:f.config.environment,intentKey:f.work.intentKey,action,transactionId:action==='close-absent'?null:f.payment.id});
+async function authorizeRecovery(f){await pool.query("INSERT INTO paddle_recovery_authorizations(database_role,tenant_id,environment,expires_at) VALUES(current_user,$1,$2,clock_timestamp()+interval '1 hour')",[f.session.tenantId,f.config.environment]);}
+test('operator authority is explicit, tenant/environment scoped, expiring and independent of workspace ownership',async()=>{
+  const f=await unknownAttempt(),service=recoveryService(f);
+  await assert.rejects(service.prepare(recoveryRequest(f)));await authorizeRecovery(f);
+  await assert.rejects(service.prepare({...recoveryRequest(f),environment:'production'}));
+  await assert.rejects(service.prepare({...recoveryRequest(f),tenantId:f.session.tenantId+1}));
+  await assert.rejects(pool.query("INSERT INTO paddle_recovery_authorizations(database_role,tenant_id,environment,expires_at) VALUES('connect_api_runtime',$1,'sandbox',clock_timestamp()+interval '1 hour')",[f.session.tenantId]));
+  const proposal=await service.prepare(recoveryRequest(f));
+  await pool.query("UPDATE paddle_recovery_authorizations SET expires_at=clock_timestamp()-interval '1 second' WHERE tenant_id=$1",[f.session.tenantId]);
+  await assert.rejects(service.apply(proposal,recoveryEvidence));assert.equal((await row(f)).state,'unknown');
+});
+test('operator support binding is atomic, concurrent/restart replay creates one receipt, and no provider POST is repeated',async()=>{
+  const f=await unknownAttempt();await authorizeRecovery(f);let gets=0;
+  const service=recoveryService(f,{async getTransaction(){gets++;return f.payment},async createTransaction(){assert.fail('recovery must never POST')}});
+  const proposal=await service.prepare(recoveryRequest(f));
+  const outcomes=await Promise.all([service.apply(proposal,recoveryEvidence),service.apply(proposal,recoveryEvidence)]);
+  assert.deepEqual(outcomes.map(x=>x.outcome).sort(),['applied','replayed']);
+  const before=gets;assert.equal((await recoveryService(f,{async getTransaction(){assert.fail('replay must not GET')}}).apply(proposal,recoveryEvidence)).outcome,'replayed');assert.equal(gets,before);
+  assert.equal((await pool.query('SELECT * FROM paddle_operator_recoveries WHERE intent_key=$1',[f.work.intentKey])).rowCount,1);
+  assert.equal((await row(f)).dispatch_sealed,true);assert.equal((await row(f)).state,'ready');assert.equal(await account(f),undefined);
+  // The normal, existing worker must still establish the customer/subscription.
+  const p=provider(f);await createPaddleWorker(journal,p,'sandbox').run();assert.equal(p.posts,0);assert.equal((await account(f)).subscription_id,f.subscription.id);
+});
+test('an unresolved checkout cannot bind an arbitrary transaction through the normal worker repository or raw SQL',async()=>{
+  const f=await unknownAttempt();await assert.rejects(journal.confirmCreation(f.work,f.receipt));
+  await assert.rejects(pool.query("UPDATE paddle_checkout_intents SET state='ready',transaction_id=$2,checkout_url=$3 WHERE intent_key=$1",[f.work.intentKey,f.receipt.id,f.receipt.checkoutUrl]));
+  assert.equal((await row(f)).state,'unknown');
+});
+test('support-confirmed absence keeps the irreversible seal, creates a closure and only permits a new explicit generation',async()=>{
+  const f=await unknownAttempt();await authorizeRecovery(f);
+  const service=recoveryService(f,{async getTransaction(){assert.fail('GET failure cannot prove absence')}});
+  const proposal=await service.prepare(recoveryRequest(f,'close-absent'));await service.apply(proposal,recoveryEvidence);
+  assert.equal((await row(f)).state,'closed');assert.equal((await row(f)).dispatch_sealed,true);
+  assert.equal((await pool.query('SELECT reason FROM paddle_checkout_closures WHERE intent_key=$1',[f.work.intentKey])).rows[0].reason,'support-confirmed-absent');
+  await journal.enqueue(f.session,f.config,0);assert.equal((await row(f)).generation,1);
+  await journal.enqueue(f.session,f.config,1);assert.equal((await row(f)).generation,2);
+  const work=await journal.claimCreation('sandbox');assert.equal(work.tenantId,f.session.tenantId);await journal.creationUnknown(work);
+});
+test('current original response identity cannot be replaced by an operator absence claim or alternate identity',async()=>{
+  const f=await unknownAttempt();await authorizeRecovery(f);
+  await journal.observeCreation(f.work,{requestId:null,httpStatus:201,transactionId:f.receipt.id,responseDigest:paddleDigest(f.transaction)});
+  for(const action of ['bind-transaction','close-absent'])await assert.rejects(recoveryService(f).prepare(recoveryRequest(f,action)),{code:'CONFLICT'});
+});
+test('operator proposals reject changed local state, changed provider facts, wrong actor and expired/future observations',async()=>{
+  const f=await unknownAttempt();await authorizeRecovery(f);const service=recoveryService(f),proposal=await service.prepare(recoveryRequest(f));
+  for(const preparedAt of [new Date(Date.parse(proposal.preparedAt)-301000).toISOString(),new Date(Date.parse(proposal.preparedAt)+60000).toISOString()]) await assert.rejects(service.apply({...proposal,preparedAt},recoveryEvidence),{code:'CONFLICT'});
+  await assert.rejects(service.apply({...proposal,operatorRole:'connect_api_runtime'},recoveryEvidence),{code:'AUTHORIZATION_DENIED'});
+  await assert.rejects(recoveryService(f,{async getTransaction(){return {...f.payment,updatedAt:'2026-07-27T09:00:00.000000Z'}}}).apply(proposal,recoveryEvidence),{code:'CONFLICT'});
+  await pool.query('UPDATE paddle_checkout_intents SET reconcile_revision=reconcile_revision+1 WHERE intent_key=$1',[f.work.intentKey]);
+  await assert.rejects(service.apply(proposal,recoveryEvidence),{code:'CONFLICT'});assert.equal((await row(f)).state,'unknown');
+});
+async function reviewedAccount(){
+  await pool.query("UPDATE paddle_checkout_intents SET next_reconcile_at=clock_timestamp()+interval '1 hour' WHERE environment='production'");
+  const f=await productionAccount();f.work={...f.work,...{intentKey:(await row(f)).intent_key}};await due(f);
+  const work=await journal.claimReconciliation('production');assert.equal(await journal.applyReconciliation(work,f.payment,{...f.subscription,status:'past_due'}),'review');
+  await authorizeRecovery(f);return f;
+}
+test('review resolution can choose the verified equal-version projection and restores paid access atomically',async()=>{
+  const f=await reviewedAccount();assert.equal(await reason(f),'review-required');
+  await assert.rejects(pool.query('UPDATE paddle_accounts SET needs_review=FALSE WHERE tenant_id=$1',[f.session.tenantId]));
+  const service=recoveryService(f),proposal=await service.prepare(recoveryRequest(f,'resolve-review'));
+  await service.apply(proposal,recoveryEvidence);assert.equal(await reason(f),'paid-active');assert.equal((await account(f)).needs_review,false);
+  await pool.query('UPDATE paddle_accounts SET needs_review=TRUE WHERE tenant_id=$1',[f.session.tenantId]);
+  // Replaying an old decision does not clear a later review episode.
+  assert.equal((await service.apply(proposal,recoveryEvidence)).outcome,'replayed');assert.equal(await reason(f),'review-required');
+  await assert.rejects(pool.query('UPDATE paddle_accounts SET needs_review=FALSE WHERE tenant_id=$1',[f.session.tenantId]));
+});
+test('an operator can select conflicting equal-version facts only with a matching new atomic review receipt',async()=>{
+  const f=await reviewedAccount(),sub={...f.subscription,status:'past_due'};
+  const service=recoveryService(f,{async getSubscription(){return sub}}),proposal=await service.prepare(recoveryRequest(f,'resolve-review'));
+  await service.apply(proposal,recoveryEvidence);assert.equal((await account(f)).provider_status,'past_due');assert.equal((await account(f)).projection_digest,paddleDigest(sub));assert.equal(await reason(f),'subscription-inactive');
+});
+test('a notice arriving during the operator GET, a new review revision, or revoked authority cancels the entire resolution',async()=>{
+  for(const mutate of [
+    f=>journal.recordNotice('production',notice(f,'operator-race')),
+    f=>pool.query('UPDATE paddle_accounts SET needs_review=TRUE WHERE tenant_id=$1',[f.session.tenantId]),
+    f=>pool.query('DELETE FROM paddle_recovery_authorizations WHERE tenant_id=$1',[f.session.tenantId]),
+  ]){
+    const f=await reviewedAccount(),proposal=await recoveryService(f).prepare(recoveryRequest(f,'resolve-review'));
+    const service=recoveryService(f,{async getSubscription(){await mutate(f);return f.subscription}});
+    await assert.rejects(service.apply(proposal,recoveryEvidence));assert.equal((await account(f)).needs_review,true);
+    assert.equal((await pool.query('SELECT * FROM paddle_operator_recoveries WHERE intent_key=$1',[f.work.intentKey])).rowCount,0);
+  }
+});
+test('older facts and resurrection of a canceled subscription stay blocked even for authorized operators',async()=>{
+  const f=await reviewedAccount();let service=recoveryService(f,{async getSubscription(){return {...f.subscription,updatedAt:'2026-07-24T09:00:00.000000Z'}}});
+  const proposal=await service.prepare(recoveryRequest(f,'resolve-review'));await assert.rejects(service.apply(proposal,recoveryEvidence));assert.equal((await account(f)).needs_review,true);
+  await pool.query("UPDATE paddle_accounts SET provider_status='canceled',provider_updated_at=provider_updated_at+interval '1 second' WHERE tenant_id=$1",[f.session.tenantId]);
+  service=recoveryService(f);await assert.rejects(service.prepare(recoveryRequest(f,'resolve-review')),{code:'CONFLICT'});
+  assert.equal((await pool.query('SELECT * FROM paddle_operator_recoveries WHERE intent_key=$1',[f.work.intentKey])).rowCount,0);
+});
+test('a failure after evidence insertion rolls back the evidence and business change; receipts reject update/delete/truncate',async()=>{
+  const f=await unknownAttempt();await authorizeRecovery(f);const proposal=await recoveryService(f).prepare(recoveryRequest(f));
+  const real=createNodePostgresTransactionManager(pool),transactions={transaction(options,body){return real.transaction(options,tx=>body({async query(sql,args){if(sql.startsWith("UPDATE paddle_checkout_intents SET state='ready'"))throw Error('injected business write failure');return tx.query(sql,args);}}));}};
+  await assert.rejects(recoveryService(f,{},transactions).apply(proposal,recoveryEvidence));assert.equal((await row(f)).state,'unknown');
+  assert.equal((await pool.query('SELECT * FROM paddle_operator_recoveries WHERE intent_key=$1',[f.work.intentKey])).rowCount,0);
+  const result=await recoveryService(f).apply(proposal,recoveryEvidence);
+  for(const sql of ['DELETE FROM paddle_operator_recoveries WHERE recovery_key=$1','UPDATE paddle_operator_recoveries SET evidence_digest=evidence_digest WHERE recovery_key=$1'])await assert.rejects(pool.query(sql,[result.recoveryKey]));
+  await assert.rejects(pool.query('TRUNCATE paddle_operator_recoveries'));
+});
+test('the private CLI requires explicit evidence confirmation, private files and supports durable apply replay without provider access',async()=>{
+  const f=await unknownAttempt();await authorizeRecovery(f);
+  const directory='/private/tmp/connect-paddle-operator-cli';await mkdir(directory,{recursive:true,mode:0o700});
+  const input=`${directory}/${f.session.tenantId}-request.json`,output=`${directory}/${f.session.tenantId}-proposal.json`,evidence=`${directory}/${f.session.tenantId}-evidence.txt`;
+  await writeFile(input,JSON.stringify(recoveryRequest(f,'close-absent')),{mode:0o600});await writeFile(evidence,JSON.stringify(f.transaction),{mode:0o600});
+  await unlink(output).catch(error=>{if(error.code!=='ENOENT')throw error});
+  const env={PADDLE_RECOVERY_DATABASE_URL:connectionString};
+  assert.deepEqual(await runPaddleOperatorRecovery(['prepare',input,output],env),{outcome:'prepared'});
+  await assert.rejects(runPaddleOperatorRecovery(['apply',output,evidence,'YES'],env));
+  await chmod(evidence,0o644);await assert.rejects(runPaddleOperatorRecovery(['apply',output,evidence,'CONFIRM_SUPPORT_TERMINAL_NO_TRANSACTION'],env));await chmod(evidence,0o600);
+  const args=['apply',output,evidence,'CONFIRM_SUPPORT_TERMINAL_NO_TRANSACTION'];assert.equal((await runPaddleOperatorRecovery(args,env)).outcome,'applied');assert.equal((await runPaddleOperatorRecovery(args,env)).outcome,'replayed');
+});
+test('a real separate operator login can recover with limited grants but cannot authorize itself or impersonate another login',async()=>{
+  await pool.query("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_paddle_recovery_test') THEN CREATE ROLE connect_paddle_recovery_test LOGIN; END IF; END $$");
+  await pool.query('GRANT USAGE ON SCHEMA public TO connect_paddle_recovery_test');
+  await pool.query('GRANT SELECT,UPDATE ON paddle_checkout_intents,paddle_accounts TO connect_paddle_recovery_test');
+  await pool.query('GRANT SELECT ON paddle_creation_observations TO connect_paddle_recovery_test');
+  await pool.query('GRANT SELECT,INSERT ON paddle_operator_recoveries,paddle_checkout_closures,audit_logs TO connect_paddle_recovery_test');
+  await pool.query('GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO connect_paddle_recovery_test');
+  await pool.query('GRANT EXECUTE ON FUNCTION paddle_recovery_authorize_v1(BIGINT,TEXT),derive_bot_reply_staging_tenant_barrier_key_v1(BIGINT) TO connect_paddle_recovery_test');
+  const operatorPool=new pg.Pool({connectionString:connectionString.replace('connect_paddle_test@','connect_paddle_recovery_test@'),max:1});
+  try {
+    const f=await unknownAttempt(),service=recoveryService(f,{},createNodePostgresTransactionManager(operatorPool));
+    await assert.rejects(service.prepare(recoveryRequest(f,'close-absent')));
+    await assert.rejects(operatorPool.query("INSERT INTO paddle_recovery_authorizations(database_role,tenant_id,environment,expires_at) VALUES(current_user,$1,'sandbox',clock_timestamp()+interval '1 hour')",[f.session.tenantId]));
+    await pool.query("INSERT INTO paddle_recovery_authorizations(database_role,tenant_id,environment,expires_at) VALUES('connect_paddle_recovery_test',$1,'sandbox',clock_timestamp()+interval '1 hour')",[f.session.tenantId]);
+    const proposal=await service.prepare(recoveryRequest(f,'close-absent'));assert.equal(proposal.operatorRole,'connect_paddle_recovery_test');
+    await service.apply(proposal,recoveryEvidence);
+    assert.equal((await pool.query('SELECT operator_role FROM paddle_operator_recoveries WHERE intent_key=$1',[f.work.intentKey])).rows[0].operator_role,'connect_paddle_recovery_test');
+    await assert.rejects(operatorPool.query('SET ROLE connect_paddle_test'));
+    await pool.query('DELETE FROM paddle_recovery_authorizations WHERE tenant_id=$1',[f.session.tenantId]);
+    await assert.rejects(service.apply(proposal,recoveryEvidence));
+  } finally { await operatorPool.end(); }
 });

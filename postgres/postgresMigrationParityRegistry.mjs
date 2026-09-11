@@ -771,4 +771,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE ai_runtime_worker_health",
     summary: "Recent credential-free worker health and rate-card expiry support tenant-bound AI publication checks without transferring provider secrets to the API.",
   }),
+  Object.freeze({
+    migration: "0084_paddle_operator_recovery.sql",
+    token: "CREATE TABLE paddle_operator_recoveries",
+    summary: "Private scoped operator recovery records immutable evidence, preserves dispatch seals and atomically resolves current subscription review revisions without duplicate provider requests.",
+  }),
 ]);
