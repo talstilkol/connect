@@ -350,6 +350,10 @@ const dormantCredentialBoundPreSendAllowedSqlIdentifiersByPath =
   ]);
 const dormantWriterBarrierAndLateTruthAllowedSqlIdentifiersByPath =
   new Map([
+    // Dedicated local verifier entries may import the existing protocol
+    // rehearsal. They gain no permission to reference dormant SQL directly.
+    ["scripts/verify-node-postgres-integration.mjs", new Set()],
+    ["tests/node-postgres-integration.test.mjs", new Set()],
     [
       "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
       dormantWriterBarrierAndLateTruthSqlIdentifiers,

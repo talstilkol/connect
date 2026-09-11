@@ -21,7 +21,7 @@ async function serverTypeScriptFiles(directoryUrl) {
   return files;
 }
 
-test("declares the exact dormant PostgreSQL 16 attested evidence verifier", async () => {
+test("declares the exact dormant PostgreSQL 16/17 attested evidence verifier", async () => {
   const source = await readFile(verifierUrl, "utf8");
 
   assert.match(
@@ -41,7 +41,7 @@ test("declares the exact dormant PostgreSQL 16 attested evidence verifier", asyn
   assert.match(source, /attestedEvidenceScenarioCount = 2/);
   assert.match(source, /return attestedEvidenceScenarioCount/);
   assert.match(source, /current_setting\('server_version'\)/);
-  assert.match(source, /assert\.match\(result\.rows\[0\]\?\.version, \/\^16/);
+  assert.match(source, /assert\.match\(result\.rows\[0\]\?\.version, \/\^\(16\|17\)/);
   assert.doesNotMatch(source, /Math\.random|randomUUID|crypto\.randomUUID/);
 });
 

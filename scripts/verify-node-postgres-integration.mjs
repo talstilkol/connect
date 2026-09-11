@@ -1,3 +1,4 @@
+import { proveCoreBotReplyProviderBoundary, finalizeCoreBotReplyProviderBoundary, seedCoreProviderFenceUpgrade } from "./verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs";
 import { connection as metaHistoryFixture } from "../tests/fixtures/meta-history.mjs";
 import assert from "node:assert/strict";
 import {
@@ -205,7 +206,7 @@ async function queryWithTenantBarrier(pool, tenantId, sql, parameters) {
   } finally { transaction.release(); }
 }
 
-async function applyMigrations(pool) {
+async function applyMigrations(pool, afterMigration) {
   const existingTables = await pool.query(
     `SELECT count(*)::integer AS count
      FROM information_schema.tables
@@ -222,7 +223,17 @@ async function applyMigrations(pool) {
       "utf8",
     );
     await pool.query(sql);
+    await afterMigration?.(migrationFile);
   }
+}
+
+async function readLegacyProviderFenceEvidence(pool, tenantId) {
+  const operations = await pool.query(`SELECT operation_key,delivery_key,provider_request_key,reservation_key,requested_at
+    FROM bot_reply_staging_provider_operations WHERE tenant_id=$1 ORDER BY operation_key`, [tenantId]);
+  const outcomes = await pool.query(`SELECT outcome.operation_key,outcome.state,outcome.provider_outcome_kind,outcome.observation_key,outcome.finalized_at
+    FROM bot_reply_staging_provider_operation_outcomes outcome JOIN bot_reply_staging_provider_operations operation USING(operation_key)
+    WHERE operation.tenant_id=$1 ORDER BY outcome.operation_key`, [tenantId]);
+  return { operations: operations.rows, outcomes: outcomes.rows };
 }
 
 async function verifyFullDataMigrationBundle(pool, transactions) {
@@ -3146,17 +3157,125 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     "settled",
   );
 
+  const providerDeferredContact =
+    await foundation.conversations.resolveInboundContact(
+      tenantId,
+      phone.rows[0].phoneNumber,
+    );
+  const windowInboundMessageKey = `message_v1_${"a1".repeat(32)}`;
+  await foundation.conversations.recordInboundMessage(Object.freeze({
+    tenantId,
+    conversationKey,
+    messageKey: windowInboundMessageKey,
+    contactId: providerDeferredContact.contactId,
+    providerMessageId: "driver-bot-window-rejection-inbound",
+    contentKind: "text",
+    textContent: "Window rejection integration",
+    occurredAt: currentPolicyRecordedAt,
+  }));
+  const windowReply = Object.freeze({
+    kind: "text",
+    text: "Integration service-window rejection",
+  });
+  const windowDeliveryKey = await deriveBotReplyDeliveryKey(tenantId, {
+    conversationKey,
+    inboundMessageKey: windowInboundMessageKey,
+    botFlowVersionKey: first.botFlowVersionKey,
+    replyIndex: 3,
+    reply: windowReply,
+  });
+  const windowStage = await foundation.botReplyDeliveries.stage(
+    Object.freeze({
+      ...deliveryInput,
+      deliveryKey: windowDeliveryKey,
+      inboundMessageKey: windowInboundMessageKey,
+      replyIndex: 3,
+      reply: windowReply,
+    }),
+  );
+  assert.equal(windowStage.outcome, "created");
+  const windowAttemptedAt = (await pool.query("SELECT date_trunc('milliseconds',clock_timestamp()) AS at")).rows[0].at.toISOString();
+  const windowClaim = await foundation.botReplyDeliveries.claim(
+    tenantId,
+    windowDeliveryKey,
+    windowAttemptedAt,
+  );
+  assert.equal(windowClaim.outcome, "claimed");
+  const windowBoundary = await proveCoreBotReplyProviderBoundary(pool, foundation, windowClaim.delivery);
+  const windowReservationKey = windowBoundary.reservationKey;
+  const windowProviderAttemptedAt = windowBoundary.attemptedAt;
+  assert.equal(
+    (await foundation.whatsappRateLimits.settle({
+      reservationKey: windowReservationKey,
+      outcome: "provider-failed",
+      settledAt: windowProviderAttemptedAt,
+    })).outcome,
+    "settled",
+  );
+  const windowRejectedAt = new Date(
+    Date.parse(windowProviderAttemptedAt) + 1,
+  ).toISOString();
+  const windowRejectionCommand = Object.freeze({
+    tenantId,
+    deliveryKey: windowDeliveryKey,
+    expectedClaimVersion: windowClaim.delivery.claimVersion,
+    reservationKey: windowReservationKey,
+    providerErrorCode: 131047,
+    reasonCode: "META_SERVICE_WINDOW_CLOSED",
+    serviceWindowOpenedAt: currentPolicyRecordedAt,
+    serviceWindowExpiresAt: new Date(
+      Date.parse(currentPolicyRecordedAt) + 86_400_000,
+    ).toISOString(),
+    attemptedAt: windowProviderAttemptedAt,
+    rejectedAt: windowRejectedAt,
+  });
+  const windowRejections = await Promise.all([
+    foundation.botReplyDeliveries.rejectProviderServiceWindow(
+      windowRejectionCommand,
+    ),
+    foundation.botReplyDeliveries.rejectProviderServiceWindow(
+      windowRejectionCommand,
+    ),
+  ]);
+  assert.equal(
+    windowRejections.every(
+      (delivery) =>
+        delivery.status === "rejected" &&
+        delivery.lastErrorCode === "META_SERVICE_WINDOW_CLOSED",
+    ),
+    true,
+  );
+  const persistedWindowRejection = await pool.query(
+    `SELECT
+       count(*)::integer AS count,
+       max(provider_error_code)::integer AS "providerErrorCode"
+     FROM bot_reply_service_window_rejection_events
+     WHERE tenant_id = $1
+       AND delivery_key = $2`,
+    [tenantId, windowDeliveryKey],
+  );
+  assert.deepEqual(persistedWindowRejection.rows, [{
+    count: 1,
+    providerErrorCode: 131047,
+  }]);
+  await assert.rejects(
+    queryWithTenantBarrier(pool, tenantId,
+      `UPDATE bot_reply_service_window_rejection_events
+       SET reason_code = 'META_BOT_REPLY_REJECTED'
+       WHERE delivery_key = $1`,
+      [windowDeliveryKey],
+    ),
+    /service-window rejection evidence is immutable/,
+  );
+
+  await finalizeCoreBotReplyProviderBoundary(pool, windowBoundary, "service-window-rejected");
+
   const providerDeferredReply = Object.freeze({
     kind: "text",
     text: "Integration provider deferral",
   });
   const providerDeferredInboundMessageKey =
     `message_v1_${"0".repeat(64)}`;
-  const providerDeferredContact =
-    await foundation.conversations.resolveInboundContact(
-      tenantId,
-      phone.rows[0].phoneNumber,
-    );
   await foundation.conversations.recordInboundMessage(Object.freeze({
     tenantId,
     conversationKey,
@@ -3184,9 +3303,7 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
       reply: providerDeferredReply,
     }));
   assert.equal(providerDeferredStage.outcome, "created");
-  const providerDeferredClaimAt = new Date(
-    Date.parse(providerDeferredStage.delivery.createdAt) + 1_000,
-  ).toISOString();
+  const providerDeferredClaimAt = (await pool.query("SELECT date_trunc('milliseconds',clock_timestamp()) AS at")).rows[0].at.toISOString();
   const providerDeferredClaim =
     await foundation.botReplyDeliveries.claim(
       tenantId,
@@ -3194,49 +3311,18 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
       providerDeferredClaimAt,
     );
   assert.equal(providerDeferredClaim.outcome, "claimed");
-  const providerDeferredReservationKey =
-    `whatsapp_rate_reservation_v1_${"4".repeat(64)}`;
-  const providerDeferredReservation =
-    await foundation.whatsappRateLimits.reserveServiceReply({
-      reservationKey: providerDeferredReservationKey,
-      tenantId,
-      portfolioKey: `whatsapp_portfolio_v1_${"9".repeat(64)}`,
-      senderKey: `whatsapp_sender_v1_${"7".repeat(64)}`,
-      recipientKey: `whatsapp_recipient_v1_${"8".repeat(64)}`,
-      policyEventKey: currentPolicy.record.eventKey,
-      portfolioCapacity: Object.freeze({
-        kind: "bounded",
-        maximumUniqueRecipients: 250,
-      }),
-      phoneThroughput: Object.freeze({
-        maximumMessagesPerSecond: 20,
-        maximumOutboundMessagesPerSecond: 2,
-      }),
-      reservedAt: providerDeferredClaimAt,
-      reservationExpiresAt: new Date(
-        Date.parse(providerDeferredClaimAt) + 300_000,
-      ).toISOString(),
-    });
-  assert.equal(providerDeferredReservation.outcome, "reserved");
-  const providerDeferredRequest =
-    await foundation.botReplyDeliveries.claimProviderRequest({
-      tenantId,
-      deliveryKey: providerDeferredDeliveryKey,
-      expectedClaimVersion:
-        providerDeferredClaim.delivery.claimVersion,
-      reservationKey: providerDeferredReservationKey,
-      requestedAt: providerDeferredClaimAt,
-    });
-  assert.equal(providerDeferredRequest.outcome, "created");
-  const providerAttemptedAt = new Date(
-    Date.parse(providerDeferredClaimAt) + 1_000,
-  ).toISOString();
+  const providerBoundary = await proveCoreBotReplyProviderBoundary(pool, foundation, providerDeferredClaim.delivery);
+  const providerDeferredReservationKey = providerBoundary.reservationKey;
+  const providerAttemptedAt = providerBoundary.attemptedAt;
   const providerDeferredAt = new Date(
     Date.parse(providerAttemptedAt) + 1_000,
   ).toISOString();
   const providerRetryAt = new Date(
     Date.parse(providerAttemptedAt) + 900_000,
   ).toISOString();
+  assert.equal((await foundation.whatsappRateLimits.settle({
+    reservationKey: providerDeferredReservationKey, outcome: "provider-failed", settledAt: providerAttemptedAt,
+  })).outcome, "settled");
   const cooldown =
     await foundation.whatsappRateLimits.applyProviderCooldown({
       reservationKey: providerDeferredReservationKey,
@@ -3290,7 +3376,7 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     reservationKey: providerDeferredReservationKey,
   }]);
   await assert.rejects(
-    pool.query(
+    queryWithTenantBarrier(pool, tenantId,
       `UPDATE bot_reply_provider_deferral_events
        SET retry_after_seconds = 18
        WHERE delivery_key = $1`,
@@ -3299,143 +3385,7 @@ async function verifyBotFlowDeliveryLifecycle(pool, foundation, tenantId) {
     /provider deferral evidence is immutable/,
   );
 
-  const windowInboundMessageKey = `message_v1_${"a1".repeat(32)}`;
-  await foundation.conversations.recordInboundMessage(Object.freeze({
-    tenantId,
-    conversationKey,
-    messageKey: windowInboundMessageKey,
-    contactId: providerDeferredContact.contactId,
-    providerMessageId: "driver-bot-window-rejection-inbound",
-    contentKind: "text",
-    textContent: "Window rejection integration",
-    occurredAt: currentPolicyRecordedAt,
-  }));
-  const windowReply = Object.freeze({
-    kind: "text",
-    text: "Integration service-window rejection",
-  });
-  const windowDeliveryKey = await deriveBotReplyDeliveryKey(tenantId, {
-    conversationKey,
-    inboundMessageKey: windowInboundMessageKey,
-    botFlowVersionKey: first.botFlowVersionKey,
-    replyIndex: 3,
-    reply: windowReply,
-  });
-  const windowStage = await foundation.botReplyDeliveries.stage(
-    Object.freeze({
-      ...deliveryInput,
-      deliveryKey: windowDeliveryKey,
-      inboundMessageKey: windowInboundMessageKey,
-      replyIndex: 3,
-      reply: windowReply,
-    }),
-  );
-  assert.equal(windowStage.outcome, "created");
-  const windowAttemptedAt = new Date(
-    Date.parse(windowStage.delivery.createdAt) + 1_000,
-  ).toISOString();
-  const windowClaim = await foundation.botReplyDeliveries.claim(
-    tenantId,
-    windowDeliveryKey,
-    windowAttemptedAt,
-  );
-  assert.equal(windowClaim.outcome, "claimed");
-  const windowReservationKey =
-    `whatsapp_rate_reservation_v1_${"a".repeat(64)}`;
-  const windowReservation =
-    await foundation.whatsappRateLimits.reserveServiceReply({
-      reservationKey: windowReservationKey,
-      tenantId,
-      portfolioKey: `whatsapp_portfolio_v1_${"a".repeat(64)}`,
-      senderKey: `whatsapp_sender_v1_${"a".repeat(64)}`,
-      recipientKey: `whatsapp_recipient_v1_${"b".repeat(64)}`,
-      policyEventKey: currentPolicy.record.eventKey,
-      portfolioCapacity: Object.freeze({
-        kind: "bounded",
-        maximumUniqueRecipients: 250,
-      }),
-      phoneThroughput: Object.freeze({
-        maximumMessagesPerSecond: 20,
-        maximumOutboundMessagesPerSecond: 2,
-      }),
-      reservedAt: windowAttemptedAt,
-      reservationExpiresAt: new Date(
-        Date.parse(windowAttemptedAt) + 300_000,
-      ).toISOString(),
-    });
-  assert.equal(windowReservation.outcome, "reserved");
-  const windowProviderRequest =
-    await foundation.botReplyDeliveries.claimProviderRequest({
-      tenantId,
-      deliveryKey: windowDeliveryKey,
-      expectedClaimVersion: windowClaim.delivery.claimVersion,
-      reservationKey: windowReservationKey,
-      requestedAt: windowAttemptedAt,
-    });
-  assert.equal(windowProviderRequest.outcome, "created");
-  assert.equal(
-    (await foundation.whatsappRateLimits.settle({
-      reservationKey: windowReservationKey,
-      outcome: "provider-failed",
-      settledAt: windowAttemptedAt,
-    })).outcome,
-    "settled",
-  );
-  const windowRejectedAt = new Date(
-    Date.parse(windowAttemptedAt) + 1,
-  ).toISOString();
-  const windowRejectionCommand = Object.freeze({
-    tenantId,
-    deliveryKey: windowDeliveryKey,
-    expectedClaimVersion: windowClaim.delivery.claimVersion,
-    reservationKey: windowReservationKey,
-    providerErrorCode: 131047,
-    reasonCode: "META_SERVICE_WINDOW_CLOSED",
-    serviceWindowOpenedAt: currentPolicyRecordedAt,
-    serviceWindowExpiresAt: new Date(
-      Date.parse(currentPolicyRecordedAt) + 86_400_000,
-    ).toISOString(),
-    attemptedAt: windowAttemptedAt,
-    rejectedAt: windowRejectedAt,
-  });
-  const windowRejections = await Promise.all([
-    foundation.botReplyDeliveries.rejectProviderServiceWindow(
-      windowRejectionCommand,
-    ),
-    foundation.botReplyDeliveries.rejectProviderServiceWindow(
-      windowRejectionCommand,
-    ),
-  ]);
-  assert.equal(
-    windowRejections.every(
-      (delivery) =>
-        delivery.status === "rejected" &&
-        delivery.lastErrorCode === "META_SERVICE_WINDOW_CLOSED",
-    ),
-    true,
-  );
-  const persistedWindowRejection = await pool.query(
-    `SELECT
-       count(*)::integer AS count,
-       max(provider_error_code)::integer AS "providerErrorCode"
-     FROM bot_reply_service_window_rejection_events
-     WHERE tenant_id = $1
-       AND delivery_key = $2`,
-    [tenantId, windowDeliveryKey],
-  );
-  assert.deepEqual(persistedWindowRejection.rows, [{
-    count: 1,
-    providerErrorCode: 131047,
-  }]);
-  await assert.rejects(
-    pool.query(
-      `UPDATE bot_reply_service_window_rejection_events
-       SET reason_code = 'META_BOT_REPLY_REJECTED'
-       WHERE delivery_key = $1`,
-      [windowDeliveryKey],
-    ),
-    /service-window rejection evidence is immutable/,
-  );
+  await finalizeCoreBotReplyProviderBoundary(pool, providerBoundary, "sender-deferred");
 
   const continuationPhoneNumber = "+972509876542";
   const continuationContact = await foundation.conversations
@@ -8354,6 +8304,27 @@ export async function verifyNodePostgresIntegration(
     assert.equal(identity.rows[0]?.database, integrationDatabaseName);
     assert.match(identity.rows[0]?.version, /^(16|17)\./);
 
+    // Preserve the nine positive 0053 protocol scenarios at their historical
+    // boundary, then prove those records survive the complete schema upgrade.
+    let providerOperationFenceConcurrencyScenarios = 0;
+    let legacyProviderTenantId;
+    let legacyProviderEvidence;
+    await applyMigrations(pool, async migrationFile => {
+      if (migrationFile === "0054_meta_credential_revision_ledger.sql") {
+        legacyProviderTenantId = await seedCoreProviderFenceUpgrade(pool);
+        providerOperationFenceConcurrencyScenarios = await verifyBotReplyStagingProviderOperationFencePostgres(pool, legacyProviderTenantId);
+        legacyProviderEvidence = await readLegacyProviderFenceEvidence(pool, legacyProviderTenantId);
+      }
+    });
+    assert.equal(providerOperationFenceConcurrencyScenarios, 9);
+    assert.ok(legacyProviderEvidence.operations.length > 0);
+    assert.ok(legacyProviderEvidence.outcomes.length > 0);
+    assert.deepEqual(await readLegacyProviderFenceEvidence(pool, legacyProviderTenantId), legacyProviderEvidence);
+    // This exact database was required to be empty before the owned rehearsal.
+    // Recreate it for the separate current-schema cutover and application proof.
+    assert.equal((await pool.query("SELECT current_database() AS name")).rows[0].name, integrationDatabaseName);
+    await pool.query("DROP SCHEMA public CASCADE");
+    await pool.query("CREATE SCHEMA public");
     await applyMigrations(pool);
     const transactions = createNodePostgresTransactionManager(pool);
     await verifyFullDataMigrationBundle(pool, transactions);
@@ -8369,7 +8340,6 @@ export async function verifyNodePostgresIntegration(
         transactions,
         tenantId,
       );
-    let providerOperationFenceConcurrencyScenarios = 0;
     const foundation = createRailwayPostgresFoundation({
       environment: postgresEnvironment(checkedConnectionString),
       telemetry: {
@@ -8488,11 +8458,7 @@ export async function verifyNodePostgresIntegration(
         checkedConnectionString,
         pool,
       );
-      providerOperationFenceConcurrencyScenarios =
-        await verifyBotReplyStagingProviderOperationFencePostgres(
-          pool,
-          tenantId,
-        );
+
     } finally {
       await foundation.close();
     }
@@ -8500,6 +8466,9 @@ export async function verifyNodePostgresIntegration(
     return Object.freeze({
       status: "passed",
       migrationCount: migrationFiles.length,
+      legacyProviderFenceUpgradeScenarios: providerOperationFenceConcurrencyScenarios,
+      legacyProviderEvidencePreserved: true,
+      currentSchemaConcurrencyScenarios: 90 + attestedEvidenceConcurrencyScenarios,
       concurrencyScenarios:
         90 + attestedEvidenceConcurrencyScenarios +
           providerOperationFenceConcurrencyScenarios,

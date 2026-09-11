@@ -1307,7 +1307,7 @@ export async function verifyBotReplyStagingProviderOperationFencePostgres(
   const version = await pool.query(
     `SELECT pg_catalog.current_setting('server_version') AS version`,
   );
-  assert.match(version.rows[0]?.version, /^16\./);
+  assert.match(version.rows[0]?.version, /^(?:16|17)\./);
   const safety = await prepareSafetyScope(pool, tenantId);
 
   await verifyConcurrentReserveReplay(pool, tenantId, safety);

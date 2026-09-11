@@ -592,6 +592,14 @@ test("blocks every dormant D1e writer-barrier identifier in runtime code", async
   );
   const fixtures = new Map([
     [
+      "scripts/verify-node-postgres-integration.mjs",
+      "write_bot_reply_staging_provider_fact_v1",
+    ],
+    [
+      "tests/node-postgres-integration.test.mjs",
+      "reserve_and_bind_bot_reply_staging_service_reply_v1",
+    ],
+    [
       "db/reserve-and-bind.ts",
       "reserve_and_bind_bot_reply_staging_service_reply_v1",
     ],

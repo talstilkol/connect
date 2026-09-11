@@ -47,6 +47,12 @@ function fixture(transactionResults) {
         return execute({
           async query(sql, parameters) {
             calls.push({ sql, parameters });
+            if (sql === postgresCampaignDeliveryProviderSql.barrier) {
+              assert.equal(calls.length, 1);
+              assert.deepEqual(parameters, [7]);
+              return result([]);
+            }
+            assert.equal(calls[0].sql, postgresCampaignDeliveryProviderSql.barrier);
             const next = pending.shift();
             if (next === undefined) throw new Error("Unexpected query");
             return next;
@@ -110,10 +116,11 @@ test("records provider acceptance and confirms its projected recipient", async (
   assert.equal(saved.outcome, "recorded");
   assert.equal(saved.link.recipientStatus, "accepted");
   assert.deepEqual(database.calls.map(({ sql }) => sql), [
+    postgresCampaignDeliveryProviderSql.barrier,
     postgresCampaignDeliveryProviderSql.insertAcceptance,
     postgresCampaignDeliveryProviderSql.findByDeliveryForUpdate,
   ]);
-  assert.deepEqual(database.calls[0].parameters, [
+  assert.deepEqual(database.calls[1].parameters, [
     7,
     deliveryKey,
     providerMessageId,
@@ -159,11 +166,12 @@ test("applies a terminal event and returns its exact settlement", async () => {
     settledAt: reconciledAt,
   });
   assert.deepEqual(database.calls.map(({ sql }) => sql), [
+    postgresCampaignDeliveryProviderSql.barrier,
     postgresCampaignDeliveryProviderSql.findByProviderMessageForUpdate,
     postgresCampaignDeliveryProviderSql.applyProviderStatus,
     postgresCampaignDeliveryProviderSql.findByProviderMessageForUpdate,
   ]);
-  assert.deepEqual(database.calls[1].parameters, [
+  assert.deepEqual(database.calls[2].parameters, [
     7,
     providerMessageId,
     "delivered",

@@ -1,0 +1,83 @@
+{
+  "status": "verified-local",
+  "decision": "R219",
+  "checkedAt": "2026-09-11T21:22:52.756611+00:00",
+  "completedSubtasks": [
+    "C4.1.4"
+  ],
+  "unitTests": {
+    "passed": 4588,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "16.13": {
+      "currentSchemaScenarios": 92,
+      "legacyProviderFenceUpgradeScenarios": 9,
+      "legacyProviderEvidencePreserved": true,
+      "totalPassed": 101,
+      "migrations": 86
+    },
+    "17.11": {
+      "currentSchemaScenarios": 92,
+      "legacyProviderFenceUpgradeScenarios": 9,
+      "legacyProviderEvidencePreserved": true,
+      "totalPassed": 101,
+      "migrations": 86
+    }
+  },
+  "builds": {
+    "vinext": "passed",
+    "nextWebpack": "passed"
+  },
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": {
+    "status": "passed",
+    "files": 965,
+    "clientGraphs": 43,
+    "typeScriptEdges": 2420
+  },
+  "interfaceGuardrails": {
+    "status": "passed",
+    "checks": 15
+  },
+  "sourceFiles": 154,
+  "originalUntrackedPreserved": 624,
+  "deployed": false,
+  "liveProviderRequests": false,
+  "publicCiRun": false,
+  "remaining": {
+    "codingPackages": [
+      "C4.1"
+    ],
+    "subtasks": 2,
+    "mainStages": 12,
+    "estimatedEngineeringHours": [
+      4,
+      8
+    ],
+    "confidence": "low",
+    "launchDate": "unknown"
+  },
+  "logs": {
+    "unit": "core-current-protocol-unit-final-20260912.log",
+    "builds": "core-current-protocol-full-test-20260911.log",
+    "postgres16": "core-current-protocol-postgres16-20260911.log",
+    "postgres17": "core-current-protocol-postgres17-20260912.log",
+    "source": "core-current-protocol-source-20260912.log",
+    "interface": "core-current-protocol-interface-20260912.log",
+    "typecheck": "core-current-protocol-typecheck-20260911.log",
+    "lint": "core-current-protocol-lint-20260911.log"
+  },
+  "limitations": [
+    "All coding is not complete: C4.1.2 uncertain outcomes and C4.1.5 final audit remain open",
+    "Nine historical protocol cases per version run before the full schema upgrade and are distinct from the 92 current-schema cases",
+    "The verifier resets its initially empty dedicated loopback database between upgrade and current-schema phases",
+    "Build log contains an earlier failed unit gate; final all-unit pass is recorded in the separate final unit log",
+    "No provider connection, public push, deployment or live acceptance was performed"
+  ]
+}

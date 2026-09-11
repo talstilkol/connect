@@ -6,6 +6,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import pg from "pg";
+import { createWhatsappRateLimitKeyDeriver } from "../server/campaigns/whatsappRateLimitKeyDeriver.ts";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const migrationDirectory = join(projectRoot, "postgres", "migrations");
@@ -3585,6 +3586,93 @@ async function prepareD1eProviderBoundary(client, fixture) {
     fixture.permitKey,
     pinnedBackendPid,
   );
+}
+
+// Adapt the existing driver fixture to the current credential-bound protocol.
+// Keep the historical migration rehearsal above unchanged, including its order.
+export async function seedCoreProviderFenceUpgrade(pool) {
+  assert.equal((await pool.query("SELECT current_database() AS name")).rows[0].name, "connect_driver_integration");
+  assert.equal((await pool.query("SELECT to_regclass('public.bot_reply_staging_credential_bound_pre_send_permits') AS permits")).rows[0].permits, null);
+  const label = "core-provider-fence-upgrade";
+  const safety = await createSafetyScope(pool, label, { legacy: true });
+  const source = await createDeliverySource(pool, safety, label);
+  const now = await databaseTimestamp(pool);
+  await pool.query(`INSERT INTO bot_reply_deliveries(delivery_key,tenant_id,conversation_key,inbound_message_key,
+    bot_flow_key,bot_flow_version_key,reply_index,recipient_phone_e164,reply_json,status,attempt_count,
+    created_at,updated_at,sender_phone_number_id)
+    VALUES($1,$2,$3,$4,$5,$6,1,$7,$8::jsonb,'pending',0,$9,$9,$10)`,
+  [identity("bot_reply_delivery_v1_", safety.tenantId, label), safety.tenantId, source.conversationKey, source.inboundMessageKey,
+    source.botFlowKey, source.botFlowVersionKey, source.recipientPhoneE164, JSON.stringify({ kind: "text", text: "Verifier reply" }), now, metaAssetId("phone", safety.tenantId)]);
+  return safety.tenantId;
+}
+
+export async function proveCoreBotReplyProviderBoundary(pool, foundation, delivery) {
+  assert.equal((await pool.query("SELECT current_database() AS name")).rows[0].name, "connect_driver_integration");
+  const tenantId = delivery.tenantId;
+  const connection = (await pool.query("SELECT business_portfolio_id,phone_number_id,version FROM meta_connections WHERE tenant_id=$1", [tenantId])).rows[0];
+  const policy = (await pool.query("SELECT * FROM whatsapp_campaign_delivery_policy_events WHERE tenant_id=$1 ORDER BY policy_version DESC LIMIT 1", [tenantId])).rows[0];
+  const prior = (await pool.query("SELECT coalesce(max(authorization_version),0)::integer AS version FROM bot_reply_staging_authorization_events WHERE tenant_id=$1", [tenantId])).rows[0].version;
+  const now = await databaseTimestamp(pool);
+  const safety = {
+    tenantId, connectionVersion: connection.version, policyVersion: policy.policy_version,
+    policyEventKey: policy.event_key,
+    recipientFingerprint: digest(`driver-recipient:${tenantId}:${delivery.recipientPhoneNumber}`),
+    rateLimitMethodFingerprint: digest(`driver-rate-policy:${policy.event_key}`),
+  };
+  const authorization = await foundation.botReplyStagingSafety.record({
+    tenantId, authorizationVersion: prior + 1, status: "approved",
+    connectionVersion: safety.connectionVersion, policyVersion: safety.policyVersion,
+    recipientFingerprint: safety.recipientFingerprint, recipientOptInRecordedAt: now,
+    recipientExpiresAt: offsetTimestamp(now, 1_800_000), rateLimitApprovedAt: now,
+    rateLimitExpiresAt: offsetTimestamp(now, 1_800_000),
+    rateLimitMethodFingerprint: safety.rateLimitMethodFingerprint,
+    actorExternalUserId: "driver-integration-owner", recordedAt: now,
+  });
+  safety.authorizationEventKey = authorization.eventKey;
+  const label = delivery.deliveryKey;
+  const claimInput = { ...createClaimInput(safety, label), graphApiVersion: policy.meta_graph_api_version, actorExternalUserId: "driver-integration-owner" };
+  const claimedRun = await claim(pool, claimInput);
+  assert.equal(claimedRun.outcome, "claimed");
+  const keys = await createWhatsappRateLimitKeyDeriver({
+    WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  }).deriveServiceReply({ businessPortfolioId: connection.business_portfolio_id, phoneNumberId: connection.phone_number_id,
+    recipientPhoneNumber: delivery.recipientPhoneNumber, deliveryKey: delivery.deliveryKey, deliveryAttemptNumber: delivery.attemptCount });
+  // Use the real shared pair key and let its existing reservation expire.
+  // A new fixture key or editing the limiter state would conceal a quota bug.
+  const pair = (await pool.query(`SELECT greatest(0,ceil(extract(epoch FROM (reserved_until-clock_timestamp()))*1000))::integer AS wait_ms
+    FROM whatsapp_pair_rate_limit_state WHERE sender_key=$1 AND recipient_key=$2`, [keys.senderKey, keys.recipientKey])).rows[0];
+  if (pair?.wait_ms > 0) { assert.ok(pair.wait_ms <= 6_000); await delay(pair.wait_ms + 1); }
+  const fixture = await completePendingD1eFixture(pool, {
+    safety, label, claimInput, claimedRun, options: { operationKind: "text-send" },
+    delivery: { ...keys, deliveryKey: delivery.deliveryKey, deliveryClaimVersion: delivery.claimVersion },
+  });
+  const actor = await pool.connect();
+  try {
+    await prepareD1eProviderBoundary(actor, fixture);
+    const proof = (await actor.query("SELECT proved_at FROM bot_reply_staging_provider_boundary_claims WHERE permit_key=$1", [fixture.permitKey])).rows[0];
+    assert.ok(proof);
+    return { permitKey: fixture.permitKey, reservationKey: fixture.delivery.reservationKey, attemptedAt: canonicalTimestamp(proof.proved_at) };
+  } finally {
+    await actor.query("ROLLBACK");
+    await releaseBarrier(actor, fixture.permitKey);
+    actor.release();
+  }
+}
+
+export async function finalizeCoreBotReplyProviderBoundary(pool, boundary, expectedKind) {
+  const actor = await pool.connect();
+  try {
+    assert.equal(await acquireBarrier(actor, boundary.permitKey), "reconciliation-required");
+    const result = await finalizePermit(actor, boundary.permitKey);
+    assert.equal(result.outcome, "finalized");
+    assert.equal(result.state, "completed");
+    assert.equal(result.providerOutcomeKind, expectedKind);
+    assert.equal((await finalizePermit(actor, boundary.permitKey)).outcome, "replayed");
+  } finally {
+    await actor.query("ROLLBACK");
+    await releaseBarrier(actor, boundary.permitKey);
+    actor.release();
+  }
 }
 
 async function writeD1eProviderFact(client, input) {
