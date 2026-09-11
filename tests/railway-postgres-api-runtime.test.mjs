@@ -75,6 +75,7 @@ test("composes one authenticated handler over the PostgreSQL foundation", async 
     "handler",
     "mediaFileHandler",
     "metaWebhookHandler",
+    "paddleWebhookHandler",
     "readiness",
   ]);
   assert.equal(typeof runtime.handler.handle, "function");

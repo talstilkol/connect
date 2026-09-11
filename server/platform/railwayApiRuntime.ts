@@ -1,3 +1,4 @@
+import { createRailwayPaddleOperations } from "./railwayPaddleOperations.ts";
 import type { KnowledgeUploadExecutor } from "./railwayKnowledgeUploadExecutor.ts";
 import type { PostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import type { RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
@@ -176,6 +177,7 @@ export interface RailwayApiRuntimeOptions {
     AiAgentService,
     "list" | "listKnowledgeSources" | "readDetails"
   >;
+  readonly paddleBilling?: Parameters<typeof createRailwayPaddleOperations>[0]["billing"];
   readonly knowledgeUpload?: KnowledgeUploadExecutor;
   readonly aiAgentMutations: RailwayAiAgentMutationExecutor;
   readonly aiReplyApprovals: Pick<AiReplyApprovalService, "listAwaiting">;
@@ -393,6 +395,7 @@ export function createRailwayApiRuntime(
     oidcVerifier: identity.oidcVerifier,
     endUserSessionVerifier: identity.endUserSessionVerifier,
     operations: [
+      ...(options.paddleBilling === undefined ? [] : createRailwayPaddleOperations({ tenantSessions, billing: options.paddleBilling, mutationRateLimit: options.mutationRateLimit })),
       ...tenantSelectionOperations,
       ...onboardingOperations,
       teamDirectoryOperation,

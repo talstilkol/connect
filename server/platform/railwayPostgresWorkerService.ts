@@ -1,3 +1,7 @@
+import { requirePaddleConfiguration, type PaddleRuntimeEnvironment } from "../billing/paddleConfiguration.ts";
+import { createPaddleProvider } from "../billing/paddleProvider.ts";
+import { createPaddleWorker } from "../billing/paddleWorker.ts";
+import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
 import { requireKnowledgeConfiguration, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import { createS3KnowledgeStorage } from "./s3KnowledgeStorage.ts";
 import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
@@ -256,7 +260,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment & KnowledgeRuntimeEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & RailwayAiReplyDeliveryEnvironment & OpenAiResponsesEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & PaddleRuntimeEnvironment & KnowledgeRuntimeEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & RailwayAiReplyDeliveryEnvironment & OpenAiResponsesEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -721,6 +725,7 @@ function createRailwayPostgresWorkerFoundation(
 
   return Object.freeze({
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
+    paddleBilling: createPostgresPaddleRepository({ queries, transactions }),
     knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
       queries,
@@ -821,6 +826,7 @@ export async function createRailwayPostgresWorkerService(
   options: Readonly<RailwayPostgresWorkerServiceOptions>,
 ): Promise<Readonly<RailwayWorkerSchedulerService>> {
   const clock = requireOptions(options);
+  const paddleConfig = requirePaddleConfiguration(options.environment ?? {});
   const aiConfiguration = inspectOpenAiResponsesConfiguration(options.environment ?? {});
   if (aiConfiguration.status === "invalid") throw new Error("Railway AI response configuration is invalid");
   const mediaMode = requireMetaMediaWorkerConfiguration(options.environment);
@@ -844,6 +850,10 @@ export async function createRailwayPostgresWorkerService(
   }>> = [];
 
   try {
+    if (paddleConfig) {
+      const worker = createPaddleWorker(foundation.paddleBilling, createPaddleProvider(paddleConfig), paddleConfig.environment);
+      queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
+    }
     const knowledgeConfig = requireKnowledgeConfiguration(options.environment ?? {});
     if (knowledgeConfig) {
       const storage = createS3KnowledgeStorage(knowledgeConfig);

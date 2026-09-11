@@ -1,3 +1,4 @@
+import type { PaddleRuntimeEnvironment } from "../billing/paddleConfiguration.ts";
 import type { KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import type { OpenAiResponsesEnvironment } from "../ai/openAiResponsesConfiguration.ts";
 import type { RailwayAiReplyDeliveryEnvironment } from "./railwayAiReplyDeliveryConfiguration.ts";
@@ -58,7 +59,7 @@ import type {
 } from "./railwayWorkerSchedulerService.ts";
 
 export type RailwayWorkerExecutableEnvironment =
-  NodePostgresPoolEnvironment & KnowledgeRuntimeEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & OpenAiResponsesEnvironment & RailwayAiReplyDeliveryEnvironment &
+  NodePostgresPoolEnvironment & PaddleRuntimeEnvironment & KnowledgeRuntimeEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & OpenAiResponsesEnvironment & RailwayAiReplyDeliveryEnvironment &
     MessageTemplateSubmissionEnvironment &
     MetaWebhookEnvironment &
     MetaEmbeddedSignupServerEnvironment &

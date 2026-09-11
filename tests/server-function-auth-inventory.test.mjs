@@ -22,6 +22,7 @@ const auditedServerFunctions = new Map([
   ["server/ai/aiReplyApprovalActions.ts", ["createCurrentRailwayAiReplyApprovalHandler"]],
   ["server/ai/knowledgeUploadActions.ts", ["createCurrentRailwayAiAgentHandler"]],
   ["server/auth/tenantSelectionActions.ts", ["createCurrentRailwayTenantSelectionHandler"]],
+  ["server/billing/paddleActions.ts", ["resolveCurrentRailwayApiServerIdentity"]],
   ["server/billing/systemAdminSubscriptionActions.ts", ["resolveCurrentRailwayApiServerIdentity"]],
   ["server/bot/botFlowActions.ts", [
     "createCurrentRailwayBotFlowHandler",

@@ -1,0 +1,18 @@
+.billing-card.paddle-billing-panel {
+  min-height: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 24px;
+  text-align: start;
+}
+.billing-card.paddle-billing-panel h2 { margin: 0; }
+.billing-card.paddle-billing-panel p { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.paddle-billing-panel .billing-logic {
+  width: auto;
+  margin-top: 0;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 0;
+  background: transparent;
+}

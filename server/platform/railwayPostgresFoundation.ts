@@ -1,3 +1,4 @@
+import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
 import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
 import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import { createPostgresRailwayMessageTemplateSyncMutationExecutor } from "./postgresRailwayMessageTemplateSyncMutationExecutor.ts";
@@ -351,6 +352,7 @@ export interface RailwayPostgresFoundation {
   readonly knowledgePassages: ReturnType<
     typeof createPostgresKnowledgePassageRepository
   >;
+  readonly paddleBilling: ReturnType<typeof createPostgresPaddleRepository>;
   readonly knowledgeIngestion: ReturnType<typeof createPostgresKnowledgeIngestionRepository>;
   readonly knowledgeSources: ReturnType<
     typeof createPostgresKnowledgeSourceRepository
@@ -644,6 +646,7 @@ export function createRailwayPostgresFoundation(
       queries,
       transactions,
     }),
+    paddleBilling: createPostgresPaddleRepository({ queries, transactions }),
     knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     knowledgeSources: createPostgresKnowledgeSourceRepository({
       queries,

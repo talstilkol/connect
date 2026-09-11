@@ -746,4 +746,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE knowledge_ingestion_jobs",
     summary: "Railway durably relays tenant-bound Knowledge uploads, binds immutable S3 versions and requires verified scan processing before source readiness.",
   }),
+  Object.freeze({
+    migration: "0079_paddle_checkout_journal.sql",
+    token: "CREATE TABLE paddle_checkout_intents",
+    summary: "Railway journals single-attempt Paddle checkout creation, immutable signed-event receipts and exact server-transaction subscription bindings without granting entitlements from redirects.",
+  }),
 ]);

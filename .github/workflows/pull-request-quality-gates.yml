@@ -173,6 +173,20 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
+      paddle-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: connect_paddle_test
+          POSTGRES_DB: connect_paddle_integration
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:55448:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U connect_paddle_test -d connect_paddle_integration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
     steps:
       - name: Check out the audited commit
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -214,6 +228,10 @@ jobs:
         env:
           CONNECT_KNOWLEDGE_TEST_URL: postgresql://connect_knowledge_test@127.0.0.1:55447/connect_knowledge_integration
         run: node --test tests/integration/knowledge-ingestion-postgres.test.mjs
+      - name: Verify durable Paddle checkout and signed-event reconciliation
+        env:
+          CONNECT_PADDLE_TEST_URL: postgresql://connect_paddle_test@127.0.0.1:55448/connect_paddle_integration
+        run: node --test tests/integration/paddle-billing-postgres.test.mjs
       - name: Verify BullMQ waits and worker restart against Redis
         env:
           CONNECT_BULLMQ_INTEGRATION_REDIS_URL: redis://127.0.0.1:6380/0

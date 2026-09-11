@@ -1,5 +1,6 @@
 "use client";
 
+import { PaddleBillingPanel } from "../billing/PaddleBillingPanel";
 import { lazy, Suspense } from "react";
 import {
   ContactDirectory,
@@ -625,24 +626,7 @@ function Billing({
       title={messages.page.title}
       description={messages.page.description}
     >
-      <section className="card billing-card">
-        <div>
-          <span className="status-pill critical">
-            {messages.unspecified}
-          </span>
-          <h2>{messages.title}</h2>
-          <p>{messages.description}</p>
-        </div>
-        <div className="billing-logic">
-          <span>{messages.steps[0]}</span>
-          <b>{messages.arrow}</b>
-          <span>{messages.steps[1]}</span>
-          <b>{messages.arrow}</b>
-          <span>{messages.steps[2]}</span>
-          <b>{messages.arrow}</b>
-          <span>{messages.steps[3]}</span>
-        </div>
-      </section>
+      <PaddleBillingPanel language={language} />
     </FeaturePage>
   );
 }

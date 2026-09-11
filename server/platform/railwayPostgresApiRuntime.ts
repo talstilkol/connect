@@ -1,3 +1,5 @@
+import { requirePaddleConfiguration, readPaddleEnvironment, type PaddleRuntimeEnvironment } from "../billing/paddleConfiguration.ts";
+import { createPaddleWebhookHandler } from "../billing/paddleWebhook.ts";
 import { requireKnowledgeConfiguration, readKnowledgeEnvironment, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
@@ -112,6 +114,7 @@ export type RailwaySystemAdminEnvironment =
     PostgresSystemAdminMutationRateLimitEnvironment;
 
 export interface RailwayPostgresApiRuntimeOptions {
+  readonly paddleEnvironment?: PaddleRuntimeEnvironment;
   readonly knowledgeEnvironment?: KnowledgeRuntimeEnvironment;
   readonly mediaFileEnvironment?: RailwayMetaMediaFileEnvironment;
   readonly identityEnvironment?: RailwayApiIdentityEnvironment;
@@ -149,6 +152,7 @@ export interface RailwayPostgresApiRuntimeOptions {
 }
 
 export interface RailwayPostgresApiRuntime {
+  readonly paddleWebhookHandler?: ReturnType<typeof createPaddleWebhookHandler> | null;
   readonly mediaFileHandler: RailwayMetaMediaFileHttpHandler | null;
   readonly handler: RailwayApiHttpHandler;
   readonly metaWebhookHandler: MetaWebhookHttpHandler | null;
@@ -157,6 +161,7 @@ export interface RailwayPostgresApiRuntime {
 }
 
 const optionKeys = Object.freeze([
+  "paddleEnvironment",
   "knowledgeEnvironment",
   "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
@@ -296,6 +301,7 @@ export async function createRailwayPostgresApiRuntime(
   options: Readonly<RailwayPostgresApiRuntimeOptions>,
 ): Promise<Readonly<RailwayPostgresApiRuntime>> {
   requireOptions(options);
+  const paddleConfig = requirePaddleConfiguration(options.paddleEnvironment ?? readPaddleEnvironment());
   const knowledgeConfig = requireKnowledgeConfiguration(options.knowledgeEnvironment ?? readKnowledgeEnvironment());
   const manualReplyConfigured = requireRailwayManualReplyConfiguration(options.manualReplyEnvironment);
   const identityConfiguration = inspectRailwayApiIdentityConfiguration(
@@ -444,6 +450,7 @@ export async function createRailwayPostgresApiRuntime(
       });
 
     const handler = createRailwayApiRuntime({
+      paddleBilling: paddleConfig ? { journal: foundation.paddleBilling, plan: paddleConfig, clientToken: paddleConfig.clientToken } : null,
       messageTemplateSyncConfigured: () => syncConfigured === "configured",
       messageTemplateSyncMutations,
       environment: options.identityEnvironment,
@@ -599,7 +606,7 @@ export async function createRailwayPostgresApiRuntime(
 
     return Object.freeze({
       handler,
-      metaWebhookHandler,
+      paddleWebhookHandler: paddleConfig ? createPaddleWebhookHandler(paddleConfig.webhookSecret, notice => foundation.paddleBilling.recordNotice(paddleConfig.environment, notice)) : null,      metaWebhookHandler,
       mediaFileHandler,
       readiness: foundation.readiness,
       async close() { await mediaFileHandler?.close(); await foundation.close(); },

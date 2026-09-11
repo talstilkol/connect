@@ -1,3 +1,4 @@
+import { readPaddleEnvironment } from "../billing/paddleConfiguration.ts";
 import { readKnowledgeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import type {
   MetaCampaignDeliveryRetryEvidenceSource,
@@ -99,6 +100,7 @@ const defaultDependencies = Object.freeze({
       META_MEDIA_WORKER_MODE: process.env.META_MEDIA_WORKER_MODE,
       MANUAL_REPLY_ENABLED: process.env.MANUAL_REPLY_ENABLED,
       ...readKnowledgeEnvironment(),
+      ...readPaddleEnvironment(),
       AI_REPLY_DELIVERY_ENABLED: process.env.AI_REPLY_DELIVERY_ENABLED,
       AI_RESPONSES_ENABLED: process.env.AI_RESPONSES_ENABLED,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,

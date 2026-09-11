@@ -1,0 +1,54 @@
+{
+  "status": "verified-local",
+  "checkedAt": "2026-09-11T17:28:55.585418+00:00",
+  "completedSubstages": [
+    "C3.1"
+  ],
+  "unitTests": {
+    "passed": 4570,
+    "failed": 0,
+    "skipped": 0
+  },
+  "paddleProtocolTests": 13,
+  "postgres": {
+    "16.13": {
+      "passed": 12,
+      "failed": 0
+    },
+    "17.11": {
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "migrations": 80,
+  "providerCalls": "isolated test transports only; no Paddle account contacted",
+  "builds": [
+    "vinext passed",
+    "Next webpack passed"
+  ],
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": "passed",
+  "interfaceGuardrails": "passed",
+  "sourceFiles": 102,
+  "originalUntrackedPreserved": 624,
+  "visualQa": "actual built application, disconnected state and refresh; Hebrew/Arabic mobile and English desktop. Connected payment journey still requires provider acceptance.",
+  "remaining": {
+    "codingPackages": 2,
+    "mainStages": 12,
+    "baselineEngineeringHours": [
+      16,
+      32
+    ],
+    "confidence": "low"
+  },
+  "limitations": [
+    "No paid entitlement enforcement or customer portal yet (C3.2)",
+    "No automatic repeated purchase or unknown creation reset; shared-payer multi-workspace flow requires C3.2",
+    "No live provider login, payment, deployment or merchant/domain approval",
+    "Operational reconciliation, AI publication readiness and historical core PostgreSQL verifier remain C4.1"
+  ]
+}
