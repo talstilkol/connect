@@ -1434,6 +1434,14 @@ function containsSeedData(source, fileName) {
 function containsDestructiveStatement(source, fileName) {
   let reviewedSource = source;
 
+  if (fileName === "0085_knowledge_object_retention.sql") {
+    for (const trigger of [
+      "CREATE TRIGGER knowledge_retention_events_no_truncate BEFORE TRUNCATE ON knowledge_retention_events FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",
+      "CREATE TRIGGER knowledge_retention_reviews_no_truncate BEFORE TRUNCATE ON knowledge_retention_reviews FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",
+      "CREATE TRIGGER knowledge_retention_jobs_no_truncate BEFORE TRUNCATE ON knowledge_retention_jobs FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
   if (fileName === "0084_paddle_operator_recovery.sql") {
     reviewedSource = reviewedSource.replace(
       "CREATE TRIGGER paddle_operator_recovery_no_truncate BEFORE TRUNCATE ON paddle_operator_recoveries FOR EACH STATEMENT EXECUTE FUNCTION reject_paddle_receipt_mutation();",

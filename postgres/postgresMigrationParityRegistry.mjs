@@ -776,4 +776,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE paddle_operator_recoveries",
     summary: "Private scoped operator recovery records immutable evidence, preserves dispatch seals and atomically resolves current subscription review revisions without duplicate provider requests.",
   }),
+  Object.freeze({
+    migration: "0085_knowledge_object_retention.sql",
+    token: "CREATE TABLE knowledge_retention_jobs",
+    summary: "Private scoped retention reviews and exact-version deletion jobs preserve closure time, legal holds, atomic retirement and immutable bounded retry evidence.",
+  }),
 ]);

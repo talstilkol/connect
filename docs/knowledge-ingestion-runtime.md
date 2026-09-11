@@ -39,5 +39,5 @@ AWS documents [conditional-write enforcement](https://docs.aws.amazon.com/Amazon
 ## Limits and operational follow-up
 
 - Unknown uploads do not reset automatically. In-flight completion may arrive late; persisted locators remain available even after rejection. Terminal rejection does not silently start another S3 version on same-content resubmission.
-- S3 object retention/deletion, handling a rejected source after provider configuration repair, and operational reconciliation of unknown outcomes remain C4.1 tasks. PostgreSQL relay expiry is separate from S3 retention. Never delete an object merely because one listing was empty or one scan is pending.
+- S3 exact-version retention/deletion is implemented locally in R218 through a [separate private operator workflow](knowledge-object-retention.md). Handling a rejected source after provider configuration repair and operational reconciliation of unknown outcomes remain C4.1.2 tasks. PostgreSQL relay expiry is separate from S3 retention. Never delete an object merely because one listing was empty or one scan is pending.
 - Local tests use existing isolated fixtures and SDK protocol responses. No live AWS/GuardDuty account, deployment, credentials or customer file has been exercised. Live upload/scan acceptance remains part of the final connection phase.

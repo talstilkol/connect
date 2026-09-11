@@ -455,6 +455,7 @@ test('the private CLI requires explicit evidence confirmation, private files and
   await writeFile(input,JSON.stringify(recoveryRequest(f,'close-absent')),{mode:0o600});await writeFile(evidence,JSON.stringify(f.transaction),{mode:0o600});
   await unlink(output).catch(error=>{if(error.code!=='ENOENT')throw error});
   const env={PADDLE_RECOVERY_DATABASE_URL:connectionString};
+  await assert.rejects(runPaddleOperatorRecovery(['prepare',input,output],{...env,PADDLE_RECOVERY_DATABASE_URL:`${connectionString}?sslmode=verify-full&sslmode=disable`}),{message:'DATABASE_CONFIGURATION_REQUIRED'});
   assert.deepEqual(await runPaddleOperatorRecovery(['prepare',input,output],env),{outcome:'prepared'});
   await assert.rejects(runPaddleOperatorRecovery(['apply',output,evidence,'YES'],env));
   await chmod(evidence,0o644);await assert.rejects(runPaddleOperatorRecovery(['apply',output,evidence,'CONFIRM_SUPPORT_TERMINAL_NO_TRANSACTION'],env));await chmod(evidence,0o600);

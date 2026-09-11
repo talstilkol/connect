@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
-import { open, writeFile } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import { isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import pg from 'pg';
@@ -9,23 +8,8 @@ import { createPaddleOperatorRecovery } from '../server/billing/paddleOperatorRe
 import { requirePaddleConfiguration, readPaddleEnvironment } from '../server/billing/paddleConfiguration.ts';
 import { createPaddleProvider } from '../server/billing/paddleProvider.ts';
 
-async function privateFile(path, limit) {
-  if (typeof path !== 'string' || !isAbsolute(path)) throw Error('INVALID_FILE');
-  const file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
-  try {
-    const stat = await file.stat();
-    if (!stat.isFile() || stat.uid !== process.getuid() || stat.mode & 0o077 || stat.size < 1 || stat.size > limit) throw Error('INVALID_FILE');
-    const bytes = Buffer.alloc(limit + 1);
-    let bytesRead = 0;
-    while (bytesRead < bytes.length) {
-      const part = await file.read(bytes, bytesRead, bytes.length - bytesRead, bytesRead);
-      if (part.bytesRead === 0) break;
-      bytesRead += part.bytesRead;
-    }
-    if (bytesRead !== stat.size || bytesRead < 1 || bytesRead > limit) throw Error('INVALID_FILE');
-    return bytes.subarray(0, bytesRead);
-  } finally { await file.close(); }
-}
+import { readPrivateOperatorFile as privateFile } from '../server/operations/privateOperatorFiles.ts';
+
 const confirmations = Object.freeze({
   'bind-transaction': 'CONFIRM_SUPPORT_BOUND_ORIGINAL_REQUEST',
   'close-absent': 'CONFIRM_SUPPORT_TERMINAL_NO_TRANSACTION',
@@ -39,7 +23,7 @@ export async function runPaddleOperatorRecovery(args, env = process.env) {
   const evidence = mode === 'apply' ? await privateFile(outputOrEvidencePath, 1048576) : null;
   const url = new URL(env.PADDLE_RECOVERY_DATABASE_URL ?? '');
   if (!['postgres:','postgresql:'].includes(url.protocol) || !url.hostname || !url.username || url.hash ||
-    [...url.searchParams.keys()].some(k => k !== 'sslmode') ||
+    [...url.searchParams.keys()].some(k => k !== 'sslmode') || url.searchParams.getAll('sslmode').length > 1 ||
     (!['127.0.0.1','localhost','[::1]'].includes(url.hostname) && url.searchParams.get('sslmode') !== 'verify-full')) throw Error('DATABASE_CONFIGURATION_REQUIRED');
   // Lazy and GET-only: absence closure does not pretend that a failed GET proves
   // absence, and does not require provider credentials. Evidence is human reviewed.
