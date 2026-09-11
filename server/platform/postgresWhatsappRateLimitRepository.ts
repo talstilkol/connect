@@ -118,6 +118,10 @@ const cooldownColumns = `
 `;
 
 export const postgresWhatsappRateLimitSql = Object.freeze({
+  // Same DB hash/namespace as migration 0056; also works in the historical 0053 migration rehearsal.
+  lockTenantBarrier: "SELECT pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('connect-bot-reply-tenant-barrier-v1:' || $1::bigint::text, 0)) AS locked",
+  lockReservationTenantBarrier: `SELECT pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('connect-bot-reply-tenant-barrier-v1:' || tenant_id::text, 0)) AS locked
+    FROM whatsapp_rate_limit_reservations WHERE reservation_key = $1`,
   lockPairScope: `
     /* whatsapp-pair-lock */
     SELECT pg_advisory_xact_lock(hashtextextended($1, 0)) AS locked
@@ -849,6 +853,7 @@ async function acquireReservationLocks(
   transaction: PostgresTransaction,
   requested: NormalizedReservation,
 ): Promise<void> {
+  await transaction.query(postgresWhatsappRateLimitSql.lockTenantBarrier, [requested.tenantId]);
   const locks: Array<readonly [string, string]> = [
     [
       postgresWhatsappRateLimitSql.lockThroughputScope,
@@ -1139,6 +1144,9 @@ export function createPostgresWhatsappRateLimitRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          // Resolve tenant from the immutable reservation before locking its row.
+          await transaction.query(postgresWhatsappRateLimitSql.lockReservationTenantBarrier,
+            [reservationKey]);
           const reservation = await loadReservation(
             transaction,
             reservationKey,
@@ -1195,6 +1203,8 @@ export function createPostgresWhatsappRateLimitRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(postgresWhatsappRateLimitSql.lockReservationTenantBarrier,
+            [requested.reservationKey]);
           const reservation = await loadReservation(
             transaction,
             requested.reservationKey,

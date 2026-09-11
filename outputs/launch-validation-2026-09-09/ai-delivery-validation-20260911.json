@@ -1,0 +1,110 @@
+{
+  "status": "verified-local",
+  "recordedAt": "2026-09-11T15:48:30.070891+00:00",
+  "allProgrammingComplete": false,
+  "providerCalls": 0,
+  "realMessagesSent": 0,
+  "deployed": false,
+  "closedLocally": [
+    "C2.1",
+    "C2.2",
+    "C2.3"
+  ],
+  "remainingCodingSubstages": [
+    "C1.1",
+    "C1.2",
+    "C3.1",
+    "C3.2",
+    "C4.1"
+  ],
+  "remainingMainStages": 12,
+  "remainingBaselineEngineeringHours": {
+    "minimum": 40,
+    "maximum": 80,
+    "confidence": "low",
+    "meaning": "sum of original estimates; not measured remaining work or launch ETA"
+  },
+  "checks": {
+    "unit": {
+      "passed": 4544,
+      "failed": 0,
+      "skipped": 0,
+      "log": "ai-delivery-unit-final-20260911.log"
+    },
+    "buildAndVercelBuild": {
+      "passed": true,
+      "log": "ai-delivery-release-check-20260911.log"
+    },
+    "postgres16": {
+      "version": "16.13",
+      "passed": 27,
+      "failed": 0,
+      "log": "ai-delivery-postgres16-20260911.log"
+    },
+    "postgres17": {
+      "version": "17.11",
+      "passed": 27,
+      "failed": 0,
+      "log": "ai-delivery-postgres17-20260911.log"
+    },
+    "manualRegression": {
+      "passed": 13,
+      "failed": 0,
+      "log": "ai-delivery-manual-regression-20260911.log"
+    },
+    "rateRepositoryAfterFinalSql": {
+      "passed": 12,
+      "failed": 0,
+      "log": "ai-delivery-rate-unit-20260911.log"
+    },
+    "typecheck": {
+      "passed": true,
+      "log": "ai-delivery-typecheck-20260911.log"
+    },
+    "lint": {
+      "errors": 0,
+      "existingWarnings": 28,
+      "log": "ai-delivery-lint-final-20260911.log"
+    },
+    "sourceGuardrails": {
+      "passed": true,
+      "log": "ai-delivery-source-20260911.log"
+    },
+    "interfaceGuardrails": {
+      "passed": true,
+      "log": "ai-delivery-interface-20260911.log"
+    },
+    "migrationContract": {
+      "passed": true,
+      "migrations": 78,
+      "log": "ai-delivery-migration-contract-20260911.log"
+    },
+    "migrationParity": {
+      "passed": true,
+      "postgresMigrations": 78,
+      "log": "ai-delivery-migration-parity-20260911.log"
+    },
+    "historicalDriver": {
+      "passed": false,
+      "log": "ai-delivery-historical-driver-diagnostic-20260911.log",
+      "reason": "Historical verifier applies only migrations 0000..0053; unchanged contact reader requires meta_contact_sync_states from later migrations. Both files byte-identical to R209.",
+      "followUp": "C4.1: update historical core verifier to current schema without bypassing database guards"
+    },
+    "secretHistory": {
+      "passed": true,
+      "log": "ai-delivery-secret-history-20260911.log"
+    }
+  },
+  "originalUntrackedFiles": {
+    "count": 624,
+    "sha256Preserved": true
+  },
+  "sourceManifest": "ai-delivery-files-20260911.json",
+  "secretScan": "ai-delivery-secret-scan-20260911.json",
+  "publication": "pending separate publication receipt",
+  "limitations": [
+    "No live Meta/OpenAI call, QR validation or deployment",
+    "Knowledge S3/scan/UI and Paddle remain incomplete",
+    "Verified uncertain delivery/charge reconciliation remains in C4.1"
+  ]
+}

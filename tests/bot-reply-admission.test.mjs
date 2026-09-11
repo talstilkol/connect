@@ -278,3 +278,11 @@ test("persists only sender and pair provider cooldowns for a service reply", asy
     );
   }
 });
+
+test("AI delivery identities enter the same service-reply admission policy", async () => {
+  const { admission, calls } = fixture();
+  const input = { ...request(), deliveryKey: deliveryKey.replace('bot_reply', 'ai_reply') };
+  const result = await admission.reserve(input);
+  assert.equal(result.outcome, 'reserved');
+  assert.equal(calls.reservations.length, 1);
+});

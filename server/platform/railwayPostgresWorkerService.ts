@@ -1,3 +1,6 @@
+import { createPostgresAiReplyDeliveryRepository } from "./postgresAiReplyDeliveryRepository.ts";
+import { requireRailwayAiReplyDeliveryConfiguration, type RailwayAiReplyDeliveryEnvironment } from "./railwayAiReplyDeliveryConfiguration.ts";
+import { createTextReplyDeliveryWorker, createMetaTextReplySender } from "../conversations/manualReplyWorker.ts";
 import { inspectOpenAiResponsesConfiguration, type OpenAiResponsesEnvironment } from "../ai/openAiResponsesConfiguration.ts";
 import { createDurableOpenAiResponsesProvider } from "../ai/durableOpenAiResponsesProvider.ts";
 import { createPostgresAiGenerationJournal } from "./postgresAiGenerationJournal.ts";
@@ -249,7 +252,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & OpenAiResponsesEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & RailwayAiReplyDeliveryEnvironment & OpenAiResponsesEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -757,6 +760,7 @@ function createRailwayPostgresWorkerFoundation(
         transactions,
       }),
     manualReplies: createPostgresManualReplyRepository({ queries, transactions }),
+    aiReplyDeliveries: createPostgresAiReplyDeliveryRepository({ queries, transactions }),
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
     metaMessageEchoes: createPostgresMetaMessageEchoRepository(transactions),
@@ -816,6 +820,7 @@ export async function createRailwayPostgresWorkerService(
   if (aiConfiguration.status === "invalid") throw new Error("Railway AI response configuration is invalid");
   const mediaMode = requireMetaMediaWorkerConfiguration(options.environment);
   const manualRepliesEnabled = requireRailwayManualReplyConfiguration(options.environment);
+  const aiRepliesEnabled = requireRailwayAiReplyDeliveryConfiguration(options.environment);
   const foundation = createRailwayPostgresWorkerFoundation(
     options.environment,
     options.postgresTelemetry,
@@ -844,6 +849,15 @@ export async function createRailwayPostgresWorkerService(
           createCampaignDeliveryRateLimitPolicySource(foundation.whatsappDeliveryPolicies)),
         vault: createMetaCredentialVault(foundation.metaCredentialEnvelopes, environment),
         sender: createMetaManualReplySender(createMetaGraphTransport(requireMetaGraphConfiguration(environment))), clock });
+      queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
+    }
+    if (aiRepliesEnabled) {
+      const environment = options.environment!;
+      const worker = createTextReplyDeliveryWorker({ replies: foundation.aiReplyDeliveries,
+        admission: createBotReplyAdmission(foundation.whatsappRateLimits, createWhatsappRateLimitKeyDeriver(environment),
+          createCampaignDeliveryRateLimitPolicySource(foundation.whatsappDeliveryPolicies)),
+        vault: createMetaCredentialVault(foundation.metaCredentialEnvelopes, environment),
+        sender: createMetaTextReplySender(createMetaGraphTransport(requireMetaGraphConfiguration(environment))), clock });
       queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
     }
     let campaignQueue = options.campaignQueue;

@@ -117,3 +117,15 @@ test("closing the loop drains an active claim and prevents another tick", async 
   await Promise.resolve(); assert.equal(drained, false); assert.equal(stopping(), true);
   release(); await closing; t.mock.timers.tick(10_000); assert.equal(count, 1);
 });
+
+test("AI deliveries share sender/pair rate capacity with human replies but retain a distinct reservation identity", async () => {
+  const key = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=";
+  const keys = createWhatsappRateLimitKeyDeriver({ WHATSAPP_RATE_LIMIT_HMAC_KEY_V1: key });
+  const input = { businessPortfolioId: claim.businessPortfolioId, phoneNumberId: claim.phoneNumberId,
+    recipientPhoneNumber: claim.recipientPhoneNumber, deliveryKey, deliveryAttemptNumber: 1 };
+  const manual = await keys.deriveServiceReply(input);
+  const ai = await keys.deriveServiceReply({ ...input, deliveryKey: deliveryKey.replace('manual_reply', 'ai_reply') });
+  assert.notEqual(ai.reservationKey, manual.reservationKey);
+  assert.equal(ai.senderKey, manual.senderKey); assert.equal(ai.recipientKey, manual.recipientKey);
+  assert.deepEqual(parseManualReplyViews([{ deliveryKey: deliveryKey.replace('manual_reply', 'ai_reply'), text, state: 'unknown', createdAt: at, updatedAt: at }])?.[0].state, 'unknown');
+});

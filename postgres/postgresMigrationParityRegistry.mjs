@@ -736,4 +736,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE ai_generation_journal",
     summary: "Railway durably reserves AI generation budgets and journals single-attempt dispatches, atomically retaining usage and replay results while unresolved charges block additional generation.",
   }),
+  Object.freeze({
+    migration: "0077_ai_reply_deliveries.sql",
+    token: "CREATE TABLE ai_reply_deliveries",
+    summary: "Railway fences approved AI delivery with immutable approval identity, durable single-POST state and transition audit.",
+  }),
 ]);

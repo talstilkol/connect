@@ -1,3 +1,5 @@
+import type { OpenAiResponsesEnvironment } from "../ai/openAiResponsesConfiguration.ts";
+import type { RailwayAiReplyDeliveryEnvironment } from "./railwayAiReplyDeliveryConfiguration.ts";
 import type { RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import type { MetaMediaWorkerEnvironment } from "./railwayMetaMediaWorkerRuntime.ts";
 import type {
@@ -55,7 +57,7 @@ import type {
 } from "./railwayWorkerSchedulerService.ts";
 
 export type RailwayWorkerExecutableEnvironment =
-  NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment &
+  NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & OpenAiResponsesEnvironment & RailwayAiReplyDeliveryEnvironment &
     MessageTemplateSubmissionEnvironment &
     MetaWebhookEnvironment &
     MetaEmbeddedSignupServerEnvironment &

@@ -90,13 +90,14 @@ test("reserves a service reply behind shared throughput and pair locks only", as
     "service-reply",
   );
   assert.deepEqual(testFixture.transactionCalls.map(({ sql }) => sql), [
+    postgresWhatsappRateLimitSql.lockTenantBarrier,
     postgresWhatsappRateLimitSql.lockThroughputScope,
     postgresWhatsappRateLimitSql.lockPairScope,
     postgresWhatsappRateLimitSql.findReservation,
     postgresWhatsappRateLimitSql.findServiceReplyBlocker,
     postgresWhatsappRateLimitSql.insertReservation,
   ]);
-  assert.deepEqual(testFixture.transactionCalls[3].parameters, [
+  assert.deepEqual(testFixture.transactionCalls[4].parameters, [
     7,
     senderKey,
     recipientKey,
@@ -134,7 +135,7 @@ test("rejects portfolio-recipient cooldown for a service reply before settlement
   );
   assert.deepEqual(
     testFixture.transactionCalls.map(({ sql }) => sql),
-    [postgresWhatsappRateLimitSql.findReservationForUpdate],
+    [postgresWhatsappRateLimitSql.lockReservationTenantBarrier, postgresWhatsappRateLimitSql.findReservationForUpdate],
   );
 });
 
@@ -199,7 +200,9 @@ function fixture(transactionResults = [], queryResults = []) {
               transactionCalls.push({ sql, parameters });
               if (
                 sql ===
-                postgresWhatsappRateLimitSql.lockThroughputScope
+                postgresWhatsappRateLimitSql.lockThroughputScope ||
+                sql === postgresWhatsappRateLimitSql.lockTenantBarrier ||
+                sql === postgresWhatsappRateLimitSql.lockReservationTenantBarrier
               ) {
                 return {
                   rows: [{ locked: "" }],
@@ -232,6 +235,7 @@ test("reserves one bounded recipient behind pair and portfolio locks", async () 
   assert.equal(result.outcome, "reserved");
   assert.equal(result.idempotent, false);
   assert.deepEqual(testFixture.transactionCalls.map(({ sql }) => sql), [
+    postgresWhatsappRateLimitSql.lockTenantBarrier,
     postgresWhatsappRateLimitSql.lockThroughputScope,
     postgresWhatsappRateLimitSql.lockPairScope,
     postgresWhatsappRateLimitSql.lockPortfolioScope,
@@ -320,7 +324,7 @@ test("classifies provider, pair, in-flight, and portfolio blockers", async () =>
       testFixture.dependencies,
     ).reserveBusinessInitiatedMessage(reservationCommand());
     assert.equal(result.outcome, expectedOutcome);
-    assert.equal(testFixture.transactionCalls.length, 5);
+    assert.equal(testFixture.transactionCalls.length, 6);
   }
 });
 
@@ -383,7 +387,7 @@ test("settles once behind the locked reservation and detects conflict", async ()
   assert.equal(created.outcome, "settled");
   assert.equal(created.idempotent, false);
   assert.equal(
-    createdFixture.transactionCalls[0].sql,
+    createdFixture.transactionCalls[1].sql,
     postgresWhatsappRateLimitSql.findReservationForUpdate,
   );
 

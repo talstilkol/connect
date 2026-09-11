@@ -53,8 +53,13 @@ export const postgresManualReplySql = Object.freeze({
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING delivery_key`,
   advanceConversation: `UPDATE conversations SET version = version + 1, status = 'agent_active', updated_at = ${nowSql}
     WHERE tenant_id = $1 AND conversation_key = $2 AND version = $3 RETURNING version`,
-  list: `SELECT delivery_key, text_content, state, created_at, updated_at FROM manual_reply_outbox
-    WHERE tenant_id = $1 AND conversation_key = $2 AND state <> 'sent' ORDER BY created_at DESC, delivery_key DESC LIMIT 100`,
+  list: `SELECT * FROM (
+    SELECT delivery_key, text_content, state, created_at, updated_at FROM manual_reply_outbox
+      WHERE tenant_id = $1 AND conversation_key = $2 AND state <> 'sent'
+    UNION ALL SELECT d.delivery_key, o.reply_text AS text_content, d.state, d.created_at, d.updated_at
+      FROM ai_reply_deliveries d JOIN ai_reply_outbox o ON o.tenant_id = d.tenant_id AND o.outbox_key = d.outbox_key
+      WHERE d.tenant_id = $1 AND d.conversation_key = $2 AND d.state <> 'sent'
+    ) pending ORDER BY created_at DESC, delivery_key DESC LIMIT 100`,
   claim: `WITH candidate AS (SELECT delivery_key FROM manual_reply_outbox
     WHERE (state = 'queued' AND next_attempt_at <= ${nowSql}) OR (state = 'preparing' AND claim_expires_at <= ${nowSql})
     ORDER BY next_attempt_at, created_at, delivery_key FOR UPDATE SKIP LOCKED LIMIT 1)
@@ -162,6 +167,8 @@ export function createPostgresManualReplyRepository(dependencies: Readonly<{ que
         const { conversation, contact, expiresAt } = await target(tx, session.tenantId, payload.conversationKey, session.externalUserId);
         if (integer(conversation.version) !== payload.expectedVersion) throw new ManualReplyError("CONFLICT");
         if (await one(tx, "SELECT delivery_key FROM manual_reply_outbox WHERE tenant_id = $1 AND conversation_key = $2 AND state IN ('queued', 'preparing', 'sending', 'unknown') LIMIT 1", [session.tenantId, payload.conversationKey])) throw new ManualReplyError("CONFLICT");
+        if (await one(tx, "SELECT delivery_key FROM ai_reply_deliveries WHERE tenant_id = $1 AND conversation_key = $2 AND state IN ('sending', 'unknown') LIMIT 1",
+          [session.tenantId, payload.conversationKey])) throw new ManualReplyError("CONFLICT");
         await required(tx, receipts.claimReceipt, [session.tenantId, operation, command.idempotencyKey, command.requestDigest, session.externalUserId]);
         await required(tx, postgresManualReplySql.insert, [deliveryKey, session.tenantId, payload.conversationKey, session.externalUserId, session.role, payload.expectedVersion,
           integer(conversation.contact_id), integer(contact.version), text(contact, "phone_e164"), payload.text,

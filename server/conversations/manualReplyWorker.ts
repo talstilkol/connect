@@ -107,3 +107,7 @@ export function createManualReplyWorkerLoop(run: (stopping: () => boolean) => Pr
     async close() { closed = true; if (timer !== null) clearTimeout(timer); timer = null; if (active !== null) await active; },
   });
 }
+
+// AI and human replies share the transport and single-attempt lifecycle, with independent repositories.
+export const createTextReplyDeliveryWorker = createManualReplyWorker;
+export const createMetaTextReplySender = createMetaManualReplySender;
