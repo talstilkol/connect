@@ -1,3 +1,6 @@
+import { inspectOpenAiResponsesConfiguration, type OpenAiResponsesEnvironment } from "../ai/openAiResponsesConfiguration.ts";
+import { createDurableOpenAiResponsesProvider } from "../ai/durableOpenAiResponsesProvider.ts";
+import { createPostgresAiGenerationJournal } from "./postgresAiGenerationJournal.ts";
 import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { createManualReplyWorker, createManualReplyWorkerLoop, createMetaManualReplySender } from "../conversations/manualReplyWorker.ts";
 import { createBotReplyAdmission } from "../bot/botReplyAdmission.ts";
@@ -34,9 +37,10 @@ import {
   createAiRuntimeService,
 } from "../ai/aiRuntimeService.ts";
 import {
-  unavailableAiKnowledgeRetriever,
   unavailableAiResponseProvider,
 } from "../ai/unavailableAiRuntimeDependencies.ts";
+import { createApprovedKnowledgeRetriever } from "../ai/approvedKnowledgeRetriever.ts";
+import { createPostgresKnowledgePassageRepository } from "./postgresKnowledgePassageRepository.ts";
 import {
   createInboundAutomationProcessor,
 } from "../automation/inboundAutomationProcessor.ts";
@@ -245,7 +249,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & OpenAiResponsesEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -715,6 +719,8 @@ function createRailwayPostgresWorkerFoundation(
       transactions,
     }),
     aiRuntime: createPostgresAiRuntimePersistence({ queries, transactions }),
+    aiGenerationJournal: createPostgresAiGenerationJournal({ queries, transactions }),
+    knowledgePassages: createPostgresKnowledgePassageRepository({ queries, transactions }),
     botFlows: createPostgresBotFlowRepository({ queries, transactions }),
     botRuntime: createPostgresBotRuntimeRepository({ queries, transactions }),
     botReplyDeliveries: createPostgresBotReplyDeliveryRepository({
@@ -806,6 +812,8 @@ export async function createRailwayPostgresWorkerService(
   options: Readonly<RailwayPostgresWorkerServiceOptions>,
 ): Promise<Readonly<RailwayWorkerSchedulerService>> {
   const clock = requireOptions(options);
+  const aiConfiguration = inspectOpenAiResponsesConfiguration(options.environment ?? {});
+  if (aiConfiguration.status === "invalid") throw new Error("Railway AI response configuration is invalid");
   const mediaMode = requireMetaMediaWorkerConfiguration(options.environment);
   const manualRepliesEnabled = requireRailwayManualReplyConfiguration(options.environment);
   const foundation = createRailwayPostgresWorkerFoundation(
@@ -889,9 +897,11 @@ export async function createRailwayPostgresWorkerService(
           foundation.botRuntime,
           createActiveAiRuntimeAgentLoader(foundation.aiAgents),
           createAiRuntimeService({
-            retriever: unavailableAiKnowledgeRetriever,
+            retriever: createApprovedKnowledgeRetriever(foundation.knowledgePassages),
             costGate: foundation.aiRuntime.costGate,
-            provider: unavailableAiResponseProvider,
+            provider: aiConfiguration.status === "configured"
+              ? createDurableOpenAiResponsesProvider(aiConfiguration.configuration, foundation.aiGenerationJournal)
+              : unavailableAiResponseProvider,
             audit: foundation.aiRuntime.auditSink,
           }),
           foundation.aiReplyOutbox,

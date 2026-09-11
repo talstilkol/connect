@@ -1,0 +1,107 @@
+{
+  "status": "local-code-batch-verified",
+  "decision": "R209",
+  "generatedAt": "2026-09-11T14:51:53.156584+00:00",
+  "baseHead": "6e26ef8b9df11a0b648b9f4188d6f361d12ec732",
+  "allProgrammingComplete": false,
+  "closedLocalSubstages": [
+    "C2.1",
+    "C2.2"
+  ],
+  "remainingCodeSubstages": [
+    "C1.1",
+    "C1.2",
+    "C2.3",
+    "C3.1",
+    "C3.2",
+    "C4.1"
+  ],
+  "openMainStages": 12,
+  "remainingPlanningRangeEngineeringHours": [
+    50,
+    100
+  ],
+  "estimateConfidence": "low; sum of original ranges, not measured elapsed work or launch ETA",
+  "unitTests": {
+    "passed": 4540,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "postgresIntegration": {
+    "passedPerVersion": 16,
+    "versions": [
+      "16.13",
+      "17.11"
+    ],
+    "failed": 0,
+    "skipped": 0,
+    "networkProviderCalls": 0
+  },
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "checks": {
+    "unit": {
+      "exitCode": 0,
+      "log": "ai-journal-unit-final-20260911.log"
+    },
+    "typecheck": {
+      "exitCode": 0,
+      "log": "ai-journal-typecheck-20260911.log"
+    },
+    "sourceGuardrails": {
+      "exitCode": 0,
+      "log": "ai-journal-source-final-20260911.log"
+    },
+    "interfaceGuardrails": {
+      "exitCode": 0,
+      "log": "ai-journal-interface-20260911.log"
+    },
+    "lint": {
+      "exitCode": 0,
+      "log": "ai-journal-lint-20260911.log"
+    },
+    "build": {
+      "exitCode": 0,
+      "log": "ai-journal-build-20260911.log"
+    },
+    "vercelBuild": {
+      "exitCode": 0,
+      "log": "ai-journal-vercel-build-20260911.log"
+    },
+    "secretHistory": {
+      "exitCode": 0,
+      "log": "ai-journal-secret-history-20260911.log"
+    },
+    "migrationContract": {
+      "exitCode": 0,
+      "log": "ai-journal-migrations-20260911.log"
+    },
+    "postgres16": {
+      "exitCode": 0,
+      "log": "ai-journal-postgres16-final-20260911.log"
+    },
+    "postgres17": {
+      "exitCode": 0,
+      "log": "ai-journal-postgres17-final-20260911.log"
+    }
+  },
+  "sourceFiles": 33,
+  "originalUntrackedFilesPreserved": 624,
+  "committed": false,
+  "published": false,
+  "deployed": false,
+  "liveProviderVerified": false,
+  "browserVerified": false,
+  "limitations": [
+    "No live OpenAI model, price card or Evals verified.",
+    "No deployment or provider feature activation.",
+    "AI sending after approval, S3 Knowledge upload and Paddle remain open.",
+    "Uncertain or expired claims are never resent or released automatically; verified operational reconciliation remains C4.1.",
+    "Input count and generation protocols use deterministic existing test fixtures and injected transport, not a provider account."
+  ],
+  "fileManifest": "ai-journal-files-20260911.json",
+  "exactSecretScan": "ai-journal-exact-secret-scan-20260911.json"
+}

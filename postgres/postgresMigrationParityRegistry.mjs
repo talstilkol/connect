@@ -731,4 +731,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "ALTER TABLE meta_message_echo_states ADD COLUMN original_caption_digest TEXT",
     summary: "Railway binds newly observed original media captions separately from legacy echo digests and receipts, while revisions and deletion remain authoritative.",
   }),
+  Object.freeze({
+    migration: "0076_ai_generation_journal.sql",
+    token: "CREATE TABLE ai_generation_journal",
+    summary: "Railway durably reserves AI generation budgets and journals single-attempt dispatches, atomically retaining usage and replay results while unresolved charges block additional generation.",
+  }),
 ]);

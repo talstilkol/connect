@@ -1,3 +1,4 @@
+import { AiResponseDeferredError } from "./aiGenerationJournal.ts";
 import type {
   PersistedAiAgent,
   PersistedAiAgentVersion,
@@ -319,9 +320,12 @@ function parseGenerationResult(
     value.outcome === "policy-violation" ||
     value.outcome === "unavailable"
   ) {
-    return hasExactKeys(value, ["outcome"])
-      ? { outcome: value.outcome }
-      : null;
+    if (hasExactKeys(value, ["outcome"])) {
+      return { outcome: value.outcome };
+    }
+    if (!hasExactKeys(value, ["outcome", "usage"])) return null;
+    const usage = parseUsage(value.usage, expectedCurrency);
+    return usage ? { outcome: value.outcome, usage } : null;
   }
 
   if (
@@ -773,7 +777,8 @@ export function createAiRuntimeService(
               input.customerMessage,
             passages: retrieval.passages,
           });
-      } catch {
+      } catch (error) {
+        if (error instanceof AiResponseDeferredError) throw error;
         return handoff(
           "provider-unavailable",
           retrieval.scoreBasisPoints,
@@ -793,22 +798,14 @@ export function createAiRuntimeService(
         );
       }
 
-      if (generation.outcome === "unavailable") {
+      if (generation.outcome !== "generated" && generation.usage === undefined) {
         return handoff(
-          "provider-unavailable",
+          generation.outcome === "unavailable" ? "provider-unavailable" : "policy-violation",
           retrieval.scoreBasisPoints,
         );
       }
-
-      if (
-        generation.outcome ===
-        "policy-violation"
-      ) {
-        return handoff(
-          "policy-violation",
-          retrieval.scoreBasisPoints,
-        );
-      }
+      const incurredUsage = generation.usage;
+      if (incurredUsage === undefined) throw runtimeError("PROVIDER_INVALID");
 
       let usageResult: unknown;
 
@@ -819,7 +816,7 @@ export function createAiRuntimeService(
             tenantId: input.tenantId,
             aiAgentKey:
               input.agent.aiAgentKey,
-            usage: generation.usage,
+            usage: incurredUsage,
           });
       } catch {
         throw runtimeError(
@@ -842,6 +839,14 @@ export function createAiRuntimeService(
       if (!usageRecord.withinLimit) {
         return handoff(
           "budget-exhausted",
+          retrieval.scoreBasisPoints,
+          generation.usage,
+        );
+      }
+
+      if (generation.outcome !== "generated") {
+        return handoff(
+          generation.outcome === "unavailable" ? "provider-unavailable" : "policy-violation",
           retrieval.scoreBasisPoints,
           generation.usage,
         );

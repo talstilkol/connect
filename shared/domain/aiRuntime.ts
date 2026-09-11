@@ -93,8 +93,8 @@ export type AiResponseGenerationResult =
       groundedPassageKeys: readonly string[];
       usage: AiUsageRecord;
     }
-  | { outcome: "policy-violation" }
-  | { outcome: "unavailable" };
+  | { outcome: "policy-violation"; usage?: AiUsageRecord }
+  | { outcome: "unavailable"; usage?: AiUsageRecord };
 
 export interface AiResponseProvider {
   generate(

@@ -1,0 +1,104 @@
+{
+  "checkedAt": "2026-09-11T14:21:24.720411+00:00",
+  "status": "local-code-batch-verified",
+  "allProgrammingComplete": false,
+  "baseHead": "6e26ef8b9df11a0b648b9f4188d6f361d12ec732",
+  "checks": [
+    {
+      "check": "unit",
+      "exitCode": 0,
+      "elapsedSeconds": 67.86,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-unit-20260911.log"
+    },
+    {
+      "check": "typecheck",
+      "exitCode": 0,
+      "elapsedSeconds": 1.33,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-typecheck-20260911.log"
+    },
+    {
+      "check": "source",
+      "exitCode": 0,
+      "elapsedSeconds": 5.41,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-source-20260911.log"
+    },
+    {
+      "check": "interface",
+      "exitCode": 0,
+      "elapsedSeconds": 0.08,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-interface-20260911.log"
+    },
+    {
+      "check": "lint",
+      "exitCode": 0,
+      "elapsedSeconds": 11.33,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-lint-20260911.log"
+    },
+    {
+      "check": "build",
+      "exitCode": 0,
+      "elapsedSeconds": 5.36,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-build-20260911.log"
+    },
+    {
+      "check": "vercel-build",
+      "exitCode": 0,
+      "elapsedSeconds": 8.94,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-vercel-build-20260911.log"
+    },
+    {
+      "check": "secret-history",
+      "exitCode": 0,
+      "elapsedSeconds": 1.61,
+      "log": "/Users/tal/Documents/connect/web/outputs/launch-validation-2026-09-09/code-first-final-secret-history-20260911.log"
+    }
+  ],
+  "unitTests": {
+    "tests": 4533,
+    "pass": 4533,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "focusedTests": {
+    "tests": 38,
+    "pass": 38,
+    "fail": 0
+  },
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "changedFiles": 19,
+  "originalUntrackedPreserved": 624,
+  "committed": false,
+  "published": false,
+  "deployed": false,
+  "liveProviderCalls": false,
+  "browserQa": false,
+  "remainingMajorStages": 12,
+  "codeWorkPackages": [
+    "Knowledge upload/scan/extraction integration",
+    "AI durable generation/budget and approved sender",
+    "Paddle checkout/entitlements/reconciliation"
+  ],
+  "remainingCodeSubstages": 8,
+  "engineeringHoursInitialRange": [
+    62,
+    124
+  ],
+  "estimateConfidence": "low",
+  "launchEta": "unknown",
+  "notes": [
+    "OpenAI HTTP adapter remains disconnected from the production worker until durable dispatch, budget reservations and readiness are implemented.",
+    "Approved PostgreSQL lexical retrieval is connected; TXT/Markdown extractor is not an S3 upload workflow.",
+    "Runtime records valid reported usage before refusal or rejected-answer handoff. Missing/unpriceable usage is not represented as zero.",
+    "Existing generated dashboard SSR bundle preserved as outputs/dashboard-report-ssr.cjs.txt to avoid linting evidence as product code."
+  ],
+  "sources": [
+    "https://developers.openai.com/api/docs/guides/structured-outputs",
+    "https://developers.openai.com/api/docs/guides/migrate-to-responses",
+    "https://developers.openai.com/api/docs/guides/token-counting",
+    "https://developers.openai.com/cookbook/articles/per_run_spending_controller_responses_api"
+  ]
+}

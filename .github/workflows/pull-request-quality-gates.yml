@@ -138,6 +138,19 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
+      ai-generation-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: connect_ai_test
+          POSTGRES_DB: connect_ai_generation_integration
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:55446:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U connect_ai_test -d connect_ai_generation_integration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
       campaign-controls-redis:
         image: redis:7-alpine@sha256:8b81dd37ff027bec4e516d41acfbe9fe2460070dc6d4a4570a2ac5b9d59df065
         ports:
@@ -180,6 +193,10 @@ jobs:
         env:
           CONNECT_POSTGRES_STARTUP_REHEARSAL_URL: postgresql://postgres@127.0.0.1:5435/connect_startup_rehearsal
         run: node --test tests/integration/manual-replies-postgres.test.mjs
+      - name: Verify AI generation reservations, replay and uncertain charges on PostgreSQL
+        env:
+          CONNECT_AI_GENERATION_TEST_URL: postgresql://connect_ai_test@127.0.0.1:55446/connect_ai_generation_integration
+        run: node --test tests/integration/ai-generation-journal-postgres.test.mjs
       - name: Verify BullMQ waits and worker restart against Redis
         env:
           CONNECT_BULLMQ_INTEGRATION_REDIS_URL: redis://127.0.0.1:6380/0
