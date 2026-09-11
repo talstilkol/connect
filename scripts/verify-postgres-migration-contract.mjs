@@ -1511,6 +1511,15 @@ function containsDestructiveStatement(source, fileName) {
 ]) reviewedSource = reviewedSource.replace(trigger, "");
   }
 
+  if (fileName === "0090_meta_media_retention.sql") {
+    // Exact guards prohibit truncation; they never truncate stored evidence.
+    for (const trigger of [
+      "CREATE TRIGGER meta_media_retention_events_no_truncate BEFORE TRUNCATE ON meta_media_retention_events FOR EACH STATEMENT EXECUTE FUNCTION reject_meta_media_retention_mutation_v1();",
+      "CREATE TRIGGER meta_media_retention_reviews_no_truncate BEFORE TRUNCATE ON meta_media_retention_reviews FOR EACH STATEMENT EXECUTE FUNCTION reject_meta_media_retention_mutation_v1();",
+      "CREATE TRIGGER meta_media_retention_jobs_no_truncate BEFORE TRUNCATE ON meta_media_retention_jobs FOR EACH STATEMENT EXECUTE FUNCTION reject_meta_media_retention_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
   if (fileName === "0085_knowledge_object_retention.sql") {
     for (const trigger of [
       "CREATE TRIGGER knowledge_retention_events_no_truncate BEFORE TRUNCATE ON knowledge_retention_events FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",

@@ -197,3 +197,8 @@ D1 נשאר 43 מיגרציות ו־55 טבלאות. אין שינוי במדי�
 נבדקו ב־10.09.2026. [המימוש](../server/platform/s3MetaMediaCleanupStorage.ts),
 [המיגרציה](../postgres/migrations/0072_meta_media_cleanup.sql),
 [האימות המקומי והגבולות, סעיף 44](planning/launch-master-plan-2026-09-09.md).
+
+
+## 13. Private retention and ambiguous versions (R221)
+
+The owner cleanup limits in section 12 remain unchanged for that API. A separate private operator now handles due retention, closed tenants and exact versions discovered after ambiguous uploads. It preserves source evidence and permanently withdraws the upload. See [media retention operation, scopes and limits](meta-media-retention.md). This is local code; AWS permissions, policy values and live acceptance remain pending.

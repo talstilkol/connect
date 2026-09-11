@@ -2263,3 +2263,202 @@ test('file read PostgreSQL rejects an edit kind that disagrees with the stored a
     finally { r.runtime.close(); }
   }
 });
+
+// Private media retirement reuses this suite's upload, scan and byte fixtures.
+import { createMetaMediaRetention } from '../../server/operations/metaMediaRetention.ts';
+import { createS3MetaMediaRetentionInspection } from '../../server/platform/s3MetaMediaRetentionInspection.ts';
+const mediaRetentionPolicy=trigger=>({META_MEDIA_RETENTION_POLICY_JSON:JSON.stringify({version:1,trigger,retainForDays:30})});
+const mediaRetention=createMetaMediaRetention({transactions,environment:mediaRetentionPolicy('tenant-closed')});
+const mediaRetentionEvidence=f=>createHash('sha256').update(JSON.stringify({jobKey:f.job.jobKey,purpose:'existing-media-retention-test'})).digest('hex');
+const mediaRetentionTarget=(f,id=f.receipt.versionId)=>({tenantId:f.scope.tenantId,jobKey:f.job.jobKey,objectVersionId:id});
+const mediaRetirementRows=f=>pool.query('SELECT * FROM meta_media_retention_jobs WHERE tenant_id=$1 ORDER BY object_version_id',[f.scope.tenantId]).then(r=>r.rows);
+const advanceMediaRetention=ms=>pool.query("UPDATE media_retention_test_clock SET observed_at=observed_at+($1::double precision*interval '1 millisecond')",[ms]);
+const reviewMediaRetention=(f,legalHold=false,expectedVersion=0)=>mediaRetention.review({tenantId:f.scope.tenantId,legalHold,expectedVersion},mediaRetentionEvidence(f));
+async function mediaRetentionFixture({closed=true,unknown=false,due=true}={}){
+  const f=unknown?await scanCase():await readableFileCase();
+  await pool.query('CREATE TABLE media_retention_test_clock(observed_at TIMESTAMPTZ NOT NULL)');
+  await pool.query('INSERT INTO media_retention_test_clock VALUES(clock_timestamp())');
+  await pool.query("CREATE OR REPLACE FUNCTION knowledge_retention_now_v1() RETURNS TIMESTAMPTZ LANGUAGE SQL VOLATILE SET search_path=pg_catalog,pg_temp AS $$ SELECT observed_at FROM public.media_retention_test_clock $$");
+  await pool.query("INSERT INTO meta_media_retention_grants(database_role,tenant_id,expires_at) VALUES(session_user,$1,knowledge_retention_now_v1()+interval '365 days')",[f.scope.tenantId]);
+  if(closed)await pool.query("UPDATE tenants SET status='cancelled' WHERE id=$1",[f.scope.tenantId]);
+  await reviewMediaRetention(f);if(due)await advanceMediaRetention(31*86400000);return f;
+}
+async function prepareMediaRetention(f,service=mediaRetention,versionId=f.receipt.versionId,reply){
+  const storage=createS3MetaMediaRetentionInspection(quarantineEnvironment,{client:{async send(command){return reply?reply(command):inspectionReply(command,f.intent,'NO_THREATS_FOUND',versionId);}}});
+  try{return await service.prepare(mediaRetentionTarget(f,versionId),storage);}finally{storage.close();}
+}
+async function queueMediaRetention(f,service=mediaRetention,versionId=f.receipt.versionId){
+  const proposal=await prepareMediaRetention(f,service,versionId);await service.enqueue(proposal,mediaRetentionEvidence(f));return proposal;
+}
+test('media retention PostgreSQL closure age, hold review, dedicated scope and policy are all mandatory',async()=>{
+  const f=await mediaRetentionFixture({due:false});await assert.rejects(prepareMediaRetention(f),{code:'RETENTION_NOT_DUE'});
+  await advanceMediaRetention(31*86400000);await reviewMediaRetention(f,true,1);await assert.rejects(prepareMediaRetention(f),{code:'CONFLICT'});
+  await reviewMediaRetention(f,false,2);await prepareMediaRetention(f);
+  await assert.rejects(prepareMediaRetention(f,createMetaMediaRetention({transactions,environment:{}})),{code:'CONFIGURATION_REQUIRED'});
+  const other=await newCase();await assert.rejects(mediaRetention.status({tenantId:other.scope.tenantId,jobKey:f.job.jobKey}),{code:'AUTHORIZATION_DENIED'});
+  await pool.query('DELETE FROM meta_media_retention_grants WHERE tenant_id=$1',[f.scope.tenantId]);await assert.rejects(prepareMediaRetention(f),{code:'AUTHORIZATION_DENIED'});
+  assert.deepEqual(await mediaRetirementRows(f),[]);
+});
+test('media retention PostgreSQL closure restarts after reopening and suspension is not closure',async()=>{
+  const f=await mediaRetentionFixture();await pool.query("UPDATE tenants SET status='suspended' WHERE id=$1",[f.scope.tenantId]);
+  await assert.rejects(prepareMediaRetention(f),{code:'RETENTION_NOT_DUE'});
+  await pool.query("UPDATE tenants SET status='cancelled' WHERE id=$1",[f.scope.tenantId]);await assert.rejects(prepareMediaRetention(f),{code:'RETENTION_NOT_DUE'});
+  await advanceMediaRetention(31*86400000);await assert.rejects(prepareMediaRetention(f),{code:'CONFLICT'});await reviewMediaRetention(f,false,1);await prepareMediaRetention(f);
+});
+test('media retention PostgreSQL record age withdraws readable media atomically without altering source evidence',async()=>{
+  const f=await mediaRetentionFixture({closed:false}),service=createMetaMediaRetention({transactions,environment:mediaRetentionPolicy('record-created')});
+  const before={uploads:await uploadRows(f),scans:await scanRows(f),thread:await thread(f)};assert.ok(await fileAuthorization.authorize(f.session,f.key));
+  const proposal=await queueMediaRetention(f,service);assert.deepEqual(await service.enqueue(proposal,mediaRetentionEvidence(f)),{outcome:'queued'});
+  assert.equal((await mediaRetirementRows(f)).length,1);await assert.rejects(fileAuthorization.authorize(f.session,f.key),{code:'NOT_READY'});
+  await assert.rejects(uploadJournal.lookup(f.job.jobKey,f.scope.tenantId,f.session.externalUserId),{code:'AUTHORIZATION_CHANGED'});
+  await assert.rejects(uploadJournal.prepare(f.intent),{code:'AUTHORIZATION_CHANGED'});
+  assert.deepEqual({uploads:await uploadRows(f),scans:await scanRows(f),thread:await thread(f)},before);
+});
+test('media retention PostgreSQL ambiguous uploads and multiple observed versions are deleted separately without selecting latest',async()=>{
+  const f=await mediaRetentionFixture({unknown:true});
+  for(const id of [f.receipt.versionId,'journal-integration-version-2'])await scans.record(f.job,scanObservation(f,'PENDING',id));
+  const before={uploads:await uploadRows(f),scans:await scanRows(f)};const removed=[];
+  for(const id of [f.receipt.versionId,'journal-integration-version-2']){
+    await queueMediaRetention(f,mediaRetention,id);
+    assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f,id),{async remove(intent,version,authorize){await authorize();assert.deepEqual(intent,f.intent);removed.push(version);}}),{outcome:'removed'});
+  }
+  assert.deepEqual(removed,[f.receipt.versionId,'journal-integration-version-2']);assert.equal((await mediaRetirementRows(f)).every(r=>r.state==='removed'),true);
+  assert.deepEqual({uploads:await uploadRows(f),scans:await scanRows(f)},before);
+});
+test('media retention PostgreSQL delayed original upload acknowledgement survives retirement but cannot restore access',async()=>{
+  const f=await mediaRetentionFixture({unknown:true});await queueMediaRetention(f);
+  assert.equal(await uploadJournal.finish(f.claim,{receipt:f.receipt}),true);
+  await pool.query("UPDATE tenants SET status='active' WHERE id=$1",[f.scope.tenantId]);
+  await assert.rejects(uploadJournal.lookup(f.job.jobKey,f.scope.tenantId,f.session.externalUserId),{code:'AUTHORIZATION_CHANGED'});
+  assert.equal((await uploadRows(f))[0].object_version_id,f.receipt.versionId);assert.equal((await mediaRetirementRows(f))[0].state,'pending');
+});
+test('media retention PostgreSQL stale proposals and wrong S3 tenant metadata cannot enqueue a deletion',async()=>{
+  const f=await mediaRetentionFixture(),p=await prepareMediaRetention(f);await reviewMediaRetention(f,false,1);
+  await assert.rejects(mediaRetention.enqueue(p,mediaRetentionEvidence(f)),{code:'CONFLICT'});
+  await assert.rejects(prepareMediaRetention(f,mediaRetention,f.receipt.versionId,c=>c.constructor.name==='HeadObjectCommand'?{...inspectionReply(c,f.intent,'NO_THREATS_FOUND',f.receipt.versionId),Metadata:{'connect-tenant':'foreign'}}:inspectionReply(c,f.intent)),{code:'CONFLICT'});
+  const expired=await prepareMediaRetention(f);await advanceMediaRetention(300001);await assert.rejects(mediaRetention.enqueue(expired,mediaRetentionEvidence(f)),{code:'CONFLICT'});
+  assert.deepEqual(await mediaRetirementRows(f),[]);
+});
+test('media retention PostgreSQL hold changed before dispatch blocks the claim with no delete',async()=>{
+  const f=await mediaRetentionFixture();await queueMediaRetention(f);await reviewMediaRetention(f,true,1);
+  assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f),{async remove(){assert.fail('delete forbidden');}}),{outcome:'idle'});
+  assert.equal((await mediaRetirementRows(f))[0].state,'blocked');
+});
+test('media retention PostgreSQL revocation during bucket checks prevents DELETE and records blocked attempt',async()=>{
+  const f=await mediaRetentionFixture();await queueMediaRetention(f);const calls=[];
+  const storage=createS3MetaMediaCleanupStorage(quarantineEnvironment,{client:{async send(command){calls.push(command.constructor.name);
+    if(command.constructor.name==='GetBucketPolicyCommand')await pool.query('DELETE FROM meta_media_retention_grants WHERE tenant_id=$1',[f.scope.tenantId]);return s3Reply(command);}}});
+  try{assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f),storage),{outcome:'blocked'});assert.equal(calls.includes('DeleteObjectCommand'),false);assert.equal((await mediaRetirementRows(f))[0].state,'blocked');}finally{storage.close();}
+});
+test('media retention PostgreSQL actual DELETE acknowledgement remains recordable after a concurrent hold review',async()=>{
+  const f=await mediaRetentionFixture();await queueMediaRetention(f);
+  assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f),{async remove(intent,id,authorize){await authorize();await reviewMediaRetention(f,true,1);}}),{outcome:'removed'});
+  assert.equal((await mediaRetirementRows(f))[0].state,'removed');
+});
+test('media retention PostgreSQL uncertain DELETE retries the same version at most three times',async()=>{
+  const f=await mediaRetentionFixture();await queueMediaRetention(f);const ids=[];
+  const storage={async remove(intent,id,authorize){await authorize();ids.push(id);throw Error('connection lost');}};
+  for(let i=0;i<3;i++){assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f),storage),{outcome:'unknown'});await advanceMediaRetention(61000);}
+  assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f),storage),{outcome:'idle'});assert.deepEqual(ids,Array(3).fill(f.receipt.versionId));assert.equal((await mediaRetirementRows(f))[0].state,'blocked');
+});
+test('media retention PostgreSQL concurrent claims and stale completions cannot duplicate or replace the current attempt',async()=>{
+  const f=await mediaRetentionFixture();await queueMediaRetention(f);
+  const claims=await Promise.all([mediaRetention.claim(mediaRetentionTarget(f)),mediaRetention.claim(mediaRetentionTarget(f))]);assert.equal(claims.filter(Boolean).length,1);
+  const first=claims.find(Boolean);await advanceMediaRetention(601000);const second=await mediaRetention.claim(mediaRetentionTarget(f));assert.ok(second);
+  assert.equal(await mediaRetention.finish(first,'removed'),false);assert.equal(await mediaRetention.finish(second,'removed'),true);
+  assert.deepEqual(await mediaRetention.run(mediaRetentionTarget(f),{async remove(){assert.fail('already removed');}}),{outcome:'idle'});
+});
+test('media retention PostgreSQL database guards retain immutable events, target identity and bounded claims',async()=>{
+  const f=await mediaRetentionFixture();await queueMediaRetention(f);
+  for(const sql of ["DELETE FROM meta_media_retention_jobs WHERE tenant_id=$1","UPDATE meta_media_retention_jobs SET version=version+1,object_version_id='changed' WHERE tenant_id=$1","UPDATE meta_media_retention_events SET details='{}' WHERE tenant_id=$1","DELETE FROM meta_media_retention_reviews WHERE tenant_id=$1"])
+    await assert.rejects(pool.query(sql,[f.scope.tenantId]));
+  for(const table of ['meta_media_retention_jobs','meta_media_retention_events','meta_media_retention_reviews'])await assert.rejects(pool.query(`TRUNCATE ${table}`));
+  const c=await mediaRetention.claim(mediaRetentionTarget(f));assert.ok(c);
+  await assert.rejects(pool.query("UPDATE meta_media_retention_jobs SET version=version+1,attempts=attempts+1,lease_expires_at=knowledge_retention_now_v1()+interval '10 minutes' WHERE tenant_id=$1",[f.scope.tenantId]));
+});
+
+test('media retention PostgreSQL restricted login cannot self-authorize or rewrite audit and runtime reads only projections',async()=>{
+  const f=await mediaRetentionFixture();
+  await pool.query("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_media_retention_test') THEN CREATE ROLE connect_media_retention_test LOGIN; END IF; IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_media_retention_reader_test') THEN CREATE ROLE connect_media_retention_reader_test LOGIN; END IF; END $$");
+  await pool.query('GRANT USAGE ON SCHEMA public TO connect_media_retention_test,connect_media_retention_reader_test');
+  await pool.query('GRANT SELECT,UPDATE ON tenants,meta_media_upload_jobs TO connect_media_retention_test');
+  await pool.query('GRANT SELECT ON meta_media_tasks,meta_media_cleanup_jobs,media_retention_test_clock TO connect_media_retention_test');
+  await pool.query('GRANT SELECT,INSERT,UPDATE ON meta_media_retention_reviews,meta_media_retention_jobs TO connect_media_retention_test');
+  await pool.query('GRANT EXECUTE ON FUNCTION meta_media_retention_authorize_v1(BIGINT),derive_bot_reply_staging_tenant_barrier_key_v1(BIGINT) TO connect_media_retention_test');
+  await pool.query('GRANT SELECT ON meta_media_withdrawals,meta_media_retention_holds TO connect_media_retention_reader_test');
+  const operatorPool=new pg.Pool({...poolOptions,connectionString:connectionString.replace('connect_echo_test@','connect_media_retention_test@')}),reader=new pg.Client({...poolOptions,connectionString:connectionString.replace('connect_echo_test@','connect_media_retention_reader_test@')});
+  const service=createMetaMediaRetention({transactions:createNodePostgresTransactionManager(operatorPool),environment:mediaRetentionPolicy('tenant-closed')});
+  try{
+    await assert.rejects(prepareMediaRetention(f,service),{code:'AUTHORIZATION_DENIED'});
+    await assert.rejects(operatorPool.query("INSERT INTO meta_media_retention_grants(database_role,tenant_id,expires_at) VALUES(session_user,$1,knowledge_retention_now_v1()+interval '1 day')",[f.scope.tenantId]));
+    await pool.query("INSERT INTO meta_media_retention_grants(database_role,tenant_id,expires_at) VALUES('connect_media_retention_test',$1,knowledge_retention_now_v1()+interval '1 day')",[f.scope.tenantId]);
+    await service.review({tenantId:f.scope.tenantId,legalHold:false,expectedVersion:1},mediaRetentionEvidence(f));await queueMediaRetention(f,service);
+    const claim=await service.claim(mediaRetentionTarget(f));assert.ok(claim);await service.authorize(claim);assert.equal(await service.finish(claim,'removed'),true);
+    await assert.rejects(operatorPool.query('DELETE FROM meta_media_retention_events WHERE tenant_id=$1',[f.scope.tenantId]));
+    await reader.connect();assert.equal((await reader.query('SELECT * FROM meta_media_withdrawals WHERE tenant_id=$1',[f.scope.tenantId])).rowCount,1);
+    for(const table of ['meta_media_retention_grants','meta_media_retention_reviews','meta_media_retention_jobs','meta_media_retention_events'])await assert.rejects(reader.query(`SELECT * FROM ${table}`));
+    await assert.rejects(reader.query('SELECT meta_media_retention_authorize_v1($1)',[f.scope.tenantId]));
+    await reader.query('CREATE TEMPORARY TABLE retention_trigger_probe(id INTEGER)');
+    for(const fn of ['guard_meta_media_retention_job_v1','guard_meta_media_retention_review_v1','guard_meta_media_retention_cleanup_v1','guard_retired_meta_media_upload_v1','guard_meta_media_withdrawn_work_v1','guard_knowledge_retention_job_v1','guard_knowledge_retention_review_v1','guard_retired_knowledge_source_v1']) {
+      assert.equal((await reader.query("SELECT has_function_privilege(session_user,$1,'EXECUTE') AS allowed",[`public.${fn}()`])).rows[0].allowed,false);
+      await assert.rejects(reader.query(`CREATE TRIGGER retention_spoof BEFORE INSERT ON retention_trigger_probe FOR EACH ROW EXECUTE FUNCTION public.${fn}()`));
+    }
+
+  }finally{await operatorPool.end();await reader.end();}
+});
+
+test('media retention PostgreSQL active inspection lease blocks retirement and pending work cannot resume after withdrawal',async()=>{
+  const f=await mediaRetentionFixture();assert.equal(await mediaTasks.discoverNext('inspect'),'enqueued');const claim=await mediaTasks.claimNext('inspect');assert.ok(claim);
+  await assert.rejects(prepareMediaRetention(f),{code:'CONFLICT'});assert.equal(await mediaTasks.finish(claim,'retry'),true);
+  await queueMediaRetention(f);assert.equal(await mediaTasks.claimNext('inspect'),null);
+  await assert.rejects(pool.query("UPDATE meta_media_tasks SET version=version+1,status='running',attempts=attempts+1,lease_expires_at=clock_timestamp()+interval '1 minute' WHERE tenant_id=$1",[f.scope.tenantId]));
+});
+test('media retention PostgreSQL rollback removes retirement and its audit; a lost commit acknowledgement safely replays',async()=>{
+  const f=await mediaRetentionFixture(),target=mediaRetentionTarget(f);const p=await prepareMediaRetention(f);
+  const rollback=createMetaMediaRetention({environment:mediaRetentionPolicy('tenant-closed'),transactions:{transaction(o,work){return transactions.transaction(o,async q=>{const result=await work(q);if(result?.outcome==='queued')throw Error('rollback injection');return result;});}}});
+  await assert.rejects(rollback.enqueue(p,mediaRetentionEvidence(f)));assert.deepEqual(await mediaRetirementRows(f),[]);
+  assert.equal((await pool.query("SELECT * FROM meta_media_retention_events WHERE tenant_id=$1 AND event_type='pending'",[f.scope.tenantId])).rowCount,0);
+  const lost=createMetaMediaRetention({environment:mediaRetentionPolicy('tenant-closed'),transactions:{async transaction(o,work){const result=await transactions.transaction(o,work);if(result?.outcome==='queued')throw Error('lost commit acknowledgement');return result;}}});
+  await assert.rejects(lost.enqueue(p,mediaRetentionEvidence(f)));assert.deepEqual(await mediaRetention.enqueue(p,mediaRetentionEvidence(f)),{outcome:'queued'});
+  assert.equal((await mediaRetirementRows(f)).length,1);assert.equal((await pool.query("SELECT * FROM meta_media_retention_events WHERE tenant_id=$1 AND event_type='pending'",[f.scope.tenantId])).rowCount,1);assert.ok(await mediaRetention.claim(target));
+});
+test('media retention PostgreSQL legacy owner cleanup cannot bypass a current legal hold',async()=>{
+  const f=await cleanupCase();await pool.query("INSERT INTO meta_media_retention_grants(database_role,tenant_id,expires_at) VALUES(session_user,$1,clock_timestamp()+interval '1 day')",[f.scope.tenantId]);
+  await reviewMediaRetention(f,true);await assert.rejects(cleanupRequest(f),{code:'PERMISSION_DENIED'});assert.deepEqual(await cleanupRows(f),[]);
+  await reviewMediaRetention(f,false,1);await cleanupRequest(f);await reviewMediaRetention(f,true,2);
+  const w=cleanupWorker(f);try{await w.worker.run();assert.deepEqual(w.calls,[]);assert.equal((await cleanupRows(f))[0].status,'cancelled');}finally{w.close();}
+});
+
+function mediaRetentionSweepStorage(f,ids=f.receipt.versionId?[f.receipt.versionId]:[],remove){
+  const deleted=[],calls=[];
+  const inspection=createS3MetaMediaRetentionInspection(quarantineEnvironment,{client:{async send(c){calls.push(c.constructor.name);
+    if(c.constructor.name==='ListObjectVersionsCommand')return {$metadata:{httpStatusCode:200},IsTruncated:false,Versions:ids.filter(id=>!deleted.includes(id)).map(id=>({Key:f.intent.objectKey,VersionId:id}))};
+    return inspectionReply(c,f.intent,'NO_THREATS_FOUND',c.input.VersionId??f.receipt.versionId);
+  }}});
+  const storage={async remove(intent,id,authorize){await authorize();assert.deepEqual(intent,f.intent);if(remove)await remove(id);else deleted.push(id);}};
+  return {inspection,storage,deleted,calls};
+}
+const mediaSweepInput=(f,afterJobKey=null)=>({tenantId:f.scope.tenantId,afterJobKey,maximumJobs:10});
+test('media retention PostgreSQL policy sweep discovers and retires unknown versions automatically within the approved tenant',async()=>{
+  const f=await mediaRetentionFixture({unknown:true}),s=mediaRetentionSweepStorage(f,[f.receipt.versionId,'journal-integration-version-2']);
+  try{const result=await mediaRetention.sweep(mediaSweepInput(f),mediaRetentionEvidence(f),s.inspection,s.storage);
+    assert.equal(result.cycleComplete,true);assert.equal(result.nextJobKey,null);assert.equal(result.results[0].state,'processed');assert.equal(result.results[0].attemptedVersions,2);
+    assert.deepEqual(s.deleted,[f.receipt.versionId,'journal-integration-version-2']);assert.equal((await mediaRetirementRows(f)).every(r=>r.state==='removed'),true);
+    await mediaRetention.sweep(mediaSweepInput(f),mediaRetentionEvidence(f),s.inspection,s.storage);assert.equal(s.deleted.length,2);
+  }finally{s.inspection.close();}
+});
+test('media retention PostgreSQL policy sweep binds hold evidence and never automatically resets exhausted attempts',async()=>{
+  const f=await mediaRetentionFixture(),s=mediaRetentionSweepStorage(f,[f.receipt.versionId],async()=>{throw Error('unknown outcome');});
+  try{await assert.rejects(mediaRetention.sweep(mediaSweepInput(f),'a'.repeat(64),s.inspection,s.storage),{code:'CONFLICT'});assert.deepEqual(s.calls,[]);
+    for(let i=0;i<3;i++){await mediaRetention.sweep(mediaSweepInput(f),mediaRetentionEvidence(f),s.inspection,s.storage);await advanceMediaRetention(61000);}
+    assert.equal((await mediaRetirementRows(f))[0].attempts,3);assert.equal((await mediaRetirementRows(f))[0].state,'blocked');
+    await mediaRetention.sweep(mediaSweepInput(f),mediaRetentionEvidence(f),s.inspection,s.storage);assert.equal((await mediaRetirementRows(f))[0].attempts,3);
+    await reviewMediaRetention(f,true,1);await assert.rejects(mediaRetention.sweep(mediaSweepInput(f),mediaRetentionEvidence(f),s.inspection,s.storage),{code:'CONFLICT'});
+  }finally{s.inspection.close();}
+});
+test('media retention PostgreSQL policy sweep bounds a large version set and resumes the same object without duplicate deletions',async()=>{
+  const f=await mediaRetentionFixture({unknown:true}),ids=Array.from({length:21},(_,i)=>`journal-integration-version-${i+1}`).sort(),s=mediaRetentionSweepStorage(f,ids);
+  try{const first=await mediaRetention.sweep(mediaSweepInput(f),mediaRetentionEvidence(f),s.inspection,s.storage);assert.equal(first.cycleComplete,false);assert.equal(first.nextJobKey,null);assert.equal(s.deleted.length,20);
+    const second=await mediaRetention.sweep(mediaSweepInput(f,first.nextJobKey),mediaRetentionEvidence(f),s.inspection,s.storage);assert.equal(second.cycleComplete,true);assert.equal(new Set(s.deleted).size,21);assert.equal(s.deleted.length,21);
+  }finally{s.inspection.close();}
+});

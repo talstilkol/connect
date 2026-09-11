@@ -7,6 +7,7 @@ import {
 
 const environmentNames = [
   ["DATABASE", "URL"].join("_"),
+  ["META", "MEDIA", "RETENTION", "DATABASE", "URL"].join("_"),
   ["POSTGRES", "API", "URL"].join("_"),
   ["POSTGRES", "WORKER", "URL"].join("_"),
   ["POSTGRES", "VERIFIER", "URL"].join("_"),
