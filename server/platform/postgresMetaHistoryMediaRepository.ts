@@ -8,9 +8,11 @@ import type { PostgresParameter, PostgresTransaction, PostgresTransactionManager
 
 // Every candidate/read is scoped through the original session and current
 // connection. An immutable binding alone must never grant access to content.
-function eligibleMediaSources(allowCaptionRevision: boolean) {
-  const allowedContent = allowCaptionRevision
-    ? `(echo.content_state = 'original' OR (echo.content_state IN ('edited', 'conflicted')
+type MediaSourcePurpose = "binding" | "acquisition" | "file-read";
+function eligibleMediaSources(purpose: MediaSourcePurpose) {
+  const captionState = purpose === "binding" ? "IN ('edited', 'conflicted')" : "= 'edited'";
+  const allowedContent = purpose !== "acquisition"
+    ? `(echo.content_state = 'original' OR (echo.content_state ${captionState}
         AND echo.edit_kind IN ('image', 'video', 'document') AND echo.edit_kind = media.payload->>'contentKind'))`
     : `echo.content_state = 'original'`;
   return `FROM meta_history_inbox_messages AS message
@@ -38,9 +40,16 @@ function eligibleMediaSources(allowCaptionRevision: boolean) {
         OR echo.recipient_phone <> contact.phone_e164))`;
 }
 
-// A caption revision may permit binding original metadata, never acquisition.
-export const metaHistoryEligibleMediaSources = eligibleMediaSources(false);
-const metaHistoryBindingSources = eligibleMediaSources(true);
+// Caption edits never reopen acquisition. A non-conflicting matching edit may
+// allow a file reader to revalidate the original source of an existing upload.
+export const metaHistoryEligibleMediaSources = eligibleMediaSources("acquisition");
+const metaHistoryBindingSources = eligibleMediaSources("binding");
+const metaHistoryFileSources = eligibleMediaSources("file-read");
+function selectMediaIdentity(eligibility: string) {
+  return `SELECT session.tenant_id AS "tenantId", session.waba_id AS "wabaId", session.phone_number_id AS "phoneNumberId",
+    session.connection_version AS "connectionVersion", message.provider_message_id AS "providerMessageId" ${eligibility}
+    AND message.tenant_id = $1 AND message.message_key = $2`;
+}
 function selectMediaSources(eligibility: string) {
   return `SELECT message.message_key AS "messageKey", message.message_digest AS "messageDigest", message.message_index AS "messageIndex",
     message.phase, message.chunk_order AS "chunkOrder", chunk.content_digest AS "chunkDigest", chunk.payload AS chunk,
@@ -55,10 +64,10 @@ export const postgresMetaHistoryMediaSql = Object.freeze({
     AND NOT EXISTS (SELECT 1 FROM meta_history_media_bindings AS binding
       WHERE binding.tenant_id = message.tenant_id AND binding.provider_message_id = message.provider_message_id)
     ORDER BY session.tenant_id, message.provider_message_id LIMIT 1`,
-  identity: `SELECT session.tenant_id AS "tenantId", session.waba_id AS "wabaId", session.phone_number_id AS "phoneNumberId",
-    session.connection_version AS "connectionVersion", message.provider_message_id AS "providerMessageId" ${metaHistoryEligibleMediaSources}
-    AND message.tenant_id = $1 AND message.message_key = $2`,
+  identity: selectMediaIdentity(metaHistoryEligibleMediaSources),
+  fileIdentity: selectMediaIdentity(metaHistoryFileSources),
   sources: selectMediaSources(metaHistoryEligibleMediaSources),
+  fileSources: selectMediaSources(metaHistoryFileSources),
   bindingSources: selectMediaSources(metaHistoryBindingSources),
   binding: `SELECT message_digest AS "messageDigest", media_digest AS "mediaDigest" FROM meta_history_media_bindings
     WHERE tenant_id = $1 AND provider_message_id = $2`,
@@ -82,7 +91,7 @@ function identity(raw: unknown) {
   return { scope, providerMessageId: row.providerMessageId };
 }
 
-async function readLocked(tx: PostgresTransaction, scope: MetaHistoryScope, providerMessageId: string, purpose: "binding" | "acquisition") {
+async function readLocked(tx: PostgresTransaction, scope: MetaHistoryScope, providerMessageId: string, purpose: MediaSourcePurpose) {
   const binding = [scope.tenantId, scope.wabaId, scope.phoneNumberId, scope.connectionVersion] as const;
   const connection = await one(tx, postgresMetaHistorySyncSql.connection, binding);
   if (connection === null) return null;
@@ -95,7 +104,9 @@ async function readLocked(tx: PostgresTransaction, scope: MetaHistoryScope, prov
   if (session.wabaId !== scope.wabaId || session.phoneNumberId !== scope.phoneNumberId ||
     parsePostgresPositiveInteger(session.connectionVersion) !== scope.connectionVersion || parsePostgresTimestamp(session.startedAt) !== startedAt) return fail();
   if (session.sharingState !== "data_received" || session.hasConflict !== false) return null;
-  const raw = await one(tx, purpose === "binding" ? postgresMetaHistoryMediaSql.bindingSources : postgresMetaHistoryMediaSql.sources,
+  const sourceSql = purpose === "binding" ? postgresMetaHistoryMediaSql.bindingSources
+    : purpose === "file-read" ? postgresMetaHistoryMediaSql.fileSources : postgresMetaHistoryMediaSql.sources;
+  const raw = await one(tx, sourceSql,
     [...binding, providerMessageId]);
   if (raw === null) return null;
   const row = requireExactPostgresRow(raw, ["messageKey", "messageDigest", "messageIndex", "phase", "chunkOrder", "chunkDigest", "chunk", "mediaDigest", "media"]);
@@ -153,11 +164,21 @@ export function createPostgresMetaHistoryMediaRepository(transactions: PostgresT
 // Shared transaction boundary for current-source checks before durable upload
 // transitions. Lock order remains tenant/connection, request, history session.
 export async function readPostgresBoundMetaHistoryMedia(tx: PostgresTransaction, tenantId: number, messageKey: string): Promise<Readonly<BoundMetaHistoryMedia> | null> {
-  const raw = await one(tx, postgresMetaHistoryMediaSql.identity, [tenantId, messageKey]);
+  return readBoundMedia(tx, tenantId, messageKey, "acquisition");
+}
+
+// Only the file authorization boundary uses this source check. It must still
+// require the existing upload receipt, exact object version and clean scans.
+export async function readPostgresBoundMetaHistoryMediaForFile(tx: PostgresTransaction, tenantId: number, messageKey: string): Promise<Readonly<BoundMetaHistoryMedia> | null> {
+  return readBoundMedia(tx, tenantId, messageKey, "file-read");
+}
+
+async function readBoundMedia(tx: PostgresTransaction, tenantId: number, messageKey: string, purpose: "acquisition" | "file-read"): Promise<Readonly<BoundMetaHistoryMedia> | null> {
+  const raw = await one(tx, purpose === "file-read" ? postgresMetaHistoryMediaSql.fileIdentity : postgresMetaHistoryMediaSql.identity, [tenantId, messageKey]);
   if (raw === null) return null;
   const { scope, providerMessageId } = identity(raw);
   if (scope.tenantId !== tenantId) return fail();
-  const sources = await readLocked(tx, scope, providerMessageId, "acquisition");
+  const sources = await readLocked(tx, scope, providerMessageId, purpose);
   if (sources === null) return null;
   if (sources.messageKey !== messageKey || !isMetaHistoryMediaCompatible(sources.message, sources.media)) return fail();
   const saved = await one(tx, postgresMetaHistoryMediaSql.binding, [tenantId, providerMessageId]);

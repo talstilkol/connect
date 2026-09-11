@@ -13,6 +13,7 @@ import type {
   AiReplyApprovalView,
 } from "../../shared/domain/aiReplyApprovalView.ts";
 import {
+  canRequestHistoryMediaFile,
   formatInboxTimestamp,
   messageBody,
 } from "./conversationPresentation.ts";
@@ -280,8 +281,7 @@ export function ConversationMessageView({
                     <p>
                       {messageBody(message, language)}
                     </p>
-                    {authEnabled && message.source === "history" && !message.contentState &&
-                      ["image", "audio", "video", "document", "sticker", "media_placeholder"].includes(message.contentKind)
+                    {authEnabled && canRequestHistoryMediaFile(message)
                       ? <MetaMediaDownloadButton messageKey={message.messageKey} language={language} /> : null}
                     <footer>
                       {message.contentState === "edited" ? <span>{messages.labels.contentStates.edited}</span> : null}
