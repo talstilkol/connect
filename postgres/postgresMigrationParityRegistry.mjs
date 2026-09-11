@@ -766,4 +766,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE paddle_creation_observations",
     summary: "Immutable POST response correlation, irreversible dispatch admission and provider-confirmed or not-dispatched closure evidence enable safe checkout recovery without replaying uncertain creation.",
   }),
+  Object.freeze({
+    migration: "0083_ai_publication_readiness.sql",
+    token: "CREATE TABLE ai_runtime_worker_health",
+    summary: "Recent credential-free worker health and rate-card expiry support tenant-bound AI publication checks without transferring provider secrets to the API.",
+  }),
 ]);

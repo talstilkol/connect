@@ -27,8 +27,6 @@ import {
 import { createAiReplyApprovalService } from
   "../ai/aiReplyApprovalService.ts";
 import { createAiAgentService } from "../ai/aiAgentService.ts";
-import { unavailableAiOperationalReadinessProvider } from
-  "../ai/aiOperationalReadiness.ts";
 import { createMessageTemplateService } from "../templates/messageTemplateService.ts";
 import {
   inspectSystemAdminConfiguration,
@@ -486,7 +484,7 @@ export async function createRailwayPostgresApiRuntime(
       aiAgents: createAiAgentService({
         agents: foundation.aiAgents,
         knowledgeSources: foundation.knowledgeSources,
-        operationalReadiness: unavailableAiOperationalReadinessProvider,
+        operationalReadiness: foundation.aiOperationalReadiness,
       }),
       aiAgentMutations: foundation.railwayAiAgentMutations,
       aiReplyApprovals: createAiReplyApprovalService(

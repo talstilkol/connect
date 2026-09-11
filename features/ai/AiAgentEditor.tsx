@@ -725,7 +725,7 @@ export function AiAgentEditor({
                   <option value="">
                     {messages.editor.responseModes.undecided}
                   </option>
-                  <option value="automatic">
+                  <option value="automatic" disabled>
                     {messages.editor.responseModes.automatic}
                   </option>
                   <option value="agent-approval">

@@ -72,12 +72,12 @@ const hebrewMessages = {
     string
   >,
   activationIssues: {
-    "provider-required": "לא הוגדר Provider פעיל",
+    "provider-required": "מענה AI אינו זמין כרגע; יש לבדוק את הגדרות ההפעלה",
     "billing-policy-required":
-      "מדיניות החיוב טרם אושרה",
+      "נדרשת זכאות פעילה ותקציב חיובי במטבע USD",
     "handoff-policy-required":
-      "מדיניות המעבר לנציג טרם אושרה",
-    "audit-sink-required": "יעד Audit טרם הוגדר",
+      "נדרשים אישור נציג לפני שליחה ונציג פעיל בעסק",
+    "audit-sink-required": "רישום הפעולות אינו זמין כרגע",
     "response-mode-required":
       "לא נבחר אופן אישור תשובות",
     "grounding-threshold-required":
@@ -146,16 +146,16 @@ const hebrewMessages = {
     responseMode: "אופן אישור תשובה",
     responseModes: {
       undecided: "טרם הוחלט",
-      automatic: "אוטומטי",
+      automatic: "אוטומטי — אינו זמין בגרסה זו",
       agentApproval: "אישור נציג",
     },
     groundingThreshold: "סף Grounding — Basis Points",
     groundingHelp:
       "10,000 הם 100%. אפשר להשאיר ריק בטיוטה.",
     costLimit: "מגבלת עלות ביחידות מטבע קטנות",
-    currency: "מטבע — ISO 4217",
+    currency: "מטבע התקציב — USD",
     costHelp:
-      "המגבלה והמטבע נשמרים יחד או נשארים ריקים.",
+      "לפרסום נדרש תקציב ב־USD. מאה יחידות הן דולר אחד. אפשר להשאיר ריק בטיוטה.",
     saving: "שומר טיוטה…",
     save: "שמירת טיוטה",
     publishing: "מפרסם…",
@@ -169,7 +169,7 @@ const hebrewMessages = {
       "הרשאת כתיבה אינה מספיקה. כל התנאים הבאים נבדקים שוב בשרת לפני פרסום.",
     empty:
       "שמרו טיוטה כדי לקבל בדיקת מוכנות מלאה.",
-    success: "כל תנאי ההפעלה אושרו בצד השרת.",
+    success: "תנאי הפרסום מתקיימים כרגע. זמינות המענה נבדקת שוב בזמן הביצוע.",
     history: "היסטוריית גרסאות",
     version: (value: number) => `גרסה ${value}`,
   },
@@ -232,12 +232,12 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
         "The server action failed. No partial change was applied.",
     },
     activationIssues: {
-      "provider-required": "No active provider is configured",
+      "provider-required": "AI replies are currently unavailable; check the runtime configuration",
       "billing-policy-required":
-        "The billing policy is not approved",
+        "Active access and a positive USD budget are required",
       "handoff-policy-required":
-        "The human handoff policy is not approved",
-      "audit-sink-required": "No audit destination is configured",
+        "Agent approval before sending and an active workspace agent are required",
+      "audit-sink-required": "Action logging is currently unavailable",
       "response-mode-required": "No reply approval mode is selected",
       "grounding-threshold-required":
         "No grounding threshold is configured",
@@ -304,16 +304,16 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
       responseMode: "Reply approval mode",
       responseModes: {
         undecided: "Not decided",
-        automatic: "Automatic",
+        automatic: "Automatic — unavailable in this release",
         agentApproval: "Agent approval",
       },
       groundingThreshold: "Grounding threshold — basis points",
       groundingHelp:
         "10,000 equals 100%. This may remain empty in a draft.",
       costLimit: "Cost limit in minor currency units",
-      currency: "Currency — ISO 4217",
+      currency: "Budget currency — USD",
       costHelp:
-        "The limit and currency are saved together or both remain empty.",
+        "Publication requires a USD budget. One hundred units equal one dollar. Drafts may leave this empty.",
       saving: "Saving draft…",
       save: "Save draft",
       publishing: "Publishing…",
@@ -327,7 +327,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
         "Write permission is not enough. The server checks every condition again before publishing.",
       empty:
         "Save a draft to receive a complete readiness check.",
-      success: "Every activation condition was approved by the server.",
+      success: "Publication requirements are currently met. Reply availability is checked again during execution.",
       history: "Version history",
       version: (value: number) => `Version ${value}`,
     },
@@ -383,11 +383,11 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
         "فشل الإجراء على الخادم. لم يتم تطبيق تغيير جزئي.",
     },
     activationIssues: {
-      "provider-required": "لم يتم إعداد Provider نشط",
-      "billing-policy-required": "لم تتم الموافقة على سياسة الفوترة",
+      "provider-required": "ردود AI غير متاحة حاليًا؛ تحقق من إعدادات التشغيل",
+      "billing-policy-required": "يلزم وصول فعال وميزانية موجبة بعملة USD",
       "handoff-policy-required":
-        "لم تتم الموافقة على سياسة التحويل إلى موظف",
-      "audit-sink-required": "لم يتم إعداد وجهة Audit",
+        "يلزم اعتماد الموظف قبل الإرسال ووجود موظف نشط في مساحة العمل",
+      "audit-sink-required": "تسجيل الإجراءات غير متاح حاليًا",
       "response-mode-required": "لم يتم اختيار أسلوب اعتماد الرد",
       "grounding-threshold-required": "لم يتم إعداد حد الاستناد",
       "cost-limit-required": "لم يتم إعداد حد التكلفة والعملة",
@@ -451,16 +451,16 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
       responseMode: "أسلوب اعتماد الرد",
       responseModes: {
         undecided: "لم يُقرر بعد",
-        automatic: "تلقائي",
+        automatic: "تلقائي — غير متاح في هذا الإصدار",
         agentApproval: "موافقة الموظف",
       },
       groundingThreshold: "حد الاستناد — Basis Points",
       groundingHelp:
         "10,000 تساوي 100%. يمكن ترك الحقل فارغًا في المسودة.",
       costLimit: "حد التكلفة بوحدات العملة الصغرى",
-      currency: "العملة — ISO 4217",
+      currency: "عملة الميزانية — USD",
       costHelp:
-        "يتم حفظ الحد والعملة معًا أو يظل كلاهما فارغًا.",
+        "يتطلب النشر ميزانية بعملة USD. مئة وحدة تساوي دولارًا واحدًا. يمكن تركها فارغة في المسودة.",
       saving: "جارٍ حفظ المسودة…",
       save: "حفظ المسودة",
       publishing: "جارٍ النشر…",
@@ -474,7 +474,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
         "صلاحية الكتابة غير كافية. يتحقق الخادم من جميع الشروط مجددًا قبل النشر.",
       empty:
         "احفظ مسودة للحصول على فحص جاهزية كامل.",
-      success: "وافق الخادم على جميع شروط التفعيل.",
+      success: "شروط النشر مستوفاة حاليًا. يتم التحقق من توفر الردود مجددًا عند التنفيذ.",
       history: "سجل الإصدارات",
       version: (value: number) => `الإصدار ${value}`,
     },

@@ -2,6 +2,7 @@ import { requirePaddleConfiguration, type PaddleRuntimeEnvironment } from "../bi
 import { createPaddleProvider } from "../billing/paddleProvider.ts";
 import { createPaddleWorker } from "../billing/paddleWorker.ts";
 import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
+import { createPostgresAiWorkerHealth } from "./postgresAiOperationalReadiness.ts";
 import { requireKnowledgeConfiguration, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import { createS3KnowledgeStorage } from "./s3KnowledgeStorage.ts";
 import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
@@ -725,6 +726,7 @@ function createRailwayPostgresWorkerFoundation(
 
   return Object.freeze({
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
+    aiWorkerHealth: createPostgresAiWorkerHealth(queries),
     paddleBilling: createPostgresPaddleRepository({ queries, transactions }),
     knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
@@ -848,6 +850,12 @@ export async function createRailwayPostgresWorkerService(
   const queueMaintenanceTasks: Array<Readonly<{
     run: () => Promise<unknown>;
   }>> = [];
+  const reportsAiHealth = options.environment?.AI_RESPONSES_ENABLED === "true";
+  const reportAiHealth = async () => {
+    if (reportsAiHealth) await foundation.aiWorkerHealth.report(options.ownerKey, options.environment ?? {},
+      aiRepliesEnabled && manualRepliesEnabled && options.metaWebhooks !== undefined);
+  };
+  if (reportsAiHealth) queueMaintenanceTasks.push({ run: reportAiHealth });
 
   try {
     if (paddleConfig) {
@@ -1145,10 +1153,10 @@ export async function createRailwayPostgresWorkerService(
       invitations: foundation.invitations,
       messageTemplateSubmissions,
       clock,
-      close: () => closeQueuesThenFoundation(
-        queueRuntimes,
-        foundation.close,
-      ),
+      close: () => closeQueuesThenFoundation(queueRuntimes, async () => {
+        try { if (reportsAiHealth) await foundation.aiWorkerHealth.clear(options.ownerKey); }
+        finally { await foundation.close(); }
+      }),
     });
 
     const schedulerService = createRailwayWorkerSchedulerService({
@@ -1158,7 +1166,10 @@ export async function createRailwayPostgresWorkerService(
     });
 
     if (queueRuntimes.length === 0) {
-      return schedulerService;
+      return { ...schedulerService, async start() {
+        try { await schedulerService.start(); await reportAiHealth(); }
+        catch (error) { await schedulerService.close(); throw error; }
+      } };
     }
 
     const managedQueueRuntimes = Object.freeze([...queueRuntimes]);
@@ -1182,6 +1193,7 @@ export async function createRailwayPostgresWorkerService(
                 managedQueueRuntimes.map((runtime) => runtime.start()),
               );
               await schedulerService.start();
+              await reportAiHealth();
               started = true;
             } catch {
               try {

@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier } from "../server/platform/postgresPaidAccess.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -6,7 +7,7 @@ import {
   deriveAiAgentVersionKey,
   deriveKnowledgeSourceKey,
 } from "../server/ai/aiAgentKey.ts";
-import { createPostgresRailwayAiAgentMutationExecutor } from
+import { createPostgresRailwayAiAgentMutationExecutor, postgresRailwayAiAgentMutationSql } from
   "../server/platform/postgresRailwayAiAgentMutationExecutor.ts";
 
 const idempotencyKey = `connect_idempotency_v1_${"a".repeat(64)}`;
@@ -113,6 +114,8 @@ function transactionFixture(responses) {
         try {
           const value = await execute({
             async query(sql, parameters) {
+              if (sql === paidAccessTenantBarrier || sql === postgresRailwayAiAgentMutationSql.lockSources) return result([], 0);
+              if (sql === postgresRailwayAiAgentMutationSql.lockActor) return result([{ role: parameters[2] }]);
               calls.queries.push({ sql, parameters });
               const next = queue.shift();
               if (next instanceof Error) throw next;

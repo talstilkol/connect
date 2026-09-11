@@ -39,6 +39,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
 
   assert.deepEqual(Object.keys(foundation).sort(), [
     "aiAgents",
+    "aiOperationalReadiness",
     "aiReplyOutbox",
     "aiRuntime",
     "botFlows",

@@ -57,3 +57,7 @@
 5.7 בדיקות: 16 תרחישי PostgreSQL עברו בנפרד על 16.13 ועל 17.11, כולל תחרות, Rollback, אובדן אישור Claim/Settlement, אי־ודאות, שינוי מחירון, הרשאות ותפוגה. נוספה הרצה ל־CI על PostgreSQL 17.11 מוצמד; הרצה מרוחקת עדיין לא בוצעה. [דוח אימות](../outputs/launch-validation-2026-09-09/ai-journal-validation-20260911.json).
 
 5.8 מקורות: [Token counting](https://developers.openai.com/api/docs/guides/token-counting), [חוזה שדות Input tokens](https://developers.openai.com/api/reference/resources/responses/subresources/input_tokens/methods/count), [מעקב X-Client-Request-Id](https://developers.openai.com/api/reference/overview#supplying-your-own-request-id-with-x-client-request-id). המחירים בדוגמת Spending controller אינם מקור למחירי המוצר.
+
+# 5. R216 — פרסום לפי מוכנות Runtime
+
+5.1 מסך הסוכן ופעולת הפרסום משתמשים כעת במוכנות Worker טרייה, זכאות, תקציב USD ואישור נציג, באותה טרנזקציה עם הפרסום. נדרשת מיגרציה 0083. תצורת הספק נשארת ב־Worker; אין אישור חיצוני משתמע מדיווח המוכנות. [תנאים, טריות ובדיקות](ai-publication-readiness.md).

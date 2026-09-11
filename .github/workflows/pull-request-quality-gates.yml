@@ -224,6 +224,17 @@ jobs:
         env:
           CONNECT_AI_GENERATION_TEST_URL: postgresql://connect_ai_test@127.0.0.1:55446/connect_ai_generation_integration
         run: node --test tests/integration/ai-generation-journal-postgres.test.mjs
+      - name: Rehearse atomic AI publication and expiring worker readiness
+        env:
+          CONNECT_AI_PUBLICATION_TEST_URL: postgresql://connect_ai_test@127.0.0.1:55446/connect_ai_publication_integration
+        run: |
+          node --input-type=module <<'JS'
+          import pg from 'pg';
+          const pool = new pg.Pool({ connectionString: 'postgresql://connect_ai_test@127.0.0.1:55446/connect_ai_generation_integration' });
+          try { await pool.query('CREATE DATABASE connect_ai_publication_integration OWNER connect_ai_test'); }
+          finally { await pool.end(); }
+          JS
+          node --test tests/integration/ai-publication-postgres.test.mjs
       - name: Verify Knowledge upload, scan, recovery and isolation on PostgreSQL
         env:
           CONNECT_KNOWLEDGE_TEST_URL: postgresql://connect_knowledge_test@127.0.0.1:55447/connect_knowledge_integration

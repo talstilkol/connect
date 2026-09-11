@@ -15,6 +15,7 @@ import {
   toAiAgentVersionView,
 } from "../ai/aiAgentView.ts";
 import { createPostgresAiAgentRepository } from "./postgresAiAgentRepository.ts";
+import { paidAccessTenantBarrier } from "./postgresPaidAccess.ts";
 import { createPostgresKnowledgeSourceRepository } from
   "./postgresKnowledgeSourceRepository.ts";
 import type {
@@ -38,6 +39,13 @@ const idempotencyKeyPattern = /^connect_idempotency_v1_[0-9a-f]{64}$/;
 const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
 
 export const postgresRailwayAiAgentMutationSql = Object.freeze({
+  lockActor: `SELECT m.role FROM tenants t JOIN tenant_memberships m ON m.tenant_id=t.id
+    WHERE t.id=$1 AND t.status IN ('trial','active','payment_failed')
+      AND m.external_user_id=$2 AND m.status='active' AND m.role=$3 AND m.role IN ('owner','manager')
+      AND public.tenant_paid_access_allowed_v1(t.id) FOR SHARE OF t,m`,
+  lockSources: `SELECT s.source_key FROM knowledge_sources s JOIN ai_agent_version_sources v
+    ON v.tenant_id=s.tenant_id AND v.source_key=s.source_key
+    WHERE v.tenant_id=$1 AND v.ai_agent_version_key=$2 ORDER BY s.source_key FOR SHARE OF s`,
   claimReceipt: `
     INSERT INTO railway_api_mutation_receipts (
       tenant_id, operation, idempotency_key, request_digest,
@@ -199,6 +207,16 @@ async function executeDomain(
     }, command);
   }
   const result = await service.publishDraft(command.session, command.payload);
+  // Recheck after any wait on the agent/version locks. Worker health may have
+  // expired while this transaction was waiting; rollback includes publication.
+  const final = await operationalReadiness.readForTenant(command.session.tenantId, result.publishedVersion.definition);
+  const issues = [
+    ...(!final.providerReady ? ["provider-required" as const] : []),
+    ...(!final.billingPolicyApproved ? ["billing-policy-required" as const] : []),
+    ...(!final.handoffPolicyApproved ? ["handoff-policy-required" as const] : []),
+    ...(!final.auditSinkReady ? ["audit-sink-required" as const] : []),
+  ];
+  if (issues.length > 0) throw new AiAgentActivationError(issues);
   return parseStoredState({
     outcome: result.outcome,
     agent: toAiAgentSummaryView(result.agent),
@@ -211,6 +229,10 @@ async function executeTransaction(
   command: Readonly<RailwayAiAgentMutationCommand>,
   operationalReadiness: AiOperationalReadinessProvider,
 ): Promise<RailwayAiAgentMutationResult> {
+  await transaction.query(paidAccessTenantBarrier, [command.session.tenantId]);
+  const actor = await transaction.query(postgresRailwayAiAgentMutationSql.lockActor,
+    [command.session.tenantId, command.session.externalUserId, command.session.role]);
+  if (requireRowCount(actor, 1) !== 1) throw new Error("AI mutation authorization is unavailable");
   const claimed = await transaction.query<{ idempotencyKey: string }>(
     postgresRailwayAiAgentMutationSql.claimReceipt,
     [
@@ -222,6 +244,10 @@ async function executeTransaction(
   if (count === 0) return loadReceipt(transaction, command);
   if (claimed.rows[0]?.idempotencyKey !== command.idempotencyKey) {
     throw new Error("PostgreSQL returned an invalid AI agent claim");
+  }
+  if (command.operation !== RAILWAY_AI_AGENT_DRAFT_OPERATION) {
+    await transaction.query(postgresRailwayAiAgentMutationSql.lockSources,
+      [command.session.tenantId, parseAiAgentPublishDraftRequest(command.payload)!.aiAgentVersionKey]);
   }
   const state = await executeDomain(transaction, command, operationalReadiness);
   const version = "draftVersion" in state
@@ -266,12 +292,12 @@ async function executeTransaction(
 
 export function createPostgresRailwayAiAgentMutationExecutor(
   transactions: PostgresTransactionManager,
-  operationalReadiness: AiOperationalReadinessProvider =
+  operationalReadiness: AiOperationalReadinessProvider | ((transaction: PostgresTransaction) => AiOperationalReadinessProvider) =
     unavailableAiOperationalReadinessProvider,
 ): RailwayAiAgentMutationExecutor {
   if (
     typeof transactions?.transaction !== "function" ||
-    typeof operationalReadiness?.readForTenant !== "function"
+    (typeof operationalReadiness !== "function" && typeof operationalReadiness?.readForTenant !== "function")
   ) {
     throw new Error("PostgreSQL AI agent mutation dependencies are invalid");
   }
@@ -282,7 +308,7 @@ export function createPostgresRailwayAiAgentMutationExecutor(
         return await transactions.transaction(
           { isolationLevel: "read-committed" },
           (transaction) =>
-            executeTransaction(transaction, command, operationalReadiness),
+            executeTransaction(transaction, command, typeof operationalReadiness === "function" ? operationalReadiness(transaction) : operationalReadiness),
         );
       } catch (error) {
         if (error instanceof AiAgentActivationError) {

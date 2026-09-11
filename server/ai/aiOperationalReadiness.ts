@@ -1,5 +1,6 @@
 import type {
   AiAgentActivationContext,
+  ValidatedAiAgentDefinition,
 } from "../../shared/domain/aiAgent.ts";
 
 export type AiOperationalReadiness =
@@ -11,6 +12,7 @@ export type AiOperationalReadiness =
 export interface AiOperationalReadinessProvider {
   readForTenant(
     tenantId: number,
+    definition: ValidatedAiAgentDefinition,
   ): Promise<AiOperationalReadiness>;
 }
 

@@ -1,4 +1,5 @@
 import { createPostgresPaidAccess } from "./postgresPaidAccess.ts";
+import { createPostgresAiOperationalReadiness } from "./postgresAiOperationalReadiness.ts";
 import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
 import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
 import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
@@ -262,6 +263,7 @@ export interface RailwayPostgresFoundationOptions {
 }
 
 export interface RailwayPostgresFoundation {
+  readonly aiOperationalReadiness: ReturnType<typeof createPostgresAiOperationalReadiness>;
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly aiAgents: ReturnType<typeof createPostgresAiAgentRepository>;
   readonly aiReplyOutbox: ReturnType<
@@ -558,6 +560,7 @@ export function createRailwayPostgresFoundation(
 
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
+    aiOperationalReadiness: createPostgresAiOperationalReadiness(queries),
     paidAccess: createPostgresPaidAccess({ transactions }),
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
@@ -728,7 +731,7 @@ export function createRailwayPostgresFoundation(
     railwayBotFlowMutations:
       createPostgresRailwayBotFlowMutationExecutor(transactions),
     railwayAiAgentMutations:
-      createPostgresRailwayAiAgentMutationExecutor(transactions),
+      createPostgresRailwayAiAgentMutationExecutor(transactions, createPostgresAiOperationalReadiness),
     railwayAiReplyApprovalMutations:
       createPostgresRailwayAiReplyApprovalMutationExecutor(transactions),
     railwayOnboardingBusinessProfileMutations:
