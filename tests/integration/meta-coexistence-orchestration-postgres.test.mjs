@@ -1,3 +1,9 @@
+import { createPostgresMetaAccountLifecycleRepository } from '../../server/platform/postgresMetaAccountLifecycleRepository.ts';
+import { createPostgresMetaHistorySyncRepository } from '../../server/platform/postgresMetaHistorySyncRepository.ts';
+import { createPostgresMetaContactSyncRepository } from '../../server/platform/postgresMetaContactSyncRepository.ts';
+import { createPostgresMetaHistoryInboxProjector } from '../../server/platform/postgresMetaHistoryInboxProjector.ts';
+import { parseMetaHistorySync } from '../../server/meta/metaHistorySync.ts';
+import { value as historyValue } from '../fixtures/meta-history.mjs';
 import { createRailwayApiHttpHandler } from '../../server/platform/railwayApiHttpHandler.ts';
 import { createRailwayApiClient } from '../../server/platform/railwayApiClient.ts';
 import { createRailwayMetaSignupOperations } from '../../server/platform/railwayMetaSignupOperations.ts';
@@ -35,11 +41,17 @@ const launches = createPostgresMetaSignupLaunchRepository(transactions), attempt
 const requests = createPostgresMetaDataSyncRepository(transactions);
 const environment = { META_APP_ID:'100001',META_EMBEDDED_SIGNUP_CONFIGURATION_ID:'500005',META_GRAPH_API_VERSION:'v23.0',
   META_APP_SECRET:'local-coexistence-app-secret',META_CREDENTIAL_ENCRYPTION_KEY_V1:Buffer.from(Array.from({ length:32 },(_,i) => i+1)).toString('base64') };
-let tenantCounter = 700;
+let tenantCounter = 700, upgradeCase, upgradeRows;
+async function retainedRequests(f) {return (await pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1 ORDER BY sync_type',[f.session.tenantId])).rows;}
 before(async () => {
   assert.equal((await pool.query("SELECT * FROM pg_tables WHERE schemaname='public'")).rowCount,0,'Refusing to change a non-empty database');
   const directory = new URL('../../postgres/migrations/',import.meta.url);
-  for (const file of (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort()) await pool.query(await readFile(new URL(file,directory),'utf8'));
+  for (const file of (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort()) {
+    if(file.startsWith('0091_')) {
+      upgradeCase=await fixture();await complete(upgradeCase,await begin(upgradeCase));upgradeRows=await retainedRequests(upgradeCase);
+    }
+    await pool.query(await readFile(new URL(file,directory),'utf8'));
+  }
 });
 beforeEach(async () => {
   await pool.query("UPDATE meta_coexistence_sync_jobs SET status='recovery-required',version=version+1,lease_expires_at=NULL WHERE status IN ('pending','running')");
@@ -79,7 +91,7 @@ async function fixture(options = {}) {
         JOIN railway_api_mutation_receipts AS receipt ON receipt.tenant_id=launch.tenant_id AND receipt.idempotency_key=launch.claim_key
         WHERE launch.tenant_id=$1`,[tenantId])).rows;
       assert.ok(evidence.some((row) => row.status==='finished' && row.receipt_status==='completed'));
-      assert.equal((await pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1',[tenantId])).rowCount,2);
+      assert.equal((await pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1 AND connection_version=(SELECT version FROM meta_connections WHERE tenant_id=$1)',[tenantId])).rowCount,2);
       if (body.sync_type==='history') assert.equal((await requests.read(tenantId,'smb_app_state_sync')).status,'accepted');
       if (options.post) return options.post(body.sync_type,json);
       return json({ messaging_product:'whatsapp',request_id:`request-${tenantId}-${body.sync_type}` });
@@ -548,4 +560,124 @@ test('queued synchronization read hides replaced connections and rejects mixed r
   assert.equal((await api.raw('meta.connection.read')).data.connection.dataSync.stage,'connection-changed');
   await assert.rejects(api.dataSync.readView(f.session.tenantId,previous),{code:'SYNC_LIFECYCLE_UNAVAILABLE'});
   await assert.rejects(api.dataSync.readView(f.session.tenantId,{...previous,tenantId:previous.tenantId+1}),{code:'SYNC_LIFECYCLE_UNAVAILABLE'});
+});
+
+// Reuse the existing provider/tenant fixture. These tests never contact Meta.
+async function observedOffboarding(f) {
+  const current=await meta.findConnectionByTenantId(f.session.tenantId);
+  // Provider lifecycle time has second precision; ensure it follows this fixture's signup.
+  await pool.query('SELECT pg_sleep(1.01)');
+  const occurredAt=(await pool.query("SELECT date_trunc('second',clock_timestamp()) AS stamp")).rows[0].stamp.toISOString();
+  const eventKey=createHash('sha256').update(`reconnect-${f.session.tenantId}-${current.version}`).digest('hex');
+  const receipt=await meta.claimWebhookReceipt({tenantId:f.session.tenantId,wabaId:f.assets.wabaId,eventKey,objectType:'whatsapp_business_account'});
+  await createPostgresMetaAccountLifecycleRepository(transactions).recordBatch({...f.assets,connectionVersion:current.version,
+    receiptId:receipt.receipt.id,eventKey,events:[{event:'ACCOUNT_OFFBOARDED',occurredAt,ownerBusinessId:null,reportedPhoneNumber:null,reason:null,initiatedBy:null}]});
+  return current;
+}
+const generationRows=f=>pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1 ORDER BY started_at,sync_type',[f.session.tenantId]);
+async function newGeneration(f) {
+  const launch=await begin(f);
+  const result=await f.service.complete(f.session,{...f.input,authorizationCode:`${f.input.authorizationCode}-${launch.launchId}`,launchId:launch.launchId});
+  return {launch,result};
+}
+const currentScope=async f=>({...f.assets,connectionVersion:(await meta.findConnectionByTenantId(f.session.tenantId)).version});
+
+test('generation: completed offboarding and new signup preserve old requests and send each new POST once',async()=>{
+  const f=await fixture();const first=await begin(f);await complete(f,first);const before=(await generationRows(f)).rows;
+  await observedOffboarding(f);const {launch,result}=await newGeneration(f);
+  assert.equal(result.synchronization.status,'requests-accepted');assert.equal((await generationRows(f)).rowCount,4);
+  assert.deepEqual((await generationRows(f)).rows.slice(0,2),before);
+  assert.deepEqual(f.syncTypes,['smb_app_state_sync','history','smb_app_state_sync','history']);
+  await f.create().resume(f.session,launch.launchId);assert.equal(f.syncTypes.length,4);
+  const starts=(await pool.query('SELECT * FROM meta_data_sync_onboardings WHERE tenant_id=$1 ORDER BY started_at',[f.session.tenantId])).rows;
+  assert.equal(starts.length,2);assert.deepEqual(starts[1].previous_started_at,starts[0].started_at);assert.ok(starts[1].offboarding_event_digest);
+  assert.equal((await f.service.resume(f.session,first.launchId)).status,'recovery-required');assert.equal(f.syncTypes.length,4);
+});
+
+test('generation: changing authorization without offboarding does not permit a repeat synchronization',async()=>{
+  const f=await fixture();await complete(f,await begin(f));const before=(await generationRows(f)).rows;
+  const {result}=await newGeneration(f);assert.equal(result.registration.status,'connected');assert.equal(result.synchronization.status,'recovery-required');
+  assert.deepEqual((await generationRows(f)).rows,before);assert.equal(f.syncTypes.length,2);
+});
+
+test('generation: original delayed acknowledgement updates only its retained dispatching request',async()=>{
+  let rejectFinish=true;
+  const f=await fixture({requests:{...requests,async finish(request,result){if(rejectFinish)throw new Error('lost storage');return requests.finish(request,result);}}});
+  const first=await begin(f);await complete(f,first);const old=await requests.read(f.session.tenantId,'smb_app_state_sync');assert.equal(old.status,'dispatching');
+  await observedOffboarding(f);rejectFinish=false;const {result}=await newGeneration(f);assert.equal(result.synchronization.status,'requests-accepted');
+  const latest=await requests.read(f.session.tenantId,'smb_app_state_sync');
+  await requests.finish(old,{status:'accepted',requestId:'accepted-original-contacts'});
+  assert.deepEqual(await requests.read(f.session.tenantId,'smb_app_state_sync'),latest);
+  assert.equal((await generationRows(f)).rows.find(r=>r.connection_version===old.connectionVersion&&r.sync_type==='smb_app_state_sync').request_id,'accepted-original-contacts');
+  assert.equal(f.syncTypes.length,3);
+});
+
+test('generation: repeated signup continuations serialize preparation and never duplicate the new contacts POST',async()=>{
+  const f=await fixture();await complete(f,await begin(f));await observedOffboarding(f);
+  const deferred=f.create({requests:{...requests,async prepareFromSignupLaunch(){throw new Error('interrupted before preparation');}}});
+  const launch=await deferred.begin(f.session);await deferred.complete(f.session,{...f.input,authorizationCode:`${f.input.authorizationCode}-${launch.launchId}`,launchId:launch.launchId});
+  const results=await Promise.all(Array.from({length:4},()=>f.create().resume(f.session,launch.launchId)));
+  assert.ok(results.every(r=>['requests-accepted','in-progress'].includes(r.status)));assert.equal(f.syncTypes.length,4);assert.equal((await generationRows(f)).rowCount,4);
+});
+
+test('generation: ambiguous history and contacts are retained separately and refusal redacts only held payloads',async()=>{
+  const f=await fixture();await complete(f,await begin(f));const history=createPostgresMetaHistorySyncRepository(transactions);
+  const item=parseMetaHistorySync({kind:'history',value:historyValue(undefined,f.assets.phoneNumberId)},f.assets.phoneNumberId)[0];
+  await history.record(await currentScope(f),item);await createPostgresMetaHistoryInboxProjector(transactions).projectNext();
+  const previous=(await pool.query('SELECT * FROM meta_history_sync_chunks WHERE tenant_id=$1',[f.session.tenantId])).rows;
+  await observedOffboarding(f);await newGeneration(f);const scope=await currentScope(f);
+  assert.equal((await history.record(scope,item)).outcome,'unattributed');await history.record(scope,item);
+  const contacts=createPostgresMetaContactSyncRepository(transactions);
+  assert.equal((await contacts.record(scope,{phoneNumber:'+16505551234',action:'add',fullName:'Pablo Morales',firstName:null,occurredAt:'2026-09-09T08:00:00.000Z'})).outcome,'unattributed');
+  assert.equal((await pool.query('SELECT * FROM meta_sync_unattributed_events WHERE tenant_id=$1',[f.session.tenantId])).rowCount,2);
+  assert.equal((await pool.query('SELECT * FROM meta_contact_sync_states WHERE tenant_id=$1',[f.session.tenantId])).rowCount,0);
+  assert.equal((await createPostgresMetaHistoryInboxProjector(transactions).projectNext()).outcome,'idle');
+  const current=await meta.findConnectionByTenantId(f.session.tenantId);
+  assert.equal((await createPostgresMetaDataSyncLifecycle({transactions,queries}).readView(f.session.tenantId,current)).stage,'import-review-required');
+  await history.record(scope,{kind:'declined'});await history.record(scope,{...item,chunkOrder:item.chunkOrder+1});
+  assert.equal((await createPostgresMetaDataSyncLifecycle({transactions,queries}).readView(f.session.tenantId,current)).stage,'sharing-declined');
+  assert.equal((await pool.query('SELECT * FROM meta_sync_unattributed_events WHERE tenant_id=$1 AND payload IS NOT NULL',[f.session.tenantId])).rowCount,0);
+  assert.deepEqual((await pool.query('SELECT * FROM meta_history_sync_chunks WHERE tenant_id=$1',[f.session.tenantId])).rows,previous);
+  await assert.rejects(pool.query('DELETE FROM meta_sync_unattributed_events WHERE tenant_id=$1',[f.session.tenantId]),/cannot be erased/);
+  await assert.rejects(pool.query("UPDATE meta_sync_unattributed_events SET payload='{}' WHERE tenant_id=$1",[f.session.tenantId]),/only be redacted/);
+});
+
+test('generation: superseded prepared requests are cancelled individually while current requests stay accepted',async()=>{
+  let rejectFinish=true;
+  const f=await fixture({requests:{...requests,async finish(request,result){if(rejectFinish)throw new Error('lost storage');return requests.finish(request,result);}}});
+  await complete(f,await begin(f));await observedOffboarding(f);rejectFinish=false;await newGeneration(f);
+  const lifecycle=createPostgresMetaDataSyncLifecycle({transactions,queries});
+  for(let i=0;i<20;i++){if(await lifecycle.reconcileNext()==='idle')break;}
+  const rows=(await generationRows(f)).rows;assert.equal(rows[0].status,'cancelled');assert.equal(rows[1].status,'dispatching');
+  assert.equal(rows[2].status,'accepted');assert.equal(rows[3].status,'accepted');
+});
+
+test('generation: offboarding a newer authorization can recover after an earlier signup lacked removal evidence',async()=>{
+  const f=await fixture();await complete(f,await begin(f));
+  assert.equal((await newGeneration(f)).result.synchronization.status,'recovery-required');
+  await observedOffboarding(f);assert.equal((await newGeneration(f)).result.synchronization.status,'requests-accepted');assert.equal(f.syncTypes.length,4);
+});
+
+test('generation: concurrent held ingestion and refusal converge without restoring content',async()=>{
+  const f=await fixture();await complete(f,await begin(f));await observedOffboarding(f);await newGeneration(f);
+  const scope=await currentScope(f),history=createPostgresMetaHistorySyncRepository(transactions);
+  const item=parseMetaHistorySync({kind:'history',value:historyValue(undefined,f.assets.phoneNumberId)},f.assets.phoneNumberId)[0];
+  const outcomes=await Promise.all([history.record(scope,item),history.record(scope,{kind:'declined'}),history.record(scope,{...item,chunkOrder:item.chunkOrder+1})]);
+  assert.ok(outcomes.every(r=>r.outcome==='unattributed'));
+  assert.equal((await pool.query('SELECT * FROM meta_sync_unattributed_events WHERE tenant_id=$1 AND payload IS NOT NULL',[f.session.tenantId])).rowCount,0);
+});
+
+test('generation: migration preserves accepted requests and the legacy cycle without inventing removal evidence',async()=>{
+  assert.deepEqual(await retainedRequests(upgradeCase),upgradeRows);
+  const row=(await pool.query('SELECT previous_started_at,offboarding_event_digest FROM meta_data_sync_onboardings WHERE tenant_id=$1',[upgradeCase.session.tenantId])).rows[0];
+  assert.deepEqual(row,{previous_started_at:null,offboarding_event_digest:null});
+});
+
+test('generation: concurrent legacy SQL callers cannot bind the same phone to two tenants',async()=>{
+  const a=await fixture(),b=await fixture();await requests.begin(a.session);await requests.begin(b.session);
+  const insert=f=>pool.query(`INSERT INTO meta_data_sync_requests (tenant_id,waba_id,phone_number_id,connection_version,sync_type,started_at)
+    SELECT $1,$2,$3,2,'history',started_at FROM meta_data_sync_onboardings WHERE tenant_id=$1`,[f.session.tenantId,f.assets.wabaId,a.assets.phoneNumberId]);
+  const outcomes=await Promise.allSettled([insert(a),insert(b)]);
+  assert.equal(outcomes.filter(r=>r.status==='fulfilled').length,1);
+  assert.equal(outcomes.filter(r=>r.status==='rejected'&&/another tenant history/.test(r.reason.message)).length,1);
 });

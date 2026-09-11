@@ -1,3 +1,4 @@
+import { lockMetaSyncAttribution, retainUnattributedMetaSync } from './postgresMetaSyncUnattributed.ts';
 import { normalizeMetaHistorySync, type MetaHistoryScope, type MetaHistoryItem, type MetaHistorySyncRepository } from "../meta/metaHistorySync.ts";
 import { MetaWebhookProcessorError } from "../meta/metaWebhookIngress.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
@@ -50,9 +51,11 @@ export function createPostgresMetaHistorySyncRepository(transactions: PostgresTr
       const digest = await sha256Hex(new TextEncoder().encode(JSON.stringify({ namespace: "whatsapp_history_capture_v1", scope, item })));
       const binding = [scope.tenantId, scope.wabaId, scope.phoneNumberId, scope.connectionVersion] as const;
       return transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await lockMetaSyncAttribution(tx,scope.tenantId);
         const connection = await one(tx, postgresMetaHistorySyncSql.connection, binding);
         if (connection === null) return fail("HISTORY_SYNC_CONNECTION_CHANGED");
         key(connection, "tenantId", scope.tenantId);
+        if (await retainUnattributedMetaSync(tx, scope, item.kind, item)) return { outcome: 'unattributed' as const };
         // Webhooks may precede the POST response or follow a lost response.
         // A prepared/rejected request never authorizes data capture. Refusal
         // may still redact data captured before a late POST rejection arrived.

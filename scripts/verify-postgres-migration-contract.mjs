@@ -1511,6 +1511,14 @@ function containsDestructiveStatement(source, fileName) {
 ]) reviewedSource = reviewedSource.replace(trigger, "");
   }
 
+  if (fileName === "0091_meta_data_sync_generations.sql") {
+    for (const statement of [
+      "CREATE TRIGGER meta_sync_unattributed_truncate_guard BEFORE TRUNCATE ON meta_sync_unattributed_events\n  FOR EACH STATEMENT EXECUTE FUNCTION guard_meta_sync_unattributed_v1();",
+      "CREATE TRIGGER meta_data_sync_start_truncate_guard BEFORE TRUNCATE ON meta_data_sync_onboardings\n  FOR EACH STATEMENT EXECUTE FUNCTION guard_meta_data_sync_start_v1();",
+      "CREATE TRIGGER meta_data_sync_request_truncate_guard BEFORE TRUNCATE ON meta_data_sync_requests\n  FOR EACH STATEMENT EXECUTE FUNCTION guard_meta_data_sync_start_v1();",
+    ]) reviewedSource = reviewedSource.replace(statement, "");
+  }
+
   if (fileName === "0090_meta_media_retention.sql") {
     // Exact guards prohibit truncation; they never truncate stored evidence.
     for (const trigger of [

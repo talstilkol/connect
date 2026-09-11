@@ -19,7 +19,7 @@ export interface MetaContactSyncChange {
 
 export interface MetaContactSyncRepository {
   record(scope: MetaContactSyncScope, change: MetaContactSyncChange): Promise<{
-    outcome: "updated" | "duplicate" | "ignored";
+    outcome: "unattributed" | "updated" | "duplicate" | "ignored";
   }>;
 }
 

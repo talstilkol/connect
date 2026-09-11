@@ -279,9 +279,10 @@ test('legacy entry points cannot bypass signup binding and existing legacy start
   await prepareSignup(f); await assert.rejects(syncRequests.prepare(f.session,(await current(f)).version),{ code:'SYNC_SIGNUP_PREPARATION_REQUIRED' });
   const legacy = await fixture(); await syncRequests.begin(legacy.session); const previous = await syncRows(legacy);
   const launch = await begin(legacy); assert.equal((await complete(legacy,launch)).status,'connected');
-  await assert.rejects(syncRequests.prepareFromSignupLaunch(legacy.session,launch.launchId),{ code:'SYNC_REQUEST_ALREADY_BOUND' });
-  await assert.rejects(syncRequests.prepare(legacy.session,(await current(legacy)).version),/legacy start/);
-  assert.deepEqual(await syncRows(legacy),previous);
+  await syncRequests.prepareFromSignupLaunch(legacy.session,launch.launchId);
+  await assert.rejects(syncRequests.prepare(legacy.session,(await current(legacy)).version),{code:'SYNC_SIGNUP_PREPARATION_REQUIRED'});
+  const retained=await syncRows(legacy);assert.equal(retained.starts.length,2);assert.deepEqual(retained.starts[0],previous.starts[0]);
+  assert.equal(retained.requests.length,2);
 });
 
 test('a fresh completed signup cannot reset old accepted synchronization requests', async () => {
@@ -290,7 +291,7 @@ test('a fresh completed signup cannot reset old accepted synchronization request
   assert.equal(claimed.outcome,'claimed'); await syncRequests.finish(claimed.request,{ status:'accepted',requestId:'existing-provider-request' });
   const previous = await syncRows(f); const newer = await begin(f);
   assert.equal((await complete(f,newer,{ ...f.input,authorizationCode:'new-code-with-old-sync' })).status,'connected');
-  await assert.rejects(syncRequests.prepareFromSignupLaunch(f.session,newer.launchId),{ code:'SYNC_REQUEST_ALREADY_BOUND' });
+  await assert.rejects(syncRequests.prepareFromSignupLaunch(f.session,newer.launchId),{ code:'SYNC_OFFBOARDING_EVIDENCE_REQUIRED' });
   assert.deepEqual(await syncRows(f),previous);
 });
 

@@ -1,3 +1,4 @@
+import { lockMetaSyncAttribution, retainUnattributedMetaSync } from './postgresMetaSyncUnattributed.ts';
 import { normalizeMetaContactSync, reduceMetaContactSync, type MetaContactSyncRepository, type MetaContactSyncState, type MetaContactSyncScope, type MetaContactSyncChange } from "../meta/metaContactSync.ts";
 import { MetaWebhookProcessorError } from "../meta/metaWebhookIngress.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
@@ -58,11 +59,13 @@ export function createPostgresMetaContactSyncRepository(transactions: PostgresTr
       })));
       const keys = [scope.tenantId, scope.wabaId, scope.phoneNumberId, change.phoneNumber] as const;
       return transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await lockMetaSyncAttribution(tx,scope.tenantId);
         const connection = await one(tx, postgresMetaContactSyncSql.lockConnection,
           [scope.tenantId, scope.wabaId, scope.phoneNumberId, scope.connectionVersion]);
         if (connection === null || parsePostgresPositiveInteger(requireExactPostgresRow(connection, ["tenantId"]).tenantId) !== scope.tenantId) {
           throw new MetaWebhookProcessorError("CONTACT_SYNC_CONNECTION_CHANGED");
         }
+        if (await retainUnattributedMetaSync(tx, scope, 'contact', change)) return { outcome: 'unattributed' as const };
         const initial = reduceMetaContactSync(null, change);
         const inserted = await one(tx, postgresMetaContactSyncSql.insertState,
           [...keys, initial.occurredAt, initial.status, initial.fullName, initial.firstName]);

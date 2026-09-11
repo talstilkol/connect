@@ -22,7 +22,7 @@ export type MetaHistoryItem = Readonly<
     contentKind: "image" | "audio" | "video" | "document" | "sticker"; content: Json }
 >;
 export interface MetaHistorySyncRepository {
-  record(scope: MetaHistoryScope, item: MetaHistoryItem): Promise<{ outcome: "stored" | "duplicate" | "conflicted" | "discarded" | "declined" }>;
+  record(scope: MetaHistoryScope, item: MetaHistoryItem): Promise<{ outcome: "unattributed" | "stored" | "duplicate" | "conflicted" | "discarded" | "declined" }>;
 }
 
 function fail(): never { throw new MetaWebhookProcessorError("INVALID_HISTORY_SYNC"); }

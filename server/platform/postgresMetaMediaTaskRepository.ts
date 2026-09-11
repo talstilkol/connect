@@ -19,7 +19,8 @@ export const postgresMetaMediaTaskSql = Object.freeze({
     AND NOT EXISTS(SELECT 1 FROM meta_media_withdrawals cleanup JOIN meta_media_upload_jobs j ON j.job_key=cleanup.job_key
       WHERE j.tenant_id=message.tenant_id AND j.message_key=message.message_key AND j.connection_version=session.connection_version) ORDER BY session.tenant_id,message.message_key LIMIT 1`,
   actor: `SELECT COALESCE((SELECT actor_external_user_id FROM meta_media_upload_jobs WHERE job_key=$2 AND tenant_id=$1),
-    (SELECT actor_external_user_id FROM meta_data_sync_onboardings WHERE tenant_id=$1)) AS actor`,
+    (SELECT onboarding.actor_external_user_id FROM meta_data_sync_onboardings onboarding JOIN meta_history_sync_sessions session
+      ON session.tenant_id=onboarding.tenant_id AND session.started_at=onboarding.started_at WHERE onboarding.tenant_id=$1)) AS actor`,
   inspectionCandidate: `SELECT job.job_key AS "jobKey",job.tenant_id AS "tenantId",job.actor_external_user_id AS actor,
     job.message_key AS "messageKey",job.connection_version AS "connectionVersion",job.source_sha256 AS "sourceSha256"
     FROM meta_media_upload_jobs job WHERE job.status IN ('dispatching','reconciliation-required','quarantined')

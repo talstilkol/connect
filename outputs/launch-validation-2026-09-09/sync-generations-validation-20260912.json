@@ -1,0 +1,164 @@
+{
+  "checkedAt": "2026-09-11T23:38:13.527969+00:00",
+  "milestone": "R222",
+  "status": "request generations and unattributed capture verified locally; historical read and attributed reimport remain open",
+  "sourceManifest": "sync-generations-files-20260912.json",
+  "sourceFiles": 204,
+  "previousLocalHead": "be45b67cb657ac6400680f3b6cfbac708e1e0911",
+  "lastPublishedHead": "a34e0b091f638f7ccbbedc57eff4c1c2ff89e943",
+  "checks": {
+    "unit": {
+      "log": "sync-generations-unit-final-20260912.log",
+      "sha256": "b95ab11df656b86e482d5be7563fd6fab3b78fb1f73a0f291e8aebfc573fb67d"
+    },
+    "builds": {
+      "log": "sync-generations-build-final-20260912.log",
+      "sha256": "832673056d499a52b2a8209498c1c098e60c73f909e0fc9bba3811a1ffac3908"
+    },
+    "typecheck": {
+      "log": "sync-generations-typecheck-final-20260912.log",
+      "sha256": "5872c78bd1d4242580d7f588f30fe8961e76f3779e71cec44e0fbe60348b249f"
+    },
+    "lint": {
+      "log": "sync-generations-lint-final-20260912.log",
+      "sha256": "91f8840965c777a6b28ea05948c6cf268a13570cb4164d3bba0bdea58b9d80da"
+    },
+    "source": {
+      "log": "sync-generations-source-final-20260912.log",
+      "sha256": "2b79ab7401004d5b684b6754cb48b1fbe2adfbe00dfc84701215cb20439f12f9"
+    },
+    "interface": {
+      "log": "sync-generations-interface-final-20260912.log",
+      "sha256": "26551f1417f5c0017c99fd908acf6495152057fc3a5a1043a4ecf1f7eabb72a1"
+    },
+    "migrations": {
+      "log": "sync-generations-migrations-final-20260912.log",
+      "sha256": "b8381eba475960c8c563e1344ae474491e6c4ad7f3893c43ab876ddeeda61443"
+    },
+    "focused": {
+      "log": "sync-generations-focused-final-20260912.log",
+      "sha256": "23f7858431b30eee3d9e3a76b30614e0ea83abd540b5241435d76e2ce904858f"
+    }
+  },
+  "unitPassed": 4598,
+  "focusedPassed": 152,
+  "migrations": 92,
+  "lintWarnings": 28,
+  "postgresRuns": [
+    {
+      "version": "16.13",
+      "scope": "all eight Coexistence suites",
+      "finalAffectedCode": true,
+      "tests": 401,
+      "suites": [
+        29,
+        51,
+        37,
+        11,
+        16,
+        225,
+        15,
+        17
+      ],
+      "failed": 0,
+      "log": "sync-generations-postgres16-final-20260912.log",
+      "sha256": "c865b7782d78494e91b7426e7e21d3902faeb8bb2ad0d0446aaba66f53004719"
+    },
+    {
+      "version": "17.11",
+      "scope": "final orchestration and lifecycle suites",
+      "finalAffectedCode": true,
+      "tests": 66,
+      "suites": [
+        51,
+        15
+      ],
+      "failed": 0,
+      "log": "sync-generations-scope-postgres17-final-20260912.log",
+      "sha256": "d502c02a175cf57e635240100828db363e42048603dadf4f22582f10514fb1b8"
+    },
+    {
+      "version": "17.11",
+      "scope": "signup, orchestration, lifecycle and media regression before the final phone fence and refusal view",
+      "finalAffectedCode": false,
+      "tests": 319,
+      "suites": [
+        29,
+        50,
+        15,
+        225
+      ],
+      "failed": 0,
+      "log": "sync-generations-postgres17-final-20260912.log",
+      "sha256": "8a635c616bc6d1cb09c3cbc16a8172bb186b02d17535f2e9b155d519fa71aaa1"
+    }
+  ],
+  "newGenerationCases": {
+    "perVersion": 10,
+    "versions": [
+      "16.13",
+      "17.11"
+    ],
+    "includes": [
+      "offboarding and new cycle with retained originals",
+      "no reimport from authorization refresh alone",
+      "late original acceptance",
+      "concurrent continuation",
+      "unattributed history and contact capture with refusal redaction",
+      "per-cycle maintenance",
+      "recovery after an earlier refresh",
+      "concurrent refusal and capture",
+      "upgrade preserves accepted records",
+      "cross-tenant phone race"
+    ]
+  },
+  "validationScopeNote": "The full unit suite and both builds preceded the final SQL-only refusal projection/read CASE; the final 152 contracts, TypeScript, lint, PostgreSQL 16 all suites and PostgreSQL 17 affected suites cover those final edits. PostgreSQL execution counts overlap and are not unique test counts. Earlier failures were fixed and the affected suites rerun.",
+  "remaining": {
+    "codingSubsteps": 2,
+    "items": [
+      {
+        "task": "authorized historical reads and attributed import across generations",
+        "engineeringHours": [
+          6,
+          12
+        ]
+      },
+      {
+        "task": "final release audit and delivery package",
+        "engineeringHours": [
+          2,
+          4
+        ]
+      }
+    ],
+    "engineeringHours": [
+      8,
+      16
+    ],
+    "confidence": "low",
+    "launchStages": 12,
+    "launchDate": null
+  },
+  "limitations": [
+    "No release path from the unattributed journal is implemented.",
+    "Existing history remains authorization-blocked after reconnect until historical read support is implemented.",
+    "No live Meta acceptance or deployment was performed."
+  ],
+  "research": {
+    "officialMeta": "https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboarding-business-app-users/",
+    "provenance": "Official Markdown retrieved during R221 on 2026-09-12 and reread locally; this turn the web fetch returned HTTP 429.",
+    "supports": [
+      "one request per sync type per onboarding",
+      "offboarding followed by new Embedded Signup for repetition",
+      "24-hour start window",
+      "request_id returned by POST; documented history batch lacks matching request_id"
+    ]
+  },
+  "externalActions": {
+    "providerCalls": false,
+    "push": false,
+    "deploy": false
+  },
+  "originalUntrackedFilesPreserved": 624,
+  "testContainersStopped": true
+}
