@@ -2,6 +2,10 @@
 
 import type { MetaConnectionView } from
   "../../shared/domain/metaConnectionView";
+import type {
+  OperationalReportStatus,
+  OperationalReportView,
+} from "../../shared/domain/operationalReportView";
 import type { InterfaceLanguage } from
   "../../shared/domain/businessProfileDraft";
 import { readWorkspaceDirection } from
@@ -18,17 +22,22 @@ import { useWorkspaceDrafts } from
   "./WorkspaceDraftProvider";
 import { readWorkspaceSetupSteps } from
   "./workspaceSetupSteps";
+import { DashboardReportSummary } from "./DashboardReportSummary";
 
 export function WorkspaceDashboard({
   metaConnection,
   decisionRequiredCount,
   language,
+  operationalReport,
+  operationalReportStatus,
   onNavigate,
   onConnectMeta,
 }: {
   metaConnection: MetaConnectionView;
   decisionRequiredCount: number;
   language: InterfaceLanguage;
+  operationalReport: OperationalReportView | null;
+  operationalReportStatus: OperationalReportStatus;
   onNavigate: (section: SectionId) => void;
   onConnectMeta: () => void;
 }) {
@@ -123,31 +132,12 @@ export function WorkspaceDashboard({
         </button>
       </section>
 
-      <section
-        className="metrics-grid"
-        aria-label={messages.metricsAriaLabel}
-      >
-        <MetricCard
-          label={messages.metrics[0]}
-          icon="↗"
-          noDataLabel={messages.noMetricSource}
-        />
-        <MetricCard
-          label={messages.metrics[1]}
-          icon="♙"
-          noDataLabel={messages.noMetricSource}
-        />
-        <MetricCard
-          label={messages.metrics[2]}
-          icon="◒"
-          noDataLabel={messages.noMetricSource}
-        />
-        <MetricCard
-          label={messages.metrics[3]}
-          icon="✦"
-          noDataLabel={messages.noMetricSource}
-        />
-      </section>
+      <DashboardReportSummary
+        language={language}
+        status={operationalReportStatus}
+        report={operationalReport}
+        onOpenReports={() => onNavigate("reports")}
+      />
 
       <div className="dashboard-grid">
         <section className="card onboarding-card">
@@ -251,28 +241,5 @@ export function WorkspaceDashboard({
         </aside>
       </div>
     </>
-  );
-}
-
-function MetricCard({
-  label,
-  icon,
-  noDataLabel,
-}: {
-  label: string;
-  icon: string;
-  noDataLabel: string;
-}) {
-  return (
-    <article className="metric-card">
-      <div className="metric-icon" aria-hidden="true">
-        {icon}
-      </div>
-      <div>
-        <span>{label}</span>
-        <strong>—</strong>
-        <small>{noDataLabel}</small>
-      </div>
-    </article>
   );
 }

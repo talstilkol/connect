@@ -148,7 +148,7 @@ export default async function WorkspaceSectionPage({
             canWrite: false as const,
           },
         }),
-    section === "reports" && authEnabled
+    (section === "reports" || section === "dashboard") && authEnabled
       ? readCurrentOperationalReport()
       : Promise.resolve({
           status:

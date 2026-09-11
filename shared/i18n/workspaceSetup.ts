@@ -23,7 +23,9 @@ export interface WorkspaceDashboardMessages {
   showOpenDecisions: string;
   metricsAriaLabel: string;
   metrics: readonly [string, string, string, string];
-  noMetricSource: string;
+  metricDescriptions: readonly [string, string, string, string];
+  metricPeriod: (start: string, end: string) => string;
+  openReports: string;
   setupKicker: string;
   setupTitle: string;
   progress: (completed: number, total: number) => string;
@@ -121,12 +123,19 @@ export const workspaceSetupMessages = {
       showOpenDecisions: "הצגת החלטות פתוחות",
       metricsAriaLabel: "מדדי חשבון",
       metrics: [
-        "הודעות החודש",
-        "אנשי קשר",
-        "קמפיינים פעילים",
-        "צריכת AI",
+        "הודעות בתקופה",
+        "שיחות עם פעילות בתקופה",
+        "קמפיינים שנוצרו בתקופה",
+        "החלטות AI שנרשמו",
       ],
-      noMetricSource: "טרם קיים מקור נתונים",
+      metricDescriptions: [
+        "הודעות נכנסות ויוצאות שנרשמו בטווח התאריכים",
+        "ההודעה האחרונה בשיחה היא בטווח, כולל שיחות שנסגרו",
+        "לפי תאריך היצירה, בכל המצבים כולל טיוטות וביטולים",
+        "החלטות על תכנון מענה או העברה לנציג, ללא חישוב עלות",
+      ],
+      metricPeriod: (start, end) => `תקופת הדוח: ${start} — ${end} (UTC)`,
+      openReports: "לכל הדוחות ולבחירת תקופה",
       setupKicker: "אשף הקמה",
       setupTitle: "10 צעדים עד לשליחה הראשונה",
       progress: (completed, total) => `${completed} מתוך ${total}`,
@@ -245,12 +254,19 @@ export const workspaceSetupMessages = {
       showOpenDecisions: "View open decisions",
       metricsAriaLabel: "Account metrics",
       metrics: [
-        "Messages this month",
-        "Contacts",
-        "Active campaigns",
-        "AI usage",
+        "Messages in period",
+        "Conversations with activity in period",
+        "Campaigns created in period",
+        "Recorded AI decisions",
       ],
-      noMetricSource: "No data source is available yet",
+      metricDescriptions: [
+        "Inbound and outbound messages recorded within the date range",
+        "Last message falls within the range, including closed conversations",
+        "By creation date, across all states including drafts and cancellations",
+        "Reply planning or handoff decisions, without a cost calculation",
+      ],
+      metricPeriod: (start, end) => `Report period: ${start} — ${end} (UTC)`,
+      openReports: "All reports and date selection",
       setupKicker: "Setup wizard",
       setupTitle: "10 steps to the first message",
       progress: (completed, total) => `${completed} of ${total}`,
@@ -370,12 +386,19 @@ export const workspaceSetupMessages = {
       showOpenDecisions: "عرض القرارات المفتوحة",
       metricsAriaLabel: "مقاييس الحساب",
       metrics: [
-        "رسائل هذا الشهر",
-        "جهات الاتصال",
-        "الحملات النشطة",
-        "استخدام AI",
+        "الرسائل خلال الفترة",
+        "المحادثات ذات النشاط خلال الفترة",
+        "الحملات المنشأة خلال الفترة",
+        "قرارات AI المسجلة",
       ],
-      noMetricSource: "لا يوجد مصدر بيانات بعد",
+      metricDescriptions: [
+        "الرسائل الواردة والصادرة المسجلة ضمن نطاق التواريخ",
+        "آخر رسالة ضمن النطاق، بما في ذلك المحادثات المغلقة",
+        "حسب تاريخ الإنشاء، بجميع الحالات بما فيها المسودات والإلغاءات",
+        "قرارات تخطيط الرد أو التحويل إلى موظف، دون حساب التكلفة",
+      ],
+      metricPeriod: (start, end) => `فترة التقرير: ${start} — ${end} (UTC)`,
+      openReports: "كل التقارير واختيار الفترة",
       setupKicker: "معالج الإعداد",
       setupTitle: "10 خطوات حتى أول إرسال",
       progress: (completed, total) => `${completed} من ${total}`,

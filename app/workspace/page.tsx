@@ -4,6 +4,7 @@ import { hasClerkServerConfiguration } from "../../server/auth/clerkConfiguratio
 import { readCurrentMetaEmbeddedSignup } from "../../server/meta/currentMetaEmbeddedSignup";
 import { readCurrentMetaConnection } from "../../server/meta/currentMetaConnection";
 import { readCurrentProductionReadiness } from "../../server/operations/currentProductionReadiness";
+import { readCurrentOperationalReport } from "../../server/reports/currentOperationalReport";
 import { readWorkspaceLanguage } from "../../shared/i18n/workspace";
 
 // Clerk's experimental lint rule cannot follow the intentional config-disabled rehearsal branch; source-contract tests enforce the conditional direct protection.
@@ -27,12 +28,19 @@ export default async function WorkspacePage({
     initialMetaConnection,
     initialMetaEmbeddedSignup,
     initialProductionReadiness,
+    operationalReportResult,
   ] = await Promise.all([
     readCurrentMetaConnection(),
     readCurrentMetaEmbeddedSignup(),
     Promise.resolve(
       readCurrentProductionReadiness(),
     ),
+    authEnabled
+      ? readCurrentOperationalReport()
+      : Promise.resolve({
+          status: "configuration-required" as const,
+          report: null,
+        }),
   ]);
 
   return (
@@ -42,6 +50,8 @@ export default async function WorkspacePage({
       authEnabled={authEnabled}
       initialMetaConnection={initialMetaConnection}
       initialMetaEmbeddedSignup={initialMetaEmbeddedSignup}
+      initialOperationalReport={operationalReportResult.report}
+      initialOperationalReportStatus={operationalReportResult.status}
       initialProductionReadiness={
         initialProductionReadiness
       }
