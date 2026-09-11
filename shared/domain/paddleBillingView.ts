@@ -8,7 +8,7 @@ export interface PaddleBillingView {
   readonly attempt: number;
   readonly canCreateCheckout: boolean;
   readonly paidAccessReason: typeof paidAccessReasons[number];
-  readonly checkout: Readonly<{ state: "queued" | "creating" | "unknown" | "ready" | "rejected" | "completed"; transactionId: string | null; url: string | null }> | null;
+  readonly checkout: Readonly<{ state: "queued" | "creating" | "unknown" | "ready" | "rejected" | "completed" | "closed"; transactionId: string | null; url: string | null }> | null;
   readonly subscription: Readonly<{ id: string; status: "active" | "trialing" | "past_due" | "paused" | "canceled"; endsAt: string | null; needsReview: boolean; scheduledChange: Readonly<{ action: "cancel" | "pause" | "resume"; effectiveAt: string }> | null }> | null;
 }
 export type PaddleBillingResult = Readonly<{ status: "ready"; billing: PaddleBillingView }> | Readonly<{ status: "configuration-required" | "permission-denied" | "server-error" | "unauthenticated" }>;
@@ -25,7 +25,7 @@ export function parsePaddleBillingView(value: unknown): PaddleBillingView | null
   const checkout = value.checkout;
   if ((checkout === null) !== (value.attempt === 0)) return null;
   if (checkout !== null) {
-    if (!record(checkout) || !exact(checkout, ["state", "transactionId", "url"]) || !["queued", "creating", "unknown", "ready", "rejected", "completed"].includes(String(checkout.state))) return null;
+    if (!record(checkout) || !exact(checkout, ["state", "transactionId", "url"]) || !["queued", "creating", "unknown", "ready", "rejected", "completed", "closed"].includes(String(checkout.state))) return null;
     if (checkout.state !== "ready" || !value.canManage) { if (checkout.transactionId !== null || checkout.url !== null) return null; }
     else {
       if (typeof checkout.transactionId !== "string" || !/^txn_[a-z0-9]{26}$/.test(checkout.transactionId) || typeof checkout.url !== "string" || checkout.url.length > 2048) return null;
@@ -41,6 +41,6 @@ export function parsePaddleBillingView(value: unknown): PaddleBillingView | null
     const scheduled = subscription.scheduledChange;
     if (scheduled !== null && (!record(scheduled) || !exact(scheduled, ["action", "effectiveAt"]) || !["cancel", "pause", "resume"].includes(String(scheduled.action)) || !timestamp(scheduled.effectiveAt))) return null;
   }
-  if (value.canCreateCheckout && checkout !== null && (!record(subscription) || subscription.status !== "canceled" || subscription.needsReview)) return null;
+  if (value.canCreateCheckout && checkout !== null && (checkout as Record<string, unknown>).state !== "closed" && (!record(subscription) || subscription.status !== "canceled" || subscription.needsReview)) return null;
   return value as unknown as PaddleBillingView;
 }

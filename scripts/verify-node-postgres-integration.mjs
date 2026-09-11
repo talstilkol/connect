@@ -1,3 +1,4 @@
+import { connection as metaHistoryFixture } from "../tests/fixtures/meta-history.mjs";
 import assert from "node:assert/strict";
 import {
   readFile,
@@ -124,62 +125,14 @@ const projectRoot = fileURLToPath(
 const integrationDatabaseName = "connect_driver_integration";
 const integrationUrlEnvironmentKey =
   "CONNECT_POSTGRES_INTEGRATION_URL";
-const migrationFiles = Object.freeze([
-  "0000_core_contacts.sql",
-  "0001_railway_api_mutation_receipts.sql",
-  "0002_tenant_access_foundation.sql",
-  "0003_tenant_membership_events.sql",
-  "0004_team_invitation_lifecycle.sql",
-  "0005_conversations_messages.sql",
-  "0006_message_templates_campaigns.sql",
-  "0007_bot_flows_deliveries.sql",
-  "0008_ai_reporting.sql",
-  "0009_contact_organization_imports.sql",
-  "0010_meta_connection_credentials.sql",
-  "0011_whatsapp_delivery_policy.sql",
-  "0012_whatsapp_rate_limit_ledger.sql",
-  "0013_whatsapp_phone_throughput.sql",
-  "0014_worker_scheduler_lease.sql",
-  "0015_campaign_dispatch.sql",
-  "0016_ai_knowledge.sql",
-  "0017_ai_reply_outbox.sql",
-  "0018_tenant_subscriptions.sql",
-  "0019_production_decisions.sql",
-  "0020_system_admin_business_profiles.sql",
-  "0021_contact_consent_events.sql",
-  "0022_campaign_delivery_provider_links.sql",
-  "0023_api_mutation_rate_limits.sql",
-  "0024_whatsapp_legacy_reservation_category.sql",
-  "0025_data_migration_bundle_receipts.sql",
-  "0026_message_template_submission_outbox.sql",
-  "0027_clerk_organization_binding.sql",
-  "0028_clerk_invitation_rate_limit.sql",
-  "0029_team_invitation_delivery_deferrals.sql",
-  "0030_whatsapp_service_reply_reservations.sql",
-  "0031_bot_reply_delivery_deferrals.sql",
-  "0032_bot_reply_delivery_provider_links.sql",
-  "0033_bot_reply_staging_runs.sql",
-  "0034_bot_reply_staging_authorizations.sql",
-  "0035_bot_reply_staging_observations.sql",
-  "0036_bot_reply_provider_attempt_provenance.sql",
-  "0037_inbound_button_reply_provenance.sql",
-  "0038_bot_reply_service_window_rejection_provenance.sql",
-  "0039_bot_reply_provider_request_fence.sql",
-  "0040_bot_reply_staging_release_evidence.sql",
-  "0041_production_readiness_release_evidence_v2.sql",
-  "0042_bot_reply_provider_outcome_request_fence.sql",
-  "0043_bot_reply_staging_release_evidence_operator_audit.sql",
-  "0044_bot_reply_staging_release_evidence_atomic_publish.sql",
-  "0045_bot_reply_provider_clock_domains.sql",
-  "0046_bot_reply_staging_release_evidence_atomic_initialize.sql",
-  "0047_bot_reply_staging_attestation_nonce_ledger.sql",
-  "0048_bot_reply_staging_attested_evidence_atomic_publish.sql",
-  "0049_bot_reply_staging_attested_evidence_readback.sql",
-  "0050_bot_reply_staging_trigger_hardening.sql",
-  "0051_bot_reply_staging_run_capability_wrappers.sql",
-  "0052_bot_reply_staging_authorization_observation_hardening.sql",
-  "0053_bot_reply_staging_provider_operation_fence.sql",
-]);
+const migrationFiles = Object.freeze(
+  readdirSync(join(projectRoot, "postgres", "migrations"))
+    .filter(name => /^\d{4}_[a-z0-9_]+\.sql$/.test(name))
+    .sort(),
+);
+if (migrationFiles.length === 0 || migrationFiles.some((name, index) => !name.startsWith(`${String(index).padStart(4, "0")}_`))) {
+  throw new Error("NODE_POSTGRES_INTEGRATION_MIGRATION_SEQUENCE_INVALID");
+}
 
 function postgresEnvironment(connectionString) {
   const runtimeUrl = new URL(connectionString);
@@ -236,6 +189,20 @@ export function requireLocalIntegrationUrl(value) {
   }
 
   return url.toString();
+}
+
+async function queryWithTenantBarrier(pool, tenantId, sql, parameters) {
+  const transaction = await pool.connect();
+  try {
+    await transaction.query("BEGIN");
+    await transaction.query("SELECT pg_advisory_xact_lock(public.derive_bot_reply_staging_tenant_barrier_key_v1($1))", [tenantId]);
+    const result = await transaction.query(sql, parameters);
+    await transaction.query("COMMIT");
+    return result;
+  } catch (error) {
+    await transaction.query("ROLLBACK");
+    throw error;
+  } finally { transaction.release(); }
 }
 
 async function applyMigrations(pool) {
@@ -989,8 +956,8 @@ async function verifyMetaConnectionCredentials(
   const pending = await foundation.metaConnections.captureVerifiedAssets(
     session,
     {
-      businessPortfolioId: "integration-business-portfolio",
-      wabaId: "integration-waba",
+      businessPortfolioId: metaHistoryFixture.businessPortfolioId,
+      wabaId: metaHistoryFixture.wabaId,
       phoneNumberId: "155512345678901",
     },
   );
@@ -999,6 +966,7 @@ async function verifyMetaConnectionCredentials(
   assert.equal(pending.version, 1);
   await foundation.metaCredentialEnvelopes.store({
     tenantId,
+    expectedConnectionVersion: pending.version,
     keyVersion: "v1",
     initializationVector: "AQIDBAUGBwgJCgsM",
     ciphertext: "AQIDBAUGBwgJCgsMDQ4PEA==",
@@ -1025,7 +993,7 @@ async function verifyMetaConnectionCredentials(
   );
 
   const connected = await foundation.metaConnections.confirmWebhookSubscription(
-    session,
+    session, pending.version,
   );
   assert.equal(connected.status, "connected");
   assert.equal(connected.version, 2);
@@ -1033,14 +1001,14 @@ async function verifyMetaConnectionCredentials(
   assert.equal(connected.connectedAt !== null, true);
   assert.equal(
     (await foundation.metaWebhooks.findConnectionByWabaId(
-      "integration-waba",
+      metaHistoryFixture.wabaId,
     ))?.tenantId,
     tenantId,
   );
 
   const concurrentClaimInput = Object.freeze({
     tenantId,
-    wabaId: "integration-waba",
+    wabaId: metaHistoryFixture.wabaId,
     eventKey: "d".repeat(64),
     objectType: "whatsapp_business_account",
   });
@@ -1140,8 +1108,8 @@ async function verifyWhatsappDeliveryPolicy(
   const current =
     await foundation.whatsappDeliveryPolicies.findCurrentEnabledPolicy({
       tenantId,
-      businessPortfolioId: "integration-business-portfolio",
-      wabaId: "integration-waba",
+      businessPortfolioId: metaHistoryFixture.businessPortfolioId,
+      wabaId: metaHistoryFixture.wabaId,
       phoneNumberId: "155512345678901",
       checkedAt: "2026-08-17T08:33:00.000Z",
     });
@@ -1167,8 +1135,8 @@ async function verifyWhatsappDeliveryPolicy(
   assert.equal(
     await foundation.whatsappDeliveryPolicies.findCurrentEnabledPolicy({
       tenantId,
-      businessPortfolioId: "integration-business-portfolio",
-      wabaId: "integration-waba",
+      businessPortfolioId: metaHistoryFixture.businessPortfolioId,
+      wabaId: metaHistoryFixture.wabaId,
       phoneNumberId: "155512345678901",
       checkedAt: "2026-08-17T08:35:00.000Z",
     }),
@@ -1379,7 +1347,7 @@ async function verifyWhatsappRateLimitLedger(
   ]);
 
   await assert.rejects(
-    pool.query(
+    queryWithTenantBarrier(pool, tenantId,
       `UPDATE whatsapp_rate_limit_reservations
        SET template_category = 'UTILITY'
        WHERE reservation_key = $1`,
@@ -1388,7 +1356,7 @@ async function verifyWhatsappRateLimitLedger(
     (error) => error?.code === "P0001" && /immutable/.test(error.message),
   );
   await assert.rejects(
-    pool.query(
+    queryWithTenantBarrier(pool, tenantId,
       `UPDATE whatsapp_pair_rate_limit_state
        SET reserved_until = reserved_until + INTERVAL '1 hour'
        WHERE sender_key = $1
@@ -1935,13 +1903,13 @@ async function verifyMessageTemplateSubmissionOutboxLifecycle(
   });
   const templateKey = `template_v1_${"a".repeat(64)}`;
 
-  await foundation.metaConnections.captureVerifiedAssets(session, {
+  const pendingConnection = await foundation.metaConnections.captureVerifiedAssets(session, {
     businessPortfolioId: "123456789012340",
     wabaId: "123456789012341",
     phoneNumberId: "123456789012342",
   });
   const connection = await foundation.metaConnections.confirmWebhookSubscription(
-    session,
+    session, pendingConnection.version,
   );
   assert.equal(connection.status, "connected");
   assert.equal(connection.version, 2);
@@ -1973,7 +1941,7 @@ async function verifyMessageTemplateSubmissionOutboxLifecycle(
   });
   assert.equal(draft.status, "draft");
 
-  const payload = Object.freeze({ templateKey });
+  const payload = Object.freeze({ templateKey, expectedVersion: draft.version });
   const [idempotencyKey, requestDigest] = await Promise.all([
     deriveRailwayApiDeterministicIdempotencyKey(
       RAILWAY_MESSAGE_TEMPLATE_SUBMISSION_OPERATION,
@@ -2892,7 +2860,7 @@ async function verifyBotDeliverySchema(pool, tenantId) {
   ]);
 
   await assert.rejects(
-    pool.query(
+    queryWithTenantBarrier(pool, tenantId,
       `UPDATE bot_reply_deliveries
        SET attempt_count = 1
        WHERE tenant_id = $1
@@ -5431,8 +5399,8 @@ async function verifyPostgresSystemAdminWhatsappDeliveryPolicyHttpRuntime(
       expectedConnectionVersion: 2,
       expectedPolicyVersion: initialPolicyVersion,
       expectedBusinessPortfolioIdentifier:
-        "integration-business-portfolio",
-      expectedWabaIdentifier: "integration-waba",
+        metaHistoryFixture.businessPortfolioId,
+      expectedWabaIdentifier: metaHistoryFixture.wabaId,
       expectedPhoneNumberIdentifier: "155512345678901",
       portfolioLimitKind: "bounded",
       portfolioLimitValue: 250,
@@ -8384,7 +8352,7 @@ export async function verifyNodePostgresIntegration(
          current_setting('server_version') AS version`,
     );
     assert.equal(identity.rows[0]?.database, integrationDatabaseName);
-    assert.match(identity.rows[0]?.version, /^16\./);
+    assert.match(identity.rows[0]?.version, /^(16|17)\./);
 
     await applyMigrations(pool);
     const transactions = createNodePostgresTransactionManager(pool);

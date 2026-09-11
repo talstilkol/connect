@@ -72,96 +72,9 @@ test("keeps the real integration proof explicit and outside the default gate", a
   assert.doesNotMatch(source, /userInfo\(\)\.username/);
   assert.match(source, /DATABASE_NOT_EMPTY/);
   assert.match(source, /Promise\.all/);
-  assert.match(source, /0004_team_invitation_lifecycle\.sql/);
-  assert.match(source, /0005_conversations_messages\.sql/);
-  assert.match(source, /0006_message_templates_campaigns\.sql/);
-  assert.match(source, /0007_bot_flows_deliveries\.sql/);
-  assert.match(source, /0008_ai_reporting\.sql/);
-  assert.match(source, /0011_whatsapp_delivery_policy\.sql/);
-  assert.match(source, /0012_whatsapp_rate_limit_ledger\.sql/);
-  assert.match(source, /0013_whatsapp_phone_throughput\.sql/);
-  assert.match(source, /0014_worker_scheduler_lease\.sql/);
-  assert.match(source, /0015_campaign_dispatch\.sql/);
-  assert.match(source, /0016_ai_knowledge\.sql/);
-  assert.match(source, /0017_ai_reply_outbox\.sql/);
-  assert.match(source, /0018_tenant_subscriptions\.sql/);
-  assert.match(source, /0019_production_decisions\.sql/);
-  assert.match(source, /0020_system_admin_business_profiles\.sql/);
-  assert.match(source, /0021_contact_consent_events\.sql/);
-  assert.match(source, /0022_campaign_delivery_provider_links\.sql/);
-  assert.match(source, /0023_api_mutation_rate_limits\.sql/);
-  assert.match(source, /0024_whatsapp_legacy_reservation_category\.sql/);
-  assert.match(source, /0025_data_migration_bundle_receipts\.sql/);
-  assert.match(source, /0026_message_template_submission_outbox\.sql/);
-  assert.match(source, /0027_clerk_organization_binding\.sql/);
-  assert.match(source, /0028_clerk_invitation_rate_limit\.sql/);
-  assert.match(source, /0029_team_invitation_delivery_deferrals\.sql/);
-  assert.match(source, /0030_whatsapp_service_reply_reservations\.sql/);
-  assert.match(source, /0031_bot_reply_delivery_deferrals\.sql/);
-  assert.match(source, /0032_bot_reply_delivery_provider_links\.sql/);
-  assert.match(source, /0033_bot_reply_staging_runs\.sql/);
-  assert.match(source, /0034_bot_reply_staging_authorizations\.sql/);
-  assert.match(source, /0035_bot_reply_staging_observations\.sql/);
-  assert.match(source, /0036_bot_reply_provider_attempt_provenance\.sql/);
-  assert.match(source, /0037_inbound_button_reply_provenance\.sql/);
-  assert.match(
-    source,
-    /0038_bot_reply_service_window_rejection_provenance\.sql/,
-  );
-  assert.match(source, /0039_bot_reply_provider_request_fence\.sql/);
-  assert.match(source, /0040_bot_reply_staging_release_evidence\.sql/);
-  assert.match(
-    source,
-    /0041_production_readiness_release_evidence_v2\.sql/,
-  );
-  assert.match(
-    source,
-    /0042_bot_reply_provider_outcome_request_fence\.sql/,
-  );
-  assert.match(
-    source,
-    /0043_bot_reply_staging_release_evidence_operator_audit\.sql/,
-  );
-  assert.match(
-    source,
-    /0044_bot_reply_staging_release_evidence_atomic_publish\.sql/,
-  );
-  assert.match(
-    source,
-    /0045_bot_reply_provider_clock_domains\.sql/,
-  );
-  assert.match(
-    source,
-    /0046_bot_reply_staging_release_evidence_atomic_initialize\.sql/,
-  );
-  assert.match(
-    source,
-    /0047_bot_reply_staging_attestation_nonce_ledger\.sql/,
-  );
-  assert.match(
-    source,
-    /0048_bot_reply_staging_attested_evidence_atomic_publish\.sql/,
-  );
-  assert.match(
-    source,
-    /0049_bot_reply_staging_attested_evidence_readback\.sql/,
-  );
-  assert.match(
-    source,
-    /0050_bot_reply_staging_trigger_hardening\.sql/,
-  );
-  assert.match(
-    source,
-    /0051_bot_reply_staging_run_capability_wrappers\.sql/,
-  );
-  assert.match(
-    source,
-    /0052_bot_reply_staging_authorization_observation_hardening\.sql/,
-  );
-  assert.match(
-    source,
-    /0053_bot_reply_staging_provider_operation_fence\.sql/,
-  );
+  assert.match(source, /readdirSync\(join\(projectRoot, "postgres", "migrations"\)\)/);
+  assert.match(source, /MIGRATION_SEQUENCE_INVALID/);
+  assert.match(source, /for \(const migrationFile of migrationFiles\)/);
   assert.match(source, /verifyFullDataMigrationBundle/);
   assert.match(source, /executePostgresFullDataMigrationCutover/);
   assert.match(source, /target-already-cut-over/);

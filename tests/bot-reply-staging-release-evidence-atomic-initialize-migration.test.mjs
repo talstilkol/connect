@@ -76,9 +76,11 @@ test("contains no secret, personal data, or randomized identity", () => {
   );
 });
 
-test("keeps the real PostgreSQL driver on the atomic initializer migration", () => {
+test("keeps the real PostgreSQL driver on the complete contiguous migration inventory", () => {
   assert.match(
     integrationDriver,
-    /0046_bot_reply_staging_release_evidence_atomic_initialize\.sql/,
+    /readdirSync\(join\(projectRoot, "postgres", "migrations"\)\)/,
   );
+  assert.match(integrationDriver, /MIGRATION_SEQUENCE_INVALID/);
+  assert.match(integrationDriver, /for \(const migrationFile of migrationFiles\)/);
 });

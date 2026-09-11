@@ -7,6 +7,7 @@ import {paddleFixture,billingId,billingTime} from '../fixtures/paddle-billing.mj
 import {paddleDigest} from '../../server/billing/paddleProtocol.ts';
 import {createNodePostgresQueryExecutor,createNodePostgresTransactionManager} from '../../server/platform/nodePostgresAdapter.ts';
 import {createPostgresPaddleRepository} from '../../server/platform/postgresPaddleRepository.ts';
+import {createPaddleProvider} from '../../server/billing/paddleProvider.ts';
 import {createPaddleWorker} from '../../server/billing/paddleWorker.ts';
 const connectionString=process.env.CONNECT_PADDLE_TEST_URL;
 if(connectionString!=='postgresql://connect_paddle_test@127.0.0.1:55448/connect_paddle_integration')throw Error('Dedicated loopback Paddle database required');
@@ -27,6 +28,14 @@ before(async t=>{t.diagnostic(`PostgreSQL ${(await pool.query('SHOW server_versi
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,[7,'sandbox',f.work.intentKey,f.subscription.customerId,f.subscription.id,f.subscription.updatedAt,paddleDigest(f.subscription),'active',f.subscription.startsAt,f.subscription.endsAt]);
       await pool.query("UPDATE paddle_checkout_intents SET state='completed',next_reconcile_at=clock_timestamp()+interval '1 hour' WHERE intent_key=$1",[f.work.intentKey]);
     }
+    if(name==='0082_paddle_checkout_recovery.sql'){
+      const f=paddleFixture(6);
+      await pool.query("INSERT INTO tenants(id,display_name,status) VALUES($1,$2,'active')",[6,f.session.displayName]);
+      await pool.query("INSERT INTO tenant_memberships(tenant_id,external_user_id,role,status) VALUES($1,$2,'owner','active')",[6,f.session.externalUserId]);
+      await pool.query('INSERT INTO paddle_checkout_intents(intent_key,tenant_id,environment,actor_external_user_id,price_id,product_id,checkout_base_url) VALUES($1,$2,$3,$4,$5,$6,$7)',[f.work.intentKey,6,'sandbox',f.session.externalUserId,f.config.priceId,f.config.productId,f.config.checkoutBaseUrl]);
+      await pool.query("UPDATE paddle_checkout_intents SET state='creating' WHERE intent_key=$1",[f.work.intentKey]);
+      await pool.query("UPDATE paddle_checkout_intents SET state='unknown' WHERE intent_key=$1",[f.work.intentKey]);
+    }
     await pool.query(await readFile(new URL(name,directory),'utf8'));
   }
 });
@@ -35,7 +44,7 @@ async function fixture(){const f=paddleFixture(++sequence);await pool.query("INS
   await pool.query("INSERT INTO tenant_memberships(tenant_id,external_user_id,role,status) VALUES($1,$2,'owner','active'),($1,'template-submission-integration-owner','owner','active')",[f.session.tenantId,f.session.externalUserId]);return f;}
 const row=async f=>(await pool.query('SELECT * FROM paddle_checkout_intents WHERE tenant_id=$1 ORDER BY generation DESC',[f.session.tenantId])).rows[0];
 const account=async f=>(await pool.query('SELECT * FROM paddle_accounts WHERE tenant_id=$1',[f.session.tenantId])).rows[0];
-async function confirmed(f){await journal.enqueue(f.session,f.config);const work=await journal.claimCreation('sandbox');assert.equal(work.tenantId,f.session.tenantId);await journal.confirmCreation(work,f.receipt);return work;}
+async function confirmed(f){await journal.enqueue(f.session,f.config);const work=await journal.claimCreation('sandbox');assert.equal(work.tenantId,f.session.tenantId);assert.equal(await journal.authorizeCreation(work),true);await journal.confirmCreation(work,f.receipt);return work;}
 async function due(f){await pool.query("UPDATE paddle_checkout_intents SET next_reconcile_at=statement_timestamp()-interval '1 second' WHERE tenant_id=$1",[f.session.tenantId]);}
 function provider(f,overrides={}){let posts=0;return{async createTransaction(work,authorize){assert.equal(await authorize(),true);posts++;return f.receipt},async getTransaction(){return f.payment},async getSubscription(){return f.subscription},get posts(){return posts},...overrides};}
 const notice=(f,id='provider-event-001')=>({eventId:billingId('evt',`${id}:${f.session.tenantId}`),eventType:'transaction.completed',entityId:f.receipt.id,occurredAt:billingTime,digest:paddleDigest({id,tenant:f.session.tenantId})});
@@ -47,15 +56,15 @@ test('concurrent authenticated requests and claims create exactly one durable at
   assert.ok((await pool.query("SELECT * FROM audit_logs WHERE tenant_id=$1 AND action LIKE 'billing.%'",[f.session.tenantId])).rowCount>=4);
 });
 test('lost creation response never repeats POST after restart or repeated owner clicks',async()=>{
-  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;const p=provider(f,{async createTransaction(){posts++;throw Error('reply lost')}});
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;const p=provider(f,{async createTransaction(work,authorize){assert.equal(await authorize(),true);posts++;throw Error('reply lost')}});
   await assert.rejects(createPaddleWorker(journal,p,'sandbox').run());assert.equal((await row(f)).state,'unknown');await journal.enqueue(f.session,f.config);
   await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal(await account(f),undefined);
 });
-test('lost database commit acknowledgement before dispatch produces zero POST and does not reset the attempt',async()=>{
+test('lost queue-claim acknowledgement before dispatch produces zero POST and closes only the provably unsent attempt',async()=>{
   const f=await fixture();await journal.enqueue(f.session,f.config);const p=provider(f),lost={...journal,async claimCreation(env){await journal.claimCreation(env);throw Error('commit acknowledgement lost')}};
   await assert.rejects(createPaddleWorker(lost,p,'sandbox').run());assert.equal(p.posts,0);
   await pool.query("UPDATE paddle_checkout_intents SET updated_at=statement_timestamp()-interval '2 minutes' WHERE tenant_id=$1",[f.session.tenantId]);
-  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(p.posts,0);assert.equal((await row(f)).state,'unknown');
+  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(p.posts,0);assert.equal((await row(f)).state,'closed');
 });
 test('creation receipt survives a lost confirmation acknowledgement and late owner revocation',async()=>{
   const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;
@@ -65,12 +74,12 @@ test('creation receipt survives a lost confirmation acknowledgement and late own
 });
 test('worker rechecks membership instead of accepting a stale owner session',async()=>{
   const f=await fixture();await journal.enqueue(f.session,f.config);await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",[f.session.tenantId,f.session.externalUserId]);
-  const p=provider(f);await createPaddleWorker(journal,p,'sandbox').run();assert.equal(p.posts,0);assert.equal((await row(f)).state,'rejected');
+  const p=provider(f);await createPaddleWorker(journal,p,'sandbox').run();assert.equal(p.posts,0);assert.equal((await row(f)).state,'closed');
   await assert.rejects(journal.enqueue(f.session,f.config),{code:'AUTHORIZATION_DENIED'});
 });
 test('untrusted metadata or customer references in notices cannot create a tenant binding',async()=>{
   const f=await fixture();await journal.recordNotice('sandbox',{...notice(f),entityId:billingId('txn','foreign')});assert.equal(await account(f),undefined);assert.equal(await row(f),undefined);
-  await journal.enqueue(f.session,f.config);const work=await journal.claimCreation('sandbox');await journal.creationUnknown(work);
+  await journal.enqueue(f.session,f.config);const work=await journal.claimCreation('sandbox');assert.equal(await journal.authorizeCreation(work),true);await journal.creationUnknown(work);
   await journal.recordNotice('sandbox',notice(f,'later'));await createPaddleWorker(journal,provider(f),'sandbox').run();assert.equal(await account(f),undefined);
 });
 test('duplicate signed-event receipts are atomic; same ID with changed content rolls back',async()=>{
@@ -112,7 +121,7 @@ async function productionAccount(overrides={}) {
   const period=(await pool.query("SELECT clock_timestamp()-interval '1 hour' AS starts, clock_timestamp()+interval '1 hour' AS ends")).rows[0];
   f.subscription={...f.subscription,startsAt:period.starts.toISOString(),endsAt:period.ends.toISOString(),...overrides};
   await journal.enqueue(f.session,f.config);const creation=await journal.claimCreation('production');assert.equal(creation.tenantId,f.session.tenantId);
-  await journal.confirmCreation(creation,f.receipt);const work=await journal.claimReconciliation('production');
+  assert.equal(await journal.authorizeCreation(creation),true);await journal.confirmCreation(creation,f.receipt);const work=await journal.claimReconciliation('production');
   assert.equal(await journal.applyReconciliation(work,f.payment,f.subscription),'applied');return f;
 }
 const access=createPostgresPaidAccess({transactions:createNodePostgresTransactionManager(pool)});
@@ -165,7 +174,7 @@ async function nextPurchase(f) {
   const work=await journal.claimCreation(f.config.environment);assert.equal(work.tenantId,f.session.tenantId);
   const id=billingId('txn',work.intentKey),subscriptionId=billingId('sub',work.intentKey);
   const receipt={...f.receipt,id,checkoutUrl:`${f.config.checkoutBaseUrl}?_ptxn=${id}`};
-  await journal.confirmCreation(work,receipt);
+  assert.equal(await journal.authorizeCreation(work),true);await journal.confirmCreation(work,receipt);
   return{work,payment:{...f.payment,id,subscriptionId,checkoutUrl:receipt.checkoutUrl},subscription:{...f.subscription,id:subscriptionId}};
 }
 test('repurchase is fenced by the observed attempt and admits exactly one new generation after verified cancellation',async()=>{
@@ -192,7 +201,7 @@ test('active, scheduled, paused, past-due, uncertain or stale billing never perm
   for(const sql of ["verified_at=clock_timestamp()-interval '16 minutes'","verified_at=clock_timestamp()+interval '1 minute'","verified_at=clock_timestamp(),needs_review=TRUE"]){
     await pool.query(`UPDATE paddle_accounts SET ${sql} WHERE tenant_id=$1`,[f.session.tenantId]);assert.equal((await journal.read(f.session,'production')).canCreateCheckout,false);await assert.rejects(journal.enqueue(f.session,f.config,1),{code:'CONFLICT'});
   }
-  const unknown=await fixture();await journal.enqueue(unknown.session,unknown.config);const work=await journal.claimCreation('sandbox');await journal.creationUnknown(work);
+  const unknown=await fixture();await journal.enqueue(unknown.session,unknown.config);const work=await journal.claimCreation('sandbox');assert.equal(await journal.authorizeCreation(work),true);await journal.creationUnknown(work);
   await assert.rejects(journal.enqueue(unknown.session,unknown.config,1),{code:'CONFLICT'});
   for(const expected of [-1,1.5,NaN,Infinity,'1',2147483647])await assert.rejects(journal.enqueue(unknown.session,unknown.config,expected),{code:'INVALID_REQUEST'});
   await assert.rejects(journal.enqueue(unknown.session,unknown.config,2),{code:'CONFLICT'});
@@ -243,4 +252,88 @@ test('0081 upgrades existing 0080 checkout and subscription history without repl
   assert.equal(checkout.intent_key,f.work.intentKey);assert.equal(checkout.transaction_id,f.receipt.id);
   assert.equal(subscription.subscription_id,f.subscription.id);assert.equal(subscription.projection_digest,paddleDigest(f.subscription));
   assert.equal((await journal.read(f.session,'sandbox')).canCreateCheckout,false);
+});
+
+test('dispatch sealing is one-shot, and a lost seal acknowledgment stays uncertain without a second POST',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);const work=await journal.claimCreation('sandbox');
+  assert.deepEqual((await Promise.all([journal.authorizeCreation(work),journal.authorizeCreation(work)])).sort(),[false,true]);
+  await journal.creationUnknown(work);assert.equal((await row(f)).dispatch_sealed,true);assert.equal((await row(f)).state,'unknown');
+  await assert.rejects(journal.enqueue(f.session,f.config,1),{code:'CONFLICT'});
+  await assert.rejects(pool.query("UPDATE paddle_checkout_intents SET dispatch_sealed=FALSE WHERE intent_key=$1",[work.intentKey]));
+  await assert.rejects(pool.query("INSERT INTO paddle_checkout_closures(intent_key,reason) VALUES($1,'not-dispatched')",[work.intentKey]));
+});
+test('a pre-dispatch authorization failure closes without POST and permits one explicit new attempt',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;
+  const p=createPaddleProvider(f.config,async()=>{posts++;return Response.json({data:f.transaction})});
+  const worker=createPaddleWorker({...journal,async authorizeCreation(){return false}},p,'sandbox');
+  await assert.rejects(worker.run());assert.equal(posts,0);assert.equal((await row(f)).state,'closed');
+  await journal.enqueue(f.session,f.config,0);assert.equal((await row(f)).generation,1);
+  await Promise.all([journal.enqueue(f.session,f.config,1),journal.enqueue(f.session,f.config,1)]);assert.equal((await row(f)).generation,2);
+  const work=await journal.claimCreation('sandbox');await journal.creationUnknown(work); // safely retire the unsealed test attempt
+});
+test('provider-confirmed unpaid cancellation closes with immutable evidence and never changes a paid account',async()=>{
+  const f=await fixture();await confirmed(f);
+  const payment={...f.receipt,status:'canceled',checkoutUrl:null};
+  const work=await journal.claimReconciliation('sandbox');assert.equal(await journal.closeCanceledTransaction(work,payment),true);
+  assert.equal((await row(f)).state,'closed');assert.equal((await journal.read(f.session,'sandbox')).canCreateCheckout,true);
+  const receipt=(await pool.query('SELECT * FROM paddle_checkout_closures WHERE intent_key=$1',[work.intentKey])).rows[0];
+  assert.equal(receipt.transaction_id,payment.id);assert.equal(receipt.projection_digest,paddleDigest(payment));
+  await assert.rejects(pool.query('DELETE FROM paddle_checkout_closures WHERE intent_key=$1',[work.intentKey]));
+  await assert.rejects(pool.query("UPDATE paddle_checkout_intents SET state='ready' WHERE intent_key=$1",[work.intentKey]));
+  const active=await productionAccount();await due(active);const paidWork=await journal.claimReconciliation('production');
+  assert.equal(await journal.closeCanceledTransaction(paidWork,{...active.receipt,status:'canceled'}),false);assert.equal(await reason(active),'paid-active');
+});
+test('a notice racing cancellation verification fences closure until a fresh provider read',async()=>{
+  const f=await fixture();await confirmed(f);const work=await journal.claimReconciliation('sandbox');await journal.recordNotice('sandbox',notice(f));
+  assert.equal(await journal.closeCanceledTransaction(work,{...f.receipt,status:'canceled'}),false);
+  assert.equal((await row(f)).state,'ready');
+  await createPaddleWorker(journal,provider(f,{async getTransaction(){return{...f.receipt,status:'canceled'}}}),'sandbox').run();assert.equal((await row(f)).state,'closed');
+});
+test('durable original POST observation recovers a lost projection acknowledgment by GET only',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0,gets=0;
+  const p=createPaddleProvider(f.config,async(url,options)=>{
+    if(options.method==='POST'){posts++;return Response.json({data:f.transaction});}
+    gets++;return Response.json({data:url.includes('/subscriptions/')?f.sub:f.paid});
+  });
+  await assert.rejects(createPaddleWorker({...journal,async confirmCreation(){throw Error('database response lost before projection')}},p,'sandbox').run());
+  assert.equal((await row(f)).state,'unknown');assert.equal((await row(f)).transaction_id,null);
+  assert.equal((await pool.query('SELECT transaction_id FROM paddle_creation_observations WHERE intent_key=$1',[(await row(f)).intent_key])).rows[0].transaction_id,f.receipt.id);
+  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal(gets,2);assert.equal((await row(f)).state,'completed');assert.equal((await account(f)).subscription_id,f.subscription.id);
+});
+test('observation commit acknowledgment loss recovers without another POST and evidence cannot be replaced',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;
+  const p=createPaddleProvider(f.config,async(url,options)=>{if(options.method==='POST'){posts++;return Response.json({data:f.transaction});}return Response.json({data:url.includes('/subscriptions/')?f.sub:f.paid});});
+  await assert.rejects(createPaddleWorker({...journal,async observeCreation(work,evidence){await journal.observeCreation(work,evidence);throw Error('observation ack lost')}},p,'sandbox').run());
+  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal((await row(f)).state,'completed');
+  const key=(await row(f)).intent_key;
+  await assert.rejects(pool.query('UPDATE paddle_creation_observations SET transaction_id=$2 WHERE intent_key=$1',[key,billingId('txn','foreign')]));
+  await assert.rejects(pool.query('DELETE FROM paddle_creation_observations WHERE intent_key=$1',[key]));
+});
+test('an error observation or lost entire response cannot bind a guessed transaction or authorize repurchase',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;
+  const p=createPaddleProvider(f.config,async()=>{posts++;return Response.json({error:{code:'invalid_request'},data:{id:f.receipt.id}},{status:400});});
+  await assert.rejects(createPaddleWorker(journal,p,'sandbox').run());
+  assert.equal((await pool.query('SELECT transaction_id FROM paddle_creation_observations WHERE intent_key=$1',[(await row(f)).intent_key])).rows[0].transaction_id,null);
+  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal((await row(f)).state,'unknown');await assert.rejects(journal.enqueue(f.session,f.config,1),{code:'CONFLICT'});
+});
+
+test('legacy unknown records are conservatively sealed during migration and cannot be closed as unsent',async()=>{
+  const f=paddleFixture(6);assert.equal((await row(f)).dispatch_sealed,true);assert.equal((await row(f)).state,'unknown');
+  await assert.rejects(journal.enqueue(f.session,f.config,1),{code:'CONFLICT'});
+  await assert.rejects(pool.query("INSERT INTO paddle_checkout_closures(intent_key,reason) VALUES($1,'not-dispatched')",[f.work.intentKey]));
+});
+test('a malformed business projection keeps the original response identity for later GET validation',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;
+  const p=createPaddleProvider(f.config,async(url,options)=>{
+    if(options.method==='POST'){posts++;return Response.json({data:{...f.transaction,items:[]}});}
+    return Response.json({data:url.includes('/subscriptions/')?f.sub:f.paid});
+  });
+  await assert.rejects(createPaddleWorker(journal,p,'sandbox').run());assert.equal((await row(f)).state,'unknown');
+  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal((await row(f)).state,'completed');
+});
+test('recovered cancellation from the original response closes without a subscription or second POST',async()=>{
+  const f=await fixture();await journal.enqueue(f.session,f.config);let posts=0;
+  const p=createPaddleProvider(f.config,async(url,options)=>{if(options.method==='POST'){posts++;return Response.json({data:f.transaction});}return Response.json({data:{...f.transaction,status:'canceled',checkout:null}});});
+  await assert.rejects(createPaddleWorker({...journal,async confirmCreation(){throw Error('projection failed')}},p,'sandbox').run());
+  await createPaddleWorker(journal,p,'sandbox').run();assert.equal(posts,1);assert.equal((await row(f)).state,'closed');assert.equal(await account(f),undefined);
 });

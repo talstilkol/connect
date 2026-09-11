@@ -1,0 +1,99 @@
+{
+  "status": "verified-local-with-open-core-integration",
+  "decision": "R215",
+  "checkedAt": "2026-09-11T19:20:37.035815+00:00",
+  "completedSubtasks": [],
+  "advancedSubtasks": [
+    "C3.2.5",
+    "C4.1.4"
+  ],
+  "unitTests": {
+    "passed": 4576,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "16.13": {
+      "paddle": 34,
+      "aiGenerationAndDelivery": 31,
+      "knowledge": 11,
+      "manualReply": 14,
+      "totalPassed": 90,
+      "failed": 0,
+      "migrations": 83,
+      "populatedUpgrade": [
+        "0080 to 0081",
+        "0081 to 0082 with legacy unknown"
+      ]
+    },
+    "17.11": {
+      "paddle": 34,
+      "totalPassed": 34,
+      "failed": 0,
+      "migrations": 83,
+      "populatedUpgrade": [
+        "0080 to 0081",
+        "0081 to 0082 with legacy unknown"
+      ]
+    },
+    "coreVerifier": {
+      "status": "incomplete",
+      "migrationsApplied": 83,
+      "latestRetainedFailure": "Legacy provider deferral fixture lacks exact staging boundary provenance",
+      "failuresFixed": [
+        "strict trigger inventory missing 18 canonical guards",
+        "staging authorization writer missing tenant barrier",
+        "bot claim, deferral, acceptance and provider status writers missing tenant barrier",
+        "stale Meta fixture identities and expected versions"
+      ],
+      "noGuardBypass": true,
+      "positiveAssertionsRetained": true
+    }
+  },
+  "builds": {
+    "vinext": "passed",
+    "nextWebpack": "passed"
+  },
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": {
+    "status": "passed",
+    "files": 960,
+    "clientGraphs": 43,
+    "typeScriptEdges": 2407
+  },
+  "interfaceGuardrails": {
+    "status": "passed",
+    "checks": 15
+  },
+  "sourceFiles": 126,
+  "originalUntrackedPreserved": 624,
+  "deployed": false,
+  "liveProviderRequests": false,
+  "remaining": {
+    "codingPackages": [
+      "C3.2",
+      "C4.1"
+    ],
+    "subtasks": 6,
+    "mainStages": 12,
+    "revisedEstimatedEngineeringHours": [
+      12,
+      24
+    ],
+    "confidence": "low",
+    "launchDate": "unknown"
+  },
+  "limitations": [
+    "All coding is not complete",
+    "No original response identity: retain unknown pending audited operator investigation",
+    "Conflicting subscription facts retain needs_review pending audited version-bound resolution",
+    "Historical core verifier needs a complete credential/session-bound provider fixture, including downstream staging ledger consumers",
+    "AI publication readiness, operational recovery, S3 retention and final review remain open",
+    "No live portal sign-in, QR or payment journey tested in this round",
+    "No public GitHub push: earlier automatic approval review rejected public publication without specific approval"
+  ]
+}

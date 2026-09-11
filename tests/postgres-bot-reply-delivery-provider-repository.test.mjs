@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier } from "../server/platform/postgresPaidAccess.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -73,6 +74,7 @@ function fixture(transactionResults) {
           });
           return execute({
             async query(sql, parameters) {
+              if (sql === paidAccessTenantBarrier) return { rows: [], rowCount: 1 };
               calls.push({ sql, parameters });
               const next = pending.shift();
               if (next === undefined) {

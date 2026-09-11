@@ -761,4 +761,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE FUNCTION paddle_checkout_can_advance_v1",
     summary: "Fresh canceled subscriptions permit fenced sequential purchases, retained history and shared payers with unique subscription bindings and latest-attempt paid policy.",
   }),
+  Object.freeze({
+    migration: "0082_paddle_checkout_recovery.sql",
+    token: "CREATE TABLE paddle_creation_observations",
+    summary: "Immutable POST response correlation, irreversible dispatch admission and provider-confirmed or not-dispatched closure evidence enable safe checkout recovery without replaying uncertain creation.",
+  }),
 ]);

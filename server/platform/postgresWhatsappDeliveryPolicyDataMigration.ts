@@ -864,6 +864,25 @@ export const POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY =
       tableName: "bot_reply_service_window_rejection_events",
       triggerName: "bot_reply_window_rejection_update_guard",
     }),
+    // Migration 0057 adds these mandatory writer barriers and deletion guards.
+    Object.freeze({ tableName: "bot_reply_delivery_provider_links", triggerName: "aa_provider_links_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "bot_reply_delivery_provider_links", triggerName: "bot_reply_provider_links_truncate_guard" }),
+    Object.freeze({ tableName: "bot_reply_service_window_rejection_events", triggerName: "aa_window_rejections_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "bot_reply_service_window_rejection_events", triggerName: "bot_reply_window_rejections_truncate_guard" }),
+    Object.freeze({ tableName: "messages", triggerName: "messages_occurred_at_immutable_guard" }),
+    Object.freeze({ tableName: "whatsapp_campaign_delivery_policy_events", triggerName: "aa_delivery_policy_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_pair_rate_limit_state", triggerName: "aa_pair_state_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_pair_rate_limit_state", triggerName: "whatsapp_pair_state_truncate_guard" }),
+    Object.freeze({ tableName: "whatsapp_portfolio_recipient_rate_limit_state", triggerName: "aa_portfolio_state_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_portfolio_recipient_rate_limit_state", triggerName: "whatsapp_portfolio_state_truncate_guard" }),
+    Object.freeze({ tableName: "whatsapp_provider_cooldown_events", triggerName: "aa_cooldown_events_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_provider_cooldown_events", triggerName: "whatsapp_provider_cooldown_events_truncate_guard" }),
+    Object.freeze({ tableName: "whatsapp_provider_cooldown_state", triggerName: "aa_cooldown_state_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_provider_cooldown_state", triggerName: "whatsapp_provider_cooldown_state_truncate_guard" }),
+    Object.freeze({ tableName: "whatsapp_rate_limit_reservations", triggerName: "aa_rate_reservation_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_rate_limit_reservations", triggerName: "whatsapp_rate_reservations_truncate_guard" }),
+    Object.freeze({ tableName: "whatsapp_rate_limit_settlements", triggerName: "aa_rate_settlements_tenant_barrier_guard" }),
+    Object.freeze({ tableName: "whatsapp_rate_limit_settlements", triggerName: "whatsapp_rate_settlements_truncate_guard" }),
   ] as const);
 
 const expectedTriggerValuesSql =

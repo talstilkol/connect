@@ -1,6 +1,6 @@
 # 1. Paddle Checkout — R212, 11.09.2026
 
-1.1 C3.1 is locally implemented: owner action → authenticated Vercel BFF → Railway API → PostgreSQL journal → Worker → one Paddle transaction → stored checkout identity → Paddle.js overlay. Signed notifications durably wake reconciliation. Current status after R214: paid entitlements, public customer portal and verified-cancellation repurchase are implemented locally; C3.2.5 operational reconciliation remains open. Do not activate customer billing before C3.2 and release acceptance.
+1.1 C3.1 is locally implemented: owner action → authenticated Vercel BFF → Railway API → PostgreSQL journal → Worker → one Paddle transaction → stored checkout identity → Paddle.js overlay. Signed notifications durably wake reconciliation. Current status after R215: paid entitlements, public customer portal and verified-cancellation repurchase are implemented locally; R215 adds evidenced checkout recovery; C3.2.5 operator investigation without an original identity and subscription conflict resolution remain open. See [checkout recovery](paddle-checkout-recovery.md). Do not activate customer billing before C3.2 and release acceptance.
 
 1.2 This implementation has not contacted a Paddle account, charged a customer, deployed, or proved merchant/domain approval. Protocol tests adapt the existing billing fixtures. Browser QA covers the actual built application in its disconnected state, including refresh and Hebrew/English/Arabic layouts. It does not prove a Paddle payment journey.
 

@@ -9,7 +9,7 @@ export async function bindPaidFixture(pool, tenantId, externalUserId, status='ac
   const journal=createPostgresPaddleRepository({queries:createNodePostgresQueryExecutor(pool),transactions:createNodePostgresTransactionManager(pool)});
   await pool.query("INSERT INTO tenant_memberships(tenant_id,external_user_id,role,status) VALUES($1,$2,'owner','active') ON CONFLICT(tenant_id,external_user_id) DO NOTHING",[tenantId,externalUserId]);
   await journal.enqueue({...f.session,externalUserId},plan);const creation=await journal.claimCreation('production');assert.equal(creation.tenantId,tenantId);
-  await journal.confirmCreation(creation,f.receipt);const work=await journal.claimReconciliation('production');assert.equal(work.tenantId,tenantId);
+  assert.equal(await journal.authorizeCreation(creation),true);await journal.confirmCreation(creation,f.receipt);const work=await journal.claimReconciliation('production');assert.equal(work.tenantId,tenantId);
   const clock=(await pool.query("SELECT clock_timestamp()-interval '1 hour' AS starts,clock_timestamp()+interval '1 hour' AS ends")).rows[0];
   const subscription={...f.subscription,status,startsAt:clock.starts.toISOString(),endsAt:clock.ends.toISOString()};
   await journal.applyReconciliation(work,f.payment,subscription);

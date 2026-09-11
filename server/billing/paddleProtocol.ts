@@ -50,8 +50,14 @@ export interface PaddleNotice {
   readonly eventId: string; readonly eventType: string; readonly occurredAt: string;
   readonly entityId: string | null; readonly digest: string;
 }
+export interface PaddleCreationObservation {
+  readonly requestId: string | null;
+  readonly httpStatus: number;
+  readonly transactionId: string | null;
+  readonly responseDigest: string;
+}
 export interface PaddleProvider {
-  createTransaction(intent: PaddleCheckoutIntent, authorize: () => Promise<boolean>): Promise<PaddleTransaction>;
+  createTransaction(intent: PaddleCheckoutIntent, authorize: () => Promise<boolean>, observe?: (observation: PaddleCreationObservation) => Promise<void>): Promise<PaddleTransaction>;
   getTransaction(id: string, plan: PaddlePlan): Promise<PaddleTransaction>;
   getSubscription(id: string, plan: PaddlePlan): Promise<PaddleSubscription>;
 }

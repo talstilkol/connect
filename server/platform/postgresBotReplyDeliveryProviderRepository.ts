@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier } from "./postgresPaidAccess.ts";
 import type {
   ApplyBotReplyProviderStatus,
   ApplyBotReplyProviderStatusResult,
@@ -292,6 +293,7 @@ export function createPostgresBotReplyDeliveryProviderRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [input.tenantId]);
           const existing = await loadLink(
             transaction,
             input.tenantId,

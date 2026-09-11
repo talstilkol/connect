@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {createHmac} from 'node:crypto';
 import {paddleFixture,billingId,billingTime,billingNow} from './fixtures/paddle-billing.mjs';
-import {paddleTimestamp,parsePaddleTransaction,parsePaddleSubscription} from '../server/billing/paddleProtocol.ts';
+import {paddleDigest,paddleTimestamp,parsePaddleTransaction,parsePaddleSubscription} from '../server/billing/paddleProtocol.ts';
 import {requirePaddleConfiguration} from '../server/billing/paddleConfiguration.ts';
 import {createPaddleProvider,readPaddleBody} from '../server/billing/paddleProvider.ts';
 import {verifyPaddleNotice,createPaddleWebhookHandler} from '../server/billing/paddleWebhook.ts';
@@ -118,4 +118,19 @@ test('billing view keeps repurchase, exact subscription reference and scheduled 
   const canceled={...view,canCreateCheckout:true,checkout:{state:'completed',transactionId:null,url:null},subscription};
   assert.deepEqual(parsePaddleBillingView(canceled),canceled);
   for(const changes of [{attempt:0},{canManage:false},{subscription:{...subscription,status:'active'}},{subscription:{...subscription,needsReview:true}},{subscription:{...subscription,id:f.subscription.customerId}},{subscription:{...subscription,scheduledChange:{action:'cancel',effectiveAt:'2026-02-30T00:00:00.000Z'}}}])assert.equal(parsePaddleBillingView({...canceled,...changes}),null);
+});
+
+test('creation correlation is bounded, preserves support request IDs and precedes business validation',async()=>{
+  const digest=paddleDigest(f.receipt.id),requestId=`${digest.slice(0,8)}-${digest.slice(8,12)}-${digest.slice(12,16)}-${digest.slice(16,20)}-${digest.slice(20,32)}`;
+  const body={data:{...f.transaction,items:[]},meta:{request_id:requestId}},observations=[];
+  const provider=createPaddleProvider(f.config,async()=>Response.json(body));
+  await assert.rejects(provider.createTransaction(f.work,async()=>true,async value=>{observations.push(value)}));
+  assert.deepEqual(observations,[{requestId,httpStatus:200,transactionId:f.transaction.id,responseDigest:paddleDigest(body)}]);
+  const failure=createPaddleProvider(f.config,async()=>Response.json({error:{detail:'private failure'},meta:{request_id:'not-a-request-id'},data:f.transaction},{status:400}));
+  await assert.rejects(failure.createTransaction(f.work,async()=>true,async value=>{assert.equal(value.transactionId,null);assert.equal(value.requestId,null);assert.equal(Object.keys(value).length,4)}));
+});
+test('billing UI contract permits a new attempt after evidenced closure but never exposes a closed transaction',()=>{
+  const closed={...view,canCreateCheckout:true,checkout:{state:'closed',transactionId:null,url:null}};
+  assert.deepEqual(parsePaddleBillingView(closed),closed);
+  assert.equal(parsePaddleBillingView({...closed,checkout:{...closed.checkout,transactionId:f.receipt.id,url:f.receipt.checkoutUrl}}),null);
 });

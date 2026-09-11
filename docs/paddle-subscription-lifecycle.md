@@ -1,6 +1,6 @@
 # 1. Subscription management and sequential purchases — R214, 11.09.2026
 
-1.1 C3.2.3/C3.2.4 are implemented and locally verified. An owner can open Paddle's public customer portal for cancellation, payment-method changes and invoices. A buyer may pay for multiple workspaces. Each workspace keeps its own immutable transaction and subscription history. C3.2.5 operator recovery remains unfinished; billing must remain disabled until that work and live acceptance pass.
+1.1 C3.2.3/C3.2.4 are implemented and locally verified. An owner can open Paddle's public customer portal for cancellation, payment-method changes and invoices. A buyer may pay for multiple workspaces. Each workspace keeps its own immutable transaction and subscription history. R215 adds [evidenced checkout recovery](paddle-checkout-recovery.md). C3.2.5 operator recovery without an original identity and subscription conflict resolution remain unfinished; billing must remain disabled until that work and live acceptance pass.
 
 1.2 Connect does not mint a customer-authenticated portal session from a workspace role. The portal authenticates the buyer using the payment email. Connect shows only the current workspace's subscription reference, so the authenticated buyer can select it when multiple subscriptions appear. The link contains no customer ID, email, subscription ID, token or action parameter. It opens with `noopener noreferrer`.
 

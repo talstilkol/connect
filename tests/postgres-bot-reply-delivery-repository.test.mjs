@@ -397,7 +397,7 @@ test("persists a due-time deferral and exposes only bounded retry work", async (
       "WHATSAPP_RATE_LIMITED",
     updatedAt: new Date(deferredAt),
   });
-  const deferred = repositoryFixture([], [{
+  const deferred = repositoryFixture([{
     rows: [deferredRow],
     rowCount: 1,
   }]);
@@ -411,7 +411,7 @@ test("persists a due-time deferral and exposes only bounded retry work", async (
   );
   assert.equal(result.nextAttemptAt, retryAt);
   assert.deepEqual(
-    deferred.queries.calls[0].parameters,
+    deferred.transactions.calls[0].parameters,
     [
       7,
       input.deliveryKey,

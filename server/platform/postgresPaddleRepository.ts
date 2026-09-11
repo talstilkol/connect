@@ -1,12 +1,12 @@
 import { isPaddleCheckoutAttempt } from "../../shared/domain/paddleCustomerPortal.ts";
 import type { TenantSession } from "../auth/tenantSession.ts";
-import { PaddleError, paddleDigest, type PaddleCheckoutIntent, type PaddleEnvironment, type PaddleNotice, type PaddlePlan, type PaddleSubscription, type PaddleTransaction } from "../billing/paddleProtocol.ts";
+import { PaddleError, paddleDigest, type PaddleCreationObservation, type PaddleCheckoutIntent, type PaddleEnvironment, type PaddleNotice, type PaddlePlan, type PaddleSubscription, type PaddleTransaction } from "../billing/paddleProtocol.ts";
 import type { PostgresQueryExecutor, PostgresTransactionManager } from "./postgresTransaction.ts";
 
 interface CheckoutRow {
   intent_key: string; tenant_id: string | number; environment: PaddleEnvironment; actor_external_user_id: string;
   price_id: string; product_id: string; checkout_base_url: string; state: string;
-  generation: number; previous_intent_key: string | null; transaction_id: string | null; checkout_url: string | null; reconcile_revision: string | number;
+  dispatch_sealed: boolean; generation: number; previous_intent_key: string | null; transaction_id: string | null; checkout_url: string | null; reconcile_revision: string | number;
 }
 export interface PaddleReconciliation extends PaddleCheckoutIntent { readonly transactionId: string; readonly revision: string; }
 export const paddleTenantBarrier = "SELECT pg_advisory_xact_lock(public.derive_bot_reply_staging_tenant_barrier_key_v1($1))";
@@ -26,6 +26,10 @@ export function createPostgresPaddleRepository({ queries, transactions }: { quer
     await tx.query(paddleTenantBarrier, [candidate.tenantId]);
     const row = (await tx.query<CheckoutRow>("SELECT * FROM paddle_checkout_intents WHERE intent_key=$1 AND tenant_id=$2 AND environment=$3 FOR UPDATE", [candidate.intentKey, candidate.tenantId, candidate.environment])).rows[0];
     if (!row || paddleDigest(intent(row)) !== paddleDigest(candidate)) throw new PaddleError("CONFLICT"); return row;
+  }
+  async function closeUnsent(tx: PostgresQueryExecutor, key: string): Promise<void> {
+    await tx.query("INSERT INTO paddle_checkout_closures(intent_key,reason) VALUES($1,'not-dispatched')", [key]);
+    await tx.query("UPDATE paddle_checkout_intents SET state='closed',error_code='NOT_DISPATCHED',updated_at=clock_timestamp() WHERE intent_key=$1", [key]);
   }
   return {
     async enqueue(session: TenantSession, plan: PaddlePlan, expectedAttempt = 0): Promise<void> {
@@ -70,17 +74,23 @@ export function createPostgresPaddleRepository({ queries, transactions }: { quer
       return transaction(async tx => {
         const work = intent(candidate), row = await lock(tx, work); if (row.state !== "queued") return null;
         if (!await currentOwner(tx, work.tenantId, work.actorExternalUserId)) {
-          await tx.query("UPDATE paddle_checkout_intents SET state='rejected',error_code='AUTHORIZATION_DENIED',updated_at=statement_timestamp() WHERE intent_key=$1", [work.intentKey]); return null;
+          await tx.query("UPDATE paddle_checkout_intents SET state='rejected',dispatch_sealed=FALSE,error_code='AUTHORIZATION_DENIED',updated_at=statement_timestamp() WHERE intent_key=$1", [work.intentKey]); await closeUnsent(tx, work.intentKey); return null;
         }
         // The commit acknowledgment is required before returning work to the provider caller.
-        await tx.query("UPDATE paddle_checkout_intents SET state='creating',updated_at=statement_timestamp() WHERE intent_key=$1", [work.intentKey]); return work;
+        await tx.query("UPDATE paddle_checkout_intents SET state='creating',dispatch_sealed=FALSE,updated_at=statement_timestamp() WHERE intent_key=$1", [work.intentKey]); return work;
       });
     },
     async authorizeCreation(work: PaddleCheckoutIntent): Promise<boolean> {
-      return transaction(async tx => { const row = await lock(tx, work); return row.state === "creating" && await currentOwner(tx, work.tenantId, work.actorExternalUserId); });
+      return transaction(async tx => {
+        const row = await lock(tx, work);
+        if (row.state !== "creating" || row.dispatch_sealed || !await currentOwner(tx, work.tenantId, work.actorExternalUserId)) return false;
+        await tx.query("UPDATE paddle_checkout_intents SET dispatch_sealed=TRUE,updated_at=clock_timestamp() WHERE intent_key=$1", [work.intentKey]);
+        return true;
+      });
     },
     async creationUnknown(work: PaddleCheckoutIntent): Promise<void> {
       await transaction(async tx => { const row = await lock(tx, work); if (row.state !== "creating") return;
+        if (!row.dispatch_sealed) { await closeUnsent(tx, work.intentKey); return; }
         await tx.query("UPDATE paddle_checkout_intents SET state='unknown',error_code='PROVIDER_OUTCOME_UNKNOWN',updated_at=statement_timestamp() WHERE intent_key=$1", [work.intentKey]); });
     },
     async confirmCreation(work: PaddleCheckoutIntent, receipt: PaddleTransaction): Promise<void> {
@@ -92,6 +102,47 @@ export function createPostgresPaddleRepository({ queries, transactions }: { quer
         if (!["creating", "unknown"].includes(row.state)) throw new PaddleError("CONFLICT");
         // Retain provider acceptance even if the owner was revoked during the request.
         await tx.query("UPDATE paddle_checkout_intents SET state='ready',transaction_id=$2,checkout_url=$3,error_code=NULL,next_reconcile_at=statement_timestamp(),updated_at=statement_timestamp() WHERE intent_key=$1", [work.intentKey, receipt.id, receipt.checkoutUrl]);
+      });
+    },
+    async observeCreation(work: PaddleCheckoutIntent, observation: PaddleCreationObservation): Promise<void> {
+      if (!Number.isInteger(observation.httpStatus) || observation.httpStatus < 100 || observation.httpStatus > 599 ||
+        !/^[a-f0-9]{64}$/.test(observation.responseDigest) ||
+        observation.transactionId !== null && (!/^txn_[a-z0-9]{26}$/.test(observation.transactionId) || observation.httpStatus < 200 || observation.httpStatus > 299) ||
+        observation.requestId !== null && !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(observation.requestId)) throw new PaddleError("INVALID_REQUEST");
+      await transaction(async tx => {
+        await lock(tx, work);
+        const previous = (await tx.query<{ request_id: string | null; http_status: number; transaction_id: string | null; response_digest: string }>("SELECT * FROM paddle_creation_observations WHERE intent_key=$1", [work.intentKey])).rows[0];
+        if (previous) {
+          if (previous.request_id !== observation.requestId || previous.http_status !== observation.httpStatus || previous.transaction_id !== observation.transactionId || previous.response_digest !== observation.responseDigest) throw new PaddleError("CONFLICT");
+          return;
+        }
+        await tx.query("INSERT INTO paddle_creation_observations(intent_key,request_id,http_status,transaction_id,response_digest) VALUES($1,$2,$3,$4,$5)", [work.intentKey, observation.requestId, observation.httpStatus, observation.transactionId, observation.responseDigest]);
+      });
+    },
+    async recoverCreation(work: PaddleReconciliation, payment: PaddleTransaction): Promise<boolean> {
+      if (payment.id !== work.transactionId || payment.priceId !== work.priceId || payment.productId !== work.productId || !["draft", "ready", "completed", "canceled"].includes(payment.status)) return false;
+      return transaction(async tx => {
+        const row = await lock(tx, { intentKey: work.intentKey, tenantId: work.tenantId, environment: work.environment, actorExternalUserId: work.actorExternalUserId, priceId: work.priceId, productId: work.productId, checkoutBaseUrl: work.checkoutBaseUrl });
+        if (String(row.reconcile_revision) !== work.revision) return false;
+        if (["ready", "completed"].includes(row.state)) return row.transaction_id === payment.id;
+        if (row.state !== "unknown") return false;
+        const receipt = await tx.query("SELECT intent_key FROM paddle_creation_observations WHERE intent_key=$1 AND transaction_id=$2 AND http_status BETWEEN 200 AND 299", [work.intentKey, payment.id]);
+        if (receipt.rowCount !== 1) return false;
+        const url = new URL(work.checkoutBaseUrl); url.searchParams.set("_ptxn", payment.id);
+        if (payment.checkoutUrl !== null && payment.checkoutUrl !== url.href) throw new PaddleError("CONFLICT");
+        if (payment.status === "completed" ? !payment.subscriptionId || !payment.customerId : payment.subscriptionId !== null) throw new PaddleError("CONFLICT");
+        await tx.query("UPDATE paddle_checkout_intents SET state='ready',transaction_id=$2,checkout_url=$3,error_code=NULL,updated_at=clock_timestamp() WHERE intent_key=$1", [work.intentKey, payment.id, url.href]);
+        return true;
+      });
+    },
+    async closeCanceledTransaction(work: PaddleReconciliation, payment: PaddleTransaction): Promise<boolean> {
+      if (payment.id !== work.transactionId || payment.status !== "canceled" || payment.subscriptionId !== null || payment.priceId !== work.priceId || payment.productId !== work.productId) throw new PaddleError("CONFLICT");
+      return transaction(async tx => {
+        const row = await lock(tx, { intentKey: work.intentKey, tenantId: work.tenantId, environment: work.environment, actorExternalUserId: work.actorExternalUserId, priceId: work.priceId, productId: work.productId, checkoutBaseUrl: work.checkoutBaseUrl });
+        if (row.state !== "ready" || String(row.reconcile_revision) !== work.revision || row.transaction_id !== payment.id) return false;
+        await tx.query("INSERT INTO paddle_checkout_closures(intent_key,reason,transaction_id,provider_updated_at,projection_digest) VALUES($1,'transaction-canceled',$2,$3::timestamptz,$4)", [work.intentKey, payment.id, payment.updatedAt, paddleDigest(payment)]);
+        await tx.query("UPDATE paddle_checkout_intents SET state='closed',error_code='TRANSACTION_CANCELED',updated_at=clock_timestamp() WHERE intent_key=$1", [work.intentKey]);
+        return true;
       });
     },
     async recordNotice(environment: PaddleEnvironment, notice: PaddleNotice): Promise<void> {
@@ -112,14 +163,23 @@ export function createPostgresPaddleRepository({ queries, transactions }: { quer
       });
     },
     async claimReconciliation(environment: PaddleEnvironment): Promise<PaddleReconciliation | null> {
-      // A crash after sealing creation cannot authorize another creation attempt.
-      await queries.query("UPDATE paddle_checkout_intents SET state='unknown',error_code='PROVIDER_OUTCOME_UNKNOWN',updated_at=statement_timestamp() WHERE environment=$1 AND state='creating' AND updated_at<statement_timestamp()-interval '1 minute'", [environment]);
-      const candidate = (await queries.query<CheckoutRow>("SELECT * FROM paddle_checkout_intents WHERE environment=$1 AND state IN ('ready','completed') AND next_reconcile_at<=statement_timestamp() ORDER BY next_reconcile_at,intent_key LIMIT 1", [environment])).rows[0];
+      const expired = (await queries.query<CheckoutRow>("SELECT * FROM paddle_checkout_intents WHERE environment=$1 AND state='creating' AND updated_at<clock_timestamp()-interval '1 minute' ORDER BY updated_at,intent_key LIMIT 1", [environment])).rows[0];
+      if (expired) await transaction(async tx => {
+        const row = await lock(tx, intent(expired));
+        if (row.state !== "creating" || (await tx.query("SELECT intent_key FROM paddle_checkout_intents WHERE intent_key=$1 AND updated_at<clock_timestamp()-interval '1 minute'", [row.intent_key])).rowCount !== 1) return;
+        if (!row.dispatch_sealed) await closeUnsent(tx, row.intent_key);
+        else await tx.query("UPDATE paddle_checkout_intents SET state='unknown',error_code='PROVIDER_OUTCOME_UNKNOWN',updated_at=clock_timestamp() WHERE intent_key=$1", [row.intent_key]);
+      });
+      const candidate = (await queries.query<CheckoutRow>(`SELECT c.* FROM paddle_checkout_intents c WHERE c.environment=$1 AND
+        (c.state IN ('ready','completed') OR c.state='unknown' AND EXISTS(SELECT 1 FROM paddle_creation_observations o WHERE o.intent_key=c.intent_key AND o.transaction_id IS NOT NULL))
+        AND c.next_reconcile_at<=clock_timestamp() ORDER BY c.next_reconcile_at,c.intent_key LIMIT 1`, [environment])).rows[0];
       if (!candidate) return null;
       return transaction(async tx => {
         const work = intent(candidate), row = await lock(tx, work);
+        if (!["ready", "completed", "unknown"].includes(row.state)) return null;
+        const observed = row.transaction_id ?? (await tx.query<{ transaction_id: string | null }>("SELECT transaction_id FROM paddle_creation_observations WHERE intent_key=$1", [work.intentKey])).rows[0]?.transaction_id;
         const result = await tx.query<{ revision: string }>("UPDATE paddle_checkout_intents SET reconcile_revision=reconcile_revision+1,next_reconcile_at=statement_timestamp()+interval '5 minutes' WHERE intent_key=$1 AND next_reconcile_at<=statement_timestamp() RETURNING reconcile_revision::text AS revision", [work.intentKey]);
-        return result.rows[0] && row.transaction_id ? { ...work, transactionId: row.transaction_id, revision: result.rows[0].revision } : null;
+        return result.rows[0] && observed ? { ...work, transactionId: observed, revision: result.rows[0].revision } : null;
       });
     },
     async applyReconciliation(work: PaddleReconciliation, payment: PaddleTransaction, subscription: PaddleSubscription): Promise<"applied" | "stale" | "review"> {
