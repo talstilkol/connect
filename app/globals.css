@@ -861,6 +861,22 @@ label.file-button:focus-within {
   font-size: 8px;
 }
 
+.dashboard-report-summary .card-header {
+  flex-wrap: wrap;
+}
+
+.dashboard-report-summary .metric-card,
+.dashboard-report-summary .metric-card > div:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-report-summary .metric-card small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.8fr);

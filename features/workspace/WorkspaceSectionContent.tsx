@@ -208,6 +208,8 @@ export function WorkspaceSectionContent({
                   .decisionRequired
               }
               language={language}
+              operationalReport={initialOperationalReport}
+              operationalReportStatus={initialOperationalReportStatus}
               onNavigate={onNavigate}
               onConnectMeta={onConnectMeta}
             />

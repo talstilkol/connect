@@ -4,6 +4,9 @@ import test from "node:test";
 import {
   createRailwayOperationalReportHandler,
 } from "../server/reports/railwayOperationalReportHandler.ts";
+import {
+  readDashboardReportMetrics,
+} from "../features/workspace/dashboardReportPresentation.ts";
 
 const operationId = "reports.read";
 const oidcToken = "oidcHeader.oidcPayload.oidcSignature";
@@ -137,6 +140,32 @@ function fixture({
 
   return { calls, handler };
 }
+
+test("dashboard summarizes the validated report without treating closed conversations as contacts or campaigns as running", async () => {
+  const result = await fixture().handler.load(input);
+  assert.equal(result.status, "loaded");
+  assert.equal(result.report.campaigns.running, 0);
+  assert.equal(result.report.conversations.closed, 1);
+  assert.deepEqual(
+    readDashboardReportMetrics("ready", result.report),
+    [2, 1, 1, 1],
+  );
+});
+
+test("dashboard hides previous report metrics for every unavailable or denied state", () => {
+  const previousReport = report();
+  for (const status of [
+    "configuration-required",
+    "unauthenticated",
+    "onboarding-required",
+    "tenant-selection-required",
+    "permission-denied",
+    "server-error",
+  ]) {
+    assert.equal(readDashboardReportMetrics(status, previousReport), null);
+  }
+  assert.equal(readDashboardReportMetrics("ready", null), null);
+});
 
 test("sends one bounded report query and accepts a fully consistent view", async () => {
   const testFixture = fixture();
