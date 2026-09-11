@@ -756,4 +756,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE FUNCTION tenant_paid_access_reason_v1",
     summary: "Production subscription bindings durably adopt paid execution policy with database-clock period, scheduled-stop and verification-freshness checks while billing recovery remains accessible.",
   }),
+  Object.freeze({
+    migration: "0081_paddle_subscription_lifecycle.sql",
+    token: "CREATE FUNCTION paddle_checkout_can_advance_v1",
+    summary: "Fresh canceled subscriptions permit fenced sequential purchases, retained history and shared payers with unique subscription bindings and latest-attempt paid policy.",
+  }),
 ]);

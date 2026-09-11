@@ -13,4 +13,4 @@ function handler() {
   });
 }
 export async function readPaddleBillingAction() { return handler().read(); }
-export async function createPaddleCheckoutAction() { return handler().createCheckout(); }
+export async function createPaddleCheckoutAction(expectedAttempt: number) { return handler().createCheckout(expectedAttempt); }

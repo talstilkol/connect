@@ -43,3 +43,7 @@
 5.1 Paddle describes storing entitlement-critical state, scheduled changes and periodic reconciliation. The stricter past-due and freshness behavior here is Connect's decision. [Provision subscription access](https://developer.paddle.com/build/subscriptions/provision-access-webhooks/).
 
 5.2 Authenticated customer portal sessions expose customer billing operations and contain temporary links that must not be cached. A subscription-specific link is not proof of tenant isolation for a payer with several businesses; that issue must be resolved before enabling customer billing management. [Customer portal sessions](https://developer.paddle.com/api-reference/customer-portals/create-customer-portal-session/).
+
+# R214 — subscription history
+
+Migration 0081 selects the account of the latest production checkout. A new generation becomes payment-pending until its own verification; historical subscriptions cannot grant or revoke current paid execution. Shared payers, public portal management and verified-cancellation repurchase are now implemented locally. Operational recovery remains open. [Lifecycle policy and validation](paddle-subscription-lifecycle.md).

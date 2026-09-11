@@ -15,12 +15,25 @@ const journal=createPostgresPaddleRepository({queries:createNodePostgresQueryExe
 before(async t=>{t.diagnostic(`PostgreSQL ${(await pool.query('SHOW server_version')).rows[0].server_version}`);
   assert.deepEqual((await pool.query('SELECT current_database() AS database,current_user AS role')).rows[0],{database:'connect_paddle_integration',role:'connect_paddle_test'});
   assert.equal((await pool.query("SELECT * FROM pg_tables WHERE schemaname='public'")).rowCount,0);
-  const directory=new URL('../../postgres/migrations/',import.meta.url);for(const name of(await readdir(directory)).filter(n=>n.endsWith('.sql')).sort())await pool.query(await readFile(new URL(name,directory),'utf8'));
+  const directory=new URL('../../postgres/migrations/',import.meta.url);for(const name of(await readdir(directory)).filter(n=>n.endsWith('.sql')).sort()){
+    if(name==='0081_paddle_subscription_lifecycle.sql'){
+      const f=paddleFixture(7);
+      await pool.query("INSERT INTO tenants(id,display_name,status) VALUES($1,$2,'active')",[f.session.tenantId,f.session.displayName]);
+      await pool.query("INSERT INTO tenant_memberships(tenant_id,external_user_id,role,status) VALUES($1,$2,'owner','active')",[f.session.tenantId,f.session.externalUserId]);
+      await pool.query(`INSERT INTO paddle_checkout_intents(intent_key,tenant_id,environment,actor_external_user_id,price_id,product_id,checkout_base_url) VALUES($1,$2,$3,$4,$5,$6,$7)`,[f.work.intentKey,7,'sandbox',f.session.externalUserId,f.config.priceId,f.config.productId,f.config.checkoutBaseUrl]);
+      await pool.query("UPDATE paddle_checkout_intents SET state='creating' WHERE intent_key=$1",[f.work.intentKey]);
+      await pool.query("UPDATE paddle_checkout_intents SET state='ready',transaction_id=$2,checkout_url=$3 WHERE intent_key=$1",[f.work.intentKey,f.receipt.id,f.receipt.checkoutUrl]);
+      await pool.query(`INSERT INTO paddle_accounts(tenant_id,environment,intent_key,customer_id,subscription_id,provider_updated_at,projection_digest,provider_status,period_starts_at,period_ends_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,[7,'sandbox',f.work.intentKey,f.subscription.customerId,f.subscription.id,f.subscription.updatedAt,paddleDigest(f.subscription),'active',f.subscription.startsAt,f.subscription.endsAt]);
+      await pool.query("UPDATE paddle_checkout_intents SET state='completed',next_reconcile_at=clock_timestamp()+interval '1 hour' WHERE intent_key=$1",[f.work.intentKey]);
+    }
+    await pool.query(await readFile(new URL(name,directory),'utf8'));
+  }
 });
 after(()=>pool.end());
 async function fixture(){const f=paddleFixture(++sequence);await pool.query("INSERT INTO tenants(id,display_name,status) VALUES($1,$2,'active')",[f.session.tenantId,f.session.displayName]);
   await pool.query("INSERT INTO tenant_memberships(tenant_id,external_user_id,role,status) VALUES($1,$2,'owner','active'),($1,'template-submission-integration-owner','owner','active')",[f.session.tenantId,f.session.externalUserId]);return f;}
-const row=async f=>(await pool.query('SELECT * FROM paddle_checkout_intents WHERE tenant_id=$1',[f.session.tenantId])).rows[0];
+const row=async f=>(await pool.query('SELECT * FROM paddle_checkout_intents WHERE tenant_id=$1 ORDER BY generation DESC',[f.session.tenantId])).rows[0];
 const account=async f=>(await pool.query('SELECT * FROM paddle_accounts WHERE tenant_id=$1',[f.session.tenantId])).rows[0];
 async function confirmed(f){await journal.enqueue(f.session,f.config);const work=await journal.claimCreation('sandbox');assert.equal(work.tenantId,f.session.tenantId);await journal.confirmCreation(work,f.receipt);return work;}
 async function due(f){await pool.query("UPDATE paddle_checkout_intents SET next_reconcile_at=statement_timestamp()-interval '1 second' WHERE tenant_id=$1",[f.session.tenantId]);}
@@ -28,7 +41,7 @@ function provider(f,overrides={}){let posts=0;return{async createTransaction(wor
 const notice=(f,id='provider-event-001')=>({eventId:billingId('evt',`${id}:${f.session.tenantId}`),eventType:'transaction.completed',entityId:f.receipt.id,occurredAt:billingTime,digest:paddleDigest({id,tenant:f.session.tenantId})});
 test('concurrent authenticated requests and claims create exactly one durable attempt and one provider call',async()=>{
   const f=await fixture();await Promise.all([journal.enqueue(f.session,f.config),journal.enqueue(f.session,f.config)]);
-  assert.equal((await pool.query('SELECT * FROM paddle_checkout_intents WHERE tenant_id=$1',[f.session.tenantId])).rowCount,1);
+  assert.equal((await pool.query('SELECT * FROM paddle_checkout_intents WHERE tenant_id=$1 ORDER BY generation DESC',[f.session.tenantId])).rowCount,1);
   const p=provider(f);await Promise.all([createPaddleWorker(journal,p,'sandbox').run(),createPaddleWorker(journal,p,'sandbox').run()]);assert.equal(p.posts,1);
   assert.equal((await row(f)).state,'completed');assert.equal((await account(f)).subscription_id,f.subscription.id);
   assert.ok((await pool.query("SELECT * FROM audit_logs WHERE tenant_id=$1 AND action LIKE 'billing.%'",[f.session.tenantId])).rowCount>=4);
@@ -144,4 +157,90 @@ test('entitlement admission waits for the tenant barrier and reads the committed
   await tx.query("UPDATE paddle_accounts SET needs_review=TRUE WHERE tenant_id=$1",[f.session.tenantId]);assert.equal(settled,false);
   await tx.query('COMMIT');tx.release();assert.equal(await pending,false);assert.equal((await journal.read(f.session,'production')).canManage,true);
   assert.equal((await pool.query(paidAccessTenantSql,[f.session.tenantId])).rowCount,0);
+});
+
+async function nextPurchase(f) {
+  const attempt=(await journal.read(f.session,f.config.environment)).attempt;
+  await Promise.all([journal.enqueue(f.session,f.config,attempt),journal.enqueue(f.session,f.config,attempt)]);
+  const work=await journal.claimCreation(f.config.environment);assert.equal(work.tenantId,f.session.tenantId);
+  const id=billingId('txn',work.intentKey),subscriptionId=billingId('sub',work.intentKey);
+  const receipt={...f.receipt,id,checkoutUrl:`${f.config.checkoutBaseUrl}?_ptxn=${id}`};
+  await journal.confirmCreation(work,receipt);
+  return{work,payment:{...f.payment,id,subscriptionId,checkoutUrl:receipt.checkoutUrl},subscription:{...f.subscription,id:subscriptionId}};
+}
+test('repurchase is fenced by the observed attempt and admits exactly one new generation after verified cancellation',async()=>{
+  const f=await productionAccount({status:'canceled',startsAt:null,endsAt:null});
+  const before=await journal.read(f.session,'production');assert.equal(before.canCreateCheckout,true);assert.equal(before.attempt,1);
+  await journal.enqueue(f.session,f.config,0);assert.equal((await row(f)).generation,1);
+  const next=await nextPurchase(f);assert.equal((await row(f)).generation,2);assert.equal((await row(f)).previous_intent_key,`paddle_checkout_v1_${paddleDigest({tenantId:f.session.tenantId,environment:'production',generation:1})}`);
+  assert.equal(await reason(f),'payment-pending');assert.equal((await journal.read(f.session,'production')).subscription,null);
+  const period=(await pool.query("SELECT clock_timestamp()-interval '1 hour' AS starts,clock_timestamp()+interval '1 hour' AS ends")).rows[0];
+  const current={...next.subscription,status:'active',startsAt:period.starts.toISOString(),endsAt:period.ends.toISOString()};
+  let work=await journal.claimReconciliation('production');assert.equal(await journal.applyReconciliation(work,next.payment,current),'applied');
+  assert.equal(await reason(f),'paid-active');assert.equal((await journal.read(f.session,'production')).subscription.id,current.id);
+  assert.equal((await pool.query('SELECT * FROM paddle_accounts WHERE tenant_id=$1',[f.session.tenantId])).rowCount,2);
+  const currentRow=await row(f);await pool.query("UPDATE paddle_checkout_intents SET next_reconcile_at=clock_timestamp() WHERE intent_key=$1",[currentRow.intent_key]);
+  work=await journal.claimReconciliation('production');await journal.applyReconciliation(work,next.payment,{...current,status:'canceled',startsAt:null,endsAt:null,updatedAt:'2026-07-26T09:00:00.000001Z'});
+  await journal.enqueue(f.session,f.config,1);assert.equal((await row(f)).generation,2); // lost response replay after a later cancellation
+});
+test('active, scheduled, paused, past-due, uncertain or stale billing never permits another purchase',async()=>{
+  for(const status of ['active','paused','past_due']){
+    const f=await productionAccount({status,scheduledChange:{action:'cancel',effectiveAt:'2026-08-26T00:00:00.000000Z'}});
+    assert.equal((await journal.read(f.session,'production')).canCreateCheckout,false);await assert.rejects(journal.enqueue(f.session,f.config,1),{code:'CONFLICT'});
+  }
+  const f=await productionAccount({status:'canceled'});
+  for(const sql of ["verified_at=clock_timestamp()-interval '16 minutes'","verified_at=clock_timestamp()+interval '1 minute'","verified_at=clock_timestamp(),needs_review=TRUE"]){
+    await pool.query(`UPDATE paddle_accounts SET ${sql} WHERE tenant_id=$1`,[f.session.tenantId]);assert.equal((await journal.read(f.session,'production')).canCreateCheckout,false);await assert.rejects(journal.enqueue(f.session,f.config,1),{code:'CONFLICT'});
+  }
+  const unknown=await fixture();await journal.enqueue(unknown.session,unknown.config);const work=await journal.claimCreation('sandbox');await journal.creationUnknown(work);
+  await assert.rejects(journal.enqueue(unknown.session,unknown.config,1),{code:'CONFLICT'});
+  for(const expected of [-1,1.5,NaN,Infinity,'1',2147483647])await assert.rejects(journal.enqueue(unknown.session,unknown.config,expected),{code:'INVALID_REQUEST'});
+  await assert.rejects(journal.enqueue(unknown.session,unknown.config,2),{code:'CONFLICT'});
+});
+test('one payer can own separate workspace subscriptions, but no subscription can bind two workspaces',async()=>{
+  const a=await productionAccount(),b=await fixture();await confirmed(b);
+  let work=await journal.claimReconciliation('sandbox');
+  const customer=a.subscription.customerId;
+  await journal.applyReconciliation(work,{...b.payment,customerId:customer},{...b.subscription,customerId:customer});
+  const c=await fixture();await confirmed(c);work=await journal.claimReconciliation('sandbox');
+  await journal.applyReconciliation(work,{...c.payment,customerId:customer},{...c.subscription,customerId:customer});
+  assert.equal((await account(b)).customer_id,(await account(c)).customer_id);
+  assert.notEqual((await journal.read(b.session,'sandbox')).subscription.id,(await journal.read(c.session,'sandbox')).subscription.id);
+  const d=await fixture();await confirmed(d);work=await journal.claimReconciliation('sandbox');
+  await assert.rejects(journal.applyReconciliation(work,{...d.payment,customerId:customer,subscriptionId:b.subscription.id},{...b.subscription,customerId:customer}),{code:'23505'});
+  assert.equal(await account(d),undefined);
+});
+test('old subscription notices reconcile only their historical attempt and cannot revive canceled access',async()=>{
+  const f=await productionAccount({status:'canceled',startsAt:null,endsAt:null});const old=await row(f);
+  const next=await nextPurchase(f);const current=await row(f);
+  await journal.applyReconciliation(await journal.claimReconciliation('production'),next.payment,next.subscription);
+  await journal.recordNotice('production',{...notice(f,'historical-subscription'),entityId:f.subscription.id,eventType:'subscription.updated'});
+  assert.equal(Number((await row(f)).reconcile_revision),Number(current.reconcile_revision)+1);
+  const history=await journal.claimReconciliation('production');assert.equal(history.intentKey,old.intent_key);
+  assert.equal(await journal.applyReconciliation(history,f.payment,{...f.subscription,status:'active',updatedAt:'2026-07-26T09:00:00.000002Z'}),'review');
+  assert.equal((await journal.read(f.session,'production')).subscription.needsReview,false);
+  assert.equal((await journal.read(f.session,'production')).subscription.id,next.subscription.id);
+  await assert.rejects(pool.query("UPDATE paddle_accounts SET provider_status='active',provider_updated_at=provider_updated_at+interval '1 second',period_starts_at=clock_timestamp(),period_ends_at=clock_timestamp()+interval '1 hour' WHERE intent_key=$1",[old.intent_key]));
+});
+test('generation identity and predecessor are immutable and direct SQL cannot bypass cancellation',async()=>{
+  const f=await productionAccount();const old=await row(f);
+  await assert.rejects(pool.query('UPDATE paddle_checkout_intents SET generation=2 WHERE intent_key=$1',[old.intent_key]));
+  await assert.rejects(pool.query(`INSERT INTO paddle_checkout_intents(intent_key,tenant_id,environment,actor_external_user_id,price_id,product_id,checkout_base_url,generation,previous_intent_key)
+    VALUES($1,$2,$3,$4,$5,$6,$7,2,$8)`,[`paddle_checkout_v1_${paddleDigest(old.intent_key)}`,f.session.tenantId,'production',f.session.externalUserId,f.config.priceId,f.config.productId,f.config.checkoutBaseUrl,old.intent_key]));
+});
+test('repurchase rechecks owner and fresh cancellation after waiting for the tenant barrier',async()=>{
+  const f=await productionAccount({status:'canceled'});assert.equal((await journal.read(f.session,'production')).canCreateCheckout,true);
+  const tx=await pool.connect();await tx.query('BEGIN');await tx.query(paidAccessTenantBarrier,[f.session.tenantId]);
+  const pending=journal.enqueue(f.session,f.config,1);const rejected=assert.rejects(pending,{code:'CONFLICT'});
+  await tx.query("UPDATE paddle_accounts SET needs_review=TRUE WHERE tenant_id=$1",[f.session.tenantId]);await tx.query('COMMIT');tx.release();await rejected;
+  assert.equal((await row(f)).generation,1);
+  await assert.rejects(journal.enqueue({...f.session,externalUserId:'revoked-owner'},f.config,1),{code:'AUTHORIZATION_DENIED'});
+});
+
+test('0081 upgrades existing 0080 checkout and subscription history without replacing identity',async()=>{
+  const f=paddleFixture(7),checkout=await row(f),subscription=await account(f);
+  assert.equal(checkout.generation,1);assert.equal(checkout.previous_intent_key,null);
+  assert.equal(checkout.intent_key,f.work.intentKey);assert.equal(checkout.transaction_id,f.receipt.id);
+  assert.equal(subscription.subscription_id,f.subscription.id);assert.equal(subscription.projection_digest,paddleDigest(f.subscription));
+  assert.equal((await journal.read(f.session,'sandbox')).canCreateCheckout,false);
 });
