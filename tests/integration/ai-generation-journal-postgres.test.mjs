@@ -487,3 +487,126 @@ test('AI reply cancellation between queue admission and final seal prevents a pr
   await deliveries.recover();const d=deliveryWorker(deliveries,async()=>{assert.fail('No provider request after cancellation');},async()=>paid.cancel());
   await d.worker.run();assert.equal(d.calls.length,0);assert.equal((await deliveryRows(f))[0].state,'failed');
 });
+
+// Recovery reuses the real protocol fixtures above, with no external transport.
+import {createAiGenerationRecovery} from '../../server/operations/aiGenerationRecovery.ts';
+const recovery=createAiGenerationRecovery(transactions);
+const recoveryEvidence=f=>createHash('sha256').update(JSON.stringify(f.result)).digest('hex');
+const recoveryRequest=(f,action='usage-confirmed')=>{
+  const usage=parseOpenAiResponsesResult(f.result,f.request,f.configuration).usage;
+  return {tenantId:f.request.tenantId,requestKey:f.request.requestKey,action,inputTokens:action==='no-charge-confirmed'?0:usage.inputTokens,
+    outputTokens:action==='no-charge-confirmed'?0:usage.outputTokens,costMinorUnits:action==='no-charge-confirmed'?0:usage.costMinorUnits,currency:'USD'};
+};
+async function uncertainRecoveryCase(){
+  const f=await newCase();await journal.claim(claimInput(f));await journal.settle(claimInput(f).binding,{outcome:'unavailable'});
+  await pool.query("INSERT INTO ai_recovery_authorizations(database_role,tenant_id,expires_at) VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[f.request.tenantId]);return f;
+}
+test('operator settles actual usage atomically, replays and preserves original uncertain evidence',async()=>{
+  const f=await uncertainRecoveryCase(),before=await rows(f),p=await recovery.prepare(recoveryRequest(f));
+  const answers=await Promise.all([recovery.apply(p,recoveryEvidence(f)),recovery.apply(p,recoveryEvidence(f))]);assert.deepEqual(answers[0],answers[1]);
+  assert.deepEqual(await rows(f),before);assert.deepEqual(await usageRows(f),[]);
+  assert.deepEqual(await journal.observe(claimInput(f).binding),{status:'settled',result:{outcome:'unavailable'}});
+  const actual=(await pool.query('SELECT cost_minor_units,input_tokens,output_tokens FROM ai_generation_effective_usage WHERE request_key=$1',[f.request.requestKey])).rows[0];
+  assert.equal(Number(actual.cost_minor_units),p.costMinorUnits);assert.equal(Number(actual.input_tokens),p.inputTokens);
+  assert.equal((await pool.query("SELECT * FROM audit_logs WHERE tenant_id=$1 AND action='ai.generation.reconciled'",[f.request.tenantId])).rowCount,1);
+  const wire=transport(f);assert.deepEqual(await provider(f,wire).generate(f.request),{outcome:'unavailable'});assert.equal(wire.calls.generate,0);
+  assert.equal((await journal.claim(claimInput(f,await anotherRequest(f)))).status,'acquired');
+});
+test('no-charge confirmation removes only this reservation and never repeats the original POST',async()=>{
+  const f=await uncertainRecoveryCase(),p=await recovery.prepare(recoveryRequest(f,'no-charge-confirmed'));await recovery.apply(p,recoveryEvidence(f));
+  assert.equal((await pool.query(sql.budget,[f.request.tenantId,f.runtime.input.agent.aiAgentKey,(await rows(f))[0].period_start])).rows[0].total,'0');
+  const wire=transport(f);assert.deepEqual(await provider(f,wire).generate(f.request),{outcome:'unavailable'});assert.equal(wire.calls.generate,0);
+});
+test('late contradictory usage is retained, blocks generation, and requires a new reviewed revision',async()=>{
+  const f=await uncertainRecoveryCase(),original=await recovery.prepare(recoveryRequest(f,'no-charge-confirmed'));await recovery.apply(original,recoveryEvidence(f));
+  const late=parseOpenAiResponsesResult(f.result,f.request,f.configuration);await journal.settle(claimInput(f).binding,late);await journal.settle(claimInput(f).binding,late);
+  assert.equal((await pool.query('SELECT * FROM ai_generation_late_usage WHERE request_key=$1',[f.request.requestKey])).rowCount,1);
+  assert.equal((await journal.observe(claimInput(f).binding)).status,'uncertain');const next=await anotherRequest(f);assert.deepEqual(await journal.claim(claimInput(f,next)),{status:'denied'});
+  const replacement=await recovery.prepare(recoveryRequest(f));await recovery.apply(replacement,recoveryEvidence(f));
+  assert.equal((await journal.observe(claimInput(f).binding)).status,'settled');assert.equal((await journal.claim(claimInput(f,next))).status,'acquired');
+  assert.equal((await pool.query('SELECT * FROM ai_generation_reconciliations WHERE request_key=$1',[f.request.requestKey])).rowCount,2);
+  await journal.settle(claimInput(f).binding,late);assert.equal((await journal.observe(claimInput(f).binding)).status,'settled');
+});
+test('operator cannot erase positive original usage as absent and a correction preserves the original row',async()=>{
+  const f=await newCase(),c=claimInput(f);await journal.claim(c);
+  const usage=parseOpenAiResponsesResult(f.result,f.request,f.configuration).usage;
+  await journal.settle(c.binding,{outcome:'unavailable',usage:{...usage,inputTokens:c.countedInputTokens+1}});
+  await pool.query("INSERT INTO ai_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[f.request.tenantId]);
+  const before=await usageRows(f),absent=await recovery.prepare(recoveryRequest(f,'no-charge-confirmed'));await assert.rejects(recovery.apply(absent,recoveryEvidence(f)));
+  const p=await recovery.prepare(recoveryRequest(f));await recovery.apply(p,recoveryEvidence(f));assert.deepEqual(await usageRows(f),before);
+  assert.equal((await journal.observe(c.binding)).status,'settled');
+});
+test('unresolved claimed dispatch requires expiry, final evidence and no re-claim',async()=>{
+  const f=await newCase();await journal.claim(claimInput(f));await pool.query("INSERT INTO ai_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[f.request.tenantId]);
+  await assert.rejects(recovery.prepare(recoveryRequest(f,'no-charge-confirmed')));await pool.query('SELECT pg_sleep(1.1)');
+  const p=await recovery.prepare(recoveryRequest(f,'no-charge-confirmed'));await recovery.apply(p,recoveryEvidence(f));
+  assert.equal((await journal.claim(claimInput(f))).status,'settled');assert.equal((await rows(f))[0].status,'claimed');
+});
+test('revoked, expired, foreign, stale, or edited recovery evidence cannot mutate usage',async()=>{
+  const f=await uncertainRecoveryCase(),p=await recovery.prepare(recoveryRequest(f));
+  await assert.rejects(recovery.apply({...p,preparedAt:'2020-01-01T00:00:00.000Z'},recoveryEvidence(f)));
+  await assert.rejects(recovery.apply({...p,snapshotDigest:recoveryEvidence(f)},recoveryEvidence(f)));
+  await assert.rejects(recovery.apply({...p,operatorRole:'connect_worker_runtime'},recoveryEvidence(f)));
+  await assert.rejects(recovery.apply({...p,currency:'EUR'},recoveryEvidence(f)));
+  const foreign=await newCase();await assert.rejects(recovery.prepare({...recoveryRequest(f),tenantId:foreign.request.tenantId}));
+  await pool.query('DELETE FROM ai_recovery_authorizations WHERE tenant_id=$1',[f.request.tenantId]);await assert.rejects(recovery.apply(p,recoveryEvidence(f)));
+  assert.equal((await pool.query('SELECT * FROM ai_generation_reconciliations WHERE request_key=$1',[f.request.requestKey])).rowCount,0);
+});
+test('reconciliation and original rows reject editing, deletion and truncation',async()=>{
+  const f=await uncertainRecoveryCase();await recovery.apply(await recovery.prepare(recoveryRequest(f)),recoveryEvidence(f));
+  for(const table of ['ai_generation_reconciliations','ai_generation_journal'])for(const mutation of [`DELETE FROM ${table} WHERE request_key=$1`,`UPDATE ${table} SET request_key=request_key WHERE request_key=$1`])await assert.rejects(pool.query(mutation,[f.request.requestKey]));
+  await assert.rejects(pool.query('TRUNCATE ai_generation_reconciliations'));await assert.rejects(pool.query('TRUNCATE ai_generation_late_usage'));
+});
+test('restricted authenticated operator can reconcile but cannot grant itself authority or rewrite evidence',async()=>{
+  const f=await uncertainRecoveryCase();await pool.query("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_ai_recovery_test') THEN CREATE ROLE connect_ai_recovery_test LOGIN; END IF; END $$");
+  await pool.query('GRANT USAGE ON SCHEMA public TO connect_ai_recovery_test');
+  await pool.query('GRANT EXECUTE ON FUNCTION ai_generation_recovery_snapshot_v1(BIGINT,TEXT),apply_ai_generation_recovery_v1(BIGINT,TEXT,TEXT,TIMESTAMPTZ,TEXT,TEXT,BIGINT,BIGINT,BIGINT,TEXT) TO connect_ai_recovery_test');
+  const op=new pg.Pool({connectionString:connectionString.replace('connect_ai_test@','connect_ai_recovery_test@'),max:1});
+  try{const service=createAiGenerationRecovery(createNodePostgresTransactionManager(op));await assert.rejects(service.prepare(recoveryRequest(f)));
+    await assert.rejects(op.query("INSERT INTO ai_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 year')",[f.request.tenantId]));
+    await pool.query("INSERT INTO ai_recovery_authorizations VALUES('connect_ai_recovery_test',$1,clock_timestamp()+interval '1 hour')",[f.request.tenantId]);
+    const proposal=await service.prepare(recoveryRequest(f));assert.equal(proposal.operatorRole,'connect_ai_recovery_test');await service.apply(proposal,recoveryEvidence(f));
+    await assert.rejects(op.query('DELETE FROM ai_generation_reconciliations'));await assert.rejects(op.query('SET ROLE connect_ai_test'));
+    await pool.query("DELETE FROM ai_recovery_authorizations WHERE database_role='connect_ai_recovery_test'");await assert.rejects(service.apply(proposal,recoveryEvidence(f)));
+  }finally{await op.end();}
+});
+
+import {createAiDeliveryRecovery} from '../../server/operations/aiDeliveryRecovery.ts';
+const deliveryRecovery=createAiDeliveryRecovery(transactions);
+async function uncertainDelivery(){
+  const f=await deliveryCase();await deliveries.recover();const claim=await deliveries.claim();assert.ok(claim);assert.equal(await deliveries.seal(claim,reservationKey),true);await deliveries.unknown(claim);
+  await pool.query("INSERT INTO ai_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[f.request.tenantId]);return {...f,claim};
+}
+const deliveryRecoveryRequest=(f,action='accepted')=>({tenantId:f.request.tenantId,deliveryKey:f.claim.deliveryKey,action,providerMessageId:action==='accepted'?'wamid.bot-reply-provider-17':null});
+test('uncertain delivery acceptance is reconciled once without a POST and retains later assignment',async()=>{
+  const f=await uncertainDelivery(),p=await deliveryRecovery.prepare(deliveryRecoveryRequest(f));
+  await pool.query("UPDATE conversations SET assigned_external_user_id='template-submission-integration-owner',status='agent_active',version=version+1 WHERE tenant_id=$1",[f.request.tenantId]);
+  const results=await Promise.all([deliveryRecovery.apply(p,recoveryEvidence(f)),deliveryRecovery.apply(p,recoveryEvidence(f))]);assert.deepEqual(results[0],results[1]);
+  assert.equal((await deliveryRows(f))[0].state,'sent');assert.equal((await pool.query("SELECT * FROM messages WHERE tenant_id=$1 AND direction='outbound'",[f.request.tenantId])).rowCount,1);
+  assert.equal((await pool.query('SELECT assigned_external_user_id FROM conversations WHERE tenant_id=$1',[f.request.tenantId])).rows[0].assigned_external_user_id,'template-submission-integration-owner');
+  assert.equal(await deliveries.claim(),null);await deliveries.accepted(f.claim,p.providerMessageId);
+});
+test('confirmed nonacceptance closes the delivery; original late acceptance remains durable and may correct it',async()=>{
+  const f=await uncertainDelivery(),p=await deliveryRecovery.prepare(deliveryRecoveryRequest(f,'not-accepted'));await deliveryRecovery.apply(p,recoveryEvidence(f));
+  assert.equal((await deliveryRows(f))[0].state,'failed');assert.equal(await deliveries.claim(),null);
+  await deliveries.accepted(f.claim,'wamid.bot-reply-provider-17');assert.equal((await deliveryRows(f))[0].state,'sent');
+  assert.equal((await pool.query('SELECT * FROM ai_delivery_late_acceptances WHERE delivery_key=$1',[f.claim.deliveryKey])).rowCount,1);
+  assert.equal((await pool.query('SELECT action FROM ai_delivery_reconciliations WHERE delivery_key=$1',[f.claim.deliveryKey])).rows[0].action,'not-accepted');
+  await deliveries.accepted(f.claim,'wamid.bot-reply-provider-17');assert.equal((await pool.query("SELECT * FROM messages WHERE tenant_id=$1 AND direction='outbound'",[f.request.tenantId])).rowCount,1);
+});
+test('stale, foreign and revoked delivery recovery cannot override an observed acceptance',async()=>{
+  const f=await uncertainDelivery(),p=await deliveryRecovery.prepare(deliveryRecoveryRequest(f));
+  await assert.rejects(deliveryRecovery.apply({...p,preparedAt:'2020-01-01T00:00:00.000Z'},recoveryEvidence(f)));
+  await assert.rejects(deliveryRecovery.apply({...p,tenantId:f.request.tenantId+10000},recoveryEvidence(f)));
+  await deliveries.accepted(f.claim,p.providerMessageId);await assert.rejects(deliveryRecovery.apply(p,recoveryEvidence(f)));
+  assert.equal((await pool.query('SELECT * FROM ai_delivery_reconciliations WHERE delivery_key=$1',[f.claim.deliveryKey])).rowCount,0);
+  await pool.query('DELETE FROM ai_recovery_authorizations WHERE tenant_id=$1',[f.request.tenantId]);await assert.rejects(deliveryRecovery.apply(p,recoveryEvidence(f)));
+});
+test('known late transport usage survives timeout without publishing a draft or redispatching',async()=>{
+  const f=await newCase();let finish;const pending=new Promise(resolve=>{finish=resolve});const wire=transport(f,()=>pending);
+  assert.deepEqual(await provider(f,wire).generate(f.request),{outcome:'unavailable'});
+  assert.equal((await rows(f))[0].status,'uncertain');finish(Response.json(f.result));
+  for(let i=0;i<100;i++){if((await pool.query('SELECT * FROM ai_generation_late_usage WHERE request_key=$1',[f.request.requestKey])).rowCount)break;await new Promise(resolve=>setTimeout(resolve,10));}
+  assert.equal((await pool.query('SELECT * FROM ai_generation_late_usage WHERE request_key=$1',[f.request.requestKey])).rowCount,1);
+  assert.deepEqual((await journal.observe(claimInput(f).binding)).result,{outcome:'unavailable'});assert.equal(wire.calls.generate,1);
+});

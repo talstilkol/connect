@@ -88,7 +88,7 @@ export const postgresManualReplySql = Object.freeze({
   reject: `UPDATE manual_reply_outbox SET state = 'failed', error_code = $4, updated_at = ${nowSql}
     WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND state IN ('sending', 'unknown') RETURNING delivery_key`,
   sent: `UPDATE manual_reply_outbox SET state = 'sent', provider_message_id = $4, error_code = NULL, updated_at = ${nowSql}
-    WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND state IN ('sending', 'unknown') RETURNING delivery_key`,
+    WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND (state IN ('sending', 'unknown') OR (state='failed' AND error_code='OPERATOR_CONFIRMED_NOT_ACCEPTED')) RETURNING delivery_key`,
   message: `INSERT INTO messages (message_key, conversation_key, tenant_id, provider_message_id, direction, content_kind, status, text_content, occurred_at, status_updated_at)
     VALUES ($1, $2, $3, $4, 'outbound', 'text', 'sent', $5, $6, $6) ON CONFLICT (tenant_id, provider_message_id) DO NOTHING RETURNING message_key`,
   existingMessage: `SELECT message_key, conversation_key, direction, content_kind, text_content FROM messages WHERE tenant_id = $1 AND provider_message_id = $2 FOR UPDATE`,
@@ -240,13 +240,16 @@ export function createPostgresManualReplyRepository(dependencies: Readonly<{ que
       if (!/^[^\u0000-\u001f\u007f]{1,255}$/.test(providerMessageId) || providerMessageId.trim() !== providerMessageId) throw new Error("Manual reply provider identity is invalid");
       const messageKey = `message_v1_${await sha256Hex(new TextEncoder().encode(JSON.stringify({ namespace: "whatsapp_manual_reply_v1", tenantId: claim.tenantId, providerMessageId })))}`;
       await transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await tx.query(postgresManualReplySql.barrier, [claim.tenantId]);
         const initial = await required(tx, postgresManualReplySql.read, claimParameters(claim).slice(0, 2));
         // Accepted side effects must be recorded even if the actor or connection was revoked after seal.
         await required(tx, postgresManualReplySql.conversation, [claim.tenantId, initial.conversation_key]);
         const row = await required(tx, postgresManualReplySql.lock, claimParameters(claim).slice(0, 2));
         if (integer(row.claim_version) !== claim.claimVersion) throw new Error("Manual reply claim changed");
         if (row.state === "sent" && row.provider_message_id === providerMessageId) return;
-        if (row.state !== "sending" && row.state !== "unknown") throw new Error("Manual reply was not sealed");
+        const late = row.state === "failed" && row.error_code === "OPERATOR_CONFIRMED_NOT_ACCEPTED";
+        if (late) await tx.query("SELECT public.record_manual_delivery_late_acceptance_v1($1,$2,$3,$4)", [...claimParameters(claim), providerMessageId]);
+        if (row.state !== "sending" && row.state !== "unknown" && !late) throw new Error("Manual reply was not sealed");
         const at = timestamp(row.provider_started_at);
         let actualMessageKey = messageKey;
         const inserted = await one(tx, postgresManualReplySql.message, [messageKey, row.conversation_key, claim.tenantId, providerMessageId, row.text_content, at]);

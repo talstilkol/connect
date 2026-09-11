@@ -29,7 +29,6 @@ export function createDurableOpenAiResponsesProvider(
     throw new Error("AI durable provider configuration is invalid");
   }
   const configuration = checked.configuration;
-  const provider = createOpenAiResponsesProvider(configuration, { fetch: transport, now });
   return Object.freeze({
     async generate(input: AiResponseGenerationRequest): Promise<AiResponseGenerationResult> {
       let request: AiResponseGenerationRequest;
@@ -64,6 +63,9 @@ export function createDurableOpenAiResponsesProvider(
           if (!result) throw new AiResponseDeferredError();
           return result;
         }
+        const provider = createOpenAiResponsesProvider(configuration, { fetch: transport, now,
+          onLateResult: async (late) => { await journal.settle(binding, late); },
+        });
         const result = await provider.generate(request) as AiResponseGenerationResult;
         return await journal.settle(binding, result);
       } catch { throw new AiResponseDeferredError(); }

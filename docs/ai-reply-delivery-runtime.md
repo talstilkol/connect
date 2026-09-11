@@ -23,3 +23,8 @@
 3.3 Pending/failed/unknown intents appear in the conversation's existing pending-delivery view, even when human sending is disabled. An unknown AI delivery blocks another direct human-send command for that conversation. Do not clear, recreate or requeue an uncertain intent. Verified operational reconciliation remains in C4.1; no guessed delivery result is presented as truth.
 
 3.4 Local evidence is in [the R210 report](../outputs/launch-validation-2026-09-09/ai-delivery-validation-20260911.json). It does not prove a real provider connection, live QR onboarding, deployment or launch acceptance.
+
+
+## R220 — בירור קבלת ההודעה המקורית
+
+כלי פרטי יכול לקשור קבלת ספק מוכחת או לסגור אי־קבלה סופית. אין POST נוסף או שחרור מכסה מוקדם; אישור מאוחר נשמר ומתקן את מצב המסירה תוך שמירת ההכרעה המקורית. [הפעלה והרשאות](uncertain-outcome-recovery.md).

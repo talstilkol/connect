@@ -4,7 +4,15 @@ const columns = `tenant_id AS "tenantId", request_key AS "requestKey", ai_agent_
   status, result_json AS result, attempt_deadline <= clock_timestamp() AS expired`;
 
 export const postgresAiGenerationSql = Object.freeze({
-  observe: `SELECT ${columns} FROM ai_generation_journal WHERE tenant_id = $1 AND request_key = $2`,
+  observe: `SELECT j.tenant_id AS "tenantId", j.request_key AS "requestKey", j.ai_agent_key AS "aiAgentKey",
+    j.ai_agent_version_key AS "aiAgentVersionKey", j.input_digest AS "inputDigest", j.policy_digest AS "policyDigest",
+    j.period_start::text AS "periodStart", j.counted_input_tokens AS "countedInputTokens", j.reserved_minor_units AS "reservedMinorUnits",
+    CASE WHEN r.recovery_key IS NULL THEN j.status WHEN r.needs_review THEN 'uncertain' ELSE 'settled' END AS status,
+    CASE WHEN r.recovery_key IS NULL THEN j.result_json ELSE '{"outcome":"unavailable"}'::jsonb END AS result,
+    j.attempt_deadline<=clock_timestamp() AS expired, r.recovery_key IS NOT NULL AS reconciled
+    FROM ai_generation_journal j LEFT JOIN ai_generation_recovery_state r ON r.request_key=j.request_key
+    WHERE j.tenant_id=$1 AND j.request_key=$2`,
+  lateUsage: "SELECT public.record_ai_generation_late_usage_v1($1,$2,$3,$4,$5)",
   lockAgent: `SELECT a.ai_agent_key AS "aiAgentKey", a.status, a.active_version_key AS "activeVersionKey",
     v.status AS "versionStatus", v.definition_json AS definition, v.version_number AS "versionNumber",
     to_char(clock_timestamp() AT TIME ZONE 'UTC', 'YYYY-MM-01') AS "currentPeriod"
@@ -13,15 +21,21 @@ export const postgresAiGenerationSql = Object.freeze({
   authorization: `SELECT ai_agent_key AS "aiAgentKey", period_start::text AS "periodStart",
     monthly_limit_minor_units AS "monthlyLimitMinorUnits", currency
     FROM ai_runtime_cost_authorizations WHERE tenant_id = $1 AND request_key = $2`,
-  blocked: `SELECT EXISTS (SELECT 1 FROM ai_generation_journal WHERE tenant_id = $1 AND ai_agent_key = $2 AND
-    (status = 'uncertain' OR (status = 'claimed' AND (attempt_deadline <= clock_timestamp() OR period_start <> $3::date)))) AS blocked`,
+  blocked: `SELECT EXISTS (SELECT 1 FROM ai_generation_journal j LEFT JOIN ai_generation_recovery_state r ON r.request_key=j.request_key
+    WHERE j.tenant_id=$1 AND j.ai_agent_key=$2 AND (r.needs_review OR (r.recovery_key IS NULL AND
+      (j.status='uncertain' OR (j.status='claimed' AND (j.attempt_deadline<=clock_timestamp() OR j.period_start<>$3::date)))))) AS blocked`,
   budget: `SELECT COALESCE(SUM(cost), 0)::text AS total FROM (
-    SELECT cost_minor_units AS cost FROM ai_runtime_usage
+    SELECT cost_minor_units AS cost FROM ai_generation_effective_usage
       WHERE tenant_id = $1 AND ai_agent_key = $2 AND period_start = $3::date AND currency = 'USD'
     UNION ALL
     SELECT reserved_minor_units AS cost FROM ai_generation_journal j
       WHERE j.tenant_id = $1 AND j.ai_agent_key = $2 AND j.period_start = $3::date
-        AND NOT EXISTS (SELECT 1 FROM ai_runtime_usage u WHERE u.tenant_id = j.tenant_id AND u.request_key = j.request_key)
+        AND NOT EXISTS (SELECT 1 FROM ai_generation_effective_usage u WHERE u.tenant_id = j.tenant_id AND u.request_key = j.request_key)
+    UNION ALL
+    SELECT greatest(j.reserved_minor_units,r.cost_minor_units,
+      coalesce((SELECT max(l.cost_minor_units) FROM ai_generation_late_usage l WHERE l.request_key=j.request_key),0))-r.cost_minor_units
+    FROM ai_generation_recovery_state r JOIN ai_generation_journal j ON j.request_key=r.request_key
+    WHERE r.needs_review AND j.tenant_id=$1 AND j.ai_agent_key=$2 AND j.period_start=$3::date
     ) AS obligations`,
   insert: `INSERT INTO ai_generation_journal (tenant_id, request_key, ai_agent_key, ai_agent_version_key,
     input_digest, policy_digest, period_start, counted_input_tokens, reserved_minor_units, status, created_at, attempt_deadline)

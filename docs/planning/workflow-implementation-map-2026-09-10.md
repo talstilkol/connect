@@ -5,8 +5,7 @@
 ואת משימה 1.2 ב־[Master Plan](launch-master-plan-2026-09-09.md).
 היא מתארת קוד וחיבורי רכיבים; היא אינה ראיית שימוש ב־Staging.
 
-1.2 **ממצא מרכזי:** חסרות גם פעולות מוצר וחיבורי Runtime. פתיחת החשבונות
-לבד אינה משלימה Templates, הפעלת קמפיינים, השהיה/ביטול או מענה ידני ב־Inbox.
+1.2 **מצב עדכני R220:** פערי Templates, הפעלת קמפיינים, בקרות ומענה ידני נסגרו מקומית בסבבים הקודמים. Knowledge/AI/Paddle ושחזור תוצאות לא ודאיות ממומשים כעת. נשארה ביקורת C4.1.5, ובפרט בירור פערי W09/W10, לפני הכרזה שכל הקוד הושלם. כל התהליכים עדיין דורשים קבלה חיה.
 
 1.3 משמעות הסיווג: **KEEP** — לשמר את המימוש הקיים; **VERIFY** — להוכיח
 את התהליך בשילוב אמיתי; **REFACTOR** — להשלים או להחליף חיבור קוד חסר.
@@ -53,8 +52,8 @@
 | W16 מענה ידני לאחר Handoff | [Composer](../../features/conversations/ConversationComposerBoundary.tsx), [מצב בקשה](../../features/conversations/manualReplyDraft.ts) | `conversations.reply.send`; [Outbox](../../server/platform/postgresManualReplyRepository.ts), [Worker](../../server/conversations/manualReplyWorker.ts) | KEEP + VERIFY: מענה ידני מומש; בקשות שלא אושרו נשמרות גם כשהסינון מסתיר את השיחה. קבלת UI וספק חי נשארת פתוחה, כמפורט בסעיפים 9–10 |
 | W17 Bot בסיסי | [Flow builder](../../features/bot/BotFlowBuilder.tsx), [פעולות Bot](../../server/bot/botFlowActions.ts) | `bot.flows.list/details.read/draft.save/publish`; [Flows](../../server/platform/postgresBotFlowRepository.ts), [Runtime](../../server/platform/postgresBotRuntimeRepository.ts) | KEEP + VERIFY: שמירה/פרסום, גרסאות, כפתורים, עצירת Bot ב־Handoff ושליחה אמיתית; W16 נשאר תלות נפרדת |
 | W18 דוחות ו־Dashboard | [Reports](../../features/reports/OperationalReports.tsx), [Dashboard](../../features/workspace/WorkspaceDashboard.tsx) | `reports.read`; [מאגר דוחות](../../server/platform/postgresOperationalReportRepository.ts) | KEEP + VERIFY: סיכום Dashboard מחובר לדוח מורשה לפי R207 וסעיף 16: הודעות, שיחות בטווח, קמפיינים שנוצרו והחלטות AI. טווח ושעת Snapshot מוצגים; קבלה מול Receipts חיים ו־QA עדיין נדרשים |
-| W19 AI ו־Knowledge אחרי פיילוט | [AI editor](../../features/ai/AiAgentEditor.tsx), [Upload action](../../server/ai/knowledgeUploadActions.ts) | `ai.agents.*`, `ai.reply-approvals.*`; [AI agents](../../server/platform/postgresAiAgentRepository.ts), [Reply outbox](../../server/platform/postgresAiReplyOutboxRepository.ts) | KEEP + REFACTOR + VERIFY: Draft/Approval אינם שליחה. Upload הישן D1/R2; נוספה חסימה שרתית מפורשת לפני הגישה אליו. הפיתוח של יעד S3 וה־AI Sender קודם כעת לפני החיבורים לפי R208; מתאם Responses, אחזור PostgreSQL ויומן/שריון עמיד מחוברים ב־Worker לפי R209; השלמת Knowledge, אישור/שליחה וקבלה חיה עדיין פתוחות |
-| W20 Billing וניהול מערכת | [Billing](../../features/workspace/WorkspaceSectionContent.tsx), [Admin](../../app/admin/page.tsx), [פעולות מנוי](../../server/billing/systemAdminSubscriptionActions.ts) | `system-admin.subscription.*`; [מאגר מנויים](../../server/platform/postgresTenantSubscriptionRepository.ts) | KEEP למנוי ידני + REFACTOR/VERIFY ל־Paddle בשלב 11. אין Checkout פעיל במסך Billing; זכאות, Webhooks ו־Dunning טרם הוכחו |
+| W19 AI ו־Knowledge | [AI editor](../../features/ai/AiAgentEditor.tsx), [Upload](../../server/ai/knowledgeUploadActions.ts) | `ai.agents.*`, `ai.reply-approvals.*`; PostgreSQL, Responses ו־S3 | KEEP + VERIFY: העלאה/סריקה, אחזור, תקציב, אישור ושליחה ושחזור פרטי הושלמו מקומית ב־R209–R220; TXT/Markdown בלבד. נדרשים Evals וקבלה חיה |
+| W20 Billing וניהול מערכת | [Billing](../../features/workspace/WorkspaceSectionContent.tsx), [Admin](../../app/admin/page.tsx) | Paddle Checkout/Webhook/Worker, זכאות ו־Portal; פעולות ניהול מנוי | KEEP + VERIFY: Checkout, אכיפת מנוי, ביטול, רכישה חוזרת ושחזור פרטי הושלמו מקומית ב־R212–R217. נדרשת קבלת Sandbox והגדרות חשבון אמיתיות |
 | W21 בקרות השקה ותפעול | [Decision center](../../features/workspace/DecisionCenter.tsx), [מדיניות WhatsApp](../../app/admin/whatsapp-delivery-policy/[tenantId]/page.tsx) | [Runtime V2](../../server/platform/currentRailwayProductionReadinessV2.ts), [מדיניות](../../server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts) | KEEP + VERIFY: V2 אינו בדיקת מוצר; נדרשים ניטור, Restore, Retention ו־Kill switch חיים בשלבים 6–7 |
 
 3.1 קמפיינים חוזרים, Enterprise, API ציבורי ויישומון Native מחוץ לגרסה
@@ -264,3 +263,8 @@ W19/C4.1.3 הושלם מקומית: סגירה מנהלית ותקופת שמי�
 ## 17.14 R219 — ליבת PostgreSQL מאומתת בסכמה הנוכחית
 
 C4.1.4 הושלם מקומית: כל 86 המיגרציות, 92 תרחישים נוכחיים ו־9 תרחישי שדרוג בכל PostgreSQL 16.13/17.11. תוקנה נעילת עסק לפני אישור וסטטוס מסירה בקמפיין. W19/C4.1 עדיין דורש בירור AI/מסירה/העלאה וביקורת סופית; נותרו 2 תתי־משימות קוד, 4–8 שעות הנדסה בביטחון נמוך ו־12 שלבי השקה. [התוכנית](code-completion-plan-2026-09-11.md#14-r219--סגירת-בודק-postgresql-ותיקון-אישורי-מסירה-12092026).
+
+
+## 17.15 R220 — שחזור עמיד וביקורת נותרת
+
+W16 ו־W19 כוללים כעת בירור פרטי של תוצאות לא ודאיות, עם הרשאות, ראיות בלתי־משתנות וקליטת תוצאה מאוחרת. C4.1.2 נסגר; C4.1.5 פתוח לביקורת רוחבית, כולל W09/W10, תיקון ממצאים ומסירת הגרסה המקומית. אומדן הביקורת 2–4 שעות בביטחון נמוך; לא אומדן מובטח לכל התכנות. 12 שלבי ההשקה עדיין פתוחים. [תוכנית](code-completion-plan-2026-09-11.md#15-r220--סגירת-תוצאות-לא-ודאיות-12092026), [חיבורים](service-connections-handoff-2026-09-12.md).

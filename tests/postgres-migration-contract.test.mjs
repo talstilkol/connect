@@ -174,12 +174,16 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0083_ai_publication_readiness.sql",
     "0084_paddle_operator_recovery.sql",
     "0085_knowledge_object_retention.sql",
+    "0086_ai_generation_reconciliation.sql",
+    "0087_ai_delivery_reconciliation.sql",
+    "0088_knowledge_ingestion_reconciliation.sql",
+    "0089_manual_delivery_reconciliation.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 86,
+      migrationCount: 90,
       findings: [],
     },
   );

@@ -91,6 +91,7 @@ export function createPostgresAiReplyDeliveryRepository(dependencies: Readonly<{
       if (!/^[^\u0000-\u001f\u007f]{1,255}$/.test(providerMessageId) || providerMessageId.trim() !== providerMessageId) throw new Error("AI delivery provider identity is invalid");
       const messageKey = `message_v1_${await sha256Hex(new TextEncoder().encode(JSON.stringify({ namespace: "whatsapp_ai_reply_v1", tenantId: claim.tenantId, providerMessageId })))}`;
       await transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await tx.query(shared.barrier, [claim.tenantId]);
         const identity = await one(tx, sql.read, parameters.slice(0, 2));
         if (!identity) throw new Error("AI delivery is unavailable");
         // Persist effects after seal even if authority was revoked or a newer inbound arrived.
@@ -99,7 +100,9 @@ export function createPostgresAiReplyDeliveryRepository(dependencies: Readonly<{
         const row = await one(tx, sql.lock, parameters.slice(0, 2));
         if (!row || integer(row.claim_version) !== claim.claimVersion) throw new Error("AI delivery claim changed");
         if (row.state === "sent" && row.provider_message_id === providerMessageId) return;
-        if (row.state !== "sending" && row.state !== "unknown") throw new Error("AI delivery was not sealed");
+        const late = row.state === "failed" && row.error_code === "OPERATOR_CONFIRMED_NOT_ACCEPTED";
+        if (late) await tx.query("SELECT public.record_ai_delivery_late_acceptance_v1($1,$2,$3,$4)", [...parameters, providerMessageId]);
+        if (row.state !== "sending" && row.state !== "unknown" && !late) throw new Error("AI delivery was not sealed");
         const at = timestamp(row.provider_started_at), conversation = text(row, "conversation_key"), body = text(o, "reply_text");
         let actualKey = messageKey;
         if (!await one(tx, shared.message, [messageKey, conversation, claim.tenantId, providerMessageId, body, at])) {

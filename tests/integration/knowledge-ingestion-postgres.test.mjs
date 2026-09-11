@@ -275,3 +275,54 @@ test('a separate restricted retention login needs a scoped grant, cannot self-au
     await assert.rejects(operatorPool.query('SET ROLE connect_knowledge_test'));
   }finally{await operatorPool.end();}
 });
+
+import {createKnowledgeIngestionRecovery} from '../../server/operations/knowledgeIngestionRecovery.ts';
+const ingestionRecoveryEvidence=f=>createHash('sha256').update(f.bytes).digest('hex');
+const recoveryRequest=f=>({tenantId:f.intent.tenantId,sourceKey:f.intent.sourceKey,action:'reprocess',versionId:'s3-integration-version-1'});
+async function rejectedRecoveryCase(verdict='FAILED'){
+  const f=await fixture();await f.enqueue();const original=storage(f,{async inspect(){return {versionId:'s3-integration-version-1',verdict}}});await createKnowledgeIngestionWorker(jobs,original).run();
+  await pool.query("INSERT INTO knowledge_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[f.intent.tenantId]);return {...f,original};
+}
+test('a repaired scan resumes the exact version, preserves rejection evidence and performs no second PUT',async()=>{
+  const f=await rejectedRecoveryCase(),reader=storage(f),service=createKnowledgeIngestionRecovery(transactions,reader),before=await row(f);
+  const p=await service.prepare(recoveryRequest(f));const results=await Promise.all([service.apply(p,ingestionRecoveryEvidence(f)),service.apply(p,ingestionRecoveryEvidence(f))]);assert.deepEqual(results[0],results[1]);
+  assert.equal((await row(f)).state,'quarantined');assert.equal((await source(f)).status,'scanning');assert.equal((await row(f)).created_at.toISOString(),before.created_at.toISOString());
+  await createKnowledgeIngestionWorker(jobs,reader).run();assert.equal(reader.puts,0);assert.equal(f.original.puts,1);assert.equal((await row(f)).state,'ready');
+  assert.equal((await pool.query('SELECT original_state FROM knowledge_ingestion_reconciliations WHERE source_key=$1',[f.intent.sourceKey])).rows[0].original_state.error_code,'KNOWLEDGE_SCAN_FAILED');
+  await service.apply(p,ingestionRecoveryEvidence(f));
+});
+test('unknown upload may bind a verified exact version; confirmed absence retains a late receipt without activation',async()=>{
+  for(const action of ['reprocess','absent']){
+    const f=await fixture();await f.enqueue();const c=await jobs.claim();await jobs.seal(c);await jobs.defer(c);
+    await pool.query("INSERT INTO knowledge_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[f.intent.tenantId]);
+    const s=storage(f),service=createKnowledgeIngestionRecovery(transactions,s),request={...recoveryRequest(f),action,versionId:action==='absent'?null:'s3-integration-version-1'};
+    await service.apply(await service.prepare(request),ingestionRecoveryEvidence(f));assert.equal(s.puts,0);
+    if(action==='reprocess'){await createKnowledgeIngestionWorker(jobs,s).run();assert.equal((await row(f)).state,'ready');}
+    else{assert.equal((await row(f)).state,'rejected');await jobs.receipt(c,'s3-integration-version-1');assert.equal((await row(f)).state,'rejected');assert.equal((await row(f)).version_id,'s3-integration-version-1');assert.equal((await source(f)).status,'rejected');
+      assert.equal((await pool.query('SELECT * FROM knowledge_ingestion_late_receipts WHERE source_key=$1',[f.intent.sourceKey])).rowCount,1);}
+  }
+});
+test('threat rejection, dirty scan, altered bytes, revoked membership and stale proposals stay blocked',async()=>{
+  const threat=await rejectedRecoveryCase('THREATS_FOUND');await assert.rejects(createKnowledgeIngestionRecovery(transactions,storage(threat)).prepare(recoveryRequest(threat)));
+  const f=await rejectedRecoveryCase();const bad=storage(f,{async inspect(){return {versionId:'s3-integration-version-1',verdict:'FAILED'}}});await assert.rejects(createKnowledgeIngestionRecovery(transactions,bad).prepare(recoveryRequest(f)));assert.equal(bad.reads,0);
+  await assert.rejects(createKnowledgeIngestionRecovery(transactions,storage(f,{async read(){return f.bytes.slice(1)}})).prepare(recoveryRequest(f)));
+  const service=createKnowledgeIngestionRecovery(transactions,storage(f)),p=await service.prepare(recoveryRequest(f));await assert.rejects(service.apply({...p,preparedAt:'2020-01-01T00:00:00.000Z'},ingestionRecoveryEvidence(f)));
+  await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",[f.intent.tenantId,f.session.externalUserId]);await assert.rejects(service.apply(p,ingestionRecoveryEvidence(f)));
+  assert.equal((await row(f)).state,'rejected');
+});
+test('a revoked operator during exact-version read cannot prepare recovery',async()=>{
+  const f=await rejectedRecoveryCase(),s=storage(f,{async read(){await pool.query('DELETE FROM knowledge_recovery_authorizations WHERE tenant_id=$1',[f.intent.tenantId]);return f.bytes.slice()}});
+  await assert.rejects(createKnowledgeIngestionRecovery(transactions,s).prepare(recoveryRequest(f)));assert.equal((await row(f)).state,'rejected');
+});
+test('a restricted Knowledge recovery login cannot self-authorize or rewrite evidence',async()=>{
+  const f=await rejectedRecoveryCase();await pool.query("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_knowledge_recovery_test') THEN CREATE ROLE connect_knowledge_recovery_test LOGIN; END IF; END $$");
+  await pool.query('GRANT USAGE ON SCHEMA public TO connect_knowledge_recovery_test');await pool.query('GRANT EXECUTE ON FUNCTION knowledge_recovery_snapshot_v1(BIGINT,TEXT),apply_knowledge_recovery_v1(BIGINT,TEXT,TEXT,TIMESTAMPTZ,TEXT,TEXT,TEXT,TEXT) TO connect_knowledge_recovery_test');
+  const op=new pg.Pool({connectionString:connectionString.replace('connect_knowledge_test@','connect_knowledge_recovery_test@'),max:1});
+  try{const service=createKnowledgeIngestionRecovery(createNodePostgresTransactionManager(op),storage(f));await assert.rejects(service.prepare(recoveryRequest(f)));
+    await assert.rejects(op.query("INSERT INTO knowledge_recovery_authorizations VALUES(session_user,$1,clock_timestamp()+interval '1 year')",[f.intent.tenantId]));
+    await pool.query("INSERT INTO knowledge_recovery_authorizations VALUES('connect_knowledge_recovery_test',$1,clock_timestamp()+interval '1 hour')",[f.intent.tenantId]);
+    const p=await service.prepare(recoveryRequest(f));assert.equal(p.operatorRole,'connect_knowledge_recovery_test');await service.apply(p,ingestionRecoveryEvidence(f));
+    await assert.rejects(op.query('DELETE FROM knowledge_ingestion_reconciliations'));await assert.rejects(op.query('SET ROLE connect_knowledge_test'));
+    await pool.query("DELETE FROM knowledge_recovery_authorizations WHERE database_role='connect_knowledge_recovery_test'");await assert.rejects(service.apply(p,ingestionRecoveryEvidence(f)));
+  }finally{await op.end();}
+});

@@ -132,6 +132,13 @@ export function createPostgresAiGenerationJournal(
         const row = await one(tx, sql.observe, [binding.tenantId, binding.requestKey]);
         const observation = observeRow(row, binding);
         if (observation.status === "missing" || !row || row.policyDigest !== binding.policyDigest) throw failure();
+        if (row.reconciled === true || observation.status === "uncertain" && captured.usage) {
+          // Preserve actual late usage after an operator decision. Contradictory
+          // evidence re-blocks future generation until a fresh reviewed decision.
+          if (captured.usage) await tx.query(sql.lateUsage, [binding.tenantId, binding.requestKey,
+            captured.usage.inputTokens, captured.usage.outputTokens, captured.usage.costMinorUnits]);
+          return { outcome: "unavailable" as const };
+        }
         if (observation.status !== "claimed") return observation.result;
         if (row.aiAgentKey !== agent.aiAgentKey || typeof row.periodStart !== "string" || !periodPattern.test(row.periodStart)) throw failure();
         const reservation = parsePostgresPositiveInteger(row.reservedMinorUnits);

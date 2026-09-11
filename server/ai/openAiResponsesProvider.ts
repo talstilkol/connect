@@ -44,7 +44,7 @@ export async function readOpenAiJsonResponse(response: Response): Promise<unknow
 // to the caller; this transport must never be installed as a retrying worker.
 export function createOpenAiResponsesProvider(
   candidate: OpenAiResponsesConfiguration,
-  options: Readonly<{ fetch?: typeof fetch; now?: () => Date }> = {},
+  options: Readonly<{ fetch?: typeof fetch; now?: () => Date; onLateResult?: (result: AiResponseGenerationResult) => Promise<void> }> = {},
 ): AiResponseProvider {
   const now = options.now ?? (() => new Date());
   const transport = options.fetch ?? globalThis.fetch;
@@ -91,8 +91,14 @@ export function createOpenAiResponsesProvider(
             return { outcome: "unavailable" };
           }
           const result = await readOpenAiJsonResponse(response);
-          if (controller.signal.aborted) return { outcome: "unavailable" };
-          return parseOpenAiResponsesResult(result, captured, configuration);
+          const parsed = parseOpenAiResponsesResult(result, captured, configuration);
+          if (controller.signal.aborted) {
+            // A transport can complete after its caller timed out. Retain known
+            // usage through the durable journal; never publish this late draft.
+            if (parsed.usage && options.onLateResult) await options.onLateResult(parsed);
+            return { outcome: "unavailable" };
+          }
+          return parsed;
         })();
         return await Promise.race([attempt, deadline]);
       } catch {

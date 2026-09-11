@@ -138,7 +138,7 @@ export const postgresAiRuntimeSql = Object.freeze({
   `,
   sumUsage: `
     SELECT COALESCE(SUM(cost_minor_units), 0) AS "costMinorUnits"
-    FROM ai_runtime_usage
+    FROM ai_generation_effective_usage
     WHERE tenant_id = $1
       AND ai_agent_key = $2
       AND period_start = $3::date

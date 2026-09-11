@@ -781,4 +781,12 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE knowledge_retention_jobs",
     summary: "Private scoped retention reviews and exact-version deletion jobs preserve closure time, legal holds, atomic retirement and immutable bounded retry evidence.",
   }),
+  Object.freeze({
+    migration: "0086_ai_generation_reconciliation.sql",
+    token: "CREATE TABLE ai_generation_reconciliations",
+    summary: "Private generation cost reconciliation preserves original evidence, projects authoritative usage and reopens review on contradictory late usage without retrying generation.",
+  }),
+  Object.freeze({migration: "0087_ai_delivery_reconciliation.sql", token: "CREATE TABLE ai_delivery_reconciliations", summary: "Private AI delivery evidence resolves original acceptance or nonacceptance without another POST and retains late original acceptance."}),
+  Object.freeze({migration: "0088_knowledge_ingestion_reconciliation.sql", token: "CREATE TABLE knowledge_recovery_authorizations", summary: "Scoped Knowledge recovery resumes exact-version scan processing or closes confirmed absence, preserving late receipts and forbidding retired-source reactivation."}),
+  Object.freeze({migration: "0089_manual_delivery_reconciliation.sql", token: "CREATE TABLE manual_recovery_authorizations", summary: "Private scoped manual delivery reconciliation records original acceptance or nonacceptance without resending, preserving immutable evidence and exact late provider truth."}),
 ]);

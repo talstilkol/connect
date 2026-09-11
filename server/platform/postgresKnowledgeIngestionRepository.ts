@@ -88,7 +88,7 @@ export function createPostgresKnowledgeIngestionRepository(deps: { queries: Post
         AND (claim_expires_at IS NULL OR claim_expires_at <= statement_timestamp()) ORDER BY next_attempt_at,source_key LIMIT 1`,[]);
       if (!c) return null;
       return tx(integer(c.tenant_id),async q => {
-        const r = await one(q,`SELECT *, encode(pending_bytes,'hex') AS bytes_hex, created_at < statement_timestamp() - interval '7 days' AS expired FROM knowledge_ingestion_jobs
+        const r = await one(q,`SELECT *, encode(pending_bytes,'hex') AS bytes_hex, greatest(created_at,coalesce((SELECT max(recorded_at) FROM knowledge_ingestion_reconciliations r WHERE r.source_key=knowledge_ingestion_jobs.source_key AND r.action='reprocess'),created_at)) < statement_timestamp() - interval '7 days' AS expired FROM knowledge_ingestion_jobs
           WHERE tenant_id=$1 AND source_key=$2 AND state NOT IN ('ready','rejected') AND next_attempt_at <= statement_timestamp()
           AND (claim_expires_at IS NULL OR claim_expires_at <= statement_timestamp()) FOR UPDATE`,[integer(c.tenant_id),text(c,"source_key")]);
         if (!r) return null;
@@ -113,6 +113,10 @@ export function createPostgresKnowledgeIngestionRepository(deps: { queries: Post
         // rejection keeps the object locator available to operations.
         const r = await one(q,"SELECT * FROM knowledge_ingestion_jobs WHERE tenant_id=$1 AND source_key=$2 FOR UPDATE",[c.intent.tenantId,c.intent.sourceKey]);
         if (!r || (r.version_id !== null && r.version_id !== versionId)) fail("CONFLICT");
+        if (r.state === "rejected" && r.version_id === null) {
+          await q.query("SELECT public.record_knowledge_late_receipt_v1($1,$2,$3)", [c.intent.tenantId,c.intent.sourceKey,versionId]);
+          return;
+        }
         if (["ready","rejected"].includes(String(r.state))) return;
         if (!["uploading","unknown","quarantined"].includes(String(r.state))) fail("CONFLICT");
         await q.query(`UPDATE knowledge_ingestion_jobs SET version_id=$3,state='quarantined',pending_bytes=NULL,updated_at=${now} WHERE tenant_id=$1 AND source_key=$2`,[c.intent.tenantId,c.intent.sourceKey,versionId]);

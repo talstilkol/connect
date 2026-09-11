@@ -71,7 +71,8 @@ export const postgresAiReplyDeliverySql = Object.freeze({
   unknown: postgresManualReplySql.unknown.replaceAll("manual_reply_outbox", "ai_reply_deliveries"),
   expiredSending: postgresManualReplySql.expiredSending.replaceAll("manual_reply_outbox", "ai_reply_deliveries"),
   reject: postgresManualReplySql.reject.replaceAll("manual_reply_outbox", "ai_reply_deliveries"),
-  sent: postgresManualReplySql.sent.replaceAll("manual_reply_outbox", "ai_reply_deliveries"),
+  sent: postgresManualReplySql.sent.replaceAll("manual_reply_outbox", "ai_reply_deliveries")
+    .replace("state IN ('sending', 'unknown')", "(state IN ('sending', 'unknown') OR (state='failed' AND error_code='OPERATOR_CONFIRMED_NOT_ACCEPTED'))"),
   project: `UPDATE conversations SET
     last_message_key = CASE WHEN last_message_at IS NULL OR last_message_at <= $4 THEN $3 ELSE last_message_key END,
     last_message_at = GREATEST(last_message_at, $4), version = version + 1, updated_at = ${now}
