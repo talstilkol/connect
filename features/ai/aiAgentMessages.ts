@@ -27,7 +27,7 @@ type Localized<T> = {
 const hebrewMessages = {
   directoryStatuses: {
     "configuration-required":
-      "נדרשת הגדרת Clerk ו־D1 כדי לטעון ולשמור סוכני AI.",
+      "יש להשלים את הגדרות השירות כדי לטעון ולשמור סוכני AI.",
     unauthenticated:
       "יש להתחבר לפני צפייה בסוכני AI.",
     "onboarding-required":
@@ -44,7 +44,7 @@ const hebrewMessages = {
   >,
   actionStatuses: {
     "configuration-required":
-      "החיבור ל־Clerk או ל־D1 אינו מוגדר.",
+      "החיבור לשירות אינו מוגדר.",
     unauthenticated:
       "החיבור פג. יש להתחבר מחדש.",
     "onboarding-required":
@@ -114,7 +114,7 @@ const hebrewMessages = {
     savedReloadFailed:
       "הטיוטה נשמרה, אך מצב ההפעלה לא נטען מחדש. יש לבחור את הסוכן מהרשימה לפני פרסום.",
     draftUnchanged: "הטיוטה כבר הייתה שמורה ללא שינוי.",
-    draftSaved: "הטיוטה נשמרה ב־D1 כגרסה חדשה.",
+    draftSaved: "הטיוטה נשמרה כגרסה חדשה.",
     publishedReloadFailed:
       "הגרסה פורסמה, אך ההיסטוריה המלאה לא נטענה מחדש.",
     publishedUnchanged: "הגרסה כבר הייתה פעילה.",
@@ -178,12 +178,12 @@ const hebrewMessages = {
     title: "מקורות השייכים לסביבה",
     upload: "העלאת מקור",
     uploadBoundary:
-      "העלאת מקור חסומה עד להגדרת R2, סוגי קובץ, מגבלת גודל וסריקה.",
+      "העלאת מקור חסומה עד להגדרת S3, סוגי קובץ, מגבלת גודל וסריקה.",
     description:
       "הבחירה נשמרת בתוך גרסת הסוכן. רק מקור במצב Ready יוכל לעבור את שער ההפעלה.",
     emptyTitle: "אין מקורות ידע שמורים",
     emptyDescription:
-      "העלאה תופעל רק לאחר הגדרת R2, סוגי קובץ, מגבלת גודל וסריקה.",
+      "אפשר להעלות קובץ TXT או Markdown בטופס. מקור שעובד בהצלחה יופיע כאן.",
   },
 } as const;
 
@@ -196,7 +196,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
   en: {
     directoryStatuses: {
       "configuration-required":
-        "Configure Clerk and D1 before loading or saving AI agents.",
+        "Complete service setup to load and save AI agents.",
       unauthenticated:
         "Sign in before viewing AI agents.",
       "onboarding-required":
@@ -210,7 +210,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
     },
     actionStatuses: {
       "configuration-required":
-        "The Clerk or D1 connection is not configured.",
+        "The service connection is not configured.",
       unauthenticated:
         "Your session expired. Sign in again.",
       "onboarding-required":
@@ -272,7 +272,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
       savedReloadFailed:
         "The draft was saved, but activation state could not be reloaded. Select the agent from the list before publishing.",
       draftUnchanged: "The draft was already saved without changes.",
-      draftSaved: "The draft was saved to D1 as a new version.",
+      draftSaved: "The draft was saved as a new version.",
       publishedReloadFailed:
         "The version was published, but the complete history could not be reloaded.",
       publishedUnchanged: "The version was already active.",
@@ -336,18 +336,18 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
       title: "Workspace knowledge sources",
       upload: "Upload source",
       uploadBoundary:
-        "Source upload is blocked until R2, file types, size limits, and scanning are configured.",
+        "Source upload is blocked until S3, file types, size limits, and scanning are configured.",
       description:
         "The selection is stored in the agent version. Only a Ready source can pass the activation gate.",
       emptyTitle: "No saved knowledge sources",
       emptyDescription:
-        "Upload will be enabled only after R2, file types, size limits, and scanning are configured.",
+        "Upload a TXT or Markdown file using the form. Successfully processed sources will appear here.",
     },
   },
   ar: {
     directoryStatuses: {
       "configuration-required":
-        "يجب إعداد Clerk وD1 قبل تحميل وكلاء AI أو حفظهم.",
+        "يجب إكمال إعداد الخدمة قبل تحميل وكلاء AI أو حفظهم.",
       unauthenticated:
         "يجب تسجيل الدخول قبل عرض وكلاء AI.",
       "onboarding-required":
@@ -361,7 +361,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
     },
     actionStatuses: {
       "configuration-required":
-        "لم يتم إعداد اتصال Clerk أو D1.",
+        "لم يتم إعداد اتصال الخدمة.",
       unauthenticated:
         "انتهت الجلسة. يجب تسجيل الدخول مجددًا.",
       "onboarding-required":
@@ -419,7 +419,7 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
       savedReloadFailed:
         "تم حفظ المسودة، لكن تعذر إعادة تحميل حالة التفعيل. اختر الوكيل من القائمة قبل النشر.",
       draftUnchanged: "كانت المسودة محفوظة بالفعل دون تغييرات.",
-      draftSaved: "تم حفظ المسودة في D1 كإصدار جديد.",
+      draftSaved: "تم حفظ المسودة كإصدار جديد.",
       publishedReloadFailed:
         "تم نشر الإصدار، لكن تعذر إعادة تحميل السجل الكامل.",
       publishedUnchanged: "كان الإصدار نشطًا بالفعل.",
@@ -483,12 +483,12 @@ const messages: Record<InterfaceLanguage, AiAgentMessages> = {
       title: "مصادر المعرفة في مساحة العمل",
       upload: "رفع مصدر",
       uploadBoundary:
-        "رفع المصدر محظور حتى إعداد R2 وأنواع الملفات وحد الحجم والفحص.",
+        "رفع المصدر محظور حتى إعداد S3 وأنواع الملفات وحد الحجم والفحص.",
       description:
         "يُحفظ الاختيار داخل إصدار الوكيل. وحده المصدر الجاهز يمكنه اجتياز بوابة التفعيل.",
       emptyTitle: "لا توجد مصادر معرفة محفوظة",
       emptyDescription:
-        "سيتم تفعيل الرفع فقط بعد إعداد R2 وأنواع الملفات وحد الحجم والفحص.",
+        "ارفع ملف TXT أو Markdown باستخدام النموذج. ستظهر هنا المصادر بعد المعالجة.",
     },
   },
 };

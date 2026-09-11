@@ -1,3 +1,5 @@
+import { KNOWLEDGE_UPLOAD_OPERATION, parseKnowledgeUploadPayload, KnowledgeIngestionError } from "../ai/knowledgeUploadRequest.ts";
+import type { KnowledgeUploadExecutor } from "./railwayKnowledgeUploadExecutor.ts";
 import { parseManualReplyRequest, parseManualReplySubmission } from "../../shared/domain/manualReply.ts";
 import { ManualReplyError } from "./postgresManualReplyRepository.ts";
 import type { PostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
@@ -559,6 +561,9 @@ export const railwayApiOperationPolicies = Object.freeze([
   Object.freeze({ id: "conversations.reply.send", requestKind: "mutation" as const, permission: "conversations.reply" as const,
     mutationSafety: Object.freeze({ rateLimit: "tenant-mutation" as const, idempotency: "atomic-request-digest-replay" as const,
       audit: "atomic-immutable-event" as const, transaction: "required" as const }) }),
+  Object.freeze({ id: KNOWLEDGE_UPLOAD_OPERATION, requestKind: "mutation" as const, permission: "ai.write" as const,
+    mutationSafety: Object.freeze({ rateLimit: "tenant-mutation" as const, idempotency: "atomic-request-digest-replay" as const,
+      audit: "atomic-immutable-event" as const, transaction: "required" as const }) }),
 ] as const satisfies readonly Readonly<RailwayApiOperationPolicy>[]);
 
 export interface RailwayApiOperationRegistryDependencies {
@@ -573,6 +578,7 @@ export interface RailwayApiOperationRegistryDependencies {
     AiAgentService,
     "list" | "listKnowledgeSources" | "readDetails"
   >;
+  readonly knowledgeUpload?: KnowledgeUploadExecutor;
   readonly aiAgentMutations: RailwayAiAgentMutationExecutor;
   readonly aiReplyApprovals: Pick<AiReplyApprovalService, "listAwaiting">;
   readonly aiReplyApprovalMutations: RailwayAiReplyApprovalMutationExecutor;
@@ -1173,7 +1179,9 @@ function createOperation<TPayload>(
       request: Readonly<RailwayApiRequestEnvelope>,
     ) {
       try {
-        const parsedPayload = parsePayload(payload);
+        let parsedPayload: TPayload;
+        try { parsedPayload = parsePayload(payload); }
+        catch (e) { if (e instanceof KnowledgeIngestionError) throw new RailwayApiDispatchError(e.code); throw e; }
         const session = await dependencies.tenantSessions.resolve(
           context.userIdentity,
         );
@@ -2103,6 +2111,7 @@ export function createRailwayApiOperationRegistry(
     messageTemplateSyncPolicy,
     reportsPolicy,
     manualReplyPolicy,
+    knowledgeUploadPolicy,
   ] =
     railwayApiOperationPolicies;
   const operations = [
@@ -2607,6 +2616,12 @@ export function createRailwayApiOperationRegistry(
         }
         throw new RailwayApiDispatchError("DEPENDENCY_UNAVAILABLE");
       }
+    }),
+    createOperation(knowledgeUploadPolicy, dependencies, parseKnowledgeUploadPayload, async (session, payload, request) => {
+      if (!dependencies.knowledgeUpload) throw new RailwayApiDispatchError("CONFIGURATION_REQUIRED");
+      const proof = await requireTenantMutationRequest(dependencies, session, KNOWLEDGE_UPLOAD_OPERATION, payload, request);
+      try { return await dependencies.knowledgeUpload(session, payload, proof.idempotencyKey, proof.requestDigest); }
+      catch (e) { if (e instanceof KnowledgeIngestionError) throw new RailwayApiDispatchError(e.code); throw e; }
     }),
   ];
 

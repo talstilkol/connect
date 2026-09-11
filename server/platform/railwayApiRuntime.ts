@@ -1,3 +1,4 @@
+import type { KnowledgeUploadExecutor } from "./railwayKnowledgeUploadExecutor.ts";
 import type { PostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import type { RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
 import type {MetaMediaCleanupRepository} from '../meta/metaMediaCleanup.ts';
@@ -175,6 +176,7 @@ export interface RailwayApiRuntimeOptions {
     AiAgentService,
     "list" | "listKnowledgeSources" | "readDetails"
   >;
+  readonly knowledgeUpload?: KnowledgeUploadExecutor;
   readonly aiAgentMutations: RailwayAiAgentMutationExecutor;
   readonly aiReplyApprovals: Pick<AiReplyApprovalService, "listAwaiting">;
   readonly aiReplyApprovalMutations: RailwayAiReplyApprovalMutationExecutor;
@@ -256,6 +258,7 @@ export function createRailwayApiRuntime(
     manualReplyConfigured: options.manualReplyConfigured,
     botFlows: options.botFlows,
     botFlowMutations: options.botFlowMutations,
+    knowledgeUpload: options.knowledgeUpload,
     aiAgents: options.aiAgents,
     aiAgentMutations: options.aiAgentMutations,
     aiReplyApprovals: options.aiReplyApprovals,

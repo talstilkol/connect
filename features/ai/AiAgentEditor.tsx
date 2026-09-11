@@ -1,4 +1,5 @@
 "use client";
+import { KnowledgeUploadPanel } from "./KnowledgeUploadPanel";
 
 import {
   type FormEvent,
@@ -152,6 +153,7 @@ export function AiAgentEditor({
   initialDirectory: AiAgentDirectoryView;
 }) {
   const messages = readAiAgentMessages(language);
+  const [knowledgeSources, setKnowledgeSources] = useState(initialDirectory.knowledgeSources);
   const [agents, setAgents] = useState(
     initialDirectory.agents,
   );
@@ -911,24 +913,12 @@ export function AiAgentEditor({
             </span>
             <h2>{messages.knowledge.title}</h2>
           </div>
-          <button
-            type="button"
-            className="secondary-button"
-            aria-describedby="ai-knowledge-upload-boundary"
-            disabled
-          >
-            {messages.knowledge.upload}
-          </button>
-          <small
-            className="sr-only"
-            id="ai-knowledge-upload-boundary"
-          >
-            {messages.knowledge.uploadBoundary}
-          </small>
+
         </div>
         <p>{messages.knowledge.description}</p>
+        <KnowledgeUploadPanel language={language} canWrite={canWrite} onSources={setKnowledgeSources} />
 
-        {initialDirectory.knowledgeSources
+        {knowledgeSources
           .length === 0 ? (
           <div className="knowledge-dropzone">
             <span>⇧</span>
@@ -941,7 +931,7 @@ export function AiAgentEditor({
           </div>
         ) : (
           <div className="ai-source-list">
-            {initialDirectory.knowledgeSources.map(
+            {knowledgeSources.map(
               (source) => (
                 <label
                   className={`ai-source-record ${
@@ -964,7 +954,7 @@ export function AiAgentEditor({
                         event.target.checked,
                       )
                     }
-                    disabled={!canWrite}
+                    disabled={!canWrite || source.status !== "ready"}
                   />
                   <span className="ai-source-icon">
                     D

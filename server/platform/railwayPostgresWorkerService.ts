@@ -1,3 +1,7 @@
+import { requireKnowledgeConfiguration, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
+import { createS3KnowledgeStorage } from "./s3KnowledgeStorage.ts";
+import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
+import { createKnowledgeIngestionWorker } from "../ai/knowledgeIngestionWorker.ts";
 import { createPostgresAiReplyDeliveryRepository } from "./postgresAiReplyDeliveryRepository.ts";
 import { requireRailwayAiReplyDeliveryConfiguration, type RailwayAiReplyDeliveryEnvironment } from "./railwayAiReplyDeliveryConfiguration.ts";
 import { createTextReplyDeliveryWorker, createMetaTextReplySender } from "../conversations/manualReplyWorker.ts";
@@ -252,7 +256,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & RailwayAiReplyDeliveryEnvironment & OpenAiResponsesEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & KnowledgeRuntimeEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & RailwayAiReplyDeliveryEnvironment & OpenAiResponsesEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -717,6 +721,7 @@ function createRailwayPostgresWorkerFoundation(
 
   return Object.freeze({
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
+    knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
       queries,
       transactions,
@@ -839,6 +844,13 @@ export async function createRailwayPostgresWorkerService(
   }>> = [];
 
   try {
+    const knowledgeConfig = requireKnowledgeConfiguration(options.environment ?? {});
+    if (knowledgeConfig) {
+      const storage = createS3KnowledgeStorage(knowledgeConfig);
+      const worker = createKnowledgeIngestionWorker(foundation.knowledgeIngestion, storage);
+      const loop = createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure);
+      queueRuntimes.push({ ...loop, async close() { storage.close(); await loop.close(); } });
+    }
     if (mediaMode !== null) {
       queueRuntimes.push(foundation.createMetaMediaWorker(options.environment!, options.schedulerTelemetry.recordRunFailure));
     }

@@ -1,3 +1,4 @@
+import { requireKnowledgeConfiguration, readKnowledgeEnvironment, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
 import { requireMetaGraphConfiguration } from "../meta/metaGraphConfiguration.ts";
@@ -111,6 +112,7 @@ export type RailwaySystemAdminEnvironment =
     PostgresSystemAdminMutationRateLimitEnvironment;
 
 export interface RailwayPostgresApiRuntimeOptions {
+  readonly knowledgeEnvironment?: KnowledgeRuntimeEnvironment;
   readonly mediaFileEnvironment?: RailwayMetaMediaFileEnvironment;
   readonly identityEnvironment?: RailwayApiIdentityEnvironment;
   readonly postgresEnvironment?: NodePostgresPoolEnvironment;
@@ -155,6 +157,7 @@ export interface RailwayPostgresApiRuntime {
 }
 
 const optionKeys = Object.freeze([
+  "knowledgeEnvironment",
   "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",
@@ -293,6 +296,7 @@ export async function createRailwayPostgresApiRuntime(
   options: Readonly<RailwayPostgresApiRuntimeOptions>,
 ): Promise<Readonly<RailwayPostgresApiRuntime>> {
   requireOptions(options);
+  const knowledgeConfig = requireKnowledgeConfiguration(options.knowledgeEnvironment ?? readKnowledgeEnvironment());
   const manualReplyConfigured = requireRailwayManualReplyConfiguration(options.manualReplyEnvironment);
   const identityConfiguration = inspectRailwayApiIdentityConfiguration(
     options.identityEnvironment,
@@ -470,6 +474,7 @@ export async function createRailwayPostgresApiRuntime(
       manualReplyConfigured: () => manualReplyConfigured,
       botFlows: createBotFlowService(foundation.botFlows),
       botFlowMutations: foundation.railwayBotFlowMutations,
+      knowledgeUpload: knowledgeConfig ? (session, payload, idempotencyKey, requestDigest) => foundation.knowledgeIngestion.enqueue(session, payload, knowledgeConfig, idempotencyKey, requestDigest) : undefined,
       aiAgents: createAiAgentService({
         agents: foundation.aiAgents,
         knowledgeSources: foundation.knowledgeSources,

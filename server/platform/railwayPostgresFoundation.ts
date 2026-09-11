@@ -1,3 +1,4 @@
+import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
 import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import { createPostgresRailwayMessageTemplateSyncMutationExecutor } from "./postgresRailwayMessageTemplateSyncMutationExecutor.ts";
 import {createPostgresMetaMediaCleanupRepository} from './postgresMetaMediaCleanupRepository.ts';
@@ -350,6 +351,7 @@ export interface RailwayPostgresFoundation {
   readonly knowledgePassages: ReturnType<
     typeof createPostgresKnowledgePassageRepository
   >;
+  readonly knowledgeIngestion: ReturnType<typeof createPostgresKnowledgeIngestionRepository>;
   readonly knowledgeSources: ReturnType<
     typeof createPostgresKnowledgeSourceRepository
   >;
@@ -642,6 +644,7 @@ export function createRailwayPostgresFoundation(
       queries,
       transactions,
     }),
+    knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     knowledgeSources: createPostgresKnowledgeSourceRepository({
       queries,
       transactions,

@@ -373,6 +373,7 @@ function persistedCampaign(overrides = {}) {
 }
 
 function fixture({
+  knowledgeUpload,
   manualReplies,
   manualReplyConfigured,
   messageTemplateSubmissionConfigured = () => true,
@@ -420,7 +421,7 @@ function fixture({
     mutationCommands: [],
   };
   const registry = createRailwayApiOperationRegistry({
-    manualReplies, manualReplyConfigured,
+    knowledgeUpload, manualReplies, manualReplyConfigured,
     tenantSessions: {
       async resolve(identity) {
         calls.tenantIdentities.push(identity);
@@ -1292,6 +1293,8 @@ test("publishes one immutable policy for every concrete operation", () => {
       mutationSafety: null,
     },
     { id: "conversations.reply.send", requestKind: "mutation", permission: "conversations.reply",
+      mutationSafety: { rateLimit: "tenant-mutation", idempotency: "atomic-request-digest-replay", audit: "atomic-immutable-event", transaction: "required" } },
+    { id: "ai.knowledge.upload", requestKind: "mutation", permission: "ai.write",
       mutationSafety: { rateLimit: "tenant-mutation", idempotency: "atomic-request-digest-replay", audit: "atomic-immutable-event", transaction: "required" } },
   ]);
   assert.equal(Object.isFrozen(railwayApiOperationPolicies), true);
@@ -2556,4 +2559,17 @@ test("rejects missing operation dependencies", () => {
       }),
     /operation dependencies are invalid/,
   );
+});
+
+test('Knowledge upload API binds session, rate limit and deterministic receipt; rejects tenant injection and disabled dependencies',async()=>{
+  const {knowledgeFixture}=await import('./fixtures/knowledge-ingestion.mjs');const f=await knowledgeFixture();const calls=[];
+  const knowledgeUpload=async(...args)=>{calls.push(args);return{source:{},outcome:'processing'}};
+  const payload=f.payload,id='ai.knowledge.upload';const request={operation:id,requestKind:'mutation',idempotencyKey:await deriveRailwayApiDeterministicIdempotencyKey(id,payload)};
+  const enabled=fixture({knowledgeUpload});await operation(enabled.registry,id).execute(dispatchContext,payload,request);
+  assert.deepEqual(calls[0][0],session());assert.deepEqual(enabled.calls.rateLimitSubjects,['7:verified-user:ai.knowledge.upload']);
+  for(const overrides of [{},{tenantSession:session('viewer'),knowledgeUpload},{rateLimitDecision:{outcome:'limited'},knowledgeUpload}]){
+    const f=fixture(overrides);await assert.rejects(operation(f.registry,id).execute(dispatchContext,payload,request));
+  }
+  await assert.rejects(operation(enabled.registry,id).execute(dispatchContext,{...payload,tenantId:7},request),{code:'INVALID_REQUEST'});
+  await assert.rejects(operation(enabled.registry,id).execute(dispatchContext,payload,{...request,idempotencyKey:null}));assert.equal(calls.length,1);
 });

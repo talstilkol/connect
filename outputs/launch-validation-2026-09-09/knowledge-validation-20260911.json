@@ -1,0 +1,55 @@
+{
+  "status": "verified-local",
+  "checkedAt": "2026-09-11T16:38:22.662524+00:00",
+  "completedSubstages": [
+    "C1.1",
+    "C1.2"
+  ],
+  "unitTests": {
+    "passed": 4557,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "16.13": {
+      "passed": 10,
+      "failed": 0
+    },
+    "17.11": {
+      "passed": 10,
+      "failed": 0
+    }
+  },
+  "migrations": 79,
+  "awsSdk": "real SDK, isolated local wire responses; no AWS requests",
+  "builds": [
+    "vinext passed",
+    "Next webpack passed"
+  ],
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": "passed",
+  "interfaceGuardrails": "passed",
+  "sourceFiles": 82,
+  "originalUntrackedPreserved": 624,
+  "visualQa": "static rendering of actual upload panel: Hebrew/Arabic 390px and English 1024px; browser file-upload journey requires connected identity and providers",
+  "remaining": {
+    "codingSubstages": 3,
+    "mainStages": 12,
+    "baselineEngineeringHours": [
+      24,
+      48
+    ],
+    "confidence": "low"
+  },
+  "limitations": [
+    "TXT/Markdown only, 128 KiB maximum",
+    "No live provider login, deployment or scan",
+    "C4.1 must complete operational recovery for terminal/unknown uploads and S3 retention",
+    "Existing historical core PostgreSQL verifier schema gap remains C4.1",
+    "Paddle and full operational review remain unfinished"
+  ]
+}

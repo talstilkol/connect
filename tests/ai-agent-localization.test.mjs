@@ -120,7 +120,7 @@ test("passes language through the lazy AI agent boundary", async () => {
   assert.match(editor, /readAiAgentMessages\(language\)/);
   assert.match(
     editor,
-    /aria-describedby="ai-knowledge-upload-boundary"/,
+    /<KnowledgeUploadPanel language=\{language\}/,
   );
   assert.doesNotMatch(editor, /[\u0590-\u05ff]/);
 });

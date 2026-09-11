@@ -741,4 +741,9 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "CREATE TABLE ai_reply_deliveries",
     summary: "Railway fences approved AI delivery with immutable approval identity, durable single-POST state and transition audit.",
   }),
+  Object.freeze({
+    migration: "0078_knowledge_ingestion_jobs.sql",
+    token: "CREATE TABLE knowledge_ingestion_jobs",
+    summary: "Railway durably relays tenant-bound Knowledge uploads, binds immutable S3 versions and requires verified scan processing before source readiness.",
+  }),
 ]);

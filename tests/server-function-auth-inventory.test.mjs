@@ -20,7 +20,7 @@ const auditedServerFunctions = new Map([
   ["server/admin/systemAdminTenantDirectoryActions.ts", ["createCurrentRailwaySystemAdminTenantDirectoryHandler"]],
   ["server/ai/aiAgentActions.ts", ["createCurrentRailwayAiAgentHandler"]],
   ["server/ai/aiReplyApprovalActions.ts", ["createCurrentRailwayAiReplyApprovalHandler"]],
-  ["server/ai/knowledgeUploadActions.ts", ["requireCurrentTenantMutationSession"]],
+  ["server/ai/knowledgeUploadActions.ts", ["createCurrentRailwayAiAgentHandler"]],
   ["server/auth/tenantSelectionActions.ts", ["createCurrentRailwayTenantSelectionHandler"]],
   ["server/billing/systemAdminSubscriptionActions.ts", ["resolveCurrentRailwayApiServerIdentity"]],
   ["server/bot/botFlowActions.ts", [

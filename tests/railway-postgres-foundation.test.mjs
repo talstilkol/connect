@@ -75,6 +75,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "invitationDeliveries",
     "invitationExpirations",
     "invitations",
+    "knowledgeIngestion",
     "knowledgePassages",
     "knowledgeSources",
     "manualReplies",

@@ -1,3 +1,6 @@
+import { prepareKnowledgeUploadForm } from "./railwayKnowledgeUploadForm.ts";
+import { KNOWLEDGE_UPLOAD_OPERATION } from "./knowledgeUploadRequest.ts";
+import type { UploadKnowledgeSourceActionResult } from "./knowledgeUploadActionResult.ts";
 import type {
   AiAgentDirectoryStatus,
   AiAgentDirectoryView,
@@ -294,6 +297,24 @@ export function createRailwayAiAgentHandler(
       }
     },
 
+    async uploadKnowledge(input: unknown): Promise<UploadKnowledgeSourceActionResult> {
+      const current = await context(); if (current.status !== "ready") return current;
+      let payload: RailwayApiJsonObject;
+      try { payload = { ...await prepareKnowledgeUploadForm(input) }; } catch { return { status: "invalid-input" }; }
+      try {
+        const response = await current.client.call({ contractVersion: RAILWAY_API_CONTRACT_VERSION, operation: KNOWLEDGE_UPLOAD_OPERATION,
+          requestKind: "mutation", idempotencyKey: await deriveRailwayApiDeterministicIdempotencyKey(KNOWLEDGE_UPLOAD_OPERATION,payload), payload });
+        if (response.outcome !== "ok") {
+          if (response.code === "CONFIGURATION_REQUIRED") return { status:"configuration-required" };
+          if (response.code === "DEPENDENCY_UNAVAILABLE" || response.code === "RATE_LIMITED") return { status:"dependency-unavailable" };
+          const mapped = mapFailure(response.code); return (mapped.status === "not-found" || mapped.status === "validation-error" || mapped.status === "activation-blocked") ? { status:"server-error" } : mapped;
+        }
+        if (!isRecord(response.data) || !hasExactKeys(response.data,["source","outcome"]) ||
+          (response.data.outcome !== "processing" && response.data.outcome !== "unchanged")) return { status:"server-error" };
+        const sources = parseRailwayKnowledgeSourceList([response.data.source]); if (!sources || sources.length !== 1) return { status:"server-error" };
+        return { status:"processing",outcome:response.data.outcome,source:sources[0] };
+      } catch { return { status:"server-error" }; }
+    },
     async loadDetails(input: unknown): Promise<LoadAiAgentDetailsActionResult> {
       const current = await context();
       if (current.status !== "ready") return current;

@@ -492,3 +492,23 @@
     padding: 22px;
   }
 }
+
+.knowledge-upload-panel form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.knowledge-upload-panel input[type="file"] {
+  flex: 1 1 260px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.knowledge-upload-panel [role="status"] {
+  min-height: 1.5em;
+}

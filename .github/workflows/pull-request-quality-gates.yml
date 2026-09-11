@@ -151,6 +151,19 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 12
+      knowledge-postgres:
+        image: postgres:17.11-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0
+        env:
+          POSTGRES_USER: connect_knowledge_test
+          POSTGRES_DB: connect_knowledge_integration
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - "127.0.0.1:55447:5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U connect_knowledge_test -d connect_knowledge_integration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
       campaign-controls-redis:
         image: redis:7-alpine@sha256:8b81dd37ff027bec4e516d41acfbe9fe2460070dc6d4a4570a2ac5b9d59df065
         ports:
@@ -197,6 +210,10 @@ jobs:
         env:
           CONNECT_AI_GENERATION_TEST_URL: postgresql://connect_ai_test@127.0.0.1:55446/connect_ai_generation_integration
         run: node --test tests/integration/ai-generation-journal-postgres.test.mjs
+      - name: Verify Knowledge upload, scan, recovery and isolation on PostgreSQL
+        env:
+          CONNECT_KNOWLEDGE_TEST_URL: postgresql://connect_knowledge_test@127.0.0.1:55447/connect_knowledge_integration
+        run: node --test tests/integration/knowledge-ingestion-postgres.test.mjs
       - name: Verify BullMQ waits and worker restart against Redis
         env:
           CONNECT_BULLMQ_INTEGRATION_REDIS_URL: redis://127.0.0.1:6380/0
