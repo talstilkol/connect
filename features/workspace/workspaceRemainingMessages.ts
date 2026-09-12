@@ -48,19 +48,19 @@ const englishDecisionContent: Record<
   "identity.team-invitation-policy": {
     title: "Invitation expiry and re-invitation policy",
     detail:
-      "Choose how long an invitation remains valid and whether a final invitation can be sent again.",
+      "The selected invitation lifetime is 72 hours, with re-invitation only after a final state. Activation requires the approved policy record and verified invitation handling in the active environment.",
     owner: "Product + Security",
   },
   "ai.provider": {
     title: "AI provider and billing model",
     detail:
-      "Choose a provider, models, usage boundaries, and key model before enabling the AI agent.",
+      "OpenAI Responses API is selected, with human approval before sending replies. Activation requires verified model access, keys, budget, privacy settings, and quality evaluation.",
     owner: "Product + Development",
   },
   "billing.provider": {
     title: "Payment and invoice provider",
     detail:
-      "Choose the provider that determines signup, Webhooks, refunds, and invoices.",
+      "Paddle is selected for billing after the pilot. Account eligibility, catalog, Webhooks, refunds, and reconciliation must be verified before activation.",
     owner: "Finance + Development",
   },
   "security.rate-limit-policy": {
@@ -72,13 +72,13 @@ const englishDecisionContent: Record<
   "security.file-scanner": {
     title: "File scanning provider and policy",
     detail:
-      "Choose a scanning mechanism and define the outcome for suspicious, stuck, or unsupported files.",
+      "AWS GuardDuty Malware Protection for S3 is selected. Files remain quarantined until a verified clean result; storage, permissions, and scan delivery must be connected and tested.",
     owner: "Security + Development",
   },
   "security.knowledge-upload-policy": {
     title: "Knowledge source upload policy",
     detail:
-      "Choose allowed file types, the size limit, and rejection rules before upload.",
+      "The first version supports TXT and Markdown only, up to 128 KiB. PDF and Office are outside this release. Storage and scanning must be connected and verified before activation.",
     owner: "Product + Security",
   },
   "operations.knowledge-scan-recovery": {
@@ -96,7 +96,7 @@ const englishDecisionContent: Record<
   "operations.slo-measurement": {
     title: "SLO measurement source",
     detail:
-      "Choose the source of truth for availability, error, and response-time events.",
+      "Better Stack with OpenTelemetry is selected. The source, data redaction, retention, and delivery of live telemetry must be verified before activation.",
     owner: "Operations + Development",
   },
   "operations.slo-alert-policy": {
@@ -120,19 +120,19 @@ const arabicDecisionContent: Record<
   "identity.team-invitation-policy": {
     title: "سياسة انتهاء الدعوات وإعادة الدعوة",
     detail:
-      "حدد مدة صلاحية الدعوة وما إذا كان يمكن إعادة إرسال دعوة بعد وصولها إلى حالة نهائية.",
+      "مدة الدعوة المختارة 72 ساعة، ولا تُعاد الدعوة إلا بعد حالة نهائية. يتطلب التفعيل حفظ السياسة المعتمدة والتحقق من معالجة الدعوات في البيئة النشطة.",
     owner: "المنتج + الأمان",
   },
   "ai.provider": {
     title: "مزوّد AI ونموذج الفوترة",
     detail:
-      "اختر المزوّد والنماذج وحدود الاستخدام ونموذج المفاتيح قبل تفعيل وكيل AI.",
+      "تم اختيار OpenAI Responses API مع موافقة بشرية قبل إرسال الردود. يتطلب التفعيل التحقق من إتاحة النماذج والمفاتيح والميزانية والخصوصية وتقييم الجودة.",
     owner: "المنتج + التطوير",
   },
   "billing.provider": {
     title: "مزوّد الدفع والفواتير",
     detail:
-      "اختر المزوّد الذي يحدد التسجيل وWebhooks والاسترداد والفواتير.",
+      "تم اختيار Paddle للفوترة بعد التجربة الأولية. يجب التحقق من أهلية الحساب والكتالوج وWebhooks والاسترداد والتسوية قبل التفعيل.",
     owner: "المالية + التطوير",
   },
   "security.rate-limit-policy": {
@@ -144,13 +144,13 @@ const arabicDecisionContent: Record<
   "security.file-scanner": {
     title: "سياسة ومزوّد فحص الملفات",
     detail:
-      "اختر آلية الفحص وحدد نتيجة الملف المشبوه أو العالق أو غير المدعوم.",
+      "تم اختيار AWS GuardDuty Malware Protection for S3. تبقى الملفات في الحجر حتى نتيجة نظيفة موثّقة؛ ويجب ربط التخزين والصلاحيات وتسليم نتائج الفحص واختبارها.",
     owner: "الأمان + التطوير",
   },
   "security.knowledge-upload-policy": {
     title: "سياسة رفع مصادر المعرفة",
     detail:
-      "حدد أنواع الملفات المسموحة وحد الحجم وقواعد الرفض قبل الرفع.",
+      "يدعم الإصدار الأول TXT وMarkdown فقط حتى 128 KiB. ملفات PDF وOffice خارج نطاق الإصدار. يلزم ربط التخزين والفحص والتحقق منهما قبل التفعيل.",
     owner: "المنتج + الأمان",
   },
   "operations.knowledge-scan-recovery": {
@@ -168,7 +168,7 @@ const arabicDecisionContent: Record<
   "operations.slo-measurement": {
     title: "مصدر قياس SLO",
     detail:
-      "اختر مصدر الحقيقة لأحداث التوفر والأخطاء وزمن الاستجابة.",
+      "تم اختيار Better Stack مع OpenTelemetry. يجب التحقق من المصدر وحجب البيانات والاحتفاظ وتسليم بيانات المراقبة الحية قبل التفعيل.",
     owner: "العمليات + التطوير",
   },
   "operations.slo-alert-policy": {
@@ -210,14 +210,14 @@ const messages = {
       eyebrow: "שער Production",
       title: "מרכז החלטות",
       description:
-        "מקור הנתונים זהה לשער המוכנות. המסך לקריאה בלבד ואינו שומר תשובות מקומיות.",
+        "כאן מוצגות הכרעות התכנון ודרישות ההפעלה שלהן. המצב נקרא מהגדרות הסביבה הפעילה; החלטה מתועדת לבדה אינה משלימה את החיבור והאימות.",
       progress: (resolved, total) =>
-        `${resolved} מתוך ${total} הושלמו`,
-      openTitle: "החלטות עדיין פתוחות",
+        `${resolved} מתוך ${total} מוכנים להפעלה`,
+      openTitle: "דרישות הפעלה שטרם הושלמו",
       openDescription:
-        "סטטוס משתנה רק לאחר החלטה ותצורת שרת אמיתית.",
-      complete: "הושלם",
-      required: "דורש החלטה",
+        "השלמה דורשת רשומת החלטה מאושרת ותצורה מאומתת בסביבה הפעילה.",
+      complete: "מוכן להפעלה",
+      required: "ממתין להגדרה ולאימות",
       owner: (value) => `בעלי החלטה: ${value}`,
       content: Object.fromEntries(
         PRODUCTION_DECISION_REGISTRY.map((decision) => [
@@ -255,14 +255,14 @@ const messages = {
       eyebrow: "Production gate",
       title: "Decision center",
       description:
-        "This view uses the readiness gate as its source. It is read-only and stores no local answers.",
+        "This view shows planning choices and their activation requirements. Status comes from the active environment; a documented choice alone does not complete connection and verification.",
       progress: (resolved, total) =>
-        `${resolved} of ${total} complete`,
-      openTitle: "Decisions still open",
+        `${resolved} of ${total} ready for activation`,
+      openTitle: "Incomplete activation requirements",
       openDescription:
-        "Status changes only after a real decision and server configuration.",
-      complete: "Complete",
-      required: "Decision required",
+        "Completion requires an approved decision record and verified settings in the active environment.",
+      complete: "Ready for activation",
+      required: "Awaiting setup and verification",
       owner: (value) => `Decision owners: ${value}`,
       content: englishDecisionContent,
     },
@@ -291,14 +291,14 @@ const messages = {
       eyebrow: "بوابة Production",
       title: "مركز القرارات",
       description:
-        "يستخدم هذا العرض بوابة الجاهزية كمصدر. وهو للقراءة فقط ولا يحفظ إجابات محلية.",
+        "يعرض هذا القسم خيارات التخطيط ومتطلبات تفعيلها. تأتي الحالة من البيئة النشطة؛ وتوثيق القرار وحده لا يكمل الربط والتحقق.",
       progress: (resolved, total) =>
-        `اكتمل ${resolved} من ${total}`,
-      openTitle: "قرارات ما زالت مفتوحة",
+        `${resolved} من ${total} جاهزة للتفعيل`,
+      openTitle: "متطلبات تفعيل لم تكتمل",
       openDescription:
-        "لا تتغير الحالة إلا بعد قرار حقيقي وإعداد الخادم.",
-      complete: "مكتمل",
-      required: "يتطلب قرارًا",
+        "يتطلب الاكتمال سجل قرار معتمد وإعدادات موثّقة في البيئة النشطة.",
+      complete: "جاهز للتفعيل",
+      required: "بانتظار الإعداد والتحقق",
       owner: (value) => `مالكو القرار: ${value}`,
       content: arabicDecisionContent,
     },

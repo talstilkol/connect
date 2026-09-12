@@ -61,7 +61,7 @@ test("server-renders the workspace dashboard", async () => {
   assert.doesNotMatch(html, /השלב הראשון: חיבור רשמי ל־Meta/);
   assert.match(
     html,
-    /החלטות חוסמות Production/,
+    /דרישות ממתינות להגדרה ולאימות/,
   );
 });
 
@@ -464,7 +464,7 @@ test("server-renders auth and workspace feature routes", async () => {
   );
   assert.match(
     decisionsHtml,
-    /מקור הנתונים זהה לשער המוכנות/,
+    /המצב נקרא מהגדרות הסביבה הפעילה/,
   );
   assert.match(
     decisionsHtml,

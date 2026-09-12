@@ -20,6 +20,7 @@ type TeamDirectoryMessages = {
   invite: string;
   inviteTitle: string;
   inviteUnavailable: string;
+  membersKicker: string;
   membersTitle: string;
   activeCount: (value: number) => string;
   identityUnavailable: string;
@@ -49,19 +50,20 @@ const messages = {
       "server-error":
         "לא ניתן לטעון כרגע את צוות סביבת העבודה.",
     },
-    eyebrow: "RBAC",
+    eyebrow: "ניהול צוות",
     title: "צוות והרשאות",
     description:
-      "Clerk מזהה את המשתמש, Membership בצד השרת קובע את ה־Tenant, ומטריצת RBAC קובעת את הפעולות המותרות.",
+      "צפייה בחברי סביבת העבודה ובפעולות המותרות לכל תפקיד.",
     invite: "הזמנת משתמש",
     inviteTitle:
-      "הזמנות יופעלו לאחר חיבור ספק, Acceptance מאומת ובדיקת E2E חיה",
+      "הזמנות יופעלו לאחר השלמת חיבור שירות ההזמנות ובדיקת הצטרפות",
     inviteUnavailable:
-      "הזמנה ושינוי משתמשים נשארים חסומים עד חיבור ספק הזמנות, Acceptance ופרטי זהות מאומתים ובדיקת E2E מול Clerk ו־D1 חיים.",
+      "הזמנות ושינויים בצוות אינם זמינים עדיין. נדרשת השלמת חיבור שירות ההזמנות ובדיקת הצטרפות לסביבת העבודה.",
+    membersKicker: "סביבת העבודה",
     membersTitle: "חברי הצוות הפעילים",
     activeCount: (value) => `${value} פעילים`,
     identityUnavailable:
-      "שמות ואימיילים אינם מוצגים עד חיבור Clerk User Directory. חברים אחרים מזוהים באמצעות Reference Code מוגן הנגזר בשרת.",
+      "שמות וכתובות אימייל אינם זמינים כרגע. בינתיים מוצג קוד מזהה מוגן לכל חבר צוות.",
     meInitials: "אני",
     teamInitials: "צ",
     currentUser: "המשתמש הנוכחי",
@@ -108,19 +110,20 @@ const messages = {
       "server-error":
         "The workspace team cannot be loaded right now.",
     },
-    eyebrow: "RBAC",
+    eyebrow: "Team management",
     title: "Team and permissions",
     description:
-      "Clerk identifies the user, server-side Membership selects the Tenant, and the RBAC matrix determines allowed actions.",
+      "View workspace members and the actions allowed for each role.",
     invite: "Invite user",
     inviteTitle:
-      "Invitations will open after a provider, verified acceptance, and live E2E test are connected",
+      "Invitations will open after the invitation service is connected and joining the workspace is verified",
     inviteUnavailable:
-      "Invitations and user changes remain blocked until an invitation provider, verified acceptance and identity details, and a live Clerk and D1 E2E test are available.",
+      "Invitations and team changes are not available yet. The invitation service must be connected and joining the workspace verified.",
+    membersKicker: "Workspace",
     membersTitle: "Active team members",
     activeCount: (value) => `${value} active`,
     identityUnavailable:
-      "Names and emails remain hidden until Clerk User Directory is connected. Other members use a protected server-derived Reference Code.",
+      "Names and email addresses are currently unavailable. A protected reference code identifies each team member in the meantime.",
     meInitials: "Me",
     teamInitials: "T",
     currentUser: "Current user",
@@ -166,19 +169,20 @@ const messages = {
         "لا يسمح دورك الحالي بعرض الفريق والصلاحيات.",
       "server-error": "تعذّر تحميل فريق مساحة العمل حاليًا.",
     },
-    eyebrow: "RBAC",
+    eyebrow: "إدارة الفريق",
     title: "الفريق والصلاحيات",
     description:
-      "يحدد Clerk المستخدم، وتحدد Membership في الخادم الـTenant، وتحدد مصفوفة RBAC الإجراءات المسموحة.",
+      "اعرض أعضاء مساحة العمل والإجراءات المسموحة لكل دور.",
     invite: "دعوة مستخدم",
     inviteTitle:
-      "ستتاح الدعوات بعد ربط مزوّد وقبول موثّق واختبار E2E حي",
+      "ستتاح الدعوات بعد ربط خدمة الدعوات والتحقق من الانضمام إلى مساحة العمل",
     inviteUnavailable:
-      "تبقى الدعوات وتغييرات المستخدمين محظورة حتى ربط مزوّد دعوات وقبول وبيانات هوية موثّقة واختبار E2E حي مع Clerk وD1.",
+      "الدعوات وتغييرات الفريق غير متاحة بعد. يلزم ربط خدمة الدعوات والتحقق من الانضمام إلى مساحة العمل.",
+    membersKicker: "مساحة العمل",
     membersTitle: "أعضاء الفريق النشطون",
     activeCount: (value) => `${value} نشطون`,
     identityUnavailable:
-      "لا تظهر الأسماء والبريد حتى ربط Clerk User Directory. يُعرّف الأعضاء الآخرون بواسطة Reference Code محمي مشتق في الخادم.",
+      "الأسماء وعناوين البريد الإلكتروني غير متاحة حاليًا. يُعرّف كل عضو برمز مرجعي محمي في الوقت الحالي.",
     meInitials: "أنا",
     teamInitials: "ف",
     currentUser: "المستخدم الحالي",

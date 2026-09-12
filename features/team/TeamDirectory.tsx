@@ -68,7 +68,7 @@ export function TeamDirectory({
             <div className="card-heading">
               <div>
                 <span className="card-kicker">
-                  D1
+                  {messages.membersKicker}
                 </span>
                 <h2 id="team-members-title">
                   {messages.membersTitle}
