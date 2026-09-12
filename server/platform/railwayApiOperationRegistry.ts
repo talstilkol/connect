@@ -1059,6 +1059,7 @@ function toContactOrganizationView(
   snapshot: Readonly<ContactOrganizationSnapshot>,
 ): Readonly<ContactOrganizationSnapshot> {
   return Object.freeze({
+    ...(snapshot.revision === undefined ? {} : { revision: snapshot.revision }),
     scopeContactIds: Object.freeze([...snapshot.scopeContactIds]),
     tags: Object.freeze(
       snapshot.tags.map(({ id, name, contactCount }) =>

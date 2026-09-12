@@ -718,6 +718,7 @@ function fixture({
           contactIds,
         });
         return {
+          revision: 91,
           scopeContactIds: contactIds,
           tags: [{
             id: 5,
@@ -1716,6 +1717,7 @@ test("lists contacts through the resolved tenant and safe mapper", async () => {
     ],
     nextCursor: null,
     organization: {
+      revision: 91,
       scopeContactIds: [23],
       tags: [{ id: 5, name: "Customers", contactCount: 1 }],
       lists: [],
