@@ -61,6 +61,7 @@ const providerOptionKeys = Object.freeze([
 ]);
 
 const apiOptionKeys = Object.freeze([
+  "teamIdentities",
   "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",

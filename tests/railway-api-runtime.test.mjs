@@ -1824,6 +1824,25 @@ test("returns an opaque team directory through the complete boundary", async () 
   );
 });
 
+test("returns configured team profiles through authenticated HTTP without exposing their source IDs", async () => {
+  const lookups = [];
+  const teamIdentities = { async resolve(ids) {
+    lookups.push(ids);
+    return { status: "ready", identities: ids.map((externalUserId, index) => ({ externalUserId, displayName: `Connect Demo ${index + 1}`, primaryEmail: `demo-${index + 1}@example.com` })) };
+  } };
+  const f = fixture("owner", { teamIdentities });
+  const response = await f.handler.handle(request("team.directory.read", {}));
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.data.directory.identityStatus, "ready");
+  assert.equal(body.data.directory.members[1].displayName, "Connect Demo 2");
+  assert.deepEqual(lookups, [["verified-user", "other-user"]]);
+  assert.doesNotMatch(JSON.stringify(body), /externalUserId|tenantId|verified-user|other-user/);
+  const denied = await fixture("viewer", { teamIdentities }).handler.handle(request("team.directory.read", {}));
+  assert.equal(denied.status, 403);
+  assert.equal(lookups.length, 1);
+});
+
 test("changes a team role through identity, quota, and PostgreSQL boundaries", async () => {
   const testFixture = fixture("owner");
   const payload = {

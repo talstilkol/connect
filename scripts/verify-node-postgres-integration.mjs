@@ -5199,8 +5199,11 @@ async function createPostgresIntegrationApiRuntime(
   verifiedInvitationEmail = "driver-integration-owner@example.com",
   enableSystemAdmin = false,
   externalOrganizationId = "org_driver_integration",
+  externalOrganizationRole = "org:member",
 ) {
   return createRailwayPostgresApiRuntime({
+    // Local fixtures have no Clerk profiles; prevent any external directory request.
+    teamIdentities: { async resolve() { return { status: "unavailable", identities: [] }; } },
     identityEnvironment: {
       APP_PUBLIC_ORIGIN: "https://connect.example.com",
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
@@ -5231,6 +5234,7 @@ async function createPostgresIntegrationApiRuntime(
                     tokenType: "session_token",
                     userId: externalUserId,
                     orgId: externalOrganizationId,
+                    orgRole: externalOrganizationRole,
                   };
                 },
               };
@@ -6154,6 +6158,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     "driver-onboarding-owner@example.com",
     false,
     "org_driver_onboarding",
+    "org:admin",
   );
   const compactJwt = "header.payload.signature";
   const createApiRequest = (
@@ -6204,6 +6209,23 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
         "onboarding.business-profile.save",
         profilePayload,
       );
+    const memberRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString, externalUserId, [], "driver-onboarding-owner@example.com",
+      false, "org_driver_onboarding", "org:member",
+    );
+    try {
+      const denied = await memberRuntime.handler.handle(createApiRequest(
+        "onboarding.business-profile.save", "mutation", profilePayload, idempotencyKey,
+      ));
+      assert.equal(denied.status, 403);
+      assert.equal((await denied.json()).code, "PERMISSION_DENIED");
+      assert.equal((await pool.query(
+        "SELECT count(*)::integer AS count FROM tenant_memberships WHERE external_user_id = $1",
+        [externalUserId],
+      )).rows[0].count, 0);
+    } finally {
+      await memberRuntime.close();
+    }
     const responses = await Promise.all([
       runtime.handler.handle(createApiRequest(
         "onboarding.business-profile.save",

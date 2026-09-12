@@ -38,9 +38,10 @@ function membership(externalUserId, role) {
   });
 }
 
-function fixture(role = "owner") {
+function fixture(role = "owner", identities) {
   const calls = { resolves: 0, tenantReads: [] };
   const operation = createRailwayTeamDirectoryOperation({
+    identities,
     tenantSessions: {
       async resolve(identity) {
         calls.resolves += 1;
@@ -183,4 +184,26 @@ test("rejects incomplete dependencies", () => {
     () => createRailwayTeamDirectoryOperation({}),
     /dependencies are invalid/,
   );
+});
+
+test("enriches profiles only after authorization and the selected tenant read", async () => {
+  const lookups = [];
+  const f = fixture("owner", { async resolve(ids) {
+    assert.deepEqual(f.calls, { resolves: 1, tenantReads: [7] });
+    lookups.push(ids);
+    return { status: "ready", identities: ids.map((externalUserId) => ({ externalUserId, displayName: "Connect Demo", primaryEmail: `${externalUserId}@example.com` })) };
+  } });
+  const result = await f.operation.execute(context, {}, request);
+  assert.deepEqual(lookups, [["verified-user", "other-user"]]);
+  assert.equal(result.directory.identityStatus, "ready");
+  assert.equal(result.directory.members[0].displayName, "Connect Demo");
+  assert.doesNotMatch(JSON.stringify(result), /externalUserId|tenantId/);
+});
+
+test("never calls the profile provider for a forbidden role or a caller-supplied user filter", async () => {
+  let lookups = 0;
+  const identities = { async resolve() { lookups += 1; throw new Error("must not call"); } };
+  await assert.rejects(fixture("viewer", identities).operation.execute(context, {}, request), (error) => error.code === "PERMISSION_DENIED");
+  await assert.rejects(fixture("owner", identities).operation.execute(context, { userId: ["foreign-user"] }, request), (error) => error.code === "INVALID_REQUEST");
+  assert.equal(lookups, 0);
 });
