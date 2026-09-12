@@ -1,10 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { applyTeamMembershipChanges } from "../features/team/teamMembershipState.ts";
-
-const owner = { memberKey: "owner", role: "owner", status: "active", version: 2, currentUser: true };
-const agent = { memberKey: "agent", role: "agent", status: "active", version: 1, currentUser: false };
-const directory = () => ({ identityStatus: "unavailable", members: [{ ...owner }, { ...agent }] });
+import { owner, agent, teamDirectoryFixture as directory } from "./fixtures/team-memberships.mjs";
 
 test("role updates retain the acknowledged revision for the next mutation", () => {
   const result = applyTeamMembershipChanges(directory(), [{ ...agent, role: "manager", version: 2 }]);
