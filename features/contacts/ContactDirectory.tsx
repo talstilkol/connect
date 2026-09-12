@@ -50,6 +50,7 @@ type ConsentEditorState = {
 
 export function ContactDirectory({
   authEnabled,
+  canWrite = false,
   language,
   initialContacts,
   initialNextCursor,
@@ -57,6 +58,7 @@ export function ContactDirectory({
   initialStatus,
 }: {
   authEnabled: boolean;
+  canWrite?: boolean;
   language: InterfaceLanguage;
   initialContacts: readonly ContactRecord[];
   initialNextCursor: number | null;
@@ -64,6 +66,7 @@ export function ContactDirectory({
   initialStatus: ContactDirectoryStatus;
 }) {
   const messages = readContactDirectoryMessages(language);
+  const writeEnabled = authEnabled && initialStatus === "ready" && canWrite;
   const [contacts, setContacts] = useState<readonly ContactRecord[]>(
     initialContacts,
   );
@@ -125,6 +128,7 @@ export function ContactDirectory({
 
   const submitContact = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!writeEnabled || isPending) return;
     setSaveResult(null);
     const submissionMilliseconds = Math.max(
       Date.now(),
@@ -190,6 +194,7 @@ export function ContactDirectory({
     contactId: number,
     action: "grant" | "unsubscribe",
   ) => {
+    if (!writeEnabled || isPending) return;
     setConsentEditor({ contactId, action });
     setConsentSource("");
     setConsentOccurredAt("");
@@ -200,7 +205,7 @@ export function ContactDirectory({
   const submitConsent = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!consentEditor || !consentOccurredAt) {
+    if (!writeEnabled || isPending || !consentEditor || !consentOccurredAt) {
       return;
     }
 
@@ -276,7 +281,8 @@ export function ContactDirectory({
             <p className="form-explanation">
               {messages.directory.explanation}
             </p>
-            <form
+            {!writeEnabled && <p className="inline-notice" role="status">{messages.directory.readOnly}</p>}
+            {writeEnabled && <form
               className="contact-profile-form"
               onSubmit={submitContact}
             >
@@ -332,7 +338,7 @@ export function ContactDirectory({
                   ? messages.directory.saving
                   : messages.directory.save}
               </button>
-            </form>
+            </form>}
 
             <ContactActionFeedback
               messages={messages.directory.feedback}
@@ -388,7 +394,7 @@ export function ContactDirectory({
                         </small>
                       </div>
                       <div className="contact-record-actions">
-                        {contact.consentStatus !== "granted" ? (
+                        {writeEnabled && contact.consentStatus !== "granted" ? (
                           <button
                             type="button"
                             className="secondary-button"
@@ -399,7 +405,7 @@ export function ContactDirectory({
                             {messages.directory.documentConsent}
                           </button>
                         ) : null}
-                        {contact.mailingStatus === "subscribed" ? (
+                        {writeEnabled && contact.mailingStatus === "subscribed" ? (
                           <button
                             type="button"
                             className="text-button danger-text-button"
@@ -455,13 +461,14 @@ export function ContactDirectory({
 
       <ContactOrganization
         enabled={authEnabled && initialStatus === "ready"}
+        canWrite={writeEnabled}
         language={language}
         contacts={contacts}
         organization={organization}
         onSnapshot={mergeOrganization}
       />
 
-      {consentEditor ? (
+      {writeEnabled && consentEditor ? (
         <section className="card consent-editor-card">
           <div className="card-header">
             <div>
@@ -535,7 +542,7 @@ export function ContactDirectory({
         </section>
       ) : null}
 
-      <section className="contact-import-section">
+      {(!authEnabled || initialStatus !== "ready" || writeEnabled) && <section className="contact-import-section">
         <div className="section-divider-heading">
           <div>
             <span className="card-kicker">
@@ -550,11 +557,11 @@ export function ContactDirectory({
         <ContactImport
           language={language}
           serverImportEnabled={
-            authEnabled && initialStatus === "ready"
+            writeEnabled
           }
           onImportedContacts={mergeImportedContacts}
         />
-      </section>
+      </section>}
     </div>
   );
 }

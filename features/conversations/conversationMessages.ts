@@ -153,7 +153,7 @@ const hebrewMessages = {
   emptyInbox: {
     title: "אין שיחות בתיבה",
     description:
-      "שיחה תופיע כאן רק לאחר קבלת הודעה מאומתת דרך Webhook של Meta ושמירתה ב־D1.",
+      "שיחות יופיעו כאן לאחר חיבור WhatsApp וקבלת הודעה מלקוח.",
     refreshing: "בודק הודעות חדשות…",
     stale: "הרענון האחרון נכשל",
     idle: "בדיקה אוטומטית כל 15 שניות",
@@ -352,7 +352,7 @@ const messages: Record<
     emptyInbox: {
       title: "No conversations in the inbox",
       description:
-        "A conversation appears here only after a verified Meta webhook message is stored in D1.",
+        "Conversations appear here after you connect WhatsApp and receive a customer message.",
       refreshing: "Checking for new messages…",
       stale: "The last refresh failed",
       idle: "Automatic check every 15 seconds",
@@ -540,7 +540,7 @@ const messages: Record<
     emptyInbox: {
       title: "لا توجد محادثات في الصندوق",
       description:
-        "تظهر المحادثة هنا فقط بعد حفظ رسالة موثقة من Webhook تابع لـMeta في D1.",
+        "تظهر المحادثات هنا بعد ربط WhatsApp وتلقي رسالة من عميل.",
       refreshing: "جارٍ البحث عن رسائل جديدة…",
       stale: "فشل التحديث الأخير",
       idle: "فحص تلقائي كل 15 ثانية",

@@ -363,3 +363,5 @@ jobs:
         run: npm run e2e:team-management
       - name: Business profile browser acceptance
         run: npm run e2e:business-profile
+      - name: Verify contact read-only controls in three languages
+        run: npm run e2e:contact-permissions
