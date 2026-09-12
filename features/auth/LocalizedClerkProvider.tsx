@@ -4,11 +4,6 @@ import {
   ClerkProvider,
 } from "@clerk/nextjs";
 import {
-  arSA,
-  enUS,
-  heIL,
-} from "@clerk/localizations";
-import {
   usePathname,
 } from "next/navigation";
 import type {
@@ -20,11 +15,9 @@ import {
   readAuthLanguageFromPathname,
 } from "../../shared/i18n/auth";
 
-const clerkLocalization = {
-  he: heIL,
-  en: enUS,
-  ar: arSA,
-} as const;
+import {
+  clerkLocalization,
+} from "../../shared/i18n/clerk";
 
 export function LocalizedClerkProvider({
   children,
