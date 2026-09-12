@@ -126,7 +126,7 @@
     "@opentelemetry/sdk-metrics": "2.9.0",
     "@opentelemetry/sdk-trace": "2.9.0",
     "@vercel/oidc": "3.8.4",
-    "bullmq": "5.81.3",
+    "bullmq": "6.3.4",
     "drizzle-orm": "0.45.2",
     "fflate": "0.8.3",
     "ioredis": "5.11.1",
