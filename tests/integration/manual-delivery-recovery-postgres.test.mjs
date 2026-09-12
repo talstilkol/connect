@@ -1,3 +1,5 @@
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import assert from 'node:assert/strict';
 import {before,after,test} from 'node:test';
 import {createHash} from 'node:crypto';
@@ -93,7 +95,7 @@ test('private CLI runs as a scoped login, requires evidence confirmation and rej
   await pool.query('GRANT USAGE ON SCHEMA public TO connect_manual_recovery_test');
   await pool.query('GRANT EXECUTE ON FUNCTION manual_delivery_recovery_snapshot_v1(BIGINT,TEXT),apply_manual_delivery_recovery_v1(BIGINT,TEXT,TEXT,TIMESTAMPTZ,TEXT,TEXT,TEXT,TEXT) TO connect_manual_recovery_test');await grant(f,'connect_manual_recovery_test');
   const url=new URL(connectionString);url.username='connect_manual_recovery_test';
-  const op=new pg.Pool({connectionString:url.href});const directory='/private/tmp/connect-manual-recovery-cli-'+process.pid;await mkdir(directory,{mode:0o700});
+  const op=new pg.Pool({connectionString:url.href});const directory=join(tmpdir(),'connect-manual-recovery-cli-'+process.pid);await mkdir(directory,{mode:0o700});
   try{
     await assert.rejects(op.query('SELECT * FROM manual_reply_outbox'));await assert.rejects(op.query('DELETE FROM manual_recovery_authorizations'));await assert.rejects(op.query('SET ROLE connect_ai_test'));
     const input=directory+'/request.json',proposal=directory+'/proposal.json',proof=directory+'/evidence.json';

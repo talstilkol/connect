@@ -1,3 +1,5 @@
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import { bindPaidFixture } from '../fixtures/paid-access-postgres.mjs';
 import assert from 'node:assert/strict';
 import { before,after,test } from 'node:test';
@@ -13,7 +15,7 @@ import {createKnowledgeObjectRetention} from '../../server/operations/knowledgeO
 import {RETENTION_DATA_CLASSES,RETENTION_ALLOWED_TRIGGER_BY_DATA_CLASS} from '../../server/operations/retentionPolicy.ts';
 import {createHash} from 'node:crypto';
 import {runKnowledgeObjectRetention} from '../../scripts/knowledge-object-retention.mjs';
-import {mkdir,writeFile,unlink,chmod} from 'node:fs/promises';
+import {mkdir,writeFile,unlink,chmod,rm} from 'node:fs/promises';
 const connectionString=process.env.CONNECT_KNOWLEDGE_TEST_URL;
 if(connectionString!=='postgresql://connect_knowledge_test@127.0.0.1:55447/connect_knowledge_integration')throw Error('Dedicated loopback Knowledge database required');
 const pool=new pg.Pool({connectionString,max:8,statement_timeout:10000,lock_timeout:5000});
@@ -238,8 +240,8 @@ test('retention grants are scoped and revoked authority blocks claims while a re
   await assert.rejects(retention.status(retentionTarget(f)),{code:'AUTHORIZATION_DENIED'});
   await assert.rejects(pool.query("INSERT INTO knowledge_retention_grants(database_role,tenant_id,expires_at) VALUES('connect_worker_runtime',$1,clock_timestamp()+interval '1 hour')",[f.intent.tenantId]));
 });
-test('private retention CLI uses real status/review/prepare/enqueue boundaries and rejects unconfirmed or nonprivate evidence',async()=>{
-  const f=await retentionFixture();await closeTenant(f);const dir='/private/tmp/connect-knowledge-retention-cli';await mkdir(dir,{recursive:true,mode:0o700});
+test('private retention CLI uses real status/review/prepare/enqueue boundaries and rejects unconfirmed or nonprivate evidence',async t=>{
+  const f=await retentionFixture();await closeTenant(f);const dir=join(tmpdir(),'connect-knowledge-retention-cli-'+process.pid);await mkdir(dir,{mode:0o700});t.after(()=>rm(dir,{recursive:true}));
   const request=`${dir}/${f.intent.tenantId}-request.json`,reviewPath=`${dir}/${f.intent.tenantId}-review.json`,proof=`${dir}/${f.intent.tenantId}-evidence.json`,proposal=`${dir}/${f.intent.tenantId}-proposal.json`;
   await writeFile(request,JSON.stringify(retentionTarget(f)),{mode:0o600});await writeFile(reviewPath,JSON.stringify({tenantId:f.intent.tenantId,expectedVersion:0,legalHold:false}),{mode:0o600});await writeFile(proof,JSON.stringify(f.intent),{mode:0o600});await unlink(proposal).catch(e=>{if(e.code!=='ENOENT')throw e});
   const env={...retentionEnvironment,KNOWLEDGE_RETENTION_DATABASE_URL:connectionString};

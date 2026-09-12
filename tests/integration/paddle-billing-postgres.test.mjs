@@ -1,3 +1,5 @@
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import { createPostgresPaidAccess, paidAccessTenantSql, paidAccessTenantBarrier } from "../../server/platform/postgresPaidAccess.ts";
 import assert from 'node:assert/strict';
 import {before,after,test} from 'node:test';
@@ -11,7 +13,7 @@ import {createPaddleProvider} from '../../server/billing/paddleProvider.ts';
 import {createPaddleWorker} from '../../server/billing/paddleWorker.ts';
 import {createPaddleOperatorRecovery} from '../../server/billing/paddleOperatorRecovery.ts';
 import {runPaddleOperatorRecovery} from '../../scripts/paddle-operator-recovery.mjs';
-import {writeFile,mkdir,chmod,unlink} from 'node:fs/promises';
+import {writeFile,mkdir,chmod,unlink,rm} from 'node:fs/promises';
 const connectionString=process.env.CONNECT_PADDLE_TEST_URL;
 if(connectionString!=='postgresql://connect_paddle_test@127.0.0.1:55448/connect_paddle_integration')throw Error('Dedicated loopback Paddle database required');
 const pool=new pg.Pool({connectionString,max:8,statement_timeout:10000,lock_timeout:5000});
@@ -448,9 +450,9 @@ test('a failure after evidence insertion rolls back the evidence and business ch
   for(const sql of ['DELETE FROM paddle_operator_recoveries WHERE recovery_key=$1','UPDATE paddle_operator_recoveries SET evidence_digest=evidence_digest WHERE recovery_key=$1'])await assert.rejects(pool.query(sql,[result.recoveryKey]));
   await assert.rejects(pool.query('TRUNCATE paddle_operator_recoveries'));
 });
-test('the private CLI requires explicit evidence confirmation, private files and supports durable apply replay without provider access',async()=>{
+test('the private CLI requires explicit evidence confirmation, private files and supports durable apply replay without provider access',async t=>{
   const f=await unknownAttempt();await authorizeRecovery(f);
-  const directory='/private/tmp/connect-paddle-operator-cli';await mkdir(directory,{recursive:true,mode:0o700});
+  const directory=join(tmpdir(),'connect-paddle-operator-cli-'+process.pid);await mkdir(directory,{mode:0o700});t.after(()=>rm(directory,{recursive:true}));
   const input=`${directory}/${f.session.tenantId}-request.json`,output=`${directory}/${f.session.tenantId}-proposal.json`,evidence=`${directory}/${f.session.tenantId}-evidence.txt`;
   await writeFile(input,JSON.stringify(recoveryRequest(f,'close-absent')),{mode:0o600});await writeFile(evidence,JSON.stringify(f.transaction),{mode:0o600});
   await unlink(output).catch(error=>{if(error.code!=='ENOENT')throw error});

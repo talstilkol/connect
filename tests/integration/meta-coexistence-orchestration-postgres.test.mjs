@@ -1,3 +1,5 @@
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import { createPostgresMetaAccountLifecycleRepository } from '../../server/platform/postgresMetaAccountLifecycleRepository.ts';
 import { createPostgresMetaHistorySyncRepository } from '../../server/platform/postgresMetaHistorySyncRepository.ts';
 import { createPostgresMetaContactSyncRepository } from '../../server/platform/postgresMetaContactSyncRepository.ts';
@@ -877,7 +879,7 @@ test('attribution: restricted login can attest only its granted tenant and canno
   const scopedPool=new pg.Pool({connectionString:connectionString.replace('connect_echo_test@','connect_sync_attribution_test@'),max:2});
   const reader=new pg.Client({connectionString:connectionString.replace('connect_echo_test@','connect_sync_projection_test@')});
   const service=createMetaSyncAttribution(createNodePostgresTransactionManager(scopedPool));
-  const directory='/private/tmp/connect-sync-attribution-cli-'+process.pid;await mkdir(directory,{mode:0o700});
+  const directory=join(tmpdir(),'connect-sync-attribution-cli-'+process.pid);await mkdir(directory,{mode:0o700});
   try{
     const requestPath=directory+'/request.json',proposalPath=directory+'/proposal.json',proofPath=directory+'/evidence.json';
     const env={META_SYNC_ATTRIBUTION_DATABASE_URL:connectionString.replace('connect_echo_test@','connect_sync_attribution_test@')};
