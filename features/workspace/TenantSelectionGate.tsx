@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   useRouter,
+  useSearchParams,
 } from "next/navigation";
 
 import {
@@ -18,29 +19,11 @@ import type {
   TenantSelectionDirectory,
 } from "../../server/auth/tenantSelectionService.ts";
 import {
-  roleLabels,
-} from "../../shared/domain/model.ts";
-
-const failureMessages = {
-  "configuration-required":
-    "מערכת ההזדהות עדיין אינה מוגדרת.",
-  unauthenticated:
-    "יש להתחבר מחדש כדי לבחור סביבת עבודה.",
-  "onboarding-required":
-    "לא נמצאה סביבת עבודה זמינה עבור המשתמש.",
-  "selection-required":
-    "סביבת העבודה שנבחרה אינה זמינה עוד.",
-  conflict:
-    "הבחירה השתנתה בחלון אחר. נא לרענן ולנסות שוב.",
-  "rate-limited":
-    "בוצעו יותר מדי ניסיונות. נא להמתין לפני ניסיון נוסף.",
-  "temporarily-unavailable":
-    "בחירת סביבת העבודה אינה זמינה כרגע.",
-  "server-error":
-    "לא ניתן לשמור את הבחירה כרגע.",
-  "validation-error":
-    "הבחירה שנשלחה אינה תקינה.",
-} as const;
+  readWorkspaceDirection,
+  readWorkspaceLanguage,
+  readWorkspaceShellMessages,
+  type WorkspaceShellMessages,
+} from "../../shared/i18n/workspace.ts";
 
 export default function TenantSelectionGate({
   directory,
@@ -50,14 +33,23 @@ export default function TenantSelectionGate({
 }) {
   const clerk = useClerk();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const languageValues = searchParams.getAll("lang");
+  // Match page searchParams validation: repeated language keys fall back to Hebrew.
+  const language = readWorkspaceLanguage(
+    languageValues.length === 1 ? languageValues[0] : undefined,
+  );
+  const direction = readWorkspaceDirection(language);
+  const messages = readWorkspaceShellMessages(language).tenant;
   const [
     selectedKey,
     setSelectedKey,
   ] = useState<string | null>(null);
   const [
-    message,
-    setMessage,
-  ] = useState<string | null>(null);
+    failureStatus,
+    setFailureStatus,
+  ] = useState<keyof WorkspaceShellMessages["tenant"]["failures"] | null>(null);
+  const message = failureStatus ? messages.failures[failureStatus] : null;
   const [
     isPending,
     startTransition,
@@ -71,7 +63,7 @@ export default function TenantSelectionGate({
     }
 
     setSelectedKey(selectionKey);
-    setMessage(null);
+    setFailureStatus(null);
     startTransition(async () => {
       const result =
         await selectTenantWithOrganization({
@@ -91,11 +83,7 @@ export default function TenantSelectionGate({
       }
 
       setSelectedKey(null);
-      setMessage(
-        failureMessages[
-          result.status
-        ],
-      );
+      setFailureStatus(result.status);
       if (["conflict", "temporarily-unavailable", "server-error"].includes(result.status)) {
         router.refresh();
       }
@@ -105,22 +93,21 @@ export default function TenantSelectionGate({
   return (
     <main
       className="tenant-selection-page"
-      dir="rtl"
+      lang={language}
+      dir={direction}
     >
       <section
         className="tenant-selection-card"
         aria-labelledby="tenant-selection-title"
       >
         <p className="card-kicker">
-          בחירת סביבת עבודה
+          {messages.selectionLabel}
         </p>
         <h1 id="tenant-selection-title">
-          לאיזו סביבת עבודה להיכנס?
+          {messages.selectionTitle}
         </h1>
         <p>
-          בחר סביבת עבודה כדי להמשיך.
-          הבחירה נשמרת בשרת ומעדכנת את
-          הארגון הפעיל בחשבון שלך.
+          {messages.selectionDescription}
         </p>
 
         <div
@@ -159,7 +146,7 @@ export default function TenantSelectionGate({
                   </strong>
                   <small>
                     {
-                      roleLabels[
+                      messages.roles[
                         option.role
                       ]
                     }
@@ -170,7 +157,7 @@ export default function TenantSelectionGate({
                     option.selectionKey &&
                   isPending
                     ? "…"
-                    : "←"}
+                    : direction === "rtl" ? "←" : "→"}
                 </span>
               </button>
             ),
