@@ -51,6 +51,41 @@ async function createFixture(prefix) {
   return root;
 }
 
+test("allows the exact localhost Next.js development command", async () => {
+  const root = await createFixture("connect-next-localhost-dev-");
+  await writeFile(
+    join(root, "package.json"),
+    JSON.stringify({
+      scripts: { dev: "next dev --webpack --hostname localhost" },
+    }),
+  );
+
+  const report = await inspectSourceGuardrails(root);
+
+  assert.deepEqual(report.findings, []);
+});
+
+test("rejects unreviewed Next.js development arguments and entry directories", async () => {
+  for (const command of [
+    "next dev --webpack --hostname localhost --experimental-next-config-strip-types",
+    "next dev --webpack --hostname localhost scripts",
+    "next dev --webpack --hostname 0.0.0.0",
+  ]) {
+    const root = await createFixture("connect-next-dev-arguments-");
+    await writeFile(
+      join(root, "package.json"),
+      JSON.stringify({ scripts: { dev: command } }),
+    );
+
+    const report = await inspectSourceGuardrails(root);
+
+    assert.deepEqual(report.findings, [{
+      code: "BOT_REPLY_STAGING_ATTESTED_IMPORTER_FORBIDDEN",
+      file: "package.json",
+    }], command);
+  }
+});
+
 test("blocks indirect eval and Function capabilities in scripts while respecting lexical shadows", async () => {
   const root = await createFixture(
     "connect-execution-capability-aliases-",
