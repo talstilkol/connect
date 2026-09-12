@@ -34,4 +34,5 @@ export type SaveBusinessProfileActionResult =
     }>
   | Readonly<{ status: "tenant-selection-required" }>
   | Readonly<{ status: "permission-denied" }>
+  | Readonly<{ status: "conflict" }>
   | Readonly<{ status: "server-error" }>;

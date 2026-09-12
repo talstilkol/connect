@@ -886,7 +886,7 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
             tenantId: command.session?.tenantId ?? 19,
             state: {
               createdTenant: command.session === null,
-              profile: { ...command.payload, version: 3 },
+              profile: { ...command.payload, version: command.expectedVersion + 1 },
             },
           };
         },
@@ -1214,7 +1214,7 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
 }
 
 test("first workspace provisioning uses verified Clerk admin status through the complete HTTP boundary", async () => {
-  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he" };
+  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he", expectedVersion: 0 };
   const key = await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload);
   for (const orgRole of ["org:member", undefined, "org:admin"]) {
     const current = fixture("owner", {
@@ -2011,6 +2011,7 @@ test("reads and saves onboarding business profile through the complete boundary"
     businessName: "Connect Updated",
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
+    expectedVersion: 2,
   };
   const mutationKey =
     await deriveRailwayApiDeterministicIdempotencyKey(
@@ -2044,7 +2045,7 @@ test("reads and saves onboarding business profile through the complete boundary"
   assert.deepEqual(saveBody.data, {
     replayed: false,
     createdTenant: false,
-    profile: { ...profilePayload, version: 3 },
+    profile: { businessName: "Connect Updated", timezone: "Asia/Jerusalem", interfaceLanguage: "he", version: 3 },
   });
   assert.deepEqual(testFixture.calls.onboardingProfileReads, [11]);
   assert.equal(testFixture.calls.onboardingProfileMutations.length, 1);

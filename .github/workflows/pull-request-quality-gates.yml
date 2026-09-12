@@ -361,3 +361,5 @@ jobs:
         run: npm run e2e:clerk-workspace-language
       - name: Verify team permissions and ownership interactions
         run: npm run e2e:team-management
+      - name: Business profile browser acceptance
+        run: npm run e2e:business-profile

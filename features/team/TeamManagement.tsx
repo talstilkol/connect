@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { InterfaceLanguage } from "../../shared/domain/businessProfileDraft";
 import type { TenantRole } from "../../shared/domain/model.ts";
 import type { TeamDirectoryView, TeamMemberView } from "../../shared/domain/teamDirectoryView.ts";
@@ -20,6 +21,7 @@ export function TeamManagement({ language, directory, onDirectory }: {
 }) {
   const m = readTeamManagementMessages(language);
   const labels = readTeamDirectoryMessages(language);
+  const router = useRouter();
   const [selectedKey, setSelectedKey] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [refreshRequired, setRefreshRequired] = useState(false);
@@ -51,6 +53,10 @@ export function TeamManagement({ language, directory, onDirectory }: {
         }
         onDirectory(next);
         setNotice(m.saved);
+        const updatedActor = next.members.find((member) => member.currentUser);
+        if (updatedActor?.role !== actor?.role || updatedActor?.status !== actor?.status) {
+          router.refresh();
+        }
       } catch {
         setNotice(m.unavailable);
         setRefreshRequired(true);

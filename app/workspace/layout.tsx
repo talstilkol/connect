@@ -65,6 +65,7 @@ export default async function WorkspaceLayout({
     >
       <WorkspaceDraftProvider
         initialBusinessProfileDraft={initialBusinessProfile}
+        initialBusinessProfileVersion={initialBusinessProfile?.version ?? 0}
       >
         {children}
       </WorkspaceDraftProvider>

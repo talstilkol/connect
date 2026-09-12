@@ -11,6 +11,7 @@ import { readTeamDirectoryMessages } from '../features/team/teamDirectoryMessage
 // No Clerk session, invitation, permission change or provider call is created.
 const actionsId = '\0connect-team-browser-actions';
 const invitationsId = '\0connect-team-browser-invitations';
+const navigationId = '\0connect-team-browser-navigation';
 const entryPath = '/__team-browser-entry.js';
 const html = `<!doctype html><html><head><meta charset="utf-8"><title>Team management acceptance</title></head>
 <body><div id="root"></div><script type="module" src="${entryPath}"></script></body></html>`;
@@ -32,10 +33,12 @@ const server = await createServer({
     resolveId(source) {
       if (source === '../../server/team/teamMembershipActions.ts') return actionsId;
       if (source === '../../server/team/teamInvitationActions.ts') return invitationsId;
+      if (source === 'next/navigation') return navigationId;
       if (source === entryPath) return entryPath;
     },
     load(id) {
       if (id === entryPath) return entry;
+      if (id === navigationId) return `export function useRouter() { return { refresh() { window.__workspaceRefreshes = (window.__workspaceRefreshes ?? 0) + 1; } }; }`;
       if (id === invitationsId) return `export async function inviteTeamMemberAction() { throw new Error('Invitations must not be submitted by this acceptance'); }`;
       if (id === actionsId) return `
         const state = window.__teamActions = {calls:[],pending:null};
@@ -155,6 +158,7 @@ try {
     } });
     await resolve({ status: 'saved', formerOwner: { ...owner, role: 'viewer', version: 3 }, newOwner: { ...agent, role: 'owner', version: 5 } });
     await management.getByText(m.ownerOnly, { exact: true }).waitFor();
+    assert.equal(await page.evaluate(() => window.__workspaceRefreshes), 1);
     assert.equal(await member.count(), 0);
     assert.equal(await page.getByRole('button', { name: labels.invite, exact: true }).count(), 0);
     assert.equal(await page.locator('.team-member-list').getByText(labels.roles.owner, { exact: true }).count(), 1);

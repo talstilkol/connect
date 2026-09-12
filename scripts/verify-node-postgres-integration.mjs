@@ -6199,11 +6199,12 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       profile: null,
     });
 
-    const profilePayload = Object.freeze({
+    const profileDraft = Object.freeze({
       businessName: "Onboarding integration",
       timezone: "Asia/Jerusalem",
       interfaceLanguage: "he",
     });
+    const profilePayload = Object.freeze({ ...profileDraft, expectedVersion: 0 });
     const idempotencyKey =
       await deriveRailwayApiDeterministicIdempotencyKey(
         "onboarding.business-profile.save",
@@ -6256,7 +6257,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       [true, true],
     );
     assert.deepEqual(bodies[0].data.profile, {
-      ...profilePayload,
+      ...profileDraft,
       version: 1,
     });
     assert.doesNotMatch(
@@ -6274,7 +6275,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     );
     assert.equal(readResponse.status, 200);
     assert.deepEqual((await readResponse.json()).data, {
-      profile: { ...profilePayload, version: 1 },
+      profile: { ...profileDraft, version: 1 },
     });
 
     const evidence = await pool.query(
@@ -6329,6 +6330,70 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       Number.isSafeInteger(evidenceTenantId) && evidenceTenantId > 0,
       true,
     );
+
+    const saveProfile = async (payload, targetRuntime = runtime) => {
+      const response = await targetRuntime.handler.handle(createApiRequest(
+        "onboarding.business-profile.save", "mutation", payload,
+        await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload),
+      ));
+      return { status: response.status, body: await response.json() };
+    };
+    const changedPayload = { ...profileDraft, businessName: "Onboarding integration updated", expectedVersion: 1 };
+    const changed = await saveProfile(changedPayload);
+    assert.equal(changed.status, 200);
+    assert.equal(changed.body.data.profile.version, 2);
+    const restored = await saveProfile({ ...profileDraft, expectedVersion: 2 });
+    assert.equal(restored.status, 200);
+    assert.deepEqual(restored.body.data.profile, { ...profileDraft, version: 3 });
+    // An old successful retry cannot report an earlier profile as current.
+    const oldReplay = await saveProfile(changedPayload);
+    assert.equal(oldReplay.status, 409);
+    assert.equal(oldReplay.body.code, "CONFLICT");
+    const competingDrafts = [
+      { ...profileDraft, timezone: "Europe/London", expectedVersion: 3 },
+      { ...profileDraft, interfaceLanguage: "en", expectedVersion: 3 },
+    ];
+    const competing = await Promise.all(competingDrafts.map(payload => saveProfile(payload)));
+    assert.deepEqual(competing.map(result => result.status).sort(), [200, 409]);
+    const winnerIndex = competing.findIndex(result => result.status === 200);
+    assert.equal(competing[winnerIndex].body.data.profile.version, 4);
+    const repeatedWinner = await saveProfile(competingDrafts[winnerIndex]);
+    assert.equal(repeatedWinner.status, 200);
+    assert.equal(repeatedWinner.body.data.replayed, true);
+    assert.deepEqual(repeatedWinner.body.data.profile, competing[winnerIndex].body.data.profile);
+    const persistedWinner = await pool.query(
+      'SELECT business_name, timezone, interface_language, version FROM business_profiles WHERE tenant_id=$1',
+      [evidenceTenantId],
+    );
+    assert.deepEqual(persistedWinner.rows, [{
+      business_name: profileDraft.businessName,
+      timezone: competingDrafts[winnerIndex].timezone,
+      interface_language: competingDrafts[winnerIndex].interfaceLanguage,
+      version: 4,
+    }]);
+
+    const raceUser = "driver-onboarding-version-race-owner";
+    const raceRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString, raceUser, [], "driver-onboarding-version-race-owner@example.com",
+      false, "org_driver_onboarding_version_race", "org:admin",
+    );
+    try {
+      const initialDrafts = [
+        { ...profileDraft, expectedVersion: 0 },
+        { ...profileDraft, timezone: "Europe/London", expectedVersion: 0 },
+      ];
+      const initialRace = await Promise.all(initialDrafts.map(payload => saveProfile(payload, raceRuntime)));
+      assert.deepEqual(initialRace.map(result => result.status).sort(), [200, 409]);
+      const initialWinner = initialRace.findIndex(result => result.status === 200);
+      assert.equal(initialRace[initialWinner].body.data.profile.version, 1);
+      const initialRows = await pool.query(
+        'SELECT p.timezone,p.version FROM business_profiles p JOIN tenant_memberships m ON m.tenant_id=p.tenant_id WHERE m.external_user_id=$1',
+        [raceUser],
+      );
+      assert.deepEqual(initialRows.rows, [{ timezone: initialDrafts[initialWinner].timezone, version: 1 }]);
+    } finally {
+      await raceRuntime.close();
+    }
 
     await pool.query(
       `UPDATE tenants
@@ -6390,9 +6455,9 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     );
     assert.deepEqual(blockedEvidence.rows, [{
       businessName: profilePayload.businessName,
-      version: 1,
-      receipts: 1,
-      audits: 1,
+      version: 4,
+      receipts: 4,
+      audits: 4,
     }]);
   } finally {
     await runtime.close();

@@ -16,6 +16,7 @@ const draft = Object.freeze({
   businessName: profile.businessName,
   timezone: profile.timezone,
   interfaceLanguage: profile.interfaceLanguage,
+  expectedVersion: 0,
 });
 
 function fixture(options = {}) {
@@ -98,6 +99,7 @@ test("normalizes and saves through one deterministic Railway mutation", async ()
     businessName: "  Connect  ",
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
+    expectedVersion: 0,
   };
   assert.deepEqual(await testFixture.handler.save(input), {
     status: "saved",
@@ -109,6 +111,7 @@ test("normalizes and saves through one deterministic Railway mutation", async ()
     businessName: "Connect",
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
+    expectedVersion: 0,
   });
   assert.equal(
     testFixture.calls.requests[0].idempotencyKey,
@@ -127,11 +130,13 @@ test("rejects malformed and extended input before Railway", async () => {
       businessName: "Connect",
       timezone: "Unsupported/Timezone",
       interfaceLanguage: "he",
+    expectedVersion: 0,
     },
     {
       businessName: "Connect",
       timezone: "Asia/Jerusalem",
       interfaceLanguage: "he",
+    expectedVersion: 0,
       tenantId: 7,
     },
   ]) {
@@ -139,6 +144,26 @@ test("rejects malformed and extended input before Railway", async () => {
     assert.equal(result.status, "validation-error");
   }
   assert.equal(testFixture.calls.requests.length, 0);
+});
+
+test("requires the displayed profile version and binds it into the retry identity", async () => {
+  const current = fixture();
+  for (const expectedVersion of [undefined, null, -1, 1.5, "1", Number.MAX_SAFE_INTEGER]) {
+    assert.equal((await current.handler.save({ ...draft, expectedVersion })).status, "validation-error");
+  }
+  assert.equal(current.calls.requests.length, 0);
+  await current.handler.save(draft);
+  await current.handler.save({ ...draft, expectedVersion: 1 });
+  assert.notEqual(current.calls.requests[0].idempotencyKey, current.calls.requests[1].idempotencyKey);
+});
+
+test("does not acknowledge a stale profile version or a different saved value", async () => {
+  for (const savedProfile of [{ ...profile, version: 3 }, { ...profile, businessName: "Other" }]) {
+    const current = fixture({ response: () => ({ outcome: "ok", data: { replayed: true, createdTenant: false, profile: savedProfile } }) });
+    assert.equal((await current.handler.save(draft)).status, "server-error");
+  }
+  const conflict = fixture({ response: () => ({ outcome: "error", code: "CONFLICT" }) });
+  assert.deepEqual(await conflict.handler.save(draft), { status: "conflict" });
 });
 
 test("maps bounded API failures and fails closed on malformed success", async () => {
