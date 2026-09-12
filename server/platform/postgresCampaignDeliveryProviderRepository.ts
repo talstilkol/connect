@@ -63,6 +63,7 @@ const linkColumns = `
 `;
 
 export const postgresCampaignDeliveryProviderSql = Object.freeze({
+  barrier: "SELECT pg_advisory_xact_lock(public.derive_bot_reply_staging_tenant_barrier_key_v1($1))",
   insertAcceptance: `
     INSERT INTO campaign_delivery_provider_links (
       delivery_key,
@@ -390,6 +391,7 @@ export function createPostgresCampaignDeliveryProviderRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(postgresCampaignDeliveryProviderSql.barrier, [input.tenantId]);
           const inserted = requirePostgresRows(
             await transaction.query<unknown>(
               postgresCampaignDeliveryProviderSql.insertAcceptance,
@@ -436,6 +438,7 @@ export function createPostgresCampaignDeliveryProviderRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(postgresCampaignDeliveryProviderSql.barrier, [input.tenantId]);
           const existing = await loadLink(
             transaction,
             postgresCampaignDeliveryProviderSql

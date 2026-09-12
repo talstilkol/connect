@@ -1,3 +1,7 @@
+import { createPostgresPaidAccess } from "./postgresPaidAccess.ts";
+import { createPostgresAiOperationalReadiness } from "./postgresAiOperationalReadiness.ts";
+import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
+import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
 import { createPostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import { createPostgresRailwayMessageTemplateSyncMutationExecutor } from "./postgresRailwayMessageTemplateSyncMutationExecutor.ts";
 import {createPostgresMetaMediaCleanupRepository} from './postgresMetaMediaCleanupRepository.ts';
@@ -259,6 +263,7 @@ export interface RailwayPostgresFoundationOptions {
 }
 
 export interface RailwayPostgresFoundation {
+  readonly aiOperationalReadiness: ReturnType<typeof createPostgresAiOperationalReadiness>;
   readonly readiness: ReturnType<typeof createPostgresReadinessProbe>;
   readonly aiAgents: ReturnType<typeof createPostgresAiAgentRepository>;
   readonly aiReplyOutbox: ReturnType<
@@ -350,6 +355,9 @@ export interface RailwayPostgresFoundation {
   readonly knowledgePassages: ReturnType<
     typeof createPostgresKnowledgePassageRepository
   >;
+  readonly paidAccess: ReturnType<typeof createPostgresPaidAccess>;
+  readonly paddleBilling: ReturnType<typeof createPostgresPaddleRepository>;
+  readonly knowledgeIngestion: ReturnType<typeof createPostgresKnowledgeIngestionRepository>;
   readonly knowledgeSources: ReturnType<
     typeof createPostgresKnowledgeSourceRepository
   >;
@@ -552,6 +560,8 @@ export function createRailwayPostgresFoundation(
 
   return Object.freeze({
     readiness: createPostgresReadinessProbe(queries),
+    aiOperationalReadiness: createPostgresAiOperationalReadiness(queries),
+    paidAccess: createPostgresPaidAccess({ transactions }),
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
       queries,
@@ -642,6 +652,8 @@ export function createRailwayPostgresFoundation(
       queries,
       transactions,
     }),
+    paddleBilling: createPostgresPaddleRepository({ queries, transactions }),
+    knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     knowledgeSources: createPostgresKnowledgeSourceRepository({
       queries,
       transactions,
@@ -661,7 +673,7 @@ export function createRailwayPostgresFoundation(
     campaignAudiences:
       createPostgresCampaignAudienceRepository(queries),
     campaignDispatch:
-      createPostgresCampaignDispatchRepository(queries),
+      createPostgresCampaignDispatchRepository(queries, transactions),
     campaignProviderDeliveries:
       createPostgresCampaignDeliveryProviderRepository({ transactions }),
     campaigns: createPostgresCampaignRepository({
@@ -719,7 +731,7 @@ export function createRailwayPostgresFoundation(
     railwayBotFlowMutations:
       createPostgresRailwayBotFlowMutationExecutor(transactions),
     railwayAiAgentMutations:
-      createPostgresRailwayAiAgentMutationExecutor(transactions),
+      createPostgresRailwayAiAgentMutationExecutor(transactions, createPostgresAiOperationalReadiness),
     railwayAiReplyApprovalMutations:
       createPostgresRailwayAiReplyApprovalMutationExecutor(transactions),
     railwayOnboardingBusinessProfileMutations:

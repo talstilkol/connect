@@ -1,3 +1,5 @@
+import { readPaddleEnvironment } from "../billing/paddleConfiguration.ts";
+import { readKnowledgeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import type {
   MetaCampaignDeliveryRetryEvidenceSource,
 } from "../campaigns/metaCampaignDeliveryRetryPolicy.ts";
@@ -97,6 +99,17 @@ const defaultDependencies = Object.freeze({
         process.env.RAILWAY_WORKER_SCHEDULER_OWNER_KEY,
       META_MEDIA_WORKER_MODE: process.env.META_MEDIA_WORKER_MODE,
       MANUAL_REPLY_ENABLED: process.env.MANUAL_REPLY_ENABLED,
+      ...readKnowledgeEnvironment(),
+      ...readPaddleEnvironment(),
+      AI_REPLY_DELIVERY_ENABLED: process.env.AI_REPLY_DELIVERY_ENABLED,
+      AI_RESPONSES_ENABLED: process.env.AI_RESPONSES_ENABLED,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      OPENAI_MODEL: process.env.OPENAI_MODEL,
+      OPENAI_ALLOWED_MODELS_JSON: process.env.OPENAI_ALLOWED_MODELS_JSON,
+      OPENAI_RATE_CARD_JSON: process.env.OPENAI_RATE_CARD_JSON,
+      OPENAI_MAX_INPUT_TOKENS: process.env.OPENAI_MAX_INPUT_TOKENS,
+      OPENAI_MAX_OUTPUT_TOKENS: process.env.OPENAI_MAX_OUTPUT_TOKENS,
+      OPENAI_TIMEOUT_MS: process.env.OPENAI_TIMEOUT_MS,
       META_MEDIA_S3_REGION: process.env.META_MEDIA_S3_REGION,
       META_MEDIA_S3_BUCKET: process.env.META_MEDIA_S3_BUCKET,
       META_MEDIA_S3_ACCOUNT_ID: process.env.META_MEDIA_S3_ACCOUNT_ID,
@@ -133,6 +146,8 @@ const defaultDependencies = Object.freeze({
     createProviderResponseMetaCampaignDeliveryRetryEvidenceSource(),
   createTelemetryRuntime: createRailwayBetterStackTelemetryRuntime,
 }) satisfies RailwayBullMqWorkerMainDependencies;
+
+export const readRailwayBullMqWorkerEnvironment = defaultDependencies.readEnvironment;
 
 export type RailwayBullMqWorkerMainErrorCode =
   | "dependencies-invalid"

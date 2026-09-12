@@ -1,3 +1,4 @@
+import { bindPaidFixture } from '../fixtures/paid-access-postgres.mjs';
 import { createPostgresWhatsappCampaignDeliveryPolicyRepository } from "../../server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -172,6 +173,14 @@ test("manual reply outbox enforces atomic intent and fenced provider claims on r
     await assert.rejects(() => replies.enqueue({ ...input, payload: { ...input.payload, tenantId } }), { code: "INVALID_REQUEST" });
     await assert.rejects(() => replies.enqueue({ ...input, payload: { ...input.payload, text: input.payload.text + "\n" } }), { code: "INVALID_REQUEST" });
     assert.deepEqual(await state(), before);
+  });
+  await t.test("canceled paid access blocks a queued reply at sealing and billing facts remain readable", async()=>{
+    await reset();const paid=await bindPaidFixture(pool,tenantId,externalUserId);const input=await command();await replies.enqueue(input);const claim=await replies.claim();assert.ok(claim);
+    await paid.cancel();await assert.rejects(replies.seal(claim,reservationKey),{code:"AUTHORIZATION_DENIED"});
+    await assert.rejects(pool.query(postgresManualReplySql.seal,[tenantId,claim.deliveryKey,claim.claimVersion,reservationKey]),{code:"42501"});
+    assert.equal((await read())[0].state,"preparing");assert.equal((await read())[0].provider_message_id,null);
+    assert.equal((await paid.journal.read(session,'production')).subscription.status,'canceled');
+    await assert.rejects(replies.enqueue(input),{code:"AUTHORIZATION_DENIED"});
   });
   assert.equal(pool.totalCount, pool.idleCount);
   t.diagnostic(`Applied ${migrations} migrations on isolated PostgreSQL; existing fixtures only; no provider requests.`);

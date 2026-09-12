@@ -40,7 +40,7 @@ export function createS3MetaMediaCleanupStorage(environment:S3MetaMediaQuarantin
       }catch(error){
         if(error instanceof MetaMediaCleanupError)throw error;
         const code=error&&typeof error==='object'&&'code'in error?error.code:undefined;
-        if(['UNSAFE_BUCKET','CONFIGURATION_INVALID','INVALID_INPUT'].includes(String(code)))throw error;
+        if(['UNSAFE_BUCKET','CONFIGURATION_INVALID','INVALID_INPUT','AUTHORIZATION_DENIED','CONFLICT','RETENTION_NOT_DUE','CONFIGURATION_REQUIRED'].includes(String(code)))throw error;
         const status=error&&typeof error==='object'&&'$metadata'in error?(error.$metadata as {httpStatusCode?:number})?.httpStatusCode:undefined;
         if(status!==undefined&&status>=400&&status<500&&![408,409,429].includes(status))return fail('DELETE_REJECTED');
         return fail('OUTCOME_UNKNOWN');

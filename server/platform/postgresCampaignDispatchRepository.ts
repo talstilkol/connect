@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier, paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import type {
   CampaignDispatchRepository,
 } from "../../db/campaignDispatchRepository.ts";
@@ -21,6 +22,7 @@ import {
 import type {
   PostgresParameter,
   PostgresQueryExecutor,
+  PostgresTransactionManager,
 } from "./postgresTransaction.ts";
 
 const maximumDispatchBatchSize = 50;
@@ -270,6 +272,7 @@ export const postgresCampaignDispatchSql = Object.freeze({
         ON candidate.tenant_id = campaigns.tenant_id
         AND candidate.campaign_key = campaigns.campaign_key
       WHERE candidate.delivery_key = $1 AND campaigns.status = 'running'
+        AND public.tenant_paid_access_allowed_v1(campaigns.tenant_id)
       FOR UPDATE OF campaigns
     )
     UPDATE campaign_recipients AS recipients
@@ -534,6 +537,7 @@ async function requireTransition(
 
 export function createPostgresCampaignDispatchRepository(
   queries: PostgresQueryExecutor,
+  transactions?: PostgresTransactionManager,
 ): CampaignDispatchRepository {
   if (typeof queries?.query !== "function") {
     throw new Error("PostgreSQL campaign dispatch dependency is invalid");
@@ -673,11 +677,18 @@ export function createPostgresCampaignDispatchRepository(
     async prepareDelivery(deliveryKeyInput, nowInput) {
       const deliveryKey = requireDeliveryKey(deliveryKeyInput);
       const now = requireTimestamp(nowInput);
-      const value = await loadOne(
-        queries,
-        postgresCampaignDispatchSql.prepareDelivery,
-        [deliveryKey, now],
-      );
+      const prepare = async (tx: PostgresQueryExecutor) => {
+        const context = await tx.query<{ tenant_id: number | string }>("SELECT tenant_id FROM campaign_recipients WHERE delivery_key=$1", [deliveryKey]);
+        if (!context.rows[0]) return null;
+        const tenantId = parsePostgresPositiveInteger(context.rows[0].tenant_id);
+        await tx.query(paidAccessTenantBarrier, [tenantId]);
+        if ((await tx.query(paidAccessTenantSql, [tenantId])).rowCount !== 1) throw new Error("Paid execution is unavailable");
+        return loadOne(tx, postgresCampaignDispatchSql.prepareDelivery, [deliveryKey, now]);
+      };
+      // Production always supplies a transaction manager. A caller already in
+      // a pinned transaction may use the query executor with the SQL predicate.
+      const value = transactions ? await transactions.transaction({ isolationLevel: "read-committed" }, prepare) :
+        await loadOne(queries, postgresCampaignDispatchSql.prepareDelivery, [deliveryKey, now]);
 
       if (value === null) {
         return Object.freeze({ outcome: "duplicate" as const });

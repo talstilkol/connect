@@ -1,0 +1,106 @@
+{
+  "status": "verified-local",
+  "decision": "R220",
+  "checkedAt": "2026-09-11T22:11:53.858491+00:00",
+  "completedSubtasks": [
+    "C4.1.2"
+  ],
+  "unitTests": {
+    "passed": 4588,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "16.13": {
+      "ai": 43,
+      "knowledge": 31,
+      "manualRecovery": 4,
+      "currentCore": 92,
+      "historicalUpgrade": 9,
+      "total": 179,
+      "migrations": 90
+    },
+    "17.11": {
+      "ai": 43,
+      "knowledge": 31,
+      "manualRecovery": 4,
+      "manual": 14,
+      "publication": 10,
+      "paddle": 47,
+      "currentCore": 92,
+      "historicalUpgrade": 9,
+      "total": 250,
+      "migrations": 90
+    }
+  },
+  "postgresScenarioExecutions": 429,
+  "builds": {
+    "vinext": "passed",
+    "nextWebpack": "passed"
+  },
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": {
+    "status": "passed",
+    "files": 970,
+    "clientGraphs": 43,
+    "typeScriptEdges": 2423
+  },
+  "interfaceGuardrails": {
+    "status": "passed",
+    "checks": 15
+  },
+  "sourceFiles": 173,
+  "originalUntrackedPreserved": 624,
+  "liveProviderRequests": false,
+  "deployed": false,
+  "publicCiRun": false,
+  "remaining": {
+    "codingPackages": [
+      "C4.1"
+    ],
+    "subtasks": 1,
+    "task": "C4.1.5",
+    "mainStages": 12,
+    "estimatedAuditEngineeringHours": [
+      2,
+      4
+    ],
+    "additionalImplementationHours": "unknown pending W09/W10 audit",
+    "confidence": "low",
+    "launchDate": "unknown"
+  },
+  "logs": {
+    "unit": "recovery-release-unit-20260912.log",
+    "builds": "recovery-release-build-20260912.log",
+    "lint": "recovery-release-lint-20260912.log",
+    "typecheck": "recovery-typecheck-final-20260912.log",
+    "source": "recovery-release-source-20260912.log",
+    "interface": "recovery-release-interface-20260912.log",
+    "migrationContract": "recovery-migration-final-20260912.log",
+    "aiPostgres16": "recovery-ai-postgres16-final-20260912.log",
+    "knowledgePostgres16": "recovery-knowledge-postgres16-final-20260912.log",
+    "corePostgres16": "recovery-core-postgres16-final-20260912.log",
+    "manual-operatorPostgres16": "recovery-manual-operator-postgres16-20260912.log",
+    "aiPostgres17": "recovery-ai-postgres17-final-20260912.log",
+    "knowledgePostgres17": "recovery-knowledge-postgres17-final-20260912.log",
+    "corePostgres17": "recovery-core-postgres17-final-20260912.log",
+    "manual-operatorPostgres17": "recovery-manual-operator-postgres17-final-20260912.log",
+    "manualPostgres17": "recovery-manual-postgres17-final-20260912.log",
+    "publicationPostgres17": "recovery-publication-postgres17-final-20260912.log",
+    "paddlePostgres17": "recovery-paddle-postgres17-final-20260912.log"
+  },
+  "limitations": [
+    "Private support evidence is an operator attestation; software cannot establish truth of a human finding",
+    "All original dispatches remain non-retryable; final absence requires conclusive provider evidence",
+    "Nine historical core scenarios per PostgreSQL version run before current-schema upgrade, followed by evidence preservation comparison",
+    "One manual recovery scenario per PostgreSQL version preserves an unknown delivery created before migration 0089",
+    "Current original evidence and late receipts remain durable; process death before receipt persistence may still require provider investigation",
+    "Actual runtime and operator grants, TLS, AWS scan and provider behavior still require Staging acceptance",
+    "C4.1.5 remains open: reconcile W09/W10 media/synchronization gaps and finish cross-plan code audit",
+    "No live provider connection, public push, deployment or new public CI result"
+  ]
+}

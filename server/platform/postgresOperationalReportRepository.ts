@@ -148,7 +148,7 @@ export const postgresOperationalReportSql = `
       coalesce(sum(input_tokens), 0)::text AS input_tokens,
       coalesce(sum(output_tokens), 0)::text AS output_tokens,
       coalesce(sum(cost_minor_units), 0)::text AS cost_minor_units
-    FROM ai_runtime_usage
+    FROM ai_generation_effective_usage
     WHERE tenant_id = $1
       AND created_at >= $2::timestamptz
       AND created_at < $3::timestamptz

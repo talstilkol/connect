@@ -20,7 +20,7 @@ import type {
 const MINIMUM_RESERVATION_SECONDS = 6;
 const MAXIMUM_RESERVATION_SECONDS = 24 * 60 * 60;
 const deliveryKeyPattern =
-  /^(?:bot_reply|manual_reply)_delivery_v1_[0-9a-f]{64}$/;
+  /^(?:bot_reply|manual_reply|ai_reply)_delivery_v1_[0-9a-f]{64}$/;
 const phoneNumberPattern = /^\+[1-9][0-9]{0,14}$/;
 const providerIdentifierPattern =
   /^[^\u0000-\u001f\u007f]{1,255}$/;

@@ -1,0 +1,97 @@
+{
+  "status": "verified-local",
+  "decision": "R218",
+  "checkedAt": "2026-09-11T20:46:13.516991+00:00",
+  "completedSubtasks": [
+    "C4.1.3"
+  ],
+  "unitTests": {
+    "passed": 4588,
+    "failed": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "16.13": {
+      "knowledgeIngestionAndRetention": 26,
+      "failed": 0,
+      "migrations": 86
+    },
+    "17.11": {
+      "knowledgeIngestionAndRetention": 26,
+      "paddle": 47,
+      "aiGenerationAndDelivery": 31,
+      "aiPublication": 10,
+      "manualReply": 14,
+      "totalPassed": 128,
+      "failed": 0,
+      "migrations": 86
+    },
+    "totalPassed": 154,
+    "restrictedRetentionLogin": "verified on both versions",
+    "historicalCoreVerifier": {
+      "status": "still-incomplete",
+      "runThisRound": false,
+      "lastFailureFrom": "R215"
+    }
+  },
+  "builds": {
+    "vinext": "passed",
+    "nextWebpack": "passed"
+  },
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": {
+    "status": "passed",
+    "files": 965,
+    "clientGraphs": 43,
+    "typeScriptEdges": 2420
+  },
+  "interfaceGuardrails": {
+    "status": "passed",
+    "checks": 15
+  },
+  "s3SdkTests": {
+    "passed": 12,
+    "includedInUnitTotal": true,
+    "realAwsRequests": false
+  },
+  "sourceFiles": 145,
+  "originalUntrackedPreserved": 624,
+  "deployed": false,
+  "liveProviderRequests": false,
+  "publicCiRun": false,
+  "remaining": {
+    "codingPackages": [
+      "C4.1"
+    ],
+    "subtasks": 3,
+    "mainStages": 12,
+    "estimatedEngineeringHours": [
+      7,
+      14
+    ],
+    "confidence": "low",
+    "launchDate": "unknown"
+  },
+  "logs": {
+    "unit": "knowledge-retention-full-test-20260911.log",
+    "knowledge16": "knowledge-retention-postgres16-20260911.log",
+    "knowledge17": "knowledge-retention-knowledge-postgres17-20260911.log",
+    "paddle17": "knowledge-retention-paddle-postgres17-20260911.log",
+    "generation": "knowledge-retention-generation-postgres17-20260911.log",
+    "publication": "knowledge-retention-publication-postgres17-20260911.log",
+    "manual": "knowledge-retention-manual-postgres17-20260911.log"
+  },
+  "limitations": [
+    "All coding is not complete",
+    "S3 exact-version cleanup is not full tenant/content erasure; ingestion receipts and extracted passages remain retained",
+    "Legal hold evidence is a human attestation; its digest does not prove its truth",
+    "Private operator grants, complete retention policy and separate S3 cleanup identity require provisioning before operation",
+    "The production database clock is owner-controlled; test clock overrides are isolated to integration databases",
+    "No provider authentication, live provider acceptance, customer deletion, deployment or public push was performed",
+    "C4.1.2 uncertain outcomes, C4.1.4 historical verifier and C4.1.5 final audit remain open"
+  ]
+}

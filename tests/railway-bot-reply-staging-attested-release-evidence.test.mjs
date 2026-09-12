@@ -715,6 +715,7 @@ test("contains no randomized identity path and stays dormant", async () => {
     [
       "scripts/verify-source-guardrails.mjs",
       [
+        '"scripts/verify-node-postgres-integration.mjs"',
         '"server/operations/botReplyStagingAttestedReleaseCutoverReadiness.ts"',
         '"server/platform/postgresBotReplyStagingAttestedReleaseEvidenceReadRepository.ts"',
       ],

@@ -122,6 +122,7 @@ const LIST_APPROVED_PASSAGES_SQL = `
     ON selected.value = passage.source_key
   WHERE passage.tenant_id = ?1
     AND source.status = 'ready'
+    AND (?4 IS NULL OR passage.source_key > ?4 OR (passage.source_key = ?4 AND passage.passage_ordinal > ?5))
   ORDER BY
     passage.source_key ASC,
     passage.passage_ordinal ASC
@@ -167,6 +168,11 @@ export type StoreProcessedKnowledgeResult =
         | "invalid-state";
     };
 
+export interface KnowledgePassageCursor {
+  readonly sourceKey: string;
+  readonly passageOrdinal: number;
+}
+
 export interface KnowledgePassageRepository {
   storeProcessedAndMarkReady(
     input: StoreProcessedKnowledgeInput,
@@ -175,6 +181,7 @@ export interface KnowledgePassageRepository {
     tenantId: number,
     sourceKeys: readonly string[],
     limit: number,
+    after?: KnowledgePassageCursor,
   ): Promise<readonly PersistedKnowledgePassage[]>;
 }
 
@@ -493,6 +500,7 @@ export function createKnowledgePassageRepository(
       tenantId,
       sourceKeys,
       limit,
+      after,
     ) {
       assertPositiveInteger(tenantId, "tenantId");
       assertPositiveInteger(limit, "limit");
@@ -519,6 +527,10 @@ export function createKnowledgePassageRepository(
       if (sourceKeys.length === 0) {
         return [];
       }
+      if (after !== undefined && (!sourceKeys.includes(after.sourceKey) ||
+        !Number.isSafeInteger(after.passageOrdinal) || after.passageOrdinal <= 0)) {
+        throw new Error("Knowledge passage cursor is invalid");
+      }
 
       const result = await database
         .prepare(LIST_APPROVED_PASSAGES_SQL)
@@ -526,6 +538,8 @@ export function createKnowledgePassageRepository(
           tenantId,
           JSON.stringify(sourceKeys),
           limit,
+          after?.sourceKey ?? null,
+          after?.passageOrdinal ?? 0,
         )
         .all<KnowledgePassageRow>();
 
@@ -557,4 +571,3 @@ export function createKnowledgePassageRepository(
     },
   };
 }
-

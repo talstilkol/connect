@@ -836,6 +836,11 @@ npm run dev
 npm run e2e:bot-flow-graph-browser
 ```
 
+`npm run dev` מפעיל Next.js עם Webpack, כמו יעד הבנייה ל־Vercel.
+לבדיקת התחברות Clerk יש לפתוח `http://localhost:3000` ולהשתמש במפתחות
+Development של האפליקציה המקושרת. `npm run dev:cloudflare` נשמר לבדיקות
+Vinext/Cloudflare; אינו מסלול קבלת Clerk החי.
+
 ## בדיקות
 
 ```bash

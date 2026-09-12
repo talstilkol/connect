@@ -1,0 +1,70 @@
+{
+  "status": "verified-local",
+  "decision": "R214",
+  "checkedAt": "2026-09-11T18:37:55.024904+00:00",
+  "completedSubtasks": [
+    "C3.2.3",
+    "C3.2.4"
+  ],
+  "unitTests": {
+    "passed": 4573,
+    "failed": 0,
+    "skipped": 0,
+    "finalFocusedProtocolTests": 15
+  },
+  "postgres": {
+    "16.13": {
+      "paddle": 24,
+      "migrations": 82,
+      "populatedUpgrade": "0080 to 0081"
+    },
+    "17.11": {
+      "paddle": 24,
+      "aiGenerationAndDelivery": 31,
+      "knowledge": 11,
+      "manualReply": 14,
+      "totalPassed": 80,
+      "failed": 0,
+      "migrations": 82,
+      "populatedUpgrade": "0080 to 0081"
+    }
+  },
+  "builds": {
+    "vinext": "passed",
+    "nextWebpack": "passed"
+  },
+  "typecheck": "passed",
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 28
+  },
+  "sourceGuardrails": "passed",
+  "interfaceGuardrails": "passed",
+  "sourceFiles": 115,
+  "originalUntrackedPreserved": 624,
+  "deployed": false,
+  "liveProviderRequests": false,
+  "remaining": {
+    "codingPackages": [
+      "C3.2",
+      "C4.1"
+    ],
+    "subtasks": 6,
+    "mainStages": 12,
+    "revisedEstimatedEngineeringHours": [
+      12,
+      24
+    ],
+    "confidence": "low",
+    "launchDate": "unknown"
+  },
+  "limitations": [
+    "Unknown, rejected and canceled-before-payment creation recovery remains C3.2.5",
+    "Equal-version review resolution remains C3.2.5",
+    "Billing must not be enabled for customers yet",
+    "C4.1 readiness, operational recovery, S3 retention and historical core verifier remain open",
+    "No live portal sign-in or payment journey was exercised",
+    "Same Web/API/Worker contract revision and actual public portal URL are required before enablement",
+    "Public GitHub publication remains blocked by the earlier automatic approval review; no push retried"
+  ]
+}

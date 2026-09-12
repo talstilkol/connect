@@ -7,11 +7,11 @@ import type { PostgresParameter,PostgresTransaction,PostgresTransactionManager }
 const claimColumns=`j.tenant_id AS "tenantId",j.job_key AS "jobKey",j.actor_external_user_id AS actor,j.object_version_id AS "versionId",j.version,j.attempts,(j.status='recovery-required') AS exhausted`;
 const exact=`tenant_id=$1 AND job_key=$2 AND actor_external_user_id=$3 AND object_version_id=$4 AND version=$5 AND attempts=$6 AND status='running' AND lease_expires_at>clock_timestamp()`;
 export const postgresMetaMediaCleanupSql=Object.freeze({
-  tenant:`SELECT id FROM tenants WHERE id=$1 AND status IN ('active','trial','payment_failed') FOR SHARE`,
+  tenant:`SELECT id FROM tenants WHERE id=$1 AND status IN ('active','trial','payment_failed') AND NOT EXISTS(SELECT 1 FROM meta_media_retention_holds WHERE tenant_id=$1) FOR SHARE`,
   owner:`SELECT external_user_id AS actor FROM tenant_memberships WHERE tenant_id=$1 AND external_user_id=$2 AND role='owner' AND status='active' FOR SHARE`,
   existing:`SELECT actor_external_user_id AS actor,idempotency_key AS key,requested_task_version AS version FROM meta_media_cleanup_jobs WHERE tenant_id=$1 AND job_key=$2`,
   tasks:`SELECT kind,status,version FROM meta_media_tasks WHERE tenant_id=$1 AND job_key=$2 ORDER BY kind COLLATE "C" FOR UPDATE`,
-  conflicting:`SELECT EXISTS(SELECT 1 FROM meta_media_scan_observations WHERE tenant_id=$1 AND job_key=$2 AND object_version_id<>$3) AS conflict`,
+  conflicting:`SELECT EXISTS(SELECT 1 FROM meta_media_scan_observations WHERE tenant_id=$1 AND job_key=$2 AND object_version_id<>$3) OR EXISTS(SELECT 1 FROM meta_media_withdrawals WHERE tenant_id=$1 AND job_key=$2) OR EXISTS(SELECT 1 FROM meta_media_retention_holds WHERE tenant_id=$1) AS conflict`,
   insert:`INSERT INTO meta_media_cleanup_jobs(tenant_id,job_key,actor_external_user_id,requested_task_version,object_version_id,idempotency_key)
     VALUES($1,$2,$3,$4,$5,$6) RETURNING job_key AS "jobKey"`,
   claim:`WITH candidate AS (SELECT job_key FROM meta_media_cleanup_jobs WHERE
@@ -20,7 +20,7 @@ export const postgresMetaMediaCleanupSql=Object.freeze({
     UPDATE meta_media_cleanup_jobs j SET version=version+1,status=CASE WHEN attempts=3 THEN 'recovery-required' ELSE 'running' END,
       attempts=LEAST(attempts+1,3),lease_expires_at=CASE WHEN attempts=3 THEN NULL ELSE clock_timestamp()+($1::integer*INTERVAL '1 millisecond') END
     FROM candidate WHERE j.job_key=candidate.job_key RETURNING ${claimColumns}`,
-  check:`SELECT job_key AS "jobKey" FROM meta_media_cleanup_jobs WHERE ${exact} FOR SHARE`,
+  check:`SELECT job_key AS "jobKey" FROM meta_media_cleanup_jobs WHERE ${exact} AND NOT EXISTS(SELECT 1 FROM meta_media_retention_holds WHERE tenant_id=$1) FOR SHARE`,
   finish:`UPDATE meta_media_cleanup_jobs SET version=version+1,lease_expires_at=NULL,
     status=CASE WHEN $7='retry' THEN CASE WHEN attempts=3 THEN 'recovery-required' ELSE 'pending' END ELSE $7 END,
     next_attempt_at=clock_timestamp()+($8::integer*INTERVAL '1 millisecond') WHERE ${exact} RETURNING status,version,attempts`,

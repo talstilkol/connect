@@ -1,3 +1,4 @@
+import { paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import { hasPermission, type TenantRole } from "../../shared/domain/model.ts";
 import { parseManualReplyRequest, parseManualReplySubmission, parseManualReplyViews, type ManualReplyRequest, type ManualReplySubmission, type ManualReplyView } from "../../shared/domain/manualReply.ts";
 import { requireTenantPermission, type TenantSession } from "../auth/tenantSession.ts";
@@ -34,7 +35,7 @@ export interface ManualReplyCommand {
 
 export const postgresManualReplySql = Object.freeze({
   barrier: "SELECT pg_advisory_xact_lock(public.derive_bot_reply_staging_tenant_barrier_key_v1($1))",
-  tenant: "SELECT id FROM tenants WHERE id = $1 AND status IN ('trial', 'active', 'payment_failed') FOR SHARE",
+  tenant: paidAccessTenantSql,
   membership: "SELECT role FROM tenant_memberships WHERE tenant_id = $1 AND external_user_id = $2 AND status = 'active' FOR SHARE",
   connection: `SELECT business_portfolio_id, waba_id, phone_number_id, version FROM meta_connections WHERE tenant_id = $1 AND status = 'connected' FOR SHARE`,
   credential: "SELECT credential_revision, envelope_digest FROM meta_credential_envelopes WHERE tenant_id = $1 FOR SHARE",
@@ -53,8 +54,13 @@ export const postgresManualReplySql = Object.freeze({
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING delivery_key`,
   advanceConversation: `UPDATE conversations SET version = version + 1, status = 'agent_active', updated_at = ${nowSql}
     WHERE tenant_id = $1 AND conversation_key = $2 AND version = $3 RETURNING version`,
-  list: `SELECT delivery_key, text_content, state, created_at, updated_at FROM manual_reply_outbox
-    WHERE tenant_id = $1 AND conversation_key = $2 AND state <> 'sent' ORDER BY created_at DESC, delivery_key DESC LIMIT 100`,
+  list: `SELECT * FROM (
+    SELECT delivery_key, text_content, state, created_at, updated_at FROM manual_reply_outbox
+      WHERE tenant_id = $1 AND conversation_key = $2 AND state <> 'sent'
+    UNION ALL SELECT d.delivery_key, o.reply_text AS text_content, d.state, d.created_at, d.updated_at
+      FROM ai_reply_deliveries d JOIN ai_reply_outbox o ON o.tenant_id = d.tenant_id AND o.outbox_key = d.outbox_key
+      WHERE d.tenant_id = $1 AND d.conversation_key = $2 AND d.state <> 'sent'
+    ) pending ORDER BY created_at DESC, delivery_key DESC LIMIT 100`,
   claim: `WITH candidate AS (SELECT delivery_key FROM manual_reply_outbox
     WHERE (state = 'queued' AND next_attempt_at <= ${nowSql}) OR (state = 'preparing' AND claim_expires_at <= ${nowSql})
     ORDER BY next_attempt_at, created_at, delivery_key FOR UPDATE SKIP LOCKED LIMIT 1)
@@ -82,7 +88,10 @@ export const postgresManualReplySql = Object.freeze({
   reject: `UPDATE manual_reply_outbox SET state = 'failed', error_code = $4, updated_at = ${nowSql}
     WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND state IN ('sending', 'unknown') RETURNING delivery_key`,
   sent: `UPDATE manual_reply_outbox SET state = 'sent', provider_message_id = $4, error_code = NULL, updated_at = ${nowSql}
-    WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND state IN ('sending', 'unknown') RETURNING delivery_key`,
+    WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND (state IN ('sending', 'unknown') OR (state='failed' AND error_code='OPERATOR_CONFIRMED_NOT_ACCEPTED')) RETURNING delivery_key`,
+  cancelUnsentReplacements: `UPDATE manual_reply_outbox SET state = 'failed', claim_expires_at = NULL,
+    reservation_key = NULL, error_code = 'ORIGINAL_DELIVERY_ACCEPTED', updated_at = ${nowSql}
+    WHERE tenant_id = $1 AND conversation_key = $2 AND delivery_key <> $3 AND state IN ('queued', 'preparing')`,
   message: `INSERT INTO messages (message_key, conversation_key, tenant_id, provider_message_id, direction, content_kind, status, text_content, occurred_at, status_updated_at)
     VALUES ($1, $2, $3, $4, 'outbound', 'text', 'sent', $5, $6, $6) ON CONFLICT (tenant_id, provider_message_id) DO NOTHING RETURNING message_key`,
   existingMessage: `SELECT message_key, conversation_key, direction, content_kind, text_content FROM messages WHERE tenant_id = $1 AND provider_message_id = $2 FOR UPDATE`,
@@ -162,6 +171,8 @@ export function createPostgresManualReplyRepository(dependencies: Readonly<{ que
         const { conversation, contact, expiresAt } = await target(tx, session.tenantId, payload.conversationKey, session.externalUserId);
         if (integer(conversation.version) !== payload.expectedVersion) throw new ManualReplyError("CONFLICT");
         if (await one(tx, "SELECT delivery_key FROM manual_reply_outbox WHERE tenant_id = $1 AND conversation_key = $2 AND state IN ('queued', 'preparing', 'sending', 'unknown') LIMIT 1", [session.tenantId, payload.conversationKey])) throw new ManualReplyError("CONFLICT");
+        if (await one(tx, "SELECT delivery_key FROM ai_reply_deliveries WHERE tenant_id = $1 AND conversation_key = $2 AND state IN ('sending', 'unknown') LIMIT 1",
+          [session.tenantId, payload.conversationKey])) throw new ManualReplyError("CONFLICT");
         await required(tx, receipts.claimReceipt, [session.tenantId, operation, command.idempotencyKey, command.requestDigest, session.externalUserId]);
         await required(tx, postgresManualReplySql.insert, [deliveryKey, session.tenantId, payload.conversationKey, session.externalUserId, session.role, payload.expectedVersion,
           integer(conversation.contact_id), integer(contact.version), text(contact, "phone_e164"), payload.text,
@@ -232,13 +243,21 @@ export function createPostgresManualReplyRepository(dependencies: Readonly<{ que
       if (!/^[^\u0000-\u001f\u007f]{1,255}$/.test(providerMessageId) || providerMessageId.trim() !== providerMessageId) throw new Error("Manual reply provider identity is invalid");
       const messageKey = `message_v1_${await sha256Hex(new TextEncoder().encode(JSON.stringify({ namespace: "whatsapp_manual_reply_v1", tenantId: claim.tenantId, providerMessageId })))}`;
       await transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await tx.query(postgresManualReplySql.barrier, [claim.tenantId]);
         const initial = await required(tx, postgresManualReplySql.read, claimParameters(claim).slice(0, 2));
         // Accepted side effects must be recorded even if the actor or connection was revoked after seal.
         await required(tx, postgresManualReplySql.conversation, [claim.tenantId, initial.conversation_key]);
         const row = await required(tx, postgresManualReplySql.lock, claimParameters(claim).slice(0, 2));
         if (integer(row.claim_version) !== claim.claimVersion) throw new Error("Manual reply claim changed");
         if (row.state === "sent" && row.provider_message_id === providerMessageId) return;
-        if (row.state !== "sending" && row.state !== "unknown") throw new Error("Manual reply was not sealed");
+        const late = row.state === "failed" && row.error_code === "OPERATOR_CONFIRMED_NOT_ACCEPTED";
+        if (late) {
+          await tx.query("SELECT public.record_manual_delivery_late_acceptance_v1($1,$2,$3,$4)", [...claimParameters(claim), providerMessageId]);
+          // The tenant barrier and conversation lock also guard enqueue/seal.
+          // A claimed replacement loses its preparing state before it can send.
+          await tx.query(postgresManualReplySql.cancelUnsentReplacements, [claim.tenantId, text(row, "conversation_key"), claim.deliveryKey]);
+        }
+        if (row.state !== "sending" && row.state !== "unknown" && !late) throw new Error("Manual reply was not sealed");
         const at = timestamp(row.provider_started_at);
         let actualMessageKey = messageKey;
         const inserted = await one(tx, postgresManualReplySql.message, [messageKey, row.conversation_key, claim.tenantId, providerMessageId, row.text_content, at]);

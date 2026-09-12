@@ -164,12 +164,31 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
   "0073_manual_reply_outbox.sql",
     "0074_meta_message_echo_captions.sql",
     "0075_meta_message_echo_original_captions.sql",
+    "0076_ai_generation_journal.sql",
+    "0077_ai_reply_deliveries.sql",
+    "0078_knowledge_ingestion_jobs.sql",
+    "0079_paddle_checkout_journal.sql",
+    "0080_paddle_paid_access.sql",
+    "0081_paddle_subscription_lifecycle.sql",
+    "0082_paddle_checkout_recovery.sql",
+    "0083_ai_publication_readiness.sql",
+    "0084_paddle_operator_recovery.sql",
+    "0085_knowledge_object_retention.sql",
+    "0086_ai_generation_reconciliation.sql",
+    "0087_ai_delivery_reconciliation.sql",
+    "0088_knowledge_ingestion_reconciliation.sql",
+    "0089_manual_delivery_reconciliation.sql",
+    "0090_meta_media_retention.sql",
+    "0091_meta_data_sync_generations.sql",
+    "0092_meta_history_read_authorizations.sql",
+    "0093_meta_history_generations.sql",
+    "0094_meta_sync_attribution.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 76,
+      migrationCount: 95,
       findings: [],
     },
   );
@@ -2345,4 +2364,12 @@ test("rejects an additional insert inside the reviewed D1e scope writer", () => 
       "$$;",
     ].join("\n"),
   ));
+});
+
+test("Paddle recovery accepts only the exact deletion-prevention triggers, not truncation or a changed function",()=>{
+  const index=migrationFiles.indexOf('0082_paddle_checkout_recovery.sql');
+  for(const sql of [migrationSources[index]+'\nTRUNCATE paddle_creation_observations;',migrationSources[index].replace('FOR EACH STATEMENT EXECUTE FUNCTION reject_paddle_receipt_mutation()', 'FOR EACH STATEMENT EXECUTE FUNCTION allow_mutation()')]){
+    const sources=[...migrationSources];sources[index]=sql;
+    assert.ok(validatePostgresMigrationSources({migrationFiles,sources}).some(f=>f.code==='POSTGRES_DESTRUCTIVE_STATEMENT'));
+  }
 });

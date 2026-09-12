@@ -1,3 +1,5 @@
+import { createRailwayPaddleOperations } from "./railwayPaddleOperations.ts";
+import type { KnowledgeUploadExecutor } from "./railwayKnowledgeUploadExecutor.ts";
 import type { PostgresManualReplyRepository } from "./postgresManualReplyRepository.ts";
 import type { RailwayMessageTemplateSyncMutationExecutor } from "./railwayMessageTemplateSyncMutationExecutor.ts";
 import type {MetaMediaCleanupRepository} from '../meta/metaMediaCleanup.ts';
@@ -156,6 +158,7 @@ import {
 } from "./railwayBotReplyStagingReleaseEvidenceReadOperation.ts";
 
 export interface RailwayApiRuntimeOptions {
+  readonly paidAccess?: Readonly<{ allowed(tenantId: number): Promise<boolean> }>;
   readonly environment?: RailwayApiIdentityEnvironment;
   readonly identityDependencies?: Readonly<RailwayApiIdentityAdapterDependencies>;
   readonly memberships: TenantMembershipRepository;
@@ -175,6 +178,8 @@ export interface RailwayApiRuntimeOptions {
     AiAgentService,
     "list" | "listKnowledgeSources" | "readDetails"
   >;
+  readonly paddleBilling?: Parameters<typeof createRailwayPaddleOperations>[0]["billing"];
+  readonly knowledgeUpload?: KnowledgeUploadExecutor;
   readonly aiAgentMutations: RailwayAiAgentMutationExecutor;
   readonly aiReplyApprovals: Pick<AiReplyApprovalService, "listAwaiting">;
   readonly aiReplyApprovalMutations: RailwayAiReplyApprovalMutationExecutor;
@@ -249,6 +254,7 @@ export function createRailwayApiRuntime(
     identityOrganizations: options.identityOrganizations,
   });
   const operations = createRailwayApiOperationRegistry({
+    paidAccess: options.paidAccess,
     tenantSessions,
     conversations: options.conversations,
     conversationMutations: options.conversationMutations,
@@ -256,6 +262,7 @@ export function createRailwayApiRuntime(
     manualReplyConfigured: options.manualReplyConfigured,
     botFlows: options.botFlows,
     botFlowMutations: options.botFlowMutations,
+    knowledgeUpload: options.knowledgeUpload,
     aiAgents: options.aiAgents,
     aiAgentMutations: options.aiAgentMutations,
     aiReplyApprovals: options.aiReplyApprovals,
@@ -390,6 +397,7 @@ export function createRailwayApiRuntime(
     oidcVerifier: identity.oidcVerifier,
     endUserSessionVerifier: identity.endUserSessionVerifier,
     operations: [
+      ...(options.paddleBilling === undefined ? [] : createRailwayPaddleOperations({ tenantSessions, billing: options.paddleBilling, mutationRateLimit: options.mutationRateLimit })),
       ...tenantSelectionOperations,
       ...onboardingOperations,
       teamDirectoryOperation,

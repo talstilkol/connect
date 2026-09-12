@@ -1,0 +1,78 @@
+{
+  "checkedAt": "2026-09-12T01:18:34.413404+00:00",
+  "revision": "R226",
+  "baseCodeCommit": "10b1fc4f23ab57297083a86cf46fda769ca04ad5",
+  "problem": "CI on Linux failed with ENOENT when private CLI integration tests used /private/tmp.",
+  "change": "Use node:os tmpdir and node:path join in four integration suites; deterministic process names, exclusive 0700 directories, 0600 files and cleanup. No runtime or migration changes.",
+  "initialCi": {
+    "run": 34663916312,
+    "failedJob": 103471869303,
+    "failedTest": "private CLI runs as a scoped login, requires evidence confirmation and rejects public files and self-authorization"
+  },
+  "linuxValidation": [
+    {
+      "suite": "manual",
+      "testFile": "manual-delivery-recovery-postgres.test.mjs",
+      "platform": "linux/amd64",
+      "node": "24.20.0",
+      "postgres": "17.11",
+      "network": "isolated loopback; no external access",
+      "exitCode": 0,
+      "seconds": 3.06
+    },
+    {
+      "suite": "knowledge",
+      "testFile": "knowledge-ingestion-postgres.test.mjs",
+      "platform": "linux/amd64",
+      "node": "24.20.0",
+      "postgres": "17.11",
+      "network": "isolated loopback; no external access",
+      "exitCode": 0,
+      "seconds": 4.11
+    },
+    {
+      "suite": "paddle",
+      "testFile": "paddle-billing-postgres.test.mjs",
+      "platform": "linux/amd64",
+      "node": "24.20.0",
+      "postgres": "17.11",
+      "network": "isolated loopback; no external access",
+      "exitCode": 0,
+      "seconds": 3.83
+    },
+    {
+      "suite": "coexistence",
+      "testFile": "meta-coexistence-orchestration-postgres.test.mjs",
+      "platform": "linux/amd64",
+      "node": "24.20.0",
+      "postgres": "17.11",
+      "network": "isolated loopback; no external access",
+      "exitCode": 0,
+      "seconds": 35.97
+    }
+  ],
+  "passedTests": 147,
+  "passedBySuite": {
+    "manual": 4,
+    "knowledge": 31,
+    "paddle": 47,
+    "coexistence": 65
+  },
+  "testFilesSha256": {
+    "tests/integration/manual-delivery-recovery-postgres.test.mjs": "390836e3da2618b33d476c96f8b6ed518eb28dbeae62e111e2cc7584991a92e4",
+    "tests/integration/knowledge-ingestion-postgres.test.mjs": "1f55fad88faca600e4660e64cb80becd872e41183e7df420f6ea9241ff7f9a1d",
+    "tests/integration/paddle-billing-postgres.test.mjs": "2414a0f8272dcc9119874a3059e56284be6a36c9dbae373ecd833a2a13712e19",
+    "tests/integration/meta-coexistence-orchestration-postgres.test.mjs": "3db2af81397a4531dc922c024397375aad252f7faef5558aa1de06126d0b984b"
+  },
+  "packageLockSha256": "99822318bebfe9d56a6a96cf3a5078e0fc7b7246d5cf9aef274f9bf32aa7178a",
+  "dependencyImageLockMatchesSource": true,
+  "eslint": "passed for all four changed files",
+  "secretHistoryScan": "passed; 2746 tracked files before this report",
+  "preparationFailures": [
+    "First local Linux attempt lacked mounted dependencies; no tests ran.",
+    "Second attempt lacked a mountpoint under the read-only source; no tests ran."
+  ],
+  "liveProviderCalls": false,
+  "newCiStatus": "not-yet-published",
+  "remainingLaunchStages": 12
+}

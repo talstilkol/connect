@@ -1,3 +1,4 @@
+import { lockMetaSyncAttribution, retainUnattributedMetaSync } from './postgresMetaSyncUnattributed.ts';
 import { normalizeMetaContactSync, reduceMetaContactSync, type MetaContactSyncRepository, type MetaContactSyncState, type MetaContactSyncScope, type MetaContactSyncChange } from "../meta/metaContactSync.ts";
 import { MetaWebhookProcessorError } from "../meta/metaWebhookIngress.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
@@ -11,7 +12,9 @@ export const postgresWhatsAppContactNameSql = `SELECT COALESCE(sync.full_name, s
   FROM meta_contact_sync_states AS sync JOIN meta_connections AS connection
     ON connection.tenant_id = sync.tenant_id AND connection.waba_id = sync.waba_id
       AND connection.phone_number_id = sync.phone_number_id AND connection.status = 'connected'
-  WHERE sync.tenant_id = contacts.tenant_id AND sync.contact_phone = contacts.phone_e164 AND sync.status = 'present'`;
+  WHERE sync.tenant_id = contacts.tenant_id AND sync.contact_phone = contacts.phone_e164 AND sync.status = 'present'
+    AND NOT EXISTS (SELECT 1 FROM meta_sync_import_refusals refusal WHERE refusal.tenant_id=sync.tenant_id
+      AND refusal.waba_id=sync.waba_id AND refusal.phone_number_id=sync.phone_number_id)`;
 
 export const postgresMetaContactSyncSql = Object.freeze({
   lockConnection: `SELECT connection.tenant_id AS "tenantId" FROM meta_connections AS connection
@@ -52,36 +55,45 @@ export function createPostgresMetaContactSyncRepository(transactions: PostgresTr
   return Object.freeze({
     async record(rawScope: MetaContactSyncScope, rawChange: MetaContactSyncChange) {
       const { scope, change } = normalizeMetaContactSync(rawScope, rawChange);
-      const eventKey = await sha256Hex(new TextEncoder().encode(JSON.stringify({
-        namespace: "whatsapp_contact_sync_v1", tenantId: scope.tenantId, wabaId: scope.wabaId,
-        phoneNumberId: scope.phoneNumberId, change,
-      })));
-      const keys = [scope.tenantId, scope.wabaId, scope.phoneNumberId, change.phoneNumber] as const;
       return transactions.transaction({ isolationLevel: "read-committed" }, async (tx) => {
+        await lockMetaSyncAttribution(tx,scope.tenantId);
         const connection = await one(tx, postgresMetaContactSyncSql.lockConnection,
           [scope.tenantId, scope.wabaId, scope.phoneNumberId, scope.connectionVersion]);
         if (connection === null || parsePostgresPositiveInteger(requireExactPostgresRow(connection, ["tenantId"]).tenantId) !== scope.tenantId) {
           throw new MetaWebhookProcessorError("CONTACT_SYNC_CONNECTION_CHANGED");
         }
-        const initial = reduceMetaContactSync(null, change);
-        const inserted = await one(tx, postgresMetaContactSyncSql.insertState,
-          [...keys, initial.occurredAt, initial.status, initial.fullName, initial.firstName]);
-        if (inserted !== null) requireKey(inserted, "phoneNumber", change.phoneNumber);
-        const state = parseState(await one(tx, postgresMetaContactSyncSql.lockState, keys));
-        const claimed = await one(tx, postgresMetaContactSyncSql.claimEvent,
-          [scope.tenantId, eventKey, scope.wabaId, scope.phoneNumberId, change.phoneNumber]);
-        if (claimed === null) return { outcome: "duplicate" as const };
-        requireKey(claimed, "eventKey", eventKey);
-        const next = reduceMetaContactSync(state, change);
-        if (inserted === null && next === state) return { outcome: "ignored" as const };
-        requireKey(await one(tx, postgresMetaContactSyncSql.updateState,
-          [...keys, next.occurredAt, next.status, next.fullName, next.firstName]), "phoneNumber", change.phoneNumber);
-        if (next.status === "present") {
-          const contact = await one(tx, postgresMetaContactSyncSql.ensureContact, [scope.tenantId, change.phoneNumber]);
-          if (contact !== null) parsePostgresPositiveInteger(requireExactPostgresRow(contact, ["id"]).id);
-        }
-        return { outcome: "updated" as const };
+        if (await retainUnattributedMetaSync(tx, scope, 'contact', change)) return { outcome: 'unattributed' as const };
+        return captureMetaContactInTransaction(tx, scope, change);
       });
     },
   });
+}
+
+// Shared with the private approved-attribution importer. The caller holds the
+// attribution lock and has revalidated the source generation's authorization.
+export async function captureMetaContactInTransaction(tx: PostgresTransaction, rawScope: MetaContactSyncScope, rawChange: MetaContactSyncChange) {
+  const { scope, change } = normalizeMetaContactSync(rawScope, rawChange);
+  const eventKey = await sha256Hex(new TextEncoder().encode(JSON.stringify({
+    namespace: "whatsapp_contact_sync_v1", tenantId: scope.tenantId, wabaId: scope.wabaId,
+    phoneNumberId: scope.phoneNumberId, change,
+  })));
+  const keys = [scope.tenantId, scope.wabaId, scope.phoneNumberId, change.phoneNumber] as const;
+  const initial = reduceMetaContactSync(null, change);
+  const inserted = await one(tx, postgresMetaContactSyncSql.insertState,
+    [...keys, initial.occurredAt, initial.status, initial.fullName, initial.firstName]);
+  if (inserted !== null) requireKey(inserted, "phoneNumber", change.phoneNumber);
+  const state = parseState(await one(tx, postgresMetaContactSyncSql.lockState, keys));
+  const claimed = await one(tx, postgresMetaContactSyncSql.claimEvent,
+    [scope.tenantId, eventKey, scope.wabaId, scope.phoneNumberId, change.phoneNumber]);
+  if (claimed === null) return { outcome: "duplicate" as const };
+  requireKey(claimed, "eventKey", eventKey);
+  const next = reduceMetaContactSync(state, change);
+  if (inserted === null && next === state) return { outcome: "ignored" as const };
+  requireKey(await one(tx, postgresMetaContactSyncSql.updateState,
+    [...keys, next.occurredAt, next.status, next.fullName, next.firstName]), "phoneNumber", change.phoneNumber);
+  if (next.status === "present") {
+    const contact = await one(tx, postgresMetaContactSyncSql.ensureContact, [scope.tenantId, change.phoneNumber]);
+    if (contact !== null) parsePostgresPositiveInteger(requireExactPostgresRow(contact, ["id"]).id);
+  }
+  return { outcome: "updated" as const };
 }

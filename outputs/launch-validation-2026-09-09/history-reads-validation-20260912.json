@@ -1,0 +1,123 @@
+{
+  "checkedAt": "2026-09-11T23:59:58.903774+00:00",
+  "milestone": "R223",
+  "status": "prior history and existing clean media reads after verified same-business signup verified locally; attributed reimport and final audit remain open",
+  "sourceManifest": "history-reads-files-20260912.json",
+  "sourceFiles": 207,
+  "previousLocalHead": "c7460d4f14a6671642bb4664a172a5740ffc3d75",
+  "lastPublishedHead": "a34e0b091f638f7ccbbedc57eff4c1c2ff89e943",
+  "checks": {
+    "unit": {
+      "log": "history-reads-unit-20260912.log",
+      "sha256": "38e84478b0b2fdcf87e4e0933ea5439a035910c3da31026b8523881bc5e3cde9"
+    },
+    "build": {
+      "log": "history-reads-build-20260912.log",
+      "sha256": "9f4a00e89b5f60991ec80cd1b252e82772995dea609dfb91940aba42e68645ac"
+    },
+    "vercel-build": {
+      "log": "history-reads-vercel-build-20260912.log",
+      "sha256": "c874dab3bce8fca17b73161e89fe8c0837ab6d3f83ea406075be50c9bf0ece9a"
+    },
+    "typecheck": {
+      "log": "history-reads-typecheck-20260912.log",
+      "sha256": "5872c78bd1d4242580d7f588f30fe8961e76f3779e71cec44e0fbe60348b249f"
+    },
+    "lint": {
+      "log": "history-reads-lint-20260912.log",
+      "sha256": "91f8840965c777a6b28ea05948c6cf268a13570cb4164d3bba0bdea58b9d80da"
+    },
+    "source": {
+      "log": "history-reads-source-20260912.log",
+      "sha256": "464b8dfe9a435cd83db0ad5317f30ac44245abb5f6ddd29a6a0a788f349e5b70"
+    },
+    "interface": {
+      "log": "history-reads-interface-20260912.log",
+      "sha256": "26551f1417f5c0017c99fd908acf6495152057fc3a5a1043a4ecf1f7eabb72a1"
+    },
+    "migrations": {
+      "log": "history-reads-migrations-20260912.log",
+      "sha256": "fb75db126ffd37fb621eaaef03e7249feac47b41cba3911b0ef6bbde6e4a8a9e"
+    },
+    "contracts": {
+      "log": "history-reads-contracts-20260912.log",
+      "sha256": "d8437d1743b125f044c013882d834578eb8a3f2ae1ab457f835164e880dc942f"
+    },
+    "candidate-secret-history": {
+      "log": "history-reads-candidate-secret-history-20260912.log",
+      "sha256": "b6ca3f7091b8c32477cd5173bfc3cd0f8340f4b2275d3e883f90589ef67ec56c"
+    }
+  },
+  "unitPassed": 4598,
+  "focusedContractsPassed": 132,
+  "migrations": 93,
+  "lintWarnings": 28,
+  "postgresRuns": [
+    {
+      "version": "16.13",
+      "scope": "complete history/inbox/media suite",
+      "finalAffectedCode": true,
+      "tests": 236,
+      "failed": 0,
+      "skipped": 0,
+      "log": "history-reads-postgres16-20260912.log",
+      "sha256": "a988e067d33985db494e0f4ffdf6d43b918413b5c7ad00a21118fa88830c966f"
+    },
+    {
+      "version": "17.11",
+      "scope": "complete history/inbox/media suite",
+      "finalAffectedCode": true,
+      "tests": 236,
+      "failed": 0,
+      "skipped": 0,
+      "log": "history-reads-postgres17-20260912.log",
+      "sha256": "7d8743d13c41ba5e3e818e6aebb11c0b8aba169b2178eb3f6a7cafbb8a857523"
+    }
+  ],
+  "newHistoryReadCases": {
+    "perVersion": 11,
+    "versions": [
+      "16.13",
+      "17.11"
+    ]
+  },
+  "validationScopeNote": "132 focused contracts overlap with the full unit suite. Each PostgreSQL version runs the same 236 cases, including 11 new cases; do not sum them as unique cases. Build, unit and PostgreSQL runs cover the final runtime and migration source. An initial reserved-word SQL alias error was fixed before the recorded passing runs. No live provider calls were made.",
+  "remaining": {
+    "codingSubsteps": 2,
+    "items": [
+      {
+        "task": "authorized attribution and import across generations",
+        "engineeringHours": [
+          4,
+          8
+        ]
+      },
+      {
+        "task": "final release audit and delivery package",
+        "engineeringHours": [
+          2,
+          4
+        ]
+      }
+    ],
+    "engineeringHours": [
+      6,
+      12
+    ],
+    "confidence": "low",
+    "launchStages": 12,
+    "launchDate": null
+  },
+  "limitations": [
+    "No release/import path from the unattributed journal is implemented.",
+    "Only existing clean exact-version media can be read after reconnection; acquisition remains tied to the original connection.",
+    "No live QR, Meta, S3 acceptance or deployment was performed."
+  ],
+  "externalActions": {
+    "providerCalls": false,
+    "push": false,
+    "deploy": false
+  },
+  "originalUntrackedFilesPreserved": 624,
+  "testContainersStopped": true
+}

@@ -1,12 +1,13 @@
 # 1. Connect — מפת מימוש ופערים בתהליכי המוצר
 
+**מצב נוכחי R224:** יתרת התכנות המקומית בתכולת הגרסה המוגדרת הושלמה ונבדקה, כולל ייבוא משויך בין מחזורי סנכרון וביקורת W01–W21. נותרו **0 תתי־שלבי קוד ידועים לפני חיבורים**; תיקונים שיתגלו בקבלה חיה ייפתחו במפורש. **12 שלבי ההשקה אינם סגורים**, משום שנדרשים חשבונות, Staging, קבלת ספקים, שחזור, Pilot ו־Canary. אין מועד השקה מאומת.
+
 1.1 נבדק ב־10.09.2026 מול בסיס קוד `801d7d868c6107fe37f3f569d3bcb05491ddc340`.
 המפה משלימה את [עקיבות 27 דרישות האפיון](../product-specification-traceability.md)
 ואת משימה 1.2 ב־[Master Plan](launch-master-plan-2026-09-09.md).
 היא מתארת קוד וחיבורי רכיבים; היא אינה ראיית שימוש ב־Staging.
 
-1.2 **ממצא מרכזי:** חסרות גם פעולות מוצר וחיבורי Runtime. פתיחת החשבונות
-לבד אינה משלימה Templates, הפעלת קמפיינים, השהיה/ביטול או מענה ידני ב־Inbox.
+1.2 **נקודת הבסיס R221:** Knowledge/AI/Paddle, שחזור תוצאות לא ודאיות וניקוי מדיה לפי מדיניות ממומשים מקומית. נותרו חיבור מחדש עם הפרדת מחזורי סנכרון ובדיקת מסירה סופית. אלה שני תתי־שלבים באומדן 8–16 שעות הנדסה בביטחון נמוך. כל התהליכים עדיין דורשים קבלה חיה.
 
 1.3 משמעות הסיווג: **KEEP** — לשמר את המימוש הקיים; **VERIFY** — להוכיח
 את התהליך בשילוב אמיתי; **REFACTOR** — להשלים או להחליף חיבור קוד חסר.
@@ -43,8 +44,8 @@
 | W06 רשימות, תגיות והסכמה | [Contact organization](../../features/contacts/ContactOrganization.tsx), [פעולות ארגון](../../server/contacts/contactOrganizationActions.ts) | `contacts.organization.*`, `contacts.consent.grant/unsubscribe`; [ארגון](../../server/platform/postgresContactOrganizationRepository.ts), [הסכמה](../../server/platform/postgresContactConsentRepository.ts) | KEEP + VERIFY: הסרה לפני שליחה, Snapshot וקלט מורשה |
 | W07 ייבוא אנשי קשר | [Import](../../features/contacts/ContactImport.tsx), [פעולות ייבוא](../../server/contacts/contactImportActions.ts) | `contacts.import.start/chunk`; [מאגר ייבוא](../../server/platform/postgresContactImportRepository.ts) | KEEP + VERIFY: CSV/XLSX אמיתיים ומורשים, שגיאה באמצע, כפילות והסכמה |
 | W08 חיבור WhatsApp | [Onboarding](../../features/workspace/WorkspaceOnboarding.tsx), [פעולות Embedded Signup](../../server/meta/metaEmbeddedSignupActions.ts) | [פעולות Meta signup](../../server/platform/railwayMetaSignupOperations.ts), [Runtime](../../server/platform/railwayMetaSignupRuntime.ts), [מאגר Meta](../../server/platform/postgresMetaRepository.ts) | KEEP + VERIFY: קוד/QR רשמי, מספר Business זכאי, ביטול ופקיעה; אין הוכחת מכשיר |
-| W09 היסטוריה, Echo וניתוק | [Inbox](../../features/conversations/ConversationInbox.tsx) | [סנכרון](../../server/platform/railwayMetaDataSyncRuntime.ts), [Echo](../../server/platform/postgresMetaMessageEchoRepository.ts), [Lifecycle](../../server/platform/postgresMetaAccountLifecycleRepository.ts) | KEEP + VERIFY + REFACTOR: תוקן סדר Projection → Binding ונוספה בדיקת Coexistence ב־CI (סעיף 66 ב־Master). עריכות כיתוב מדיה ומיגרציה 0074 נוספו בסעיף 70; השלמת ייבוא וחידוש אחרי Offboarding עם שיוך לדור הנכון עדיין דורשים קבלה, כמפורט במשימות 4.6–4.8 |
-| W10 מדיה מהיסטוריה | [הצגת הודעה](../../features/conversations/ConversationMessageView.tsx), [אבחון משימות](../../app/workspace/media-tasks/page.tsx) | [קריאת קובץ](../../server/platform/railwayMetaMediaFileReadRuntime.ts), [ניקוי](../../server/platform/postgresMetaMediaCleanupRepository.ts) | KEEP + VERIFY + REFACTOR: S3/סריקה חיים, גרסאות סותרות וניקוי אוטומטי; ההפעלה נשארת מוגבלת |
+| W09 היסטוריה, Echo וניתוק | [Inbox](../../features/conversations/ConversationInbox.tsx) | [סנכרון](../../server/platform/railwayMetaDataSyncRuntime.ts), [Echo](../../server/platform/postgresMetaMessageEchoRepository.ts), [Lifecycle](../../server/platform/postgresMetaAccountLifecycleRepository.ts) | KEEP + VERIFY: מחזורי בקשות, קריאת מקור ישן וייבוא משויך לפי ראיית מפעיל הושלמו ב־R222–R224; הפרדת מחזורים, כפילות, סירוב ומקביליות נבדקו. אצווה ללא ראיית שיוך נשארת בבירור; שלמות הייבוא וזמינות ראיית ספק דורשות קבלה חיה |
+| W10 מדיה מהיסטוריה | [הצגת הודעה](../../features/conversations/ConversationMessageView.tsx), [אבחון משימות](../../app/workspace/media-tasks/page.tsx) | [קריאת קובץ](../../server/platform/railwayMetaMediaFileReadRuntime.ts), [ניקוי](../../server/platform/postgresMetaMediaCleanupRepository.ts) | KEEP + VERIFY: R221 מוסיף Retention, טיפול בגרסאות לא ידועות/מרובות וניקוי אוטומטי מוגבל לפי מדיניות; S3/סריקה, IAM, ערכי שמירה ותזמון בפריסה דורשים קבלה חיה |
 | W11 טיוטת Template | [Template editor](../../features/templates/TemplateDraftEditor.tsx), [פעולות](../../server/templates/messageTemplateActions.ts) | `templates.list/draft.save`; [מאגר Templates](../../server/platform/postgresMessageTemplateRepository.ts) | KEEP + VERIFY: כתיבה וקריאה ב־PostgreSQL קיימות; זו אינה הגשה ל־Meta |
 | W12 הגשה וסנכרון Template | אותו Editor ו־Action של W11 | `templates.submit/sync`; [Submission executor](../../server/platform/postgresRailwayMessageTemplateSubmissionMutationExecutor.ts), [Outbox](../../server/platform/postgresMessageTemplateSubmissionOutboxRepository.ts) | KEEP + VERIFY: הגשה וסנכרון מחוברים ל־Railway; ההפעלה נפרדת וכבויה כברירת מחדל. נדרשים Staging, Meta אמיתי ובדיקת התאוששות |
 | W13 יצירת קמפיין ותזמון | [Campaign manager](../../features/campaigns/CampaignManager.tsx), [פעולות](../../server/campaigns/campaignActions.ts) | `campaigns.directory.read/snapshot.save/activate`; [קמפיין](../../server/platform/postgresCampaignRepository.ts), [Dispatch](../../server/platform/postgresCampaignDispatchRepository.ts) | KEEP + VERIFY: ה־API Executable מחבר כעת את CAMPAIGN_ACTIVATION_ENABLED למוכנות ההפעלה; כבוי כברירת מחדל. הפעלה ב־Staging ובדיקת משלוח חי עדיין פתוחות |
@@ -53,8 +54,8 @@
 | W16 מענה ידני לאחר Handoff | [Composer](../../features/conversations/ConversationComposerBoundary.tsx), [מצב בקשה](../../features/conversations/manualReplyDraft.ts) | `conversations.reply.send`; [Outbox](../../server/platform/postgresManualReplyRepository.ts), [Worker](../../server/conversations/manualReplyWorker.ts) | KEEP + VERIFY: מענה ידני מומש; בקשות שלא אושרו נשמרות גם כשהסינון מסתיר את השיחה. קבלת UI וספק חי נשארת פתוחה, כמפורט בסעיפים 9–10 |
 | W17 Bot בסיסי | [Flow builder](../../features/bot/BotFlowBuilder.tsx), [פעולות Bot](../../server/bot/botFlowActions.ts) | `bot.flows.list/details.read/draft.save/publish`; [Flows](../../server/platform/postgresBotFlowRepository.ts), [Runtime](../../server/platform/postgresBotRuntimeRepository.ts) | KEEP + VERIFY: שמירה/פרסום, גרסאות, כפתורים, עצירת Bot ב־Handoff ושליחה אמיתית; W16 נשאר תלות נפרדת |
 | W18 דוחות ו־Dashboard | [Reports](../../features/reports/OperationalReports.tsx), [Dashboard](../../features/workspace/WorkspaceDashboard.tsx) | `reports.read`; [מאגר דוחות](../../server/platform/postgresOperationalReportRepository.ts) | KEEP + VERIFY: סיכום Dashboard מחובר לדוח מורשה לפי R207 וסעיף 16: הודעות, שיחות בטווח, קמפיינים שנוצרו והחלטות AI. טווח ושעת Snapshot מוצגים; קבלה מול Receipts חיים ו־QA עדיין נדרשים |
-| W19 AI ו־Knowledge אחרי פיילוט | [AI editor](../../features/ai/AiAgentEditor.tsx), [Upload action](../../server/ai/knowledgeUploadActions.ts) | `ai.agents.*`, `ai.reply-approvals.*`; [AI agents](../../server/platform/postgresAiAgentRepository.ts), [Reply outbox](../../server/platform/postgresAiReplyOutboxRepository.ts) | KEEP + REFACTOR + VERIFY: Draft/Approval אינם שליחה. Upload הישן D1/R2; נוספה חסימה שרתית מפורשת לפני הגישה אליו. יעד S3 וה־AI Sender נשארים לשלב 10 |
-| W20 Billing וניהול מערכת | [Billing](../../features/workspace/WorkspaceSectionContent.tsx), [Admin](../../app/admin/page.tsx), [פעולות מנוי](../../server/billing/systemAdminSubscriptionActions.ts) | `system-admin.subscription.*`; [מאגר מנויים](../../server/platform/postgresTenantSubscriptionRepository.ts) | KEEP למנוי ידני + REFACTOR/VERIFY ל־Paddle בשלב 11. אין Checkout פעיל במסך Billing; זכאות, Webhooks ו־Dunning טרם הוכחו |
+| W19 AI ו־Knowledge | [AI editor](../../features/ai/AiAgentEditor.tsx), [Upload](../../server/ai/knowledgeUploadActions.ts) | `ai.agents.*`, `ai.reply-approvals.*`; PostgreSQL, Responses ו־S3 | KEEP + VERIFY: העלאה/סריקה, אחזור, תקציב, אישור ושליחה ושחזור פרטי הושלמו מקומית ב־R209–R220; TXT/Markdown בלבד. נדרשים Evals וקבלה חיה |
+| W20 Billing וניהול מערכת | [Billing](../../features/workspace/WorkspaceSectionContent.tsx), [Admin](../../app/admin/page.tsx) | Paddle Checkout/Webhook/Worker, זכאות ו־Portal; פעולות ניהול מנוי | KEEP + VERIFY: Checkout, אכיפת מנוי, ביטול, רכישה חוזרת ושחזור פרטי הושלמו מקומית ב־R212–R217. נדרשת קבלת Sandbox והגדרות חשבון אמיתיות |
 | W21 בקרות השקה ותפעול | [Decision center](../../features/workspace/DecisionCenter.tsx), [מדיניות WhatsApp](../../app/admin/whatsapp-delivery-policy/[tenantId]/page.tsx) | [Runtime V2](../../server/platform/currentRailwayProductionReadinessV2.ts), [מדיניות](../../server/platform/postgresWhatsappCampaignDeliveryPolicyRepository.ts) | KEEP + VERIFY: V2 אינו בדיקת מוצר; נדרשים ניטור, Restore, Retention ו־Kill switch חיים בשלבים 6–7 |
 
 3.1 קמפיינים חוזרים, Enterprise, API ציבורי ויישומון Native מחוץ לגרסה
@@ -210,3 +211,82 @@ G01/G02/G03 עדיין ממתינים לקבלה חיה. אין בכך סגיר�
 16.1 R207 החליף את הכרטיסים חסרי המקור בארבעה מדדי דוח קיימים עם כותרות מדויקות, תקופת UTC מפורשת ושעת יצירת Snapshot. שתי כניסות Dashboard משתמשות ב־reports.read ובהרשאתו הקיימת. מצב שגיאה או הרשאה חסרה מסתיר את הערכים; אין מנגנון Polling או קריאה לספק מתוך הרכיב.
 
 16.2 [מקור מצב המימוש והבדיקות](../../outputs/launch-validation-2026-09-09/dashboard-report-validation.json). שינוי כרטיסי הסיכום אינו מימוש של ספירת כלל אנשי הקשר או כלל הקמפיינים הפעילים; הוא שינוי מתוחם לפיילוט. עלויות AI לפי מטבע נשארות בדוח המפורט. W18 אינו מסומן כמאומת בסביבה חיה.
+
+# 17. תכנות AI/Knowledge לפני חיבורים — 11.09.2026
+
+17.1 לפי R208, כתיבת הקוד של W19/W20 קודמת כעת לחיבור החשבונות. פיתוח מקומי של שלבים 10–11 אינו תלוי בהמתנה לפיילוט, אך פתיחה ללקוחות עדיין כפופה לשערי ההפעלה.
+
+17.2 W19 כולל כעת מתאם Responses עם תצורה ו־Rate card, ציטוטים מובנים ו־Usage בסירוב; אחזור PostgreSQL מחובר ל־Worker, ומפענח UTF-8 ל־TXT/Markdown קיים. מתאם Responses עצמו אינו מחובר ל־Worker עד יומן Generation ושריון תקציב עמידים. Upload ל־S3 ו־Sender נשארים פתוחים.
+
+17.3 [תור הפיתוח והאומדנים](code-completion-plan-2026-09-11.md), [אימות מקומי](../../outputs/launch-validation-2026-09-09/code-first-validation-20260911.json). W19/W20 ו־12 השלבים הראשיים לא נסגרו.
+
+
+17.4 עדכון R209: C2.1/C2.2 מאומתים מקומית, כולל 16 תרחישי PostgreSQL על 16.13/17.11. W19 נשאר פתוח בשל C1.1/C1.2, C2.3 ו־Reconciliation תפעולי; W20 נשאר פתוח. [תור הקוד המעודכן](code-completion-plan-2026-09-11.md), [דוח R209](../../outputs/launch-validation-2026-09-09/ai-journal-validation-20260911.json).
+
+
+17.5 עדכון R210: C2.3 מאומת מקומית — אישור אדם עד הודעת Inbox וסטטוס מסירה, עם תור עמיד, בדיקת הרשאה/עדכניות חוזרת ומכסות משותפות. W19 נשאר פתוח להשלמת Knowledge ולבירור תפעולי ב־C4.1; W20 נשאר פתוח. נותרו 5 תתי־שלבי פיתוח ו־12 שלבים ראשיים. [התוכנית המעודכנת](code-completion-plan-2026-09-11.md), [דוח R210](../../outputs/launch-validation-2026-09-09/ai-delivery-validation-20260911.json).
+
+### 17.6 R211 — מקורות ידע, 11.09.2026
+
+מסלול Knowledge ממומש מקומית מטופס ההעלאה ועד Ready אחרי סריקת גרסת S3, אימות Hash וחילוץ אטומי. אין חיבור חי. היקף הגרסה הראשונה: TXT/Markdown עד 128 KiB. C1.1/C1.2 סגורים מקומית; C3.1/C3.2/C4.1 נותרים פתוחים, בסיס 24–48 שעות הנדסה בביטחון נמוך; 12 השלבים הראשיים טרם נסגרו. תפעול כשלי סריקה/תשובה לא ודאית ומחיקת S3 נכללים ב־C4.1.
+
+
+### 17.7 R212 — Paddle Checkout, 11.09.2026
+
+C3.1 מאומת מקומית: יצירת עסקה עמידה, בדיקת Owner, חתימת Webhook, שיוך באמצעות Transaction ID שמור ו־UI בשלוש שפות. W20 נשאר פתוח משום ש־C3.2 עדיין דורש אכיפת זכאות, Portal, רכישה חוזרת ו־Reconciliation תפעולי. C4.1 נשאר פתוח גם עבור W19. נותרו שתי חבילות פיתוח ובדיקות, אומדן בסיס 16–32 שעות הנדסה בביטחון נמוך ו־12 שלבים ראשיים. [פרטים](../paddle-checkout-runtime.md).
+
+### 17.8 R213 — אכיפת זכאות, 11.09.2026
+
+C3.2.1/C3.2.2 הושלמו מקומית עם מדיניות במסד ואכיפת API/Worker. W20 עדיין פתוח לניהול/ביטול, משלם משותף, רכישה חוזרת ו־Reconciliation. W19/C4.1 נשארים לביקורת ותפעול. נותרו 8 תתי־משימות ב־2 חבילות, בסיס 16–32 שעות הנדסה בביטחון נמוך ו־12 שלבים ראשיים. [פרטים](../paddle-paid-access-runtime.md).
+
+### 17.9 R214 — ניהול מנוי ורכישה חוזרת, 11.09.2026
+
+C3.2.3/C3.2.4 הושלמו מקומית: Portal עם אימות המשלם, Customer משותף עם Subscription נפרד לכל עסק ורכישה חדשה לאחר ביטול סופי מאומת. W20 עדיין פתוח לבירור תוצאות לא ודאיות/סתירות ולקבלה חיה; W19/C4.1 נשארים לביקורת ותפעול. נותרו 6 תתי־משימות בשתי חבילות; אומדן 12–24 שעות הנדסה בביטחון נמוך ו־12 שלבי השקה ראשיים. [תוכנית סיום](code-completion-plan-2026-09-11.md#9-r214--ניהול-מנוי-ורכישה-חוזרת-11092026).
+
+### 17.10 R215 — שחזור Checkout ותיקוני Bot, 11.09.2026
+
+W20 כולל כעת שחזור לפי מזהה מהתשובה המקורית וסגירת ניסיון שלא נשלח/עסקה שבוטלה, עם ראיות עמידות וללא POST כפול. C3.2.5 נשאר לבירור unknown ללא זהות ולסתירת מנוי. W19/C4.1.4 התקדם לכל הסכמה ולתיקוני נעילות; Fixture ספק היסטורי עדיין אינו עומד בדרישת גבול הספק. נותרו 6 תתי־משימות קוד ו־12 שלבים ראשיים; 12–24 שעות הנדסה בביטחון נמוך. [התוכנית הפעילה](code-completion-plan-2026-09-11.md#10-r215--שחזור-checkout-ותיקון-שילוב-postgresql-11092026).
+
+### 17.11 R216 — פרסום AI לפי מוכנות Runtime, 11.09.2026
+
+C4.1.1 הושלם מקומית: Worker מדווח ללא סודות, וה־API בודק מוכנות, זכאות, תקציב USD, אישור נציג ומקורות באותה טרנזקציה עם פרסום ו־Audit. W19 עדיין דורש טיפול תפעולי וקבלה חיה; W20 עדיין דורש בירור C3.2.5. נותרו 5 תתי־משימות קוד ו־12 שלבים ראשיים, באומדן 10–20 שעות הנדסה בביטחון נמוך. [התור המעודכן](code-completion-plan-2026-09-11.md#11-r216--פרסום-ai-לפי-תנאים-עדכניים-11092026).
+
+
+## 17.12 R217 — בירור חיובים פרטי
+
+W20/C3.2.5 הושלם מקומית: בירור תמיכה מתועד → הכנת פעולה → הרשאה לפי Login/עסק/סביבה → GET חוזר → הכרעה ו־Audit אטומיים. 47 תרחישי Paddle עברו בכל PostgreSQL 16/17. נדרשים עדיין חשבון ספק וקבלה חיה; W19 ממשיך לדרוש בירור AI/מסירה/העלאה. נותרו 4 תתי־משימות קוד ו־12 שלבי השקה, 8–16 שעות הנדסה בביטחון נמוך. [התוכנית הפעילה](code-completion-plan-2026-09-11.md#12-r217--סגירת-שחזור-paddle-תפעולי-11092026).
+
+
+## 17.13 R218 — Retention למקורות Knowledge
+
+W19/C4.1.3 הושלם מקומית: סגירה מנהלית ותקופת שמירה → בדיקת עיכוב משפטי → הצעה מוגבלת בזמן → פרישת מקור ויומן אטומי → מחיקת גרסת S3 המדויקת בהרשאה נפרדת. 26 תרחישי Knowledge עברו בכל PostgreSQL 16/17. קבלות ומידע שחולץ אינם נמחקים במסלול זה; C4.1.2 עדיין נדרש לתוצאות AI/מסירה/העלאה לא ודאיות. נותרו 3 תתי־משימות קוד ו־12 שלבי השקה, 7–14 שעות הנדסה בביטחון נמוך. [התוכנית הפעילה](code-completion-plan-2026-09-11.md#13-r218--סגירת-retention-לקובצי-ידע-11092026), [תפעול](../knowledge-object-retention.md).
+
+
+## 17.14 R219 — ליבת PostgreSQL מאומתת בסכמה הנוכחית
+
+C4.1.4 הושלם מקומית: כל 86 המיגרציות, 92 תרחישים נוכחיים ו־9 תרחישי שדרוג בכל PostgreSQL 16.13/17.11. תוקנה נעילת עסק לפני אישור וסטטוס מסירה בקמפיין. W19/C4.1 עדיין דורש בירור AI/מסירה/העלאה וביקורת סופית; נותרו 2 תתי־משימות קוד, 4–8 שעות הנדסה בביטחון נמוך ו־12 שלבי השקה. [התוכנית](code-completion-plan-2026-09-11.md#14-r219--סגירת-בודק-postgresql-ותיקון-אישורי-מסירה-12092026).
+
+
+## 17.15 R220 — שחזור עמיד וביקורת נותרת
+
+W16 ו־W19 כוללים כעת בירור פרטי של תוצאות לא ודאיות, עם הרשאות, ראיות בלתי־משתנות וקליטת תוצאה מאוחרת. C4.1.2 נסגר; C4.1.5 פתוח לביקורת רוחבית, כולל W09/W10, תיקון ממצאים ומסירת הגרסה המקומית. אומדן הביקורת 2–4 שעות בביטחון נמוך; לא אומדן מובטח לכל התכנות. 12 שלבי ההשקה עדיין פתוחים. [תוכנית](code-completion-plan-2026-09-11.md#15-r220--סגירת-תוצאות-לא-ודאיות-12092026), [חיבורים](service-connections-handoff-2026-09-12.md).
+
+
+## 17.16 R221 — ניקוי מדיה והפרדת יתרת הסנכרון
+
+W10/A221-3 מומש בכלי פרטי עם בחירה אוטומטית לפי מדיניות, בדיקת גרסאות, הוצאה משימוש, Hold, הרשאות וניסיונות מוגבלים. W09/A221-1 אומת מחדש. A221-4 הוכרע לשמור דיווח מדויק על הנתונים שהתקבלו; A221-2 נשאר פער קוד של חיבור מחדש. נותרו שני תתי־שלבים, 8–16 שעות הנדסה בביטחון נמוך ו־12 שלבי השקה. [תור העבודה](code-completion-plan-2026-09-11.md#16-r221--ניקוי-מדיה-והכרעת-מדיניות-הייבוא-12092026), [מדריך המדיה](../meta-media-retention.md).
+
+
+## 17.17 R222 — W09: שכבת מחזורים בלבד
+
+נוספו מחזורי בקשות נפרדים ועדות ניתוק, תוצאות מאוחרות נשמרות במחזור המקורי וקליטה ללא שיוך נעצרת ביומן נפרד. W09 עדיין פתוח בגלל שיוך היסטוריה וקריאה מורשית בין מחזורים. W10 נשאר כפי שאומת ב־R221. יתרת הקוד והאומדן המחייבים מפורטים בסעיף 17 של תור השלמת הקוד; אין סגירת קבלה חיה על סמך בדיקות מקומיות.
+
+## 17.18 R223 — W09/W10: הרשאת קריאה למקור המקורי
+
+ה־Inbox וקורא המדיה משתמשים בהרשאת Signup נוכחית לאותו עסק ומספר תוך שמירת גרסת המקור. סירוב שיתוף חוסם גם לאחר Signup נוסף, וסריקה/Withdrawal ממשיכים להיבדק עבור גרסת S3 המקורית. W09 עדיין פתוח לשיוך וייבוא ממחזורים נוספים; יתרת הקוד ואומדניה המחייבים בסעיף 18 בתור העבודה. 2 תתי־שלבים, 6–12 שעות עבודה בביטחון נמוך; 12 שלבי השקה פתוחים.
+
+## 17.19 R224 — סגירה מקומית של W09 וביקורת W01–W21
+
+המימוש וה־CLI לשיוך מפורש בין מחזורים אומתו עם הרשאות מוגבלות ושדרוג נתונים. W09 אינו מכיל עוד פער קוד מזוהה בתכולה המוגדרת; אצווה ללא ראיה נשארת בבירור כחלק מהמדיניות. כל 21 התהליכים מופו לקוד ולראיות המקומיות ב[מסמך המסירה](local-code-delivery-2026-09-12.md). אין REFACTOR פתוח בתור הקוד הנוכחי. קבלת ספקים, מכשיר, עומס, הרשאות פריסה ותיקוני קבלה נשארים VERIFY.
+
+תור הקוד: 0 תתי־שלבים ידועים, 0 שעות יתרה. 12 שלבי ההשקה עדיין פתוחים; אין מועד השקה מאומת. סעיף 19 בתור הקוד גובר על אומדני היתרה ההיסטוריים שלעיל.

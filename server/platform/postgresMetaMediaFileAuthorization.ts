@@ -13,7 +13,7 @@ export const postgresMetaMediaFileAuthorizationSql = Object.freeze({
   scan: `SELECT COALESCE(COUNT(DISTINCT object_version_id)=1 AND bool_and(object_version_id=$3)
     AND bool_or(result='NO_THREATS_FOUND' AND content_verified)
     AND NOT bool_or(result IN ('THREATS_FOUND','UNSUPPORTED','ACCESS_DENIED','FAILED')),FALSE)
-    AND NOT EXISTS(SELECT 1 FROM meta_media_cleanup_jobs WHERE tenant_id=$1 AND job_key=$2) AS eligible
+    AND NOT EXISTS(SELECT 1 FROM meta_media_withdrawals WHERE tenant_id=$1 AND job_key=$2) AS eligible
     FROM meta_media_scan_observations WHERE tenant_id=$1 AND job_key=$2`,
 });
 // Locks last only for the database check, never across S3 I/O. Ordering follows

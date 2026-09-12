@@ -16,13 +16,15 @@ export const postgresMetaMediaTaskSql = Object.freeze({
     AND EXISTS (SELECT 1 FROM meta_history_media_bindings b WHERE b.tenant_id=message.tenant_id AND b.provider_message_id=message.provider_message_id)
     AND NOT EXISTS (SELECT 1 FROM meta_media_tasks task WHERE task.tenant_id=message.tenant_id AND task.message_key=message.message_key
       AND task.connection_version=session.connection_version AND task.kind='upload')
-    AND NOT EXISTS(SELECT 1 FROM meta_media_cleanup_jobs cleanup JOIN meta_media_upload_jobs j ON j.job_key=cleanup.job_key
+    AND NOT EXISTS(SELECT 1 FROM meta_media_withdrawals cleanup JOIN meta_media_upload_jobs j ON j.job_key=cleanup.job_key
       WHERE j.tenant_id=message.tenant_id AND j.message_key=message.message_key AND j.connection_version=session.connection_version) ORDER BY session.tenant_id,message.message_key LIMIT 1`,
   actor: `SELECT COALESCE((SELECT actor_external_user_id FROM meta_media_upload_jobs WHERE job_key=$2 AND tenant_id=$1),
-    (SELECT actor_external_user_id FROM meta_data_sync_onboardings WHERE tenant_id=$1)) AS actor`,
+    (SELECT onboarding.actor_external_user_id FROM meta_data_sync_onboardings onboarding JOIN meta_history_sync_sessions session
+      ON session.tenant_id=onboarding.tenant_id AND session.started_at=onboarding.started_at WHERE onboarding.tenant_id=$1 AND session.connection_version=$3)) AS actor`,
   inspectionCandidate: `SELECT job.job_key AS "jobKey",job.tenant_id AS "tenantId",job.actor_external_user_id AS actor,
     job.message_key AS "messageKey",job.connection_version AS "connectionVersion",job.source_sha256 AS "sourceSha256"
     FROM meta_media_upload_jobs job WHERE job.status IN ('dispatching','reconciliation-required','quarantined')
+    AND NOT EXISTS (SELECT 1 FROM meta_media_withdrawals w WHERE w.job_key=job.job_key)
     AND NOT EXISTS (SELECT 1 FROM meta_media_tasks task WHERE task.job_key=job.job_key AND task.kind='inspect') ORDER BY job.job_key LIMIT 1`,
   handoff: `SELECT job.job_key AS "jobKey",job.tenant_id AS "tenantId",job.actor_external_user_id AS actor,
     job.message_key AS "messageKey",job.connection_version AS "connectionVersion",job.source_sha256 AS "sourceSha256"
@@ -30,6 +32,7 @@ export const postgresMetaMediaTaskSql = Object.freeze({
   insert: `INSERT INTO meta_media_tasks(job_key,kind,tenant_id,actor_external_user_id,message_key,connection_version,source_sha256)
     VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING RETURNING job_key AS "jobKey"`,
   claim: `WITH candidate AS (SELECT job_key,kind FROM meta_media_tasks WHERE kind=$1
+    AND NOT EXISTS(SELECT 1 FROM meta_media_withdrawals w WHERE w.job_key=meta_media_tasks.job_key)
     AND ((status='pending' AND next_attempt_at<=clock_timestamp()) OR (status='running' AND lease_expires_at<=clock_timestamp()))
     ORDER BY next_attempt_at,job_key LIMIT 1 FOR UPDATE SKIP LOCKED)
     UPDATE meta_media_tasks job SET version=version+1,
@@ -94,7 +97,7 @@ export function createPostgresMetaMediaTaskRepository(transactions: PostgresTran
         const sourceSha256=await sha256Hex(new TextEncoder().encode(JSON.stringify(bound)));
         const identity={tenantId,messageKey,connectionVersion:bound.scope.connectionVersion,sourceSha256};
         const jobKey=await deriveMetaMediaUploadJobKey(identity);
-        const actor=requireExactPostgresRow(await one(tx,postgresMetaMediaTaskSql.actor,[tenantId,jobKey]),["actor"]).actor as string;
+        const actor=requireExactPostgresRow(await one(tx,postgresMetaMediaTaskSql.actor,[tenantId,jobKey,bound.scope.connectionVersion]),["actor"]).actor as string;
         return await enqueue(tx,{...identity,jobKey,kind,actor})?"enqueued":"idle";
       });
     },

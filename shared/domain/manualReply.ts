@@ -46,7 +46,7 @@ export function parseManualReplyViews(value: unknown): readonly ManualReplyView[
   for (const row of value) {
     if (!row || typeof row !== "object" || Array.isArray(row) ||
         Object.keys(row).sort().join(",") !== "createdAt,deliveryKey,state,text,updatedAt" ||
-        typeof row.deliveryKey !== "string" || !/^manual_reply_delivery_v1_[a-f0-9]{64}$/.test(row.deliveryKey) ||
+        typeof row.deliveryKey !== "string" || !/^(?:manual_reply|ai_reply)_delivery_v1_[a-f0-9]{64}$/.test(row.deliveryKey) ||
         seen.has(row.deliveryKey) || !isManualReplyText(row.text) || !manualReplyStates.includes(row.state) ||
         ![row.createdAt, row.updatedAt].every((at) => typeof at === "string" && Number.isFinite(Date.parse(at)) && new Date(at).toISOString() === at) ||
         row.updatedAt < row.createdAt) return null;

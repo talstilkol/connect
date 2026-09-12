@@ -39,6 +39,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
 
   assert.deepEqual(Object.keys(foundation).sort(), [
     "aiAgents",
+    "aiOperationalReadiness",
     "aiReplyOutbox",
     "aiRuntime",
     "botFlows",
@@ -75,6 +76,7 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "invitationDeliveries",
     "invitationExpirations",
     "invitations",
+    "knowledgeIngestion",
     "knowledgePassages",
     "knowledgeSources",
     "manualReplies",
@@ -98,6 +100,8 @@ test("composes every completed PostgreSQL repository behind one pool", async () 
     "metaSignupAttempts",
     "metaSignupLaunches",
     "metaWebhooks",
+    "paddleBilling",
+    "paidAccess",
     "productionDecisions",
     "provisioning",
     "railwayAiAgentMutations",

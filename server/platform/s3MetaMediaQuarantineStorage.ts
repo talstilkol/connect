@@ -28,7 +28,8 @@ function status(error: unknown): number | undefined {
 }
 
 export async function verifyS3MetaMediaQuarantineBucket(config: S3MetaMediaQuarantineConfiguration, client: Pick<S3Client, "send">,
-  request: <T>(operation: (signal: AbortSignal) => Promise<T>) => Promise<T>) {
+  request: <T>(operation: (signal: AbortSignal) => Promise<T>) => Promise<T>,
+  policyValidator = hasRequiredMetaMediaQuarantineBucketPolicy) {
   const target = Object.freeze({ Bucket: config.bucket, ExpectedBucketOwner: config.accountId });
     const replies = await Promise.allSettled([
       request((abortSignal) => client.send(new GetPublicAccessBlockCommand(target), { abortSignal })),
@@ -50,7 +51,7 @@ export async function verifyS3MetaMediaQuarantineBucket(config: S3MetaMediaQuara
       !keys || keys.length !== 1 || keys[0].ApplyServerSideEncryptionByDefault?.SSEAlgorithm !== "aws:kms" ||
       keys[0].ApplyServerSideEncryptionByDefault.KMSMasterKeyID !== config.kmsKeyArn ||
       !policyStatus || !("PolicyStatus" in policyStatus) || policyStatus.PolicyStatus?.IsPublic !== false ||
-      !policy || !("Policy" in policy) || !hasRequiredMetaMediaQuarantineBucketPolicy(policy.Policy, config)) return fail("UNSAFE_BUCKET");
+      !policy || !("Policy" in policy) || !policyValidator(policy.Policy, config)) return fail("UNSAFE_BUCKET");
   }
 
 export function createS3MetaMediaQuarantineStorage(environment: S3MetaMediaQuarantineEnvironment,

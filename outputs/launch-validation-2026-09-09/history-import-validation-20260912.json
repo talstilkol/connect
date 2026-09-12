@@ -1,0 +1,159 @@
+{
+  "checkedAt": "2026-09-12T00:46:24.982184+00:00",
+  "milestone": "R224",
+  "status": "defined local coding scope verified; service connections, live acceptance and launch remain open",
+  "closedCodingItems": [
+    "A221-2 / C4.1.5.2b: explicit attribution and import across source generations",
+    "C4.1.5.3: current-scope workflow audit, final local regression and delivery documentation"
+  ],
+  "sourceManifest": "history-import-files-20260912.json",
+  "sourceFiles": 214,
+  "changedFiles": 27,
+  "previousLocalHead": "b9b81616debc2bed19bb225c6e79f1e1057a3ac5",
+  "lastVerifiedPublishedHead": "a34e0b091f638f7ccbbedc57eff4c1c2ff89e943",
+  "checks": {
+    "history-import-unit-20260912.log": {
+      "sha256": "ec441c7fc8ca4de04472a2449b9da13d65daa6b0f36d4d9bc6ec7d6c93f27f47"
+    },
+    "history-import-build-20260912.log": {
+      "sha256": "c92db71c1bebed09da340dc8b20f5740f0be774580d5eddb65bb8ab400a64206"
+    },
+    "history-import-vercel-build-20260912.log": {
+      "sha256": "c6a6f6640e2858021c6ee11c9c6307af4117f0908b93d031a522b7d90a744364"
+    },
+    "history-import-typecheck-20260912.log": {
+      "sha256": "5872c78bd1d4242580d7f588f30fe8961e76f3779e71cec44e0fbe60348b249f"
+    },
+    "history-import-lint-20260912.log": {
+      "sha256": "91f8840965c777a6b28ea05948c6cf268a13570cb4164d3bba0bdea58b9d80da"
+    },
+    "history-import-source-20260912.log": {
+      "sha256": "4d83ca25c3b86dbafa69959991dc98141baba8d1c2fea4342d5ff98689246b43"
+    },
+    "history-import-interface-20260912.log": {
+      "sha256": "547272f8287825de3ab58183892c5a3c7842e008921fc50d81007ebb5f02fedc"
+    },
+    "history-import-migrations-20260912.log": {
+      "sha256": "78b00c880e00ec2cba70ee1730677b8bb2fa3431928f001138f087c4cc6f0f77"
+    },
+    "history-import-migration-contracts-20260912.log": {
+      "sha256": "05f123e7ac008daa23aa0e5bc151f07f57c81359238ad1a34ea1a0e7ef64f771"
+    },
+    "history-import-candidate-secret-history-20260912.log": {
+      "sha256": "1de2221f9b64270ef5a0329716bf3a13197917b5b999accacbe60b2e1de566cc"
+    },
+    "final-dependency-lock-20260912.log": {
+      "sha256": "207ed9387fa30d57120fba5e8e6005fc5e7d1faf243148c90be50f0a448579ec"
+    },
+    "final-d1-migrations-20260912.log": {
+      "sha256": "a11db50dba9300261a231cf000d710280a6b687878834df885f18aeef907e4a1"
+    },
+    "final-postgres-parity-20260912.log": {
+      "sha256": "e2d6dcc31525be8481885269abe231729e3cbca707d32ec6d806c8d19301f2f2"
+    },
+    "final-product-regressions-postgres17-20260912.log": {
+      "sha256": "62f4cb93953cdb250a75b9bef98d48476097c8f4d540c8e5041094dbb792369b"
+    },
+    "history-import-media-postgres16-20260912.log": {
+      "sha256": "bb616ae031a787c9c2032e51612767eb6f603dd582767c4249b45de807f6a26a"
+    },
+    "history-import-coexistence-postgres16-20260912.log": {
+      "sha256": "904be096f7fff9964f9979b45484bc218ced3b42437d6bf287db7d1a340a1984"
+    },
+    "history-import-core-postgres16-20260912.log": {
+      "sha256": "942ff37ddf60839abd6460706874689deef0483edc306395a1ba5b7d5183b1aa"
+    },
+    "history-import-media-postgres17-20260912.log": {
+      "sha256": "9cd59eca3944ec550ad8443a9928b2f5f546fe2377467f24ac869c175ef3630e"
+    },
+    "history-import-coexistence-postgres17-20260912.log": {
+      "sha256": "cac5527383f032bebf9b1e15d858761dc2b29ee60956788d393184ed7617dd48"
+    },
+    "history-import-core-postgres17-20260912.log": {
+      "sha256": "942ff37ddf60839abd6460706874689deef0483edc306395a1ba5b7d5183b1aa"
+    }
+  },
+  "unitPassed": 4598,
+  "focusedContractsPassed": 104,
+  "migrations": 95,
+  "lintWarnings": 28,
+  "sourceGuardrails": {
+    "files": 975,
+    "clientGraphs": 43,
+    "dependencyEdges": 2446
+  },
+  "documentationLinksChecked": 633,
+  "postgresRuns": [
+    {
+      "version": "16.13",
+      "schemaMigrations": 95,
+      "metaCases": 426,
+      "coreConcurrencyScenarios": 101,
+      "historicalCoreCasesIncluded": 9,
+      "newAttributionCasesIncluded": 14,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "version": "17.11",
+      "schemaMigrations": 95,
+      "metaCases": 426,
+      "coreConcurrencyScenarios": 101,
+      "historicalCoreCasesIncluded": 9,
+      "newAttributionCasesIncluded": 14,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "additionalProductRun": {
+    "version": "17.11",
+    "schemaMigrations": 95,
+    "cases": {
+      "aiGenerationDeliveryRecovery": 43,
+      "aiPublication": 10,
+      "knowledge": 31,
+      "paddle": 47,
+      "manualReplyIncludingParent": 14,
+      "manualRecovery": 4
+    },
+    "total": 149,
+    "failed": 0,
+    "skipped": 0
+  },
+  "validationScopeNote": "The 104 focused contracts overlap the 4598 unit cases. PostgreSQL 16 and 17 execute the same 426 Meta cases and the same 101 core scenarios; do not count repeated versions as unique cases. The 101 core cases include 9 historical upgrade-boundary cases and 92 current-schema cases. Additional product tests use the final schema and existing fixtures on PG17. Both builds preceded unit/rendered tests. No runtime edits followed those builds; subsequent integration-test corrections were covered by the final PostgreSQL runs. UI/device/provider acceptance was not performed.",
+  "localWorkflowAudit": {
+    "workflows": "W01-W21",
+    "specificationScope": "current 27-requirement mapping, including explicit exclusions",
+    "document": "docs/planning/local-code-delivery-2026-09-12.md",
+    "knownOpenCodingItems": []
+  },
+  "remaining": {
+    "codingSubsteps": 0,
+    "engineeringHours": [
+      0,
+      0
+    ],
+    "scope": "known local implementation queue before service connections",
+    "launchStages": 12,
+    "launchDate": null,
+    "liveAcceptanceEngineeringHours": null,
+    "pilotBusinessDays": 10,
+    "canaryHours": 72
+  },
+  "limitations": [
+    "No live QR, Meta, S3, OpenAI, Paddle or Clerk acceptance and no deployment occurred.",
+    "Attribution is an authorized operator attestation backed by external evidence; the CLI does not acquire or cryptographically validate provider evidence. If evidence is unavailable the event remains held.",
+    "First Inbox source is immutable across cycles. Later duplicates do not replace an old media source; provider acquisition still requires the original active source generation.",
+    "Account configuration, live price/model evidence, deployment permissions, backups/restoration, capacity, telemetry, pilot and canary remain required.",
+    "Future acceptance defects must be reopened explicitly; local completion does not mean a defect-free or launched product."
+  ],
+  "externalActions": {
+    "providerCalls": false,
+    "push": false,
+    "deploy": false
+  },
+  "originalUntrackedFilesPreserved": 624,
+  "sourceHeadUnchanged": true,
+  "sourceIndexUnchanged": true,
+  "testContainersStopped": true
+}

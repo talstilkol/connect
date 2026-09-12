@@ -386,7 +386,7 @@ test("builds private evidence and restores all eleven trigger boundaries", async
   assert.equal(inventoryChecks.length, 2);
   assert.equal(
     POSTGRES_WHATSAPP_DELIVERY_POLICY_EXPECTED_TRIGGER_INVENTORY.length,
-    47,
+    65,
   );
   assert.ok(inventoryChecks[0] < firstDisable);
   assert.ok(inventoryChecks[1] > lastEnable);

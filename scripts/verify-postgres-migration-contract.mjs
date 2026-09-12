@@ -1314,6 +1314,53 @@ function reviewedD1eInsert(functionName, statement) {
   return false;
 }
 
+const reviewedRecoveryFunctionInserts = new Map([
+  ["0094_meta_sync_attribution.sql:apply_meta_sync_attribution_v1", ["INSERT INTO public.meta_sync_attributions(tenant_id,event_digest,connection_version,sync_type,attribution_key,evidence_digest,snapshot_digest,provider_request_id) VALUES(t,e,v,CASE WHEN observed->>'kind'='contact' THEN 'smb_app_state_sync' ELSE 'history' END,identity_key,evidence,expected_digest,request_id)", "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'meta.sync.attributed','meta_sync_event',e,jsonb_build_object('attributionKey',identity_key,'connectionVersion',v,'evidenceDigest',evidence))"]],
+  ["0089_manual_delivery_reconciliation.sql:apply_manual_delivery_recovery_v1", ["INSERT INTO public.manual_delivery_reconciliations(recovery_key,tenant_id,delivery_key,action,provider_message_id,evidence_digest,snapshot_digest,original_state) VALUES(recovery,t,k,action_name,provider_id,evidence,expected_digest,observed->'snapshot'->'delivery')", "INSERT INTO public.messages(message_key,conversation_key,tenant_id,provider_message_id,direction,content_kind,status,text_content,occurred_at,status_updated_at) VALUES(message_identity,d.conversation_key,t,provider_id,'outbound','text','sent',d.text_content,d.provider_started_at,d.provider_started_at) ON CONFLICT(tenant_id,provider_message_id) DO NOTHING", "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'manual.delivery.reconciled','manual_reply_delivery',k,jsonb_build_object('recoveryKey',recovery,'action',action_name,'evidenceDigest',evidence))"]],
+  ["0089_manual_delivery_reconciliation.sql:record_manual_delivery_late_acceptance_v1", ["INSERT INTO public.manual_delivery_late_acceptances(delivery_key,tenant_id,claim_version,provider_message_id) VALUES(k,t,claim,provider_id)", "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,NULL,'manual.delivery.late-acceptance','manual_reply_delivery',k,jsonb_build_object('claimVersion',claim,'providerMessageId',provider_id))"]],
+  [
+    "0086_ai_generation_reconciliation.sql:record_ai_generation_late_usage_v1",
+    [
+      "INSERT INTO public.ai_generation_late_usage(observation_key,tenant_id,request_key,input_tokens,output_tokens,cost_minor_units) VALUES(identity,t,k,i,o,c) ON CONFLICT DO NOTHING"
+    ]
+  ],
+  [
+    "0086_ai_generation_reconciliation.sql:apply_ai_generation_recovery_v1",
+    [
+      "INSERT INTO public.ai_generation_reconciliations(recovery_key,request_key,tenant_id,revision,action,input_tokens,output_tokens,cost_minor_units, within_limit,evidence_digest,snapshot_digest,observed_late_keys) VALUES(recovery,k,t,coalesce(prev.revision,0)+1,action_name,input_count,output_count,cost, (SELECT coalesce(sum(u.cost_minor_units),0)+cost FROM public.ai_generation_effective_usage u WHERE u.tenant_id=t AND u.ai_agent_key=j.ai_agent_key AND u.period_start=j.period_start AND u.request_key<>k) <=(SELECT monthly_limit_minor_units FROM public.ai_runtime_cost_authorizations WHERE tenant_id=t AND request_key=k),evidence,expected_digest, COALESCE((SELECT jsonb_agg(observation_key ORDER BY observation_key) FROM public.ai_generation_late_usage WHERE request_key=k),'[]'::jsonb))",
+      "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'ai.generation.reconciled','ai_generation',k,jsonb_build_object('recoveryKey',recovery,'revision',coalesce(prev.revision,0)+1,'action',action_name,'evidenceDigest',evidence))"
+    ]
+  ],
+  [
+    "0087_ai_delivery_reconciliation.sql:apply_ai_delivery_recovery_v1",
+    [
+      "INSERT INTO public.ai_delivery_reconciliations(recovery_key,tenant_id,delivery_key,action,provider_message_id,evidence_digest,snapshot_digest,original_state) VALUES(recovery,t,k,action_name,provider_id,evidence,expected_digest,observed->'snapshot'->'delivery')",
+      "INSERT INTO public.messages(message_key,conversation_key,tenant_id,provider_message_id,direction,content_kind,status,text_content,occurred_at,status_updated_at) VALUES(message_identity,d.conversation_key,t,provider_id,'outbound','text','sent',approval.reply_text,d.provider_started_at,d.provider_started_at) ON CONFLICT(tenant_id,provider_message_id) DO NOTHING",
+      "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'ai.delivery.reconciled','ai_reply_delivery',k,jsonb_build_object('recoveryKey',recovery,'action',action_name,'evidenceDigest',evidence))"
+    ]
+  ],
+  [
+    "0087_ai_delivery_reconciliation.sql:record_ai_delivery_late_acceptance_v1",
+    [
+      "INSERT INTO public.ai_delivery_late_acceptances(delivery_key,tenant_id,claim_version,provider_message_id) VALUES(k,t,claim,provider_id)",
+      "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,NULL,'ai.delivery.late-acceptance','ai_reply_delivery',k,jsonb_build_object('claimVersion',claim,'providerMessageId',provider_id))"
+    ]
+  ],
+  [
+    "0088_knowledge_ingestion_reconciliation.sql:apply_knowledge_recovery_v1",
+    [
+      "INSERT INTO public.knowledge_ingestion_reconciliations(recovery_key,tenant_id,source_key,action,version_id,original_state,evidence_digest,snapshot_digest) VALUES(recovery,t,k,action_name,object_version,observed->'snapshot'->'job',evidence,expected_digest)",
+      "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'ai.knowledge.reconciled','knowledge_source',k,jsonb_build_object('recoveryKey',recovery,'action',action_name,'evidenceDigest',evidence))"
+    ]
+  ],
+  [
+    "0088_knowledge_ingestion_reconciliation.sql:record_knowledge_late_receipt_v1",
+    [
+      "INSERT INTO public.knowledge_ingestion_late_receipts(source_key,tenant_id,version_id,original_state) VALUES(k,t,object_version,to_jsonb(j)-'pending_bytes')"
+    ]
+  ]
+]);
+
 function containsSeedData(source, fileName) {
   for (const match of source.matchAll(functionDefinition)) {
     const body = match[1];
@@ -1358,6 +1405,7 @@ function containsSeedData(source, fileName) {
             );
           return dataInsertion.test(statement) &&
           !hasLiveTriggerRowReference &&
+          !(reviewedRecoveryFunctionInserts.get(`${fileName}:${functionName}`)?.includes(statement.replace(/\s+/g, " ").trim())) &&
           !(
             fileName ===
               "0051_bot_reply_staging_run_capability_wrappers.sql" &&
@@ -1433,6 +1481,83 @@ function containsSeedData(source, fileName) {
 
 function containsDestructiveStatement(source, fileName) {
   let reviewedSource = source;
+
+  if (fileName === "0089_manual_delivery_reconciliation.sql") {
+    for (const trigger of [
+  "CREATE TRIGGER manual_delivery_recovery_no_truncate BEFORE TRUNCATE ON manual_delivery_reconciliations FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+  "CREATE TRIGGER manual_delivery_late_no_truncate BEFORE TRUNCATE ON manual_delivery_late_acceptances FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();"
+]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0086_ai_generation_reconciliation.sql") {
+    for (const trigger of [
+      "CREATE TRIGGER ai_recovery_no_truncate BEFORE TRUNCATE ON ai_generation_reconciliations FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER ai_late_usage_no_truncate BEFORE TRUNCATE ON ai_generation_late_usage FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER ai_original_usage_no_truncate BEFORE TRUNCATE ON ai_runtime_usage FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER ai_generation_no_truncate BEFORE TRUNCATE ON ai_generation_journal FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0087_ai_delivery_reconciliation.sql") {
+    for (const trigger of [
+      "CREATE TRIGGER ai_delivery_recovery_no_truncate BEFORE TRUNCATE ON ai_delivery_reconciliations FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER ai_delivery_late_no_truncate BEFORE TRUNCATE ON ai_delivery_late_acceptances FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();"
+]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0088_knowledge_ingestion_reconciliation.sql") {
+    for (const trigger of [
+      "CREATE TRIGGER knowledge_recovery_no_truncate BEFORE TRUNCATE ON knowledge_ingestion_reconciliations FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER knowledge_late_receipt_no_truncate BEFORE TRUNCATE ON knowledge_ingestion_late_receipts FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();"
+]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0094_meta_sync_attribution.sql") {
+    for (const statement of [
+      "CREATE TRIGGER meta_sync_attribution_no_truncate BEFORE TRUNCATE ON meta_sync_attributions\n  FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER meta_sync_import_no_truncate BEFORE TRUNCATE ON meta_sync_attribution_imports\n  FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(statement, "");
+  }
+
+  if (fileName === "0091_meta_data_sync_generations.sql") {
+    for (const statement of [
+      "CREATE TRIGGER meta_sync_unattributed_truncate_guard BEFORE TRUNCATE ON meta_sync_unattributed_events\n  FOR EACH STATEMENT EXECUTE FUNCTION guard_meta_sync_unattributed_v1();",
+      "CREATE TRIGGER meta_data_sync_start_truncate_guard BEFORE TRUNCATE ON meta_data_sync_onboardings\n  FOR EACH STATEMENT EXECUTE FUNCTION guard_meta_data_sync_start_v1();",
+      "CREATE TRIGGER meta_data_sync_request_truncate_guard BEFORE TRUNCATE ON meta_data_sync_requests\n  FOR EACH STATEMENT EXECUTE FUNCTION guard_meta_data_sync_start_v1();",
+    ]) reviewedSource = reviewedSource.replace(statement, "");
+  }
+
+  if (fileName === "0090_meta_media_retention.sql") {
+    // Exact guards prohibit truncation; they never truncate stored evidence.
+    for (const trigger of [
+      "CREATE TRIGGER meta_media_retention_events_no_truncate BEFORE TRUNCATE ON meta_media_retention_events FOR EACH STATEMENT EXECUTE FUNCTION reject_meta_media_retention_mutation_v1();",
+      "CREATE TRIGGER meta_media_retention_reviews_no_truncate BEFORE TRUNCATE ON meta_media_retention_reviews FOR EACH STATEMENT EXECUTE FUNCTION reject_meta_media_retention_mutation_v1();",
+      "CREATE TRIGGER meta_media_retention_jobs_no_truncate BEFORE TRUNCATE ON meta_media_retention_jobs FOR EACH STATEMENT EXECUTE FUNCTION reject_meta_media_retention_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0085_knowledge_object_retention.sql") {
+    for (const trigger of [
+      "CREATE TRIGGER knowledge_retention_events_no_truncate BEFORE TRUNCATE ON knowledge_retention_events FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",
+      "CREATE TRIGGER knowledge_retention_reviews_no_truncate BEFORE TRUNCATE ON knowledge_retention_reviews FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",
+      "CREATE TRIGGER knowledge_retention_jobs_no_truncate BEFORE TRUNCATE ON knowledge_retention_jobs FOR EACH STATEMENT EXECUTE FUNCTION reject_knowledge_retention_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0084_paddle_operator_recovery.sql") {
+    reviewedSource = reviewedSource.replace(
+      "CREATE TRIGGER paddle_operator_recovery_no_truncate BEFORE TRUNCATE ON paddle_operator_recoveries FOR EACH STATEMENT EXECUTE FUNCTION reject_paddle_receipt_mutation();",
+      "",
+    );
+  }
+
+  if (fileName === "0082_paddle_checkout_recovery.sql") {
+    // These exact statements prohibit deletion; they do not truncate data.
+    for (const trigger of [
+      "CREATE TRIGGER paddle_creation_observation_no_truncate BEFORE TRUNCATE ON paddle_creation_observations FOR EACH STATEMENT EXECUTE FUNCTION reject_paddle_receipt_mutation();",
+      "CREATE TRIGGER paddle_checkout_closure_no_truncate BEFORE TRUNCATE ON paddle_checkout_closures FOR EACH STATEMENT EXECUTE FUNCTION reject_paddle_receipt_mutation();",
+    ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
 
   if (
     fileName ===

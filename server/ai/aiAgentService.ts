@@ -393,7 +393,7 @@ export function createAiAgentService(
     const [operational, sources] =
       await Promise.all([
         dependencies.operationalReadiness
-          .readForTenant(tenantId),
+          .readForTenant(tenantId, definition),
         readSourcesForDefinition(
           tenantId,
           definition,

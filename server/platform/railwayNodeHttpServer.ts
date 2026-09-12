@@ -39,7 +39,7 @@ export type RailwayNodeHttpRuntime = Pick<
   RailwayPostgresApiRuntime,
   "handler" | "readiness"
 > & Partial<
-  Pick<RailwayPostgresApiRuntime, "metaWebhookHandler" | "mediaFileHandler">
+  Pick<RailwayPostgresApiRuntime, "metaWebhookHandler" | "mediaFileHandler" | "paddleWebhookHandler">
 >;
 
 export interface RailwayNodeHttpServer {
@@ -137,6 +137,10 @@ export function createRailwayNodeRequestDispatcher(
 
     if (url.hash !== "") {
       return jsonResponse(404, "not-found");
+    }
+
+    if (url.pathname === "/webhooks/paddle") {
+      return runtime.paddleWebhookHandler ? runtime.paddleWebhookHandler.handle(request) : jsonResponse(503, "unavailable");
     }
 
     if (url.pathname === RAILWAY_META_WEBHOOK_PATH) {

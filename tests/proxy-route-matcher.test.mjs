@@ -3,6 +3,8 @@ import {
   readFile,
 } from "node:fs/promises";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
+import nextServerTesting from "next/experimental/testing/server.js";
 
 const proxyUrl = new URL(
   "../proxy.ts",
@@ -15,27 +17,29 @@ test("runs Clerk middleware on every explicit application surface without path-l
     "utf8",
   );
 
-  for (const matcher of [
-    "/workspace/:path*",
-    "/admin/:path*",
-    "/invite/:path*",
-    "/api/:path*",
-    "/trpc/:path*",
-    "/__clerk/:path*",
+  const configuration = source.match(
+    /export const config = (\{[\s\S]*?\n\});/,
+  );
+  assert.ok(configuration, "proxy must export a static matcher configuration");
+  const config = runInNewContext(`(${configuration[1]})`, {}, { timeout: 1000 });
+
+  for (const url of [
+    "/workspace",
+    "/workspace/media-tasks",
+    "/admin",
+    "/admin/decisions",
+    "/invite",
+    "/api",
+    "/trpc",
+    "/__clerk/v1/client",
   ]) {
     assert.equal(
-      source.includes(
-        JSON.stringify(matcher),
-      ),
+      nextServerTesting.unstable_doesMiddlewareMatch({ config, url }),
       true,
-      `missing proxy matcher: ${matcher}`,
+      `Clerk middleware must run for ${url}`,
     );
   }
 
-  assert.doesNotMatch(
-    source,
-    /\(\?!_next|\(api\|trpc\)/,
-  );
   assert.match(
     source,
     /configuredClerkMiddleware = clerkMiddleware\(\)/,

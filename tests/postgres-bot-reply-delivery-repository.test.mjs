@@ -1,3 +1,4 @@
+import { paidAccessTenantSql, paidAccessTenantBarrier } from "../server/platform/postgresPaidAccess.ts";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
@@ -196,6 +197,9 @@ function queryFixture(responses) {
   return {
     calls,
     async query(sql, parameters) {
+      // The common authority boundary is covered by the paid-access integration suite.
+      if (sql === paidAccessTenantBarrier) return { rows: [], rowCount: 1 };
+      if (sql === paidAccessTenantSql) return { rows: [{ id: parameters[0] }], rowCount: 1 };
       calls.push({ sql, parameters });
       const response = remaining.shift();
       if (response instanceof Error) throw response;
@@ -393,7 +397,7 @@ test("persists a due-time deferral and exposes only bounded retry work", async (
       "WHATSAPP_RATE_LIMITED",
     updatedAt: new Date(deferredAt),
   });
-  const deferred = repositoryFixture([], [{
+  const deferred = repositoryFixture([{
     rows: [deferredRow],
     rowCount: 1,
   }]);
@@ -407,7 +411,7 @@ test("persists a due-time deferral and exposes only bounded retry work", async (
   );
   assert.equal(result.nextAttemptAt, retryAt);
   assert.deepEqual(
-    deferred.queries.calls[0].parameters,
+    deferred.transactions.calls[0].parameters,
     [
       7,
       input.deliveryKey,

@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier, paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import type {
   ClaimMessageTemplateSubmissionResult,
   MessageTemplateSubmissionCandidateRepository,
@@ -566,6 +567,9 @@ async function claimInTransaction(
   graphApiVersion: string,
   occurredAt: string,
 ): Promise<ClaimMessageTemplateSubmissionResult> {
+  await transaction.query(paidAccessTenantBarrier, [tenantId]);
+  const access = await transaction.query(paidAccessTenantSql, [tenantId]);
+  if (access.rowCount !== 1) throw new Error("Paid execution is unavailable");
   const context = await loadContext(transaction, tenantId, submissionKey);
 
   if (context === null) {

@@ -11,7 +11,7 @@ const columns = `job_key AS "jobKey",tenant_id AS "tenantId",actor_external_user
   size_bytes AS "sizeBytes",bucket,object_key AS "objectKey",kms_key_arn AS "kmsKeyArn",status,version,claim_version AS "claimVersion",
   COALESCE(lease_expires_at<=clock_timestamp(),FALSE) AS expired,object_version_id AS "objectVersionId"`;
 export const postgresMetaMediaUploadSql = Object.freeze({
-  withdrawn: `SELECT job_key FROM meta_media_cleanup_jobs WHERE tenant_id=$1 AND job_key=$2`,
+  withdrawn: `SELECT job_key FROM meta_media_withdrawals WHERE tenant_id=$1 AND job_key=$2`,
   read: `SELECT ${columns} FROM meta_media_upload_jobs WHERE tenant_id=$1 AND job_key=$2`,
   lock: `SELECT ${columns} FROM meta_media_upload_jobs WHERE tenant_id=$1 AND job_key=$2 FOR UPDATE`,
   member: `SELECT tenant_id AS "tenantId" FROM tenant_memberships WHERE tenant_id=$1 AND external_user_id=$2

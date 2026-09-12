@@ -731,4 +731,67 @@ export const POSTGRES_TARGET_ONLY_MIGRATIONS = Object.freeze([
     token: "ALTER TABLE meta_message_echo_states ADD COLUMN original_caption_digest TEXT",
     summary: "Railway binds newly observed original media captions separately from legacy echo digests and receipts, while revisions and deletion remain authoritative.",
   }),
+  Object.freeze({
+    migration: "0076_ai_generation_journal.sql",
+    token: "CREATE TABLE ai_generation_journal",
+    summary: "Railway durably reserves AI generation budgets and journals single-attempt dispatches, atomically retaining usage and replay results while unresolved charges block additional generation.",
+  }),
+  Object.freeze({
+    migration: "0077_ai_reply_deliveries.sql",
+    token: "CREATE TABLE ai_reply_deliveries",
+    summary: "Railway fences approved AI delivery with immutable approval identity, durable single-POST state and transition audit.",
+  }),
+  Object.freeze({
+    migration: "0078_knowledge_ingestion_jobs.sql",
+    token: "CREATE TABLE knowledge_ingestion_jobs",
+    summary: "Railway durably relays tenant-bound Knowledge uploads, binds immutable S3 versions and requires verified scan processing before source readiness.",
+  }),
+  Object.freeze({
+    migration: "0079_paddle_checkout_journal.sql",
+    token: "CREATE TABLE paddle_checkout_intents",
+    summary: "Railway journals single-attempt Paddle checkout creation, immutable signed-event receipts and exact server-transaction subscription bindings without granting entitlements from redirects.",
+  }),
+  Object.freeze({
+    migration: "0080_paddle_paid_access.sql",
+    token: "CREATE FUNCTION tenant_paid_access_reason_v1",
+    summary: "Production subscription bindings durably adopt paid execution policy with database-clock period, scheduled-stop and verification-freshness checks while billing recovery remains accessible.",
+  }),
+  Object.freeze({
+    migration: "0081_paddle_subscription_lifecycle.sql",
+    token: "CREATE FUNCTION paddle_checkout_can_advance_v1",
+    summary: "Fresh canceled subscriptions permit fenced sequential purchases, retained history and shared payers with unique subscription bindings and latest-attempt paid policy.",
+  }),
+  Object.freeze({
+    migration: "0082_paddle_checkout_recovery.sql",
+    token: "CREATE TABLE paddle_creation_observations",
+    summary: "Immutable POST response correlation, irreversible dispatch admission and provider-confirmed or not-dispatched closure evidence enable safe checkout recovery without replaying uncertain creation.",
+  }),
+  Object.freeze({
+    migration: "0083_ai_publication_readiness.sql",
+    token: "CREATE TABLE ai_runtime_worker_health",
+    summary: "Recent credential-free worker health and rate-card expiry support tenant-bound AI publication checks without transferring provider secrets to the API.",
+  }),
+  Object.freeze({
+    migration: "0084_paddle_operator_recovery.sql",
+    token: "CREATE TABLE paddle_operator_recoveries",
+    summary: "Private scoped operator recovery records immutable evidence, preserves dispatch seals and atomically resolves current subscription review revisions without duplicate provider requests.",
+  }),
+  Object.freeze({
+    migration: "0085_knowledge_object_retention.sql",
+    token: "CREATE TABLE knowledge_retention_jobs",
+    summary: "Private scoped retention reviews and exact-version deletion jobs preserve closure time, legal holds, atomic retirement and immutable bounded retry evidence.",
+  }),
+  Object.freeze({
+    migration: "0086_ai_generation_reconciliation.sql",
+    token: "CREATE TABLE ai_generation_reconciliations",
+    summary: "Private generation cost reconciliation preserves original evidence, projects authoritative usage and reopens review on contradictory late usage without retrying generation.",
+  }),
+  Object.freeze({migration: "0087_ai_delivery_reconciliation.sql", token: "CREATE TABLE ai_delivery_reconciliations", summary: "Private AI delivery evidence resolves original acceptance or nonacceptance without another POST and retains late original acceptance."}),
+  Object.freeze({migration: "0088_knowledge_ingestion_reconciliation.sql", token: "CREATE TABLE knowledge_recovery_authorizations", summary: "Scoped Knowledge recovery resumes exact-version scan processing or closes confirmed absence, preserving late receipts and forbidding retired-source reactivation."}),
+  Object.freeze({migration: "0089_manual_delivery_reconciliation.sql", token: "CREATE TABLE manual_recovery_authorizations", summary: "Private scoped manual delivery reconciliation records original acceptance or nonacceptance without resending, preserving immutable evidence and exact late provider truth."}),
+  Object.freeze({migration: "0090_meta_media_retention.sql", token: "CREATE TABLE meta_media_retention_jobs", summary: "Scoped media retirement records exact-version deletion, policy age, hold reviews and bounded immutable attempts while preserving upload evidence and permanently withdrawing access."}),
+  Object.freeze({migration: "0091_meta_data_sync_generations.sql", token: "CREATE TABLE meta_sync_unattributed_events", summary: "Verified signup generations preserve prior requests and offboarding evidence; ambiguous incoming history remains separate from inbox projection."}),
+  Object.freeze({migration: "0092_meta_history_read_authorizations.sql", token: "CREATE VIEW meta_history_read_authorizations", summary: "Current verified same-business signup authorizes prior imported history reads without rebinding sources, releasing ambiguous imports or reacquiring media; sharing refusals remain effective."}),
+  Object.freeze({migration: "0093_meta_history_generations.sql", token: "ALTER TABLE meta_history_sync_sessions DROP CONSTRAINT meta_history_sync_sessions_pkey", summary: "Immutable source generations preserve legacy chunks, cursors and media bindings while deduplicating Inbox provider messages across cycles."}),
+  Object.freeze({migration: "0094_meta_sync_attribution.sql", token: "CREATE TABLE meta_sync_attributions", summary: "Private evidence binds one retained event to an accepted provider request; an atomic importer retains exact attribution, refusal and replay evidence."}),
 ]);

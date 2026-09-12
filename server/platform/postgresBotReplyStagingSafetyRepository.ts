@@ -89,6 +89,9 @@ const eventColumns = `
 
 export const postgresBotReplyStagingSafetySql = Object.freeze({
   insert: `
+    WITH tenant_barrier AS MATERIALIZED (
+      SELECT pg_advisory_xact_lock(public.derive_bot_reply_staging_tenant_barrier_key_v1($2))
+    )
     INSERT INTO bot_reply_staging_authorization_events (
       event_key,
       tenant_id,
@@ -109,12 +112,12 @@ export const postgresBotReplyStagingSafetySql = Object.freeze({
       actor_external_user_id,
       recorded_at,
       created_at
-    ) VALUES (
+    ) SELECT
       $1, $2, $3, $4, 'staging', 'approved-staging-waba',
       $5, $6, $7, TRUE, $8::timestamptz, $9::timestamptz,
       'tal', $10::timestamptz, $11::timestamptz, $12, $13,
       $14::timestamptz, $14::timestamptz
-    )
+    FROM tenant_barrier WHERE TRUE
     ON CONFLICT DO NOTHING
     RETURNING ${eventColumns}
   `,

@@ -1,0 +1,198 @@
+{
+  "checkedAt": "2026-09-11T23:03:53.333935+00:00",
+  "milestone": "R221",
+  "status": "media-retention-verified-locally; reconnect and final release audit remain open",
+  "sourceManifest": "media-retention-files-20260912.json",
+  "sourceFiles": 189,
+  "previousLocalHead": "afc79497757f404d9cd84dc3715fc9b2a16e33ab",
+  "previousPublishedHead": "a34e0b091f638f7ccbbedc57eff4c1c2ff89e943",
+  "unit": {
+    "passed": 4598,
+    "failed": 0,
+    "skipped": 0,
+    "log": "media-retention-unit-final-20260912.log",
+    "sha256": "3aa8195be8410f962d17668162e191044492ef3738df0af115de87b16550a646"
+  },
+  "checks": {
+    "builds": {
+      "log": "media-retention-build-release-final-20260912.log",
+      "sha256": "d82ea33a6d0173310e8cd97a016223de9338177e135de37f7dc67e773054d5ef"
+    },
+    "typecheck": {
+      "log": "media-retention-typecheck-final-20260912.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint": {
+      "log": "media-retention-lint-final-20260912.log",
+      "sha256": "91f8840965c777a6b28ea05948c6cf268a13570cb4164d3bba0bdea58b9d80da"
+    },
+    "source": {
+      "log": "media-retention-source-final-20260912.log",
+      "sha256": "2a2d4a39775a9794ac73fc5a4e35755f782015a1c6dd4be06e0b27f6d0e9aa72"
+    },
+    "interface": {
+      "log": "media-retention-interface-20260912.log",
+      "sha256": "26551f1417f5c0017c99fd908acf6495152057fc3a5a1043a4ecf1f7eabb72a1"
+    },
+    "migrations": {
+      "log": "media-retention-migrations-20260912.log",
+      "sha256": "019536e0536e51fe41e790107f65b36cebcd3a7fcf4ffe35ee7b52ed48ecea22"
+    }
+  },
+  "lintWarnings": 28,
+  "orderedMigrations": 91,
+  "postgresRuns": [
+    {
+      "postgresVersion": "17.11",
+      "purpose": "full history/media regression before the final policy-sweep addition",
+      "passed": 219,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-postgres17-final-20260912.log",
+      "sha256": "989db8a2ecd93db30be585ab3412cb2ced7853689f5ea59001b1de6c06aec700"
+    },
+    {
+      "postgresVersion": "16.13",
+      "purpose": "full history/media regression before the final policy-sweep addition",
+      "passed": 222,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-postgres16-final-20260912.log",
+      "sha256": "7a2201e0c965c04de5248680a6755ca4a16154b96330065365ef3c9a757dfe80"
+    },
+    {
+      "postgresVersion": "17.11",
+      "purpose": "final code and migration: all retention/policy scenarios, restricted login and temporary-trigger spoof rejection",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-postgres17-acl-final-20260912.log",
+      "sha256": "02d61cd628ca2cef4fad50bb54ace3da363cccb90919921d6d2bd2895a8fde10"
+    },
+    {
+      "postgresVersion": "16.13",
+      "purpose": "final code and migration: all retention/policy scenarios, restricted login and temporary-trigger spoof rejection",
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-postgres16-acl-final-20260912.log",
+      "sha256": "cd0a77e00bbb510a3d7f61d82841c0b13d394eb5492cc19ace6947af98206203"
+    },
+    {
+      "postgresVersion": "17.11",
+      "purpose": "current schema: signup orchestration and synchronization lifecycle",
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-sync-postgres17-final-20260912.log",
+      "sha256": "85a472226c5be9943cf4b12802032d45fcb3c72ba88d95dc43a462304ff81b3a"
+    },
+    {
+      "postgresVersion": "16.13",
+      "purpose": "current schema: signup orchestration and synchronization lifecycle",
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-sync-postgres16-final-20260912.log",
+      "sha256": "823792151ae5af1126704f8693c6b1f7700437178d92bd6f3df3c00eac7d9e81"
+    },
+    {
+      "postgresVersion": "16.13",
+      "purpose": "final migration: existing Knowledge ingestion, recovery and retention with restricted trigger helpers",
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-knowledge-postgres16-final-20260912.log",
+      "sha256": "5b0afd63fe1d175f5ed3d51cb313159b715fbc5ed857bd28110b50bfde3cfd6d"
+    },
+    {
+      "postgresVersion": "17.11",
+      "purpose": "final migration: existing Knowledge ingestion, recovery and retention with restricted trigger helpers",
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "log": "media-retention-knowledge-postgres17-final-20260912.log",
+      "sha256": "1894682cf78e436ea4c96325a680170c10be370c45e0b4838e817eeea8324d08"
+    }
+  ],
+  "postgresExecutions": 653,
+  "postgresCountMeaning": "Scenario executions across listed full and targeted runs; overlapping cases are not unique scenarios. Final targeted runs include all 19 new retention/policy cases on each version.",
+  "findings": [
+    {
+      "id": "A221-1",
+      "state": "verified-existing-code",
+      "finding": "Matching caption edits reauthorize an existing verified object without reacquisition; full media suites passed."
+    },
+    {
+      "id": "A221-2",
+      "state": "open-code",
+      "finding": "An immutable single onboarding still blocks a different completed signup; preserve previous generation and do not assign late history batches by arrival time."
+    },
+    {
+      "id": "A221-3",
+      "state": "implemented-verified-locally",
+      "finding": "Age/closure retention, exact-version discovery, metadata verification, private policy sweep, immutable bounded deletion jobs, withdrawal, scope and hold checks including legacy cleanup."
+    },
+    {
+      "id": "A221-4",
+      "state": "policy-decided-live-acceptance-pending",
+      "finding": "Keep received-data-processed/completeness-unverified display. Provider progress 100 is not independent proof that all chunks arrived locally."
+    }
+  ],
+  "research": {
+    "officialMetaUrl": "https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboarding-business-app-users.md",
+    "retrieval": "direct public HTTPS HTTP 200 after web tool 429/safety failures",
+    "retrievedBodySha256": "de444f072d78d8fa22cb430909e65de8814599c15bd7751f32e01ff986ad628a",
+    "observations": [
+      "Contacts/history requests can each be initiated once; another synchronization requires offboarding then Embedded Signup again.",
+      "The documented history metadata has phase, chunk_order and progress; the POST request_id is retained for support. No per-history-batch request_id was found.",
+      "The provider describes progress 100 as synchronization complete; chunks may arrive out of order and empty phases emit no webhook."
+    ],
+    "awsSources": [
+      "https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectVersions.html",
+      "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html"
+    ]
+  },
+  "remaining": {
+    "planSubtask": "C4.1.5",
+    "codeSubsteps": 2,
+    "reconnectEngineeringHours": [
+      6,
+      12
+    ],
+    "finalAuditEngineeringHours": [
+      2,
+      4
+    ],
+    "totalEngineeringHours": [
+      8,
+      16
+    ],
+    "confidence": "low; estimate, not measured runtime or delivery promise",
+    "mainLaunchStages": 12,
+    "launchDate": "unknown"
+  },
+  "externalActions": {
+    "publicDocumentationRead": true,
+    "applicationProviderRequests": false,
+    "customerObjectsDeleted": false,
+    "push": false,
+    "deployment": false
+  },
+  "originalUntrackedFilesPreserved": 624,
+  "finalContracts": {
+    "passed": 118,
+    "failed": 0,
+    "log": "media-retention-final-contracts-20260912.log",
+    "sha256": "3ff3c068333a0c95a0594d71f8be9e1639d167e013f4ebcf59515dfe1735a0a0"
+  },
+  "finalValidationNote": "Full unit and builds passed before the final SQL-only trigger ACL/relation hardening. The final migration was then verified by 118 focused contracts and 19 media plus 31 Knowledge PostgreSQL cases on each server version. Earlier full media and sync runs are retained as regression evidence, with overlapping executions counted explicitly.",
+  "triggerHardening": {
+    "publicExecuteRevoked": true,
+    "newMediaHelpersRequireExactRelation": true,
+    "existingKnowledgeHelpersRestricted": true,
+    "temporaryTableAttachmentRejectedByRestrictedLogins": true,
+    "reference": "https://www.postgresql.org/docs/current/sql-createtrigger.html"
+  }
+}

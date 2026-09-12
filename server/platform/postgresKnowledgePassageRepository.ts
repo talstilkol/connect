@@ -121,6 +121,7 @@ export const postgresKnowledgePassageSql = Object.freeze({
       ON selected.source_key = passage.source_key
     WHERE passage.tenant_id = $1
       AND source.status = 'ready'
+      AND ($4::text IS NULL OR passage.source_key > $4 OR (passage.source_key = $4 AND passage.passage_ordinal > $5))
     ORDER BY passage.source_key ASC, passage.passage_ordinal ASC
     LIMIT $3
   `,
@@ -439,7 +440,7 @@ export function createPostgresKnowledgePassageRepository(
       );
     },
 
-    async listApprovedBySourceKeys(tenantId, sourceKeys, limit) {
+    async listApprovedBySourceKeys(tenantId, sourceKeys, limit, after) {
       requirePositiveInteger(tenantId, "tenantId");
       requirePositiveInteger(limit, "limit");
       if (limit > 100) {
@@ -449,10 +450,14 @@ export function createPostgresKnowledgePassageRepository(
       if (sourceKeys.length === 0) {
         return Object.freeze([]);
       }
+      if (after !== undefined && (!sourceKeys.includes(after.sourceKey) ||
+        !Number.isSafeInteger(after.passageOrdinal) || after.passageOrdinal <= 0)) {
+        throw new Error("Knowledge passage cursor is invalid");
+      }
       const rows = await loadRows(
         dependencies.queries,
         postgresKnowledgePassageSql.listApprovedBySourceKeys,
-        [tenantId, JSON.stringify(sourceKeys), limit],
+        [tenantId, JSON.stringify(sourceKeys), limit, after?.sourceKey ?? null, after?.passageOrdinal ?? 0],
         limit,
       );
       const allowed = new Set(sourceKeys);

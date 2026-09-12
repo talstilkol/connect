@@ -6,7 +6,7 @@ import { deriveMetaSignupConfigurationKey } from './metaSignupService.ts';
 import type { MetaCoexistenceSynchronizationResult } from './metaCoexistenceSignupService.ts';
 
 const terminalFailures = new Set(['unknown','rejected','expired','cancelled']);
-const recoverableScopeErrors = new Set(['SYNC_SIGNUP_NOT_COMPLETED','SYNC_SIGNUP_CONNECTION_CHANGED','SYNC_REQUEST_ALREADY_BOUND','SYNC_DEADLINE_EXPIRED','SYNC_PHONE_NOT_VERIFIED']);
+const recoverableScopeErrors = new Set(['SYNC_OFFBOARDING_EVIDENCE_REQUIRED','SYNC_SIGNUP_NOT_COMPLETED','SYNC_SIGNUP_CONNECTION_CHANGED','SYNC_REQUEST_ALREADY_BOUND','SYNC_DEADLINE_EXPIRED','SYNC_PHONE_NOT_VERIFIED']);
 
 export function createMetaCoexistenceSynchronizationService(dependencies: Readonly<{
   configuration: MetaEmbeddedSignupView;

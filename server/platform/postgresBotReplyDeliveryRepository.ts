@@ -1,3 +1,4 @@
+import { paidAccessTenantBarrier, paidAccessTenantSql } from "./postgresPaidAccess.ts";
 import {
   createHash,
 } from "node:crypto";
@@ -1343,6 +1344,7 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction<StageBotReplyDeliveryResult>(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [normalized.tenantId]);
           const insertedRow = await loadOne(
             transaction,
             postgresBotReplyDeliverySql.insertDelivery,
@@ -1398,6 +1400,7 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction<ClaimBotReplyDeliveryResult>(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [tenantId]);
           const claimedRow = await loadOne(
             transaction,
             postgresBotReplyDeliverySql.claim,
@@ -1453,6 +1456,8 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [request.tenantId]);
+          if (!await loadOne(transaction, paidAccessTenantSql, [request.tenantId])) throw new Error("Paid execution is unavailable");
           const inserted = await loadOne(
             transaction,
             postgresBotReplyDeliverySql.insertProviderRequest,
@@ -1549,17 +1554,14 @@ export function createPostgresBotReplyDeliveryRepository(
         );
       }
 
-      const row = await loadOne(
-        dependencies.queries,
-        postgresBotReplyDeliverySql.defer,
-        [
-          tenantId,
-          deliveryKey,
-          expectedClaimVersion,
-          timestamp,
-          retryAt,
-          reasonCode,
-        ],
+      const row = await dependencies.transactions.transaction(
+        { isolationLevel: "read-committed" },
+        async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [tenantId]);
+          return loadOne(transaction, postgresBotReplyDeliverySql.defer, [
+            tenantId, deliveryKey, expectedClaimVersion, timestamp, retryAt, reasonCode,
+          ]);
+        },
       );
 
       if (row === null) {
@@ -1595,6 +1597,7 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [provenance.tenantId]);
           const loadProvenance = async () => {
             const storedRow = await loadOne(
               transaction,
@@ -1707,6 +1710,7 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [provenance.tenantId]);
           const loadProvenance = async () => {
             const storedRow = await loadOne(
               transaction,
@@ -1861,6 +1865,7 @@ export function createPostgresBotReplyDeliveryRepository(
       return dependencies.transactions.transaction(
         { isolationLevel: "read-committed" },
         async (transaction) => {
+          await transaction.query(paidAccessTenantBarrier, [tenantId]);
           await loadRows(
             transaction,
             postgresBotReplyDeliverySql.recordAcceptance,

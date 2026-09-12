@@ -95,11 +95,11 @@ async function databaseClock(pool) {
   return new Date(value.getTime());
 }
 
-async function verifyPostgres16(pool) {
+async function verifySupportedPostgres(pool) {
   const result = await pool.query(
     `SELECT pg_catalog.current_setting('server_version') AS version`,
   );
-  assert.match(result.rows[0]?.version, /^16\./);
+  assert.match(result.rows[0]?.version, /^(16|17)\./);
 }
 
 async function createCompletedRunFixture(
@@ -708,7 +708,7 @@ export async function verifyBotReplyStagingAttestedEvidencePostgres(
   transactions,
   tenantId,
 ) {
-  await verifyPostgres16(pool);
+  await verifySupportedPostgres(pool);
   const repository =
     createPostgresBotReplyStagingAttestedReleaseEvidenceRepository(
       transactions,

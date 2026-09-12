@@ -94,9 +94,12 @@ const serverOnlyIdentifiers = [
   "POSTGRES_API_URL",
   "POSTGRES_WORKER_URL",
   "POSTGRES_VERIFIER_URL",
+  "PADDLE_RECOVERY_DATABASE_URL",
+  "KNOWLEDGE_RETENTION_DATABASE_URL",
   "POSTGRES_MIGRATION_URL",
   "POSTGRES_OWNER_URL",
   "CLERK_SECRET_KEY",
+  "OPENAI_API_KEY",
   "CONNECT_TRACE_CONTEXT_HMAC_KEY",
   "CONNECT_SYSTEM_ADMIN_EXTERNAL_USER_IDS",
   "REDIS_URL",
@@ -347,6 +350,10 @@ const dormantCredentialBoundPreSendAllowedSqlIdentifiersByPath =
   ]);
 const dormantWriterBarrierAndLateTruthAllowedSqlIdentifiersByPath =
   new Map([
+    // Dedicated local verifier entries may import the existing protocol
+    // rehearsal. They gain no permission to reference dormant SQL directly.
+    ["scripts/verify-node-postgres-integration.mjs", new Set()],
+    ["tests/node-postgres-integration.test.mjs", new Set()],
     [
       "postgres/migrations/0057_bot_reply_staging_writer_barrier_and_late_truth.sql",
       dormantWriterBarrierAndLateTruthSqlIdentifiers,
@@ -1502,6 +1509,7 @@ function projectToolCommandIsExact(tokens, executableIndex) {
       );
   }
   return exact(["next", "build", "--webpack"]) ||
+    exact(["next", "dev", "--webpack", "--hostname", "localhost"]) ||
     exact(["drizzle-kit", "generate"]) ||
     exact([
       "eslint",

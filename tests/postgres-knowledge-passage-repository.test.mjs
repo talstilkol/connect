@@ -252,6 +252,8 @@ test("lists only ready passages from selected tenant sources", async () => {
     7,
     JSON.stringify([source.sourceKey]),
     100,
+    null,
+    0,
   ]);
   assert.match(
     postgresKnowledgePassageSql.listApprovedBySourceKeys,

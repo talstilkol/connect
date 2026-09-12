@@ -30,7 +30,7 @@ SELECT EXISTS(SELECT 1 FROM authorized) AS authorized,(SELECT valid FROM anchor)
   COALESCE((SELECT jsonb_agg(to_jsonb(entry) ORDER BY entry."jobKey" COLLATE "C",entry.kind COLLATE "C") FROM (
     SELECT page.*,
       CASE WHEN cleanup.job_key IS NULL THEN NULL ELSE jsonb_build_object('status',cleanup.status,'attempts',cleanup.attempts) END AS cleanup,
-      (cleanup.job_key IS NULL AND page.kind='inspect' AND page.status IN ('blocked','recovery-required')
+      (cleanup.job_key IS NULL AND NOT EXISTS(SELECT 1 FROM meta_media_withdrawals retired WHERE retired.job_key=page."jobKey") AND page.kind='inspect' AND page.status IN ('blocked','recovery-required')
         AND EXISTS(SELECT 1 FROM meta_media_upload_jobs j WHERE j.tenant_id=$1 AND j.job_key=page."jobKey" AND j.status='quarantined' AND j.object_version_id IS NOT NULL
           AND NOT EXISTS(SELECT 1 FROM meta_media_scan_observations s WHERE s.job_key=j.job_key AND s.object_version_id<>j.object_version_id))
         AND NOT EXISTS(SELECT 1 FROM meta_media_tasks other WHERE other.job_key=page."jobKey" AND other.status IN ('pending','running'))) AS "canCleanup",

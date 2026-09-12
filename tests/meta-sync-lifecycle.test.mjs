@@ -22,7 +22,7 @@ test('public sync view rejects private fields, impossible counts and invented st
   assert.equal(parseRailwayMetaConnectionView({ status: 'connected', dataSync: null }), null);
 });
 test('hidden history cannot carry stale progress and local processing never establishes completeness', () => {
-  for (const stage of ['awaiting-registration', 'connection-changed', 'sharing-declined', 'conflicted']) {
+  for (const stage of ['awaiting-registration', 'connection-changed', 'sharing-declined', 'conflicted', 'import-review-required']) {
     assert.equal(parseMetaDataSyncView({ ...view, stage }), null);
     assert.ok(parseMetaDataSyncView({ ...view, stage, providerProgress: null, receivedChunks: 0, processedChunks: 0, projectedMessages: 0 }));
   }

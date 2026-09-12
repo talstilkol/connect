@@ -1,3 +1,18 @@
+import { requirePaddleConfiguration, type PaddleRuntimeEnvironment } from "../billing/paddleConfiguration.ts";
+import { createPaddleProvider } from "../billing/paddleProvider.ts";
+import { createPaddleWorker } from "../billing/paddleWorker.ts";
+import { createPostgresPaddleRepository } from "./postgresPaddleRepository.ts";
+import { createPostgresAiWorkerHealth } from "./postgresAiOperationalReadiness.ts";
+import { requireKnowledgeConfiguration, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
+import { createS3KnowledgeStorage } from "./s3KnowledgeStorage.ts";
+import { createPostgresKnowledgeIngestionRepository } from "./postgresKnowledgeIngestionRepository.ts";
+import { createKnowledgeIngestionWorker } from "../ai/knowledgeIngestionWorker.ts";
+import { createPostgresAiReplyDeliveryRepository } from "./postgresAiReplyDeliveryRepository.ts";
+import { requireRailwayAiReplyDeliveryConfiguration, type RailwayAiReplyDeliveryEnvironment } from "./railwayAiReplyDeliveryConfiguration.ts";
+import { createTextReplyDeliveryWorker, createMetaTextReplySender } from "../conversations/manualReplyWorker.ts";
+import { inspectOpenAiResponsesConfiguration, type OpenAiResponsesEnvironment } from "../ai/openAiResponsesConfiguration.ts";
+import { createDurableOpenAiResponsesProvider } from "../ai/durableOpenAiResponsesProvider.ts";
+import { createPostgresAiGenerationJournal } from "./postgresAiGenerationJournal.ts";
 import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { createManualReplyWorker, createManualReplyWorkerLoop, createMetaManualReplySender } from "../conversations/manualReplyWorker.ts";
 import { createBotReplyAdmission } from "../bot/botReplyAdmission.ts";
@@ -14,6 +29,7 @@ import { createPostgresTenantMembershipRepository } from './postgresTenantMember
 import { createRailwayMetaCoexistenceMaintenance } from './railwayMetaCoexistenceMaintenance.ts';
 import type { MetaEmbeddedSignupServerEnvironment } from '../meta/metaEmbeddedSignupServerReadiness.ts';
 import { createPostgresMetaDataSyncLifecycle } from "./postgresMetaDataSyncLifecycle.ts";
+import { createPostgresMetaSyncAttributionImporter } from './postgresMetaSyncAttributionImporter.ts';
 import { createPostgresMetaHistoryInboxProjector } from "./postgresMetaHistoryInboxProjector.ts";
 import { createPostgresMetaHistoryMediaRepository } from "./postgresMetaHistoryMediaRepository.ts";
 import { MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES } from "../meta/metaWebhookQueueMessage.ts";
@@ -34,9 +50,10 @@ import {
   createAiRuntimeService,
 } from "../ai/aiRuntimeService.ts";
 import {
-  unavailableAiKnowledgeRetriever,
   unavailableAiResponseProvider,
 } from "../ai/unavailableAiRuntimeDependencies.ts";
+import { createApprovedKnowledgeRetriever } from "../ai/approvedKnowledgeRetriever.ts";
+import { createPostgresKnowledgePassageRepository } from "./postgresKnowledgePassageRepository.ts";
 import {
   createInboundAutomationProcessor,
 } from "../automation/inboundAutomationProcessor.ts";
@@ -245,7 +262,7 @@ import {
 } from "./railwayWorkerSchedulerService.ts";
 
 export interface RailwayPostgresWorkerServiceOptions {
-  readonly environment?: NodePostgresPoolEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment;
+  readonly environment?: NodePostgresPoolEnvironment & PaddleRuntimeEnvironment & KnowledgeRuntimeEnvironment & MetaMediaWorkerEnvironment & RailwayManualReplyEnvironment & RailwayAiReplyDeliveryEnvironment & OpenAiResponsesEnvironment;
   readonly ownerKey: string;
   readonly campaignQueue?: CampaignDeliveryQueueBinding;
   readonly campaignDeliveries?: Readonly<{
@@ -682,7 +699,7 @@ class RailwayPostgresWorkerFoundationError extends Error {
  * four admitted queue families prevents dormant staging repositories and
  * provider-send adapters from becoming worker runtime dependencies.
  */
-function createRailwayPostgresWorkerFoundation(
+export function createRailwayPostgresWorkerFoundation(
   environment: NodePostgresPoolEnvironment | undefined,
   telemetry: NodePostgresPoolTelemetry,
 ) {
@@ -710,11 +727,16 @@ function createRailwayPostgresWorkerFoundation(
 
   return Object.freeze({
     aiAgents: createPostgresAiAgentRepository({ queries, transactions }),
+    aiWorkerHealth: createPostgresAiWorkerHealth(queries),
+    paddleBilling: createPostgresPaddleRepository({ queries, transactions }),
+    knowledgeIngestion: createPostgresKnowledgeIngestionRepository({ queries, transactions }),
     aiReplyOutbox: createPostgresAiReplyOutboxRepository({
       queries,
       transactions,
     }),
     aiRuntime: createPostgresAiRuntimePersistence({ queries, transactions }),
+    aiGenerationJournal: createPostgresAiGenerationJournal({ queries, transactions }),
+    knowledgePassages: createPostgresKnowledgePassageRepository({ queries, transactions }),
     botFlows: createPostgresBotFlowRepository({ queries, transactions }),
     botRuntime: createPostgresBotRuntimeRepository({ queries, transactions }),
     botReplyDeliveries: createPostgresBotReplyDeliveryRepository({
@@ -723,7 +745,7 @@ function createRailwayPostgresWorkerFoundation(
     }),
     botReplyProviderLinks:
       createPostgresBotReplyDeliveryProviderRepository({ transactions }),
-    campaignDispatch: createPostgresCampaignDispatchRepository(queries),
+    campaignDispatch: createPostgresCampaignDispatchRepository(queries, transactions),
     campaignProviderDeliveries:
       createPostgresCampaignDeliveryProviderRepository({ transactions }),
     campaigns: createPostgresCampaignRepository({ queries, transactions }),
@@ -751,6 +773,7 @@ function createRailwayPostgresWorkerFoundation(
         transactions,
       }),
     manualReplies: createPostgresManualReplyRepository({ queries, transactions }),
+    aiReplyDeliveries: createPostgresAiReplyDeliveryRepository({ queries, transactions }),
     metaCredentialEnvelopes:
       createPostgresMetaCredentialRepository(queries),
     metaMessageEchoes: createPostgresMetaMessageEchoRepository(transactions),
@@ -762,6 +785,7 @@ function createRailwayPostgresWorkerFoundation(
     metaDataSyncLifecycle: createPostgresMetaDataSyncLifecycle({ queries, transactions }),
     metaHistorySync: createPostgresMetaHistorySyncRepository(transactions),
     metaHistoryInbox: createPostgresMetaHistoryInboxProjector(transactions),
+    metaSyncImporter: createPostgresMetaSyncAttributionImporter(transactions),
     metaHistoryMedia: createPostgresMetaHistoryMediaRepository(transactions),
     metaWebhooks: Object.freeze({
       revokeConnection: meta.revokeConnection,
@@ -806,8 +830,12 @@ export async function createRailwayPostgresWorkerService(
   options: Readonly<RailwayPostgresWorkerServiceOptions>,
 ): Promise<Readonly<RailwayWorkerSchedulerService>> {
   const clock = requireOptions(options);
+  const paddleConfig = requirePaddleConfiguration(options.environment ?? {});
+  const aiConfiguration = inspectOpenAiResponsesConfiguration(options.environment ?? {});
+  if (aiConfiguration.status === "invalid") throw new Error("Railway AI response configuration is invalid");
   const mediaMode = requireMetaMediaWorkerConfiguration(options.environment);
   const manualRepliesEnabled = requireRailwayManualReplyConfiguration(options.environment);
+  const aiRepliesEnabled = requireRailwayAiReplyDeliveryConfiguration(options.environment);
   const foundation = createRailwayPostgresWorkerFoundation(
     options.environment,
     options.postgresTelemetry,
@@ -824,8 +852,26 @@ export async function createRailwayPostgresWorkerService(
   const queueMaintenanceTasks: Array<Readonly<{
     run: () => Promise<unknown>;
   }>> = [];
+  // Every inbound consumer participates, including replicas with AI disabled.
+  // Otherwise a healthy replica can hide a consumer that cannot serve AI work.
+  const reportsAiHealth = options.metaWebhooks !== undefined || options.environment?.AI_RESPONSES_ENABLED === "true";
+  const reportAiHealth = async () => {
+    if (reportsAiHealth) await foundation.aiWorkerHealth.report(options.ownerKey, options.environment ?? {},
+      aiRepliesEnabled && manualRepliesEnabled && options.metaWebhooks !== undefined);
+  };
 
   try {
+    if (paddleConfig) {
+      const worker = createPaddleWorker(foundation.paddleBilling, createPaddleProvider(paddleConfig), paddleConfig.environment);
+      queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
+    }
+    const knowledgeConfig = requireKnowledgeConfiguration(options.environment ?? {});
+    if (knowledgeConfig) {
+      const storage = createS3KnowledgeStorage(knowledgeConfig);
+      const worker = createKnowledgeIngestionWorker(foundation.knowledgeIngestion, storage);
+      const loop = createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure);
+      queueRuntimes.push({ ...loop, async close() { storage.close(); await loop.close(); } });
+    }
     if (mediaMode !== null) {
       queueRuntimes.push(foundation.createMetaMediaWorker(options.environment!, options.schedulerTelemetry.recordRunFailure));
     }
@@ -836,6 +882,15 @@ export async function createRailwayPostgresWorkerService(
           createCampaignDeliveryRateLimitPolicySource(foundation.whatsappDeliveryPolicies)),
         vault: createMetaCredentialVault(foundation.metaCredentialEnvelopes, environment),
         sender: createMetaManualReplySender(createMetaGraphTransport(requireMetaGraphConfiguration(environment))), clock });
+      queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
+    }
+    if (aiRepliesEnabled) {
+      const environment = options.environment!;
+      const worker = createTextReplyDeliveryWorker({ replies: foundation.aiReplyDeliveries,
+        admission: createBotReplyAdmission(foundation.whatsappRateLimits, createWhatsappRateLimitKeyDeriver(environment),
+          createCampaignDeliveryRateLimitPolicySource(foundation.whatsappDeliveryPolicies)),
+        vault: createMetaCredentialVault(foundation.metaCredentialEnvelopes, environment),
+        sender: createMetaTextReplySender(createMetaGraphTransport(requireMetaGraphConfiguration(environment))), clock });
       queueRuntimes.push(createManualReplyWorkerLoop(worker.run, options.schedulerTelemetry.recordRunFailure));
     }
     let campaignQueue = options.campaignQueue;
@@ -889,9 +944,11 @@ export async function createRailwayPostgresWorkerService(
           foundation.botRuntime,
           createActiveAiRuntimeAgentLoader(foundation.aiAgents),
           createAiRuntimeService({
-            retriever: unavailableAiKnowledgeRetriever,
+            retriever: createApprovedKnowledgeRetriever(foundation.knowledgePassages),
             costGate: foundation.aiRuntime.costGate,
-            provider: unavailableAiResponseProvider,
+            provider: aiConfiguration.status === "configured"
+              ? createDurableOpenAiResponsesProvider(aiConfiguration.configuration, foundation.aiGenerationJournal)
+              : unavailableAiResponseProvider,
             audit: foundation.aiRuntime.auditSink,
           }),
           foundation.aiReplyOutbox,
@@ -954,6 +1011,9 @@ export async function createRailwayPostgresWorkerService(
       }));
       queueMaintenanceTasks.push(Object.freeze({
         async run() {
+          for (let item = 0; item < 10; item++) {
+            if (await foundation.metaSyncImporter.importNext() === "idle") break;
+          }
           for (let page = 0; page < 10; page++) {
             const result = await foundation.metaHistoryInbox.projectNext();
             if (result.outcome !== "projected") break;
@@ -1099,20 +1159,31 @@ export async function createRailwayPostgresWorkerService(
       invitations: foundation.invitations,
       messageTemplateSubmissions,
       clock,
-      close: () => closeQueuesThenFoundation(
-        queueRuntimes,
-        foundation.close,
-      ),
+      close: () => closeQueuesThenFoundation(queueRuntimes, async () => {
+        try { if (reportsAiHealth) await foundation.aiWorkerHealth.clear(options.ownerKey); }
+        finally { await foundation.close(); }
+      }),
     });
 
     const schedulerService = createRailwayWorkerSchedulerService({
-      runtime,
+      runtime: reportsAiHealth ? {
+        ...runtime,
+        scheduler: { async run() {
+          // Heartbeats belong to each replica, even when another replica owns
+          // the scheduler lease and this replica runs no maintenance tasks.
+          await reportAiHealth();
+          return runtime.scheduler.run();
+        } },
+      } : runtime,
       telemetry: options.schedulerTelemetry,
       clock,
     });
 
     if (queueRuntimes.length === 0) {
-      return schedulerService;
+      return { ...schedulerService, async start() {
+        try { await schedulerService.start(); await reportAiHealth(); }
+        catch (error) { await schedulerService.close(); throw error; }
+      } };
     }
 
     const managedQueueRuntimes = Object.freeze([...queueRuntimes]);
@@ -1132,10 +1203,13 @@ export async function createRailwayPostgresWorkerService(
         if (starting === null) {
           starting = (async () => {
             try {
+              // Register before any queue can consume an inbound message.
+              await reportAiHealth();
               await Promise.all(
                 managedQueueRuntimes.map((runtime) => runtime.start()),
               );
               await schedulerService.start();
+              await reportAiHealth();
               started = true;
             } catch {
               try {

@@ -1,3 +1,6 @@
+import { requirePaddleConfiguration, readPaddleEnvironment, type PaddleRuntimeEnvironment } from "../billing/paddleConfiguration.ts";
+import { createPaddleWebhookHandler } from "../billing/paddleWebhook.ts";
+import { requireKnowledgeConfiguration, readKnowledgeEnvironment, type KnowledgeRuntimeEnvironment } from "./s3KnowledgeConfiguration.ts";
 import { requireRailwayManualReplyConfiguration, type RailwayManualReplyEnvironment } from "./railwayManualReplyConfiguration.ts";
 import { inspectRailwayMessageTemplateSyncConfiguration, type RailwayMessageTemplateSyncEnvironment } from "./railwayMessageTemplateSyncConfiguration.ts";
 import { requireMetaGraphConfiguration } from "../meta/metaGraphConfiguration.ts";
@@ -24,8 +27,6 @@ import {
 import { createAiReplyApprovalService } from
   "../ai/aiReplyApprovalService.ts";
 import { createAiAgentService } from "../ai/aiAgentService.ts";
-import { unavailableAiOperationalReadinessProvider } from
-  "../ai/aiOperationalReadiness.ts";
 import { createMessageTemplateService } from "../templates/messageTemplateService.ts";
 import {
   inspectSystemAdminConfiguration,
@@ -111,6 +112,8 @@ export type RailwaySystemAdminEnvironment =
     PostgresSystemAdminMutationRateLimitEnvironment;
 
 export interface RailwayPostgresApiRuntimeOptions {
+  readonly paddleEnvironment?: PaddleRuntimeEnvironment;
+  readonly knowledgeEnvironment?: KnowledgeRuntimeEnvironment;
   readonly mediaFileEnvironment?: RailwayMetaMediaFileEnvironment;
   readonly identityEnvironment?: RailwayApiIdentityEnvironment;
   readonly postgresEnvironment?: NodePostgresPoolEnvironment;
@@ -147,6 +150,7 @@ export interface RailwayPostgresApiRuntimeOptions {
 }
 
 export interface RailwayPostgresApiRuntime {
+  readonly paddleWebhookHandler?: ReturnType<typeof createPaddleWebhookHandler> | null;
   readonly mediaFileHandler: RailwayMetaMediaFileHttpHandler | null;
   readonly handler: RailwayApiHttpHandler;
   readonly metaWebhookHandler: MetaWebhookHttpHandler | null;
@@ -155,6 +159,8 @@ export interface RailwayPostgresApiRuntime {
 }
 
 const optionKeys = Object.freeze([
+  "paddleEnvironment",
+  "knowledgeEnvironment",
   "mediaFileEnvironment",
   "botReplyStagingReleaseEvidence",
   "campaignDeliveryConfigured",
@@ -293,6 +299,8 @@ export async function createRailwayPostgresApiRuntime(
   options: Readonly<RailwayPostgresApiRuntimeOptions>,
 ): Promise<Readonly<RailwayPostgresApiRuntime>> {
   requireOptions(options);
+  const paddleConfig = requirePaddleConfiguration(options.paddleEnvironment ?? readPaddleEnvironment());
+  const knowledgeConfig = requireKnowledgeConfiguration(options.knowledgeEnvironment ?? readKnowledgeEnvironment());
   const manualReplyConfigured = requireRailwayManualReplyConfiguration(options.manualReplyEnvironment);
   const identityConfiguration = inspectRailwayApiIdentityConfiguration(
     options.identityEnvironment,
@@ -440,6 +448,8 @@ export async function createRailwayPostgresApiRuntime(
       });
 
     const handler = createRailwayApiRuntime({
+      paidAccess: foundation.paidAccess,
+      paddleBilling: paddleConfig ? { journal: foundation.paddleBilling, plan: paddleConfig, clientToken: paddleConfig.clientToken, customerPortalUrl: paddleConfig.customerPortalUrl } : null,
       messageTemplateSyncConfigured: () => syncConfigured === "configured",
       messageTemplateSyncMutations,
       environment: options.identityEnvironment,
@@ -470,10 +480,11 @@ export async function createRailwayPostgresApiRuntime(
       manualReplyConfigured: () => manualReplyConfigured,
       botFlows: createBotFlowService(foundation.botFlows),
       botFlowMutations: foundation.railwayBotFlowMutations,
+      knowledgeUpload: knowledgeConfig ? (session, payload, idempotencyKey, requestDigest) => foundation.knowledgeIngestion.enqueue(session, payload, knowledgeConfig, idempotencyKey, requestDigest) : undefined,
       aiAgents: createAiAgentService({
         agents: foundation.aiAgents,
         knowledgeSources: foundation.knowledgeSources,
-        operationalReadiness: unavailableAiOperationalReadinessProvider,
+        operationalReadiness: foundation.aiOperationalReadiness,
       }),
       aiAgentMutations: foundation.railwayAiAgentMutations,
       aiReplyApprovals: createAiReplyApprovalService(
@@ -594,7 +605,7 @@ export async function createRailwayPostgresApiRuntime(
 
     return Object.freeze({
       handler,
-      metaWebhookHandler,
+      paddleWebhookHandler: paddleConfig ? createPaddleWebhookHandler(paddleConfig.webhookSecret, notice => foundation.paddleBilling.recordNotice(paddleConfig.environment, notice)) : null,      metaWebhookHandler,
       mediaFileHandler,
       readiness: foundation.readiness,
       async close() { await mediaFileHandler?.close(); await foundation.close(); },

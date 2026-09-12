@@ -213,3 +213,19 @@ test("rejects invalid input and response extensions before UI exposure", async (
     : null);
   assert.equal((await extended.handler.readCurrent()).status, "server-error");
 });
+
+test('Knowledge BFF uses verified Railway context and returns a bounded source view with no D1 fallback',async()=>{
+  const {knowledgeFixture}=await import('./fixtures/knowledge-ingestion.mjs');const k=await knowledgeFixture();
+  const source={sourceKey:k.intent.sourceKey,fileName:k.payload.fileName,mediaType:k.payload.mediaType,sizeBytes:k.bytes.length,status:'pending-validation',
+    readyAt:null,version:1,createdAt:agent().createdAt,updatedAt:agent().updatedAt};
+  const f=fixture(()=>({contractVersion:'connect.railway-api.v1',outcome:'ok',data:{source,outcome:'processing'}}));
+  const form=new FormData();form.set('file',new File([k.bytes],k.payload.fileName,{type:k.payload.mediaType}));
+  assert.deepEqual(await f.handler.uploadKnowledge(form),{status:'processing',source,outcome:'processing'});
+  assert.equal(f.calls.identities,1);assert.equal(f.calls.requests[0].operation,'ai.knowledge.upload');
+  assert.equal(f.calls.requests[0].idempotencyKey,await deriveRailwayApiDeterministicIdempotencyKey('ai.knowledge.upload',k.payload));
+  assert.doesNotMatch(JSON.stringify(f.calls.requests[0]),/tenantId|externalUserId|bucket|versionId/);
+  const denied=fixture(()=>({contractVersion:'connect.railway-api.v1',outcome:'error',code:'CONFIGURATION_REQUIRED'}));
+  assert.deepEqual(await denied.handler.uploadKnowledge(form),{status:'configuration-required'});
+  const invalid=new FormData();invalid.set('file',new File([k.bytes],'מדיניות-שירות.pdf',{type:'application/pdf'}));
+  assert.deepEqual(await f.handler.uploadKnowledge(invalid),{status:'invalid-input'});assert.equal(f.calls.requests.length,1);
+});

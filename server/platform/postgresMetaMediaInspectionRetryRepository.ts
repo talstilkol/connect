@@ -14,7 +14,7 @@ export const postgresMetaMediaInspectionRetrySql = Object.freeze({
     WHERE tenant_id=$1 AND actor_external_user_id=$2 AND idempotency_key=$3`,
   task: `SELECT version,attempts,operator_retry_count AS "operatorRetries",status FROM meta_media_tasks
     WHERE tenant_id=$1 AND job_key=$2 AND kind='inspect'
-      AND NOT EXISTS(SELECT 1 FROM meta_media_cleanup_jobs WHERE tenant_id=$1 AND job_key=$2) FOR UPDATE`,
+      AND NOT EXISTS(SELECT 1 FROM meta_media_withdrawals WHERE tenant_id=$1 AND job_key=$2) FOR UPDATE`,
   evidence: `SELECT COUNT(DISTINCT object_version_id)>1 OR COALESCE(bool_or(result IN ('THREATS_FOUND','UNSUPPORTED','ACCESS_DENIED','FAILED')),FALSE) AS blocked
     FROM meta_media_scan_observations WHERE tenant_id=$1 AND job_key=$2`,
   insert: `INSERT INTO meta_media_inspection_retry_requests(tenant_id,job_key,requested_task_version,actor_external_user_id,retry_number,idempotency_key)
