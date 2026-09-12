@@ -620,6 +620,7 @@ function mergeContactOrganization(
   const refreshedContactIds = new Set(incoming.scopeContactIds);
 
   return {
+    ...(incoming.revision === undefined ? {} : { revision: incoming.revision }),
     scopeContactIds: [
       ...new Set([
         ...current.scopeContactIds,

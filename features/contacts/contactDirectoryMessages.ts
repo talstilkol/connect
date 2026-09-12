@@ -105,7 +105,7 @@ export interface ContactDirectoryMessages {
     assigned: string;
     assign: string;
     saved: string;
-    failures: Record<ContactActionFailureStatus, string>;
+    failures: Record<ContactActionFailureStatus | "conflict", string>;
   };
 }
 
@@ -236,6 +236,7 @@ const messages = {
       saved: "השינוי נשמר עבור ה־Tenant המאומת.",
       failures: {
         "validation-error": "שם הקבוצה או השיוך אינם תקינים.",
+        conflict: "ארגון אנשי הקשר השתנה. רעננו את העמוד לפני שינוי נוסף.",
         "configuration-required": "חיבור שירותי סביבת העבודה עדיין לא הושלם.",
         unauthenticated: "ה־Session אינו פעיל. יש להתחבר מחדש.",
         "onboarding-required":
@@ -373,6 +374,7 @@ const messages = {
       saved: "The change was saved for the authenticated tenant.",
       failures: {
         "validation-error": "The group name or assignment is invalid.",
+        conflict: "Contact organization has changed. Refresh the page before making another change.",
         "configuration-required": "The workspace service connection is not ready.",
         unauthenticated: "The session is inactive. Sign in again.",
         "onboarding-required": "Complete workspace creation first.",
@@ -507,6 +509,7 @@ const messages = {
       saved: "تم حفظ التغيير للـTenant الموثّق.",
       failures: {
         "validation-error": "اسم المجموعة أو التعيين غير صالح.",
+        conflict: "تغيّر تنظيم جهات الاتصال. حدّث الصفحة قبل إجراء تغيير آخر.",
         "configuration-required": "لم يكتمل اتصال خدمات مساحة العمل بعد.",
         unauthenticated: "الجلسة غير نشطة. سجّل الدخول مجددًا.",
         "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",

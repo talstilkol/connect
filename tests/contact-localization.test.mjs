@@ -34,7 +34,7 @@ test("keeps every contact directory message complete in all workspace languages"
     );
     assert.equal(
       Object.keys(messages.organization.failures).length,
-      contactActionFailureStatuses.length,
+      contactActionFailureStatuses.length + 1,
     );
     assert.ok(
       contactActionFailureStatuses.every(
@@ -47,6 +47,7 @@ test("keeps every contact directory message complete in all workspace languages"
     );
     assert.match(messages.directory.loaded(0), /0/);
     assert.match(messages.organization.contactCount(0), /0/);
+    assert.ok(messages.organization.failures.conflict.trim().length > 0);
   }
 
   assert.equal(

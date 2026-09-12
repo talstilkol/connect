@@ -94,7 +94,7 @@ export function ContactOrganization({
   };
 
   const toggleTag = (tagId: number, assigned: boolean) => {
-    if (numericContactId === null) {
+    if (numericContactId === null || organization.revision === undefined) {
       return;
     }
 
@@ -103,12 +103,13 @@ export function ContactOrganization({
         contactId: numericContactId,
         groupId: tagId,
         assigned,
+        expectedRevision: organization.revision,
       }),
     );
   };
 
   const toggleList = (listId: number, assigned: boolean) => {
-    if (numericContactId === null) {
+    if (numericContactId === null || organization.revision === undefined) {
       return;
     }
 
@@ -117,6 +118,7 @@ export function ContactOrganization({
         contactId: numericContactId,
         groupId: listId,
         assigned,
+        expectedRevision: organization.revision,
       }),
     );
   };
@@ -205,7 +207,7 @@ export function ContactOrganization({
               assignedLabel={messages.assigned}
               assignLabel={messages.assign}
               groups={organization.tags}
-              disabled={numericContactId === null || isPending}
+              disabled={numericContactId === null || isPending || organization.revision === undefined}
               isAssigned={(groupId) =>
                 numericContactId !== null &&
                 organization.tagAssignments.some(
@@ -223,7 +225,7 @@ export function ContactOrganization({
               assignedLabel={messages.assigned}
               assignLabel={messages.assign}
               groups={organization.lists}
-              disabled={numericContactId === null || isPending}
+              disabled={numericContactId === null || isPending || organization.revision === undefined}
               isAssigned={(groupId) =>
                 numericContactId !== null &&
                 organization.listMemberships.some(

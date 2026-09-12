@@ -1909,11 +1909,13 @@ test("routes all contact organization mutations through atomic receipts", async 
       contactId: 23,
       groupId: 5,
       assigned: true,
+      expectedRevision: 91,
     }],
     ["contacts.organization.list-membership", {
       contactId: 23,
       groupId: 8,
       assigned: false,
+      expectedRevision: 92,
     }],
   ];
 
@@ -1933,6 +1935,7 @@ test("routes all contact organization mutations through atomic receipts", async 
   }
 
   assert.equal(calls.organizationMutationCommands.length, 4);
+  assert.deepEqual(calls.organizationMutationCommands.map(({ payload }) => payload), cases.map(([, payload]) => payload));
   assert.deepEqual(
     calls.organizationMutationCommands.map(({ operation }) => operation),
     cases.map(([operationId]) => operationId),

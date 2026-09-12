@@ -12,6 +12,7 @@ type ContactOrganizationActionFailure =
   | { status: "tenant-selection-required" }
   | { status: "permission-denied" }
   | { status: "not-found" }
+  | { status: "conflict" }
   | { status: "server-error" };
 
 export type ContactOrganizationActionResult =

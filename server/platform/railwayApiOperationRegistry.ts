@@ -639,6 +639,7 @@ interface ContactOrganizationAssignmentPayload {
   readonly contactId: number;
   readonly groupId: number;
   readonly assigned: boolean;
+  readonly expectedRevision?: number;
 }
 
 function hasExactKeys(
@@ -938,7 +939,8 @@ function parseContactOrganizationNamePayload(
 function parseContactOrganizationAssignmentPayload(
   payload: RailwayApiJsonObject,
 ): Readonly<ContactOrganizationAssignmentPayload> {
-  if (!hasExactKeys(payload, ["assigned", "contactId", "groupId"])) {
+  if (!hasExactKeys(payload, ["assigned", "contactId", "groupId"]) &&
+      !hasExactKeys(payload, ["assigned", "contactId", "expectedRevision", "groupId"])) {
     invalidRequest();
   }
 

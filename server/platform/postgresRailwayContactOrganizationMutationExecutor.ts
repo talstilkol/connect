@@ -14,7 +14,9 @@ import {
 } from "../contacts/railwayContactDirectoryHandler.ts";
 import {
   createPostgresContactOrganizationRepository,
+  readPostgresContactOrganizationRevision,
 } from "./postgresContactOrganizationRepository.ts";
+import { parsePostgresPositiveInteger } from "./postgresResultValidation.ts";
 import type {
   PostgresQueryResult,
   PostgresTransaction,
@@ -37,6 +39,7 @@ const idempotencyKeyPattern =
 const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
 
 export const postgresRailwayContactOrganizationMutationSql = Object.freeze({
+  lockTenant: `SELECT id FROM tenants WHERE id = $1 FOR UPDATE`,
   claimReceipt: `
     INSERT INTO railway_api_mutation_receipts (
       tenant_id,
@@ -96,6 +99,8 @@ interface MutationReceiptRow {
   responseJson: unknown;
 }
 
+class OrganizationRevisionConflict extends Error {}
+
 function requireRowCount(
   result: Readonly<PostgresQueryResult<unknown>>,
   maximum: number,
@@ -153,7 +158,7 @@ function requireNamePayload(
 
 function requireAssignmentPayload(
   command: Readonly<RailwayContactOrganizationMutationCommand>,
-): Readonly<{ contactId: number; groupId: number; assigned: boolean }> {
+): Readonly<{ contactId: number; groupId: number; assigned: boolean; expectedRevision?: number }> {
   if (!("contactId" in command.payload)) {
     throw new Error("Railway contact organization command is invalid");
   }
@@ -227,7 +232,8 @@ function validateCommand(
     return;
   }
 
-  if (!hasExactKeys(command.payload, ["assigned", "contactId", "groupId"])) {
+  if (!hasExactKeys(command.payload, ["assigned", "contactId", "groupId"]) &&
+      !hasExactKeys(command.payload, ["assigned", "contactId", "expectedRevision", "groupId"])) {
     throw new Error("Railway contact organization command is invalid");
   }
 
@@ -285,10 +291,17 @@ async function loadExistingReceipt(
     throw new Error("PostgreSQL mutation receipt is incomplete");
   }
 
+  // The receipt proves this request completed. Its historical snapshot must
+  // not replace groups or assignments changed by later successful requests.
+  parseStoredSnapshot(receipt.responseJson, command);
+  const organization = await createContactOrganizationService(
+    createPostgresContactOrganizationRepository(transaction),
+  ).read(command.session, expectedContactIds(command));
+
   return Object.freeze({
     outcome: "replayed",
     tenantId: command.session.tenantId,
-    organization: parseStoredSnapshot(receipt.responseJson, command),
+    organization,
   });
 }
 
@@ -359,6 +372,11 @@ async function commitNewMutation(
     throw new Error("PostgreSQL audit write failed");
   }
 
+  const currentOrganization = Object.freeze({
+    ...validatedOrganization,
+    revision: parsePostgresPositiveInteger((audit.rows[0] as { id: unknown }).id),
+  });
+
   const completed = await transaction.query<{ idempotencyKey: string }>(
     postgresRailwayContactOrganizationMutationSql.completeReceipt,
     [
@@ -366,7 +384,7 @@ async function commitNewMutation(
       command.operation,
       command.idempotencyKey,
       command.requestDigest,
-      JSON.stringify(validatedOrganization),
+      JSON.stringify(currentOrganization),
     ],
   );
 
@@ -380,7 +398,7 @@ async function commitNewMutation(
   return Object.freeze({
     outcome: "committed",
     tenantId: command.session.tenantId,
-    organization: validatedOrganization,
+    organization: currentOrganization,
   });
 }
 
@@ -388,6 +406,15 @@ async function executeTransaction(
   transaction: PostgresTransaction,
   command: Readonly<RailwayContactOrganizationMutationCommand>,
 ): Promise<RailwayContactOrganizationMutationResult> {
+  const tenant = await transaction.query<{ id: unknown }>(
+    postgresRailwayContactOrganizationMutationSql.lockTenant,
+    [command.session.tenantId],
+  );
+  if (requireRowCount(tenant, 1) !== 1 ||
+      parsePostgresPositiveInteger(tenant.rows[0].id) !== command.session.tenantId) {
+    throw new Error("Contact organization tenant is unavailable");
+  }
+
   const claimed = await transaction.query<{ idempotencyKey: string }>(
     postgresRailwayContactOrganizationMutationSql.claimReceipt,
     [
@@ -406,6 +433,13 @@ async function executeTransaction(
 
   if (claimed.rows[0]?.idempotencyKey !== command.idempotencyKey) {
     throw new Error("PostgreSQL returned an invalid mutation claim");
+  }
+
+  if ("contactId" in command.payload && command.payload.expectedRevision !== undefined &&
+      await readPostgresContactOrganizationRevision(transaction, command.session.tenantId) !==
+        command.payload.expectedRevision) {
+    // Roll back the new processing receipt so a stale view cannot reserve a key.
+    throw new OrganizationRevisionConflict();
   }
 
   return commitNewMutation(transaction, command);
@@ -428,7 +462,9 @@ export function createPostgresRailwayContactOrganizationMutationExecutor(
           (transaction) => executeTransaction(transaction, command),
         );
       } catch (error) {
-        return error instanceof ContactOrganizationTargetNotFoundError
+        return error instanceof OrganizationRevisionConflict
+          ? { outcome: "conflict", tenantId: null, organization: null }
+          : error instanceof ContactOrganizationTargetNotFoundError
           ? { outcome: "not-found", tenantId: null, organization: null }
           : { outcome: "unavailable", tenantId: null, organization: null };
       }

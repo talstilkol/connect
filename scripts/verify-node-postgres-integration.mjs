@@ -1,5 +1,6 @@
 import { proveCoreBotReplyProviderBoundary, finalizeCoreBotReplyProviderBoundary, seedCoreProviderFenceUpgrade } from "./verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs";
 import { connection as metaHistoryFixture } from "../tests/fixtures/meta-history.mjs";
+import { verifyContactOrganizationMutationsPostgres } from "./verify-contact-organization-mutations-postgres.mjs";
 import assert from "node:assert/strict";
 import {
   readFile,
@@ -8458,6 +8459,7 @@ export async function verifyNodePostgresIntegration(
         checkedConnectionString,
         pool,
       );
+      await verifyContactOrganizationMutationsPostgres(pool);
 
     } finally {
       await foundation.close();
