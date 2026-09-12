@@ -29,6 +29,7 @@ import { createPostgresTenantMembershipRepository } from './postgresTenantMember
 import { createRailwayMetaCoexistenceMaintenance } from './railwayMetaCoexistenceMaintenance.ts';
 import type { MetaEmbeddedSignupServerEnvironment } from '../meta/metaEmbeddedSignupServerReadiness.ts';
 import { createPostgresMetaDataSyncLifecycle } from "./postgresMetaDataSyncLifecycle.ts";
+import { createPostgresMetaSyncAttributionImporter } from './postgresMetaSyncAttributionImporter.ts';
 import { createPostgresMetaHistoryInboxProjector } from "./postgresMetaHistoryInboxProjector.ts";
 import { createPostgresMetaHistoryMediaRepository } from "./postgresMetaHistoryMediaRepository.ts";
 import { MAXIMUM_RAILWAY_META_WEBHOOK_PAYLOAD_BYTES } from "../meta/metaWebhookQueueMessage.ts";
@@ -784,6 +785,7 @@ function createRailwayPostgresWorkerFoundation(
     metaDataSyncLifecycle: createPostgresMetaDataSyncLifecycle({ queries, transactions }),
     metaHistorySync: createPostgresMetaHistorySyncRepository(transactions),
     metaHistoryInbox: createPostgresMetaHistoryInboxProjector(transactions),
+    metaSyncImporter: createPostgresMetaSyncAttributionImporter(transactions),
     metaHistoryMedia: createPostgresMetaHistoryMediaRepository(transactions),
     metaWebhooks: Object.freeze({
       revokeConnection: meta.revokeConnection,
@@ -1008,6 +1010,9 @@ export async function createRailwayPostgresWorkerService(
       }));
       queueMaintenanceTasks.push(Object.freeze({
         async run() {
+          for (let item = 0; item < 10; item++) {
+            if (await foundation.metaSyncImporter.importNext() === "idle") break;
+          }
           for (let page = 0; page < 10; page++) {
             const result = await foundation.metaHistoryInbox.projectNext();
             if (result.outcome !== "projected") break;

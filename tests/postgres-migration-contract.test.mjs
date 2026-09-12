@@ -181,12 +181,14 @@ test("keeps the PostgreSQL critical-path migration inventory ordered", async () 
     "0090_meta_media_retention.sql",
     "0091_meta_data_sync_generations.sql",
     "0092_meta_history_read_authorizations.sql",
+    "0093_meta_history_generations.sql",
+    "0094_meta_sync_attribution.sql",
   ]);
   assert.deepEqual(
     await inspectPostgresMigrationContract(),
     {
       status: "passed",
-      migrationCount: 93,
+      migrationCount: 95,
       findings: [],
     },
   );

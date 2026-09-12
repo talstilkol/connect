@@ -1315,6 +1315,7 @@ function reviewedD1eInsert(functionName, statement) {
 }
 
 const reviewedRecoveryFunctionInserts = new Map([
+  ["0094_meta_sync_attribution.sql:apply_meta_sync_attribution_v1", ["INSERT INTO public.meta_sync_attributions(tenant_id,event_digest,connection_version,sync_type,attribution_key,evidence_digest,snapshot_digest,provider_request_id) VALUES(t,e,v,CASE WHEN observed->>'kind'='contact' THEN 'smb_app_state_sync' ELSE 'history' END,identity_key,evidence,expected_digest,request_id)", "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'meta.sync.attributed','meta_sync_event',e,jsonb_build_object('attributionKey',identity_key,'connectionVersion',v,'evidenceDigest',evidence))"]],
   ["0089_manual_delivery_reconciliation.sql:apply_manual_delivery_recovery_v1", ["INSERT INTO public.manual_delivery_reconciliations(recovery_key,tenant_id,delivery_key,action,provider_message_id,evidence_digest,snapshot_digest,original_state) VALUES(recovery,t,k,action_name,provider_id,evidence,expected_digest,observed->'snapshot'->'delivery')", "INSERT INTO public.messages(message_key,conversation_key,tenant_id,provider_message_id,direction,content_kind,status,text_content,occurred_at,status_updated_at) VALUES(message_identity,d.conversation_key,t,provider_id,'outbound','text','sent',d.text_content,d.provider_started_at,d.provider_started_at) ON CONFLICT(tenant_id,provider_message_id) DO NOTHING", "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,session_user,'manual.delivery.reconciled','manual_reply_delivery',k,jsonb_build_object('recoveryKey',recovery,'action',action_name,'evidenceDigest',evidence))"]],
   ["0089_manual_delivery_reconciliation.sql:record_manual_delivery_late_acceptance_v1", ["INSERT INTO public.manual_delivery_late_acceptances(delivery_key,tenant_id,claim_version,provider_message_id) VALUES(k,t,claim,provider_id)", "INSERT INTO public.audit_logs(tenant_id,actor_external_user_id,action,target_type,target_id,metadata_json) VALUES(t,NULL,'manual.delivery.late-acceptance','manual_reply_delivery',k,jsonb_build_object('claimVersion',claim,'providerMessageId',provider_id))"]],
   [
@@ -1509,6 +1510,13 @@ function containsDestructiveStatement(source, fileName) {
       "CREATE TRIGGER knowledge_recovery_no_truncate BEFORE TRUNCATE ON knowledge_ingestion_reconciliations FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
       "CREATE TRIGGER knowledge_late_receipt_no_truncate BEFORE TRUNCATE ON knowledge_ingestion_late_receipts FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();"
 ]) reviewedSource = reviewedSource.replace(trigger, "");
+  }
+
+  if (fileName === "0094_meta_sync_attribution.sql") {
+    for (const statement of [
+      "CREATE TRIGGER meta_sync_attribution_no_truncate BEFORE TRUNCATE ON meta_sync_attributions\n  FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+      "CREATE TRIGGER meta_sync_import_no_truncate BEFORE TRUNCATE ON meta_sync_attribution_imports\n  FOR EACH STATEMENT EXECUTE FUNCTION reject_ai_recovery_mutation_v1();",
+    ]) reviewedSource = reviewedSource.replace(statement, "");
   }
 
   if (fileName === "0091_meta_data_sync_generations.sql") {

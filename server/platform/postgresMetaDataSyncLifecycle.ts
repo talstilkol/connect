@@ -53,13 +53,16 @@ export const postgresMetaDataSyncLifecycleSql = Object.freeze({
     CASE WHEN EXISTS (SELECT 1 FROM meta_sync_import_refusals refusal WHERE refusal.tenant_id=onboarding.tenant_id
       AND refusal.waba_id=connection.waba_id AND refusal.phone_number_id=connection.phone_number_id) THEN 'declined'
       WHEN EXISTS (SELECT 1 FROM meta_data_sync_requests prior WHERE prior.tenant_id=onboarding.tenant_id
-      AND prior.connection_version<>onboarding.signup_connection_version AND prior.dispatched_at IS NOT NULL) THEN 'unattributed' ELSE session.sharing_state END AS "sharingState", session.has_conflict AS "hasConflict", session.max_progress AS "providerProgress",
-    (SELECT count(*) FROM meta_history_sync_chunks AS chunk WHERE chunk.tenant_id = session.tenant_id AND NOT chunk.conflicted AND chunk.payload IS NOT NULL) AS "receivedChunks",
+      AND prior.connection_version<>onboarding.signup_connection_version AND prior.dispatched_at IS NOT NULL)
+      AND (session.tenant_id IS NULL OR EXISTS (SELECT 1 FROM meta_sync_pending_imports pending
+        WHERE pending.tenant_id=onboarding.tenant_id AND pending.waba_id=connection.waba_id AND pending.phone_number_id=connection.phone_number_id
+          )) THEN 'unattributed' ELSE session.sharing_state END AS "sharingState", session.has_conflict AS "hasConflict", session.max_progress AS "providerProgress",
+    (SELECT count(*) FROM meta_history_sync_chunks AS chunk WHERE chunk.tenant_id = session.tenant_id AND chunk.connection_version = session.connection_version AND NOT chunk.conflicted AND chunk.payload IS NOT NULL) AS "receivedChunks",
     (SELECT count(*) FROM meta_history_sync_chunks AS chunk JOIN meta_history_inbox_cursors AS cursor
-      ON cursor.tenant_id = chunk.tenant_id AND cursor.phase = chunk.phase AND cursor.chunk_order = chunk.chunk_order AND cursor.content_digest = chunk.content_digest
-      WHERE chunk.tenant_id = session.tenant_id AND NOT chunk.conflicted AND chunk.payload IS NOT NULL
+      ON cursor.tenant_id = chunk.tenant_id AND cursor.connection_version = chunk.connection_version AND cursor.phase = chunk.phase AND cursor.chunk_order = chunk.chunk_order AND cursor.content_digest = chunk.content_digest
+      WHERE chunk.tenant_id = session.tenant_id AND chunk.connection_version = session.connection_version AND NOT chunk.conflicted AND chunk.payload IS NOT NULL
         AND cursor.next_index = jsonb_array_length(chunk.payload->'messages')) AS "processedChunks",
-    (SELECT count(*) FROM meta_history_inbox_messages AS message WHERE message.tenant_id = session.tenant_id AND NOT message.conflicted) AS "projectedMessages"
+    (SELECT count(*) FROM meta_history_inbox_messages AS message WHERE message.tenant_id = session.tenant_id AND message.connection_version = session.connection_version AND NOT message.conflicted) AS "projectedMessages"
     FROM tenants AS tenant JOIN LATERAL (SELECT * FROM meta_data_sync_onboardings WHERE tenant_id=tenant.id ORDER BY started_at DESC LIMIT 1) AS onboarding ON TRUE
     LEFT JOIN meta_connections AS connection ON connection.tenant_id = tenant.id
     LEFT JOIN meta_data_sync_requests AS contacts ON contacts.tenant_id = tenant.id AND contacts.started_at=onboarding.started_at AND contacts.sync_type = 'smb_app_state_sync'

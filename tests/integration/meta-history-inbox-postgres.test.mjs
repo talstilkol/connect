@@ -35,6 +35,7 @@ import { createMetaWebhookIngress } from "../../server/meta/metaWebhookIngress.t
 import { createMetaWebhookEventDispatcher } from "../../server/meta/metaWebhookEventDispatcher.ts";
 import { createMetaWebhookBusinessBatchProcessor } from "../../server/meta/metaWebhookBusinessProcessor.ts";
 import { createPostgresMetaHistoryInboxProjector, postgresMetaHistoryInboxSql } from "../../server/platform/postgresMetaHistoryInboxProjector.ts";
+import { postgresMetaSyncGenerationConnectionSql } from "../../server/platform/postgresMetaSyncAttributionImporter.ts";
 import { createPostgresMetaHistoryMediaRepository, postgresMetaHistoryMediaSql } from "../../server/platform/postgresMetaHistoryMediaRepository.ts";
 import { createRailwayPostgresWorkerService } from "../../server/platform/railwayPostgresWorkerService.ts";
 import { createRailwayMetaHistoryMediaRuntime, createRailwayMetaHistoryMediaQuarantineRuntime } from "../../server/platform/railwayMetaHistoryMediaRuntime.ts";
@@ -412,10 +413,12 @@ test('projection waiting behind revocation rechecks authorization before creatin
     const waitingAtLock = new Promise((resolve) => { reachedLock = resolve; });
     const observed = createPostgresMetaHistoryInboxProjector({ transaction: (options, work) => transactions.transaction(options, (tx) => work({ query(sql, args) {
       const pendingQuery = tx.query(sql, args);
-      if (sql === postgresMetaHistorySyncSql.connection) reachedLock();
+      if (sql === postgresMetaSyncGenerationConnectionSql) reachedLock();
       return pendingQuery;
     } })) });
-    const pending = observed.projectNext(); await waitingAtLock; await blocker.query('COMMIT');
+    const pending = observed.projectNext();
+    await Promise.race([waitingAtLock, pending.then(() => assert.fail('Projection did not reach the generation authorization lock'))]);
+    await blocker.query('COMMIT');
     assert.equal((await pending).outcome, 'blocked');
     assert.equal((await counts(f)).conversations, '0');
   } finally { await blocker.query('ROLLBACK'); blocker.release(); }
@@ -431,7 +434,7 @@ test('database guards reject resetting cursor, changing projection identity and 
   await pool.query('INSERT INTO conversations (tenant_id, contact_id, conversation_key) VALUES ($1,$2,$3)', [f.scope.tenantId, other.contactId, otherKey]);
   const source = (await pool.query('SELECT * FROM meta_history_inbox_messages WHERE tenant_id=$1', [f.scope.tenantId])).rows[0];
   await assert.rejects(pool.query(postgresMetaHistoryInboxSql.insert, [f.scope.tenantId, 'wamid.wrong-binding', `message_v1_${'a'.repeat(64)}`,
-    otherKey, source.phase, source.chunk_order, source.content_digest, 0, source.message_digest, source.occurred_at]));
+    otherKey, source.phase, source.chunk_order, source.content_digest, 0, source.message_digest, source.occurred_at, f.scope.connectionVersion]));
 });
 
 function mediaPlaceholder(overrides = {}) {
@@ -549,7 +552,7 @@ test('edited binding rechecks deletion after waiting for the history session loc
   const f = await mediaCase({ media: captionMedia() }); await echoes.record(f.scope, mediaCaptionEdit(f));
   const blocker = await pool.connect();
   try {
-    await blocker.query('BEGIN'); await blocker.query(postgresMetaHistorySyncSql.lock, [f.scope.tenantId]);
+    await blocker.query('BEGIN'); await blocker.query(postgresMetaHistorySyncSql.lock, [f.scope.tenantId, f.scope.connectionVersion]);
     let reached; const atLock = new Promise(resolve => { reached = resolve; });
     const observed = createPostgresMetaHistoryMediaRepository({ transaction: (options, work) => transactions.transaction(options, (tx) => work({ query(sql, params) {
       const pending = tx.query(sql, params); if (sql === postgresMetaHistorySyncSql.lock) reached(); return pending;
@@ -834,8 +837,8 @@ test('database constraints reject rebinding, deletion, foreign digests and incom
   const f = await mediaCase({ original: message({ id: 'wamid.history-media' }) });
   const ref = (await pool.query('SELECT message_digest FROM meta_history_inbox_messages WHERE tenant_id=$1', [f.scope.tenantId])).rows[0];
   const media = (await pool.query('SELECT content_digest FROM meta_history_sync_media WHERE tenant_id=$1', [f.scope.tenantId])).rows[0];
-  await assert.rejects(pool.query(postgresMetaHistoryMediaSql.insert, [f.scope.tenantId, row.provider_message_id, row.message_digest, media.content_digest]));
-  await assert.rejects(pool.query(postgresMetaHistoryMediaSql.insert, [f.scope.tenantId, row.provider_message_id, ref.message_digest, media.content_digest]));
+  await assert.rejects(pool.query(postgresMetaHistoryMediaSql.insert, [f.scope.tenantId, row.provider_message_id, row.message_digest, media.content_digest, f.scope.connectionVersion]));
+  await assert.rejects(pool.query(postgresMetaHistoryMediaSql.insert, [f.scope.tenantId, row.provider_message_id, ref.message_digest, media.content_digest, f.scope.connectionVersion]));
   assert.equal(await mediaBindings.bindNext(), 'conflicted');
 });
 

@@ -17,7 +17,7 @@ function eligibleMediaSources(purpose: MediaSourcePurpose) {
         AND echo.edit_kind IN ('image', 'video', 'document') AND echo.edit_kind = media.payload->>'contentKind'))`
     : `echo.content_state = 'original'`;
   return `FROM meta_history_inbox_messages AS message
-  JOIN meta_history_sync_sessions AS session ON session.tenant_id = message.tenant_id
+  JOIN meta_history_sync_sessions AS session ON session.tenant_id = message.tenant_id AND session.connection_version = message.connection_version
     AND session.sharing_state = 'data_received' AND NOT session.has_conflict
   JOIN tenants AS tenant ON tenant.id = session.tenant_id AND tenant.status IN ('active', 'trial', 'payment_failed')
   ${purpose === "file-read" ? `JOIN meta_history_read_authorizations AS read_access ON read_access.tenant_id = session.tenant_id
@@ -30,9 +30,9 @@ function eligibleMediaSources(purpose: MediaSourcePurpose) {
     AND request.waba_id = session.waba_id AND request.phone_number_id = session.phone_number_id
     AND request.connection_version = session.connection_version AND request.started_at = session.started_at
     AND request.status IN ('dispatching', 'accepted', 'unknown')
-  JOIN meta_history_sync_chunks AS chunk ON chunk.tenant_id = message.tenant_id AND chunk.phase = message.phase
+  JOIN meta_history_sync_chunks AS chunk ON chunk.tenant_id = message.tenant_id AND chunk.connection_version = message.connection_version AND chunk.phase = message.phase
     AND chunk.chunk_order = message.chunk_order AND chunk.content_digest = message.content_digest AND NOT chunk.conflicted AND chunk.payload IS NOT NULL
-  JOIN meta_history_sync_media AS media ON media.tenant_id = message.tenant_id AND media.provider_message_id = message.provider_message_id
+  JOIN meta_history_sync_media AS media ON media.tenant_id = message.tenant_id AND media.connection_version = message.connection_version AND media.provider_message_id = message.provider_message_id
     AND NOT media.conflicted AND media.payload IS NOT NULL
   JOIN conversations AS conversation ON conversation.tenant_id = message.tenant_id AND conversation.conversation_key = message.conversation_key
   JOIN contacts AS contact ON contact.tenant_id = conversation.tenant_id AND contact.id = conversation.contact_id
@@ -74,7 +74,7 @@ export const postgresMetaHistoryMediaSql = Object.freeze({
   candidate: `SELECT session.tenant_id AS "tenantId", session.waba_id AS "wabaId", session.phone_number_id AS "phoneNumberId",
     session.connection_version AS "connectionVersion", message.provider_message_id AS "providerMessageId" ${metaHistoryBindingSources}
     AND NOT EXISTS (SELECT 1 FROM meta_history_media_bindings AS binding
-      WHERE binding.tenant_id = message.tenant_id AND binding.provider_message_id = message.provider_message_id)
+      WHERE binding.tenant_id = message.tenant_id AND binding.connection_version = message.connection_version AND binding.provider_message_id = message.provider_message_id)
     ORDER BY session.tenant_id, message.provider_message_id LIMIT 1`,
   identity: selectMediaIdentity(metaHistoryEligibleMediaSources),
   fileIdentity: selectMediaIdentity(metaHistoryFileSources),
@@ -82,10 +82,10 @@ export const postgresMetaHistoryMediaSql = Object.freeze({
   fileSources: selectMediaSources(metaHistoryFileSources),
   bindingSources: selectMediaSources(metaHistoryBindingSources),
   binding: `SELECT message_digest AS "messageDigest", media_digest AS "mediaDigest" FROM meta_history_media_bindings
-    WHERE tenant_id = $1 AND provider_message_id = $2`,
-  insert: `INSERT INTO meta_history_media_bindings (tenant_id, provider_message_id, message_digest, media_digest)
-    VALUES ($1, $2, $3, $4) RETURNING provider_message_id AS "providerMessageId"`,
-  conflict: `UPDATE meta_history_sync_sessions SET has_conflict = TRUE WHERE tenant_id = $1 RETURNING tenant_id AS "tenantId"`,
+    WHERE tenant_id = $1 AND provider_message_id = $2 AND connection_version = $3`,
+  insert: `INSERT INTO meta_history_media_bindings (tenant_id, provider_message_id, message_digest, media_digest, connection_version)
+    VALUES ($1, $2, $3, $4, $5) RETURNING provider_message_id AS "providerMessageId"`,
+  conflict: `UPDATE meta_history_sync_sessions SET has_conflict = TRUE WHERE tenant_id = $1 AND connection_version = $2 RETURNING tenant_id AS "tenantId"`,
   audit: `INSERT INTO audit_logs (tenant_id, actor_external_user_id, action, target_type, target_id, metadata_json)
     VALUES ($1, NULL, 'meta.history.media-bound', 'meta_history_message', $2, $3::jsonb) RETURNING id`,
 });
@@ -111,7 +111,7 @@ async function readLocked(tx: PostgresTransaction, scope: MetaHistoryScope, prov
   const request = await one(tx, postgresMetaHistorySyncSql.request, [...binding, "media"]);
   if (request === null) return null;
   const startedAt = parsePostgresTimestamp(requireExactPostgresRow(request, ["startedAt"]).startedAt);
-  const session = requireExactPostgresRow(await one(tx, postgresMetaHistorySyncSql.lock, [scope.tenantId]),
+  const session = requireExactPostgresRow(await one(tx, postgresMetaHistorySyncSql.lock, [scope.tenantId, scope.connectionVersion]),
     ["wabaId", "phoneNumberId", "connectionVersion", "startedAt", "sharingState", "maxProgress", "hasConflict"]);
   if (session.wabaId !== scope.wabaId || session.phoneNumberId !== scope.phoneNumberId ||
     parsePostgresPositiveInteger(session.connectionVersion) !== scope.connectionVersion || parsePostgresTimestamp(session.startedAt) !== startedAt) return fail();
@@ -148,15 +148,15 @@ export function createPostgresMetaHistoryMediaRepository(transactions: PostgresT
         const { scope, providerMessageId } = identity(raw);
         const sources = await readLocked(tx, scope, providerMessageId, "binding");
         if (sources === null) return "blocked";
-        const previous = await one(tx, postgresMetaHistoryMediaSql.binding, [scope.tenantId, providerMessageId]);
+        const previous = await one(tx, postgresMetaHistoryMediaSql.binding, [scope.tenantId, providerMessageId, scope.connectionVersion]);
         if (previous !== null && matchesBinding(previous, sources)) return "duplicate";
         const compatible = isMetaHistoryMediaCompatible(sources.message, sources.media);
         if (compatible) {
           const saved = requireExactPostgresRow(await one(tx, postgresMetaHistoryMediaSql.insert,
-            [scope.tenantId, providerMessageId, sources.messageDigest, sources.mediaDigest]), ["providerMessageId"]);
+            [scope.tenantId, providerMessageId, sources.messageDigest, sources.mediaDigest, scope.connectionVersion]), ["providerMessageId"]);
           if (saved.providerMessageId !== providerMessageId) return fail();
         } else {
-          if (parsePostgresPositiveInteger(requireExactPostgresRow(await one(tx, postgresMetaHistoryMediaSql.conflict, [scope.tenantId]), ["tenantId"]).tenantId) !== scope.tenantId) return fail();
+          if (parsePostgresPositiveInteger(requireExactPostgresRow(await one(tx, postgresMetaHistoryMediaSql.conflict, [scope.tenantId, scope.connectionVersion]), ["tenantId"]).tenantId) !== scope.tenantId) return fail();
         }
         parsePostgresPositiveInteger(requireExactPostgresRow(await one(tx, postgresMetaHistoryMediaSql.audit,
           [scope.tenantId, sources.messageKey, JSON.stringify({ outcome: compatible ? "bound" : "conflicted" })]), ["id"]).id);
@@ -196,7 +196,7 @@ async function readBoundMedia(tx: PostgresTransaction, tenantId: number, message
   const sources = await readLocked(tx, scope, providerMessageId, purpose);
   if (sources === null) return null;
   if (sources.messageKey !== messageKey || !isMetaHistoryMediaCompatible(sources.message, sources.media)) return fail();
-  const saved = await one(tx, postgresMetaHistoryMediaSql.binding, [tenantId, providerMessageId]);
+  const saved = await one(tx, postgresMetaHistoryMediaSql.binding, [tenantId, providerMessageId, scope.connectionVersion]);
   if (saved === null) return null;
   matchesBinding(saved, sources);
   return Object.freeze({ scope: Object.freeze(scope), messageKey, message: sources.message, media: sources.media });

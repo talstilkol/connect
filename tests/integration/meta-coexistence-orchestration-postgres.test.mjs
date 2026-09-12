@@ -20,7 +20,8 @@ import { createPostgresTenantMembershipRepository } from '../../server/platform/
 import { createRailwayMetaCoexistenceMaintenance } from '../../server/platform/railwayMetaCoexistenceMaintenance.ts';
 import assert from 'node:assert/strict';
 import { before, beforeEach, after, test } from 'node:test';
-import { readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, chmod, rm } from 'node:fs/promises';
+import { runMetaSyncAttribution } from '../../scripts/meta-sync-attribution.mjs';
 import pg from 'pg';
 import { createNodePostgresTransactionManager, createNodePostgresQueryExecutor } from '../../server/platform/nodePostgresAdapter.ts';
 import { createPostgresMetaRepository } from '../../server/platform/postgresMetaRepository.ts';
@@ -41,7 +42,7 @@ const launches = createPostgresMetaSignupLaunchRepository(transactions), attempt
 const requests = createPostgresMetaDataSyncRepository(transactions);
 const environment = { META_APP_ID:'100001',META_EMBEDDED_SIGNUP_CONFIGURATION_ID:'500005',META_GRAPH_API_VERSION:'v23.0',
   META_APP_SECRET:'local-coexistence-app-secret',META_CREDENTIAL_ENCRYPTION_KEY_V1:Buffer.from(Array.from({ length:32 },(_,i) => i+1)).toString('base64') };
-let tenantCounter = 700, upgradeCase, upgradeRows;
+let tenantCounter = 700, upgradeCase, upgradeRows, upgradeHistoryRows;
 async function retainedRequests(f) {return (await pool.query('SELECT * FROM meta_data_sync_requests WHERE tenant_id=$1 ORDER BY sync_type',[f.session.tenantId])).rows;}
 before(async () => {
   assert.equal((await pool.query("SELECT * FROM pg_tables WHERE schemaname='public'")).rowCount,0,'Refusing to change a non-empty database');
@@ -50,6 +51,7 @@ before(async () => {
     if(file.startsWith('0091_')) {
       upgradeCase=await fixture();await complete(upgradeCase,await begin(upgradeCase));upgradeRows=await retainedRequests(upgradeCase);
     }
+    if(file.startsWith('0093_')) upgradeHistoryRows=await seedLegacyHistoryUpgrade(upgradeCase);
     await pool.query(await readFile(new URL(file,directory),'utf8'));
   }
 });
@@ -680,4 +682,226 @@ test('generation: concurrent legacy SQL callers cannot bind the same phone to tw
   const outcomes=await Promise.allSettled([insert(a),insert(b)]);
   assert.equal(outcomes.filter(r=>r.status==='fulfilled').length,1);
   assert.equal(outcomes.filter(r=>r.status==='rejected'&&/another tenant history/.test(r.reason.message)).length,1);
+});
+
+// Multi-generation import uses the same local provider fixture as signup above.
+import { createMetaSyncAttribution } from '../../server/operations/metaSyncAttribution.ts';
+import { createPostgresMetaSyncAttributionImporter } from '../../server/platform/postgresMetaSyncAttributionImporter.ts';
+import { createPostgresConversationRepository,postgresConversationSql } from '../../server/platform/postgresConversationRepository.ts';
+import { createPostgresMetaHistoryMediaRepository } from '../../server/platform/postgresMetaHistoryMediaRepository.ts';
+import { deriveConversationKey } from '../../server/conversations/conversationKey.ts';
+import { normalizeMetaHistorySync } from '../../server/meta/metaHistorySync.ts';
+import { chunk as historyChunk,message as historyMessage,mediaValue as historyMediaValue } from '../fixtures/meta-history.mjs';
+const importHistory=createPostgresMetaHistorySyncRepository(transactions);
+const attribution=createMetaSyncAttribution(transactions),importer=createPostgresMetaSyncAttributionImporter(transactions);
+const historyProjector=createPostgresMetaHistoryInboxProjector(transactions);
+const inbox=createPostgresConversationRepository({transactions,queries});
+const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const historicalItem=(f,messages=[historyMessage()],order=1)=>parseMetaHistorySync({kind:'history',value:historyValue([
+  historyChunk({metadata:{phase:0,chunk_order:order,progress:55},threads:[{id:'16505551234',messages}]})
+],f.assets.phoneNumberId)},f.assets.phoneNumberId)[0];
+async function drainImports(){for(let i=0;i<30;i++)if(await importer.importNext()==='idle')return;assert.fail('Import bound exceeded');}
+async function drainProjection(){for(let i=0;i<30;i++)if((await historyProjector.projectNext()).outcome==='idle')return;assert.fail('Projection bound exceeded');}
+async function importedMessages(f){const list=await inbox.listByTenant(f.session.tenantId,100);return (await Promise.all(list.map(c=>inbox.listMessagesByConversation(f.session.tenantId,c.conversationKey,100)))).flat();}
+async function sourceRows(f,version){
+  const result={};for(const table of ['meta_history_sync_sessions','meta_history_sync_events','meta_history_sync_chunks','meta_history_sync_media','meta_history_inbox_cursors','meta_history_inbox_messages','meta_history_media_bindings'])
+    result[table]=(await pool.query(`SELECT * FROM ${table} WHERE tenant_id=$1 AND connection_version=$2`,[f.session.tenantId,version])).rows;
+  return result;
+}
+async function importFixture(){
+  const f=await fixture();await complete(f,await begin(f));f.oldScope=await currentScope(f);
+  await importHistory.record(f.oldScope,historicalItem(f));await drainProjection();f.original=await sourceRows(f,f.oldScope.connectionVersion);
+  await observedOffboarding(f);await newGeneration(f);f.newScope=await currentScope(f);return f;
+}
+async function retainForImport(f,item,scope=f.newScope){
+  assert.equal((await importHistory.record(scope,item)).outcome,'unattributed');
+  const canonical=normalizeMetaHistorySync(scope,item),eventDigest=hash({namespace:'meta_sync_unattributed_v1',scope:canonical.scope,kind:item.kind,payload:canonical.item});
+  assert.equal((await pool.query('SELECT * FROM meta_sync_unattributed_events WHERE tenant_id=$1 AND event_digest=$2',[f.session.tenantId,eventDigest])).rowCount,1);
+  return eventDigest;
+}
+async function attributionGrant(f,role){await pool.query(`INSERT INTO meta_sync_attribution_grants(database_role,tenant_id,expires_at)
+ VALUES(COALESCE($2::name,session_user),$1,clock_timestamp()+interval '1 hour') ON CONFLICT(database_role,tenant_id) DO UPDATE SET expires_at=EXCLUDED.expires_at`,[f.session.tenantId,role??null]);}
+async function approveImport(f,eventDigest,version=f.newScope.connectionVersion,service=attribution){
+  const input={tenantId:f.session.tenantId,eventDigest,connectionVersion:version};const proposal=await service.prepare(input);
+  const evidence=hash({eventDigest,connectionVersion:version,providerRequestId:proposal.providerRequestId});
+  assert.doesNotMatch(JSON.stringify(proposal),/history fixture|access_token|authorizationCode/);
+  return {input,proposal,evidence,result:await service.apply(proposal,evidence)};
+}
+
+test('attribution: approved new chunks and media import separately, bind the correct cycle, and preserve every old row',async()=>{
+  const f=await importFixture();await attributionGrant(f);
+  const chunk=historicalItem(f,[historyMessage({id:'wamid.history-media',type:'media_placeholder',text:undefined})]);
+  const media=parseMetaHistorySync({kind:'history',value:historyMediaValue(f.assets.phoneNumberId)},f.assets.phoneNumberId)[0];
+  const e=await retainForImport(f,chunk),m=await retainForImport(f,media);assert.equal(await importer.importNext(),'idle');
+  await approveImport(f,e);await approveImport(f,m);await drainImports();await drainProjection();
+  const bindings=createPostgresMetaHistoryMediaRepository(transactions);assert.equal(await bindings.bindNext(),'bound');
+  const messages=await importedMessages(f);assert.equal(messages.length,2);
+  const key=messages.find(m=>m.providerMessageId==='wamid.history-media').messageKey;
+  assert.equal((await bindings.readBoundMedia(f.session.tenantId,key)).scope.connectionVersion,f.newScope.connectionVersion);
+  assert.deepEqual(await sourceRows(f,f.oldScope.connectionVersion),f.original);
+  assert.equal((await pool.query('SELECT * FROM meta_history_sync_sessions WHERE tenant_id=$1',[f.session.tenantId])).rowCount,2);
+  assert.equal((await pool.query('SELECT * FROM messages WHERE tenant_id=$1',[f.session.tenantId])).rowCount,0);
+  assert.equal((await pool.query('SELECT * FROM contact_consent_events WHERE tenant_id=$1',[f.session.tenantId])).rowCount,0);
+  const current=await meta.findConnectionByTenantId(f.session.tenantId);
+  assert.equal((await createPostgresMetaDataSyncLifecycle({transactions,queries}).readView(f.session.tenantId,current)).stage,'receiving-history');
+});
+test('attribution: a confirmed late batch projects into its original cycle after reconnection',async()=>{
+  const f=await importFixture();await attributionGrant(f);
+  const e=await retainForImport(f,historicalItem(f,[historyMessage({id:'wamid.history-media'})],2));
+  await approveImport(f,e,f.oldScope.connectionVersion);await drainImports();await drainProjection();
+  const rows=await importedMessages(f);assert.equal(rows.length,2);
+  assert.equal((await pool.query('SELECT connection_version FROM meta_history_inbox_messages WHERE tenant_id=$1 AND provider_message_id=$2',[f.session.tenantId,'wamid.history-media'])).rows[0].connection_version,f.oldScope.connectionVersion);
+});
+test('attribution: cross-cycle duplicate delivery snapshots keep one Inbox row and the original immutable source',async()=>{
+  const f=await importFixture();await attributionGrant(f);
+  const e=await retainForImport(f,historicalItem(f,[historyMessage({history_context:{status:'DELIVERED'}})]));
+  await approveImport(f,e);await drainImports();await drainProjection();
+  assert.equal((await importedMessages(f)).length,1);assert.deepEqual(await sourceRows(f,f.oldScope.connectionVersion),f.original);
+  assert.equal((await pool.query('SELECT has_conflict FROM meta_history_sync_sessions WHERE tenant_id=$1 AND connection_version=$2',[f.session.tenantId,f.newScope.connectionVersion])).rows[0].has_conflict,false);
+});
+test('attribution: incompatible repeated message content blocks the new cycle without mutating the older message',async()=>{
+  const f=await importFixture();await attributionGrant(f);
+  const e=await retainForImport(f,historicalItem(f,[historyMessage({text:{body:'edited history'}})]));
+  await approveImport(f,e);await drainImports();await drainProjection();
+  assert.deepEqual(await sourceRows(f,f.oldScope.connectionVersion),f.original);assert.equal((await importedMessages(f))[0].textContent,'history fixture');
+  assert.equal((await pool.query('SELECT has_conflict FROM meta_history_sync_sessions WHERE tenant_id=$1 AND connection_version=$2',[f.session.tenantId,f.newScope.connectionVersion])).rows[0].has_conflict,true);
+});
+test('attribution: concurrent identical attestations and imports produce one attribution, one import and no duplicate projection',async()=>{
+  const f=await importFixture();await attributionGrant(f);const e=await retainForImport(f,historicalItem(f,[historyMessage({id:'wamid.history-media'})]));
+  const p=await attribution.prepare({tenantId:f.session.tenantId,eventDigest:e,connectionVersion:f.newScope.connectionVersion}),proof=hash(p);
+  const approved=await Promise.all(Array.from({length:4},()=>attribution.apply(p,proof)));assert.ok(approved.every(a=>a.attributionKey===approved[0].attributionKey));
+  const imported=await Promise.all(Array.from({length:4},()=>importer.importNext()));assert.equal(imported.filter(x=>x==='imported').length,1);
+  await Promise.all(Array.from({length:4},()=>historyProjector.projectNext()));assert.equal((await importedMessages(f)).length,2);
+  assert.equal((await pool.query('SELECT * FROM meta_sync_attributions WHERE tenant_id=$1',[f.session.tenantId])).rowCount,1);
+  assert.equal((await pool.query('SELECT * FROM meta_sync_attribution_imports WHERE tenant_id=$1',[f.session.tenantId])).rowCount,1);
+});
+test('attribution: refusal before approval, after approval and after import cannot be reset by a later signup',async()=>{
+  for(const timing of ['before','queued','imported']){
+    const f=await importFixture();await attributionGrant(f);const e=await retainForImport(f,historicalItem(f,[historyMessage({id:'wamid.history-media'})]));
+    const p=await attribution.prepare({tenantId:f.session.tenantId,eventDigest:e,connectionVersion:f.newScope.connectionVersion});
+    if(timing!=='before')await attribution.apply(p,hash(p));if(timing==='imported'){await drainImports();await drainProjection();}
+    const stored=await sourceRows(f,f.oldScope.connectionVersion);await importHistory.record(f.newScope,{kind:'declined'});
+    await assert.rejects(attribution.apply(p,hash(p)));await drainImports();await drainProjection();assert.equal((await importedMessages(f)).length,0);
+    assert.deepEqual(await sourceRows(f,f.oldScope.connectionVersion),stored);
+    if(timing==='queued')assert.equal((await pool.query('SELECT outcome FROM meta_sync_attribution_imports WHERE tenant_id=$1',[f.session.tenantId])).rows[0].outcome,'discarded');
+    await observedOffboarding(f);await newGeneration(f);assert.equal((await importedMessages(f)).length,0);
+  }
+});
+test('attribution: missing, expired or revoked private grants and forged operator/target/proof cannot authorize import',async()=>{
+  const f=await importFixture(),e=await retainForImport(f,historicalItem(f));const input={tenantId:f.session.tenantId,eventDigest:e,connectionVersion:f.newScope.connectionVersion};
+  await assert.rejects(attribution.prepare(input));await attributionGrant(f);const p=await attribution.prepare(input);
+  for(const changed of [{operatorRole:'connect_api_runtime'},{connectionVersion:2147483647},{providerRequestId:'wrong-request'},{snapshotDigest:'a'.repeat(64)},{sourceWabaId:'999888777'},{kind:'contact'},
+    {preparedAt:new Date(Date.parse(p.preparedAt)-360000).toISOString()}])await assert.rejects(attribution.apply({...p,...changed},hash(p)));
+  await pool.query("UPDATE meta_sync_attribution_grants SET expires_at=clock_timestamp()-interval '1 second' WHERE tenant_id=$1",[f.session.tenantId]);
+  await assert.rejects(attribution.apply(p,hash(p)));assert.equal(await importer.importNext(),'idle');
+});
+test('attribution: newer connection after prepare invalidates a proposal, and no worker work runs while disconnected',async()=>{
+  const f=await importFixture();await attributionGrant(f);const e=await retainForImport(f,historicalItem(f));
+  const p=await attribution.prepare({tenantId:f.session.tenantId,eventDigest:e,connectionVersion:f.newScope.connectionVersion});
+  await observedOffboarding(f);assert.equal(await importer.importNext(),'idle');await newGeneration(f);
+  await assert.rejects(attribution.apply(p,hash(p)),/stale/);
+});
+test('attribution: accepted provider request is required even when a history POST response was lost',async()=>{
+  let historyCalls=0;const f=await fixture({post:(type,json)=>type==='history'&&++historyCalls===2?json({error:{code:1}},503):json({messaging_product:'whatsapp',request_id:'accepted-contacts'})});
+  await complete(f,await begin(f));await observedOffboarding(f);await newGeneration(f);f.newScope=await currentScope(f);
+  const e=await retainForImport(f,historicalItem(f));await attributionGrant(f);
+  await assert.rejects(attribution.prepare({tenantId:f.session.tenantId,eventDigest:e,connectionVersion:f.newScope.connectionVersion}),/Accepted source request unavailable/);
+});
+test('attribution: import rollback retains the pending event; a lost commit acknowledgement replays without duplicate writes',async()=>{
+  const f=await importFixture();await attributionGrant(f);const e=await retainForImport(f,historicalItem(f,[historyMessage({id:'wamid.history-media'})]));await approveImport(f,e);
+  const rollback=createPostgresMetaSyncAttributionImporter({transaction(o,work){return transactions.transaction(o,async q=>{const result=await work(q);if(result==='imported')throw Error('rollback injection');return result;});}});
+  await assert.rejects(rollback.importNext());assert.equal((await pool.query('SELECT * FROM meta_sync_attribution_imports WHERE tenant_id=$1',[f.session.tenantId])).rowCount,0);
+  assert.equal((await pool.query('SELECT * FROM meta_history_sync_chunks WHERE tenant_id=$1 AND connection_version=$2',[f.session.tenantId,f.newScope.connectionVersion])).rowCount,0);
+  const lost=createPostgresMetaSyncAttributionImporter({async transaction(o,work){const result=await transactions.transaction(o,work);if(result==='imported')throw Error('lost commit acknowledgement');return result;}});
+  await assert.rejects(lost.importNext());assert.equal(await importer.importNext(),'idle');await drainProjection();assert.equal((await importedMessages(f)).length,2);
+});
+test('attribution: confirmed contact state imports with its accepted contacts request and respects later refusal',async()=>{
+  const f=await importFixture();await attributionGrant(f);const contacts=createPostgresMetaContactSyncRepository(transactions);
+  assert.equal((await contacts.record(f.newScope,{phoneNumber:'+16505551234',action:'add',fullName:'Pablo Morales',firstName:null,occurredAt:'2026-09-09T08:00:00.000Z'})).outcome,'unattributed');
+  const e=(await pool.query("SELECT event_digest FROM meta_sync_unattributed_events WHERE tenant_id=$1 AND kind='contact'",[f.session.tenantId])).rows[0].event_digest;
+  await approveImport(f,e);await drainImports();assert.equal((await pool.query('SELECT full_name FROM meta_contact_sync_states WHERE tenant_id=$1',[f.session.tenantId])).rows[0].full_name,'Pablo Morales');
+  assert.equal((await inbox.listByTenant(f.session.tenantId,100))[0].contact.whatsappDisplayName,'Pablo Morales');
+  await importHistory.record(f.newScope,{kind:'declined'});assert.notEqual((await inbox.listByTenant(f.session.tenantId,100))[0].contact.whatsappDisplayName,'Pablo Morales');
+});
+test('attribution: generation identities and evidence remain immutable and cannot bind a foreign cycle media source',async()=>{
+  const f=await importFixture();await attributionGrant(f);const e=await retainForImport(f,historicalItem(f,[historyMessage({id:'wamid.history-media'})]));const a=await approveImport(f,e);await drainImports();await drainProjection();
+  await assert.rejects(attribution.apply({...a.proposal,connectionVersion:f.oldScope.connectionVersion},a.evidence));
+  for(const table of ['meta_sync_attributions','meta_sync_attribution_imports']){
+    await assert.rejects(pool.query(`DELETE FROM ${table} WHERE tenant_id=$1`,[f.session.tenantId]));await assert.rejects(pool.query(`TRUNCATE ${table}`));
+  }
+  await assert.rejects(pool.query('UPDATE meta_history_inbox_messages SET connection_version=$2 WHERE tenant_id=$1',[f.session.tenantId,f.newScope.connectionVersion]));
+  await assert.rejects(pool.query('UPDATE meta_history_sync_chunks SET connection_version=$2 WHERE tenant_id=$1',[f.session.tenantId,f.oldScope.connectionVersion]));
+});
+
+// Populate actual pre-0093 tables using the existing public fixture, without
+// disabling any trigger. Every old value is compared after the real migration.
+async function seedLegacyHistoryUpgrade(f){
+  const scope=normalizeMetaHistorySync(await currentScope(f),{kind:'declined'}).scope;
+  const item=historicalItem(f,[historyMessage(),historyMessage({id:'wamid.history-media',type:'media_placeholder',text:undefined})]);
+  const media=parseMetaHistorySync({kind:'history',value:historyMediaValue(f.assets.phoneNumberId)},f.assets.phoneNumberId)[0];
+  const request=await requests.read(f.session.tenantId,'history'),digest=hash({namespace:'whatsapp_history_capture_v1',scope,item});
+  const mediaDigest=hash({namespace:'whatsapp_history_capture_v1',scope,item:media});
+  await pool.query("INSERT INTO meta_history_sync_sessions(tenant_id,waba_id,phone_number_id,connection_version,started_at,sharing_state,max_progress) VALUES($1,$2,$3,$4,$5,'data_received',55)",[scope.tenantId,scope.wabaId,scope.phoneNumberId,scope.connectionVersion,request.startedAt]);
+  await pool.query('INSERT INTO meta_history_sync_chunks(tenant_id,phase,chunk_order,progress,content_digest,payload) VALUES($1,0,1,55,$2,$3::jsonb)',[scope.tenantId,digest,JSON.stringify(item)]);
+  await pool.query("INSERT INTO meta_history_sync_events(tenant_id,event_digest,kind) VALUES($1,$2,'chunk'),($1,$3,'media')",[scope.tenantId,digest,mediaDigest]);
+  await pool.query('INSERT INTO meta_history_sync_media(tenant_id,provider_message_id,content_digest,payload) VALUES($1,$2,$3,$4::jsonb)',[scope.tenantId,media.providerMessageId,mediaDigest,JSON.stringify(media)]);
+  for(const [index,message] of item.messages.entries()){
+    const contact=(await pool.query(postgresConversationSql.resolveInboundContact,[scope.tenantId,message.threadPhoneNumber])).rows[0];
+    const key=await deriveConversationKey(scope.tenantId,Number(contact.contactId));await pool.query(postgresConversationSql.insertConversation,[key,scope.tenantId,Number(contact.contactId)]);
+    const messageKey='message_v1_'+hash({namespace:message.direction==='inbound'?'message_v1':'whatsapp_business_app_message_v1',tenantId:scope.tenantId,providerMessageId:message.providerMessageId});
+    await pool.query('INSERT INTO meta_history_inbox_messages(tenant_id,provider_message_id,message_key,conversation_key,phase,chunk_order,content_digest,message_index,message_digest,occurred_at) VALUES($1,$2,$3,$4,0,1,$5,$6,$7,$8)',[scope.tenantId,message.providerMessageId,messageKey,key,digest,index,hash(message),message.occurredAt]);
+    if(message.providerMessageId===media.providerMessageId)await pool.query('INSERT INTO meta_history_media_bindings(tenant_id,provider_message_id,message_digest,media_digest) VALUES($1,$2,$3,$4)',[scope.tenantId,message.providerMessageId,hash(message),mediaDigest]);
+  }
+  await pool.query('INSERT INTO meta_history_inbox_cursors(tenant_id,phase,chunk_order,content_digest,next_index) VALUES($1,0,1,$2,$3)',[scope.tenantId,digest,item.messages.length]);
+  const result={};for(const table of ['meta_history_sync_sessions','meta_history_sync_events','meta_history_sync_chunks','meta_history_sync_media','meta_history_inbox_cursors','meta_history_inbox_messages','meta_history_media_bindings'])
+    result[table]=(await pool.query(`SELECT * FROM ${table} WHERE tenant_id=$1`,[scope.tenantId])).rows;
+  return result;
+}
+test('attribution: additive migration preserves every legacy capture, message, cursor and binding field',async()=>{
+  const scope=await currentScope(upgradeCase),after=await sourceRows(upgradeCase,scope.connectionVersion);
+  for(const [table,rows] of Object.entries(after)){
+    if(table!=='meta_history_sync_sessions')for(const row of rows){assert.equal(row.connection_version,scope.connectionVersion);delete row.connection_version;}
+    assert.deepEqual(rows,upgradeHistoryRows[table]);
+  }
+  assert.equal((await importedMessages(upgradeCase)).length,2);
+  const key=(await importedMessages(upgradeCase)).find(m=>m.providerMessageId==='wamid.history-media').messageKey;
+  assert.ok(await createPostgresMetaHistoryMediaRepository(transactions).readBoundMedia(scope.tenantId,key));
+});
+test('attribution: restricted login can attest only its granted tenant and cannot forge evidence rows or expose private payloads',async()=>{
+  const f=await importFixture(),other=await importFixture();const e=await retainForImport(f,historicalItem(f));const otherEvent=await retainForImport(other,historicalItem(other));
+  await pool.query("DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_sync_attribution_test') THEN CREATE ROLE connect_sync_attribution_test LOGIN; END IF; IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='connect_sync_projection_test') THEN CREATE ROLE connect_sync_projection_test LOGIN; END IF; END $$");
+  await pool.query('GRANT USAGE ON SCHEMA public TO connect_sync_attribution_test,connect_sync_projection_test');
+  await pool.query('GRANT EXECUTE ON FUNCTION meta_sync_attribution_snapshot_v1(BIGINT,TEXT,INTEGER),apply_meta_sync_attribution_v1(BIGINT,TEXT,INTEGER,TEXT,TIMESTAMPTZ,TEXT,TEXT,TEXT) TO connect_sync_attribution_test');
+  await pool.query('GRANT SELECT ON meta_sync_pending_imports,meta_history_read_authorizations,meta_sync_generation_authorizations TO connect_sync_projection_test');
+  await attributionGrant(f,'connect_sync_attribution_test');
+  const scopedPool=new pg.Pool({connectionString:connectionString.replace('connect_echo_test@','connect_sync_attribution_test@'),max:2});
+  const reader=new pg.Client({connectionString:connectionString.replace('connect_echo_test@','connect_sync_projection_test@')});
+  const service=createMetaSyncAttribution(createNodePostgresTransactionManager(scopedPool));
+  const directory='/private/tmp/connect-sync-attribution-cli-'+process.pid;await mkdir(directory,{mode:0o700});
+  try{
+    const requestPath=directory+'/request.json',proposalPath=directory+'/proposal.json',proofPath=directory+'/evidence.json';
+    const env={META_SYNC_ATTRIBUTION_DATABASE_URL:connectionString.replace('connect_echo_test@','connect_sync_attribution_test@')};
+    await writeFile(requestPath,JSON.stringify({tenantId:f.session.tenantId,eventDigest:e,connectionVersion:f.newScope.connectionVersion}),{mode:0o600});
+    await assert.rejects(runMetaSyncAttribution(['prepare',requestPath,proposalPath],{...env,META_SYNC_ATTRIBUTION_DATABASE_URL:env.META_SYNC_ATTRIBUTION_DATABASE_URL+'?sslmode=verify-full&sslmode=disable'}));
+    await runMetaSyncAttribution(['prepare',requestPath,proposalPath],env);
+    await assert.rejects(runMetaSyncAttribution(['prepare',requestPath,proposalPath],env));
+    const proposal=JSON.parse(await readFile(proposalPath,'utf8'));assert.equal(proposal.operatorRole,'connect_sync_attribution_test');
+    const proof={schemaVersion:1,tenantId:proposal.tenantId,eventDigest:e,connectionVersion:proposal.connectionVersion,
+      providerRequestId:proposal.providerRequestId,providerEvidenceReference:'existing-coexistence-fixture',
+      statement:'Provider evidence identifies this exact retained event as belonging to this original sync request.'};
+    await writeFile(proofPath,JSON.stringify({...proof,eventDigest:hash(proof)}),{mode:0o600});
+    const args=['apply',proposalPath,proofPath,'CONFIRM_PROVIDER_EVENT_ATTRIBUTION'];
+    await assert.rejects(runMetaSyncAttribution(args,env));
+    await writeFile(proofPath,JSON.stringify(proof));
+    await assert.rejects(runMetaSyncAttribution(['apply',proposalPath,proofPath,'YES'],env));
+    await chmod(proofPath,0o644);await assert.rejects(runMetaSyncAttribution(args,env));await chmod(proofPath,0o600);
+    const first=await runMetaSyncAttribution(args,env);assert.equal(first.outcome,'attributed');
+    assert.deepEqual(await runMetaSyncAttribution(args,env),first);
+    await assert.rejects(service.prepare({tenantId:other.session.tenantId,eventDigest:otherEvent,connectionVersion:other.newScope.connectionVersion}));
+    await assert.rejects(scopedPool.query("INSERT INTO meta_sync_attribution_grants(database_role,tenant_id,expires_at) VALUES(session_user,$1,clock_timestamp()+interval '1 hour')",[other.session.tenantId]));
+    for(const table of ['meta_sync_unattributed_events','meta_sync_attributions','meta_sync_attribution_imports'])await assert.rejects(scopedPool.query(`SELECT * FROM ${table}`));
+    await reader.connect();assert.equal((await reader.query('SELECT * FROM meta_sync_pending_imports WHERE tenant_id=$1',[f.session.tenantId])).rowCount,1);
+    await assert.rejects(reader.query('SELECT * FROM meta_sync_unattributed_events'));await assert.rejects(reader.query('SELECT meta_sync_attribution_snapshot_v1($1,$2,$3)',[f.session.tenantId,e,f.newScope.connectionVersion]));
+    await drainImports();assert.equal((await reader.query('SELECT * FROM meta_sync_pending_imports WHERE tenant_id=$1',[f.session.tenantId])).rowCount,0);
+  }finally{await scopedPool.end();await reader.end();await rm(directory,{recursive:true});}
 });

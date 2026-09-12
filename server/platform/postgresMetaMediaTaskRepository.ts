@@ -20,7 +20,7 @@ export const postgresMetaMediaTaskSql = Object.freeze({
       WHERE j.tenant_id=message.tenant_id AND j.message_key=message.message_key AND j.connection_version=session.connection_version) ORDER BY session.tenant_id,message.message_key LIMIT 1`,
   actor: `SELECT COALESCE((SELECT actor_external_user_id FROM meta_media_upload_jobs WHERE job_key=$2 AND tenant_id=$1),
     (SELECT onboarding.actor_external_user_id FROM meta_data_sync_onboardings onboarding JOIN meta_history_sync_sessions session
-      ON session.tenant_id=onboarding.tenant_id AND session.started_at=onboarding.started_at WHERE onboarding.tenant_id=$1)) AS actor`,
+      ON session.tenant_id=onboarding.tenant_id AND session.started_at=onboarding.started_at WHERE onboarding.tenant_id=$1 AND session.connection_version=$3)) AS actor`,
   inspectionCandidate: `SELECT job.job_key AS "jobKey",job.tenant_id AS "tenantId",job.actor_external_user_id AS actor,
     job.message_key AS "messageKey",job.connection_version AS "connectionVersion",job.source_sha256 AS "sourceSha256"
     FROM meta_media_upload_jobs job WHERE job.status IN ('dispatching','reconciliation-required','quarantined')
@@ -97,7 +97,7 @@ export function createPostgresMetaMediaTaskRepository(transactions: PostgresTran
         const sourceSha256=await sha256Hex(new TextEncoder().encode(JSON.stringify(bound)));
         const identity={tenantId,messageKey,connectionVersion:bound.scope.connectionVersion,sourceSha256};
         const jobKey=await deriveMetaMediaUploadJobKey(identity);
-        const actor=requireExactPostgresRow(await one(tx,postgresMetaMediaTaskSql.actor,[tenantId,jobKey]),["actor"]).actor as string;
+        const actor=requireExactPostgresRow(await one(tx,postgresMetaMediaTaskSql.actor,[tenantId,jobKey,bound.scope.connectionVersion]),["actor"]).actor as string;
         return await enqueue(tx,{...identity,jobKey,kind,actor})?"enqueued":"idle";
       });
     },
