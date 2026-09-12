@@ -49,6 +49,10 @@ import { toInboxConversationThreadView } from "../../server/conversations/conver
 import { parseRailwayConversationThread } from "../../server/conversations/railwayConversationResult.ts";
 import { customerPhone, message, chunk, value, mediaValue, declinedValue, payload } from "../fixtures/meta-history.mjs";
 import { mediaBytes, mediaSha256, mediaId, metadataResponse, binaryResponse } from "../fixtures/meta-media.mjs";
+import { createMetaConnectionService } from '../../server/meta/metaConnectionService.ts';
+import { createPostgresMetaSignupLaunchRepository } from '../../server/platform/postgresMetaSignupLaunchRepository.ts';
+import { createPostgresMetaSignupAttemptRepository } from '../../server/platform/postgresMetaSignupAttemptRepository.ts';
+import { createRailwayMetaCoexistenceSignupRuntime } from '../../server/platform/railwayMetaSignupRuntime.ts';
 
 const connectionString = process.env.CONNECT_META_HISTORY_INBOX_TEST_URL;
 if (connectionString !== "postgresql://connect_echo_test@127.0.0.1:55439/connect_meta_inbox_integration") {
@@ -1683,6 +1687,136 @@ test('diagnostic media keyset pagination returns every task once even when its s
 });
 
 const fileAuthorization=createPostgresMetaMediaFileAuthorization(transactions);
+
+// Reuse the existing signup provider protocol fixture to establish a real
+// completed launch/receipt. This is a local transport; it never calls Meta.
+async function verifiedHistoryReconnect(f, overrides = {}) {
+  const previous = await meta.findConnectionByTenantId(f.scope.tenantId);
+  const assets = { businessPortfolioId: previous.businessPortfolioId, wabaId: previous.wabaId,
+    phoneNumberId: previous.phoneNumberId, ...overrides };
+  await pool.query("INSERT INTO tenant_memberships(tenant_id,external_user_id,role,status) VALUES($1,$2,'owner','active') ON CONFLICT DO NOTHING",
+    [f.scope.tenantId, f.session.externalUserId]);
+  const calls = [];
+  const environment = { ...mediaEnvironment, META_APP_ID: '100001', META_EMBEDDED_SIGNUP_CONFIGURATION_ID: '500005',
+    META_APP_SECRET: 'local-coexistence-app-secret' };
+  const service = createRailwayMetaCoexistenceSignupRuntime({ environment, deferSynchronization: true,
+    webhookEnvironment: { META_APP_SECRET: environment.META_APP_SECRET },
+    connections: createMetaConnectionService(meta), credentials: mediaCredentials,
+    launches: createPostgresMetaSignupLaunchRepository(transactions),
+    attempts: createPostgresMetaSignupAttemptRepository(transactions), requests,
+    transportOptions: { async fetchImplementation(raw, init) {
+      const url = new URL(raw); assert.equal(url.hostname, 'graph.facebook.com');
+      const path = url.pathname.split('/').slice(2).join('/'); calls.push(`${init.method} ${path}`);
+      const json = body => new Response(JSON.stringify(body));
+      if (path === 'oauth/access_token') return json({ access_token: `media-token-${f.scope.tenantId}` });
+      assert.equal(init.headers.authorization, `Bearer media-token-${f.scope.tenantId}`);
+      if (path === assets.wabaId) return json({ id: assets.wabaId, owner_business_info: { id: assets.businessPortfolioId } });
+      if (path === `${assets.wabaId}/phone_numbers`) return json({ data: [{ id: assets.phoneNumberId }] });
+      if (path === assets.phoneNumberId) return json({ id: assets.phoneNumberId, is_on_biz_app: true, platform_type: 'CLOUD_API' });
+      if (path === `${assets.wabaId}/subscribed_apps`) return json({ success: true });
+      assert.fail(`Unexpected provider call during historical read authorization: ${path}`);
+    } },
+  });
+  const launch = await service.begin(f.session); assert.equal(launch.status, 'ready');
+  const result = await service.complete(f.session, { flow: 'business-app', wabaId: assets.wabaId,
+    authorizationCode: `coexistence-code-${f.scope.tenantId}-${launch.launchId}`, launchId: launch.launchId });
+  assert.equal(result.registration.status, 'connected');
+  assert.equal(result.synchronization, null);
+  assert.ok(calls.every(call => !call.includes('/smb_app_data')));
+  const current = await meta.findConnectionByTenantId(f.scope.tenantId);
+  return { tenantId: f.scope.tenantId, wabaId: current.wabaId, phoneNumberId: current.phoneNumberId, connectionVersion: current.version };
+}
+
+async function retainedHistory(f) {
+  const rows = {};
+  for (const table of ['meta_history_sync_sessions', 'meta_history_sync_chunks', 'meta_history_sync_media',
+    'meta_history_inbox_messages', 'meta_history_media_bindings', 'meta_media_upload_jobs']) {
+    rows[table] = (await pool.query(`SELECT * FROM ${table} WHERE tenant_id=$1`, [f.scope.tenantId])).rows;
+  }
+  return rows;
+}
+
+test('historical reads: token-only refresh stays hidden; verified same-business signup restores existing history without rewriting it', async () => {
+  const f = await newCase(); await capture(f); await drain();
+  const before = await thread(f), stored = await retainedHistory(f);
+  const old = await meta.findConnectionByTenantId(f.scope.tenantId);
+  const pending = await meta.saveAssetSnapshot({ tenantId: f.scope.tenantId, businessPortfolioId: old.businessPortfolioId,
+    wabaId: old.wabaId, phoneNumberId: old.phoneNumberId });
+  await meta.markConnectionConnected(f.scope.tenantId, pending.version);
+  assert.equal((await thread(f)).rows.length, 0);
+  const scope = await verifiedHistoryReconnect(f);
+  assert.ok(scope.connectionVersion > f.scope.connectionVersion);
+  assert.deepEqual(await thread(f), before); assert.deepEqual(await retainedHistory(f), stored);
+  assert.equal((await projector.projectNext()).outcome, 'idle');
+  assert.equal((await pool.query('SELECT * FROM messages WHERE tenant_id=$1', [f.scope.tenantId])).rowCount, 0);
+  assert.equal((await pool.query('SELECT * FROM contact_consent_events WHERE tenant_id=$1', [f.scope.tenantId])).rowCount, 0);
+});
+
+for (const failure of ['different-phone', 'different-waba', 'refusal', 'original-declined', 'original-conflict', 'tenant-blocked', 'unverified-refresh']) {
+  test(`historical reads: ${failure} cannot use a newer signup to disclose old history`, async () => {
+    const f = await newCase(); await capture(f); await drain();
+    if (failure === 'original-declined') await repository.record(f.scope, { kind: 'declined' });
+    if (failure === 'original-conflict') await capture(f, value([chunk({ metadata: { phase: 0, chunk_order: 1, progress: 56 } })]));
+    const scope = await verifiedHistoryReconnect(f, failure === 'different-phone' ? { phoneNumberId: '999888777' }
+      : failure === 'different-waba' ? { wabaId: '999888777' } : {});
+    if (failure === 'refusal') await repository.record(scope, { kind: 'declined' });
+    if (failure === 'tenant-blocked') await pool.query("UPDATE tenants SET status='blocked' WHERE id=$1", [f.scope.tenantId]);
+    if (failure === 'unverified-refresh') {
+      const old = await meta.findConnectionByTenantId(f.scope.tenantId);
+      const pending = await meta.saveAssetSnapshot({ tenantId: f.scope.tenantId, businessPortfolioId: old.businessPortfolioId,
+        wabaId: old.wabaId, phoneNumberId: old.phoneNumberId });
+      await meta.markConnectionConnected(f.scope.tenantId, pending.version);
+    }
+    assert.equal((await thread(f)).rows.length, 0);
+    assert.equal((await pool.query('SELECT * FROM meta_history_read_authorizations WHERE tenant_id=$1', [f.scope.tenantId])).rowCount, 0);
+  });
+}
+
+test('historical file reads: newer verified signup reads the exact stored clean version without reopening acquisition', async () => {
+  const f = await readableFileCase(), source = await mediaBindings.readBoundMedia(f.scope.tenantId, f.key);
+  const before = await fileAuthorization.authorize(f.session, f.key), stored = await retainedHistory(f);
+  await verifiedHistoryReconnect(f);
+  assert.deepEqual(await fileAuthorization.authorize(f.session, f.key), before);
+  assert.equal(before.intent.connectionVersion, source.scope.connectionVersion);
+  assert.equal(await mediaBindings.readBoundMedia(f.scope.tenantId, f.key), null);
+  assert.equal(await mediaBindings.bindNext(), 'idle');
+  const r = fileReadRuntime(f);
+  try { assert.equal(await r.run(), mediaBytes.length); assert.equal(r.calls.length, 9); }
+  finally { r.runtime.close(); }
+  assert.deepEqual(await retainedHistory(f), stored);
+});
+
+test('historical file reads: refusal committed during the body transfer withholds bytes and preserves original evidence', async () => {
+  const f = await readableFileCase(), stored = await retainedHistory(f), scope = await verifiedHistoryReconnect(f);
+  let refused = false, delivered = false;
+  const r = fileReadRuntime(f, { async reply(command) {
+    if (command.constructor.name === 'GetObjectCommand' && !refused) {
+      refused = true; assert.equal((await repository.record(scope, { kind: 'declined' })).outcome, 'unattributed');
+    }
+    return mediaFileReply(command, f.intent, f.receipt.versionId);
+  } });
+  try { await assert.rejects(r.run(f.session, async () => { delivered = true; }), { code: 'ACCESS_DENIED' }); }
+  finally { r.runtime.close(); }
+  assert.equal(refused, true); assert.equal(delivered, false); assert.equal((await thread(f)).rows.length, 0);
+  assert.deepEqual(await retainedHistory(f), stored);
+  await verifiedHistoryReconnect(f);
+  await assert.rejects(fileAuthorization.authorize(f.session, f.key), { code: 'ACCESS_DENIED' });
+});
+
+test('historical file reads: reconnection never overrides blocking scans, withdrawal or current viewer membership', async () => {
+  for (const failure of ['scan', 'membership', 'withdrawal']) {
+    const f = failure === 'withdrawal' ? await cleanupCase({ clean: true }) : await readableFileCase();
+    if (failure === 'withdrawal') await cleanupRequest(f);
+    await verifiedHistoryReconnect(f);
+    if (failure === 'scan') await scans.record(f.job, scanObservation(f, 'THREATS_FOUND'));
+    if (failure === 'membership') await pool.query("UPDATE tenant_memberships SET status='suspended',version=version+1 WHERE tenant_id=$1 AND external_user_id=$2",
+      [f.scope.tenantId, f.session.externalUserId]);
+    const r = fileReadRuntime(f);
+    try { await assert.rejects(r.run(), { code: failure === 'membership' ? 'ACCESS_DENIED' : 'NOT_READY' }); assert.deepEqual(r.calls, []); }
+    finally { r.runtime.close(); }
+  }
+});
+
 async function readableFileCase({clean=true}={}) {
   const f=await scanCase('quarantined');
   if(clean)await scans.record(f.job,scanObservation(f));

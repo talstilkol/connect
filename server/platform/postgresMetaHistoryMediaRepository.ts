@@ -3,11 +3,12 @@ import { normalizeMetaHistorySync, type MetaHistoryItem, type MetaHistoryScope }
 import { MetaWebhookProcessorError } from "../meta/metaWebhookIngress.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
 import { postgresMetaHistorySyncSql } from "./postgresMetaHistorySyncRepository.ts";
+import { lockMetaSyncAttribution } from "./postgresMetaSyncUnattributed.ts";
 import { parsePostgresPositiveInteger, parsePostgresTimestamp, requireExactPostgresRow, requirePostgresRows } from "./postgresResultValidation.ts";
 import type { PostgresParameter, PostgresTransaction, PostgresTransactionManager } from "./postgresTransaction.ts";
 
-// Every candidate/read is scoped through the original session and current
-// connection. An immutable binding alone must never grant access to content.
+// Acquiring/binding new media requires the original connection. File reads may
+// use a verified newer authorization, without changing the source or job key.
 type MediaSourcePurpose = "binding" | "acquisition" | "file-read";
 function eligibleMediaSources(purpose: MediaSourcePurpose) {
   const captionState = purpose === "binding" ? "IN ('edited', 'conflicted')" : "= 'edited'";
@@ -19,8 +20,12 @@ function eligibleMediaSources(purpose: MediaSourcePurpose) {
   JOIN meta_history_sync_sessions AS session ON session.tenant_id = message.tenant_id
     AND session.sharing_state = 'data_received' AND NOT session.has_conflict
   JOIN tenants AS tenant ON tenant.id = session.tenant_id AND tenant.status IN ('active', 'trial', 'payment_failed')
+  ${purpose === "file-read" ? `JOIN meta_history_read_authorizations AS read_access ON read_access.tenant_id = session.tenant_id
+    AND read_access.source_connection_version = session.connection_version` : ""}
   JOIN meta_connections AS connection ON connection.tenant_id = session.tenant_id AND connection.waba_id = session.waba_id
-    AND connection.phone_number_id = session.phone_number_id AND connection.version = session.connection_version AND connection.status = 'connected'
+    AND connection.phone_number_id = session.phone_number_id
+    AND connection.version = ${purpose === "file-read" ? "read_access.current_connection_version" : "session.connection_version"}
+    AND connection.status = 'connected'
   JOIN meta_data_sync_requests AS request ON request.tenant_id = session.tenant_id AND request.sync_type = 'history'
     AND request.waba_id = session.waba_id AND request.phone_number_id = session.phone_number_id
     AND request.connection_version = session.connection_version AND request.started_at = session.started_at
@@ -59,6 +64,13 @@ function selectMediaSources(eligibility: string) {
 }
 
 export const postgresMetaHistoryMediaSql = Object.freeze({
+  fileConnection: `SELECT connection.tenant_id AS "tenantId" FROM meta_connections AS connection
+    JOIN tenants AS tenant ON tenant.id = connection.tenant_id AND tenant.status IN ('active', 'trial', 'payment_failed')
+    JOIN meta_history_read_authorizations AS read_access ON read_access.tenant_id = connection.tenant_id
+      AND read_access.current_connection_version = connection.version
+    WHERE connection.tenant_id = $1 AND connection.waba_id = $2 AND connection.phone_number_id = $3
+      AND read_access.source_connection_version = $4 AND connection.status = 'connected'
+    FOR SHARE OF connection, tenant`,
   candidate: `SELECT session.tenant_id AS "tenantId", session.waba_id AS "wabaId", session.phone_number_id AS "phoneNumberId",
     session.connection_version AS "connectionVersion", message.provider_message_id AS "providerMessageId" ${metaHistoryBindingSources}
     AND NOT EXISTS (SELECT 1 FROM meta_history_media_bindings AS binding
@@ -93,7 +105,7 @@ function identity(raw: unknown) {
 
 async function readLocked(tx: PostgresTransaction, scope: MetaHistoryScope, providerMessageId: string, purpose: MediaSourcePurpose) {
   const binding = [scope.tenantId, scope.wabaId, scope.phoneNumberId, scope.connectionVersion] as const;
-  const connection = await one(tx, postgresMetaHistorySyncSql.connection, binding);
+  const connection = await one(tx, purpose === "file-read" ? postgresMetaHistoryMediaSql.fileConnection : postgresMetaHistorySyncSql.connection, binding);
   if (connection === null) return null;
   if (parsePostgresPositiveInteger(requireExactPostgresRow(connection, ["tenantId"]).tenantId) !== scope.tenantId) return fail();
   const request = await one(tx, postgresMetaHistorySyncSql.request, [...binding, "media"]);
@@ -170,6 +182,9 @@ export async function readPostgresBoundMetaHistoryMedia(tx: PostgresTransaction,
 // Only the file authorization boundary uses this source check. It must still
 // require the existing upload receipt, exact object version and clean scans.
 export async function readPostgresBoundMetaHistoryMediaForFile(tx: PostgresTransaction, tenantId: number, messageKey: string): Promise<Readonly<BoundMetaHistoryMedia> | null> {
+  // Use capture/refusal's lock order. This lock covers database checks only;
+  // the file delivery runtime reauthorizes after S3 I/O in a new transaction.
+  await lockMetaSyncAttribution(tx, tenantId);
   return readBoundMedia(tx, tenantId, messageKey, "file-read");
 }
 

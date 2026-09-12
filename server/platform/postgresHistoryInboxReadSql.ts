@@ -24,9 +24,11 @@ export const postgresInboxMessageSourceSql = `(
   FROM meta_history_inbox_messages AS history
   JOIN meta_history_sync_sessions AS session ON session.tenant_id = history.tenant_id
     AND session.sharing_state = 'data_received' AND NOT session.has_conflict
+  JOIN meta_history_read_authorizations AS read_access ON read_access.tenant_id = session.tenant_id
+    AND read_access.source_connection_version = session.connection_version
   JOIN meta_connections AS connection ON connection.tenant_id = session.tenant_id
     AND connection.waba_id = session.waba_id AND connection.phone_number_id = session.phone_number_id
-    AND connection.version = session.connection_version AND connection.status = 'connected'
+    AND connection.version = read_access.current_connection_version AND connection.status = 'connected'
   JOIN tenants AS tenant ON tenant.id = session.tenant_id AND tenant.status IN ('active', 'trial', 'payment_failed')
   JOIN meta_data_sync_requests AS request ON request.tenant_id = session.tenant_id AND request.sync_type = 'history'
     AND request.started_at = session.started_at AND request.status IN ('dispatching', 'accepted', 'unknown')
