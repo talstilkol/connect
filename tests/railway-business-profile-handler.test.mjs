@@ -17,6 +17,7 @@ const draft = Object.freeze({
   timezone: profile.timezone,
   interfaceLanguage: profile.interfaceLanguage,
   expectedVersion: 0,
+    expectedOrganizationId: "org_verified",
 });
 
 function fixture(options = {}) {
@@ -100,6 +101,7 @@ test("normalizes and saves through one deterministic Railway mutation", async ()
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
     expectedVersion: 0,
+    expectedOrganizationId: "org_verified",
   };
   assert.deepEqual(await testFixture.handler.save(input), {
     status: "saved",
@@ -112,6 +114,7 @@ test("normalizes and saves through one deterministic Railway mutation", async ()
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
     expectedVersion: 0,
+    expectedOrganizationId: "org_verified",
   });
   assert.equal(
     testFixture.calls.requests[0].idempotencyKey,
@@ -131,12 +134,14 @@ test("rejects malformed and extended input before Railway", async () => {
       timezone: "Unsupported/Timezone",
       interfaceLanguage: "he",
     expectedVersion: 0,
+    expectedOrganizationId: "org_verified",
     },
     {
       businessName: "Connect",
       timezone: "Asia/Jerusalem",
       interfaceLanguage: "he",
     expectedVersion: 0,
+    expectedOrganizationId: "org_verified",
       tenantId: 7,
     },
   ]) {
@@ -164,6 +169,17 @@ test("does not acknowledge a stale profile version or a different saved value", 
   }
   const conflict = fixture({ response: () => ({ outcome: "error", code: "CONFLICT" }) });
   assert.deepEqual(await conflict.handler.save(draft), { status: "conflict" });
+});
+
+test("requires the rendered organization and binds it into the retry identity", async () => {
+  const current = fixture();
+  for (const expectedOrganizationId of [undefined, null, "", 7, "org_bad\n", "other", "org_" + "a".repeat(252)]) {
+    assert.equal((await current.handler.save({ ...draft, expectedOrganizationId })).status, "validation-error");
+  }
+  assert.equal(current.calls.requests.length, 0);
+  await current.handler.save(draft);
+  await current.handler.save({ ...draft, expectedOrganizationId: "org_other" });
+  assert.notEqual(current.calls.requests[0].idempotencyKey, current.calls.requests[1].idempotencyKey);
 });
 
 test("maps bounded API failures and fails closed on malformed success", async () => {

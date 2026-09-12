@@ -22,6 +22,7 @@ type WorkspaceDraftContextValue = {
   businessProfileDraft: BusinessProfileDraft | null;
   businessProfilePersistence: BusinessProfilePersistence | null;
   businessProfileVersion: number;
+  businessProfileOrganizationId: string | null;
   saveTemplateDraft: (draft: TemplateDraft) => void;
   saveContactImportDraft: (draft: ContactImportDraft) => void;
   saveCampaignDraft: (draft: CampaignDraft) => void;
@@ -43,10 +44,12 @@ export function WorkspaceDraftProvider({
   children,
   initialBusinessProfileDraft = null,
   initialBusinessProfileVersion = 0,
+  initialOrganizationId = null,
 }: {
   children: ReactNode;
   initialBusinessProfileDraft?: BusinessProfileDraft | null;
   initialBusinessProfileVersion?: number;
+  initialOrganizationId?: string | null;
 }) {
   const [templateDraft, setTemplateDraft] = useState<TemplateDraft | null>(
     null,
@@ -60,6 +63,9 @@ export function WorkspaceDraftProvider({
     useState<BusinessProfileDraft | null>(initialBusinessProfileDraft);
   const [businessProfileVersion, setBusinessProfileVersion] =
     useState(initialBusinessProfileVersion);
+  // Keep the identity of the rendered form, even if another tab changes Clerk.
+  // Switching this workspace remounts the provider through its tenant key.
+  const [businessProfileOrganizationId] = useState(initialOrganizationId);
   const [
     businessProfilePersistence,
     setBusinessProfilePersistence,
@@ -148,6 +154,7 @@ export function WorkspaceDraftProvider({
       businessProfileDraft,
       businessProfilePersistence,
       businessProfileVersion,
+      businessProfileOrganizationId,
       saveTemplateDraft,
       saveContactImportDraft,
       saveCampaignDraft,
@@ -161,6 +168,7 @@ export function WorkspaceDraftProvider({
       businessProfileDraft,
       businessProfilePersistence,
       businessProfileVersion,
+      businessProfileOrganizationId,
       campaignDraft,
       clearBusinessProfileDraft,
       clearCampaignDraft,

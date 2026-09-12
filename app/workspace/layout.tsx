@@ -24,12 +24,14 @@ export default async function WorkspaceLayout({
   children: ReactNode;
 }) {
   let initialBusinessProfile = null;
+  let initialOrganizationId: string | null = null;
   let tenantDirectory:
     TenantSelectionDirectory | null =
     null;
 
   if (hasClerkServerConfiguration()) {
-    await auth.protect();
+    const identity = await auth.protect();
+    initialOrganizationId = identity.orgId ?? null;
 
     const tenantSelection =
       await loadTenantSelectionAction();
@@ -66,6 +68,7 @@ export default async function WorkspaceLayout({
       <WorkspaceDraftProvider
         initialBusinessProfileDraft={initialBusinessProfile}
         initialBusinessProfileVersion={initialBusinessProfile?.version ?? 0}
+        initialOrganizationId={initialOrganizationId}
       >
         {children}
       </WorkspaceDraftProvider>

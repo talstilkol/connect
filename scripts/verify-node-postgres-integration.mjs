@@ -6204,7 +6204,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       timezone: "Asia/Jerusalem",
       interfaceLanguage: "he",
     });
-    const profilePayload = Object.freeze({ ...profileDraft, expectedVersion: 0 });
+    const profilePayload = Object.freeze({ ...profileDraft, expectedVersion: 0, expectedOrganizationId: "org_driver_onboarding" });
     const idempotencyKey =
       await deriveRailwayApiDeterministicIdempotencyKey(
         "onboarding.business-profile.save",
@@ -6331,7 +6331,8 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       true,
     );
 
-    const saveProfile = async (payload, targetRuntime = runtime) => {
+    const saveProfile = async (draft, targetRuntime = runtime) => {
+      const payload = { expectedOrganizationId: "org_driver_onboarding", ...draft };
       const response = await targetRuntime.handler.handle(createApiRequest(
         "onboarding.business-profile.save", "mutation", payload,
         await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload),
@@ -6379,8 +6380,8 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     );
     try {
       const initialDrafts = [
-        { ...profileDraft, expectedVersion: 0 },
-        { ...profileDraft, timezone: "Europe/London", expectedVersion: 0 },
+        { ...profileDraft, expectedVersion: 0, expectedOrganizationId: "org_driver_onboarding_version_race" },
+        { ...profileDraft, timezone: "Europe/London", expectedVersion: 0, expectedOrganizationId: "org_driver_onboarding_version_race" },
       ];
       const initialRace = await Promise.all(initialDrafts.map(payload => saveProfile(payload, raceRuntime)));
       assert.deepEqual(initialRace.map(result => result.status).sort(), [200, 409]);
@@ -6393,6 +6394,54 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       assert.deepEqual(initialRows.rows, [{ timezone: initialDrafts[initialWinner].timezone, version: 1 }]);
     } finally {
       await raceRuntime.close();
+    }
+
+    // Same owner, two authorized organizations, and equal profile versions:
+    // a tab showing A must not overwrite B after the active session changes.
+    const scopeOwner = "driver-onboarding-two-organizations-owner";
+    const firstOrg = "org_driver_onboarding_scope_first";
+    const scopeTenantId = await createTenant(pool, scopeOwner, "First onboarding business");
+    await pool.query("UPDATE tenants SET clerk_organization_id=$2 WHERE id=$1", [scopeTenantId, firstOrg]);
+    await pool.query(
+      "INSERT INTO business_profiles (tenant_id,business_name,timezone,interface_language,version) VALUES ($1,$2,'Asia/Jerusalem','he',4)",
+      [scopeTenantId, "First onboarding business"],
+    );
+    const otherOrg = "org_driver_onboarding_other";
+    const otherTenantId = await createTenant(pool, scopeOwner, "Other onboarding business");
+    await pool.query("UPDATE tenants SET clerk_organization_id=$2 WHERE id=$1", [otherTenantId, otherOrg]);
+    await pool.query(
+      "INSERT INTO business_profiles (tenant_id,business_name,timezone,interface_language,version) VALUES ($1,$2,'Asia/Jerusalem','he',4)",
+      [otherTenantId, "Other onboarding business"],
+    );
+    const selectBusiness = (tenantId) => pool.query(
+      `INSERT INTO tenant_selections (external_user_id,tenant_id,version) VALUES ($1,$2,1)
+       ON CONFLICT (external_user_id) DO UPDATE SET tenant_id=EXCLUDED.tenant_id,version=tenant_selections.version+1`,
+      [scopeOwner, tenantId],
+    );
+    await selectBusiness(otherTenantId);
+    const otherRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString, scopeOwner, [], "driver-onboarding-scope-owner@example.com", false, otherOrg, "org:admin",
+    );
+    const readBoth = async () => (await pool.query(
+      "SELECT tenant_id,business_name,timezone,interface_language,version FROM business_profiles WHERE tenant_id=ANY($1) ORDER BY tenant_id",
+      [[scopeTenantId, otherTenantId]],
+    )).rows;
+    try {
+      const before = await readBoth();
+      assert.deepEqual(before.map(row => row.version), [4, 4]);
+      const stale = await saveProfile({ ...profileDraft, businessName: "Stale organization draft", expectedVersion: 4, expectedOrganizationId: firstOrg }, otherRuntime);
+      assert.equal(stale.status, 409);
+      assert.equal(stale.body.code, "CONFLICT");
+      assert.deepEqual(await readBoth(), before);
+      const control = await saveProfile({ ...profileDraft, businessName: "Other onboarding business updated", expectedVersion: 4, expectedOrganizationId: otherOrg }, otherRuntime);
+      assert.equal(control.status, 200);
+      assert.equal(control.body.data.profile.version, 5);
+      const after = await readBoth();
+      assert.deepEqual(after[0], before[0]);
+      assert.equal(after[1].business_name, "Other onboarding business updated");
+      assert.equal(after[1].version, 5);
+    } finally {
+      await otherRuntime.close();
     }
 
     await pool.query(

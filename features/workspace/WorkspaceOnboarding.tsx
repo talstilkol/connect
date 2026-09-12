@@ -39,6 +39,7 @@ export function WorkspaceOnboarding({
     businessProfileDraft,
     businessProfilePersistence,
     businessProfileVersion,
+    businessProfileOrganizationId,
     saveBusinessProfileDraft,
   } = useWorkspaceDrafts();
   const [businessName, setBusinessName] = useState(
@@ -102,6 +103,7 @@ export function WorkspaceOnboarding({
       const result = await saveBusinessProfileAction({
         ...draft,
         expectedVersion: businessProfileVersion,
+        expectedOrganizationId: businessProfileOrganizationId,
       });
       setSaveResult(result);
 

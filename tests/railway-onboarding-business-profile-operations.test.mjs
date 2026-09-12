@@ -33,7 +33,7 @@ const profilePayload = Object.freeze({
   interfaceLanguage: "he",
 });
 
-const payload = Object.freeze({ ...profilePayload, expectedVersion: 0 });
+const payload = Object.freeze({ ...profilePayload, expectedVersion: 0, expectedOrganizationId: identity.externalOrganizationId });
 
 function session(role = "owner") {
   return Object.freeze({
@@ -165,6 +165,18 @@ test("existing workspace management does not require initial provisioning permis
   }, payload, await saveRequest());
   assert.equal(result.createdTenant, false);
   assert.equal(current.calls.mutationCommands.length, 1);
+});
+
+test("rejects a stale form from another organization even when the profile version is valid", async () => {
+  const current = fixture();
+  const stale = { ...payload, expectedVersion: 2, expectedOrganizationId: "org_other" };
+  await assert.rejects(
+    current.save.execute(context, stale, await saveRequest(stale)),
+    (error) => error.code === "CONFLICT",
+  );
+  assert.equal(current.calls.sessions, 0);
+  assert.deepEqual(current.calls.mutationCommands, []);
+  assert.deepEqual(current.calls.rateLimitSubjects, []);
 });
 
 test("reads a bounded profile and returns null before tenant provisioning", async () => {

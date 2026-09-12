@@ -1214,7 +1214,7 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
 }
 
 test("first workspace provisioning uses verified Clerk admin status through the complete HTTP boundary", async () => {
-  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he", expectedVersion: 0 };
+  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he", expectedVersion: 0, expectedOrganizationId: "org_verified" };
   const key = await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload);
   for (const orgRole of ["org:member", undefined, "org:admin"]) {
     const current = fixture("owner", {
@@ -2012,6 +2012,7 @@ test("reads and saves onboarding business profile through the complete boundary"
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
     expectedVersion: 2,
+    expectedOrganizationId: "org_verified",
   };
   const mutationKey =
     await deriveRailwayApiDeterministicIdempotencyKey(

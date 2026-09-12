@@ -21,8 +21,10 @@ document.documentElement.lang = language;
 document.documentElement.dir = language === 'en' ? 'ltr' : 'rtl';
 function Harness() {
   const [visible, setVisible] = useState(true);
+  const [organization, setOrganization] = useState("org_profile_browser");
   window.__showProfile = setVisible;
-  return React.createElement(WorkspaceDraftProvider, { initialBusinessProfileDraft: ${JSON.stringify(profile)}, initialBusinessProfileVersion: 1 },
+  window.__changeOrganization = setOrganization;
+  return React.createElement(WorkspaceDraftProvider, { initialBusinessProfileDraft: ${JSON.stringify(profile)}, initialBusinessProfileVersion: 1, initialOrganizationId: organization },
     visible ? React.createElement(WorkspaceOnboarding, { language, metaConnection: {status:'disconnected'}, onConnectMeta() {throw new Error('Meta is outside this acceptance');}, serverPersistenceEnabled:true }) : null);
 }
 createRoot(document.getElementById('root')).render(React.createElement(Harness));`;
@@ -83,7 +85,7 @@ try {
     for (const field of [m.fields.timezone, m.fields.interfaceLanguage]) {
       assert.equal(await page.getByRole('combobox', { name: field, exact: true }).isDisabled(), true);
     }
-    assert.deepEqual(await calls(), [{ ...profile, businessName: 'Connect updated', expectedVersion: 1 }]);
+    assert.deepEqual(await calls(), [{ ...profile, businessName: 'Connect updated', expectedVersion: 1, expectedOrganizationId: "org_profile_browser" }]);
     await page.getByRole('button', { name: m.saveActions.saving, exact: true }).evaluate(button => button.click());
     assert.equal((await calls()).length, 1);
     await resolve({ status: 'saved', createdTenant: false, profile: { ...profile, businessName: 'Connect updated', version: 2 } });
@@ -92,7 +94,7 @@ try {
     await name.fill(profile.businessName);
     await save.click();
     await page.waitForFunction(() => window.__profileActions.pending !== null);
-    assert.deepEqual((await calls()).at(-1), { ...profile, expectedVersion: 2 });
+    assert.deepEqual((await calls()).at(-1), { ...profile, expectedVersion: 2, expectedOrganizationId: "org_profile_browser" });
     await resolve({ status: 'saved', createdTenant: false, profile: { ...profile, version: 3 } });
     await page.evaluate(() => window.__showProfile(false));
     await name.waitFor({ state: 'detached' });
@@ -101,10 +103,14 @@ try {
     assert.equal(await name.inputValue(), profile.businessName);
     scenarios++;
 
+    // Another tab may change the current auth organization, but this existing
+    // form must continue to submit the identity of the workspace it displayed.
+    await page.evaluate(() => window.__changeOrganization('org_other_browser'));
     await name.fill('Connect updated');
     await save.click();
     await page.waitForFunction(() => window.__profileActions.pending !== null);
     assert.equal((await calls()).at(-1).expectedVersion, 3);
+    assert.equal((await calls()).at(-1).expectedOrganizationId, 'org_profile_browser');
     await resolve({ status: 'conflict' });
     await page.getByRole('alert').filter({ hasText: m.saveFailures.conflict }).waitFor();
     assert.equal(await name.inputValue(), 'Connect updated');

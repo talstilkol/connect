@@ -80,6 +80,7 @@ export interface RailwayOnboardingBusinessProfileOperationDependencies {
 
 const profilePayloadKeys = Object.freeze([
   "businessName",
+  "expectedOrganizationId",
   "expectedVersion",
   "interfaceLanguage",
   "timezone",
@@ -130,13 +131,15 @@ function requireDependencies(
 
 function parseProfilePayload(
   payload: RailwayApiJsonObject,
-): Readonly<BusinessProfileDraft & { expectedVersion: number }> {
+): Readonly<BusinessProfileDraft & { expectedVersion: number; expectedOrganizationId: string }> {
   const keys = Object.keys(payload).sort();
   const validation = validatePersistedBusinessProfile(payload);
   if (
     keys.length !== profilePayloadKeys.length ||
     !keys.every((key, index) => key === profilePayloadKeys[index]) ||
     !validation.success ||
+    typeof payload.expectedOrganizationId !== "string" ||
+    !/^org_[A-Za-z0-9_]{1,251}$/.test(payload.expectedOrganizationId) ||
     !Number.isSafeInteger(payload.expectedVersion) ||
     Number(payload.expectedVersion) < 0 ||
     Number(payload.expectedVersion) >= Number.MAX_SAFE_INTEGER ||
@@ -146,7 +149,7 @@ function parseProfilePayload(
   ) {
     invalidRequest();
   }
-  return Object.freeze({ ...validation.value, expectedVersion: Number(payload.expectedVersion) });
+  return Object.freeze({ ...validation.value, expectedVersion: Number(payload.expectedVersion), expectedOrganizationId: payload.expectedOrganizationId });
 }
 
 function snapshotMutationResult(
@@ -315,7 +318,12 @@ function createSaveOperation(
     ) {
       try {
         const parsedPayload = parseProfilePayload(payload);
-        const { expectedVersion, ...profilePayload } = parsedPayload;
+        const { expectedVersion, expectedOrganizationId, ...profilePayload } = parsedPayload;
+        // This only restricts the verified identity; client input never selects
+        // a tenant or grants authority. An old tab must not follow a new session.
+        if (expectedOrganizationId !== context.userIdentity.externalOrganizationId) {
+          throw new RailwayApiDispatchError("CONFLICT");
+        }
         if (
           request.operation !==
             RAILWAY_ONBOARDING_BUSINESS_PROFILE_SAVE_OPERATION ||

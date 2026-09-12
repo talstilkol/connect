@@ -54,6 +54,7 @@ type ClientContextResult =
 
 const strictPayloadKeys = Object.freeze([
   "businessName",
+  "expectedOrganizationId",
   "expectedVersion",
   "interfaceLanguage",
   "timezone",
@@ -155,6 +156,8 @@ function parseSaveInput(input: unknown):
     return { status: "invalid", issues: validation.issues };
   }
   if (!isRecord(normalized) || !hasExactKeys(normalized, strictPayloadKeys) ||
+      typeof normalized.expectedOrganizationId !== "string" ||
+      !/^org_[A-Za-z0-9_]{1,251}$/.test(normalized.expectedOrganizationId) ||
       !Number.isSafeInteger(normalized.expectedVersion) ||
       Number(normalized.expectedVersion) < 0 ||
       Number(normalized.expectedVersion) >= Number.MAX_SAFE_INTEGER) {
@@ -162,7 +165,7 @@ function parseSaveInput(input: unknown):
   }
   return Object.freeze({
     status: "ready" as const,
-    payload: Object.freeze({ ...validation.value, expectedVersion: Number(normalized.expectedVersion) }),
+    payload: Object.freeze({ ...validation.value, expectedVersion: Number(normalized.expectedVersion), expectedOrganizationId: normalized.expectedOrganizationId }),
   });
 }
 
