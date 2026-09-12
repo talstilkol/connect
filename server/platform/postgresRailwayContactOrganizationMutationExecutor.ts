@@ -435,10 +435,12 @@ async function executeTransaction(
     throw new Error("PostgreSQL returned an invalid mutation claim");
   }
 
-  if ("contactId" in command.payload && command.payload.expectedRevision !== undefined &&
+  if ("contactId" in command.payload && (
+      command.payload.expectedRevision === undefined ||
       await readPostgresContactOrganizationRevision(transaction, command.session.tenantId) !==
-        command.payload.expectedRevision) {
-    // Roll back the new processing receipt so a stale view cannot reserve a key.
+        command.payload.expectedRevision)) {
+    // Legacy receipts replay above. New writes always need a current revision;
+    // roll back the processing receipt so an old client cannot reserve a key.
     throw new OrganizationRevisionConflict();
   }
 

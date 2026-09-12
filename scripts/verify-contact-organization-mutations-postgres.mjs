@@ -115,6 +115,16 @@ export async function verifyContactOrganizationMutationsPostgres(pool) {
     assert.deepEqual(stored.tagAssignments, [{ contactId: secondContactId, tagId: tag.organization.tags[0].id }]);
   }
 
+  const beforeLegacyWrites = await counts();
+  for (const [operation, groupId] of [
+    ["contacts.organization.tag-assignment", tag.organization.tags[0].id],
+    ["contacts.organization.list-membership", list.organization.lists[0].id],
+  ]) {
+    const legacy = await executor.execute(await command(operation, { contactId, groupId, assigned: true }));
+    assert.equal(legacy.outcome, "conflict");
+    assert.deepEqual(await counts(), beforeLegacyWrites);
+  }
+
   const otherTenant = await pool.query("INSERT INTO tenants (display_name, status) VALUES ('Other organization regression', 'active') RETURNING id");
   const beforeCrossTenant = await counts();
   const crossTenant = await executor.execute(await command("contacts.organization.tag-assignment", {
@@ -122,5 +132,5 @@ export async function verifyContactOrganizationMutationsPostgres(pool) {
   }, { ...session, tenantId: Number(otherTenant.rows[0].id) }));
   assert.equal(crossTenant.outcome, "not-found");
   assert.deepEqual(await counts(), beforeCrossTenant);
-  return Object.freeze({ status: "passed", cycles: 2, concurrentPairs: 4, historicalReplay: true, staleReceiptRollback: true, crossTenantBlocked: true, stalePreservedContactScenarios: 2 });
+  return Object.freeze({ status: "passed", cycles: 2, concurrentPairs: 4, historicalReplay: true, staleReceiptRollback: true, crossTenantBlocked: true, stalePreservedContactScenarios: 2, newLegacyAssignmentsBlocked: 2 });
 }

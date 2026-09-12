@@ -138,6 +138,7 @@ test("commits a tag, audit, snapshot, and receipt atomically", async () => {
 test("sets a relationship and returns one-contact organization scope", async () => {
   const fixture = transactionFixture([
     result([{ idempotencyKey }]),
+    result([{ revision: "91" }]),
     result([{ found: true }]),
     result([{ revision: "91" }]),
     result([{ id: "5", name: "Priority", contactCount: "1" }]),
@@ -151,7 +152,7 @@ test("sets a relationship and returns one-contact organization scope", async () 
     fixture.manager,
   ).execute(command(
     "contacts.organization.tag-assignment",
-    { contactId: 23, groupId: 5, assigned: true },
+    { contactId: 23, groupId: 5, assigned: true, expectedRevision: 91 },
   ));
 
   assert.equal(saved.outcome, "committed");
@@ -160,10 +161,10 @@ test("sets a relationship and returns one-contact organization scope", async () 
     { contactId: 23, tagId: 5 },
   ]);
   assert.match(
-    fixture.calls.queries[1].sql,
+    fixture.calls.queries[2].sql,
     /INSERT INTO contact_tag_assignments/,
   );
-  assert.deepEqual(fixture.calls.queries[7].parameters.slice(3, 5), [
+  assert.deepEqual(fixture.calls.queries[8].parameters.slice(3, 5), [
     "contact_tag_assignment",
     "23:5",
   ]);
@@ -282,6 +283,7 @@ test("separates conflict, missing target, and unavailable outcomes", async () =>
 
   const missing = transactionFixture([
     result([{ idempotencyKey }]),
+    result([{ revision: "0" }]),
     result([{ found: false }]),
   ]);
   assert.deepEqual(
@@ -289,7 +291,7 @@ test("separates conflict, missing target, and unavailable outcomes", async () =>
       missing.manager,
     ).execute(command(
       "contacts.organization.list-membership",
-      { contactId: 23, groupId: 8, assigned: true },
+      { contactId: 23, groupId: 8, assigned: true, expectedRevision: 0 },
     )),
     { outcome: "not-found", tenantId: null, organization: null },
   );
@@ -389,6 +391,19 @@ for (const operation of ["contacts.organization.tag-assignment", "contacts.organ
     assert.equal(fixture.calls.committed, 0);
     assert.equal(fixture.calls.queries.length, 2);
     assert.match(fixture.calls.queries[1].sql, /SELECT COALESCE/);
+    assert.equal(fixture.queue.length, 0);
+  });
+}
+
+for (const operation of ["contacts.organization.tag-assignment", "contacts.organization.list-membership"]) {
+  test(`${operation} rejects a newly claimed legacy request without a revision`, async () => {
+    const fixture = transactionFixture([result([{ idempotencyKey }])]);
+    const outcome = await createPostgresRailwayContactOrganizationMutationExecutor(fixture.manager)
+      .execute(command(operation, { contactId: 23, groupId: 5, assigned: true }));
+    assert.deepEqual(outcome, { outcome: "conflict", tenantId: null, organization: null });
+    assert.equal(fixture.calls.rolledBack, 1);
+    assert.equal(fixture.calls.committed, 0);
+    assert.equal(fixture.calls.queries.length, 1);
     assert.equal(fixture.queue.length, 0);
   });
 }
