@@ -14,6 +14,7 @@ import {
 const identity = Object.freeze({
   externalUserId: "verified-user",
   externalOrganizationId: "org_verified",
+  canProvisionWorkspace: true,
 });
 const context = Object.freeze({
   userIdentity: identity,
@@ -138,6 +139,31 @@ async function saveRequest(value = payload) {
     payload: value,
   });
 }
+
+test("denies initial ownership without verified provisioning permission before mutation", async () => {
+  for (const permission of [undefined, false, "true", 1]) {
+    const current = fixture({ noMembership: true });
+    const request = await saveRequest();
+    await assert.rejects(
+      current.save.execute({
+        ...context,
+        userIdentity: { ...identity, canProvisionWorkspace: permission },
+      }, payload, request),
+      (error) => error.code === "PERMISSION_DENIED",
+    );
+    assert.equal(current.calls.mutationCommands.length, 0);
+  }
+});
+
+test("existing workspace management does not require initial provisioning permission", async () => {
+  const current = fixture();
+  const result = await current.save.execute({
+    ...context,
+    userIdentity: { ...identity, canProvisionWorkspace: false },
+  }, payload, await saveRequest());
+  assert.equal(result.createdTenant, false);
+  assert.equal(current.calls.mutationCommands.length, 1);
+});
 
 test("reads a bounded profile and returns null before tenant provisioning", async () => {
   const existing = fixture();

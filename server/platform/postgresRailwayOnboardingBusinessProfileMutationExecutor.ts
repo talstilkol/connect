@@ -10,6 +10,7 @@ import { createPostgresClerkOrganizationBindingRepository } from
 import { createPostgresTenantProvisioningRepository } from
   "./postgresTenantProvisioningRepository.ts";
 import type { TenantId } from "../../shared/domain/model.ts";
+import { requireWorkspaceProvisioningPermission } from "../auth/tenantSession.ts";
 import type {
   PostgresQueryResult,
   PostgresTransaction,
@@ -481,6 +482,9 @@ export function createPostgresRailwayOnboardingBusinessProfileMutationExecutor(
     ): Promise<RailwayOnboardingBusinessProfileMutationResult> {
       try {
         validateCommand(command);
+        if (command.session === null) {
+          requireWorkspaceProvisioningPermission(command.identity);
+        }
         return await transactions.transaction(
           { isolationLevel: "read-committed" },
           (transaction) => executeTransaction(transaction, command),

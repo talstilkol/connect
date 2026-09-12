@@ -1210,6 +1210,46 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
   return { calls, handler };
 }
 
+test("first workspace provisioning uses verified Clerk admin status through the complete HTTP boundary", async () => {
+  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he" };
+  const key = await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload);
+  for (const orgRole of ["org:member", undefined, "org:admin"]) {
+    const current = fixture("owner", {
+      identityDependencies: {
+        vercelOidc: { createRemoteKeySet() { return async () => {}; }, async verifyJwt() {} },
+        clerk: {
+          create() {
+            return {
+              async authenticateRequest() {
+                return {
+                  isAuthenticated: true,
+                  toAuth() {
+                    return { isAuthenticated: true, tokenType: "session_token", userId: "verified-user", orgId: "org_verified", orgRole };
+                  },
+                };
+              },
+            };
+          },
+        },
+      },
+      memberships: { async findActiveByExternalUserId() { return []; }, async findActiveByTenantId() { return []; } },
+    });
+    const response = await current.handler.handle(request("onboarding.business-profile.save", payload, "mutation", key));
+    const body = await response.json();
+    if (orgRole === "org:admin") {
+      assert.equal(response.status, 200);
+      assert.equal(body.data.createdTenant, true);
+      assert.equal(current.calls.onboardingProfileMutations.length, 1);
+      assert.equal(current.calls.onboardingProfileMutations[0].identity.canProvisionWorkspace, true);
+    } else {
+      assert.equal(response.status, 403);
+      assert.equal(body.code, "PERMISSION_DENIED");
+      assert.equal(current.calls.onboardingProfileMutations.length, 0);
+    }
+    assert.doesNotMatch(JSON.stringify(body), /canProvisionWorkspace|orgRole|org_verified|verified-user/);
+  }
+});
+
 function request(
   operation,
   payload,

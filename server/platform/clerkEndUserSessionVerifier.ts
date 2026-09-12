@@ -181,6 +181,7 @@ export function createClerkEndUserSessionVerifier(
       return Object.freeze({
         externalUserId: auth.userId as UserId,
         externalOrganizationId: auth.orgId,
+        canProvisionWorkspace: auth.orgRole === "org:admin",
       });
     },
   };

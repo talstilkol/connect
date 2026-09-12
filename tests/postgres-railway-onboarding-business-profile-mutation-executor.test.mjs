@@ -26,6 +26,7 @@ function command(overrides = {}) {
     identity: {
       externalUserId: "verified-user",
       externalOrganizationId: "org_verified",
+      canProvisionWorkspace: true,
     },
     session: null,
     operation: "onboarding.business-profile.save",
@@ -48,6 +49,20 @@ function transactionManager(query) {
     },
   };
 }
+
+test("initial provisioning is denied before opening a transaction without verified permission", async () => {
+  for (const permission of [undefined, false, "true", 1]) {
+    const fixture = transactionManager(async () => {
+      assert.fail("unauthorized provisioning must not reach PostgreSQL");
+    });
+    const input = command();
+    const result = await createPostgresRailwayOnboardingBusinessProfileMutationExecutor(
+      fixture.manager,
+    ).execute({ ...input, identity: { ...input.identity, canProvisionWorkspace: permission } });
+    assert.equal(result.outcome, "unavailable");
+    assert.equal(fixture.calls.length, 0);
+  }
+});
 
 test("provisions and receipts an initial workspace atomically", async () => {
   const queries = [];

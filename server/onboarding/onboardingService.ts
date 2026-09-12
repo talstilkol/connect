@@ -16,6 +16,7 @@ import {
 } from "../../shared/validation/persistedBusinessProfile.ts";
 import {
   resolveTenantSessionFromMemberships,
+  requireWorkspaceProvisioningPermission,
   type AuthenticatedIdentity,
 } from "../auth/tenantSession.ts";
 import type {
@@ -69,6 +70,7 @@ export function createOnboardingService(
         );
 
       if (memberships.length === 0) {
+        requireWorkspaceProvisioningPermission(identity);
         const provisioningKey = await deriveTenantProvisioningKey(
           identity.externalUserId,
         );
