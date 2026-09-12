@@ -45,29 +45,29 @@ export const authMessages = {
     },
     languageSelectorAriaLabel: "בחירת שפת מסך האימות",
     brand: {
-      badge: "React SaaS",
+      badge: "Connect לעסקים",
       titleFirstLine: "סביבת עבודה אחת.",
       titleSecondLine: "כל התקשורת העסקית.",
       description:
-        "כל משתמש מזוהה על ידי Clerk, ולאחר מכן Membership בצד השרת קובע לאיזה Tenant ולאילו הרשאות הוא שייך.",
+        "נהלו את השיחות עם הלקוחות ואת עבודת הצוות במקום אחד.",
       securityTitle: "הסיסמה אינה נשמרת ב־Connect",
       securityDescription:
-        "אימות, Verification ואיפוס סיסמה מנוהלים דרך Clerk.",
+        "שירות האימות מטפל בכניסה לחשבון ובשחזור הסיסמה.",
     },
     configuration: {
-      disabledTitle: "Clerk מוכן לחיבור אך טרם הופעל",
+      disabledTitle: "ההתחברות עדיין אינה זמינה",
       disabledDescription:
-        "יש להגדיר Publishable Key ו־Secret Key בסביבת ההרצה. לא נוצר משתמש חלופי ולא בוצעה כניסה מדומה.",
-      incompleteTitle: "הגדרת Clerk אינה מלאה",
+        "הגדרת השירות טרם הושלמה. פנו למנהל המערכת לקבלת גישה.",
+      incompleteTitle: "לא ניתן להתחבר כרגע",
       incompleteDescription:
-        "הוגדר רק חלק מחוזה ההתחברות. מטעמי אבטחה הטופס נשאר חסום עד השלמת שני המפתחות.",
+        "נדרשת בדיקה של הגדרות השירות. פנו למנהל המערכת ונסו שוב לאחר השלמתה.",
     },
     form: {
       login: {
         eyebrow: "כניסה מאובטחת",
         title: "ברוכים השבים",
         description:
-          "הגישה ל־Workspace דורשת Session מאומת ו־Membership פעיל.",
+          "התחברו לחשבון כדי להמשיך לסביבת העבודה שלכם.",
         switchPrompt: "עדיין אין לך חשבון?",
         switchAction: "פתיחת חשבון",
       },
@@ -89,29 +89,29 @@ export const authMessages = {
     languageSelectorAriaLabel:
       "Select authentication language",
     brand: {
-      badge: "React SaaS",
+      badge: "Connect for business",
       titleFirstLine: "One workspace.",
       titleSecondLine: "Every business conversation.",
       description:
-        "Clerk verifies each user, then a server-side membership determines which tenant and permissions they can access.",
+        "Manage customer conversations and work with your team in one place.",
       securityTitle: "Connect does not store your password",
       securityDescription:
-        "Clerk manages authentication, verification, and password recovery.",
+        "The authentication service handles sign-in and password recovery.",
     },
     configuration: {
-      disabledTitle: "Clerk is ready but not enabled",
+      disabledTitle: "Sign-in is not available yet",
       disabledDescription:
-        "Configure the Publishable Key and Secret Key in the runtime environment. Connect does not create a fallback user or simulate a sign-in.",
-      incompleteTitle: "Clerk configuration is incomplete",
+        "Service setup is not complete. Contact your administrator for access.",
+      incompleteTitle: "Unable to sign in right now",
       incompleteDescription:
-        "Only part of the authentication contract is configured. For security, the form remains blocked until both keys are available.",
+        "The service settings need attention. Contact your administrator and try again once they are resolved.",
     },
     form: {
       login: {
         eyebrow: "Secure sign-in",
         title: "Welcome back",
         description:
-          "Workspace access requires a verified session and an active membership.",
+          "Sign in to continue to your workspace.",
         switchPrompt: "Do not have an account yet?",
         switchAction: "Create account",
       },
@@ -132,29 +132,29 @@ export const authMessages = {
     },
     languageSelectorAriaLabel: "اختيار لغة المصادقة",
     brand: {
-      badge: "React SaaS",
+      badge: "Connect للأعمال",
       titleFirstLine: "مساحة عمل واحدة.",
       titleSecondLine: "لكل محادثات العمل.",
       description:
-        "يتحقق Clerk من هوية كل مستخدم، ثم تحدد العضوية على الخادم المؤسسة والصلاحيات التي يمكنه الوصول إليها.",
+        "أديروا محادثات العملاء وتعاونوا مع فريقكم في مكان واحد.",
       securityTitle: "لا يخزن Connect كلمة المرور",
       securityDescription:
-        "يدير Clerk المصادقة والتحقق واستعادة كلمة المرور.",
+        "تتولى خدمة المصادقة تسجيل الدخول واستعادة كلمة المرور.",
     },
     configuration: {
-      disabledTitle: "Clerk جاهز للربط لكنه غير مفعّل",
+      disabledTitle: "تسجيل الدخول غير متاح بعد",
       disabledDescription:
-        "يجب إعداد Publishable Key وSecret Key في بيئة التشغيل. لا ينشئ Connect مستخدماً بديلاً ولا يحاكي تسجيل الدخول.",
-      incompleteTitle: "إعداد Clerk غير مكتمل",
+        "لم يكتمل إعداد الخدمة. تواصلوا مع مسؤول النظام للحصول على صلاحية الدخول.",
+      incompleteTitle: "يتعذر تسجيل الدخول حالياً",
       incompleteDescription:
-        "تم إعداد جزء فقط من عقد المصادقة. لأسباب أمنية، يبقى النموذج محظوراً حتى يتوفر المفتاحان.",
+        "تحتاج إعدادات الخدمة إلى مراجعة. تواصلوا مع مسؤول النظام وحاولوا مجدداً بعد اكتمالها.",
     },
     form: {
       login: {
         eyebrow: "تسجيل دخول آمن",
         title: "مرحباً بعودتك",
         description:
-          "يتطلب الوصول إلى مساحة العمل جلسة موثقة وعضوية نشطة.",
+          "سجلوا الدخول للمتابعة إلى مساحة العمل الخاصة بكم.",
         switchPrompt: "ليس لديك حساب بعد؟",
         switchAction: "إنشاء حساب",
       },

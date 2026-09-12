@@ -397,8 +397,8 @@ test("server-renders auth and workspace feature routes", async () => {
       decisionsResponse.text(),
     ]);
 
-  assert.match(loginHtml, /Clerk מוכן לחיבור אך טרם הופעל/);
-  assert.match(loginHtml, /לא נוצר משתמש חלופי ולא בוצעה כניסה מדומה/);
+  assert.match(loginHtml, /ההתחברות עדיין אינה זמינה/);
+  assert.match(loginHtml, /פנו למנהל המערכת לקבלת גישה/);
   assert.doesNotMatch(loginHtml, /name="password"/);
   assert.match(templateHtml, /תבניות הודעה/);
   assert.match(templateHtml, /תבניות שמורות/);
