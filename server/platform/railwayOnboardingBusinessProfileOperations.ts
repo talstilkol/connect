@@ -12,6 +12,7 @@ import {
 } from "../onboarding/railwayBusinessProfileResult.ts";
 import {
   requireTenantPermission,
+  requireWorkspaceProvisioningPermission,
   TenantSessionError,
 } from "../auth/tenantSession.ts";
 import type {
@@ -350,6 +351,8 @@ function createSaveOperation(
         );
         if (session !== null) {
           requireTenantPermission(session, "workspace.manage");
+        } else {
+          requireWorkspaceProvisioningPermission(context.userIdentity);
         }
         const result = snapshotMutationResult(
           await dependencies.mutations.execute({

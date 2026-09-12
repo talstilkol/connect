@@ -13,6 +13,18 @@ import {
 
 const mutationKey = `connect_idempotency_v1_${"a".repeat(64)}`;
 
+test("never accepts or exposes the server-only workspace provisioning permission", () => {
+  for (const field of ["canProvisionWorkspace", "can_provision_workspace", "CAN_PROVISION_WORKSPACE"]) {
+    for (const data of [{ [field]: true }, { nested: [{ [field]: true }] }]) {
+      assert.throws(() => parseRailwayApiRequestEnvelope(queryEnvelope(data)), RailwayApiContractError);
+      assert.throws(() => createRailwayApiSuccessEnvelope(data), RailwayApiContractError);
+      assert.throws(() => parseRailwayApiResponseEnvelope({
+        contractVersion: RAILWAY_API_CONTRACT_VERSION, outcome: "ok", data,
+      }), RailwayApiContractError);
+    }
+  }
+});
+
 test("allows only the selected organization reference in the exact selection response, never in requests", () => {
   const data = { organizationId: "org_verified", version: 1, unchanged: false, replayed: false };
   const response = createRailwayApiSuccessEnvelope(data, "tenant-selection.save");

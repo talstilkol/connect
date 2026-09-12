@@ -74,6 +74,7 @@ test("builds both verifiers from one fail-closed configuration", async () => {
     {
       externalUserId: "verified-user",
       externalOrganizationId: "org_verified",
+      canProvisionWorkspace: false,
     },
   );
   assert.deepEqual(calls.map(([name]) => name), [

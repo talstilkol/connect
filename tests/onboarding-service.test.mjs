@@ -8,7 +8,19 @@ import {
 
 const identity = {
   externalUserId: "external-user-id",
+  canProvisionWorkspace: true,
 };
+
+test("legacy onboarding also denies initial ownership without verified permission", async () => {
+  const fixture = dependenciesWith([]);
+  const service = createOnboardingService(fixture.dependencies);
+  await assert.rejects(
+    service.saveBusinessProfile({ ...identity, canProvisionWorkspace: false }, validDraft),
+    (error) => error.code === "PERMISSION_DENIED",
+  );
+  assert.equal(fixture.state.provisioningInputs.length, 0);
+  assert.equal(fixture.state.profileSaves.length, 0);
+});
 
 const validDraft = {
   businessName: "business-name",

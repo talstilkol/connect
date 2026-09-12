@@ -100,6 +100,7 @@ const forbiddenPayloadKeys = new Set([
   "awsaccesskeyid",
   "awssecretaccesskey",
   "blobreadwritetoken",
+  "canprovisionworkspace",
   "clientsecret",
   "cookie",
   "databaseurl",

@@ -36,6 +36,7 @@ function signedInState(overrides = {}) {
         tokenType: "session_token",
         userId: "user_from_verified_session",
         orgId: "org_from_verified_session",
+        orgRole: "org:admin",
         ...overrides,
       };
     },
@@ -97,8 +98,18 @@ test("accepts only a Clerk session token from the configured party", async () =>
   assert.deepEqual(identity, {
     externalUserId: "user_from_verified_session",
     externalOrganizationId: "org_from_verified_session",
+    canProvisionWorkspace: true,
   });
   assert.equal(Object.isFrozen(identity), true);
+});
+
+test("derives provisioning permission only from the verified active organization admin role", async () => {
+  for (const orgRole of ["org:member", undefined, null, "admin", "org:custom", "org:admin "]) {
+    const { verifier } = fixture(signedInState({ orgRole, canProvisionWorkspace: true }));
+    const identity = await verifier.verify(sessionToken);
+    assert.ok(identity, "non-admin organization members can still authenticate");
+    assert.equal(identity.canProvisionWorkspace, false);
+  }
 });
 
 test("rejects signed-out and malformed Clerk identities", async () => {
@@ -193,6 +204,7 @@ test("allows loopback HTTP only for the development identity", async () => {
     {
       externalUserId: "user_from_verified_session",
       externalOrganizationId: "org_from_verified_session",
+      canProvisionWorkspace: true,
     },
   );
   assert.equal(

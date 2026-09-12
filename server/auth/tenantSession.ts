@@ -36,6 +36,23 @@ export interface AuthenticatedIdentity {
    * it, but the Railway identity and tenant boundaries require it.
    */
   externalOrganizationId?: string;
+  /**
+   * Derived by the trusted identity adapter from the signed active Clerk
+   * organization admin role. Only grants initial workspace provisioning;
+   * existing workspace access still comes from stored tenant membership.
+   */
+  canProvisionWorkspace?: boolean;
+}
+
+export function requireWorkspaceProvisioningPermission(
+  identity: Readonly<AuthenticatedIdentity>,
+): void {
+  if (identity.canProvisionWorkspace !== true) {
+    throw new TenantSessionError(
+      "PERMISSION_DENIED",
+      "Workspace provisioning requires organization administration",
+    );
+  }
 }
 
 export interface TenantSession extends TenantContext {
