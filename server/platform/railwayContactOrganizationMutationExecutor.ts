@@ -21,6 +21,7 @@ export type RailwayContactOrganizationMutationPayload =
       contactId: number;
       groupId: number;
       assigned: boolean;
+      expectedRevision?: number;
     }>;
 
 export interface RailwayContactOrganizationMutationCommand {

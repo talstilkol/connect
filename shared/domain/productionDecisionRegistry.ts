@@ -58,7 +58,7 @@ export const PRODUCTION_DECISION_REGISTRY = Object.freeze([
     checkId: "security.knowledge-upload-policy",
     title: "מדיניות העלאת מקורות ידע",
     detail:
-      "טל בחר עד 10 MiB ורק PDF, TXT ו-DOCX. נדרשים אישור אבטחה, אימות MIME וחתימה, Scanner פעיל ותצורה חיה לפני העלאה.",
+      "הגרסה הראשונה תומכת ב־TXT ו־Markdown בלבד עד 128 KiB. קובץ נשמר בהסגר עד תוצאת סריקה נקייה ומאומתת. PDF ו־Office מחוץ להיקף הגרסה; נדרשים חיבור אחסון וסריקה ואימות בסביבה החיה לפני הפעלה.",
     owner: "מוצר + אבטחה",
   },
   {

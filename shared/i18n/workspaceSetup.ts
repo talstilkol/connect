@@ -120,7 +120,7 @@ export const workspaceSetupMessages = {
         profileIncomplete:
           "סביבת העבודה מוכנה. כדי להתקדם לחיבור הרשמי יש להשלים תחילה את פרטי העסק.",
       },
-      showOpenDecisions: "הצגת החלטות פתוחות",
+      showOpenDecisions: "הצגת דרישות הפעלה",
       metricsAriaLabel: "מדדי חשבון",
       metrics: [
         "הודעות בתקופה",
@@ -150,11 +150,11 @@ export const workspaceSetupMessages = {
         meta: "מעבר לחיבור Meta",
         onboarding: "המשך באשף ההקמה",
       },
-      decisionRequired: "דורש החלטה",
+      decisionRequired: "דורש השלמת הגדרה",
       blockingDecisions: (count) =>
-        `${count} החלטות חוסמות Production`,
+        `${count} דרישות ממתינות להגדרה ולאימות`,
       blockingDecisionDescription:
-        "ספק Meta, סליקה, חבילות, AI ומדיניות מידע עדיין לא הוגדרו באפיון.",
+        "הכרעות התכנון מתועדות במרכז ההחלטות. הפעלה דורשת גם הגדרות ספק מאומתות ושמירת ההחלטות בסביבה הפעילה.",
       openDecisionCenter: "פתיחת מרכז ההחלטות",
       quickActions: "פעולות מהירות",
       importContacts: "ייבוא אנשי קשר",
@@ -227,7 +227,8 @@ export const workspaceSetupMessages = {
           "המשתמש שייך למספר Tenants ונדרשת בחירה מפורשת.",
         "permission-denied":
           "לתפקיד הנוכחי אין הרשאה לשנות את פרטי העסק.",
-        "configuration-required": "חיבור Clerk אינו מוגדר במלואו.",
+        "configuration-required":
+          "חיבור סביבת העבודה לשירותים הנדרשים עדיין לא הושלם. פרטי העסק לא נשמרו.",
         "server-error":
           "השמירה בשרת נכשלה. לא בוצע מעבר שקט לשמירה מקומית.",
       },
@@ -251,7 +252,7 @@ export const workspaceSetupMessages = {
         profileIncomplete:
           "The workspace is ready. Complete the business profile before starting the official connection.",
       },
-      showOpenDecisions: "View open decisions",
+      showOpenDecisions: "View activation requirements",
       metricsAriaLabel: "Account metrics",
       metrics: [
         "Messages in period",
@@ -281,11 +282,11 @@ export const workspaceSetupMessages = {
         meta: "Continue to Meta connection",
         onboarding: "Continue setup wizard",
       },
-      decisionRequired: "Decision required",
+      decisionRequired: "Setup required",
       blockingDecisions: (count) =>
-        `${count} decisions block Production`,
+        `${count} requirements await setup and verification`,
       blockingDecisionDescription:
-        "The Meta, billing, packages, AI, and data-policy decisions are not approved yet.",
+        "Planning choices are documented in the decision center. Activation also requires verified provider settings and decision records in the active environment.",
       openDecisionCenter: "Open decision center",
       quickActions: "Quick actions",
       importContacts: "Import contacts",
@@ -359,7 +360,7 @@ export const workspaceSetupMessages = {
         "permission-denied":
           "Your current role cannot change the business profile.",
         "configuration-required":
-          "The Clerk connection is not fully configured.",
+          "The workspace connection to the required services is not ready. The business profile was not saved.",
         "server-error":
           "The server save failed. Connect did not silently fall back to local storage.",
       },
@@ -383,7 +384,7 @@ export const workspaceSetupMessages = {
         profileIncomplete:
           "مساحة العمل جاهزة. أكمل بيانات النشاط قبل بدء الربط الرسمي.",
       },
-      showOpenDecisions: "عرض القرارات المفتوحة",
+      showOpenDecisions: "عرض متطلبات التفعيل",
       metricsAriaLabel: "مقاييس الحساب",
       metrics: [
         "الرسائل خلال الفترة",
@@ -413,11 +414,11 @@ export const workspaceSetupMessages = {
         meta: "المتابعة إلى ربط Meta",
         onboarding: "متابعة معالج الإعداد",
       },
-      decisionRequired: "يتطلب قراراً",
+      decisionRequired: "يلزم إكمال الإعداد",
       blockingDecisions: (count) =>
-        `${count} قرارات تحظر Production`,
+        `${count} متطلبات تنتظر الإعداد والتحقق`,
       blockingDecisionDescription:
-        "لم تُعتمد بعد قرارات Meta والفوترة والباقات وAI وسياسة البيانات.",
+        "خيارات التخطيط موثّقة في مركز القرارات. يتطلب التفعيل أيضًا إعدادات مزوّد موثّقة وحفظ القرارات في البيئة النشطة.",
       openDecisionCenter: "فتح مركز القرارات",
       quickActions: "إجراءات سريعة",
       importContacts: "استيراد جهات الاتصال",
@@ -490,7 +491,8 @@ export const workspaceSetupMessages = {
           "ينتمي المستخدم إلى عدة مؤسسات. اختر واحدة بشكل صريح.",
         "permission-denied":
           "لا يسمح دورك الحالي بتغيير بيانات النشاط.",
-        "configuration-required": "اتصال Clerk غير مكتمل الإعداد.",
+        "configuration-required":
+          "لم يكتمل اتصال مساحة العمل بالخدمات المطلوبة بعد. لم تُحفظ بيانات النشاط.",
         "server-error":
           "فشل الحفظ على الخادم. لم ينتقل Connect بصمت إلى الحفظ المحلي.",
       },

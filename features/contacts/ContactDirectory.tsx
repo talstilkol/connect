@@ -27,6 +27,11 @@ import {
 import { ContactImport } from "./ContactImport";
 import { ContactOrganization } from "./ContactOrganization";
 import {
+  createContactOrganizationState,
+  mergeContactOrganization,
+  type ContactOrganizationState,
+} from "./contactOrganizationState.ts";
+import {
   readContactDirectoryMessages,
   type ContactDirectoryMessages,
 } from "./contactDirectoryMessages";
@@ -65,7 +70,7 @@ export function ContactDirectory({
   const [nextCursor, setNextCursor] =
     useState<number | null>(initialNextCursor);
   const [organization, setOrganization] =
-    useState<ContactOrganizationSnapshot>(initialOrganization);
+    useState<ContactOrganizationState>(() => createContactOrganizationState(initialOrganization));
   const [phoneNumber, setPhoneNumber] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -611,36 +616,4 @@ function contactLoadFailureMessage(
   messages: ContactDirectoryMessages["directory"]["feedback"]["loadFailures"],
 ): string {
   return messages[result.status];
-}
-
-function mergeContactOrganization(
-  current: ContactOrganizationSnapshot,
-  incoming: ContactOrganizationSnapshot,
-): ContactOrganizationSnapshot {
-  const refreshedContactIds = new Set(incoming.scopeContactIds);
-
-  return {
-    scopeContactIds: [
-      ...new Set([
-        ...current.scopeContactIds,
-        ...incoming.scopeContactIds,
-      ]),
-    ],
-    tags: incoming.tags,
-    lists: incoming.lists,
-    tagAssignments: [
-      ...current.tagAssignments.filter(
-        (assignment) =>
-          !refreshedContactIds.has(assignment.contactId),
-      ),
-      ...incoming.tagAssignments,
-    ],
-    listMemberships: [
-      ...current.listMemberships.filter(
-        (membership) =>
-          !refreshedContactIds.has(membership.contactId),
-      ),
-      ...incoming.listMemberships,
-    ],
-  };
 }

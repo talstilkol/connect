@@ -174,7 +174,7 @@ const messages = {
       "cell-length-limit": "אחד התאים ארוך מהמגבלה המותרת.",
     },
     actionFailures: {
-      "configuration-required": "חיבור Clerk אינו מוגדר.",
+      "configuration-required": "חיבור שירותי סביבת העבודה עדיין לא הושלם.",
       unauthenticated: "ה־Session אינו פעיל. יש להתחבר מחדש.",
       "onboarding-required": "יש להשלים תחילה את יצירת סביבת העבודה.",
       "tenant-selection-required": "נדרשת בחירת Tenant מפורשת.",
@@ -254,7 +254,7 @@ const messages = {
       unchanged: "ללא שינוי",
       rejectedOrDuplicate: "נדחו / כפולים",
       disabledNotice:
-        "נדרשים Clerk ו־Tenant פעיל כדי לבצע ייבוא קבוע. בדיקת הקובץ המקומית נשארת זמינה.",
+        "ייבוא קבוע דורש סביבת עבודה פעילה המחוברת לשירות הנתונים. בדיקת הקובץ במחשב נשארת זמינה.",
       processing: (processed, total) => `מעבד ${processed}/${total}...`,
       continueImport: "המשך ייבוא",
       startImport: "התחלת ייבוא קבוע",
@@ -317,7 +317,7 @@ const messages = {
       "cell-length-limit": "A cell exceeds the allowed length.",
     },
     actionFailures: {
-      "configuration-required": "Clerk is not configured.",
+      "configuration-required": "The workspace service connection is not ready.",
       unauthenticated: "The session is inactive. Sign in again.",
       "onboarding-required": "Complete workspace creation first.",
       "tenant-selection-required": "Choose a tenant explicitly.",
@@ -397,7 +397,7 @@ const messages = {
       unchanged: "Unchanged",
       rejectedOrDuplicate: "Rejected / duplicate",
       disabledNotice:
-        "Clerk and an active tenant are required for persistent import. Local file review remains available.",
+        "Persistent import requires an active workspace connected to the data service. Local file review remains available.",
       processing: (processed, total) => `Processing ${processed}/${total}...`,
       continueImport: "Continue import",
       startImport: "Start persistent import",
@@ -460,7 +460,7 @@ const messages = {
       "cell-length-limit": "تتجاوز إحدى الخلايا الطول المسموح.",
     },
     actionFailures: {
-      "configuration-required": "لم يتم إعداد Clerk.",
+      "configuration-required": "لم يكتمل اتصال خدمات مساحة العمل بعد.",
       unauthenticated: "الجلسة غير نشطة. سجّل الدخول مجددًا.",
       "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",
       "tenant-selection-required": "اختر Tenant صراحةً.",
@@ -540,7 +540,7 @@ const messages = {
       unchanged: "بلا تغيير",
       rejectedOrDuplicate: "مرفوضة / مكررة",
       disabledNotice:
-        "يلزم Clerk وTenant نشط للاستيراد الدائم. يبقى فحص الملف المحلي متاحًا.",
+        "يتطلب الاستيراد الدائم مساحة عمل نشطة متصلة بخدمة البيانات. يبقى فحص الملف المحلي متاحًا.",
       processing: (processed, total) => `جارٍ معالجة ${processed}/${total}...`,
       continueImport: "متابعة الاستيراد",
       startImport: "بدء الاستيراد الدائم",

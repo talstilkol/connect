@@ -22,6 +22,10 @@ import {
   type ContactOrganizationActionResult,
 } from "../../server/contacts/contactOrganizationActions";
 import {
+  readContactOrganizationRevision,
+  type ContactOrganizationState,
+} from "./contactOrganizationState.ts";
+import {
   readContactDirectoryMessages,
   type ContactDirectoryMessages,
 } from "./contactDirectoryMessages";
@@ -36,7 +40,7 @@ export function ContactOrganization({
   enabled: boolean;
   language: InterfaceLanguage;
   contacts: readonly ContactRecord[];
-  organization: ContactOrganizationSnapshot;
+  organization: ContactOrganizationState;
   onSnapshot: (snapshot: ContactOrganizationSnapshot) => void;
 }) {
   const messages = readContactDirectoryMessages(language).organization;
@@ -49,6 +53,12 @@ export function ContactOrganization({
   const numericContactId = selectedContactId
     ? Number(selectedContactId)
     : null;
+
+  const expectedRevision = numericContactId === null
+    ? undefined
+    : readContactOrganizationRevision(organization, numericContactId);
+  const needsSnapshotRefresh = numericContactId !== null &&
+    (expectedRevision === undefined || expectedRevision !== organization.revision);
 
   const runAction = (
     action: () => Promise<ContactOrganizationActionResult>,
@@ -94,7 +104,7 @@ export function ContactOrganization({
   };
 
   const toggleTag = (tagId: number, assigned: boolean) => {
-    if (numericContactId === null) {
+    if (numericContactId === null || expectedRevision === undefined || needsSnapshotRefresh) {
       return;
     }
 
@@ -103,12 +113,13 @@ export function ContactOrganization({
         contactId: numericContactId,
         groupId: tagId,
         assigned,
+        expectedRevision,
       }),
     );
   };
 
   const toggleList = (listId: number, assigned: boolean) => {
-    if (numericContactId === null) {
+    if (numericContactId === null || expectedRevision === undefined || needsSnapshotRefresh) {
       return;
     }
 
@@ -117,6 +128,7 @@ export function ContactOrganization({
         contactId: numericContactId,
         groupId: listId,
         assigned,
+        expectedRevision,
       }),
     );
   };
@@ -197,6 +209,20 @@ export function ContactOrganization({
             </select>
           </label>
 
+          {needsSnapshotRefresh || result?.status === "conflict" ? (
+            <div className="inline-notice warning" role="status">
+              <p>{messages.refreshNotice}</p>
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={isPending}
+                onClick={() => window.location.reload()}
+              >
+                {messages.refreshPage}
+              </button>
+            </div>
+          ) : null}
+
           <div className="contact-group-columns">
             <ContactGroupColumn
               title={messages.tags}
@@ -205,7 +231,7 @@ export function ContactOrganization({
               assignedLabel={messages.assigned}
               assignLabel={messages.assign}
               groups={organization.tags}
-              disabled={numericContactId === null || isPending}
+              disabled={numericContactId === null || isPending || needsSnapshotRefresh}
               isAssigned={(groupId) =>
                 numericContactId !== null &&
                 organization.tagAssignments.some(
@@ -223,7 +249,7 @@ export function ContactOrganization({
               assignedLabel={messages.assigned}
               assignLabel={messages.assign}
               groups={organization.lists}
-              disabled={numericContactId === null || isPending}
+              disabled={numericContactId === null || isPending || needsSnapshotRefresh}
               isAssigned={(groupId) =>
                 numericContactId !== null &&
                 organization.listMemberships.some(

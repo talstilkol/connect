@@ -78,7 +78,7 @@ type OperationalReportMessages = {
 
 const hebrewStatuses = {
   "configuration-required":
-    "נדרשת הגדרת Clerk ו־D1 כדי לטעון דוחות.",
+    "טעינת הדוחות דורשת השלמת חיבור שירותי סביבת העבודה.",
   unauthenticated: "יש להתחבר לפני צפייה בדוחות.",
   "onboarding-required":
     "יש להשלים יצירת סביבת עבודה לפני טעינת דוחות.",
@@ -91,7 +91,7 @@ const hebrewStatuses = {
 
 const englishStatuses = {
   "configuration-required":
-    "Configure Clerk and D1 to load reports.",
+    "Complete the workspace service connection to load reports.",
   unauthenticated: "Sign in to view reports.",
   "onboarding-required":
     "Create a workspace before loading reports.",
@@ -104,7 +104,7 @@ const englishStatuses = {
 
 const arabicStatuses = {
   "configuration-required":
-    "يجب إعداد Clerk وD1 لتحميل التقارير.",
+    "أكمل اتصال خدمات مساحة العمل لتحميل التقارير.",
   unauthenticated: "سجّل الدخول لعرض التقارير.",
   "onboarding-required":
     "أنشئ مساحة عمل قبل تحميل التقارير.",

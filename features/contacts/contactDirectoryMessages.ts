@@ -97,6 +97,8 @@ export interface ContactDirectoryMessages {
     createList: string;
     contactPicker: string;
     chooseContact: string;
+    refreshNotice: string;
+    refreshPage: string;
     tags: string;
     noTags: string;
     lists: string;
@@ -105,7 +107,7 @@ export interface ContactDirectoryMessages {
     assigned: string;
     assign: string;
     saved: string;
-    failures: Record<ContactActionFailureStatus, string>;
+    failures: Record<ContactActionFailureStatus | "conflict", string>;
   };
 }
 
@@ -123,7 +125,7 @@ const messages = {
       loaded: (count) => `${count} נטענו מהשרת`,
       serverInactive: "השרת אינו פעיל",
       configurationNotice:
-        "Clerk אינו מוגדר. ניתן לבדוק את מסלול ה־CSV/XLSX המקומי, אך אי אפשר ליצור אנשי קשר קבועים.",
+        "חיבור שירותי סביבת העבודה עדיין לא הושלם. ניתן לבדוק קובצי CSV/XLSX במחשב, אך אי אפשר לשמור אנשי קשר בשרת.",
       errors: {
         "onboarding-required":
           "יש להשלים תחילה את פרטי העסק כדי ליצור Tenant פעיל.",
@@ -168,7 +170,7 @@ const messages = {
         saved: "הפעולה נשמרה בשרת עבור ה־Tenant המאומת.",
         failures: {
           "validation-error": "אחד או יותר מהשדות אינו תקין.",
-          "configuration-required": "חיבור Clerk אינו מוגדר.",
+          "configuration-required": "חיבור שירותי סביבת העבודה עדיין לא הושלם.",
           unauthenticated: "ה־Session אינו פעיל. יש להתחבר מחדש.",
           "onboarding-required":
             "יש להשלים תחילה את יצירת סביבת העבודה.",
@@ -180,7 +182,7 @@ const messages = {
         },
         loadFailures: {
           "validation-error": "סמן ההמשך של הרשימה אינו תקין.",
-          "configuration-required": "חיבור Clerk אינו מוגדר.",
+          "configuration-required": "חיבור שירותי סביבת העבודה עדיין לא הושלם.",
           unauthenticated: "ה־Session אינו פעיל. יש להתחבר מחדש.",
           "onboarding-required":
             "יש להשלים תחילה את יצירת סביבת העבודה.",
@@ -219,13 +221,15 @@ const messages = {
       explanation:
         "תגיות ורשימות מארגנות קהלים בלבד. הן אינן יכולות לעקוף הסרה: איש קשר חסום נשאר חסום בכל הרשימות.",
       disabledNotice:
-        "נדרשים Clerk ו־Tenant פעיל כדי לשמור תגיות ורשימות.",
+        "שמירת תגיות ורשימות דורשת סביבת עבודה פעילה המחוברת לשירות הנתונים.",
       tagName: "שם תגית",
       createTag: "יצירת תגית",
       listName: "שם רשימה",
       createList: "יצירת רשימה",
       contactPicker: "איש קשר לניהול שיוכים",
       chooseContact: "בחירת איש קשר",
+      refreshNotice: "יש לרענן את העמוד לפני שינוי שיוכים של איש קשר זה. נתוני השיוך המוצגים עדיין לא נבדקו מול העדכון האחרון.",
+      refreshPage: "רענון העמוד",
       tags: "תגיות",
       noTags: "לא נוצרו תגיות.",
       lists: "רשימות",
@@ -236,7 +240,8 @@ const messages = {
       saved: "השינוי נשמר עבור ה־Tenant המאומת.",
       failures: {
         "validation-error": "שם הקבוצה או השיוך אינם תקינים.",
-        "configuration-required": "חיבור Clerk אינו מוגדר.",
+        conflict: "ארגון אנשי הקשר השתנה. רעננו את העמוד לפני שינוי נוסף.",
+        "configuration-required": "חיבור שירותי סביבת העבודה עדיין לא הושלם.",
         unauthenticated: "ה־Session אינו פעיל. יש להתחבר מחדש.",
         "onboarding-required":
           "יש להשלים תחילה את יצירת סביבת העבודה.",
@@ -261,7 +266,7 @@ const messages = {
       loaded: (count) => `${count} loaded from the server`,
       serverInactive: "Server unavailable",
       configurationNotice:
-        "Clerk is not configured. You can test the local CSV/XLSX flow, but persistent contacts cannot be created.",
+        "The workspace service connection is not ready. You can test the local CSV/XLSX flow, but persistent contacts cannot be created.",
       errors: {
         "onboarding-required":
           "Complete the business profile first to create an active tenant.",
@@ -306,7 +311,7 @@ const messages = {
         saved: "The action was saved for the authenticated tenant.",
         failures: {
           "validation-error": "One or more fields are invalid.",
-          "configuration-required": "Clerk is not configured.",
+          "configuration-required": "The workspace service connection is not ready.",
           unauthenticated: "The session is inactive. Sign in again.",
           "onboarding-required": "Complete workspace creation first.",
           "tenant-selection-required": "Choose a tenant explicitly.",
@@ -318,7 +323,7 @@ const messages = {
         },
         loadFailures: {
           "validation-error": "The list continuation cursor is invalid.",
-          "configuration-required": "Clerk is not configured.",
+          "configuration-required": "The workspace service connection is not ready.",
           unauthenticated: "The session is inactive. Sign in again.",
           "onboarding-required": "Complete workspace creation first.",
           "tenant-selection-required": "Choose a tenant explicitly.",
@@ -356,13 +361,15 @@ const messages = {
       explanation:
         "Tags and lists organize audiences only. They cannot bypass an unsubscribe: a blocked contact remains blocked in every list.",
       disabledNotice:
-        "Clerk and an active tenant are required to save tags and lists.",
+        "Saving tags and lists requires an active workspace connected to the data service.",
       tagName: "Tag name",
       createTag: "Create tag",
       listName: "List name",
       createList: "Create list",
       contactPicker: "Contact to manage assignments",
       chooseContact: "Choose a contact",
+      refreshNotice: "Refresh the page before changing this contact’s assignments. The displayed assignments have not been checked against the latest update.",
+      refreshPage: "Refresh page",
       tags: "Tags",
       noTags: "No tags have been created.",
       lists: "Lists",
@@ -373,7 +380,8 @@ const messages = {
       saved: "The change was saved for the authenticated tenant.",
       failures: {
         "validation-error": "The group name or assignment is invalid.",
-        "configuration-required": "Clerk is not configured.",
+        conflict: "Contact organization has changed. Refresh the page before making another change.",
+        "configuration-required": "The workspace service connection is not ready.",
         unauthenticated: "The session is inactive. Sign in again.",
         "onboarding-required": "Complete workspace creation first.",
         "tenant-selection-required": "Choose a tenant explicitly.",
@@ -398,7 +406,7 @@ const messages = {
       loaded: (count) => `تم تحميل ${count} من الخادم`,
       serverInactive: "الخادم غير متاح",
       configurationNotice:
-        "لم يتم إعداد Clerk. يمكن اختبار مسار CSV/XLSX المحلي، لكن لا يمكن إنشاء جهات اتصال دائمة.",
+        "لم يكتمل اتصال خدمات مساحة العمل بعد. يمكن اختبار مسار CSV/XLSX المحلي، لكن لا يمكن إنشاء جهات اتصال دائمة.",
       errors: {
         "onboarding-required":
           "أكمل بيانات النشاط أولًا لإنشاء Tenant نشط.",
@@ -443,7 +451,7 @@ const messages = {
         saved: "تم حفظ الإجراء للـTenant الموثّق.",
         failures: {
           "validation-error": "حقل واحد أو أكثر غير صالح.",
-          "configuration-required": "لم يتم إعداد Clerk.",
+          "configuration-required": "لم يكتمل اتصال خدمات مساحة العمل بعد.",
           unauthenticated: "الجلسة غير نشطة. سجّل الدخول مجددًا.",
           "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",
           "tenant-selection-required": "اختر Tenant صراحةً.",
@@ -453,7 +461,7 @@ const messages = {
         },
         loadFailures: {
           "validation-error": "مؤشر متابعة القائمة غير صالح.",
-          "configuration-required": "لم يتم إعداد Clerk.",
+          "configuration-required": "لم يكتمل اتصال خدمات مساحة العمل بعد.",
           unauthenticated: "الجلسة غير نشطة. سجّل الدخول مجددًا.",
           "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",
           "tenant-selection-required": "اختر Tenant صراحةً.",
@@ -490,13 +498,15 @@ const messages = {
       explanation:
         "تنظّم الوسوم والقوائم الجماهير فقط. لا يمكنها تجاوز إلغاء الاشتراك: تبقى جهة الاتصال المحظورة محظورة في جميع القوائم.",
       disabledNotice:
-        "يلزم Clerk وTenant نشط لحفظ الوسوم والقوائم.",
+        "يتطلب حفظ الوسوم والقوائم مساحة عمل نشطة متصلة بخدمة البيانات.",
       tagName: "اسم الوسم",
       createTag: "إنشاء وسم",
       listName: "اسم القائمة",
       createList: "إنشاء قائمة",
       contactPicker: "جهة الاتصال المراد إدارة تعييناتها",
       chooseContact: "اختيار جهة اتصال",
+      refreshNotice: "حدّث الصفحة قبل تغيير تعيينات جهة الاتصال هذه. لم تُراجع التعيينات المعروضة مقابل آخر تحديث بعد.",
+      refreshPage: "تحديث الصفحة",
       tags: "الوسوم",
       noTags: "لم يتم إنشاء وسوم.",
       lists: "القوائم",
@@ -507,7 +517,8 @@ const messages = {
       saved: "تم حفظ التغيير للـTenant الموثّق.",
       failures: {
         "validation-error": "اسم المجموعة أو التعيين غير صالح.",
-        "configuration-required": "لم يتم إعداد Clerk.",
+        conflict: "تغيّر تنظيم جهات الاتصال. حدّث الصفحة قبل إجراء تغيير آخر.",
+        "configuration-required": "لم يكتمل اتصال خدمات مساحة العمل بعد.",
         unauthenticated: "الجلسة غير نشطة. سجّل الدخول مجددًا.",
         "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",
         "tenant-selection-required": "اختر Tenant صراحةً.",

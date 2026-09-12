@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   createRailwayContactDirectoryHandler,
+  parseRailwayContactOrganizationSnapshot,
 } from "../server/contacts/railwayContactDirectoryHandler.ts";
 
 const oidcToken = "oidcHeader.oidcPayload.oidcSignature";
@@ -290,4 +291,15 @@ test("sanitizes client failures and rejects missing or extended dependencies", a
     }),
     /dependencies are invalid/,
   );
+});
+
+test("preserves server organization revisions and accepts historical snapshots", () => {
+  const snapshot = page().organization;
+  assert.deepEqual(parseRailwayContactOrganizationSnapshot(snapshot, [23]), snapshot);
+  for (const revision of [0, 42, Number.MAX_SAFE_INTEGER]) {
+    assert.deepEqual(parseRailwayContactOrganizationSnapshot({ ...snapshot, revision }, [23]), { ...snapshot, revision });
+  }
+  for (const revision of [-1, 0.5, '42', null, undefined, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(parseRailwayContactOrganizationSnapshot({ ...snapshot, revision }, [23]), null);
+  }
 });

@@ -266,7 +266,7 @@ const messages = {
       },
       directoryFailures: {
         "configuration-required":
-          "Clerk או D1 אינם מוגדרים. מוצג תרגול מקומי בלבד, ללא קמפיין עסקי.",
+          "חיבור שירותי סביבת העבודה עדיין לא הושלם. מוצג תרגול מקומי בלבד, ללא קמפיין עסקי.",
         "onboarding-required":
           "נדרש להשלים יצירת סביבת עבודה לפני ניהול קמפיינים.",
         "tenant-selection-required":
@@ -287,7 +287,7 @@ const messages = {
         "audience-invalid":
           "הקהל ריק, אינו כשיר או שחסרים ערכי התאמה אמיתיים.",
         "configuration-required":
-          "שמירה קבועה דורשת Clerk ו־D1 מוגדרים.",
+          "שמירה קבועה דורשת השלמת חיבור שירותי סביבת העבודה.",
         unauthenticated: "נדרשת התחברות לפני שמירת קמפיין.",
         "onboarding-required": "נדרש להשלים יצירת סביבת עבודה.",
         "tenant-selection-required": "יש לבחור סביבת עבודה פעילה.",
@@ -302,7 +302,7 @@ const messages = {
         "delivery-configuration-required":
           "ההפעלה חסומה עד חיבור Adapter שליחה אמיתי.",
         "configuration-required":
-          "ההפעלה דורשת Clerk ו־D1 מוגדרים.",
+          "ההפעלה דורשת השלמת חיבור שירותי סביבת העבודה.",
         unauthenticated: "נדרשת התחברות לפני הפעלת קמפיין.",
         "onboarding-required": "נדרש להשלים יצירת סביבת עבודה.",
         "tenant-selection-required": "יש לבחור סביבת עבודה פעילה.",
@@ -546,7 +546,7 @@ const messages = {
       },
       directoryFailures: {
         "configuration-required":
-          "Clerk or D1 is not configured. Only a local rehearsal is shown; no business campaign is created.",
+          "The workspace service connection is not ready. Only a local rehearsal is shown; no business campaign is created.",
         "onboarding-required":
           "Complete workspace creation before managing campaigns.",
         "tenant-selection-required":
@@ -567,7 +567,7 @@ const messages = {
         "audience-invalid":
           "The audience is empty, ineligible, or missing real personalization values.",
         "configuration-required":
-          "Persistent saving requires configured Clerk and D1.",
+          "Persistent saving requires the workspace service connection to be ready.",
         unauthenticated: "Sign in before saving a campaign.",
         "onboarding-required": "Complete workspace creation first.",
         "tenant-selection-required": "Select an active workspace.",
@@ -584,7 +584,7 @@ const messages = {
         "delivery-configuration-required":
           "Activation is blocked until a real delivery Adapter is connected.",
         "configuration-required":
-          "Activation requires configured Clerk and D1.",
+          "Activation requires the workspace service connection to be ready.",
         unauthenticated: "Sign in before activating a campaign.",
         "onboarding-required": "Complete workspace creation first.",
         "tenant-selection-required": "Select an active workspace.",
@@ -831,7 +831,7 @@ const messages = {
       },
       directoryFailures: {
         "configuration-required":
-          "لم يتم إعداد Clerk أو D1. تظهر تجربة محلية فقط ولا تُنشأ حملة تجارية.",
+          "لم يكتمل اتصال خدمات مساحة العمل بعد. تظهر تجربة محلية فقط ولا تُنشأ حملة تجارية.",
         "onboarding-required":
           "أكمل إنشاء مساحة العمل قبل إدارة الحملات.",
         "tenant-selection-required":
@@ -851,7 +851,7 @@ const messages = {
         "audience-invalid":
           "الجمهور فارغ أو غير مؤهل أو تنقصه قيم تخصيص حقيقية.",
         "configuration-required":
-          "يتطلب الحفظ الدائم إعداد Clerk وD1.",
+          "يتطلب الحفظ الدائم إكمال اتصال خدمات مساحة العمل.",
         unauthenticated: "سجّل الدخول قبل حفظ الحملة.",
         "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",
         "tenant-selection-required": "اختر مساحة عمل نشطة.",
@@ -866,7 +866,7 @@ const messages = {
           "تغيرت الحملة أو تم تفعيلها بالفعل. حدّث القائمة.",
         "delivery-configuration-required":
           "التفعيل محظور حتى توصيل Adapter إرسال حقيقي.",
-        "configuration-required": "يتطلب التفعيل إعداد Clerk وD1.",
+        "configuration-required": "يتطلب التفعيل إكمال اتصال خدمات مساحة العمل.",
         unauthenticated: "سجّل الدخول قبل تفعيل الحملة.",
         "onboarding-required": "أكمل إنشاء مساحة العمل أولًا.",
         "tenant-selection-required": "اختر مساحة عمل نشطة.",

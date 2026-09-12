@@ -61,7 +61,7 @@ test("server-renders the workspace dashboard", async () => {
   assert.doesNotMatch(html, /השלב הראשון: חיבור רשמי ל־Meta/);
   assert.match(
     html,
-    /החלטות חוסמות Production/,
+    /דרישות ממתינות להגדרה ולאימות/,
   );
 });
 
@@ -308,13 +308,13 @@ test("server-renders the conversation inbox boundary in English and Arabic", asy
   assert.match(englishHtml, /Inbox unavailable/);
   assert.match(
     englishHtml,
-    /Conversations are not loaded and no fallback display data is created/,
+    /The workspace service connection is not ready\. Conversations are currently unavailable/,
   );
   assert.doesNotMatch(englishHtml, /תיבת השיחות אינה זמינה/);
 
   assert.match(arabicHtml, /صندوق المحادثات/);
   assert.match(arabicHtml, /صندوق المحادثات غير متاح/);
-  assert.match(arabicHtml, /لا يتم تحميل المحادثات/);
+  assert.match(arabicHtml, /لم يكتمل اتصال خدمات مساحة العمل بعد\. المحادثات غير متاحة حاليًا/);
   assert.doesNotMatch(arabicHtml, /תיבת השיחות אינה זמינה/);
 });
 
@@ -419,7 +419,9 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.match(contactsHtml, /בחירת קובץ אנשי קשר/);
   assert.match(contactsHtml, /הנתונים אינם מועלים/);
   assert.match(contactsHtml, /ניהול אנשי קשר קבוע/);
-  assert.match(contactsHtml, /Clerk אינו מוגדר/);
+  assert.match(contactsHtml, /חיבור שירותי סביבת העבודה עדיין לא הושלם/);
+  assert.match(contactsHtml, /אי אפשר לשמור אנשי קשר בשרת/);
+  assert.doesNotMatch(contactsHtml, /Clerk אינו מוגדר/);
   assert.doesNotMatch(contactsHtml, /שמירת איש קשר/);
   assert.match(campaignsHtml, /טיוטת קמפיין/);
   assert.match(campaignsHtml, /שלמות תכנון/);
@@ -431,7 +433,7 @@ test("server-renders auth and workspace feature routes", async () => {
   assert.match(inboxHtml, /תיבת שיחות/);
   assert.match(
     inboxHtml,
-    /לא נטענות שיחות ולא נוצרים נתוני תצוגה חלופיים/,
+    /חיבור שירותי סביבת העבודה עדיין לא הושלם\. השיחות אינן זמינות כעת/,
   );
   assert.doesNotMatch(
     inboxHtml,
@@ -462,7 +464,7 @@ test("server-renders auth and workspace feature routes", async () => {
   );
   assert.match(
     decisionsHtml,
-    /מקור הנתונים זהה לשער המוכנות/,
+    /המצב נקרא מהגדרות הסביבה הפעילה/,
   );
   assert.match(
     decisionsHtml,

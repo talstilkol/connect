@@ -15,6 +15,7 @@ export interface ContactListMembership {
 }
 
 export interface ContactOrganizationSnapshot {
+  revision?: number;
   scopeContactIds: readonly number[];
   tags: readonly ContactGroupRecord[];
   lists: readonly ContactGroupRecord[];

@@ -55,7 +55,7 @@ test("keeps selected production directions visible but fail-closed", () => {
   assert.match(details.get("billing.provider"), /Paddle/);
   assert.match(details.get("billing.provider"), /Stripe רדום/);
   assert.match(details.get("security.rate-limit-policy"), /מצב Meta חי/);
-  assert.match(details.get("security.knowledge-upload-policy"), /10 MiB/);
+  assert.match(details.get("security.knowledge-upload-policy"), /TXT.*Markdown.*128 KiB/);
   assert.match(details.get("operations.knowledge-scan-recovery"), /15 דקות/);
   assert.match(details.get("operations.backup-policy"), /90 יום/);
   assert.match(details.get("operations.slo-measurement"), /Better Stack/);

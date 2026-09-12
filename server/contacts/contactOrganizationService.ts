@@ -48,6 +48,7 @@ export interface ContactOrganizationService {
 }
 
 export interface ContactOrganizationAssignmentInput {
+  expectedRevision?: number;
   contactId: number;
   groupId: number;
   assigned: boolean;
@@ -109,8 +110,9 @@ export function parseContactOrganizationAssignment(
     typeof input !== "object" ||
     input === null ||
     Array.isArray(input) ||
-    Object.keys(input).sort().join(",") !==
-      "assigned,contactId,groupId" ||
+    !["assigned,contactId,groupId", "assigned,contactId,expectedRevision,groupId"].includes(
+      Object.keys(input).sort().join(","),
+    ) ||
     !("contactId" in input) ||
     !("groupId" in input) ||
     !("assigned" in input) ||
@@ -118,7 +120,10 @@ export function parseContactOrganizationAssignment(
     Number(input.contactId) <= 0 ||
     !Number.isSafeInteger(input.groupId) ||
     Number(input.groupId) <= 0 ||
-    typeof input.assigned !== "boolean"
+    typeof input.assigned !== "boolean" ||
+    ("expectedRevision" in input && (
+      !Number.isSafeInteger(input.expectedRevision) || Number(input.expectedRevision) < 0
+    ))
   ) {
     throw new ContactOrganizationInputError("invalid-assignment");
   }
@@ -127,6 +132,7 @@ export function parseContactOrganizationAssignment(
     contactId: Number(input.contactId),
     groupId: Number(input.groupId),
     assigned: input.assigned,
+    ...("expectedRevision" in input ? { expectedRevision: Number(input.expectedRevision) } : {}),
   });
 }
 

@@ -62,6 +62,7 @@ test("upserts tenant-scoped tags and lists through one returning statement", asy
 
 test("reads group counts and only the requested contact relationships", async () => {
   const fixture = scriptedQueries([
+    [{ revision: "42" }],
     [{ id: "11", name: "Priority", contactCount: "1" }],
     [{ id: "12", name: "Pilot", contactCount: "1" }],
     [{ contactId: "23", groupId: "11" }],
@@ -72,28 +73,30 @@ test("reads group counts and only the requested contact relationships", async ()
   );
 
   assert.deepEqual(await repository.readSnapshot(7, [23, 24]), {
+    revision: 42,
     scopeContactIds: [23, 24],
     tags: [{ id: 11, name: "Priority", contactCount: 1 }],
     lists: [{ id: 12, name: "Pilot", contactCount: 1 }],
     tagAssignments: [{ contactId: 23, tagId: 11 }],
     listMemberships: [{ contactId: 24, listId: 12 }],
   });
-  assert.equal(fixture.calls.length, 4);
-  assert.deepEqual(fixture.calls[2].parameters, [7, 23, 24]);
+  assert.equal(fixture.calls.length, 5);
   assert.deepEqual(fixture.calls[3].parameters, [7, 23, 24]);
-  assert.match(fixture.calls[2].sql, /tenant_id = \$1/);
-  assert.match(fixture.calls[2].sql, /contact_id IN \(\$2, \$3\)/);
+  assert.deepEqual(fixture.calls[4].parameters, [7, 23, 24]);
+  assert.match(fixture.calls[3].sql, /tenant_id = \$1/);
   assert.match(fixture.calls[3].sql, /contact_id IN \(\$2, \$3\)/);
+  assert.match(fixture.calls[4].sql, /contact_id IN \(\$2, \$3\)/);
 });
 
 test("does not query relationships for an empty contact scope", async () => {
-  const fixture = scriptedQueries([[], []]);
+  const fixture = scriptedQueries([[{ revision: "0" }], [], []]);
 
   assert.deepEqual(
     await createPostgresContactOrganizationRepository(
       fixture.queries,
     ).readSnapshot(7, []),
     {
+      revision: 0,
       scopeContactIds: [],
       tags: [],
       lists: [],
@@ -101,7 +104,7 @@ test("does not query relationships for an empty contact scope", async () => {
       listMemberships: [],
     },
   );
-  assert.equal(fixture.calls.length, 2);
+  assert.equal(fixture.calls.length, 3);
 });
 
 test("sets and removes relationships only after a same-tenant target exists", async () => {
@@ -178,7 +181,7 @@ test("rejects cross-scope and malformed snapshot rows", async () => {
   for (const results of invalidFixtures) {
     await assert.rejects(
       createPostgresContactOrganizationRepository(
-        scriptedQueries(results).queries,
+        scriptedQueries([[{ revision: "0" }], ...results]).queries,
       ).readSnapshot(7, [23]),
       /PostgreSQL returned|trimmed string/,
     );

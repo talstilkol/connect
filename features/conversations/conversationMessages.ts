@@ -29,7 +29,7 @@ type Localized<T> = {
 const hebrewMessages = {
   directoryFailures: {
     "configuration-required":
-      "Clerk או D1 אינם מוגדרים. לא נטענות שיחות ולא נוצרים נתוני תצוגה חלופיים.",
+      "חיבור שירותי סביבת העבודה עדיין לא הושלם. השיחות אינן זמינות כעת.",
     unauthenticated:
       "נדרשת התחברות לפני צפייה בשיחות.",
     "onboarding-required":
@@ -46,7 +46,7 @@ const hebrewMessages = {
   >,
   actionFailures: {
     "configuration-required":
-      "הפעולה דורשת Clerk ו־D1 מוגדרים.",
+      "הפעולה דורשת השלמת חיבור שירותי סביבת העבודה.",
     unauthenticated:
       "נדרשת התחברות מחדש לפני ביצוע הפעולה.",
     "onboarding-required":
@@ -71,7 +71,7 @@ const hebrewMessages = {
   >,
   aiApprovalFailures: {
     "configuration-required":
-      "אישורי AI דורשים Clerk ו־D1 מוגדרים.",
+      "אישורי AI דורשים השלמת חיבור שירותי סביבת העבודה.",
     unauthenticated:
       "נדרשת התחברות מחדש לפני החלטה.",
     "onboarding-required":
@@ -242,7 +242,7 @@ const messages: Record<
   en: {
     directoryFailures: {
       "configuration-required":
-        "Clerk or D1 is not configured. Conversations are not loaded and no fallback display data is created.",
+        "The workspace service connection is not ready. Conversations are currently unavailable.",
       unauthenticated:
         "Sign in before viewing conversations.",
       "onboarding-required":
@@ -256,7 +256,7 @@ const messages: Record<
     },
     actionFailures: {
       "configuration-required":
-        "This action requires configured Clerk and D1 services.",
+        "This action requires the workspace service connection to be ready.",
       unauthenticated:
         "Sign in again before performing this action.",
       "onboarding-required":
@@ -278,7 +278,7 @@ const messages: Record<
     },
     aiApprovalFailures: {
       "configuration-required":
-        "AI approvals require configured Clerk and D1 services.",
+        "AI approvals require the workspace service connection to be ready.",
       unauthenticated:
         "Sign in again before making a decision.",
       "onboarding-required":
@@ -431,7 +431,7 @@ const messages: Record<
   ar: {
     directoryFailures: {
       "configuration-required":
-        "لم يتم إعداد Clerk أو D1. لا يتم تحميل المحادثات ولا إنشاء بيانات عرض بديلة.",
+        "لم يكتمل اتصال خدمات مساحة العمل بعد. المحادثات غير متاحة حاليًا.",
       unauthenticated:
         "يجب تسجيل الدخول قبل عرض المحادثات.",
       "onboarding-required":
@@ -445,7 +445,7 @@ const messages: Record<
     },
     actionFailures: {
       "configuration-required":
-        "يتطلب هذا الإجراء إعداد Clerk وD1.",
+        "يتطلب هذا الإجراء إكمال اتصال خدمات مساحة العمل.",
       unauthenticated:
         "يجب تسجيل الدخول مجددًا قبل تنفيذ الإجراء.",
       "onboarding-required":
@@ -467,7 +467,7 @@ const messages: Record<
     },
     aiApprovalFailures: {
       "configuration-required":
-        "تتطلب موافقات AI إعداد Clerk وD1.",
+        "تتطلب موافقات AI إكمال اتصال خدمات مساحة العمل.",
       unauthenticated:
         "يجب تسجيل الدخول مجددًا قبل اتخاذ القرار.",
       "onboarding-required":

@@ -65,7 +65,7 @@ function conversation(keyCharacter = "b", overrides = {}) {
   };
 }
 
-test("presents every inbox directory boundary without fallback records", () => {
+test("presents every inbox directory boundary and identifies unavailable services", () => {
   assert.deepEqual(
     Object.keys(inboxDirectoryFailureMessages).sort(),
     [
@@ -81,7 +81,7 @@ test("presents every inbox directory boundary without fallback records", () => {
     inboxDirectoryFailureMessages[
       "configuration-required"
     ],
-    /לא נוצרים נתוני תצוגה חלופיים/,
+    /חיבור שירותי סביבת העבודה עדיין לא הושלם\. השיחות אינן זמינות כעת/,
   );
 });
 

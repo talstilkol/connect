@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import pg from "pg";
+import { verifyContactOrganizationMutationsPostgres } from "../../scripts/verify-contact-organization-mutations-postgres.mjs";
 
 import {
   applyPostgresMigrations,
@@ -84,5 +85,10 @@ test("startup migrations commit as a group and roll back a real late SQL failure
     await assert.rejects(applyPostgresMigrations(pool), /RAILWAY_API_STARTUP_REHEARSAL_DATABASE_NOT_EMPTY/);
     assert.deepEqual(await schemaSnapshot(pool), before);
     assert.equal(pool.totalCount, pool.idleCount);
+  });
+
+  await t.test("organization retries, new intents and concurrent revisions preserve data", async () => {
+    const result = await verifyContactOrganizationMutationsPostgres(pool);
+    assert.equal(result.status, "passed");
   });
 });

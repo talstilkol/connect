@@ -89,6 +89,8 @@ function mapFailure(code: string): ContactOrganizationActionResult {
       return { status: "permission-denied" };
     case "NOT_FOUND":
       return { status: "not-found" };
+    case "CONFLICT":
+      return { status: "conflict" };
     default:
       return { status: "server-error" };
   }

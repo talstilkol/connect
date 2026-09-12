@@ -363,9 +363,12 @@ export function parseRailwayContactOrganizationSnapshot(
   value: unknown,
   expectedContactIds: readonly number[],
 ): Readonly<ContactOrganizationSnapshot> | null {
-  if (!isExactRecord(value, organizationKeys)) {
+  if (!isExactRecord(value, organizationKeys) &&
+      !isExactRecord(value, [...organizationKeys, "revision"].sort())) {
     return null;
   }
+
+  if ("revision" in value && parseNonnegativeInteger(value.revision) === null) return null;
 
   const scopeContactIds = parseScopeContactIds(
     value.scopeContactIds,
@@ -397,6 +400,7 @@ export function parseRailwayContactOrganizationSnapshot(
   return tagAssignments === null || listMemberships === null
     ? null
     : Object.freeze({
+        ...("revision" in value ? { revision: Number(value.revision) } : {}),
         scopeContactIds,
         tags,
         lists,

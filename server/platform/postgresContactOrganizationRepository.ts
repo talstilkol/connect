@@ -87,6 +87,15 @@ function writeRelationshipSql(
 }
 
 export const postgresContactOrganizationSql = Object.freeze({
+  readRevision: `
+    SELECT COALESCE(MAX(id), 0) AS revision
+    FROM audit_logs
+    WHERE tenant_id = $1
+      AND action IN (
+        'contacts.organization.tag.save', 'contacts.organization.list.save',
+        'contacts.organization.tag-assignment', 'contacts.organization.list-membership'
+      )
+  `,
   upsertTag: `
     INSERT INTO contact_tags (
       tenant_id, name, normalized_name
@@ -297,6 +306,19 @@ function mapListMemberships(
   );
 }
 
+export async function readPostgresContactOrganizationRevision(
+  queries: PostgresQueryExecutor,
+  tenantId: number,
+): Promise<number> {
+  const result = await queries.query<Record<string, unknown>>(
+    postgresContactOrganizationSql.readRevision,
+    [requirePositiveInteger(tenantId, "tenantId")],
+  );
+  const rows = requirePostgresRows(result, 1);
+  if (rows.length !== 1) throw new Error("Contact organization revision is unavailable");
+  return parseNonnegativeInteger(requireExactPostgresRow(rows[0], ["revision"]).revision);
+}
+
 export function createPostgresContactOrganizationRepository(
   queries: PostgresQueryExecutor,
 ): Readonly<ContactOrganizationRepository> {
@@ -400,6 +422,9 @@ export function createPostgresContactOrganizationRepository(
     ): Promise<Readonly<ContactOrganizationSnapshot>> {
       const tenantId = requirePositiveInteger(tenantIdInput, "tenantId");
       const contactIds = requireContactIds(contactIdsInput);
+      // Read the revision first: concurrent changes leave an older token,
+      // which is safely rejected when a later mutation checks its revision.
+      const revision = await readPostgresContactOrganizationRevision(queries, tenantId);
       const [tagResult, listResult] = await Promise.all([
         queries.query<Record<string, unknown>>(
           postgresContactOrganizationSql.listTags,
@@ -449,6 +474,7 @@ export function createPostgresContactOrganizationRepository(
       }
 
       return Object.freeze({
+        revision,
         scopeContactIds: contactIds,
         tags,
         lists,

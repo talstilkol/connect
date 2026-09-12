@@ -214,7 +214,7 @@ test("maps bounded Railway failures and rejects unsafe responses", async () => {
     ["TENANT_SELECTION_REQUIRED", "tenant-selection-required"],
     ["PERMISSION_DENIED", "permission-denied"],
     ["NOT_FOUND", "not-found"],
-    ["CONFLICT", "server-error"],
+    ["CONFLICT", "conflict"],
     ["RATE_LIMITED", "server-error"],
   ];
 
@@ -275,4 +275,16 @@ test("sanitizes client failures and rejects unsafe dependencies", async () => {
     }),
     /dependencies are invalid/,
   );
+});
+
+test("keeps retries stable and gives later assignment intents a distinct key", async () => {
+  const f = fixture();
+  for (const expectedRevision of [91, 91, 93]) {
+    const result = await f.handler.setTagAssignment({ contactId: 23, groupId: 5, assigned: true, expectedRevision });
+    assert.equal(result.status, "saved");
+  }
+  const [first, retry, later] = f.calls.requests;
+  assert.deepEqual(retry, first);
+  assert.notEqual(later.idempotencyKey, first.idempotencyKey);
+  assert.equal(later.payload.expectedRevision, 93);
 });

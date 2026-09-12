@@ -37,7 +37,7 @@ const hebrewMessages = {
   },
   directoryStatuses: {
     "configuration-required":
-      "נדרשת הגדרת Clerk ו־D1 כדי לשמור תהליכי בוט.",
+      "שמירת תהליכי בוט דורשת השלמת חיבור שירותי סביבת העבודה.",
     unauthenticated:
       "יש להתחבר לפני צפייה בתהליכי הבוט.",
     "onboarding-required":
@@ -54,7 +54,7 @@ const hebrewMessages = {
   >,
   actionStatuses: {
     "configuration-required":
-      "החיבור ל־Clerk או ל־D1 אינו מוגדר.",
+      "חיבור שירותי סביבת העבודה עדיין לא הושלם.",
     unauthenticated:
       "החיבור פג. יש להתחבר מחדש.",
     "onboarding-required":
@@ -462,7 +462,7 @@ const englishMessages: BotFlowMessages = {
   },
   directoryStatuses: {
     "configuration-required":
-      "Configure Clerk and D1 to save bot flows.",
+      "Complete the workspace service connection to save bot flows.",
     unauthenticated: "Sign in to view bot flows.",
     "onboarding-required":
       "Create a workspace before saving a flow.",
@@ -474,7 +474,7 @@ const englishMessages: BotFlowMessages = {
   },
   actionStatuses: {
     "configuration-required":
-      "The Clerk or D1 connection is not configured.",
+      "The workspace service connection is not ready.",
     unauthenticated: "Your session expired. Sign in again.",
     "onboarding-required": "Create a workspace first.",
     "tenant-selection-required":
@@ -849,7 +849,7 @@ const arabicMessages: BotFlowMessages = {
   },
   directoryStatuses: {
     "configuration-required":
-      "يجب إعداد Clerk وD1 لحفظ مسارات البوت.",
+      "أكمل اتصال خدمات مساحة العمل لحفظ مسارات البوت.",
     unauthenticated: "سجّل الدخول لعرض مسارات البوت.",
     "onboarding-required":
       "أنشئ مساحة عمل قبل حفظ المسار.",
@@ -860,7 +860,7 @@ const arabicMessages: BotFlowMessages = {
     "server-error": "تعذّر تحميل مسارات البوت حاليًا.",
   },
   actionStatuses: {
-    "configuration-required": "اتصال Clerk أو D1 غير مُعد.",
+    "configuration-required": "لم يكتمل اتصال خدمات مساحة العمل بعد.",
     unauthenticated: "انتهت الجلسة. سجّل الدخول مجددًا.",
     "onboarding-required": "أنشئ مساحة عمل أولًا.",
     "tenant-selection-required": "اختر مساحة عمل نشطة.",
