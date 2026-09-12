@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { createNodePostgresTransactionManager } from "../server/platform/nodePostgresAdapter.ts";
+import { mergeContactOrganization, readContactOrganizationRevision } from "../features/contacts/contactOrganizationState.ts";
+import { createPostgresContactOrganizationRepository } from "../server/platform/postgresContactOrganizationRepository.ts";
+import { createNodePostgresQueryExecutor, createNodePostgresTransactionManager } from "../server/platform/nodePostgresAdapter.ts";
 import { createPostgresRailwayContactOrganizationMutationExecutor } from "../server/platform/postgresRailwayContactOrganizationMutationExecutor.ts";
 import {
   deriveRailwayApiDeterministicIdempotencyKey,
@@ -85,6 +87,34 @@ export async function verifyContactOrganizationMutationsPostgres(pool) {
     assert.deepEqual(await counts(), { audits: beforeCycle.audits + 5, receipts: beforeCycle.receipts + 5 });
   }
 
+  // Simulate another writer changing a preserved contact, followed by partial
+  // responses in the original browser. Cached relationships keep their token.
+  const secondContact = await pool.query(
+    "INSERT INTO contacts (tenant_id, phone_e164) VALUES ($1, '+12025550127') RETURNING id", [tenantId],
+  );
+  const secondContactId = Number(secondContact.rows[0].id);
+  const repository = createPostgresContactOrganizationRepository(createNodePostgresQueryExecutor(pool));
+  let cached = await repository.readSnapshot(tenantId, [contactId, secondContactId]);
+  const external = await executor.execute(await command("contacts.organization.tag-assignment", {
+    contactId: secondContactId, groupId: tag.organization.tags[0].id, assigned: true, expectedRevision: cached.revision,
+  }));
+  assert.equal(external.outcome, "committed");
+  const groupOnly = await executor.execute(await command("contacts.organization.list.save", { name: "Later list" }));
+  assert.equal(groupOnly.outcome, "committed");
+  const beforeStaleWrites = await counts();
+  for (const partial of [groupOnly.organization, await repository.readSnapshot(tenantId, [contactId])]) {
+    cached = mergeContactOrganization(cached, partial);
+    const expectedRevision = readContactOrganizationRevision(cached, secondContactId);
+    assert.ok(expectedRevision < partial.revision);
+    const stale = await executor.execute(await command("contacts.organization.tag-assignment", {
+      contactId: secondContactId, groupId: tag.organization.tags[0].id, assigned: false, expectedRevision,
+    }));
+    assert.equal(stale.outcome, "conflict");
+    assert.deepEqual(await counts(), beforeStaleWrites);
+    const stored = await repository.readSnapshot(tenantId, [secondContactId]);
+    assert.deepEqual(stored.tagAssignments, [{ contactId: secondContactId, tagId: tag.organization.tags[0].id }]);
+  }
+
   const otherTenant = await pool.query("INSERT INTO tenants (display_name, status) VALUES ('Other organization regression', 'active') RETURNING id");
   const beforeCrossTenant = await counts();
   const crossTenant = await executor.execute(await command("contacts.organization.tag-assignment", {
@@ -92,5 +122,5 @@ export async function verifyContactOrganizationMutationsPostgres(pool) {
   }, { ...session, tenantId: Number(otherTenant.rows[0].id) }));
   assert.equal(crossTenant.outcome, "not-found");
   assert.deepEqual(await counts(), beforeCrossTenant);
-  return Object.freeze({ status: "passed", cycles: 2, concurrentPairs: 4, historicalReplay: true, staleReceiptRollback: true, crossTenantBlocked: true });
+  return Object.freeze({ status: "passed", cycles: 2, concurrentPairs: 4, historicalReplay: true, staleReceiptRollback: true, crossTenantBlocked: true, stalePreservedContactScenarios: 2 });
 }

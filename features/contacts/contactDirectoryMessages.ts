@@ -97,6 +97,8 @@ export interface ContactDirectoryMessages {
     createList: string;
     contactPicker: string;
     chooseContact: string;
+    refreshNotice: string;
+    refreshPage: string;
     tags: string;
     noTags: string;
     lists: string;
@@ -226,6 +228,8 @@ const messages = {
       createList: "יצירת רשימה",
       contactPicker: "איש קשר לניהול שיוכים",
       chooseContact: "בחירת איש קשר",
+      refreshNotice: "יש לרענן את העמוד לפני שינוי שיוכים של איש קשר זה. נתוני השיוך המוצגים עדיין לא נבדקו מול העדכון האחרון.",
+      refreshPage: "רענון העמוד",
       tags: "תגיות",
       noTags: "לא נוצרו תגיות.",
       lists: "רשימות",
@@ -364,6 +368,8 @@ const messages = {
       createList: "Create list",
       contactPicker: "Contact to manage assignments",
       chooseContact: "Choose a contact",
+      refreshNotice: "Refresh the page before changing this contact’s assignments. The displayed assignments have not been checked against the latest update.",
+      refreshPage: "Refresh page",
       tags: "Tags",
       noTags: "No tags have been created.",
       lists: "Lists",
@@ -499,6 +505,8 @@ const messages = {
       createList: "إنشاء قائمة",
       contactPicker: "جهة الاتصال المراد إدارة تعييناتها",
       chooseContact: "اختيار جهة اتصال",
+      refreshNotice: "حدّث الصفحة قبل تغيير تعيينات جهة الاتصال هذه. لم تُراجع التعيينات المعروضة مقابل آخر تحديث بعد.",
+      refreshPage: "تحديث الصفحة",
       tags: "الوسوم",
       noTags: "لم يتم إنشاء وسوم.",
       lists: "القوائم",
