@@ -11,6 +11,7 @@ import { createKnowledgeIngestionWorker } from '../../server/ai/knowledgeIngesti
 import { createPostgresAiOperationalReadiness,createPostgresAiWorkerHealth } from '../../server/platform/postgresAiOperationalReadiness.ts';
 import { createPostgresRailwayAiAgentMutationExecutor,postgresRailwayAiAgentMutationSql } from '../../server/platform/postgresRailwayAiAgentMutationExecutor.ts';
 import { postgresAiAgentSql } from '../../server/platform/postgresAiAgentRepository.ts';
+import { createRailwayPostgresWorkerService } from '../../server/platform/railwayPostgresWorkerService.ts';
 import { createRailwayPostgresFoundation } from '../../server/platform/railwayPostgresFoundation.ts';
 import { createAiAgentService } from '../../server/ai/aiAgentService.ts';
 import { deriveRailwayApiDeterministicIdempotencyKey,deriveRailwayApiMutationRequestDigest } from '../../server/platform/railwayApiMutationExecutor.ts';
@@ -121,4 +122,33 @@ test('audit failure rolls back the active version, publication and replay receip
   }}))};
   const result=await createPostgresRailwayAiAgentMutationExecutor(manager,createPostgresAiOperationalReadiness).execute(f.publish);
   assert.equal(result.outcome,'unavailable');assert.deepEqual(await publicationState(f),{status:'draft',receipts:0,audits:0});
+});
+
+test('actual AI-disabled inbound worker vetoes publication before consuming and clears its health on shutdown', async () => {
+  for (const enabled of [undefined, 'false']) {
+    const f = await fixture(); await ready(f);
+    let started = false;
+    const service = await createRailwayPostgresWorkerService({
+      environment: { APP_RUNTIME_ENVIRONMENT: 'test', DATABASE_URL: connectionString, POSTGRES_TLS_MODE: 'disabled', POSTGRES_APPLICATION_NAME: 'ai-publication-worker',
+        POSTGRES_MAX_CONNECTIONS: "4", POSTGRES_CONNECTION_TIMEOUT_MS: "2000", POSTGRES_IDLE_TIMEOUT_MS: "2000", POSTGRES_STATEMENT_TIMEOUT_MS: "15000", POSTGRES_QUERY_TIMEOUT_MS: "20000", POSTGRES_LOCK_TIMEOUT_MS: "5000", POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS: "10000", POSTGRES_MAX_LIFETIME_SECONDS: "1800",
+        ...(enabled === undefined ? {} : { AI_RESPONSES_ENABLED: enabled }) },
+      ownerKey: otherOwner, campaignQueue: { async sendBatch() {} }, postgresTelemetry: { recordIdleClientError() {} },
+      schedulerTelemetry: { recordRunFailure() {}, recordTimerFailure() {}, recordOverlapSuppressed() {} },
+      metaWebhooks: {
+        environment: { META_APP_SECRET: 'app-secret', META_WEBHOOK_VERIFY_TOKEN: 'verify-token' },
+        telemetrySink: { async record() { return { outcome: 'recorded' }; } },
+        createQueueRuntime() { return {
+          async start() {
+            assert.equal((await pool.query('SELECT ready FROM ai_runtime_worker_health WHERE owner_key=$1', [otherOwner])).rows[0].ready, false);
+            await blocked(f); started = true;
+          },
+          async cleanExpiredDeadLetters() { return 0; }, async close() {},
+        }; },
+      },
+    });
+    try { await service.start(); assert.equal(started, true); await blocked(f); }
+    finally { await service.close(); }
+    assert.equal((await pool.query('SELECT * FROM ai_runtime_worker_health WHERE owner_key=$1', [otherOwner])).rowCount, 0);
+    assert.equal((await publish(f)).outcome, 'committed');
+  }
 });

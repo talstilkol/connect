@@ -73,12 +73,13 @@ test('confirmed nonacceptance unblocks the conversation and exact late acceptanc
   const f=await fixture();await grant(f);const proposal=await recovery.prepare({...f.request,action:'not-accepted',providerMessageId:null});
   await recovery.apply(proposal,evidence);assert.equal((await row(f)).state,'failed');assert.equal(await replies.claim(),null);
   await assert.rejects(pool.query("UPDATE manual_reply_outbox SET state='sent',provider_message_id=$2,error_code=NULL WHERE delivery_key=$1",[f.claim.deliveryKey,f.request.providerMessageId]));
-  await replies.enqueue(await f.command());
+  const replacement = await replies.enqueue(await f.command());
   await replies.accepted(f.claim,f.request.providerMessageId);await replies.accepted(f.claim,f.request.providerMessageId);
   assert.equal((await row(f)).state,'sent');assert.equal((await pool.query('SELECT count(*)::integer AS count FROM manual_delivery_late_acceptances WHERE tenant_id=$1',[f.tenantId])).rows[0].count,1);
   assert.equal((await pool.query('SELECT action FROM manual_delivery_reconciliations WHERE tenant_id=$1',[f.tenantId])).rows[0].action,'not-accepted');
-  assert.equal((await pool.query("SELECT count(*)::integer AS count FROM manual_reply_outbox WHERE tenant_id=$1 AND state='queued'",[f.tenantId])).rows[0].count,1);
-  const next=await replies.claim();await replies.fail(next,'DELIVERY_UNAVAILABLE');
+  assert.deepEqual((await pool.query('SELECT state,error_code,claim_expires_at,reservation_key FROM manual_reply_outbox WHERE delivery_key=$1', [replacement.submission.deliveryKey])).rows[0],
+    {state:'failed',error_code:'ORIGINAL_DELIVERY_ACCEPTED',claim_expires_at:null,reservation_key:null});
+  assert.equal(await replies.claim(),null);
 });
 test('stale, expired, foreign and revoked proposals fail; provider identity conflict rolls back evidence and projection',async()=>{
   const f=await fixture();await grant(f);const proposal=await recovery.prepare(f.request);
@@ -108,4 +109,52 @@ test('private CLI runs as a scoped login, requires evidence confirmation and rej
     assert.deepEqual(await runManualDeliveryRecovery(['apply',proposal,proof,'CONFIRM_PROVIDER_ORIGINAL_ACCEPTANCE'],env),first);
     assert.equal((await row(f)).state,'sent');
   }finally{await op.end();await rm(directory,{recursive:true});}
+});
+
+function gate(){let resolve;const promise=new Promise(done=>{resolve=done});return{promise,resolve}}
+test('late acceptance fences a concurrently claimed replacement before seal and cannot be undone by defer',async()=>{
+  const f=await fixture();await grant(f);
+  await recovery.apply(await recovery.prepare({...f.request,action:'not-accepted',providerMessageId:null}),evidence);
+  const replacement=await replies.enqueue(await f.command());
+  const held=gate(),release=gate();
+  const accepting=createPostgresManualReplyRepository({queries,transactions:{
+    transaction:(options,execute)=>transactions.transaction(options,tx=>execute({query:async(sql,parameters)=>{
+      if(sql===postgresManualReplySql.cancelUnsentReplacements){held.resolve();await release.promise}
+      return tx.query(sql,parameters);
+    }})),
+  }}).accepted(f.claim,f.request.providerMessageId);
+  await held.promise;
+  const claim=await replies.claim();assert.equal(claim.deliveryKey,replacement.submission.deliveryKey);
+  const seal=replies.seal(claim,'whatsapp_rate_reservation_v1_'+'9'.repeat(64));
+  try {
+    const deadline=Date.now()+2000;let waiting=false;
+    while(Date.now()<deadline){
+      waiting=(await pool.query("SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query LIKE '%derive_bot_reply_staging_tenant_barrier_key_v1%' LIMIT 1")).rowCount===1;
+      if(waiting)break;await new Promise(resolve=>setTimeout(resolve,10));
+    }
+    assert.equal(waiting,true,'replacement seal waits behind late acceptance');
+  } finally {release.resolve()}
+  await accepting;assert.equal(await seal,false);
+  await replies.defer(claim,new Date().toISOString(),'DELIVERY_UNAVAILABLE');
+  assert.equal(await replies.claim(),null);
+  assert.equal((await pool.query('SELECT state FROM manual_reply_outbox WHERE delivery_key=$1',[claim.deliveryKey])).rows[0].state,'failed');
+});
+test('conflicting late provider identity rolls back replacement cancellation and late evidence',async()=>{
+  const f=await fixture();await grant(f);
+  await recovery.apply(await recovery.prepare({...f.request,action:'not-accepted',providerMessageId:null}),evidence);
+  const replacement=await replies.enqueue(await f.command());
+  await assert.rejects(replies.accepted(f.claim,'driver-conversation-inbound-1'));
+  assert.equal((await row(f)).state,'failed');
+  assert.equal((await pool.query('SELECT 1 FROM manual_delivery_late_acceptances WHERE delivery_key=$1',[f.claim.deliveryKey])).rowCount,0);
+  const claim=await replies.claim();assert.equal(claim.deliveryKey,replacement.submission.deliveryKey);await replies.fail(claim,'DELIVERY_UNAVAILABLE');
+});
+test('late original acceptance preserves a replacement whose provider send was already sealed',async()=>{
+  const f=await fixture();await grant(f);
+  await recovery.apply(await recovery.prepare({...f.request,action:'not-accepted',providerMessageId:null}),evidence);
+  await replies.enqueue(await f.command());const claim=await replies.claim();
+  assert.equal(await replies.seal(claim,'whatsapp_rate_reservation_v1_'+'9'.repeat(64)),true);
+  await replies.accepted(f.claim,f.request.providerMessageId);
+  assert.equal((await pool.query('SELECT state FROM manual_reply_outbox WHERE delivery_key=$1',[claim.deliveryKey])).rows[0].state,'sending');
+  await replies.unknown(claim);
+  assert.equal(await replies.claim(),null);
 });

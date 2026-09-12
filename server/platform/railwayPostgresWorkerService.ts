@@ -699,7 +699,7 @@ class RailwayPostgresWorkerFoundationError extends Error {
  * four admitted queue families prevents dormant staging repositories and
  * provider-send adapters from becoming worker runtime dependencies.
  */
-function createRailwayPostgresWorkerFoundation(
+export function createRailwayPostgresWorkerFoundation(
   environment: NodePostgresPoolEnvironment | undefined,
   telemetry: NodePostgresPoolTelemetry,
 ) {
@@ -745,7 +745,7 @@ function createRailwayPostgresWorkerFoundation(
     }),
     botReplyProviderLinks:
       createPostgresBotReplyDeliveryProviderRepository({ transactions }),
-    campaignDispatch: createPostgresCampaignDispatchRepository(queries),
+    campaignDispatch: createPostgresCampaignDispatchRepository(queries, transactions),
     campaignProviderDeliveries:
       createPostgresCampaignDeliveryProviderRepository({ transactions }),
     campaigns: createPostgresCampaignRepository({ queries, transactions }),
@@ -852,12 +852,13 @@ export async function createRailwayPostgresWorkerService(
   const queueMaintenanceTasks: Array<Readonly<{
     run: () => Promise<unknown>;
   }>> = [];
-  const reportsAiHealth = options.environment?.AI_RESPONSES_ENABLED === "true";
+  // Every inbound consumer participates, including replicas with AI disabled.
+  // Otherwise a healthy replica can hide a consumer that cannot serve AI work.
+  const reportsAiHealth = options.metaWebhooks !== undefined || options.environment?.AI_RESPONSES_ENABLED === "true";
   const reportAiHealth = async () => {
     if (reportsAiHealth) await foundation.aiWorkerHealth.report(options.ownerKey, options.environment ?? {},
       aiRepliesEnabled && manualRepliesEnabled && options.metaWebhooks !== undefined);
   };
-  if (reportsAiHealth) queueMaintenanceTasks.push({ run: reportAiHealth });
 
   try {
     if (paddleConfig) {
@@ -1165,7 +1166,15 @@ export async function createRailwayPostgresWorkerService(
     });
 
     const schedulerService = createRailwayWorkerSchedulerService({
-      runtime,
+      runtime: reportsAiHealth ? {
+        ...runtime,
+        scheduler: { async run() {
+          // Heartbeats belong to each replica, even when another replica owns
+          // the scheduler lease and this replica runs no maintenance tasks.
+          await reportAiHealth();
+          return runtime.scheduler.run();
+        } },
+      } : runtime,
       telemetry: options.schedulerTelemetry,
       clock,
     });
@@ -1194,6 +1203,8 @@ export async function createRailwayPostgresWorkerService(
         if (starting === null) {
           starting = (async () => {
             try {
+              // Register before any queue can consume an inbound message.
+              await reportAiHealth();
               await Promise.all(
                 managedQueueRuntimes.map((runtime) => runtime.start()),
               );

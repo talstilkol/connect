@@ -89,6 +89,9 @@ export const postgresManualReplySql = Object.freeze({
     WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND state IN ('sending', 'unknown') RETURNING delivery_key`,
   sent: `UPDATE manual_reply_outbox SET state = 'sent', provider_message_id = $4, error_code = NULL, updated_at = ${nowSql}
     WHERE tenant_id = $1 AND delivery_key = $2 AND claim_version = $3 AND (state IN ('sending', 'unknown') OR (state='failed' AND error_code='OPERATOR_CONFIRMED_NOT_ACCEPTED')) RETURNING delivery_key`,
+  cancelUnsentReplacements: `UPDATE manual_reply_outbox SET state = 'failed', claim_expires_at = NULL,
+    reservation_key = NULL, error_code = 'ORIGINAL_DELIVERY_ACCEPTED', updated_at = ${nowSql}
+    WHERE tenant_id = $1 AND conversation_key = $2 AND delivery_key <> $3 AND state IN ('queued', 'preparing')`,
   message: `INSERT INTO messages (message_key, conversation_key, tenant_id, provider_message_id, direction, content_kind, status, text_content, occurred_at, status_updated_at)
     VALUES ($1, $2, $3, $4, 'outbound', 'text', 'sent', $5, $6, $6) ON CONFLICT (tenant_id, provider_message_id) DO NOTHING RETURNING message_key`,
   existingMessage: `SELECT message_key, conversation_key, direction, content_kind, text_content FROM messages WHERE tenant_id = $1 AND provider_message_id = $2 FOR UPDATE`,
@@ -248,7 +251,12 @@ export function createPostgresManualReplyRepository(dependencies: Readonly<{ que
         if (integer(row.claim_version) !== claim.claimVersion) throw new Error("Manual reply claim changed");
         if (row.state === "sent" && row.provider_message_id === providerMessageId) return;
         const late = row.state === "failed" && row.error_code === "OPERATOR_CONFIRMED_NOT_ACCEPTED";
-        if (late) await tx.query("SELECT public.record_manual_delivery_late_acceptance_v1($1,$2,$3,$4)", [...claimParameters(claim), providerMessageId]);
+        if (late) {
+          await tx.query("SELECT public.record_manual_delivery_late_acceptance_v1($1,$2,$3,$4)", [...claimParameters(claim), providerMessageId]);
+          // The tenant barrier and conversation lock also guard enqueue/seal.
+          // A claimed replacement loses its preparing state before it can send.
+          await tx.query(postgresManualReplySql.cancelUnsentReplacements, [claim.tenantId, text(row, "conversation_key"), claim.deliveryKey]);
+        }
         if (row.state !== "sending" && row.state !== "unknown" && !late) throw new Error("Manual reply was not sealed");
         const at = timestamp(row.provider_started_at);
         let actualMessageKey = messageKey;

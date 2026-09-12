@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import pg from "pg";
 
 import {
   createRailwayPostgresWorkerService,
@@ -133,8 +134,18 @@ test("wires the campaign queue to the PostgreSQL consumer and owns its lifecycle
   ]);
 });
 
-test("wires Meta webhooks to the PostgreSQL business consumer and owns the worker lifecycle", async () => {
+test("wires Meta webhooks to the PostgreSQL business consumer and owns the worker lifecycle", async (t) => {
   const events = [];
+  t.mock.method(pg.Pool.prototype, "query", async (sql, parameters) => {
+    if (sql.includes("INSERT INTO ai_runtime_worker_health")) {
+      assert.deepEqual(parameters, [ownerKey, false, null]);
+      events.push("ai-health.unready");
+    } else {
+      assert.match(sql, /DELETE FROM ai_runtime_worker_health/);
+      events.push("ai-health.clear");
+    }
+    return { rows: [], rowCount: 0 };
+  });
   let capturedConsumer;
   const service = await createRailwayPostgresWorkerService(options({
     metaWebhooks: {
@@ -169,8 +180,11 @@ test("wires Meta webhooks to the PostgreSQL business consumer and owns the worke
   await service.start();
   await service.close();
   assert.deepEqual(events, [
+    "ai-health.unready",
     "meta-webhook-queue.start",
+    "ai-health.unready",
     "meta-webhook-queue.close",
+    "ai-health.clear",
   ]);
 });
 
@@ -535,4 +549,33 @@ test('media inspection composes with its separate AWS configuration and closes b
   const {quarantineEnvironment}=await import('./fixtures/meta-media-quarantine.mjs');
   const service=await createRailwayPostgresWorkerService(options({environment:{...environment(),...quarantineEnvironment,META_MEDIA_WORKER_MODE:'inspect'}}));
   await service.close();await service.close();
+});
+
+test("replica health refreshes before a scheduler tick even when no lease is acquired", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: Date.parse("2026-07-26T09:00:00Z") });
+  const queries = [];
+  t.mock.method(pg.Pool.prototype, "query", async (sql) => {
+    queries.push(sql);
+    return { rows: [], rowCount: 0 };
+  });
+  const service = await createRailwayPostgresWorkerService(options({
+    metaWebhooks: {
+      environment: { META_APP_SECRET: "app-secret", META_WEBHOOK_VERIFY_TOKEN: "verify-token" },
+      createQueueRuntime() { return { async start() {}, async close() {}, async cleanExpiredDeadLetters() { return 0; } }; },
+      telemetrySink: { async record() { return { outcome: "recorded" }; } },
+    },
+  }));
+  try {
+    await service.start();
+    queries.length = 0;
+    t.mock.timers.tick(60_000);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(queries[0], /INSERT INTO ai_runtime_worker_health/);
+    assert.equal(queries.filter(sql => sql.includes("INSERT INTO ai_runtime_worker_health")).length, 1);
+    assert.ok(queries.some(sql => sql.includes("worker_scheduler")), "scheduler attempts its lease after the heartbeat");
+    queries.length = 0;
+    t.mock.timers.tick(60_000);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.match(queries[0], /INSERT INTO ai_runtime_worker_health/);
+  } finally { await service.close(); }
 });

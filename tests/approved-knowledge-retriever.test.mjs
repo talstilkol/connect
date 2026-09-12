@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createApprovedKnowledgeRetriever } from "../server/ai/approvedKnowledgeRetriever.ts";
 import { knowledgeUtf8TextExtractor } from "../server/ai/knowledgeUtf8TextExtractor.ts";
-import { deriveKnowledgePassageKey } from "../server/ai/aiAgentKey.ts";
+import { deriveKnowledgePassageKey, deriveKnowledgeSourceKey } from "../server/ai/aiAgentKey.ts";
 import { sha256Hex } from "../server/meta/metaWebhookSecurity.ts";
 import { runtimeFixture } from "./fixtures/ai-runtime.mjs";
 
@@ -27,7 +27,7 @@ test("retrieves approved tenant-scoped passages with deterministic query coverag
   assert.equal(result.outcome, "grounded");
   assert.equal(result.scoreBasisPoints, 10_000);
   assert.equal(result.passages[0].passageKey, f.passage.passageKey);
-  assert.deepEqual(calls, [[7, [f.passage.sourceKey], 100]]);
+  assert.deepEqual(calls, [[7, [f.passage.sourceKey], 100, undefined]]);
   assert.deepEqual(await retriever.retrieve(f.request), result);
 });
 
@@ -97,4 +97,43 @@ test("text extraction splits long content without breaking surrogate pairs", asy
     assert.equal(section.content.isWellFormed(), true);
   }
   assert.deepEqual(await knowledgeUtf8TextExtractor.extract(input), result);
+});
+
+async function pagedFixture() {
+  const f=await fixture();
+  const keys=[f.passage.sourceKey,await deriveKnowledgeSourceKey(f.request.tenantId,'e'.repeat(64))].sort();
+  const runtime=await runtimeFixture();
+  const unrelated=runtime.input.version.definition.handoffMessage;
+  const make=async(sourceKey,passageOrdinal,content)=>{
+    const contentSha256=await sha256Hex(new TextEncoder().encode(content));
+    return{...f.passage,sourceKey,passageOrdinal,content,contentSha256,
+      passageKey:await deriveKnowledgePassageKey(f.request.tenantId,sourceKey,passageOrdinal,contentSha256)};
+  };
+  const passages=[];
+  for(let ordinal=1;ordinal<=101;ordinal++) passages.push(await make(keys[0],ordinal,ordinal===101?f.passage.content:unrelated));
+  passages.push(await make(keys[1],1,f.passage.content));
+  return{...f,passages,request:{...f.request,sourceKeys:keys}};
+}
+test('ranks a relevant passage after ordinal 100 and a later selected source before applying the global cap',async()=>{
+  const f=await pagedFixture(),calls=[];
+  const retriever=createApprovedKnowledgeRetriever({async listApprovedBySourceKeys(tenant,keys,limit,after){
+    calls.push(after);
+    return f.passages.filter(p=>!after||p.sourceKey>after.sourceKey||p.sourceKey===after.sourceKey&&p.passageOrdinal>after.passageOrdinal).slice(0,limit);
+  }});
+  const result=await retriever.retrieve(f.request);
+  assert.equal(result.outcome,'grounded');assert.equal(result.scoreBasisPoints,10000);
+  assert.deepEqual(result.passages.map(p=>p.passageKey).sort(),f.passages.slice(100).map(p=>p.passageKey).sort());
+  assert.equal(calls.length,2);assert.deepEqual(calls[1],{sourceKey:f.request.sourceKeys[0],passageOrdinal:100});
+  assert.deepEqual(await retriever.retrieve(f.request),result);
+});
+test('a repeated page or a later database failure cannot masquerade as a complete knowledge result',async()=>{
+  const f=await pagedFixture();
+  for(const fail of [false,true]){
+    let calls=0;
+    const retriever=createApprovedKnowledgeRetriever({async listApprovedBySourceKeys(){
+      if(++calls===2&&fail)throw Error('reader unavailable');
+      return f.passages.slice(0,100);
+    }});
+    assert.deepEqual(await retriever.retrieve(f.request),{outcome:'unavailable'});assert.equal(calls,2);
+  }
 });

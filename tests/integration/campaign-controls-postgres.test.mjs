@@ -3,11 +3,13 @@ import test from "node:test";
 import pg from "pg";
 import { applyPostgresMigrations, requireLocalStartupRehearsalUrl } from "../../scripts/verify-railway-api-startup.mjs";
 import { createNodePostgresQueryExecutor, createNodePostgresTransactionManager } from "../../server/platform/nodePostgresAdapter.ts";
-import { createPostgresMessageTemplateRepository } from "../../server/platform/postgresMessageTemplateRepository.ts";
-import { createPostgresCampaignRepository } from "../../server/platform/postgresCampaignRepository.ts";
 import { createPostgresCampaignDispatchRepository } from "../../server/platform/postgresCampaignDispatchRepository.ts";
 import { createPostgresRailwayCampaignMutationExecutor, postgresRailwayCampaignMutationSql } from "../../server/platform/postgresRailwayCampaignMutationExecutor.ts";
 import { deriveRailwayApiDeterministicIdempotencyKey, deriveRailwayApiMutationRequestDigest } from "../../server/platform/railwayApiMutationExecutor.ts";
+
+import { createRailwayPostgresWorkerFoundation } from "../../server/platform/railwayPostgresWorkerService.ts";
+import { createPostgresPaddleRepository } from "../../server/platform/postgresPaddleRepository.ts";
+import { bindPaidFixture } from "../fixtures/paid-access-postgres.mjs";
 
 function gate() { let resolve; const promise = new Promise((done) => { resolve = done; }); return { promise, resolve }; }
 
@@ -18,9 +20,13 @@ test("campaign controls preserve recipients, authorization and receipts on real 
   const migrations = await applyPostgresMigrations(pool);
   const queries = createNodePostgresQueryExecutor(pool);
   const transactions = createNodePostgresTransactionManager(pool);
-  const foundation = { messageTemplates: createPostgresMessageTemplateRepository({ queries, transactions }),
-    campaigns: createPostgresCampaignRepository({ queries, transactions }) };
-  const dispatch = createPostgresCampaignDispatchRepository(queries);
+  const foundation = createRailwayPostgresWorkerFoundation({
+    APP_RUNTIME_ENVIRONMENT: "test", DATABASE_URL: requireLocalStartupRehearsalUrl(process.env.CONNECT_POSTGRES_STARTUP_REHEARSAL_URL),
+    POSTGRES_TLS_MODE: "disabled", POSTGRES_APPLICATION_NAME: "campaign-controls-worker",
+    POSTGRES_MAX_CONNECTIONS: "4", POSTGRES_CONNECTION_TIMEOUT_MS: "2000", POSTGRES_IDLE_TIMEOUT_MS: "2000", POSTGRES_STATEMENT_TIMEOUT_MS: "15000", POSTGRES_QUERY_TIMEOUT_MS: "20000", POSTGRES_LOCK_TIMEOUT_MS: "5000", POSTGRES_IDLE_TRANSACTION_TIMEOUT_MS: "10000", POSTGRES_MAX_LIFETIME_SECONDS: "1800",
+  }, { recordIdleClientError() {} });
+  t.after(() => foundation.close());
+  const dispatch = foundation.campaignDispatch;
   // Reuse verifyCampaignDispatch/contactCommand fixtures from verify-node-postgres-integration.mjs.
   const displayName = "Driver integration tenant";
   const externalUserId = "driver-integration-owner";
@@ -252,7 +258,7 @@ test("campaign controls preserve recipients, authorization and receipts on real 
     const pausing = executor(true, tx).execute(await command("pause"));
     await held.promise;
     const preparing = dispatch.prepareDelivery(firstDeliveryKey, new Date().toISOString());
-    try { await waitForBlockedQuery("running_campaign"); } finally { release.resolve(); }
+    try { await waitForBlockedQuery("derive_bot_reply_staging_tenant_barrier_key_v1"); } finally { release.resolve(); }
     assert.equal((await pausing).outcome, "committed");
     assert.deepEqual(await preparing, { outcome: "duplicate" });
     assert.ok(await dispatch.findQueuedDeliveryContext(firstDeliveryKey));
@@ -290,6 +296,37 @@ test("campaign controls preserve recipients, authorization and receipts on real 
     assert.equal(oldInput.idempotencyKey, receipt.idempotency_key);
     assert.equal((await executor().execute(oldInput)).outcome, "unavailable");
     assert.deepEqual(await state(), before);
+  });
+  await t.test("production worker dispatch waits for committed Paddle cancellation before sealing a send", async () => {
+    const paid = await bindPaidFixture(pool, tenantId, "template-submission-integration-owner");
+    const replacement = { ...snapshot, campaignKey: `campaign_v1_${"b".repeat(64)}`,
+      recipients: snapshot.recipients.map((recipient, index) => ({ ...recipient,
+        deliveryKey: `campaign_delivery_v1_${String(index + 8).repeat(64)}` })) };
+    await foundation.campaigns.saveSnapshot(replacement);
+    await dispatch.activateCampaign(tenantId, replacement.campaignKey, 1, new Date().toISOString());
+    await dispatch.promoteDueCampaigns(new Date().toISOString(), 10);
+    await dispatch.claimPendingRecipients(new Date().toISOString(), 10);
+    await pool.query("UPDATE paddle_checkout_intents SET next_reconcile_at=statement_timestamp()-interval '1 second' WHERE tenant_id=$1", [tenantId]);
+    const work = await paid.journal.claimReconciliation("production");
+    const held = gate(), release = gate();
+    const journal = createPostgresPaddleRepository({ queries, transactions: {
+      transaction: (options, execute) => transactions.transaction(options, tx => execute({ query: async (sql, parameters) => {
+        const result = await tx.query(sql, parameters);
+        if (sql.includes("INSERT INTO paddle_accounts")) { held.resolve(); await release.promise; }
+        return result;
+      } })),
+    } });
+    const cancelling = journal.applyReconciliation(work, paid.fixture.payment, { ...paid.subscription,
+      status: "canceled", startsAt: null, endsAt: null, updatedAt: "2026-07-26T09:00:00.000001Z" });
+    await held.promise;
+    const deliveryKey = replacement.recipients[0].deliveryKey;
+    const preparation = dispatch.prepareDelivery(deliveryKey, new Date().toISOString());
+    const rejected = assert.rejects(preparation, /Paid execution is unavailable/);
+    try { await waitForBlockedQuery("derive_bot_reply_staging_tenant_barrier_key_v1"); }
+    finally { release.resolve(); }
+    assert.equal(await cancelling, "applied");
+    await rejected;
+    assert.equal((await pool.query("SELECT status FROM campaign_recipients WHERE delivery_key=$1", [deliveryKey])).rows[0].status, "queued");
   });
   assert.equal(pool.totalCount, pool.idleCount);
   t.diagnostic(`Applied ${migrations} real migrations; existing dispatch fixtures only; no provider calls.`);

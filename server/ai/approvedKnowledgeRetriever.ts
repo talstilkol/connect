@@ -1,10 +1,12 @@
-import type { KnowledgePassageRepository } from "../../db/knowledgePassageRepository.ts";
+import type { KnowledgePassageCursor, KnowledgePassageRepository } from "../../db/knowledgePassageRepository.ts";
 import type { AiKnowledgePassage, AiKnowledgeRetriever, AiKnowledgeRetrievalRequest, AiKnowledgeRetrievalResult } from "../../shared/domain/aiRuntime.ts";
 import { deriveKnowledgePassageKey } from "./aiAgentKey.ts";
 import { sha256Hex } from "../meta/metaWebhookSecurity.ts";
 
 const sourcePattern = /^knowledge_source_v1_[a-f0-9]{64}$/;
-const maximumCandidatePassages = 100;
+const maximumPagePassages = 100;
+const maximumRankedPassages = 100;
+const maximumPassagesPerSource = 1_000;
 const maximumSelectedPassages = 20;
 const maximumSelectedBytes = 65_536;
 
@@ -35,30 +37,43 @@ export function createApprovedKnowledgeRetriever(
       if (sourceKeys.length === 0 || queryTerms.size === 0) return { outcome: "no-approved-knowledge" };
       const allowed = new Set(sourceKeys);
       try {
-        const candidates = await repository.listApprovedBySourceKeys(tenantId, sourceKeys, maximumCandidatePassages);
-        if (!Array.isArray(candidates) || candidates.length > maximumCandidatePassages) return { outcome: "unavailable" };
         const ranked: { passage: AiKnowledgePassage; matches: Set<string>; score: number }[] = [];
-        const seen = new Set<string>();
-        for (const candidate of candidates.map((value) => ({ ...value }))) {
-          if (!candidate || candidate.tenantId !== tenantId || !allowed.has(candidate.sourceKey) ||
-            typeof candidate.content !== "string" || candidate.content.length === 0 || candidate.content.length > 16_384 ||
-            candidate.content !== candidate.content.trim() || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(candidate.content) ||
-            !Number.isSafeInteger(candidate.passageOrdinal) || candidate.passageOrdinal <= 0 || seen.has(candidate.passageKey)) {
-            return { outcome: "unavailable" };
+        const compare = (a: typeof ranked[number], b: typeof ranked[number]) =>
+          b.score - a.score || (a.passage.passageKey < b.passage.passageKey ? -1 : 1);
+        let cursor: KnowledgePassageCursor | undefined;
+        let scanned = 0;
+        // Keyset pages cover every approved source before the global ranking cap.
+        // Storage admits at most 1,000 passages per source; only one page and
+        // the best 100 candidates remain in memory throughout the scan.
+        for (;;) {
+          const candidates = await repository.listApprovedBySourceKeys(tenantId, sourceKeys, maximumPagePassages, cursor);
+          if (!Array.isArray(candidates) || candidates.length > maximumPagePassages ||
+            (scanned += candidates.length) > sourceKeys.length * maximumPassagesPerSource) return { outcome: "unavailable" };
+          for (const candidate of candidates.map((value) => ({ ...value }))) {
+            if (!candidate || candidate.tenantId !== tenantId || !allowed.has(candidate.sourceKey) ||
+              typeof candidate.content !== "string" || candidate.content.length === 0 || candidate.content.length > 16_384 ||
+              candidate.content !== candidate.content.trim() || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(candidate.content) ||
+              !Number.isSafeInteger(candidate.passageOrdinal) || candidate.passageOrdinal <= 0 ||
+              (cursor && (candidate.sourceKey < cursor.sourceKey ||
+                (candidate.sourceKey === cursor.sourceKey && candidate.passageOrdinal <= cursor.passageOrdinal)))) {
+              return { outcome: "unavailable" };
+            }
+            const digest = await sha256Hex(new TextEncoder().encode(candidate.content));
+            if (digest !== candidate.contentSha256 || candidate.passageKey !==
+              await deriveKnowledgePassageKey(tenantId, candidate.sourceKey, candidate.passageOrdinal, digest)) return { outcome: "unavailable" };
+            cursor = { sourceKey: candidate.sourceKey, passageOrdinal: candidate.passageOrdinal };
+            const contentTerms = terms(candidate.content);
+            const matches = new Set([...queryTerms].filter((term) => contentTerms.has(term)));
+            if (matches.size === 0) continue;
+            ranked.push({
+              passage: { passageKey: candidate.passageKey, sourceKey: candidate.sourceKey, content: candidate.content },
+              matches, score: matches.size,
+            });
           }
-          const digest = await sha256Hex(new TextEncoder().encode(candidate.content));
-          if (digest !== candidate.contentSha256 || candidate.passageKey !==
-            await deriveKnowledgePassageKey(tenantId, candidate.sourceKey, candidate.passageOrdinal, digest)) return { outcome: "unavailable" };
-          seen.add(candidate.passageKey);
-          const contentTerms = terms(candidate.content);
-          const matches = new Set([...queryTerms].filter((term) => contentTerms.has(term)));
-          if (matches.size === 0) continue;
-          ranked.push({
-            passage: { passageKey: candidate.passageKey, sourceKey: candidate.sourceKey, content: candidate.content },
-            matches, score: matches.size,
-          });
+          ranked.sort(compare);
+          ranked.splice(maximumRankedPassages);
+          if (candidates.length < maximumPagePassages) break;
         }
-        ranked.sort((a, b) => b.score - a.score || (a.passage.passageKey < b.passage.passageKey ? -1 : 1));
         const selected: AiKnowledgePassage[] = [];
         const matched = new Set<string>();
         let bytes = 0;

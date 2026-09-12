@@ -889,3 +889,28 @@ test("rejects stored version data when relational source links no longer match t
     /sources/,
   );
 });
+
+test("approved knowledge keyset pages exhaust every selected source without duplicates", async () => {
+  const fixture = await createFixture();
+  const sources = [await registerSource(fixture, 1, "1"), await registerSource(fixture, 1, "2")];
+  for (const source of sources) {
+    await fixture.sources.transition({ tenantId: 1, sourceKey: source.sourceKey, expectedVersion: 1, action: "validation-passed", errorCode: null });
+    await fixture.sources.transition({ tenantId: 1, sourceKey: source.sourceKey, expectedVersion: 2, action: "scan-started", errorCode: null });
+    const passages = [];
+    for (let ordinal = 1; ordinal <= 101; ordinal++) passages.push(await processedPassage(1, source.sourceKey, ordinal, "מידע מאושר לדיירי tenant אחד."));
+    assert.equal((await fixture.passages.storeProcessedAndMarkReady({tenantId:1, sourceKey:source.sourceKey, expectedSourceVersion:3, passages})).outcome,"updated");
+  }
+  const keys = sources.map(source => source.sourceKey), results = [], sizes = [];
+  let cursor;
+  for (;;) {
+    const page = await fixture.passages.listApprovedBySourceKeys(1, keys, 100, cursor);
+    sizes.push(page.length); results.push(...page);
+    if (page.length < 100) break;
+    cursor = { sourceKey: page.at(-1).sourceKey, passageOrdinal: page.at(-1).passageOrdinal };
+  }
+  assert.deepEqual(sizes, [100, 100, 2]);
+  assert.equal(new Set(results.map(p => p.passageKey)).size, 202);
+  assert.deepEqual(results.map(p => [p.sourceKey, p.passageOrdinal]),
+    keys.sort().flatMap(key => Array.from({length:101}, (_, index) => [key, index + 1])));
+  await assert.rejects(fixture.passages.listApprovedBySourceKeys(1, keys, 100, {sourceKey:keys[0], passageOrdinal:0}));
+});

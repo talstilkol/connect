@@ -5,6 +5,9 @@ import assert from 'node:assert/strict';
 import { before,after,test } from 'node:test';
 import { readdir,readFile } from 'node:fs/promises';
 import pg from 'pg';
+import { runtimeFixture } from '../fixtures/ai-runtime.mjs';
+import { createApprovedKnowledgeRetriever } from '../../server/ai/approvedKnowledgeRetriever.ts';
+import { createPostgresKnowledgePassageRepository } from '../../server/platform/postgresKnowledgePassageRepository.ts';
 import { knowledgeFixture } from '../fixtures/knowledge-ingestion.mjs';
 import { createNodePostgresQueryExecutor,createNodePostgresTransactionManager } from '../../server/platform/nodePostgresAdapter.ts';
 import { createPostgresKnowledgeIngestionRepository } from '../../server/platform/postgresKnowledgeIngestionRepository.ts';
@@ -42,6 +45,25 @@ const source=async f=>(await pool.query('SELECT * FROM knowledge_sources WHERE t
 async function due(f){await pool.query("UPDATE knowledge_ingestion_jobs SET next_attempt_at=statement_timestamp()-interval '1 second',claim_expires_at=NULL WHERE tenant_id=$1",[f.intent.tenantId]);}
 function storage(f,overrides={}){let puts=0,reads=0;return{async put(){puts++;return's3-integration-version-1'},async inspect(){return{versionId:'s3-integration-version-1',verdict:'NO_THREATS_FOUND'}},async read(){reads++;return f.bytes.slice()},close(){},...overrides,get puts(){return puts},get reads(){return reads}};}
 async function finishPending(f){const s=storage(f);await due(f);await createKnowledgeIngestionWorker(jobs,s).run();}
+test('PostgreSQL keyset retrieval finds approved content beyond 100 passages without crossing tenant or source scope',async()=>{
+  const f=await fixture(),runtime=await runtimeFixture({tenantId:f.intent.tenantId});
+  await runtime.service.process(runtime.input);
+  const query=runtime.calls.find(call=>call.dependency==='provider').request.passages[0].content;
+  await f.enqueue();const claim=await jobs.claim();await jobs.seal(claim);await jobs.receipt(claim,'s3-integration-version-1');
+  // Reuse runtime fixture content at the extraction/repository boundary.
+  const sections=Array.from({length:100},()=>({content:runtime.input.version.definition.handoffMessage}));
+  sections.push({content:query});await jobs.complete(claim,'s3-integration-version-1',sections);
+  const repository=createPostgresKnowledgePassageRepository({queries,transactions});
+  const request={...runtime.calls.find(call=>call.dependency==='retriever').request,sourceKeys:[f.intent.sourceKey],query};
+  const result=await createApprovedKnowledgeRetriever(repository).retrieve(request);
+  assert.equal(result.outcome,'grounded');assert.equal(result.passages.length,1);assert.equal(result.passages[0].content,query);
+  const first=await repository.listApprovedBySourceKeys(f.intent.tenantId,request.sourceKeys,100);
+  const second=await repository.listApprovedBySourceKeys(f.intent.tenantId,request.sourceKeys,100,{sourceKey:f.intent.sourceKey,passageOrdinal:100});
+  assert.equal(first.length,100);assert.equal(second.length,1);assert.equal(second[0].passageOrdinal,101);
+  assert.equal(result.passages[0].passageKey,second[0].passageKey);
+  await assert.rejects(repository.listApprovedBySourceKeys(f.intent.tenantId,request.sourceKeys,100,{sourceKey:f.intent.sourceKey,passageOrdinal:0}));
+});
+
 test('concurrent authenticated upload replay creates one tenant source, job and request receipt',async()=>{
   const f=await fixture(),results=await Promise.all([f.enqueue(),f.enqueue()]);assert.deepEqual(results.map(r=>r.outcome).sort(),['processing','unchanged']);
   assert.equal((await pool.query('SELECT * FROM railway_api_mutation_receipts WHERE tenant_id=$1',[f.intent.tenantId])).rowCount,1);
