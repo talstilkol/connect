@@ -3,6 +3,7 @@ import {
   readFile,
 } from "node:fs/promises";
 import test from "node:test";
+import { arSA, enUS, heIL } from "@clerk/localizations";
 
 import {
   authMessages,
@@ -12,6 +13,7 @@ import {
   readAuthLocaleLinks,
   readAuthMessages,
 } from "../shared/i18n/auth.ts";
+import { clerkLocalization } from "../shared/i18n/clerk.ts";
 import {
   publicLandingLocales,
 } from "../shared/i18n/publicLanding.ts";
@@ -68,6 +70,43 @@ function collectStrings(value) {
 
   return [];
 }
+
+test("covers Clerk MFA setup translations without losing runtime placeholders", () => {
+  function verifyBranch(reference, translated, script, path = "taskSetupMfa") {
+    for (const [key, value] of Object.entries(reference)) {
+      const location = `${path}.${key}`;
+      const actual = translated?.[key];
+
+      if (typeof value === "string") {
+        assert.equal(typeof actual, "string", location);
+        assert.match(actual, script, location);
+        assert.deepEqual(
+          actual.match(/\{\{[^}]+\}\}/gu) ?? [],
+          value.match(/\{\{[^}]+\}\}/gu) ?? [],
+          `${location} interpolation`,
+        );
+      } else {
+        verifyBranch(value, actual, script, location);
+      }
+    }
+  }
+
+  for (const [language, base, script] of [
+    ["he", heIL, /[\u0590-\u05ff]/u],
+    ["ar", arSA, /[\u0600-\u06ff]/u],
+  ]) {
+    const localized = clerkLocalization[language];
+    verifyBranch(enUS.taskSetupMfa, localized.taskSetupMfa, script);
+    assert.match(localized.unstable__errors.form_code_incorrect, script);
+    assert.match(localized.unstable__errors.form_param_nil, script);
+    assert.deepEqual(localized.signIn, base.signIn);
+    assert.deepEqual(localized.signUp, base.signUp);
+    assert.deepEqual(localized.userProfile, base.userProfile);
+    assert.equal(localized.locale, base.locale);
+  }
+
+  assert.equal(clerkLocalization.en, enUS);
+});
 
 test("defines deterministic localized authentication routes", () => {
   assert.deepEqual(
@@ -183,9 +222,7 @@ test("keeps localized Auth UI, Clerk configuration, and route boundaries aligned
   assert.doesNotMatch(authForm, /[\u0590-\u05ff]/u);
 
   assert.match(clerkProvider, /^"use client";/);
-  assert.match(clerkProvider, /ar: arSA/);
-  assert.match(clerkProvider, /en: enUS/);
-  assert.match(clerkProvider, /he: heIL/);
+  assert.match(clerkProvider, /shared\/i18n\/clerk/);
   assert.match(clerkProvider, /usePathname\(\)/);
   assert.match(
     clerkProvider,
