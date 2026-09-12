@@ -295,6 +295,7 @@ export function createRailwayApiRuntime(
     });
   const tenantSelectionOperations = createRailwayTenantSelectionOperations({
     memberships: options.memberships,
+    identityOrganizations: options.identityOrganizations,
     selections: options.selections,
     mutationRateLimit: options.mutationRateLimit,
     mutations: options.tenantSelection.mutations,

@@ -16,6 +16,21 @@ import {
 const oidcToken = "oidcHeader.oidcPayload.oidcSignature";
 const userToken = "userHeader.userPayload.userSignature";
 
+test("accepts the organization activation reference only for a tenant selection response", async () => {
+  const response = { contractVersion: RAILWAY_API_CONTRACT_VERSION, outcome: "ok",
+    data: { organizationId: "org_verified", version: 1, unchanged: false, replayed: false } };
+  const selected = createFixture(jsonResponse(response));
+  const result = await createRailwayApiClient(selected.options).call({
+    ...queryEnvelope({ selectionKey: `tenant_selection_option_v1_${"a".repeat(64)}`, expectedVersion: 0 }),
+    operation: "tenant-selection.save", requestKind: "mutation",
+    idempotencyKey: `connect_idempotency_v1_${"a".repeat(64)}`,
+  });
+  assert.deepEqual(result, response);
+  const unrelated = createFixture(jsonResponse(response));
+  await assert.rejects(createRailwayApiClient(unrelated.options).call(queryEnvelope()),
+    (error) => error.code === "INVALID_RESPONSE");
+});
+
 function queryEnvelope(payload = {}) {
   return {
     contractVersion: RAILWAY_API_CONTRACT_VERSION,

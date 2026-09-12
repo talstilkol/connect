@@ -246,6 +246,7 @@ export function createRailwayTenantSelectionHandler(
           ? { status: "server-error" }
           : Object.freeze({
               status: "selected" as const,
+              organizationId: result.organizationId,
               version: result.version,
               unchanged: result.unchanged,
             });

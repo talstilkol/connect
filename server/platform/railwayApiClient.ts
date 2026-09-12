@@ -297,6 +297,7 @@ function isJsonContentType(value: string | null): boolean {
 
 function parseResponseBody(
   body: Uint8Array,
+  operation: string,
 ): Readonly<RailwayApiResponseEnvelope> {
   let value: unknown;
 
@@ -310,7 +311,7 @@ function parseResponseBody(
   }
 
   try {
-    return parseRailwayApiResponseEnvelope(value);
+    return parseRailwayApiResponseEnvelope(value, operation);
   } catch {
     throw new RailwayApiClientError("INVALID_RESPONSE");
   }
@@ -439,6 +440,7 @@ export function createRailwayApiClient(
             response,
             maximumResponseBytes,
           ),
+          envelope.operation,
         );
 
         if (

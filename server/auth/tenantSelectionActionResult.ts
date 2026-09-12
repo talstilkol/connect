@@ -23,6 +23,7 @@ export type LoadTenantSelectionActionResult =
 export type SelectTenantActionResult =
   | Readonly<{
       status: "selected";
+      organizationId: string;
       version: number;
       unchanged: boolean;
     }>

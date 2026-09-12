@@ -1,5 +1,8 @@
 "use client";
 
+import { useClerk } from "@clerk/nextjs";
+import { selectTenantWithOrganization } from "./tenantOrganizationSelection.ts";
+
 import {
   useState,
   useTransition,
@@ -45,6 +48,7 @@ export default function TenantSelectionGate({
   directory:
     TenantSelectionDirectory;
 }) {
+  const clerk = useClerk();
   const router = useRouter();
   const [
     selectedKey,
@@ -70,16 +74,19 @@ export default function TenantSelectionGate({
     setMessage(null);
     startTransition(async () => {
       const result =
-        await selectTenantAction({
+        await selectTenantWithOrganization({
           selectionKey,
           expectedVersion:
             directory.version,
+        }, {
+          select: selectTenantAction,
+          activate: (organization) => clerk.setActive({ organization }),
         });
 
       if (
         result.status === "selected"
       ) {
-        router.refresh();
+        window.location.reload();
         return;
       }
 
@@ -89,6 +96,9 @@ export default function TenantSelectionGate({
           result.status
         ],
       );
+      if (["conflict", "temporarily-unavailable", "server-error"].includes(result.status)) {
+        router.refresh();
+      }
     });
   };
 
@@ -108,9 +118,9 @@ export default function TenantSelectionGate({
           לאיזו סביבת עבודה להיכנס?
         </h1>
         <p>
-          המשתמש שלך משויך למספר סביבות.
-          הבחירה נשמרת בשרת וניתן לשנותה
-          בהמשך.
+          בחר סביבת עבודה כדי להמשיך.
+          הבחירה נשמרת בשרת ומעדכנת את
+          הארגון הפעיל בחשבון שלך.
         </p>
 
         <div

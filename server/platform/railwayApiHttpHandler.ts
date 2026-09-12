@@ -665,7 +665,7 @@ export function createRailwayApiHttpHandler(
             envelope,
           );
           const responseBody = JSON.stringify(
-            createRailwayApiSuccessEnvelope(result),
+            createRailwayApiSuccessEnvelope(result, envelope.operation),
           );
 
           if (

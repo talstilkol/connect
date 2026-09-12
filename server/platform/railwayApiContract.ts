@@ -361,7 +361,29 @@ export function parseRailwayApiRequestEnvelope(
 
 export function createRailwayApiSuccessEnvelope(
   data: unknown,
+  operation?: string,
 ): Readonly<RailwayApiSuccessEnvelope> {
+  // The selected Clerk organization is a client activation target, never a
+  // caller-supplied identity. Permit it only in this exact response shape.
+  if (operation === "tenant-selection.save" && isRecord(data) &&
+      hasExactKeys(data, ["organizationId", "version", "unchanged", "replayed"])) {
+    const descriptors = Object.getOwnPropertyDescriptors(data);
+    if (Reflect.ownKeys(data).length !== 4 ||
+        Object.values(descriptors).some((descriptor) => !("value" in descriptor)) ||
+        ![Object.prototype, null].includes(Object.getPrototypeOf(data))) invalidContract();
+    const { organizationId, version, unchanged, replayed } = data;
+    if (typeof organizationId !== "string" || organizationId.length === 0 ||
+        organizationId.length > 255 || organizationId.trim() !== organizationId ||
+        /[\u0000-\u001f\u007f]/.test(organizationId) ||
+        !Number.isSafeInteger(version) || Number(version) <= 0 ||
+        typeof unchanged !== "boolean" || typeof replayed !== "boolean" ||
+        (replayed && !unchanged)) invalidContract();
+    return Object.freeze({
+      contractVersion: RAILWAY_API_CONTRACT_VERSION,
+      outcome: "ok",
+      data: Object.freeze({ organizationId, version, unchanged, replayed }) as RailwayApiJsonObject,
+    });
+  }
   return Object.freeze({
     contractVersion: RAILWAY_API_CONTRACT_VERSION,
     outcome: "ok",
@@ -385,6 +407,7 @@ export function createRailwayApiFailureEnvelope(
 
 export function parseRailwayApiResponseEnvelope(
   value: unknown,
+  operation?: string,
 ): Readonly<RailwayApiResponseEnvelope> {
   if (
     !isRecord(value) ||
@@ -401,7 +424,7 @@ export function parseRailwayApiResponseEnvelope(
       "data",
     ])
   ) {
-    return createRailwayApiSuccessEnvelope(value.data);
+    return createRailwayApiSuccessEnvelope(value.data, operation);
   }
 
   if (

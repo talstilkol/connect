@@ -55,7 +55,7 @@ function fixture(options = {}) {
             : {
                 contractVersion: "connect.railway-api.v1",
                 outcome: "ok",
-                data: { version: 1, unchanged: false, replayed: false },
+                data: { organizationId: "org_verified", version: 1, unchanged: false, replayed: false },
               };
         },
       };
@@ -88,6 +88,7 @@ test("saves one opaque selection with a deterministic idempotency key", async ()
   const input = Object.freeze({ selectionKey, expectedVersion: 0 });
   assert.deepEqual(await testFixture.handler.select(input), {
     status: "selected",
+    organizationId: "org_verified",
     version: 1,
     unchanged: false,
   });
@@ -164,4 +165,13 @@ test("does not resolve identity while Railway configuration is disabled", async 
     status: "configuration-required",
   });
   assert.equal(disabled.calls.identities, 0);
+});
+
+test("requires a valid server-provided organization before returning a successful switch", async () => {
+  for (const organizationId of [undefined, null, "", " org_verified", "org_\nverified", "a".repeat(256)]) {
+    const testFixture = fixture({ response() {
+      return { outcome: "ok", data: { organizationId, version: 1, unchanged: false, replayed: false } };
+    } });
+    assert.equal((await testFixture.handler.select({ selectionKey, expectedVersion: 0 })).status, "server-error");
+  }
 });

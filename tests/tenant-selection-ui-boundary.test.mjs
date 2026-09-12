@@ -70,7 +70,7 @@ test("keeps the workspace switcher on opaque server-backed selection", async () 
 
   assert.match(
     source,
-    /selectTenantAction\(\{/,
+    /selectTenantWithOrganization\(\{/,
   );
   assert.match(
     source,
@@ -127,4 +127,15 @@ test("wires an accessible tenant switcher through the workspace layout", async (
     workspaceSource,
     /<TenantWorkspaceSwitcher/,
   );
+});
+
+test("both selection entry points activate Clerk and clear prior workspace state", async () => {
+  for (const path of ["features/workspace/TenantSelectionGate.tsx", "features/workspace/TenantWorkspaceSwitcher.tsx"]) {
+    const source = await readSource(path);
+    assert.match(source, /selectTenantWithOrganization/);
+    assert.match(source, /clerk\.setActive\(\{ organization \}\)/);
+    assert.match(source, /window\.location\.reload\(\)/);
+  }
+  const layout = await readSource("app/workspace/layout.tsx");
+  assert.match(layout, /key=\{tenantDirectory\?\.options\.find\([\s\S]*?selectionKey/);
 });

@@ -168,7 +168,7 @@ function validateSelectionInput(
   };
 }
 
-function deriveSelectionKey(
+export function deriveSelectionKey(
   externalUserId: UserId,
   tenantId: TenantId,
 ): string {

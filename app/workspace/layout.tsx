@@ -60,6 +60,7 @@ export default async function WorkspaceLayout({
 
   return (
     <TenantWorkspaceProvider
+      key={tenantDirectory?.options.find((option) => option.selected)?.selectionKey ?? "unselected"}
       directory={tenantDirectory}
     >
       <WorkspaceDraftProvider
