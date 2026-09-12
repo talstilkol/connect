@@ -1509,6 +1509,7 @@ function projectToolCommandIsExact(tokens, executableIndex) {
       );
   }
   return exact(["next", "build", "--webpack"]) ||
+    exact(["next", "typegen"]) ||
     exact(["next", "dev", "--webpack", "--hostname", "localhost"]) ||
     exact(["drizzle-kit", "generate"]) ||
     exact([

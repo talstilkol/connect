@@ -267,7 +267,7 @@ label.file-button:focus-within {
   color: rgba(255, 255, 255, 0.69);
   cursor: pointer;
   text-align: right;
-  transition: 160ms ease;
+  transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
 .nav-item:hover {
@@ -3241,11 +3241,13 @@ label.file-button:focus-within {
 @media (max-width: 820px) {
 
   .sidebar {
+    visibility: hidden;
     transform: translateX(105%);
     transition: transform 180ms ease;
   }
 
   .sidebar.sidebar-open {
+    visibility: visible;
     transform: translateX(0);
   }
 

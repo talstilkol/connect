@@ -1,6 +1,11 @@
 import { isRecord, validInteger, type OpenAiResponsesConfiguration } from "./openAiResponsesConfiguration.ts";
 import { readOpenAiJsonResponse } from "./openAiResponsesProvider.ts";
 
+export type OpenAiInputTokenCount =
+  | Readonly<{ outcome: "counted"; inputTokens: number }>
+  | Readonly<{ outcome: "input-too-large" }>
+  | Readonly<{ outcome: "unavailable" }>;
+
 export function createOpenAiInputTokenBody(responseBody: string): string {
   const body = JSON.parse(responseBody);
   // Count the exact input, instructions, tool definitions and output schema.
@@ -13,26 +18,30 @@ export async function countOpenAiInputTokens(
   responseBody: string,
   configuration: OpenAiResponsesConfiguration,
   transport: typeof fetch,
-): Promise<number | null> {
+): Promise<OpenAiInputTokenCount> {
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const deadline = new Promise<null>((resolve) => {
-      timer = setTimeout(() => { controller.abort(); resolve(null); }, configuration.timeoutMs);
+    const deadline = new Promise<OpenAiInputTokenCount>((resolve) => {
+      timer = setTimeout(() => { controller.abort(); resolve({ outcome: "unavailable" }); }, configuration.timeoutMs);
     });
-    const attempt = (async (): Promise<number | null> => {
+    const attempt = (async (): Promise<OpenAiInputTokenCount> => {
       const response = await transport("https://api.openai.com/v1/responses/input_tokens", {
         method: "POST", redirect: "error", cache: "no-store", signal: controller.signal,
         headers: { authorization: `Bearer ${configuration.apiKey}`, "content-type": "application/json", accept: "application/json" },
         body: createOpenAiInputTokenBody(responseBody),
       });
-      if (response.status !== 200 || response.redirected) { await response.body?.cancel(); return null; }
+      if (response.status !== 200 || response.redirected) { await response.body?.cancel(); return { outcome: "unavailable" }; }
       const result = await readOpenAiJsonResponse(response);
-      return !controller.signal.aborted && isRecord(result) && result.object === "response.input_tokens" &&
-        validInteger(result.input_tokens, 1, configuration.maximumInputTokens) ? result.input_tokens : null;
+      if (controller.signal.aborted || !isRecord(result) || result.object !== "response.input_tokens" ||
+        !validInteger(result.input_tokens, 1, Number.MAX_SAFE_INTEGER)) return { outcome: "unavailable" };
+      // A valid count above our ceiling is a permanent input decision, not a
+      // provider outage: retrying the same input cannot make it fit the limit.
+      return result.input_tokens > configuration.maximumInputTokens ? { outcome: "input-too-large" } :
+        { outcome: "counted", inputTokens: result.input_tokens };
     })();
     return await Promise.race([attempt, deadline]);
-  } catch { return null; }
+  } catch { return { outcome: "unavailable" }; }
   finally { if (timer !== undefined) clearTimeout(timer); controller.abort(); }
 }
 
