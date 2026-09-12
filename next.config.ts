@@ -9,6 +9,7 @@ const unavailableCloudflareEnvironment = path.join(
 );
 
 const nextConfig: NextConfig = {
+  agentRules: false,
   webpack(configuration, { webpack }) {
     configuration.plugins.push(
       new webpack.NormalModuleReplacementPlugin(
