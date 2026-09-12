@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 import {
   readFile,
@@ -28,13 +30,26 @@ function expectedProductionFailure() {
   return {
     status: 1,
     signal: null,
-    stdout:
-      "Release gate: PASS (tests-and-build)\n",
-    stderr: [
-      "Dependency audit evidence attestation: FAIL (DEPENDENCY_AUDIT_ATTESTATION_ARGUMENTS_INVALID)",
-      "Release gate: FAIL (dependency-audit-attestation)",
+    stdout: [
+      "Release gate: PASS (tests-and-build)",
+      "Production readiness v2: BLOCKED",
+      "Source: NONE (disabled)",
+      "Code: PRODUCTION_READINESS_V2_SOURCE_REQUIRED",
       "",
     ].join("\n"),
+    stderr: [
+      "Release gate: FAIL (production-infrastructure-readiness-v2)",
+      "",
+    ].join("\n"),
+  };
+}
+
+function expectedDependencyFailure() {
+  return {
+    status: 1,
+    signal: null,
+    stdout: "",
+    stderr: "Dependency audit evidence attestation: FAIL (DEPENDENCY_AUDIT_ATTESTATION_ARGUMENTS_INVALID)\n",
   };
 }
 
@@ -48,6 +63,7 @@ test("builds release-bound local rehearsal evidence while keeping production blo
         passedRequiredSteps(),
       productionGateResult:
         expectedProductionFailure(),
+      dependencyAttestationProbeResult: expectedDependencyFailure(),
     });
 
   assert.equal(report.schemaVersion, 1);
@@ -73,7 +89,12 @@ test("builds release-bound local rehearsal evidence while keeping production blo
     [
       ...localReleaseRehearsalRequiredStepIds,
       "production-fail-closed",
+      "dependency-attestation-fail-closed",
     ],
+  );
+  assert.equal(
+    report.checks.at(-2).observedBlockerCode,
+    "PRODUCTION_READINESS_V2_SOURCE_REQUIRED",
   );
   assert.equal(
     report.checks.at(-1).observedBlockerCode,
@@ -129,6 +150,37 @@ test("removes production evidence authority from the fail-closed probe", () => {
   );
 });
 
+test("the isolated probe blocks the real readiness CLI before opening a configured source", () => {
+  const inherited = {
+    PATH: process.env.PATH,
+    PRODUCTION_READINESS_V2_SOURCE: "postgresql",
+    APP_RELEASE_ID: "configured",
+    APP_DEPLOYED_COMMIT_SHA: "configured",
+    PRODUCTION_READINESS_V2_RAILWAY_API_ARTIFACT_DIGEST: "configured",
+    PRODUCTION_READINESS_V2_RAILWAY_WORKER_ARTIFACT_DIGEST: "configured",
+    PRODUCTION_READINESS_V2_VERCEL_WEB_ARTIFACT_DIGEST: "configured",
+  };
+  const isolated = createFailClosedProbeEnvironment(inherited);
+  const result = spawnSync(process.execPath, [
+    fileURLToPath(new URL("../scripts/verify-production-readiness.mjs", import.meta.url)),
+    "--v2",
+  ], { env: isolated, encoding: "utf8", timeout: 15_000 });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.signal, null);
+  assert.equal(result.stderr, "");
+  assert.equal(result.stdout, [
+    "Production readiness v2: BLOCKED",
+    "Source: NONE (disabled)",
+    "Code: PRODUCTION_READINESS_V2_SOURCE_REQUIRED",
+    "",
+  ].join("\n"));
+  for (const key of Object.keys(inherited).filter((key) => key !== "PATH")) {
+    assert.equal(Object.hasOwn(isolated, key), false);
+    assert.equal(typeof inherited[key], "string");
+  }
+});
+
 test("rejects an unexpected production pass or unrelated production failure", async () => {
   const releaseManifest =
     await readCommittedReleaseManifest();
@@ -136,6 +188,7 @@ test("rejects an unexpected production pass or unrelated production failure", as
     releaseManifest,
     requiredStepResults:
       passedRequiredSteps(),
+    dependencyAttestationProbeResult: expectedDependencyFailure(),
   };
 
   assert.throws(
@@ -166,6 +219,57 @@ test("rejects an unexpected production pass or unrelated production failure", as
       }),
     /LOCAL_REHEARSAL_PRODUCTION_GATE_UNEXPECTED_FAILURE/,
   );
+});
+
+test("the isolated dependency attestation CLI fails before reading evidence or contacting GitHub", async () => {
+  const isolated = createFailClosedProbeEnvironment({
+    PATH: process.env.PATH,
+    DEPENDENCY_AUDIT_ATTESTATION_REPOSITORY: "configured",
+    DEPENDENCY_AUDIT_EVIDENCE_JSON: "configured",
+  });
+  const result = spawnSync(process.execPath, [
+    fileURLToPath(new URL("../scripts/verify-dependency-audit-evidence-attestation.mjs", import.meta.url)),
+  ], { env: isolated, encoding: "utf8", timeout: 15_000 });
+  assert.equal(result.status, 1);
+  assert.equal(result.signal, null);
+  assert.equal(result.stdout, "");
+  assert.equal(result.stderr, expectedDependencyFailure().stderr);
+  const report = buildLocalReleaseRehearsalReport({
+    releaseManifest: await readCommittedReleaseManifest(),
+    requiredStepResults: passedRequiredSteps(),
+    productionGateResult: expectedProductionFailure(),
+    dependencyAttestationProbeResult: result,
+  });
+  assert.equal(report.productionReady, false);
+});
+
+test("requires both exact blockers and rejects partial, successful or interrupted probes", async () => {
+  const base = {
+    releaseManifest: await readCommittedReleaseManifest(),
+    requiredStepResults: passedRequiredSteps(),
+    productionGateResult: expectedProductionFailure(),
+    dependencyAttestationProbeResult: expectedDependencyFailure(),
+  };
+  for (const productionGateResult of [
+    { ...expectedProductionFailure(), stdout: "" },
+    { ...expectedProductionFailure(), stdout: expectedProductionFailure().stdout.replace("Code:", "Embedded Code:") },
+    { ...expectedProductionFailure(), stdout: `${expectedProductionFailure().stdout}Release gate: PRODUCTION PASS\n` },
+    { ...expectedProductionFailure(), status: null, signal: "SIGTERM" },
+  ]) {
+    assert.throws(() => buildLocalReleaseRehearsalReport({ ...base, productionGateResult }),
+      /LOCAL_REHEARSAL_PRODUCTION_GATE_UNEXPECTED_FAILURE/);
+  }
+  for (const dependencyAttestationProbeResult of [
+    undefined,
+    { ...expectedDependencyFailure(), status: 0 },
+    { ...expectedDependencyFailure(), status: null, signal: "SIGTERM" },
+    { ...expectedDependencyFailure(), stderr: "An unrelated failure\n" },
+    { ...expectedDependencyFailure(), stderr: `Embedded ${expectedDependencyFailure().stderr}` },
+    { ...expectedDependencyFailure(), stdout: "Dependency audit evidence attestation: PASS (unexpected)\n" },
+  ]) {
+    assert.throws(() => buildLocalReleaseRehearsalReport({ ...base, dependencyAttestationProbeResult }),
+      /LOCAL_REHEARSAL_DEPENDENCY_PROBE_(?:RESULT_INVALID|UNEXPECTED_PASS|UNEXPECTED_FAILURE)/);
+  }
 });
 
 test("keeps the operator runbook and package command connected to the rehearsal", async () => {
