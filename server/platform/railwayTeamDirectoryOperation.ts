@@ -47,7 +47,8 @@ function requireDependencies(
     Object.keys(dependencies).sort().join(",") !==
       "memberships,tenantSessions" ||
     typeof dependencies.tenantSessions?.resolve !== "function" ||
-    typeof dependencies.memberships?.findActiveByTenantId !== "function"
+    typeof dependencies.memberships?.findActiveByTenantId !== "function" ||
+    typeof dependencies.memberships?.findByTenantId !== "function"
   ) {
     throw new Error("Railway team directory dependencies are invalid");
   }

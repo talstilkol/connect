@@ -38,23 +38,24 @@ test("routes invitation requests through the protected Railway boundary", async 
   );
 });
 
-test("keeps invitation actions and sensitive identities outside React", async () => {
+test("uses the invitation server action without exposing provider or tenant identities", async () => {
   const [
     component,
     view,
   ] = await Promise.all([
     readSource(
-      "features/team/TeamDirectory.tsx",
+      "features/team/TeamInvitationForm.tsx",
     ),
     readSource(
       "shared/domain/teamInvitationView.ts",
     ),
   ]);
 
-  assert.doesNotMatch(
-    component,
-    /teamInvitationActions|inviteTeamMemberAction|teamInvitationAcceptanceActions|acceptTeamInvitationAction/,
-  );
+  assert.match(component, /inviteTeamMemberAction\(\{ email: email.trim\(\), role \}\)/);
+  assert.doesNotMatch(component, /\btenantId\b|\bexternalUserId\b|requestKey|localStorage|sessionStorage/);
+  assert.match(component, /result.status === "queued"/);
+  assert.match(component, /result.status === "already-pending"/);
+  assert.match(component, /inFlight.current/);
   assert.doesNotMatch(
     view,
     /email|tenantId|externalUserId|requestKey/,

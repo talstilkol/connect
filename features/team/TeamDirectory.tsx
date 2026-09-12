@@ -1,3 +1,9 @@
+"use client";
+
+import { useState } from "react";
+import { TeamInvitationForm } from "./TeamInvitationForm";
+import { TeamManagement } from "./TeamManagement";
+import { readTeamManagementMessages } from "./teamManagementMessages";
 import {
   rolePermissions,
   type TenantRole,
@@ -16,16 +22,18 @@ const roles =
     rolePermissions,
   ) as TenantRole[];
 
-export function TeamDirectory({
+function TeamDirectoryContent({
   language,
-  directory,
+  directory: initialDirectory,
   status,
 }: {
   language: InterfaceLanguage;
   directory: TeamDirectoryView;
   status: TeamDirectoryStatus;
 }) {
+  const [directory, setDirectory] = useState(initialDirectory);
   const messages = readTeamDirectoryMessages(language);
+  const managementMessages = readTeamManagementMessages(language);
   return (
     <>
       <div className="page-heading compact">
@@ -38,26 +46,9 @@ export function TeamDirectory({
             {messages.description}
           </p>
         </div>
-        <div className="heading-actions">
-          <button
-            aria-describedby="team-invitation-unavailable"
-            className="primary-button"
-            disabled
-            title={messages.inviteTitle}
-            type="button"
-          >
-            {messages.invite}
-          </button>
-        </div>
       </div>
 
-      <p
-        className="inline-notice warning"
-        id="team-invitation-unavailable"
-        role="status"
-      >
-        {messages.inviteUnavailable}
-      </p>
+      <TeamInvitationForm language={language} enabled={status === "ready" && directory.members.some((member) => member.currentUser && member.status === "active" && (member.role === "owner" || member.role === "manager"))} />
 
       {status === "ready" ? (
         <>
@@ -76,7 +67,7 @@ export function TeamDirectory({
               </div>
               <span className="status-pill healthy">
                 {messages.activeCount(
-                  directory.members.length,
+                  directory.members.filter((member) => member.status === "active").length,
                 )}
               </span>
             </div>
@@ -115,6 +106,8 @@ export function TeamDirectory({
                           messages.reference(member.referenceCode)}
                       </small>
                     </div>
+                    <div className="team-member-badges">
+                    <span className="status-pill neutral">{managementMessages[member.status]}</span>
                     <span className="status-pill neutral">
                       {
                         messages.roles[
@@ -122,11 +115,14 @@ export function TeamDirectory({
                         ]
                       }
                     </span>
+                    </div>
                   </li>
                 ),
               )}
             </ul>
           </section>
+
+          <TeamManagement language={language} directory={directory} onDirectory={setDirectory} />
 
           <section
             aria-label={messages.permissionsAriaLabel}
@@ -207,4 +203,9 @@ export function TeamDirectory({
       )}
     </>
   );
+}
+
+export function TeamDirectory(props: { language: InterfaceLanguage; directory: TeamDirectoryView; status: TeamDirectoryStatus }) {
+  const snapshotKey = JSON.stringify([props.language, props.status, props.directory]);
+  return <TeamDirectoryContent key={snapshotKey} {...props} />;
 }

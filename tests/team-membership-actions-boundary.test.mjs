@@ -34,23 +34,23 @@ test("routes team mutations through Railway without D1 fallback", async () => {
   );
 });
 
-test("keeps team mutation actions outside the read-only React surface", async () => {
+test("connects team controls only through server actions and opaque membership keys", async () => {
   const [
     component,
     view,
   ] = await Promise.all([
     readSource(
-      "features/team/TeamDirectory.tsx",
+      "features/team/TeamManagement.tsx",
     ),
     readSource(
       "shared/domain/teamMembershipMutationView.ts",
     ),
   ]);
 
-  assert.doesNotMatch(
-    component,
-    /teamMembershipActions|changeTeamMember|transferTeamOwnership/,
-  );
+  assert.match(component, /changeTeamMemberRoleAction/);
+  assert.match(component, /changeTeamMemberStatusAction/);
+  assert.match(component, /transferTeamOwnershipAction/);
+  assert.doesNotMatch(component, /\bexternalUserId\b|\btenantId\b|localStorage|sessionStorage/);
   assert.doesNotMatch(
     view,
     /tenantId|externalUserId|actorExternalUserId|eventKey|operationKey/,

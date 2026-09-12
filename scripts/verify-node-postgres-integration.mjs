@@ -1,3 +1,4 @@
+import { verifyTeamManagementPostgres } from "./verify-team-management-postgres.mjs";
 import { proveCoreBotReplyProviderBoundary, finalizeCoreBotReplyProviderBoundary, seedCoreProviderFenceUpgrade } from "./verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs";
 import { connection as metaHistoryFixture } from "../tests/fixtures/meta-history.mjs";
 import { verifyContactOrganizationMutationsPostgres } from "./verify-contact-organization-mutations-postgres.mjs";
@@ -8460,6 +8461,7 @@ export async function verifyNodePostgresIntegration(
         pool,
       );
       await verifyContactOrganizationMutationsPostgres(pool);
+      await verifyTeamManagementPostgres(pool);
 
     } finally {
       await foundation.close();

@@ -15,6 +15,7 @@ const directory = Object.freeze({
     primaryEmail: null,
     role: "owner",
     version: 1,
+    status: "active",
     currentUser: true,
   })]),
 });

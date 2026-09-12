@@ -58,9 +58,9 @@ const messages = {
     inviteTitle:
       "הזמנות יופעלו לאחר השלמת חיבור שירות ההזמנות ובדיקת הצטרפות",
     inviteUnavailable:
-      "הזמנות ושינויים בצוות אינם זמינים עדיין. נדרשת השלמת חיבור שירות ההזמנות ובדיקת הצטרפות לסביבת העבודה.",
+      "הזמנות אינן זמינות עדיין. נדרשת השלמת חיבור שירות ההזמנות ובדיקת הצטרפות לסביבת העבודה.",
     membersKicker: "סביבת העבודה",
-    membersTitle: "חברי הצוות הפעילים",
+    membersTitle: "חברי הצוות",
     activeCount: (value) => `${value} פעילים`,
     identityUnavailable:
       "שמות וכתובות אימייל אינם זמינים כרגע. בינתיים מוצג קוד מזהה מוגן לכל חבר צוות.",
@@ -118,9 +118,9 @@ const messages = {
     inviteTitle:
       "Invitations will open after the invitation service is connected and joining the workspace is verified",
     inviteUnavailable:
-      "Invitations and team changes are not available yet. The invitation service must be connected and joining the workspace verified.",
+      "Invitations are not available yet. The invitation service must be connected and joining the workspace verified.",
     membersKicker: "Workspace",
-    membersTitle: "Active team members",
+    membersTitle: "Team members",
     activeCount: (value) => `${value} active`,
     identityUnavailable:
       "Names and email addresses are currently unavailable. A protected reference code identifies each team member in the meantime.",
@@ -177,9 +177,9 @@ const messages = {
     inviteTitle:
       "ستتاح الدعوات بعد ربط خدمة الدعوات والتحقق من الانضمام إلى مساحة العمل",
     inviteUnavailable:
-      "الدعوات وتغييرات الفريق غير متاحة بعد. يلزم ربط خدمة الدعوات والتحقق من الانضمام إلى مساحة العمل.",
+      "الدعوات غير متاحة بعد. يلزم ربط خدمة الدعوات والتحقق من الانضمام إلى مساحة العمل.",
     membersKicker: "مساحة العمل",
-    membersTitle: "أعضاء الفريق النشطون",
+    membersTitle: "أعضاء الفريق",
     activeCount: (value) => `${value} نشطون`,
     identityUnavailable:
       "الأسماء وعناوين البريد الإلكتروني غير متاحة حاليًا. يُعرّف كل عضو برمز مرجعي محمي في الوقت الحالي.",

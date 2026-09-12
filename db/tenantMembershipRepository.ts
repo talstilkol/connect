@@ -46,6 +46,10 @@ const FIND_ACTIVE_TENANT_MEMBERS_SQL = `
   LIMIT 101
 `;
 
+const FIND_ALL_TENANT_MEMBERS_SQL = FIND_ACTIVE_TENANT_MEMBERS_SQL
+  .replace("tenant_memberships.version AS version", "tenant_memberships.version AS version, tenant_memberships.status AS status")
+  .replace("AND tenant_memberships.status = 'active'", "");
+
 const tenantRoles: readonly TenantRole[] = [
   "owner",
   "manager",
@@ -81,7 +85,12 @@ export interface ActiveTenantMembership {
   version: number;
 }
 
+export interface TenantDirectoryMembership extends ActiveTenantMembership {
+  status: "active" | "suspended";
+}
+
 export interface TenantMembershipRepository {
+  findByTenantId(tenantId: TenantId): Promise<readonly TenantDirectoryMembership[]>;
   findActiveByExternalUserId(
     externalUserId: UserId,
   ): Promise<readonly ActiveTenantMembership[]>;
@@ -159,6 +168,18 @@ export function createTenantMembershipRepository(
   database: D1DatabaseBinding,
 ): TenantMembershipRepository {
   return {
+    async findByTenantId(tenantId) {
+      const result = await database.prepare(FIND_ALL_TENANT_MEMBERS_SQL)
+        .bind(requireTenantId(tenantId)).all<D1TenantMembershipRow & { status: string }>();
+      const rows = result.results ?? [];
+      if (!result.success || rows.length > 100) throw new Error("Team directory read failed");
+      return rows.map((row) => {
+        if (row.tenantId !== tenantId || (row.status !== "active" && row.status !== "suspended")) {
+          throw new Error("Team directory membership is invalid");
+        }
+        return { ...parseMembershipRow(row), status: row.status };
+      });
+    },
     async findActiveByExternalUserId(externalUserId) {
       const normalizedExternalUserId = externalUserId.trim();
 

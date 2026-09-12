@@ -18,6 +18,7 @@ export interface TeamMemberView {
   primaryEmail: string | null;
   role: TenantRole;
   version: number;
+  status: "active" | "suspended";
   currentUser: boolean;
 }
 

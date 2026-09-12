@@ -57,7 +57,10 @@ function fixture(role = "owner") {
       async findActiveByExternalUserId() {
         throw new Error("unexpected identity membership read");
       },
-      async findActiveByTenantId(tenantId) {
+      async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId(tenantId) {
         calls.tenantReads.push(tenantId);
         return [
           membership("verified-user", role),
@@ -136,7 +139,10 @@ test("maps session and repository failures to bounded API errors", async () => {
     },
     memberships: {
       async findActiveByExternalUserId() { return []; },
-      async findActiveByTenantId() { return []; },
+      async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId() { return []; },
     },
   });
   await assert.rejects(
@@ -158,7 +164,10 @@ test("maps session and repository failures to bounded API errors", async () => {
     },
     memberships: {
       async findActiveByExternalUserId() { return []; },
-      async findActiveByTenantId() {
+      async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId() {
         throw new Error("database unavailable");
       },
     },

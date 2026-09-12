@@ -22,6 +22,7 @@ function toMemberView(
   externalUserId: string,
   role: TeamMemberView["role"],
   version: number,
+  status: TeamMemberView["status"],
   identity:
     TeamIdentityDisplay | null,
 ): TeamMemberView {
@@ -44,6 +45,7 @@ function toMemberView(
       null,
     role,
     version,
+    status,
     currentUser:
       externalUserId ===
       session.externalUserId,
@@ -139,11 +141,10 @@ export function createTeamDirectoryService(
         session,
         "team.manage",
       );
-      const members =
-        await dependencies.memberships
-          .findActiveByTenantId(
-            session.tenantId,
-          );
+      const members = session.role === "owner"
+        ? await dependencies.memberships.findByTenantId(session.tenantId)
+        : (await dependencies.memberships.findActiveByTenantId(session.tenantId))
+          .map((membership) => ({ ...membership, status: "active" as const }));
 
       if (
         members.length > 100 ||
@@ -162,7 +163,8 @@ export function createTeamDirectoryService(
             !Number.isSafeInteger(
               membership.version,
             ) ||
-            membership.version <= 0,
+            membership.version <= 0 ||
+            (membership.status !== "active" && membership.status !== "suspended"),
         )
       ) {
         throw new Error(
@@ -177,7 +179,8 @@ export function createTeamDirectoryService(
             session.externalUserId,
         ).length;
 
-      if (currentUserCount !== 1) {
+      const actor = members.find((membership) => membership.externalUserId === session.externalUserId);
+      if (currentUserCount !== 1 || actor?.status !== "active" || actor.role !== session.role) {
         throw new Error(
           "The current tenant member is missing or duplicated",
         );
@@ -269,6 +272,7 @@ export function createTeamDirectoryService(
               membership.externalUserId,
               membership.role,
               membership.version,
+              membership.status,
               identityById.get(
                 membership.externalUserId,
               ) ?? null,

@@ -204,7 +204,10 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
           membership(11, selectedRole),
         ];
       },
-      async findActiveByTenantId(tenantId) {
+      async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId(tenantId) {
         calls.teamDirectoryReads.push(tenantId);
         return [
           membership(tenantId, selectedRole),
@@ -1232,7 +1235,10 @@ test("first workspace provisioning uses verified Clerk admin status through the 
           },
         },
       },
-      memberships: { async findActiveByExternalUserId() { return []; }, async findActiveByTenantId() { return []; } },
+      memberships: { async findActiveByExternalUserId() { return []; }, async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId() { return []; } },
     });
     const response = await current.handler.handle(request("onboarding.business-profile.save", payload, "mutation", key));
     const body = await response.json();
