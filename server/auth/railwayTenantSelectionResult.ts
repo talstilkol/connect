@@ -78,13 +78,19 @@ export function parseRailwayTenantSelectionDirectory(
 export function parseRailwayTenantSelectionSaveResult(
   value: unknown,
 ): Readonly<{
+  organizationId: string;
   version: number;
   unchanged: boolean;
   replayed: boolean;
 }> | null {
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, ["replayed", "unchanged", "version"]) ||
+    !hasExactKeys(value, ["organizationId", "replayed", "unchanged", "version"]) ||
+    typeof value.organizationId !== "string" ||
+    value.organizationId.length === 0 ||
+    value.organizationId.length > 255 ||
+    value.organizationId.trim() !== value.organizationId ||
+    /[\u0000-\u001f\u007f]/.test(value.organizationId) ||
     !Number.isSafeInteger(value.version) ||
     Number(value.version) <= 0 ||
     typeof value.unchanged !== "boolean" ||
@@ -94,6 +100,7 @@ export function parseRailwayTenantSelectionSaveResult(
     return null;
   }
   return Object.freeze({
+    organizationId: value.organizationId,
     version: Number(value.version),
     unchanged: value.unchanged,
     replayed: value.replayed,

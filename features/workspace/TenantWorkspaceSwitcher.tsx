@@ -1,5 +1,8 @@
 "use client";
 
+import { useClerk } from "@clerk/nextjs";
+import { selectTenantWithOrganization, type ActivateTenantOrganization } from "./tenantOrganizationSelection.ts";
+
 import {
   createContext,
   useContext,
@@ -29,6 +32,20 @@ const TenantWorkspaceContext =
     null,
   );
 
+const TenantOrganizationActivationContext = createContext<ActivateTenantOrganization | null>(null);
+
+function ConnectedTenantWorkspaceProvider({ children, directory }: {
+  children: ReactNode;
+  directory: TenantSelectionDirectory;
+}) {
+  const clerk = useClerk();
+  return (
+    <TenantOrganizationActivationContext.Provider value={(organization) => clerk.setActive({ organization })}>
+      <TenantWorkspaceContext.Provider value={directory}>{children}</TenantWorkspaceContext.Provider>
+    </TenantOrganizationActivationContext.Provider>
+  );
+}
+
 export function TenantWorkspaceProvider({
   children,
   directory,
@@ -37,6 +54,9 @@ export function TenantWorkspaceProvider({
   directory:
     TenantSelectionDirectory | null;
 }) {
+  if (directory) {
+    return <ConnectedTenantWorkspaceProvider directory={directory}>{children}</ConnectedTenantWorkspaceProvider>;
+  }
   return (
     <TenantWorkspaceContext.Provider
       value={directory}
@@ -56,6 +76,7 @@ export function TenantWorkspaceSwitcher({
   const directory = useContext(
     TenantWorkspaceContext,
   );
+  const activate = useContext(TenantOrganizationActivationContext);
   const router = useRouter();
   const messages =
     readWorkspaceShellMessages(language).tenant;
@@ -96,7 +117,7 @@ export function TenantWorkspaceSwitcher({
     selectionKey: string,
   ) => {
     if (
-      !directory ||
+      !directory || !activate ||
       isPending ||
       selectionKey.length === 0 ||
       selectionKey ===
@@ -109,17 +130,17 @@ export function TenantWorkspaceSwitcher({
     setMessage(messages.saving);
     startTransition(async () => {
       const result =
-        await selectTenantAction({
+        await selectTenantWithOrganization({
           selectionKey,
           expectedVersion:
             directory.version,
-        });
+        }, { select: selectTenantAction, activate });
 
       if (
         result.status === "selected"
       ) {
         setMessage(messages.switched);
-        router.refresh();
+        window.location.reload();
         return;
       }
 
@@ -134,7 +155,9 @@ export function TenantWorkspaceSwitcher({
         result.status ===
           "conflict" ||
         result.status ===
-          "selection-required"
+          "selection-required" ||
+        result.status === "temporarily-unavailable" ||
+        result.status === "server-error"
       ) {
         router.refresh();
       }

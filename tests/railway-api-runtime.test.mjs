@@ -1927,6 +1927,7 @@ test("lists and selects an opaque tenant through the complete boundary", async (
   );
   assert.equal(selectionResponse.status, 200);
   assert.deepEqual((await selectionResponse.json()).data, {
+    organizationId: "org_verified",
     version: 3,
     unchanged: false,
     replayed: false,

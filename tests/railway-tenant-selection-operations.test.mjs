@@ -9,8 +9,10 @@ import {
 import {
   createRailwayTenantSelectionOperations,
 } from "../server/platform/railwayTenantSelectionOperations.ts";
+import { selectTenantWithOrganization } from "../features/workspace/tenantOrganizationSelection.ts";
+import { createRailwayTenantSessionResolver } from "../server/platform/railwayTenantSessionResolver.ts";
 
-const identity = Object.freeze({ externalUserId: "verified-user" });
+const identity = Object.freeze({ externalUserId: "verified-user", externalOrganizationId: "org_verified" });
 const context = Object.freeze({
   userIdentity: identity,
   serviceIdentity: Object.freeze({
@@ -51,6 +53,12 @@ function fixture(options = {}) {
     mutations: [],
   };
   const operations = createRailwayTenantSelectionOperations({
+    identityOrganizations: {
+      async findByTenantId(tenantId) {
+        if (options.binding !== undefined) return options.binding;
+        return { tenantId, externalOrganizationId: tenantId === 7 ? "org_verified" : "org_other" };
+      },
+    },
     memberships: {
       async findActiveByExternalUserId() {
         calls.memberships += 1;
@@ -75,6 +83,7 @@ function fixture(options = {}) {
     mutations: {
       async execute(command) {
         calls.mutations.push(command);
+        if (options.stateful) options.selection = { tenantId: command.input.tenantId, version: command.input.expectedVersion + 1 };
         return options.mutationResult ?? {
           outcome: "committed",
           tenantId: command.input.tenantId,
@@ -107,6 +116,92 @@ function readRequest() {
     payload: Object.freeze({}),
   });
 }
+
+test("switches Clerk after saving and recovers an interrupted activation with the current directory version", async () => {
+  const options = { stateful: true, selection: { tenantId: 7, version: 2 } };
+  const testFixture = fixture(options);
+  let currentIdentity = identity;
+  const input = { selectionKey: selectionKey(11), expectedVersion: 2 };
+  const select = async (payload) => {
+    const result = await testFixture.save.execute(
+      { ...context, userIdentity: currentIdentity }, payload, await saveRequest(payload),
+    );
+    return { status: "selected", ...result };
+  };
+  const resolver = createRailwayTenantSessionResolver({
+    memberships: { async findActiveByExternalUserId() { return [membership(7), membership(11)]; } },
+    selections: { async findByExternalUserId() { return options.selection; } },
+    identityOrganizations: { async findByTenantId(tenantId) {
+      return { tenantId, externalOrganizationId: tenantId === 7 ? "org_verified" : "org_other" };
+    } },
+  });
+  const first = await selectTenantWithOrganization(input, {
+    select,
+    async activate(organizationId) {
+      assert.equal(options.selection.tenantId, 11);
+      assert.equal(organizationId, "org_other");
+      throw new Error("Clerk unavailable");
+    },
+  });
+  assert.equal(first.status, "temporarily-unavailable");
+  await assert.rejects(resolver.resolve(currentIdentity), /organization binding/);
+  const { directory } = await testFixture.read.execute(context, {}, readRequest());
+  assert.equal(directory.version, 3);
+  assert.equal(directory.selectionRequired, true);
+  assert.equal(directory.options.some((option) => option.selected), false);
+
+  const retried = await selectTenantWithOrganization({ ...input, expectedVersion: directory.version }, {
+    select,
+    async activate(organizationId) {
+      currentIdentity = { ...identity, externalOrganizationId: organizationId };
+    },
+  });
+  assert.equal(retried.status, "selected");
+  assert.equal((await resolver.resolve(currentIdentity)).tenantId, 11);
+  const readback = await testFixture.read.execute({ ...context, userIdentity: currentIdentity }, {}, readRequest());
+  assert.equal(readback.directory.selectionRequired, false);
+  assert.equal(readback.directory.options.find((option) => option.selected).selectionKey, selectionKey(11));
+});
+
+test("offers organization recovery even when there is only one membership", async () => {
+  const testFixture = fixture({ memberships: [membership(11)] });
+  const { directory } = await testFixture.read.execute(context, {}, readRequest());
+  assert.equal(directory.selectionRequired, true);
+  assert.equal(directory.options.length, 1);
+  assert.equal(directory.options[0].selected, false);
+});
+
+test("rejects missing or mismatched organization binding before committing a selection", async () => {
+  for (const binding of [null, { tenantId: 7, externalOrganizationId: "org_verified" },
+    { tenantId: 11, externalOrganizationId: " " }]) {
+    const testFixture = fixture({ binding });
+    const payload = { selectionKey: selectionKey(11), expectedVersion: 0 };
+    await assert.rejects(testFixture.save.execute(context, payload, await saveRequest(payload)),
+      (error) => error.code === "DEPENDENCY_UNAVAILABLE");
+    assert.equal(testFixture.calls.mutations.length, 0);
+  }
+});
+
+test("does not activate Clerk after a failed selection and waits for activation before reporting success", async () => {
+  const input = { selectionKey: selectionKey(11), expectedVersion: 0 };
+  const failure = await selectTenantWithOrganization(input, {
+    async select() { return { status: "conflict" }; },
+    async activate() { assert.fail("Must not activate after a failed save"); },
+  });
+  assert.equal(failure.status, "conflict");
+  let finish;
+  const activation = new Promise((resolve) => { finish = resolve; });
+  let completed = false;
+  const pending = selectTenantWithOrganization(input, {
+    async select() { return { status: "selected", organizationId: "org_other", version: 1, unchanged: false }; },
+    async activate(organizationId) { assert.equal(organizationId, "org_other"); await activation; },
+  }).then((result) => { completed = true; return result; });
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(completed, false);
+  finish();
+  assert.equal((await pending).status, "selected");
+});
 
 async function saveRequest(payload) {
   return Object.freeze({
@@ -159,7 +254,7 @@ test("selects through identity quota and one atomic mutation command", async () 
     await saveRequest(payload),
   );
 
-  assert.deepEqual(result, { version: 1, unchanged: false, replayed: false });
+  assert.deepEqual(result, { organizationId: "org_other", version: 1, unchanged: false, replayed: false });
   assert.deepEqual(testFixture.calls.rateLimitSubjects, [
     "verified-user:tenant-selection.save",
   ]);
@@ -195,7 +290,7 @@ test("marks an exact receipt replay as unchanged", async () => {
   });
   assert.deepEqual(
     await testFixture.save.execute(context, payload, await saveRequest(payload)),
-    { version: 1, unchanged: true, replayed: true },
+    { organizationId: "org_verified", version: 1, unchanged: true, replayed: true },
   );
 });
 

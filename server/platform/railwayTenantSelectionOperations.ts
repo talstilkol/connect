@@ -1,12 +1,15 @@
 import type {
   TenantMembershipRepository,
 } from "../../db/tenantMembershipRepository.ts";
+import type { ClerkOrganizationBindingRepository } from "../../db/clerkOrganizationBindingRepository.ts";
+import type { TenantId } from "../../shared/domain/model.ts";
 import type {
   SaveTenantSelectionInput,
   TenantSelectionRepository,
 } from "../../db/tenantSelectionRepository.ts";
 import {
   createTenantSelectionService,
+  deriveSelectionKey,
   TenantSelectionConflictError,
   TenantSelectionInputError,
   type TenantSelectionDirectory,
@@ -61,6 +64,7 @@ export const railwayTenantSelectionOperationPolicies = Object.freeze([
 
 export interface RailwayTenantSelectionOperationDependencies {
   readonly memberships: TenantMembershipRepository;
+  readonly identityOrganizations: Pick<ClerkOrganizationBindingRepository, "findByTenantId">;
   readonly selections: Pick<TenantSelectionRepository, "findByExternalUserId">;
   readonly mutationRateLimit: Pick<RateLimitGuard, "consume">;
   readonly mutations: RailwayTenantSelectionMutationExecutor;
@@ -84,7 +88,8 @@ function requireDependencies(
     !dependencies ||
     typeof dependencies !== "object" ||
     Object.keys(dependencies).sort().join(",") !==
-      "memberships,mutationRateLimit,mutations,selections" ||
+      "identityOrganizations,memberships,mutationRateLimit,mutations,selections" ||
+    typeof dependencies.identityOrganizations?.findByTenantId !== "function" ||
     typeof dependencies.memberships?.findActiveByExternalUserId !== "function" ||
     typeof dependencies.selections?.findByExternalUserId !== "function" ||
     typeof dependencies.mutationRateLimit?.consume !== "function" ||
@@ -190,8 +195,14 @@ function createReadOperation(
     ) {
       try {
         requireReadRequest(payload, request);
+        const memberships = await dependencies.memberships.findActiveByExternalUserId(
+          context.userIdentity.externalUserId,
+        );
         const service = createTenantSelectionService({
-          memberships: dependencies.memberships,
+          memberships: {
+            ...dependencies.memberships,
+            async findActiveByExternalUserId() { return memberships; },
+          },
           selections: {
             findByExternalUserId:
               dependencies.selections.findByExternalUserId.bind(
@@ -202,11 +213,25 @@ function createReadOperation(
             },
           },
         });
-        return Object.freeze({
-          directory: toPublicDirectory(
-            await service.list(context.userIdentity),
-          ),
-        });
+        const directory = toPublicDirectory(await service.list(context.userIdentity));
+        const selected = directory.options.find((option) => option.selected);
+        if (selected) {
+          const membership = memberships.find((item) =>
+            deriveSelectionKey(context.userIdentity.externalUserId, item.tenantId) === selected.selectionKey,
+          );
+          if (!membership) throw new Error("Selected tenant membership is unavailable");
+          const organizationId = await readOrganizationId(dependencies, membership.tenantId);
+          if (organizationId !== context.userIdentity.externalOrganizationId) {
+            // A failed/interrupted Clerk activation must return to the chooser,
+            // including a single membership or a choice saved in another tab.
+            return Object.freeze({ directory: toPublicDirectory({
+              ...directory,
+              selectionRequired: true,
+              options: directory.options.map((option) => ({ ...option, selected: false })),
+            }) });
+          }
+        }
+        return Object.freeze({ directory });
       } catch (error) {
         mapOperationError(error);
       }
@@ -264,6 +289,7 @@ function createSaveOperation(
         }
 
         let replayed = false;
+        let organizationId: string | null = null;
         const service = createTenantSelectionService({
           memberships: dependencies.memberships,
           selections: {
@@ -272,6 +298,9 @@ function createSaveOperation(
                 dependencies.selections,
               ),
             async save(input: Readonly<SaveTenantSelectionInput>) {
+              // Resolve only after the opaque option was matched to a current
+              // membership. Missing bindings must not change the saved choice.
+              organizationId = await readOrganizationId(dependencies, input.tenantId);
               const result = await dependencies.mutations.execute({
                 identity: context.userIdentity,
                 operation: RAILWAY_TENANT_SELECTION_SAVE_OPERATION,
@@ -309,7 +338,9 @@ function createSaveOperation(
           context.userIdentity,
           parsedPayload,
         );
+        if (organizationId === null) throw new Error("Selected organization is unavailable");
         return Object.freeze({
+          organizationId,
           version: selected.version,
           unchanged: replayed || selected.outcome === "unchanged",
           replayed,
@@ -319,6 +350,22 @@ function createSaveOperation(
       }
     },
   });
+}
+
+async function readOrganizationId(
+  dependencies: Readonly<RailwayTenantSelectionOperationDependencies>,
+  tenantId: TenantId,
+): Promise<string> {
+  const binding = await dependencies.identityOrganizations.findByTenantId(tenantId);
+  if (
+    binding?.tenantId !== tenantId ||
+    typeof binding.externalOrganizationId !== "string" ||
+    binding.externalOrganizationId.length === 0 ||
+    binding.externalOrganizationId.length > 255 ||
+    binding.externalOrganizationId.trim() !== binding.externalOrganizationId ||
+    /[\u0000-\u001f\u007f]/.test(binding.externalOrganizationId)
+  ) throw new Error("Selected organization binding is unavailable");
+  return binding.externalOrganizationId;
 }
 
 export function createRailwayTenantSelectionOperations(

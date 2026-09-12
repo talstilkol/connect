@@ -13,6 +13,22 @@ import {
 
 const mutationKey = `connect_idempotency_v1_${"a".repeat(64)}`;
 
+test("allows only the selected organization reference in the exact selection response, never in requests", () => {
+  const data = { organizationId: "org_verified", version: 1, unchanged: false, replayed: false };
+  const response = createRailwayApiSuccessEnvelope(data, "tenant-selection.save");
+  assert.deepEqual(parseRailwayApiResponseEnvelope(response, "tenant-selection.save").data, data);
+  assert.throws(() => createRailwayApiSuccessEnvelope(data), RailwayApiContractError);
+  assert.throws(() => parseRailwayApiResponseEnvelope(response, "contacts.list"), RailwayApiContractError);
+  assert.throws(() => parseRailwayApiRequestEnvelope({ ...queryEnvelope(data),
+    operation: "tenant-selection.save", requestKind: "mutation", idempotencyKey: mutationKey,
+  }), RailwayApiContractError);
+  for (const invalid of [
+    { ...data, tenantId: 7 }, { nested: data }, { ...data, organizationId: { organizationId: "org_verified" } },
+    { ...data, organizationId: "org_verified\n" }, { ...data, version: 0 }, { ...data, replayed: true },
+    Object.defineProperty({ ...data }, "organizationId", { get() { assert.fail("Getter must not run"); } }),
+  ]) assert.throws(() => createRailwayApiSuccessEnvelope(invalid, "tenant-selection.save"), RailwayApiContractError);
+});
+
 function queryEnvelope(payload = {}) {
   return {
     contractVersion: RAILWAY_API_CONTRACT_VERSION,
