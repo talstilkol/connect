@@ -35,6 +35,18 @@ test("keeps Clerk on protected resources, API routes, and its frontend proxy", (
   assert.notEqual(config.matcher.indexOf("/(api|trpc)(.*)"), -1);
 });
 
+test("runs Clerk when a pending session resumes through a task URL", () => {
+  for (const { language } of publicLandingLocales) {
+    for (const mode of ["login", "register"]) {
+      const route = readAuthHref(language, mode);
+      for (const task of ["", "/choose-organization", "/setup-mfa", "/reset-password"]) {
+        const url = `${route}/tasks${task}?redirect_url=%2Fworkspace`;
+        assert.equal(matches(url), true, `Clerk must resume the pending session at ${url}`);
+      }
+    }
+  }
+});
+
 test("skips public static assets without skipping page query strings", () => {
   for (const url of ["/favicon.svg", "/og.png"]) {
     assert.equal(matches(url), false, `Clerk should skip ${url}`);

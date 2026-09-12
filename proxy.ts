@@ -31,6 +31,8 @@ export const config = {
     "/",
     "/login",
     "/register",
+    "/login/tasks/:path*",
+    "/register/tasks/:path*",
     "/en/:path*",
     "/ar/:path*",
     "/workspace/:path*",

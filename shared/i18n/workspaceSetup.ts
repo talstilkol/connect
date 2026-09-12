@@ -227,7 +227,8 @@ export const workspaceSetupMessages = {
           "המשתמש שייך למספר Tenants ונדרשת בחירה מפורשת.",
         "permission-denied":
           "לתפקיד הנוכחי אין הרשאה לשנות את פרטי העסק.",
-        "configuration-required": "חיבור Clerk אינו מוגדר במלואו.",
+        "configuration-required":
+          "חיבור סביבת העבודה לשירותים הנדרשים עדיין לא הושלם. פרטי העסק לא נשמרו.",
         "server-error":
           "השמירה בשרת נכשלה. לא בוצע מעבר שקט לשמירה מקומית.",
       },
@@ -359,7 +360,7 @@ export const workspaceSetupMessages = {
         "permission-denied":
           "Your current role cannot change the business profile.",
         "configuration-required":
-          "The Clerk connection is not fully configured.",
+          "The workspace connection to the required services is not ready. The business profile was not saved.",
         "server-error":
           "The server save failed. Connect did not silently fall back to local storage.",
       },
@@ -490,7 +491,8 @@ export const workspaceSetupMessages = {
           "ينتمي المستخدم إلى عدة مؤسسات. اختر واحدة بشكل صريح.",
         "permission-denied":
           "لا يسمح دورك الحالي بتغيير بيانات النشاط.",
-        "configuration-required": "اتصال Clerk غير مكتمل الإعداد.",
+        "configuration-required":
+          "لم يكتمل اتصال مساحة العمل بالخدمات المطلوبة بعد. لم تُحفظ بيانات النشاط.",
         "server-error":
           "فشل الحفظ على الخادم. لم ينتقل Connect بصمت إلى الحفظ المحلي.",
       },
