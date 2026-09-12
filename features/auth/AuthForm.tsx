@@ -1,6 +1,7 @@
 import { SignIn, SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { inspectClerkConfiguration } from "../../server/auth/clerkConfiguration";
+import { workspaceSectionPath } from "../../shared/workspace/navigation";
 import type {
   InterfaceLanguage,
 } from "../../shared/domain/businessProfileDraft";
@@ -137,13 +138,13 @@ export default function AuthForm({
                 <SignUp
                   routing="hash"
                   signInUrl={signInUrl}
-                  fallbackRedirectUrl="/workspace/onboarding"
+                  fallbackRedirectUrl={workspaceSectionPath("onboarding", language)}
                 />
               ) : (
                 <SignIn
                   routing="hash"
                   signUpUrl={signUpUrl}
-                  fallbackRedirectUrl="/workspace"
+                  fallbackRedirectUrl={workspaceSectionPath("dashboard", language)}
                 />
               )
             ) : (

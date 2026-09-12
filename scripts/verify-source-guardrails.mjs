@@ -1,9 +1,4 @@
-import {
-  readdir,
-  readFile,
-  realpath,
-  stat,
-} from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { builtinModules } from "node:module";
 import {
@@ -19,6 +14,25 @@ import {
   pathToFileURL,
 } from "node:url";
 import ts from "typescript";
+import {
+  canonicalExistingPath,
+  isSourceFileExtension,
+  listImmediateSourceFiles,
+  listProjectFiles,
+  listProjectPackageManifests,
+  listProjectSourceFiles,
+  listSourceFiles,
+  listSymbolicLinks,
+} from "./source-guardrails/file-discovery.mjs";
+import {
+  packageTargetPatternMatchesCanonicalFile,
+  resolvePackageTargetPath,
+} from "./source-guardrails/package-targets.mjs";
+import {
+  escapeRegularExpression,
+  relativePath,
+  stripResourceSuffix,
+} from "./source-guardrails/paths.mjs";
 
 const projectRoot = fileURLToPath(
   new URL("../", import.meta.url),
@@ -46,24 +60,6 @@ const rootRuntimeFiles = [
   "scripts/start-railway-bullmq-api.mjs",
   "scripts/start-railway-bullmq-worker.mjs",
 ];
-const sourceExtensions = new Set([
-  ".cjs",
-  ".cts",
-  ".js",
-  ".jsx",
-  ".ts",
-  ".tsx",
-  ".mjs",
-  ".mts",
-]);
-const ignoredSourceGraphDirectoryNames = new Set([
-  ".git",
-  ".next",
-  ".wrangler",
-  "coverage",
-  "dist",
-  "node_modules",
-]);
 const bannedPatterns = [
   {
     code: "RANDOMNESS_FORBIDDEN",
@@ -700,389 +696,6 @@ const dormantAttestedAllowedRuntimeDependencies =
     ],
   ]);
 
-async function listSourceFiles(
-  directory,
-  canonicalRoot = directory,
-) {
-  return listProjectFiles(
-    directory,
-    (name) => sourceExtensions.has(extname(name)),
-    Object.freeze({
-      canonicalRoot:
-        await canonicalExistingPath(canonicalRoot),
-      visitedCanonicalDirectories: new Set(),
-    }),
-  );
-}
-
-async function listProjectFiles(
-  directory,
-  includesFile,
-  traversal = undefined,
-) {
-  const canonicalDirectory =
-    await canonicalExistingPath(directory);
-  const state = traversal ?? Object.freeze({
-    canonicalRoot: canonicalDirectory,
-    visitedCanonicalDirectories: new Set(),
-  });
-  const canonicalRelativePath = relativePath(
-    state.canonicalRoot,
-    canonicalDirectory,
-  );
-  if (
-    canonicalRelativePath === ".." ||
-    canonicalRelativePath.startsWith("../") ||
-    canonicalRelativePath.split("/").some((name) =>
-      ignoredSourceGraphDirectoryNames.has(name)
-    ) ||
-    state.visitedCanonicalDirectories.has(canonicalDirectory)
-  ) {
-    return [];
-  }
-  const visitedCanonicalDirectories = new Set(
-    state.visitedCanonicalDirectories,
-  );
-  visitedCanonicalDirectories.add(canonicalDirectory);
-  const nestedTraversal = Object.freeze({
-    canonicalRoot: state.canonicalRoot,
-    visitedCanonicalDirectories,
-  });
-  let entries;
-  try {
-    entries = await readdir(directory, {
-      withFileTypes: true,
-    });
-  } catch (error) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      return [];
-    }
-    throw error;
-  }
-  const nested = await Promise.all(
-    entries.map(async (entry) => {
-      const path = join(directory, entry.name);
-      if (
-        entry.isDirectory() &&
-        !ignoredSourceGraphDirectoryNames.has(entry.name)
-      ) {
-        return listProjectFiles(
-          path,
-          includesFile,
-          nestedTraversal,
-        );
-      }
-      if (
-        entry.isSymbolicLink() &&
-        !ignoredSourceGraphDirectoryNames.has(entry.name)
-      ) {
-        let target;
-        try {
-          target = await stat(path);
-        } catch (error) {
-          if (
-            typeof error === "object" &&
-            error !== null &&
-            "code" in error &&
-            error.code === "ENOENT"
-          ) {
-            return [];
-          }
-          throw error;
-        }
-        if (target.isDirectory()) {
-          return listProjectFiles(
-            path,
-            includesFile,
-            nestedTraversal,
-          );
-        }
-        return target.isFile() && includesFile(entry.name)
-          ? [path]
-          : [];
-      }
-      return entry.isFile() && includesFile(entry.name)
-        ? [path]
-        : [];
-    }),
-  );
-  return nested.flat();
-}
-
-async function listProjectSourceFiles(directory) {
-  return listProjectFiles(
-    directory,
-    (name) => sourceExtensions.has(extname(name)),
-  );
-}
-
-async function listProjectPackageManifests(directory) {
-  return listProjectFiles(
-    directory,
-    (name) => name === "package.json",
-  );
-}
-
-async function listImmediateSourceFiles(directory) {
-  const entries = await readdir(directory, {
-    withFileTypes: true,
-  });
-
-  return entries
-    .filter(
-      (entry) =>
-        (entry.isFile() || entry.isSymbolicLink()) &&
-        sourceExtensions.has(extname(entry.name)),
-    )
-    .map((entry) => join(directory, entry.name));
-}
-
-async function listSymbolicLinks(directory) {
-  let entries;
-
-  try {
-    entries = await readdir(directory, {
-      withFileTypes: true,
-    });
-  } catch (error) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      return [];
-    }
-    throw error;
-  }
-
-  const nested = await Promise.all(
-    entries.map((entry) => {
-      const path = join(directory, entry.name);
-      if (entry.isSymbolicLink()) return [path];
-      if (
-        entry.isDirectory() &&
-        !ignoredSourceGraphDirectoryNames.has(
-          entry.name,
-        )
-      ) {
-        return listSymbolicLinks(path);
-      }
-      return [];
-    }),
-  );
-  return nested.flat();
-}
-
-async function canonicalExistingPath(file) {
-  try {
-    return normalize(await realpath(file));
-  } catch (error) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      return normalize(resolve(file));
-    }
-    throw error;
-  }
-}
-
-function resolvePackageTargetPath(
-  manifestFile,
-  target,
-) {
-  try {
-    const manifestDirectoryUrl = pathToFileURL(
-      `${dirname(manifestFile)}/`,
-    );
-    return fileURLToPath(
-      new URL(target, manifestDirectoryUrl),
-    );
-  } catch {
-    return null;
-  }
-}
-
-function escapeRegularExpression(value) {
-  return value.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&",
-  );
-}
-
-function packageTargetPatternMatchesFile(
-  manifestFile,
-  target,
-  file,
-) {
-  let decodedTarget;
-  try {
-    decodedTarget = decodeURIComponent(
-      target.split(/[?#]/, 1)[0],
-    );
-  } catch {
-    return false;
-  }
-  const patternParts = decodedTarget.split("*");
-  if (patternParts.length < 2) return false;
-
-  let pattern = escapeRegularExpression(
-    patternParts[0],
-  );
-  for (
-    let index = 1;
-    index < patternParts.length;
-    index += 1
-  ) {
-    pattern += index === 1 ? "(.*)" : "\\1";
-    pattern += escapeRegularExpression(
-      patternParts[index],
-    );
-  }
-
-  const relativeFile = `./${relative(
-    dirname(manifestFile),
-    file,
-  ).replaceAll("\\", "/")}`;
-  return new RegExp(`^${pattern}$`, "u").test(
-    relativeFile,
-  );
-}
-
-async function packageTargetPatternMatchesCanonicalFile(
-  manifestFile,
-  target,
-  file,
-  canonicalFile,
-  canonicalSymbolicLinkByPath,
-) {
-  if (
-    packageTargetPatternMatchesFile(
-      manifestFile,
-      target,
-      file,
-    )
-  ) {
-    return true;
-  }
-
-  let decodedTarget;
-  try {
-    decodedTarget = decodeURIComponent(
-      stripResourceSuffix(target),
-    );
-  } catch {
-    return false;
-  }
-  const wildcardIndex = decodedTarget.indexOf("*");
-  if (wildcardIndex === -1) return false;
-
-  const targetPathPattern = stripResourceSuffix(
-    decodedTarget,
-  );
-  if (
-    wildcardIndex < targetPathPattern.lastIndexOf("/")
-  ) {
-    return true;
-  }
-
-  const manifestDirectory = normalize(
-    resolve(dirname(manifestFile)),
-  );
-  for (
-    const [symbolicLinkPath, canonicalTarget] of
-      canonicalSymbolicLinkByPath
-  ) {
-    if (
-      symbolicLinkPath !== manifestDirectory &&
-      !symbolicLinkPath.startsWith(
-        `${manifestDirectory}/`,
-      )
-    ) {
-      continue;
-    }
-    const canonicalRelativeFile = relative(
-      canonicalTarget,
-      canonicalFile,
-    );
-    if (
-      canonicalRelativeFile === ".." ||
-      canonicalRelativeFile.startsWith("../")
-    ) {
-      continue;
-    }
-    const aliasCandidate = canonicalRelativeFile === ""
-      ? symbolicLinkPath
-      : resolve(
-        symbolicLinkPath,
-        canonicalRelativeFile,
-      );
-    if (
-      packageTargetPatternMatchesFile(
-        manifestFile,
-        target,
-        aliasCandidate,
-      )
-    ) {
-      return true;
-    }
-  }
-
-  const staticPrefix = decodedTarget.slice(
-    0,
-    wildcardIndex,
-  );
-  const staticPrefixPath = resolve(
-    dirname(manifestFile),
-    staticPrefix,
-  );
-  const aliasDirectory = staticPrefix.endsWith("/")
-    ? staticPrefixPath
-    : dirname(staticPrefixPath);
-  for (const symbolicLinkPath of
-    canonicalSymbolicLinkByPath.keys()) {
-    if (
-      aliasDirectory === symbolicLinkPath ||
-      aliasDirectory.startsWith(
-        `${symbolicLinkPath}/`,
-      )
-    ) {
-      return true;
-    }
-  }
-  const canonicalAliasDirectory =
-    await canonicalExistingPath(aliasDirectory);
-  const canonicalRelativeFile = relative(
-    canonicalAliasDirectory,
-    canonicalFile,
-  );
-  if (
-    canonicalRelativeFile === "" ||
-    canonicalRelativeFile === ".." ||
-    canonicalRelativeFile.startsWith(`..${"/"}`) ||
-    resolve(
-      canonicalAliasDirectory,
-      canonicalRelativeFile,
-    ) !== canonicalFile
-  ) {
-    return false;
-  }
-
-  return packageTargetPatternMatchesFile(
-    manifestFile,
-    target,
-    resolve(aliasDirectory, canonicalRelativeFile),
-  );
-}
-
 function collectPackageRuntimeTargets(value, targets) {
   if (typeof value === "string") {
     targets.add(value);
@@ -1509,6 +1122,7 @@ function projectToolCommandIsExact(tokens, executableIndex) {
       );
   }
   return exact(["next", "build", "--webpack"]) ||
+    exact(["next", "typegen"]) ||
     exact(["next", "dev", "--webpack", "--hostname", "localhost"]) ||
     exact(["drizzle-kit", "generate"]) ||
     exact([
@@ -7297,34 +6911,12 @@ function isSourceLikeSpecifier(specifier) {
 
   return (
     extension.length === 0 ||
-    sourceExtensions.has(extension)
+    isSourceFileExtension(extension)
   );
-}
-
-function stripResourceSuffix(specifier) {
-  const queryIndex = specifier.indexOf("?");
-  const fragmentIndex = specifier.startsWith("#")
-    ? -1
-    : specifier.indexOf("#");
-  const suffixIndexes = [
-    queryIndex,
-    fragmentIndex,
-  ].filter((index) => index >= 0);
-
-  return suffixIndexes.length === 0
-    ? specifier
-    : specifier.slice(0, Math.min(...suffixIndexes));
 }
 
 function isInlineRuntimeModuleSpecifier(specifier) {
   return /^data:/iu.test(specifier);
-}
-
-function relativePath(root, file) {
-  return relative(root, file).replaceAll(
-    "\\",
-    "/",
-  );
 }
 
 function isServerOnlyModule(
@@ -7434,7 +7026,7 @@ export async function inspectSourceGuardrails(
   const rootFiles = rootRuntimeFiles
     .map((file) => join(root, file))
     .filter((file) =>
-      sourceExtensions.has(extname(file)),
+      isSourceFileExtension(extname(file)),
     );
   const configuredCandidateFiles = new Set([
     ...nestedFiles,

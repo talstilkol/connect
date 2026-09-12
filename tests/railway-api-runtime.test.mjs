@@ -204,7 +204,10 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
           membership(11, selectedRole),
         ];
       },
-      async findActiveByTenantId(tenantId) {
+      async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId(tenantId) {
         calls.teamDirectoryReads.push(tenantId);
         return [
           membership(tenantId, selectedRole),
@@ -883,7 +886,7 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
             tenantId: command.session?.tenantId ?? 19,
             state: {
               createdTenant: command.session === null,
-              profile: { ...command.payload, version: 3 },
+              profile: { ...command.payload, version: command.expectedVersion + 1 },
             },
           };
         },
@@ -1211,7 +1214,7 @@ function fixture(selectedRole = "owner", runtimeOverrides = {}) {
 }
 
 test("first workspace provisioning uses verified Clerk admin status through the complete HTTP boundary", async () => {
-  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he" };
+  const payload = { businessName: "Connect", timezone: "Asia/Jerusalem", interfaceLanguage: "he", expectedVersion: 0, expectedOrganizationId: "org_verified" };
   const key = await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload);
   for (const orgRole of ["org:member", undefined, "org:admin"]) {
     const current = fixture("owner", {
@@ -1232,7 +1235,10 @@ test("first workspace provisioning uses verified Clerk admin status through the 
           },
         },
       },
-      memberships: { async findActiveByExternalUserId() { return []; }, async findActiveByTenantId() { return []; } },
+      memberships: { async findActiveByExternalUserId() { return []; }, async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
+        async findActiveByTenantId() { return []; } },
     });
     const response = await current.handler.handle(request("onboarding.business-profile.save", payload, "mutation", key));
     const body = await response.json();
@@ -1818,6 +1824,25 @@ test("returns an opaque team directory through the complete boundary", async () 
   );
 });
 
+test("returns configured team profiles through authenticated HTTP without exposing their source IDs", async () => {
+  const lookups = [];
+  const teamIdentities = { async resolve(ids) {
+    lookups.push(ids);
+    return { status: "ready", identities: ids.map((externalUserId, index) => ({ externalUserId, displayName: `Connect Demo ${index + 1}`, primaryEmail: `demo-${index + 1}@example.com` })) };
+  } };
+  const f = fixture("owner", { teamIdentities });
+  const response = await f.handler.handle(request("team.directory.read", {}));
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.data.directory.identityStatus, "ready");
+  assert.equal(body.data.directory.members[1].displayName, "Connect Demo 2");
+  assert.deepEqual(lookups, [["verified-user", "other-user"]]);
+  assert.doesNotMatch(JSON.stringify(body), /externalUserId|tenantId|verified-user|other-user/);
+  const denied = await fixture("viewer", { teamIdentities }).handler.handle(request("team.directory.read", {}));
+  assert.equal(denied.status, 403);
+  assert.equal(lookups.length, 1);
+});
+
 test("changes a team role through identity, quota, and PostgreSQL boundaries", async () => {
   const testFixture = fixture("owner");
   const payload = {
@@ -1986,6 +2011,8 @@ test("reads and saves onboarding business profile through the complete boundary"
     businessName: "Connect Updated",
     timezone: "Asia/Jerusalem",
     interfaceLanguage: "he",
+    expectedVersion: 2,
+    expectedOrganizationId: "org_verified",
   };
   const mutationKey =
     await deriveRailwayApiDeterministicIdempotencyKey(
@@ -2019,7 +2046,7 @@ test("reads and saves onboarding business profile through the complete boundary"
   assert.deepEqual(saveBody.data, {
     replayed: false,
     createdTenant: false,
-    profile: { ...profilePayload, version: 3 },
+    profile: { businessName: "Connect Updated", timezone: "Asia/Jerusalem", interfaceLanguage: "he", version: 3 },
   });
   assert.deepEqual(testFixture.calls.onboardingProfileReads, [11]);
   assert.equal(testFixture.calls.onboardingProfileMutations.length, 1);

@@ -9,6 +9,7 @@ import {
 } from "../team/teamDirectoryService.ts";
 import {
   createUnavailableTeamIdentityDirectory,
+  type TeamIdentityDirectory,
 } from "../team/teamIdentityDirectory.ts";
 import type {
   RailwayApiJsonObject,
@@ -36,6 +37,7 @@ export const railwayTeamDirectoryOperationPolicy = Object.freeze({
 export interface RailwayTeamDirectoryOperationDependencies {
   readonly tenantSessions: RailwayTenantSessionResolver;
   readonly memberships: TenantMembershipRepository;
+  readonly identities?: TeamIdentityDirectory;
 }
 
 function requireDependencies(
@@ -44,10 +46,11 @@ function requireDependencies(
   if (
     !dependencies ||
     typeof dependencies !== "object" ||
-    Object.keys(dependencies).sort().join(",") !==
-      "memberships,tenantSessions" ||
+    Object.keys(dependencies).some((key) => !["memberships", "tenantSessions", "identities"].includes(key)) ||
+    (dependencies.identities !== undefined && typeof dependencies.identities?.resolve !== "function") ||
     typeof dependencies.tenantSessions?.resolve !== "function" ||
-    typeof dependencies.memberships?.findActiveByTenantId !== "function"
+    typeof dependencies.memberships?.findActiveByTenantId !== "function" ||
+    typeof dependencies.memberships?.findByTenantId !== "function"
   ) {
     throw new Error("Railway team directory dependencies are invalid");
   }
@@ -96,7 +99,7 @@ export function createRailwayTeamDirectoryOperation(
           context.userIdentity,
         );
         const directory = await createTeamDirectoryService({
-          identities: createUnavailableTeamIdentityDirectory(),
+          identities: dependencies.identities ?? createUnavailableTeamIdentityDirectory(),
           memberships: dependencies.memberships,
         }).list(session);
 

@@ -15,6 +15,7 @@ const directory = Object.freeze({
     primaryEmail: null,
     role: "owner",
     version: 1,
+    status: "active",
     currentUser: true,
   })]),
 });
@@ -69,6 +70,12 @@ test("loads one bounded Railway team directory", async () => {
     idempotencyKey: null,
     payload: {},
   }]);
+});
+
+test("accepts verified profile display fields through the web boundary", async () => {
+  const enriched = { ...directory, identityStatus: "ready", members: [{ ...directory.members[0], displayName: "Connect Demo", primaryEmail: "demo@example.com" }] };
+  const f = fixture({ response: () => ({ contractVersion: "connect.railway-api.v1", outcome: "ok", data: { directory: enriched } }) });
+  assert.deepEqual(await f.handler.read(), { status: "ready", directory: enriched });
 });
 
 test("maps authentication, tenant, and permission failures", async () => {

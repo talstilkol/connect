@@ -33,18 +33,23 @@ function command(overrides = {}) {
     idempotencyKey: `connect_idempotency_v1_${"b".repeat(64)}`,
     requestDigest: `railway_mutation_request_v1_${"c".repeat(64)}`,
     payload: profile,
+    expectedVersion: 0,
     ...overrides,
   };
 }
 
-function transactionManager(query) {
+function transactionManager(query, profileVersion = 1) {
   const calls = [];
   return {
     calls,
     manager: {
       async transaction(options, execute) {
         calls.push(options);
-        return execute({ query });
+        return execute({ query: async (sql, parameters) => {
+          if (sql === postgresRailwayOnboardingBusinessProfileMutationSql.lockProvisioning) return { rowCount: 1, rows: [{}] };
+          if (sql === postgresRailwayOnboardingBusinessProfileMutationSql.lockProfileVersion) return { rowCount: 1, rows: [{ version: profileVersion }] };
+          return query(sql, parameters);
+        } });
       },
     },
   };
@@ -174,6 +179,7 @@ test("provisions and receipts an initial workspace atomically", async () => {
 
 test("updates an existing profile in the same receipt transaction", async () => {
   const existing = command({
+    expectedVersion: 2,
     session: {
       tenantId: 7,
       externalUserId: "verified-user",
@@ -226,7 +232,7 @@ test("updates an existing profile in the same receipt transaction", async () => 
       };
     }
     throw new Error("unexpected query");
-  });
+  }, 2);
   assert.deepEqual(
     await createPostgresRailwayOnboardingBusinessProfileMutationExecutor(
       fixture.manager,
@@ -254,7 +260,7 @@ test("replays without a second profile or audit write", async () => {
       sql ===
       postgresRailwayOnboardingBusinessProfileMutationSql
         .findTenantByProvisioningKey
-    ) return { rowCount: 1, rows: [{ tenantId: 19 }] };
+    ) return { rowCount: 1, rows: [{ tenantId: "19" }] };
     if (sql === postgresClerkOrganizationBindingSql.ensureBinding) {
       return {
         rowCount: 1,
@@ -304,7 +310,7 @@ test("separates digest conflicts from outages and rejects malformed commands", a
       sql ===
       postgresRailwayOnboardingBusinessProfileMutationSql
         .findTenantByProvisioningKey
-    ) return { rowCount: 1, rows: [{ tenantId: 19 }] };
+    ) return { rowCount: 1, rows: [{ tenantId: "19" }] };
     if (sql === postgresClerkOrganizationBindingSql.ensureBinding) {
       return {
         rowCount: 1,

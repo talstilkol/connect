@@ -101,14 +101,20 @@
     "preflight:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs --preflight",
     "e2e:team-invitation-browser": "node scripts/run-team-invitation-browser-e2e.mjs",
     "e2e:bot-flow-graph-browser": "node scripts/run-bot-flow-graph-browser-e2e.mjs",
+    "e2e:workspace-navigation": "node scripts/run-workspace-navigation-browser-e2e.mjs",
+    "e2e:ai-agent-editor": "node scripts/run-ai-agent-editor-browser-e2e.mjs",
+    "e2e:clerk-workspace-language": "node scripts/run-clerk-workspace-language-browser-e2e.mjs",
+    "e2e:team-management": "node scripts/run-team-management-browser-e2e.mjs",
+    "e2e:business-profile": "node scripts/run-business-profile-browser-e2e.mjs",
+    "e2e:contact-permissions": "node scripts/run-contact-permissions-browser-e2e.mjs",
     "evidence:team-invitation-browser": "node scripts/create-team-invitation-browser-evidence.mjs",
     "evidence:dependency-audit": "node scripts/create-dependency-audit-evidence.mjs",
     "evidence:github": "node scripts/create-github-evidence.mjs",
     "evidence:cloudflare": "node scripts/create-cloudflare-evidence.mjs",
-    "test": "npm run build && npm run build:vercel && node --test tests/*.test.mjs",
+    "test": "node scripts/run-local-test-suite.mjs",
     "test:bullmq-integration": "node --test tests/integration/railway-bullmq-live-integration.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1129.0",

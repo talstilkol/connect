@@ -92,6 +92,8 @@ import type {
 import {
   createClerkRailwayTeamInvitationIdentityResolver,
 } from "./clerkRailwayTeamInvitationIdentityResolver.ts";
+import { createClerkTeamIdentityDirectory } from "./clerkTeamIdentityDirectory.ts";
+import type { TeamIdentityDirectory } from "../team/teamIdentityDirectory.ts";
 import {
   inspectRailwayBotReplyStagingReleaseEvidenceStorageConfiguration,
   type RailwayBotReplyStagingReleaseEvidenceStorageEnvironment,
@@ -112,6 +114,7 @@ export type RailwaySystemAdminEnvironment =
     PostgresSystemAdminMutationRateLimitEnvironment;
 
 export interface RailwayPostgresApiRuntimeOptions {
+  readonly teamIdentities?: TeamIdentityDirectory;
   readonly paddleEnvironment?: PaddleRuntimeEnvironment;
   readonly knowledgeEnvironment?: KnowledgeRuntimeEnvironment;
   readonly mediaFileEnvironment?: RailwayMetaMediaFileEnvironment;
@@ -159,6 +162,7 @@ export interface RailwayPostgresApiRuntime {
 }
 
 const optionKeys = Object.freeze([
+  "teamIdentities",
   "paddleEnvironment",
   "knowledgeEnvironment",
   "mediaFileEnvironment",
@@ -259,6 +263,7 @@ function requireOptions(
 
   if (
     keys.some((key) => !optionKeys.includes(key)) ||
+    (options.teamIdentities !== undefined && typeof options.teamIdentities?.resolve !== "function") ||
     !validReleaseEvidenceOptions(
       options.botReplyStagingReleaseEvidence,
     ) ||
@@ -448,6 +453,7 @@ export async function createRailwayPostgresApiRuntime(
       });
 
     const handler = createRailwayApiRuntime({
+      teamIdentities: options.teamIdentities ?? createClerkTeamIdentityDirectory(identityConfiguration.configuration),
       paidAccess: foundation.paidAccess,
       paddleBilling: paddleConfig ? { journal: foundation.paddleBilling, plan: paddleConfig, clientToken: paddleConfig.clientToken, customerPortalUrl: paddleConfig.customerPortalUrl } : null,
       messageTemplateSyncConfigured: () => syncConfigured === "configured",

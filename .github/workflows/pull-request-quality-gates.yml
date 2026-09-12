@@ -351,3 +351,17 @@ jobs:
         run: npm ci
       - name: Build and run the complete test suite
         run: npm test
+      - name: Install the locked Playwright Chromium browser
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Verify mobile keyboard navigation
+        run: npm run e2e:workspace-navigation
+      - name: Verify AI editor concurrency
+        run: npm run e2e:ai-agent-editor
+      - name: Verify workspace language lifecycle
+        run: npm run e2e:clerk-workspace-language
+      - name: Verify team permissions and ownership interactions
+        run: npm run e2e:team-management
+      - name: Business profile browser acceptance
+        run: npm run e2e:business-profile
+      - name: Verify contact read-only controls in three languages
+        run: npm run e2e:contact-permissions

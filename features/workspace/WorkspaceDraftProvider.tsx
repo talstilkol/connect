@@ -21,12 +21,15 @@ type WorkspaceDraftContextValue = {
   campaignDraft: CampaignDraft | null;
   businessProfileDraft: BusinessProfileDraft | null;
   businessProfilePersistence: BusinessProfilePersistence | null;
+  businessProfileVersion: number;
+  businessProfileOrganizationId: string | null;
   saveTemplateDraft: (draft: TemplateDraft) => void;
   saveContactImportDraft: (draft: ContactImportDraft) => void;
   saveCampaignDraft: (draft: CampaignDraft) => void;
   saveBusinessProfileDraft: (
     draft: BusinessProfileDraft,
     persistence?: BusinessProfilePersistence,
+    version?: number,
   ) => void;
   clearTemplateDraft: () => void;
   clearContactImportDraft: () => void;
@@ -40,9 +43,13 @@ const WorkspaceDraftContext =
 export function WorkspaceDraftProvider({
   children,
   initialBusinessProfileDraft = null,
+  initialBusinessProfileVersion = 0,
+  initialOrganizationId = null,
 }: {
   children: ReactNode;
   initialBusinessProfileDraft?: BusinessProfileDraft | null;
+  initialBusinessProfileVersion?: number;
+  initialOrganizationId?: string | null;
 }) {
   const [templateDraft, setTemplateDraft] = useState<TemplateDraft | null>(
     null,
@@ -54,6 +61,11 @@ export function WorkspaceDraftProvider({
   );
   const [businessProfileDraft, setBusinessProfileDraft] =
     useState<BusinessProfileDraft | null>(initialBusinessProfileDraft);
+  const [businessProfileVersion, setBusinessProfileVersion] =
+    useState(initialBusinessProfileVersion);
+  // Keep the identity of the rendered form, even if another tab changes Clerk.
+  // Switching this workspace remounts the provider through its tenant key.
+  const [businessProfileOrganizationId] = useState(initialOrganizationId);
   const [
     businessProfilePersistence,
     setBusinessProfilePersistence,
@@ -119,9 +131,11 @@ export function WorkspaceDraftProvider({
     (
       draft: BusinessProfileDraft,
       persistence: BusinessProfilePersistence = "local",
+      version = 0,
     ) => {
       setBusinessProfileDraft({ ...draft });
       setBusinessProfilePersistence(persistence);
+      setBusinessProfileVersion(version);
     },
     [],
   );
@@ -129,6 +143,7 @@ export function WorkspaceDraftProvider({
   const clearBusinessProfileDraft = useCallback(() => {
     setBusinessProfileDraft(null);
     setBusinessProfilePersistence(null);
+    setBusinessProfileVersion(0);
   }, []);
 
   const value = useMemo(
@@ -138,6 +153,8 @@ export function WorkspaceDraftProvider({
       campaignDraft,
       businessProfileDraft,
       businessProfilePersistence,
+      businessProfileVersion,
+      businessProfileOrganizationId,
       saveTemplateDraft,
       saveContactImportDraft,
       saveCampaignDraft,
@@ -150,6 +167,8 @@ export function WorkspaceDraftProvider({
     [
       businessProfileDraft,
       businessProfilePersistence,
+      businessProfileVersion,
+      businessProfileOrganizationId,
       campaignDraft,
       clearBusinessProfileDraft,
       clearCampaignDraft,

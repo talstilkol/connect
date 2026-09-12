@@ -74,25 +74,10 @@ test("routes the current team directory through Railway without D1 fallback", as
   );
 });
 
-test("keeps unsupported team mutations disabled with an accessible explanation", async () => {
-  const source = await readSource(
-    "features/team/TeamDirectory.tsx",
-  );
-
-  assert.match(
-    source,
-    /team-invitation-unavailable/,
-  );
-  assert.match(
-    source,
-    /disabled/,
-  );
-  assert.match(
-    source,
-    /role="status"/,
-  );
-  assert.doesNotMatch(
-    source,
-    /onClick|onSubmit/,
-  );
+test("connects invitation and membership controls only for an authenticated current role", async () => {
+  const source = await readSource("features/team/TeamDirectory.tsx");
+  assert.match(source, /<TeamInvitationForm/);
+  assert.match(source, /status === "ready" && directory.members.some/);
+  assert.match(source, /member.currentUser && member.status === "active"/);
+  assert.match(source, /<TeamManagement language=\{language\} directory=\{directory\}/);
 });

@@ -174,3 +174,22 @@ test("rejects a missing PostgreSQL query dependency", () => {
     /database is invalid/,
   );
 });
+
+test("owner directory preserves suspended memberships without changing active session queries", async () => {
+  const fixture = databaseReturning([membershipRow({ status: "suspended", role: "agent", version: 3 })]);
+  const result = await createPostgresTenantMembershipRepository(fixture.database).findByTenantId(7);
+  assert.equal(result[0].status, "suspended");
+  assert.equal(result[0].version, 3);
+  assert.deepEqual(fixture.calls[0].parameters, [7]);
+  assert.doesNotMatch(fixture.calls[0].sql, /status = 'active'/);
+  assert.match(postgresTenantMembershipSql.findActiveByExternalUserId, /status = 'active'/);
+});
+
+test("owner directory rejects foreign, unknown-status and oversized responses", async () => {
+  for (const rows of [
+    [membershipRow({ tenantId: 11, status: "active" })],
+    [membershipRow({ status: "deleted" })],
+    [membershipRow()],
+    Array.from({ length: 101 }, () => membershipRow({ status: "active" })),
+  ]) await assert.rejects(createPostgresTenantMembershipRepository(databaseReturning(rows).database).findByTenantId(7));
+});

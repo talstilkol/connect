@@ -27,11 +27,13 @@ const context = Object.freeze({
       "owner:connect-team:project:connect-web:environment:production",
   }),
 });
-const payload = Object.freeze({
+const profilePayload = Object.freeze({
   businessName: "Connect",
   timezone: "Asia/Jerusalem",
   interfaceLanguage: "he",
 });
+
+const payload = Object.freeze({ ...profilePayload, expectedVersion: 0, expectedOrganizationId: identity.externalOrganizationId });
 
 function session(role = "owner") {
   return Object.freeze({
@@ -165,6 +167,18 @@ test("existing workspace management does not require initial provisioning permis
   assert.equal(current.calls.mutationCommands.length, 1);
 });
 
+test("rejects a stale form from another organization even when the profile version is valid", async () => {
+  const current = fixture();
+  const stale = { ...payload, expectedVersion: 2, expectedOrganizationId: "org_other" };
+  await assert.rejects(
+    current.save.execute(context, stale, await saveRequest(stale)),
+    (error) => error.code === "CONFLICT",
+  );
+  assert.equal(current.calls.sessions, 0);
+  assert.deepEqual(current.calls.mutationCommands, []);
+  assert.deepEqual(current.calls.rateLimitSubjects, []);
+});
+
 test("reads a bounded profile and returns null before tenant provisioning", async () => {
   const existing = fixture();
   assert.deepEqual(
@@ -196,7 +210,7 @@ test("saves an initial profile with identity-scoped quota and null session", asy
   assert.deepEqual(result, {
     replayed: false,
     createdTenant: true,
-    profile: { ...payload, version: 1 },
+    profile: { ...profilePayload, version: 1 },
   });
   assert.deepEqual(testFixture.calls.rateLimitSubjects, [
     "verified-user:onboarding.business-profile.save",
@@ -326,7 +340,7 @@ test("maps mutation conflicts and invalid bounded states", async () => {
       tenantId: 7,
       state: {
         createdTenant: false,
-        profile: { ...payload, version: 0 },
+        profile: { ...profilePayload, version: 0 },
       },
     },
   });
@@ -343,7 +357,7 @@ test("rejects unknown mutation outcomes and cross-tenant results", async () => {
       tenantId: 7,
       state: {
         createdTenant: false,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     },
   });
@@ -358,7 +372,7 @@ test("rejects unknown mutation outcomes and cross-tenant results", async () => {
       tenantId: 8,
       state: {
         createdTenant: false,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     },
   });
@@ -384,7 +398,7 @@ test("snapshots mutation results without invoking accessors", async () => {
       enumerable: true,
       value: {
         createdTenant: true,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     },
   });
@@ -401,7 +415,7 @@ test("snapshots mutation results without invoking accessors", async () => {
       tenantId: 7,
       state: {
         createdTenant: false,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     }),
   });
@@ -417,7 +431,7 @@ test("rejects expanded, hidden, symbol, and trapped mutation results", async () 
     tenantId: 7,
     state: {
       createdTenant: false,
-      profile: { ...payload, version: 1 },
+      profile: { ...profilePayload, version: 1 },
     },
   };
   const candidates = [
@@ -453,7 +467,7 @@ test("requires committed createdTenant state to match tenant provisioning", asyn
       tenantId: 7,
       state: {
         createdTenant: true,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     },
   });
@@ -473,7 +487,7 @@ test("requires committed createdTenant state to match tenant provisioning", asyn
       tenantId: 19,
       state: {
         createdTenant: false,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     },
   });
@@ -494,7 +508,7 @@ test("accepts a historical tenant-creation replay after the session appears", as
       tenantId: 7,
       state: {
         createdTenant: true,
-        profile: { ...payload, version: 1 },
+        profile: { ...profilePayload, version: 1 },
       },
     },
   });
@@ -504,7 +518,7 @@ test("accepts a historical tenant-creation replay after the session appears", as
     {
       replayed: true,
       createdTenant: true,
-      profile: { ...payload, version: 1 },
+      profile: { ...profilePayload, version: 1 },
     },
   );
 });

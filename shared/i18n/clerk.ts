@@ -89,6 +89,9 @@ export const clerkLocalization = {
   en: enUS,
   ar: {
     ...arSA,
+    // Missing in the upstream Arabic catalog; otherwise Clerk falls back to English.
+    formFieldInputPlaceholder__emailAddress: "أدخل عنوان بريدك الإلكتروني",
+    formFieldInputPlaceholder__password: "أدخل كلمة المرور",
     taskSetupMfa: {
       badge: "إعداد التحقق بخطوتين",
       signOut: {

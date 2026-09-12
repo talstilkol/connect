@@ -32,6 +32,7 @@ export interface RailwayOnboardingBusinessProfileMutationCommand {
     typeof RAILWAY_ONBOARDING_BUSINESS_PROFILE_SAVE_OPERATION;
   readonly idempotencyKey: string;
   readonly requestDigest: string;
+  readonly expectedVersion: number;
   readonly payload: Readonly<BusinessProfileDraft>;
 }
 
