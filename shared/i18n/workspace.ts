@@ -44,6 +44,9 @@ export interface WorkspaceShellMessages {
   navigationLabels: Record<SectionId, string>;
   navigationGroups: Record<WorkspaceNavigationGroupId, string>;
   tenant: {
+    selectionLabel: string;
+    selectionTitle: string;
+    selectionDescription: string;
     switchLabel: string;
     disconnectedWorkspace: string;
     saving: string;
@@ -90,6 +93,9 @@ export const workspaceShellMessages = {
       account: "חשבון",
     },
     tenant: {
+      selectionLabel: "בחירת סביבת עבודה",
+      selectionTitle: "לאיזו סביבת עבודה להיכנס?",
+      selectionDescription: "בחר סביבת עבודה כדי להמשיך לחשבון העסק שלך.",
       switchLabel: "החלפת סביבת עבודה",
       disconnectedWorkspace: "סביבת עבודה לא מחוברת",
       saving: "שומר את סביבת העבודה…",
@@ -165,6 +171,9 @@ export const workspaceShellMessages = {
       account: "Account",
     },
     tenant: {
+      selectionLabel: "Select workspace",
+      selectionTitle: "Which workspace would you like to open?",
+      selectionDescription: "Choose a workspace to continue to your business account.",
       switchLabel: "Switch workspace",
       disconnectedWorkspace: "No workspace connected",
       saving: "Saving workspace…",
@@ -239,6 +248,9 @@ export const workspaceShellMessages = {
       account: "الحساب",
     },
     tenant: {
+      selectionLabel: "اختيار مساحة العمل",
+      selectionTitle: "أي مساحة عمل تريد فتحها؟",
+      selectionDescription: "اختر مساحة عمل للمتابعة إلى حساب نشاطك التجاري.",
       switchLabel: "تبديل مساحة العمل",
       disconnectedWorkspace: "لا توجد مساحة عمل متصلة",
       saving: "جارٍ حفظ مساحة العمل…",
