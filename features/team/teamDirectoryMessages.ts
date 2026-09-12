@@ -38,7 +38,7 @@ const messages = {
   he: {
     statuses: {
       "configuration-required":
-        "נדרשת הגדרת Clerk ו־D1 כדי לטעון את צוות סביבת העבודה.",
+        "טעינת צוות סביבת העבודה דורשת השלמת חיבור השירותים.",
       unauthenticated: "יש להתחבר מחדש כדי לצפות בצוות.",
       "onboarding-required":
         "יש ליצור סביבת עבודה לפני ניהול צוות.",
@@ -97,7 +97,7 @@ const messages = {
   en: {
     statuses: {
       "configuration-required":
-        "Configure Clerk and D1 to load the workspace team.",
+        "Complete the service connection to load the workspace team.",
       unauthenticated: "Sign in again to view the team.",
       "onboarding-required":
         "Create a workspace before managing a team.",
@@ -156,7 +156,7 @@ const messages = {
   ar: {
     statuses: {
       "configuration-required":
-        "يجب إعداد Clerk وD1 لتحميل فريق مساحة العمل.",
+        "أكمل اتصال الخدمات لتحميل فريق مساحة العمل.",
       unauthenticated: "سجّل الدخول مجددًا لعرض الفريق.",
       "onboarding-required":
         "أنشئ مساحة عمل قبل إدارة الفريق.",

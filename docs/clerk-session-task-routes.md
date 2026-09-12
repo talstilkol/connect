@@ -13,10 +13,13 @@ Pending sessions can also resume through server-side task URLs.
    continues to own task selection, MFA, organization selection and redirects.
 2. Run the Clerk proxy on the new root task routes. Existing protected
    resource checks and rejection of unsupported locales remain in place.
-3. Describe an incomplete business-profile service connection accurately
-   in Hebrew, English and Arabic. This result covers both identity and API
-   configuration; it cannot establish that Clerk is the missing service.
-   The message explicitly states that the profile was not saved.
+3. Describe incomplete workspace service connections accurately in Hebrew,
+   English and Arabic across business profiles, contacts and import, reports,
+   teams, campaigns, bot flows and conversations. These results cover both
+   identity and API configuration; they cannot establish that Clerk or the
+   former D1 service is the missing dependency. The profile message explicitly
+   states that the profile was not saved. Configuration checks and persistence
+   behavior remain unchanged.
 
 No demo login endpoint, hardcoded identity, session token, authentication
 bypass, dependency change, database migration or provider configuration is
