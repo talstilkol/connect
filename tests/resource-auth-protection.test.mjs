@@ -64,7 +64,7 @@ test("keeps resource authorization out of the Clerk proxy", async () => {
 
   assert.match(
     source,
-    /configuredClerkMiddleware = clerkMiddleware\(\)/,
+    /configuredClerkMiddleware = clerkMiddleware\(/,
   );
   assert.doesNotMatch(
     source,

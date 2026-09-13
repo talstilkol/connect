@@ -1,12 +1,12 @@
 import type {
-  BusinessProfileDraft,
-} from "../../shared/domain/businessProfileDraft.ts";
+  BusinessProfileView,
+} from "../../shared/domain/businessProfileView.ts";
 import {
   createCurrentRailwayBusinessProfileHandler,
 } from "./currentRailwayBusinessProfileHandler.ts";
 
 export async function readCurrentBusinessProfile(): Promise<
-  BusinessProfileDraft | null
+  BusinessProfileView | null
 > {
   const result = await createCurrentRailwayBusinessProfileHandler().load();
   if (
@@ -23,5 +23,6 @@ export async function readCurrentBusinessProfile(): Promise<
     businessName: result.profile.businessName,
     timezone: result.profile.timezone,
     interfaceLanguage: result.profile.interfaceLanguage,
+    version: result.profile.version,
   });
 }

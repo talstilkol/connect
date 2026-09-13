@@ -27,6 +27,7 @@ export interface ContactDirectoryMessages {
     title: string;
     loaded: (count: number) => string;
     serverInactive: string;
+    readOnly: string;
     configurationNotice: string;
     errors: Record<
       | "onboarding-required"
@@ -122,6 +123,7 @@ const messages = {
     directory: {
       kicker: "אנשי קשר קבועים",
       title: "ניהול אנשי קשר קבוע",
+      readOnly: "ההרשאות שלך מאפשרות צפייה בלבד. לשינוי אנשי קשר, הסכמה או קבוצות יש לפנות למנהל סביבת העבודה.",
       loaded: (count) => `${count} נטענו מהשרת`,
       serverInactive: "השרת אינו פעיל",
       configurationNotice:
@@ -263,6 +265,7 @@ const messages = {
     directory: {
       kicker: "Persistent contacts",
       title: "Persistent contact management",
+      readOnly: "Your permissions allow viewing only. Contact your workspace manager to change contacts, consent, or groups.",
       loaded: (count) => `${count} loaded from the server`,
       serverInactive: "Server unavailable",
       configurationNotice:
@@ -403,6 +406,7 @@ const messages = {
     directory: {
       kicker: "جهات اتصال دائمة",
       title: "إدارة جهات الاتصال الدائمة",
+      readOnly: "تسمح صلاحياتك بالعرض فقط. لتغيير جهات الاتصال أو الموافقة أو المجموعات، تواصل مع مدير مساحة العمل.",
       loaded: (count) => `تم تحميل ${count} من الخادم`,
       serverInactive: "الخادم غير متاح",
       configurationNotice:

@@ -8,6 +8,7 @@ type BusinessProfileSaveFailureStatus =
   | "tenant-selection-required"
   | "permission-denied"
   | "configuration-required"
+  | "conflict"
   | "server-error";
 
 export interface WorkspaceDashboardMessages {
@@ -220,6 +221,7 @@ export const workspaceSetupMessages = {
           "יש להשלים את השדות החסרים; ניתן לעבור למסך אחר ולחזור לגרסה האחרונה שנשמרה.",
       },
       saveFailures: {
+        conflict: "פרטי העסק השתנו מאז פתיחת הטופס. רענן את הדף, בדוק את הנתונים ונסה שוב.",
         "validation-error":
           "השרת דחה אחד או יותר מהשדות. יש לבדוק את הערכים ולנסות שוב.",
         unauthenticated: "ה־Session אינו פעיל. יש להתחבר מחדש.",
@@ -352,6 +354,7 @@ export const workspaceSetupMessages = {
           "Complete the missing fields. You can leave this screen and return to the last saved version.",
       },
       saveFailures: {
+        conflict: "The business details changed after this form was opened. Refresh the page, review the current details, and try again.",
         "validation-error":
           "The server rejected one or more fields. Review the values and try again.",
         unauthenticated: "The session is inactive. Sign in again.",
@@ -484,6 +487,7 @@ export const workspaceSetupMessages = {
           "أكمل الحقول الناقصة. يمكنك مغادرة الشاشة والعودة إلى آخر إصدار محفوظ.",
       },
       saveFailures: {
+        conflict: "تغيّرت بيانات النشاط بعد فتح النموذج. حدّث الصفحة وراجع البيانات الحالية ثم حاول مجدداً.",
         "validation-error":
           "رفض الخادم حقلاً واحداً أو أكثر. راجع القيم وحاول مجدداً.",
         unauthenticated: "الـSession غير نشط. سجّل الدخول مجدداً.",

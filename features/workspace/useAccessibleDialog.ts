@@ -11,6 +11,7 @@ const FOCUSABLE_SELECTOR = [
   "input:not([disabled])",
   "select:not([disabled])",
   "textarea:not([disabled])",
+  "details > summary:first-of-type",
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 

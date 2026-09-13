@@ -217,6 +217,7 @@ export function AiAgentEditor({
     useTransition();
   const [isPublishing, startPublishing] =
     useTransition();
+  const isBusy = isLoading || isSaving || isPublishing;
   const currentVersion = latestVersion(details);
   const canWrite =
     initialStatus === "ready" &&
@@ -242,16 +243,14 @@ export function AiAgentEditor({
     handoffMessage.trim().length > 0 &&
     groundingValid &&
     costPolicyComplete &&
-    !isSaving &&
-    !isPublishing;
+    !isBusy;
   const canPublish =
     canWrite &&
     !dirty &&
     currentVersion?.status === "draft" &&
     details?.activationReadiness.ready ===
       true &&
-    !isSaving &&
-    !isPublishing;
+    !isBusy;
 
   const markChanged = () => {
     setDirty(true);
@@ -307,6 +306,7 @@ export function AiAgentEditor({
   };
 
   const beginNewAgent = () => {
+    if (!canWrite || isBusy) return;
     setDetails(null);
     setName("");
     setSystemPrompt("");
@@ -321,7 +321,7 @@ export function AiAgentEditor({
   };
 
   const loadAgent = (aiAgentKey: string) => {
-    if (isLoading) {
+    if (isBusy) {
       return;
     }
 
@@ -364,6 +364,7 @@ export function AiAgentEditor({
     sourceKey: string,
     checked: boolean,
   ) => {
+    if (!canWrite || isBusy) return;
     setSelectedSourceKeys((current) => {
       const next = checked
         ? current.includes(sourceKey)
@@ -556,7 +557,7 @@ export function AiAgentEditor({
             type="button"
             className="secondary-button"
             onClick={beginNewAgent}
-            disabled={!canWrite}
+            disabled={!canWrite || isBusy}
           >
             {messages.directory.newAgent}
           </button>
@@ -601,7 +602,7 @@ export function AiAgentEditor({
                     agent.aiAgentKey,
                   )
                 }
-                disabled={isLoading}
+                disabled={isBusy}
               >
                 <span>
                   <strong>{agent.name}</strong>
@@ -657,7 +658,7 @@ export function AiAgentEditor({
                   markChanged();
                 }}
                 disabled={
-                  Boolean(details) || !canWrite
+                  Boolean(details) || !canWrite || isBusy
                 }
                 maxLength={160}
                 required
@@ -680,7 +681,7 @@ export function AiAgentEditor({
                   );
                   markChanged();
                 }}
-                disabled={!canWrite}
+                disabled={!canWrite || isBusy}
                 maxLength={16_384}
                 required
               />
@@ -700,7 +701,7 @@ export function AiAgentEditor({
                   );
                   markChanged();
                 }}
-                disabled={!canWrite}
+                disabled={!canWrite || isBusy}
                 maxLength={4_096}
                 required
               />
@@ -720,7 +721,7 @@ export function AiAgentEditor({
                     );
                     markChanged();
                   }}
-                  disabled={!canWrite}
+                  disabled={!canWrite || isBusy}
                 >
                   <option value="">
                     {messages.editor.responseModes.undecided}
@@ -750,7 +751,7 @@ export function AiAgentEditor({
                     );
                     markChanged();
                   }}
-                  disabled={!canWrite}
+                  disabled={!canWrite || isBusy}
                 />
                 <small>
                   {messages.editor.groundingHelp}
@@ -772,7 +773,7 @@ export function AiAgentEditor({
                     );
                     markChanged();
                   }}
-                  disabled={!canWrite}
+                  disabled={!canWrite || isBusy}
                 />
               </label>
 
@@ -786,7 +787,7 @@ export function AiAgentEditor({
                     );
                     markChanged();
                   }}
-                  disabled={!canWrite}
+                  disabled={!canWrite || isBusy}
                   maxLength={3}
                   inputMode="text"
                 />
@@ -916,7 +917,7 @@ export function AiAgentEditor({
 
         </div>
         <p>{messages.knowledge.description}</p>
-        <KnowledgeUploadPanel language={language} canWrite={canWrite} onSources={setKnowledgeSources} />
+        <KnowledgeUploadPanel language={language} canWrite={canWrite && !isBusy} onSources={setKnowledgeSources} />
 
         {knowledgeSources
           .length === 0 ? (
@@ -954,7 +955,7 @@ export function AiAgentEditor({
                         event.target.checked,
                       )
                     }
-                    disabled={!canWrite || source.status !== "ready"}
+                    disabled={!canWrite || isBusy || source.status !== "ready"}
                   />
                   <span className="ai-source-icon">
                     D

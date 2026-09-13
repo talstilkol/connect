@@ -91,7 +91,7 @@ test("keeps onboarding state and persistence behind its feature boundary", async
   );
   assert.match(
     onboardingSource,
-    /saveBusinessProfileAction\(draft\)/,
+    /saveBusinessProfileAction\(\{/,
   );
   assert.match(
     featurePageSource,

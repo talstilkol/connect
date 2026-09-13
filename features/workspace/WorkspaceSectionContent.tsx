@@ -1,5 +1,8 @@
 "use client";
 
+import { useCurrentTenantRole } from "./tenantWorkspaceContext";
+import { hasPermission } from "../../shared/domain/model";
+
 import { PaddleBillingPanel } from "../billing/PaddleBillingPanel";
 import { lazy, Suspense } from "react";
 import {
@@ -345,6 +348,7 @@ function Contacts({
   initialStatus: ContactDirectoryStatus;
 }) {
   const messages = readContactDirectoryMessages(language);
+  const role = useCurrentTenantRole();
 
   return (
     <FeaturePage
@@ -354,6 +358,7 @@ function Contacts({
     >
       <ContactDirectory
         authEnabled={authEnabled}
+        canWrite={role !== null && hasPermission(role, "contacts.write")}
         language={language}
         initialContacts={initialContacts}
         initialNextCursor={initialContactsCursor}

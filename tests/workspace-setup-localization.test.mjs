@@ -65,7 +65,8 @@ test("keeps Dashboard and Onboarding dynamic messages complete", () => {
     assert.equal(dashboard.metrics.length, 4);
     assert.ok(dashboard.metrics.every((label) => label.trim().length > 0));
     assert.equal(onboarding.checks.length, 4);
-    assert.equal(Object.keys(onboarding.saveFailures).length, 6);
+    assert.equal(Object.keys(onboarding.saveFailures).length, 7);
+    assert.ok(onboarding.saveFailures.conflict.trim().length > 0);
     assert.match(onboarding.progress.profile(2, 4), /2\/4/);
   }
 });

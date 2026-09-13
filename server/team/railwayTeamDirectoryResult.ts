@@ -48,6 +48,7 @@ function parseMember(
       "referenceCode",
       "role",
       "version",
+      "status",
     ]) ||
     typeof value.memberKey !== "string" ||
     !memberKeyPattern.test(value.memberKey) ||
@@ -58,6 +59,8 @@ function parseMember(
     !Number.isSafeInteger(value.version) ||
     Number(value.version) <= 0 ||
     typeof value.currentUser !== "boolean" ||
+    (value.status !== "active" && value.status !== "suspended") ||
+    (value.currentUser && value.status !== "active") ||
     (identityStatus === "unavailable" &&
       (value.displayName !== null || value.primaryEmail !== null)) ||
     (identityStatus === "ready" &&
@@ -73,6 +76,7 @@ function parseMember(
     primaryEmail: value.primaryEmail as string | null,
     role: value.role as TeamMemberView["role"],
     version: Number(value.version),
+    status: value.status as TeamMemberView["status"],
     currentUser: value.currentUser,
   });
 }

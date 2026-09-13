@@ -13,24 +13,58 @@ test('token count includes the exact generation input and output schema, without
   assert.deepEqual(Object.keys(counting).sort(), ['input', 'instructions', 'model', 'text', 'tool_choice', 'tools', 'truncation']);
   for (const key of Object.keys(counting)) assert.deepEqual(counting[key], parsed[key]);
   let attempts = 0;
-  assert.equal(await countOpenAiInputTokens(body, f.configuration, async (url, options) => {
+  assert.deepEqual(await countOpenAiInputTokens(body, f.configuration, async (url, options) => {
     attempts++; assert.equal(url, 'https://api.openai.com/v1/responses/input_tokens');
     assert.deepEqual(JSON.parse(options.body), counting); assert.equal(options.redirect, 'error');
     return Response.json({ object: 'response.input_tokens', input_tokens: f.result.usage.input_tokens });
-  }), f.result.usage.input_tokens);
+  }), { outcome: 'counted', inputTokens: f.result.usage.input_tokens });
   assert.equal(attempts, 1);
 });
 
-test('count refuses missing, fractional, oversized and failed responses with no HTTP retries', async () => {
+test('count refuses malformed and failed responses with no HTTP retries', async () => {
   const f = await openAiFixture(), body = createOpenAiResponsesBody(f.request, f.configuration);
-  for (const input_tokens of [null, 0, -1, 1.2, '120', f.configuration.maximumInputTokens + 1]) {
+  for (const input_tokens of [null, 0, -1, 1.2, '120', Number.MAX_SAFE_INTEGER + 1]) {
     let attempts = 0;
-    assert.equal(await countOpenAiInputTokens(body, f.configuration, async () => {
+    assert.deepEqual(await countOpenAiInputTokens(body, f.configuration, async () => {
       attempts++; return Response.json({ object: 'response.input_tokens', input_tokens });
-    }), null); assert.equal(attempts, 1);
+    }), { outcome: 'unavailable' }); assert.equal(attempts, 1);
   }
-  assert.equal(await countOpenAiInputTokens(body, f.configuration, async () => Response.json({}, { status: 429 })), null);
-  assert.equal(await countOpenAiInputTokens(body, f.configuration, async () => { throw new Error('transport lost'); }), null);
+  assert.deepEqual(await countOpenAiInputTokens(body, f.configuration, async () => Response.json({}, { status: 429 })), { outcome: 'unavailable' });
+  assert.deepEqual(await countOpenAiInputTokens(body, f.configuration, async () => { throw new Error('transport lost'); }), { outcome: 'unavailable' });
+});
+
+test('a valid count distinguishes the configured ceiling from oversized input', async () => {
+  const f = await openAiFixture(), body = createOpenAiResponsesBody(f.request, f.configuration);
+  for (const inputTokens of [f.configuration.maximumInputTokens, f.configuration.maximumInputTokens + 1]) {
+    let attempts = 0;
+    const result = await countOpenAiInputTokens(body, f.configuration, async () => {
+      attempts++;
+      return Response.json({ object: 'response.input_tokens', input_tokens: inputTokens });
+    });
+    assert.deepEqual(result, inputTokens === f.configuration.maximumInputTokens ?
+      { outcome: 'counted', inputTokens } : { outcome: 'input-too-large' });
+    assert.equal(attempts, 1);
+  }
+});
+
+test('oversized input produces a policy handoff without a generation claim, charge or retry error', async () => {
+  const f = await openAiFixture(); let requests = 0;
+  const provider = createDurableOpenAiResponsesProvider(f.configuration, {
+    async admit() { return true; }, async observe() { return { status: 'missing' }; },
+    async claim() { assert.fail('Oversized input must not claim generation'); },
+    async settle() { assert.fail('Oversized input has no provider charge to settle'); },
+  }, { now: () => f.now, fetch: async (url) => {
+    assert.ok(url.endsWith('/input_tokens')); requests++;
+    return Response.json({ object: 'response.input_tokens', input_tokens: f.configuration.maximumInputTokens + 1 });
+  } });
+  const result = await provider.generate(f.request);
+  assert.deepEqual(result, { outcome: 'policy-violation' });
+  const runtime = await runtimeFixture({ providerResult: result });
+  assert.equal((await runtime.service.process(runtime.input)).outcome, 'handoff-planned');
+  assert.equal(runtime.auditEvents.length, 1);
+  assert.equal(runtime.auditEvents[0].reason, 'policy-violation');
+  assert.equal(runtime.calls.some(call => call.dependency === 'record-usage'), false);
+  assert.equal(requests, 1);
 });
 
 test('reservation uses the highest possible input rate and maximum output, with exact integer rounding', async () => {

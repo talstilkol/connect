@@ -26,11 +26,7 @@ import {
 import type {
   InterfaceLanguage,
 } from "../../shared/domain/businessProfileDraft";
-
-const TenantWorkspaceContext =
-  createContext<TenantSelectionDirectory | null>(
-    null,
-  );
+import { TenantWorkspaceContext } from "./tenantWorkspaceContext";
 
 const TenantOrganizationActivationContext = createContext<ActivateTenantOrganization | null>(null);
 

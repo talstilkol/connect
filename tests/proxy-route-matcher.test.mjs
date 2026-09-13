@@ -42,7 +42,7 @@ test("runs Clerk middleware on every explicit application surface without path-l
 
   assert.match(
     source,
-    /configuredClerkMiddleware = clerkMiddleware\(\)/,
+    /configuredClerkMiddleware = clerkMiddleware\(/,
   );
   assert.doesNotMatch(
     source,

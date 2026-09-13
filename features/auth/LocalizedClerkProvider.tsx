@@ -6,9 +6,14 @@ import {
 import {
   usePathname,
 } from "next/navigation";
-import type {
-  ReactNode,
+import {
+  useState,
+  type ReactNode,
 } from "react";
+import type {
+  InterfaceLanguage,
+} from "../../shared/domain/businessProfileDraft";
+import { ClerkWorkspaceLanguageContext } from "./ClerkWorkspaceLanguage";
 
 import {
   readAuthHref,
@@ -18,6 +23,7 @@ import {
 import {
   clerkLocalization,
 } from "../../shared/i18n/clerk";
+import { workspaceSectionPath } from "../../shared/workspace/navigation";
 
 export function LocalizedClerkProvider({
   children,
@@ -27,15 +33,19 @@ export function LocalizedClerkProvider({
   publishableKey: string;
 }) {
   const pathname = usePathname();
-  const language = readAuthLanguageFromPathname(pathname);
+  const [workspaceLanguage, setWorkspaceLanguage] = useState<InterfaceLanguage | null>(null);
+  const language = pathname === "/workspace" || pathname?.startsWith("/workspace/")
+    ? workspaceLanguage ?? "he"
+    : readAuthLanguageFromPathname(pathname);
 
   return (
+    <ClerkWorkspaceLanguageContext.Provider value={setWorkspaceLanguage}>
     <ClerkProvider
       publishableKey={publishableKey}
       signInUrl={readAuthHref(language, "login")}
       signUpUrl={readAuthHref(language, "register")}
-      signInFallbackRedirectUrl="/workspace"
-      signUpFallbackRedirectUrl="/workspace/onboarding"
+      signInFallbackRedirectUrl={workspaceSectionPath("dashboard", language)}
+      signUpFallbackRedirectUrl={workspaceSectionPath("onboarding", language)}
       localization={clerkLocalization[language]}
       appearance={{
         variables: {
@@ -53,5 +63,6 @@ export function LocalizedClerkProvider({
     >
       {children}
     </ClerkProvider>
+    </ClerkWorkspaceLanguageContext.Provider>
   );
 }

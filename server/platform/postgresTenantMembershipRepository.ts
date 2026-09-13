@@ -1,6 +1,7 @@
 import type {
   ActiveTenantMembership,
   TenantMembershipRepository,
+  TenantDirectoryMembership,
 } from "../../db/tenantMembershipRepository.ts";
 import type {
   TenantId,
@@ -171,6 +172,24 @@ export function createPostgresTenantMembershipRepository(
   }
 
   return Object.freeze({
+    async findByTenantId(tenantId: TenantId): Promise<readonly TenantDirectoryMembership[]> {
+      const id = requireTenantId(tenantId);
+      const sql = postgresTenantMembershipSql.findActiveByTenantId
+        .replace("tenant_memberships.version", "tenant_memberships.version, tenant_memberships.status")
+        .replace("AND tenant_memberships.status = 'active'", "");
+      const result = await database.query<Record<string, unknown>>(sql, [id]);
+      const rows = requirePostgresRows(result, maximumMemberships + 1);
+      if (rows.length > maximumMemberships) throw new Error("PostgreSQL membership directory exceeds the safe limit");
+      return Object.freeze(rows.map((value) => {
+        const row = requireExactPostgresRow(value, [...membershipRowKeys, "status"]);
+        const { status, ...active } = row;
+        const membership = parseMembership(active);
+        if (membership.tenantId !== id || (status !== "active" && status !== "suspended")) {
+          throw new Error("PostgreSQL returned an invalid directory membership");
+        }
+        return Object.freeze({ ...membership, status });
+      }));
+    },
     async findActiveByExternalUserId(externalUserId: UserId) {
       const normalizedExternalUserId =
         requireExternalUserId(externalUserId);

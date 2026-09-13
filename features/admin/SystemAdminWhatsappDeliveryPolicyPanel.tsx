@@ -32,6 +32,7 @@ import {
 import {
   useAdminDocumentLocale,
 } from "./useAdminDocumentLocale.ts";
+import { canonicalUtcDateTime } from "./whatsappPolicyEvidenceDateTime.ts";
 
 type Feedback = {
   tone: "success" | "danger";
@@ -89,26 +90,6 @@ function AdminState({
       </section>
     </main>
   );
-}
-
-function canonicalUtcDateTime(
-  value: FormDataEntryValue | null,
-): string | null {
-  if (
-    typeof value !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(
-      value,
-    )
-  ) {
-    return null;
-  }
-
-  const timestamp = `${value}.000Z`;
-
-  return new Date(timestamp).toISOString() ===
-    timestamp
-    ? timestamp
-    : null;
 }
 
 function formatTimestamp(

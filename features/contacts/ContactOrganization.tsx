@@ -32,12 +32,14 @@ import {
 
 export function ContactOrganization({
   enabled,
+  canWrite = false,
   language,
   contacts,
   organization,
   onSnapshot,
 }: {
   enabled: boolean;
+  canWrite?: boolean;
   language: InterfaceLanguage;
   contacts: readonly ContactRecord[];
   organization: ContactOrganizationState;
@@ -64,6 +66,7 @@ export function ContactOrganization({
     action: () => Promise<ContactOrganizationActionResult>,
     onSaved?: () => void,
   ) => {
+    if (!enabled || !canWrite || isPending) return;
     setResult(null);
 
     startTransition(async () => {
@@ -156,7 +159,7 @@ export function ContactOrganization({
         </div>
       ) : (
         <>
-          <div className="contact-group-create-grid">
+          {canWrite && <div className="contact-group-create-grid">
             <form onSubmit={createTag}>
               <label>
                 <span>{messages.tagName}</span>
@@ -190,7 +193,7 @@ export function ContactOrganization({
                 {messages.createList}
               </button>
             </form>
-          </div>
+          </div>}
 
           <label className="contact-group-contact-picker">
             <span>{messages.contactPicker}</span>
@@ -231,7 +234,7 @@ export function ContactOrganization({
               assignedLabel={messages.assigned}
               assignLabel={messages.assign}
               groups={organization.tags}
-              disabled={numericContactId === null || isPending || needsSnapshotRefresh}
+              disabled={!canWrite || numericContactId === null || isPending || needsSnapshotRefresh}
               isAssigned={(groupId) =>
                 numericContactId !== null &&
                 organization.tagAssignments.some(
@@ -249,7 +252,7 @@ export function ContactOrganization({
               assignedLabel={messages.assigned}
               assignLabel={messages.assign}
               groups={organization.lists}
-              disabled={numericContactId === null || isPending || needsSnapshotRefresh}
+              disabled={!canWrite || numericContactId === null || isPending || needsSnapshotRefresh}
               isAssigned={(groupId) =>
                 numericContactId !== null &&
                 organization.listMemberships.some(

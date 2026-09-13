@@ -10,6 +10,7 @@ import { createPostgresClerkOrganizationBindingRepository } from
 import { createPostgresTenantProvisioningRepository } from
   "./postgresTenantProvisioningRepository.ts";
 import type { TenantId } from "../../shared/domain/model.ts";
+import { parsePostgresPositiveInteger } from "./postgresResultValidation.ts";
 import { requireWorkspaceProvisioningPermission } from "../auth/tenantSession.ts";
 import type {
   PostgresQueryResult,
@@ -32,6 +33,15 @@ const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
 
 export const postgresRailwayOnboardingBusinessProfileMutationSql =
   Object.freeze({
+    lockProvisioning: `
+      SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
+    `,
+    lockProfileVersion: `
+      SELECT version
+      FROM business_profiles
+      WHERE tenant_id = $1
+      FOR UPDATE
+    `,
     findTenantByProvisioningKey: `
       SELECT id AS "tenantId"
       FROM tenants
@@ -115,13 +125,6 @@ function requireRowCount(
   return result.rowCount;
 }
 
-function requirePositiveInteger(value: unknown): number {
-  if (!Number.isSafeInteger(value) || Number(value) <= 0) {
-    throw new Error("PostgreSQL returned an invalid tenant identity");
-  }
-  return Number(value);
-}
-
 function createInlineTransactionManager(
   transaction: PostgresTransaction,
 ): PostgresTransactionManager {
@@ -162,6 +165,9 @@ function validateCommand(
         command.session.externalUserId !== command.identity.externalUserId)) ||
     !idempotencyKeyPattern.test(command.idempotencyKey) ||
     !requestDigestPattern.test(command.requestDigest) ||
+    !Number.isSafeInteger(command.expectedVersion) ||
+    command.expectedVersion < 0 ||
+    command.expectedVersion >= Number.MAX_SAFE_INTEGER ||
     !validation.success ||
     Object.keys(command.payload).sort().join(",") !==
       "businessName,interfaceLanguage,timezone" ||
@@ -278,7 +284,7 @@ async function findProvisionedTenantId(
   );
   return requireRowCount(result, 1) === 0
     ? null
-    : requirePositiveInteger(result.rows[0]?.tenantId);
+    : parsePostgresPositiveInteger(result.rows[0]?.tenantId);
 }
 
 async function persistProfile(
@@ -298,8 +304,17 @@ async function persistProfile(
 > {
   const inlineTransactions = createInlineTransactionManager(transaction);
   if (command.session === null) {
+    if (command.expectedVersion !== 0) {
+      throw new OnboardingMutationConflictError();
+    }
     const provisioningKey = await deriveTenantProvisioningKey(
       command.identity.externalUserId,
+    );
+    // The tenant row does not exist yet. Serialize initial submissions for this
+    // verified user so concurrent, different drafts cannot overwrite creation.
+    await transaction.query(
+      postgresRailwayOnboardingBusinessProfileMutationSql.lockProvisioning,
+      [`connect-onboarding-profile-v1:${provisioningKey}`],
     );
     const existingTenantId = await findProvisionedTenantId(
       transaction,
@@ -317,12 +332,16 @@ async function persistProfile(
         command,
       );
       if (replay !== null) {
+        await requireCurrentReplay(transaction, replay);
         return Object.freeze({
           outcome: "replayed" as const,
           tenantId: replay.tenantId,
           state: replay.state,
         });
       }
+      // A version-zero request may retry creation, but cannot update a profile
+      // that another initial submission has already committed.
+      throw new OnboardingMutationConflictError();
     }
     const workspace = await createPostgresTenantProvisioningRepository({
       queries: transaction,
@@ -371,17 +390,24 @@ async function persistProfile(
     command.session.tenantId,
     command,
   );
+  const currentVersion = await lockProfileVersion(transaction, command.session.tenantId);
   const replay = await claimReceipt(
     transaction,
     command.session.tenantId,
     command,
   );
   if (replay !== null) {
+    if (replay.state.profile.version !== currentVersion) {
+      throw new OnboardingMutationConflictError();
+    }
     return Object.freeze({
       outcome: "replayed" as const,
       tenantId: replay.tenantId,
       state: replay.state,
     });
+  }
+  if (currentVersion !== command.expectedVersion) {
+    throw new OnboardingMutationConflictError();
   }
   const profiles = createPostgresBusinessProfileRepository({
     queries: transaction,
@@ -408,6 +434,26 @@ async function persistProfile(
       }),
     }),
   });
+}
+
+async function lockProfileVersion(transaction: PostgresTransaction, tenantId: number): Promise<number> {
+  const result = await transaction.query<{ version: unknown }>(
+    postgresRailwayOnboardingBusinessProfileMutationSql.lockProfileVersion,
+    [tenantId],
+  );
+  if (requireRowCount(result, 1) !== 1) {
+    throw new Error("PostgreSQL onboarding profile version is unavailable");
+  }
+  return parsePostgresPositiveInteger(result.rows[0].version);
+}
+
+async function requireCurrentReplay(transaction: PostgresTransaction, replay: Readonly<{
+  tenantId: number;
+  state: RailwayOnboardingBusinessProfileMutationState;
+}>): Promise<void> {
+  if (await lockProfileVersion(transaction, replay.tenantId) !== replay.state.profile.version) {
+    throw new OnboardingMutationConflictError();
+  }
 }
 
 async function executeTransaction(

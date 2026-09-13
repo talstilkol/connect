@@ -4,8 +4,12 @@ import {
 import type { NextFetchEvent, NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { inspectClerkConfiguration } from "./server/auth/clerkConfiguration";
+import { readClerkRequestRoutes } from "./server/auth/clerkRequestRoutes";
 
-const configuredClerkMiddleware = clerkMiddleware();
+const configuredClerkMiddleware = clerkMiddleware(
+  () => NextResponse.next(),
+  (request) => readClerkRequestRoutes(request.nextUrl),
+);
 
 export default function proxy(
   request: NextRequest,

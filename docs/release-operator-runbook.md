@@ -96,10 +96,16 @@ npm run release:rehearse:local
 
 3.2.4 אימות מחדש של שני ה־Artifacts מול ה־Commit.
 
-3.2.5 Production Release Gate בסביבה שממנה הוסרו במכוון סמכויות
-ה־Evidence. תוצאה תקינה של ה־Probe היא חסימה מדויקת בקוד
-`DEPENDENCY_AUDIT_ATTESTATION_ARGUMENTS_INVALID` לאחר שכל השערים
-המקומיים עברו.
+3.2.5 Production Release Gate בסביבה שממנה הוסרו במכוון מקור V2,
+זהות השחרור וסמכויות ה־Evidence. אחרי השערים המקומיים נדרשת חסימה
+ב־`production-infrastructure-readiness-v2`, בקוד
+`PRODUCTION_READINESS_V2_SOURCE_REQUIRED` ובמצב מקור disabled.
+כך ה־Probe אינו קורא מקור PostgreSQL שאולי הוגדר בתהליך האב.
+
+3.2.6 בדיקת Dependency attestation נפרדת, באותה סביבה מבודדת, נדרשת
+להיחסם בקוד `DEPENDENCY_AUDIT_ATTESTATION_ARGUMENTS_INVALID` לפני
+קריאת Evidence או פנייה ל־GitHub. היא אינה יכולה להיבדק דרך השער המלא
+בתרגיל זה, משום ש־V2 חוסם לפני שמגיעים אליה. שתי החסימות מחייבות.
 
 3.3 הצלחה יוצרת `.artifacts/local-release-rehearsal.json`. הקובץ
 מכיל רק זהות Release, ‏Digests ותוצאות מוגבלות; הוא אינו מכיל Secret,

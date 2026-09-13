@@ -1,7 +1,8 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
+import { useClerkWorkspaceLanguage } from "../auth/ClerkWorkspaceLanguage";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
   ContactDirectoryStatus,
@@ -197,11 +198,14 @@ export default function WorkspaceApp({
 }) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuButton = useRef<HTMLButtonElement>(null);
+  const sidebar = useRef<HTMLElement>(null);
   const [metaPanelOpen, setMetaPanelOpen] = useState(false);
   const messages = readWorkspaceShellMessages(language);
   const direction = readWorkspaceDirection(language);
   const localizedNavigation = readWorkspaceNavigation(language);
   const localeLinks = readWorkspaceLocaleLinks(activeSection);
+  useClerkWorkspaceLanguage(language);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -217,6 +221,45 @@ export default function WorkspaceApp({
     };
   }, [direction, language]);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const media = window.matchMedia("(max-width: 820px)");
+    const menu = sidebar.current;
+    const toggle = mobileMenuButton.current;
+    if (!media.matches || !menu) return;
+    const focusable = () => Array.from(menu.querySelectorAll<HTMLElement>(
+      "button:not(:disabled), a[href], select:not(:disabled), [tabindex='0']",
+    ));
+    // Let the hidden sidebar become visible before moving focus out of the
+    // content area, which becomes inert in the same commit.
+    const focusFrame = window.requestAnimationFrame(() => focusable()[0]?.focus());
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMobileMenuOpen(false);
+      } else if (event.key === "Tab") {
+        const controls = focusable();
+        const target = event.shiftKey ? controls.at(-1) : controls[0];
+        const boundary = event.shiftKey ? controls[0] : controls.at(-1);
+        if (document.activeElement === boundary) {
+          event.preventDefault();
+          target?.focus();
+        }
+      }
+    };
+    const onBreakpointChange = () => {
+      if (!media.matches) setMobileMenuOpen(false);
+    };
+    menu.addEventListener("keydown", onKeyDown);
+    media.addEventListener("change", onBreakpointChange);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      menu.removeEventListener("keydown", onKeyDown);
+      media.removeEventListener("change", onBreakpointChange);
+      if (media.matches) toggle?.focus();
+    };
+  }, [mobileMenuOpen]);
+
   const navigate = (section: SectionId) => {
     router.push(workspaceSectionPath(section, language));
     setMobileMenuOpen(false);
@@ -230,7 +273,14 @@ export default function WorkspaceApp({
       >
         {messages.skipLink}
       </a>
-      <aside className={`sidebar ${mobileMenuOpen ? "sidebar-open" : ""}`}>
+      <aside
+        className={`sidebar ${mobileMenuOpen ? "sidebar-open" : ""}`}
+        id="workspace-sidebar"
+        ref={sidebar}
+        role={mobileMenuOpen ? "dialog" : undefined}
+        aria-modal={mobileMenuOpen || undefined}
+        aria-label={mobileMenuOpen ? messages.primaryNavigationAriaLabel : undefined}
+      >
         <div className="brand">
           <div className="brand-mark" aria-hidden="true">
             <span />
@@ -308,13 +358,16 @@ export default function WorkspaceApp({
         className="content-area"
         id="workspace-content"
         tabIndex={-1}
+        inert={mobileMenuOpen}
       >
         <header className="topbar">
           <div className="topbar-start">
             <button
               type="button"
               className="mobile-menu-button"
+              ref={mobileMenuButton}
               aria-label={messages.openMenuAriaLabel}
+              aria-controls="workspace-sidebar"
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen((open) => !open)}
             >

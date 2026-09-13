@@ -56,10 +56,7 @@ test("exposes a deterministic Vercel build without a remote font dependency", ()
   );
 
   assert.equal(packageJson.scripts["build:vercel"], "next build --webpack");
-  assert.match(
-    packageJson.scripts.test,
-    /npm run build && npm run build:vercel && node --test/,
-  );
+  assert.equal(packageJson.scripts.test, "node scripts/run-local-test-suite.mjs");
   assert.doesNotMatch(layoutSource, /next\/font|fonts\.googleapis\.com/);
   assert.match(tokensSource, /--font-geist-sans:/);
   assert.match(tokensSource, /--font-geist-mono:/);

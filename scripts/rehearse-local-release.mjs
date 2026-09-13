@@ -31,13 +31,20 @@ const gitObjectPattern = /^[a-f0-9]{40}$/;
 const maximumCapturedOutputBytes =
   64 * 1024 * 1024;
 const expectedProductionBlockerCode =
+  "PRODUCTION_READINESS_V2_SOURCE_REQUIRED";
+const expectedDependencyBlockerCode =
   "DEPENDENCY_AUDIT_ATTESTATION_ARGUMENTS_INVALID";
 const expectedProductionFailureLines =
   Object.freeze([
     "Release gate: PASS (tests-and-build)",
-    `Dependency audit evidence attestation: FAIL (${expectedProductionBlockerCode})`,
-    "Release gate: FAIL (dependency-audit-attestation)",
+    "Production readiness v2: BLOCKED",
+    "Source: NONE (disabled)",
+    `Code: ${expectedProductionBlockerCode}`,
+    "Release gate: FAIL (production-infrastructure-readiness-v2)",
   ]);
+const expectedDependencyFailureLines = Object.freeze([
+  `Dependency audit evidence attestation: FAIL (${expectedDependencyBlockerCode})`,
+]);
 const requiredSteps = Object.freeze([
   Object.freeze({
     id: "local-release-gate",
@@ -71,6 +78,12 @@ const requiredSteps = Object.freeze([
 ]);
 const productionEvidenceEnvironmentKeys =
   Object.freeze([
+    "PRODUCTION_READINESS_V2_SOURCE",
+    "APP_RELEASE_ID",
+    "APP_DEPLOYED_COMMIT_SHA",
+    "PRODUCTION_READINESS_V2_RAILWAY_API_ARTIFACT_DIGEST",
+    "PRODUCTION_READINESS_V2_RAILWAY_WORKER_ARTIFACT_DIGEST",
+    "PRODUCTION_READINESS_V2_VERCEL_WEB_ARTIFACT_DIGEST",
     "DEPENDENCY_AUDIT_ATTESTATION_REPOSITORY",
     "DEPENDENCY_AUDIT_EVIDENCE_JSON",
     "TEAM_INVITATION_BROWSER_ATTESTATION_REPOSITORY",
@@ -123,7 +136,7 @@ function hasSuccessfulRequiredSteps(results) {
   );
 }
 
-function requireExpectedProductionFailure(result) {
+function requireExpectedFailure(result, expectedLines, errorKind) {
   if (
     typeof result !== "object" ||
     result === null ||
@@ -140,7 +153,7 @@ function requireExpectedProductionFailure(result) {
     ) > maximumCapturedOutputBytes
   ) {
     throw new Error(
-      "LOCAL_REHEARSAL_PRODUCTION_GATE_RESULT_INVALID",
+      `LOCAL_REHEARSAL_${errorKind}_RESULT_INVALID`,
     );
   }
 
@@ -149,25 +162,25 @@ function requireExpectedProductionFailure(result) {
     result.signal === null
   ) {
     throw new Error(
-      "LOCAL_REHEARSAL_PRODUCTION_GATE_UNEXPECTED_PASS",
+      `LOCAL_REHEARSAL_${errorKind}_UNEXPECTED_PASS`,
     );
   }
 
-  const output =
-    `${result.stdout}\n${result.stderr}`;
+  const lines = `${result.stdout}\n${result.stderr}`.split(/\r?\n/);
 
   if (
     result.status !== 1 ||
     result.signal !== null ||
-    output.includes(
-      "Release gate: PRODUCTION PASS",
+    lines.some((line) =>
+      line === "Release gate: PRODUCTION PASS" ||
+      line.startsWith("Dependency audit evidence attestation: PASS (")
     ) ||
-    expectedProductionFailureLines.some(
-      (line) => !output.includes(line),
+    expectedLines.some(
+      (line) => !lines.includes(line),
     )
   ) {
     throw new Error(
-      "LOCAL_REHEARSAL_PRODUCTION_GATE_UNEXPECTED_FAILURE",
+      `LOCAL_REHEARSAL_${errorKind}_UNEXPECTED_FAILURE`,
     );
   }
 }
@@ -201,6 +214,7 @@ export function buildLocalReleaseRehearsalReport({
   releaseManifest,
   requiredStepResults,
   productionGateResult,
+  dependencyAttestationProbeResult,
 }) {
   if (!hasReleaseIdentity(releaseManifest)) {
     throw new Error(
@@ -218,8 +232,15 @@ export function buildLocalReleaseRehearsalReport({
     );
   }
 
-  requireExpectedProductionFailure(
+  requireExpectedFailure(
     productionGateResult,
+    expectedProductionFailureLines,
+    "PRODUCTION_GATE",
+  );
+  requireExpectedFailure(
+    dependencyAttestationProbeResult,
+    expectedDependencyFailureLines,
+    "DEPENDENCY_PROBE",
   );
 
   return Object.freeze({
@@ -247,6 +268,11 @@ export function buildLocalReleaseRehearsalReport({
         status: "passed",
         observedBlockerCode:
           expectedProductionBlockerCode,
+      }),
+      Object.freeze({
+        id: "dependency-attestation-fail-closed",
+        status: "passed",
+        observedBlockerCode: expectedDependencyBlockerCode,
       }),
     ]),
     productionReady: false,
@@ -278,6 +304,19 @@ function runProductionFailClosedProbe() {
       env: createFailClosedProbeEnvironment(
         process.env,
       ),
+      encoding: "utf8",
+      maxBuffer: maximumCapturedOutputBytes,
+    },
+  );
+}
+
+function runDependencyAttestationFailClosedProbe() {
+  return spawnSync(
+    process.execPath,
+    ["scripts/verify-dependency-audit-evidence-attestation.mjs"],
+    {
+      cwd: projectRoot,
+      env: createFailClosedProbeEnvironment(process.env),
       encoding: "utf8",
       maxBuffer: maximumCapturedOutputBytes,
     },
@@ -317,12 +356,17 @@ async function runCli() {
   console.log(
     "Local release rehearsal: RUN (production-fail-closed)",
   );
+  const productionGateResult = runProductionFailClosedProbe();
+  console.log(
+    "Local release rehearsal: RUN (dependency-attestation-fail-closed)",
+  );
   const report =
     buildLocalReleaseRehearsalReport({
       releaseManifest,
       requiredStepResults,
-      productionGateResult:
-        runProductionFailClosedProbe(),
+      productionGateResult,
+      dependencyAttestationProbeResult:
+        runDependencyAttestationFailClosedProbe(),
     });
 
   await mkdir(dirname(outputPath), {

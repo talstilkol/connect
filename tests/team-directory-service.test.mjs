@@ -68,6 +68,9 @@ function createFixture(
             "unexpected identity read",
           );
         },
+        async findByTenantId(tenantId) {
+          return (await this.findActiveByTenantId(tenantId)).map((member) => ({ ...member, status: member.status ?? "active" }));
+        },
         async findActiveByTenantId(
           tenantId,
         ) {
@@ -419,4 +422,39 @@ test("fails closed for cross-tenant, stale, or missing current membership data",
       ),
     );
   }
+});
+
+test("owner can still locate suspended members after a fresh directory read", async () => {
+  const { service } = createFixture([
+    member("current-user", "owner"),
+    member("suspended-user", "agent", { status: "suspended", version: 3 }),
+  ]);
+  const result = await service.list(session());
+  assert.equal(result.members[1].status, "suspended");
+  assert.equal(result.members[1].version, 3);
+});
+
+test("a manager never reads the owner-only directory of suspended members", async () => {
+  let allReads = 0;
+  const service = createTeamDirectoryService({
+    identities: { async resolve() { return { status: "unavailable", identities: [] }; } },
+    memberships: {
+      async findByTenantId() { allReads++; throw new Error("owner read must not run"); },
+      async findActiveByTenantId() { return [member("current-user", "manager")]; },
+    },
+  });
+  assert.equal((await service.list(session("manager"))).members.length, 1);
+  assert.equal(allReads, 0);
+});
+
+test("a stale owner role or suspended actor is rejected before identity enrichment", async () => {
+  let identities = 0;
+  for (const actor of [member("current-user", "manager"), member("current-user", "owner", { status: "suspended" })]) {
+    const service = createTeamDirectoryService({
+      identities: { async resolve() { identities++; return { status: "unavailable", identities: [] }; } },
+      memberships: { async findByTenantId() { return [{ ...actor, status: actor.status ?? "active" }]; } },
+    });
+    await assert.rejects(service.list(session()));
+  }
+  assert.equal(identities, 0);
 });

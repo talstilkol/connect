@@ -86,6 +86,26 @@ test("rejects unreviewed Next.js development arguments and entry directories", a
   }
 });
 
+test("allows route type generation before typecheck but rejects alternative entry directories", async () => {
+  for (const [command, accepted] of [
+    ["next typegen && tsc --noEmit", true],
+    ["next typegen scripts && tsc --noEmit", false],
+    ["next typegen --experimental-next-config-strip-types && tsc --noEmit", false],
+  ]) {
+    const root = await createFixture("connect-next-route-types-");
+    await writeFile(join(root, "package.json"), JSON.stringify({
+      scripts: { typecheck: command },
+    }));
+
+    const report = await inspectSourceGuardrails(root);
+
+    assert.deepEqual(report.findings, accepted ? [] : [{
+      code: "BOT_REPLY_STAGING_ATTESTED_IMPORTER_FORBIDDEN",
+      file: "package.json",
+    }], command);
+  }
+});
+
 test("blocks indirect eval and Function capabilities in scripts while respecting lexical shadows", async () => {
   const root = await createFixture(
     "connect-execution-capability-aliases-",

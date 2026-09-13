@@ -157,7 +157,10 @@ import {
   type RailwayBotReplyStagingReleaseEvidenceReadDependencies,
 } from "./railwayBotReplyStagingReleaseEvidenceReadOperation.ts";
 
+import type { TeamIdentityDirectory } from "../team/teamIdentityDirectory.ts";
+
 export interface RailwayApiRuntimeOptions {
+  readonly teamIdentities?: TeamIdentityDirectory;
   readonly paidAccess?: Readonly<{ allowed(tenantId: number): Promise<boolean> }>;
   readonly environment?: RailwayApiIdentityEnvironment;
   readonly identityDependencies?: Readonly<RailwayApiIdentityAdapterDependencies>;
@@ -303,6 +306,7 @@ export function createRailwayApiRuntime(
   const teamDirectoryOperation = createRailwayTeamDirectoryOperation({
     tenantSessions,
     memberships: options.memberships,
+    identities: options.teamIdentities,
   });
   const teamMembershipOperations = createRailwayTeamMembershipOperations({
     tenantSessions,

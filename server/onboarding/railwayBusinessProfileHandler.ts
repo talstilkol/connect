@@ -54,6 +54,8 @@ type ClientContextResult =
 
 const strictPayloadKeys = Object.freeze([
   "businessName",
+  "expectedOrganizationId",
+  "expectedVersion",
   "interfaceLanguage",
   "timezone",
 ]);
@@ -118,6 +120,8 @@ function mapLoadFailure(code: string): LoadBusinessProfileActionResult {
 
 function mapSaveFailure(code: string): SaveBusinessProfileActionResult {
   switch (code) {
+    case "CONFLICT":
+      return { status: "conflict" };
     case "USER_AUTHENTICATION_REQUIRED":
       return { status: "unauthenticated" };
     case "TENANT_SELECTION_REQUIRED":
@@ -151,12 +155,17 @@ function parseSaveInput(input: unknown):
   if (!validation.success) {
     return { status: "invalid", issues: validation.issues };
   }
-  if (!isRecord(normalized) || !hasExactKeys(normalized, strictPayloadKeys)) {
+  if (!isRecord(normalized) || !hasExactKeys(normalized, strictPayloadKeys) ||
+      typeof normalized.expectedOrganizationId !== "string" ||
+      !/^org_[A-Za-z0-9_]{1,251}$/.test(normalized.expectedOrganizationId) ||
+      !Number.isSafeInteger(normalized.expectedVersion) ||
+      Number(normalized.expectedVersion) < 0 ||
+      Number(normalized.expectedVersion) >= Number.MAX_SAFE_INTEGER) {
     return { status: "invalid", issues: unsupportedShapeIssues };
   }
   return Object.freeze({
     status: "ready" as const,
-    payload: Object.freeze({ ...validation.value }),
+    payload: Object.freeze({ ...validation.value, expectedVersion: Number(normalized.expectedVersion), expectedOrganizationId: normalized.expectedOrganizationId }),
   });
 }
 
@@ -276,7 +285,12 @@ export function createRailwayBusinessProfileHandler(
           createdTenant: response.data.createdTenant,
           profile: response.data.profile,
         });
-        return saved === null
+        return saved === null ||
+          saved.profile.businessName !== parsed.payload.businessName ||
+          saved.profile.timezone !== parsed.payload.timezone ||
+          saved.profile.interfaceLanguage !== parsed.payload.interfaceLanguage ||
+          saved.profile.version < Number(parsed.payload.expectedVersion) ||
+          saved.profile.version > Number(parsed.payload.expectedVersion) + 1
           ? { status: "server-error" }
           : Object.freeze({
               status: "saved" as const,

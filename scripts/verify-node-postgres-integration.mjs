@@ -1,3 +1,4 @@
+import { verifyTeamManagementPostgres } from "./verify-team-management-postgres.mjs";
 import { proveCoreBotReplyProviderBoundary, finalizeCoreBotReplyProviderBoundary, seedCoreProviderFenceUpgrade } from "./verify-bot-reply-staging-credential-bound-pre-send-session-barrier-postgres.mjs";
 import { connection as metaHistoryFixture } from "../tests/fixtures/meta-history.mjs";
 import { verifyContactOrganizationMutationsPostgres } from "./verify-contact-organization-mutations-postgres.mjs";
@@ -5198,8 +5199,11 @@ async function createPostgresIntegrationApiRuntime(
   verifiedInvitationEmail = "driver-integration-owner@example.com",
   enableSystemAdmin = false,
   externalOrganizationId = "org_driver_integration",
+  externalOrganizationRole = "org:member",
 ) {
   return createRailwayPostgresApiRuntime({
+    // Local fixtures have no Clerk profiles; prevent any external directory request.
+    teamIdentities: { async resolve() { return { status: "unavailable", identities: [] }; } },
     identityEnvironment: {
       APP_PUBLIC_ORIGIN: "https://connect.example.com",
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
@@ -5230,6 +5234,7 @@ async function createPostgresIntegrationApiRuntime(
                     tokenType: "session_token",
                     userId: externalUserId,
                     orgId: externalOrganizationId,
+                    orgRole: externalOrganizationRole,
                   };
                 },
               };
@@ -6153,6 +6158,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     "driver-onboarding-owner@example.com",
     false,
     "org_driver_onboarding",
+    "org:admin",
   );
   const compactJwt = "header.payload.signature";
   const createApiRequest = (
@@ -6193,16 +6199,34 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       profile: null,
     });
 
-    const profilePayload = Object.freeze({
+    const profileDraft = Object.freeze({
       businessName: "Onboarding integration",
       timezone: "Asia/Jerusalem",
       interfaceLanguage: "he",
     });
+    const profilePayload = Object.freeze({ ...profileDraft, expectedVersion: 0, expectedOrganizationId: "org_driver_onboarding" });
     const idempotencyKey =
       await deriveRailwayApiDeterministicIdempotencyKey(
         "onboarding.business-profile.save",
         profilePayload,
       );
+    const memberRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString, externalUserId, [], "driver-onboarding-owner@example.com",
+      false, "org_driver_onboarding", "org:member",
+    );
+    try {
+      const denied = await memberRuntime.handler.handle(createApiRequest(
+        "onboarding.business-profile.save", "mutation", profilePayload, idempotencyKey,
+      ));
+      assert.equal(denied.status, 403);
+      assert.equal((await denied.json()).code, "PERMISSION_DENIED");
+      assert.equal((await pool.query(
+        "SELECT count(*)::integer AS count FROM tenant_memberships WHERE external_user_id = $1",
+        [externalUserId],
+      )).rows[0].count, 0);
+    } finally {
+      await memberRuntime.close();
+    }
     const responses = await Promise.all([
       runtime.handler.handle(createApiRequest(
         "onboarding.business-profile.save",
@@ -6233,7 +6257,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       [true, true],
     );
     assert.deepEqual(bodies[0].data.profile, {
-      ...profilePayload,
+      ...profileDraft,
       version: 1,
     });
     assert.doesNotMatch(
@@ -6251,7 +6275,7 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     );
     assert.equal(readResponse.status, 200);
     assert.deepEqual((await readResponse.json()).data, {
-      profile: { ...profilePayload, version: 1 },
+      profile: { ...profileDraft, version: 1 },
     });
 
     const evidence = await pool.query(
@@ -6306,6 +6330,119 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
       Number.isSafeInteger(evidenceTenantId) && evidenceTenantId > 0,
       true,
     );
+
+    const saveProfile = async (draft, targetRuntime = runtime) => {
+      const payload = { expectedOrganizationId: "org_driver_onboarding", ...draft };
+      const response = await targetRuntime.handler.handle(createApiRequest(
+        "onboarding.business-profile.save", "mutation", payload,
+        await deriveRailwayApiDeterministicIdempotencyKey("onboarding.business-profile.save", payload),
+      ));
+      return { status: response.status, body: await response.json() };
+    };
+    const changedPayload = { ...profileDraft, businessName: "Onboarding integration updated", expectedVersion: 1 };
+    const changed = await saveProfile(changedPayload);
+    assert.equal(changed.status, 200);
+    assert.equal(changed.body.data.profile.version, 2);
+    const restored = await saveProfile({ ...profileDraft, expectedVersion: 2 });
+    assert.equal(restored.status, 200);
+    assert.deepEqual(restored.body.data.profile, { ...profileDraft, version: 3 });
+    // An old successful retry cannot report an earlier profile as current.
+    const oldReplay = await saveProfile(changedPayload);
+    assert.equal(oldReplay.status, 409);
+    assert.equal(oldReplay.body.code, "CONFLICT");
+    const competingDrafts = [
+      { ...profileDraft, timezone: "Europe/London", expectedVersion: 3 },
+      { ...profileDraft, interfaceLanguage: "en", expectedVersion: 3 },
+    ];
+    const competing = await Promise.all(competingDrafts.map(payload => saveProfile(payload)));
+    assert.deepEqual(competing.map(result => result.status).sort(), [200, 409]);
+    const winnerIndex = competing.findIndex(result => result.status === 200);
+    assert.equal(competing[winnerIndex].body.data.profile.version, 4);
+    const repeatedWinner = await saveProfile(competingDrafts[winnerIndex]);
+    assert.equal(repeatedWinner.status, 200);
+    assert.equal(repeatedWinner.body.data.replayed, true);
+    assert.deepEqual(repeatedWinner.body.data.profile, competing[winnerIndex].body.data.profile);
+    const persistedWinner = await pool.query(
+      'SELECT business_name, timezone, interface_language, version FROM business_profiles WHERE tenant_id=$1',
+      [evidenceTenantId],
+    );
+    assert.deepEqual(persistedWinner.rows, [{
+      business_name: profileDraft.businessName,
+      timezone: competingDrafts[winnerIndex].timezone,
+      interface_language: competingDrafts[winnerIndex].interfaceLanguage,
+      version: 4,
+    }]);
+
+    const raceUser = "driver-onboarding-version-race-owner";
+    const raceRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString, raceUser, [], "driver-onboarding-version-race-owner@example.com",
+      false, "org_driver_onboarding_version_race", "org:admin",
+    );
+    try {
+      const initialDrafts = [
+        { ...profileDraft, expectedVersion: 0, expectedOrganizationId: "org_driver_onboarding_version_race" },
+        { ...profileDraft, timezone: "Europe/London", expectedVersion: 0, expectedOrganizationId: "org_driver_onboarding_version_race" },
+      ];
+      const initialRace = await Promise.all(initialDrafts.map(payload => saveProfile(payload, raceRuntime)));
+      assert.deepEqual(initialRace.map(result => result.status).sort(), [200, 409]);
+      const initialWinner = initialRace.findIndex(result => result.status === 200);
+      assert.equal(initialRace[initialWinner].body.data.profile.version, 1);
+      const initialRows = await pool.query(
+        'SELECT p.timezone,p.version FROM business_profiles p JOIN tenant_memberships m ON m.tenant_id=p.tenant_id WHERE m.external_user_id=$1',
+        [raceUser],
+      );
+      assert.deepEqual(initialRows.rows, [{ timezone: initialDrafts[initialWinner].timezone, version: 1 }]);
+    } finally {
+      await raceRuntime.close();
+    }
+
+    // Same owner, two authorized organizations, and equal profile versions:
+    // a tab showing A must not overwrite B after the active session changes.
+    const scopeOwner = "driver-onboarding-two-organizations-owner";
+    const firstOrg = "org_driver_onboarding_scope_first";
+    const scopeTenantId = await createTenant(pool, scopeOwner, "First onboarding business");
+    await pool.query("UPDATE tenants SET clerk_organization_id=$2 WHERE id=$1", [scopeTenantId, firstOrg]);
+    await pool.query(
+      "INSERT INTO business_profiles (tenant_id,business_name,timezone,interface_language,version) VALUES ($1,$2,'Asia/Jerusalem','he',4)",
+      [scopeTenantId, "First onboarding business"],
+    );
+    const otherOrg = "org_driver_onboarding_other";
+    const otherTenantId = await createTenant(pool, scopeOwner, "Other onboarding business");
+    await pool.query("UPDATE tenants SET clerk_organization_id=$2 WHERE id=$1", [otherTenantId, otherOrg]);
+    await pool.query(
+      "INSERT INTO business_profiles (tenant_id,business_name,timezone,interface_language,version) VALUES ($1,$2,'Asia/Jerusalem','he',4)",
+      [otherTenantId, "Other onboarding business"],
+    );
+    const selectBusiness = (tenantId) => pool.query(
+      `INSERT INTO tenant_selections (external_user_id,tenant_id,version) VALUES ($1,$2,1)
+       ON CONFLICT (external_user_id) DO UPDATE SET tenant_id=EXCLUDED.tenant_id,version=tenant_selections.version+1`,
+      [scopeOwner, tenantId],
+    );
+    await selectBusiness(otherTenantId);
+    const otherRuntime = await createPostgresIntegrationApiRuntime(
+      connectionString, scopeOwner, [], "driver-onboarding-scope-owner@example.com", false, otherOrg, "org:admin",
+    );
+    const readBoth = async () => (await pool.query(
+      "SELECT tenant_id,business_name,timezone,interface_language,version FROM business_profiles WHERE tenant_id=ANY($1) ORDER BY tenant_id",
+      [[scopeTenantId, otherTenantId]],
+    )).rows;
+    try {
+      const before = await readBoth();
+      assert.deepEqual(before.map(row => row.version), [4, 4]);
+      const stale = await saveProfile({ ...profileDraft, businessName: "Stale organization draft", expectedVersion: 4, expectedOrganizationId: firstOrg }, otherRuntime);
+      assert.equal(stale.status, 409);
+      assert.equal(stale.body.code, "CONFLICT");
+      assert.deepEqual(await readBoth(), before);
+      const control = await saveProfile({ ...profileDraft, businessName: "Other onboarding business updated", expectedVersion: 4, expectedOrganizationId: otherOrg }, otherRuntime);
+      assert.equal(control.status, 200);
+      assert.equal(control.body.data.profile.version, 5);
+      const after = await readBoth();
+      assert.deepEqual(after[0], before[0]);
+      assert.equal(after[1].business_name, "Other onboarding business updated");
+      assert.equal(after[1].version, 5);
+    } finally {
+      await otherRuntime.close();
+    }
 
     await pool.query(
       `UPDATE tenants
@@ -6367,9 +6504,9 @@ async function verifyPostgresOnboardingBusinessProfileHttpRuntime(
     );
     assert.deepEqual(blockedEvidence.rows, [{
       businessName: profilePayload.businessName,
-      version: 1,
-      receipts: 1,
-      audits: 1,
+      version: 4,
+      receipts: 4,
+      audits: 4,
     }]);
   } finally {
     await runtime.close();
@@ -8460,6 +8597,7 @@ export async function verifyNodePostgresIntegration(
         pool,
       );
       await verifyContactOrganizationMutationsPostgres(pool);
+      await verifyTeamManagementPostgres(pool);
 
     } finally {
       await foundation.close();

@@ -53,8 +53,10 @@ export function createDurableOpenAiResponsesProvider(
         const time = now().getTime();
         if (!Number.isFinite(time) || time >= Date.parse(configuration.rateCard.validUntil)) return { outcome: "unavailable" };
         if (!await journal.admit(binding)) return { outcome: "unavailable" };
-        const count = await countOpenAiInputTokens(body, configuration, transport);
-        if (count === null) throw new AiResponseDeferredError();
+        const counting = await countOpenAiInputTokens(body, configuration, transport);
+        if (counting.outcome === "input-too-large") return { outcome: "policy-violation" };
+        if (counting.outcome === "unavailable") throw new AiResponseDeferredError();
+        const count = counting.inputTokens;
         const reservedMinorUnits = reserveOpenAiCost(count, configuration);
         const claim = await journal.claim({ binding, request, countedInputTokens: count, reservedMinorUnits, timeoutMs: configuration.timeoutMs });
         if (claim.status === "denied") return { outcome: "unavailable" };

@@ -38,6 +38,8 @@ export function WorkspaceOnboarding({
   const {
     businessProfileDraft,
     businessProfilePersistence,
+    businessProfileVersion,
+    businessProfileOrganizationId,
     saveBusinessProfileDraft,
   } = useWorkspaceDrafts();
   const [businessName, setBusinessName] = useState(
@@ -80,7 +82,7 @@ export function WorkspaceOnboarding({
   };
 
   const persistBusinessProfile = () => {
-    if (!canCaptureProfile || interfaceLanguage === "") {
+    if (!canCaptureProfile || interfaceLanguage === "" || isSaving) {
       return;
     }
 
@@ -98,7 +100,11 @@ export function WorkspaceOnboarding({
     }
 
     startSaving(async () => {
-      const result = await saveBusinessProfileAction(draft);
+      const result = await saveBusinessProfileAction({
+        ...draft,
+        expectedVersion: businessProfileVersion,
+        expectedOrganizationId: businessProfileOrganizationId,
+      });
       setSaveResult(result);
 
       if (result.status === "saved") {
@@ -109,6 +115,7 @@ export function WorkspaceOnboarding({
             interfaceLanguage: result.profile.interfaceLanguage,
           },
           "server",
+          result.profile.version,
         );
         setProfileSaved(true);
       }
@@ -176,6 +183,7 @@ export function WorkspaceOnboarding({
                   markChanged();
                 }}
                 autoComplete="organization"
+                disabled={isSaving}
                 required
               />
             </label>
@@ -183,6 +191,7 @@ export function WorkspaceOnboarding({
               <span>{messages.fields.timezone}</span>
               <select
                 value={timezone}
+                disabled={isSaving}
                 onChange={(event) => {
                   setTimezone(event.target.value);
                   markChanged();
@@ -199,6 +208,7 @@ export function WorkspaceOnboarding({
               <span>{messages.fields.interfaceLanguage}</span>
               <select
                 value={interfaceLanguage}
+                disabled={isSaving}
                 onChange={(event) => {
                   setInterfaceLanguage(
                     event.target.value as InterfaceLanguage | "",
