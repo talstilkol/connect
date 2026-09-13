@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { workspaceSectionPath } from "../../shared/workspace/navigation";
 
 import type {
   InterfaceLanguage,
@@ -120,7 +121,7 @@ export function PublicLandingPage({
           </h1>
           <p>{messages.hero.description}</p>
           <div className="hero-actions">
-            <Link href="/workspace" className="primary-button">
+            <Link href={workspaceSectionPath("dashboard", language)} className="primary-button">
               {messages.hero.workspaceAction}
               <span aria-hidden="true">{flowArrow}</span>
             </Link>
@@ -225,7 +226,7 @@ export function PublicLandingPage({
           <p>{messages.pricing.description}</p>
         </div>
         <Link
-          href="/workspace/decisions"
+          href={workspaceSectionPath("decisions", language)}
           className="primary-button"
         >
           {messages.pricing.action}
