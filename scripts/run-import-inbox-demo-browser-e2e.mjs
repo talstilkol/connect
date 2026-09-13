@@ -92,6 +92,10 @@ const server = await createServer({
 const callsNamed = (state, name) => state.calls.filter(call => call.name === name);
 async function stateOf(page) { return page.evaluate(() => window.__demo.state); }
 async function assertText(page, text) { await page.getByText(text, { exact: true }).first().waitFor(); }
+async function awaitInboxIdle(page) {
+  // Feedback can render before the React transition releases the composer.
+  await page.locator('.message-stream[aria-busy="false"]').waitFor();
+}
 async function filterInbox(page, messages, value) {
   await page.getByRole('searchbox', { name: messages.threadList.searchLabel, exact: true }).fill(value);
   await page.getByRole('button', { name: messages.threadList.applyFilters, exact: true }).click();
@@ -182,6 +186,7 @@ async function inboxScenario(page, language, scenario) {
     await composer.fill(importInboxDemoReply);
     await page.getByRole('button', { name: reply.send, exact: true }).click();
     await assertText(page, reply.uncertain);
+    await awaitInboxIdle(page);
     assert.equal(await composer.inputValue(), importInboxDemoReply);
     assert.equal(await composer.isDisabled(), true);
     await filterInbox(page, m, 'No demo matches');
@@ -189,11 +194,13 @@ async function inboxScenario(page, language, scenario) {
     assert.equal(await page.locator('.manual-reply-composer').count(), 0);
     await page.getByRole('button', { name: m.threadList.clear, exact: true }).click();
     await page.getByRole('button', { name: reply.retry, exact: true }).waitFor();
+    await awaitInboxIdle(page);
     assert.equal(await composer.inputValue(), importInboxDemoReply, 'The Inbox must preserve an uncertain draft after the composer unmounts');
     assert.equal(await composer.isDisabled(), true);
     await page.getByRole('button', { name: reply.retry, exact: true }).click();
     await assertText(page, reply.queued);
     await page.locator('.manual-reply-pending.queued').waitFor();
+    await awaitInboxIdle(page);
     const state = await stateOf(page);
     const sends = callsNamed(state, 'sendManualReplyAction');
     assert.equal(sends.length, 2);
@@ -208,21 +215,25 @@ async function inboxScenario(page, language, scenario) {
   await page.getByRole('button', { name: m.assignmentControls.assignSelf, exact: true }).click();
   if (scenario === 'inbox-conflict') {
     await assertText(page, m.actionFailures['state-conflict']);
+    await awaitInboxIdle(page);
     assert.equal(await composer.isDisabled(), true);
     assert.equal((await stateOf(page)).threads[0].conversation.version, 3);
     await page.getByRole('button', { name: m.assignmentControls.assignSelf, exact: true }).click();
   }
   await assertText(page, m.feedback.assigned);
+  await awaitInboxIdle(page);
   assert.equal(await composer.isEnabled(), true);
   const assignmentCalls = callsNamed(await stateOf(page), 'changeConversationAssignmentAction');
   assert.equal(assignmentCalls.length, scenario === 'inbox-conflict' ? 2 : 1);
   for (const call of assignmentCalls) assert.deepEqual(call.input, { conversationKey: importInboxDemoConversationKey, expectedVersion: 3, action: 'assign-self' });
   await page.getByRole('button', { name: m.assignmentControls.markRead, exact: true }).click();
   await assertText(page, m.feedback.markedRead);
+  await awaitInboxIdle(page);
   assert.equal(await page.getByRole('button', { name: m.assignmentControls.markRead, exact: true }).count(), 0);
   assert.deepEqual(callsNamed(await stateOf(page), 'markConversationReadAction')[0].input, { conversationKey: importInboxDemoConversationKey, expectedVersion: 4 });
   await page.locator('.conversation-record').filter({ hasText: 'Demo recipient 2' }).click();
   await page.locator('.message-stream').getByText('Demo inbound message 2', { exact: true }).waitFor();
+  await awaitInboxIdle(page);
   assert.equal(await composer.isDisabled(), true);
   assert.equal(callsNamed(await stateOf(page), 'loadConversationThreadAction').at(-1).input, importInboxDemoOtherConversationKey);
   await filterInbox(page, m, 'Demo recipient 1');
@@ -234,6 +245,7 @@ async function inboxScenario(page, language, scenario) {
   await page.getByRole('button', { name: reply.send, exact: true }).click();
   await assertText(page, reply.queued);
   await page.locator('.manual-reply-pending.queued').waitFor();
+  await awaitInboxIdle(page);
   const state = await stateOf(page);
   const sends = callsNamed(state, 'sendManualReplyAction');
   assert.equal(sends.length, 1);
@@ -262,20 +274,26 @@ try {
       page.setDefaultTimeout(15_000);
       page.on('pageerror', error => errors.push({ language, scenario, message: error.message }));
       page.on('request', request => { if (new URL(request.url()).origin !== origin) forbiddenRequests.push(request.url()); });
-      await restrictAcceptancePage(page, origin);
-      await page.goto(origin + '/');
-      await page.waitForFunction(() => typeof window.__renderDemo === 'function');
-      const kind = scenario.startsWith('import') ? 'import' : 'inbox';
-      await page.evaluate(({ kind, language, scenario }) => window.__renderDemo(kind, language, scenario), { kind, language, scenario });
-      if (kind === 'import') await importScenario(page, language, scenario);
-      else await inboxScenario(page, language, scenario);
-      assert.equal(await page.locator('main').getAttribute('lang'), language);
-      assert.equal(await page.locator('main').getAttribute('dir'), language === 'en' ? 'ltr' : 'rtl');
-      if (language === 'en' && ['import-resume', 'reply-uncertain'].includes(scenario)) {
-        await page.screenshot({ path: outputDirectory + engine + '-' + scenario + '.png', fullPage: true });
+      try {
+        await restrictAcceptancePage(page, origin);
+        await page.goto(origin + '/');
+        await page.waitForFunction(() => typeof window.__renderDemo === 'function');
+        const kind = scenario.startsWith('import') ? 'import' : 'inbox';
+        await page.evaluate(({ kind, language, scenario }) => window.__renderDemo(kind, language, scenario), { kind, language, scenario });
+        if (kind === 'import') await importScenario(page, language, scenario);
+        else await inboxScenario(page, language, scenario);
+        assert.equal(await page.locator('main').getAttribute('lang'), language);
+        assert.equal(await page.locator('main').getAttribute('dir'), language === 'en' ? 'ltr' : 'rtl');
+        if (language === 'en' && ['import-resume', 'reply-uncertain'].includes(scenario)) {
+          await page.screenshot({ path: outputDirectory + engine + '-' + scenario + '.png', fullPage: true });
+        }
+        scenarios.push({ language, scenario, status: 'passed', state: await stateOf(page) });
+      } catch (error) {
+        console.error("Import/inbox demo scenario failed: " + JSON.stringify({ engine, language, scenario }));
+        throw error;
+      } finally {
+        await page.close();
       }
-      scenarios.push({ language, scenario, status: 'passed', state: await stateOf(page) });
-      await page.close();
     }
   }
   assert.deepEqual(errors, [], 'Real components must not throw browser errors');
