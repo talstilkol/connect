@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
-import { chromium } from 'playwright';
+import { launchAcceptanceBrowser, restrictAcceptancePage } from './browser-acceptance.mjs';
 import { createServer } from 'vite';
 import { readContactDirectoryMessages } from '../features/contacts/contactDirectoryMessages.ts';
 
@@ -58,13 +58,13 @@ let browser;
 try {
  await server.listen();
  const address=server.httpServer.address();assert.ok(address&&typeof address!=='string');
- browser=await chromium.launch({headless:true});
+ browser=await launchAcceptanceBrowser();
  let scenarios=0;const errors=[];
  const directory=role=>({version:1,selectionRequired:false,options:[{selectionKey:'contact-test-selection',displayName:'Connect',role,selected:true}]});
  const cases=[['viewer',directory('viewer'),false],['agent',directory('agent'),false],['owner',directory('owner'),true],['manager',directory('manager'),true],['missing',null,false],['unselected',{...directory('owner'),options:[{...directory('owner').options[0],selected:false}]},false],['selection-required',{...directory('owner'),selectionRequired:true},false],['ambiguous',{...directory('owner'),options:[...directory('owner').options,...directory('manager').options]},false]];
  for(const language of ['he','en','ar']) for(const [name,selection,canWrite] of cases) {
   const page=await browser.newPage();page.on('pageerror',error=>errors.push(error.message));
-  await page.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
+  await restrictAcceptancePage(page, `http://127.0.0.1:${address.port}`);
   await page.goto(`http://127.0.0.1:${address.port}/`);
   await page.waitForFunction(()=>typeof window.__renderContacts==='function');
   await page.evaluate(({language,selection})=>window.__renderContacts(language,selection),{language,selection});

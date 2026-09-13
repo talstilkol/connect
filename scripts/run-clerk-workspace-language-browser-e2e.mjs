@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
-import { chromium } from "playwright";
+import { launchAcceptanceBrowser, restrictAcceptancePage } from "./browser-acceptance.mjs";
 import { createServer } from "vite";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -33,7 +33,7 @@ function Check() {
 createRoot(document.getElementById("root")).render(<Check />);`;
 
 const server = await createServer({
-  root, configFile: false, appType: "custom",
+  root, configFile: false, envFile: false, appType: "custom",
   plugins: [react(), {
     name: "connect-clerk-workspace-language-acceptance",
     resolveId(id) { if (id === entry) return id; },
@@ -51,8 +51,9 @@ const server = await createServer({
 let browser;
 try {
   await server.listen();
-  browser = await chromium.launch({ headless: true });
+  browser = await launchAcceptanceBrowser();
   const page = await browser.newPage();
+  await restrictAcceptancePage(page, `http://127.0.0.1:${server.httpServer.address().port}`);
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}`);

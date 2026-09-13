@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
-import { chromium } from 'playwright';
+import { launchAcceptanceBrowser, restrictAcceptancePage } from './browser-acceptance.mjs';
 import { createServer } from 'vite';
 import { readWorkspaceSetupMessages } from '../shared/i18n/workspaceSetup.ts';
 
@@ -61,13 +61,13 @@ try {
   await server.listen();
   const address = server.httpServer.address();
   assert.ok(address && typeof address !== 'string');
-  browser = await chromium.launch({ headless: true });
+  browser = await launchAcceptanceBrowser();
   const errors = [];
   let scenarios = 0;
   for (const language of ['he', 'en', 'ar']) {
     const page = await browser.newPage();
     page.on('pageerror', error => errors.push(error.message));
-    await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
+    await restrictAcceptancePage(page, `http://127.0.0.1:${address.port}`);
     await page.goto(`http://127.0.0.1:${address.port}/?language=${language}`, { waitUntil: 'networkidle' });
     const m = readWorkspaceSetupMessages(language).onboarding;
     const name = page.getByRole('textbox', { name: m.fields.businessName, exact: true });

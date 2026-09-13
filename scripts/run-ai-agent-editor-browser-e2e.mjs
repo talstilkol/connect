@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
-import { chromium } from 'playwright';
+import { launchAcceptanceBrowser, restrictAcceptancePage } from './browser-acceptance.mjs';
 import { createServer } from 'vite';
 import { runtimeFixture } from '../tests/fixtures/ai-runtime.mjs';
 import { knowledgeFixture } from '../tests/fixtures/knowledge-ingestion.mjs';
@@ -77,8 +77,9 @@ try {
   await server.listen();
   const address = server.httpServer.address();
   assert.ok(address && typeof address !== 'string');
-  browser = await chromium.launch({ headless: true });
+  browser = await launchAcceptanceBrowser();
   const page = await browser.newPage();
+  await restrictAcceptancePage(page, `http://127.0.0.1:${address.port}`);
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   const messages = readAiAgentMessages('en');

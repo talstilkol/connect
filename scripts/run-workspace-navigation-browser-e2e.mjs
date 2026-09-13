@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
-import { chromium } from "playwright";
+import { launchAcceptanceBrowser, restrictAcceptancePage } from "./browser-acceptance.mjs";
 
 // Exercise the built application with its existing configuration-required state.
 // This runner neither loads environment files nor creates users or business data.
@@ -64,11 +64,10 @@ try {
   });
   const { port } = server.address();
   const origin = `http://127.0.0.1:${port}`;
-  browser = await chromium.launch({ headless: true });
+  browser = await launchAcceptanceBrowser();
   page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.route("**/*", (route) => new URL(route.request().url()).origin === origin
-    ? route.continue() : route.abort());
+  await restrictAcceptancePage(page, origin);
 
   for (const language of ["he", "en", "ar"]) {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -112,9 +111,32 @@ try {
     assert.equal(await sidebar.isVisible(), true, `${language}: desktop navigation remains visible`);
     assert.equal(await page.locator(".mobile-overlay").count(), 0);
     assert.equal(await sidebar.getAttribute("aria-modal"), null);
+
+    // Exercise actual built CSS at a narrow phone width. The configuration-
+    // required editor is present but disabled; this is not authenticated editing.
+    await page.setViewportSize({ width: 320, height: 844 });
+    const aiResponse = await page.goto(`${origin}/workspace/ai?lang=${language}`);
+    assert.equal(aiResponse.status(), 200);
+    await page.locator(".ai-agent-workspace").waitFor();
+    const layout = await page.evaluate(() => ({
+      viewport: window.innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      boxes: [...document.querySelectorAll(
+        ".ai-agent-directory,.ai-agent-editor,.ai-readiness-card,.ai-knowledge-card,.ai-agent-fields input,.ai-agent-fields textarea,.ai-agent-fields select,.knowledge-upload-panel input[type=file]",
+      )].map(element => {
+        const rectangle = element.getBoundingClientRect();
+        return { element: element.id || element.className || element.tagName,
+          width: rectangle.width, left: rectangle.left, right: rectangle.right };
+      }),
+    }));
+    assert.ok(layout.boxes.length > 4, `${language}: AI layout must include its actual cards and input controls`);
+    assert.ok(layout.scrollWidth <= layout.viewport + 1,
+      `${language}: 320px AI workspace must not overflow horizontally (${JSON.stringify(layout)})`);
+    assert.deepEqual(layout.boxes.filter(box => box.width <= 0 || box.left < -1 || box.right > layout.viewport + 1), [],
+      `${language}: AI cards and controls must fit without being clipped`);
   }
   assert.deepEqual(errors, []);
-  console.log("Workspace navigation browser acceptance passed: Hebrew, English, Arabic; hidden focus, dialog focus cycle, Escape, backdrop and desktop resize.");
+  console.log("Workspace navigation browser acceptance passed: Hebrew, English, Arabic; hidden focus, dialog focus cycle, Escape, backdrop, desktop resize and unclipped 320px AI workspace cards and controls.");
 } catch (error) {
   console.error("Navigation browser diagnostic:", JSON.stringify({
     errors,
