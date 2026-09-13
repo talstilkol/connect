@@ -9,6 +9,7 @@ import { readContactImportMessages } from '../features/contacts/contactImportMes
 import { readConversationMessages } from '../features/conversations/conversationMessages.ts';
 import { readManualReplyMessages } from '../features/conversations/manualReplyMessages.ts';
 import { parseManualReplyRequest } from '../shared/domain/manualReply.ts';
+import { createContactDemoXlsx } from '../tests/fixtures/contact-import-demo-xlsx.mjs';
 import {
   importInboxDemoAccounts, importInboxDemoCsv, importInboxDemoFileName, importInboxDemoReply,
   importInboxDemoConversationKey, importInboxDemoOtherConversationKey,
@@ -55,7 +56,7 @@ window.__renderDemo = (kind,language,scenario) => {
     React.createElement('p', null, 'LOCAL DEMO ONLY · '+importInboxDemoAccounts.owner.email),
     kind === 'import' ? React.createElement(ImportDemo,{language}) : React.createElement(ConversationInbox,{
       authEnabled:true,language,initialInbox:window.__demo.inbox(),initialStatus:'ready',
-      initialAiReplyApprovals:{approvals:[],canDecide:false},initialAiReplyApprovalStatus:'ready'
+      initialAiReplyApprovals:{approvals:window.__demo.state.approvals,canDecide:window.__demo.state.canDecide},initialAiReplyApprovalStatus:'ready'
     })
   ));
 };`;
@@ -101,7 +102,9 @@ async function importScenario(page, language, scenario) {
   await upload.setInputFiles({ name: 'unsupported-demo.txt', mimeType: 'text/plain', buffer: Buffer.from('demo') });
   await assertText(page, m.sourceFailures['unsupported-format']);
   assert.equal((await stateOf(page)).calls.length, 0, 'Unsupported files cannot begin an import');
-  await upload.setInputFiles({ name: importInboxDemoFileName, mimeType: 'text/csv', buffer: Buffer.from(importInboxDemoCsv) });
+  const sourceFile = scenario === 'import-xlsx' ? { name: 'connect-import-inbox-demo.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: createContactDemoXlsx() }
+    : { name: importInboxDemoFileName, mimeType: 'text/csv', buffer: Buffer.from(importInboxDemoCsv) };
+  await upload.setInputFiles(sourceFile);
   await assertText(page, m.mapping.rowsFound(7));
   const mapping = page.locator('.mapping-grid select');
   await mapping.nth(0).selectOption('0');
@@ -125,7 +128,7 @@ async function importScenario(page, language, scenario) {
   const state = await stateOf(page);
   assert.equal(state.job.status, 'completed');
   const expectedStart = {
-    fileName: importInboxDemoFileName, sourceDigest: createHash('sha256').update(importInboxDemoCsv).digest('hex'),
+    fileName: sourceFile.name, sourceDigest: createHash('sha256').update(sourceFile.buffer).digest('hex'),
     totalRows: 7, mapping: { phoneNumber: 0, firstName: 1, lastName: 2, email: 3, company: 4 },
   };
   const starts = callsNamed(state, 'startContactImportAction');
@@ -149,6 +152,32 @@ async function inboxScenario(page, language, scenario) {
   const reply = readManualReplyMessages(language);
   const composer = page.getByRole('textbox', { name: reply.label, exact: true });
   await page.locator('.conversation-stage h2').getByText('Demo recipient 1', { exact: true }).waitFor();
+  if (scenario.startsWith('ai-')) {
+    const card=page.locator('.ai-approval-card').filter({hasText:'Demo proposed answer 1'});
+    await card.waitFor();assert.equal(await page.locator('.ai-approval-card').count(),2);
+    if (scenario==='ai-readonly') {
+      for(const button of await page.locator('.ai-approval-card button').all())assert.equal(await button.isDisabled(),true);
+      assert.equal(callsNamed(await stateOf(page),'decideAiReplyApprovalAction').length,0);return;
+    }
+    const approve=()=>card.getByRole('button',{name:m.messageView.approve,exact:true});
+    await approve().click();await page.waitForFunction(()=>window.__demo.state.approvalPending);
+    for(const button of await page.locator('.ai-approval-card button').all())assert.equal(await button.isDisabled(),true);
+    await page.evaluate(()=>window.__demo.state.releaseApproval());await assertText(page,m.aiApprovalFailures['server-error']);
+    assert.equal(await page.locator('.ai-approval-card').count(),2);
+    await approve().click();await page.waitForFunction(()=>window.__demo.state.approvalPending);
+    await page.evaluate(()=>window.__demo.state.releaseApproval());await assertText(page,m.feedback.aiApproved);await card.waitFor({state:'hidden'});
+    await page.locator('.ai-approval-card').getByRole('button',{name:m.messageView.reject,exact:true}).click();
+    await page.waitForFunction(()=>window.__demo.state.approvalPending);await page.evaluate(()=>window.__demo.state.releaseApproval());
+    await assertText(page,m.feedback.aiRejected);assert.equal(await page.locator('.ai-approval-card').count(),0);
+    const state=await stateOf(page),decisions=callsNamed(state,'decideAiReplyApprovalAction');
+    assert.deepEqual(decisions.map(call=>call.input),[
+      {outboxKey:`ai_reply_outbox_v1_${'a'.repeat(64)}`,expectedVersion:1,decision:'approve'},
+      {outboxKey:`ai_reply_outbox_v1_${'a'.repeat(64)}`,expectedVersion:1,decision:'approve'},
+      {outboxKey:`ai_reply_outbox_v1_${'b'.repeat(64)}`,expectedVersion:1,decision:'reject'},
+    ]);
+    assert.deepEqual(state.approvalDecisions.map(row=>row.status),['ready-for-delivery','rejected']);
+    assert.equal(state.acceptedReplies.length,0,'Approving AI prepares delivery; it is not a manual send receipt');return;
+  }
   if (scenario === 'reply-uncertain') {
     await composer.fill(importInboxDemoReply);
     await page.getByRole('button', { name: reply.send, exact: true }).click();
@@ -228,7 +257,7 @@ try {
   const origin = `http://127.0.0.1:${address.port}`;
   browser = await launchAcceptanceBrowser();
   for (const language of ['he', 'en', 'ar']) {
-    for (const scenario of ['import-success', 'import-resume', 'inbox-success', 'inbox-conflict', 'reply-uncertain']) {
+    for (const scenario of ['import-success', 'import-resume', 'import-xlsx', 'inbox-success', 'inbox-conflict', 'reply-uncertain','ai-decision','ai-readonly']) {
       const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
       page.setDefaultTimeout(15_000);
       page.on('pageerror', error => errors.push({ language, scenario, message: error.message }));
@@ -253,10 +282,10 @@ try {
   assert.deepEqual(forbiddenRequests, [], 'The demo must not attempt external network requests');
   await writeFile(outputDirectory + engine + '-results.json', JSON.stringify({
     suite: 'import-inbox-demo', engine, browserVersion: browser.version(), accounts: importInboxDemoAccounts,
-    scope: 'Real React components and CSV parser; local action boundary; no provider accounts, real authentication, database persistence or message delivery.',
+    scope: 'Real React components and CSV/XLSX parsers; local action boundary; no provider accounts, real authentication, database persistence or message delivery.',
     viewport: { width: 1280, height: 900 }, scenarios, errors, forbiddenRequests,
   }, null, 2) + '\n');
-  console.log(`Import/inbox demo browser acceptance passed: ${scenarios.length} scenarios; 3 languages; CSV mapping/chunks/resume; Inbox assignment/read/filter; manual reply acknowledgement loss and exact retry without duplicate delivery.`);
+  console.log(`Import/inbox demo browser acceptance passed: ${scenarios.length} scenarios; 3 languages; CSV/XLSX mapping/chunks/resume; Inbox assignment/read/filter; manual reply acknowledgement loss and exact retry without duplicate delivery.`);
 } finally {
   await browser?.close();
   await server.close();

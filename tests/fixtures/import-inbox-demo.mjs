@@ -38,6 +38,12 @@ function conversation(key, recipient) {
 export function createImportInboxDemoBoundary(scenario) {
   const state = {
     calls: [], failureConsumed: false, importedIds: [], acceptedReplies: [],
+    approvals: scenario.startsWith('ai-') ? ['a','b'].map((character,index)=>({
+      outboxKey:`ai_reply_outbox_v1_${character.repeat(64)}`, conversationKey:importInboxDemoConversationKey,
+      replyText:`Demo proposed answer ${index+1}`, groundedSourceCount:2, groundingScoreBasisPoints:9000,
+      version:1, createdAt:importInboxDemoAt,
+    })) : [],
+    canDecide:scenario==='ai-decision', approvalDecisions:[], approvalPending:false,
     job: { id: 71, fileName: importInboxDemoFileName, totalRows: 7, processedRows: 0, createdRows: 0,
       updatedRows: 0, unchangedRows: 0, rejectedRows: 0, duplicateRows: 0, status: 'processing' },
     threads: [importInboxDemoConversationKey, importInboxDemoOtherConversationKey].map((key, index) => ({
@@ -62,7 +68,10 @@ export function createImportInboxDemoBoundary(scenario) {
 
   async function action(name, input) {
     state.calls.push({ name, input: clone(input) });
-    if (name === 'startContactImportAction') return { status: 'ready', job: clone(state.job) };
+    if (name === 'startContactImportAction') {
+      state.job.fileName = input.fileName;
+      return { status: 'ready', job: clone(state.job) };
+    }
     if (name === 'processContactImportChunkAction') {
       if (scenario === 'import-resume' && input.rows[0]?.sourceRowNumber === 8 && !state.failureConsumed) {
         state.failureConsumed = true;
@@ -82,7 +91,19 @@ export function createImportInboxDemoBoundary(scenario) {
       state.job.status = state.importedIds.length === 7 ? 'completed' : 'processing';
       return { status: 'processed', job: clone(state.job), contacts };
     }
-    if (name === 'loadAiReplyApprovalsAction') return { status: 'loaded', directory: { approvals: [], canDecide: false } };
+    if (name === 'loadAiReplyApprovalsAction') return { status: 'loaded', directory: { approvals: clone(state.approvals), canDecide: state.canDecide } };
+    if (name === 'decideAiReplyApprovalAction') {
+      if (!state.canDecide) return { status:'permission-denied' };
+      state.approvalPending=true;
+      await new Promise(resolve=>{state.releaseApproval=resolve;});
+      state.approvalPending=false;delete state.releaseApproval;
+      if (!state.failureConsumed) { state.failureConsumed=true;throw Error('Controlled AI decision acknowledgement failure before saving'); }
+      const approval=state.approvals.find(row=>row.outboxKey===input.outboxKey&&row.version===input.expectedVersion);
+      if (!approval) return { status:'state-conflict' };
+      const decision={outboxKey:approval.outboxKey,status:input.decision==='approve'?'ready-for-delivery':'rejected',version:2};
+      state.approvals=state.approvals.filter(row=>row.outboxKey!==approval.outboxKey);state.approvalDecisions.push(decision);
+      return { status:'decided',approval:decision };
+    }
     if (name === 'refreshInboxAction') return { status: 'refreshed', inbox: inbox(input.filters, input.selectedConversationKey) };
     const key = typeof input === 'string' ? input : input?.conversationKey;
     const thread = state.threads.find((candidate) => candidate.conversation.conversationKey === key);

@@ -8,6 +8,7 @@ export const acceptanceSuites = Object.freeze([
   "workspace-navigation", "ai-agent-editor", "clerk-workspace-language",
   "team-management", "business-profile", "contact-permissions", "meta-dialog",
   "template-campaign-demo", "import-inbox-demo", "knowledge-billing-demo", "tenant-reports-demo",
+  "contact-management-demo", "meta-lifecycle-media-demo", "bot-admin-demo", "onboarding-team-demo", "admin-tenant-demo",
 ]);
 
 export function acceptanceRunResult(engine, suite, result) {

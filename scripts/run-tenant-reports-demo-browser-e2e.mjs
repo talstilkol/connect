@@ -80,11 +80,13 @@ try {
     const {page,context}=await open(language);
     const tm=readWorkspaceShellMessages(language).tenant,rm=readOperationalReportMessages(language);
     const selector=page.getByRole('combobox',{name:tm.switchLabel,exact:true});
+    // ICU data can differ between Node and the browser, especially Arabic digits.
+    const formattedNumber = value => page.evaluate(({locale,value}) => new Intl.NumberFormat(locale).format(value), {locale:rm.locale,value});
     const metric=()=>page.locator('.report-metric').filter({has:page.locator('span').getByText(rm.campaigns.total,{exact:true})}).locator('strong');
     const show=()=>page.getByRole('button',{name:rm.toolbar.show,exact:true});
     assert.equal(await selector.inputValue(),tenants[0].selectionKey);
     for(const tenant of tenants)assert.equal(await selector.locator('option').filter({hasText:tenant.displayName+' — '+tm.roles[tenant.role]}).count(),1);
-    assert.equal(await metric().textContent(),new Intl.NumberFormat(rm.locale).format(1));passed(language,'two-demo-tenants-roles-and-initial-report');
+    assert.equal(await metric().textContent(),await formattedNumber(1));passed(language,'two-demo-tenants-roles-and-initial-report');
 
     await page.evaluate(()=>window.__tenantReportsDemo.selectMode='pending');
     await selector.selectOption(tenants[1].selectionKey);await page.waitForFunction(()=>!!window.__tenantReportsDemo.resolveSelection);
@@ -104,14 +106,14 @@ try {
     await page.locator('#tenant-workspace-status').getByText(tm.failures['temporarily-unavailable'],{exact:true}).waitFor();
     assert.equal(await selector.inputValue(),tenants[0].selectionKey);
     assert.deepEqual(await page.evaluate(()=>({active:window.__tenantReportsDemo.activeKey,committed:window.__tenantReportsDemo.committedKey,refreshes:window.__tenantReportsDemo.refreshes,navigationCount:window.__tenantReportsDemo.navigationCount})),{active:tenants[0].selectionKey,committed:tenants[1].selectionKey,refreshes:3,navigationCount:1});
-    assert.equal(await metric().textContent(),new Intl.NumberFormat(rm.locale).format(1));passed(language,'setActive-failure-keeps-active-view-and-refreshes-without-false-rollback');
+    assert.equal(await metric().textContent(),await formattedNumber(1));passed(language,'setActive-failure-keeps-active-view-and-refreshes-without-false-rollback');
 
     await page.evaluate(()=>window.__tenantReportsDemo.activationMode='ready');
     await selector.selectOption(tenants[1].selectionKey);
     await page.waitForFunction(key=>window.__tenantReportsDemo?.activeKey===key&&window.__tenantReportsDemo?.navigationCount===2,tenants[1].selectionKey);
     await page.getByTestId('active-demo-tenant').getByText(tenants[1].displayName,{exact:true}).waitFor();
     assert.equal(await selector.inputValue(),tenants[1].selectionKey);
-    assert.equal(await metric().textContent(),new Intl.NumberFormat(rm.locale).format(3));
+    assert.equal(await metric().textContent(),await formattedNumber(3));
     assert.deepEqual(await page.evaluate(()=>window.__tenantReportsDemo.selectCalls.at(-1)),{selectionKey:tenants[1].selectionKey,expectedVersion:2});
     assert.deepEqual(await page.evaluate(()=>window.__tenantReportsDemo.activationCalls),[tenants[1].organizationId,tenants[1].organizationId]);passed(language,'explicit-retry-switches-organization-and-reloads-beta-report');
 
@@ -122,20 +124,20 @@ try {
     assert.equal(await page.getByRole('button',{name:rm.toolbar.loading,exact:true}).isDisabled(),true);
     assert.deepEqual(await page.evaluate(()=>window.__tenantReportsDemo.reportCalls),[{input:{startDate:'2026-07-10',endDate:'2026-07-20'},tenantKey:tenants[1].selectionKey}]);
     await page.evaluate(report=>window.__tenantReportsDemo.resolveReport({status:'loaded',report}),reports[1].updated);
-    await show().waitFor();assert.equal(await metric().textContent(),new Intl.NumberFormat(rm.locale).format(4));
+    await show().waitFor();assert.equal(await metric().textContent(),await formattedNumber(4));
     assert.equal(await from.inputValue(),'2026-07-10');assert.equal(await to.inputValue(),'2026-07-20');passed(language,'date-range-read-is-pending-then-displays-beta-result');
 
     for(const status of ['permission-denied','server-error']) {
       await page.evaluate(value=>window.__tenantReportsDemo.reportMode=value,status);await show().click();
       await page.getByRole('alert').getByText(rm.actionFailures[status],{exact:true}).waitFor();
-      assert.equal(await metric().textContent(),new Intl.NumberFormat(rm.locale).format(4));
+      assert.equal(await metric().textContent(),await formattedNumber(4));
       assert.equal(await show().isEnabled(),true);passed(language,'report-'+status+'-does-not-replace-last-loaded-result');
     }
     const callsBeforeInvalid=await page.evaluate(()=>window.__tenantReportsDemo.reportCalls.length);
     await from.fill('2026-08-01');assert.equal(await from.evaluate(input=>input.checkValidity()),false);await show().click();
     assert.equal(await page.evaluate(()=>window.__tenantReportsDemo.reportCalls.length),callsBeforeInvalid);passed(language,'invalid-date-range-blocked-before-action');
     await from.fill('2026-07-10');await page.evaluate(()=>window.__tenantReportsDemo.reportMode='loaded');await show().click();
-    await page.getByRole('alert').waitFor({state:'hidden'});assert.equal(await metric().textContent(),new Intl.NumberFormat(rm.locale).format(4));passed(language,'successful-report-retry-clears-error');
+    await page.getByRole('alert').waitFor({state:'hidden'});assert.equal(await metric().textContent(),await formattedNumber(4));passed(language,'successful-report-retry-clears-error');
     await page.screenshot({path:`${evidence}${language}-tenant-beta-reports.png`,fullPage:true});
     await context.close();
 

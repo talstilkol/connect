@@ -1,6 +1,6 @@
 # React browser acceptance
 
-1. The credential-free React regression matrix runs the seven existing suites plus four deterministic demo journeys in Chromium, Firefox and WebKit: **33 required runs**. A missing engine, timeout, failing assertion or missing/mismatched browser evidence fails acceptance. There is no fallback to another engine.
+1. The credential-free React regression matrix runs the seven existing suites plus nine deterministic demo journeys in Chromium, Firefox and WebKit: **48 required runs**. A missing engine, timeout, failing assertion or missing/mismatched browser evidence fails acceptance. There is no fallback to another engine.
 
 1.1 Install the browser versions matched to the repository's locked Playwright dependency:
 
@@ -14,7 +14,7 @@ node node_modules/playwright/cli.js install chromium firefox webkit
 npm run e2e:react-browser-matrix
 ```
 
-1.3 For a single-engine diagnostic run, set `CONNECT_E2E_BROWSER=firefox` or `CONNECT_E2E_BROWSER=webkit`. Each individual `e2e:*` command also accepts that variable and otherwise retains Chromium as its default. A narrowed run is recorded as eleven runs, never as a full matrix.
+1.3 For a single-engine diagnostic run, set `CONNECT_E2E_BROWSER=firefox` or `CONNECT_E2E_BROWSER=webkit`. Each individual `e2e:*` command also accepts that variable and otherwise retains Chromium as its default. A narrowed run is recorded as sixteen runs, never as a full matrix.
 
 2. Results are written to `output/playwright/react-browser-matrix.json`: engine and actual browser version, host, Node version, process exit status and full per-suite diagnostics. The file is replaced by the next run; preserve a copy with the source revision when preparing a release.
 
@@ -28,9 +28,14 @@ npm run e2e:react-browser-matrix
 | Contact permissions | Three languages, eight membership/selection states, role-loss behavior |
 | Meta dialog | Actual dialog; keyboard traversal through native disclosure summaries to footer actions and focus restoration |
 | Template and campaign demo | Actual editors with local owner/viewer accounts; template save/retry, simulated submit/sync, campaign scheduling and activate/pause/resume/cancel with version conflicts |
-| Import and Inbox demo | Actual CSV parsing/mapping and chunk resumption; thread/filter/assignment/read controls and original-intent retry after a simulated lost manual-reply acknowledgement |
+| Import and Inbox demo | Actual CSV/XLSX parsing/mapping and chunk resumption; thread/filter/assignment/read controls, original-intent manual-reply retry and pending/retry/approve/reject/read-only AI approval controls |
 | Knowledge and billing demo | File payload, pending controls and source-status callback; checkout preparation, synthetic SDK transaction/locale, stale-authority rejection, unknown-state controls and viewer restrictions |
 | Tenant and reports demo | Local business selection and report actions with explicit demo identities; see the runner's scenario receipt for exact branches |
+| Contact management demo | Contact create/update, overlapping pagination, list/tag assignment revisions, explicit fixture consent/withdrawal, errors/retry and viewer controls |
+| Meta lifecycle and media demo | Actual sync/history/echo views, controlled signup SDK lifecycle, Blob download and versioned scan/cleanup requests with local provider responses |
+| Bot and admin demo | Actual Bot save/publish and admin decision/delivery-policy controls with controlled action results and deterministic fixtures |
+| Onboarding and team demo | Empty-profile onboarding, team invitations and invitation acceptance with local actions; no email delivery or real identity provisioning |
+| Admin tenant demo | Local administrator profile and subscription controls with versioned action results; no real entitlement or account is changed |
 
 3. Browser network traffic is restricted to the **exact owned loopback origin**, including its port. Knowledge/billing additionally intercepts the exact Paddle SDK URL with a synthetic local JavaScript response; it never forwards that request to the CDN. Vite component harnesses disable environment-file loading and all suites reject ambient Clerk credentials. No real account, invitation, WhatsApp message or product data is changed.
 
@@ -40,8 +45,8 @@ npm run e2e:react-browser-matrix
 
 3.2 Playwright's WebKit is browser-engine coverage, not acceptance of Apple's installed Safari or a physical iPhone. This matrix does not claim physical Android/iOS testing, touch behavior, installation, full feature coverage or all operating systems. Workspace navigation and Meta dialog use a mobile-width viewport and keyboard input; navigation also resizes to desktop.
 
-3.3 The bot graph's separate browser harness and the account-bound invitation workflow are outside these eleven suites. Their existing scope and activation requirements remain unchanged.
+3.3 The older standalone bot graph harness and account-bound invitation workflow are outside these sixteen suites. The new bot/admin and onboarding/team fixtures provide separate, credential-free acceptance of their actual React controls. They do not replace a real invitation lifecycle or bot delivery acceptance.
 
-4. CI installs all three locked browser engines with their Linux dependencies and runs the same 33-case matrix after the complete tests and builds. Local macOS results and future Linux CI results must be identified separately; neither implies physical-device acceptance.
+4. CI installs all three locked browser engines with their Linux dependencies and runs the same 48-case matrix after the complete tests and builds. Local macOS results and future Linux CI results must be identified separately; neither implies physical-device acceptance.
 
 4.1 CI logs one compact `CONNECT_BROWSER_RESULT` record per suite with engine, browser version and status. The detailed local report is not uploaded by this workflow.

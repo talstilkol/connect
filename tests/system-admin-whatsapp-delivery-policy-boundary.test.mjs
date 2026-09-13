@@ -3,6 +3,28 @@ import {
   readFile,
 } from "node:fs/promises";
 import test from "node:test";
+import { canonicalUtcDateTime } from "../features/admin/whatsappPolicyEvidenceDateTime.ts";
+
+test("policy evidence accepts browser-normalized minute precision as UTC with zero seconds", () => {
+  assert.equal(canonicalUtcDateTime("2026-08-16T10:00"), "2026-08-16T10:00:00.000Z");
+  assert.equal(canonicalUtcDateTime("2026-08-16T11:00"), "2026-08-16T11:00:00.000Z");
+  assert.equal(canonicalUtcDateTime("2024-02-29T23:59"), "2024-02-29T23:59:00.000Z");
+});
+
+test("policy evidence preserves explicit seconds without interpreting a local timezone", () => {
+  assert.equal(canonicalUtcDateTime("2026-08-16T10:00:00"), "2026-08-16T10:00:00.000Z");
+  assert.equal(canonicalUtcDateTime("2026-08-16T10:00:45"), "2026-08-16T10:00:45.000Z");
+});
+
+test("policy evidence rejects impossible dates and unsupported formats without throwing", () => {
+  for (const value of [
+    null, undefined, {}, "", "2026-02-29T10:00", "2026-04-31T10:00:01",
+    "2026-13-01T10:00", "2026-08-16T24:00", "2026-08-16T10:60",
+    "2026-08-16T10:00:60", "2026-08-16T10:00:00.123", "2026-08-16T10:00Z",
+    "2026-08-16T10:00+03:00", "2026-08-16 10:00", "2026-8-16T10:00",
+    " 2026-08-16T10:00", "2026-08-16T10:00 ",
+  ]) assert.equal(canonicalUtcDateTime(value), null);
+});
 
 const actionsUrl = new URL(
   "../server/campaigns/systemAdminWhatsappDeliveryPolicyActions.ts",
