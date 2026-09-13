@@ -353,5 +353,5 @@ jobs:
         run: npm test
       - name: Install the locked Playwright browser engines
         run: node node_modules/playwright/cli.js install --with-deps chromium firefox webkit
-      - name: Verify seven credential-free React suites in all three browser engines
+      - name: Verify eleven credential-free React suites in all three browser engines
         run: npm run e2e:react-browser-matrix

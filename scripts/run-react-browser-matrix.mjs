@@ -7,6 +7,7 @@ import { acceptanceBrowserNames, browserEvidencePrefix, readAcceptanceBrowserNam
 export const acceptanceSuites = Object.freeze([
   "workspace-navigation", "ai-agent-editor", "clerk-workspace-language",
   "team-management", "business-profile", "contact-permissions", "meta-dialog",
+  "template-campaign-demo", "import-inbox-demo", "knowledge-billing-demo", "tenant-reports-demo",
 ]);
 
 export function acceptanceRunResult(engine, suite, result) {
@@ -29,7 +30,7 @@ export function acceptanceRunResult(engine, suite, result) {
 async function run() {
   if (process.argv.length > 2) throw new Error("React browser matrix accepts no command-line arguments; use CONNECT_E2E_BROWSER for a single-engine diagnostic run.");
   const projectRoot = fileURLToPath(new URL("../", import.meta.url));
-  // A supplied engine narrows a diagnostic run. CI leaves this unset, requiring 21 runs.
+  // A supplied engine narrows a diagnostic run. CI leaves this unset, requiring every suite in every engine.
   const engines = process.env.CONNECT_E2E_BROWSER === undefined
     ? acceptanceBrowserNames : [readAcceptanceBrowserName()];
   readAcceptanceBrowserName(); // Reject credentials before starting any child process.
@@ -58,7 +59,7 @@ async function run() {
     engines, expectedRuns: engines.length * acceptanceSuites.length, runs,
     scope: {
       realReactComponents: true, credentialsUsed: false, externalProviderAcceptance: false,
-      mobileCoverage: "Workspace navigation and Meta dialog use a 390px-wide viewport and keyboard input; navigation also resizes to desktop and checks the built configuration-required AI layout at 320px. Component fixtures do not prove styled mobile layout or touch.",
+      mobileCoverage: "Workspace navigation and Meta dialog use a 390px-wide viewport and keyboard input; navigation also resizes to desktop and checks the built configuration-required AI layout at 320px. Component fixtures do not prove styled mobile layout or touch. Added demo journeys use explicit local accounts and action doubles; the Paddle SDK URL is fulfilled synthetically without external network.",
       physicalDeviceAcceptance: false, installedSafariOrChromeAcceptance: false,
       limitations: "Playwright browser engines on this host do not prove every operating system, touch device, authenticated flow or production service.",
     },
