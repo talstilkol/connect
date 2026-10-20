@@ -2025,3 +2025,51 @@ PostgreSQL מאמת ונועל מחדש את העסק והחברות גם בשח
 98.2 הושלמה גם ביקורת המסירה C4.1.5.3 בתכולה המוגדרת: מפת התהליכים, שתי הבניות, 4,598 בדיקות כלליות, 426 תרחישי WhatsApp/מדיה בכל PostgreSQL 16.13 ו־17.11, 101 תרחישי בודק הליבה בכל גרסה ו־149 תרחישי מוצר נוספים על 17.11. סריקת סודות ושימור קובצי הבסיס נדרשים בקיבוע המקומי המתועד בדוח. [מסירת קוד](local-code-delivery-2026-09-12.md), [ראיות R224](../../outputs/launch-validation-2026-09-09/history-import-validation-20260912.json).
 
 98.3 **0 תתי־שלבי קוד ידועים לפני החיבורים; 12 שלבי השקה עדיין פתוחים.** האומדן ליתרת תור הקוד הוא 0 שעות. משך החיבורים, הקבלה ותיקונים שיתגלו אינו ידוע; אין תאריך השקה מאומת. התוכנית המלאה, זמני ה־Pilot וה־Canary והחרגות התכולה נשמרים. [סדר חיבורים מרוכז](service-connections-handoff-2026-09-12.md), [פירוט סגירת התור](code-completion-plan-2026-09-11.md#19-r224--ייבוא-משויך-וביקורת-מסירה-מקומית-12092026).
+
+# 99. פיוס מול GitHub החי — 20.10.2026
+
+99.1 **מקור ומגבלות.** נצפה לקריאה בלבד דרך GitHub REST ב־20.10.2026. סעיף זה אינו משנה אומדנים, החלטות או מצב שלבים; הוא רושם מה נמצא על GitHub מול מה שכתוב בסעיפים 1.6 ו־98. `main` נשאר המקור; שום ענף או PR לא מוזג, לא נסגר ולא נמחק במסגרת הסעיף.
+
+99.2 **מצב `main`.** ראש `main` הוא `2404289` — "Merge pull request #30 from talstilkol/codex/mfa-localization", 12.09.2026. מאז לא מוזג דבר ל־`main`; `pushed_at` של המאגר (18.10.2026) נובע מענפי Dependabot בלבד. מסמך זה (סעיף 98, R224) מתאר את אותו `main`. ההגנה על `main` פעילה: עשרת ה־Checks נדרשים, `enforce_admins` פעיל, Secret scanning ו־Push protection מופעלים (המאגר ציבורי).
+
+99.3 **ענפים.** 36 ענפים: 17 ממוזגים במלואם ל־`main` (ahead=0), 18 מקדימים את `main`, ועוד `main`. מהמקדימים: 3 ענפי קוד של Codex ו־14 ענפי Dependabot (אחד, `codex/github-evidence-builders`, מקדים ב־commit אחד מ־14.08.2026 ומפגר ב־377). הענפים הממוזגים לא נמחקו — החלטת ניקוי שמורה ל־Tal.
+
+99.4 **PRs פתוחים — קוד (עם תוצאת ה־Checks על ה־head המדויק):**
+
+| PR | ענף @ head | נפתח / עודכן | Draft | מקדים את main | Checks | מצב מיזוג |
+|---|---|---|---|---:|---|---|
+| #31 Fix Clerk session tasks and contact organization consistency — https://github.com/talstilkol/connect/pull/31 | `codex/clerk-session-tasks` @ `8f56087` | 12.09 / 12.09 | לא | 7 commits, 44 קבצים | 10/10 success (12.09.2026) | clean |
+| #32 React: תיקוני הרשאות ושפות, בדיקות דמו ותיקון בניית שרת — https://github.com/talstilkol/connect/pull/32 | `codex/audit-improvements-20260912` @ `7f2aa67` | 12.09 / 13.09 | כן | 23 commits, 122 קבצים; מכיל את #31 במלואו | 12/12 success (13.09, dependency-audit חוזר 16.09) | clean; **base = `codex/clerk-session-tasks`, לא `main`** |
+| #4 fix: load .ts under node --test — https://github.com/talstilkol/connect/pull/4 | `fix/node-test-load-ts` @ `04a9e8b` | 20.08 / 20.08 | לא | 1 (374 מאחור) | failure (dependency-audit, Staging browser proof) | dirty — conflict; פותר issue #3 שנותר פתוח |
+
+ענף ללא PR: `codex/team-membership-controls` @ `1c5b485` (12.09.2026, commit אחד מעל #31: "add versioned team membership controls and invitation form", 0 Checks). הוא מוכל כולו בענף של #32.
+
+99.5 **PRs פתוחים — Dependabot (13).** כולם מול `main`; אף אחד אינו ירוק במלואו:
+
+| PR | חבילה | Checks על ה־head |
+|---|---|---|
+| #44 | source-map-js 1.2.1 → 1.2.2 (18.10) | 9 success, **dependency-audit failure** |
+| #43 | brace-expansion (18.10) | 9 success, **dependency-audit failure** |
+| #42 | production-minor-patch, 20 עדכונים (12.10) | typecheck, tests-and-build, dependency-audit — failure |
+| #41 | next 16.3.4 → 16.4.0 (08.10) | 9 success, **dependency-audit failure** |
+| #39 | development-minor-patch, 12 עדכונים (05.10) | 7 failures |
+| #15 | typescript 5.9.3 → 7.0.2 (major) | lint, tests-and-build, source-guardrails — failure; behind |
+| #13 | bullmq 5 → 6 (major) | 10/10 success אך behind (12.09) |
+| #12 | eslint 9 → 10 (major) | lint failure; behind |
+| #9, #8 | actions/setup-node 7, actions/upload-artifact 7 | 10/10 success אך behind (12.09) |
+| #7 | actions/attest 4.2.2 | tests-and-build failure (15.09) |
+| #6, #5 | browserslist, fast-uri | dependency-audit failure; #6 dirty |
+
+ה־Job `dependency-audit` נכשל בצעד "Reject unapproved development dependency findings" (`scripts/verify-development-dependency-audit.mjs`) על ראשי Dependabot #44, #43, #42, #41 (אומת על ארבעת ה־Runs). על `main` ה־Workflow רץ רק ב־pull_request; הריצה הירוקה האחרונה שלו על `main` היא `6e26ef8` מ־11.09.2026. **אומת ב־20.10.2026:** PR #45 (תיעוד בלבד, ללא שינוי ב־`package.json`/`package-lock.json`) נכשל באותו צעד (run 39409701333). כלומר הכשל קיים ב־lockfile של `main` עצמו — ממצא תלות פיתוח חדש ב־Registry מאז 11.09 — ולא בשינויי Dependabot. עד שהוא ייפתר, שום PR (גם תיעוד) אינו יכול לעמוד ב־10 ה־Checks הנדרשים.
+
+99.6 **מה נותר לפי התוכנית עצמה.** סעיף 98.3 נשאר בתוקף: 0 תתי־שלבי קוד ידועים לפני החיבורים; 12 שלבים ראשיים (סעיפים 4.2–5.3) פתוחים; אומדן סעיף 6: 142–250 שעות עד השקת הליבה (178–313 עם רזרבה), 190–334 לכל התכולה (238–418 עם רזרבה), מותנה בזמינות חשבונות חיצוניים. לא נמדדו שעות בפועל מאז 12.09; אין אומדן חדש כאן.
+
+99.7 **מה טל צריך לעשות (לפי סדר):**
+
+1. (ראו 3 — חסם קודם לכל מיזוג) **למזג או לדחות את PR #31** (https://github.com/talstilkol/connect/pull/31; 10/10 ירוק, clean). זהו הבסיס של #32 ושל `codex/team-membership-controls`.
+2. **אחרי #31: להחליט על PR #32** (https://github.com/talstilkol/connect/pull/32; draft, 12/12 ירוק). ה־base שלו הוא `codex/clerk-session-tasks`; לאחר מיזוג #31 GitHub יעביר אותו אוטומטית ל־`main`. אין לשנות base ידנית לפני כן.
+3. **לפתור את כשל `dependency-audit` שקיים ב־`main`** (צעד "Reject unapproved development dependency findings"; מוכח על PR #45 ללא שינוי lockfile) — לעדכן את תלות הפיתוח הפגיעה או לאשר אותה ב־`scripts/verify-development-dependency-audit.mjs`; עד אז **אף PR אינו יכול להתמזג** דרך 10 ה־Checks הנדרשים, כולל #31, #32 ו־PR זה, אלא אם Tal מאשר חריגה ידנית כ־Admin.
+4. **לסגור או לעדכן PR #4** (conflict, 374 מאחור) ואת issue #3 שהוא פותר; הכשל שתואר שם (node --test ו־.ts) אינו קיים ב־CI הנוכחי שעובר 10/10.
+5. **להחליט על 3 PRs של major** (#15 TypeScript 7, #13 BullMQ 6, #12 ESLint 10) — סגירה או עבודה ייעודית; Dependabot ימשיך לפתוח אותם מחדש.
+6. **חיבורים חיצוניים** (סעיפים 1.6.2 ו־4.3): Railway/Clerk/Meta/Paddle — אלו החסמים שאינם נפתרים בקוד.
+7. **ניקוי 17 ענפים ממוזגים** — החלטת בעלים; לא בוצע.
