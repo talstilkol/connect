@@ -2060,15 +2060,15 @@ PostgreSQL מאמת ונועל מחדש את העסק והחברות גם בשח
 | #7 | actions/attest 4.2.2 | tests-and-build failure (15.09) |
 | #6, #5 | browserslist, fast-uri | dependency-audit failure; #6 dirty |
 
-ה־Job `dependency-audit` נכשל בצעד "Reject unapproved development dependency findings" (`scripts/verify-development-dependency-audit.mjs`) על ראשי Dependabot #44, #43, #42, #41 (אומת על ארבעת ה־Runs). על `main` ה־Workflow רץ רק ב־pull_request; הריצה הירוקה האחרונה שלו על `main` היא `6e26ef8` מ־11.09.2026. לכן אין ראיה שה־audit של תלויות הפיתוח ירוק על `main` היום — UNVERIFIED.
+ה־Job `dependency-audit` נכשל בצעד "Reject unapproved development dependency findings" (`scripts/verify-development-dependency-audit.mjs`) על ראשי Dependabot #44, #43, #42, #41 (אומת על ארבעת ה־Runs). על `main` ה־Workflow רץ רק ב־pull_request; הריצה הירוקה האחרונה שלו על `main` היא `6e26ef8` מ־11.09.2026. **אומת ב־20.10.2026:** PR #45 (תיעוד בלבד, ללא שינוי ב־`package.json`/`package-lock.json`) נכשל באותו צעד (run 39409701333). כלומר הכשל קיים ב־lockfile של `main` עצמו — ממצא תלות פיתוח חדש ב־Registry מאז 11.09 — ולא בשינויי Dependabot. עד שהוא ייפתר, שום PR (גם תיעוד) אינו יכול לעמוד ב־10 ה־Checks הנדרשים.
 
 99.6 **מה נותר לפי התוכנית עצמה.** סעיף 98.3 נשאר בתוקף: 0 תתי־שלבי קוד ידועים לפני החיבורים; 12 שלבים ראשיים (סעיפים 4.2–5.3) פתוחים; אומדן סעיף 6: 142–250 שעות עד השקת הליבה (178–313 עם רזרבה), 190–334 לכל התכולה (238–418 עם רזרבה), מותנה בזמינות חשבונות חיצוניים. לא נמדדו שעות בפועל מאז 12.09; אין אומדן חדש כאן.
 
 99.7 **מה טל צריך לעשות (לפי סדר):**
 
-1. **למזג או לדחות את PR #31** (https://github.com/talstilkol/connect/pull/31; 10/10 ירוק, clean). זהו הבסיס של #32 ושל `codex/team-membership-controls`.
+1. (ראו 3 — חסם קודם לכל מיזוג) **למזג או לדחות את PR #31** (https://github.com/talstilkol/connect/pull/31; 10/10 ירוק, clean). זהו הבסיס של #32 ושל `codex/team-membership-controls`.
 2. **אחרי #31: להחליט על PR #32** (https://github.com/talstilkol/connect/pull/32; draft, 12/12 ירוק). ה־base שלו הוא `codex/clerk-session-tasks`; לאחר מיזוג #31 GitHub יעביר אותו אוטומטית ל־`main`. אין לשנות base ידנית לפני כן.
-3. **לפתור את כשל `dependency-audit`** על ראשי Dependabot (צעד "Reject unapproved development dependency findings") — או לאשר ממצאים ב־`verify-development-dependency-audit.mjs` או לעדכן תלויות; עד אז אף PR של Dependabot לא יכול להתמזג, ו־#44/#43/#41 (patch) ממתינים.
+3. **לפתור את כשל `dependency-audit` שקיים ב־`main`** (צעד "Reject unapproved development dependency findings"; מוכח על PR #45 ללא שינוי lockfile) — לעדכן את תלות הפיתוח הפגיעה או לאשר אותה ב־`scripts/verify-development-dependency-audit.mjs`; עד אז **אף PR אינו יכול להתמזג** דרך 10 ה־Checks הנדרשים, כולל #31, #32 ו־PR זה, אלא אם Tal מאשר חריגה ידנית כ־Admin.
 4. **לסגור או לעדכן PR #4** (conflict, 374 מאחור) ואת issue #3 שהוא פותר; הכשל שתואר שם (node --test ו־.ts) אינו קיים ב־CI הנוכחי שעובר 10/10.
 5. **להחליט על 3 PRs של major** (#15 TypeScript 7, #13 BullMQ 6, #12 ESLint 10) — סגירה או עבודה ייעודית; Dependabot ימשיך לפתוח אותם מחדש.
 6. **חיבורים חיצוניים** (סעיפים 1.6.2 ו־4.3): Railway/Clerk/Meta/Paddle — אלו החסמים שאינם נפתרים בקוד.
